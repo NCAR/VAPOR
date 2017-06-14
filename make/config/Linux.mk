@@ -26,7 +26,7 @@ C_DEBUG_FLAGS     += -g
 
 else
 
-CXXFLAGS          += -std=c++0x -DLINUX -Wall -Wno-sign-compare 
+CXXFLAGS          += -std=c++0x -DLINUX -Wall -Wno-sign-compare  -Wno-comment
 CXXFLAGS          += -D__USE_LARGEFILE64 -pthread
 CXX_RELEASE_FLAGS += -O3 -DNDEBUG -fno-strict-aliasing
 CXX_DEBUG_FLAGS   += -g
