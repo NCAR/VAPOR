@@ -1,0 +1,75 @@
+WASP Installation Instructions
+
+This document provides instructions for building and installing the WASP 
+component only of VAPOR. To install VAPOR itself consult only the 
+INSTALL.txt document.
+
+
+Dependencies
+------------
+
+WASP depends on Unidata's NetCDF library. The library is available from:
+
+http://www.unidata.ucar.edu/software/netcdf/
+
+WASP has been tested with versions 4.2 and higher.
+
+Unpacking
+---------
+
+Unpack the wasp tar file and change directories to the WASP source
+directory:
+
+	gunzip wasp-x.x.x-src.tar.gz
+	tar xf wasp-x.x.x-src.tar
+	cd wasp-x.x.x-src
+
+where 'x.x'x' is the WASP version number
+
+Configuration
+-------------
+
+WASP must be configured before it can be compiled. Configuration can be
+performed by copying the file 'options.WASP.mk' to  'options.mk', and then
+editing the options.mk file:
+
+	cp options.WASP.mk options.mk
+
+A small number of macros in the options.mk file may require editing before
+attempting to build WASP. Other macros can be safely ignored. The salient
+macros are:
+
+NSTALL_PREFIX_DIR : set this macro to the root of the tree where
+you wish to install WASP. WASP will be installed in bin, lib, and
+include subdirectories under this directory.
+
+LIB_SEARCH_DIRS : Set this directory to a space-separated list of 
+directories containing the libraries WASP depends on (currently only
+libnetcdf).
+
+INC_SEARCH_DIRS : Set this directory to a space-separated list of 
+directories containing the include files WASP depends on (currently only
+netcdf).
+
+Compiling and Installing
+------------------------
+
+Once the WASP installation system has been configured, you may
+compile by simply typing:
+
+     gmake
+
+or possibly just
+
+     make
+
+if your version of make is gmake compilant.  After compiling the
+software, executable and libraries may be installed by executing
+
+     gmake install
+
+Executables, libraries, and header files will be installed to the
+installation target directory defined previously in the configuration
+step.
+
+

@@ -1,0 +1,122 @@
+#include gradient2.hgl
+#include tex2lay.hgl
+vec3 tex2lay(in vec3 texCoord, in int comp);
+
+#ifdef	LIGHTING
+uniform vec3 dimensions;		// texture dimensions
+uniform vec3 lightDirection;	
+uniform float kd;
+uniform float ka;
+uniform float ks;
+uniform float expS;
+varying vec3 ecPosition;
+vec3 Gradient(in vec3, in vec3);
+#endif
+
+#ifdef	PREINTEGRATED
+uniform sampler2D colormap;	// 2D color map for pre-intergrated shading
+#else
+uniform sampler1D colormap;
+#endif
+uniform sampler1D coordmap; // coordinate map for stretched grids
+
+// volumeTexture[0] : field value
+// volumeTexture[midx] : missing data "flag" (if midx > 0)
+// volumeTexture[zidx] : Z (layered) component of user coord (if zidx > 0)
+//
+uniform sampler3D volumeTexture;
+uniform int zidx;   // texel component containing user Z coordinate
+uniform int midx;   // texel component containing missing data indicator
+uniform bool fast;  // render fast
+uniform bool stretched;  // stretched coordinates (rectilinear grid)
+
+
+//------------------------------------------------------------------
+// Fragment shader main
+//------------------------------------------------------------------
+void main(void)
+{
+	
+	vec3 texCoord0 = gl_TexCoord[0].xyz;
+
+	//
+	// For layered data (zidx > 0) we need to transform the Z 
+	// texture coordinate 
+	//
+	if (zidx>0 && ! fast) {
+		texCoord0 = tex2lay(texCoord0, zidx);
+		if (texCoord0.x < 0) {
+			discard;	// Z texture coordinate is invalid
+			return;
+		}
+	}
+	else if (stretched) {
+		texCoord0.x = texture1D(coordmap, texCoord0.x).x;
+		texCoord0.y = texture1D(coordmap, texCoord0.y).y;
+		texCoord0.z = texture1D(coordmap, texCoord0.z).z;
+	}
+	vec4 texel = texture3D(volumeTexture, texCoord0);
+
+	// If any of the texels used to filter the texture contain missing
+	// data we discard the result
+	//
+	if (midx>0) {
+		if (texel[midx] != 0.0) {
+			discard;
+			return;
+		}
+	}
+
+#ifdef	PREINTEGRATED
+	vec3 texCoord1 = gl_TexCoord[1].xyz;
+
+	if (zidx>0 && ! fast) {
+		texCoord1 = tex2lay(texCoord1, zidx);
+		if (texCoord1.x < 0) {
+			discard;
+			return;
+		}
+	}
+
+	vec4 texel1 = texture3D(volumeTexture, texCoord1);
+	if (midx>0) {
+		if (texel1[midx] != 0.0) {
+			discard;
+			return;
+		}
+	}
+	vec4 color     = texture2D(colormap, vec2(texel.x, texel1.x));
+#else
+	vec4 color     = texture1D(colormap, texel.x);
+#endif
+
+	gl_FragColor = color;
+
+#ifdef	LIGHTING
+	vec3 lightColor = vec3 (1.0, 1.0, 1.0);
+	
+//	vec3 grad_dd = 0.5 / dimensions;
+	vec3 gradient = normalize(gl_NormalMatrix * Gradient(dimensions, texCoord0));
+
+	float diffuse = 0.0;
+	float specular = 0.0;
+	if (length(gradient) > 0.0) { 
+		vec3 lightVec      = normalize(lightDirection);
+		vec3 halfv      = reflect(-lightVec, gradient);
+		vec3 viewVec      = normalize(-ecPosition);
+
+		diffuse  = abs(dot(lightVec, gradient));
+
+		if (diffuse > 0.0) {
+			specular = pow(abs(dot(halfv, normalize(viewVec))), expS);
+		}
+	}
+
+	diffuse = kd * diffuse;
+	specular = ks * specular;
+
+	gl_FragColor.w = color.w;
+	gl_FragColor.xyz = color.xyz * (ka + diffuse) + vec3(specular * lightColor);
+#endif
+
+}

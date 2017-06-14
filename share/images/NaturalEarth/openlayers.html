@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml"
+          <head>
+            <title>tmp.vrt</title>
+            <meta http-equiv='imagetoolbar' content='no'/>
+            <style type="text/css"> v\:* {behavior:url(#default#VML);}
+                html, body { overflow: hidden; padding: 0; height: 100%; width: 100%; font-family: 'Lucida Grande',Geneva,Arial,Verdana,sans-serif; }
+                body { margin: 10px; background: #fff; }
+                h1 { margin: 0; padding: 6px; border:0; font-size: 20pt; }
+            #header { height: 43px; padding: 0; background-color: #eee; border: 1px solid #888; }
+            #subheader { height: 12px; text-align: right; font-size: 10px; color: #555;}
+            #map { height: 95%; border: 1px solid #888; }
+            .olImageLoadError { display: none; }
+            .olControlLayerSwitcher .layersDiv { border-radius: 10px 0 0 10px; } 
+        </style>
+            <script src='http://maps.google.com/maps/api/js?sensor=false&v=3.7'></script>
+            <script src="http://www.openlayers.org/api/2.12/OpenLayers.js"></script>
+            <script>
+              var map;
+              var mapBounds = new OpenLayers.Bounds( -179.999999975, -85.0511287776, 179.999999975, 85.0511287776);
+              var mapMinZoom = 0;
+              var mapMaxZoom = 4;
+              var emptyTileURL = "http://www.maptiler.org/img/none.png";
+              OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+
+              function init(){
+                  var options = {
+                      div: "map",
+                      controls: [],
+                      projection: "EPSG:900913",
+                      displayProjection: new OpenLayers.Projection("EPSG:4326"),
+                      numZoomLevels: 20
+                  };
+                  map = new OpenLayers.Map(options);
+
+                  // Create Google Mercator layers
+                  var gmap = new OpenLayers.Layer.Google("Google Streets",
+                  {
+                      type: google.maps.MapTypeId.ROADMAP,
+                      sphericalMercator: true
+                  });
+                  var gsat = new OpenLayers.Layer.Google("Google Satellite",
+                  {
+                      type: google.maps.MapTypeId.SATELLITE,
+                      sphericalMercator: true
+                  });
+                  var ghyb = new OpenLayers.Layer.Google("Google Hybrid",
+                  {
+                      type: google.maps.MapTypeId.HYBRID,
+                      sphericalMercator: true
+                  });
+                  var gter = new OpenLayers.Layer.Google("Google Terrain",
+                  {
+                      type: google.maps.MapTypeId.TERRAIN,
+                      sphericalMercator: true
+                  });
+
+                  // Create Bing layers
+                  var broad = new OpenLayers.Layer.Bing({
+                      name: "Bing Roads",
+                      key: "INSERT_YOUR_KEY_HERE",
+                      type: "Road",
+                      sphericalMercator: true
+                  });
+                  var baer = new OpenLayers.Layer.Bing({
+                      name: "Bing Aerial",
+                      key: "INSERT_YOUR_KEY_HERE",
+                      type: "Aerial",
+                      sphericalMercator: true
+                  });
+                  var bhyb = new OpenLayers.Layer.Bing({
+                      name: "Bing Hybrid",
+                      key: "INSERT_YOUR_KEY_HERE",
+                      type: "AerialWithLabels",
+                      sphericalMercator: true
+                  });
+
+                  // Create OSM layer
+                  var osm = new OpenLayers.Layer.OSM("OpenStreetMap");
+
+                  // create TMS Overlay layer
+                   var tmsoverlay = new OpenLayers.Layer.TMS("TMS Overlay", "",
+                  {
+                      serviceVersion: '.',
+                      layername: '.',
+                      alpha: true,
+                      type: 'tiff',
+                      isBaseLayer: false,
+                      getURL: getURL
+                  });
+                  if (OpenLayers.Util.alphaHack() == false) {
+                      tmsoverlay.setOpacity(0.7);
+                  }
+
+                  map.addLayers([gmap, gsat, ghyb, gter,
+                                 broad, baer, bhyb,
+                                 osm, tmsoverlay]);
+
+                  var switcherControl = new OpenLayers.Control.LayerSwitcher();
+                  map.addControl(switcherControl);
+                  switcherControl.maximizeControl();
+
+                  map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
+          
+                  map.addControls([new OpenLayers.Control.PanZoomBar(),
+                                   new OpenLayers.Control.Navigation(),
+                                   new OpenLayers.Control.MousePosition(),
+                                   new OpenLayers.Control.ArgParser(),
+                                   new OpenLayers.Control.Attribution()]);
+              }
+          
+              function getURL(bounds) {
+                  bounds = this.adjustBounds(bounds);
+                  var res = this.getServerResolution();
+                  var x = Math.round((bounds.left - this.tileOrigin.lon) / (res * this.tileSize.w));
+                  var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
+                  var z = this.getServerZoom();
+                  if (this.map.baseLayer.CLASS_NAME === 'OpenLayers.Layer.Bing') {
+                      z+=1;
+                  }
+                  var path = this.serviceVersion + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type; 
+                  var url = this.url;
+                  if (OpenLayers.Util.isArray(url)) {
+                      url = this.selectUrl(path, url);
+                  }
+                  if (mapBounds.intersectsBounds(bounds) && (z >= mapMinZoom) && (z <= mapMaxZoom)) {
+                      return url + path;
+                  } else {
+                      return emptyTileURL;
+                  }
+              } 
+          
+           function getWindowHeight() {
+                if (self.innerHeight) return self.innerHeight;
+                    if (document.documentElement && document.documentElement.clientHeight)
+                        return document.documentElement.clientHeight;
+                    if (document.body) return document.body.clientHeight;
+                        return 0;
+                }
+
+                function getWindowWidth() {
+                    if (self.innerWidth) return self.innerWidth;
+                    if (document.documentElement && document.documentElement.clientWidth)
+                        return document.documentElement.clientWidth;
+                    if (document.body) return document.body.clientWidth;
+                        return 0;
+                }
+
+                function resize() {  
+                    var map = document.getElementById("map");  
+                    var header = document.getElementById("header");  
+                    var subheader = document.getElementById("subheader");  
+                    map.style.height = (getWindowHeight()-80) + "px";
+                    map.style.width = (getWindowWidth()-20) + "px";
+                    header.style.width = (getWindowWidth()-20) + "px";
+                    subheader.style.width = (getWindowWidth()-20) + "px";
+                    if (map.updateSize) { map.updateSize(); };
+                }
+
+                onresize=function(){ resize(); };
+
+                </script>
+              </head>
+              <body onload="init()">
+                <div id="header"><h1>tmp.vrt</h1></div>
+                <div id="subheader">Generated by <a href="http://www.maptiler.org/">MapTiler</a>/<a href="http://www.klokan.cz/projects/gdal2tiles/">GDAL2Tiles</a>, Copyright &copy; 2008 <a href="http://www.klokan.cz/">Klokan Petr Pridal</a>,  <a href="http://www.gdal.org/">GDAL</a> &amp; <a href="http://www.osgeo.org/">OSGeo</a> <a href="http://code.google.com/soc/">GSoC</a>
+                <!-- PLEASE, LET THIS NOTE ABOUT AUTHOR AND PROJECT SOMEWHERE ON YOUR WEBSITE, OR AT LEAST IN THE COMMENT IN HTML. THANK YOU -->
+                </div>
+                <div id="map"></div>
+                <script type="text/javascript" >resize()</script>
+              </body>
+            </html>

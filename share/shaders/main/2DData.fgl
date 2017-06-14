@@ -1,0 +1,27 @@
+varying float lightIntensity;
+uniform sampler1D colormap;
+uniform sampler2D dataTexture;
+uniform float minLUTValue;
+uniform float maxLUTValue;
+
+//------------------------------------------------------------------
+// Fragment shader main
+//------------------------------------------------------------------
+void main(void)
+{
+	if (minLUTValue >= maxLUTValue) discard;
+
+	vec2 texCoord0 = gl_TexCoord[0].xy;
+    vec4 texel = texture2D(dataTexture, texCoord0);
+
+	// Check for missing value
+	//
+	if (texel.y != 0.0) discard;
+
+	float s = (texel.x - minLUTValue) / (maxLUTValue - minLUTValue);
+	vec4 color     = texture1D(colormap, s);
+
+	color.rgb = color.rgb * lightIntensity;
+
+	gl_FragColor = vec4(color);
+}
