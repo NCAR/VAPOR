@@ -1,0 +1,34 @@
+//
+// Direct volume renderer (DVR) shader
+//
+#ifdef	LIGHTING
+varying vec3 ecPosition;
+#endif
+
+#ifdef	PREINTEGRATED
+uniform float delta;
+uniform vec4  vdir;
+uniform vec4  vpos;
+#endif
+
+void main() {
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	gl_TexCoord[0] = gl_MultiTexCoord0;
+	gl_ClipVertex = gl_ModelViewMatrix * gl_Vertex;
+
+#ifdef	LIGHTING
+	ecPosition     = vec3(gl_ModelViewMatrix * gl_Vertex);
+#endif
+
+#ifdef	PREINTEGRATED
+	vec4 sf        = gl_Vertex;
+
+	vec4 eye2vert  = normalize(sf - vpos);
+	vec4 sb        = sf - eye2vert * (delta / dot(normalize(vdir), eye2vert));
+
+	// Finally, convert sb into texture coordinates
+	gl_TexCoord[1] = gl_TextureMatrix[0] * sb;
+
+#endif
+
+}

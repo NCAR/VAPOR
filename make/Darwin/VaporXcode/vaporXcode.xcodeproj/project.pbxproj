@@ -1,0 +1,1577 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXFileReference section */
+		E700021F14EF138D002070D3 /* arrowrenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = arrowrenderer.cpp; sourceTree = "<group>"; };
+		E700022014EF138D002070D3 /* arrowrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arrowrenderer.h; sourceTree = "<group>"; };
+		E700022114EF138D002070D3 /* GLModelNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLModelNode.cpp; sourceTree = "<group>"; };
+		E700022214EF138D002070D3 /* GLModelNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLModelNode.h; sourceTree = "<group>"; };
+		E700022314EF138D002070D3 /* jfilewrite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jfilewrite.cpp; sourceTree = "<group>"; };
+		E700022414EF138D002070D3 /* ModelRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelRenderer.cpp; sourceTree = "<group>"; };
+		E700022514EF138D002070D3 /* ModelRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelRenderer.h; sourceTree = "<group>"; };
+		E700022614EF138D002070D3 /* ShaderMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderMgr.cpp; sourceTree = "<group>"; };
+		E700022714EF138D002070D3 /* ShaderMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderMgr.h; sourceTree = "<group>"; };
+		E700022914EF1954002070D3 /* arrowparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = arrowparams.cpp; sourceTree = "<group>"; };
+		E700022A14EF1954002070D3 /* arrowparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arrowparams.h; sourceTree = "<group>"; };
+		E700022B14EF1954002070D3 /* Colormap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Colormap.h; sourceTree = "<group>"; };
+		E700022C14EF1954002070D3 /* ModelParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelParams.cpp; sourceTree = "<group>"; };
+		E700022D14EF1954002070D3 /* ModelParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelParams.h; sourceTree = "<group>"; };
+		E700022E14EF1954002070D3 /* ModelScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelScene.cpp; sourceTree = "<group>"; };
+		E700022F14EF1954002070D3 /* ModelScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelScene.h; sourceTree = "<group>"; };
+		E700023114EF19CB002070D3 /* LayeredGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LayeredGrid.cpp; sourceTree = "<group>"; };
+		E700023214EF19CB002070D3 /* LayeredGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayeredGrid.h; sourceTree = "<group>"; };
+		E700023314EF19CB002070D3 /* NCBuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NCBuf.cpp; sourceTree = "<group>"; };
+		E700023414EF19CB002070D3 /* NCBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NCBuf.h; sourceTree = "<group>"; };
+		E700023514EF19CB002070D3 /* RegularGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RegularGrid.cpp; sourceTree = "<group>"; };
+		E700023614EF19CB002070D3 /* RegularGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegularGrid.h; sourceTree = "<group>"; };
+		E700023714EF19CB002070D3 /* SphericalGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SphericalGrid.cpp; sourceTree = "<group>"; };
+		E700023814EF19CB002070D3 /* SphericalGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphericalGrid.h; sourceTree = "<group>"; };
+		E700023914EF19CB002070D3 /* StretchedGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StretchedGrid.cpp; sourceTree = "<group>"; };
+		E700023A14EF19CB002070D3 /* StretchedGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StretchedGrid.h; sourceTree = "<group>"; };
+		E70180F3124014CE00478E12 /* pythonpipeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pythonpipeline.h; sourceTree = "<group>"; };
+		E70180F4124014CE00478E12 /* pythonpipeline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pythonpipeline.cpp; sourceTree = "<group>"; };
+		E7041383123042460083F569 /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../../lib/common/Base64.cpp; sourceTree = SOURCE_ROOT; };
+		E7041385123042460083F569 /* CFuncs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CFuncs.cpp; path = ../../../lib/common/CFuncs.cpp; sourceTree = SOURCE_ROOT; };
+		E7041387123042460083F569 /* common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = common.cpp; path = ../../../lib/common/common.cpp; sourceTree = SOURCE_ROOT; };
+		E7041388123042460083F569 /* EasyThreads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EasyThreads.cpp; path = ../../../lib/common/EasyThreads.cpp; sourceTree = SOURCE_ROOT; };
+		E704138A123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/common/Makefile; sourceTree = SOURCE_ROOT; };
+		E704138B123042460083F569 /* MyBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MyBase.cpp; path = ../../../lib/common/MyBase.cpp; sourceTree = SOURCE_ROOT; };
+		E704138D123042460083F569 /* OptionParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionParser.cpp; path = ../../../lib/common/OptionParser.cpp; sourceTree = SOURCE_ROOT; };
+		E704138F123042460083F569 /* PVTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PVTime.cpp; path = ../../../lib/common/PVTime.cpp; sourceTree = SOURCE_ROOT; };
+		E7041391123042460083F569 /* Version.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Version.cpp; path = ../../../lib/common/Version.cpp; sourceTree = SOURCE_ROOT; };
+		E7041393123042460083F569 /* Version.h.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Version.h.sed; path = ../../../lib/common/Version.h.sed; sourceTree = SOURCE_ROOT; };
+		E7041396123042460083F569 /* Field.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Field.cpp; path = ../../../lib/flow/Field.cpp; sourceTree = SOURCE_ROOT; };
+		E7041397123042460083F569 /* Field.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Field.h; path = ../../../lib/flow/Field.h; sourceTree = SOURCE_ROOT; };
+		E7041398123042460083F569 /* flow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flow.cpp; path = ../../../lib/flow/flow.cpp; sourceTree = SOURCE_ROOT; };
+		E7041399123042460083F569 /* flowlinedata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flowlinedata.cpp; path = ../../../lib/flow/flowlinedata.cpp; sourceTree = SOURCE_ROOT; };
+		E704139A123042460083F569 /* flowTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flowTest.cpp; path = ../../../lib/flow/flowTest.cpp; sourceTree = SOURCE_ROOT; };
+		E704139B123042460083F569 /* Grid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Grid.cpp; path = ../../../lib/flow/Grid.cpp; sourceTree = SOURCE_ROOT; };
+		E704139C123042460083F569 /* Grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Grid.h; path = ../../../lib/flow/Grid.h; sourceTree = SOURCE_ROOT; };
+		E704139D123042460083F569 /* header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = header.h; path = ../../../lib/flow/header.h; sourceTree = SOURCE_ROOT; };
+		E704139E123042460083F569 /* Interpolator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Interpolator.cpp; path = ../../../lib/flow/Interpolator.cpp; sourceTree = SOURCE_ROOT; };
+		E704139F123042460083F569 /* Interpolator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Interpolator.h; path = ../../../lib/flow/Interpolator.h; sourceTree = SOURCE_ROOT; };
+		E70413A0123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/flow/Makefile; sourceTree = SOURCE_ROOT; };
+		E70413A1123042460083F569 /* Plot3DReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Plot3DReader.cpp; path = ../../../lib/flow/Plot3DReader.cpp; sourceTree = SOURCE_ROOT; };
+		E70413A2123042460083F569 /* Plot3DReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Plot3DReader.h; path = ../../../lib/flow/Plot3DReader.h; sourceTree = SOURCE_ROOT; };
+		E70413A3123042460083F569 /* Rake.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Rake.cpp; path = ../../../lib/flow/Rake.cpp; sourceTree = SOURCE_ROOT; };
+		E70413A4123042460083F569 /* Rake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rake.h; path = ../../../lib/flow/Rake.h; sourceTree = SOURCE_ROOT; };
+		E70413A5123042460083F569 /* Solution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Solution.cpp; path = ../../../lib/flow/Solution.cpp; sourceTree = SOURCE_ROOT; };
+		E70413A6123042460083F569 /* Solution.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Solution.h; path = ../../../lib/flow/Solution.h; sourceTree = SOURCE_ROOT; };
+		E70413A7123042460083F569 /* VaporFlow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VaporFlow.cpp; path = ../../../lib/flow/VaporFlow.cpp; sourceTree = SOURCE_ROOT; };
+		E70413A8123042460083F569 /* VectorMatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VectorMatrix.cpp; path = ../../../lib/flow/VectorMatrix.cpp; sourceTree = SOURCE_ROOT; };
+		E70413A9123042460083F569 /* VectorMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VectorMatrix.h; path = ../../../lib/flow/VectorMatrix.h; sourceTree = SOURCE_ROOT; };
+		E70413AA123042460083F569 /* VTFieldLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VTFieldLine.cpp; path = ../../../lib/flow/VTFieldLine.cpp; sourceTree = SOURCE_ROOT; };
+		E70413AB123042460083F569 /* VTFieldLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VTFieldLine.h; path = ../../../lib/flow/VTFieldLine.h; sourceTree = SOURCE_ROOT; };
+		E70413AD123042460083F569 /* VTStreakLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VTStreakLine.cpp; path = ../../../lib/flow/VTStreakLine.cpp; sourceTree = SOURCE_ROOT; };
+		E70413AE123042460083F569 /* VTStreamLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VTStreamLine.cpp; path = ../../../lib/flow/VTStreamLine.cpp; sourceTree = SOURCE_ROOT; };
+		E70413B0123042460083F569 /* VTTimeVaryingFieldLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VTTimeVaryingFieldLine.cpp; path = ../../../lib/flow/VTTimeVaryingFieldLine.cpp; sourceTree = SOURCE_ROOT; };
+		E70413B3123042460083F569 /* IDLCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDLCommon.cpp; path = ../../../lib/idl/IDLCommon.cpp; sourceTree = SOURCE_ROOT; };
+		E70413B4123042460083F569 /* IDLCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDLCommon.h; path = ../../../lib/idl/IDLCommon.h; sourceTree = SOURCE_ROOT; };
+		E70413B5123042460083F569 /* IDLLifting1D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDLLifting1D.cpp; path = ../../../lib/idl/IDLLifting1D.cpp; sourceTree = SOURCE_ROOT; };
+		E70413B6123042460083F569 /* IDLMetadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDLMetadata.cpp; path = ../../../lib/idl/IDLMetadata.cpp; sourceTree = SOURCE_ROOT; };
+		E70413B7123042460083F569 /* IDLMetadataAuto.cpp.template */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = IDLMetadataAuto.cpp.template; path = ../../../lib/idl/IDLMetadataAuto.cpp.template; sourceTree = SOURCE_ROOT; };
+		E70413B8123042460083F569 /* IDLVaporImport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDLVaporImport.cpp; path = ../../../lib/idl/IDLVaporImport.cpp; sourceTree = SOURCE_ROOT; };
+		E70413B9123042460083F569 /* IDLWbIo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDLWbIo.cpp; path = ../../../lib/idl/IDLWbIo.cpp; sourceTree = SOURCE_ROOT; };
+		E70413BA123042460083F569 /* libidl_vdfmodule.dlm.template */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = libidl_vdfmodule.dlm.template; path = ../../../lib/idl/libidl_vdfmodule.dlm.template; sourceTree = SOURCE_ROOT; };
+		E70413BB123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/idl/Makefile; sourceTree = SOURCE_ROOT; };
+		E70413BC123042460083F569 /* mkmeta.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; name = mkmeta.pl; path = ../../../lib/idl/mkmeta.pl; sourceTree = SOURCE_ROOT; };
+		E70413FA123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/Makefile; sourceTree = SOURCE_ROOT; };
+		E70413FC123042460083F569 /* animationparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animationparams.cpp; path = ../../../lib/params/animationparams.cpp; sourceTree = SOURCE_ROOT; };
+		E70413FD123042460083F569 /* animationparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animationparams.h; path = ../../../lib/params/animationparams.h; sourceTree = SOURCE_ROOT; };
+		E70413FE123042460083F569 /* Colormap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Colormap.cpp; path = ../../../lib/params/Colormap.cpp; sourceTree = SOURCE_ROOT; };
+		E7041400123042460083F569 /* ColorMapBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorMapBase.cpp; path = ../../../lib/params/ColorMapBase.cpp; sourceTree = SOURCE_ROOT; };
+		E7041402123042460083F569 /* datastatus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = datastatus.cpp; path = ../../../lib/params/datastatus.cpp; sourceTree = SOURCE_ROOT; };
+		E7041403123042460083F569 /* datastatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = datastatus.h; path = ../../../lib/params/datastatus.h; sourceTree = SOURCE_ROOT; };
+		E7041404123042460083F569 /* dvrparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dvrparams.cpp; path = ../../../lib/params/dvrparams.cpp; sourceTree = SOURCE_ROOT; };
+		E7041405123042460083F569 /* dvrparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dvrparams.h; path = ../../../lib/params/dvrparams.h; sourceTree = SOURCE_ROOT; };
+		E7041406123042460083F569 /* flowparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flowparams.cpp; path = ../../../lib/params/flowparams.cpp; sourceTree = SOURCE_ROOT; };
+		E7041407123042460083F569 /* flowparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = flowparams.h; path = ../../../lib/params/flowparams.h; sourceTree = SOURCE_ROOT; };
+		E7041408123042460083F569 /* glutil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glutil.cpp; path = ../../../lib/params/glutil.cpp; sourceTree = SOURCE_ROOT; };
+		E7041409123042460083F569 /* glutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glutil.h; path = ../../../lib/params/glutil.h; sourceTree = SOURCE_ROOT; };
+		E704140A123042460083F569 /* histo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = histo.cpp; path = ../../../lib/params/histo.cpp; sourceTree = SOURCE_ROOT; };
+		E704140B123042460083F569 /* histo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = histo.h; path = ../../../lib/params/histo.h; sourceTree = SOURCE_ROOT; };
+		E704140C123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/params/Makefile; sourceTree = SOURCE_ROOT; };
+		E704140D123042460083F569 /* mapperfunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapperfunction.cpp; path = ../../../lib/params/mapperfunction.cpp; sourceTree = SOURCE_ROOT; };
+		E704140E123042460083F569 /* mapperfunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapperfunction.h; path = ../../../lib/params/mapperfunction.h; sourceTree = SOURCE_ROOT; };
+		E704140F123042460083F569 /* MapperFunctionBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapperFunctionBase.cpp; path = ../../../lib/params/MapperFunctionBase.cpp; sourceTree = SOURCE_ROOT; };
+		E7041411123042460083F569 /* OpacityMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpacityMap.cpp; path = ../../../lib/params/OpacityMap.cpp; sourceTree = SOURCE_ROOT; };
+		E7041412123042460083F569 /* OpacityMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpacityMap.h; path = ../../../lib/params/OpacityMap.h; sourceTree = SOURCE_ROOT; };
+		E7041413123042460083F569 /* OpacityMapBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpacityMapBase.cpp; path = ../../../lib/params/OpacityMapBase.cpp; sourceTree = SOURCE_ROOT; };
+		E7041415123042460083F569 /* ParamNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParamNode.cpp; path = ../../../lib/params/ParamNode.cpp; sourceTree = SOURCE_ROOT; };
+		E7041417123042460083F569 /* params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = params.cpp; path = ../../../lib/params/params.cpp; sourceTree = SOURCE_ROOT; };
+		E7041418123042460083F569 /* params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = params.h; path = ../../../lib/params/params.h; sourceTree = SOURCE_ROOT; };
+		E7041419123042460083F569 /* ParamsBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParamsBase.cpp; path = ../../../lib/params/ParamsBase.cpp; sourceTree = SOURCE_ROOT; };
+		E704141B123042460083F569 /* ParamsIso.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParamsIso.cpp; path = ../../../lib/params/ParamsIso.cpp; sourceTree = SOURCE_ROOT; };
+		E704141C123042460083F569 /* ParamsIso.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParamsIso.h; path = ../../../lib/params/ParamsIso.h; sourceTree = SOURCE_ROOT; };
+		E704141D123042460083F569 /* probeparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = probeparams.cpp; path = ../../../lib/params/probeparams.cpp; sourceTree = SOURCE_ROOT; };
+		E704141E123042460083F569 /* probeparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = probeparams.h; path = ../../../lib/params/probeparams.h; sourceTree = SOURCE_ROOT; };
+		E704141F123042460083F569 /* regionparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = regionparams.cpp; path = ../../../lib/params/regionparams.cpp; sourceTree = SOURCE_ROOT; };
+		E7041420123042460083F569 /* regionparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = regionparams.h; path = ../../../lib/params/regionparams.h; sourceTree = SOURCE_ROOT; };
+		E7041421123042460083F569 /* tfinterpolator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tfinterpolator.cpp; path = ../../../lib/params/tfinterpolator.cpp; sourceTree = SOURCE_ROOT; };
+		E7041423123042460083F569 /* transferfunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transferfunction.cpp; path = ../../../lib/params/transferfunction.cpp; sourceTree = SOURCE_ROOT; };
+		E7041424123042460083F569 /* transferfunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transferfunction.h; path = ../../../lib/params/transferfunction.h; sourceTree = SOURCE_ROOT; };
+		E7041425123042460083F569 /* TransferFunctionLite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransferFunctionLite.cpp; path = ../../../lib/params/TransferFunctionLite.cpp; sourceTree = SOURCE_ROOT; };
+		E7041427123042460083F569 /* twoDdataparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDdataparams.cpp; path = ../../../lib/params/twoDdataparams.cpp; sourceTree = SOURCE_ROOT; };
+		E7041428123042460083F569 /* twoDdataparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDdataparams.h; path = ../../../lib/params/twoDdataparams.h; sourceTree = SOURCE_ROOT; };
+		E7041429123042460083F569 /* twoDimageparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDimageparams.cpp; path = ../../../lib/params/twoDimageparams.cpp; sourceTree = SOURCE_ROOT; };
+		E704142A123042460083F569 /* twoDimageparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDimageparams.h; path = ../../../lib/params/twoDimageparams.h; sourceTree = SOURCE_ROOT; };
+		E704142B123042460083F569 /* twoDparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDparams.cpp; path = ../../../lib/params/twoDparams.cpp; sourceTree = SOURCE_ROOT; };
+		E704142C123042460083F569 /* twoDparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDparams.h; path = ../../../lib/params/twoDparams.h; sourceTree = SOURCE_ROOT; };
+		E704142D123042460083F569 /* viewpoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = viewpoint.cpp; path = ../../../lib/params/viewpoint.cpp; sourceTree = SOURCE_ROOT; };
+		E704142E123042460083F569 /* viewpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viewpoint.h; path = ../../../lib/params/viewpoint.h; sourceTree = SOURCE_ROOT; };
+		E704142F123042460083F569 /* viewpointparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = viewpointparams.cpp; path = ../../../lib/params/viewpointparams.cpp; sourceTree = SOURCE_ROOT; };
+		E7041430123042460083F569 /* viewpointparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viewpointparams.h; path = ../../../lib/params/viewpointparams.h; sourceTree = SOURCE_ROOT; };
+		E7041432123042460083F569 /* BBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BBox.cpp; path = ../../../lib/render/BBox.cpp; sourceTree = SOURCE_ROOT; };
+		E7041433123042460083F569 /* BBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBox.h; path = ../../../lib/render/BBox.h; sourceTree = SOURCE_ROOT; };
+		E7041434123042460083F569 /* customcontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = customcontext.cpp; path = ../../../lib/render/customcontext.cpp; sourceTree = SOURCE_ROOT; };
+		E7041435123042460083F569 /* customcontext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = customcontext.h; path = ../../../lib/render/customcontext.h; sourceTree = SOURCE_ROOT; };
+		E7041436123042460083F569 /* DVRBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRBase.cpp; path = ../../../lib/render/DVRBase.cpp; sourceTree = SOURCE_ROOT; };
+		E7041437123042460083F569 /* DVRBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRBase.h; path = ../../../lib/render/DVRBase.h; sourceTree = SOURCE_ROOT; };
+		E7041438123042460083F569 /* DVRDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRDebug.cpp; path = ../../../lib/render/DVRDebug.cpp; sourceTree = SOURCE_ROOT; };
+		E7041439123042460083F569 /* DVRDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRDebug.h; path = ../../../lib/render/DVRDebug.h; sourceTree = SOURCE_ROOT; };
+		E704143A123042460083F569 /* DVRLookup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRLookup.cpp; path = ../../../lib/render/DVRLookup.cpp; sourceTree = SOURCE_ROOT; };
+		E704143B123042460083F569 /* DVRLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRLookup.h; path = ../../../lib/render/DVRLookup.h; sourceTree = SOURCE_ROOT; };
+		E704143C123042460083F569 /* DVRRayCaster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRRayCaster.cpp; path = ../../../lib/render/DVRRayCaster.cpp; sourceTree = SOURCE_ROOT; };
+		E704143D123042460083F569 /* DVRRayCaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRRayCaster.h; path = ../../../lib/render/DVRRayCaster.h; sourceTree = SOURCE_ROOT; };
+		E704143E123042460083F569 /* DVRRayCaster2Var.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRRayCaster2Var.cpp; path = ../../../lib/render/DVRRayCaster2Var.cpp; sourceTree = SOURCE_ROOT; };
+		E704143F123042460083F569 /* DVRRayCaster2Var.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRRayCaster2Var.h; path = ../../../lib/render/DVRRayCaster2Var.h; sourceTree = SOURCE_ROOT; };
+		E7041440123042460083F569 /* DVRShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRShader.cpp; path = ../../../lib/render/DVRShader.cpp; sourceTree = SOURCE_ROOT; };
+		E7041441123042460083F569 /* DVRShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRShader.h; path = ../../../lib/render/DVRShader.h; sourceTree = SOURCE_ROOT; };
+		E7041442123042460083F569 /* DVRSpherical.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRSpherical.cpp; path = ../../../lib/render/DVRSpherical.cpp; sourceTree = SOURCE_ROOT; };
+		E7041443123042460083F569 /* DVRSpherical.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRSpherical.h; path = ../../../lib/render/DVRSpherical.h; sourceTree = SOURCE_ROOT; };
+		E7041444123042460083F569 /* DVRTexture3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRTexture3d.cpp; path = ../../../lib/render/DVRTexture3d.cpp; sourceTree = SOURCE_ROOT; };
+		E7041445123042460083F569 /* DVRTexture3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRTexture3d.h; path = ../../../lib/render/DVRTexture3d.h; sourceTree = SOURCE_ROOT; };
+		E7041446123042460083F569 /* DVRVolumizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DVRVolumizer.cpp; path = ../../../lib/render/DVRVolumizer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041447123042460083F569 /* DVRVolumizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVRVolumizer.h; path = ../../../lib/render/DVRVolumizer.h; sourceTree = SOURCE_ROOT; };
+		E7041448123042460083F569 /* flowrenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flowrenderer.cpp; path = ../../../lib/render/flowrenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041449123042460083F569 /* flowrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = flowrenderer.h; path = ../../../lib/render/flowrenderer.h; sourceTree = SOURCE_ROOT; };
+		E704144A123042460083F569 /* glwindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glwindow.cpp; path = ../../../lib/render/glwindow.cpp; sourceTree = SOURCE_ROOT; };
+		E704144B123042460083F569 /* glwindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glwindow.h; path = ../../../lib/render/glwindow.h; sourceTree = SOURCE_ROOT; };
+		E704144C123042460083F569 /* isorenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = isorenderer.cpp; path = ../../../lib/render/isorenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E704144D123042460083F569 /* isorenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = isorenderer.h; path = ../../../lib/render/isorenderer.h; sourceTree = SOURCE_ROOT; };
+		E704144E123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/render/Makefile; sourceTree = SOURCE_ROOT; };
+		E704144F123042460083F569 /* manip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = manip.cpp; path = ../../../lib/render/manip.cpp; sourceTree = SOURCE_ROOT; };
+		E7041450123042460083F569 /* manip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = manip.h; path = ../../../lib/render/manip.h; sourceTree = SOURCE_ROOT; };
+		E7041451123042460083F569 /* Matrix3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix3d.cpp; path = ../../../lib/render/Matrix3d.cpp; sourceTree = SOURCE_ROOT; };
+		E7041452123042460083F569 /* Matrix3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix3d.h; path = ../../../lib/render/Matrix3d.h; sourceTree = SOURCE_ROOT; };
+		E7041454123042460083F569 /* moc_renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moc_renderer.cpp; path = ../../../lib/render/moc/moc_renderer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041455123042460083F569 /* Point3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Point3d.h; path = ../../../lib/render/Point3d.h; sourceTree = SOURCE_ROOT; };
+		E7041456123042460083F569 /* proberenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = proberenderer.cpp; path = ../../../lib/render/proberenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041457123042460083F569 /* proberenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proberenderer.h; path = ../../../lib/render/proberenderer.h; sourceTree = SOURCE_ROOT; };
+		E7041458123042460083F569 /* raycast_shaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = raycast_shaders.h; path = ../../../lib/render/raycast_shaders.h; sourceTree = SOURCE_ROOT; };
+		E7041459123042460083F569 /* renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renderer.cpp; path = ../../../lib/render/renderer.cpp; sourceTree = SOURCE_ROOT; };
+		E704145A123042460083F569 /* renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renderer.h; path = ../../../lib/render/renderer.h; sourceTree = SOURCE_ROOT; };
+		E704145B123042460083F569 /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderProgram.cpp; path = ../../../lib/render/ShaderProgram.cpp; sourceTree = SOURCE_ROOT; };
+		E704145C123042460083F569 /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShaderProgram.h; path = ../../../lib/render/ShaderProgram.h; sourceTree = SOURCE_ROOT; };
+		E704145D123042460083F569 /* shaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shaders.h; path = ../../../lib/render/shaders.h; sourceTree = SOURCE_ROOT; };
+		E704145E123042460083F569 /* Stopwatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Stopwatch.cpp; path = ../../../lib/render/Stopwatch.cpp; sourceTree = SOURCE_ROOT; };
+		E704145F123042460083F569 /* Stopwatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stopwatch.h; path = ../../../lib/render/Stopwatch.h; sourceTree = SOURCE_ROOT; };
+		E7041460123042460083F569 /* TextureBrick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextureBrick.cpp; path = ../../../lib/render/TextureBrick.cpp; sourceTree = SOURCE_ROOT; };
+		E7041461123042460083F569 /* TextureBrick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextureBrick.h; path = ../../../lib/render/TextureBrick.h; sourceTree = SOURCE_ROOT; };
+		E7041462123042460083F569 /* trackball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trackball.cpp; path = ../../../lib/render/trackball.cpp; sourceTree = SOURCE_ROOT; };
+		E7041463123042460083F569 /* trackball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trackball.h; path = ../../../lib/render/trackball.h; sourceTree = SOURCE_ROOT; };
+		E7041464123042460083F569 /* twoDdatarenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDdatarenderer.cpp; path = ../../../lib/render/twoDdatarenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041465123042460083F569 /* twoDdatarenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDdatarenderer.h; path = ../../../lib/render/twoDdatarenderer.h; sourceTree = SOURCE_ROOT; };
+		E7041466123042460083F569 /* twoDimagerenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDimagerenderer.cpp; path = ../../../lib/render/twoDimagerenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041467123042460083F569 /* twoDimagerenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDimagerenderer.h; path = ../../../lib/render/twoDimagerenderer.h; sourceTree = SOURCE_ROOT; };
+		E7041468123042460083F569 /* twoDrenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDrenderer.cpp; path = ../../../lib/render/twoDrenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E7041469123042460083F569 /* twoDrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDrenderer.h; path = ../../../lib/render/twoDrenderer.h; sourceTree = SOURCE_ROOT; };
+		E704146A123042460083F569 /* Vect3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vect3d.cpp; path = ../../../lib/render/Vect3d.cpp; sourceTree = SOURCE_ROOT; };
+		E704146B123042460083F569 /* Vect3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vect3d.h; path = ../../../lib/render/Vect3d.h; sourceTree = SOURCE_ROOT; };
+		E704146C123042460083F569 /* VolumeRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VolumeRenderer.cpp; path = ../../../lib/render/VolumeRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		E704146D123042460083F569 /* VolumeRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VolumeRenderer.h; path = ../../../lib/render/VolumeRenderer.h; sourceTree = SOURCE_ROOT; };
+		E704146F123042460083F569 /* AMRData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AMRData.cpp; path = ../../../lib/vdf/AMRData.cpp; sourceTree = SOURCE_ROOT; };
+		E7041471123042460083F569 /* AMRIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AMRIO.cpp; path = ../../../lib/vdf/AMRIO.cpp; sourceTree = SOURCE_ROOT; };
+		E7041473123042460083F569 /* AMRTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AMRTree.cpp; path = ../../../lib/vdf/AMRTree.cpp; sourceTree = SOURCE_ROOT; };
+		E7041475123042460083F569 /* AMRTreeBranch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AMRTreeBranch.cpp; path = ../../../lib/vdf/AMRTreeBranch.cpp; sourceTree = SOURCE_ROOT; };
+		E7041477123042460083F569 /* BlkMemMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlkMemMgr.cpp; path = ../../../lib/vdf/BlkMemMgr.cpp; sourceTree = SOURCE_ROOT; };
+		E7041479123042460083F569 /* Compressor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Compressor.cpp; path = ../../../lib/vdf/Compressor.cpp; sourceTree = SOURCE_ROOT; };
+		E704147B123042460083F569 /* DataMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataMgr.cpp; path = ../../../lib/vdf/DataMgr.cpp; sourceTree = SOURCE_ROOT; };
+		E704147D123042460083F569 /* DataMgrAMR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataMgrAMR.cpp; path = ../../../lib/vdf/DataMgrAMR.cpp; sourceTree = SOURCE_ROOT; };
+		E704147F123042460083F569 /* DataMgrFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataMgrFactory.cpp; path = ../../../lib/vdf/DataMgrFactory.cpp; sourceTree = SOURCE_ROOT; };
+		E7041483123042460083F569 /* DataMgrWB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataMgrWB.cpp; path = ../../../lib/vdf/DataMgrWB.cpp; sourceTree = SOURCE_ROOT; };
+		E7041485123042460083F569 /* DataMgrWC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataMgrWC.cpp; path = ../../../lib/vdf/DataMgrWC.cpp; sourceTree = SOURCE_ROOT; };
+		E7041487123042460083F569 /* DataMgrWRF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataMgrWRF.cpp; path = ../../../lib/vdf/DataMgrWRF.cpp; sourceTree = SOURCE_ROOT; };
+		E7041489123042460083F569 /* ExpatParseMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ExpatParseMgr.cpp; path = ../../../lib/vdf/ExpatParseMgr.cpp; sourceTree = SOURCE_ROOT; };
+		E704148B123042460083F569 /* ImpExp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImpExp.cpp; path = ../../../lib/vdf/ImpExp.cpp; sourceTree = SOURCE_ROOT; };
+		E704148F123042460083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../lib/vdf/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041490123042460083F569 /* MatWaveBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MatWaveBase.cpp; path = ../../../lib/vdf/MatWaveBase.cpp; sourceTree = SOURCE_ROOT; };
+		E7041492123042460083F569 /* MatWaveDwt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MatWaveDwt.cpp; path = ../../../lib/vdf/MatWaveDwt.cpp; sourceTree = SOURCE_ROOT; };
+		E7041494123042460083F569 /* MatWaveWavedec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MatWaveWavedec.cpp; path = ../../../lib/vdf/MatWaveWavedec.cpp; sourceTree = SOURCE_ROOT; };
+		E7041496123042460083F569 /* Metadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Metadata.cpp; path = ../../../lib/vdf/Metadata.cpp; sourceTree = SOURCE_ROOT; };
+		E7041498123042460083F569 /* MetadataSpherical.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MetadataSpherical.cpp; path = ../../../lib/vdf/MetadataSpherical.cpp; sourceTree = SOURCE_ROOT; };
+		E704149A123042460083F569 /* MetadataVDC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MetadataVDC.cpp; path = ../../../lib/vdf/MetadataVDC.cpp; sourceTree = SOURCE_ROOT; };
+		E704149C123042460083F569 /* MetadataWRF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MetadataWRF.cpp; path = ../../../lib/vdf/MetadataWRF.cpp; sourceTree = SOURCE_ROOT; };
+		E70414A0123042460083F569 /* SignificanceMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SignificanceMap.cpp; path = ../../../lib/vdf/SignificanceMap.cpp; sourceTree = SOURCE_ROOT; };
+		E70414A3123042460083F569 /* Transpose.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Transpose.cpp; path = ../../../lib/vdf/Transpose.cpp; sourceTree = SOURCE_ROOT; };
+		E70414A5123042460083F569 /* vdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vdf.cpp; path = ../../../lib/vdf/vdf.cpp; sourceTree = SOURCE_ROOT; };
+		E70414A6123042460083F569 /* VDFIOBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VDFIOBase.cpp; path = ../../../lib/vdf/VDFIOBase.cpp; sourceTree = SOURCE_ROOT; };
+		E70414A8123042460083F569 /* WaveCodecIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveCodecIO.cpp; path = ../../../lib/vdf/WaveCodecIO.cpp; sourceTree = SOURCE_ROOT; };
+		E70414AA123042470083F569 /* WaveFiltBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveFiltBase.cpp; path = ../../../lib/vdf/WaveFiltBase.cpp; sourceTree = SOURCE_ROOT; };
+		E70414AC123042470083F569 /* WaveFiltBior.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveFiltBior.cpp; path = ../../../lib/vdf/WaveFiltBior.cpp; sourceTree = SOURCE_ROOT; };
+		E70414AE123042470083F569 /* WaveFiltCoif.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveFiltCoif.cpp; path = ../../../lib/vdf/WaveFiltCoif.cpp; sourceTree = SOURCE_ROOT; };
+		E70414B0123042470083F569 /* WaveFiltDaub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveFiltDaub.cpp; path = ../../../lib/vdf/WaveFiltDaub.cpp; sourceTree = SOURCE_ROOT; };
+		E70414B2123042470083F569 /* WaveFiltHaar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveFiltHaar.cpp; path = ../../../lib/vdf/WaveFiltHaar.cpp; sourceTree = SOURCE_ROOT; };
+		E70414B4123042470083F569 /* WaveletBlock1D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock1D.cpp; path = ../../../lib/vdf/WaveletBlock1D.cpp; sourceTree = SOURCE_ROOT; };
+		E70414B6123042470083F569 /* WaveletBlock2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock2D.cpp; path = ../../../lib/vdf/WaveletBlock2D.cpp; sourceTree = SOURCE_ROOT; };
+		E70414B8123042470083F569 /* WaveletBlock3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3D.cpp; path = ../../../lib/vdf/WaveletBlock3D.cpp; sourceTree = SOURCE_ROOT; };
+		E70414BA123042470083F569 /* WaveletBlock3DBufReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3DBufReader.cpp; path = ../../../lib/vdf/WaveletBlock3DBufReader.cpp; sourceTree = SOURCE_ROOT; };
+		E70414BC123042470083F569 /* WaveletBlock3DBufWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3DBufWriter.cpp; path = ../../../lib/vdf/WaveletBlock3DBufWriter.cpp; sourceTree = SOURCE_ROOT; };
+		E70414BE123042470083F569 /* WaveletBlock3DReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3DReader.cpp; path = ../../../lib/vdf/WaveletBlock3DReader.cpp; sourceTree = SOURCE_ROOT; };
+		E70414C0123042470083F569 /* WaveletBlock3DRegionReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3DRegionReader.cpp; path = ../../../lib/vdf/WaveletBlock3DRegionReader.cpp; sourceTree = SOURCE_ROOT; };
+		E70414C2123042470083F569 /* WaveletBlock3DRegionWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3DRegionWriter.cpp; path = ../../../lib/vdf/WaveletBlock3DRegionWriter.cpp; sourceTree = SOURCE_ROOT; };
+		E70414C4123042470083F569 /* WaveletBlock3DWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlock3DWriter.cpp; path = ../../../lib/vdf/WaveletBlock3DWriter.cpp; sourceTree = SOURCE_ROOT; };
+		E70414C6123042470083F569 /* WaveletBlockIOBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveletBlockIOBase.cpp; path = ../../../lib/vdf/WaveletBlockIOBase.cpp; sourceTree = SOURCE_ROOT; };
+		E70414C8123042470083F569 /* WRF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WRF.cpp; path = ../../../lib/vdf/WRF.cpp; sourceTree = SOURCE_ROOT; };
+		E70414CA123042470083F569 /* WRFReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WRFReader.cpp; path = ../../../lib/vdf/WRFReader.cpp; sourceTree = SOURCE_ROOT; };
+		E70414CC123042470083F569 /* XmlNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlNode.cpp; path = ../../../lib/vdf/XmlNode.cpp; sourceTree = SOURCE_ROOT; };
+		E70414D0123042930083F569 /* AMRData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMRData.h; path = ../../../include/vapor/AMRData.h; sourceTree = SOURCE_ROOT; };
+		E70414D1123042930083F569 /* AMRIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMRIO.h; path = ../../../include/vapor/AMRIO.h; sourceTree = SOURCE_ROOT; };
+		E70414D2123042930083F569 /* AMRTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMRTree.h; path = ../../../include/vapor/AMRTree.h; sourceTree = SOURCE_ROOT; };
+		E70414D3123042930083F569 /* AMRTreeBranch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMRTreeBranch.h; path = ../../../include/vapor/AMRTreeBranch.h; sourceTree = SOURCE_ROOT; };
+		E70414D4123042930083F569 /* Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Base64.h; path = ../../../include/vapor/Base64.h; sourceTree = SOURCE_ROOT; };
+		E70414D5123042930083F569 /* BlkMemMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BlkMemMgr.h; path = ../../../include/vapor/BlkMemMgr.h; sourceTree = SOURCE_ROOT; };
+		E70414D6123042930083F569 /* CFuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CFuncs.h; path = ../../../include/vapor/CFuncs.h; sourceTree = SOURCE_ROOT; };
+		E70414D7123042930083F569 /* ColorMapBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ColorMapBase.h; path = ../../../include/vapor/ColorMapBase.h; sourceTree = SOURCE_ROOT; };
+		E70414D8123042930083F569 /* Compressor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Compressor.h; path = ../../../include/vapor/Compressor.h; sourceTree = SOURCE_ROOT; };
+		E70414D9123042930083F569 /* DataMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataMgr.h; path = ../../../include/vapor/DataMgr.h; sourceTree = SOURCE_ROOT; };
+		E70414DA123042930083F569 /* DataMgrAMR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataMgrAMR.h; path = ../../../include/vapor/DataMgrAMR.h; sourceTree = SOURCE_ROOT; };
+		E70414DB123042930083F569 /* DataMgrFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataMgrFactory.h; path = ../../../include/vapor/DataMgrFactory.h; sourceTree = SOURCE_ROOT; };
+		E70414DD123042930083F569 /* DataMgrWB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataMgrWB.h; path = ../../../include/vapor/DataMgrWB.h; sourceTree = SOURCE_ROOT; };
+		E70414DE123042930083F569 /* DataMgrWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataMgrWC.h; path = ../../../include/vapor/DataMgrWC.h; sourceTree = SOURCE_ROOT; };
+		E70414DF123042930083F569 /* DataMgrWRF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataMgrWRF.h; path = ../../../include/vapor/DataMgrWRF.h; sourceTree = SOURCE_ROOT; };
+		E70414E0123042930083F569 /* EasyThreads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EasyThreads.h; path = ../../../include/vapor/EasyThreads.h; sourceTree = SOURCE_ROOT; };
+		E70414E1123042930083F569 /* errorcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = errorcodes.h; path = ../../../include/vapor/errorcodes.h; sourceTree = SOURCE_ROOT; };
+		E70414E2123042930083F569 /* ExpatParseMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExpatParseMgr.h; path = ../../../include/vapor/ExpatParseMgr.h; sourceTree = SOURCE_ROOT; };
+		E70414E3123042930083F569 /* flowlinedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = flowlinedata.h; path = ../../../include/vapor/flowlinedata.h; sourceTree = SOURCE_ROOT; };
+		E70414E4123042930083F569 /* ImpExp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImpExp.h; path = ../../../include/vapor/ImpExp.h; sourceTree = SOURCE_ROOT; };
+		E70414E6123042930083F569 /* Lifting1D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lifting1D.h; path = ../../../include/vapor/Lifting1D.h; sourceTree = SOURCE_ROOT; };
+		E70414E7123042930083F569 /* MapperFunctionBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MapperFunctionBase.h; path = ../../../include/vapor/MapperFunctionBase.h; sourceTree = SOURCE_ROOT; };
+		E70414E8123042930083F569 /* MatWaveBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatWaveBase.h; path = ../../../include/vapor/MatWaveBase.h; sourceTree = SOURCE_ROOT; };
+		E70414E9123042930083F569 /* MatWaveDwt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatWaveDwt.h; path = ../../../include/vapor/MatWaveDwt.h; sourceTree = SOURCE_ROOT; };
+		E70414EA123042930083F569 /* MatWaveWavedec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatWaveWavedec.h; path = ../../../include/vapor/MatWaveWavedec.h; sourceTree = SOURCE_ROOT; };
+		E70414EB123042930083F569 /* Metadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Metadata.h; path = ../../../include/vapor/Metadata.h; sourceTree = SOURCE_ROOT; };
+		E70414EC123042930083F569 /* MetadataSpherical.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MetadataSpherical.h; path = ../../../include/vapor/MetadataSpherical.h; sourceTree = SOURCE_ROOT; };
+		E70414ED123042930083F569 /* MetadataVDC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MetadataVDC.h; path = ../../../include/vapor/MetadataVDC.h; sourceTree = SOURCE_ROOT; };
+		E70414EE123042930083F569 /* MetadataWRF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MetadataWRF.h; path = ../../../include/vapor/MetadataWRF.h; sourceTree = SOURCE_ROOT; };
+		E70414EF123042930083F569 /* MyBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyBase.h; path = ../../../include/vapor/MyBase.h; sourceTree = SOURCE_ROOT; };
+		E70414F0123042930083F569 /* OpacityMapBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpacityMapBase.h; path = ../../../include/vapor/OpacityMapBase.h; sourceTree = SOURCE_ROOT; };
+		E70414F1123042930083F569 /* OptionParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OptionParser.h; path = ../../../include/vapor/OptionParser.h; sourceTree = SOURCE_ROOT; };
+		E70414F2123042930083F569 /* ParamNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParamNode.h; path = ../../../include/vapor/ParamNode.h; sourceTree = SOURCE_ROOT; };
+		E70414F3123042930083F569 /* ParamsBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParamsBase.h; path = ../../../include/vapor/ParamsBase.h; sourceTree = SOURCE_ROOT; };
+		E70414F4123042930083F569 /* PVTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PVTime.h; path = ../../../include/vapor/PVTime.h; sourceTree = SOURCE_ROOT; };
+		E70414F6123042930083F569 /* SignificanceMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SignificanceMap.h; path = ../../../include/vapor/SignificanceMap.h; sourceTree = SOURCE_ROOT; };
+		E70414F7123042930083F569 /* tfinterpolator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tfinterpolator.h; path = ../../../include/vapor/tfinterpolator.h; sourceTree = SOURCE_ROOT; };
+		E70414F8123042930083F569 /* TransferFunctionLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TransferFunctionLite.h; path = ../../../include/vapor/TransferFunctionLite.h; sourceTree = SOURCE_ROOT; };
+		E70414F9123042930083F569 /* Transpose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Transpose.h; path = ../../../include/vapor/Transpose.h; sourceTree = SOURCE_ROOT; };
+		E70414FA123042930083F569 /* VaporFlow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VaporFlow.h; path = ../../../include/vapor/VaporFlow.h; sourceTree = SOURCE_ROOT; };
+		E70414FB123042930083F569 /* VDFIOBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VDFIOBase.h; path = ../../../include/vapor/VDFIOBase.h; sourceTree = SOURCE_ROOT; };
+		E70414FC123042930083F569 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Version.h; path = ../../../include/vapor/Version.h; sourceTree = SOURCE_ROOT; };
+		E70414FD123042930083F569 /* WaveCodecIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveCodecIO.h; path = ../../../include/vapor/WaveCodecIO.h; sourceTree = SOURCE_ROOT; };
+		E70414FE123042930083F569 /* WaveFiltBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveFiltBase.h; path = ../../../include/vapor/WaveFiltBase.h; sourceTree = SOURCE_ROOT; };
+		E70414FF123042930083F569 /* WaveFiltBior.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveFiltBior.h; path = ../../../include/vapor/WaveFiltBior.h; sourceTree = SOURCE_ROOT; };
+		E7041500123042930083F569 /* WaveFiltCoif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveFiltCoif.h; path = ../../../include/vapor/WaveFiltCoif.h; sourceTree = SOURCE_ROOT; };
+		E7041501123042930083F569 /* WaveFiltDaub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveFiltDaub.h; path = ../../../include/vapor/WaveFiltDaub.h; sourceTree = SOURCE_ROOT; };
+		E7041502123042930083F569 /* WaveFiltHaar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveFiltHaar.h; path = ../../../include/vapor/WaveFiltHaar.h; sourceTree = SOURCE_ROOT; };
+		E7041503123042930083F569 /* WaveletBlock1D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock1D.h; path = ../../../include/vapor/WaveletBlock1D.h; sourceTree = SOURCE_ROOT; };
+		E7041504123042930083F569 /* WaveletBlock2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock2D.h; path = ../../../include/vapor/WaveletBlock2D.h; sourceTree = SOURCE_ROOT; };
+		E7041505123042930083F569 /* WaveletBlock3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3D.h; path = ../../../include/vapor/WaveletBlock3D.h; sourceTree = SOURCE_ROOT; };
+		E7041506123042930083F569 /* WaveletBlock3DBufReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3DBufReader.h; path = ../../../include/vapor/WaveletBlock3DBufReader.h; sourceTree = SOURCE_ROOT; };
+		E7041507123042930083F569 /* WaveletBlock3DBufWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3DBufWriter.h; path = ../../../include/vapor/WaveletBlock3DBufWriter.h; sourceTree = SOURCE_ROOT; };
+		E7041508123042930083F569 /* WaveletBlock3DReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3DReader.h; path = ../../../include/vapor/WaveletBlock3DReader.h; sourceTree = SOURCE_ROOT; };
+		E7041509123042930083F569 /* WaveletBlock3DRegionReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3DRegionReader.h; path = ../../../include/vapor/WaveletBlock3DRegionReader.h; sourceTree = SOURCE_ROOT; };
+		E704150A123042930083F569 /* WaveletBlock3DRegionWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3DRegionWriter.h; path = ../../../include/vapor/WaveletBlock3DRegionWriter.h; sourceTree = SOURCE_ROOT; };
+		E704150B123042930083F569 /* WaveletBlock3DWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlock3DWriter.h; path = ../../../include/vapor/WaveletBlock3DWriter.h; sourceTree = SOURCE_ROOT; };
+		E704150C123042930083F569 /* WaveletBlockIOBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaveletBlockIOBase.h; path = ../../../include/vapor/WaveletBlockIOBase.h; sourceTree = SOURCE_ROOT; };
+		E704150D123042930083F569 /* WRF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WRF.h; path = ../../../include/vapor/WRF.h; sourceTree = SOURCE_ROOT; };
+		E704150E123042930083F569 /* WRFReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WRFReader.h; path = ../../../include/vapor/WRFReader.h; sourceTree = SOURCE_ROOT; };
+		E704150F123042930083F569 /* XmlNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlNode.h; path = ../../../include/vapor/XmlNode.h; sourceTree = SOURCE_ROOT; };
+		E704151B123042CB0083F569 /* asciitf2vtf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = asciitf2vtf.cpp; path = ../../../apps/asciitf2vtf/asciitf2vtf.cpp; sourceTree = SOURCE_ROOT; };
+		E704151C123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/asciitf2vtf/Makefile; sourceTree = SOURCE_ROOT; };
+		E704151E123042CB0083F569 /* cart2wrfvdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cart2wrfvdf.cpp; path = ../../../apps/cart2wrfvdf/cart2wrfvdf.cpp; sourceTree = SOURCE_ROOT; };
+		E704151F123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/cart2wrfvdf/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041521123042CB0083F569 /* flashamr2vdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flashamr2vdf.cpp; path = ../../../apps/flashamr2vdf/flashamr2vdf.cpp; sourceTree = SOURCE_ROOT; };
+		E7041522123042CB0083F569 /* flashhdf5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flashhdf5.cpp; path = ../../../apps/flashamr2vdf/flashhdf5.cpp; sourceTree = SOURCE_ROOT; };
+		E7041523123042CB0083F569 /* flashhdf5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = flashhdf5.h; path = ../../../apps/flashamr2vdf/flashhdf5.h; sourceTree = SOURCE_ROOT; };
+		E7041524123042CB0083F569 /* flashvdfcreate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flashvdfcreate.cpp; path = ../../../apps/flashamr2vdf/flashvdfcreate.cpp; sourceTree = SOURCE_ROOT; };
+		E7041525123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/flashamr2vdf/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041526123042CB0083F569 /* Makefile.flashamr2vdf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.flashamr2vdf; path = ../../../apps/flashamr2vdf/Makefile.flashamr2vdf; sourceTree = SOURCE_ROOT; };
+		E7041527123042CB0083F569 /* Makefile.flashvdfcreate */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.flashvdfcreate; path = ../../../apps/flashamr2vdf/Makefile.flashvdfcreate; sourceTree = SOURCE_ROOT; };
+		E7041529123042CB0083F569 /* glewinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = glewinfo.c; path = ../../../apps/glewinfo/glewinfo.c; sourceTree = SOURCE_ROOT; };
+		E704152A123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/glewinfo/Makefile; sourceTree = SOURCE_ROOT; };
+		E704152B123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/Makefile; sourceTree = SOURCE_ROOT; };
+		E704152D123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/ncdf2vdf/Makefile; sourceTree = SOURCE_ROOT; };
+		E704152E123042CB0083F569 /* ncdf2vdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ncdf2vdf.cpp; path = ../../../apps/ncdf2vdf/ncdf2vdf.cpp; sourceTree = SOURCE_ROOT; };
+		E7041530123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/raw2vdf/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041531123042CB0083F569 /* raw2vdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raw2vdf.cpp; path = ../../../apps/raw2vdf/raw2vdf.cpp; sourceTree = SOURCE_ROOT; };
+		E7041533123042CB0083F569 /* geotiff_proj4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = geotiff_proj4.cpp; path = ../../../apps/tiff2geotiff/geotiff_proj4.cpp; sourceTree = SOURCE_ROOT; };
+		E7041534123042CB0083F569 /* getopt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getopt.cpp; path = ../../../apps/tiff2geotiff/getopt.cpp; sourceTree = SOURCE_ROOT; };
+		E7041535123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/tiff2geotiff/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041536123042CB0083F569 /* tiff2geotiff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tiff2geotiff.cpp; path = ../../../apps/tiff2geotiff/tiff2geotiff.cpp; sourceTree = SOURCE_ROOT; };
+		E704153A123042CB0083F569 /* animationeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animationeventrouter.cpp; path = ../../../apps/vaporgui/guis/animationeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E704153B123042CB0083F569 /* animationeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animationeventrouter.h; path = ../../../apps/vaporgui/guis/animationeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E704153C123042CB0083F569 /* ColorbarWidget.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorbarWidget.cpp; path = ../../../apps/vaporgui/guis/ColorbarWidget.cpp; sourceTree = SOURCE_ROOT; };
+		E704153D123042CB0083F569 /* ColorbarWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ColorbarWidget.h; path = ../../../apps/vaporgui/guis/ColorbarWidget.h; sourceTree = SOURCE_ROOT; };
+		E704153E123042CB0083F569 /* colorpickerframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = colorpickerframe.cpp; path = ../../../apps/vaporgui/guis/colorpickerframe.cpp; sourceTree = SOURCE_ROOT; };
+		E704153F123042CB0083F569 /* colorpickerframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = colorpickerframe.h; path = ../../../apps/vaporgui/guis/colorpickerframe.h; sourceTree = SOURCE_ROOT; };
+		E7041540123042CB0083F569 /* ControlPointEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ControlPointEditor.cpp; path = ../../../apps/vaporgui/guis/ControlPointEditor.cpp; sourceTree = SOURCE_ROOT; };
+		E7041541123042CB0083F569 /* ControlPointEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ControlPointEditor.h; path = ../../../apps/vaporgui/guis/ControlPointEditor.h; sourceTree = SOURCE_ROOT; };
+		E7041542123042CB0083F569 /* DomainWidget.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DomainWidget.cpp; path = ../../../apps/vaporgui/guis/DomainWidget.cpp; sourceTree = SOURCE_ROOT; };
+		E7041543123042CB0083F569 /* DomainWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DomainWidget.h; path = ../../../apps/vaporgui/guis/DomainWidget.h; sourceTree = SOURCE_ROOT; };
+		E7041544123042CB0083F569 /* dvreventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dvreventrouter.cpp; path = ../../../apps/vaporgui/guis/dvreventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041545123042CB0083F569 /* dvreventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dvreventrouter.h; path = ../../../apps/vaporgui/guis/dvreventrouter.h; sourceTree = SOURCE_ROOT; };
+		E7041546123042CB0083F569 /* eventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eventrouter.cpp; path = ../../../apps/vaporgui/guis/eventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041547123042CB0083F569 /* eventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eventrouter.h; path = ../../../apps/vaporgui/guis/eventrouter.h; sourceTree = SOURCE_ROOT; };
+		E7041548123042CB0083F569 /* floweventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = floweventrouter.cpp; path = ../../../apps/vaporgui/guis/floweventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041549123042CB0083F569 /* floweventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = floweventrouter.h; path = ../../../apps/vaporgui/guis/floweventrouter.h; sourceTree = SOURCE_ROOT; };
+		E704154A123042CB0083F569 /* glprobewindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glprobewindow.cpp; path = ../../../apps/vaporgui/guis/glprobewindow.cpp; sourceTree = SOURCE_ROOT; };
+		E704154B123042CB0083F569 /* glprobewindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glprobewindow.h; path = ../../../apps/vaporgui/guis/glprobewindow.h; sourceTree = SOURCE_ROOT; };
+		E704154C123042CB0083F569 /* gltwoDwindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gltwoDwindow.cpp; path = ../../../apps/vaporgui/guis/gltwoDwindow.cpp; sourceTree = SOURCE_ROOT; };
+		E704154D123042CB0083F569 /* gltwoDwindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gltwoDwindow.h; path = ../../../apps/vaporgui/guis/gltwoDwindow.h; sourceTree = SOURCE_ROOT; };
+		E704154E123042CB0083F569 /* GLWidget.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLWidget.cpp; path = ../../../apps/vaporgui/guis/GLWidget.cpp; sourceTree = SOURCE_ROOT; };
+		E704154F123042CB0083F569 /* GLWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLWidget.h; path = ../../../apps/vaporgui/guis/GLWidget.h; sourceTree = SOURCE_ROOT; };
+		E7041550123042CB0083F569 /* guis.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = guis.mk; path = ../../../apps/vaporgui/guis/guis.mk; sourceTree = SOURCE_ROOT; };
+		E7041551123042CB0083F569 /* instancetable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = instancetable.cpp; path = ../../../apps/vaporgui/guis/instancetable.cpp; sourceTree = SOURCE_ROOT; };
+		E7041552123042CB0083F569 /* instancetable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instancetable.h; path = ../../../apps/vaporgui/guis/instancetable.h; sourceTree = SOURCE_ROOT; };
+		E7041553123042CB0083F569 /* isoeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = isoeventrouter.cpp; path = ../../../apps/vaporgui/guis/isoeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041554123042CB0083F569 /* isoeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = isoeventrouter.h; path = ../../../apps/vaporgui/guis/isoeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E7041555123042CB0083F569 /* loadtfdialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = loadtfdialog.cpp; path = ../../../apps/vaporgui/guis/loadtfdialog.cpp; sourceTree = SOURCE_ROOT; };
+		E7041556123042CB0083F569 /* loadtfdialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = loadtfdialog.h; path = ../../../apps/vaporgui/guis/loadtfdialog.h; sourceTree = SOURCE_ROOT; };
+		E7041557123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vaporgui/guis/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041558123042CB0083F569 /* mappingframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mappingframe.cpp; path = ../../../apps/vaporgui/guis/mappingframe.cpp; sourceTree = SOURCE_ROOT; };
+		E7041559123042CB0083F569 /* mappingframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mappingframe.h; path = ../../../apps/vaporgui/guis/mappingframe.h; sourceTree = SOURCE_ROOT; };
+		E704155A123042CB0083F569 /* OpacityWidget.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpacityWidget.cpp; path = ../../../apps/vaporgui/guis/OpacityWidget.cpp; sourceTree = SOURCE_ROOT; };
+		E704155B123042CB0083F569 /* OpacityWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpacityWidget.h; path = ../../../apps/vaporgui/guis/OpacityWidget.h; sourceTree = SOURCE_ROOT; };
+		E704155C123042CB0083F569 /* probeeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = probeeventrouter.cpp; path = ../../../apps/vaporgui/guis/probeeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E704155D123042CB0083F569 /* probeeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = probeeventrouter.h; path = ../../../apps/vaporgui/guis/probeeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E704155E123042CB0083F569 /* probeframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = probeframe.cpp; path = ../../../apps/vaporgui/guis/probeframe.cpp; sourceTree = SOURCE_ROOT; };
+		E704155F123042CB0083F569 /* probeframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = probeframe.h; path = ../../../apps/vaporgui/guis/probeframe.h; sourceTree = SOURCE_ROOT; };
+		E7041560123042CB0083F569 /* qtthumbwheel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qtthumbwheel.cpp; path = ../../../apps/vaporgui/guis/qtthumbwheel.cpp; sourceTree = SOURCE_ROOT; };
+		E7041561123042CB0083F569 /* qtthumbwheel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = qtthumbwheel.h; path = ../../../apps/vaporgui/guis/qtthumbwheel.h; sourceTree = SOURCE_ROOT; };
+		E7041562123042CB0083F569 /* regioneventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = regioneventrouter.cpp; path = ../../../apps/vaporgui/guis/regioneventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041563123042CB0083F569 /* regioneventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = regioneventrouter.h; path = ../../../apps/vaporgui/guis/regioneventrouter.h; sourceTree = SOURCE_ROOT; };
+		E7041564123042CB0083F569 /* savetfdialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = savetfdialog.cpp; path = ../../../apps/vaporgui/guis/savetfdialog.cpp; sourceTree = SOURCE_ROOT; };
+		E7041565123042CB0083F569 /* savetfdialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = savetfdialog.h; path = ../../../apps/vaporgui/guis/savetfdialog.h; sourceTree = SOURCE_ROOT; };
+		E7041566123042CB0083F569 /* seedlisteditor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = seedlisteditor.cpp; path = ../../../apps/vaporgui/guis/seedlisteditor.cpp; sourceTree = SOURCE_ROOT; };
+		E7041567123042CB0083F569 /* seedlisteditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = seedlisteditor.h; path = ../../../apps/vaporgui/guis/seedlisteditor.h; sourceTree = SOURCE_ROOT; };
+		E7041568123042CB0083F569 /* twoDdataeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDdataeventrouter.cpp; path = ../../../apps/vaporgui/guis/twoDdataeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041569123042CB0083F569 /* twoDdataeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDdataeventrouter.h; path = ../../../apps/vaporgui/guis/twoDdataeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E704156A123042CB0083F569 /* twoDeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDeventrouter.cpp; path = ../../../apps/vaporgui/guis/twoDeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E704156B123042CB0083F569 /* twoDeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDeventrouter.h; path = ../../../apps/vaporgui/guis/twoDeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E704156C123042CB0083F569 /* twodframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twodframe.cpp; path = ../../../apps/vaporgui/guis/twodframe.cpp; sourceTree = SOURCE_ROOT; };
+		E704156D123042CB0083F569 /* twodframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twodframe.h; path = ../../../apps/vaporgui/guis/twodframe.h; sourceTree = SOURCE_ROOT; };
+		E704156E123042CB0083F569 /* twoDimageeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = twoDimageeventrouter.cpp; path = ../../../apps/vaporgui/guis/twoDimageeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E704156F123042CB0083F569 /* twoDimageeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoDimageeventrouter.h; path = ../../../apps/vaporgui/guis/twoDimageeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E7041571123042CB0083F569 /* animationtab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = animationtab.ui; path = ../../../apps/vaporgui/guis/ui/animationtab.ui; sourceTree = SOURCE_ROOT; };
+		E7041572123042CB0083F569 /* ControlPointEditorBase.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = ControlPointEditorBase.ui; path = ../../../apps/vaporgui/guis/ui/ControlPointEditorBase.ui; sourceTree = SOURCE_ROOT; };
+		E7041573123042CB0083F569 /* dvr.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = dvr.ui; path = ../../../apps/vaporgui/guis/ui/dvr.ui; sourceTree = SOURCE_ROOT; };
+		E7041574123042CB0083F569 /* flowtab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = flowtab.ui; path = ../../../apps/vaporgui/guis/ui/flowtab.ui; sourceTree = SOURCE_ROOT; };
+		E7041575123042CB0083F569 /* isotab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = isotab.ui; path = ../../../apps/vaporgui/guis/ui/isotab.ui; sourceTree = SOURCE_ROOT; };
+		E7041576123042CB0083F569 /* preferences.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = preferences.ui; path = ../../../apps/vaporgui/guis/ui/preferences.ui; sourceTree = SOURCE_ROOT; };
+		E7041577123042CB0083F569 /* probetab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = probetab.ui; path = ../../../apps/vaporgui/guis/ui/probetab.ui; sourceTree = SOURCE_ROOT; };
+		E7041578123042CB0083F569 /* regiontab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = regiontab.ui; path = ../../../apps/vaporgui/guis/ui/regiontab.ui; sourceTree = SOURCE_ROOT; };
+		E7041579123042CB0083F569 /* setoffset.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = setoffset.ui; path = ../../../apps/vaporgui/guis/ui/setoffset.ui; sourceTree = SOURCE_ROOT; };
+		E704157A123042CB0083F569 /* twoDdatatab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = twoDdatatab.ui; path = ../../../apps/vaporgui/guis/ui/twoDdatatab.ui; sourceTree = SOURCE_ROOT; };
+		E704157B123042CB0083F569 /* twoDimagetab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = twoDimagetab.ui; path = ../../../apps/vaporgui/guis/ui/twoDimagetab.ui; sourceTree = SOURCE_ROOT; };
+		E704157C123042CB0083F569 /* twoDtab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = twoDtab.ui; path = ../../../apps/vaporgui/guis/ui/twoDtab.ui; sourceTree = SOURCE_ROOT; };
+		E704157D123042CB0083F569 /* ui.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ui.mk; path = ../../../apps/vaporgui/guis/ui/ui.mk; sourceTree = SOURCE_ROOT; };
+		E704157E123042CB0083F569 /* vizfeatures.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = vizfeatures.ui; path = ../../../apps/vaporgui/guis/ui/vizfeatures.ui; sourceTree = SOURCE_ROOT; };
+		E704157F123042CB0083F569 /* viztab.ui */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = viztab.ui; path = ../../../apps/vaporgui/guis/ui/viztab.ui; sourceTree = SOURCE_ROOT; };
+		E7041580123042CB0083F569 /* userpreferences.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = userpreferences.cpp; path = ../../../apps/vaporgui/guis/userpreferences.cpp; sourceTree = SOURCE_ROOT; };
+		E7041581123042CB0083F569 /* userpreferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = userpreferences.h; path = ../../../apps/vaporgui/guis/userpreferences.h; sourceTree = SOURCE_ROOT; };
+		E7041582123042CB0083F569 /* viewpointeventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = viewpointeventrouter.cpp; path = ../../../apps/vaporgui/guis/viewpointeventrouter.cpp; sourceTree = SOURCE_ROOT; };
+		E7041583123042CB0083F569 /* viewpointeventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viewpointeventrouter.h; path = ../../../apps/vaporgui/guis/viewpointeventrouter.h; sourceTree = SOURCE_ROOT; };
+		E7041584123042CB0083F569 /* vizselectcombo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vizselectcombo.cpp; path = ../../../apps/vaporgui/guis/vizselectcombo.cpp; sourceTree = SOURCE_ROOT; };
+		E7041585123042CB0083F569 /* vizselectcombo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vizselectcombo.h; path = ../../../apps/vaporgui/guis/vizselectcombo.h; sourceTree = SOURCE_ROOT; };
+		E7041587123042CB0083F569 /* back.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = back.xpm; path = ../../../apps/vaporgui/images/back.xpm; sourceTree = SOURCE_ROOT; };
+		E7041588123042CB0083F569 /* capture-off.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "capture-off.jpg"; path = "../../../apps/vaporgui/images/capture-off.jpg"; sourceTree = SOURCE_ROOT; };
+		E7041589123042CB0083F569 /* capture-off.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "capture-off.xpm"; path = "../../../apps/vaporgui/images/capture-off.xpm"; sourceTree = SOURCE_ROOT; };
+		E704158A123042CB0083F569 /* capture-on.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "capture-on.jpg"; path = "../../../apps/vaporgui/images/capture-on.jpg"; sourceTree = SOURCE_ROOT; };
+		E704158B123042CB0083F569 /* capture-on.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "capture-on.xpm"; path = "../../../apps/vaporgui/images/capture-on.xpm"; sourceTree = SOURCE_ROOT; };
+		E704158C123042CB0083F569 /* cascade.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = cascade.JPG; path = ../../../apps/vaporgui/images/cascade.JPG; sourceTree = SOURCE_ROOT; };
+		E704158D123042CB0083F569 /* cascade.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = cascade.xpm; path = ../../../apps/vaporgui/images/cascade.xpm; sourceTree = SOURCE_ROOT; };
+		E704158E123042CB0083F569 /* cube.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = cube.JPG; path = ../../../apps/vaporgui/images/cube.JPG; sourceTree = SOURCE_ROOT; };
+		E704158F123042CB0083F569 /* cube.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = cube.xpm; path = ../../../apps/vaporgui/images/cube.xpm; sourceTree = SOURCE_ROOT; };
+		E7041590123042CB0083F569 /* eye.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = eye.xpm; path = ../../../apps/vaporgui/images/eye.xpm; sourceTree = SOURCE_ROOT; };
+		E7041591123042CB0083F569 /* fastforward.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = fastforward.jpg; path = ../../../apps/vaporgui/images/fastforward.jpg; sourceTree = SOURCE_ROOT; };
+		E7041592123042CB0083F569 /* fastreverse.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = fastreverse.JPG; path = ../../../apps/vaporgui/images/fastreverse.JPG; sourceTree = SOURCE_ROOT; };
+		E7041593123042CB0083F569 /* fileopen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fileopen.png; path = ../../../apps/vaporgui/images/fileopen.png; sourceTree = SOURCE_ROOT; };
+		E7041594123042CB0083F569 /* fileopen.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = fileopen.xpm; path = ../../../apps/vaporgui/images/fileopen.xpm; sourceTree = SOURCE_ROOT; };
+		E7041595123042CB0083F569 /* forward.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = forward.xpm; path = ../../../apps/vaporgui/images/forward.xpm; sourceTree = SOURCE_ROOT; };
+		E7041596123042CB0083F569 /* hand.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = hand.jpg; path = ../../../apps/vaporgui/images/hand.jpg; sourceTree = SOURCE_ROOT; };
+		E7041597123042CB0083F569 /* home.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = home.JPG; path = ../../../apps/vaporgui/images/home.JPG; sourceTree = SOURCE_ROOT; };
+		E7041598123042CB0083F569 /* home.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = home.xpm; path = ../../../apps/vaporgui/images/home.xpm; sourceTree = SOURCE_ROOT; };
+		E7041599123042CB0083F569 /* home2.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = home2.xpm; path = ../../../apps/vaporgui/images/home2.xpm; sourceTree = SOURCE_ROOT; };
+		E704159A123042CB0083F569 /* lightbulb.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = lightbulb.JPG; path = ../../../apps/vaporgui/images/lightbulb.JPG; sourceTree = SOURCE_ROOT; };
+		E704159B123042CB0083F569 /* lightbulb.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = lightbulb.xpm; path = ../../../apps/vaporgui/images/lightbulb.xpm; sourceTree = SOURCE_ROOT; };
+		E704159C123042CB0083F569 /* magnify.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = magnify.jpg; path = ../../../apps/vaporgui/images/magnify.jpg; sourceTree = SOURCE_ROOT; };
+		E704159D123042CB0083F569 /* magnify.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = magnify.xpm; path = ../../../apps/vaporgui/images/magnify.xpm; sourceTree = SOURCE_ROOT; };
+		E704159E123042CB0083F569 /* navigate.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = navigate.jpg; path = ../../../apps/vaporgui/images/navigate.jpg; sourceTree = SOURCE_ROOT; };
+		E704159F123042CB0083F569 /* pause.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = pause.JPG; path = ../../../apps/vaporgui/images/pause.JPG; sourceTree = SOURCE_ROOT; };
+		E70415A0123042CB0083F569 /* pauseA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = pauseA.xpm; path = ../../../apps/vaporgui/images/pauseA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415A1123042CB0083F569 /* pauseimage.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = pauseimage.xpm; path = ../../../apps/vaporgui/images/pauseimage.xpm; sourceTree = SOURCE_ROOT; };
+		E70415A2123042CB0083F569 /* planes.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = planes.JPG; path = ../../../apps/vaporgui/images/planes.JPG; sourceTree = SOURCE_ROOT; };
+		E70415A3123042CB0083F569 /* planes.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = planes.xpm; path = ../../../apps/vaporgui/images/planes.xpm; sourceTree = SOURCE_ROOT; };
+		E70415A4123042CB0083F569 /* play.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = play.jpg; path = ../../../apps/vaporgui/images/play.jpg; sourceTree = SOURCE_ROOT; };
+		E70415A5123042CB0083F569 /* playforward.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = playforward.jpg; path = ../../../apps/vaporgui/images/playforward.jpg; sourceTree = SOURCE_ROOT; };
+		E70415A6123042CB0083F569 /* playforward.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = playforward.xpm; path = ../../../apps/vaporgui/images/playforward.xpm; sourceTree = SOURCE_ROOT; };
+		E70415A7123042CB0083F569 /* playforwardA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = playforwardA.xpm; path = ../../../apps/vaporgui/images/playforwardA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415A8123042CB0083F569 /* playreverse.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = playreverse.JPG; path = ../../../apps/vaporgui/images/playreverse.JPG; sourceTree = SOURCE_ROOT; };
+		E70415A9123042CB0083F569 /* playreverse.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = playreverse.xpm; path = ../../../apps/vaporgui/images/playreverse.xpm; sourceTree = SOURCE_ROOT; };
+		E70415AA123042CB0083F569 /* playreverseA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = playreverseA.xpm; path = ../../../apps/vaporgui/images/playreverseA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415AB123042CB0083F569 /* pointer.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = pointer.jpg; path = ../../../apps/vaporgui/images/pointer.jpg; sourceTree = SOURCE_ROOT; };
+		E70415AC123042CB0083F569 /* probe.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = probe.JPG; path = ../../../apps/vaporgui/images/probe.JPG; sourceTree = SOURCE_ROOT; };
+		E70415AD123042CB0083F569 /* probe.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = probe.xpm; path = ../../../apps/vaporgui/images/probe.xpm; sourceTree = SOURCE_ROOT; };
+		E70415AE123042CB0083F569 /* rake.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = rake.jpg; path = ../../../apps/vaporgui/images/rake.jpg; sourceTree = SOURCE_ROOT; };
+		E70415AF123042CB0083F569 /* rake.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = rake.xpm; path = ../../../apps/vaporgui/images/rake.xpm; sourceTree = SOURCE_ROOT; };
+		E70415B0123042CB0083F569 /* replay.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = replay.JPG; path = ../../../apps/vaporgui/images/replay.JPG; sourceTree = SOURCE_ROOT; };
+		E70415B1123042CB0083F569 /* replayA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = replayA.xpm; path = ../../../apps/vaporgui/images/replayA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415B2123042CB0083F569 /* rewind.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = rewind.JPG; path = ../../../apps/vaporgui/images/rewind.JPG; sourceTree = SOURCE_ROOT; };
+		E70415B3123042CB0083F569 /* sethome.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = sethome.JPG; path = ../../../apps/vaporgui/images/sethome.JPG; sourceTree = SOURCE_ROOT; };
+		E70415B4123042CB0083F569 /* sethome.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sethome.xpm; path = ../../../apps/vaporgui/images/sethome.xpm; sourceTree = SOURCE_ROOT; };
+		E70415B5123042CB0083F569 /* sphere.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = sphere.JPG; path = ../../../apps/vaporgui/images/sphere.JPG; sourceTree = SOURCE_ROOT; };
+		E70415B6123042CB0083F569 /* sphere.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sphere.xpm; path = ../../../apps/vaporgui/images/sphere.xpm; sourceTree = SOURCE_ROOT; };
+		E70415B7123042CB0083F569 /* spherecolored.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = spherecolored.JPG; path = ../../../apps/vaporgui/images/spherecolored.JPG; sourceTree = SOURCE_ROOT; };
+		E70415B8123042CB0083F569 /* spherecolored.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = spherecolored.xpm; path = ../../../apps/vaporgui/images/spherecolored.xpm; sourceTree = SOURCE_ROOT; };
+		E70415B9123042CB0083F569 /* step-back-off.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "step-back-off.jpg"; path = "../../../apps/vaporgui/images/step-back-off.jpg"; sourceTree = SOURCE_ROOT; };
+		E70415BA123042CB0083F569 /* step-back-off.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "step-back-off.xpm"; path = "../../../apps/vaporgui/images/step-back-off.xpm"; sourceTree = SOURCE_ROOT; };
+		E70415BB123042CB0083F569 /* step-back.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "step-back.jpg"; path = "../../../apps/vaporgui/images/step-back.jpg"; sourceTree = SOURCE_ROOT; };
+		E70415BC123042CB0083F569 /* step-fwd-off.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "step-fwd-off.jpg"; path = "../../../apps/vaporgui/images/step-fwd-off.jpg"; sourceTree = SOURCE_ROOT; };
+		E70415BD123042CB0083F569 /* step-fwd-off.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "step-fwd-off.xpm"; path = "../../../apps/vaporgui/images/step-fwd-off.xpm"; sourceTree = SOURCE_ROOT; };
+		E70415BE123042CB0083F569 /* step-fwd.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "step-fwd.jpg"; path = "../../../apps/vaporgui/images/step-fwd.jpg"; sourceTree = SOURCE_ROOT; };
+		E70415BF123042CB0083F569 /* stepback.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = stepback.xpm; path = ../../../apps/vaporgui/images/stepback.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C0123042CB0083F569 /* stepbackA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = stepbackA.xpm; path = ../../../apps/vaporgui/images/stepbackA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C1123042CB0083F569 /* stepfwd.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = stepfwd.xpm; path = ../../../apps/vaporgui/images/stepfwd.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C2123042CB0083F569 /* stepfwdA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = stepfwdA.xpm; path = ../../../apps/vaporgui/images/stepfwdA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C3123042CB0083F569 /* tiles.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = tiles.JPG; path = ../../../apps/vaporgui/images/tiles.JPG; sourceTree = SOURCE_ROOT; };
+		E70415C4123042CB0083F569 /* tiles.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = tiles.xpm; path = ../../../apps/vaporgui/images/tiles.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C5123042CB0083F569 /* tobegin.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = tobegin.jpg; path = ../../../apps/vaporgui/images/tobegin.jpg; sourceTree = SOURCE_ROOT; };
+		E70415C6123042CB0083F569 /* tobeginA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = tobeginA.xpm; path = ../../../apps/vaporgui/images/tobeginA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C7123042CB0083F569 /* toend.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = toend.JPG; path = ../../../apps/vaporgui/images/toend.JPG; sourceTree = SOURCE_ROOT; };
+		E70415C8123042CB0083F569 /* toendA.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = toendA.xpm; path = ../../../apps/vaporgui/images/toendA.xpm; sourceTree = SOURCE_ROOT; };
+		E70415C9123042CB0083F569 /* twoDData.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = twoDData.xpm; path = ../../../apps/vaporgui/images/twoDData.xpm; sourceTree = SOURCE_ROOT; };
+		E70415CA123042CB0083F569 /* twoDImage.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = twoDImage.xpm; path = ../../../apps/vaporgui/images/twoDImage.xpm; sourceTree = SOURCE_ROOT; };
+		E70415CB123042CB0083F569 /* vapor-icon-32.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "vapor-icon-32.jpg"; path = "../../../apps/vaporgui/images/vapor-icon-32.jpg"; sourceTree = SOURCE_ROOT; };
+		E70415CC123042CB0083F569 /* vapor-icon-32.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "vapor-icon-32.xpm"; path = "../../../apps/vaporgui/images/vapor-icon-32.xpm"; sourceTree = SOURCE_ROOT; };
+		E70415CD123042CB0083F569 /* wheel.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = wheel.jpg; path = ../../../apps/vaporgui/images/wheel.jpg; sourceTree = SOURCE_ROOT; };
+		E70415CE123042CB0083F569 /* wheel.xpm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = wheel.xpm; path = ../../../apps/vaporgui/images/wheel.xpm; sourceTree = SOURCE_ROOT; };
+		E70415D0123042CB0083F569 /* command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = command.cpp; path = ../../../apps/vaporgui/main/command.cpp; sourceTree = SOURCE_ROOT; };
+		E70415D1123042CB0083F569 /* command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = command.h; path = ../../../apps/vaporgui/main/command.h; sourceTree = SOURCE_ROOT; };
+		E70415D2123042CB0083F569 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../apps/vaporgui/main/main.cpp; sourceTree = SOURCE_ROOT; };
+		E70415D3123042CB0083F569 /* main.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = main.mk; path = ../../../apps/vaporgui/main/main.mk; sourceTree = SOURCE_ROOT; };
+		E70415D4123042CB0083F569 /* mainform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mainform.cpp; path = ../../../apps/vaporgui/main/mainform.cpp; sourceTree = SOURCE_ROOT; };
+		E70415D5123042CB0083F569 /* mainform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mainform.h; path = ../../../apps/vaporgui/main/mainform.h; sourceTree = SOURCE_ROOT; };
+		E70415D6123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vaporgui/main/Makefile; sourceTree = SOURCE_ROOT; };
+		E70415D7123042CB0083F569 /* messagereporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = messagereporter.cpp; path = ../../../apps/vaporgui/main/messagereporter.cpp; sourceTree = SOURCE_ROOT; };
+		E70415D8123042CB0083F569 /* messagereporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = messagereporter.h; path = ../../../apps/vaporgui/main/messagereporter.h; sourceTree = SOURCE_ROOT; };
+		E70415D9123042CB0083F569 /* panelcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = panelcommand.cpp; path = ../../../apps/vaporgui/main/panelcommand.cpp; sourceTree = SOURCE_ROOT; };
+		E70415DA123042CB0083F569 /* panelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = panelcommand.h; path = ../../../apps/vaporgui/main/panelcommand.h; sourceTree = SOURCE_ROOT; };
+		E70415DB123042CB0083F569 /* session.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = session.cpp; path = ../../../apps/vaporgui/main/session.cpp; sourceTree = SOURCE_ROOT; };
+		E70415DC123042CB0083F569 /* session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = session.h; path = ../../../apps/vaporgui/main/session.h; sourceTree = SOURCE_ROOT; };
+		E70415DD123042CB0083F569 /* tabmanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tabmanager.cpp; path = ../../../apps/vaporgui/main/tabmanager.cpp; sourceTree = SOURCE_ROOT; };
+		E70415DE123042CB0083F569 /* tabmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tabmanager.h; path = ../../../apps/vaporgui/main/tabmanager.h; sourceTree = SOURCE_ROOT; };
+		E70415DF123042CB0083F569 /* vizactivatecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vizactivatecommand.cpp; path = ../../../apps/vaporgui/main/vizactivatecommand.cpp; sourceTree = SOURCE_ROOT; };
+		E70415E0123042CB0083F569 /* vizactivatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vizactivatecommand.h; path = ../../../apps/vaporgui/main/vizactivatecommand.h; sourceTree = SOURCE_ROOT; };
+		E70415E1123042CB0083F569 /* vizwin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vizwin.cpp; path = ../../../apps/vaporgui/main/vizwin.cpp; sourceTree = SOURCE_ROOT; };
+		E70415E2123042CB0083F569 /* vizwin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vizwin.h; path = ../../../apps/vaporgui/main/vizwin.h; sourceTree = SOURCE_ROOT; };
+		E70415E3123042CB0083F569 /* vizwinmgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vizwinmgr.cpp; path = ../../../apps/vaporgui/main/vizwinmgr.cpp; sourceTree = SOURCE_ROOT; };
+		E70415E4123042CB0083F569 /* vizwinmgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vizwinmgr.h; path = ../../../apps/vaporgui/main/vizwinmgr.h; sourceTree = SOURCE_ROOT; };
+		E70415E5123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vaporgui/Makefile; sourceTree = SOURCE_ROOT; };
+		E70415E8123042CB0083F569 /* animationcontroller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animationcontroller.cpp; path = ../../../apps/vaporgui/misc/animationcontroller.cpp; sourceTree = SOURCE_ROOT; };
+		E70415E9123042CB0083F569 /* animationcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animationcontroller.h; path = ../../../apps/vaporgui/misc/animationcontroller.h; sourceTree = SOURCE_ROOT; };
+		E70415EA123042CB0083F569 /* controllerthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = controllerthread.h; path = ../../../apps/vaporgui/misc/controllerthread.h; sourceTree = SOURCE_ROOT; };
+		E70415ED123042CB0083F569 /* helpwindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = helpwindow.cpp; path = ../../../apps/vaporgui/misc/helpwindow.cpp; sourceTree = SOURCE_ROOT; };
+		E70415EE123042CB0083F569 /* helpwindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = helpwindow.h; path = ../../../apps/vaporgui/misc/helpwindow.h; sourceTree = SOURCE_ROOT; };
+		E70415EF123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vaporgui/misc/Makefile; sourceTree = SOURCE_ROOT; };
+		E70415F0123042CB0083F569 /* misc.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = misc.mk; path = ../../../apps/vaporgui/misc/misc.mk; sourceTree = SOURCE_ROOT; };
+		E70415F1123042CB0083F569 /* pythonedit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pythonedit.cpp; path = ../../../apps/vaporgui/misc/pythonedit.cpp; sourceTree = SOURCE_ROOT; };
+		E70415F2123042CB0083F569 /* pythonedit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pythonedit.h; path = ../../../apps/vaporgui/misc/pythonedit.h; sourceTree = SOURCE_ROOT; };
+		E70415F3123042CB0083F569 /* sharedcontrollerthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedcontrollerthread.cpp; path = ../../../apps/vaporgui/misc/sharedcontrollerthread.cpp; sourceTree = SOURCE_ROOT; };
+		E70415F4123042CB0083F569 /* unsharedcontrollerthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = unsharedcontrollerthread.cpp; path = ../../../apps/vaporgui/misc/unsharedcontrollerthread.cpp; sourceTree = SOURCE_ROOT; };
+		E70415F5123042CB0083F569 /* vizfeatureparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vizfeatureparams.cpp; path = ../../../apps/vaporgui/misc/vizfeatureparams.cpp; sourceTree = SOURCE_ROOT; };
+		E70415F6123042CB0083F569 /* vizfeatureparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vizfeatureparams.h; path = ../../../apps/vaporgui/misc/vizfeatureparams.h; sourceTree = SOURCE_ROOT; };
+		E70415FB123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vaporversion/Makefile; sourceTree = SOURCE_ROOT; };
+		E70415FC123042CB0083F569 /* vaporversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vaporversion.cpp; path = ../../../apps/vaporversion/vaporversion.cpp; sourceTree = SOURCE_ROOT; };
+		E70415FE123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vdf2raw/Makefile; sourceTree = SOURCE_ROOT; };
+		E70415FF123042CB0083F569 /* vdf2raw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vdf2raw.cpp; path = ../../../apps/vdf2raw/vdf2raw.cpp; sourceTree = SOURCE_ROOT; };
+		E7041601123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vdfcreate/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041602123042CB0083F569 /* vdfcreate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vdfcreate.cpp; path = ../../../apps/vdfcreate/vdfcreate.cpp; sourceTree = SOURCE_ROOT; };
+		E7041604123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vdfedit/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041605123042CB0083F569 /* vdfedit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vdfedit.cpp; path = ../../../apps/vdfedit/vdfedit.cpp; sourceTree = SOURCE_ROOT; };
+		E7041607123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/vdfls/Makefile; sourceTree = SOURCE_ROOT; };
+		E7041608123042CB0083F569 /* vdfls.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vdfls.cpp; path = ../../../apps/vdfls/vdfls.cpp; sourceTree = SOURCE_ROOT; };
+		E704160A123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/wrf2vdf/Makefile; sourceTree = SOURCE_ROOT; };
+		E704160B123042CB0083F569 /* wrf2vdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wrf2vdf.cpp; path = ../../../apps/wrf2vdf/wrf2vdf.cpp; sourceTree = SOURCE_ROOT; };
+		E704160D123042CB0083F569 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../apps/wrfvdfcreate/Makefile; sourceTree = SOURCE_ROOT; };
+		E704160E123042CB0083F569 /* wrfvdfcreate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wrfvdfcreate.cpp; path = ../../../apps/wrfvdfcreate/wrfvdfcreate.cpp; sourceTree = SOURCE_ROOT; };
+		E70895151624F39600E63B60 /* MetadataROMS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MetadataROMS.cpp; sourceTree = "<group>"; };
+		E70895161624F39600E63B60 /* MetadataROMS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataROMS.h; sourceTree = "<group>"; };
+		E70895171624F39600E63B60 /* NetCDFCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NetCDFCollection.cpp; sourceTree = "<group>"; };
+		E70895181624F39600E63B60 /* NetCDFCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetCDFCollection.h; sourceTree = "<group>"; };
+		E70895191624F39600E63B60 /* NetCDFSimple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NetCDFSimple.cpp; sourceTree = "<group>"; };
+		E708951A1624F39600E63B60 /* NetCDFSimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetCDFSimple.h; sourceTree = "<group>"; };
+		E708951B1624F39600E63B60 /* ROMS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ROMS.cpp; sourceTree = "<group>"; };
+		E708951C1624F39600E63B60 /* ROMS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROMS.h; sourceTree = "<group>"; };
+		E708951D1624F39600E63B60 /* WeightTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WeightTable.cpp; sourceTree = "<group>"; };
+		E708951E1624F39600E63B60 /* WeightTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeightTable.h; sourceTree = "<group>"; };
+		E715141715090FAD004B7685 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		E715141815090FAD004B7685 /* ExtensionClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExtensionClasses.h; sourceTree = "<group>"; };
+		E715141915090FAD004B7685 /* jpegapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jpegapi.h; sourceTree = "<group>"; };
+		E75132001299BD44009C3A61 /* GetAppPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GetAppPath.h; sourceTree = "<group>"; };
+		E75B94631507DA5600BF2D69 /* arroweventrouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = arroweventrouter.cpp; sourceTree = "<group>"; };
+		E75B94641507DA5600BF2D69 /* arroweventrouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arroweventrouter.h; sourceTree = "<group>"; };
+		E75B94651507DA5600BF2D69 /* boxsliderframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boxsliderframe.cpp; sourceTree = "<group>"; };
+		E75B94661507DA5600BF2D69 /* boxsliderframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boxsliderframe.h; sourceTree = "<group>"; };
+		E788602C145A32E9001F7D1A /* MOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MOM.h; sourceTree = "<group>"; };
+		E788602D145A32E9001F7D1A /* MetadataMOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataMOM.h; sourceTree = "<group>"; };
+		E78860EF146078D4001F7D1A /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		E78860F3146081F0001F7D1A /* mom2vdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mom2vdf.cpp; sourceTree = "<group>"; };
+		E7BA1ACA14522310003DBE0A /* MetadataMOM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MetadataMOM.cpp; sourceTree = "<group>"; };
+		E7BA1ACB14522310003DBE0A /* MOM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MOM.cpp; sourceTree = "<group>"; };
+		E7BA1ACD1452232F003DBE0A /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		E7BA1ACE1452232F003DBE0A /* momvdfcreate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = momvdfcreate.cpp; sourceTree = "<group>"; };
+		E7C588541357379300F0E7D8 /* Box.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Box.cpp; sourceTree = "<group>"; };
+		E7C588551357379300F0E7D8 /* Box.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Box.h; sourceTree = "<group>"; };
+		E7D30A35128880210066DF2E /* GetAppPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GetAppPath.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* vaporXcode */ = {
+			isa = PBXGroup;
+			children = (
+				E7041519123042CB0083F569 /* apps */,
+				E70414CE123042930083F569 /* include */,
+				E7041381123042460083F569 /* lib */,
+			);
+			name = vaporXcode;
+			sourceTree = "<group>";
+		};
+		E7041381123042460083F569 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				E7041382123042460083F569 /* common */,
+				E7041394123042460083F569 /* flow */,
+				E70413B2123042460083F569 /* idl */,
+				E70413FA123042460083F569 /* Makefile */,
+				E70413FB123042460083F569 /* params */,
+				E7041431123042460083F569 /* render */,
+				E704146E123042460083F569 /* vdf */,
+			);
+			name = lib;
+			path = ../../../lib;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041382123042460083F569 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				E7041383123042460083F569 /* Base64.cpp */,
+				E7041385123042460083F569 /* CFuncs.cpp */,
+				E7041387123042460083F569 /* common.cpp */,
+				E7041388123042460083F569 /* EasyThreads.cpp */,
+				E704138A123042460083F569 /* Makefile */,
+				E704138B123042460083F569 /* MyBase.cpp */,
+				E704138D123042460083F569 /* OptionParser.cpp */,
+				E704138F123042460083F569 /* PVTime.cpp */,
+				E7041391123042460083F569 /* Version.cpp */,
+				E7041393123042460083F569 /* Version.h.sed */,
+			);
+			name = common;
+			path = ../../../lib/common;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041394123042460083F569 /* flow */ = {
+			isa = PBXGroup;
+			children = (
+				E7041396123042460083F569 /* Field.cpp */,
+				E7041397123042460083F569 /* Field.h */,
+				E7041398123042460083F569 /* flow.cpp */,
+				E7041399123042460083F569 /* flowlinedata.cpp */,
+				E704139A123042460083F569 /* flowTest.cpp */,
+				E704139B123042460083F569 /* Grid.cpp */,
+				E704139C123042460083F569 /* Grid.h */,
+				E704139D123042460083F569 /* header.h */,
+				E704139E123042460083F569 /* Interpolator.cpp */,
+				E704139F123042460083F569 /* Interpolator.h */,
+				E70413A0123042460083F569 /* Makefile */,
+				E70413A1123042460083F569 /* Plot3DReader.cpp */,
+				E70413A2123042460083F569 /* Plot3DReader.h */,
+				E70413A3123042460083F569 /* Rake.cpp */,
+				E70413A4123042460083F569 /* Rake.h */,
+				E70413A5123042460083F569 /* Solution.cpp */,
+				E70413A6123042460083F569 /* Solution.h */,
+				E70413A7123042460083F569 /* VaporFlow.cpp */,
+				E70413A8123042460083F569 /* VectorMatrix.cpp */,
+				E70413A9123042460083F569 /* VectorMatrix.h */,
+				E70413AA123042460083F569 /* VTFieldLine.cpp */,
+				E70413AB123042460083F569 /* VTFieldLine.h */,
+				E70413AD123042460083F569 /* VTStreakLine.cpp */,
+				E70413AE123042460083F569 /* VTStreamLine.cpp */,
+				E70413B0123042460083F569 /* VTTimeVaryingFieldLine.cpp */,
+			);
+			name = flow;
+			path = ../../../lib/flow;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70413B2123042460083F569 /* idl */ = {
+			isa = PBXGroup;
+			children = (
+				E70413B3123042460083F569 /* IDLCommon.cpp */,
+				E70413B4123042460083F569 /* IDLCommon.h */,
+				E70413B5123042460083F569 /* IDLLifting1D.cpp */,
+				E70413B6123042460083F569 /* IDLMetadata.cpp */,
+				E70413B7123042460083F569 /* IDLMetadataAuto.cpp.template */,
+				E70413B8123042460083F569 /* IDLVaporImport.cpp */,
+				E70413B9123042460083F569 /* IDLWbIo.cpp */,
+				E70413BA123042460083F569 /* libidl_vdfmodule.dlm.template */,
+				E70413BB123042460083F569 /* Makefile */,
+				E70413BC123042460083F569 /* mkmeta.pl */,
+			);
+			name = idl;
+			path = ../../../lib/idl;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70413FB123042460083F569 /* params */ = {
+			isa = PBXGroup;
+			children = (
+				E700022914EF1954002070D3 /* arrowparams.cpp */,
+				E700022A14EF1954002070D3 /* arrowparams.h */,
+				E700022B14EF1954002070D3 /* Colormap.h */,
+				E700022C14EF1954002070D3 /* ModelParams.cpp */,
+				E700022D14EF1954002070D3 /* ModelParams.h */,
+				E700022E14EF1954002070D3 /* ModelScene.cpp */,
+				E700022F14EF1954002070D3 /* ModelScene.h */,
+				E7C588541357379300F0E7D8 /* Box.cpp */,
+				E7C588551357379300F0E7D8 /* Box.h */,
+				E75132001299BD44009C3A61 /* GetAppPath.h */,
+				E70180F3124014CE00478E12 /* pythonpipeline.h */,
+				E70180F4124014CE00478E12 /* pythonpipeline.cpp */,
+				E70413FC123042460083F569 /* animationparams.cpp */,
+				E70413FD123042460083F569 /* animationparams.h */,
+				E70413FE123042460083F569 /* Colormap.cpp */,
+				E7041400123042460083F569 /* ColorMapBase.cpp */,
+				E7041402123042460083F569 /* datastatus.cpp */,
+				E7041403123042460083F569 /* datastatus.h */,
+				E7041404123042460083F569 /* dvrparams.cpp */,
+				E7041405123042460083F569 /* dvrparams.h */,
+				E7041407123042460083F569 /* flowparams.h */,
+				E7041408123042460083F569 /* glutil.cpp */,
+				E7041409123042460083F569 /* glutil.h */,
+				E7041406123042460083F569 /* flowparams.cpp */,
+				E704140A123042460083F569 /* histo.cpp */,
+				E704140B123042460083F569 /* histo.h */,
+				E704140C123042460083F569 /* Makefile */,
+				E704140D123042460083F569 /* mapperfunction.cpp */,
+				E704140E123042460083F569 /* mapperfunction.h */,
+				E704140F123042460083F569 /* MapperFunctionBase.cpp */,
+				E7041411123042460083F569 /* OpacityMap.cpp */,
+				E7041412123042460083F569 /* OpacityMap.h */,
+				E7041413123042460083F569 /* OpacityMapBase.cpp */,
+				E7041415123042460083F569 /* ParamNode.cpp */,
+				E7041417123042460083F569 /* params.cpp */,
+				E7041418123042460083F569 /* params.h */,
+				E7041419123042460083F569 /* ParamsBase.cpp */,
+				E704141B123042460083F569 /* ParamsIso.cpp */,
+				E704141C123042460083F569 /* ParamsIso.h */,
+				E704141D123042460083F569 /* probeparams.cpp */,
+				E704141E123042460083F569 /* probeparams.h */,
+				E704141F123042460083F569 /* regionparams.cpp */,
+				E7041420123042460083F569 /* regionparams.h */,
+				E7041421123042460083F569 /* tfinterpolator.cpp */,
+				E7041423123042460083F569 /* transferfunction.cpp */,
+				E7041424123042460083F569 /* transferfunction.h */,
+				E7041425123042460083F569 /* TransferFunctionLite.cpp */,
+				E7041427123042460083F569 /* twoDdataparams.cpp */,
+				E7041428123042460083F569 /* twoDdataparams.h */,
+				E7041429123042460083F569 /* twoDimageparams.cpp */,
+				E704142A123042460083F569 /* twoDimageparams.h */,
+				E704142B123042460083F569 /* twoDparams.cpp */,
+				E704142C123042460083F569 /* twoDparams.h */,
+				E704142D123042460083F569 /* viewpoint.cpp */,
+				E704142E123042460083F569 /* viewpoint.h */,
+				E704142F123042460083F569 /* viewpointparams.cpp */,
+				E7041430123042460083F569 /* viewpointparams.h */,
+				E7D30A35128880210066DF2E /* GetAppPath.cpp */,
+			);
+			name = params;
+			path = ../../../lib/params;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041431123042460083F569 /* render */ = {
+			isa = PBXGroup;
+			children = (
+				E700021F14EF138D002070D3 /* arrowrenderer.cpp */,
+				E700022014EF138D002070D3 /* arrowrenderer.h */,
+				E700022114EF138D002070D3 /* GLModelNode.cpp */,
+				E700022214EF138D002070D3 /* GLModelNode.h */,
+				E700022314EF138D002070D3 /* jfilewrite.cpp */,
+				E700022414EF138D002070D3 /* ModelRenderer.cpp */,
+				E700022514EF138D002070D3 /* ModelRenderer.h */,
+				E700022614EF138D002070D3 /* ShaderMgr.cpp */,
+				E700022714EF138D002070D3 /* ShaderMgr.h */,
+				E7041432123042460083F569 /* BBox.cpp */,
+				E7041433123042460083F569 /* BBox.h */,
+				E7041434123042460083F569 /* customcontext.cpp */,
+				E7041435123042460083F569 /* customcontext.h */,
+				E7041436123042460083F569 /* DVRBase.cpp */,
+				E7041437123042460083F569 /* DVRBase.h */,
+				E7041438123042460083F569 /* DVRDebug.cpp */,
+				E7041439123042460083F569 /* DVRDebug.h */,
+				E704143A123042460083F569 /* DVRLookup.cpp */,
+				E704143B123042460083F569 /* DVRLookup.h */,
+				E704143C123042460083F569 /* DVRRayCaster.cpp */,
+				E704143D123042460083F569 /* DVRRayCaster.h */,
+				E704143E123042460083F569 /* DVRRayCaster2Var.cpp */,
+				E704143F123042460083F569 /* DVRRayCaster2Var.h */,
+				E7041440123042460083F569 /* DVRShader.cpp */,
+				E7041441123042460083F569 /* DVRShader.h */,
+				E7041442123042460083F569 /* DVRSpherical.cpp */,
+				E7041443123042460083F569 /* DVRSpherical.h */,
+				E7041444123042460083F569 /* DVRTexture3d.cpp */,
+				E7041445123042460083F569 /* DVRTexture3d.h */,
+				E7041446123042460083F569 /* DVRVolumizer.cpp */,
+				E7041447123042460083F569 /* DVRVolumizer.h */,
+				E7041448123042460083F569 /* flowrenderer.cpp */,
+				E7041449123042460083F569 /* flowrenderer.h */,
+				E704144A123042460083F569 /* glwindow.cpp */,
+				E704144B123042460083F569 /* glwindow.h */,
+				E704144C123042460083F569 /* isorenderer.cpp */,
+				E704144D123042460083F569 /* isorenderer.h */,
+				E704144E123042460083F569 /* Makefile */,
+				E704144F123042460083F569 /* manip.cpp */,
+				E7041450123042460083F569 /* manip.h */,
+				E7041451123042460083F569 /* Matrix3d.cpp */,
+				E7041452123042460083F569 /* Matrix3d.h */,
+				E7041453123042460083F569 /* moc */,
+				E7041455123042460083F569 /* Point3d.h */,
+				E7041456123042460083F569 /* proberenderer.cpp */,
+				E7041457123042460083F569 /* proberenderer.h */,
+				E7041458123042460083F569 /* raycast_shaders.h */,
+				E7041459123042460083F569 /* renderer.cpp */,
+				E704145A123042460083F569 /* renderer.h */,
+				E704145B123042460083F569 /* ShaderProgram.cpp */,
+				E704145C123042460083F569 /* ShaderProgram.h */,
+				E704145D123042460083F569 /* shaders.h */,
+				E704145E123042460083F569 /* Stopwatch.cpp */,
+				E704145F123042460083F569 /* Stopwatch.h */,
+				E7041460123042460083F569 /* TextureBrick.cpp */,
+				E7041461123042460083F569 /* TextureBrick.h */,
+				E7041462123042460083F569 /* trackball.cpp */,
+				E7041463123042460083F569 /* trackball.h */,
+				E7041464123042460083F569 /* twoDdatarenderer.cpp */,
+				E7041465123042460083F569 /* twoDdatarenderer.h */,
+				E7041466123042460083F569 /* twoDimagerenderer.cpp */,
+				E7041467123042460083F569 /* twoDimagerenderer.h */,
+				E7041468123042460083F569 /* twoDrenderer.cpp */,
+				E7041469123042460083F569 /* twoDrenderer.h */,
+				E704146A123042460083F569 /* Vect3d.cpp */,
+				E704146B123042460083F569 /* Vect3d.h */,
+				E704146C123042460083F569 /* VolumeRenderer.cpp */,
+				E704146D123042460083F569 /* VolumeRenderer.h */,
+			);
+			name = render;
+			path = ../../../lib/render;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041453123042460083F569 /* moc */ = {
+			isa = PBXGroup;
+			children = (
+				E7041454123042460083F569 /* moc_renderer.cpp */,
+			);
+			name = moc;
+			path = ../../../lib/render/moc;
+			sourceTree = SOURCE_ROOT;
+		};
+		E704146E123042460083F569 /* vdf */ = {
+			isa = PBXGroup;
+			children = (
+				E70895151624F39600E63B60 /* MetadataROMS.cpp */,
+				E70895161624F39600E63B60 /* MetadataROMS.h */,
+				E70895171624F39600E63B60 /* NetCDFCollection.cpp */,
+				E70895181624F39600E63B60 /* NetCDFCollection.h */,
+				E70895191624F39600E63B60 /* NetCDFSimple.cpp */,
+				E708951A1624F39600E63B60 /* NetCDFSimple.h */,
+				E708951B1624F39600E63B60 /* ROMS.cpp */,
+				E708951C1624F39600E63B60 /* ROMS.h */,
+				E708951D1624F39600E63B60 /* WeightTable.cpp */,
+				E708951E1624F39600E63B60 /* WeightTable.h */,
+				E700023114EF19CB002070D3 /* LayeredGrid.cpp */,
+				E700023214EF19CB002070D3 /* LayeredGrid.h */,
+				E700023314EF19CB002070D3 /* NCBuf.cpp */,
+				E700023414EF19CB002070D3 /* NCBuf.h */,
+				E700023514EF19CB002070D3 /* RegularGrid.cpp */,
+				E700023614EF19CB002070D3 /* RegularGrid.h */,
+				E700023714EF19CB002070D3 /* SphericalGrid.cpp */,
+				E700023814EF19CB002070D3 /* SphericalGrid.h */,
+				E700023914EF19CB002070D3 /* StretchedGrid.cpp */,
+				E700023A14EF19CB002070D3 /* StretchedGrid.h */,
+				E7BA1ACA14522310003DBE0A /* MetadataMOM.cpp */,
+				E7BA1ACB14522310003DBE0A /* MOM.cpp */,
+				E704146F123042460083F569 /* AMRData.cpp */,
+				E7041471123042460083F569 /* AMRIO.cpp */,
+				E7041473123042460083F569 /* AMRTree.cpp */,
+				E7041475123042460083F569 /* AMRTreeBranch.cpp */,
+				E7041477123042460083F569 /* BlkMemMgr.cpp */,
+				E7041479123042460083F569 /* Compressor.cpp */,
+				E704147B123042460083F569 /* DataMgr.cpp */,
+				E704147D123042460083F569 /* DataMgrAMR.cpp */,
+				E704147F123042460083F569 /* DataMgrFactory.cpp */,
+				E7041483123042460083F569 /* DataMgrWB.cpp */,
+				E7041485123042460083F569 /* DataMgrWC.cpp */,
+				E7041487123042460083F569 /* DataMgrWRF.cpp */,
+				E7041489123042460083F569 /* ExpatParseMgr.cpp */,
+				E704148B123042460083F569 /* ImpExp.cpp */,
+				E704148F123042460083F569 /* Makefile */,
+				E7041490123042460083F569 /* MatWaveBase.cpp */,
+				E7041492123042460083F569 /* MatWaveDwt.cpp */,
+				E7041494123042460083F569 /* MatWaveWavedec.cpp */,
+				E7041496123042460083F569 /* Metadata.cpp */,
+				E7041498123042460083F569 /* MetadataSpherical.cpp */,
+				E704149A123042460083F569 /* MetadataVDC.cpp */,
+				E704149C123042460083F569 /* MetadataWRF.cpp */,
+				E70414A0123042460083F569 /* SignificanceMap.cpp */,
+				E70414A3123042460083F569 /* Transpose.cpp */,
+				E70414A5123042460083F569 /* vdf.cpp */,
+				E70414A6123042460083F569 /* VDFIOBase.cpp */,
+				E70414A8123042460083F569 /* WaveCodecIO.cpp */,
+				E70414AA123042470083F569 /* WaveFiltBase.cpp */,
+				E70414AC123042470083F569 /* WaveFiltBior.cpp */,
+				E70414AE123042470083F569 /* WaveFiltCoif.cpp */,
+				E70414B0123042470083F569 /* WaveFiltDaub.cpp */,
+				E70414B2123042470083F569 /* WaveFiltHaar.cpp */,
+				E70414B4123042470083F569 /* WaveletBlock1D.cpp */,
+				E70414B6123042470083F569 /* WaveletBlock2D.cpp */,
+				E70414B8123042470083F569 /* WaveletBlock3D.cpp */,
+				E70414BA123042470083F569 /* WaveletBlock3DBufReader.cpp */,
+				E70414BC123042470083F569 /* WaveletBlock3DBufWriter.cpp */,
+				E70414BE123042470083F569 /* WaveletBlock3DReader.cpp */,
+				E70414C0123042470083F569 /* WaveletBlock3DRegionReader.cpp */,
+				E70414C2123042470083F569 /* WaveletBlock3DRegionWriter.cpp */,
+				E70414C4123042470083F569 /* WaveletBlock3DWriter.cpp */,
+				E70414C6123042470083F569 /* WaveletBlockIOBase.cpp */,
+				E70414C8123042470083F569 /* WRF.cpp */,
+				E70414CA123042470083F569 /* WRFReader.cpp */,
+				E70414CC123042470083F569 /* XmlNode.cpp */,
+			);
+			name = vdf;
+			path = ../../../lib/vdf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70414CE123042930083F569 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				E70414CF123042930083F569 /* vapor */,
+			);
+			name = include;
+			path = ../../../include;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70414CF123042930083F569 /* vapor */ = {
+			isa = PBXGroup;
+			children = (
+				E715141715090FAD004B7685 /* common.h */,
+				E715141815090FAD004B7685 /* ExtensionClasses.h */,
+				E715141915090FAD004B7685 /* jpegapi.h */,
+				E788602C145A32E9001F7D1A /* MOM.h */,
+				E788602D145A32E9001F7D1A /* MetadataMOM.h */,
+				E70414D0123042930083F569 /* AMRData.h */,
+				E70414D1123042930083F569 /* AMRIO.h */,
+				E70414D2123042930083F569 /* AMRTree.h */,
+				E70414D3123042930083F569 /* AMRTreeBranch.h */,
+				E70414D4123042930083F569 /* Base64.h */,
+				E70414D5123042930083F569 /* BlkMemMgr.h */,
+				E70414D6123042930083F569 /* CFuncs.h */,
+				E70414D7123042930083F569 /* ColorMapBase.h */,
+				E70414D8123042930083F569 /* Compressor.h */,
+				E70414D9123042930083F569 /* DataMgr.h */,
+				E70414DA123042930083F569 /* DataMgrAMR.h */,
+				E70414DB123042930083F569 /* DataMgrFactory.h */,
+				E70414DD123042930083F569 /* DataMgrWB.h */,
+				E70414DE123042930083F569 /* DataMgrWC.h */,
+				E70414DF123042930083F569 /* DataMgrWRF.h */,
+				E70414E0123042930083F569 /* EasyThreads.h */,
+				E70414E1123042930083F569 /* errorcodes.h */,
+				E70414E2123042930083F569 /* ExpatParseMgr.h */,
+				E70414E3123042930083F569 /* flowlinedata.h */,
+				E70414E4123042930083F569 /* ImpExp.h */,
+				E70414E6123042930083F569 /* Lifting1D.h */,
+				E70414E7123042930083F569 /* MapperFunctionBase.h */,
+				E70414E8123042930083F569 /* MatWaveBase.h */,
+				E70414E9123042930083F569 /* MatWaveDwt.h */,
+				E70414EA123042930083F569 /* MatWaveWavedec.h */,
+				E70414EB123042930083F569 /* Metadata.h */,
+				E70414EC123042930083F569 /* MetadataSpherical.h */,
+				E70414ED123042930083F569 /* MetadataVDC.h */,
+				E70414EE123042930083F569 /* MetadataWRF.h */,
+				E70414EF123042930083F569 /* MyBase.h */,
+				E70414F0123042930083F569 /* OpacityMapBase.h */,
+				E70414F1123042930083F569 /* OptionParser.h */,
+				E70414F2123042930083F569 /* ParamNode.h */,
+				E70414F3123042930083F569 /* ParamsBase.h */,
+				E70414F4123042930083F569 /* PVTime.h */,
+				E70414F6123042930083F569 /* SignificanceMap.h */,
+				E70414F7123042930083F569 /* tfinterpolator.h */,
+				E70414F8123042930083F569 /* TransferFunctionLite.h */,
+				E70414F9123042930083F569 /* Transpose.h */,
+				E70414FA123042930083F569 /* VaporFlow.h */,
+				E70414FB123042930083F569 /* VDFIOBase.h */,
+				E70414FC123042930083F569 /* Version.h */,
+				E70414FD123042930083F569 /* WaveCodecIO.h */,
+				E70414FE123042930083F569 /* WaveFiltBase.h */,
+				E70414FF123042930083F569 /* WaveFiltBior.h */,
+				E7041500123042930083F569 /* WaveFiltCoif.h */,
+				E7041501123042930083F569 /* WaveFiltDaub.h */,
+				E7041502123042930083F569 /* WaveFiltHaar.h */,
+				E7041503123042930083F569 /* WaveletBlock1D.h */,
+				E7041504123042930083F569 /* WaveletBlock2D.h */,
+				E7041505123042930083F569 /* WaveletBlock3D.h */,
+				E7041506123042930083F569 /* WaveletBlock3DBufReader.h */,
+				E7041507123042930083F569 /* WaveletBlock3DBufWriter.h */,
+				E7041508123042930083F569 /* WaveletBlock3DReader.h */,
+				E7041509123042930083F569 /* WaveletBlock3DRegionReader.h */,
+				E704150A123042930083F569 /* WaveletBlock3DRegionWriter.h */,
+				E704150B123042930083F569 /* WaveletBlock3DWriter.h */,
+				E704150C123042930083F569 /* WaveletBlockIOBase.h */,
+				E704150D123042930083F569 /* WRF.h */,
+				E704150E123042930083F569 /* WRFReader.h */,
+				E704150F123042930083F569 /* XmlNode.h */,
+			);
+			name = vapor;
+			path = ../../../include/vapor;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041519123042CB0083F569 /* apps */ = {
+			isa = PBXGroup;
+			children = (
+				E78860EE146078D4001F7D1A /* mom2vdf */,
+				E7BA1ACC1452232F003DBE0A /* momvdfcreate */,
+				E704151A123042CB0083F569 /* asciitf2vtf */,
+				E704151D123042CB0083F569 /* cart2wrfvdf */,
+				E7041520123042CB0083F569 /* flashamr2vdf */,
+				E7041528123042CB0083F569 /* glewinfo */,
+				E704152B123042CB0083F569 /* Makefile */,
+				E704152C123042CB0083F569 /* ncdf2vdf */,
+				E704152F123042CB0083F569 /* raw2vdf */,
+				E7041532123042CB0083F569 /* tiff2geotiff */,
+				E70415FA123042CB0083F569 /* vaporversion */,
+				E7041537123042CB0083F569 /* vaporgui */,
+				E70415FD123042CB0083F569 /* vdf2raw */,
+				E7041600123042CB0083F569 /* vdfcreate */,
+				E7041603123042CB0083F569 /* vdfedit */,
+				E7041606123042CB0083F569 /* vdfls */,
+				E7041609123042CB0083F569 /* wrf2vdf */,
+				E704160C123042CB0083F569 /* wrfvdfcreate */,
+			);
+			name = apps;
+			path = ../../../apps;
+			sourceTree = SOURCE_ROOT;
+		};
+		E704151A123042CB0083F569 /* asciitf2vtf */ = {
+			isa = PBXGroup;
+			children = (
+				E704151B123042CB0083F569 /* asciitf2vtf.cpp */,
+				E704151C123042CB0083F569 /* Makefile */,
+			);
+			name = asciitf2vtf;
+			path = ../../../apps/asciitf2vtf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E704151D123042CB0083F569 /* cart2wrfvdf */ = {
+			isa = PBXGroup;
+			children = (
+				E704151E123042CB0083F569 /* cart2wrfvdf.cpp */,
+				E704151F123042CB0083F569 /* Makefile */,
+			);
+			name = cart2wrfvdf;
+			path = ../../../apps/cart2wrfvdf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041520123042CB0083F569 /* flashamr2vdf */ = {
+			isa = PBXGroup;
+			children = (
+				E7041521123042CB0083F569 /* flashamr2vdf.cpp */,
+				E7041522123042CB0083F569 /* flashhdf5.cpp */,
+				E7041523123042CB0083F569 /* flashhdf5.h */,
+				E7041524123042CB0083F569 /* flashvdfcreate.cpp */,
+				E7041525123042CB0083F569 /* Makefile */,
+				E7041526123042CB0083F569 /* Makefile.flashamr2vdf */,
+				E7041527123042CB0083F569 /* Makefile.flashvdfcreate */,
+			);
+			name = flashamr2vdf;
+			path = ../../../apps/flashamr2vdf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041528123042CB0083F569 /* glewinfo */ = {
+			isa = PBXGroup;
+			children = (
+				E7041529123042CB0083F569 /* glewinfo.c */,
+				E704152A123042CB0083F569 /* Makefile */,
+			);
+			name = glewinfo;
+			path = ../../../apps/glewinfo;
+			sourceTree = SOURCE_ROOT;
+		};
+		E704152C123042CB0083F569 /* ncdf2vdf */ = {
+			isa = PBXGroup;
+			children = (
+				E704152D123042CB0083F569 /* Makefile */,
+				E704152E123042CB0083F569 /* ncdf2vdf.cpp */,
+			);
+			name = ncdf2vdf;
+			path = ../../../apps/ncdf2vdf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E704152F123042CB0083F569 /* raw2vdf */ = {
+			isa = PBXGroup;
+			children = (
+				E7041530123042CB0083F569 /* Makefile */,
+				E7041531123042CB0083F569 /* raw2vdf.cpp */,
+			);
+			name = raw2vdf;
+			path = ../../../apps/raw2vdf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041532123042CB0083F569 /* tiff2geotiff */ = {
+			isa = PBXGroup;
+			children = (
+				E7041533123042CB0083F569 /* geotiff_proj4.cpp */,
+				E7041534123042CB0083F569 /* getopt.cpp */,
+				E7041535123042CB0083F569 /* Makefile */,
+				E7041536123042CB0083F569 /* tiff2geotiff.cpp */,
+			);
+			name = tiff2geotiff;
+			path = ../../../apps/tiff2geotiff;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041537123042CB0083F569 /* vaporgui */ = {
+			isa = PBXGroup;
+			children = (
+				E7041539123042CB0083F569 /* guis */,
+				E7041586123042CB0083F569 /* images */,
+				E70415CF123042CB0083F569 /* main */,
+				E70415E5123042CB0083F569 /* Makefile */,
+				E70415E7123042CB0083F569 /* misc */,
+			);
+			name = vaporgui;
+			path = ../../../apps/vaporgui;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041539123042CB0083F569 /* guis */ = {
+			isa = PBXGroup;
+			children = (
+				E75B94641507DA5600BF2D69 /* arroweventrouter.h */,
+				E75B94631507DA5600BF2D69 /* arroweventrouter.cpp */,
+				E75B94651507DA5600BF2D69 /* boxsliderframe.cpp */,
+				E75B94661507DA5600BF2D69 /* boxsliderframe.h */,
+				E704153A123042CB0083F569 /* animationeventrouter.cpp */,
+				E704153B123042CB0083F569 /* animationeventrouter.h */,
+				E704153C123042CB0083F569 /* ColorbarWidget.cpp */,
+				E704153D123042CB0083F569 /* ColorbarWidget.h */,
+				E704153E123042CB0083F569 /* colorpickerframe.cpp */,
+				E704153F123042CB0083F569 /* colorpickerframe.h */,
+				E7041540123042CB0083F569 /* ControlPointEditor.cpp */,
+				E7041541123042CB0083F569 /* ControlPointEditor.h */,
+				E7041542123042CB0083F569 /* DomainWidget.cpp */,
+				E7041543123042CB0083F569 /* DomainWidget.h */,
+				E7041544123042CB0083F569 /* dvreventrouter.cpp */,
+				E7041545123042CB0083F569 /* dvreventrouter.h */,
+				E7041546123042CB0083F569 /* eventrouter.cpp */,
+				E7041547123042CB0083F569 /* eventrouter.h */,
+				E7041548123042CB0083F569 /* floweventrouter.cpp */,
+				E7041549123042CB0083F569 /* floweventrouter.h */,
+				E704154A123042CB0083F569 /* glprobewindow.cpp */,
+				E704154B123042CB0083F569 /* glprobewindow.h */,
+				E704154C123042CB0083F569 /* gltwoDwindow.cpp */,
+				E704154D123042CB0083F569 /* gltwoDwindow.h */,
+				E704154E123042CB0083F569 /* GLWidget.cpp */,
+				E704154F123042CB0083F569 /* GLWidget.h */,
+				E7041550123042CB0083F569 /* guis.mk */,
+				E7041551123042CB0083F569 /* instancetable.cpp */,
+				E7041552123042CB0083F569 /* instancetable.h */,
+				E7041553123042CB0083F569 /* isoeventrouter.cpp */,
+				E7041554123042CB0083F569 /* isoeventrouter.h */,
+				E7041555123042CB0083F569 /* loadtfdialog.cpp */,
+				E7041556123042CB0083F569 /* loadtfdialog.h */,
+				E7041557123042CB0083F569 /* Makefile */,
+				E7041558123042CB0083F569 /* mappingframe.cpp */,
+				E7041559123042CB0083F569 /* mappingframe.h */,
+				E704155A123042CB0083F569 /* OpacityWidget.cpp */,
+				E704155B123042CB0083F569 /* OpacityWidget.h */,
+				E704155C123042CB0083F569 /* probeeventrouter.cpp */,
+				E704155D123042CB0083F569 /* probeeventrouter.h */,
+				E704155E123042CB0083F569 /* probeframe.cpp */,
+				E704155F123042CB0083F569 /* probeframe.h */,
+				E7041560123042CB0083F569 /* qtthumbwheel.cpp */,
+				E7041561123042CB0083F569 /* qtthumbwheel.h */,
+				E7041562123042CB0083F569 /* regioneventrouter.cpp */,
+				E7041563123042CB0083F569 /* regioneventrouter.h */,
+				E7041564123042CB0083F569 /* savetfdialog.cpp */,
+				E7041565123042CB0083F569 /* savetfdialog.h */,
+				E7041566123042CB0083F569 /* seedlisteditor.cpp */,
+				E7041567123042CB0083F569 /* seedlisteditor.h */,
+				E7041568123042CB0083F569 /* twoDdataeventrouter.cpp */,
+				E7041569123042CB0083F569 /* twoDdataeventrouter.h */,
+				E704156A123042CB0083F569 /* twoDeventrouter.cpp */,
+				E704156B123042CB0083F569 /* twoDeventrouter.h */,
+				E704156C123042CB0083F569 /* twodframe.cpp */,
+				E704156D123042CB0083F569 /* twodframe.h */,
+				E704156E123042CB0083F569 /* twoDimageeventrouter.cpp */,
+				E704156F123042CB0083F569 /* twoDimageeventrouter.h */,
+				E7041580123042CB0083F569 /* userpreferences.cpp */,
+				E7041581123042CB0083F569 /* userpreferences.h */,
+				E7041582123042CB0083F569 /* viewpointeventrouter.cpp */,
+				E7041583123042CB0083F569 /* viewpointeventrouter.h */,
+				E7041584123042CB0083F569 /* vizselectcombo.cpp */,
+				E7041585123042CB0083F569 /* vizselectcombo.h */,
+				E7041570123042CB0083F569 /* ui */,
+			);
+			name = guis;
+			path = ../../../apps/vaporgui/guis;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041570123042CB0083F569 /* ui */ = {
+			isa = PBXGroup;
+			children = (
+				E7041571123042CB0083F569 /* animationtab.ui */,
+				E7041572123042CB0083F569 /* ControlPointEditorBase.ui */,
+				E7041573123042CB0083F569 /* dvr.ui */,
+				E7041574123042CB0083F569 /* flowtab.ui */,
+				E7041575123042CB0083F569 /* isotab.ui */,
+				E7041576123042CB0083F569 /* preferences.ui */,
+				E7041577123042CB0083F569 /* probetab.ui */,
+				E7041578123042CB0083F569 /* regiontab.ui */,
+				E7041579123042CB0083F569 /* setoffset.ui */,
+				E704157A123042CB0083F569 /* twoDdatatab.ui */,
+				E704157B123042CB0083F569 /* twoDimagetab.ui */,
+				E704157C123042CB0083F569 /* twoDtab.ui */,
+				E704157D123042CB0083F569 /* ui.mk */,
+				E704157E123042CB0083F569 /* vizfeatures.ui */,
+				E704157F123042CB0083F569 /* viztab.ui */,
+			);
+			name = ui;
+			path = ../../../apps/vaporgui/guis/ui;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041586123042CB0083F569 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				E7041587123042CB0083F569 /* back.xpm */,
+				E7041588123042CB0083F569 /* capture-off.jpg */,
+				E7041589123042CB0083F569 /* capture-off.xpm */,
+				E704158A123042CB0083F569 /* capture-on.jpg */,
+				E704158B123042CB0083F569 /* capture-on.xpm */,
+				E704158C123042CB0083F569 /* cascade.JPG */,
+				E704158D123042CB0083F569 /* cascade.xpm */,
+				E704158E123042CB0083F569 /* cube.JPG */,
+				E704158F123042CB0083F569 /* cube.xpm */,
+				E7041590123042CB0083F569 /* eye.xpm */,
+				E7041591123042CB0083F569 /* fastforward.jpg */,
+				E7041592123042CB0083F569 /* fastreverse.JPG */,
+				E7041593123042CB0083F569 /* fileopen.png */,
+				E7041594123042CB0083F569 /* fileopen.xpm */,
+				E7041595123042CB0083F569 /* forward.xpm */,
+				E7041596123042CB0083F569 /* hand.jpg */,
+				E7041597123042CB0083F569 /* home.JPG */,
+				E7041598123042CB0083F569 /* home.xpm */,
+				E7041599123042CB0083F569 /* home2.xpm */,
+				E704159A123042CB0083F569 /* lightbulb.JPG */,
+				E704159B123042CB0083F569 /* lightbulb.xpm */,
+				E704159C123042CB0083F569 /* magnify.jpg */,
+				E704159D123042CB0083F569 /* magnify.xpm */,
+				E704159E123042CB0083F569 /* navigate.jpg */,
+				E704159F123042CB0083F569 /* pause.JPG */,
+				E70415A0123042CB0083F569 /* pauseA.xpm */,
+				E70415A1123042CB0083F569 /* pauseimage.xpm */,
+				E70415A2123042CB0083F569 /* planes.JPG */,
+				E70415A3123042CB0083F569 /* planes.xpm */,
+				E70415A4123042CB0083F569 /* play.jpg */,
+				E70415A5123042CB0083F569 /* playforward.jpg */,
+				E70415A6123042CB0083F569 /* playforward.xpm */,
+				E70415A7123042CB0083F569 /* playforwardA.xpm */,
+				E70415A8123042CB0083F569 /* playreverse.JPG */,
+				E70415A9123042CB0083F569 /* playreverse.xpm */,
+				E70415AA123042CB0083F569 /* playreverseA.xpm */,
+				E70415AB123042CB0083F569 /* pointer.jpg */,
+				E70415AC123042CB0083F569 /* probe.JPG */,
+				E70415AD123042CB0083F569 /* probe.xpm */,
+				E70415AE123042CB0083F569 /* rake.jpg */,
+				E70415AF123042CB0083F569 /* rake.xpm */,
+				E70415B0123042CB0083F569 /* replay.JPG */,
+				E70415B1123042CB0083F569 /* replayA.xpm */,
+				E70415B2123042CB0083F569 /* rewind.JPG */,
+				E70415B3123042CB0083F569 /* sethome.JPG */,
+				E70415B4123042CB0083F569 /* sethome.xpm */,
+				E70415B5123042CB0083F569 /* sphere.JPG */,
+				E70415B6123042CB0083F569 /* sphere.xpm */,
+				E70415B7123042CB0083F569 /* spherecolored.JPG */,
+				E70415B8123042CB0083F569 /* spherecolored.xpm */,
+				E70415B9123042CB0083F569 /* step-back-off.jpg */,
+				E70415BA123042CB0083F569 /* step-back-off.xpm */,
+				E70415BB123042CB0083F569 /* step-back.jpg */,
+				E70415BC123042CB0083F569 /* step-fwd-off.jpg */,
+				E70415BD123042CB0083F569 /* step-fwd-off.xpm */,
+				E70415BE123042CB0083F569 /* step-fwd.jpg */,
+				E70415BF123042CB0083F569 /* stepback.xpm */,
+				E70415C0123042CB0083F569 /* stepbackA.xpm */,
+				E70415C1123042CB0083F569 /* stepfwd.xpm */,
+				E70415C2123042CB0083F569 /* stepfwdA.xpm */,
+				E70415C3123042CB0083F569 /* tiles.JPG */,
+				E70415C4123042CB0083F569 /* tiles.xpm */,
+				E70415C5123042CB0083F569 /* tobegin.jpg */,
+				E70415C6123042CB0083F569 /* tobeginA.xpm */,
+				E70415C7123042CB0083F569 /* toend.JPG */,
+				E70415C8123042CB0083F569 /* toendA.xpm */,
+				E70415C9123042CB0083F569 /* twoDData.xpm */,
+				E70415CA123042CB0083F569 /* twoDImage.xpm */,
+				E70415CB123042CB0083F569 /* vapor-icon-32.jpg */,
+				E70415CC123042CB0083F569 /* vapor-icon-32.xpm */,
+				E70415CD123042CB0083F569 /* wheel.jpg */,
+				E70415CE123042CB0083F569 /* wheel.xpm */,
+			);
+			name = images;
+			path = ../../../apps/vaporgui/images;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70415CF123042CB0083F569 /* main */ = {
+			isa = PBXGroup;
+			children = (
+				E70415D0123042CB0083F569 /* command.cpp */,
+				E70415D1123042CB0083F569 /* command.h */,
+				E70415D2123042CB0083F569 /* main.cpp */,
+				E70415D3123042CB0083F569 /* main.mk */,
+				E70415D4123042CB0083F569 /* mainform.cpp */,
+				E70415D5123042CB0083F569 /* mainform.h */,
+				E70415D6123042CB0083F569 /* Makefile */,
+				E70415D7123042CB0083F569 /* messagereporter.cpp */,
+				E70415D8123042CB0083F569 /* messagereporter.h */,
+				E70415D9123042CB0083F569 /* panelcommand.cpp */,
+				E70415DA123042CB0083F569 /* panelcommand.h */,
+				E70415DB123042CB0083F569 /* session.cpp */,
+				E70415DC123042CB0083F569 /* session.h */,
+				E70415DD123042CB0083F569 /* tabmanager.cpp */,
+				E70415DE123042CB0083F569 /* tabmanager.h */,
+				E70415DF123042CB0083F569 /* vizactivatecommand.cpp */,
+				E70415E0123042CB0083F569 /* vizactivatecommand.h */,
+				E70415E1123042CB0083F569 /* vizwin.cpp */,
+				E70415E2123042CB0083F569 /* vizwin.h */,
+				E70415E3123042CB0083F569 /* vizwinmgr.cpp */,
+				E70415E4123042CB0083F569 /* vizwinmgr.h */,
+			);
+			name = main;
+			path = ../../../apps/vaporgui/main;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70415E7123042CB0083F569 /* misc */ = {
+			isa = PBXGroup;
+			children = (
+				E70415E8123042CB0083F569 /* animationcontroller.cpp */,
+				E70415E9123042CB0083F569 /* animationcontroller.h */,
+				E70415EA123042CB0083F569 /* controllerthread.h */,
+				E70415ED123042CB0083F569 /* helpwindow.cpp */,
+				E70415EE123042CB0083F569 /* helpwindow.h */,
+				E70415F3123042CB0083F569 /* sharedcontrollerthread.cpp */,
+				E70415EF123042CB0083F569 /* Makefile */,
+				E70415F0123042CB0083F569 /* misc.mk */,
+				E70415F1123042CB0083F569 /* pythonedit.cpp */,
+				E70415F2123042CB0083F569 /* pythonedit.h */,
+				E70415F4123042CB0083F569 /* unsharedcontrollerthread.cpp */,
+				E70415F5123042CB0083F569 /* vizfeatureparams.cpp */,
+				E70415F6123042CB0083F569 /* vizfeatureparams.h */,
+			);
+			name = misc;
+			path = ../../../apps/vaporgui/misc;
+			sourceTree = SOURCE_ROOT;
+		};
+		E70415FA123042CB0083F569 /* vaporversion */ = {
+			isa = PBXGroup;
+			children = (
+				E70415FB123042CB0083F569 /* Makefile */,
+				E70415FC123042CB0083F569 /* vaporversion.cpp */,
+			);
+			path = vaporversion;
+			sourceTree = "<group>";
+		};
+		E70415FD123042CB0083F569 /* vdf2raw */ = {
+			isa = PBXGroup;
+			children = (
+				E70415FE123042CB0083F569 /* Makefile */,
+				E70415FF123042CB0083F569 /* vdf2raw.cpp */,
+			);
+			name = vdf2raw;
+			path = ../../../apps/vdf2raw;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041600123042CB0083F569 /* vdfcreate */ = {
+			isa = PBXGroup;
+			children = (
+				E7041601123042CB0083F569 /* Makefile */,
+				E7041602123042CB0083F569 /* vdfcreate.cpp */,
+			);
+			name = vdfcreate;
+			path = ../../../apps/vdfcreate;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041603123042CB0083F569 /* vdfedit */ = {
+			isa = PBXGroup;
+			children = (
+				E7041604123042CB0083F569 /* Makefile */,
+				E7041605123042CB0083F569 /* vdfedit.cpp */,
+			);
+			name = vdfedit;
+			path = ../../../apps/vdfedit;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041606123042CB0083F569 /* vdfls */ = {
+			isa = PBXGroup;
+			children = (
+				E7041607123042CB0083F569 /* Makefile */,
+				E7041608123042CB0083F569 /* vdfls.cpp */,
+			);
+			name = vdfls;
+			path = ../../../apps/vdfls;
+			sourceTree = SOURCE_ROOT;
+		};
+		E7041609123042CB0083F569 /* wrf2vdf */ = {
+			isa = PBXGroup;
+			children = (
+				E704160A123042CB0083F569 /* Makefile */,
+				E704160B123042CB0083F569 /* wrf2vdf.cpp */,
+			);
+			name = wrf2vdf;
+			path = ../../../apps/wrf2vdf;
+			sourceTree = SOURCE_ROOT;
+		};
+		E704160C123042CB0083F569 /* wrfvdfcreate */ = {
+			isa = PBXGroup;
+			children = (
+				E704160D123042CB0083F569 /* Makefile */,
+				E704160E123042CB0083F569 /* wrfvdfcreate.cpp */,
+			);
+			name = wrfvdfcreate;
+			path = ../../../apps/wrfvdfcreate;
+			sourceTree = SOURCE_ROOT;
+		};
+		E78860EE146078D4001F7D1A /* mom2vdf */ = {
+			isa = PBXGroup;
+			children = (
+				E78860F3146081F0001F7D1A /* mom2vdf.cpp */,
+				E78860EF146078D4001F7D1A /* Makefile */,
+			);
+			path = mom2vdf;
+			sourceTree = "<group>";
+		};
+		E7BA1ACC1452232F003DBE0A /* momvdfcreate */ = {
+			isa = PBXGroup;
+			children = (
+				E7BA1ACD1452232F003DBE0A /* Makefile */,
+				E7BA1ACE1452232F003DBE0A /* momvdfcreate.cpp */,
+			);
+			path = momvdfcreate;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		E7041615123043540083F569 /* vaporgui */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = E7041618123043720083F569 /* Build configuration list for PBXLegacyTarget "vaporgui" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../;
+			dependencies = (
+			);
+			name = vaporgui;
+			passBuildSettingsInEnvironment = 1;
+			productName = vaporgui;
+		};
+		E744081E1461970900EA955E /* mom2vdf */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = E74408211461972700EA955E /* Build configuration list for PBXLegacyTarget "mom2vdf" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "/Users/alan/Vapor/vapor2-2Working/";
+			dependencies = (
+			);
+			name = mom2vdf;
+			passBuildSettingsInEnvironment = 1;
+			productName = mom2vdf;
+		};
+		E7BA1AC4145222C6003DBE0A /* momvdfcreate */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = E7BA1AC914522305003DBE0A /* Build configuration list for PBXLegacyTarget "momvdfcreate" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "/Users/alan/Vapor/vapor2-2Working/";
+			dependencies = (
+			);
+			name = momvdfcreate;
+			passBuildSettingsInEnvironment = 1;
+			productName = momvdfcreate;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB919308733D9F0010E9CD /* Build configuration list for PBXProject "vaporXcode" */;
+			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* vaporXcode */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E7041615123043540083F569 /* vaporgui */,
+				E7BA1AC4145222C6003DBE0A /* momvdfcreate */,
+				E744081E1461970900EA955E /* mom2vdf */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB919408733D9F0010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+				VAPOR_HOME = /Users/alan/tmp;
+			};
+			name = Debug;
+		};
+		1DEB919508733D9F0010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+		E7041616123043540083F569 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = vaporgui;
+			};
+			name = Debug;
+		};
+		E7041617123043540083F569 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = vaporgui;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		E744081F1461970900EA955E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = mom2vdf;
+			};
+			name = Debug;
+		};
+		E74408201461970900EA955E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = mom2vdf;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		E7BA1AC5145222C6003DBE0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = momvdfcreate;
+			};
+			name = Debug;
+		};
+		E7BA1AC6145222C6003DBE0A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = momvdfcreate;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB919308733D9F0010E9CD /* Build configuration list for PBXProject "vaporXcode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB919408733D9F0010E9CD /* Debug */,
+				1DEB919508733D9F0010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E7041618123043720083F569 /* Build configuration list for PBXLegacyTarget "vaporgui" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7041616123043540083F569 /* Debug */,
+				E7041617123043540083F569 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E74408211461972700EA955E /* Build configuration list for PBXLegacyTarget "mom2vdf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E744081F1461970900EA955E /* Debug */,
+				E74408201461970900EA955E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E7BA1AC914522305003DBE0A /* Build configuration list for PBXLegacyTarget "momvdfcreate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7BA1AC5145222C6003DBE0A /* Debug */,
+				E7BA1AC6145222C6003DBE0A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

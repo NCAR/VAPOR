@@ -1,0 +1,1140 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<Session DataExtents="0 0 0 1 1 1"  FlowPath="/usr/local/apps/vapor1.2.1/data"  InteractiveRefinementLevel="0"  JpegPath="B:/TEMP"  MetadataPath="C:/Vapor/exampleData/OT128_lowres/ot128_lowres.vdf"  StretchFactors="1 1 1"  TransferFunctionPath="C:\Cygwin\home\alan"  VaporVersion="1.5.0" >
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="bx" >
+</SessionVariable>
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="by" >
+</SessionVariable>
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="bz" >
+</SessionVariable>
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="vx" >
+</SessionVariable>
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="vy" >
+</SessionVariable>
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="vz" >
+</SessionVariable>
+<SessionVariable AboveGridValue="0"  BelowGridValue="0"  ExtendAboveGrid="false"  ExtendBelowGrid="false"  VariableName="current" >
+</SessionVariable>
+<GlobalParameterPanels>
+<RegionPanelParameters FullGridHeight="0"  Local="false"  VisualizerNum="-1" >
+<RegionMax Type="Double">
+  1 1 1 
+</RegionMax>
+<RegionMin Type="Double">
+  0 0 0 
+</RegionMin>
+</RegionPanelParameters>
+<AnimationPanelParameters CurrentFrame="61"  EndFrame="61"  FrameStepSize="4"  Local="false"  MaxFrameRate="10"  MaxWait="6000"  RepeatPlay="false"  StartFrame="1"  UseTimestepSampleList="false"  VisualizerNum="-1" >
+</AnimationPanelParameters>
+<ViewpointPanelParameters AmbientCoefficient="0.1"  Local="false"  SpecularExponent="20"  StereoMode="center"  StereoSeparation="0"  UseLatLon="false"  VisualizerNum="-1" >
+<Light DiffuseCoefficient="0.8"  LightDirection="0 0 1 "  LightNum="0"  SpecularCoefficient="0.3" >
+</Light>
+<Light DiffuseCoefficient="0.8"  LightDirection="0 1 0 "  LightNum="1"  SpecularCoefficient="0.3" >
+</Light>
+<CurrentViewpoint>
+<Viewpoint Perspective="true" >
+<CameraLatLon Type="Double">
+  0 0 
+</CameraLatLon>
+<CameraPosition Type="Double">
+  0.639719188213 0.871956467628 1.10478579998 
+</CameraPosition>
+<RotCenterLatLon Type="Double">
+  0 0 
+</RotCenterLatLon>
+<RotationCenter Type="Double">
+  0.519999980927 0.649999976158 0.660000026226 
+</RotationCenter>
+<UpVector Type="Double">
+  -0.0678051039577 0.899890840054 -0.430811911821 
+</UpVector>
+<ViewDirection Type="Double">
+  -0.234144806862 -0.434098869562 -0.869904816151 
+</ViewDirection>
+</Viewpoint>
+</CurrentViewpoint>
+<HomeViewpoint>
+<Viewpoint Perspective="true" >
+<CameraLatLon Type="Double">
+  0 0 
+</CameraLatLon>
+<CameraPosition Type="Double">
+  0.5 0.5 3 
+</CameraPosition>
+<RotCenterLatLon Type="Double">
+  0 0 
+</RotCenterLatLon>
+<RotationCenter Type="Double">
+  0.5 0.5 0.5 
+</RotationCenter>
+<UpVector Type="Double">
+  0 0 1 
+</UpVector>
+<ViewDirection Type="Double">
+  0 0 -1 
+</ViewDirection>
+</Viewpoint>
+</HomeViewpoint>
+</ViewpointPanelParameters>
+</GlobalParameterPanels>
+<Visualizers>
+<VizWindow AxesEnabled="false"  AxisAnnotationColor="255 255 255"  AxisAnnotationEnabled="false"  AxisLabelDigits="4"  AxisLabelHeight="10"  AxisOriginPosition="0 0 0"  AxisPosition="0 0 0"  AxisTicLengths="0.05 0.05 0.05"  ColorbarBackgroundColor="0 0 0"  ColorbarEnabled="false"  ColorbarLLPosition="0.1 0.1"  ColorbarNumTics="11"  ColorbarURPosition="0.3 0.5"  ElevGridColor="150 75 0"  ElevGridDisplacement="0"  ElevGridInverted="false"  ElevGridRefinement="0"  ElevGridRenderingEnabled="false"  ElevGridRotation="0"  ElevGridTextureFilename="imageFile.jpg"  ElevGridTextured="false"  MaxTicPositions="1 1 1"  MinTicPositions="0 0 0"  NumTicMarks="6 6 6"  TicDirections="1 0 0"  TicWidth="2"  TimeAnnotationColor="255 255 255"  TimeAnnotationCoords="0.1 0.1"  TimeAnnotationTextSize="10"  TimeAnnotationType="none"  VisualizerNum="0"  WindowName="Visualizer No. 0" >
+<DvrPanelParameters ActiveVariableName="current"  BitsPerVoxel="8"  DVRLighting="false"  DVRPreIntegration="false"  HistoStretchFactor="1"  NumTransforms="3"  NumVariables="7"  TFEditMode="true"  VisualizerNum="0" >
+<Variable LeftEditBound="-1.73205"  OpacityScale="1"  RightEditBound="1.73205"  VariableName="bx" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.333"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.73205"  OpacityScale="1"  RightEditBound="1.73205"  VariableName="by" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.333"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.1547"  OpacityScale="1"  RightEditBound="1.1547"  VariableName="bz" >
+<TransferFunction LeftBound="-1.1547"  OpacityComposition="0"  RightBound="1.1547" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.333"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.41421"  OpacityScale="1"  RightEditBound="1.41421"  VariableName="vx" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.333"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.41421"  OpacityScale="1"  RightEditBound="1.41421"  VariableName="vy" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.333"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="0"  OpacityScale="1"  RightEditBound="1"  VariableName="vz" >
+<TransferFunction LeftBound="0"  OpacityComposition="0"  RightBound="0" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.333"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="0.0168669"  OpacityScale="0.123596"  RightEditBound="30"  VariableName="current" >
+<TransferFunction LeftBound="0.0168669"  OpacityComposition="0"  RightBound="30" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="0"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="0.667"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+</DvrPanelParameters>
+<IsoPanelParameters>
+<NormalOnOff Type="Long">
+  1 
+</NormalOnOff>
+<NumVoxelBits Type="Long">
+  8 
+</NumVoxelBits>
+<RefinementLevel Type="Long">
+  0 
+</RefinementLevel>
+<VisualizerNum Type="Long">
+  0 
+</VisualizerNum>
+<ConstantColor Type="Double">
+  1 1 1 1 
+</ConstantColor>
+<HistoBounds Type="Double">
+  -1.73205149174 1.73205304146 
+</HistoBounds>
+<HistoScale Type="Double">
+  1 
+</HistoScale>
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+<MapHistoScale Type="Double">
+  1 
+</MapHistoScale>
+<SelectedPoint Type="Double">
+  0 0 0 
+</SelectedPoint>
+<MapVariableName Type="String">
+  Constant
+</MapVariableName>
+<VariableName Type="String">
+  bx
+</VariableName>
+<Variable OpacityScale="1"  VariableName="bx" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+<Variable OpacityScale="1"  VariableName="by" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+<Variable OpacityScale="1"  VariableName="bz" >
+<TransferFunction LeftBound="-1.1547"  OpacityComposition="0"  RightBound="1.1547" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+<Variable OpacityScale="1"  VariableName="vx" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+<Variable OpacityScale="1"  VariableName="vy" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+<Variable OpacityScale="1"  VariableName="vz" >
+<TransferFunction LeftBound="0"  OpacityComposition="0"  RightBound="0" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+<Variable OpacityScale="1"  VariableName="current" >
+<TransferFunction LeftBound="0.0168669"  OpacityComposition="0"  RightBound="3.82948" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+<IsoControl LeftHistoBound="-1.73205"  RightHistoBound="1.73205" >
+<IsoValue Type="Double">
+  7.7486038208e-007 
+</IsoValue>
+</IsoControl>
+</Variable>
+</IsoPanelParameters>
+<FlowPanelParameters AdvectBeforePrioritize="false"  AutoRefresh="true"  AutoScale="false"  FlowType="2"  IntegrationAccuracy="0.5"  NumFLASamples="5"  NumTransforms="2"  NumVariables="7"  PeriodicDimensions="true true true "  PriorityBounds="0 1e+030"  PriorityVariableNames="bx by bz"  SamplingTimes="1 25 1"  SeedDistVariableNames="bx by bz"  SeedDistribBias="0"  Smoothness="100"  SteadyFlowDirection="0"  SteadyFlowLength="1"  SteadyVariableNames="bx by bz"  UnsteadyFlowDirection="1"  UnsteadyVariableNames="vx vy vz"  UseTimestepSampleList="false"  VisualizerNum="0"  steadyScale="1"  unsteadyScale="0.01989" >
+<FlowSeeding GeneratorCountsByDimension="1 1 1"  RandomSeed="1"  RandomSeeding="false"  SeedInjectionTimes="1 1 1"  SeedRegionMaxes="1 1 1"  SeedRegionMins="0 0 0"  TotalGeneratorCount="10"  UseRake="false" >
+<SeedPoint Position="0.5 0.0748036 0.14567"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.14567 0.14567"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.216536 0.14567"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.287402 0.14567"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.358268 0.14567"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.429134 0.14567"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.0748036 0.287402"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.14567 0.287402"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.216536 0.287402"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.287402 0.287402"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.358268 0.287402"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.429134 0.287402"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.0748036 0.429134"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.14567 0.429134"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.216536 0.429134"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.287402 0.429134"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.358268 0.429134"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.429134 0.429134"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.0748036 0.570866"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.14567 0.570866"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.216536 0.570866"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.287402 0.570866"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.358268 0.570866"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.429134 0.570866"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.0748036 0.712598"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.14567 0.712598"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.216536 0.712598"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.287402 0.712598"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.358268 0.712598"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.429134 0.712598"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.0748036 0.85433"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.14567 0.85433"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.216536 0.85433"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.287402 0.85433"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.358268 0.85433"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.429134 0.85433"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.572538 0.145679"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.643125 0.145679"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.713713 0.145679"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.7843 0.145679"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.854887 0.145679"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.925475 0.145679"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.572538 0.287407"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.643125 0.287407"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.713713 0.287407"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.7843 0.287407"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.854887 0.287407"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.925475 0.287407"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.572538 0.429136"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.643125 0.429136"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.713713 0.429136"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.7843 0.429136"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.854887 0.429136"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.925475 0.429136"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.572538 0.570864"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.643125 0.570864"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.713713 0.570864"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.7843 0.570864"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.854887 0.570864"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.925475 0.570864"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.572538 0.712593"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.643125 0.712593"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.713713 0.712593"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.7843 0.712593"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.854887 0.712593"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.925475 0.712593"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.572538 0.854321"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.643125 0.854321"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.713713 0.854321"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.7843 0.854321"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.854887 0.854321"  TimeStep="-1" >
+</SeedPoint>
+<SeedPoint Position="0.5 0.925475 0.854321"  TimeStep="-1" >
+</SeedPoint>
+</FlowSeeding>
+<FlowGeometry ArrowheadDiameter="2"  ColorMappedEntityIndex="3"  ConstantColorRGBValue="255 0 0"  ConstantOpacityValue="1"  DiamondDiameter="2"  DisplayInterval="-100 1"  GeometryType="0"  ObjectsPerFlowline="20"  ObjectsPerTimestep="1"  OpacityMappedEntityIndex="0"  OpacityScale="1"  ShapeDiameter="1" >
+<MapperFunction LeftColorBound="0"  LeftOpacityBound="0"  OpacityComposition="0"  RightColorBound="71"  RightOpacityBound="1" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.496316" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="0.496316" >
+</ColorMapControlPoint>
+</Colormap>
+</MapperFunction>
+</FlowGeometry>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="1"  RightOpacityBound="1"  VariableName="Constant" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="1"  RightOpacityBound="1"  VariableName="Timestep" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="1.41421"  RightOpacityBound="1.41421"  VariableName="FieldMagnitude" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="71"  RightOpacityBound="71"  VariableName="SeedIndex" >
+</Variable>
+<Variable LeftColorBound="-1.73205"  LeftOpacityBound="-1.73205"  RightColorBound="1.73205"  RightOpacityBound="1.73205"  VariableName="bx" >
+</Variable>
+<Variable LeftColorBound="-1.73205"  LeftOpacityBound="-1.73205"  RightColorBound="1.73205"  RightOpacityBound="1.73205"  VariableName="by" >
+</Variable>
+<Variable LeftColorBound="-1.1547"  LeftOpacityBound="-1.1547"  RightColorBound="1.1547"  RightOpacityBound="1.1547"  VariableName="bz" >
+</Variable>
+<Variable LeftColorBound="-1.41421"  LeftOpacityBound="-1.41421"  RightColorBound="1.41421"  RightOpacityBound="1.41421"  VariableName="vx" >
+</Variable>
+<Variable LeftColorBound="-1.41421"  LeftOpacityBound="-1.41421"  RightColorBound="1.41421"  RightOpacityBound="1.41421"  VariableName="vy" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="0"  RightOpacityBound="0"  VariableName="vz" >
+</Variable>
+<Variable LeftColorBound="0.0168669"  LeftOpacityBound="0.0168669"  RightColorBound="3.82948"  RightOpacityBound="3.82948"  VariableName="current" >
+</Variable>
+</FlowPanelParameters>
+<FlowPanelParameters AdvectBeforePrioritize="false"  AutoRefresh="true"  AutoScale="true"  FlowType="2"  IntegrationAccuracy="0.5"  NumFLASamples="5"  NumTransforms="2"  NumVariables="7"  PeriodicDimensions="true true true "  PriorityBounds="0 1e+030"  PriorityVariableNames="bx by bz"  SamplingTimes="1 61 4"  SeedDistVariableNames="bx by bz"  SeedDistribBias="0"  Smoothness="100"  SteadyFlowDirection="0"  SteadyFlowLength="1"  SteadyVariableNames="bx by bz"  UnsteadyFlowDirection="1"  UnsteadyVariableNames="vx vy vz"  UseTimestepSampleList="false"  VisualizerNum="0"  steadyScale="2.46536"  unsteadyScale="0.01989" >
+<FlowSeeding GeneratorCountsByDimension="1 1 1"  RandomSeed="1"  RandomSeeding="false"  SeedInjectionTimes="61 61 1"  SeedRegionMaxes="1 1 1"  SeedRegionMins="0 0 0"  TotalGeneratorCount="10"  UseRake="false" >
+<SeedPoint Position="0.52 0.65 0.66"  TimeStep="61" >
+</SeedPoint>
+</FlowSeeding>
+<FlowGeometry ArrowheadDiameter="2"  ColorMappedEntityIndex="3"  ConstantColorRGBValue="255 0 0"  ConstantOpacityValue="1"  DiamondDiameter="2"  DisplayInterval="-100 1"  GeometryType="0"  ObjectsPerFlowline="100"  ObjectsPerTimestep="1"  OpacityMappedEntityIndex="0"  OpacityScale="1"  ShapeDiameter="1" >
+<MapperFunction LeftColorBound="0"  LeftOpacityBound="0"  OpacityComposition="0"  RightColorBound="71"  RightOpacityBound="1" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.496316" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="0.496316" >
+</ColorMapControlPoint>
+</Colormap>
+</MapperFunction>
+</FlowGeometry>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="1"  RightOpacityBound="1"  VariableName="Constant" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="1"  RightOpacityBound="1"  VariableName="Timestep" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="1.41421"  RightOpacityBound="1.41421"  VariableName="FieldMagnitude" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="0"  RightOpacityBound="0"  VariableName="SeedIndex" >
+</Variable>
+<Variable LeftColorBound="-1.73205"  LeftOpacityBound="-1.73205"  RightColorBound="1.73205"  RightOpacityBound="1.73205"  VariableName="bx" >
+</Variable>
+<Variable LeftColorBound="-1.73205"  LeftOpacityBound="-1.73205"  RightColorBound="1.73205"  RightOpacityBound="1.73205"  VariableName="by" >
+</Variable>
+<Variable LeftColorBound="-1.1547"  LeftOpacityBound="-1.1547"  RightColorBound="1.1547"  RightOpacityBound="1.1547"  VariableName="bz" >
+</Variable>
+<Variable LeftColorBound="-1.41421"  LeftOpacityBound="-1.41421"  RightColorBound="1.41421"  RightOpacityBound="1.41421"  VariableName="vx" >
+</Variable>
+<Variable LeftColorBound="-1.41421"  LeftOpacityBound="-1.41421"  RightColorBound="1.41421"  RightOpacityBound="1.41421"  VariableName="vy" >
+</Variable>
+<Variable LeftColorBound="0"  LeftOpacityBound="0"  RightColorBound="0"  RightOpacityBound="0"  VariableName="vz" >
+</Variable>
+<Variable LeftColorBound="0.0168669"  LeftOpacityBound="0.0168669"  RightColorBound="3.82948"  RightOpacityBound="3.82948"  VariableName="current" >
+</Variable>
+</FlowPanelParameters>
+<ProbePanelParameters Alpha="0.12"  FieldScale="1"  FieldVariables="bx by bz "  HistoStretchFactor="1"  MergeColors="false"  NumTransforms="3"  NumVariables="7"  Planar="true"  ProbeType="0"  TFEditMode="true"  VisualizerNum="0" >
+<Variable LeftEditBound="-1.73205"  OpacityScale="1"  RightEditBound="1.73205"  VariableName="bx"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.73205"  OpacityScale="1"  RightEditBound="1.73205"  VariableName="by"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.1547"  OpacityScale="1"  RightEditBound="1.1547"  VariableName="bz"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.1547"  OpacityComposition="0"  RightBound="1.1547" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.41421"  OpacityScale="1"  RightEditBound="1.41421"  VariableName="vx"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.41421"  OpacityScale="1"  RightEditBound="1.41421"  VariableName="vy"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="0"  OpacityScale="1"  RightEditBound="1"  VariableName="vz"  VariableSelected="false" >
+<TransferFunction LeftBound="0"  OpacityComposition="0"  RightBound="0" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="0.01687"  OpacityScale="1"  RightEditBound="30"  VariableName="current"  VariableSelected="true" >
+<TransferFunction LeftBound="0.01687"  OpacityComposition="0"  RightBound="30" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<ProbeGeometry CursorCoords="0 0"  PhiAngle="0"  ProbeMax="0.62 0.75 0.66"  ProbeMin="0.42 0.55 0.66"  PsiAngle="0"  ThetaAngle="0" >
+</ProbeGeometry>
+</ProbePanelParameters>
+<ProbePanelParameters Alpha="0.12"  FieldScale="1"  FieldVariables="bx by bz "  HistoStretchFactor="1"  MergeColors="false"  NumTransforms="3"  NumVariables="7"  Planar="true"  ProbeType="0"  TFEditMode="true"  VisualizerNum="0" >
+<Variable LeftEditBound="-1.73205"  OpacityScale="1"  RightEditBound="1.73205"  VariableName="bx"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.73205"  OpacityScale="1"  RightEditBound="1.73205"  VariableName="by"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.73205"  OpacityComposition="0"  RightBound="1.73205" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.1547"  OpacityScale="1"  RightEditBound="1.1547"  VariableName="bz"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.1547"  OpacityComposition="0"  RightBound="1.1547" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.41421"  OpacityScale="1"  RightEditBound="1.41421"  VariableName="vx"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="-1.41421"  OpacityScale="1"  RightEditBound="1.41421"  VariableName="vy"  VariableSelected="false" >
+<TransferFunction LeftBound="-1.41421"  OpacityComposition="0"  RightBound="1.41421" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="0"  OpacityScale="1"  RightEditBound="1"  VariableName="vz"  VariableSelected="false" >
+<TransferFunction LeftBound="0"  OpacityComposition="0"  RightBound="0" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<Variable LeftEditBound="0.01687"  OpacityScale="1"  RightEditBound="30"  VariableName="current"  VariableSelected="true" >
+<TransferFunction LeftBound="0.01687"  OpacityComposition="0"  RightBound="30" >
+<OpacityMap Enabled="1"  Freq="5"  MaxValue="1"  Mean="0.5"  MinValue="0"  Phase="6.28319"  SSq="0.1"  Type="0" >
+<OpacityMapControlPoint Opacity="1"  Value="0" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.333" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="0.667" >
+</OpacityMapControlPoint>
+<OpacityMapControlPoint Opacity="1"  Value="1" >
+</OpacityMapControlPoint>
+</OpacityMap>
+<Colormap MaxValue="1"  MinValue="0" >
+<ColorMapControlPoint HSV="0 1 1"  Value="0" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.333 1 1"  Value="0.333" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.667 1 1"  Value="0.667" >
+</ColorMapControlPoint>
+<ColorMapControlPoint HSV="0.833 1 1"  Value="1" >
+</ColorMapControlPoint>
+</Colormap>
+</TransferFunction>
+</Variable>
+<ProbeGeometry CursorCoords="0 0"  PhiAngle="90"  ProbeMax="0.62 0.75 0.66"  ProbeMin="0.42 0.55 0.66"  PsiAngle="0"  ThetaAngle="0" >
+</ProbeGeometry>
+</ProbePanelParameters>
+<TwoDImagePanelParameters CropImage="false"  Georeferenced="true"  ImageFileName=""  ImagePlacement="0"  MapToTerrain="false"  NumTransforms="0"  OpacityMultiplier="1"  Orientation="2"  ResamplingRate="1"  VisualizerNum="0" >
+<TwoDGeometry CursorCoords="0 0"  TwoDMax="1 1 0.5"  TwoDMin="0 0 0.5" >
+</TwoDGeometry>
+</TwoDImagePanelParameters>
+<RegionPanelParameters FullGridHeight="0"  Local="false"  VisualizerNum="0" >
+<RegionMax Type="Double">
+  1 1 1 
+</RegionMax>
+<RegionMin Type="Double">
+  0 0 0 
+</RegionMin>
+</RegionPanelParameters>
+<AnimationPanelParameters CurrentFrame="1"  EndFrame="61"  FrameStepSize="1"  Local="false"  MaxFrameRate="10"  MaxWait="6000"  RepeatPlay="false"  StartFrame="1"  UseTimestepSampleList="false"  VisualizerNum="0" >
+</AnimationPanelParameters>
+<ViewpointPanelParameters AmbientCoefficient="0.1"  Local="false"  SpecularExponent="20"  StereoMode="center"  StereoSeparation="0"  UseLatLon="false"  VisualizerNum="0" >
+<Light DiffuseCoefficient="0.8"  LightDirection="0 0 1 "  LightNum="0"  SpecularCoefficient="0.3" >
+</Light>
+<Light DiffuseCoefficient="0.8"  LightDirection="0 1 0 "  LightNum="1"  SpecularCoefficient="0.3" >
+</Light>
+<CurrentViewpoint>
+<Viewpoint Perspective="true" >
+<CameraLatLon Type="Double">
+  0 0 
+</CameraLatLon>
+<CameraPosition Type="Double">
+  0.5 0.5 3 
+</CameraPosition>
+<RotCenterLatLon Type="Double">
+  0 0 
+</RotCenterLatLon>
+<RotationCenter Type="Double">
+  0.5 0.5 0.5 
+</RotationCenter>
+<UpVector Type="Double">
+  0 0 1 
+</UpVector>
+<ViewDirection Type="Double">
+  0 0 -1 
+</ViewDirection>
+</Viewpoint>
+</CurrentViewpoint>
+<HomeViewpoint>
+<Viewpoint Perspective="true" >
+<CameraLatLon Type="Double">
+  0 0 
+</CameraLatLon>
+<CameraPosition Type="Double">
+  0.5 0.5 3 
+</CameraPosition>
+<RotCenterLatLon Type="Double">
+  0 0 
+</RotCenterLatLon>
+<RotationCenter Type="Double">
+  0.5 0.5 0.5 
+</RotationCenter>
+<UpVector Type="Double">
+  0 0 1 
+</UpVector>
+<ViewDirection Type="Double">
+  0 0 -1 
+</ViewDirection>
+</Viewpoint>
+</HomeViewpoint>
+</ViewpointPanelParameters>
+</VizWindow>
+</Visualizers>
+</Session>
