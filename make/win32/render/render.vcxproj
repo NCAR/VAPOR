@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9FD418C0-1BFF-4BA3-B901-3AC872588F06}</ProjectGuid>
+    <RootNamespace>render</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\targets\win64\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\targets\win64\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(VAPORDEPS_INC_DIR)/freetype;$(VAPORDEPS_INC_DIR)/tiff;$(VAPORDEPS_INC_DIR);$(VAPORDEPS_INC_DIR)/jpeg;$(VAPORDEPS_INC_DIR)/geotiff;../../../include/;$(PYTHON64ROOT)/Lib/site-packages/numpy/core/include;$(PYTHON64ROOT)/include;../../../lib/vdf;../../../lib/params;../../../include/vaporinternal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FLOW;SPHERICAL_GRID;WIN32;DEBUG;_WINDOWS;_USRDLL;MODELS;_CRT_SECURE_NO_WARNINGS;RENDER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ObjectFileName>../../../targets/win64/built/render/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win64/built/render/vc70.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\..\..\targets\win64\bin\vdc.lib;..\..\..\targets\win64\bin\common.lib;..\..\..\targets\win64\bin\flow.lib;..\..\..\targets\win64\bin\params.lib;mpr.lib;opengl32.lib;glu32.lib;proj.lib;libtiff.lib;glew32.lib;libjpeg.lib;assimp.lib;ftgl.lib;geotiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(VAPOR_WIN64_DEBUG_LIB_PATH);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>MSVCRT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>../../../targets/win32/bin/render.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>../../../targets/win64/bin/render.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(VAPORDEPS_INC_DIR)/freetype;$(VAPORDEPS_INC_DIR)/tiff;$(VAPORDEPS_INC_DIR);$(VAPORDEPS_INC_DIR)/jpeg;$(VAPORDEPS_INC_DIR)/geotiff;../../../include/;$(QTDIR64)/include;$(PYTHON64ROOT)/Lib/site-packages/numpy/core/include;$(PYTHON64ROOT)/include;../../../lib/vdf;../../../lib/params;../../../include/vaporinternal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FLOW;SPHERICAL_GRID;WIN32;NDEBUG;_WINDOWS;_USRDLL;RENDER_EXPORTS;MODELS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ObjectFileName>../../../targets/win64/built/render/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win64/built/render/vc70.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\..\..\targets\win64\bin\vdc.lib;..\..\..\targets\win64\bin\common.lib;..\..\..\targets\win64\bin\flow.lib;..\..\..\targets\win64\bin\params.lib;mpr.lib;opengl32.lib;glu32.lib;proj.lib;libtiff.lib;glew32.lib;libjpeg.lib;assimp.lib;ftgl.lib;geotiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(VAPOR_WIN64_RELEASE_LIB_PATH);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrtd;msvcr71d;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>../../../targets/win64/bin/render.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\lib\render\arrowrenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\ControlExecutive.cpp" />
+    <ClCompile Include="..\..\..\lib\render\GeoImage.cpp" />
+    <ClCompile Include="..\..\..\lib\render\GeoImageGeoTiff.cpp" />
+    <ClCompile Include="..\..\..\lib\render\GeoImageTMS.cpp" />
+    <ClCompile Include="..\..\..\lib\render\GeoTile.cpp" />
+    <ClCompile Include="..\..\..\lib\render\GeoTileEquirectangular.cpp" />
+    <ClCompile Include="..\..\..\lib\render\GeoTileMercator.cpp" />
+    <ClCompile Include="..\..\..\lib\render\hellorenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\isolinerenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\jfilewrite.cpp" />
+    <ClCompile Include="..\..\..\lib\render\manip.cpp" />
+    <ClCompile Include="..\..\..\lib\render\preferenceNode.cpp" />
+    <ClCompile Include="..\..\..\lib\render\renderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\ShaderMgr.cpp" />
+    <ClCompile Include="..\..\..\lib\render\ShaderProgram.cpp" />
+    <ClCompile Include="..\..\..\lib\render\streamrenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\textRenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\trackball.cpp" />
+    <ClCompile Include="..\..\..\lib\render\TwoDDataRenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\TwoDImageRenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\TwoDRenderer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\visualizer.cpp" />
+    <ClCompile Include="..\..\..\lib\render\vizfeaturerenderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\vapor\arrowrenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\ControlExecutive.h" />
+    <ClInclude Include="..\..\..\include\vapor\GeoImage.h" />
+    <ClInclude Include="..\..\..\include\vapor\GeoImageGeoTiff.h" />
+    <ClInclude Include="..\..\..\include\vapor\GeoImageTMS.h" />
+    <ClInclude Include="..\..\..\include\vapor\GeoTile.h" />
+    <ClInclude Include="..\..\..\include\vapor\GeoTileEquirectangular.h" />
+    <ClInclude Include="..\..\..\include\vapor\GeoTileMercator.h" />
+    <ClInclude Include="..\..\..\include\vapor\hellorenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\isolinerenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\renderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\ShaderMgr.h" />
+    <ClInclude Include="..\..\..\include\vapor\ShaderProgram.h" />
+    <ClInclude Include="..\..\..\include\vapor\streamrenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\TwoDDataRenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\TwoDImageRenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\TwoDRenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\visualizer.h" />
+    <ClInclude Include="..\..\..\include\vapor\jpegapi.h" />
+    <ClInclude Include="..\..\..\include\vapor\vizfeaturerenderer.h" />
+    <ClInclude Include="..\..\..\lib\render\manip.h" />
+    <ClInclude Include="..\..\..\lib\render\preferenceNode.h" />
+    <ClInclude Include="..\..\..\lib\render\textRenderer.h" />
+    <ClInclude Include="..\..\..\lib\render\trackball.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.vcxproj">
+      <Project>{29c8ac86-3d4b-4081-9d20-0770b10c4d30}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
