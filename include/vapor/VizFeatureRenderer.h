@@ -51,8 +51,10 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     //! Render the overlay features
     void overlayPaint();
 
+#ifdef DEAD
     //! Clear all the text objects
     void invalidateCache();
+#endif
 
   protected:
   private:
