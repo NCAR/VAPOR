@@ -131,8 +131,16 @@ void HelloEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
-	_appearance->updateTab();
-	_geometry->updateTab();
+	_appearance->Update(
+		_controlExec->GetDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+	);
+	_geometry->Update(
+		_controlExec->GetDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+	);
 	
 }
 
@@ -228,8 +236,12 @@ selectColor(){
 	aParams->SetConstantColor(rgbf);
 
 }
-void HelloEventRouter::HelloLayoutGUI::_updateTab(){
-	HelloParams* hParams = (HelloParams*) GetActiveParams();
+void HelloEventRouter::HelloLayoutGUI::Update(
+	VAPoR::DataMgr *dataMgr,
+	VAPoR::ParamsMgr *paramsMgr,
+	VAPoR::RenderParams *rParams){
+
+	HelloParams* hParams = (HelloParams*)rParams;
 
 	//Apply the start and end point coordinates to the text boxes in the geometry sub-tab
 	//First obtain the point coordinates from the Params:
@@ -244,8 +256,13 @@ void HelloEventRouter::HelloLayoutGUI::_updateTab(){
 	yCoord2Edit->setText(QString::number(endPoint[1]));
 	zCoord2Edit->setText(QString::number(endPoint[2]));
 }
-void HelloEventRouter::HelloAppearanceGUI::_updateTab(){
-	HelloParams* hParams = (HelloParams*) GetActiveParams();
+
+void HelloEventRouter::HelloAppearanceGUI::Update(
+	VAPoR::DataMgr *dataMgr,
+	VAPoR::ParamsMgr *paramsMgr,
+	VAPoR::RenderParams *rParams){
+
+	HelloParams* hParams = (HelloParams*)rParams;
 
 	//Setup the constant color box.  Obtain the color from the params
 	float rgb[3];
