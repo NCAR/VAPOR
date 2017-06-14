@@ -272,7 +272,6 @@ void Renderer::buildLocal2DTransform(int dataOrientation, float a[2],float b[2],
 
 }
 
-#endif
 void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]){
 	//Determine the smallest axis-aligned cube that contains the rotated box local coordinates.  This is
 	//obtained by mapping all 8 corners into the space.
@@ -321,6 +320,7 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]){
 	}
 	return;
 }
+#endif
 
 int Renderer::makeColorbarTexture(){
 	if (_colorbarTexture) delete _colorbarTexture;

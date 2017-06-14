@@ -259,12 +259,12 @@ public:
 	void SetTimes(const vector<long>& times) { 
 		SetValueLongVec(Box::_timesTag, "Change box times",times);
 	}
-#endif
 
 	void buildLocalCoordTransform(
 		double transformMatrix[12], double extraThickness, 
 		int timestep, double rotation = 0., int axis= -1
 	) const;
+#endif
 
 	// Get static string identifier for this params class
 	//
