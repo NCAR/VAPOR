@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E8FB619B-48D3-4B7E-B3F0-88939299995A}</ProjectGuid>
+    <RootNamespace>params</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\targets\win64\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\targets\win64\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(VAPORDEPS_INC_DIR)/tiff;$(VAPORDEPS_INC_DIR);$(VAPORDEPS_INC_DIR)/jpeg;$(VAPORDEPS_INC_DIR)/geotiff;../../../include/;$(PYTHON64ROOT)/Lib/site-packages/numpy/core/include;$(PYTHON64ROOT)/include;../../../lib/vdc;../../../lib/params;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FLOW;SPHERICAL_GRID;WIN32;_WINDOWS;PARAMS_EXPORTS;_CRT_SECURE_NO_WARNINGS;MODELS;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ObjectFileName>../../../targets/win64/built/params/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win64/built/params/vc70.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\..\..\targets\win64\bin\vdc.lib;..\..\..\targets\win64\bin\common.lib;mpr.lib;opengl32.lib;libtiff.lib;geotiff.lib;glu32.lib;proj.lib;python27_d.lib;libjpeg.lib;libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(VAPOR_WIN64_DEBUG_LIB_PATH);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>MSVCRT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>../../../targets/win32/bin/params.pdb</ProgramDatabaseFile>
+      <SubSystem>NotSet</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>../../../targets/win64/bin/params.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(VAPORDEPS_INC_DIR)/tiff;$(VAPORDEPS_INC_DIR);$(VAPORDEPS_INC_DIR)/jpeg;$(VAPORDEPS_INC_DIR)/geotiff;../../../include/;$(PYTHON64ROOT)/Lib/site-packages/numpy/core/include;$(PYTHON64ROOT)/include;../../../lib/vdc;../../../lib/params;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FLOW;SPHERICAL_GRID;WIN32;NDEBUG;_WINDOWS;_USRDLL;PARAMS_EXPORTS;MODELS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ObjectFileName>../../../targets/win64/built/params/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win64/built/params/vc70.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\..\..\targets\win64\bin\vdc.lib;..\..\..\targets\win64\bin\common.lib;mpr.lib;opengl32.lib;libtiff.lib;geotiff.lib;glu32.lib;proj.lib;python27.lib;libjpeg.lib;libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(VAPOR_WIN64_RELEASE_LIB_PATH);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrtd;msvcr71d;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>../../../targets/win64/bin/params.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\lib\params\animationparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\appSettingsparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\arrowparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\Box.cpp" />
+    <ClCompile Include="..\..\..\lib\params\ColorbarPbase.cpp" />
+    <ClCompile Include="..\..\..\lib\params\Colormap.cpp" />
+    <ClCompile Include="..\..\..\lib\params\command.cpp" />
+    <ClCompile Include="..\..\..\lib\params\datastatus.cpp" />
+    <ClCompile Include="..\..\..\lib\params\ExpatParseMgr.cpp" />
+    <ClCompile Include="..\..\..\lib\params\helloparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\histo.cpp" />
+    <ClCompile Include="..\..\..\lib\params\instanceparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\isocontrol.cpp" />
+    <ClCompile Include="..\..\..\lib\params\isolineparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\MapperFunction.cpp" />
+    <ClCompile Include="..\..\..\lib\params\mousemodeparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\OpacityMap.cpp" />
+    <ClCompile Include="..\..\..\lib\params\ParamNode.cpp" />
+    <ClCompile Include="..\..\..\lib\params\params.cpp" />
+    <ClCompile Include="..\..\..\lib\params\ParamsBase.cpp" />
+    <ClCompile Include="..\..\..\lib\params\ParamsMgr.cpp" />
+    <ClCompile Include="..\..\..\lib\params\pathparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\regionparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\renderparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\startupparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\streamparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\tfinterpolator.cpp" />
+    <ClCompile Include="..\..\..\lib\params\transferfunction.cpp" />
+    <ClCompile Include="..\..\..\lib\params\TwoDDataParams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\TwoDImageParams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\viewpoint.cpp" />
+    <ClCompile Include="..\..\..\lib\params\viewpointparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\vizfeatureparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\vizwinparams.cpp" />
+    <ClCompile Include="..\..\..\lib\params\XmlNode.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\vapor\animationparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\appSettingsparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\arrowparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\Box.h" />
+    <ClInclude Include="..\..\..\include\vapor\ColorbarPbase.h" />
+    <ClInclude Include="..\..\..\include\vapor\Colormap.h" />
+    <ClInclude Include="..\..\..\include\vapor\command.h" />
+    <ClInclude Include="..\..\..\include\vapor\datastatus.h" />
+    <ClInclude Include="..\..\..\include\vapor\ExpatParseMgr.h" />
+    <ClInclude Include="..\..\..\include\vapor\ExtensionClasses.h" />
+    <ClInclude Include="..\..\..\include\vapor\helloparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\hellorenderer.h" />
+    <ClInclude Include="..\..\..\include\vapor\histo.h" />
+    <ClInclude Include="..\..\..\include\vapor\instanceparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\isocontrol.h" />
+    <ClInclude Include="..\..\..\include\vapor\isolineparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\MapperFunction.h" />
+    <ClInclude Include="..\..\..\include\vapor\mousemodeparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\OpacityMap.h" />
+    <ClInclude Include="..\..\..\include\vapor\params.h" />
+    <ClInclude Include="..\..\..\include\vapor\ParamsMgr.h" />
+    <ClInclude Include="..\..\..\include\vapor\pathparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\regionparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\renderparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\startupparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\streamparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\tfinterpolator.h" />
+    <ClInclude Include="..\..\..\include\vapor\transferfunction.h" />
+    <ClInclude Include="..\..\..\include\vapor\TwoDDataParams.h" />
+    <ClInclude Include="..\..\..\include\vapor\TwoDImageParams.h" />
+    <ClInclude Include="..\..\..\include\vapor\viewpoint.h" />
+    <ClInclude Include="..\..\..\include\vapor\viewpointparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\vizfeatureparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\vizwinparams.h" />
+    <ClInclude Include="..\..\..\include\vapor\XmlNode.h" />
+    <ClInclude Include="..\..\..\include\vapor\errorcodes.h" />
+    <ClInclude Include="..\..\..\include\vapor\ParamNode.h" />
+    <ClInclude Include="..\..\..\include\vapor\ParamsBase.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.vcxproj">
+      <Project>{29c8ac86-3d4b-4081-9d20-0770b10c4d30}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

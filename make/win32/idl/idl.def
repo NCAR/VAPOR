@@ -1,0 +1,3 @@
+LIBRARY			libidl_vdfmodule
+
+EXPORTS			IDL_Load		@1

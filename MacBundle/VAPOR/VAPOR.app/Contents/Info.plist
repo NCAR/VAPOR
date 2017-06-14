@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>vaporgui</string>
+	<key>CFBundleIconFile</key>
+	<string>VAPOR.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>edu.ncar.VAPOR3</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>VAPOR3</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>VERSION</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>VERSION</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+		<key>CFBundleTypeExtensions</key>
+		<array>
+			<string>vdf</string>
+			<string>vss</string>
+		</array>
+		<key>CFBundleTypeRole</key>
+		<string>None</string>
+		</dict>
+	</array>
+</dict>
+</plist>
