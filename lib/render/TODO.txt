@@ -1,0 +1,10 @@
+TwoDDataRender
+--------------
+
++ add support for lighting, currently hard-coded to disabled
+
+
+ControlExec
+-----------
+
+GetDataMgr() should return const 

@@ -1,0 +1,640 @@
+//-- VizFeatureRenderer.cpp ----------------------------------------------------------
+//
+//                   Copyright (C)  2015
+//     University Corporation for Atmospheric Research
+//                   All Rights Reserved
+//
+//----------------------------------------------------------------------------
+//
+//      File:           VizFeatureRenderer.cpp
+//
+//      Author:         Alan Norton
+//
+//      Description:  Implementation of VizFeatureRenderer class
+//
+//----------------------------------------------------------------------------
+
+#include <vapor/glutil.h>    // Must be included first!!!
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cfloat>
+
+#ifndef WIN32
+    #include <unistd.h>
+#endif
+
+#include <vapor/VizFeatureRenderer.h>
+
+using namespace VAPoR;
+using namespace Wasp;
+
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
+VizFeatureRenderer::VizFeatureRenderer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName)
+{
+    m_paramsMgr = pm;
+    m_dataStatus = dataStatus;
+    m_winName = winName;
+    m_shaderMgr = NULL;
+
+    _textObjectsValid = false;
+}
+
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
+VizFeatureRenderer::~VizFeatureRenderer()
+{
+    if (_textObjectsValid) invalidateCache();
+}
+
+void VizFeatureRenderer::InitializeGL(ShaderMgr *shaderMgr) { m_shaderMgr = shaderMgr; }
+
+// Issue OpenGL commands to draw a grid of lines of the full domain.
+// Grid resolution is up to 2x2x2
+//
+void VizFeatureRenderer::drawDomainFrame()
+{
+    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+
+    // Draw the domain frame
+
+    vector<double> minExt, maxExt;
+    m_dataStatus->GetExtents(minExt, maxExt);
+#ifdef DEAD
+    vector<double> stretchFac = vfParams->GetStretchFactors();
+
+#endif
+
+    int    i;
+    int    numLines[3];
+    double fullSize[3], modMin[3], modMax[3];
+
+    // Instead:  either have 2 or 1 lines in each dimension.  2 if the size is < 1/3
+    for (i = 0; i < 3; i++) {
+        double regionSize = maxExt[i] - minExt[i];
+
+        // Stretch size by 1%
+        fullSize[i] = (maxExt[i] - minExt[i]) * 1.01;
+        double mid = 0.5f * (maxExt[i] + minExt[i]);
+        modMin[i] = mid - 0.5f * fullSize[i];
+        modMax[i] = mid + 0.5f * fullSize[i];
+        if (regionSize < fullSize[i] * .3)
+            numLines[i] = 2;
+        else
+            numLines[i] = 1;
+    }
+
+    glPushAttrib(GL_CURRENT_BIT);
+    double clr[3];
+    vfParams->GetDomainColor(clr);
+    glColor3dv(clr);
+    glLineWidth(2.0);
+    // Now draw the lines.  Divide each dimension into numLines[dim] sections.
+
+    int x, y, z;
+    // Do the lines in each z-plane
+    // Turn on writing to the z-buffer
+    glDepthMask(GL_TRUE);
+
+    glBegin(GL_LINES);
+    for (z = 0; z <= numLines[2]; z++) {
+        float zCrd = modMin[2] + ((float)z / (float)numLines[2]) * fullSize[2];
+        // Draw lines in x-direction for each y
+        for (y = 0; y <= numLines[1]; y++) {
+            float yCrd = modMin[1] + ((float)y / (float)numLines[1]) * fullSize[1];
+
+            glVertex3f(modMin[0], yCrd, zCrd);
+            glVertex3f(modMax[0], yCrd, zCrd);
+        }
+        // Draw lines in y-direction for each x
+        for (x = 0; x <= numLines[0]; x++) {
+            float xCrd = modMin[0] + ((float)x / (float)numLines[0]) * fullSize[0];
+
+            glVertex3f(xCrd, modMin[1], zCrd);
+            glVertex3f(xCrd, modMax[1], zCrd);
+        }
+    }
+    // Do the lines in each y-plane
+
+    for (y = 0; y <= numLines[1]; y++) {
+        float yCrd = modMin[1] + ((float)y / (float)numLines[1]) * fullSize[1];
+        // Draw lines in x direction for each z
+        for (z = 0; z <= numLines[2]; z++) {
+            float zCrd = modMin[2] + ((float)z / (float)numLines[2]) * fullSize[2];
+
+            glVertex3f(modMin[0], yCrd, zCrd);
+            glVertex3f(modMax[0], yCrd, zCrd);
+        }
+        // Draw lines in z direction for each x
+        for (x = 0; x <= numLines[0]; x++) {
+            float xCrd = modMin[0] + ((float)x / (float)numLines[0]) * fullSize[0];
+
+            glVertex3f(xCrd, yCrd, modMin[2]);
+            glVertex3f(xCrd, yCrd, modMax[2]);
+        }
+    }
+
+    // Do the lines in each x-plane
+    for (x = 0; x <= numLines[0]; x++) {
+        float xCrd = modMin[0] + ((float)x / (float)numLines[0]) * fullSize[0];
+        // Draw lines in y direction for each z
+        for (z = 0; z <= numLines[2]; z++) {
+            float zCrd = modMin[2] + ((float)z / (float)numLines[2]) * fullSize[2];
+
+            glVertex3f(xCrd, modMin[1], zCrd);
+            glVertex3f(xCrd, modMax[1], zCrd);
+        }
+        // Draw lines in z direction for each y
+        for (y = 0; y <= numLines[1]; y++) {
+            float yCrd = modMin[1] + ((float)y / (float)numLines[1]) * fullSize[1];
+
+            glVertex3f(xCrd, yCrd, modMin[2]);
+            glVertex3f(xCrd, yCrd, modMax[2]);
+        }
+    }
+
+    glEnd();    // GL_LINES
+    glPopAttrib();
+}
+
+#ifdef DEAD
+
+void VizFeatureRenderer::drawRegionBounds()
+{
+    int           timeStep = _visualizer->getActiveAnimationParams()->GetCurrentTimestep();
+    RegionParams *rParams = _visualizer->getActiveRegionParams();
+    double        extents[6];
+    rParams->GetBox()->GetLocalExtents(extents, timeStep);
+    _dataStatus->stretchCoords(extents);
+    _dataStatus->stretchCoords(extents + 3);
+
+    glPushAttrib(GL_CURRENT_BIT);
+    glLineWidth(2.0);
+    double clr[3];
+    ((VizFeatureParams *)_params)->GetRegionColor(clr);
+    glColor3dv(clr);
+    glEnable(GL_LINE_SMOOTH);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(extents[0], extents[1], extents[2]);
+    glVertex3f(extents[0], extents[1], extents[5]);
+    glVertex3f(extents[0], extents[4], extents[5]);
+    glVertex3f(extents[0], extents[4], extents[2]);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(extents[3], extents[1], extents[2]);
+    glVertex3f(extents[3], extents[1], extents[5]);
+    glVertex3f(extents[3], extents[4], extents[5]);
+    glVertex3f(extents[3], extents[4], extents[2]);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(extents[0], extents[4], extents[2]);
+    glVertex3f(extents[3], extents[4], extents[2]);
+    glVertex3f(extents[3], extents[4], extents[5]);
+    glVertex3f(extents[0], extents[4], extents[5]);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(extents[0], extents[1], extents[2]);
+    glVertex3f(extents[3], extents[1], extents[2]);
+    glVertex3f(extents[3], extents[1], extents[5]);
+    glVertex3f(extents[0], extents[1], extents[5]);
+    glEnd();
+    glDisable(GL_LINE_SMOOTH);
+    glPopAttrib();
+}
+
+#endif
+
+void VizFeatureRenderer::inScenePaint()
+{
+    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+
+    // Push or reset state
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+#ifdef DEAD
+    if (vfParams->GetUseRegionFrame()) drawRegionBounds();
+#endif
+
+    if (vfParams->GetUseDomainFrame()) drawDomainFrame();
+
+#ifdef DEAD
+    if (vfParams->ShowAxisArrows()) {
+        RegionParams *rParams = GetVisualizer()->getActiveRegionParams();
+        size_t        timestep = (size_t)GetVisualizer()->getActiveAnimationParams()->GetCurrentTimestep();
+        float         extents[6];
+        rParams->GetBox()->GetLocalExtents(extents, timestep);
+        drawAxisArrows(extents);
+    }
+
+    if (vfParams->GetAxisAnnotation()) { drawAxisTics(timestep); }
+#endif
+
+    glPopAttrib();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+    printOpenGLErrorMsg(m_winName.c_str());
+}
+
+#ifdef DEAD
+
+void VizFeatureRenderer::overlayPaint() {}
+
+void VizFeatureRenderer::drawAxisTics(size_t timestep)
+{
+    // Preserve the current GL color state
+    glPushAttrib(GL_CURRENT_BIT);
+
+    // Modify minTic, maxTic, ticLength, axisOriginCoord to user coords
+    // if using latLon, convert annotation axes to user coords
+    VizFeatureParams *vfParams = (VizFeatureParams *)_params;
+    vector<double>    axisOriginCoord = vfParams->GetAxisOrigin();
+    vector<double>    minTic = vfParams->GetMinTics();
+    vector<double>    maxTic = vfParams->GetMaxTics();
+    vector<double>    ticLength = vfParams->GetTicSize();
+    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<long>      numTics = vfParams->GetNumTics();
+    double            ticWidth = vfParams->GetTicWidth();
+    double            minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
+
+    double axisColor[3];
+    vfParams->GetAxisColor(axisColor);
+
+    if (((VizFeatureParams *)_params)->GetLatLonAxes()) {
+        ConvertAxes(false, ticDir, minTic, maxTic, axisOriginCoord, ticLength, minTicA, maxTicA, axisOriginCoordA, ticLengthA);
+    } else {
+        for (int i = 0; i < 3; i++) {    // copy values to (un-)modified _A variables
+            minTicA[i] = minTic[i];
+            maxTicA[i] = maxTic[i];
+            ticLengthA[i] = ticLength[i];
+            axisOriginCoordA[i] = axisOriginCoord[i];
+        }
+    }
+
+    vector<double> sorigin, sticMin, sticMax, sticLen;
+    vector<double> lorigin, lticMin, lticMax;
+    // Need both stretched and unstretched coordinates
+    for (int i = 0; i < 3; i++) {
+        sorigin.push_back(axisOriginCoordA[i]);
+        sticMin.push_back(minTicA[i]);
+        sticMax.push_back(maxTicA[i]);
+    }
+    _dataStatus->stretchCoords(sorigin);
+    // minTic and maxTic can be regarded as points in world space, defining
+    // corners of a box that's projected to axes.
+    _dataStatus->stretchCoords(sticMin);
+    _dataStatus->stretchCoords(sticMax);
+    // TicLength needs to be stretched based on which axes are used for tic direction
+    vector<double> stretch = _dataStatus->getStretchFactors();
+
+    for (int i = 0; i < 3; i++) {
+        int j = ticDir[i];
+        sticLen.push_back(ticLengthA[i] * stretch[j]);
+    }
+
+    glDisable(GL_LIGHTING);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glColor3d(axisColor[0], axisColor[1], axisColor[2]);
+    glLineWidth(ticWidth);
+    // Draw lines on x-axis:
+    glEnable(GL_LINE_SMOOTH);
+    glBegin(GL_LINES);
+    glVertex3d(sticMin[0], sorigin[1], sorigin[2]);
+    glVertex3d(sticMax[0], sorigin[1], sorigin[2]);
+    glVertex3d(sorigin[0], sticMin[1], sorigin[2]);
+    glVertex3d(sorigin[0], sticMax[1], sorigin[2]);
+    glVertex3d(sorigin[0], sorigin[1], sticMin[2]);
+    glVertex3d(sorigin[0], sorigin[1], sticMax[2]);
+    double pointOnAxis[3];
+    double ticVec[3], drawPosn[3];
+    // Now draw tic marks for x:
+    if (numTics[0] > 1 && ticLength[0] > 0.f) {
+        pointOnAxis[1] = sorigin[1];
+        pointOnAxis[2] = sorigin[2];
+        ticVec[0] = 0.f;
+        ticVec[1] = 0.f;
+        ticVec[2] = 0.f;
+        if (ticDir[0] == 1)
+            ticVec[1] = sticLen[0];
+        else
+            ticVec[2] = sticLen[0];
+        for (int i = 0; i < numTics[0]; i++) {
+            pointOnAxis[0] = sticMin[0] + (float)i * (sticMax[0] - sticMin[0]) / (float)(numTics[0] - 1);
+            vsub(pointOnAxis, ticVec, drawPosn);
+            glVertex3dv(drawPosn);
+            vadd(pointOnAxis, ticVec, drawPosn);
+            glVertex3dv(drawPosn);
+        }
+    }
+    // Now draw tic marks for y:
+    if (numTics[1] > 1 && sticLen[1] > 0.f) {
+        pointOnAxis[0] = sorigin[0];
+        pointOnAxis[2] = sorigin[2];
+        ticVec[0] = 0.f;
+        ticVec[1] = 0.f;
+        ticVec[2] = 0.f;
+        if (ticDir[1] == 0)
+            ticVec[0] = sticLen[1];
+        else
+            ticVec[2] = sticLen[1];
+        for (int i = 0; i < numTics[1]; i++) {
+            pointOnAxis[1] = sticMin[1] + (float)i * (sticMax[1] - sticMin[1]) / (float)(numTics[1] - 1);
+            vsub(pointOnAxis, ticVec, drawPosn);
+            glVertex3dv(drawPosn);
+            vadd(pointOnAxis, ticVec, drawPosn);
+            glVertex3dv(drawPosn);
+        }
+    }
+    // Now draw tic marks for z:
+    if (numTics[2] > 1 && sticLen[2] > 0.f) {
+        pointOnAxis[0] = sorigin[0];
+        pointOnAxis[1] = sorigin[1];
+        ticVec[0] = 0.f;
+        ticVec[1] = 0.f;
+        ticVec[2] = 0.f;
+        if (ticDir[2] == 0)
+            ticVec[0] = sticLen[2];
+        else
+            ticVec[1] = sticLen[2];
+        for (int i = 0; i < numTics[2]; i++) {
+            pointOnAxis[2] = sticMin[2] + (float)i * (sticMax[2] - sticMin[2]) / (float)(numTics[2] - 1);
+            vsub(pointOnAxis, ticVec, drawPosn);
+            glVertex3dv(drawPosn);
+            vadd(pointOnAxis, ticVec, drawPosn);
+            glVertex3dv(drawPosn);
+        }
+    }
+    glEnd();
+    glDisable(GL_LINE_SMOOTH);
+    glPopAttrib();
+
+    int textSize = vfParams->GetAxisTextHeight();
+
+    if (textSize > 0 && !_textObjectsValid) {
+        TextObject::clearTextObjects(this);
+        // prepare to render text.
+        // TextObject coordinates are not stretched.
+        float  bgc[4] = {0, 0, 0, 1.};
+        double clr[3];
+        vfParams->GetBackgroundColor(clr);
+        for (int i = 0; i < 3; i++) bgc[i] = (float)clr[i];
+        vector<string> fontpath;
+        fontpath.push_back("fonts");
+        fontpath.push_back("Vera.ttf");
+        int   digits = vfParams->GetAxisDigits();
+        float textColor[4];
+        for (int i = 0; i < 3; i++) textColor[i] = (float)axisColor[i];
+        textColor[3] = 1.f;
+        string labelText;
+        // Now draw text x:
+        if (numTics[0] > 1 && ticLengthA[0] > 0.f) {
+            pointOnAxis[1] = axisOriginCoordA[1];
+            pointOnAxis[2] = axisOriginCoordA[2];
+            for (int i = 0; i < numTics[0]; i++) {
+                pointOnAxis[0] = minTicA[0] + (float)i * (maxTicA[0] - minTicA[0]) / (float)(numTics[0] - 1);
+                doubleToString(pointOnAxis[0], labelText, digits);
+                int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR", "share", fontpath).c_str(), textSize, textColor, bgc, 1, labelText);
+                TextObject::addText(this, objNum, pointOnAxis);
+            }
+        }
+        // Now draw tic marks for y:
+        if (numTics[1] > 1 && ticLengthA[1] > 0.f) {
+            pointOnAxis[0] = axisOriginCoordA[0];
+            pointOnAxis[2] = axisOriginCoordA[2];
+
+            for (int i = 0; i < numTics[1]; i++) {
+                pointOnAxis[1] = minTicA[1] + (float)i * (maxTicA[1] - minTicA[1]) / (float)(numTics[1] - 1);
+                doubleToString(pointOnAxis[1], labelText, digits);
+                int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR", "share", fontpath).c_str(), textSize, textColor, bgc, 1, labelText);
+                TextObject::addText(this, objNum, pointOnAxis);
+            }
+        }
+        // Now draw tic marks for z:
+        if (numTics[2] > 1 && ticLengthA[2] > 0.f) {
+            pointOnAxis[0] = axisOriginCoordA[0];
+            pointOnAxis[1] = axisOriginCoordA[1];
+            for (int i = 0; i < numTics[2]; i++) {
+                pointOnAxis[2] = minTicA[2] + (float)i * (maxTicA[2] - minTicA[2]) / (float)(numTics[2] - 1);
+                doubleToString(pointOnAxis[2], labelText, digits);
+                int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR", "share", fontpath).c_str(), textSize, textColor, bgc, 1, labelText);
+                TextObject::addText(this, objNum, pointOnAxis);
+            }
+        }
+        _textObjectsValid = true;
+    }
+}
+
+void VizFeatureRenderer::flatConvertFromLonLat(double x[2], double minLon, double maxLon, double minX, double maxX)
+{
+    if (x[1] > 90.) x[1] = 90.;
+    if (x[1] < -90.) x[1] = -90.;
+    // Extend the conversion linearly if the point is outside the lon extents.
+
+    if (x[0] < minLon) {
+        x[0] = 2. * minLon - x[0];
+        _dataStatus->convertFromLonLat(x);
+        x[0] = 2. * minX - x[0];
+    } else if (x[0] > maxLon) {
+        x[0] = 2. * maxLon - x[0];
+        _dataStatus->convertFromLonLat(x);
+        x[0] = 2. * maxX - x[0];
+    } else {
+        _dataStatus->convertFromLonLat(x);
+    }
+}
+void VizFeatureRenderer::ConvertAxes(bool toLatLon, const vector<long> ticDirs, const vector<double> fromMinTic, const vector<double> fromMaxTic, const vector<double> fromOrigin,
+                                     const vector<double> fromTicLength, double toMinTic[3], double toMaxTic[3], double toOrigin[3], double toTicLength[3])
+{
+    double ticLengthFactor[3], xmin[2], ymin[2], xmax[2], ymax[2];
+    // Copy the z coordinates.
+    toMinTic[2] = fromMinTic[2];
+    toMaxTic[2] = fromMaxTic[2];
+    toTicLength[2] = fromTicLength[2];
+    // Put inputs into xmin, xmax, ymin, ymax
+    xmin[0] = fromMinTic[0];
+    xmin[1] = fromOrigin[1];
+    xmax[0] = fromMaxTic[0];
+    xmax[1] = fromOrigin[1];
+    ymin[1] = fromMinTic[1];
+    ymin[0] = fromOrigin[0];
+    ymax[1] = fromMaxTic[1];
+    ymax[0] = fromOrigin[0];
+    for (int j = 0; j < 3; j++) {
+        toOrigin[j] = fromOrigin[j];    // copy the origin coords
+        // Determine ticLength as a fraction of maxTic-minTic along the direction in which the tic is pointed
+        // Ignore tics that point in the z direction
+        if (ticDirs[j] == 2) continue;
+        double den = (fromMaxTic[ticDirs[j]] - fromMinTic[ticDirs[j]]);
+        if (den > 0.)
+            ticLengthFactor[j] = fromTicLength[j] / den;
+        else
+            ticLengthFactor[j] = 1.;
+    }
+    if (toLatLon) {
+        // convert user coords  at axis annotation ends to lat lon
+
+        _dataStatus->convertToLonLat(xmin);
+        _dataStatus->convertToLonLat(ymin);
+        _dataStatus->convertToLonLat(xmax);
+
+        _dataStatus->convertToLonLat(ymax);
+        _dataStatus->convertToLonLat(toOrigin);
+        if (xmax[0] < xmin[0]) xmax[0] += 360.;
+        if (xmax[0] > 361.) {
+            xmax[0] -= 360.;
+            xmin[0] -= 360.;
+            toOrigin[0] -= 360.;
+        }
+        if (xmin[0] <= -360.) {
+            xmax[0] += 360.;
+            xmin[0] += 360.;
+            toOrigin[0] += 360.;
+        }
+
+    } else {
+        // Convert lat/lon to user
+        // First find lat/lon of min/max extents:
+        const double *exts = _dataStatus->getStretchedLocalExtents();
+        double        cvExts[4];
+        cvExts[0] = exts[0];
+        cvExts[1] = exts[1];
+        cvExts[2] = exts[3];
+        cvExts[3] = exts[4];
+        _dataStatus->convertToLonLat(cvExts, 2);
+        if (cvExts[2] <= cvExts[0]) cvExts[2] = cvExts[2] + 360.;
+        if (cvExts[2] > 360.) {
+            cvExts[2] -= 360.;
+            cvExts[0] -= 360.;
+        }
+        // convert user coords at axis annotation ends from lat/lon to user
+
+        flatConvertFromLonLat(xmin, cvExts[0], cvExts[2], exts[0], exts[3]);
+        flatConvertFromLonLat(xmax, cvExts[0], cvExts[2], exts[0], exts[3]);
+        flatConvertFromLonLat(ymin, cvExts[0], cvExts[2], exts[0], exts[3]);
+        flatConvertFromLonLat(ymax, cvExts[0], cvExts[2], exts[0], exts[3]);
+        flatConvertFromLonLat(toOrigin, cvExts[0], cvExts[2], exts[0], exts[3]);
+    }
+    // Set min/max tic from xmin,xmax,ymin,ymax
+    // Only set min and max on each axis.
+    toMinTic[0] = xmin[0];
+    toMaxTic[0] = xmax[0];
+    toMinTic[1] = ymin[1];
+    toMaxTic[1] = ymax[1];
+    // Adjust ticLength to be in user coords
+    for (int j = 0; j < 3; j++) {
+        if (ticDirs[j] == 2) continue;
+        double dst = (toMaxTic[ticDirs[j]] - toMinTic[ticDirs[j]]);
+        toTicLength[j] = dst * ticLengthFactor[j];
+    }
+}
+
+void VizFeatureRenderer::drawAxisArrows(float *extents)
+{
+    // Preserve the current GL color state
+    glPushAttrib(GL_CURRENT_BIT);
+
+    float          origin[3];
+    float          maxLen = -1.f;
+    vector<double> stretch = _dataStatus->getStretchFactors();
+    vector<double> strExts;
+    for (int i = 0; i < 6; i++) strExts.push_back(stretch[i % 3] * extents[i]);
+    vector<double> axisArrowCoords = ((VizFeatureParams *)_params)->GetAxisArrowCoords();
+    for (int i = 0; i < 3; i++) {
+        origin[i] = strExts[i] + (axisArrowCoords[i]) * (strExts[i + 3] - strExts[i]);
+        if (extents[i + 3] - extents[i] > maxLen) { maxLen = strExts[i + 3] - strExts[i]; }
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    float len = maxLen * 0.2f;
+    glColor3f(1.f, 0.f, 0.f);
+    glLineWidth(4.0);
+    glEnable(GL_LINE_SMOOTH);
+    glBegin(GL_LINES);
+    glVertex3fv(origin);
+    glVertex3f(origin[0] + len, origin[1], origin[2]);
+
+    glEnd();
+    glBegin(GL_TRIANGLES);
+    glVertex3f(origin[0] + len, origin[1], origin[2]);
+    glVertex3f(origin[0] + .8 * len, origin[1] + .1 * len, origin[2]);
+    glVertex3f(origin[0] + .8 * len, origin[1], origin[2] + .1 * len);
+
+    glVertex3f(origin[0] + len, origin[1], origin[2]);
+    glVertex3f(origin[0] + .8 * len, origin[1], origin[2] + .1 * len);
+    glVertex3f(origin[0] + .8 * len, origin[1] - .1 * len, origin[2]);
+
+    glVertex3f(origin[0] + len, origin[1], origin[2]);
+    glVertex3f(origin[0] + .8 * len, origin[1] - .1 * len, origin[2]);
+    glVertex3f(origin[0] + .8 * len, origin[1], origin[2] - .1 * len);
+
+    glVertex3f(origin[0] + len, origin[1], origin[2]);
+    glVertex3f(origin[0] + .8 * len, origin[1], origin[2] - .1 * len);
+    glVertex3f(origin[0] + .8 * len, origin[1] + .1 * len, origin[2]);
+    glEnd();
+
+    glColor3f(0.f, 1.f, 0.f);
+    glBegin(GL_LINES);
+    glVertex3fv(origin);
+    glVertex3f(origin[0], origin[1] + len, origin[2]);
+    glEnd();
+    glBegin(GL_TRIANGLES);
+    glVertex3f(origin[0], origin[1] + len, origin[2]);
+    glVertex3f(origin[0] + .1 * len, origin[1] + .8 * len, origin[2]);
+    glVertex3f(origin[0], origin[1] + .8 * len, origin[2] + .1 * len);
+
+    glVertex3f(origin[0], origin[1] + len, origin[2]);
+    glVertex3f(origin[0], origin[1] + .8 * len, origin[2] + .1 * len);
+    glVertex3f(origin[0] - .1 * len, origin[1] + .8 * len, origin[2]);
+
+    glVertex3f(origin[0], origin[1] + len, origin[2]);
+    glVertex3f(origin[0] - .1 * len, origin[1] + .8 * len, origin[2]);
+    glVertex3f(origin[0], origin[1] + .8 * len, origin[2] - .1 * len);
+
+    glVertex3f(origin[0], origin[1] + len, origin[2]);
+    glVertex3f(origin[0], origin[1] + .8 * len, origin[2] - .1 * len);
+    glVertex3f(origin[0] + .1 * len, origin[1] + .8 * len, origin[2]);
+    glEnd();
+    glColor3f(0.f, 0.3f, 1.f);
+    glBegin(GL_LINES);
+    glVertex3fv(origin);
+    glVertex3f(origin[0], origin[1], origin[2] + len);
+    glEnd();
+    glBegin(GL_TRIANGLES);
+    glVertex3f(origin[0], origin[1], origin[2] + len);
+    glVertex3f(origin[0] + .1 * len, origin[1], origin[2] + .8 * len);
+    glVertex3f(origin[0], origin[1] + .1 * len, origin[2] + .8 * len);
+
+    glVertex3f(origin[0], origin[1], origin[2] + len);
+    glVertex3f(origin[0], origin[1] + .1 * len, origin[2] + .8 * len);
+    glVertex3f(origin[0] - .1 * len, origin[1], origin[2] + .8 * len);
+
+    glVertex3f(origin[0], origin[1], origin[2] + len);
+    glVertex3f(origin[0] - .1 * len, origin[1], origin[2] + .8 * len);
+    glVertex3f(origin[0], origin[1] - .1 * len, origin[2] + .8 * len);
+
+    glVertex3f(origin[0], origin[1], origin[2] + len);
+    glVertex3f(origin[0], origin[1] - .1 * len, origin[2] + .8 * len);
+    glVertex3f(origin[0] + .1 * len, origin[1], origin[2] + .8 * len);
+    glEnd();
+
+    glDisable(GL_LINE_SMOOTH);
+    // Revert to previous GL color state
+    glPopAttrib();
+}
+//! Invalidate all the text caches at all time steps
+void VizFeatureRenderer::invalidateCache()
+{
+    TextObject::clearTextObjects(this);
+    _textObjectsValid = false;
+}
+
+#endif

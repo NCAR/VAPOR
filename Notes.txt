@@ -1,0 +1,42 @@
+On supporting multiple datamgrs.
+-------------------------------
+
++ datastatus could hold multiple data mgrs. methods like GetExtents() would
+operate on all DMs
+
++ Indivisual renderers would have a DM parameter, not a DataStatus
+
++ Visualizers would have a DS pointer
+
+
+On Undo/Redo and session restarts
+---------------------------------
+
+ParamsBase has two constructors: one to start from scratch, one to 
+construct from an exising XML database. Supporting general undo/redo (such 
+as restoring deletion of a renderer or visualizer, or undoing their
+creation) probably most easy to do by a complete reconstruction
+of *everything*. I.e. treat undo/redo like loading a new session.
+Possible to be smarter about this if the determination
+of where in the params database changes were made.
+
+
+
+	
+MouseModeParams
+--------------
+
++ Hardcodes mouse navigation mode type (mouseModeType) for each rendener. Hence, adding a new renderer requires editing MouseModeParams class.
+
+Misc
+----
+
++ Need to disable 2D only renderers if no 2D data are present, and
+3d only renderers if no 3D. Otherwise crash.
+
++ ViewPointEventRouter and VizWinMgr both handle viewpoint change events (former supports "View" tab, latter supports main menu bar. Former is an event
+router, latter is not. Both modifiy ViewPointParams. Should VizWinMgr be
+made an event router, or possible migrate VizWinMgr "view" functions 
+to viewpointeventrouter
+
++ paint events get generated every time mouse moves anywhere in GUI

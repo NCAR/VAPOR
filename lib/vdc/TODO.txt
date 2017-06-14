@@ -1,0 +1,14 @@
+DataMgr:
+	Make Get* methods const by making cache supporting elements mutable
+
+NetCDFCollection:
+	Remove deprecated staggered grid handling
+	Add support for reading subsets of derived variables
+
+VDC:
+	File format should store the actual data range of each variable
+	and DataMgr::GetDataRange should be changed to use this. Otherwise
+	statistics used for, e.g. histograms, will be wrong
+
+CurvlinearGrid:
+	Broken with POP data in /glade/p/DASG/VAPOR/Data/POP/BryanASP/tenth_degree/daily

@@ -1,0 +1,469 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4E78CEB5-55C5-4BE2-A59F-B382B37F2182}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>gribapi</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>grib_api</TargetName>
+    <OutDir>..\..\..\targets\win32\bin\</OutDir>
+    <IntDir>..\..\..\targets\win32\built\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>grib_api</TargetName>
+    <OutDir>..\..\..\targets\win64\bin\</OutDir>
+    <IntDir>..\..\..\targets\win64\built\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>grib_api</TargetName>
+    <OutDir>..\..\..\targets\win32\bin\</OutDir>
+    <IntDir>..\..\..\targets\win32\built\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>grib_api</TargetName>
+    <OutDir>..\..\..\targets\win64\bin\</OutDir>
+    <IntDir>..\..\..\targets\win64\built\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRIBAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../include;</AdditionalIncludeDirectories>
+      <ObjectFileName>../../../targets/win32/built/gribapi/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win32/built/gribapi/vc70.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>../../../targets/win64/bin/grib_api.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRIBAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../include;</AdditionalIncludeDirectories>
+      <ObjectFileName>../../../targets/win64/built/gribapi/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win64/built/gribapi/vc70.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>../../../targets/win64/bin/grib_api.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRIBAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../include;</AdditionalIncludeDirectories>
+      <ObjectFileName>../../../targets/win32/built/gribapi/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win32/built/gribapi/vc70.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ImportLibrary>../../../targets/win32/bin/grib_api.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRIBAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../include;</AdditionalIncludeDirectories>
+      <ObjectFileName>../../../targets/win64/built/gribapi/</ObjectFileName>
+      <ProgramDataBaseFileName>../../../targets/win64/built/gribapi/vc70.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ImportLibrary>../../../targets/win64/bin/grib_api.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\lib\gribapi\config.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\dirent.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_accessor_class.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_accessor_factory.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_api.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_api_internal.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_api_prototypes.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_box_class.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_box_factory.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_dumper_class.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_dumper_factory.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_emoslib.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_expression.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_iterator_class.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_iterator_factory.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_nearest_class.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_nearest_factory.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_templates.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\grib_yacc.h" />
+    <ClInclude Include="..\..\..\lib\gribapi\md5.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\lib\gribapi\action.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_alias.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_assert.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_concept.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_gen.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_if.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_list.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_meta.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_modify.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_noop.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_print.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_put.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_remove.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_section.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_set.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_set_darray.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_set_iarray.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_set_missing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_switch.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_template.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_trigger.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_variable.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_when.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_while.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\action_class_write.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\compile.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\functions.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_2order_packer_simple.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_abstract_long_vector.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_abstract_vector.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_array.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_ascii.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_assert.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_bit.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_bits.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_bits_per_value.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_box.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_budgdate.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_bytes.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_change_scanning_direction.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_codeflag.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_codetable.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_codetable_title.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_codetable_units.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_concept.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_constant.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_count_file.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_count_missing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_count_total.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_2order_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_2order_packing_count.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_apply_bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_apply_boustrophedonic.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_apply_gdsnotpresent.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_complex_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_constant_field.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_dummy_field.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1complex_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1secondary_bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1second_order_constant_width_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1second_order_general_extended_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1second_order_general_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1second_order_row_by_row_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1shsimple_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g1simple_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g22order_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g2complex_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g2secondary_bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g2shsimple_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g2simple_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_g2simple_packing_with_preprocessing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_jpeg2000_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_png_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_raw_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_secondary_bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_shsimple_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_sh_packed.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_sh_unpacked.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_simple_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_data_szip_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_decimal_precision.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_dirty.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_divdouble.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_double.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_element.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_evaluate.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_forward.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_from_scale_factor_scaled_value.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1area.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1date.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1day_of_the_year_date.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1end_of_interval_monthly.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1fcperiod.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1forecastmonth.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1monthlydate.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1number_of_coded_values_sh_complex.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1number_of_coded_values_sh_simple.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1p1p2.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1param.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1step_range.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1verificationdate.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1_half_byte_codeflag.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1_increment.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1_message_length.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g1_section4_length.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2bitmap_present.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2date.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2end_step.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2grid.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2latlon.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2level.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2lon.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2step.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2step_range.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2_chemical.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2_eps.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_g2_mars_labeling.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_gds_is_present.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_gds_not_present_bitmap.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_gen.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_global_gaussian.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_gts_header.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_headers_only.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_ibmfloat.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_ieeefloat.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_ifs_param.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_iterator.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_julian_day.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_ksec1expver.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_label.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_laplacian.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_latitudes.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_latlonvalues.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_latlon_increment.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_library_version.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_local_definition.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_long.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_longitudes.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_long_vector.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_lookup.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_mars_param.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_mars_step.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_md5.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_message.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_missing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_nearest.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_number_of_coded_values.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_number_of_points.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_number_of_points_gaussian.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_number_of_values.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_number_of_values_data_raw_packing.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_octect_number.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_offset_file.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_offset_values.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_pad.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_padding.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_padto.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_padtoeven.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_padtomultiple.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_position.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_reference_value_error.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_round.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_scale.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_scale_values.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_second_order_bits_per_value.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_section.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_section_length.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_section_padding.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_section_pointer.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_select_step_template.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_signed.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_signed_bits.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_simple_packing_error.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_size.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_spd.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_spectral_truncation.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_sprintf.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_statistics.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_statistics_spectral.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_step_in_units.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_sum.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_suppressed.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_time.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_times.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_transient.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_unsigned.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_unsigned_bits.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_validity_date.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_validity_time.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_values.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_variable.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_vector.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_accessor_class_when.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_bits.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_box.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_box_class.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_box_class_gen.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_box_class_reduced_gaussian.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_box_class_regular_gaussian.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_buffer.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_concept.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_context.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_darray.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_date.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dependency.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class_c_code.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class_debug.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class_default.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class_keys.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class_serialize.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_dumper_class_wmo.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_errors.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_accessor.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_binop.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_double.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_functor.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_long.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_string.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_string_compare.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_true.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_expression_class_unop.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_fieldset.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_filepool.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_gaussian_reduced.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_geography.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_handle.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_hash_keys.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_header_compute.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iarray.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_ibmfloat.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_ieeefloat.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_index.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_io.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_gaussian.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_gaussian_reduced.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_gen.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_lambert_azimuthal_equal_area.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_lambert_conformal.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_latlon.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_latlon_reduced.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_polar_stereographic.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_iterator_class_regular.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_itrie.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_jasper_encoding.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_keys_iterator.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_lex.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_loader_from_handle.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_memory.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest_class.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest_class_gen.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest_class_latlon_reduced.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest_class_reduced.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest_class_regular.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_nearest_class_sh.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_openjpeg_encoding.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_parse_utils.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_query.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_rules.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_scaling.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_templates.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_timer.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_trie.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_util.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_value.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\grib_yacc.c" />
+    <ClCompile Include="..\..\..\lib\gribapi\md5.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
