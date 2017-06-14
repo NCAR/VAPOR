@@ -7,7 +7,7 @@
 #include <vapor/MyBase.h>
 
 #include "RenderEventRouter.h"
-#include "subeventrouter.h"
+//#include "subeventrouter.h"
 #include "helloSubtabs.h"
 #include "helloAppearanceSubtab.h"
 #include "helloLayoutSubtab.h"
@@ -74,31 +74,34 @@ private:
     // Internal classes for sub-widgets:
     //! \class HelloAppearanceGUI
     //! \brief Widget class for Appearance sub-tab
-    class HelloAppearanceGUI : public SubEventRouter, public Ui_helloAppearanceSubtab {
+    // class HelloAppearanceGUI : public SubEventRouter, public Ui_helloAppearanceSubtab {
+    class HelloAppearanceGUI : public QWidget, public Ui_helloAppearanceSubtab {
     public:
-        HelloAppearanceGUI(QWidget *parent, RenderEventRouter *er, const VAPoR::ControlExec *ce) : SubEventRouter(parent, er, ce), Ui_helloAppearanceSubtab()
+        HelloAppearanceGUI(QWidget *parent, RenderEventRouter *er, const VAPoR::ControlExec *ce)
+        :    // SubEventRouter(parent, er, ce), Ui_helloAppearanceSubtab(){
+          Ui_helloAppearanceSubtab()
         {
             // This GUI is a Qt Designer Widget, so call setupUi() to convert the
             // Ui_helloAppearance object into a Widget.
             setupUi(this);
         }
 
-    protected:
-        void _updateTab();
+        void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     };
     //! \class HelloLayoutGUI
     //! \brief Widget class for geometry sub-tab
-    class HelloLayoutGUI : public SubEventRouter, public Ui_helloLayoutSubtab {
+    class HelloLayoutGUI : public QWidget, public Ui_helloLayoutSubtab {
     public:
-        HelloLayoutGUI(QWidget *parent, RenderEventRouter *er, const VAPoR::ControlExec *ce) : SubEventRouter(parent, er, ce), Ui_helloLayoutSubtab()
+        HelloLayoutGUI(QWidget *parent, RenderEventRouter *er, const VAPoR::ControlExec *ce)
+        :    // SubEventRouter(parent, er, ce), Ui_helloLayoutSubtab() {
+          Ui_helloLayoutSubtab()
         {
             // This GUI is a Qt Designer Widget, so call setupUi() to convert the
             // Ui_helloAppearance object into a Widget.
             setupUi(this);
         }
 
-    protected:
-        void _updateTab();
+        void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     };
 
     //! Override default wheel behavior on the tab.  This has the effect of
