@@ -257,10 +257,10 @@ size_t TFWidget::getCurrentTimestep(ParamsMgr *paramsMgr) {
 }
 
 void TFWidget::updateHisto() {
-
+    cout << "update histo" << endl;
     mappingFrame->fitToView();
     mappingFrame->updateMap();
-    mappingFrame->Update();
+    mappingFrame->Update(_rParams);
 }
 
 void TFWidget::autoUpdateHistoChecked(int state) {

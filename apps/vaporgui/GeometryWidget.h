@@ -42,7 +42,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
                 VAPoR::DataMgr *dataMgr,
                 VAPoR::RenderParams *rParams);
 
-  public slots:
+    //public slots:
+  private slots:
     void setRange(double min, double max);
     void copyRegion();
     void updateRenTypeCombo();
