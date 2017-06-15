@@ -220,10 +220,13 @@ public:
 	void buildLocal2DTransform(int dataOrientation, float a[2],float b[2], float* constVal, int mappedDims[3]);
 #endif
 
+#ifdef	DEAD
+
 	//! Obtain the extents of a region that contains a rotated (3D) box associated with a renderer.
 	//! \param[out] regMin Minimum coordinates of containing region.
 	//! \param[out] regMix Maximum coordinates of containing region.
 	void getLocalContainingRegion(float regMin[3], float regMax[3]);
+#endif
 
 	//! Render the colorbar for this renderer (if it has one)
 	void renderColorbar();
