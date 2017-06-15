@@ -50,7 +50,9 @@ VizFeatureRenderer::VizFeatureRenderer(
 //----------------------------------------------------------------------------
 VizFeatureRenderer::~VizFeatureRenderer()
 {
+#ifdef	DEAD
 	if (_textObjectsValid) invalidateCache();
+#endif
 }
 
 void VizFeatureRenderer::InitializeGL(ShaderMgr *shaderMgr) {
