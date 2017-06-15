@@ -42,12 +42,9 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
                 VAPoR::DataMgr *dataMgr,
                 VAPoR::RenderParams *rParams);
 
-    //public slots:
   private slots:
     void setRange(double min, double max);
     void copyRegion();
-    void updateRenTypeCombo();
-    void updateRenNameCombo();
 
   private:
     void connectWidgets();
@@ -57,7 +54,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     void GetVectorExtents(size_t ts, int level,
                           std::vector<double> minFullExt,
                           std::vector<double> maxFullExt);
-    void updateVisCombo();
+    void updateCopyCombo();
 
     VAPoR::ParamsMgr *_paramsMgr;
     VAPoR::DataMgr *_dataMgr;
@@ -74,6 +71,9 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     Combo *_minZCombo;
     Combo *_maxZCombo;
     RangeCombo *_zRangeCombo;
+
+    std::map<std::string, std::string> _visNames;
+    std::map<std::string, std::string> _renTypeNames;
 
     Flags _flags;
 };
