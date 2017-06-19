@@ -292,9 +292,7 @@ void VariablesWidget::getCmpFactors(
 		
 	// Now get the "levels of detail" compression factors
 	//
-	vector <size_t> cratios;
-	int rc = _dataMgr->GetCRatios(varname, cratios);
-	assert(rc >= 0);
+	vector <size_t> cratios = _dataMgr->GetCRatios(varname);
 
 	for (int i=0; i<cratios.size(); i++) {
 		ostringstream oss;
@@ -325,9 +323,7 @@ void VariablesWidget::updateFidelity(
 	}
 	fidelityFrame->show();
 
-	vector <size_t> cratios;
-	int rc = _dataMgr->GetCRatios(varname, cratios);
-	assert(rc >= 0);
+	vector <size_t> cratios = _dataMgr->GetCRatios(varname);
 
 
 	// Get the effective compression rates as a floating point value,
