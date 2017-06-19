@@ -429,17 +429,14 @@ int DC::GetNumTimeSteps(string varname) const {
 	return (dim.GetLength());
 }
 
-int DC::GetCRatios(string varname, vector <size_t> &cratios) const {
+vector <size_t> DC::GetCRatios(string varname) const {
 
 	DC::BaseVar var;
 	bool status = GetBaseVarInfo(varname, var);
 	if (! status) {
-		SetErrMsg("Undefined variable name : %s", varname.c_str());
-		return(-1);
+		return(vector <size_t> (1,1));
 	}
-
-	cratios = var.GetCRatios();
-	return(0);
+	return(var.GetCRatios());
 }
 
 bool DC::GetVarCoordVars(
