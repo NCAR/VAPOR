@@ -511,17 +511,18 @@ double BarbRenderer::_calcDefaultScale(const vector<string> &varnames, const Bar
     assert(varnames.size() <= 3);
     double maxvarvals[3] = {1.0, 1.0, 1.0};
 
+    DataMgr *dataMgr = m_dataStatus->GetDataMgr();
+
     vector<double> stretch = bParams->GetStretchFactors();
     for (int i = 0; i < varnames.size(); i++) {
         if (varnames[i] == "") {
             maxvarvals[i] = 0.;
         } else {
-            float minmax[2];
-
-            // Obtain the default, but don't set it into the transfer function.
+            // Obtain the default
             //
 
-            m_dataStatus->GetDefaultVariableRange(varnames[i], 0, minmax);
+            vector<double> minmax;
+            dataMgr->GetDataRange(0, varnames[i], 0, 0, minmax);
             maxvarvals[i] = Max(abs(minmax[0]), abs(minmax[1]));
         }
     }
