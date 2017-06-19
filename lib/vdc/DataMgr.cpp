@@ -464,24 +464,22 @@ int DataMgr::GetNumTimeSteps(string varname) const
     return (_dc->GetNumTimeSteps(varname));
 }
 
-int DataMgr::GetNumRefLevels(string varname) const
+size_t DataMgr::GetNumRefLevels(string varname) const
 {
-    if (!_dc) { return (0); }
+    if (!_dc) { return (1); }
     if (varname == "") return 1;
     return (_dc->GetNumRefLevels(varname));
 }
 
-int DataMgr::GetCRatios(string varname, vector<size_t> &cratios) const
+vector<size_t> DataMgr::GetCRatios(string varname) const
 {
-    if (!_dc) { return (0); }
-    cratios.clear();
+    if (!_dc) { return (vector<size_t>(1, 1)); }
 
     DC::BaseVar var;
     int         rc = GetBaseVarInfo(varname, var);
-    if (rc < 0) return (rc);
+    if (rc < 0) return (vector<size_t>(1, 1));
 
-    cratios = var.GetCRatios();
-    return (0);
+    return (var.GetCRatios());
 }
 
 StructuredGrid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, bool lock)
@@ -519,6 +517,7 @@ StructuredGrid *DataMgr::GetVariable(size_t ts, string varname, int level, int l
     //
     vector<string> coord_vars;
     bool           ok = DataMgr::GetVarCoordVars(varname, true, coord_vars);
+    assert(ok);
 
     while (min.size() > coord_vars.size()) {
         min.pop_back();
@@ -723,6 +722,8 @@ StructuredGrid *DataMgr::GetVariable(size_t ts, string varname, int level, int l
     //
     vector<string> coord_vars;
     bool           ok = DataMgr::GetVarCoordVars(varname, true, coord_vars);
+    assert(ok);
+
     while (min.size() > coord_vars.size()) {
         min.pop_back();
         max.pop_back();
@@ -934,7 +935,7 @@ void DataMgr::RemovePipeline(string name)
 
 #endif
 
-bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod)
+bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) const
 {
     // disable error reporting
     //
@@ -1194,7 +1195,6 @@ int DataMgr::_get_regions(size_t ts, const vector<string> &varnames, int level, 
         }
 
         int nlevels = DataMgr::GetNumRefLevels(varnames[i]);
-        if (nlevels < 0) return (-1);
 
         DC::BaseVar var;
         int         rc = GetBaseVarInfo(varnames[i], var);
@@ -1802,7 +1802,6 @@ float *DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int lev
 int DataMgr::_level_correction(string varname, int &level) const
 {
     int nlevels = DataMgr::GetNumRefLevels(varname);
-    if (nlevels < 0) return (-1);
 
     if (level >= nlevels) level = nlevels - 1;
     if (level >= 0) level = -(nlevels - level);
