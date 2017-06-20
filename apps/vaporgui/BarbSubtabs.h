@@ -54,7 +54,7 @@ public:
     BarbGeometrySubtab(QWidget *parent)
     {
         setupUi(this);
-        _geometryWidget->Reinit(GeometryWidget::TWOD);
+        _geometryWidget->Reinit(GeometryWidget::VECTOR);
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams) { _geometryWidget->Update(paramsMgr, dataMgr, rParams); }
