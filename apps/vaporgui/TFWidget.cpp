@@ -170,8 +170,6 @@ void TFWidget::Update(ParamsMgr *paramsMgr,
                       DataMgr *dataMgr,
                       RenderParams *rParams) {
 
-    cout << "Updating TFWidget" << endl;
-
     assert(paramsMgr);
     assert(dataMgr);
     assert(rParams);
