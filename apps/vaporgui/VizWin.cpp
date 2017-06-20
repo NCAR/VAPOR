@@ -618,8 +618,6 @@ void VizWin::setFocus(){
 
 void VizWin::paintGL() {
 
-cout << "VizWin::paintGL() " << endl;
-
 	if (! FrameBufferReady()) {
 		return;
 	}
