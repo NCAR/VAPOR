@@ -694,7 +694,7 @@ vector <string> VDC::GetCoordVarNames() const {
 }
 
 
-int VDC::GetNumRefLevels(string varname) const {
+size_t VDC::GetNumRefLevels(string varname) const {
 
 	vector <size_t> bs;
 	string wname;
@@ -714,8 +714,8 @@ int VDC::GetNumRefLevels(string varname) const {
 		wname = itr->second.GetWName();
 	}
 	else {
-		SetErrMsg("Undefined variable name : %s", varname.c_str());
-		return(-1);
+		// Var doesn't exist. Still return 1
+		return(1);
 	}
 
 

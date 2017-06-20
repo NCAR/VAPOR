@@ -342,39 +342,13 @@ public:
  //
  int GetNumTimeSteps(string varname) const;
 
- //! Return the number of refinement levels for the indicated variable
- //!
- //! Compressed variables have a multi-resolution grid representation.
- //! This method returns the number of levels in the hiearchy. A value
- //! of one indicates that only the native resolution is available. 
- //! A value of two indicates that two levels, the native plus the
- //! next coarsest are available, and so on.
- //!
- //! \param[in] varname Data or coordinate variable name.
- //!
- //! \retval num If \p varname is unknown zero is returned. if \p varname
- //! is not compressed (has no multi-resolution representation) one is
- //! returned. Otherwise the total number of levels in the multi-resolution
- //! hierarchy are returned.
+ //! \copydoc DC::GetNumRefLevels()
  //
- int GetNumRefLevels(string varname) const;
+ size_t GetNumRefLevels(string varname) const;
 
- //! Return the compression ratio vector for the indicated variable
- //!
- //! Return the compression ratio vector for the indicated variable.
- //! The vector returned contains an ordered list of available
- //! compression ratios for the variable named by \p variable.
- //! If the variable is not compressed, the \p cratios parameter will
- //! contain a single element, one.
- //!
- //! \param[in] varname Data or coordinate variable name.
- //! \param[out] cratios Ordered vector of compression ratios
- //!
- //! \retval status A negative int is returned on failure
- //!
- //! \sa DC::BaseVar::GetCRatios();
+ //! \copydoc DC::GetCRatios()
  //
-int GetCRatios(string varname, std::vector <size_t> &cratios) const;
+std::vector <size_t> GetCRatios(string varname) const;
 
  //! Read and return variable data
  //!
@@ -519,7 +493,7 @@ int GetCRatios(string varname, std::vector <size_t> &cratios) const;
 	string varname,
 	int level = 0,
 	int lod = 0
- );
+ ) const;
 
  //! \copydoc DC::GetMapProjection(
  //!   string varname 

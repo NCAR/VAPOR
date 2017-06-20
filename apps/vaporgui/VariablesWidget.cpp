@@ -37,8 +37,11 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 	setupUi(this);
 
 	_fidelityButtons = new QButtonGroup(fidelityBox);
+	_fidelityButtons->setExclusive(true);
+
     QHBoxLayout* hlay = new QHBoxLayout(fidelityBox);
 	hlay->setAlignment(Qt::AlignHCenter);
+	fidelityBox->setLayout(hlay);
 
 	connect (
 		refinementCombo,SIGNAL(activated(int)), this,
@@ -292,9 +295,7 @@ void VariablesWidget::getCmpFactors(
 		
 	// Now get the "levels of detail" compression factors
 	//
-	vector <size_t> cratios;
-	int rc = _dataMgr->GetCRatios(varname, cratios);
-	assert(rc >= 0);
+	vector <size_t> cratios = _dataMgr->GetCRatios(varname);
 
 	for (int i=0; i<cratios.size(); i++) {
 		ostringstream oss;
@@ -325,9 +326,7 @@ void VariablesWidget::updateFidelity(
 	}
 	fidelityFrame->show();
 
-	vector <size_t> cratios;
-	int rc = _dataMgr->GetCRatios(varname, cratios);
-	assert(rc >= 0);
+	vector <size_t> cratios = _dataMgr->GetCRatios(varname);
 
 
 	// Get the effective compression rates as a floating point value,
@@ -400,19 +399,27 @@ void VariablesWidget::updateFidelity(
 		
 
 
-	QHBoxLayout* hlay = (QHBoxLayout*) fidelityBox->layout();
 
+	// Remove buttons from the group
+	//
 	QList<QAbstractButton*> btns = _fidelityButtons->buttons();
 	for (int i = 0; i<btns.size(); i++){
 		_fidelityButtons->removeButton(btns[i]);
-		hlay->removeWidget(btns[i]);
-		delete btns[i];
+	}
+
+	// Remove and delete buttons from the layout
+	//
+	QHBoxLayout* hlay = (QHBoxLayout*) fidelityBox->layout();
+	QLayoutItem *child;
+	while ((child = hlay->takeAt(0)) != 0) {
+		delete child;
 	}
 
 	int numButtons = _fidelityLodStrs.size();
 	for (int i = 0; i<numButtons; i++){
-		QRadioButton * rd = new QRadioButton(fidelityBox);
+		QRadioButton * rd = new QRadioButton();
 		hlay->addWidget(rd);
+
 		_fidelityButtons->addButton(rd, i);
 		QString qs = "Refinement " + 
 			QString(_fidelityMultiresStrs[i].c_str()) +  "\nLOD " +
@@ -423,8 +430,8 @@ void VariablesWidget::updateFidelity(
 		if (lod == _fidelityLodIdx[i] && refLevel == _fidelityMultiresIdx[i]) {
 			rd->setChecked(true);
 		}
-			
 	}
+	fidelityBox->setLayout(hlay);
 }
 
 void VariablesWidget::uncheckFidelity() {
@@ -434,13 +441,11 @@ void VariablesWidget::uncheckFidelity() {
 	if (! _fidelityButtons) return;
 
 	QList<QAbstractButton*> btns = _fidelityButtons->buttons();
-	_fidelityButtons->setExclusive(false);
 	for (int i = 0; i<btns.size(); i++){
 		if (btns[i]->isChecked()) {
 			btns[i]->setChecked(false);
 		}
 	}
-	_fidelityButtons->setExclusive(true);
 }
 
 void VariablesWidget::setCompRatio(int num){
