@@ -140,8 +140,6 @@ void TwoDDataEventRouter::UpdateMapBounds()
 
 void TwoDDataEventRouter::_updateTab()
 {
-    cout << "Updating TwoDDataEventRouter" << endl;
-
     // The variable tab updates itself:
     //
     _variables->Update(_controlExec->GetDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());

@@ -670,7 +670,6 @@ RegionEventRouter *VizWinMgr::getRegionRouter() { return ((RegionEventRouter *)G
 
 void VizWinMgr::updateDirtyWindows()
 {
-    cout << "VizWinMgr::updateDirtyWindows " << endl;
     map<string, VizWin *>::const_iterator it;
     for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) { (it->second)->updateGL(); }
 }
