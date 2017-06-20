@@ -707,6 +707,12 @@ void ParamsMgr::PMgrStateSave::Save(
         return;
     }
 
+    // Set state change flags
+    //
+    for (int i = 0; i < _stateChangeFlags.size(); i++) {
+        *(_stateChangeFlags[i]) = true;
+    }
+
     if (!_groups.empty()) {
         return;
     }
