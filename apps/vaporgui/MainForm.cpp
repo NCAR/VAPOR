@@ -140,6 +140,7 @@ MainForm::MainForm(vector<QString> files, QApplication* app, QWidget* parent, co
 	_seedMe = NULL;
 	_stats = NULL;
 	_plot = NULL;	
+	_paramsStateChange = true;
    
 
     createActions();
@@ -166,6 +167,7 @@ MainForm::MainForm(vector<QString> files, QApplication* app, QWidget* parent, co
 	_controlExec->SetSaveStateEnabled(false);
 
 	_paramsMgr = _controlExec->GetParamsMgr();
+	_paramsMgr->RegisterStateChangeFlag(&_paramsStateChange);
 
 	StartupParams *sP = GetStartupParams();
 	_controlExec->SetCacheSize(sP->GetCacheMB());
@@ -1704,7 +1706,15 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 	// Not sure why Paint is needed. Who generates it?
 	//
 	//case (QEvent::Paint):
+
 		_vizWinMgr->updateDirtyWindows();
+
+		// Only update the GUI if the Params state has changed
+		//
+		if (_paramsStateChange) {
+			_vizWinMgr->UpdateRouters();
+			_paramsStateChange = false;
+		}
 
 		//update();
 

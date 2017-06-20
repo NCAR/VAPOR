@@ -334,15 +334,38 @@ public:
  }
 
  
-
+ //! Save current state to a file
+ //!
+ //! Save the current state of the parameter database to an XML file
+ //!
+ //! \param[in] path Path to file
+ //
  int SaveToFile(string path) const;
 
  //const DataMgr *GetDataMgr() const {return (_dataMgr);}
 
+ //! Begin state save group
+ //!
+ //! Changes in state can be undone (redone) one at a time using
+ //! Undo() and Redo(), or can be grouped to together into a collection.
+ //! This method announces the start of such a collection group. The group
+ //! will be completed when EndSaveStateGroup() is called. 
+ //! When a subsequent call
+ //! to Undo() or Redo() is made all of the state changes made within the 
+ //! group are undone (redone) at once. Groups may be nested, in
+ //! which case the outermost group prevails.
+ //!
+ //! \param[in] description A descriptive name for the group
+ //!
+ //! \sa EndSaveStateGroup()
+ //!
  void BeginSaveStateGroup(string description) {
 	_ssave.BeginGroup(description);
  }
 
+ //! End state save group
+ //! \sa BeginSaveStateGroup()
+ //
  void EndSaveStateGroup() {
 	_ssave.EndGroup();
  };
@@ -353,18 +376,34 @@ public:
 
  bool GetSaveStateEnabled() const { return (_ssave.GetEnabled()); }
 
+ //! Restore state to previously saved state
+ //!
+ //! \retval status Returns true on success, false if the state is unchanged
+ //! \sa BeginSaveStateGroup()
+ //
  bool Undo();
 
+ //! Restore state to state that existed prior to the last Undo()
+ //!
+ //! \retval status Returns true on success, false if the state is unchanged
+ //! \sa BeginSaveStateGroup()
+ //
  bool Redo();
 
  void UndoRedoClear();
 
+ //! Return number states saved that can be undone with Undo()
+ //!
  size_t UndoSize() const {
 	return(_ssave.UndoSize());
  }
 
  size_t RedoSize() const {
 	return(_ssave.RedoSize());
+ }
+
+ void RegisterStateChangeFlag(bool *flag) {
+	_ssave.RegisterStateChangeFlag(flag);
  }
 
  const XmlNode *GetXMLRoot() const {
@@ -397,6 +436,9 @@ private:
   
   void Reinit(const XmlNode *rootNode) {
  	_rootNode = rootNode;
+	for (int i=0; i<_stateChangeFlags.size(); i++) {
+		*(_stateChangeFlags[i]) = true;
+	}
   }
   void Save(const XmlNode *node, string description);
   void BeginGroup(string descripion);
@@ -423,6 +465,10 @@ private:
 	return(_redoStack.size());
   }
 
+  void RegisterStateChangeFlag(bool *flag) {
+	_stateChangeFlags.push_back(flag);
+  }
+
  private:
 
   bool _enabled;
@@ -434,6 +480,8 @@ private:
   std::deque <std::pair <string, XmlNode *>> _redoStack;
 
   void cleanStack(int maxN, std::deque <std::pair <string, XmlNode *>> &s);
+
+  std::vector <bool *> _stateChangeFlags;
    
  };
  
