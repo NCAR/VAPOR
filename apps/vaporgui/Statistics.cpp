@@ -474,13 +474,7 @@ void Statistics::initRangeControllers() {
 }
 
 void Statistics::initCRatios() {
-	int rc = _dm->GetCRatios(_defaultVar, _cRatios);
-	if (rc<0){
-		string myErr;
-		myErr = "Could not find any compression ratios in the provided data set.";
-		errReport(myErr);
-		return;
-	}
+	_cRatios = _dm->GetCRatios(_defaultVar);
 	_cRatio = _cRatios.size()-1;
 
 	for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it){
