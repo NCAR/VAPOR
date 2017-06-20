@@ -35,8 +35,11 @@ VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_Variable
     setupUi(this);
 
     _fidelityButtons = new QButtonGroup(fidelityBox);
+    _fidelityButtons->setExclusive(true);
+
     QHBoxLayout *hlay = new QHBoxLayout(fidelityBox);
     hlay->setAlignment(Qt::AlignHCenter);
+    fidelityBox->setLayout(hlay);
 
     connect(refinementCombo, SIGNAL(activated(int)), this, SLOT(setNumRefinements(int)));
     connect(lodCombo, SIGNAL(activated(int)), this, SLOT(setCompRatio(int)));
@@ -245,9 +248,7 @@ void VariablesWidget::getCmpFactors(string varname, vector<float> &lodCF, vector
 
     // Now get the "levels of detail" compression factors
     //
-    vector<size_t> cratios;
-    int            rc = _dataMgr->GetCRatios(varname, cratios);
-    assert(rc >= 0);
+    vector<size_t> cratios = _dataMgr->GetCRatios(varname);
 
     for (int i = 0; i < cratios.size(); i++) {
         ostringstream oss;
@@ -275,9 +276,7 @@ void VariablesWidget::updateFidelity(RenderParams *rParams)
     }
     fidelityFrame->show();
 
-    vector<size_t> cratios;
-    int            rc = _dataMgr->GetCRatios(varname, cratios);
-    assert(rc >= 0);
+    vector<size_t> cratios = _dataMgr->GetCRatios(varname);
 
     // Get the effective compression rates as a floating point value,
     // and as a string that can be displayed, for the LOD and refinement
@@ -339,19 +338,22 @@ void VariablesWidget::updateFidelity(RenderParams *rParams)
         }
     } while (l < lodCFs.size() && m < multiresCFs.size());
 
-    QHBoxLayout *hlay = (QHBoxLayout *)fidelityBox->layout();
-
+    // Remove buttons from the group
+    //
     QList<QAbstractButton *> btns = _fidelityButtons->buttons();
-    for (int i = 0; i < btns.size(); i++) {
-        _fidelityButtons->removeButton(btns[i]);
-        hlay->removeWidget(btns[i]);
-        delete btns[i];
-    }
+    for (int i = 0; i < btns.size(); i++) { _fidelityButtons->removeButton(btns[i]); }
+
+    // Remove and delete buttons from the layout
+    //
+    QHBoxLayout *hlay = (QHBoxLayout *)fidelityBox->layout();
+    QLayoutItem *child;
+    while ((child = hlay->takeAt(0)) != 0) { delete child; }
 
     int numButtons = _fidelityLodStrs.size();
     for (int i = 0; i < numButtons; i++) {
-        QRadioButton *rd = new QRadioButton(fidelityBox);
+        QRadioButton *rd = new QRadioButton();
         hlay->addWidget(rd);
+
         _fidelityButtons->addButton(rd, i);
         QString qs = "Refinement " + QString(_fidelityMultiresStrs[i].c_str()) + "\nLOD " + QString(_fidelityLodStrs[i].c_str());
 
@@ -359,6 +361,7 @@ void VariablesWidget::updateFidelity(RenderParams *rParams)
 
         if (lod == _fidelityLodIdx[i] && refLevel == _fidelityMultiresIdx[i]) { rd->setChecked(true); }
     }
+    fidelityBox->setLayout(hlay);
 }
 
 void VariablesWidget::uncheckFidelity()
@@ -368,11 +371,9 @@ void VariablesWidget::uncheckFidelity()
     if (!_fidelityButtons) return;
 
     QList<QAbstractButton *> btns = _fidelityButtons->buttons();
-    _fidelityButtons->setExclusive(false);
     for (int i = 0; i < btns.size(); i++) {
         if (btns[i]->isChecked()) { btns[i]->setChecked(false); }
     }
-    _fidelityButtons->setExclusive(true);
 }
 
 void VariablesWidget::setCompRatio(int num)
