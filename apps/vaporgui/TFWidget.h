@@ -72,7 +72,8 @@ private:
 	void updateColorInterpolation();
 	void updateMappingFrame();
 	void updateColorVarCombo();
-	void disableTFWidget(bool state);
+	void enableTFWidget(bool state);
+	void collapseColormapSettings();
 
 	int confirmMinRangeEdit(VAPoR::MapperFunction* tf, float* range);
 	int confirmMaxRangeEdit(VAPoR::MapperFunction* tf, float* range);

@@ -47,7 +47,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="colorVarLabel">
        <property name="text">
         <string>Color mapped variable:</string>
        </property>
@@ -61,7 +61,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
-         <height>20</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -92,7 +92,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="constColorLabel">
        <property name="text">
         <string>Constant color:</string>
        </property>
@@ -106,7 +106,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
-         <height>20</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -149,7 +149,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="textLabel2_4">
+    <widget class="QLabel" name="tfHeader">
      <property name="font">
       <font/>
      </property>
