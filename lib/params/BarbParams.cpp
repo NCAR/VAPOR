@@ -115,8 +115,8 @@ void BarbParams::_init() {
 	assert(minExt.size()==maxExt.size() && minExt.size()==3);
 
 	GetBox()->SetExtents(minExt, maxExt);
-	GetBox()->SetPlanar(true);	
-	GetBox()->SetOrientation(2);	
+	//GetBox()->SetPlanar(true);	
+	//GetBox()->SetOrientation(2);	
 }
 
 #ifdef	DEAD

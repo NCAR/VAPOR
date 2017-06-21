@@ -531,6 +531,9 @@ string VariablesWidget::updateVarCombo(
 		varCombo->addItem(QString::fromStdString(s));
 		if (s == currentVar) {
 			currentIndex = i;
+			if (doZero) {
+				currentIndex++;
+			}
 		}
 	}
 	if (currentIndex == -1) {

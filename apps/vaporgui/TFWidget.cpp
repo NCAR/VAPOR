@@ -60,7 +60,6 @@ TFWidget::TFWidget(QWidget* parent)
 
 void TFWidget::Reinit(Flags flags) {
 	_flags = flags;
-
 }
 
 TFWidget::~TFWidget() {
@@ -80,7 +79,6 @@ TFWidget::~TFWidget() {
 
 void TFWidget::setCMVar() {
 	string var = colormapVarCombo->currentText().toStdString();
-	cout << "cmVarCombo " << var << endl;
 	if (var == "None") {
 		var = ""; 
 		_rParams->SetColorMapVariableName(var);
@@ -91,7 +89,19 @@ void TFWidget::setCMVar() {
 		_rParams->SetColorMapVariableName(var);
 		_rParams->SetUseSingleColor(false);
 	}  
-	cout << "params color var " << _rParams->GetColorMapVariableName() << endl;
+}
+
+void TFWidget::collapseColormapSettings() {
+	colormapVarCombo->hide();
+	colormapVarCombo->resize(0,0);
+	colorDisplay->hide();
+	colorDisplay->resize(0,0);
+	constColorLabel->hide();
+	constColorLabel->resize(0,0);
+	colorVarLabel->hide();
+	colorVarLabel->resize(0,0);
+	colorSelectButton->hide();
+	colorSelectButton->resize(0,0);
 }
 
 void TFWidget::setSingleColor() {
@@ -110,6 +120,7 @@ void TFWidget::setSingleColor() {
 
 	_rParams->SetConstantColor(_myRGB);
 	_rParams->SetUseSingleColor(true);
+	colormapVarCombo->setCurrentIndex(0);
 }
 
 void TFWidget::setEventRouter(RenderEventRouter* e) {
@@ -120,13 +131,16 @@ void TFWidget::setEventRouter(RenderEventRouter* e) {
 		opacitySlider);	
 }
 
-void TFWidget::disableTFWidget(bool state) {
+void TFWidget::enableTFWidget(bool state) {
 	loadButton->setEnabled(state);
 	saveButton->setEnabled(state);
 	tfFrame->setEnabled(state);
 	minRangeEdit->setEnabled(state);
 	maxRangeEdit->setEnabled(state);
-	
+	opacitySlider->setEnabled(state);
+	updateHistoButton->setEnabled(state);
+	autoUpdateHistoCheckbox->setEnabled(state);
+	colorInterpCombo->setEnabled(state);
 }
 
 void TFWidget::getRange(float range[2], 
@@ -135,12 +149,8 @@ void TFWidget::getRange(float range[2],
 	string varName;
 	if (_flags & COLORMAPPED) {
 		varName = _rParams->GetColorMapVariableName();
-		
-		// If we are using a single color instead of a
-		// color mapped variable, disable the transfer func
-		//
 		if (varName == "") {
-			return;//disableTFWidget(true);
+			return;
 		}
 	}	
 	else {
@@ -172,7 +182,15 @@ void TFWidget::updateColorInterpolation() {
 	else {
 		varName = _rParams->GetVariableName();
 	}
+
+	if (varName == "") {
+		return;
+	}
+
 	MapperFunction* tf = _rParams->GetMapperFunc(varName);
+	if (tf == NULL) {
+		tf = _rParams->MakeMapperFunc(varName);
+	}
 	
 	TFInterpolator::type t = tf->getColorInterpType();
 	colorInterpCombo->blockSignals(true);
@@ -231,7 +249,6 @@ void TFWidget::Update(ParamsMgr *paramsMgr,
 					DataMgr *dataMgr,
 					RenderParams *rParams) {
 
-
 	assert(paramsMgr);
 	assert(dataMgr);
 	assert(rParams);
@@ -240,12 +257,12 @@ void TFWidget::Update(ParamsMgr *paramsMgr,
 	_dataMgr = dataMgr;
 	_rParams = rParams;
 
-	if (_flags & COLORMAPPED) {
-		if (_rParams->GetColorMapVariableName() == "") {
-			string var = _rParams->GetFirstVariableName();
-			_rParams->SetColorMapVariableName(var);
-		}
-	}
+//	if (_flags & COLORMAPPED) {
+//		if (_rParams->GetColorMapVariableName() == "") {
+//			string var = _rParams->GetFirstVariableName();
+//			_rParams->SetColorMapVariableName(var);
+//		}
+//	}
 
 	updateAutoUpdateHistoCheckbox();
 	updateMappingFrame();
@@ -256,12 +273,11 @@ void TFWidget::Update(ParamsMgr *paramsMgr,
 	string varName;
 	if (_flags & COLORMAPPED) {
 		varName = _rParams->GetColorMapVariableName();
-		cout << "VARNAME        " << varName << endl;	
 		// If we are using a single color instead of a
 		// color mapped variable, disable the transfer function
 		//
 		if (varName == "") {
-			disableTFWidget(true);
+			enableTFWidget(false);
 			return;
 		}
 
@@ -269,8 +285,11 @@ void TFWidget::Update(ParamsMgr *paramsMgr,
 		// min/max sliders in the transfer function
 		//
 		else {
-			disableTFWidget(false);
+			enableTFWidget(true);
 		}
+	}
+	else {
+		collapseColormapSettings();
 	}
 
 	updateSliders();
@@ -280,6 +299,7 @@ void TFWidget::updateColorVarCombo() {
 	int ndim = _rParams->GetValueLong(_nDimsTag, 3);
 	assert(ndim == 2 || ndim == 3);
 
+	int index = colormapVarCombo->currentIndex();
 	vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
 
 	colormapVarCombo->clear();
@@ -287,7 +307,7 @@ void TFWidget::updateColorVarCombo() {
 	for (int i=0; i<vars.size(); i++) {
 		colormapVarCombo->addItem(QString::fromStdString(vars[i]));
 	}
-	colormapVarCombo->setCurrentIndex(0);
+	colormapVarCombo->setCurrentIndex(index);
 }
 
 void TFWidget::connectWidgets() {
@@ -366,7 +386,6 @@ size_t TFWidget::getCurrentTimestep(ParamsMgr* paramsMgr) {
 }
 
 void TFWidget::updateHisto() {
-	cout << "update histo" << endl;
 	mappingFrame->fitToView();
 	mappingFrame->updateMap();
 	mappingFrame->Update(_rParams);
