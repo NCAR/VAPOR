@@ -77,6 +77,7 @@ void Box::SetExtents(const vector<double> &minExt, const vector<double> &maxExt)
     for (int i = maxExt.size(); i < 3; i++) exts.push_back(0.0);
 
     SetValueDoubleVec(m_extentsTag, "Set box extents", exts);
+    cout << "Box::SetExts: " << exts[0] << " " << exts[1] << " " << exts[2] << " " << exts[3] << " " << exts[4] << " " << exts[5] << endl;
 }
 
 void Box::GetExtents(vector<double> &minExt, vector<double> &maxExt) const
@@ -92,6 +93,7 @@ void Box::GetExtents(vector<double> &minExt, vector<double> &maxExt) const
     // defaultv
     //
     vector<double> exts = GetValueDoubleVec(m_extentsTag, defaultv);
+    cout << "Box::GetExts: " << exts[0] << " " << exts[1] << " " << exts[2] << " " << exts[3] << " " << exts[4] << " " << exts[5] << endl;
 
     int n = IsPlanar() ? 2 : 3;
     for (int i = 0; i < n; i++) minExt.push_back(exts[i]);
