@@ -77,8 +77,8 @@ int BarbRenderer::_paintGL() {
     int refLevel = bParams->GetRefinementLevel();
     int lod = bParams->GetCompressionLevel();
     vector<double> minExts, maxExts;
-    //bParams->GetBox()->GetExtents(minExts, maxExts);
-    m_dataStatus->GetExtents(minExts, maxExts);
+    bParams->GetBox()->GetExtents(minExts, maxExts);
+    //m_dataStatus->GetExtents(minExts, maxExts);
 
     // Find box extents for ROI
     //
@@ -289,18 +289,25 @@ int BarbRenderer::performRendering( //DataMgr* dataMgr,
 
     vector<double> rMinExtents, rMaxExtents;
     bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
-    //Convert to user coordinates:
-    vector<double> minExts, maxExts;
-    m_dataStatus->GetExtents(minExts, maxExts);
 
-    const vector<long> rGrid = bParams->GetGrid();
+    //	vector<double> minExts,maxExts;
+    //	m_dataStatus->GetExtents(minExts,maxExts);
+
+    //	const vector<long> rGrid = bParams->GetGrid();
     int rakeGrid[3];
     double rakeExts[6]; //rake extents in user coordinates
 
-    for (int i = 0; i < 3; i++) {
-        rakeExts[i] = minExts[i];
-        rakeExts[i + 3] = maxExts[i];
-    }
+    //	for (int i = 0; i<3; i++) {
+    //		rakeExts[i] = minExts[i];
+    //		rakeExts[i+3] = maxExts[i];
+    //	}
+
+    rakeExts[0] = rMinExtents[0];
+    rakeExts[1] = rMinExtents[1];
+    rakeExts[2] = rMinExtents[2];
+    rakeExts[3] = rMaxExtents[0];
+    rakeExts[4] = rMaxExtents[1];
+    rakeExts[5] = rMaxExtents[2];
 
     string winName = GetVisualizer();
     ViewpointParams *vpParams = m_pm->GetViewpointParams(winName);
@@ -329,7 +336,7 @@ int BarbRenderer::performRendering( //DataMgr* dataMgr,
     }
     glColor3fv(fcolor);
 
-    rakeGrid[0] = rakeGrid[1] = 5;
+    rakeGrid[0] = rakeGrid[1] = 50;
     rakeGrid[2] = 1;
 
     // NEED TO PASS RAKE EXTENTS, NOT DOMAIN EXTENTS
