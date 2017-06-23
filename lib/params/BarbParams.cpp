@@ -48,32 +48,6 @@ BarbParams::~BarbParams() {
 
 }
 
-#ifdef	DEAD
-// Initialize for new metadata.  
-//
-//
-void BarbParams::
-Validate(int type){
-	//Command capturing should be disabled
-	assert(!Command::isRecording());
-	
-	DataMgr* dataMgr = GetDataMgr();
-	if (!dataMgr) return;
-	if(dataMgr->GetDataVarNames().size() == 0) return;
-
-	(void) validateHgtVar(type, dataMgr);
-	(void) validatePrimaryVar(type, dataMgr);
-	validateExtents(type);
-	_validateTF(type, dataMgr);
-
-	//Perform validations unique to BarbParams:
-
-	//Check the rake grid.
-	
-	return;
-}
-#endif
-
 bool BarbParams::IsOpaque() const {
 	return true;
 }
@@ -118,25 +92,3 @@ void BarbParams::_init() {
 	//GetBox()->SetPlanar(true);	
 	//GetBox()->SetOrientation(2);	
 }
-
-#ifdef	DEAD
-void BarbParams::_validateTF(int type, DataMgr* dataMgr) {
-	if (type == 0) {
-		_TFs->Clear();
-		return;
-	} else if (type == 1) {
-		// For now simply remove any IsoControls for variables that don't
-		// exist in the data set
-		//
-		vector <string> dvars = dataMgr->GetDataVarNames();
-		vector <string> ivars = _TFs->GetNames();
-		for (int i=0; i<ivars.size(); i++) {
-			if (find(dvars.begin(), dvars.end(), ivars[i]) == dvars.end()) {
-				_TFs->Erase(ivars[i]);
-			}
-		}
-	} else if (type == 2) {
-	}
-}
-#endif
-
