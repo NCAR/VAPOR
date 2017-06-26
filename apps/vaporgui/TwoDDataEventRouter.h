@@ -65,8 +65,6 @@ public:
  virtual void UpdateMapBounds();
 
 private slots:
- //! Respond to georeferencing checkbox being clicked
- void geoCheckboxClicked(bool);
 
  //! Load a TF from file
  void twodLoadTF();

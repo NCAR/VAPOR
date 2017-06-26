@@ -128,17 +128,6 @@ void TwoDDataEventRouter::GetWebHelp(
 
 }
 
-// The updateTab() method is invoked whenever it is necessary to 
-// display the current values in the tab.
-//
-void TwoDDataEventRouter::geoCheckboxClicked(bool state) {
-	confirmText();
-#ifdef	DEAD
-	TwoDDataEventRouter* rParams = (TwoDDataEventRouter*)GetActiveParams();
-#endif
-	//rParams->SetGeoreferencing(state);
-}
-
 //
 // Method to be invoked after the user has moved the right or left bounds
 // (e.g. From the MapEditor. ) 
