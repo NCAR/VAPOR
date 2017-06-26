@@ -13,6 +13,10 @@ endif()
 find_library (OPENGL OpenGL)
 target_link_libraries (common GLEW ${OPENGL})
 
+if (UNIX AND NOT APPLE)
+	target_link_libraries (common GLU)
+endif ()
+
 target_compile_options(common PRIVATE "-Wno-deprecated-declarations")
 
 # Not needed since vapor shares include directory
