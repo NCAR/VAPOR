@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "vapor/MyBase.h"
-#include "VariablesWidgetGUI.h"
+#include "ui_VariablesWidgetGUI.h"
 
 QT_USE_NAMESPACE
 

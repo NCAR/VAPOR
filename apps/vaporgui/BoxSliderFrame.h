@@ -22,7 +22,7 @@
 #include <cassert>
 #include <QFrame>
 #include <qwidget.h>
-#include "boxframe.h"
+#include "ui_boxframe.h"
 #include <vector>
 
 namespace VAPoR {

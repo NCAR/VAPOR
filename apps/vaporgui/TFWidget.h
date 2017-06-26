@@ -1,7 +1,7 @@
 #ifndef TFWIDGET_H
 #define TFWIDGET_H
 
-#include "TFWidgetGUI.h"
+#include "ui_TFWidgetGUI.h"
 #include "EventRouter.h"
 #include "RangeCombos.h"
 

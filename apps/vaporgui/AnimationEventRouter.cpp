@@ -32,14 +32,14 @@
 #include "RangeCombos.h"
 #include "AnimationEventRouter.h"
 
-#include "../images/playreverseA.xpm"
-#include "../images/playforwardA.xpm"
-#include "../images/pauseA.xpm"
-#include "../images/stepfwdA.xpm"
-#include "../images/stepbackA.xpm"
-#include "../images/toendA.xpm"
-#include "../images/tobeginA.xpm"
-#include "../images/replayA.xpm"
+#include "images/playreverseA.xpm"
+#include "images/playforwardA.xpm"
+#include "images/pauseA.xpm"
+#include "images/stepfwdA.xpm"
+#include "images/stepbackA.xpm"
+#include "images/toendA.xpm"
+#include "images/tobeginA.xpm"
+#include "images/replayA.xpm"
 
 QT_USE_NAMESPACE
 
