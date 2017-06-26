@@ -91,8 +91,6 @@ find_package(Qt4)
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
 
-
-
 if (APPLE)
 	set (MACOSX_BUNDLE_ICON_FILE VAPOR.icns)
 	set (MACOSX_BUNDLE_ICON_FILE_PATH ${CMAKE_SOURCE_DIR}/share/images/VAPOR.icns)
@@ -106,16 +104,22 @@ find_library (QTCORE QtCore)
 find_library (QTGUI QtGui)
 find_library (QTOPENGL QtOpenGL)
 
-target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp ${QTCORE} ${QTGUI} ${QTOPENGL})
+target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp quadmath ${QTCORE} ${QTGUI} ${QTOPENGL})
 target_include_directories (vaporgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (APPLE)
 	include_directories (${QTCORE}/Headers)
 	include_directories (${QTGUI}/Headers)
 	include_directories (${QTOPENGL}/Headers)
-endif()
+elseif (UNIX AND NOT APPLE)
+	include_directories (${QTDIR}/include/QtCore)
+	include_directories (${QTDIR}/include/QtGui)
+	include_directories (${QTDIR}/include/QtOpenGL)
+endif ()
 
-target_compile_options (vaporgui PRIVATE "-Wno-deprecated-declarations")
+if (APPLE)
+	target_compile_options (vaporgui PRIVATE "-Wno-deprecated-declarations")
+endif ()
 
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
 add_definitions (-DPYTHONDIR="${PYTHONDIR}")
