@@ -14,6 +14,7 @@
 #endif
 #include <vapor/MyBase.h>
 #include "vapor/GetAppPath.h"
+#include "vapor/CMakeConfig.h"
 #ifdef WIN32
     #pragma warning(disable : 4996)
 #endif
