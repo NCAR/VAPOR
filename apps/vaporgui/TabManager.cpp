@@ -23,7 +23,7 @@
 #include <qwidget.h>
 #include <QScrollArea>
 #include "TabManager.h"
-#include "vizTab.h"
+#include "ui_vizTab.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
 
