@@ -25,11 +25,6 @@ public:
     //
     double GetVectorScale() const { return GetValueDouble(_vectorScaleTag, 1.0); }
 
-#ifdef DEAD
-    //! \copydoc Params::Validate()
-    virtual void Validate(int type);
-#endif
-
     //! \copydoc RenderParams::IsOpaque()
     virtual bool IsOpaque() const;
 
@@ -46,9 +41,12 @@ public:
         return (GetValueLongVec(_gridTag, defaultGrid));
     }
 
-    //! Determine if rake grid is aligned to data grid
-    //! \retval bool true if aligned.
-    bool IsAlignedToData() const { return (GetValueLong(_alignGridTag, (bool)false)); }
+    void SetGrid(const int grid[3])
+    {
+        vector<long> griddims;
+        for (int i = 0; i < 3; i++) { griddims.push_back((long)grid[i]); }
+        SetValueLongVec(_gridTag, "Set grid", griddims);
+    }
 
     //! Determine line thickness in voxels
     //! \retval double line thickness
