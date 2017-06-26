@@ -5,14 +5,6 @@ set (CMAKE_CXX_STANDARD 11)
 
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
-# These need to be updatd to change for install build
-set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
-set (BINDIR ${PROJECT_BINARY_DIR}/bin)
-set (ABS_TOP ${PROJECT_SOURCE_DIR})
-set (QTDIR /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64)
-set (PYTHONDIR /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64)
-set (PYTHONVERSION 2.7)
-
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 0)
 set (VERSION_MICRO 0)
@@ -32,17 +24,27 @@ option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 include_directories ("${PROJECT_BINARY_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
-set (THIRD_PARTY_LIB_DIR "/glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/lib")
-set (THIRD_PARTY_INC_DIR "/glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/include")
+set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# These need to be updatd to change for install build
+set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
+set (BINDIR ${PROJECT_BINARY_DIR}/bin)
+set (ABS_TOP ${PROJECT_SOURCE_DIR})
+
+set (QTDIR )
+set (PYTHONDIR )
+set (PYTHONVERSION )
+set (THIRD_PARTY_LIB_DIR )
+set (THIRD_PARTY_INC_DIR )
+
+include (site.local OPTIONAL)
 
 include_directories (${THIRD_PARTY_INC_DIR})
 link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 LIST (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
-
-set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory (apps)
 add_subdirectory (lib)
