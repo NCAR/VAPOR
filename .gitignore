@@ -1,3 +1,5 @@
+/Makefile
+/build
 .DS_Store
 apps/vaporgui/guis/ui/*.h
 apps/vaporgui/moc/
