@@ -1,0 +1,35 @@
+lib/vdc/SphericalGrid.cpp out of date and deleted
+lib/vdc/StretchedGrid.cpp out of date and deleted
+lib/render/Manip.cpp out of date and deleted
+lib/render/TwoDImageRenderer.cpp out of date and deleted
+
+What to do about
+-undefined dynamic_lookup
+why are only certain
+
+GetAppPath.cpp has #ifdef Darwin but build system passes -DDARWIN
+
+
+Make sure to add optinal builds for libraries
+
+cyclic dependency between params and render.
+moved glutil to commont to resolve
+
+
+TODO
+  remove temp CMakeConfig.h
+
+
+Setting output directories:
+------------------------------
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+set_target_properties( targets...
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
