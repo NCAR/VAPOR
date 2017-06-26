@@ -104,7 +104,7 @@ find_library (QTCORE QtCore)
 find_library (QTGUI QtGui)
 find_library (QTOPENGL QtOpenGL)
 
-target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp quadmath ${QTCORE} ${QTGUI} ${QTOPENGL})
+target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp ${QTCORE} ${QTGUI} ${QTOPENGL})
 target_include_directories (vaporgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (APPLE)
@@ -115,6 +115,7 @@ elseif (UNIX AND NOT APPLE)
 	include_directories (${QTDIR}/include/QtCore)
 	include_directories (${QTDIR}/include/QtGui)
 	include_directories (${QTDIR}/include/QtOpenGL)
+	target_link_libraries (vaporgui quadmath)
 endif ()
 
 if (APPLE)
