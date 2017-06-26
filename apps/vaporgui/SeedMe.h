@@ -22,9 +22,9 @@
 #include <QtCore>
 #include <QtGui>
 //#include <Python.h>
-#include <errMsg.h>
-#include <SeedMeGUI.h>
-#include <firstTimeUser.h>
+#include "ui_errMsg.h"
+#include "ui_SeedMeGUI.h"
+#include "ui_firstTimeUser.h"
 
 class FirstTimeDialog : public QDialog, public Ui_FirstTimeDialog {
 	Q_OBJECT

@@ -1,9 +1,9 @@
 #ifndef TWODSUBTABS_H
 #define TWODSUBTABS_H
 
-#include "TwoDAppearanceGUI.h"
-#include "TwoDVariablesGUI.h"
-#include "TwoDGeometryGUI.h"
+#include "ui_TwoDAppearanceGUI.h"
+#include "ui_TwoDVariablesGUI.h"
+#include "ui_TwoDGeometryGUI.h"
 
 namespace VAPoR {
 	class ControlExec;

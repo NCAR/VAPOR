@@ -25,7 +25,7 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
 #include "qdialog.h"
-#include "newRendererDialog.h"
+#include "ui_newRendererDialog.h"
 #include "VizSelectCombo.h"
 #include "MessageReporter.h"
 #include "RenderEventRouter.h"
