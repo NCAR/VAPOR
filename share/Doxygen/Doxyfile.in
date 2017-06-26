@@ -17,20 +17,20 @@
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           =  VAPoR
+PROJECT_NAME           =  @PROJECT_NAME@
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = 3.0.0
+PROJECT_NUMBER         = @VERSION_STRING@
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = DOCDIR
+OUTPUT_DIRECTORY       = @DOC_DEST_DIR@
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -400,18 +400,18 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT        = mainpage.dox \
-		TOP_OF_TREE/include/vapor \
-		TOP_OF_TREE/apps/vaporgui/VizWinMgr.h \
-		TOP_OF_TREE/apps/vaporgui/TabManager.h \
-		TOP_OF_TREE/apps/vaporgui/VizWin.h \
-		TOP_OF_TREE/apps/vaporgui/EventRouter.h \
-		TOP_OF_TREE/apps/vaporgui/BarbEventRouter.h \
-		TOP_OF_TREE/apps/vaporgui/HelloEventRouter.h \
-		TOP_OF_TREE/apps/vaporgui/BoxSliderFrame.h \
-		TOP_OF_TREE/apps/vaporgui/MappingFrame.h \
-		TOP_OF_TREE/apps/vaporgui/VariablesWidget.h \
-		TOP_OF_TREE/apps/vaporgui/RenderHolder.h   
+INPUT        = @CMAKE_CURRENT_SOURCE_DIR@/mainpage.dox \
+		@PROJECT_SOURCE_DIR@/include/vapor \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/VizWinMgr.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/TabManager.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/VizWin.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/EventRouter.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/BarbEventRouter.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/HelloEventRouter.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/BoxSliderFrame.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/MappingFrame.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/VariablesWidget.h \
+		@PROJECT_SOURCE_DIR@/apps/vaporgui/RenderHolder.h   
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
