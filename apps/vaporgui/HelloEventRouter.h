@@ -9,8 +9,8 @@
 #include "RenderEventRouter.h"
 //#include "subeventrouter.h"
 #include "helloSubtabs.h"
-#include "helloAppearanceSubtab.h"
-#include "helloLayoutSubtab.h"
+#include "ui_helloAppearanceSubtab.h"
+#include "ui_helloLayoutSubtab.h"
 
 QT_USE_NAMESPACE
 

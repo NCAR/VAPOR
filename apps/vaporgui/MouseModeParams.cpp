@@ -26,12 +26,12 @@
 #include <vector>
 #include <string>
 
-#include "../../vaporgui/images/wheel.xpm"
-#include "../../vaporgui/images/twoDData.xpm"
-#include "../../vaporgui/images/twoDImage.xpm"
-#include "../../vaporgui/images/cube.xpm"
-#include "../../vaporgui/images/arrowrake.xpm"
-#include "../../vaporgui/images/isoline.xpm"
+#include "images/wheel.xpm"
+#include "images/twoDData.xpm"
+#include "images/twoDImage.xpm"
+#include "images/cube.xpm"
+#include "images/arrowrake.xpm"
+#include "images/isoline.xpm"
 #include "MouseModeParams.h"
 
 const std::string MouseModeParams::_currentMouseModeTag = "CurrentMouseModeTag";

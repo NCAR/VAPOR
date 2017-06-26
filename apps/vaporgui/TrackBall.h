@@ -46,7 +46,7 @@
 #ifndef TRACKBALL_H
 #define TRACKBALL_H
 
-#ifdef DARWIN
+#ifdef Darwin
     #include <OpenGL/gl.h>
 #else
     #include <GL/gl.h>
