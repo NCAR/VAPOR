@@ -624,7 +624,9 @@ int DataStatus::getGrids(
 
 			for (int j = 0; j<minExts.size(); j++){
 				//shrink minExts/maxExts to requested extents
-				if (minExts[j] < minExtsReq[j]) minExts[j] = minExtsReq[j];
+				if (minExts[j] < minExtsReq[j]) {
+					minExts[j] = minExtsReq[j];
+				}
 				if (maxExts[j] > maxExtsReq[j]) maxExts[j] = maxExtsReq[j];
 			}
 
@@ -648,7 +650,6 @@ int DataStatus::getGrids(
 		// greater than the max
 		//
 		for (int j=0; j<minExts.size(); j++) if (maxExts[j] < minExts[j]) {
-			cout << "extents size " << minExts.size() << " " << maxExts.size() << endl;
 			MyBase::SetErrMsg("Variable extents invalid");
 			return -1;
 		}
@@ -662,6 +663,7 @@ int DataStatus::getGrids(
 	
 		tminExts = minExts;
 		tmaxExts = maxExts;
+
 		StructuredGrid* rGrid = dataMgr->GetVariable(
 			ts,varnames[i], *refLevel, *lod, tminExts, tmaxExts,true
 		);
@@ -674,6 +676,7 @@ int DataStatus::getGrids(
 			return -1;
 		}
 		grids[i] = rGrid;
+
 	}
 
 #ifdef	DEAD

@@ -59,16 +59,6 @@
       <enum>QLayout::SetMaximumSize</enum>
      </property>
      <item>
-      <widget class="ColorMappedVariable" name="_ColorMappedVariable" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>50</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -123,18 +113,12 @@
   <customwidget>
    <class>ColorbarSettings</class>
    <extends>QWidget</extends>
-   <header>ColorbarSettings.h</header>
+   <header>colorbarsettings.h</header>
   </customwidget>
   <customwidget>
    <class>TFWidget</class>
    <extends>QWidget</extends>
    <header>TFWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ColorMappedVariable</class>
-   <extends>QWidget</extends>
-   <header>ColorMappedVariable.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
