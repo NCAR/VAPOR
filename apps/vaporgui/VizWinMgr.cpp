@@ -835,7 +835,7 @@ void VizWinMgr::UpdateRouters() {
 
 		QWidget* w = dynamic_cast<QWidget*> (eRouter);
 		assert(w);
-//		w->setEnabled(true);
+		w->setEnabled(true);
 
 		eRouter->updateTab();
 	}
@@ -855,7 +855,7 @@ void VizWinMgr::UpdateRouters() {
 
 		QWidget* w = dynamic_cast<QWidget*> (eRouter);
 		assert(w);
-//		w->setEnabled(true);
+		w->setEnabled(true);
 
 		eRouter->updateTab();
 	}

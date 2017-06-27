@@ -37,10 +37,10 @@ namespace VAPoR {
       
   public:
 
-	//BarbRenderer(const ParamsMgr *pm, string winName, string paramsType,
-	//	string instName, DataStatus *ds);
-	BarbRenderer(const ParamsMgr *pm, string winName,
-		string instName, DataStatus *ds);
+	BarbRenderer(
+		const ParamsMgr *pm, string winName, string dataSetName,
+		string instName, DataStatus *ds
+	);
 
     virtual ~BarbRenderer();
 
