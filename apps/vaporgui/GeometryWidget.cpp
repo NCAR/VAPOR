@@ -26,6 +26,8 @@
 
 using namespace VAPoR;
 
+const string GeometryWidget::_nDimsTag = "ActiveDimension";
+
 template <typename Out>
 void split(const std::string &s, char delim, Out result) {
     std::stringstream ss;
@@ -66,7 +68,6 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 
 void GeometryWidget::Reinit(Flags flags) {
     _flags = flags;
-
     if (_flags & TWOD) {
         zMinMaxGroupBox->hide();
     }
@@ -242,8 +243,6 @@ void GeometryWidget::copyRegion() {
     string renType = _renTypeNames[elems[1]];
     string renderer = elems[2];
 
-    cout << visualizer << " " << renType << " " << renderer << endl;
-
     RenderParams *copyParams = _paramsMgr->GetRenderParams(
         visualizer,
         renType,
@@ -269,6 +268,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     _paramsMgr = paramsMgr;
     _dataMgr = dataMgr;
     _rParams = rParams;
+
+    int ndim = _rParams->GetValueLong(_nDimsTag, 3);
+    assert(ndim == 2 || ndim == 3);
+    if (ndim == 2) {
+        _flags = (Flags)(_flags | TWOD);
+        _flags = (Flags)(_flags & ~(THREED));
+    } else {
+        _flags = (Flags)(_flags | THREED);
+        _flags = (Flags)(_flags & ~(TWOD));
+    }
 
     // Get current domain extents
     //

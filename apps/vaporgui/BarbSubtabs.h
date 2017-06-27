@@ -22,7 +22,7 @@ class BarbVariablesSubtab : public QWidget, public Ui_BarbVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::VECTOR | VariablesWidget::HGT |
                                                                  VariablesWidget::COLOR),
-                                 VariablesWidget::THREED);
+                                 (VariablesWidget::DimFlags)(VariablesWidget::TWOD | VariablesWidget::THREED));
     }
 
     void Update(
