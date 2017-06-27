@@ -2617,6 +2617,7 @@ int DataMgr::_find_bounding_grid(
 	vector <double> min, vector <double> max, 
 	vector <size_t> &min_ui, vector <size_t> &max_ui
 ) {
+
 	min_ui.clear();
 	max_ui.clear();
 
@@ -2742,7 +2743,9 @@ int DataMgr::_find_bounding_grid(
 	//
 	map_blk_to_vox(bs_at_level, bmin, bmax, min_ui, max_ui);
 	for (int i=0; i<max_ui.size(); i++) {
-		if (max_ui[i] >= dims_at_level[i]) max_ui[i] = dims_at_level[i]-1;
+		if (max_ui[i] >= dims_at_level[i]) {
+			max_ui[i] = dims_at_level[i]-1;
+		}
 	}
 
 	return(0);

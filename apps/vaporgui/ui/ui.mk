@@ -8,7 +8,7 @@ UI_FILES := animationTab vizTab regionTab  \
 	BarbAppearanceGUI BarbVariablesGUI BarbGeometryGUI \
 	TwoDVariablesGUI TwoDGeometryGUI VariablesWidgetGUI HelloVariablesGUI \
 	statsWindow errMsg plotWindow SeedMeGUI firstTimeUser TFWidgetGUI \
-	GeometryWidgetGUI ColorMappedVariableGUI
+	GeometryWidgetGUI
 
 ifeq ($(BUILD_FLOW),1)
 UI_FILES += fieldAppearanceSubtab seedingSubtab 

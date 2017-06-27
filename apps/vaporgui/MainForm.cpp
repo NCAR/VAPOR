@@ -1700,7 +1700,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 	switch(event->type()) {
 	case (QEvent::MouseButtonPress):
 	case (QEvent::MouseButtonRelease):
-	case (QEvent::MouseMove):
+//	case (QEvent::MouseMove):
 	case (QEvent::KeyRelease):
 
 	// Not sure why Paint is needed. Who generates it?
