@@ -8,6 +8,7 @@
 #include <map>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
+#include <vapor/DCCF.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
 #include <float.h>
@@ -401,6 +402,8 @@ int DataMgr::Initialize(const vector<string> &files) {
         _dc = new VDCNetCDF(_nthreads);
     } else if (_format.compare("wrf") == 0) {
         _dc = new DCWRF();
+    } else if (_format.compare("cf") == 0) {
+        _dc = new DCCF();
     } else {
         SetErrMsg("Invalid data collection format : %s", _format.c_str());
         return (-1);
@@ -2565,6 +2568,7 @@ int DataMgr::_find_bounding_grid(
     size_t ts, string varname, int level, int lod,
     vector<double> min, vector<double> max,
     vector<size_t> &min_ui, vector<size_t> &max_ui) {
+
     min_ui.clear();
     max_ui.clear();
 
@@ -2687,8 +2691,9 @@ int DataMgr::_find_bounding_grid(
     //
     map_blk_to_vox(bs_at_level, bmin, bmax, min_ui, max_ui);
     for (int i = 0; i < max_ui.size(); i++) {
-        if (max_ui[i] >= dims_at_level[i])
+        if (max_ui[i] >= dims_at_level[i]) {
             max_ui[i] = dims_at_level[i] - 1;
+        }
     }
 
     return (0);
