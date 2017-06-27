@@ -196,13 +196,19 @@ void GeometryWidget::updateCopyCombo() {
 	std::vector<string> visNames = _paramsMgr->GetVisualizerNames();
 	_visNames.clear();
 
+	_dataSetNames = _paramsMgr->GetDataMgrNames();
+
 	for (int i=0; i<visNames.size(); i++) {
+	for (int ii=0; ii<_dataSetNames.size(); ii++) {
 
 		// Create a mapping of abreviated visualizer names to their
 		// actual string values. 
 		//
 		string visAbb = "Vis" + std::to_string(i);
 		_visNames[visAbb] = visNames[i];
+
+		string dataSetName = _dataSetNames[ii];
+
 
 		std::vector<string> typeNames;
 		typeNames = _paramsMgr->GetRenderParamsClassNames(visNames[i]);
@@ -224,11 +230,13 @@ void GeometryWidget::updateCopyCombo() {
 
 			for (int k=0; k<renNames.size(); k++) {
 				string displayName = visAbb + ":" + 
-									 typeAbb + ":" + renNames[k];
+									dataSetName + ":" +
+									typeAbb + ":" + renNames[k];
 				QString qDisplayName = QString::fromStdString(displayName);
 				copyCombo->addItem(qDisplayName);
 			}
 		}
+	}
 	}
 }
 
@@ -237,13 +245,15 @@ void GeometryWidget::copyRegion() {
 	string copyString = copyCombo->currentText().toStdString();
 	std::vector<std::string> elems = split(copyString, ':');
 	string visualizer = _visNames[elems[0]];
-	string renType = _renTypeNames[elems[1]];
-	string renderer = elems[2];
+	string dataSetName = elems[1];
+	string renType = _renTypeNames[elems[2]];
+	string renderer = elems[3];
 
 	cout << visualizer << " " << renType << " " << renderer << endl;
 	
 	RenderParams* copyParams = _paramsMgr->GetRenderParams(
 												visualizer, 
+												dataSetName,
 												renType, 
 												renderer);
 	assert(copyParams);
