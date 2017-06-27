@@ -67,6 +67,9 @@ class PARAMS_API DataStatus {
     DataMgr *GetActiveDataMgr() const {
         return (GetDataMgr(_activeDataMgr));
     }
+    string GetActiveDataMgrName() const {
+        return (_activeDataMgr);
+    }
     void SetActiveDataMgr(string name);
 
     //! Set number of execution threads

@@ -48,8 +48,8 @@ static RendererRegistrar<TwoDDataRenderer> registrar(
     TwoDDataRenderer::GetClassType(), TwoDDataParams::GetClassType());
 
 TwoDDataRenderer::TwoDDataRenderer(
-    const ParamsMgr *pm, string winName,
-    string instName, DataStatus *ds) : TwoDRenderer(pm, winName, TwoDDataParams::GetClassType(),
+    const ParamsMgr *pm, string winName, string dataSetName,
+    string instName, DataStatus *ds) : TwoDRenderer(pm, winName, dataSetName, TwoDDataParams::GetClassType(),
                                                     TwoDDataRenderer::GetClassType(), instName, ds) {
 
     _texWidth = 0;
@@ -97,13 +97,13 @@ int TwoDDataRenderer::_initializeGL() {
 
 //#define	NOSHADER
 #ifndef NOSHADER
-    if (!m_shaderMgr) {
+    if (!_shaderMgr) {
         SetErrMsg("Programmable shading not available");
         return (-1);
     }
 
-    if (!m_shaderMgr->EffectExists(EffectName)) {
-        int rc = m_shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
+    if (!_shaderMgr->EffectExists(EffectName)) {
+        int rc = _shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
         if (rc < 0)
             return (-1);
     }
@@ -141,24 +141,24 @@ int TwoDDataRenderer::_paintGL() {
     int rc;
 #ifndef NOSHADER
 
-    rc = m_shaderMgr->EnableEffect(EffectName);
+    rc = _shaderMgr->EnableEffect(EffectName);
     if (rc < 0)
         return (-1);
 
     // 2D Data LIGHT parameters hard coded
     //
-    m_shaderMgr->UploadEffectData(EffectName, "lightingEnabled", (int)false);
-    m_shaderMgr->UploadEffectData(EffectName, "kd", (float)0.6);
-    m_shaderMgr->UploadEffectData(EffectName, "ka", (float)0.3);
-    m_shaderMgr->UploadEffectData(EffectName, "ks", (float)0.1);
-    m_shaderMgr->UploadEffectData(EffectName, "expS", (float)16.0);
-    m_shaderMgr->UploadEffectData(
+    _shaderMgr->UploadEffectData(EffectName, "lightingEnabled", (int)false);
+    _shaderMgr->UploadEffectData(EffectName, "kd", (float)0.6);
+    _shaderMgr->UploadEffectData(EffectName, "ka", (float)0.3);
+    _shaderMgr->UploadEffectData(EffectName, "ks", (float)0.1);
+    _shaderMgr->UploadEffectData(EffectName, "expS", (float)16.0);
+    _shaderMgr->UploadEffectData(
         EffectName, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
-    m_shaderMgr->UploadEffectData(EffectName, "minLUTValue", (float)crange[0]);
-    m_shaderMgr->UploadEffectData(EffectName, "maxLUTValue", (float)crange[1]);
+    _shaderMgr->UploadEffectData(EffectName, "minLUTValue", (float)crange[0]);
+    _shaderMgr->UploadEffectData(EffectName, "maxLUTValue", (float)crange[1]);
 
-    m_shaderMgr->UploadEffectData(EffectName, "colormap", colormapTexUnit);
-    m_shaderMgr->UploadEffectData(EffectName, "dataTexture", dataTexUnit);
+    _shaderMgr->UploadEffectData(EffectName, "colormap", colormapTexUnit);
+    _shaderMgr->UploadEffectData(EffectName, "dataTexture", dataTexUnit);
 
 #endif
 
@@ -179,7 +179,7 @@ int TwoDDataRenderer::_paintGL() {
     glDisable(GL_TEXTURE_1D);
 
 #ifndef NOSHADER
-    m_shaderMgr->DisableEffect();
+    _shaderMgr->DisableEffect();
 #endif
 
     return (rc);
@@ -256,7 +256,7 @@ int TwoDDataRenderer::_GetMesh(
     varnames.push_back(varname);
 
     StructuredGrid *sg = NULL;
-    int rc = m_dataStatus->getGrids(
+    int rc = _dataStatus->getGrids(
         ts, varnames, minBoxReq, maxBoxReq, &refLevel, &lod, &sg);
     if (rc < 0)
         return (-1);
@@ -408,7 +408,7 @@ int TwoDDataRenderer::_getMeshDisplaced(
     vars.push_back(hgtvar);
 
     StructuredGrid *hgtGrid = NULL;
-    int rc = m_dataStatus->getGrids(
+    int rc = _dataStatus->getGrids(
         ts, vars, minExtsReq, maxExtsReq, &refLevel, &lod, &hgtGrid);
     if (rc < 0)
         return (rc);
@@ -551,7 +551,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(
     myParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     StructuredGrid *sg = NULL;
-    int rc = m_dataStatus->getGrids(
+    int rc = _dataStatus->getGrids(
         ts, varnames, minBoxReq, maxBoxReq, &refLevel, &lod, &sg);
 
     if (rc < 0)

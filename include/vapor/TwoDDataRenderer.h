@@ -42,7 +42,7 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
 
   public:
     TwoDDataRenderer(
-        const ParamsMgr *pm, string winName,
+        const ParamsMgr *pm, string winName, string dataSetName,
         string instName, DataStatus *ds);
 
     virtual ~TwoDDataRenderer();
