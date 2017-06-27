@@ -18,6 +18,7 @@ const string BarbParams::_vectorScaleTag = "VectorScale";
 const string BarbParams::_gridTag = "GridDimensions";
 const string BarbParams::_alignGridTag = "GridAlignedToData";
 const string BarbParams::_alignGridStridesTag = "GridAlignedStrides";
+const string BarbParams::_varsAre3dTag = "VarsAre3D";
 
 
 BarbParams::BarbParams(
@@ -81,6 +82,10 @@ void BarbParams::_init() {
     int rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
 
 	SetUseSingleColor(true);
+	cout << "BARB PARAMS _init" << endl;
+	float rgb[] = {.95,.66,.27};
+	SetConstantColor(rgb);
+	
 
 	// Crap. No error handling from constructor. Need Initialization()
 	// method.

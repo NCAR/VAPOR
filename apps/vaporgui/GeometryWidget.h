@@ -10,6 +10,7 @@ namespace VAPoR {
 	class DataMgr;
 }
 
+
 class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 	
 	Q_OBJECT
@@ -76,6 +77,8 @@ private:
 	std::map<std::string, std::string> _renTypeNames;
 
 	Flags _flags;
+
+	static const std::string _nDimsTag;
 };
 
 #endif //REGIONSLIDERWIDGET_H
