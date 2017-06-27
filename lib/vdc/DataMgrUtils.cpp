@@ -172,6 +172,97 @@ int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &va
     return (DataMgrUtils::GetGrids(dataMgr, ts, varnames, minExtsReq, maxExtsReq, useLowerAccuracy, refLevel, lod, grids));
 }
 
+bool DataMgrUtils::GetAxes(const DataMgr *dataMgr, string varname, vector<int> &axes)
+{
+    axes.clear();
+
+    vector<string> coordvars;
+    bool           status = dataMgr->GetVarCoordVars(varname, true, coordvars);
+    if (!status) return (status);
+
+    for (int i = 0; i < coordvars.size(); i++) {
+        VAPoR::DC::CoordVar cvar;
+
+        status = dataMgr->GetCoordVarInfo(coordvars[i], cvar);
+        assert(status);
+
+        axes.push_back(cvar.GetAxis());
+    }
+    return (true);
+}
+
+bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double> &minExts, vector<double> &maxExts)
+{
+    minExts.clear();
+    maxExts.clear();
+
+    size_t maxXForm;
+    bool   status = DataMgrUtils::MaxXFormPresent(dataMgr, timestep, varname, maxXForm);
+    if (!status) return (status);
+
+    bool errEnabled = MyBase::EnableErrMsg(false);
+    int  rc = dataMgr->GetVariableExtents(timestep, varname, (int)maxXForm, minExts, maxExts);
+    MyBase::EnableErrMsg(errEnabled);
+
+    if (rc < 0) return (false);
+
+    return (true);
+}
+
+bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes)
+{
+    minExts.clear();
+    maxExts.clear();
+    axes.clear();
+
+    vector<double> tmpMinExts(3, std::numeric_limits<double>::max());
+    vector<double> tmpMaxExts(3, std::numeric_limits<double>::min());
+
+    // Get the coordinate extents of each variable. Grow the bounding
+    // box to accomodate each new variable. Handle cases where variables
+    // have different dimensionality, or, in 2D case, live in different
+    // planes.
+    //
+    // Have to be careful
+    // about what coordinate axis the coordinate extents apply to
+    //
+    for (int i = 0; i < varnames.size(); i++) {
+        vector<double> varMinExts;
+        vector<double> varMaxExts;
+        vector<int>    varAxes;
+
+        bool status = DataMgrUtils::GetExtents(dataMgr, timestep, varnames[i], varMinExts, varMaxExts);
+        if (!status) continue;
+
+        // Figure out which axes the variable coordinate extents
+        // apply to.
+        //
+        status = DataMgrUtils::GetAxes(dataMgr, varnames[i], varAxes);
+        assert(status);
+        assert(varMinExts.size() == varAxes.size());
+
+        for (int j = 0; j < varAxes.size(); j++) {
+            int axis = varAxes[j];
+
+            if (varMinExts[j] < tmpMinExts[axis]) { tmpMinExts[axis] = varMinExts[j]; }
+            if (varMaxExts[j] > tmpMaxExts[axis]) { tmpMaxExts[axis] = varMaxExts[j]; }
+        }
+    }
+
+    // tmp{Min,Max}Exts are always 3D vectors. If all variables are 2D
+    // and live in same plane the returned {min,max}Exts should have
+    // size of 2.
+    //
+    for (int i = 0; i < tmpMinExts.size(); i++) {
+        if (tmpMinExts[i] != std::numeric_limits<double>::max()) {
+            minExts.push_back(tmpMinExts[i]);
+            maxExts.push_back(tmpMaxExts[i]);
+            axes.push_back(i);
+        }
+    }
+    return (true);
+}
+
 #ifdef DEAD
 // Map corners of box to voxels.
 void DataMgrUtils::mapBoxToVox(Box *box, string varname, int refLevel, int lod, int timestep, size_t voxExts[6])
@@ -195,40 +286,6 @@ void DataMgrUtils::mapBoxToVox(Box *box, string varname, int refLevel, int lod, 
     }
     //(Note: this can be expensive with layered data)
     return;
-}
-
-bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts)
-{
-    minExts.clear();
-    maxExts.clear();
-
-    DataMgr *dataMgr = GetActiveDataMgr();
-    if (!dataMgr) {
-        for (int i = 0; i < 3; i++) {
-            minExts.push_back(0.0);
-            maxExts.push_back(0.0);
-        }
-        return (true);
-    }
-
-    vector<double> tempMin, tempMax;
-    bool           varfound = false;
-
-    for (int j = 0; j < _domainVars.size(); j++) {
-        int rc = dataMgr->GetVariableExtents(timestep, _domainVars[j], maxXFormPresent(_domainVars[j], timestep), tempMin, tempMax);
-        if (rc != 0) continue;
-        if (!varfound) {
-            minExts = tempMin;
-            maxExts = tempMax;
-            varfound = true;
-        } else {
-            for (int k = 0; k < 3; k++) {
-                if (minExts[k] > tempMin[k]) minExts[k] = tempMin[k];
-                if (maxExts[k] < tempMax[k]) maxExts[k] = tempMax[k];
-            }
-        }
-    }
-    return varfound;
 }
 
 double DataMgrUtils::getVoxelSize(size_t ts, string varname, int refLevel, int dir)

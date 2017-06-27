@@ -31,13 +31,16 @@ using namespace VAPoR;
 
 RenderParams *RenderEventRouter::GetActiveParams() const
 {
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    assert(paramsMgr);
+    // ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    // assert(paramsMgr);
     assert(!m_winName.empty());
     assert(!_paramsType.empty());
     assert(!m_instName.empty());
 
-    return (paramsMgr->GetRenderParams(m_winName, _paramsType, m_instName));
+    // return(paramsMgr->GetRenderParams(m_winName, _paramsType, m_instName));
+
+    string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(_paramsType);
+    return (_controlExec->GetRenderParams(m_winName, renderType, m_instName));
 }
 
 //

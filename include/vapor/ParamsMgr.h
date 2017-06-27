@@ -26,8 +26,8 @@
 #include <stack>
 #include <utility>
 
+#include <vapor/DataMgr.h>
 #include <vapor/ParamsBase.h>
-#include <vapor/DataStatus.h>
 #include <vapor/RenderParams.h>
 #include <vapor/AnimationParams.h>
 #include <vapor/ViewpointParams.h>
@@ -92,15 +92,27 @@ public:
     //
     virtual int LoadState(string stateFile);
 
-    //! Set the data manager for the current session
+    //! Add a DataMgr to the ParamsMgr class
     //!
-    //! Set the data manager for the active session. A
-    //! DataStatus must be present before any RenderParams
-    //! objects can be created.
+    //! This method associates a data set name \p dataSetName with a
+    //! DataMgr \p dataMgr. Methods on this class that take a data set
+    //! name as an argument can not be invoked until the data set name is
+    //! bound to a DataMgr instance.
     //!
-    //! \sa CreateRenderParamsInstance(), GetRenderParams()
+    void AddDataMgr(string dataSetName, DataMgr *dataMgr);
+
+    //! Remove a DataMgr instance previously.
+    //!
+    //! This method removes the association of a DataMgr instance with
+    //! the data set name \p dataSetName, previously made by AddDataMgr()
+    //!
+    void RemoveDataMgr(string dataSetName);
+
+    //! Return list of all DataMgr names
+    //!
+    //! Return a list of all DataMgr names bound with AddDataMgr()
     //
-    void SetDataStatus(DataStatus *dataStatus);
+    vector<string> GetDataMgrNames() const;
 
     //! Create a new ViewpointParams instances
     //!
@@ -109,14 +121,10 @@ public:
     //! \param [in] winName Window name to associate the new RenderParams
     //! object with.
     //!
-    //! This method will fail if a valid DataStatus has not be established
-    //! with SetDataStatus()
-    //!
     //! \retval ptr Returns a pointer to the newly created object on success,
-    //! and NULL on failure. This method will fail if a DataStatus does not
-    //! exist.
+    //! and NULL on failure.
     //!
-    //! \sa RenParamsRegistrar, RenParamsFactory, SetDataStatus(),
+    //! \sa RenParamsRegistrar, RenParamsFactory
     //! GetRenderParams()
     //
     ViewpointParams *CreateVisualizerParamsInstance(string winName);
@@ -135,19 +143,17 @@ public:
     //! object with.
     //! \param [in] instName Name to associate with the new object.
     //!
-    //! This method will fail if a valid DataStatus has not be established
-    //! with SetDataStatus()
-    //!
     //! \retval ptr Returns a pointer to the newly created object on success,
-    //! and NULL on failure. This method will fail if a DataStatus does not
+    //! and NULL on failure. This method will fail if the data set
+    //! \p dataSetName was not previously bound with AddDataMgr()
     //! exist, or if \p classType does not refer to a valid RenderParams
     //! derived class.
     //!
-    //! \sa RenParamsRegistrar, RenParamsFactory, SetDataStatus(),
-    //! GetRenderParams()
+    //! \sa RenParamsRegistrar, RenParamsFactory, AddDataMgr(),
+    //! GetRenderParams(), AddDataMgr()
     //! \sa RemoveRenderParamsInstance()
     //
-    RenderParams *CreateRenderParamsInstance(string winName, string classType, string instName);
+    RenderParams *CreateRenderParamsInstance(string winName, string dataSetName, string classType, string instName);
 
     //! Create a render params instance from an existing one
     //!
@@ -164,7 +170,7 @@ public:
     //!
     //! \retval pointer Pointer to the newly created RenderParams instance
     //
-    RenderParams *CreateRenderParamsInstance(string winName, string instName, const RenderParams *rp);
+    RenderParams *CreateRenderParamsInstance(string winName, string dataSetName, string instName, const RenderParams *rp);
 
     //! Remove a previously created RenderParams instance
     //!
@@ -178,11 +184,11 @@ public:
     //! object with.
     //! \param [in] instName Name associated with the object to destroy.
     //!
-    //! \sa RenParamsRegistrar, RenParamsFactory, SetDataStatus(),
+    //! \sa RenParamsRegistrar, RenParamsFactory
     //! GetRenderParams()
     //! \sa CreateRenderParamsInstance()
     //
-    void RemoveRenderParamsInstance(string winName, string classType, string instName);
+    void RemoveRenderParamsInstance(string winName, string dataSetName, string classType, string instName);
 
     //! Return a previously created RenderParams instance
     //!
@@ -196,7 +202,7 @@ public:
     //! object with.
     //! \param [in] instName Name associated with the object to destroy.
     //!
-    //! \sa RenParamsRegistrar, RenParamsFactory, SetDataStatus(),
+    //! \sa RenParamsRegistrar, RenParamsFactory, AddDataMgr(),
     //! GetRenderParams()
     //! \sa CreateRenderParamsInstance()
     //!
@@ -204,7 +210,7 @@ public:
     //! session state it is returned, otherwise NULL is returned. The latter
     //! case does not generate an error
     //
-    RenderParams *GetRenderParams(string winName, string classType, string instName) const;
+    RenderParams *GetRenderParams(string winName, string dataSetName, string classType, string instName) const;
 
     //! Returns all defined window (aka visualizer names).
     //!
@@ -226,6 +232,16 @@ public:
     //! \sa RenParamsRegistrar, RenParamsFactory
     //
     vector<string> GetRenderParamsClassNames(string winName) const;
+
+    //! Returns renderer types (aka class names) defined for window \p winName
+    //! associated with a data set named by \p dataSetName.
+    //! This method returns a list of all RenderParams types associated
+    //! with the window \p winName in the session state
+    //!
+    //! \sa CreateRenderParamsInstance()
+    //! \sa RenParamsRegistrar, RenParamsFactory
+    //
+    vector<string> GetRenderParamsClassNames(string winName, string dataSetName) const;
 
     //! Returns available renderer types (aka class names)
     //!
@@ -427,15 +443,15 @@ private:
         std::vector<bool *> _stateChangeFlags;
     };
 
-    DataStatus *        _dataStatus;
-    ParamsSeparator *   _rootSeparator;
-    XmlNode             _prevState;
-    std::vector<string> _appParamNames;
+    map<string, DataMgr *> _dataMgrMap;
+    ParamsSeparator *      _rootSeparator;
+    XmlNode                _prevState;
+    std::vector<string>    _appParamNames;
 
-    // Map of RenParamsContainers referenced by Window Name, and then by
-    // Renderer Name.
+    // Map of RenParamsContainers referenced by Window Name, then by
+    // data set name, and finally Renderer Name.
     //
-    map<string, map<string, RenParamsContainer *>> _renderParamsMap;
+    map<string, map<string, map<string, RenParamsContainer *>>> _renderParamsMap;
 
     // Map of ViewpointParams referenced by Window Name
     //
@@ -452,13 +468,27 @@ private:
     void _init(std::vector<string> appParamNames, XmlNode *node);
     void _destroy();
 
-    RenParamsContainer *get_ren_container(string winName, string renderName) const;
+    const map<string, map<string, RenParamsContainer *>> *getWinMap3(const map<string, map<string, map<string, RenParamsContainer *>>> &m3, string key) const;
 
-    void delete_ren_container(string winName, string renderName);
+    const map<string, RenParamsContainer *> *getWinMap3(const map<string, map<string, map<string, RenParamsContainer *>>> &m3, string key1, string key2) const;
+
+    const map<string, RenParamsContainer *> *getWinMap2(const map<string, map<string, RenParamsContainer *>> &m2, string key) const;
+
+    RenParamsContainer *get_ren_container(string winName, string dataSetName, string renderName) const;
+
+    map<string, map<string, RenParamsContainer *>> *getWinMap3(map<string, map<string, map<string, RenParamsContainer *>>> &m3, string key) const;
+
+    map<string, RenParamsContainer *> *getWinMap3(map<string, map<string, map<string, RenParamsContainer *>>> &m3, string key1, string key2) const;
+
+    map<string, RenParamsContainer *> *getWinMap2(map<string, map<string, RenParamsContainer *>> &m2, string key) const;
+
+    void delete_ren_container(string winName, string dataSetName, string renderName);
+
+    void delete_ren_containers(string winName, string dataSetName);
     void delete_ren_containers(string winName);
     void delete_ren_containers();
 
-    RenParamsContainer *make_ren_container(string winName, string renderName);
+    RenParamsContainer *make_ren_container(string winName, string dataSetName, string renderName);
 
     ViewpointParams *get_vp_params(string winName) const;
 
@@ -466,169 +496,11 @@ private:
 
     ViewpointParams *make_vp_params(string winName);
 
-    void setDataStatusNew(DataStatus *dataStatus);
-    void setDataStatusMerge(DataStatus *dataStatus);
+    void addDataMgrNew();
+    void addDataMgrMerge(string dataSetName);
 
     bool undoRedoHelper();
 };
 
-#ifdef DEAD
-
-//! method that specifies the instance that is current in the identified window.
-//! For non-Render Params, the current instance should always be 0;
-//! \param[in] pType ParamsBase TypeId of the params class
-//! \param[in] winnum index of identified window
-//! \param[in] instance index of instance to be made current
-void SetCurrentParamsInstanceIndex(int pType, int winnum, int instance) { _currentParamsInstance[make_pair(pType, winnum)] = instance; }
-
-//! method that returns the default Params instance.
-//! Useful for application developers.
-//! Based on XML tag (name) of Params class.
-//! With non-render params this is the global Params instance.
-//! \param[in] tag XML tag of the Params class
-//! \retval Pointer to specified Params instance
-Params *GetDefaultParams(const string &tag) const
-{
-    ParamsBase::ParamsBaseType ptype = GetTypeFromTag(tag);
-    return GetDefaultParams(ptype);
-}
-
-//! method that sets the default Params instance.
-//! Useful for application developers.
-//! With non-render params this is the global Params instance.
-//! \param[in] pType ParamsBase TypeId of the params class
-//! \param[in] p Pointer to default Params instance
-void SetDefaultParams(int pType, Params *p) { _defaultParamsInstance[pType] = p; }
-
-//! method that specifies the default Params instance
-//! Based on Xml Tag of Params class.
-//! With non-render params this is the global Params instance.
-//! Useful for application developers.
-//! \param[in] tag XML Tag of the params class
-//! \param[in] p Pointer to default Params instance
-void SetDefaultParams(const string &tag, Params *p) { _defaultParamsInstance[GetTypeFromTag(tag)] = p; }
-
-//! Method that constructs a default Params instance.
-//! Useful for application developers.
-//! \param[in] tag name of the params class
-//! \retval Pointer to new default Params instance, Null on failure
-Params *CreateDefaultParams(string tag);
-
-//! method that tells how many instances of a Params class
-//! exist for a particular visualizer.
-//! Useful for application developers.
-//! \param[in] pType ParamsBase TypeId of the params class
-//! \param[in] winnum index of specified visualizer window
-//! \retval number of instances that exist
-int GetNumParamsInstances(int pType, int winnum) const;
-
-//! method that tells how many instances of a Params class
-//! exist for a particular visualizer.
-//! Based on the XML tag of the Params class.
-//! Useful for application developers.
-//! \param[in] tag XML tag associated with Params class
-//! \param[in] winnum index of specified visualizer window
-//! \retval number of instances that exist
-int GetNumParamsInstances(const std::string tag, int winnum) const { return GetNumParamsInstances(GetTypeFromTag(tag), winnum); }
-
-//! method that appends a new instance to the list of existing
-//! Params instances for a particular visualizer.
-//! Useful for application developers.
-//! \param[in] pType ParamsBase TypeId of the params class
-//! \param[in] winnum index of specified visualizer window
-//! \param[in] p pointer to Params instance being appended
-//! \return 0 if successful
-int AppendParamsInstance(int pType, int winnum, Params *p)
-{
-    _paramsInstances[make_pair(pType, winnum)].push_back(p);
-    if (pType == 3 && _paramsInstances[make_pair(pType, winnum)].size() > 1) {
-        SetErrMsg("Error appending params instance");
-        return -1;
-    }
-    return 0;
-}
-
-//! method that appends a new instance to the list of existing
-//! Params instances for a particular visualizer.
-//! Based on the XML tag of the Params class.
-//! Useful for application developers.
-//! \param[in] tag XML tag associated with Params class
-//! \param[in] winnum index of specified visualizer window
-//! \param[in] p pointer to Params instance being appended
-//! \return 0 if successful
-int AppendParamsInstance(const std::string tag, int winnum, Params *p) { return AppendParamsInstance(GetTypeFromTag(tag), winnum, p); }
-
-//! method that removes an instance from the list of existing
-//! Params instances for a particular visualizer.
-//! Useful for application developers.
-//! \param[in] tag ParamsBase tag of the params class
-//! \param[in] winnum index of specified visualizer window
-//! \param[in] instance index of instance to remove
-//! \return zero if successful, -1 if error
-int RemoveParamsInstance(string tag, int winnum, int instance);
-
-//! method that produces a list of all the Params instances of a type
-//! for any visualizer (but not the default params)
-//! Useful for application developers.
-//! \param[in] pType ParamsBase TypeId of the params class.
-//! \param[out] vector<Params*> vector of all params of the specified type
-//! \retval int indicates size of result vector.
-int GetAllParamsInstances(string tag, vector<Params *> &) const;
-
-//! method that deletes all the Params instances for a particular visualizer
-//! of any type.
-//! \param[in] viznum window number associated with the visualizer
-//! \retval number of Params instances that were deleted.
-int DeleteVisualizerParams(int viznum);
-
-//! Determine if a tag is a valid Params tag
-//! \params[in] tag to be checked
-//! \return true if tag is a params tag
-bool IsParamsTag(const string &tag) const { return (GetTypeFromTag(tag) > 0); }
-
-//!
-//! method for converting a ParamsBase typeID to a Tag
-//! \retval string Tag (Name) associated with ParamsBase TypeID, empty string if typeID invalid
-//!
-const string GetTagFromType(ParamsBase::ParamsBaseType t) const;
-
-//! method that produces a vector of all the Params instances
-//! for a particular visualizer,
-//! based on the XML Tag of the Params class.
-//! Useful for application developers.
-//! \param[in] tag XML tag associated with Params class
-//! \param[in] winnum index of specified visualizer window
-//! \retval vector of the Params pointers associated with the window
-vector<Params *> &GetAllParamsInstances(const std::string tag, int winnum) { return GetAllParamsInstances(GetTypeFromTag(tag), winnum); }
-
-//!
-//! method for constructing a default instance of a ParamsBase
-//! class based on the Tag.
-//! \param[in] tag XML tag of the ParamsBase instance to be created.
-//! \retval instance newly created ParamsBase instance, or NULL on failure
-//!
-ParamsBase *CreateDefaultParamsBase(const string &tag);
-//! method for registering a tag for an already registered ParamsBaseClass.
-//! This is needed for backwards compatibility when a tag is changed.
-//! The class must first be registered with the new tag.
-//! \param[in] tag  Tag of class to be registered
-//! \param[in] newtag  Previously registered tag (new name of class)
-//! \param[in] isParams set true if the ParamsBase class is derived from Params
-//! \retval classID Returns the ParamsBaseClassId, or 0 on failure
-//!
-int ReregisterParamsBaseClass(const string &tag, const string &newtag, bool isParams);
-
-//! Copy the color bar settings from one RenderParams to all other RenderParams with ColorBars
-//! \param[in] rp RenderParams instance which will have its colorbar settings copied
-void CopyColorBarSettings(RenderParams *rp);
-
-    #ifndef DOXYGEN_SKIP_THIS
-private:
-        //! method that identifies the instance that is current in the identified window.
-
-    #endif    // DOXYGEN_SKIP_THIS
-};
-#endif
-}
-;         // End namespace VAPoR
+};        // End namespace VAPoR
 #endif    // PARAMSMGR_H

@@ -21,7 +21,8 @@ using namespace Wasp;
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-TwoDRenderer::TwoDRenderer(const ParamsMgr *pm, string winName, string paramsType, string classType, string instName, DataStatus *ds) : Renderer(pm, winName, paramsType, classType, instName, ds)
+TwoDRenderer::TwoDRenderer(const ParamsMgr *pm, string winName, string dataSetName, string paramsType, string classType, string instName, DataStatus *ds)
+: Renderer(pm, winName, dataSetName, paramsType, classType, instName, ds)
 {
     _textureID = 0;
     _texture = NULL;
@@ -54,7 +55,7 @@ int TwoDRenderer::_initializeGL()
 
 int TwoDRenderer::_paintGL()
 {
-    DataMgr *dataMgr = m_dataStatus->GetDataMgr();
+    DataMgr *dataMgr = _dataStatus->GetDataMgr();
     // Get the 2D texture
     //
     _texture = _GetTexture(dataMgr, _texWidth, _texHeight, _texInternalFormat, _texFormat, _texType, _texelSize);

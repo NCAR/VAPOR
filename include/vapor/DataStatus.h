@@ -61,6 +61,7 @@ public:
 
     DataMgr *GetDataMgr() const { return (GetActiveDataMgr()); }
     DataMgr *GetActiveDataMgr() const { return (GetDataMgr(_activeDataMgr)); }
+    string   GetActiveDataMgrName() const { return (_activeDataMgr); }
     void     SetActiveDataMgr(string name);
 
     //! Set number of execution threads

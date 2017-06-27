@@ -38,7 +38,10 @@ static RendererRegistrar<HelloRenderer> registrar(HelloRenderer::GetClassType(),
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-HelloRenderer::HelloRenderer(const ParamsMgr *pm, string winName, string instName, DataStatus *ds) : Renderer(pm, winName, HelloParams::GetClassType(), HelloRenderer::GetClassType(), instName, ds) {}
+HelloRenderer::HelloRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataStatus *ds)
+: Renderer(pm, winName, dataSetName, HelloParams::GetClassType(), HelloRenderer::GetClassType(), instName, ds)
+{
+}
 
 //----------------------------------------------------------------------------
 //
@@ -80,10 +83,10 @@ int HelloRenderer::_paintGL()
 
     // Finally, obtain the StructuredGrid of the data for the specified region, at requested refinement and lod,
     // using Renderer::getGrids()
-    DataMgr *dataMgr = m_dataStatus->GetDataMgr();
+    DataMgr *dataMgr = _dataStatus->GetDataMgr();
     size_t   timestep = myAnimationParams->GetCurrentTimestep();
 
-    int rc = m_dataStatus->getGrids(timestep, varnames, regMin, regMax, &actualRefLevel, &lod, &helloGrid);
+    int rc = _dataStatus->getGrids(timestep, varnames, regMin, regMax, &actualRefLevel, &lod, &helloGrid);
     if (rc) { return rc; }
 
     // Set the grid to use nearest-point interpolation, to calculate actual (uninterpolated) data max and min
@@ -149,7 +152,7 @@ int HelloRenderer::_paintGL()
     // Set up lighting and color.  We will use the lighting settings from the viewpoint params for rendering the lines,
     // but lighting will be disabled for rendering the max and min points.
 
-    ViewpointParams *vpParams = m_pm->GetViewpointParams(m_winName);
+    ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(_winName);
     int              nLights = vpParams->getNumLights();
     float            fcolor[3];
     rParams->GetConstantColor(fcolor);
