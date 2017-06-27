@@ -72,6 +72,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     Combo *_maxZCombo;
     RangeCombo *_zRangeCombo;
 
+    std::vector<std::string> _dataSetNames;
     std::map<std::string, std::string> _visNames;
     std::map<std::string, std::string> _renTypeNames;
 

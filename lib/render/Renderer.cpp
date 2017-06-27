@@ -39,8 +39,8 @@ const int Renderer::_imgWid = 256;
 const int Renderer::_imgHgt = 256;
 
 Renderer::Renderer(
-    const ParamsMgr *pm, string winName, string paramsType,
-    string classType, string instName, DataStatus *ds) : RendererBase(pm, winName, paramsType, classType, instName, ds) {
+    const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
+    string classType, string instName, DataStatus *ds) : RendererBase(pm, winName, dataSetName, paramsType, classType, instName, ds) {
     //Establish the data sources for the rendering:
     //
 
@@ -49,19 +49,20 @@ Renderer::Renderer(
 }
 
 RendererBase::RendererBase(
-    const ParamsMgr *pm, string winName, string paramsType,
+    const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
     string classType, string instName, DataStatus *ds) {
     //Establish the data sources for the rendering:
     //
-    m_pm = pm;
-    m_winName = winName;
-    m_paramsType = paramsType;
-    m_classType = classType;
-    m_instName = instName;
-    m_dataStatus = ds;
+    _paramsMgr = pm;
+    _winName = winName;
+    _dataSetName = dataSetName;
+    _paramsType = paramsType;
+    _classType = classType;
+    _instName = instName;
+    _dataStatus = ds;
 
-    m_shaderMgr = NULL;
-    m_glInitialized = false;
+    _shaderMgr = NULL;
+    _glInitialized = false;
 }
 // Destructor
 RendererBase::~RendererBase() {
@@ -73,7 +74,7 @@ Renderer::~Renderer() {
 }
 
 int RendererBase::initializeGL(ShaderMgr *sm) {
-    m_shaderMgr = sm;
+    _shaderMgr = sm;
     int rc = _initializeGL();
     if (rc < 0) {
         return (rc);
@@ -86,7 +87,7 @@ int RendererBase::initializeGL(ShaderMgr *sm) {
         return (-1);
     }
 
-    m_glInitialized = true;
+    _glInitialized = true;
 
     return (0);
 }
@@ -97,7 +98,7 @@ int Renderer::paintGL() {
     if (!rp->IsEnabled())
         return (0);
 
-    _timestep = m_pm->GetAnimationParams()->GetCurrentTimestep();
+    _timestep = _paramsMgr->GetAnimationParams()->GetCurrentTimestep();
 
     // Do not proceed if the bypass flag is set.
 #ifdef DEAD
@@ -160,11 +161,11 @@ void Renderer::enableClippingPlanes(const double extents[6]) {
 
 void Renderer::enableFullClippingPlanes() {
 
-    AnimationParams *myAnimationParams = m_pm->GetAnimationParams();
+    AnimationParams *myAnimationParams = _paramsMgr->GetAnimationParams();
     size_t timeStep = myAnimationParams->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
-    m_dataStatus->GetExtents(timeStep, minExts, maxExts);
+    _dataStatus->GetExtents(timeStep, minExts, maxExts);
     double extents[6];
     for (int i = 0; i < 3; i++) {
         extents[i] = minExts[i] - ((maxExts[i] - minExts[i]) * 0.001);
@@ -189,7 +190,7 @@ void Renderer::enable2DClippingPlanes() {
     GLdouble leftPlane[] = {1., 0., 0., 0.001}; //x = -.001
     GLdouble botPlane[] = {0., 1., 0., 0.001};  //y = -.001
 
-    const double *sizes = m_dataStatus->getFullStretchedSizes();
+    const double *sizes = _dataStatus->getFullStretchedSizes();
     topPlane[3] = sizes[1] * 1.001;
     rightPlane[3] = sizes[0] * 1.001;
 
@@ -206,10 +207,10 @@ void Renderer::enable2DClippingPlanes() {
 #ifdef DEAD
 void Renderer::enableRegionClippingPlanes() {
 
-    AnimationParams *myAnimationParams = m_pm->GetAnimationParams();
+    AnimationParams *myAnimationParams = _paramsMgr->GetAnimationParams();
     size_t timeStep = myAnimationParams->GetCurrentTimestep();
 
-    RegionParams *myRegionParams = m_pm->GetRegionParams();
+    RegionParams *myRegionParams = _paramsMgr->GetRegionParams();
 
     double regExts[6];
     myRegionParams->GetBox()->GetUserExtents(regExts, timeStep);
@@ -272,7 +273,7 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]) {
     double transformMatrix[12];
     //Set up to transform from probe (coords [-1,1]) into volume:
     GetActiveParams()->GetBox()->buildLocalCoordTransform(transformMatrix, 0.f, -1);
-    const double *sizes = m_dataStatus->getFullSizes();
+    const double *sizes = _dataStatus->getFullSizes();
 
     //Calculate the normal vector to the probe plane:
     double zdir[3] = {0.f, 0.f, 1.f};
@@ -471,15 +472,15 @@ void Renderer::renderColorbar() {
 /////////////////////////////////////////////////////////////////////////
 
 Renderer *RendererFactory::CreateInstance(
-    const ParamsMgr *pm, string winName,
+    const ParamsMgr *pm, string winName, string dataSetName,
     string classType, string instName, DataStatus *ds) {
     Renderer *instance = NULL;
 
     // find classType in the registry and call factory method.
     //
-    auto it = m_factoryFunctionRegistry.find(classType);
-    if (it != m_factoryFunctionRegistry.end()) {
-        instance = it->second(pm, winName, classType, instName, ds);
+    auto it = _factoryFunctionRegistry.find(classType);
+    if (it != _factoryFunctionRegistry.end()) {
+        instance = it->second(pm, winName, dataSetName, classType, instName, ds);
     }
 
     if (instance != NULL)
@@ -492,7 +493,7 @@ string RendererFactory::GetRenderClassFromParamsClass(
     string paramsClass) const {
 
     map<string, string>::const_iterator itr;
-    for (itr = m_factoryMapRegistry.begin(); itr != m_factoryMapRegistry.end(); ++itr) {
+    for (itr = _factoryMapRegistry.begin(); itr != _factoryMapRegistry.end(); ++itr) {
         if (itr->second == paramsClass)
             return (itr->first);
     }
@@ -503,7 +504,7 @@ string RendererFactory::GetParamsClassFromRenderClass(
     string renderClass) const {
 
     map<string, string>::const_iterator itr;
-    for (itr = m_factoryMapRegistry.begin(); itr != m_factoryMapRegistry.end(); ++itr) {
+    for (itr = _factoryMapRegistry.begin(); itr != _factoryMapRegistry.end(); ++itr) {
         if (itr->first == renderClass)
             return (itr->second);
     }
@@ -514,11 +515,11 @@ vector<string> RendererFactory::GetFactoryNames() const {
     vector<string> names;
 
     map<string, function<Renderer *(
-                    const ParamsMgr *, string, string, string, DataStatus *)>>::const_iterator itr;
+                    const ParamsMgr *, string, string, string, string, DataStatus *)>>::const_iterator itr;
 
     for (
-        itr = m_factoryFunctionRegistry.begin();
-        itr != m_factoryFunctionRegistry.end();
+        itr = _factoryFunctionRegistry.begin();
+        itr != _factoryFunctionRegistry.end();
         ++itr) {
         names.push_back(itr->first);
     }

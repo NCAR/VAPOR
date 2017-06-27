@@ -134,15 +134,74 @@ int GetGrids(
     bool useLowerAccuracy, int *refLevel, int *lod,
     std::vector<StructuredGrid *> &grids);
 
-#ifdef DEAD
+//! Get the spatial coordinate axes for a variable
+//!
+//! Returns the ordered (fastest to slowest varying) coordinate axis
+//! for a named variable.
+//!
+//! \param[in] varname Name of variable
+//! \param[out] axes Ordered list of axis indecies. The range of possible
+//! axes values is [0..2], with 0 corresponding to the X coordinate axis,
+//! 1 corresponding to Y, and 2 to Z.
+//!
+bool GetAxes(
+    const DataMgr *dataMgr, string varname, vector<int> &axes);
 
-void GetExtents(vector<double> &minExt, vector<double> &maxExt) const {
-    minExt.clear(), maxExt.clear();
-    for (int i = 0; i < 3; i++) {
-        minExt.push_back(_extents[i]);
-        maxExt.push_back(_extents[i + 3]);
-    }
-}
+//! Get a variables coordinate extents
+//!
+//! Get the minimum and maximum coordinate extents of a name variable
+//! at a given time step. The extents are returned in \p minExts and
+//! \p maxExts. The size of these vectors will match the dimensionality
+//! of the variable. The GetAxes() method can be used to determine which
+//! coordinate axes the returned extents correspond to.
+//!
+//! \param[in] timestep Time step of variable. Ignored for variables that
+//! are not time-varying.
+//! \param[in] Name of variable
+//! \param[out] minExts A vector whose size matches the dimensionality
+//! of the variable, and containing the minimum ordered coordinate
+//! extents of \p varname at time step \p timestep.
+//! \param[out] maxExts A vector whose size matches the dimensionality
+//! of the variable, and containing the maximum ordered coordinate
+//! extents of \p varname at time step \p timestep.
+//!
+//! \sa GetAxes()
+//
+bool GetExtents(
+    DataMgr *dataMgr,
+    size_t timestep, string varname,
+    vector<double> &minExts, vector<double> &maxExts);
+
+//! Get coordinate extents for one or more variables.
+//!
+//! Get the minimum and maximum coordinate extents of a list of variables
+//! at a given time step. This function handles variables with mixed
+//! dimensionality, and 2D variables that are defined on different planes.
+//! The extents are returned in \p minExts and
+//! \p maxExts.
+//!
+//! \param[in] timestep Time step of variable. Ignored for variables that
+//! are not time-varying.
+//! \param[in] Name of variable
+//! \param[out] minExts A vector whose size matches the dimensionality
+//! of the variable, and containing the minimum ordered coordinate
+//! extents of \p varname at time step \p timestep.
+//! \param[out] maxExts A vector whose size matches the dimensionality
+//! of the variable, and containing the maximum ordered coordinate
+//! extents of \p varname at time step \p timestep.
+//!
+//! \param[out] axes A vector indicating the axis of each coordinate
+//! returned in \p minExts and \p maxExts. See GetAxes()
+//!
+//! \sa GetAxes()
+//
+bool GetExtents(
+    DataMgr *dataMgr,
+    size_t timestep, vector<string> &varnames,
+    vector<double> &minExts, vector<double> &maxExts,
+    vector<int> &axes);
+
+#ifdef DEAD
 
 //! Determine the size of a voxel in user coordinates, along a specific dimension,
 //! or its maximum or minimum dimension
@@ -173,11 +232,6 @@ int getNumActiveVariables() { return getNumActiveVariables3D() + getNumActiveVar
 void mapBoxToVox(
     Box *box, string varname, int refLevel, int lod,
     int timestep, size_t voxExts[6]);
-
-//! Obtain the time-varying extents, based on the domain-defining variables.
-//! Return true on success.
-bool GetExtents(
-    size_t timestep, vector<double> &minExts, vector<double> &maxExts);
 
 #endif
 
