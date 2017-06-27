@@ -47,7 +47,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
                 VAPoR::RenderParams *rParams);
 
     void setEventRouter(RenderEventRouter *eventRouter);
-  public slots:
+
+  private slots:
     void setRange(double min, double max);
     void textChanged();
     void updateHisto();
@@ -55,6 +56,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void colorInterpChanged(int index);
     void loadTF();
     void saveTF();
+    void setCMVar();
+    void setSingleColor();
 
   private:
     void getRange(float range[2], float values[2]);
@@ -68,6 +71,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateAutoUpdateHistoCheckbox();
     void updateColorInterpolation();
     void updateMappingFrame();
+    void updateColorVarCombo();
+    void enableTFWidget(bool state);
+    void collapseColormapSettings();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
@@ -75,8 +81,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     bool _autoUpdateHisto = false;
     bool _discreteColormap = false;
     bool _textChanged = false;
+    float _myRGB[3];
 
-    VAPoR::ControlExec *_controlExec;
+    //VAPoR::ControlExec* _controlExec;
     RenderEventRouter *_eventRouter;
     VAPoR::ParamsMgr *_paramsMgr;
     VAPoR::DataMgr *_dataMgr;
@@ -87,6 +94,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     RangeCombo *_rangeCombo = NULL;
 
     Flags _flags;
+
+    static string _nDimsTag;
 };
 
 #endif //TFWIDGET_H
