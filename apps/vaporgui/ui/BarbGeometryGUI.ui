@@ -67,7 +67,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QSpinBox" name="xDimSpinBox">
+         <widget class="QSpinBox" name="_xDimSpinBox">
           <property name="minimumSize">
            <size>
             <width>100</width>
@@ -76,6 +76,12 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>999</number>
           </property>
          </widget>
         </item>
@@ -110,7 +116,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QSpinBox" name="yDimSpinBox">
+         <widget class="QSpinBox" name="_yDimSpinBox">
           <property name="minimumSize">
            <size>
             <width>100</width>
@@ -119,6 +125,12 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>999</number>
           </property>
          </widget>
         </item>
@@ -153,7 +165,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QSpinBox" name="zDimSpinBox">
+         <widget class="QSpinBox" name="_zDimSpinBox">
           <property name="minimumSize">
            <size>
             <width>100</width>
@@ -162,6 +174,12 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>999</number>
           </property>
          </widget>
         </item>

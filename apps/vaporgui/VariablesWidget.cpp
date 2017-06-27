@@ -122,7 +122,6 @@ void VariablesWidget::Reinit(
 	if (! ((_dimFlags & TWOD) && (_dimFlags & THREED)) ) {
 		dimensionFrame->hide();
 	}
-
 }
 
 void VariablesWidget::setNumRefinements(int num) {
