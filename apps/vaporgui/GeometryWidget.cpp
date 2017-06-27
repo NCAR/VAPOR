@@ -26,6 +26,8 @@
 
 using namespace VAPoR;
 
+const string GeometryWidget::_nDimsTag = "ActiveDimension";
+
 template<typename Out> void split(const std::string &s, char delim, Out result)
 {
     std::stringstream ss;
@@ -67,7 +69,6 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 void GeometryWidget::Reinit(Flags flags)
 {
     _flags = flags;
-
     if (_flags & TWOD) { zMinMaxGroupBox->hide(); }
 }
 
@@ -134,7 +135,7 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
     zMinMaxGroupBox->setTitle(zTitle);
 }
 
-void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> minFullExt, std::vector<double> maxFullExt)
+void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> &minFullExt, std::vector<double> &maxFullExt)
 {
     std::vector<string> varNames = _rParams->GetFieldVariableNames();
     std::vector<double> minVarExt, maxVarExt;
@@ -154,18 +155,22 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> 
                         varNames[i].c_str());
                 MyBase::SetErrMsg(bufr);
             }
-            for (int j = 0; j < 3; j++) {
-                // If we are on the extents of the first
-                // variable, just apply those extents as
-                // our initial condition...
-                //
-                if (i == 0) {
-                    minVarExt[j] = minFullExt[j];
-                    maxVarExt[j] = maxFullExt[j];
-                }
-                // ...Otherwise run our comparisons
-                //
-                else {
+
+            // If we are on the extents of the first
+            // variable, just apply those extents as
+            // our initial condition...
+            //
+            if (i == 0) {
+                minVarExt.push_back(minFullExt[0]);
+                minVarExt.push_back(minFullExt[1]);
+                minVarExt.push_back(minFullExt[2]);
+                maxVarExt.push_back(maxFullExt[0]);
+                maxVarExt.push_back(maxFullExt[1]);
+                maxVarExt.push_back(maxFullExt[2]);
+            } else {
+                for (int j = 0; j < 3; j++) {
+                    // ...Otherwise run our comparisons
+                    //
                     if (minVarExt[j] < minFullExt[j]) { minFullExt[j] = minVarExt[j]; }
                     if (maxVarExt[j] > maxFullExt[j]) { maxFullExt[j] = maxVarExt[j]; }
                 }
@@ -227,8 +232,6 @@ void GeometryWidget::copyRegion()
     string                   renType = _renTypeNames[elems[2]];
     string                   renderer = elems[3];
 
-    cout << visualizer << " " << renType << " " << renderer << endl;
-
     RenderParams *copyParams = _paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
     assert(copyParams);
 
@@ -249,6 +252,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     _paramsMgr = paramsMgr;
     _dataMgr = dataMgr;
     _rParams = rParams;
+
+    int ndim = _rParams->GetValueLong(_nDimsTag, 3);
+    assert(ndim == 2 || ndim == 3);
+    if (ndim == 2) {
+        _flags = (Flags)(_flags | TWOD);
+        _flags = (Flags)(_flags & ~(THREED));
+    } else {
+        _flags = (Flags)(_flags | THREED);
+        _flags = (Flags)(_flags & ~(TWOD));
+    }
 
     // Get current domain extents
     //

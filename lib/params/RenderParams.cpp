@@ -405,6 +405,7 @@ void RenderParams::SetColorMapVariableName(string varname)
 
 void RenderParams::SetConstantColor(const float rgb[3])
 {
+    cout << "SetConstantColor " << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
     vector<double> rgbv;
     for (int i = 0; i < 3; i++) {
         float v = rgb[i];
