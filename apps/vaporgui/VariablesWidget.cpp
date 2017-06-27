@@ -122,7 +122,6 @@ void VariablesWidget::Reinit(
 	if (! ((_dimFlags & TWOD) && (_dimFlags & THREED)) ) {
 		dimensionFrame->hide();
 	}
-
 }
 
 void VariablesWidget::setNumRefinements(int num) {
@@ -531,6 +530,9 @@ string VariablesWidget::updateVarCombo(
 		varCombo->addItem(QString::fromStdString(s));
 		if (s == currentVar) {
 			currentIndex = i;
+			if (doZero) {
+				currentIndex++;
+			}
 		}
 	}
 	if (currentIndex == -1) {
