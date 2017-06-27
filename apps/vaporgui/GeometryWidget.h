@@ -52,8 +52,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     void updateRangeLabels(std::vector<double> minExt,
                            std::vector<double> maxExt);
     void GetVectorExtents(size_t ts, int level,
-                          std::vector<double> minFullExt,
-                          std::vector<double> maxFullExt);
+                          std::vector<double> &minFullExt,
+                          std::vector<double> &maxFullExt);
     void updateCopyCombo();
 
     VAPoR::ParamsMgr *_paramsMgr;
@@ -76,6 +76,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     std::map<std::string, std::string> _renTypeNames;
 
     Flags _flags;
+
+    static const std::string _nDimsTag;
 };
 
 #endif //REGIONSLIDERWIDGET_H
