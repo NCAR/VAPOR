@@ -94,11 +94,11 @@ void BarbEventRouter::_updateTab() {
         _controlExec->GetParamsMgr(),
         _controlExec->GetDataMgr(),
         GetActiveParams());
-    /*_geometry->Update(
-		m_controlExec->GetParamsMgr(),
-		m_controlExec->GetDataMgr(),
-		GetActiveParams()
-	);*/
+
+    _geometry->Update(
+        _controlExec->GetParamsMgr(),
+        _controlExec->GetDataMgr(),
+        GetActiveParams());
 }
 
 void BarbEventRouter::startChangeMapFcn(QString) {
