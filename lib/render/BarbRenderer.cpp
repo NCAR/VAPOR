@@ -108,7 +108,8 @@ int BarbRenderer::_paintGL()
         if (rc < 0) return (rc);
     }
 
-    float vectorLengthScale = bParams->GetVectorScale() * _vectorScaleFactor;
+    float vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
+    cout << "calculated vectorLengthScale" << endl;
 
     //
     // Perform OpenGL rendering of barbs
@@ -327,7 +328,7 @@ float BarbRenderer::getHeightOffset(StructuredGrid *heightVar, float xCoord, flo
     return offset;
 }
 
-void BarbRenderer::renderScottsGrid(int rakeGrid[3], double rakeExts[6], StructuredGrid *variableData[5], int timestep, float vectorLengthScale, float rad, const BarbParams *bParams)
+void BarbRenderer::renderScottsGrid(int rakeGrid[3], double rakeExts[6], StructuredGrid *variableData[5], int timestep, float length, float rad, const BarbParams *bParams)
 {
     string           winName = GetVisualizer();
     ViewpointParams *vpParams = m_pm->GetViewpointParams(winName);
@@ -361,9 +362,9 @@ void BarbRenderer::renderScottsGrid(int rakeGrid[3], double rakeExts[6], Structu
                 }
 
                 float point[3] = {xCoord, yCoord, zCoord};
-                end[0] = point[0] + scales[0] * direction[0];
-                end[1] = point[1] + scales[1] * direction[1];
-                end[2] = point[2] + scales[2] * direction[2];
+                end[0] = point[0] + scales[0] * direction[0] * length;
+                end[1] = point[1] + scales[1] * direction[1] * length;
+                end[2] = point[2] + scales[2] * direction[2] * length;
 
                 string colorVar = bParams->GetColorMapVariableName();
                 bool   doColorMapping;
