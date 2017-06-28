@@ -26,8 +26,9 @@
 
 #include <vapor/DataStatus.h>
 #include <vapor/DataMgr.h>
+#include <vapor/DataMgrUtils.h>
+#include <vapor/ParamsMgr.h>
 #include <vapor/Proj4API.h>
-#include <vapor/MapperFunction.h>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -106,6 +107,129 @@ void DataStatus::SetActiveDataMgr(string name)
     // Need to manage lists of DMs. For now just handle one
     //
     reset();
+}
+
+vector<string> DataStatus::GetDataMgrNames() const
+{
+    vector<string> names;
+
+    map<string, DataMgr *>::const_iterator itr;
+    for (itr = _dataMgrs.begin(); itr != _dataMgrs.end(); ++itr) { names.push_back(itr->first); }
+    return (names);
+}
+
+void DataStatus::GetExtents(size_t ts, const map<string, vector<string>> &varMap, vector<double> &minExts, vector<double> &maxExts) const
+{
+    minExts.resize(3, 0.0);
+    maxExts.resize(3, 1.0);
+
+    if (varMap.empty()) return;
+
+    vector<double> tmpMinExts(3, std::numeric_limits<double>::max());
+    vector<double> tmpMaxExts(3, std::numeric_limits<double>::min());
+
+    map<string, vector<string>>::const_iterator itr;
+    for (itr = varMap.begin(); itr != varMap.end(); ++itr) {
+        DataMgr *dataMgr = GetDataMgr(itr->first);
+        if (!dataMgr) continue;
+
+        const vector<string> &varnames = itr->second;
+
+        vector<double> minVExts, maxVExts;
+        vector<int>    axes;
+        bool           status = DataMgrUtils::GetExtents(dataMgr, ts, varnames, minVExts, maxVExts, axes);
+        if (!status) continue;
+
+        for (int i = 0; i < axes.size(); i++) {
+            int axis = axes[i];
+
+            if (minVExts[i] < tmpMinExts[axis]) { tmpMinExts[axis] = minVExts[i]; }
+            if (maxVExts[i] > tmpMaxExts[axis]) { tmpMaxExts[axis] = maxVExts[i]; }
+        }
+    }
+
+    // tmp{Min,Max}Exts are always 3D vectors. If all variables are 2D
+    // and live in same plane the returned {min,max}Exts should have
+    // size of 2.
+    //
+    for (int i = 0; i < tmpMinExts.size(); i++) {
+        if (tmpMinExts[i] != std::numeric_limits<double>::max()) {
+            minExts[i] = tmpMinExts[i];
+            maxExts[i] = tmpMaxExts[i];
+        }
+    }
+    return;
+}
+
+map<string, vector<string>> DataStatus::getFirstVars(const vector<string> &dataSetNames) const
+{
+    map<string, vector<string>> defaultVars;
+
+    for (int i = 0; i < dataSetNames.size(); i++) {
+        DataMgr *      dataMgr = GetDataMgr(dataSetNames[i]);
+        vector<string> varnames;
+        for (int dim = 3; dim > 1; dim--) {
+            varnames = dataMgr->GetDataVarNames(dim, true);
+            if (varnames.size()) {
+                vector<string> oneVar(1, varnames[0]);
+                defaultVars[dataSetNames[i]] = oneVar;
+                break;
+            }
+        }
+    }
+    return (defaultVars);
+}
+
+void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, vector<double> &minExts, vector<double> &maxExts) const
+{
+    vector<string> dataSetNames = GetDataMgrNames();
+
+    map<string, vector<string>> varMap;
+
+    bool foundOne = false;
+    for (int i = 0; i < dataSetNames.size(); i++) {
+        vector<RenderParams *> rParams;
+        paramsMgr->GetRenderParams(winName, dataSetNames[i], rParams);
+
+        vector<string> varnames;
+        for (int j = 0; j < rParams.size(); j++) {
+            if (!rParams[j]->IsEnabled()) continue;
+            string varname = rParams[j]->GetVariableName();
+            if (!varname.empty()) { varnames.push_back(varname); }
+
+            vector<string> fvarnames = rParams[j]->GetFieldVariableNames();
+            for (int k = 0; k < fvarnames.size(); k++) {
+                if (!fvarnames[k].empty()) { varnames.push_back(fvarnames[k]); }
+            }
+        }
+        if (varnames.size()) { foundOne = true; }
+        varMap[dataSetNames[i]] = varnames;
+    }
+
+    // If we didn't find any enabled variable use the first variables
+    // found in each data set
+    //
+    if (!foundOne) { varMap = getFirstVars(dataSetNames); }
+
+    GetExtents(ts, varMap, minExts, maxExts);
+}
+
+void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<double> &minExts, vector<double> &maxExts) const
+{
+    minExts.resize(3, std::numeric_limits<double>::max());
+    maxExts.resize(3, std::numeric_limits<double>::min());
+
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+
+    for (int i = 0; i < winNames.size(); i++) {
+        vector<double> minWExts, maxWExts;
+        GetActiveExtents(paramsMgr, winNames[i], ts, minWExts, maxWExts);
+
+        for (int j = 0; j < minWExts.size(); j++) {
+            if (minWExts[j] < minExts[j]) { minExts[j] = minWExts[j]; }
+            if (maxWExts[j] > maxExts[j]) { maxExts[j] = maxWExts[j]; }
+        }
+    }
 }
 
 // After data is loaded or if there is a merge, call DataStatus::reset to
@@ -486,26 +610,6 @@ double DataStatus::getVoxelSize(size_t ts, string varname, int refLevel, int dir
             if (vsize < minsize) minsize = vsize;
         }
         return minsize;
-    }
-}
-
-bool DataStatus::GetDefaultVariableRange(string varname, MapperFunction *mf, float minmax[2])
-{
-    minmax[0] = minmax[1] = 0.0;
-
-    DataMgr *dataMgr = GetActiveDataMgr();
-    if (!dataMgr) { return (true); }
-
-    bool first = false;
-    if (mf) first = (mf->getMinMapValue() > mf->getMaxMapValue());
-    if (!dataMgr->VariableExists(_minTimeStep, varname, 0, 0)) return false;
-    StructuredGrid *rGrid = dataMgr->GetVariable(_minTimeStep, varname, 0, 0);
-    rGrid->GetRange(minmax);
-    if (!first) {
-        return false;
-    } else {    // Actually do need to set bounds
-        if (mf) mf->setMinMaxMapValue(minmax[0], minmax[1]);
-        return true;
     }
 }
 

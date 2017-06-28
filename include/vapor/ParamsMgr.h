@@ -212,6 +212,12 @@ public:
     //
     RenderParams *GetRenderParams(string winName, string dataSetName, string classType, string instName) const;
 
+    void GetRenderParams(string winName, string dataSetName, vector<RenderParams *> &rParams) const;
+
+    void GetRenderParams(string winName, vector<RenderParams *> &rParams) const;
+
+    void GetRenderParams(vector<RenderParams *> &rParams) const;
+
     //! Returns all defined window (aka visualizer names).
     //!
     //! This method will return all defined window names in the session state

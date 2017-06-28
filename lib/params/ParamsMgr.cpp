@@ -330,6 +330,57 @@ RenderParams *ParamsMgr::GetRenderParams(string winName, string dataSetName, str
     return (container->GetParams(instName));
 }
 
+void ParamsMgr::GetRenderParams(string winName, string dataSetName, vector<RenderParams *> &rParams) const
+{
+    rParams.clear();
+
+    const map<string, RenParamsContainer *> *m1Ptr;
+    m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+    if (!m1Ptr) return;
+
+    // m1Ptr[className]
+    //
+    const map<string, RenParamsContainer *> &         ref = *m1Ptr;
+    map<string, RenParamsContainer *>::const_iterator itr;
+    for (itr = ref.begin(); itr != ref.end(); ++itr) {
+        RenParamsContainer *rpc = itr->second;
+        vector<string>      names = rpc->GetNames();
+        for (int i = 0; i < names.size(); i++) { rParams.push_back(rpc->GetParams(names[i])); }
+    }
+}
+
+void ParamsMgr::GetRenderParams(string winName, vector<RenderParams *> &rParams) const
+{
+    rParams.clear();
+
+    const map<string, map<string, RenParamsContainer *>> *m2Ptr;
+    m2Ptr = getWinMap3(_renderParamsMap, winName);
+    if (!m2Ptr) return;
+
+    // m2Ptr[dataSetName][className]
+    //
+    const map<string, map<string, RenParamsContainer *>> &         ref = *m2Ptr;
+    map<string, map<string, RenParamsContainer *>>::const_iterator itr;
+    for (itr = ref.begin(); itr != ref.end(); ++itr) {
+        vector<RenderParams *> tmp;
+        GetRenderParams(winName, itr->first, tmp);
+        rParams.insert(rParams.end(), tmp.begin(), tmp.end());
+    }
+}
+
+void ParamsMgr::GetRenderParams(vector<RenderParams *> &rParams) const
+{
+    rParams.clear();
+
+    map<string, map<string, map<string, RenParamsContainer *>>>::const_iterator itr;
+
+    for (itr = _renderParamsMap.begin(); itr != _renderParamsMap.end(); ++itr) {
+        vector<RenderParams *> tmp;
+        GetRenderParams(itr->first, tmp);
+        rParams.insert(rParams.end(), tmp.begin(), tmp.end());
+    }
+}
+
 vector<string> ParamsMgr::GetVisualizerNames() const
 {
     vector<string> vizNames;

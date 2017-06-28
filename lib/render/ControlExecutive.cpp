@@ -51,11 +51,6 @@ ControlExec::~ControlExec()
 
 int ControlExec::NewVisualizer(string winName)
 {
-    if (!_dataStatus) {
-        SetErrMsg("Invalid state : no data");
-        return -1;
-    }
-
     // Remove if already exists. Else no-op
     //
     RemoveVisualizer(winName);
@@ -202,7 +197,7 @@ int ControlExec::ActivateRender(string winName, string renderType, string render
             return -1;
         }
 
-        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, dataSetName, renderType, renderName, _dataStatus);
+        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, dataSetName, renderType, renderName, _dataStatus->GetDataMgr(dataSetName));
         if (!ren) {
             SetErrMsg("Invalid renderer of type \"%s\"", renderType.c_str());
             _paramsMgr->EndSaveStateGroup();
@@ -252,7 +247,7 @@ int ControlExec::ActivateRender(string winName, const RenderParams *rp, string r
             return -1;
         }
 
-        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, dataSetName, renderType, renderName, _dataStatus);
+        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, dataSetName, renderType, renderName, _dataStatus->GetDataMgr(dataSetName));
         if (!ren) {
             SetErrMsg("Invalid renderer of type \"%s\"", renderType.c_str());
             _paramsMgr->EndSaveStateGroup();
@@ -389,7 +384,7 @@ int ControlExec::OpenData(vector<string> files, string typ)
         return -1;
     }
 
-    _paramsMgr->AddDataMgr(dataSetName, _dataStatus->GetDataMgr());
+    _paramsMgr->AddDataMgr(dataSetName, _dataStatus->GetDataMgr(dataSetName));
 
     // Re-initialize the ControlExec to match the new state
     //

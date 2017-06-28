@@ -26,6 +26,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/AnimationParams.h>
 #include <vapor/ShaderMgr.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/TwoDDataRenderer.h>
 #include <vapor/TwoDDataParams.h>
 
@@ -46,8 +47,8 @@ const int colormapTexUnit = 1;    // GL_TEXTURE1
 //
 static RendererRegistrar<TwoDDataRenderer> registrar(TwoDDataRenderer::GetClassType(), TwoDDataParams::GetClassType());
 
-TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataStatus *ds)
-: TwoDRenderer(pm, winName, dataSetName, TwoDDataParams::GetClassType(), TwoDDataRenderer::GetClassType(), instName, ds)
+TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
+: TwoDRenderer(pm, winName, dataSetName, TwoDDataParams::GetClassType(), TwoDDataRenderer::GetClassType(), instName, dataMgr)
 {
     _texWidth = 0;
     _texHeight = 0;
@@ -232,11 +233,8 @@ int TwoDDataRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
         return (-1);
     }
 
-    vector<string> varnames;
-    varnames.push_back(varname);
-
     StructuredGrid *sg = NULL;
-    int             rc = _dataStatus->getGrids(ts, varnames, minBoxReq, maxBoxReq, &refLevel, &lod, &sg);
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &sg);
     if (rc < 0) return (-1);
 
     assert(sg);
@@ -370,11 +368,8 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     string hgtvar = myParams->GetHeightVariableName();
     assert(!hgtvar.empty());
 
-    vector<string> vars;
-    vars.push_back(hgtvar);
-
     StructuredGrid *hgtGrid = NULL;
-    int             rc = _dataStatus->getGrids(ts, vars, minExtsReq, maxExtsReq, &refLevel, &lod, &hgtGrid);
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, hgtvar, minExtsReq, maxExtsReq, true, &refLevel, &lod, &hgtGrid);
     if (rc < 0) return (rc);
     assert(hgtGrid);
 
@@ -487,17 +482,16 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     int             refLevel = myParams->GetRefinementLevel();
     int             lod = myParams->GetCompressionLevel();
 
-    vector<string> varnames;
-    varnames.push_back(myParams->GetVariableName());
-    if (varnames[0].empty()) {
+    string varname = myParams->GetVariableName();
+    if (varname.empty()) {
         SetErrMsg("No variable name specified");
         return (NULL);
     }
 
     size_t ndim;
-    dataMgr->GetNumDimensions(varnames[0], ndim);
+    dataMgr->GetNumDimensions(varname, ndim);
     if (ndim != 2) {
-        SetErrMsg("Invalid variable: %s ", varnames[0].c_str());
+        SetErrMsg("Invalid variable: %s ", varname.c_str());
         return (NULL);
     }
 
@@ -507,15 +501,13 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     myParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     StructuredGrid *sg = NULL;
-    int             rc = _dataStatus->getGrids(ts, varnames, minBoxReq, maxBoxReq, &refLevel, &lod, &sg);
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &sg);
 
     if (rc < 0) return (NULL);
 
     vector<size_t> dims;
     sg->GetDimensions(dims);
     assert(dims.size() == 2);
-
-    cout << "dataStatus report: " << minBoxReq[0] << " " << dims[0] << endl;
 
     _texWidth = dims[0];
     _texHeight = dims[1];

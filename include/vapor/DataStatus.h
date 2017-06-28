@@ -27,6 +27,7 @@
 #include <vapor/DataMgr.h>
 
 namespace VAPoR {
+
 //! \class DataStatus
 //! \ingroup Public_Params
 //! \brief A class for describing the currently loaded dataset
@@ -45,7 +46,8 @@ namespace VAPoR {
 //! mappings are provided between active names/nums and session nums, and also between variable names and
 //! their 2D and 3D session variable numbers and active variable numbers.
 
-class MapperFunction;
+class ParamsMgr;
+
 class PARAMS_API DataStatus {
 public:
     DataStatus(size_t cacheSize, int nThreads = 0);
@@ -62,7 +64,35 @@ public:
     DataMgr *GetDataMgr() const { return (GetActiveDataMgr()); }
     DataMgr *GetActiveDataMgr() const { return (GetDataMgr(_activeDataMgr)); }
     string   GetActiveDataMgrName() const { return (_activeDataMgr); }
-    void     SetActiveDataMgr(string name);
+
+    vector<string> GetDataMgrNames() const;
+
+    void SetActiveDataMgr(string name);
+
+    void GetExtents(size_t ts, const map<string, vector<string>> &varnames, vector<double> &minExt, vector<double> &maxExt) const;
+
+    //! Get domain extents for all active variables
+    //!
+    //! This method returns the union of the domain extents for
+    //! all active variables on the window named by \p winName.
+    //! A variable is considered active if it
+    //! it currrently in use by an enabled RenderParams instance.
+    //!
+    //! The domain extents returned are always 3D. I.e. \p minExts
+    //! and \p maxExts will always have three elements.
+    //!
+    //! If no variable is active all elements of \p minExts will be zero,
+    //! and all elements of maxExts will be one.
+    //!
+    //! \param[in] paramsMgr Active variables are determined by
+    //! querying the ParamsMgr.
+    //! \param[out] minExts
+    //!
+    //! \sa ParamsMgr::GetRenderParams()
+    //
+    void GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, vector<double> &minExts, vector<double> &maxExts) const;
+
+    void GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<double> &minExts, vector<double> &maxExts) const;
 
     //! Set number of execution threads
     //!
@@ -157,6 +187,7 @@ public:
 
 #endif
 
+#ifdef DEAD
     //! Obtain default variable range lazily
     //! Saves bounds in MapperFunction if values not previously initialized
     //! Returns true if range is being set for the first time
@@ -167,6 +198,8 @@ public:
     //! \param[out] minmax Resulting bounds.
     //! \return true if this is the first time the bounds of this variable have been obtained
     bool GetDefaultVariableRange(string varname, MapperFunction *mf, float minmax[2]);
+
+#endif
 
     //! Convert user point coordinates to lon/lat in-place.  Return false if can't do it.
     //! \param[in/out] coords coordinates to be converted
@@ -334,6 +367,8 @@ public:
     int getGrids(size_t ts, const vector<string> &varnames, const double extents[6], int *refLevel, int *lod, StructuredGrid **grids) const;
 
 private:
+    map<string, vector<string>> getFirstVars(const vector<string> &dataSetNames) const;
+
     //! Reset the datastatus when a new datamgr is opened.
     //! This must be called whenever the data manager changes or when any new variables are defined.
     void reset();

@@ -393,9 +393,11 @@ void VizWinMgr::sethome()
 void VizWinMgr::viewAll()
 {
     DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+    size_t      ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
-    dataStatus->GetExtents(minExts, maxExts);
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
     assert(minExts.size() == 3);
     assert(maxExts.size() == 3);
 
