@@ -40,8 +40,10 @@ const int Renderer::_imgHgt = 256;
 
 Renderer::Renderer(
 	const ParamsMgr *pm, string winName,  string dataSetName, string paramsType,
-	string classType, string instName, DataStatus *ds
-) : RendererBase(pm, winName, dataSetName, paramsType, classType, instName, ds) {
+	string classType, string instName, DataMgr *dataMgr
+) : RendererBase(
+		pm, winName, dataSetName, paramsType, classType, instName, dataMgr
+) {
 	//Establish the data sources for the rendering:
 	//
 	
@@ -51,7 +53,7 @@ Renderer::Renderer(
 
 RendererBase::RendererBase(
 	const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
-	string classType, string instName, DataStatus *ds
+	string classType, string instName, DataMgr *dataMgr
 ) {
 	//Establish the data sources for the rendering:
 	//
@@ -61,7 +63,7 @@ RendererBase::RendererBase(
     _paramsType = paramsType;
     _classType = classType;
 	_instName = instName;
-	_dataStatus = ds;
+	_dataMgr = dataMgr;
 
     _shaderMgr = NULL;
 	_glInitialized = false;
@@ -168,6 +170,7 @@ void Renderer::enableClippingPlanes(const double extents[6]){
 
 void Renderer::enableFullClippingPlanes() {
 
+#ifdef	DEAD
 	AnimationParams *myAnimationParams = _paramsMgr->GetAnimationParams();
     size_t timeStep = myAnimationParams->GetCurrentTimestep();
 	
@@ -180,6 +183,7 @@ void Renderer::enableFullClippingPlanes() {
 	}
 
 	enableClippingPlanes(extents);
+#endif
 }
 	
 void Renderer::disableClippingPlanes(){
@@ -192,6 +196,7 @@ void Renderer::disableClippingPlanes(){
 }
 
  void Renderer::enable2DClippingPlanes(){
+#ifdef	DEAD
 	GLdouble topPlane[] = {0., -1., 0., 1.}; //y = 1
 	GLdouble rightPlane[] = {-1., 0., 0., 1.0};// x = 1
 	GLdouble leftPlane[] = {1., 0., 0., 0.001};//x = -.001
@@ -209,6 +214,7 @@ void Renderer::disableClippingPlanes(){
 	glEnable(GL_CLIP_PLANE2);
 	glClipPlane(GL_CLIP_PLANE3, leftPlane);
 	glEnable(GL_CLIP_PLANE3);
+#endif
 }
 
 #ifdef	DEAD
@@ -468,7 +474,7 @@ void Renderer::renderColorbar(){
 
 Renderer *RendererFactory::CreateInstance(
 	const ParamsMgr *pm, string winName,  string dataSetName,
-	string classType, string instName, DataStatus *ds
+	string classType, string instName, DataMgr *dataMgr
 ) {
     Renderer * instance = NULL;
 
@@ -476,7 +482,9 @@ Renderer *RendererFactory::CreateInstance(
     //
     auto it = _factoryFunctionRegistry.find(classType);
     if(it != _factoryFunctionRegistry.end()) {
-        instance = it->second(pm, winName, dataSetName, classType, instName,ds);
+        instance = it->second(
+			pm, winName, dataSetName, classType, instName, dataMgr
+		);
 	}
 
     if(instance != NULL)
@@ -512,7 +520,7 @@ vector <string> RendererFactory::GetFactoryNames() const {
 	vector <string> names;
 
 	map<string, function<Renderer * (
-		const ParamsMgr *, string, string, string, string, DataStatus *
+		const ParamsMgr *, string, string, string, string, DataMgr *
 		)>>::const_iterator itr;
 
 	for (

@@ -25,7 +25,6 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
-#include <vapor/DataStatus.h>
 
 namespace VAPoR {
 
@@ -49,7 +48,7 @@ class RENDER_API RendererBase: public MyBase {
 public:
 	RendererBase(
 		const ParamsMgr *pm, string winName, string dataSetName,
-		string paramsType, string classType, string instName, DataStatus *ds
+		string paramsType, string classType, string instName, DataMgr *dataMgr
 	);
 	virtual ~RendererBase();
 	//! Pure virtual method
@@ -89,7 +88,7 @@ protected:
  string _paramsType;
  string _classType;
  string _instName;
- DataStatus* _dataStatus;
+ DataMgr* _dataMgr;
 
  ShaderMgr *_shaderMgr;
 
@@ -128,7 +127,7 @@ public:
 	//
 	Renderer(
 		const ParamsMgr *pm, string winName, string dataSetName,
-		string paramsType, string classType, string instName, DataStatus *ds
+		string paramsType, string classType, string instName, DataMgr *dataMgr
 	);
 	
 	virtual ~Renderer();
@@ -313,7 +312,7 @@ public:
  void RegisterFactoryFunction(
 	string myName, string myParamsName,
 	function<Renderer*(
-		const ParamsMgr *, string, string, string, string, DataStatus *
+		const ParamsMgr *, string, string, string, string, DataMgr *
 	)> classFactoryFunction) 
  {
 
@@ -324,7 +323,7 @@ public:
 
  Renderer *(CreateInstance(
 	const ParamsMgr *pm, string winName, string dataSetName,
-	string classType, string instName, DataStatus *ds
+	string classType, string instName, DataMgr *dataMgr
  ));
 
  string GetRenderClassFromParamsClass(string paramsClass) const;
@@ -333,7 +332,7 @@ public:
 
 private:
  map<string, function<Renderer * (
-	const ParamsMgr *, string, string, string, string, DataStatus *)
+	const ParamsMgr *, string, string, string, string, DataMgr *)
  >>_factoryFunctionRegistry;
  map<string, string> _factoryMapRegistry;
 
@@ -369,9 +368,9 @@ public:
 			classType, paramsClassType, [](
 			const ParamsMgr *pm, string winName, 
 			string dataSetName, string classType, string instName,
-			DataStatus *ds
+			DataMgr *dataMgr
 	) -> Renderer * { 
-		return new T(pm, winName, dataSetName, instName, ds);
+		return new T(pm, winName, dataSetName, instName, dataMgr);
 	}
 	);
  }
