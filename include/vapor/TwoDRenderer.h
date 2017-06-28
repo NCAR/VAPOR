@@ -38,7 +38,7 @@ class RENDER_API TwoDRenderer : public Renderer {
     //! this renderer
     TwoDRenderer(
         const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
-        string classType, string instName, DataStatus *ds);
+        string classType, string instName, DataMgr *dataMgr);
 
     //! Destructor
     //

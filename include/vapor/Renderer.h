@@ -25,7 +25,6 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
-#include <vapor/DataStatus.h>
 
 namespace VAPoR {
 
@@ -48,7 +47,7 @@ class RENDER_API RendererBase : public MyBase {
   public:
     RendererBase(
         const ParamsMgr *pm, string winName, string dataSetName,
-        string paramsType, string classType, string instName, DataStatus *ds);
+        string paramsType, string classType, string instName, DataMgr *dataMgr);
     virtual ~RendererBase();
     //! Pure virtual method
     //! Any OpenGL initialization is performed in initializeGL
@@ -85,7 +84,7 @@ class RENDER_API RendererBase : public MyBase {
     string _paramsType;
     string _classType;
     string _instName;
-    DataStatus *_dataStatus;
+    DataMgr *_dataMgr;
 
     ShaderMgr *_shaderMgr;
 
@@ -120,7 +119,7 @@ class RENDER_API Renderer : public RendererBase {
     //
     Renderer(
         const ParamsMgr *pm, string winName, string dataSetName,
-        string paramsType, string classType, string instName, DataStatus *ds);
+        string paramsType, string classType, string instName, DataMgr *dataMgr);
 
     virtual ~Renderer();
 
@@ -302,7 +301,7 @@ class PARAMS_API RendererFactory {
     void RegisterFactoryFunction(
         string myName, string myParamsName,
         function<Renderer *(
-            const ParamsMgr *, string, string, string, string, DataStatus *)>
+            const ParamsMgr *, string, string, string, string, DataMgr *)>
             classFactoryFunction) {
 
         // register the class factory function
@@ -312,7 +311,7 @@ class PARAMS_API RendererFactory {
 
     Renderer *(CreateInstance(
         const ParamsMgr *pm, string winName, string dataSetName,
-        string classType, string instName, DataStatus *ds));
+        string classType, string instName, DataMgr *dataMgr));
 
     string GetRenderClassFromParamsClass(string paramsClass) const;
     string GetParamsClassFromRenderClass(string renderClass) const;
@@ -320,7 +319,7 @@ class PARAMS_API RendererFactory {
 
   private:
     map<string, function<Renderer *(
-                    const ParamsMgr *, string, string, string, string, DataStatus *)>>
+                    const ParamsMgr *, string, string, string, string, DataMgr *)>>
         _factoryFunctionRegistry;
     map<string, string> _factoryMapRegistry;
 
@@ -351,8 +350,8 @@ class RENDER_API RendererRegistrar {
         // register the class factory function
         //
         RendererFactory::Instance()->RegisterFactoryFunction(
-            classType, paramsClassType, [](const ParamsMgr *pm, string winName, string dataSetName, string classType, string instName, DataStatus *ds) -> Renderer * {
-                return new T(pm, winName, dataSetName, instName, ds);
+            classType, paramsClassType, [](const ParamsMgr *pm, string winName, string dataSetName, string classType, string instName, DataMgr *dataMgr) -> Renderer * {
+                return new T(pm, winName, dataSetName, instName, dataMgr);
             });
     }
 };

@@ -25,6 +25,8 @@
 
 namespace VAPoR {
 
+class DataStatus;
+
 //! \class VizFeatureRenderer
 //! \brief Class that draws various geometry as specified by VizFeatureParams
 //! \author Alan Norton
@@ -66,6 +68,9 @@ class RENDER_API VizFeatureRenderer : public MyBase {
 
     //! Render the domain fram
     void drawDomainFrame();
+
+    void getDomainExtents(
+        vector<double> &minExts, vector<double> &maxExts) const;
 
 #ifdef DEAD
     //! Render the region frame
