@@ -11,8 +11,8 @@ using namespace VAPoR;
 //
 static RenParamsRegistrar<BarbParams> registrar(BarbParams::GetClassType());
 
-const string BarbParams::_lineThicknessTag = "LineThickness";
-const string BarbParams::_vectorScaleTag = "VectorScale";
+const string BarbParams::_thicknessScaleTag = "LineThickness";
+const string BarbParams::_lengthScaleTag = "VectorScale";
 const string BarbParams::_gridTag = "GridDimensions";
 const string BarbParams::_alignGridTag = "GridAlignedToData";
 const string BarbParams::_alignGridStridesTag = "GridAlignedStrides";
