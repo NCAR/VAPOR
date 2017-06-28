@@ -8,6 +8,7 @@
 #include <map>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
+#include <vapor/DCCF.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
 #include <float.h>
@@ -406,6 +407,9 @@ int DataMgr::Initialize(const vector <string> &files) {
 	else if (_format.compare("wrf") == 0) {
 		_dc = new DCWRF();
 	}
+	else if (_format.compare("cf") == 0) {
+		_dc = new DCCF();
+	}
 	else {
 		SetErrMsg("Invalid data collection format : %s", _format.c_str());
 		return(-1);
@@ -553,26 +557,24 @@ int DataMgr::GetNumTimeSteps(string varname) const {
 	return(_dc->GetNumTimeSteps(varname));
 }
 
-int DataMgr::GetNumRefLevels(string varname) const {
+size_t DataMgr::GetNumRefLevels(string varname) const {
 	if (!_dc) {
-		return(0);
+		return(1);
 	}
 	if (varname == "") return 1;
 	return(_dc->GetNumRefLevels(varname));
 }
 
-int DataMgr::GetCRatios(string varname, vector <size_t> &cratios) const {
+vector <size_t> DataMgr::GetCRatios(string varname) const {
 	if (!_dc) {
-		return(0);
+		return(vector <size_t> (1,1));
 	}
-	cratios.clear();
 
 	DC::BaseVar var;
 	int rc = GetBaseVarInfo(varname, var);
-	if (rc<0) return(rc);
+	if (rc<0) return(vector <size_t> (1,1));
 
-	cratios = var.GetCRatios();
-	return(0);
+	return (var.GetCRatios());
 }
 
 StructuredGrid *DataMgr::GetVariable (
@@ -622,6 +624,7 @@ StructuredGrid *DataMgr::GetVariable (
 	//
 	vector <string> coord_vars;
 	bool ok = DataMgr::GetVarCoordVars(varname, true, coord_vars);
+	assert(ok);
 
 	while (min.size() > coord_vars.size()) {
 		min.pop_back();
@@ -890,6 +893,8 @@ StructuredGrid *DataMgr::GetVariable(
 	//
 	vector <string> coord_vars;
 	bool ok = DataMgr::GetVarCoordVars(varname, true, coord_vars);
+	assert(ok);
+
 	while (min.size() > coord_vars.size()) {
 		min.pop_back();
 		max.pop_back();
@@ -1129,7 +1134,7 @@ void	DataMgr::RemovePipeline(string name) {
 
 bool DataMgr::VariableExists(
     size_t ts, string varname, int level, int lod
-) {
+) const {
 
 	
     // disable error reporting
@@ -1469,7 +1474,6 @@ int DataMgr::_get_regions(
 		}
 
 		int nlevels = DataMgr::GetNumRefLevels(varnames[i]);
-		if (nlevels < 0) return(-1);
 
 		DC::BaseVar var;
 		int rc = GetBaseVarInfo(varnames[i], var);
@@ -2190,7 +2194,6 @@ float *DataMgr::_get_unblocked_region_from_fs(
 
 int DataMgr::_level_correction(string varname, int &level) const {
 	int nlevels = DataMgr::GetNumRefLevels(varname);
-	if (nlevels < 0) return(-1);
 
 	if (level >= nlevels) level = nlevels-1;
 	if (level >= 0) level = -(nlevels-level);
@@ -2614,6 +2617,7 @@ int DataMgr::_find_bounding_grid(
 	vector <double> min, vector <double> max, 
 	vector <size_t> &min_ui, vector <size_t> &max_ui
 ) {
+
 	min_ui.clear();
 	max_ui.clear();
 
@@ -2739,7 +2743,9 @@ int DataMgr::_find_bounding_grid(
 	//
 	map_blk_to_vox(bs_at_level, bmin, bmax, min_ui, max_ui);
 	for (int i=0; i<max_ui.size(); i++) {
-		if (max_ui[i] >= dims_at_level[i]) max_ui[i] = dims_at_level[i]-1;
+		if (max_ui[i] >= dims_at_level[i]) {
+			max_ui[i] = dims_at_level[i]-1;
+		}
 	}
 
 	return(0);

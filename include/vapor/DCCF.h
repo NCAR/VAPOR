@@ -99,7 +99,7 @@ public:
 
  //! \copydoc DC::GetCoordVarNames()
  //!
- virtual int GetNumRefLevels(string varname) const { return(1); }
+ virtual size_t GetNumRefLevels(string varname) const { return(1); }
 
  //! \copydoc DC::GetMapProjection(string)
  //!
