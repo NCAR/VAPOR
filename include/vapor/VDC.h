@@ -689,22 +689,9 @@ class VDF_API VDC : public VAPoR::DC {
     //
     virtual std::vector<string> GetCoordVarNames() const;
 
-    //! Return the number of refinement levels for the indicated variable
-    //!
-    //! Compressed variables have a multi-resolution grid representation.
-    //! This method returns the number of levels in the hiearchy. A value
-    //! of one indicates that only the native resolution is available.
-    //! A value of two indicates that two levels, the native plus the
-    //! next coarsest are available, and so on.
-    //!
-    //! \param[in] varname Data or coordinate variable name.
-    //!
-    //! \retval num If \p varname is unknown zero is returned. if \p varname
-    //! is not compressed (has no multi-resolution representation) one is
-    //! returned. Otherwise the total number of levels in the multi-resolution
-    //! hierarchy are returned.
+    //! \copydoc DC:GetNumRefLevels()
     //
-    int GetNumRefLevels(string varname) const;
+    size_t GetNumRefLevels(string varname) const;
 
     //! Write an attribute
     //!
