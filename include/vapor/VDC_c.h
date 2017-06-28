@@ -116,21 +116,23 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 // Write
 
 int VDC_DefineDimension(VDC *p, const char *dimname, size_t length);
-int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char **coordvars, size_t coordvarCount, const char *units, int xtype, int compressed);
-int VDC_PutAtt(VDC *p, const char *varname, const char *attname, int xtype, const void *values, size_t count);
-int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, int xtype, const double *values, size_t count);
-int VDC_PutAtt_long(VDC *p, const char *varname, const char *attname, int xtype, const long *values, size_t count);
-int VDC_PutAtt_text(VDC *p, const char *varname, const char *attname, int xtype, const char *values);
+int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char **coordvars, size_t coordvarCount, const char *units, VDC_XType xtype, int compressed);
+int VDC_DefineCoordVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);
+int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const void *values, size_t count);
+int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count);
+int VDC_PutAtt_long(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const long *values, size_t count);
+int VDC_PutAtt_text(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const char *values);
 int VDC_EndDefine(VDC *p);
 int VDC_PutVar(VDC *p, const char *varname, int lod, const float *data);
 int VDC_PutVarAtTimeStep(VDC *p, size_t ts, const char *varname, int lod, const float *data);
 
 // Utility
-void VDC_FreeStringArray(char ***str, int *count);
-void VDC_FreeString(char **str);
-void VDC_FreeLongArray(long **data);
-void VDC_FreeDoubleArray(double **data);
-void VDC_FreeSize_tArray(size_t **data);
+const char *VDC_GetErrMsg();
+void        VDC_FreeStringArray(char ***str, int *count);
+void        VDC_FreeString(char **str);
+void        VDC_FreeLongArray(long **data);
+void        VDC_FreeDoubleArray(double **data);
+void        VDC_FreeSize_tArray(size_t **data);
 
 #ifdef __cplusplus
 }    // extern "C" }
