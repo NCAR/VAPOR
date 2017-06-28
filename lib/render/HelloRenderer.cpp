@@ -25,6 +25,7 @@
 #endif
 
 #include <vapor/ParamsMgr.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/HelloRenderer.h>
 
 using namespace VAPoR;
@@ -41,8 +42,8 @@ static RendererRegistrar<HelloRenderer> registrar(
 //----------------------------------------------------------------------------
 HelloRenderer::HelloRenderer(
     const ParamsMgr *pm, string winName, string dataSetName,
-    string instName, DataStatus *ds) : Renderer(pm, winName, dataSetName, HelloParams::GetClassType(),
-                                                HelloRenderer::GetClassType(), instName, ds) {}
+    string instName, DataMgr *dataMgr) : Renderer(pm, winName, dataSetName, HelloParams::GetClassType(),
+                                                  HelloRenderer::GetClassType(), instName, dataMgr) {}
 
 //----------------------------------------------------------------------------
 //
@@ -67,10 +68,10 @@ int HelloRenderer::_paintGL() {
     int lod = rParams->GetCompressionLevel();
 
     //Get the variable name
-    vector<string> varnames;
-    varnames.push_back(rParams->GetVariableName());
+    string varname = rParams->GetVariableName();
 
-    //Determine the full vdc extents, in order to render in local user coordinates.
+    //Determine the full vdc extents, in order to render
+    // in local user coordinates.
 
     //Determine the data extents.
     //The extents of data needed are determined by the end points.
@@ -87,13 +88,12 @@ int HelloRenderer::_paintGL() {
 
     //Finally, obtain the StructuredGrid of the data for the specified region, at requested refinement and lod,
     //using Renderer::getGrids()
-    DataMgr *dataMgr = _dataStatus->GetDataMgr();
     size_t timestep = myAnimationParams->GetCurrentTimestep();
 
-    int rc = _dataStatus->getGrids(
-        timestep, varnames, regMin, regMax,
+    int rc = DataMgrUtils::GetGrids(
+        _dataMgr, timestep, varname, regMin, regMax, true,
         &actualRefLevel, &lod, &helloGrid);
-    if (rc) {
+    if (rc < 0) {
         return rc;
     }
 
@@ -144,6 +144,8 @@ int HelloRenderer::_paintGL() {
             maxPoint[2] = coord[2];
         }
     }
+
+    _dataMgr->UnlockGrid(helloGrid);
 
 #ifdef DEAD
     //Apply scene stretching to all the points that will be rendered.
