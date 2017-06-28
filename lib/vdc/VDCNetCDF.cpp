@@ -1126,6 +1126,12 @@ bool VDCNetCDF::VariableExists(
     return(true);
 }
 
+int VDCNetCDF::SetFill(int fillmode)
+{
+	int last;
+	int ret = ((NetCDFCpp *)_master)->SetFill(fillmode, last);
+	return ret;
+}
 
 int VDCNetCDF::_WriteMasterMeta() {
 
