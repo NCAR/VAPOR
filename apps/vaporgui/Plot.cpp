@@ -351,7 +351,7 @@ void Plot::Initialize(DataMgr* dm, VizWinMgr* vwm) {
 #endif
 
 void Plot::initCRatios() {
-	_dm->GetCRatios(_defaultVar, _cRatios);
+	_cRatios = _dm->GetCRatios(_defaultVar);
 	cRatioCombo->clear();
 
 	for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it){

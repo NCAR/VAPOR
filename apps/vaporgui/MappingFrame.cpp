@@ -311,8 +311,6 @@ void MappingFrame::setVariableName(std::string name)
 //void MappingFrame::updateTab()
 void MappingFrame::Update(RenderParams *rParams)
 {
-	cout << "updating MappingFrame" << endl;
-
 	_rParams = rParams;
 
 	string varname = rParams->GetVariableName();

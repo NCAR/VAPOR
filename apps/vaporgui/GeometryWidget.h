@@ -10,6 +10,7 @@ namespace VAPoR {
 	class DataMgr;
 }
 
+
 class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 	
 	Q_OBJECT
@@ -42,11 +43,9 @@ public:
 				VAPoR::DataMgr* dataMgr,
 				VAPoR::RenderParams* rParams);
 
-public slots:
+private slots:
 	void setRange(double min, double max);
 	void copyRegion();
-	void updateRenTypeCombo();
-	void updateRenNameCombo();
 
 private:
 	void connectWidgets();
@@ -54,9 +53,9 @@ private:
 	void updateRangeLabels(std::vector<double> minExt,
 							std::vector<double> maxExt);
 	void GetVectorExtents(size_t ts, int level,
-						std::vector<double> minFullExt,
-						std::vector<double> maxFullExt);
-	void updateVisCombo();
+						std::vector<double> &minFullExt,
+						std::vector<double> &maxFullExt);
+	void updateCopyCombo();
 
 	VAPoR::ParamsMgr* _paramsMgr;
 	VAPoR::DataMgr* _dataMgr;
@@ -74,7 +73,12 @@ private:
 	Combo* _maxZCombo;
 	RangeCombo* _zRangeCombo;
 
+	std::map<std::string, std::string> _visNames;
+	std::map<std::string, std::string> _renTypeNames;
+
 	Flags _flags;
+
+	static const std::string _nDimsTag;
 };
 
 #endif //REGIONSLIDERWIDGET_H
