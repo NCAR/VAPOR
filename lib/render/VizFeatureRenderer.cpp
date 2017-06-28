@@ -444,15 +444,17 @@ void VizFeatureRenderer::flatConvertFromLonLat(double x[2], double minLon, doubl
 
     if (x[0] < minLon) {
         x[0] = 2. * minLon - x[0];
-        _dataStatus->convertFromLonLat(x);
+        ConvertLonLatToPCS(_dataMgr, x);
         x[0] = 2. * minX - x[0];
     } else if (x[0] > maxLon) {
         x[0] = 2. * maxLon - x[0];
-        _dataStatus->convertFromLonLat(x);
+        ConvertLonLatToPCS(_dataMgr, x);
         x[0] = 2. * maxX - x[0];
     } else {
-        _dataStatus->convertFromLonLat(x);
+        ConvertLonLatToPCS(_dataMgr, x);
     }
+
+    if (rc < 0) { Handle error }
 }
 void VizFeatureRenderer::ConvertAxes(bool toLatLon, const vector<long> ticDirs, const vector<double> fromMinTic, const vector<double> fromMaxTic, const vector<double> fromOrigin,
                                      const vector<double> fromTicLength, double toMinTic[3], double toMaxTic[3], double toOrigin[3], double toTicLength[3])

@@ -26,6 +26,23 @@
 
 using namespace VAPoR;
 
+const string GeometryWidget::_nDimsTag = "ActiveDimension";
+
+template<typename Out> void split(const std::string &s, char delim, Out result)
+{
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) { *(result++) = item; }
+}
+
+std::vector<std::string> split(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
 GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWidgetGUI()
 {
     setupUi(this);
@@ -52,7 +69,6 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 void GeometryWidget::Reinit(Flags flags)
 {
     _flags = flags;
-
     if (_flags & TWOD) { zMinMaxGroupBox->hide(); }
 }
 
@@ -119,7 +135,7 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
     zMinMaxGroupBox->setTitle(zTitle);
 }
 
-void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> minFullExt, std::vector<double> maxFullExt)
+void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> &minFullExt, std::vector<double> &maxFullExt)
 {
     std::vector<string> varNames = _rParams->GetFieldVariableNames();
     std::vector<double> minVarExt, maxVarExt;
@@ -139,18 +155,22 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> 
                         varNames[i].c_str());
                 MyBase::SetErrMsg(bufr);
             }
-            for (int j = 0; j < 3; j++) {
-                // If we are on the extents of the first
-                // variable, just apply those extents as
-                // our initial condition...
-                //
-                if (i == 0) {
-                    minVarExt[j] = minFullExt[j];
-                    maxVarExt[j] = maxFullExt[j];
-                }
-                // ...Otherwise run our comparisons
-                //
-                else {
+
+            // If we are on the extents of the first
+            // variable, just apply those extents as
+            // our initial condition...
+            //
+            if (i == 0) {
+                minVarExt.push_back(minFullExt[0]);
+                minVarExt.push_back(minFullExt[1]);
+                minVarExt.push_back(minFullExt[2]);
+                maxVarExt.push_back(maxFullExt[0]);
+                maxVarExt.push_back(maxFullExt[1]);
+                maxVarExt.push_back(maxFullExt[2]);
+            } else {
+                for (int j = 0; j < 3; j++) {
+                    // ...Otherwise run our comparisons
+                    //
                     if (minVarExt[j] < minFullExt[j]) { minFullExt[j] = minVarExt[j]; }
                     if (maxVarExt[j] > maxFullExt[j]) { maxFullExt[j] = maxVarExt[j]; }
                 }
@@ -159,118 +179,51 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> 
     }
 }
 
-void GeometryWidget::updateVisCombo()
+void GeometryWidget::updateCopyCombo()
 {
-    // Add new visualizer names, if any
-    //
+    copyCombo->clear();
+
     std::vector<string> visNames = _paramsMgr->GetVisualizerNames();
+    _visNames.clear();
+
     for (int i = 0; i < visNames.size(); i++) {
-        QString visName = QString::fromStdString(visNames[i]);
+        // Create a mapping of abreviated visualizer names to their
+        // actual string values.
+        //
+        string visAbb = "Vis" + std::to_string(i);
+        _visNames[visAbb] = visNames[i];
 
-        if (copyVisCombo->findText(visName) < 0) { copyVisCombo->addItem(visName); }
-    }
+        std::vector<string> typeNames;
+        typeNames = _paramsMgr->GetRenderParamsClassNames(visNames[i]);
 
-    // Remove deleted visualizer names, if any
-    //
-    for (int i = 0; i < copyVisCombo->count(); i++) {
-        string visName = copyVisCombo->itemText(i).toStdString();
-        if (std::find(visNames.begin(), visNames.end(), visName) == visNames.end() && (visName != "Visualizer")) {
-            copyVisCombo->removeItem(i);
-            i = 0;    // Redo search since our indices are now screwed up :(
-        }
-    }
-}
+        for (int j = 0; j < typeNames.size(); j++) {
+            // Abbreviate Params names by removing 'Params" from them.
+            // Then store them in a map for later reference.
+            //
+            string typeAbb = typeNames[j];
+            int    pos = typeAbb.find("Params");
+            typeAbb.erase(pos, 6);
+            _renTypeNames[typeAbb] = typeNames[j];
 
-void GeometryWidget::updateRenTypeCombo()
-{
-    // Now update the renderer selector menu based on
-    // whatever visualizer is selected
-    //
+            std::vector<string> renNames;
+            renNames = _paramsMgr->GetRenderParamInstances(visNames[i], typeNames[j]);
 
-    // Default case where no visualizer is selected
-    //
-    string visName = copyVisCombo->currentText().toStdString();
-    if (visName == "Visualizer") {
-        copyRenTypeCombo->clear();
-        copyRenTypeCombo->addItem(QString("Type"));
-        return;
-    }
-
-    // Now add new renderer names pertaining to our current visualizer
-    // if they weren't in the comboBox already
-    //
-    std::vector<string> typeNames = _paramsMgr->GetRenderParamsClassNames(visName);
-    for (int i = 0; i < typeNames.size(); i++) {
-        QString typeName = QString::fromStdString(typeNames[i]);
-        if (copyRenTypeCombo->findText(typeName) < 0) { copyRenTypeCombo->addItem(typeName); }
-    }
-
-    // Finally removed renderer names that may have been removed from
-    //
-    for (int i = 0; i < copyRenTypeCombo->count(); i++) {
-        string typeName = copyRenTypeCombo->itemText(i).toStdString();
-        if ((std::find(typeNames.begin(), typeNames.end(), typeName) == typeNames.end()) && (typeName != "Type")) {
-            copyRenTypeCombo->removeItem(i);
-            i = 0;    // Redo search since our indices are now screwed up :(
-        }
-    }
-}
-
-void GeometryWidget::updateRenNameCombo()
-{
-    // Now update the renderer selector menu based on
-    // whatever visualizer is selected
-    //
-
-    // Default case where no visualizer is selected
-    //
-    string visName = copyVisCombo->currentText().toStdString();
-    string typeName = copyRenTypeCombo->currentText().toStdString();
-    if (typeName == "Type") {
-        copyRenNameCombo->clear();
-        copyRenNameCombo->addItem(QString("Name"));
-        return;
-    }
-
-    // Now add new renderer names pertaining to our current visualizer
-    // if they weren't in the comboBox already
-    //
-    std::vector<string> renNames = _paramsMgr->GetRenderParamInstances(visName, typeName);
-    for (int i = 0; i < renNames.size(); i++) {
-        QString renName = QString::fromStdString(renNames[i]);
-        if (copyRenNameCombo->findText(renName) < 0) { copyRenNameCombo->addItem(renName); }
-    }
-
-    // Finally removed renderer names that may have been removed from
-    //
-    for (int i = 0; i < copyRenNameCombo->count(); i++) {
-        string renName = copyRenNameCombo->itemText(i).toStdString();
-        if ((std::find(renNames.begin(), renNames.end(), renName) == renNames.end()) && (renName != "Name")) {
-            copyRenNameCombo->removeItem(i);
-            i = 0;    // Redo search since our indices are now screwed up :(
+            for (int k = 0; k < renNames.size(); k++) {
+                string  displayName = visAbb + ":" + typeAbb + ":" + renNames[k];
+                QString qDisplayName = QString::fromStdString(displayName);
+                copyCombo->addItem(qDisplayName);
+            }
         }
     }
 }
 
 void GeometryWidget::copyRegion()
 {
-    cout << "Copying region " << copyRenTypeCombo->currentText().toStdString() << " " << copyVisCombo->currentText().toStdString() << " " << copyRenNameCombo->currentText().toStdString() << endl;
-
-    string visualizer = copyVisCombo->currentText().toStdString();
-    if (visualizer == "Visualizer") {
-        MyBase::SetErrMsg("You must select a Visualizer, Renderer Type, and "
-                          "Renderer Name before copying extents");
-    }
-    string renType = copyRenTypeCombo->currentText().toStdString();
-    if (visualizer == "Type") {
-        MyBase::SetErrMsg("You must select a Renderer Type and "
-                          "Renderer Name before copying extents");
-    }
-    string renderer = copyRenNameCombo->currentText().toStdString();
-    if (visualizer == "Name") {
-        MyBase::SetErrMsg("You must select a "
-                          "Renderer Name before copying extents");
-    }
+    string                   copyString = copyCombo->currentText().toStdString();
+    std::vector<std::string> elems = split(copyString, ':');
+    string                   visualizer = _visNames[elems[0]];
+    string                   renType = _renTypeNames[elems[1]];
+    string                   renderer = elems[2];
 
     RenderParams *copyParams = _paramsMgr->GetRenderParams(visualizer, renType, renderer);
     assert(copyParams);
@@ -293,6 +246,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     _dataMgr = dataMgr;
     _rParams = rParams;
 
+    int ndim = _rParams->GetValueLong(_nDimsTag, 3);
+    assert(ndim == 2 || ndim == 3);
+    if (ndim == 2) {
+        _flags = (Flags)(_flags | TWOD);
+        _flags = (Flags)(_flags & ~(THREED));
+    } else {
+        _flags = (Flags)(_flags | THREED);
+        _flags = (Flags)(_flags & ~(TWOD));
+    }
+
     // Get current domain extents
     //
     size_t              ts = getCurrentTimestep();
@@ -311,8 +274,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     }
 
     updateRangeLabels(minFullExt, maxFullExt);
-    updateRenTypeCombo();
-    updateVisCombo();
+    updateCopyCombo();
 
     // Get current user selected extents
     //
@@ -338,8 +300,6 @@ void GeometryWidget::connectWidgets()
     connect(_xRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_yRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_zRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
-    connect(copyVisCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateRenTypeCombo()));
-    connect(copyRenTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateRenNameCombo()));
     connect(copyButton, SIGNAL(released()), this, SLOT(copyRegion()));
 }
 

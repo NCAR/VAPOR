@@ -474,7 +474,10 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 {
     // See if already in cache
     //
-    if (!_texStateDirty(dataMgr) && _sb_texture.GetBuf()) { return ((const GLvoid *)_sb_texture.GetBuf()); }
+    if (!_texStateDirty(dataMgr) && _sb_texture.GetBuf()) {
+        cout << "_getTexture already cached" << endl;
+        return ((const GLvoid *)_sb_texture.GetBuf());
+    }
     _texStateClear();
 
     AnimationParams *myAnimationParams = GetAnimationParams();
@@ -511,6 +514,8 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     vector<size_t> dims;
     sg->GetDimensions(dims);
     assert(dims.size() == 2);
+
+    cout << "dataStatus report: " << minBoxReq[0] << " " << dims[0] << endl;
 
     _texWidth = dims[0];
     _texHeight = dims[1];

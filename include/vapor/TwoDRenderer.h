@@ -23,7 +23,7 @@
 
 namespace VAPoR {
 
-//! \class
+//! \class TwoDRenderer
 //! \brief
 //! \author John Clyne
 //! \version 3.0

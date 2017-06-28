@@ -775,7 +775,8 @@ public:
         //! Access variable's compression ratios
         //
         std::vector<size_t> GetCRatios() const { return (_cratios); };
-        void                SetCRatios(std::vector<size_t> cratios)
+
+        void SetCRatios(std::vector<size_t> cratios)
         {
             _cratios = cratios;
             if (_cratios.size() == 0) _cratios.push_back(1);
@@ -1352,12 +1353,12 @@ public:
     //!
     //! \param[in] varname Data or coordinate variable name.
     //!
-    //! \retval num If \p varname is unknown zero is returned. if \p varname
+    //! \retval num If \p varname is unknown one is returned. if \p varname
     //! is not compressed (has no multi-resolution representation) one is
     //! returned. Otherwise the total number of levels in the multi-resolution
     //! hierarchy are returned.
     //
-    virtual int GetNumRefLevels(string varname) const = 0;
+    virtual size_t GetNumRefLevels(string varname) const = 0;
 
     //! Read an attribute
     //!
@@ -1855,15 +1856,14 @@ public:
     //! Return the compression ratio vector for the indicated variable.
     //! The vector returned contains an ordered list of available
     //! compression ratios for the variable named by \p variable.
-    //! If the variable is not compressed, the \p cratios parameter will
+    //! If the variable is not compressed, or the variable named
+    //! \p varname does not exist, the \p cratios parameter will
     //! contain a single element, one.
     //!
-    //! \param[in] varname Data or coordinate variable name.
-    //! \param[out] cratios Ordered vector of compression ratios
+    //! \retval cratios Ordered vector of compression ratios
     //!
-    //! \retval status A negative int is returned on failure
     //
-    virtual int GetCRatios(string varname, vector<size_t> &cratios) const;
+    virtual std::vector<size_t> GetCRatios(string varname) const;
 
     //! Return a boolean indicating whether a variable is a data variable
     //!

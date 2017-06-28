@@ -231,6 +231,8 @@ private:
     VizWinMgr *                _vizWinMgr;
     string                     _capturingAnimationVizName;
 
+    bool _paramsStateChange;
+
 private slots:
     void sessionOpen(QString qfileName = "");
     void fileSave();
