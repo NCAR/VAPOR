@@ -8,7 +8,7 @@
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
-#include <vapor/DataMgrV3_0.h>
+#include <vapor/DataMgr.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -69,7 +69,7 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
 const char *ProgName;
 
 void ErrMsgCBHandler(const char *msg, int) { cerr << ProgName << " : " << msg << endl; }
-void print_info(DataMgrV3_0 &datamgr)
+void print_info(DataMgr &datamgr)
 {
     vector<string> vars;
     DC::DataVar    datavar;
@@ -130,8 +130,8 @@ int main(int argc, char **argv)
     vector<string> files;
     for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
 
-    DataMgrV3_0 datamgr(opt.ftype, opt.memsize, opt.nthreads);
-    int         rc = datamgr.Initialize(files);
+    DataMgr datamgr(opt.ftype, opt.memsize, opt.nthreads);
+    int     rc = datamgr.Initialize(files);
     if (rc < 0) exit(1);
 
     print_info(datamgr);

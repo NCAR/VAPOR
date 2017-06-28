@@ -259,12 +259,12 @@ int DCCF::GetDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_le
     dims_at_level.clear();
     bs_at_level.clear();
 
-    vector<size_t> dimlens;
-    bool           ok = GetVarDimLens(varname, true, dimlens);
+    bool ok = GetVarDimLens(varname, true, dims_at_level);
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", varname.c_str());
         return (-1);
     }
+    bs_at_level = dims_at_level;
 
     return (0);
 }
@@ -341,7 +341,11 @@ int DCCF::ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float
     return (_ncdfc->Read(ncdf_start, ncdf_count, region, _ovr_fd));
 }
 
-int DCCF::ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (DCCF::ReadRegion(min, max, region)); }
+int DCCF::ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    // return(DCCF::ReadRegion(min, max, region));
+    return (DCCF::Read(region));
+}
 
 int DCCF::GetVar(string varname, float *data)
 {
@@ -1019,8 +1023,8 @@ int DCCF::_GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<s
 
     reverse(scoordvars.begin(), scoordvars.end());    // DC dimension order
 
-    vector<string> dimnames = ncdfc->GetDimNames(varname);
-    reverse(dimnames.begin(), dimnames.end());    // DC order
+    sdimnames = ncdfc->GetDimNames(varname);
+    reverse(sdimnames.begin(), sdimnames.end());    // DC order
 
     // Coordinate variables returned by ncdfc are assumed to be lat, lon,
     // height, time. For each native coordinate variable a derived
@@ -1043,7 +1047,7 @@ int DCCF::_GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<s
         // equal to that of the data variable, or we have to use
         // the native coordinates
         //
-        if (ncdfc->GetDimNames(xcv).size() <= dimnames.size()) { scoordvars[i] = xcv; }
+        if (ncdfc->GetDimNames(xcv).size() <= sdimnames.size()) { scoordvars[i] = xcv; }
     }
 
     if (ncdfc->IsTimeVarying(varname)) {
