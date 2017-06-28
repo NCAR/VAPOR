@@ -26,6 +26,7 @@
 #endif
 
 
+#include <vapor/DataStatus.h>
 #include <vapor/VizFeatureRenderer.h>
 
 using namespace VAPoR;
@@ -66,10 +67,14 @@ void VizFeatureRenderer::drawDomainFrame() {
 
 	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
-	//Draw the domain frame
+	vector <double> minExts, maxExts;
+	size_t ts = m_paramsMgr->GetAnimationParams()->GetCurrentTimestep();
+	
+	m_dataStatus->GetActiveExtents(
+		m_paramsMgr, m_winName, ts, minExts, maxExts
+	);
 
-	vector <double> minExt, maxExt;
-	m_dataStatus->GetExtents(minExt, maxExt);
+
 #ifdef	DEAD
 	vector <double> stretchFac = vfParams->GetStretchFactors();
 
@@ -80,12 +85,12 @@ void VizFeatureRenderer::drawDomainFrame() {
 	double fullSize[3], modMin[3],modMax[3];
 
 	//Instead:  either have 2 or 1 lines in each dimension.  2 if the size is < 1/3
-	for (i = 0; i<3; i++){
-		double regionSize = maxExt[i]-minExt[i];
+	for (i = 0; i<minExts.size(); i++){
+		double regionSize = maxExts[i]-minExts[i];
 
 		//Stretch size by 1%
-		fullSize[i] = (maxExt[i] - minExt[i])*1.01;
-		double mid = 0.5f*(maxExt[i]+minExt[i]);
+		fullSize[i] = (maxExts[i] - minExts[i])*1.01;
+		double mid = 0.5f*(maxExts[i]+minExts[i]);
 		modMin[i] = mid - 0.5f*fullSize[i];
 		modMax[i] = mid + 0.5f*fullSize[i];
 		if (regionSize < fullSize[i]*.3) numLines[i] = 2;

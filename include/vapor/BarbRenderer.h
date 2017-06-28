@@ -39,7 +39,7 @@ namespace VAPoR {
 
 	BarbRenderer(
 		const ParamsMgr *pm, string winName, string dataSetName,
-		string instName, DataStatus *ds
+		string instName, DataMgr *dataMgr
 	);
 
     virtual ~BarbRenderer();
@@ -76,8 +76,10 @@ namespace VAPoR {
 	
 
 
-	double _calcDefaultScale(const std::vector<string> &varnames,
-		const BarbParams* bParams);
+	double _calcDefaultScale(
+		size_t ts, const std::vector<string> &varnames,
+		const BarbParams* bParams
+	);
 
 //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
@@ -92,19 +94,19 @@ namespace VAPoR {
 //! \param[in] int actualRefLevel refinement level to be rendered.
 //! \param[in] float vectorScale Scale factor to be applied to barbs.
 //! \param[in] float barbRadius Radius of barbs in voxel diameters.
-//! \param[in] StructuredGrid*[5] StructuredGrid used in rendering.
+//! \param[in] StructuredGrid StructuredGrid used in rendering.
 //! The first three are the vector field, StructuredGrid[3] is the Height variable, StructuredGrid[4] is the color variable.
 //! \retval int zero if successful
 	int performRendering(const BarbParams* rParams,
 		int actualRefLevel,float vectorScale, 
-		StructuredGrid *variableData[5]
+		vector <StructuredGrid *> variableData
 	);
 
 	float getHeightOffset(StructuredGrid* heightVar, float xCoord,
 		float yCoord, bool& missing);	
 
 	void renderScottsGrid(int rakeGrid[3],double rakeExts[6],
-		StructuredGrid *variableData[5], int timestep,
+		vector <StructuredGrid *> variableData, int timestep,
 		float vectorLengthScale, float rad, const BarbParams* params);
 
 	bool GetColorMapping(TransferFunction* tf, float val);
