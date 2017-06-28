@@ -33,7 +33,6 @@ public:
 		VAPoR::RenderParams *rParams
 	) {
 		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
-		//_variablesWidget->Update(dataMgr, rParams);
 	}
 };
 
@@ -74,6 +73,10 @@ public:
 			SLOT(yDimChanged(int)));
 		connect(_zDimSpinBox, SIGNAL(valueChanged(int)), this,
 			SLOT(zDimChanged(int)));
+		connect(_lengthSpinBox, SIGNAL(valueChanged(double)), this,
+			SLOT(lengthChanged(double)));
+		connect(_thicknessSpinBox, SIGNAL(valueChanged(double)), this,
+			SLOT(thicknessChanged(double)));
 	}
 	
 	void Update(
@@ -120,6 +123,16 @@ private slots:
 		dims[1] = (int)longDims[1];
 		dims[2] = i;
 		bParams->SetGrid(dims);
+	}
+
+	void lengthChanged(double d) {
+		VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
+		bParams->SetLengthScale(d);
+	}
+
+	void thicknessChanged(double d) {
+		VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
+		bParams->SetLineThickness(d);
 	}
 
 private:
