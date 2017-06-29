@@ -1012,8 +1012,10 @@ int Visualizer::paintEvent() {
             double maxProj = -std::numeric_limits<double>::max();
             double minProj = std::numeric_limits<double>::max();
 
+            size_t ts = getActiveAnimationParams()->GetCurrentTimestep();
             vector<double> minExts, maxExts;
-            m_dataStatus->GetExtents(minExts, maxExts);
+            m_dataStatus->GetActiveExtents(
+                m_paramsMgr, m_winName, ts, minExts, maxExts);
 
             for (int i = 0; i < 3; i++)
                 camPosBox[i] = posVec[i];

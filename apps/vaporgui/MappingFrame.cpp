@@ -1680,7 +1680,6 @@ void MappingFrame::mouseDoubleClickEvent(QMouseEvent * /* event*/) {
 //----------------------------------------------------------------------------
 void MappingFrame::mouseMoveEvent(QMouseEvent *event) {
     if (event->buttons() == Qt::NoButton) {
-        //		if (!_dataStatus->trackMouse()) return;
         bool isIso = (_isoSliderEnabled || _isolineSlidersEnabled);
         QToolTip::showText(event->globalPos(), tipText(event->pos(), isIso));
         return;
@@ -2358,7 +2357,6 @@ void MappingFrame::fitToData() {
     GUIStateParams *p = MainForm::getInstance()->GetStateParams();
     string vizName = p->GetActiveVizName();
 
-    //Get bounds from DataStatus:
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     size_t ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
 

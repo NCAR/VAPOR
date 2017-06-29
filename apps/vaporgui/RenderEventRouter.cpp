@@ -23,6 +23,7 @@
 
 #include <QFileDialog>
 #include <vapor/GetAppPath.h>
+#include <vapor/DataMgrUtils.h>
 #include "MessageReporter.h"
 #include "MappingFrame.h"
 #include "RenderEventRouter.h"
@@ -40,6 +41,22 @@ RenderParams *RenderEventRouter::GetActiveParams() const {
 
     string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(_paramsType);
     return (_controlExec->GetRenderParams(m_winName, renderType, m_instName));
+}
+
+DataMgr *RenderEventRouter::GetActiveDataMgr() const {
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    string winName, dataSetName, paramsType;
+
+    bool status = paramsMgr->RenderParamsLookup(
+        m_instName, winName, dataSetName, paramsType);
+    assert(status);
+
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataMgr *dataMgr = dataStatus->GetDataMgr(dataSetName);
+    assert(dataMgr);
+
+    return (dataMgr);
 }
 
 //
@@ -72,6 +89,8 @@ void RenderEventRouter::RefreshHistogram() {
     size_t timeStep = GetCurrentTimeStep();
 
     string varname = rParams->GetVariableName();
+    if (varname.empty())
+        return;
 
 #ifdef DEAD
     if (tParams->doBypass(timeStep))
@@ -86,14 +105,12 @@ void RenderEventRouter::RefreshHistogram() {
     StructuredGrid *histoGrid;
     int actualRefLevel = rParams->GetRefinementLevel();
     int lod = rParams->GetCompressionLevel();
-    vector<string> varnames;
-    varnames.push_back(varname);
     vector<double> minExts, maxExts;
     rParams->GetBox()->GetExtents(minExts, maxExts);
 
-    DataStatus *dataStatus = _controlExec->getDataStatus();
-    int rc = dataStatus->getGrids(
-        timeStep, varnames, minExts, maxExts,
+    DataMgr *dataMgr = GetActiveDataMgr();
+    int rc = DataMgrUtils::GetGrids(
+        dataMgr, timeStep, varname, minExts, maxExts, true,
         &actualRefLevel, &lod, &histoGrid);
 
     if (rc)
