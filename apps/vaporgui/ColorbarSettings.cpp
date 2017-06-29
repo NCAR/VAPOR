@@ -28,7 +28,6 @@
 #include <vector>
 #include <QString>
 #include <qcolordialog.h>
-#include "vapor/DataStatus.h"
 
 
 using namespace VAPoR;

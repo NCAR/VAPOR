@@ -235,6 +235,43 @@ public:
 
  void GetRenderParams(vector <RenderParams *> &rParams) const;
 
+ //! Return all render param instance names
+ //!
+ //! Return all of the RenderParam instance names associated with
+ //! the visualizer (window) named \p winName, the data set named 
+ //! \p dataSetName, and the Params class type \p classType
+ //!
+ //! The returned names are guaranteed to be unique.
+ //!
+ void GetRenderParamNames(
+	string winName, string dataSetName, string classType,
+	vector <string> &instNames
+ ) const;
+
+ void GetRenderParamNames(
+	string winName, string dataSetName, 
+	vector <string> &instNames
+ ) const;
+
+ void GetRenderParamNames(string winName, vector <string> &instNames) const;
+
+ void GetRenderParamNames(vector <string> &instNames) const;
+
+ //! Lookup window, data set, and class name from a render instance name
+ //!
+ //! This method returns the window name \p winName, data set name 
+ //! \p dataSetName, and render params type \p className that are associated
+ //! with the render instance name \p instName. 
+ //!
+ //! \retval status True on success, false if \p instName is not a previously
+ //! defined render instance name
+ //!
+ //! \sa CreateRenderParamsInstance
+ //
+ bool RenderParamsLookup(
+	string instName, string &winName, string &dataSetName, string &className
+ ) const;
+
 
  //! Returns all defined window (aka visualizer names).
  //!
@@ -595,6 +632,10 @@ private:
  void addDataMgrMerge(string dataSetName);
 
  bool undoRedoHelper();
+
+ RenParamsContainer *createRenderParamsHelper(
+	string winName, string dataSetName, string className, string instName
+ ) ;
 
 };
 
