@@ -109,6 +109,24 @@ class PARAMS_API DataStatus {
         const ParamsMgr *paramsMgr, size_t ts,
         vector<double> &minExts, vector<double> &maxExts) const;
 
+    vector<double> GetTimeCoordinates() const {
+        return (_timeCoords);
+    }
+
+    //! Map a global to a local time step
+    //!
+    //! Map the global time step \p ts to the closest "local" time step
+    //! in the data set named by \p dataSetName. If \p ts is greater
+    //! than or equal to GetTimeCoordinates().size then the last time
+    //! step in \p dataSetName is returned.
+    //!
+    //! \return local_ts Returns the local time step, or zero if
+    //! \p dataSetName is not recognized.
+    //!
+    //! \sa GetTimeCoordinates().
+    //
+    size_t MapTimeStep(string dataSetName, size_t ts) const;
+
     //! Set number of execution threads
     //!
     //! Set the number of execution threads. If \p nThreads == 0, the
@@ -415,6 +433,7 @@ class PARAMS_API DataStatus {
     //! Reset the datastatus when a new datamgr is opened.
     //! This must be called whenever the data manager changes or when any new variables are defined.
     void reset();
+    void reset_time();
 
 #ifndef DOXYGEN_SKIP_THIS
 
@@ -422,6 +441,8 @@ class PARAMS_API DataStatus {
     int _nThreads;
     map<string, DataMgr *> _dataMgrs;
     string _activeDataMgr;
+    map<string, vector<size_t>> _timeMap;
+    vector<double> _timeCoords;
 
     //specify the minimum and max time step that actually have data:
     size_t _minTimeStep;
