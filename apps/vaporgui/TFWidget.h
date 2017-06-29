@@ -63,10 +63,6 @@ private:
     void   getRange(float range[2], float values[2]);
     void   connectWidgets();
     size_t getCurrentTimestep(VAPoR::ParamsMgr *paramsMgr);
-    void   makeItRed(QLineEdit *edit);
-    void   makeItYellow(QLineEdit *edit);
-    void   makeItGreen(QLineEdit *edit);
-    void   makeItWhite(QLineEdit *edit);
     void   updateSliders();
     void   updateAutoUpdateHistoCheckbox();
     void   updateColorInterpolation();
@@ -96,6 +92,13 @@ private:
     Flags _flags;
 
     static string _nDimsTag;
+
+#ifdef DEAD
+    void makeItRed(QLineEdit *edit);
+    void makeItYellow(QLineEdit *edit);
+    void makeItGreen(QLineEdit *edit);
+    void makeItWhite(QLineEdit *edit);
+#endif
 };
 
 #endif    // TFWIDGET_H
