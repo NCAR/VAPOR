@@ -24,6 +24,7 @@
 
 #include <vapor/glutil.h>	// Must be included first!!!
 #include <vapor/Renderer.h>
+#include <vapor/DataMgrUtils.h>
 
 #include <vapor/ViewpointParams.h>
 #include <vapor/AnimationParams.h>
@@ -127,7 +128,12 @@ int Renderer::paintGL() {
 }
 
 
-void Renderer::enableClippingPlanes(const double extents[6]){
+void Renderer::enableClippingPlanes(
+	vector <double> minExts,
+	vector <double> maxExts,
+	vector <int> axes
+) const {
+#ifdef	DEAD
 
 	const RenderParams *rp = GetActiveParams();
 
@@ -166,24 +172,25 @@ void Renderer::enableClippingPlanes(const double extents[6]){
 	glEnable(GL_CLIP_PLANE5);
 
 	glPopMatrix();
+#endif
 }
 
 void Renderer::enableFullClippingPlanes() {
 
-#ifdef	DEAD
 	AnimationParams *myAnimationParams = _paramsMgr->GetAnimationParams();
-    size_t timeStep = myAnimationParams->GetCurrentTimestep();
-	
-	vector<double> minExts,maxExts;
-	_dataStatus->GetExtents(timeStep, minExts, maxExts);
-	double extents[6];
-	for (int i=0; i<3; i++) {
-		extents[i] = minExts[i] - ((maxExts[i]-minExts[i])*0.001);
-		extents[i+3] = maxExts[i] + ((maxExts[i]-minExts[i])*0.001);
-	}
+    size_t ts = myAnimationParams->GetCurrentTimestep();
 
-	enableClippingPlanes(extents);
-#endif
+	const RenderParams *rParams = GetActiveParams();
+	vector <string> varnames = rParams->GetFieldVariableNames();
+	varnames.push_back(rParams->GetVariableName());
+	
+    vector <double> minExts, maxExts;
+	vector <int> axes;
+    DataMgrUtils::GetExtents(
+		_dataMgr, ts, varnames, minExts, maxExts, axes
+    );
+
+	enableClippingPlanes(minExts, maxExts, axes);
 }
 	
 void Renderer::disableClippingPlanes(){
