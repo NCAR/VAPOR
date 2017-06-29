@@ -721,9 +721,13 @@ void VizWinMgr::resetTrackball()
 void VizWinMgr::ReinitRouters()
 {
     DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+    size_t      ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
-    dataStatus->GetExtents(minExts, maxExts);
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
+    assert(minExts.size() == 3);
+    assert(maxExts.size() == 3);
 
     double scale[3];
     scale[0] = scale[1] = scale[2] = max(maxExts[0] - minExts[0], (maxExts[1] - minExts[1]));

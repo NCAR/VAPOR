@@ -45,7 +45,10 @@ DataStatus::DataStatus(size_t cacheSize, int nThreads)
     _dataMgrs.clear();
     _activeDataMgr = "";
     _useLowerAccuracy = true;
+    _timeCoords.clear();
+    _timeMap.clear();
 
+    reset_time();
     reset();
 }
 
@@ -66,6 +69,7 @@ int DataStatus::Open(const std::vector<string> &files, string name, string forma
     _dataMgrs[name] = dataMgr;
     _activeDataMgr = name;
 
+    reset_time();
     reset();
 
     return (0);
@@ -85,6 +89,8 @@ void DataStatus::Close(string name)
         itr = _dataMgrs.begin();
         if (itr != _dataMgrs.end()) _activeDataMgr = itr->first;
     }
+
+    reset_time();
 }
 
 // const DataMgr *DataStatus::GetDataMgr(string name) const
@@ -232,6 +238,77 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<
     }
 }
 
+size_t DataStatus::MapTimeStep(string dataSetName, size_t ts) const
+{
+    map<string, vector<size_t>>::const_iterator itr;
+    itr = _timeMap.find(dataSetName);
+    if (itr == _timeMap.end()) return (0);
+
+    const vector<size_t> &ref = itr->second;
+    if (ts >= ref.size()) { ts = ref.size() - 1; }
+    return (ref[ts]);
+}
+
+namespace {
+int find_nearest(const vector<double> &timeCoords, double time)
+{
+    if (!timeCoords.size()) return (-1);
+
+    if (time <= timeCoords[0]) return (0);
+    if (time >= timeCoords[timeCoords.size() - 1]) return (timeCoords.size() - 1);
+
+    // If we get to here there must be at least two elements in timeCoords
+    //
+    assert(timeCoords.size() >= 2);
+
+    for (int i = 0; i < timeCoords.size() - 1; i++) {
+        if (time >= timeCoords[i] && time <= timeCoords[i + 1]) {
+            assert(timeCoords[i] != timeCoords[i + 1]);
+
+            double s = (time - timeCoords[i]) / (timeCoords[i + 1] - timeCoords[i]);
+            if (s <= 0.5) {
+                return (i);
+            } else {
+                return (i + 1);
+            }
+        }
+    }
+    assert(0);
+}
+};    // namespace
+
+void DataStatus::reset_time()
+{
+    _timeCoords.clear();
+    _timeMap.clear();
+
+    // First construct global list of time coordinates
+    //
+    map<string, DataMgr *>::const_iterator itr;
+    for (itr = _dataMgrs.begin(); itr != _dataMgrs.end(); ++itr) {
+        DataMgr *dataMgr = itr->second;
+
+        vector<double> t = dataMgr->GetTimeCoordinates();
+        _timeCoords.insert(_timeCoords.end(), t.begin(), t.end());
+    }
+
+    sort(_timeCoords.begin(), _timeCoords.end());
+    unique(_timeCoords.begin(), _timeCoords.end());
+
+    for (itr = _dataMgrs.begin(); itr != _dataMgrs.end(); ++itr) {
+        string   dataSetName = itr->first;
+        DataMgr *dataMgr = itr->second;
+
+        vector<size_t> timeSteps;
+        vector<double> t = dataMgr->GetTimeCoordinates();
+        for (int i = 0; i < t.size(); i++) {
+            int idx = find_nearest(_timeCoords, t[i]);
+            timeSteps.push_back(idx);
+        }
+        _timeMap[dataSetName] = timeSteps;
+    }
+}
+
 // After data is loaded or if there is a merge, call DataStatus::reset to
 // add additional and/or modify previous variables
 // return true if there was anything to set up.
@@ -291,30 +368,9 @@ void DataStatus::reset()
     _minTimeStep = mints;
     _maxTimeStep = maxts;
 
-#ifdef DEAD
-    // Determine the domain extents.  Obtain them from RegionParams, but
-    // if they are not available, find the first variable in the VDC
-    vector<string> domainVars = RegionParams::GetDomainVariables();
-    // Determine the range of time steps for which there is data.
-#endif
-
     size_t firstTimeStep = getMinTimestep();
 
     bool getDomainVars = true;
-
-#ifdef DEAD
-    if (domainVars.size() > 0) {
-        // see if a variable exists at the first time.  If so use the domainVars.  Otherwise find another
-        getDomainVars = false;
-        for (int j = 0; j < domainVars.size(); j++) {
-            if (!dataMgr->VariableExists(firstTimeStep, domainVars[j])) {
-                getDomainVars = true;
-                break;
-            }
-        }
-    }
-
-#endif
 
     if (getDomainVars) {
         // Use the first variable that has data at the first time step.

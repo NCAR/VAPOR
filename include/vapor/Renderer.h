@@ -241,7 +241,8 @@ protected:
     //! Clipping planes are specified in User coordinates.
     //! \sa disableClippingPlanes
     //! \param[in] extents Specifies the user extents of the clipping bounds
-    void enableClippingPlanes(const double extents[6]);
+    void enableClippingPlanes(vector<double> minExts, vector<double> maxExts, vector<int> axes) const;
+
     //! Enable clipping planes associated with the full 3D data domain of the VDC.
     //! \sa disableClippingPlanes
     void enableFullClippingPlanes();

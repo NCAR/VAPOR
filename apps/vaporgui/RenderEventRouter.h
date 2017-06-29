@@ -262,7 +262,12 @@ public:
     //! Return the currently active params instance for this event
     //! router.
     //!
-    virtual VAPoR::RenderParams *GetActiveParams() const;
+    VAPoR::RenderParams *GetActiveParams() const;
+
+    //! Return the currently active params instance for this event
+    //! router.
+    //!
+    VAPoR::DataMgr *GetActiveDataMgr() const;
 
 #ifdef DEAD
     //! For parameters that multiple instances set the current

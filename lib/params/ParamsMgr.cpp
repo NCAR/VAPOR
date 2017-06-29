@@ -20,6 +20,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
@@ -243,12 +244,19 @@ ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(string winName)
     return (vpParams);
 }
 
-RenderParams *ParamsMgr::CreateRenderParamsInstance(string winName, string dataSetName, string className, string instName)
+RenParamsContainer *ParamsMgr::createRenderParamsHelper(string winName, string dataSetName, string className, string instName)
 {
     map<string, DataMgr *>::const_iterator itr;
     itr = _dataMgrMap.find(dataSetName);
     if (itr == _dataMgrMap.end()) {
         SetErrMsg("Invalid state : no data set");
+        return (NULL);
+    }
+
+    vector<string> instNames;
+    GetRenderParamNames(instNames);
+    if (find(instNames.begin(), instNames.end(), instName) != instNames.end()) {
+        SetErrMsg("Non-unique render instance name : %s", instName.c_str());
         return (NULL);
     }
 
@@ -258,11 +266,22 @@ RenderParams *ParamsMgr::CreateRenderParamsInstance(string winName, string dataS
     if (!vpParams) { vpParams = CreateVisualizerParamsInstance(winName); }
     assert(vpParams != NULL);
 
-    _ssave.BeginGroup("CreateRenderParamsInstance");
-
     RenParamsContainer *container = get_ren_container(winName, dataSetName, className);
     if (!container) { container = make_ren_container(winName, dataSetName, className); }
     assert(container != NULL);
+
+    return (container);
+}
+
+RenderParams *ParamsMgr::CreateRenderParamsInstance(string winName, string dataSetName, string className, string instName)
+{
+    _ssave.BeginGroup("CreateRenderParamsInstance");
+
+    RenParamsContainer *container = createRenderParamsHelper(winName, dataSetName, className, instName);
+    if (!container) {
+        _ssave.EndGroup();
+        return (NULL);
+    }
 
     RenderParams *rp = container->GetParams(instName);
     if (!rp) { rp = container->Create(className, instName); }
@@ -281,26 +300,14 @@ RenderParams *ParamsMgr::CreateRenderParamsInstance(string winName, string dataS
 {
     assert(rp);
 
-    map<string, DataMgr *>::const_iterator itr;
-    itr = _dataMgrMap.find(dataSetName);
-    if (itr == _dataMgrMap.end()) {
-        SetErrMsg("Invalid state : no data set");
+    _ssave.BeginGroup("CreateRenderParamsInstance");
+
+    string              className = rp->GetName();
+    RenParamsContainer *container = createRenderParamsHelper(winName, dataSetName, className, instName);
+    if (!container) {
+        _ssave.EndGroup();
         return (NULL);
     }
-
-    string className = rp->GetName();
-
-    // Create ViewpointParams if we don't have one
-    //
-    ViewpointParams *vpParams = get_vp_params(winName);
-    if (!vpParams) { vpParams = CreateVisualizerParamsInstance(winName); }
-    assert(vpParams != NULL);
-
-    _ssave.BeginGroup("InsertRenderParamsInstance");
-
-    RenParamsContainer *container = get_ren_container(winName, dataSetName, className);
-    if (!container) { container = make_ren_container(winName, dataSetName, className); }
-    assert(container != NULL);
 
     RenderParams *newRP = container->Insert(rp, instName);
 
@@ -379,6 +386,105 @@ void ParamsMgr::GetRenderParams(vector<RenderParams *> &rParams) const
         GetRenderParams(itr->first, tmp);
         rParams.insert(rParams.end(), tmp.begin(), tmp.end());
     }
+}
+
+void ParamsMgr::GetRenderParamNames(string winName, string dataSetName, string className, vector<string> &instNames) const
+{
+    instNames.clear();
+
+    RenParamsContainer *container = get_ren_container(winName, dataSetName, className);
+    if (!container) return;
+
+    instNames = container->GetNames();
+
+    // Sanity check.  Names should always be unique!
+    //
+    unique(instNames.begin(), instNames.end());
+}
+
+void ParamsMgr::GetRenderParamNames(string winName, string dataSetName, vector<string> &instNames) const
+{
+    instNames.clear();
+
+    const map<string, RenParamsContainer *> *m1Ptr;
+    m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+    if (!m1Ptr) return;
+
+    // m1Ptr[className]
+    //
+    const map<string, RenParamsContainer *> &         ref = *m1Ptr;
+    map<string, RenParamsContainer *>::const_iterator itr;
+    for (itr = ref.begin(); itr != ref.end(); ++itr) {
+        vector<string> tmp;
+        GetRenderParamNames(winName, dataSetName, itr->first, tmp);
+
+        instNames.insert(instNames.end(), tmp.begin(), tmp.end());
+    }
+    unique(instNames.begin(), instNames.end());
+}
+
+void ParamsMgr::GetRenderParamNames(string winName, vector<string> &instNames) const
+{
+    instNames.clear();
+
+    const map<string, map<string, RenParamsContainer *>> *m2Ptr;
+    m2Ptr = getWinMap3(_renderParamsMap, winName);
+    if (!m2Ptr) return;
+
+    // m2Ptr[dataSetName][className]
+    //
+    const map<string, map<string, RenParamsContainer *>> &         ref = *m2Ptr;
+    map<string, map<string, RenParamsContainer *>>::const_iterator itr;
+    for (itr = ref.begin(); itr != ref.end(); ++itr) {
+        vector<string> tmp;
+        GetRenderParamNames(winName, itr->first, tmp);
+        instNames.insert(instNames.end(), tmp.begin(), tmp.end());
+    }
+    unique(instNames.begin(), instNames.end());
+}
+
+void ParamsMgr::GetRenderParamNames(vector<string> &instNames) const
+{
+    instNames.clear();
+
+    map<string, map<string, map<string, RenParamsContainer *>>>::const_iterator itr;
+
+    for (itr = _renderParamsMap.begin(); itr != _renderParamsMap.end(); ++itr) {
+        vector<string> tmp;
+        GetRenderParamNames(itr->first, tmp);
+        instNames.insert(instNames.end(), tmp.begin(), tmp.end());
+    }
+    unique(instNames.begin(), instNames.end());
+}
+
+bool ParamsMgr::RenderParamsLookup(string instName, string &winName, string &dataSetName, string &className) const
+{
+    winName.clear();
+    dataSetName.clear();
+    className.clear();
+
+    // Exhaustively search through _renderParamsMap looking for an
+    // occurrence of instName
+    //
+    map<string, map<string, map<string, RenParamsContainer *>>>::const_iterator itr1;
+    for (itr1 = _renderParamsMap.begin(); itr1 != _renderParamsMap.end(); ++itr1) {
+        map<string, map<string, RenParamsContainer *>>::const_iterator itr2;
+        for (itr2 = itr1->second.begin(); itr2 != itr1->second.end(); ++itr2) {
+            map<string, RenParamsContainer *>::const_iterator itr3;
+            for (itr3 = itr2->second.begin(); itr3 != itr2->second.end(); ++itr3) {
+                const RenParamsContainer &ref = *(itr3->second);
+                vector<string>            instNames = ref.GetNames();
+
+                if (find(instNames.begin(), instNames.end(), instName) != instNames.end()) {
+                    winName = itr1->first;
+                    dataSetName = itr2->first;
+                    className = itr3->first;
+                    return (true);
+                }
+            }
+        }
+    }
+    return (false);
 }
 
 vector<string> ParamsMgr::GetVisualizerNames() const
