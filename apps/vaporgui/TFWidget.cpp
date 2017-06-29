@@ -45,17 +45,6 @@ TFWidget::TFWidget(QWidget *parent)
     _rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 
     connectWidgets();
-
-    /*colormapVarCombo->setVisible(false);
-	colormapVarLabel->setVisible(false);
-	constantColorLabel->setVisible(false);
-	colorSelectEdit->setVisible(false);
-	colorSelectButton->setVisible(false);*/
-    //colormapVarSpacer->hide();
-    //colormapVarCombo->setMaximumHeight(0);
-    //colormapVarLabel->setMaximumHeight(0);
-    //colormapVarSpacer->setMaximumHeight(0);
-    //colormapVarLayout->hide();
 }
 
 void TFWidget::Reinit(Flags flags) {
@@ -251,13 +240,6 @@ void TFWidget::Update(ParamsMgr *paramsMgr,
     _dataMgr = dataMgr;
     _rParams = rParams;
 
-    //	if (_flags & COLORMAPPED) {
-    //		if (_rParams->GetColorMapVariableName() == "") {
-    //			string var = _rParams->GetFirstVariableName();
-    //			_rParams->SetColorMapVariableName(var);
-    //		}
-    //	}
-
     updateAutoUpdateHistoCheckbox();
     updateMappingFrame();
     updateColorInterpolation();
@@ -339,35 +321,6 @@ void TFWidget::setRange(double min, double max) {
         mappingFrame->fitToView();
 }
 
-void TFWidget::makeItRed(QLineEdit *edit) {
-    QPalette p;
-    p.setColor(QPalette::Base, QColor(255, 150, 150));
-    edit->setPalette(p);
-}
-
-void TFWidget::makeItWhite(QLineEdit *edit) {
-    QPalette p;
-    p.setColor(QPalette::Base, QColor(255, 255, 255));
-    edit->setPalette(p);
-}
-
-void TFWidget::makeItGreen(QLineEdit *edit) {
-    QPalette p;
-    p.setColor(QPalette::Base, QColor(150, 255, 150));
-    edit->setPalette(p);
-}
-
-void TFWidget::makeItYellow(QLineEdit *edit) {
-    QPalette p;
-    p.setColor(QPalette::Base, QColor(255, 255, 150));
-    edit->setPalette(p);
-}
-
-void TFWidget::textChanged() {
-    _textChanged = true;
-    makeItGreen((QLineEdit *)sender());
-}
-
 size_t TFWidget::getCurrentTimestep(ParamsMgr *paramsMgr) {
     GUIStateParams *p = MainForm::getInstance()->GetStateParams();
     string vizName = p->GetActiveVizName();
@@ -423,3 +376,29 @@ void TFWidget::loadTF() {
 void TFWidget::saveTF() {
     dynamic_cast<RenderEventRouter *>(_eventRouter)->fileSaveTF();
 }
+
+#ifdef DEAD
+void TFWidget::makeItRed(QLineEdit *edit) {
+    QPalette p;
+    p.setColor(QPalette::Base, QColor(255, 150, 150));
+    edit->setPalette(p);
+}
+
+void TFWidget::makeItWhite(QLineEdit *edit) {
+    QPalette p;
+    p.setColor(QPalette::Base, QColor(255, 255, 255));
+    edit->setPalette(p);
+}
+
+void TFWidget::makeItGreen(QLineEdit *edit) {
+    QPalette p;
+    p.setColor(QPalette::Base, QColor(150, 255, 150));
+    edit->setPalette(p);
+}
+
+void TFWidget::makeItYellow(QLineEdit *edit) {
+    QPalette p;
+    p.setColor(QPalette::Base, QColor(255, 255, 150));
+    edit->setPalette(p);
+}
+#endif
