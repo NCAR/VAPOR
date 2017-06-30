@@ -71,29 +71,6 @@ TwoDDataEventRouter::~TwoDDataEventRouter() {
         delete _appearance;
 }
 
-/**********************************************************
- * Whenever a new TwoDtab is created all the connections between widgets and slots are made
- ************************************************************/
-void TwoDDataEventRouter::hookUpTab() {
-    //	_appearance->transferFunctionFrame->hookup(this, _appearance->TFeditButton,_appearance->TFnavigateButton,
-    //	_appearance->TFalignButton, _appearance->TFHistoButton,_appearance->fitTFDataButton, 0,0,0);
-
-    //_appearance->initialize();
-    //	_appearance->_TFWidget->transferFunctionFrame->hookup(this, _appearance->TFeditButton,_appearance->TFnavigateButton,
-    //	_appearance->TFalignButton, _appearance->TFHistoButton,_appearance->fitTFDataButton, 0,0,0);
-
-    //	connect(_appearance->leftMappingEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setTwoDTextChanged(const QString&)));
-    //	connect(_appearance->rightMappingEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setTwoDTextChanged(const QString&)));
-    //	connect(_appearance->leftMappingEdit, SIGNAL(returnPressed()), this, SLOT(twoDReturnPressed()));
-    //	connect(_appearance->rightMappingEdit, SIGNAL(returnPressed()), this, SLOT(twoDReturnPressed()));
-    //	connect(_appearance->colorInterpCombobox,SIGNAL(currentIndexChanged(int)), this, SLOT(toggleColorInterpType(int)));
-    //	connect(_appearance->loadButton, SIGNAL(clicked()), this, SLOT(twodLoadTF()));
-    //	connect(_appearance->loadInstalledButton, SIGNAL(clicked()), this, SLOT(twodLoadInstalledTF()));
-    //	connect(_appearance->saveButton, SIGNAL(clicked()), this, SLOT(twodSaveTF()));
-    //	connect(_appearance->transferFunctionFrame, SIGNAL(startChange(QString)), this, SLOT(startChangeMapFcn(QString)));
-    //	connect(_appearance->transferFunctionFrame, SIGNAL(endChange()), this, SLOT(endChangeMapFcn()));
-}
-
 void TwoDDataEventRouter::GetWebHelp(
     vector<pair<string, string>> &help) const {
     help.clear();
@@ -119,6 +96,7 @@ void TwoDDataEventRouter::GetWebHelp(
         "http://www.vapor.ucar.edu/docs/vapor-gui-help/twoD#HelloAppearance"));
 }
 
+#ifdef DEAD
 //
 // Method to be invoked after the user has moved the right or left bounds
 // (e.g. From the MapEditor. )
@@ -136,6 +114,7 @@ void TwoDDataEventRouter::UpdateMapBounds() {
     }
     setEditorDirty();
 }
+#endif
 
 void TwoDDataEventRouter::_updateTab() {
 
@@ -147,8 +126,8 @@ void TwoDDataEventRouter::_updateTab() {
         GetActiveParams());
 
     _appearance->Update(
+        _controlExec->getDataStatus(),
         _controlExec->GetParamsMgr(),
-        _controlExec->GetDataMgr(),
         GetActiveParams());
     _geometry->Update(
         _controlExec->GetParamsMgr(),
