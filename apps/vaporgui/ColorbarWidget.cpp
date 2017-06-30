@@ -65,8 +65,12 @@ ColorbarWidget::ColorbarWidget( QWidget * parent)
 ColorbarWidget::~ColorbarWidget() {
 }
 
-void ColorbarWidget::Update(ParamsMgr* paramsMgr,
-							DataMgr* dataMgr,
+void ColorbarWidget::colorbarReturnPressed() {
+
+}
+
+void ColorbarWidget::Update(DataMgr* dataMgr,
+							ParamsMgr* paramsMgr,
 							RenderParams* rParams) {
     assert(paramsMgr);
     assert(dataMgr);

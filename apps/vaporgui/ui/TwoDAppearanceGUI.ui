@@ -76,7 +76,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ColorbarSettings" name="_ColorBarFrame" native="true">
+      <widget class="ColorbarWidget" name="_ColorbarWidget" native="true">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -104,9 +104,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorbarSettings</class>
+   <class>ColorbarWidget</class>
    <extends>QWidget</extends>
-   <header>ColorbarSettings.h</header>
+   <header>ColorbarWidget.h</header>
   </customwidget>
   <customwidget>
    <class>TFWidget</class>
