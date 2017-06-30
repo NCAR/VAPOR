@@ -59,8 +59,8 @@ class ColorbarWidget : public QFrame, public Ui_ColorbarWidgetGUI {
     //! Update the values displayed in this frame, by obtaining them from the
     //! ColorbarPbase instance in the Params.
     //! \param[in] p Params associated with this frame.
-    void Update(VAPoR::ParamsMgr *paramsMgr,
-                VAPoR::DataMgr *dataMgr,
+    void Update(VAPoR::DataMgr *dataMgr,
+                VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams);
 
   signals:
@@ -70,6 +70,7 @@ class ColorbarWidget : public QFrame, public Ui_ColorbarWidgetGUI {
     void enabledChange();
     void setBackgroundColor();
     void applyToAll();
+    void colorbarReturnPressed();
 
   private:
     RenderEventRouter *_eventRouter;

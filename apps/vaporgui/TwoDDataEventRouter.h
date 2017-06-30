@@ -38,9 +38,6 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
         QWidget *parent, VAPoR::ControlExec *ce);
     ~TwoDDataEventRouter();
 
-    //! \copydoc EventRouter::hookUpTab()
-    void hookUpTab();
-
     void GetWebHelp(
         vector<pair<string, string>> &help) const;
 
@@ -53,11 +50,13 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
     //! \copydoc EventRouter::getMappingFrame()
     virtual MappingFrame *getMappingFrame() { return _appearance->_TFWidget->mappingFrame; }
 
-    //! \copydoc EventRouter::getColorbarFrame()
-    virtual ColorbarSettings *getColorbarFrame() { return _appearance->_ColorBarFrame; }
+    //! \copydoc EventRouter::getColorbarWidget()
+    virtual ColorbarWidget *getColorbarWidget() { return _appearance->_ColorbarWidget; }
 
+#ifdef DEAD
     //! \copydoc EventRouter::UpdateMapBounds()
     virtual void UpdateMapBounds();
+#endif
 
   private slots:
 
@@ -100,10 +99,13 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
 
     //! VariablesWidget is used as Variables tab
     TwoDVariablesSubtab *_variables;
-    //	TwoDDataImageGUI *_image;
     TwoDGeometrySubtab *_geometry;
     GLTwoDDataImageWindow *_glTwoDDataImageWindow;
     TwoDAppearanceSubtab *_appearance;
+
+#ifdef DEAD
+    TwoDDataImageGUI *_image;
+#endif
 };
 
 #endif //TWODDATAEVENTROUTER_H

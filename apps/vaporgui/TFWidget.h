@@ -42,15 +42,17 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
                                           "necessary for making changes to a "
                                           "Vapor Transfer Function."); }
     bool isContainer() const { return true; }
-    void Update(VAPoR::ParamsMgr *paramsMgr,
-                VAPoR::DataMgr *dataMgr,
+    void Update(VAPoR::DataStatus *dataStatus,
+                VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams);
 
     void setEventRouter(RenderEventRouter *eventRouter);
+    void setDataStatus(VAPoR::DataStatus *ds) {
+        mappingFrame->setDataStatus(ds);
+    }
 
   private slots:
     void setRange(double min, double max);
-    void textChanged();
     void updateHisto();
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
