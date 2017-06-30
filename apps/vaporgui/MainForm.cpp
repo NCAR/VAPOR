@@ -173,7 +173,7 @@ MainForm::MainForm(vector<QString> files, QApplication* app, QWidget* parent, co
 	_controlExec->SetCacheSize(sP->GetCacheMB());
 	_controlExec->SetNumThreads(sP->GetNumExecutionThreads());
 
-	MappingFrame::SetControlExec(_controlExec);
+	//MappingFrame::SetControlExec(_controlExec);
 	BoxSliderFrame::SetControlExec(_controlExec);
 	
 	MessageReporter::SetParamsMgr(_paramsMgr);
