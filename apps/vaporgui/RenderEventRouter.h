@@ -37,7 +37,7 @@ class ParamsMgr;
 #endif
 
 class Histo;
-class ColorbarSettings;
+class ColorbarWidget;
 
 //!
 //! \class RenderEventRouter
@@ -174,6 +174,7 @@ public:
     //
     virtual void setEditorDirty();
 
+#ifdef DEAD
     //! Method used to indicate that the mapping bounds have changed,
     //! in the transfer function editor, requiring update of the display.
     //! Must be reimplemented in every EventRouter which has a transfer function.
@@ -181,6 +182,7 @@ public:
     //! \param[in] RenderParams* owner of the Transfer Function
     //
     virtual void UpdateMapBounds() {}
+#endif
 
     //! Launch a dialog to save the current transfer function to file.
     //!
@@ -218,7 +220,9 @@ public:
     //! with an IsoSelection panel
     //! \retval Histo* is resulting Histo instance.
     //
-    virtual Histo *GetHistogram(bool mustGet, bool isIsoWin = false);
+    // virtual Histo* GetHistogram(
+    //	bool mustGet, bool isIsoWin = false
+    // );
 
     //! Virtual method to refresh the histogram for the associated EventRouter.
     //! Must be reimplemented in every EventRouter class with a Histogram.
@@ -242,10 +246,10 @@ public:
     //! \retval MappingFrame* is MappingFrame associated with the EventRouter
     virtual MappingFrame *getMappingFrame() { return NULL; }
 
-    //! Virtual method identifies the ColorbarFrame associated with an EventRouter.
+    //! Virtual method identifies the ColorbarWidget associated with an EventRouter.
     //! Must be implemented in every EventRouter with a MappingFrame
-    //! \retval ColorbarFrame* is ColorbarFrame associated with the EventRouter
-    virtual ColorbarSettings *getColorbarFrame() { return NULL; }
+    //! \retval ColorbarWidget* is ColorbarWidget associated with the EventRouter
+    virtual ColorbarWidget *getColorbarWidget() { return NULL; }
 
     //! Respond to a variable change
     //! Make any gui changes beyond updating the variable combos.

@@ -40,9 +40,6 @@ const int Renderer::_imgHgt = 256;
 
 Renderer::Renderer(const ParamsMgr *pm, string winName, string paramsType, string classType, string instName, DataStatus *ds) : RendererBase(pm, winName, paramsType, classType, instName, ds)
 {
-    // Establish the data sources for the rendering:
-    //
-
     _colorbarTexture = 0;
     _timestep = 0;
 }
@@ -95,10 +92,6 @@ int Renderer::paintGL()
 
     _timestep = m_pm->GetAnimationParams()->GetCurrentTimestep();
 
-    // Do not proceed if the bypass flag is set.
-#ifdef DEAD
-    if (doBypass(_timestep)) return -1;
-#endif
     int rc = _paintGL();
     if (rc < 0) { return (-1); }
 

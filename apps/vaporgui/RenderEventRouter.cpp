@@ -45,39 +45,34 @@ RenderParams *RenderEventRouter::GetActiveParams() const
 // new one.
 // Boolean flag is only used by isoeventrouter version
 //
-Histo *RenderEventRouter::GetHistogram(bool mustGet, bool)
-{
+/*Histo* RenderEventRouter::GetHistogram(bool mustGet, bool) {
     RenderParams *rParams = GetActiveParams();
 
     if (m_currentHistogram && !mustGet) return m_currentHistogram;
     if (!mustGet) return 0;
-    string          varname = rParams->GetVariableName();
-    MapperFunction *mapFunc = rParams->MakeMapperFunc(varname);
+    string varname = rParams->GetVariableName();
+    MapperFunction* mapFunc = rParams->MakeMapperFunc(varname);
     if (!mapFunc) return 0;
     if (m_currentHistogram) delete m_currentHistogram;
 
-    m_currentHistogram = new Histo(256, mapFunc->getMinMapValue(), mapFunc->getMaxMapValue());
+    m_currentHistogram = new Histo(256,mapFunc->getMinMapValue(),mapFunc->getMaxMapValue());
     RefreshHistogram();
     return m_currentHistogram;
-}
+}*/
 
 void RenderEventRouter::RefreshHistogram()
 {
     RenderParams *rParams = GetActiveParams();
+    size_t        timeStep = GetCurrentTimeStep();
+    string        varname = rParams->GetVariableName();
 
-    size_t timeStep = GetCurrentTimeStep();
-
-    string varname = rParams->GetVariableName();
-
-#ifdef DEAD
-    if (tParams->doBypass(timeStep)) return;
-#endif
     float minRange = rParams->MakeMapperFunc(varname)->getMinMapValue();
     float maxRange = rParams->MakeMapperFunc(varname)->getMaxMapValue();
     if (!m_currentHistogram)
         m_currentHistogram = new Histo(256, minRange, maxRange);
     else
         m_currentHistogram->reset(256, minRange, maxRange);
+
     StructuredGrid *histoGrid;
     int             actualRefLevel = rParams->GetRefinementLevel();
     int             lod = rParams->GetCompressionLevel();
@@ -274,22 +269,7 @@ void RenderEventRouter::setEditorDirty()
     MappingFrame *mp = getMappingFrame();
     if (!mp) return;
 
-    // mp->updateTab();
-    mp->Update(rParams);
-
-#ifdef DEAD
-    if (rParams->GetMapperFunc()) p->GetMapperFunc()->setParams(p);
-    getMappingFrame()->setMapperFunction(p->GetMapperFunc());
-    if (getColorbarFrame()) getColorbarFrame()->setParams(p);
-    getMappingFrame()->updateParams();
-    if (_dataStatus->getNumActiveVariables()) {
-        const std::string &varname = p->GetVariableName();
-        getMappingFrame()->setVariableName(varname);
-    } else {
-        getMappingFrame()->setVariableName("N/A");
-    }
-    getMappingFrame()->update();
-#endif
+    mp->Update(_controlExec->GetDataMgr(), _controlExec->GetParamsMgr(), rParams);
 }
 
 float RenderEventRouter::CalcCurrentValue(const double point[3])
