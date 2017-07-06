@@ -2357,8 +2357,8 @@ void MappingFrame::fitToData() {
     GUIStateParams *p = MainForm::getInstance()->GetStateParams();
     string vizName = p->GetActiveVizName();
 
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    size_t ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
+    AnimationParams *aParams = MainForm::getInstance()->GetAnimationParams();
+    size_t ts = aParams->GetCurrentTimestep();
 
     float range[2];
 #ifdef DEAD

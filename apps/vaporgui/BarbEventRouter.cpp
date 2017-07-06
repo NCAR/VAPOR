@@ -12,7 +12,6 @@
 #include <string>
 #include <vapor/TransferFunction.h>
 #include "VizWin.h"
-#include "MainForm.h"
 #include "vapor/BarbParams.h"
 //#include "vapor/BarbRenderer.h"
 #include "VariablesWidget.h"

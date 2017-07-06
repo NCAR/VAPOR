@@ -26,7 +26,6 @@
 #include <map>
 #include <vapor/DataStatus.h>
 #include <vapor/ParamsMgr.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/Renderer.h>
 #include <vapor/VizFeatureRenderer.h>
 
@@ -59,10 +58,6 @@ class RENDER_API Visualizer : public MyBase {
     //! Method that returns the RegionParams that is active in this window.
     //! \retval RegionParams* current active RegionParams
     RegionParams *getActiveRegionParams() const;
-
-    //! Method that returns the AnimationParams that is active in this window.
-    //! \retval AnimationParams* current active AnimationParams
-    AnimationParams *getActiveAnimationParams() const;
 
     //! Method that returns the VizFeatureParams that is active in this window.
     //! \retval VizFeatureParams* current active VizFeatureParams
@@ -293,6 +288,8 @@ class RENDER_API Visualizer : public MyBase {
     //! \param[out] data is array of rgb byte values, 3 bytes per pixel
     //! \return true if successful
     bool getPixelData(unsigned char *data) const;
+
+    int getCurrentTimestep() const;
 
     static void incrementPath(string &s);
 

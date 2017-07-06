@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <vapor/AnimationParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/MyBase.h>
 #include <vapor/TwoDRenderer.h>
