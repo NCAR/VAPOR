@@ -57,6 +57,7 @@ public:
 
 private slots:
 
+#ifdef DEAD
     //! Load a TF from file
     void twodLoadTF();
 
@@ -65,6 +66,7 @@ private slots:
 
     //! Save the current TF to file
     void twodSaveTF();
+#endif
 
     //! respond when TF editing starts
     void startChangeMapFcn(QString);

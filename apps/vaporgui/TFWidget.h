@@ -46,21 +46,22 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::DataStatus *dataStatus, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
-    void setEventRouter(RenderEventRouter *eventRouter);
     void setDataStatus(VAPoR::DataStatus *ds) { mappingFrame->setDataStatus(ds); }
 
-signals:
-    void loadInstalledTF(string);
-    void fileSaveTF();
+    void fileLoadTF(string varname, const char *path, bool savePath);
+
+    void loadTF(string varname);
+
+    void loadInstalledTF(string varname);
 
 private slots:
+    void fileSaveTF();
     void setRange();
     void setRange(double min, double max);
     void updateHisto();
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void saveTF();
     void setCMVar();
     void setSingleColor();
 

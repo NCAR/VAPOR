@@ -327,6 +327,7 @@ void RenderEventRouter::updateTab()
     EventRouter::updateTab();
 }
 
+#ifdef DEAD
 void RenderEventRouter::fileSaveTF()
 {
     RenderParams *rParams = GetActiveParams();
@@ -405,9 +406,10 @@ void RenderEventRouter::fileLoadTF(string varname, const char *startPath, bool s
         MessageReporter::errorMsg((const char *)str.toAscii());
     }
 
-#ifdef DEAD
+    #ifdef DEAD
     // Remember the path to the file:
     if (savePath) PathParams::SetCurrentTFPath(s.toStdString());
     setEditorDirty(rParams);
-#endif
+    #endif
 }
+#endif
