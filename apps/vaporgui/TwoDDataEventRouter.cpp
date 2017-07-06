@@ -151,12 +151,14 @@ void TwoDDataEventRouter::_updateTab(){
  * widget, e.g. combo boxes, sliders, pushbuttons
  *****************************************************************************/
 
+#ifdef DEAD
 //Whenever a lineEdit changes, set the textChanged flag.
 void TwoDDataEventRouter::twodLoadTF(){
 	TwoDDataParams* rParams = (TwoDDataParams*)GetActiveParams();
 	
 	loadTF(rParams->GetVariableName());
 }
+
 void TwoDDataEventRouter::twodLoadInstalledTF(){
 	TwoDDataParams* rParams = (TwoDDataParams*)GetActiveParams();
 	string varName = rParams->GetVariableName();
@@ -175,6 +177,8 @@ void TwoDDataEventRouter::twodLoadInstalledTF(){
 void TwoDDataEventRouter::twodSaveTF(){
 	fileSaveTF();
 }
+#endif
+
 void TwoDDataEventRouter::startChangeMapFcn(QString){
 }
 
