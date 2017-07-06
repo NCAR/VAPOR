@@ -52,10 +52,10 @@ public:
  virtual ~VizFeatureRenderer();
 
  //! Render the in-scene features
-	void inScenePaint();
+	void InScenePaint(size_t ts);
 
  //! Render the overlay features
-	void overlayPaint();
+	void OverlayPaint(size_t ts);
 
 #ifdef	DEAD
  //! Clear all the text objects
@@ -73,7 +73,7 @@ private:
  bool _textObjectsValid;
 
 //! Render the domain fram
-	void drawDomainFrame();
+	void drawDomainFrame(size_t ts) const;
 
  void getDomainExtents(
 	vector <double> &minExts, vector <double> &maxExts
@@ -81,7 +81,7 @@ private:
 
 #ifdef	DEAD
 //! Render the region frame
-	void drawRegionBounds();
+	void drawRegionBounds(size_t ts) const;
 //! Draw the axis lines, while building text labels.
 	void drawAxisTics(size_t timestep);
 //! Draw Axis arrows

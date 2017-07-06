@@ -63,13 +63,11 @@ void VizFeatureRenderer::InitializeGL(ShaderMgr *shaderMgr) {
 //Issue OpenGL commands to draw a grid of lines of the full domain.
 //Grid resolution is up to 2x2x2
 //
-void VizFeatureRenderer::drawDomainFrame() {
+void VizFeatureRenderer::drawDomainFrame(size_t ts) const {
 
 	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
 	vector <double> minExts, maxExts;
-	size_t ts = m_paramsMgr->GetAnimationParams()->GetCurrentTimestep();
-	
 	m_dataStatus->GetActiveExtents(
 		m_paramsMgr, m_winName, ts, minExts, maxExts
 	);
@@ -178,11 +176,10 @@ void VizFeatureRenderer::drawDomainFrame() {
 
 #ifdef	DEAD
 
-void VizFeatureRenderer::drawRegionBounds() {
-	int timeStep = _visualizer->getActiveAnimationParams()->GetCurrentTimestep();
+void VizFeatureRenderer::drawRegionBounds(size_t ts) const {
 	RegionParams* rParams = _visualizer->getActiveRegionParams();
 	double extents[6];
-	rParams->GetBox()->GetLocalExtents(extents, timeStep);
+	rParams->GetBox()->GetLocalExtents(extents, ts);
 	_dataStatus->stretchCoords(extents);
 	_dataStatus->stretchCoords(extents+3);
 	
@@ -223,7 +220,7 @@ void VizFeatureRenderer::drawRegionBounds() {
 
 #endif
 
-void VizFeatureRenderer::inScenePaint(){
+void VizFeatureRenderer::InScenePaint(size_t ts){
 
 	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
@@ -235,23 +232,22 @@ void VizFeatureRenderer::inScenePaint(){
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 #ifdef	DEAD
-	if (vfParams->GetUseRegionFrame()) drawRegionBounds();
+	if (vfParams->GetUseRegionFrame()) drawRegionBounds(ts);
 #endif
 
-	if (vfParams->GetUseDomainFrame()) drawDomainFrame();
+	if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
 
 #ifdef	DEAD
 	if (vfParams->ShowAxisArrows()) {
 
 		RegionParams* rParams = GetVisualizer()->getActiveRegionParams();
-		size_t timestep = (size_t)GetVisualizer()->getActiveAnimationParams()->GetCurrentTimestep();
 		float extents[6];
-		rParams->GetBox()->GetLocalExtents(extents, timestep);
+		rParams->GetBox()->GetLocalExtents(extents, ts);
 		drawAxisArrows(extents);
 	}
 
 	if (vfParams->GetAxisAnnotation()) {
-		drawAxisTics(timestep);
+		drawAxisTics(ts);
 	}
 #endif
 
@@ -265,7 +261,7 @@ void VizFeatureRenderer::inScenePaint(){
 
 #ifdef	DEAD
 
-void VizFeatureRenderer::overlayPaint(){
+void VizFeatureRenderer::OverlayPaint(size_t ts) {
 }
 
 void VizFeatureRenderer::drawAxisTics(size_t timestep){

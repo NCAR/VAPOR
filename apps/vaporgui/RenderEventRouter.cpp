@@ -33,27 +33,33 @@ using namespace VAPoR;
 
 
 RenderParams *RenderEventRouter::GetActiveParams() const {
-    //ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    //assert(paramsMgr);
-    assert(! m_winName.empty());
-    assert(! _paramsType.empty());
-    assert(! m_instName.empty());
+    assert(! _instName.empty());
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
  
-    //return(paramsMgr->GetRenderParams(m_winName, _paramsType, m_instName));
+	string winName, dataSetName, paramsType;
+	bool status = paramsMgr->RenderParamsLookup(
+		_instName, winName, dataSetName, paramsType
+	);
+	assert(status);
 
 	string renderType = RendererFactory::Instance()->
-        GetRenderClassFromParamsClass(_paramsType);
-    return(_controlExec->GetRenderParams(m_winName, renderType, m_instName));
+        GetRenderClassFromParamsClass(paramsType);
+
+    return(_controlExec->GetRenderParams(
+		winName, dataSetName, renderType, _instName
+	));
 }
 
 DataMgr *RenderEventRouter::GetActiveDataMgr() const {
+    assert(! _instName.empty());
+
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
 	string winName, dataSetName, paramsType;
 
-
 	bool status = paramsMgr->RenderParamsLookup(
-		m_instName, winName, dataSetName, paramsType
+		_instName, winName, dataSetName, paramsType
 	);
 	assert(status);
 
@@ -72,16 +78,16 @@ DataMgr *RenderEventRouter::GetActiveDataMgr() const {
 Histo* RenderEventRouter::GetHistogram(bool mustGet, bool) {
 	RenderParams *rParams = GetActiveParams();
 	
-	if (m_currentHistogram && !mustGet) return m_currentHistogram;
+	if (_currentHistogram && !mustGet) return _currentHistogram;
 	if (!mustGet) return 0;
 	string varname = rParams->GetVariableName();
 	MapperFunction* mapFunc = rParams->MakeMapperFunc(varname);
 	if (!mapFunc) return 0;
-	if (m_currentHistogram) delete m_currentHistogram;
+	if (_currentHistogram) delete _currentHistogram;
 
-	m_currentHistogram = new Histo(256,mapFunc->getMinMapValue(),mapFunc->getMaxMapValue());
+	_currentHistogram = new Histo(256,mapFunc->getMinMapValue(),mapFunc->getMaxMapValue());
 	RefreshHistogram();
-	return m_currentHistogram;
+	return _currentHistogram;
 }
 
 void RenderEventRouter::RefreshHistogram(){
@@ -98,9 +104,9 @@ void RenderEventRouter::RefreshHistogram(){
 #endif
 	float minRange = rParams->MakeMapperFunc(varname)->getMinMapValue();
 	float maxRange = rParams->MakeMapperFunc(varname)->getMaxMapValue();
-	if (!m_currentHistogram)
-		m_currentHistogram = new Histo(256, minRange, maxRange);
-	else m_currentHistogram->reset(256,minRange,maxRange);
+	if (!_currentHistogram)
+		_currentHistogram = new Histo(256, minRange, maxRange);
+	else _currentHistogram->reset(256,minRange,maxRange);
 	StructuredGrid* histoGrid;
 	int actualRefLevel = rParams->GetRefinementLevel();
 	int lod = rParams->GetCompressionLevel();
@@ -122,7 +128,7 @@ void RenderEventRouter::RefreshHistogram(){
 	for (itr = rg_const->begin(); itr!=rg_const->end(); ++itr) {
 		v = *itr;
 		if (v == histoGrid->GetMissingValue()) continue;
-		m_currentHistogram->addToBin(v);
+		_currentHistogram->addToBin(v);
 	}
 	
 	delete histoGrid;

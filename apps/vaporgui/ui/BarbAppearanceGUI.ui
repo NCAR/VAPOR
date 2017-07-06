@@ -113,7 +113,7 @@
   <customwidget>
    <class>ColorbarSettings</class>
    <extends>QWidget</extends>
-   <header>colorbarsettings.h</header>
+   <header>ColorbarSettings.h</header>
   </customwidget>
   <customwidget>
    <class>TFWidget</class>

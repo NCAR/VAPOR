@@ -240,10 +240,6 @@ public:
 		);
 	}
 
- AnimationParams* GetAnimationParams() const {
-	return(_paramsMgr->GetAnimationParams());
- }
-
 protected:
 	Renderer() {}
 

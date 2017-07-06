@@ -215,15 +215,18 @@ public:
  //! the renderer cannot be activated
  //
  int ActivateRender(
-	string winName, string renderType, string renderName, bool on
+	string winName, string dataSetName,
+	string renderType, string renderName, bool on
  );
 
  int ActivateRender(
-	string winName, const RenderParams *rp, string renderName, bool on
+	string winName, string dataSetName,
+	const RenderParams *rp, string renderName, bool on
  );
 
  void RemoveRenderer(
-	string winName, string renderType, string renderName
+	string winName, string dataSetName,
+	string renderType, string renderName
  );
  
 
@@ -300,12 +303,12 @@ public:
  //! the DataMgr class, rather than keeping them separate.
  //
  int OpenData(
-	vector <string> files, string type = "vdc"
+	vector <string> files, string dataSetName, string type = "vdc"
  );
 
  //! Unloads the specified data set
  //!
- void CloseData();
+ void CloseData(string dataSetName);
   
  //! Obtain the current DataStatus
  //! Needed to store in GUI when the DataStatus changes.
@@ -327,7 +330,7 @@ public:
  //! with the specified
  //
  RenderParams *GetRenderParams(
-	string winName, string renderType,  string instName
+	string winName, string dataSetName, string renderType,  string instName
  ) const;
 
  //! Get all activated render class names 
@@ -499,8 +502,8 @@ private:
  int openDataHelper(bool reportErrs);
  void undoRedoHelper();
  int activateClassRenderers(
-	string vizName, string pClassName, vector <string> instNames,
-	bool reportErrs
+	string vizName, string dataSetName,
+	string pClassName, vector <string> instNames, bool reportErrs
  );
 
 

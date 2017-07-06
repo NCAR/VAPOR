@@ -377,12 +377,11 @@ void TFWidget::textChanged() {
 	makeItGreen((QLineEdit*)sender());
 }
 
-size_t TFWidget::getCurrentTimestep(ParamsMgr* paramsMgr) {
-	GUIStateParams* p = MainForm::getInstance()->GetStateParams();
-	string vizName = p->GetActiveVizName();
-
-	size_t ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
-	return ts;
+size_t TFWidget::getCurrentTimestep(ParamsMgr* paramsMgr) const {
+	AnimationParams *aParams = (AnimationParams *) paramsMgr->GetParams(
+		AnimationParams::GetClassType()
+	);
+	return(aParams->GetCurrentTimestep());
 }
 
 void TFWidget::updateHisto() {
