@@ -214,6 +214,16 @@ public:
     int lod = 0
  ) const;
 
+ //! Enable or disable the NetCDF fill-value mode
+ //!
+ //! Enable or disable the NetCDF fill-value mode
+ //!
+ //! \param[in] fillmode NC_FILL as 0x0 or NC_NOFILL as 0x100
+ //!
+ //! \retval err: NC_NOERR on success
+ //
+ int SetFill(int fillmode);
+
 
 
 protected:
