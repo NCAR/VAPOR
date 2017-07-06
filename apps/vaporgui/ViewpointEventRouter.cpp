@@ -43,7 +43,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "MainForm.h"
 
 using namespace VAPoR;
 
@@ -258,7 +257,7 @@ void ViewpointEventRouter::_updateTab() {
     string vizName = p->GetActiveVizName();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    size_t ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
+    size_t ts = GetCurrentTimeStep();
 
     latLonFrame->hide();
     //Always display the current values of the campos and rotcenter

@@ -37,6 +37,7 @@
 #include "GUIStateParams.h"
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
+#include "AnimationParams.h"
 
 class QApplication;
 class QSpacerItem;
@@ -129,6 +130,12 @@ class MainForm : public QMainWindow {
         assert(_paramsMgr != NULL);
         return ((StartupParams *)
                     _paramsMgr->GetParams(StartupParams::GetClassType()));
+    }
+
+    AnimationParams *GetAnimationParams() const {
+        assert(_paramsMgr != NULL);
+        return ((AnimationParams *)
+                    _paramsMgr->GetParams(AnimationParams::GetClassType()));
     }
 
   protected:

@@ -16,10 +16,6 @@
 using namespace VAPoR;
 using namespace std;
 
-namespace {
-const string dataSetName = "DataSet1";
-};
-
 ControlExec::ControlExec(
     vector<string> appParamsNames, size_t cacheSizeMB, int nThreads) : MyBase() {
 
@@ -178,7 +174,8 @@ int ControlExec::Paint(string winName, bool force) {
 }
 
 int ControlExec::ActivateRender(
-    string winName, string renderType, string renderName, bool on) {
+    string winName, string dataSetName, string renderType,
+    string renderName, bool on) {
     if (!_dataStatus->GetActiveDataMgr()) {
         SetErrMsg("Invalid state : no data");
         return -1;
@@ -232,7 +229,8 @@ int ControlExec::ActivateRender(
 }
 
 int ControlExec::ActivateRender(
-    string winName, const RenderParams *rp, string renderName, bool on) {
+    string winName, string dataSetName, const RenderParams *rp,
+    string renderName, bool on) {
     assert(rp);
 
     if (!_dataStatus->GetActiveDataMgr()) {
@@ -286,7 +284,7 @@ int ControlExec::ActivateRender(
 }
 
 void ControlExec::RemoveRenderer(
-    string winName, string renderType, string renderName) {
+    string winName, string dataSetName, string renderType, string renderName) {
 
     Visualizer *v = getVisualizer(winName);
     if (!v)
@@ -361,8 +359,8 @@ int ControlExec::LoadState(string stateFile) {
 }
 
 int ControlExec::activateClassRenderers(
-    string vizName, string pClassName, vector<string> instNames,
-    bool reportErrs) {
+    string vizName, string dataSetName, string pClassName,
+    vector<string> instNames, bool reportErrs) {
     bool errEnabled = MyBase::GetEnableErrMsg();
 
     for (int i = 0; i < instNames.size(); i++) {
@@ -381,7 +379,7 @@ int ControlExec::activateClassRenderers(
         }
 
         int rc = ActivateRender(
-            vizName, rClassName, instNames[i], rp->IsEnabled());
+            vizName, dataSetName, rClassName, instNames[i], rp->IsEnabled());
         if (rc < 0) {
             SetErrMsg(
                 "Failed to activate render: %s", instNames[i].c_str());
@@ -402,27 +400,31 @@ int ControlExec::openDataHelper(bool reportErrs) {
     // Activate/Create renderers as needed. This is a no-op if renderers
     // already exist
     //
+    vector<string> dataSetNames = _paramsMgr->GetDataMgrNames();
     vector<string> vizNames = _paramsMgr->GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) {
-        vector<string> pClassNames =
-            _paramsMgr->GetRenderParamsClassNames(vizNames[i], dataSetName);
 
-        for (int j = 0; j < pClassNames.size(); j++) {
-            vector<string> instNames =
-                _paramsMgr->GetRenderParamInstances(vizNames[i], pClassNames[j]);
+        for (int j = 0; j < dataSetNames.size(); j++) {
+            vector<string> pClassNames = _paramsMgr->GetRenderParamsClassNames(vizNames[i], dataSetNames[j]);
 
-            int rc = activateClassRenderers(
-                vizNames[i], pClassNames[j], instNames,
-                reportErrs);
-            if (rc < 0)
-                return (rc);
+            for (int k = 0; k < pClassNames.size(); k++) {
+                vector<string> instNames =
+                    _paramsMgr->GetRenderParamInstances(
+                        vizNames[i], dataSetNames[j], pClassNames[k]);
+
+                int rc = activateClassRenderers(
+                    vizNames[i], dataSetNames[j], pClassNames[k], instNames,
+                    reportErrs);
+                if (rc < 0)
+                    return (rc);
+            }
         }
     }
     return (0);
 }
 
 int ControlExec::OpenData(
-    vector<string> files, string typ) {
+    vector<string> files, string dataSetName, string typ) {
 
     int rc = _dataStatus->Open(files, dataSetName, typ);
     if (rc < 0) {
@@ -440,7 +442,7 @@ int ControlExec::OpenData(
     return (rc);
 }
 
-void ControlExec::CloseData() {
+void ControlExec::CloseData(string dataSetName) {
 
     _dataStatus->Close(dataSetName);
     _paramsMgr->RemoveDataMgr(dataSetName);
@@ -554,7 +556,7 @@ int ControlExec::SaveSession(string filename) {
 }
 
 RenderParams *ControlExec::GetRenderParams(
-    string winName, string renderType, string instName) const {
+    string winName, string dataSetName, string renderType, string instName) const {
 
     string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 

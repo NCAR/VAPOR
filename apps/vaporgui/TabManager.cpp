@@ -293,7 +293,7 @@ void TabManager::setActive(
     RenderEventRouter *eRouter = VizWinMgr::getInstance()->GetRenderEventRouter(
         activeViz, renderClass, renderInst);
 
-    eRouter->SetActive(activeViz, renderInst);
+    eRouter->SetActive(renderInst);
 
     eRouter->updateTab();
 
@@ -312,7 +312,24 @@ void TabManager::newRenderer(
     RenderEventRouter *er = VizWinMgr::getInstance()->GetRenderEventRouter(
         activeViz, renderClass, renderInst);
 
-    er->SetActive(activeViz, renderInst);
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    string winName, dataSetName, paramsType;
+    bool status = paramsMgr->RenderParamsLookup(
+        renderInst, winName, dataSetName, paramsType);
+
+    AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(
+        AnimationParams::GetClassType());
+    size_t ts = aParams->GetCurrentTimestep();
+
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+
+    RenderParams *rParams = er->GetActiveParams();
+    size_t local_ts = dataStatus->MapGlobalToLocalTimeStep(dataSetName, ts);
+    rParams->SetCurrentTimestep(local_ts);
+
+    cout << "Global, local ts " << ts << " " << local_ts << endl;
+
+    er->SetActive(renderInst);
 
     // Ugh. Why isn't RenderEvenRouter base class a QWidget?
     //
