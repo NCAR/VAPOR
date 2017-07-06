@@ -231,6 +231,7 @@ void TFWidget::updateSliders() {
 }
 
 void TFWidget::updateMappingFrame() {
+	cout << "updateMappingFrame()" << endl;
 	mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
 	mappingFrame->fitToView();
 }
@@ -253,7 +254,6 @@ void TFWidget::Update(DataStatus *dataStatus,
 	updateMappingFrame();
 	updateColorInterpolation();
 	updateColorVarCombo();
-
 	
 	string varName;
 	if (_flags & COLORMAPPED) {
@@ -312,7 +312,15 @@ void TFWidget::connectWidgets() {
 		this, SLOT(setCMVar()));
 	connect(colorSelectButton, SIGNAL(pressed()),
 		this, SLOT(setSingleColor()));
+	connect(mappingFrame, SIGNAL(updateParams()), this, 
+		SLOT(setRange()));
 }	
+
+void TFWidget::setRange() {
+	float min = mappingFrame->getMinEditBound();
+	float max = mappingFrame->getMaxEditBound();
+	setRange(min, max);
+}
 
 void TFWidget::setRange(double min, double max) {
 	string varName;
@@ -383,12 +391,14 @@ void TFWidget::loadTF() {
 	else {
 		varName = _rParams->GetVariableName();
 	}
-	dynamic_cast<RenderEventRouter*>(_eventRouter)->loadInstalledTF(varName);
+	//dynamic_cast<RenderEventRouter*>(_eventRouter)->loadInstalledTF(varName);
+	emit loadInstalledTF(varName);
 	updateHisto();
 }
 
 void TFWidget::saveTF() {
-	dynamic_cast<RenderEventRouter*>(_eventRouter)->fileSaveTF();
+	//dynamic_cast<RenderEventRouter*>(_eventRouter)->fileSaveTF();
+	emit fileSaveTF();
 }
 
 #ifdef DEAD

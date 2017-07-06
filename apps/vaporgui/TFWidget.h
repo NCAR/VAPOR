@@ -51,7 +51,12 @@ public:
 		mappingFrame->setDataStatus(ds);
 	}
 
+signals:
+	void loadInstalledTF(string);
+	void fileSaveTF();
+
 private slots:
+	void setRange();
 	void setRange(double min, double max);
 	void updateHisto();
 	void autoUpdateHistoChecked(int state);
