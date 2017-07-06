@@ -195,11 +195,11 @@ public:
     //! \return status A negative int is returned on failure, indicating that
     //! the renderer cannot be activated
     //
-    int ActivateRender(string winName, string renderType, string renderName, bool on);
+    int ActivateRender(string winName, string dataSetName, string renderType, string renderName, bool on);
 
-    int ActivateRender(string winName, const RenderParams *rp, string renderName, bool on);
+    int ActivateRender(string winName, string dataSetName, const RenderParams *rp, string renderName, bool on);
 
-    void RemoveRenderer(string winName, string renderType, string renderName);
+    void RemoveRenderer(string winName, string dataSetName, string renderType, string renderName);
 
     //! Obtain the ParamsMgr, for use in accessing the Params instances.
     //! \return ParamsMgr*
@@ -271,11 +271,11 @@ public:
     //! DataStatus methods into
     //! the DataMgr class, rather than keeping them separate.
     //
-    int OpenData(vector<string> files, string type = "vdc");
+    int OpenData(vector<string> files, string dataSetName, string type = "vdc");
 
     //! Unloads the specified data set
     //!
-    void CloseData();
+    void CloseData(string dataSetName);
 
     //! Obtain the current DataStatus
     //! Needed to store in GUI when the DataStatus changes.
@@ -294,7 +294,7 @@ public:
     //! the visualizer \p winName, and named \p instName
     //! with the specified
     //
-    RenderParams *GetRenderParams(string winName, string renderType, string instName) const;
+    RenderParams *GetRenderParams(string winName, string dataSetName, string renderType, string instName) const;
 
     //! Get all activated render class names
     //!
@@ -449,7 +449,7 @@ private:
 
     int  openDataHelper(bool reportErrs);
     void undoRedoHelper();
-    int  activateClassRenderers(string vizName, string pClassName, vector<string> instNames, bool reportErrs);
+    int  activateClassRenderers(string vizName, string dataSetName, string pClassName, vector<string> instNames, bool reportErrs);
 };
 };    // namespace VAPoR
 

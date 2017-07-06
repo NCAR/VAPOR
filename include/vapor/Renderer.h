@@ -224,8 +224,6 @@ public:
     //! \retval RenderParams* current render params
     RenderParams *GetActiveParams() const { return (_paramsMgr->GetRenderParams(_winName, _dataSetName, _paramsType, _instName)); }
 
-    AnimationParams *GetAnimationParams() const { return (_paramsMgr->GetAnimationParams()); }
-
 protected:
     Renderer() {}
 

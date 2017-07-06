@@ -24,7 +24,6 @@
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/regionparams.h>
 
 using namespace VAPoR;
@@ -59,8 +58,6 @@ void ParamsMgr::_init(vector<string> appParams, XmlNode *node)
         _otherParams = new ParamsContainer(&_ssave, _globalTag);
         _otherParams->SetParent(_rootSeparator);
     }
-
-    if (!_otherParams->GetParams(AnimationParams::GetClassType())) { _otherParams->Create(AnimationParams::GetClassType(), AnimationParams::GetClassType()); }
 
     if (!_otherParams->GetParams(RegionParams::GetClassType())) { _otherParams->Create(RegionParams::GetClassType(), RegionParams::GetClassType()); }
 
@@ -627,6 +624,19 @@ vector<string> ParamsMgr::GetRenderParamsClassNames(string winName) const
     }
 
     return (rClassNames);
+}
+
+vector<string> ParamsMgr::GetRenderParamInstances(string winName, string dataSetName, string className) const
+{
+    vector<string> instances;
+
+    RenParamsContainer *rpc = get_ren_container(winName, dataSetName, className);
+    if (rpc) {
+        vector<string> names = rpc->GetNames();
+        instances.insert(instances.end(), names.begin(), names.end());
+    }
+
+    return (instances);
 }
 
 vector<string> ParamsMgr::GetRenderParamInstances(string winName, string className) const

@@ -108,7 +108,17 @@ public:
     //!
     //! \sa GetTimeCoordinates().
     //
-    size_t MapTimeStep(string dataSetName, size_t ts) const;
+    size_t MapGlobalToLocalTimeStep(string dataSetName, size_t ts) const;
+
+    //! Map a local time step to a global time step range
+    //!
+    //! Map the local time step \p local_ts for the data set named
+    //! \p dataSetName to the possible range of global
+    //!
+    //!
+    //! \sa GetTimeCoordinates().
+    //
+    void MapLocalToGlobalTimeRange(string dataSetName, size_t local_ts, size_t &min_ts, size_t &max_ts) const;
 
     //! Set number of execution threads
     //!

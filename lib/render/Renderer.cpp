@@ -27,7 +27,6 @@
 #include <vapor/DataMgrUtils.h>
 
 #include <vapor/ViewpointParams.h>
-#include <vapor/AnimationParams.h>
 
 #ifdef Darwin
     #include <OpenGL/gl.h>
@@ -92,11 +91,11 @@ int RendererBase::initializeGL(ShaderMgr *sm)
 
 int Renderer::paintGL()
 {
-    const RenderParams *rp = GetActiveParams();
+    const RenderParams *rParams = GetActiveParams();
 
-    if (!rp->IsEnabled()) return (0);
+    if (!rParams->IsEnabled()) return (0);
 
-    _timestep = _paramsMgr->GetAnimationParams()->GetCurrentTimestep();
+    _timestep = rParams->GetCurrentTimestep();
 
     // Do not proceed if the bypass flag is set.
 #ifdef DEAD
@@ -118,12 +117,12 @@ void Renderer::enableClippingPlanes(vector<double> minExts, vector<double> maxEx
 {
 #ifdef DEAD
 
-    const RenderParams *rp = GetActiveParams();
+    const RenderParams *rParams = GetActiveParams();
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    vector<double> scales = rp->GetStretchFactors();
+    vector<double> scales = rParams->GetStretchFactors();
     glScaled(scales[0], scales[1], scales[2]);
 
     GLdouble x0Plane[] = {1., 0., 0., 0.};
@@ -159,11 +158,11 @@ void Renderer::enableClippingPlanes(vector<double> minExts, vector<double> maxEx
 
 void Renderer::enableFullClippingPlanes()
 {
-    AnimationParams *myAnimationParams = _paramsMgr->GetAnimationParams();
-    size_t           ts = myAnimationParams->GetCurrentTimestep();
-
     const RenderParams *rParams = GetActiveParams();
-    vector<string>      varnames = rParams->GetFieldVariableNames();
+
+    size_t ts = rParams->GetCurrentTimestep();
+
+    vector<string> varnames = rParams->GetFieldVariableNames();
     varnames.push_back(rParams->GetVariableName());
 
     vector<double> minExts, maxExts;
@@ -209,8 +208,7 @@ void Renderer::enable2DClippingPlanes()
 #ifdef DEAD
 void Renderer::enableRegionClippingPlanes()
 {
-    AnimationParams *myAnimationParams = _paramsMgr->GetAnimationParams();
-    size_t           timeStep = myAnimationParams->GetCurrentTimestep();
+    size_t timeStep = GetCurrentTimestep();
 
     RegionParams *myRegionParams = _paramsMgr->GetRegionParams();
 
@@ -230,35 +228,14 @@ void Renderer::enableRegionClippingPlanes()
 #endif
 
 #ifdef DEAD
-
-// Undo Redo Helper function to undo/redo enable and disable renderer.
-void Renderer::UndoRedo(bool isUndo, int instance, Params *beforeP, Params *afterP, Params *, Params *)
-{
-    // This only handles RenderParams
-    assert(beforeP->isRenderParams());
-    assert(afterP->isRenderParams());
-    RenderParams *rbefore = (RenderParams *)beforeP;
-    RenderParams *rafter = (RenderParams *)afterP;
-    // and only a change of enablement
-    if (rbefore->IsEnabled() == rafter->IsEnabled()) return;
-    // Undo an enable, or redo a disable
-    bool doEnable = ((rafter->IsEnabled() && !isUndo) || (rbefore->IsEnabled() && isUndo));
-
-    _controlExec->ActivateRender(beforeP->GetVizNum(), beforeP->GetName(), instance, doEnable);
-    return;
-}
-
-#endif
-
-#ifdef DEAD
 void Renderer::buildLocal2DTransform(int dataOrientation, float a[2], float b[2], float *constVal, int mappedDims[3])
 {
     mappedDims[2] = dataOrientation;
     mappedDims[0] = (dataOrientation == 0) ? 1 : 0;    // x or y
     mappedDims[1] = (dataOrientation < 2) ? 2 : 1;     // z or y
-    const RenderParams *rp = GetActiveParams();
+    const RenderParams *rParams = GetActiveParams();
 
-    const vector<double> &exts = rp->GetBox()->GetLocalExtents();
+    const vector<double> &exts = rParams->GetBox()->GetLocalExtents();
     *constVal = exts[dataOrientation];
     // constant terms go to middle
     b[0] = 0.5 * (exts[mappedDims[0]] + exts[3 + mappedDims[0]]);

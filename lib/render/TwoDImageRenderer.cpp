@@ -24,7 +24,6 @@
 
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/GeoImageGeoTiff.h>
 #include <vapor/GeoImageTMS.h>
 #include <vapor/TwoDImageRenderer.h>
@@ -136,9 +135,6 @@ int TwoDImageRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **nor
     }
     _gridStateClear();
 
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
-    size_t           ts = myAnimationParams->GetCurrentTimestep();
-
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
 
     // Find box extents for ROI
@@ -202,10 +198,9 @@ int TwoDImageRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **nor
 //
 unsigned char *TwoDImageRenderer::_getTexture(DataMgr *dataMgr)
 {
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
 
-    int currentTimestep = myAnimationParams->GetCurrentTimestep();
+    int currentTimestep = GetCurrentTimestep();
 
     string         imgFileName = myParams->GetImageFileName();
     vector<double> times = dataMgr->GetTimeCoordinates();
@@ -251,12 +246,11 @@ unsigned char *TwoDImageRenderer::_getTexture(DataMgr *dataMgr)
 bool TwoDImageRenderer::_gridStateDirty() const
 {
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
 
     int            refLevel = myParams->GetRefinementLevel();
     int            lod = myParams->GetCompressionLevel();
     string         hgtVar = myParams->GetHeightVariableName();
-    int            ts = myAnimationParams->GetCurrentTimestep();
+    int            ts = GetCurrentTimestep();
     vector<double> boxExtents = myParams->GetBox()->GetLocalExtents();
 
     return (refLevel != _cacheRefLevel || lod != _cacheLod || hgtVar != _cacheHgtVar || ts != _cacheTimestep || boxExtents != _cacheBoxExtents);
@@ -274,11 +268,10 @@ void TwoDImageRenderer::_gridStateClear()
 void TwoDImageRenderer::_gridStateSet()
 {
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
     _cacheRefLevel = myParams->GetRefinementLevel();
     _cacheLod = myParams->GetCompressionLevel();
     _cacheHgtVar = myParams->GetHeightVariableName();
-    _cacheTimestep = myAnimationParams->GetCurrentTimestep();
+    _cacheTimestep = GetCurrentTimestep();
     _cacheBoxExtents = myParams->GetBox()->GetLocalExtents();
 }
 
@@ -309,10 +302,9 @@ void TwoDImageRenderer::_imageStateClear()
 bool TwoDImageRenderer::_texStateDirty(DataMgr *dataMgr) const
 {
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
 
     int            georeferenced = (int)myParams->GetGeoreferenced();
-    int            ts = myAnimationParams->GetCurrentTimestep();
+    int            ts = GetCurrentTimestep();
     vector<double> boxExtents = myParams->GetBox()->GetLocalExtents();
 
     return (_cacheTimestepTex != ts || _cacheBoxExtentsTex != boxExtents || _cacheGeoreferenced != georeferenced);
@@ -321,10 +313,9 @@ bool TwoDImageRenderer::_texStateDirty(DataMgr *dataMgr) const
 void TwoDImageRenderer::_texStateSet(DataMgr *dataMgr)
 {
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
     int              georeferenced = (int)myParams->GetGeoreferenced();
 
-    _cacheTimestepTex = myAnimationParams->GetCurrentTimestep();
+    _cacheTimestepTex = GetCurrentTimestep();
     _cacheBoxExtentsTex = myParams->GetBox()->GetLocalExtents();
     _cacheGeoreferenced = georeferenced;
 }
@@ -640,8 +631,7 @@ int TwoDImageRenderer::_getMeshPlane(const vector<double> &minBox, const vector<
 //
 vector<double> TwoDImageRenderer::_getPCSExtentsData() const
 {
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
-    size_t           ts = myAnimationParams->GetCurrentTimestep();
+    size_t           ts = GetCurrentTimestep();
     TwoDImageParams *myParams = (TwoDImageParams *)getRenderParams();
 
     // Find box extents for ROI
@@ -661,9 +651,7 @@ vector<double> TwoDImageRenderer::_getPCSExtentsData() const
 
 void TwoDImageRenderer::_transformToLocal(size_t width, size_t height, const vector<double> &scaleFac) const
 {
-    AnimationParams *myAnimationParams = _visualizer->getActiveAnimationParams();
-
-    size_t         ts = myAnimationParams->GetCurrentTimestep();
+    size_t         ts = GetCurrentTimestep();
     vector<double> minExts, maxExts;
     _dataStatus->GetExtents(ts, minExts, maxExts);
 

@@ -109,6 +109,10 @@ using namespace VAPoR;
 MainForm *   MainForm::_mainForm = 0;
 ControlExec *MainForm::_controlExec = NULL;
 
+namespace {
+const string DataSetName = "DataSet1";
+};
+
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, const char *) : QMainWindow(parent)
@@ -151,6 +155,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     myParams.push_back(GUIStateParams::GetClassType());
     myParams.push_back(AppSettingsParams::GetClassType());
     myParams.push_back(StartupParams::GetClassType());
+    myParams.push_back(AnimationParams::GetClassType());
 
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
@@ -589,7 +594,7 @@ void MainForm::sessionOpenHelper(string fileName)
     enableWidgets(false);
 
     _vizWinMgr->Shutdown();
-    _controlExec->CloseData();
+    _controlExec->CloseData(DataSetName);
 
     if (!fileName.empty()) {
         int rc = _controlExec->LoadState(fileName);
@@ -810,7 +815,7 @@ void MainForm::loadData(QString fileName)
     vector<string> files;
     files.push_back(fileName.toStdString());
 
-    int rc = _controlExec->OpenData(files);
+    int rc = _controlExec->OpenData(files, DataSetName);
     if (rc < 0) {
         QMessageBox::information(this, "Load Data Error", "Unable to read metadata file ");
         return;
@@ -1054,15 +1059,10 @@ void MainForm::setTimestep()
 {
     int timestep = _timeStepEdit->text().toInt();
 
-    _paramsMgr->BeginSaveStateGroup("Change timestep");
+    AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
-    vector<string> winNames = _paramsMgr->GetVisualizerNames();
-
-    AnimationParams *aParams = _paramsMgr->GetAnimationParams();
-
-    aParams->SetCurrentTimestep(timestep);
-
-    _paramsMgr->EndSaveStateGroup();
+    aRouter->SetTimeStep(timestep);
+    update();
 }
 
 void MainForm::enableKeyframing(bool ison)
@@ -1489,7 +1489,7 @@ void MainForm::update()
 {
     assert(_controlExec);
 
-    AnimationParams *aParams = _paramsMgr->GetAnimationParams();
+    AnimationParams *aParams = GetAnimationParams();
     size_t           timestep = aParams->GetCurrentTimestep();
 
     _timeStepEdit->setText(QString::number((int)timestep));

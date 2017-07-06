@@ -27,7 +27,6 @@
 #include <vapor/Visualizer.h>
 
 #include <vapor/regionparams.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/MyBase.h>
 #include <vapor/errorcodes.h>
@@ -65,11 +64,9 @@ int BarbRenderer::_paintGL()
     //
     vector<StructuredGrid *> varData;
 
-    AnimationParams *myAnimationParams;
-    myAnimationParams = GetAnimationParams();
-    size_t ts = myAnimationParams->GetCurrentTimestep();
+    BarbParams *bParams = (BarbParams *)GetActiveParams();
+    size_t      ts = bParams->GetCurrentTimestep();
 
-    BarbParams *   bParams = (BarbParams *)GetActiveParams();
     int            refLevel = bParams->GetRefinementLevel();
     int            lod = bParams->GetCompressionLevel();
     vector<double> minExts, maxExts;
@@ -273,9 +270,7 @@ int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel
 {
     assert(variableData.size() == 5);
 
-    AnimationParams *myAnimationParams;
-    myAnimationParams = GetAnimationParams();
-    size_t timestep = myAnimationParams->GetCurrentTimestep();
+    size_t timestep = bParams->GetCurrentTimestep();
 
     vector<double> rMinExtents, rMaxExtents;
     bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);

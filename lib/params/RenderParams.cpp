@@ -47,6 +47,7 @@ const string RenderParams::_CompressionLevelTag = "CompressionLevel";
 const string RenderParams::_RefinementLevelTag = "RefinementLevel";
 const string RenderParams::_transferFunctionsTag = "TransferFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
+const string RenderParams::_currentTimestepTag = "CurrentTimestep";
 
 namespace {
 vector<string> string_replace(vector<string> v, string olds, string news)

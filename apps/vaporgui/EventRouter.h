@@ -26,6 +26,7 @@
 #include <QSlider>
 #include "vapor/ControlExecutive.h"
 #include "GUIStateParams.h"
+#include "AnimationParams.h"
 
 #ifdef WIN32
     // Annoying unreferenced formal parameter warning
@@ -232,12 +233,11 @@ public:
 
     size_t GetCurrentTimeStep() const
     {
-        GUIStateParams *sP = GetStateParams();
-        assert(sP);
+        AnimationParams *aParams;
+        aParams = (AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+        assert(aParams);
 
-        string            vizName = sP->GetActiveVizName();
-        VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-        return (paramsMgr->GetAnimationParams()->GetCurrentTimestep());
+        return (aParams->GetCurrentTimestep());
     }
 
     //! Return derived class type

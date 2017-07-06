@@ -107,7 +107,7 @@ void VizWin::getNearFarDist(const double posVec[3], const double dirVec[3], doub
     DataStatus *dataStatus = _controlExec->getDataStatus();
     ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
 
-    AnimationParams *p = paramsMgr->GetAnimationParams();
+    AnimationParams *p = _mainForm->GetAnimationParams();
     size_t           ts = p->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
