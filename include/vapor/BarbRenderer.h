@@ -50,26 +50,16 @@ namespace VAPoR {
 
   private:
 
-	// Copied from TwoDDataRender.h
-	//
-	size_t _currentTimestep;			// new!
-	int _currentRefLevel;				// new!
-	int _currentLod;					// new!
 	vector <string> _fieldVariables;	// old, used instead of _currentVarname
 	double _vectorScaleFactor;			// old
 	
 	vector<double> _currentBoxMinExts;	// new!
 	vector<double> _currentBoxMaxExts;	// new!
 
-	size_t _currentTimestepTex;			// new, do we need this?
 	string _currentHgtVar;				// new!
 	vector<double> _currentBoxMinExtsTex;	// new, do we need this?
 	vector<double> _currentBoxMaxExtsTex;	// new, do we need this?
 	
-	GLuint _cMapTexID;					// new, do we need this?
-	GLfloat *_colormap;					// new, do we need this?
-	size_t _colormapsize;				// new, do we need this?
-
 	// Copied from TwoDRenderer.h
 	//
 	// ...TBD...
