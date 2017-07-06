@@ -26,6 +26,7 @@
 #include <QSlider>
 #include "vapor/ControlExecutive.h"
 #include "GUIStateParams.h"
+#include "AnimationParams.h"
 
 
 #ifdef WIN32
@@ -242,12 +243,13 @@ public:
 
 
  size_t GetCurrentTimeStep() const {
- 	GUIStateParams *sP = GetStateParams();
- 	assert(sP);
- 
-	string vizName = sP->GetActiveVizName();
-	VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-	return(paramsMgr->GetAnimationParams()->GetCurrentTimestep());
+ 	AnimationParams *aParams;
+	aParams = (AnimationParams *) _controlExec->GetParamsMgr()->GetParams(
+		AnimationParams::GetClassType()
+	);
+ 	assert(aParams);
+
+	return(aParams->GetCurrentTimestep());
  }
 
  //! Return derived class type

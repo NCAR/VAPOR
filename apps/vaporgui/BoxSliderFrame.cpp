@@ -25,6 +25,7 @@
 #include <QString>
 #include "vapor/DataStatus.h"
 #include "MainForm.h"
+#include "AnimationParams.h"
 #include "vapor/ControlExecutive.h"
 using namespace VAPoR;
 DataStatus* BoxSliderFrame::_dataStatus = 0;
@@ -303,7 +304,7 @@ void BoxSliderFrame::nudgeCenter(string varname, int val, int dir){
 	
 	GUIStateParams *p = MainForm::getInstance()->GetStateParams();
 	string activeViz = p->GetActiveVizName();
-	AnimationParams *animP = _controlExec->GetParamsMgr()->GetAnimationParams();
+	AnimationParams *animP = MainForm::getInstance()->GetAnimationParams();
 
 	size_t timeStep = animP->GetCurrentTimestep();
 
@@ -383,7 +384,7 @@ void BoxSliderFrame::nudgeSize(int val, int dir){
 	
 	GUIStateParams *p = MainForm::getInstance()->GetStateParams();
 	string activeViz = p->GetActiveVizName();
-	AnimationParams *animP = _controlExec->GetParamsMgr()->GetAnimationParams();
+	AnimationParams *animP = MainForm::getInstance()->GetAnimationParams();
 
 	size_t timeStep = animP->GetCurrentTimestep();
 

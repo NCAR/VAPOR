@@ -35,6 +35,7 @@ using namespace VAPoR;
 
 namespace {
 	const string DuplicateInStr = "Duplicate in:";
+	const string DataSetName = "DataSet1";
 };
 
 RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
@@ -148,7 +149,7 @@ void RenderHolder::newRenderer() {
 	qname = QString(renderInst.c_str());
 
 	int rc = _controlExec->ActivateRender(
-		activeViz, renderClass, renderInst, false
+		activeViz, DataSetName, renderClass, renderInst, false
 	);
 	if (rc<0) {
 		MessageReporter::errorMsg(
@@ -183,11 +184,13 @@ void RenderHolder::deleteRenderer() {
 	getRow(renderInst, renderClass, enabled);
 
 	int rc = _controlExec->ActivateRender(
-		activeViz, renderClass, renderInst, false
+		activeViz, DataSetName, renderClass, renderInst, false
 	);
 	assert(rc == 0);
 
-	_controlExec->RemoveRenderer(activeViz, renderClass, renderInst);
+	_controlExec->RemoveRenderer(
+		activeViz, DataSetName, renderClass, renderInst
+	);
 
 	// Make the renderer in the first row the active renderer
 	//
@@ -219,7 +222,7 @@ void RenderHolder::changeChecked(int row, int col) {
 	p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
 	int rc = _controlExec->ActivateRender(
-		activeViz, renderClass, renderInst, enabled
+		activeViz, DataSetName, renderClass, renderInst, enabled
 	);
 	if (rc<0) {
 		MessageReporter::errorMsg(
@@ -315,7 +318,7 @@ void RenderHolder::copyInstanceTo(int item) {
 	);
 
 	RenderParams *rParams = _controlExec->GetRenderParams(
-		activeViz, activeRenderClass, activeRenderInst
+		activeViz, DataSetName, activeRenderClass, activeRenderInst
 	);
 	assert(rParams);
 
@@ -324,7 +327,7 @@ void RenderHolder::copyInstanceTo(int item) {
 	string renderInst = uniqueName(activeRenderInst);
 
 	int rc = _controlExec->ActivateRender(
-		dstVizName, rParams, renderInst, false
+		dstVizName, DataSetName, rParams, renderInst, false
 	);
 	if (rc<0) {
 		MessageReporter::errorMsg(
@@ -500,7 +503,7 @@ void RenderHolder::Update() {
 			}
 
 			RenderParams *rParams = _controlExec->GetRenderParams(
-				activeViz, className, renderInst
+				activeViz, DataSetName, className, renderInst
 			);
 			assert(rParams);
 

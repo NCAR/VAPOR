@@ -21,7 +21,6 @@
 #include <vapor/Visualizer.h>
 #include <vapor/params.h>
 #include <vapor/ViewpointParams.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/DataStatus.h>
 
 #include "Manip.h"
@@ -176,7 +175,9 @@ bool TranslateStretchManip::startHandleSlide(Visualizer* viz, double mouseCoords
 	if (handleNum > 2) handleNum = handleNum-3;
 	else handleNum = 2 - handleNum;
 	double boxExtents[6];
+#ifdef	DEAD
 	int timestep = viz->getActiveAnimationParams()->GetCurrentTimestep();
+#endif
 	manipParams->GetBox()->GetStretchedLocalExtents(boxExtents, timestep);
 	
 	for (int i = 0; i<3; i++){boxCtr[i] = (boxExtents[i] + boxExtents[i+3])*0.5f;}
@@ -338,7 +339,9 @@ rayHandleIntersect(double ray[3], const std::vector<double>& cameraPos, int hand
 	double val;
 	double handleExtents[6];
 	double boxExtents[6];
+#ifdef	DEAD
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
+#endif
 	_params->GetBox()->GetLocalExtents(boxExtents,timestep);
 	
 	makeHandleExtents(handleNum, handleExtents, 0, boxExtents);
@@ -389,7 +392,9 @@ void TranslateStretchManip::render(){
 	double extents[6];
 	//Calculate the box extents, and the viewer position, in the unit cube,
 	//Without any rotation applied:
+#ifdef	DEAD
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
+#endif
 	_params->GetBox()->GetStretchedLocalExtents(extents, timestep);
 	
 	ViewpointParams* myViewpointParams = _vis->getActiveViewpointParams();
@@ -443,7 +448,9 @@ void TranslateStretchManip::render(){
 
 void TranslateStretchManip::drawBoxFaces(){
 	double corners[8][3];
+#ifdef	DEAD
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
+#endif
 	_params->GetBox()->calcLocalBoxCorners(corners, 0.f, timestep);
 	
 	//Now the corners need to be put into the unit cube, and displaced appropriately
@@ -522,7 +529,9 @@ void TranslateStretchManip::
 mouseRelease(float /*screenCoords*/[2]){
 	//Need to commit to latest drag position
 	//Are we dragging?
+#ifdef	DEAD
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
+#endif
 	if (_selectedHandle >= 0){
 		double boxExts[6];
 		int axis = (_selectedHandle <3) ? (2-_selectedHandle): (_selectedHandle-3);
@@ -616,7 +625,9 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	//Do this calculation in stretched world coords
 	double boxExtents[6];
 	const double* sizes = _dataStatus->getFullStretchedSizes();
+#ifdef	DEAD
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
+#endif
 	_params->GetBox()->GetStretchedLocalExtents(boxExtents,timestep);
 	
 	if (_isStretching){ //don't push through opposite face ..

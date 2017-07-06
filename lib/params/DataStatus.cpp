@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cassert>
 #include <cfloat>
+#include <algorithm>
 
 
 #include <vapor/DataStatus.h>
@@ -147,15 +148,19 @@ void DataStatus::GetExtents(
 
 	map <string, vector <string>>::const_iterator itr;
 	for (itr = varMap.begin(); itr != varMap.end(); ++itr) {
-		DataMgr *dataMgr = GetDataMgr(itr->first);
+		string dataSetName = itr->first;
+
+		DataMgr *dataMgr = GetDataMgr(dataSetName);
 		if (! dataMgr) continue;
+
+		size_t local_ts = MapGlobalToLocalTimeStep(dataSetName, ts);
 
 		const vector <string> &varnames = itr->second;
 
 		vector <double> minVExts, maxVExts;
 		vector <int> axes;
 		bool status = DataMgrUtils::GetExtents(
-			dataMgr, ts, varnames, minVExts, maxVExts, axes
+			dataMgr, local_ts, varnames, minVExts, maxVExts, axes
 		);
 		if (! status) continue;
 
@@ -275,7 +280,9 @@ void DataStatus::GetActiveExtents(
 	}
 }
 
-size_t DataStatus::MapTimeStep(string dataSetName, size_t ts) const {
+size_t DataStatus::MapGlobalToLocalTimeStep(
+	string dataSetName, size_t ts
+) const {
 
 	map <string, vector <size_t>>::const_iterator itr;
 	itr = _timeMap.find(dataSetName);
@@ -288,7 +295,28 @@ size_t DataStatus::MapTimeStep(string dataSetName, size_t ts) const {
 	return(ref[ts]);
 }
 
+void DataStatus::MapLocalToGlobalTimeRange(
+	string dataSetName, size_t local_ts, size_t &min_ts, size_t &max_ts
+) const {
+	min_ts = max_ts = 0;
 
+	map <string, vector <size_t>>::const_iterator itr;
+	itr = _timeMap.find(dataSetName);
+	if (itr == _timeMap.end()) return;
+
+	const vector <size_t> &ref = itr->second;
+	vector <size_t>::const_iterator itr1;
+	vector <size_t>::const_reverse_iterator itr2;
+
+	itr1 = find(ref.begin(), ref.end(), local_ts);
+	if (itr1 == ref.end()) return;
+
+	itr2 = find(ref.rbegin(), ref.rend(), local_ts);
+	if (itr2 == ref.rend()) return;
+
+	min_ts = itr1 - ref.begin();
+	max_ts = ref.rend() - itr2 - 1;
+}
 
 namespace {
 int find_nearest(const vector <double> &timeCoords, double time) {
@@ -454,8 +482,7 @@ void DataStatus::reset() {
 
 
 
-DataStatus::
-~DataStatus(){
+DataStatus::~DataStatus(){
 	
 }
 
