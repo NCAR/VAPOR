@@ -362,8 +362,14 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	_rParams = rParams;
 	_paramsMgr = paramsMgr;
 
-	string varname = rParams->GetVariableName();
-	MapperFunction *mapper = rParams->MakeMapperFunc(varname);
+	string varname = _rParams->GetVariableName();
+	
+	MapperFunction *mapper;
+	mapper = _rParams->GetMapperFunc(varname);
+	if (!mapper) {
+		mapper = _rParams->MakeMapperFunc(varname);
+		assert(mapper);
+	}
 
 	setMapperFunction(mapper);
 

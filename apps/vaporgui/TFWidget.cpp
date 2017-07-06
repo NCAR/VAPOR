@@ -27,8 +27,10 @@
 #include "StartupParams.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
+#include "vapor/GetAppPath.h"
 #include "MainForm.h"
 #include "TFWidget.h"
+#include "MessageReporter.h"
 
 using namespace VAPoR;
 
@@ -114,14 +116,6 @@ void TFWidget::setSingleColor() {
 	colormapVarCombo->setCurrentIndex(0);
 }
 
-void TFWidget::setEventRouter(RenderEventRouter* e) {
-	_eventRouter = e;
-	mappingFrame->hookup(
-		_eventRouter,
-		updateHistoButton,
-		opacitySlider);	
-}
-
 void TFWidget::enableTFWidget(bool state) {
 	loadButton->setEnabled(state);
 	saveButton->setEnabled(state);
@@ -132,6 +126,79 @@ void TFWidget::enableTFWidget(bool state) {
 	updateHistoButton->setEnabled(state);
 	autoUpdateHistoCheckbox->setEnabled(state);
 	colorInterpCombo->setEnabled(state);
+}
+
+void TFWidget::loadTF(string varname) {
+	GUIStateParams *p;
+	p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+
+	string path = p->GetCurrentTFPath();
+	fileLoadTF(varname, path.c_str(), true);
+}
+
+void TFWidget::fileLoadTF(
+	string varname, const char* startPath, bool savePath
+) {
+	QString s = QFileDialog::getOpenFileName(0,
+					"Choose a transfer function file to open",
+					startPath,
+					"Vapor 3 Transfer Functions (*.tf3)");
+
+	// Null string indicates nothing selected
+	if (s.length()==0) return;
+
+	// Force name to end with .tf3
+	if (!s.endsWith(".tf3")) {
+		s += ".tf3";
+	}
+
+	TransferFunction *tf = _rParams->GetTransferFunc(varname);
+	if (!tf) {
+		tf = _rParams->MakeTransferFunc(varname);
+		assert(tf);
+	}
+
+	int rc = tf->LoadFromFile(s.toStdString());
+	if (rc<0) {
+		QString str("Error loading transfer function. /nFailed to convert "
+			"input file: \n)");
+		str += s;
+		MessageReporter::errorMsg((const char*)str.toAscii());
+	}
+}
+
+void TFWidget::fileSaveTF() {
+    //Launch a file save dialog, open resulting file
+    GUIStateParams *p;
+	p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string path = p->GetCurrentTFPath();
+
+    QString s = QFileDialog::getSaveFileName(0,
+            "Choose a filename to save the transfer function",
+            path.c_str(), "Vapor 3 Transfer Functions (*.tf3)"
+    );  
+    //Did the user cancel?
+    if (s.length()== 0) return;
+    //Force the name to end with .tf3
+    if (!s.endsWith(".tf3")){
+        s += ".tf3";
+    }   
+    
+    string varname = _rParams->GetVariableName();
+
+    TransferFunction *tf = _rParams->GetTransferFunc(varname);
+    if (! tf) {
+        tf = _rParams->MakeTransferFunc(varname);
+        assert(tf);
+    }   
+
+    int rc = tf->SaveToFile(s.toStdString());
+    if (rc<0) {
+        QString str("Failed to write output file: \n");
+        str += s;
+        MessageReporter::errorMsg((const char*)str.toAscii());
+        return;
+    }   
 }
 
 void TFWidget::getRange(float range[2], 
@@ -231,7 +298,6 @@ void TFWidget::updateSliders() {
 }
 
 void TFWidget::updateMappingFrame() {
-	cout << "updateMappingFrame()" << endl;
 	mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
 	mappingFrame->fitToView();
 }
@@ -307,7 +373,7 @@ void TFWidget::connectWidgets() {
 	connect(loadButton, SIGNAL(pressed()), 
 		this, SLOT(loadTF()));
 	connect(saveButton, SIGNAL(pressed()), 
-		this, SLOT(saveTF()));
+		this, SLOT(fileSaveTF()));
 	connect(colormapVarCombo, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(setCMVar()));
 	connect(colorSelectButton, SIGNAL(pressed()),
@@ -384,22 +450,34 @@ void TFWidget::colorInterpChanged(int index) {
 }
 
 void TFWidget::loadTF() {
-	string varName;
+	string varname;
 	if (_flags & COLORMAPPED) {
-		varName = _rParams->GetColorMapVariableName();
+		varname = _rParams->GetColorMapVariableName();
 	}	
 	else {
-		varName = _rParams->GetVariableName();
+		varname = _rParams->GetVariableName();
 	}
-	//dynamic_cast<RenderEventRouter*>(_eventRouter)->loadInstalledTF(varName);
-	emit loadInstalledTF(varName);
+
+    //Ignore TF's in session, for now.
+
+	GUIStateParams *p;
+	p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string path = p->GetCurrentTFPath();
+
+    fileLoadTF(varname, p->GetCurrentTFPath().c_str(),true);
+}
+	
+void TFWidget::loadInstalledTF(string varname) {
+    //Get the path from the environment:
+    vector <string> paths;
+    paths.push_back("palettes");
+    string palettes = GetAppPath("VAPOR", "share", paths);
+
+    QString installPath = palettes.c_str();
+    fileLoadTF(varname, (const char*) installPath.toAscii(),false);
 	updateHisto();
 }
 
-void TFWidget::saveTF() {
-	//dynamic_cast<RenderEventRouter*>(_eventRouter)->fileSaveTF();
-	emit fileSaveTF();
-}
 
 #ifdef DEAD
 void TFWidget::makeItRed(QLineEdit* edit) {
