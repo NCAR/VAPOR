@@ -20,10 +20,12 @@ public:
 
     virtual ~BarbParams();
 
-    //! Get the vector scaling factor
+    //! Get the length scaling factor
     //! \retval double scale factor
     //
-    double GetVectorScale() const { return GetValueDouble(_vectorScaleTag, 1.0); }
+    double GetLengthScale() const { return GetValueDouble(_lengthScaleTag, 1.0); }
+
+    void SetLengthScale(double val) { SetValueDouble(_lengthScaleTag, "Barb length", val); }
 
     //! \copydoc RenderParams::IsOpaque()
     virtual bool IsOpaque() const;
@@ -67,7 +69,9 @@ public:
 
     //! Determine line thickness in voxels
     //! \retval double line thickness
-    double GetLineThickness() const { return (GetValueDouble(_lineThicknessTag, 1.0)); }
+    double GetLineThickness() const { return (GetValueDouble(_thicknessScaleTag, 1.0)); }
+
+    void SetLineThickness(double val) { SetValueDouble(_thicknessScaleTag, "Barb thickness", val); }
 
     // Get static string identifier for this params class
     //
@@ -75,8 +79,8 @@ public:
 
 private:
     void                _init();
-    static const string _vectorScaleTag;
-    static const string _lineThicknessTag;
+    static const string _lengthScaleTag;
+    static const string _thicknessScaleTag;
     static const string _gridTag;
     static const string _alignGridTag;
     static const string _alignGridStridesTag;
