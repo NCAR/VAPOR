@@ -179,6 +179,8 @@ signals:
     //
     void mappingChanged();
 
+    void updateParams();
+
 public slots:
     void updateHisto();
     void fitToView();

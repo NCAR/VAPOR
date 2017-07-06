@@ -32,6 +32,7 @@ public:
     TwoDAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
+        //_TFWidget->Reinit((TFWidget::Flags)(0));
         _TFWidget->setEventRouter(dynamic_cast<RenderEventRouter *>(parent));
     }
 

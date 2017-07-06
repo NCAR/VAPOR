@@ -135,7 +135,6 @@ void MappingFrame::setDataStatus(DataStatus *ds) { _dataStatus = ds; }
 
 void MappingFrame::RefreshHistogram()
 {
-    cout << "void MappingFrame::RefreshHistogram() {" << endl;
     string var = _rParams->GetVariableName();
     size_t timestep = _paramsMgr->GetAnimationParams()->GetCurrentTimestep();
 
@@ -1582,6 +1581,8 @@ void MappingFrame::mousePressEvent(QMouseEvent *event)
         emit startChange("Mapping window zoom/pan");
     }
 
+    cout << "MappingFrame mousePressEvent" << endl;
+
     updateGL();
 }
 
@@ -1612,7 +1613,10 @@ void MappingFrame::mouseReleaseEvent(QMouseEvent *event)
         updateGL();
 
         emit endChange();
+        emit updateParams();
     }
+
+    cout << "MappingFrame mouseReleaseEvent" << endl;
 }
 
 //----------------------------------------------------------------------------

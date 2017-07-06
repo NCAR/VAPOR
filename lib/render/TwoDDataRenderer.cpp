@@ -515,8 +515,6 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     sg->GetDimensions(dims);
     assert(dims.size() == 2);
 
-    cout << "dataStatus report: " << minBoxReq[0] << " " << dims[0] << endl;
-
     _texWidth = dims[0];
     _texHeight = dims[1];
 
