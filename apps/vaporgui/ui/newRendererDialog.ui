@@ -51,7 +51,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="dataMgrCombo">
          <property name="minimumSize">
           <size>
            <width>125</width>
