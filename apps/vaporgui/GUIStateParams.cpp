@@ -28,7 +28,7 @@ using namespace VAPoR;
 const string GUIStateParams::m_activeVisualizer = "ActiveVisualizer";
 const string GUIStateParams::m_pathParamsTag = "PathParamsTag";
 const string GUIStateParams::m_sessionFileTag = "SessionFileTag";
-const string GUIStateParams::m_dataFileTag = "DataFileTag";
+const string GUIStateParams::m_openDataTag = "OpenDataTag";
 const string GUIStateParams::m_imagePathTag = "ImagePathTag";
 const string GUIStateParams::m_pythonPathTag = "PythonPathTag";
 const string GUIStateParams::m_flowPathTag = "FlowPathTag";
@@ -96,6 +96,32 @@ GUIStateParams &GUIStateParams::operator=(const GUIStateParams &rhs)
 // Destructor
 //----------------------------------------------------------------------------
 GUIStateParams::~GUIStateParams() {}
+
+void GUIStateParams::SetOpenDataSets(const std::vector<string> &paths, const std::vector<string> &names)
+{
+    assert(paths.size() == names.size());
+
+    vector<string> v;
+    for (int i = 0; i < paths.size(); i++) {
+        v.push_back(names[i]);
+        v.push_back(paths[i]);
+    }
+    SetValueStringVec(m_openDataTag, "open data sets", v);
+}
+
+void GUIStateParams::GetOpenDataSets(std::vector<string> &paths, std::vector<string> &names) const
+{
+    paths.clear();
+    names.clear();
+
+    std::vector<string> v = GetValueStringVec(m_openDataTag);
+    assert((v.size() % 2) == 0);
+
+    for (int i = 0; i < v.size(); i += 2) {
+        names.push_back(v[i]);
+        paths.push_back(v[i + 1]);
+    }
+}
 
 void GUIStateParams::_init() { SetActiveVizName(""); }
 
