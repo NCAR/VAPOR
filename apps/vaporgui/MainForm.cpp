@@ -36,6 +36,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GetAppPath.h>
+#include <vapor/CFuncs.h>
 
 #include "VizWin.h"
 #include "VizSelectCombo.h"
@@ -114,7 +115,44 @@ MainForm* MainForm::_mainForm = 0;
 ControlExec * MainForm::_controlExec = NULL;
 
 namespace {
-	const string DataSetName = "DataSet1";
+bool make_dataset_name(
+	const vector <string> &currentPaths,
+	const vector <string> &currentNames,
+	const string &newPath,
+	string &dataSetName
+	
+) {
+	dataSetName.clear();
+
+	assert(currentPaths.size() == currentNames.size());
+
+	string volume, dir, file;
+	Wasp::Splitpath(newPath, volume, dir, file, false);
+
+	Wasp::StrRmWhiteSpace(file);
+
+	// Remove any file extension
+	//
+	file.erase(file.find_last_of("."), string::npos);
+
+	for (int i=0; i<currentNames.size(); i++) {
+		if (currentNames[i] == file) {
+			if (currentPaths[i] == newPath) {
+				//
+				// path and data set name already exist
+				dataSetName = file;
+				return(false);
+			}
+			else {
+				file += "1";
+				dataSetName = file;
+				return(true);
+			}
+		}
+	}
+	dataSetName = file;
+	return(true);
+}
 };
 
 //Only the main program should call the constructor:
@@ -769,7 +807,13 @@ void MainForm::sessionOpenHelper(string fileName) {
 	enableWidgets(false);
 
 	_vizWinMgr->Shutdown();
-	_controlExec->CloseData(DataSetName);
+
+	GUIStateParams *p = GetStateParams();
+	vector <string> currentPaths, currentDataSets;
+	p->GetOpenDataSets(currentPaths, currentDataSets);
+	for (int i=0; i<currentDataSets.size(); i++) {
+		_controlExec->CloseData(currentDataSets[i]);
+	}
 
 	if (! fileName.empty()) {
 		int rc = _controlExec->LoadState(fileName);
@@ -783,8 +827,10 @@ void MainForm::sessionOpenHelper(string fileName) {
 	}
 
 
-	GUIStateParams *p = GetStateParams();
-	p->SetCurrentSessionPath(fileName);
+	// ControlExec::LoadState invalidates params state
+	//
+	GUIStateParams *newP = GetStateParams();
+	newP->SetCurrentSessionPath(fileName);
 
 }
 
@@ -991,6 +1037,10 @@ void MainForm::batchSetup(){
 //
 void MainForm::loadData(QString fileName)
 {
+	GUIStateParams *p = GetStateParams();
+	vector <string> currentPaths, currentDataSets;
+	p->GetOpenDataSets(currentPaths, currentDataSets);
+
 	// This launches a panel that enables the
     // user to choose input data files, then to
 	// create a datamanager using those files
@@ -1011,8 +1061,7 @@ void MainForm::loadData(QString fileName)
 		if (btn == QMessageBox::Cancel) return;
 #endif
 
-		GUIStateParams *p = GetStateParams();
-		string path = p->GetCurrentDataPath();
+		string path = currentPaths.size() ? currentPaths[currentPaths.size()-1] : ".";
 
 		fileName = QFileDialog::getOpenFileName(this,
 			"Choose the Master data File to load", path.c_str(),
@@ -1030,15 +1079,29 @@ void MainForm::loadData(QString fileName)
 		return;
 	}
 
+
+	// Generate a new data set name if needed (not re-opening the same 
+	// file)
+	//
+	string dataSetName;
+	bool newDataSet = make_dataset_name(
+		currentPaths, currentDataSets, fileName.toStdString(), dataSetName
+	);
+
 	vector<string> files;
 	files.push_back(fileName.toStdString());
-
-	int rc = _controlExec->OpenData(files, DataSetName);
+	int rc = _controlExec->OpenData(files, dataSetName);
 	if (rc<0) {
 		QMessageBox::information(
 			this,"Load Data Error","Unable to read metadata file "
 		);
 		return;
+	}
+
+	if (newDataSet) {
+		currentPaths.push_back(fileName.toStdString());
+		currentDataSets.push_back(dataSetName);
+		p->SetOpenDataSets(currentPaths, currentDataSets);
 	}
 
 	// Reinitialize all tabs
@@ -1054,8 +1117,6 @@ void MainForm::loadData(QString fileName)
 
 	enableWidgets(true);
 
-	GUIStateParams *p = GetStateParams();
-	p->SetCurrentDataPath(files[0]);
 
 	_timeStepEditValidator->setRange(0,ds->getNumTimesteps()-1);
 
@@ -1075,6 +1136,10 @@ void MainForm::importWRFData()
 	
 }
 void MainForm::importData(const string& modelType){
+	GUIStateParams *p = GetStateParams();
+	vector <string> currentPaths, currentDataSets;
+	p->GetOpenDataSets(currentPaths, currentDataSets);
+
 	//This launches a panel that enables the
     //user to choose netcdf files, then to
 	//use them to create a new data manager
@@ -1095,8 +1160,8 @@ void MainForm::importData(const string& modelType){
 	prompt += modelType.c_str();
 	prompt += " model output files to import into current session.";
 
-	GUIStateParams *stateParams = GetStateParams();
-	string path = stateParams->GetCurrentDataPath();
+	string path = currentPaths.size() ? currentPaths[currentPaths.size()-1] : ".";
+
 	QStringList fileNames = QFileDialog::getOpenFileNames(
 		this, prompt, path.c_str(),""
 	);
@@ -1115,10 +1180,24 @@ void MainForm::importData(const string& modelType){
 		++it;
 	}
 
-	int rc = _controlExec->OpenData(files, modelType);
+	// Generate a new data set name if needed (not re-opening the same 
+	// file)
+	//
+	string dataSetName;
+	bool newDataSet = make_dataset_name(
+		currentPaths, currentDataSets, files[0], dataSetName
+	);
+
+	int rc = _controlExec->OpenData(files, dataSetName, modelType);
 	if (rc<0) {
 		MessageReporter::errorMsg("No valid %s files \n", modelType.c_str());
 		return;
+	}
+
+	if (newDataSet) {
+		currentPaths.push_back(files[0]);
+		currentDataSets.push_back(dataSetName);
+		p->SetOpenDataSets(currentPaths, currentDataSets);
 	}
 		
 	// Reinitialize all tabs
@@ -1133,8 +1212,6 @@ void MainForm::importData(const string& modelType){
 	vector <string> tabNames = _vizWinMgr->GetInstalledTabNames();
 
 	enableWidgets(true);
-
-	stateParams->SetCurrentDataPath(files[0]);
 
 	_tabMgr->Update();
 }

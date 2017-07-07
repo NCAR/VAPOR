@@ -35,7 +35,6 @@ using namespace VAPoR;
 
 namespace {
 	const string DuplicateInStr = "Duplicate in:";
-	const string DataSetName = "DataSet1";
 };
 
 RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
@@ -44,9 +43,9 @@ RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
 	setupUi(this);
 	_controlExec = ce;
 
-	tableWidget->setColumnCount(3);
+	tableWidget->setColumnCount(4);
 	QStringList headerText;
-	headerText << "    Name    " << "  Type  " << "Enabled";
+	headerText << " Name " << " Type " << " Data Set " << "Enabled";
 	tableWidget->setHorizontalHeaderLabels(headerText);
 	tableWidget->verticalHeader()->hide();
 	tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -105,6 +104,9 @@ int RenderHolder::AddWidget(QWidget* wid, const char* name, string tag){
 // Slots: 
 //
 void RenderHolder::newRenderer() {
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	vector <string> dataSetNames = paramsMgr->GetDataMgrNames();
+
 
 	vector <string> renderClasses = _controlExec->GetAllRenderClasses();
 
@@ -117,6 +119,15 @@ void RenderHolder::newRenderer() {
 	rDialog.setupUi(&nDialog);
 	rDialog.rendererNameEdit->setText(" ");
 
+	// Set up the list of data set names in the dialog:
+	//
+	rDialog.dataMgrCombo->clear();
+	for (int i = 0; i<dataSetNames.size(); i++){
+		rDialog.dataMgrCombo->addItem(
+			QString::fromStdString(dataSetNames[i])
+		);
+	}
+
 	// Set up the list of renderer names in the dialog:
 	//
 	rDialog.rendererCombo->clear();
@@ -128,8 +139,10 @@ void RenderHolder::newRenderer() {
 	if (nDialog.exec() != QDialog::Accepted) return;
 	
 	int selection = rDialog.rendererCombo->currentIndex();
-	
 	string renderClass = renderClasses[selection];
+
+	selection = rDialog.dataMgrCombo->currentIndex();
+	string dataSetName = dataSetNames[selection];
 
 	GUIStateParams *p = getStateParams();
 	string activeViz = p->GetActiveVizName();
@@ -149,7 +162,7 @@ void RenderHolder::newRenderer() {
 	qname = QString(renderInst.c_str());
 
 	int rc = _controlExec->ActivateRender(
-		activeViz, DataSetName, renderClass, renderInst, false
+		activeViz, dataSetName, renderClass, renderInst, false
 	);
 	if (rc<0) {
 		MessageReporter::errorMsg(
@@ -179,22 +192,22 @@ void RenderHolder::deleteRenderer() {
 
 	// Get the currently selected renderer.
 	//
-	string renderInst, renderClass;
+	string renderInst, renderClass, dataSetName;
 	bool enabled;
-	getRow(renderInst, renderClass, enabled);
+	getRow(renderInst, renderClass, dataSetName, enabled);
 
 	int rc = _controlExec->ActivateRender(
-		activeViz, DataSetName, renderClass, renderInst, false
+		activeViz, dataSetName, renderClass, renderInst, false
 	);
 	assert(rc == 0);
 
 	_controlExec->RemoveRenderer(
-		activeViz, DataSetName, renderClass, renderInst
+		activeViz, dataSetName, renderClass, renderInst
 	);
 
 	// Make the renderer in the first row the active renderer
 	//
-	getRow(0, renderInst, renderClass, enabled);
+	getRow(0, renderInst, renderClass, dataSetName, enabled);
 	p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
 	// Update will rebuild the TableWidget with the updated state
@@ -209,20 +222,20 @@ void RenderHolder::changeChecked(int row, int col) {
 	GUIStateParams *p = getStateParams();
 	string activeViz = p->GetActiveVizName();
 
-	if ( col != 2) return;
+	if ( col != 3) return;
 
 	// Get the currently selected renderer.
 	//
-	string renderInst, renderClass;
+	string renderInst, renderClass, dataSetName;
 	bool enabled;
-	getRow(renderInst, renderClass, enabled);
+	getRow(renderInst, renderClass, dataSetName, enabled);
 
 	// Save current instance to state
 	//
 	p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
 	int rc = _controlExec->ActivateRender(
-		activeViz, DataSetName, renderClass, renderInst, enabled
+		activeViz, dataSetName, renderClass, renderInst, enabled
 	);
 	if (rc<0) {
 		MessageReporter::errorMsg(
@@ -254,9 +267,9 @@ void RenderHolder::selectInstance() {
 
 	// Get the currently selected renderer.
 	//
-	string renderInst, renderClass;
+	string renderInst, renderClass, dataSetName;
 	bool enabled;
-	getRow(renderInst, renderClass, enabled);
+	getRow(renderInst, renderClass, dataSetName, enabled);
 
 	selectInstanceHelper(activeViz, renderClass, renderInst);
 
@@ -316,9 +329,14 @@ void RenderHolder::copyInstanceTo(int item) {
  	p->GetActiveRenderer(
 		activeViz, activeRenderClass, activeRenderInst
 	);
+	string dataSetName, dummy1, dummy2;
+	bool status = _controlExec->RenderLookup(
+		activeRenderInst, dummy1, dataSetName, dummy2
+	);
+	assert(status);
 
 	RenderParams *rParams = _controlExec->GetRenderParams(
-		activeViz, DataSetName, activeRenderClass, activeRenderInst
+		activeViz, dataSetName, activeRenderClass, activeRenderInst
 	);
 	assert(rParams);
 
@@ -327,7 +345,7 @@ void RenderHolder::copyInstanceTo(int item) {
 	string renderInst = uniqueName(activeRenderInst);
 
 	int rc = _controlExec->ActivateRender(
-		dstVizName, DataSetName, rParams, renderInst, false
+		dstVizName, dataSetName, rParams, renderInst, false
 	);
 	if (rc<0) {
 		MessageReporter::errorMsg(
@@ -496,6 +514,12 @@ void RenderHolder::Update() {
 
 			string renderInst = renderInsts[i];
 
+			string dataSetName, dummy1, dummy2;
+			bool status = _controlExec->RenderLookup(
+				renderInst, dummy1, dataSetName, dummy2
+			);
+			assert(status);
+
 			// Is this the currently selected render instance?
 			//
 			if (renderInst==activeRenderInst && className==activeRenderClass) {
@@ -503,11 +527,11 @@ void RenderHolder::Update() {
 			}
 
 			RenderParams *rParams = _controlExec->GetRenderParams(
-				activeViz, DataSetName, className, renderInst
+				activeViz, dataSetName, className, renderInst
 			);
 			assert(rParams);
 
-			setRow(row, renderInst, className, rParams->IsEnabled());
+			setRow(row, renderInst, className,dataSetName,rParams->IsEnabled());
 
 			row++;
 		}
@@ -526,7 +550,8 @@ void RenderHolder::Update() {
 }
 
 void RenderHolder::getRow(
-	int row, string &renderInst, string &renderClass, bool &enabled
+	int row, string &renderInst, string &renderClass, 
+	string &dataSetName, bool &enabled
 ) const {
 	renderInst.clear();
 	renderClass.clear();
@@ -540,21 +565,25 @@ void RenderHolder::getRow(
 	item = tableWidget->item(row, 1);
 	renderClass = item->text().toStdString();
 
-	item = tableWidget->item(row,2);
+	item = tableWidget->item(row, 2);
+	dataSetName = item->text().toStdString();
+
+	item = tableWidget->item(row,3);
 	enabled = item->checkState() == Qt::Checked;
 }
 
 void RenderHolder::getRow(
-	string &renderInst, string &renderClass, bool &enabled
+	string &renderInst, string &renderClass, string &dataSetName, bool &enabled
 ) const {
 
 	int row = tableWidget->currentRow();
 
-	getRow(row, renderInst, renderClass, enabled);
+	getRow(row, renderInst, renderClass, dataSetName, enabled);
 }
 
 void RenderHolder::setRow(
-	int row, const string &renderInst, const string &renderClass, bool enabled
+	int row, const string &renderInst, const string &renderClass, 
+	const string &dataSetName, bool enabled
 ) {
 
 	int rowCount = tableWidget->rowCount();
@@ -568,8 +597,11 @@ void RenderHolder::setRow(
 	item = new QTableWidgetItem(renderClass.c_str());
 	tableWidget->setItem(row, 1, item);
 
-	item = new QTableWidgetItem("      ");
+	item = new QTableWidgetItem(dataSetName.c_str());
 	tableWidget->setItem(row, 2, item);
+
+	item = new QTableWidgetItem(" ");
+	tableWidget->setItem(row, 3, item);
 
 	if (enabled) {
 		item->setCheckState(Qt::Checked);
@@ -580,10 +612,11 @@ void RenderHolder::setRow(
 }
 
 void RenderHolder::setRow(
-	const string &renderInst, const string &renderClass, bool enabled
+	const string &renderInst, const string &renderClass, 
+	const string &dataSetName, bool enabled
 ) {
 
 	int row = tableWidget->currentRow();
 
-	setRow(row, renderInst, renderClass, enabled);
+	setRow(row, renderInst, renderClass, dataSetName, enabled);
 }
