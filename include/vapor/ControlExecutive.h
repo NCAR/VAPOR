@@ -341,6 +341,20 @@ class RENDER_API ControlExec : public MyBase {
         return (RendererFactory::Instance()->GetFactoryNames());
     }
 
+    //! Lookup window, data set, and class name from a render instance name
+    //!
+    //! This method returns the window name \p winName, data set name
+    //! \p dataSetName, and render type \p rendererType that are associated
+    //! with the render instance name \p instName.
+    //!
+    //! \retval status True on success, false if \p instName is not a previously
+    //! defined render instance name
+    //!
+    //! \sa ActivateRender
+    //
+    bool RenderLookup(
+        string instName, string &winName, string &dataSetName, string &rendererType) const;
+
 #ifdef DEAD
     //! Draw 2D text on the screen
     //!
