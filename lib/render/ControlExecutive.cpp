@@ -589,3 +589,12 @@ vector<string> ControlExec::GetRenderInstances(
 
     return (_paramsMgr->GetRenderParamInstances(winName, paramsType));
 }
+
+bool ControlExec::RenderLookup(
+    string instName, string &winName, string &dataSetName, string &renderType) const {
+
+    string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
+
+    return (_paramsMgr->RenderParamsLookup(
+        instName, winName, dataSetName, paramsType));
+}
