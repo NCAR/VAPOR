@@ -96,21 +96,23 @@ private:
  );
 
  void getRow(
-	int row, string &renderInst, string &renderClass, bool &enabled
+	int row, string &renderInst, string &renderClass, 
+	string &dataSetName, bool &enabled
  ) const;
 
  void getRow(
-	string &renderInst, string &renderClass, bool &enabled
+	string &renderInst, string &renderClass, 
+	string &dataSetName, bool &enabled
  ) const;
 
  void setRow(
 	int row, const string &renderInst, 
-	const string &renderClass, bool enabled
+	const string &renderClass, const string &dataSetName, bool enabled
  );
 
  void setRow(
 	const string &renderInst, const string &renderClass,
-	bool enabled
+	const string &dataSetName, bool enabled
  );
 
 #endif //DOXYGEN_SKIP_THIS

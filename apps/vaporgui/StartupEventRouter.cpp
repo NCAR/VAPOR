@@ -324,7 +324,10 @@ void StartupEventRouter::copyLatestSession(){
 }
 void StartupEventRouter::copyLatestMetadata(){
 	GUIStateParams *p = GetStateParams(); 
-	string latestPath = p->GetCurrentDataPath();
+
+	vector <string> paths, names;
+	p->GetOpenDataSets(paths, names);
+	string latestPath = paths.size() ? paths[paths.size()-1] : ".";
 
 	size_t pos = latestPath.find_last_of("\\/");
 	if(pos != string::npos) latestPath = latestPath.substr(0, pos);
