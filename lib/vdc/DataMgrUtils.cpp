@@ -297,7 +297,7 @@ bool DataMgrUtils::GetExtents(
     axes.clear();
 
     vector<double> tmpMinExts(3, std::numeric_limits<double>::max());
-    vector<double> tmpMaxExts(3, std::numeric_limits<double>::min());
+    vector<double> tmpMaxExts(3, std::numeric_limits<double>::lowest());
 
     // Get the coordinate extents of each variable. Grow the bounding
     // box to accomodate each new variable. Handle cases where variables

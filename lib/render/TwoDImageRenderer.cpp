@@ -742,7 +742,9 @@ void TwoDImageRenderer::_transformToLocal(
 
     size_t ts = GetCurrentTimestep();
     vector<double> minExts, maxExts;
+#ifdef DEAD
     _dataStatus->GetExtents(ts, minExts, maxExts);
+#endif
 
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
 
