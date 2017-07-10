@@ -71,7 +71,7 @@ void RenderParams::_init()
     SetEnabled(true);
 
     vector<string> varnames;
-    for (int ndim = 3; ndim > 0; ndim--) {
+    for (int ndim = _maxDim; ndim > 0; ndim--) {
         varnames = _dataMgr->GetDataVarNames(ndim, true);
         if (!varnames.empty()) break;
     }
@@ -125,9 +125,10 @@ void RenderParams::_initBox()
     _Box->SetPlanar(planar);
 }
 
-RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname) : ParamsBase(ssave, classname)
+RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname, int maxdim) : ParamsBase(ssave, classname)
 {
     _dataMgr = dataMgr;
+    _maxDim = maxdim;
 
     // Initialize DataMgr dependent parameters
     //
@@ -144,9 +145,10 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const
     _Colorbar->SetParent(this);
 }
 
-RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
+RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node, int maxdim) : ParamsBase(ssave, node)
 {
     _dataMgr = dataMgr;
+    _maxDim = maxdim;
 
     // Reconcile DataMgr dependent parameters
     //

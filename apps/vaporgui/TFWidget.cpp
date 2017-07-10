@@ -153,7 +153,7 @@ void TFWidget::getRange(float range[2], float values[2])
         varName = _rParams->GetVariableName();
     }
 
-    size_t ts = getCurrentTimestep(_paramsMgr);
+    size_t ts = _rParams->GetCurrentTimestep();
     int    ref = _rParams->GetRefinementLevel();
     int    cmp = _rParams->GetCompressionLevel();
 
@@ -231,7 +231,7 @@ void TFWidget::updateSliders()
 
 void TFWidget::updateMappingFrame()
 {
-    mappingFrame->Update(_rParams);
+    mappingFrame->Update(_dataMgr, _rParams);
     mappingFrame->fitToView();
     // mappingFrame->updateHisto();
 }
@@ -361,17 +361,11 @@ void TFWidget::textChanged()
     makeItGreen((QLineEdit *)sender());
 }
 
-size_t TFWidget::getCurrentTimestep(ParamsMgr *paramsMgr) const
-{
-    AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
-    return (aParams->GetCurrentTimestep());
-}
-
 void TFWidget::updateHisto()
 {
     mappingFrame->fitToView();
     mappingFrame->updateMap();
-    mappingFrame->Update(_rParams);
+    mappingFrame->Update(_dataMgr, _rParams);
 }
 
 void TFWidget::autoUpdateHistoChecked(int state)

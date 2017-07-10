@@ -130,10 +130,10 @@ void TwoDDataEventRouter::_updateTab()
 {
     // The variable tab updates itself:
     //
-    _variables->Update(_controlExec->GetDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
+    _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
-    _appearance->Update(_controlExec->GetParamsMgr(), _controlExec->GetDataMgr(), GetActiveParams());
-    _geometry->Update(_controlExec->GetParamsMgr(), _controlExec->GetDataMgr(), GetActiveParams());
+    _appearance->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+    _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 }
 
 /******************************************************************************

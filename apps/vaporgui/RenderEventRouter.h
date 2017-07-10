@@ -247,29 +247,24 @@ public:
     //! Default does nothing
     virtual void variableChanged() {}
 
+#ifdef DEAD
     //! Determine the value of the current variable at specified point.
     //! Return _OUT_OF_BOUNDS if not in current extents but in full domain
     //!
     //! \param[in] point[3] coordinates of point to evaluate.
     //! \return value at point, or _OUT_OF_BOUNDS
     virtual float CalcCurrentValue(const double point[3]);
+#endif
 
     //! Return the currently active params instance for this event
     //! router.
     //!
     VAPoR::RenderParams *GetActiveParams() const;
 
-    //! Return the currently active params instance for this event
+    //! Return the currently active DataMgr instance for this event
     //! router.
     //!
     VAPoR::DataMgr *GetActiveDataMgr() const;
-
-#ifdef DEAD
-    //! For parameters that multiple instances set the current
-    //! instance name.
-    //
-    void SetActiveInstName(string instName) { m_activeInstName = instName; }
-#endif
 
 protected:
     RenderEventRouter() {}

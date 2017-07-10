@@ -239,7 +239,11 @@ void VizFeatureEventRouter::_updateTab()
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
     regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
 
+#ifdef DEAD
     string projString = _controlExec->GetDataMgr()->GetMapProjection();
+#else
+    string projString;
+#endif
     if (projString.size() == 0)
         latLonCheckbox->setEnabled(false);
     else {

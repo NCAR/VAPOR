@@ -162,7 +162,7 @@ int Visualizer::paintEvent()
     MyBase::SetDiagMsg("Visualizer::paintGL()");
 
     // Do not proceed if there is no DataMgr
-    if (!m_dataStatus->GetDataMgr()) return (0);
+    if (!m_dataStatus->GetDataMgrNames().size()) return (0);
 
     if (!fbSetup()) return (0);
 
@@ -940,52 +940,4 @@ int Visualizer::paintEvent()
             string sval = string(result);
             string newbody = s.substr(0, lastpos + 1);
             s = newbody + sval + s_end;
-        }
-
-        //  First project all 8 box corners to the center line of the camera view, finding the furthest and
-        //  nearest projection in front of the camera.  The furthest distance is used as the far distance.
-        //  If some point projects behind the camera, then either the camera is inside the box, or a corner of the
-        //  box is behind the camera.  This calculation is always performed in local coordinates since a translation won't affect
-        //  the result
-        void Visualizer::getFarNearDist(vector<double> posVec, vector<double> dirVec, float &boxFar, float &boxNear) const
-        {
-            // First check full box
-            double wrk[3], cor[3], boxcor[3];
-            double camPosBox[3], dvdir[3];
-            double maxProj = -std::numeric_limits<double>::max();
-            double minProj = std::numeric_limits<double>::max();
-
-            int ts = getCurrentTimestep();
-            assert(ts >= 0);
-            vector<double> minExts, maxExts;
-            m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
-
-            for (int i = 0; i < 3; i++) camPosBox[i] = posVec[i];
-
-            for (int i = 0; i < 3; i++) dvdir[i] = dirVec[i];
-            vnormal(dvdir);
-
-            // For each box corner,
-            //   convert to box coords, then project to line of view
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 3; j++) { cor[j] = ((i >> j) & 1) ? maxExts[j] : minExts[j]; }
-                for (int k = 0; k < 3; k++) boxcor[k] = cor[k];
-
-                vsub(boxcor, camPosBox, wrk);
-
-                float mdist = abs(vdot(wrk, dvdir));
-                if (minProj > mdist) { minProj = mdist; }
-                if (maxProj < mdist) { maxProj = mdist; }
-            }
-
-            if (maxProj < 1.e-10) maxProj = 1.e-10;
-            if (minProj > 0.03 * maxProj) minProj = 0.03 * maxProj;
-            // minProj will be < 0 if either the camera is in the box, or
-            // if some of the region is behind the camera plane.  In that case, just
-            // set the nearDist a reasonable multiple of the fardist
-            if (minProj <= 0.0) minProj = 0.0002 * maxProj;
-            boxFar = (float)maxProj;
-            boxNear = (float)minProj;
-
-            return;
         }

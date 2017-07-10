@@ -138,7 +138,7 @@ public:
     //! Update the display of the Transfer Function or IsoControl based on the current RenderParams that
     //! contains the MapperFunction being used.  This should be invoked in RenderEventRouter::updateTab()
     // void updateTab();
-    void Update(VAPoR::RenderParams *rParams = NULL);
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams = NULL);
 
     //! Specify the variable associated with the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
     void setVariableName(std::string name);
@@ -381,6 +381,7 @@ private:
     int                  _axisRegionHeight;
     const int            _opacityGap;
     const int            _bottomGap;
+    VAPoR::DataMgr *     _dataMgr;
     VAPoR::RenderParams *_rParams;
 
     QStringList     _axisTexts;

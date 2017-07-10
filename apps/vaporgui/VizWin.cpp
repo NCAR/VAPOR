@@ -575,6 +575,12 @@ void VizWin::paintGL()
 {
     if (!FrameBufferReady()) { return; }
 
+    glClearColor(0., 0., 0., 1.);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+    if (!dataStatus->GetDataMgrNames().size()) return;
+
     // Set up projection and modelview matrices
     //
 

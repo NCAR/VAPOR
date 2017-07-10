@@ -60,20 +60,19 @@ private slots:
     void setSingleColor();
 
 private:
-    void   getRange(float range[2], float values[2]);
-    void   connectWidgets();
-    size_t getCurrentTimestep(VAPoR::ParamsMgr *paramsMgr) const;
-    void   makeItRed(QLineEdit *edit);
-    void   makeItYellow(QLineEdit *edit);
-    void   makeItGreen(QLineEdit *edit);
-    void   makeItWhite(QLineEdit *edit);
-    void   updateSliders();
-    void   updateAutoUpdateHistoCheckbox();
-    void   updateColorInterpolation();
-    void   updateMappingFrame();
-    void   updateColorVarCombo();
-    void   enableTFWidget(bool state);
-    void   collapseColormapSettings();
+    void getRange(float range[2], float values[2]);
+    void connectWidgets();
+    void makeItRed(QLineEdit *edit);
+    void makeItYellow(QLineEdit *edit);
+    void makeItGreen(QLineEdit *edit);
+    void makeItWhite(QLineEdit *edit);
+    void updateSliders();
+    void updateAutoUpdateHistoCheckbox();
+    void updateColorInterpolation();
+    void updateMappingFrame();
+    void updateColorVarCombo();
+    void enableTFWidget(bool state);
+    void collapseColormapSettings();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);

@@ -314,11 +314,6 @@ private:
     // the region is shared, and the active region is shared.
     static bool _regionShareFlag;
 
-    //! determine far and near distance to region based on current viewpoint
-    //! \param[out] boxFar far distance to box
-    //! \param[out] boxNear near distance to box
-    void getFarNearDist(vector<double> posVec, vector<double> dirVec, float &boxFar, float &boxNear) const;
-
     //! Reset the near/far clipping, so that the near and far clipping
     //! planes are wide enough
     //! to view twice the entire region from the current camera position.

@@ -71,11 +71,11 @@ void BarbEventRouter::geoCheckboxClicked(bool state) {}
 void BarbEventRouter::_updateTab()
 {
     // The variable tab updates itself:
-    _variables->Update(_controlExec->GetParamsMgr(), _controlExec->GetDataMgr(), GetActiveParams());
+    _variables->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 
-    _appearance->Update(_controlExec->GetParamsMgr(), _controlExec->GetDataMgr(), GetActiveParams());
+    _appearance->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 
-    _geometry->Update(_controlExec->GetParamsMgr(), _controlExec->GetDataMgr(), GetActiveParams());
+    _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 }
 
 void BarbEventRouter::startChangeMapFcn(QString) {}

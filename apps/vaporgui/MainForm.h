@@ -146,14 +146,15 @@ private:
     // Set the various widgets in the main window consistent with latest
     // params settings:
     //
-    void         update();
-    virtual void undoRedoHelper(bool undo);
-    void         importData(const string &modelType);
-    void         createActions();
-    void         createMenus();
-    void         hookupSignals();
-    void         createToolBars();
-    virtual void sessionOpenHelper(string fileName);
+    void                update();
+    virtual void        undoRedoHelper(bool undo);
+    std::vector<string> myGetOpenFileNames(string prompt, string dir, string filter, bool multi);
+    void                loadDataHelper(std::vector<string> files, string prompt, string filter, string format, bool multi);
+    void                createActions();
+    void                createMenus();
+    void                hookupSignals();
+    void                createToolBars();
+    virtual void        sessionOpenHelper(string fileName);
 
     // Enable/Disable all the widgets that require data to be present
     //
@@ -199,6 +200,7 @@ private:
 
     // Data menu
     QAction *_dataImportWRF_Action;
+    QAction *_dataImportCF_Action;
     QAction *_dataLoad_MetafileAction;
     QAction *_fileNew_SessionAction;
     QAction *_plotAction;
@@ -251,8 +253,9 @@ private slots:
     void helpIndex();
     void helpContents();
     void helpAbout();
-    void loadData(QString fileName = "");
+    void loadData(string fileName = "");
     void importWRFData();
+    void importCFData();
     void sessionNew();
     void startAnimCapture();
     void endAnimCapture();

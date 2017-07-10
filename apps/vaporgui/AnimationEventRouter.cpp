@@ -162,7 +162,7 @@ void AnimationEventRouter::setCurrentTimestep(size_t ts) const
 
             size_t local_ts = dataStatus->MapGlobalToLocalTimeStep(dataSetNames[j], ts);
 
-            for (int k = 0; k < rParams.size(); k++) { rParams[k]->SetCurrentTimestep(ts); }
+            for (int k = 0; k < rParams.size(); k++) { rParams[k]->SetCurrentTimestep(local_ts); }
         }
     }
 }
@@ -185,7 +185,7 @@ void AnimationEventRouter::_updateTab()
     DataStatus *     dataStatus = _controlExec->getDataStatus();
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    size_t numTS = dataStatus->getNumTimesteps();
+    size_t numTS = dataStatus->GetTimeCoordinates().size();
     assert(numTS >= 1);
 
     size_t startFrame = aParams->GetStartTimestep();

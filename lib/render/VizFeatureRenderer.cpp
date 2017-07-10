@@ -287,13 +287,22 @@ void VizFeatureRenderer::drawAxisTics(size_t timestep)
         sticMin.push_back(minTicA[i]);
         sticMax.push_back(maxTicA[i]);
     }
-    _dataStatus->stretchCoords(sorigin);
-    // minTic and maxTic can be regarded as points in world space, defining
-    // corners of a box that's projected to axes.
-    _dataStatus->stretchCoords(sticMin);
-    _dataStatus->stretchCoords(sticMax);
-    // TicLength needs to be stretched based on which axes are used for tic direction
+
+    #ifdef DEAD
     vector<double> stretch = _dataStatus->getStretchFactors();
+    #else
+    vector<double> stretch(3, 1.0);
+    #endif
+    for (int i = 0; i < stretch.size(); i++) {
+        sorigin[i] *= stretch[i];
+
+        // minTic and maxTic can be regarded as points in world space, defining
+        // corners of a box that's projected to axes.
+        sticMin[i] *= stretch[i];
+        sticMax[i] *= stretch[i];
+    }
+
+    // TicLength needs to be stretched based on which axes are used for tic direction
 
     for (int i = 0; i < 3; i++) {
         int j = ticDir[i];
@@ -545,9 +554,13 @@ void VizFeatureRenderer::drawAxisArrows(float *extents)
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
 
-    float          origin[3];
-    float          maxLen = -1.f;
+    float origin[3];
+    float maxLen = -1.f;
+    #ifdef DEAD
     vector<double> stretch = _dataStatus->getStretchFactors();
+    #else
+    vector<double> stretch(3, 1.0);
+    #endif
     vector<double> strExts;
     for (int i = 0; i < 6; i++) strExts.push_back(stretch[i % 3] * extents[i]);
     vector<double> axisArrowCoords = ((VizFeatureParams *)_params)->GetAxisArrowCoords();
