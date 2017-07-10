@@ -69,7 +69,14 @@ mouseIsOverHandle(double screenCoords[2], double* boxExtents, double handleMid[3
 	//which handles are in front of the box.
 	ViewpointParams* myViewpointParams = _vis->getActiveViewpointParams();
 	vector<double> camPos = myViewpointParams->getCameraPosLocal();
-	_dataStatus->stretchCoords(camPos);
+#ifdef	DEAD
+	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
+	for (int i=0; i<stretch.size(); i++) {
+		camPos[i] *= stretch[i];
+	}
 	
 	//Determine the octant based on camera relative to box center:
 	int octant = 0;
@@ -399,7 +406,14 @@ void TranslateStretchManip::render(){
 	
 	ViewpointParams* myViewpointParams = _vis->getActiveViewpointParams();
 	vector<double> camPos = myViewpointParams->getCameraPosLocal();
-	_dataStatus->stretchCoords(camPos);
+#ifdef	DEAD
+	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
+	for (int i=0; i<stretch.size(); i++) {
+		camPos[i] *= stretch[i];
+	}
 
 	//Set the handleSize, in user coords.
 	//May need to adjust for scene stretch
@@ -452,11 +466,20 @@ void TranslateStretchManip::drawBoxFaces(){
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	_params->GetBox()->calcLocalBoxCorners(corners, 0.f, timestep);
+
+#ifdef	DEAD
+	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
 	
 	//Now the corners need to be put into the unit cube, and displaced appropriately
 	//Either displace just half the corners or do the opposite ones as well.
 	for (int cor = 0; cor < 8; cor++){
-		_dataStatus->stretchCoords(corners[cor]);
+		for (int i=0; i<stretch.size(); i++) {
+			corners[cor][i] *= stretch[i];
+		}
+
 		if (_selectedHandle >= 0) {
 			int axis = (_selectedHandle < 3) ? (2-_selectedHandle):(_selectedHandle-3);
 			//The corners associated with a handle are as follows:
@@ -564,7 +587,11 @@ captureMouseDown(int handleNum, const std::vector<double>& camPos, double* dirVe
 	//Grab a probe handle
 	_selectedHandle = handleNum;
 	_dragDistance = 0.f;
+#ifdef	DEAD
 	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
 
 	//Calculate intersection of ray with specified plane in unstretched coords
 	//The selection ray is the vector from the camera to the intersection point
@@ -613,9 +640,14 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	double denom = vdot(q,q);
 	_dragDistance = 0.f;
 	//convert to stretched world coords.
+#ifdef	DEAD
+	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
 	if (denom != 0.){
 		_dragDistance = -vdot(q,r)/denom;
-		_dragDistance *= (_dataStatus->getStretchFactors())[coord];
+		_dragDistance *= stretch[coord];
 	}
 	
 	//Make sure the displacement is OK.  Not allowed to
@@ -624,8 +656,9 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	
 	//Do this calculation in stretched world coords
 	double boxExtents[6];
-	const double* sizes = _dataStatus->getFullStretchedSizes();
+	const double* sizes;
 #ifdef	DEAD
+	sizes = _dataStatus->getFullStretchedSizes();
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	_params->GetBox()->GetStretchedLocalExtents(boxExtents,timestep);
@@ -730,8 +763,15 @@ void TranslateRotateManip::drawBoxFaces(){
 	//Now the corners need to be put into the unit cube, and displaced appropriately
 	
 	//Either displace just half the corners (when stretching) or do the opposite ones as well.
+#ifdef	DEAD
+	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
 	for (int cor = 0; cor < 8; cor++){
-		_dataStatus->stretchCoords(corners[cor]);
+		for (int i=0; i<stretch.size(); i++) {
+			corners[cor][i] *= stretch[i];
+		}
 		if (_selectedHandle >= 0) {
 			int axis = (_selectedHandle < 3) ? (2-_selectedHandle):(_selectedHandle-3);
 			//The corners associated with a handle are as follows:
@@ -871,10 +911,14 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	float denom = vdot(q,q);
 	_dragDistance = 0.f;
 	//Convert the drag distance to stretched world coords
+#ifdef	DEAD
+	vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+	vector<double> stretch(3,1.0);
+#endif
 	if (denom != 0.f){
 		_dragDistance = -vdot(q,r)/denom;
-		_dragDistance *= (_dataStatus->getStretchFactors())[coord];
-		//qWarning("drag dist, stretch factor: %g %g\n",_dragDistance, (_dataStatus->getStretchFactors())[coord]);
+		_dragDistance *= stretch[coord];
 	}
 	
 	
@@ -891,7 +935,10 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	} else { //sliding, not stretching
 		//with constraint: Don't slide the center out of the full domain:
 		if (constrain) {
-			const double* sizes = _dataStatus->getFullStretchedSizes();
+			const double* sizes;
+#ifdef	DEAD
+			sizes = _dataStatus->getFullStretchedSizes();
+#endif
 			float boxCenter = 0.5f*(boxExtents[coord]+boxExtents[coord+3]);
 			if (_dragDistance + boxCenter < 0.) {
 				_dragDistance = -boxCenter;
@@ -1006,7 +1053,11 @@ mouseRelease(float /*screenCoords*/[2]){
 			//We need to stretch the size along axis2, without changing the center;
 			//However this stretch is affected by the relative stretch factors of 
 			//axis2 and axis
+#ifdef	DEAD
 			vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+			vector<double> stretch(3,1.0);
+#endif
 			float dist2 = dist*stretch[axis2]/stretch[axis];
 			if (_selectedHandle < 3){
 				boxExts[axis2] += 0.5f*dist2;
@@ -1031,7 +1082,10 @@ mouseRelease(float /*screenCoords*/[2]){
 //requiring that the resulting box will have all its min coords less than
 //its max coords.
 double TranslateRotateManip::constrainStretch(double currentDist){
+	double dist;
+#ifdef	DEAD
 	double dist = currentDist/_dataStatus->getMaxStretchedSize();
+#endif
 	double boxExts[6];
 	_params->GetBox()->GetStretchedLocalExtents(boxExts,-1);
 	
@@ -1057,8 +1111,15 @@ double TranslateRotateManip::constrainStretch(double currentDist){
 			return 0.f;
 		}
 	}
-	vector<double> strFacs = _dataStatus->getStretchFactors();
-	float corrFactor = _dataStatus->getMaxStretchedSize()*strFacs[axis2]/strFacs[axis1]; 
+#ifdef	DEAD
+			vector<double> stretch = _dataStatus->getStretchFactors();
+#else
+			vector<double> stretch(3,1.0);
+#endif
+	float corrFactor = 0.0;
+#ifdef	DEAD
+	float corrFactor = _dataStatus->getMaxStretchedSize()*stretch[axis2]/stretch[axis1]; 
+#endif
 	
 	if (_selectedHandle < 3){
 			if (dist*corrFactor > (boxExts[axis2+3]-boxExts[axis2])) 
@@ -1070,7 +1131,10 @@ double TranslateRotateManip::constrainStretch(double currentDist){
 	}
 	delete myPermuter;
 	
+	return (dist);
+#ifdef	DEAD
 	return (dist*_dataStatus->getMaxStretchedSize());
+#endif
 }
 TranslateRotateManip::Permuter::Permuter(double theta, double phi, double psi){
 	//Find the nearest multiple of 90 degrees > 0

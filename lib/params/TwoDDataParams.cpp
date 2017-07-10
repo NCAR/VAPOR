@@ -16,7 +16,7 @@ static RenParamsRegistrar<TwoDDataParams> registrar(TwoDDataParams::GetClassType
 
 TwoDDataParams::TwoDDataParams(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave
-) : RenderParams(dataMgr, ssave, TwoDDataParams::GetClassType()) {
+) : RenderParams(dataMgr, ssave, TwoDDataParams::GetClassType(), 2) {
 	SetDiagMsg("TwoDDataParams::TwoDDataParams() this=%p", this);
 
 	_init();
@@ -24,7 +24,7 @@ TwoDDataParams::TwoDDataParams(
 
 TwoDDataParams::TwoDDataParams(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node
-) : RenderParams(dataMgr, ssave, node) {
+) : RenderParams(dataMgr, ssave, node, 2) {
 	SetDiagMsg("TwoDDataParams::TwoDDataParams() this=%p", this);
 
 	// If node isn't tagged correctly we correct the tag and reinitialize

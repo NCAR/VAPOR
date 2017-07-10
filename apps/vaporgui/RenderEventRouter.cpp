@@ -160,11 +160,18 @@ void RenderEventRouter::CalcSliceHistogram(int ts, Histo* histo){
 		extents[i] += minExts[i];
 		extents[i+3] += minExts[i];
 	}
-	
+
+#ifdef	DEAD
+	DataMgr *dataMgr = GetActiveDataMgr(); 
+	int rc = DataMgrUtils::GetGrids(
+		dataMgr, ts, varnames, minExts, maxExts, true,
+		&actualRefLevel, &lod, &histoGrid
 	int rc = Renderer::getGrids(_dataMgr, ts, varnames, extents, &actualRefLevel, &lod, &probeGrid);
+#endif
+	
 
 	
-	if(rc){
+	if(rc<0){
 		return;
 	}
 	
@@ -305,7 +312,7 @@ void RenderEventRouter::setEditorDirty() {
 	if (!mp) return;
 
 	//mp->updateTab();
-	mp->Update(rParams);
+	mp->Update(GetActiveDataMgr(), rParams);
 
 #ifdef	DEAD
 	if(rParams->GetMapperFunc())p->GetMapperFunc()->setParams(p);
@@ -323,6 +330,7 @@ void RenderEventRouter::setEditorDirty() {
 }
 
 
+#ifdef	DEAD
 float RenderEventRouter::CalcCurrentValue(const double point[3] ){
 	RenderParams *rParams = GetActiveParams();
 	
@@ -366,15 +374,17 @@ float RenderEventRouter::CalcCurrentValue(const double point[3] ){
 	delete grid;
 	return varVal;
 }
+#endif
 
 void RenderEventRouter::updateTab(){
+	if (_instName.empty()) return;
 
 	RenderParams *rParams = GetActiveParams();
 
 	//If the Params is not valid do not proceed.
 	if (!rParams) return;
 
-	DataMgr *dataMgr = _controlExec->GetDataMgr();
+	DataMgr *dataMgr = GetActiveDataMgr();
 	if (!dataMgr) return;
 
 

@@ -62,7 +62,6 @@ private slots:
 private:
 	void getRange(float range[2], float values[2]);
 	void connectWidgets();
-	size_t getCurrentTimestep(VAPoR::ParamsMgr* paramsMgr) const ;
 	void makeItRed(QLineEdit* edit);
 	void makeItYellow(QLineEdit* edit);
 	void makeItGreen(QLineEdit* edit);

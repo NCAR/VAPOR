@@ -92,19 +92,19 @@ void BarbEventRouter::_updateTab(){
 	//The variable tab updates itself:
 	_variables->Update(
 		_controlExec->GetParamsMgr(),
-		_controlExec->GetDataMgr(),
+		GetActiveDataMgr(),
 		GetActiveParams()
 	);
 
 	_appearance->Update(
 		_controlExec->GetParamsMgr(),
-		_controlExec->GetDataMgr(),
+		GetActiveDataMgr(),
 		GetActiveParams()
 	);
 	
 	_geometry->Update(
 		_controlExec->GetParamsMgr(),
-		_controlExec->GetDataMgr(),
+		GetActiveDataMgr(),
 		GetActiveParams()
 	);
 }

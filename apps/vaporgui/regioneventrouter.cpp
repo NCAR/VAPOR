@@ -268,9 +268,13 @@ maxGridZLabel->setText(QString::number(-1));
 	
 	
 	//Provide latlon box extents if available:
+#ifdef	DEAD
 	if (_controlExec->GetDataMgr()->GetMapProjection().size() == 0){
+#endif
 		minMaxLonLatFrame->hide();
+#ifdef	DEAD
 	} else {
+#endif
 #ifdef	DEAD
 		double boxLatLon[4];
 		
@@ -288,8 +292,8 @@ maxGridZLabel->setText(QString::number(-1));
 		} else {
 			minMaxLonLatFrame->hide();
 		}
-#endif
 	}
+#endif
 
 	
 
