@@ -249,9 +249,13 @@ void RegionEventRouter::_updateTab() {
     maxGridZLabel->setText(QString::number(-1));
 
     //Provide latlon box extents if available:
+#ifdef DEAD
     if (_controlExec->GetDataMgr()->GetMapProjection().size() == 0) {
+#endif
         minMaxLonLatFrame->hide();
+#ifdef DEAD
     } else {
+#endif
 #ifdef DEAD
         double boxLatLon[4];
 
@@ -269,8 +273,8 @@ void RegionEventRouter::_updateTab() {
         } else {
             minMaxLonLatFrame->hide();
         }
-#endif
     }
+#endif
 
 #ifdef DEAD
     if (rParams->IsLocal())

@@ -129,7 +129,9 @@ bool make_dataset_name(
 
     // Remove any file extension
     //
-    file.erase(file.find_last_of("."), string::npos);
+    if (file.find(".") != std::string::npos) {
+        file.erase(file.find_last_of("."), string::npos);
+    }
 
     for (int i = 0; i < currentNames.size(); i++) {
         if (currentNames[i] == file) {
@@ -152,7 +154,8 @@ bool make_dataset_name(
 
 //Only the main program should call the constructor:
 //
-MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, const char *)
+MainForm::MainForm(
+    vector<QString> files, QApplication *app, QWidget *parent, const char *)
     : QMainWindow(parent) {
 
     QString fileName("");
@@ -265,7 +268,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
         // Assume VAPOR VDC file. Need to deal with import cases!
         //
         if (files[0].endsWith(".nc")) {
-            loadData(files[0]);
+            loadData(files[0].toStdString());
         }
     }
     app->installEventFilter(this);
@@ -428,6 +431,9 @@ void MainForm::hookupSignals() {
         _dataImportWRF_Action, SIGNAL(triggered()),
         this, SLOT(importWRFData()));
     connect(
+        _dataImportCF_Action, SIGNAL(triggered()),
+        this, SLOT(importCFData()));
+    connect(
         _captureMenu, SIGNAL(aboutToShow()),
         this, SLOT(initCaptureMenu()));
     connect(
@@ -539,11 +545,12 @@ void MainForm::createMenus() {
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
     _File->addAction(_dataLoad_MetafileAction);
+    _File->addAction(_dataImportWRF_Action);
+    _File->addAction(_dataImportCF_Action);
     _File->addAction(_fileNew_SessionAction);
     _File->addAction(_fileOpenAction);
     _File->addAction(_fileSaveAction);
     _File->addAction(_fileSaveAsAction);
-    _File->addAction(_dataImportWRF_Action);
     _File->addAction(_fileExitAction);
 
     _Edit = menuBar()->addMenu(tr("Edit"));
@@ -608,6 +615,7 @@ void MainForm::createActions() {
 
     _dataLoad_MetafileAction = new QAction(this);
     _dataImportWRF_Action = new QAction(this);
+    _dataImportCF_Action = new QAction(this);
     _fileNew_SessionAction = new QAction(this);
 
     _captureSingleJpegCaptureAction = new QAction(this);
@@ -713,8 +721,10 @@ void MainForm::languageChange() {
     _dataLoad_MetafileAction->setText(tr("Open a VDC in Current Session"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
-    _dataImportWRF_Action->setText(tr("Import WRF-ARW output files into current session"));
+    _dataImportWRF_Action->setText(tr("Import WRF-ARW files in current session"));
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
+    _dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
+    _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention output files to import into the current session");
     _plotAction->setText("Plot Utility");
     _statsAction->setText("Data Statistics");
     _seedMeAction->setText("SeedMe Video Encoder");
@@ -775,11 +785,13 @@ void MainForm::sessionOpen(QString qfileName) {
         GUIStateParams *p = GetStateParams();
         string path = p->GetCurrentSessionPath();
 
-        qfileName = QFileDialog::getOpenFileName(
-            this, "Choose a VAPOR session file to restore a session",
-            path.c_str(), "Vapor 3 Session Save Files (*.vs3)");
-        if (qfileName.length() == 0)
+        vector<string> files = myGetOpenFileNames(
+            "Choose a VAPOR session file to restore a session",
+            path, "Vapor 3 Session Save Files (*.vs3)", false);
+        if (files.empty())
             return;
+
+        qfileName = files[0].c_str();
     }
 
     //Make sure the name ends with .vs3
@@ -942,10 +954,9 @@ void MainForm::batchSetup() {
     //Here we provide panel to setup batch runs
 }
 
-//Load data into current session
-//If current session is at default then same as loadDefaultData
-//
-void MainForm::loadData(QString fileName) {
+void MainForm::loadDataHelper(
+    vector<string> files, string prompt, string filter, string format,
+    bool multi) {
     GUIStateParams *p = GetStateParams();
     vector<string> currentPaths, currentDataSets;
     p->GetOpenDataSets(currentPaths, currentDataSets);
@@ -955,132 +966,16 @@ void MainForm::loadData(QString fileName) {
     // create a datamanager using those files
     // or metafiles.
     //
-    if (fileName == "") {
-#ifdef DEAD
-        QString messageText = "Note that a dataset has already been loaded.\n";
-        messageText += "Click OK to load data using the existing settings.\n";
-        messageText += "Otherwise click Cancel and create a New Session \n";
-        messageText += "before loading data.";
+    if (files.empty()) {
 
-        QMessageBox::StandardButton btn = QMessageBox::question(
-            this, "VAPOR Warning", messageText,
-            QMessageBox::Ok | QMessageBox::Cancel);
+        string defaultPath = currentPaths.size() ? currentPaths[currentPaths.size() - 1] : ".";
 
-        if (btn == QMessageBox::Cancel)
-            return;
-#endif
-
-        string path = currentPaths.size() ? currentPaths[currentPaths.size() - 1] : ".";
-
-        fileName = QFileDialog::getOpenFileName(this,
-                                                "Choose the Master data File to load", path.c_str(),
-                                                "Vapor WASP files (*.*)");
+        files = myGetOpenFileNames(
+            prompt, defaultPath, filter, multi);
     }
 
-    if (fileName == QString::null) {
-        MyBase::SetErrMsg("Load Data Error \n Invalid data set\n");
+    if (files.empty())
         return;
-    }
-
-    QFileInfo fInfo(fileName);
-    if (!fInfo.isReadable() || !fInfo.isFile()) {
-        MyBase::SetErrMsg("Load Data Error \n Invalid data set\n");
-        return;
-    }
-
-    // Generate a new data set name if needed (not re-opening the same
-    // file)
-    //
-    string dataSetName;
-    bool newDataSet = make_dataset_name(
-        currentPaths, currentDataSets, fileName.toStdString(), dataSetName);
-
-    vector<string> files;
-    files.push_back(fileName.toStdString());
-    int rc = _controlExec->OpenData(files, dataSetName);
-    if (rc < 0) {
-        QMessageBox::information(
-            this, "Load Data Error", "Unable to read metadata file ");
-        return;
-    }
-
-    if (newDataSet) {
-        currentPaths.push_back(fileName.toStdString());
-        currentDataSets.push_back(dataSetName);
-        p->SetOpenDataSets(currentPaths, currentDataSets);
-    }
-
-    // Reinitialize all tabs
-    //
-    endAnimCapture();
-
-    _vizWinMgr->viewAll();
-
-    DataStatus *ds = _controlExec->getDataStatus();
-    BoxSliderFrame::setDataStatus(ds);
-
-    _vizWinMgr->ReinitRouters();
-
-    enableWidgets(true);
-
-    _timeStepEditValidator->setRange(0, ds->getNumTimesteps() - 1);
-
-    update();
-    _tabMgr->Update();
-}
-
-//import WRF data into current session
-//
-void MainForm::importWRFData() {
-
-    //This launches a panel that enables the
-    //user to choose input WRF output files, then to
-    //use them to create a new data
-    importData("wrf");
-}
-void MainForm::importData(const string &modelType) {
-    GUIStateParams *p = GetStateParams();
-    vector<string> currentPaths, currentDataSets;
-    p->GetOpenDataSets(currentPaths, currentDataSets);
-
-    //This launches a panel that enables the
-    //user to choose netcdf files, then to
-    //use them to create a new data manager
-
-    //Check first if there is already a dataset loaded.
-    QString messageText = "Note that a dataset has already been loaded.\n";
-    messageText += "Click OK to load data using the existing settings.\n";
-    messageText += "Otherwise click Cancel and create a New Session before\n";
-    messageText += "loading data.";
-    QMessageBox::StandardButton btn = QMessageBox::question(
-        this, "VAPOR Warning", messageText,
-        QMessageBox::Ok | QMessageBox::Cancel);
-
-    if (btn == QMessageBox::Cancel)
-        return;
-
-    QString prompt("Select ");
-    prompt += modelType.c_str();
-    prompt += " model output files to import into current session.";
-
-    string path = currentPaths.size() ? currentPaths[currentPaths.size() - 1] : ".";
-
-    QStringList fileNames = QFileDialog::getOpenFileNames(
-        this, prompt, path.c_str(), "");
-
-    if (fileNames.length() == 0) {
-        MessageReporter::errorMsg("No valid %s files \n", modelType.c_str());
-        return;
-    }
-
-    //Create a string vector from the QStringList
-    vector<string> files;
-    QStringList list = fileNames;
-    QStringList::Iterator it = list.begin();
-    while (it != list.end()) {
-        files.push_back((*it).toStdString());
-        ++it;
-    }
 
     // Generate a new data set name if needed (not re-opening the same
     // file)
@@ -1089,9 +984,12 @@ void MainForm::importData(const string &modelType) {
     bool newDataSet = make_dataset_name(
         currentPaths, currentDataSets, files[0], dataSetName);
 
-    int rc = _controlExec->OpenData(files, dataSetName, modelType);
+    int rc = _controlExec->OpenData(files, dataSetName, format);
     if (rc < 0) {
-        MessageReporter::errorMsg("No valid %s files \n", modelType.c_str());
+#ifdef DEAD
+        QMessageBox::information(
+            this, "Load Data Error", "Unable to read metadata file ");
+#endif
         return;
     }
 
@@ -1103,18 +1001,84 @@ void MainForm::importData(const string &modelType) {
 
     // Reinitialize all tabs
     //
-    endAnimCapture();
 
     _vizWinMgr->viewAll();
 
     DataStatus *ds = _controlExec->getDataStatus();
     BoxSliderFrame::setDataStatus(ds);
 
-    vector<string> tabNames = _vizWinMgr->GetInstalledTabNames();
+    _vizWinMgr->ReinitRouters();
 
     enableWidgets(true);
 
+    _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
+
+    update();
     _tabMgr->Update();
+}
+
+//Load data into current session
+//If current session is at default then same as loadDefaultData
+//
+void MainForm::loadData(string fileName) {
+
+    vector<string> files;
+    if (!fileName.empty()) {
+        files.push_back(fileName);
+    }
+
+    loadDataHelper(
+        files, "Choose the Master data File to load",
+        "Vapor VDC files (*.*)", "vdc", false);
+}
+
+//import WRF data into current session
+//
+void MainForm::importWRFData() {
+
+    vector<string> files;
+    loadDataHelper(
+        files, "WRF-ARW NetCDF files", "", "wrf", true);
+}
+
+void MainForm::importCFData() {
+
+    vector<string> files;
+    loadDataHelper(
+        files, "NetCDF CF files", "", "cf", true);
+}
+
+vector<string> MainForm::myGetOpenFileNames(
+    string prompt, string dir, string filter, bool multi) {
+
+    QString qPrompt(prompt.c_str());
+    QString qDir(dir.c_str());
+    QString qFilter(filter.c_str());
+
+    vector<string> files;
+    if (multi) {
+        QStringList fileNames = QFileDialog::getOpenFileNames(
+            this, qPrompt, qDir, qFilter);
+        QStringList list = fileNames;
+        QStringList::Iterator it = list.begin();
+        while (it != list.end()) {
+            files.push_back((*it).toStdString());
+            ++it;
+        }
+    } else {
+        QString fileName = QFileDialog::getOpenFileName(
+            this, qPrompt, qDir, qFilter);
+        files.push_back(fileName.toStdString());
+    }
+
+    for (int i = 0; i < files.size(); i++) {
+        QFileInfo fInfo(files[i].c_str());
+        if (!fInfo.isReadable() || !fInfo.isFile()) {
+            MyBase::SetErrMsg("Load Data Error \n Invalid data set\n");
+            return (vector<string>());
+        }
+    }
+    return (files);
 }
 
 void MainForm::sessionNew() {
@@ -1839,6 +1803,7 @@ void MainForm::launchSeedMe() {
 }
 
 void MainForm::launchStats() {
+#ifdef DEAD
     if (!_stats)
         _stats = new Statistics(this);
     DataMgr *dataMgr = _controlExec->GetDataMgr();
@@ -1847,6 +1812,7 @@ void MainForm::launchStats() {
         _stats->showMe();
     }
     _stats->showMe();
+#endif
 }
 void MainForm::launchPlotUtility() {
     //    DataMgr *dataMgr = Session::getInstance()->getDataMgr();

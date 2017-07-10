@@ -162,49 +162,57 @@ void RenderEventRouter::CalcSliceHistogram(int ts, Histo *histo) {
         extents[i + 3] += minExts[i];
     }
 
-    int rc = Renderer::getGrids(_dataMgr, ts, varnames, extents, &actualRefLevel, &lod, &probeGrid);
+#ifdef DEAD
+    DataMgr *dataMgr = GetActiveDataMgr();
+    int rc = DataMgrUtils::GetGrids(
+		dataMgr, ts, varnames, minExts, maxExts, true,
+		&actualRefLevel, &lod, &histoGrid
+	int rc = Renderer::getGrids(_dataMgr, ts, varnames, extents, &actualRefLevel, &lod, &probeGrid);
+#endif
+	
 
-    if (rc) {
+	
+	if(rc<0){
         return;
-    }
+	}
+	
+	probeGrid->SetInterpolationOrder(0);
 
-    probeGrid->SetInterpolationOrder(0);
+	double transformMatrix[12];
+	//Set up to transform from probe into volume:
+	rParams->GetBox()->buildLocalCoordTransform(transformMatrix, 0., -1);
 
-    double transformMatrix[12];
-    //Set up to transform from probe into volume:
-    rParams->GetBox()->buildLocalCoordTransform(transformMatrix, 0., -1);
+	//Get the data dimensions (at this resolution):
+	size_t dataSize[3];
+	//Start by initializing extents
+	
+	probeGrid->GetDimensions(dataSize);
 
-    //Get the data dimensions (at this resolution):
-    size_t dataSize[3];
-    //Start by initializing extents
-
-    probeGrid->GetDimensions(dataSize);
-
-    const double *fullSizes = _dataStatus->getFullSizes();
-    //Now calculate the histogram
-    //
-    //For each voxel, map it into the volume.
-    //We first map the coords in the probe to the volume.
-    //Then we map the volume into the region provided by dataMgr
-
-    double probeCoord[3];
-    double dataCoord[3];
-
-    float extExtents[6]; //Extend extents 1/2 voxel on each side so no bdry issues.
-    for (int i = 0; i < 3; i++) {
+	const double* fullSizes = _dataStatus->getFullSizes();
+	//Now calculate the histogram
+	//
+	//For each voxel, map it into the volume.
+	//We first map the coords in the probe to the volume.  
+	//Then we map the volume into the region provided by dataMgr
+	
+	double probeCoord[3];
+	double dataCoord[3];
+	
+	float extExtents[6]; //Extend extents 1/2 voxel on each side so no bdry issues.
+	for (int i = 0; i<3; i++){
         float mid = (fullSizes[i]) * 0.5;
         float halfExtendedSize = fullSizes[i] * 0.5 * (1.f + dataSize[i]) / (float)(dataSize[i]);
         extExtents[i] = mid - halfExtendedSize;
         extExtents[i + 3] = mid + halfExtendedSize;
-    }
+	}
+	
+	// To determine the grid resolution to histogram, find out the change
+	// in grid coordinate along each edge of the probe box.  Map each corner of the box to grid coordinates at current refinement level:
+	// First map them to user coordinates, then convert these user coordinates to grid coordinates.
 
-    // To determine the grid resolution to histogram, find out the change
-    // in grid coordinate along each edge of the probe box.  Map each corner of the box to grid coordinates at current refinement level:
-    // First map them to user coordinates, then convert these user coordinates to grid coordinates.
-
-    //icor will contain the integer coordinates of each of the 8 corners of the probe box.
-    int icor[8][3];
-    for (int cornum = 0; cornum < 8; cornum++) {
+	//icor will contain the integer coordinates of each of the 8 corners of the probe box.
+	int icor[8][3];
+	for (int cornum = 0; cornum < 8; cornum++){
         // coords relative to (-1,1)
         probeCoord[2] = -1.f + 2.f * (float)(cornum / 4);
         probeCoord[1] = -1.f + 2.f * (float)((cornum / 2) % 2);
@@ -216,50 +224,50 @@ void RenderEventRouter::CalcSliceHistogram(int ts, Histo *histo) {
         for (int i = 0; i < 3; i++) {
             icor[cornum][i] = (size_t)(0.5f + (float)dataSize[i] * dataCoord[i] / fullSizes[i]);
         }
-    }
-    //Find the resolution along each axis of the probe
-    //for each probe axis direction,  find the difference of each of the integer coordinates of the probe, across the probe in that direction.
-    //Because the data is layered, try all 4 edges for each direction.  The various edges are identified by cornum increasing by 4,1,or 2 starting at
-    //(0,1,2,3), (0,2,4,6), (0,1,4,5)
-    // Once the fastest varying coordinate is known, subdivide that axis to match the resolution of that coordinate.
-    // difference of a coordinate across a probe-axis direction is determined by the change in data-grid coordinates going from one face to the
-    // opposite face of the probe.
+	}
+	//Find the resolution along each axis of the probe
+	//for each probe axis direction,  find the difference of each of the integer coordinates of the probe, across the probe in that direction.
+	//Because the data is layered, try all 4 edges for each direction.  The various edges are identified by cornum increasing by 4,1,or 2 starting at
+	//(0,1,2,3), (0,2,4,6), (0,1,4,5)
+	// Once the fastest varying coordinate is known, subdivide that axis to match the resolution of that coordinate.
+	// difference of a coordinate across a probe-axis direction is determined by the change in data-grid coordinates going from one face to the
+	// opposite face of the probe.
 
-    int gridRes[3] = {0, 0, 0};
-    int difmax = -1;
-    for (int dir = 0; dir < 3; dir++) {
-
+	int gridRes[3] = {0,0,0};
+	int difmax = -1;
+	for (int dir = 0; dir<3;dir++){
         //four differences in the data-grid z direction, for data grid coordinate dir
         difmax = Max(difmax, abs(icor[0][dir] - icor[4][dir]));
         difmax = Max(difmax, abs(icor[1][dir] - icor[5][dir]));
         difmax = Max(difmax, abs(icor[2][dir] - icor[6][dir]));
         difmax = Max(difmax, abs(icor[3][dir] - icor[7][dir]));
-    }
-    gridRes[2] = difmax + 1;
-    difmax = -1;
-    for (int dir = 0; dir < 3; dir++) {
+
+	}
+	gridRes[2] = difmax+1;
+	difmax = -1;
+	for (int dir = 0; dir<3;dir++){
         //four differences in the data-grid y direction
         difmax = Max(difmax, abs(icor[0][dir] - icor[2][dir]));
         difmax = Max(difmax, abs(icor[1][dir] - icor[3][dir]));
         difmax = Max(difmax, abs(icor[4][dir] - icor[6][dir]));
         difmax = Max(difmax, abs(icor[5][dir] - icor[7][dir]));
-    }
-    gridRes[1] = difmax + 1;
-    difmax = -1;
-    for (int dir = 0; dir < 3; dir++) {
+	}
+	gridRes[1] = difmax+1;
+	difmax = -1;
+	for (int dir = 0; dir<3;dir++){
         //four differences in the data-grid x direction
         difmax = Max(difmax, abs(icor[0][dir] - icor[1][dir]));
         difmax = Max(difmax, abs(icor[2][dir] - icor[3][dir]));
         difmax = Max(difmax, abs(icor[4][dir] - icor[5][dir]));
         difmax = Max(difmax, abs(icor[6][dir] - icor[7][dir]));
-    }
-    gridRes[0] = difmax + 1;
+	}
+	gridRes[0] = difmax+1;
+		
+	//Now gridRes represents the number of samples to take in each direction across the probe
+	//Use the region reader to calculate coordinates in volume
 
-    //Now gridRes represents the number of samples to take in each direction across the probe
-    //Use the region reader to calculate coordinates in volume
-
-    //Loop over pixels in texture.  Pixel centers map to edges of probe
-    for (int iz = 0; iz < gridRes[2]; iz++) {
+	//Loop over pixels in texture.  Pixel centers map to edges of probe
+	for (int iz = 0; iz < gridRes[2]; iz++){
         if (gridRes[2] == 1)
             probeCoord[2] = 0.;
         else
@@ -298,10 +306,10 @@ void RenderEventRouter::CalcSliceHistogram(int ts, Histo *histo) {
                 // otherwise ignore this sample...
             } //End loop over ix
         }     //End loop over iy
-    }         //End loop over iz;
-
-    _dataMgr->UnlockGrid(probeGrid);
-    delete probeGrid;
+	}//End loop over iz;
+	
+	_dataMgr->UnlockGrid(probeGrid);
+	delete probeGrid;
 #endif
 }
 
@@ -313,7 +321,7 @@ void RenderEventRouter::setEditorDirty() {
         return;
 
     //mp->updateTab();
-    mp->Update(rParams);
+    mp->Update(GetActiveDataMgr(), rParams);
 
 #ifdef DEAD
     if (rParams->GetMapperFunc())
@@ -332,6 +340,7 @@ void RenderEventRouter::setEditorDirty() {
 #endif
 }
 
+#ifdef DEAD
 float RenderEventRouter::CalcCurrentValue(const double point[3]) {
     RenderParams *rParams = GetActiveParams();
 
@@ -378,8 +387,11 @@ float RenderEventRouter::CalcCurrentValue(const double point[3]) {
     delete grid;
     return varVal;
 }
+#endif
 
 void RenderEventRouter::updateTab() {
+    if (_instName.empty())
+        return;
 
     RenderParams *rParams = GetActiveParams();
 
@@ -387,7 +399,7 @@ void RenderEventRouter::updateTab() {
     if (!rParams)
         return;
 
-    DataMgr *dataMgr = _controlExec->GetDataMgr();
+    DataMgr *dataMgr = GetActiveDataMgr();
     if (!dataMgr)
         return;
 

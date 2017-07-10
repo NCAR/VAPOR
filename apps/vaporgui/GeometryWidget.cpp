@@ -114,12 +114,6 @@ GeometryWidget::~GeometryWidget() {
     }
 }
 
-size_t GeometryWidget::getCurrentTimestep(ParamsMgr *paramsMgr) const {
-    AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(
-        AnimationParams::GetClassType());
-    return (aParams->GetCurrentTimestep());
-}
-
 void GeometryWidget::updateRangeLabels(
     std::vector<double> minExt,
     std::vector<double> maxExt) {
@@ -288,7 +282,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 
     // Get current domain extents
     //
-    size_t ts = getCurrentTimestep(_paramsMgr);
+    size_t ts = _rParams->GetCurrentTimestep();
     int level = _rParams->GetRefinementLevel();
     std::vector<double> minFullExt, maxFullExt;
 

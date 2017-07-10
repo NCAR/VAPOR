@@ -176,7 +176,7 @@ int ControlExec::Paint(string winName, bool force) {
 int ControlExec::ActivateRender(
     string winName, string dataSetName, string renderType,
     string renderName, bool on) {
-    if (!_dataStatus->GetActiveDataMgr()) {
+    if (!_dataStatus->GetDataMgrNames().size()) {
         SetErrMsg("Invalid state : no data");
         return -1;
     }
@@ -233,7 +233,7 @@ int ControlExec::ActivateRender(
     string renderName, bool on) {
     assert(rp);
 
-    if (!_dataStatus->GetActiveDataMgr()) {
+    if (!_dataStatus->GetDataMgrNames().size()) {
         SetErrMsg("Invalid state : no data");
         return -1;
     }
