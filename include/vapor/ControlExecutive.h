@@ -315,13 +315,6 @@ public:
  //! \return DataStatus*
  DataStatus* getDataStatus() const {return _dataStatus;}
 
- //! Obtain a pointer to the current DataMgr
- //! Returns NULL if it does not exist.
- //! \retVal _dataMgr
- //const DataMgr* GetDataMgr() const 
- DataMgr* GetDataMgr() const { 
- 	return (_dataStatus->GetActiveDataMgr());
- }
 
  //! Get RenderParams for an active renderer
  //!

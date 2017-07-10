@@ -47,11 +47,13 @@ public:
 //! Standard RenderParams constructor.
 //! \param[in] name  std::string name, can be the tag
 	RenderParams(
-		DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname
+		DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname,
+		int maxdim = 3
 	); 
 
 	RenderParams(
-		DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node 
+		DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node,
+		int maxdim = 3
 	);
 
 	RenderParams(const RenderParams &rhs);
@@ -387,6 +389,7 @@ protected:
 	
 private:
 
+ int _maxDim;
  ParamsContainer *_TFs; 
  Box *_Box;
  ColorbarPbase *_Colorbar;

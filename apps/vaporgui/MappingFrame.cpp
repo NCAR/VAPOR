@@ -136,6 +136,7 @@ MappingFrame::MappingFrame(QWidget* parent, const char* )
     _axisRegionHeight(20),
     _opacityGap(4),
     _bottomGap(10),
+	_dataMgr(NULL),
 	_rParams(NULL)
 
 {
@@ -309,8 +310,9 @@ void MappingFrame::setVariableName(std::string name)
 // Synchronize the frame with the underlying params
 //----------------------------------------------------------------------------
 //void MappingFrame::updateTab()
-void MappingFrame::Update(RenderParams *rParams)
+void MappingFrame::Update(DataMgr *dataMgr, RenderParams *rParams)
 {
+	_dataMgr = dataMgr;
 	_rParams = rParams;
 
 	string varname = rParams->GetVariableName();
@@ -2592,7 +2594,7 @@ void MappingFrame::fitToData(){
 		rParams->GetBox()->GetExtents(minExts, maxExts, ts);
 #endif
 		rParams->GetBox()->GetExtents(minExts, maxExts);
-		StructuredGrid* rGrid = _controlExec->GetDataMgr()->GetVariable(ts, rParams->GetVariableName(),
+		StructuredGrid* rGrid = _dataMgr->GetVariable(ts, rParams->GetVariableName(),
 			rParams->GetRefinementLevel(), rParams->GetCompressionLevel(),minExts, maxExts);
 		rGrid->GetRange(range);
 		if (range[1]<range[0]){ //no data

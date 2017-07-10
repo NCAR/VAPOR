@@ -285,7 +285,12 @@ int CurvilinearGrid::GetUserCoordinates(
 
 	*x = _xrg.AccessIJK(i,j,k);
 	*y = _yrg.AccessIJK(i,j,k);
-	*z = _zcoords[k];
+	if (_ndim == 3) {
+		*z = _zcoords[k];
+	}
+	else {
+		*z = 0.0;
+	}
 
 	return(0);
 }
