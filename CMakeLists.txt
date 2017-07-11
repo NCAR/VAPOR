@@ -46,6 +46,9 @@ link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 LIST (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 
+find_package (OpenGL REQUIRED)
+include_directories (${OPENGL_INCLUDE_DIRS})
+
 add_subdirectory (apps)
 add_subdirectory (lib)
 add_subdirectory (include)
