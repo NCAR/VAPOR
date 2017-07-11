@@ -257,7 +257,36 @@ int NetCDFCpp::PutAtt(
     if (rc < 0)
         return (rc);
 
-    rc = nc_put_att_int(_ncid, varid, attname.c_str(), NC_INT, n, values);
+    if (attname == "_FillValue") {
+        nc_type xtype;
+        rc = InqVartype(varname, xtype);
+        if (rc < 0)
+            return (rc);
+
+        if (xtype == NC_BYTE) {
+            unsigned char *valuesB = new unsigned char[n];
+            for (int i = 0; i < n; i++)
+                valuesB[i] = (unsigned char)values[i];
+            rc = nc_put_att_ubyte(_ncid, varid, attname.c_str(), NC_BYTE, n, valuesB);
+            delete[] valuesB;
+        } else if (xtype == NC_SHORT) {
+            short *valuesS = new short[n];
+            for (int i = 0; i < n; i++)
+                valuesS[i] = (short)values[i];
+            rc = nc_put_att_short(_ncid, varid, attname.c_str(), NC_SHORT, n, valuesS);
+            delete[] valuesS;
+        } else if (xtype == NC_INT64) {
+            long *valuesS = new long[n];
+            for (int i = 0; i < n; i++)
+                valuesS[i] = (long)values[i];
+            rc = nc_put_att_long(_ncid, varid, attname.c_str(), NC_INT64, n, valuesS);
+            delete[] valuesS;
+        } else {
+            rc = nc_put_att_int(_ncid, varid, attname.c_str(), NC_INT, n, values);
+        }
+    } else {
+        rc = nc_put_att_int(_ncid, varid, attname.c_str(), NC_INT, n, values);
+    }
     MY_NC_ERR(rc, _path, "nc_put_att_int(" + attname + ")");
 
     return (NC_NOERR);
@@ -445,8 +474,25 @@ int NetCDFCpp::PutAtt(
     if (rc < 0)
         return (rc);
 
-    rc = nc_put_att_double(
-        _ncid, varid, attname.c_str(), NC_DOUBLE, n, values);
+    if (attname == "_FillValue") {
+        nc_type xtype;
+        rc = InqVartype(varname, xtype);
+        if (rc < 0)
+            return (rc);
+
+        if (xtype == NC_FLOAT) {
+            float *valuesF = new float[n];
+            for (int i = 0; i < n; i++)
+                valuesF[i] = (float)values[i];
+            rc = nc_put_att_float(_ncid, varid, attname.c_str(), NC_FLOAT, n, valuesF);
+            delete[] valuesF;
+        } else {
+            rc = nc_put_att_double(_ncid, varid, attname.c_str(), NC_DOUBLE, n, values);
+        }
+    } else {
+        rc = nc_put_att_double(_ncid, varid, attname.c_str(), NC_DOUBLE, n, values);
+    }
+
     MY_NC_ERR(rc, _path, "nc_put_att_double(" + attname + ")");
 
     return (NC_NOERR);
