@@ -48,7 +48,6 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 
   private:
     void connectWidgets();
-    size_t getCurrentTimestep(VAPoR::ParamsMgr *paramsMgr) const;
     void updateRangeLabels(std::vector<double> minExt,
                            std::vector<double> maxExt);
     void GetVectorExtents(size_t ts, int level,

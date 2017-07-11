@@ -46,10 +46,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
                 VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams);
 
-    void setDataStatus(VAPoR::DataStatus *ds) {
-        mappingFrame->setDataStatus(ds);
-    }
-
     void fileLoadTF(string varname, const char *path,
                     bool savePath);
 
