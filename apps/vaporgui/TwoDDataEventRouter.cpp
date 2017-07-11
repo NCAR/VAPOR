@@ -68,30 +68,6 @@ TwoDDataEventRouter::~TwoDDataEventRouter()
     if (_appearance) delete _appearance;
 }
 
-/**********************************************************
- * Whenever a new TwoDtab is created all the connections between widgets and slots are made
- ************************************************************/
-void TwoDDataEventRouter::hookUpTab()
-{
-    //	_appearance->transferFunctionFrame->hookup(this, _appearance->TFeditButton,_appearance->TFnavigateButton,
-    //	_appearance->TFalignButton, _appearance->TFHistoButton,_appearance->fitTFDataButton, 0,0,0);
-
-    //_appearance->initialize();
-    //	_appearance->_TFWidget->transferFunctionFrame->hookup(this, _appearance->TFeditButton,_appearance->TFnavigateButton,
-    //	_appearance->TFalignButton, _appearance->TFHistoButton,_appearance->fitTFDataButton, 0,0,0);
-
-    //	connect(_appearance->leftMappingEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setTwoDTextChanged(const QString&)));
-    //	connect(_appearance->rightMappingEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setTwoDTextChanged(const QString&)));
-    //	connect(_appearance->leftMappingEdit, SIGNAL(returnPressed()), this, SLOT(twoDReturnPressed()));
-    //	connect(_appearance->rightMappingEdit, SIGNAL(returnPressed()), this, SLOT(twoDReturnPressed()));
-    //	connect(_appearance->colorInterpCombobox,SIGNAL(currentIndexChanged(int)), this, SLOT(toggleColorInterpType(int)));
-    //	connect(_appearance->loadButton, SIGNAL(clicked()), this, SLOT(twodLoadTF()));
-    //	connect(_appearance->loadInstalledButton, SIGNAL(clicked()), this, SLOT(twodLoadInstalledTF()));
-    //	connect(_appearance->saveButton, SIGNAL(clicked()), this, SLOT(twodSaveTF()));
-    //	connect(_appearance->transferFunctionFrame, SIGNAL(startChange(QString)), this, SLOT(startChangeMapFcn(QString)));
-    //	connect(_appearance->transferFunctionFrame, SIGNAL(endChange()), this, SLOT(endChangeMapFcn()));
-}
-
 void TwoDDataEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();
@@ -107,69 +83,12 @@ void TwoDDataEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
     help.push_back(make_pair("TwoD Appearance settings", "http://www.vapor.ucar.edu/docs/vapor-gui-help/twoD#HelloAppearance"));
 }
 
-//
-// Method to be invoked after the user has moved the right or left bounds
-// (e.g. From the MapEditor. )
-// Make the textboxes consistent with the new left/right bounds, but
-// don't trigger a new undo/redo event
-//
-void TwoDDataEventRouter::UpdateMapBounds()
-{
-    RenderParams *    rParams = GetActiveParams();
-    QString           strn;
-    string            varname = rParams->GetVariableName();
-    TransferFunction *tFunc = rParams->GetTransferFunc(varname);
-    if (tFunc) {
-        //_appearance->leftMappingEdit->setText(strn.setNum(tFunc->getMinMapValue(),'g',4));
-        //_appearance->rightMappingEdit->setText(strn.setNum(tFunc->getMaxMapValue(),'g',4));
-    }
-    setEditorDirty();
-}
-
 void TwoDDataEventRouter::_updateTab()
 {
     // The variable tab updates itself:
     //
     _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
-    _appearance->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+    _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 }
-
-/******************************************************************************
- * Slots associated with TwoDTab.
- * Any EventRouter needs the first two slots here.
- * Plus, each EventRouter needs a slot to respond to events in every non-text
- * widget, e.g. combo boxes, sliders, pushbuttons
- *****************************************************************************/
-
-// Whenever a lineEdit changes, set the textChanged flag.
-void TwoDDataEventRouter::twodLoadTF()
-{
-    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
-
-    loadTF(rParams->GetVariableName());
-}
-void TwoDDataEventRouter::twodLoadInstalledTF()
-{
-    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
-    string          varName = rParams->GetVariableName();
-    MapperFunction *tf = rParams->MakeMapperFunc(varName);
-    if (!tf) return;
-    float minb = tf->getMinMapValue();
-    float maxb = tf->getMaxMapValue();
-    if (minb >= maxb) {
-        minb = 0.0;
-        maxb = 1.0;
-    }
-    loadInstalledTF(rParams->GetVariableName());
-    tf = (TransferFunction *)rParams->MakeMapperFunc(varName);
-    tf->setMinMaxMapValue(minb, maxb);
-
-    setEditorDirty();
-}
-
-void TwoDDataEventRouter::twodSaveTF() { fileSaveTF(); }
-void TwoDDataEventRouter::startChangeMapFcn(QString) {}
-
-void TwoDDataEventRouter::endChangeMapFcn() {}

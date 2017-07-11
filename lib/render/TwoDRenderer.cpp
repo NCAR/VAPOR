@@ -61,8 +61,6 @@ int TwoDRenderer::_paintGL()
     assert(_texWidth >= 2);
     assert(_texHeight >= 2);
 
-    cout << "texInfo: " << _texWidth << " " << _texHeight << endl;
-
     // Get the proxy geometry used to render the 2D surface (vertices and
     // normals)
     //
@@ -71,13 +69,9 @@ int TwoDRenderer::_paintGL()
     assert(_meshWidth >= 2);
     assert(_meshHeight >= 2);
 
-    cout << "meshInfo1: " << _meshWidth << " " << _meshHeight << endl;
-
     _texCoords = (GLfloat *)_sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
 
     _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
-
-    cout << "meshInfo2: " << _meshWidth << " " << _meshHeight << endl;
 
     // Render the 2D surface
     //

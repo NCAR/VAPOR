@@ -46,7 +46,7 @@ class QSlider;
 class QTabWidget;
 
 class OpacityWidget;
-class ColorbarWidget;
+class GLColorbarWidget;
 class Histo;
 class DomainWidget;
 class IsoSlider;
@@ -88,6 +88,8 @@ public:
     MappingFrame(QWidget *parent, const char *name = 0);
     virtual ~MappingFrame();
 
+    void setDataStatus(VAPoR::DataStatus *ds);
+
     //! Method required to establish a connection between the EventRouter that contains a transfer function editor,
     //! (or an IsoControl)
     //! and the MappingFrame that provides the editing functionality.  This method should be invoked in the method EventRouter::hookupTab()
@@ -96,19 +98,7 @@ public:
     //! \param[in] opacityScaleSlider QSlider that controls the opacity scale
     void hookup(RenderEventRouter *evrouter, QPushButton *updateHistoButton, QSlider *opacityScaleSlider);
 
-    //! Method required to establish a connection between the EventRouter that contains a transfer function editor,
-    //! (or an IsoControl)
-    //! and the MappingFrame that provides the editing functionality.  This method should be invoked in the method EventRouter::hookupTab()
-    //! \param[in] evrouter The EventRouter associated with this MappingFrame
-    //! \param[in] editButton The QPushButton that enables Edit mode
-    //! \param[in] ZoomPan QPushButton that enables zoom/pan (navigate) mode.
-    //! \param[in] histoButton QPushButton that refreshes the histogram.
-    //! \param[in] fitData QPushButton that fits the bounds to the data
-    //! \param[in] bindColorToOpac QPushButton that binds the selected color control point to selected opacity control point.
-    //! \param[in] bindOpacToColor QPushButton that binds the selected opacity control point to the selected color control point.
-    //! \param[in] opacityScaleSlider QSlider that controls the opacity scale
-    void hookup(RenderEventRouter *evrouter, QPushButton *editButton, QPushButton *ZoomPan, QPushButton *fitToView, QPushButton *histoButton, QPushButton *fitData, QPushButton *bindColorToOpac,
-                QPushButton *bindOpacToColor, QSlider *opacityScaleSlider);
+    void RefreshHistogram();
 
     //! Enable or disable the color mapping in the Transfer Function.
     //! Should be specified in the RenderEventRouter constructor
@@ -138,7 +128,7 @@ public:
     //! Update the display of the Transfer Function or IsoControl based on the current RenderParams that
     //! contains the MapperFunction being used.  This should be invoked in RenderEventRouter::updateTab()
     // void updateTab();
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams = NULL);
+    void Update(VAPoR::DataMgr *dataMgr = NULL, VAPoR::ParamsMgr *paramsMgr = NULL, VAPoR::RenderParams *rParams = NULL);
 
     //! Specify the variable associated with the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
     void setVariableName(std::string name);
@@ -169,7 +159,7 @@ public:
         _myTabWidget = wid;
         _myTabPosn = posn;
     }
-    static void SetControlExec(VAPoR::ControlExec *ce) { _controlExec = ce; }
+    // static void SetControlExec(VAPoR::ControlExec* ce){_controlExec = ce;}
 
 signals:
 
@@ -188,6 +178,8 @@ signals:
     //! on this signal if you want transfer function edits visualized in real-time
     //
     void mappingChanged();
+
+    void updateParams();
 
 public slots:
     void updateHisto();
@@ -294,7 +286,9 @@ private:
 protected slots:
 
     void fitToData();
+#ifdef DEAD
     void refreshHisto();
+#endif
     void addOpacityWidget(QAction *);
     void deleteOpacityWidget();
 
@@ -332,7 +326,7 @@ private:
     std::map<int, OpacityWidget *> _opacityWidgets;
     DomainWidget *                 _domainSlider;
     IsoSlider *                    _isoSlider;
-    ColorbarWidget *               _colorbarWidget;
+    GLColorbarWidget *             _colorbarWidget;
     GLWidget *                     _lastSelected;
     std::set<GLWidget *>           _selectedWidgets;
 
@@ -383,6 +377,8 @@ private:
     const int            _bottomGap;
     VAPoR::DataMgr *     _dataMgr;
     VAPoR::RenderParams *_rParams;
+    VAPoR::ParamsMgr *   _paramsMgr;
+    VAPoR::DataStatus *  _dataStatus;
 
     QStringList     _axisTexts;
     QList<QPoint *> _axisTextPos;

@@ -106,10 +106,6 @@ class MappingFrame;
 //! save the transfer functions.  Refer to MappingFrame documentation
 //! for additional instructions.
 //!
-//! Various widgets associated with the TransferFunction editor are managed
-//! by the MappingFrame as described under MappingFrame::hookup().
-//! These must implement EventRouter::RefreshHistogram() to refresh
-//! the histogram in the Transfer Function Editor.
 //!
 //! If there is a MouseMode (manipulator) associated with the tab,
 //! then EventRouter::captureMouseUp() and

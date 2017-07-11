@@ -13,7 +13,6 @@
 #include <vapor/TransferFunction.h>
 #include "VizWin.h"
 #include "vapor/BarbParams.h"
-//#include "vapor/BarbRenderer.h"
 #include "VariablesWidget.h"
 #include "BarbEventRouter.h"
 #include "EventRouter.h"
@@ -49,7 +48,9 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, VizWinMgr *vizMgr, ControlExec
 BarbEventRouter::~BarbEventRouter()
 {
     if (_variables) delete _variables;
-    // if (_image) delete _image;
+#ifdef DEAD
+    if (_image) delete _image;
+#endif
     if (_geometry) delete _geometry;
     if (_appearance) delete _appearance;
 }
@@ -71,9 +72,9 @@ void BarbEventRouter::geoCheckboxClicked(bool state) {}
 void BarbEventRouter::_updateTab()
 {
     // The variable tab updates itself:
-    _variables->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+    _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
-    _appearance->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+    _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 }

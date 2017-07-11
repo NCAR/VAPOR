@@ -1,102 +1,83 @@
-//-- ColorbarWidget.h ---------------------------------------------------------
+//************************************************************************
+//															*
+//			 Copyright (C)  2016										*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
+//															*
+//************************************************************************/
 //
-// Copyright (C) 2006 Kenny Gruchalla.  All rights reserved.
+//	File:		ColorbarWidget.h
 //
-// OpenGL-based colorbar with interactive color control points.
+//	Author:		Alan Norton
+//			National Center for Atmospheric Research
+//			PO 3000, Boulder, Colorado
 //
-//----------------------------------------------------------------------------
-
-#ifndef ColorbarWidget_H
-#define ColorbarWidget_H
-
-#include "GLWidget.h"
-#include <vapor/MyBase.h>
-
-#include <qobject.h>
-#include <QColor>
-#include <set>
-#include <list>
-
-class GLUquadric;
+//	Date:		February 2016
+//
+//	Description:	Defines the ColorbarWidget class.  This provides
+//		a frame that controls colorbar settings
+//
+#ifndef COLORBARWIDGET_H
+#define COLORBARWIDGET_H
+#include <QFrame>
+#include <qwidget.h>
+#include <vector>
+#include <vapor/RenderParams.h>
+#include "RenderEventRouter.h"
+#include "ColorbarWidgetGUI.h"
 
 namespace VAPoR {
-class ColorMap;
-}
+class ColorbarPbase;
+class ParamsBase;
+}    // namespace VAPoR
 
-class MappingFrame;
+//! \class ColorbarWidget
+//! \ingroup Public_GUI
+//! \brief A QFrame that contains text boxes controlling the colorbar settings
+//! \author Alan Norton
+//! \version 3.0
+//! \date	February 2016
 
-class ColorbarWidget : public GLWidget {
+//!	This QFrame should be embedded in various EventRouter .ui files to support
+//! controlling box extents. EventRouter implementors must do the following:
+//!
+//! If a slider or text box should not be displayed, invoke hide() on that gui
+//! element in the EventRouter constructor.
+//!
+
+class ColorbarWidget : public QFrame, public Ui_ColorbarWidgetGUI {
     Q_OBJECT
 
 public:
-    ColorbarWidget(MappingFrame *parent, VAPoR::ColorMap *colormap);
-    virtual ~ColorbarWidget();
+    ColorbarWidget(QWidget *parent = 0);
+    ~ColorbarWidget();
 
-    int  paintGL();
-    void initializeGL();
+    void SetEventRouter(RenderEventRouter *er) { _eventRouter = er; }
 
-    virtual void select(int handle, Qt::KeyboardModifiers);
-    virtual void deselect();
-
-    std::list<float> selectedPoints();
-
-    bool controlPointSelected() { return selected(); }
-    int  selectedControlPoint() { return _selected; }
-    void deleteSelectedControlPoint();
-
-    void move(float dx, float dy = 0.0, float dz = 0.0);
-    void drag(float dx, float dy = 0.0, float dz = 0.0);
-
-    float minValue() const { return _minValue; }
-    float maxValue() const { return _maxValue; }
-
-    void             setColormap(VAPoR::ColorMap *colormap);
-    VAPoR::ColorMap *colormap() { return _colormap; }
-
-    void setDirty() { _updateTexture = true; }
-
-public slots:
-
-    void newHsv(int h, int s, int v);
+    //! Update the values displayed in this frame, by obtaining them from the
+    //! ColorbarPbase instance in the Params.
+    //! \param[in] p Params associated with this frame.
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 signals:
 
-    //
-    // Signals that a color control point has be selected
-    //
-    void sendRgb(QRgb color);
-
-    //
-    // Signals that the widget has changed the mapping function.
-    //
-    void mapChanged();
+protected slots:
+    void colorbarTextChanged(const QString &);
+    void enabledChange();
+    void setBackgroundColor();
+    void applyToAll();
+    void colorbarReturnPressed();
 
 private:
-    void drawControlPoint(int index);
-    void updateTexture();
+    RenderEventRouter *_eventRouter;
+    void               disableSignals(bool disabled);
 
-    float width();
+    bool                 _textChangedFlag;
+    VAPoR::ParamsMgr *   _paramsMgr;
+    VAPoR::DataMgr *     _dataMgr;
+    VAPoR::RenderParams *_rParams;
 
-    float right();
-    float left();
-
-    float dataToWorld(float x);
-    float worldToData(float x);
-
-private:
-    const int _NUM_BINS;
-
-    MappingFrame *   _parent;
-    VAPoR::ColorMap *_colormap;
-
-    unsigned int   _texid;
-    unsigned char *_texture;
-    bool           _updateTexture;
-
-    float _minValue;
-    float _maxValue;
-
-    std::set<int> _selectedCPs;
+    VAPoR::ColorbarPbase *GetActiveParams() const { return (_rParams->GetColorbarPbase()); }
 };
 
-#endif    // ColorbarWidget_H
+#endif    // COLORBARSETTINGS_H

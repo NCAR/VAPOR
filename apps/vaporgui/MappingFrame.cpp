@@ -27,19 +27,17 @@
 #include <QMouseEvent>
 #include <QToolTip>
 
-#include "VizWinMgr.h"
-#include "vapor/MapperFunction.h"
+#include <vapor/ControlExecutive.h>
+#include <vapor/DataMgrUtils.h>
+#include <vapor/MapperFunction.h>
+#include <vapor/OpacityMap.h>
 #include "OpacityWidget.h"
-#include "vapor/OpacityMap.h"
 #include "DomainWidget.h"
-#include "ColorbarWidget.h"
+#include "GLColorbarWidget.h"
 #include "ControlPointEditor.h"
 #include "RenderEventRouter.h"
-#include "vapor/errorcodes.h"
-#include "vapor/ControlExecutive.h"
 #include "MessageReporter.h"
 #include "Histo.h"
-#include "MainForm.h"
 #include "MappingFrame.h"
 
 #ifndef MAX
@@ -81,19 +79,17 @@ void oglPopState()
 
 };    // namespace
 
-ControlExec *MappingFrame::_controlExec = 0;
 //----------------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------------
 MappingFrame::MappingFrame(QWidget *parent, const char *)
 : QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _opacityMappingEnabled(false), _colorMappingEnabled(false), _isoSliderEnabled(false), _isolineSlidersEnabled(false),
   _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _eventRouter(NULL), _variableName(""), _domainSlider(new DomainWidget(this)), _isoSlider(new IsoSlider(this)),
-  _colorbarWidget(new ColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL), _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL), _addOpacityWidgetSubMenu(NULL),
+  _colorbarWidget(new GLColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL), _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL), _addOpacityWidgetSubMenu(NULL),
   _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL), _deleteOpacityWidgetAction(NULL), _addColorControlPointAction(NULL), _addOpacityControlPointAction(NULL),
   _deleteControlPointAction(NULL), _lastx(0), _lasty(0), _editMode(true), _clickedPos(0, 0), _minValueStart(0.0), _maxValueStart(1.0), _isoVal(0.0), _button(Qt::LeftButton), _minX(-0.035),
   _maxX(1.035), _minY(-0.35), _maxY(1.3), _minValue(0.0), _maxValue(1.0), _colorbarHeight(16), _domainBarHeight(16), _domainLabelHeight(10), _domainHeight(_domainBarHeight + _domainLabelHeight + 3),
   _axisRegionHeight(20), _opacityGap(4), _bottomGap(10), _dataMgr(NULL), _rParams(NULL)
-
 {
     initWidgets();
     initConnections();
@@ -131,6 +127,43 @@ MappingFrame::~MappingFrame()
     for (int i = 0; i < _axisTexts.size(); i++) { delete _axisTextPos[i]; }
     _axisTexts.clear();
     _axisTextPos.clear();
+}
+
+void MappingFrame::RefreshHistogram()
+{
+    string var = _rParams->GetVariableName();
+    size_t ts = _rParams->GetCurrentTimestep();
+
+    float minRange = _rParams->MakeMapperFunc(var)->getMinMapValue();
+    float maxRange = _rParams->MakeMapperFunc(var)->getMaxMapValue();
+    if (!_histogram)
+        _histogram = new Histo(256, minRange, maxRange);
+    else
+        _histogram->reset(256, minRange, maxRange);
+
+    int refLevel = _rParams->GetRefinementLevel();
+    int lod = _rParams->GetCompressionLevel();
+
+    vector<double> minExts, maxExts;
+    _rParams->GetBox()->GetExtents(minExts, maxExts);
+
+    StructuredGrid *grid;
+
+    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, var, minExts, maxExts, true, &refLevel, &lod, &grid);
+    if (rc) return;
+
+    grid->SetInterpolationOrder(0);
+
+    StructuredGrid *         rg_const = (StructuredGrid *)grid;
+    StructuredGrid::Iterator itr;
+
+    float v;
+    for (itr = rg_const->begin(); itr != rg_const->end(); ++itr) {
+        v = *itr;
+        if (v == grid->GetMissingValue()) continue;
+        _histogram->addToBin(v);
+    }
+    delete grid;
 }
 
 //----------------------------------------------------------------------------
@@ -238,13 +271,24 @@ void MappingFrame::setVariableName(std::string name)
 // Synchronize the frame with the underlying params
 //----------------------------------------------------------------------------
 // void MappingFrame::updateTab()
-void MappingFrame::Update(DataMgr *dataMgr, RenderParams *rParams)
+void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
 {
+    assert(dataMgr);
+    assert(paramsMgr);
+    assert(rParams);
+
     _dataMgr = dataMgr;
     _rParams = rParams;
+    _paramsMgr = paramsMgr;
 
-    string          varname = rParams->GetVariableName();
-    MapperFunction *mapper = rParams->MakeMapperFunc(varname);
+    string varname = _rParams->GetVariableName();
+
+    MapperFunction *mapper;
+    mapper = _rParams->GetMapperFunc(varname);
+    if (!mapper) {
+        mapper = _rParams->MakeMapperFunc(varname);
+        assert(mapper);
+    }
 
     setMapperFunction(mapper);
 
@@ -424,11 +468,8 @@ void MappingFrame::setEditMode(bool flag)
 //----------------------------------------------------------------------------
 void MappingFrame::fitToView()
 {
-    RenderParams *myParams = GetActiveParams();
-    if (!myParams) return;
     // Make sure it's current active params:
 
-    //_eventRouter->confirmText();
     emit startChange("Mapping window fit-to-view");
 
     _minValue = getMinDomainBound();
@@ -701,9 +742,6 @@ void MappingFrame::paintGL()
     if (!FrameBufferReady()) { return; }
 
     if (!_mapper) return;
-#ifdef DEAD
-    if (_controlExec->GuiRenderBlocked()) return;
-#endif
     resize();
     int rc = printOpenGLErrorMsg("MappingFrame::paintGL");
     if (rc < 0) {
@@ -1510,6 +1548,7 @@ void MappingFrame::resize()
 //----------------------------------------------------------------------------
 void MappingFrame::mousePressEvent(QMouseEvent *event)
 {
+    _paramsMgr->BeginSaveStateGroup("MappingFrame mousePressEvent");
     select(event->x(), event->y(), event->modifiers());
 
     _lastx = xViewToWorld(event->x());
@@ -1542,6 +1581,8 @@ void MappingFrame::mousePressEvent(QMouseEvent *event)
         emit startChange("Mapping window zoom/pan");
     }
 
+    cout << "MappingFrame mousePressEvent" << endl;
+
     updateGL();
 }
 
@@ -1572,7 +1613,10 @@ void MappingFrame::mouseReleaseEvent(QMouseEvent *event)
         updateGL();
 
         emit endChange();
+        emit updateParams();
     }
+
+    _paramsMgr->EndSaveStateGroup();
 }
 
 //----------------------------------------------------------------------------
@@ -1882,8 +1926,17 @@ RenderParams *MappingFrame::GetActiveParams()
 //----------------------------------------------------------------------------
 Histo *MappingFrame::getHistogram()
 {
-    RenderParams *params = GetActiveParams();
-    return (_eventRouter->GetHistogram(params->IsEnabled(), _isoSliderEnabled));
+    bool mustGet = _rParams->IsEnabled();
+    if (_histogram && !mustGet) return _histogram;
+    if (!mustGet) return 0;
+    string          varname = _rParams->GetVariableName();
+    MapperFunction *mapFunc = _rParams->MakeMapperFunc(varname);
+    if (!mapFunc) return 0;
+    if (_histogram) delete _histogram;
+
+    _histogram = new Histo(256, mapFunc->getMinMapValue(), mapFunc->getMaxMapValue());
+    RefreshHistogram();
+    return _histogram;
 }
 
 //----------------------------------------------------------------------------
@@ -2094,8 +2147,6 @@ void MappingFrame::setDomain()
             emit endChange();
         }
 
-        if (!_isoSliderEnabled && !_isolineSlidersEnabled) { _eventRouter->UpdateMapBounds(); }
-
         updateGL();
     } else {
         _domainSlider->setDomain(xDataToWorld(_minValue), xDataToWorld(_maxValue));
@@ -2160,7 +2211,7 @@ void MappingFrame::setIsolineSliders(const vector<double> &sliderVals)
 {
     // delete unused sliders
     if (sliderVals.size() < _isolineSliders.size()) {
-        for (int i = sliderVals.size(); i < _isolineSliders.size(); i++) delete _isolineSliders[i];
+        for (int i = sliderVals.size(); i < _isolineSliders.size(); i++) { delete _isolineSliders[i]; }
         _isolineSliders.resize(sliderVals.size());
     } else if (sliderVals.size() > _isolineSliders.size()) {
         // create new ones:
@@ -2182,83 +2233,25 @@ void MappingFrame::updateHisto()
     updateMap();
 }
 
-void MappingFrame::hookup(RenderEventRouter *evRouter, QPushButton *editBtn, QPushButton *zoomPan, QPushButton *fitToView, QPushButton *histoButton, QPushButton *fitDataButton,
-                          QPushButton *bindColorToOpac, QPushButton *bindOpacToColor, QSlider *opacityScaleSlider)
-{
-    _eventRouter = evRouter;
-    navigateButton = zoomPan;
-    _editButton = editBtn;
-    connect(_editButton, SIGNAL(toggled(bool)), this, SLOT(setEditMode(bool)));
-    connect(navigateButton, SIGNAL(toggled(bool)), this, SLOT(setNavigateMode(bool)));
-    connect(fitToView, SIGNAL(clicked()), this, SLOT(fitToView()));
-    connect(fitDataButton, SIGNAL(clicked()), this, SLOT(fitToData()));
-    connect(histoButton, SIGNAL(clicked()), this, SLOT(refreshHisto()));
-}
 void MappingFrame::setNavigateMode(bool mode)
 {
     setEditMode(!mode);
     _editButton->setChecked(!mode);
 }
-void MappingFrame::refreshHisto()
-{
-    VizWin *vizWin = VizWinMgr::getInstance()->getActiveVizWin();
-    if (!vizWin) return;
-    RenderParams *rParams = GetActiveParams();
-    if (!rParams) return;
 
-#ifdef DEAD
-    if (rParams->doBypass(_controlExec->GetActiveAnimationParams()->GetCurrentTimestep())) {
-        MyBase::SetErrMsg(VAPOR_ERROR_DATA_UNAVAILABLE, "Unable to refresh histogram");
-        MessageReporter::postCurrentMsgs();
-        return;
-    }
-#endif
-
-#ifdef DEAD
-    DataMgr *dataManager = _controlExec->GetDataMgr();
-    if (dataManager) {
-#endif
-        _eventRouter->RefreshHistogram();
-#ifdef DEAD
-    }
-#endif
-    _eventRouter->setEditorDirty();
-}
 void MappingFrame::fitToData()
 {
-#ifdef DEAD
-    if (!_controlExec->GetDataMgr()) return;
-#endif
+    size_t ts = _rParams->GetCurrentTimestep();
 
-    RenderParams *rParams = GetActiveParams();
-
-    GUIStateParams *p = MainForm::getInstance()->GetStateParams();
-    string          vizName = p->GetActiveVizName();
-
-    AnimationParams *aParams = MainForm::getInstance()->GetAnimationParams();
-    size_t           ts = aParams->GetCurrentTimestep();
-
-    float range[2];
-#ifdef DEAD
-    if (rParams->UseAuxVariable()) {
-        range[0] = 0.;
-        range[1] = 1.;
-    } else {
-#endif
-        vector<double> minExts, maxExts;
-#ifdef DEAD
-        rParams->GetBox()->GetExtents(minExts, maxExts, ts);
-#endif
-        rParams->GetBox()->GetExtents(minExts, maxExts);
-        StructuredGrid *rGrid = _dataMgr->GetVariable(ts, rParams->GetVariableName(), rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), minExts, maxExts);
-        rGrid->GetRange(range);
-        if (range[1] < range[0]) {    // no data
-            range[1] = 1.f;
-            range[0] = 0.f;
-        }
-#ifdef DEAD
+    float          range[2];
+    vector<double> minExts, maxExts;
+    _rParams->GetBox()->GetExtents(minExts, maxExts);
+    StructuredGrid *rGrid = _dataMgr->GetVariable(ts, _rParams->GetVariableName(), _rParams->GetRefinementLevel(), _rParams->GetCompressionLevel(), minExts, maxExts);
+    rGrid->GetRange(range);
+    if (range[1] < range[0]) {    // no data
+        range[1] = 1.f;
+        range[0] = 0.f;
     }
-#endif
     _mapper->setMinMaxMapValue(range[0], range[1]);
     _eventRouter->updateTab();
 }
