@@ -39,7 +39,7 @@ namespace VAPoR {
 #endif
 
 class Histo;
-class ColorbarSettings;
+class ColorbarWidget;
 
 //!
 //! \class RenderEventRouter
@@ -112,10 +112,6 @@ class ColorbarSettings;
 //! save the transfer functions.  Refer to MappingFrame documentation 
 //! for additional instructions.
 //!
-//! Various widgets associated with the TransferFunction editor are managed 
-//! by the MappingFrame as described under MappingFrame::hookup().
-//! These must implement EventRouter::RefreshHistogram() to refresh 
-//! the histogram in the Transfer Function Editor.
 //!
 //! If there is a MouseMode (manipulator) associated with the tab, 
 //! then EventRouter::captureMouseUp() and 
@@ -179,7 +175,8 @@ public:
  //! \param[in] RenderParams* is the Params that owns the Transfer Function
  //
  virtual void setEditorDirty();
- 
+
+#ifdef DEAD 
  //! Method used to indicate that the mapping bounds have changed,
  //! in the transfer function editor, requiring update of the display.
  //! Must be reimplemented in every EventRouter which has a transfer function.
@@ -187,8 +184,9 @@ public:
  //! \param[in] RenderParams* owner of the Transfer Function
  //
  virtual void UpdateMapBounds() {}
+#endif
 
-
+#ifdef DEAD
  //! Launch a dialog to save the current transfer function to file.
  //!
  //! \param[in] rParams RenderParams instance associated with the 
@@ -218,6 +216,7 @@ public:
 	string varname, const char* startPath, 
 	bool savePath
  );
+#endif
  
  //! Obtain the current valid histogram.  Optionally will construct a new 
  //! one if needed.
@@ -228,14 +227,10 @@ public:
  //! with an IsoSelection panel
  //! \retval Histo* is resulting Histo instance.
  //
- virtual Histo* GetHistogram(
-	bool mustGet, bool isIsoWin = false
- );
+ //virtual Histo* GetHistogram(
+//	bool mustGet, bool isIsoWin = false
+// );
  
- //! Virtual method to refresh the histogram for the associated EventRouter.
- //! Must be reimplemented in every EventRouter class with a Histogram.
- //!
- virtual void RefreshHistogram();
  
  //! Virtual method to fit the color map editor interval to the current map 
  //! bounds.
@@ -255,10 +250,10 @@ public:
  //! \retval MappingFrame* is MappingFrame associated with the EventRouter
  virtual MappingFrame* getMappingFrame() {return NULL;}
  
- //! Virtual method identifies the ColorbarFrame associated with an EventRouter.
+ //! Virtual method identifies the ColorbarWidget associated with an EventRouter.
  //! Must be implemented in every EventRouter with a MappingFrame
- //! \retval ColorbarFrame* is ColorbarFrame associated with the EventRouter
- virtual ColorbarSettings* getColorbarFrame() {return NULL;}
+ //! \retval ColorbarWidget* is ColorbarWidget associated with the EventRouter
+ virtual ColorbarWidget* getColorbarWidget() {return NULL;}
  
  //! Respond to a variable change
  //! Make any gui changes beyond updating the variable combos.

@@ -8,7 +8,7 @@ FILES = \
 	EventRouter RenderEventRouter RenderHolder ImageFrame ControlPointEditor \
 	BoxSliderFrame DomainWidget GLWidget OpacityWidget Histo \
 	ColorbarWidget StartupEventRouter AppSettingsEventRouter \
-	VizSelectCombo VizFeatureEventRouter ColorbarSettings \
+	VizSelectCombo VizFeatureEventRouter \
 	AnimationEventRouter MappingFrame HelloEventRouter \
 	regioneventrouter ViewpointEventRouter \
 	TwoDDataEventRouter \
@@ -18,13 +18,13 @@ FILES = \
 	BannerGUI AnimationParams \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
-	TabManager MessageReporter  TrackBall
+	TabManager MessageReporter  TrackBall GLColorbarWidget
 
 QT_HEADERS := \
 	RenderHolder BoxSliderFrame DomainWidget GLWidget \
 	OpacityWidget \
 	ControlPointEditor ColorbarWidget ImageFrame \
-	VizSelectCombo  ColorbarSettings\
+	VizSelectCombo \
 	MappingFrame VizFeatureEventRouter \
 	AnimationEventRouter HelloEventRouter \
 	StartupEventRouter AppSettingsEventRouter\
@@ -35,7 +35,7 @@ QT_HEADERS := \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
 	BannerGUI AnimationParams \
-	MainForm TabManager VizWinMgr VizWin  TrackBall
+	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget
 
 
 ifneq ($(ARCH),WIN32)
