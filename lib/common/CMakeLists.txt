@@ -10,8 +10,7 @@ if (NOT WIN32)
 	add_definitions (-DENABLE_THREADS)
 endif()
 
-find_library (OPENGL OpenGL)
-target_link_libraries (common GLEW ${OPENGL})
+target_link_libraries (common GLEW ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (common GLU)
