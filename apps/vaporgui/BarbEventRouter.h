@@ -60,8 +60,8 @@ public:
 		return _appearance->_TFWidget->mappingFrame;}
 
     //! \copydoc EventRouter::getColorbarFrame()
-    virtual ColorbarSettings* getColorbarFrame() {
-		return _appearance->_ColorBarFrame;}
+    virtual ColorbarWidget* getColorbarWidget() {
+		return _appearance->_ColorbarWidget;}
 
 private slots:
 	//! Respond to georeferencing checkbox being clicked
