@@ -28,4 +28,5 @@ CmakeFiles
 CMakeCache.txt
 site.local
 bin
-build
+/build
+/apps/vaporgui/ui/
