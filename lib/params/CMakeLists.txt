@@ -26,5 +26,5 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	target_link_libraries (params PUBLIC ${AGL})
 endif()
 
-find_library (EXPAT expat)
-target_link_libraries (params PUBLIC vdc ${EXPAT})
+find_package (expat REQUIRED)
+target_link_libraries (params PUBLIC vdc ${EXPAT_LIBRARIES})
