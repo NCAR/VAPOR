@@ -64,77 +64,6 @@ DataMgr *RenderEventRouter::GetActiveDataMgr() const {
     return (dataMgr);
 }
 
-//
-// Obtain the current valid histogram.  if mustGet is false, don't build a
-// new one.
-// Boolean flag is only used by isoeventrouter version
-//
-Histo *RenderEventRouter::GetHistogram(bool mustGet, bool) {
-    RenderParams *rParams = GetActiveParams();
-
-    if (_currentHistogram && !mustGet)
-        return _currentHistogram;
-    if (!mustGet)
-        return 0;
-    string varname = rParams->GetVariableName();
-    MapperFunction *mapFunc = rParams->MakeMapperFunc(varname);
-    if (!mapFunc)
-        return 0;
-    if (_currentHistogram)
-        delete _currentHistogram;
-
-    _currentHistogram = new Histo(256, mapFunc->getMinMapValue(), mapFunc->getMaxMapValue());
-    RefreshHistogram();
-    return _currentHistogram;
-}
-
-void RenderEventRouter::RefreshHistogram() {
-    RenderParams *rParams = GetActiveParams();
-
-    size_t timeStep = GetCurrentTimeStep();
-
-    string varname = rParams->GetVariableName();
-    if (varname.empty())
-        return;
-
-#ifdef DEAD
-    if (tParams->doBypass(timeStep))
-        return;
-#endif
-    float minRange = rParams->MakeMapperFunc(varname)->getMinMapValue();
-    float maxRange = rParams->MakeMapperFunc(varname)->getMaxMapValue();
-    if (!_currentHistogram)
-        _currentHistogram = new Histo(256, minRange, maxRange);
-    else
-        _currentHistogram->reset(256, minRange, maxRange);
-    StructuredGrid *histoGrid;
-    int actualRefLevel = rParams->GetRefinementLevel();
-    int lod = rParams->GetCompressionLevel();
-    vector<double> minExts, maxExts;
-    rParams->GetBox()->GetExtents(minExts, maxExts);
-
-    DataMgr *dataMgr = GetActiveDataMgr();
-    int rc = DataMgrUtils::GetGrids(
-        dataMgr, timeStep, varname, minExts, maxExts, true,
-        &actualRefLevel, &lod, &histoGrid);
-
-    if (rc)
-        return;
-    histoGrid->SetInterpolationOrder(0);
-    float v;
-    StructuredGrid *rg_const = (StructuredGrid *)histoGrid;
-    StructuredGrid::Iterator itr;
-
-    for (itr = rg_const->begin(); itr != rg_const->end(); ++itr) {
-        v = *itr;
-        if (v == histoGrid->GetMissingValue())
-            continue;
-        _currentHistogram->addToBin(v);
-    }
-
-    delete histoGrid;
-}
-
 // Calculate histogram for a planar slice of data, such as in
 // the probe or the isolines.
 //
@@ -320,24 +249,9 @@ void RenderEventRouter::setEditorDirty() {
     if (!mp)
         return;
 
-    //mp->updateTab();
-    mp->Update(GetActiveDataMgr(), rParams);
-
-#ifdef DEAD
-    if (rParams->GetMapperFunc())
-        p->GetMapperFunc()->setParams(p);
-    getMappingFrame()->setMapperFunction(p->GetMapperFunc());
-    if (getColorbarFrame())
-        getColorbarFrame()->setParams(p);
-    getMappingFrame()->updateParams();
-    if (_dataStatus->getNumActiveVariables()) {
-        const std::string &varname = p->GetVariableName();
-        getMappingFrame()->setVariableName(varname);
-    } else {
-        getMappingFrame()->setVariableName("N/A");
-    }
-    getMappingFrame()->update();
-#endif
+    mp->Update(GetActiveDataMgr(),
+               _controlExec->GetParamsMgr(),
+               rParams);
 }
 
 #ifdef DEAD
@@ -406,6 +320,7 @@ void RenderEventRouter::updateTab() {
     EventRouter::updateTab();
 }
 
+#ifdef DEAD
 void RenderEventRouter::fileSaveTF() {
     RenderParams *rParams = GetActiveParams();
 
@@ -501,3 +416,4 @@ void RenderEventRouter::fileLoadTF(
     setEditorDirty(rParams);
 #endif
 }
+#endif
