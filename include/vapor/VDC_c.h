@@ -21,7 +21,7 @@
 #ifdef __cplusplus
 
 #include "vapor/VDC.h"
-typedef VAPoR::VDC VDC;
+typedef VAPoR::VDCNetCDF VDC;
 typedef VAPoR::VDC::Dimension VDCDimension;
 typedef VAPoR::VDC::BaseVar   VDCBaseVar;
 typedef VAPoR::VDC::AuxVar    VDCAuxVar;
@@ -31,7 +31,7 @@ extern "C" {
 
 #else
 
-typedef struct VDC VDC;
+typedef struct VDCNetCDF VDC;
 typedef struct VDCDimension VDCDimension;
 typedef struct VDCBaseVar   VDCBaseVar;
 typedef struct VDCAuxVar    VDCAuxVar;
@@ -121,9 +121,11 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 
 // Write
 
+int VDC_SetCompressionBlock(VDC *p, const size_t *bs, int bsCount, const char *wname, const size_t *cratios, int cratiosCount);
 int VDC_DefineDimension(VDC *p, const char *dimname, size_t length);
 int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char **coordvars, size_t coordvarCount, const char *units, VDC_XType xtype, int compressed);
 int VDC_DefineCoordVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);
+int VDC_DefineCoordVarUniform(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);
 int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const void *values, size_t count);
 int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count);
 int VDC_PutAtt_long(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const long *values, size_t count);
