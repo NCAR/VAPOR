@@ -42,30 +42,35 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
                                           "necessary for making changes to a "
                                           "Vapor Transfer Function."); }
     bool isContainer() const { return true; }
-    void Update(VAPoR::ParamsMgr *paramsMgr,
-                VAPoR::DataMgr *dataMgr,
+    void Update(VAPoR::DataMgr *dataMgr,
+                VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams);
 
-    void setEventRouter(RenderEventRouter *eventRouter);
+    void setDataStatus(VAPoR::DataStatus *ds) {
+        mappingFrame->setDataStatus(ds);
+    }
+
+    void fileLoadTF(string varname, const char *path,
+                    bool savePath);
+
+    void loadTF(string varname);
+
+    void loadInstalledTF(string varname);
 
   private slots:
+    void fileSaveTF();
+    void setRange();
     void setRange(double min, double max);
-    void textChanged();
     void updateHisto();
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void saveTF();
     void setCMVar();
     void setSingleColor();
 
   private:
     void getRange(float range[2], float values[2]);
     void connectWidgets();
-    void makeItRed(QLineEdit *edit);
-    void makeItYellow(QLineEdit *edit);
-    void makeItGreen(QLineEdit *edit);
-    void makeItWhite(QLineEdit *edit);
     void updateSliders();
     void updateAutoUpdateHistoCheckbox();
     void updateColorInterpolation();
@@ -95,6 +100,13 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     Flags _flags;
 
     static string _nDimsTag;
+
+#ifdef DEAD
+    void makeItRed(QLineEdit *edit);
+    void makeItYellow(QLineEdit *edit);
+    void makeItGreen(QLineEdit *edit);
+    void makeItWhite(QLineEdit *edit);
+#endif
 };
 
 #endif //TFWIDGET_H
