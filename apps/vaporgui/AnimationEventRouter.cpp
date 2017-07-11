@@ -236,8 +236,8 @@ void AnimationEventRouter::_updateTab()
     startFrameEdit->setText(QString::number(startFrame));
     currentFrameEdit->setText(QString::number(currentFrame));
     endFrameEdit->setText(QString::number(endFrame));
-    minFrameLabel->setText(QString::number(aParams->GetStartTimestep()));
-    maxFrameLabel->setText(QString::number(aParams->GetEndTimestep()));
+    minFrameLabel->setText(QString::number(0));
+    maxFrameLabel->setText(QString::number(numTS - 1));
     replayButton->setChecked(aParams->GetRepeating());
 
 #ifdef DEAD
