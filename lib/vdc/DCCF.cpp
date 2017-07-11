@@ -538,7 +538,7 @@ int DCCF::_get_coord_pair_extents(
         return (-1);
 
     float latmin_f, latmax_f;
-    rc = _get_latlon_extents(ncdfc, lon, false, latmin_f, latmax_f);
+    rc = _get_latlon_extents(ncdfc, lat, false, latmin_f, latmax_f);
     if (rc < 0)
         return (-1);
 
