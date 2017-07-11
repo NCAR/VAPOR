@@ -35,7 +35,6 @@
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
 #include "ControlPointEditor.h"
-#include "RenderEventRouter.h"
 #include "MessageReporter.h"
 #include "Histo.h"
 #include "MappingFrame.h"
@@ -82,9 +81,9 @@ void oglPopState()
 //----------------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------------
-MappingFrame::MappingFrame(QWidget *parent, const char *)
+MappingFrame::MappingFrame(QWidget *parent)
 : QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _opacityMappingEnabled(false), _colorMappingEnabled(false), _isoSliderEnabled(false), _isolineSlidersEnabled(false),
-  _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _eventRouter(NULL), _variableName(""), _domainSlider(new DomainWidget(this)), _isoSlider(new IsoSlider(this)),
+  _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _variableName(""), _domainSlider(new DomainWidget(this)), _isoSlider(new IsoSlider(this)),
   _colorbarWidget(new GLColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL), _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL), _addOpacityWidgetSubMenu(NULL),
   _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL), _deleteOpacityWidgetAction(NULL), _addColorControlPointAction(NULL), _addOpacityControlPointAction(NULL),
   _deleteControlPointAction(NULL), _lastx(0), _lasty(0), _editMode(true), _clickedPos(0, 0), _minValueStart(0.0), _maxValueStart(1.0), _isoVal(0.0), _button(Qt::LeftButton), _minX(-0.035),
@@ -481,9 +480,6 @@ void MappingFrame::fitToView()
     _domainSlider->setDomain(xDataToWorld(_minValue), xDataToWorld(_maxValue));
     if (_colorbarWidget) _colorbarWidget->setDirty();
 
-#ifdef DEAD
-    _eventRouter->setEditorDirty();
-#endif
     updateGL();
 }
 
@@ -1111,7 +1107,7 @@ void MappingFrame::updateTexture()
     if (!_histogram && _mapper) return;
 
     float stretch;
-    stretch = GetActiveParams()->GetHistoStretch();
+    stretch = _rParams->GetHistoStretch();
 
     for (int x = 0; x < _NUM_BINS; x++) {
         float binValue = 0.0;
@@ -1913,15 +1909,6 @@ float MappingFrame::getOpacityData(float value)
 }
 
 //----------------------------------------------------------------------------
-// Return the params
-//----------------------------------------------------------------------------
-RenderParams *MappingFrame::GetActiveParams()
-{
-    assert(_rParams);
-    return (_rParams);
-}
-
-//----------------------------------------------------------------------------
 // Return the histogram
 //----------------------------------------------------------------------------
 Histo *MappingFrame::getHistogram()
@@ -2221,12 +2208,6 @@ void MappingFrame::setIsolineSliders(const vector<double> &sliderVals)
     for (int i = 0; i < _isolineSliders.size(); i++) { _isolineSliders[i]->setIsoValue(xDataToWorld(sliderVals[i])); }
 }
 
-void MappingFrame::hookup(RenderEventRouter *evRouter, QPushButton *updateHistoButton, QSlider *opacityScaleSlider)
-{
-    _eventRouter = evRouter;
-    connect(updateHistoButton, SIGNAL(clicked()), this, SLOT(updateHisto()));
-}
-
 void MappingFrame::updateHisto()
 {
     fitToView();
@@ -2237,21 +2218,4 @@ void MappingFrame::setNavigateMode(bool mode)
 {
     setEditMode(!mode);
     _editButton->setChecked(!mode);
-}
-
-void MappingFrame::fitToData()
-{
-    size_t ts = _rParams->GetCurrentTimestep();
-
-    float          range[2];
-    vector<double> minExts, maxExts;
-    _rParams->GetBox()->GetExtents(minExts, maxExts);
-    StructuredGrid *rGrid = _dataMgr->GetVariable(ts, _rParams->GetVariableName(), _rParams->GetRefinementLevel(), _rParams->GetCompressionLevel(), minExts, maxExts);
-    rGrid->GetRange(range);
-    if (range[1] < range[0]) {    // no data
-        range[1] = 1.f;
-        range[0] = 0.f;
-    }
-    _mapper->setMinMaxMapValue(range[0], range[1]);
-    _eventRouter->updateTab();
 }
