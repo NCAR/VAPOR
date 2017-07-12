@@ -62,7 +62,7 @@ private slots:
 	void autoUpdateHistoChecked(int state);
 	void colorInterpChanged(int index);
 	void loadTF();
-	void setCMVar();
+	void setCMVar(const QString&);
 	void setSingleColor();
 
 private:
