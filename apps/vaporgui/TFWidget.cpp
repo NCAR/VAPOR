@@ -67,10 +67,11 @@ TFWidget::~TFWidget()
     }
 }
 
-void TFWidget::setCMVar()
+void TFWidget::setCMVar(const QString &qvar)
 {
-    string var = colormapVarCombo->currentText().toStdString();
-    if (var == "None") {
+    string var = qvar.toStdString();
+
+    if (var == "0" || var == "") {
         var = "";
         _rParams->SetColorMapVariableName(var);
         _rParams->SetUseSingleColor(true);
@@ -333,7 +334,7 @@ void TFWidget::updateColorVarCombo()
     vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
 
     colormapVarCombo->clear();
-    colormapVarCombo->addItem(QString("None"));
+    colormapVarCombo->addItem(QString("0"));
     for (int i = 0; i < vars.size(); i++) { colormapVarCombo->addItem(QString::fromStdString(vars[i])); }
     colormapVarCombo->setCurrentIndex(index);
 }
@@ -343,10 +344,10 @@ void TFWidget::connectWidgets()
     connect(_rangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(updateHistoButton, SIGNAL(pressed()), this, SLOT(updateHisto()));
     connect(autoUpdateHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateHistoChecked(int)));
-    connect(colorInterpCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colorInterpChanged(int)));
+    connect(colorInterpCombo, SIGNAL(activated(int)), this, SLOT(colorInterpChanged(int)));
     connect(loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
-    connect(colormapVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setCMVar()));
+    connect(colormapVarCombo, SIGNAL(activated(const QString &)), this, SLOT(setCMVar(const QString &)));
     connect(colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
 }
