@@ -61,7 +61,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void setCMVar();
+    void setCMVar(const QString &);
     void setSingleColor();
 
   private:
