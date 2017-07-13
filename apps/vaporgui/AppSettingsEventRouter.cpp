@@ -27,8 +27,8 @@
 #include <qmessagebox.h>
 #include <qlineedit.h>
 #include "GL/glew.h"
-#include "AppSettingsParams.h"
-#include "StartupParams.h"
+#include "vapor/AppSettingsParams.h"
+#include "vapor/StartupParams.h"
 #include "qcolordialog.h"
 #include "images/fileopen.xpm"
 #include "MessageReporter.h"

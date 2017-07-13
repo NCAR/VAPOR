@@ -156,7 +156,7 @@ std::string Wasp::GetAppPath(
         }
     }
 #endif
-#ifndef WIN32 //For both Linux and Mac:
+    // #ifndef WIN32 //For both Linux and Mac:
     if (path.empty()) {
         if (resource.compare("lib") == 0) {
             path.append(DSO_DIR);
@@ -172,7 +172,7 @@ std::string Wasp::GetAppPath(
             path.append("plugins");
         }
     }
-#endif
+    // #endif
 
     if (path.empty()) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (path empty)");

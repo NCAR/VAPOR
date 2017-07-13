@@ -27,9 +27,9 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/Viewpoint.h>
-#include "TrackBall.h"
+#include "vapor/TrackBall.h"
 #include "TabManager.h"
-#include "MouseModeParams.h"
+#include "vapor/MouseModeParams.h"
 #include "qdatetime.h"
 #include "ViewpointEventRouter.h"
 #include "MainForm.h"
