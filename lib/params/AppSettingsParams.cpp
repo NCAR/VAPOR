@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-#include "AppSettingsParams.h"
+#include "vapor/AppSettingsParams.h"
 
 using namespace VAPoR;
 

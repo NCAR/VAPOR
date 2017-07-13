@@ -8,7 +8,7 @@ set (SRCS
 	DomainWidget.cpp
 	GLWidget.cpp
 	OpacityWidget.cpp
-	Histo.cpp
+	# Histo.cpp
 	ColorbarWidget.cpp
 	StartupEventRouter.cpp
 	AppSettingsEventRouter.cpp
@@ -33,17 +33,17 @@ set (SRCS
 	BarbEventRouter.cpp
 	ColorMappedVariable.cpp
 	BannerGUI.cpp
-	AppSettingsParams.cpp
-	GUIStateParams.cpp
-	MouseModeParams.cpp
-	StartupParams.cpp
+	# AppSettingsParams.cpp
+	# GUIStateParams.cpp
+	# MouseModeParams.cpp
+	# StartupParams.cpp
 	main.cpp
 	MainForm.cpp
 	VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
 	MessageReporter.cpp
-	TrackBall.cpp
+	# TrackBall.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

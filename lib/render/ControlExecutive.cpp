@@ -101,6 +101,7 @@ int ControlExec::InitializeViz(string winName)
     int rc = shaderMgr->LoadShaders();
     if (rc < 0) {
         SetErrMsg("Failed to initialize GLSL shaders in dir %s", shaderPath.c_str());
+        printf("%s\n", GetErrMsg());
         delete shaderMgr;
         return (-1);
     }
