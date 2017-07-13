@@ -134,10 +134,18 @@
  *
  */
 
-#include "cpl_serv.h"
-#include "geotiff.h"
-#include "geo_normalize.h"
-#include "geovalues.h"
+#ifdef WIN32
+    #include "geotiff/cpl_serv.h"
+    #include "geotiff/geotiff.h"
+    #include "geotiff/geo_normalize.h"
+    #include "geotiff/geovalues.h"
+#else
+    #include "cpl_serv.h"
+    #include "geotiff.h"
+    #include "geo_normalize.h"
+    #include "geovalues.h"
+#endif
+
 #ifdef WIN32
     #pragma warning(disable : 4996)
 #endif

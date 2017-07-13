@@ -101,7 +101,8 @@ else()
 	add_executable (vaporgui ${SRCS} ${UIS})
 endif()
 
-target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
+# target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (vaporgui common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (vaporgui quadmath)
@@ -113,3 +114,4 @@ endif ()
 
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
 add_definitions (-DPYTHONDIR="${PYTHONDIR}")
+# add_definitions (-DPARAMS_EXPORTS)
