@@ -10,13 +10,17 @@ if (NOT WIN32)
 	add_definitions (-DENABLE_THREADS)
 endif()
 
-target_link_libraries (common GLEW ${OPENGL_LIBRARIES})
+target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (common GLU)
 endif ()
 
-target_compile_options(common PRIVATE "-Wno-deprecated-declarations")
+if (NOT WIN32)
+	target_compile_options(common PRIVATE "-Wno-deprecated-declarations")
+endif ()
+
+add_definitions (-DCOMMON_EXPORTS)
 
 # Not needed since vapor shares include directory
 # target_include_directories (common PUBLIC ${VAPOR_SOURCE_DIR}/include)
