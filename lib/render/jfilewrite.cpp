@@ -24,7 +24,11 @@
  * You may also wish to include "jerror.h".
  */
 
+#ifdef WIN32
+#include <jpeg/jpeglib.h>
+#else
 #include <jpeglib.h>
+#endif
 #include <vapor/jpegapi.h>
 
 /*
