@@ -19,6 +19,13 @@ add_library (params SHARED
 	VizFeatureParams.cpp
 	XmlNode.cpp
 	regionparams.cpp
+
+	AppSettingsParams.cpp
+	GUIStateParams.cpp
+	MouseModeParams.cpp
+	StartupParams.cpp
+	Histo.cpp
+
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

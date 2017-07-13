@@ -24,7 +24,7 @@
 #include <qcolordialog.h>
 #include "TwoDSubtabs.h"
 #include "RenderEventRouter.h"
-#include "StartupParams.h"
+#include "vapor/StartupParams.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
 #include "vapor/GetAppPath.h"

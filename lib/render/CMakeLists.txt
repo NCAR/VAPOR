@@ -13,6 +13,7 @@ add_library (render SHARED
 
 	GeoImage.cpp
 	ControlExecutive.cpp
+	TrackBall.cpp
 )
 
 target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff)
