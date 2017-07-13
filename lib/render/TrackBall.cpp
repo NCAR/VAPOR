@@ -78,7 +78,7 @@
 
 #include <vapor/glutil.h>	// Must be included first!!!
 #include <cmath>
-#include "TrackBall.h"
+#include "vapor/TrackBall.h"
 using namespace VAPoR;
 void Trackball::TrackballReset()
 {
