@@ -28,3 +28,5 @@ endif()
 
 find_package (expat REQUIRED)
 target_link_libraries (params PUBLIC vdc ${EXPAT_LIBRARIES})
+
+add_definitions (-DPARAMS_EXPORTS)

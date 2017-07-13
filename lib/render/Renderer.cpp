@@ -452,6 +452,22 @@ void Renderer::renderColorbar() {
 //
 /////////////////////////////////////////////////////////////////////////
 
+RendererFactory *RendererFactory::Instance() {
+    static RendererFactory instance;
+    return &instance;
+}
+
+void RendererFactory::RegisterFactoryFunction(
+    string myName, string myParamsName,
+    function<Renderer *(
+        const ParamsMgr *, string, string, string, DataStatus *)>
+        classFactoryFunction) {
+
+    // register the class factory function
+    m_factoryFunctionRegistry[myName] = classFactoryFunction;
+    m_factoryMapRegistry[myName] = myParamsName;
+}
+
 Renderer *RendererFactory::CreateInstance(
     const ParamsMgr *pm, string winName, string dataSetName,
     string classType, string instName, DataMgr *dataMgr) {
@@ -507,3 +523,8 @@ vector<string> RendererFactory::GetFactoryNames() const {
     }
     return (names);
 }
+
+RendererFactory::RendererFactory() {}
+RendererFactory::~RendererFactory() {}
+RendererFactory::RendererFactory(const RendererFactory &) {}
+RendererFactory &RendererFactory::operator=(const RendererFactory &) { return *this; }
