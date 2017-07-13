@@ -14,6 +14,8 @@ set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_definitions (-DDarwin)
+elseif (WIN32)
+	add_definitions (-DWIN32)
 endif()
 
 
@@ -44,10 +46,17 @@ include (site.local OPTIONAL)
 include_directories (${THIRD_PARTY_INC_DIR})
 link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
-LIST (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
+list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
+# message ("--------------------- ${QTDIR}/bin")
 
 find_package (OpenGL REQUIRED)
 include_directories (${OPENGL_INCLUDE_DIRS})
+
+if (WIN32)
+	find_library (GLEW glew32)
+else ()
+	find_library (GLEW GLEW)
+endif ()
 
 add_subdirectory (apps)
 add_subdirectory (lib)
