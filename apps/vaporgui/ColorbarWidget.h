@@ -24,7 +24,7 @@
 #include <vector>
 #include <vapor/RenderParams.h>
 #include "RenderEventRouter.h"
-#include "ColorbarWidgetGUI.h"
+#include "ui_ColorbarWidgetGUI.h"
 
 
 namespace VAPoR {
