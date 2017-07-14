@@ -235,16 +235,17 @@ class PARAMS_API MapperFunction : public ParamsBase {
     //! update setting.
     //! \return The state of the autoUpdateHisto checkbox
     //
-    bool getAutoUpdateHisto() {
-        return _autoUpdateHisto;
+    bool GetAutoUpdateHisto() {
+        return ((bool)GetValueLong(_autoUpdateHistoTag, (int)false));
     }
 
     //! Method to set the state of the automatic histogram
     //! update setting.
     //! \param[in] State of the autoUpdateHisto setting
     //
-    void setAutoUpdateHisto(bool val) {
-        _autoUpdateHisto = val;
+    void SetAutoUpdateHisto(bool val) {
+        SetValueLong(
+            _autoUpdateHistoTag, "enable/disable auto update of histogram", val);
     }
 
   private:
@@ -266,7 +267,6 @@ class PARAMS_API MapperFunction : public ParamsBase {
 
     ParamsContainer *m_opacityMaps;
     ColorMap *m_colorMap;
-    bool _autoUpdateHisto;
 
     //!
     //! Map a point to the specified range, and quantize it.
