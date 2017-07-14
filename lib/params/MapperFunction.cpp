@@ -39,7 +39,6 @@ const string MapperFunction::_opacityCompositionTag = "OpacityComposition";
 const string MapperFunction::_opacityScaleTag = "OpacityScale";
 const string MapperFunction::_opacityMapsTag = "OpacityMaps";
 const string MapperFunction::_opacityMapTag = "OpacityMap";
-const string MapperFunction::_colorMapTag = "ColorMap";
 const string MapperFunction::_autoUpdateHistoTag = "autoUpdateHisto";
 
 
@@ -92,8 +91,8 @@ MapperFunction::MapperFunction(
 	else {
 		_autoUpdateHisto = false;
 	}
-	if (node->HasChild(_colorMapTag)) {
-		m_colorMap = new ColorMap(ssave, node->GetChild(_colorMapTag));
+	if (node->HasChild(ColorMap::GetClassType())) {
+		m_colorMap = new ColorMap(ssave, node->GetChild(ColorMap::GetClassType()));
 	}
 	else {
 		// Node doesn't contain a colormap
@@ -137,13 +136,22 @@ MapperFunction::MapperFunction(
 }
 
 MapperFunction &MapperFunction::operator=( const MapperFunction& rhs ) {
+
+	if (m_colorMap) delete m_colorMap;
+
+	if (m_opacityMaps) delete m_opacityMaps;
+
+	ParamsBase::operator=(rhs);
+
 	m_colorMap = NULL;
 	m_opacityMaps = NULL;
 
-	m_colorMap = new ColorMap(*(rhs.m_colorMap));
+	m_colorMap = new ColorMap(rhs._ssave, rhs.m_colorMap->GetNode());
 	m_colorMap->SetParent(this);
 
-	m_opacityMaps = new ParamsContainer(*(rhs.m_opacityMaps));
+	m_opacityMaps = new ParamsContainer(
+		rhs._ssave, rhs.m_opacityMaps->GetNode()
+	);
 	m_opacityMaps->SetParent(this);
 
 	return(*this);
