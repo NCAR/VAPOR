@@ -34,6 +34,25 @@
 using namespace VAPoR;
 using namespace Wasp;
 
+namespace {
+void print_extents(
+    string header,
+    const vector<double> &minExts,
+    const vector<double> &maxExts) {
+#ifdef DEBUG
+    assert(minExts.size() == maxExts.size());
+
+    cout << endl;
+    cout << header << endl;
+
+    for (int i = 0; i < minExts.size(); i++) {
+        cout << "\t" << minExts[i] << " " << maxExts[i] << endl;
+    }
+    cout << endl;
+#endif
+}
+}; // namespace
+
 //Default constructor
 //Whether or not it exists on disk, what's its max and min
 //What resolutions are available.
@@ -145,6 +164,8 @@ void DataStatus::GetExtents(
         if (!status)
             continue;
 
+        print_extents(dataSetName, minVExts, maxVExts);
+
         for (int i = 0; i < axes.size(); i++) {
             int axis = axes[i];
 
@@ -167,6 +188,7 @@ void DataStatus::GetExtents(
             maxExts[i] = tmpMaxExts[i];
         }
     }
+    print_extents("Dataset union", minExts, maxExts);
     return;
 }
 
