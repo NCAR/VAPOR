@@ -22,7 +22,7 @@
 #define RENDEREREVENTROUTER_H
 
 #include "EventRouter.h"
-#include "vapor/Histo.h"
+#include "Histo.h"
 class MappingFrame;
 
 namespace VAPoR {

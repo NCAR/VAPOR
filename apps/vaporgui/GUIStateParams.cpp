@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "vapor/GUIStateParams.h"
+#include "GUIStateParams.h"
 
 using namespace VAPoR;
 
@@ -103,36 +103,10 @@ GUIStateParams &GUIStateParams::operator=(const GUIStateParams &rhs) {
 GUIStateParams::~GUIStateParams() {
 }
 
-void GUIStateParams::SetOpenDataSets(
-    const std::vector<string> &paths, const std::vector<string> &names) {
-    assert(paths.size() == names.size());
-
-    vector<string> v;
-    for (int i = 0; i < paths.size(); i++) {
-        v.push_back(names[i]);
-        v.push_back(paths[i]);
-    }
-    SetValueStringVec(m_openDataTag, "open data sets", v);
-}
-
-void GUIStateParams::GetOpenDataSets(
-    std::vector<string> &paths, std::vector<string> &names) const {
-    paths.clear();
-    names.clear();
-
-    std::vector<string> v = GetValueStringVec(m_openDataTag);
-    assert((v.size() % 2) == 0);
-
-    for (int i = 0; i < v.size(); i += 2) {
-        names.push_back(v[i]);
-        paths.push_back(v[i + 1]);
-    }
-}
-
 //----------------------------------------------------------------------------
-// Static Getters and Setters
+// Getters and Setters
 //----------------------------------------------------------------------------
-//
+
 string GUIStateParams::GetActiveVizName() const {
     string defaultv;
     return (GetValueString(m_activeVisualizer, defaultv));
@@ -149,7 +123,7 @@ void GUIStateParams::GetActiveRenderer(
     m_activeRenderer->GetActiveRenderer(vizWin, renderType, renderInst);
 }
 
-//! Get active renderer class and instance name for a visualizer
+//! Set active renderer class and instance name for a visualizer
 //
 void GUIStateParams::SetActiveRenderer(
     string vizWin, string renderType, string renderInst) {
@@ -166,18 +140,6 @@ string GUIStateParams::GetCurrentSessionPath() const {
 //! \param[in] path string
 void GUIStateParams::SetCurrentSessionPath(string path) {
     SetValueString(m_sessionFileTag, "Set current session path", path);
-}
-
-//! Static method identifies the current session file
-//! \retval session file path
-string GUIStateParams::GetCurrentDataPath() const {
-    return (GetValueString(m_dataFileTag, "."));
-}
-
-//! method sets the current session path
-//! \param[in] path string
-void GUIStateParams::SetCurrentDataPath(string path) {
-    SetValueString(m_dataFileTag, "Set current data path", path);
 }
 
 //! method identifies the current session file
@@ -230,6 +192,36 @@ void GUIStateParams::SetCurrentFlowPath(string path) {
 
 MouseModeParams *GUIStateParams::GetMouseModeParams() const {
     return (m_mouseModeParams);
+}
+
+//----------------------------------------------------------------------------
+// Funcs
+//----------------------------------------------------------------------------
+
+void GUIStateParams::SetOpenDataSets(
+    const std::vector<string> &paths, const std::vector<string> &names) {
+    assert(paths.size() == names.size());
+
+    vector<string> v;
+    for (int i = 0; i < paths.size(); i++) {
+        v.push_back(names[i]);
+        v.push_back(paths[i]);
+    }
+    SetValueStringVec(m_openDataTag, "open data sets", v);
+}
+
+void GUIStateParams::GetOpenDataSets(
+    std::vector<string> &paths, std::vector<string> &names) const {
+    paths.clear();
+    names.clear();
+
+    std::vector<string> v = GetValueStringVec(m_openDataTag);
+    assert((v.size() % 2) == 0);
+
+    for (int i = 0; i < v.size(); i += 2) {
+        names.push_back(v[i]);
+        paths.push_back(v[i + 1]);
+    }
 }
 
 void GUIStateParams::_init() {
