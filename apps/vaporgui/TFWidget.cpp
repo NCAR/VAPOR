@@ -281,7 +281,7 @@ void TFWidget::updateAutoUpdateHistoCheckbox() {
 	// Update the state of autoUpdateHisto according to params
 	//
 	autoUpdateHistoCheckbox->blockSignals(true);
-	if (tf->getAutoUpdateHisto()) {
+	if (tf->GetAutoUpdateHisto()) {
 		autoUpdateHistoCheckbox->setCheckState(Qt::Checked);
 	}
 	else {
