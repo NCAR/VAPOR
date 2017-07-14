@@ -39,7 +39,7 @@
 #include <vapor/ParamsMgr.h>
 #include "MainForm.h"
 #include "TabManager.h"
-#include "vapor/AppSettingsParams.h"
+#include "AppSettingsParams.h"
 #include "MessageReporter.h"
 
 #include <QEvent>

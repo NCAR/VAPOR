@@ -40,7 +40,7 @@
 
 #include "AnimationParams.h"
 #include "MainForm.h"
-#include "vapor/MouseModeParams.h"
+#include "MouseModeParams.h"
 #include "AnimationEventRouter.h"
 #include "regioneventrouter.h"
 #include "VizFeatureEventRouter.h"
@@ -48,7 +48,7 @@
 #include "StartupEventRouter.h"
 #include "ViewpointEventRouter.h"
 #include "HelloEventRouter.h"
-#include "vapor/TrackBall.h"
+#include "TrackBall.h"
 #include "VizWin.h"
 #include "VizWinMgr.h"
 

@@ -29,7 +29,7 @@ class QDockWidget;
 #include <vapor/ControlExecutive.h>
 #include <qobject.h>
 #include <vapor/common.h>
-#include "vapor/GUIStateParams.h"
+#include "GUIStateParams.h"
 
 namespace VAPoR {
 class ViewpointParams;
