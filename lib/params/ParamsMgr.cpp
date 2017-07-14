@@ -287,8 +287,16 @@ RenParamsContainer *ParamsMgr::createRenderParamsHelper(
     vector<string> instNames;
     GetRenderParamNames(instNames);
     if (find(instNames.begin(), instNames.end(), instName) != instNames.end()) {
-        SetErrMsg("Non-unique render instance name : %s", instName.c_str());
-        return (NULL);
+
+        string myWinName, myDataSetName, myClassName;
+        (void)RenderParamsLookup(
+            instName, myWinName, myDataSetName, myClassName);
+        if (!(myWinName == winName) &&
+            (myDataSetName == dataSetName) &&
+            (myClassName == className)) {
+            SetErrMsg("Non-unique render instance name : %s", instName.c_str());
+            return (NULL);
+        }
     }
 
     // Create ViewpointParams if we don't have one
