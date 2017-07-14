@@ -1,25 +1,26 @@
 add_library (vdc SHARED
 	BlkMemMgr.cpp
-	CurvilinearGrid.cpp
-	DC.cpp
-	DCCF.cpp
-	DCWRF.cpp
-	DataMgr.cpp
-	GeoUtil.cpp
-	KDTreeRG.cpp
-	LayeredGrid.cpp
-	NetCDFCFCollection.cpp
-	NetCDFCollection.cpp
-	NetCDFSimple.cpp
-	Proj4API.cpp
-	RegularGrid.cpp
 	StructuredGrid.cpp
+	RegularGrid.cpp
+	LayeredGrid.cpp
+	CurvilinearGrid.cpp
+	NetCDFSimple.cpp
+	NetCDFCollection.cpp
+	NetCDFCFCollection.cpp
 	UDUnitsClass.cpp
+	Proj4API.cpp
+	DC.cpp
 	VDC.cpp
 	VDCNetCDF.cpp
-	VDC_c.cpp
-	kdtree.c
+	DCWRF.cpp
+	DCCF.cpp
+	DataMgr.cpp
+	DataMgrUtils.cpp
+	GeoUtil.cpp
 	vizutil.cpp
+	KDTreeRG.cpp
+	kdtree.c
+	VDC_c.cpp
 )
 
 target_link_libraries (vdc PUBLIC common wasp udunits2 proj)

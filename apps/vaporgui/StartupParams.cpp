@@ -26,7 +26,7 @@
 #include <iostream>
 #include <vector>
 
-#include "vapor/StartupParams.h"
+#include "StartupParams.h"
 
 
 using namespace VAPoR;
