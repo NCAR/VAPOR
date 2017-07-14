@@ -71,13 +71,28 @@ TransferFunction::~TransferFunction() {
 int TransferFunction::LoadFromFile(string path) {
     XmlParser xmlparser;
 
-    XmlNode *node = GetNode();
+    XmlNode *node = new XmlNode();
 
     int rc = xmlparser.LoadFromFile(node, path);
     if (rc < 0) {
         MyBase::SetErrMsg("Failed to read file %s : %M", path.c_str());
         return (-1);
     }
+
+    // Create a new TransferFunction from the XmlNode tree
+    //
+    XmlNode *parent = this->GetNode()->GetParent();
+    TransferFunction *newTF = new TransferFunction(_ssave, node);
+
+    // Assign (copy) new TF to this object
+    //
+    *this = *newTF;
+    this->GetNode()->SetParent(parent);
+
+    // Delete the new tree
+    //
+    delete newTF;
+
     return (0);
 }
 

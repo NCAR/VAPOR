@@ -257,7 +257,6 @@ class PARAMS_API MapperFunction : public ParamsBase {
     static const string _opacityScaleTag;
     static const string _opacityMapsTag;
     static const string _opacityMapTag;
-    static const string _colorMapTag;
     static const string _autoUpdateHistoTag;
 
     //
