@@ -193,6 +193,12 @@ RenderParams::RenderParams(const RenderParams &rhs) : ParamsBase(rhs)
 
 RenderParams &RenderParams::operator=(const RenderParams &rhs)
 {
+    if (_TFs) delete _TFs;
+    if (_Box) delete _Box;
+    if (_Colorbar) delete _Colorbar;
+
+    ParamsBase::operator=(rhs);
+
     _dataMgr = rhs._dataMgr;
 
     _TFs = new ParamsContainer(*(rhs._TFs));
@@ -555,27 +561,30 @@ RenParamsContainer::RenParamsContainer(const RenParamsContainer &rhs)
 
 RenParamsContainer &RenParamsContainer::operator=(const RenParamsContainer &rhs)
 {
+    assert(_separator);
+
     vector<string> mynames = GetNames();
     for (int i = 0; i < mynames.size(); i++) { Remove(mynames[i]); }
     _elements.clear();
 
     _dataMgr = rhs._dataMgr;
     _ssave = rhs._ssave;
-    _separator = NULL;
-    _elements.clear();
-
-    if (!_separator) { _separator = new ParamsSeparator(*(rhs._separator)); }
+    _separator = rhs._separator;
 
     vector<string> names = rhs.GetNames();
     for (int i = 0; i < names.size(); i++) {
-        // Make copy of RenderParams
-        //
-        RenderParams *rhspb = rhs.GetParams(names[i]);
-        XmlNode *     node = new XmlNode(*(rhspb->GetNode()));
+        XmlNode *eleNameNode = _separator->GetNode()->GetChild(names[i]);
+        assert(eleNameNode);
 
-        string        classname = rhspb->GetName();
-        RenderParams *mypb = RenParamsFactory::Instance()->CreateInstance(classname, _dataMgr, _ssave, node);
-        mypb->SetParent(_separator);
+        ParamsSeparator mySep(_ssave, eleNameNode);
+
+        XmlNode *eleNode = eleNameNode->GetChild(0);
+
+        string eleName = eleNameNode->GetTag();
+        string classname = eleNode->GetTag();
+
+        RenderParams *mypb = RenParamsFactory::Instance()->CreateInstance(classname, _dataMgr, _ssave, eleNode);
+        mypb->SetParent(&mySep);
 
         _elements[names[i]] = mypb;
     }

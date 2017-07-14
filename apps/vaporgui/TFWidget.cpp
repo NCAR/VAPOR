@@ -430,6 +430,8 @@ void TFWidget::loadTF()
     string path = p->GetCurrentTFPath();
 
     fileLoadTF(varname, p->GetCurrentTFPath().c_str(), true);
+
+    Update(_dataMgr, _paramsMgr, _rParams);
 }
 
 void TFWidget::loadInstalledTF(string varname)
@@ -441,6 +443,8 @@ void TFWidget::loadInstalledTF(string varname)
 
     QString installPath = palettes.c_str();
     fileLoadTF(varname, (const char *)installPath.toAscii(), false);
+
+    Update(_dataMgr, _paramsMgr, _rParams);
     updateHisto();
 }
 
