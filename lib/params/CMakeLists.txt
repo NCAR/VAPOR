@@ -1,31 +1,23 @@
 add_library (params SHARED
-	AnimationParams.cpp
-	BarbParams.cpp
-	Box.cpp
-	ColorMap.cpp
-	ColorbarPbase.cpp
-	DataStatus.cpp
-	HelloParams.cpp
-	MapperFunction.cpp
-	OpacityMap.cpp
+	XmlNode.cpp
 	ParamsBase.cpp
-	ParamsMgr.cpp
-	RenderParams.cpp
-	TFInterpolator.cpp
+	ColorMap.cpp
+	OpacityMap.cpp
+	MapperFunction.cpp
 	TransferFunction.cpp
+	Box.cpp
+	ColorbarPbase.cpp
+	RenderParams.cpp
 	TwoDDataParams.cpp
+	BarbParams.cpp
 	Viewpoint.cpp
 	ViewpointParams.cpp
-	VizFeatureParams.cpp
-	XmlNode.cpp
 	regionparams.cpp
-
-	AppSettingsParams.cpp
-	GUIStateParams.cpp
-	MouseModeParams.cpp
-	StartupParams.cpp
-	Histo.cpp
-
+	ParamsMgr.cpp
+	DataStatus.cpp
+	VizFeatureParams.cpp
+	HelloParams.cpp
+	TFInterpolator.cpp
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

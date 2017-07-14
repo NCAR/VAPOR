@@ -460,12 +460,12 @@ RendererFactory *RendererFactory::Instance() {
 void RendererFactory::RegisterFactoryFunction(
     string myName, string myParamsName,
     function<Renderer *(
-        const ParamsMgr *, string, string, string, DataStatus *)>
+        const ParamsMgr *, string, string, string, string, DataMgr *)>
         classFactoryFunction) {
 
     // register the class factory function
-    m_factoryFunctionRegistry[myName] = classFactoryFunction;
-    m_factoryMapRegistry[myName] = myParamsName;
+    _factoryFunctionRegistry[myName] = classFactoryFunction;
+    _factoryMapRegistry[myName] = myParamsName;
 }
 
 Renderer *RendererFactory::CreateInstance(
@@ -525,6 +525,5 @@ vector<string> RendererFactory::GetFactoryNames() const {
 }
 
 RendererFactory::RendererFactory() {}
-RendererFactory::~RendererFactory() {}
 RendererFactory::RendererFactory(const RendererFactory &) {}
 RendererFactory &RendererFactory::operator=(const RendererFactory &) { return *this; }

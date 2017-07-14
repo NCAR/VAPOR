@@ -32,7 +32,7 @@
 #include "../../apps/vaporgui/images/cube.xpm"
 #include "../../apps/vaporgui/images/arrowrake.xpm"
 #include "../../apps/vaporgui/images/isoline.xpm"
-#include "vapor/MouseModeParams.h"
+#include "MouseModeParams.h"
 
 const std::string MouseModeParams::_currentMouseModeTag = "CurrentMouseModeTag";
 

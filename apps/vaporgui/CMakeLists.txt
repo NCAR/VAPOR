@@ -8,13 +8,12 @@ set (SRCS
 	DomainWidget.cpp
 	GLWidget.cpp
 	OpacityWidget.cpp
-	# Histo.cpp
+	Histo.cpp
 	ColorbarWidget.cpp
 	StartupEventRouter.cpp
 	AppSettingsEventRouter.cpp
 	VizSelectCombo.cpp
 	VizFeatureEventRouter.cpp
-	ColorbarSettings.cpp
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp
@@ -31,19 +30,20 @@ set (SRCS
 	GeometryWidget.cpp
 	RangeCombos.cpp
 	BarbEventRouter.cpp
-	ColorMappedVariable.cpp
 	BannerGUI.cpp
-	# AppSettingsParams.cpp
-	# GUIStateParams.cpp
-	# MouseModeParams.cpp
-	# StartupParams.cpp
+	AnimationParams.cpp
+	AppSettingsParams.cpp
+	GUIStateParams.cpp
+	MouseModeParams.cpp
+	StartupParams.cpp
 	main.cpp
 	MainForm.cpp
 	VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
 	MessageReporter.cpp
-	# TrackBall.cpp
+	TrackBall.cpp
+	GLColorbarWidget.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -51,40 +51,39 @@ set (SRCS
 	SeedMe.h
 	Plot.h
 	BarbSubtabs.h
+	ColorbarWidget.h
 )
 
 set (UIS 
-	BarbAppearanceGUI.ui
-	BarbGeometryGUI.ui
-	BarbVariablesGUI.ui
-	ColorMappedVariableGUI.ui
-	ColorbarWidgetGUI.ui
-	ControlPointEditorBase.ui
-	GeometryWidgetGUI.ui
-	HelloVariablesGUI.ui
-	SeedMeGUI.ui
-	TFWidgetGUI.ui
-	TwoDAppearanceGUI.ui
-	TwoDGeometryGUI.ui
-	TwoDVariablesGUI.ui
-	VariablesWidgetGUI.ui
 	animationTab.ui
-	appSettingsTab.ui
-	barbAppearanceSubtab.ui
-	boxframe.ui
-	colorbarframe.ui
-	errMsg.ui
-	firstTimeUser.ui
-	helloAppearanceSubtab.ui
-	helloLayoutSubtab.ui
-	newRendererDialog.ui
-	plotWindow.ui
-	regionTab.ui
-	renderselector.ui
-	startupTab.ui
-	statsWindow.ui
-	vizFeaturesTab.ui
 	vizTab.ui
+	regionTab.ui
+	boxframe.ui
+	startupTab.ui
+	appSettingsTab.ui
+	vizFeaturesTab.ui
+	ControlPointEditorBase.ui
+	barbAppearanceSubtab.ui
+	newRendererDialog.ui
+	renderselector.ui
+	helloLayoutSubtab.ui
+	helloAppearanceSubtab.ui
+	TwoDAppearanceGUI.ui
+	BarbAppearanceGUI.ui
+	BarbVariablesGUI.ui
+	BarbGeometryGUI.ui
+	TwoDVariablesGUI.ui
+	TwoDGeometryGUI.ui
+	VariablesWidgetGUI.ui
+	HelloVariablesGUI.ui
+	statsWindow.ui
+	errMsg.ui
+	plotWindow.ui
+	SeedMeGUI.ui
+	firstTimeUser.ui
+	TFWidgetGUI.ui
+	GeometryWidgetGUI.ui
+	ColorbarWidgetGUI.ui
 )
 
 find_package(Qt4 REQUIRED)
