@@ -114,3 +114,9 @@ endif ()
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
 add_definitions (-DPYTHONDIR="${PYTHONDIR}")
 # add_definitions (-DPARAMS_EXPORTS)
+
+install (
+	TARGETS vaporgui
+	DESTINATION bin
+	COMPONENT applications
+	)
