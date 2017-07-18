@@ -29,7 +29,7 @@ const string ColorbarPbase::_colorbarPositionTag = "ColorbarPosition";
 const string ColorbarPbase::_colorbarFontSizeTag = "ColorbarFontsize";
 const string ColorbarPbase::_colorbarNumDigitsTag = "ColorbarNumDigits";
 const string ColorbarPbase::_colorbarTitleTag = "ColorbarTitle";
-const string ColorbarPbase::_colorbarNumTicsTag = "ColorbarNumTics";
+const string ColorbarPbase::_colorbarNumTicksTag = "ColorbarNumTicks";
 const string ColorbarPbase::_colorbarEnabledTag = "ColorbarEnabled";
 
 //
@@ -47,7 +47,7 @@ ColorbarPbase::ColorbarPbase(ParamsBase::StateSave *ssave) : ParamsBase(ssave, C
     SetTitle("");
     SetFontSize(10);
     SetNumDigits(4);
-    SetNumTics(6);
+    SetNumTicks(6);
     SetBackgroundColor(vector<double>(3, 1.));
     SetEnabled(false);
 }
@@ -143,8 +143,8 @@ void ColorbarPbase::SetFontSize(long val) {
 
 //! Determine colorbar num tics
 //! \return number of tics
-long ColorbarPbase::GetNumTics() const {
-    long val = GetValueLong(_colorbarNumTicsTag, 8);
+long ColorbarPbase::GetNumTicks() const {
+    long val = GetValueLong(_colorbarNumTicksTag, 8);
     if (val < 0)
         val = 0;
     if (val > 20)
@@ -154,12 +154,12 @@ long ColorbarPbase::GetNumTics() const {
 
 //! Set colorbar number of tic marks
 //! \param[in] val number of tics
-void ColorbarPbase::SetNumTics(long val) {
+void ColorbarPbase::SetNumTicks(long val) {
     if (val < 0)
         val = 0;
     if (val > 20)
         val = 20;
-    SetValueLong(_colorbarNumTicsTag, "set num tics", val);
+    SetValueLong(_colorbarNumTicksTag, "set num tics", val);
 }
 
 //! Determine colorbar num digits to display
@@ -217,5 +217,5 @@ void ColorbarPbase::copyTo(ColorbarPbase *target) {
     target->SetSize(GetSize());
     target->SetFontSize(GetFontSize());
     target->SetNumDigits(GetNumDigits());
-    target->SetNumTics(GetNumTics());
+    target->SetNumTicks(GetNumTicks());
 }
