@@ -114,18 +114,6 @@ ControlExec *MainForm::_controlExec = NULL;
 //
 MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, const char *) : QMainWindow(parent)
 {
-    //	QFontDatabase fdb;
-    //	int result = fdb.addApplicationFont("/Users/pearse/Downloads/pacifico/Pacifico.ttf");
-    //	cout << result << endl;
-    //	QFont f = fdb.font("testFont", "normal", 12);
-    //	setFont(f);
-
-    //	QFontDatabase fdb;
-    //	int result = fdb.addApplicationFont("/Users/pearse/Downloads/pacifico/Pacifico.ttf");
-    //	QStringList fonts = fdb.families();
-    //	QFont f = fdb.font("Pacifico", "normal", 12);
-    //	setFont(f);
-
     QString fileName("");
     setAttribute(Qt::WA_DeleteOnClose);
     _mainForm = this;
