@@ -20,6 +20,8 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include <QFontDatabase>
+#include <QStringList>
 #include <qradiobutton.h>
 #include <qcolordialog.h>
 #include "TwoDSubtabs.h"

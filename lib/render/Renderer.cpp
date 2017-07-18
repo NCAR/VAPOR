@@ -362,7 +362,7 @@ int Renderer::makeColorbarTexture()
         }
     }
     // Draw tics
-    int numtics = cbpb->GetNumTics();
+    int numtics = cbpb->GetNumTicks();
     for (int tic = 0; tic < numtics; tic++) {
         int ticPos = tic * (_imgHgt / numtics) + (_imgHgt / (2 * numtics));
         // Draw a horizontal line from .35 to .45 width

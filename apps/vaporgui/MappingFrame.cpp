@@ -1588,8 +1588,6 @@ void MappingFrame::mousePressEvent(QMouseEvent *event)
         emit startChange("Mapping window zoom/pan");
     }
 
-    cout << "MappingFrame mousePressEvent" << endl;
-
     updateGL();
 }
 

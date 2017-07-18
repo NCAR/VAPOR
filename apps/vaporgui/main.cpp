@@ -24,6 +24,7 @@
 #include "MainForm.h"
 #include <qfont.h>
 #include <QMessageBox>
+#include <QFontDatabase>
 #include "BannerGUI.h"
 #include "vapor/GetAppPath.h"
 #ifdef WIN32
@@ -149,13 +150,20 @@ int           main(int argc, char **argv)
     // The pointsize of 10 works ok on linux and irix, not windows
     // The weight of 55 is slightly heavier than normal.
     // default font is OK
-    QFont myFont = a.font();
-    myFont.setPointSize(10);
-    a.setFont(myFont);
+    // QFont myFont = a.font();
+    // myFont.setPointSize(10);
+    // a.setFont(myFont);
+
+    QFontDatabase fdb;
+    int           result = fdb.addApplicationFont("/Users/pearse/Downloads/pacifico/Pacifico.ttf");
+    QStringList   fonts = fdb.families();
+    QFont         f = fdb.font("Pacifico", "normal", 12);
+    //	app->setFont(f);
 
     vector<QString> files;
     for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
     MainForm *mw = new MainForm(files, app);
+    mw->setFont(f);
 
     mw->setWindowTitle("VAPOR User Interface");
     mw->show();
