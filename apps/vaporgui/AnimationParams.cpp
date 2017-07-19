@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-#include <vapor/AnimationParams.h>
+#include "AnimationParams.h"
 
 using namespace VAPoR;
 const string AnimationParams::_repeatTag = "RepeatPlay";

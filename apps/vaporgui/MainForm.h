@@ -37,6 +37,7 @@
 #include "GUIStateParams.h"
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
+#include "AnimationParams.h"
 
 class QApplication;
 class QSpacerItem;
@@ -131,6 +132,12 @@ class MainForm : public QMainWindow {
                     _paramsMgr->GetParams(StartupParams::GetClassType()));
     }
 
+    AnimationParams *GetAnimationParams() const {
+        assert(_paramsMgr != NULL);
+        return ((AnimationParams *)
+                    _paramsMgr->GetParams(AnimationParams::GetClassType()));
+    }
+
   protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
@@ -140,7 +147,11 @@ class MainForm : public QMainWindow {
     //
     void update();
     virtual void undoRedoHelper(bool undo);
-    void importData(const string &modelType);
+    std::vector<string> myGetOpenFileNames(
+        string prompt, string dir, string filter, bool multi);
+    void loadDataHelper(
+        std::vector<string> files, string prompt, string filter, string format,
+        bool multi);
     void createActions();
     void createMenus();
     void hookupSignals();
@@ -191,6 +202,7 @@ class MainForm : public QMainWindow {
 
     //Data menu
     QAction *_dataImportWRF_Action;
+    QAction *_dataImportCF_Action;
     QAction *_dataLoad_MetafileAction;
     QAction *_fileNew_SessionAction;
     QAction *_plotAction;
@@ -243,8 +255,9 @@ class MainForm : public QMainWindow {
     void helpIndex();
     void helpContents();
     void helpAbout();
-    void loadData(QString fileName = "");
+    void loadData(string fileName = "");
     void importWRFData();
+    void importCFData();
     void sessionNew();
     void startAnimCapture();
     void endAnimCapture();

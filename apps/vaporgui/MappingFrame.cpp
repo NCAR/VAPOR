@@ -27,19 +27,16 @@
 #include <QMouseEvent>
 #include <QToolTip>
 
-#include "VizWinMgr.h"
-#include "vapor/MapperFunction.h"
+#include <vapor/ControlExecutive.h>
+#include <vapor/DataMgrUtils.h>
+#include <vapor/MapperFunction.h>
+#include <vapor/OpacityMap.h>
 #include "OpacityWidget.h"
-#include "vapor/OpacityMap.h"
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
 #include "ControlPointEditor.h"
-#include "RenderEventRouter.h"
-#include "vapor/errorcodes.h"
-#include "vapor/ControlExecutive.h"
 #include "MessageReporter.h"
 #include "Histo.h"
-#include "MainForm.h"
 #include "MappingFrame.h"
 
 #ifndef MAX
@@ -82,7 +79,7 @@ void oglPopState() {
 //----------------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------------
-MappingFrame::MappingFrame(QWidget *parent, const char *)
+MappingFrame::MappingFrame(QWidget *parent)
     : QGLWidget(parent),
       _NUM_BINS(256),
       _mapper(NULL),
@@ -94,7 +91,6 @@ MappingFrame::MappingFrame(QWidget *parent, const char *)
       _lastSelectedIndex(-1),
       navigateButton(NULL),
       _editButton(NULL),
-      _eventRouter(NULL),
       _variableName(""),
       _domainSlider(new DomainWidget(this)),
       _isoSlider(new IsoSlider(this)),
@@ -134,8 +130,8 @@ MappingFrame::MappingFrame(QWidget *parent, const char *)
       _axisRegionHeight(20),
       _opacityGap(4),
       _bottomGap(10),
-      _rParams(NULL),
-      _dataStatus(NULL) {
+      _dataMgr(NULL),
+      _rParams(NULL) {
     initWidgets();
     initConnections();
     setMouseTracking(true);
@@ -176,13 +172,9 @@ MappingFrame::~MappingFrame() {
     _axisTextPos.clear();
 }
 
-void MappingFrame::setDataStatus(DataStatus *ds) {
-    _dataStatus = ds;
-}
-
 void MappingFrame::RefreshHistogram() {
     string var = _rParams->GetVariableName();
-    size_t timestep = _paramsMgr->GetAnimationParams()->GetCurrentTimestep();
+    size_t ts = _rParams->GetCurrentTimestep();
 
     float minRange = _rParams->MakeMapperFunc(var)->getMinMapValue();
     float maxRange = _rParams->MakeMapperFunc(var)->getMaxMapValue();
@@ -193,15 +185,15 @@ void MappingFrame::RefreshHistogram() {
 
     int refLevel = _rParams->GetRefinementLevel();
     int lod = _rParams->GetCompressionLevel();
-    vector<string> vars;
-    vars.push_back(var);
 
     vector<double> minExts, maxExts;
     _rParams->GetBox()->GetExtents(minExts, maxExts);
 
     StructuredGrid *grid;
-    int rc = _dataStatus->getGrids(timestep, vars, minExts, maxExts,
-                                   &refLevel, &lod, &grid);
+
+    int rc = DataMgrUtils::GetGrids(
+        _dataMgr, ts, var, minExts, maxExts, true,
+        &refLevel, &lod, &grid);
     if (rc)
         return;
 
@@ -542,9 +534,6 @@ void MappingFrame::setEditMode(bool flag) {
 // Fit the mapping space to the current domain.
 //----------------------------------------------------------------------------
 void MappingFrame::fitToView() {
-    RenderParams *myParams = GetActiveParams();
-    if (!myParams)
-        return;
     //Make sure it's current active params:
 
     emit startChange("Mapping window fit-to-view");
@@ -559,9 +548,6 @@ void MappingFrame::fitToView() {
     if (_colorbarWidget)
         _colorbarWidget->setDirty();
 
-#ifdef DEAD
-    _eventRouter->setEditorDirty();
-#endif
     updateGL();
 }
 
@@ -1200,7 +1186,7 @@ void MappingFrame::updateTexture() {
         return;
 
     float stretch;
-    stretch = GetActiveParams()->GetHistoStretch();
+    stretch = _rParams->GetHistoStretch();
 
     for (int x = 0; x < _NUM_BINS; x++) {
         float binValue = 0.0;
@@ -1735,7 +1721,6 @@ void MappingFrame::mouseDoubleClickEvent(QMouseEvent * /* event*/) {
 //----------------------------------------------------------------------------
 void MappingFrame::mouseMoveEvent(QMouseEvent *event) {
     if (event->buttons() == Qt::NoButton) {
-        //		if (!_dataStatus->trackMouse()) return;
         bool isIso = (_isoSliderEnabled || _isolineSlidersEnabled);
         QToolTip::showText(event->globalPos(), tipText(event->pos(), isIso));
         return;
@@ -2036,14 +2021,6 @@ float MappingFrame::getOpacityData(float value) {
 }
 
 //----------------------------------------------------------------------------
-// Return the params
-//----------------------------------------------------------------------------
-RenderParams *MappingFrame::GetActiveParams() {
-    assert(_rParams);
-    return (_rParams);
-}
-
-//----------------------------------------------------------------------------
 // Return the histogram
 //----------------------------------------------------------------------------
 Histo *MappingFrame::getHistogram() {
@@ -2276,12 +2253,6 @@ void MappingFrame::setDomain() {
             emit endChange();
         }
 
-#ifdef DEAD
-        if (!_isoSliderEnabled && !_isolineSlidersEnabled) {
-            _eventRouter->UpdateMapBounds();
-        }
-#endif
-
         updateGL();
     } else {
         _domainSlider->setDomain(xDataToWorld(_minValue),
@@ -2360,15 +2331,6 @@ void MappingFrame::setIsolineSliders(const vector<double> &sliderVals) {
     }
 }
 
-void MappingFrame::hookup(
-    RenderEventRouter *evRouter,
-    QPushButton *updateHistoButton,
-    QSlider *opacityScaleSlider) {
-
-    _eventRouter = evRouter;
-    connect(updateHistoButton, SIGNAL(clicked()), this, SLOT(updateHisto()));
-}
-
 void MappingFrame::updateHisto() {
     fitToView();
     updateMap();
@@ -2377,43 +2339,4 @@ void MappingFrame::updateHisto() {
 void MappingFrame::setNavigateMode(bool mode) {
     setEditMode(!mode);
     _editButton->setChecked(!mode);
-}
-
-#ifdef DEAD
-void MappingFrame::refreshHisto() {
-
-    VizWin *vizWin = VizWinMgr::getInstance()->getActiveVizWin();
-    if (!vizWin)
-        return;
-    RenderParams *rParams = GetActiveParams();
-    if (!rParams)
-        return;
-
-    _eventRouter->RefreshHistogram();
-    _eventRouter->setEditorDirty();
-}
-#endif
-
-void MappingFrame::fitToData() {
-    RenderParams *rParams = GetActiveParams();
-
-    GUIStateParams *p = MainForm::getInstance()->GetStateParams();
-    string vizName = p->GetActiveVizName();
-
-    //Get bounds from DataStatus:
-    size_t ts = _paramsMgr->GetAnimationParams()->GetCurrentTimestep();
-
-    float range[2];
-    vector<double> minExts, maxExts;
-    rParams->GetBox()->GetExtents(minExts, maxExts);
-    StructuredGrid *rGrid = _dataMgr->GetVariable(ts,
-                                                  rParams->GetVariableName(), rParams->GetRefinementLevel(),
-                                                  rParams->GetCompressionLevel(), minExts, maxExts);
-    rGrid->GetRange(range);
-    if (range[1] < range[0]) { //no data
-        range[1] = 1.f;
-        range[0] = 0.f;
-    }
-    _mapper->setMinMaxMapValue(range[0], range[1]);
-    _eventRouter->updateTab();
 }
