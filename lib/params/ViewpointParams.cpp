@@ -114,6 +114,9 @@ ViewpointParams::ViewpointParams(const ViewpointParams &rhs
 }
 
 ViewpointParams &ViewpointParams::operator=( const ViewpointParams& rhs ) {
+	if (m_VPs) delete m_VPs;
+
+	ParamsBase::operator=(rhs);
 
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
 

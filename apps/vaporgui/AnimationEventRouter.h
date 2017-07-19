@@ -27,7 +27,6 @@
 #include "TabManager.h"
 
 namespace VAPoR {
-	class AnimationParams;
 	class ControlExec;
 }
 
@@ -102,6 +101,8 @@ private:
 
  AnimationEventRouter() {}
  
+ void setCurrentTimestep(size_t ts) const; 
+
  void setPlay(int direction);
 
  void enableWidgets(bool on);

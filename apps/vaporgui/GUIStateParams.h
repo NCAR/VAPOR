@@ -78,15 +78,15 @@ public:
 
  //! Static method identifies the current session file
  //! \retval session file path
- string  GetCurrentDataPath() const {
-	return(GetValueString(m_dataFileTag, "."));
- }
+ void  GetOpenDataSets(
+	std::vector <string> &paths, std::vector <string> &names
+ ) const;
 
  //! method sets the current session path
  //! \param[in] path string
- void SetCurrentDataPath(string path) {
-	SetValueString(m_dataFileTag, "Set current data path", path);
- }
+ void SetOpenDataSets(
+	const std::vector <string> &paths, const std::vector <string> &names
+ );
 
  //! method identifies the current session file
  //! \retval session file path
@@ -176,7 +176,7 @@ private:
  static const string m_activeVisualizer;
  static const string m_pathParamsTag;
  static const string m_sessionFileTag;
- static const string m_dataFileTag;
+ static const string m_openDataTag;
  static const string m_imagePathTag;
  static const string m_pythonPathTag;
  static const string m_flowPathTag;

@@ -39,8 +39,8 @@ public:
  //! \param[in] RenderParams* pointer to the ArrowParams describing 
  //! this renderer
  TwoDRenderer(
-	const ParamsMgr *pm, string winName, string paramsType,
-	string classType, string instName, DataStatus *ds
+	const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
+	string classType, string instName, DataMgr *dataMgr
  );
 
  //! Destructor
