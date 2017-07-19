@@ -44,12 +44,10 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
     }
 
     void Update(
-        VAPoR::DataStatus *dataStatus,
+        VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams) {
-        _TFWidget->Update(dataStatus, paramsMgr, rParams);
-
-        VAPoR::DataMgr *dataMgr = dataStatus->GetActiveDataMgr();
+        _TFWidget->Update(dataMgr, paramsMgr, rParams);
         _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
     }
 };

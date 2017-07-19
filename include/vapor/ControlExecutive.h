@@ -208,13 +208,16 @@ class RENDER_API ControlExec : public MyBase {
     //! the renderer cannot be activated
     //
     int ActivateRender(
-        string winName, string renderType, string renderName, bool on);
+        string winName, string dataSetName,
+        string renderType, string renderName, bool on);
 
     int ActivateRender(
-        string winName, const RenderParams *rp, string renderName, bool on);
+        string winName, string dataSetName,
+        const RenderParams *rp, string renderName, bool on);
 
     void RemoveRenderer(
-        string winName, string renderType, string renderName);
+        string winName, string dataSetName,
+        string renderType, string renderName);
 
     //! Obtain the ParamsMgr, for use in accessing the Params instances.
     //! \return ParamsMgr*
@@ -287,24 +290,16 @@ class RENDER_API ControlExec : public MyBase {
     //! the DataMgr class, rather than keeping them separate.
     //
     int OpenData(
-        vector<string> files, string type = "vdc");
+        vector<string> files, string dataSetName, string type = "vdc");
 
     //! Unloads the specified data set
     //!
-    void CloseData();
+    void CloseData(string dataSetName);
 
     //! Obtain the current DataStatus
     //! Needed to store in GUI when the DataStatus changes.
     //! \return DataStatus*
     DataStatus *getDataStatus() const { return _dataStatus; }
-
-    //! Obtain a pointer to the current DataMgr
-    //! Returns NULL if it does not exist.
-    //! \retVal _dataMgr
-    //const DataMgr* GetDataMgr() const
-    DataMgr *GetDataMgr() const {
-        return (_dataStatus->GetActiveDataMgr());
-    }
 
     //! Get RenderParams for an active renderer
     //!
@@ -313,7 +308,7 @@ class RENDER_API ControlExec : public MyBase {
     //! with the specified
     //
     RenderParams *GetRenderParams(
-        string winName, string renderType, string instName) const;
+        string winName, string dataSetName, string renderType, string instName) const;
 
     //! Get all activated render class names
     //!
@@ -337,6 +332,20 @@ class RENDER_API ControlExec : public MyBase {
     static vector<string> GetAllRenderClasses() {
         return (RendererFactory::Instance()->GetFactoryNames());
     }
+
+    //! Lookup window, data set, and class name from a render instance name
+    //!
+    //! This method returns the window name \p winName, data set name
+    //! \p dataSetName, and render type \p rendererType that are associated
+    //! with the render instance name \p instName.
+    //!
+    //! \retval status True on success, false if \p instName is not a previously
+    //! defined render instance name
+    //!
+    //! \sa ActivateRender
+    //
+    bool RenderLookup(
+        string instName, string &winName, string &dataSetName, string &rendererType) const;
 
 #ifdef DEAD
     //! Draw 2D text on the screen
@@ -480,8 +489,8 @@ class RENDER_API ControlExec : public MyBase {
     int openDataHelper(bool reportErrs);
     void undoRedoHelper();
     int activateClassRenderers(
-        string vizName, string pClassName, vector<string> instNames,
-        bool reportErrs);
+        string vizName, string dataSetName,
+        string pClassName, vector<string> instNames, bool reportErrs);
 };
 }; // namespace VAPoR
 

@@ -115,15 +115,15 @@ void HelloEventRouter::_updateTab() {
 
     //The variable tab updates itself:
     _variables->Update(
-        _controlExec->GetDataMgr(),
+        GetActiveDataMgr(),
         _controlExec->GetParamsMgr(),
         GetActiveParams());
     _appearance->Update(
-        _controlExec->GetDataMgr(),
+        GetActiveDataMgr(),
         _controlExec->GetParamsMgr(),
         GetActiveParams());
     _geometry->Update(
-        _controlExec->GetDataMgr(),
+        GetActiveDataMgr(),
         _controlExec->GetParamsMgr(),
         GetActiveParams());
 }

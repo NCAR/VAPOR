@@ -97,20 +97,8 @@ class MappingFrame : public QGLWidget {
     };
 
   public:
-    MappingFrame(QWidget *parent, const char *name = 0);
+    MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
-
-    void setDataStatus(VAPoR::DataStatus *ds);
-
-    //! Method required to establish a connection between the EventRouter that contains a transfer function editor,
-    //! (or an IsoControl)
-    //! and the MappingFrame that provides the editing functionality.  This method should be invoked in the method EventRouter::hookupTab()
-    //! \param[in] evrouter The EventRouter associated with this MappingFrame
-    //! \param[in] updateHistoButton QPushButton that refreshes the histogram.
-    //! \param[in] opacityScaleSlider QSlider that controls the opacity scale
-    void hookup(RenderEventRouter *evrouter,
-                QPushButton *updateHistoButton,
-                QSlider *opacityScaleSlider);
 
     void RefreshHistogram();
 
@@ -297,15 +285,10 @@ class MappingFrame : public QGLWidget {
     virtual float getMaxDomainBound();
 
     virtual float getOpacityData(float val);
-    virtual VAPoR::RenderParams *GetActiveParams();
     virtual Histo *getHistogram();
 
   protected slots:
 
-    void fitToData();
-#ifdef DEAD
-    void refreshHisto();
-#endif
     void addOpacityWidget(QAction *);
     void deleteOpacityWidget();
 
@@ -336,7 +319,6 @@ class MappingFrame : public QGLWidget {
     int _lastSelectedIndex;
     QPushButton *navigateButton;
     QPushButton *_editButton;
-    RenderEventRouter *_eventRouter;
 
     std::string _variableName;
 
@@ -392,11 +374,9 @@ class MappingFrame : public QGLWidget {
     int _axisRegionHeight;
     const int _opacityGap;
     const int _bottomGap;
-
     VAPoR::DataMgr *_dataMgr;
     VAPoR::RenderParams *_rParams;
     VAPoR::ParamsMgr *_paramsMgr;
-    VAPoR::DataStatus *_dataStatus;
 
     QStringList _axisTexts;
     QList<QPoint *> _axisTextPos;

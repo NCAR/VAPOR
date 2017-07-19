@@ -235,21 +235,6 @@ class PARAMS_API ParamsSeparator : public ParamsBase {
     bool HasChild(const string &name) {
         return (GetNode()->HasChild(name));
     }
-
-    // The separator is a dataless node
-    //
-    void SetValueLongVec(
-        const string &tag, string description, const vector<long> &values) {}
-    void SetValueLong(
-        const string &tag, string description, long value) {}
-    void SetValueDoubleVec(
-        const string &tag, string description, const vector<double> &values) {}
-    void SetValueDouble(
-        const string &tag, string description, double value) {}
-    void SetValueStringVec(
-        const string &tag, string description, const vector<string> &values) {}
-    void SetValueString(
-        const string &tag, string description, const string &value) {}
 };
 
 //////////////////////////////////////////////////////////////////////////

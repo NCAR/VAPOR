@@ -26,9 +26,8 @@
 #include "TabManager.h"
 
 namespace VAPoR {
-class AnimationParams;
 class ControlExec;
-} // namespace VAPoR
+}
 
 class QTableWidget;
 class QTimer;
@@ -94,6 +93,8 @@ class AnimationEventRouter : public QWidget, public Ui_AnimationTab, public Even
 
   private:
     AnimationEventRouter() {}
+
+    void setCurrentTimestep(size_t ts) const;
 
     void setPlay(int direction);
 

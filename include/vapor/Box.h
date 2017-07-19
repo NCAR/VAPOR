@@ -22,7 +22,6 @@
 #define BOX_H
 
 #include <vapor/ParamsBase.h>
-#include <vapor/DataStatus.h>
 
 namespace VAPoR {
 

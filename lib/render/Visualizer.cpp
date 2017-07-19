@@ -32,7 +32,6 @@
 #include <vapor/RenderParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/Renderer.h>
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
@@ -110,8 +109,6 @@ Visualizer::~Visualizer() {
 //
 
 int Visualizer::resizeGL(int wid, int ht) {
-    ViewpointParams *vpParams = getActiveViewpointParams();
-
     //Depth buffers are setup, now we need to setup the color textures
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //prevent framebuffers from being messed with
 
@@ -124,17 +121,63 @@ int Visualizer::resizeGL(int wid, int ht) {
     return 0;
 }
 
-int Visualizer::paintEvent() {
+int Visualizer::getCurrentTimestep() const {
+    vector<string> dataSetNames = m_dataStatus->GetDataMgrNames();
 
+    bool first = true;
+    size_t min_ts = 0;
+    size_t max_ts = 0;
+    for (int i = 0; i < dataSetNames.size(); i++) {
+        vector<RenderParams *> rParams;
+        m_paramsMgr->GetRenderParams(m_winName, dataSetNames[i], rParams);
+
+        if (rParams.size()) {
+
+            // Use local time of first RenderParams instance on window
+            // for current data set. I.e. it is assumed that every
+            // RenderParams instance for a data set has same current
+            // time step.
+            //
+            size_t local_ts = rParams[0]->GetCurrentTimestep();
+            size_t my_min_ts, my_max_ts;
+            m_dataStatus->MapLocalToGlobalTimeRange(
+                dataSetNames[i], local_ts, my_min_ts, my_max_ts);
+            if (first) {
+                min_ts = my_min_ts;
+                max_ts = my_max_ts;
+                first = false;
+            } else {
+                if (my_min_ts > min_ts)
+                    min_ts = my_min_ts;
+                if (my_max_ts < max_ts)
+                    max_ts = my_max_ts;
+            }
+        }
+    }
+    if (min_ts > max_ts)
+        return (-1);
+
+    return (min_ts);
+}
+
+int Visualizer::paintEvent() {
     MyBase::SetDiagMsg("Visualizer::paintGL()");
 
     //Do not proceed if there is no DataMgr
+    if (!m_dataStatus->GetDataMgrNames().size())
+        return (0);
 
     if (!fbSetup())
         return (0);
 
     //Set up the OpenGL environment
-    int timeStep = getActiveAnimationParams()->GetCurrentTimestep();
+    int timeStep = getCurrentTimestep();
+    if (timeStep < 0) {
+        MyBase::SetErrMsg("Invalid time step");
+        return -1;
+    }
+    cout << "Visualizer::paintEvent() time step : " << timeStep << endl;
+
     if (paintSetup(timeStep))
         return -1;
     //make sure to capture whenever the time step or frame index changes (once we implement capture!)
@@ -145,7 +188,7 @@ int Visualizer::paintEvent() {
 
     //Draw the domain frame and other in-scene features
     if (m_vizFeatures)
-        m_vizFeatures->inScenePaint();
+        m_vizFeatures->InScenePaint(timeStep);
 
     //Prepare for Renderers
     //Make the depth buffer writable
@@ -222,7 +265,7 @@ int Visualizer::paintEvent() {
         renderColorbars(timeStep);
 #ifdef DEAD
         if (m_vizFeatures)
-            m_vizFeatures->overlayPaint();
+            m_vizFeatures->OverlayPaint(timeStep);
 #endif
 
         //Perform final touch-up on the final images, before capturing or displaying them.
@@ -775,10 +818,6 @@ int Visualizer::paintEvent() {
         return m_paramsMgr->GetRegionParams(m_winName);
     }
 
-    AnimationParams *Visualizer::getActiveAnimationParams() const {
-        return m_paramsMgr->GetAnimationParams();
-    }
-
     VizFeatureParams *Visualizer::getActiveVizFeatureParams() const {
         return m_paramsMgr->GetVizFeatureParams(m_winName);
     }
@@ -995,64 +1034,4 @@ int Visualizer::paintEvent() {
             string sval = string(result);
             string newbody = s.substr(0, lastpos + 1);
             s = newbody + sval + s_end;
-        }
-
-        //  First project all 8 box corners to the center line of the camera view, finding the furthest and
-        //  nearest projection in front of the camera.  The furthest distance is used as the far distance.
-        //  If some point projects behind the camera, then either the camera is inside the box, or a corner of the
-        //  box is behind the camera.  This calculation is always performed in local coordinates since a translation won't affect
-        //  the result
-        void Visualizer::getFarNearDist(
-            vector<double> posVec, vector<double> dirVec,
-            float &boxFar, float &boxNear) const {
-
-            //First check full box
-            double wrk[3], cor[3], boxcor[3];
-            double camPosBox[3], dvdir[3];
-            double maxProj = -std::numeric_limits<double>::max();
-            double minProj = std::numeric_limits<double>::max();
-
-            vector<double> minExts, maxExts;
-            m_dataStatus->GetExtents(minExts, maxExts);
-
-            for (int i = 0; i < 3; i++)
-                camPosBox[i] = posVec[i];
-
-            for (int i = 0; i < 3; i++)
-                dvdir[i] = dirVec[i];
-            vnormal(dvdir);
-
-            //For each box corner,
-            //   convert to box coords, then project to line of view
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 3; j++) {
-                    cor[j] = ((i >> j) & 1) ? maxExts[j] : minExts[j];
-                }
-                for (int k = 0; k < 3; k++)
-                    boxcor[k] = cor[k];
-
-                vsub(boxcor, camPosBox, wrk);
-
-                float mdist = abs(vdot(wrk, dvdir));
-                if (minProj > mdist) {
-                    minProj = mdist;
-                }
-                if (maxProj < mdist) {
-                    maxProj = mdist;
-                }
-            }
-
-            if (maxProj < 1.e-10)
-                maxProj = 1.e-10;
-            if (minProj > 0.03 * maxProj)
-                minProj = 0.03 * maxProj;
-            //minProj will be < 0 if either the camera is in the box, or
-            //if some of the region is behind the camera plane.  In that case, just
-            //set the nearDist a reasonable multiple of the fardist
-            if (minProj <= 0.0)
-                minProj = 0.0002 * maxProj;
-            boxFar = (float)maxProj;
-            boxNear = (float)minProj;
-
-            return;
         }
