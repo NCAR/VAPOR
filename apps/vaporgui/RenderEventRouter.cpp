@@ -24,6 +24,7 @@
 
 #include <QFileDialog>
 #include <vapor/GetAppPath.h>
+#include <vapor/DataMgrUtils.h>
 #include "MessageReporter.h"
 #include "MappingFrame.h"
 #include "RenderEventRouter.h"
@@ -32,74 +33,43 @@ using namespace VAPoR;
 
 
 RenderParams *RenderEventRouter::GetActiveParams() const {
+    assert(! _instName.empty());
+
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    assert(paramsMgr);
-    assert(! m_winName.empty());
-    assert(! _paramsType.empty());
-    assert(! m_instName.empty());
  
-    return(paramsMgr->GetRenderParams(m_winName, _paramsType, m_instName));
+	string winName, dataSetName, paramsType;
+	bool status = paramsMgr->RenderParamsLookup(
+		_instName, winName, dataSetName, paramsType
+	);
+	assert(status);
+
+	string renderType = RendererFactory::Instance()->
+        GetRenderClassFromParamsClass(paramsType);
+
+    return(_controlExec->GetRenderParams(
+		winName, dataSetName, renderType, _instName
+	));
 }
 
-//
-// Obtain the current valid histogram.  if mustGet is false, don't build a 
-// new one.
-// Boolean flag is only used by isoeventrouter version
-//
-/*Histo* RenderEventRouter::GetHistogram(bool mustGet, bool) {
-	RenderParams *rParams = GetActiveParams();
-	
-	if (m_currentHistogram && !mustGet) return m_currentHistogram;
-	if (!mustGet) return 0;
-	string varname = rParams->GetVariableName();
-	MapperFunction* mapFunc = rParams->MakeMapperFunc(varname);
-	if (!mapFunc) return 0;
-	if (m_currentHistogram) delete m_currentHistogram;
+DataMgr *RenderEventRouter::GetActiveDataMgr() const {
+    assert(! _instName.empty());
 
-	m_currentHistogram = new Histo(256,mapFunc->getMinMapValue(),mapFunc->getMaxMapValue());
-	RefreshHistogram();
-	return m_currentHistogram;
-}*/
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
-void RenderEventRouter::RefreshHistogram(){
-	RenderParams *rParams = GetActiveParams();
-	size_t timeStep = GetCurrentTimeStep();
-	string varname = rParams->GetVariableName();
+	string winName, dataSetName, paramsType;
 
-	float minRange = rParams->MakeMapperFunc(varname)->getMinMapValue();
-	float maxRange = rParams->MakeMapperFunc(varname)->getMaxMapValue();
-	if (!m_currentHistogram)
-		m_currentHistogram = new Histo(256, minRange, maxRange);
-	else m_currentHistogram->reset(256,minRange,maxRange);
-
-	StructuredGrid* histoGrid;
-	int actualRefLevel = rParams->GetRefinementLevel();
-	int lod = rParams->GetCompressionLevel();
-	vector<string>varnames;
-	varnames.push_back(varname);
-	vector<double> minExts, maxExts;
-	rParams->GetBox()->GetExtents(minExts, maxExts);
+	bool status = paramsMgr->RenderParamsLookup(
+		_instName, winName, dataSetName, paramsType
+	);
+	assert(status);
 
 	DataStatus *dataStatus = _controlExec->getDataStatus();
-	int rc = dataStatus->getGrids(
-		timeStep, varnames, minExts, maxExts, 
-		&actualRefLevel, &lod, &histoGrid
-	);
+	DataMgr *dataMgr = dataStatus->GetDataMgr(dataSetName);
+	assert(dataMgr);
 
-	if(rc) return;
-	histoGrid->SetInterpolationOrder(0);	
-	float v;
-	StructuredGrid *rg_const = (StructuredGrid *) histoGrid;   
-	StructuredGrid::Iterator itr;
-	
-	for (itr = rg_const->begin(); itr!=rg_const->end(); ++itr) {
-		v = *itr;
-		if (v == histoGrid->GetMissingValue()) continue;
-		m_currentHistogram->addToBin(v);
-	}
-	
-	delete histoGrid;
+	return(dataMgr);
 }
+
 
 // Calculate histogram for a planar slice of data, such as in
 // the probe or the isolines.
@@ -126,11 +96,18 @@ void RenderEventRouter::CalcSliceHistogram(int ts, Histo* histo){
 		extents[i] += minExts[i];
 		extents[i+3] += minExts[i];
 	}
-	
+
+#ifdef	DEAD
+	DataMgr *dataMgr = GetActiveDataMgr(); 
+	int rc = DataMgrUtils::GetGrids(
+		dataMgr, ts, varnames, minExts, maxExts, true,
+		&actualRefLevel, &lod, &histoGrid
 	int rc = Renderer::getGrids(_dataMgr, ts, varnames, extents, &actualRefLevel, &lod, &probeGrid);
+#endif
+	
 
 	
-	if(rc){
+	if(rc<0){
 		return;
 	}
 	
@@ -270,12 +247,13 @@ void RenderEventRouter::setEditorDirty() {
 	MappingFrame *mp = getMappingFrame();
 	if (!mp) return;
 
-	mp->Update(_controlExec->GetDataMgr(), 
+	mp->Update(GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
 		rParams);
 }
 
 
+#ifdef	DEAD
 float RenderEventRouter::CalcCurrentValue(const double point[3] ){
 	RenderParams *rParams = GetActiveParams();
 	
@@ -319,15 +297,17 @@ float RenderEventRouter::CalcCurrentValue(const double point[3] ){
 	delete grid;
 	return varVal;
 }
+#endif
 
 void RenderEventRouter::updateTab(){
+	if (_instName.empty()) return;
 
 	RenderParams *rParams = GetActiveParams();
 
 	//If the Params is not valid do not proceed.
 	if (!rParams) return;
 
-	DataMgr *dataMgr = _controlExec->GetDataMgr();
+	DataMgr *dataMgr = GetActiveDataMgr();
 	if (!dataMgr) return;
 
 

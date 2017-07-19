@@ -49,7 +49,6 @@ private slots:
 
 private:
 	void connectWidgets();
-	size_t getCurrentTimestep();
 	void updateRangeLabels(std::vector<double> minExt,
 							std::vector<double> maxExt);
 	void GetVectorExtents(size_t ts, int level,
@@ -73,6 +72,7 @@ private:
 	Combo* _maxZCombo;
 	RangeCombo* _zRangeCombo;
 
+	std::vector <std::string> _dataSetNames;
 	std::map<std::string, std::string> _visNames;
 	std::map<std::string, std::string> _renTypeNames;
 
