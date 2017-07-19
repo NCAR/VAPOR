@@ -91,6 +91,9 @@ RegionParams::RegionParams(const RegionParams &rhs
 }
 
 RegionParams &RegionParams::operator=( const RegionParams& rhs ) {
+	if (m_Box) delete m_Box;
+
+	ParamsBase::operator=(rhs);
 
 
 	m_Box = new Box(*(rhs.m_Box));

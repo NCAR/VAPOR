@@ -20,11 +20,11 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/regionparams.h>
 
 
@@ -34,8 +34,8 @@ using namespace VAPoR;
 //----------------------------------------------------------------------------
 const string ParamsMgr::_rootTag = "VAPOR";
 const string ParamsMgr::_globalTag = "Global";
-const string ParamsMgr::_renderersTag = "Renderers";
 const string ParamsMgr::_windowsTag = "Windows";
+const string ParamsMgr::_renderersTag = "Renderers";
 
 void ParamsMgr::_init(vector <string> appParams, XmlNode *node) {
 
@@ -65,12 +65,6 @@ void ParamsMgr::_init(vector <string> appParams, XmlNode *node) {
 		_otherParams->SetParent(_rootSeparator);
 	}
 
-	if (! _otherParams->GetParams(AnimationParams::GetClassType())) {
-		_otherParams->Create(
-			AnimationParams::GetClassType(), AnimationParams::GetClassType()
-		);
-	}
-
 	if (! _otherParams->GetParams(RegionParams::GetClassType())) {
 		_otherParams->Create(
 			RegionParams::GetClassType(), RegionParams::GetClassType()
@@ -95,17 +89,19 @@ void ParamsMgr::_init(vector <string> appParams, XmlNode *node) {
 }
 
 ParamsMgr::ParamsMgr() {
-	_dataStatus = NULL;
 	_appParamNames.clear();
+	_dataMgrMap.clear();
 
 	_ssave.SetEnabled(false);
     _init(vector <string> (), NULL);
 	_ssave.SetEnabled(true);
 }
 
-ParamsMgr::ParamsMgr(std::vector <string> appParamNames) {
-	_dataStatus = NULL;
+ParamsMgr::ParamsMgr(
+	std::vector <string> appParamNames
+) {
 	_appParamNames = appParamNames;
+	_dataMgrMap.clear();
 
 	_ssave.SetEnabled(false);
 	_init(appParamNames, NULL);
@@ -147,8 +143,8 @@ void ParamsMgr::LoadState() {
 
 	// If data loaded set up data dependent parameters from default state.
 	//
-	if (_dataStatus && _dataStatus->GetDataMgr()) {
-		setDataStatusNew(_dataStatus);
+	if (_dataMgrMap.size()) {
+		addDataMgrNew();
 	}
 }
 
@@ -176,8 +172,9 @@ void ParamsMgr::LoadState(const XmlNode *node) {
 
 	// If data loaded set up data dependent parameters from new state.
 	//
-	if (_dataStatus && _dataStatus->GetDataMgr()) {
-		setDataStatusMerge(_dataStatus);
+	map <string, DataMgr *>::const_iterator itr;
+	for (itr = _dataMgrMap.begin(); itr != _dataMgrMap.end(); ++itr) {
+		addDataMgrMerge(itr->first);
 	}
 }
 
@@ -196,11 +193,7 @@ int ParamsMgr::LoadState(string stateFile) {
 	return(0);
 }
 
-void ParamsMgr::setDataStatusNew(DataStatus *dataStatus) {
-
-	assert(dataStatus != NULL);
-
-	_dataStatus = dataStatus;
+void ParamsMgr::addDataMgrNew() {
 
 	// Delete all of the renderer containers
 	//
@@ -208,11 +201,7 @@ void ParamsMgr::setDataStatusNew(DataStatus *dataStatus) {
 
 }
 
-void ParamsMgr::setDataStatusMerge(DataStatus *dataStatus) {
-
-	assert(dataStatus != NULL);
-
-	_dataStatus = dataStatus;
+void ParamsMgr::addDataMgrMerge(string dataSetName) {
 
 	ParamsSeparator *windowsSep = new ParamsSeparator(
 		_rootSeparator, _windowsTag
@@ -223,14 +212,21 @@ void ParamsMgr::setDataStatusMerge(DataStatus *dataStatus) {
 		XmlNode *winNode = winSepNode->GetChild(i);
 		string winName = winNode->GetTag();
 
-
 		if (winNode->HasChild(_renderersTag)) {
 			XmlNode *renderersNode = winNode->GetChild(_renderersTag);
 
 			for (int j=0; j<renderersNode->GetNumChildren(); j++) {
-				(void) make_ren_container(
-					winName, renderersNode->GetChild(j)->GetTag()
-				);
+
+				XmlNode *dataSepNode = renderersNode->GetChild(j);
+				string s = dataSepNode->GetTag();
+
+				if (s != dataSetName) continue;
+
+				for (int k=0; k<dataSepNode->GetNumChildren(); k++) {
+					(void) make_ren_container(
+						winName, dataSetName, dataSepNode->GetChild(k)->GetTag()
+					);
+				}
 			}
 		}
 	}
@@ -238,26 +234,46 @@ void ParamsMgr::setDataStatusMerge(DataStatus *dataStatus) {
 	delete windowsSep;
 }
 
-void ParamsMgr::SetDataStatus(DataStatus *dataStatus) {
+void ParamsMgr::AddDataMgr(string dataSetName, DataMgr *dataMgr) {
+
+	_dataMgrMap[dataSetName] = dataMgr;
 
 	// If state already exist use it. Otherwise, create new, default
 	// state
 	//
 	if (_rootSeparator->HasChild(_windowsTag)) {
-		setDataStatusMerge(dataStatus);
+		addDataMgrMerge(dataSetName);
 	}
 	else {
-		setDataStatusNew(dataStatus);
+		addDataMgrNew();
 	}
+}
+
+void ParamsMgr::RemoveDataMgr(string dataSetName) {
+
+	map <string, DataMgr *>::iterator itr;
+	itr = _dataMgrMap.find(dataSetName);
+	if (itr == _dataMgrMap.end()) return; 
+
+	_dataMgrMap.erase(itr);
+
+}
+
+vector <string> ParamsMgr::GetDataMgrNames() const {
+
+	vector <string> dataMgrNames;
+
+	map <string, DataMgr *>::const_iterator itr;
+	for (itr=_dataMgrMap.begin(); itr!=_dataMgrMap.end(); ++itr) {
+		dataMgrNames.push_back(itr->first);
+	}
+
+	return(dataMgrNames);
 }
 
 ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(
 	string winName
 ) {
-	if (! _dataStatus ) {
-		SetErrMsg("Invalid state : no DataStatus");
-		return(NULL);
-	}
 
 	_ssave.BeginGroup("CreateVisualizerParamsInstance");
 
@@ -272,12 +288,33 @@ ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(
 	return(vpParams);
 }
 
-RenderParams *ParamsMgr::CreateRenderParamsInstance(
-	string winName, string className, string instName
+RenParamsContainer *ParamsMgr::createRenderParamsHelper(
+	string winName, string dataSetName, string className, string instName
 ) {
-	if (! _dataStatus || ! _dataStatus->GetDataMgr()) {
-		SetErrMsg("Invalid state : no DataStatus");
+
+	map <string, DataMgr *>::const_iterator itr;
+	itr = _dataMgrMap.find(dataSetName);
+	if (itr == _dataMgrMap.end()) {
+		SetErrMsg("Invalid state : no data set");
 		return(NULL);
+	}
+
+	vector <string> instNames;
+	GetRenderParamNames(instNames);
+	if (find(instNames.begin(), instNames.end(), instName) != instNames.end()) {
+
+		string myWinName, myDataSetName, myClassName;
+		(void) RenderParamsLookup(
+			instName, myWinName, myDataSetName, myClassName
+		);
+		if (! 
+			(myWinName == winName) && 
+			(myDataSetName == dataSetName) && 
+			(myClassName == className)
+		) {
+			SetErrMsg("Non-unique render instance name : %s", instName.c_str());
+			return(NULL);
+		}
 	}
 
 
@@ -289,14 +326,32 @@ RenderParams *ParamsMgr::CreateRenderParamsInstance(
 	}
 	assert(vpParams != NULL);
 
-	_ssave.BeginGroup("CreateRenderParamsInstance");
 
-	RenParamsContainer *container = get_ren_container(winName, className);
+	RenParamsContainer *container = get_ren_container(
+		winName, dataSetName, className
+	);
 	if (! container) {
-		container = make_ren_container(winName, className);
+		container = make_ren_container(
+			winName, dataSetName, className
+		);
 	}
 	assert(container != NULL);
 
+	return(container);
+}
+
+RenderParams *ParamsMgr::CreateRenderParamsInstance(
+	string winName, string dataSetName, string className, string instName
+) {
+	_ssave.BeginGroup("CreateRenderParamsInstance");
+
+	RenParamsContainer *container = createRenderParamsHelper(
+		winName, dataSetName, className, instName
+	);
+	if (! container) {
+		_ssave.EndGroup();
+		return(NULL);
+	}
 	
 	RenderParams *rp = container->GetParams(instName);
 	if (! rp) {
@@ -316,32 +371,20 @@ RenderParams *ParamsMgr::CreateRenderParamsInstance(
 }
 
 RenderParams *ParamsMgr::CreateRenderParamsInstance(
-	string winName, string instName, const RenderParams *rp
+	string winName, string dataSetName, string instName, const RenderParams *rp
 ) {
 	assert(rp);
 
-	if (! _dataStatus || ! _dataStatus->GetDataMgr()) {
-		SetErrMsg("Invalid state : no DataStatus");
-		return(NULL);
-	}
+	_ssave.BeginGroup("CreateRenderParamsInstance");
 
 	string className = rp->GetName();
-
-	// Create ViewpointParams if we don't have one
-	//
-	ViewpointParams *vpParams = get_vp_params(winName);
-	if (! vpParams) {
-		vpParams = CreateVisualizerParamsInstance(winName);
-	}
-	assert(vpParams != NULL);
-
-	_ssave.BeginGroup("InsertRenderParamsInstance");
-
-	RenParamsContainer *container = get_ren_container(winName, className);
+	RenParamsContainer *container = createRenderParamsHelper(
+		winName, dataSetName, className, instName
+	);
 	if (! container) {
-		container = make_ren_container(winName, className);
+		_ssave.EndGroup();
+		return(NULL);
 	}
-	assert(container != NULL);
 
 	RenderParams *newRP = container->Insert(rp, instName);
 
@@ -358,26 +401,201 @@ RenderParams *ParamsMgr::CreateRenderParamsInstance(
 }
 
 void ParamsMgr::RemoveRenderParamsInstance(
-	string winName, string className, string instName
+	string winName, string dataSetName, string className, string instName
 ) {
 
-	RenParamsContainer *container = get_ren_container(winName, className);
+	RenParamsContainer *container = get_ren_container(
+		winName, dataSetName, className
+	);
 	if (! container) return;
 
 	container->Remove(instName);
 }
 
 RenderParams *ParamsMgr::GetRenderParams(
-	string winName, string className, string instName
+	string winName, string dataSetName, string className, string instName
 ) const {
 
-	RenParamsContainer *container = get_ren_container(winName, className);
+	RenParamsContainer *container = get_ren_container(
+		winName, dataSetName, className
+	);
 	if (! container) {
 		return(NULL);
 	}
 
 	return(container->GetParams(instName));
 
+}
+
+void ParamsMgr::GetRenderParams(
+	string winName, string dataSetName, vector <RenderParams *> &rParams
+) const {
+	rParams.clear();
+
+	const map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+	if (! m1Ptr) return;
+
+	// m1Ptr[className]
+	//
+	const map <string, RenParamsContainer *> &ref = *m1Ptr;
+	map <string, RenParamsContainer *>::const_iterator itr;
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+
+		RenParamsContainer *rpc = itr->second;
+		vector <string> names = rpc->GetNames();
+		for (int i=0; i<names.size(); i++) {
+			rParams.push_back(rpc->GetParams(names[i]));
+		}
+	}
+}
+
+void ParamsMgr::GetRenderParams(
+	string winName, vector <RenderParams *> &rParams
+) const {
+	rParams.clear();
+
+	const map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(_renderParamsMap, winName);
+	if (! m2Ptr) return;
+
+	// m2Ptr[dataSetName][className]
+	//
+	const map <string, map <string, RenParamsContainer *>> &ref = *m2Ptr;
+	map <string, map <string, RenParamsContainer *>>::const_iterator itr;
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+		vector <RenderParams *> tmp;
+		GetRenderParams(winName, itr->first, tmp);
+		rParams.insert(rParams.end(), tmp.begin(), tmp.end());
+	}
+}
+
+void ParamsMgr::GetRenderParams(
+	vector <RenderParams *> &rParams
+) const {
+	rParams.clear();
+
+	map <string, map <string, map <string,RenParamsContainer *>>>::const_iterator itr;
+
+	for (itr = _renderParamsMap.begin(); itr != _renderParamsMap.end(); ++itr) {
+		vector <RenderParams *> tmp;
+		GetRenderParams(itr->first, tmp);
+		rParams.insert(rParams.end(), tmp.begin(), tmp.end());
+	}
+}
+
+
+void ParamsMgr::GetRenderParamNames(
+	string winName, string dataSetName, string className, 
+	vector <string> &instNames
+) const {
+	instNames.clear();
+
+	RenParamsContainer *container = get_ren_container(
+		winName, dataSetName, className
+	);
+	if (! container) return;
+
+	instNames = container->GetNames();
+
+	// Sanity check.  Names should always be unique!
+	//
+	unique(instNames.begin(), instNames.end());
+
+}
+
+void ParamsMgr::GetRenderParamNames(
+	string winName, string dataSetName, vector <string> &instNames
+) const {
+	instNames.clear();
+
+	const map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+	if (! m1Ptr) return;
+
+	// m1Ptr[className]
+	//
+	const map <string, RenParamsContainer *> &ref = *m1Ptr;
+	map <string, RenParamsContainer *>::const_iterator itr;
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+		
+		vector <string> tmp;
+		GetRenderParamNames(winName, dataSetName, itr->first, tmp);
+
+		instNames.insert(instNames.end(), tmp.begin(), tmp.end());
+	}
+	unique(instNames.begin(), instNames.end());
+}
+
+void ParamsMgr::GetRenderParamNames(
+	string winName, vector <string> &instNames
+) const {
+	instNames.clear();
+
+	const map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(_renderParamsMap, winName);
+	if (! m2Ptr) return;
+
+	// m2Ptr[dataSetName][className]
+	//
+	const map <string, map <string, RenParamsContainer *>> &ref = *m2Ptr;
+	map <string, map <string, RenParamsContainer *>>::const_iterator itr;
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+		vector <string> tmp;
+		GetRenderParamNames(winName, itr->first, tmp);
+		instNames.insert(instNames.end(), tmp.begin(), tmp.end());
+	}
+	unique(instNames.begin(), instNames.end());
+}
+
+void ParamsMgr::GetRenderParamNames(
+	vector <string > &instNames
+) const {
+	instNames.clear();
+
+	map <string, map <string, map <string,RenParamsContainer *>>>::const_iterator itr;
+
+	for (itr = _renderParamsMap.begin(); itr != _renderParamsMap.end(); ++itr) {
+		vector <string> tmp;
+		GetRenderParamNames(itr->first, tmp);
+		instNames.insert(instNames.end(), tmp.begin(), tmp.end());
+	}
+	unique(instNames.begin(), instNames.end());
+}
+
+
+bool ParamsMgr::RenderParamsLookup(
+	string instName, string &winName, string &dataSetName, string &className
+) const {
+	winName.clear();
+	dataSetName.clear();
+	className.clear();
+
+	// Exhaustively search through _renderParamsMap looking for an
+	// occurrence of instName
+	//
+	map <string, map <string, map <string,RenParamsContainer *>>>::const_iterator itr1;
+	for (itr1 = _renderParamsMap.begin(); itr1!=_renderParamsMap.end(); ++itr1){
+		map <string, map <string, RenParamsContainer *>>::const_iterator itr2;
+		for (itr2 = itr1->second.begin(); itr2!=itr1->second.end(); ++itr2){
+
+			map <string, RenParamsContainer *>::const_iterator itr3;
+			for (itr3 = itr2->second.begin(); itr3!=itr2->second.end(); ++itr3){
+
+				const RenParamsContainer &ref = *(itr3->second);
+				vector <string> instNames = ref.GetNames();
+
+				if (find(instNames.begin(), instNames.end(), instName)!=instNames.end())  {
+
+					winName = itr1->first;
+					dataSetName = itr2->first;
+					className = itr3->first;
+					return (true);
+				}
+			}
+		}
+	}
+	return(false);
 }
 
 vector <string> ParamsMgr::GetVisualizerNames() const {
@@ -392,34 +610,202 @@ vector <string> ParamsMgr::GetVisualizerNames() const {
 	return(vizNames);
 }
 
+// m2[b][c] <- m3[a][b][c] 
+//
+const map <string, map <string, RenParamsContainer *>> *ParamsMgr::getWinMap3(
+	const map <string, map <string, map <string, RenParamsContainer *>>> &m3,
+	string key
+) const {
+	// map[a][b][c]
+	//
+	map <string, map <string, map <string, RenParamsContainer *>>>::
+		const_iterator itr;
+
+	itr = m3.find(key);
+	if (itr == m3.end()) return (NULL);
+
+	return (&(itr->second));
+}
+
+// m1[c] <- m3[a][b][c] 
+//
+const map <string, RenParamsContainer *> *ParamsMgr::getWinMap3(
+	const map <string, map <string, map <string, RenParamsContainer *>>> &m3,
+	string key1, string key2
+) const { 
+	const map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(m3, key1);
+	if (! m2Ptr) return (NULL);
+
+	const map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap2(*m2Ptr, key2);
+
+	return(m1Ptr);
+}
+
+// m1[c] <- m2[b][c] 
+//
+const map <string, RenParamsContainer *> *ParamsMgr::getWinMap2(
+	const map <string, map <string, RenParamsContainer *>> &m2,
+	string key
+) const {
+	// map[b][c]
+	//
+	map <string, map <string, RenParamsContainer *>>::const_iterator itr;
+
+	itr = m2.find(key);
+	if (itr == m2.end()) return (NULL);
+
+	return (&(itr->second));
+}
+
+// m2[b][c] <- m3[a][b][c] 
+//
+map <string, map <string, RenParamsContainer *>> *ParamsMgr::getWinMap3(
+	map <string, map <string, map <string, RenParamsContainer *>>> &m3,
+	string key
+) const {
+	// map[a][b][c]
+	//
+	map <string, map <string, map <string, RenParamsContainer *>>>::
+		iterator itr;
+
+	itr = m3.find(key);
+	if (itr == m3.end()) return (NULL);
+
+	return (&(itr->second));
+}
+
+// m1[c] <- m3[a][b][c] 
+//
+map <string, RenParamsContainer *> *ParamsMgr::getWinMap3(
+	map <string, map <string, map <string, RenParamsContainer *>>> &m3,
+	string key1, string key2
+) const { 
+	map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(m3, key1);
+	if (! m2Ptr) return (NULL);
+
+	map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap2(*m2Ptr, key2);
+
+	return(m1Ptr);
+}
+
+// m1[c] <- m2[b][c] 
+//
+map <string, RenParamsContainer *> *ParamsMgr::getWinMap2(
+	map <string, map <string, RenParamsContainer *>> &m2,
+	string key
+) const {
+	// map[b][c]
+	//
+	map <string, map <string, RenParamsContainer *>>::iterator itr;
+
+	itr = m2.find(key);
+	if (itr == m2.end()) return (NULL);
+
+	return (&(itr->second));
+}
+
+	
+
+vector <string> ParamsMgr::GetRenderParamsClassNames(
+	string winName, string dataSetName
+) const {
+	vector <string> rClassNames;
+
+	// _renderParamsMap[winName][dataSetName][className]
+	//
+
+	const map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+	if (! m1Ptr) return (rClassNames);
+
+	// m1Ptr[className]
+	//
+	const map <string, RenParamsContainer *> &ref = *m1Ptr;
+	
+	map <string, RenParamsContainer *>::const_iterator itr;
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+		rClassNames.push_back(itr->first);
+	}
+
+	return(rClassNames);
+	
+}
+
+
 vector <string> ParamsMgr::GetRenderParamsClassNames(string winName) const {
 
 	vector <string> rClassNames;
 
-	map <string, map <string, RenParamsContainer *>>::const_iterator itr1;
-	itr1 = _renderParamsMap.find(winName);
-	if (itr1 == _renderParamsMap.end()) return (rClassNames);
+	// _renderParamsMap[winName][dataSetName][className]
+	//
 
-	const map <string, RenParamsContainer *> &ref = itr1->second;
-	map <string, RenParamsContainer *>::const_iterator itr2;
-	for (itr2 = ref.begin(); itr2 != ref.end(); ++itr2) {
-		rClassNames.push_back(itr2->first);
+	const map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(_renderParamsMap, winName);
+	if (! m2Ptr) return (rClassNames);
+
+	// m2Ptr[dataSetName][className]
+	//
+
+	const map <string, map <string, RenParamsContainer *>> &ref = *m2Ptr;
+
+	map <string, map <string, RenParamsContainer *>>::const_iterator itr;
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+		string dataSetName = itr->first;
+
+		vector <string> tmpV = GetRenderParamsClassNames(
+			winName, dataSetName
+		);
+		rClassNames.insert(rClassNames.end(), tmpV.begin(), tmpV.end());
+	}
+		
+	return(rClassNames);
+}
+
+vector <string> ParamsMgr::GetRenderParamInstances(
+	string winName, string dataSetName, string className
+) const {
+	vector <string> instances;
+
+	RenParamsContainer *rpc = get_ren_container(
+		winName, dataSetName, className
+	);
+	if (rpc) {
+		vector <string> names = rpc->GetNames();
+		instances.insert(instances.end(), names.begin(), names.end());
 	}
 
-	return(rClassNames);
+	return(instances);
 }
 
 vector <string> ParamsMgr::GetRenderParamInstances(
 	string winName, string className
 ) const {
-
 	vector <string> instances;
-	RenParamsContainer *rpc = get_ren_container(winName, className);
-	if (rpc) {
-		instances = rpc->GetNames();
-	}
-	return(instances);
 
+	const map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(_renderParamsMap, winName);
+	if (! m2Ptr) return(instances);
+
+	const map <string, map <string, RenParamsContainer *>> &ref = *m2Ptr;
+	map <string, map <string, RenParamsContainer *>>::const_iterator itr;
+
+	for (itr = ref.begin(); itr != ref.end(); ++itr) {
+		string dataSetName = itr->first;
+
+		RenParamsContainer *rpc = get_ren_container(
+			winName, dataSetName, className
+		);
+		if (rpc) {
+			vector <string> names = rpc->GetNames();
+			instances.insert(instances.end(), names.begin(), names.end());
+		}
+	}
+
+	return(instances);
 }
 
 ViewpointParams* ParamsMgr::GetViewpointParams(string winName) const {
@@ -446,36 +832,46 @@ void ParamsMgr::InsertRenderParamsInstance(
 #endif
 
 RenParamsContainer *ParamsMgr::get_ren_container(
-	string winName, string renderName
+	string winName, string dataSetName, string renderName
 ) const {
 
-	map <string, map <string, RenParamsContainer *>>::const_iterator itr1;
-	itr1 = _renderParamsMap.find(winName);
-	if (itr1 == _renderParamsMap.end()) return (NULL);
+	// map[winName][dataSetName][renderName]
+	//
 
-	const map <string, RenParamsContainer *> &ref = itr1->second;
-	map <string, RenParamsContainer *>::const_iterator itr2;
+	const map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+	if (! m1Ptr) return (NULL);
 
-	itr2 = ref.find(renderName);
-	if (itr2 == ref.end()) return (NULL);
+	// m1Ptr[className]
+	//
+	const map <string, RenParamsContainer *> &ref = *m1Ptr;
 
-	return(itr2->second);
+	map <string, RenParamsContainer *>::const_iterator itr;
+	itr = ref.find(renderName);
+	if (itr == ref.end()) return (NULL);
+
+	return(itr->second);
 }
 
 void ParamsMgr::delete_ren_container(
-	string winName, string renderName
+	string winName, string dataSetName, string renderName
 ) {
-	map <string, map <string, RenParamsContainer *>>::iterator itr1;
-	itr1 = _renderParamsMap.find(winName);
-	if (itr1 == _renderParamsMap.end()) return;
+	// _renderParamsMap[winName][dataSetName][renderName] -> ref[renderName]
+	//
+	map <string, RenParamsContainer *> *m1Ptr;
+	m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
+	if (! m1Ptr) return;
 
-	map <string, RenParamsContainer *> &ref = itr1->second;
-	map <string, RenParamsContainer *>::iterator itr2;
-	itr2 = ref.find(renderName);
-	if (itr2 == ref.end()) return;
+	// *m1Ptr[renderName] == ref[renderName]
+	//
+	map <string, RenParamsContainer *> &ref = *m1Ptr;
 
-	RenParamsContainer *rpc = itr2->second;
-	ref.erase(itr2);
+	map <string, RenParamsContainer *>::iterator itr;
+	itr = ref.find(renderName);
+	if (itr == ref.end()) return;
+
+	RenParamsContainer *rpc = itr->second;
+	ref.erase(renderName);
 
 	if (! rpc) return;
 
@@ -485,33 +881,58 @@ void ParamsMgr::delete_ren_container(
 	delete rpc;
 }
 
-void ParamsMgr::delete_ren_containers(string winName) {
+void ParamsMgr::delete_ren_containers(string winName, string dataSetName) {
+
+	// _renderParamsMap[winName][dataSetName][renderName] -> 
+	//		ref1[dataSetName][renderName]
+	//
+	map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(_renderParamsMap, winName);
+	if (! m2Ptr) return;
+
+	map <string, map <string, RenParamsContainer *>> &ref1 = *m2Ptr;
 
 	map <string, map <string, RenParamsContainer *>>::iterator itr1;
-	itr1 = _renderParamsMap.find(winName);
+	itr1 = ref1.find(dataSetName);
+	if (itr1 == ref1.end()) return;
 
-	if (itr1 == _renderParamsMap.end()) return;
-	map <string, RenParamsContainer *> &ref = itr1->second;
-
-	// Delete each render container associated with this window name
+	//	ref1[dataSetName][renderName] -> ref2[renderName]
 	//
+	map <string, RenParamsContainer *> &ref2 = itr1->second;
 	map <string, RenParamsContainer *>::iterator itr2;
-	while ((itr2 = ref.begin()) != ref.end()) {
-		delete_ren_container(winName, itr2->first);
+	while ((itr2 = ref2.begin()) != ref2.end()) {
+		delete_ren_container(winName, dataSetName, itr2->first);
+	}
+	ref1.erase(dataSetName);
+
+}
+
+void ParamsMgr::delete_ren_containers(string winName) {
+
+	// _renderParamsMap[winName][dataSetName][renderName] -> 
+	//		ref1[dataSetName][renderName]
+	//
+	map <string, map <string, RenParamsContainer *>> *m2Ptr;
+	m2Ptr = getWinMap3(_renderParamsMap, winName);
+	if (! m2Ptr) return;
+
+	map <string, map <string, RenParamsContainer *>> &ref = *m2Ptr;
+	map <string, map <string, RenParamsContainer *>>::iterator itr;
+	while ((itr = ref.begin()) != ref.end()) {
+		delete_ren_containers(winName, itr->first);
 	}
 
-	_renderParamsMap.erase(itr1);
+	_renderParamsMap.erase(winName);
 }
 
 void ParamsMgr::delete_ren_containers() {
 
 	// For each window name delete all of the windows render containers
 	//
-	map <string, map <string, RenParamsContainer *>>::iterator itr;
+	map <string, map <string, map <string,RenParamsContainer *>>>::iterator itr;
 	while ((itr=_renderParamsMap.begin()) != _renderParamsMap.end()) {
 		delete_ren_containers(itr->first);
 	}
-
 }
 
 	
@@ -519,10 +940,8 @@ void ParamsMgr::delete_ren_containers() {
 
 
 RenParamsContainer *ParamsMgr::make_ren_container(
-	string winName, string renderName
+	string winName, string dataSetName, string renderName
 ) {
-	assert(_dataStatus != NULL);
-
 	ParamsSeparator *windowsSep = new ParamsSeparator(
 		_rootSeparator, _windowsTag
 	);
@@ -531,35 +950,38 @@ RenParamsContainer *ParamsMgr::make_ren_container(
 		windowsSep, winName
 	);
 
-	ParamsSeparator *renderSep = new ParamsSeparator(
+	ParamsSeparator *renderSep  = new ParamsSeparator(
 		windowSep, _renderersTag
 	);
 
+	ParamsSeparator *dataSep = new ParamsSeparator(renderSep, dataSetName);
+
 	// Delete any existing occurences with the same name
 	//
-	RenParamsContainer *rpc = get_ren_container(winName, renderName);
+	RenParamsContainer *rpc = get_ren_container(winName,dataSetName,renderName);
 	if (rpc) delete rpc;
 
-	if (renderSep->HasChild(renderName)) {
-		XmlNode *node = renderSep->GetNode()->GetChild(renderName);
+	if (dataSep->HasChild(renderName)) {
+		XmlNode *node = dataSep->GetNode()->GetChild(renderName);
 		assert(node);
 
 		rpc = new RenParamsContainer(
-			_dataStatus->GetDataMgr(), &_ssave, node
+			_dataMgrMap[dataSetName], &_ssave, node
 		);
 	}
 	else  {
 		rpc = new RenParamsContainer(
-			_dataStatus->GetDataMgr(), &_ssave, renderName
+			_dataMgrMap[dataSetName], &_ssave, renderName
 		);
-		rpc->GetSeparator()->SetParent(renderSep);
+		rpc->GetSeparator()->SetParent(dataSep);
 	}
 
-	_renderParamsMap[winName][renderName] = rpc;
+	_renderParamsMap[winName][dataSetName][renderName] = rpc;
 
-	delete windowsSep;
-	delete windowSep;
+	delete dataSep;
 	delete renderSep;
+	delete windowSep;
+	delete windowsSep;
 
 	return(rpc);
 }
@@ -578,8 +1000,6 @@ ViewpointParams *ParamsMgr::get_vp_params(
 ViewpointParams *ParamsMgr::make_vp_params(
 	string winName
 ) {
-	assert(_dataStatus != NULL);
-
 	ParamsSeparator *windowsSep = new ParamsSeparator(
 		_rootSeparator, _windowsTag
 	);

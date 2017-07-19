@@ -26,9 +26,6 @@
 #include <vapor/ParamsBase.h>
 
 
-namespace VAPoR {
-class ExpatParseMgr;
-
 
 //! \class AnimationParams
 //! \ingroup Public_Params
@@ -40,7 +37,7 @@ class ExpatParseMgr;
 //! When this class is local, it controls the time-steps in one visualizer.
 //! The global (shared) AnimationParams controls the animation in any number of visualizers.
 
-class PARAMS_API AnimationParams : public ParamsBase {
+class PARAMS_API AnimationParams : public VAPoR::ParamsBase {
 	
 public: 
 
@@ -50,7 +47,7 @@ public:
  );
 
  AnimationParams(
-     ParamsBase::StateSave *ssave, XmlNode *node
+     VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node
  );
 
 
@@ -177,8 +174,6 @@ private:
 
  //! Put a params instance into default state with no data.
  void _init();
-
-};
 
 };
 

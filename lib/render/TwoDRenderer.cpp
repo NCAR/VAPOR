@@ -11,7 +11,6 @@
 #include <cstdio>
 
 
-#include <vapor/AnimationParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/MyBase.h>
 #include <vapor/TwoDRenderer.h>
@@ -23,9 +22,9 @@ using namespace Wasp;
 //
 //----------------------------------------------------------------------------
 TwoDRenderer::TwoDRenderer(
-	const ParamsMgr *pm, string winName, string paramsType,
-	string classType, string instName, DataStatus *ds
-) : Renderer(pm, winName, paramsType, classType, instName, ds) {
+	const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
+	string classType, string instName, DataMgr *dataMgr
+) : Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr) {
 	_textureID = 0;
 	_texture = NULL;
 	_texCoords = NULL;
@@ -57,11 +56,10 @@ int TwoDRenderer::_initializeGL(){
 int TwoDRenderer::_paintGL() {
 
 
-	DataMgr *dataMgr = m_dataStatus->GetDataMgr();
 	// Get the 2D texture
 	//
 	_texture = _GetTexture(
-		dataMgr, _texWidth, _texHeight, _texInternalFormat,
+		_dataMgr, _texWidth, _texHeight, _texInternalFormat,
 		_texFormat, _texType, _texelSize
 	);
 	if (! _texture) {
@@ -73,7 +71,7 @@ int TwoDRenderer::_paintGL() {
 	// Get the proxy geometry used to render the 2D surface (vertices and
 	// normals)
 	//
-	int rc = _GetMesh(dataMgr, &_verts, &_normals, _meshWidth, _meshHeight);
+	int rc = _GetMesh(_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight);
 	if (rc < 0) {
 		return(-1);
 	}

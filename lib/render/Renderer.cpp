@@ -24,9 +24,9 @@
 
 #include <vapor/glutil.h>	// Must be included first!!!
 #include <vapor/Renderer.h>
+#include <vapor/DataMgrUtils.h>
 
 #include <vapor/ViewpointParams.h>
-#include <vapor/AnimationParams.h>
 
 #ifdef Darwin
 #include <OpenGL/gl.h>
@@ -39,28 +39,34 @@ const int Renderer::_imgWid = 256;
 const int Renderer::_imgHgt = 256;
 
 Renderer::Renderer(
-	const ParamsMgr *pm, string winName,  string paramsType,
-	string classType, string instName, DataStatus *ds
-) : RendererBase(pm, winName, paramsType, classType, instName, ds) {
+	const ParamsMgr *pm, string winName,  string dataSetName, string paramsType,
+	string classType, string instName, DataMgr *dataMgr
+) : RendererBase(
+		pm, winName, dataSetName, paramsType, classType, instName, dataMgr
+) {
+	//Establish the data sources for the rendering:
+	//
+	
 	_colorbarTexture = 0;
     _timestep = 0;
 }
 
 RendererBase::RendererBase(
-	const ParamsMgr *pm, string winName, string paramsType,
-	string classType, string instName, DataStatus *ds
+	const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
+	string classType, string instName, DataMgr *dataMgr
 ) {
 	//Establish the data sources for the rendering:
 	//
-	m_pm = pm;
-    m_winName = winName;
-    m_paramsType = paramsType;
-    m_classType = classType;
-	m_instName = instName;
-	m_dataStatus = ds;
+	_paramsMgr = pm;
+    _winName = winName;
+    _dataSetName = dataSetName;
+    _paramsType = paramsType;
+    _classType = classType;
+	_instName = instName;
+	_dataMgr = dataMgr;
 
-    m_shaderMgr = NULL;
-	m_glInitialized = false;
+    _shaderMgr = NULL;
+	_glInitialized = false;
 
 
 }
@@ -77,7 +83,7 @@ Renderer::~Renderer()
 
 
 int RendererBase::initializeGL(ShaderMgr *sm) {
-    m_shaderMgr = sm;
+    _shaderMgr = sm;
 	int rc = _initializeGL();
 	if (rc<0) {
 		return(rc);
@@ -90,17 +96,17 @@ int RendererBase::initializeGL(ShaderMgr *sm) {
 		return(-1);
 	}
 
-	m_glInitialized = true;
+	_glInitialized = true;
 	
 	return(0);
 }
 
 int Renderer::paintGL() {
-	const RenderParams *rp = GetActiveParams();
+	const RenderParams *rParams = GetActiveParams();
 
-	if (! rp->IsEnabled()) return(0);
+	if (! rParams->IsEnabled()) return(0);
 
-	_timestep = m_pm->GetAnimationParams()->GetCurrentTimestep();
+	_timestep = rParams->GetCurrentTimestep();
 
 	int rc = _paintGL();
 	if (rc<0) {
@@ -117,14 +123,19 @@ int Renderer::paintGL() {
 }
 
 
-void Renderer::enableClippingPlanes(const double extents[6]){
+void Renderer::enableClippingPlanes(
+	vector <double> minExts,
+	vector <double> maxExts,
+	vector <int> axes
+) const {
+#ifdef	DEAD
 
-	const RenderParams *rp = GetActiveParams();
+	const RenderParams *rParams = GetActiveParams();
 
 	glMatrixMode(GL_MODELVIEW);
     	glPushMatrix();
 
-	vector<double> scales = rp->GetStretchFactors();
+	vector<double> scales = rParams->GetStretchFactors();
    	glScaled(scales[0], scales[1], scales[2]);
 
 	GLdouble x0Plane[] = {1., 0., 0., 0.};
@@ -156,22 +167,25 @@ void Renderer::enableClippingPlanes(const double extents[6]){
 	glEnable(GL_CLIP_PLANE5);
 
 	glPopMatrix();
+#endif
 }
 
 void Renderer::enableFullClippingPlanes() {
 
-	AnimationParams *myAnimationParams = m_pm->GetAnimationParams();
-    size_t timeStep = myAnimationParams->GetCurrentTimestep();
-	
-	vector<double> minExts,maxExts;
-	m_dataStatus->GetExtents(timeStep, minExts, maxExts);
-	double extents[6];
-	for (int i=0; i<3; i++) {
-		extents[i] = minExts[i] - ((maxExts[i]-minExts[i])*0.001);
-		extents[i+3] = maxExts[i] + ((maxExts[i]-minExts[i])*0.001);
-	}
+	const RenderParams *rParams = GetActiveParams();
 
-	enableClippingPlanes(extents);
+    size_t ts = rParams->GetCurrentTimestep();
+
+	vector <string> varnames = rParams->GetFieldVariableNames();
+	varnames.push_back(rParams->GetVariableName());
+	
+    vector <double> minExts, maxExts;
+	vector <int> axes;
+    DataMgrUtils::GetExtents(
+		_dataMgr, ts, varnames, minExts, maxExts, axes
+    );
+
+	enableClippingPlanes(minExts, maxExts, axes);
 }
 	
 void Renderer::disableClippingPlanes(){
@@ -184,12 +198,13 @@ void Renderer::disableClippingPlanes(){
 }
 
  void Renderer::enable2DClippingPlanes(){
+#ifdef	DEAD
 	GLdouble topPlane[] = {0., -1., 0., 1.}; //y = 1
 	GLdouble rightPlane[] = {-1., 0., 0., 1.0};// x = 1
 	GLdouble leftPlane[] = {1., 0., 0., 0.001};//x = -.001
 	GLdouble botPlane[] = {0., 1., 0., 0.001};//y = -.001
 	
-	const double* sizes = m_dataStatus->getFullStretchedSizes();
+	const double* sizes = _dataStatus->getFullStretchedSizes();
 	topPlane[3] = sizes[1]*1.001;
 	rightPlane[3] = sizes[0]*1.001;
 	
@@ -201,15 +216,15 @@ void Renderer::disableClippingPlanes(){
 	glEnable(GL_CLIP_PLANE2);
 	glClipPlane(GL_CLIP_PLANE3, leftPlane);
 	glEnable(GL_CLIP_PLANE3);
+#endif
 }
 
 #ifdef	DEAD
 void Renderer::enableRegionClippingPlanes() {
 
-	AnimationParams *myAnimationParams = m_pm->GetAnimationParams();
-    size_t timeStep = myAnimationParams->GetCurrentTimestep();
+    size_t timeStep = GetCurrentTimestep();
 
-	RegionParams* myRegionParams = m_pm->GetRegionParams();
+	RegionParams* myRegionParams = _paramsMgr->GetRegionParams();
 
 	double regExts[6];
 	myRegionParams->GetBox()->GetUserExtents(regExts,timeStep);
@@ -226,25 +241,6 @@ void Renderer::enableRegionClippingPlanes() {
 }
 #endif
 
-#ifdef	DEAD
-
-//Undo Redo Helper function to undo/redo enable and disable renderer.
-void Renderer::UndoRedo(bool isUndo, int instance, Params* beforeP, Params* afterP, Params*, Params*){
-	//This only handles RenderParams
-	assert (beforeP->isRenderParams());
-	assert (afterP->isRenderParams());
-	RenderParams* rbefore = (RenderParams*)beforeP;
-	RenderParams* rafter = (RenderParams*)afterP;
-	//and only a change of enablement
-	if (rbefore->IsEnabled() == rafter->IsEnabled()) return;
-	//Undo an enable, or redo a disable
-	bool doEnable = ((rafter->IsEnabled() && !isUndo) || (rbefore->IsEnabled() && isUndo));
-	
-	_controlExec->ActivateRender(beforeP->GetVizNum(),beforeP->GetName(),instance,doEnable);
-	return;
-}
-
-#endif
 
 #ifdef	DEAD
 void Renderer::buildLocal2DTransform(int dataOrientation, float a[2],float b[2],float *constVal, int mappedDims[3]){
@@ -252,9 +248,9 @@ void Renderer::buildLocal2DTransform(int dataOrientation, float a[2],float b[2],
 	mappedDims[2] = dataOrientation;
 	mappedDims[0] = (dataOrientation == 0) ? 1 : 0;  // x or y
 	mappedDims[1] = (dataOrientation < 2) ? 2 : 1; // z or y
-	const RenderParams *rp = GetActiveParams();
+	const RenderParams *rParams = GetActiveParams();
 
-	const vector<double>& exts = rp->GetBox()->GetLocalExtents();
+	const vector<double>& exts = rParams->GetBox()->GetLocalExtents();
 	*constVal = exts[dataOrientation];
 	//constant terms go to middle
 	b[0] = 0.5*(exts[mappedDims[0]]+exts[3+mappedDims[0]]);
@@ -272,7 +268,7 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]){
 	double transformMatrix[12];
 	//Set up to transform from probe (coords [-1,1]) into volume:
 	GetActiveParams()->GetBox()->buildLocalCoordTransform(transformMatrix, 0.f, -1);
-	const double* sizes = m_dataStatus->getFullSizes();
+	const double* sizes = _dataStatus->getFullSizes();
 
 	//Calculate the normal vector to the probe plane:
 	double zdir[3] = {0.f,0.f,1.f};
@@ -459,16 +455,18 @@ void Renderer::renderColorbar(){
 
 
 Renderer *RendererFactory::CreateInstance(
-	const ParamsMgr *pm, string winName, 
-	string classType, string instName, DataStatus *ds
+	const ParamsMgr *pm, string winName,  string dataSetName,
+	string classType, string instName, DataMgr *dataMgr
 ) {
     Renderer * instance = NULL;
 
     // find classType in the registry and call factory method.
     //
-    auto it = m_factoryFunctionRegistry.find(classType);
-    if(it != m_factoryFunctionRegistry.end()) {
-        instance = it->second(pm, winName, classType, instName, ds);
+    auto it = _factoryFunctionRegistry.find(classType);
+    if(it != _factoryFunctionRegistry.end()) {
+        instance = it->second(
+			pm, winName, dataSetName, classType, instName, dataMgr
+		);
 	}
 
     if(instance != NULL)
@@ -482,7 +480,7 @@ string RendererFactory::GetRenderClassFromParamsClass(
 ) const {
 
 	map<string, string>::const_iterator itr;
-	for (itr = m_factoryMapRegistry.begin(); itr != m_factoryMapRegistry.end(); ++itr) {
+	for (itr = _factoryMapRegistry.begin(); itr != _factoryMapRegistry.end(); ++itr) {
 		if (itr->second == paramsClass) return (itr->first);
 	}
 	return("");
@@ -493,7 +491,7 @@ string RendererFactory::GetParamsClassFromRenderClass(
 ) const {
 
 	map<string, string>::const_iterator itr;
-	for (itr = m_factoryMapRegistry.begin(); itr != m_factoryMapRegistry.end(); ++itr) {
+	for (itr = _factoryMapRegistry.begin(); itr != _factoryMapRegistry.end(); ++itr) {
 		if (itr->first == renderClass) return (itr->second);
 	}
 	return("");
@@ -504,12 +502,12 @@ vector <string> RendererFactory::GetFactoryNames() const {
 	vector <string> names;
 
 	map<string, function<Renderer * (
-		const ParamsMgr *, string, string, string, DataStatus *
+		const ParamsMgr *, string, string, string, string, DataMgr *
 		)>>::const_iterator itr;
 
 	for (
-		itr = m_factoryFunctionRegistry.begin();
-		itr!=m_factoryFunctionRegistry.end();
+		itr = _factoryFunctionRegistry.begin();
+		itr!=_factoryFunctionRegistry.end();
 		++itr
 	) {
 		names.push_back(itr->first);
