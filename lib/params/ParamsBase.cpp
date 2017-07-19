@@ -66,6 +66,8 @@ ParamsBase::ParamsBase(StateSave *ssave)
 
 ParamsBase &ParamsBase::operator=(const ParamsBase &rhs)
 {
+    MyBase::operator=(rhs);
+
     if (_node) {
         _node->SetParent(NULL);
         delete _node;
@@ -365,31 +367,31 @@ ParamsContainer::ParamsContainer(const ParamsContainer &rhs)
 
 ParamsContainer &ParamsContainer::operator=(const ParamsContainer &rhs)
 {
-    if (_separator) {
-        delete _separator;
-        _ssave->Save(_separator->GetNode(), "New params");
-    }
+    assert(_separator);
+
     vector<string> mynames = GetNames();
     for (int i = 0; i < mynames.size(); i++) { Remove(mynames[i]); }
     _elements.clear();
 
-    _ssave = rhs._ssave;
-    _separator = NULL;
-
-    if (!_separator) { _separator = new ParamsSeparator(*(rhs._separator)); }
-
     _ssave->BeginGroup("Params container");
+
+    _separator = rhs._separator;
+    _ssave = rhs._ssave;
 
     vector<string> names = rhs.GetNames();
     for (int i = 0; i < names.size(); i++) {
-        // Make copy of ParamsBase
-        //
-        ParamsBase *rhspb = rhs.GetParams(names[i]);
-        XmlNode *   node = new XmlNode(*(rhspb->GetNode()));
+        XmlNode *eleNameNode = _separator->GetNode()->GetChild(names[i]);
+        assert(eleNameNode);
 
-        string      classname = rhspb->GetName();
-        ParamsBase *mypb = ParamsFactory::Instance()->CreateInstance(classname, _ssave, node);
-        mypb->SetParent(_separator);
+        ParamsSeparator mySep(_ssave, eleNameNode);
+
+        XmlNode *eleNode = eleNameNode->GetChild(0);
+
+        string eleName = eleNameNode->GetTag();
+        string classname = eleNode->GetTag();
+
+        ParamsBase *mypb = ParamsFactory::Instance()->CreateInstance(classname, _ssave, eleNode);
+        mypb->SetParent(&mySep);
 
         _elements[names[i]] = mypb;
     }

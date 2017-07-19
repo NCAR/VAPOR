@@ -35,10 +35,10 @@
 #include <QMdiSubWindow>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
 
+#include "AnimationParams.h"
 #include "MainForm.h"
 #include "MouseModeParams.h"
 #include "AnimationEventRouter.h"
@@ -311,7 +311,7 @@ void VizWinMgr::setActiveViz(string vizName)
         // Set the animation toolbar to the correct frame number:
         //
         ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-        int        currentTS = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
+        int        currentTS = _mainForm->GetAnimationParams()->GetCurrentTimestep();
 
         _tabManager->show();
         // Add to history if this is not during initial creation.
@@ -393,9 +393,11 @@ void VizWinMgr::sethome()
 void VizWinMgr::viewAll()
 {
     DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+    size_t      ts = _mainForm->GetAnimationParams()->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
-    dataStatus->GetExtents(minExts, maxExts);
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
     assert(minExts.size() == 3);
     assert(maxExts.size() == 3);
 
@@ -631,7 +633,7 @@ RenderEventRouter *VizWinMgr::GetRenderEventRouter(string winName, string render
     RenderEventRouter *er = dynamic_cast<RenderEventRouter *>(itr->second);
     assert(er);
 
-    er->SetActive(winName, instName);
+    er->SetActive(instName);
 
     return er;
 }
@@ -719,9 +721,13 @@ void VizWinMgr::resetTrackball()
 void VizWinMgr::ReinitRouters()
 {
     DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+    size_t      ts = _mainForm->GetAnimationParams()->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
-    dataStatus->GetExtents(minExts, maxExts);
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
+    assert(minExts.size() == 3);
+    assert(maxExts.size() == 3);
 
     double scale[3];
     scale[0] = scale[1] = scale[2] = max(maxExts[0] - minExts[0], (maxExts[1] - minExts[1]));
@@ -750,7 +756,7 @@ void VizWinMgr::UpdateRouters()
 
         QWidget *w = dynamic_cast<QWidget *>(eRouter);
         assert(w);
-        //		w->setEnabled(true);
+        w->setEnabled(true);
 
         eRouter->updateTab();
     }
@@ -768,7 +774,7 @@ void VizWinMgr::UpdateRouters()
 
         QWidget *w = dynamic_cast<QWidget *>(eRouter);
         assert(w);
-        //		w->setEnabled(true);
+        w->setEnabled(true);
 
         eRouter->updateTab();
     }

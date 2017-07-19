@@ -25,6 +25,7 @@
 #endif
 
 #include <vapor/ParamsMgr.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/HelloRenderer.h>
 
 using namespace VAPoR;
@@ -38,7 +39,10 @@ static RendererRegistrar<HelloRenderer> registrar(HelloRenderer::GetClassType(),
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-HelloRenderer::HelloRenderer(const ParamsMgr *pm, string winName, string instName, DataStatus *ds) : Renderer(pm, winName, HelloParams::GetClassType(), HelloRenderer::GetClassType(), instName, ds) {}
+HelloRenderer::HelloRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
+: Renderer(pm, winName, dataSetName, HelloParams::GetClassType(), HelloRenderer::GetClassType(), instName, dataMgr)
+{
+}
 
 //----------------------------------------------------------------------------
 //
@@ -49,8 +53,7 @@ int HelloRenderer::_initializeGL() { return (0); }
 
 int HelloRenderer::_paintGL()
 {
-    HelloParams *    rParams = (HelloParams *)GetActiveParams();
-    AnimationParams *myAnimationParams = GetAnimationParams();
+    HelloParams *rParams = (HelloParams *)GetActiveParams();
 
     // Next we need to get a StructuredGrid for the data we are rendering.
     StructuredGrid *helloGrid;
@@ -60,10 +63,10 @@ int HelloRenderer::_paintGL()
     int lod = rParams->GetCompressionLevel();
 
     // Get the variable name
-    vector<string> varnames;
-    varnames.push_back(rParams->GetVariableName());
+    string varname = rParams->GetVariableName();
 
-    // Determine the full vdc extents, in order to render in local user coordinates.
+    // Determine the full vdc extents, in order to render
+    // in local user coordinates.
 
     // Determine the data extents.
     // The extents of data needed are determined by the end points.
@@ -80,11 +83,10 @@ int HelloRenderer::_paintGL()
 
     // Finally, obtain the StructuredGrid of the data for the specified region, at requested refinement and lod,
     // using Renderer::getGrids()
-    DataMgr *dataMgr = m_dataStatus->GetDataMgr();
-    size_t   timestep = myAnimationParams->GetCurrentTimestep();
+    size_t timestep = rParams->GetCurrentTimestep();
 
-    int rc = m_dataStatus->getGrids(timestep, varnames, regMin, regMax, &actualRefLevel, &lod, &helloGrid);
-    if (rc) { return rc; }
+    int rc = DataMgrUtils::GetGrids(_dataMgr, timestep, varname, regMin, regMax, true, &actualRefLevel, &lod, &helloGrid);
+    if (rc < 0) { return rc; }
 
     // Set the grid to use nearest-point interpolation, to calculate actual (uninterpolated) data max and min
     helloGrid->SetInterpolationOrder(0);
@@ -132,6 +134,8 @@ int HelloRenderer::_paintGL()
         }
     }
 
+    _dataMgr->UnlockGrid(helloGrid);
+
 #ifdef DEAD
     // Apply scene stretching to all the points that will be rendered.
     // When we perform OpenGL rendering, all the coordinates must be stretched.
@@ -149,7 +153,7 @@ int HelloRenderer::_paintGL()
     // Set up lighting and color.  We will use the lighting settings from the viewpoint params for rendering the lines,
     // but lighting will be disabled for rendering the max and min points.
 
-    ViewpointParams *vpParams = m_pm->GetViewpointParams(m_winName);
+    ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(_winName);
     int              nLights = vpParams->getNumLights();
     float            fcolor[3];
     rParams->GetConstantColor(fcolor);

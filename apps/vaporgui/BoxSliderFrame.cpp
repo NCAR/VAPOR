@@ -25,6 +25,7 @@
 #include <QString>
 #include "vapor/DataStatus.h"
 #include "MainForm.h"
+#include "AnimationParams.h"
 #include "vapor/ControlExecutive.h"
 using namespace VAPoR;
 DataStatus * BoxSliderFrame::_dataStatus = 0;
@@ -50,6 +51,7 @@ BoxSliderFrame::BoxSliderFrame(QWidget *parent) : QFrame(parent), Ui_boxframe()
     connect(xSizeSlider, SIGNAL(sliderReleased()), this, SLOT(xSliderSizeChange()));
     connect(ySizeSlider, SIGNAL(sliderReleased()), this, SLOT(ySliderSizeChange()));
     connect(zSizeSlider, SIGNAL(sliderReleased()), this, SLOT(zSliderSizeChange()));
+#ifdef DEAD
     // nudge events:
     connect(xSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(nudgeXSize(int)));
     connect(xCenterSlider, SIGNAL(valueChanged(int)), this, SLOT(nudgeXCenter(int)));
@@ -57,6 +59,7 @@ BoxSliderFrame::BoxSliderFrame(QWidget *parent) : QFrame(parent), Ui_boxframe()
     connect(yCenterSlider, SIGNAL(valueChanged(int)), this, SLOT(nudgeYCenter(int)));
     connect(zSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(nudgeZSize(int)));
     connect(zCenterSlider, SIGNAL(valueChanged(int)), this, SLOT(nudgeZCenter(int)));
+#endif
     for (int i = 0; i < 3; i++) {
         _lastCenterSlider[i] = 128;
         _lastSizeSlider[i] = 256;
@@ -246,6 +249,8 @@ void BoxSliderFrame::updateGuiValues(const double centers[3], const double sizes
     ySizeSlider->setValue((int)(0.5 + 256 * sizes[1] / (_domainExtents[4] - _domainExtents[1])));
     zSizeSlider->setValue((int)(0.5 + 256 * sizes[2] / (_domainExtents[5] - _domainExtents[2])));
 }
+
+#ifdef DEAD
 // Nudge events:
 void BoxSliderFrame::nudgeXCenter(int val)
 {
@@ -294,12 +299,14 @@ void BoxSliderFrame::nudgeCenter(string varname, int val, int dir)
 
     GUIStateParams * p = MainForm::getInstance()->GetStateParams();
     string           activeViz = p->GetActiveVizName();
-    AnimationParams *animP = _controlExec->GetParamsMgr()->GetAnimationParams();
+    AnimationParams *animP = MainForm::getInstance()->GetAnimationParams();
 
     size_t timeStep = animP->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
+    #ifdef DEAD
     _dataStatus->GetExtents(timeStep, minExts, maxExts);
+    #endif
     float  voxelSize = _dataStatus->getVoxelSize(timeStep, varname, _numRefinements, dir);
     double pmin = _boxExtents[dir];
     double pmax = _boxExtents[dir + 3];
@@ -373,15 +380,20 @@ void BoxSliderFrame::nudgeSize(int val, int dir)
 
     GUIStateParams * p = MainForm::getInstance()->GetStateParams();
     string           activeViz = p->GetActiveVizName();
-    AnimationParams *animP = _controlExec->GetParamsMgr()->GetAnimationParams();
+    AnimationParams *animP = MainForm::getInstance()->GetAnimationParams();
 
     size_t timeStep = animP->GetCurrentTimestep();
 
     float  voxelSize = _dataStatus->getVoxelSize(timeStep, _varname, _numRefinements, dir);
     double pmin = _boxExtents[dir];
     double pmax = _boxExtents[dir + 3];
-    float  maxExtent = _dataStatus->getLocalExtents()[dir + 3];
-    float  minExtent = _dataStatus->getLocalExtents()[dir];
+    #ifdef DEAD
+    float maxExtent = _dataStatus->getLocalExtents()[dir + 3];
+    float minExtent = _dataStatus->getLocalExtents()[dir];
+    #else
+    float maxExtent = 0.0;
+    float minExtent = 0.0;
+    #endif
     double newSize = (pmax - pmin);
     if (val > _lastSizeSlider[dir]) {    // increase by 1 voxel, but don't move past end
         _lastSizeSlider[dir]++;
@@ -410,3 +422,4 @@ void BoxSliderFrame::nudgeSize(int val, int dir)
     if (_lastSizeSlider[dir] != newSliderPos) { _lastSizeSlider[dir] = newSliderPos; }
     return;
 }
+#endif

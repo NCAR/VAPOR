@@ -26,6 +26,7 @@
 #include <QSlider>
 #include "vapor/ControlExecutive.h"
 #include "GUIStateParams.h"
+#include "AnimationParams.h"
 
 #ifdef WIN32
     // Annoying unreferenced formal parameter warning
@@ -105,10 +106,6 @@ class MappingFrame;
 //! save the transfer functions.  Refer to MappingFrame documentation
 //! for additional instructions.
 //!
-//! Various widgets associated with the TransferFunction editor are managed
-//! by the MappingFrame as described under MappingFrame::hookup().
-//! These must implement EventRouter::RefreshHistogram() to refresh
-//! the histogram in the Transfer Function Editor.
 //!
 //! If there is a MouseMode (manipulator) associated with the tab,
 //! then EventRouter::captureMouseUp() and
@@ -232,12 +229,11 @@ public:
 
     size_t GetCurrentTimeStep() const
     {
-        GUIStateParams *sP = GetStateParams();
-        assert(sP);
+        AnimationParams *aParams;
+        aParams = (AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+        assert(aParams);
 
-        string            vizName = sP->GetActiveVizName();
-        VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-        return (paramsMgr->GetAnimationParams()->GetCurrentTimestep());
+        return (aParams->GetCurrentTimestep());
     }
 
     //! Return derived class type

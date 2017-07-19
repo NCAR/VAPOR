@@ -104,9 +104,9 @@ void HelloEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 void HelloEventRouter::_updateTab()
 {
     // The variable tab updates itself:
-    _variables->Update(_controlExec->GetDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
-    _appearance->Update(_controlExec->GetDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
-    _geometry->Update(_controlExec->GetDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
+    _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
+    _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
+    _geometry->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 }
 
 // Whenever the user presses enter, call confirmText

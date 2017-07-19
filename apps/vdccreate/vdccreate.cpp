@@ -154,7 +154,7 @@ int main(int argc, char **argv)
     if (op.ParseOptions(&argc, argv, get_options) < 0) { exit(1); }
 
     if (argc != 2) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << " [options] master.nc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
     }

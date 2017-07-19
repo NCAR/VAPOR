@@ -24,8 +24,8 @@
 
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/ShaderMgr.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/TwoDDataRenderer.h>
 #include <vapor/TwoDDataParams.h>
 
@@ -46,8 +46,8 @@ const int colormapTexUnit = 1;    // GL_TEXTURE1
 //
 static RendererRegistrar<TwoDDataRenderer> registrar(TwoDDataRenderer::GetClassType(), TwoDDataParams::GetClassType());
 
-TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string instName, DataStatus *ds)
-: TwoDRenderer(pm, winName, TwoDDataParams::GetClassType(), TwoDDataRenderer::GetClassType(), instName, ds)
+TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
+: TwoDRenderer(pm, winName, dataSetName, TwoDDataParams::GetClassType(), TwoDDataRenderer::GetClassType(), instName, dataMgr)
 {
     _texWidth = 0;
     _texHeight = 0;
@@ -93,13 +93,13 @@ int TwoDDataRenderer::_initializeGL()
 {
 //#define	NOSHADER
 #ifndef NOSHADER
-    if (!m_shaderMgr) {
+    if (!_shaderMgr) {
         SetErrMsg("Programmable shading not available");
         return (-1);
     }
 
-    if (!m_shaderMgr->EffectExists(EffectName)) {
-        int rc = m_shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
+    if (!_shaderMgr->EffectExists(EffectName)) {
+        int rc = _shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
         if (rc < 0) return (-1);
     }
 #endif
@@ -135,22 +135,22 @@ int TwoDDataRenderer::_paintGL()
     int rc;
 #ifndef NOSHADER
 
-    rc = m_shaderMgr->EnableEffect(EffectName);
+    rc = _shaderMgr->EnableEffect(EffectName);
     if (rc < 0) return (-1);
 
     // 2D Data LIGHT parameters hard coded
     //
-    m_shaderMgr->UploadEffectData(EffectName, "lightingEnabled", (int)false);
-    m_shaderMgr->UploadEffectData(EffectName, "kd", (float)0.6);
-    m_shaderMgr->UploadEffectData(EffectName, "ka", (float)0.3);
-    m_shaderMgr->UploadEffectData(EffectName, "ks", (float)0.1);
-    m_shaderMgr->UploadEffectData(EffectName, "expS", (float)16.0);
-    m_shaderMgr->UploadEffectData(EffectName, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
-    m_shaderMgr->UploadEffectData(EffectName, "minLUTValue", (float)crange[0]);
-    m_shaderMgr->UploadEffectData(EffectName, "maxLUTValue", (float)crange[1]);
+    _shaderMgr->UploadEffectData(EffectName, "lightingEnabled", (int)false);
+    _shaderMgr->UploadEffectData(EffectName, "kd", (float)0.6);
+    _shaderMgr->UploadEffectData(EffectName, "ka", (float)0.3);
+    _shaderMgr->UploadEffectData(EffectName, "ks", (float)0.1);
+    _shaderMgr->UploadEffectData(EffectName, "expS", (float)16.0);
+    _shaderMgr->UploadEffectData(EffectName, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
+    _shaderMgr->UploadEffectData(EffectName, "minLUTValue", (float)crange[0]);
+    _shaderMgr->UploadEffectData(EffectName, "maxLUTValue", (float)crange[1]);
 
-    m_shaderMgr->UploadEffectData(EffectName, "colormap", colormapTexUnit);
-    m_shaderMgr->UploadEffectData(EffectName, "dataTexture", dataTexUnit);
+    _shaderMgr->UploadEffectData(EffectName, "colormap", colormapTexUnit);
+    _shaderMgr->UploadEffectData(EffectName, "dataTexture", dataTexUnit);
 
 #endif
 
@@ -170,7 +170,7 @@ int TwoDDataRenderer::_paintGL()
     glDisable(GL_TEXTURE_1D);
 
 #ifndef NOSHADER
-    m_shaderMgr->DisableEffect();
+    _shaderMgr->DisableEffect();
 #endif
 
     return (rc);
@@ -183,7 +183,7 @@ const GLvoid *TwoDDataRenderer::_GetTexture(DataMgr *dataMgr, GLsizei &width, GL
     type = GL_FLOAT;
     texelSize = _texelSize;
 
-    TwoDDataParams *myParams = (TwoDDataParams *)GetActiveParams();
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
     GLvoid *texture = (GLvoid *)_getTexture(dataMgr);
     if (!texture) return (NULL);
@@ -209,34 +209,30 @@ int TwoDDataRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
     }
     _gridStateClear();
 
-    AnimationParams *myAnimationParams = GetAnimationParams();
-    TwoDDataParams * myParams = (TwoDDataParams *)GetActiveParams();
-    int              refLevel = myParams->GetRefinementLevel();
-    int              lod = myParams->GetCompressionLevel();
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+    int             refLevel = rParams->GetRefinementLevel();
+    int             lod = rParams->GetCompressionLevel();
 
     // Find box extents for ROI
     //
     vector<double> minBoxReq, maxBoxReq;
-    size_t         ts = myAnimationParams->GetCurrentTimestep();
-    myParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
+    size_t         ts = rParams->GetCurrentTimestep();
+    rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     // Get scene scaling factors
     //
-    vector<double> stretchFac = myParams->GetStretchFactors();
+    vector<double> stretchFac = rParams->GetStretchFactors();
     assert(stretchFac.size() == 3);
 
-    string varname = myParams->GetVariableName();
+    string varname = rParams->GetVariableName();
     int    orientation = _getOrientation(dataMgr, varname);
     if (orientation != 2) {
         SetErrMsg("Only XY plane orientations currently supported");
         return (-1);
     }
 
-    vector<string> varnames;
-    varnames.push_back(varname);
-
     StructuredGrid *sg = NULL;
-    int             rc = m_dataStatus->getGrids(ts, varnames, minBoxReq, maxBoxReq, &refLevel, &lod, &sg);
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &sg);
     if (rc < 0) return (-1);
 
     assert(sg);
@@ -256,7 +252,7 @@ int TwoDDataRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
 
     rc = 0;
     double defaultZ = minBoxReq[2];
-    if (!myParams->GetHeightVariableName().empty()) {
+    if (!rParams->GetHeightVariableName().empty()) {
         rc = _getMeshDisplaced(dataMgr, sg, stretchFac, defaultZ);
     } else {
         rc = _getMeshPlane(dataMgr, sg, stretchFac, defaultZ);
@@ -282,15 +278,14 @@ int TwoDDataRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
 
 bool TwoDDataRenderer::_gridStateDirty() const
 {
-    TwoDDataParams * myParams = (TwoDDataParams *)GetActiveParams();
-    AnimationParams *myAnimationParams = GetAnimationParams();
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
-    int            refLevel = myParams->GetRefinementLevel();
-    int            lod = myParams->GetCompressionLevel();
-    string         hgtVar = myParams->GetHeightVariableName();
-    int            ts = myAnimationParams->GetCurrentTimestep();
+    int            refLevel = rParams->GetRefinementLevel();
+    int            lod = rParams->GetCompressionLevel();
+    string         hgtVar = rParams->GetHeightVariableName();
+    int            ts = rParams->GetCurrentTimestep();
     vector<double> boxMinExts, boxMaxExts;
-    myParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
+    rParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
 
     return (refLevel != _currentRefLevel || lod != _currentLod || hgtVar != _currentHgtVar || ts != _currentTimestep || boxMinExts != _currentBoxMinExts || boxMaxExts != _currentBoxMaxExts);
 }
@@ -307,36 +302,33 @@ void TwoDDataRenderer::_gridStateClear()
 
 void TwoDDataRenderer::_gridStateSet()
 {
-    TwoDDataParams * myParams = (TwoDDataParams *)GetActiveParams();
-    AnimationParams *myAnimationParams = GetAnimationParams();
-    _currentRefLevel = myParams->GetRefinementLevel();
-    _currentLod = myParams->GetCompressionLevel();
-    _currentHgtVar = myParams->GetHeightVariableName();
-    _currentTimestep = myAnimationParams->GetCurrentTimestep();
-    myParams->GetBox()->GetExtents(_currentBoxMinExts, _currentBoxMaxExts);
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+    _currentRefLevel = rParams->GetRefinementLevel();
+    _currentLod = rParams->GetCompressionLevel();
+    _currentHgtVar = rParams->GetHeightVariableName();
+    _currentTimestep = rParams->GetCurrentTimestep();
+    rParams->GetBox()->GetExtents(_currentBoxMinExts, _currentBoxMaxExts);
 }
 
 bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const
 {
-    TwoDDataParams * myParams = (TwoDDataParams *)GetActiveParams();
-    AnimationParams *myAnimationParams = GetAnimationParams();
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
-    int            ts = myAnimationParams->GetCurrentTimestep();
+    int            ts = rParams->GetCurrentTimestep();
     vector<double> boxMinExts, boxMaxExts;
-    myParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
-    string varname = myParams->GetVariableName();
+    rParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
+    string varname = rParams->GetVariableName();
 
     return (_currentTimestepTex != ts || _currentBoxMinExtsTex != boxMinExts || _currentBoxMaxExtsTex != boxMaxExts || _currentVarname != varname);
 }
 
 void TwoDDataRenderer::_texStateSet(DataMgr *dataMgr)
 {
-    TwoDDataParams * myParams = (TwoDDataParams *)GetActiveParams();
-    AnimationParams *myAnimationParams = GetAnimationParams();
-    string           varname = myParams->GetVariableName();
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+    string          varname = rParams->GetVariableName();
 
-    _currentTimestepTex = myAnimationParams->GetCurrentTimestep();
-    myParams->GetBox()->GetExtents(_currentBoxMinExtsTex, _currentBoxMaxExtsTex);
+    _currentTimestepTex = rParams->GetCurrentTimestep();
+    rParams->GetBox()->GetExtents(_currentBoxMinExtsTex, _currentBoxMaxExtsTex);
     _currentVarname = varname;
 }
 
@@ -350,15 +342,13 @@ void TwoDDataRenderer::_texStateClear()
 
 int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, const vector<double> &scaleFac, double defaultZ)
 {
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
     // Construct the displaced (terrain following) grid using
     // a map projection, if specified.
     //
-    AnimationParams *myAnimationParams = GetAnimationParams();
-    size_t           ts = myAnimationParams->GetCurrentTimestep();
-
-    TwoDDataParams *myParams = (TwoDDataParams *)GetActiveParams();
-    int             refLevel = myParams->GetRefinementLevel();
-    int             lod = myParams->GetCompressionLevel();
+    size_t ts = rParams->GetCurrentTimestep();
+    int    refLevel = rParams->GetRefinementLevel();
+    int    lod = rParams->GetCompressionLevel();
 
     // Get user extents of sg. Use these to get the height variable
     //
@@ -367,14 +357,11 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
 
     // Try to get requested refinement level or the nearest acceptable level:
     //
-    string hgtvar = myParams->GetHeightVariableName();
+    string hgtvar = rParams->GetHeightVariableName();
     assert(!hgtvar.empty());
 
-    vector<string> vars;
-    vars.push_back(hgtvar);
-
     StructuredGrid *hgtGrid = NULL;
-    int             rc = m_dataStatus->getGrids(ts, vars, minExtsReq, maxExtsReq, &refLevel, &lod, &hgtGrid);
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, hgtvar, minExtsReq, maxExtsReq, true, &refLevel, &lod, &hgtGrid);
     if (rc < 0) return (rc);
     assert(hgtGrid);
 
@@ -480,34 +467,32 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     }
     _texStateClear();
 
-    AnimationParams *myAnimationParams = GetAnimationParams();
-    size_t           ts = myAnimationParams->GetCurrentTimestep();
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+    size_t          ts = rParams->GetCurrentTimestep();
 
-    TwoDDataParams *myParams = (TwoDDataParams *)GetActiveParams();
-    int             refLevel = myParams->GetRefinementLevel();
-    int             lod = myParams->GetCompressionLevel();
+    int refLevel = rParams->GetRefinementLevel();
+    int lod = rParams->GetCompressionLevel();
 
-    vector<string> varnames;
-    varnames.push_back(myParams->GetVariableName());
-    if (varnames[0].empty()) {
+    string varname = rParams->GetVariableName();
+    if (varname.empty()) {
         SetErrMsg("No variable name specified");
         return (NULL);
     }
 
     size_t ndim;
-    dataMgr->GetNumDimensions(varnames[0], ndim);
+    dataMgr->GetNumDimensions(varname, ndim);
     if (ndim != 2) {
-        SetErrMsg("Invalid variable: %s ", varnames[0].c_str());
+        SetErrMsg("Invalid variable: %s ", varname.c_str());
         return (NULL);
     }
 
     // Find box extents for ROI
     //
     vector<double> minBoxReq, maxBoxReq;
-    myParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
+    rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     StructuredGrid *sg = NULL;
-    int             rc = m_dataStatus->getGrids(ts, varnames, minBoxReq, maxBoxReq, &refLevel, &lod, &sg);
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &sg);
 
     if (rc < 0) return (NULL);
 

@@ -43,7 +43,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "MainForm.h"
 
 using namespace VAPoR;
 
@@ -168,11 +167,6 @@ void ViewpointEventRouter::_confirmText()
 
     size_t timeStep = GetCurrentTimeStep();
 
-    vector<double> minExts, maxExts;
-
-    DataStatus *dataStatus = _controlExec->getDataStatus();
-    dataStatus->GetExtents(timeStep, minExts, maxExts);
-
     // Get the light directions from the gui:
     vpParams->setNumLights(numLights->text().toInt());
     vpParams->setLightDirection(0, 0, lightPos00->text().toFloat());
@@ -246,12 +240,7 @@ void ViewpointEventRouter::_updateTab()
     string          vizName = p->GetActiveVizName();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    size_t     ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
-
-    vector<double> minExts, maxExts;
-
-    DataStatus *dataStatus = _controlExec->getDataStatus();
-    dataStatus->GetExtents(ts, minExts, maxExts);
+    size_t     ts = GetCurrentTimeStep();
 
     latLonFrame->hide();
     // Always display the current values of the campos and rotcenter

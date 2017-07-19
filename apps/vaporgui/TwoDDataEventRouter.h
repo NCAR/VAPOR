@@ -38,46 +38,6 @@ public:
 
     void GetWebHelp(vector<pair<string, string>> &help) const;
 
-    //! \copydoc EventRouter::captureMouseUp()
-    virtual void captureMouseUp() {}
-
-    //! \copydoc EventRouter::captureMouseDown()
-    virtual void captureMouseDown(int button) {}
-
-    //! \copydoc EventRouter::getMappingFrame()
-    virtual MappingFrame *getMappingFrame() { return _appearance->_TFWidget->mappingFrame; }
-
-    //! \copydoc EventRouter::getColorbarWidget()
-    virtual ColorbarWidget *getColorbarWidget() { return _appearance->_ColorbarWidget; }
-
-#ifdef DEAD
-    //! \copydoc EventRouter::UpdateMapBounds()
-    virtual void UpdateMapBounds();
-#endif
-
-private slots:
-
-#ifdef DEAD
-    //! Load a TF from file
-    void twodLoadTF();
-
-    //! Load an installed TF
-    void twodLoadInstalledTF();
-
-    //! Save the current TF to file
-    void twodSaveTF();
-#endif
-
-    //! respond when TF editing starts
-    void startChangeMapFcn(QString);
-
-    //! respond when TF editing ends
-    void endChangeMapFcn();
-
-    //! Respond to image transparency checkbox being clicked
-    // void transparencyCheckboxClicked(bool);
-
-    // Get static string identifier for this router class
     //
     static string GetClassType() { return (VAPoR::TwoDDataRenderer::GetClassType()); }
     string        GetType() const { return GetClassType(); }

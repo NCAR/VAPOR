@@ -51,12 +51,12 @@ class VizWin : public QGLWidget {
     Q_OBJECT
 
 public:
-    VizWin(MainForm *parent, const QString &name, VizWinMgr *myMgr, QRect *location, string vizName, VAPoR::ControlExec *ce, Trackball *trackBall);
+    VizWin(MainForm *parent, const QString &name, VizWinMgr *myMgr, QRect *location, string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
     ~VizWin();
 
     //! Identify the visualizer index
     //! \retval visualizer index.
-    string getWindowName() { return m_vizName; }
+    string getWindowName() { return _winName; }
 
     //! Force the window to update, even if nothing has changed.
     void reallyUpdate();
@@ -96,7 +96,7 @@ private:
     void         paintGL();
     bool         mouseIsDown() { return _mouseDownHere; }
 
-    string              m_vizName;
+    string              _winName;
     VizWinMgr *         _vizWinMgr;
     VAPoR::ControlExec *_controlExec;
     // Variables to control spin animation:
@@ -110,7 +110,7 @@ private:
     bool       _mouseClicked;       // Indicates mouse has been clicked but not move
     double     _strHandleMid[3];    // Stretched coordinates of middle of selected handle
     int        _buttonNum;          // currently pressed button (0=none, 1=left,2=mid, 3=right)
-    Trackball *m_trackBall;
+    Trackball *_trackBall;
 
     void getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar) const;
 

@@ -43,13 +43,13 @@ using namespace VAPoR;
  *  name 'name' and widget flags set to 'f'.
  *
  */
-VizWin::VizWin(MainForm *parent, const QString &name, VizWinMgr *myMgr, QRect *location, string vizName, ControlExec *ce, Trackball *trackBall) : QGLWidget(parent)
+VizWin::VizWin(MainForm *parent, const QString &name, VizWinMgr *myMgr, QRect *location, string winName, ControlExec *ce, Trackball *trackBall) : QGLWidget(parent)
 {
     _mainForm = parent;
-    m_trackBall = trackBall;
+    _trackBall = trackBall;
 
     setAttribute(Qt::WA_DeleteOnClose);
-    m_vizName = vizName;
+    _winName = winName;
     setWindowIcon(QPixmap(vapor_icon___));
     _controlExec = ce;
 
@@ -71,7 +71,7 @@ VizWin::~VizWin()
 void VizWin::closeEvent(QCloseEvent *e)
 {
     // Tell the winmgr that we are closing:
-    _vizWinMgr->vizAboutToDisappear(m_vizName);
+    _vizWinMgr->vizAboutToDisappear(_winName);
     QWidget::closeEvent(e);
 }
 /******************************************************
@@ -82,8 +82,8 @@ void VizWin::focusInEvent(QFocusEvent *e)
     // Test for hidden here, since a vanishing window can get this event.
     if (e->gotFocus() && !isHidden()) {
         GUIStateParams *p = _mainForm->GetStateParams();
-        string          vizName = p->GetActiveVizName();
-        if (vizName != m_vizName) { _vizWinMgr->setActiveViz(m_vizName); }
+        string          winName = p->GetActiveVizName();
+        if (winName != _winName) { _vizWinMgr->setActiveViz(_winName); }
     }
 }
 
@@ -105,9 +105,13 @@ void VizWin::getNearFarDist(const double posVec[3], const double dirVec[3], doub
     double minProj = std::numeric_limits<double>::max();
 
     DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+
+    AnimationParams *p = _mainForm->GetAnimationParams();
+    size_t           ts = p->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
-    dataStatus->GetExtents(minExts, maxExts);
+    dataStatus->GetActiveExtents(paramsMgr, _winName, ts, minExts, maxExts);
 
     for (int i = 0; i < 3; i++) camPosBox[i] = posVec[i];
 
@@ -144,7 +148,7 @@ void VizWin::getNearFarDist(const double posVec[3], const double dirVec[3], doub
 void VizWin::setUpProjMatrix()
 {
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(m_vizName);
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
 
     double dirVec[3], posVec[3];
     vParams->GetCameraViewDir(dirVec);
@@ -182,10 +186,10 @@ void VizWin::setUpModelViewMatrix()
     // Set the modelview matrix via the trackball
     //
     glLoadIdentity();
-    m_trackBall->TrackballSetMatrix();
+    _trackBall->TrackballSetMatrix();
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(m_vizName);
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
 
     double m[16];
     glGetDoublev(GL_MODELVIEW_MATRIX, m);
@@ -201,7 +205,7 @@ void VizWin::resizeGL(int width, int height)
 
     int rc1 = printOpenGLErrorMsg("GLVizWindowResizeEvent");
 
-    int rc2 = _controlExec->ResizeViz(m_vizName, width, height);
+    int rc2 = _controlExec->ResizeViz(_winName, width, height);
 
     glViewport(0, 0, (GLint)width, (GLint)height);
 
@@ -216,7 +220,7 @@ void VizWin::resizeGL(int width, int height)
     swapBuffers();
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(m_vizName);
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
 
     bool enabled = _controlExec->GetSaveStateEnabled();
     _controlExec->SetSaveStateEnabled(false);
@@ -227,7 +231,7 @@ void VizWin::resizeGL(int width, int height)
 void VizWin::initializeGL()
 {
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
-    int rc2 = _controlExec->InitializeViz(m_vizName);
+    int rc2 = _controlExec->InitializeViz(_winName);
     if (rc2) { MessageReporter::errorMsg("Failure to initialize Visualizer, exiting\n"); }
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
 }
@@ -256,7 +260,7 @@ void VizWin::mousePressEventNavigate(QMouseEvent *e)
     vep->captureMouseDown(_buttonNum);
 #endif
 
-    m_trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
+    _trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
 }
 
 /* If the user presses the mouse on the active viz window,
@@ -296,11 +300,11 @@ void VizWin::mousePressEvent(QMouseEvent *e)
 #ifdef DEAD
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    AnimationParams *p = paramsMgr->GetAnimationParams(m_vizName);
+    AnimationParams *p = paramsMgr->GetAnimationParams(_winName);
     int              timestep = p->GetCurrentTimestep();
 
     double           boxExtents[6];
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(m_vizName);
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     assert(vParams);
     string  tag = MouseModeParams::getModeTag(mode);
     Params *rParams = paramsMgr->GetCurrentParams(_windowNum, tag);
@@ -381,7 +385,7 @@ void VizWin::mousePressEvent(QMouseEvent *e)
 
 void VizWin::mouseReleaseEventNavigate(QMouseEvent *e)
 {
-    m_trackBall->MouseOnTrackball(2, _buttonNum, e->x(), e->y(), width(), height());
+    _trackBall->MouseOnTrackball(2, _buttonNum, e->x(), e->y(), width(), height());
 
 #ifdef DEAD
     setMouseDown(false);
@@ -488,7 +492,7 @@ void VizWin::mouseMoveEventNavigate(QMouseEvent *e)
 
 #endif
 
-    m_trackBall->MouseOnTrackball(1, _buttonNum, e->x(), e->y(), width(), height());
+    _trackBall->MouseOnTrackball(1, _buttonNum, e->x(), e->y(), width(), height());
 
     // Note that the coords have changed in the trackball:
 #ifdef DEAD
@@ -571,6 +575,12 @@ void VizWin::paintGL()
 {
     if (!FrameBufferReady()) { return; }
 
+    glClearColor(0., 0., 0., 1.);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+    if (!dataStatus->GetDataMgrNames().size()) return;
+
     // Set up projection and modelview matrices
     //
 
@@ -618,7 +628,7 @@ void VizWin::paintGL()
 #ifdef DEAD
     static bool first = true;
     // first paint, just clear front and back buffers.
-    if (first && m_vizName.empty()) {
+    if (first && _winName.empty()) {
         glClearColor(0., 0., 0., 1.);
         glClear(GL_COLOR_BUFFER_BIT);
         swapBuffers();
@@ -635,7 +645,7 @@ void VizWin::paintGL()
     int rc0 = printOpenGLErrorMsg("VizWindowPaintGL");
 #endif
 
-    _controlExec->Paint(m_vizName, false);
+    _controlExec->Paint(_winName, false);
     swapBuffers();
     printOpenGLErrorMsg("VizWindowPaintGL");
 
@@ -648,7 +658,7 @@ void VizWin::paintGL()
 void VizWin::reallyUpdate()
 {
     makeCurrent();
-    _controlExec->Paint(m_vizName, true);
+    _controlExec->Paint(_winName, true);
     swapBuffers();
     return;
 }
@@ -657,13 +667,13 @@ void VizWin::SetTrackBall(const double posvec[3], const double dirvec[3], const 
 {
     makeCurrent();
 
-    m_trackBall->setFromFrame(posvec, dirvec, upvec, centerRot, true);
+    _trackBall->setFromFrame(posvec, dirvec, upvec, centerRot, true);
 
     glPushMatrix();
-    m_trackBall->TrackballSetMatrix();
+    _trackBall->TrackballSetMatrix();
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(m_vizName);
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
 
     double m[16];
     glGetDoublev(GL_MODELVIEW_MATRIX, m);

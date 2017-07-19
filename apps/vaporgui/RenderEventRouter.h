@@ -110,10 +110,6 @@ class ColorbarWidget;
 //! save the transfer functions.  Refer to MappingFrame documentation
 //! for additional instructions.
 //!
-//! Various widgets associated with the TransferFunction editor are managed
-//! by the MappingFrame as described under MappingFrame::hookup().
-//! These must implement EventRouter::RefreshHistogram() to refresh
-//! the histogram in the Transfer Function Editor.
 //!
 //! If there is a MouseMode (manipulator) associated with the tab,
 //! then EventRouter::captureMouseUp() and
@@ -124,21 +120,16 @@ class RenderEventRouter : public EventRouter {
 public:
     RenderEventRouter(VAPoR::ControlExec *ce, string paramsType) : EventRouter(ce, paramsType)
     {
-        m_currentHistogram = NULL;
-        m_winName = "";
-        m_instName = "";
+        _currentHistogram = NULL;
+        _instName = "";
     }
 
     virtual ~RenderEventRouter()
     {
-        if (m_currentHistogram) delete m_currentHistogram;
+        if (_currentHistogram) delete _currentHistogram;
     }
 
-    void SetActive(string winName, string instName)
-    {
-        m_winName = winName;
-        m_instName = instName;
-    }
+    void SetActive(string instName) { _instName = instName; }
 
     virtual void hookUpTab() {}
 
@@ -226,11 +217,6 @@ public:
     //	bool mustGet, bool isIsoWin = false
     // );
 
-    //! Virtual method to refresh the histogram for the associated EventRouter.
-    //! Must be reimplemented in every EventRouter class with a Histogram.
-    //!
-    virtual void RefreshHistogram();
-
     //! Virtual method to fit the color map editor interval to the current map
     //! bounds.
     //! By default does nothing
@@ -258,24 +244,24 @@ public:
     //! Default does nothing
     virtual void variableChanged() {}
 
+#ifdef DEAD
     //! Determine the value of the current variable at specified point.
     //! Return _OUT_OF_BOUNDS if not in current extents but in full domain
     //!
     //! \param[in] point[3] coordinates of point to evaluate.
     //! \return value at point, or _OUT_OF_BOUNDS
     virtual float CalcCurrentValue(const double point[3]);
+#endif
 
     //! Return the currently active params instance for this event
     //! router.
     //!
-    virtual VAPoR::RenderParams *GetActiveParams() const;
+    VAPoR::RenderParams *GetActiveParams() const;
 
-#ifdef DEAD
-    //! For parameters that multiple instances set the current
-    //! instance name.
-    //
-    void SetActiveInstName(string instName) { m_activeInstName = instName; }
-#endif
+    //! Return the currently active DataMgr instance for this event
+    //! router.
+    //!
+    VAPoR::DataMgr *GetActiveDataMgr() const;
 
 protected:
     RenderEventRouter() {}
@@ -301,10 +287,9 @@ protected:
     //! \param[in] p Params instance associated with the current active tab.
     virtual void _confirmText(){};
 
-    Histo *m_currentHistogram;
+    Histo *_currentHistogram;
 
 private:
-    string m_winName;
-    string m_instName;
+    string _instName;
 };
 #endif    // RENDEREREVENTROUTER_H
