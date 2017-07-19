@@ -42,13 +42,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
                                           "necessary for making changes to a "
                                           "Vapor Transfer Function."); }
     bool isContainer() const { return true; }
-    void Update(VAPoR::DataStatus *dataStatus,
+    void Update(VAPoR::DataMgr *dataMgr,
                 VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams);
-
-    void setDataStatus(VAPoR::DataStatus *ds) {
-        mappingFrame->setDataStatus(ds);
-    }
 
     void fileLoadTF(string varname, const char *path,
                     bool savePath);
@@ -65,13 +61,12 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void setCMVar();
+    void setCMVar(const QString &);
     void setSingleColor();
 
   private:
     void getRange(float range[2], float values[2]);
     void connectWidgets();
-    size_t getCurrentTimestep(VAPoR::ParamsMgr *paramsMgr);
     void updateSliders();
     void updateAutoUpdateHistoCheckbox();
     void updateColorInterpolation();

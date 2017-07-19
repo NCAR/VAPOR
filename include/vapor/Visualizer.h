@@ -26,7 +26,6 @@
 #include <map>
 #include <vapor/DataStatus.h>
 #include <vapor/ParamsMgr.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/Renderer.h>
 #include <vapor/VizFeatureRenderer.h>
 
@@ -59,10 +58,6 @@ class RENDER_API Visualizer : public MyBase {
     //! Method that returns the RegionParams that is active in this window.
     //! \retval RegionParams* current active RegionParams
     RegionParams *getActiveRegionParams() const;
-
-    //! Method that returns the AnimationParams that is active in this window.
-    //! \retval AnimationParams* current active AnimationParams
-    AnimationParams *getActiveAnimationParams() const;
 
     //! Method that returns the VizFeatureParams that is active in this window.
     //! \retval VizFeatureParams* current active VizFeatureParams
@@ -294,6 +289,8 @@ class RENDER_API Visualizer : public MyBase {
     //! \return true if successful
     bool getPixelData(unsigned char *data) const;
 
+    int getCurrentTimestep() const;
+
     static void incrementPath(string &s);
 
     const ParamsMgr *m_paramsMgr;
@@ -320,13 +317,6 @@ class RENDER_API Visualizer : public MyBase {
     //If the current window is not active, it will still share the region, if
     //the region is shared, and the active region is shared.
     static bool _regionShareFlag;
-
-    //! determine far and near distance to region based on current viewpoint
-    //! \param[out] boxFar far distance to box
-    //! \param[out] boxNear near distance to box
-    void getFarNearDist(
-        vector<double> posVec, vector<double> dirVec,
-        float &boxFar, float &boxNear) const;
 
     //! Reset the near/far clipping, so that the near and far clipping
     //! planes are wide enough

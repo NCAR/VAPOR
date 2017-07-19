@@ -37,7 +37,6 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/DataMgr.h>
-#include "MainForm.h"
 #include "qbuttongroup.h"
 #include "EventRouter.h"
 
