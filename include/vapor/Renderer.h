@@ -25,7 +25,6 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
-#include <vapor/DataStatus.h>
 
 namespace VAPoR {
 
@@ -47,8 +46,8 @@ class ShaderMgr;
 class RENDER_API RendererBase : public MyBase {
   public:
     RendererBase(
-        const ParamsMgr *pm, string winName, string paramsType,
-        string classType, string instName, DataStatus *ds);
+        const ParamsMgr *pm, string winName, string dataSetName,
+        string paramsType, string classType, string instName, DataMgr *dataMgr);
     virtual ~RendererBase();
     //! Pure virtual method
     //! Any OpenGL initialization is performed in initializeGL
@@ -57,36 +56,37 @@ class RENDER_API RendererBase : public MyBase {
     virtual int initializeGL(ShaderMgr *sm);
 
     //! Obtain the Visualizer associated with this Renderer
-    string GetVisualizer() { return m_winName; }
+    string GetVisualizer() { return _winName; }
 
     //! Identify the name of the current renderer
     //! \return name of renderer
-    string GetMyName() const { return (m_instName); };
+    string GetMyName() const { return (_instName); };
 
     //! Identify the type of the current renderer
     //! \return type of renderer
-    string GetMyType() const { return (m_classType); };
+    string GetMyType() const { return (_classType); };
 
     //! Identify the type of the current renderer
     //! \return type of renderer
-    string GetMyParamsType() const { return (m_paramsType); };
+    string GetMyParamsType() const { return (_paramsType); };
 
     //! Return boolean indicating whether initializeGL has been
     //! successfully called
     //!
     bool IsGLInitialized() const {
-        return (m_glInitialized);
+        return (_glInitialized);
     }
 
   protected:
-    const ParamsMgr *m_pm;
-    string m_winName;
-    string m_paramsType;
-    string m_classType;
-    string m_instName;
-    DataStatus *m_dataStatus;
+    const ParamsMgr *_paramsMgr;
+    string _winName;
+    string _dataSetName;
+    string _paramsType;
+    string _classType;
+    string _instName;
+    DataMgr *_dataMgr;
 
-    ShaderMgr *m_shaderMgr;
+    ShaderMgr *_shaderMgr;
 
     //! Pure virtual method
     //! Any OpenGL initialization is performed in initializeGL
@@ -97,7 +97,7 @@ class RENDER_API RendererBase : public MyBase {
     RendererBase() {}
 
   private:
-    bool m_glInitialized;
+    bool _glInitialized;
 };
 
 //! \class Renderer
@@ -118,9 +118,8 @@ class RENDER_API Renderer : public RendererBase {
     //! Provides any needed setup of renderer state, but not of OpenGL state.
     //
     Renderer(
-        const ParamsMgr *pm, string winName, string paramsType,
-        string classType, string instName,
-        DataStatus *ds);
+        const ParamsMgr *pm, string winName, string dataSetName,
+        string paramsType, string classType, string instName, DataMgr *dataMgr);
 
     virtual ~Renderer();
 
@@ -233,12 +232,8 @@ class RENDER_API Renderer : public RendererBase {
     //! Obtain the current RenderParams instance
     //! \retval RenderParams* current render params
     RenderParams *GetActiveParams() const {
-        return (m_pm->GetRenderParams(
-            m_winName, m_paramsType, m_instName));
-    }
-
-    AnimationParams *GetAnimationParams() const {
-        return (m_pm->GetAnimationParams());
+        return (_paramsMgr->GetRenderParams(
+            _winName, _dataSetName, _paramsType, _instName));
     }
 
   protected:
@@ -256,7 +251,11 @@ class RENDER_API Renderer : public RendererBase {
     //! Clipping planes are specified in User coordinates.
     //! \sa disableClippingPlanes
     //! \param[in] extents Specifies the user extents of the clipping bounds
-    void enableClippingPlanes(const double extents[6]);
+    void enableClippingPlanes(
+        vector<double> minExts,
+        vector<double> maxExts,
+        vector<int> axes) const;
+
     //! Enable clipping planes associated with the full 3D data domain of the VDC.
     //! \sa disableClippingPlanes
     void enableFullClippingPlanes();
@@ -302,17 +301,17 @@ class PARAMS_API RendererFactory {
     void RegisterFactoryFunction(
         string myName, string myParamsName,
         function<Renderer *(
-            const ParamsMgr *, string, string, string, DataStatus *)>
+            const ParamsMgr *, string, string, string, string, DataMgr *)>
             classFactoryFunction) {
 
         // register the class factory function
-        m_factoryFunctionRegistry[myName] = classFactoryFunction;
-        m_factoryMapRegistry[myName] = myParamsName;
+        _factoryFunctionRegistry[myName] = classFactoryFunction;
+        _factoryMapRegistry[myName] = myParamsName;
     }
 
     Renderer *(CreateInstance(
-        const ParamsMgr *pm, string winName,
-        string classType, string instName, DataStatus *ds));
+        const ParamsMgr *pm, string winName, string dataSetName,
+        string classType, string instName, DataMgr *dataMgr));
 
     string GetRenderClassFromParamsClass(string paramsClass) const;
     string GetParamsClassFromRenderClass(string renderClass) const;
@@ -320,9 +319,9 @@ class PARAMS_API RendererFactory {
 
   private:
     map<string, function<Renderer *(
-                    const ParamsMgr *, string, string, string, DataStatus *)>>
-        m_factoryFunctionRegistry;
-    map<string, string> m_factoryMapRegistry;
+                    const ParamsMgr *, string, string, string, string, DataMgr *)>>
+        _factoryFunctionRegistry;
+    map<string, string> _factoryMapRegistry;
 
     RendererFactory() {}
     RendererFactory(const RendererFactory &) {}
@@ -351,8 +350,8 @@ class RENDER_API RendererRegistrar {
         // register the class factory function
         //
         RendererFactory::Instance()->RegisterFactoryFunction(
-            classType, paramsClassType, [](const ParamsMgr *pm, string winName, string classType, string instName, DataStatus *ds) -> Renderer * {
-                return new T(pm, winName, instName, ds);
+            classType, paramsClassType, [](const ParamsMgr *pm, string winName, string dataSetName, string classType, string instName, DataMgr *dataMgr) -> Renderer * {
+                return new T(pm, winName, dataSetName, instName, dataMgr);
             });
     }
 };

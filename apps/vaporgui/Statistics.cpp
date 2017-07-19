@@ -30,7 +30,6 @@
 #include <cstdio>
 #include <vapor/MyBase.h>
 //#include "regionparams.h"
-//#include "AnimationParams.h"
 
 using namespace Wasp;
 using namespace VAPoR;

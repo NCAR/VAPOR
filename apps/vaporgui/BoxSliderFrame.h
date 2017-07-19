@@ -119,12 +119,14 @@ class BoxSliderFrame : public QFrame, public Ui_boxframe {
     void xSliderSizeChange();
     void ySliderSizeChange();
     void zSliderSizeChange();
+#ifdef DEAD
     void nudgeXCenter(int);
     void nudgeYCenter(int);
     void nudgeZCenter(int);
     void nudgeXSize(int);
     void nudgeYSize(int);
     void nudgeZSize(int);
+#endif
 
   private:
     static VAPoR::DataStatus *_dataStatus;

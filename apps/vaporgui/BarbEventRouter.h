@@ -44,35 +44,6 @@ class BarbEventRouter : public QTabWidget, public RenderEventRouter {
     void GetWebHelp(
         vector<pair<string, string>> &help) const;
 
-    //! \copydoc EventRouter::captureMouseUp()
-    virtual void captureMouseUp() {}
-
-    //! \copydoc EventRouter::captureMouseDown()
-    virtual void captureMouseDown(int button) {}
-
-    //! \copydoc EventRouter::getMappingFrame()
-    virtual MappingFrame *getMappingFrame() {
-        return _appearance->_TFWidget->mappingFrame;
-    }
-
-    //! \copydoc EventRouter::getColorbarFrame()
-    virtual ColorbarWidget *getColorbarWidget() {
-        return _appearance->_ColorbarWidget;
-    }
-
-  private slots:
-    //! Respond to georeferencing checkbox being clicked
-    void geoCheckboxClicked(bool);
-
-    //! respond when TF editing starts
-    void startChangeMapFcn(QString);
-
-    //! respond when TF editing ends
-    void endChangeMapFcn();
-
-    //! Respond to image transparency checkbox being clicked
-    //void transparencyCheckboxClicked(bool);
-
     // Get static string identifier for this router class
     //
     static string GetClassType() {
@@ -96,12 +67,6 @@ class BarbEventRouter : public QTabWidget, public RenderEventRouter {
     BarbVariablesSubtab *_variables;
     BarbGeometrySubtab *_geometry;
     BarbAppearanceSubtab *_appearance;
-
-    //! Web help text is specified in the class definition
-    static const char *_webHelpText[];
-
-    //! Web help URLs are specified in the class definition
-    static const char *_webHelpURL[];
 };
 
 #endif //BARBEVENTROUTER_H
