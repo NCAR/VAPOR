@@ -138,6 +138,7 @@ XmlNode::XmlNode(const XmlNode &rhs) :
 
 XmlNode &XmlNode::operator=( const XmlNode& rhs ) {
 	DeleteAll();
+	MyBase::operator=(rhs);
 
 	_children.clear();
 	_longmap = rhs._longmap;

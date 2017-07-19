@@ -6,7 +6,7 @@
 #include "vapor/VDC_c.h"
 #include "vapor/MyBase.h"
 
-#define VDC_DEBUG
+// #define VDC_DEBUG
 #ifdef VDC_DEBUG
 #define VDC_DEBUG_printf(...) fprintf (stderr, __VA_ARGS__)
 #define VDC_DEBUG_printff(...) { fprintf (stderr, "[%s:%i]%s", __FILE__, __LINE__, __func__); fprintf (stderr, __VA_ARGS__); }
@@ -37,6 +37,8 @@ const char *_AxisToStr(const int a);
 
 vector<string> _strArrayToStringVector(const char **a, size_t count);
 string _stringVectorToString(const vector<string> v);
+vector<size_t> _size_tArrayToSize_tVector(const size_t *a, size_t count);
+string _size_tVectorToString(const vector<size_t> v);
 
 // ########################
 // #    VDC::Dimension    #
@@ -116,14 +118,14 @@ void VDC_delete(VDC *p)
 int VDC_Initialize(VDC *p, const char *path, int mode)
 {
 	VDC_DEBUG_called(); 
-	VDC::AccessMode am;
+	VDC::AccessMode am = VDC::R;
 	if		(mode == VDC_AccessMode_R) am = VDC::R;
 	else if (mode == VDC_AccessMode_W) am = VDC::W;
 	else if (mode == VDC_AccessMode_A) am = VDC::A;
 
 	VAPoR::VDCNetCDF *pnc = (VAPoR::VDCNetCDF *)p;
 	int ret = pnc->Initialize(string(path), am, 0);
-	pnc->SetFill(0x100); // Required to disable set_fill
+	// pnc->SetFill(0x100); // Required to disable set_fill
 	return ret;
 }
 
@@ -295,6 +297,15 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 // #        Write         #
 // ########################
 
+int VDC_SetCompressionBlock(VDC *p, const size_t *bs, int bsCount, const char *wname, const size_t *cratios, int cratiosCount)
+{
+	vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
+	vector<size_t> cratios_v = _size_tArrayToSize_tVector(cratios, cratiosCount);
+	VDC_DEBUG_printff("(%s, \"%s\", %s)", _size_tVectorToString(bs_v).c_str(), wname, _size_tVectorToString(cratios_v).c_str());
+	int ret = p->SetCompressionBlock(bs_v, string(wname), cratios_v);
+	return ret;
+}
+
 int VDC_DefineDimension(VDC *p, const char *dimname, size_t length)
 { VDC_DEBUG_called(); return p->DefineDimension(string(dimname), length); }
 
@@ -323,6 +334,15 @@ int VDC_DefineCoordVar(VDC *p, const char *varname, const char **dimnames, size_
 	for (int i = 0; i < dimnamesCount; i++) dimnames_v.push_back(string(dimnames[i]));
 	VDC_DEBUG_printff(": calling VDC::DefineCoordVar(\"%s\", %s, \"%s\", \"%s\", %s, %s, %s)\n", varname, _stringVectorToString(dimnames_v).c_str(), time_dim_name, units, _AxisToStr(axis), _XTypeToString(_IntToXType(xtype)), _boolToStr(compressed));
 	return p->DefineCoordVar(string(varname), dimnames_v, string(time_dim_name), string(units), axis, _IntToXType(xtype), compressed);
+}
+
+int VDC_DefineCoordVarUniform(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed)
+{
+	VDC_DEBUG_printff("(%s, \"%s\", %s, %li, \"%s\", \"%s\", %s, %s, %s)\n", p?"*p":"NULL", varname, _stringVectorToString(_strArrayToStringVector(dimnames, dimnamesCount)).c_str(), dimnamesCount, time_dim_name, units, _AxisToStr(axis), _XTypeToString(_IntToXType(xtype)), _boolToStr(compressed));
+	vector<string> dimnames_v;
+	for (int i = 0; i < dimnamesCount; i++) dimnames_v.push_back(string(dimnames[i]));
+	VDC_DEBUG_printff(": calling VDC::DefineCoordVarUniform(\"%s\", %s, \"%s\", \"%s\", %s, %s, %s)\n", varname, _stringVectorToString(dimnames_v).c_str(), time_dim_name, units, _AxisToStr(axis), _XTypeToString(_IntToXType(xtype)), _boolToStr(compressed));
+	return p->DefineCoordVarUniform(string(varname), dimnames_v, string(time_dim_name), string(units), axis, _IntToXType(xtype), compressed);
 }
 
 int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const void *values, size_t count)
@@ -359,10 +379,6 @@ static string valueCArrayToString(const void *a, int l, VDC_XType type) {
 int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count)
 {
 	VDC_DEBUG_printff("(%s, \"%s\", \"%s\", %s, %s, %li)\n", p?"*p":"NULL", varname, attname, _XTypeToString(_IntToXType(xtype)), valueCArrayToString(values, count, xtype).c_str(), count);
-	if (!strcmp(attname, "_FillValue")) {
-		printf("Renaming\n");
-		attname = "_FillValue";
-	}
 	vector<double> values_v;
 	if (xtype == VDC_XType_FLOAT) 
 		for (int i = 0; i < count; i++)
@@ -576,3 +592,20 @@ string _stringVectorToString(const vector<string> v)
 	return s;
 }
 
+vector<size_t> _size_tArrayToSize_tVector(const size_t *a, size_t count)
+{
+	vector<size_t> v;
+	for (int i = 0; i < count; i++)
+		v.push_back(a[i]);
+	return v;
+}
+
+string _size_tVectorToString(const vector<size_t> v)
+{
+	string s = "[";
+	for (int i = 0; i < v.size(); i++) {
+		s += "\"" + std::to_string(v[i]) + "\"" + (i == v.size()-1?"":", ");
+	}
+	s += "]";
+	return s;
+}

@@ -8,7 +8,7 @@ FILES = \
 	TransferFunction Box ColorbarPbase \
 	RenderParams TwoDDataParams \
 	BarbParams \
-	AnimationParams Viewpoint ViewpointParams regionparams \
+	Viewpoint ViewpointParams regionparams \
 	ParamsMgr DataStatus VizFeatureParams \
 	HelloParams TFInterpolator
 

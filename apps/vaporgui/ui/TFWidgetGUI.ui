@@ -669,7 +669,7 @@ how the histogram is scaled.</string>
   <customwidget>
    <class>MappingFrame</class>
    <extends>QWidget</extends>
-   <header>mappingframe.h</header>
+   <header>MappingFrame.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -193,7 +193,7 @@ int	main(int argc, char **argv) {
 	}
 
 	if (argc != 2) {
-		cerr << "Usage: " << ProgName << " master.nc" << endl;
+		cerr << "Usage: " << ProgName << " [options] master.nc" << endl;
 		op.PrintOptionHelp(stderr, 80, false);
 		exit(1);
 	}
