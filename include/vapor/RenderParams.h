@@ -43,9 +43,9 @@ class PARAMS_API RenderParams : public ParamsBase {
 public:
     //! Standard RenderParams constructor.
     //! \param[in] name  std::string name, can be the tag
-    RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname);
+    RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname, int maxdim = 3);
 
-    RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
+    RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node, int maxdim = 3);
 
     RenderParams(const RenderParams &rhs);
 
@@ -314,6 +314,16 @@ public:
         return GetValueDoubleVec(_stretchFactorsTag, defaultvec);
     }
 
+    //! Get the current data timestep
+    //! \retval ts current time step
+    //
+    size_t GetCurrentTimestep() const { return (size_t)GetValueLong(_currentTimestepTag, 0); }
+
+    //! Set the current data timestep being used
+    //! \param[in] ts current time step
+    //
+    void SetCurrentTimestep(size_t ts) { SetValueLong(_currentTimestepTag, "Set timestep", (long)ts); }
+
     //! method to set stretch factors
     //! Always sets them in the global instance.
     //! Also saves previous values
@@ -337,6 +347,7 @@ protected:
     DataMgr *_dataMgr;
 
 private:
+    int              _maxDim;
     ParamsContainer *_TFs;
     Box *            _Box;
     ColorbarPbase *  _Colorbar;
@@ -360,6 +371,7 @@ private:
     static const string _RefinementLevelTag;
     static const string _transferFunctionsTag;
     static const string _stretchFactorsTag;
+    static const string _currentTimestepTag;
 
     void _init();
     void _initBox();

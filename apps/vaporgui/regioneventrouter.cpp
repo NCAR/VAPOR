@@ -140,7 +140,6 @@ void RegionEventRouter::_updateTab()
     domainVariableList->clear();
     vector<string> domainVars = RegionParams::GetDomainVariables();
     for (int i = 0; i < domainVars.size(); i++) { domainVariableList->addItem(QString::fromStdString(domainVars[i])); }
-#endif
 
     DataStatus *dataStatus = _controlExec->getDataStatus();
 
@@ -153,6 +152,7 @@ void RegionEventRouter::_updateTab()
 
     boxSliderFrame->setFullDomain(minExts, maxExts);
     boxSliderFrame->setBoxExtents(minBoxExts, maxBoxExts);
+#endif
 #ifdef DEAD
     string varname = rParams->GetDomainVariables()[0];
     int    maxreflevel = dataStatus->maxXFormPresent(varname, ts);
@@ -188,13 +188,13 @@ void RegionEventRouter::_updateTab()
     maxUserXLabel->setText(QString::number(minExts[0] + dboxmax[0]));
     maxUserYLabel->setText(QString::number(minExts[1] + dboxmax[1]));
     maxUserZLabel->setText(QString::number(minExts[2] + dboxmax[2]));
-#endif
     minUserXLabel->setText(QString::number(minExts[0]));
     minUserYLabel->setText(QString::number(minExts[1]));
     minUserZLabel->setText(QString::number(minExts[2]));
     maxUserXLabel->setText(QString::number(minExts[0]));
     maxUserYLabel->setText(QString::number(minExts[1]));
     maxUserZLabel->setText(QString::number(minExts[2]));
+#endif
 
 #ifdef DEAD
     // And convert these to grid coordinates.
@@ -216,9 +216,14 @@ void RegionEventRouter::_updateTab()
     maxGridZLabel->setText(QString::number(-1));
 
     // Provide latlon box extents if available:
+#ifdef DEAD
     if (_controlExec->GetDataMgr()->GetMapProjection().size() == 0) {
+#endif
         minMaxLonLatFrame->hide();
+#ifdef DEAD
     } else {
+#endif
+#ifdef DEAD
         double boxLatLon[4];
 
         boxLatLon[0] = minBoxExts[0];
@@ -236,6 +241,7 @@ void RegionEventRouter::_updateTab()
             minMaxLonLatFrame->hide();
         }
     }
+#endif
 
 #ifdef DEAD
     if (rParams->IsLocal())
@@ -270,12 +276,14 @@ void RegionEventRouter::setMaxSize()
     confirmText();
     RegionParams *rParams = (RegionParams *)GetActiveParams();
 
+#ifdef DEAD
     vector<double> minExt, maxExt;
     DataStatus *   dataStatus = _controlExec->getDataStatus();
     dataStatus->GetExtents(minExt, maxExt);
 
     rParams->GetBox()->SetExtents(minExt, maxExt);
     updateTab();
+#endif
 }
 
 #ifdef DEAD
@@ -562,6 +570,7 @@ void RegionEventRouter::removeDomainVar()
 }
 void RegionEventRouter::changeExtents()
 {
+#ifdef DEAD
     confirmText();
 
     RegionParams *rParams = (RegionParams *)GetActiveParams();
@@ -579,6 +588,7 @@ void RegionEventRouter::changeExtents()
     dataStatus->GetExtents(timeStep, minExts, maxExts);
     bx->SetExtents(minExts, maxExts);
     updateTab();
+#endif
 }
 void RegionEventRouter::setCenter(const double newCenter[3])
 {

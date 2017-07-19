@@ -145,24 +145,14 @@ int           main(int argc, char **argv)
     app = &a;
     a.setPalette(QPalette(QColor(233, 236, 216), QColor(233, 236, 216)));
 
-    // Depending on the platform, we may want nondefault fonts!
-
-    // The pointsize of 10 works ok on linux and irix, not windows
-    // The weight of 55 is slightly heavier than normal.
-    // default font is OK
-    // QFont myFont = a.font();
-    // myFont.setPointSize(10);
-    // a.setFont(myFont);
+    vector<QString> files;
+    for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
+    MainForm *mw = new MainForm(files, app);
 
     QFontDatabase fdb;
     int           result = fdb.addApplicationFont("/Users/pearse/Downloads/pacifico/Pacifico.ttf");
     QStringList   fonts = fdb.families();
     QFont         f = fdb.font("Pacifico", "normal", 12);
-    //	app->setFont(f);
-
-    vector<QString> files;
-    for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
-    MainForm *mw = new MainForm(files, app);
     mw->setFont(f);
 
     mw->setWindowTitle("VAPOR User Interface");

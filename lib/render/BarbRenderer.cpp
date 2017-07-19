@@ -21,12 +21,12 @@
 #endif
 
 //#include <vapor/Renderer.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/BarbRenderer.h>
 #include <vapor/BarbParams.h>
 #include <vapor/Visualizer.h>
 
 #include <vapor/regionparams.h>
-#include <vapor/AnimationParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/MyBase.h>
 #include <vapor/errorcodes.h>
@@ -37,7 +37,8 @@ using namespace Wasp;
 
 static RendererRegistrar<BarbRenderer> registrar(BarbRenderer::GetClassType(), BarbParams::GetClassType());
 
-BarbRenderer::BarbRenderer(const ParamsMgr *pm, string winName, string instName, DataStatus *ds) : Renderer(pm, winName, BarbParams::GetClassType(), BarbRenderer::GetClassType(), instName, ds)
+BarbRenderer::BarbRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
+: Renderer(pm, winName, dataSetName, BarbParams::GetClassType(), BarbRenderer::GetClassType(), instName, dataMgr)
 {
     _fieldVariables.clear();
     _vectorScaleFactor = 1.0;
@@ -61,40 +62,44 @@ int BarbRenderer::_paintGL()
     // Set up the variable data required, while determining data
     // extents to use in rendering
     //
-    StructuredGrid *varData[] = {NULL, NULL, NULL, NULL, NULL};
+    vector<StructuredGrid *> varData;
 
-    AnimationParams *myAnimationParams;
-    myAnimationParams = GetAnimationParams();
-    size_t ts = myAnimationParams->GetCurrentTimestep();
+    BarbParams *bParams = (BarbParams *)GetActiveParams();
+    size_t      ts = bParams->GetCurrentTimestep();
 
-    BarbParams *   bParams = (BarbParams *)GetActiveParams();
     int            refLevel = bParams->GetRefinementLevel();
     int            lod = bParams->GetCompressionLevel();
     vector<double> minExts, maxExts;
     bParams->GetBox()->GetExtents(minExts, maxExts);
-    // m_dataStatus->GetExtents(minExts, maxExts);
 
     // Find box extents for ROI
     //
     vector<string> varnames = bParams->GetFieldVariableNames();
     if (varnames != _fieldVariables) {
-        _vectorScaleFactor = _calcDefaultScale(varnames, bParams);
+        _vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
         _fieldVariables = varnames;
     }
 
     // Get grids for our vector variables
     //
-    int rc = m_dataStatus->getGrids(ts, varnames, minExts, maxExts, &refLevel, &lod, varData);
+    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
     if (rc < 0) return (rc);
+    varData.push_back(NULL);
+    varData.push_back(NULL);
 
     // Get grids for our height variable
     //
     string hname = bParams->GetHeightVariableName();
     if (!hname.empty()) {
-        vector<string> varnames;
-        varnames.push_back(hname);
-        int rc = m_dataStatus->getGrids(ts, varnames, minExts, maxExts, &refLevel, &lod, &varData[3]);
-        if (rc < 0) return (rc);
+        StructuredGrid *sg = NULL;
+        int             rc = DataMgrUtils::GetGrids(_dataMgr, ts, hname, minExts, maxExts, true, &refLevel, &lod, &sg);
+        if (rc < 0) {
+            for (int i = 0; i < varData.size(); i++) {
+                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
+            }
+            return (rc);
+        }
+        varData[3] = sg;
     }
 
     // Get grids for our auxillary variables
@@ -102,10 +107,15 @@ int BarbRenderer::_paintGL()
     // vector<string> auxvars = bParams->GetAuxVariableNames();
     string colorVar = bParams->GetColorMapVariableName();
     if (!(colorVar == "") && !bParams->UseSingleColor()) {
-        vector<string> varnames;
-        varnames.push_back(colorVar);
-        int rc = m_dataStatus->getGrids(ts, varnames, minExts, maxExts, &refLevel, &lod, &varData[4]);
-        if (rc < 0) return (rc);
+        StructuredGrid *sg;
+        int             rc = DataMgrUtils::GetGrids(_dataMgr, ts, colorVar, minExts, maxExts, true, &refLevel, &lod, &sg);
+        if (rc < 0) {
+            for (int i = 0; i < varData.size(); i++) {
+                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
+            }
+            return (rc);
+        }
+        varData[4] = sg;
     }
 
     float vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
@@ -116,9 +126,8 @@ int BarbRenderer::_paintGL()
     rc = performRendering(bParams, refLevel, vectorLengthScale, varData);
 
     // Release the locks on the data:
-    DataMgr *dataMgr = m_dataStatus->GetDataMgr();
-    for (int k = 0; k < 5; k++) {
-        if (varData[k]) dataMgr->UnlockGrid(varData[k]);
+    for (int i = 0; i < varData.size(); i++) {
+        if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
     }
     return (rc);
 }
@@ -257,11 +266,11 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     glEnd();
 }
 
-int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel, float vectorLengthScale, StructuredGrid *variableData[5])
+int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<StructuredGrid *> variableData)
 {
-    AnimationParams *myAnimationParams;
-    myAnimationParams = GetAnimationParams();
-    size_t timestep = myAnimationParams->GetCurrentTimestep();
+    assert(variableData.size() == 5);
+
+    size_t timestep = bParams->GetCurrentTimestep();
 
     vector<double> rMinExtents, rMaxExtents;
     bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
@@ -276,7 +285,7 @@ int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel
     rakeExts[5] = rMaxExtents[2];
 
     string           winName = GetVisualizer();
-    ViewpointParams *vpParams = m_pm->GetViewpointParams(winName);
+    ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winName);
     // Barb thickness is .001*LineThickness*viewDiameter.
     float thickness = bParams->GetLineThickness();
     // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
@@ -327,10 +336,12 @@ float BarbRenderer::getHeightOffset(StructuredGrid *heightVar, float xCoord, flo
     return offset;
 }
 
-void BarbRenderer::renderScottsGrid(int rakeGrid[3], double rakeExts[6], StructuredGrid *variableData[5], int timestep, float length, float rad, const BarbParams *bParams)
+void BarbRenderer::renderScottsGrid(int rakeGrid[3], double rakeExts[6], vector<StructuredGrid *> variableData, int timestep, float length, float rad, const BarbParams *bParams)
 {
+    assert(variableData.size() == 5);
+
     string           winName = GetVisualizer();
-    ViewpointParams *vpParams = m_pm->GetViewpointParams(winName);
+    ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winName);
     vector<double>   scales = vpParams->GetStretchFactors();
 
     StructuredGrid *heightVar = variableData[3];
@@ -400,33 +411,38 @@ bool BarbRenderer::GetColorMapping(TransferFunction *tf, float val)
     return missing;
 }
 
-double BarbRenderer::_calcDefaultScale(const vector<string> &varnames, const BarbParams *bParams)
+double BarbRenderer::_calcDefaultScale(size_t ts, const vector<string> &varnames, const BarbParams *bParams)
 {
     assert(varnames.size() <= 3);
-    double maxvarvals[3] = {1.0, 1.0, 1.0};
-
-    DataMgr *dataMgr = m_dataStatus->GetDataMgr();
+    vector<double> maxvarvals;
 
     vector<double> stretch = bParams->GetStretchFactors();
     for (int i = 0; i < varnames.size(); i++) {
         if (varnames[i] == "") {
-            maxvarvals[i] = 0.;
+            maxvarvals.push_back(0.);
         } else {
             // Obtain the default
             //
 
             vector<double> minmax;
-            dataMgr->GetDataRange(0, varnames[i], 0, 0, minmax);
-            maxvarvals[i] = Max(abs(minmax[0]), abs(minmax[1]));
+            _dataMgr->GetDataRange(0, varnames[i], 0, 0, minmax);
+            maxvarvals.push_back(Max(abs(minmax[0]), abs(minmax[1])));
         }
     }
 
-    for (int i = 0; i < 3; i++) maxvarvals[i] *= stretch[i];
+    for (int i = 0; i < maxvarvals.size(); i++) maxvarvals[i] *= stretch[i];
 
-    const double *extents = m_dataStatus->getLocalExtents();
-    double        maxVecLength = (double)Max(extents[3] - extents[0], extents[4] - extents[1]) * 0.1;
+    vector<int>    axes;
+    vector<double> minExts, maxExts;
+    bool           status = DataMgrUtils::GetExtents(_dataMgr, ts, varnames, minExts, maxExts, axes);
+    assert(status);
 
-    double maxVecVal = Max(maxvarvals[0], Max(maxvarvals[1], maxvarvals[2]));
+    double maxVecLength = 0.0;
+    for (int i = 0; i < minExts.size(); i++) { maxVecLength = Max(maxVecLength, (maxExts[i] - minExts[i])); }
+    maxVecLength *= 0.1;
+
+    double maxVecVal = 0.0;
+    for (int i = 0; i < maxvarvals.size(); i++) { maxVecVal = Max(maxVecLength, maxvarvals[i]); }
 
     if (maxVecVal == 0.)
         return (maxVecLength);

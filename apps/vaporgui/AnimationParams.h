@@ -24,9 +24,6 @@
 
 #include <vapor/ParamsBase.h>
 
-namespace VAPoR {
-class ExpatParseMgr;
-
 //! \class AnimationParams
 //! \ingroup Public_Params
 //! \brief A class that specifies parameters used in animation
@@ -37,11 +34,11 @@ class ExpatParseMgr;
 //! When this class is local, it controls the time-steps in one visualizer.
 //! The global (shared) AnimationParams controls the animation in any number of visualizers.
 
-class PARAMS_API AnimationParams : public ParamsBase {
+class PARAMS_API AnimationParams : public VAPoR::ParamsBase {
 public:
     AnimationParams(ParamsBase::StateSave *ssave);
 
-    AnimationParams(ParamsBase::StateSave *ssave, XmlNode *node);
+    AnimationParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);
 
     virtual ~AnimationParams();
 
@@ -137,7 +134,5 @@ private:
     //! Put a params instance into default state with no data.
     void _init();
 };
-
-};    // namespace VAPoR
 
 #endif    // ANIMATIONPARAMS_H

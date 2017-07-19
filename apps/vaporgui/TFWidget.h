@@ -44,9 +44,7 @@ public:
                   "Vapor Transfer Function.");
     }
     bool isContainer() const { return true; }
-    void Update(VAPoR::DataStatus *dataStatus, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
-
-    void setDataStatus(VAPoR::DataStatus *ds) { mappingFrame->setDataStatus(ds); }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
     void fileLoadTF(string varname, const char *path, bool savePath);
 
@@ -62,20 +60,19 @@ private slots:
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void setCMVar();
+    void setCMVar(const QString &);
     void setSingleColor();
 
 private:
-    void   getRange(float range[2], float values[2]);
-    void   connectWidgets();
-    size_t getCurrentTimestep(VAPoR::ParamsMgr *paramsMgr);
-    void   updateSliders();
-    void   updateAutoUpdateHistoCheckbox();
-    void   updateColorInterpolation();
-    void   updateMappingFrame();
-    void   updateColorVarCombo();
-    void   enableTFWidget(bool state);
-    void   collapseColormapSettings();
+    void getRange(float range[2], float values[2]);
+    void connectWidgets();
+    void updateSliders();
+    void updateAutoUpdateHistoCheckbox();
+    void updateColorInterpolation();
+    void updateMappingFrame();
+    void updateColorVarCombo();
+    void enableTFWidget(bool state);
+    void collapseColormapSettings();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);

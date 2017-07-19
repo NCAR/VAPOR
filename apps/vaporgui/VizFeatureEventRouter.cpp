@@ -42,7 +42,6 @@
 #include "VizFeatureEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
-#include "vapor/DataStatus.h"
 
 using namespace VAPoR;
 
@@ -240,7 +239,11 @@ void VizFeatureEventRouter::_updateTab()
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
     regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
 
+#ifdef DEAD
     string projString = _controlExec->GetDataMgr()->GetMapProjection();
+#else
+    string projString;
+#endif
     if (projString.size() == 0)
         latLonCheckbox->setEnabled(false);
     else {

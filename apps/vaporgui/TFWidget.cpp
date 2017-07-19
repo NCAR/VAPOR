@@ -69,10 +69,11 @@ TFWidget::~TFWidget()
     }
 }
 
-void TFWidget::setCMVar()
+void TFWidget::setCMVar(const QString &qvar)
 {
-    string var = colormapVarCombo->currentText().toStdString();
-    if (var == "None") {
+    string var = qvar.toStdString();
+
+    if (var == "0" || var == "") {
         var = "";
         _rParams->SetColorMapVariableName(var);
         _rParams->SetUseSingleColor(true);
@@ -205,7 +206,7 @@ void TFWidget::getRange(float range[2], float values[2])
         varName = _rParams->GetVariableName();
     }
 
-    size_t ts = getCurrentTimestep(_paramsMgr);
+    size_t ts = _rParams->GetCurrentTimestep();
     int    ref = _rParams->GetRefinementLevel();
     int    cmp = _rParams->GetCompressionLevel();
 
@@ -264,7 +265,7 @@ void TFWidget::updateAutoUpdateHistoCheckbox()
     // Update the state of autoUpdateHisto according to params
     //
     autoUpdateHistoCheckbox->blockSignals(true);
-    if (tf->getAutoUpdateHisto()) {
+    if (tf->GetAutoUpdateHisto()) {
         autoUpdateHistoCheckbox->setCheckState(Qt::Checked);
     } else {
         autoUpdateHistoCheckbox->setCheckState(Qt::Unchecked);
@@ -287,17 +288,15 @@ void TFWidget::updateMappingFrame()
     mappingFrame->fitToView();
 }
 
-void TFWidget::Update(DataStatus *dataStatus, ParamsMgr *paramsMgr, RenderParams *rParams)
+void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
 {
     assert(paramsMgr);
-    assert(dataStatus);
+    assert(dataMgr);
     assert(rParams);
 
     _paramsMgr = paramsMgr;
-    _dataMgr = dataStatus->GetActiveDataMgr();
+    _dataMgr = dataMgr;
     _rParams = rParams;
-
-    mappingFrame->setDataStatus(dataStatus);
 
     updateAutoUpdateHistoCheckbox();
     updateMappingFrame();
@@ -337,7 +336,7 @@ void TFWidget::updateColorVarCombo()
     vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
 
     colormapVarCombo->clear();
-    colormapVarCombo->addItem(QString("None"));
+    colormapVarCombo->addItem(QString("0"));
     for (int i = 0; i < vars.size(); i++) { colormapVarCombo->addItem(QString::fromStdString(vars[i])); }
     colormapVarCombo->setCurrentIndex(index);
 }
@@ -347,10 +346,10 @@ void TFWidget::connectWidgets()
     connect(_rangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(updateHistoButton, SIGNAL(pressed()), this, SLOT(updateHisto()));
     connect(autoUpdateHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateHistoChecked(int)));
-    connect(colorInterpCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colorInterpChanged(int)));
+    connect(colorInterpCombo, SIGNAL(activated(int)), this, SLOT(colorInterpChanged(int)));
     connect(loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
-    connect(colormapVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setCMVar()));
+    connect(colormapVarCombo, SIGNAL(activated(const QString &)), this, SLOT(setCMVar(const QString &)));
     connect(colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
 }
@@ -379,15 +378,6 @@ void TFWidget::setRange(double min, double max)
         updateHisto();
     } else
         mappingFrame->fitToView();
-}
-
-size_t TFWidget::getCurrentTimestep(ParamsMgr *paramsMgr)
-{
-    GUIStateParams *p = MainForm::getInstance()->GetStateParams();
-    string          vizName = p->GetActiveVizName();
-
-    size_t ts = paramsMgr->GetAnimationParams()->GetCurrentTimestep();
-    return ts;
 }
 
 void TFWidget::updateHisto()
@@ -442,6 +432,8 @@ void TFWidget::loadTF()
     string path = p->GetCurrentTFPath();
 
     fileLoadTF(varname, p->GetCurrentTFPath().c_str(), true);
+
+    Update(_dataMgr, _paramsMgr, _rParams);
 }
 
 void TFWidget::loadInstalledTF(string varname)
@@ -453,6 +445,8 @@ void TFWidget::loadInstalledTF(string varname)
 
     QString installPath = palettes.c_str();
     fileLoadTF(varname, (const char *)installPath.toAscii(), false);
+
+    Update(_dataMgr, _paramsMgr, _rParams);
     updateHisto();
 }
 

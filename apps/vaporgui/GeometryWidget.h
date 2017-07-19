@@ -43,11 +43,10 @@ private slots:
     void copyRegion();
 
 private:
-    void   connectWidgets();
-    size_t getCurrentTimestep();
-    void   updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt);
-    void   GetVectorExtents(size_t ts, int level, std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
-    void   updateCopyCombo();
+    void connectWidgets();
+    void updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt);
+    void GetVectorExtents(size_t ts, int level, std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
+    void updateCopyCombo();
 
     VAPoR::ParamsMgr *   _paramsMgr;
     VAPoR::DataMgr *     _dataMgr;
@@ -65,6 +64,7 @@ private:
     Combo *     _maxZCombo;
     RangeCombo *_zRangeCombo;
 
+    std::vector<std::string>           _dataSetNames;
     std::map<std::string, std::string> _visNames;
     std::map<std::string, std::string> _renTypeNames;
 

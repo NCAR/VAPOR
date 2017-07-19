@@ -22,8 +22,6 @@ ControlExec::ControlExec(vector<string> appParamsNames, size_t cacheSizeMB, int 
     _dataStatus = new DataStatus(cacheSizeMB, nThreads);
     _shaderMgrs.clear();
     _visualizers.clear();
-
-    _paramsMgr->SetDataStatus(_dataStatus);
 }
 
 ControlExec::~ControlExec()
@@ -49,11 +47,6 @@ ControlExec::~ControlExec()
 
 int ControlExec::NewVisualizer(string winName)
 {
-    if (!_dataStatus) {
-        SetErrMsg("Invalid state : no data");
-        return -1;
-    }
-
     // Remove if already exists. Else no-op
     //
     RemoveVisualizer(winName);
@@ -169,9 +162,9 @@ int ControlExec::Paint(string winName, bool force)
     return rc;
 }
 
-int ControlExec::ActivateRender(string winName, string renderType, string renderName, bool on)
+int ControlExec::ActivateRender(string winName, string dataSetName, string renderType, string renderName, bool on)
 {
-    if (!_dataStatus->GetActiveDataMgr()) {
+    if (!_dataStatus->GetDataMgrNames().size()) {
         SetErrMsg("Invalid state : no data");
         return -1;
     }
@@ -193,14 +186,14 @@ int ControlExec::ActivateRender(string winName, string renderType, string render
 
         // Need to create a params instance for this renderer
         //
-        RenderParams *rp = _paramsMgr->CreateRenderParamsInstance(winName, paramsType, renderName);
+        RenderParams *rp = _paramsMgr->CreateRenderParamsInstance(winName, dataSetName, paramsType, renderName);
         if (!rp) {
             SetErrMsg("Invalid renderer of type \"%s\"", renderType.c_str());
             _paramsMgr->EndSaveStateGroup();
             return -1;
         }
 
-        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, renderType, renderName, _dataStatus);
+        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, dataSetName, renderType, renderName, _dataStatus->GetDataMgr(dataSetName));
         if (!ren) {
             SetErrMsg("Invalid renderer of type \"%s\"", renderType.c_str());
             _paramsMgr->EndSaveStateGroup();
@@ -219,11 +212,11 @@ int ControlExec::ActivateRender(string winName, string renderType, string render
     return 0;
 }
 
-int ControlExec::ActivateRender(string winName, const RenderParams *rp, string renderName, bool on)
+int ControlExec::ActivateRender(string winName, string dataSetName, const RenderParams *rp, string renderName, bool on)
 {
     assert(rp);
 
-    if (!_dataStatus->GetActiveDataMgr()) {
+    if (!_dataStatus->GetDataMgrNames().size()) {
         SetErrMsg("Invalid state : no data");
         return -1;
     }
@@ -243,14 +236,14 @@ int ControlExec::ActivateRender(string winName, const RenderParams *rp, string r
     if (!ren) {
         // Need to create a params instance for this renderer
         //
-        RenderParams *newRP = _paramsMgr->CreateRenderParamsInstance(winName, renderName, rp);
+        RenderParams *newRP = _paramsMgr->CreateRenderParamsInstance(winName, dataSetName, renderName, rp);
         if (!newRP) {
             SetErrMsg("Invalid renderer of type \"%s\"", renderType.c_str());
             _paramsMgr->EndSaveStateGroup();
             return -1;
         }
 
-        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, renderType, renderName, _dataStatus);
+        ren = RendererFactory::Instance()->CreateInstance(_paramsMgr, winName, dataSetName, renderType, renderName, _dataStatus->GetDataMgr(dataSetName));
         if (!ren) {
             SetErrMsg("Invalid renderer of type \"%s\"", renderType.c_str());
             _paramsMgr->EndSaveStateGroup();
@@ -269,7 +262,7 @@ int ControlExec::ActivateRender(string winName, const RenderParams *rp, string r
     return 0;
 }
 
-void ControlExec::RemoveRenderer(string winName, string renderType, string renderName)
+void ControlExec::RemoveRenderer(string winName, string dataSetName, string renderType, string renderName)
 {
     Visualizer *v = getVisualizer(winName);
     if (!v) return;
@@ -283,7 +276,7 @@ void ControlExec::RemoveRenderer(string winName, string renderType, string rende
 
     string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 
-    _paramsMgr->RemoveRenderParamsInstance(winName, paramsType, renderName);
+    _paramsMgr->RemoveRenderParamsInstance(winName, dataSetName, paramsType, renderName);
 }
 
 void ControlExec::LoadState()
@@ -333,12 +326,12 @@ int ControlExec::LoadState(string stateFile)
     return (0);
 }
 
-int ControlExec::activateClassRenderers(string vizName, string pClassName, vector<string> instNames, bool reportErrs)
+int ControlExec::activateClassRenderers(string vizName, string dataSetName, string pClassName, vector<string> instNames, bool reportErrs)
 {
     bool errEnabled = MyBase::GetEnableErrMsg();
 
     for (int i = 0; i < instNames.size(); i++) {
-        RenderParams *rp = _paramsMgr->GetRenderParams(vizName, pClassName, instNames[i]);
+        RenderParams *rp = _paramsMgr->GetRenderParams(vizName, dataSetName, pClassName, instNames[i]);
         assert(rp);
 
         // Convert from params render type to render type. Sigh
@@ -347,7 +340,7 @@ int ControlExec::activateClassRenderers(string vizName, string pClassName, vecto
 
         if (!reportErrs) { EnableErrMsg(false); }
 
-        int rc = ActivateRender(vizName, rClassName, instNames[i], rp->IsEnabled());
+        int rc = ActivateRender(vizName, dataSetName, rClassName, instNames[i], rp->IsEnabled());
         if (rc < 0) {
             SetErrMsg("Failed to activate render: %s", instNames[i].c_str());
             EnableErrMsg(errEnabled);
@@ -362,36 +355,35 @@ int ControlExec::activateClassRenderers(string vizName, string pClassName, vecto
 
 int ControlExec::openDataHelper(bool reportErrs)
 {
-    _paramsMgr->SetDataStatus(_dataStatus);
-
     // Activate/Create renderers as needed. This is a no-op if renderers
     // already exist
     //
+    vector<string> dataSetNames = _paramsMgr->GetDataMgrNames();
     vector<string> vizNames = _paramsMgr->GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) {
-        vector<string> pClassNames = _paramsMgr->GetRenderParamsClassNames(vizNames[i]);
+        for (int j = 0; j < dataSetNames.size(); j++) {
+            vector<string> pClassNames = _paramsMgr->GetRenderParamsClassNames(vizNames[i], dataSetNames[j]);
 
-        for (int j = 0; j < pClassNames.size(); j++) {
-            vector<string> instNames = _paramsMgr->GetRenderParamInstances(vizNames[i], pClassNames[j]);
+            for (int k = 0; k < pClassNames.size(); k++) {
+                vector<string> instNames = _paramsMgr->GetRenderParamInstances(vizNames[i], dataSetNames[j], pClassNames[k]);
 
-            int rc = activateClassRenderers(vizNames[i], pClassNames[j], instNames, reportErrs);
-            if (rc < 0) return (rc);
+                int rc = activateClassRenderers(vizNames[i], dataSetNames[j], pClassNames[k], instNames, reportErrs);
+                if (rc < 0) return (rc);
+            }
         }
     }
     return (0);
 }
 
-int ControlExec::OpenData(vector<string> files, string typ)
+int ControlExec::OpenData(vector<string> files, string dataSetName, string typ)
 {
-    const string dataSetName = "Data Set 1";
-
     int rc = _dataStatus->Open(files, dataSetName, typ);
     if (rc < 0) {
         SetErrMsg("Failure to open data set of type \"%s\"", typ.c_str());
         return -1;
     }
 
-    _paramsMgr->SetDataStatus(_dataStatus);
+    _paramsMgr->AddDataMgr(dataSetName, _dataStatus->GetDataMgr(dataSetName));
 
     // Re-initialize the ControlExec to match the new state
     //
@@ -400,11 +392,10 @@ int ControlExec::OpenData(vector<string> files, string typ)
     return (rc);
 }
 
-void ControlExec::CloseData()
+void ControlExec::CloseData(string dataSetName)
 {
-    const string dataSetName = "Data Set 1";
-
     _dataStatus->Close(dataSetName);
+    _paramsMgr->RemoveDataMgr(dataSetName);
 }
 
 int ControlExec::EnableImageCapture(string filename, string winName)
@@ -505,11 +496,11 @@ int ControlExec::SaveSession(string filename)
     return (0);
 }
 
-RenderParams *ControlExec::GetRenderParams(string winName, string renderType, string instName) const
+RenderParams *ControlExec::GetRenderParams(string winName, string dataSetName, string renderType, string instName) const
 {
     string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 
-    RenderParams *rParams = _paramsMgr->GetRenderParams(winName, paramsType, instName);
+    RenderParams *rParams = _paramsMgr->GetRenderParams(winName, dataSetName, paramsType, instName);
 
     if (!rParams) {
         SetErrMsg("Invalid window name, render type, or instance name");
@@ -533,4 +524,11 @@ vector<string> ControlExec::GetRenderInstances(string winName, string renderType
     string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 
     return (_paramsMgr->GetRenderParamInstances(winName, paramsType));
+}
+
+bool ControlExec::RenderLookup(string instName, string &winName, string &dataSetName, string &renderType) const
+{
+    string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
+
+    return (_paramsMgr->RenderParamsLookup(instName, winName, dataSetName, paramsType));
 }

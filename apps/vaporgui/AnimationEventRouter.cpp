@@ -28,7 +28,7 @@
 #include <iostream>
 #include <QTimer>
 
-#include "vapor/AnimationParams.h"
+#include "AnimationParams.h"
 #include "RangeCombos.h"
 #include "AnimationEventRouter.h"
 
@@ -139,6 +139,34 @@ void AnimationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
     help.push_back(make_pair("How to create a key-framed animation sequence", "http://www.vapor.ucar.edu/docs/vapor-gui-help/creating-key-framed-animation"));
 }
 
+void AnimationEventRouter::setCurrentTimestep(size_t ts) const
+{
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+
+    // First set current *global* timestep in AnimationParams
+    //
+    AnimationParams *aParams = (AnimationParams *)GetActiveParams();
+    aParams->SetCurrentTimestep(ts);
+
+    // Now set *local* time step for each RenderParams instance
+    //
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+    for (int i = 0; i < winNames.size(); i++) {
+        vector<string> dataSetNames = dataStatus->GetDataMgrNames();
+        for (int j = 0; j < dataSetNames.size(); j++) {
+            vector<RenderParams *> rParams;
+            paramsMgr->GetRenderParams(winNames[i], dataSetNames[j], rParams);
+
+            if (!rParams.size()) continue;
+
+            size_t local_ts = dataStatus->MapGlobalToLocalTimeStep(dataSetNames[j], ts);
+
+            for (int k = 0; k < rParams.size(); k++) { rParams[k]->SetCurrentTimestep(local_ts); }
+        }
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Slots associated with AnimationTab:
@@ -157,7 +185,7 @@ void AnimationEventRouter::_updateTab()
     DataStatus *     dataStatus = _controlExec->getDataStatus();
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    size_t numTS = dataStatus->getNumTimesteps();
+    size_t numTS = dataStatus->GetTimeCoordinates().size();
     assert(numTS >= 1);
 
     size_t startFrame = aParams->GetStartTimestep();
@@ -183,12 +211,12 @@ void AnimationEventRouter::_updateTab()
 
     if (currentFrame < startFrame) {
         currentFrame = startFrame;
-        aParams->SetCurrentTimestep(currentFrame);
+        setCurrentTimestep(currentFrame);
     }
 
     if (currentFrame > endFrame) {
         currentFrame = endFrame;
-        aParams->SetCurrentTimestep(currentFrame);
+        setCurrentTimestep(currentFrame);
     }
 
     if (frameStepSize < minStepSize || frameStepSize > maxStepSize) {
@@ -208,8 +236,8 @@ void AnimationEventRouter::_updateTab()
     startFrameEdit->setText(QString::number(startFrame));
     currentFrameEdit->setText(QString::number(currentFrame));
     endFrameEdit->setText(QString::number(endFrame));
-    minFrameLabel->setText(QString::number(aParams->GetStartTimestep()));
-    maxFrameLabel->setText(QString::number(aParams->GetEndTimestep()));
+    minFrameLabel->setText(QString::number(0));
+    maxFrameLabel->setText(QString::number(numTS - 1));
     replayButton->setChecked(aParams->GetRepeating());
 
 #ifdef DEAD
@@ -276,7 +304,7 @@ void AnimationEventRouter::AnimationGoToBegin()
 {
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    aParams->SetCurrentTimestep(aParams->GetStartTimestep());
+    setCurrentTimestep(aParams->GetStartTimestep());
 
     _updateTab();
 }
@@ -285,7 +313,7 @@ void AnimationEventRouter::AnimationGoToEnd()
 {
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    aParams->SetCurrentTimestep(aParams->GetEndTimestep());
+    setCurrentTimestep(aParams->GetEndTimestep());
 
     _updateTab();
 }
@@ -301,7 +329,7 @@ void AnimationEventRouter::AnimationStepForward()
 
     if (currentFrame > endFrame) return;
 
-    aParams->SetCurrentTimestep(currentFrame);
+    setCurrentTimestep(currentFrame);
 
     _updateTab();
 }
@@ -317,7 +345,7 @@ void AnimationEventRouter::AnimationStepReverse()
 
     if (currentFrame < startFrame) return;
 
-    aParams->SetCurrentTimestep(currentFrame);
+    setCurrentTimestep(currentFrame);
 
     _updateTab();
 }
@@ -326,7 +354,7 @@ void AnimationEventRouter::SetTimeStep(int ts)
 {
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    aParams->SetCurrentTimestep((size_t)ts);
+    setCurrentTimestep((size_t)ts);
 
     _updateTab();
 }
@@ -409,7 +437,7 @@ void AnimationEventRouter::playNextFrame()
     if (currentFrame < startFrame) currentFrame = endFrame;
     if (currentFrame > endFrame) currentFrame = startFrame;
 
-    aParams->SetCurrentTimestep(currentFrame);
+    setCurrentTimestep(currentFrame);
 
     _updateTab();
 }

@@ -39,14 +39,13 @@ const string MapperFunction::_opacityCompositionTag = "OpacityComposition";
 const string MapperFunction::_opacityScaleTag = "OpacityScale";
 const string MapperFunction::_opacityMapsTag = "OpacityMaps";
 const string MapperFunction::_opacityMapTag = "OpacityMap";
-const string MapperFunction::_colorMapTag = "ColorMap";
 const string MapperFunction::_autoUpdateHistoTag = "autoUpdateHisto";
 
 //----------------------------------------------------------------------------
 // Constructor for empty, default Mapper function
 //----------------------------------------------------------------------------
 
-MapperFunction::MapperFunction(ParamsBase::StateSave *ssave, const string &classname) : ParamsBase(ssave, classname), _numEntries(256), _autoUpdateHisto(false)
+MapperFunction::MapperFunction(ParamsBase::StateSave *ssave, const string &classname) : ParamsBase(ssave, classname), _numEntries(256)
 {
     m_colorMap = NULL;
     m_opacityMaps = NULL;
@@ -76,13 +75,8 @@ MapperFunction::MapperFunction(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
     m_colorMap = NULL;
     m_opacityMaps = NULL;
 
-    if (node->HasChild(_autoUpdateHistoTag)) {
-        _autoUpdateHisto = node->GetChild(_autoUpdateHistoTag);
-    } else {
-        _autoUpdateHisto = false;
-    }
-    if (node->HasChild(_colorMapTag)) {
-        m_colorMap = new ColorMap(ssave, node->GetChild(_colorMapTag));
+    if (node->HasChild(ColorMap::GetClassType())) {
+        m_colorMap = new ColorMap(ssave, node->GetChild(ColorMap::GetClassType()));
     } else {
         // Node doesn't contain a colormap
         //
@@ -106,7 +100,7 @@ MapperFunction::MapperFunction(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
     }
 }
 
-MapperFunction::MapperFunction(const MapperFunction &rhs) : ParamsBase(rhs), _numEntries(256), _autoUpdateHisto(false)
+MapperFunction::MapperFunction(const MapperFunction &rhs) : ParamsBase(rhs), _numEntries(256)
 {
     m_colorMap = NULL;
     m_opacityMaps = NULL;
@@ -120,13 +114,19 @@ MapperFunction::MapperFunction(const MapperFunction &rhs) : ParamsBase(rhs), _nu
 
 MapperFunction &MapperFunction::operator=(const MapperFunction &rhs)
 {
+    if (m_colorMap) delete m_colorMap;
+
+    if (m_opacityMaps) delete m_opacityMaps;
+
+    ParamsBase::operator=(rhs);
+
     m_colorMap = NULL;
     m_opacityMaps = NULL;
 
-    m_colorMap = new ColorMap(*(rhs.m_colorMap));
+    m_colorMap = new ColorMap(rhs._ssave, rhs.m_colorMap->GetNode());
     m_colorMap->SetParent(this);
 
-    m_opacityMaps = new ParamsContainer(*(rhs.m_opacityMaps));
+    m_opacityMaps = new ParamsContainer(rhs._ssave, rhs.m_opacityMaps->GetNode());
     m_opacityMaps->SetParent(this);
 
     return (*this);

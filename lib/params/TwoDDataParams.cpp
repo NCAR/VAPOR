@@ -11,14 +11,14 @@ using namespace VAPoR;
 //
 static RenParamsRegistrar<TwoDDataParams> registrar(TwoDDataParams::GetClassType());
 
-TwoDDataParams::TwoDDataParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, TwoDDataParams::GetClassType())
+TwoDDataParams::TwoDDataParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, TwoDDataParams::GetClassType(), 2)
 {
     SetDiagMsg("TwoDDataParams::TwoDDataParams() this=%p", this);
 
     _init();
 }
 
-TwoDDataParams::TwoDDataParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node)
+TwoDDataParams::TwoDDataParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 2)
 {
     SetDiagMsg("TwoDDataParams::TwoDDataParams() this=%p", this);
 

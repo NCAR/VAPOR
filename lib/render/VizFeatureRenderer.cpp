@@ -24,6 +24,7 @@
     #include <unistd.h>
 #endif
 
+#include <vapor/DataStatus.h>
 #include <vapor/VizFeatureRenderer.h>
 
 using namespace VAPoR;
@@ -57,14 +58,13 @@ void VizFeatureRenderer::InitializeGL(ShaderMgr *shaderMgr) { m_shaderMgr = shad
 // Issue OpenGL commands to draw a grid of lines of the full domain.
 // Grid resolution is up to 2x2x2
 //
-void VizFeatureRenderer::drawDomainFrame()
+void VizFeatureRenderer::drawDomainFrame(size_t ts) const
 {
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
-    // Draw the domain frame
+    vector<double> minExts, maxExts;
+    m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
 
-    vector<double> minExt, maxExt;
-    m_dataStatus->GetExtents(minExt, maxExt);
 #ifdef DEAD
     vector<double> stretchFac = vfParams->GetStretchFactors();
 
@@ -75,12 +75,12 @@ void VizFeatureRenderer::drawDomainFrame()
     double fullSize[3], modMin[3], modMax[3];
 
     // Instead:  either have 2 or 1 lines in each dimension.  2 if the size is < 1/3
-    for (i = 0; i < 3; i++) {
-        double regionSize = maxExt[i] - minExt[i];
+    for (i = 0; i < minExts.size(); i++) {
+        double regionSize = maxExts[i] - minExts[i];
 
         // Stretch size by 1%
-        fullSize[i] = (maxExt[i] - minExt[i]) * 1.01;
-        double mid = 0.5f * (maxExt[i] + minExt[i]);
+        fullSize[i] = (maxExts[i] - minExts[i]) * 1.01;
+        double mid = 0.5f * (maxExts[i] + minExts[i]);
         modMin[i] = mid - 0.5f * fullSize[i];
         modMax[i] = mid + 0.5f * fullSize[i];
         if (regionSize < fullSize[i] * .3)
@@ -164,12 +164,11 @@ void VizFeatureRenderer::drawDomainFrame()
 
 #ifdef DEAD
 
-void VizFeatureRenderer::drawRegionBounds()
+void VizFeatureRenderer::drawRegionBounds(size_t ts) const
 {
-    int           timeStep = _visualizer->getActiveAnimationParams()->GetCurrentTimestep();
     RegionParams *rParams = _visualizer->getActiveRegionParams();
     double        extents[6];
-    rParams->GetBox()->GetLocalExtents(extents, timeStep);
+    rParams->GetBox()->GetLocalExtents(extents, ts);
     _dataStatus->stretchCoords(extents);
     _dataStatus->stretchCoords(extents + 3);
 
@@ -209,7 +208,7 @@ void VizFeatureRenderer::drawRegionBounds()
 
 #endif
 
-void VizFeatureRenderer::inScenePaint()
+void VizFeatureRenderer::InScenePaint(size_t ts)
 {
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
@@ -221,21 +220,20 @@ void VizFeatureRenderer::inScenePaint()
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 #ifdef DEAD
-    if (vfParams->GetUseRegionFrame()) drawRegionBounds();
+    if (vfParams->GetUseRegionFrame()) drawRegionBounds(ts);
 #endif
 
-    if (vfParams->GetUseDomainFrame()) drawDomainFrame();
+    if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
 
 #ifdef DEAD
     if (vfParams->ShowAxisArrows()) {
         RegionParams *rParams = GetVisualizer()->getActiveRegionParams();
-        size_t        timestep = (size_t)GetVisualizer()->getActiveAnimationParams()->GetCurrentTimestep();
         float         extents[6];
-        rParams->GetBox()->GetLocalExtents(extents, timestep);
+        rParams->GetBox()->GetLocalExtents(extents, ts);
         drawAxisArrows(extents);
     }
 
-    if (vfParams->GetAxisAnnotation()) { drawAxisTics(timestep); }
+    if (vfParams->GetAxisAnnotation()) { drawAxisTics(ts); }
 #endif
 
     glPopAttrib();
@@ -248,7 +246,7 @@ void VizFeatureRenderer::inScenePaint()
 
 #ifdef DEAD
 
-void VizFeatureRenderer::overlayPaint() {}
+void VizFeatureRenderer::OverlayPaint(size_t ts) {}
 
 void VizFeatureRenderer::drawAxisTics(size_t timestep)
 {
@@ -289,13 +287,22 @@ void VizFeatureRenderer::drawAxisTics(size_t timestep)
         sticMin.push_back(minTicA[i]);
         sticMax.push_back(maxTicA[i]);
     }
-    _dataStatus->stretchCoords(sorigin);
-    // minTic and maxTic can be regarded as points in world space, defining
-    // corners of a box that's projected to axes.
-    _dataStatus->stretchCoords(sticMin);
-    _dataStatus->stretchCoords(sticMax);
-    // TicLength needs to be stretched based on which axes are used for tic direction
+
+    #ifdef DEAD
     vector<double> stretch = _dataStatus->getStretchFactors();
+    #else
+    vector<double> stretch(3, 1.0);
+    #endif
+    for (int i = 0; i < stretch.size(); i++) {
+        sorigin[i] *= stretch[i];
+
+        // minTic and maxTic can be regarded as points in world space, defining
+        // corners of a box that's projected to axes.
+        sticMin[i] *= stretch[i];
+        sticMax[i] *= stretch[i];
+    }
+
+    // TicLength needs to be stretched based on which axes are used for tic direction
 
     for (int i = 0; i < 3; i++) {
         int j = ticDir[i];
@@ -547,9 +554,13 @@ void VizFeatureRenderer::drawAxisArrows(float *extents)
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
 
-    float          origin[3];
-    float          maxLen = -1.f;
+    float origin[3];
+    float maxLen = -1.f;
+    #ifdef DEAD
     vector<double> stretch = _dataStatus->getStretchFactors();
+    #else
+    vector<double> stretch(3, 1.0);
+    #endif
     vector<double> strExts;
     for (int i = 0; i < 6; i++) strExts.push_back(stretch[i % 3] * extents[i]);
     vector<double> axisArrowCoords = ((VizFeatureParams *)_params)->GetAxisArrowCoords();
