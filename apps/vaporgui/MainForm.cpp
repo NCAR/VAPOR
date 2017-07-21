@@ -51,6 +51,7 @@
 #include "SeedMe.h"
 #include "Statistics.h"
 #include "Plot.h"
+#include "ErrorReporter.h"
 #include "MainForm.h"
 
 
@@ -256,7 +257,8 @@ MainForm::MainForm(
 	//Load preferences at start, set preferences directory
 	loadStartingPrefs();
 	//Create the MessageReporter
-	MessageReporter::getInstance();
+	//MessageReporter::getInstance();
+	ErrorReporter::getInstance();
 	
 	setUpdatesEnabled(true);
     show();
@@ -1023,7 +1025,7 @@ void MainForm::helpContents()
 
 void MainForm::helpAbout()
 {
-    std::string banner_file_name = "vapor_banner.png";
+	std::string banner_file_name = "vapor_banner.png";
     if(_banner) delete _banner;
 	std::string banner_text = 
 		"Visualization and Analysis Platform for atmospheric, Oceanic and "
