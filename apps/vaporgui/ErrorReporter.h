@@ -1,3 +1,29 @@
+//************************************************************************
+//									*
+//		     Copyright (C)  2015				*
+//     University Corporation for Atmospheric Research			*
+//		     All Rights Reserved				*
+//									*
+//************************************************************************/
+//
+//	File:		ErrorReporter.h
+//
+//	Author:		Stas Jaroszynski
+//				National Center for Atmospheric Research
+//				PO 3000, Boulder, Colorado
+//
+//	Date:		July 2017
+//
+//	Description:	Defines the ErrorReporting class.  This is used for
+//	posting various messages that can occur during the operation of the Vapor GUI
+//  This is a singleton class that registers callbacks with the Vapor error api
+//  and keeps tracks of errors that occur. The GUI can then invoke an error message
+//  which will display the GUI provided message and provide a details area which 
+//  contains the full error log accumilated since the last error message  which can
+//  be saved to a text file.
+//  This class also registeres a signal handler for SIGSEGV and displays an error
+//  window with the current backtrace.
+
 #ifndef ERRORREPORTER_H
 #define ERRORREPORTER_H
 
