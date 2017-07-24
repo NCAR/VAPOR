@@ -20,17 +20,52 @@ using namespace std;
 
 namespace {
 
-// Product of elements in a vector
-//
-size_t vproduct(vector<size_t> a) {
+vector<string> requiredDimNames = {
+    "nVertLevels",
+    "nCells",
+    "Time",
+    "nEdges",
+    "nVertices",
+    "maxEdges",
+    "maxEdges2",
+    "vertexDegree"};
+
+vector<string> requiredHorizCoordVarNames = {
+    "latCell",
+    "lonCell",
+    "xCell",   // Cartesian coord - not used
+    "yCell",   // Cartesian coord - not used
+    "yVertex", // Cartesian coord - not used
+    "latVertex",
+    "lonVertex",
+    "xVertex", // Cartesian coord - not used
+    "yVertex", // Cartesian coord - not used
+    "yVertex", // Cartesian coord - not used
+    "latEdge",
+    "lonEdge",
+    "xEdge",   // Cartesian coord - not used
+    "yVertex", // Cartesian coord - not used
+    "yEdge"    // Cartesian coord - not used
+};
+
+lat, lon, x, y, z
+} // namespace
+Vertex, and the coordinates of the edges(the points where Delaunay triangle faces intersect Voronoi cell faces) are given by{lat, lon, x, y, z} Edge.
+}
+;
+{lat, lon, x, y, z} Vertex, and the coordinates of the edges(the points where Delaunay triangle faces intersect Voronoi cell faces) are given by{lat, lon, x, y, z} Edge.
+
+                                // Product of elements in a vector
+                                //
+                                size_t vproduct(vector<size_t> a) {
     size_t ntotal = 1;
 
     for (int i = 0; i < a.size(); i++)
         ntotal *= a[i];
     return (ntotal);
 }
-
-}; // namespace
+}
+;
 
 DCMPAS::DCMPAS() {
     _ncdfc = NULL;
@@ -64,11 +99,12 @@ DCMPAS::~DCMPAS() {
 
 int DCMPAS::Initialize(const vector<string> &files) {
 
-    NetCDFMPASCollection *ncdfc = new NetCDFMPASCollection();
+    NetCDFCollection *ncdfc = new NetCDFCollection();
 
-    // Initialize the NetCDFMPASCollection class.
+    // Initialize NetCDFCollection class
     //
-    int rc = ncdfc->Initialize(files);
+    vector<string> time_dimnames(1, "Time");
+    int rc = ncdfc->Initialize(files, time_dimnames, vector<string>());
     if (rc < 0) {
         SetErrMsg("Failed to initialize netCDF data collection for reading");
         return (-1);
@@ -459,7 +495,7 @@ bool DCMPAS::VariableExists(
 }
 
 int DCMPAS::_get_latlon_coordvars(
-    NetCDFMPASCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const {
+    NetCDFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const {
     loncvar.clear();
     latcvar.clear();
 
@@ -481,7 +517,7 @@ int DCMPAS::_get_latlon_coordvars(
 }
 
 int DCMPAS::_get_latlon_extents(
-    NetCDFMPASCollection *ncdfc, string latlon, bool lonflag,
+    NetCDFCollection *ncdfc, string latlon, bool lonflag,
     float &min, float &max) {
 
     vector<size_t> dims = ncdfc->GetSpatialDims(latlon);
@@ -528,7 +564,7 @@ int DCMPAS::_get_latlon_extents(
 }
 
 int DCMPAS::_get_coord_pair_extents(
-    NetCDFMPASCollection *ncdfc, string lon, string lat,
+    NetCDFCollection *ncdfc, string lon, string lat,
     double &lonmin, double &lonmax, double &latmin, double &latmax) {
     lonmin = lonmax = latmin = latmax = 0.0;
 
@@ -572,7 +608,7 @@ Proj4API *DCMPAS::_create_proj4api(
 }
 
 int DCMPAS::_AddCoordvars(
-    NetCDFMPASCollection *ncdfc,
+    NetCDFCollection *ncdfc,
     const vector<string> &cvars) {
 
     for (int i = 0; i < cvars.size(); i++) {
@@ -619,58 +655,8 @@ int DCMPAS::_AddCoordvars(
 }
 
 int DCMPAS::_InitHorizontalCoordinatesDerived(
-    NetCDFMPASCollection *ncdfc,
+    NetCDFCollection *ncdfc,
     const vector<pair<string, string>> &coordpairs) {
-
-    // Get min and max lat-lon extents for all lat-lon coordinate
-    // pairs
-    //
-    double lonmin = 360.0;
-    double lonmax = -360.0;
-    double latmin = 180.0;
-    double latmax = -180.0;
-    for (int i = 0; i < coordpairs.size(); i++) {
-
-        // Get Min and Max lat and lon for all coordinate pairs
-        //
-        double my_lonmin, my_lonmax, my_latmin, my_latmax;
-        int rc = _get_coord_pair_extents(
-            ncdfc, coordpairs[i].first, coordpairs[i].second,
-            my_lonmin, my_lonmax, my_latmin, my_latmax);
-        if (rc < 0)
-            return (-1);
-        if (my_lonmin < lonmin)
-            lonmin = my_lonmin;
-        if (my_lonmax > lonmax)
-            lonmax = my_lonmax;
-        if (my_latmin < latmin)
-            latmin = my_latmin;
-        if (my_latmax > latmax)
-            latmax = my_latmax;
-    }
-
-    // Synthesize a proj4 string for each coordinate pair. Only used
-    // if variable does not provide its own map projection
-    //
-    for (int i = 0; i < coordpairs.size(); i++) {
-
-        // Generate a proj4string and create a Proj4API instance for
-        // each coordinate pair
-        //
-        string proj4string;
-        Proj4API *proj4API = _create_proj4api(
-            lonmin, lonmax, latmin, latmax, proj4string);
-
-        if (!proj4API)
-            return (-1);
-
-        // Save Proj4APIs and proj4 strings for later use
-        //
-        _proj4APIs.push_back(proj4API);
-
-        string key = coordpairs[i].first + ":" + coordpairs[i].second;
-        _proj4Strings[key] = proj4string;
-    }
 
     // Create derived variables and find min and max lat-lon coordinate
     // extents.
@@ -703,6 +689,9 @@ int DCMPAS::_InitHorizontalCoordinatesDerived(
             latdims.push_back(_dimsMap[latdimnames[j]]);
         }
 
+        // Time varying coordinates are't currently supported by MPAS, so this
+        // code is a no-op
+        //
         string lon_time_dim_name;
         if (ncdfc->IsTimeVarying(coordpairs[i].first)) {
             lon_time_dim_name = londimnames.back();
@@ -725,8 +714,8 @@ int DCMPAS::_InitHorizontalCoordinatesDerived(
             londims, _proj4APIs[i], true);
         _derivedVars.push_back(derivedX);
 
-        // Install the derived variable on the NetCDFMPASCollection class. Then
-        // all NetCDFMPASCollection methods will treat the derived variable as
+        // Install the derived variable on the NetCDFCollection class. Then
+        // all NetCDFCollection methods will treat the derived variable as
         // if it existed in the MPAS data set.
         //
         ncdfc->InstallDerivedCoordVar(name, derivedX, 0);
@@ -771,74 +760,48 @@ int DCMPAS::_InitHorizontalCoordinatesDerived(
 // Initializes _proj4APIs, _proj4Strings, _coordVarKeys
 //
 int DCMPAS::_InitHorizontalCoordinates(
-    NetCDFMPASCollection *ncdfc) {
-    _proj4APIs.clear();
-    _proj4Strings.clear();
-    _coordVarKeys.clear();
+    NetCDFCollection *ncdfc) {
 
-    //
-    // Get names of data variables  in the MPAS data set that have 2 or 3
-    // spatial dimensions
-    //
-    vector<string> dvars;
-    for (int i = 2; i < 4; i++) {
-        vector<string> v = ncdfc->GetDataVariableNames(i, true);
-        dvars.insert(dvars.end(), v.begin(), v.end());
-    }
+    _proj4APIs = NULL;
+    _proj4String.clear();
 
-    // Now get all of the lat and lon coordiates pairs used for
-    // for each of the 2D and 3D data variables
+    // Check for required horizontal coordinate variables
     //
-    vector<pair<string, string>> coordpairs;
-    vector<string> cvars;
-    for (int i = 0; i < dvars.size(); i++) {
-        string loncvar, latcvar;
-
-        int rc = _get_latlon_coordvars(ncdfc, dvars[i], loncvar, latcvar);
-        if (rc < 0)
+    vector<string> varnames = ncdfc->GetVarNames(1, true);
+    for (int i = 0; i < requiredHorizCoordVarNames.size(); i++) {
+        if (_dimsMap.find(requiredHorizCoordVarNames[i]) == _dimsMap.end()) {
+            SetErrMsg(
+                "Missing required horizontal coordinate variable \"%s\",
+                requiredHorizCoordVarNames[i]
+                    .c_str());
             return (-1);
-
-        if (!loncvar.empty())
-            cvars.push_back(loncvar);
-        if (!latcvar.empty())
-            cvars.push_back(latcvar);
-
-        if (loncvar.empty() || latcvar.empty())
-            continue;
-
-        pair<string, string> p1 = make_pair(loncvar, latcvar);
-
-        coordpairs.push_back(make_pair(loncvar, latcvar));
-
-        // Map varname to coord var pair
-        //
-        string key = loncvar + ":" + latcvar;
-        _coordVarKeys[dvars[i]] = key;
+        }
     }
 
-    // Remove duplicates
-    //
-    sort(coordpairs.begin(), coordpairs.end());
-    vector<pair<string, string>>::iterator last1;
-    last1 = unique(coordpairs.begin(), coordpairs.end());
-    coordpairs.erase(last1, coordpairs.end());
+    _proj4API = _create_proj4api(
+        -180.0, 180.0, -90.0, 90.0, _proj4string);
+    if (!_proj4API)
+        return (-1);
 
-    sort(cvars.begin(), cvars.end());
-    vector<string>::iterator last2;
-    last2 = unique(cvars.begin(), cvars.end());
-    cvars.erase(last2, cvars.end());
+    vector<pair<string, string>> coordpairs;
+    coordpairs.push_back(make_pair("lonCell", "latCell"));
+    coordpairs.push_back(make_pair("lonVertex", "latVertex"));
+    coordpairs.push_back(make_pair("lonEdge", "latEdge"));
 
     // Create a pair of derived horizontal coordinate variables
     // in Cartographic
     // coordiantes for each lat-lon pair
     //
-
     int rc = _InitHorizontalCoordinatesDerived(ncdfc, coordpairs);
     if (rc < 0)
         return (-1);
 
     // Add native coordinate variables
     //
+    vector<string> cvars = {
+        "lonCell", "latCell",
+        "lonVertex", "latVertex",
+        "lonEdge", "latEdge"};
     rc = _AddCoordvars(ncdfc, cvars);
     if (rc < 0)
         return (-1);
@@ -847,7 +810,7 @@ int DCMPAS::_InitHorizontalCoordinates(
 }
 
 int DCMPAS::_get_vertical_coordvar(
-    NetCDFMPASCollection *ncdfc, string dvar, string &cvar) {
+    NetCDFCollection *ncdfc, string dvar, string &cvar) {
     cvar.clear();
 
     vector<string> cvars;
@@ -865,7 +828,7 @@ int DCMPAS::_get_vertical_coordvar(
 }
 
 int DCMPAS::_InitVerticalCoordinatesDerived(
-    NetCDFMPASCollection *ncdfc,
+    NetCDFCollection *ncdfc,
     const vector<string> &cvars) {
     vector<bool> periodic(3, false);
     for (int i = 0; i < cvars.size(); i++) {
@@ -931,7 +894,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
 // ELEVATIONW.
 //
 int DCMPAS::_InitVerticalCoordinates(
-    NetCDFMPASCollection *ncdfc) {
+    NetCDFCollection *ncdfc) {
 
     //
     // Get names of data variables  in the MPAS data set that have 1, 2 or 3
@@ -968,7 +931,7 @@ int DCMPAS::_InitVerticalCoordinates(
     cvars.erase(last, cvars.end());
 
     // Create a new derived vertical coordinate variable for each native
-    // vertical coordinate variable using the NetCDFMPASCollection class
+    // vertical coordinate variable using the NetCDFCollection class
     // built-in standard vertical coordinate converts
     //
     int rc = _InitVerticalCoordinatesDerived(ncdfc, cvars);
@@ -983,7 +946,7 @@ int DCMPAS::_InitVerticalCoordinates(
 }
 
 int DCMPAS::_get_time_coordvar(
-    NetCDFMPASCollection *ncdfc, string dvar, string &cvar) {
+    NetCDFCollection *ncdfc, string dvar, string &cvar) {
     cvar.clear();
 
     vector<string> cvars;
@@ -1001,7 +964,7 @@ int DCMPAS::_get_time_coordvar(
 }
 
 int DCMPAS::_InitTimeCoordinatesDerived(
-    NetCDFMPASCollection *ncdfc,
+    NetCDFCollection *ncdfc,
     const vector<string> &cvars) {
 
     vector<bool> periodic(1, false);
@@ -1048,7 +1011,7 @@ int DCMPAS::_InitTimeCoordinatesDerived(
 // time be expressed as seconds represented as floats.
 //
 int DCMPAS::_InitTimeCoordinates(
-    NetCDFMPASCollection *ncdfc) {
+    NetCDFCollection *ncdfc) {
     //
     // Get names of data variables  in the MPAS data set that have 1, 2 or 3
     // spatial dimensions
@@ -1107,7 +1070,7 @@ int DCMPAS::_InitTimeCoordinates(
 // _dimsMap
 //
 int DCMPAS::_InitDimensions(
-    NetCDFMPASCollection *ncdfc) {
+    NetCDFCollection *ncdfc) {
     _dimsMap.clear();
 
     // Get dimension names and lengths for all dimensions in the
@@ -1117,22 +1080,20 @@ int DCMPAS::_InitDimensions(
     vector<size_t> dimlens = ncdfc->GetDims();
     assert(dimnames.size() == dimlens.size());
 
-    //
-    // Find all dimensions and their associated axis (X,Y,Z,T). From
-    // MPAS 1.6:
-    //
-    // All of a variable's dimensions that are latitude, longitude, vertical,
-    // or time dimensions (see Section 1.2, “Terminology”) must have
-    // corresponding coordinate variables, i.e., one-dimensional variables
-    // with the same name as the dimension (see examples in Chapter 4,
-    // Coordinate Types ). This is the only method of associating dimensions
-    // with coordinates that is supported by COARDS.
-    //
     for (int i = 0; i < dimnames.size(); i++) {
-        //if (! ncdfc->IsCoordVarMPAS(dimnames[i])) continue;
 
         Dimension dim(dimnames[i], dimlens[i]);
         _dimsMap[dimnames[i]] = dim;
+    }
+
+    for (int i = 0; i < requiredDimNames.size(); i++) {
+        if (_dimsMap.find(requiredDimNames[i]) == _dimsMap.end()) {
+            SetErrMsg(
+                "Missing required dimension \"%s\",
+                requiredDimNames[i]
+                    .c_str());
+            return (-1);
+        }
     }
 
     return (0);
@@ -1148,7 +1109,7 @@ int DCMPAS::_InitDimensions(
 // is significant.
 //
 int DCMPAS::_GetVarCoordinates(
-    NetCDFMPASCollection *ncdfc, string varname,
+    NetCDFCollection *ncdfc, string varname,
     vector<string> &sdimnames,
     vector<string> &scoordvars,
     string &time_dim_name,
@@ -1207,7 +1168,7 @@ int DCMPAS::_GetVarCoordinates(
 // Collect metadata for all data variables found in the MPAS data
 // set. Initialize the _dataVarsMap member
 //
-int DCMPAS::_InitVars(NetCDFMPASCollection *ncdfc) {
+int DCMPAS::_InitVars(NetCDFCollection *ncdfc) {
     _dataVarsMap.clear();
     _meshMap.clear();
 
@@ -1289,7 +1250,7 @@ int DCMPAS::_InitVars(NetCDFMPASCollection *ncdfc) {
 // project from geographic to Cartographic using the Proj4 API
 //
 DCMPAS::DerivedVarHorizontal::DerivedVarHorizontal(
-    NetCDFMPASCollection *ncdfc, string lonname, string latname,
+    NetCDFCollection *ncdfc, string lonname, string latname,
     const vector<DC::Dimension> &dims, Proj4API *proj4API, bool xflag) : DerivedVar(ncdfc) {
 
     assert(dims.size() >= 1 && dims.size() <= 3);
