@@ -2,10 +2,8 @@
 #ifndef IMAGEPARAMS_H
 #define IMAGEPARAMS_H
 
-#include <vapor/ParamNode.h>
-#include <vapor/params.h>
-#include <vapor/renderparams.h>
-#include <vapor/command.h>
+#include <vapor/RenderParams.h>
+#include <vapor/DataMgr.h>
 
 namespace VAPoR 
 {
@@ -15,34 +13,65 @@ class PARAMS_API ImageParams : public RenderParams
 {
 public:
 
-  ImageParams( DataMgr* dataManager, ParamsBase::StateSave* stateSave );
-  ImageParams( DataMgr* dataManager, ParamsBase::StateSave* stateSave, XmlNode* xmlNode );
+  ImageParams( DataMgr* dataManager, 
+               ParamsBase::StateSave* stateSave,
+               std::string& fileName );
+  ImageParams( DataMgr* dataManager, 
+               ParamsBase::StateSave* stateSave, 
+               std::string* fileName,
+               XmlNode* xmlNode );
 
- //! Required static method for extensibility:
- //! \retval ParamsBase* pointer to a default Params instance
- /* static ParamsBase* CreateDefaultInstance() 
- {
-	return new ImageParams(0, -1);
- } */
-
- virtual ~ImageParams();
+  virtual ~ImageParams();
 
   static std::string getClassType() 
   {
     return ("ImageParams");
   }
 
-  virtual void Validate( int type );
 
-  virtual void IsOpaque() const;
+  bool isGeoTIFF() const
+  {
+    return _isGeoTIFF;
+  }
+  void treatAsGeoTIFF()
+  {
+    _isGeoTIFF = true;
+  }
+  void doNotTreatAsGeoTIFF()
+  {
+    _isGeoTIFF = false;
+  }
 
-  virtual bool usingVariable( const std::string& varName );
+
+  bool isTransparencyIgnored() const
+  {
+    return _ignoreTransparence;
+  }
+  void ignoreTransparency()
+  {
+    _ignoreTransparence = true;
+  }
+  void doNotIgnoreTransparency()
+  {
+    _ignoreTransparence = false;
+  }
+
+
+  float getOpacity() const
+  {
+    return _opacity;
+  }
+  float setOpacity( float val ) 
+  {
+    _opacity = val;
+  }
+
 
 private:
-  bool          _hasGeoreference;
+  bool          _isGeoTIFF;
   bool          _ignoreTransparence;
-  float         _Opacity;
-  std::string   _filePath;
+  float         _opacity;
+  std::string   _fileName;
 
   void          _init();
 };
