@@ -2,25 +2,21 @@
 #ifndef IMAGEPARAMS_H
 #define IMAGEPARAMS_H
 
-#include <vapor/ParamNode.h>
-#include <vapor/params.h>
-#include <vapor/renderparams.h>
-#include <vapor/command.h>
+#include <vapor/RenderParams.h>
+#include <vapor/DataMgr.h>
 
 namespace VAPoR {
 //! \class ImageParams
 //! \brief Class that supports drawing Barbs based on 2D or 3D vector field
 class PARAMS_API ImageParams : public RenderParams {
   public:
-    ImageParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave);
-    ImageParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, XmlNode *xmlNode);
-
-    //! Required static method for extensibility:
-    //! \retval ParamsBase* pointer to a default Params instance
-    /* static ParamsBase* CreateDefaultInstance() 
- {
-	return new ImageParams(0, -1);
- } */
+    ImageParams(DataMgr *dataManager,
+                ParamsBase::StateSave *stateSave,
+                std::string &fileName);
+    ImageParams(DataMgr *dataManager,
+                ParamsBase::StateSave *stateSave,
+                std::string *fileName,
+                XmlNode *xmlNode);
 
     virtual ~ImageParams();
 
@@ -28,17 +24,38 @@ class PARAMS_API ImageParams : public RenderParams {
         return ("ImageParams");
     }
 
-    virtual void Validate(int type);
+    bool isGeoTIFF() const {
+        return _isGeoTIFF;
+    }
+    void treatAsGeoTIFF() {
+        _isGeoTIFF = true;
+    }
+    void doNotTreatAsGeoTIFF() {
+        _isGeoTIFF = false;
+    }
 
-    virtual void IsOpaque() const;
+    bool isTransparencyIgnored() const {
+        return _ignoreTransparence;
+    }
+    void ignoreTransparency() {
+        _ignoreTransparence = true;
+    }
+    void doNotIgnoreTransparency() {
+        _ignoreTransparence = false;
+    }
 
-    virtual bool usingVariable(const std::string &varName);
+    float getOpacity() const {
+        return _opacity;
+    }
+    float setOpacity(float val) {
+        _opacity = val;
+    }
 
   private:
-    bool _hasGeoreference;
+    bool _isGeoTIFF;
     bool _ignoreTransparence;
-    float _Opacity;
-    std::string _filePath;
+    float _opacity;
+    std::string _fileName;
 
     void _init();
 };
