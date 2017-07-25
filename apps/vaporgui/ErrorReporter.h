@@ -50,6 +50,7 @@ class ErrorReporter {
     static ErrorReporter *getInstance();
     static void showErrors();
     static void report(std::string msg, Type severity = Diagnostic, std::string details = "");
+    static std::string getSystemInformation();
 
   protected:
     ErrorReporter();
