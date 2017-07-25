@@ -12,6 +12,13 @@
 #include <unistd.h>
 
 #include "vapor/MyBase.h"
+#include "vapor/Version.h"
+
+#if defined(DARWIN)
+    #include <CoreServices/CoreServices.h>
+#elif defined(LINUX)
+#elif defined(WIN32)
+#endif
 
 using std::string;
 using std::vector;
@@ -89,8 +96,10 @@ void ErrorReporter::report(string msg, Type severity, string details)
                 return;
             }
             QDataStream out(&file);
-            out << QString(msg.c_str());
-            out << QString("-------------------");
+            out << QString((getSystemInformation() + "\n").c_str());
+            out << QString("-------------------\n");
+            out << QString((msg + "\n").c_str());
+            out << QString("-------------------\n");
             out << QString(details.c_str());
         }
         break;
@@ -99,6 +108,28 @@ void ErrorReporter::report(string msg, Type severity, string details)
     default: break;
     }
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+string                 ErrorReporter::getSystemInformation()
+{
+    string ret = "Vapor " + Wasp::Version::GetVersionString() + "\n";
+#if defined(DARWIN)
+    SInt32 major, minor, rev;
+    Gestalt(gestaltSystemVersionMajor, &major);
+    Gestalt(gestaltSystemVersionMinor, &minor);
+    Gestalt(gestaltSystemVersionBugFix, &rev);
+    ret += "OS: Mac OS X " + to_string(major) + "." + to_string(minor) + "." + to_string(rev) + "\n";
+#elif defined(LINUX)
+    return "Linux";
+#elif defined(WIN32)
+    return "Windows";
+#else
+    return "Unsupported Platform";
+#endif
+    return ret;
+}
+#pragma GCC diagnostic pop
 
 ErrorReporter::ErrorReporter()
 {
