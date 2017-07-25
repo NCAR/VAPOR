@@ -20,6 +20,8 @@
 #elif defined(WIN32)
 #endif
 
+// #define LOG_FILE "/tmp/vapor.log"
+
 using std::string;
 using std::vector;
 
@@ -43,9 +45,24 @@ void segFaultHandler(int sig)
     exit(1);
 }
 
-void MyBaseErrorCallback(const char *msg, int err_code) { ErrorReporter::getInstance()->log.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code)); }
+void MyBaseErrorCallback(const char *msg, int err_code)
+{
+    ErrorReporter::getInstance()->log.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code));
+    ErrorReporter::getInstance()->fullLog.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code));
 
-void MyBaseDiagCallback(const char *msg) { ErrorReporter::getInstance()->log.push_back(ErrorReporter::Message(ErrorReporter::Diagnostic, string(msg))); }
+#ifdef LOG_FILE
+    fprintf(ErrorReporter::getInstance()->logFile, "Error[%i]: %s\n", err_code, msg);
+#endif
+}
+
+void MyBaseDiagCallback(const char *msg)
+{
+    ErrorReporter::getInstance()->log.push_back(ErrorReporter::Message(ErrorReporter::Diagnostic, string(msg)));
+    ErrorReporter::getInstance()->fullLog.push_back(ErrorReporter::Message(ErrorReporter::Diagnostic, string(msg)));
+#ifdef LOG_FILE
+    fprintf(ErrorReporter::getInstance()->logFile, "Diagnostic: %s\n", msg);
+#endif
+}
 
 ErrorReporter *ErrorReporter::instance;
 ErrorReporter *ErrorReporter::getInstance()
@@ -59,6 +76,9 @@ void ErrorReporter::showErrors() { report("The action failed"); }
 void ErrorReporter::report(string msg, Type severity, string details)
 {
     ErrorReporter *e = getInstance();
+#ifdef LOG_FILE
+    fprintf(e->logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str());
+#endif
 
     QMessageBox box;
     box.setText("An error has occured");
@@ -136,4 +156,10 @@ ErrorReporter::ErrorReporter()
     signal(SIGSEGV, segFaultHandler);
     Wasp::MyBase::SetErrMsgCB(MyBaseErrorCallback);
     Wasp::MyBase::SetDiagMsgCB(MyBaseDiagCallback);
+
+#ifdef LOG_FILE
+    logFile = fopen(LOG_FILE, "w");
+#endif
 }
+
+ErrorReporter::~ErrorReporter() { fclose(logFile); }

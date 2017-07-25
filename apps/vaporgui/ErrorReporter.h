@@ -49,10 +49,13 @@ public:
 
 protected:
     ErrorReporter();
+    ~ErrorReporter();
 
 private:
     static ErrorReporter *instance;
     std::vector<Message>  log;
+    std::vector<Message>  fullLog;
+    FILE *                logFile;
 
     friend void MyBaseErrorCallback(const char *msg, int err_code);
     friend void MyBaseDiagCallback(const char *msg);
