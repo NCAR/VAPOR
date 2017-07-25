@@ -5,14 +5,15 @@
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
 
-namespace VAPoR {
+namespace VAPoR 
+{
 
 //! \class TwoDDataParams
 //! \brief Class that supports drawing Barbs based on 2D or 3D vector field
 //! \author Alan Norton
 //! \version 3.0
-//! \date February 2014
-class PARAMS_API TwoDDataParams : public RenderParams {
+class PARAMS_API TwoDDataParams : public RenderParams 
+{
 public:
 
  TwoDDataParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave);
@@ -36,9 +37,10 @@ public:
 
  // Get static string identifier for this params class
  //
- static string GetClassType() {
-	return("TwoDDataParams");
- }
+  static string GetClassType() 
+  {
+	  return("TwoDDataParams");
+  }
 
 private:
 
