@@ -792,9 +792,16 @@ public:
   NetCDFCollection *_ncdfc;
  };
 
- void InstallDerivedVar(string varname, DerivedVar *derivedVar) {
-	_derivedVarsMap[varname] = derivedVar;
- };
+ //! Add a derived variable to the list of available variables. The 
+ //!
+ //! Add a derived variable to the list of available variables. The new
+ //! variable will appear as part of the collection. Any new dimensions
+ //! defined by the derived variable will be added to the list of dimensions
+ //! for this collection. Unpredictable results may occur if dimension
+ //! lengths defined by the new variable disagree with existing native or
+ //! previously defined derived variables
+ //!
+ void InstallDerivedVar(string varname, DerivedVar *derivedVar);
 
  void RemoveDerivedVar(string varname) {
 	std::map <string,DerivedVar*>::iterator itr = _derivedVarsMap.find(varname);
