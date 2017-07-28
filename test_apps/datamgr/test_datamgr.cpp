@@ -25,6 +25,7 @@ struct {
     string savefilebase;
     string ftype;
     std::vector<float> extents;
+    OptionParser::Boolean_T verbose;
     OptionParser::Boolean_T help;
     OptionParser::Boolean_T quiet;
     OptionParser::Boolean_T debug;
@@ -44,6 +45,7 @@ OptionParser::OptDescRec_T set_opts[] = {
     {"ftype", 1, "vdc", "data set type (vdc|wrf)"},
     {"extents", 1, "", "Colon delimited 6-element vector "
                        "specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"},
+    {"verbose", 0, "", "Verobse output"},
     {"help", 0, "", "Print this message and exit"},
     {"quiet", 0, "", "Operate quitely"},
     {"debug", 0, "", "Debug mode"},
@@ -61,6 +63,7 @@ OptionParser::Option_T get_options[] = {
     {"savefilebase", Wasp::CvtToCPPStr, &opt.savefilebase, sizeof(opt.savefilebase)},
     {"ftype", Wasp::CvtToCPPStr, &opt.ftype, sizeof(opt.ftype)},
     {"extents", Wasp::CvtToFloatVec, &opt.extents, sizeof(opt.extents)},
+    {"verbose", Wasp::CvtToBoolean, &opt.verbose, sizeof(opt.verbose)},
     {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
     {"quiet", Wasp::CvtToBoolean, &opt.quiet, sizeof(opt.quiet)},
     {"debug", Wasp::CvtToBoolean, &opt.debug, sizeof(opt.debug)},
@@ -71,17 +74,43 @@ const char *ProgName;
 void ErrMsgCBHandler(const char *msg, int) {
     cerr << ProgName << " : " << msg << endl;
 }
-void print_info(DataMgr &datamgr) {
+void print_info(DataMgr &datamgr, bool verbose) {
+
+    vector<string> dimnames;
+    dimnames = datamgr.GetDimensionNames();
+    cout << "Dimensions:" << endl;
+    for (int i = 0; i < dimnames.size(); i++) {
+        DC::Dimension dimension;
+        datamgr.GetDimension(dimnames[i], dimension);
+        cout << "\t" << dimension.GetName() << " = " << dimension.GetLength()
+             << endl;
+    }
+
+    vector<string> meshnames;
+    cout << "Meshes:" << endl;
+    meshnames = datamgr.GetMeshNames();
+    for (int i = 0; i < meshnames.size(); i++) {
+        cout << "\t" << meshnames[i] << endl;
+        if (verbose) {
+            DC::Mesh mesh;
+            datamgr.GetMesh(meshnames[i], mesh);
+            cout << mesh;
+        }
+    }
+
     vector<string> vars;
-    DC::DataVar datavar;
 
     for (int d = 1; d < 4; d++) {
         cout << d << "D variables: ";
         vars = datamgr.GetDataVarNames(d, true);
         for (int i = 0; i < vars.size(); i++) {
             cout << vars[i] << endl;
-            datamgr.GetDataVarInfo(vars[i], datavar);
-            cout << datavar;
+
+            if (verbose) {
+                DC::DataVar datavar;
+                datamgr.GetDataVarInfo(vars[i], datavar);
+                cout << datavar;
+            }
         }
         cout << endl;
     }
@@ -141,16 +170,11 @@ int main(int argc, char **argv) {
     if (rc < 0)
         exit(1);
 
-    print_info(datamgr);
+    print_info(datamgr, opt.verbose);
 
     string vname = opt.varname;
     if (vname.empty()) {
-        vector<string> v = datamgr.GetDataVarNames();
-        if (v.size() == 0) {
-            cerr << "No variables" << endl;
-            exit(0);
-        }
-        vname = v[0];
+        return (0);
     }
 
     FILE *fp = NULL;
