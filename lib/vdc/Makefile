@@ -8,7 +8,7 @@ FILES = \
 	LayeredGrid CurvilinearGrid NetCDFSimple \
 	NetCDFCollection NetCDFCFCollection \
 	UDUnitsClass Proj4API DC VDC VDCNetCDF \
-	DCWRF DCCF DataMgr DataMgrUtils GeoUtil vizutil \
+	DCWRF DCCF DCMPAS DataMgr DataMgrUtils GeoUtil vizutil \
 	KDTreeRG kdtree VDC_c
 
 	
