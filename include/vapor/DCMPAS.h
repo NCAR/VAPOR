@@ -3,7 +3,7 @@
 #include <map>
 #include <iostream>
 #include <vapor/MyBase.h>
-#include <vapor/NetCDFMPASCollection.h>
+#include <vapor/NetCDFCollection.h>
 #include <vapor/Proj4API.h>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/utils.h>
@@ -98,11 +98,15 @@ class VDF_API DCMPAS : public VAPoR::DC {
 
     //! \copydoc DC::GetMapProjection(string)
     //!
-    virtual string GetMapProjection(string varname) const;
+    virtual string GetMapProjection(string varname) const {
+        return (_proj4String);
+    }
 
     //! \copydoc DC::GetMapProjection()
     //!
-    virtual string GetMapProjection() const;
+    virtual string GetMapProjection() const {
+        return (_proj4String);
+    }
 
     //! \copydoc DC::GetAtt()
     //!
@@ -201,67 +205,48 @@ class VDF_API DCMPAS : public VAPoR::DC {
         int lod = 0) const;
 
   private:
-    NetCDFMPASCollection *_ncdfc;
+    NetCDFCollection *_ncdfc;
     VAPoR::UDUnits _udunits;
-    Wasp::SmartBuf _buf;
 
     int _ovr_fd; // File descriptor for currently opened file
 
-    std::map<string, string> _proj4Strings;
+    string _proj4String;
+    Proj4API *_proj4API;
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar> _coordVarsMap;
     std::map<string, DC::Mesh> _meshMap;
     std::map<string, DC::DataVar> _dataVarsMap;
-    std::map<string, string> _coordVarKeys;
-    std::vector<Proj4API *> _proj4APIs;
+    std::map<string, DC::AuxVar> _auxVarsMap;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
-
-    int _get_latlon_coordvars(
-        NetCDFMPASCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const;
-
-    int _get_latlon_extents(
-        NetCDFMPASCollection *ncdfc, string latlon, bool lonflag,
-        float &min, float &max);
-
-    int _get_coord_pair_extents(
-        NetCDFMPASCollection *ncdfc, string lon, string lat,
-        double &lonmin, double &lonmax, double &latmin, double &latmax);
+    std::vector<string> _cellVars;
+    std::vector<string> _pointVars;
+    std::vector<string> _edgeVars;
 
     Proj4API *_create_proj4api(
         double lonmin, double lonmax, double latmin, double latmax,
         string &proj4string) const;
 
-    int _get_vertical_coordvar(
-        NetCDFMPASCollection *ncdfc, string dvar, string &cvar);
+    int _InitDerivedVars(NetCDFCollection *ncdfc);
+    int _InitCoordvars(NetCDFCollection *ncdfc);
 
-    int _get_time_coordvar(
-        NetCDFMPASCollection *ncdfc, string dvar, string &cvar);
+    int _InitHorizontalCoordinatesDerived(NetCDFCollection *ncdfc);
 
-    int _AddCoordvars(
-        NetCDFMPASCollection *ncdfc, const vector<string> &cvars);
+    int _InitVerticalCoordinatesDerived(NetCDFCollection *ncdfc);
 
-    int _InitHorizontalCoordinates(NetCDFMPASCollection *ncdfc);
-    int _InitHorizontalCoordinatesDerived(
-        NetCDFMPASCollection *ncdfc, const vector<pair<string, string>> &coordpairs);
+    int _CheckRequiredFields(NetCDFCollection *ncdfc) const;
 
-    int _InitVerticalCoordinates(NetCDFMPASCollection *ncdfc);
-    int _InitVerticalCoordinatesDerived(
-        NetCDFMPASCollection *ncdfc, const vector<string> &cvars);
-
-    int _InitTimeCoordinates(NetCDFMPASCollection *ncdfc);
-    int _InitTimeCoordinatesDerived(
-        NetCDFMPASCollection *ncdfc, const vector<string> &cvars);
-
-    int _InitDimensions(NetCDFMPASCollection *ncdfc);
+    int _InitDimensions(NetCDFCollection *ncdfc);
 
     int _GetVarCoordinates(
-        NetCDFMPASCollection *ncdfc, string varname,
+        NetCDFCollection *ncdfc, string varname,
         vector<string> &sdimnames,
         vector<string> &scoordvars,
         string &time_dim_name,
         string &time_coordvar);
 
-    int _InitVars(NetCDFMPASCollection *ncdfc);
+    int _InitMeshes(NetCDFCollection *ncdfc);
+    int _InitAuxVars(NetCDFCollection *ncdfc);
+    int _InitDataVars(NetCDFCollection *ncdfc);
 
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -279,8 +264,9 @@ class VDF_API DCMPAS : public VAPoR::DC {
     class DerivedVarHorizontal : public NetCDFCollection::DerivedVar {
       public:
         DerivedVarHorizontal(
-            NetCDFMPASCollection *ncdfc, string lonname, string latname,
-            const vector<DC::Dimension> &dims, Proj4API *proj4API, bool lonflag);
+            NetCDFCollection *ncdfc, string lonname, string latname,
+            Proj4API *proj4API, bool lonflag,
+            bool uGridFlag);
         virtual ~DerivedVarHorizontal();
 
         virtual int Open(size_t ts);
@@ -299,6 +285,8 @@ class VDF_API DCMPAS : public VAPoR::DC {
         string _lonname;                // name of longitude variable
         string _latname;                // name of latitude variable
         bool _xflag;                    // calculate X or Y Cartographic coordinates?
+        bool _uGridFlag;                // unstructured grid?
+        bool _oneDFlag;                 // structured grid with lat and lon functions of one variable
         size_t _time_dim;               // number of time steps
         string _time_dim_name;          // Name of time dimension
         std::vector<size_t> _sdims;     // spatial dimensions
@@ -309,6 +297,79 @@ class VDF_API DCMPAS : public VAPoR::DC {
         Proj4API *_proj4API;
         int _lonfd;
         int _latfd; // file descriptors for reading lat and lon coord vars
+    };
+
+    //
+    // Vertical coordinate  derived variables. This class computes
+    // vertical coordinate variables in meters for the unstaggered grid
+    // from the staggered grid.
+    //
+    class DerivedVarVertical : public NetCDFCollection::DerivedVar {
+      public:
+        DerivedVarVertical(
+            NetCDFCollection *ncdfc, string staggeredVarName,
+            string zDimNameUnstaggered);
+        virtual ~DerivedVarVertical();
+
+        virtual int Open(size_t ts);
+        virtual int ReadSlice(float *slice, int);
+        virtual int Read(float *buf, int);
+        virtual int SeekSlice(int offset, int whence, int);
+        virtual int Close(int fd);
+        virtual bool TimeVarying() const { return (!_time_dim_name.empty()); };
+        virtual std::vector<size_t> GetSpatialDims() const { return (_sdims); }
+        virtual std::vector<string> GetSpatialDimNames() const { return (_sdimnames); }
+        virtual size_t GetTimeDim() const { return (_time_dim); }
+        virtual string GetTimeDimName() const { return (_time_dim_name); }
+        virtual bool GetMissingValue(double &mv) const { return (false); }
+
+      private:
+        string _staggeredVarName;       // name of unstaggered vertical coord var
+        size_t _time_dim;               // number of time steps
+        string _time_dim_name;          // Name of time dimension
+        std::vector<size_t> _sdims;     // spatial dimensions
+        std::vector<string> _sdimnames; // spatial dimension names
+        bool _is_open;                  // Open for reading?
+        float *_buf;                    // boundary points of lat and lon
+        int _fd;                        // file descriptors for reading coord vars
+    };
+
+    //
+    // Time coordinate derived variables. This class maps a WRF-style
+    // time coordinate variable (a formatted string) into a valid
+    // time coordinate.
+    //
+    class DerivedVarWRFTime : public NetCDFCollection::DerivedVar {
+      public:
+        DerivedVarWRFTime(
+            NetCDFCollection *ncdfc, const VAPoR::UDUnits *udunits,
+            string wrfTimeVar);
+        virtual ~DerivedVarWRFTime();
+
+        virtual int Open(size_t ts);
+        virtual int ReadSlice(float *slice, int);
+        virtual int Read(float *buf, int);
+        virtual int SeekSlice(int offset, int whence, int);
+        virtual int Close(int fd);
+        virtual bool TimeVarying() const { return (true); }
+        virtual std::vector<size_t> GetSpatialDims() const {
+            return (std::vector<size_t>());
+        }
+        virtual std::vector<string> GetSpatialDimNames() const {
+            return (std::vector<string>());
+        }
+        virtual size_t GetTimeDim() const { return (_time_dim); }
+        virtual string GetTimeDimName() const { return (_time_dim_name); }
+        virtual bool GetMissingValue(double &mv) const { return (false); }
+
+      private:
+        const VAPoR::UDUnits *_udunits;
+        string _wrfTimeVar;
+        size_t _time_dim;      // number of time steps
+        string _time_dim_name; // Name of time dimension
+        bool _is_open;         // Open for reading?
+        char *_buf;            // boundary points of lat and lon
+        int _fd;
     };
 };
 }; // namespace VAPoR

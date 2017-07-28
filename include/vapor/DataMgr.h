@@ -172,6 +172,36 @@ class VDF_API DataMgr : public Wasp::MyBase {
     //
     virtual int Initialize(const std::vector<string> &files);
 
+    //! \copydoc DC::GetDimensionNames()
+    //
+    std::vector<string> GetDimensionNames() const {
+        assert(_dc);
+        return (_dc->GetDimensionNames());
+    }
+
+    //! \copydoc DC::GetDimension()
+    //
+    bool GetDimension(
+        string dimname, DC::Dimension &dimension) const {
+        assert(_dc);
+        return (_dc->GetDimension(dimname, dimension));
+    }
+
+    //! \copydoc DC::GetMeshNames()
+    //
+    std::vector<string> GetMeshNames() const {
+        assert(_dc);
+        return (_dc->GetMeshNames());
+    }
+
+    //! \copydoc DC::GetMesh()
+    //
+    bool GetMesh(
+        string meshname, DC::Mesh &mesh) const {
+        assert(_dc);
+        return (_dc->GetMesh(meshname, mesh));
+    }
+
     //! Return a list of names for all of the defined data variables.
     //!
     //! This method returns a list of all data variables defined
