@@ -1,4 +1,4 @@
-#include <vapor/ImageParams.cpp>
+#include <vapor/ImageParams.h>
 
 using namespace VAPoR;
 
@@ -8,37 +8,27 @@ using namespace VAPoR;
 static RenParamsRegistrar<ImageParams> registrar(ImageParams::GetClassType());
 
 ImageParams::ImageParams(DataMgr *dataManager,
-                         ParamsBase::StateSave *stateSave,
-                         std::string file) : RenderParams(dataManager,
-                                                          stateSave,
-                                                          ImageParams::GetClassType(),
-                                                          2) {
+                         ParamsBase::StateSave *stateSave)
+    : RenderParams(dataManager,
+                   stateSave,
+                   ImageParams::GetClassType(),
+                   2) {
     SetDiagMsg("ImageParams::ImageParams() this=%p", this);
-    _fileName = file;
-    _init();
 }
 
 ImageParams::ImageParams(DataMgr *dataManager,
                          ParamsBase::StateSave *stateSave,
-                         std::string file,
-                         XmlNode *node) : RenderParams(dataManager,
-                                                       stateSave,
-                                                       ImageParams::GetClassType(),
-                                                       2) {
+                         XmlNode *node)
+    : RenderParams(dataManager,
+                   stateSave,
+                   ImageParams::GetClassType(),
+                   2) {
     SetDiagMsg("ImageParams::ImageParams() this=%p", this);
-    if (node->GetTag() != ImageParams::GetClasstype()) {
-        node->SetTag(ImageParams::GetClasstype());
-        _fileName = file;
-        _init();
+    if (node->GetTag() != ImageParams::GetClassType()) {
+        node->SetTag(ImageParams::GetClassType());
     }
 }
 
 ImageParams::~ImageParams() {
     SetDiagMsg("ImageParams::~ImageParams() this=%p", this);
-}
-
-ImageParams::_init() {
-    _isGeoTIFF = false;
-    _ignoreTransparence = false;
-    _opacity = -1.0;
 }
