@@ -1,4 +1,3 @@
-
 #ifndef IMAGEPARAMS_H
 #define IMAGEPARAMS_H
 
@@ -7,72 +6,95 @@
 
 namespace VAPoR 
 {
-//! \class ImageParams
-//! \brief Class that supports drawing Barbs based on 2D or 3D vector field
+
 class PARAMS_API ImageParams : public RenderParams 
 {
 public:
 
-  ImageParams( DataMgr* dataManager, 
-               ParamsBase::StateSave* stateSave,
-               std::string& fileName );
-  ImageParams( DataMgr* dataManager, 
-               ParamsBase::StateSave* stateSave, 
-               std::string* fileName,
-               XmlNode* xmlNode );
+  ImageParams( DataMgr*                 dataManager, 
+               ParamsBase::StateSave*   stateSave );
+  ImageParams( DataMgr*                 dataManager, 
+               ParamsBase::StateSave*   stateSave, 
+               XmlNode*                 xmlNode );
 
   virtual ~ImageParams();
 
-  static std::string getClassType() 
+  static std::string GetClassType() 
   {
     return ("ImageParams");
   }
 
-
-  bool isGeoTIFF() const
+  //
+  // Get and set image file path
+  // 
+  void SetImagePath( std::string file )
   {
-    return _isGeoTIFF;
+    SetValueString( _fileNameTag, "Set image file path", file );
   }
-  void treatAsGeoTIFF()
+  std::string GetImagePath( ) const
   {
-    _isGeoTIFF = true;
-  }
-  void doNotTreatAsGeoTIFF()
-  {
-    _isGeoTIFF = false;
+    return GetValueString( _fileNameTag, "File name not found!" );
   }
 
 
-  bool isTransparencyIgnored() const
+  //
+  // Get and set ifGeoTIFF
+  // 
+  bool GetIsGeoTIFF() const
   {
-    return _ignoreTransparence;
+    return (0 != GetValueLong( _isGeoTIFFTag, (long)false ) );
   }
-  void ignoreTransparency()
+  void SetIsGeoTIFF( bool val )
   {
-    _ignoreTransparence = true;
-  }
-  void doNotIgnoreTransparency()
-  {
-    _ignoreTransparence = false;
+    SetValueLong( _isGeoTIFFTag, "if the image has geo reference", (long)val );
   }
 
 
-  float getOpacity() const
+  //
+  // Get and set ignoreTransparence
+  // 
+  bool GetIgnoreTransparence() const
   {
-    return _opacity;
+    return (0 != GetValueLong( _ignoreTransparenceTag, (long)false ) );
   }
-  float setOpacity( float val ) 
+  void SetIgnoreTransparence( bool val )
   {
-    _opacity = val;
+    SetValueLong( _ignoreTransparenceTag, "if transparence is ignored", (long)val );
+  }
+
+
+  //
+  // Get and set opacity value
+  // 
+  double GetOpacity() const
+  {
+    return GetValueDouble( _opacityTag, 1.0 );
+  }
+  void  setOpacity( double val ) 
+  {
+    SetValueDouble( _opacityTag, "set opacity value", val );
+  }
+
+
+  //
+  // (Pure virtual methods from RenderParams)
+  //
+  virtual bool IsOpaque() const override
+  { 
+    return false; 
+  }
+  virtual bool usingVariable(const std::string& varname) override
+  {
+    return false;   // since this class is for an image, not rendering a variable.
   }
 
 
 private:
-  bool          _isGeoTIFF;
-  bool          _ignoreTransparence;
-  float         _opacity;
-  std::string   _fileName;
-
-  void          _init();
+  static const std::string          _fileNameTag;
+  static const std::string          _isGeoTIFFTag;
+  static const std::string          _ignoreTransparenceTag;
+  static const std::string          _opacityTag;
 };
 }
+
+#endif

@@ -10,7 +10,8 @@ FILES = \
 	BarbParams \
 	Viewpoint ViewpointParams regionparams \
 	ParamsMgr DataStatus VizFeatureParams \
-	HelloParams TFInterpolator
+	HelloParams TFInterpolator \
+  ImageParams
 
 #arrowparams
 
