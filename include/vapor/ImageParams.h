@@ -51,15 +51,15 @@ public:
 
 
   //
-  // Get and set ignoreTransparence
+  // Get and set ignoreTransparency
   // 
-  bool GetIgnoreTransparence() const
+  bool GetIgnoreTransparency() const
   {
-    return (0 != GetValueLong( _ignoreTransparenceTag, (long)false ) );
+    return (0 != GetValueLong( _ignoreTransparencyTag, (long)false ) );
   }
-  void SetIgnoreTransparence( bool val )
+  void SetIgnoreTransparency( bool val )
   {
-    SetValueLong( _ignoreTransparenceTag, "if transparence is ignored", (long)val );
+    SetValueLong( _ignoreTransparencyTag, "if transparence is ignored", (long)val );
   }
 
 
@@ -92,7 +92,7 @@ public:
 private:
   static const std::string          _fileNameTag;
   static const std::string          _isGeoTIFFTag;
-  static const std::string          _ignoreTransparenceTag;
+  static const std::string          _ignoreTransparencyTag;
   static const std::string          _opacityTag;
 };
 }

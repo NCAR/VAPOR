@@ -11,7 +11,7 @@ FILES = \
 	VizSelectCombo VizFeatureEventRouter \
 	AnimationEventRouter MappingFrame HelloEventRouter \
 	regioneventrouter ViewpointEventRouter \
-	TwoDDataEventRouter \
+	TwoDDataEventRouter ImageEventRouter \
 	RangeController Statistics Plot SeedMe \
 	helloSubtabs TFWidget VariablesWidget \
 	GeometryWidget RangeCombos BarbEventRouter \
@@ -29,7 +29,7 @@ QT_HEADERS := \
 	AnimationEventRouter HelloEventRouter \
 	StartupEventRouter AppSettingsEventRouter\
 	regioneventrouter ViewpointEventRouter \
-	TwoDDataEventRouter \
+	TwoDDataEventRouter ImageEventRouter \
 	RangeController Statistics Plot SeedMe \
 	TFWidget VariablesWidget \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \

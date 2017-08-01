@@ -8,7 +8,8 @@ FILES = \
 	glutil Renderer TwoDRenderer HelloRenderer TwoDDataRenderer \
 	BarbRenderer ShaderProgram ShaderMgr \
 	jfilewrite Visualizer  ControlExecutive \
-	VizFeatureRenderer 
+	VizFeatureRenderer \
+	ImageRenderer 
 
 
 ifeq ($(BUILD_FLOW),1)
