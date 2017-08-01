@@ -42,9 +42,9 @@ public:
     virtual ~TwoDRenderer();
 
 protected:
-    virtual int _GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height) = 0;
+    virtual int _getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height) = 0;
 
-    virtual const GLvoid *_GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize) = 0;
+    virtual const GLvoid *_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize) = 0;
 
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
