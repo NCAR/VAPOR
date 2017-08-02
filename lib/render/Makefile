@@ -4,8 +4,6 @@ include ${TOP}/make/config/prebase.mk
 
 LIBRARY = render
 
-#QT = 1
-
 FILES = \
 	glutil Renderer TwoDRenderer HelloRenderer TwoDDataRenderer \
 	BarbRenderer ShaderProgram ShaderMgr \
