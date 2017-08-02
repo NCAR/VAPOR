@@ -302,6 +302,7 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]) {
 #endif
 
 int Renderer::makeColorbarTexture() {
+
     if (_colorbarTexture)
         delete _colorbarTexture;
 
@@ -401,6 +402,16 @@ int Renderer::makeColorbarTexture() {
 }
 
 void Renderer::renderColorbar() {
+
+    if (_textObject == NULL) {
+        float inCoords[] = {50, 50, 0};
+        float txtColor[] = {1., 1., 1., 1.};
+        float bgColor[] = {0., 0., 0., 0.};
+        _textObject = new TextObject();
+        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+                                "My ugly font", 20, inCoords, 0, txtColor, bgColor);
+    }
+    _textObject->drawMe();
 
     float whitecolor[4] = {1., 1., 1., 1.f};
     const RenderParams *rParams = GetActiveParams();

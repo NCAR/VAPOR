@@ -17,6 +17,7 @@
 //  Description:	Implements the TFWidget class.  This provides
 //	  a widget that is inserted in the "Appearance" tab of various Renderer GUIs
 //
+#include <GL/glew.h>
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
