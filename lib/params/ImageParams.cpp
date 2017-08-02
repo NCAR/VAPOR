@@ -2,6 +2,12 @@
 
 using namespace VAPoR;
 
+const std::string   ImageParams::_fileNameTag           = "ImageParams filename tag";
+const std::string   ImageParams::_isGeoTIFFTag          = "ImageParams isgeotiff tag";
+const std::string   ImageParams::_ignoreTransparencyTag = "ImageParams ignore transparency tag";
+const std::string   ImageParams::_opacityTag            = "ImageParams opacity tag";
+const std::string   ImageParams::_orientationTag        = "ImageParams orientation tag";
+
 //
 // Register class with object factory
 //
