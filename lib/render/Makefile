@@ -9,7 +9,8 @@ FILES = \
 	BarbRenderer ShaderProgram ShaderMgr \
 	jfilewrite Visualizer  ControlExecutive \
 	VizFeatureRenderer \
-	ImageRenderer 
+	ImageRenderer \
+  GeoImageTMS GeoImageGeoTiff GeoImage GeoTileMercator GeoTile GeoTileEquirectangular
 
 
 ifeq ($(BUILD_FLOW),1)
