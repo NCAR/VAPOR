@@ -51,6 +51,7 @@ SHARED = 0
 QT = 1
 
 
+
 LIBRARIES = dl util m render params jpeg vdc wasp common 
 LIBRARIES += $(QT_LIB) GLEW tiff geotiff python$(PYTHONVERSION)
 LIBRARIES += assimp
@@ -77,8 +78,11 @@ MAKEFILE_CXXFLAGS += -Wno-unused-variable -Wno-non-virtual-dtor
 
 endif   
 
-include ${TOP}/make/config/base.mk
+ifdef FREETYPE2_INC_DIR
+MAKEFILE_INCLUDE_DIRS += -I$(FREETYPE2_INC_DIR)
+endif
 
+include ${TOP}/make/config/base.mk
 
 cat:
 	echo "QTDIR=$(QTDIR)"
