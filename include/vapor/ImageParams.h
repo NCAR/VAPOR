@@ -56,8 +56,18 @@ class PARAMS_API ImageParams : public RenderParams {
     double GetOpacity() const {
         return GetValueDouble(_opacityTag, 1.0);
     }
-    void setOpacity(double val) {
+    void SetOpacity(double val) {
         SetValueDouble(_opacityTag, "set opacity value", val);
+    }
+
+    //
+    // Get and set orientation
+    //
+    int GetOrientation() const {
+        return GetValueLong(_orientationTag, 2);
+    }
+    void SetOrientation(int val) {
+        SetValueLong(_orientationTag, "set orientation value", val);
     }
 
     //
@@ -75,6 +85,9 @@ class PARAMS_API ImageParams : public RenderParams {
     static const std::string _isGeoTIFFTag;
     static const std::string _ignoreTransparencyTag;
     static const std::string _opacityTag;
+    static const std::string _orientationTag; // If it's X-Y (orientation = 2)
+                                              // If it's X-Z (orientation = 1)
+                                              // If it's Y-Z (orientation = 0)
 };
 } // namespace VAPoR
 
