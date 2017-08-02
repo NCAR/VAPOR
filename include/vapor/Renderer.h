@@ -25,6 +25,7 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
+#include <vapor/textRenderer.h>
 
 namespace VAPoR {
 
@@ -276,6 +277,7 @@ class RENDER_API Renderer : public RendererBase {
     static const int _imgHgt;
     static const int _imgWid;
     unsigned char *_colorbarTexture;
+    TextObject *_textObject;
 
   private:
     size_t _timestep;
