@@ -1,10 +1,21 @@
-
-#include "ErrorReporter.h"
-
-#include <QWidget>
-#include <QMessageBox>
-#include <QFileDialog>
-
+//************************************************************************
+//                                                                       *
+//                        Copyright (C)  2017                            *
+//           University Corporation for Atmospheric Research             *
+//                        All Rights Reserved                            *
+//                                                                       *
+//************************************************************************
+//
+//	File:			ErrorReporter.cpp
+//
+//	Author:			Stas Jaroszynski (stasj@ucar.edu)
+//					National Center for Atmospheric Research
+//					1850 Table Mesa Drive
+//					PO 3000, Boulder, Colorado
+//
+//	Date:			July 2017
+//
+//	Description:	Implements the ErrorReporter class 
 
 #include <stdio.h>
 #include <execinfo.h>
@@ -12,21 +23,27 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "vapor/MyBase.h"
-#include "vapor/Version.h"
-
 #if defined(DARWIN)
 #include <CoreServices/CoreServices.h>
 #elif defined(LINUX)
 #elif defined(WIN32)
 #endif
 
-// #define LOG_FILE "/tmp/vapor.log"
+#include <QWidget>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QTextStream>
+
+#include "vapor/MyBase.h"
+#include "vapor/Version.h"
+
+#include "ErrorReporter.h"
+
 
 using std::string;
 using std::vector;
 
-void segFaultHandler(int sig)
+void _segFaultHandler(int sig)
 {
 	void *array[128];
 	size_t size;
@@ -36,55 +53,62 @@ void segFaultHandler(int sig)
 	char **backtrace_str = backtrace_symbols(array, 128);
 
 	string details;
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++)
+	{
 		if (strlen(backtrace_str[i]) == 0)
 			break;
 		details += string(backtrace_str[i]) + "\n";
 	}
 
-	ErrorReporter::report("A memory error occured", ErrorReporter::Error, details);
-
+	ErrorReporter::Report("A memory error occured", ErrorReporter::Error, details);
 	exit(1);
 }
 
-void MyBaseErrorCallback(const char *msg, int err_code)
+void _myBaseErrorCallback(const char *msg, int err_code)
 {
-	ErrorReporter::getInstance()->    log.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code));
-	ErrorReporter::getInstance()->fullLog.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code));
+	ErrorReporter *e = ErrorReporter::GetInstance();
+	e->    _log.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code));
+	e->_fullLog.push_back(ErrorReporter::Message(ErrorReporter::Error, string(msg), err_code));
 
-#ifdef LOG_FILE
-	fprintf(ErrorReporter::getInstance()->logFile, "Error[%i]: %s\n", err_code, msg);
-#endif
+	if (e->_logFile)
+	{
+		fprintf(e->_logFile, "Error[%i]: %s\n", err_code, msg);
+	}
 }
 
-void MyBaseDiagCallback(const char *msg)
+void _myBaseDiagCallback(const char *msg)
 {
-	ErrorReporter::getInstance()->    log.push_back(ErrorReporter::Message(ErrorReporter::Diagnostic, string(msg)));
-	ErrorReporter::getInstance()->fullLog.push_back(ErrorReporter::Message(ErrorReporter::Diagnostic, string(msg)));
-#ifdef LOG_FILE
-	fprintf(ErrorReporter::getInstance()->logFile, "Diagnostic: %s\n", msg);
-#endif
+	ErrorReporter *e = ErrorReporter::GetInstance();
+	e->_fullLog.push_back(ErrorReporter::Message(ErrorReporter::Diagnostic, string(msg)));
+	
+	if (e->_logFile)
+	{
+		fprintf(e->_logFile, "Diagnostic: %s\n", msg);
+	}
 }
 
-ErrorReporter *ErrorReporter::instance;
-ErrorReporter *ErrorReporter::getInstance()
+ErrorReporter *ErrorReporter::_instance;
+ErrorReporter *ErrorReporter::GetInstance()
 {
-	if (!instance)
-		instance = new ErrorReporter();
-	return instance;
+	if (!_instance)
+	{
+		_instance = new ErrorReporter();
+	}
+	return _instance;
 }
 
-void ErrorReporter::showErrors()
+void ErrorReporter::ShowErrors()
 {
-	report("The action failed");
+	Report(ERRORREPORTER_DEFAULT_MESSAGE);
 }
 
-void ErrorReporter::report(string msg, Type severity, string details)
+void ErrorReporter::Report(string msg, Type severity, string details)
 {
-	ErrorReporter *e = getInstance();
-#ifdef LOG_FILE
-	fprintf(e->logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str());
-#endif
+	ErrorReporter *e = GetInstance();
+	if (e->_logFile)
+	{
+		fprintf(e->_logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str());
+	}
 
 	QMessageBox box;
 	box.setText("An error has occured");
@@ -92,18 +116,21 @@ void ErrorReporter::report(string msg, Type severity, string details)
 	box.addButton(QMessageBox::Ok);
 	box.addButton(QMessageBox::Save);
 
-	if (details == "") {
-		while (e->log.size()) {
-			details += e->log.back().value + "\n";
-			if (e->log.back().type > severity)
-				severity = e->log.back().type;
-			e->log.pop_back();
+	if (details == "")
+	{
+		while (e->_log.size())
+		{
+			details += e->_log.back().value + "\n";
+			if (e->_log.back().type > severity)
+				severity = e->_log.back().type;
+			e->_log.pop_back();
 		}
 	}
 	box.setDetailedText(details.c_str());
 
 
-	switch (severity) {
+	switch (severity)
+	{
 		case Diagnostic:
 		case       Info: box.setIcon(QMessageBox::Information); break;
 		case    Warning: box.setIcon(QMessageBox::Warning);     break;
@@ -112,19 +139,22 @@ void ErrorReporter::report(string msg, Type severity, string details)
 
 	int ret = box.exec();
 
-	switch (ret) {
-		case QMessageBox::Save: {
+	switch (ret)
+	{
+		case QMessageBox::Save:
+			{
 				QString fileName = QFileDialog::getSaveFileName(NULL, "Save Error Log", QString(), "Text (*.txt);;All Files (*)");
 				if (fileName.isEmpty())
 					return;
 				else {
 					QFile file(fileName);
-					if (!file.open(QIODevice::WriteOnly)) {
+					if (!file.open(QIODevice::WriteOnly))
+					{
 						QMessageBox::information(NULL, "Unable to open file", file.errorString());
 						return;
 					}
-					QDataStream out(&file);
-					out << QString((getSystemInformation() + "\n").c_str());
+					QTextStream out(&file);
+					out << QString((GetSystemInformation() + "\n").c_str());
 					out << QString("-------------------\n");
 					out << QString((msg + "\n").c_str());
 					out << QString("-------------------\n");
@@ -139,7 +169,7 @@ void ErrorReporter::report(string msg, Type severity, string details)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-string ErrorReporter::getSystemInformation()
+string ErrorReporter::GetSystemInformation()
 {
 	string ret = "Vapor " + Wasp::Version::GetVersionString() + "\n";
 #if defined(DARWIN)
@@ -159,18 +189,34 @@ string ErrorReporter::getSystemInformation()
 }
 #pragma GCC diagnostic pop
 
+int ErrorReporter::OpenLogFile(std::string path)
+{
+	ErrorReporter *e = ErrorReporter::GetInstance();
+	e->_logFilePath = path;
+	e->_logFile = fopen(path.c_str(), "w");
+
+	if (!e->_logFile)
+	{
+		Wasp::MyBase::SetErrMsg(errno, "Failed to open log file \"%s\"", path.c_str());
+		return -1;
+	}
+	return 0;
+}
+
 ErrorReporter::ErrorReporter()
 {
-	signal(SIGSEGV, segFaultHandler);
-	Wasp::MyBase::SetErrMsgCB(MyBaseErrorCallback);
-	Wasp::MyBase::SetDiagMsgCB(MyBaseDiagCallback);
+	signal(SIGSEGV, _segFaultHandler);
+	Wasp::MyBase::SetErrMsgCB(_myBaseErrorCallback);
+	Wasp::MyBase::SetDiagMsgCB(_myBaseDiagCallback);
 
-#ifdef LOG_FILE
-	logFile = fopen(LOG_FILE, "w");
-#endif
+	_logFilePath = "";
+	_logFile = NULL;
 }
 
 ErrorReporter::~ErrorReporter()
 {
-	fclose(logFile);
+	if (_logFile)
+	{
+		fclose(_logFile);
+	}
 }
