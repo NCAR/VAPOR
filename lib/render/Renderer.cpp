@@ -46,6 +46,7 @@ Renderer::Renderer(const ParamsMgr *pm, string winName, string dataSetName, stri
 
     _colorbarTexture = 0;
     _timestep = 0;
+    _textObject = NULL;
 }
 
 RendererBase::RendererBase(const ParamsMgr *pm, string winName, string dataSetName, string paramsType, string classType, string instName, DataMgr *dataMgr)
@@ -325,7 +326,10 @@ int Renderer::makeColorbarTexture()
     vector<double> colorbarSize = cbpb->GetSize();
 
     // determine horizontal and vertical line widths in pixels (.02 times image size?)
-    int lineWidth = (int)(0.02 * Min(_imgHgt, _imgWid) + 0.5);
+    // int lineWidth = (int)(0.02*Min(_imgHgt, _imgWid)+0.5);
+    int lineWidth = 1;
+
+    cout << "Texture size " << _imgWid << " " << _imgHgt << endl;
 
     // Draw top and bottom
     for (int i = 0; i < _imgWid; i++) {
@@ -353,8 +357,9 @@ int Renderer::makeColorbarTexture()
     int numtics = cbpb->GetNumTicks();
     for (int tic = 0; tic < numtics; tic++) {
         int ticPos = tic * (_imgHgt / numtics) + (_imgHgt / (2 * numtics));
-        // Draw a horizontal line from .35 to .45 width
-        for (int i = (int)(_imgWid * .35); i <= (int)(_imgWid * .45); i++) {
+        // Draw a horizontal line from .37 to .45 width
+        // for (int i = (int)(_imgWid*.35); i<= (int)( _imgWid*.45); i++){
+        for (int i = (int)(_imgWid * .37); i <= (int)(_imgWid * .45); i++) {
             for (int j = ticPos - lineWidth / 2; j <= ticPos + lineWidth / 2; j++) {
                 _colorbarTexture[3 * (i + _imgWid * j)] = fgr;
                 _colorbarTexture[1 + 3 * (i + _imgWid * j)] = fgg;
@@ -387,6 +392,12 @@ int Renderer::makeColorbarTexture()
 
 void Renderer::renderColorbar()
 {
+    float               whitecolor[4] = {1., 1., 1., 1.f};
+    const RenderParams *rParams = GetActiveParams();
+    ColorbarPbase *     cbpb = rParams->GetColorbarPbase();
+    if (!cbpb || !cbpb->IsEnabled()) return;
+    if (makeColorbarTexture()) return;
+
     if (_textObject == NULL) {
         float inCoords[] = {50, 50, 0};
         float txtColor[] = {1., 1., 1., 1.};
@@ -395,12 +406,6 @@ void Renderer::renderColorbar()
         _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf", "My ugly font", 20, inCoords, 0, txtColor, bgColor);
     }
     _textObject->drawMe();
-
-    float               whitecolor[4] = {1., 1., 1., 1.f};
-    const RenderParams *rParams = GetActiveParams();
-    ColorbarPbase *     cbpb = rParams->GetColorbarPbase();
-    if (!cbpb || !cbpb->IsEnabled()) return;
-    if (makeColorbarTexture()) return;
 
     glColor4fv(whitecolor);
 
@@ -415,6 +420,9 @@ void Renderer::renderColorbar()
 
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
+
+    cout << "cbpb size " << cbsize[0] << " " << cbsize[1] << endl;
+
     // Note that GL reverses y coordinates
     float llx = 2. * cornerPosn[0] - 1.;
     float lly = 2. * (cornerPosn[1] + cbsize[1]) - 1.;
