@@ -482,18 +482,28 @@ void Renderer::renderColorbar() {
 
     for (int tic = 0; tic < numtics; tic++) {
         int ticPos = tic * (_imgHgt / numtics) + (_imgHgt / (2 * numtics));
-        //for (int j = ticPos - 1; j<= ticPos + 1; j++){
-        // Convert pixel coordinates (window width/height) to GL coords (-1:1)
-        float Tx = (llx + 1) * fbWidth / 2.f;
-        float Ty = (lly + 1) * fbHeight / 2.f;
+        // llx and lly are between -1 and 1
+        // TextRenderer takes pixel coordinates. Trx and Tuy are the
+        // TextRenderer coords of the colorbar in the pixel coord system.
+        float Trx = (urx + 1) * fbWidth / 2.f;  // right
+        float Tlx = (llx + 1) * fbWidth / 2.f;  // left
+        float Tly = (lly + 1) * fbHeight / 2.f; // lower
+        float Tuy = (ury + 1) * fbHeight / 2.f; // upper
 
-        float ticOffset = fbHeight / 2.f * (float)tic / (float)numtics * (lly - ury); //(float)_imgHgt;//(float)fbHeight;
-        cout << "Offset " << ticOffset << " " << ury << " " << lly << endl;
-        Ty -= ticOffset;
+        // Start at lower left corner
+        float Tx = Tlx;
+        float Ty = Tuy;
+
+        // Calculate Y offset to align with tick marks
+        float ticOffset = (float)tic / (float)numtics * (Tuy - Tly); //(float)_imgHgt;//(float)fbHeight;
+        //Ty += ticOffset;
+        //cout << "Offset " << ticOffset << " " << ury << " " << lly << endl;
+
+        Tx += _imgWid * .5 / fbWidth;
 
         float inCoords[] = {Tx, Ty, 0};
         float txtColor[] = {(float)tic / numtics, 0., 0., 1.};
-        float bgColor[] = {1., 1., 1., 1.};
+        float bgColor[] = {1., 1., 1., 0.};
 
         if (_textObject != NULL) {
             delete _textObject;
@@ -505,10 +515,9 @@ void Renderer::renderColorbar() {
                                 "My ugly font", 20, inCoords, 0, txtColor, bgColor);
         _textObject->drawMe();
 
-        cout << "TO" << tic << ": " << Tx << " " << Ty << endl;
+        cout << "TO" << tic << ": " << Tx << " " << Ty << " " << Tly << endl;
         cout << tic << " ";
         printOpenGLError();
-        //}
     }
 
     if (_textObject != NULL) {
