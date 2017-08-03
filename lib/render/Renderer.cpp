@@ -483,6 +483,7 @@ void Renderer::renderColorbar() {
     for (int tic = 0; tic < numtics; tic++) {
         // First generate our text object so we can use proper width/height
         // values when calculating offsets
+        //
         if (_textObject != NULL) {
             delete _textObject;
             _textObject = NULL;
@@ -492,44 +493,35 @@ void Renderer::renderColorbar() {
         float dummy[] = {0., 0., 0.};
         _textObject = new TextObject();
         _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
-                                "My ugly font", 20, dummy, 0, txtColor, bgColor);
+                                "0.1234", 20, dummy, 0, txtColor, bgColor);
         float texWidth = _textObject->getWidth();
         float texHeight = _textObject->getHeight();
 
         // llx and lly are between -1 and 1
         // TextRenderer takes pixel coordinates. Trx and Tuy are the
         // TextRenderer coords of the colorbar in the pixel coord system.
+        //
         float Trx = (urx + 1) * fbWidth / 2.f;  // right
         float Tlx = (llx + 1) * fbWidth / 2.f;  // left
         float Tly = (lly + 1) * fbHeight / 2.f; // lower
         float Tuy = (ury + 1) * fbHeight / 2.f; // upper
 
         // Start at lower left corner
+        //
         float Tx = Tlx;
         float Ty = Tuy;
 
         // Calculate Y offset to align with tick marks
-        //float texRatio = (float)_imgHgt/(float)fbHeight;
-        //float scaledSize = textureSize * fbHeight;
-        //			float ticOffset = (float)(tic-1)/(float)numtics * scaledSize;
-        //float ticOffset = (ury-lly)/2 * (float)(tic)/(float)numtics * fbHeight;// * (Tuy - Tly);//(float)_imgHgt;//(float)fbHeight;
-        //			Ty += ticOffset;
-
+        //
         Ty -= texHeight / 2.f; // Center the text vertically, at the bottom of the colorbar
-        cout << "up,bottom " << Tuy << " " << Tly << endl;
-        //float colorbarHeight = Tly - Tuy;
-
         float ticOffset = (Tly - Tuy) * 1.f / (float)numtics;
-        Ty += ticOffset / 2.f;
-        Ty += ticOffset * tic;
+        Ty += ticOffset / 2.f; // Initial offset from bottom of colorbar
+        Ty += ticOffset * tic; // Offset applied per tick mark
 
         // Calculate X offset to allign with tick marks
-        //			ticOffset = (llx-urx)/2 * (float)tic
-
-        cout << "hgt " << _imgHgt << " " << fbHeight << endl;
-        //cout << "Offset " << ticOffset << " " << ury << " " << lly << endl;
-
-        Tx += _imgWid * .5 / fbWidth;
+        float rightShift = (Trx - Tlx) * .5;
+        cout << "RightShift " << rightShift << endl;
+        Tx += rightShift;
 
         float inCoords[] = {Tx, Ty, 0};
 
