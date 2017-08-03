@@ -341,9 +341,9 @@ int Renderer::makeColorbarTexture() {
 
     // determine horizontal and vertical line widths in pixels (.02 times image size?)
     //int lineWidth = (int)(0.02*Min(_imgHgt, _imgWid)+0.5);
-    int lineWidth = 1;
+    int lineWidth = 2;
 
-    cout << "Texture size " << _imgWid << " " << _imgHgt << endl;
+    //cout << "Texture size " << _imgWid << " " << _imgHgt << endl;
 
     //Draw top and bottom
     for (int i = 0; i < _imgWid; i++) {
@@ -373,14 +373,16 @@ int Renderer::makeColorbarTexture() {
         int ticPos = tic * (_imgHgt / numtics) + (_imgHgt / (2 * numtics));
         //Draw a horizontal line from .37 to .45 width
         //for (int i = (int)(_imgWid*.35); i<= (int)( _imgWid*.45); i++){
-        for (int i = (int)(_imgWid * .37); i <= (int)(_imgWid * .45); i++) {
-            for (int j = ticPos - lineWidth / 2; j <= ticPos + lineWidth / 2; j++) {
+        int i, j;
+        for (i = (int)(_imgWid * .37); i <= (int)(_imgWid * .45); i++) {
+            for (j = ticPos - lineWidth / 2; j <= ticPos + lineWidth / 2; j++) {
                 _colorbarTexture[3 * (i + _imgWid * j)] = fgr;
                 _colorbarTexture[1 + 3 * (i + _imgWid * j)] = fgg;
                 _colorbarTexture[2 + 3 * (i + _imgWid * j)] = fgb;
             }
         }
     }
+
     //Draw colors
     //With no tics, use the whole scale
     if (numtics == 0)
@@ -389,7 +391,8 @@ int Renderer::makeColorbarTexture() {
                ((double)(1. - numtics) * (double)_imgHgt);
     double B = mf->getMaxMapValue() - A * (double)_imgHgt * .5 / (double)(numtics);
 
-    for (int line = _imgHgt - 2 * lineWidth; line >= 2 * lineWidth; line--) {
+    //for (int line = _imgHgt-2*lineWidth; line>=2*lineWidth; line--){
+    for (int line = _imgHgt - 2 * lineWidth - 5; line > 2 * lineWidth + 5; line--) {
         float ycoord = A * (float)line + B;
 
         float rgb[3];
@@ -408,6 +411,11 @@ int Renderer::makeColorbarTexture() {
 
 void Renderer::renderColorbar() {
 
+    GLint dims[4] = {0};
+    glGetIntegerv(GL_VIEWPORT, dims);
+    GLint fbWidth = dims[2];
+    GLint fbHeight = dims[3];
+
     float whitecolor[4] = {1., 1., 1., 1.f};
     const RenderParams *rParams = GetActiveParams();
     ColorbarPbase *cbpb = rParams->GetColorbarPbase();
@@ -416,16 +424,17 @@ void Renderer::renderColorbar() {
     if (makeColorbarTexture())
         return;
 
-    if (_textObject == NULL) {
-        float inCoords[] = {50, 50, 0};
-        float txtColor[] = {1., 1., 1., 1.};
-        float bgColor[] = {0., 0., 0., 0.};
-        _textObject = new TextObject();
-        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
-                                "My ugly font", 20, inCoords, 0, txtColor, bgColor);
-    }
-    _textObject->drawMe();
-
+    /*
+    if (_textObject==NULL) {
+         float inCoords[] = {50, 50, 0};
+         float txtColor[] = {1., 1., 1., 1.};
+         float bgColor[] = {0., 0., 0., 0.};
+         _textObject = new TextObject();
+         _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+             "My ugly font", 20, inCoords, 0, txtColor, bgColor);
+	}
+	_textObject->drawMe();
+*/
     glColor4fv(whitecolor);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -441,7 +450,7 @@ void Renderer::renderColorbar() {
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
 
-    cout << "cbpb size " << cbsize[0] << " " << cbsize[1] << endl;
+    //cout << "cbpb size " << cbsize[0] << " " << cbsize[1] << endl;
 
     //Note that GL reverses y coordinates
     float llx = 2. * cornerPosn[0] - 1.;
@@ -459,10 +468,55 @@ void Renderer::renderColorbar() {
     glVertex3f(urx, ury, 0.0f);
     glTexCoord2f(1.0f, 0.0f);
     glVertex3f(urx, lly, 0.0f);
+
     glEnd();
     glDisable(GL_TEXTURE_2D);
-    //Reset to default:
-    glDepthFunc(GL_LESS);
+
+    // Draw numeric text annotation
+    //int textPos = ticPos;
+
+    int i = (int)(_imgWid * .37) + llx;
+    int numtics = cbpb->GetNumTicks();
+
+    cout << "FB Dims: " << fbWidth << " " << fbHeight << endl;
+
+    for (int tic = 0; tic < numtics; tic++) {
+        int ticPos = tic * (_imgHgt / numtics) + (_imgHgt / (2 * numtics));
+        //for (int j = ticPos - 1; j<= ticPos + 1; j++){
+        // Convert pixel coordinates (window width/height) to GL coords (-1:1)
+        float Tx = (llx + 1) * fbWidth / 2.f;
+        float Ty = (lly + 1) * fbHeight / 2.f;
+
+        float ticOffset = fbHeight / 2.f * (float)tic / (float)numtics * (lly - ury); //(float)_imgHgt;//(float)fbHeight;
+        cout << "Offset " << ticOffset << " " << ury << " " << lly << endl;
+        Ty -= ticOffset;
+
+        float inCoords[] = {Tx, Ty, 0};
+        float txtColor[] = {(float)tic / numtics, 0., 0., 1.};
+        float bgColor[] = {1., 1., 1., 1.};
+
+        if (_textObject != NULL) {
+            delete _textObject;
+            _textObject = NULL;
+        }
+
+        _textObject = new TextObject();
+        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+                                "My ugly font", 20, inCoords, 0, txtColor, bgColor);
+        _textObject->drawMe();
+
+        cout << "TO" << tic << ": " << Tx << " " << Ty << endl;
+        cout << tic << " ";
+        printOpenGLError();
+        //}
+    }
+
+    if (_textObject != NULL) {
+        delete _textObject;
+        _textObject = NULL;
+    }
+
+    cout << "end " << printOpenGLError();
 }
 
 //////////////////////////////////////////////////////////////////////////
