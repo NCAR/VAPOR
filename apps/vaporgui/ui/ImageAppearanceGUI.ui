@@ -134,7 +134,7 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Opacity</string>
+          <string>Opacity: </string>
          </property>
         </widget>
        </item>
@@ -144,6 +144,9 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit"/>
        </item>
       </layout>
      </item>
