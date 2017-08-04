@@ -19,7 +19,7 @@ class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
   public:
     ImageVariablesSubtab(QWidget *parent) {
         setupUi(this);
-        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
+        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::HGT),
                                  VariablesWidget::TWOD);
     }
 
@@ -38,15 +38,15 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
   public:
     ImageAppearanceSubtab(QWidget *parent) {
         setupUi(this);
-        _TFWidget->Reinit((TFWidget::Flags)(0));
+        //_TFWidget->Reinit((TFWidget::Flags)(0));
     }
 
     void Update(
         VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams) {
-        _TFWidget->Update(dataMgr, paramsMgr, rParams);
-        _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
+        //_TFWidget->Update(dataMgr, paramsMgr, rParams);
+        //_ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
     }
 };
 
