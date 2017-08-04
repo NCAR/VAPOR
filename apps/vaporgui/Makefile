@@ -35,7 +35,8 @@ QT_HEADERS := \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
 	BannerGUI AnimationParams \
-	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget
+	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget \
+	ImageSubtabs 
 
 
 ifneq ($(ARCH),WIN32)
