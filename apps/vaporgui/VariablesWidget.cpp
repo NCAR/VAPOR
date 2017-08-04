@@ -303,6 +303,7 @@ void VariablesWidget::updateFidelity(
     }
 
     if (varname.empty()) {
+        cout << "TEST" << endl;
         fidelityFrame->hide();
         return;
     }
