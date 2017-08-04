@@ -219,6 +219,9 @@ public:
     //! Render the colorbar for this renderer (if it has one)
     void renderColorbar();
 
+    //! Render colorbar text
+    void renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHeight, float llx, float lly, float urx, float ury);
+
     ///@}
 
     //! Obtain the current RenderParams instance

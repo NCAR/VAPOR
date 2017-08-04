@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2004				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -21,6 +21,8 @@
 #include <cfloat>
 #include <climits>
 #include <limits>
+#include <iomanip>
+#include <sstream>
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <vapor/Renderer.h>
@@ -376,6 +378,7 @@ int Renderer::makeColorbarTexture()
     double B = mf->getMaxMapValue() - A * (double)_imgHgt * .5 / (double)(numtics);
 
     // for (int line = _imgHgt-2*lineWidth; line>=2*lineWidth; line--){
+    cout << "num lines " << _imgHgt - 2 * lineWidth - 5 << endl;
     for (int line = _imgHgt - 2 * lineWidth - 5; line > 2 * lineWidth + 5; line--) {
         float ycoord = A * (float)line + B;
 
@@ -406,17 +409,6 @@ void Renderer::renderColorbar()
     if (!cbpb || !cbpb->IsEnabled()) return;
     if (makeColorbarTexture()) return;
 
-    /*
-    if (_textObject==NULL) {
-         float inCoords[] = {50, 50, 0};
-         float txtColor[] = {1., 1., 1., 1.};
-         float bgColor[] = {0., 0., 0., 0.};
-         _textObject = new TextObject();
-         _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
-             "My ugly font", 20, inCoords, 0, txtColor, bgColor);
-    }
-    _textObject->drawMe();
-*/
     glColor4fv(whitecolor);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -430,8 +422,6 @@ void Renderer::renderColorbar()
 
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
-
-    // cout << "cbpb size " << cbsize[0] << " " << cbsize[1] << endl;
 
     // Note that GL reverses y coordinates
     float llx = 2. * cornerPosn[0] - 1.;
@@ -454,26 +444,54 @@ void Renderer::renderColorbar()
     glDisable(GL_TEXTURE_2D);
 
     // Draw numeric text annotation
-    // int textPos = ticPos;
+    //
+    renderColorbarText(cbpb, fbWidth, fbHeight, llx, lly, urx, ury);
 
-    int i = (int)(_imgWid * .37) + llx;
-    int numtics = cbpb->GetNumTicks();
+    glDepthFunc(GL_LESS);
+}
 
-    cout << "FB Dims: " << fbWidth << " " << fbHeight << endl;
+void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHeight, float llx, float lly, float urx, float ury)
+{
+    const RenderParams *rParams = GetActiveParams();
+    MapperFunction *    mf = rParams->GetMapperFunc(rParams->GetVariableName());
+    float               numEntries = mf->getNumEntries();
+    cout << "num entries " << numEntries << endl;
 
+    vector<double> bgc = cbpb->GetBackgroundColor();
+
+    // determine text color; the compliment of the background color:
+    float fgr = 1.f - bgc[0];
+    float fgg = 1.f - bgc[1];
+    float fgb = 1.f - bgc[2];
+
+    float txtColor[] = {fgr, fgg, fgb, 1.};
+    float bgColor[] = {(float)bgc[0], (float)bgc[1], (float)bgc[2], 0.};
+    float dummy[] = {0., 0., 0.};
+    int   precision = (int)cbpb->GetNumDigits();
+    cout << "PREC " << precision << endl;
+
+    float maxWidth = 0;
+
+    float Trx, Tlx, Tly, Tuy;
+    int   numtics = cbpb->GetNumTicks();
     for (int tic = 0; tic < numtics; tic++) {
-        // First generate our text object so we can use proper width/height
+        // Find numeric data value associated with our current text label
+        //
+        int          mapIndex = (1.f / ((float)numtics * 2.f) + (float)tic / (float)numtics) * numEntries;
+        float        textValue = mf->mapIndexToFloat(mapIndex);
+        stringstream ss;
+        ss << fixed << setprecision(precision) << textValue;
+        string textString = ss.str();
+
+        // Generate our text object so we can use proper width/height
         // values when calculating offsets
         //
         if (_textObject != NULL) {
             delete _textObject;
             _textObject = NULL;
         }
-        float txtColor[] = {(float)tic / numtics, 0., 0., 1.};
-        float bgColor[] = {1., 1., 1., 0.};
-        float dummy[] = {0., 0., 0.};
         _textObject = new TextObject();
-        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf", "0.1234", 20, dummy, 0, txtColor, bgColor);
+        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf", textString, 20, dummy, 0, txtColor, bgColor);
         float texWidth = _textObject->getWidth();
         float texHeight = _textObject->getHeight();
 
@@ -481,10 +499,10 @@ void Renderer::renderColorbar()
         // TextRenderer takes pixel coordinates. Trx and Tuy are the
         // TextRenderer coords of the colorbar in the pixel coord system.
         //
-        float Trx = (urx + 1) * fbWidth / 2.f;     // right
-        float Tlx = (llx + 1) * fbWidth / 2.f;     // left
-        float Tly = (lly + 1) * fbHeight / 2.f;    // lower
-        float Tuy = (ury + 1) * fbHeight / 2.f;    // upper
+        Trx = (urx + 1) * fbWidth / 2.f;     // right
+        Tlx = (llx + 1) * fbWidth / 2.f;     // left
+        Tly = (lly + 1) * fbHeight / 2.f;    // lower
+        Tuy = (ury + 1) * fbHeight / 2.f;    // upper
 
         // Start at lower left corner
         //
@@ -499,23 +517,51 @@ void Renderer::renderColorbar()
         Ty += ticOffset * tic;    // Offset applied per tick mark
 
         // Calculate X offset to allign with tick marks
-        float rightShift = (Trx - Tlx) * .5;
-        cout << "RightShift " << rightShift << endl;
+        //
+        float cbWidth = Trx - Tlx;
+        float rightShift = cbWidth * .5;
         Tx += rightShift;
+
+        // Now that we know the x offset, check if the colorbar box is big enough
+        // to contain the text, and resize the colorbar if not
+        //
+        if (texWidth > maxWidth) { maxWidth = texWidth; }
+        vector<double> size = cbpb->GetSize();
+        // size[0]/2 is the space we have to place text into
+        //
+        if (size[0] / 2.f < maxWidth / fbWidth) {
+            size[0] = 2 * maxWidth / fbWidth;
+            cbpb->SetSize(size);
+        }
 
         float inCoords[] = {Tx, Ty, 0};
 
         _textObject->drawMe(inCoords);
+    }
 
-        // cout << "TO" << tic << ": " << Tx << " " << Ty << " " << Tly << endl;
-        printOpenGLError();
+    // Render colorbar title, if any
+    //
+    string title = cbpb->GetTitle();
+    if (title != "") {
+        if (_textObject != NULL) {
+            delete _textObject;
+            _textObject = NULL;
+        }
+        txtColor[0] = bgColor[0];
+        txtColor[1] = bgColor[1];
+        txtColor[2] = bgColor[2];
+        txtColor[3] = 1.f;
+        _textObject = new TextObject();
+        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf", title, 20, dummy, 0, txtColor, bgColor);
+        Tuy -= _textObject->getHeight();
+        float coords[] = {Tlx, Tuy, 0.f};
+        _textObject->drawMe(coords);
     }
 
     if (_textObject != NULL) {
         delete _textObject;
         _textObject = NULL;
     }
-    glDepthFunc(GL_LESS);
 }
 
 //////////////////////////////////////////////////////////////////////////
