@@ -51,7 +51,7 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
     void _updateTab();
 
   private:
-    TwoDDataEventRouter() {}
+    TwoDDataEventRouter() {} // Sam: why a constructor in private?
 
     //! Override default wheel behavior on the tab.  This has the effect of
     //! ignoring wheel events over the tab.  This is because wheel events will always

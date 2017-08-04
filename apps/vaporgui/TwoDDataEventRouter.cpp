@@ -18,9 +18,9 @@
 
 using namespace VAPoR;
 
-TwoDDataEventRouter::TwoDDataEventRouter(
-    QWidget *parent, ControlExec *ce) : QTabWidget(parent),
-                                        RenderEventRouter(ce, TwoDDataParams::GetClassType()) {
+TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce)
+    : QTabWidget(parent),
+      RenderEventRouter(ce, TwoDDataParams::GetClassType()) {
     _variables = new TwoDVariablesSubtab(this);
     QScrollArea *qsvar = new QScrollArea(this);
     qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
