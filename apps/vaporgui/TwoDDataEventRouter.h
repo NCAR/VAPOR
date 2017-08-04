@@ -13,7 +13,6 @@
 
 QT_USE_NAMESPACE
 
-
 namespace VAPoR {
 	class ControlExec;
 }
@@ -58,7 +57,7 @@ protected:
 
 private:
 
- TwoDDataEventRouter() {}
+ TwoDDataEventRouter() {} // Sam: why a constructor in private?
 
 
  //! Override default wheel behavior on the tab.  This has the effect of 
