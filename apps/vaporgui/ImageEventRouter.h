@@ -3,18 +3,18 @@
 
 #include <qobject.h>
 #include <vapor/MyBase.h>
-#include <vapor/ImageParams.h>
 #include <GL/glew.h>
+#include <vapor/ImageParams.h>
+#include <vapor/ImageRenderer.h>
 #include <RenderEventRouter.h>
 #include <VariablesWidget.h>
+#include <ImageSubtabs.h>
 
 QT_USE_NAMESPACE
 
 namespace VAPoR {
 class ControlExec;
 }
-
-//class GLImageWindow;
 
 class ImageEventRouter : public QTabWidget, public RenderEventRouter {
 
@@ -26,10 +26,12 @@ class ImageEventRouter : public QTabWidget, public RenderEventRouter {
 
     void GetWebHelp(vector<pair<string, string>> &help) const;
 
-    //static std::string GetClassType()
-    //{
-    //  return(VAPoR::ImageRenderer::GetClassType());
-    //}
+    static std::string GetClassType() {
+        return (VAPoR::ImageRenderer::GetClassType());
+    }
+    std::string GetType() const {
+        return GetClassType();
+    }
 
   protected:
     void _updateTab();
@@ -41,7 +43,9 @@ class ImageEventRouter : public QTabWidget, public RenderEventRouter {
     //! if wheel events also scrolled the tab itself
     void wheelEvent(QWheelEvent *) {}
 
-    //GLImageWindow*      _glImageWindow;
+    ImageVariablesSubtab *_variables;
+    ImageGeometrySubtab *_geometry;
+    ImageAppearanceSubtab *_appearance;
 };
 
 #endif
