@@ -93,7 +93,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="samboc">
+        <widget class="QCheckBox" name="GeoreferenceCheckbox">
          <property name="text">
           <string/>
          </property>
@@ -141,7 +141,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <property name="spacing">
-        <number>0</number>
+        <number>10</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -155,6 +155,9 @@
        </item>
        <item>
         <widget class="QSlider" name="horizontalSlider">
+         <property name="maximum">
+          <number>100</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -175,7 +178,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <property name="spacing">
-        <number>0</number>
+        <number>10</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
