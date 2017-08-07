@@ -23,194 +23,157 @@ namespace VAPoR {
 //! for some real dx and dy .
 //!
 //
-class VDF_API LayeredGrid : public RegularGrid {
+class VDF_API LayeredGrid : public StructuredGrid {
   public:
     //!
     //! Construct a layered grid sampling a 3D or 2D scalar function
     //!
-    //! \param[in] bs A three-element vector specifying the dimensions of
-    //! each block storing the sampled scalar function.
-    //! \param[in] min A three-element vector specifying the ijk index
-    //! of the first point in the grid. The first grid point need not coincide
-    //! with
-    //! block boundaries. I.e. the indecies need not be (0,0,0)
-    //! \param[in] max A three-element vector specifying the ijk index
-    //! of the last point in the grid
+    //! \copydoc StructuredGrid::StructuredGrid()
+    //!
+    //!
+    //! Adds or changes parameters:
+    //!
     //! \param[in] minu A two-element vector specifying the X and Y user
     //! coordinates
     //! of the first grid point.
     //! \param[in] maxu A two-element vector specifying the X and Y user
     //! coordinates
     //! of the last grid point.
-    //! \param[in] periodic A three-element boolean vector indicating
-    //! which i,j,k indecies, respectively, are periodic. The varying
-    //! dimension may not be periodic.
-    //! \param[in] blks An array of blocks containing the sampled function.
-    //! The dimensions of each block
-    //! is given by \p bs. The number of blocks is given by the product
-    //! of the terms:
-    //!
-    //! \code (max[i]/bs[i] - min[i]/bs[i] + 1) \endcode
-    //!
-    //! over i = 0..2.
     //!
     //! \param[in] rg A RegularGrid instance with the same dimensionality and
     //! min/max offsets as specified by \p bs, \p min, and \p max. The
     //! data values of \p rg provide the user coordinates for the Z dinmension.
     //!
     LayeredGrid(
+        const std::vector<size_t> &dims,
         const std::vector<size_t> &bs,
-        const std::vector<size_t> &min,
-        const std::vector<size_t> &max,
+        const std::vector<float *> &blks,
         const std::vector<double> &minu,
         const std::vector<double> &maxu,
-        const std::vector<bool> &periodic,
-        const std::vector<float *> &blks,
-        const RegularGrid &rg);
-
-#ifdef DEAD
-    //! \deprecated This method is deprecated.
-    //!
-    LayeredGrid(
-        const size_t bs[3],
-        const size_t min[3],
-        const size_t max[3],
-        const double extents[6],
-        const bool periodic[3],
-        const std::vector<float *> &blks,
-        const RegularGrid &rg);
-#endif
-
-    //!
-    //! Construct a layered grid sampling a 3D or 2D scalar function
-    //! that contains missing values.
-    //!
-    //! This constructor adds a parameter, \p missing_value, that specifies
-    //! the value of missing values in the sampled function. When
-    //! reconstructing the function at arbitrary coordinates special
-    //! consideration is given to grid points with missing values that
-    //! are used in the reconstruction.
-    //!
-    //! \sa GetValue()
-    //!
-    LayeredGrid(
-        const std::vector<size_t> &bs,
-        const std::vector<size_t> &min,
-        const std::vector<size_t> &max,
-        const std::vector<double> &minu,
-        const std::vector<double> &maxu,
-        const std::vector<bool> &periodic,
-        const std::vector<float *> &blks,
-        const RegularGrid &rg,
-        float missing_value);
-
-#ifdef DEAD
-    //! \deprecated This method is deprecated.
-    //!
-    LayeredGrid(
-        const size_t bs[3],
-        const size_t min[3],
-        const size_t max[3],
-        const double extents[6],
-        const bool periodic[3],
-        const std::vector<float *> &blks,
-        const RegularGrid &rg,
-        float missing_value);
-#endif
+        const RegularGrid *rg);
 
     virtual ~LayeredGrid();
 
+    //! Return value of grid at specified location
+    //!
+    //! This method provides an alternate interface to Grid::AccessIndex()
+    //! If the dimensionality of the grid as determined by GetDimensions() is
+    //! less than three subsequent parameters are ignored. Parameters
+    //! that are outside of range are clamped to boundaries.
+    //!
+    //! \param[in] i Index into first fastest varying dimension
+    //! \param[in] j Index into second fastest varying dimension
+    //! \param[in] k Index into third fastest varying dimension
+    //
+    virtual float AccessIJK(size_t i, size_t j, size_t k) const;
+
     //! \copydoc RegularGrid::GetValue()
     //!
-    float GetValue(double x, double y, double z) const;
+    float GetValue(const std::vector<double> &coords) const;
 
-    //! \copydoc RegularGrid::GetUserExtents()
+    //! \copydoc Grid::GetInterpolationOrder()
+    //
+    virtual int GetInterpolationOrder() const { return _interpolationOrder; };
+
+    //! Set the interpolation order to be used during function reconstruction
+    //!
+    //! This method sets the order of the interpolation method that will
+    //! be used when reconstructing the sampled scalar function. Valid values
+    //! of \p order are 0,  1, and 2, corresponding to nearest-neighbor,linear,
+    //! and quadratic
+    //! interpolation, respectively. If \p order is invalid it will be silently
+    //! set to 2. The default interpolation order is 1
+    //!
+    //! \param[in] order interpolation order
+    //! \sa GetInterpolationOrder()
+    //!
+    virtual void SetInterpolationOrder(int order);
+
+    //! \copydoc Grid::GetUserExtents()
     //!
     virtual void GetUserExtents(
         std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    //! \copydoc RegularGrid::GetBoundingBox()
+    //! \copydoc Grid::GetBoundingBox()
     //!
     virtual void GetBoundingBox(
         const std::vector<size_t> &min, const std::vector<size_t> &max,
         std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    //! \copydoc RegularGrid::GetEnclosingRegion()
+    //! \copydoc Grid::GetEnclosingRegion()
     //!
     virtual void GetEnclosingRegion(
         const std::vector<double> &minu, const std::vector<double> &maxu,
         std::vector<size_t> &min, std::vector<size_t> &max) const;
 
-    //! \copydoc RegularGrid::GetUserCoordinates()
+    //! \copydoc Grid::GetUserCoordinates()
     //!
-    int GetUserCoordinates(
+    void GetUserCoordinates(
+        const std::vector<size_t> &indices,
+        std::vector<double> &coords) const;
+
+    void GetUserCoordinates(
         size_t i, size_t j, size_t k,
-        double *x, double *y, double *z) const;
+        double &x, double &y, double &z) const {
+        std::vector<size_t> indices = {i, j, k};
+        std::vector<double> coords;
+        GetUserCoordinates(indices, coords);
+        x = coords[0];
+        y = coords[1];
+        z = coords[2];
+    }
 
-    //! \copydoc RegularGrid::GetIJKIndex()
+    //! \copydoc Grid::GetIndices()
     //!
-    void GetIJKIndex(
-        double x, double y, double z,
-        size_t *i, size_t *j, size_t *k) const;
+    void GetIndices(
+        const std::vector<double> &coords,
+        std::vector<size_t> &indices) const;
 
-    //! \copydoc RegularGrid::GetIJKIndexFloor()
+    //! \copydoc RegularGrid::GetIndicesFloor()
     //!
-    void GetIJKIndexFloor(
-        double x, double y, double z,
-        size_t *i, size_t *j, size_t *k) const;
+    void GetIndicesFloor(
+        const std::vector<double> &coords,
+        std::vector<size_t> &indices) const;
 
-    //! \copydoc RegularGrid::Reshape()
+    //! \copydoc Grid::InsideGrid()
     //!
-    int Reshape(
-        const size_t min[3],
-        const size_t max[3],
-        const bool periodic[3]);
+    bool InsideGrid(const std::vector<double> &coords) const;
 
-    //! \copydoc RegularGrid::InsideGrid()
+    //! \copydoc Grid::GetPeriodic()
     //!
-    bool InsideGrid(double x, double y, double z) const;
-
-    //! Set periodic boundaries
-    //!
-    //! This method changes the periodicity of boundaries set
-    //! by the class constructor. It overides the base class method
-    //! to ensure the varying dimension is not periodic.
-    //!
-    //! \param[in] periodic A three-element boolean vector indicating
-    //! which i,j,k indecies, respectively, are periodic. The varying dimension
-    //! may not be periodic.
+    //! Only horizonal dimensions can be periodic. Layered (third) dimension
+    //! is ignored if set to periodic
     //
-    virtual void SetPeriodic(const bool periodic[3]);
-    virtual void SetPeriodic(const std::vector<bool> &periodic);
-
-    //! \copydoc RegularGrid::GetMinCellExtents()
-    //!
-    virtual void GetMinCellExtents(double *x, double *y, double *z) const;
+    virtual void SetPeriodic(const std::vector<bool> &periodic) {
+        assert(periodic.size() == 3);
+        std::vector<bool> myPeriodic = periodic;
+        myPeriodic[2] = false;
+        Grid::SetPeriodic(myPeriodic);
+    }
 
     //! Return the internal data structure containing a copy of the coordinate
     //! blocks passed in by the constructor
     //!
-    const RegularGrid &GetZRG() const { return (_rg); };
+    const RegularGrid *GetZRG() const { return (_rg); };
 
   private:
-    RegularGrid _rg;
+    const RegularGrid *_rg;
     std::vector<double> _minu;
     std::vector<double> _maxu;
+    std::vector<double> _delta;
+    int _interpolationOrder;
 
     void _layeredGrid(
-        const std::vector<bool> &periodic,
         const std::vector<double> &minu,
         const std::vector<double> &maxu,
-        const RegularGrid &rg);
+        const RegularGrid *rg);
 
     void _GetUserExtents(
         std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    float _GetValueNearestNeighbor(double x, double y, double z) const;
-    float _GetValueLinear(double x, double y, double z) const;
+    float _GetValueNearestNeighbor(const std::vector<double> &coords) const;
+    float _GetValueLinear(const std::vector<double> &coords) const;
 
-    //! void _getBilinearWeights(double x, double y, size_t k,
-    //!						double *iwgt, double *jwgt) const;
     //!
     //! Return the bilinear interpolation weights of a point given in user
     //! coordinates.  These weights apply to the x (iwgt) and y (jwgt) axes.
@@ -224,15 +187,9 @@ class VDF_API LayeredGrid : public RegularGrid {
     //! \param[out] a bilinearly calculated weight for the x axis
     //! \param[out] a bilinearly calculated weight for the y axis
     //
-    void _getBilinearWeights(double x, double y, double z,
+    void _getBilinearWeights(const std::vector<double> &coords,
                              double &iwgt, double &jwgt) const;
 
-    //! double _bilinearElevation(double x, double y, size_t k,
-    //!						double *iwgt, double *jwgt) const;
-    //!
-    //! Return the bilinearly interpolated elevation of a point given in user
-    //! coordinates.
-    //!
     //! This function applies the bilinear interpolation method to derive
     //! a the elevation from x and y axis weights of a point in user coordinates.
     //!
@@ -287,7 +244,7 @@ class VDF_API LayeredGrid : public RegularGrid {
     //! \param[out] a quadratically interpolated value of a point in user
     //! coordinates
     //!
-    float _getValueQuadratic(double x, double y, double z) const;
+    float _getValueQuadratic(const std::vector<double> &coords) const;
 
     //! Return the linearly interpolated value of a point in user
     //! coordinates.  This only interpolates in the vertical (z) direction.
@@ -304,7 +261,10 @@ class VDF_API LayeredGrid : public RegularGrid {
 
     double _interpolateVaryingCoord(
         size_t i0, size_t j0, size_t k0,
-        double x, double y, double z) const;
+        double x, double y) const;
+
+    bool _bsearchKIndexFloor(
+        size_t i, size_t j, double z, size_t &k) const;
 };
 }; // namespace VAPoR
 #endif
