@@ -74,6 +74,7 @@ protected slots:
     void setZTicOrient(int);
     void setLatLonAnnot(bool);
     void setUseAxisArrows(bool);
+    void timeAnnotationChanged(int);
 
 private:
     VizFeatureEventRouter() {}
