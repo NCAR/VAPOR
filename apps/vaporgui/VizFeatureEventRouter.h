@@ -79,6 +79,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void setZTicOrient(int);
     void setLatLonAnnot(bool);
     void setUseAxisArrows(bool);
+    void timeAnnotationChanged(int);
 
   private:
     VizFeatureEventRouter() {}
