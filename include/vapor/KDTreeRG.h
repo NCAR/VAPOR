@@ -79,6 +79,14 @@ class VDF_API KDTreeRG {
     void Nearest(
         const std::vector<float> &coordu, std::vector<size_t> &index) const;
 
+    void Nearest(
+        const std::vector<double> &coordu, std::vector<size_t> &index) const {
+        std::vector<float> coordu_f;
+        for (int i = 0; i < coordu.size(); i++)
+            coordu_f.push_back(coordu[i]);
+        Nearest(coordu_f, index);
+    }
+
     //! Returns the dimesionality of the structured grids passed to the
     //! constructor.
     //!
@@ -152,6 +160,14 @@ class VDF_API KDTreeRGSubset {
     //
     void Nearest(
         const std::vector<float> &coordu, std::vector<size_t> &coord) const;
+
+    void Nearest(
+        const std::vector<double> &coordu, std::vector<size_t> &index) const {
+        std::vector<float> coordu_f;
+        for (int i = 0; i < coordu.size(); i++)
+            coordu_f.push_back(coordu[i]);
+        Nearest(coordu_f, index);
+    }
 
   private:
     const KDTreeRG *_kdtree;

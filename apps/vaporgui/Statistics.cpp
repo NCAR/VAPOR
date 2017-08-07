@@ -1154,8 +1154,7 @@ bool Statistics::calcMean(string varname) {
         StructuredGrid::ForwardIterator<StructuredGrid> itr;
         double c = 0.0;
 
-        size_t dims[3];
-        _rGrid->GetDimensions(dims);
+        vector<size_t> dims = _rGrid->GetDimensions();
 
         // If _regionSelection==2, we are querying a single point.
         // So here we just call GetValue at that point.
@@ -1304,8 +1303,7 @@ bool Statistics::calcStdDev(string varname) {
             //			RegularGrid::Iterator itr;
             StructuredGrid::ForwardIterator<StructuredGrid> itr;
             double c = 0.0;
-            size_t dims[3];
-            _rGrid->GetDimensions(dims);
+            vector<size_t> dims = _rGrid->GetDimensions();
             for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
                 val = *itr;
 
