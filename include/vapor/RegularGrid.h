@@ -24,14 +24,7 @@ namespace VAPoR {
 
 class VDF_API RegularGrid : public StructuredGrid {
 public:
-    //! Alternate constructor.
-    //!
-    //! \deprecated This constructor is deprecated.
-    //!
-    RegularGrid(const size_t bs[3], const size_t min[3], const size_t max[3], const double extents[6], const bool periodic[3], const std::vector<float *> &blks);
-
     //! \copydoc StructuredGrid::StructuredGrid(
-    //!	const std::vector<size_t>&, const std::vector<size_t>&,
     //!	const std::vector<size_t>&, const std::vector<bool>&,
     //!	const std::vector<float*>&
     //!	)
@@ -47,67 +40,42 @@ public:
     //! equal to corresponding elements in \p minu.
     //!
     //
-    RegularGrid(const std::vector<size_t> &bs, const std::vector<size_t> &min, const std::vector<size_t> &max, const std::vector<double> &minu, const std::vector<double> &maxu,
-                const std::vector<bool> &periodic, const std::vector<float *> &blks);
-
-    //! Alternate constructor.
-    //!
-    //! \deprecated This constructor is deprecated.
-    //!
-    RegularGrid(const size_t bs[3], const size_t min[3], const size_t max[3], const double extents[6], const bool periodic[3], const std::vector<float *> &blks, float missing_value);
-
-    //! \copydoc StructuredGrid::StructuredGrid(
-    //!	const std::vector<size_t>&, const std::vector<size_t>&,
-    //!	const std::vector<size_t>&, const std::vector<bool>&,
-    //!	const std::vector<float*>&, float
-    //!	)
-    //!
-    //! Construct a regular grid sampling a 3D or 2D scalar function.
-    //!
-    //! Adds new parameters:
-    //!
-    //! \param[in] minu A vector provding the user coordinates of the first
-    //! point in the grid.
-    //! \param[in] maxu A vector provding the user coordinates of the last
-    //! point in the grid. All elements of \p maxu must be greater than or
-    //! equal to corresponding elements in \p minu.
-    //!
-    //
-    RegularGrid(const std::vector<size_t> &bs, const std::vector<size_t> &min, const std::vector<size_t> &max, const std::vector<double> &minu, const std::vector<double> &maxu,
-                const std::vector<bool> &periodic, const std::vector<float *> &blks, float missing_value);
-    RegularGrid(const std::vector<size_t> &bs, const std::vector<size_t> &min, const std::vector<size_t> &max, const std::vector<bool> &periodic, const std::vector<float *> &blks,
-                float missing_value);
-    RegularGrid();
+    RegularGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &minu, const std::vector<double> &maxu);
 
     virtual ~RegularGrid();
 
-    // Implements StructuredGrid::GetUserExtents()
+    //! Return value of grid at specified location
+    //!
+    //! This method provides an alternate interface to Grid::AccessIndex()
+    //! If the dimensionality of the grid as determined by GetDimensions() is
+    //! less than three subsequent parameters are ignored. Parameters
+    //! that are outside of range are clamped to boundaries.
+    //!
+    //! \param[in] i Index into first fastest varying dimension
+    //! \param[in] j Index into second fastest varying dimension
+    //! \param[in] k Index into third fastest varying dimension
+    //
+    virtual float AccessIJK(size_t i, size_t j, size_t k) const;
+
+    // \copydoc Grid::GetUserExtents()
     //
     virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    //! \deprecated  This method is deprecated
-    //
-    virtual void GetUserExtents(double extents[6]) const;
-
-    // Implements StructuredGrid::GetBoundingBox()
+    // \copydoc Grid::GetBoundingBox()
     //
     virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    //! \deprecated  This method is deprecated
-    //
-    virtual void GetBoundingBox(const size_t min[3], const size_t max[3], double extents[6]) const;
-
-    // Implements StructuredGrid::GetEnclosingRegion()
+    // \copydoc Grid::GetEnclosingRegion()
     //
     virtual void GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const;
 
-    // Implements StructuredGrid::GetUserCoordinates()
+    // \copydoc Grid::GetUserCoordinates()
     //
-    virtual int GetUserCoordinates(size_t i, size_t j, size_t k, double *x, double *y, double *z) const;
+    virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const;
 
-    // Implements StructuredGrid::GetIJKIndex()
+    // \copydoc Grid::GetIndices()
     //
-    virtual void GetIJKIndex(double x, double y, double z, size_t *i, size_t *j, size_t *k) const;
+    virtual void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const;
 
     //! Return the corner grid point of the cell containing the
     //! specified user coordinates
@@ -124,52 +92,25 @@ public:
     //! defining the boundary cell closest
     //! to the point are returned.
     //!
-    //! \param[in] x coordinate along fastest varying dimension
-    //! \param[in] y coordinate along second fastest varying dimension
-    //! \param[in] z coordinate along third fastest varying dimension
-    //! \param[out] i index of grid point along fastest varying dimension
-    //! \param[out] j index of grid point along second fastest varying dimension
-    //! \param[out] k index of grid point along third fastest varying dimension
     //!
-    virtual void GetIJKIndexFloor(double x, double y, double z, size_t *i, size_t *j, size_t *k) const;
+    virtual void GetIndicesFloor(const std::vector<double> &coords, std::vector<size_t> &indices) const;
 
-    // Implements StructuredGrid::InsideGrid()
+    // \copydoc Grid::InsideGrid()
     //
-    virtual bool InsideGrid(double x, double y, double z) const;
-
-    // Implements StructuredGrid::GetMinCelExtents()
-    //
-    virtual void GetMinCellExtents(double *x, double *y, double *z) const
-    {
-        *x = _delta[0];
-        *y = _delta[1];
-        *z = _delta[2];
-    };
+    virtual bool InsideGrid(const std::vector<double> &coords) const;
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const RegularGrid &rg);
 
 protected:
-    virtual float _GetValueNearestNeighbor(double x, double y, double z) const;
-    virtual float _GetValueLinear(double x, double y, double z) const;
-    virtual void  _ClampCoord(double &x, double &y, double &z) const;
-
-    //! \copydoc StructuredGrid::StructuredGrid(
-    //!	const std::vector<size_t>&, const std::vector<size_t>&,
-    //!	const std::vector<size_t>&, const std::vector<bool>&,
-    //!	const std::vector<float*>&
-    //!	)
-    //!
-    //! Construct a regular grid sampling a 3D or 2D scalar function.
-    //!
-    //! This constructor does not specify user coordinates.
-    //
-    RegularGrid(const std::vector<size_t> &bs, const std::vector<size_t> &min, const std::vector<size_t> &max, const std::vector<bool> &periodic, const std::vector<float *> &blks);
-    RegularGrid(const size_t bs[3], const size_t min[3], const size_t max[3], const bool periodic[3], const std::vector<float *> &blks);
-
-    RegularGrid(const size_t bs[3], const size_t min[3], const size_t max[3], const bool periodic[3], const std::vector<float *> &blks, float missing_value);
-    void _SetExtents(const std::vector<double> &minu, const std::vector<double> &maxu);
+    virtual float _GetValueNearestNeighbor(const std::vector<double> &coords) const;
+    virtual float _GetValueLinear(const std::vector<double> &coords) const;
+    virtual void  _ClampCoord(std::vector<double> &coords) const;
 
 private:
+    RegularGrid();
+
+    void _SetExtents(const std::vector<double> &minu, const std::vector<double> &maxu);
+
     std::vector<double> _minu;
     std::vector<double> _maxu;     // User coords of first and last voxel
     std::vector<double> _delta;    // increment between grid points in user coords
