@@ -51,6 +51,7 @@
 #include "SeedMe.h"
 #include "Statistics.h"
 #include "Plot.h"
+#include "ErrorReporter.h"
 #include "MainForm.h"
 
 //Following shortcuts are provided:
@@ -244,7 +245,8 @@ MainForm::MainForm(
     //Load preferences at start, set preferences directory
     loadStartingPrefs();
     //Create the MessageReporter
-    MessageReporter::getInstance();
+    //MessageReporter::getInstance();
+    ErrorReporter::getInstance();
 
     setUpdatesEnabled(true);
     show();
