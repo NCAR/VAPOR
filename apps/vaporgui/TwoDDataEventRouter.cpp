@@ -44,7 +44,7 @@ TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce)
 	qsgeo->setWidgetResizable(true);
 	addTab(qsgeo, "Geometry");
 
-#ifdef DEAD	
+#if 0	
 	QScrollArea *qsimg = new QScrollArea(this);
 	qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_image = new TwoDDataImageGUI(this);
