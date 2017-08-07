@@ -6,6 +6,7 @@ lib/render/moc/
 share/doc/Doxygen/Doxyfile
 site.mk
 targets/
+.ycm_extra_conf.py
 make/Darwin/VaporXcode/vaporXcode.xcodeproj/project.xcworkspace/
 make/Darwin/VaporXcode/vaporXcode.xcodeproj/xcuserdata/
 plugins/visit/CMakeCache.txt
