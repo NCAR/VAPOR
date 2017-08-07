@@ -131,6 +131,7 @@ VizFeatureEventRouter::hookUpTab()
 
 	connect (axisColorButton,SIGNAL(clicked()), this, SLOT(selectAxisColor()));
 
+	connect (timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged(int)));
 }
 
 void VizFeatureEventRouter::GetWebHelp(
@@ -386,6 +387,24 @@ void VizFeatureEventRouter::selectAxisColor(){
 	invalidateText();
 	
 }
+
+void VizFeatureEventRouter::timeAnnotationChanged(int index) {
+	VizFeatureParams* gsParams = (VizFeatureParams*)GetStateParams();
+	cout << "timeAnnotationChanged " << index << endl;
+	if (index == 1) {
+		gsParams->SetUseTimeStep(true);
+		gsParams->SetUseTimeStamp(false);
+	}
+	else if (index == 2) {
+		gsParams->SetUseTimeStamp(true);
+		gsParams->SetUseTimeStep(false);
+	}
+	else {
+		gsParams->SetUseTimeStamp(false);
+		gsParams->SetUseTimeStep(false);
+	}
+}
+
 void VizFeatureEventRouter::setXTicOrient(int){
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vector<long> ticDir = vfParams->GetTicDirs();
