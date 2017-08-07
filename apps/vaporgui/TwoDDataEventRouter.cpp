@@ -43,22 +43,22 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce)
     qsgeo->setWidgetResizable(true);
     addTab(qsgeo, "Geometry");
 
-#ifdef DEAD
-    QScrollArea *qsimg = new QScrollArea(this);
-    qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _image = new TwoDDataImageGUI(this);
-    qsimg->setWidget(_image);
-    addTab(qsimg, "Image");
-    _image->adjustSize();
+#if 0	
+	QScrollArea *qsimg = new QScrollArea(this);
+	qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_image = new TwoDDataImageGUI(this);
+	qsimg->setWidget(_image);
+	addTab(qsimg,"Image");
+	_image->adjustSize();
 
-    ImageFrame *imageFrame = _image->imageFrame;
-    QGLFormat fmt;
-    fmt.setAlpha(true);
-    fmt.setRgba(true);
-    fmt.setDoubleBuffer(true);
-    fmt.setDirectRendering(true);
-    _glTwoDDataImageWindow = new GLTwoDDataImageWindow(fmt, imageFrame, "gltwoddatawindow", imageFrame);
-    imageFrame->attachRenderWindow(_glTwoDDataImageWindow, this);
+	ImageFrame *imageFrame = _image->imageFrame;
+	QGLFormat fmt;
+	fmt.setAlpha(true);
+	fmt.setRgba(true);
+	fmt.setDoubleBuffer(true);
+	fmt.setDirectRendering(true);
+	_glTwoDDataImageWindow = new GLTwoDDataImageWindow(fmt,imageFrame,"gltwoddatawindow",imageFrame);
+	imageFrame->attachRenderWindow(_glTwoDDataImageWindow, this);
 #endif
 }
 
