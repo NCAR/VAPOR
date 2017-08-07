@@ -104,23 +104,6 @@ class PipeLine;
 class VDF_API DataMgr : public Wasp::MyBase {
 public:
 
-#define DUMMIES
-#ifdef DUMMIES
-    vector<double> GetExtents(size_t ts=0) {vector<double> foo; return foo;}
-    vector<size_t> GetCRatios() {vector<size_t> r; return r;}  
-    int GetNumTransforms(){return 0;}  
-    vector<string> GetVariables3D() {vector<string> s; return s;}  
-    vector<string> GetVariables2DXY() {vector<string> s; return s;}  
-    vector<string> GetVariables2DYZ() {vector<string> s; return s;}  
-    vector<string> GetVariables2DXZ() {vector<string> s; return s;}  
-    void GetEnclosingRegion(size_t ts, double minu[3], double maxu[3],
-                        size_t min[3], size_t max[3], int reflevel=0,
-                        int lod=0) {};  
-    void GetDim(size_t dim[3], int reflevel=0) {};  
-    void MapUserToVox(size_t ts, double vcoord0[3], size_t vcoord1[3], int ref=0, int lod=0) {};
-    double GetTSUserTime(size_t ts);
-#endif
-
  //! Constructor for the DataMgr class.
  //!
  //! The DataMgr will attempt to cache previously read data and coordinate
