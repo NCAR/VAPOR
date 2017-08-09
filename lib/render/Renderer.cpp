@@ -27,6 +27,7 @@
 #include <vapor/glutil.h>	// Must be included first!!!
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/GetAppPath.h>
 
 #include <vapor/ViewpointParams.h>
 
@@ -52,6 +53,11 @@ Renderer::Renderer(
 	_colorbarTexture = 0;
 	_timestep = 0;
 	_textObject = NULL;
+
+	vector<string> fpath;
+	fpath.push_back("fonts");
+	_fontFile = GetAppPath("VAPOR", "share", fpath);
+	_fontFile = _fontFile + "//arial.ttf";
 }
 
 RendererBase::RendererBase(
@@ -352,8 +358,6 @@ int Renderer::makeColorbarTexture(){
 	//int lineWidth = (int)(0.02*Min(_imgHgt, _imgWid)+0.5);
 	int lineWidth = 2;
 
-	//cout << "Texture size " << _imgWid << " " << _imgHgt << endl;
-
 	//Draw top and bottom
 	for (int i = 0; i< _imgWid; i++){
 		for (int j = 0; j<lineWidth; j++){
@@ -400,7 +404,6 @@ int Renderer::makeColorbarTexture(){
 	double B = mf->getMaxMapValue() - A*(double)_imgHgt*.5/(double)(numtics);
 
 	//for (int line = _imgHgt-2*lineWidth; line>=2*lineWidth; line--){
-	cout << "num lines " << _imgHgt-2*lineWidth-5 << endl;
 	for (int line = _imgHgt-2*lineWidth-5; line>2*lineWidth+5; line--){
 		float ycoord = A*(float)line + B;
 		
@@ -470,30 +473,33 @@ void Renderer::renderColorbar(){
 }
 
 
-void Renderer::renderColorbarText(ColorbarPbase* cbpb, float fbWidth,
-	float fbHeight, float llx, float lly, float urx, float ury) {
+void Renderer::renderColorbarText(ColorbarPbase* cbpb, 
+			float fbWidth,	float fbHeight, 
+			float llx, float lly, float urx, float ury) {
+
 	const RenderParams *rParams = GetActiveParams();
 	MapperFunction* mf = rParams->GetMapperFunc(rParams->GetVariableName());
 	float numEntries = mf->getNumEntries();
-	cout << "num entries " << numEntries << endl;
 
 	vector<double> bgc = cbpb->GetBackgroundColor();
 
 	//determine text color; the compliment of the background color:
+	//
 	float fgr = 1.f - bgc[0];
 	float fgg = 1.f - bgc[1];
 	float fgb = 1.f - bgc[2];
 
 	float txtColor[] = {fgr, fgg, fgb, 1.};
 	float bgColor[] = {(float)bgc[0], (float)bgc[1], (float)bgc[2], 0.};
-	float dummy[] = {0.,0.,0.};
 	int precision = (int)cbpb->GetNumDigits();
-	cout << "PREC " << precision << endl;
+	float dummy[] = {0.,0.,0.}; // Dummy coordinates.  We won't know the correct 
+								// coords until we know image size.
 
+	// Corners in texture coordinates, to be derived later
+	//
+	float Trx, Tlx, Tly, Tuy;
 
 	float maxWidth = 0;
-
-	float Trx, Tlx, Tly, Tuy;
 	int numtics = cbpb->GetNumTicks();
 	for (int tic = 0; tic < numtics; tic++){
 		// Find numeric data value associated with our current text label
@@ -513,13 +519,14 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb, float fbWidth,
 			_textObject = NULL;
 		}
 		_textObject = new TextObject();
-		_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+		//_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+		_textObject->Initialize(_fontFile,
 	   		 textString, 20, dummy, 0, txtColor, bgColor);
 		float texWidth = _textObject->getWidth();
 		float texHeight = _textObject->getHeight();
 
 
-		// llx and lly are between -1 and 1
+		// llx and lly are in visualizer coordinates between -1 and 1
 		// TextRenderer takes pixel coordinates. Trx and Tuy are the 
 		// TextRenderer coords of the colorbar in the pixel coord system.
 		//

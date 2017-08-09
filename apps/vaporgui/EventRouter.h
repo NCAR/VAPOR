@@ -27,7 +27,7 @@
 #include "vapor/ControlExecutive.h"
 #include "GUIStateParams.h"
 #include "AnimationParams.h"
-
+#include "MiscParams.h"
 
 #ifdef WIN32
 //Annoying unreferenced formal parameter warning
@@ -237,6 +237,12 @@ public:
 	 );
  }
 
+ MiscParams *GetMiscParams() const {
+	assert(_controlExec != NULL);
+	return ((MiscParams *)
+		_controlExec->GetParamsMgr()->GetParams(MiscParams::GetClassType())
+	 );
+ }
 
  size_t GetCurrentTimeStep() const {
  	AnimationParams *aParams;

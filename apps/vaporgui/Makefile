@@ -15,7 +15,7 @@ FILES = \
 	RangeController Statistics Plot SeedMe \
 	helloSubtabs TFWidget VariablesWidget \
 	GeometryWidget RangeCombos BarbEventRouter \
-	BannerGUI AnimationParams \
+	BannerGUI AnimationParams MiscParams \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
 	TabManager MessageReporter  TrackBall GLColorbarWidget
@@ -34,7 +34,7 @@ QT_HEADERS := \
 	TFWidget VariablesWidget \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
-	BannerGUI AnimationParams \
+	BannerGUI AnimationParams MiscParams \
 	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget
 
 
