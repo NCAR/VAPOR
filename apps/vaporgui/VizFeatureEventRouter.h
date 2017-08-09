@@ -80,6 +80,10 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void setLatLonAnnot(bool);
     void setUseAxisArrows(bool);
     void timeAnnotationChanged(int);
+    void timeLLXChanged();
+    void timeLLYChanged();
+    void timeSizeChanged();
+    void timeColorChanged();
 
   private:
     VizFeatureEventRouter() {}
@@ -88,6 +92,9 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
 
     virtual void _confirmText();
     virtual void _updateTab();
+
+    void drawTimeStamp();
+    void drawTimeStep(string text = "");
 };
 
 #endif //VIZFEATUREEVENTROUTER_H

@@ -282,6 +282,7 @@ class RENDER_API Renderer : public RendererBase {
     static const int _imgWid;
     unsigned char *_colorbarTexture;
     TextObject *_textObject;
+    string _fontFile;
 
   private:
     size_t _timestep;

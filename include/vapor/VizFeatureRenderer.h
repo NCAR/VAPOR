@@ -22,6 +22,7 @@
 
 #include <vapor/StructuredGrid.h>
 #include <vapor/Renderer.h>
+#include <vapor/textRenderer.h>
 
 namespace VAPoR {
 
@@ -53,6 +54,12 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     //! Render the overlay features
     void OverlayPaint(size_t ts);
 
+    void AddText(string text, int x, int y, int size, float color[3]);
+
+    void DrawText();
+
+    void ClearText() { _billboards.clear(); }
+
 #ifdef DEAD
     //! Clear all the text objects
     void invalidateCache();
@@ -60,11 +67,22 @@ class RENDER_API VizFeatureRenderer : public MyBase {
 
   protected:
   private:
+    struct billboard {
+        string text;
+        int x;
+        int y;
+        int size;
+        float color[3];
+    };
+    vector<billboard> _billboards;
+
     const ParamsMgr *m_paramsMgr;
     const DataStatus *m_dataStatus;
     string m_winName;
     ShaderMgr *m_shaderMgr;
     bool _textObjectsValid;
+    TextObject *_textObject;
+    string _fontFile;
 
     //! Render the domain fram
     void drawDomainFrame(size_t ts) const;
