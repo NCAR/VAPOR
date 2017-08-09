@@ -64,6 +64,9 @@
         <property name="spacing">
          <number>0</number>
         </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
@@ -148,6 +151,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="titleEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -201,6 +210,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="xPosEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -254,6 +269,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="yPosEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -307,6 +328,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="xSizeEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -360,6 +387,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="ySizeEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -413,6 +446,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="fontSizeEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -466,6 +505,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="numDigitsEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -519,6 +564,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="numTicksEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -569,6 +620,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="bgColorEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
