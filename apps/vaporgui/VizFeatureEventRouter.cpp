@@ -54,6 +54,9 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 {
 
 	setupUi(this);
+
+	_animConnected = false;
+	_ap = NULL;
 }
 
 
@@ -131,7 +134,7 @@ VizFeatureEventRouter::hookUpTab()
 
 	connect (axisColorButton,SIGNAL(clicked()), this, SLOT(selectAxisColor()));
 
-	connect (timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged(int)));
+	connect (timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
 	connect (timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
 	connect (timeLLYEdit, SIGNAL(returnPressed()), this, SLOT(timeLLYChanged()));
 	connect (timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
@@ -392,16 +395,28 @@ void VizFeatureEventRouter::selectAxisColor(){
 	
 }
 
-void VizFeatureEventRouter::timeAnnotationChanged(int index) {
+void VizFeatureEventRouter::timeAnnotationChanged() {
+	if (_animConnected==false){
+		_ap= GetAnimationParams();
+		bool v = connect (_ap, SIGNAL(timestepChanged()), this, SLOT(timeAnnotationChanged()));
+		cout << "connection " << v << endl;
+		_animConnected=true;
+	}	
+
+	cout << "TIME ANNOTATION CHANGED!" << endl;
 	MiscParams* miscParams = GetMiscParams();
+
+	int index = timeCombo->currentIndex();
 	if (index == 1) {
 		miscParams->SetTimeStep(true);
 		miscParams->SetTimeStamp(false);
+		_controlExec->ClearText();
 		drawTimeStep();
 	}
 	else if (index == 2) {
 		miscParams->SetTimeStamp(true);
 		miscParams->SetTimeStep(false);
+		_controlExec->ClearText();
 		drawTimeStamp();
 	}
 	else {
@@ -453,9 +468,12 @@ void VizFeatureEventRouter::timeColorChanged() {
 }
 
 void VizFeatureEventRouter::drawTimeStep(string myString) {
+	_controlExec->ClearText();
+
 	if (myString=="") {
 		myString = "Timestep: " + std::to_string(GetCurrentTimeStep());
 	}
+
 	MiscParams* mp = GetMiscParams();
 	int x = mp->GetTimeAnnotLLX();
 	int y = mp->GetTimeAnnotLLY();
@@ -464,7 +482,7 @@ void VizFeatureEventRouter::drawTimeStep(string myString) {
 	mp->GetTimeAnnotColor(color);
 
 	cout << "DRAW TIMESTEP " << x << " " << y << " " << size << " " << color[0] << " " << color[1] << " " << color[2] << endl;
-	_controlExec->DrawText(myString, x, y, size, color);
+	_controlExec->DrawText(myString, x, y, size, color, 1);
 }
 
 void VizFeatureEventRouter::drawTimeStamp() {

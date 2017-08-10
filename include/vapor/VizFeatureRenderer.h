@@ -35,11 +35,11 @@ class DataStatus;
 //! \date July 2015
 
 class RENDER_API VizFeatureRenderer : public MyBase {
-	
+
+private:
+ struct billboard;	
       
 public:
-
-
  //! Constructor, must invoke Renderer constructor
  VizFeatureRenderer(
 	const ParamsMgr *pm, const DataStatus *dataStatus, string winName
@@ -58,11 +58,14 @@ public:
  //! Render the overlay features
 	void OverlayPaint(size_t ts);
 
-	void AddText(string text, int x, int y, int size, float color[3]);
+	void AddText(string text, int x, int y, int size, 
+				float color[3], int type=0);
 
 	void DrawText();
 
-	void ClearText() {_billboards.clear();}
+	void DrawText(vector<billboard> billboards);
+
+	void ClearText(int type=-1);
 
 #ifdef	DEAD
  //! Clear all the text objects
@@ -81,6 +84,9 @@ private:
 	float color[3];
  };
  vector<billboard> _billboards;
+ vector<billboard> _timeAnnot;
+ vector<billboard> _axisAnnot;
+ vector<billboard> _miscAnnot;
 
  const ParamsMgr* m_paramsMgr;
  const DataStatus* m_dataStatus;

@@ -1681,7 +1681,7 @@ with Lat/Lon</string>
                <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
               </property>
               <property name="text">
-               <string>0.1</string>
+               <string>10</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignHCenter</set>
@@ -1694,7 +1694,7 @@ with Lat/Lon</string>
                <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
               </property>
               <property name="text">
-               <string>0.1</string>
+               <string>10</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignHCenter</set>

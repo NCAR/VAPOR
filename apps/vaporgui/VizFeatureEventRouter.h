@@ -26,7 +26,6 @@
 #include <vapor/MyBase.h>
 #include "vizFeaturesTab.h"
 
-
 QT_USE_NAMESPACE
 
 namespace VAPoR {
@@ -88,7 +87,7 @@ protected slots:
 	void setZTicOrient(int);
 	void setLatLonAnnot(bool);
 	void setUseAxisArrows(bool);
-	void timeAnnotationChanged(int);
+	void timeAnnotationChanged();
 	void timeLLXChanged();
 	void timeLLYChanged();
 	void timeSizeChanged();
@@ -104,6 +103,9 @@ private:
 
 	void drawTimeStamp();
 	void drawTimeStep(string text="");
+
+	AnimationParams* _ap;
+	bool _animConnected;
 };
 
 #endif //VIZFEATUREEVENTROUTER_H 
