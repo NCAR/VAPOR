@@ -208,7 +208,7 @@ public:
 
     //! Draw a text banner at x, y coordinates
     //
-    void DrawText(string text, int x, int y, int size, float color[3]) { m_vizFeatures->AddText(text, x, y, size, color); }
+    void DrawText(string text, int x, int y, int size, float color[3], int type = 0) { m_vizFeatures->AddText(text, x, y, size, color, type); }
 
     void ClearText() { m_vizFeatures->ClearText(); }
 

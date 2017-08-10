@@ -234,6 +234,12 @@ public:
         return ((MiscParams *)_controlExec->GetParamsMgr()->GetParams(MiscParams::GetClassType()));
     }
 
+    AnimationParams *GetAnimationParams() const
+    {
+        assert(_controlExec != NULL);
+        return ((AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType()));
+    }
+
     size_t GetCurrentTimeStep() const
     {
         AnimationParams *aParams;

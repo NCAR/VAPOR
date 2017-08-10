@@ -533,7 +533,7 @@ bool ControlExec::RenderLookup(string instName, string &winName, string &dataSet
     return (_paramsMgr->RenderParamsLookup(instName, winName, dataSetName, paramsType));
 }
 
-int ControlExec::DrawText(string winName, string text, int x, int y, int size, float color[3])
+int ControlExec::DrawText(string winName, string text, int x, int y, int size, float color[3], int type)
 {
     Visualizer *v = getVisualizer(winName);
     if (v == NULL) {
@@ -542,17 +542,17 @@ int ControlExec::DrawText(string winName, string text, int x, int y, int size, f
         return -1;
     }
 
-    v->DrawText(text, x, y, size, color);
+    v->DrawText(text, x, y, size, color, type);
 
     return 0;
 }
 
-int ControlExec::DrawText(string text, int x, int y, int size, float color[3])
+int ControlExec::DrawText(string text, int x, int y, int size, float color[3], int type)
 {
     vector<string> visNames = GetVisualizerNames();
     for (int i = 0; i < visNames.size(); i++) {
         cout << "Calling DrawText on " << visNames[i] << endl;
-        DrawText(visNames[i], text, x, y, size, color);
+        DrawText(visNames[i], text, x, y, size, color, type);
     }
 
     return 0;
