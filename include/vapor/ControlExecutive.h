@@ -365,7 +365,7 @@ class RENDER_API ControlExec : public MyBase {
     //! \params[in] color Three tuple describing rgj values for the billboard
     //
     int DrawText(string winName, string text, int x, int y,
-                 int size, float color[3]);
+                 int size, float color[3], int type = 0);
 
     //! Draw 2D text to all visualizers
     //!
@@ -382,7 +382,8 @@ class RENDER_API ControlExec : public MyBase {
     //! \params[in] size Font size to be used
     //! \params[in] color Three tuple describing rgj values for the billboard
     //
-    int DrawText(string text, int x, int y, int size, float color[3]);
+    int DrawText(string text, int x, int y,
+                 int size, float color[3], int type = 0);
 
     int ClearText();
     int ClearText(string winName);

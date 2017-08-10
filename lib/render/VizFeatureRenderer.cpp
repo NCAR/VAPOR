@@ -173,20 +173,24 @@ void VizFeatureRenderer::drawDomainFrame(size_t ts) const {
 }
 
 void VizFeatureRenderer::DrawText() {
+    DrawText(_miscAnnot);
+    DrawText(_timeAnnot);
+    DrawText(_axisAnnot);
+}
+
+void VizFeatureRenderer::DrawText(vector<billboard> billboards) {
     float txtColor[] = {1.f, 1.f, 1.f, 1.f};
     float bgColor[] = {0.f, 0.f, 0.f, 0.f};
     float coords[] = {67.5f, 31.6f, 0.f};
 
-    for (int i = 0; i < _billboards.size(); i++) {
-        string text = _billboards[i].text;
-        coords[0] = _billboards[i].x;
-        coords[1] = _billboards[i].y;
-        int size = _billboards[i].size;
-        txtColor[0] = _billboards[i].color[0];
-        txtColor[1] = _billboards[i].color[1];
-        txtColor[2] = _billboards[i].color[2];
-
-        cout << "VisFeatureRenderer DrawText() " << size << endl;
+    for (int i = 0; i < billboards.size(); i++) {
+        string text = billboards[i].text;
+        coords[0] = billboards[i].x;
+        coords[1] = billboards[i].y;
+        int size = billboards[i].size;
+        txtColor[0] = billboards[i].color[0];
+        txtColor[1] = billboards[i].color[1];
+        txtColor[2] = billboards[i].color[2];
 
         if (_textObject != NULL) {
             delete _textObject;
@@ -202,13 +206,13 @@ void VizFeatureRenderer::DrawText() {
 
 void VizFeatureRenderer::AddText(string text,
                                  int x, int y, int size,
-                                 float color[3]) {
-    _billboards.clear(); // Temporary hack.  We eventually need separate
-                         // billboard groups for time annotations, axis
-                         // labels, etc.  Grouping them all in the same
-                         // vector makes it hard if not impossible to
-                         // make changes to any of the labels (color, size,
-                         // etc)
+                                 float color[3], int type) {
+    //_billboards.clear();  // Temporary hack.  We eventually need separate
+    // billboard groups for time annotations, axis
+    // labels, etc.  Grouping them all in the same
+    // vector makes it hard if not impossible to
+    // make changes to any of the labels (color, size,
+    // etc)
     billboard myBoard;
     myBoard.text = text;
     myBoard.x = x;
@@ -217,7 +221,29 @@ void VizFeatureRenderer::AddText(string text,
     myBoard.color[0] = color[0];
     myBoard.color[1] = color[1];
     myBoard.color[2] = color[2];
-    _billboards.push_back(myBoard);
+
+    if (type == 0) { // Miscellaneous annotation
+        _miscAnnot.push_back(myBoard);
+    } else if (type == 1) { // Time annotation
+        _timeAnnot.push_back(myBoard);
+    } else if (type == 2) {
+        _axisAnnot.push_back(myBoard);
+    }
+}
+
+void VizFeatureRenderer::ClearText(int type) {
+    if (type == -1) {
+        _miscAnnot.clear();
+        _timeAnnot.clear();
+        _axisAnnot.clear();
+    }
+    if (type == 0) {
+        _miscAnnot.clear();
+    } else if (type == 1) {
+        _timeAnnot.clear();
+    } else if (type == 2) {
+        _axisAnnot.clear();
+    }
 }
 
 #ifdef DEAD
