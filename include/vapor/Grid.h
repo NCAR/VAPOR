@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <vector>
+#include <cassert>
 #include <vapor/common.h>
 
 #ifdef WIN32
@@ -53,6 +54,8 @@ class VDF_API Grid {
         const std::vector<size_t> &dims,
         size_t topology_dimension);
 
+    Grid();
+
     virtual ~Grid();
 
     //! Set or Get the data value at the indicated grid point
@@ -92,6 +95,15 @@ class VDF_API Grid {
     //! \sa GetUserExtents()
     //!
     virtual float GetValue(const std::vector<double> &coords) const;
+
+    virtual float GetValue(double x, double y) const {
+        std::vector<double> coords = {x, y};
+        return (GetValue(coords));
+    }
+    virtual float GetValue(double x, double y, double z) const {
+        std::vector<double> coords = {x, y, z};
+        return (GetValue(coords));
+    }
 
     //! Return the extents of the user coordinate system
     //!
@@ -197,7 +209,7 @@ class VDF_API Grid {
     //! of grid data will be compared against the value of GetMissingValue()
     //! if this flag is set.
     //
-    void SetHasMissingData(bool flag) {
+    void SetHasMissingValues(bool flag) {
         _hasMissing = flag;
     }
 
@@ -248,6 +260,13 @@ class VDF_API Grid {
         const std::vector<size_t> &indices,
         std::vector<double> &coords) const = 0;
 
+    virtual void GetUserCoordinates(
+        size_t i, double &x, double &y, double &z) const;
+    virtual void GetUserCoordinates(
+        size_t i, size_t j, double &x, double &y, double &z) const;
+    virtual void GetUserCoordinates(
+        size_t i, size_t j, size_t k, double &x, double &y, double &z) const;
+
     //! Return the closest grid point to the specified user coordinates
     //!
     //! This method returns the indices of the grid point closest to
@@ -261,6 +280,26 @@ class VDF_API Grid {
     //! \param[out] indices Array of grid indices.
     //!
     virtual void GetIndices(
+        const std::vector<double> &coords,
+        std::vector<size_t> &indices) const = 0;
+
+    //! Return the indices of the cell containing the
+    //! specified user coordinates
+    //!
+    //! This method returns the cell ID (index) of the cell containing
+    //! the specified user coordinates. If any
+    //! of the input coordinates correspond to periodic dimensions the
+    //! the coordinate(s) are first re-mapped to lie inside the grid
+    //! extents as returned by GetUserExtents()
+    //!
+    //! If the specified coordinates lie outside of the grid (are not
+    //! contained by any cell) the method returns false, otherwise true is
+    //! returned.
+    //!
+    //! \retval status true on success, false if the point is not contained
+    //! by any cell.
+    //!
+    virtual bool GetIndicesCell(
         const std::vector<double> &coords,
         std::vector<size_t> &indices) const = 0;
 
@@ -287,6 +326,8 @@ class VDF_API Grid {
     //!
     virtual bool InsideGrid(const std::vector<double> &coords) const = 0;
 
+    virtual void ClampCoord(std::vector<double> &coords) const = 0;
+
     //! Set periodic boundaries
     //!
     //! This method changes the periodicity of boundaries set
@@ -308,17 +349,17 @@ class VDF_API Grid {
         return (_periodic);
     }
 
-    //! Return the rank of the grid
+    //! Return the topological dimension of the grid
     //!
-    //! This method returns the number of dimensions, 2 or 3.
+    //! This method returns the number of topological dimensions, 2 or 3.
+    //! The topological dimension determines the number of coordinates
+    //! needed to describe the position of each node
     //
     virtual size_t GetTopologyDim() const {
         return (_topologyDimension);
     }
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
-
-    virtual void _ClampCoord(std::vector<double> &coords) const = 0;
 
     virtual float _GetValueNearestNeighbor(
         const std::vector<double> &coords) const = 0;
@@ -327,14 +368,15 @@ class VDF_API Grid {
         const std::vector<double> &coords) const = 0;
 
   private:
-    Grid();
-
     std::vector<size_t> _dims;   // dimensions of grid arrays
     std::vector<bool> _periodic; // periodicity of boundaries
     size_t _topologyDimension;
     float _missingValue;
     bool _hasMissing;
     int _interpolationOrder; // Order of interpolation
+
+    virtual void _getUserCoordinatesHelper(
+        const std::vector<double> &coords, double &x, double &y, double &z) const;
 };
 }; // namespace VAPoR
 #endif
