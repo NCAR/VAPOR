@@ -47,71 +47,46 @@ class VDF_API RegularGrid : public StructuredGrid {
         const std::vector<double> &minu,
         const std::vector<double> &maxu);
 
+    RegularGrid();
+
     virtual ~RegularGrid();
 
-    //! Return value of grid at specified location
-    //!
-    //! This method provides an alternate interface to Grid::AccessIndex()
-    //! If the dimensionality of the grid as determined by GetDimensions() is
-    //! less than three subsequent parameters are ignored. Parameters
-    //! that are outside of range are clamped to boundaries.
-    //!
-    //! \param[in] i Index into first fastest varying dimension
-    //! \param[in] j Index into second fastest varying dimension
-    //! \param[in] k Index into third fastest varying dimension
-    //
-    virtual float AccessIJK(size_t i, size_t j, size_t k) const;
-
-    // \copydoc Grid::GetUserExtents()
+    //! \copydoc Grid::GetUserExtents()
     //
     virtual void GetUserExtents(
         std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    // \copydoc Grid::GetBoundingBox()
+    //! \copydoc Grid::GetBoundingBox()
     //
     virtual void GetBoundingBox(
         const std::vector<size_t> &min, const std::vector<size_t> &max,
         std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    // \copydoc Grid::GetEnclosingRegion()
+    //! \copydoc Grid::GetEnclosingRegion()
     //
     virtual void GetEnclosingRegion(
         const std::vector<double> &minu, const std::vector<double> &maxu,
         std::vector<size_t> &min, std::vector<size_t> &max) const;
 
-    // \copydoc Grid::GetUserCoordinates()
+    //! \copydoc Grid::GetUserCoordinates()
     //
     virtual void GetUserCoordinates(
         const std::vector<size_t> &indices,
         std::vector<double> &coords) const;
 
-    // \copydoc Grid::GetIndices()
+    //! \copydoc Grid::GetIndices()
     //
     virtual void GetIndices(
         const std::vector<double> &coords,
         std::vector<size_t> &indices) const;
 
-    //! Return the corner grid point of the cell containing the
-    //! specified user coordinates
+    //! \copydoc Grid::GetIndicesCell
     //!
-    //! This method returns the smallest ijk index of the grid point of
-    //! associated with the cell containing
-    //! the specified user coordinates. If any
-    //! of the input coordinates correspond to periodic dimensions the
-    //! the coordinate(s) are first re-mapped to lie inside the grid
-    //! extents as returned by GetUserExtents()
-    //!
-    //! If the specified coordinates lie outside of the grid (are not
-    //! contained by any cell) the lowest valued ijk index of the grid points
-    //! defining the boundary cell closest
-    //! to the point are returned.
-    //!
-    //!
-    virtual void GetIndicesFloor(
+    virtual bool GetIndicesCell(
         const std::vector<double> &coords,
         std::vector<size_t> &indices) const;
 
-    // \copydoc Grid::InsideGrid()
+    //! \copydoc Grid::InsideGrid()
     //
     virtual bool InsideGrid(const std::vector<double> &coords) const;
 
@@ -120,11 +95,8 @@ class VDF_API RegularGrid : public StructuredGrid {
   protected:
     virtual float _GetValueNearestNeighbor(const std::vector<double> &coords) const;
     virtual float _GetValueLinear(const std::vector<double> &coords) const;
-    virtual void _ClampCoord(std::vector<double> &coords) const;
 
   private:
-    RegularGrid();
-
     void _SetExtents(
         const std::vector<double> &minu,
         const std::vector<double> &maxu);

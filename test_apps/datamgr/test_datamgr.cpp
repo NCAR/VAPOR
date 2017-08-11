@@ -247,9 +247,12 @@ int main(int argc, char **argv) {
             rg->GetRange(r);
             cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
 
-            size_t dims[3];
-            rg->GetDimensions(dims);
-            cout << "Grid dimensions: [" << dims[0] << ", " << dims[1] << ", " << dims[2] << "]" << endl;
+            vector<size_t> dims = rg->GetDimensions();
+            cout << "Grid dimensions: [ ";
+            for (int i = 0; i < dims.size(); i++) {
+                cout << dims[i] << " ";
+            }
+            cout << "]" << endl;
 
             vector<double> minu, maxu;
             rg->GetUserExtents(minu, maxu);
