@@ -15,7 +15,6 @@ QT_USE_NAMESPACE
 namespace VAPoR 
 {
   class ControlExec;
-}
 
 class ImageEventRouter : public QTabWidget,  public RenderEventRouter 
 {
@@ -54,6 +53,8 @@ private:
   ImageGeometrySubtab*    _geometry;
   ImageAppearanceSubtab*  _appearance;
 };
+
+}
 
 #endif 
 
