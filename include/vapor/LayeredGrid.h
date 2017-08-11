@@ -51,24 +51,10 @@ public:
 	const std::vector <float *> &blks,
 	const std::vector <double> &minu,
 	const std::vector <double> &maxu,
-	const RegularGrid *rg
+	const RegularGrid &rg
 );
 
  virtual ~LayeredGrid();
-
- //! Return value of grid at specified location
- //!
- //! This method provides an alternate interface to Grid::AccessIndex()
- //! If the dimensionality of the grid as determined by GetDimensions() is
- //! less than three subsequent parameters are ignored. Parameters
- //! that are outside of range are clamped to boundaries.
- //!
- //! \param[in] i Index into first fastest varying dimension
- //! \param[in] j Index into second fastest varying dimension
- //! \param[in] k Index into third fastest varying dimension
- //
- virtual float AccessIJK(size_t i, size_t j, size_t k) const;
-
 
  //! \copydoc RegularGrid::GetValue()
  //!
@@ -140,13 +126,12 @@ public:
     std::vector <size_t> &indices
  ) const;
 
- //! \copydoc RegularGrid::GetIndicesFloor()
+ //! \copydoc Grid::GetIndicesCell
  //!
- void GetIndicesFloor(
+ virtual bool GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
  ) const;
-
 
  //! \copydoc Grid::InsideGrid()
  //!
@@ -168,11 +153,11 @@ public:
  //! Return the internal data structure containing a copy of the coordinate
  //! blocks passed in by the constructor
  //!
- const RegularGrid *GetZRG() const { return(_rg); };
+ const RegularGrid &GetZRG() const { return(_rg); };
 
 
 private:
- const RegularGrid *_rg;
+ RegularGrid _rg;
  std::vector <double> _minu;
  std::vector <double> _maxu;
  std::vector <double> _delta;
@@ -181,7 +166,7 @@ private:
  void _layeredGrid(
 	const std::vector <double> &minu,
 	const std::vector <double> &maxu,
-	const RegularGrid *rg
+	const RegularGrid &rg
  );
 
  void _GetUserExtents(
@@ -283,7 +268,7 @@ private:
  ) const;
 
  
- bool _bsearchKIndexFloor(
+ int _bsearchKIndexCell(
 	size_t i, size_t j, double z, size_t &k
  ) const;
 

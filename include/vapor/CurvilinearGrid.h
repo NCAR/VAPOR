@@ -55,7 +55,7 @@ public:
  //! values specify the Y user coordinates.
  //! \param[in] zcoords  A 1D vector whose size matches that of the K
  //! dimension of this class, and whose values specify the Z user coordinates.
- //! \param[in] kdtree A KDTreeRGSubset instance that contains a KD tree
+ //! \param[in] kdtree A KDTreeRG instance that contains a KD tree
  //! that may be used to find the nearest grid vertex to a given point
  //! expressed in user coordintes. The offsets returned by \p kdtree will
  //! be used as indeces into \p xrg and \p yrg.
@@ -70,7 +70,7 @@ public:
 	const RegularGrid &xrg,
 	const RegularGrid &yrg,
 	const std::vector <double> &zcoords,
-	const KDTreeRGSubset &kdtree
+	const KDTreeRG *kdtree
  );
 
  virtual ~CurvilinearGrid();
@@ -103,7 +103,7 @@ public:
 
  // \copydoc GetGrid::GetUserCoordinates()
  //
- virtual int GetUserCoordinates(
+ virtual void GetUserCoordinates(
 	const std::vector <size_t> &indices,
 	std::vector <double> &coords
  ) const;
@@ -111,6 +111,13 @@ public:
  // \copydoc GetGrid::GetIndices()
  //
  virtual void GetIndices(
+	const std::vector <double> &coords,
+	std::vector <size_t> &indices
+ ) const;
+
+ //! \copydoc Grid::GetIndicesCell
+ //!
+ virtual bool GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
  ) const;
@@ -125,14 +132,14 @@ public:
  //! Returns reference to RegularGrid instance passed to constructor 
  //! containing X user coordinates
  //!
- const RegularGrid *GetXRG() const { return(_xrg); };
+ const RegularGrid &GetXRG() const { return(_xrg); };
 
  //! Returns reference to RegularGrid instance containing Y user coordinates
  //!
  //! Returns reference to RegularGrid instance passed to constructor 
  //! containing Y user coordinates
  //!
- const RegularGrid *GetYRG() const { return(_yrg); };
+ const RegularGrid &GetYRG() const { return(_yrg); };
 
  //! Returns reference to vector containing Z user coordinates
  //!
@@ -142,7 +149,6 @@ public:
  const std::vector <double> &GetZCoords() const { return(_zcoords); };
 
 protected:
- virtual void _ClampCoord(const std::vector <double> &coords) const;
  virtual float _GetValueNearestNeighbor(const std::vector <double> &coords) const;
  virtual float _GetValueLinear(const std::vector <double> &coords) const;
 
@@ -151,28 +157,28 @@ private:
  std::vector <double> _zcoords;
  std::vector <double> _minu;
  std::vector <double> _maxu;
- KDTreeRGSubset _kdtree;
- RegularGrid *_xrg;
- RegularGrid *_yrg;
+ const KDTreeRG *_kdtree;
+ RegularGrid _xrg;
+ RegularGrid _yrg;
 
  void _curvilinearGrid(
 	const RegularGrid &xrg,
 	const RegularGrid &yrg,
 	const std::vector <double> &zcoords,
-	const KDTreeRGSubset &kdtree
+	const KDTreeRG *kdtree
  );
 
  void _GetUserExtents(
 	std::vector <double> &minu, std::vector <double> &maxu
  ) const;
 
- bool _binarySearchRange(
-	const std::vector <double> &sorted, double x, int &i
+ int _binarySearchRange(
+	const std::vector <double> &sorted, double x, size_t &i
  ) const;
 
  bool _insideGrid(
 	double x, double y, double z,
-	int &i, int &j, int &k,
+	size_t &i, size_t &j, size_t &k,
 	double lambda[4], double zwgt[2]
  ) const;
 
