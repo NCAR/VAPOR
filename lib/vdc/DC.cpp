@@ -115,12 +115,8 @@ DC::Mesh::Mesh(
 	_face_node_var = face_node_var;
 }
 
-size_t DC::Mesh::GetDim() const {
-	if (_mtype == UNSTRUC_2D) return(2);
-	if (_mtype == UNSTRUC_3D) return(3);
-	if (_mtype == UNSTRUC_LAYERED) return(3);
-
-	return(_dim_names.size());
+size_t DC::Mesh::GetTopologyDim() const {
+	return(_coord_vars.size());
 }
 
 vector <string> DC::GetDataVarNames(int ndim, bool spatial) const {
@@ -140,7 +136,7 @@ vector <string> DC::GetDataVarNames(int ndim, bool spatial) const {
 		ok = GetMesh(mesh_name, mesh);
 		if (! ok) continue;
 
-		size_t nsdim = mesh.GetDim();
+		size_t nsdim = mesh.GetTopologyDim();
 
 		if (! spatial && IsTimeVarying(allnames[i])) {
 			ndim--;
@@ -361,6 +357,22 @@ bool DC::GetVarDimNames(
 
 	return(true);
 }
+
+size_t DC::GetVarTopologyDim(string varname) const {
+
+	DataVar var;
+	bool status = GetDataVarInfo(varname, var);
+	if (! status) return(0);
+
+	string mname = var.GetMeshName();
+
+	Mesh mesh;
+	status = GetMesh(mname, mesh);
+	if (! status) return(0);
+
+	return(mesh.GetTopologyDim());
+}
+
 
 
 bool DC::IsTimeVarying(string varname) const {

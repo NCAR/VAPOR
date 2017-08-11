@@ -591,10 +591,10 @@ public:
 
   //! Get topological dimension of mesh
   //!
-  //! Return the number of dimensions for the mesh. I.e. the dimensionality
-  //! of each of it's cells
+  //! Return the number of dimensions for the mesh. I.e. the number
+  //! of coordinates needed to describe each node position.
   //!
-  size_t GetDim() const ;
+  size_t GetTopologyDim() const ;
 
   friend std::ostream &operator<<(
 	std::ostream &o, const Mesh &mesh
@@ -2058,6 +2058,16 @@ public:
 	vector <string> &sdimnames,
 	string &time_dimname
  ) const;
+
+ //! Return the topological dimension of a variable
+ //!
+ //! Return the number of spatial coordinate variables needed to describe
+ //! the postion of each grid point (node) in a variables mesh.
+ //!
+ //! \retval dim Topological dimension or zero if variable is not known
+ //! or has no coordinates.
+ //
+ virtual size_t GetVarTopologyDim(string varname) const;
 
  //! Return a boolean indicating whether a variable is time varying
  //!

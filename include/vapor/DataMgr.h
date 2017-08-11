@@ -484,6 +484,10 @@ std::vector <size_t> GetCRatios(string varname) const;
  //
  bool GetNumDimensions(string varname, size_t &ndim) const;
 
+ //! \copydoc DC:GetVarTopologyDim()
+ //!
+ size_t GetVarTopologyDim(string varname) const;
+
 
  //! Clear the memory cache
  //!
@@ -835,9 +839,6 @@ private:
  int _get_default_projection(string &projection);
 
  VAPoR::RegularGrid *_make_grid_regular(
-    const VAPoR::DC::DataVar &var,
-    const std::vector <size_t> &min,
-    const std::vector <size_t> &max,
     const std::vector <size_t> &dims,
     const std::vector <float *> &blkvec,
     const std::vector <size_t> &bs,
@@ -846,9 +847,6 @@ private:
  ) const;
 
  VAPoR::LayeredGrid *_make_grid_layered(
-    const VAPoR::DC::DataVar &var,
-    const std::vector <size_t> &min,
-    const std::vector <size_t> &max,
     const std::vector <size_t> &dims,
     const std::vector <float *> &blkvec,
     const std::vector <size_t> &bs,
@@ -857,10 +855,9 @@ private:
  ) const;
 
  VAPoR::CurvilinearGrid *_make_grid_curvilinear(
-    const VAPoR::DC::DataVar &var,
+	int level,
+	int lod,
     const vector <DC::CoordVar> &cvarsinfo,
-    const std::vector <size_t> &min,
-    const std::vector <size_t> &max,
     const std::vector <size_t> &dims,
     const std::vector <float *> &blkvec,
     const std::vector <size_t> &bs,
@@ -869,9 +866,10 @@ private:
  ) ;
 
  VAPoR::StructuredGrid *_make_grid(
+	int level,
+	int lod,
 	const VAPoR::DC::DataVar &var,
-	const std::vector <size_t> &min,
-	const std::vector <size_t> &max,
+	const std::vector <size_t> &roi_dims,
 	const std::vector <size_t> &dims,
 	const std::vector <float *> &blkvec,
 	const std::vector < std::vector <size_t > > &bsvec,
@@ -893,6 +891,7 @@ int _setupCoordVecs(
 	const vector <size_t> &min,
 	const vector <size_t> &max,
 	vector <string> &varnames,
+	vector <size_t> &roi_dims,
 	vector < vector <size_t > > &dimsvec,
 	vector < vector <size_t > > &dims_at_levelvec,
 	vector < vector <size_t > > &bsvec,
@@ -993,11 +992,14 @@ int _setupCoordVecs(
  int _level_correction(string varname, int &level) const;
  int _lod_correction(string varname, int &lod) const;
 
- void _getKDSubtree2D(
+ const KDTreeRG *_getKDTree2D(
+	int level,
+	int lod,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax,
 	const vector <DC::CoordVar> &cvarsinfo,
 	const RegularGrid &xrg,
-	const RegularGrid &yrg,
-	KDTreeRGSubset &kdsubtree
+	const RegularGrid &yrg
  );
 
 };
