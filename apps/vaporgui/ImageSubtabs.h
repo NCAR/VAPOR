@@ -4,13 +4,13 @@
 #include "ImageAppearanceGUI.h"
 #include "ImageVariablesGUI.h"
 #include "ImageGeometryGUI.h"
+#include "vapor/ImageParams.h"
+#include <QFileDialog>
 
 namespace VAPoR {
 class ControlExec;
-class RenderParams;
 class ParamsMgr;
 class DataMgr;
-} // namespace VAPoR
 
 //
 // ImageVariablesSubtab class
@@ -41,19 +41,65 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
 
   public:
     ImageAppearanceSubtab(QWidget *parent) {
+        _rParams = NULL;
         setupUi(this);
-        connect(GeoreferenceCheckbox, SIGNAL(clicked()), this, SLOT(GeoreferenceClicked()));
+        connect(GeoTIFFCheckbox, SIGNAL(clicked()), this, SLOT(GeoTIFFClicked()));
+        connect(IgnoreTransparencyCheckbox, SIGNAL(clicked()), this, SLOT(IgnoreTransparencyClicked()));
+
+        OpacityEdit->setValidator(new QDoubleValidator(0, 1.0, 2, this));
+        connect(OpacitySlider, SIGNAL(sliderReleased()), this, SLOT(OpacityChanged1()));
+        connect(OpacityEdit, SIGNAL(returnPressed()), this, SLOT(OpacityChanged2()));
+
+        connect(SelectImagePushButton, SIGNAL(clicked()), this, SLOT(SelectImage()));
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
                 VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams) {
+        _rParams = (ImageParams *)rParams;
+
+        bool state = _rParams->GetIsGeoTIFF();
+        GeoTIFFCheckbox->setChecked(state);
+        state = _rParams->GetIgnoreTransparency();
+        IgnoreTransparencyCheckbox->setChecked(state);
+
+        double opacity = _rParams->GetOpacity();
+        OpacityEdit->setText(QString::number(opacity));
+        OpacitySlider->setSliderPosition((int)(opacity * 100.0));
+
+        std::string imageFile = _rParams->GetImagePath();
+        SelectImageEdit->setText(QString::fromStdString(imageFile));
     }
 
   private slots:
-    void GeoreferenceClicked() {
-        std::cout << "I'm clicked" << std::endl;
+    void GeoTIFFClicked() {
+        _rParams->SetIsGeoTIFF(GeoTIFFCheckbox->isChecked());
     }
+
+    void IgnoreTransparencyClicked() {
+        _rParams->SetIgnoreTransparency(IgnoreTransparencyCheckbox->isChecked());
+    }
+
+    void OpacityChanged1() {
+        double opacity = OpacitySlider->sliderPosition() / 100.0;
+        OpacityEdit->setText(QString::number(opacity));
+        _rParams->SetOpacity(opacity);
+    }
+
+    void OpacityChanged2() {
+        double opacity = OpacityEdit->text().toDouble();
+        OpacitySlider->setSliderPosition((int)(opacity * 100.0));
+        _rParams->SetOpacity(opacity);
+    }
+
+    void SelectImage() {
+        QString file1Name = QFileDialog::getOpenFileName(this, tr("Open Image File"));
+        SelectImageEdit->setText(file1Name);
+        _rParams->SetImagePath(file1Name.toStdString());
+    }
+
+  private:
+    ImageParams *_rParams;
 };
 
 //
@@ -77,5 +123,7 @@ class ImageGeometrySubtab : public QWidget, public Ui_ImageGeometryGUI {
 
   private:
 };
+
+} // namespace VAPoR
 
 #endif
