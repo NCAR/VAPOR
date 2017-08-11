@@ -37,17 +37,16 @@ Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2
     _numBins = 256;
     reset();
 
-    unsigned int             qv;    // quantized value
-    float                    v;
-    StructuredGrid *         rg_const = (StructuredGrid *)rg;    // kludge - no const_iterator
-    StructuredGrid::Iterator itr;
-    double                   point[3];
-    for (itr = rg_const->begin(); itr != rg_const->end(); ++itr) {
+    unsigned int                  qv;    // quantized value
+    float                         v;
+    StructuredGrid::ConstIterator itr;
+    vector<double>                point;
+    for (itr = rg->begin(); itr != rg->end(); ++itr) {
         v = *itr;
         if (v == rg->GetMissingValue()) continue;
-        itr.GetUserCoordinates(point, point + 1, point + 2);
+        itr.GetUserCoordinates(point);
         bool isIn = true;
-        for (int j = 0; j < 3; j++) {
+        for (int j = 0; j < point.size(); j++) {
             if (point[j] > exts[j + 3] || point[j] < exts[j]) isIn = false;
         }
         if (!isIn) continue;

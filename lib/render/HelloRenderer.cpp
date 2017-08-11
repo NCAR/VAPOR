@@ -73,19 +73,14 @@ int HelloRenderer::_paintGL()
     // Get the end points from the Params:
     vector<double> point1 = rParams->GetPoint1();
     vector<double> point2 = rParams->GetPoint2();
-
-    vector<double> regMin, regMax;
-    // extents are determined as the min and max x,y,z coordinates of the two points
-    for (int i = 0; i < 3; i++) {
-        regMin.push_back(Min(point1[i], point2[i]));
-        regMax.push_back(Max(point1[i], point2[i]));
-    }
+    assert(point1.size() == point2.size());
+    assert(point1.size() >= 2 && point1.size() <= 3);
 
     // Finally, obtain the StructuredGrid of the data for the specified region, at requested refinement and lod,
     // using Renderer::getGrids()
     size_t timestep = rParams->GetCurrentTimestep();
 
-    int rc = DataMgrUtils::GetGrids(_dataMgr, timestep, varname, regMin, regMax, true, &actualRefLevel, &lod, &helloGrid);
+    int rc = DataMgrUtils::GetGrids(_dataMgr, timestep, varname, point1, point2, true, &actualRefLevel, &lod, &helloGrid);
     if (rc < 0) { return rc; }
 
     // Set the grid to use nearest-point interpolation, to calculate actual (uninterpolated) data max and min
@@ -95,58 +90,32 @@ int HelloRenderer::_paintGL()
     // that the line crosses, which requires knowing the underlying grid.
     //
 
-    // Call StructuredGrid::GetEnclosingRegion to find the grid dimensions
-    // that enclose the user extents requested.
-    //
-    vector<size_t> min_dim, max_dim;
-    helloGrid->GetEnclosingRegion(regMin, regMax, min_dim, max_dim);
-
-    // Determine the number of voxels traversed (in each dimension) as we go from the first point to the second.
-    // Th maximum of these three counts is used to determine how frequently the data will be sampled.
-    int maxvox = 1;
-    for (int i = 0; i < 3; i++) {
-        int numvox = (max_dim[i] - min_dim[i] + 1);
-        if (numvox > maxvox) maxvox = numvox;
-    }
-    // maxvox is the number of samples along the line.
+    size_t nsamples = 100;
+    // nsamples is the number of samples along the line.
     // Divide the line into maxvox equal sections, sample the variable at each point along the line, to find
     // coordinates of min and max value
-    double maxval = -DBL_MAX;
-    double minval = DBL_MAX;
-    double minPoint[3], maxPoint[3], coord[3];
-    for (int i = 0; i < maxvox + 1; i++) {
-        coord[0] = point1[0] + i * (point2[0] - point1[0]) / (double)maxvox;
-        coord[1] = point1[1] + i * (point2[1] - point1[1]) / (double)maxvox;
-        coord[2] = point1[2] + i * (point2[2] - point1[2]) / (double)maxvox;
-        double sampledVal = helloGrid->GetValue(coord[0], coord[1], coord[2]);
+    double         maxval = -DBL_MAX;
+    double         minval = DBL_MAX;
+    vector<double> minPoint, maxPoint;
+    for (int i = 0; i < nsamples; i++) {
+        vector<double> coord;
+
+        for (int j = 0; j < point1.size(); j++) { coord.push_back(point1[j] + i * (point2[j] - point1[j]) / (double)(nsamples - 1)); }
+
+        double sampledVal = helloGrid->GetValue(coord);
         if (sampledVal == helloGrid->GetMissingValue()) continue;
         if (minval > sampledVal) {
             minval = sampledVal;
-            minPoint[0] = coord[0];
-            minPoint[1] = coord[1];
-            minPoint[2] = coord[2];
+            minPoint = coord;
         }
         if (maxval < sampledVal) {
             maxval = sampledVal;
-            maxPoint[0] = coord[0];
-            maxPoint[1] = coord[1];
-            maxPoint[2] = coord[2];
+            maxPoint = coord;
         }
     }
 
     _dataMgr->UnlockGrid(helloGrid);
 
-#ifdef DEAD
-    // Apply scene stretching to all the points that will be rendered.
-    // When we perform OpenGL rendering, all the coordinates must be stretched.
-    vector<double> stretch = rParams->GetStretchFactors();
-    for (int i = 0; i < 3; i++) {
-        point1[i] *= stretch[i];
-        point2[i] *= stretch[i];
-        minPoint[i] *= stretch[i];
-        maxPoint[i] *= stretch[i];
-    }
-#endif
     // Obtain the line width
     float width = (float)rParams->GetLineThickness();
 
@@ -173,6 +142,13 @@ int HelloRenderer::_paintGL()
     }
     glColor3fv(fcolor);
     glLineWidth(width);
+
+    if (point1.size() != 3) {
+        point1.push_back(0.0);
+        point2.push_back(0.0);
+        minPoint.push_back(0.0);
+        maxPoint.push_back(0.0);
+    }
 
     // Calculate the normal vector as orthogonal to the line and projected to the viewer direction
     // To do this, take the cross product of the line direction with the viewer direction,

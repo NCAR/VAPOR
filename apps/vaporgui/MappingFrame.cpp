@@ -153,11 +153,10 @@ void MappingFrame::RefreshHistogram()
 
     grid->SetInterpolationOrder(0);
 
-    StructuredGrid *         rg_const = (StructuredGrid *)grid;
     StructuredGrid::Iterator itr;
 
     float v;
-    for (itr = rg_const->begin(); itr != rg_const->end(); ++itr) {
+    for (itr = grid->begin(); itr != grid->end(); ++itr) {
         v = *itr;
         if (v == grid->GetMissingValue()) continue;
         _histogram->addToBin(v);

@@ -29,9 +29,10 @@ void StructuredGrid::_StructuredGrid(const vector<size_t> &dims, const vector<si
 
     for (int i = 0; i < bs.size(); i++) {
         assert(bs[i] > 0);
+        assert(dims[i] > 0);
 
         _bs.push_back(bs[i]);
-        _bdims.push_back((dims[i] / bs[i]) + 1);
+        _bdims.push_back(((dims[i] - 1) / bs[i]) + 1);
     }
 
     //
@@ -41,6 +42,13 @@ void StructuredGrid::_StructuredGrid(const vector<size_t> &dims, const vector<si
 }
 
 StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, dims.size()) { _StructuredGrid(dims, bs, blks); }
+
+StructuredGrid::StructuredGrid()
+{
+    _bs.clear();
+    _bdims.clear();
+    _blks.clear();
+}
 
 StructuredGrid::~StructuredGrid() {}
 
@@ -70,6 +78,15 @@ float StructuredGrid::_AccessIndex(const std::vector<float *> &blks, const std::
     return (blk[z * _bs[0] * _bs[1] + y * _bs[0] + x]);
 }
 
+float StructuredGrid::AccessIJK(size_t i, size_t j, size_t k) const
+{
+    std::vector<size_t> indices;
+    indices.push_back(i);
+    indices.push_back(j);
+    if (GetTopologyDim() == 3) { indices.push_back(k); }
+    return (AccessIndex(indices));
+}
+
 void StructuredGrid::GetRange(float range[2]) const
 {
     StructuredGrid::ConstIterator itr;
@@ -91,6 +108,36 @@ void StructuredGrid::GetRange(float range[2]) const
     }
 }
 
+void StructuredGrid::ClampCoord(std::vector<double> &coords) const
+{
+    assert(coords.size() >= GetTopologyDim());
+
+    while (coords.size() > GetTopologyDim()) { coords.pop_back(); }
+
+    vector<bool>   periodic = GetPeriodic();
+    vector<size_t> dims = GetDimensions();
+
+    vector<double> minu, maxu;
+    GetUserExtents(minu, maxu);
+
+    for (int i = 0; i < coords.size(); i++) {
+        //
+        // Handle coordinates for dimensions of length 1
+        //
+        if (dims[i] == 1) {
+            coords[i] = minu[i];
+            continue;
+        }
+
+        if (coords[i] < minu[i] && periodic[i]) {
+            while (coords[i] < minu[i]) coords[i] += maxu[i] - minu[i];
+        }
+        if (coords[i] > maxu[i] && periodic[i]) {
+            while (coords[i] > maxu[i]) coords[i] -= maxu[i] - minu[i];
+        }
+    }
+}
+
 template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg)
 {
     if (!rg->_blks.size()) {
@@ -104,7 +151,7 @@ template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg)
     assert(dims.size() > 1 && dims.size() < 4);
     for (int i = 0; i < dims.size(); i++) {
         _max[i] = dims[i] - 1;
-        _bs[i] = bs[i] - 1;
+        _bs[i] = bs[i];
         _bdims[i] = bdims[i];
     }
 

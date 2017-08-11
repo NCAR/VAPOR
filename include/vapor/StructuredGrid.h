@@ -84,11 +84,26 @@ public:
     //!
     StructuredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks);
 
+    StructuredGrid();
+
     virtual ~StructuredGrid();
 
     //! \copydoc Grid::AccessIndex()
     //
     float AccessIndex(const std::vector<size_t> &indices) const;
+
+    //! Return value of grid at specified location
+    //!
+    //! This method provides an alternate interface to Grid::AccessIndex()
+    //! If the dimensionality of the grid as determined by GetDimensions() is
+    //! less than three subsequent parameters are ignored. Parameters
+    //! that are outside of range are clamped to boundaries.
+    //!
+    //! \param[in] i Index into first fastest varying dimension
+    //! \param[in] j Index into second fastest varying dimension
+    //! \param[in] k Index into third fastest varying dimension
+    //
+    virtual float AccessIJK(size_t i, size_t j, size_t k) const;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -122,6 +137,8 @@ public:
     //! passed in by the constructor
     //!
     const std::vector<float *> &GetBlks() const { return (_blks); };
+
+    virtual void ClampCoord(std::vector<double> &coords) const;
 
     //! A forward iterator for accessing the data elements of the
     //! structured grid.
@@ -195,8 +212,6 @@ private:
     std::vector<float *> _blks;
 
     void _StructuredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks);
-
-    StructuredGrid();
 };
 };    // namespace VAPoR
 #endif

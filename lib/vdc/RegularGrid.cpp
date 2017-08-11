@@ -41,16 +41,14 @@ RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
     _SetExtents(minu, maxu);
 }
 
-RegularGrid::~RegularGrid() {}
-
-float RegularGrid::AccessIJK(size_t i, size_t j, size_t k) const
+RegularGrid::RegularGrid()
 {
-    std::vector<size_t> indices;
-    indices.push_back(i);
-    indices.push_back(j);
-    if (GetTopologyDim() == 3) { indices.push_back(k); }
-    return (AccessIndex(indices));
+    _minu.clear();
+    _maxu.clear();
+    _delta.clear();
 }
+
+RegularGrid::~RegularGrid() {}
 
 float RegularGrid::_GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
@@ -178,28 +176,6 @@ float RegularGrid::_GetValueLinear(const std::vector<double> &coords) const
     return (c0 + kwgt * (c1 - c0));
 }
 
-void RegularGrid::_ClampCoord(std::vector<double> &coords) const
-{
-    assert(coords.size() == GetTopologyDim());
-
-    vector<bool>   periodic = GetPeriodic();
-    vector<size_t> dims = GetDimensions();
-
-    for (int i = 0; i < coords.size(); i++) {
-        if (coords[i] < _minu[i] && periodic[i]) {
-            while (coords[i] < _minu[i]) coords[i] += _maxu[i] - _minu[i];
-        }
-        if (coords[i] > _maxu[i] && periodic[i]) {
-            while (coords[i] > _maxu[i]) coords[i] -= _maxu[i] - _minu[i];
-        }
-
-        //
-        // Handle coordinates for dimensions of length 1
-        //
-        if (dims[i] == 1) { coords[i] = _minu[i]; }
-    }
-}
-
 void RegularGrid::GetUserExtents(vector<double> &minu, vector<double> &maxu) const
 {
     minu = _minu;
@@ -255,11 +231,11 @@ void RegularGrid::GetUserCoordinates(const std::vector<size_t> &indices, std::ve
 
 void RegularGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
 {
-    assert(coords.size() == GetTopologyDim());
+    assert(coords.size() >= GetTopologyDim());
     indices.clear();
 
     std::vector<double> clampedCoords = coords;
-    _ClampCoord(clampedCoords);
+    ClampCoord(clampedCoords);
 
     vector<size_t> dims = GetDimensions();
 
@@ -267,6 +243,15 @@ void RegularGrid::GetIndices(const std::vector<double> &coords, std::vector<size
 
     for (int i = 0; i < clampedCoords.size(); i++) {
         indices.push_back(0);
+
+        if (clampedCoords[i] < _minu[i]) {
+            indices[i] = 0;
+            continue;
+        }
+        if (clampedCoords[i] > _maxu[i]) {
+            indices[i] = dims[i] - 1;
+            continue;
+        }
 
         if (_delta[i] != 0.0) { indices[i] = (size_t)floor((clampedCoords[i] - _minu[i]) / _delta[i]); }
 
@@ -279,13 +264,13 @@ void RegularGrid::GetIndices(const std::vector<double> &coords, std::vector<size
     }
 }
 
-void RegularGrid::GetIndicesFloor(const std::vector<double> &coords, std::vector<size_t> &indices) const
+bool RegularGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const
 {
-    assert(coords.size() == GetTopologyDim());
+    assert(coords.size() >= GetTopologyDim());
     indices.clear();
 
     std::vector<double> clampedCoords = coords;
-    _ClampCoord(clampedCoords);
+    ClampCoord(clampedCoords);
 
     vector<size_t> dims = GetDimensions();
 
@@ -294,10 +279,14 @@ void RegularGrid::GetIndicesFloor(const std::vector<double> &coords, std::vector
     for (int i = 0; i < clampedCoords.size(); i++) {
         indices.push_back(0);
 
+        if (clampedCoords[i] < _minu[i] || clampedCoords[i] > _maxu[i]) { return (false); }
+
         if (_delta[i] != 0.0) { indices[i] = (size_t)floor((clampedCoords[i] - _minu[i]) / _delta[i]); }
 
         assert(indices[i] < dims[i]);
     }
+
+    return (true);
 }
 
 bool RegularGrid::InsideGrid(const std::vector<double> &coords) const
@@ -305,7 +294,7 @@ bool RegularGrid::InsideGrid(const std::vector<double> &coords) const
     assert(coords.size() == GetTopologyDim());
 
     std::vector<double> clampedCoords = coords;
-    _ClampCoord(clampedCoords);
+    ClampCoord(clampedCoords);
 
     for (int i = 0; i < clampedCoords.size(); i++) {
         if (clampedCoords[i] < _minu[i]) return (false);

@@ -155,6 +155,13 @@ public:
         Nearest(coordu_f, index);
     }
 
+    std::vector<size_t> GetDimensions() const
+    {
+        std::vector<std::size_t> dims;
+        for (int i = 0; i < _min.size(); i++) { dims.push_back(_max[i] - _min[i] + 1); }
+        return (dims);
+    }
+
 private:
     const KDTreeRG *    _kdtree;
     std::vector<size_t> _min;

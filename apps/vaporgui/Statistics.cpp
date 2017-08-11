@@ -1074,8 +1074,8 @@ bool Statistics::calcMean(string varname)
 
         mv = _rGrid->GetMissingValue();
 
-        StructuredGrid::ForwardIterator<StructuredGrid> itr;
-        double                                          c = 0.0;
+        StructuredGrid::Iterator itr;
+        double                   c = 0.0;
 
         vector<size_t> dims = _rGrid->GetDimensions();
 

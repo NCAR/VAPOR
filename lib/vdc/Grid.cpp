@@ -30,6 +30,16 @@ Grid::Grid(const vector<size_t> &dims, size_t topology_dimension)
     _interpolationOrder = 0;
 }
 
+Grid::Grid()
+{
+    _dims.clear();
+    _periodic.clear();
+    _topologyDimension = 0;
+    _missingValue = INFINITY;
+    _hasMissing = false;
+    _interpolationOrder = 0;
+}
+
 Grid::~Grid() {}
 
 float Grid::GetValue(const std::vector<double> &coords) const
@@ -38,7 +48,7 @@ float Grid::GetValue(const std::vector<double> &coords) const
 
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    _ClampCoord(clampedCoords);
+    ClampCoord(clampedCoords);
 
     // At this point xyz should be within the grid bounds
     //
@@ -49,6 +59,40 @@ float Grid::GetValue(const std::vector<double> &coords) const
     } else {
         return (_GetValueLinear(clampedCoords));
     }
+}
+
+void Grid::_getUserCoordinatesHelper(const vector<double> &coords, double &x, double &y, double &z) const
+{
+    if (coords.size() >= 1) { x = coords[0]; }
+    if (coords.size() >= 2) { y = coords[1]; }
+    if (coords.size() >= 3) { z = coords[2]; }
+}
+
+void Grid::GetUserCoordinates(size_t i, double &x, double &y, double &z) const
+{
+    x = y = z = 0.0;
+    vector<size_t> indices = {i};
+    vector<double> coords;
+    GetUserCoordinates(indices, coords);
+    _getUserCoordinatesHelper(coords, x, y, z);
+}
+
+void Grid::GetUserCoordinates(size_t i, size_t j, double &x, double &y, double &z) const
+{
+    x = y = z = 0.0;
+    vector<size_t> indices = {i, j};
+    vector<double> coords;
+    GetUserCoordinates(indices, coords);
+    _getUserCoordinatesHelper(coords, x, y, z);
+}
+
+void Grid::GetUserCoordinates(size_t i, size_t j, size_t k, double &x, double &y, double &z) const
+{
+    x = y = z = 0.0;
+    vector<size_t> indices = {i, j, k};
+    vector<double> coords;
+    GetUserCoordinates(indices, coords);
+    _getUserCoordinatesHelper(coords, x, y, z);
 }
 
 void Grid::SetInterpolationOrder(int order)
