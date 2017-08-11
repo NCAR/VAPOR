@@ -93,7 +93,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="GeoreferenceCheckbox">
+        <widget class="QCheckBox" name="GeoTIFFCheckbox">
          <property name="text">
           <string/>
          </property>
@@ -130,7 +130,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="IgnoreTransparencyCheckbox">
          <property name="text">
           <string/>
          </property>
@@ -154,7 +154,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QSlider" name="horizontalSlider">
+        <widget class="QSlider" name="OpacitySlider">
          <property name="maximum">
           <number>100</number>
          </property>
@@ -164,7 +164,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="OpacityEdit">
          <property name="maximumSize">
           <size>
            <width>100</width>
@@ -191,10 +191,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="SelectImageEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="SelectImagePushButton">
          <property name="text">
           <string>Select Image...</string>
          </property>
