@@ -394,11 +394,9 @@ void VizFeatureEventRouter::timeAnnotationChanged() {
     if (_animConnected == false) {
         _ap = GetAnimationParams();
         bool v = connect(_ap, SIGNAL(timestepChanged()), this, SLOT(timeAnnotationChanged()));
-        cout << "connection " << v << endl;
         _animConnected = true;
     }
 
-    cout << "TIME ANNOTATION CHANGED!" << endl;
     MiscParams *miscParams = GetMiscParams();
 
     int index = timeCombo->currentIndex();
@@ -438,7 +436,6 @@ void VizFeatureEventRouter::timeLLYChanged() {
 void VizFeatureEventRouter::timeSizeChanged() {
     MiscParams *miscParams = GetMiscParams();
     float size = timeSizeEdit->text().toFloat();
-    cout << "timeSizeChanged " << size << endl;
     miscParams->SetTimeAnnotSize(size);
     drawTimeStamp();
 }
@@ -475,7 +472,6 @@ void VizFeatureEventRouter::drawTimeStep(string myString) {
     float color[3];
     mp->GetTimeAnnotColor(color);
 
-    cout << "DRAW TIMESTEP " << x << " " << y << " " << size << " " << color[0] << " " << color[1] << " " << color[2] << endl;
     _controlExec->DrawText(myString, x, y, size, color, 1);
 }
 
