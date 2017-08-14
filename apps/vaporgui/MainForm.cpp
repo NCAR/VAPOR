@@ -1929,16 +1929,20 @@ void MainForm::launchSeedMe(){
 }
 
 void MainForm::launchStats(){
-#ifdef	DEAD
     if (!_stats) _stats = new Statistics(this);
-	DataMgr *dataMgr = _controlExec->GetDataMgr();
-	if (dataMgr){
-        _stats->initDataMgr(dataMgr);
-        _stats->showMe();
-    } 
+//	DataStatus* ds = _controlExec->getDataStatus();
+//	string dm = ds->GetDataMgrNames()[0];
+//	DataMgr *dataMgr = ds->GetDataMgr(dm);
+//	if (dataMgr){
+//      _stats->initDataMgr(dataMgr);
+//        _stats->showMe();
+//    }
+	if (_controlExec) {
+		_stats->initControlExec(_controlExec);
+	} 
 	_stats->showMe();   
-#endif
 }
+
 void MainForm::launchPlotUtility(){
 //    DataMgr *dataMgr = Session::getInstance()->getDataMgr();
     if (! _plot) _plot = new Plot(this);
