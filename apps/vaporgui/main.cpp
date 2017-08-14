@@ -155,10 +155,9 @@ int           main(int argc, char **argv)
     fontFile = fontFile + "//arial.ttf";
 
     QFontDatabase fdb;
-    // int result = fdb.addApplicationFont("/Users/pearse/Downloads/pacifico/Pacifico.ttf");
-    int         result = fdb.addApplicationFont(QString::fromStdString(fontFile));
-    QStringList fonts = fdb.families();
-    QFont       f = fdb.font("Arial", "normal", 11);
+    int           result = fdb.addApplicationFont(QString::fromStdString(fontFile));
+    QStringList   fonts = fdb.families();
+    QFont         f = fdb.font("Arial", "normal", 10);
     mw->setFont(f);
 
     mw->setWindowTitle("VAPOR User Interface");
