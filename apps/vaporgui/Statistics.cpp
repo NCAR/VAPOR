@@ -115,6 +115,8 @@ QDialog(parent), Ui_StatsWindow(){
 	_spZMinLabel = NULL;
 	_spZMaxLabel = NULL;
 
+	_controlExec = NULL;
+	_dataStatus = NULL;
 	_dm = NULL;
 	_rGrid = NULL;
 	
@@ -169,6 +171,26 @@ int Statistics::initDataMgr(DataMgr* dm) {
 	}
 	else { return -1;}
 	initialize();
+	return 0;
+}
+
+int Statistics::initControlExec(ControlExec* ce) {
+	if (ce!=NULL) {
+		_controlExec = ce;
+	}
+	else { return -1;}
+
+	_dataStatus = _controlExec->getDataStatus();
+	vector<string> dmNames = _dataStatus->GetDataMgrNames();
+	dataMgrCombo->clear();
+	for (int i=0; i<dmNames.size(); i++) {
+		QString item = QString::fromStdString(dmNames[i]);
+		dataMgrCombo->addItem(item);
+	}
+
+	DataMgr* dm = _dataStatus->GetDataMgr(dmNames[0]);
+	initDataMgr(dm);
+
 	return 0;
 }
 

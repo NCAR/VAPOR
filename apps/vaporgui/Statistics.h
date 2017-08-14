@@ -27,10 +27,10 @@
 #include <qwidget.h>
 #include <vapor/DataMgr.h>
 #include <vapor/StructuredGrid.h>
+#include <vapor/ControlExecutive.h>
 #include <statsWindow.h>
 #include <errMsg.h>
 #include <RangeController.h>
-
 
 //
 //! \class Statistics
@@ -77,6 +77,7 @@ class Statistics : public QDialog, public Ui_StatsWindow {
 	public:
 		Statistics(QWidget* parent);
 		~Statistics();	
+		int initControlExec(VAPoR::ControlExec* ce);
 		int initDataMgr(VAPoR::DataMgr* dm);
 		void showMe();
 		int initialize();
@@ -210,6 +211,8 @@ class Statistics : public QDialog, public Ui_StatsWindow {
 		MinMaxLabel* _spZMinLabel;
 		MinMaxLabel* _spZMaxLabel;
 
+		VAPoR::ControlExec* _controlExec;
+		VAPoR::DataStatus* _dataStatus;
 		VAPoR::DataMgr* _dm;
 //		RegularGrid* _rGrid;
 		VAPoR::StructuredGrid* _rGrid;
@@ -240,5 +243,7 @@ class Statistics : public QDialog, public Ui_StatsWindow {
 		bool _regionInitialized;
 		bool _initialized;
 		bool _slidersInitialized;
+
+		
 };
 #endif
