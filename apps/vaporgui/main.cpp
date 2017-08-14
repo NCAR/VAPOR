@@ -168,8 +168,12 @@ MyBase::SetErrMsgFilePtr(stderr);
 	int result = fdb.addApplicationFont(QString::fromStdString(fontFile));
 	QStringList fonts = fdb.families();
 	QFont f = fdb.font("Arial", "normal", 10);  
-	mw->setFont(f);
 	
+	const char* useFont = std::getenv("USE_SYSTEM_FONT");
+	if (!useFont) {
+		mw->setFont(f);
+	}
+
     mw->setWindowTitle( "VAPOR User Interface" );
     mw->show();
     std::string banner_file_name = "vapor_banner.png";
