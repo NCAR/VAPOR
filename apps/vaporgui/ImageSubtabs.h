@@ -51,7 +51,8 @@ public:
     connect( GeoTIFFCheckbox, SIGNAL(clicked()), this, SLOT( GeoTIFFClicked() ) );
     connect( IgnoreTransparencyCheckbox, SIGNAL(clicked()), this, SLOT( IgnoreTransparencyClicked() ) );
 
-    OpacityEdit->setValidator( new QDoubleValidator(0, 1.0, 2, this) );
+    OpacityEdit->setValidator( new QDoubleValidator(0, 1.0, 2, this) ); // ranging from 0 to 1 
+                                                                        // with 2 digit accuracy
     connect( OpacitySlider, SIGNAL( sliderReleased() ), this, SLOT( OpacityChanged1() ) );
     connect( OpacityEdit, SIGNAL( returnPressed() ), this, SLOT( OpacityChanged2() ) );
 
@@ -88,14 +89,14 @@ private slots:
     _rParams->SetIgnoreTransparency( IgnoreTransparencyCheckbox->isChecked() );
   }
 
-  void OpacityChanged1()
+  void OpacityChanged1()  // triggered by the slider
   {
     double opacity = OpacitySlider->sliderPosition() / 100.0;
     OpacityEdit->setText( QString::number( opacity ) );
     _rParams->SetOpacity( opacity );
   }
 
-  void OpacityChanged2()
+  void OpacityChanged2()  // triggered by the checkbox
   {
     double opacity = OpacityEdit->text().toDouble();
     OpacitySlider->setSliderPosition( (int)(opacity * 100.0) );
@@ -104,7 +105,7 @@ private slots:
 
   void SelectImage()
   {
-    QString file1Name = QFileDialog::getOpenFileName(this, tr("Open Image File") );
+    QString file1Name = QFileDialog::getOpenFileName( this, tr("Open Image File") );
     SelectImageEdit->setText(file1Name);
     _rParams->SetImagePath( file1Name.toStdString() );
   }
