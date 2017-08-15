@@ -5,6 +5,7 @@
 #include "ImageVariablesGUI.h"
 #include "ImageGeometryGUI.h"
 #include "vapor/ImageParams.h"
+#include "vapor/GetAppPath.h"
 #include <QFileDialog>
 
 namespace VAPoR {
@@ -88,9 +89,13 @@ private slots:
 
     void SelectImage()
     {
-        QString file1Name = QFileDialog::getOpenFileName(this, tr("Open Image File"));
-        SelectImageEdit->setText(file1Name);
-        _rParams->SetImagePath(file1Name.toStdString());
+        std::vector<std::string> paths;
+        paths.push_back("images");
+        std::string installedImagePath = Wasp::GetAppPath("VAPOR", "share", paths);
+        QString     fileName =
+            QFileDialog::getOpenFileName(this, tr("Specify installed image to load"), QString::fromStdString(installedImagePath), tr("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)"));
+        SelectImageEdit->setText(fileName);
+        _rParams->SetImagePath(fileName.toStdString());
     }
 
 private:
