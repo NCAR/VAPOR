@@ -326,6 +326,57 @@ class VDF_API Grid {
     //!
     virtual bool InsideGrid(const std::vector<double> &coords) const = 0;
 
+    //! Get the indices of the nodes that define a cell
+    //!
+    //! This method returns a vector of index vectors. Each index vector
+    //! contains the indices for a node that defines the given cell ID
+    //! \p indices.
+    //!
+    //! For 2D cells the node IDs are returned in counter-clockwise order.
+    //! For 3D cells the ordering is dependent on the shape of the node. TBD.
+    //!
+    //!
+    //! \param[in] cindices An ordered vector of multi-dimensional cell
+    //! indices.
+    //! \param[out] nodes A vector of index vectors . Each index vector
+    //! has size given by GetDimensions.size()
+    //!
+    virtual bool GetCellNodes(
+        const std::vector<size_t> &cindices,
+        std::vector<std::vector<size_t>> &nodes) const = 0;
+
+    //! Get the IDs (indices) of all of the cells that border a cell
+    //!
+    //! This method returns a vector of index vectors. Each index vector
+    //! contains the indices of a cell that borders the cell given by
+    //! \p indices. If a
+    //! cell edge is a boundary edge, having no neighbors, the associated
+    //! index vector for that border will be empty.
+    //! The cell IDs are returned in counter-clockwise order
+    //!
+    //! \param[in] cindices An ordered vector of multi-dimensional cell
+    //! indices.
+    //! \param[out] cells A vector of index vectors. Each index vector
+    //! has size given by GetDimensions.size()
+    //!
+    virtual bool GetCellNeighbors(
+        const std::vector<size_t> &cindices,
+        std::vector<std::vector<size_t>> &cells) const = 0;
+
+    //! Get the IDs (indices) of all of the cells that share a node
+    //!
+    //! This method returns a vector of index vectors. Each index vector
+    //! contains the indices of a cell that share the node given by
+    //! \p indices.
+    //! The cell IDs are returned in counter-clockwise order
+    //!
+    //! \param[out] nodes A vector of index vectors . Each index vector
+    //! has size given by GetDimensions.size()
+    //!
+    virtual bool GetNodeCells(
+        const std::vector<size_t> &indices,
+        std::vector<std::vector<size_t>> &cells) const = 0;
+
     virtual void ClampCoord(std::vector<double> &coords) const = 0;
 
     //! Set periodic boundaries

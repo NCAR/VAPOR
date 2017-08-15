@@ -125,6 +125,136 @@ void StructuredGrid::GetRange(float range[2]) const {
     }
 }
 
+bool StructuredGrid::GetCellNodes(
+    const std::vector<size_t> &cindices,
+    std::vector<vector<size_t>> &nodes) const {
+    nodes.clear();
+
+    vector<size_t> dims = GetDimensions();
+    assert(cindices.size() == dims.size());
+
+    assert((dims.size() == 2) && "3D cells not yet supported");
+
+    // Check if invalid indices
+    //
+    for (int i = 0; i < cindices.size(); i++) {
+        if (cindices[i] > (dims[i] - 2))
+            return (false);
+    }
+
+    // Cells have the same ID's as their first node
+    //
+    // walk counter-clockwise order
+    //
+    if (dims.size() == 2) {
+        vector<size_t> indices;
+
+        indices = {cindices[0], cindices[1]};
+        nodes.push_back(indices);
+
+        indices = {cindices[0] + 1, cindices[1]};
+        nodes.push_back(indices);
+
+        indices = {cindices[0] + 1, cindices[1] + 1};
+        nodes.push_back(indices);
+
+        indices = {cindices[0], cindices[1] + 1};
+        nodes.push_back(indices);
+    }
+
+    return (true);
+}
+
+bool StructuredGrid::GetCellNeighbors(
+    const std::vector<size_t> &cindices,
+    std::vector<vector<size_t>> &cells) const {
+    cells.clear();
+
+    vector<size_t> dims = GetDimensions();
+    assert(cindices.size() == dims.size());
+
+    assert((dims.size() == 2) && "3D cells not yet supported");
+
+    // Check if invalid indices
+    //
+    for (int i = 0; i < cindices.size(); i++) {
+        if (cindices[i] > (dims[i] - 2))
+            return (false);
+    }
+
+    // Cells have the same ID's as their first node
+    //
+    // walk counter-clockwise order
+    //
+    if (dims.size() == 2) {
+        vector<size_t> indices;
+
+        if (cindices[1] != 0) { // below
+            indices = {cindices[0], cindices[1] - 1};
+        }
+        cells.push_back(indices);
+
+        if (cindices[0] != dims[0] - 2) { // right
+            indices = {cindices[0] + 1, cindices[1]};
+        }
+        cells.push_back(indices);
+
+        if (cindices[1] != dims[1] - 2) { // top
+            indices = {cindices[0], cindices[1] + 1};
+        }
+        cells.push_back(indices);
+
+        if (cindices[0] != 0) { // left
+            indices = {cindices[0] - 1, cindices[1]};
+        }
+        cells.push_back(indices);
+    }
+    return (true);
+}
+
+bool StructuredGrid::GetNodeCells(
+    const std::vector<size_t> &indices,
+    std::vector<vector<size_t>> &cells) const {
+    cells.clear();
+
+    vector<size_t> dims = GetDimensions();
+    assert(indices.size() == dims.size());
+
+    assert((dims.size() == 2) && "3D cells not yet supported");
+
+    // Check if invalid indices
+    //
+    for (int i = 0; i < indices.size(); i++) {
+        if (indices[i] > (dims[i] - 1))
+            return (false);
+    }
+
+    if (dims.size() == 2) {
+        vector<size_t> indices;
+
+        if (indices[0] != 0 && indices[1] != 0) { // below, left
+            indices = {indices[0] - 1, indices[1] - 1};
+            cells.push_back(indices);
+        }
+
+        if (indices[1] != 0) { // below, right
+            indices = {indices[0], indices[1] - 1};
+            cells.push_back(indices);
+        }
+
+        if (indices[0] != (dims[0] - 1) && indices[1] != (dims[1])) { // top, right
+            indices = {indices[0], indices[1]};
+            cells.push_back(indices);
+        }
+
+        if (indices[0] != 0) { // top, top
+            indices = {indices[0] - 1, indices[1]};
+            cells.push_back(indices);
+        }
+    }
+    return (true);
+}
+
 void StructuredGrid::ClampCoord(std::vector<double> &coords) const {
     assert(coords.size() >= GetTopologyDim());
 
