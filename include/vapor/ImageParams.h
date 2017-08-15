@@ -71,6 +71,7 @@ public:
   //
   // Get and set opacity value
   // 
+  /*
   double GetOpacity() const
   {
     return GetValueDouble( _opacityTag, 1.0 );
@@ -79,6 +80,7 @@ public:
   {
     SetValueDouble( _opacityTag, "set opacity value", val );
   }
+  */
 
 
   //
