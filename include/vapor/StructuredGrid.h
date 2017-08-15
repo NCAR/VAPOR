@@ -132,6 +132,28 @@ public:
  //!
  virtual void GetRange(float range[2]) const;
 
+
+ //! \copydoc Grid::GetCellNodes()
+ //!
+ virtual bool GetCellNodes(
+	const std::vector <size_t> &cindices,
+	std::vector <std::vector <size_t> > &nodes
+ ) const;
+
+ //! \copydoc Grid::GetCellNeighbors()
+ //!
+ virtual bool GetCellNeighbors(
+	const std::vector <size_t> &cindices,
+	std::vector <std::vector <size_t> > &cells
+ ) const;
+
+ //! \copydoc Grid::GetNodeCells()
+ //!
+ virtual bool GetNodeCells(
+	const std::vector <size_t> &indices,
+	std::vector <std::vector <size_t> > &cells
+ ) const;
+
  //! Return the internal blocking factor
  //!
  //! This method returns the internal blocking factor passed 
