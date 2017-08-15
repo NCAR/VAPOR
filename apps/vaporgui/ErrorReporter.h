@@ -42,6 +42,16 @@
 //! ErrorReporter class provides error reporting functionality. Registers error
 //! callbacks with MyBase and registers signal handler for SIGSEGV
 
+#define MSG_ERR(M) \
+	(ErrorReporter::GetInstance()->Report(M, ErrorReporter::Error))
+
+#define MSG_WARN(M) \
+	(ErrorReporter::GetInstance()->Report(M, ErrorReporter::Warning))
+
+#define MSG_DIAG(M) \
+	(ErrorReporter::GetInstance()->Report(M, ErrorReporter::Diagnostic))
+
+
 class ErrorReporter {
 
 	public:

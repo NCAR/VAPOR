@@ -27,7 +27,7 @@
 #include "qdialog.h"
 #include "newRendererDialog.h"
 #include "VizSelectCombo.h"
-#include "MessageReporter.h"
+#include "ErrorReporter.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
 
@@ -165,9 +165,7 @@ void RenderHolder::newRenderer() {
 		activeViz, dataSetName, renderClass, renderInst, false
 	);
 	if (rc<0) {
-		MessageReporter::errorMsg(
-			"Can't create renderer class %s", renderClass.c_str()
-		);
+		MSG_ERR("Can't create renderer");
 		return;
 	}
 
@@ -238,9 +236,7 @@ void RenderHolder::changeChecked(int row, int col) {
 		activeViz, dataSetName, renderClass, renderInst, enabled
 	);
 	if (rc<0) {
-		MessageReporter::errorMsg(
-			"Can't create renderer class %s", renderClass.c_str()
-		);
+		MSG_ERR("Can't create renderer");
 		return;
 	}
 	
@@ -348,9 +344,7 @@ void RenderHolder::copyInstanceTo(int item) {
 		dstVizName, dataSetName, rParams, renderInst, false
 	);
 	if (rc<0) {
-		MessageReporter::errorMsg(
-			"Can't create renderer class %s", activeRenderClass.c_str()
-		);
+		MSG_ERR("Can't create renderer");
 		return;
 	}
 
