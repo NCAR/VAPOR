@@ -140,7 +140,8 @@ const GLvoid *ImageRenderer::_getTexture( DataMgr *dataMgr,
 
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
 
-	if (myParams->GetIgnoreTransparency()) internalFormat = GL_RGB;
+	if (myParams->GetIgnoreTransparency()) 
+    internalFormat = GL_RGB;
 
 	GLvoid *texture = (GLvoid *) _getTexture(dataMgr);
 	if (! texture) return(NULL);
