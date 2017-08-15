@@ -14,6 +14,29 @@ class ParamsMgr;
 class DataMgr;
 
 //
+// A derived QDoubleValidator that also implements the fixup function.
+//
+class VaporDoubleValidator : public QDoubleValidator {
+public:
+    VaporDoubleValidator(QObject *parent = 0) : QDoubleValidator(parent = 0) {}
+    VaporDoubleValidator(double bottom, double top, int decimals, QObject *parent = 0) : QDoubleValidator(bottom, top, decimals, parent = 0) {}
+
+    //
+    // overload fixup() from QValidator
+    //
+    void fixup(QString &input) const
+    {
+        double val = input.toFloat();
+        if (val > top())
+            val = top();
+        else if (val < bottom())
+            val = bottom();
+
+        input = QString::number(val);
+    }
+};
+
+//
 // ImageVariablesSubtab class
 //
 class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
@@ -43,8 +66,8 @@ public:
         connect(GeoTIFFCheckbox, SIGNAL(clicked()), this, SLOT(GeoTIFFClicked()));
         connect(IgnoreTransparencyCheckbox, SIGNAL(clicked()), this, SLOT(IgnoreTransparencyClicked()));
 
-        OpacityEdit->setValidator(new QDoubleValidator(0, 1.0, 2, this));    // ranging from 0 to 1
-                                                                             // with 2 digit accuracy
+        OpacityEdit->setValidator(new VaporDoubleValidator(0, 1.0, 2, this));    // ranging from 0 to 1
+                                                                                 // with 2 decimals
         connect(OpacitySlider, SIGNAL(sliderReleased()), this, SLOT(OpacityChanged1()));
         connect(OpacityEdit, SIGNAL(returnPressed()), this, SLOT(OpacityChanged2()));
 
@@ -60,7 +83,7 @@ public:
         state = _rParams->GetIgnoreTransparency();
         IgnoreTransparencyCheckbox->setChecked(state);
 
-        double opacity = _rParams->GetOpacity();
+        float opacity = _rParams->GetConstantOpacity();
         OpacityEdit->setText(QString::number(opacity));
         OpacitySlider->setSliderPosition((int)(opacity * 100.0));
 
@@ -75,16 +98,19 @@ private slots:
 
     void OpacityChanged1()    // triggered by the slider
     {
-        double opacity = OpacitySlider->sliderPosition() / 100.0;
+        float opacity = OpacitySlider->sliderPosition() / 100.0;
         OpacityEdit->setText(QString::number(opacity));
-        _rParams->SetOpacity(opacity);
+        _rParams->SetConstantOpacity(opacity);
     }
 
-    void OpacityChanged2()    // triggered by the checkbox
+    void OpacityChanged2()    // triggered by the text box
     {
-        double opacity = OpacityEdit->text().toDouble();
+        QString userInput = OpacityEdit->text();
+        OpacityEdit->validator()->fixup(userInput);
+        OpacityEdit->setText(userInput);
+        float opacity = userInput.toFloat();
         OpacitySlider->setSliderPosition((int)(opacity * 100.0));
-        _rParams->SetOpacity(opacity);
+        _rParams->SetConstantOpacity(opacity);
     }
 
     void SelectImage()
