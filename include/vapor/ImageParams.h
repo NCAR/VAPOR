@@ -58,12 +58,16 @@ class PARAMS_API ImageParams : public RenderParams {
     //
     // Get and set opacity value
     //
-    double GetOpacity() const {
-        return GetValueDouble(_opacityTag, 1.0);
-    }
-    void SetOpacity(double val) {
-        SetValueDouble(_opacityTag, "set opacity value", val);
-    }
+    /*
+  double GetOpacity() const
+  {
+    return GetValueDouble( _opacityTag, 1.0 );
+  }
+  void  SetOpacity( double val ) 
+  {
+    SetValueDouble( _opacityTag, "set opacity value", val );
+  }
+  */
 
     //
     // Get and set orientation
