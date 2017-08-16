@@ -92,6 +92,10 @@ public:
     //
     float AccessIndex(const std::vector<size_t> &indices) const;
 
+    //! \copydoc Grid::SetValue()
+    //
+    void SetValue(const std::vector<size_t> &indices, float value);
+
     //! Return value of grid at specified location
     //!
     //! This method provides an alternate interface to Grid::AccessIndex()
@@ -104,6 +108,8 @@ public:
     //! \param[in] k Index into third fastest varying dimension
     //
     virtual float AccessIJK(size_t i, size_t j, size_t k) const;
+
+    void SetValueIJK(size_t i, size_t j, size_t k, float v);
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -152,6 +158,26 @@ public:
 
     virtual void ClampCoord(std::vector<double> &coords) const;
 
+    // Inside a box functor
+    //
+    class InsideBox {
+    public:
+        InsideBox(const std::vector<double> &min, const std::vector<double> &max) : _min(min), _max(max) {}
+        InsideBox() {}
+
+        bool operator()(const std::vector<double> &pt) const
+        {
+            for (int i = 0; i < _min.size(); i++) {
+                if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
+            }
+            return (true);
+        }
+
+    private:
+        std::vector<double> _min;
+        std::vector<double> _max;
+    };
+
     //! A forward iterator for accessing the data elements of the
     //! structured grid.
     //!
@@ -167,6 +193,7 @@ public:
     //
     template<class T> class VDF_API ForwardIterator {
     public:
+        ForwardIterator(T *rg, const std::vector<double> &minu, const std::vector<double> &maxu);
         ForwardIterator(T *rg);
         ForwardIterator();
         ~ForwardIterator() {}
@@ -193,20 +220,22 @@ public:
         };
 
     private:
-        T *    _rg;
-        size_t _x, _y, _z;    // current index into _rg->_min[3]
-        size_t _xb;           // x index within a block
-        float *_itr;
-        size_t _max[3];
-        size_t _bs[3];
-        size_t _bdims[3];
-        int    _ndim;
-        bool   _end;
+        T *       _rg;
+        size_t    _x, _y, _z;    // current index into _rg->_min[3]
+        size_t    _xb;           // x index within a block
+        float *   _itr;
+        size_t    _max[3];
+        size_t    _bs[3];
+        size_t    _bdims[3];
+        int       _ndim;
+        bool      _end;
+        InsideBox _pred;
     };
 
     typedef StructuredGrid::ForwardIterator<StructuredGrid>       Iterator;
     typedef StructuredGrid::ForwardIterator<StructuredGrid const> ConstIterator;
 
+    Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu) { return (Iterator(this, minu, maxu)); }
     Iterator begin() { return (Iterator(this)); }
     Iterator end() { return (Iterator()); }
 
@@ -216,7 +245,7 @@ public:
     VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &rg);
 
 protected:
-    float _AccessIndex(const std::vector<float *> &blks, const std::vector<size_t> &indices) const;
+    float *_AccessIndex(const std::vector<float *> &blks, const std::vector<size_t> &indices) const;
 
 private:
     std::vector<size_t>  _bs;       // dimensions of each block
