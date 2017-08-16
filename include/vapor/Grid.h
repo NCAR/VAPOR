@@ -60,7 +60,7 @@ public:
 
  virtual ~Grid();
 
- //! Set or Get the data value at the indicated grid point
+ //! Get the data value at the indicated grid point
  //!
  //! This method provides read and write access to the scalar data value
  //! defined at the grid point indicated by \p indices. The range
@@ -75,6 +75,13 @@ public:
  //! \param[in] indices of grid point along fastest varying dimension
  //!
  virtual float AccessIndex(const std::vector <size_t> &indices) const = 0;
+
+ //! Set the data value at the indicated grid point
+ //!
+ //! This method sets the data value of the grid point indexed by 
+ //! \p indices to \p value. 
+ //!
+ virtual void SetValue(const std::vector <size_t> &indices, float value) = 0;
 
  //! Get the reconstructed value of the sampled scalar function
  //!
