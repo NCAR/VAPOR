@@ -128,7 +128,7 @@ std::ostream &operator<<(std::ostream &o, const Grid &g) {
     }
     o << endl;
 
-    o << " Missing value flag" << g._hasMissing << endl;
+    o << " Missing value flag " << g._hasMissing << endl;
     o << " Missing value " << g._missingValue << endl;
     o << " Interpolation order " << g._interpolationOrder << endl;
 

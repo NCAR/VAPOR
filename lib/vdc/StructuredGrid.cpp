@@ -62,23 +62,33 @@ StructuredGrid::~StructuredGrid() {
 }
 
 float StructuredGrid::AccessIndex(const std::vector<size_t> &indices) const {
-    return (_AccessIndex(_blks, indices));
+    float *fptr = _AccessIndex(_blks, indices);
+    if (!fptr)
+        return (GetMissingValue());
+    return (*fptr);
 }
 
-float StructuredGrid::_AccessIndex(
+void StructuredGrid::SetValue(const std::vector<size_t> &indices, float v) {
+    float *fptr = _AccessIndex(_blks, indices);
+    if (!fptr)
+        return;
+    *fptr = v;
+}
+
+float *StructuredGrid::_AccessIndex(
     const std::vector<float *> &blks,
     const std::vector<size_t> &indices) const {
 
-    assert(indices.size() == GetTopologyDim());
+    assert(indices.size() >= GetTopologyDim());
 
     if (!blks.size())
-        return (GetMissingValue());
+        return (NULL);
 
     vector<size_t> dims = GetDimensions();
     size_t ndim = dims.size();
     for (int i = 0; i < ndim; i++) {
         if (indices[i] >= dims[i]) {
-            return (GetMissingValue());
+            return (NULL);
         }
     }
 
@@ -91,17 +101,17 @@ float StructuredGrid::_AccessIndex(
     size_t z = ndim == 3 ? indices[2] % _bs[2] : 0;
 
     float *blk = blks[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
-    return (blk[z * _bs[0] * _bs[1] + y * _bs[0] + x]);
+    return (&blk[z * _bs[0] * _bs[1] + y * _bs[0] + x]);
 }
 
 float StructuredGrid::AccessIJK(size_t i, size_t j, size_t k) const {
-    std::vector<size_t> indices;
-    indices.push_back(i);
-    indices.push_back(j);
-    if (GetTopologyDim() == 3) {
-        indices.push_back(k);
-    }
+    std::vector<size_t> indices = {i, j, k};
     return (AccessIndex(indices));
+}
+
+void StructuredGrid::SetValueIJK(size_t i, size_t j, size_t k, float v) {
+    std::vector<size_t> indices = {i, j, k};
+    return (SetValue(indices, v));
 }
 
 void StructuredGrid::GetRange(float range[2]) const {
@@ -290,8 +300,9 @@ void StructuredGrid::ClampCoord(std::vector<double> &coords) const {
 }
 
 template <class T>
-StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg) {
-    if (!rg->_blks.size()) {
+StructuredGrid::ForwardIterator<T>::ForwardIterator(
+    T *rg, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu) {
+    if (!rg->GetBlks().size()) {
         _end = true;
         return;
     }
@@ -311,7 +322,41 @@ StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg) {
     _y = 0;
     _z = 0;
     _xb = 0;
-    _itr = &rg->_blks[0][0];
+    _itr = &rg->GetBlks()[0][0];
+    _ndim = dims.size();
+    _end = false;
+
+    vector<size_t> indices = {0, 0, 0};
+    vector<double> pt;
+    _rg->GetUserCoordinates(indices, pt);
+    if (!_pred(pt)) {
+        operator++();
+    }
+}
+
+template <class T>
+StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg) {
+    if (!rg->GetBlks().size()) {
+        _end = true;
+        return;
+    }
+
+    vector<size_t> dims = rg->GetDimensions();
+    vector<size_t> bs = rg->GetBlockSize();
+    vector<size_t> bdims = rg->GetDimensionInBlks();
+    assert(dims.size() > 1 && dims.size() < 4);
+    for (int i = 0; i < dims.size(); i++) {
+        _max[i] = dims[i] - 1;
+        _bs[i] = bs[i];
+        _bdims[i] = bdims[i];
+    }
+
+    _rg = rg;
+    _x = 0;
+    _y = 0;
+    _z = 0;
+    _xb = 0;
+    _itr = &rg->GetBlks()[0][0];
     _ndim = dims.size();
     _end = false;
 }
@@ -331,51 +376,73 @@ template <class T>
 StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIterator<T>::
 operator++() {
 
-    if (!_rg->_blks.size())
+    if (!_rg->GetBlks().size())
         _end = true;
     if (_end)
         return (*this);
 
-    _xb++;
-    _itr++;
-    _x++;
-    if (_xb < _bs[0] && _x < _max[0]) {
-        return (*this);
-    }
+    size_t xb = 0;
+    size_t yb = 0;
+    size_t zb = 0;
+    size_t x = 0;
+    size_t y = 0;
+    size_t z = 0;
+    vector<double> pt;
+    pt = {0.5, 0.5, 0.5};
+    do {
 
-    _xb = 0;
-    if (_x > _max[0]) {
-        _x = _xb = 0;
-        _y++;
-    }
+        _xb++;
+        _itr++;
+        _x++;
+        if (_xb < _bs[0] && _x < _max[0]) {
+            vector<size_t> indices = {_x, _y, _z};
+            _rg->GetUserCoordinates(indices, pt);
+            if (_pred(pt)) {
+                return (*this);
+            }
 
-    if (_y > _max[1]) {
-        if (_ndim == 2) {
+            continue;
+        }
+
+        _xb = 0;
+        if (_x > _max[0]) {
+            _x = _xb = 0;
+            _y++;
+        }
+
+        if (_y > _max[1]) {
+            if (_ndim == 2) {
+                _end = true;
+                return (*this);
+            }
+            _y = 0;
+            _z++;
+        }
+
+        if (_ndim == 3 && _z > _max[2]) {
             _end = true;
             return (*this);
         }
-        _y = 0;
-        _z++;
-    }
 
-    if (_ndim == 3 && _z > _max[2]) {
-        _end = true;
-        return (*this);
-    }
+        xb = _x / _bs[0];
+        yb = _y / _bs[1];
+        zb = 0;
+        if (_ndim == 3)
+            zb = _z / _bs[2];
 
-    size_t xb = _x / _bs[0];
-    size_t yb = _y / _bs[1];
-    size_t zb = 0;
-    if (_ndim == 3)
-        zb = _z / _bs[2];
+        x = _x % _bs[0];
+        y = _y % _bs[1];
+        z = 0;
+        if (_ndim == 3)
+            z = _z % _bs[2];
 
-    size_t x = _x % _bs[0];
-    size_t y = _y % _bs[1];
-    size_t z = 0;
-    if (_ndim == 3)
-        z = _z % _bs[2];
-    float *blk = _rg->_blks[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
-    _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
+        float *blk = _rg->GetBlks()[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
+        _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
+
+        vector<size_t> indices = {_x, _y, _z};
+        _rg->GetUserCoordinates(indices, pt);
+    } while (!_pred(pt));
+
     return (*this);
 }
 
@@ -444,7 +511,7 @@ operator+=(const long int &offset) {
     if (_ndim == 3)
         z = _z % _bs[2];
 
-    float *blk = _rg->_blks[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
+    float *blk = _rg->GetBlks()[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
     _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
     return (*this);
 }
@@ -487,13 +554,13 @@ template class StructuredGrid::ForwardIterator<const StructuredGrid>;
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg) {
     o << "StructuredGrid " << endl;
-    o << " Block dimensions";
+    o << " Block dimensions ";
     for (int i = 0; i < sg._bs.size(); i++) {
         o << sg._bs[i] << " ";
     }
     o << endl;
 
-    o << " Grid dimensions in blocks";
+    o << " Grid dimensions in blocks ";
     for (int i = 0; i < sg._bdims.size(); i++) {
         o << sg._bdims[i] << " ";
     }
