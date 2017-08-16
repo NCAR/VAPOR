@@ -383,13 +383,13 @@ namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const RegularGrid &rg)
 {
 	o << "RegularGrid " << endl;
-    o << " Min coord";
+    o << " Min coord ";
     for (int i=0; i<rg._minu.size(); i++) {
         o << rg._minu[i] << " ";
     }
     o << endl;
 
-    o << " Max coord";
+    o << " Max coord ";
     for (int i=0; i<rg._maxu.size(); i++) {
         o << rg._maxu[i] << " ";
     }
