@@ -32,7 +32,7 @@
 #include "vapor/GetAppPath.h"
 #include "MainForm.h"
 #include "TFWidget.h"
-#include "MessageReporter.h"
+#include "ErrorReporter.h"
 
 using namespace VAPoR;
 
@@ -158,12 +158,7 @@ void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
     }
 
     int rc = tf->LoadFromFile(s.toStdString());
-    if (rc < 0) {
-        QString str("Error loading transfer function. /nFailed to convert "
-                    "input file: \n)");
-        str += s;
-        MessageReporter::errorMsg((const char *)str.toAscii());
-    }
+    if (rc < 0) { MSG_ERR("Error loading transfer function"); }
 }
 
 void TFWidget::fileSaveTF()
@@ -189,9 +184,7 @@ void TFWidget::fileSaveTF()
 
     int rc = tf->SaveToFile(s.toStdString());
     if (rc < 0) {
-        QString str("Failed to write output file: \n");
-        str += s;
-        MessageReporter::errorMsg((const char *)str.toAscii());
+        MSG_ERR("Failed to write output file");
         return;
     }
 }

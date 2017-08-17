@@ -31,7 +31,6 @@
 #include "StartupParams.h"
 #include "qcolordialog.h"
 #include "../images/fileopen.xpm"
-#include "MessageReporter.h"
 
 #include <qlabel.h>
 #include <qfiledialog.h>
@@ -254,11 +253,13 @@ void AppSettingsEventRouter::chooseLogFilePath()
 }
 void AppSettingsEventRouter::unsilenceMessages()
 {
+#ifdef DEAD
     AppSettingsParams *sParams = (AppSettingsParams *)GetActiveParams();
     sParams->SetCurrentMessageSilence(false);
     if (silenceCheckbox->isChecked()) silenceCheckbox->setChecked(false);
     MessageReporter::unSilenceAll();
     _settingsChanged = true;
+#endif
 }
 void AppSettingsEventRouter::silenceAllMessages(bool val)
 {
@@ -269,18 +270,16 @@ void AppSettingsEventRouter::silenceAllMessages(bool val)
 }
 void AppSettingsEventRouter::enableLogfile(bool val)
 {
+#ifdef DEAD
     AppSettingsParams *aParams = (AppSettingsParams *)GetActiveParams();
     aParams->SetCurrentLogfileEnabled(val);
     if (val) {
-#ifdef DEAD
         int rc = _controlExec->OpenLogfile(aParams->GetCurrentLogFileName());
         if (!rc) MessageReporter::setDiagMsgCB(true);
-#endif
     } else {
-#ifdef DEAD
         _controlExec->OpenLogfile("");
-#endif
         MessageReporter::setDiagMsgCB(false);
     }
     _settingsChanged = true;
+#endif
 }
