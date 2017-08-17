@@ -104,6 +104,7 @@ void VDC_GetAttNames(const VDC *p, const char *varname, char ***names, int *coun
 int  VDC_GetAttType(const VDC *p, const char *varname, const char *attname);
 int  VDC_VariableExists(const VDC *p, size_t ts, const char *varname, int reflevel, int lod);
 int  VDC_IsTimeVarying(const VDC *p, const char *varname);
+int  VDC_CoordVarExists(const VDC *p, const char *varname);
 
 int  VDC_GetCRatios(const VDC *p, const char *varname, size_t **ratios, int *count);
 int  VDC_GetCRatiosCount(const VDC *p, const char *varname);
