@@ -24,7 +24,7 @@
 #include <QFileDialog>
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgrUtils.h>
-#include "MessageReporter.h"
+#include "ErrorReporter.h"
 #include "MappingFrame.h"
 #include "RenderEventRouter.h"
 
@@ -331,9 +331,7 @@ void RenderEventRouter::fileSaveTF()
 
     int rc = tf->SaveToFile(s.toStdString());
     if (rc < 0) {
-        QString str("Failed to write output file: \n");
-        str += s;
-        MessageReporter::errorMsg((const char *)str.toAscii());
+        ERR_MSG("Failed to write output file");
         return;
     }
 }
@@ -379,11 +377,7 @@ void RenderEventRouter::fileLoadTF(string varname, const char *startPath, bool s
     }
 
     int rc = tf->LoadFromFile(s.toStdString());
-    if (rc < 0) {
-        QString str("Error loading transfer function. /nFailed to convert input file: \n ");
-        str += s;
-        MessageReporter::errorMsg((const char *)str.toAscii());
-    }
+    if (rc < 0) { ERR_MSG("Error loading transfer function"); }
 
     #ifdef DEAD
     // Remember the path to the file:

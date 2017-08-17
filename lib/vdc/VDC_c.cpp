@@ -6,7 +6,7 @@
 #include "vapor/VDC_c.h"
 #include "vapor/MyBase.h"
 
-// #define VDC_DEBUG
+#define VDC_DEBUG
 #ifdef VDC_DEBUG
     #define VDC_DEBUG_printf(...) fprintf(stderr, __VA_ARGS__)
     #define VDC_DEBUG_printff(...)                                      \
@@ -263,6 +263,12 @@ int VDC_IsTimeVarying(const VDC *p, const char *varname)
     return p->IsTimeVarying(string(varname));
 }
 
+int VDC_CoordVarExists(const VDC *p, const char *varname)
+{
+    VDCCoordVar v;
+    return p->GetCoordVarInfo(string(varname), v);
+}
+
 int VDC_GetCRatios(const VDC *p, const char *varname, size_t **ratios, int *count)
 {
     VDC_DEBUG_called();
@@ -374,6 +380,13 @@ int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t
     VDC_DEBUG_printff(": Current dimensions = %s\n", _stringVectorToString(p->GetDimensionNames()).c_str());
     VDC_DEBUG_printff(": Current coordvars = %s\n", _stringVectorToString(p->GetCoordVarNames()).c_str());
     VDC_DEBUG_printff(": Current datavars = %s\n", _stringVectorToString(p->GetDataVarNames()).c_str());
+
+    for (int i = 0; i < coordvarsCount; i++) {
+        VDCCoordVar cv;
+        p->GetCoordVarInfo(coordvars[i], cv);
+        cout << cv;
+    }
+
     vector<string> dimnames_v;
     vector<string> coordvars_v;
     for (int i = 0; i < dimnamesCount; i++) dimnames_v.push_back(string(dimnames[i]));
@@ -383,6 +396,7 @@ int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t
     int ret = p->DefineDataVar(string(varname), dimnames_v, coordvars_v, string(units), _IntToXType(xtype), compressed);
     VDC_DEBUG_printff(": return (%i)\n", ret);
     if (ret < 0) VDC_DEBUG_printff(": Error message = \"%s\"\n", Wasp::MyBase::GetErrMsg());
+    VDC_DEBUG_printff(": Current coordvars = %s\n", _stringVectorToString(p->GetCoordVarNames()).c_str());
     return ret;
 }
 

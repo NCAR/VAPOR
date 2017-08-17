@@ -496,13 +496,15 @@ int VDC::_DefineDataVar(string varname, vector<string> dim_names, vector<string>
 
     // Check for a time coordinate
     //
-    map<string, CoordVar>::const_iterator itr;
-    itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
     string time_coord_var;
-    if (itr != _coordVars.end()) {
-        time_coord_var = coord_vars[coord_vars.size() - 1];
-        dim_names.pop_back();
-        coord_vars.pop_back();
+    if (coord_vars.size() > 0) {
+        map<string, CoordVar>::const_iterator itr;
+        itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
+        if (itr != _coordVars.end()) {
+            time_coord_var = coord_vars[coord_vars.size() - 1];
+            dim_names.pop_back();
+            coord_vars.pop_back();
+        }
     }
 
     // Determine block size
@@ -1385,14 +1387,17 @@ bool VDC::_ValidDefineDataVar(string varname, vector<string> dim_names, vector<s
     // ordered X, Y, Z, T
     //
 
+    printf("Axis Order: ");
     if (coord_vars.size() > 1) {
         map<string, CoordVar>::const_iterator itr;
         int                                   axis = -1;
         for (int i = 0; i < coord_vars.size(); i++) {
             itr = _coordVars.find(coord_vars[i]);
             assert(itr != _coordVars.end());    // already checked for existance
+            printf("%s(%i) ", itr->second.GetName().c_str(), itr->second.GetAxis());
             if (itr->second.GetAxis() <= axis) {
                 SetErrMsg("Dimensions must be ordered X, Y, Z, T");
+                printf("\n");
                 return (false);
             }
             axis = itr->second.GetAxis();
@@ -1401,12 +1406,14 @@ bool VDC::_ValidDefineDataVar(string varname, vector<string> dim_names, vector<s
 
     // Check for a time coordinate
     //
-    map<string, CoordVar>::const_iterator itr;
-    itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
-    if (itr != _coordVars.end()) {
-        dim_names.pop_back();
-        dimensions.pop_back();
-        coord_vars.pop_back();
+    if (coord_vars.size() > 0) {
+        map<string, CoordVar>::const_iterator itr;
+        itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
+        if (itr != _coordVars.end()) {
+            dim_names.pop_back();
+            dimensions.pop_back();
+            coord_vars.pop_back();
+        }
     }
 
     // Determine block size
