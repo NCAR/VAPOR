@@ -18,7 +18,7 @@ FILES = \
 	BannerGUI AnimationParams MiscParams \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
-	TabManager MessageReporter  TrackBall GLColorbarWidget \
+	TabManager TrackBall GLColorbarWidget ErrorReporter
 	StatisticsParams
 
 QT_HEADERS := \
@@ -35,8 +35,8 @@ QT_HEADERS := \
 	TFWidget VariablesWidget \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
-	BannerGUI AnimationParams MiscParams \
-	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget
+	BannerGUI AnimationParams MiscParams\
+	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget ErrorReporter
 
 
 ifneq ($(ARCH),WIN32)

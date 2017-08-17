@@ -45,12 +45,12 @@
 #include "regioneventrouter.h"
 #include "VizFeatureEventRouter.h"
 #include "AnimationEventRouter.h"
-#include "MessageReporter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
 #include "SeedMe.h"
 #include "Statistics.h"
 #include "Plot.h"
+#include "ErrorReporter.h"
 #include "MainForm.h"
 
 
@@ -223,8 +223,6 @@ MainForm::MainForm(
 	//MappingFrame::SetControlExec(_controlExec);
 	BoxSliderFrame::SetControlExec(_controlExec);
 	
-	MessageReporter::SetParamsMgr(_paramsMgr);
-
 	_tabMgr = TabManager::Create(this, _controlExec);
     _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
@@ -256,8 +254,6 @@ MainForm::MainForm(
 
 	//Load preferences at start, set preferences directory
 	loadStartingPrefs();
-	//Create the MessageReporter
-	MessageReporter::getInstance();
 	
 	setUpdatesEnabled(true);
     show();
@@ -296,9 +292,6 @@ MainForm::MainForm(
  */
 MainForm::~MainForm()
 {
-#ifdef	DEAD
-	MessageReporter::SetFullSilence(true);
-#endif
 
 	if (_modeStatusWidget) delete _modeStatusWidget;
     if (_banner) delete _banner;
@@ -831,7 +824,7 @@ void MainForm::sessionOpenHelper(string fileName) {
 	if (! fileName.empty()) {
 		int rc = _controlExec->LoadState(fileName);
 		if (rc < 0) {
-			MyBase::SetErrMsg("Failed to restore session from file\n");
+			MSG_ERR("Failed to restore session from file");
 			_controlExec->LoadState();
 		}
 	}
@@ -888,9 +881,8 @@ void MainForm::fileSave()
 	GUIStateParams *p = GetStateParams();
 	string path = p->GetCurrentSessionPath();
 
-	if (_controlExec->SaveSession(path)){
-		MyBase::SetErrMsg("Failed to write session file: \n%s", path.c_str());
-		MessageReporter::postCurrentMsgs();
+	if (_controlExec->SaveSession(path) < 0){
+		MSG_ERR("Saving session file");
 		return;
 	}
 }
@@ -910,8 +902,7 @@ void MainForm::fileSaveAs()
 	string path = fileName.toStdString();
 
 	if (_controlExec->SaveSession(path)){
-		MyBase::SetErrMsg("Failed to write session file: \n%s", path.c_str());
-		MessageReporter::postCurrentMsgs();
+		MSG_ERR("Saving session file");
 		return;
 	}
 
@@ -1025,7 +1016,7 @@ void MainForm::helpContents()
 
 void MainForm::helpAbout()
 {
-    std::string banner_file_name = "vapor_banner.png";
+	std::string banner_file_name = "vapor_banner.png";
     if(_banner) delete _banner;
 	std::string banner_text = 
 		"Visualization and Analysis Platform for atmospheric, Oceanic and "
@@ -1081,11 +1072,7 @@ void MainForm::loadDataHelper(
 
 	int rc = _controlExec->OpenData(files, dataSetName, format);
 	if (rc<0) {
-#ifdef	DEAD
-		QMessageBox::information(
-			this,"Load Data Error","Unable to read metadata file "
-		);
-#endif
+		MSG_ERR("Failed to load data");
 		return;
 	}
 
@@ -1184,6 +1171,7 @@ vector <string> MainForm::myGetOpenFileNames(
 		QFileInfo fInfo(files[i].c_str());
 		if (! fInfo.isReadable() || ! fInfo.isFile()){
 			MyBase::SetErrMsg("Load Data Error \n Invalid data set\n");
+			MSG_ERR("Failed to load data");
 			return(vector <string> ());
 		}
 	}
@@ -1259,7 +1247,7 @@ void MainForm::initCaptureMenu(){
 		_captureStartJpegCaptureAction->setEnabled(false);
 		_captureSingleJpegCaptureAction->setEnabled(false);
 		_captureEndJpegCaptureAction->setEnabled( false);
-		MessageReporter::warningMsg("Animation capture is in progress in another visualizer");
+		MSG_WARN("Animation capture is in progress in another visualizer");
 	} else if (_capturingAnimationVizName == vizName) {// there is a visualizer, and it's capturing images
 		
 		_captureStartJpegCaptureAction->setEnabled(false);
@@ -1456,8 +1444,7 @@ void MainForm::launchWebHelp(QAction* webAction){
 	QUrl myURL = qv.toUrl();
 	bool success = QDesktopServices::openUrl(myURL);
 	if (!success){
-		MessageReporter::errorMsg("Unable to launch Web browser for URL %s\n",
-			myURL.toString().toAscii().data());
+		MSG_ERR("Unable to launch Web browser for URL");
 	}
 }
 
@@ -1911,7 +1898,7 @@ void MainForm::captureSingleJpeg() {
 	QFileInfo* fileInfo = new QFileInfo(fn);
 	QString suffix = fileInfo->suffix();
 	if (suffix != "jpg" && suffix != "tif" ) {
-		MessageReporter::errorMsg("Image Capture Error;\nFilename must end with .jpg or .tif");
+		MSG_ERR("Image capture file name must end with .jpg or .tif");
 		return;
 	}
 
@@ -2033,10 +2020,10 @@ void MainForm::endAnimCapture(){
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
 	if (vizName != _capturingAnimationVizName){
-		MessageReporter::warningMsg("Terminating capture in non-active visualizer");
+		MSG_WARN("Terminating capture in non-active visualizer");
 	}
 	if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false))
-		MessageReporter::warningMsg("Image Capture Warning;\nCurrent active visualizer is not capturing images");
+		MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
 	
 	_capturingAnimationVizName = "";
 
