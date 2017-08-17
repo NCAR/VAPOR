@@ -28,6 +28,7 @@
 #include <cmath>
 #include <cassert>
 #include <cstdio>
+#include <algorithm>
 #include <vapor/MyBase.h>
 //#include "regionparams.h"
 
@@ -127,7 +128,7 @@ QDialog(parent), Ui_StatsWindow(){
 
 Statistics::~Statistics() {
 	if (_errMsg) delete _errMsg;
-	
+
 	if (_zRange) delete _zRange;
 	if (_zMinSlider) delete _zMinSlider;
 	if (_zMaxSlider) delete _zMaxSlider;
@@ -180,6 +181,9 @@ int Statistics::initControlExec(ControlExec* ce) {
 	}
 	else { return -1;}
 
+	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
+	_params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
+
 	_dataStatus = _controlExec->getDataStatus();
 	vector<string> dmNames = _dataStatus->GetDataMgrNames();
 	dataMgrCombo->clear();
@@ -212,25 +216,31 @@ int Statistics::initialize(){
 	if (_initialized==1) return 0;
 
 	_errMsg = new sErrMsg;
-	_autoUpdate = false;
+	_autoUpdate = _params->GetAutoUpdate();
+	UpdateCheckbox->setChecked(_autoUpdate);
 
 	// for _regionSelection,
 	// 0 = center/size, 1 = min/max, 2 = center/size
 	//
-	_regionSelection = 0;
-	stackedSliderWidget->setCurrentIndex(0);
+	//_regionSelection = 0;
+	_regionSelection = _params->GetRegionSelection();
+	stackedSliderWidget->setCurrentIndex(_regionSelection);
 
 	generateTableColumns();
 
-	_defaultVar = _dm->GetDataVarNames()[0];
-	if (_defaultVar=="") return -1;
+	initVariables();
+
+	_defaultVar = _vars3d[0];
+	if (_defaultVar=="") {
+		return -1;
+	}
+
 	initTimes();
 
 	int rc = GetExtents(_extents);
 	if (rc<0) return -1;
 	_fullExtents = _extents;
 
-	initVariables();
 	initCRatios();
 	initRefinement();
 	initRegion();
@@ -262,11 +272,26 @@ void Statistics::addStatistic(int index) {
 	if (index == 0) return;
 	string statName = addStatCombo->currentText().toStdString();
 
-	if (statName == "Min") _MIN = 0x01;
-	if (statName == "Max") _MAX = 0x02;
-	if (statName == "Mean") _MEAN = 0x04;
-	if (statName == "Median") _MEDIAN = 0x10;
-	if (statName == "StdDev") _SIGMA = 0x08;
+	if (statName == "Min") {
+		_MIN = 0x01;
+		_params->SetMinStat(true);
+	}
+	if (statName == "Max") {
+		_MAX = 0x02;
+		_params->SetMaxStat(true);
+	}
+	if (statName == "Mean") {
+		_MEAN = 0x04;
+		_params->SetMeanStat(true);
+	}
+	if (statName == "Median") {
+		_MEDIAN = 0x10;
+		_params->SetMedianStat(true);
+	}
+	if (statName == "StdDev") {
+		_SIGMA = 0x08;
+		_params->SetStdDevStat(true);
+	}
 
 	VariablesTable->resizeColumnsToContents();
 	addStatCombo->setCurrentIndex(0);
@@ -278,11 +303,26 @@ void Statistics::removeStatistic(int index) {
 	if (index == 0) return;
 	string statName = removeStatCombo->currentText().toStdString();
 
-	if (statName == "Min") _MIN = 0x00;
-	if (statName == "Max") _MAX = 0x00;
-	if (statName == "Mean") _MEAN = 0x00;
-	if (statName == "Median") _MEDIAN = 0x00;
-	if (statName == "StdDev") _SIGMA = 0x00;
+	if (statName == "Min") {
+		_MIN = 0x00;
+		_params->SetMinStat(false);
+	}
+	if (statName == "Max") {
+		_MAX = 0x00;
+		_params->SetMaxStat(false);
+	}
+	if (statName == "Mean") {
+		_MEAN = 0x00;
+		_params->SetMeanStat(false);
+	}
+	if (statName == "Median") {
+		_MEDIAN = 0x00;
+		_params->SetMedianStat(false);
+	}
+	if (statName == "StdDev") {
+		_SIGMA = 0x00;
+		_params->SetStdDevStat(false);
+	}
 
 	VariablesTable->resizeColumnsToContents();
 	removeStatCombo->setCurrentIndex(0);
@@ -298,16 +338,15 @@ void Statistics::errReport(string msg) const {
 }
 
 void Statistics::initTimes() {
-	_minTS = 0;
-	_maxTS = 0;
-	
 	MinTimestepSpinbox->setMinimum(0);
 	MinTimestepSpinbox->setMaximum(_dm->GetNumTimeSteps(_defaultVar)-1);
-	MinTimestepSpinbox->setValue(0);
+	_minTS = _params->GetMinTS();
+	MinTimestepSpinbox->setValue(_minTS);
 
 	MaxTimestepSpinbox->setMinimum(0);
 	MaxTimestepSpinbox->setMaximum(_dm->GetNumTimeSteps(_defaultVar)-1);
-	MaxTimestepSpinbox->setValue(0);
+	_maxTS = _params->GetMaxTS();	
+	MaxTimestepSpinbox->setValue(_maxTS);
 }
 
 void Statistics::initRangeControllers() {
@@ -326,6 +365,8 @@ void Statistics::initRangeControllers() {
 	if (_xSinglePointSlider) delete _xSinglePointSlider;
 	if (_xSinglePointLineEdit) delete _xSinglePointLineEdit;
 	_xRange = new Range(_fullExtents[0],_fullExtents[3]);
+	cout << "FE " << _fullExtents[0] << " " << _fullExtents[3] << endl;
+	cout << _xRange->getDomainMin() << " " << _xRange->getDomainMax() << endl;
 	_xMinSlider = new MinMaxSlider(_xRange, minXSlider, 0);
 	_xMaxSlider = new MinMaxSlider(_xRange, maxXSlider, 1);
 	_xSinglePointSlider = new SinglePointSlider(_xRange, spXSlider);
@@ -370,6 +411,7 @@ void Statistics::initRangeControllers() {
 	_xRange->addObserver(_xSizeLineEdit);
 	_xRange->addObserver(_xMinCell);
 	_xRange->addObserver(_xMaxCell);
+	
 
 	// Set up y axis controllers
 	//
@@ -496,7 +538,11 @@ void Statistics::initRangeControllers() {
 
 void Statistics::initCRatios() {
 	_cRatios = _dm->GetCRatios(_defaultVar);
-	_cRatio = _cRatios.size()-1;
+
+	_cRatio = _params->GetCRatio();
+	if (_cRatio == -1) {
+		_cRatio = _cRatios.size()-1;
+	}
 
 	for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it){
 		CRatioCombo->addItem("1:"+QString::number(*it));
@@ -506,7 +552,10 @@ void Statistics::initCRatios() {
 }
 
 void Statistics::initRefinement() {
-	_refLevel = _dm->GetNumRefLevels(_defaultVar);
+	_refLevel = _params->GetRefinement();
+	if (_refLevel == -1) {
+		_refLevel = _dm->GetNumRefLevels(_defaultVar);
+	}
 
 	for (int i=0; i<=_refLevel; i++){
 		RefCombo->addItem(QString::number(i));
@@ -535,7 +584,7 @@ void Statistics::copyActiveRegion(){
 
 // In Vapor 2.x, the function call:
 //
-//     _extents = _dm->GetExtents(_minTS);
+//	 _extents = _dm->GetExtents(_minTS);
 //
 // would set our 6 element _extents vector.
 // In Vapor 3.x, we receive two sets of thre
@@ -545,14 +594,43 @@ void Statistics::copyActiveRegion(){
 //
 int Statistics::GetExtents(vector<double>& extents) {
 	vector<double> minExtents, maxExtents;
-	int rc = _dm->GetVariableExtents(_minTS, _defaultVar, _refLevel,
-									minExtents, maxExtents);
-	if (rc<0) {
-		string myErr;
-		myErr = "Could not find minimum and maximun extents in current data set."; 
-		errReport(myErr);
-		return -1;
+
+	// If StatisticsParams has extents set, and we are not yet
+	// initialized, then use get the settings from params and 
+	// use those.
+	//
+	vector<double> minPExtents = _params->GetMinExtents();
+	vector<double> maxPExtents = _params->GetMaxExtents();
+	if (!minPExtents.empty() && 
+		!maxPExtents.empty() &&
+		!_initialized) {
+		minExtents = minPExtents;
+		maxExtents = maxPExtents;
+//		minExtents[0] = minPExtents[0];
+//		minExtents[1] = minPExtents[1];
+//		if (minPExtents.size()==3)
+//			minExtents[2] = minPExtents[2];
+//		maxExtents[0] = maxPExtents[0];
+//		maxExtents[1] = maxPExtents[1];
+//		if (maxPExtents.size()==3)
+//			maxExtents[2] = maxPExtents[2];
 	}
+	// Otherwise use the extents passed by the data manager
+	//
+	else {
+		int rc = _dm->GetVariableExtents(_minTS, _defaultVar, _refLevel,
+									minExtents, maxExtents);
+
+
+		if (rc<0) {
+			string myErr;
+			myErr = "Could not find minimum and maximun extents" 
+				" in current data set."; 
+			errReport(myErr);
+			return -1;
+		}
+	}
+
 	if (extents.size() < 6) {
 		extents.push_back(minExtents[0]);
 		extents.push_back(minExtents[1]);
@@ -576,6 +654,10 @@ int Statistics::GetExtents(vector<double>& extents) {
 		extents[4] = maxExtents[1];
 		extents[5] = maxExtents[2];
 	}
+
+	_params->SetMinExtents(minExtents);
+	_params->SetMaxExtents(maxExtents);
+
 	return 1;
 }
 
@@ -593,7 +675,7 @@ void Statistics::restoreExtents() {
 	_zRange->setUserMax(extents[5]);
 }
 
-void Statistics::initRegion(bool activeRegion){
+void Statistics::initRegion(){
 	// Save our old extents
 	//
 	vector<double> oldExtents(_fullExtents);
@@ -620,8 +702,6 @@ void Statistics::initRegion(bool activeRegion){
 	}
 	else if (_regionInitialized) setNewExtents();
 	
-	_resettingRegion = 1;
-
 	QTableWidgetItem* twi;
 	for (int i=0; i<2; i++){
 		for (int j=0; j<3; j++){
@@ -640,7 +720,6 @@ void Statistics::initRegion(bool activeRegion){
 	}
 	_regionInitialized = 1;
 
-	_resettingRegion = 0;
 	if (_slidersInitialized) updateSliders();
 	if (_autoUpdate) update();
 	else (makeItRed());
@@ -648,11 +727,11 @@ void Statistics::initRegion(bool activeRegion){
 
 void Statistics::setNewExtents() {
 	_xRange->setDomainMin(_fullExtents[0]);
-	_xRange->setDomainMin(_fullExtents[1]);
-	_yRange->setDomainMin(_fullExtents[2]);
-	_yRange->setDomainMin(_fullExtents[3]);
-	_zRange->setDomainMin(_fullExtents[4]);
-	_zRange->setDomainMin(_fullExtents[5]);
+	_xRange->setDomainMax(_fullExtents[3]);
+	_yRange->setDomainMin(_fullExtents[1]);
+	_yRange->setDomainMax(_fullExtents[4]);
+	_zRange->setDomainMin(_fullExtents[2]);
+	_zRange->setDomainMax(_fullExtents[5]);
 }
 
 void Statistics::updateSliders() {
@@ -666,10 +745,14 @@ void Statistics::updateSliders() {
 
 int Statistics::initVariables() {
 	vector<string> vars;
-	vars = _dm->GetDataVarNames();
+	vars = _dm->GetDataVarNames(3, true);
 	for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it){
 		_vars.push_back(*it);
 		_vars3d.push_back(*it);
+	}
+	vars = _dm->GetDataVarNames(2, true);
+	for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it){
+		_vars.push_back(*it);
 	}
 
 	sort(_vars.begin(), _vars.end());
@@ -729,6 +812,10 @@ void Statistics::maxTSChanged() {
 		_minTS = min;
 		_maxTS = max;
 	}
+	
+	_params->SetMinTS(_minTS);
+	_params->SetMaxTS(_maxTS);
+	
 	if (_autoUpdate) update();
 	else (makeItRed());
 }
@@ -746,6 +833,10 @@ void Statistics::minTSChanged() {
 		_minTS = min;
 		_maxTS = max;
 	}
+
+	_params->SetMinTS(_minTS);
+	_params->SetMaxTS(_maxTS);
+
 	initRegion();
 	if (_autoUpdate) update();
 	else (makeItRed());
@@ -755,6 +846,8 @@ void Statistics::autoUpdateClicked() {
 	if (UpdateCheckbox->isChecked()) _autoUpdate = true;
 	else _autoUpdate = false;
 	UpdateButton->setEnabled(!_autoUpdate);
+	_params->SetAutoUpdate(_autoUpdate);
+
 	if (_autoUpdate) update();
 	else (makeItRed());
 }
@@ -767,6 +860,7 @@ void Statistics::refinementChanged(int index) {
 
 void Statistics::cRatioChanged(int index) {
 	_cRatio = index;
+	_params->SetCRatio(_cRatio);
 	if (_autoUpdate) update();
 	else (makeItRed());
 }
@@ -948,6 +1042,12 @@ void Statistics::varRemoved(int index) {
 	if (index == 0) return;
 	string varName = RemoveVarCombo->currentText().toStdString();
 	_stats.erase(varName);
+
+	vector<string> varNames = _params->GetVarNames();
+	varNames.erase(std::remove(varNames.begin(), varNames.end(), varName),
+		varNames.end());
+	_params->SetVarNames(varNames);
+
 	RemoveVarCombo->setCurrentIndex(0);
 	RemoveVarCombo->removeItem(index);
 	update();
@@ -961,6 +1061,10 @@ void Statistics::newVarAdded(int index) {
 	for (it_type it = _stats.begin(); it!=_stats.end(); it++){
 		if (it->first == varName) return;
 	}
+
+	vector<string> varNames = _params->GetVarNames();
+	varNames.push_back(varName);
+	_params->SetVarNames(varNames);
 
 	_stats[varName] = _statistics();
 
@@ -1194,7 +1298,8 @@ bool Statistics::calcStdDev(string varname) {
 		deviations = 0;
 		missing = 0;
 		if (_rGrid) delete _rGrid;
-		_rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+		_rGrid = _dm->GetVariable(ts, varname, _refLevel, 
+						_cRatio, _uCoordMin, _uCoordMax);
 
 		// Invalid regular grid.  Use previous timesteps and return.
 		if (!_rGrid) { 
@@ -1295,7 +1400,8 @@ bool Statistics::calcMedian(string varname) {
 	}
 
 	for (int ts=_minTS; ts<=_maxTS; ts++){
-		_rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+		_rGrid = _dm->GetVariable(ts, varname, _refLevel, 
+								_cRatio, _uCoordMin, _uCoordMax);
 
 		// Invalid regular grid.  Use previous timesteps and return.
 		if (!_rGrid) { 

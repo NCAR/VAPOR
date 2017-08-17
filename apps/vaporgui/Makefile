@@ -18,7 +18,8 @@ FILES = \
 	BannerGUI AnimationParams MiscParams \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
-	TabManager MessageReporter  TrackBall GLColorbarWidget
+	TabManager MessageReporter  TrackBall GLColorbarWidget \
+	StatisticsParams
 
 QT_HEADERS := \
 	RenderHolder BoxSliderFrame DomainWidget GLWidget \
