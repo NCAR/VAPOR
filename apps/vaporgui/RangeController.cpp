@@ -47,6 +47,8 @@ Range::Range(double min, double max)
     _domainMin = min;
     _domainMax = max;
 
+    cout << "Range " << _domainMin << " " << _domainMax << endl;
+
     _userMin = min;
     _userMax = max;
 }
