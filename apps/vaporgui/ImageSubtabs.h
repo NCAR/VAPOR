@@ -4,6 +4,7 @@
 #include "ImageAppearanceGUI.h"
 #include "ImageVariablesGUI.h"
 #include "ImageGeometryGUI.h"
+#include "RangeCombos.h"
 #include "vapor/ImageParams.h"
 #include "vapor/GetAppPath.h"
 #include <QFileDialog>
@@ -63,14 +64,11 @@ public:
     {
         _rParams = NULL;
         setupUi(this);
+        _opacityCombo = new Combo(OpacityEdit, OpacitySlider);
+
         connect(GeoTIFFCheckbox, SIGNAL(clicked()), this, SLOT(GeoTIFFClicked()));
         connect(IgnoreTransparencyCheckbox, SIGNAL(clicked()), this, SLOT(IgnoreTransparencyClicked()));
-
-        OpacityEdit->setValidator(new VaporDoubleValidator(0, 1.0, 2, this));    // ranging from 0 to 1
-                                                                                 // with 2 decimals
-        connect(OpacitySlider, SIGNAL(sliderReleased()), this, SLOT(OpacityChanged1()));
-        connect(OpacityEdit, SIGNAL(returnPressed()), this, SLOT(OpacityChanged2()));
-
+        connect(_opacityCombo, SIGNAL(valueChanged(double)), this, SLOT(OpacityChanged()));
         connect(SelectImagePushButton, SIGNAL(clicked()), this, SLOT(SelectImage()));
     }
 
@@ -84,11 +82,18 @@ public:
         IgnoreTransparencyCheckbox->setChecked(state);
 
         float opacity = _rParams->GetConstantOpacity();
-        OpacityEdit->setText(QString::number(opacity));
-        OpacitySlider->setSliderPosition((int)(opacity * 100.0));
+        _opacityCombo->Update(0.0, 1.0, opacity);
 
         std::string imageFile = _rParams->GetImagePath();
         SelectImageEdit->setText(QString::fromStdString(imageFile));
+    }
+
+    ~ImageAppearanceSubtab()
+    {
+        if (_opacityCombo) {
+            delete _opacityCombo;
+            _opacityCombo = NULL;
+        }
     }
 
 private slots:
@@ -96,20 +101,9 @@ private slots:
 
     void IgnoreTransparencyClicked() { _rParams->SetIgnoreTransparency(IgnoreTransparencyCheckbox->isChecked()); }
 
-    void OpacityChanged1()    // triggered by the slider
+    void OpacityChanged()
     {
-        float opacity = OpacitySlider->sliderPosition() / 100.0;
-        OpacityEdit->setText(QString::number(opacity));
-        _rParams->SetConstantOpacity(opacity);
-    }
-
-    void OpacityChanged2()    // triggered by the text box
-    {
-        QString userInput = OpacityEdit->text();
-        OpacityEdit->validator()->fixup(userInput);
-        OpacityEdit->setText(userInput);
-        float opacity = userInput.toFloat();
-        OpacitySlider->setSliderPosition((int)(opacity * 100.0));
+        float opacity = _opacityCombo->GetValue();
         _rParams->SetConstantOpacity(opacity);
     }
 
@@ -126,6 +120,8 @@ private slots:
 
 private:
     ImageParams *_rParams;
+
+    Combo *_opacityCombo;
 };
 
 //
