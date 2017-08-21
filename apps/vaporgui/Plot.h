@@ -32,8 +32,9 @@
     //#include <Python.h>
     #include <errMsg.h>
     #include <plotWindow.h>
-    #include "RangeController.h"
     #include <vapor/DataMgr.h>
+    #include "RangeController.h"
+    #include "PlotParams.h"
 
 using namespace std;
 

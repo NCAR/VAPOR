@@ -258,7 +258,15 @@ int Statistics::initialize()
     _MAX = 0x02;
     _MEAN = 0x04;
     _MEDIAN = 0x00;
+    if (_params->GetMedianStat()) {
+        cout << "Median found" << endl;
+        _MEDIAN = 0x10;
+    }
     _SIGMA = 0x00;
+    if (_params->GetStdDevStat()) {
+        cout << "StdDev found" << endl;
+        _SIGMA = 0x08;
+    }
     _calculations = 0xFF;
 
     if (_dm == NULL) return -1;
@@ -358,6 +366,7 @@ void Statistics::addStatistic(int index)
         _params->SetMedianStat(true);
     }
     if (statName == "StdDev") {
+        cout << "Setting SetStdDevStat" << endl;
         _SIGMA = 0x08;
         _params->SetStdDevStat(true);
     }
@@ -773,7 +782,11 @@ void Statistics::retrieveRangeParams()
     // accordingly.
     //
     vector<double> minExtents, maxExtents;
-    if (_regionInitialized) {
+    minExtents = _params->GetMinExtents();
+    maxExtents = _params->GetMaxExtents();
+
+    // If the region has been initialized
+    if (_regionInitialized || minExtents.empty()) {
         minExtents.push_back(_extents[0]);
         minExtents.push_back(_extents[1]);
         minExtents.push_back(_extents[2]);
@@ -783,16 +796,24 @@ void Statistics::retrieveRangeParams()
         _params->SetMinExtents(minExtents);
         _params->SetMaxExtents(maxExtents);
 
-        _xRange->setUserMin(_extents[0]);
-        _xRange->setUserMax(_extents[1]);
-        _yRange->setUserMin(_extents[2]);
-        _yRange->setUserMax(_extents[3]);
-        _zRange->setUserMin(_extents[4]);
-        _zRange->setUserMax(_extents[5]);
-    } else {
-        minExtents = _params->GetMinExtents();
-        maxExtents = _params->GetMaxExtents();
+        cout << _extents[0] << endl;
+        cout << _extents[1] << endl;
+        cout << _extents[2] << endl;
+        cout << _extents[3] << endl;
+        cout << _extents[4] << endl;
+        cout << _extents[5] << endl;
 
+        _xRange->setUserMin(_extents[0]);
+        _yRange->setUserMin(_extents[1]);
+        _zRange->setUserMin(_extents[2]);
+        _xRange->setUserMax(_extents[3]);
+        _yRange->setUserMax(_extents[4]);
+        _zRange->setUserMax(_extents[5]);
+    }
+
+    // Region has not been initialized.  See if params holds extent data.
+    // If not,
+    else {
         _xRange->setUserMin(minExtents[0]);
         _xRange->setUserMax(maxExtents[0]);
         _yRange->setUserMin(minExtents[1]);
@@ -1351,7 +1372,7 @@ bool Statistics::calcMean(string varname)
             if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) { count *= (_vCoordMax[2] - _vCoordMin[2] + 1); }
 
             count -= missing;
-            assert(count >= 0);
+            // assert (count >= 0);
             if (count == 0)
                 tsMean = mv;
             else
