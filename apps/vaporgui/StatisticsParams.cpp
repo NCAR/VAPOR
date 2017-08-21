@@ -104,7 +104,7 @@ void StatisticsParams::SetMaxTS(int ts) { SetValueDouble(_maxTSTag, "Maximum sel
 
 vector<double> StatisticsParams::GetMinExtents()
 {
-    vector<double> extents = GetValueDoubleVec(_maxExtentsTag);
+    vector<double> extents = GetValueDoubleVec(_minExtentsTag);
     return extents;
 }
 
@@ -112,7 +112,7 @@ void StatisticsParams::SetMinExtents(vector<double> minExts) { SetValueDoubleVec
 
 vector<double> StatisticsParams::GetMaxExtents()
 {
-    vector<double> extents = GetValueDoubleVec(_minExtentsTag);
+    vector<double> extents = GetValueDoubleVec(_maxExtentsTag);
     return extents;
 }
 

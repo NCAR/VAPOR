@@ -22,6 +22,7 @@
 #include "Statistics.h"
 
 #include <QFileDialog>
+#include <QMouseEvent>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -120,9 +121,38 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
     _dm = NULL;
     _rGrid = NULL;
 
+    _fullExtents.push_back(0.f);
+    _fullExtents.push_back(0.f);
+    _fullExtents.push_back(0.f);
+    _fullExtents.push_back(0.f);
+    _fullExtents.push_back(0.f);
+    _fullExtents.push_back(0.f);
+
     setupUi(this);
     setWindowTitle("Statistics");
     adjustTables();
+    minXSlider->installEventFilter(this);
+    minXEdit->installEventFilter(this);
+    maxXSlider->installEventFilter(this);
+    maxXEdit->installEventFilter(this);
+    minYSlider->installEventFilter(this);
+    minYEdit->installEventFilter(this);
+    maxYSlider->installEventFilter(this);
+    maxYEdit->installEventFilter(this);
+    minZSlider->installEventFilter(this);
+    minZEdit->installEventFilter(this);
+    maxZSlider->installEventFilter(this);
+    maxZEdit->installEventFilter(this);
+    RegionTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    RegionTable->setMouseTracking(true);
+    RegionTable->viewport()->installEventFilter(this);
+    //	for (int i=0; i<2; i++) {
+    //		for (int j=0; j<3; j++) {
+    //			QTableWidgetItem* item;
+    //			item = RegionTable->itemAt(i,j);
+    //			item->installEventFilter(this);
+    //		}
+    //	}
 }
 
 Statistics::~Statistics()
@@ -164,6 +194,21 @@ Statistics::~Statistics()
     if (_xSizeLineEdit) delete _xSizeLineEdit;
     if (_xSinglePointSlider) delete _xSinglePointSlider;
     if (_xSinglePointLineEdit) delete _xSinglePointLineEdit;
+}
+
+bool Statistics::eventFilter(QObject *target, QEvent *event)
+{
+    vector<double> minExts, maxExts;
+    minExts.push_back(_xRange->getUserMin());
+    minExts.push_back(_yRange->getUserMin());
+    minExts.push_back(_zRange->getUserMin());
+    maxExts.push_back(_xRange->getUserMax());
+    maxExts.push_back(_yRange->getUserMax());
+    maxExts.push_back(_zRange->getUserMax());
+    _params->SetMinExtents(minExts);
+    _params->SetMaxExtents(maxExts);
+
+    return false;
 }
 
 int Statistics::initDataMgr(DataMgr *dm)
@@ -217,7 +262,6 @@ int Statistics::initialize()
     _calculations = 0xFF;
 
     if (_dm == NULL) return -1;
-    if (_initialized == 1) return 0;
 
     _errMsg = new sErrMsg;
     _autoUpdate = _params->GetAutoUpdate();
@@ -239,16 +283,38 @@ int Statistics::initialize()
 
     initTimes();
 
-    int rc = GetExtents(_extents);
-    if (rc < 0) return -1;
-    _fullExtents = _extents;
+    //	int rc = GetExtents(_extents);
+    //	if (rc<0) return -1;
+    //	_fullExtents = _extents;
 
     initCRatios();
+
     initRefinement();
+
     initRegion();
+
     initRangeControllers();
 
+    retrieveRangeParams();
+    _regionInitialized = 1;
+
+    //	vector<double> minPExtents = _params->GetMinExtents();
+    //	vector<double> maxPExtents = _params->GetMaxExtents();
+    //	cout << minPExtents.size() << endl;
+    //	cout << maxPExtents.size() << endl;
+    //	if (!minPExtents.empty() &&
+    //		!maxPExtents.empty()) {
+    //		_xRange->setUserMin(minPExtents[0]);
+    //		_xRange->setUserMax(maxPExtents[0]);
+    //		_yRange->setUserMin(minPExtents[1]);
+    //		_yRange->setUserMax(maxPExtents[1]);
+    //		_zRange->setUserMin(minPExtents[2]);
+    //		_zRange->setUserMax(maxPExtents[2]);
+    //	}
+
     ExportButton->setEnabled(true);
+
+    if (_initialized == 1) return 0;
 
     connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(minTSChanged()));
     connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(maxTSChanged()));
@@ -371,8 +437,6 @@ void Statistics::initRangeControllers()
     if (_xSinglePointSlider) delete _xSinglePointSlider;
     if (_xSinglePointLineEdit) delete _xSinglePointLineEdit;
     _xRange = new Range(_fullExtents[0], _fullExtents[3]);
-    cout << "FE " << _fullExtents[0] << " " << _fullExtents[3] << endl;
-    cout << _xRange->getDomainMin() << " " << _xRange->getDomainMax() << endl;
     _xMinSlider = new MinMaxSlider(_xRange, minXSlider, 0);
     _xMaxSlider = new MinMaxSlider(_xRange, maxXSlider, 1);
     _xSinglePointSlider = new SinglePointSlider(_xRange, spXSlider);
@@ -596,36 +660,14 @@ int Statistics::GetExtents(vector<double> &extents)
 {
     vector<double> minExtents, maxExtents;
 
-    // If StatisticsParams has extents set, and we are not yet
-    // initialized, then use get the settings from params and
-    // use those.
-    //
-    vector<double> minPExtents = _params->GetMinExtents();
-    vector<double> maxPExtents = _params->GetMaxExtents();
-    if (!minPExtents.empty() && !maxPExtents.empty() && !_initialized) {
-        minExtents = minPExtents;
-        maxExtents = maxPExtents;
-        //		minExtents[0] = minPExtents[0];
-        //		minExtents[1] = minPExtents[1];
-        //		if (minPExtents.size()==3)
-        //			minExtents[2] = minPExtents[2];
-        //		maxExtents[0] = maxPExtents[0];
-        //		maxExtents[1] = maxPExtents[1];
-        //		if (maxPExtents.size()==3)
-        //			maxExtents[2] = maxPExtents[2];
-    }
-    // Otherwise use the extents passed by the data manager
-    //
-    else {
-        int rc = _dm->GetVariableExtents(_minTS, _defaultVar, _refLevel, minExtents, maxExtents);
+    int rc = _dm->GetVariableExtents(_minTS, _defaultVar, _refLevel, minExtents, maxExtents);
 
-        if (rc < 0) {
-            string myErr;
-            myErr = "Could not find minimum and maximun extents"
-                    " in current data set.";
-            errReport(myErr);
-            return -1;
-        }
+    if (rc < 0) {
+        string myErr;
+        myErr = "Could not find minimum and maximun extents"
+                " in current data set.";
+        errReport(myErr);
+        return -1;
     }
 
     if (extents.size() < 6) {
@@ -651,8 +693,8 @@ int Statistics::GetExtents(vector<double> &extents)
         extents[5] = maxExtents[2];
     }
 
-    _params->SetMinExtents(minExtents);
-    _params->SetMaxExtents(maxExtents);
+    //_params->SetMinExtents(minExtents);
+    //_params->SetMaxExtents(maxExtents);
 
     return 1;
 }
@@ -690,11 +732,14 @@ void Statistics::initRegion()
     // are different from our old extents,
     // reset the region sliders.
     //
-    if (((oldExtents[0] == _fullExtents[0]) && (oldExtents[1] == _fullExtents[1]) && (oldExtents[2] == _fullExtents[2]) && (oldExtents[3] == _fullExtents[3]) && (oldExtents[4] == _fullExtents[4])
-         && (oldExtents[5] == _fullExtents[5]))) {
-        return;
-    } else if (_regionInitialized)
-        setNewExtents();
+    //	if (oldExtents == _fullExtents) {
+    //		if (_regionInitialized) {
+    //			setNewExtents();
+    //			return;
+    //		}
+    //	}
+
+    if (_regionInitialized) setNewExtents();
 
     QTableWidgetItem *twi;
     for (int i = 0; i < 2; i++) {
@@ -711,13 +756,50 @@ void Statistics::initRegion()
             }
         }
     }
-    _regionInitialized = 1;
 
     if (_slidersInitialized) updateSliders();
     if (_autoUpdate)
         update();
     else
         (makeItRed());
+}
+
+void Statistics::retrieveRangeParams()
+{
+    // If the region has not been initialized, keep the extents
+    // from params and do not apply the new extents.
+    // If it has been initialized, it means we've
+    // incremented our minimum timestep, and we need to set params
+    // accordingly.
+    //
+    vector<double> minExtents, maxExtents;
+    if (_regionInitialized) {
+        minExtents.push_back(_extents[0]);
+        minExtents.push_back(_extents[1]);
+        minExtents.push_back(_extents[2]);
+        maxExtents.push_back(_extents[3]);
+        maxExtents.push_back(_extents[4]);
+        maxExtents.push_back(_extents[5]);
+        _params->SetMinExtents(minExtents);
+        _params->SetMaxExtents(maxExtents);
+
+        _xRange->setUserMin(_extents[0]);
+        _xRange->setUserMax(_extents[1]);
+        _yRange->setUserMin(_extents[2]);
+        _yRange->setUserMax(_extents[3]);
+        _zRange->setUserMin(_extents[4]);
+        _zRange->setUserMax(_extents[5]);
+    } else {
+        minExtents = _params->GetMinExtents();
+        maxExtents = _params->GetMaxExtents();
+
+        _xRange->setUserMin(minExtents[0]);
+        _xRange->setUserMax(maxExtents[0]);
+        _yRange->setUserMin(minExtents[1]);
+        _yRange->setUserMax(maxExtents[1]);
+        _zRange->setUserMin(minExtents[2]);
+        _zRange->setUserMax(maxExtents[2]);
+    }
 }
 
 void Statistics::setNewExtents()
@@ -756,6 +838,16 @@ int Statistics::initVariables()
     // Add variables to combo box
     //
     for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { NewVarCombo->addItem(QString::fromStdString(*it)); }
+
+    vector<string> pVars = _params->GetVarNames();
+    if (pVars.size() > 0) {
+        for (int i = 0; i < pVars.size(); i++) {
+            QString varName = QString::fromStdString(pVars[i]);
+            int     index = NewVarCombo->findText(varName);
+            newVarAdded(index);
+            cout << varName.toStdString() << " " << i << endl;
+        }
+    }
 
     return 0;
 }
@@ -863,6 +955,7 @@ void Statistics::autoUpdateClicked()
 void Statistics::refinementChanged(int index)
 {
     _refLevel = index;
+    _params->SetRefinement(_refLevel);
     if (_autoUpdate)
         update();
     else
@@ -1063,7 +1156,8 @@ void Statistics::varRemoved(int index)
 void Statistics::newVarAdded(int index)
 {
     if (index == 0) return;
-    string varName = NewVarCombo->currentText().toStdString();
+    // string varName = NewVarCombo->currentText().toStdString();
+    string varName = NewVarCombo->itemText(index).toStdString();
 
     typedef std::map<string, _statistics>::iterator it_type;
     for (it_type it = _stats.begin(); it != _stats.end(); it++) {
@@ -1113,8 +1207,8 @@ void Statistics::regionSlidersChanged()
     _extents[1] = _yRange->getUserMin();
     _extents[2] = _zRange->getUserMin();
     _extents[3] = _xRange->getUserMax();
-    _extents[4] = _xRange->getUserMax();
-    _extents[5] = _xRange->getUserMax();
+    _extents[4] = _yRange->getUserMax();
+    _extents[5] = _zRange->getUserMax();
 
     if (_regionSelection == 0) {
         copyActiveRegionButton->setEnabled(true);

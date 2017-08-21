@@ -67,7 +67,7 @@ public:
     void showMe();
     int  initialize();
 
-public slots:
+private slots:
     void restoreExtents();
     void minTSChanged();
     void maxTSChanged();
@@ -86,6 +86,8 @@ public slots:
 
 private:
     VAPoR::StatisticsParams *_params;
+    void                     retrieveRangeParams();
+    bool                     eventFilter(QObject *o, QEvent *e);
     int                      GetExtents(vector<double> &extents);
     int                      initVariables();
     void                     adjustTables();
