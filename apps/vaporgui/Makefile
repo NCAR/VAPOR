@@ -19,7 +19,7 @@ FILES = \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
 	TabManager TrackBall GLColorbarWidget ErrorReporter \
-	StatisticsParams
+	StatisticsParams PlotParams
 
 QT_HEADERS := \
 	RenderHolder BoxSliderFrame DomainWidget GLWidget \
