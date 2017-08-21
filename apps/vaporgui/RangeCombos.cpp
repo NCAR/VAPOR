@@ -25,17 +25,13 @@ Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType) {
 
     _lineEdit = edit;
 
-    /*
-   * validators without specifications don't validate anything, so better not having them.
-   *
-	if (_intType) {
-		_lineEditValidator = new QIntValidator(_lineEdit);
-		_lineEdit->setValidator((QIntValidator *) _lineEditValidator);
-	}
-	else {
-		_lineEditValidator = new QDoubleValidator(_lineEdit);
-		_lineEdit->setValidator((QDoubleValidator *) _lineEditValidator);
-	}*/
+    if (_intType) {
+        _lineEditValidator = new QIntValidator(_lineEdit);
+        _lineEdit->setValidator((QIntValidator *)_lineEditValidator);
+    } else {
+        _lineEditValidator = new QDoubleValidator(_lineEdit);
+        _lineEdit->setValidator((QDoubleValidator *)_lineEditValidator);
+    }
 
     // Set up slot for changes to _lineEdit
     //
