@@ -267,6 +267,8 @@ void SinglePointSlider::notify() {
 }
 
 void SinglePointSlider::updateValue() {
+    _min = _range->getDomainMin();
+    _max = _range->getDomainMax();
     double val;
     int pos = _slider->value();
     if (pos == _increments)
