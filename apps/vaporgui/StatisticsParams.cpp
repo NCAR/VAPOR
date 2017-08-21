@@ -209,7 +209,7 @@ void StatisticsParams::SetMedianStat(bool state) {
 }
 
 bool StatisticsParams::GetStdDevStat() {
-    if (GetValueString(_minStatTag, "false") == "false") {
+    if (GetValueString(_stdDevStatTag, "false") == "false") {
         return false;
     } else {
         return true;
