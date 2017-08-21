@@ -45,8 +45,6 @@ Range::Range(double min, double max) {
 	_domainMin = min;
 	_domainMax = max;
 
-	cout << "Range " << _domainMin << " " << _domainMax << endl;
-
 	_userMin = min;
 	_userMax = max;
 }
@@ -175,6 +173,8 @@ MinMaxSlider::MinMaxSlider(Range* range,
 void MinMaxSlider::updateValue() {
 	double val;
 	int pos = _slider->value();
+
+
 	if (pos == _increments) val = _max;
 	else if (pos == 0) val = _min;
 	else val = pos * (_max-_min)/_increments + _min;
@@ -185,15 +185,15 @@ void MinMaxSlider::updateValue() {
 void MinMaxSlider::notify() {
 	double min = _range->getUserMin();
 	double max = _range->getUserMax();
-	double domainMin = _range->getDomainMin();
-	double domainMax = _range->getDomainMax();
-	
+	_min = _range->getDomainMin();
+	_max = _range->getDomainMax();
+
 	_val = (_type==0) ? min : max;	
 	
-	int denom = (domainMax - domainMin) / _increments;
+	int denom = (_max - _min) / _increments;
 	if (denom <= 0) denom = 1;
 
-	int position = (_val-domainMin) / denom;
+	int position = (_val-_min) / denom;
 
 	_slider->blockSignals(true);
 	_slider->setValue(position);
