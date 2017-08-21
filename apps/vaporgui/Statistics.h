@@ -69,7 +69,7 @@ class Statistics : public QDialog, public Ui_StatsWindow {
 		void showMe();
 		int initialize();
 
-	public slots:
+	private slots:
 		void restoreExtents();
 		void minTSChanged();
 		void maxTSChanged();
@@ -88,6 +88,8 @@ class Statistics : public QDialog, public Ui_StatsWindow {
 
 	private:
 		VAPoR::StatisticsParams* _params;
+		void retrieveRangeParams();
+		bool eventFilter(QObject* o, QEvent* e);
 		int GetExtents(vector<double>& extents);
 		int initVariables();
 		void adjustTables();
