@@ -40,6 +40,14 @@ bool Observee::notifyObservers() {
     return (_observers.size() > 0);
 }
 
+void Observee::deleteObservers() {
+	vector<Observer*>::iterator it;
+	for (it = _observers.begin(); it!=_observers.end(); ++it) {
+		delete (*it);
+		(*it) = NULL;
+	}
+}
+
 Range::Range(double min, double max) {
 	_constant = false;
 	_domainMin = min;
