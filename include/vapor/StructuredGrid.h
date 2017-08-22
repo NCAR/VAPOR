@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <vector>
+#include <memory>
 #include <vapor/common.h>
 #include <vapor/Grid.h>
 
@@ -158,6 +159,69 @@ public:
 
     virtual void ClampCoord(std::vector<double> &coords) const;
 
+    // Interface for iterator specializations
+    //
+    class ConstCoordItrAbstract {
+    public:
+        virtual ~ConstCoordItrAbstract() {}
+        virtual void                                   next() = 0;
+        virtual const std::vector<double> &            deref() const = 0;
+        virtual const void *                           address() const = 0;
+        virtual bool                                   equal(const void *other) const = 0;
+        virtual std::unique_ptr<ConstCoordItrAbstract> clone() const = 0;
+    };
+
+    // Overloaded operators that will act on spealizations of
+    // ConstCoordItrAbstract
+    //
+    class ConstCoordItr {
+    public:
+        ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract> it) : _impl(std::move(it)) {}
+
+        // ConstCoordItr has a unique_ptr member so we must remove
+        // copy/assignmet constructors
+        //
+        ConstCoordItr(ConstCoordItr const &rhs) = delete;
+        ConstCoordItr &operator=(ConstCoordItr const &rhs) = delete;
+
+        // ConstCoordItr has a unique_ptr member so we must provide
+        // std::move constructors
+        //
+        ConstCoordItr(ConstCoordItr &&rhs) { _impl = std::move(rhs._impl); }
+
+        ConstCoordItr &operator=(ConstCoordItr &&rhs)
+        {
+            if (this != &rhs) { _impl = std::move(rhs._impl); }
+            return (*this);
+        }
+
+        ConstCoordItr() : _impl(nullptr) {}
+
+        ConstCoordItr &operator++()
+        {    // ++prefix
+            _impl->next();
+            return *this;
+        };
+        ConstCoordItr operator++(int)
+        {    // postfix++
+            assert(false && "Not implemented");
+            // return(*this);
+            return (ConstCoordItr());
+        };
+
+        const std::vector<double> &operator*() const { return _impl->deref(); }
+
+        bool operator==(const ConstCoordItr &rhs) const { return (_impl->equal(rhs._impl->address())); }
+
+        bool operator!=(const ConstCoordItr &rhs) const { return (!(*this == rhs)); }
+
+    private:
+        std::unique_ptr<ConstCoordItrAbstract> _impl;
+    };
+
+    virtual ConstCoordItr ConstCoordBegin() const = 0;
+    virtual ConstCoordItr ConstCoordEnd() const = 0;
+
     // Inside a box functor
     //
     class InsideBox {
@@ -196,40 +260,39 @@ public:
         ForwardIterator(T *rg, const std::vector<double> &minu, const std::vector<double> &maxu);
         ForwardIterator(T *rg);
         ForwardIterator();
+        ForwardIterator(const ForwardIterator<T> &) = delete;
+        ForwardIterator(ForwardIterator<T> &&rhs);
         ~ForwardIterator() {}
 
         inline float &operator*() { return (*_itr); }
 
-        ForwardIterator<T> &operator++();       // ++prefix
-        ForwardIterator<T>  operator++(int);    // postfix++
+        ForwardIterator<T> &operator++();    // ++prefix
+
+#ifdef DEAD
+        ForwardIterator<T> operator++(int);    // postfix++
 
         ForwardIterator<T> &operator+=(const long int &offset);
         ForwardIterator<T>  operator+(const long int &offset) const;
+#endif
+
+        ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
+        ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
         bool operator==(const ForwardIterator<T> &other);
         bool operator!=(const ForwardIterator<T> &other);
 
-        void GetUserCoordinates(std::vector<double> &coords) const
-        {
-            coords.clear();
-            std::vector<size_t> indices;
-            indices.push_back(_x);
-            indices.push_back(_y);
-            indices.push_back(_z);
-            return (_rg->GetUserCoordinates(indices, coords));
-        };
-
     private:
-        T *       _rg;
-        size_t    _x, _y, _z;    // current index into _rg->_min[3]
-        size_t    _xb;           // x index within a block
-        float *   _itr;
-        size_t    _max[3];
-        size_t    _bs[3];
-        size_t    _bdims[3];
-        int       _ndim;
-        bool      _end;
-        InsideBox _pred;
+        T *           _rg;
+        ConstCoordItr _coordItr;
+        size_t        _x, _y, _z;    // current index into _rg->_min[3]
+        size_t        _xb;           // x index within a block
+        float *       _itr;
+        size_t        _dims[3];
+        size_t        _bs[3];
+        size_t        _bdims[3];
+        int           _ndim;
+        bool          _end;
+        InsideBox     _pred;
     };
 
     typedef StructuredGrid::ForwardIterator<StructuredGrid>       Iterator;

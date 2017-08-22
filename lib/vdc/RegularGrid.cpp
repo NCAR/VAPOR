@@ -305,6 +305,66 @@ bool RegularGrid::InsideGrid(const std::vector<double> &coords) const
     return (true);
 }
 
+RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin) : ConstCoordItrAbstract()
+{
+    _dims = rg->GetDimensions();
+    _minu = rg->_minu;
+    _delta = rg->_delta;
+    _coords = rg->_minu;
+    if (begin) {
+        _x = 0;
+        _y = 0;
+        _z = 0;
+    } else {
+        _x = 0;
+        _y = _dims.size() == 2 ? _dims[1] : 0;
+        _z = _dims.size() == 3 ? _dims[2] : 0;
+    }
+}
+
+RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const ConstCoordItrRG &rhs) : ConstCoordItrAbstract()
+{
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _dims = rhs._dims;
+    _minu = rhs._minu;
+    _delta = rhs._delta;
+    _coords = rhs._coords;
+}
+
+RegularGrid::ConstCoordItrRG::ConstCoordItrRG() : ConstCoordItrAbstract()
+{
+    _x = 0;
+    _y = 0;
+    _z = 0;
+    _dims.clear();
+    _minu.clear();
+    _delta.clear();
+    _coords.clear();
+}
+
+void RegularGrid::ConstCoordItrRG::next()
+{
+    _x++;
+    _coords[0] += _delta[0];
+    if (_x < _dims[0]) { return; }
+
+    _x = 0;
+    _coords[0] = _minu[0];
+    _y++;
+    _coords[1] += _delta[1];
+
+    if (_y < _dims[1]) { return; }
+
+    if (_dims.size() == 2) { return; }
+
+    _y = 0;
+    _coords[1] = _minu[1];
+    _z++;
+    _coords[2] += _delta[2];
+}
+
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const RegularGrid &rg)
 {
