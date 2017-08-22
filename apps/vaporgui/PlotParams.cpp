@@ -31,11 +31,20 @@ const string PlotParams::_vars3dTag = "Vars3d";
 const string PlotParams::_dataSourceTag = "DataSource";
 const string PlotParams::_refinementTag = "Refinement";
 const string PlotParams::_cRatioTag = "Lod";
-const string PlotParams::_minTSTag = "MinTS";
-const string PlotParams::_maxTSTag = "MaxTS";
+const string PlotParams::_spaceMinTSTag = "SpaceSpaceMinTS";
+const string PlotParams::_spaceMaxTSTag = "SpaceMaxTS";
+const string PlotParams::_spaceMinExtentsTag = "SpaceMinExtents";
+const string PlotParams::_spaceMaxExtentsTag = "SpaceMaxExtents";
 const string PlotParams::_spaceOrTimeTag = "SpaceOrTime";
-const string PlotParams::_minExtentsTag = "MinExtents";
-const string PlotParams::_maxExtentsTag = "MaxExtents";
+const string PlotParams::_timeMinTSTag = "TimeSpaceMinTS";
+const string PlotParams::_timeMaxTSTag = "TimeMaxTS";
+const string PlotParams::_timeXTag = "TimeX";
+const string PlotParams::_timeYTag = "TimeY";
+const string PlotParams::_timeZTag = "TimeZ";
+const string PlotParams::_xConstTag = "XConst";
+const string PlotParams::_yConstTag = "YConst";
+const string PlotParams::_zConstTag = "ZConst";
+const string PlotParams::_timeConstTag = "TimeConst";
 
 //
 // Register class with object factory!!!
@@ -54,39 +63,31 @@ PlotParams::PlotParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase
 
 PlotParams::~PlotParams() { MyBase::SetDiagMsg("PlotParams::~PlotParams() this=%p", this); }
 
-int PlotParams::GetMinTS()
+int PlotParams::GetSpaceTS() const
 {
-    double minTS = GetValueDouble(_minTSTag, 0.f);
-    return (int)minTS;
-}
-
-void PlotParams::SetMinTS(int ts) { SetValueDouble(_minTSTag, "Minimum selected timestep for plot", (double)ts); }
-
-int PlotParams::GetMaxTS()
-{
-    double maxTS = GetValueDouble(_maxTSTag, 0.f);
+    double maxTS = GetValueDouble(_spaceMaxTSTag, 0.f);
     return (int)maxTS;
 }
 
-void PlotParams::SetMaxTS(int ts) { SetValueDouble(_maxTSTag, "Maximum selected timestep for plot", (double)ts); }
+void PlotParams::SetSpaceTS(int ts) { SetValueDouble(_spaceMaxTSTag, "Maximum selected spatial timestep for plot", (double)ts); }
 
-vector<double> PlotParams::GetMinExtents()
+vector<double> PlotParams::GetSpaceMinExtents() const
 {
-    vector<double> extents = GetValueDoubleVec(_minExtentsTag);
+    vector<double> extents = GetValueDoubleVec(_spaceMinExtentsTag);
     return extents;
 }
 
-void PlotParams::SetMinExtents(vector<double> minExts) { SetValueDoubleVec(_minExtentsTag, "Minimum extents for plot", minExts); }
+void PlotParams::SetSpaceMinExtents(vector<double> minExts) { SetValueDoubleVec(_spaceMinExtentsTag, "Minimum spatial extents for plot", minExts); }
 
-vector<double> PlotParams::GetMaxExtents()
+vector<double> PlotParams::GetSpaceMaxExtents() const
 {
-    vector<double> extents = GetValueDoubleVec(_maxExtentsTag);
+    vector<double> extents = GetValueDoubleVec(_spaceMaxExtentsTag);
     return extents;
 }
 
-void PlotParams::SetMaxExtents(vector<double> maxExts) { SetValueDoubleVec(_maxExtentsTag, "Maximum extents for plot", maxExts); }
+void PlotParams::SetSpaceMaxExtents(vector<double> maxExts) { SetValueDoubleVec(_spaceMaxExtentsTag, "Maximum spatial extents for plot", maxExts); }
 
-int PlotParams::GetCRatio()
+int PlotParams::GetCRatio() const
 {
     int cRatio = (int)GetValueDouble(_cRatioTag, -1);
     return cRatio;
@@ -94,7 +95,7 @@ int PlotParams::GetCRatio()
 
 void PlotParams::SetCRatio(int cRatio) { SetValueDouble(_cRatioTag, "Compression ratio for plot", cRatio); }
 
-int PlotParams::GetRefinement()
+int PlotParams::GetRefinement() const
 {
     int refinement = (int)GetValueDouble(_refinementTag, -1);
     return refinement;
@@ -102,7 +103,7 @@ int PlotParams::GetRefinement()
 
 void PlotParams::SetRefinement(int ref) { SetValueDouble(_refinementTag, "Refinement level for plot", ref); }
 
-vector<string> PlotParams::GetVarNames()
+vector<string> PlotParams::GetVarNames() const
 {
     vector<string> varNames = GetValueStringVec(_varsTag);
     return varNames;
@@ -118,8 +119,111 @@ void PlotParams::SetSpaceOrTime(string state)
                    state);
 }
 
-string PlotParams::GetSpaceOrTime()
+string PlotParams::GetSpaceOrTime() const
 {
     string state = GetValueString(_spaceOrTimeTag, "space");
     return state;
+}
+
+int PlotParams::GetTimeMinTS() const
+{
+    int ts = (int)GetValueDouble(_timeMinTSTag, 0);
+    return ts;
+}
+
+void PlotParams::SetTimeMinTS(int time) { SetValueDouble(_timeMinTSTag, "Minimum timestep for temporal plot", time); }
+int  PlotParams::GetTimeMaxTS() const
+{
+    int ts = (int)GetValueDouble(_timeMaxTSTag, 0);
+    return ts;
+}
+
+void PlotParams::SetTimeMaxTS(int time) { SetValueDouble(_timeMaxTSTag, "Maximum timestep for temporal plot", time); }
+
+double PlotParams::GetTimeXCoord() const
+{
+    double coord = GetValueDouble(_timeXTag, 0.f);
+    return coord;
+}
+
+void PlotParams::SetTimeXCoord(double coord) { SetValueDouble(_timeXTag, "X coordinate for temporal plot", coord); }
+
+double PlotParams::GetTimeYCoord() const
+{
+    double coord = GetValueDouble(_timeYTag, 0.f);
+    return coord;
+}
+
+void PlotParams::SetTimeYCoord(double coord) { SetValueDouble(_timeYTag, "Y coordinate for temporal plot", coord); }
+
+double PlotParams::GetTimeZCoord() const
+{
+    double coord = GetValueDouble(_timeZTag, 0.f);
+    return coord;
+}
+
+void PlotParams::SetTimeZCoord(double coord) { SetValueDouble(_timeZTag, "Z coordinate for temporal plot", coord); }
+
+bool PlotParams::GetXConst() const
+{
+    string sState = GetValueString(_xConstTag, "false");
+    bool   state = (sState == "true") ? true : false;
+    return state;
+}
+
+void PlotParams::SetXConst(bool state)
+{
+    string sState = state ? "true" : "false";
+    SetValueString(_xConstTag,
+                   "Variable for keeping the min/max X coordinate "
+                   "constant",
+                   sState);
+}
+
+bool PlotParams::GetYConst() const
+{
+    string sState = GetValueString(_yConstTag, "false");
+    bool   state = (sState == "true") ? true : false;
+    return state;
+}
+
+void PlotParams::SetYConst(bool state)
+{
+    string sState = state ? "true" : "false";
+    SetValueString(_yConstTag,
+                   "Variable for keeping the min/max Y coordinate "
+                   "constant",
+                   sState);
+}
+
+bool PlotParams::GetZConst() const
+{
+    string sState = GetValueString(_zConstTag, "false");
+    bool   state = (sState == "true") ? true : false;
+    return state;
+}
+
+void PlotParams::SetZConst(bool state)
+{
+    string sState = state ? "true" : "false";
+    SetValueString(_zConstTag,
+                   "Variable for keeping the min/max Z coordinate "
+                   "constant",
+                   sState);
+}
+
+bool PlotParams::GetTimeConst() const
+{
+    string sState = GetValueString(_timeConstTag, "false");
+    bool   state = (sState == "true") ? true : false;
+    return state;
+}
+
+void PlotParams::SetTimeConst(bool state)
+{
+    string sState = state ? "true" : "false";
+    SetValueString(_zConstTag,
+                   "Variable for keeping the min/max time "
+                   "coordinate constant",
+                   sState);
 }

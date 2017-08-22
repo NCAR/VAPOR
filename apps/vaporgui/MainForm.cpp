@@ -192,6 +192,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     myParams.push_back(AnimationParams::GetClassType());
     myParams.push_back(MiscParams::GetClassType());
     myParams.push_back(StatisticsParams::GetClassType());
+    myParams.push_back(PlotParams::GetClassType());
 
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
@@ -1650,10 +1651,8 @@ void MainForm::launchStats()
 
 void MainForm::launchPlotUtility()
 {
-    //    DataMgr *dataMgr = Session::getInstance()->getDataMgr();
     if (!_plot) _plot = new Plot(this);
-
-    //    _plot->Initialize(dataMgr, _vizWinMgr);
+    _plot->Initialize(_controlExec, _vizWinMgr);
 }
 
 // Begin capturing animation images.

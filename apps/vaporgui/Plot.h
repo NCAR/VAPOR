@@ -24,15 +24,19 @@
 #ifndef PLOT_H
     #define PLOT_H
 
+    #define FIXED
+
     #include <vector>
     #include <qdialog.h>
     #include <QWidget>
     #include <QLineEdit>
     #include <QCheckBox>
-    //#include <Python.h>
+    #include <Python.h>
     #include <errMsg.h>
     #include <plotWindow.h>
     #include <vapor/DataMgr.h>
+    #include <vapor/ControlExecutive.h>
+    #include <Python.h>
     #include "RangeController.h"
     #include "PlotParams.h"
 
@@ -85,7 +89,7 @@ public:
     Plot(QWidget *parent);
     ~Plot();
 
-    void Initialize(VAPoR::DataMgr *dm, VizWinMgr *vwm);
+    void Initialize(VAPoR::ControlExec *ce, VizWinMgr *vwm);
 
 private:
     int            init();
@@ -100,6 +104,8 @@ private:
     void           initSSCs();
     void           initCRatios();
     void           initRefinement();
+    void           applyParams();
+    bool           eventFilter(QObject *obj, QEvent *ev);
     void           enableZControllers(bool s);
     vector<string> getEnabledVars() const;
 
@@ -123,11 +129,9 @@ private:
 
     string readPlotScript() const;
 
-    //	PyObject *buildNumpyArray(const vector <float> &vec) const;
+    PyObject *buildNumpyArray(const vector<float> &vec) const;
 
-    //	PyObject* buildPyDict(
-    //		const map <string, vector <float> > &data
-    //	) ;
+    PyObject *buildPyDict(const map<string, vector<float>> &data);
 
     // void getSliders(
     //	QObject*& sender, QComboBox*& qcb, SpaceSSC*& x, SpaceSSC*& y,
@@ -141,6 +145,8 @@ private:
     static bool _isInitializedPython;    // static!!!!
 
     VAPoR::DataMgr *    _dm;
+    VAPoR::ControlExec *_controlExec;
+    VAPoR::PlotParams * _params;
     pErrMsg *           _errMsg;
     VizWinMgr *         _vwm;
     QDialog *           _plotDialog;
@@ -247,12 +253,14 @@ private:
 
 public slots:
     void go();
+    #ifdef DEAD
     void getPointFromRenderer();
+    #endif
     void newVarAdded(int index);
     void removeVar(int);
     void savePlotToFile();
-    void refinementChanged(int i) { _refLevel = i; }
-    void cRatioChanged(int i) { _cRatio = i; }
+    void refinementChanged(int i);
+    void cRatioChanged(int i);
     void constCheckboxChanged(int state);
 };
 
