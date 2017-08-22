@@ -30,35 +30,62 @@ class PARAMS_API PlotParams : public ParamsBase {
   PlotParams(ParamsBase::StateSave *ssave, XmlNode *node);
   ~PlotParams();
 
-  bool GetAutoUpdate();
-  void SetAutoUpdate(bool state);
-
-  int GetRegionSelection();
+  int GetRegionSelection() const;
   void SetRegionSelection(int state);
 
-  int GetMinTS();
-  void SetMinTS(int ts);
+  int GetSpaceMinTS() const;
+  void SetSpaceMinTS(int ts);
 
-  int GetMaxTS();
+  int GetMaxTS() const;
   void SetMaxTS(int ts);
 
-  vector<double> GetMinExtents();
-  void SetMinExtents(vector<double> minExts);
+  vector<double> GetSpaceMinExtents() const;
+  void SetSpaceMinExtents(vector<double> minExts);
 
-  vector<double> GetMaxExtents();
-  void SetMaxExtents(vector<double> maxExts);
+  vector<double> GetSpaceMaxExtents() const;
+  void SetSpaceMaxExtents(vector<double> maxExts);
 
-  int GetCRatio();
+  int GetCRatio() const;
   void SetCRatio(int cRatio);
 
-  int GetRefinement();
+  int GetRefinement() const;
   void SetRefinement(int ref);
 
-  vector<string> GetVarNames();
+  vector<string> GetVarNames() const;
   void SetVarNames(vector<string> varNames);
 
-  string GetSpaceOrTime();
+  string GetSpaceOrTime() const;
   void SetSpaceOrTime(string state);
+
+  int GetSpaceTS() const;
+  void SetSpaceTS(int time);
+
+  int GetTimeMinTS() const;
+  void SetTimeMinTS(int time);
+
+  int GetTimeMaxTS() const;
+  void SetTimeMaxTS(int time);
+
+  double GetTimeXCoord() const;
+  void SetTimeXCoord(double coord);
+
+  double GetTimeYCoord() const;
+  void SetTimeYCoord(double coord);
+
+  double GetTimeZCoord() const;
+  void SetTimeZCoord(double coord);
+
+  bool GetXConst() const;
+  void SetXConst(bool state);
+
+  bool GetYConst() const;
+  void SetYConst(bool state);
+
+  bool GetZConst() const;
+  void SetZConst(bool state);
+
+  bool GetTimeConst() const;
+  void SetTimeConst(bool state);
 
   // Get static string id for this params class
   //
@@ -72,11 +99,20 @@ class PARAMS_API PlotParams : public ParamsBase {
   static const string _dataSourceTag;
   static const string _refinementTag;
   static const string _cRatioTag;
-  static const string _minTSTag;
-  static const string _maxTSTag;
-  static const string _minExtentsTag;
-  static const string _maxExtentsTag;
+  static const string _spaceMinTSTag;
+  static const string _spaceMaxTSTag;
+  static const string _spaceMinExtentsTag;
+  static const string _spaceMaxExtentsTag;
   static const string _spaceOrTimeTag;
+  static const string _timeMinTSTag;
+  static const string _timeMaxTSTag;
+  static const string _timeXTag;
+  static const string _timeYTag;
+  static const string _timeZTag;
+  static const string _xConstTag;
+  static const string _yConstTag;
+  static const string _zConstTag;
+  static const string _timeConstTag;
 };
 
 }; // End namespace VAPoR

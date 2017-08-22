@@ -4,7 +4,7 @@ include ${TOP}/make/config/prebase.mk
 
 LIBRARY = common
 FILES = MyBase OptionParser EasyThreads CFuncs Version PVTime \
-	GetAppPath utils 
+	GetAppPath utils MyPython
 
 
 ifneq ($(ARCH),WIN32)
