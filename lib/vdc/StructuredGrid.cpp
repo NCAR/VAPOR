@@ -312,12 +312,13 @@ StructuredGrid::ForwardIterator<T>::ForwardIterator(
     vector<size_t> bdims = rg->GetDimensionInBlks();
     assert(dims.size() > 1 && dims.size() < 4);
     for (int i = 0; i < dims.size(); i++) {
-        _max[i] = dims[i] - 1;
+        _dims[i] = dims[i];
         _bs[i] = bs[i];
         _bdims[i] = bdims[i];
     }
 
     _rg = rg;
+    _coordItr = rg->ConstCoordBegin();
     _x = 0;
     _y = 0;
     _z = 0;
@@ -326,9 +327,7 @@ StructuredGrid::ForwardIterator<T>::ForwardIterator(
     _ndim = dims.size();
     _end = false;
 
-    vector<size_t> indices = {0, 0, 0};
-    vector<double> pt;
-    _rg->GetUserCoordinates(indices, pt);
+    vector<double> pt = *_coordItr;
     if (!_pred(pt)) {
         operator++();
     }
@@ -346,12 +345,13 @@ StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg) {
     vector<size_t> bdims = rg->GetDimensionInBlks();
     assert(dims.size() > 1 && dims.size() < 4);
     for (int i = 0; i < dims.size(); i++) {
-        _max[i] = dims[i] - 1;
+        _dims[i] = dims[i];
         _bs[i] = bs[i];
         _bdims[i] = bdims[i];
     }
 
     _rg = rg;
+    //_coordItr = xx;
     _x = 0;
     _y = 0;
     _z = 0;
@@ -362,19 +362,71 @@ StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg) {
 }
 
 template <class T>
-StructuredGrid::ForwardIterator<T>::ForwardIterator() {
-    _rg = NULL;
-    _xb = 0;
-    _x = 0;
-    _y = 0;
-    _z = 0;
-    _itr = NULL;
-    _end = true;
+StructuredGrid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &&rhs) {
+    _rg = rhs._rg;
+    rhs._rg = nullptr;
+    _coordItr = std::move(rhs._coordItr);
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _xb = rhs._xb;
+    _itr = rhs._itr;
+    rhs._itr = nullptr;
+    for (int i = 0; i < 3; i++) {
+        _dims[i] = rhs._dims[i];
+        _bs[i] = rhs._bs[i];
+        _bdims[i] = rhs._bdims[i];
+    }
+    _ndim = rhs._ndim;
+    _end = rhs._end;
+    _pred = rhs._pred;
 }
 
 template <class T>
-StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIterator<T>::
-operator++() {
+StructuredGrid::ForwardIterator<T>::ForwardIterator() {
+    _rg = nullptr;
+    //_coordItr = xx;
+    _x = 0;
+    _y = 0;
+    _z = 0;
+    _xb = 0;
+    _itr = nullptr;
+    for (int i = 0; i < 3; i++) {
+        _dims[i] = 1;
+        _bs[i] = 1;
+        _bdims[i] = 1;
+    }
+    _ndim = 0;
+    _end = true;
+    //_pred = xx;
+}
+
+template <class T>
+StructuredGrid::ForwardIterator<T>
+    &StructuredGrid::ForwardIterator<T>::operator=(ForwardIterator<T> rhs) {
+
+    std::swap(_rg, rhs._rg);
+    std::swap(_coordItr, rhs._coordItr);
+    std::swap(_x, rhs._x);
+    std::swap(_y, rhs._y);
+    std::swap(_z, rhs._z);
+    std::swap(_xb, rhs._xb);
+    std::swap(_itr, rhs._itr);
+    for (int i = 0; i < 3; i++) {
+        std::swap(_dims[i], rhs._dims[i]);
+        std::swap(_bs[i], rhs._bs[i]);
+        std::swap(_bdims[i], rhs._bdims[i]);
+    }
+    std::swap(_ndim, rhs._ndim);
+    std::swap(_end, rhs._end);
+    std::swap(_pred, rhs._pred);
+
+    return (*this);
+}
+
+template <class T>
+StructuredGrid::ForwardIterator<T>
+    &StructuredGrid::ForwardIterator<T>::operator++() {
 
     if (!_rg->GetBlks().size())
         _end = true;
@@ -388,15 +440,16 @@ operator++() {
     size_t y = 0;
     size_t z = 0;
     vector<double> pt;
-    pt = {0.5, 0.5, 0.5};
     do {
 
         _xb++;
         _itr++;
         _x++;
-        if (_xb < _bs[0] && _x < _max[0]) {
-            vector<size_t> indices = {_x, _y, _z};
-            _rg->GetUserCoordinates(indices, pt);
+        ++_coordItr;
+
+        if (_xb < _bs[0] && _x < _dims[0]) {
+            pt = *_coordItr;
+
             if (_pred(pt)) {
                 return (*this);
             }
@@ -405,12 +458,12 @@ operator++() {
         }
 
         _xb = 0;
-        if (_x > _max[0]) {
+        if (_x >= _dims[0]) {
             _x = _xb = 0;
             _y++;
         }
 
-        if (_y > _max[1]) {
+        if (_y >= _dims[1]) {
             if (_ndim == 2) {
                 _end = true;
                 return (*this);
@@ -419,7 +472,7 @@ operator++() {
             _z++;
         }
 
-        if (_ndim == 3 && _z > _max[2]) {
+        if (_ndim == 3 && _z >= _dims[2]) {
             _end = true;
             return (*this);
         }
@@ -439,13 +492,14 @@ operator++() {
         float *blk = _rg->GetBlks()[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
         _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
 
-        vector<size_t> indices = {_x, _y, _z};
-        _rg->GetUserCoordinates(indices, pt);
+        pt = *_coordItr;
+
     } while (!_pred(pt));
 
     return (*this);
 }
 
+#ifdef DEAD
 template <class T>
 StructuredGrid::ForwardIterator<T> StructuredGrid::ForwardIterator<T>::
 operator++(int) {
@@ -528,6 +582,8 @@ operator+(const long int &offset) const {
     temp += offset;
     return (temp);
 }
+
+#endif
 
 template <class T>
 bool StructuredGrid::ForwardIterator<T>::
