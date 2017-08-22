@@ -58,7 +58,7 @@ public:
  //
  virtual void GetUserExtents(
     std::vector <double> &minu, std::vector <double> &maxu
- ) const;
+ ) const override;
 
 
  //! \copydoc Grid::GetBoundingBox()
@@ -66,47 +66,97 @@ public:
  virtual void GetBoundingBox(
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	std::vector <double> &minu, std::vector <double> &maxu
- ) const;
+ ) const override;
 
  //! \copydoc Grid::GetEnclosingRegion()
  //
  virtual void    GetEnclosingRegion(
 	const std::vector <double> &minu, const std::vector <double> &maxu,
 	std::vector <size_t> &min, std::vector <size_t> &max
- ) const;
+ ) const override;
 
  //! \copydoc Grid::GetUserCoordinates()
  //
  virtual void GetUserCoordinates(
 	const std::vector <size_t> &indices,
 	std::vector <double> &coords
- ) const;
+ ) const override;
 
  //! \copydoc Grid::GetIndices()
  //
  virtual void GetIndices(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
- ) const;
+ ) const override;
 
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
- ) const;
+ ) const override;
 
  //! \copydoc Grid::InsideGrid()
  //
- virtual bool InsideGrid(const std::vector <double> &coords) const;
+ virtual bool InsideGrid(const std::vector <double> &coords) const override;
 
+
+ class ConstCoordItrRG : public StructuredGrid::ConstCoordItrAbstract {
+ public:
+  ConstCoordItrRG(const RegularGrid *rg, bool begin);
+  ConstCoordItrRG(const ConstCoordItrRG &rhs);
+  
+
+  ConstCoordItrRG();
+  virtual ~ConstCoordItrRG() {}
+
+  virtual void next();
+  virtual const std::vector <double>  &deref() const {
+	return(_coords);
+  }
+  virtual const void *address() const {return this; };
+
+  virtual bool equal(const void* rhs) const {
+	const ConstCoordItrRG *itrptr = 
+		static_cast<const ConstCoordItrRG *> (rhs);
+
+	return(_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+  }
+
+  virtual std::unique_ptr<ConstCoordItrAbstract> clone() const {
+	return std::unique_ptr<ConstCoordItrAbstract> (new ConstCoordItrRG(*this));
+  };
+
+ private:
+	size_t _x, _y, _z;
+	std::vector <size_t> _dims;
+	std::vector <double> _minu;
+	std::vector <double> _delta;
+	std::vector <double> _coords;
+ };
+
+ virtual ConstCoordItr ConstCoordBegin() const override {
+	return ConstCoordItr(
+		std::unique_ptr<ConstCoordItrAbstract> (new ConstCoordItrRG(this, true))
+	);
+ }
+ virtual ConstCoordItr ConstCoordEnd() const override {
+	return ConstCoordItr(
+		std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrRG(this, false))
+	);
+ }
 
  VDF_API friend std::ostream &operator<<(std::ostream &o, const RegularGrid &rg);
 
 
 protected:
- virtual float _GetValueNearestNeighbor(const std::vector <double> &coords) const;
- virtual float _GetValueLinear(const std::vector <double> &coords) const;
+ virtual float _GetValueNearestNeighbor(
+	const std::vector <double> &coords
+ ) const override;
+
+ virtual float _GetValueLinear(
+	const std::vector <double> &coords
+ ) const override;
 
 
 

@@ -9,8 +9,8 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/RegularGrid.h>
-#include <vapor/LayeredGrid.h>
-#include <vapor/CurvilinearGrid.h>
+//#include <vapor/LayeredGrid.h>
+//#include <vapor/CurvilinearGrid.h>
 #include <vapor/KDTreeRG.h>
 
 using namespace Wasp;
@@ -131,6 +131,7 @@ VAPoR::RegularGrid *make_regular_grid() {
 	return(rg);
 }
 
+#ifdef	DEAD
 VAPoR::LayeredGrid *make_layered_grid() {
 	assert(opt.bs.size() == 3);
 	assert(opt.bs.size() == opt.minu.size());
@@ -214,6 +215,8 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid() {
 	return(cg);
 }
 
+#endif
+
 void init_grid(StructuredGrid *sg) {
 
 	// Initialize data to linear ramp
@@ -266,6 +269,7 @@ int main(int argc, char **argv) {
 	double t0 = Wasp::GetTime();
 
 	StructuredGrid *sg = NULL;
+#ifdef	DEAD
 	if (opt.type == "layered") {
 		cout << "Layered grid" << endl;
 		sg = make_layered_grid();
@@ -275,9 +279,12 @@ int main(int argc, char **argv) {
 		sg = make_curvilinear_grid();
 	}
 	else {
+#endif
 		cout << "Regular grid" << endl;
 		sg = make_regular_grid();
+#ifdef	DEAD
 	}
+#endif
 
 	if (! sg) return(1);
 
@@ -290,7 +297,7 @@ int main(int argc, char **argv) {
 
 	t0 = Wasp::GetTime();
 
-    RegularGrid::Iterator itr;
+    StructuredGrid::Iterator itr;
 	double accum = 0.0;
 	size_t count = 0;
     for (itr = sg->begin(opt.roimin, opt.roimax); itr!=sg->end(); ++itr) {
