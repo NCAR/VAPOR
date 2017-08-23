@@ -106,9 +106,17 @@ class Statistics : public QDialog, public Ui_StatsWindow {
     void errReport(string msg) const;
     void rGridError(int ts, string varname);
 
+    bool calcMinMax(string varname);
     bool calcMean(string varname);
     bool calcMedian(string varname);
     bool calcStdDev(string varname);
+    void getSinglePointTSMean(double &tsMean,
+                              int &missing, VAPoR::StructuredGrid *rGrid);
+    void getMultiPointTSMean(double &tsMean,
+                             int &missing, int &count, VAPoR::StructuredGrid *rGrid);
+    void getSinglePointTSStdDev(double &tsStdDev,
+                                int &globalCount, int &spMissing, double mean,
+                                VAPoR::StructuredGrid *rGrid);
 
     struct _statistics {
         size_t row;
