@@ -308,33 +308,26 @@ template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg, con
     if (!_pred(pt)) { operator++(); }
 }
 
-template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg)
+#ifdef DEAD
+template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(const ForwardIterator<T> &rhs)
 {
-    if (!rg->GetBlks().size()) {
-        _end = true;
-        return;
+    _rg = rhs._rg;
+    _coordItr = rhs._coordItr.clone();
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _xb = rhs._xb;
+    _itr = rhs._itr;
+    for (int i = 0; i < 3; i++) {
+        _dims[i] = rhs._dims[i];
+        _bs[i] = rhs._bs[i];
+        _bdims[i] = rhs._bdims[i];
     }
-
-    vector<size_t> dims = rg->GetDimensions();
-    vector<size_t> bs = rg->GetBlockSize();
-    vector<size_t> bdims = rg->GetDimensionInBlks();
-    assert(dims.size() > 1 && dims.size() < 4);
-    for (int i = 0; i < dims.size(); i++) {
-        _dims[i] = dims[i];
-        _bs[i] = bs[i];
-        _bdims[i] = bdims[i];
-    }
-
-    _rg = rg;
-    //_coordItr = xx;
-    _x = 0;
-    _y = 0;
-    _z = 0;
-    _xb = 0;
-    _itr = &rg->GetBlks()[0][0];
-    _ndim = dims.size();
-    _end = false;
+    _ndim = rhs._ndim;
+    _end = rhs._end;
+    _pred = rhs._pred;
 }
+#endif
 
 template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &&rhs)
 {
@@ -378,22 +371,7 @@ template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator()
 
 template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIterator<T>::operator=(ForwardIterator<T> rhs)
 {
-    std::swap(_rg, rhs._rg);
-    std::swap(_coordItr, rhs._coordItr);
-    std::swap(_x, rhs._x);
-    std::swap(_y, rhs._y);
-    std::swap(_z, rhs._z);
-    std::swap(_xb, rhs._xb);
-    std::swap(_itr, rhs._itr);
-    for (int i = 0; i < 3; i++) {
-        std::swap(_dims[i], rhs._dims[i]);
-        std::swap(_bs[i], rhs._bs[i]);
-        std::swap(_bdims[i], rhs._bdims[i]);
-    }
-    std::swap(_ndim, rhs._ndim);
-    std::swap(_end, rhs._end);
-    std::swap(_pred, rhs._pred);
-
+    swap(*this, rhs);
     return (*this);
 }
 

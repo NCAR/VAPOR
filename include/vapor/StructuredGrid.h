@@ -159,6 +159,12 @@ public:
 
     virtual void ClampCoord(std::vector<double> &coords) const;
 
+    //
+    // Define polymorphic iterator that can be used with any
+    // class derived from this class
+    //
+    //
+
     // Interface for iterator specializations
     //
     class ConstCoordItrAbstract {
@@ -257,8 +263,7 @@ public:
     //
     template<class T> class VDF_API ForwardIterator {
     public:
-        ForwardIterator(T *rg, const std::vector<double> &minu, const std::vector<double> &maxu);
-        ForwardIterator(T *rg);
+        ForwardIterator(T *rg, const std::vector<double> &minu = {}, const std::vector<double> &maxu = {});
         ForwardIterator();
         ForwardIterator(const ForwardIterator<T> &) = delete;
         ForwardIterator(ForwardIterator<T> &&rhs);
@@ -281,6 +286,25 @@ public:
         bool operator==(const ForwardIterator<T> &other);
         bool operator!=(const ForwardIterator<T> &other);
 
+        friend void swap(StructuredGrid::ForwardIterator<T> &a, StructuredGrid::ForwardIterator<T> &b)
+        {
+            std::swap(a._rg, b._rg);
+            std::swap(a._coordItr, b._coordItr);
+            std::swap(a._x, b._x);
+            std::swap(a._y, b._y);
+            std::swap(a._z, b._z);
+            std::swap(a._xb, b._xb);
+            std::swap(a._itr, b._itr);
+            for (int i = 0; i < 3; i++) {
+                std::swap(a._dims[i], b._dims[i]);
+                std::swap(a._bs[i], b._bs[i]);
+                std::swap(a._bdims[i], b._bdims[i]);
+            }
+            std::swap(a._ndim, b._ndim);
+            std::swap(a._end, b._end);
+            std::swap(a._pred, b._pred);
+        }
+
     private:
         T *           _rg;
         ConstCoordItr _coordItr;
@@ -298,6 +322,9 @@ public:
     typedef StructuredGrid::ForwardIterator<StructuredGrid>       Iterator;
     typedef StructuredGrid::ForwardIterator<StructuredGrid const> ConstIterator;
 
+    //! Construct a begin iterator that will iterate through elements
+    //! inside or on the box defined by \p minu and \p maxu
+    //
     Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu) { return (Iterator(this, minu, maxu)); }
     Iterator begin() { return (Iterator(this)); }
     Iterator end() { return (Iterator()); }

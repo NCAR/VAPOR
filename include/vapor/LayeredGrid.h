@@ -51,11 +51,11 @@ public:
 
     //! \copydoc RegularGrid::GetValue()
     //!
-    float GetValue(const std::vector<double> &coords) const;
+    float GetValue(const std::vector<double> &coords) const override;
 
     //! \copydoc Grid::GetInterpolationOrder()
     //
-    virtual int GetInterpolationOrder() const { return _interpolationOrder; };
+    virtual int GetInterpolationOrder() const override { return _interpolationOrder; };
 
     //! Set the interpolation order to be used during function reconstruction
     //!
@@ -69,25 +69,25 @@ public:
     //! \param[in] order interpolation order
     //! \sa GetInterpolationOrder()
     //!
-    virtual void SetInterpolationOrder(int order);
+    virtual void SetInterpolationOrder(int order) override;
 
     //! \copydoc Grid::GetUserExtents()
     //!
-    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const;
+    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;
 
     //! \copydoc Grid::GetBoundingBox()
     //!
-    virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const;
+    virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const override;
 
     //! \copydoc Grid::GetEnclosingRegion()
     //!
-    virtual void GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const;
+    virtual void GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const override;
 
     //! \copydoc Grid::GetUserCoordinates()
     //!
-    void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const;
+    void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const override;
 
-    void GetUserCoordinates(size_t i, size_t j, size_t k, double &x, double &y, double &z) const
+    void GetUserCoordinates(size_t i, size_t j, size_t k, double &x, double &y, double &z) const override
     {
         std::vector<size_t> indices = {i, j, k};
         std::vector<double> coords;
@@ -99,22 +99,22 @@ public:
 
     //! \copydoc Grid::GetIndices()
     //!
-    void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const;
+    void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const;
+    virtual bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
 
     //! \copydoc Grid::InsideGrid()
     //!
-    bool InsideGrid(const std::vector<double> &coords) const;
+    bool InsideGrid(const std::vector<double> &coords) const override;
 
     //! \copydoc Grid::GetPeriodic()
     //!
     //! Only horizonal dimensions can be periodic. Layered (third) dimension
     //! is ignored if set to periodic
     //
-    virtual void SetPeriodic(const std::vector<bool> &periodic)
+    virtual void SetPeriodic(const std::vector<bool> &periodic) override
     {
         assert(periodic.size() == 3);
         std::vector<bool> myPeriodic = periodic;
@@ -127,6 +127,39 @@ public:
     //!
     const RegularGrid &GetZRG() const { return (_rg); };
 
+    class ConstCoordItrLayered : public StructuredGrid::ConstCoordItrAbstract {
+    public:
+        ConstCoordItrLayered(const LayeredGrid *rg, bool begin);
+        ConstCoordItrLayered(const ConstCoordItrLayered &rhs);
+
+        ConstCoordItrLayered();
+        virtual ~ConstCoordItrLayered() {}
+
+        virtual void                       next();
+        virtual const std::vector<double> &deref() const { return (_coords); }
+        virtual const void *               address() const { return this; };
+
+        virtual bool equal(const void *rhs) const
+        {
+            const ConstCoordItrLayered *itrptr = static_cast<const ConstCoordItrLayered *>(rhs);
+
+            return (_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+        }
+
+        virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrLayered(*this)); };
+
+    private:
+        size_t              _x, _y, _z;
+        std::vector<size_t> _dims;
+        std::vector<double> _minu;
+        std::vector<double> _delta;
+        std::vector<double> _coords;
+        ConstIterator       _zCoordItr;
+    };
+
+    virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrLayered(this, true))); }
+    virtual ConstCoordItr ConstCoordEnd() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrLayered(this, false))); }
+
 private:
     RegularGrid         _rg;
     std::vector<double> _minu;
@@ -138,8 +171,9 @@ private:
 
     void _GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    float _GetValueNearestNeighbor(const std::vector<double> &coords) const;
-    float _GetValueLinear(const std::vector<double> &coords) const;
+    float _GetValueNearestNeighbor(const std::vector<double> &coords) const override;
+
+    float _GetValueLinear(const std::vector<double> &coords) const override;
 
     //!
     //! Return the bilinear interpolation weights of a point given in user
