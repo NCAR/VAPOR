@@ -35,7 +35,7 @@
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
 #include "ControlPointEditor.h"
-#include "MessageReporter.h"
+#include "ErrorReporter.h"
 #include "Histo.h"
 #include "MappingFrame.h"
 
@@ -740,7 +740,7 @@ void MappingFrame::paintGL()
     resize();
     int rc = printOpenGLErrorMsg("MappingFrame::paintGL");
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
+        MSG_ERR("MappingFrame::paintGL");
         return;
     }
 
@@ -809,7 +809,7 @@ void MappingFrame::paintGL()
     //
     rc = drawOpacityWidgets();
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
+        MSG_ERR("MappingFrame");
         oglPopState();
         return;
     }
@@ -819,8 +819,8 @@ void MappingFrame::paintGL()
     //
     rc = drawOpacityCurve();
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
         oglPopState();
+        MSG_ERR("MappingFrame");
         return;
     }
 
@@ -829,21 +829,21 @@ void MappingFrame::paintGL()
     //
     rc = drawDomainSlider();
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
+        MSG_ERR("MappingFrame");
         oglPopState();
         return;
     }
 
     if (_isoSliderEnabled) rc = drawIsoSlider();
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
+        MSG_ERR("MappingFrame");
         oglPopState();
         return;
     }
 
     if (_isolineSlidersEnabled) rc = drawIsolineSliders();
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
+        MSG_ERR("MappingFrame");
         oglPopState();
         return;
     }
@@ -869,7 +869,7 @@ void MappingFrame::paintGL()
     //
     rc = drawColorbar();
     if (rc < 0) {
-        MessageReporter::postCurrentMsgs();
+        MSG_ERR("MappingFrame");
         oglPopState();
         return;
     }

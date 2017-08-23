@@ -33,7 +33,7 @@
 #include "qdatetime.h"
 #include "ViewpointEventRouter.h"
 #include "MainForm.h"
-#include "MessageReporter.h"
+#include "ErrorReporter.h"
 #include "images/vapor-icon-32.xpm"
 
 using namespace VAPoR;
@@ -231,8 +231,8 @@ void VizWin::resizeGL(int width, int height)
 void VizWin::initializeGL()
 {
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
-    int rc2 = _controlExec->InitializeViz(_winName);
-    if (rc2) { MessageReporter::errorMsg("Failure to initialize Visualizer, exiting\n"); }
+    int rc = _controlExec->InitializeViz(_winName);
+    if (rc < 0) { MSG_ERR("Failure to initialize Visualizer"); }
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
 }
 
@@ -645,9 +645,12 @@ void VizWin::paintGL()
     int rc0 = printOpenGLErrorMsg("VizWindowPaintGL");
 #endif
 
-    _controlExec->Paint(_winName, false);
+    int rc = _controlExec->Paint(_winName, false);
+    if (rc < 0) { MSG_ERR("Paint failed"); }
     swapBuffers();
-    printOpenGLErrorMsg("VizWindowPaintGL");
+
+    rc = printOpenGLErrorMsg("VizWindowPaintGL");
+    if (rc < 0) { MSG_ERR("OpenGL error"); }
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
