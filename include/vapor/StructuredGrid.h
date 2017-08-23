@@ -211,11 +211,11 @@ public:
   ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract> it) : 
 	_impl(std::move(it)) {}
 
-  // ConstCoordItr has a unique_ptr member so we must remove
-  // copy/assignmet constructors
-  //
-  ConstCoordItr(ConstCoordItr const &rhs) = delete;
-  ConstCoordItr &operator=(ConstCoordItr const &rhs) = delete;
+  ConstCoordItr(ConstCoordItr const &rhs) : _impl(rhs._impl->clone()) {}
+
+  ConstCoordItr &operator=(ConstCoordItr const &rhs) {
+	_impl = rhs._impl->clone(); return *this;
+  }
 
   // ConstCoordItr has a unique_ptr member so we must provide
   // std::move constructors
@@ -306,7 +306,7 @@ public:
 	const std::vector<double> &maxu = {}
   );
   ForwardIterator ();
-  ForwardIterator (const ForwardIterator<T> &) = delete;
+  ForwardIterator (const ForwardIterator<T> &) = default;
   ForwardIterator (ForwardIterator<T> &&rhs);
   ~ForwardIterator () {}
 
@@ -326,6 +326,10 @@ public:
 
   bool operator==(const ForwardIterator<T> &other);
   bool operator!=(const ForwardIterator<T> &other);
+ 
+  const ConstCoordItr &GetCoordItr() {
+	return(_coordItr);
+  }
 
   friend void swap(
 	StructuredGrid::ForwardIterator<T> &a,
@@ -381,6 +385,7 @@ public:
 
  ConstIterator begin() const { return( ConstIterator(this)); }
  ConstIterator end() const { return(ConstIterator()); }
+
 
 
  
