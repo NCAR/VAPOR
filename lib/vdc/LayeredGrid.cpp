@@ -560,6 +560,7 @@ void LayeredGrid::ConstCoordItrLayered::next() {
     ++_zCoordItr;
     _coords[0] += _delta[0];
     if (_x < _dims[0]) {
+        _coords[2] = *_zCoordItr;
         return;
     }
 
@@ -569,13 +570,17 @@ void LayeredGrid::ConstCoordItrLayered::next() {
     _coords[1] += _delta[1];
 
     if (_y < _dims[1]) {
+        _coords[2] = *_zCoordItr;
         return;
     }
 
     _y = 0;
     _coords[1] = _minu[1];
     _z++;
-    _coords[2] = *zCoordItr;
+    if (_z < _dims[2]) {
+        _coords[2] = *_zCoordItr;
+        return;
+    }
 }
 
 void LayeredGrid::_getBilinearWeights(const vector<double> &coords,
