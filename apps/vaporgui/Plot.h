@@ -6,7 +6,7 @@
 //                                                                      *
 //************************************************************************/
 //
-//  File:       Plot.h
+//  File:       plot.h
 //
 //  Author:     Scott Pearse
 //          National Center for Atmospheric Research
@@ -24,7 +24,6 @@
 #ifndef PLOT_H
 #define PLOT_H
 
-#define FIXED
 
 #include <vector>
 #include <qdialog.h>
@@ -36,7 +35,6 @@
 #include <plotWindow.h>
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
-#include <Python.h>
 #include "RangeController.h"
 #include "PlotParams.h"
 
@@ -63,12 +61,17 @@ class NewLineEdit : public QLineEdit {
 
 public:
 	NewLineEdit(QWidget* parent, bool minOrMax) : 
-		QLineEdit(parent), _minOrMax(minOrMax) {}
+		QLineEdit(parent), _minOrMax(minOrMax) 
+  {
+    (void)_minOrMax;
+  }
 
 private:
 	bool _minOrMax;
-	void focusOutEvent(QFocusEvent* e) {
-		QLineEdit::focusOutEvent(e);}
+	void focusOutEvent(QFocusEvent* e) 
+  {
+		QLineEdit::focusOutEvent(e);
+  }
 };
 
 class pErrMsg : public QDialog, public Ui_ErrMsg {
@@ -95,28 +98,26 @@ public:
 	void Initialize(VAPoR::ControlExec* ce, VizWinMgr* vwm);
 
 private:
-	int init();
+	bool init();
 	void reject();
 	void print(bool doSpace) const;
+	void showMe();
 	void initTables();
 	void initTimes();
-	int initExtents(int ts, vector<double>& extents);
+	void initExtents(int ts);
 	void initPlotDlg();
 	void initVariables();
 	void initConstCheckboxes();
 	void initSSCs();
 	void initCRatios();
 	void initRefinement();
-	void applyParams();
-	bool eventFilter(QObject* obj, QEvent* ev);
 	void enableZControllers(bool s);
+	void destroyControllers();
 	vector<string> getEnabledVars() const;
 
-#ifdef FIXED
 	PyObject *createPyFunc(
 		string moduleName, string funcName, string script
 	) const;
-#endif
 
 	int initPython();
 	void finalizePython();
@@ -125,14 +126,14 @@ private:
 			QTableWidgetItem* twi);
 
 	int findNyquist(
-		const vector<size_t> minv, const vector<size_t> maxv,
-		const vector<double> minu, const vector<double> maxu,
+		const size_t minv[3], const size_t maxv[3],
+		const double minu[3], const double maxu[3],
 		double &dX, double &dY, double &dZ
 	) const;
 
-	void getSpatialExtents(vector<double>& minu,
-							vector<double>& maxu,
-							size_t &ts) const;
+	void fudgeVoxBounds(size_t minv[3], size_t maxv[3]) const;
+
+	void getSpatialExtents(double minu[3], double maxu[3], size_t &ts) const;
 
 	int getSpatialVectors(
 		const vector <string> vars,
@@ -141,7 +142,7 @@ private:
 	) const;
 
 	void getTemporalExtents(
-		vector<double>& xyz, size_t &ts0, size_t &ts1
+		double xyz[3], size_t &ts0, size_t &ts1
 	) const;
 
 	int getTemporalVectors(
@@ -172,8 +173,8 @@ private:
 
 	static bool _isInitializedPython;	// static!!!!
 
-	VAPoR::DataMgr* _dm;
 	VAPoR::ControlExec* _controlExec;
+	VAPoR::DataMgr* _dm;
 	VAPoR::PlotParams* _params;
 	pErrMsg* _errMsg;
 	VizWinMgr* _vwm;
@@ -195,7 +196,6 @@ private:
 	int _cRatio;
 	int _refLevel;
 	int _refLevels;
-	string _defaultVar;
 
 	// All of the following vectors are used to store
 	// spatial or temporal coordinates and extents:
@@ -281,16 +281,13 @@ private:
 
 public slots:
 	void go();
-#ifdef DEAD
-	void getPointFromRenderer();
-#endif
+//	void getPointFromRenderer();
 	void newVarAdded(int index);
 	void removeVar(int);
 	void savePlotToFile();
-	void refinementChanged(int i);
-	void cRatioChanged(int i);
+	void refinementChanged(int i) {_refLevel = i;}
+	void cRatioChanged(int i) {_cRatio = i;}
 	void constCheckboxChanged(int state);
 };
-
 
 #endif // PLOT_H

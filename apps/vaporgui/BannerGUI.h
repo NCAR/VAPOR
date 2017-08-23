@@ -33,5 +33,4 @@ private slots:
     void closeButton_action();
 };
 
-
 #endif //BANNERGUI_H
