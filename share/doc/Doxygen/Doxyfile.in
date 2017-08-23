@@ -411,7 +411,8 @@ INPUT        = mainpage.dox \
 		TOP_OF_TREE/apps/vaporgui/BoxSliderFrame.h \
 		TOP_OF_TREE/apps/vaporgui/MappingFrame.h \
 		TOP_OF_TREE/apps/vaporgui/VariablesWidget.h \
-		TOP_OF_TREE/apps/vaporgui/RenderHolder.h   
+		TOP_OF_TREE/apps/vaporgui/RenderHolder.h \
+		TOP_OF_TREE/apps/vaporgui/ErrorReporter.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
