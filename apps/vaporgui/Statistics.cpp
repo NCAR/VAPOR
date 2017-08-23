@@ -146,19 +146,19 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
     RegionTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
     RegionTable->setMouseTracking(true);
     RegionTable->viewport()->installEventFilter(this);
-    //	for (int i=0; i<2; i++) {
-    //		for (int j=0; j<3; j++) {
-    //			QTableWidgetItem* item;
-    //			item = RegionTable->itemAt(i,j);
-    //			item->installEventFilter(this);
-    //		}
-    //	}
 }
 
 Statistics::~Statistics()
 {
     if (_errMsg) delete _errMsg;
 
+    // Each Range will delete all of its observers
+    //
+    if (_xRange) delete _xRange;
+    if (_yRange) delete _yRange;
+    if (_zRange) delete _zRange;
+
+#ifdef DEAD
     if (_zRange) delete _zRange;
     if (_zMinSlider) delete _zMinSlider;
     if (_zMaxSlider) delete _zMaxSlider;
@@ -194,10 +194,32 @@ Statistics::~Statistics()
     if (_xSizeLineEdit) delete _xSizeLineEdit;
     if (_xSinglePointSlider) delete _xSinglePointSlider;
     if (_xSinglePointLineEdit) delete _xSinglePointLineEdit;
+#endif
 }
 
-bool Statistics::eventFilter(QObject *target, QEvent *event)
+bool Statistics::eventFilter(QObject *o, QEvent *e)
 {
+    string objName = string(o->metaObject()->className());
+    if (objName == "QSlider") {
+        if (e->type() == QEvent::MouseButtonRelease) {
+            if (_autoUpdate)
+                update();
+            else
+                makeItRed();
+        }
+    }
+    if ((objName == "QTableWidget") || (objName == "QLineEdit")) {
+        if (e->type() == QEvent::KeyRelease) {
+            QKeyEvent *ke = dynamic_cast<QKeyEvent *>(e);
+            if ((ke->key() == Qt::Key_Return) || (ke->key() == Qt::Key_Enter)) {
+                if (_autoUpdate)
+                    update();
+                else
+                    makeItRed();
+            }
+        }
+    }
+
     vector<double> minExts, maxExts;
     minExts.push_back(_xRange->getUserMin());
     minExts.push_back(_yRange->getUserMin());
@@ -208,7 +230,7 @@ bool Statistics::eventFilter(QObject *target, QEvent *event)
     _params->SetMinExtents(minExts);
     _params->SetMaxExtents(maxExts);
 
-    return false;
+    return QObject::eventFilter(o, e);
 }
 
 int Statistics::initDataMgr(DataMgr *dm)
@@ -285,7 +307,6 @@ int Statistics::initialize()
     generateTableColumns();
 
     initVariables();
-
     _defaultVar = _vars3d[0];
     if (_defaultVar == "") { return -1; }
 
@@ -302,6 +323,7 @@ int Statistics::initialize()
     initRegion();
 
     initRangeControllers();
+    // updateSliders();
 
     retrieveRangeParams();
     _regionInitialized = 1;
@@ -753,6 +775,7 @@ void Statistics::initRegion()
     QTableWidgetItem *twi;
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 3; j++) {
+#ifdef DEAD
             if (!_regionInitialized) {
                 twi = new QTableWidgetItem(QString::number(_extents[i * 3 + j]));
                 twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -760,786 +783,1167 @@ void Statistics::initRegion()
                 twi->setFlags(flags);
                 RegionTable->setItem(i, j, twi);
             } else {
+#endif
                 twi = RegionTable->item(i, j);
                 twi->setText(QString::number(_extents[i * 3 + j]));
+                //			}
+            }
+        }
+
+        if (_slidersInitialized) updateSliders();
+        if (_autoUpdate)
+            update();
+        else
+            (makeItRed());
+    }
+
+    void Statistics::retrieveRangeParams()
+    {
+        // If the region has not been initialized, keep the extents
+        // from params and do not apply the new extents.
+        // If it has been initialized, it means we've
+        // incremented our minimum timestep, and we need to set params
+        // accordingly.
+        //
+        vector<double> minExtents, maxExtents;
+        minExtents = _params->GetMinExtents();
+        maxExtents = _params->GetMaxExtents();
+
+        // If the region has been initialized
+        if (_regionInitialized || minExtents.empty()) {
+            minExtents.push_back(_extents[0]);
+            minExtents.push_back(_extents[1]);
+            minExtents.push_back(_extents[2]);
+            maxExtents.push_back(_extents[3]);
+            maxExtents.push_back(_extents[4]);
+            maxExtents.push_back(_extents[5]);
+            _params->SetMinExtents(minExtents);
+            _params->SetMaxExtents(maxExtents);
+
+            cout << _extents[0] << endl;
+            cout << _extents[1] << endl;
+            cout << _extents[2] << endl;
+            cout << _extents[3] << endl;
+            cout << _extents[4] << endl;
+            cout << _extents[5] << endl;
+
+            _xRange->setUserMin(_extents[0]);
+            _yRange->setUserMin(_extents[1]);
+            _zRange->setUserMin(_extents[2]);
+            _xRange->setUserMax(_extents[3]);
+            _yRange->setUserMax(_extents[4]);
+            _zRange->setUserMax(_extents[5]);
+        }
+
+        // Region has not been initialized.  See if params holds extent data.
+        // If not,
+        else {
+            _xRange->setUserMin(minExtents[0]);
+            _xRange->setUserMax(maxExtents[0]);
+            _yRange->setUserMin(minExtents[1]);
+            _yRange->setUserMax(maxExtents[1]);
+            _zRange->setUserMin(minExtents[2]);
+            _zRange->setUserMax(maxExtents[2]);
+        }
+    }
+
+    void Statistics::setNewExtents()
+    {
+        _xRange->setDomainMin(_fullExtents[0]);
+        _xRange->setDomainMax(_fullExtents[3]);
+        _yRange->setDomainMin(_fullExtents[1]);
+        _yRange->setDomainMax(_fullExtents[4]);
+        _zRange->setDomainMin(_fullExtents[2]);
+        _zRange->setDomainMax(_fullExtents[5]);
+    }
+
+    void Statistics::updateSliders()
+    {
+        if (_regionSelection == 2) {
+            _xRange->setUserMin((_extents[0] + _extents[3]) / 2.f);
+            _xRange->setUserMax((_extents[0] + _extents[3]) / 2.f);
+            _yRange->setUserMin((_extents[1] + _extents[4]) / 2.f);
+            _yRange->setUserMax((_extents[1] + _extents[4]) / 2.f);
+            _zRange->setUserMin((_extents[2] + _extents[5]) / 2.f);
+            _zRange->setUserMax((_extents[2] + _extents[5]) / 2.f);
+        } else {
+            _xRange->setUserMin(_extents[0]);
+            _xRange->setUserMax(_extents[3]);
+            _yRange->setUserMin(_extents[1]);
+            _yRange->setUserMax(_extents[4]);
+            _zRange->setUserMin(_extents[2]);
+            _zRange->setUserMax(_extents[5]);
+        }
+    }
+
+    int Statistics::initVariables()
+    {
+        vector<string> vars;
+        vars = _dm->GetDataVarNames(3, true);
+        for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
+            _vars.push_back(*it);
+            _vars3d.push_back(*it);
+        }
+        vars = _dm->GetDataVarNames(2, true);
+        for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) { _vars.push_back(*it); }
+
+        sort(_vars.begin(), _vars.end());
+
+        // Add variables to combo box
+        //
+        for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { NewVarCombo->addItem(QString::fromStdString(*it)); }
+
+        vector<string> pVars = _params->GetVarNames();
+        if (pVars.size() > 0) {
+            for (int i = 0; i < pVars.size(); i++) {
+                QString varName = QString::fromStdString(pVars[i]);
+                int     index = NewVarCombo->findText(varName);
+                newVarAdded(index);
+                cout << varName.toStdString() << " " << i << endl;
+            }
+        }
+
+        return 0;
+    }
+
+    void Statistics::adjustTables()
+    {
+        VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+        VariablesTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+        VariablesTable->resizeRowsToContents();
+        VariablesTable->resizeColumnsToContents();
+
+        RegionTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+        RegionTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+        RegionTable->resizeRowsToContents();
+        RegionTable->resizeColumnsToContents();
+    }
+
+    void Statistics::showMe()
+    {
+        show();
+        raise();
+        activateWindow();
+        if (!_dm) return;
+    }
+
+    void Statistics::makeItRed()
+    {
+        size_t            rows = VariablesTable->rowCount();
+        size_t            cols = VariablesTable->columnCount();
+        QTableWidgetItem *twi;
+        QBrush            brush(QColor(255, 0, 0));
+
+        for (size_t i = 0; i < rows; i++) {
+            for (size_t j = 0; j < cols; j++) {
+                twi = VariablesTable->item(i, j);
+                if (twi != NULL) twi->setForeground(brush);
             }
         }
     }
 
-    if (_slidersInitialized) updateSliders();
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
+    void Statistics::maxTSChanged()
+    {
+        int min = MinTimestepSpinbox->value();
+        int max = MaxTimestepSpinbox->value();
 
-void Statistics::retrieveRangeParams()
-{
-    // If the region has not been initialized, keep the extents
-    // from params and do not apply the new extents.
-    // If it has been initialized, it means we've
-    // incremented our minimum timestep, and we need to set params
-    // accordingly.
-    //
-    vector<double> minExtents, maxExtents;
-    minExtents = _params->GetMinExtents();
-    maxExtents = _params->GetMaxExtents();
+        if (max < min) {
+            min = max;
+            MinTimestepSpinbox->setValue(max);
+        }
 
-    // If the region has been initialized
-    if (_regionInitialized || minExtents.empty()) {
-        minExtents.push_back(_extents[0]);
-        minExtents.push_back(_extents[1]);
-        minExtents.push_back(_extents[2]);
-        maxExtents.push_back(_extents[3]);
-        maxExtents.push_back(_extents[4]);
-        maxExtents.push_back(_extents[5]);
-        _params->SetMinExtents(minExtents);
-        _params->SetMaxExtents(maxExtents);
+        if ((min != _minTS) || (max != _maxTS)) {
+            _minTS = min;
+            _maxTS = max;
+        }
 
-        cout << _extents[0] << endl;
-        cout << _extents[1] << endl;
-        cout << _extents[2] << endl;
-        cout << _extents[3] << endl;
-        cout << _extents[4] << endl;
-        cout << _extents[5] << endl;
+        _params->SetMinTS(_minTS);
+        _params->SetMaxTS(_maxTS);
 
-        _xRange->setUserMin(_extents[0]);
-        _yRange->setUserMin(_extents[1]);
-        _zRange->setUserMin(_extents[2]);
-        _xRange->setUserMax(_extents[3]);
-        _yRange->setUserMax(_extents[4]);
-        _zRange->setUserMax(_extents[5]);
+        if (_autoUpdate)
+            update();
+        else
+            (makeItRed());
     }
 
-    // Region has not been initialized.  See if params holds extent data.
-    // If not,
-    else {
-        _xRange->setUserMin(minExtents[0]);
-        _xRange->setUserMax(maxExtents[0]);
-        _yRange->setUserMin(minExtents[1]);
-        _yRange->setUserMax(maxExtents[1]);
-        _zRange->setUserMin(minExtents[2]);
-        _zRange->setUserMax(maxExtents[2]);
+    void Statistics::minTSChanged()
+    {
+        int min = MinTimestepSpinbox->value();
+        int max = MaxTimestepSpinbox->value();
+
+        if (min > max) {
+            max = min;
+            MaxTimestepSpinbox->setValue(min);
+        }
+
+        if ((min != _minTS) || (max != _maxTS)) {
+            _minTS = min;
+            _maxTS = max;
+        }
+
+        _params->SetMinTS(_minTS);
+        _params->SetMaxTS(_maxTS);
+
+        initRegion();
+        if (_autoUpdate)
+            update();
+        else
+            (makeItRed());
     }
-}
 
-void Statistics::setNewExtents()
-{
-    _xRange->setDomainMin(_fullExtents[0]);
-    _xRange->setDomainMax(_fullExtents[3]);
-    _yRange->setDomainMin(_fullExtents[1]);
-    _yRange->setDomainMax(_fullExtents[4]);
-    _zRange->setDomainMin(_fullExtents[2]);
-    _zRange->setDomainMax(_fullExtents[5]);
-}
+    void Statistics::autoUpdateClicked()
+    {
+        if (UpdateCheckbox->isChecked())
+            _autoUpdate = true;
+        else
+            _autoUpdate = false;
+        UpdateButton->setEnabled(!_autoUpdate);
+        _params->SetAutoUpdate(_autoUpdate);
 
-void Statistics::updateSliders()
-{
-    _xRange->setUserMin(_extents[0]);
-    _xRange->setUserMax(_extents[3]);
-    _yRange->setUserMin(_extents[1]);
-    _yRange->setUserMax(_extents[4]);
-    _zRange->setUserMin(_extents[2]);
-    _zRange->setUserMax(_extents[5]);
-}
-
-int Statistics::initVariables()
-{
-    vector<string> vars;
-    vars = _dm->GetDataVarNames(3, true);
-    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
-        _vars.push_back(*it);
-        _vars3d.push_back(*it);
+        if (_autoUpdate)
+            update();
+        else
+            (makeItRed());
     }
-    vars = _dm->GetDataVarNames(2, true);
-    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) { _vars.push_back(*it); }
 
-    sort(_vars.begin(), _vars.end());
+    void Statistics::refinementChanged(int index)
+    {
+        _refLevel = index;
+        _params->SetRefinement(_refLevel);
+        if (_autoUpdate)
+            update();
+        else
+            (makeItRed());
+    }
 
-    // Add variables to combo box
-    //
-    for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { NewVarCombo->addItem(QString::fromStdString(*it)); }
+    void Statistics::cRatioChanged(int index)
+    {
+        _cRatio = index;
+        _params->SetCRatio(_cRatio);
+        if (_autoUpdate)
+            update();
+        else
+            (makeItRed());
+    }
 
-    vector<string> pVars = _params->GetVarNames();
-    if (pVars.size() > 0) {
-        for (int i = 0; i < pVars.size(); i++) {
-            QString varName = QString::fromStdString(pVars[i]);
-            int     index = NewVarCombo->findText(varName);
-            newVarAdded(index);
-            cout << varName.toStdString() << " " << i << endl;
+    void Statistics::refreshTable()
+    {
+        VariablesTable->clear();
+        VariablesTable->setRowCount(0);
+        VariablesTable->setColumnCount(0);
+
+        // First generate the layout of our VariablesTable
+        //
+        generateTableColumns();
+    }
+
+    void Statistics::update()
+    {
+        if (!_regionInitialized) return;
+
+        refreshTable();
+
+        _extents[0] = _xRange->getUserMin();
+        _extents[1] = _yRange->getUserMin();
+        _extents[2] = _zRange->getUserMin();
+        _extents[3] = _xRange->getUserMax();
+        _extents[4] = _yRange->getUserMax();
+        _extents[5] = _zRange->getUserMax();
+
+        double uCoordMin[3], uCoordMax[3];
+        if (_regionSelection == 2) {
+            uCoordMin[0] = _fullExtents[0];
+            uCoordMin[1] = _fullExtents[1];
+            uCoordMin[2] = _fullExtents[2];
+            uCoordMax[0] = _fullExtents[3];
+            uCoordMax[1] = _fullExtents[4];
+            uCoordMax[2] = _fullExtents[5];
+        } else {
+            uCoordMin[0] = _extents[0];
+            uCoordMin[1] = _extents[1];
+            uCoordMin[2] = _extents[2];
+            uCoordMax[0] = _extents[3];
+            uCoordMax[1] = _extents[4];
+            uCoordMax[2] = _extents[5];
+        }
+
+        _dm->GetEnclosingRegion(_minTS, uCoordMin, uCoordMax, _vCoordMin, _vCoordMax, _refLevel, _cRatio);
+
+        string                                          varName;
+        typedef std::map<string, _statistics>::iterator it_type;
+
+        // Disable error reporting. Under VAPOR 2.x any errors result in
+        // a callback that can trigger an infinite cascade of error msg
+        // popups :-(
+        //
+        bool enable = MyBase::EnableErrMsg(false);
+        bool success = true;
+        for (it_type it = _stats.begin(); it != _stats.end(); it++) {
+            varName = it->first;
+
+            if ((_calculations & _MIN) || (_calculations & _MAX)) { success &= calcMinMax(varName); }
+
+            if (_calculations & _MEAN) { success &= calcMean(varName); }
+            if (_calculations & _SIGMA) { success &= calcStdDev(varName); }
+            if (_calculations & _MEDIAN) { success &= calcMedian(varName); }
+
+            addCalculationToTable(varName);
+        }
+
+        if (!success) {
+            string myErr;
+            myErr = "Warning: Not all requested variables and/or timesteps available.\n"
+                    "Some statistics may be incorrect!\n";
+            errReport(myErr);
+        }
+
+        // Restore error reporting
+        //
+        MyBase::EnableErrMsg(enable);
+
+        VariablesTable->resizeRowsToContents();
+    }
+
+#ifdef DEAD
+    void Statistics::update()
+    {
+        refreshTable();
+
+        _uCoordMin[0] = _extents[0] = _xRange->getUserMin();
+        _uCoordMin[1] = _extents[1] = _yRange->getUserMin();
+        _uCoordMin[2] = _extents[2] = _zRange->getUserMin();
+        _uCoordMax[0] = _extents[3] = _xRange->getUserMax();
+        _uCoordMax[1] = _extents[4] = _yRange->getUserMax();
+        _uCoordMax[2] = _extents[5] = _zRange->getUserMax();
+
+        string                                          varName;
+        typedef std::map<string, _statistics>::iterator it_type;
+
+        // Disable error reporting. Under VAPOR 2.x any errors result in
+        // a callback that can trigger an infinite cascade of error msg
+        // popups :-(
+        //
+        bool enable = MyBase::EnableErrMsg(false);
+        bool success = true;
+        for (it_type it = _stats.begin(); it != _stats.end(); it++) {
+            varName = it->first;
+
+            if (_calculations & _MEAN) { success &= calcMean(varName); }
+            if (_calculations & _SIGMA) { success &= calcStdDev(varName); }
+            if (_calculations & _MEDIAN) { success &= calcMedian(varName); }
+
+            addCalculationToTable(varName);
+        }
+
+        if (!success) {
+            string myErr;
+            myErr = "Warning: Not all requested variables and/or timesteps available.\n"
+                    "Some statistics may be incorrect!\n";
+            errReport(myErr);
+        }
+
+        // Restore error reporting
+        //
+        MyBase::EnableErrMsg(enable);
+
+        VariablesTable->resizeRowsToContents();
+    }
+#endif
+
+    void Statistics::addCalculationToTable(string varName)
+    {
+        int rowCount = VariablesTable->rowCount();
+        VariablesTable->insertRow(rowCount);
+        VariablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
+
+        QTableWidgetItem *twi;
+
+        unsigned char calcCopy = _calculations;
+        int           colCount = VariablesTable->columnCount();
+        for (int i = 0; i < colCount; i++) {
+            if (calcCopy & _MIN) {
+                twi = new QTableWidgetItem(QString::number(_stats[varName].min));
+                VariablesTable->setItem(rowCount, i, twi);
+                calcCopy = calcCopy - _MIN;
+            } else if (calcCopy & _MAX) {
+                twi = new QTableWidgetItem(QString::number(_stats[varName].max));
+                VariablesTable->setItem(rowCount, i, twi);
+                calcCopy = calcCopy - _MAX;
+            } else if (calcCopy & _MEAN) {
+                twi = new QTableWidgetItem(QString::number(_stats[varName].mean));
+                VariablesTable->setItem(rowCount, i, twi);
+                calcCopy = calcCopy - _MEAN;
+            } else if (calcCopy & _MEDIAN) {
+                twi = new QTableWidgetItem(QString::number(_stats[varName].median));
+                VariablesTable->setItem(rowCount, i, twi);
+                calcCopy = calcCopy - _MEDIAN;
+            } else if (calcCopy & _SIGMA) {
+                twi = new QTableWidgetItem(QString::number(_stats[varName].stddev));
+                VariablesTable->setItem(rowCount, i, twi);
+                calcCopy = calcCopy - _SIGMA;
+            }
+            twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        }
+        VariablesTable->resizeRowToContents(rowCount);
+        VariablesTable->setRowHeight(rowCount, 20);
+    }
+
+    void Statistics::generateTableColumns()
+    {
+        // Generate statistic columns in variables talbe
+        //
+        int colCount;
+
+        if (_calculations & _MIN) {
+            colCount = VariablesTable->columnCount();
+            VariablesTable->insertColumn(colCount);
+            VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Min")));
+        }
+        if (_calculations & _MAX) {
+            colCount = VariablesTable->columnCount();
+            VariablesTable->insertColumn(colCount);
+            VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Max")));
+        }
+        if (_calculations & _MEAN) {
+            colCount = VariablesTable->columnCount();
+            VariablesTable->insertColumn(colCount);
+            VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Mean")));
+        }
+        if (_calculations & _MEDIAN) {
+            colCount = VariablesTable->columnCount();
+            VariablesTable->insertColumn(colCount);
+            VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Median")));
+        }
+        if (_calculations & _SIGMA) {
+            colCount = VariablesTable->columnCount();
+            VariablesTable->insertColumn(colCount);
+            VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("StdDev")));
         }
     }
 
-    return 0;
-}
+    void Statistics::exportText()
+    {
+        _extents[0] = _xRange->getUserMin();
+        _extents[1] = _yRange->getUserMin();
+        _extents[2] = _zRange->getUserMin();
+        _extents[3] = _xRange->getUserMax();
+        _extents[4] = _yRange->getUserMax();
+        _extents[5] = _zRange->getUserMax();
 
-void Statistics::adjustTables()
-{
-    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    VariablesTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    VariablesTable->resizeRowsToContents();
-    VariablesTable->resizeColumnsToContents();
+        QString fName = QFileDialog::getSaveFileName(this, "Select file to write statistics into:", "", "*.txt");
+        if (!fName.isEmpty()) {
+            ofstream file;
+            file.open(fName.toStdString().c_str());
+            if (file.fail()) {
+                std::ostringstream ss;
+                ss << "Failed to open file ";
+                ss << fName.toStdString();
+                ss << " for writing.";
+                string myErr = ss.str();
+                errReport(myErr);
+            }
 
-    RegionTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    RegionTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    RegionTable->resizeRowsToContents();
-    RegionTable->resizeColumnsToContents();
-}
+            file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
 
-void Statistics::showMe()
-{
-    show();
-    raise();
-    activateWindow();
-    if (!_dm) return;
-}
+            typedef std::map<string, _statistics>::iterator it_type;
+            for (it_type it = _stats.begin(); it != _stats.end(); it++) {
+                file << it->first << ",";
+                file << it->second.min << ",";
+                file << it->second.max << ",";
+                file << it->second.mean << ",";
+                file << it->second.stddev;
+                file << endl;
+            }
 
-void Statistics::makeItRed()
-{
-    size_t            rows = VariablesTable->rowCount();
-    size_t            cols = VariablesTable->columnCount();
-    QTableWidgetItem *twi;
-    QBrush            brush(QColor(255, 0, 0));
+            file << endl;
 
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            twi = VariablesTable->item(i, j);
-            if (twi != NULL) twi->setForeground(brush);
+            file << "Dependent Variable\nDimension,Min,Max" << endl;
+            file << "X," << _extents[0] << "," << _extents[3] << endl;
+            file << "Y," << _extents[1] << "," << _extents[4] << endl;
+            file << "Z," << _extents[2] << "," << _extents[5] << endl;
+
+            file << endl;
+
+            file << "Temporal Extents\nStartTime,EndTime" << endl;
+            file << _minTS << "," << _maxTS << endl;
+
+            file.close();
         }
     }
-}
 
-void Statistics::maxTSChanged()
-{
-    int min = MinTimestepSpinbox->value();
-    int max = MaxTimestepSpinbox->value();
+#ifdef DEAD
+    void Statistics::exportText()
+    {
+        _extents[0] = _xRange->getUserMin();
+        _extents[1] = _yRange->getUserMin();
+        _extents[2] = _zRange->getUserMin();
+        _extents[3] = _xRange->getUserMax();
+        _extents[4] = _yRange->getUserMax();
+        _extents[5] = _zRange->getUserMax();
 
-    if (max < min) {
-        min = max;
-        MinTimestepSpinbox->setValue(max);
+        QString  fName = QFileDialog::getSaveFileName(this, "Select file to write statistics into:");
+        ofstream file;
+        file.open(fName.toStdString().c_str());
+
+        file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
+
+        typedef std::map<string, _statistics>::iterator it_type;
+        for (it_type it = _stats.begin(); it != _stats.end(); it++) {
+            file << it->first << ",";
+            file << it->second.min << ",";
+            file << it->second.max << ",";
+            file << it->second.mean << ",";
+            file << it->second.stddev;
+            file << endl;
+        }
+
+        file << endl;
+
+        file << "Dependent Variable\nDimension,Min,Max" << endl;
+        file << "X," << _extents[0] << "," << _extents[3] << endl;
+        file << "Y," << _extents[1] << "," << _extents[4] << endl;
+        file << "Z," << _extents[2] << "," << _extents[5] << endl;
+
+        file << endl;
+
+        file << "Temporal Extents\nStartTime,EndTime" << endl;
+        file << _minTS << "," << _maxTS << endl;
+
+        file.close();
+    }
+#endif
+
+    void Statistics::varRemoved(int index)
+    {
+        if (index == 0) return;
+        string varName = RemoveVarCombo->currentText().toStdString();
+        _stats.erase(varName);
+
+        vector<string> varNames = _params->GetVarNames();
+        varNames.erase(std::remove(varNames.begin(), varNames.end(), varName), varNames.end());
+        _params->SetVarNames(varNames);
+
+        RemoveVarCombo->setCurrentIndex(0);
+        RemoveVarCombo->removeItem(index);
+        update();
     }
 
-    if ((min != _minTS) || (max != _maxTS)) {
-        _minTS = min;
-        _maxTS = max;
+    void Statistics::newVarAdded(int index)
+    {
+        if (index == 0) return;
+        // string varName = NewVarCombo->currentText().toStdString();
+        string varName = NewVarCombo->itemText(index).toStdString();
+
+        typedef std::map<string, _statistics>::iterator it_type;
+        for (it_type it = _stats.begin(); it != _stats.end(); it++) {
+            if (it->first == varName) return;
+        }
+
+        vector<string> varNames = _params->GetVarNames();
+        varNames.push_back(varName);
+        _params->SetVarNames(varNames);
+
+        _stats[varName] = _statistics();
+
+        int rowCount = VariablesTable->rowCount();
+        VariablesTable->insertRow(rowCount);
+        VariablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
+
+        QHeaderView *verticalHeader = VariablesTable->verticalHeader();
+        verticalHeader->setResizeMode(QHeaderView::Fixed);
+        verticalHeader->setDefaultSectionSize(20);
+
+        int colCount = VariablesTable->columnCount();
+        for (int j = 0; j < colCount; j++) {
+            QTableWidgetItem *twi = new QTableWidgetItem("");
+            twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            VariablesTable->setItem(rowCount, j, twi);
+        }
+
+        NewVarCombo->setCurrentIndex(0);
+
+        RemoveVarCombo->addItem(QString::fromStdString(varName));
+        VariablesTable->resizeRowsToContents();
+
+        if (_autoUpdate) {
+            update();
+        } else
+            (makeItRed());
     }
 
-    _params->SetMinTS(_minTS);
-    _params->SetMaxTS(_maxTS);
+    void Statistics::regionSlidersChanged()
+    {
+        QString text = regionSelectorCombo->currentText();
+        int     index = regionSelectorCombo->currentIndex();
+        stackedSliderWidget->setCurrentIndex(index);
+        _regionSelection = index;
 
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
+        _extents[0] = _xRange->getUserMin();
+        _extents[1] = _yRange->getUserMin();
+        _extents[2] = _zRange->getUserMin();
+        _extents[3] = _xRange->getUserMax();
+        _extents[4] = _yRange->getUserMax();
+        _extents[5] = _zRange->getUserMax();
 
-void Statistics::minTSChanged()
-{
-    int min = MinTimestepSpinbox->value();
-    int max = MaxTimestepSpinbox->value();
+        if (_regionSelection == 0) {
+            copyActiveRegionButton->setEnabled(true);
+            RestoreExtentsButton->setEnabled(true);
+        }
+        if (_regionSelection == 1) {
+            copyActiveRegionButton->setEnabled(true);
+            RestoreExtentsButton->setEnabled(true);
+        }
+        if (_regionSelection == 2) {
+            copyActiveRegionButton->setEnabled(false);
+            RestoreExtentsButton->setEnabled(false);
 
-    if (min > max) {
-        max = min;
-        MaxTimestepSpinbox->setValue(min);
+            double xMid = (_xRange->getDomainMin() + _xRange->getDomainMax()) / 2.f;
+            _xRange->setUserMin(xMid);
+            _xRange->setUserMax(xMid);
+
+            double yMid = (_yRange->getDomainMin() + _yRange->getDomainMax()) / 2.f;
+            _yRange->setUserMin(yMid);
+            _yRange->setUserMax(yMid);
+
+            double zMid = (_zRange->getDomainMin() + _zRange->getDomainMax()) / 2.f;
+            _zRange->setUserMin(zMid);
+            _zRange->setUserMax(zMid);
+        } else {
+            copyActiveRegionButton->setEnabled(true);
+            RestoreExtentsButton->setEnabled(true);
+        }
     }
 
-    if ((min != _minTS) || (max != _maxTS)) {
-        _minTS = min;
-        _maxTS = max;
-    }
-
-    _params->SetMinTS(_minTS);
-    _params->SetMaxTS(_maxTS);
-
-    initRegion();
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
-
-void Statistics::autoUpdateClicked()
-{
-    if (UpdateCheckbox->isChecked())
-        _autoUpdate = true;
-    else
-        _autoUpdate = false;
-    UpdateButton->setEnabled(!_autoUpdate);
-    _params->SetAutoUpdate(_autoUpdate);
-
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
-
-void Statistics::refinementChanged(int index)
-{
-    _refLevel = index;
-    _params->SetRefinement(_refLevel);
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
-
-void Statistics::cRatioChanged(int index)
-{
-    _cRatio = index;
-    _params->SetCRatio(_cRatio);
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
-
-void Statistics::refreshTable()
-{
-    VariablesTable->clear();
-    VariablesTable->setRowCount(0);
-    VariablesTable->setColumnCount(0);
-
-    // First generate the layout of our VariablesTable
-    //
-    generateTableColumns();
-}
-
-void Statistics::update()
-{
-    refreshTable();
-
-    _uCoordMin[0] = _extents[0] = _xRange->getUserMin();
-    _uCoordMin[1] = _extents[1] = _yRange->getUserMin();
-    _uCoordMin[2] = _extents[2] = _zRange->getUserMin();
-    _uCoordMax[0] = _extents[3] = _xRange->getUserMax();
-    _uCoordMax[1] = _extents[4] = _yRange->getUserMax();
-    _uCoordMax[2] = _extents[5] = _zRange->getUserMax();
-
-    string                                          varName;
-    typedef std::map<string, _statistics>::iterator it_type;
-
-    // Disable error reporting. Under VAPOR 2.x any errors result in
-    // a callback that can trigger an infinite cascade of error msg
-    // popups :-(
-    //
-    bool enable = MyBase::EnableErrMsg(false);
-    bool success = true;
-    for (it_type it = _stats.begin(); it != _stats.end(); it++) {
-        varName = it->first;
-
-        if (_calculations & _MEAN) { success &= calcMean(varName); }
-        if (_calculations & _SIGMA) { success &= calcStdDev(varName); }
-        if (_calculations & _MEDIAN) { success &= calcMedian(varName); }
-
-        addCalculationToTable(varName);
-    }
-
-    if (!success) {
-        string myErr;
-        myErr = "Warning: Not all requested variables and/or timesteps available.\n"
-                "Some statistics may be incorrect!\n";
+    void Statistics::rGridError(int ts, string varname)
+    {
+        std::ostringstream ss;
+        ss << "Invalid grid specification at timestep ";
+        ss << ts;
+        ss << ", variable ";
+        ss << varname;
+        ss << ", refLevel ";
+        ss << _refLevel;
+        ss << ", cRatio 1:";
+        ss << _cRatios[_cRatio];
+        ss << ", voxelCoordMin ";
+        ss << _vCoordMin[0];
+        ss << " ";
+        ss << _vCoordMin[1];
+        ss << " ";
+        ss << _vCoordMin[2];
+        ss << ", voxelCoordMax ";
+        ss << _vCoordMax[0];
+        ss << " ";
+        ss << _vCoordMax[1];
+        ss << " ";
+        ss << _vCoordMax[2];
+        string myErr = ss.str();
         errReport(myErr);
     }
 
-    // Restore error reporting
-    //
-    MyBase::EnableErrMsg(enable);
+    bool Statistics::calcMinMax(string varname)
+    {
+        float range[2];
 
-    VariablesTable->resizeRowsToContents();
-}
+        for (int ts = _minTS; ts <= _maxTS; ts++) {
+            StructuredGrid *rGrid = NULL;
+            float           mv;
 
-void Statistics::addCalculationToTable(string varName)
-{
-    int rowCount = VariablesTable->rowCount();
-    VariablesTable->insertRow(rowCount);
-    VariablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
+            if (_regionSelection == 2) {
+                rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+                if (!rGrid) return false;
 
-    QTableWidgetItem *twi;
-
-    unsigned char calcCopy = _calculations;
-    int           colCount = VariablesTable->columnCount();
-    for (int i = 0; i < colCount; i++) {
-        if (calcCopy & _MIN) {
-            twi = new QTableWidgetItem(QString::number(_stats[varName].min));
-            VariablesTable->setItem(rowCount, i, twi);
-            calcCopy = calcCopy - _MIN;
-        } else if (calcCopy & _MAX) {
-            twi = new QTableWidgetItem(QString::number(_stats[varName].max));
-            VariablesTable->setItem(rowCount, i, twi);
-            calcCopy = calcCopy - _MAX;
-        } else if (calcCopy & _MEAN) {
-            twi = new QTableWidgetItem(QString::number(_stats[varName].mean));
-            VariablesTable->setItem(rowCount, i, twi);
-            calcCopy = calcCopy - _MEAN;
-        } else if (calcCopy & _MEDIAN) {
-            twi = new QTableWidgetItem(QString::number(_stats[varName].median));
-            VariablesTable->setItem(rowCount, i, twi);
-            calcCopy = calcCopy - _MEDIAN;
-        } else if (calcCopy & _SIGMA) {
-            twi = new QTableWidgetItem(QString::number(_stats[varName].stddev));
-            VariablesTable->setItem(rowCount, i, twi);
-            calcCopy = calcCopy - _SIGMA;
-        }
-        twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    }
-    VariablesTable->resizeRowToContents(rowCount);
-    VariablesTable->setRowHeight(rowCount, 20);
-}
-
-void Statistics::generateTableColumns()
-{
-    // Generate statistic columns in variables talbe
-    //
-    int colCount;
-
-    if (_calculations & _MIN) {
-        colCount = VariablesTable->columnCount();
-        VariablesTable->insertColumn(colCount);
-        VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Min")));
-    }
-    if (_calculations & _MAX) {
-        colCount = VariablesTable->columnCount();
-        VariablesTable->insertColumn(colCount);
-        VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Max")));
-    }
-    if (_calculations & _MEAN) {
-        colCount = VariablesTable->columnCount();
-        VariablesTable->insertColumn(colCount);
-        VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Mean")));
-    }
-    if (_calculations & _MEDIAN) {
-        colCount = VariablesTable->columnCount();
-        VariablesTable->insertColumn(colCount);
-        VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("Median")));
-    }
-    if (_calculations & _SIGMA) {
-        colCount = VariablesTable->columnCount();
-        VariablesTable->insertColumn(colCount);
-        VariablesTable->setHorizontalHeaderItem(colCount, new QTableWidgetItem(QString::fromStdString("StdDev")));
-    }
-}
-
-void Statistics::exportText()
-{
-    _extents[0] = _xRange->getUserMin();
-    _extents[1] = _yRange->getUserMin();
-    _extents[2] = _zRange->getUserMin();
-    _extents[3] = _xRange->getUserMax();
-    _extents[4] = _yRange->getUserMax();
-    _extents[5] = _zRange->getUserMax();
-
-    QString  fName = QFileDialog::getSaveFileName(this, "Select file to write statistics into:");
-    ofstream file;
-    file.open(fName.toStdString().c_str());
-
-    file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
-
-    typedef std::map<string, _statistics>::iterator it_type;
-    for (it_type it = _stats.begin(); it != _stats.end(); it++) {
-        file << it->first << ",";
-        file << it->second.min << ",";
-        file << it->second.max << ",";
-        file << it->second.mean << ",";
-        file << it->second.stddev;
-        file << endl;
-    }
-
-    file << endl;
-
-    file << "Dependent Variable\nDimension,Min,Max" << endl;
-    file << "X," << _extents[0] << "," << _extents[3] << endl;
-    file << "Y," << _extents[1] << "," << _extents[4] << endl;
-    file << "Z," << _extents[2] << "," << _extents[5] << endl;
-
-    file << endl;
-
-    file << "Temporal Extents\nStartTime,EndTime" << endl;
-    file << _minTS << "," << _maxTS << endl;
-
-    file.close();
-}
-
-void Statistics::varRemoved(int index)
-{
-    if (index == 0) return;
-    string varName = RemoveVarCombo->currentText().toStdString();
-    _stats.erase(varName);
-
-    vector<string> varNames = _params->GetVarNames();
-    varNames.erase(std::remove(varNames.begin(), varNames.end(), varName), varNames.end());
-    _params->SetVarNames(varNames);
-
-    RemoveVarCombo->setCurrentIndex(0);
-    RemoveVarCombo->removeItem(index);
-    update();
-}
-
-void Statistics::newVarAdded(int index)
-{
-    if (index == 0) return;
-    // string varName = NewVarCombo->currentText().toStdString();
-    string varName = NewVarCombo->itemText(index).toStdString();
-
-    typedef std::map<string, _statistics>::iterator it_type;
-    for (it_type it = _stats.begin(); it != _stats.end(); it++) {
-        if (it->first == varName) return;
-    }
-
-    vector<string> varNames = _params->GetVarNames();
-    varNames.push_back(varName);
-    _params->SetVarNames(varNames);
-
-    _stats[varName] = _statistics();
-
-    int rowCount = VariablesTable->rowCount();
-    VariablesTable->insertRow(rowCount);
-    VariablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
-
-    QHeaderView *verticalHeader = VariablesTable->verticalHeader();
-    verticalHeader->setResizeMode(QHeaderView::Fixed);
-    verticalHeader->setDefaultSectionSize(20);
-
-    int colCount = VariablesTable->columnCount();
-    for (int j = 0; j < colCount; j++) {
-        QTableWidgetItem *twi = new QTableWidgetItem("");
-        twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-        VariablesTable->setItem(rowCount, j, twi);
-    }
-
-    NewVarCombo->setCurrentIndex(0);
-
-    RemoveVarCombo->addItem(QString::fromStdString(varName));
-    VariablesTable->resizeRowsToContents();
-
-    if (_autoUpdate)
-        update();
-    else
-        (makeItRed());
-}
-
-void Statistics::regionSlidersChanged()
-{
-    QString text = regionSelectorCombo->currentText();
-    int     index = regionSelectorCombo->currentIndex();
-    stackedSliderWidget->setCurrentIndex(index);
-    _regionSelection = index;
-
-    _extents[0] = _xRange->getUserMin();
-    _extents[1] = _yRange->getUserMin();
-    _extents[2] = _zRange->getUserMin();
-    _extents[3] = _xRange->getUserMax();
-    _extents[4] = _yRange->getUserMax();
-    _extents[5] = _zRange->getUserMax();
-
-    if (_regionSelection == 0) {
-        copyActiveRegionButton->setEnabled(true);
-        RestoreExtentsButton->setEnabled(true);
-    }
-    if (_regionSelection == 1) {
-        copyActiveRegionButton->setEnabled(true);
-        RestoreExtentsButton->setEnabled(true);
-    }
-    if (_regionSelection == 2) {
-        copyActiveRegionButton->setEnabled(false);
-        RestoreExtentsButton->setEnabled(false);
-    } else {
-        copyActiveRegionButton->setEnabled(true);
-        RestoreExtentsButton->setEnabled(true);
-    }
-}
-
-void Statistics::rGridError(int ts, string varname)
-{
-    std::ostringstream ss;
-    ss << "Invalid grid specification at timestep ";
-    ss << ts;
-    ss << ", variable ";
-    ss << varname;
-    ss << ", refLevel ";
-    ss << _refLevel;
-    ss << ", cRatio 1:";
-    ss << _cRatios[_cRatio];
-    ss << ", voxelCoordMin ";
-    ss << _vCoordMin[0];
-    ss << " ";
-    ss << _vCoordMin[1];
-    ss << " ";
-    ss << _vCoordMin[2];
-    ss << ", voxelCoordMax ";
-    ss << _vCoordMax[0];
-    ss << " ";
-    ss << _vCoordMax[1];
-    ss << " ";
-    ss << _vCoordMax[2];
-    string myErr = ss.str();
-    errReport(myErr);
-}
-
-bool Statistics::calcMean(string varname)
-{
-    float  mv;
-    float  val = 0;
-    double sum = 0;
-    double tsMean = 0;
-    long   count = 0;
-    long   missing = 0;
-    float  range[2];
-    bool   varIs3D = false;
-    bool   success = true;
-
-    if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) varIs3D = true;
-
-    int spMissing = 0;
-    for (int ts = _minTS; ts <= _maxTS; ts++) {
-        sum = 0;
-        missing = 0;
-        count = 0;
-
-        _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
-
-        if (!_rGrid) {
-            success = false;
-            continue;
-        }
-
-        mv = _rGrid->GetMissingValue();
-
-        StructuredGrid::ForwardIterator<StructuredGrid> itr;
-        double                                          c = 0.0;
-
-        size_t dims[3];
-        _rGrid->GetDimensions(dims);
-
-        // If _regionSelection==2, we are querying a single point.
-        // So here we just call GetValue at that point.
-        //
-        if (_regionSelection == 2) {
-            val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
-            if (val != mv) {
-                tsMean += val;
+                mv = rGrid->GetMissingValue();
+                range[0] = rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+                range[1] = range[0];
             } else {
-                spMissing++;
+                rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+                if (!rGrid) return false;
+
+                mv = rGrid->GetMissingValue();
+                rGrid->GetRange(range);
             }
-
-            // Generate min and max values for our single-point calculation
-            // Initialize min and max with the first timestep, then overwrite
-            // if necessary.
-            if (ts == _minTS) {
-                _stats[varname].min = val;
-                _stats[varname].max = val;
-            } else {
-                if (val < _stats[varname].min) _stats[varname].min = val;
-                if (val > _stats[varname].max) _stats[varname].max = val;
-            }
-
-            // If our missing value count is equal to the number of timesteps,
-            // then all queries for this point have given us a missing value.
-            // We must set the mean to mv, otherwise it will be set to its default of 0.
-            //
-            if (spMissing == _maxTS - _minTS + 1) { tsMean = mv; }
-        }
-
-        // We are selecting a range of values, so we need to query each one.
-        //
-        else {
-            int count = 0;
 
             // Generate min and max values for our multi-point calculation
             //
-            _rGrid->GetRange(range);
+            if (rGrid) delete rGrid;
+
             if (ts == _minTS) {
                 _stats[varname].min = range[0];
                 _stats[varname].max = range[1];
             } else {
-                if (range[0] < _stats[varname].min) _stats[varname].min = range[0];
-                if (range[1] > _stats[varname].max) _stats[varname].max = range[1];
+                if ((range[0] < _stats[varname].min) && (range[0] != mv)) { _stats[varname].min = range[0]; }
+                if ((range[1] > _stats[varname].max) && (range[1] != mv)) { _stats[varname].max = range[1]; }
             }
-
-            for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
-                count++;
-                val = *itr;
-                if (val != mv) {
-                    double y = val - c;
-                    double t = sum + y;
-                    c = t - sum - y;
-                    sum = t;
-                } else
-                    missing++;
-            }
-
-            count = _vCoordMax[0] - _vCoordMin[0] + 1;
-            count *= (_vCoordMax[1] - _vCoordMin[1] + 1);
-            if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) { count *= (_vCoordMax[2] - _vCoordMin[2] + 1); }
-
-            count -= missing;
-            // assert (count >= 0);
-            if (count == 0)
-                tsMean = mv;
-            else
-                tsMean += sum / (double)count;
         }
+        return true;
     }
 
-    // Subtracting spMissing in the denominator is a hack to accomodate
-    // missing values that arise during the single-point calculation.
-    // This is due to the fact that if we have a missing value during
-    // single-point calculations, discarding that sample also means discarding
-    // that entire timestep.  This must be accounted for when we average over time.
-    // spMissing will always be 0 when we sample volumes of data.
-    //
-    _stats[varname].mean = tsMean / (double)(_maxTS - _minTS - spMissing + 1);
-    return success;
-}
-
-bool Statistics::calcStdDev(string varname)
-{
-    double deviations;
-    double mean = _stats[varname].mean;
-    double tsStdDev = 0;
-    float  mv;
-    float  val;
-    long   missing = 0;
-    long   globalCount = 0;
-    bool   varIs3D = false;
-    bool   success = true;
-    int    spMissing = 0;
-
-    if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) varIs3D = true;
-
-    for (int ts = _minTS; ts <= _maxTS; ts++) {
-        long count = 0;
-        deviations = 0;
-        missing = 0;
-        if (_rGrid) delete _rGrid;
-        _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
-
-        // Invalid regular grid.  Use previous timesteps and return.
-        if (!_rGrid) {
-            success = false;
-            continue;
+    void Statistics::getSinglePointTSMean(double &tsMean, int &missing, VAPoR::StructuredGrid *rGrid)
+    {
+        float val = rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+        float mv = rGrid->GetMissingValue();
+        if (val != mv) {
+            tsMean += val;
+        } else {
+            missing++;
         }
 
-        mv = _rGrid->GetMissingValue();
-
-        // If _regionSelection==2, we are querying a single point.
-        // So here we just call GetValue at that point.
+        // If our missing value count is equal to the number of timesteps,
+        // then all queries for this point have given us a missing value.
+        // We must set the mean to mv, otherwise it will be set to its default of 0.
         //
-        if (_regionSelection == 2) {
-            val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+        if (missing == _maxTS - _minTS + 1) { tsMean = mv; }
+    }
+
+    void Statistics::getMultiPointTSMean(double &tsMean, int &missing, int &count, VAPoR::StructuredGrid *rGrid)
+    {
+        double                          c = 0.0;
+        double                          sum = 0;
+        float                           val = 0.0;
+        float                           mv = rGrid->GetMissingValue();
+        VAPoR::StructuredGrid::Iterator itr;
+        for (itr = rGrid->begin(); itr != rGrid->end(); itr++) {
+            count++;
+            val = *itr;
             if (val != mv) {
-                tsStdDev += (val - mean) * (val - mean);
-            } else {
-                spMissing++;
-            }
-
-            // If our missing value count is equal to the number of timesteps,
-            // then all queries for this point have given us a missing value.
-            // We must set the mean to mv, otherwise it will be set to its default of 0.
-            //
-            if (spMissing == _maxTS - _minTS + 1) { tsStdDev = mv; }
-            globalCount = _maxTS - _minTS - spMissing + 1;
-            if (globalCount == 0) tsStdDev = mv;
+                double y = val - c;
+                double t = sum + y;
+                c = t - sum - y;
+                sum = t;
+            } else
+                missing++;
         }
 
-        else {
-            //			RegularGrid::Iterator itr;
-            StructuredGrid::ForwardIterator<StructuredGrid> itr;
-            double                                          c = 0.0;
-            size_t                                          dims[3];
-            _rGrid->GetDimensions(dims);
-            for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
-                val = *itr;
+        count -= missing;
+        assert(count >= 0);
+        if (count == 0)
+            tsMean = mv;
+        else
+            tsMean += sum / (double)count;
+    }
 
-                if (val != mv) {    // sum += val;
-                    double y = (val - mean) * (val - mean) - c;
-                    double t = deviations + y;
-                    c = t - deviations - y;
-                    deviations = t;
-                } else
-                    missing++;
+    bool Statistics::calcMean(string varname)
+    {
+        float  mv;
+        double sum = 0;
+        double tsMean = 0;
+        int    count = 0;
+        int    missing = 0;
+        int    spMissing = 0;
+        bool   varIs3D = false;
+        bool   success = true;
+
+        if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) varIs3D = true;
+
+        for (int ts = _minTS; ts <= _maxTS; ts++) {
+            sum = 0;
+            missing = 0;
+            count = 0;
+
+            StructuredGrid *rGrid;
+            rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+            if (!rGrid) {
+                success = false;
+                continue;
             }
 
-            count = _vCoordMax[0] - _vCoordMin[0] + 1;
-            count *= (_vCoordMax[1] - _vCoordMin[1] + 1);
+            mv = rGrid->GetMissingValue();
 
-            // If var is 3d, add third dimension to our count
+            RegularGrid::Iterator itr;
+
+            size_t dims[3];
+            rGrid->GetDimensions(dims);
+
+            // If _regionSelection==2, we are querying a single point.
+            // So here we just call GetValue at that point.
             //
-            if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) count *= (_vCoordMax[2] - _vCoordMin[2] + 1);
+            if (_regionSelection == 2) {
+                getSinglePointTSMean(tsMean, spMissing, rGrid);
+            }
 
-            count -= missing;
-            assert(count >= 0);
-            if (count == 0)
-                tsStdDev = mv;
-            else
-                tsStdDev += deviations;
-
-            globalCount += count;
+            // We are selecting a range of values, so we need to query each one.
+            //
+            else {
+                count = 0;
+                getMultiPointTSMean(tsMean, missing, count, rGrid);
+            }
+            if (rGrid) delete rGrid;
         }
-    }
 
-    _stats[varname].stddev = sqrt(tsStdDev / (double)(globalCount));
-    return success;
-}
+        // Subtracting spMissing in the denominator is a hack to accomodate
+        // missing values that arise during the single-point calculation.
+        // This is due to the fact that if we have a missing value during
+        // single-point calculations, discarding that sample also means discarding
+        // that entire timestep.  This must be accounted for when we average over time.
+        // spMissing will always be 0 when we sample volumes of data.
+        //
+        _stats[varname].mean = tsMean / (double)(_maxTS - _minTS - spMissing + 1);
 
-bool Statistics::calcMedian(string varname)
-{
-    float mv;
-    bool  varIs3D = false;
-    bool  success = true;
-    long  globalCount = _vCoordMax[0] - _vCoordMin[0] + 1;
-    globalCount *= (_vCoordMax[1] - _vCoordMin[1] + 1);
-    // If var is 3d, add third dimension to our count
-    if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) {
-        varIs3D = true;
-        globalCount *= (_vCoordMax[2] - _vCoordMin[2] + 1);
-    }
-    globalCount = globalCount * (_maxTS - _minTS + 1);
-    std::vector<float> allValues;    // rGrid only returns floats
-    try {
-        allValues.reserve(globalCount);
-    } catch (exception &e) {
-        std::ostringstream ss;
-        ss << "Standard exception: " << e.what() << endl;
-        ss << "  Memory allocation failed at median calculation";
-        errReport(ss.str());
-        success = false;
         return success;
     }
 
-    for (int ts = _minTS; ts <= _maxTS; ts++) {
-        _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+#ifdef DEAD
+    bool Statistics::calcMean(string varname)
+    {
+        float  mv;
+        float  val = 0;
+        double sum = 0;
+        double tsMean = 0;
+        long   count = 0;
+        long   missing = 0;
+        float  range[2];
+        bool   varIs3D = false;
+        bool   success = true;
 
-        // Invalid regular grid.  Use previous timesteps and return.
-        if (!_rGrid) {
-            success = false;
-            continue;
-        }
+        if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) varIs3D = true;
 
-        float val;
-        mv = _rGrid->GetMissingValue();
-        //		RegularGrid::Iterator itr;
-        StructuredGrid::ForwardIterator<StructuredGrid> itr;
-        // If _regionSelection==2, we are querying a single point.
-        // So here we just call GetValue at that point.
-        //
-        if (_regionSelection == 2) {
-            val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
-            if (val != mv) { allValues.push_back(val); }
-        } else {
-            for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
-                val = *itr;
+        int spMissing = 0;
+        for (int ts = _minTS; ts <= _maxTS; ts++) {
+            sum = 0;
+            missing = 0;
+            count = 0;
 
-                if (val != mv) allValues.push_back(val);
+            _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+            if (!_rGrid) {
+                success = false;
+                continue;
+            }
+
+            mv = _rGrid->GetMissingValue();
+
+            StructuredGrid::ForwardIterator<StructuredGrid> itr;
+            double                                          c = 0.0;
+
+            size_t dims[3];
+            _rGrid->GetDimensions(dims);
+
+            // If _regionSelection==2, we are querying a single point.
+            // So here we just call GetValue at that point.
+            //
+            if (_regionSelection == 2) {
+                val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+                if (val != mv) {
+                    tsMean += val;
+                } else {
+                    spMissing++;
+                }
+
+                // Generate min and max values for our single-point calculation
+                // Initialize min and max with the first timestep, then overwrite
+                // if necessary.
+                if (ts == _minTS) {
+                    _stats[varname].min = val;
+                    _stats[varname].max = val;
+                } else {
+                    if (val < _stats[varname].min) _stats[varname].min = val;
+                    if (val > _stats[varname].max) _stats[varname].max = val;
+                }
+
+                // If our missing value count is equal to the number of timesteps,
+                // then all queries for this point have given us a missing value.
+                // We must set the mean to mv, otherwise it will be set to its default of 0.
+                //
+                if (spMissing == _maxTS - _minTS + 1) { tsMean = mv; }
+            }
+
+            // We are selecting a range of values, so we need to query each one.
+            //
+            else {
+                int count = 0;
+
+                // Generate min and max values for our multi-point calculation
+                //
+                _rGrid->GetRange(range);
+                if (ts == _minTS) {
+                    _stats[varname].min = range[0];
+                    _stats[varname].max = range[1];
+                } else {
+                    if (range[0] < _stats[varname].min) _stats[varname].min = range[0];
+                    if (range[1] > _stats[varname].max) _stats[varname].max = range[1];
+                }
+
+                for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
+                    count++;
+                    val = *itr;
+                    if (val != mv) {
+                        double y = val - c;
+                        double t = sum + y;
+                        c = t - sum - y;
+                        sum = t;
+                    } else
+                        missing++;
+                }
+
+                count = _vCoordMax[0] - _vCoordMin[0] + 1;
+                count *= (_vCoordMax[1] - _vCoordMin[1] + 1);
+                if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) { count *= (_vCoordMax[2] - _vCoordMin[2] + 1); }
+
+                count -= missing;
+                // assert (count >= 0);
+                if (count == 0)
+                    tsMean = mv;
+                else
+                    tsMean += sum / (double)count;
             }
         }
-        if (_rGrid) delete _rGrid;
+
+        // Subtracting spMissing in the denominator is a hack to accomodate
+        // missing values that arise during the single-point calculation.
+        // This is due to the fact that if we have a missing value during
+        // single-point calculations, discarding that sample also means discarding
+        // that entire timestep.  This must be accounted for when we average over time.
+        // spMissing will always be 0 when we sample volumes of data.
+        //
+        _stats[varname].mean = tsMean / (double)(_maxTS - _minTS - spMissing + 1);
+        return success;
+    }
+#endif
+
+    void Statistics::getSinglePointTSStdDev(double &tsStdDev, int &globalCount, int &spMissing, double mean, VAPoR::StructuredGrid *rGrid)
+    {
+        float mv = rGrid->GetMissingValue();
+        float val = rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+        if (val != mv) {
+            tsStdDev += (val - mean) * (val - mean);
+        } else {
+            spMissing++;
+        }
+
+        // If our missing value count is equal to the number of timesteps,
+        // then all queries for this point have given us a missing value.
+        // We must set the mean to mv, otherwise it will be set to its default of 0.
+        //
+        if (spMissing == _maxTS - _minTS + 1) { tsStdDev = mv; }
+        globalCount = _maxTS - _minTS - spMissing + 1;
+        if (globalCount == 0) tsStdDev = mv;
     }
 
-    std::sort(allValues.begin(), allValues.end());
-    if (allValues.empty())
-        _stats[varname].median = mv;
-    else
-        _stats[varname].median = allValues.at(allValues.size() / 2);
+    bool Statistics::calcStdDev(string varname)
+    {
+        double deviations;
+        double mean = _stats[varname].mean;
+        double tsStdDev = 0;
+        float  mv;
+        float  val;
+        long   missing = 0;
+        int    globalCount = 0;
+        bool   varIs3D = false;
+        bool   success = true;
+        int    spMissing = 0;
 
-    return success;
-}
+        if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) varIs3D = true;
+
+        for (int ts = _minTS; ts <= _maxTS; ts++) {
+            int count = 0;
+            deviations = 0;
+            missing = 0;
+
+            StructuredGrid *rGrid;
+            rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+            // Invalid regular grid.  Use previous timesteps and return.
+            if (!rGrid) {
+                success = false;
+                continue;
+            }
+
+            mv = rGrid->GetMissingValue();
+
+            // If _regionSelection==2, we are querying a single point.
+            // So here we just call GetValue at that point.
+            //
+            if (_regionSelection == 2) {
+                getSinglePointTSStdDev(tsStdDev, globalCount, spMissing, mean, rGrid);
+            }
+
+            else {
+                StructuredGrid::Iterator itr;
+                double                   c = 0.0;
+                size_t                   dims[3];
+                rGrid->GetDimensions(dims);
+                for (itr = rGrid->begin(); itr != rGrid->end(); itr++) {
+                    val = *itr;
+
+                    if (val != mv) {    // sum += val;
+                        count++;
+                        double y = (val - mean) * (val - mean) - c;
+                        double t = deviations + y;
+                        c = t - deviations - y;
+                        deviations = t;
+                    } else
+                        missing++;
+                }
+
+                assert(count >= 0);
+                if (count == 0)
+                    tsStdDev = mv;
+                else
+                    tsStdDev += deviations;
+
+                globalCount += count;
+            }
+            if (rGrid) delete rGrid;
+        }
+
+        _stats[varname].stddev = sqrt(tsStdDev / (double)(globalCount));
+
+        return success;
+    }
+
+#ifdef DEAD
+    bool Statistics::calcStdDev(string varname)
+    {
+        double deviations;
+        double mean = _stats[varname].mean;
+        double tsStdDev = 0;
+        float  mv;
+        float  val;
+        long   missing = 0;
+        long   globalCount = 0;
+        bool   varIs3D = false;
+        bool   success = true;
+        int    spMissing = 0;
+
+        if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) varIs3D = true;
+
+        for (int ts = _minTS; ts <= _maxTS; ts++) {
+            long count = 0;
+            deviations = 0;
+            missing = 0;
+            if (_rGrid) delete _rGrid;
+            _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+            // Invalid regular grid.  Use previous timesteps and return.
+            if (!_rGrid) {
+                success = false;
+                continue;
+            }
+
+            mv = _rGrid->GetMissingValue();
+
+            // If _regionSelection==2, we are querying a single point.
+            // So here we just call GetValue at that point.
+            //
+            if (_regionSelection == 2) {
+                val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+                if (val != mv) {
+                    tsStdDev += (val - mean) * (val - mean);
+                } else {
+                    spMissing++;
+                }
+
+                // If our missing value count is equal to the number of timesteps,
+                // then all queries for this point have given us a missing value.
+                // We must set the mean to mv, otherwise it will be set to its default of 0.
+                //
+                if (spMissing == _maxTS - _minTS + 1) { tsStdDev = mv; }
+                globalCount = _maxTS - _minTS - spMissing + 1;
+                if (globalCount == 0) tsStdDev = mv;
+            }
+
+            else {
+                //			VAPoR::StructuredGrid::Iterator itr;
+                StructuredGrid::ForwardIterator<StructuredGrid> itr;
+                double                                          c = 0.0;
+                size_t                                          dims[3];
+                _rGrid->GetDimensions(dims);
+                for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
+                    val = *itr;
+
+                    if (val != mv) {    // sum += val;
+                        double y = (val - mean) * (val - mean) - c;
+                        double t = deviations + y;
+                        c = t - deviations - y;
+                        deviations = t;
+                    } else
+                        missing++;
+                }
+
+                count = _vCoordMax[0] - _vCoordMin[0] + 1;
+                count *= (_vCoordMax[1] - _vCoordMin[1] + 1);
+
+                // If var is 3d, add third dimension to our count
+                //
+                if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) count *= (_vCoordMax[2] - _vCoordMin[2] + 1);
+
+                count -= missing;
+                assert(count >= 0);
+                if (count == 0)
+                    tsStdDev = mv;
+                else
+                    tsStdDev += deviations;
+
+                globalCount += count;
+            }
+        }
+
+        _stats[varname].stddev = sqrt(tsStdDev / (double)(globalCount));
+        return success;
+    }
+#endif
+
+    bool Statistics::calcMedian(string varname)
+    {
+        float mv;
+        bool  varIs3D = false;
+        bool  success = true;
+        long  globalCount = _vCoordMax[0] - _vCoordMin[0] + 1;
+        globalCount *= (_vCoordMax[1] - _vCoordMin[1] + 1);
+        // If var is 3d, add third dimension to our count
+        if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) {
+            varIs3D = true;
+            globalCount *= (_vCoordMax[2] - _vCoordMin[2] + 1);
+        }
+        globalCount = globalCount * (_maxTS - _minTS + 1);
+        std::vector<float> allValues;    // rGrid only returns floats
+        try {
+            allValues.reserve(globalCount);
+        } catch (exception &e) {
+            std::ostringstream ss;
+            ss << "Standard exception: " << e.what() << endl;
+            ss << "  Memory allocation failed at median calculation";
+            errReport(ss.str());
+            success = false;
+            return success;
+        }
+
+        for (int ts = _minTS; ts <= _maxTS; ts++) {
+            _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+            // Invalid regular grid.  Use previous timesteps and return.
+            if (!_rGrid) {
+                success = false;
+                continue;
+            }
+
+            float val;
+            mv = _rGrid->GetMissingValue();
+            //		VAPoR::StructuredGrid::Iterator itr;
+            StructuredGrid::ForwardIterator<StructuredGrid> itr;
+            // If _regionSelection==2, we are querying a single point.
+            // So here we just call GetValue at that point.
+            //
+            if (_regionSelection == 2) {
+                val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+                if (val != mv) { allValues.push_back(val); }
+            } else {
+                for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
+                    val = *itr;
+
+                    if (val != mv) allValues.push_back(val);
+                }
+            }
+            if (_rGrid) delete _rGrid;
+        }
+
+        std::sort(allValues.begin(), allValues.end());
+        if (allValues.empty())
+            _stats[varname].median = mv;
+        else
+            _stats[varname].median = allValues.at(allValues.size() / 2);
+
+        return success;
+    }
