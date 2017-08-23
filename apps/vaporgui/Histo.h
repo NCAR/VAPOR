@@ -26,9 +26,12 @@
 class PARAMS_API Histo {
   public:
     Histo(int numberBins, float mnData, float mxData);
+
+#ifdef DEAD
     //Special constructor for unsigned char data:
     //
     Histo(const VAPoR::StructuredGrid *rg, const double exts[6], const float range[2]);
+#endif
     ~Histo();
     void reset(int newNumBins = -1);
     void reset(int newNumBins, float mnData, float mxData) {

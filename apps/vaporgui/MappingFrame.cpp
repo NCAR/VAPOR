@@ -202,7 +202,7 @@ void MappingFrame::RefreshHistogram() {
     StructuredGrid::Iterator itr;
 
     float v;
-    for (itr = grid->begin(); itr != grid->end(); ++itr) {
+    for (itr = grid->begin(minExts, maxExts); itr != grid->end(); ++itr) {
         v = *itr;
         if (v == grid->GetMissingValue())
             continue;

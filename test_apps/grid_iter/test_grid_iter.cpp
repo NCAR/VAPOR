@@ -9,8 +9,8 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/RegularGrid.h>
-//#include <vapor/LayeredGrid.h>
-//#include <vapor/CurvilinearGrid.h>
+#include <vapor/LayeredGrid.h>
+#include <vapor/CurvilinearGrid.h>
 #include <vapor/KDTreeRG.h>
 
 using namespace Wasp;
@@ -63,6 +63,10 @@ OptionParser::Option_T get_options[] = {
     {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
     {NULL}};
 
+namespace {
+vector<float *> Heap;
+};
+
 const char *ProgName;
 
 vector<float *> alloc_blocks(
@@ -83,6 +87,7 @@ vector<float *> alloc_blocks(
     }
 
     float *buf = new float[nblocks * block_size];
+    Heap.push_back(buf);
 
     vector<float *> blks;
     for (int i = 0; i < nblocks; i++) {
@@ -106,7 +111,6 @@ VAPoR::RegularGrid *make_regular_grid() {
     return (rg);
 }
 
-#ifdef DEAD
 VAPoR::LayeredGrid *make_layered_grid() {
     assert(opt.bs.size() == 3);
     assert(opt.bs.size() == opt.minu.size());
@@ -152,10 +156,12 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid() {
     vector<float *> xblks = alloc_blocks(bs2d, dims2d);
 
     RegularGrid *xrg = new RegularGrid(
-        dims2d, bs2d, xblks, vector<double>(3, 0.0), vector<double>(3, 1.0));
+        dims2d, bs2d, xblks, vector<double>(2, 0.0), vector<double>(2, 1.0));
+
+    vector<float *> yblks = alloc_blocks(bs2d, dims2d);
 
     RegularGrid *yrg = new RegularGrid(
-        dims2d, bs2d, xblks, vector<double>(3, 0.0), vector<double>(3, 1.0));
+        dims2d, bs2d, yblks, vector<double>(2, 0.0), vector<double>(2, 1.0));
 
     for (size_t j = 0; j < dims2d[1]; j++) {
         for (size_t i = 0; i < dims2d[0]; i++) {
@@ -184,8 +190,6 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid() {
 
     return (cg);
 }
-
-#endif
 
 void init_grid(StructuredGrid *sg) {
 
@@ -237,7 +241,6 @@ int main(int argc, char **argv) {
     double t0 = Wasp::GetTime();
 
     StructuredGrid *sg = NULL;
-#ifdef DEAD
     if (opt.type == "layered") {
         cout << "Layered grid" << endl;
         sg = make_layered_grid();
@@ -245,12 +248,9 @@ int main(int argc, char **argv) {
         cout << "Curvilinear grid" << endl;
         sg = make_curvilinear_grid();
     } else {
-#endif
         cout << "Regular grid" << endl;
         sg = make_regular_grid();
-#ifdef DEAD
     }
-#endif
 
     if (!sg)
         return (1);
@@ -266,15 +266,20 @@ int main(int argc, char **argv) {
     StructuredGrid::Iterator itr;
     double accum = 0.0;
     size_t count = 0;
-    //    for (itr = sg->begin(opt.roimin, opt.roimax); itr!=sg->end(); ++itr) {
-    for (itr = sg->begin(); itr != sg->end(); ++itr) {
+    for (itr = sg->begin(opt.roimin, opt.roimax); itr != sg->end(); ++itr) {
         accum += *itr;
         count++;
+        //		const vector <double> &coord = *(itr.GetCoordItr());
+        //		cout << coord[0] << " " << coord[1] << " " << coord[2] << endl;
     }
     cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
     cout << "Sum and count: " << accum << " " << count << endl;
 
     delete sg;
+
+    for (int i = 0; i < Heap.size(); i++) {
+        delete[] Heap[i];
+    }
 
     return (0);
 }
