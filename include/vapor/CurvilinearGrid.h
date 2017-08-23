@@ -68,7 +68,7 @@ public:
 
     // \copydoc GetGrid::GetUserExtents()
     //
-    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const
+    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override
     {
         minu = _minu;
         maxu = _maxu;
@@ -76,27 +76,27 @@ public:
 
     // \copydoc GetGrid::GetBoundingBox()
     //
-    virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const;
+    virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const override;
 
     // \copydoc GetGrid::GetEnclosingRegion()
     //
-    virtual void GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const;
+    virtual void GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const override;
 
     // \copydoc GetGrid::GetUserCoordinates()
     //
-    virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const;
+    virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const override;
 
     // \copydoc GetGrid::GetIndices()
     //
-    virtual void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const;
+    virtual void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const;
+    virtual bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
 
     // \copydoc GetGrid::InsideGrid()
     //
-    virtual bool InsideGrid(const std::vector<double> &coords) const;
+    virtual bool InsideGrid(const std::vector<double> &coords) const override;
 
     //! Returns reference to RegularGrid instance containing X user coordinates
     //!
@@ -119,9 +119,42 @@ public:
     //!
     const std::vector<double> &GetZCoords() const { return (_zcoords); };
 
+    class ConstCoordItrCG : public StructuredGrid::ConstCoordItrAbstract {
+    public:
+        ConstCoordItrCG(const CurvilinearGrid *cg, bool begin);
+        ConstCoordItrCG(const ConstCoordItrCG &rhs);
+
+        ConstCoordItrCG();
+        virtual ~ConstCoordItrCG() {}
+
+        virtual void                       next();
+        virtual const std::vector<double> &deref() const { return (_coords); }
+        virtual const void *               address() const { return this; };
+
+        virtual bool equal(const void *rhs) const
+        {
+            const ConstCoordItrCG *itrptr = static_cast<const ConstCoordItrCG *>(rhs);
+
+            return (_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+        }
+
+        virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrCG(*this)); };
+
+    private:
+        const CurvilinearGrid *_cg;
+        size_t                 _x, _y, _z;
+        std::vector<double>    _coords;
+        ConstIterator          _xCoordItr;
+        ConstIterator          _yCoordItr;
+    };
+
+    virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrCG(this, true))); }
+    virtual ConstCoordItr ConstCoordEnd() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrCG(this, false))); }
+
 protected:
-    virtual float _GetValueNearestNeighbor(const std::vector<double> &coords) const;
-    virtual float _GetValueLinear(const std::vector<double> &coords) const;
+    virtual float _GetValueNearestNeighbor(const std::vector<double> &coords) const override;
+
+    virtual float _GetValueLinear(const std::vector<double> &coords) const override;
 
 private:
     std::vector<double> _zcoords;

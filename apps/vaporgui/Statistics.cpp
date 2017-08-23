@@ -1124,7 +1124,7 @@ bool Statistics::calcMean(string varname)
                 if (range[1] > _stats[varname].max) _stats[varname].max = range[1];
             }
 
-            for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
+            for (itr = _rGrid->begin(); itr != _rGrid->end(); ++itr) {
                 count++;
                 val = *itr;
                 if (val != mv) {
@@ -1215,7 +1215,7 @@ bool Statistics::calcStdDev(string varname)
             StructuredGrid::ForwardIterator<StructuredGrid> itr;
             double                                          c = 0.0;
             vector<size_t>                                  dims = _rGrid->GetDimensions();
-            for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
+            for (itr = _rGrid->begin(); itr != _rGrid->end(); ++itr) {
                 val = *itr;
 
                 if (val != mv) {    // sum += val;
@@ -1294,7 +1294,7 @@ bool Statistics::calcMedian(string varname)
             val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
             if (val != mv) { allValues.push_back(val); }
         } else {
-            for (itr = _rGrid->begin(); itr != _rGrid->end(); itr++) {
+            for (itr = _rGrid->begin(); itr != _rGrid->end(); ++itr) {
                 val = *itr;
 
                 if (val != mv) allValues.push_back(val);

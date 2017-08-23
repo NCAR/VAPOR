@@ -380,13 +380,12 @@ template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIte
     if (!_rg->GetBlks().size()) _end = true;
     if (_end) return (*this);
 
-    size_t         xb = 0;
-    size_t         yb = 0;
-    size_t         zb = 0;
-    size_t         x = 0;
-    size_t         y = 0;
-    size_t         z = 0;
-    vector<double> pt;
+    size_t xb = 0;
+    size_t yb = 0;
+    size_t zb = 0;
+    size_t x = 0;
+    size_t y = 0;
+    size_t z = 0;
     do {
         _xb++;
         _itr++;
@@ -394,9 +393,7 @@ template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIte
         ++_coordItr;
 
         if (_xb < _bs[0] && _x < _dims[0]) {
-            pt = *_coordItr;
-
-            if (_pred(pt)) { return (*this); }
+            if (_pred(*_coordItr)) { return (*this); }
 
             continue;
         }
@@ -434,9 +431,7 @@ template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIte
         float *blk = _rg->GetBlks()[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
         _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
 
-        pt = *_coordItr;
-
-    } while (!_pred(pt));
+    } while (!_pred(*_coordItr));
 
     return (*this);
 }
