@@ -147,18 +147,18 @@ QDialog(parent), Ui_StatsWindow(){
 	RegionTable->setSelectionMode( QAbstractItemView::ExtendedSelection );
 	RegionTable->setMouseTracking(true);
 	RegionTable->viewport()->installEventFilter(this);
-//	for (int i=0; i<2; i++) {
-//		for (int j=0; j<3; j++) {
-//			QTableWidgetItem* item;
-//			item = RegionTable->itemAt(i,j);
-//			item->installEventFilter(this);
-//		}
-//	}
 }
 
 Statistics::~Statistics() {
 	if (_errMsg) delete _errMsg;
 
+	// Each Range will delete all of its observers
+	//
+	if (_xRange) delete _xRange;
+	if (_yRange) delete _yRange;
+	if (_zRange) delete _zRange;
+
+#ifdef DEAD
 	if (_zRange) delete _zRange;
 	if (_zMinSlider) delete _zMinSlider;
 	if (_zMaxSlider) delete _zMaxSlider;
@@ -194,9 +194,30 @@ Statistics::~Statistics() {
 	if (_xSizeLineEdit) delete _xSizeLineEdit;
 	if (_xSinglePointSlider) delete _xSinglePointSlider;
 	if (_xSinglePointLineEdit) delete _xSinglePointLineEdit;
+#endif
 }
 
-bool Statistics::eventFilter(QObject *target, QEvent *event) {
+bool Statistics::eventFilter(QObject *o, QEvent *e) {
+
+	string objName = string(o->metaObject()->className());
+	if (objName == "QSlider") {
+		if (e->type() == QEvent::MouseButtonRelease) {
+			if (_autoUpdate) update();
+			else makeItRed();
+		}
+	}
+	if ((objName == "QTableWidget") ||
+		(objName == "QLineEdit")) {
+		if (e->type() == QEvent::KeyRelease) {
+			QKeyEvent* ke = dynamic_cast<QKeyEvent*>(e);
+			if ((ke->key() == Qt::Key_Return) ||
+				(ke->key() == Qt::Key_Enter)) {
+				if (_autoUpdate) update();
+				else makeItRed();
+			}
+		}
+	}
+
 	vector<double> minExts, maxExts;
 	minExts.push_back(_xRange->getUserMin());
 	minExts.push_back(_yRange->getUserMin());
@@ -207,7 +228,7 @@ bool Statistics::eventFilter(QObject *target, QEvent *event) {
 	_params->SetMinExtents(minExts);
 	_params->SetMaxExtents(maxExts);
 
-	return false;
+	return QObject::eventFilter(o, e);
 }
 
 int Statistics::initDataMgr(DataMgr* dm) {
@@ -279,8 +300,8 @@ int Statistics::initialize(){
 
 	generateTableColumns();
 
-	initVariables();
 
+	initVariables();
 	_defaultVar = _vars3d[0];
 	if (_defaultVar=="") {
 		return -1;
@@ -295,10 +316,12 @@ int Statistics::initialize(){
 	initCRatios();
 	
 	initRefinement();
+	
 
 	initRegion();
 
 	initRangeControllers();
+	//updateSliders();		
 
 	retrieveRangeParams();
 	_regionInitialized = 1;
@@ -753,6 +776,7 @@ void Statistics::initRegion(){
 	QTableWidgetItem* twi;
 	for (int i=0; i<2; i++){
 		for (int j=0; j<3; j++){
+#ifdef DEAD
 			if (!_regionInitialized){	
 				twi = new QTableWidgetItem(QString::number(_extents[i*3+j]));
 				twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -761,9 +785,10 @@ void Statistics::initRegion(){
 				RegionTable->setItem(i,j,twi);
 			}
 			else {
+#endif
 				twi = RegionTable->item(i,j);
 				twi->setText(QString::number(_extents[i*3+j]));
-			}
+//			}
 		}
 	}
 
@@ -831,12 +856,22 @@ void Statistics::setNewExtents() {
 }
 
 void Statistics::updateSliders() {
-	_xRange->setUserMin(_extents[0]);
-	_xRange->setUserMax(_extents[3]);
-	_yRange->setUserMin(_extents[1]);
-	_yRange->setUserMax(_extents[4]);
-	_zRange->setUserMin(_extents[2]);
-	_zRange->setUserMax(_extents[5]);
+	if (_regionSelection==2) {
+		_xRange->setUserMin((_extents[0]+_extents[3])/2.f);
+		_xRange->setUserMax((_extents[0]+_extents[3])/2.f);
+		_yRange->setUserMin((_extents[1]+_extents[4])/2.f);
+		_yRange->setUserMax((_extents[1]+_extents[4])/2.f);
+		_zRange->setUserMin((_extents[2]+_extents[5])/2.f);
+		_zRange->setUserMax((_extents[2]+_extents[5])/2.f);
+	}
+	else {
+		_xRange->setUserMin(_extents[0]);
+		_xRange->setUserMax(_extents[3]);
+		_yRange->setUserMin(_extents[1]);
+		_yRange->setUserMax(_extents[4]);
+		_zRange->setUserMin(_extents[2]);
+		_zRange->setUserMax(_extents[5]);
+	}
 }
 
 int Statistics::initVariables() {
@@ -984,6 +1019,84 @@ void Statistics::refreshTable() {
 
 void Statistics::update() {
 
+	if (!_regionInitialized) return;
+
+	refreshTable();
+
+	_extents[0] = _xRange->getUserMin();
+	_extents[1] = _yRange->getUserMin();
+	_extents[2] = _zRange->getUserMin();
+	_extents[3] = _xRange->getUserMax();
+	_extents[4] = _yRange->getUserMax();
+	_extents[5] = _zRange->getUserMax();
+
+	double uCoordMin[3], uCoordMax[3];
+	if (_regionSelection == 2) {
+		uCoordMin[0] = _fullExtents[0];
+		uCoordMin[1] = _fullExtents[1];
+		uCoordMin[2] = _fullExtents[2];
+		uCoordMax[0] = _fullExtents[3];
+		uCoordMax[1] = _fullExtents[4];
+		uCoordMax[2] = _fullExtents[5];
+	}
+	else {
+		uCoordMin[0] = _extents[0];
+		uCoordMin[1] = _extents[1];
+		uCoordMin[2] = _extents[2];
+		uCoordMax[0] = _extents[3];
+		uCoordMax[1] = _extents[4];
+		uCoordMax[2] = _extents[5];
+	}
+
+	_dm->GetEnclosingRegion(_minTS, uCoordMin, uCoordMax, _vCoordMin, _vCoordMax, _refLevel, _cRatio);
+
+	string varName;
+	typedef std::map<string, _statistics>::iterator it_type;
+
+	// Disable error reporting. Under VAPOR 2.x any errors result in
+	// a callback that can trigger an infinite cascade of error msg
+	// popups :-(
+	//
+	bool enable = MyBase::EnableErrMsg(false);
+	bool success = true;
+	for (it_type it = _stats.begin(); it!=_stats.end(); it++){
+		varName = it->first;
+
+		if ((_calculations & _MIN) ||
+			(_calculations & _MAX)) {
+			success &= calcMinMax(varName);
+		}
+
+		if (_calculations & _MEAN) {
+			success &= calcMean(varName);
+		}
+		if (_calculations & _SIGMA) {
+			success &= calcStdDev(varName);
+		}
+		if (_calculations & _MEDIAN) {
+			success &= calcMedian(varName);
+		}
+	
+		addCalculationToTable(varName);	
+	}
+
+	if (! success) {
+		string myErr;
+		myErr = "Warning: Not all requested variables and/or timesteps available.\n"
+		"Some statistics may be incorrect!\n";
+		errReport(myErr);
+	}
+
+	// Restore error reporting
+	//
+	MyBase::EnableErrMsg(enable);
+
+	VariablesTable->resizeRowsToContents();
+}
+
+#ifdef DEAD
+void Statistics::update() {
+
 	refreshTable();
 
 	_uCoordMin[0] = _extents[0] = _xRange->getUserMin();
@@ -1031,6 +1144,7 @@ void Statistics::update() {
 
 	VariablesTable->resizeRowsToContents();
 }
+#endif
 
 void Statistics::addCalculationToTable(string varName) {
 	int rowCount = VariablesTable->rowCount();
@@ -1114,6 +1228,57 @@ void Statistics::exportText() {
 	_extents[4] = _yRange->getUserMax();
 	_extents[5] = _zRange->getUserMax();
 
+	QString fName = QFileDialog::getSaveFileName(this,"Select file to write statistics into:", "", "*.txt");
+  if( !fName.isEmpty() )
+  {
+    ofstream file;
+    file.open(fName.toStdString().c_str());
+    if (file.fail()) {
+      std::ostringstream ss;
+      ss << "Failed to open file ";
+      ss << fName.toStdString();
+      ss << " for writing.";
+      string myErr = ss.str();
+      errReport(myErr);
+    }
+      
+    file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
+
+    typedef std::map<string, _statistics>::iterator it_type;
+    for (it_type it = _stats.begin(); it!=_stats.end(); it++){
+      file << it->first << ",";
+      file << it->second.min << ",";
+      file << it->second.max << ",";
+      file << it->second.mean << ",";
+      file << it->second.stddev;
+      file << endl;
+    }
+
+    file << endl;
+
+    file << "Dependent Variable\nDimension,Min,Max" << endl;
+    file << "X," << _extents[0] << "," << _extents[3] << endl;
+    file << "Y," << _extents[1] << "," << _extents[4] << endl;
+    file << "Z," << _extents[2] << "," << _extents[5] << endl;
+
+    file << endl;
+
+    file << "Temporal Extents\nStartTime,EndTime" << endl;
+    file << _minTS << "," << _maxTS << endl;
+
+    file.close();
+  }
+}
+
+#ifdef DEAD
+void Statistics::exportText() {
+	_extents[0] = _xRange->getUserMin();
+	_extents[1] = _yRange->getUserMin();
+	_extents[2] = _zRange->getUserMin();
+	_extents[3] = _xRange->getUserMax();
+	_extents[4] = _yRange->getUserMax();
+	_extents[5] = _zRange->getUserMax();
+
 	QString fName = QFileDialog::getSaveFileName(this,"Select file to write statistics into:");
 	ofstream file;
 	file.open(fName.toStdString().c_str());
@@ -1144,6 +1309,7 @@ void Statistics::exportText() {
 
 	file.close();
 }
+#endif
 
 void Statistics::varRemoved(int index) {
 	if (index == 0) return;
@@ -1196,7 +1362,9 @@ void Statistics::newVarAdded(int index) {
 	RemoveVarCombo->addItem(QString::fromStdString(varName));
 	VariablesTable->resizeRowsToContents();
 
-	if (_autoUpdate) update();
+	if (_autoUpdate) {
+			update();
+	}
 	else (makeItRed());
 }
 
@@ -1225,6 +1393,18 @@ void Statistics::regionSlidersChanged() {
 	if (_regionSelection == 2) {
 		copyActiveRegionButton->setEnabled(false);
 		RestoreExtentsButton->setEnabled(false);
+
+		double xMid = (_xRange->getDomainMin() + _xRange->getDomainMax())/2.f;
+		_xRange->setUserMin(xMid);
+		_xRange->setUserMax(xMid);
+
+		double yMid = (_yRange->getDomainMin() + _yRange->getDomainMax())/2.f;
+		_yRange->setUserMin(yMid);
+		_yRange->setUserMax(yMid);
+
+		double zMid = (_zRange->getDomainMin() + _zRange->getDomainMax())/2.f;
+		_zRange->setUserMin(zMid);
+		_zRange->setUserMax(zMid);
 	}
 	else {
 		copyActiveRegionButton->setEnabled(true);
@@ -1258,6 +1438,161 @@ void Statistics::rGridError(int ts, string varname) {
 	errReport(myErr);
 }
 
+bool Statistics::calcMinMax(string varname) {
+	float range[2];
+
+	for (int ts=_minTS; ts<=_maxTS; ts++){
+		StructuredGrid* rGrid = NULL;
+		float mv;
+
+
+		if (_regionSelection==2) {
+			rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+			if (!rGrid) return false;
+
+			mv = rGrid->GetMissingValue();
+			range[0] = rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+			range[1] = range[0];
+		}
+		else {
+			rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+			if (!rGrid) return false;
+
+			mv = rGrid->GetMissingValue();
+			rGrid->GetRange(range);
+		}
+
+		// Generate min and max values for our multi-point calculation
+		//
+		if (rGrid) delete rGrid;
+
+		if (ts == _minTS) {
+			_stats[varname].min = range[0];
+			_stats[varname].max = range[1];
+		}
+		else {
+			if ((range[0] < _stats[varname].min) &&
+				(range[0] != mv)) {
+				_stats[varname].min = range[0];
+			}
+			if ((range[1] > _stats[varname].max) &&
+				(range[1] != mv)) {
+				_stats[varname].max = range[1];
+			}
+		}
+	}
+	return true;
+}
+
+void Statistics::getSinglePointTSMean(double &tsMean, int &missing, VAPoR::StructuredGrid* rGrid) {
+	float val = rGrid->GetValue(_extents[0],_extents[1],_extents[2]);
+	float mv = rGrid->GetMissingValue();
+	if (val != mv) {
+		tsMean += val;
+	}
+	else {
+		missing++;
+	}
+
+	// If our missing value count is equal to the number of timesteps,
+	// then all queries for this point have given us a missing value.
+	// We must set the mean to mv, otherwise it will be set to its default of 0.
+	//
+	if (missing == _maxTS-_minTS+1) {
+		tsMean = mv;
+	}
+}
+
+void Statistics::getMultiPointTSMean(double &tsMean, int &missing, 
+						int &count, VAPoR::StructuredGrid* rGrid)
+{
+	double c = 0.0;
+	double sum = 0;
+	float val = 0.0;
+	float mv = rGrid->GetMissingValue();
+	VAPoR::StructuredGrid::Iterator itr;
+	for (itr=rGrid->begin(); itr!=rGrid->end(); itr++) 
+	{
+		count++;
+		val = *itr;
+		if (val != mv) 
+		{
+			double y = val - c;
+			double t = sum + y;
+			c = t - sum - y;
+			sum = t;
+		}
+		else missing++;
+	}   
+			
+	count -= missing;
+	assert (count >= 0);
+	if (count == 0) tsMean = mv;
+	else tsMean += sum/(double)count;
+}
+
+bool Statistics::calcMean(string varname) {
+	float mv;
+	double sum = 0;
+	double tsMean = 0;
+	int count = 0;
+	int missing = 0;
+	int spMissing=0;
+	bool varIs3D = false;
+	bool success = true;
+
+	if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end())
+		varIs3D = true;
+
+	for (int ts=_minTS; ts<=_maxTS; ts++){
+		sum = 0;
+		missing = 0;
+		count = 0;
+
+		StructuredGrid* rGrid;
+		rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+		if (!rGrid) {
+			success = false;
+			continue;
+		}
+
+		mv = rGrid->GetMissingValue();
+		
+		RegularGrid::Iterator itr;
+
+		size_t dims[3];
+		rGrid->GetDimensions(dims);
+
+		// If _regionSelection==2, we are querying a single point.
+		// So here we just call GetValue at that point.
+		//
+		if (_regionSelection==2){
+			getSinglePointTSMean(tsMean, spMissing, rGrid);
+		}
+
+		// We are selecting a range of values, so we need to query each one.
+		//
+		else {
+			count=0;
+			getMultiPointTSMean(tsMean, missing, count, rGrid);
+		}
+		if (rGrid) delete rGrid;
+	}
+
+	// Subtracting spMissing in the denominator is a hack to accomodate
+	// missing values that arise during the single-point calculation.
+	// This is due to the fact that if we have a missing value during
+	// single-point calculations, discarding that sample also means discarding
+	// that entire timestep.  This must be accounted for when we average over time.
+	// spMissing will always be 0 when we sample volumes of data.
+	//
+	_stats[varname].mean = tsMean / (double)(_maxTS - _minTS - spMissing + 1);
+	
+	return success;
+}
+
+#ifdef DEAD
 bool Statistics::calcMean(string varname) {
 	float mv;
 	float val = 0;
@@ -1384,8 +1719,103 @@ bool Statistics::calcMean(string varname) {
 	_stats[varname].mean = tsMean / (double)(_maxTS - _minTS - spMissing + 1);
 	return success;
 }
+#endif
 
 
+void Statistics::getSinglePointTSStdDev(double &tsStdDev, int &globalCount,
+						int &spMissing, double mean, VAPoR::StructuredGrid* rGrid) {
+	float mv = rGrid->GetMissingValue();
+	float val = rGrid->GetValue(_extents[0],_extents[1],_extents[2]);
+	if (val != mv) {
+		tsStdDev += (val-mean)*(val-mean);
+	}
+	else {
+		spMissing++;
+	}
+
+	// If our missing value count is equal to the number of timesteps,
+	// then all queries for this point have given us a missing value.
+	// We must set the mean to mv, otherwise it will be set to its default of 0.
+	//
+	if (spMissing == _maxTS-_minTS+1) {
+		tsStdDev = mv;
+	}
+	globalCount = _maxTS - _minTS - spMissing + 1;
+	if (globalCount==0) tsStdDev = mv;
+}
+
+bool Statistics::calcStdDev(string varname) {
+	double deviations;
+	double mean = _stats[varname].mean;
+	double tsStdDev = 0;
+	float mv;
+	float val;
+	long missing = 0;
+	int globalCount = 0;
+	bool varIs3D = false;
+	bool success = true;
+	int spMissing = 0;
+	
+	if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end())
+		varIs3D = true;
+
+	for (int ts=_minTS; ts<=_maxTS; ts++){
+		int count = 0;
+		deviations = 0;
+		missing = 0;
+		
+		StructuredGrid* rGrid;
+		rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+		// Invalid regular grid.  Use previous timesteps and return.
+		if (!rGrid) { 
+			success = false;
+			continue;
+		}
+
+		mv = rGrid->GetMissingValue();
+
+		// If _regionSelection==2, we are querying a single point.
+		// So here we just call GetValue at that point.
+		//
+		if (_regionSelection==2){
+			getSinglePointTSStdDev(tsStdDev, globalCount, spMissing, mean, rGrid);
+		}
+
+		else {
+			StructuredGrid::Iterator itr;
+			double c = 0.0;
+			size_t dims[3];
+			rGrid->GetDimensions(dims);
+			for (itr=rGrid->begin(); itr!=rGrid->end(); itr++) {
+				val = *itr;
+	
+				if (val != mv) { //sum += val;
+					count++;
+					double y = (val - mean) * (val - mean) - c;
+					double t = deviations + y;
+					c = t - deviations - y;
+					deviations = t;
+				}
+				else 
+					missing++;
+			}
+		 
+			assert(count >= 0);  
+			if (count == 0) tsStdDev = mv;
+			else tsStdDev += deviations;
+			
+			globalCount += count;
+		}
+		if (rGrid) delete rGrid;
+	}
+	
+	_stats[varname].stddev = sqrt( tsStdDev / (double)(globalCount) );
+	
+	return success;
+}
+
+#ifdef DEAD
 bool Statistics::calcStdDev(string varname) {
 	double deviations;
 	double mean = _stats[varname].mean;
@@ -1441,7 +1871,7 @@ bool Statistics::calcStdDev(string varname) {
 		}
 
 		else {
-//			RegularGrid::Iterator itr;
+//			VAPoR::StructuredGrid::Iterator itr;
 			StructuredGrid::ForwardIterator<StructuredGrid> itr;
 			double c = 0.0;
 			size_t dims[3];
@@ -1479,6 +1909,7 @@ bool Statistics::calcStdDev(string varname) {
 	_stats[varname].stddev = sqrt( tsStdDev / (double)(globalCount) );
 	return success;
 }
+#endif
 
 bool Statistics::calcMedian(string varname) {
 	float mv;
@@ -1519,7 +1950,7 @@ bool Statistics::calcMedian(string varname) {
 
 		float val;
 		mv = _rGrid->GetMissingValue();
-//		RegularGrid::Iterator itr;
+//		VAPoR::StructuredGrid::Iterator itr;
 		StructuredGrid::ForwardIterator<StructuredGrid> itr;
 		// If _regionSelection==2, we are querying a single point.
 		// So here we just call GetValue at that point.
