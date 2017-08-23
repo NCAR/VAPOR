@@ -324,6 +324,104 @@ bool CurvilinearGrid::InsideGrid(const std::vector <double> &coords) const {
 	return(inside);
 }
 
+
+
+
+CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(
+	const CurvilinearGrid *cg, bool begin
+) : ConstCoordItrAbstract() {
+	_cg = cg;
+	vector <size_t> dims = _cg->GetDimensions();
+	if (begin) {
+		_xCoordItr = _cg->_xrg.begin();
+		_yCoordItr = _cg->_yrg.begin();
+		_x = 0;
+		_y = 0;
+		_z = 0;
+	}
+	else {
+		_xCoordItr = _cg->_xrg.end();
+		_yCoordItr = _cg->_yrg.end();
+		_x = 0;
+		_y = dims.size() == 2 ? dims[1] : 0;
+		_z = dims.size() == 3 ? dims[2] : 0;
+	}
+	_coords.push_back(*_xCoordItr);
+	_coords.push_back(*_yCoordItr);
+	if (dims.size() == 3) {
+		_coords.push_back(_cg->_zcoords[0]);
+	}
+}
+
+
+CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(
+	const ConstCoordItrCG &rhs
+) : ConstCoordItrAbstract() {
+	_cg = rhs._cg;
+	_x = rhs._x;
+	_y = rhs._y;
+	_z = rhs._z;
+	_coords = rhs._coords;
+	_xCoordItr = rhs._xCoordItr;
+	_yCoordItr = rhs._yCoordItr;
+}
+
+CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract() {
+	_cg = NULL;
+	_x = 0;
+	_y = 0;
+	_z = 0;
+	_coords.clear();
+}
+
+
+void CurvilinearGrid::ConstCoordItrCG::next() {
+
+	const vector <size_t> &dims = _cg->GetDimensions();
+
+	_x++;
+	++_xCoordItr;
+	++_yCoordItr;
+
+	if (_x < dims[0]) {
+		_coords[0] = *_xCoordItr;
+		_coords[1] = *_yCoordItr;
+		return;
+	}
+
+	_x = 0;
+	_y++;
+
+	if (_y < dims[1]) {
+		_coords[0] = *_xCoordItr;
+		_coords[1] = *_yCoordItr;
+		return;
+	}
+
+	if (dims.size() == 2) return;
+
+
+	_y = 0;
+	_z++;
+	if (_z < dims[2]) {
+		_xCoordItr = _cg->_xrg.begin();
+		_yCoordItr = _cg->_yrg.begin();
+
+		_coords[0] = *_xCoordItr;
+		_coords[1] = *_yCoordItr;
+		_coords[2] = _cg->_zcoords[_z];
+		return;
+	}
+}
+
+
+
+
+
+
+
+
+
 float CurvilinearGrid::_GetValueNearestNeighbor(
 	const std::vector <double> &coords
 ) const {

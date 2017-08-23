@@ -5,12 +5,10 @@ include ${TOP}/make/config/prebase.mk
 LIBRARY = vdc
 FILES = \
 	BlkMemMgr Grid StructuredGrid RegularGrid \
-	LayeredGrid \
-# CurvilinearGrid NetCDFSimple \
-	NetCDFSimple \
+	LayeredGrid CurvilinearGrid NetCDFSimple \
 	NetCDFCollection NetCDFCFCollection \
 	UDUnitsClass Proj4API DC VDC VDCNetCDF \
-#	DCWRF DCCF DCMPAS DataMgr DataMgrUtils GeoUtil vizutil \
+	DCWRF DCCF DCMPAS DataMgr DataMgrUtils GeoUtil vizutil \
 	KDTreeRG kdtree VDC_c
 
 	

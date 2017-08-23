@@ -582,7 +582,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(
 	GLfloat *texptr = texture;
 
 	StructuredGrid::Iterator itr;
-	for (itr = sg->begin(); itr != sg->end(); ++itr) {
+	for (itr = sg->begin(minBoxReq, maxBoxReq); itr != sg->end(); ++itr) {
 		float v = *itr;
 
 		if (v == sg->GetMissingValue()) {

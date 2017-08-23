@@ -29,6 +29,8 @@ Histo::Histo(int numberBins, float mnData, float mxData){
 	_binArray = new int[_numBins];
 	reset();
 }
+
+#ifdef	DEAD
 Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2]) {
 	_binArray = new int[256];
 	_minData = range[0];
@@ -61,6 +63,7 @@ Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2
 	}
 	
 }
+#endif
 	
 Histo::~Histo(){
 	if (_binArray) delete [] _binArray;
