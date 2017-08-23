@@ -523,6 +523,77 @@ bool LayeredGrid::InsideGrid(const std::vector <double> &coords) const {
 
 }
 
+
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
+	const LayeredGrid *lg, bool begin
+) : ConstCoordItrAbstract() {
+	_dims = lg->GetDimensions();
+	_minu = lg->_minu;
+	_delta = lg->_delta;
+	_coords = lg->_minu;
+	if (begin) {
+		_zCoordItr = lg->_rg.begin();
+		_x = 0;
+		_y = 0;
+		_z = 0;
+	}
+	else {
+		_zCoordItr = lg->_rg.end();
+		_x = 0;
+		_y = 0;
+		_z = _dims[2];
+	}
+}
+
+
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
+	const ConstCoordItrLayered &rhs
+) : ConstCoordItrAbstract() {
+	_x = rhs._x;
+	_y = rhs._y;
+	_z = rhs._z;
+	_dims = rhs._dims;
+	_minu = rhs._minu;
+	_delta = rhs._delta;
+	_coords = rhs._coords;
+	_zCoordItr = rhs._zCoordItr;
+}
+
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered() : ConstCoordItrAbstract() {
+	_x = 0;
+	_y = 0;
+	_z = 0;
+	_dims.clear();
+	_minu.clear();
+	_delta.clear();
+	_coords.clear();
+}
+
+
+void LayeredGrid::ConstCoordItrLayered::next() {
+
+	_x++;
+	++_zCoordItr;
+	_coords[0] += _delta[0];
+	if (_x < _dims[0]) {
+		return;
+	}
+
+	_x = 0;
+	_coords[0] = _minu[0];
+	_y++;
+	_coords[1] += _delta[1];
+
+	if (_y < _dims[1]) {
+		return;
+	}
+
+	_y = 0;
+	_coords[1] = _minu[1];
+	_z++;
+	_coords[2] = *zCoordItr; 
+}
+
 void LayeredGrid::_getBilinearWeights(const vector <double> &coords,
 									double &iwgt, double &jwgt) const {
 

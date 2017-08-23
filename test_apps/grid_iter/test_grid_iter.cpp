@@ -300,7 +300,8 @@ int main(int argc, char **argv) {
     StructuredGrid::Iterator itr;
 	double accum = 0.0;
 	size_t count = 0;
-    for (itr = sg->begin(opt.roimin, opt.roimax); itr!=sg->end(); ++itr) {
+//    for (itr = sg->begin(opt.roimin, opt.roimax); itr!=sg->end(); ++itr) {
+    for (itr = sg->begin(); itr!=sg->end(); ++itr) {
 		accum += *itr;
 		count++;
     }

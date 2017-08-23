@@ -183,6 +183,12 @@ public:
  virtual void ClampCoord(std::vector <double> &coords) const;
 
 
+ // 
+ // Define polymorphic iterator that can be used with any
+ // class derived from this class
+ //
+ //
+
  // Interface for iterator specializations
  //
  class ConstCoordItrAbstract {
@@ -294,50 +300,76 @@ public:
  template <class T>
  class VDF_API ForwardIterator {
  public:
-	ForwardIterator (
-		T *rg, const std::vector<double> &minu, const std::vector<double> &maxu
-	);
-	ForwardIterator (T *rg);
-	ForwardIterator ();
-	ForwardIterator (const ForwardIterator<T> &) = delete;
-	ForwardIterator (ForwardIterator<T> &&rhs);
-	~ForwardIterator () {}
+  ForwardIterator (
+	T *rg, 
+	const std::vector<double> &minu = {}, 
+	const std::vector<double> &maxu = {}
+  );
+  ForwardIterator ();
+  ForwardIterator (const ForwardIterator<T> &) = delete;
+  ForwardIterator (ForwardIterator<T> &&rhs);
+  ~ForwardIterator () {}
 
-	inline float &operator*() {return (*_itr);}
+  inline float &operator*() {return (*_itr);}
 
-	ForwardIterator<T> &operator++();	// ++prefix 
+  ForwardIterator<T> &operator++();	// ++prefix 
 
 #ifdef	DEAD
-	ForwardIterator<T> operator++(int);	// postfix++
-
-	ForwardIterator<T> &operator+=(const long int &offset);	
-	ForwardIterator<T> operator+(const long int &offset) const;
+  ForwardIterator<T> operator++(int);	// postfix++
+  
+  ForwardIterator<T> &operator+=(const long int &offset);	
+  ForwardIterator<T> operator+(const long int &offset) const;
 #endif
 
-	ForwardIterator<T>& operator=(ForwardIterator<T> rhs);
-	ForwardIterator<T>& operator=(ForwardIterator<T> &rhs) = delete;
+  ForwardIterator<T>& operator=(ForwardIterator<T> rhs);
+  ForwardIterator<T>& operator=(ForwardIterator<T> &rhs) = delete;
 
-	bool operator==(const ForwardIterator<T> &other);
-	bool operator!=(const ForwardIterator<T> &other);
+  bool operator==(const ForwardIterator<T> &other);
+  bool operator!=(const ForwardIterator<T> &other);
+
+  friend void swap(
+	StructuredGrid::ForwardIterator<T> &a,
+	StructuredGrid::ForwardIterator<T> &b
+  ) {
+	std::swap(a._rg, b._rg);
+	std::swap(a._coordItr, b._coordItr);
+	std::swap(a._x, b._x);
+	std::swap(a._y, b._y);
+	std::swap(a._z, b._z);
+	std::swap(a._xb, b._xb);
+	std::swap(a._itr, b._itr);
+	for (int i=0; i<3; i++) {
+		std::swap(a._dims[i], b._dims[i]);
+		std::swap(a._bs[i], b._bs[i]);
+		std::swap(a._bdims[i], b._bdims[i]);
+	}
+	std::swap(a._ndim, b._ndim);
+	std::swap(a._end, b._end);
+	std::swap(a._pred, b._pred);
+
+  }
 
  private:
-	T *_rg;
-	ConstCoordItr _coordItr;
-	size_t _x, _y, _z;	// current index into _rg->_min[3]
-	size_t _xb;	// x index within a block
-	float *_itr;
-	size_t _dims[3];
-	size_t _bs[3];
-	size_t _bdims[3];
-	int _ndim;
-	bool _end;
-	InsideBox _pred;
+  T *_rg;
+  ConstCoordItr _coordItr;
+  size_t _x, _y, _z;	// current index into _rg->_min[3]
+  size_t _xb;	// x index within a block
+  float *_itr;
+  size_t _dims[3];
+  size_t _bs[3];
+  size_t _bdims[3];
+  int _ndim;
+  bool _end;
+  InsideBox _pred;
 
  };
 
  typedef StructuredGrid::ForwardIterator<StructuredGrid> Iterator;
  typedef StructuredGrid::ForwardIterator<StructuredGrid const> ConstIterator;
 
+ //! Construct a begin iterator that will iterate through elements
+ //! inside or on the box defined by \p minu and \p maxu
+ //
  Iterator begin(
 	const std::vector <double> &minu, const std::vector <double>  &maxu
  ) {
