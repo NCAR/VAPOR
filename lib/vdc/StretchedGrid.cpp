@@ -123,7 +123,7 @@ StretchedGrid::StretchedGrid(
 
 float StretchedGrid::GetValue(double x, double y, double z) const {
 
-    RegularGrid::_ClampCoord(x, y, z);
+    RegularGrid::ClampCoord(x, y, z);
 
     // At this point xyz should be within the bounds _minu, _maxu
     //
@@ -454,7 +454,7 @@ void StretchedGrid::GetIJKIndex(
     double x, double y, double z,
     size_t *i, size_t *j, size_t *k) const {
 
-    RegularGrid::_ClampCoord(x, y, z);
+    RegularGrid::ClampCoord(x, y, z);
 
     size_t dims[3];
     RegularGrid::GetDimensions(dims);
@@ -518,7 +518,7 @@ void StretchedGrid::GetIJKIndexFloor(
     double x, double y, double z,
     size_t *i, size_t *j, size_t *k) const {
 
-    RegularGrid::_ClampCoord(x, y, z);
+    RegularGrid::ClampCoord(x, y, z);
 
     size_t dims[3];
     RegularGrid::GetDimensions(dims);
