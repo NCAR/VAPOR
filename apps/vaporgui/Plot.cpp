@@ -217,15 +217,22 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow() {
     connect(plotButton, SIGNAL(pressed()), this, SLOT(go()));
     connect(addVarCombo, SIGNAL(activated(int)), this, SLOT(newVarAdded(int)));
     connect(removeVarCombo, SIGNAL(activated(int)), this, SLOT(removeVar(int)));
-    connect(timeCopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
-    connect(spaceP1CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
-    connect(spaceP2CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
-    connect(refCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(refinementChanged(int)));
-    connect(cRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
+    connect(timeCopyCombo, SIGNAL(activated(int)),
+            this, SLOT(getPointFromRenderer()));
+    connect(spaceP1CopyCombo, SIGNAL(activated(int)),
+            this, SLOT(getPointFromRenderer()));
+    connect(spaceP2CopyCombo, SIGNAL(activated(int)),
+            this, SLOT(getPointFromRenderer()));
+    connect(refCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(refinementChanged(int)));
+    connect(cRatioCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(cRatioChanged(int)));
     for (int i = 0; i < 4; i++) {
-        connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int)));
+        connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)),
+                this, SLOT(constCheckboxChanged(int)));
         if (i < 3) {
-            connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int)));
+            connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)),
+                    this, SLOT(constCheckboxChanged(int)));
         }
     }
 }
@@ -459,6 +466,8 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm) {
     //
     initSSCs();
 
+    applyParams();
+
     showMe();
 }
 
@@ -469,27 +478,36 @@ void Plot::showMe() {
 }
 
 void Plot::initCRatios() {
-    _cRatios = _dm->GetCRatios();
+    _cRatios = _dm->GetCRatios(_vars[0]);
+
+    cRatioCombo->blockSignals(true);
     cRatioCombo->clear();
 
     for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it) {
         cRatioCombo->addItem("1:" + QString::number(*it));
     }
 
-    _cRatio = _cRatios.size() - 1;
-    cRatioCombo->setCurrentIndex(_cRatio);
+    if (_params->GetCRatio() == -1) {
+        _cRatio = _cRatios.size() - 1;
+        cRatioCombo->setCurrentIndex(_cRatio);
+    }
+    cRatioCombo->blockSignals(false);
 }
 
 void Plot::initRefinement() {
+    refCombo->blockSignals(true);
+
     refCombo->clear();
-    _refLevel = _dm->GetNumTransforms();
+    _refLevel = _dm->GetNumRefLevels(_vars[0]);
     for (int i = 0; i <= _refLevel; i++) {
-        refCombo->blockSignals(true);
         refCombo->addItem(QString::number(i));
-        refCombo->blockSignals(false);
     }
 
-    refCombo->setCurrentIndex(_refLevel);
+    if (_params->GetRefinement() == -1) {
+        refCombo->setCurrentIndex(_refLevel);
+    }
+
+    refCombo->blockSignals(false);
 }
 
 void Plot::initSSCs() {
@@ -607,6 +625,32 @@ void Plot::initSSCs() {
     _timeZRange->addObserver(_timeZSlider);
     _timeZRange->addObserver(_timeZLineEdit);
     _timeZRange->setUserMin((_extents[2] + _extents[5]) / 2.f);
+
+    spaceP1XSlider->installEventFilter(this);
+    spaceP2XSlider->installEventFilter(this);
+    spaceP1YSlider->installEventFilter(this);
+    spaceP2YSlider->installEventFilter(this);
+    spaceP1ZSlider->installEventFilter(this);
+    spaceP2ZSlider->installEventFilter(this);
+
+    spaceP1XEdit->installEventFilter(this);
+    spaceP2XEdit->installEventFilter(this);
+    spaceP1YEdit->installEventFilter(this);
+    spaceP2YEdit->installEventFilter(this);
+    spaceP1ZEdit->installEventFilter(this);
+    spaceP2ZEdit->installEventFilter(this);
+
+    spaceTimeSlider->installEventFilter(this);
+    timeTimeMinSlider->installEventFilter(this);
+    timeTimeMaxSlider->installEventFilter(this);
+
+    timeXSlider->installEventFilter(this);
+    timeYSlider->installEventFilter(this);
+    timeZSlider->installEventFilter(this);
+
+    timeXEdit->installEventFilter(this);
+    timeYEdit->installEventFilter(this);
+    timeZEdit->installEventFilter(this);
 }
 
 void Plot::initPlotDlg() {
@@ -931,6 +975,16 @@ void Plot::fudgeVoxBounds(
         if (maxv[i] < dims[i] - 1)
             maxv[i]++;
     }
+}
+
+void Plot::refinementChanged(int i) {
+    _refLevel = i;
+    _params->SetRefinement(i);
+}
+
+void Plot::cRatioChanged(int i) {
+    _cRatio = i;
+    _params->SetCRatio(i);
 }
 
 // Get extents of line in user coordinates. Ensure min[i] <= max[i]
@@ -1297,16 +1351,123 @@ void Plot::getPointFromRenderer() {
 }
 #endif
 
+void Plot::applyParams() {
+    vector<double> minSpace, maxSpace, timeExts;
+    minSpace = _params->GetSpaceMinExtents();
+    maxSpace = _params->GetSpaceMaxExtents();
+
+    // If minSpace is empty, then we have an empty set of params.  Just return.
+    if (minSpace.empty()) {
+        return;
+    }
+
+    _spaceXRange->setUserMin(minSpace[0]);
+    _spaceYRange->setUserMin(minSpace[1]);
+    _spaceZRange->setUserMin(minSpace[2]);
+    _spaceXRange->setUserMax(maxSpace[0]);
+    _spaceYRange->setUserMax(maxSpace[1]);
+    _spaceZRange->setUserMax(maxSpace[2]);
+
+    timeExts = _params->GetTimeExtents();
+    _timeXRange->setUserMin(timeExts[0]);
+    _timeXRange->setUserMax(timeExts[0]);
+    _timeYRange->setUserMin(timeExts[1]);
+    _timeYRange->setUserMax(timeExts[1]);
+    _timeZRange->setUserMin(timeExts[2]);
+    _timeZRange->setUserMax(timeExts[2]);
+
+    int timeMinTS, timeMaxTS;
+    timeMinTS = _params->GetTimeMinTS();
+    timeMaxTS = _params->GetTimeMaxTS();
+    _timeTimeRange->setUserMin(timeMinTS);
+    _timeTimeRange->setUserMax(timeMaxTS);
+
+    int spaceTS = _params->GetSpaceTS();
+    _spaceTimeRange->setUserMin(spaceTS);
+
+    vector<string> vars = _params->GetVarNames();
+    for (int i = 0; i < vars.size(); i++) {
+        string var = vars[i];
+        int index = addVarCombo->findText(QString::fromStdString(var));
+        newVarAdded(index);
+    }
+
+    int refIndex = _params->GetRefinement();
+    refCombo->setCurrentIndex(refIndex);
+
+    int cRatioIndex = _params->GetCRatio();
+    cRatioCombo->setCurrentIndex(cRatioIndex);
+
+    bool xConst = _params->GetXConst();
+    if (xConst) {
+        _spaceXRange->setConst(xConst);
+        _spaceCheckBoxes[0]->setCheckState(Qt::Checked);
+    }
+    bool yConst = _params->GetYConst();
+    if (yConst) {
+        constCheckboxChanged(yConst);
+        _spaceCheckBoxes[1]->setCheckState(Qt::Checked);
+    }
+    bool zConst = _params->GetZConst();
+    if (zConst) {
+        constCheckboxChanged(zConst);
+        _spaceCheckBoxes[2]->setCheckState(Qt::Checked);
+    }
+    bool tConst = _params->GetTimeConst();
+    if (tConst) {
+        constCheckboxChanged(tConst);
+        _timeCheckBoxes[3]->setCheckState(Qt::Checked);
+    }
+}
+
+bool Plot::eventFilter(QObject *o, QEvent *e) {
+    vector<double> spaceMinExts, spaceMaxExts, timeExts;
+    int spaceTS, minTimeTS, maxTimeTS;
+
+    spaceMinExts.push_back(_spaceXRange->getUserMin());
+    spaceMinExts.push_back(_spaceYRange->getUserMin());
+    spaceMinExts.push_back(_spaceZRange->getUserMin());
+    spaceMaxExts.push_back(_spaceXRange->getUserMax());
+    spaceMaxExts.push_back(_spaceYRange->getUserMax());
+    spaceMaxExts.push_back(_spaceZRange->getUserMax());
+    _params->SetSpaceMaxExtents(spaceMaxExts);
+    _params->SetSpaceMinExtents(spaceMinExts);
+
+    timeExts.push_back(_timeXRange->getUserMin());
+    timeExts.push_back(_timeYRange->getUserMin());
+    timeExts.push_back(_timeZRange->getUserMin());
+
+    _params->SetTimeExtents(timeExts);
+
+    spaceTS = _spaceTimeRange->getUserMin();
+    minTimeTS = _timeTimeRange->getUserMin();
+    maxTimeTS = _timeTimeRange->getUserMax();
+
+    _params->SetSpaceTS(spaceTS);
+    _params->SetTimeMinTS(minTimeTS);
+    _params->SetTimeMaxTS(maxTimeTS);
+
+    //return QObject::eventFilter(o,e);
+    return false;
+}
+
 void Plot::constCheckboxChanged(int state) {
     QObject *sender = QObject::sender();
-    if (sender == _spaceCheckBoxes[0])
+    cout << sender->objectName().toStdString() << endl;
+    if (sender == _spaceCheckBoxes[0]) {
         _spaceXRange->setConst(state);
-    else if (sender == _spaceCheckBoxes[1])
+        _params->SetXConst((bool)state);
+    } else if (sender == _spaceCheckBoxes[1]) {
         _spaceYRange->setConst(state);
-    else if (sender == _spaceCheckBoxes[2])
+        _params->SetYConst((bool)state);
+    } else if (sender == _spaceCheckBoxes[2]) {
         _spaceZRange->setConst(state);
-    else if (sender == _timeCheckBoxes[0])
+        _params->SetZConst((bool)state);
+    } else if (sender == _timeCheckBoxes[3]) {
+        cout << "TimeCheckboxChecked" << endl;
         _timeTimeRange->setConst(state);
+        _params->SetTimeConst((bool)state);
+    }
 }
 
 void Plot::print(bool doSpace) const {
@@ -1335,13 +1496,35 @@ void Plot::print(bool doSpace) const {
 
 void Plot::initTimes() {
     _timeExtents.clear();
-
     _timeExtents.push_back(0);
     _timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0]) - 1);
 }
 
 void Plot::initExtents(int ts) {
-    _extents = _dm->GetExtents(0);
+    vector<double> minExts, maxExts;
+
+    int rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel,
+                                     minExts, maxExts);
+    if (rc < 0) {
+        string myErr;
+        myErr = "Plot could not find minimum and maximum extents"
+                " in current data set.";
+    }
+    if (_extents.size() < 6) {
+        _extents.push_back(minExts[0]);
+        _extents.push_back(minExts[1]);
+        _extents.push_back(minExts[2]);
+        _extents.push_back(maxExts[0]);
+        _extents.push_back(maxExts[1]);
+        _extents.push_back(maxExts[2]);
+    } else {
+        _extents[0] = minExts[0];
+        _extents[1] = minExts[1];
+        _extents[2] = minExts[2];
+        _extents[3] = maxExts[0];
+        _extents[4] = maxExts[1];
+        _extents[5] = maxExts[2];
+    }
 }
 
 void Plot::initConstCheckboxes() {
@@ -1382,20 +1565,12 @@ void Plot::initVariables() {
     addVarCombo->addItem("Add Variable:");
     vector<string> vars;
 
-    vars = _dm->GetVariables3D();
+    vars = _dm->GetDataVarNames(3, true);
     for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
         _vars.push_back(*it);
         _vars3d.push_back(*it);
     }
-    vars = _dm->GetVariables2DXY();
-    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
-        _vars.push_back(*it);
-    }
-    vars = _dm->GetVariables2DYZ();
-    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
-        _vars.push_back(*it);
-    }
-    vars = _dm->GetVariables2DXZ();
+    vars = _dm->GetDataVarNames(2, true);
     for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
         _vars.push_back(*it);
     }
@@ -1412,7 +1587,8 @@ void Plot::newVarAdded(int index) {
 
     if (index == 0)
         return;
-    string varName = addVarCombo->currentText().toStdString();
+    //string varName = addVarCombo->currentText().toStdString();
+    string varName = addVarCombo->itemText(index).toStdString();
 
     if (std::find(_uVars.begin(), _uVars.end(), varName) != _uVars.end())
         return;
@@ -1459,6 +1635,8 @@ void Plot::newVarAdded(int index) {
         }
     }
     varsAre2D ? enableZControllers(false) : enableZControllers(true);
+
+    _params->SetVarNames(_uVars);
 }
 
 void Plot::enableZControllers(bool s) {
@@ -1509,6 +1687,7 @@ void Plot::removeVar(int index) {
     }
 
     removeVarCombo->setCurrentIndex(0);
+    _params->SetVarNames(_uVars);
 }
 
 void Plot::initTables() {
