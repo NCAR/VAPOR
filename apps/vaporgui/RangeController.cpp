@@ -136,6 +136,8 @@ RangeLabel::RangeLabel(Range *range,
     _range = range;
     _label = label;
     _type = type;
+
+    //notify();
 }
 
 MinMaxLabel::MinMaxLabel(Range *range,
@@ -192,7 +194,6 @@ MinMaxSlider::MinMaxSlider(Range *range,
 void MinMaxSlider::updateValue() {
     double val;
     int pos = _slider->value();
-
     if (pos == _increments)
         val = _max;
     else if (pos == 0)
@@ -211,7 +212,7 @@ void MinMaxSlider::notify() {
 
     _val = (_type == 0) ? min : max;
 
-    int denom = (_max - _min) / _increments;
+    float denom = (_max - _min) / _increments;
     if (denom <= 0)
         denom = 1;
 
@@ -224,9 +225,15 @@ void MinMaxSlider::notify() {
 
 TimeSlider::TimeSlider(Range *range, QSlider *slider, int type)
     : MinMaxSlider(range, slider, type) {
-    _increments = range->getUserMax() - range->getUserMin();
+    _increments = range->getDomainMax() - range->getDomainMin();
     _slider->setRange(0, _increments);
     _slider->setSingleStep(1);
+
+    if (type == 0) {
+        _slider->setValue(range->getDomainMin());
+    } else {
+        _slider->setValue(range->getDomainMax());
+    }
 }
 
 SinglePointSlider::SinglePointSlider(Range *range,
@@ -258,16 +265,16 @@ SinglePointSlider::SinglePointSlider(Range *range,
 }
 
 void SinglePointSlider::notify() {
-    double domainMin = _range->getDomainMin();
-    double domainMax = _range->getDomainMax();
+    _min = _range->getDomainMin();
+    _max = _range->getDomainMax();
 
     _val = _range->getUserMin();
 
-    int denom = (domainMax - domainMin) / _increments;
+    float denom = (_max - _min) / _increments;
     if (denom <= 0)
         denom = 1;
 
-    _position = (_val - domainMin) / denom;
+    _position = (_val - _min) / denom;
 
     _slider->blockSignals(true);
     _slider->setValue(_position);
@@ -275,8 +282,6 @@ void SinglePointSlider::notify() {
 }
 
 void SinglePointSlider::updateValue() {
-    _min = _range->getDomainMin();
-    _max = _range->getDomainMax();
     double val;
     int pos = _slider->value();
     if (pos == _increments)
@@ -362,12 +367,16 @@ void CenterSizeSlider::updateValue() {
     double uMax = _range->getUserMax();
     int pos = _slider->value();
 
+    double dMin = _range->getDomainMin();
+    double dMax = _range->getDomainMax();
+    double binSize = (dMax - dMin) / _increments;
+
     double center, size;
     if (_type == 0) {
-        center = pos * _binSize + _min;
+        center = pos * binSize + dMin;
         size = uMax - uMin;
     } else if (_type == 1) {
-        size = pos * _binSize;
+        size = pos * binSize;
         center = (uMax + uMin) / 2.f;
     } else
         return;
@@ -383,13 +392,17 @@ void CenterSizeSlider::notify() {
     double min = _range->getUserMin();
     double max = _range->getUserMax();
 
+    double dMin = _range->getDomainMin();
+    double dMax = _range->getDomainMax();
+    double binSize = (dMax - dMin) / _increments;
+
     int pos;
     if (_type == 0) {
         double center = (max + min) / 2.f;
-        pos = (center - _min) / _binSize;
+        pos = (center - dMin) / binSize;
     } else if (_type == 1) {
         double size = max - min;
-        pos = size / _binSize;
+        pos = size / binSize;
     } else
         return;
 
@@ -410,21 +423,54 @@ CenterSizeLineEdit::CenterSizeLineEdit(Range *range,
 }
 
 void CenterSizeLineEdit::updateValue() {
+    double dMin = _range->getDomainMin();
+    double dMax = _range->getDomainMax();
     double uMin = _range->getUserMin();
     double uMax = _range->getUserMax();
     double center, size;
+    double newMin, newMax;
 
     if (_type == 0) {
         center = _lineEdit->text().toDouble();
         size = uMax - uMin;
-    } else if (_type == 1) {
+
+        newMin = center - size / 2.f;
+        newMax = center + size / 2.f;
+
+        if (newMin < dMin) {
+            newMin = dMin;
+            newMax = 2 * (center - dMin);
+        }
+
+        if (newMax > dMax) {
+            newMax = dMax;
+            newMin = dMax - 2 * (dMax - center);
+        }
+    }
+
+    else if (_type == 1) {
         size = _lineEdit->text().toDouble();
         center = (uMax + uMin) / 2.f;
+
+        float fullSize = dMax - dMin;
+        if (size > fullSize)
+            size = fullSize;
+
+        newMin = center - size / 2.f;
+        newMax = center + size / 2.f;
+
+        if (newMin < dMin) {
+            newMin = dMin;
+            newMax = dMin + size;
+        }
+
+        if (newMax > dMax) {
+            newMax = dMax;
+            newMin = dMax - size;
+        }
+
     } else
         return;
-
-    double newMin = center - size / 2.f;
-    double newMax = center + size / 2.f;
 
     _range->setUserMin(newMin);
     _range->setUserMax(newMax);
@@ -448,6 +494,8 @@ MinMaxTableCell::MinMaxTableCell(Range *range,
     : Controller(range, type) {
     _table = table;
     _cell = table->item(row, col);
+    _row = row;
+    _col = col;
     _val = type == 0 ? _min : _max;
 
     _cell->setText(QString::number(_val));
@@ -465,8 +513,9 @@ void MinMaxTableCell::updateValue(int row, int col) {
 
 void MinMaxTableCell::notify() {
     double val = _type == 0 ? _range->getUserMin() : _range->getUserMax();
+    QTableWidgetItem *cell = _table->item(_row, _col);
 
     _table->blockSignals(true);
-    _cell->setText(QString::number(val));
+    cell->setText(QString::number(val));
     _table->blockSignals(false);
 }
