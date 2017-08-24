@@ -212,7 +212,6 @@ void PlotParams::SetXConst(bool state) {
 	string sState = state ? "true" : "false";
 	SetValueString(_xConstTag, "Variable for keeping the min/max X coordinate "
 		"constant", sState);
-	cout << "SetXConst " << state << endl;
 }
 
 bool PlotParams::GetYConst() const {
@@ -247,6 +246,6 @@ bool PlotParams::GetTimeConst() const {
 
 void PlotParams::SetTimeConst(bool state) {
 	string sState = state ? "true" : "false";
-	SetValueString(_zConstTag, "Variable for keeping the min/max time "
+	SetValueString(_timeConstTag, "Variable for keeping the min/max time "
 		"coordinate constant", sState);
 }
