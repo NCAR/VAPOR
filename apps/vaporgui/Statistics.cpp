@@ -280,15 +280,9 @@ int Statistics::initialize()
     _MAX = 0x02;
     _MEAN = 0x04;
     _MEDIAN = 0x00;
-    if (_params->GetMedianStat()) {
-        cout << "Median found" << endl;
-        _MEDIAN = 0x10;
-    }
+    if (_params->GetMedianStat()) { _MEDIAN = 0x10; }
     _SIGMA = 0x00;
-    if (_params->GetStdDevStat()) {
-        cout << "StdDev found" << endl;
-        _SIGMA = 0x08;
-    }
+    if (_params->GetStdDevStat()) { _SIGMA = 0x08; }
     _calculations = 0xFF;
 
     if (_dm == NULL) return -1;
@@ -312,10 +306,6 @@ int Statistics::initialize()
 
     initTimes();
 
-    //	int rc = GetExtents(_extents);
-    //	if (rc<0) return -1;
-    //	_fullExtents = _extents;
-
     initCRatios();
 
     initRefinement();
@@ -323,24 +313,9 @@ int Statistics::initialize()
     initRegion();
 
     initRangeControllers();
-    // updateSliders();
 
     retrieveRangeParams();
     _regionInitialized = 1;
-
-    //	vector<double> minPExtents = _params->GetMinExtents();
-    //	vector<double> maxPExtents = _params->GetMaxExtents();
-    //	cout << minPExtents.size() << endl;
-    //	cout << maxPExtents.size() << endl;
-    //	if (!minPExtents.empty() &&
-    //		!maxPExtents.empty()) {
-    //		_xRange->setUserMin(minPExtents[0]);
-    //		_xRange->setUserMax(maxPExtents[0]);
-    //		_yRange->setUserMin(minPExtents[1]);
-    //		_yRange->setUserMax(maxPExtents[1]);
-    //		_zRange->setUserMin(minPExtents[2]);
-    //		_zRange->setUserMax(maxPExtents[2]);
-    //	}
 
     ExportButton->setEnabled(true);
 
@@ -388,7 +363,6 @@ void Statistics::addStatistic(int index)
         _params->SetMedianStat(true);
     }
     if (statName == "StdDev") {
-        cout << "Setting SetStdDevStat" << endl;
         _SIGMA = 0x08;
         _params->SetStdDevStat(true);
     }
@@ -695,7 +669,7 @@ int Statistics::GetExtents(vector<double> &extents)
 
     if (rc < 0) {
         string myErr;
-        myErr = "Could not find minimum and maximun extents"
+        myErr = "Statistics could not find minimum and maximun extents"
                 " in current data set.";
         errReport(myErr);
         return -1;
@@ -820,13 +794,6 @@ void Statistics::initRegion()
             _params->SetMinExtents(minExtents);
             _params->SetMaxExtents(maxExtents);
 
-            cout << _extents[0] << endl;
-            cout << _extents[1] << endl;
-            cout << _extents[2] << endl;
-            cout << _extents[3] << endl;
-            cout << _extents[4] << endl;
-            cout << _extents[5] << endl;
-
             _xRange->setUserMin(_extents[0]);
             _yRange->setUserMin(_extents[1]);
             _zRange->setUserMin(_extents[2]);
@@ -899,7 +866,6 @@ void Statistics::initRegion()
                 QString varName = QString::fromStdString(pVars[i]);
                 int     index = NewVarCombo->findText(varName);
                 newVarAdded(index);
-                cout << varName.toStdString() << " " << i << endl;
             }
         }
 

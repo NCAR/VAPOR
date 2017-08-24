@@ -102,6 +102,8 @@ private:
     void           initSSCs();
     void           initCRatios();
     void           initRefinement();
+    void           applyParams();
+    bool           eventFilter(QObject *o, QEvent *e);
     void           enableZControllers(bool s);
     void           destroyControllers();
     vector<string> getEnabledVars() const;
@@ -253,8 +255,8 @@ public slots:
     void newVarAdded(int index);
     void removeVar(int);
     void savePlotToFile();
-    void refinementChanged(int i) { _refLevel = i; }
-    void cRatioChanged(int i) { _cRatio = i; }
+    void refinementChanged(int i);
+    void cRatioChanged(int i);
     void constCheckboxChanged(int state);
 };
 
