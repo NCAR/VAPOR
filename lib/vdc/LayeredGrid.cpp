@@ -4,126 +4,53 @@
 #include <cmath>
 #include <cfloat>
 #include "vapor/LayeredGrid.h"
+#include "vapor/glutil.h"
 
 using namespace std;
 using namespace VAPoR;
 
 void LayeredGrid::_layeredGrid(
-    const vector<bool> &periodic,
     const vector<double> &minu,
     const vector<double> &maxu,
     const RegularGrid &rg) {
-    assert(periodic.size() == _ndim);
+    assert(GetTopologyDim() == 3);
     assert(minu.size() == maxu.size());
     assert(minu.size() == 2);
 
+    _minu.clear();
+    _maxu.clear();
+    _delta.clear();
+    _interpolationOrder = 1;
+
     _rg = rg;
+    _minu = minu;
+    _maxu = maxu;
 
+    // Coordinates for horizontal dimensions
     //
-    // Periodic, varying dimensions are not supported
-    //
-    if (_ndim == 3 && periodic[2])
-        SetPeriodic(periodic);
+    vector<size_t> dims = GetDimensions();
+    for (int i = 0; i < _minu.size(); i++) {
+        _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1));
+    }
 
+    // Get extents of layered dimension
     //
-    // Set 2D horizontal extents in base class.
-    //
-    vector<double> my_minu = minu;
-    my_minu.push_back(0.0);
-
-    vector<double> my_maxu = maxu;
-    my_maxu.push_back(1.0);
-    RegularGrid::_SetExtents(my_minu, my_maxu);
-
-    // Now get the extents of the varying dimension
-    //
-    _GetUserExtents(_minu, _maxu);
+    float range[2];
+    _rg.GetRange(range);
+    _minu.push_back(range[0]);
+    _maxu.push_back(range[1]);
 }
 
 LayeredGrid::LayeredGrid(
+    const vector<size_t> &dims,
     const vector<size_t> &bs,
-    const vector<size_t> &min,
-    const vector<size_t> &max,
+    const vector<float *> &blks,
     const vector<double> &minu,
     const vector<double> &maxu,
-    const vector<bool> &periodic,
-    const vector<float *> &blks,
-    const RegularGrid &rg) : RegularGrid(bs, min, max, periodic, blks) {
+    const RegularGrid &rg) : StructuredGrid(dims, bs, blks) {
 
-    _layeredGrid(periodic, minu, maxu, rg);
+    _layeredGrid(minu, maxu, rg);
 }
-
-#ifdef DEAD
-LayeredGrid::LayeredGrid(
-    const size_t bs[3],
-    const size_t min[3],
-    const size_t max[3],
-    const double extents[6],
-    const bool periodic[3],
-    const vector<float *> &blks,
-    const RegularGrid &rg) : RegularGrid(bs, min, max, periodic, blks) {
-
-    vector<bool> periodic_v;
-    vector<double> minu;
-    vector<double> maxu;
-
-    // Extents contains horizontal
-    for (int i = 0; i < 2; i++) {
-        minu.push_back(extents[i]);
-        maxu.push_back(extents[i + 3]);
-    }
-
-    for (int i = 0; i < _ndim; i++) {
-        periodic_v.push_back(periodic[i]);
-    }
-
-    _layeredGrid(periodic_v, minu, maxu, rg);
-}
-#endif
-
-LayeredGrid::LayeredGrid(
-    const vector<size_t> &bs,
-    const vector<size_t> &min,
-    const vector<size_t> &max,
-    const vector<double> &minu,
-    const vector<double> &maxu,
-    const vector<bool> &periodic,
-    const vector<float *> &blks,
-    const RegularGrid &rg,
-    float missing_value) : RegularGrid(bs, min, max, periodic, blks, missing_value) {
-
-    _layeredGrid(periodic, minu, maxu, rg);
-}
-
-#ifdef DEAD
-LayeredGrid::LayeredGrid(
-    const size_t bs[3],
-    const size_t min[3],
-    const size_t max[3],
-    const double extents[6],
-    const bool periodic[3],
-    const vector<float *> &blks,
-    const RegularGrid &rg,
-    float missing_value) : RegularGrid(bs, min, max, periodic, blks, missing_value) {
-
-    vector<bool> periodic_v;
-    vector<double> minu;
-    vector<double> maxu;
-
-    // Extents contains horizontal
-    for (int i = 0; i < 2; i++) {
-        minu.push_back(extents[i]);
-        maxu.push_back(extents[i + 3]);
-    }
-
-    for (int i = 0; i < _ndim; i++) {
-        periodic_v.push_back(periodic[i]);
-    }
-
-    _layeredGrid(periodic_v, minu, maxu, rg);
-}
-
-#endif
 
 LayeredGrid::~LayeredGrid() {
 }
@@ -145,21 +72,19 @@ void LayeredGrid::GetBoundingBox(
     minu.clear();
     maxu.clear();
 
-    // Get extents of horizontal dimensions from base class. Also get vertical
-    // dimension, but it's bogus.
+    // Get extents of horizontal dimensions. Note: also get vertical
+    // dimension, but it's bogus for layered grid.
     //
-    RegularGrid::GetBoundingBox(min, max, minu, maxu);
-
-    if (_ndim == 2)
-        return;
+    GetUserCoordinates(min, minu);
+    GetUserCoordinates(max, maxu);
 
     // Initialize min and max coordinates of varying dimension with
     // coordinates of "first" and "last" grid point. Coordinates of
     // varying dimension are stored as values of a scalar function
     // sampling the coordinate space.
     //
-    float mincoord = _rg.AccessIJK(min[0], min[1], min[2]);
-    float maxcoord = _rg.AccessIJK(max[0], max[1], max[2]);
+    float mincoord = _rg.AccessIndex(min);
+    float maxcoord = _rg.AccessIndex(max);
 
     // Now find the extreme values of the varying dimension's coordinates
     //
@@ -189,86 +114,66 @@ void LayeredGrid::GetEnclosingRegion(
     const vector<double> &minu, const vector<double> &maxu,
     vector<size_t> &min, vector<size_t> &max) const {
     assert(minu.size() == maxu.size());
-    assert(minu.size() == _ndim);
+    assert(minu.size() == 3);
 
     min.clear();
     max.clear();
 
     //
-    // Get coords for non-varying dimension
+    // Get coords for non-varying dimension AND varying dimension.
     //
-    RegularGrid::GetEnclosingRegion(minu, maxu, min, max);
-    if (_ndim == 2)
-        return;
+    for (int i = 0; i < 2; i++) {
+        assert(minu[i] <= maxu[i]);
+        double u = minu[i];
+        if (u < minu[i]) {
+            u = minu[i];
+        }
+        size_t index = (u - _minu[i]) / _delta[i];
+        min.push_back(index);
+
+        u = maxu[i];
+        if (u > maxu[i]) {
+            u = maxu[i];
+        }
+        index = (u - _maxu[i]) / _delta[i];
+        max.push_back(index);
+    }
 
     // we have the correct results
-    // for X and Y dimensions, but the Z levels may not be completely
-    // contained in the box. We need to verify and possibly expand
-    // the min and max Z values.
+    // for X and Y dimensions, Now need to do the varying axis
     //
 
-    size_t dims[3];
-    GetDimensions(dims);
+    min.push_back(0.0);
+    max.push_back(0.0);
+    vector<size_t> dims = GetDimensions();
 
     bool done;
     double z;
-    if (maxu[2] >= minu[2]) {
-        //
-        // first do max, then min
-        //
-        done = false;
-        for (int k = 0; k < dims[2] && !done; k++) {
-            done = true;
-            max[2] = k;
-            for (int j = min[1]; j <= max[1] && done; j++) {
-                for (int i = min[0]; i <= max[0] && done; i++) {
-                    z = _rg.AccessIJK(i, j, k); // get Z coordinate
-                    if (z < maxu[2]) {
-                        done = false;
-                    }
+    //
+    // first do max, then min
+    //
+    done = false;
+    for (int k = 0; k < dims[2] && !done; k++) {
+        done = true;
+        max[2] = k;
+        for (int j = min[1]; j <= max[1] && done; j++) {
+            for (int i = min[0]; i <= max[0] && done; i++) {
+                z = _rg.AccessIJK(i, j, k); // get Z coordinate
+                if (z < maxu[2]) {
+                    done = false;
                 }
             }
         }
-        done = false;
-        for (int k = dims[2] - 1; k >= 0 && !done; k--) {
-            done = true;
-            min[2] = k;
-            for (int j = min[1]; j <= max[1] && done; j++) {
-                for (int i = min[0]; i <= max[0] && done; i++) {
-                    z = _rg.AccessIJK(i, j, k); // get Z coordinate
-                    if (z > minu[2]) {
-                        done = false;
-                    }
-                }
-            }
-        }
-    } else {
-        //
-        // first do max, then min
-        //
-        done = false;
-        for (int k = 0; k < dims[2] && !done; k++) {
-            done = true;
-            max[2] = k;
-            for (int j = min[1]; j <= max[1] && done; j++) {
-                for (int i = min[0]; i <= max[0] && done; i++) {
-                    z = _rg.AccessIJK(i, j, k); // get Z coordinate
-                    if (z > maxu[2]) {
-                        done = false;
-                    }
-                }
-            }
-        }
-        done = false;
-        for (int k = dims[2] - 1; k >= 0 && !done; k--) {
-            done = true;
-            min[2] = k;
-            for (int j = min[1]; j <= max[1] && done; j++) {
-                for (int i = min[0]; i <= max[0] && done; i++) {
-                    z = _rg.AccessIJK(i, j, k); // get Z coordinate
-                    if (z < maxu[2]) {
-                        done = false;
-                    }
+    }
+    done = false;
+    for (int k = dims[2] - 1; k >= 0 && !done; k--) {
+        done = true;
+        min[2] = k;
+        for (int j = min[1]; j <= max[1] && done; j++) {
+            for (int i = min[0]; i <= max[0] && done; i++) {
+                z = _rg.AccessIJK(i, j, k); // get Z coordinate
+                if (z > minu[2]) {
+                    done = false;
                 }
             }
         }
@@ -276,52 +181,65 @@ void LayeredGrid::GetEnclosingRegion(
 }
 
 float LayeredGrid::_GetValueNearestNeighbor(
-    double x, double y, double z) const {
+    const std::vector<double> &coords) const {
 
-    // Get the indecies of the cell containing the point
+    // Get the indecies of the nearest grid point
     //
-    size_t i, j, k;
-    GetIJKIndex(x, y, z, &i, &j, &k);
+    vector<size_t> indices;
+    GetIndices(coords, indices);
 
-    return (AccessIJK(i, j, k));
+    return (AccessIndex(indices));
 }
 
-float LayeredGrid::_GetValueLinear(double x, double y, double z) const {
+float LayeredGrid::_GetValueLinear(
+    const std::vector<double> &coords) const {
+    assert(coords.size() == 3);
 
-    size_t dims[3];
-    GetDimensions(dims);
+    vector<size_t> dims = GetDimensions();
 
     // Get the indecies of the cell containing the point
     //
-    size_t i0, j0, k0;
-    size_t i1, j1, k1;
-    GetIJKIndexFloor(x, y, z, &i0, &j0, &k0);
-    if (i0 == dims[0] - 1)
-        i1 = i0;
-    else
-        i1 = i0 + 1;
-    if (j0 == dims[1] - 1)
-        j1 = j0;
-    else
-        j1 = j0 + 1;
-    if (k0 == dims[2] - 1)
-        k1 = k0;
-    else
-        k1 = k0 + 1;
+    vector<size_t> indices0;
+    bool found = GetIndicesCell(coords, indices0);
+    if (!found)
+        return (GetMissingValue());
+
+    vector<size_t> indices1 = indices0;
+
+    indices1[0] += 1;
+    indices1[1] += 1;
+    indices1[2] += 1;
 
     // Get user coordinates of cell containing point
     //
-    double x0, y0, z0, x1, y1, z1;
-    RegularGrid::GetUserCoordinates(i0, j0, k0, &x0, &y0, &z0);
-    RegularGrid::GetUserCoordinates(i1, j1, k1, &x1, &y1, &z1);
+    vector<double> coords0, coords1;
+    GetUserCoordinates(indices0, coords0);
+    GetUserCoordinates(indices1, coords1);
+
+    size_t i0 = indices0[0];
+    size_t j0 = indices0[1];
+    size_t k0 = indices0[2];
+    size_t i1 = indices1[0];
+    size_t j1 = indices1[1];
+    size_t k1 = indices1[2];
+
+    double x = coords[0];
+    double y = coords[1];
+    double z = coords[2];
+    double x0 = coords0[0];
+    double y0 = coords0[1];
+    double z0 = coords0[2];
+    double x1 = coords1[0];
+    double y1 = coords1[1];
+    double z1 = coords1[2];
 
     //
     // Calculate interpolation weights. We always interpolate along
     // the varying dimension last (the kwgt)
     //
     double iwgt, jwgt, kwgt;
-    z0 = _interpolateVaryingCoord(i0, j0, k0, x, y, z);
-    z1 = _interpolateVaryingCoord(i0, j0, k1, x, y, z);
+    z0 = _interpolateVaryingCoord(i0, j0, k0, x, y);
+    z1 = _interpolateVaryingCoord(i0, j0, k1, x, y);
 
     if (x1 != x0)
         iwgt = fabs((x - x0) / (x1 - x0));
@@ -335,17 +253,6 @@ float LayeredGrid::_GetValueLinear(double x, double y, double z) const {
         kwgt = fabs((z - z0) / (z1 - z0));
     else
         kwgt = 0.0;
-
-    if (GetInterpolationOrder() == 0) {
-        if (iwgt > 0.5)
-            i0++;
-        if (jwgt > 0.5)
-            j0++;
-        if (kwgt > 0.5)
-            k0++;
-
-        return (AccessIJK(i0, j0, k0));
-    }
 
     //
     // perform tri-linear interpolation
@@ -411,387 +318,298 @@ float LayeredGrid::_GetValueLinear(double x, double y, double z) const {
     return (c0 + kwgt * (c1 - c0));
 }
 
-float LayeredGrid::GetValue(double x, double y, double z) const {
+float LayeredGrid::GetValue(const std::vector<double> &coords) const {
 
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    _ClampCoord(x, y, z);
+    vector<double> clampedCoords = coords;
+    ClampCoord(clampedCoords);
 
-    if (!LayeredGrid::InsideGrid(x, y, z))
+    if (!LayeredGrid::InsideGrid(clampedCoords))
         return (GetMissingValue());
 
-    size_t dims[3];
-    GetDimensions(dims);
+    vector<size_t> dims = GetDimensions();
 
     // Figure out interpolation order
     //
     int interp_order = _interpolationOrder;
-    if (interp_order == 2 || _ndim != 3) {
+    if (interp_order == 2) {
         if (dims[2] < 3)
             interp_order = 1;
     }
 
     if (interp_order == 0) {
-        return (_GetValueNearestNeighbor(x, y, z));
+        return (_GetValueNearestNeighbor(clampedCoords));
     } else if (interp_order == 1) {
-        return (_GetValueLinear(x, y, z));
+        return (_GetValueLinear(clampedCoords));
     }
 
-    return _getValueQuadratic(x, y, z);
+    return _getValueQuadratic(clampedCoords);
 }
 
-void LayeredGrid::_GetUserExtents(
-    vector<double> &minu, vector<double> &maxu) const {
-    minu.clear();
-    maxu.clear();
-
-    vector<size_t> dims = GetDimensions();
-    vector<size_t> min, max;
-
-    for (int i = 0; i < dims.size(); i++) {
-        min.push_back(0);
-        max.push_back(dims[i] - 1);
-    }
-
-    LayeredGrid::GetBoundingBox(min, max, minu, maxu);
+void LayeredGrid::SetInterpolationOrder(int order) {
+    if (order < 0 || order > 3)
+        order = 2;
+    _interpolationOrder = order;
 }
 
-int LayeredGrid::GetUserCoordinates(
-    size_t i, size_t j, size_t k,
-    double *x, double *y, double *z) const {
+void LayeredGrid::GetUserCoordinates(
+    const std::vector<size_t> &indices,
+    std::vector<double> &coords) const {
+    assert(indices.size() == 3);
+    coords.clear();
 
-    // First get coordinates of non-varying dimensions
-    // The varying dimension coordinate returned is ignored
+    // First get coordinates of non-varying (horizontal) dimensions
     //
-    int rc = RegularGrid::GetUserCoordinates(i, j, k, x, y, z);
-    if (rc < 0)
-        return (rc);
+    vector<size_t> dims = GetDimensions();
+    assert(indices.size() == GetTopologyDim());
+
+    for (int i = 0; i < 2; i++) {
+        size_t index = indices[i];
+
+        if (index >= dims[i]) {
+            index = dims[i] - 1;
+        }
+
+        coords.push_back(indices[i] * _delta[i] + _minu[i]);
+    }
 
     // Now get coordinates of varying dimension
     //
-
-    *z = _rg.AccessIJK(i, j, k);
-    return (0);
+    float v = _rg.AccessIndex(indices);
+    coords.push_back(v);
 }
 
-void LayeredGrid::GetIJKIndex(
-    double x, double y, double z,
-    size_t *i, size_t *j, size_t *k) const {
+void LayeredGrid::GetIndices(
+    const std::vector<double> &coords,
+    std::vector<size_t> &indices) const {
 
-    // First get ijk index of non-varying dimensions
-    // N.B. index returned for varying dimension is bogus
+    // First get ij index of non-varying dimensions
     //
-    RegularGrid::GetIJKIndex(x, y, z, i, j, k);
+    assert(coords.size() >= GetTopologyDim());
+    indices.clear();
 
-    size_t dims[3];
-    GetDimensions(dims);
+    std::vector<double> clampedCoords = coords;
+    ClampCoord(clampedCoords);
 
-    // At this point the ijk indecies are correct for the non-varying
-    // dimensions. We only need to find the index for the varying dimension
+    vector<size_t> dims = GetDimensions();
+
+    vector<double> wgts;
+
+    // Get the two horizontal offsets
     //
-    size_t i0, j0, k0;
-    LayeredGrid::GetIJKIndexFloor(x, y, z, &i0, &j0, &k0);
-    if (k0 == dims[2] - 1) { // on boundary
-        *k = k0;
-        return;
+    for (int i = 0; i < 2; i++) {
+        indices.push_back(0);
+
+        if (clampedCoords[i] < _minu[i]) {
+            indices[i] = 0;
+            continue;
+        }
+        if (clampedCoords[i] > _maxu[i]) {
+            indices[i] = dims[i] - 1;
+            continue;
+        }
+
+        if (_delta[i] != 0.0) {
+            indices[i] = (size_t)floor(
+                (clampedCoords[i] - _minu[i]) / _delta[i]);
+        }
+
+        assert(indices[i] < dims[i]);
+
+        double wgt = 0.0;
+
+        if (_delta[0] != 0.0) {
+            wgt = ((clampedCoords[i] - _minu[i]) - (indices[i] * _delta[i])) /
+                  _delta[i];
+        }
+        if (wgt > 0.5)
+            indices[i] += 1;
     }
 
-    double z0 = _interpolateVaryingCoord(i0, j0, k0, x, y, z);
-    double z1 = _interpolateVaryingCoord(i0, j0, k0 + 1, x, y, z);
-    if (fabs(z - z0) < fabs(z - z1)) {
-        *k = k0;
+    // At this point the ij indecies are correct for the non-varying
+    // dimensions. We only need to find the index for the varying dimension
+    //
+    size_t k0;
+    int rc = _bsearchKIndexCell(
+        indices[0], indices[1], clampedCoords[2], k0);
+
+    // _bsearchKIndexCell returns non-zero value if point is outside of the
+    // vertical column  (negative number if below, positive if above);
+    //
+    if (rc != 0) {
+        if (rc < 0) {
+            indices.push_back(0);
+            return;
+        } else {
+            indices.push_back(dims[2] - 1);
+            return;
+        }
+    }
+
+    double z0 = _interpolateVaryingCoord(
+        indices[0], indices[1], k0, clampedCoords[0], clampedCoords[1]);
+    double z1 = _interpolateVaryingCoord(
+        indices[0], indices[1], k0 + 1, clampedCoords[0], clampedCoords[1]);
+    if (fabs(clampedCoords[2] - z0) < fabs(clampedCoords[2] - z1)) {
+        indices.push_back(k0);
     } else {
-        *k = k0 + 1;
+        indices.push_back(k0 + 1);
     }
 }
 
-void LayeredGrid::GetIJKIndexFloor(
-    double x, double y, double z,
-    size_t *i, size_t *j, size_t *k) const {
+bool LayeredGrid::GetIndicesCell(
+    const std::vector<double> &coords,
+    std::vector<size_t> &indices) const {
 
-    // First get ijk index of non-varying dimensions
-    // N.B. index returned for varying dimension is bogus
+    assert(coords.size() >= GetTopologyDim());
+    indices.clear();
+
+    std::vector<double> clampedCoords = coords;
+    ClampCoord(clampedCoords);
+
+    vector<size_t> dims = GetDimensions();
+
+    // Get horizontal indices from regular grid
     //
-    size_t i0, j0, k0;
-    RegularGrid::GetIJKIndexFloor(x, y, z, &i0, &j0, &k0);
+    for (int i = 0; i < 2; i++) {
+        indices.push_back(0);
 
-    size_t dims[3];
-    GetDimensions(dims);
-
-    size_t i1, j1, k1;
-    if (i0 == dims[0] - 1)
-        i1 = i0;
-    else
-        i1 = i0 + 1;
-    if (j0 == dims[1] - 1)
-        j1 = j0;
-    else
-        j1 = j0 + 1;
-    if (k0 == dims[2] - 1)
-        k1 = k0;
-    else
-        k1 = k0 + 1;
-
-    // At this point the ijk indecies are correct for the non-varying
-    // dimensions. We only need to find the index for the varying dimension
-    //
-    *i = i0;
-    *j = j0;
-
-    // Now search for the closest point
-    //
-    k0 = 0;
-    k1 = dims[2] - 1;
-    double z0 = _interpolateVaryingCoord(i0, j0, k0, x, y, z);
-    double z1 = _interpolateVaryingCoord(i0, j0, k1, x, y, z);
-
-    // see if point is outside grid or on boundary
-    //
-    if ((z - z0) * (z - z1) >= 0.0) {
-        if (z0 <= z1) {
-            if (z <= z0)
-                *k = 0;
-            else if (z >= z1)
-                *k = dims[2] - 1;
-        } else {
-            if (z >= z0)
-                *k = 0;
-            else if (z <= z1)
-                *k = dims[2] - 1;
+        if (clampedCoords[i] < _minu[i] || clampedCoords[i] > _maxu[i]) {
+            return (false);
         }
-        return;
+
+        if (_delta[i] != 0.0) {
+            indices[i] = (size_t)floor(
+                (clampedCoords[i] - _minu[i]) / _delta[i]);
+        }
+
+        assert(indices[i] < dims[i]);
     }
 
+    // Now find index for layered grid
     //
-    // Z-coord of point must be between z0 and z1
-    //
-    while (k1 - k0 > 1) {
+    size_t k;
+    int rc = _bsearchKIndexCell(indices[0], indices[1], clampedCoords[2], k);
+    if (rc != 0)
+        return (false);
 
-        z1 = _interpolateVaryingCoord(i0, j0, (k0 + k1) >> 1, x, y, z);
-        if (z1 == z) { // pathological case
-            //*k = (k0+k1)>>1;
-            k0 = (k0 + k1) >> 1;
-            break;
-        }
+    indices.push_back(k);
 
-        // if the signs of differences change then the coordinate
-        // is between z0 and z1
-        //
-        if ((z - z0) * (z - z1) <= 0.0) {
-            k1 = (k0 + k1) >> 1;
-        } else {
-            k0 = (k0 + k1) >> 1;
-            z0 = z1;
-        }
-    }
-    *k = k0;
+    return (true);
 }
 
-void LayeredGrid::SetPeriodic(const std::vector<bool> &periodic) {
-    vector<bool> myperiodic = periodic;
-    if (myperiodic.size() == 3)
-        myperiodic[2] = false;
-
-    RegularGrid::SetPeriodic(myperiodic);
-}
-void LayeredGrid::SetPeriodic(const bool periodic[3]) {
-
-    vector<bool> pvec;
-    for (int i = 0; i < 3; i++)
-        pvec.push_back(periodic[i]);
-
-    LayeredGrid::SetPeriodic(pvec);
-}
-
-bool LayeredGrid::InsideGrid(double x, double y, double z) const {
+bool LayeredGrid::InsideGrid(const std::vector<double> &coords) const {
+    assert(coords.size() == 3);
 
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents (vary-dimensions can not have periodic boundaries)
     //
-    _ClampCoord(x, y, z);
+    vector<double> clampedCoords = coords;
+    ClampCoord(clampedCoords);
 
-    // Do a quick check to see if the point is completely outside of
-    // the grid bounds.
-    //
-    if (x < _minu[0] || x > _maxu[0])
-        return (false);
-    if (y < _minu[1] || y > _maxu[1])
-        return (false);
-    if (_ndim == 2)
-        return (true);
-
-    if (z < _minu[2] || z > _maxu[2])
-        return (false);
-
-    // If we get to here the point's non-varying dimension coordinates
-    // must be inside the grid. It is only the varying dimension
-    // coordinates that we need to check
-    //
-
-    // Get the indecies of the cell containing the point
-    // Only the indecies for the non-varying dimensions are correctly
-    // returned by GetIJKIndexFloor()
-    //
-    vector<size_t> dims = GetDimensions();
-    assert(dims.size() == 3);
-
-    size_t i0, j0, k0;
-    size_t i1, j1, k1;
-    RegularGrid::GetIJKIndexFloor(x, y, z, &i0, &j0, &k0);
-    if (i0 == dims[0] - 1)
-        i1 = i0;
-    else
-        i1 = i0 + 1;
-
-    if (j0 == dims[1] - 1)
-        j1 = j0;
-    else
-        j1 = j0 + 1;
-
-    if (k0 == dims[2] - 1)
-        k1 = k0;
-    else
-        k1 = k0 + 1;
-
-    //
-    // See if the varying dimension coordinate of the point is
-    // completely above or below all of the corner points in the first (last)
-    // cell in the column of cells containing the point
-    //
-    double t00, t01, t10, t11; // varying dimension coord of "top" cell
-    double b00, b01, b10, b11; // varying dimension coord of "bottom" cell
-    double vc;                 // varying coordinate value
-
-    t00 = _rg.AccessIJK(i0, j0, dims[2] - 1);
-    t01 = _rg.AccessIJK(i1, j0, dims[2] - 1);
-    t10 = _rg.AccessIJK(i0, j1, dims[2] - 1);
-    t11 = _rg.AccessIJK(i1, j1, dims[2] - 1);
-
-    b00 = _rg.AccessIJK(i0, j0, 0);
-    b01 = _rg.AccessIJK(i1, j0, 0);
-    b10 = _rg.AccessIJK(i0, j1, 0);
-    b11 = _rg.AccessIJK(i1, j1, 0);
-    vc = z;
-
-    if (b00 < t00) {
-        // If coordinate is between all of the cell's top and bottom
-        // coordinates the point must be in the grid
-        //
-        if (b00 < vc && b01 < vc && b10 < vc && b11 < vc &&
-            t00 > vc && t01 > vc && t10 > vc && t11 > vc) {
-
-            return (true);
-        }
-        //
-        // if coordinate is above or below all corner points
-        // the input point must be outside the grid
-        //
-        if (b00 > vc && b01 > vc && b10 > vc && b11 > vc)
-            return (false);
-        if (t00 < vc && t01 < vc && t10 < vc && t11 < vc)
-            return (false);
-    } else {
-        if (b00 > vc && b01 > vc && b10 > vc && b11 > vc &&
-            t00 < vc && t01 < vc && t10 < vc && t11 < vc) {
-
-            return (true);
-        }
-        if (b00 < vc && b01 < vc && b10 < vc && b11 < vc)
-            return (false);
-        if (t00 > vc && t01 > vc && t10 > vc && t11 > vc)
-            return (false);
-    }
-
-    // If we get this far the point is either inside or outside of a
-    // boundary cell on the varying dimension. Need to interpolate
-    // the varying coordinate of the cell
-
-    // Varying dimesion coordinate value returned by GetUserCoordinates
-    // is not valid
-    //
-    double x0, y0, z0, x1, y1, z1;
-    RegularGrid::GetUserCoordinates(i0, j0, k0, &x0, &y0, &z0);
-    RegularGrid::GetUserCoordinates(i1, j1, k1, &x1, &y1, &z1);
-
-    double iwgt, jwgt;
-    if (x1 != x0)
-        iwgt = fabs((x - x0) / (x1 - x0));
-    else
-        iwgt = 0.0;
-
-    if (y1 != y0)
-        jwgt = fabs((y - y0) / (y1 - y0));
-    else
-        jwgt = 0.0;
-
-    double t = t00 + iwgt * (t01 - t00) + jwgt * ((t10 + iwgt * (t11 - t10)) - (t00 + iwgt * (t01 - t00)));
-    double b = b00 + iwgt * (b01 - b00) + jwgt * ((b10 + iwgt * (b11 - b10)) - (b00 + iwgt * (b01 - b00)));
-
-    if (b < t) {
-        if (vc < b || vc > t)
-            return (false);
-    } else {
-        if (vc > b || vc < t)
-            return (false);
-    }
-    return (true);
+    vector<size_t> indices;
+    bool found = GetIndicesCell(clampedCoords, indices);
+    return (found);
 }
 
-void LayeredGrid::GetMinCellExtents(double *x, double *y, double *z) const {
-
-    *x = *y = *z = 0;
-    //
-    // Get X and Y dimension minimums
-    //
-    RegularGrid::GetMinCellExtents(x, y, z);
-    if (_ndim == 2)
-        return;
-
-    vector<size_t> dims = GetDimensions();
-
-    if (dims[2] < 2)
-        return;
-
-    double tmp;
-    *z = fabs(_maxu[2] - _minu[2]);
-
-    for (int k = 0; k < dims[2] - 1; k++) {
-        for (int j = 0; j < dims[1]; j++) {
-            for (int i = 0; i < dims[0]; i++) {
-                float z0 = _rg.AccessIJK(i, j, k);
-                float z1 = _rg.AccessIJK(i, j, k + 1);
-
-                tmp = fabs(z1 - z0);
-                if (tmp < *z)
-                    *z = tmp;
-            }
-        }
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
+    const LayeredGrid *lg, bool begin) : ConstCoordItrAbstract() {
+    _dims = lg->GetDimensions();
+    _minu = lg->_minu;
+    _delta = lg->_delta;
+    _coords = lg->_minu;
+    if (begin) {
+        _zCoordItr = lg->_rg.begin();
+        _x = 0;
+        _y = 0;
+        _z = 0;
+    } else {
+        _zCoordItr = lg->_rg.end();
+        _x = 0;
+        _y = 0;
+        _z = _dims[2];
     }
 }
 
-void LayeredGrid::_getBilinearWeights(double x, double y, double z,
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
+    const ConstCoordItrLayered &rhs) : ConstCoordItrAbstract() {
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _dims = rhs._dims;
+    _minu = rhs._minu;
+    _delta = rhs._delta;
+    _coords = rhs._coords;
+    _zCoordItr = rhs._zCoordItr;
+}
+
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered() : ConstCoordItrAbstract() {
+    _x = 0;
+    _y = 0;
+    _z = 0;
+    _dims.clear();
+    _minu.clear();
+    _delta.clear();
+    _coords.clear();
+}
+
+void LayeredGrid::ConstCoordItrLayered::next() {
+
+    _x++;
+    ++_zCoordItr;
+    _coords[0] += _delta[0];
+    if (_x < _dims[0]) {
+        _coords[2] = *_zCoordItr;
+        return;
+    }
+
+    _x = 0;
+    _coords[0] = _minu[0];
+    _y++;
+    _coords[1] += _delta[1];
+
+    if (_y < _dims[1]) {
+        _coords[2] = *_zCoordItr;
+        return;
+    }
+
+    _y = 0;
+    _coords[1] = _minu[1];
+    _z++;
+    if (_z < _dims[2]) {
+        _coords[2] = *_zCoordItr;
+        return;
+    }
+}
+
+void LayeredGrid::_getBilinearWeights(const vector<double> &coords,
                                       double &iwgt, double &jwgt) const {
-    size_t dims[3];
-    GetDimensions(dims);
 
-    size_t i0, j0;
-    size_t i1, j1;
-    size_t k0;
+    vector<size_t> dims = GetDimensions();
 
-    GetIJKIndexFloor(x, y, z, &i0, &j0, &k0);
-    if (i0 == dims[0] - 1)
-        i1 = i0;
-    else
-        i1 = i0 + 1;
-    if (j0 == dims[1] - 1)
-        j1 = j0;
-    else
-        j1 = j0 + 1;
+    vector<size_t> indices0;
+    bool found = GetIndicesCell(coords, indices0);
+    assert(found);
 
-    double x0, y0, z0;
-    double x1, y1, z1;
-    GetUserCoordinates(i0, j0, k0, &x0, &y0, &z0);
-    GetUserCoordinates(i1, j1, k0, &x1, &y1, &z1);
+    vector<size_t> indices1 = indices0;
+    if (indices0[0] != dims[0] - 1) {
+        indices1[0] += 1;
+    }
+    if (indices0[1] != dims[1] - 1) {
+        indices1[1] += 1;
+    }
+
+    vector<double> coords0, coords1;
+    GetUserCoordinates(indices0, coords0);
+    GetUserCoordinates(indices1, coords1);
+    double x = coords[0];
+    double y = coords[1];
+    double x0 = coords0[0];
+    double y0 = coords0[1];
+    double x1 = coords1[0];
+    double y1 = coords1[1];
+
     if (x1 != x0)
         iwgt = fabs((x - x0) / (x1 - x0));
     else
@@ -846,31 +664,41 @@ double LayeredGrid::_bilinearElevation(
     double xVal1 = 0.0;
     double x, y, z00, z10, z01, z11;
 
-    GetUserCoordinates(i0, j0, k0, &x, &y, &z00);
-    GetUserCoordinates(i1, j0, k0, &x, &y, &z10);
+    GetUserCoordinates(i0, j0, k0, x, y, z00);
+    GetUserCoordinates(i1, j0, k0, x, y, z10);
     xVal0 = z00 * (1 - iwgt) + z10 * iwgt;
 
-    GetUserCoordinates(i0, j1, k0, &x, &y, &z01);
-    GetUserCoordinates(i1, j1, k0, &x, &y, &z11);
+    GetUserCoordinates(i0, j1, k0, x, y, z01);
+    GetUserCoordinates(i1, j1, k0, x, y, z11);
     xVal1 = z01 * (1 - iwgt) + z11 * iwgt;
 
     result = xVal0 * (1 - jwgt) + xVal1 * jwgt;
     return result;
 }
 
-float LayeredGrid::_getValueQuadratic(double x, double y, double z) const {
+float LayeredGrid::_getValueQuadratic(
+    const std::vector<double> &coords) const {
 
     double mv = GetMissingValue();
-    size_t dims[3];
-    GetDimensions(dims);
+    vector<size_t> dims = GetDimensions();
 
     // Get the indecies of the hyperslab containing the point
     // k0 = level above the point
     // k1 = level below the point
     // k2 = two levels below the point
-    size_t i0, i1, j0, j1;
-    size_t k0, k1, k2;
-    GetIJKIndexFloor(x, y, z, &i0, &j0, &k1);
+    //
+    vector<size_t> indices;
+    bool found = GetIndicesCell(coords, indices);
+    if (!found)
+        return (GetMissingValue());
+
+    size_t i0 = indices[0];
+    size_t j0 = indices[1];
+    size_t k1 = indices[2];
+
+    size_t k0, k2;
+    size_t i1, j1;
+
     if (i0 == dims[0] - 1)
         i1 = i0;
     else
@@ -893,7 +721,7 @@ float LayeredGrid::_getValueQuadratic(double x, double y, double z) const {
     }
 
     double iwgt, jwgt;
-    _getBilinearWeights(x, y, z, iwgt, jwgt);
+    _getBilinearWeights(coords, iwgt, jwgt);
 
     // bilinearly interpolated values at each k0, k1 and k2
     double val0, val1, val2;
@@ -912,6 +740,7 @@ float LayeredGrid::_getValueQuadratic(double x, double y, double z) const {
         return mv;
 
     // quadratic interpolation weights
+    double z = coords[2];
     double w0, w1, w2;
     w0 = ((z - z1) * (z - z2)) / ((z0 - z1) * (z0 - z2));
     w1 = ((z - z0) * (z - z2)) / ((z1 - z0) * (z1 - z2));
@@ -925,14 +754,13 @@ float LayeredGrid::_getValueQuadratic(double x, double y, double z) const {
 
 double LayeredGrid::_interpolateVaryingCoord(
     size_t i0, size_t j0, size_t k0,
-    double x, double y, double z) const {
+    double x, double y) const {
 
     // varying dimension coord at corner grid points of cell face
     //
     double c00, c01, c10, c11;
 
-    size_t dims[3];
-    GetDimensions(dims);
+    vector<size_t> dims = GetDimensions();
 
     size_t i1, j1, k1;
     if (i0 == dims[0] - 1)
@@ -950,8 +778,8 @@ double LayeredGrid::_interpolateVaryingCoord(
 
     // Coordinates of grid points for non-varying dimensions
     double x0, y0, z0, x1, y1, z1;
-    RegularGrid::GetUserCoordinates(i0, j0, k0, &x0, &y0, &z0);
-    RegularGrid::GetUserCoordinates(i1, j1, k1, &x1, &y1, &z1);
+    GetUserCoordinates(i0, j0, k0, x0, y0, z0);
+    GetUserCoordinates(i1, j1, k1, x1, y1, z1);
     double iwgt, jwgt;
 
     c00 = _rg.AccessIJK(i0, j0, k0);
@@ -968,6 +796,109 @@ double LayeredGrid::_interpolateVaryingCoord(
     else
         jwgt = 0.0;
 
-    double c = c00 + iwgt * (c01 - c00) + jwgt * ((c10 + iwgt * (c11 - c10)) - (c00 + iwgt * (c01 - c00)));
-    return (c);
+    double z = c00 + iwgt * (c01 - c00) + jwgt * ((c10 + iwgt * (c11 - c10)) - (c00 + iwgt * (c01 - c00)));
+    return (z);
+}
+
+namespace {
+double pointDotPlane(
+    const vector<double> &v1,
+    const vector<double> &v2,
+    const vector<double> &v3,
+    const vector<double> &p) {
+    double vec1_2[3] = {v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]};
+    double vec1_3[3] = {v3[0] - v1[0], v3[1] - v1[1], v3[2] - v1[2]};
+    double vp[3] = {p[0] - v1[0], p[1] - v1[1], p[2] - v1[2]};
+    double normal[3];
+
+    vcross(vec1_2, vec1_3, normal);
+
+    return (vdot(normal, vp));
+}
+}; // namespace
+
+int LayeredGrid::_bsearchKIndexCell(
+    size_t i, size_t j, double z,
+    size_t &k) const {
+    k = 0;
+
+    vector<size_t> dims = GetDimensions();
+
+    // Binary search for starting index of cell containing z
+    //
+
+    // Indices of bottom level triangle inside of column containing point
+    //
+    vector<size_t> v1idx = {i, j, 0};
+    vector<size_t> v2idx = {i + 1, j, 0};
+    vector<size_t> v3idx = {i, j + 1, 0};
+
+    // Coordinates of bottom level triangle inside column containing point
+    // The horizontal coordinates (X & Y) don't change for the search
+    //
+    vector<double> v1;
+    vector<double> v2;
+    vector<double> v3;
+    vector<double> pt;
+
+    GetUserCoordinates(v1idx, v1);
+    GetUserCoordinates(v2idx, v2);
+    GetUserCoordinates(v3idx, v3);
+
+    // Coordinates of point we're looking for. X & Y are meaningless. Just
+    // use first triangle vertex.
+    //
+    pt = v1;
+    pt[2] = z;
+
+    size_t k0 = 0;
+    size_t k1 = dims[2] - 1;
+
+    // See if point is below or above the column
+    //
+    v1[2] = _rg.AccessIJK(i, j, k0);
+    v2[2] = _rg.AccessIJK(i + 1, j, k0);
+    v3[2] = _rg.AccessIJK(i, j + 1, k0);
+    double d = pointDotPlane(v1, v2, v3, pt);
+    if (d < 0.0)
+        return (-1);
+
+    v1[2] = _rg.AccessIJK(i, j, k1);
+    v2[2] = _rg.AccessIJK(i + 1, j, k1);
+    v3[2] = _rg.AccessIJK(i, j + 1, k1);
+    d = pointDotPlane(v1, v2, v3, pt);
+    if (d > 0.0)
+        return (1);
+
+    // point is inside column. Now find it
+    //
+    while (k1 - k0 > 1) {
+
+        // Update Z coordinate only for search
+        //
+        v1[2] = _rg.AccessIJK(i, j, (k0 + k1) >> 1);
+        v2[2] = _rg.AccessIJK(i + 1, j, (k0 + k1) >> 1);
+        v3[2] = _rg.AccessIJK(i, j + 1, (k0 + k1) >> 1);
+
+        // d is signed distance from plane. Sign determines if it is
+        // above triangle (positive) or below (negative)
+        //
+        double d = pointDotPlane(v1, v2, v3, pt);
+
+        // Pathlogical case. Point is on triangle.
+        //
+        if (d == 0.0) {
+            k0 = (k0 + k1) >> 1;
+            break;
+        }
+
+        if (d < 0.0) {
+            k1 = (k0 + k1) >> 1;
+        } else {
+            k0 = (k0 + k1) >> 1;
+        }
+    }
+    k = k0;
+
+    return (0);
 }

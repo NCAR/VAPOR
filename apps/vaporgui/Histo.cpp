@@ -28,6 +28,8 @@ Histo::Histo(int numberBins, float mnData, float mxData) {
     _binArray = new int[_numBins];
     reset();
 }
+
+#ifdef DEAD
 Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2]) {
     _binArray = new int[256];
     _minData = range[0];
@@ -37,16 +39,15 @@ Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2
 
     unsigned int qv; // quantized value
     float v;
-    StructuredGrid *rg_const = (StructuredGrid *)rg; // kludge - no const_iterator
-    StructuredGrid::Iterator itr;
-    double point[3];
-    for (itr = rg_const->begin(); itr != rg_const->end(); ++itr) {
+    StructuredGrid::ConstIterator itr;
+    vector<double> point;
+    for (itr = rg->begin(); itr != rg->end(); ++itr) {
         v = *itr;
         if (v == rg->GetMissingValue())
             continue;
-        itr.GetUserCoordinates(point, point + 1, point + 2);
+        itr.GetUserCoordinates(point);
         bool isIn = true;
-        for (int j = 0; j < 3; j++) {
+        for (int j = 0; j < point.size(); j++) {
             if (point[j] > exts[j + 3] || point[j] < exts[j])
                 isIn = false;
         }
@@ -66,6 +67,7 @@ Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2
         }
     }
 }
+#endif
 
 Histo::~Histo() {
     if (_binArray)
