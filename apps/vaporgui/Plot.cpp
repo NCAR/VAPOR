@@ -218,6 +218,7 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow()
     connect(plotButton, SIGNAL(pressed()), this, SLOT(go()));
     connect(addVarCombo, SIGNAL(activated(int)), this, SLOT(newVarAdded(int)));
     connect(removeVarCombo, SIGNAL(activated(int)), this, SLOT(removeVar(int)));
+    connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(reinitDataMgr()));
     connect(timeCopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
     connect(spaceP1CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
     connect(spaceP2CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
@@ -225,7 +226,7 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow()
     connect(cRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
     for (int i = 0; i < 4; i++) {
         connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int)));
-        if (i < 3) { connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int))); }
+        if (i > 2) { connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int))); }
     }
 }
 
@@ -362,10 +363,12 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm)
 
     assert(ce != NULL);
     _controlExec = ce;
-    DataStatus *ds = _controlExec->getDataStatus();
-    string      dm = ds->GetDataMgrNames()[0];
-    _dm = ds->GetDataMgr(dm);
+    DataStatus *   ds = _controlExec->getDataStatus();
+    vector<string> dataMgrs = ds->GetDataMgrNames();
+    _dm = ds->GetDataMgr(dataMgrs[0]);
     assert(_dm != NULL);
+
+    for (int i = 0; i < dataMgrs.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(dataMgrs[i])); }
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     _params = (PlotParams *)paramsMgr->GetParams("PlotParams");
@@ -392,6 +395,18 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm)
     applyParams();
 
     showMe();
+}
+
+void Plot::reinitDataMgr()
+{
+    DataStatus *ds = _controlExec->getDataStatus();
+    string      dmName = dataMgrCombo->currentText().toStdString();
+    _dm = ds->GetDataMgr(dmName);
+
+    if (_dm == NULL) {
+        string err = "Could not find DataMgr named " + dmName;
+        errReport(err);
+    }
 }
 
 void Plot::showMe()
@@ -1325,7 +1340,6 @@ bool Plot::eventFilter(QObject *o, QEvent *e)
 void Plot::constCheckboxChanged(int state)
 {
     QObject *sender = QObject::sender();
-    cout << sender->objectName().toStdString() << endl;
     if (sender == _spaceCheckBoxes[0]) {
         _spaceXRange->setConst(state);
         _params->SetXConst((bool)state);
@@ -1336,7 +1350,6 @@ void Plot::constCheckboxChanged(int state)
         _spaceZRange->setConst(state);
         _params->SetZConst((bool)state);
     } else if (sender == _timeCheckBoxes[3]) {
-        cout << "TimeCheckboxChecked" << endl;
         _timeTimeRange->setConst(state);
         _params->SetTimeConst((bool)state);
     }

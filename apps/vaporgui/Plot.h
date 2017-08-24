@@ -258,6 +258,7 @@ public slots:
     void refinementChanged(int i);
     void cRatioChanged(int i);
     void constCheckboxChanged(int state);
+    void reinitDataMgr();
 };
 
 #endif    // PLOT_H
