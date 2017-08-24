@@ -36,7 +36,8 @@ const string PlotParams::_spaceMaxTSTag = "SpaceMaxTS";
 const string PlotParams::_spaceMinExtentsTag = "SpaceMinExtents";
 const string PlotParams::_spaceMaxExtentsTag = "SpaceMaxExtents";
 const string PlotParams::_spaceOrTimeTag = "SpaceOrTime";
-const string PlotParams::_timeMinTSTag = "TimeSpaceMinTS";
+const string PlotParams::_timeExtentsTag = "TimeExtents";
+const string PlotParams::_timeMinTSTag = "TimeMinTS";
 const string PlotParams::_timeMaxTSTag = "TimeMaxTS";
 const string PlotParams::_timeXTag = "TimeX";
 const string PlotParams::_timeYTag = "TimeY";
@@ -103,6 +104,16 @@ vector<double> PlotParams::GetSpaceMaxExtents() const {
 void PlotParams::SetSpaceMaxExtents(vector<double> maxExts) {
 	SetValueDoubleVec(_spaceMaxExtentsTag, "Maximum spatial extents for plot",
 		maxExts);
+}
+
+vector<double> PlotParams::GetTimeExtents() const {
+	vector<double> extents = GetValueDoubleVec(_timeExtentsTag);
+	return extents;
+}
+
+void PlotParams::SetTimeExtents(vector<double> extents) {
+	SetValueDoubleVec(_timeExtentsTag, "Spatial extents for time plotting",
+		extents);
 }
 
 int PlotParams::GetCRatio() const {
@@ -201,6 +212,7 @@ void PlotParams::SetXConst(bool state) {
 	string sState = state ? "true" : "false";
 	SetValueString(_xConstTag, "Variable for keeping the min/max X coordinate "
 		"constant", sState);
+	cout << "SetXConst " << state << endl;
 }
 
 bool PlotParams::GetYConst() const {
