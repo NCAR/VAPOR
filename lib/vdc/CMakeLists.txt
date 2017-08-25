@@ -26,3 +26,9 @@ add_library (vdc SHARED
 target_link_libraries (vdc PUBLIC common wasp udunits2 proj)
 
 add_definitions (-DVDF_EXPORTS)
+
+install (
+	TARGETS vdc
+	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)
