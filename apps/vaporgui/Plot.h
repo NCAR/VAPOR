@@ -126,7 +126,9 @@ class Plot : public QDialog, public Ui_PlotWindow {
         const double minu[3], const double maxu[3],
         double &dX, double &dY, double &dZ) const;
 
+#ifdef DEAD
     void fudgeVoxBounds(size_t minv[3], size_t maxv[3]) const;
+#endif
 
     void getSpatialExtents(double minu[3], double maxu[3], size_t &ts) const;
 

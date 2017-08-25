@@ -978,6 +978,7 @@ void Plot::go() {
     _plotDialog->activateWindow();
 }
 
+#ifdef DEAD
 // Grow selected voxel region by one voxel if possible. This is a
 // a workaround for poor design choice in DataMgr
 //
@@ -993,6 +994,7 @@ void Plot::fudgeVoxBounds(
             maxv[i]++;
     }
 }
+#endif
 
 void Plot::refinementChanged(int i) {
     _refLevel = i;
@@ -1048,6 +1050,8 @@ int Plot::getSpatialVectors(
     // Get bounding box for data in voxel coordiantes
     //
     size_t minv[3], maxv[3];
+
+#ifdef DEAD
     _dm->MapUserToVox(ts, minu, minv, _refLevel, _cRatio);
     _dm->MapUserToVox(ts, maxu, maxv, _refLevel, _cRatio);
 
@@ -1055,6 +1059,7 @@ int Plot::getSpatialVectors(
     // points may not be inside of the returned RegularGrid. Sigh :-(
     //
     fudgeVoxBounds(minv, maxv);
+#endif
 
     double dX, dY, dZ;
     int nsamples = 0;
@@ -1179,14 +1184,18 @@ int Plot::getTemporalVectors(
         for (size_t ts = ts0; ts <= ts1; ts++) {
 
             size_t ijk[3];
+#ifdef DEAD
             _dm->MapUserToVox(ts, xyz, ijk, _refLevel, _cRatio);
 
             // Ugh. Need to try to grow the voxel bounds otherwise boundary
             // points may not be inside of the returned RegularGrid. Sigh :-(
             //
+            //			size_t minv[3] = {ijk[0], ijk[1],ijk[2]};
+            //			size_t maxv[3] = {ijk[0], ijk[1],ijk[2]};
+            fudgeVoxBounds(minv, maxv);
+#endif
             size_t minv[3] = {ijk[0], ijk[1], ijk[2]};
             size_t maxv[3] = {ijk[0], ijk[1], ijk[2]};
-            fudgeVoxBounds(minv, maxv);
 
             //			StructuredGrid *rg = _dm->GetVariable(
             //				ts, var, _refLevel, _cRatio, minv, maxv, false
