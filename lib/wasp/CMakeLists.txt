@@ -23,3 +23,9 @@ if (NOT WIN32)
 endif ()
 
 add_definitions (-DWASP_EXPORTS)
+
+install (
+	TARGETS wasp
+	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)

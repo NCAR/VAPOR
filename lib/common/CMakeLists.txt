@@ -22,5 +22,11 @@ endif ()
 
 add_definitions (-DCOMMON_EXPORTS)
 
+install (
+	TARGETS common
+	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)
+
 # Not needed since vapor shares include directory
 # target_include_directories (common PUBLIC ${VAPOR_SOURCE_DIR}/include)
