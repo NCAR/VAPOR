@@ -55,13 +55,11 @@ public:
 
  //! Set the first endpoint
  void SetPoint1(vector<double> pt){
-	assert(pt.size() == 3);
 	SetValueDoubleVec(m_point1Tag, "Set First Endpoint", pt);
  }
 
  //! Set the second endpoint
  void SetPoint2(vector<double> pt){
-	assert(pt.size() == 3);
 	SetValueDoubleVec(m_point2Tag, "Set Second Endpoint", pt);
  }
 
