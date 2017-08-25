@@ -1092,24 +1092,14 @@ void Statistics::initRegion() {
         _extents[4] = _yRange->getUserMax();
         _extents[5] = _zRange->getUserMax();
 
-        double uCoordMin[3], uCoordMax[3];
-        if (_regionSelection == 2) {
-            uCoordMin[0] = _fullExtents[0];
-            uCoordMin[1] = _fullExtents[1];
-            uCoordMin[2] = _fullExtents[2];
-            uCoordMax[0] = _fullExtents[3];
-            uCoordMax[1] = _fullExtents[4];
-            uCoordMax[2] = _fullExtents[5];
-        } else {
-            uCoordMin[0] = _extents[0];
-            uCoordMin[1] = _extents[1];
-            uCoordMin[2] = _extents[2];
-            uCoordMax[0] = _extents[3];
-            uCoordMax[1] = _extents[4];
-            uCoordMax[2] = _extents[5];
-        }
+        _uCoordMin[0] = _extents[0];
+        _uCoordMin[1] = _extents[1];
+        _uCoordMin[2] = _extents[2];
+        _uCoordMax[0] = _extents[3];
+        _uCoordMax[1] = _extents[4];
+        _uCoordMax[2] = _extents[5];
 
-        _dm->GetEnclosingRegion(_minTS, uCoordMin, uCoordMax, _vCoordMin, _vCoordMax, _refLevel, _cRatio);
+        //_dm->GetEnclosingRegion(_minTS, uCoordMin, uCoordMax, _vCoordMin, _vCoordMax, _refLevel, _cRatio);
 
         string varName;
         typedef std::map<string, _statistics>::iterator it_type;
@@ -1325,47 +1315,6 @@ void Statistics::initRegion() {
         }
     }
 
-#ifdef DEAD
-    void Statistics::exportText() {
-        _extents[0] = _xRange->getUserMin();
-        _extents[1] = _yRange->getUserMin();
-        _extents[2] = _zRange->getUserMin();
-        _extents[3] = _xRange->getUserMax();
-        _extents[4] = _yRange->getUserMax();
-        _extents[5] = _zRange->getUserMax();
-
-        QString fName = QFileDialog::getSaveFileName(this, "Select file to write statistics into:");
-        ofstream file;
-        file.open(fName.toStdString().c_str());
-
-        file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
-
-        typedef std::map<string, _statistics>::iterator it_type;
-        for (it_type it = _stats.begin(); it != _stats.end(); it++) {
-            file << it->first << ",";
-            file << it->second.min << ",";
-            file << it->second.max << ",";
-            file << it->second.mean << ",";
-            file << it->second.stddev;
-            file << endl;
-        }
-
-        file << endl;
-
-        file << "Dependent Variable\nDimension,Min,Max" << endl;
-        file << "X," << _extents[0] << "," << _extents[3] << endl;
-        file << "Y," << _extents[1] << "," << _extents[4] << endl;
-        file << "Z," << _extents[2] << "," << _extents[5] << endl;
-
-        file << endl;
-
-        file << "Temporal Extents\nStartTime,EndTime" << endl;
-        file << _minTS << "," << _maxTS << endl;
-
-        file.close();
-    }
-#endif
-
     void Statistics::varRemoved(int index) {
         if (index == 0)
             return;
@@ -1501,6 +1450,15 @@ void Statistics::initRegion() {
             StructuredGrid *rGrid = NULL;
             float mv;
 
+            cout << "MinMax ";
+            cout << _uCoordMin[0] << " ";
+            cout << _uCoordMin[1] << " ";
+            cout << _uCoordMin[2] << " ";
+            cout << _uCoordMax[0] << " ";
+            cout << _uCoordMax[1] << " ";
+            cout << _uCoordMax[2] << " " << endl;
+            ;
+
             if (_regionSelection == 2) {
                 rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
                 if (!rGrid)
@@ -1564,8 +1522,26 @@ void Statistics::initRegion() {
         double sum = 0;
         float val = 0.0;
         float mv = rGrid->GetMissingValue();
+
+        /*	_uCoordMin = _extents[0];
+	_uCoordMin = _extents[1];
+	_uCoordMin = _extents[2];
+	_uCoordMax = _extents[3];
+	_uCoordMax = _extents[4];
+	_uCoordMax = _extents[5];
+*/
+
+        cout << _uCoordMin[0] << " ";
+        cout << _uCoordMin[1] << " ";
+        cout << _uCoordMin[2] << " ";
+        cout << _uCoordMax[0] << " ";
+        cout << _uCoordMax[1] << " ";
+        cout << _uCoordMax[2] << " " << endl;
+        ;
+        cout << mv << endl;
+
         VAPoR::StructuredGrid::Iterator itr;
-        for (itr = rGrid->begin(); itr != rGrid->end(); itr++) {
+        for (itr = rGrid->begin(_uCoordMin, _uCoordMax); itr != rGrid->end(); ++itr) {
             count++;
             val = *itr;
             if (val != mv) {
@@ -1578,6 +1554,10 @@ void Statistics::initRegion() {
         }
 
         count -= missing;
+
+        cout << count << endl;
+        cout << missing << endl;
+
         assert(count >= 0);
         if (count == 0)
             tsMean = mv;
@@ -1615,8 +1595,8 @@ void Statistics::initRegion() {
 
             RegularGrid::Iterator itr;
 
-            size_t dims[3];
-            rGrid->GetDimensions(dims);
+            vector<size_t> dims;
+            dims = rGrid->GetDimensions(); //dims);
 
             // If _regionSelection==2, we are querying a single point.
             // So here we just call GetValue at that point.
@@ -1835,9 +1815,9 @@ void Statistics::initRegion() {
             else {
                 StructuredGrid::Iterator itr;
                 double c = 0.0;
-                size_t dims[3];
-                rGrid->GetDimensions(dims);
-                for (itr = rGrid->begin(); itr != rGrid->end(); itr++) {
+                vector<size_t> dims;
+                dims = rGrid->GetDimensions();
+                for (itr = rGrid->begin(); itr != rGrid->end(); ++itr) {
                     val = *itr;
 
                     if (val != mv) { //sum += val;
