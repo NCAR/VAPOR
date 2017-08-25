@@ -276,7 +276,7 @@ private:
 //
 /////////////////////////////////////////////////////////////////////////
 
-class PARAMS_API RendererFactory {
+class RENDER_API RendererFactory {
 public:
     static RendererFactory *Instance();
 
