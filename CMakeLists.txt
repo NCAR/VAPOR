@@ -54,14 +54,32 @@ include_directories (${OPENGL_INCLUDE_DIRS})
 
 if (WIN32)
 	find_library (GLEW glew32)
+	set (INSTALL_BIN_DIR .)
+	set (INSTALL_LIB_DIR .)
 else ()
 	find_library (GLEW GLEW)
+	set (INSTALL_BIN_DIR bin)
+	set (INSTALL_LIB_DIR lib)
 endif ()
 
 add_subdirectory (apps)
 add_subdirectory (lib)
 add_subdirectory (include)
 add_subdirectory (share/Doxygen)
+
+###############################################################################
+#                            CPack Installation                               #
+###############################################################################
+
+if (WIN32)
+	set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
+	file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
+	install (
+		FILES ${WIN_INSTALL_DLLS}
+		DESTINATION ${INSTALL_BIN_DIR}
+		COMPONENT Dependencies
+		)
+endif ()
 
 set (CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set (CPACK_PACKAGE_VENDOR "NCAR")
@@ -70,4 +88,8 @@ set (CPACK_PACKAGE_VERSION ${VERSION_STRING})
 set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_RC})
-set (CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
+set (CPACK_PACKAGE_INSTALL_DIRECTORY "VAPOR")
+set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
+set (CPACK_PACKAGE_EXECUTABLES vaporgui;VaporGUI)
+# set (NSIS_ADDITIONAL_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/NSIS.template.in")
+include (CPack)
