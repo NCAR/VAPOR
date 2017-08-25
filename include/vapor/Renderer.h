@@ -291,7 +291,7 @@ class RENDER_API Renderer : public RendererBase {
 //
 /////////////////////////////////////////////////////////////////////////
 
-class PARAMS_API RendererFactory {
+class RENDER_API RendererFactory {
   public:
     static RendererFactory *Instance();
 
