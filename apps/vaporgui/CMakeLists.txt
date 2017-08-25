@@ -117,6 +117,12 @@ add_definitions (-DPYTHONDIR="${PYTHONDIR}")
 
 install (
 	TARGETS vaporgui
-	DESTINATION bin
-	COMPONENT applications
+	DESTINATION ${INSTALL_BIN_DIR}
+	COMPONENT VaporGUI
+	)
+
+install (
+	TARGETS vaporgui
+	DESTINATION ${INSTALL_BIN_DIR}
+	COMPONENT Utilites
 	)
