@@ -49,18 +49,10 @@ public:
     }
 
     //! Set the first endpoint
-    void SetPoint1(vector<double> pt)
-    {
-        assert(pt.size() == 3);
-        SetValueDoubleVec(m_point1Tag, "Set First Endpoint", pt);
-    }
+    void SetPoint1(vector<double> pt) { SetValueDoubleVec(m_point1Tag, "Set First Endpoint", pt); }
 
     //! Set the second endpoint
-    void SetPoint2(vector<double> pt)
-    {
-        assert(pt.size() == 3);
-        SetValueDoubleVec(m_point2Tag, "Set Second Endpoint", pt);
-    }
+    void SetPoint2(vector<double> pt) { SetValueDoubleVec(m_point2Tag, "Set Second Endpoint", pt); }
 
     // Get static string identifier for this params class
     //
