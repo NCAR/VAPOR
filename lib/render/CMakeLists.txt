@@ -22,3 +22,9 @@ if (NOT WIN32)
 endif ()
 
 add_definitions (-DRENDER_EXPORTS)
+
+install (
+	TARGETS render
+	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)
