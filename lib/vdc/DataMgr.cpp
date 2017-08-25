@@ -9,6 +9,7 @@
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
+#include <vapor/DCMPAS.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
 #include <float.h>
@@ -271,20 +272,20 @@ void map_blk_to_vox(
 // Extract various grid related metadata from a BaseVar class object
 //
 void grid_params(
-	const DC::BaseVar &var,
-	const vector <size_t> &min,
-	const vector <size_t> &max,
+	const DC::DataVar &var,
+	const vector <size_t> &roi_dims,
 	const vector <size_t> &dims,
 	vector <bool> &periodic,
 	bool &has_missing,
 	float &missing
 ) {
+	assert(roi_dims.size() == dims.size());
 	periodic.clear();
 	has_missing = false;
 
 	vector <bool> has_periodic = var.GetPeriodic();
 	for (int i=0; i<dims.size(); i++) {
-		if (has_periodic[i] && min[i]==0 && max[i]==dims[i]-1) {
+		if (has_periodic[i] && roi_dims[i] == dims[i]) {
 			periodic.push_back(true);
 		}
 		else {
@@ -293,10 +294,9 @@ void grid_params(
 	}
 
 
-	const DC::DataVar *dvarptr = dynamic_cast<const DC::DataVar *> (&var);
-	if (dvarptr->GetHasMissing()) {
+	if (var.GetHasMissing()) {
 		has_missing = true;
-		missing = dvarptr->GetMissingValue();
+		missing = var.GetMissingValue();
 	}
 }
 
@@ -409,6 +409,9 @@ int DataMgr::Initialize(const vector <string> &files) {
 	}
 	else if (_format.compare("cf") == 0) {
 		_dc = new DCCF();
+	}
+	else if (_format.compare("mpas") == 0) {
+		_dc = new DCMPAS();
 	}
 	else {
 		SetErrMsg("Invalid data collection format : %s", _format.c_str());
@@ -685,6 +688,7 @@ int	DataMgr::_setupCoordVecs(
 	const vector <size_t> &min,
 	const vector <size_t> &max,
 	vector <string> &varnames,
+	vector < size_t > &roi_dims,
 	vector < vector <size_t > > &dimsvec,
 	vector < vector <size_t > > &dims_at_levelvec,
 	vector < vector <size_t > > &bsvec,
@@ -699,6 +703,7 @@ int	DataMgr::_setupCoordVecs(
 	bs_at_levelvec.clear();
 	bminvec.clear();
 	bmaxvec.clear();
+	roi_dims.clear();
 
 	vector <string> cvarnames;
 	bool ok = _dc->GetVarCoordVars(varname, true, cvarnames);
@@ -739,6 +744,12 @@ int	DataMgr::_setupCoordVecs(
 	vector <size_t> bmin, bmax;
 	map_vox_to_blk(bs_at_level, min, bmin);
 	map_vox_to_blk(bs_at_level, max, bmax);
+
+	// Compute dimenions of ROI
+	//
+	for (int i=0; i<min.size(); i++) {
+		roi_dims.push_back(max[i] - min[i] + 1);
+	}
 
 
 	// data varname + coord varnames
@@ -803,6 +814,7 @@ StructuredGrid *DataMgr::_getVariable(
 	}
 
 	vector <string> varnames;
+	vector <size_t> roi_dims;
 	vector < vector <size_t > > dimsvec;
 	vector < vector <size_t > > dims_at_levelvec;
 	vector < vector <size_t > > bsvec;
@@ -812,7 +824,7 @@ StructuredGrid *DataMgr::_getVariable(
 	
 
 	int	rc = _setupCoordVecs(
-		ts, varname, level, lod, min, max, varnames,
+		ts, varname, level, lod, min, max, varnames, roi_dims,
 		dimsvec, dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec
 	);
 	if (rc<0) return(NULL);
@@ -842,7 +854,7 @@ StructuredGrid *DataMgr::_getVariable(
 	}
 	else {
 		rg = _make_grid(
-			dvar, min, max, dims_at_levelvec[0], blkvec, 
+			level, lod, dvar, roi_dims, dims_at_levelvec[0], blkvec, 
 			bs_at_levelvec, bminvec, bmaxvec
 		);
 	}
@@ -1296,6 +1308,14 @@ bool DataMgr::GetNumDimensions(string varname, size_t &ndim) const {
 		return(0);
 	}
 	return(_dc->GetNumDimensions(varname, ndim));
+}
+
+size_t DataMgr::GetVarTopologyDim(string varname) const {
+
+	if (!_dc) {
+		return(0);
+	}
+	return(_dc->GetVarTopologyDim(varname));
 }
 
 	
@@ -1958,6 +1978,7 @@ string DataMgr::VarInfoCache::_make_hash(
 ) {
 	ostringstream oss;
 
+	oss << key << ":"; 
 	oss << ts << ":"; 
 	for (int i=0; i<varnames.size(); i++) {
 		oss << varnames[i] << ":";
@@ -2273,9 +2294,6 @@ int DataMgr::_get_time_coordinates(vector <double> &timecoords) {
 }
 
 RegularGrid *DataMgr::_make_grid_regular(
-	const DC::DataVar &var,
-    const vector <size_t> &min,
-	const vector <size_t> &max, 
 	const vector <size_t> &dims,
     const vector <float *> &blkvec,
 	const vector <size_t> &bs,
@@ -2283,27 +2301,17 @@ RegularGrid *DataMgr::_make_grid_regular(
 	const vector <size_t> &bmax
 
 ) const {
-	assert (min.size() == max.size());
-	assert (min.size() == dims.size());
-	assert (min.size() == min.size());
-	assert (min.size() == max.size());
-	assert (min.size() == bs.size());
-	assert (min.size() == bmin.size());
-	assert (min.size() == bmax.size());
+	assert (dims.size() == bs.size());
+	assert (dims.size() == bmin.size());
+	assert (dims.size() == bmax.size());
 
 	vector <double> minu, maxu;
-	for (int i = 0; i<min.size(); i++) { 
+	for (int i = 0; i < dims.size(); i++) { 
 		float *coords = blkvec[i+1];
-		int x0 = min[i] % bs[i];
-        int x1 = x0 + (max[i]-min[i]);
-		minu.push_back(coords[x0]);
-		maxu.push_back(coords[x1]);
+		minu.push_back(coords[0]);
+		maxu.push_back(coords[dims[i]-1]);
 	}
 
-	vector <bool> periodic;
-	bool has_missing;
-	float mv;
-	grid_params(var, min, max, dims, periodic, has_missing, mv);
 
 	size_t nblocks = 1;
 	size_t block_size = 1;
@@ -2319,50 +2327,30 @@ RegularGrid *DataMgr::_make_grid_regular(
 		}
 	}
 
-	RegularGrid *rg;
-	if (has_missing) {
-		rg = new RegularGrid(bs,min,max,minu,maxu,periodic,blkptrs,mv);
-	}
-	else {
-		rg = new RegularGrid(bs,min,max,minu,maxu,periodic,blkptrs);
-	}
+	RegularGrid *rg = new RegularGrid(dims, bs, blkptrs, minu, maxu);
 
 	return(rg);
 }
 
 LayeredGrid *DataMgr::_make_grid_layered(
-	const DC::DataVar &var,
-    const vector <size_t> &min,
-	const vector <size_t> &max, 
 	const vector <size_t> &dims,
     const vector <float *> &blkvec,
 	const vector <size_t> &bs,
 	const vector <size_t> &bmin,
 	const vector <size_t> &bmax
 ) const {
-	assert (min.size() == max.size());
-	assert (min.size() == dims.size());
-	assert (min.size() == min.size());
-	assert (min.size() == max.size());
-	assert (min.size() == bs.size());
-	assert (min.size() == bmin.size());
-	assert (min.size() == bmax.size());
+	assert (dims.size() == bs.size());
+	assert (dims.size() == bmin.size());
+	assert (dims.size() == bmax.size());
 
 	// Get horizontal dimensions
 	//
 	vector <double> hminu, hmaxu;
 	for (int i = 0; i<2; i++) { 
 		float *coords = blkvec[i+1];
-		int x0 = min[i] % bs[i];
-        int x1 = x0 + (max[i]-min[i]);
-		hminu.push_back(coords[x0]);
-		hmaxu.push_back(coords[x1]);
+		hminu.push_back(coords[0]);
+		hmaxu.push_back(coords[dims[i]-1]);
 	}
-
-	vector <bool> periodic;
-	bool has_missing;
-	float mv;
-	grid_params(var, min, max, dims, periodic, has_missing, mv);
 
 	size_t nblocks = 1;
 	size_t block_size = 1;
@@ -2382,53 +2370,29 @@ LayeredGrid *DataMgr::_make_grid_layered(
         zcblkptrs.push_back(blkvec[3] + i*block_size);
 	}
 
-	LayeredGrid *lg;
-	vector <double> minuzero(3, 0.0);
-	vector <double> maxuone(3, 1.0);
-	if (has_missing) {
-		RegularGrid rg(bs,min,max,minuzero, maxuone, periodic,zcblkptrs,mv);
 
-		lg = new LayeredGrid(
-			bs,min,max,hminu, hmaxu,periodic,blkptrs, rg, mv
-		);
-	}
-	else {
-		RegularGrid rg(bs,min,max,minuzero, maxuone, periodic,zcblkptrs);
+	RegularGrid rg(
+		dims, bs, zcblkptrs, vector <double> (3,0.0), vector <double> (3,1.0)
+	);
 
-		lg = new LayeredGrid(
-			bs,min,max,hminu, hmaxu,periodic,blkptrs, rg
-		);
-	}
+	LayeredGrid *lg = new LayeredGrid(dims, bs, blkptrs, hminu, hmaxu, rg);
 
 	return(lg);
 }
 
 CurvilinearGrid *DataMgr::_make_grid_curvilinear(
-	const DC::DataVar &var,
+	int level,
+	int lod,
 	const vector <DC::CoordVar> &cvarsinfo,
-    const vector <size_t> &min,
-	const vector <size_t> &max, 
 	const vector <size_t> &dims,
     const vector <float *> &blkvec,
 	const vector <size_t> &bs,
 	const vector <size_t> &bmin,
 	const vector <size_t> &bmax
 ) {
-	assert (min.size() == max.size());
-	assert (min.size() == dims.size());
-	assert (min.size() == min.size());
-	assert (min.size() == max.size());
-	assert (min.size() == bs.size());
-	assert (min.size() == bmin.size());
-	assert (min.size() == bmax.size());
-
-
-	vector <bool> periodic;
-	bool has_missing;
-	float mv;
-	grid_params(var, min, max, dims, periodic, has_missing, mv);
-	vector <bool> periodic_v;
-	for (int i=0; i<dims.size(); i++) periodic_v.push_back(periodic[i]);
+	assert (dims.size() == bs.size());
+	assert (dims.size() == bmin.size());
+	assert (dims.size() == bmax.size());
 
 	size_t nblocks = 1;
 	size_t block_size = 1;
@@ -2444,16 +2408,13 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(
         if (blkvec[0]) blkptrs.push_back(blkvec[0] + i*block_size);
 	}
 
-	vector <size_t> bs2d, min2d, max2d;
-	vector <bool> periodic2d;
+	vector <size_t> bs2d, dims2d;
 	vector <double> minu2d, maxu2d;
 	for (int i=0; i<2; i++) {
 		bs2d.push_back(bs[i]);
-		min2d.push_back(min[i]);
-		max2d.push_back(max[i]);
+		dims2d.push_back(dims[i]);
 		minu2d.push_back(0.0);
 		maxu2d.push_back(1.0);
-		periodic2d.push_back(periodic[i]);
 	}
 
 	size_t nblocks2d = 1;
@@ -2476,39 +2437,23 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(
 		for (int i=0; i<dims[2]; i++) zcoords.push_back(blkvec[3][i]);
 	}
 
+	RegularGrid xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
+	RegularGrid yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-	CurvilinearGrid *g;
-	if (has_missing) {
-		RegularGrid xrg(bs2d,min2d,max2d,minu2d,maxu2d,periodic2d,xcblkptrs,mv);
-		RegularGrid yrg(bs2d,min2d,max2d,minu2d,maxu2d,periodic2d,ycblkptrs,mv);
+	const KDTreeRG *kdtree = _getKDTree2D(
+		level, lod, bmin, bmax, cvarsinfo, xrg, yrg
+	);
 
-		KDTreeRGSubset kdsubtree;
-		_getKDSubtree2D(cvarsinfo, xrg, yrg, kdsubtree);
-
-		g = new CurvilinearGrid(
-				bs,min,max,periodic_v,blkptrs, xrg, yrg, 
-				zcoords, kdsubtree, mv
-		);
-	}
-	else {
-		RegularGrid xrg(bs2d,min2d,max2d,minu2d,maxu2d,periodic2d,xcblkptrs);
-		RegularGrid yrg(bs2d,min2d,max2d,minu2d,maxu2d,periodic2d,ycblkptrs);
-
-		KDTreeRGSubset kdsubtree;
-		_getKDSubtree2D(cvarsinfo, xrg, yrg, kdsubtree);
-
-		g = new CurvilinearGrid(
-				bs,min,max,periodic_v,blkptrs, xrg, yrg,
-				zcoords, kdsubtree
-		);
-	}
+	CurvilinearGrid *g = new CurvilinearGrid(
+		dims, bs, blkptrs, xrg, yrg, 
+		zcoords, kdtree
+	);
 
 	return(g);
 }
 
 //	var: variable info
-//  min: min ROI offsets in voxels, full domain 
-//  min: max ROI offsets in voxels, full domain 
+//  roi_dims: spatial dimensions of ROI
 //	dims: spatial dimensions of full variable domain in voxels
 //	blkvec: data blocks, and coordinate blocks
 //	bsvec: data block dimensions, and coordinate block dimensions
@@ -2517,9 +2462,10 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(
 //
 
 StructuredGrid *DataMgr::_make_grid(
+	int level,
+	int lod,
 	const DC::DataVar &var,
-    const vector <size_t> &min,
-	const vector <size_t> &max, 
+	const vector <size_t> &roi_dims, 
 	const vector <size_t> &dims,
 	const vector <float *> &blkvec,
 	const vector < vector <size_t > > &bsvec,
@@ -2591,19 +2537,30 @@ StructuredGrid *DataMgr::_make_grid(
 	StructuredGrid *rg = NULL;
     if (grid_type == REGULAR) {
 		rg = _make_grid_regular(
-			var, min, max, dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]
+			dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]
 		);
 	}
 	else if (grid_type == LAYERED) {
 		rg = _make_grid_layered(
-			var, min, max, dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]
+			dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]
 		);
 	}
 	else if (grid_type == CURVILINEAR) {
 		rg = _make_grid_curvilinear(
-			var, cvarsinfo, min, max, dims, 
+			level, lod, cvarsinfo, dims, 
 			blkvec, bsvec[0], bminvec[0], bmaxvec[0]
 		);
+	}
+
+	vector <bool> periodic;
+	bool has_missing;
+	float mv;
+	grid_params(var, roi_dims, dims, periodic, has_missing, mv);
+
+	rg->SetPeriodic(periodic);
+	if (has_missing) {
+		rg->SetHasMissingValues(true);
+		rg->SetMissingValue(mv);
 	}
 
 	return(rg);
@@ -2767,14 +2724,19 @@ void	DataMgr::_unlock_blocks(
 	return;
 }
 
-void DataMgr::_getKDSubtree2D(
+const KDTreeRG *DataMgr::_getKDTree2D(
+	int level,
+	int lod,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax,
     const vector <DC::CoordVar> &cvarsinfo, 
 	const RegularGrid &xrg,
-	const RegularGrid &yrg,
-	KDTreeRGSubset &kdsubtree
+	const RegularGrid &yrg
 ) {
 	assert(cvarsinfo.size() >= 2);
 	assert(xrg.GetDimensions() == yrg.GetDimensions());
+	assert(bmin.size() == 2);
+	assert(bmin.size() == bmax.size());
 
 	vector <string> varnames;
 	for (int i=0; i<2; i++) {
@@ -2782,18 +2744,21 @@ void DataMgr::_getKDSubtree2D(
 		varnames.push_back(cvarsinfo[i].GetName());
 	}
 
-	vector <size_t> min, max;
-	xrg.GetIJKOrigin(min);
-
-	for (int i=0; i<min.size(); i++) {
-		max.push_back(min[i] + xrg.GetDimensions()[i] - 1);
+	// Create a unique hash tag for the KDTree: Need a new tree for each
+	// ROI
+	//
+	ostringstream oss;
+	oss << "KDTree" << ":"; 
+	for (int i=0; i<bmin.size(); i++) {
+		oss << bmin[i] << ":";
+		oss << bmax[i] << ":";
 	}
-
+	const string key = oss.str();
+	
 	KDTreeRG *kdtree = NULL;
 
 	vector <void *> values;
-	const string key = "KDTree";
-	bool found = _varInfoCache.Get(0,varnames,0,0,key, values);
+	bool found = _varInfoCache.Get(0,varnames,level,lod,key, values);
 	if (found) {
 		assert(values.size() == 1);
 		kdtree = (KDTreeRG *) values[0];
@@ -2801,13 +2766,12 @@ void DataMgr::_getKDSubtree2D(
 	else {
 		kdtree = new KDTreeRG(xrg, yrg);
 		values.push_back(kdtree);
-		_varInfoCache.Set(0, varnames, 0,0, key, values);
+		_varInfoCache.Set(0, varnames, level,lod, key, values);
 	}
 
-	KDTreeRGSubset mykdsubtree(kdtree, min, max);
-	kdsubtree = mykdsubtree;
-
+	return(kdtree);
 }
+
 
 namespace VAPoR {
 
