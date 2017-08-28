@@ -22,6 +22,7 @@ endif()
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
+option (INSTALL_DLL "Include third party library DLLs when building installer" OFF)
 
 include_directories ("${PROJECT_BINARY_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
@@ -72,18 +73,23 @@ add_subdirectory (share/Doxygen)
 ###############################################################################
 
 if (WIN32)
-	set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
-	file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
-	install (
-		FILES ${WIN_INSTALL_DLLS}
-		DESTINATION ${INSTALL_BIN_DIR}
-		COMPONENT Dependencies
-		)
-endif ()
+	set (ENV_CONFIG_FILE_NAME "NSIS.EnvConfig.ini")
+	set (ENV_CONFIG_PATH "${CMAKE_CURRENT_BINARY_DIR}/buildutils/${ENV_CONFIG_FILE_NAME}")
+	configure_file ("buildutils/${ENV_CONFIG_FILE_NAME}.in" "${ENV_CONFIG_PATH}")
+	if (${INSTALL_DLL})
+		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
+		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
+		install (
+			FILES ${WIN_INSTALL_DLLS}
+			DESTINATION ${INSTALL_BIN_DIR}
+			COMPONENT Dependencies
+			)
+	endif (${INSTALL_DLL})
+endif (WIN32)
 
 set (CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set (CPACK_PACKAGE_VENDOR "NCAR")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "VAPOR - DESCRIPTION")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "VAPOR - DESCRIPTION\nInstaller build 0.1")
 set (CPACK_PACKAGE_VERSION ${VERSION_STRING})
 set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
@@ -91,5 +97,10 @@ set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_RC})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "VAPOR")
 set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 set (CPACK_PACKAGE_EXECUTABLES vaporgui;VaporGUI)
+
+set (CPACK_NSIS_MODIFY_PATH ON)
 # set (NSIS_ADDITIONAL_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/NSIS.template.in")
+set (CPACK_NSIS_MUI_ICON "Images/vapor-win-icon.ico")
+# set (CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "MessageBox MB_OK \"Pre Install Command\"")
+
 include (CPack)
