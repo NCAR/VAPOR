@@ -18,10 +18,9 @@
 
 using namespace VAPoR;
 
-TwoDDataEventRouter::TwoDDataEventRouter(
-	QWidget *parent, ControlExec *ce
-) : QTabWidget(parent),
-	RenderEventRouter( ce, TwoDDataParams::GetClassType())
+TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce) 
+                    : QTabWidget(parent),
+	                    RenderEventRouter( ce, TwoDDataParams::GetClassType())
 {
 	_variables = new TwoDVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
@@ -45,7 +44,7 @@ TwoDDataEventRouter::TwoDDataEventRouter(
 	qsgeo->setWidgetResizable(true);
 	addTab(qsgeo, "Geometry");
 
-#ifdef DEAD	
+#if 0	
 	QScrollArea *qsimg = new QScrollArea(this);
 	qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_image = new TwoDDataImageGUI(this);

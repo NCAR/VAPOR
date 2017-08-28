@@ -8,7 +8,10 @@ FILES = \
 	glutil Renderer TwoDRenderer HelloRenderer TwoDDataRenderer \
 	BarbRenderer ShaderProgram ShaderMgr \
 	jfilewrite Visualizer  ControlExecutive \
-	VizFeatureRenderer textRenderer
+	VizFeatureRenderer textRenderer\
+	ImageRenderer \
+	GeoImageTMS GeoImageGeoTiff GeoImage GeoTileMercator \
+	GeoTile GeoTileEquirectangular
 
 
 ifeq ($(BUILD_FLOW),1)
