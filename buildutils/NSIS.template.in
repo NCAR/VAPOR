@@ -626,7 +626,6 @@ FunctionEnd
   ;Only for solid compression (by default, solid compression is enabled for BZIP2 and LZMA)
 
   ReserveFile "NSIS.InstallOptions.ini"
-  ReserveFile "@ENV_CONFIG_PATH@"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 ;--------------------------------
@@ -636,7 +635,7 @@ Section "-Core installation"
   ;Use the entire tree produced by the INSTALL target.  Keep the
   ;list of directories here in sync with the RMDir commands below.
   SetOutPath "$INSTDIR"
-  @CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS@
+  !include "@CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS@"
   @CPACK_NSIS_FULL_INSTALL@
 
   ;Store installation folder
@@ -817,7 +816,7 @@ Section "Uninstall"
     "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "InstallToDesktop"
   ;MessageBox MB_OK "Install to desktop: $INSTALL_DESKTOP "
 
-@CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@
+!include "@CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@"
 
   ;Remove files we installed.
   ;Keep the list of directories here in sync with the File commands above.
@@ -900,7 +899,6 @@ SectionEnd
 
 Function .onInit
   StrCmp "@CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL@" "ON" 0 inst
-  !insertmacro INSTALLOPTIONS_EXTRACT_AS "@ENV_CONFIG_PATH@" "@ENV_CONFIG_FILE_NAME@"
 
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "UninstallString"
   StrCmp $0 "" inst
