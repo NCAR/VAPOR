@@ -681,10 +681,22 @@ int Plot::findNyquist(VAPoR::StructuredGrid* sg,
 	double &dX, double &dY, double &dZ
 ) const {
 
-//	int s1 = abs((int)maxv[0]-(int)minv[0]);
-//	int s2 = abs((int)maxv[1]-(int)minv[1]);
-//	int s3 = abs((int)maxv[2]-(int)minv[2]);
+	vector<size_t> dims = sg->GetDimensions();
+	cout << "Dims " << dims.size() << endl;
+	for (int i=0; i<dims.size(); i++) {
+		cout << dims[i] << endl;
+	}
+
+	
 	int s1, s2, s3;
+	s1 = (int)dims[0];;
+	s2 = (int)dims[1];
+	if (dims[2]) {
+		s3 = (int)dims[2];
+	}
+	else {
+		s3 = 0;
+	}
 	int nsamples = 2*ceil(sqrt((double)(s1*s1 + s2*s2 + s3*s3)));
 
 	if (nsamples < 2) nsamples = 2;
@@ -693,6 +705,15 @@ int Plot::findNyquist(VAPoR::StructuredGrid* sg,
 	dY = ((maxu[1]-minu[1]) / (double) (nsamples-1));
 	dZ = ((maxu[2]-minu[2]) / (double) (nsamples-1));
 
+	cout << "deltas " << dX << " " << dY << " " << dZ << endl;
+	cout << minu[0] << " " << maxu[0] << endl;
+	cout << minu[1] << " " << maxu[1] << endl;
+	cout << minu[2] << " " << maxu[2] << endl;
+	cout << nsamples << endl;
+
+	//dX = 10000;
+	//dY = 100000;
+	//dZ = 1000;
 	return nsamples;
 }
 
@@ -1036,7 +1057,7 @@ int Plot::getSpatialVectors(
 			double yCoord = j*dY + minu[1];
 			double zCoord = j*dZ + minu[2];
 			float val = sg->GetValue(xCoord, yCoord, zCoord);
-
+			cout << "get SG value " << j << " " << val << endl;
 			// Map missing values to NaNs. matplotlib won't plot
 			// these. May need to using a numpy masked array in future.
 			//
