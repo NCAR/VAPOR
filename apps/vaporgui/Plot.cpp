@@ -740,13 +740,14 @@ void Plot::savePlotToFile() {
 // Our sampling rate is based on how many voxels are crossed
 // between points a and b, multiplied by 2
 //
-int Plot::findNyquist(
-    const double minu[3], const double maxu[3],
-    double &dX, double &dY, double &dZ) const {
+int Plot::findNyquist(VAPoR::StructuredGrid *sg,
+                      const double minu[3], const double maxu[3],
+                      double &dX, double &dY, double &dZ) const {
 
-    int s1 = abs((int)maxv[0] - (int)minv[0]);
-    int s2 = abs((int)maxv[1] - (int)minv[1]);
-    int s3 = abs((int)maxv[2] - (int)minv[2]);
+    //	int s1 = abs((int)maxv[0]-(int)minv[0]);
+    //	int s2 = abs((int)maxv[1]-(int)minv[1]);
+    //	int s3 = abs((int)maxv[2]-(int)minv[2]);
+    int s1, s2, s3;
     int nsamples = 2 * ceil(sqrt((double)(s1 * s1 + s2 * s2 + s3 * s3)));
 
     if (nsamples < 2)
