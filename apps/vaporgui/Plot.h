@@ -114,7 +114,7 @@ private:
     void finalizePython();
     void updateValues(QSlider *slider, QAbstractSpinBox *spinner, QTableWidgetItem *twi);
 
-    int findNyquist(const size_t minv[3], const size_t maxv[3], const double minu[3], const double maxu[3], double &dX, double &dY, double &dZ) const;
+    int findNyquist(StructuredGrid *sg, const double minu[3], const double maxu[3], double &dX, double &dY, double &dZ) const;
 
     void fudgeVoxBounds(size_t minv[3], size_t maxv[3]) const;
 

@@ -6,7 +6,7 @@ ifeq    ($(HAVE_QT_FRAMEWORK),1)
 QT_FRAMEWORK = 1
 endif
 
-CXXFLAGS          += -std=c++0x -stdlib=libc++ -DDARWIN -Wall 
+CXXFLAGS          += -std=c++11 -stdlib=libc++ -DDARWIN -Wall 
 CXXFLAGS          += -Wno-format -Wno-sign-compare -Wno-deprecated-register 
 CXXFLAGS          += -fPIC 
 

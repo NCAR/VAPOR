@@ -18,348 +18,425 @@
 using namespace std;
 using namespace VAPoR;
 
-void StructuredGrid::_StructuredGrid(const vector<size_t> &bs, const vector<size_t> &min, const vector<size_t> &max, const vector<bool> &periodic, const vector<float *> &blks)
+void StructuredGrid::_StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks)
 {
     assert(bs.size() == 2 || bs.size() == 3);
-    assert(bs.size() == min.size());
-    assert(bs.size() == max.size());
-    assert(bs.size() == periodic.size());
+    assert(bs.size() == dims.size());
 
-    _min.clear();
-    _max.clear();
     _bs.clear();
     _bdims.clear();
-    _minabs.clear();
-    _maxabs.clear();
-    _periodic.clear();
     _blks.clear();
 
-    size_t nblocks = 1;
     for (int i = 0; i < bs.size(); i++) {
-        assert(max[i] >= min[i]);
         assert(bs[i] > 0);
+        assert(dims[i] > 0);
 
         _bs.push_back(bs[i]);
-        _bdims.push_back((max[i] / bs[i]) - (min[i] / bs[i]) + 1);
-        nblocks *= _bdims[i];
-        _minabs.push_back(min[i]);
-        _maxabs.push_back(max[i]);
-        _min.push_back(min[i] % bs[i]);
-        _max.push_back(_min[i] + (max[i] - min[i]));
-        _periodic.push_back(periodic[i]);
+        _bdims.push_back(((dims[i] - 1) / bs[i]) + 1);
     }
-
-    _ndim = _bs.size();
 
     //
     // Shallow  copy blocks
     //
     _blks = blks;
-
-    _hasMissing = false;
-    _missingValue = INFINITY;
-    _interpolationOrder = 1;
 }
 
-StructuredGrid::StructuredGrid(const size_t bs[3], const size_t min[3], const size_t max[3], const bool periodic[3], const std::vector<float *> &blks)
-{
-    vector<size_t> bs_v;
-    vector<size_t> min_v;
-    vector<size_t> max_v;
-    vector<bool>   periodic_v;
-
-    for (int i = 0; i < 3; i++) {
-        if (min[i] == max[i]) break;
-        bs_v.push_back(bs[i]);
-        min_v.push_back(min[i]);
-        max_v.push_back(max[i]);
-        periodic_v.push_back(periodic[i]);
-    }
-
-    _StructuredGrid(bs_v, min_v, max_v, periodic_v, blks);
-}
-
-StructuredGrid::StructuredGrid(const vector<size_t> &bs, const vector<size_t> &min, const vector<size_t> &max, const vector<bool> &periodic, const vector<float *> &blks)
-{
-    _StructuredGrid(bs, min, max, periodic, blks);
-}
-
-StructuredGrid::StructuredGrid(const size_t bs[3], const size_t min[3], const size_t max[3], const bool periodic[3], const vector<float *> &blks, float missing_value)
-{
-    vector<size_t> bs_v;
-    vector<size_t> min_v;
-    vector<size_t> max_v;
-    vector<bool>   periodic_v;
-
-    for (int i = 0; i < 3; i++) {
-        if (min[i] == max[i]) break;
-        bs_v.push_back(bs[i]);
-        min_v.push_back(min[i]);
-        max_v.push_back(max[i]);
-        periodic_v.push_back(periodic[i]);
-    }
-
-    _StructuredGrid(bs_v, min_v, max_v, periodic_v, blks);
-
-    _missingValue = missing_value;
-    _hasMissing = true;
-}
-
-StructuredGrid::StructuredGrid(const std::vector<size_t> &bs, const std::vector<size_t> &min, const std::vector<size_t> &max, const std::vector<bool> &periodic, const vector<float *> &blks,
-                               float missing_value)
-{
-    _StructuredGrid(bs, min, max, periodic, blks);
-
-    _missingValue = missing_value;
-    _hasMissing = true;
-}
+StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, dims.size()) { _StructuredGrid(dims, bs, blks); }
 
 StructuredGrid::StructuredGrid()
 {
-    _min.clear();
-    _max.clear();
     _bs.clear();
     _bdims.clear();
-    _minabs.clear();
-    _maxabs.clear();
-    _periodic.clear();
-
-    _missingValue = INFINITY;
-    _hasMissing = false;
-    _interpolationOrder = 0;
-    _ndim = 0;
     _blks.clear();
 }
 
 StructuredGrid::~StructuredGrid() {}
 
-float &StructuredGrid::AccessIJK(size_t x, size_t y, size_t z) const { return (_AccessIJK(_blks, x, y, z)); }
-
-float &StructuredGrid::_AccessIJK(const vector<float *> &blks, size_t x, size_t y, size_t z) const
+float StructuredGrid::AccessIndex(const std::vector<size_t> &indices) const
 {
-    if (!blks.size()) return ((float &)_missingValue);
+    float *fptr = _AccessIndex(_blks, indices);
+    if (!fptr) return (GetMissingValue());
+    return (*fptr);
+}
 
-    if (x > (_max[0] - _min[0])) return ((float &)_missingValue);
-    if (y > (_max[1] - _min[1])) return ((float &)_missingValue);
-    if (_ndim == 3) {
-        if (z > (_max[2] - _min[2])) return ((float &)_missingValue);
+void StructuredGrid::SetValue(const std::vector<size_t> &indices, float v)
+{
+    float *fptr = _AccessIndex(_blks, indices);
+    if (!fptr) return;
+    *fptr = v;
+}
+
+float *StructuredGrid::_AccessIndex(const std::vector<float *> &blks, const std::vector<size_t> &indices) const
+{
+    assert(indices.size() >= GetTopologyDim());
+
+    if (!blks.size()) return (NULL);
+
+    vector<size_t> dims = GetDimensions();
+    size_t         ndim = dims.size();
+    for (int i = 0; i < ndim; i++) {
+        if (indices[i] >= dims[i]) { return (NULL); }
     }
 
-    // x,y,z are specified relative to _min[i]
-    //
-    x += _min[0];
-    y += _min[1];
-    if (_ndim == 3) z += _min[2];
+    size_t xb = indices[0] / _bs[0];
+    size_t yb = indices[1] / _bs[1];
+    size_t zb = ndim == 3 ? indices[2] / _bs[2] : 0;
 
-    size_t xb = x / _bs[0];
-    size_t yb = y / _bs[1];
-    size_t zb = 0;
-    if (_ndim == 3) zb = z / _bs[2];
+    size_t x = indices[0] % _bs[0];
+    size_t y = indices[1] % _bs[1];
+    size_t z = ndim == 3 ? indices[2] % _bs[2] : 0;
 
-    x = x % _bs[0];
-    y = y % _bs[1];
-    if (_ndim == 3) z = z % _bs[2];
     float *blk = blks[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
-    return (blk[z * _bs[0] * _bs[1] + y * _bs[0] + x]);
+    return (&blk[z * _bs[0] * _bs[1] + y * _bs[0] + x]);
 }
 
-float StructuredGrid::GetValue(double x, double y, double z) const
+float StructuredGrid::AccessIJK(size_t i, size_t j, size_t k) const
 {
-    // Clamp coordinates on periodic boundaries to grid extents
-    //
-    _ClampCoord(x, y, z);
-
-    // At this point xyz should be within the grid bounds
-    //
-    if (!InsideGrid(x, y, z)) return (_missingValue);
-
-    if (_interpolationOrder == 0) {
-        return (_GetValueNearestNeighbor(x, y, z));
-    } else {
-        return (_GetValueLinear(x, y, z));
-    }
-}
-void StructuredGrid::GetUserExtents(double extents[6]) const
-{
-    for (int i = 0; i < 6; i++) extents[i] = 0.0;
-
-    vector<double> minu, maxu;
-    GetUserExtents(minu, maxu);
-    assert(minu.size() == maxu.size());
-    assert(minu.size() == _ndim);
-
-    for (int i = 0; i < minu.size(); i++) {
-        extents[i] = minu[i];
-        extents[i + 3] = maxu[i];
-    }
+    std::vector<size_t> indices = {i, j, k};
+    return (AccessIndex(indices));
 }
 
-void StructuredGrid::GetEnclosingRegion(const double minu[3], const double maxu[3], size_t min[3], size_t max[3]) const
+void StructuredGrid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 {
-    for (int i = 0; i < 3; i++) {
-        min[i] = 0.0;
-        max[i] = 0.0;
-    }
-
-    vector<double> v_minu;
-    vector<double> v_maxu;
-    for (int i = 0; i < _ndim; i++) {
-        v_minu.push_back(minu[i]);
-        v_maxu.push_back(maxu[i]);
-    }
-
-    vector<size_t> v_min;
-    vector<size_t> v_max;
-    GetEnclosingRegion(v_minu, v_maxu, v_min, v_max);
-
-    assert(v_min.size() == v_max.size());
-    for (int i = 0; i < v_min.size(); i++) {
-        min[i] = v_min[i];
-        max[i] = v_max[i];
-    }
-}
-
-void StructuredGrid::GetDimensions(size_t dims[3]) const
-{
-    vector<size_t> dims_v = StructuredGrid::GetDimensions();
-
-    for (int i = 0; i < 3; i++) dims[i] = 1;
-    for (int i = 0; i < dims_v.size(); i++) dims[i] = dims_v[i];
-}
-
-void StructuredGrid::GetDimensions(std::vector<size_t> &dims) const
-{
-    dims.clear();
-
-    for (int i = 0; i < _min.size(); i++) dims.push_back(_max[i] - _min[i] + 1);
-}
-
-vector<size_t> StructuredGrid::GetDimensions() const
-{
-    vector<size_t> dims;
-
-    for (int i = 0; i < _min.size(); i++) dims.push_back(_max[i] - _min[i] + 1);
-    return (dims);
-}
-
-void StructuredGrid::SetInterpolationOrder(int order)
-{
-    if (order < 0 || order > 2) order = 1;
-    _interpolationOrder = order;
+    std::vector<size_t> indices = {i, j, k};
+    return (SetValue(indices, v));
 }
 
 void StructuredGrid::GetRange(float range[2]) const
 {
     StructuredGrid::ConstIterator itr;
     bool                          first = true;
-    range[0] = range[1] = _missingValue;
+    range[0] = range[1] = GetMissingValue();
+    float missingValue = GetMissingValue();
     for (itr = this->begin(); itr != this->end(); ++itr) {
-        if (first && *itr != _missingValue) {
+        if (first && *itr != missingValue) {
             range[0] = range[1] = *itr;
             first = false;
         }
 
         if (!first) {
-            if (*itr < range[0] && *itr != _missingValue)
+            if (*itr < range[0] && *itr != missingValue)
                 range[0] = *itr;
-            else if (*itr > range[1] && *itr != _missingValue)
+            else if (*itr > range[1] && *itr != missingValue)
                 range[1] = *itr;
         }
     }
 }
 
-void StructuredGrid::SetPeriodic(const std::vector<bool> &periodic)
+bool StructuredGrid::GetCellNodes(const std::vector<size_t> &cindices, std::vector<vector<size_t>> &nodes) const
 {
-    assert(periodic.size() == _ndim);
+    nodes.clear();
 
-    _periodic = periodic;
+    vector<size_t> dims = GetDimensions();
+    assert(cindices.size() == dims.size());
+
+    assert((dims.size() == 2) && "3D cells not yet supported");
+
+    // Check if invalid indices
+    //
+    for (int i = 0; i < cindices.size(); i++) {
+        if (cindices[i] > (dims[i] - 2)) return (false);
+    }
+
+    // Cells have the same ID's as their first node
+    //
+    // walk counter-clockwise order
+    //
+    if (dims.size() == 2) {
+        vector<size_t> indices;
+
+        indices = {cindices[0], cindices[1]};
+        nodes.push_back(indices);
+
+        indices = {cindices[0] + 1, cindices[1]};
+        nodes.push_back(indices);
+
+        indices = {cindices[0] + 1, cindices[1] + 1};
+        nodes.push_back(indices);
+
+        indices = {cindices[0], cindices[1] + 1};
+        nodes.push_back(indices);
+    }
+
+    return (true);
 }
 
-void StructuredGrid::SetPeriodic(const bool periodic[3])
+bool StructuredGrid::GetCellNeighbors(const std::vector<size_t> &cindices, std::vector<vector<size_t>> &cells) const
 {
-    _periodic.clear();
+    cells.clear();
 
-    for (int i = 0; i < _ndim; i++) _periodic.push_back(periodic[i]);
+    vector<size_t> dims = GetDimensions();
+    assert(cindices.size() == dims.size());
+
+    assert((dims.size() == 2) && "3D cells not yet supported");
+
+    // Check if invalid indices
+    //
+    for (int i = 0; i < cindices.size(); i++) {
+        if (cindices[i] > (dims[i] - 2)) return (false);
+    }
+
+    // Cells have the same ID's as their first node
+    //
+    // walk counter-clockwise order
+    //
+    if (dims.size() == 2) {
+        vector<size_t> indices;
+
+        if (cindices[1] != 0) {    // below
+            indices = {cindices[0], cindices[1] - 1};
+        }
+        cells.push_back(indices);
+
+        if (cindices[0] != dims[0] - 2) {    // right
+            indices = {cindices[0] + 1, cindices[1]};
+        }
+        cells.push_back(indices);
+
+        if (cindices[1] != dims[1] - 2) {    // top
+            indices = {cindices[0], cindices[1] + 1};
+        }
+        cells.push_back(indices);
+
+        if (cindices[0] != 0) {    // left
+            indices = {cindices[0] - 1, cindices[1]};
+        }
+        cells.push_back(indices);
+    }
+    return (true);
 }
 
-void StructuredGrid::GetBlockSize(size_t bs[3]) const
+bool StructuredGrid::GetNodeCells(const std::vector<size_t> &indices, std::vector<vector<size_t>> &cells) const
 {
-    for (int i = 0; i < 3; i++) bs[i] = 1;
+    cells.clear();
 
-    for (int i = 0; i < _bs.size(); i++) bs[i] = _bs[i];
+    vector<size_t> dims = GetDimensions();
+    assert(indices.size() == dims.size());
+
+    assert((dims.size() == 2) && "3D cells not yet supported");
+
+    // Check if invalid indices
+    //
+    for (int i = 0; i < indices.size(); i++) {
+        if (indices[i] > (dims[i] - 1)) return (false);
+    }
+
+    if (dims.size() == 2) {
+        vector<size_t> indices;
+
+        if (indices[0] != 0 && indices[1] != 0) {    // below, left
+            indices = {indices[0] - 1, indices[1] - 1};
+            cells.push_back(indices);
+        }
+
+        if (indices[1] != 0) {    // below, right
+            indices = {indices[0], indices[1] - 1};
+            cells.push_back(indices);
+        }
+
+        if (indices[0] != (dims[0] - 1) && indices[1] != (dims[1])) {    // top, right
+            indices = {indices[0], indices[1]};
+            cells.push_back(indices);
+        }
+
+        if (indices[0] != 0) {    // top, top
+            indices = {indices[0] - 1, indices[1]};
+            cells.push_back(indices);
+        }
+    }
+    return (true);
 }
 
-template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg)
+void StructuredGrid::ClampCoord(std::vector<double> &coords) const
 {
-    if (!rg->_blks.size()) {
+    assert(coords.size() >= GetTopologyDim());
+
+    while (coords.size() > GetTopologyDim()) { coords.pop_back(); }
+
+    vector<bool>   periodic = GetPeriodic();
+    vector<size_t> dims = GetDimensions();
+
+    vector<double> minu, maxu;
+    GetUserExtents(minu, maxu);
+
+    for (int i = 0; i < coords.size(); i++) {
+        //
+        // Handle coordinates for dimensions of length 1
+        //
+        if (dims[i] == 1) {
+            coords[i] = minu[i];
+            continue;
+        }
+
+        if (coords[i] < minu[i] && periodic[i]) {
+            while (coords[i] < minu[i]) coords[i] += maxu[i] - minu[i];
+        }
+        if (coords[i] > maxu[i] && periodic[i]) {
+            while (coords[i] > maxu[i]) coords[i] -= maxu[i] - minu[i];
+        }
+    }
+}
+
+template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(T *rg, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
+{
+    if (!rg->GetBlks().size()) {
         _end = true;
         return;
     }
-    _z = 0;
+
+    vector<size_t> dims = rg->GetDimensions();
+    vector<size_t> bs = rg->GetBlockSize();
+    vector<size_t> bdims = rg->GetDimensionInBlks();
+    assert(dims.size() > 1 && dims.size() < 4);
+    for (int i = 0; i < dims.size(); i++) {
+        _dims[i] = dims[i];
+        _bs[i] = bs[i];
+        _bdims[i] = bdims[i];
+    }
 
     _rg = rg;
-    _xb = rg->_min[0];
-    _x = rg->_min[0];
-    _y = rg->_min[1];
-    if (_rg->_ndim == 3) _z = rg->_min[2];
-    _itr = &rg->_blks[0][_z * rg->_bs[0] * rg->_bs[1] + _y * rg->_bs[0] + _x];
+    _coordItr = rg->ConstCoordBegin();
+    _x = 0;
+    _y = 0;
+    _z = 0;
+    _xb = 0;
+    _itr = &rg->GetBlks()[0][0];
+    _ndim = dims.size();
     _end = false;
+
+    vector<double> pt = *_coordItr;
+    if (!_pred(pt)) { operator++(); }
+}
+
+#ifdef DEAD
+template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(const ForwardIterator<T> &rhs)
+{
+    _rg = rhs._rg;
+    _coordItr = rhs._coordItr.clone();
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _xb = rhs._xb;
+    _itr = rhs._itr;
+    for (int i = 0; i < 3; i++) {
+        _dims[i] = rhs._dims[i];
+        _bs[i] = rhs._bs[i];
+        _bdims[i] = rhs._bdims[i];
+    }
+    _ndim = rhs._ndim;
+    _end = rhs._end;
+    _pred = rhs._pred;
+}
+#endif
+
+template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &&rhs)
+{
+    _rg = rhs._rg;
+    rhs._rg = nullptr;
+    _coordItr = std::move(rhs._coordItr);
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _xb = rhs._xb;
+    _itr = rhs._itr;
+    rhs._itr = nullptr;
+    for (int i = 0; i < 3; i++) {
+        _dims[i] = rhs._dims[i];
+        _bs[i] = rhs._bs[i];
+        _bdims[i] = rhs._bdims[i];
+    }
+    _ndim = rhs._ndim;
+    _end = rhs._end;
+    _pred = rhs._pred;
 }
 
 template<class T> StructuredGrid::ForwardIterator<T>::ForwardIterator()
 {
-    _rg = NULL;
-    _xb = 0;
+    _rg = nullptr;
+    //_coordItr = xx;
     _x = 0;
     _y = 0;
     _z = 0;
-    _itr = NULL;
+    _xb = 0;
+    _itr = nullptr;
+    for (int i = 0; i < 3; i++) {
+        _dims[i] = 1;
+        _bs[i] = 1;
+        _bdims[i] = 1;
+    }
+    _ndim = 0;
     _end = true;
+    //_pred = xx;
+}
+
+template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIterator<T>::operator=(ForwardIterator<T> rhs)
+{
+    swap(*this, rhs);
+    return (*this);
 }
 
 template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIterator<T>::operator++()
 {
-    if (!_rg->_blks.size()) _end = true;
+    if (!_rg->GetBlks().size()) _end = true;
     if (_end) return (*this);
 
-    _xb++;
-    _itr++;
-    _x++;
-    if (_xb < _rg->_bs[0] && _x < _rg->_max[0]) { return (*this); }
+    size_t xb = 0;
+    size_t yb = 0;
+    size_t zb = 0;
+    size_t x = 0;
+    size_t y = 0;
+    size_t z = 0;
+    do {
+        _xb++;
+        _itr++;
+        _x++;
+        ++_coordItr;
 
-    _xb = 0;
-    if (_x > _rg->_max[0]) {
-        _x = _xb = _rg->_min[0];
-        _y++;
-    }
-    if (_y > _rg->_max[1]) {
-        if (_rg->_ndim == 2) {
+        if (_xb < _bs[0] && _x < _dims[0]) {
+            if (_pred(*_coordItr)) { return (*this); }
+
+            continue;
+        }
+
+        _xb = 0;
+        if (_x >= _dims[0]) {
+            _x = _xb = 0;
+            _y++;
+        }
+
+        if (_y >= _dims[1]) {
+            if (_ndim == 2) {
+                _end = true;
+                return (*this);
+            }
+            _y = 0;
+            _z++;
+        }
+
+        if (_ndim == 3 && _z >= _dims[2]) {
             _end = true;
             return (*this);
         }
-        _y = _rg->_min[1];
-        _z++;
-    }
 
-    if (_rg->_ndim == 3 && _z > _rg->_max[2]) {
-        _end = true;
-        return (*this);
-    }
+        xb = _x / _bs[0];
+        yb = _y / _bs[1];
+        zb = 0;
+        if (_ndim == 3) zb = _z / _bs[2];
 
-    size_t xb = _x / _rg->_bs[0];
-    size_t yb = _y / _rg->_bs[1];
-    size_t zb = 0;
-    if (_rg->_ndim == 3) zb = _z / _rg->_bs[2];
+        x = _x % _bs[0];
+        y = _y % _bs[1];
+        z = 0;
+        if (_ndim == 3) z = _z % _bs[2];
 
-    size_t x = _x % _rg->_bs[0];
-    size_t y = _y % _rg->_bs[1];
-    size_t z = 0;
-    if (_rg->_ndim == 3) z = _z % _rg->_bs[2];
-    float *blk = _rg->_blks[zb * _rg->_bdims[0] * _rg->_bdims[1] + yb * _rg->_bdims[0] + xb];
-    _itr = &blk[z * _rg->_bs[0] * _rg->_bs[1] + y * _rg->_bs[0] + x];
+        float *blk = _rg->GetBlks()[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
+        _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
+
+    } while (!_pred(*_coordItr));
+
     return (*this);
 }
 
+#ifdef DEAD
 template<class T> StructuredGrid::ForwardIterator<T> StructuredGrid::ForwardIterator<T>::operator++(int)
 {
     if (_end) return (*this);
@@ -374,15 +451,15 @@ template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIte
     _end = false;
 
     vector<size_t> min, max;
-    for (int i = 0; i < _rg->_ndim; i++) {
-        min.push_back(_rg->_min[i]);
-        max.push_back(_rg->_max[i]);
+    for (int i = 0; i < _ndim; i++) {
+        min.push_back(0);
+        max.push_back(0);
     }
 
     vector<size_t> xyz;
-    if (_rg->_ndim > 0) xyz.push_back(_x);
-    if (_rg->_ndim > 1) xyz.push_back(_y);
-    if (_rg->_ndim > 2) xyz.push_back(_z);
+    if (_ndim > 0) xyz.push_back(_x);
+    if (_ndim > 1) xyz.push_back(_y);
+    if (_ndim > 2) xyz.push_back(_z);
 
     long newoffset = Wasp::LinearizeCoords(xyz, min, max) + offset;
 
@@ -396,24 +473,24 @@ template<class T> StructuredGrid::ForwardIterator<T> &StructuredGrid::ForwardIte
     xyz = Wasp::VectorizeCoords(offset, min, max);
     _x = _y = _z = 0;
 
-    if (_rg->_ndim > 0) _x = xyz[0];
-    if (_rg->_ndim > 1) _y = xyz[1];
-    if (_rg->_ndim > 2) _z = xyz[2];
-    _xb = _x % _rg->_bs[0];
+    if (_ndim > 0) _x = xyz[0];
+    if (_ndim > 1) _y = xyz[1];
+    if (_ndim > 2) _z = xyz[2];
+    _xb = _x % _bs[0];
 
-    size_t xb = _x / _rg->_bs[0];
+    size_t xb = _x / _bs[0];
 
-    size_t yb = _y / _rg->_bs[1];
+    size_t yb = _y / _bs[1];
     size_t zb = 0;
-    if (_rg->_ndim == 3) zb = _z / _rg->_bs[2];
+    if (_ndim == 3) zb = _z / _bs[2];
 
-    size_t x = _x % _rg->_bs[0];
-    size_t y = _y % _rg->_bs[1];
+    size_t x = _x % _bs[0];
+    size_t y = _y % _bs[1];
     size_t z = 0;
-    if (_rg->_ndim == 3) z = _z % _rg->_bs[2];
+    if (_ndim == 3) z = _z % _bs[2];
 
-    float *blk = _rg->_blks[zb * _rg->_bdims[0] * _rg->_bdims[1] + yb * _rg->_bdims[0] + xb];
-    _itr = &blk[z * _rg->_bs[0] * _rg->_bs[1] + y * _rg->_bs[0] + x];
+    float *blk = _rg->GetBlks()[zb * _bdims[0] * _bdims[1] + yb * _bdims[0] + xb];
+    _itr = &blk[z * _bs[0] * _bs[1] + y * _bs[0] + x];
     return (*this);
 }
 
@@ -426,6 +503,8 @@ template<class T> StructuredGrid::ForwardIterator<T> StructuredGrid::ForwardIter
     temp += offset;
     return (temp);
 }
+
+#endif
 
 template<class T> bool StructuredGrid::ForwardIterator<T>::operator!=(const StructuredGrid::ForwardIterator<T> &other)
 {
@@ -440,29 +519,18 @@ template class StructuredGrid::ForwardIterator<StructuredGrid>;
 template class StructuredGrid::ForwardIterator<const StructuredGrid>;
 
 namespace VAPoR {
-std::ostream &operator<<(std::ostream &o, const StructuredGrid &rg)
+std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg)
 {
-    o << "StructuredGrid " << endl << " Dimensions " << rg._max[0] - rg._min[0] + 1 << " " << rg._max[1] - rg._min[1] + 1 << " ";
-    if (rg._ndim == 3) o << rg._max[2] - rg._min[2] + 1;
+    o << "StructuredGrid " << endl;
+    o << " Block dimensions ";
+    for (int i = 0; i < sg._bs.size(); i++) { o << sg._bs[i] << " "; }
     o << endl;
 
-    o << " Min voxel offset " << rg._min[0] << " " << rg._min[1] << " ";
-    if (rg._ndim == 3) o << rg._min[2];
+    o << " Grid dimensions in blocks ";
+    for (int i = 0; i < sg._bdims.size(); i++) { o << sg._bdims[i] << " "; }
     o << endl;
 
-    o << " Max voxel offset " << rg._max[0] << " " << rg._max[1] << " ";
-    if (rg._ndim == 3) o << rg._max[2];
-    o << endl;
-
-    o << " Block dimensions" << rg._bs[0] << " " << rg._bs[1] << " ";
-    if (rg._ndim == 3) o << rg._bs[2];
-    o << endl;
-
-    o << " Periodicity " << rg._periodic[0] << " " << rg._periodic[1] << " ";
-    if (rg._ndim == 3) o << rg._periodic[2];
-    o << endl;
-
-    o << " Missing value " << rg._missingValue << endl << " Interpolation order " << rg._interpolationOrder << endl;
+    o << (const Grid &)sg;
 
     return o;
 }

@@ -653,7 +653,7 @@ void Plot::savePlotToFile()
 // Our sampling rate is based on how many voxels are crossed
 // between points a and b, multiplied by 2
 //
-int Plot::findNyquist(const size_t minv[3], const size_t maxv[3], const double minu[3], const double maxu[3], double &dX, double &dY, double &dZ) const
+int Plot::findNyquist(const double minu[3], const double maxu[3], double &dX, double &dY, double &dZ) const
 {
     int s1 = abs((int)maxv[0] - (int)minv[0]);
     int s2 = abs((int)maxv[1] - (int)minv[1]);
@@ -963,8 +963,8 @@ int Plot::getSpatialVectors(const vector<string> vars, map<string, vector<float>
         maxUVec.push_back(maxu[1]);
         maxUVec.push_back(maxu[2]);
 
-        StructuredGrid *rg = _dm->GetVariable(ts, var, _refLevel, _cRatio, minUVec, maxUVec, false);
-        if (!rg) {
+        StructuredGrid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio, minUVec, maxUVec, false);
+        if (!sg) {
             // N.B. In VAPOR 2.x libvdc functions post their own
             // error popups!
             //
@@ -975,14 +975,17 @@ int Plot::getSpatialVectors(const vector<string> vars, map<string, vector<float>
         // and step size. Only do this with first variable. All
         // variables sampled same number of times
         //
-        if (!nsamples) { nsamples = findNyquist(minv, maxv, minu, maxu, dX, dY, dZ); }
+        if (!nsamples) {
+            // nsamples = findNyquist(minv, maxv, minu, maxu, dX, dY, dZ);
+            nsamples = findNyquist(sg, minu, maxu, dX, dY, dZ);
+        }
 
-        float mv = rg->GetMissingValue();
+        float mv = sg->GetMissingValue();
         for (int j = 0; j < nsamples; ++j) {
             double xCoord = j * dX + minu[0];
             double yCoord = j * dY + minu[1];
             double zCoord = j * dZ + minu[2];
-            float  val = rg->GetValue(xCoord, yCoord, zCoord);
+            float  val = sg->GetValue(xCoord, yCoord, zCoord);
 
             // Map missing values to NaNs. matplotlib won't plot
             // these. May need to using a numpy masked array in future.
@@ -992,7 +995,7 @@ int Plot::getSpatialVectors(const vector<string> vars, map<string, vector<float>
             vec.push_back(val);
         }
 
-        if (rg) delete rg;
+        if (sg) delete sg;
 
         data[var] = vec;
     }
@@ -1067,28 +1070,28 @@ int Plot::getTemporalVectors(const vector<string> vars, map<string, vector<float
             size_t maxv[3] = {ijk[0], ijk[1], ijk[2]};
             fudgeVoxBounds(minv, maxv);
 
-            //			StructuredGrid *rg = _dm->GetVariable(
+            //			StructuredGrid *sg = _dm->GetVariable(
             //				ts, var, _refLevel, _cRatio, minv, maxv, false
             //			);
             vector<double> uPoint;
             uPoint.push_back(xyz[0]);
             uPoint.push_back(xyz[1]);
             uPoint.push_back(xyz[2]);
-            StructuredGrid *rg = _dm->GetVariable(ts, var, _refLevel, _cRatio, uPoint, uPoint, false);
-            if (!rg) {
+            StructuredGrid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio, uPoint, uPoint, false);
+            if (!sg) {
                 // N.B. In VAPOR 2.x libvdc functions post their own
                 // error popups!
                 //
                 return (-1);
             }
 
-            float val = rg->GetValue(xyz[0], xyz[1], xyz[2]);
+            float val = sg->GetValue(xyz[0], xyz[1], xyz[2]);
 
             // TODO: Handle missing values
             //
             vec.push_back(val);
 
-            delete rg;
+            delete sg;
         }
         data[var] = vec;
     }

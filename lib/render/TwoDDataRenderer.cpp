@@ -176,7 +176,7 @@ int TwoDDataRenderer::_paintGL()
     return (rc);
 }
 
-const GLvoid *TwoDDataRenderer::_GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize)
+const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize)
 {
     internalFormat = GL_RG32F;
     format = GL_RG;
@@ -193,7 +193,7 @@ const GLvoid *TwoDDataRenderer::_GetTexture(DataMgr *dataMgr, GLsizei &width, GL
     return (texture);
 }
 
-int TwoDDataRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height)
+int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height)
 {
     width = 0;
     height = 0;
@@ -237,8 +237,7 @@ int TwoDDataRenderer::_GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
 
     assert(sg);
 
-    vector<size_t> dims;
-    sg->GetDimensions(dims);
+    vector<size_t> dims = sg->GetDimensions();
     assert(dims.size() == 2);
 
     _vertsWidth = dims[0];
@@ -365,8 +364,7 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     if (rc < 0) return (rc);
     assert(hgtGrid);
 
-    vector<size_t> dims;
-    sg->GetDimensions(dims);
+    vector<size_t> dims = sg->GetDimensions();
     assert(dims.size() == 2);
 
     size_t   width = dims[0];
@@ -375,8 +373,8 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     double   mv = hgtGrid->GetMissingValue();
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            double x, y, z;
-            sg->GetUserCoordinates(i, j, 0, &x, &y, &z);
+            double x, y, zdummy;
+            sg->GetUserCoordinates(i, j, x, y, zdummy);
 
             // Lookup vertical coordinate displacement as a data element from the
             // height variable. Note, missing values are possible if image
@@ -386,7 +384,7 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
             double deltaZ = hgtGrid->GetValue(x, y, 0.0);
             if (deltaZ == mv) deltaZ = 0.0;
 
-            z = deltaZ + defaultZ;
+            double z = deltaZ + defaultZ;
 
             // Finally apply stretch factors
             //
@@ -404,8 +402,7 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
 
 int TwoDDataRenderer::_getMeshPlane(DataMgr *dataMgr, StructuredGrid *sg, const vector<double> &scaleFac, double defaultZ)
 {
-    vector<size_t> dims;
-    sg->GetDimensions(dims);
+    vector<size_t> dims = sg->GetDimensions();
     assert(dims.size() == 2);
 
     size_t   width = dims[0];
@@ -413,10 +410,10 @@ int TwoDDataRenderer::_getMeshPlane(DataMgr *dataMgr, StructuredGrid *sg, const 
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            double x, y, z;
-            sg->GetUserCoordinates(i, j, 0, &x, &y, &z);
+            double x, y, zdummy;
+            sg->GetUserCoordinates(i, j, x, y, zdummy);
 
-            z = defaultZ;
+            double z = defaultZ;
 
             // Finally apply stretch factors
             //
@@ -496,8 +493,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 
     if (rc < 0) return (NULL);
 
-    vector<size_t> dims;
-    sg->GetDimensions(dims);
+    vector<size_t> dims = sg->GetDimensions();
     assert(dims.size() == 2);
 
     _texWidth = dims[0];
@@ -508,7 +504,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     GLfloat *texptr = texture;
 
     StructuredGrid::Iterator itr;
-    for (itr = sg->begin(); itr != sg->end(); ++itr) {
+    for (itr = sg->begin(minBoxReq, maxBoxReq); itr != sg->end(); ++itr) {
         float v = *itr;
 
         if (v == sg->GetMissingValue()) {
