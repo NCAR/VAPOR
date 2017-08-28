@@ -127,8 +127,7 @@ private:
 			QAbstractSpinBox* spinner, 
 			QTableWidgetItem* twi);
 
-	int findNyquist(
-		const size_t minv[3], const size_t maxv[3],
+	int findNyquist(StructuredGrid* sg,
 		const double minu[3], const double maxu[3],
 		double &dX, double &dY, double &dZ
 	) const;
