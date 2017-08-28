@@ -25,7 +25,6 @@ Combo::Combo(QLineEdit* edit, QSlider* slider, bool intType)
 	_lineEditValidator = NULL;
 	_slider = NULL;
 
-//	_lineEdit = new QLineEdit;
 	_lineEdit = edit;
 
 	if (_intType) {

@@ -1704,6 +1704,29 @@ int NetCDFCollection::Close(int fd) {
 	return(rc);
 }
 
+void NetCDFCollection::InstallDerivedVar(
+	string varname, DerivedVar *derivedVar
+) {
+	vector <string> sdimnames = derivedVar->GetSpatialDimNames();
+	vector <size_t> sdimlens = derivedVar->GetSpatialDims();
+	assert(sdimlens.size() == sdimnames.size());
+
+	// Add any new dimensions to the dimensions map. Should be 
+	// checking for re-definition of exisiting dimensions, but 
+	// being lazy.
+	//
+	for (int i=0; i<sdimnames.size(); i++) {
+		vector <string>::iterator itr;
+		itr = find(_dimNames.begin(), _dimNames.end(), sdimnames[i]);
+		if (itr == _dimNames.end()) { 
+			_dimNames.push_back(sdimnames[i]);
+			_dimLens.push_back(sdimlens[i]);
+		}
+	}
+
+    _derivedVarsMap[varname] = derivedVar;
+};
+
 namespace VAPoR {
 std::ostream &operator<<(
     std::ostream &o, const NetCDFCollection &ncdfc

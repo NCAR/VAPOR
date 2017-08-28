@@ -11,7 +11,7 @@ FILES = \
 	VizSelectCombo VizFeatureEventRouter \
 	AnimationEventRouter MappingFrame HelloEventRouter \
 	regioneventrouter ViewpointEventRouter \
-	TwoDDataEventRouter \
+	TwoDDataEventRouter ImageEventRouter \
 	RangeController Statistics Plot SeedMe \
 	helloSubtabs TFWidget VariablesWidget \
 	GeometryWidget RangeCombos BarbEventRouter \
@@ -30,13 +30,14 @@ QT_HEADERS := \
 	AnimationEventRouter HelloEventRouter \
 	StartupEventRouter AppSettingsEventRouter\
 	regioneventrouter ViewpointEventRouter \
-	TwoDDataEventRouter \
+	TwoDDataEventRouter ImageEventRouter \
 	RangeController Statistics Plot SeedMe \
 	TFWidget VariablesWidget \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
 	BannerGUI AnimationParams MiscParams\
-	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget ErrorReporter
+	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget ErrorReporter \
+	ImageSubtabs 
 
 
 ifneq ($(ARCH),WIN32)
