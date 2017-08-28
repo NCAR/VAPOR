@@ -202,6 +202,7 @@ private:
     QAction *_dataImportWRF_Action;
     QAction *_dataImportCF_Action;
     QAction *_dataLoad_MetafileAction;
+    QAction *_dataClose_MetafileAction;
     QAction *_fileNew_SessionAction;
     QAction *_plotAction;
     QAction *_statsAction;
@@ -254,6 +255,7 @@ private slots:
     void helpContents();
     void helpAbout();
     void loadData(string fileName = "");
+    void closeData(string fileName = "");
     void importWRFData();
     void importCFData();
     void sessionNew();
