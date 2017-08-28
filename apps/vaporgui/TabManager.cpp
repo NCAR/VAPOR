@@ -124,6 +124,7 @@ int TabManager::MoveToFront(string widgetTag){
  */
 int TabManager::findWidget(string widgetTag){
 	int tabType = getTabType(widgetTag);
+	cout << "TABTYPE " << tabType << " " << widgetTag << endl;
 	assert(tabType >= 0 && tabType <= 2);
 
 	for (int i = 0; i< _widgets[tabType].size(); i++){
@@ -157,6 +158,7 @@ void TabManager::InstallWidgets() {
 	//
 	for (int i = 0; i< _widgets[0].size(); i++){
 		string tag = _widgetTags[0][i];
+		cout << "ADDING " << tag << endl;
 		_renderHolder->AddWidget(_widgets[0][i],tag.c_str(), tag);
 		_widgets[0][i]->hide();
 	}
