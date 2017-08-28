@@ -30,36 +30,37 @@ namespace VAPoR {
 //! \date March 2016
 
 class RENDER_API TwoDRenderer : public Renderer {
-
   public:
     //! Constructor, must invoke Renderer constructor
     //! \param[in] Visualizer* pointer to the visualizer where this will draw
     //! \param[in] RenderParams* pointer to the ArrowParams describing
     //! this renderer
-    TwoDRenderer(
-        const ParamsMgr *pm, string winName, string dataSetName, string paramsType,
-        string classType, string instName, DataMgr *dataMgr);
+    TwoDRenderer(const ParamsMgr *pm,
+                 string winName,
+                 string dataSetName,
+                 string paramsType,
+                 string classType,
+                 string instName,
+                 DataMgr *dataMgr);
 
     //! Destructor
     //
     virtual ~TwoDRenderer();
 
   protected:
-    virtual int _GetMesh(
-        DataMgr *dataMgr,
-        GLfloat **verts,
-        GLfloat **normals,
-        GLsizei &width,
-        GLsizei &height) = 0;
+    virtual int _getMesh(DataMgr *dataMgr,
+                         GLfloat **verts,
+                         GLfloat **normals,
+                         GLsizei &width,
+                         GLsizei &height) = 0;
 
-    virtual const GLvoid *_GetTexture(
-        DataMgr *dataMgr,
-        GLsizei &width,
-        GLsizei &height,
-        GLint &internalFormat,
-        GLenum &format,
-        GLenum &type,
-        size_t &texelSize) = 0;
+    virtual const GLvoid *_getTexture(DataMgr *dataMgr,
+                                      GLsizei &width,
+                                      GLsizei &height,
+                                      GLint &internalFormat,
+                                      GLenum &format,
+                                      GLenum &type,
+                                      size_t &texelSize) = 0;
 
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
