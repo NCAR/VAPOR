@@ -50,8 +50,6 @@ public:
 
 	virtual ~Box();
 
-
-
  //! Set the box min and max extents
  //!
  //! Set the extents of the box. 
@@ -62,9 +60,7 @@ public:
  //! of the box, specified in the order X, Y, Z
  //!
  //
- void SetExtents(
-	const vector <double> &minExt, const vector <double> &maxExt
- );
+ void SetExtents( const vector <double> &minExt, const vector <double> &maxExt );
 
  //! Get the box min and max extents
  //!
@@ -81,9 +77,7 @@ public:
  //!
  //! \sa IsPlanar(), GetOrientation(), SetExtents()
  //
- void GetExtents(
-	vector <double> &minExt, vector <double> &maxExt
- ) const;
+ void GetExtents( vector <double> &minExt, vector <double> &maxExt ) const;
 
  //! Indicate whether or not the box is constrained to be planar.  
  //!
@@ -91,9 +85,10 @@ public:
  //!
  //! \sa GetOrientation()
  //
- bool IsPlanar() const {
-	return GetValueLong(Box::m_planarTag, (long) false);
- }
+  bool IsPlanar() const 
+  {
+	  return GetValueLong(Box::m_planarTag, (long) false);
+  }
 
  //! Constain the box to be planar or not
  //!
@@ -131,7 +126,7 @@ public:
 	SetValueLong(Box::m_orientationTag, "Set box orientation", (long)value);
  }
 
-#ifdef	DEAD
+#if 0
 	//! Get the stretched local box extents as a float array.  If timestep is >= 0, then get it just
 	//! for the specified timestep
 	//! \param[out] extents[6] float Returned extents
@@ -144,9 +139,10 @@ public:
 	//! \sa GetTimes()
 	//!
 	//! \param[out] extents const vector<double>& returned extents
-	vector<double>  GetLocalExtents() const {
-		const vector<double> localExtents(6,0.);
-		return GetValueDoubleVec(_extentsTag,localExtents);
+	vector<double>  GetLocalExtents() const 
+  { 
+    const vector<double> localExtents(6, 0);
+		return GetValueDoubleVec(_extentsTag, localExtents);
 	}
 
 	//! Specify the local extents.  If time step is -1, then set the generic extents.
@@ -181,7 +177,7 @@ public:
 	void SetLocalExtents(const float extents[6], int timestep = -1);
 #endif
 
-#ifdef	DEAD
+#if	0
 	//! Specify the stretched local extents as a float array.  If time step is -1, then set the generic extents.
 	//! Otherwise set the extents for a specific timestep.
 	//! \param[in] float extents[6]
@@ -194,12 +190,13 @@ public:
 	//! Get the three orientation angles (theta, phi, psi)
 	//! Defaults to empty vector if no angles are set.
 	//! \retval const vector<double> vector of length 3 of angles.
-	vector<double> GetAngles() const {
+	vector<double> GetAngles() const 
+  {
 		const vector<double> defaultAngles(3,0.);
 		return GetValueDoubleVec(Box::m_anglesTag,defaultAngles);
 	}
 
-#ifdef	DEAD
+#if 0
 	//! Get the angles as a double array
 	//! \param [out] double angles[3] array of three doubles for theta, phi, psi
 	//! \retval int zero if successful
@@ -240,7 +237,7 @@ public:
 	void SetAngles(const vector<double>& vals) {
 		SetValueDoubleVec(m_anglesTag, "Change box angles",vals);
 	}
-#ifdef	DEAD
+#if 0
 	//! Get the time(s) as a long vector.
 	//! The first one should be negative, marking the default extents.
 	//! Subsequent times are nonnegative integers indicating times for nondefault extents.
@@ -274,7 +271,7 @@ public:
 
 private:
 	
-#ifdef	DEAD
+#if 0
 //! method supports rotated boxes such as probe
 //! Specifies an axis-aligned box containing the rotated box.
 //! By default it just finds the box extents.

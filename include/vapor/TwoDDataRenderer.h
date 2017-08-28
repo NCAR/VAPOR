@@ -43,41 +43,39 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer
 
 public:
 
- TwoDDataRenderer( 
-	const ParamsMgr *pm, string winName, string dataSetName,
-	string instName, DataMgr *dataMgr
- );
+  TwoDDataRenderer( const ParamsMgr   *pm, 
+                          string      winName, 
+                          string      dataSetName,
+	                        string      instName, 
+                          DataMgr     *dataMgr);
 
- virtual ~TwoDDataRenderer();
+  virtual ~TwoDDataRenderer();
 
- // Get static string identifier for this render class
- //
- static string GetClassType() {
-	return("TwoDData");
- }
+  // Get static string identifier for this render class
+  //
+  static string GetClassType() 
+  {
+    return("TwoDData");
+  }
 
 protected:
  int _initializeGL();
 
  int _paintGL();
 
- int _GetMesh(
-	DataMgr *dataMgr,
-	GLfloat **verts,
-	GLfloat **normals,
-	GLsizei &width,
-	GLsizei &height
- ); 
+ int _getMesh(  DataMgr *dataMgr,
+                GLfloat **verts,
+                GLfloat **normals,
+                GLsizei &width,
+                GLsizei &height); 
 
- const GLvoid *_GetTexture(
-	DataMgr *dataMgr,
-	GLsizei &width,
-	GLsizei &height,
-	GLint &internalFormat,
-	GLenum &format,
-	GLenum &type,
-	size_t &texelSize
- );
+ const GLvoid *_getTexture( DataMgr *dataMgr,
+                            GLsizei &width,
+                            GLsizei &height,
+                            GLint &internalFormat,
+                            GLenum &format,
+                            GLenum &type,
+                            size_t &texelSize);
 
 	
 private:

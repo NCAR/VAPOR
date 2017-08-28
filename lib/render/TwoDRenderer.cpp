@@ -58,7 +58,7 @@ int TwoDRenderer::_paintGL() {
 
 	// Get the 2D texture
 	//
-	_texture = _GetTexture(
+	_texture = _getTexture(
 		_dataMgr, _texWidth, _texHeight, _texInternalFormat,
 		_texFormat, _texType, _texelSize
 	);
@@ -71,7 +71,7 @@ int TwoDRenderer::_paintGL() {
 	// Get the proxy geometry used to render the 2D surface (vertices and
 	// normals)
 	//
-	int rc = _GetMesh(_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight);
+	int rc = _getMesh(_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight);
 	if (rc < 0) {
 		return(-1);
 	}
