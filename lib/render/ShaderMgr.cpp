@@ -793,6 +793,17 @@ std::string ShaderMgr::GLVersion()
     return versionString;
 }
 
+void ShaderMgr::GLVersion(int &major, int &minor)
+{
+    GLint result;
+
+    glGetIntegerv(GL_MAJOR_VERSION, &result);
+    major = (int)result;
+
+    glGetIntegerv(GL_MINOR_VERSION, &result);
+    minor = (int)result;
+}
+
 std::string ShaderMgr::GLShaderVersion()
 {
     const GLubyte *glsl = glGetString(GL_SHADING_LANGUAGE_VERSION);
