@@ -122,7 +122,7 @@ void StructuredGrid::GetRange(float range[2]) const {
 	bool first = true;
 	range[0] = range[1] = GetMissingValue();
 	float missingValue = GetMissingValue();
-	for (itr = this->begin(); itr!=this->end(); ++itr) {
+	for (itr = this->cbegin(); itr!=this->cend(); ++itr) {
 		if (first && *itr != missingValue) {
 			range[0] = range[1] = *itr;
 			first = false;
@@ -144,8 +144,6 @@ bool StructuredGrid::GetCellNodes(
 	vector <size_t> dims = GetDimensions();
 	assert (cindices.size() == dims.size());
 
-	assert((dims.size() == 2) && "3D cells not yet supported");
-
 	// Check if invalid indices
 	//
 	for (int i=0; i<cindices.size(); i++) {
@@ -156,9 +154,9 @@ bool StructuredGrid::GetCellNodes(
 	//
 	// walk counter-clockwise order
 	//
-	if (dims.size() == 2) {
-		vector <size_t> indices;
+	vector <size_t> indices;
 
+	if (dims.size() == 2) {
 		indices =  {cindices[0], cindices[1]};
 		nodes.push_back(indices);
 
@@ -169,6 +167,32 @@ bool StructuredGrid::GetCellNodes(
 		nodes.push_back(indices);
 
 		indices =  {cindices[0], cindices[1]+1};
+		nodes.push_back(indices);
+
+	}
+	else if (dims.size() == 3 && dims[2] > 1) {
+		indices =  {cindices[0], cindices[1], cindices[2]};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0]+1, cindices[1], cindices[2]};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0]+1, cindices[1]+1, cindices[2]};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0], cindices[1]+1, cindices[2]};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0], cindices[1], cindices[2]+1};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0]+1, cindices[1], cindices[2]+1};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0]+1, cindices[1]+1, cindices[2]+1};
+		nodes.push_back(indices);
+
+		indices =  {cindices[0], cindices[1]+1, cindices[2]+1};
 		nodes.push_back(indices);
 	}
 
@@ -328,8 +352,7 @@ StructuredGrid::ForwardIterator<T>::ForwardIterator (
 	_ndim = dims.size();
 	_end = false;
 
-	vector <double> pt = *_coordItr;
-	if (! _pred(pt)) {
+	if (! _pred(*_coordItr)) {
 		operator++();
 	}
 }
@@ -571,6 +594,195 @@ operator!= (const StructuredGrid::ForwardIterator<T> &other) {
 //
 template class StructuredGrid::ForwardIterator<StructuredGrid>;
 template class StructuredGrid::ForwardIterator<const StructuredGrid>;
+
+
+
+
+#ifdef	DEAD
+
+// Only partially implmented for 2D cells. Need predicate cell-intersect-box
+// functor
+//
+//	Assumes counter-clockwise node ordering:
+//
+//	3-------2
+//	|       |	
+//	|       |	
+//	|       |	
+//	0-------1
+//  
+//
+template <class T>
+StructuredGrid::CellIterator<T>::CellIterator (
+	T *sg, const vector <double> &minu, const vector <double> &maxu
+) : _pred(minu, maxu) {
+
+	_sg = sg;
+	_dims = rg->GetDimensions();
+
+	_cellIndex = vector <size_t> (_dims.size(), 0);
+
+	_coordItr0 = rg->begin();
+	_coordItr1 = rg->begin();
+	++_coordItr1;
+
+	_coordItr2 = rg->begin();
+	_coordItr3 = rg->begin();
+	++_coordItr2;
+
+	for (int i=0; i<_dims[0]; i++) {
+		++_coordItr2
+		++_coordItr3
+	}
+
+	// Skip to first cell containing point (if any)
+	//
+	if (! _pred(*_coordItr0, *_coordItr1, *_coordItr2, *_coordItr3)) {
+		operator++();
+	}
+}
+#endif
+
+template <class T>
+StructuredGrid::ForwardCellIterator<T>::ForwardCellIterator(T *sg, bool begin) {
+	_sg = sg;
+	_dims = sg->GetDimensions();
+
+	_cellIndex = vector <size_t> (_dims.size(), 0);
+	if (! begin) {
+		_cellIndex[_dims.size()-1] = _dims[_dims.size()-1] - 1;
+    }
+}
+
+template <class T>
+StructuredGrid::ForwardCellIterator<T>::ForwardCellIterator(
+	ForwardCellIterator<T> &&rhs
+) {
+
+	_sg = rhs._sg; rhs._sg = nullptr;
+	_dims = rhs._dims;
+	_cellIndex = rhs._cellIndex;
+
+#ifdef	DEAD
+	_coordItr0 = std::move(rhs._coordItr0);
+	_coordItr1 = std::move(rhs._coordItr1);
+	_coordItr2 = std::move(rhs._coordItr2);
+	_coordItr3 = std::move(rhs._coordItr3);
+	_coordItr4 = std::move(rhs._coordItr4);
+	_coordItr5 = std::move(rhs._coordItr5);
+	_coordItr6 = std::move(rhs._coordItr6);
+	_coordItr7 = std::move(rhs._coordItr7);
+#endif
+
+}
+
+template <class T>
+StructuredGrid::ForwardCellIterator<T>::ForwardCellIterator() {
+	_sg = nullptr;
+	_dims.clear();
+	_cellIndex.clear();
+}
+
+template <class T>
+StructuredGrid::ForwardCellIterator<T>
+&StructuredGrid::ForwardCellIterator<T>::operator=(ForwardCellIterator<T> rhs) {
+
+	swap(*this, rhs);
+	return(*this);
+}
+
+
+template <class T>
+StructuredGrid::ForwardCellIterator<T>
+&StructuredGrid::ForwardCellIterator<T>::next2d() {
+
+	if (_cellIndex[1] >= (_dims[1]-1)) return(*this);
+
+	_cellIndex[0]++;
+
+#ifdef	DEAD
+	++_coordItr1;
+	++_coordItr2;
+	++_coordItr3;
+	++_coordItr4;
+#endif
+
+	if (_cellIndex[0]<(_dims[0]-1)) {
+		return(*this);
+	}
+
+	if (_cellIndex[0] >= (_dims[0]-1)) {
+
+#ifdef	DEAD
+		++_coordItr1;
+		++_coordItr2;
+		++_coordItr3;
+		++_coordItr4;
+#endif
+		_cellIndex[0] = 0;
+		_cellIndex[1]++;
+	}
+	return(*this);
+}
+
+template <class T>
+StructuredGrid::ForwardCellIterator<T>
+&StructuredGrid::ForwardCellIterator<T>::next3d() {
+
+	if (_cellIndex[2] >= (_dims[2]-1)) return(*this);
+
+	_cellIndex[0]++;
+
+#ifdef	DEAD
+	++_coordItr1;
+	++_coordItr2;
+	++_coordItr3;
+	++_coordItr4;
+#endif
+
+	if (_cellIndex[0]<(_dims[0]-1)) {
+		return(*this);
+	}
+
+	if (_cellIndex[0] >= (_dims[0]-1)) {
+#ifdef	DEAD
+		++_coordItr1;
+		++_coordItr2;
+		++_coordItr3;
+		++_coordItr4;
+#endif
+		_cellIndex[0] = 0;
+		_cellIndex[1]++;
+	}
+
+	if (_cellIndex[1] >= (_dims[1]-1)) {
+#ifdef	DEAD
+		++_coordItr1;
+		++_coordItr2;
+		++_coordItr3;
+		++_coordItr4;
+#endif
+		_cellIndex[1] = 0;
+		_cellIndex[2]++;
+	}
+
+	return(*this);
+}
+
+template <class T> 
+StructuredGrid::ForwardCellIterator<T>
+&StructuredGrid::ForwardCellIterator<T>::operator++() {
+
+	if (_dims.size() == 2) return(next2d());
+	if (_dims.size() == 3) return(next3d());
+
+	assert(_dims.size() >=2 && _dims.size() <= 3);
+	return(*this);
+}
+
+// Need this so that template definitions can be made in .cpp file, not .h file
+//
+template class StructuredGrid::ForwardCellIterator<const StructuredGrid>;
 
 
 namespace VAPoR {
