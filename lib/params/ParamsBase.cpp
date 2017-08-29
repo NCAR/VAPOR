@@ -161,9 +161,9 @@ vector <double> ParamsBase::GetValueDoubleVec( const string tag) const {
 	return(_node->GetElementDouble(tag));
 }
 
-vector <double> ParamsBase::GetValueDoubleVec(
-	const string tag, const vector<double>& defaultVal
-) const {
+vector <double> ParamsBase::GetValueDoubleVec( const string tag, 
+                                               const vector<double>& defaultVal) const 
+{
 	if (! _node->HasElementDouble(tag)) return(defaultVal);
 
 	vector <double> v = _node->GetElementDouble(tag);
