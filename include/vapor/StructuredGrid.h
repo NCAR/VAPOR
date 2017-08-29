@@ -380,16 +380,133 @@ public:
 	return( Iterator(this, minu, maxu));
  }
  Iterator begin() { return( Iterator(this)); }
+
  Iterator end() { return(Iterator()); }
 
 
- ConstIterator begin() const { return( ConstIterator(this)); }
- ConstIterator end() const { return(ConstIterator()); }
+
+ ConstIterator cbegin(
+	const std::vector <double> &minu, const std::vector <double>  &maxu
+ ) const {
+	return( ConstIterator(this, minu, maxu));
+ }
+ ConstIterator cbegin() const { return( ConstIterator(this)); }
+
+ ConstIterator cend() const { return(ConstIterator()); }
 
 
+ //! A forward iterator for accessing the data elements of the 
+ //! structured grid.
+ //!
+ //! This class provides a C++ STL style Forward Iterator for 
+ //! accessing grid elements passed to the constructor. All Forward
+ //! Iterator expressions are supported. In addition, the following
+ //! Random Access Iterator expressions are supported:
+ //!
+ //! \li \c a + n
+ //! \li \c n + a
+ //!
+ //! where \i a are objects of type ForwardIterator, and \i n is an int.
+ //
+ template <class T>
+ class VDF_API ForwardCellIterator {
+ public:
+  ForwardCellIterator (
+	T *sg, 
+	const std::vector<double> &minu = {}, 
+	const std::vector<double> &maxu = {}
+  );
+  ForwardCellIterator (T *sg, bool begin);
+  ForwardCellIterator ();
+  ForwardCellIterator (const ForwardCellIterator<T> &) = default;
+  ForwardCellIterator (ForwardCellIterator<T> &&rhs);
+  ~ForwardCellIterator () {}
+
+  std::vector <size_t> &operator*() {return (_cellIndex);}
+
+  ForwardCellIterator<T> &operator++();	// ++prefix 
+
+#ifdef	DEAD
+  ForwardCellIterator<T> operator++(int);	// postfix++
+  
+  ForwardCellIterator<T> &operator+=(const long int &offset);	
+  ForwardCellIterator<T> operator+(const long int &offset) const;
+#endif
+
+  ForwardCellIterator<T>& operator=(ForwardCellIterator<T> rhs);
+  ForwardCellIterator<T>& operator=(ForwardCellIterator<T> &rhs) = delete;
+
+  bool operator==(const ForwardCellIterator<T> &rhs) {
+	return(_cellIndex == rhs._cellIndex);
+  }
+  bool operator!=(const ForwardCellIterator<T> &rhs) {
+	return( ! (*this == rhs));
+  }
+ 
+  friend void swap(
+	StructuredGrid::ForwardCellIterator<T> &a,
+	StructuredGrid::ForwardCellIterator<T> &b
+  ) {
+#ifdef	DEAD
+	std::swap(a._coordItr0, b._coordItr0);
+	std::swap(a._coordItr1, b._coordItr1);
+	std::swap(a._coordItr2, b._coordItr2);
+	std::swap(a._coordItr3, b._coordItr3);
+	std::swap(a._coordItr4, b._coordItr4);
+	std::swap(a._coordItr5, b._coordItr5);
+	std::swap(a._coordItr6, b._coordItr6);
+	std::swap(a._coordItr7, b._coordItr7);
+	std::swap(a._pred, b._pred);
+#endif
+	std::swap(a._sg, b._sg);
+	std::swap(a._dims, b._dims);
+	std::swap(a._cellIndex, b._cellIndex);
+  }
+
+ private:
+#ifdef	DEAD
+  InsideBox _pred;
+  ConstCoordItr _coordItr0;
+  ConstCoordItr _coordItr1;
+  ConstCoordItr _coordItr2;
+  ConstCoordItr _coordItr3;
+  ConstCoordItr _coordItr4;
+  ConstCoordItr _coordItr5;
+  ConstCoordItr _coordItr6;
+  ConstCoordItr _coordItr7;
+#endif
+  T *_sg;
+  std::vector <size_t> _dims;
+  std::vector<size_t> _cellIndex;
+
+  ForwardCellIterator<T> & next2d();
+  ForwardCellIterator<T> & next3d();
+
+ };
+
+ typedef StructuredGrid::ForwardCellIterator<StructuredGrid const> ConstCellIterator;
+
+#ifdef	DEAD
+ //! Construct a begin iterator that will iterate through elements
+ //! inside or on the box defined by \p minu and \p maxu
+ //
+ CellIterator ConstCellBegin(
+	const std::vector <double> &minu, const std::vector <double>  &maxu
+ ) {
+	return( CellIterator(this, minu, maxu));
+ }
+#endif
+
+ ConstCellIterator ConstCellBegin() const {
+	return( ConstCellIterator(this, true)); 
+ }
+
+ ConstCellIterator ConstCellEnd() const {
+	return(ConstCellIterator(this, false));
+ }
 
  
- VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &rg);
+ VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg);
 
 
 protected: 
