@@ -96,6 +96,7 @@ if (APPLE)
 	set (MACOSX_BUNDLE_ICON_FILE_PATH ${CMAKE_SOURCE_DIR}/share/images/VAPOR.icns)
 	set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	add_executable (vaporgui MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
+	set (INSTALL_BIN_DIR ".")
 else()
 	add_executable (vaporgui ${SRCS} ${UIS})
 endif()
@@ -119,10 +120,4 @@ install (
 	TARGETS vaporgui
 	DESTINATION ${INSTALL_BIN_DIR}
 	COMPONENT VaporGUI
-	)
-
-install (
-	TARGETS vaporgui
-	DESTINATION ${INSTALL_BIN_DIR}
-	COMPONENT Utilites
 	)
