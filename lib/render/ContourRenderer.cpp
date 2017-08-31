@@ -135,6 +135,7 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 	float boxexts[6];
 	double userExts[6];
 	if (mapToTerrain) {
+		cout << "MAP TO TERRAIN" << endl;
 		//Note that the height variable may be retrieved when building the cache, however it will not actually
 		//be used until render time, when it will be re-retrieved.
 		vector<string> varname;
@@ -163,6 +164,8 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 	}
 
 	glBegin(GL_LINES);
+
+	cout << "PerformRendering Num Isovalues " << cParams->GetNumIsovalues() << endl;
 	
 	for(int iso = 0; iso< cParams->GetNumIsovalues(); iso++){
 		float lineColor[3];
@@ -208,6 +211,7 @@ int ContourRenderer::_initializeGL()
 }
 
 int ContourRenderer::buildLineCache(DataMgr* dataMgr){
+	cout << "buildLineCache " << endl;
 	
 	ContourParams* cParams = (ContourParams*)GetActiveParams();
 
@@ -244,21 +248,25 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	// We are currently only supporting axis-orthogonal planes.  When we
 	// support arbitrarily rotated planes, planeCoords[] will be a 3 element
 	// array.
-	double planeCoords[2]; 
+//	double planeCoords[2]; 
 	vector<double> dataCoords(3);
 
 	double iIncrement = boxMax[0] - boxMin[0];
 	double jIncrement = boxMax[1] - boxMin[1];
 
+	cout << "box  " << boxMax[0] << " " << boxMin[0] << " " << boxMax[1] << " " << boxMin[1] << endl;
+	cout << "incs " << iIncrement << " " << jIncrement << endl;
+	cout << "m/m  " << varMax[2] << " " << varMin[2] << endl;
+
 	float mv = varGrid->GetMissingValue();
 	for (int i = 0; i<_gridSize; i++){
-		planeCoords[0] = -1. + 2.*(double)i/(_gridSize-1.);
+//		planeCoords[0] = -1. + 2.*(double)i/(_gridSize-1.);
 		for (int j = 0; j<_gridSize; j++){
 			dataVals[i+j*_gridSize] = mv;  
 
 //			int orientation = cParams->GetBox()->GetOrientation();
 			dataCoords[0] = i*iIncrement + boxMin[0];
-			dataCoords[1] = j*jIncrement + boxMax[1];
+			dataCoords[1] = j*jIncrement + boxMin[1];
 			dataCoords[2] = (varMax[2] - varMin[2])/2.f;
 
 //			planeCoords[1] = -1. + 2.*(double)j/(_gridSize-1.);
@@ -277,6 +285,7 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 //			if(dataOK) { //find the coordinate in the data array
 //				dataVals[i+j*_gridSize] = isolineGrid[0]->GetValue(dataCoords[0],dataCoords[1],dataCoords[2]);
 //			}
+			//cout << "coords " << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << endl;
 		}
 	}
 	//Unlock the StructuredGrid
@@ -285,6 +294,7 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	//Loop over each isovalue and cell, and classify the cell as to which edges are crossed by the isoline.
 	//when there is an isoline crossing, a line segment is saved in the cache, defined by the two endpoints.
 	const vector<double>& isovals = cParams->GetIsovalues();
+	cout << "num isovals " << isovals.size() << endl;
 	
 	//Clear the textObjects (if they exist)
 //	TextObject::clearTextObjects(this);
@@ -299,6 +309,7 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	delete [] dataVals;
 	return 0;
 }
+
 //! Invalidate the cache for a specific time step.
 void ContourRenderer::invalidateLineCache(int timestep){
 	int numisovals = numIsovalsInCache();
@@ -383,9 +394,11 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float* dataVals){
 			ecode = -1;
 			assert(0);
 	}
+	//cout << "cellCase " << ecode << " " << i << " " << j << " " << isoval << endl;
 	return ecode;
 }
 int ContourRenderer::addLineSegment(int timestep, int isoIndex, float x1, float y1, float x2, float y2){
+	cout << "addLineSegment" << endl;
 	float* floatvec = new float[4];
 	floatvec[0] = x1; floatvec[1]=y1; floatvec[2]=x2; floatvec[3] = y2;
 	pair<int,int> indexpair = make_pair(timestep,isoIndex);
@@ -701,9 +714,11 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso){
 #endif
 
 void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
+	cout << "buildEdges " << iso << endl;
 	ContourParams* cParams = (ContourParams*)GetActiveParams();
 	const vector<double>& isovals = cParams->GetIsovalues();
 	if(cParams->GetTextDensity() > 0. && cParams->GetTextEnabled()) { //create a textObject to hold annotation of this isovalue
+		cout << "Configuring text" << endl;
 		//BLACK background!
 		float bgc[4] = {0,0,0,1.};
 			
@@ -735,11 +750,14 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 	for (int i = 0; i<_gridSize-1; i++){
 		for (int j = 0; j<_gridSize-1; j++){
 			//Determine which case is associated with cell cornered at i,j
-			if ((dataVals[i+j*_gridSize] == mv) || (dataVals[i+1+j*_gridSize] == mv) ||
-				(dataVals[i+(j+1)*_gridSize] == mv) || (dataVals[i+1+(j+1)*_gridSize] == mv)) cellCase = 0;
+			if (0) {//(dataVals[i+j*_gridSize] == mv) || (dataVals[i+1+j*_gridSize] == mv) ||
+				//(dataVals[i+(j+1)*_gridSize] == mv) || (dataVals[i+1+(j+1)*_gridSize] == mv)) {
+				cout << "strange edge case for mv" << endl;
+				cellCase = 0;
+			}
 			else
 				cellCase = edgeCode(i,j, isoval, dataVals);
-			
+		
 			//Note the vertices are numbered counterclockwise starting with 0 at (i,j)
 			switch (cellCase) {
 				case(0): //no lines
