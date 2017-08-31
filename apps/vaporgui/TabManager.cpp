@@ -124,7 +124,6 @@ int TabManager::MoveToFront(string widgetTag){
  */
 int TabManager::findWidget(string widgetTag){
 	int tabType = getTabType(widgetTag);
-	cout << "TABTYPE " << tabType << " " << widgetTag << endl;
 	assert(tabType >= 0 && tabType <= 2);
 
 	for (int i = 0; i< _widgets[tabType].size(); i++){
