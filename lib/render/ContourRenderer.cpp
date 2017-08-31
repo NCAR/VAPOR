@@ -231,7 +231,8 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr)
     // support arbitrarily rotated planes, planeCoords[] will be a 3 element
     // array.
     //	double planeCoords[2];
-    vector<double> dataCoords(3);
+    // vector<double> dataCoords(3);
+    double dataCoords[3];
 
     double iIncrement = boxMax[0] - boxMin[0];
     double jIncrement = boxMax[1] - boxMin[1];
@@ -256,8 +257,10 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr)
             //			dataCoords[0] = a[0]*planeCoords[0] + b[0];
             //			dataCoords[1] = a[1]*planeCoords[1] + b[1];
             //			dataCoords[2] = 0.;
-
-            dataVals[i + j * _gridSize] = varGrid->GetValue(dataCoords);
+            // double val = varGrid->GetValue(dataCoords);
+            double val = varGrid->GetValue(dataCoords[0], dataCoords[1], dataCoords[2]);
+            dataVals[i + j * _gridSize] = val;
+            if (j / 10 == 0) cout << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << " " << val << endl;
             // find the coords that the texture maps to
             //			bool dataOK = true;
             //			for (int k = 0; k< 3; k++){
