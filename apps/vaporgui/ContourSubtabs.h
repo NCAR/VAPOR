@@ -39,6 +39,9 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
     ContourAppearanceSubtab(QWidget *parent) {
         setupUi(this);
         _TFWidget->Reinit((TFWidget::Flags)(0));
+        _TFWidget->mappingFrame->setIsolineSliders(true);
+        _TFWidget->mappingFrame->setOpacityMapping(false);
+
         //_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
     }
 
