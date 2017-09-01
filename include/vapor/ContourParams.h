@@ -73,8 +73,9 @@ public:
     vector<double> GetIsovalues() const
     {
         vector<double> vals;
-        vals.push_back(500.f);
         vals = GetValueDoubleVec(_isovalsTag, vals);
+        vals.clear();
+        vals.push_back(-120.f);
         return vals;
     }
 
