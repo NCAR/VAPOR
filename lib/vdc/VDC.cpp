@@ -1546,6 +1546,7 @@ bool VDC::_ValidDefineDataVar(
             }
             axis = itr->second.GetAxis();
         }
+        printf("\n");
     }
 
     // Check for a time coordinate
