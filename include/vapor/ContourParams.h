@@ -67,11 +67,11 @@ public:
 
  void GetLineColor(float color[3]) {
 	vector<double> defaultVec;
-	defaultVec.push_back(0.f);
+	defaultVec.push_back(1.f);
 	defaultVec.push_back(0.f);
 	defaultVec.push_back(0.f);
 	GetValueDoubleVec(_lineColorTag, defaultVec);
-	color[0] = defaultVec[0];
+	color[0] = 255.f;//defaultVec[0];
 	color[1] = defaultVec[1];
 	color[2] = defaultVec[2];
  }
@@ -84,7 +84,7 @@ public:
 	vector<double> vals;
 	vals = GetValueDoubleVec(_isovalsTag, vals);
 	vals.clear();
-	vals.push_back(-120.f);
+	vals.push_back(20.f);
 	return vals;
  }
 

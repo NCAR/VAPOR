@@ -375,6 +375,9 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float* dataVals){
 	//check for crossing between (i,j+1) and (i,j)
 	if((dataVals[i+_gridSize*j] < isoval &&  dataVals[i+_gridSize*(j+1)] >= isoval) ||
 			(dataVals[i+_gridSize*j] >= isoval &&  dataVals[i+_gridSize*(j+1)] < isoval)) intersectionCode+=8;
+
+	cout << "intersectionCode " << intersectionCode << endl;
+	cout << dataVals[i+_gridSize*j] << " " << dataVals[i+1+_gridSize*j] << endl;
 	
 	int ecode;
 	float avgvalue;
