@@ -1402,6 +1402,7 @@ bool VDC::_ValidDefineDataVar(string varname, vector<string> dim_names, vector<s
             }
             axis = itr->second.GetAxis();
         }
+        printf("\n");
     }
 
     // Check for a time coordinate
