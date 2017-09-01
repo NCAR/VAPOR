@@ -315,11 +315,11 @@ COMMON_API void StrRmWhiteSpace(string &s);
 //
 COMMON_API void StrToWordVec(const string &s, vector<string> &v);
 
-std::vector<std::string> &SplitString(const std::string &s, char delim, std::vector<std::string> &elems);
-std::vector<size_t> &     SplitString(const std::string &s, char delim, std::vector<size_t> &elems);
-std::vector<int> &        SplitString(const std::string &s, char delim, std::vector<int> &elems);
-std::vector<float> &      SplitString(const std::string &s, char delim, std::vector<float> &elems);
-std::vector<double> &     SplitString(const std::string &s, char delim, std::vector<double> &elems);
+COMMON_API std::vector<std::string> &SplitString(const std::string &s, char delim, std::vector<std::string> &elems);
+COMMON_API std::vector<size_t> &SplitString(const std::string &s, char delim, std::vector<size_t> &elems);
+COMMON_API std::vector<int> &SplitString(const std::string &s, char delim, std::vector<int> &elems);
+COMMON_API std::vector<float> &SplitString(const std::string &s, char delim, std::vector<float> &elems);
+COMMON_API std::vector<double> &SplitString(const std::string &s, char delim, std::vector<double> &elems);
 
 //! Retrieve a sequence of bits
 //!
@@ -407,6 +407,11 @@ COMMON_API double ran1(long *);
 #endif
 
 #if defined(Darwin)
+    #define STAT64_T stat
+    #define STAT64   stat
+#endif
+
+#if defined(__CYGWIN__)
     #define STAT64_T stat
     #define STAT64   stat
 #endif

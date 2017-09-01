@@ -35,7 +35,7 @@
 //! There is only a global StartupParams, that
 //! is used throughout the application
 //!
-class PARAMS_API StartupParams : public VAPoR::ParamsBase {
+class StartupParams : public VAPoR::ParamsBase {
 public:
     StartupParams(VAPoR::ParamsBase::StateSave *ssave);
 

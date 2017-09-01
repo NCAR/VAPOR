@@ -30,8 +30,8 @@
     #include <QLineEdit>
     #include <QCheckBox>
     //#include <Python.h>
-    #include <errMsg.h>
-    #include <plotWindow.h>
+    #include "ui_errMsg.h"
+    #include "ui_plotWindow.h"
     #include "RangeController.h"
     #include <vapor/DataMgr.h>
 

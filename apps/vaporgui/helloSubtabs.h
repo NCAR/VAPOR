@@ -1,6 +1,6 @@
 #ifndef HELLOSUBTABS_H
 #define HELLOSUBTABS_H
-#include "HelloVariablesGUI.h"
+#include "ui_HelloVariablesGUI.h"
 
 namespace VAPoR {
 class RenderParams;
