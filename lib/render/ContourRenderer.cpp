@@ -357,6 +357,9 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float *dataVals)
     if ((dataVals[i + _gridSize * j] < isoval && dataVals[i + _gridSize * (j + 1)] >= isoval) || (dataVals[i + _gridSize * j] >= isoval && dataVals[i + _gridSize * (j + 1)] < isoval))
         intersectionCode += 8;
 
+    cout << "intersectionCode " << intersectionCode << endl;
+    cout << dataVals[i + _gridSize * j] << " " << dataVals[i + 1 + _gridSize * j] << endl;
+
     int   ecode;
     float avgvalue;
     // Remap intersectionCode to ecode: 0->0, 3->2; 5->5; 6->3; 9->1; 10->6; 12->4; 15-> 7 or 8
