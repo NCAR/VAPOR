@@ -2,7 +2,11 @@
 #ifndef _GeoImage_h_
 #define _GeoImage_h_
 
+#ifdef WIN32
+#include <geotiff/xtiffio.h>
+#else
 #include <xtiffio.h>
+#endif
 
 #include <vapor/MyBase.h>
 

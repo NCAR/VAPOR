@@ -27,9 +27,9 @@
 #include <qwidget.h>
 #include <vapor/DataMgr.h>
 #include <vapor/StructuredGrid.h>
-#include <statsWindow.h>
-#include <errMsg.h>
-#include <RangeController.h>
+#include "ui_statsWindow.h"
+#include "ui_errMsg.h"
+#include "RangeController.h"
 
 //
 //! \class Statistics
