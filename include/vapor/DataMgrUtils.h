@@ -123,7 +123,7 @@ namespace DataMgrUtils {
  //! \param[out] grid is a vector of StructuredGrid* pointers, one 
  //! for each variable
  //
- int GetGrids(
+ VDF_API int GetGrids(
 	DataMgr *dataMgr,
 	size_t ts, 
 	const vector<string>& varnames, 
@@ -134,20 +134,20 @@ namespace DataMgrUtils {
 	std::vector <StructuredGrid *> &grids
  );
 
- int GetGrids(
+ VDF_API int GetGrids(
 	DataMgr *dataMgr, size_t ts, string varname, 
 	const vector <double> &minExtsReq, const vector <double> &maxExtsReq,
 	bool useLowerAccuracy, int* refLevel, int* lod, StructuredGrid ** gridptr
  );
 
- int GetGrids(
+ VDF_API int GetGrids(
 	DataMgr *dataMgr,
 	size_t ts, const vector<string>& varnames,
 	bool useLowerAccuracy, int* refLevel, int* lod, 
 	std::vector <StructuredGrid *> &grids
  );
 
- int GetGrids(
+ VDF_API int GetGrids(
 	DataMgr *dataMgr, size_t ts, string varname, 
 	bool useLowerAccuracy, int* refLevel, int* lod, StructuredGrid ** gridptr
  );
@@ -186,7 +186,7 @@ namespace DataMgrUtils {
  //!
  //! \sa GetAxes()
  //
- bool GetExtents(
+ VDF_API bool GetExtents(
 	DataMgr *dataMgr,
 	size_t timestep, string varname,
 	vector <double>& minExts, vector <double>& maxExts
@@ -215,7 +215,7 @@ namespace DataMgrUtils {
  //!
  //! \sa GetAxes()
  //
- bool GetExtents(
+ VDF_API bool GetExtents(
 	DataMgr *dataMgr,
 	size_t timestep, const vector <string> &varnames,
 	vector <double>& minExts, vector <double>& maxExts,

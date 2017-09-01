@@ -14,6 +14,10 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/TFInterpolator.h>
 
+#ifdef WIN32
+#include <vapor/glutil.h>
+#endif
+
 
 namespace VAPoR {
 
