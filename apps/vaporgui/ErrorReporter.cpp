@@ -26,7 +26,9 @@
 #if defined(DARWIN)
 #include <CoreServices/CoreServices.h>
 #elif defined(LINUX)
+#include <sys/utsname.h>
 #elif defined(WIN32)
+#include <windows.h>
 #endif
 
 #include <QWidget>
@@ -179,9 +181,36 @@ string ErrorReporter::GetSystemInformation()
 	Gestalt(gestaltSystemVersionBugFix, &rev);
 	ret += "OS: Mac OS X " + to_string(major) + "." + to_string(minor) + "." + to_string(rev) + "\n";    
 #elif defined(LINUX)
-	return "Linux";
+	// struct utsname info;
+	// uname(&info);
+	// ret += "OS: " + string(info.sysname) + " " + string(info.release) + " " + string(info.version) "\n";
+	// ret += "Distro:\n";
+	// char buffer[128];
+    // std::shared_ptr<FILE> pipe(popen("lsb_release", "r"), pclose);
+    // if (pipe) {
+	// 	while (!feof(pipe.get())) {
+	// 		if (fgets(buffer, 128, pipe.get()) != std::nullptr)
+	// 			ret += buffer;
+	// 	}
+	// } else  {
+	// 	fprintf(stderr, "popen failed\n");
+	// }
 #elif defined(WIN32)
-	return "Windows";
+	// DWORD version = 0;
+	// DWORD major = 0;
+	// DWORD minor = 0;
+	// DWORD build = 0;
+	// 
+	// vrsion = GetVersion();
+	// 
+	// major = (DWORD)(LOBYTE(LOWORD(version)));
+	// minor = (DWORD)(HIBYTE(LOWORD(version)));
+	// 
+	// if (version < 0x80000000) {
+	//     build = (DWORD)(HIWORD(version));
+	// }
+
+	// ret += "OS: Windows " + to_string(major) + "." + to_string(minor) + " (" + to_string(build) + ")\n";
 #else
 	return "Unsupported Platform";
 #endif
