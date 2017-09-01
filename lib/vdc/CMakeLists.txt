@@ -1,5 +1,6 @@
 add_library (vdc SHARED
 	BlkMemMgr.cpp
+	Grid.cpp
 	StructuredGrid.cpp
 	RegularGrid.cpp
 	LayeredGrid.cpp
@@ -14,6 +15,7 @@ add_library (vdc SHARED
 	VDCNetCDF.cpp
 	DCWRF.cpp
 	DCCF.cpp
+	DCMPAS.cpp
 	DataMgr.cpp
 	DataMgrUtils.cpp
 	GeoUtil.cpp

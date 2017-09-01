@@ -17,6 +17,7 @@ add_library (params SHARED
 	DataStatus.cpp
 	VizFeatureParams.cpp
 	HelloParams.cpp
+	ImageParams.cpp
 	TFInterpolator.cpp
 )
 

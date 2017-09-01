@@ -8,6 +8,7 @@ set (SRCS
 	DomainWidget.cpp
 	GLWidget.cpp
 	OpacityWidget.cpp
+	ErrorReporter.cpp
 	Histo.cpp
 	ColorbarWidget.cpp
 	StartupEventRouter.cpp
@@ -44,6 +45,7 @@ set (SRCS
 	MessageReporter.cpp
 	TrackBall.cpp
 	GLColorbarWidget.cpp
+	ImageEventRouter.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -52,6 +54,7 @@ set (SRCS
 	Plot.h
 	BarbSubtabs.h
 	ColorbarWidget.h
+	ImageSubtabs.h
 )
 
 set (UIS 
@@ -84,6 +87,9 @@ set (UIS
 	TFWidgetGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui
+	ImageAppearanceGUI.ui
+	ImageGeometryGUI.ui
+	ImageVariablesGUI.ui
 )
 
 find_package(Qt4 REQUIRED)
