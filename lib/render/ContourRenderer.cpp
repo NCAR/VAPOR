@@ -245,12 +245,22 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
     //vector<double> dataCoords(3);
     double dataCoords[3];
 
-    double iIncrement = boxMax[0] - boxMin[0];
-    double jIncrement = boxMax[1] - boxMin[1];
+    double iIncrement = (boxMax[0] - boxMin[0]) / (float)_gridSize;
+    double jIncrement = (boxMax[1] - boxMin[1]) / (float)_gridSize;
 
     cout << "box  " << boxMax[0] << " " << boxMin[0] << " " << boxMax[1] << " " << boxMin[1] << endl;
     cout << "incs " << iIncrement << " " << jIncrement << endl;
     cout << "m/m  " << varMax[2] << " " << varMin[2] << endl;
+
+    vector<double> minu, maxu;
+    varGrid->GetUserExtents(minu, maxu);
+    cout << minu[0] << " " << minu[1] << " " << minu[2] << endl;
+    cout << maxu[0] << " " << maxu[1] << " " << maxu[2] << endl;
+
+    boxMin[0] = minu[0];
+    boxMax[0] = maxu[0];
+    boxMin[1] = minu[1];
+    boxMax[1] = maxu[1];
 
     float mv = varGrid->GetMissingValue();
     for (int i = 0; i < _gridSize; i++) {
@@ -271,8 +281,8 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
             //double val = varGrid->GetValue(dataCoords);
             double val = varGrid->GetValue(dataCoords[0], dataCoords[1], dataCoords[2]);
             dataVals[i + j * _gridSize] = val;
-            if (j / 10 == 0)
-                cout << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << " " << val << endl;
+            //if (j/500==0)
+            //cout << var << " " << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << " " << val << endl;
             //find the coords that the texture maps to
             //			bool dataOK = true;
             //			for (int k = 0; k< 3; k++){
@@ -406,7 +416,7 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float *dataVals) {
     return ecode;
 }
 int ContourRenderer::addLineSegment(int timestep, int isoIndex, float x1, float y1, float x2, float y2) {
-    cout << "addLineSegment" << endl;
+    //	cout << "addLineSegment" << endl;
     float *floatvec = new float[4];
     floatvec[0] = x1;
     floatvec[1] = y1;
@@ -778,6 +788,7 @@ void ContourRenderer::buildEdges(int iso, float *dataVals, float mv) {
             } else
                 cellCase = edgeCode(i, j, isoval, dataVals);
 
+            cout << "cellCase " << cellCase << " " << isoval << " " << dataVals[0] << endl;
             //Note the vertices are numbered counterclockwise starting with 0 at (i,j)
             switch (cellCase) {
             case (0): //no lines
