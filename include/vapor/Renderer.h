@@ -303,24 +303,15 @@ private:
 /////////////////////////////////////////////////////////////////////////
 
 
-class PARAMS_API RendererFactory {
+class RENDER_API RendererFactory {
 public:
- static RendererFactory *Instance() {
-	static RendererFactory instance;
-	return &instance;
- }
+ static RendererFactory *Instance();
 
  void RegisterFactoryFunction(
 	string myName, string myParamsName,
 	function<Renderer*(
 		const ParamsMgr *, string, string, string, string, DataMgr *
-	)> classFactoryFunction) 
- {
-
-	// register the class factory function
-	_factoryFunctionRegistry[myName] = classFactoryFunction;
-	_factoryMapRegistry[myName] = myParamsName;
- }
+	)> classFactoryFunction);
 
  Renderer *(CreateInstance(
 	const ParamsMgr *pm, string winName, string dataSetName,
@@ -337,9 +328,9 @@ private:
  >>_factoryFunctionRegistry;
  map<string, string> _factoryMapRegistry;
 
- RendererFactory() {}
- RendererFactory(const RendererFactory &) { }
- RendererFactory &operator=(const RendererFactory &) { return *this; }
+ RendererFactory();
+ RendererFactory(const RendererFactory &);
+ RendererFactory &operator=(const RendererFactory &);
 
 };
 

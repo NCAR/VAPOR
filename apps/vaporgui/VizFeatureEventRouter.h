@@ -24,7 +24,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "vizFeaturesTab.h"
+#include "ui_vizFeaturesTab.h"
 
 
 QT_USE_NAMESPACE

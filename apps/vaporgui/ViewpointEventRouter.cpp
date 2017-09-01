@@ -36,7 +36,7 @@
 #include "ViewpointEventRouter.h"
 #include "vapor/ViewpointParams.h"
 #include "vapor/ControlExecutive.h"
-#include "vizTab.h"
+#include "ui_vizTab.h"
 #include "VizWinMgr.h"
 #include <vector>
 #include <string>

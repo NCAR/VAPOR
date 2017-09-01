@@ -7,7 +7,7 @@
 #include "qtableview.h"
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "renderselector.h"
+#include "ui_renderselector.h"
 
 QT_USE_NAMESPACE
 
