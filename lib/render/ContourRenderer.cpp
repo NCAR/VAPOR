@@ -95,22 +95,16 @@ int ContourRenderer::_paintGL()
 
 int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr)
 {
-    // ContourParams* cParams = (ContourParams*)getRenderParams();
     ContourParams *cParams = (ContourParams *)GetActiveParams();
 
     // Set up lighting
     glDisable(GL_LIGHTING);
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
     glLineWidth(cParams->GetLineThickness());
 
     // Need to convert the iso-box coordinates to user coordinates, then to unit box coords.
-    //	double transformMatrix[12];
-    //	cParams->GetBox()->buildLocalCoordTransform(transformMatrix, 0.f, -1);
-    double pointa[3], pointb[3];    // points in cache
-    double point1[3], point2[3];    // points in local box
-    pointa[2] = pointb[2] = 0.;
+    double transformMatrix[12];
 
     // Determine if terrain mapping will be used
     string          hgtVar = cParams->GetHeightVariableName();
@@ -120,42 +114,22 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr)
     float           boxexts[6];
     double          userExts[6];
     if (mapToTerrain) {
-        cout << "MAP TO TERRAIN" << endl;
-        // Note that the height variable may be retrieved when building the cache, however it will not actually
-        // be used until render time, when it will be re-retrieved.
-        vector<string> varname;
-        varname.push_back(hgtVar);
-        int level = cParams->GetRefinementLevel();
-        int lod = cParams->GetCompressionLevel();
-
-        vector<double> minExts, maxExts;
-        //		cParams->GetBox()->GetUserExtents(
-        //			minExts, maxExts, GetCurrentTimestep()
-        //		);
-        dataMgr->GetVariableExtents(ts, hgtVar, level, minExts, maxExts);
-
-        //		int rc = getGrids(
-        //			dataMgr, GetCurrentTimestep(), varname, minExts, maxExts,
-        //			&actualRefLevel, &lod, &heightGrid
-        //		);
-
-        heightGrid = dataMgr->GetVariable(ts, hgtVar, level, lod);
-        if (heightGrid == NULL) {
-            mapToTerrain = false;
-            return -1;
-        }
-        heightGrid->GetUserExtents(minExts, maxExts);
+        // See bottom of file!
+        cout << "map to terrain not implemented" << endl;
     }
 
     glBegin(GL_LINES);
 
-    cout << "PerformRendering Num Isovalues " << cParams->GetNumIsovalues() << endl;
+    vector<double> minExt, maxExt;
+    cParams->GetBox()->GetExtents(minExt, maxExt);
+    double pointa[3], pointb[3];    // points in cache
+    pointa[2] = pointb[2] = 0.;
 
     for (int iso = 0; iso < cParams->GetNumIsovalues(); iso++) {
         float lineColor[3];
-        //		cParams->GetLineColor(iso,lineColor);
         cParams->GetLineColor(lineColor);
         glColor3fv(lineColor);
+
         pair<int, int>  mapPair = make_pair(timestep, iso);
         vector<float *> lines = _lineCache[mapPair];
         for (int linenum = 0; linenum < lines.size(); linenum++) {
@@ -163,19 +137,24 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr)
             pointa[1] = lines[linenum][1];
             pointb[0] = lines[linenum][2];
             pointb[1] = lines[linenum][3];
-            //			vtransform(pointa,transformMatrix,point1);
-            //			vtransform(pointb,transformMatrix,point2);
-            if (mapToTerrain) {
-                // Obtain the height corresponding to point1 and point2
-                float z1 = heightGrid->GetValue(point1[0] + userExts[0], point1[1] + userExts[1], 0.);
-                float z2 = heightGrid->GetValue(point2[0] + userExts[0], point2[1] + userExts[1], 0.);
-                point1[2] = z1 + boxexts[2] - userExts[2];
-                point2[2] = z2 + boxexts[2] - userExts[2];
-            }
-            //			_dataStatus->localToStretched(point1,point1);
-            //			_dataStatus->localToStretched(point2,point2);
-            glVertex3dv(point1);
-            glVertex3dv(point2);
+
+            if (mapToTerrain) { cout << "map to terrain not implemented" << endl; }
+
+            // Scale the cached points {-1:1} to the user extents
+            double xSpan = maxExt[0] - minExt[0];
+            pointa[0] = (1 + pointa[0]) / 2.f * xSpan + minExt[0];
+            pointb[0] = (1 + pointb[0]) / 2.f * xSpan + minExt[0];
+
+            double ySpan = maxExt[1] - minExt[1];
+            pointa[1] = (1 + pointa[1]) / 2.f * ySpan + minExt[1];
+            pointb[1] = (1 + pointb[1]) / 2.f * ySpan + minExt[1];
+
+            double zSpan = maxExt[2] - minExt[2];
+            pointa[2] = 500.f;    //(1+pointa[2]) * zSpan;
+            pointb[2] = 500.f;    //(1+pointb[2]) * zSpan;
+
+            glVertex3dv(pointa);
+            glVertex3dv(pointb);
         }
     }
     glEnd();
@@ -220,7 +199,8 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr)
     vector<double> boxMin, boxMax;
     cParams->GetBox()->GetExtents(boxMin, boxMax);
 
-    _gridSize = 1000;
+    //_gridSize = 1000;
+    _gridSize = 25;
     float *dataVals = new float[_gridSize * _gridSize];
 
     // Set up to transform from isoline plane into volume:
@@ -357,9 +337,6 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float *dataVals)
     if ((dataVals[i + _gridSize * j] < isoval && dataVals[i + _gridSize * (j + 1)] >= isoval) || (dataVals[i + _gridSize * j] >= isoval && dataVals[i + _gridSize * (j + 1)] < isoval))
         intersectionCode += 8;
 
-    cout << "intersectionCode " << intersectionCode << endl;
-    cout << dataVals[i + _gridSize * j] << " " << dataVals[i + 1 + _gridSize * j] << endl;
-
     int   ecode;
     float avgvalue;
     // Remap intersectionCode to ecode: 0->0, 3->2; 5->5; 6->3; 9->1; 10->6; 12->4; 15-> 7 or 8
@@ -382,12 +359,10 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float *dataVals)
         break;
     default: ecode = -1; assert(0);
     }
-    // cout << "cellCase " << ecode << " " << i << " " << j << " " << isoval << endl;
     return ecode;
 }
 int ContourRenderer::addLineSegment(int timestep, int isoIndex, float x1, float y1, float x2, float y2)
 {
-    //	cout << "addLineSegment" << endl;
     float *floatvec = new float[4];
     floatvec[0] = x1;
     floatvec[1] = y1;
@@ -586,7 +561,7 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso)
     int            timestep = (int)GetCurrentTimestep();
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     // Prepare to convert the iso-box coordinates to user coordinates, then to unit box coords.
-    //	double transformMatrix[12];
+    double transformMatrix[12];
     //	cParams->GetBox()->buildLocalCoordTransform(transformMatrix, 0.f, -1);
     // traverse each component, writing annotation at specified interval
     // Note that all marker bits are true,so we can use _markerBit[i]==false as a new marker
@@ -652,7 +627,7 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso)
                     int linenum = _edgeSeg[currentEdge];
                     pointa[0] = lines[linenum][0];
                     pointa[1] = lines[linenum][1];
-                    //					vtransform(pointa,transformMatrix,point1);
+                    vtransform(pointa, transformMatrix, point1);
                     // Convert local to user:
                     for (int i = 0; i < 3; i++) point1[i] += minExts[i];
 
@@ -684,7 +659,7 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso)
                         int linenum = _edgeSeg[currentEdge];
                         pointa[0] = lines[linenum][0];
                         pointa[1] = lines[linenum][1];
-                        //						vtransform(pointa,transformMatrix,point1);
+                        vtransform(pointa, transformMatrix, point1);
                         // Convert local to user:
                         for (int i = 0; i < 3; i++) point1[i] += minExts[i];
 
@@ -705,11 +680,9 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso)
 
 void ContourRenderer::buildEdges(int iso, float *dataVals, float mv)
 {
-    cout << "buildEdges " << iso << endl;
     ContourParams *       cParams = (ContourParams *)GetActiveParams();
     const vector<double> &isovals = cParams->GetIsovalues();
     if (cParams->GetTextDensity() > 0. && cParams->GetTextEnabled()) {    // create a textObject to hold annotation of this isovalue
-        cout << "Configuring text" << endl;
         // BLACK background!
         float bgc[4] = {0, 0, 0, 1.};
 
@@ -742,12 +715,10 @@ void ContourRenderer::buildEdges(int iso, float *dataVals, float mv)
             // Determine which case is associated with cell cornered at i,j
             if (0) {    //(dataVals[i+j*_gridSize] == mv) || (dataVals[i+1+j*_gridSize] == mv) ||
                 //(dataVals[i+(j+1)*_gridSize] == mv) || (dataVals[i+1+(j+1)*_gridSize] == mv)) {
-                cout << "strange edge case for mv" << endl;
                 cellCase = 0;
             } else
                 cellCase = edgeCode(i, j, isoval, dataVals);
 
-            cout << "cellCase " << cellCase << " " << isoval << " " << dataVals[0] << endl;
             // Note the vertices are numbered counterclockwise starting with 0 at (i,j)
             switch (cellCase) {
             case (0):    // no lines
@@ -944,3 +915,43 @@ void ContourRenderer::deleteCacheKey(int timestep)
         cacheKeys.erase(it);
     }
 }
+
+/*
+        //Note that the height variable may be retrieved when building the cache, however it will not actually
+        //be used until render time, when it will be re-retrieved.
+        vector<string> varname;
+        varname.push_back(hgtVar);
+        int level = cParams->GetRefinementLevel();
+        int lod = cParams->GetCompressionLevel();
+
+        vector<double> minExts, maxExts;
+//		cParams->GetBox()->GetUserExtents(
+//			minExts, maxExts, GetCurrentTimestep()
+//		);
+        dataMgr->GetVariableExtents(ts, hgtVar,
+            level, minExts, maxExts);
+
+//		int rc = getGrids(
+//			dataMgr, GetCurrentTimestep(), varname, minExts, maxExts,
+//			&actualRefLevel, &lod, &heightGrid
+//		);
+
+        heightGrid = dataMgr->GetVariable(ts, hgtVar, level, lod);
+        if(heightGrid == NULL){
+            mapToTerrain = false;
+            return -1;
+        }
+        heightGrid->GetUserExtents(minExts, maxExts);
+
+*/
+
+/*  Height stuff during isoline drawing loop:
+
+
+                //Obtain the height corresponding to point1 and point2
+                float z1 = heightGrid->GetValue(point1[0]+userExts[0],point1[1]+userExts[1],0.);
+                float z2 = heightGrid->GetValue(point2[0]+userExts[0],point2[1]+userExts[1],0.);
+                point1[2] = z1+boxexts[2]-userExts[2];
+                point2[2] = z2+boxexts[2]-userExts[2];
+
+*/
