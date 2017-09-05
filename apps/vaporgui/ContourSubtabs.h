@@ -1,9 +1,11 @@
 #ifndef CONTOURSUBTABS_H
 #define CONTOURSUBTABS_H
 
+#include "vapor/ContourParams.h"
 #include "ContourAppearanceGUI.h"
 #include "ContourVariablesGUI.h"
 #include "ContourGeometryGUI.h"
+#include "RangeCombos.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -45,7 +47,10 @@ public:
 		_TFWidget->mappingFrame->setIsolineSliders(true);
 		_TFWidget->mappingFrame->setOpacityMapping(false);
 
-		//_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
+		_lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
+
+		connect(_lineWidthCombo, SIGNAL(valueChanged(double)), this,
+			SLOT(SetLineThickness(double)));
 	}
 
 	void Update(
@@ -55,7 +60,26 @@ public:
 	) {
 		_TFWidget->Update(dataMgr, paramsMgr, rParams);
 		_ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
+
+		// Set up or stand-alone slider/edit combo
+		//
+		_cParams = (VAPoR::ContourParams*)rParams;
+		GLfloat lineWidthRange[2] = {0.f, 0.f};
+		glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
+		_lineWidthCombo->Update(lineWidthRange[0], lineWidthRange[1], 
+			_cParams->GetLineThickness()
+		);
 	}
+
+private:
+	VAPoR::ContourParams* _cParams;
+	Combo* _lineWidthCombo;
+
+private slots:
+	void SetLineThickness(double val) {
+		_cParams->SetLineThickness(val);
+	}
+
 };
 
 class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
