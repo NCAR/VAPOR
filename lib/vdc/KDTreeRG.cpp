@@ -43,8 +43,8 @@ KDTreeRG::KDTreeRG(const RegularGrid &xrg, const RegularGrid &yrg)
 
     // Store the point coordinates and associated offsets in the k-d tree
     //
-    RegularGrid::ConstIterator xitr = xrg.begin();
-    RegularGrid::ConstIterator yitr = yrg.begin();
+    RegularGrid::ConstIterator xitr = xrg.cbegin();
+    RegularGrid::ConstIterator yitr = yrg.cbegin();
 
     float posXY[2];
     for (size_t i = 0; i < nelem; ++i, ++xitr, ++yitr) {

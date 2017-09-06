@@ -290,14 +290,14 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _cg = cg;
     vector<size_t> dims = _cg->GetDimensions();
     if (begin) {
-        _xCoordItr = _cg->_xrg.begin();
-        _yCoordItr = _cg->_yrg.begin();
+        _xCoordItr = _cg->_xrg.cbegin();
+        _yCoordItr = _cg->_yrg.cbegin();
         _x = 0;
         _y = 0;
         _z = 0;
     } else {
-        _xCoordItr = _cg->_xrg.end();
-        _yCoordItr = _cg->_yrg.end();
+        _xCoordItr = _cg->_xrg.cend();
+        _yCoordItr = _cg->_yrg.cend();
         _x = 0;
         _y = dims.size() == 2 ? dims[1] : 0;
         _z = dims.size() == 3 ? dims[2] : 0;
@@ -355,8 +355,8 @@ void CurvilinearGrid::ConstCoordItrCG::next()
     _y = 0;
     _z++;
     if (_z < dims[2]) {
-        _xCoordItr = _cg->_xrg.begin();
-        _yCoordItr = _cg->_yrg.begin();
+        _xCoordItr = _cg->_xrg.cbegin();
+        _yCoordItr = _cg->_yrg.cbegin();
 
         _coords[0] = *_xCoordItr;
         _coords[1] = *_yCoordItr;
