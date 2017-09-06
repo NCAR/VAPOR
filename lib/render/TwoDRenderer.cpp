@@ -32,6 +32,8 @@ TwoDRenderer::TwoDRenderer(
     _texFormat = GL_RGBA;
     _texType = GL_UNSIGNED_BYTE;
     _texelSize = 0;
+    _gridAligned = false;
+    _structuredMesh = false;
     _verts = NULL;
     _normals = NULL;
     _meshWidth = 0;
@@ -57,31 +59,43 @@ int TwoDRenderer::_paintGL() {
     //
     _texture = _getTexture(
         _dataMgr, _texWidth, _texHeight, _texInternalFormat,
-        _texFormat, _texType, _texelSize);
+        _texFormat, _texType, _texelSize, _gridAligned);
     if (!_texture) {
         return (-1);
     }
-    assert(_texWidth >= 2);
-    assert(_texHeight >= 2);
+    assert(_texWidth >= 1);
+    assert(_texHeight >= 1);
 
     // Get the proxy geometry used to render the 2D surface (vertices and
     // normals)
     //
-    int rc = _getMesh(_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight);
+    int rc = _getMesh(
+        _dataMgr, &_verts, &_normals, _meshWidth, _meshHeight,
+        &_indices, _nindices, _structuredMesh);
     if (rc < 0) {
         return (-1);
     }
-    assert(_meshWidth >= 2);
-    assert(_meshHeight >= 2);
 
-    _texCoords = (GLfloat *)_sb_texCoords.Alloc(
-        _meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
+    if (!_gridAligned) {
+        assert(_structuredMesh);
 
-    _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
+        assert(_meshWidth >= 2);
+        assert(_meshHeight >= 2);
 
-    // Render the 2D surface
-    //
-    _renderMesh();
+        _texCoords = (GLfloat *)_sb_texCoords.Alloc(
+            _meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
+
+        _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
+
+        // Render the 2D surface
+        //
+        _renderMeshUnAligned();
+    } else {
+        assert(_meshWidth == _texWidth);
+        assert(_meshHeight == _texHeight);
+
+        _renderMeshAligned();
+    }
 
     return (0);
 }
@@ -93,22 +107,24 @@ void TwoDRenderer::_openGLInit() {
     RenderParams *myParams = (RenderParams *)GetActiveParams();
     float opacity = myParams->GetConstantOpacity();
 
-    //glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureID);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, _texInternalFormat, _texWidth, _texHeight, 0,
-        _texFormat, _texType, _texture);
+    if (!_gridAligned) {
+        //glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureID);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, _texInternalFormat, _texWidth, _texHeight, 0,
+            _texFormat, _texType, _texture);
 
-    glMatrixMode(GL_TEXTURE);
-    glLoadIdentity();
+        glMatrixMode(GL_TEXTURE);
+        glLoadIdentity();
+
+        glEnable(GL_TEXTURE_2D);
+    }
 
     glMatrixMode(GL_MODELVIEW);
 
-    glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
-    glEnable(GL_TEXTURE_2D);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_DEPTH_TEST);
 
@@ -141,8 +157,14 @@ void TwoDRenderer::_openGLInit() {
     glDepthMask(GL_TRUE);
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
+
+    if (_gridAligned) {
+        GLuint attrindx = _getAttribIndex();
+        glEnableVertexAttribArray(attrindx);
+    } else {
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
 }
 
 // Restore OpenGL settings to OpenGL defaults
@@ -159,25 +181,19 @@ void TwoDRenderer::_openGLRestore() {
     glDisable(GL_TEXTURE_2D);
 
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
+
+    if (_gridAligned) {
+        GLuint attrindx = _getAttribIndex();
+        glDisableVertexAttribArray(attrindx);
+    } else {
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
 }
 
-void TwoDRenderer::_renderMesh() {
+void TwoDRenderer::_renderMeshUnAligned() {
 
     _openGLInit();
-
-    GLuint *indeces;
-
-    indeces = new GLuint[_meshWidth * 2];
-
-    // Construct indeces for a triangle strip covering one row
-    // of the mesh
-    //
-    for (int i = 0; i < _meshWidth; i++)
-        indeces[2 * i] = i;
-    for (int i = 0; i < _meshWidth; i++)
-        indeces[2 * i + 1] = i + _meshWidth;
 
     // Draw triangle strips one row at a time
     //
@@ -187,10 +203,50 @@ void TwoDRenderer::_renderMesh() {
         glNormalPointer(GL_FLOAT, 0, &_normals[j * _meshWidth * 3]);
 
         glDrawElements(
-            GL_TRIANGLE_STRIP, 2 * _meshWidth, GL_UNSIGNED_INT, indeces);
+            GL_TRIANGLE_STRIP, 2 * _meshWidth, GL_UNSIGNED_INT, _indices);
     }
 
-    delete[] indeces;
+    _openGLRestore();
+}
+
+void TwoDRenderer::_renderMeshAligned() {
+
+    _openGLInit();
+
+    GLuint attrindx = _getAttribIndex();
+
+    // Ugh. For aligned data the type must be GLfloat.
+    //
+    assert(_texType == GL_FLOAT);
+    assert(_texelSize == 8);
+    const GLfloat *data = (GLfloat *)_texture;
+
+    if (_structuredMesh) {
+        // Draw triangle strips one row at a time
+        //
+        for (int j = 0; j < _meshHeight - 1; j++) {
+            glVertexPointer(3, GL_FLOAT, 0, &_verts[j * _meshWidth * 3]);
+            glVertexAttribPointer(
+                attrindx, 2, GL_FLOAT, false, 0, &data[j * _meshWidth * 2]);
+            glNormalPointer(GL_FLOAT, 0, &_normals[j * _meshWidth * 3]);
+
+            glDrawElements(
+                GL_TRIANGLE_STRIP, 2 * _meshWidth, GL_UNSIGNED_INT, _indices);
+        }
+    } else {
+        assert(_meshWidth >= 3);
+        assert(_meshHeight == 1);
+
+        assert((_nindices % 3) == 0);
+
+        glVertexPointer(3, GL_FLOAT, 0, _verts);
+        glVertexAttribPointer(
+            attrindx, 2, GL_FLOAT, false, 0, data);
+        glNormalPointer(GL_FLOAT, 0, _normals);
+
+        glDrawElements(
+            GL_TRIANGLES, _nindices, GL_UNSIGNED_INT, _indices);
+    }
 
     _openGLRestore();
 }

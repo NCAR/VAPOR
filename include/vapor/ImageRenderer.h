@@ -48,7 +48,10 @@ class RENDER_API ImageRenderer : public TwoDRenderer {
                  GLfloat **verts,
                  GLfloat **normals,
                  GLsizei &width,
-                 GLsizei &height);
+                 GLsizei &height,
+                 GLuint **indices,
+                 GLsizei &nindices,
+                 bool &structuredMesh);
 
     const GLvoid *_getTexture(DataMgr *dataMgr,
                               GLsizei &width,
@@ -56,7 +59,10 @@ class RENDER_API ImageRenderer : public TwoDRenderer {
                               GLint &internalFormat,
                               GLenum &format,
                               GLenum &type,
-                              size_t &texelSize);
+                              size_t &texelSize,
+                              bool &gridAligned);
+
+    virtual GLuint _getAttribIndex() const { return 0; }
 
   private:
     GeoImage *_geoImage;
@@ -78,6 +84,7 @@ class RENDER_API ImageRenderer : public TwoDRenderer {
     vector<double> _cacheBoxExtentsTex;
     SmartBuf _sb_verts;
     SmartBuf _sb_normals;
+    SmartBuf _sb_indices;
     GLsizei _vertsWidth;
     GLsizei _vertsHeight;
 

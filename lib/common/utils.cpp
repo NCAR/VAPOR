@@ -43,7 +43,7 @@ size_t Wasp::LinearizeCoords(
 }
 
 size_t Wasp::LinearizeCoords(
-    vector<size_t> coords, vector<size_t> dims) {
+    const vector<size_t> &coords, const vector<size_t> &dims) {
     assert(coords.size() == dims.size());
 
     vector<size_t> min, max;
