@@ -87,6 +87,16 @@ namespace {
 	vector <float *> Heap;
 };
 
+template <class T>
+void out_container (T first, T last) {
+
+	for (T itr = first; itr != last; ++itr) {
+		cout << *itr << " ";
+	}
+	cout << endl;
+
+}
+
 const char	*ProgName;
 
 vector <float *> alloc_blocks(
@@ -241,6 +251,52 @@ void init_grid(StructuredGrid *sg) {
 	}
 }
 
+
+void test_node_iterator(const StructuredGrid *sg) {
+
+	double t0 = Wasp::GetTime();
+
+    StructuredGrid::ConstIterator itr;
+	double accum = 0.0;
+	size_t count = 0;
+    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=sg->cend(); ++itr) {
+		accum += *itr;
+		count++;
+//		const vector <double> &coord = *(itr.GetCoordItr());
+//		cout << coord[0] << " " << coord[1] << " " << coord[2] << endl;
+    }
+	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+	cout << "Sum and count: " << accum << " " << count << endl;
+
+}
+
+void test_cell_iterator(const StructuredGrid *sg) {
+
+	double t0 = Wasp::GetTime();
+
+	StructuredGrid::ConstCellIterator itr;
+	size_t count = 0;
+    for (itr = sg->ConstCellBegin(); itr!=sg->ConstCellEnd(); ++itr) {
+		count++;
+		cout << "Cell : ";
+		out_container((*itr).cbegin(), (*itr).cend());
+		vector <vector <size_t>> nodes;
+		sg->GetCellNodes(*itr, nodes);
+		cout << "\tNodes : " << endl;
+		for (int i=0; i<nodes.size(); i++) {
+			cout << "\t";
+			out_container(nodes[i].cbegin(), nodes[i].cend());
+		}
+		cout << endl;
+
+//		const vector <double> &coord = *(itr.GetCoordItr());
+//		cout << coord[0] << " " << coord[1] << " " << coord[2] << endl;
+    }
+	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+	cout << "Cell count : " << count << endl;
+
+}
+
 int main(int argc, char **argv) {
 
 	OptionParser op;
@@ -296,19 +352,10 @@ int main(int argc, char **argv) {
 	cout << endl;
 
 
-	t0 = Wasp::GetTime();
+	test_node_iterator(sg);
 
-    StructuredGrid::Iterator itr;
-	double accum = 0.0;
-	size_t count = 0;
-    for (itr = sg->begin(opt.roimin, opt.roimax); itr!=sg->end(); ++itr) {
-		accum += *itr;
-		count++;
-//		const vector <double> &coord = *(itr.GetCoordItr());
-//		cout << coord[0] << " " << coord[1] << " " << coord[2] << endl;
-    }
-	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
-	cout << "Sum and count: " << accum << " " << count << endl;
+	test_cell_iterator(sg);
+
 
 	delete sg;
 

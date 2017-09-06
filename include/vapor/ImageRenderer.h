@@ -48,19 +48,26 @@ public:
   }*/
 
 protected:
- int _getMesh( DataMgr  *dataMgr,
-              GLfloat   **verts,
-              GLfloat   **normals,
-              GLsizei   &width,
-              GLsizei   &height); 
+ int GetMesh( DataMgr  *dataMgr,
+               GLfloat   **verts,
+               GLfloat   **normals,
+               GLsizei   &width,
+               GLsizei &height,
+               GLuint **indices,
+               GLsizei &nindices,
+               bool &structuredMesh);
 
- const GLvoid *_getTexture( DataMgr   *dataMgr,
+ const GLvoid *GetTexture( DataMgr   *dataMgr,
                             GLsizei   &width,
                             GLsizei   &height,
                             GLint     &internalFormat,
                             GLenum    &format,
                             GLenum    &type,
-                            size_t    &texelSize );
+                            size_t    &texelSize,
+                            bool    &gridAligned);
+
+ virtual GLuint GetAttribIndex() const {return 0;}
+
 	
 private:
  GeoImage *_geoImage;
@@ -82,6 +89,7 @@ private:
  vector <double> _cacheBoxExtentsTex;
  SmartBuf _sb_verts;
  SmartBuf _sb_normals;
+ SmartBuf _sb_indices;
  GLsizei _vertsWidth;
  GLsizei _vertsHeight;
 

@@ -532,13 +532,13 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
 	_delta = lg->_delta;
 	_coords = lg->_minu;
 	if (begin) {
-		_zCoordItr = lg->_rg.begin();
+		_zCoordItr = lg->_rg.cbegin();
 		_x = 0;
 		_y = 0;
 		_z = 0;
 	}
 	else {
-		_zCoordItr = lg->_rg.end();
+		_zCoordItr = lg->_rg.cend();
 		_x = 0;
 		_y = 0;
 		_z = _dims[2];
