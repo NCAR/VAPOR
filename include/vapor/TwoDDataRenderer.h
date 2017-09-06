@@ -64,7 +64,10 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
                  GLfloat **verts,
                  GLfloat **normals,
                  GLsizei &width,
-                 GLsizei &height);
+                 GLsizei &height,
+                 GLuint **indices,
+                 GLsizei &nindices,
+                 bool &structuredMesh);
 
     const GLvoid *_getTexture(DataMgr *dataMgr,
                               GLsizei &width,
@@ -72,7 +75,10 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
                               GLint &internalFormat,
                               GLenum &format,
                               GLenum &type,
-                              size_t &texelSize);
+                              size_t &texelSize,
+                              bool &gridAligned);
+
+    virtual GLuint _getAttribIndex() const { return (_vertexDataAttr); }
 
   private:
     GLsizei _texWidth;
@@ -90,13 +96,16 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     vector<double> _currentBoxMaxExtsTex;
     SmartBuf _sb_verts;
     SmartBuf _sb_normals;
+    SmartBuf _sb_indices;
     SmartBuf _sb_texture;
     GLsizei _vertsWidth;
     GLsizei _vertsHeight;
+    GLsizei _nindices;
 
     GLuint _cMapTexID;
     GLfloat *_colormap;
     size_t _colormapsize;
+    GLuint _vertexDataAttr;
 
     bool _gridStateDirty() const;
 
@@ -110,14 +119,27 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
 
     void _texStateClear();
 
-    int _getMeshDisplaced(
-        DataMgr *dataMgr, StructuredGrid *sg,
-        const vector<double> &scaleFac,
+    int _getMeshStructured(
+        DataMgr *dataMgr,
+        const StructuredGrid *g,
         double defaultZ);
 
-    int _getMeshPlane(
-        DataMgr *dataMgr, StructuredGrid *sg,
-        const vector<double> &scaleFac,
+    int _getMeshUnStructured(
+        DataMgr *dataMgr,
+        const StructuredGrid *g,
+        double defaultZ);
+
+    int _getMeshUnStructuredHelper(
+        DataMgr *dataMgr,
+        const StructuredGrid *g,
+        double defaultZ);
+
+    int _getMeshStructuredDisplaced(
+        DataMgr *dataMgr, const StructuredGrid *g,
+        double defaultZ);
+
+    int _getMeshStructuredPlane(
+        DataMgr *dataMgr, const StructuredGrid *g,
         double defaultZ);
 
     const GLvoid *_getTexture(DataMgr *dataMgr);

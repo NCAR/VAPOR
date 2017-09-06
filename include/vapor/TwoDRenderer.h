@@ -52,7 +52,10 @@ class RENDER_API TwoDRenderer : public Renderer {
                          GLfloat **verts,
                          GLfloat **normals,
                          GLsizei &width,
-                         GLsizei &height) = 0;
+                         GLsizei &height,
+                         GLuint **indices,
+                         GLsizei &nindices,
+                         bool &structuredMesh) = 0;
 
     virtual const GLvoid *_getTexture(DataMgr *dataMgr,
                                       GLsizei &width,
@@ -60,7 +63,10 @@ class RENDER_API TwoDRenderer : public Renderer {
                                       GLint &internalFormat,
                                       GLenum &format,
                                       GLenum &type,
-                                      size_t &texelSize) = 0;
+                                      size_t &texelSize,
+                                      bool &gridAligned) = 0;
+
+    virtual GLuint _getAttribIndex() const = 0;
 
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
@@ -109,15 +115,21 @@ class RENDER_API TwoDRenderer : public Renderer {
     GLenum _texFormat;
     GLenum _texType;
     size_t _texelSize;
+    bool _gridAligned;
+    bool _structuredMesh;
     GLfloat *_verts;
     GLfloat *_normals;
+    GLuint *_indices;
     GLsizei _meshWidth;
     GLsizei _meshHeight;
+    GLsizei _nindices;
     SmartBuf _sb_texCoords;
 
     void _openGLInit();
     void _openGLRestore();
     void _renderMesh();
+    void _renderMeshUnAligned();
+    void _renderMeshAligned();
     void _computeTexCoords(GLfloat *tcoords, size_t w, size_t h) const;
 };
 }; // namespace VAPoR
