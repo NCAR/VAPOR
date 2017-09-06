@@ -388,11 +388,27 @@ public:
     //
     virtual size_t GetTopologyDim() const { return (_topologyDimension); }
 
+    //! Get the linear offset to the node IDs
+    //!
+    //! Return the smallest node ID. The default is zero
+    //
+    virtual size_t GetNodeOffset() const { return (_nodeIDOffset); }
+
+    //! Get the linear offset to the cell IDs
+    //!
+    //! Return the smallest Cell ID. The default is zero
+    //
+    virtual size_t GetCellOffset() const { return (_cellIDOffset); }
+
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
     virtual float _GetValueNearestNeighbor(const std::vector<double> &coords) const = 0;
 
     virtual float _GetValueLinear(const std::vector<double> &coords) const = 0;
+
+protected:
+    void SetNodeOffset(size_t offset) { _nodeIDOffset = offset; }
+    void SetCellOffset(size_t offset) { _cellIDOffset = offset; }
 
 private:
     std::vector<size_t> _dims;        // dimensions of grid arrays
@@ -401,6 +417,8 @@ private:
     float               _missingValue;
     bool                _hasMissing;
     int                 _interpolationOrder;    // Order of interpolation
+    size_t              _nodeIDOffset;
+    size_t              _cellIDOffset;
 
     virtual void _getUserCoordinatesHelper(const std::vector<double> &coords, double &x, double &y, double &z) const;
 };

@@ -821,7 +821,7 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     StructuredGrid::ConstIterator itr;
     bool                          first = true;
     float                         mv = sg->GetMissingValue();
-    for (itr = sg->begin(); itr != sg->end(); ++itr) {
+    for (itr = sg->cbegin(); itr != sg->cend(); ++itr) {
         float v = *itr;
         if (v != mv) {
             if (first) {

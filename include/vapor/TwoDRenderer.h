@@ -42,9 +42,61 @@ public:
     virtual ~TwoDRenderer();
 
 protected:
-    virtual int _getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height) = 0;
+    // Protected pure virual methods
+    //
 
-    virtual const GLvoid *_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize) = 0;
+    // Return a 2D structured or unstructured mesh
+    //
+    // verts : contains a packed representation of the x,y,z coordinates
+    // of each grid point. Thus size is height * width * sizeof(float) * 3
+    //
+    // normals : contains surface normal at each vertex. Need not be unit length
+    // Same packing as verts
+    //
+    // width : For structured grids contains number of grid points along
+    // fastest varying dimension. For unstructured grids contains *total*
+    // number of grid points
+    //
+    // height : For structured grids contains number of grid points along
+    // second fastest varying dimension. For unstructured grids should be set to
+    // one.
+    //
+    // indices : indexes into verts and normals to generate either triangles
+    // (unstructured mesh) or triangle strips (structured mesh).
+    // Compatible with index argument to GLDrawElements
+    //
+    // nindices : num elements in indices
+    //
+    // structuredMesh : bool, true if structured mesh, false if unstructured
+    //
+    virtual int GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh) = 0;
+
+    // Return data values for mesh returned with GetMesh(). The returned
+    // array may or may not be coincident with the mesh nodes. In the latter
+    // case the array returned is a uniformally 2D sampling of the data
+    // values on the mesh.
+    //
+    // width : For grid aligned data (gridAligned == true) contains number of
+    // data values along
+    // fastest varying dimension. For non-aligned data (gridAligned == false)
+    // contains *total* number of elements
+    //
+    // height : For grid aligned data (gridAligned == true) contains number of
+    // data values along
+    // second fastest varying dimension. For non-aligned data
+    // (gridAligned == false) should be set to one.
+    //
+    // type : Type of data returned by GetTexture(). If gridAligned
+    // is true, type must be GL_FLOAT
+    //
+    // texelSize: Size, in bytes, of a single element returned by GetTexture.
+    //
+    // gridAligned : bool. If true data are coincident with mesh returned by
+    // GetMesh()
+    //
+    virtual const GLvoid *GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned) = 0;
+
+    virtual GLuint GetAttribIndex() const = 0;
 
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
@@ -78,7 +130,7 @@ protected:
     //! that will contain the computed, unitized surface normals, stored
     //! in interleaved form.
     //
-    void _ComputeNormals(const GLfloat *verts, GLsizei w, GLsizei h, GLfloat *normals);
+    void ComputeNormals(const GLfloat *verts, GLsizei w, GLsizei h, GLfloat *normals);
 
 private:
     GLuint        _textureID;
@@ -90,15 +142,21 @@ private:
     GLenum        _texFormat;
     GLenum        _texType;
     size_t        _texelSize;
+    bool          _gridAligned;
+    bool          _structuredMesh;
     GLfloat *     _verts;
     GLfloat *     _normals;
+    GLuint *      _indices;
     GLsizei       _meshWidth;
     GLsizei       _meshHeight;
+    GLsizei       _nindices;
     SmartBuf      _sb_texCoords;
 
     void _openGLInit();
     void _openGLRestore();
     void _renderMesh();
+    void _renderMeshUnAligned();
+    void _renderMeshAligned();
     void _computeTexCoords(GLfloat *tcoords, size_t w, size_t h) const;
 };
 };    // namespace VAPoR
