@@ -117,14 +117,14 @@ ImageRenderer::~ImageRenderer() {
     }
 }
 
-const GLvoid *ImageRenderer::_getTexture(DataMgr *dataMgr,
-                                         GLsizei &width,
-                                         GLsizei &height,
-                                         GLint &internalFormat,
-                                         GLenum &format,
-                                         GLenum &type,
-                                         size_t &texelSize,
-                                         bool &gridAligned) {
+const GLvoid *ImageRenderer::GetTexture(DataMgr *dataMgr,
+                                        GLsizei &width,
+                                        GLsizei &height,
+                                        GLint &internalFormat,
+                                        GLenum &format,
+                                        GLenum &type,
+                                        size_t &texelSize,
+                                        bool &gridAligned) {
     width = 0;
     height = 0;
     internalFormat = GL_RGBA;
@@ -147,14 +147,14 @@ const GLvoid *ImageRenderer::_getTexture(DataMgr *dataMgr,
     return (texture);
 }
 
-int ImageRenderer::_getMesh(DataMgr *dataMgr,
-                            GLfloat **verts,
-                            GLfloat **normals,
-                            GLsizei &width,
-                            GLsizei &height,
-                            GLuint **indices,
-                            GLsizei &nindices,
-                            bool &structuredMesh) {
+int ImageRenderer::GetMesh(DataMgr *dataMgr,
+                           GLfloat **verts,
+                           GLfloat **normals,
+                           GLsizei &width,
+                           GLsizei &height,
+                           GLuint **indices,
+                           GLsizei &nindices,
+                           bool &structuredMesh) {
     width = 0;
     height = 0;
     nindices = 0;
@@ -219,7 +219,7 @@ int ImageRenderer::_getMesh(DataMgr *dataMgr,
     //
     *verts = (GLfloat *)_sb_verts.GetBuf();
     *normals = (GLfloat *)_sb_normals.GetBuf();
-    _ComputeNormals(*verts, _vertsWidth, _vertsHeight, *normals);
+    ComputeNormals(*verts, _vertsWidth, _vertsHeight, *normals);
 
     // Construct indices for a triangle strip covering one row
     // of the mesh
