@@ -818,7 +818,7 @@ std::string ShaderMgr::_findEffect(GLuint prog) {
 // Check to see if an effect exists, must be done due to std::map autocreating
 // an object that does not exist when checked with []
 //-------------------------------------------------------------------------
-bool ShaderMgr::EffectExists(std::string effect) {
+bool ShaderMgr::EffectExists(std::string effect) const {
     if (_effects.count(effect) > 0) {
         return true;
     } else {
@@ -842,6 +842,16 @@ std::string ShaderMgr::GLVersion() {
     const GLubyte *version = glGetString(GL_VERSION);
     std::string versionString = version ? (const char *)version : "";
     return versionString;
+}
+
+void ShaderMgr::GLVersion(int &major, int &minor) {
+    GLint result;
+
+    glGetIntegerv(GL_MAJOR_VERSION, &result);
+    major = (int)result;
+
+    glGetIntegerv(GL_MINOR_VERSION, &result);
+    minor = (int)result;
 }
 
 std::string ShaderMgr::GLShaderVersion() {
@@ -896,6 +906,18 @@ int ShaderMgr::GetUniformValuef(
     glGetUniformfv(_effects[effect]->GetProgram(), location, result);
 
     return 0;
+}
+
+GLint ShaderMgr::AttributeLocation(
+    std::string effect, std::string variable) {
+    if (!EffectExists(effect)) {
+        SetErrMsg("Uniform %s not found", variable.c_str());
+        return (-1);
+    }
+
+    GLint location = _effects[effect]->AttributeLocation(variable);
+
+    return (location);
 }
 
 int ShaderMgr::MaxTexUnits(bool fixed) {

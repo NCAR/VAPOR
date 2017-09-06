@@ -430,6 +430,25 @@ GLint ShaderProgram::UniformLocation(string uniformName) {
 }
 
 //----------------------------------------------------------------------------
+// Find attribute location in the shader.
+//----------------------------------------------------------------------------
+GLint ShaderProgram::AttributeLocation(string attributeName) const {
+    GLint location;
+    if (GLEW_VERSION_2_0) {
+        location = glGetAttribLocation(_program, attributeName.c_str());
+    } else {
+        location = glGetAttribLocationARB(_program, attributeName.c_str());
+    }
+    if (location == -1) {
+        SetErrMsg("attribute \"%s\" not found.\n", attributeName.c_str());
+    }
+
+    printOpenGLError();
+
+    return location;
+}
+
+//----------------------------------------------------------------------------
 // Determine if shader programming is supported.
 //----------------------------------------------------------------------------
 bool ShaderProgram::Supported() {

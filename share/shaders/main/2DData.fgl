@@ -1,8 +1,13 @@
 varying float lightIntensity;
 uniform sampler1D colormap;
-uniform sampler2D dataTexture;
 uniform float minLUTValue;
 uniform float maxLUTValue;
+
+#ifdef	USE_VERTEX_ATTR
+varying vec2 vertexData;
+#else
+uniform sampler2D dataTexture;
+#endif
 
 //------------------------------------------------------------------
 // Fragment shader main
@@ -12,7 +17,12 @@ void main(void)
 	if (minLUTValue >= maxLUTValue) discard;
 
 	vec2 texCoord0 = gl_TexCoord[0].xy;
-    vec4 texel = texture2D(dataTexture, texCoord0);
+
+#ifdef	USE_VERTEX_ATTR
+	vec2 texel = vertexData;
+#else
+    vec2 texel = texture2D(dataTexture, texCoord0).xy;
+#endif
 
 	// Check for missing value
 	//

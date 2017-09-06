@@ -33,6 +33,7 @@ class RENDER_API ShaderMgr : public Wasp::MyBase {
     std::string GLVendor();
     std::string GLRenderer();
     std::string GLVersion();
+    void GLVersion(int &major, int &minor);
     std::string GLShaderVersion();
     std::string GLExtensions();
     bool SupportsExtension(std::string extension);
@@ -53,8 +54,10 @@ class RENDER_API ShaderMgr : public Wasp::MyBase {
     int DefineEffect(std::string baseName, std::string defines, std::string instanceName);
     int GetUniformValuei(std::string effect, std::string variable, GLint *result);
     int GetUniformValuef(std::string effect, std::string variable, GLfloat *result);
+    GLint AttributeLocation(std::string effect, std::string attributeName);
+
     bool UndefEffect(std::string instanceName);
-    bool EffectExists(std::string effect);
+    bool EffectExists(std::string effect) const;
     void PrintEffects();
     bool CheckFramebufferStatus();
     int MaxTexUnits(bool fixed);
