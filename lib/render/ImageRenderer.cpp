@@ -123,7 +123,7 @@ ImageRenderer::~ImageRenderer()
   }
 }
 
-const GLvoid *ImageRenderer::_getTexture( DataMgr *dataMgr,
+const GLvoid *ImageRenderer::GetTexture( DataMgr *dataMgr,
                                           GLsizei &width,
                                           GLsizei &height,
                                           GLint &internalFormat,
@@ -154,7 +154,7 @@ const GLvoid *ImageRenderer::_getTexture( DataMgr *dataMgr,
 }
 	
 	
-int ImageRenderer::_getMesh( DataMgr *dataMgr,
+int ImageRenderer::GetMesh( DataMgr *dataMgr,
                              GLfloat **verts,
                              GLfloat **normals,
                              GLsizei &width,
@@ -230,7 +230,7 @@ int ImageRenderer::_getMesh( DataMgr *dataMgr,
 	//
 	*verts = (GLfloat *) _sb_verts.GetBuf();
 	*normals = (GLfloat *) _sb_normals.GetBuf();
-	_ComputeNormals(*verts, _vertsWidth, _vertsHeight, *normals);
+	ComputeNormals(*verts, _vertsWidth, _vertsHeight, *normals);
 
 	// Construct indices for a triangle strip covering one row
 	// of the mesh

@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <numeric>
 
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
@@ -247,8 +248,7 @@ int TwoDDataRenderer::_paintGL() {
 
 	// 2D Data LIGHT parameters hard coded
 	//
-//	_shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
-	_shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) true);
+	_shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
 	_shaderMgr->UploadEffectData(effect, "kd", (float) 0.6);
 	_shaderMgr->UploadEffectData(effect, "ka", (float) 0.3);
 	_shaderMgr->UploadEffectData(effect, "ks", (float) 0.1);
@@ -256,11 +256,15 @@ int TwoDDataRenderer::_paintGL() {
 	_shaderMgr->UploadEffectData(
 		effect, "lightDirection", (float) 0.0, (float) 0.0, (float) 1.0
 	);
+
 	_shaderMgr->UploadEffectData(effect, "minLUTValue", (float) crange[0]);
 	_shaderMgr->UploadEffectData(effect, "maxLUTValue", (float) crange[1]);
 
 	_shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
 
+	// If data aren't grid aligned we sample the data values with a 
+	// texture.
+	//
 	if (! GridAligned) {
 		_shaderMgr->UploadEffectData(effect, "dataTexture", dataTexUnit);
 	}
@@ -293,7 +297,7 @@ int TwoDDataRenderer::_paintGL() {
 	return(rc);
 }
 
-const GLvoid *TwoDDataRenderer::_getTexture(  DataMgr *dataMgr,
+const GLvoid *TwoDDataRenderer::GetTexture(  DataMgr *dataMgr,
                                               GLsizei &width,
                                               GLsizei &height,
                                               GLint &internalFormat,
@@ -320,7 +324,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(  DataMgr *dataMgr,
 
 	
 	
-int TwoDDataRenderer::_getMesh( DataMgr *dataMgr,
+int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
                                 GLfloat **verts,
                                 GLfloat **normals,
                                 GLsizei &width,
@@ -384,9 +388,6 @@ int TwoDDataRenderer::_getMesh( DataMgr *dataMgr,
 		structuredMesh = false;
 	}
 
-cout << "Unstructured Mesh " << ForceUnstructured << " " << structuredMesh << endl;
-
-	
 	dataMgr->UnlockGrid(g);
 	delete g;
 
@@ -480,6 +481,8 @@ void TwoDDataRenderer::_texStateClear() {
 	_currentVarname.clear();
 }
 
+// Get mesh for a structured grid
+//
 int TwoDDataRenderer::_getMeshStructured(
 	DataMgr *dataMgr,
 	const StructuredGrid *g,
@@ -514,7 +517,7 @@ int TwoDDataRenderer::_getMeshStructured(
 	//
 	GLfloat *verts = (GLfloat *) _sb_verts.GetBuf();
 	GLfloat *normals = (GLfloat *) _sb_normals.GetBuf();
-	_ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
+	ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
 
 	// Construct indices for a triangle strip covering one row
 	// of the mesh
@@ -527,6 +530,8 @@ int TwoDDataRenderer::_getMeshStructured(
 }
 
 
+// Get mesh for an unstructured grid
+//
 int TwoDDataRenderer::_getMeshUnStructured(
 	DataMgr *dataMgr,
 	const StructuredGrid *g,
@@ -537,7 +542,11 @@ int TwoDDataRenderer::_getMeshUnStructured(
 	assert(g->GetTopologyDim() == 2);
 	vector <size_t> dims = g->GetDimensions();
 
-	_vertsWidth = dims[0] * dims[1];
+	// Unstructured 2d grids are stored in 1d
+	//
+	_vertsWidth = std::accumulate(
+		dims.begin(), dims.end(), 1, std::multiplies<size_t>()
+	);
 	_vertsHeight = 1;
 
 	// Count the number of triangle vertex indices needed
@@ -608,7 +617,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
 
 	double mv = hgtGrid ? hgtGrid->GetMissingValue() : 0.0;
 
-	// Hard-code dx and dy for normal calculation :-(
+	// Hard-code dx and dy for gradient calculation :-(
 	//
 	float dx = (maxExts[0] - minExts[0]) / 1000.0;
 	float dy = (maxExts[1] - minExts[1]) / 1000.0;
@@ -636,6 +645,8 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
 		verts[voffset + 1] = coords[1];
 		verts[voffset + 2] = deltaZ + defaultZ;
 
+		// Compute the surface normal using central differences
+		//
 		computeNormal(
 			hgtGrid, coords[0], coords[1], dx, dy, mv,
 			normals[voffset + 0], normals[voffset + 1], normals[voffset + 2]
@@ -677,7 +688,8 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
 }
 
 
-
+// Get mesh for a structured grid displaced by a height field
+//
 int TwoDDataRenderer::_getMeshStructuredDisplaced(
 	DataMgr *dataMgr,
 	const StructuredGrid *g,
@@ -750,6 +762,9 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(
 	return(rc);
 }
 
+// Get mesh for a structured grid that is NOT displaced by a height field.
+// I.e. it's planar.
+//
 int TwoDDataRenderer::_getMeshStructuredPlane(
 	DataMgr *dataMgr,
 	const StructuredGrid *g,
@@ -851,13 +866,18 @@ const GLvoid *TwoDDataRenderer::_getTexture(
 	
 	if(rc<0) return (NULL);
 
+	// For structured grid variable data are stored in a 2D array.
+	// For structured grid variable data are stored in a 1D array.
+	//
 	vector <size_t> dims = g->GetDimensions();
 	if (dynamic_cast<StructuredGrid *>(g) && ! ForceUnstructured) {
 		_texWidth = dims[0];
 		_texHeight = dims[1];
 	}
 	else {
-		_texWidth = dims[0] * dims[1];
+		_texWidth = std::accumulate(
+			dims.begin(), dims.end(), 1, std::multiplies<size_t>()
+		);
 		_texHeight = 1;
 	}
 

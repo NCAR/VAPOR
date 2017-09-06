@@ -60,7 +60,7 @@ int TwoDRenderer::_paintGL() {
 
 	// Get the 2D texture
 	//
-	_texture = _getTexture(
+	_texture = GetTexture(
 		_dataMgr, _texWidth, _texHeight, _texInternalFormat,
 		_texFormat, _texType, _texelSize, _gridAligned
 	);
@@ -73,7 +73,7 @@ int TwoDRenderer::_paintGL() {
 	// Get the proxy geometry used to render the 2D surface (vertices and
 	// normals)
 	//
-	int rc = _getMesh(
+	int rc = GetMesh(
 		_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight,
 		&_indices, _nindices, _structuredMesh
 	);
@@ -169,7 +169,7 @@ void TwoDRenderer::_openGLInit() {
 	glEnableClientState(GL_NORMAL_ARRAY);
 
 	if (_gridAligned) {
-		GLuint attrindx = _getAttribIndex();
+		GLuint attrindx = GetAttribIndex();
 		glEnableVertexAttribArray(attrindx);
 	}
 	else {
@@ -195,7 +195,7 @@ void TwoDRenderer::_openGLRestore() {
 	glDisableClientState(GL_NORMAL_ARRAY);
 
 	if (_gridAligned) {
-		GLuint attrindx = _getAttribIndex();
+		GLuint attrindx = GetAttribIndex();
 		glDisableVertexAttribArray(attrindx);
 	}
 	else {
@@ -226,7 +226,7 @@ void TwoDRenderer::_renderMeshAligned() {
 
 	_openGLInit();
 
-	GLuint attrindx = _getAttribIndex();
+	GLuint attrindx = GetAttribIndex();
 
 	// Ugh. For aligned data the type must be GLfloat.
 	//
@@ -270,7 +270,7 @@ void TwoDRenderer::_renderMeshAligned() {
 }
 
 
-void TwoDRenderer::_ComputeNormals(
+void TwoDRenderer::ComputeNormals(
 	const GLfloat *verts,
 	GLsizei w, GLsizei h,
 	GLfloat *normals
