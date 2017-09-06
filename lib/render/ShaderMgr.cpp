@@ -763,7 +763,7 @@ std::string ShaderMgr::_findEffect(GLuint prog)
 // Check to see if an effect exists, must be done due to std::map autocreating
 // an object that does not exist when checked with []
 //-------------------------------------------------------------------------
-bool ShaderMgr::EffectExists(std::string effect)
+bool ShaderMgr::EffectExists(std::string effect) const
 {
     if (_effects.count(effect) > 0) {
         return true;
@@ -859,6 +859,18 @@ int ShaderMgr::GetUniformValuef(std::string effect, std::string variable, GLfloa
     glGetUniformfv(_effects[effect]->GetProgram(), location, result);
 
     return 0;
+}
+
+GLint ShaderMgr::AttributeLocation(std::string effect, std::string variable)
+{
+    if (!EffectExists(effect)) {
+        SetErrMsg("Uniform %s not found", variable.c_str());
+        return (-1);
+    }
+
+    GLint location = _effects[effect]->AttributeLocation(variable);
+
+    return (location);
 }
 
 int ShaderMgr::MaxTexUnits(bool fixed)

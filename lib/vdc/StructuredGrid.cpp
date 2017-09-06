@@ -699,6 +699,109 @@ template<class T> StructuredGrid::ForwardCellIterator<T> &StructuredGrid::Forwar
 //
 template class StructuredGrid::ForwardCellIterator<const StructuredGrid>;
 
+#ifdef DEAD
+
+// Only partially implmented for 2D node. Need predicate node-intersect-box
+// functor
+//
+//
+template<class T> StructuredGrid::NodeIterator<T>::NodeIterator(T *sg, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
+{
+    _sg = sg;
+    _dims = rg->GetDimensions();
+
+    _cellIndex = vector<size_t>(_dims.size(), 0);
+
+    ....
+}
+#endif
+
+template<class T> StructuredGrid::ForwardNodeIterator<T>::ForwardNodeIterator(T *sg, bool begin)
+{
+    _sg = sg;
+    _dims = sg->GetDimensions();
+
+    _nodeIndex = vector<size_t>(_dims.size(), 0);
+    if (!begin) { _nodeIndex[_dims.size() - 1] = _dims[_dims.size() - 1]; }
+}
+
+template<class T> StructuredGrid::ForwardNodeIterator<T>::ForwardNodeIterator(ForwardNodeIterator<T> &&rhs)
+{
+    _sg = rhs._sg;
+    rhs._sg = nullptr;
+    _dims = rhs._dims;
+    _nodeIndex = rhs._nodeIndex;
+}
+
+template<class T> StructuredGrid::ForwardNodeIterator<T>::ForwardNodeIterator()
+{
+    _sg = nullptr;
+    _dims.clear();
+    _nodeIndex.clear();
+}
+
+template<class T> StructuredGrid::ForwardNodeIterator<T> &StructuredGrid::ForwardNodeIterator<T>::operator=(ForwardNodeIterator<T> rhs)
+{
+    swap(*this, rhs);
+    return (*this);
+}
+
+template<class T> StructuredGrid::ForwardNodeIterator<T> &StructuredGrid::ForwardNodeIterator<T>::next2d()
+{
+    if (_nodeIndex[1] >= (_dims[1])) return (*this);
+
+    _nodeIndex[0]++;
+
+    if (_nodeIndex[0] < (_dims[0])) { return (*this); }
+
+    if (_nodeIndex[0] >= (_dims[0])) {
+        _nodeIndex[0] = 0;
+        _nodeIndex[1]++;
+    }
+    return (*this);
+}
+
+template<class T> StructuredGrid::ForwardNodeIterator<T> &StructuredGrid::ForwardNodeIterator<T>::next3d()
+{
+    if (_nodeIndex[2] >= (_dims[2] - 1)) return (*this);
+
+    _nodeIndex[0]++;
+
+#ifdef DEAD
+    ++_coordItr1;
+    ++_coordItr2;
+    ++_coordItr3;
+    ++_coordItr4;
+#endif
+
+    if (_nodeIndex[0] < (_dims[0])) { return (*this); }
+
+    if (_nodeIndex[0] >= (_dims[0])) {
+        _nodeIndex[0] = 0;
+        _nodeIndex[1]++;
+    }
+
+    if (_nodeIndex[1] >= (_dims[1])) {
+        _nodeIndex[1] = 0;
+        _nodeIndex[2]++;
+    }
+
+    return (*this);
+}
+
+template<class T> StructuredGrid::ForwardNodeIterator<T> &StructuredGrid::ForwardNodeIterator<T>::operator++()
+{
+    if (_dims.size() == 2) return (next2d());
+    if (_dims.size() == 3) return (next3d());
+
+    assert(_dims.size() >= 2 && _dims.size() <= 3);
+    return (*this);
+}
+
+// Need this so that template definitions can be made in .cpp file, not .h file
+//
+template class StructuredGrid::ForwardNodeIterator<const StructuredGrid>;
+
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg)
 {

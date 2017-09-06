@@ -24,6 +24,7 @@
 
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
+#include <vapor/utils.h>
 #include <vapor/ShaderMgr.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/TwoDDataRenderer.h>
@@ -31,20 +32,77 @@
 
 using namespace VAPoR;
 
-namespace {
-
-const string EffectBaseName = "2DData";
-const string EffectName = "2DData";
-
-const int dataTexUnit = 0;        // GL_TEXTURE0
-const int colormapTexUnit = 1;    // GL_TEXTURE1
-
-}    // namespace
-
 //
 // Register class with object factory!!!
 //
 static RendererRegistrar<TwoDDataRenderer> registrar(TwoDDataRenderer::GetClassType(), TwoDDataParams::GetClassType());
+
+namespace {
+
+// Set to true to force structured grids to be renderered as
+// unstructured grids.
+//
+const bool ForceUnstructured = false;
+
+// GLSL shader constants
+//
+const string EffectBaseName = "2DData";
+const string EffectName = "2DData";
+const string EffectNameAttr = "2DDataAttr";
+const string VertexDataAttr = "vertexDataAttr";
+
+// Rendering primitives will be aligned with grid points
+//
+const bool GridAligned = true;
+
+// Texture units. Only use data texture if GridAligned is false
+//
+const int dataTexUnit = 0;        // GL_TEXTURE0
+const int colormapTexUnit = 1;    // GL_TEXTURE1
+
+// Return name of GLSL shader instance to use
+//
+string getEffectInstance(bool useVertAttr)
+{
+    if (useVertAttr)
+        return (EffectNameAttr);
+    else
+        return (EffectName);
+}
+
+// Compute surface normal (gradient) for point (x,y) using 1st order
+// central differences. 'hgtGrid' is a displacement map for Z coordinate.
+//
+void computeNormal(const StructuredGrid *hgtGrid, float x, float y, float dx, float dy, float mv, float &nx, float &ny, float &nz)
+{
+    nx = ny = 0.0;
+    nz = 1.0;
+    if (!hgtGrid) return;
+
+    // Missing value?
+    //
+    if ((hgtGrid->GetValue(x, y)) == mv) return;
+
+    float z_xpdx = hgtGrid->GetValue(x + dx, y);
+    if (z_xpdx == mv) { z_xpdx = x; }
+
+    float z_xmdx = hgtGrid->GetValue(x - dx, y);
+    if (z_xmdx == mv) { z_xmdx = x; }
+
+    float z_ypdy = hgtGrid->GetValue(x, y + dy);
+    if (z_ypdy == mv) { z_ypdy = y; }
+
+    float z_ymdy = hgtGrid->GetValue(x, y - dy);
+    if (z_ymdy == mv) { z_ymdy = x; }
+
+    float dzx = z_xpdx - z_xmdx;
+    float dzy = z_ypdy - z_ymdy;
+
+    nx = dy * dzx;
+    ny = dx * dzy;
+    nz = 1.0;
+}
+}    // namespace
 
 TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
 : TwoDRenderer(pm, winName, dataSetName, TwoDDataParams::GetClassType(), TwoDDataRenderer::GetClassType(), instName, dataMgr)
@@ -64,8 +122,10 @@ TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string d
     _currentBoxMaxExtsTex.clear();
     _vertsWidth = 0;
     _vertsHeight = 0;
+    _nindices = 0;
     _colormap = NULL;
     _colormapsize = 0;
+    _vertexDataAttr = -1;
 
     _cMapTexID = 0;
 
@@ -98,10 +158,31 @@ int TwoDDataRenderer::_initializeGL()
         return (-1);
     }
 
+    int rc;
+
+    // First shader is used when 'GridAligned' is false
+    //
     if (!_shaderMgr->EffectExists(EffectName)) {
-        int rc = _shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
+        rc = _shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
         if (rc < 0) return (-1);
     }
+
+    // Second shader is used when 'GridAligned' is true
+    //
+    if (!_shaderMgr->EffectExists(EffectNameAttr)) {
+        rc = _shaderMgr->DefineEffect(EffectBaseName, "USE_VERTEX_ATTR;", EffectNameAttr);
+        if (rc < 0) return (-1);
+    }
+
+    //	rc = _shaderMgr->EnableEffect(EffectNameAttr);
+    //	if (rc<0) return(-1);
+
+    rc = (int)_shaderMgr->AttributeLocation(EffectNameAttr, VertexDataAttr);
+    if (rc < 0) return (-1);
+    _vertexDataAttr = rc;
+
+    //	_shaderMgr->DisableEffect();
+
 #endif
 
     glGenTextures(1, &_cMapTexID);
@@ -135,22 +216,26 @@ int TwoDDataRenderer::_paintGL()
     int rc;
 #ifndef NOSHADER
 
-    rc = _shaderMgr->EnableEffect(EffectName);
+    string effect = getEffectInstance(GridAligned);
+
+    rc = _shaderMgr->EnableEffect(effect);
     if (rc < 0) return (-1);
 
     // 2D Data LIGHT parameters hard coded
     //
-    _shaderMgr->UploadEffectData(EffectName, "lightingEnabled", (int)false);
-    _shaderMgr->UploadEffectData(EffectName, "kd", (float)0.6);
-    _shaderMgr->UploadEffectData(EffectName, "ka", (float)0.3);
-    _shaderMgr->UploadEffectData(EffectName, "ks", (float)0.1);
-    _shaderMgr->UploadEffectData(EffectName, "expS", (float)16.0);
-    _shaderMgr->UploadEffectData(EffectName, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
-    _shaderMgr->UploadEffectData(EffectName, "minLUTValue", (float)crange[0]);
-    _shaderMgr->UploadEffectData(EffectName, "maxLUTValue", (float)crange[1]);
+    //	_shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
+    _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int)true);
+    _shaderMgr->UploadEffectData(effect, "kd", (float)0.6);
+    _shaderMgr->UploadEffectData(effect, "ka", (float)0.3);
+    _shaderMgr->UploadEffectData(effect, "ks", (float)0.1);
+    _shaderMgr->UploadEffectData(effect, "expS", (float)16.0);
+    _shaderMgr->UploadEffectData(effect, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
+    _shaderMgr->UploadEffectData(effect, "minLUTValue", (float)crange[0]);
+    _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float)crange[1]);
 
-    _shaderMgr->UploadEffectData(EffectName, "colormap", colormapTexUnit);
-    _shaderMgr->UploadEffectData(EffectName, "dataTexture", dataTexUnit);
+    _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
+
+    if (!GridAligned) { _shaderMgr->UploadEffectData(effect, "dataTexture", dataTexUnit); }
 
 #endif
 
@@ -176,12 +261,13 @@ int TwoDDataRenderer::_paintGL()
     return (rc);
 }
 
-const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize)
+const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned)
 {
     internalFormat = GL_RG32F;
     format = GL_RG;
     type = GL_FLOAT;
     texelSize = _texelSize;
+    gridAligned = GridAligned;
 
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
@@ -193,10 +279,11 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GL
     return (texture);
 }
 
-int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height)
+int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh)
 {
     width = 0;
     height = 0;
+    nindices = 0;
 
     // See if already in cache
     //
@@ -205,8 +292,12 @@ int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
         height = _vertsHeight;
         *verts = (GLfloat *)_sb_verts.GetBuf();
         *normals = (GLfloat *)_sb_normals.GetBuf();
+
+        nindices = _nindices;
+        *indices = (GLuint *)_sb_indices.GetBuf();
         return (0);
     }
+
     _gridStateClear();
 
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
@@ -219,11 +310,6 @@ int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
     size_t         ts = rParams->GetCurrentTimestep();
     rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
-    // Get scene scaling factors
-    //
-    vector<double> stretchFac = rParams->GetStretchFactors();
-    assert(stretchFac.size() == 3);
-
     string varname = rParams->GetVariableName();
     int    orientation = _getOrientation(dataMgr, varname);
     if (orientation != 2) {
@@ -231,46 +317,36 @@ int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
         return (-1);
     }
 
-    StructuredGrid *sg = NULL;
-    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &sg);
+    StructuredGrid *g = NULL;
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &g);
     if (rc < 0) return (-1);
 
-    assert(sg);
+    assert(g);
 
-    vector<size_t> dims = sg->GetDimensions();
-    assert(dims.size() == 2);
-
-    _vertsWidth = dims[0];
-    _vertsHeight = dims[1];
-
-    // (Re)allocate space for verts
-    //
-    size_t   vertsSize = _vertsWidth * _vertsHeight * 3;
-    GLfloat *dummy = (float *)_sb_verts.Alloc(vertsSize * sizeof(*dummy));
-    dummy = (float *)_sb_normals.Alloc(vertsSize * sizeof(*dummy));
-
-    rc = 0;
-    double defaultZ = minBoxReq[2];
-    if (!rParams->GetHeightVariableName().empty()) {
-        rc = _getMeshDisplaced(dataMgr, sg, stretchFac, defaultZ);
+    if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
+        rc = _getMeshStructured(dataMgr, g, minBoxReq[2]);
+        structuredMesh = true;
     } else {
-        rc = _getMeshPlane(dataMgr, sg, stretchFac, defaultZ);
+        rc = _getMeshUnStructured(dataMgr, g, minBoxReq[2]);
+        structuredMesh = false;
     }
-    dataMgr->UnlockGrid(sg);
-    delete sg;
+
+    cout << "Unstructured Mesh " << ForceUnstructured << " " << structuredMesh << endl;
+
+    dataMgr->UnlockGrid(g);
+    delete g;
 
     if (rc < 0) return (-1);
 
     _gridStateSet();
 
-    // Compute vertex normals
-    //
     *verts = (GLfloat *)_sb_verts.GetBuf();
     *normals = (GLfloat *)_sb_normals.GetBuf();
-    _ComputeNormals(*verts, _vertsWidth, _vertsHeight, *normals);
+    *indices = (GLuint *)_sb_indices.GetBuf();
 
     width = _vertsWidth;
     height = _vertsHeight;
+    nindices = _nindices;
 
     return (0);
 }
@@ -339,7 +415,81 @@ void TwoDDataRenderer::_texStateClear()
     _currentVarname.clear();
 }
 
-int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, const vector<double> &scaleFac, double defaultZ)
+int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
+{
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+
+    vector<size_t> dims = g->GetDimensions();
+    assert(dims.size() == 2);
+
+    _vertsWidth = dims[0];
+    _vertsHeight = dims[1];
+    _nindices = _vertsWidth * 2;
+
+    // (Re)allocate space for verts
+    //
+    size_t vertsSize = _vertsWidth * _vertsHeight * 3;
+    _sb_verts.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_normals.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_indices.Alloc(2 * _vertsWidth * sizeof(GLuint));
+
+    int rc;
+    if (!rParams->GetHeightVariableName().empty()) {
+        rc = _getMeshStructuredDisplaced(dataMgr, g, defaultZ);
+    } else {
+        rc = _getMeshStructuredPlane(dataMgr, g, defaultZ);
+    }
+    if (rc < 0) return (rc);
+
+    // Compute vertex normals
+    //
+    GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
+    GLfloat *normals = (GLfloat *)_sb_normals.GetBuf();
+    _ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
+
+    // Construct indices for a triangle strip covering one row
+    // of the mesh
+    //
+    GLuint *indices = (GLuint *)_sb_indices.GetBuf();
+    for (GLuint i = 0; i < _vertsWidth; i++) indices[2 * i] = i;
+    for (GLuint i = 0; i < _vertsWidth; i++) indices[2 * i + 1] = i + _vertsWidth;
+
+    return (0);
+}
+
+int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
+{
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+
+    assert(g->GetTopologyDim() == 2);
+    vector<size_t> dims = g->GetDimensions();
+
+    _vertsWidth = dims[0] * dims[1];
+    _vertsHeight = 1;
+
+    // Count the number of triangle vertex indices needed
+    //
+    _nindices = 0;
+    StructuredGrid::ConstCellIterator citr;
+    for (citr = g->ConstCellBegin(); citr != g->ConstCellEnd(); ++citr) {
+        std::vector<std::vector<size_t>> nodes;
+        g->GetCellNodes(*citr, nodes);
+
+        if (nodes.size() < 3) continue;    // degenerate
+        _nindices += 3 * (nodes.size() - 2);
+    }
+
+    // (Re)allocate space for verts
+    //
+    size_t vertsSize = _vertsWidth * 3;
+    _sb_verts.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_normals.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_indices.Alloc(_nindices * sizeof(GLuint));
+
+    return (_getMeshUnStructuredHelper(dataMgr, g, defaultZ));
+}
+
+int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
     // Construct the displaced (terrain following) grid using
@@ -349,10 +499,111 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     int    refLevel = rParams->GetRefinementLevel();
     int    lod = rParams->GetCompressionLevel();
 
-    // Get user extents of sg. Use these to get the height variable
+    // Find box extents for ROI
+    //
+    vector<double> minExts, maxExts;
+    g->GetUserExtents(minExts, maxExts);
+
+    // Try to get requested refinement level or the nearest acceptable level:
+    //
+    string hgtvar = rParams->GetHeightVariableName();
+
+    StructuredGrid *hgtGrid = NULL;
+
+    if (!hgtvar.empty()) {
+        int rc = DataMgrUtils::GetGrids(dataMgr, ts, hgtvar, minExts, maxExts, true, &refLevel, &lod, &hgtGrid);
+
+        if (rc < 0) return (rc);
+        assert(hgtGrid);
+    }
+
+    assert(g->GetTopologyDim() == 2);
+    vector<size_t> dims = g->GetDimensions();
+
+    GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
+    GLfloat *normals = (GLfloat *)_sb_normals.GetBuf();
+    GLuint * indices = (GLuint *)_sb_indices.GetBuf();
+
+    double mv = hgtGrid ? hgtGrid->GetMissingValue() : 0.0;
+
+    // Hard-code dx and dy for normal calculation :-(
+    //
+    float dx = (maxExts[0] - minExts[0]) / 1000.0;
+    float dy = (maxExts[1] - minExts[1]) / 1000.0;
+
+    //
+    // Visit each node in the grid, build a list of vertices
+    //
+    StructuredGrid::ConstNodeIterator nitr;
+    size_t                            voffset = 0;
+    for (nitr = g->ConstNodeBegin(); nitr != g->ConstNodeEnd(); ++nitr) {
+        vector<double> coords;
+
+        g->GetUserCoordinates(*nitr, coords);
+
+        // Lookup vertical coordinate displacement as a data element
+        // from the
+        // height variable. Note, missing values are possible if image
+        // extents are out side of extents for height variable, or if
+        // height variable itself contains missing values.
+        //
+        double deltaZ = hgtGrid ? hgtGrid->GetValue(coords) : 0.0;
+        if (deltaZ == mv) deltaZ = 0.0;
+
+        verts[voffset + 0] = coords[0];
+        verts[voffset + 1] = coords[1];
+        verts[voffset + 2] = deltaZ + defaultZ;
+
+        computeNormal(hgtGrid, coords[0], coords[1], dx, dy, mv, normals[voffset + 0], normals[voffset + 1], normals[voffset + 2]);
+
+        voffset += 3;
+    }
+
+    //
+    // Visit each cell in the grid. For each cell triangulate it and
+    // and compute an index
+    // array for the triangle list
+    //
+    StructuredGrid::ConstCellIterator citr;
+    size_t                            index = 0;
+    size_t                            offset = g->GetNodeOffset();
+    for (citr = g->ConstCellBegin(); citr != g->ConstCellEnd(); ++citr) {
+        std::vector<std::vector<size_t>> nodes;
+        g->GetCellNodes(*citr, nodes);
+
+        if (nodes.size() < 3) continue;    // degenerate
+
+        // Compute triangle node indices
+        //
+        for (int i = 0; i < nodes.size() - 2; i++) {
+            indices[index++] = LinearizeCoords(nodes[0], dims) - offset;
+            indices[index++] = LinearizeCoords(nodes[i + 1], dims) - offset;
+            indices[index++] = LinearizeCoords(nodes[i + 2], dims) - offset;
+        }
+    }
+
+    if (hgtGrid) {
+        dataMgr->UnlockGrid(hgtGrid);
+        delete hgtGrid;
+    }
+
+    return (0);
+}
+
+int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
+{
+    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
+    // Construct the displaced (terrain following) grid using
+    // a map projection, if specified.
+    //
+    size_t ts = rParams->GetCurrentTimestep();
+    int    refLevel = rParams->GetRefinementLevel();
+    int    lod = rParams->GetCompressionLevel();
+
+    // Find box extents for ROI
     //
     vector<double> minExtsReq, maxExtsReq;
-    sg->GetUserExtents(minExtsReq, maxExtsReq);
+    rParams->GetBox()->GetExtents(minExtsReq, maxExtsReq);
 
     // Try to get requested refinement level or the nearest acceptable level:
     //
@@ -364,7 +615,7 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     if (rc < 0) return (rc);
     assert(hgtGrid);
 
-    vector<size_t> dims = sg->GetDimensions();
+    vector<size_t> dims = g->GetDimensions();
     assert(dims.size() == 2);
 
     size_t   width = dims[0];
@@ -374,7 +625,7 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
             double x, y, zdummy;
-            sg->GetUserCoordinates(i, j, x, y, zdummy);
+            g->GetUserCoordinates(i, j, x, y, zdummy);
 
             // Lookup vertical coordinate displacement as a data element from the
             // height variable. Note, missing values are possible if image
@@ -386,11 +637,10 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
 
             double z = deltaZ + defaultZ;
 
-            // Finally apply stretch factors
             //
-            verts[j * width * 3 + i * 3] = x * scaleFac[0];
-            verts[j * width * 3 + i * 3 + 1] = y * scaleFac[1];
-            verts[j * width * 3 + i * 3 + 2] = z * scaleFac[2];
+            verts[j * width * 3 + i * 3] = x;
+            verts[j * width * 3 + i * 3 + 1] = y;
+            verts[j * width * 3 + i * 3 + 2] = z;
         }
     }
 
@@ -400,9 +650,9 @@ int TwoDDataRenderer::_getMeshDisplaced(DataMgr *dataMgr, StructuredGrid *sg, co
     return (rc);
 }
 
-int TwoDDataRenderer::_getMeshPlane(DataMgr *dataMgr, StructuredGrid *sg, const vector<double> &scaleFac, double defaultZ)
+int TwoDDataRenderer::_getMeshStructuredPlane(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
-    vector<size_t> dims = sg->GetDimensions();
+    vector<size_t> dims = g->GetDimensions();
     assert(dims.size() == 2);
 
     size_t   width = dims[0];
@@ -411,15 +661,13 @@ int TwoDDataRenderer::_getMeshPlane(DataMgr *dataMgr, StructuredGrid *sg, const 
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
             double x, y, zdummy;
-            sg->GetUserCoordinates(i, j, x, y, zdummy);
+            g->GetUserCoordinates(i, j, x, y, zdummy);
 
             double z = defaultZ;
 
-            // Finally apply stretch factors
-            //
-            verts[j * width * 3 + i * 3] = x * scaleFac[0];
-            verts[j * width * 3 + i * 3 + 1] = y * scaleFac[1];
-            verts[j * width * 3 + i * 3 + 2] = z * scaleFac[2];
+            verts[j * width * 3 + i * 3] = x;
+            verts[j * width * 3 + i * 3 + 1] = y;
+            verts[j * width * 3 + i * 3 + 2] = z;
         }
     }
 
@@ -476,38 +724,39 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
         return (NULL);
     }
 
-    size_t ndim;
-    dataMgr->GetNumDimensions(varname, ndim);
-    if (ndim != 2) {
-        SetErrMsg("Invalid variable: %s ", varname.c_str());
-        return (NULL);
-    }
-
     // Find box extents for ROI
     //
     vector<double> minBoxReq, maxBoxReq;
     rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
-    StructuredGrid *sg = NULL;
-    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &sg);
+    StructuredGrid *g = NULL;
+    int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &g);
+
+    if (g->GetTopologyDim() != 2) {
+        SetErrMsg("Invalid variable: %s ", varname.c_str());
+        return (NULL);
+    }
 
     if (rc < 0) return (NULL);
 
-    vector<size_t> dims = sg->GetDimensions();
-    assert(dims.size() == 2);
-
-    _texWidth = dims[0];
-    _texHeight = dims[1];
+    vector<size_t> dims = g->GetDimensions();
+    if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
+        _texWidth = dims[0];
+        _texHeight = dims[1];
+    } else {
+        _texWidth = dims[0] * dims[1];
+        _texHeight = 1;
+    }
 
     size_t   texSize = _texWidth * _texHeight;
     GLfloat *texture = (float *)_sb_texture.Alloc(texSize * _texelSize);
     GLfloat *texptr = texture;
 
     StructuredGrid::Iterator itr;
-    for (itr = sg->begin(minBoxReq, maxBoxReq); itr != sg->end(); ++itr) {
+    for (itr = g->begin(minBoxReq, maxBoxReq); itr != g->end(); ++itr) {
         float v = *itr;
 
-        if (v == sg->GetMissingValue()) {
+        if (v == g->GetMissingValue()) {
             *texptr++ = 0.0;    // Data value
             *texptr++ = 1.0;    // Missing value flag
         } else {
@@ -520,7 +769,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 
     // Unlock the StructuredGrid
     //
-    dataMgr->UnlockGrid(sg);
+    dataMgr->UnlockGrid(g);
 
     return (texture);
 }

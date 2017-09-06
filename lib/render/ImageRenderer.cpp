@@ -98,7 +98,7 @@ ImageRenderer::~ImageRenderer()
     }
 }
 
-const GLvoid *ImageRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize)
+const GLvoid *ImageRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned)
 {
     width = 0;
     height = 0;
@@ -106,6 +106,7 @@ const GLvoid *ImageRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsiz
     format = GL_RGBA;
     type = GL_UNSIGNED_BYTE;
     texelSize = 4;    // RGBA * sizeof(type)
+    gridAligned = false;
 
     ImageParams *myParams = (ImageParams *)GetActiveParams();
 
@@ -119,10 +120,12 @@ const GLvoid *ImageRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsiz
     return (texture);
 }
 
-int ImageRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height)
+int ImageRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh)
 {
     width = 0;
     height = 0;
+    nindices = 0;
+    structuredMesh = true;
 
     // See if already in cache
     //
@@ -131,6 +134,9 @@ int ImageRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals
         height = _vertsHeight;
         *verts = (GLfloat *)_sb_verts.GetBuf();
         *normals = (GLfloat *)_sb_normals.GetBuf();
+
+        nindices = 2 * width;
+        *indices = (GLuint *)_sb_indices.GetBuf();
         return (0);
     }
     _gridStateClear();
@@ -178,6 +184,13 @@ int ImageRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals
     *verts = (GLfloat *)_sb_verts.GetBuf();
     *normals = (GLfloat *)_sb_normals.GetBuf();
     _ComputeNormals(*verts, _vertsWidth, _vertsHeight, *normals);
+
+    // Construct indices for a triangle strip covering one row
+    // of the mesh
+    //
+    *indices = (GLuint *)_sb_indices.GetBuf();
+    for (GLuint i = 0; i < _vertsWidth; i++) (*indices)[2 * i] = i;
+    for (GLuint i = 0; i < _vertsWidth; i++) (*indices)[2 * i + 1] = i + _vertsWidth;
 
     width = _vertsWidth;
     height = _vertsHeight;
@@ -455,9 +468,10 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
 
     // (Re)allocate space for verts
     //
-    size_t   vertsSize = width * height * 3;
-    GLfloat *dummy = (float *)_sb_verts.Alloc(vertsSize * sizeof(*dummy));
-    dummy = (float *)_sb_normals.Alloc(vertsSize * sizeof(*dummy));
+    size_t vertsSize = width * height * 3;
+    _sb_verts.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_normals.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_indices.Alloc(2 * width * sizeof(GLuint));
 
     int rc;
     if (myParams->GetIsGeoTIFF()) {
@@ -601,7 +615,8 @@ int ImageRenderer::_getMeshPlane(const vector<double> &minBox, const vector<doub
 
     size_t   vertsSize = 2 * 2 * 3;
     GLfloat *verts = (float *)_sb_verts.Alloc(vertsSize * sizeof(*verts));
-    GLfloat *dummy = (float *)_sb_normals.Alloc(vertsSize * sizeof(*dummy));
+    _sb_normals.Alloc(vertsSize * sizeof(GLfloat));
+    _sb_indices.Alloc(2 * 2 * sizeof(GLuint));
 
     if (orient == 2) {    // X-Y
         verts[0] = minBox[0];
