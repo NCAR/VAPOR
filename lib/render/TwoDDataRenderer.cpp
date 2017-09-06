@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <numeric>
 
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
@@ -223,18 +224,21 @@ int TwoDDataRenderer::_paintGL()
 
     // 2D Data LIGHT parameters hard coded
     //
-    //	_shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
-    _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int)true);
+    _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int)false);
     _shaderMgr->UploadEffectData(effect, "kd", (float)0.6);
     _shaderMgr->UploadEffectData(effect, "ka", (float)0.3);
     _shaderMgr->UploadEffectData(effect, "ks", (float)0.1);
     _shaderMgr->UploadEffectData(effect, "expS", (float)16.0);
     _shaderMgr->UploadEffectData(effect, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
+
     _shaderMgr->UploadEffectData(effect, "minLUTValue", (float)crange[0]);
     _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float)crange[1]);
 
     _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
 
+    // If data aren't grid aligned we sample the data values with a
+    // texture.
+    //
     if (!GridAligned) { _shaderMgr->UploadEffectData(effect, "dataTexture", dataTexUnit); }
 
 #endif
@@ -261,7 +265,7 @@ int TwoDDataRenderer::_paintGL()
     return (rc);
 }
 
-const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned)
+const GLvoid *TwoDDataRenderer::GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned)
 {
     internalFormat = GL_RG32F;
     format = GL_RG;
@@ -279,7 +283,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr, GLsizei &width, GL
     return (texture);
 }
 
-int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh)
+int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh)
 {
     width = 0;
     height = 0;
@@ -330,8 +334,6 @@ int TwoDDataRenderer::_getMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norm
         rc = _getMeshUnStructured(dataMgr, g, minBoxReq[2]);
         structuredMesh = false;
     }
-
-    cout << "Unstructured Mesh " << ForceUnstructured << " " << structuredMesh << endl;
 
     dataMgr->UnlockGrid(g);
     delete g;
@@ -415,6 +417,8 @@ void TwoDDataRenderer::_texStateClear()
     _currentVarname.clear();
 }
 
+// Get mesh for a structured grid
+//
 int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
@@ -445,7 +449,7 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
     //
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
     GLfloat *normals = (GLfloat *)_sb_normals.GetBuf();
-    _ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
+    ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
 
     // Construct indices for a triangle strip covering one row
     // of the mesh
@@ -457,6 +461,8 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
     return (0);
 }
 
+// Get mesh for an unstructured grid
+//
 int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
@@ -464,7 +470,9 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const StructuredGri
     assert(g->GetTopologyDim() == 2);
     vector<size_t> dims = g->GetDimensions();
 
-    _vertsWidth = dims[0] * dims[1];
+    // Unstructured 2d grids are stored in 1d
+    //
+    _vertsWidth = std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
     _vertsHeight = 1;
 
     // Count the number of triangle vertex indices needed
@@ -526,7 +534,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Structu
 
     double mv = hgtGrid ? hgtGrid->GetMissingValue() : 0.0;
 
-    // Hard-code dx and dy for normal calculation :-(
+    // Hard-code dx and dy for gradient calculation :-(
     //
     float dx = (maxExts[0] - minExts[0]) / 1000.0;
     float dy = (maxExts[1] - minExts[1]) / 1000.0;
@@ -554,6 +562,8 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Structu
         verts[voffset + 1] = coords[1];
         verts[voffset + 2] = deltaZ + defaultZ;
 
+        // Compute the surface normal using central differences
+        //
         computeNormal(hgtGrid, coords[0], coords[1], dx, dy, mv, normals[voffset + 0], normals[voffset + 1], normals[voffset + 2]);
 
         voffset += 3;
@@ -590,6 +600,8 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Structu
     return (0);
 }
 
+// Get mesh for a structured grid displaced by a height field
+//
 int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
@@ -650,6 +662,9 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
     return (rc);
 }
 
+// Get mesh for a structured grid that is NOT displaced by a height field.
+// I.e. it's planar.
+//
 int TwoDDataRenderer::_getMeshStructuredPlane(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
     vector<size_t> dims = g->GetDimensions();
@@ -739,12 +754,15 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 
     if (rc < 0) return (NULL);
 
+    // For structured grid variable data are stored in a 2D array.
+    // For structured grid variable data are stored in a 1D array.
+    //
     vector<size_t> dims = g->GetDimensions();
     if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
         _texWidth = dims[0];
         _texHeight = dims[1];
     } else {
-        _texWidth = dims[0] * dims[1];
+        _texWidth = std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
         _texHeight = 1;
     }
 
