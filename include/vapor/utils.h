@@ -52,7 +52,7 @@ private:
 //! address specified by \p coords
 //
 COMMON_API size_t LinearizeCoords(
-	std::vector <size_t> coords, std::vector <size_t> dims
+	const std::vector <size_t> &coords, const std::vector <size_t> &dims
 );
 
 //! Linearize multi-dimensional coordinates

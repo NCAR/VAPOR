@@ -44,6 +44,8 @@ public:
  void Disable();
 
  GLint UniformLocation(string uniformName);
+ GLint AttributeLocation(string attributeName) const;
+
 
  static bool Supported();
  GLuint GetProgram();
