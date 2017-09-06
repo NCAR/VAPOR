@@ -11,6 +11,11 @@ uniform float ks;
 uniform float expS;
 uniform vec3 lightDirection;
 
+#ifdef  USE_VERTEX_ATTR 
+attribute vec2 vertexDataAttr;
+varying vec2 vertexData;
+#endif
+
 void main() {
 
 	if (lightingEnabled) {
@@ -31,4 +36,8 @@ void main() {
 
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_Position = ftransform();
+
+#ifdef  USE_VERTEX_ATTR 
+	vertexData = vertexDataAttr;
+#endif
 }
