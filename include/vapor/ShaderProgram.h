@@ -41,6 +41,7 @@ class RENDER_API ShaderProgram : public Wasp::MyBase {
     void Disable();
 
     GLint UniformLocation(string uniformName);
+    GLint AttributeLocation(string attributeName) const;
 
     static bool Supported();
     GLuint GetProgram();
