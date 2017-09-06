@@ -52,7 +52,34 @@ public:
 
 protected:
 
- virtual int _getMesh(  DataMgr *dataMgr,
+ // Protected pure virual methods
+ //
+
+ // Return a 2D structured or unstructured mesh
+ //
+ // verts : contains a packed representation of the x,y,z coordinates 
+ // of each grid point. Thus size is height * width * sizeof(float) * 3
+ //
+ // normals : contains surface normal at each vertex. Need not be unit length
+ // Same packing as verts
+ //
+ // width : For structured grids contains number of grid points along
+ // fastest varying dimension. For unstructured grids contains *total*
+ // number of grid points
+ //
+ // height : For structured grids contains number of grid points along
+ // second fastest varying dimension. For unstructured grids should be set to 
+ // one.
+ //
+ // indices : indexes into verts and normals to generate either triangles
+ // (unstructured mesh) or triangle strips (structured mesh). 
+ // Compatible with index argument to GLDrawElements
+ //
+ // nindices : num elements in indices
+ //
+ // structuredMesh : bool, true if structured mesh, false if unstructured
+ //
+ virtual int GetMesh(  DataMgr *dataMgr,
                         GLfloat **verts,
                         GLfloat **normals,
                         GLsizei &width,
@@ -61,7 +88,30 @@ protected:
                         GLsizei &nindices,
                         bool &structuredMesh) = 0;
 
- virtual const GLvoid *_getTexture( DataMgr *dataMgr,
+ // Return data values for mesh returned with GetMesh(). The returned
+ // array may or may not be coincident with the mesh nodes. In the latter
+ // case the array returned is a uniformally 2D sampling of the data
+ // values on the mesh. 
+ //
+ // width : For grid aligned data (gridAligned == true) contains number of 
+ // data values along
+ // fastest varying dimension. For non-aligned data (gridAligned == false) 
+ // contains *total* number of elements
+ //
+ // height : For grid aligned data (gridAligned == true) contains number of 
+ // data values along
+ // second fastest varying dimension. For non-aligned data 
+ // (gridAligned == false) should be set to one.
+ //
+ // type : Type of data returned by GetTexture(). If gridAligned
+ // is true, type must be GL_FLOAT
+ //
+ // texelSize: Size, in bytes, of a single element returned by GetTexture.
+ //
+ // gridAligned : bool. If true data are coincident with mesh returned by
+ // GetMesh()
+ //
+ virtual const GLvoid *GetTexture( DataMgr *dataMgr,
                                     GLsizei &width,
                                     GLsizei &height,
                                     GLint &internalFormat,
@@ -70,7 +120,7 @@ protected:
                                     size_t &texelSize,
                                     bool &gridAligned) = 0;
 
- virtual GLuint _getAttribIndex() const = 0;
+ virtual GLuint GetAttribIndex() const = 0;
 
 
  //! \copydoc Renderer::_initializeGL()
@@ -105,7 +155,7 @@ protected:
  //! that will contain the computed, unitized surface normals, stored
  //! in interleaved form.
  //
- void _ComputeNormals(
+ void ComputeNormals(
 	const GLfloat *verts,
 	GLsizei w, GLsizei h,
 	GLfloat *normals

@@ -63,7 +63,7 @@ protected:
 
  int _paintGL();
 
- int _getMesh(  DataMgr *dataMgr,
+ int GetMesh(  DataMgr *dataMgr,
                 GLfloat **verts,
                 GLfloat **normals,
                 GLsizei &width,
@@ -73,7 +73,7 @@ protected:
                 bool &structuredMesh);
 
 
- const GLvoid *_getTexture( DataMgr *dataMgr,
+ const GLvoid *GetTexture( DataMgr *dataMgr,
                             GLsizei &width,
                             GLsizei &height,
                             GLint &internalFormat,
@@ -82,7 +82,7 @@ protected:
                             size_t &texelSize,
                             bool &gridAligned);
 
- virtual GLuint _getAttribIndex() const {return (_vertexDataAttr); }
+ virtual GLuint GetAttribIndex() const {return (_vertexDataAttr); }
 
 
 	
