@@ -21,7 +21,8 @@ endif()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
-option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
+option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
+option (BUILD_TEST_APPS "Build test applications" OFF)
 option (INSTALL_DLL "Include third party library DLLs when building installer" OFF)
 
 include_directories ("${PROJECT_BINARY_DIR}/include")
@@ -69,6 +70,7 @@ endif ()
 add_subdirectory (apps)
 add_subdirectory (lib)
 add_subdirectory (include)
+add_subdirectory (test_apps)
 add_subdirectory (share/Doxygen)
 
 ###############################################################################
