@@ -25,6 +25,7 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
+#include <vapor/textRenderer.h>
 
 namespace VAPoR {
 
@@ -229,6 +230,10 @@ public:
 
 	//! Render the colorbar for this renderer (if it has one)
 	void renderColorbar();
+
+	//! Render colorbar text
+	void renderColorbarText(ColorbarPbase* cbpb, float fbWidth, float fbHeight,
+		float llx, float lly, float urx, float ury);
 	
 	///@}
 
@@ -285,6 +290,8 @@ protected:
 	static const int _imgHgt;
 	static const int _imgWid;
 	unsigned char* _colorbarTexture;
+	TextObject* _textObject;
+	string _fontFile;
 private:
 
 	size_t _timestep;

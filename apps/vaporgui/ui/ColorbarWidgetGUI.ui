@@ -64,6 +64,9 @@
         <property name="spacing">
          <number>0</number>
         </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
@@ -87,7 +90,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="colorbarEnableCheckbox">
+           <widget class="QCheckBox" name="enableCheckbox">
             <property name="text">
              <string/>
             </property>
@@ -123,6 +126,9 @@
              </property>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_6">
                  <property name="text">
@@ -144,7 +150,13 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarTitleEdit">
+                <widget class="QLineEdit" name="titleEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -160,6 +172,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label">
                  <property name="text">
@@ -194,7 +209,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarXposEdit">
+                <widget class="QLineEdit" name="xPosEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -210,6 +231,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_5">
                  <property name="text">
@@ -244,7 +268,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarYposEdit">
+                <widget class="QLineEdit" name="yPosEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -260,6 +290,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_7">
                  <property name="text">
@@ -294,7 +327,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarXsizeEdit">
+                <widget class="QLineEdit" name="xSizeEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -310,6 +349,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_10">
                  <property name="text">
@@ -344,7 +386,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarYsizeEdit">
+                <widget class="QLineEdit" name="ySizeEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -360,6 +408,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_2">
                  <property name="text">
@@ -394,7 +445,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarFontsizeEdit">
+                <widget class="QLineEdit" name="fontSizeEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -410,10 +467,13 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_11">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_3">
                  <property name="text">
-                  <string>Num. Digits</string>
+                  <string>Num. Decimals</string>
                  </property>
                 </widget>
                </item>
@@ -444,7 +504,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarDigitsEdit">
+                <widget class="QLineEdit" name="numDigitsEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -460,6 +526,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_8">
                  <property name="text">
@@ -494,7 +563,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="colorbarNumTicsEdit">
+                <widget class="QLineEdit" name="numTicksEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -510,6 +585,9 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_13">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLabel" name="label_9">
                  <property name="text">
@@ -531,7 +609,7 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="colorbarBackgroundSelectButton">
+                <widget class="QPushButton" name="bgSelectButton">
                  <property name="toolTip">
                   <string>Click to select color bar background color</string>
                  </property>
@@ -541,7 +619,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="ColorbarBackgroundColorEdit">
+                <widget class="QLineEdit" name="bgColorEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
@@ -561,7 +645,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="QPushButton" name="colorbarApplyAllButton">
+                <widget class="QPushButton" name="applyAllButton">
                  <property name="minimumSize">
                   <size>
                    <width>120</width>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>808</height>
+    <height>1077</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -609,7 +609,16 @@
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
          <number>1</number>
         </property>
         <item>
@@ -1545,7 +1554,16 @@ with Lat/Lon</string>
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
          <number>1</number>
         </property>
         <item>
@@ -1599,7 +1617,7 @@ with Lat/Lon</string>
                <string>specify time annotation type</string>
               </property>
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <property name="maxCount">
                <number>3</number>
@@ -1663,7 +1681,7 @@ with Lat/Lon</string>
                <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
               </property>
               <property name="text">
-               <string>0.1</string>
+               <string>10</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignHCenter</set>
@@ -1676,7 +1694,7 @@ with Lat/Lon</string>
                <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
               </property>
               <property name="text">
-               <string>0.1</string>
+               <string>10</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignHCenter</set>

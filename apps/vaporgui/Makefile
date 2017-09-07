@@ -15,10 +15,11 @@ FILES = \
 	RangeController Statistics Plot SeedMe \
 	helloSubtabs TFWidget VariablesWidget \
 	GeometryWidget RangeCombos BarbEventRouter \
-	BannerGUI AnimationParams \
+	BannerGUI AnimationParams MiscParams \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
-	TabManager TrackBall GLColorbarWidget ErrorReporter
+	TabManager TrackBall GLColorbarWidget ErrorReporter \
+	StatisticsParams PlotParams
 
 QT_HEADERS := \
 	RenderHolder BoxSliderFrame DomainWidget GLWidget \
@@ -34,7 +35,7 @@ QT_HEADERS := \
 	TFWidget VariablesWidget \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
-	BannerGUI AnimationParams \
+	BannerGUI AnimationParams MiscParams\
 	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget ErrorReporter \
 	ImageSubtabs 
 
@@ -50,6 +51,7 @@ UI_DIR = ui
 include $(UI_DIR)/ui.mk
 SHARED = 0
 QT = 1
+
 
 
 LIBRARIES = dl util m render params jpeg vdc wasp common 
@@ -78,8 +80,11 @@ MAKEFILE_CXXFLAGS += -Wno-unused-variable -Wno-non-virtual-dtor
 
 endif   
 
-include ${TOP}/make/config/base.mk
+ifdef FREETYPE2_INC_DIR
+MAKEFILE_INCLUDE_DIRS += -I$(FREETYPE2_INC_DIR)
+endif
 
+include ${TOP}/make/config/base.mk
 
 cat:
 	echo "QTDIR=$(QTDIR)"
