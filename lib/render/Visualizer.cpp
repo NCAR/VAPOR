@@ -172,7 +172,6 @@ int Visualizer::paintEvent()
         MyBase::SetErrMsg("Invalid time step");
         return -1;
     }
-    cout << "Visualizer::paintEvent() time step : " << timeStep << endl;
 
     if (paintSetup(timeStep)) return -1;
     // make sure to capture whenever the time step or frame index changes (once we implement capture!)
