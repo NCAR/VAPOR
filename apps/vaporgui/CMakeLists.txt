@@ -46,6 +46,10 @@ set (SRCS
 	TrackBall.cpp
 	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
+	ContourEventRouter.cpp
+	PlotParams.cpp
+	StatisticsParams.cpp
+	MiscParams.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -55,6 +59,7 @@ set (SRCS
 	BarbSubtabs.h
 	ColorbarWidget.h
 	ImageSubtabs.h
+	ContourSubtabs.h
 )
 
 set (UIS 
@@ -90,6 +95,9 @@ set (UIS
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	ImageVariablesGUI.ui
+	ContourAppearanceGUI.ui
+	ContourGeometryGUI.ui
+	ContourVariablesGUI.ui
 )
 
 find_package(Qt4 REQUIRED)
@@ -108,7 +116,7 @@ else()
 endif()
 
 # target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (vaporgui common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (vaporgui common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (vaporgui quadmath)

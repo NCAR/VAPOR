@@ -106,11 +106,11 @@ class PARAMS_API ColorbarPbase : public ParamsBase {
 
     //! Determine colorbar num tics
     //! \return number of tics
-    long GetNumTics() const;
+    long GetNumTicks() const;
 
     //! Set colorbar number of tic marks
     //! \param[in] val number of tics
-    void SetNumTics(long val);
+    void SetNumTicks(long val);
 
     //! Determine colorbar num digits to display
     //! \return number of digits
@@ -146,7 +146,7 @@ class PARAMS_API ColorbarPbase : public ParamsBase {
     static const string _colorbarFontSizeTag;
     static const string _colorbarNumDigitsTag;
     static const string _colorbarTitleTag;
-    static const string _colorbarNumTicsTag;
+    static const string _colorbarNumTicksTag;
     static const string _colorbarEnabledTag;
 };
 };     // namespace VAPoR

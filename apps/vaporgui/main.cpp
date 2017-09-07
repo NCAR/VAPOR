@@ -24,6 +24,7 @@
 #include "MainForm.h"
 #include <qfont.h>
 #include <QMessageBox>
+#include <QFontDatabase>
 #include "BannerGUI.h"
 #include "vapor/GetAppPath.h"
 #ifdef WIN32
@@ -151,20 +152,26 @@ int main(int argc, char **argv) {
     app = &a;
     a.setPalette(QPalette(QColor(233, 236, 216), QColor(233, 236, 216)));
 
-    //Depending on the platform, we may want nondefault fonts!
-
-    //The pointsize of 10 works ok on linux and irix, not windows
-    //The weight of 55 is slightly heavier than normal.
-    //default font is OK
-    QFont myFont = a.font();
-    myFont.setPointSize(10);
-    a.setFont(myFont);
-
     vector<QString> files;
     for (int i = 1; i < argc; i++) {
         files.push_back(argv[i]);
     }
     MainForm *mw = new MainForm(files, app);
+
+    vector<string> fpath;
+    fpath.push_back("fonts");
+    string fontFile = GetAppPath("VAPOR", "share", fpath);
+    fontFile = fontFile + "//arial.ttf";
+
+    QFontDatabase fdb;
+    int result = fdb.addApplicationFont(QString::fromStdString(fontFile));
+    QStringList fonts = fdb.families();
+    QFont f = fdb.font("Arial", "normal", 10);
+
+    const char *useFont = std::getenv("USE_SYSTEM_FONT");
+    if (!useFont) {
+        mw->setFont(f);
+    }
 
     mw->setWindowTitle("VAPOR User Interface");
     mw->show();
