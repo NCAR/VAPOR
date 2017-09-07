@@ -64,6 +64,9 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
     _zRangeCombo = new RangeCombo(_minZCombo, _maxZCombo);
 
     connectWidgets();
+
+    QFont myFont = font();
+    xMinMaxGroupBox->setFont(myFont);
 }
 
 void GeometryWidget::Reinit(Flags flags)

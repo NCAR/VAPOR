@@ -22,6 +22,7 @@
 #ifndef ANIMATIONPARAMS_H
 #define ANIMATIONPARAMS_H
 
+#include <QObject>
 #include <vapor/ParamsBase.h>
 
 //! \class AnimationParams
@@ -34,7 +35,12 @@
 //! When this class is local, it controls the time-steps in one visualizer.
 //! The global (shared) AnimationParams controls the animation in any number of visualizers.
 
-class PARAMS_API AnimationParams : public VAPoR::ParamsBase {
+class PARAMS_API AnimationParams : public QObject, public VAPoR::ParamsBase {
+    Q_OBJECT
+
+signals:
+    void timestepChanged();
+
 public:
     AnimationParams(ParamsBase::StateSave *ssave);
 
@@ -51,7 +57,11 @@ public:
     //! \param long current time step
     //! \retval int 0 if successful
     //
-    void SetCurrentTimestep(size_t ts) { SetValueLong(_currentTimestepTag, "Set timestep", (long)ts); }
+    void SetCurrentTimestep(size_t ts)
+    {
+        SetValueLong(_currentTimestepTag, "Set timestep", (long)ts);
+        emit timestepChanged();
+    }
 
     //! Identify the starting time step currently set in the UI.
     //! \retval int starting frame number.
