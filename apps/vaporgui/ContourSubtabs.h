@@ -88,12 +88,12 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
             int numContours = _cParams->GetNumContours();
             double maxSpacing = (upper - min) / numContours;
             double maxContour = min + spacing * numContours;
-            cout << "spacing " << spacing << endl;
-            cout << "m/l/u   " << min << " " << lower << " " << upper << endl;
-            cout << "#/Ms/Mc " << numContours << " " << maxSpacing << " " << maxContour << endl;
+            //cout << "spacing " << spacing << endl;
+            //cout << "m/l/u   " << min << " " << lower << " " << upper << endl;
+            //cout << "#/Ms/Mc " << numContours << " " << maxSpacing << " " << maxContour << endl;
             if (maxContour > upper) {
                 spacing = maxSpacing;
-                cout << "spacing shift " << spacing << endl;
+                //	cout << "spacing shift " << spacing << endl;
             }
             _spacingCombo->Update(0, maxSpacing, spacing);
         } else {
