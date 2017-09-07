@@ -10,6 +10,7 @@ add_library (render SHARED
 	Visualizer.cpp
 	VizFeatureRenderer.cpp
 	jfilewrite.cpp
+	textRenderer.cpp
 
 	GeoImage.cpp
 	ControlExecutive.cpp

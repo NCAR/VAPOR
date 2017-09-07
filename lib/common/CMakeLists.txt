@@ -1,4 +1,16 @@
-add_library (common SHARED common.cpp MyBase.cpp OptionParser.cpp EasyThreads.cpp CFuncs.cpp Version.cpp PVTime.cpp GetAppPath.cpp utils.cpp glutil.cpp)
+add_library (common SHARED
+	common.cpp
+	MyBase.cpp
+	OptionParser.cpp
+	EasyThreads.cpp
+	CFuncs.cpp
+	Version.cpp
+	PVTime.cpp
+	GetAppPath.cpp
+	utils.cpp
+	glutil.cpp
+	MyPython.cpp
+	)
 
 
 if (APPLE)
@@ -10,7 +22,7 @@ if (NOT WIN32)
 	add_definitions (-DENABLE_THREADS)
 endif()
 
-target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES})
+target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES} python${PYTHONVERSION})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (common GLU)

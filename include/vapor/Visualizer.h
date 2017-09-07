@@ -208,10 +208,21 @@ public:
 		return 0;
 	}
 
+	//! Draw a text banner at x, y coordinates
+	//
+	void DrawText(string text, int x, int y, int size, 
+					float color[3], int type=0) {
+		m_vizFeatures->AddText(text, x, y, size, color, type);
+	}
+
+	void ClearText() {
+		m_vizFeatures->ClearText();
+	}
 
 private:
 	//! Render all the colorbars enabled in this visualizer.
 	void renderColorbars(int timeStep);
+
 
 	//! Capture a single image to a file.  Filename must be *.tif or *.jpg
 	//! Must be called during paintEvent when captureEnabled has been called.

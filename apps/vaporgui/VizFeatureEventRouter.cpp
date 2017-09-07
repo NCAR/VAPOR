@@ -1,8 +1,8 @@
 //************************************************************************
 //															*
-//		     Copyright (C)  2015										*
-//     University Corporation for Atmospheric Research					*
-//		     All Rights Reserved										*
+//			 Copyright (C)  2015										*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
 //															*
 //************************************************************************/
 //
@@ -47,13 +47,16 @@
 using namespace VAPoR;
 
 VizFeatureEventRouter::VizFeatureEventRouter(
-    QWidget *parent, ControlExec *ce
+	QWidget *parent, ControlExec *ce
 ) : QWidget(parent),
-    Ui_vizFeaturesTab(),
-    EventRouter(ce, VizFeatureParams::GetClassType())
+	Ui_vizFeaturesTab(),
+	EventRouter(ce, VizFeatureParams::GetClassType())
 {
 
 	setupUi(this);
+
+	_animConnected = false;
+	_ap = NULL;
 }
 
 
@@ -131,10 +134,15 @@ VizFeatureEventRouter::hookUpTab()
 
 	connect (axisColorButton,SIGNAL(clicked()), this, SLOT(selectAxisColor()));
 
+	connect (timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
+	connect (timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
+	connect (timeLLYEdit, SIGNAL(returnPressed()), this, SLOT(timeLLYChanged()));
+	connect (timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
+	connect (timeColorButton, SIGNAL(pressed()), this, SLOT(timeColorChanged()));
 }
 
 void VizFeatureEventRouter::GetWebHelp(
-    vector <pair <string, string> > &help
+	vector <pair <string, string> > &help
 ) const {
 	help.clear();
 
@@ -386,6 +394,111 @@ void VizFeatureEventRouter::selectAxisColor(){
 	invalidateText();
 	
 }
+
+void VizFeatureEventRouter::timeAnnotationChanged() {
+	if (_animConnected==false){
+		_ap= GetAnimationParams();
+		bool v = connect (_ap, SIGNAL(timestepChanged()), this, SLOT(timeAnnotationChanged()));
+		_animConnected=true;
+	}	
+
+	MiscParams* miscParams = GetMiscParams();
+
+	int index = timeCombo->currentIndex();
+	if (index == 1) {
+		miscParams->SetTimeStep(true);
+		miscParams->SetTimeStamp(false);
+		_controlExec->ClearText();
+		drawTimeStep();
+	}
+	else if (index == 2) {
+		miscParams->SetTimeStamp(true);
+		miscParams->SetTimeStep(false);
+		_controlExec->ClearText();
+		drawTimeStamp();
+	}
+	else {
+		miscParams->SetTimeStamp(false);
+		miscParams->SetTimeStep(false);
+		_controlExec->ClearText();
+	}
+}
+
+void VizFeatureEventRouter::timeLLXChanged() {
+	MiscParams* miscParams = GetMiscParams();
+	float llx = timeLLXEdit->text().toFloat();
+
+	miscParams->SetTimeAnnotLLX(llx);
+	drawTimeStamp();
+}
+
+void VizFeatureEventRouter::timeLLYChanged() {
+	MiscParams* miscParams = GetMiscParams();
+	float lly = timeLLYEdit->text().toFloat();
+
+	miscParams->SetTimeAnnotLLY(lly);
+	drawTimeStamp();
+}
+
+void VizFeatureEventRouter::timeSizeChanged() {
+	MiscParams* miscParams = GetMiscParams();
+	float size = timeSizeEdit->text().toFloat();
+	miscParams->SetTimeAnnotSize(size);
+	drawTimeStamp();
+}
+
+void VizFeatureEventRouter::timeColorChanged() {
+	MiscParams* miscParams = GetMiscParams();
+
+	QPalette pal(timeColorEdit->palette());
+	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
+	if (!newColor.isValid()) return;
+	pal.setColor(QPalette::Base, newColor);
+	timeColorEdit->setPalette(pal);
+	//vector<float> rgb;
+	float rgb[3];
+	rgb[0] = ((float)newColor.red()/256.);
+	rgb[1] = ((float)newColor.green()/256.);
+	rgb[2] = ((float)newColor.blue()/256.);
+	miscParams->SetTimeAnnotColor(rgb);
+	drawTimeStamp();
+}
+
+void VizFeatureEventRouter::drawTimeStep(string myString) {
+	_controlExec->ClearText();
+
+	if (myString=="") {
+		myString = "Timestep: " + std::to_string(GetCurrentTimeStep());
+	}
+
+	MiscParams* mp = GetMiscParams();
+	int x = mp->GetTimeAnnotLLX();
+	int y = mp->GetTimeAnnotLLY();
+	int size = mp->GetTimeAnnotSize();
+	float color[3];
+	mp->GetTimeAnnotColor(color);
+
+	_controlExec->DrawText(myString, x, y, size, color, 1);
+}
+
+void VizFeatureEventRouter::drawTimeStamp() {
+	MiscParams* mp = GetMiscParams();
+	if (mp->GetTimeStep() == true) {
+		drawTimeStep();
+		return;
+	}	
+
+	size_t ts = GetCurrentTimeStep();
+	DataStatus* ds = _controlExec->getDataStatus();
+	vector<double> timeCoords = ds->GetTimeCoordinates();
+	
+	double myTime = timeCoords[ts];
+	std::ostringstream ss;
+	ss << myTime;
+	std::string myString = ss.str();
+	drawTimeStep(myString);
+}
+
 void VizFeatureEventRouter::setXTicOrient(int){
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vector<long> ticDir = vfParams->GetTicDirs();
