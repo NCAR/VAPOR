@@ -15,12 +15,15 @@ static RenParamsRegistrar<ContourParams> registrar(ContourParams::GetClassType()
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
 const string ContourParams::_varsAre3dTag = "VarsAre3D";
-const string ContourParams::_numIsovaluesTag = "NumIsovalues";
-const string ContourParams::_isovalsTag = "Isovalues";
+const string ContourParams::_numContoursTag = "NumIsovalues";
+const string ContourParams::_contoursTag = "Contours";
 const string ContourParams::_numDigitsTag = "NumDigits";
 const string ContourParams::_textDensityTag = "TextDensity";
 const string ContourParams::_lineColorTag = "LineColor";
 const string ContourParams::_textEnabledTag = "TextEnabled";
+const string ContourParams::_contourMinTag = "ContourMinimum";
+const string ContourParams::_contourSpacingTag = "ContourSpacing";
+const string ContourParams::_lockToTFTag = "LockToTF";
 
 ContourParams::ContourParams(
     DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, ContourParams::GetClassType()) {

@@ -135,9 +135,9 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr) {
     double pointa[3], pointb[3]; //points in cache
     pointa[2] = pointb[2] = 0.;
 
-    for (int iso = 0; iso < cParams->GetNumIsovalues(); iso++) {
+    for (int iso = 0; iso < cParams->GetNumContours(); iso++) {
         float lineColor[3];
-        cParams->GetLineColor(lineColor);
+        cParams->GetLineColor(iso, lineColor);
         glColor3fv(lineColor);
 
         pair<int, int> mapPair = make_pair(timestep, iso);
@@ -184,7 +184,6 @@ int ContourRenderer::_initializeGL() {
 }
 
 int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
-    cout << "buildLineCache " << endl;
 
     ContourParams *cParams = (ContourParams *)GetActiveParams();
 
@@ -228,10 +227,6 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
 
     double iIncrement = (boxMax[0] - boxMin[0]) / (float)_gridSize;
     double jIncrement = (boxMax[1] - boxMin[1]) / (float)_gridSize;
-
-    cout << "box  " << boxMax[0] << " " << boxMin[0] << " " << boxMax[1] << " " << boxMin[1] << endl;
-    cout << "incs " << iIncrement << " " << jIncrement << endl;
-    cout << "m/m  " << varMax[2] << " " << varMin[2] << endl;
 
     vector<double> minu, maxu;
     varGrid->GetUserExtents(minu, maxu);
@@ -282,7 +277,6 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
     //Loop over each isovalue and cell, and classify the cell as to which edges are crossed by the isoline.
     //when there is an isoline crossing, a line segment is saved in the cache, defined by the two endpoints.
     const vector<double> &isovals = cParams->GetIsovalues();
-    cout << "num isovals " << isovals.size() << endl;
 
     //Clear the textObjects (if they exist)
     //	TextObject::clearTextObjects(this);
@@ -317,12 +311,12 @@ void ContourRenderer::setupCache() {
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     //for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
     for (size_t ts = GetCurrentTimestep(); ts <= GetCurrentTimestep(); ts++) {
-        for (int iso = 0; iso < cParams->GetNumIsovalues(); iso++) {
+        for (int iso = 0; iso < cParams->GetNumContours(); iso++) {
             pair<int, int> indexpair = make_pair((int)ts, iso);
             _lineCache[indexpair] = *(new vector<float *>);
         }
     }
-    _numIsovalsCached = cParams->GetNumIsovalues();
+    _numIsovalsCached = cParams->GetNumContours();
 }
 //Classify a cell to one of 9 possibilities:
 //0: no crossing
@@ -732,8 +726,8 @@ void ContourRenderer::buildEdges(int iso, float *dataVals, float mv) {
         float bgc[4] = {0, 0, 0, 1.};
 
         float lineColor[4];
-        //		cParams->getLineColor(iso,lineColor);
-        cParams->GetLineColor(lineColor);
+        cParams->GetLineColor(iso, lineColor);
+        //		cParams->GetLineColor(lineColor);
         lineColor[3] = 1.;
         vector<string> vec;
         vec.push_back("fonts");
