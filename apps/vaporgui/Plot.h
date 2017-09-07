@@ -6,7 +6,7 @@
 //                                                                      *
 //************************************************************************/
 //
-//  File:       Plot.h
+//  File:       plot.h
 //
 //  Author:     Scott Pearse
 //          National Center for Atmospheric Research
@@ -29,11 +29,13 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QCheckBox>
-//#include <Python.h>
+#include <Python.h>
 #include "ui_errMsg.h"
 #include "ui_plotWindow.h"
 #include "RangeController.h"
 #include <vapor/DataMgr.h>
+#include <vapor/ControlExecutive.h>
+#include "PlotParams.h"
 
 using namespace std;
 
@@ -57,7 +59,9 @@ class NewLineEdit : public QLineEdit {
     //using QLineEdit::QLineEdit;
 
   public:
-    NewLineEdit(QWidget *parent, bool minOrMax) : QLineEdit(parent), _minOrMax(minOrMax) {}
+    NewLineEdit(QWidget *parent, bool minOrMax) : QLineEdit(parent), _minOrMax(minOrMax) {
+        (void)_minOrMax;
+    }
 
   private:
     bool _minOrMax;
@@ -86,28 +90,30 @@ class Plot : public QDialog, public Ui_PlotWindow {
     Plot(QWidget *parent);
     ~Plot();
 
-    void Initialize(VAPoR::DataMgr *dm, VizWinMgr *vwm);
+    void Initialize(VAPoR::ControlExec *ce, VizWinMgr *vwm);
 
   private:
-    int init();
+    bool init();
     void reject();
     void print(bool doSpace) const;
+    void showMe();
     void initTables();
     void initTimes();
-    int initExtents(int ts, vector<double> &extents);
+    void initExtents(int ts);
     void initPlotDlg();
     void initVariables();
     void initConstCheckboxes();
     void initSSCs();
     void initCRatios();
     void initRefinement();
+    void applyParams();
+    bool eventFilter(QObject *o, QEvent *e);
     void enableZControllers(bool s);
+    void destroyControllers();
     vector<string> getEnabledVars() const;
 
-#ifdef FIXED
     PyObject *createPyFunc(
         string moduleName, string funcName, string script) const;
-#endif
 
     int initPython();
     void finalizePython();
@@ -115,14 +121,13 @@ class Plot : public QDialog, public Ui_PlotWindow {
                       QAbstractSpinBox *spinner,
                       QTableWidgetItem *twi);
 
-    int findNyquist(
-        const vector<size_t> minv, const vector<size_t> maxv,
-        const vector<double> minu, const vector<double> maxu,
-        double &dX, double &dY, double &dZ) const;
+    int findNyquist(VAPoR::StructuredGrid *sg,
+                    const double minu[3], const double maxu[3],
+                    double &dX, double &dY, double &dZ) const;
 
-    void getSpatialExtents(vector<double> &minu,
-                           vector<double> &maxu,
-                           size_t &ts) const;
+    void fudgeVoxBounds(size_t minv[3], size_t maxv[3]) const;
+
+    void getSpatialExtents(double minu[3], double maxu[3], size_t &ts) const;
 
     int getSpatialVectors(
         const vector<string> vars,
@@ -130,7 +135,7 @@ class Plot : public QDialog, public Ui_PlotWindow {
         map<string, vector<float>> &iData) const;
 
     void getTemporalExtents(
-        vector<double> &xyz, size_t &ts0, size_t &ts1) const;
+        double xyz[3], size_t &ts0, size_t &ts1) const;
 
     int getTemporalVectors(
         const vector<string> vars,
@@ -139,11 +144,10 @@ class Plot : public QDialog, public Ui_PlotWindow {
 
     string readPlotScript() const;
 
-    //	PyObject *buildNumpyArray(const vector <float> &vec) const;
+    PyObject *buildNumpyArray(const vector<float> &vec) const;
 
-    //	PyObject* buildPyDict(
-    //		const map <string, vector <float> > &data
-    //	) ;
+    PyObject *buildPyDict(
+        const map<string, vector<float>> &data);
 
     //void getSliders(
     //	QObject*& sender, QComboBox*& qcb, SpaceSSC*& x, SpaceSSC*& y,
@@ -158,7 +162,9 @@ class Plot : public QDialog, public Ui_PlotWindow {
 
     static bool _isInitializedPython; // static!!!!
 
+    VAPoR::ControlExec *_controlExec;
     VAPoR::DataMgr *_dm;
+    VAPoR::PlotParams *_params;
     pErrMsg *_errMsg;
     VizWinMgr *_vwm;
     QDialog *_plotDialog;
@@ -179,7 +185,6 @@ class Plot : public QDialog, public Ui_PlotWindow {
     int _cRatio;
     int _refLevel;
     int _refLevels;
-    string _defaultVar;
 
     // All of the following vectors are used to store
     // spatial or temporal coordinates and extents:
@@ -265,13 +270,14 @@ class Plot : public QDialog, public Ui_PlotWindow {
 
   public slots:
     void go();
-    void getPointFromRenderer();
+    //	void getPointFromRenderer();
     void newVarAdded(int index);
     void removeVar(int);
     void savePlotToFile();
-    void refinementChanged(int i) { _refLevel = i; }
-    void cRatioChanged(int i) { _cRatio = i; }
+    void refinementChanged(int i);
+    void cRatioChanged(int i);
     void constCheckboxChanged(int state);
+    void reinitDataMgr();
 };
 
 #endif // PLOT_H
