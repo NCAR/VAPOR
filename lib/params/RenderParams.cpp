@@ -705,6 +705,9 @@ RenderParams *RenParamsContainer::Create(string className, string name) {
 	ParamsSeparator mySep(_ssave, name);
 	mySep.SetParent(_separator);
 
+	cout << "createInstance (rp): " << className << " " << name << endl;
+	cout << (_dataMgr==NULL) << endl;
+
 	// Create the desired class
 	//
     RenderParams *mypb = RenParamsFactory::Instance()->CreateInstance(

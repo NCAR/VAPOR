@@ -20,6 +20,7 @@ FILES = \
 	main MainForm VizWin VizWinMgr \
 	TabManager TrackBall GLColorbarWidget ErrorReporter \
 	StatisticsParams PlotParams
+	ContourEventRouter
 
 QT_HEADERS := \
 	RenderHolder BoxSliderFrame DomainWidget GLWidget \
@@ -36,8 +37,9 @@ QT_HEADERS := \
 	helloSubtabs TwoDSubtabs GeometryWidget RangeCombos \
 	BarbEventRouter BarbSubtabs \
 	BannerGUI AnimationParams MiscParams\
-	MainForm TabManager VizWinMgr VizWin  TrackBall GLColorbarWidget ErrorReporter \
-	ImageSubtabs 
+	MainForm TabManager VizWinMgr VizWin  TrackBall \
+	GLColorbarWidget ErrorReporter ImageSubtabs \
+	ContourEventRouter ContourSubtabs
 
 
 ifneq ($(ARCH),WIN32)

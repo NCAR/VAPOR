@@ -9,7 +9,8 @@ UI_FILES := animationTab vizTab regionTab  \
 	TwoDVariablesGUI TwoDGeometryGUI VariablesWidgetGUI HelloVariablesGUI \
 	statsWindow errMsg plotWindow SeedMeGUI firstTimeUser TFWidgetGUI \
 	GeometryWidgetGUI ColorbarWidgetGUI \
-	ImageAppearanceGUI ImageGeometryGUI ImageVariablesGUI
+	ImageAppearanceGUI ImageGeometryGUI ImageVariablesGUI \
+	ContourAppearanceGUI ContourGeometryGUI ContourVariablesGUI
 
 ifeq ($(BUILD_FLOW),1)
 UI_FILES += fieldAppearanceSubtab seedingSubtab 
