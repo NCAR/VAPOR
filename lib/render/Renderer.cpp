@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2004				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -21,10 +21,13 @@
 #include <cfloat>
 #include <climits>
 #include <limits>
+#include <iomanip>
+#include <sstream>
 
 #include <vapor/glutil.h> // Must be included first!!!
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/GetAppPath.h>
 
 #include <vapor/ViewpointParams.h>
 
@@ -46,6 +49,12 @@ Renderer::Renderer(
 
     _colorbarTexture = 0;
     _timestep = 0;
+    _textObject = NULL;
+
+    vector<string> fpath;
+    fpath.push_back("fonts");
+    _fontFile = GetAppPath("VAPOR", "share", fpath);
+    _fontFile = _fontFile + "//arial.ttf";
 }
 
 RendererBase::RendererBase(
@@ -302,6 +311,7 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]) {
 #endif
 
 int Renderer::makeColorbarTexture() {
+
     if (_colorbarTexture)
         delete _colorbarTexture;
 
@@ -338,7 +348,8 @@ int Renderer::makeColorbarTexture() {
     vector<double> colorbarSize = cbpb->GetSize();
 
     // determine horizontal and vertical line widths in pixels (.02 times image size?)
-    int lineWidth = (int)(0.02 * Min(_imgHgt, _imgWid) + 0.5);
+    //int lineWidth = (int)(0.02*Min(_imgHgt, _imgWid)+0.5);
+    int lineWidth = 2;
 
     //Draw top and bottom
     for (int i = 0; i < _imgWid; i++) {
@@ -363,18 +374,21 @@ int Renderer::makeColorbarTexture() {
         }
     }
     //Draw tics
-    int numtics = cbpb->GetNumTics();
+    int numtics = cbpb->GetNumTicks();
     for (int tic = 0; tic < numtics; tic++) {
         int ticPos = tic * (_imgHgt / numtics) + (_imgHgt / (2 * numtics));
-        //Draw a horizontal line from .35 to .45 width
-        for (int i = (int)(_imgWid * .35); i <= (int)(_imgWid * .45); i++) {
-            for (int j = ticPos - lineWidth / 2; j <= ticPos + lineWidth / 2; j++) {
+        //Draw a horizontal line from .37 to .45 width
+        //for (int i = (int)(_imgWid*.35); i<= (int)( _imgWid*.45); i++){
+        int i, j;
+        for (i = (int)(_imgWid * .37); i <= (int)(_imgWid * .45); i++) {
+            for (j = ticPos - lineWidth / 2; j <= ticPos + lineWidth / 2; j++) {
                 _colorbarTexture[3 * (i + _imgWid * j)] = fgr;
                 _colorbarTexture[1 + 3 * (i + _imgWid * j)] = fgg;
                 _colorbarTexture[2 + 3 * (i + _imgWid * j)] = fgb;
             }
         }
     }
+
     //Draw colors
     //With no tics, use the whole scale
     if (numtics == 0)
@@ -383,7 +397,8 @@ int Renderer::makeColorbarTexture() {
                ((double)(1. - numtics) * (double)_imgHgt);
     double B = mf->getMaxMapValue() - A * (double)_imgHgt * .5 / (double)(numtics);
 
-    for (int line = _imgHgt - 2 * lineWidth; line >= 2 * lineWidth; line--) {
+    //for (int line = _imgHgt-2*lineWidth; line>=2*lineWidth; line--){
+    for (int line = _imgHgt - 2 * lineWidth - 5; line > 2 * lineWidth + 5; line--) {
         float ycoord = A * (float)line + B;
 
         float rgb[3];
@@ -401,6 +416,11 @@ int Renderer::makeColorbarTexture() {
 }
 
 void Renderer::renderColorbar() {
+
+    GLint dims[4] = {0};
+    glGetIntegerv(GL_VIEWPORT, dims);
+    GLint fbWidth = dims[2];
+    GLint fbHeight = dims[3];
 
     float whitecolor[4] = {1., 1., 1., 1.f};
     const RenderParams *rParams = GetActiveParams();
@@ -424,6 +444,7 @@ void Renderer::renderColorbar() {
 
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
+
     //Note that GL reverses y coordinates
     float llx = 2. * cornerPosn[0] - 1.;
     float lly = 2. * (cornerPosn[1] + cbsize[1]) - 1.;
@@ -440,10 +461,138 @@ void Renderer::renderColorbar() {
     glVertex3f(urx, ury, 0.0f);
     glTexCoord2f(1.0f, 0.0f);
     glVertex3f(urx, lly, 0.0f);
+
     glEnd();
     glDisable(GL_TEXTURE_2D);
-    //Reset to default:
+
+    // Draw numeric text annotation
+    //
+    renderColorbarText(cbpb, fbWidth, fbHeight, llx, lly, urx, ury);
+
     glDepthFunc(GL_LESS);
+}
+
+void Renderer::renderColorbarText(ColorbarPbase *cbpb,
+                                  float fbWidth, float fbHeight,
+                                  float llx, float lly, float urx, float ury) {
+
+    const RenderParams *rParams = GetActiveParams();
+    MapperFunction *mf = rParams->GetMapperFunc(rParams->GetVariableName());
+    float numEntries = mf->getNumEntries();
+
+    vector<double> bgc = cbpb->GetBackgroundColor();
+
+    //determine text color; the compliment of the background color:
+    //
+    float fgr = 1.f - bgc[0];
+    float fgg = 1.f - bgc[1];
+    float fgb = 1.f - bgc[2];
+
+    float txtColor[] = {fgr, fgg, fgb, 1.};
+    float bgColor[] = {(float)bgc[0], (float)bgc[1], (float)bgc[2], 0.};
+    int precision = (int)cbpb->GetNumDigits();
+    float dummy[] = {0., 0., 0.}; // Dummy coordinates.  We won't know the correct
+                                  // coords until we know image size.
+
+    // Corners in texture coordinates, to be derived later
+    //
+    float Trx, Tlx, Tly, Tuy;
+
+    float maxWidth = 0;
+    int numtics = cbpb->GetNumTicks();
+    for (int tic = 0; tic < numtics; tic++) {
+        // Find numeric data value associated with our current text label
+        //
+        int mapIndex = (1.f / ((float)numtics * 2.f) + (float)tic / (float)numtics) * numEntries;
+        float textValue = mf->mapIndexToFloat(mapIndex);
+        stringstream ss;
+        ss << fixed << setprecision(precision) << textValue;
+        string textString = ss.str();
+
+        // Generate our text object so we can use proper width/height
+        // values when calculating offsets
+        //
+        if (_textObject != NULL) {
+            delete _textObject;
+            _textObject = NULL;
+        }
+        _textObject = new TextObject();
+        //_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+        _textObject->Initialize(_fontFile,
+                                textString, 20, dummy, 0, txtColor, bgColor);
+        float texWidth = _textObject->getWidth();
+        float texHeight = _textObject->getHeight();
+
+        // llx and lly are in visualizer coordinates between -1 and 1
+        // TextRenderer takes pixel coordinates. Trx and Tuy are the
+        // TextRenderer coords of the colorbar in the pixel coord system.
+        //
+        Trx = (urx + 1) * fbWidth / 2.f;  // right
+        Tlx = (llx + 1) * fbWidth / 2.f;  // left
+        Tly = (lly + 1) * fbHeight / 2.f; // lower
+        Tuy = (ury + 1) * fbHeight / 2.f; // upper
+
+        // Start at lower left corner
+        //
+        float Tx = Tlx;
+        float Ty = Tuy;
+
+        // Calculate Y offset to align with tick marks
+        //
+        Ty -= texHeight / 2.f; // Center the text vertically, at the bottom of the colorbar
+        float ticOffset = (Tly - Tuy) * 1.f / (float)numtics;
+        Ty += ticOffset / 2.f; // Initial offset from bottom of colorbar
+        Ty += ticOffset * tic; // Offset applied per tick mark
+
+        // Calculate X offset to allign with tick marks
+        //
+        float cbWidth = Trx - Tlx;
+        float rightShift = cbWidth * .5;
+        Tx += rightShift;
+
+        // Now that we know the x offset, check if the colorbar box is big enough
+        // to contain the text, and resize the colorbar if not
+        //
+        if (texWidth > maxWidth) {
+            maxWidth = texWidth;
+        }
+        vector<double> size = cbpb->GetSize();
+        // size[0]/2 is the space we have to place text into
+        //
+        if (size[0] / 2.f < maxWidth / fbWidth) {
+            size[0] = 2 * maxWidth / fbWidth;
+            cbpb->SetSize(size);
+        }
+
+        float inCoords[] = {Tx, Ty, 0};
+
+        _textObject->drawMe(inCoords);
+    }
+
+    // Render colorbar title, if any
+    //
+    string title = cbpb->GetTitle();
+    if (title != "") {
+        if (_textObject != NULL) {
+            delete _textObject;
+            _textObject = NULL;
+        }
+        txtColor[0] = bgColor[0];
+        txtColor[1] = bgColor[1];
+        txtColor[2] = bgColor[2];
+        txtColor[3] = 1.f;
+        _textObject = new TextObject();
+        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+                                title, 20, dummy, 0, txtColor, bgColor);
+        Tuy -= _textObject->getHeight();
+        float coords[] = {Tlx, Tuy, 0.f};
+        _textObject->drawMe(coords);
+    }
+
+    if (_textObject != NULL) {
+        delete _textObject;
+        _textObject = NULL;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
