@@ -375,6 +375,7 @@ void MainForm::hookupSignals()
     connect(_editUndoRedoClearAction, SIGNAL(triggered()), this, SLOT(clear()));
     connect(_helpAboutAction, SIGNAL(triggered()), this, SLOT(helpAbout()));
     connect(_dataLoad_MetafileAction, SIGNAL(triggered()), this, SLOT(loadData()));
+    connect(_dataClose_MetafileAction, SIGNAL(triggered()), this, SLOT(closeData()));
     connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
     connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
     connect(_captureMenu, SIGNAL(aboutToShow()), this, SLOT(initCaptureMenu()));
@@ -422,6 +423,7 @@ void MainForm::createMenus()
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
     _File->addAction(_dataLoad_MetafileAction);
+    _File->addAction(_dataClose_MetafileAction);
     _File->addAction(_dataImportWRF_Action);
     _File->addAction(_dataImportCF_Action);
     _File->addAction(_fileNew_SessionAction);
@@ -492,6 +494,7 @@ void MainForm::createActions()
     _helpAboutAction->setEnabled(true);
 
     _dataLoad_MetafileAction = new QAction(this);
+    _dataClose_MetafileAction = new QAction(this);
     _dataImportWRF_Action = new QAction(this);
     _dataImportCF_Action = new QAction(this);
     _fileNew_SessionAction = new QAction(this);
@@ -601,6 +604,8 @@ void MainForm::languageChange()
     _dataLoad_MetafileAction->setText(tr("Open a VDC in Current Session"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
+    _dataClose_MetafileAction->setText(tr("Close a VDC in Current Session"));
+    _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
     _dataImportWRF_Action->setText(tr("Import WRF-ARW files in current session"));
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
     _dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
@@ -879,6 +884,8 @@ void MainForm::loadData(string fileName)
 
     loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.*)", "vdc", false);
 }
+
+void MainForm::closeData(string fileName) { cout << "how do we close a dataset?" << endl; }
 
 // import WRF data into current session
 //

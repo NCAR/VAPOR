@@ -77,7 +77,7 @@ public:
     //
     static const string &GetDateString()
     {
-        _dateString.assign("Wed Jun 14 16:30:37 MDT 2017");
+        _dateString.assign("Thu Aug 31 15:57:28 MDT 2017");
         return (_dateString);
     }
 
