@@ -51,6 +51,8 @@ class Observee {
 		// an update to the Range/Observee.  
 		bool notifyObservers();
 
+		void deleteObservers();
+
 	protected:
 		//! Protect the constructor.  This should only be
 		//! inherited.

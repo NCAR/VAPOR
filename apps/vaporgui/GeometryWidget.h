@@ -10,7 +10,6 @@ namespace VAPoR {
 	class DataMgr;
 }
 
-
 class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 	
 	Q_OBJECT
