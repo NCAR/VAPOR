@@ -25,6 +25,7 @@
 #include <vapor/RenderParams.h>
 #include "RenderEventRouter.h"
 #include "ColorbarWidgetGUI.h"
+#include "RangeCombos.h"
 
 namespace VAPoR {
 class ColorbarPbase;
@@ -66,24 +67,35 @@ class ColorbarWidget : public QFrame, public Ui_ColorbarWidgetGUI {
   signals:
 
   protected slots:
-    void colorbarTextChanged(const QString &);
-    void enabledChange();
+    void xPosChanged(double);
+    void yPosChanged(double);
+    void xSizeChanged(double);
+    void ySizeChanged(double);
+    void fontSizeChanged(int);
+    void fontDigitsChanged(int);
+    void numTicksChanged(int);
+
+    void titleChanged();
+    void enableDisable(int);
     void setBackgroundColor();
     void applyToAll();
-    void colorbarReturnPressed();
 
   private:
     RenderEventRouter *_eventRouter;
-    void disableSignals(bool disabled);
+    void connectWidgets();
 
     bool _textChangedFlag;
     VAPoR::ParamsMgr *_paramsMgr;
     VAPoR::DataMgr *_dataMgr;
-    VAPoR::RenderParams *_rParams;
+    VAPoR::ColorbarPbase *_cbPbase;
 
-    VAPoR::ColorbarPbase *GetActiveParams() const {
-        return (_rParams->GetColorbarPbase());
-    }
+    Combo *_xPosCombo;
+    Combo *_yPosCombo;
+    Combo *_xSizeCombo;
+    Combo *_ySizeCombo;
+    Combo *_fontSizeCombo;
+    Combo *_fontDigitsCombo;
+    Combo *_numTicksCombo;
 };
 
-#endif //COLORBARSETTINGS_H
+#endif //COLORBARWIDGET_H
