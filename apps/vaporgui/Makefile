@@ -19,7 +19,7 @@ FILES = \
 	AppSettingsParams GUIStateParams MouseModeParams StartupParams \
 	main MainForm VizWin VizWinMgr \
 	TabManager TrackBall GLColorbarWidget ErrorReporter \
-	StatisticsParams PlotParams
+	StatisticsParams PlotParams \
 	ContourEventRouter
 
 QT_HEADERS := \
