@@ -182,6 +182,7 @@ public:
     int Paint(string name, bool force = false);
 
     //! Activate or Deactivate a renderer
+
     //!
     //! Create and activate a new renderer instance.
     //! This renderer instance is inserted in the queue of active renderers
@@ -327,27 +328,43 @@ public:
     //
     bool RenderLookup(string instName, string &winName, string &dataSetName, string &rendererType) const;
 
-#ifdef DEAD
     //! Draw 2D text on the screen
-    //!
-    //! \note Not yet implemented
     //!
     //! This method provides a simple interface for rendering text on
     //! the screen. No text will actually be rendered until after Paint()
     //! is called. Text rendering will occur after all active renderers
     //! associated with \p viz have completed rendering.
     //!
-    //! \param[in] viz A visualizer handle returned by NewVisualizer()
+    //! \param[in] winName A visualizer handle returned by NewVisualizer()
+    //! \param[in] text The text to render
     //! \param[in] x X coordinate in pixels coordinates of lower left
     //! corner of rectangle bounding the text.
     //! \param[in] y Y coordinate in pixels coordinates of lower left
     //! corner of rectangle bounding the text.
-    //! \param[in] font A string specifying the font name
-    //! \param[in] size Font size in points
-    //! \param[in] text The text to render
+    //! \params[in] size Font size to be used
+    //! \params[in] color Three tuple describing rgj values for the billboard
     //
-    int DrawText(int viz, int x, int y, string font, int size, string text);
-#endif
+    int DrawText(string winName, string text, int x, int y, int size, float color[3], int type = 0);
+
+    //! Draw 2D text to all visualizers
+    //!
+    //! This method provides a simple interface for rendering text on
+    //! all Visualizers. No text will actually be rendered until after Paint()
+    //! is called. Text rendering will occur after all active renderers
+    //! associated with \p viz have completed rendering.
+    //!
+    //! \param[in] text The text to render
+    //! \param[in] x X coordinate in pixels coordinates of lower left
+    //! corner of rectangle bounding the text.
+    //! \param[in] y Y coordinate in pixels coordinates of lower left
+    //! corner of rectangle bounding the text.
+    //! \params[in] size Font size to be used
+    //! \params[in] color Three tuple describing rgj values for the billboard
+    //
+    int DrawText(string text, int x, int y, int size, float color[3], int type = 0);
+
+    int ClearText();
+    int ClearText(string winName);
 
     //! Undo the last session state change
     //! Restores the state of the session to what it was prior to the

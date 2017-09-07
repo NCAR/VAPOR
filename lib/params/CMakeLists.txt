@@ -19,6 +19,7 @@ add_library (params SHARED
 	HelloParams.cpp
 	ImageParams.cpp
 	TFInterpolator.cpp
+	ContourParams.cpp
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
