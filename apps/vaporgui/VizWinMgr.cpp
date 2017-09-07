@@ -56,6 +56,7 @@
 #include "TwoDDataEventRouter.h"
 #include "ImageEventRouter.h"
 #include "BarbEventRouter.h"
+#include "ContourEventRouter.h"
 #ifdef	DEAD
 #include "imageeventrouter.h"
 //#include "arroweventrouter.h"
@@ -160,6 +161,10 @@ void VizWinMgr::createAllDefaultTabs() {
 
 	parent = TabManager::getInstance()->GetSubTabWidget(0);
 	er = new ImageEventRouter(parent, _controlExec);
+	installTab(er->GetType(), 0, er);
+
+	parent = TabManager::getInstance()->GetSubTabWidget(0);
+	er = new ContourEventRouter(parent, this, _controlExec);
 	installTab(er->GetType(), 0, er);
 
 	//set up widgets in tabs:
