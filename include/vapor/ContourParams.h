@@ -46,12 +46,13 @@ class PARAMS_API ContourParams : public RenderParams {
         return false;
     }
 
-    int GetNumIsovalues() const {
-        return (int)GetValueDouble(_numIsovaluesTag, 1.0);
+    int GetNumContours() const {
+        return (int)GetValueDouble(_numContoursTag, 1.0);
     }
 
-    void SetNumIsovalues(int num) {
-        SetValueDouble(_numIsovaluesTag, "Number of isovalues", num);
+    void SetNumContours(int num) {
+        cout << "Internal params SetNumContours" << num << endl;
+        SetValueDouble(_numContoursTag, "Number of contours", (double)num);
     }
 
     //! Determine line thickness in voxels
@@ -64,31 +65,72 @@ class PARAMS_API ContourParams : public RenderParams {
         SetValueDouble(_thicknessScaleTag, "Contour thickness", val);
     }
 
-    void GetLineColor(float color[3]) {
-        vector<double> defaultVec;
-        defaultVec.push_back(1.f);
-        defaultVec.push_back(0.f);
-        defaultVec.push_back(0.f);
-        GetValueDoubleVec(_lineColorTag, defaultVec);
-        color[0] = 255.f; //defaultVec[0];
-        color[1] = defaultVec[1];
-        color[2] = defaultVec[2];
+    double GetContourMin() const {
+        return (GetValueDouble(_contourMinTag, 0.f));
+    }
+
+    void SetContourMin(double val) {
+        SetValueDouble(_contourMinTag, "Contour minimum value", val);
+    }
+
+    double GetContourSpacing() const {
+        return (GetValueDouble(_contourSpacingTag, 1.f));
+    }
+
+    void SetContourSpacing(double val) {
+        SetValueDouble(_contourSpacingTag, "Spacing between contours", val);
+    }
+
+    void GetLineColor(int lineNum, float color[3]) {
+
+        string varName = GetVariableName();
+        TransferFunction *tf = 0;
+        tf = (TransferFunction *)GetMapperFunc(varName);
+        assert(tf);
+
+        vector<double> vals = GetValueDoubleVec(_contoursTag);
+        double val = vals[lineNum];
+
+        tf->rgbValue(val, color);
+
+        //	vector<double> defaultVec;
+        //	defaultVec.push_back(1.f);
+        //	defaultVec.push_back(0.f);
+        //	defaultVec.push_back(0.f);
+        //	GetValueDoubleVec(_lineColorTag, defaultVec);
+        //	color[0] = 255.f;//defaultVec[0];
+        //	color[1] = defaultVec[1];
+        //	color[2] = defaultVec[2];
     }
 
     void SetLineColor(vector<double> vec) {
         SetValueDoubleVec(_lineColorTag, "Line color", vec);
     }
 
+    void SetLockToTF(bool lock) {
+        string l = "false";
+        if (lock) {
+            l = "true";
+        }
+        SetValueString(_lockToTFTag, "Lock settings to TF", l);
+    }
+
+    bool GetLockToTF() {
+        if (GetValueString(_lockToTFTag, "true") == "true") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     vector<double> GetIsovalues() const {
         vector<double> vals;
-        vals = GetValueDoubleVec(_isovalsTag, vals);
-        vals.clear();
-        vals.push_back(20.f);
+        vals = GetValueDoubleVec(_contoursTag);
         return vals;
     }
 
     void SetIsovalues(vector<double> vals) {
-        SetValueDoubleVec(_isovalsTag, "Isovalue list", vals);
+        SetValueDoubleVec(_contoursTag, "Isovalue list", vals);
     }
 
     // Get static string identifier for this params class
@@ -118,7 +160,6 @@ class PARAMS_API ContourParams : public RenderParams {
     }
 
     bool GetTextEnabled() const {
-        bool val;
         if (GetValueString(_textEnabledTag, "false") == "false") {
             return false;
         } else {
@@ -130,12 +171,15 @@ class PARAMS_API ContourParams : public RenderParams {
     void _init();
     static const string _thicknessScaleTag;
     static const string _varsAre3dTag;
-    static const string _numIsovaluesTag;
+    static const string _numContoursTag;
     static const string _lineColorTag;
-    static const string _isovalsTag;
+    static const string _contoursTag;
     static const string _numDigitsTag;
     static const string _textDensityTag;
     static const string _textEnabledTag;
+    static const string _contourMinTag;
+    static const string _contourSpacingTag;
+    static const string _lockToTFTag;
 
 }; //End of Class ContourParams
 }; // namespace VAPoR
