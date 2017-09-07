@@ -53,6 +53,7 @@ public:
 	void loadTF(string varname);
 
 	void loadInstalledTF(string varname);
+	void getRange(float range[2], float values[2]);
 
 private slots:
 	void fileSaveTF();
@@ -66,7 +67,6 @@ private slots:
 	void setSingleColor();
 
 private:
-	void getRange(float range[2], float values[2]);
 	void connectWidgets();
 	void updateSliders();
 	void updateAutoUpdateHistoCheckbox();

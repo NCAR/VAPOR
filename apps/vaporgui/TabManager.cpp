@@ -157,6 +157,7 @@ void TabManager::InstallWidgets() {
 	//
 	for (int i = 0; i< _widgets[0].size(); i++){
 		string tag = _widgetTags[0][i];
+		cout << "ADDING " << tag << endl;
 		_renderHolder->AddWidget(_widgets[0][i],tag.c_str(), tag);
 		_widgets[0][i]->hide();
 	}

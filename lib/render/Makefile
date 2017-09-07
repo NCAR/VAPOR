@@ -10,8 +10,9 @@ FILES = \
 	jfilewrite Visualizer  ControlExecutive \
 	VizFeatureRenderer textRenderer\
 	ImageRenderer \
-	GeoImageTMS GeoImageGeoTiff GeoImage GeoTileMercator \
-	GeoTile GeoTileEquirectangular
+	GeoImageTMS GeoImageGeoTiff GeoImage \
+	GeoTileMercator GeoTile GeoTileEquirectangular \
+	ContourRenderer
 
 
 ifeq ($(BUILD_FLOW),1)

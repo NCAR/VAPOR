@@ -11,7 +11,7 @@ FILES = \
 	Viewpoint ViewpointParams regionparams \
 	ParamsMgr DataStatus VizFeatureParams \
 	HelloParams TFInterpolator \
-  ImageParams
+  ImageParams ContourParams
 
 #arrowparams
 
