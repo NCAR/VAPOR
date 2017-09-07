@@ -31,6 +31,7 @@
 #include <vapor/DataMgrUtils.h>
 #include <vapor/MapperFunction.h>
 #include <vapor/OpacityMap.h>
+#include <vapor/ContourParams.h>
 #include "OpacityWidget.h"
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
@@ -377,14 +378,16 @@ void MappingFrame::Update(DataMgr *dataMgr,
 		//	   _isoSlider->setIsoValue(xDataToWorld(_isoVal));
 	}
 	else if (_isolineSlidersEnabled){
+		cout << "HeHERE" << endl;
 		//Synchronize sliders with isovalues
-#ifdef	DEAD
-		vector<double> isovals = ((IsolineParams*) rParams)->GetIsovalues();
+//#ifdef	DEAD
+		vector<double> isovals = ((ContourParams*) rParams)->GetIsovalues();
 		setIsolineSliders(isovals);
 		for (int i = 0; i<isovals.size(); i++){
+			cout << "Isoval " << isovals[i] << endl;
 			_isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
 		}
-#endif
+//#endif
 	}
 
 	_domainSlider->setDomain(xDataToWorld(getMinDomainBound()), 

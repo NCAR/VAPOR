@@ -110,10 +110,6 @@ void RenderHolder::newRenderer() {
 
 	vector <string> renderClasses = _controlExec->GetAllRenderClasses();
 
-	for (int i=0; i<renderClasses.size(); ++i) {
-		cout << "renClass: " << renderClasses[i] << endl;;
-	}
-
 	// Launch a dialog to select a renderer type, visualizer, name
 	// Then insert a horizontal line with text and checkbox.
 	// The new line becomes selected.
