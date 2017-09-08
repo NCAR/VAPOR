@@ -23,7 +23,7 @@ option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
 option (BUILD_TEST_APPS "Build test applications" OFF)
-option (INSTALL_DLL "Include third party library DLLs when building installer" OFF)
+option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" OFF)
 
 include_directories ("${PROJECT_BINARY_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
@@ -98,7 +98,7 @@ if (WIN32)
 	set (PRE_UNINSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${PRE_UNINSTALL_LOCAL_PATH}")
 	configure_file ("${PRE_UNINSTALL_LOCAL_PATH}.in" "${PRE_UNINSTALL_PATH}" @ONLY)
 
-	if (${INSTALL_DLL})
+	if (${GENERATE_FULL_INSTALLER})
 		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
 		install (
@@ -106,7 +106,7 @@ if (WIN32)
 			DESTINATION ${INSTALL_BIN_DIR}
 			COMPONENT Dependencies
 			)
-	endif (${INSTALL_DLL})
+	endif (${GENERATE_FULL_INSTALLER})
 
 	set (CPACK_NSIS_MODIFY_PATH ON)
 	set (CPACK_NSIS_URL_INFO_ABOUT "https://www.vapor.ucar.edu")
