@@ -20,7 +20,7 @@
 #ifndef HELLORENDERER_H
 #define HELLORENDERER_H
 
-#include <vapor/StructuredGrid.h>
+#include <vapor/Grid.h>
 #include <vapor/Renderer.h>
 #include <vapor/HelloParams.h>
 
