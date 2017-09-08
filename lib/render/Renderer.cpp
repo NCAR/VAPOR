@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2004				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -21,10 +21,13 @@
 #include <cfloat>
 #include <climits>
 #include <limits>
+#include <iomanip>
+#include <sstream>
 
 #include <vapor/glutil.h>	// Must be included first!!!
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/GetAppPath.h>
 
 #include <vapor/ViewpointParams.h>
 
@@ -48,7 +51,13 @@ Renderer::Renderer(
 	//
 	
 	_colorbarTexture = 0;
-    _timestep = 0;
+	_timestep = 0;
+	_textObject = NULL;
+
+	vector<string> fpath;
+	fpath.push_back("fonts");
+	_fontFile = GetAppPath("VAPOR", "share", fpath);
+	_fontFile = _fontFile + "//arial.ttf";
 }
 
 RendererBase::RendererBase(
@@ -58,14 +67,14 @@ RendererBase::RendererBase(
 	//Establish the data sources for the rendering:
 	//
 	_paramsMgr = pm;
-    _winName = winName;
-    _dataSetName = dataSetName;
-    _paramsType = paramsType;
-    _classType = classType;
+	_winName = winName;
+	_dataSetName = dataSetName;
+	_paramsType = paramsType;
+	_classType = classType;
 	_instName = instName;
 	_dataMgr = dataMgr;
 
-    _shaderMgr = NULL;
+	_shaderMgr = NULL;
 	_glInitialized = false;
 
 
@@ -83,7 +92,7 @@ Renderer::~Renderer()
 
 
 int RendererBase::initializeGL(ShaderMgr *sm) {
-    _shaderMgr = sm;
+	_shaderMgr = sm;
 	int rc = _initializeGL();
 	if (rc<0) {
 		return(rc);
@@ -133,7 +142,7 @@ void Renderer::enableClippingPlanes(
 	const RenderParams *rParams = GetActiveParams();
 
 	glMatrixMode(GL_MODELVIEW);
-    	glPushMatrix();
+		glPushMatrix();
 
 	vector<double> scales = rParams->GetStretchFactors();
    	glScaled(scales[0], scales[1], scales[2]);
@@ -174,16 +183,16 @@ void Renderer::enableFullClippingPlanes() {
 
 	const RenderParams *rParams = GetActiveParams();
 
-    size_t ts = rParams->GetCurrentTimestep();
+	size_t ts = rParams->GetCurrentTimestep();
 
 	vector <string> varnames = rParams->GetFieldVariableNames();
 	varnames.push_back(rParams->GetVariableName());
 	
-    vector <double> minExts, maxExts;
+	vector <double> minExts, maxExts;
 	vector <int> axes;
-    DataMgrUtils::GetExtents(
+	DataMgrUtils::GetExtents(
 		_dataMgr, ts, varnames, minExts, maxExts, axes
-    );
+	);
 
 	enableClippingPlanes(minExts, maxExts, axes);
 }
@@ -222,7 +231,7 @@ void Renderer::disableClippingPlanes(){
 #ifdef	DEAD
 void Renderer::enableRegionClippingPlanes() {
 
-    size_t timeStep = GetCurrentTimestep();
+	size_t timeStep = GetCurrentTimestep();
 
 	RegionParams* myRegionParams = _paramsMgr->GetRegionParams();
 
@@ -312,6 +321,7 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]){
 #endif
 
 int Renderer::makeColorbarTexture(){
+
 	if (_colorbarTexture) delete _colorbarTexture;
 
 	const RenderParams *rParams = GetActiveParams();
@@ -345,7 +355,8 @@ int Renderer::makeColorbarTexture(){
 	vector<double> colorbarSize = cbpb->GetSize();
 	
 	// determine horizontal and vertical line widths in pixels (.02 times image size?)
-	int lineWidth = (int)(0.02*Min(_imgHgt, _imgWid)+0.5);
+	//int lineWidth = (int)(0.02*Min(_imgHgt, _imgWid)+0.5);
+	int lineWidth = 2;
 
 	//Draw top and bottom
 	for (int i = 0; i< _imgWid; i++){
@@ -370,18 +381,21 @@ int Renderer::makeColorbarTexture(){
 		}
 	}
 	//Draw tics
-	int numtics = cbpb->GetNumTics();
+	int numtics = cbpb->GetNumTicks();
 	for (int tic = 0; tic < numtics; tic++){
 		int ticPos = tic*(_imgHgt/numtics)+(_imgHgt/(2*numtics));
-		//Draw a horizontal line from .35 to .45 width
-		for (int i = (int)(_imgWid*.35); i<= (int)( _imgWid*.45); i++){
-			for (int j = ticPos - lineWidth/2; j<= ticPos + lineWidth/2; j++){
+		//Draw a horizontal line from .37 to .45 width
+		//for (int i = (int)(_imgWid*.35); i<= (int)( _imgWid*.45); i++){
+		int i, j;
+		for (i = (int)(_imgWid*.37); i<= (int)( _imgWid*.45); i++){
+			for (j = ticPos - lineWidth/2; j<= ticPos + lineWidth/2; j++){
 				_colorbarTexture[3*(i+_imgWid*j)] = fgr;
 				_colorbarTexture[1+3*(i+_imgWid*j)] = fgg;
 				_colorbarTexture[2+3*(i+_imgWid*j)] = fgb;
 			}
 		}
 	}
+
 	//Draw colors
 	//With no tics, use the whole scale
 	if (numtics == 0) numtics = 1000;
@@ -389,9 +403,10 @@ int Renderer::makeColorbarTexture(){
 		((double)(1.-numtics)*(double)_imgHgt);
 	double B = mf->getMaxMapValue() - A*(double)_imgHgt*.5/(double)(numtics);
 
-	for (int line = _imgHgt-2*lineWidth; line>=2*lineWidth; line--){
+	//for (int line = _imgHgt-2*lineWidth; line>=2*lineWidth; line--){
+	for (int line = _imgHgt-2*lineWidth-5; line>2*lineWidth+5; line--){
 		float ycoord = A*(float)line + B;
-        
+		
 		float rgb[3];
 		unsigned char rgbByte;
 		mf->rgbValue(ycoord,rgb);
@@ -408,6 +423,11 @@ int Renderer::makeColorbarTexture(){
 
 void Renderer::renderColorbar(){
 	
+	GLint dims[4] = {0};
+	glGetIntegerv(GL_VIEWPORT, dims);
+	GLint fbWidth = dims[2];
+	GLint fbHeight = dims[3];
+
 	float whitecolor[4] = {1.,1.,1.,1.f};
 	const RenderParams *rParams = GetActiveParams();
 	ColorbarPbase* cbpb = rParams->GetColorbarPbase();
@@ -417,10 +437,10 @@ void Renderer::renderColorbar(){
 	glColor4fv(whitecolor);
 	
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	//Disable z-buffer compare, always overwrite:
 	glDepthFunc(GL_ALWAYS);
-    glEnable( GL_TEXTURE_2D);
+	glEnable( GL_TEXTURE_2D);
 	
 	//create a polygon appropriately positioned in the scene.  It's inside the unit cube--
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE,
@@ -428,6 +448,7 @@ void Renderer::renderColorbar(){
 
 	vector<double> cornerPosn = cbpb->GetCornerPosition();
 	vector<double> cbsize = cbpb->GetSize();
+
 	//Note that GL reverses y coordinates
 	float llx = 2.*cornerPosn[0] - 1.;
 	float lly = 2.*(cornerPosn[1]+cbsize[1]) -1.;
@@ -440,39 +461,188 @@ void Renderer::renderColorbar(){
 	glTexCoord2f(0.0f, 1.0f); glVertex3f(llx, ury, 0.0f);
 	glTexCoord2f(1.0f, 1.0f); glVertex3f(urx, ury, 0.0f);
 	glTexCoord2f(1.0f, 0.0f); glVertex3f(urx, lly, 0.0f);
+
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
-	//Reset to default:
+		
+	// Draw numeric text annotation
+	//
+	renderColorbarText(cbpb, fbWidth, fbHeight, llx, lly, urx, ury);
+
 	glDepthFunc(GL_LESS);
 }
 
 
+void Renderer::renderColorbarText(ColorbarPbase* cbpb, 
+			float fbWidth,	float fbHeight, 
+			float llx, float lly, float urx, float ury) {
+
+	const RenderParams *rParams = GetActiveParams();
+	MapperFunction* mf = rParams->GetMapperFunc(rParams->GetVariableName());
+	float numEntries = mf->getNumEntries();
+
+	vector<double> bgc = cbpb->GetBackgroundColor();
+
+	//determine text color; the compliment of the background color:
+	//
+	float fgr = 1.f - bgc[0];
+	float fgg = 1.f - bgc[1];
+	float fgb = 1.f - bgc[2];
+
+	float txtColor[] = {fgr, fgg, fgb, 1.};
+	float bgColor[] = {(float)bgc[0], (float)bgc[1], (float)bgc[2], 0.};
+	int precision = (int)cbpb->GetNumDigits();
+	float dummy[] = {0.,0.,0.}; // Dummy coordinates.  We won't know the correct 
+								// coords until we know image size.
+
+	// Corners in texture coordinates, to be derived later
+	//
+	float Trx, Tlx, Tly, Tuy;
+
+	float maxWidth = 0;
+	int numtics = cbpb->GetNumTicks();
+	for (int tic = 0; tic < numtics; tic++){
+		// Find numeric data value associated with our current text label
+		//
+		int mapIndex = (1.f/((float)numtics*2.f) + (float)tic/(float)numtics)
+			* numEntries;
+		float textValue = mf->mapIndexToFloat(mapIndex);
+		stringstream ss;
+		ss << fixed << setprecision(precision) << textValue;
+		string textString = ss.str();
+
+		// Generate our text object so we can use proper width/height
+		// values when calculating offsets
+		//
+		if (_textObject!=NULL) {
+			delete _textObject;
+			_textObject = NULL;
+		}
+		_textObject = new TextObject();
+		//_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+		_textObject->Initialize(_fontFile,
+	   		 textString, 20, dummy, 0, txtColor, bgColor);
+		float texWidth = _textObject->getWidth();
+		float texHeight = _textObject->getHeight();
+
+
+		// llx and lly are in visualizer coordinates between -1 and 1
+		// TextRenderer takes pixel coordinates. Trx and Tuy are the 
+		// TextRenderer coords of the colorbar in the pixel coord system.
+		//
+		Trx = (urx+1)*fbWidth/2.f;  // right
+		Tlx = (llx+1)*fbWidth/2.f;  // left
+		Tly = (lly+1)*fbHeight/2.f; // lower
+		Tuy = (ury+1)*fbHeight/2.f; // upper
+
+		// Start at lower left corner
+		//
+		float Tx = Tlx;
+		float Ty = Tuy;
+
+		// Calculate Y offset to align with tick marks
+		//
+		Ty -= texHeight/2.f;  // Center the text vertically, at the bottom of the colorbar
+		float ticOffset = (Tly-Tuy) * 1.f / (float)numtics;
+		Ty += ticOffset/2.f;  // Initial offset from bottom of colorbar
+		Ty += ticOffset*tic;  // Offset applied per tick mark
+
+
+		// Calculate X offset to allign with tick marks
+		//
+		float cbWidth = Trx - Tlx;
+		float rightShift = cbWidth * .5;
+		Tx += rightShift;
+
+		// Now that we know the x offset, check if the colorbar box is big enough
+		// to contain the text, and resize the colorbar if not
+		//
+		if (texWidth > maxWidth) {
+			maxWidth = texWidth;
+		}
+		vector<double> size = cbpb->GetSize();
+		// size[0]/2 is the space we have to place text into
+		//
+		if (size[0]/2.f < maxWidth/fbWidth) {
+			size[0] = 2*maxWidth/fbWidth;
+			cbpb->SetSize(size);
+		}
+
+		float inCoords[] = {Tx, Ty, 0};
+
+		_textObject->drawMe(inCoords);
+	}
+
+	// Render colorbar title, if any
+	//
+	string title = cbpb->GetTitle();
+	if (title != "") {
+		if (_textObject!=NULL) {
+			delete _textObject;
+			_textObject = NULL;
+		}
+		txtColor[0] = bgColor[0];
+		txtColor[1] = bgColor[1];
+		txtColor[2] = bgColor[2];
+		txtColor[3] = 1.f;
+		_textObject = new TextObject();
+		_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+	   		 title, 20, dummy, 0, txtColor, bgColor);
+		Tuy -= _textObject->getHeight();
+		float coords[] = {Tlx, Tuy, 0.f};
+		_textObject->drawMe(coords);
+		
+	}
+
+	if (_textObject!=NULL) {
+		delete _textObject;
+		_textObject = NULL;
+	}
+}
+		
 //////////////////////////////////////////////////////////////////////////
 //
 // RendererFactory Class
 //
 /////////////////////////////////////////////////////////////////////////
 
+RendererFactory *RendererFactory::Instance() {
+	static RendererFactory instance;
+	return &instance;
+ }
+
+ void RendererFactory::RegisterFactoryFunction(
+	string myName, string myParamsName,
+	function<Renderer*(
+		const ParamsMgr *, string, string, string, string, DataMgr *
+	)> classFactoryFunction) 
+ {
+
+	// register the class factory function
+	_factoryFunctionRegistry[myName] = classFactoryFunction;
+	_factoryMapRegistry[myName] = myParamsName;
+ }
+
 
 Renderer *RendererFactory::CreateInstance(
 	const ParamsMgr *pm, string winName,  string dataSetName,
 	string classType, string instName, DataMgr *dataMgr
 ) {
-    Renderer * instance = NULL;
+	Renderer * instance = NULL;
 
-    // find classType in the registry and call factory method.
-    //
-    auto it = _factoryFunctionRegistry.find(classType);
-    if(it != _factoryFunctionRegistry.end()) {
-        instance = it->second(
+	// find classType in the registry and call factory method.
+	//
+	auto it = _factoryFunctionRegistry.find(classType);
+	if(it != _factoryFunctionRegistry.end()) {
+		instance = it->second(
 			pm, winName, dataSetName, classType, instName, dataMgr
 		);
 	}
 
-    if(instance != NULL)
-        return instance;
-    else
-        return NULL;
+	if(instance != NULL)
+		return instance;
+	else
+		return NULL;
 }
 
 string RendererFactory::GetRenderClassFromParamsClass(
@@ -514,3 +684,7 @@ vector <string> RendererFactory::GetFactoryNames() const {
 	}
 	return(names);
 }
+
+RendererFactory::RendererFactory() {}
+RendererFactory::RendererFactory(const RendererFactory &) { }
+RendererFactory &RendererFactory::operator=(const RendererFactory &) { return *this; }

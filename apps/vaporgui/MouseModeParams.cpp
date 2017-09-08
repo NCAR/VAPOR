@@ -28,12 +28,12 @@
 #include <vector>
 #include <string>
 
-#include "../../vaporgui/images/wheel.xpm"
-#include "../../vaporgui/images/twoDData.xpm"
-#include "../../vaporgui/images/twoDImage.xpm"
-#include "../../vaporgui/images/cube.xpm"
-#include "../../vaporgui/images/arrowrake.xpm"
-#include "../../vaporgui/images/isoline.xpm"
+#include "../../apps/vaporgui/images/wheel.xpm"
+#include "../../apps/vaporgui/images/twoDData.xpm"
+#include "../../apps/vaporgui/images/twoDImage.xpm"
+#include "../../apps/vaporgui/images/cube.xpm"
+#include "../../apps/vaporgui/images/arrowrake.xpm"
+#include "../../apps/vaporgui/images/isoline.xpm"
 #include "MouseModeParams.h"
 
 
