@@ -33,7 +33,7 @@ ControlExec::~ControlExec() {
 #ifdef DEBUG
     const vector<XmlNode *> &nodes = XmlNode::GetAllocatedNodes();
     for (int i = 0; i < nodes.size(); i++) {
-        cout << "   " << nodes[i]->GetTag() << " " << nodes[i] << endl;
+        cout << "   " << nodes[i]->GetTag() << " " << XmlNode::streamOut(cout, nodes[i]) << endl;
     }
 #endif
 
@@ -47,7 +47,7 @@ ControlExec::~ControlExec() {
 #ifdef DEBUG
 
     for (int i = 0; i < nodes.size(); i++) {
-        cout << "   " << nodes[i]->GetTag() << " " << nodes[i] << endl;
+        cout << "   " << nodes[i]->GetTag() << " " << XmlNode::streamOut(cout, nodes[i]) << endl;
     }
 #endif
 }
@@ -110,6 +110,7 @@ int ControlExec::InitializeViz(string winName) {
         SetErrMsg(
             "Failed to initialize GLSL shaders in dir %s",
             shaderPath.c_str());
+        printf("%s\n", GetErrMsg());
         delete shaderMgr;
         return (-1);
     }
@@ -545,7 +546,7 @@ int ControlExec::SaveSession(string filename) {
     }
 
     const XmlNode *node = _paramsMgr->GetXMLRoot();
-    fileout << *node;
+    XmlNode::streamOut(fileout, *node);
     if (fileout.bad()) {
         SetErrMsg("Unable to write output session file : %M");
         return (-1);
@@ -597,4 +598,51 @@ bool ControlExec::RenderLookup(
 
     return (_paramsMgr->RenderParamsLookup(
         instName, winName, dataSetName, paramsType));
+}
+
+int ControlExec::DrawText(string winName, string text,
+                          int x, int y, int size, float color[3], int type) {
+    Visualizer *v = getVisualizer(winName);
+    if (v == NULL) {
+        string msg = "Could not get Visualizer " + winName;
+        SetErrMsg(msg.c_str());
+        return -1;
+    }
+
+    v->DrawText(text, x, y, size, color, type);
+
+    return 0;
+}
+
+int ControlExec::DrawText(string text, int x,
+                          int y, int size, float color[3], int type) {
+    vector<string> visNames = GetVisualizerNames();
+    for (int i = 0; i < visNames.size(); i++) {
+        cout << "Calling DrawText on " << visNames[i] << endl;
+        DrawText(visNames[i], text, x, y, size, color, type);
+    }
+
+    return 0;
+}
+
+int ControlExec::ClearText(string winName) {
+    Visualizer *v = getVisualizer(winName);
+    if (v == NULL) {
+        string msg = "Could not get Visualizer " + winName;
+        SetErrMsg(msg.c_str());
+        return -1;
+    }
+
+    v->ClearText();
+
+    return 0;
+}
+
+int ControlExec::ClearText() {
+    vector<string> visNames = GetVisualizerNames();
+    for (int i = 0; i < visNames.size(); i++) {
+        ClearText(visNames[i]);
+    }
+
+    return 0;
 }

@@ -1,7 +1,7 @@
 #ifndef TFWIDGET_H
 #define TFWIDGET_H
 
-#include "TFWidgetGUI.h"
+#include "ui_TFWidgetGUI.h"
 #include "EventRouter.h"
 #include "RangeCombos.h"
 
@@ -52,6 +52,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadTF(string varname);
 
     void loadInstalledTF(string varname);
+    void getRange(float range[2], float values[2]);
 
   private slots:
     void fileSaveTF();
@@ -65,7 +66,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void setSingleColor();
 
   private:
-    void getRange(float range[2], float values[2]);
     void connectWidgets();
     void updateSliders();
     void updateAutoUpdateHistoCheckbox();
