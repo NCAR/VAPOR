@@ -120,7 +120,7 @@ namespace DataMgrUtils {
  //! requested if the requested accuracy is not available
  //! \param[in/out] *lod : requested lod may be reduced if only 
  //! a lower lod is available.
- //! \param[out] grid is a vector of StructuredGrid* pointers, one 
+ //! \param[out] grid is a vector of Grid* pointers, one 
  //! for each variable
  //
  int GetGrids(
@@ -131,25 +131,25 @@ namespace DataMgrUtils {
 	bool useLowerAccuracy,
 	int* refLevel, 
 	int* lod, 
-	std::vector <StructuredGrid *> &grids
+	std::vector <Grid *> &grids
  );
 
  int GetGrids(
 	DataMgr *dataMgr, size_t ts, string varname, 
 	const vector <double> &minExtsReq, const vector <double> &maxExtsReq,
-	bool useLowerAccuracy, int* refLevel, int* lod, StructuredGrid ** gridptr
+	bool useLowerAccuracy, int* refLevel, int* lod, Grid ** gridptr
  );
 
  int GetGrids(
 	DataMgr *dataMgr,
 	size_t ts, const vector<string>& varnames,
 	bool useLowerAccuracy, int* refLevel, int* lod, 
-	std::vector <StructuredGrid *> &grids
+	std::vector <Grid *> &grids
  );
 
  int GetGrids(
 	DataMgr *dataMgr, size_t ts, string varname, 
-	bool useLowerAccuracy, int* refLevel, int* lod, StructuredGrid ** gridptr
+	bool useLowerAccuracy, int* refLevel, int* lod, Grid ** gridptr
  );
 
  //! Get the spatial coordinate axes for a variable

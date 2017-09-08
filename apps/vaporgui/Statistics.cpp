@@ -1053,7 +1053,7 @@ bool Statistics::calcMean(string varname) {
 
 		mv = _rGrid->GetMissingValue();
 
-		StructuredGrid::Iterator itr;
+		Grid::Iterator itr;
 		double c = 0.0;
 
 		vector <size_t> dims = _rGrid->GetDimensions();
@@ -1205,11 +1205,10 @@ bool Statistics::calcStdDev(string varname) {
 		}
 
 		else {
-//			RegularGrid::Iterator itr;
-			StructuredGrid::ForwardIterator<StructuredGrid> itr;
+			Grid::ConstIterator itr;
 			double c = 0.0;
 			vector <size_t> dims = _rGrid->GetDimensions();
-			for (itr=_rGrid->begin(); itr!=_rGrid->end(); ++itr) {
+			for (itr=_rGrid->cbegin(); itr!=_rGrid->cend(); ++itr) {
 				val = *itr;
 	
 				if (val != mv) { //sum += val;
@@ -1281,8 +1280,7 @@ bool Statistics::calcMedian(string varname) {
 
 		float val;
 		mv = _rGrid->GetMissingValue();
-//		RegularGrid::Iterator itr;
-		StructuredGrid::ForwardIterator<StructuredGrid> itr;
+		Grid::ConstIterator itr;
 		// If _regionSelection==2, we are querying a single point.
 		// So here we just call GetValue at that point.
 		//
@@ -1293,7 +1291,7 @@ bool Statistics::calcMedian(string varname) {
 			}
 		}
 		else {
-			for (itr=_rGrid->begin(); itr!=_rGrid->end(); ++itr) 
+			for (itr=_rGrid->cbegin(); itr!=_rGrid->cend(); ++itr) 
 			{
 				val = *itr;
 	
