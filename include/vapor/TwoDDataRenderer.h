@@ -32,7 +32,7 @@
 #include <vapor/TwoDRenderer.h>
 #include <vapor/DataMgr.h>
 #include <vapor/GeoImage.h>
-#include <vapor/StructuredGrid.h>
+#include <vapor/Grid.h>
 #include <vapor/utils.h>
 #include <vapor/TwoDDataParams.h>
 
@@ -135,13 +135,13 @@ private:
 
  int _getMeshUnStructured(
 	DataMgr *dataMgr,
-	const StructuredGrid *g,
+	const Grid *g,
 	double defaultZ
  );
 
  int _getMeshUnStructuredHelper(
 	DataMgr *dataMgr,
-	const StructuredGrid *g,
+	const Grid *g,
 	double defaultZ
  );
 
