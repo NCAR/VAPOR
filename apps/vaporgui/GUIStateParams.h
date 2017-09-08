@@ -36,40 +36,24 @@ class GUIStateParams : public VAPoR::ParamsBase {
 
     virtual ~GUIStateParams();
 
-    string GetActiveVizName() const {
-        string defaultv;
-        return (GetValueString(m_activeVisualizer, defaultv));
-    }
-
-    void SetActiveVizName(string vizWin) {
-        SetValueString(m_activeVisualizer, "Set active visualizer window", vizWin);
-    }
+    string GetActiveVizName() const;
+    void SetActiveVizName(string vizWin);
 
     //! Get active renderer class and instance name for a visualizer
     //
-    void GetActiveRenderer(
-        string vizWin, string &renderType, string &renderInst) const {
-        m_activeRenderer->GetActiveRenderer(vizWin, renderType, renderInst);
-    }
+    void GetActiveRenderer(string vizWin, string &renderType, string &renderInst) const;
 
     //! Get active renderer class and instance name for a visualizer
     //
-    void SetActiveRenderer(
-        string vizWin, string renderType, string renderInst) {
-        m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst);
-    }
+    void SetActiveRenderer(string vizWin, string renderType, string renderInst);
 
     //! method identifies the current session file
     //! \retval session file path
-    string GetCurrentSessionPath() const {
-        return (GetValueString(m_sessionFileTag, "."));
-    }
+    string GetCurrentSessionPath() const;
 
     //! method sets the current session path
     //! \param[in] path string
-    void SetCurrentSessionPath(string path) {
-        SetValueString(m_sessionFileTag, "Set current session path", path);
-    }
+    void SetCurrentSessionPath(string path);
 
     //! Static method identifies the current session file
     //! \retval session file path
@@ -83,55 +67,37 @@ class GUIStateParams : public VAPoR::ParamsBase {
 
     //! method identifies the current session file
     //! \retval session file path
-    string GetCurrentImagePath() const {
-        return (GetValueString(m_imagePathTag, "."));
-    }
+    string GetCurrentImagePath() const;
 
     //! method sets the current session path
     //! \param[in] path string
-    void SetCurrentImagePath(string path) {
-        SetValueString(m_imagePathTag, "Set current image path", path);
-    }
+    void SetCurrentImagePath(string path);
 
     //! method identifies the current session file
     //! \retval session file path
-    string GetCurrentTFPath() {
-        return (GetValueString(m_tfPathTag, "."));
-    }
+    string GetCurrentTFPath();
 
     //! method sets the current session path
     //! \param[in] path string
-    void SetCurrentTFPath(string path) {
-        SetValueString(m_tfPathTag, "Set current tf path", path);
-    }
+    void SetCurrentTFPath(string path);
 
     //! method identifies the current session file
     //! \retval session file path
-    string GetCurrentPythonPath() const {
-        return (GetValueString(m_pythonPathTag, "."));
-    }
+    string GetCurrentPythonPath() const;
 
     //! method sets the current session path
     //! \param[in] path string
-    void SetCurrentPythonPath(string path) {
-        SetValueString(m_pythonPathTag, "Set current python path", path);
-    }
+    void SetCurrentPythonPath(string path);
 
     //! method identifies the current session file
     //! \retval session file path
-    string GetCurrentFlowPath() const {
-        return (GetValueString(m_flowPathTag, "."));
-    }
+    string GetCurrentFlowPath() const;
 
     //! method sets the current session path
     //! \param[in] path string
-    void SetCurrentFlowPath(string path) {
-        SetValueString(m_flowPathTag, "Set current flow path", path);
-    }
+    void SetCurrentFlowPath(string path);
 
-    MouseModeParams *GetMouseModeParams() const {
-        return (m_mouseModeParams);
-    }
+    MouseModeParams *GetMouseModeParams() const;
 
     // Get static string identifier for this params class
     //

@@ -21,3 +21,13 @@ plugins/visit/WASP/WASP.xml.bak
 plugins/visit/WASP/cmake_install.cmake
 plugins/visit/vdf.xml.bak
 plugins/visit/VDC/CMake*
+
+# CMake
+Makefile
+cmake_install.cmake
+CmakeFiles
+CMakeCache.txt
+site.local
+bin
+/build
+/apps/vaporgui/ui/

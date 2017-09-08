@@ -23,7 +23,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "vizTab.h"
+#include "ui_vizTab.h"
 
 namespace VAPoR {
 class ControlExec;

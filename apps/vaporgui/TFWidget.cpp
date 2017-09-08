@@ -17,9 +17,12 @@
 //  Description:	Implements the TFWidget class.  This provides
 //	  a widget that is inserted in the "Appearance" tab of various Renderer GUIs
 //
+#include <GL/glew.h>
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include <QFontDatabase>
+#include <QStringList>
 #include <qradiobutton.h>
 #include <qcolordialog.h>
 #include "TwoDSubtabs.h"
@@ -38,6 +41,7 @@ string TFWidget::_nDimsTag = "ActiveDimension";
 
 TFWidget::TFWidget(QWidget *parent)
     : QWidget(parent), Ui_TFWidgetGUI() {
+
     setupUi(this);
 
     _myRGB[0] = _myRGB[1] = _myRGB[2] = .1;

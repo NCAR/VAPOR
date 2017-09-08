@@ -6,7 +6,7 @@
 //																	  *
 //************************************************************************/
 //
-//  File:	   Plot.cpp
+//  File:	   plot.cpp
 //
 //  Author:	 Scott Pearse
 //		  National Center for Atmospheric Research
@@ -21,7 +21,7 @@
 #pragma warning(disable : 4100)
 #endif
 
-//#include <Python.h>
+#include <Python.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -32,47 +32,22 @@
 #include <algorithm>
 #include <QCheckBox>
 #include <QFileDialog>
-//#include <vapor/MyPython.h>
+#include <QMessageBox>
+#include <vapor/MyPython.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgr.h>
 //#include "params.h"
+//#include "vizwinmgr.h"
 #include "Plot.h"
 #include "RangeController.h"
 
 #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
-//#include <numpy/ndarrayobject.h>
+#include <numpy/ndarrayobject.h>
 
 using namespace VAPoR;
 using namespace Wasp;
 
 namespace {
-
-//
-// Commented Python Functions:
-//
-//  PyObject *buildNumpyArray(const vector <float> &vec) const;
-//  void getSliders(
-//  QObject*& sender, QComboBox*& qcb, SpaceSSC*& x, SpaceSSC*& y,
-//  SpaceSSC*& z
-//);
-//
-
-//
-// Params functions needed:
-//
-// 1061: error: no member named 'getActiveProbeParams' in 'VAPoR::VizWinMgr'
-// 1062: error: no member named 'getActiveTwoDDataParams' in 'VAPoR::VizWinMgr'
-// 1063: error: no member named 'getActiveIsolineParams' in 'VAPoR::VizWinMgr'
-// 1070: error: member access into incomplete type 'VAPoR::RenderParams'
-// 1075: error: member access into incomplete type 'VAPoR::RenderParams'
-
-//
-// Changes to DataMgr in 3.0
-// GetNumTimeSteps() now takes a varname argument.  We will need to modify statistics
-// to show data on a more dynamic time range.  See function initTimes().
-//
-// Need access to a new grid class instead of RegularGrid that provides GetValue()
-// and GetMissingValue() function calls.
 
 // Get path to write temporary image file. File path will be in user's home
 // directory. Better to use cross-platform tmp directory :-(
@@ -126,7 +101,7 @@ string Plot::readPlotScript() const {
         vector<string> paths;
         paths.push_back("python");
         paths.push_back("plot1D.py");
-        path = GetAppPath("VAPOR", "share", paths);
+        path = Wasp::GetAppPath("VAPOR", "share", paths);
     }
 
     //
@@ -242,28 +217,176 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow() {
     connect(plotButton, SIGNAL(pressed()), this, SLOT(go()));
     connect(addVarCombo, SIGNAL(activated(int)), this, SLOT(newVarAdded(int)));
     connect(removeVarCombo, SIGNAL(activated(int)), this, SLOT(removeVar(int)));
-    connect(timeCopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
-    connect(spaceP1CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
-    connect(spaceP2CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
-    connect(refCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(refinementChanged(int)));
-    connect(cRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
+    connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(reinitDataMgr()));
+    connect(timeCopyCombo, SIGNAL(activated(int)),
+            this, SLOT(getPointFromRenderer()));
+    connect(spaceP1CopyCombo, SIGNAL(activated(int)),
+            this, SLOT(getPointFromRenderer()));
+    connect(spaceP2CopyCombo, SIGNAL(activated(int)),
+            this, SLOT(getPointFromRenderer()));
+    connect(refCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(refinementChanged(int)));
+    connect(cRatioCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(cRatioChanged(int)));
     for (int i = 0; i < 4; i++) {
-        connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int)));
-        if (i < 3) {
-            connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int)));
+        connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)),
+                this, SLOT(constCheckboxChanged(int)));
+        if (i > 2) {
+            connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)),
+                    this, SLOT(constCheckboxChanged(int)));
         }
     }
 }
 
 Plot::~Plot() {
+    destroyControllers();
     if (_errMsg)
         delete _errMsg;
-
     if (_plotImage)
         delete _plotImage;
+}
 
-    // TODO: what else can be cleaned up?
-    //
+void Plot::destroyControllers() {
+    if (_spaceTimeRange)
+        delete _spaceTimeRange;
+    if (_spaceTimeLineEdit)
+        delete _spaceTimeLineEdit;
+    if (_spaceTimeSlider)
+        delete _spaceTimeSlider;
+    if (_spaceTimeCell)
+        delete _spaceTimeCell;
+    if (_spaceTimeMinLabel)
+        delete _spaceTimeMinLabel;
+    if (_spaceTimeMaxLabel)
+        delete _spaceTimeMaxLabel;
+
+    if (_spaceXRange)
+        delete _spaceXRange;
+    if (_spaceP1XSlider)
+        delete _spaceP1XSlider;
+    if (_spaceP2XSlider)
+        delete _spaceP2XSlider;
+    if (_spaceP1XLineEdit)
+        delete _spaceP1XLineEdit;
+    if (_spaceP2XLineEdit)
+        delete _spaceP2XLineEdit;
+    if (_spaceP1XCell)
+        delete _spaceP1XCell;
+    if (_spaceP2XCell)
+        delete _spaceP2XCell;
+    if (_spaceP1XMinLabel)
+        delete _spaceP1XMinLabel;
+    if (_spaceP1XMaxLabel)
+        delete _spaceP1XMaxLabel;
+    if (_spaceP2XMinLabel)
+        delete _spaceP2XMinLabel;
+    if (_spaceP2XMaxLabel)
+        delete _spaceP2XMaxLabel;
+
+    if (_spaceYRange)
+        delete _spaceYRange;
+    if (_spaceP1YSlider)
+        delete _spaceP1YSlider;
+    if (_spaceP2YSlider)
+        delete _spaceP2YSlider;
+    if (_spaceP1YLineEdit)
+        delete _spaceP1YLineEdit;
+    if (_spaceP2YLineEdit)
+        delete _spaceP2YLineEdit;
+    if (_spaceP1YCell)
+        delete _spaceP1YCell;
+    if (_spaceP2YCell)
+        delete _spaceP2YCell;
+    if (_spaceP1YMinLabel)
+        delete _spaceP1YMinLabel;
+    if (_spaceP1YMaxLabel)
+        delete _spaceP1YMaxLabel;
+    if (_spaceP2YMinLabel)
+        delete _spaceP2YMinLabel;
+    if (_spaceP2YMaxLabel)
+        delete _spaceP2YMaxLabel;
+
+    if (_spaceZRange)
+        delete _spaceZRange;
+    if (_spaceP1ZSlider)
+        delete _spaceP1ZSlider;
+    if (_spaceP2ZSlider)
+        delete _spaceP2ZSlider;
+    if (_spaceP1ZLineEdit)
+        delete _spaceP1ZLineEdit;
+    if (_spaceP2ZLineEdit)
+        delete _spaceP2ZLineEdit;
+    if (_spaceP1ZCell)
+        delete _spaceP1ZCell;
+    if (_spaceP2ZCell)
+        delete _spaceP2ZCell;
+    if (_spaceP1ZMinLabel)
+        delete _spaceP1ZMinLabel;
+    if (_spaceP1ZMaxLabel)
+        delete _spaceP1ZMaxLabel;
+    if (_spaceP2ZMinLabel)
+        delete _spaceP2ZMinLabel;
+    if (_spaceP2ZMaxLabel)
+        delete _spaceP2ZMaxLabel;
+
+    if (_timeTimeRange)
+        delete _timeTimeRange;
+    if (_timeTimeMinSlider)
+        delete _timeTimeMinSlider;
+    if (_timeTimeMaxSlider)
+        delete _timeTimeMaxSlider;
+    if (_timeTimeMinLineEdit)
+        delete _timeTimeMinLineEdit;
+    if (_timeTimeMaxLineEdit)
+        delete _timeTimeMaxLineEdit;
+    if (_timeTimeMinCell)
+        delete _timeTimeMinCell;
+    if (_timeTimeMaxCell)
+        delete _timeTimeMaxCell;
+    if (_timeTimeMinLabel)
+        delete _timeTimeMinLabel;
+    if (_timeTimeMaxLabel)
+        delete _timeTimeMaxLabel;
+
+    if (_timeXRange)
+        delete _timeXRange;
+    if (_timeXSlider)
+        delete _timeXSlider;
+    if (_timeXMinLabel)
+        delete _timeXMinLabel;
+    if (_timeXMaxLabel)
+        delete _timeXMaxLabel;
+    if (_timeXLineEdit)
+        delete _timeXLineEdit;
+    if (_timeXCell)
+        delete _timeXCell;
+
+    if (_timeYRange)
+        delete _timeYRange;
+    if (_timeYSlider)
+        delete _timeYSlider;
+    if (_timeYMinLabel)
+        delete _timeYMinLabel;
+    if (_timeYMaxLabel)
+        delete _timeYMaxLabel;
+    if (_timeYLineEdit)
+        delete _timeYLineEdit;
+    if (_timeYCell)
+        delete _timeYCell;
+
+    if (_timeZRange)
+        delete _timeZRange;
+    if (_timeZSlider)
+        delete _timeZSlider;
+    if (_timeZMinLabel)
+        delete _timeZMinLabel;
+    if (_timeZMaxLabel)
+        delete _timeZMaxLabel;
+    if (_timeZLineEdit)
+        delete _timeZLineEdit;
+    if (_timeZCell)
+        delete _timeZCell;
 }
 
 void Plot::reject() {
@@ -276,12 +399,12 @@ void Plot::reject() {
 // One-time initialization. Stuff that can't go in constructor because
 // it's not no-fail
 //
-int Plot::init() {
+bool Plot::init() {
 
     // Strictly one-time
     //
     if (_isInitialized)
-        return (0);
+        return (false);
 
     // For error popups
     //
@@ -297,10 +420,10 @@ int Plot::init() {
     //
     int rc = initPython();
     if (rc < 0)
-        return (-1);
+        return (false);
 
     _isInitialized = true;
-    return (0);
+    return (true);
 }
 
 // NOT One-time initialization!!! This method is called every time the
@@ -311,12 +434,23 @@ int Plot::init() {
 // methods: one to launch the window, and one to be called *only* when
 // dm and vwm change
 //
-#ifdef FIXED
-void Plot::Initialize(DataMgr *dm, VizWinMgr *vwm) {
-    assert(dm != NULL);
+void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm) {
     assert(vwm != NULL);
-    _dm = dm;
     _vwm = vwm;
+
+    assert(ce != NULL);
+    _controlExec = ce;
+    DataStatus *ds = _controlExec->getDataStatus();
+    vector<string> dataMgrs = ds->GetDataMgrNames();
+    _dm = ds->GetDataMgr(dataMgrs[0]);
+    assert(_dm != NULL);
+
+    for (int i = 0; i < dataMgrs.size(); i++) {
+        dataMgrCombo->addItem(QString::fromStdString(dataMgrs[i]));
+    }
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    _params = (PlotParams *)paramsMgr->GetParams("PlotParams");
 
     // Do one-time initialization. The Initialize() method is called
     // every time Plot is launched.
@@ -329,7 +463,7 @@ void Plot::Initialize(DataMgr *dm, VizWinMgr *vwm) {
     //
     initVariables();
     initTimes();
-    initExtents(0, _extents);
+    initExtents(0);
     initCRatios();
     initRefinement();
 
@@ -338,45 +472,69 @@ void Plot::Initialize(DataMgr *dm, VizWinMgr *vwm) {
     //
     initSSCs();
 
+    applyParams();
+
+    showMe();
+}
+
+void Plot::reinitDataMgr() {
+    DataStatus *ds = _controlExec->getDataStatus();
+    string dmName = dataMgrCombo->currentText().toStdString();
+    _dm = ds->GetDataMgr(dmName);
+
+    if (_dm == NULL) {
+        string err = "Could not find DataMgr named " + dmName;
+        errReport(err);
+    }
+}
+
+void Plot::showMe() {
     show();
     raise();
     activateWindow();
 }
-#endif
 
 void Plot::initCRatios() {
-    _cRatios = _dm->GetCRatios(_defaultVar);
+    _cRatios = _dm->GetCRatios(_vars[0]);
+
+    cRatioCombo->blockSignals(true);
     cRatioCombo->clear();
 
     for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it) {
         cRatioCombo->addItem("1:" + QString::number(*it));
     }
 
-    _cRatio = _cRatios.size() - 1;
-    cRatioCombo->setCurrentIndex(_cRatio);
+    if (_params->GetCRatio() == -1) {
+        _cRatio = _cRatios.size() - 1;
+        cRatioCombo->setCurrentIndex(_cRatio);
+    }
+    cRatioCombo->blockSignals(false);
 }
 
 void Plot::initRefinement() {
+    refCombo->blockSignals(true);
+
     refCombo->clear();
-    _refLevel = _dm->GetNumRefLevels(_defaultVar);
+    _refLevel = _dm->GetNumRefLevels(_vars[0]);
     for (int i = 0; i <= _refLevel; i++) {
-        refCombo->blockSignals(true);
         refCombo->addItem(QString::number(i));
-        refCombo->blockSignals(false);
     }
 
-    refCombo->setCurrentIndex(_refLevel);
+    if (_params->GetRefinement() == -1) {
+        refCombo->setCurrentIndex(_refLevel);
+    }
+
+    refCombo->blockSignals(false);
 }
 
 void Plot::initSSCs() {
-
     _spaceTimeRange = new Range(_timeExtents[0], _timeExtents[1]);
     _spaceTimeRange->setConst(true);
     _spaceTimeSlider = new TimeSlider(_spaceTimeRange, spaceTimeSlider);
     _spaceTimeLineEdit = new SinglePointLineEdit(_spaceTimeRange, spaceTimeEdit, 0);
     _spaceTimeCell = new MinMaxTableCell(_spaceTimeRange, spaceTable, 0, 3, 0);
     _spaceTimeMinLabel = new MinMaxLabel(_spaceTimeRange, spaceTimeMinLabel, 0);
-    _spaceTimeMinLabel = new MinMaxLabel(_spaceTimeRange, spaceTimeMaxLabel, 1);
+    _spaceTimeMaxLabel = new MinMaxLabel(_spaceTimeRange, spaceTimeMaxLabel, 1);
     _spaceTimeRange->addObserver(_spaceTimeCell);
     _spaceTimeRange->addObserver(_spaceTimeSlider);
     _spaceTimeRange->addObserver(_spaceTimeLineEdit);
@@ -459,6 +617,7 @@ void Plot::initSSCs() {
     _timeXRange->addObserver(_timeXCell);
     _timeXRange->addObserver(_timeXSlider);
     _timeXRange->addObserver(_timeXLineEdit);
+    _timeXRange->setUserMin((_extents[0] + _extents[3]) / 2.f);
 
     _timeYRange = new Range(_extents[1], _extents[4]);
     _timeYRange->setConst(true);
@@ -470,6 +629,7 @@ void Plot::initSSCs() {
     _timeYRange->addObserver(_timeYCell);
     _timeYRange->addObserver(_timeYSlider);
     _timeYRange->addObserver(_timeYLineEdit);
+    _timeYRange->setUserMin((_extents[1] + _extents[4]) / 2.f);
 
     _timeZRange = new Range(_extents[2], _extents[5]);
     _timeZRange->setConst(true);
@@ -481,6 +641,33 @@ void Plot::initSSCs() {
     _timeZRange->addObserver(_timeZCell);
     _timeZRange->addObserver(_timeZSlider);
     _timeZRange->addObserver(_timeZLineEdit);
+    _timeZRange->setUserMin((_extents[2] + _extents[5]) / 2.f);
+
+    spaceP1XSlider->installEventFilter(this);
+    spaceP2XSlider->installEventFilter(this);
+    spaceP1YSlider->installEventFilter(this);
+    spaceP2YSlider->installEventFilter(this);
+    spaceP1ZSlider->installEventFilter(this);
+    spaceP2ZSlider->installEventFilter(this);
+
+    spaceP1XEdit->installEventFilter(this);
+    spaceP2XEdit->installEventFilter(this);
+    spaceP1YEdit->installEventFilter(this);
+    spaceP2YEdit->installEventFilter(this);
+    spaceP1ZEdit->installEventFilter(this);
+    spaceP2ZEdit->installEventFilter(this);
+
+    spaceTimeSlider->installEventFilter(this);
+    timeTimeMinSlider->installEventFilter(this);
+    timeTimeMaxSlider->installEventFilter(this);
+
+    timeXSlider->installEventFilter(this);
+    timeYSlider->installEventFilter(this);
+    timeZSlider->installEventFilter(this);
+
+    timeXEdit->installEventFilter(this);
+    timeYEdit->installEventFilter(this);
+    timeZEdit->installEventFilter(this);
 }
 
 void Plot::initPlotDlg() {
@@ -498,37 +685,80 @@ void Plot::initPlotDlg() {
     _plotLayout->addWidget(_plotButton);
     _plotDialog->setLayout(_plotLayout);
 
-    connect(_plotButton, SIGNAL(pressed()), this, SLOT(savePlotToFile()));
+    connect(_plotButton, SIGNAL(clicked()), this, SLOT(savePlotToFile()));
 }
 
 void Plot::savePlotToFile() {
     QFileDialog *fd = new QFileDialog;
-    fd->setDefaultSuffix(".png");
-    string file = fd->getSaveFileName(this, "Select Output File Name",
-                                      "/", tr("(*.png)"))
-                      .toStdString();
-    ;
+    QString defaultOpenLocation = QDir::homePath();
+    QString f = fd->getSaveFileName(this, "Select Output File Name",
+                                    defaultOpenLocation, tr("*.png"));
+    string fileName = f.toStdString();
     delete fd;
 
-    std::ifstream src(_defaultImageLocation.c_str(), std::ios::binary);
-    std::ofstream dest(file.c_str(), std::ios::binary);
-    dest << src.rdbuf();
+    //See if it ends with "png":
+    //
+    QFileInfo *fileInfo = new QFileInfo(f);
+    if (fileInfo->suffix() != "png") {
+        fileName.append(".png");
+
+        // Verify if we're overwriting existing video files
+        //
+        if (std::ifstream(fileName.c_str())) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Are you sure?");
+            msgBox.setText("Target output file already exists. Do you want to overwrite?");
+            msgBox.setStandardButtons(QMessageBox::Yes);
+            msgBox.addButton(QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            if (msgBox.exec() == QMessageBox::No) {
+                return;
+            }
+        }
+    }
+    if (fileInfo)
+        delete fileInfo;
+
+    // Check to see if file is writable
+    //
+    if (!fileName.empty()) {
+        std::ifstream src(_defaultImageLocation.c_str(), std::ios::binary);
+        std::ofstream dest(fileName.c_str(), std::ios::binary);
+        if (dest.fail()) {
+            std::ostringstream ss;
+            ss << "Failed to save file " << fileName << " for writing.";
+            string myErr = ss.str();
+            errReport(myErr);
+        } else
+            dest << src.rdbuf();
+
+        dest.close();
+        src.close();
+    }
 }
 
 // Our sampling rate is based on how many voxels are crossed
 // between points a and b, multiplied by 2
 //
-int Plot::findNyquist(
-    const vector<size_t> minv, const vector<size_t> maxv,
-    const vector<double> minu, const vector<double> maxu,
-    double &dX, double &dY, double &dZ) const {
+int Plot::findNyquist(VAPoR::Grid *sg,
+                      const double minu[3], const double maxu[3],
+                      double &dX, double &dY, double &dZ) const {
 
-    //int s1 = maxv[0]>minv[0] ? maxv[0]-minv[0] : minv[0]-maxv[0];
-    //int s2 = maxv[1]>minv[1] ? maxv[1]-minv[1] : minv[1]-maxv[1];
-    //int s3 = maxv[2]>minv[2] ? maxv[2]-minv[2] : minv[2]-maxv[2];
-    int s1 = abs((int)maxv[0] - (int)minv[0]);
-    int s2 = abs((int)maxv[1] - (int)minv[1]);
-    int s3 = abs((int)maxv[2] - (int)minv[2]);
+    vector<size_t> dims = sg->GetDimensions();
+    cout << "Dims " << dims.size() << endl;
+    for (int i = 0; i < dims.size(); i++) {
+        cout << dims[i] << endl;
+    }
+
+    int s1, s2, s3;
+    s1 = (int)dims[0];
+    ;
+    s2 = (int)dims[1];
+    if (dims[2]) {
+        s3 = (int)dims[2];
+    } else {
+        s3 = 0;
+    }
     int nsamples = 2 * ceil(sqrt((double)(s1 * s1 + s2 * s2 + s3 * s3)));
 
     if (nsamples < 2)
@@ -538,6 +768,15 @@ int Plot::findNyquist(
     dY = ((maxu[1] - minu[1]) / (double)(nsamples - 1));
     dZ = ((maxu[2] - minu[2]) / (double)(nsamples - 1));
 
+    cout << "deltas " << dX << " " << dY << " " << dZ << endl;
+    cout << minu[0] << " " << maxu[0] << endl;
+    cout << minu[1] << " " << maxu[1] << endl;
+    cout << minu[2] << " " << maxu[2] << endl;
+    cout << nsamples << endl;
+
+    //dX = 10000;
+    //dY = 100000;
+    //dZ = 1000;
     return nsamples;
 }
 
@@ -547,7 +786,7 @@ int Plot::findNyquist(
 // stderr to a memory buffer.
 //
 string Plot::pyErr() const {
-#ifdef FIXED
+
     PyObject *pMain = PyImport_AddModule("__main__");
 
     PyObject *catcher = NULL;
@@ -570,8 +809,6 @@ string Plot::pyErr() const {
         return ("Can't get err msg : PyObject_GetAttrString(catcher,'value')");
     }
     return (PyString_AsString(output));
-#endif
-    return "";
 }
 
 // Initialize embedded python environment.
@@ -579,9 +816,8 @@ string Plot::pyErr() const {
 // TODO: restructure this code so it can be used by SeedMe and move
 // to MyPython helper class.
 //
-
 int Plot::initPython() {
-#ifdef FIXED
+
     if (_isInitializedPython)
         return (0); // Static one time initialization!
 
@@ -603,7 +839,7 @@ int Plot::initPython() {
     // Use MyPython singleton class to initialize Python interpeter to
     // ensure it only gets initialized once.
     //
-    MyPython::Instance()->Initialize();
+    Wasp::MyPython::Instance()->Initialize();
 
     // see http://docs.scipy.org/doc/numpy/reference/
     //  c-api.array.html#importing-the-api
@@ -641,8 +877,6 @@ int Plot::initPython() {
 
     _isInitializedPython = true;
 
-#endif
-
     return (0);
 }
 
@@ -663,7 +897,7 @@ vector<string> Plot::getEnabledVars() const {
 }
 
 void Plot::go() {
-#ifdef FIXED
+
     vector<string> enabledVars;
     enabledVars = getEnabledVars();
 
@@ -716,7 +950,7 @@ void Plot::go() {
     if (plotScript.empty())
         return;
 
-    PyObject *pFunc = MyPython::CreatePyFunc(
+    PyObject *pFunc = Wasp::MyPython::CreatePyFunc(
         "plotModule", "plot1D", plotScript);
     if (!pFunc) {
         errReport(pyErr());
@@ -762,29 +996,47 @@ void Plot::go() {
     _plotDialog->show();
     _plotDialog->raise();
     _plotDialog->activateWindow();
+}
+
+#ifdef DEAD
+// Grow selected voxel region by one voxel if possible. This is a
+// a workaround for poor design choice in DataMgr
+//
+void Plot::fudgeVoxBounds(
+    size_t minv[3], size_t maxv[3]) const {
+    size_t dims[3];
+    _dm->GetDim(dims, _refLevel);
+
+    for (int i = 0; i < 3; i++) {
+        if (minv[i] > 0)
+            minv[i]--;
+        if (maxv[i] < dims[i] - 1)
+            maxv[i]++;
+    }
+}
 #endif
+
+void Plot::refinementChanged(int i) {
+    _refLevel = i;
+    _params->SetRefinement(i);
+}
+
+void Plot::cRatioChanged(int i) {
+    _cRatio = i;
+    _params->SetCRatio(i);
 }
 
 // Get extents of line in user coordinates. Ensure min[i] <= max[i]
 //
 void Plot::getSpatialExtents(
-    vector<double> &minu, vector<double> &maxu, size_t &ts) const {
+    double minu[3], double maxu[3], size_t &ts) const {
 
-    if (minu.size() > 0) {
-        minu[0] = _spaceXRange->getUserMin();
-        maxu[0] = _spaceXRange->getUserMax();
-        minu[1] = _spaceYRange->getUserMin();
-        maxu[1] = _spaceYRange->getUserMax();
-        minu[2] = _spaceZRange->getUserMin();
-        maxu[2] = _spaceZRange->getUserMax();
-    } else {
-        minu.push_back(_spaceXRange->getUserMin());
-        minu.push_back(_spaceYRange->getUserMin());
-        minu.push_back(_spaceZRange->getUserMin());
-        maxu.push_back(_spaceXRange->getUserMax());
-        maxu.push_back(_spaceYRange->getUserMax());
-        maxu.push_back(_spaceZRange->getUserMax());
-    }
+    minu[0] = _spaceXRange->getUserMin();
+    maxu[0] = _spaceXRange->getUserMax();
+    minu[1] = _spaceYRange->getUserMin();
+    maxu[1] = _spaceYRange->getUserMax();
+    minu[2] = _spaceZRange->getUserMin();
+    maxu[2] = _spaceZRange->getUserMax();
 
     // Swap if needed
     //
@@ -796,7 +1048,7 @@ void Plot::getSpatialExtents(
         }
     }
 
-    ts = _timeTimeRange->getUserMin();
+    ts = _spaceTimeRange->getUserMin();
 }
 
 // Sample selected variables over a line through space
@@ -811,37 +1063,63 @@ int Plot::getSpatialVectors(
 
     // Get bounding box for data (line extents) in user coordinates
     //
+    double minu[3], maxu[3];
     size_t ts;
-    vector<double> minu, maxu;
     getSpatialExtents(minu, maxu, ts);
 
-    int nsamples = 0;
-    double dX, dY, dZ;
-    vector<size_t> minv, maxv;
+    // Get bounding box for data in voxel coordiantes
+    //
+    size_t minv[3], maxv[3];
 
+#ifdef DEAD
+    _dm->MapUserToVox(ts, minu, minv, _refLevel, _cRatio);
+    _dm->MapUserToVox(ts, maxu, maxv, _refLevel, _cRatio);
+
+    // Ugh. Need to try to grow the voxel bounds otherwise boundary
+    // points may not be inside of the returned RegularGrid. Sigh :-(
+    //
+    fudgeVoxBounds(minv, maxv);
+#endif
+
+    double dX, dY, dZ;
+    int nsamples = 0;
     for (int i = 0; i < vars.size(); i++) {
         string var = vars[i];
         vector<float> vec;
 
-        Grid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio, minu, maxu);
+        vector<double> minUVec, maxUVec;
+        minUVec.push_back(minu[0]);
+        minUVec.push_back(minu[1]);
+        minUVec.push_back(minu[2]);
+        maxUVec.push_back(maxu[0]);
+        maxUVec.push_back(maxu[1]);
+        maxUVec.push_back(maxu[2]);
+
+        Grid *sg = _dm->GetVariable(
+            ts, var, _refLevel, _cRatio, minUVec, maxUVec, false);
         if (!sg) {
+            // N.B. In VAPOR 2.x libvdc functions post their own
+            // error popups!
+            //
             return (-1);
         }
 
-        sg->GetEnclosingRegion(minu, maxu, minv, maxv);
-
-        // Use first SG to figure out how many samples we need,
+        // Use first RG to figure out how many samples we need,
         // and step size. Only do this with first variable. All
         // variables sampled same number of times
         //
         if (!nsamples) {
-            nsamples = findNyquist(minv, maxv, minu, maxu, dX, dY, dZ);
+            //nsamples = findNyquist(minv, maxv, minu, maxu, dX, dY, dZ);
+            nsamples = findNyquist(sg, minu, maxu, dX, dY, dZ);
         }
 
-        float mv = 0.f;
+        float mv = sg->GetMissingValue();
         for (int j = 0; j < nsamples; ++j) {
-            float val = 0.f;
-
+            double xCoord = j * dX + minu[0];
+            double yCoord = j * dY + minu[1];
+            double zCoord = j * dZ + minu[2];
+            float val = sg->GetValue(xCoord, yCoord, zCoord);
+            cout << "get SG value " << j << " " << val << endl;
             // Map missing values to NaNs. matplotlib won't plot
             // these. May need to using a numpy masked array in future.
             //
@@ -852,7 +1130,8 @@ int Plot::getSpatialVectors(
             vec.push_back(val);
         }
 
-        //		if (sg) delete sg;
+        if (sg)
+            delete sg;
 
         data[var] = vec;
     }
@@ -889,7 +1168,7 @@ int Plot::getSpatialVectors(
 // Get extents of line in user coordinates. Ensure ts0 <= ts1
 //
 void Plot::getTemporalExtents(
-    vector<double> &xyz, size_t &ts0, size_t &ts1) const {
+    double xyz[3], size_t &ts0, size_t &ts1) const {
     ts0 = _timeTimeRange->getUserMin();
     ts1 = _timeTimeRange->getUserMax();
 
@@ -899,16 +1178,9 @@ void Plot::getTemporalExtents(
         ts1 = tmp;
     }
 
-    if (xyz.size() < 3) {
-        xyz.clear();
-        xyz.push_back(_timeXRange->getUserMin());
-        xyz.push_back(_timeYRange->getUserMin());
-        xyz.push_back(_timeZRange->getUserMin());
-    } else {
-        xyz[0] = _timeXRange->getUserMin();
-        xyz[1] = _timeYRange->getUserMin();
-        xyz[2] = _timeZRange->getUserMin();
-    }
+    xyz[0] = _timeXRange->getUserMin();
+    xyz[1] = _timeYRange->getUserMin();
+    xyz[2] = _timeZRange->getUserMin();
 }
 
 int Plot::getTemporalVectors(
@@ -922,7 +1194,7 @@ int Plot::getTemporalVectors(
     // Get spatial coordinates of selected  point in user coordinates,
     // and temporal range in time steps
     //
-    vector<double> xyz;
+    double xyz[3];
     size_t ts0, ts1;
     getTemporalExtents(xyz, ts0, ts1);
 
@@ -932,9 +1204,33 @@ int Plot::getTemporalVectors(
 
         for (size_t ts = ts0; ts <= ts1; ts++) {
 
+            size_t ijk[3];
+#ifdef DEAD
+            _dm->MapUserToVox(ts, xyz, ijk, _refLevel, _cRatio);
+
+            // Ugh. Need to try to grow the voxel bounds otherwise boundary
+            // points may not be inside of the returned RegularGrid. Sigh :-(
+            //
+            //			size_t minv[3] = {ijk[0], ijk[1],ijk[2]};
+            //			size_t maxv[3] = {ijk[0], ijk[1],ijk[2]};
+            fudgeVoxBounds(minv, maxv);
+#endif
+            size_t minv[3] = {ijk[0], ijk[1], ijk[2]};
+            size_t maxv[3] = {ijk[0], ijk[1], ijk[2]};
+
+            //			Grid *sg = _dm->GetVariable(
+            //				ts, var, _refLevel, _cRatio, minv, maxv, false
+            //			);
+            vector<double> uPoint;
+            uPoint.push_back(xyz[0]);
+            uPoint.push_back(xyz[1]);
+            uPoint.push_back(xyz[2]);
             Grid *sg = _dm->GetVariable(
-                ts, var, _refLevel, _cRatio);
+                ts, var, _refLevel, _cRatio, uPoint, uPoint, false);
             if (!sg) {
+                // N.B. In VAPOR 2.x libvdc functions post their own
+                // error popups!
+                //
                 return (-1);
             }
 
@@ -943,26 +1239,26 @@ int Plot::getTemporalVectors(
             // TODO: Handle missing values
             //
             vec.push_back(val);
+
+            delete sg;
         }
         data[var] = vec;
     }
 
-    vector<double> allTimes;
-    vector<float> requestedTimes;
-    _dm->GetTimeCoordinates(allTimes);
-
     vector<float> vec;
+    vector<double> timeCoords;
+    _dm->GetTimeCoordinates(timeCoords);
     for (size_t ts = ts0; ts <= ts1; ts++) {
-        requestedTimes.push_back(allTimes[ts]);
+        vec.push_back(timeCoords[ts]);
     }
-    iData["X"] = requestedTimes;
+
+    iData["X"] = vec;
     return (0);
 }
 
-#ifdef FIXED
 PyObject *Plot::buildNumpyArray(const vector<float> &vec) const {
 
-    npy_intp dims[] = {vec.size()};
+    npy_intp dims[] = {static_cast<npy_intp>(vec.size())};
     PyObject *myArray = (PyObject *)PyArray_SimpleNew(
         1, dims, NPY_FLOAT);
     if (!myArray)
@@ -997,9 +1293,7 @@ PyObject *Plot::buildNumpyArray(const vector<float> &vec) const {
     Py_INCREF(myArray);
     return myArray;
 }
-#endif
 
-#ifdef FIXED
 PyObject *Plot::buildPyDict(
     const map<string, vector<float>> &data) {
     PyObject *pyDict = PyDict_New();
@@ -1030,7 +1324,6 @@ PyObject *Plot::buildPyDict(
     }
     return pyDict;
 }
-#endif
 
 void Plot::getRanges(QObject *&sender, QComboBox *&qcb, Range *&x, Range *&y, Range *&z) {
     if (sender == timeCopyCombo) {
@@ -1053,8 +1346,8 @@ void Plot::getRanges(QObject *&sender, QComboBox *&qcb, Range *&x, Range *&y, Ra
     }
 }
 
+#ifdef DEAD
 void Plot::getPointFromRenderer() {
-#ifdef FIXED
     QComboBox *qcb = NULL;
     Range *x = NULL;
     Range *y = NULL;
@@ -1102,25 +1395,130 @@ void Plot::getPointFromRenderer() {
         y->setUserMin((double)selectedCoord[1]);
         z->setUserMin((double)selectedCoord[2]);
     }
+}
 #endif
+
+void Plot::applyParams() {
+    vector<double> minSpace, maxSpace, timeExts;
+    minSpace = _params->GetSpaceMinExtents();
+    maxSpace = _params->GetSpaceMaxExtents();
+
+    // If minSpace is empty, then we have an empty set of params.  Just return.
+    if (minSpace.empty()) {
+        return;
+    }
+
+    _spaceXRange->setUserMin(minSpace[0]);
+    _spaceYRange->setUserMin(minSpace[1]);
+    _spaceZRange->setUserMin(minSpace[2]);
+    _spaceXRange->setUserMax(maxSpace[0]);
+    _spaceYRange->setUserMax(maxSpace[1]);
+    _spaceZRange->setUserMax(maxSpace[2]);
+
+    timeExts = _params->GetTimeExtents();
+    _timeXRange->setUserMin(timeExts[0]);
+    _timeXRange->setUserMax(timeExts[0]);
+    _timeYRange->setUserMin(timeExts[1]);
+    _timeYRange->setUserMax(timeExts[1]);
+    _timeZRange->setUserMin(timeExts[2]);
+    _timeZRange->setUserMax(timeExts[2]);
+
+    int timeMinTS, timeMaxTS;
+    timeMinTS = _params->GetTimeMinTS();
+    timeMaxTS = _params->GetTimeMaxTS();
+    _timeTimeRange->setUserMin(timeMinTS);
+    _timeTimeRange->setUserMax(timeMaxTS);
+
+    int spaceTS = _params->GetSpaceTS();
+    _spaceTimeRange->setUserMin(spaceTS);
+
+    vector<string> vars = _params->GetVarNames();
+    for (int i = 0; i < vars.size(); i++) {
+        string var = vars[i];
+        int index = addVarCombo->findText(QString::fromStdString(var));
+        newVarAdded(index);
+    }
+
+    int refIndex = _params->GetRefinement();
+    refCombo->setCurrentIndex(refIndex);
+
+    int cRatioIndex = _params->GetCRatio();
+    cRatioCombo->setCurrentIndex(cRatioIndex);
+
+    bool xConst = _params->GetXConst();
+    if (xConst) {
+        _spaceXRange->setConst(xConst);
+        _spaceCheckBoxes[0]->setCheckState(Qt::Checked);
+    }
+    bool yConst = _params->GetYConst();
+    if (yConst) {
+        constCheckboxChanged(yConst);
+        _spaceCheckBoxes[1]->setCheckState(Qt::Checked);
+    }
+    bool zConst = _params->GetZConst();
+    if (zConst) {
+        constCheckboxChanged(zConst);
+        _spaceCheckBoxes[2]->setCheckState(Qt::Checked);
+    }
+    bool tConst = _params->GetTimeConst();
+    if (tConst) {
+        constCheckboxChanged(tConst);
+        _timeCheckBoxes[3]->setCheckState(Qt::Checked);
+    }
+}
+
+bool Plot::eventFilter(QObject *o, QEvent *e) {
+    vector<double> spaceMinExts, spaceMaxExts, timeExts;
+    int spaceTS, minTimeTS, maxTimeTS;
+
+    spaceMinExts.push_back(_spaceXRange->getUserMin());
+    spaceMinExts.push_back(_spaceYRange->getUserMin());
+    spaceMinExts.push_back(_spaceZRange->getUserMin());
+    spaceMaxExts.push_back(_spaceXRange->getUserMax());
+    spaceMaxExts.push_back(_spaceYRange->getUserMax());
+    spaceMaxExts.push_back(_spaceZRange->getUserMax());
+    _params->SetSpaceMaxExtents(spaceMaxExts);
+    _params->SetSpaceMinExtents(spaceMinExts);
+
+    timeExts.push_back(_timeXRange->getUserMin());
+    timeExts.push_back(_timeYRange->getUserMin());
+    timeExts.push_back(_timeZRange->getUserMin());
+
+    _params->SetTimeExtents(timeExts);
+
+    spaceTS = _spaceTimeRange->getUserMin();
+    minTimeTS = _timeTimeRange->getUserMin();
+    maxTimeTS = _timeTimeRange->getUserMax();
+
+    _params->SetSpaceTS(spaceTS);
+    _params->SetTimeMinTS(minTimeTS);
+    _params->SetTimeMaxTS(maxTimeTS);
+
+    //return QObject::eventFilter(o,e);
+    return false;
 }
 
 void Plot::constCheckboxChanged(int state) {
     QObject *sender = QObject::sender();
-    if (sender == _spaceCheckBoxes[0])
+    if (sender == _spaceCheckBoxes[0]) {
         _spaceXRange->setConst(state);
-    else if (sender == _spaceCheckBoxes[1])
+        _params->SetXConst((bool)state);
+    } else if (sender == _spaceCheckBoxes[1]) {
         _spaceYRange->setConst(state);
-    else if (sender == _spaceCheckBoxes[2])
+        _params->SetYConst((bool)state);
+    } else if (sender == _spaceCheckBoxes[2]) {
         _spaceZRange->setConst(state);
-    else if (sender == _timeCheckBoxes[0])
+        _params->SetZConst((bool)state);
+    } else if (sender == _timeCheckBoxes[3]) {
         _timeTimeRange->setConst(state);
+        _params->SetTimeConst((bool)state);
+    }
 }
 
 void Plot::print(bool doSpace) const {
     vector<string>::const_iterator it;
 
-    vector<double> minu, maxu;
+    double minu[3], maxu[3];
     size_t ts0, ts1;
     if (doSpace) {
         getSpatialExtents(minu, maxu, ts0);
@@ -1143,45 +1541,35 @@ void Plot::print(bool doSpace) const {
 
 void Plot::initTimes() {
     _timeExtents.clear();
-
     _timeExtents.push_back(0);
-    _timeExtents.push_back(1);
-    //_timeExtents.push_back(_dm->GetNumTimeSteps()-1);
+    _timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0]) - 1);
 }
 
-int Plot::initExtents(int ts, vector<double> &extents) {
-    vector<double> minExtents, maxExtents;
-    int rc = _dm->GetVariableExtents(ts, _defaultVar, _refLevel,
-                                     minExtents, maxExtents);
+void Plot::initExtents(int ts) {
+    vector<double> minExts, maxExts;
+
+    int rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel,
+                                     minExts, maxExts);
     if (rc < 0) {
         string myErr;
-        myErr = "Could not find minimum and maximun extents in current data set.";
-        errReport(myErr);
-        return -1;
+        myErr = "Plot could not find minimum and maximum extents"
+                " in current data set.";
     }
-    if (extents.size() < 6) {
-        extents.push_back(minExtents[0]);
-        extents.push_back(minExtents[1]);
-        extents.push_back(minExtents[2]);
-        extents.push_back(maxExtents[0]);
-        extents.push_back(maxExtents[1]);
-        extents.push_back(maxExtents[2]);
-
-        extents.push_back(minExtents[0]);
-        extents.push_back(minExtents[1]);
-        extents.push_back(minExtents[2]);
-        extents.push_back(maxExtents[0]);
-        extents.push_back(maxExtents[1]);
-        extents.push_back(maxExtents[2]);
+    if (_extents.size() < 6) {
+        _extents.push_back(minExts[0]);
+        _extents.push_back(minExts[1]);
+        _extents.push_back(minExts[2]);
+        _extents.push_back(maxExts[0]);
+        _extents.push_back(maxExts[1]);
+        _extents.push_back(maxExts[2]);
     } else {
-        extents[0] = minExtents[0];
-        extents[1] = minExtents[1];
-        extents[2] = minExtents[2];
-        extents[3] = maxExtents[0];
-        extents[4] = maxExtents[1];
-        extents[5] = maxExtents[2];
+        _extents[0] = minExts[0];
+        _extents[1] = minExts[1];
+        _extents[2] = minExts[2];
+        _extents[3] = maxExts[0];
+        _extents[4] = maxExts[1];
+        _extents[5] = maxExts[2];
     }
-    return 1;
 }
 
 void Plot::initConstCheckboxes() {
@@ -1222,13 +1610,15 @@ void Plot::initVariables() {
     addVarCombo->addItem("Add Variable:");
     vector<string> vars;
 
-    vars = _dm->GetDataVarNames();
+    vars = _dm->GetDataVarNames(3, true);
     for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
         _vars.push_back(*it);
         _vars3d.push_back(*it);
     }
-
-    _defaultVar = _vars[0];
+    vars = _dm->GetDataVarNames(2, true);
+    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
+        _vars.push_back(*it);
+    }
 
     sort(_vars.begin(), _vars.end());
 
@@ -1242,7 +1632,8 @@ void Plot::newVarAdded(int index) {
 
     if (index == 0)
         return;
-    string varName = addVarCombo->currentText().toStdString();
+    //string varName = addVarCombo->currentText().toStdString();
+    string varName = addVarCombo->itemText(index).toStdString();
 
     if (std::find(_uVars.begin(), _uVars.end(), varName) != _uVars.end())
         return;
@@ -1275,19 +1666,22 @@ void Plot::newVarAdded(int index) {
     addVarCombo->setCurrentIndex(0);
 
     removeVarCombo->addItem(QString::fromStdString(varName));
-    addVarCombo->removeItem(index);
+    //addVarCombo->removeItem(index);
 
     // If all variables are 2D, disable Z axis controllers
     //
     bool varsAre2D = true;
     for (int i = 0; i < _uVars.size(); i++) {
-#ifdef FIXED
-        if (_dm->GetVarType(_uVars[i]) == DataMgr::VAR3D) {
+        //		if (_dm->GetVarType(_uVars[i]) == DataMgr::VAR3D) {
+        size_t nDims;
+        _dm->GetNumDimensions(_uVars[i], nDims);
+        if (nDims == 3) {
             varsAre2D = false;
         }
-#endif
     }
     varsAre2D ? enableZControllers(false) : enableZControllers(true);
+
+    _params->SetVarNames(_uVars);
 }
 
 void Plot::enableZControllers(bool s) {
@@ -1305,7 +1699,8 @@ void Plot::enableZControllers(bool s) {
     if (s) {
         spaceP1ZEdit->setText(QString::number(_extents[2]));
         spaceP2ZEdit->setText(QString::number(_extents[5]));
-        timeZEdit->setText(QString::number(_extents[2]));
+        timeZEdit->setText(QString::number((_extents[2] + _extents[5]) / 2.f));
+        _timeZRange->setUserMin((_extents[2] + _extents[5]) / 2.f);
     } else {
         spaceP1ZEdit->clear();
         spaceP2ZEdit->clear();
@@ -1337,6 +1732,7 @@ void Plot::removeVar(int index) {
     }
 
     removeVarCombo->setCurrentIndex(0);
+    _params->SetVarNames(_uVars);
 }
 
 void Plot::initTables() {

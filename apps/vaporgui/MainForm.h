@@ -38,6 +38,7 @@
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
 #include "AnimationParams.h"
+#include "MiscParams.h"
 
 class QApplication;
 class QSpacerItem;
@@ -138,6 +139,12 @@ class MainForm : public QMainWindow {
                     _paramsMgr->GetParams(AnimationParams::GetClassType()));
     }
 
+    MiscParams *GetMiscParams() const {
+        assert(_paramsMgr != NULL);
+        return ((MiscParams *)
+                    _paramsMgr->GetParams(MiscParams::GetClassType()));
+    }
+
   protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
@@ -204,6 +211,7 @@ class MainForm : public QMainWindow {
     QAction *_dataImportWRF_Action;
     QAction *_dataImportCF_Action;
     QAction *_dataLoad_MetafileAction;
+    QAction *_dataClose_MetafileAction;
     QAction *_fileNew_SessionAction;
     QAction *_plotAction;
     QAction *_statsAction;
@@ -256,6 +264,7 @@ class MainForm : public QMainWindow {
     void helpContents();
     void helpAbout();
     void loadData(string fileName = "");
+    void closeData(string fileName = "");
     void importWRFData();
     void importCFData();
     void sessionNew();

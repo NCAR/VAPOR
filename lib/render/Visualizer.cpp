@@ -23,7 +23,11 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#ifdef WIN32
+#include <tiff/tiffio.h>
+#else
 #include <tiffio.h>
+#endif
 
 #ifdef WIN32
 #pragma warning(disable : 4996)
@@ -176,7 +180,6 @@ int Visualizer::paintEvent() {
         MyBase::SetErrMsg("Invalid time step");
         return -1;
     }
-    cout << "Visualizer::paintEvent() time step : " << timeStep << endl;
 
     if (paintSetup(timeStep))
         return -1;
@@ -186,9 +189,11 @@ int Visualizer::paintEvent() {
         _previousTimeStep = timeStep;
     }
 
-    //Draw the domain frame and other in-scene features
-    if (m_vizFeatures)
+    if (m_vizFeatures) {
+        //Draw the domain frame and other in-scene features
+        //
         m_vizFeatures->InScenePaint(timeStep);
+    }
 
     //Prepare for Renderers
     //Make the depth buffer writable
@@ -262,6 +267,8 @@ int Visualizer::paintEvent() {
 
         //Draw any features that are overlaid on scene
 
+        if (m_vizFeatures)
+            m_vizFeatures->DrawText();
         renderColorbars(timeStep);
 #ifdef DEAD
         if (m_vizFeatures)

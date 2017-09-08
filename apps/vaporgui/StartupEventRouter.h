@@ -23,7 +23,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "startupTab.h"
+#include "ui_startupTab.h"
 
 QT_USE_NAMESPACE
 
