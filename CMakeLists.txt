@@ -66,12 +66,13 @@ else ()
 	set (INSTALL_BIN_DIR bin)
 	set (INSTALL_LIB_DIR lib)
 endif ()
+set (INSTALL_SHARE_DIR share)
 
 add_subdirectory (apps)
 add_subdirectory (lib)
 add_subdirectory (include)
+add_subdirectory (share)
 add_subdirectory (test_apps)
-add_subdirectory (share/Doxygen)
 
 ###############################################################################
 #                            CPack Installation                               #
