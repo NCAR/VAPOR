@@ -797,7 +797,7 @@ int Plot::getSpatialVectors(const vector<string> vars, map<string, vector<float>
         string        var = vars[i];
         vector<float> vec;
 
-        StructuredGrid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio, minu, maxu);
+        Grid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio, minu, maxu);
         if (!sg) { return (-1); }
 
         sg->GetEnclosingRegion(minu, maxu, minv, maxv);
@@ -892,7 +892,7 @@ int Plot::getTemporalVectors(const vector<string> vars, map<string, vector<float
         vector<float> vec;
 
         for (size_t ts = ts0; ts <= ts1; ts++) {
-            StructuredGrid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio);
+            Grid *sg = _dm->GetVariable(ts, var, _refLevel, _cRatio);
             if (!sg) { return (-1); }
 
             float val = sg->GetValue(xyz[0], xyz[1], xyz[2]);

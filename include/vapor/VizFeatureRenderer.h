@@ -20,7 +20,7 @@
 #ifndef VIZFEATURERENDERER_H
 #define VIZFEATURERENDERER_H
 
-#include <vapor/StructuredGrid.h>
+#include <vapor/Grid.h>
 #include <vapor/Renderer.h>
 
 namespace VAPoR {
