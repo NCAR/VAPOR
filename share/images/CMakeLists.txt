@@ -1,0 +1,15 @@
+file (GLOB TMS_FILES *.tms)
+file (GLOB PNG_FILES *.png)
+string (REPLACE ".tms" "" TMS_DIRS ${TMS_FILES})
+
+install (
+	FILES ${TMS_FILES} ${PNG_FILES}
+	DESTINATION ${INSTALL_SHARE_DIR}/images
+	COMPONENT Share
+	)
+
+install (
+	DIRECTORY ${TMS_DIRS}
+	DESTINATION ${INSTALL_SHARE_DIR}/images
+	COMPONENT Share
+	)
