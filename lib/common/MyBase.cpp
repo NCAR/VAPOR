@@ -240,7 +240,7 @@ std::vector<std::string> &Wasp::SplitString(const std::string &s, char delim, st
 
 namespace {
 
-template<class T> vector<T> &splitString(const std::string &s, char delim, std::vector<T> &elems)
+template<class T> vector<T> &splitStringTemplate(const std::string &s, char delim, std::vector<T> &elems)
 {
     elems.clear();
     vector<string> tokens;
@@ -256,13 +256,13 @@ template<class T> vector<T> &splitString(const std::string &s, char delim, std::
 
 };    // namespace
 
-std::vector<size_t> &Wasp::SplitString(const std::string &s, char delim, std::vector<size_t> &elems) { return (splitString(s, delim, elems)); }
+std::vector<size_t> &Wasp::SplitString(const std::string &s, char delim, std::vector<size_t> &elems) { return (splitStringTemplate(s, delim, elems)); }
 
-std::vector<int> &Wasp::SplitString(const std::string &s, char delim, std::vector<int> &elems) { return (splitString(s, delim, elems)); }
+std::vector<int> &Wasp::SplitString(const std::string &s, char delim, std::vector<int> &elems) { return (splitStringTemplate(s, delim, elems)); }
 
-std::vector<float> &Wasp::SplitString(const std::string &s, char delim, std::vector<float> &elems) { return (splitString(s, delim, elems)); }
+std::vector<float> &Wasp::SplitString(const std::string &s, char delim, std::vector<float> &elems) { return (splitStringTemplate(s, delim, elems)); }
 
-std::vector<double> &Wasp::SplitString(const std::string &s, char delim, std::vector<double> &elems) { return (splitString(s, delim, elems)); }
+std::vector<double> &Wasp::SplitString(const std::string &s, char delim, std::vector<double> &elems) { return (splitStringTemplate(s, delim, elems)); }
 
 unsigned long long Wasp::GetBits64(unsigned long long targ, int pos, int n) { return ((targ >> (pos + 1 - n)) & ~(~0ULL << n)); }
 

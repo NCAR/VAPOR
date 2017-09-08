@@ -311,8 +311,6 @@ int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel
     }
     glColor3fv(fcolor);
 
-    // Why is the grid stored as longs, not ints?
-    //
     vector<long> longGrid = bParams->GetGrid();
     int          rakeGrid[3];
     rakeGrid[0] = (int)longGrid[0];

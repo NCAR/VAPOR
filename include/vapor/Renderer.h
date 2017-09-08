@@ -25,6 +25,7 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
+#include <vapor/textRenderer.h>
 
 namespace VAPoR {
 
@@ -218,6 +219,9 @@ public:
     //! Render the colorbar for this renderer (if it has one)
     void renderColorbar();
 
+    //! Render colorbar text
+    void renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHeight, float llx, float lly, float urx, float ury);
+
     ///@}
 
     //! Obtain the current RenderParams instance
@@ -261,6 +265,8 @@ protected:
     static const int _imgHgt;
     static const int _imgWid;
     unsigned char *  _colorbarTexture;
+    TextObject *     _textObject;
+    string           _fontFile;
 
 private:
     size_t _timestep;
@@ -276,20 +282,11 @@ private:
 //
 /////////////////////////////////////////////////////////////////////////
 
-class PARAMS_API RendererFactory {
+class RENDER_API RendererFactory {
 public:
-    static RendererFactory *Instance()
-    {
-        static RendererFactory instance;
-        return &instance;
-    }
+    static RendererFactory *Instance();
 
-    void RegisterFactoryFunction(string myName, string myParamsName, function<Renderer *(const ParamsMgr *, string, string, string, string, DataMgr *)> classFactoryFunction)
-    {
-        // register the class factory function
-        _factoryFunctionRegistry[myName] = classFactoryFunction;
-        _factoryMapRegistry[myName] = myParamsName;
-    }
+    void RegisterFactoryFunction(string myName, string myParamsName, function<Renderer *(const ParamsMgr *, string, string, string, string, DataMgr *)> classFactoryFunction);
 
     Renderer *(CreateInstance(const ParamsMgr *pm, string winName, string dataSetName, string classType, string instName, DataMgr *dataMgr));
 
@@ -301,9 +298,9 @@ private:
     map<string, function<Renderer *(const ParamsMgr *, string, string, string, string, DataMgr *)>> _factoryFunctionRegistry;
     map<string, string>                                                                             _factoryMapRegistry;
 
-    RendererFactory() {}
-    RendererFactory(const RendererFactory &) {}
-    RendererFactory &operator=(const RendererFactory &) { return *this; }
+    RendererFactory();
+    RendererFactory(const RendererFactory &);
+    RendererFactory &operator=(const RendererFactory &);
 };
 
 //////////////////////////////////////////////////////////////////////////

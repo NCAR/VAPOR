@@ -38,6 +38,7 @@
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
 #include "AnimationParams.h"
+#include "MiscParams.h"
 
 class QApplication;
 class QSpacerItem;
@@ -139,6 +140,12 @@ public:
         return ((AnimationParams *)_paramsMgr->GetParams(AnimationParams::GetClassType()));
     }
 
+    MiscParams *GetMiscParams() const
+    {
+        assert(_paramsMgr != NULL);
+        return ((MiscParams *)_paramsMgr->GetParams(MiscParams::GetClassType()));
+    }
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
@@ -202,6 +209,7 @@ private:
     QAction *_dataImportWRF_Action;
     QAction *_dataImportCF_Action;
     QAction *_dataLoad_MetafileAction;
+    QAction *_dataClose_MetafileAction;
     QAction *_fileNew_SessionAction;
     QAction *_plotAction;
     QAction *_statsAction;
@@ -254,6 +262,7 @@ private slots:
     void helpContents();
     void helpAbout();
     void loadData(string fileName = "");
+    void closeData(string fileName = "");
     void importWRFData();
     void importCFData();
     void sessionNew();

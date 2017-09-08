@@ -1,9 +1,9 @@
 #ifndef IMAGESUBTABS_H
 #define IMAGESUBTABS_H
 
-#include "ImageAppearanceGUI.h"
-#include "ImageVariablesGUI.h"
-#include "ImageGeometryGUI.h"
+#include "ui_ImageAppearanceGUI.h"
+#include "ui_ImageVariablesGUI.h"
+#include "ui_ImageGeometryGUI.h"
 #include "RangeCombos.h"
 #include "vapor/ImageParams.h"
 #include "vapor/GetAppPath.h"

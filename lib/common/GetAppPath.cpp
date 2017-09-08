@@ -14,6 +14,7 @@
 #endif
 #include <vapor/MyBase.h>
 #include "vapor/GetAppPath.h"
+#include "vapor/CMakeConfig.h"
 #ifdef WIN32
     #pragma warning(disable : 4996)
 #endif
@@ -134,7 +135,7 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
         }
     }
 #endif
-#ifndef WIN32    // For both Linux and Mac:
+    // #ifndef WIN32 //For both Linux and Mac:
     if (path.empty()) {
         if (resource.compare("lib") == 0) {
             path.append(DSO_DIR);
@@ -150,7 +151,7 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
             path.append("plugins");
         }
     }
-#endif
+    // #endif
 
     if (path.empty()) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (path empty)");

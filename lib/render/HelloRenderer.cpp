@@ -76,6 +76,10 @@ int HelloRenderer::_paintGL()
     assert(point1.size() == point2.size());
     assert(point1.size() >= 2 && point1.size() <= 3);
 
+    cout << "helloParams point: " << endl;
+    cout << "point1: " << point1[0] << " " << point1[1] << " " << point1[2] << endl;
+    cout << "point2: " << point2[0] << " " << point2[1] << " " << point2[2] << endl;
+
     // Finally, obtain the Grid of the data for the specified region, at requested refinement and lod,
     // using Renderer::getGrids()
     size_t timestep = rParams->GetCurrentTimestep();

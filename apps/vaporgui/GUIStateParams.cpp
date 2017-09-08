@@ -97,6 +97,72 @@ GUIStateParams &GUIStateParams::operator=(const GUIStateParams &rhs)
 //----------------------------------------------------------------------------
 GUIStateParams::~GUIStateParams() {}
 
+//----------------------------------------------------------------------------
+// Getters and Setters
+//----------------------------------------------------------------------------
+
+string GUIStateParams::GetActiveVizName() const
+{
+    string defaultv;
+    return (GetValueString(m_activeVisualizer, defaultv));
+}
+
+void GUIStateParams::SetActiveVizName(string vizWin) { SetValueString(m_activeVisualizer, "Set active visualizer window", vizWin); }
+
+//! Get active renderer class and instance name for a visualizer
+//
+void GUIStateParams::GetActiveRenderer(string vizWin, string &renderType, string &renderInst) const { m_activeRenderer->GetActiveRenderer(vizWin, renderType, renderInst); }
+
+//! Set active renderer class and instance name for a visualizer
+//
+void GUIStateParams::SetActiveRenderer(string vizWin, string renderType, string renderInst) { m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst); }
+
+//! method identifies the current session file
+//! \retval session file path
+string GUIStateParams::GetCurrentSessionPath() const { return (GetValueString(m_sessionFileTag, ".")); }
+
+//! method sets the current session path
+//! \param[in] path string
+void GUIStateParams::SetCurrentSessionPath(string path) { SetValueString(m_sessionFileTag, "Set current session path", path); }
+
+//! method identifies the current session file
+//! \retval session file path
+string GUIStateParams::GetCurrentImagePath() const { return (GetValueString(m_imagePathTag, ".")); }
+
+//! method sets the current session path
+//! \param[in] path string
+void GUIStateParams::SetCurrentImagePath(string path) { SetValueString(m_imagePathTag, "Set current image path", path); }
+
+//! method identifies the current session file
+//! \retval session file path
+string GUIStateParams::GetCurrentTFPath() { return (GetValueString(m_tfPathTag, ".")); }
+
+//! method sets the current session path
+//! \param[in] path string
+void GUIStateParams::SetCurrentTFPath(string path) { SetValueString(m_tfPathTag, "Set current tf path", path); }
+
+//! method identifies the current session file
+//! \retval session file path
+string GUIStateParams::GetCurrentPythonPath() const { return (GetValueString(m_pythonPathTag, ".")); }
+
+//! method sets the current session path
+//! \param[in] path string
+void GUIStateParams::SetCurrentPythonPath(string path) { SetValueString(m_pythonPathTag, "Set current python path", path); }
+
+//! method identifies the current session file
+//! \retval session file path
+string GUIStateParams::GetCurrentFlowPath() const { return (GetValueString(m_flowPathTag, ".")); }
+
+//! method sets the current session path
+//! \param[in] path string
+void GUIStateParams::SetCurrentFlowPath(string path) { SetValueString(m_flowPathTag, "Set current flow path", path); }
+
+MouseModeParams *GUIStateParams::GetMouseModeParams() const { return (m_mouseModeParams); }
+
+//----------------------------------------------------------------------------
+// Funcs
+//----------------------------------------------------------------------------
+
 void GUIStateParams::SetOpenDataSets(const std::vector<string> &paths, const std::vector<string> &names)
 {
     assert(paths.size() == names.size());

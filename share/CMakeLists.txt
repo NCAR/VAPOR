@@ -1,0 +1,6 @@
+add_subdirectory (Doxygen)
+if (${GENERATE_FULL_INSTALLER})
+	add_subdirectory (fonts)
+	add_subdirectory (images)
+	add_subdirectory (shaders)
+endif (${GENERATE_FULL_INSTALLER})

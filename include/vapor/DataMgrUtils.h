@@ -112,14 +112,14 @@ int ConvertLonLatToPCS(const DataMgr *dataMgr, double coords[], int npoints = 1)
 //! \param[out] grid is a vector of Grid* pointers, one
 //! for each variable
 //
-int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
-             std::vector<Grid *> &grids);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
+                     std::vector<Grid *> &grids);
 
-int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr);
 
-int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids);
 
-int GetGrids(DataMgr *dataMgr, size_t ts, string varname, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr);
 
 //! Get the spatial coordinate axes for a variable
 //!
@@ -153,7 +153,7 @@ bool GetAxes(const DataMgr *dataMgr, string varname, vector<int> &axes);
 //!
 //! \sa GetAxes()
 //
-bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double> &minExts, vector<double> &maxExts);
+VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double> &minExts, vector<double> &maxExts);
 
 //! Get coordinate extents for one or more variables.
 //!
@@ -178,7 +178,7 @@ bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double
 //!
 //! \sa GetAxes()
 //
-bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes);
+VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes);
 
 #ifdef DEAD
 

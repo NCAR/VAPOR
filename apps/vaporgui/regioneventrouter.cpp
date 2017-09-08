@@ -38,7 +38,7 @@
 #include <QListWidgetItem>
 #include "GL/glew.h"
 #include "vapor/regionparams.h"
-#include "regionTab.h"
+#include "ui_regionTab.h"
 
 #include "ErrorReporter.h"
 #include <qlineedit.h>

@@ -22,6 +22,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #if defined(DARWIN)
     #include <CoreServices/CoreServices.h>
