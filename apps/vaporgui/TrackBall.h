@@ -46,7 +46,7 @@
 #ifndef	TRACKBALL_H
 #define	TRACKBALL_H
 
-#ifdef DARWIN
+#ifdef Darwin
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
@@ -63,7 +63,7 @@
 /* The Trackball package gives that nice 3D rotation interface.
  * A TrackBall class is needed for each rotated scene.
  */
-class RENDER_API Trackball {
+class Trackball {
 public:
 	Trackball();
 	Trackball(float scale[3]);

@@ -19,6 +19,7 @@
 #ifndef VIZWIN_H
 #define VIZWIN_H
 
+#include <GL/glew.h>
 #include <QGLWidget>
 #include "VizWinMgr.h"
 #include "vapor/Visualizer.h"

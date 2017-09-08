@@ -29,7 +29,7 @@
 #include "GL/glew.h"
 #include "qcolordialog.h"
 
-#include "../images/fileopen.xpm"
+#include "images/fileopen.xpm"
 #include <qlabel.h>
 #include <QFileDialog>
 #include <vector>

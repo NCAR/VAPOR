@@ -1,7 +1,7 @@
 #ifndef REGIONSLIDERWIDGET_H
 #define REGIONSLIDERWIDGET_H
 
-#include "GeometryWidgetGUI.h"
+#include "ui_GeometryWidgetGUI.h"
 #include "RangeCombos.h"
 
 namespace VAPoR {
@@ -9,7 +9,6 @@ namespace VAPoR {
 	class ParamsMgr;
 	class DataMgr;
 }
-
 
 class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 	

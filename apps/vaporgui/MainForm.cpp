@@ -163,7 +163,6 @@ MainForm::MainForm(
 	vector<QString> files, QApplication* app, QWidget* parent, const char*)
     : QMainWindow( parent)
 {
-
 	QString fileName("");
 	setAttribute(Qt::WA_DeleteOnClose);
 	_mainForm = this;
@@ -205,6 +204,9 @@ MainForm::MainForm(
 	myParams.push_back(AppSettingsParams::GetClassType());
 	myParams.push_back(StartupParams::GetClassType());
 	myParams.push_back(AnimationParams::GetClassType());
+	myParams.push_back(MiscParams::GetClassType());
+	myParams.push_back(StatisticsParams::GetClassType());
+	myParams.push_back(PlotParams::GetClassType());
 	
 	// Create the Control executive before the VizWinMgr. Disable
 	// state saving until completely initalized
@@ -449,6 +451,10 @@ void MainForm::hookupSignals() {
 		this, SLOT( loadData() ) 
 	);
 	connect( 
+		_dataClose_MetafileAction, SIGNAL( triggered() ),
+		this, SLOT( closeData() ) 
+	);
+	connect( 
 		_dataImportWRF_Action, SIGNAL( triggered() ),
 		this, SLOT( importWRFData() ) 
 	);
@@ -602,6 +608,7 @@ void MainForm::createMenus(){
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
 	_File->addAction(_dataLoad_MetafileAction );
+	_File->addAction(_dataClose_MetafileAction );
     _File->addAction(_dataImportWRF_Action);
     _File->addAction(_dataImportCF_Action);
     _File->addAction(_fileNew_SessionAction);
@@ -671,6 +678,7 @@ void MainForm::createActions(){
 	_helpAboutAction->setEnabled(true);
     
     _dataLoad_MetafileAction = new QAction( this);
+	_dataClose_MetafileAction = new QAction( this );
 	_dataImportWRF_Action = new QAction( this );
 	_dataImportCF_Action = new QAction( this );
 	_fileNew_SessionAction = new QAction( this );
@@ -684,6 +692,7 @@ void MainForm::createActions(){
 	_plotAction = new QAction(this);
 	_plotAction->setEnabled(false);
 	_statsAction = new QAction(this);
+	_statsAction->setEnabled(false);
 
 	//Then do the actions for the toolbars:
 	//Create an exclusive action group for the mouse mode toolbar:
@@ -781,6 +790,8 @@ void MainForm::languageChange()
     _dataLoad_MetafileAction->setText( tr( "Open a VDC in Current Session" ) );
 	_dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
 	_dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
+    _dataClose_MetafileAction->setText( tr( "Close a VDC in Current Session" ) );
+	_dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
 	_dataImportWRF_Action->setText(tr("Import WRF-ARW files in current session"));
 	_dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
 	_dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
@@ -1114,6 +1125,10 @@ void MainForm::loadData(string fileName)
 		"Vapor VDC files (*.*)", "vdc", false
 	);
 
+}
+
+void MainForm::closeData(string fileName) {
+	cout << "how do we close a dataset?" << endl;
 }
 	
 //import WRF data into current session
@@ -1821,6 +1836,8 @@ void MainForm::enableWidgets(bool onOff) {
 	_windowSelector->setEnabled(onOff);
 	_vizWinMgr->setEnabled(onOff);
 	_tabMgr->setEnabled(onOff);
+	_statsAction->setEnabled(onOff);
+	_plotAction->setEnabled(onOff);
 
 	AnimationEventRouter* aRouter = (AnimationEventRouter*)
 		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
@@ -1916,21 +1933,23 @@ void MainForm::launchSeedMe(){
 }
 
 void MainForm::launchStats(){
-#ifdef	DEAD
     if (!_stats) _stats = new Statistics(this);
-	DataMgr *dataMgr = _controlExec->GetDataMgr();
-	if (dataMgr){
-        _stats->initDataMgr(dataMgr);
-        _stats->showMe();
-    } 
+//	DataStatus* ds = _controlExec->getDataStatus();
+//	string dm = ds->GetDataMgrNames()[0];
+//	DataMgr *dataMgr = ds->GetDataMgr(dm);
+//	if (dataMgr){
+//      _stats->initDataMgr(dataMgr);
+//        _stats->showMe();
+//    }
+	if (_controlExec) {
+		_stats->initControlExec(_controlExec);
+	} 
 	_stats->showMe();   
-#endif
 }
-void MainForm::launchPlotUtility(){
-//    DataMgr *dataMgr = Session::getInstance()->getDataMgr();
-    if (! _plot) _plot = new Plot(this);
 
-//    _plot->Initialize(dataMgr, _vizWinMgr);
+void MainForm::launchPlotUtility(){
+    if (! _plot) _plot = new Plot(this);
+    _plot->Initialize(_controlExec, _vizWinMgr);
 }
 
 
