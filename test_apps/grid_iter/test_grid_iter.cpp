@@ -222,7 +222,7 @@ void test_node_iterator(const StructuredGrid *sg) {
 
     double t0 = Wasp::GetTime();
 
-    StructuredGrid::ConstIterator itr;
+    Grid::ConstIterator itr;
     double accum = 0.0;
     size_t count = 0;
     for (itr = sg->cbegin(opt.roimin, opt.roimax); itr != sg->cend(); ++itr) {

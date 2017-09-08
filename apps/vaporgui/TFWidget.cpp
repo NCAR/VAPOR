@@ -218,7 +218,7 @@ void TFWidget::getRange(float range[2],
     Box *myBox = _rParams->GetBox();
     myBox->GetExtents(minExt, maxExt);
 
-    StructuredGrid *myVar;
+    Grid *myVar;
     myVar = _dataMgr->GetVariable(ts, varName, ref, cmp, minExt, maxExt);
     myVar->GetRange(range);
 
