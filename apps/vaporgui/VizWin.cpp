@@ -111,8 +111,13 @@ void VizWin::getNearFarDist(
 	//First check full box
 	double wrk[3], cor[3], boxcor[3];
 	double camPosBox[3],dvdir[3];
+#ifdef WIN32
+	double maxProj = -DBL_MAX;
+	double minProj = DBL_MAX;
+#else
 	double maxProj = -std::numeric_limits<double>::max();
 	double minProj = std::numeric_limits<double>::max();
+#endif
 
 	DataStatus *dataStatus = _controlExec->getDataStatus();
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
