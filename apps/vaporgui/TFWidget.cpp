@@ -371,12 +371,19 @@ void TFWidget::connectWidgets() {
             this, SLOT(setSingleColor()));
     connect(mappingFrame, SIGNAL(updateParams()), this,
             SLOT(setRange()));
+    connect(mappingFrame, SIGNAL(endChange()), this,
+            SLOT(forwardTFChange()));
+}
+
+void TFWidget::forwardTFChange() {
+    emit emitChange();
 }
 
 void TFWidget::setRange() {
     float min = mappingFrame->getMinEditBound();
     float max = mappingFrame->getMaxEditBound();
     setRange(min, max);
+    emit emitChange();
 }
 
 void TFWidget::setRange(double min, double max) {
@@ -395,6 +402,7 @@ void TFWidget::setRange(double min, double max) {
         updateHisto();
     } else
         mappingFrame->fitToView();
+    emit emitChange();
 }
 
 void TFWidget::updateHisto() {

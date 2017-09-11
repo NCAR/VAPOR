@@ -93,6 +93,16 @@ void ContourParams::_init() {
     assert(minExt.size() == maxExt.size() && minExt.size() == 3);
 
     GetBox()->SetExtents(minExt, maxExt);
+
+    vector<double> cVals;
+    int spacing = GetContourSpacing();
+    int numContours = GetNumContours();
+    double min = GetContourMin();
+    for (size_t i = 0; i < numContours; i++) {
+        cVals.push_back(min + spacing * i);
+    }
+    SetIsovalues(cVals);
+
     //GetBox()->SetPlanar(true);
     //GetBox()->SetOrientation(2);
 }
