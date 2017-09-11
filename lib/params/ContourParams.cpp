@@ -73,18 +73,18 @@ void ContourParams::_init() {
 
 	// Only 2D variables supported. Override base class
 	//
-    vector <string> varnames = _dataMgr->GetDataVarNames(3, true);
+	vector <string> varnames = _dataMgr->GetDataVarNames(3, true);
 	string varname;
 
 	if (! varnames.empty()) varname = varnames[0];
-    SetVariableName(varname);
+	SetVariableName(varname);
 
 	// Initialize 2D box
 	//
 	if (varname.empty()) return;
 
-    vector <double> minExt, maxExt;
-    int rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
+	vector <double> minExt, maxExt;
+	int rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
 
 	SetUseSingleColor(true);
 	float rgb[] = {.95,.66,.27};
@@ -97,6 +97,16 @@ void ContourParams::_init() {
 	assert(minExt.size()==maxExt.size() && minExt.size()==3);
 
 	GetBox()->SetExtents(minExt, maxExt);
+
+	vector<double> cVals;
+	int spacing = GetContourSpacing();
+	int numContours = GetNumContours();
+	double min = GetContourMin();
+	for (size_t i=0; i<numContours; i++) {
+		cVals.push_back(min + spacing*i);
+	}
+	SetIsovalues(cVals);
+
 	//GetBox()->SetPlanar(true);	
 	//GetBox()->SetOrientation(2);	
 }
