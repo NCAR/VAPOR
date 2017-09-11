@@ -53,6 +53,7 @@ class ContourEventRouter : public QTabWidget, public RenderEventRouter {
     string GetType() const { return GetClassType(); }
 
   protected:
+    virtual void _initializeTab();
     virtual void _updateTab();
 
   private:
