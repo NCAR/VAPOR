@@ -58,8 +58,6 @@ string get_path_from_bundle(const string &app) {
     componentStr[range.length] = 0;
 	string s = componentStr;
 
-	if (s.find(bundlename) == string::npos) return(path); 
-
     path = s;
     return(path);
 
@@ -149,7 +147,7 @@ else{
 				path.append("MacOS");
 			}
 			else if (resource.compare("share") == 0) {
-				path.append("SharedSupport");
+				path.append("share");
 			}
 			else {	// must be plugins
 				path.append("Plugins");
