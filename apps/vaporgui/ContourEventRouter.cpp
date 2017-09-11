@@ -81,6 +81,13 @@ void ContourEventRouter::GetWebHelp(
                                        "http://www.vapor.ucar.edu/docs/vapor-gui-help/ContourAppearance"));
 }
 
+void ContourEventRouter::_initializeTab() {
+
+    ContourParams *rParams = (ContourParams *)GetActiveParams();
+
+    cout << "ContourEventRouter::_initializeTab() : override param defaults here" << endl;
+}
+
 void ContourEventRouter::_updateTab() {
     //The variable tab updates itself:
     _variables->Update(
