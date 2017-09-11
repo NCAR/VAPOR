@@ -1,4 +1,4 @@
-file (GLOB FONT_FILES *.tff)
+file (GLOB FONT_FILES *.ttf)
 
 install (
 	FILES ${FONT_FILES}
