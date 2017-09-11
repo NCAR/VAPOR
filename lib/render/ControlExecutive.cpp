@@ -31,7 +31,7 @@ ControlExec::~ControlExec()
 //#define DEBUG
 #ifdef DEBUG
     const vector<XmlNode *> &nodes = XmlNode::GetAllocatedNodes();
-    for (int i = 0; i < nodes.size(); i++) { cout << "   " << nodes[i]->GetTag() << " " << nodes[i] << endl; }
+    for (int i = 0; i < nodes.size(); i++) { cout << "   " << nodes[i]->GetTag() << " " << XmlNode::streamOut(cout, nodes[i]) << endl; }
 #endif
 
     if (_paramsMgr) delete _paramsMgr;
@@ -41,7 +41,7 @@ ControlExec::~ControlExec()
 
 #ifdef DEBUG
 
-    for (int i = 0; i < nodes.size(); i++) { cout << "   " << nodes[i]->GetTag() << " " << nodes[i] << endl; }
+    for (int i = 0; i < nodes.size(); i++) { cout << "   " << nodes[i]->GetTag() << " " << XmlNode::streamOut(cout, nodes[i]) << endl; }
 #endif
 }
 
@@ -101,6 +101,7 @@ int ControlExec::InitializeViz(string winName)
     int rc = shaderMgr->LoadShaders();
     if (rc < 0) {
         SetErrMsg("Failed to initialize GLSL shaders in dir %s", shaderPath.c_str());
+        printf("%s\n", GetErrMsg());
         delete shaderMgr;
         return (-1);
     }
@@ -486,7 +487,7 @@ int ControlExec::SaveSession(string filename)
     }
 
     const XmlNode *node = _paramsMgr->GetXMLRoot();
-    fileout << *node;
+    XmlNode::streamOut(fileout, *node);
     if (fileout.bad()) {
         SetErrMsg("Unable to write output session file : %M");
         return (-1);

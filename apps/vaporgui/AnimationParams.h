@@ -35,7 +35,7 @@
 //! When this class is local, it controls the time-steps in one visualizer.
 //! The global (shared) AnimationParams controls the animation in any number of visualizers.
 
-class PARAMS_API AnimationParams : public QObject, public VAPoR::ParamsBase {
+class AnimationParams : public QObject, public VAPoR::ParamsBase {
     Q_OBJECT
 
 signals:

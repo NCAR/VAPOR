@@ -2,9 +2,9 @@
 #define CONTOURSUBTABS_H
 
 #include "vapor/ContourParams.h"
-#include "ContourAppearanceGUI.h"
-#include "ContourVariablesGUI.h"
-#include "ContourGeometryGUI.h"
+#include "ui_ContourAppearanceGUI.h"
+#include "ui_ContourVariablesGUI.h"
+#include "ui_ContourGeometryGUI.h"
 #include "RangeCombos.h"
 
 namespace VAPoR {

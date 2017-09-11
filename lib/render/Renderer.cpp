@@ -576,6 +576,19 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
 //
 /////////////////////////////////////////////////////////////////////////
 
+RendererFactory *RendererFactory::Instance()
+{
+    static RendererFactory instance;
+    return &instance;
+}
+
+void RendererFactory::RegisterFactoryFunction(string myName, string myParamsName, function<Renderer *(const ParamsMgr *, string, string, string, string, DataMgr *)> classFactoryFunction)
+{
+    // register the class factory function
+    _factoryFunctionRegistry[myName] = classFactoryFunction;
+    _factoryMapRegistry[myName] = myParamsName;
+}
+
 Renderer *RendererFactory::CreateInstance(const ParamsMgr *pm, string winName, string dataSetName, string classType, string instName, DataMgr *dataMgr)
 {
     Renderer *instance = NULL;
@@ -618,3 +631,7 @@ vector<string> RendererFactory::GetFactoryNames() const
     for (itr = _factoryFunctionRegistry.begin(); itr != _factoryFunctionRegistry.end(); ++itr) { names.push_back(itr->first); }
     return (names);
 }
+
+RendererFactory::RendererFactory() {}
+RendererFactory::RendererFactory(const RendererFactory &) {}
+RendererFactory &RendererFactory::operator=(const RendererFactory &) { return *this; }
