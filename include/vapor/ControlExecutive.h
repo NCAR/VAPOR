@@ -21,14 +21,6 @@ class RENDER_API ControlExec : public MyBase {
   public:
     //! Initialize the control executive
     //!
-    //! \sa ParamsMgr();
-    //
-    ControlExec() {
-        ControlExec(std::vector<string>());
-    }
-
-    //! Initialize the control executive
-    //!
     //! \param[in] appParamsNames A vector of unique ParamsBase class
     //! \param[in] cacheSizeMB Size of data cache expressed in Megabytes
     //!
@@ -40,6 +32,15 @@ class RENDER_API ControlExec : public MyBase {
         std::vector<string> appParamsNames,
         size_t cacheSize = 1000, int nThreads = 0);
     virtual ~ControlExec();
+
+    //! Initialize the control executive
+    //!
+    //! \sa ParamsMgr();
+    //
+    ControlExec() {
+        std::vector<string> appParamsNames;
+        ControlExec(appParamsNames, 1000, 0); // Full function needed for WIN32
+    }
 
     //! Set the ControlExec to a default state:
     //! Remove all visualizers

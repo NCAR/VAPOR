@@ -32,7 +32,7 @@
 //! \version 3.0
 //! \date    April 2014
 //!
-class PARAMS_API MouseModeParams : public VAPoR::ParamsBase {
+class MouseModeParams : public VAPoR::ParamsBase {
 
   public:
     //! Create a MouseModeParams object from scratch

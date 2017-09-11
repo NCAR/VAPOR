@@ -14,6 +14,7 @@
 #endif
 #include <vapor/MyBase.h>
 #include "vapor/GetAppPath.h"
+#include "vapor/CMakeConfig.h"
 #ifdef WIN32
 #pragma warning(disable : 4996)
 #endif
@@ -59,9 +60,6 @@ string get_path_from_bundle(const string &app) {
     strncpy(componentStr, (const char *)&buffer[range.location], range.length);
     componentStr[range.length] = 0;
     string s = componentStr;
-
-    if (s.find(bundlename) == string::npos)
-        return (path);
 
     path = s;
     return (path);
@@ -148,14 +146,14 @@ std::string Wasp::GetAppPath(
                 (resource.compare("") == 0)) {
                 path.append("MacOS");
             } else if (resource.compare("share") == 0) {
-                path.append("SharedSupport");
+                path.append("share");
             } else { // must be plugins
                 path.append("Plugins");
             }
         }
     }
 #endif
-#ifndef WIN32 //For both Linux and Mac:
+    // #ifndef WIN32 //For both Linux and Mac:
     if (path.empty()) {
         if (resource.compare("lib") == 0) {
             path.append(DSO_DIR);
@@ -171,7 +169,7 @@ std::string Wasp::GetAppPath(
             path.append("plugins");
         }
     }
-#endif
+    // #endif
 
     if (path.empty()) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (path empty)");
