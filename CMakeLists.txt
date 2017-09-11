@@ -4,6 +4,7 @@ project (VAPOR)
 set (CMAKE_CXX_STANDARD 11)
 
 # set(CMAKE_VERBOSE_MAKEFILE on)
+set (CMAKE_BUILD_TYPE Debug)
 
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 0)
@@ -23,13 +24,13 @@ option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
 option (BUILD_TEST_APPS "Build test applications" OFF)
-option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" OFF)
+option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" ON)
 
 include_directories ("${PROJECT_BINARY_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # These need to be updatd to change for install build
@@ -61,12 +62,20 @@ if (WIN32)
 	find_library (GLEW glew32)
 	set (INSTALL_BIN_DIR .)
 	set (INSTALL_LIB_DIR .)
+	set (INSTALL_SHARE_DIR share)
+elseif (APPLE)
+	find_library (GLEW GLEW)
+	set (INSTALL_BIN_DIR ./vaporgui.app/Contents/utilities)
+	set (INSTALL_SHARE_DIR ./vaporgui.app/Contents/share)
+	set (INSTALL_LIB_DIR ./vaporgui.app/Contents/lib)
+	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+	set (CMAKE_INSTALL_PREFIX /Applications)
 else ()
 	find_library (GLEW GLEW)
 	set (INSTALL_BIN_DIR bin)
 	set (INSTALL_LIB_DIR lib)
+	set (INSTALL_SHARE_DIR share)
 endif ()
-set (INSTALL_SHARE_DIR share)
 
 add_subdirectory (apps)
 add_subdirectory (lib)
@@ -88,6 +97,8 @@ set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_RC})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "VAPOR")
 set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 set (CPACK_PACKAGE_EXECUTABLES vaporgui;VaporGUI)
+set (CPACK_BINARY_STGZ OFF)
+set (CPACK_BINARY_TGZ OFF)
 
 if (WIN32)
 	set (PRE_INSTALL_LOCAL_PATH "buildutils/NSIS.preInstall.ini")
@@ -121,5 +132,23 @@ if (WIN32)
 	
 	set (CPACK_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildutils")
 endif (WIN32)
+
+if (APPLE)
+	if (${GENERATE_FULL_INSTALLER})
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
+		install (
+			FILES ${INSTALL_LIBS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			DIRECTORY ${INSTALL_FRAMEWORKS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+	endif (${GENERATE_FULL_INSTALLER})
+	set (CPACK_BINARY_DRAGNDROP ON)
+endif (APPLE)
 
 include (CPack)
