@@ -29,7 +29,7 @@
 #include <vapor/CFuncs.h>
 //#include <vapor/MyPython.h>
 #include "SeedMe.h"
-#include "SeedMeGUI.h"
+#include "ui_SeedMeGUI.h"
 
 using namespace std;
 

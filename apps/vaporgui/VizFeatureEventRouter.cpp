@@ -28,7 +28,7 @@
 #include <qlineedit.h>
 #include "GL/glew.h"
 #include "vapor/VizFeatureParams.h"
-#include "vizFeaturesTab.h"
+#include "ui_vizFeaturesTab.h"
 #include "qcolordialog.h"
 
 #include <qlabel.h>

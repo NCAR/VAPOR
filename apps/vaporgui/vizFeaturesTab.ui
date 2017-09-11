@@ -1,0 +1,1843 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>vizFeaturesTab</class>
+ <widget class="QWidget" name="vizFeaturesTab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>418</width>
+    <height>1077</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>418</width>
+    <height>800</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>418</width>
+    <height>1200</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>415</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form1</string>
+  </property>
+  <property name="whatsThis">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This panel specifies properties of each visualizer.  Additional information about this panel is available as a tooltip for each element.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_7">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QFrame" name="frame9">
+       <property name="whatsThis">
+        <string>The global visualizer settings apply to all visualizers.</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <layout class="QHBoxLayout">
+        <item>
+         <layout class="QVBoxLayout">
+          <item>
+           <widget class="QLabel" name="textLabel1_6">
+            <property name="text">
+             <string>Global settings (apply to all visualizers)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="wordWrap">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <widget class="QLabel" name="textLabel1_4_2">
+              <property name="whatsThis">
+               <string>These three stretch factors provide a visual scaling of the data appearance, without changing the actual coordinates or the flow integration.</string>
+              </property>
+              <property name="text">
+               <string>Scene Stretch Factors X, Y, Z:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer20_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>31</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="stretch0Edit">
+              <property name="toolTip">
+               <string>Stretch factor in X direction</string>
+              </property>
+              <property name="whatsThis">
+               <string>These three stretch factors provide a visual scaling of the data appearance, without changing the actual coordinates or the flow integration.</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="stretch1Edit">
+              <property name="toolTip">
+               <string>Stretch factor in Y direction</string>
+              </property>
+              <property name="whatsThis">
+               <string>These three stretch factors provide a visual scaling of the data appearance, without changing the actual coordinates or the flow integration.</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="stretch2Edit">
+              <property name="toolTip">
+               <string>Stretch factor in Z direction</string>
+              </property>
+              <property name="whatsThis">
+               <string>These three stretch factors provide a visual scaling of the data appearance, without changing the actual coordinates or the flow integration.</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout">
+       <item>
+        <widget class="QCheckBox" name="axisArrowCheckbox">
+         <property name="toolTip">
+          <string>show colored X,Y,Z axes in scene</string>
+         </property>
+         <property name="text">
+          <string>Show X,Y,Z (R,G,B) Arrows</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer21">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>81</width>
+           <height>21</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="textLabel1_2">
+       <property name="text">
+        <string>X,Y,Z arrow location relative to current region:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout">
+       <item>
+        <widget class="QLineEdit" name="arrowXEdit">
+         <property name="toolTip">
+          <string>Specify x-coord of axis relative to region in [0,1]</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignHCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="arrowYEdit">
+         <property name="toolTip">
+          <string>Specify y-coord of axis relative to region in [0,1]</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignHCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="arrowZEdit">
+         <property name="toolTip">
+          <string>Specify z-coord of axis relative to region in [0,1]</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignHCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="textLabel2_2">
+       <property name="text">
+        <string>&lt;b&gt;Incidental Geometry in 3D Scene&lt;/b&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="_4">
+       <item>
+        <widget class="QLabel" name="textLabel2_3">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Background color:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer87">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>31</width>
+           <height>21</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="backgroundColorButton">
+         <property name="minimumSize">
+          <size>
+           <width>68</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Click to edit the background color</string>
+         </property>
+         <property name="text">
+          <string>Select</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="backgroundColorEdit">
+         <property name="minimumSize">
+          <size>
+           <width>25</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="_5">
+       <item>
+        <widget class="QCheckBox" name="domainFrameCheckbox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Turn on/off wireframe display of full data domain</string>
+         </property>
+         <property name="text">
+          <string>Display full domain bounds</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer23">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>61</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="_6">
+       <item>
+        <widget class="QLabel" name="textLabel2_2_2">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Domain frame color:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+         <property name="indent">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer54">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>31</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="domainColorButton">
+         <property name="minimumSize">
+          <size>
+           <width>68</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>click to specify color of domain frame</string>
+         </property>
+         <property name="text">
+          <string>Select</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="domainColorEdit">
+         <property name="minimumSize">
+          <size>
+           <width>25</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="_7">
+       <item>
+        <widget class="QCheckBox" name="regionFrameCheckbox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>turn on/off wireframe display of current subregion</string>
+         </property>
+         <property name="text">
+          <string>Display region bounds</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer25_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>81</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="_8">
+       <item>
+        <widget class="QLabel" name="textLabel2_6">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Region frame color:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+         <property name="indent">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer52">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>31</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="regionColorButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>68</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Click to specify color of subregionframe</string>
+         </property>
+         <property name="text">
+          <string>Select</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="regionColorEdit">
+         <property name="minimumSize">
+          <size>
+           <width>25</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout">
+       <item>
+        <widget class="QCheckBox" name="axisAnnotationCheckbox">
+         <property name="toolTip">
+          <string>Check to provide axes with coordinates and tic marks</string>
+         </property>
+         <property name="whatsThis">
+          <string>Check this checkbox to provide coordinate axes and to specify how the axes will be marked and labelled.</string>
+         </property>
+         <property name="text">
+          <string>Enable axis annotation</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer21_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>81</width>
+           <height>21</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QFrame" name="axisAnnotationFrame">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>259</height>
+        </size>
+       </property>
+       <property name="whatsThis">
+        <string>To display (x,y,z)-axes with tic marks and to display coordinates at the tic marks, specify the min and max coordinate values, the number of tic marks on each axis, and the orientation of the tic marks.</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <property name="spacing">
+         <number>1</number>
+        </property>
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
+         <number>1</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="textLabel4">
+            <property name="text">
+             <string>Axis Annotation Properties</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="wordWrap">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <spacer name="spacer129">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>21</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel1_3">
+                <property name="minimumSize">
+                 <size>
+                  <width>25</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Axis origin</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLineEdit" name="axisOriginXEdit">
+                  <property name="maximumSize">
+                   <size>
+                    <width>75</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Specify x-coord of axis origin in user coordinates</string>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="axisOriginYEdit">
+                  <property name="maximumSize">
+                   <size>
+                    <width>75</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Specify y-coord of axis origin in user coordinates</string>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="axisOriginZEdit">
+                  <property name="maximumSize">
+                   <size>
+                    <width>75</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Specify z-coord of axis origin in user coordinates</string>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="spacer124">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
+              <item>
+               <widget class="QLabel" name="textLabel2_7">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Axis color</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QPushButton" name="axisColorButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>100</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>click to specify color of axes, tic marks, and axis labels</string>
+                  </property>
+                  <property name="text">
+                   <string>Select</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="axisColorEdit">
+                  <property name="minimumSize">
+                   <size>
+                    <width>40</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>40</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="spacer125">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>21</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="latLonCheckbox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to use longitude and latitude units on x and y axes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="whatsThis">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When the data is georeferenced, this check box sets axis annotation to be in latitude and longitude units. The axis origin, as well as min and max x/y tics and tic size are all expressed in latitude and longitude units.  Note that latitude and longitude values are not accurate if the data grid is not precisely situated on latitude and longitude lines.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Annotate
+with Lat/Lon</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="spacer131">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>17</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2">
+                <property name="text">
+                 <string>Label text size</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="labelHeightEdit">
+                <property name="toolTip">
+                 <string>Point size of axis labels</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_4">
+                <property name="minimumSize">
+                 <size>
+                  <width>25</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Digits</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="labelDigitsEdit">
+                <property name="toolTip">
+                 <string>Number of digits displayed in axis labels</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_3">
+                <property name="text">
+                 <string>Tic width</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="ticWidthEdit">
+                <property name="toolTip">
+                 <string>Thickness of tic marks, in pixels</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="spacer128">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>18</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2">
+                <property name="text">
+                 <string>Axis</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_6">
+                <property name="text">
+                 <string>X</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_7">
+                <property name="text">
+                 <string>Y</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_8">
+                <property name="text">
+                 <string>Z</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_2">
+                <property name="text">
+                 <string>Min</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="xMinTicEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Minimum coordinate of tic mark on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="yMinTicEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Minimum coordinate of tic mark on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="zMinTicEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Minimum coordinate of tic mark on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_2_2">
+                <property name="text">
+                 <string>Max</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="xMaxTicEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Maximum coordinate of tic mark on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="yMaxTicEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Maximum coordinate of tic mark on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="zMaxTicEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Maximum coordinate of tic mark on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_2_2_2">
+                <property name="text">
+                 <string>Tics</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="xNumTicsEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Number of tic marks on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="yNumTicsEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Number of tic marks on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="zNumTicsEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Number of tic marks on axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_2_2_3">
+                <property name="text">
+                 <string>Tic size</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="xTicSizeEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Length of tic marks in user coordinates or latitude/longitude on this axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="yTicSizeEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Length of tic marks in user coordinates or latitude/longitude on this axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="zTicSizeEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Length of tic marks in user coordinates or latitude/longitude on this axis</string>
+                </property>
+                <property name="text">
+                 <string>20</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignHCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout">
+              <item>
+               <widget class="QLabel" name="textLabel2_7_2_2_5">
+                <property name="text">
+                 <string>Tic orient</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="xTicOrientCombo">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Direction of the tic marks on this axis</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Y</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Z</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="yTicOrientCombo">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Direction of the tic marks on this axis</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>X</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Z</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="zTicOrientCombo">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Direction of the tic marks on this axis</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>X</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Y</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="timeframe">
+       <property name="whatsThis">
+        <string>Each frame of an animation can be identified with either the time step number or (with WRF data) the date/time stamp of the data in the image.</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <layout class="QHBoxLayout">
+        <property name="spacing">
+         <number>1</number>
+        </property>
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
+         <number>1</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout">
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <widget class="QLabel" name="textLabel1_5">
+              <property name="text">
+               <string>Time Annotation:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer44">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>21</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QComboBox" name="timeCombo">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>specify time annotation type</string>
+              </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <property name="maxCount">
+               <number>3</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>No annotation</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Time step number</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Date/time stamp</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <widget class="QLabel" name="textLabel2_8">
+              <property name="toolTip">
+               <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
+              </property>
+              <property name="text">
+               <string>Lower-left coords:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer45">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="timeLLXEdit">
+              <property name="toolTip">
+               <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
+              </property>
+              <property name="text">
+               <string>10</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="timeLLYEdit">
+              <property name="toolTip">
+               <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
+              </property>
+              <property name="text">
+               <string>10</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <widget class="QLabel" name="textLabel2_7_2_5">
+              <property name="text">
+               <string>Text size:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="timeSizeEdit">
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Point size of time annotation</string>
+              </property>
+              <property name="text">
+               <string>20</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer49">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>41</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="textLabel2_7_3">
+              <property name="text">
+               <string>Text color:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="timeColorButton">
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>click to specify color of time annotation</string>
+              </property>
+              <property name="text">
+               <string>Select</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="timeColorEdit">
+              <property name="minimumSize">
+               <size>
+                <width>40</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="spacer13">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>18</width>
+         <height>13</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

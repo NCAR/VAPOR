@@ -28,9 +28,9 @@
 #include <vapor/DataMgr.h>
 #include <vapor/StructuredGrid.h>
 #include <vapor/ControlExecutive.h>
-#include <statsWindow.h>
-#include <errMsg.h>
-#include <RangeController.h>
+#include "ui_statsWindow.h"
+#include "ui_errMsg.h"
+#include "RangeController.h"
 #include <RangeCombos.h>
 #include <StatisticsParams.h>
 

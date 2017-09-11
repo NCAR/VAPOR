@@ -274,7 +274,7 @@ std::vector<std::string> &Wasp::SplitString(
 namespace {
 
 template <class T>
-vector<T> &splitString(
+vector<T> &splitStringTemplate(
     const std::string &s, char delim, std::vector<T> &elems) {
     elems.clear();
     vector<string> tokens;
@@ -292,22 +292,22 @@ vector<T> &splitString(
 
 std::vector<size_t> &Wasp::SplitString(
     const std::string &s, char delim, std::vector<size_t> &elems) {
-    return (splitString(s, delim, elems));
+    return (splitStringTemplate(s, delim, elems));
 }
 
 std::vector<int> &Wasp::SplitString(
     const std::string &s, char delim, std::vector<int> &elems) {
-    return (splitString(s, delim, elems));
+    return (splitStringTemplate(s, delim, elems));
 }
 
 std::vector<float> &Wasp::SplitString(
     const std::string &s, char delim, std::vector<float> &elems) {
-    return (splitString(s, delim, elems));
+    return (splitStringTemplate(s, delim, elems));
 }
 
 std::vector<double> &Wasp::SplitString(
     const std::string &s, char delim, std::vector<double> &elems) {
-    return (splitString(s, delim, elems));
+    return (splitStringTemplate(s, delim, elems));
 }
 
 unsigned long long Wasp::GetBits64(

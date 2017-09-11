@@ -23,7 +23,11 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#ifdef WIN32
+#include <tiff/tiffio.h>
+#else
 #include <tiffio.h>
+#endif
 
 #ifdef WIN32
 #pragma warning(disable : 4996)

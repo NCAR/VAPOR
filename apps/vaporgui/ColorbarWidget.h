@@ -24,8 +24,8 @@
 #include <vector>
 #include <vapor/RenderParams.h>
 #include "RenderEventRouter.h"
-#include "ColorbarWidgetGUI.h"
 #include "RangeCombos.h"
+#include "ui_ColorbarWidgetGUI.h"
 
 namespace VAPoR {
 class ColorbarPbase;

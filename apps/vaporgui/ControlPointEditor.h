@@ -10,7 +10,7 @@
 #ifndef ControlPointEditor_h
 #define ControlPointEditor_h
 
-#include "ControlPointEditorBase.h"
+#include "ui_ControlPointEditorBase.h"
 #include <qdialog.h>
 
 namespace VAPoR {

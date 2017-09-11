@@ -23,7 +23,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "appSettingsTab.h"
+#include "ui_appSettingsTab.h"
 
 namespace VAPoR {
 class ControlExec;
