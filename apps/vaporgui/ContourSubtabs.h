@@ -183,6 +183,17 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
     Combo *_cMinCombo;
     Combo *_spacingCombo;
 
+    void SetIsovalues() {
+        vector<double> cVals;
+        int numContours = _cParams->GetNumContours();
+        double spacing = _cParams->GetContourSpacing();
+        double min = _cParams->GetContourMin();
+        for (size_t i = 0; i < numContours; i++) {
+            cVals.push_back(min + spacing * i);
+        }
+        _cParams->SetIsovalues(cVals);
+    }
+
   private slots:
     void MappingChanged() {
         cout << "mapping changed!" << endl;
@@ -244,64 +255,39 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
             VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
             double lower = mf->getMinMapValue();
             double upper = mf->getMaxMapValue();
-            double min = _cParams->GetContourMin();
-            double spacing = _cParams->GetContourSpacing();
-            int numContours = _cParams->GetNumContours();
+            //			double min = _cParams->GetContourMin();
+            //			double spacing = _cParams->GetContourSpacing();
+            //			int numContours = _cParams->GetNumContours();
 
-            double span = spacing * count + min;
-            if (span > upper) {
-                spacing = (upper - min) / (double)(count - 1);
-                _cParams->SetContourSpacing(spacing);
-            }
+            //			double span = spacing * count + min;
+            //			if (span > upper) {
+            //				spacing = (upper - min) / (double)(count-1);
+            //				_cParams->SetContourSpacing(spacing);
+            //			}
+            double spacing = (upper - lower) / (double)(count - 1);
+            _cParams->SetContourSpacing(spacing);
         }
 
         _cParams->SetNumContours(count);
+        SetIsovalues();
     }
 
     void SetContourMinimum(double min) {
-        bool locked = _cParams->GetLockToTF();
         string varname = _cParams->GetVariableName();
-        // Set the contour minimum within the bounds of the transfer function
-        //
-        if (locked) {
-            VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
-            double lower = mf->getMinMapValue();
-            double upper = mf->getMaxMapValue();
+        int lod = _cParams->GetCompressionLevel();
+        int level = _cParams->GetRefinementLevel();
+        int ts = _cParams->GetCurrentTimestep();
+        VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
+        float range[2];
+        var->GetRange(range);
 
-            if (min < lower)
-                min = lower;
-            if (min > upper)
-                min = upper;
-            _cParams->SetContourMin(min);
+        if (min < range[0])
+            min = range[0];
+        if (min > range[1])
+            min = range[1];
+        _cParams->SetContourMin(min);
 
-            // If the contour spacing now extents beyond the TF bounds,
-            // and we are constraining to the TF bounds (locked==true),
-            // then adjust the spacing accordingly
-            //
-            int numContours = _cParams->GetNumContours();
-            double spacing = _cParams->GetContourSpacing();
-            double span = spacing * numContours + min;
-            if (span > upper) {
-                spacing = (upper - min) / (double)(numContours - 1);
-                _cParams->SetContourSpacing(spacing);
-            }
-        }
-        // Set the contour minimum within the bounds of the variable data
-        //
-        else {
-            int lod = _cParams->GetCompressionLevel();
-            int level = _cParams->GetRefinementLevel();
-            int ts = _cParams->GetCurrentTimestep();
-            VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
-            float range[2];
-            var->GetRange(range);
-
-            if (min < range[0])
-                min = range[0];
-            if (min > range[1])
-                min = range[1];
-            _cParams->SetContourMin(min);
-        }
+        SetIsovalues();
     }
 
     void SetContourSpacing(double spacing) {
@@ -317,37 +303,36 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
             return;
         }
 
-        // Set the contour spacing so that all isolines lie within the
-        // bounds of the transfer function (locked==true);
-        //
-        if (locked) {
-            VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
-            double lower = mf->getMinMapValue();
-            double upper = mf->getMaxMapValue();
-            double maxSpacing = (upper - min) / (double)(numContours - 1);
-            double maxContour = min + spacing * numContours;
-            if (maxContour > upper)
-                spacing = maxSpacing;
-        }
-        // Set spacing such that the isolines are bounded only
-        // by the min/max values of the variable.
-        //
-        else {
+        int lod = _cParams->GetCompressionLevel();
+        int level = _cParams->GetRefinementLevel();
+        int ts = _cParams->GetCurrentTimestep();
+        VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
+        float range[2];
+        var->GetRange(range);
+        maxSpacing = (range[1] - range[0]) / (double)(numContours - 1);
+        if (spacing > maxSpacing)
+            spacing = maxSpacing;
+        _cParams->SetContourSpacing(spacing);
+        SetIsovalues();
+    }
+
+    void LockToTFChecked(bool checked) {
+        _cParams->SetLockToTF(checked);
+        if (checked) {
+            string varname = _cParams->GetVariableName();
             int lod = _cParams->GetCompressionLevel();
             int level = _cParams->GetRefinementLevel();
             int ts = _cParams->GetCurrentTimestep();
             VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
             float range[2];
             var->GetRange(range);
-            maxSpacing = (range[1] - range[0]) / (double)(numContours - 1);
-            if (spacing > maxSpacing)
-                spacing = maxSpacing;
-        }
-        _cParams->SetContourSpacing(spacing);
-    }
+            _cParams->SetContourMin(range[0]);
 
-    void LockToTFChecked(bool checked) {
-        _cParams->SetLockToTF(checked);
+            int numContours = _cParams->GetNumContours();
+            double spacing = (range[1] - range[0]) / ((double)numContours - 1);
+            _cParams->SetContourSpacing(spacing);
+            SetIsovalues();
+        }
     }
 };
 
