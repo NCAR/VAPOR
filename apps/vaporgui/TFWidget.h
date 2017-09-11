@@ -64,6 +64,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadTF();
     void setCMVar(const QString &);
     void setSingleColor();
+    void forwardTFChange();
 
   private:
     void connectWidgets();
@@ -103,6 +104,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void makeItGreen(QLineEdit *edit);
     void makeItWhite(QLineEdit *edit);
 #endif
+
+  signals:
+    void emitChange();
 };
 
 #endif //TFWIDGET_H

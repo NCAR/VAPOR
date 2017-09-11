@@ -40,6 +40,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
   public:
     ContourAppearanceSubtab(QWidget *parent) {
         setupUi(this);
+
         _TFWidget->Reinit((TFWidget::Flags)(0));
         _TFWidget->mappingFrame->setIsolineSliders(true);
         _TFWidget->mappingFrame->setOpacityMapping(false);
@@ -59,9 +60,16 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
                 SLOT(SetContourSpacing(double)));
         connect(lockToTFCheckbox, SIGNAL(toggled(bool)), this,
                 SLOT(LockToTFChecked(bool)));
+
+        connect(_TFWidget->mappingFrame, SIGNAL(mappingChanged()), this,
+                SLOT(MappingChanged()));
+        connect(_TFWidget->mappingFrame, SIGNAL(updateParams()), this,
+                SLOT(UpdateParams()));
+        connect(_TFWidget, SIGNAL(emitChange()), this,
+                SLOT(EndTFChange()));
     }
 
-    void updateSpacingAndMin(VAPoR::DataMgr *dataMgr) {
+    double GetMinComboExtent(bool minOrMax) {
         // Apply params to lockTF checkbox
         //
         bool locked = _cParams->GetLockToTF();
@@ -80,22 +88,10 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
             VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
             double lower = mf->getMinMapValue();
             double upper = mf->getMaxMapValue();
-            _cMinCombo->Update(lower, upper, min);
-
-            // Update spacing combo
-            //
-            spacing = _cParams->GetContourSpacing();
-            int numContours = _cParams->GetNumContours();
-            double maxSpacing = (upper - min) / numContours;
-            double maxContour = min + spacing * numContours;
-            //cout << "spacing " << spacing << endl;
-            //cout << "m/l/u   " << min << " " << lower << " " << upper << endl;
-            //cout << "#/Ms/Mc " << numContours << " " << maxSpacing << " " << maxContour << endl;
-            if (maxContour > upper) {
-                spacing = maxSpacing;
-                //	cout << "spacing shift " << spacing << endl;
-            }
-            _spacingCombo->Update(0, maxSpacing, spacing);
+            if (minOrMax)
+                return upper;
+            else
+                return lower;
         } else {
             // Apply settings to contour minimum and spacing, bounded only
             // by the min/max values of the variable.
@@ -103,24 +99,24 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
             int lod = _cParams->GetCompressionLevel();
             int level = _cParams->GetRefinementLevel();
             int ts = _cParams->GetCurrentTimestep();
-            VAPoR::StructuredGrid *var = dataMgr->GetVariable(ts, varname, level, lod);
+            VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
             float range[2];
             var->GetRange(range);
-
-            // Apply params to contour spacing
-            //
-            spacing = _cParams->GetContourSpacing();
-            maxSpacing = range[1] - range[0];
-            _spacingCombo->Update(0, maxSpacing, spacing);
-            _cMinCombo->Update(range[0], range[1], min);
-        } // Whew!
+            if (minOrMax)
+                return range[1];
+            else
+                return range[0];
+        }
     }
 
     void Update(
         VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams) {
+        cout << "Update" << endl;
         _cParams = (VAPoR::ContourParams *)rParams;
+        _dataMgr = dataMgr;
+        _paramsMgr = paramsMgr;
 
         _TFWidget->Update(dataMgr, paramsMgr, _cParams);
         _ColorbarWidget->Update(dataMgr, paramsMgr, _cParams);
@@ -134,6 +130,15 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
         _lineWidthCombo->Update(lineWidthRange[0], lineWidthRange[1],
                                 _cParams->GetLineThickness());
 
+        bool lock = _cParams->GetTFLock();
+        lockToTFCheckbox->setChecked(lock);
+        // If we're locked, disable sliders and edits
+        //
+        contourSpacingSlider->setEnabled(!lock);
+        contourSpacingEdit->setEnabled(!lock);
+        contourMinSlider->setEnabled(!lock);
+        contourMinEdit->setEnabled(!lock);
+
         // Apply params to contour count
         //
         int numContours = _cParams->GetNumContours();
@@ -142,7 +147,69 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
         // Update contour spacing and minimum settings, which may
         // or may not be locked within the transfer function bounds.
         //
-        updateSpacingAndMin(dataMgr);
+        //		updateSpacingAndMin(dataMgr);
+        double minComboMin = GetMinComboExtent(false);
+        double minComboMax = GetMinComboExtent(true);
+        double minVal = _cParams->GetContourMin();
+        _cMinCombo->Update(minComboMin, minComboMax, minVal);
+
+        double spacing = _cParams->GetContourSpacing();
+        double maxSpacing = (minComboMax - minVal) / (double)(numContours - 1);
+        if (spacing > maxSpacing)
+            spacing = maxSpacing;
+        _spacingCombo->Update(0, maxSpacing, spacing);
+        //		_cParams->SetContourSpacing(spacing);
+
+        // Finally apply contour/isoline parameters to our TFWidget's
+        // mapping frame, based off of ContourParams.  This is not done
+        // during _TFWidget::Update() because TFWidget can only query
+        // RenderParams get methods, not those of ContourParams.
+        //
+        //		vector<double> cVals;
+        //		spacing = _cParams->GetContourSpacing();
+        //		double min = _cParams->GetContourMin();
+        //		for (size_t i=0; i<numContours; i++) {
+        //			cVals.push_back(min + spacing*i);
+        //		}
+        //		_cParams->SetIsovalues(cVals);
+    }
+
+  private:
+    VAPoR::ContourParams *_cParams;
+    VAPoR::DataMgr *_dataMgr;
+    VAPoR::ParamsMgr *_paramsMgr;
+    Combo *_lineWidthCombo;
+    Combo *_countCombo;
+    Combo *_cMinCombo;
+    Combo *_spacingCombo;
+
+  private slots:
+    void MappingChanged() {
+        cout << "mapping changed!" << endl;
+    }
+
+    void EndTFChange() {
+        cout << "end change!" << endl;
+        double minComboMin = GetMinComboExtent(false);
+        double minComboMax = GetMinComboExtent(true);
+        double minVal = _cParams->GetContourMin();
+        if (minVal < minComboMin)
+            minVal = minComboMin;
+        if (minVal > minComboMax)
+            minVal = minComboMax;
+        //		_cMinCombo->Update(minComboMin, minComboMax, minVal);
+        _cMinCombo->Update(minComboMin, minComboMax, minVal);
+        _cParams->SetContourMin(minVal);
+
+        int numContours = _cParams->GetNumContours();
+        double spacing = _cParams->GetContourSpacing();
+        double maxSpacing = (minComboMax - minVal) / (double)(numContours - 1);
+        if ((spacing > maxSpacing) || (_cParams->GetLockToTF())) {
+            spacing = maxSpacing;
+        }
+        //		_spacingCombo->Update(0, maxSpacing, spacing);
+        _spacingCombo->Update(0, maxSpacing, spacing);
+        _cParams->SetContourSpacing(spacing);
 
         // Finally apply contour/isoline parameters to our TFWidget's
         // mapping frame, based off of ContourParams.  This is not done
@@ -150,7 +217,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
         // RenderParams get methods, not those of ContourParams.
         //
         vector<double> cVals;
-        double spacing = _cParams->GetContourSpacing();
+        spacing = _cParams->GetContourSpacing();
         double min = _cParams->GetContourMin();
         for (size_t i = 0; i < numContours; i++) {
             cVals.push_back(min + spacing * i);
@@ -158,40 +225,124 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
         _cParams->SetIsovalues(cVals);
     }
 
-  private:
-    VAPoR::ContourParams *_cParams;
-    Combo *_lineWidthCombo;
-    Combo *_countCombo;
-    Combo *_cMinCombo;
-    Combo *_spacingCombo;
-
-  private slots:
+    void UpdateParams() {
+        cout << "update params!" << endl;
+    }
     void SetLineThickness(double val) {
         _cParams->SetLineThickness(val);
     }
 
     void SetContourCount(int count) {
+        bool locked = _cParams->GetLockToTF();
+        string varname = _cParams->GetVariableName();
+
+        // If we're locked to the transfer function and our span exceeds
+        // the TF max value, adjust our spacing to make room for the added
+        // contours
+        //
+        if (locked) {
+            VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
+            double lower = mf->getMinMapValue();
+            double upper = mf->getMaxMapValue();
+            double min = _cParams->GetContourMin();
+            double spacing = _cParams->GetContourSpacing();
+            int numContours = _cParams->GetNumContours();
+
+            double span = spacing * count + min;
+            if (span > upper) {
+                spacing = (upper - min) / (double)(count - 1);
+                _cParams->SetContourSpacing(spacing);
+            }
+        }
+
         _cParams->SetNumContours(count);
-        /*		double min = _cParams->GetContourMin();
-		double spacing = _cParams->GetContourSpacing();
-
-		vector<double> sliderVals;
-		for (size_t i=0; i<count; i++) {
-			sliderVals.push_back(min + spacing*i);
-		}
-		
-		_TFWidget->mappingFrame->setIsolineSliders(sliderVals);
-		_cParams->SetNumContours(count);
-
-		cout << "cParams num contours: " << _cParams->GetNumContours() << endl;
-*/
     }
 
     void SetContourMinimum(double min) {
-        _cParams->SetContourMin(min);
+        bool locked = _cParams->GetLockToTF();
+        string varname = _cParams->GetVariableName();
+        // Set the contour minimum within the bounds of the transfer function
+        //
+        if (locked) {
+            VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
+            double lower = mf->getMinMapValue();
+            double upper = mf->getMaxMapValue();
+
+            if (min < lower)
+                min = lower;
+            if (min > upper)
+                min = upper;
+            _cParams->SetContourMin(min);
+
+            // If the contour spacing now extents beyond the TF bounds,
+            // and we are constraining to the TF bounds (locked==true),
+            // then adjust the spacing accordingly
+            //
+            int numContours = _cParams->GetNumContours();
+            double spacing = _cParams->GetContourSpacing();
+            double span = spacing * numContours + min;
+            if (span > upper) {
+                spacing = (upper - min) / (double)(numContours - 1);
+                _cParams->SetContourSpacing(spacing);
+            }
+        }
+        // Set the contour minimum within the bounds of the variable data
+        //
+        else {
+            int lod = _cParams->GetCompressionLevel();
+            int level = _cParams->GetRefinementLevel();
+            int ts = _cParams->GetCurrentTimestep();
+            VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
+            float range[2];
+            var->GetRange(range);
+
+            if (min < range[0])
+                min = range[0];
+            if (min > range[1])
+                min = range[1];
+            _cParams->SetContourMin(min);
+        }
     }
 
     void SetContourSpacing(double spacing) {
+        bool locked = _cParams->GetLockToTF();
+
+        double min = _cParams->GetContourMin();
+        string varname = _cParams->GetVariableName();
+        int numContours = _cParams->GetNumContours();
+        double maxSpacing;
+
+        if (numContours <= 1) {
+            _cParams->SetContourSpacing(1);
+            return;
+        }
+
+        // Set the contour spacing so that all isolines lie within the
+        // bounds of the transfer function (locked==true);
+        //
+        if (locked) {
+            VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
+            double lower = mf->getMinMapValue();
+            double upper = mf->getMaxMapValue();
+            double maxSpacing = (upper - min) / (double)(numContours - 1);
+            double maxContour = min + spacing * numContours;
+            if (maxContour > upper)
+                spacing = maxSpacing;
+        }
+        // Set spacing such that the isolines are bounded only
+        // by the min/max values of the variable.
+        //
+        else {
+            int lod = _cParams->GetCompressionLevel();
+            int level = _cParams->GetRefinementLevel();
+            int ts = _cParams->GetCurrentTimestep();
+            VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
+            float range[2];
+            var->GetRange(range);
+            maxSpacing = (range[1] - range[0]) / (double)(numContours - 1);
+            if (spacing > maxSpacing)
+                spacing = maxSpacing;
+        }
         _cParams->SetContourSpacing(spacing);
     }
 
