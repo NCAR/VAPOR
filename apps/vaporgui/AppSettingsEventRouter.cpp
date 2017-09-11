@@ -30,7 +30,7 @@
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
 #include "qcolordialog.h"
-#include "../images/fileopen.xpm"
+#include "images/fileopen.xpm"
 
 #include <qlabel.h>
 #include <qfiledialog.h>

@@ -11,8 +11,8 @@ set InstDest = $argv[2]
 set vapor_root = $InstDest/VAPOR3/VAPOR.app
 set bindir = $vapor_root/Contents/MacOS
 set lib_search_dirs = $bindir
-set mandir = $vapor_root/Contents/SharedSupport/man
-set sharedir = $vapor_root/Contents/SharedSupport
+set mandir = $vapor_root/Contents/share/man
+set sharedir = $vapor_root/Contents/share
 
 set sedcmd = sed
 if (-e /bin/sed) set sedcmd = /bin/sed

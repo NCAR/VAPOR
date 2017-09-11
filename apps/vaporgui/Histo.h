@@ -24,7 +24,7 @@
 #include <vapor/StructuredGrid.h>
 
 
-class PARAMS_API Histo{
+class Histo{
 public:
 	Histo(int numberBins, float mnData, float mxData);
 
