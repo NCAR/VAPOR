@@ -63,6 +63,7 @@ private slots:
     void loadTF();
     void setCMVar(const QString &);
     void setSingleColor();
+    void forwardTFChange();
 
 private:
     void connectWidgets();
@@ -102,6 +103,9 @@ private:
     void makeItGreen(QLineEdit *edit);
     void makeItWhite(QLineEdit *edit);
 #endif
+
+signals:
+    void emitChange();
 };
 
 #endif    // TFWIDGET_H
