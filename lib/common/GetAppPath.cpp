@@ -61,6 +61,9 @@ string get_path_from_bundle(const string &app) {
     componentStr[range.length] = 0;
     string s = componentStr;
 
+    if (s.find(BINDIR) != string::npos)
+        return "";
+
     path = s;
     return (path);
 }
