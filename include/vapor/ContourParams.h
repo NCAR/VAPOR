@@ -48,7 +48,7 @@ public:
  }
 
  int GetNumContours() const {
-	return (int)GetValueDouble(_numContoursTag, 1.0);
+	return (int)GetValueDouble(_numContoursTag, 3.0);
  }
 
  void SetNumContours(int num) {
@@ -170,6 +170,21 @@ public:
 	else {
 		return true;
 	}
+ }
+
+ void SetTFLock(bool lock) {
+	string l = "false";
+	if (lock)
+		l = "true";
+ 	SetValueString(_lockToTFTag, "Lock contours to transfer function"	
+		" bounds", l
+	);
+ }
+
+ bool GetTFLock() {
+	string l = GetValueString(_lockToTFTag, "true");
+	if (l=="false") return false;
+	return true;
  }
 
 private:
