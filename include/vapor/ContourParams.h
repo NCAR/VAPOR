@@ -48,11 +48,7 @@ public:
 
     int GetNumContours() const { return (int)GetValueDouble(_numContoursTag, 3.0); }
 
-    void SetNumContours(int num)
-    {
-        cout << "Internal params SetNumContours" << num << endl;
-        SetValueDouble(_numContoursTag, "Number of contours", (double)num);
-    }
+    void SetNumContours(int num) { SetValueDouble(_numContoursTag, "Number of contours", (double)num); }
 
     //! Determine line thickness in voxels
     //! \retval double line thickness
