@@ -232,19 +232,19 @@ int main(int argc, char **argv) {
 				if (rc<0) exit(1);
 			}
 
-			StructuredGrid *rg;
-			rg = datamgr.GetVariable(
+			Grid *g;
+			g = datamgr.GetVariable(
 				ts, vname, opt.level, opt.lod, min, max, false
 			);
 
-			if (! rg) {
+			if (! g) {
 				exit(1);
 			}
 
 			if (fp) {
-				StructuredGrid::Iterator itr;
+				Grid::Iterator itr;
 				float v;
-				for (itr = rg->begin(); itr!=rg->end(); ++itr) {
+				for (itr = g->begin(); itr!=g->end(); ++itr) {
 					v = *itr;
 					fwrite(&v, sizeof(v), 1, fp);
 				}
@@ -252,11 +252,11 @@ int main(int argc, char **argv) {
 			}
 
 			float r[2];
-			rg->GetRange(r);
+			g->GetRange(r);
 			cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
 
 
-			vector <size_t> dims = rg->GetDimensions();
+			vector <size_t> dims = g->GetDimensions();
 			cout << "Grid dimensions: [ " ;
 			for (int i=0; i<dims.size(); i++) {
 				cout << dims[i] << " ";
@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
 
 
 			vector <double> minu, maxu;
-			rg->GetUserExtents(minu, maxu);
+			g->GetUserExtents(minu, maxu);
 			cout << "Min user extents: ["; 
 			for (int i=0; i<minu.size(); i++) cout << minu[i] << " ";
 			cout << "]" << endl;
@@ -274,14 +274,14 @@ int main(int argc, char **argv) {
 			for (int i=0; i<maxu.size(); i++) cout << maxu[i] << " ";
 			cout << "]" << endl;
 
-			cout << "Has missing data : " << rg->HasMissingData() << endl;
-			if (rg->HasMissingData()) {
+			cout << "Has missing data : " << g->HasMissingData() << endl;
+			if (g->HasMissingData()) {
 
-				cout << "Missing data value : " << rg->GetMissingValue() << endl;
-				StructuredGrid::Iterator itr;
-				float mv = rg->GetMissingValue();
+				cout << "Missing data value : " << g->GetMissingValue() << endl;
+				Grid::Iterator itr;
+				float mv = g->GetMissingValue();
 				int count = 0;
-				for (itr = rg->begin(); itr!=rg->end(); ++itr) {
+				for (itr = g->begin(); itr!=g->end(); ++itr) {
 					if (*itr == mv) count++;
 				}
 				cout << "Num missing values : " << count << endl;
