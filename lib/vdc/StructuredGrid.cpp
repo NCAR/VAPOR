@@ -225,55 +225,111 @@ void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
 
 
 
-StructuredGrid::ConstNodeIteratorRG::ConstNodeIteratorRG(
+StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG(
 	const StructuredGrid *rg, bool begin
 ) : ConstNodeIteratorAbstract() {
 
 	_dims = rg->GetDimensions();
-	_nodeIndex = vector<size_t> (_dims.size(), 0);
+	_index = vector<size_t> (_dims.size(), 0);
 	if (! begin) {
-		_nodeIndex[_dims.size()-1] = _dims[_dims.size()-1];
+		_index[_dims.size()-1] = _dims[_dims.size()-1];
 	}
 }
 
-StructuredGrid::ConstNodeIteratorRG::ConstNodeIteratorRG(
+StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG(
 	const StructuredGrid *rg,
 	const std::vector <double> &minu, const std::vector <double> &maxu
 ) : ConstNodeIteratorAbstract() {
 	assert(0 && "Not supported");
 }
 
-StructuredGrid::ConstNodeIteratorRG::ConstNodeIteratorRG(
-	const ConstNodeIteratorRG &rhs
+StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG(
+	const ConstNodeIteratorSG &rhs
 ) : ConstNodeIteratorAbstract() {
 	_dims = rhs._dims;
-	_nodeIndex = rhs._nodeIndex;
+	_index = rhs._index;
 }
 
-StructuredGrid::ConstNodeIteratorRG::ConstNodeIteratorRG(
+StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG(
 ) : ConstNodeIteratorAbstract() {
 
 	_dims.clear();
-	_nodeIndex.clear();
+	_index.clear();
 }
 
 
-void StructuredGrid::ConstNodeIteratorRG::next() {
+void StructuredGrid::ConstNodeIteratorSG::next() {
 
-	_nodeIndex[0]++;
-	if (_nodeIndex[0] < _dims[0]) {
+	_index[0]++;
+	if (_index[0] < _dims[0]) {
 		return;
 	}
 
-	_nodeIndex[0] = 0;
-	_nodeIndex[1]++;
-	if (_nodeIndex[1] < _dims[1] || _dims.size() == 2) {
+	_index[0] = 0;
+	_index[1]++;
+	if (_index[1] < _dims[1] || _dims.size() == 2) {
 		return;
 	}
 
-	_nodeIndex[1] = 0;
-	_nodeIndex[2]++;
-	if (_nodeIndex[2] < _dims[2] || _dims.size() == 3) {
+	_index[1] = 0;
+	_index[2]++;
+	if (_index[2] < _dims[2] || _dims.size() == 3) {
+		return;
+	}
+	assert(0 && "Invalid state");
+
+}
+
+
+StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG(
+	const StructuredGrid *rg, bool begin
+) : ConstCellIteratorAbstract() {
+
+	_dims = rg->GetDimensions();
+	_index = vector<size_t> (_dims.size(), 0);
+	if (! begin) {
+		_index[_dims.size()-1] = _dims[_dims.size()-1] - 1;
+	}
+}
+
+StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG(
+	const StructuredGrid *rg,
+	const std::vector <double> &minu, const std::vector <double> &maxu
+) : ConstCellIteratorAbstract() {
+	assert(0 && "Not supported");
+}
+
+StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG(
+	const ConstCellIteratorSG &rhs
+) : ConstCellIteratorAbstract() {
+	_dims = rhs._dims;
+	_index = rhs._index;
+}
+
+StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG(
+) : ConstCellIteratorAbstract() {
+
+	_dims.clear();
+	_index.clear();
+}
+
+
+void StructuredGrid::ConstCellIteratorSG::next() {
+
+	_index[0]++;
+	if (_index[0] < (_dims[0] - 1)) {
+		return;
+	}
+
+	_index[0] = 0;
+	_index[1]++;
+	if (_index[1] < (_dims[1] - 1) || _dims.size() == 2) {
+		return;
+	}
+
+	_index[1] = 0;
+	_index[2]++;
+	if (_index[2] < (_dims[2] - 1) || _dims.size() == 3) {
 		return;
 	}
 	assert(0 && "Invalid state");
