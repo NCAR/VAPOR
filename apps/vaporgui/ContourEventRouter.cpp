@@ -69,7 +69,10 @@ void ContourEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 
 void ContourEventRouter::_initializeTab()
 {
+    _updateTab();
     ContourParams *rParams = (ContourParams *)GetActiveParams();
+
+    _appearance->initialize(rParams);
 
     cout << "ContourEventRouter::_initializeTab() : override param defaults here" << endl;
 }
