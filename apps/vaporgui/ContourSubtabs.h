@@ -89,6 +89,7 @@ public:
 		string varname = _cParams->GetVariableName();
 		double spacing, maxSpacing;
 		if (locked) {
+			cout << "LOCKED" << endl;
 			// Update contour minimum combo
 			//
 			VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
@@ -98,6 +99,7 @@ public:
 			else return lower;
 		}
 		else {
+			cout << "NOT LOCKED" << endl;
 			// Apply settings to contour minimum and spacing, bounded only
 			// by the min/max values of the variable.
 			//
@@ -117,7 +119,6 @@ public:
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
 	) {
-		cout << "Update ME" << endl;
 		_cParams = (VAPoR::ContourParams*)rParams;
 		_dataMgr = dataMgr;
 		_paramsMgr = paramsMgr;
@@ -152,7 +153,6 @@ public:
 		// Update contour spacing and minimum settings, which may
 		// or may not be locked within the transfer function bounds.
 		//
-//		updateSpacingAndMin(dataMgr);
 		double minComboMin = GetContourMinOrMax(false);
 		double minComboMax = GetContourMinOrMax(true);
 		double minVal = _cParams->GetContourMin();
@@ -162,21 +162,6 @@ public:
 		double maxSpacing = (minComboMax - minVal) / (double)(numContours-1);
 		if (spacing > maxSpacing) spacing = maxSpacing;
 		_spacingCombo->Update(0, maxSpacing, spacing);
-//		_cParams->SetContourSpacing(spacing);
-
-		// Finally apply contour/isoline parameters to our TFWidget's
-		// mapping frame, based off of ContourParams.  This is not done
-		// during _TFWidget::Update() because TFWidget can only query
-		// RenderParams get methods, not those of ContourParams.
-		//
-//		vector<double> cVals;
-//		spacing = _cParams->GetContourSpacing();
-//		double min = _cParams->GetContourMin();
-//		for (size_t i=0; i<numContours; i++) {
-//			cVals.push_back(min + spacing*i);
-//		}
-//		_cParams->SetIsovalues(cVals);
-
 	}
 
 	void initialize(VAPoR::ContourParams* cParams) {
@@ -211,7 +196,6 @@ private:
 		double min = _cParams->GetContourMin();
 		for (size_t i=0; i<numContours; i++) {
 			cVals.push_back(min + spacing*i);
-			cout << "isovals " << min+spacing*i << endl;
 		}
 		_cParams->SetIsovalues(cVals);
 
@@ -223,43 +207,32 @@ private slots:
 	}
 
 	void EndTFChange() {
-		cout << "end change!" << endl;
-		double minComboMin = GetContourMinOrMax(false);
-		double minComboMax = GetContourMinOrMax(true);
+		double min = GetContourMinOrMax(false);
+		double max = GetContourMinOrMax(true);
 		double minVal = _cParams->GetContourMin();
-		if (minVal < minComboMin) minVal = minComboMin;
-		if (minVal > minComboMax) minVal = minComboMax;
-//		_cMinCombo->Update(minComboMin, minComboMax, minVal);
-		_cMinCombo->Update(minComboMin, minComboMax, minVal);
+		if (minVal < min) minVal = min;
+		if (minVal > max) minVal = max;
+		cout << "TF min " << minVal << endl;
+		_cMinCombo->Update(min, max, minVal);
 		_cParams->SetContourMin(minVal);
 		
 		int numContours = _cParams->GetNumContours();
 		double spacing = _cParams->GetContourSpacing();
-		double maxSpacing = (minComboMax - minVal) / (double)(numContours-1);
-		if ((spacing > maxSpacing) || (_cParams->GetLockToTF())) {
+		double maxSpacing = (max - minVal) / (double)(numContours-1);
+		double span = spacing*(numContours-1) + minVal;
+		//if ((spacing > maxSpacing) || (_cParams->GetLockToTF())) {
+		if ((span > max) || (_cParams->GetLockToTF())) {
 			 spacing = maxSpacing;
+			cout << "set sp to: " << spacing << endl;
 		}
-//		_spacingCombo->Update(0, maxSpacing, spacing);
 		_spacingCombo->Update(0, maxSpacing, spacing);
 		_cParams->SetContourSpacing(spacing);
 	
-		// Finally apply contour/isoline parameters to our TFWidget's
-		// mapping frame, based off of ContourParams.  This is not done
-		// during _TFWidget::Update() because TFWidget can only query
-		// RenderParams get methods, not those of ContourParams.
-		//
-		vector<double> cVals;
-		spacing = _cParams->GetContourSpacing();
-		double min = _cParams->GetContourMin();
-		for (size_t i=0; i<numContours; i++) {
-			cVals.push_back(min + spacing*i);
-		}
-		_cParams->SetIsovalues(cVals);
+		SetIsovalues();
 	}
 
 
 	void UpdateParams() {
-		cout << "update params!" << endl;
 	}
 	void SetLineThickness(double val) {
 		_cParams->SetLineThickness(val);
@@ -285,26 +258,20 @@ private slots:
 	}
 
 	void SetContourMinimum(double min) {
-		/*string varname = _cParams->GetVariableName();
-		int lod = _cParams->GetCompressionLevel();
-		int level = _cParams->GetRefinementLevel();
-		int ts = _cParams->GetCurrentTimestep();
-		VAPoR::StructuredGrid* var = _dataMgr->GetVariable(ts, varname, level, lod);
-		float range[2];
-		var->GetRange(range);*/
-
 		double minRange = GetContourMinOrMax(0);
 		double maxRange = GetContourMinOrMax(1);
 
 		if (min < minRange) min = minRange;
 		if (min > maxRange) min = maxRange;
 
+		int numContours = _cParams->GetNumContours();
+		double spacing = (maxRange - min) / (double)(numContours-1);
+		_cParams->SetContourSpacing(spacing);
+
 		double test = GetContourMinOrMax(0);
-		cout << test << " !!! " << minRange << endl;
+		cout << minRange << " ! " << maxRange << endl;
 
 		_cParams->SetContourMin(min);
-
-
 
 		SetIsovalues();
 	}
@@ -337,19 +304,20 @@ private slots:
 	void LockToTFChecked(bool checked) {
 		_cParams->SetLockToTF(checked);
 		if (checked) {
-			string varname = _cParams->GetVariableName();
-			int lod = _cParams->GetCompressionLevel();
-			int level = _cParams->GetRefinementLevel();
-			int ts = _cParams->GetCurrentTimestep();
-			VAPoR::StructuredGrid* var = _dataMgr->GetVariable(ts, varname, level, lod);
-			float range[2];
-			var->GetRange(range);
-			_cParams->SetContourMin(range[0]);
+			EndTFChange();
+	//		string varname = _cParams->GetVariableName();
+	//		int lod = _cParams->GetCompressionLevel();
+	//		int level = _cParams->GetRefinementLevel();
+	//		int ts = _cParams->GetCurrentTimestep();
+	//		VAPoR::StructuredGrid* var = _dataMgr->GetVariable(ts, varname, level, lod);
+	//		float range[2];
+	//		var->GetRange(range);
+	//		_cParams->SetContourMin(range[0]);
 	
-			int numContours = _cParams->GetNumContours();
-			double spacing = (range[1] - range[0]) / ((double)numContours-1);
-			_cParams->SetContourSpacing(spacing);
-			SetIsovalues();
+	//		int numContours = _cParams->GetNumContours();
+	//		double spacing = (range[1] - range[0]) / ((double)numContours-1);
+	//		_cParams->SetContourSpacing(spacing);
+	//		SetIsovalues();
 		}
 	}
 
