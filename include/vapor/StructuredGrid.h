@@ -99,57 +99,113 @@ class VDF_API StructuredGrid : public Grid {
     //
     // Node index iterator. Iterates over node indices
     //
-    class ConstNodeIteratorRG : public Grid::ConstNodeIteratorAbstract {
+    class ConstNodeIteratorSG : public Grid::ConstNodeIteratorAbstract {
       public:
-        ConstNodeIteratorRG(const StructuredGrid *rg, bool begin);
-        ConstNodeIteratorRG(
+        ConstNodeIteratorSG(const StructuredGrid *rg, bool begin);
+        ConstNodeIteratorSG(
             const StructuredGrid *rg,
             const std::vector<double> &minu, const std::vector<double> &maxu);
-        ConstNodeIteratorRG(const ConstNodeIteratorRG &rhs);
+        ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs);
 
-        ConstNodeIteratorRG();
-        virtual ~ConstNodeIteratorRG() {}
+        ConstNodeIteratorSG();
+        virtual ~ConstNodeIteratorSG() {}
 
         virtual void next();
         virtual ConstIndexType &deref() const {
-            return (_nodeIndex);
+            return (_index);
         }
         virtual const void *address() const { return this; };
 
         virtual bool equal(const void *rhs) const {
-            const ConstNodeIteratorRG *itrptr =
-                static_cast<const ConstNodeIteratorRG *>(rhs);
+            const ConstNodeIteratorSG *itrptr =
+                static_cast<const ConstNodeIteratorSG *>(rhs);
 
-            return (_nodeIndex == itrptr->_nodeIndex);
+            return (_index == itrptr->_index);
         }
 
         virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
-            return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorRG(*this));
+            return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(*this));
         };
 
       private:
         InsideBox _pred;
         std::vector<size_t> _dims;
-        std::vector<size_t> _nodeIndex;
+        std::vector<size_t> _index;
     };
 
     virtual ConstNodeIterator ConstNodeBegin() const override {
         return ConstNodeIterator(
             std::unique_ptr<ConstNodeIteratorAbstract>(
-                new ConstNodeIteratorRG(this, true)));
+                new ConstNodeIteratorSG(this, true)));
     }
 
     virtual ConstNodeIterator ConstNodeBegin(
         const std::vector<double> &minu, const std::vector<double> &maxu) const override {
         return ConstNodeIterator(
             std::unique_ptr<ConstNodeIteratorAbstract>(
-                new ConstNodeIteratorRG(this, minu, maxu)));
+                new ConstNodeIteratorSG(this, minu, maxu)));
     }
 
     virtual ConstNodeIterator ConstNodeEnd() const override {
         return ConstNodeIterator(
             std::unique_ptr<ConstNodeIteratorAbstract>(
-                new ConstNodeIteratorRG(this, false)));
+                new ConstNodeIteratorSG(this, false)));
+    }
+
+    //
+    // Cell index iterator. Iterates over cell indices
+    //
+    class ConstCellIteratorSG : public Grid::ConstCellIteratorAbstract {
+      public:
+        ConstCellIteratorSG(const StructuredGrid *rg, bool begin);
+        ConstCellIteratorSG(
+            const StructuredGrid *rg,
+            const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstCellIteratorSG(const ConstCellIteratorSG &rhs);
+
+        ConstCellIteratorSG();
+        virtual ~ConstCellIteratorSG() {}
+
+        virtual void next();
+        virtual ConstIndexType &deref() const {
+            return (_index);
+        }
+        virtual const void *address() const { return this; };
+
+        virtual bool equal(const void *rhs) const {
+            const ConstCellIteratorSG *itrptr =
+                static_cast<const ConstCellIteratorSG *>(rhs);
+
+            return (_index == itrptr->_index);
+        }
+
+        virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(*this));
+        };
+
+      private:
+        InsideBox _pred;
+        std::vector<size_t> _dims;
+        std::vector<size_t> _index;
+    };
+
+    virtual ConstCellIterator ConstCellBegin() const override {
+        return ConstCellIterator(
+            std::unique_ptr<ConstCellIteratorAbstract>(
+                new ConstCellIteratorSG(this, true)));
+    }
+
+    virtual ConstCellIterator ConstCellBegin(
+        const std::vector<double> &minu, const std::vector<double> &maxu) const override {
+        return ConstCellIterator(
+            std::unique_ptr<ConstCellIteratorAbstract>(
+                new ConstCellIteratorSG(this, minu, maxu)));
+    }
+
+    virtual ConstCellIterator ConstCellEnd() const override {
+        return ConstCellIterator(
+            std::unique_ptr<ConstCellIteratorAbstract>(
+                new ConstCellIteratorSG(this, false)));
     }
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg);
