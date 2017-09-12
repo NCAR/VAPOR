@@ -58,6 +58,9 @@ string get_path_from_bundle(const string &app) {
     componentStr[range.length] = 0;
 	string s = componentStr;
 
+	if (s.find(BINDIR) != string::npos)
+		return "";
+
     path = s;
     return(path);
 
@@ -80,14 +83,14 @@ std::string Wasp::GetAppPath(
 	MyBase::SetDiagMsg("%s", oss.str().c_str());
 
 	string separator, otherSeparator;
-if (!forwardSeparator){
-	separator = "\\";
-	otherSeparator = "/";
-}
-else{
-	separator = "/";
-	otherSeparator = "\\";
-}
+	if (!forwardSeparator) {
+		separator = "\\";
+		otherSeparator = "/";
+	}
+	else {
+		separator = "/";
+		otherSeparator = "\\";
+	}
 
 	string path;
 	path.clear();
