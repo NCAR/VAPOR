@@ -75,7 +75,7 @@ public:
 			SLOT(EndTFChange()));
 	}
 
-	double GetMinComboExtent(bool minOrMax) {
+	double GetContourMinOrMax(bool minOrMax) {
 		// Apply params to lockTF checkbox
 		//
 		bool locked = _cParams->GetLockToTF();
@@ -153,8 +153,8 @@ public:
 		// or may not be locked within the transfer function bounds.
 		//
 //		updateSpacingAndMin(dataMgr);
-		double minComboMin = GetMinComboExtent(false);
-		double minComboMax = GetMinComboExtent(true);
+		double minComboMin = GetContourMinOrMax(false);
+		double minComboMax = GetContourMinOrMax(true);
 		double minVal = _cParams->GetContourMin();
 		_cMinCombo->Update(minComboMin, minComboMax, minVal);
 
@@ -179,6 +179,22 @@ public:
 
 	}
 
+	void initialize(VAPoR::ContourParams* cParams) {
+		_cParams = cParams;
+		string varname = _cParams->GetVariableName();
+		cout << "initializing varname " << varname << endl;
+		VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
+		double lower = mf->getMinMapValue();
+		double upper = mf->getMaxMapValue();
+		int count = 3;
+		double spacing = (upper - lower) / (double)(count-1);
+	
+		_cParams->SetNumContours(count);
+		_cParams->SetContourMin(lower);
+		_cParams->SetContourSpacing(spacing);
+		SetIsovalues();	
+	}
+
 private:
 	VAPoR::ContourParams* _cParams;
 	VAPoR::DataMgr* _dataMgr;
@@ -195,6 +211,7 @@ private:
 		double min = _cParams->GetContourMin();
 		for (size_t i=0; i<numContours; i++) {
 			cVals.push_back(min + spacing*i);
+			cout << "isovals " << min+spacing*i << endl;
 		}
 		_cParams->SetIsovalues(cVals);
 
@@ -207,8 +224,8 @@ private slots:
 
 	void EndTFChange() {
 		cout << "end change!" << endl;
-		double minComboMin = GetMinComboExtent(false);
-		double minComboMax = GetMinComboExtent(true);
+		double minComboMin = GetContourMinOrMax(false);
+		double minComboMax = GetContourMinOrMax(true);
 		double minVal = _cParams->GetContourMin();
 		if (minVal < minComboMin) minVal = minComboMin;
 		if (minVal > minComboMax) minVal = minComboMax;
@@ -249,9 +266,7 @@ private slots:
 	}
 
 	void SetContourCount(int count) {
-		cout << "HELLO" << endl;
 		bool locked = _cParams->GetLockToTF();
-		cout << "lock " << locked << endl;
 		string varname = _cParams->GetVariableName();
 
 		// If we're locked to the transfer function and our span exceeds
@@ -262,36 +277,34 @@ private slots:
 			VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
 			double lower = mf->getMinMapValue();
 			double upper = mf->getMaxMapValue();
-//			double min = _cParams->GetContourMin();
-//			double spacing = _cParams->GetContourSpacing();
-//			int numContours = _cParams->GetNumContours();
-			
-//			double span = spacing * count + min;
-//			if (span > upper) {
-//				spacing = (upper - min) / (double)(count-1);
-//				_cParams->SetContourSpacing(spacing);
-//			}
 			double spacing = (upper - lower) / (double)(count-1);
-			cout << "i'm locked.  setting spacing " << spacing << endl;
 			_cParams->SetContourSpacing(spacing);
 		}
-
 		_cParams->SetNumContours(count);
 		SetIsovalues();
 	}
 
 	void SetContourMinimum(double min) {
-		string varname = _cParams->GetVariableName();
+		/*string varname = _cParams->GetVariableName();
 		int lod = _cParams->GetCompressionLevel();
 		int level = _cParams->GetRefinementLevel();
 		int ts = _cParams->GetCurrentTimestep();
 		VAPoR::StructuredGrid* var = _dataMgr->GetVariable(ts, varname, level, lod);
 		float range[2];
-		var->GetRange(range);
+		var->GetRange(range);*/
 
-		if (min < range[0]) min = range[0];
-		if (min > range[1]) min = range[1];
+		double minRange = GetContourMinOrMax(0);
+		double maxRange = GetContourMinOrMax(1);
+
+		if (min < minRange) min = minRange;
+		if (min > maxRange) min = maxRange;
+
+		double test = GetContourMinOrMax(0);
+		cout << test << " !!! " << minRange << endl;
+
 		_cParams->SetContourMin(min);
+
+
 
 		SetIsovalues();
 	}
