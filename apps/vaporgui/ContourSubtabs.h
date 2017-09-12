@@ -75,7 +75,6 @@ public:
 			SLOT(EndTFChange()));
 	}
 
-
 	double GetMinComboExtent(bool minOrMax) {
 		// Apply params to lockTF checkbox
 		//
@@ -118,7 +117,7 @@ public:
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
 	) {
-		cout << "Update" << endl;
+		cout << "Update ME" << endl;
 		_cParams = (VAPoR::ContourParams*)rParams;
 		_dataMgr = dataMgr;
 		_paramsMgr = paramsMgr;
@@ -250,7 +249,9 @@ private slots:
 	}
 
 	void SetContourCount(int count) {
+		cout << "HELLO" << endl;
 		bool locked = _cParams->GetLockToTF();
+		cout << "lock " << locked << endl;
 		string varname = _cParams->GetVariableName();
 
 		// If we're locked to the transfer function and our span exceeds
@@ -271,6 +272,7 @@ private slots:
 //				_cParams->SetContourSpacing(spacing);
 //			}
 			double spacing = (upper - lower) / (double)(count-1);
+			cout << "i'm locked.  setting spacing " << spacing << endl;
 			_cParams->SetContourSpacing(spacing);
 		}
 
