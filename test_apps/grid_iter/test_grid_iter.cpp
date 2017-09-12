@@ -252,7 +252,7 @@ void init_grid(StructuredGrid *sg) {
 }
 
 
-void test_node_iterator(const StructuredGrid *sg) {
+void test_iterator(const StructuredGrid *sg) {
 
 	double t0 = Wasp::GetTime();
 
@@ -272,6 +272,7 @@ void test_node_iterator(const StructuredGrid *sg) {
 
 void test_cell_iterator(const StructuredGrid *sg) {
 
+#ifdef	DEAD
 	double t0 = Wasp::GetTime();
 
 	StructuredGrid::ConstCellIterator itr;
@@ -294,8 +295,23 @@ void test_cell_iterator(const StructuredGrid *sg) {
     }
 	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
 	cout << "Cell count : " << count << endl;
+#endif
 
 }
+
+void test_node_iterator(const StructuredGrid *sg) {
+
+	double t0 = Wasp::GetTime();
+
+	Grid::ConstNodeIterator newitr;
+	size_t count = 0;
+    for (newitr = sg->ConstNodeBegin(); newitr!=sg->ConstNodeEnd(); ++newitr) {
+		out_container((*newitr).cbegin(), (*newitr).cend());
+		cout << endl;
+    }
+	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+}
+
 
 int main(int argc, char **argv) {
 
@@ -352,9 +368,11 @@ int main(int argc, char **argv) {
 	cout << endl;
 
 
-	test_node_iterator(sg);
+//	test_iterator(sg);
 
-	test_cell_iterator(sg);
+//	test_cell_iterator(sg);
+
+	test_node_iterator(sg);
 
 
 	delete sg;

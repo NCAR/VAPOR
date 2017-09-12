@@ -509,6 +509,35 @@ public:
  
  VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
+ /////////////////////////////////////////////////////////////////////////////
+ //
+ // Iterators
+ //
+ /////////////////////////////////////////////////////////////////////////////
+
+ // Inside a box functor
+ //
+ // operator() returns true if point pt is on or inside the axis-aligned
+ // box defined by min and max
+ //
+ class InsideBox {
+ public:
+  InsideBox(
+	const std::vector<double> &min, const std::vector<double> &max
+  ) : _min(min), _max(max) {}
+  InsideBox() {}
+
+  bool operator()(const std::vector<double> &pt) const {
+	for (int i=0; i<_min.size(); i++) {
+		if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
+	}
+	return(true);
+  }
+ 
+ private:
+  std::vector <double> _min;
+  std::vector <double> _max;
+ };
 
 
 
@@ -573,7 +602,7 @@ public:
 	return(PolyIterator());
   };
 
-  const std::vector<double>& operator*() const {
+  const T& operator*() const {
 	return _impl->deref();
   }
 
@@ -589,6 +618,8 @@ public:
   std::unique_ptr<AbstractIterator<T>> _impl;
  };
 
+ // Coordinate iterator. Iterates over grid node/cell coordinates
+ //
  typedef const std::vector <double> ConstCoordType;
  typedef Grid::PolyIterator<ConstCoordType> ConstCoordItr;
  typedef Grid::AbstractIterator<ConstCoordType> ConstCoordItrAbstract;
@@ -597,27 +628,17 @@ public:
  virtual ConstCoordItr ConstCoordEnd() const = 0;
 
 
+ typedef const std::vector <size_t> ConstIndexType;
+ typedef Grid::PolyIterator<ConstIndexType> ConstNodeIterator;
+ typedef Grid::AbstractIterator<ConstIndexType> ConstNodeIteratorAbstract;
 
- // Inside a box functor
- //
- class InsideBox {
- public:
-  InsideBox(
-	const std::vector<double> &min, const std::vector<double> &max
-  ) : _min(min), _max(max) {}
-  InsideBox() {}
+ virtual ConstNodeIterator ConstNodeBegin() const = 0;
+ virtual ConstNodeIterator ConstNodeBegin(
+	const std::vector <double> &minu, const std::vector <double>  &maxu
+ ) const = 0;
+ virtual ConstNodeIterator ConstNodeEnd() const = 0;
 
-  bool operator()(const std::vector<double> &pt) const {
-	for (int i=0; i<_min.size(); i++) {
-		if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
-	}
-	return(true);
-  }
- 
- private:
-  std::vector <double> _min;
-  std::vector <double> _max;
- };
+
 
 
  //! A forward iterator for accessing the data elements of the 
