@@ -230,8 +230,6 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
 
     vector<double> minu, maxu;
     varGrid->GetUserExtents(minu, maxu);
-    cout << minu[0] << " " << minu[1] << " " << minu[2] << endl;
-    cout << maxu[0] << " " << maxu[1] << " " << maxu[2] << endl;
 
     boxMin[0] = minu[0];
     boxMax[0] = maxu[0];
