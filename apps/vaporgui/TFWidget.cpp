@@ -73,6 +73,21 @@ TFWidget::~TFWidget()
 void TFWidget::setCMVar(const QString &qvar)
 {
     string var = qvar.toStdString();
+    _rParams->SetColorMapVariableName(var);
+
+    if (_flags & CONSTCOLOR) {
+        if (var == "Default") {
+            colorDisplay->setEnabled(false);
+            colorSelectButton->setEnabled(false);
+            _rParams->SetUseSingleColor(false);
+        } else {
+            colorDisplay->setEnabled(true);
+            colorSelectButton->setEnabled(true);
+            _rParams->SetUseSingleColor(true);
+            setSingleColor();
+        }
+        return;
+    }
 
     if (var == "0" || var == "") {
         var = "";
@@ -86,16 +101,20 @@ void TFWidget::setCMVar(const QString &qvar)
     }
 }
 
-void TFWidget::collapseColormapSettings()
+void TFWidget::collapseColorVarSettings()
 {
     colormapVarCombo->hide();
     colormapVarCombo->resize(0, 0);
+    colorVarLabel->hide();
+    colorVarLabel->resize(0, 0);
+}
+
+void TFWidget::collapseConstColorSettings()
+{
     colorDisplay->hide();
     colorDisplay->resize(0, 0);
     constColorLabel->hide();
     constColorLabel->resize(0, 0);
-    colorVarLabel->hide();
-    colorVarLabel->resize(0, 0);
     colorSelectButton->hide();
     colorSelectButton->resize(0, 0);
 }
@@ -117,7 +136,11 @@ void TFWidget::setSingleColor()
 
     _rParams->SetConstantColor(_myRGB);
     _rParams->SetUseSingleColor(true);
-    colormapVarCombo->setCurrentIndex(0);
+    if (_flags & CONSTCOLOR) {
+        colormapVarCombo->setCurrentIndex(1);
+    } else {
+        colormapVarCombo->setCurrentIndex(0);
+    }
 }
 
 void TFWidget::enableTFWidget(bool state)
@@ -314,8 +337,11 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
         else {
             enableTFWidget(true);
         }
+    } else if (_flags & CONSTCOLOR) {
+        // collapseColorVarSettings();
     } else {
-        collapseColormapSettings();
+        collapseColorVarSettings();
+        collapseConstColorSettings();
     }
 
     updateSliders();
@@ -323,15 +349,22 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
 
 void TFWidget::updateColorVarCombo()
 {
-    int ndim = _rParams->GetValueLong(_nDimsTag, 3);
-    assert(ndim == 2 || ndim == 3);
+    int index = colormapVarCombo->currentIndex();
 
-    int            index = colormapVarCombo->currentIndex();
-    vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
+    if (_flags & CONSTCOLOR) {
+        colormapVarCombo->clear();
+        colormapVarCombo->addItem(QString("Default"));
+        colormapVarCombo->addItem(QString("Constant"));
+    } else {
+        int ndim = _rParams->GetValueLong(_nDimsTag, 3);
+        assert(ndim == 2 || ndim == 3);
 
-    colormapVarCombo->clear();
-    colormapVarCombo->addItem(QString("0"));
-    for (int i = 0; i < vars.size(); i++) { colormapVarCombo->addItem(QString::fromStdString(vars[i])); }
+        vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
+
+        colormapVarCombo->clear();
+        colormapVarCombo->addItem(QString("0"));
+        for (int i = 0; i < vars.size(); i++) { colormapVarCombo->addItem(QString::fromStdString(vars[i])); }
+    }
     colormapVarCombo->setCurrentIndex(index);
 }
 
