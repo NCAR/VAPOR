@@ -41,7 +41,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
     ContourAppearanceSubtab(QWidget *parent) {
         setupUi(this);
 
-        _TFWidget->Reinit((TFWidget::Flags)(0));
+        _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTCOLOR));
         _TFWidget->mappingFrame->setIsolineSliders(true);
         _TFWidget->mappingFrame->setOpacityMapping(false);
 
@@ -83,7 +83,6 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
         string varname = _cParams->GetVariableName();
         double spacing, maxSpacing;
         if (locked) {
-            cout << "LOCKED" << endl;
             // Update contour minimum combo
             //
             VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
@@ -94,7 +93,6 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
             else
                 return lower;
         } else {
-            cout << "NOT LOCKED" << endl;
             // Apply settings to contour minimum and spacing, bounded only
             // by the min/max values of the variable.
             //
