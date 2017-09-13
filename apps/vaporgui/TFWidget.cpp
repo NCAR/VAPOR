@@ -89,7 +89,7 @@ void TFWidget::setCMVar(const QString &qvar)
         return;
     }
 
-    if (var == "0" || var == "") {
+    if (var == "Constant" || var == "") {
         var = "";
         _rParams->SetColorMapVariableName(var);
         _rParams->SetUseSingleColor(true);
@@ -362,7 +362,7 @@ void TFWidget::updateColorVarCombo()
         vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
 
         colormapVarCombo->clear();
-        colormapVarCombo->addItem(QString("0"));
+        colormapVarCombo->addItem(QString("Constant"));
         for (int i = 0; i < vars.size(); i++) { colormapVarCombo->addItem(QString::fromStdString(vars[i])); }
     }
     colormapVarCombo->setCurrentIndex(index);
