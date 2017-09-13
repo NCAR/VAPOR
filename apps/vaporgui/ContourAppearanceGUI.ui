@@ -85,7 +85,7 @@
       <number>5</number>
      </property>
      <property name="rightMargin">
-      <number>5</number>
+      <number>10</number>
      </property>
      <item>
       <widget class="QLabel" name="label">
@@ -150,7 +150,7 @@
       <number>5</number>
      </property>
      <property name="rightMargin">
-      <number>5</number>
+      <number>10</number>
      </property>
      <item>
       <widget class="QLabel" name="label_11">
@@ -214,7 +214,7 @@
       <number>5</number>
      </property>
      <property name="rightMargin">
-      <number>5</number>
+      <number>10</number>
      </property>
      <item>
       <widget class="QLabel" name="label_9">
@@ -278,7 +278,7 @@
       <number>5</number>
      </property>
      <property name="rightMargin">
-      <number>5</number>
+      <number>10</number>
      </property>
      <item>
       <widget class="QLabel" name="label_10">
@@ -342,7 +342,7 @@
       <number>5</number>
      </property>
      <property name="rightMargin">
-      <number>15</number>
+      <number>20</number>
      </property>
      <item>
       <widget class="QLabel" name="label_3">
@@ -365,6 +365,35 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_3">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="lineWidth">
+      <number>1</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>400</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="TFWidget" name="_TFWidget" native="true">
@@ -414,13 +443,16 @@
     </spacer>
    </item>
   </layout>
+  <zorder>line</zorder>
+  <zorder>line_2</zorder>
+  <zorder>_ColorbarWidget</zorder>
   <zorder></zorder>
   <zorder></zorder>
   <zorder></zorder>
   <zorder></zorder>
-  <zorder>horizontalLayoutWidget</zorder>
   <zorder>_TFWidget</zorder>
-  <zorder>layoutWidget</zorder>
+  <zorder>horizontalSpacer_3</zorder>
+  <zorder>line_3</zorder>
  </widget>
  <customwidgets>
   <customwidget>
