@@ -1453,12 +1453,13 @@ void MappingFrame::updateAxisLabels()
   // Draw axis labels
   //
   qglColor(Qt::black);
-  for (int i = 0; i<_axisTexts.size(); i++){
-		
-		QPoint* pt = _axisTextPos[i];
-		renderText(pt->x(),pt->y(), _axisTexts[i], QFont("Arial",10,5,false));
+  if (!_isolineSlidersEnabled) {
+	  for (int i = 0; i<_axisTexts.size(); i++){
+			
+			QPoint* pt = _axisTextPos[i];
+			renderText(pt->x(),pt->y(), _axisTexts[i], QFont("Arial",10,5,false));
+	  }
   }
-
 }
 
 //----------------------------------------------------------------------------
