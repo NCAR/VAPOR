@@ -83,24 +83,21 @@ public:
 
  void GetLineColor(int lineNum, float color[3]) {
 
-	string varName = GetVariableName();
-	TransferFunction* tf = 0;
-	tf = (TransferFunction*)GetMapperFunc(varName);
-	assert(tf);
+	string cmVar = GetColorMapVariableName();
+	if ((cmVar == "") || (cmVar == "Default")) {
+		string varName = GetVariableName();
+		TransferFunction* tf = 0;
+		tf = (TransferFunction*)GetMapperFunc(varName);
+		assert(tf);
 
-	vector<double> vals = GetValueDoubleVec(_contoursTag);
-	double val = vals[lineNum];
+		vector<double> vals = GetValueDoubleVec(_contoursTag);
+		double val = vals[lineNum];
 
-	tf->rgbValue(val, color);
-
-//	vector<double> defaultVec;
-//	defaultVec.push_back(1.f);
-//	defaultVec.push_back(0.f);
-//	defaultVec.push_back(0.f);
-//	GetValueDoubleVec(_lineColorTag, defaultVec);
-//	color[0] = 255.f;//defaultVec[0];
-//	color[1] = defaultVec[1];
-//	color[2] = defaultVec[2];
+		tf->rgbValue(val, color);
+	}
+	else {
+		GetConstantColor(color);
+	}
  }
 
  void SetLineColor(vector<double> vec) {
