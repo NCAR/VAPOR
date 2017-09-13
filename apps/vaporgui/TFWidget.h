@@ -26,6 +26,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     //!
     enum Flags {
         COLORMAPPED = (1u << 0),
+        CONSTCOLOR = (1u << 1)
     };
 
     TFWidget(QWidget *parent = 0);
@@ -74,7 +75,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateMappingFrame();
     void updateColorVarCombo();
     void enableTFWidget(bool state);
-    void collapseColormapSettings();
+    void collapseColorVarSettings();
+    void collapseConstColorSettings();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
