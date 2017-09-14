@@ -8,6 +8,6 @@ install (
 
 install (
 	DIRECTORY includes main
-	DESTINATION ${INSTALL_SHARE_DIR}/images
+	DESTINATION ${INSTALL_SHARE_DIR}/shaders
 	COMPONENT Share
 	)
