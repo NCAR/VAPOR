@@ -57,7 +57,7 @@ string get_path_from_bundle(const string &app)
     componentStr[range.length] = 0;
     string s = componentStr;
 
-    if (s.find(bundlename) == string::npos) return (path);
+    if (s.find(BINDIR) != string::npos) return "";
 
     path = s;
     return (path);
@@ -128,7 +128,7 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
             if ((resource.compare("lib") == 0) || (resource.compare("bin") == 0) || (resource.compare("") == 0)) {
                 path.append("MacOS");
             } else if (resource.compare("share") == 0) {
-                path.append("SharedSupport");
+                path.append("share");
             } else {    // must be plugins
                 path.append("Plugins");
             }

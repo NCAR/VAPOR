@@ -258,6 +258,13 @@ public:
 protected:
     EventRouter() {}
 
+    //! Initialize params managed by this event router.
+    //!
+    //! This method is invoked from updateTab() before _updateTab() the first
+    //! time updateTab() is called with new params to manage
+    //!
+    virtual void _initializeTab() {}
+
     //! Pure virtual method to set the values of all the gui elements in the
     //! tab based on current Params state.
     //! This is invoked whenever the tab is redisplayed and the values in the
@@ -286,5 +293,7 @@ protected:
     string _paramsType;
 
 private:
+    // paths to params that have been initialized
+    std::vector<string> _initPaths;
 };
 #endif    // EVENTROUTER_H
