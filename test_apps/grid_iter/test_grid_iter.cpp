@@ -254,12 +254,16 @@ void init_grid(StructuredGrid *sg) {
 
 void test_iterator(const StructuredGrid *sg) {
 
+	cout << "Value Iterator Test ----->" << endl;
+
 	double t0 = Wasp::GetTime();
 
     Grid::ConstIterator itr;
+	Grid::ConstIterator enditr = sg->cend();
 	double accum = 0.0;
 	size_t count = 0;
-    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=sg->cend(); ++itr) {
+//    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=->cend(); ++itr) 
+    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=enditr; ++itr) {
 		accum += *itr;
 		count++;
 //		const vector <double> &coord = *(itr.GetCoordItr());
@@ -267,6 +271,7 @@ void test_iterator(const StructuredGrid *sg) {
     }
 	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
 	cout << "Sum and count: " << accum << " " << count << endl;
+	cout << endl;
 
 }
 
@@ -296,6 +301,7 @@ void test_cell_iterator(const StructuredGrid *sg) {
     }
 	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
 	cout << "Cell count : " << count << endl;
+	cout << endl;
 
 }
 #endif
@@ -307,12 +313,24 @@ void test_node_iterator(const StructuredGrid *sg) {
 	double t0 = Wasp::GetTime();
 
 	Grid::ConstNodeIterator itr;
+	Grid::ConstNodeIterator enditr = sg->ConstNodeEnd();
+
+	if (opt.roimin == opt.minu && opt.roimax == opt.maxu) {
+		itr = sg->ConstNodeBegin();
+	}
+	else {
+		itr = sg->ConstNodeBegin(opt.roimin, opt.roimax);
+	}
 	size_t count = 0;
-    for (itr = sg->ConstNodeBegin(); itr!=sg->ConstNodeEnd(); ++itr) {
-		out_container((*itr).cbegin(), (*itr).cend());
-		cout << endl;
+//    for ( ; itr!=sg->ConstNodeEnd(); ++itr) 
+	for ( ; itr!=enditr; ++itr) {
+		count++;
+//		out_container((*itr).cbegin(), (*itr).cend());
+//		cout << endl;
     }
 	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+	cout << "count: " << count << endl;
+	cout << endl;
 }
 
 void test_cell_iterator(const StructuredGrid *sg) {
@@ -322,12 +340,25 @@ void test_cell_iterator(const StructuredGrid *sg) {
 	double t0 = Wasp::GetTime();
 
 	Grid::ConstCellIterator itr;
+	Grid::ConstCellIterator enditr = sg->ConstCellEnd();
+
+	if (opt.roimin == opt.minu && opt.roimax == opt.maxu) {
+		itr = sg->ConstCellBegin();
+	}
+	else {
+		itr = sg->ConstCellBegin(opt.roimin, opt.roimax);
+	}
+
 	size_t count = 0;
-    for (itr = sg->ConstCellBegin(); itr!=sg->ConstCellEnd(); ++itr) {
-		out_container((*itr).cbegin(), (*itr).cend());
-		cout << endl;
+//    for (itr = sg->ConstCellBegin(); itr!=sg->ConstCellEnd(); ++itr) 
+    for ( ; itr!=enditr; ++itr) {
+		count++;
+//		out_container((*itr).cbegin(), (*itr).cend());
+//		cout << endl;
     }
 	cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+	cout << "count: " << count << endl;
+	cout << endl;
 }
 
 
@@ -386,7 +417,7 @@ int main(int argc, char **argv) {
 	cout << endl;
 
 
-//	test_iterator(sg);
+	test_iterator(sg);
 
 //	test_cell_iterator(sg);
 
