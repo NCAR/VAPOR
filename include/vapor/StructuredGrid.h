@@ -102,12 +102,9 @@ class VDF_API StructuredGrid : public Grid {
     class ConstNodeIteratorSG : public Grid::ConstNodeIteratorAbstract {
       public:
         ConstNodeIteratorSG(const StructuredGrid *rg, bool begin);
-        ConstNodeIteratorSG(
-            const StructuredGrid *rg,
-            const std::vector<double> &minu, const std::vector<double> &maxu);
         ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs);
-
         ConstNodeIteratorSG();
+
         virtual ~ConstNodeIteratorSG() {}
 
         virtual void next();
@@ -127,10 +124,31 @@ class VDF_API StructuredGrid : public Grid {
             return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(*this));
         };
 
-      private:
-        InsideBox _pred;
+      protected:
         std::vector<size_t> _dims;
         std::vector<size_t> _index;
+        std::vector<size_t> _lastIndex;
+    };
+
+    class ConstNodeIteratorBoxSG : public ConstNodeIteratorSG {
+      public:
+        ConstNodeIteratorBoxSG(
+            const StructuredGrid *rg,
+            const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstNodeIteratorBoxSG(const ConstNodeIteratorBoxSG &rhs);
+        ConstNodeIteratorBoxSG();
+
+        virtual ~ConstNodeIteratorBoxSG() {}
+
+        virtual void next();
+
+        virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorBoxSG(*this));
+        };
+
+      private:
+        InsideBox _pred;
+        ConstCoordItr _coordItr;
     };
 
     virtual ConstNodeIterator ConstNodeBegin() const override {
@@ -143,7 +161,7 @@ class VDF_API StructuredGrid : public Grid {
         const std::vector<double> &minu, const std::vector<double> &maxu) const override {
         return ConstNodeIterator(
             std::unique_ptr<ConstNodeIteratorAbstract>(
-                new ConstNodeIteratorSG(this, minu, maxu)));
+                new ConstNodeIteratorBoxSG(this, minu, maxu)));
     }
 
     virtual ConstNodeIterator ConstNodeEnd() const override {
@@ -158,12 +176,9 @@ class VDF_API StructuredGrid : public Grid {
     class ConstCellIteratorSG : public Grid::ConstCellIteratorAbstract {
       public:
         ConstCellIteratorSG(const StructuredGrid *rg, bool begin);
-        ConstCellIteratorSG(
-            const StructuredGrid *rg,
-            const std::vector<double> &minu, const std::vector<double> &maxu);
         ConstCellIteratorSG(const ConstCellIteratorSG &rhs);
-
         ConstCellIteratorSG();
+
         virtual ~ConstCellIteratorSG() {}
 
         virtual void next();
@@ -183,10 +198,31 @@ class VDF_API StructuredGrid : public Grid {
             return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(*this));
         };
 
-      private:
-        InsideBox _pred;
+      protected:
         std::vector<size_t> _dims;
         std::vector<size_t> _index;
+        std::vector<size_t> _lastIndex;
+    };
+
+    class ConstCellIteratorBoxSG : public ConstCellIteratorSG {
+      public:
+        ConstCellIteratorBoxSG(
+            const StructuredGrid *rg,
+            const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs);
+        ConstCellIteratorBoxSG();
+
+        virtual ~ConstCellIteratorBoxSG() {}
+
+        virtual void next();
+
+        virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorBoxSG(*this));
+        };
+
+      private:
+        InsideBox _pred;
+        ConstCoordItr _coordItr;
     };
 
     virtual ConstCellIterator ConstCellBegin() const override {
@@ -199,7 +235,7 @@ class VDF_API StructuredGrid : public Grid {
         const std::vector<double> &minu, const std::vector<double> &maxu) const override {
         return ConstCellIterator(
             std::unique_ptr<ConstCellIteratorAbstract>(
-                new ConstCellIteratorSG(this, minu, maxu)));
+                new ConstCellIteratorBoxSG(this, minu, maxu)));
     }
 
     virtual ConstCellIterator ConstCellEnd() const override {
