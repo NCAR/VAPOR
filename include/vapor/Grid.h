@@ -515,10 +515,10 @@ public:
  //
  /////////////////////////////////////////////////////////////////////////////
 
- // Inside a box functor
- //
- // operator() returns true if point pt is on or inside the axis-aligned
- // box defined by min and max
+ //! Inside a box functor
+ //!
+ //! operator() returns true if point pt is on or inside the axis-aligned
+ //! box defined by min and max
  //
  class InsideBox {
  public:
@@ -618,33 +618,61 @@ public:
   std::unique_ptr<AbstractIterator<T>> _impl;
  };
 
- // Coordinate iterator. Iterates over grid node/cell coordinates
+ //! Coordinate iterator. Iterates over grid node/cell coordinates
+ //!
+ //! The ConstCoordItr can be dererenced to return a grid node or 
+ //! cell's coordinates. The determination, node or cell, is determined
+ //! by the location of the sampled data within the grid (node, face,
+ //! cell, etc)
+ //!
+ //! 
  //
  typedef const std::vector <double> ConstCoordType;
  typedef Grid::PolyIterator<ConstCoordType> ConstCoordItr;
  typedef Grid::AbstractIterator<ConstCoordType> ConstCoordItrAbstract;
 
+ //! Return constant grid coordinate iterator
+ //
  virtual ConstCoordItr ConstCoordBegin() const = 0;
  virtual ConstCoordItr ConstCoordEnd() const = 0;
 
 
- // Node index iterator. Iterates over grid node indices
- //
+ //! Node index iterator. Iterates over grid node indices
+ //!
+ //! The ConstNodeIterator is dereferenced to give the index of 
+ //! a node within the grid
+ //!
  typedef const std::vector <size_t> ConstIndexType;
  typedef Grid::PolyIterator<ConstIndexType> ConstNodeIterator;
  typedef Grid::AbstractIterator<ConstIndexType> ConstNodeIteratorAbstract;
 
+ //! Return constant grid node coordinate iterator
+ //!
+ //! If \p minu and \p maxu are specified the iterator is constrained to
+ //! operation within the axis-aligned box defined by \p minu and \p maxu.
+ //!
+ //! \param[in] minu Minimum box coordinate.
+ //! \param[in] maxu Maximum box coordinate.
+ //!
  virtual ConstNodeIterator ConstNodeBegin() const = 0;
  virtual ConstNodeIterator ConstNodeBegin(
 	const std::vector <double> &minu, const std::vector <double>  &maxu
  ) const = 0;
  virtual ConstNodeIterator ConstNodeEnd() const = 0;
 
- // Cell index iterator. Iterates over grid cell indices
+ //! Cell index iterator. Iterates over grid cell indices
  //
  typedef Grid::PolyIterator<ConstIndexType> ConstCellIterator;
  typedef Grid::AbstractIterator<ConstIndexType> ConstCellIteratorAbstract;
 
+ //! Return constant grid cell coordinate iterator
+ //!
+ //! If \p minu and \p maxu are specified the iterator is constrained to
+ //! operation within the axis-aligned box defined by \p minu and \p maxu.
+ //!
+ //! \param[in] minu Minimum box coordinate.
+ //! \param[in] maxu Maximum box coordinate.
+ //!
  virtual ConstCellIterator ConstCellBegin() const = 0;
  virtual ConstCellIterator ConstCellBegin(
 	const std::vector <double> &minu, const std::vector <double>  &maxu
@@ -666,6 +694,9 @@ public:
  //! \li \c n + a
  //!
  //! where \i a are objects of type ForwardIterator, and \i n is an int.
+ //!
+ //! N.B. this class does NOT need to be a template. It's a historical
+ //! implementation.
  //
  template <class T>
  class VDF_API ForwardIterator {

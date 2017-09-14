@@ -230,21 +230,6 @@ Grid::ForwardIterator<T>::ForwardIterator (
 	}
 }
 
-#ifdef	DEAD
-template <class T>
-Grid::ForwardIterator<T>::ForwardIterator(
-	const ForwardIterator<T> &rhs
-) {
-	_rg = rhs._rg; 
-	_coordItr = rhs._coordItr.clone();
-	_index = rhs._index;
-	_end_index = rhs._end_index;
-	_xb = rhs._xb;
-	_itr = rhs._itr; 
-	_pred = rhs._pred;
-}
-#endif
-
 template <class T>
 Grid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &&rhs) {
 	_rg = rhs._rg; rhs._rg = nullptr;
