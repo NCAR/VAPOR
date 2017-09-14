@@ -121,7 +121,7 @@ sub copy_install_targets {
 	copy_dir_contents($srcdir, $dstdir);
 
 	$srcdir = File::Spec->catdir($install_path, "share");
-	$dstdir = File::Spec->catdir($bundle_path, "Contents", "SharedSupport");
+	$dstdir = File::Spec->catdir($bundle_path, "Contents", "share");
 	copy_dir_contents($srcdir, $dstdir);
 
 	$srcdir = File::Spec->catdir($install_path, "plugins");
@@ -208,7 +208,7 @@ my (@cmd) = (
 );
 mysystem(@cmd);
 
-$mandir = File::Spec->catdir($bundle_path, "Contents", "SharedSupport", "man");
+$mandir = File::Spec->catdir($bundle_path, "Contents", "share", "man");
 
 my (@cmd) = (
 	$vapor_install, "-nocopy", "-root", $macos_dir, 
