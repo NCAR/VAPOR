@@ -1,6 +1,15 @@
-file (GLOB TMS_FILES *.tms)
 file (GLOB PNG_FILES *.png)
-string (REPLACE ".tms" "" TMS_DIRS ${TMS_FILES})
+
+set (TMS_DIRS
+	BigBlueMarble
+	NaturalEarth
+	)
+
+set (TMS_FILES
+	BigBlueMarble.tms
+	NaturalEarth.tms
+	)
+
 
 install (
 	FILES ${TMS_FILES} ${PNG_FILES}
