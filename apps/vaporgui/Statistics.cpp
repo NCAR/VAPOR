@@ -1542,7 +1542,7 @@ void Statistics::initRegion() {
 
         VAPoR::StructuredGrid::Iterator itr;
         VAPoR::StructuredGrid::Iterator endItr;
-        enditr = rGrid->end();
+        endItr = rGrid->end();
 
         for (itr = rGrid->begin(_uCoordMin, _uCoordMax); itr != endItr; ++itr) {
             count++;
