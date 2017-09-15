@@ -109,7 +109,6 @@ private slots:
 		dims[1] = i;
 		dims[2] = (int)longDims[2];
 		bParams->SetGrid(dims);
-
 	}
 
 	void zDimChanged(int i) {
