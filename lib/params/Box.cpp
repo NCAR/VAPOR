@@ -88,7 +88,6 @@ void Box::SetExtents(
         exts.push_back(0.0);
 
     SetValueDoubleVec(m_extentsTag, "Set box extents", exts);
-    //cout << "Box::SetExts: " << exts[0] << " " << exts[1] << " " << exts[2] << " " << exts[3] << " " << exts[4] << " " << exts[5] << endl;
 }
 
 void Box::GetExtents(
