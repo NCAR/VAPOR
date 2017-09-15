@@ -10,6 +10,7 @@ class ControlExec;
 class RenderParams;
 class ParamsMgr;
 class DataMgr;
+class BarbParams;
 }    // namespace VAPoR
 
 class BarbVariablesSubtab : public QWidget, public Ui_BarbVariablesGUI {
@@ -47,17 +48,23 @@ class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
     Q_OBJECT
 
 public:
-    BarbGeometrySubtab(QWidget *parent)
-    {
+    BarbGeometrySubtab(QWidget *parent);
+    /*BarbGeometrySubtab(QWidget* parent) {
         setupUi(this);
-        _geometryWidget->Reinit((GeometryWidget::Flags)((GeometryWidget::VECTOR) | (GeometryWidget::THREED)));
+        _geometryWidget->Reinit((GeometryWidget::Flags)
+            ((GeometryWidget::VECTOR) | (GeometryWidget::THREED)));
 
-        connect(_xDimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(xDimChanged(int)));
-        connect(_yDimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(yDimChanged(int)));
-        connect(_zDimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(zDimChanged(int)));
-        connect(_lengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(lengthChanged(double)));
-        connect(_thicknessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(thicknessChanged(double)));
-    }
+        connect(_xDimSpinBox, SIGNAL(valueChanged(int)), this,
+            SLOT(xDimChanged(int)));
+        connect(_yDimSpinBox, SIGNAL(valueChanged(int)), this,
+            SLOT(yDimChanged(int)));
+        connect(_zDimSpinBox, SIGNAL(valueChanged(int)), this,
+            SLOT(zDimChanged(int)));
+        connect(_lengthSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(lengthChanged(double)));
+        connect(_thicknessSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(thicknessChanged(double)));
+    }*/
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
     {
@@ -66,53 +73,54 @@ public:
     }
 
 private slots:
-    void xDimChanged(int i)
-    {
-        VAPoR::BarbParams *bParams = (VAPoR::BarbParams *)_rParams;
-        vector<long>       longDims = bParams->GetGrid();
-        int                dims[3];
+    void xDimChanged(int i);
+    /*void xDimChanged(int i) {
+        VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
+        vector<long> longDims = bParams->GetGrid();
+        int dims[3];
 
         dims[0] = i;
         dims[1] = (int)longDims[1];
         dims[2] = (int)longDims[2];
         bParams->SetGrid(dims);
-    }
 
-    void yDimChanged(int i)
-    {
-        VAPoR::BarbParams *bParams = (VAPoR::BarbParams *)_rParams;
-        vector<long>       longDims = bParams->GetGrid();
-        int                dims[3];
+    }*/
+
+    void yDimChanged(int i);
+    /*void yDimChanged(int i) {
+        VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
+        vector<long> longDims = bParams->GetGrid();
+        int dims[3];
 
         dims[0] = (int)longDims[0];
         dims[1] = i;
         dims[2] = (int)longDims[2];
         bParams->SetGrid(dims);
-    }
+    }*/
 
-    void zDimChanged(int i)
-    {
-        VAPoR::BarbParams *bParams = (VAPoR::BarbParams *)_rParams;
-        vector<long>       longDims = bParams->GetGrid();
-        int                dims[3];
+    void zDimChanged(int i);
+    /*void zDimChanged(int i) {
+        VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
+        vector<long> longDims = bParams->GetGrid();
+        int dims[3];
 
         dims[0] = (int)longDims[0];
         dims[1] = (int)longDims[1];
         dims[2] = i;
         bParams->SetGrid(dims);
-    }
+    }*/
 
-    void lengthChanged(double d)
-    {
-        VAPoR::BarbParams *bParams = (VAPoR::BarbParams *)_rParams;
+    void lengthChanged(double d);
+    /*void lengthChanged(double d) {
+        VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
         bParams->SetLengthScale(d);
-    }
+    }*/
 
-    void thicknessChanged(double d)
-    {
-        VAPoR::BarbParams *bParams = (VAPoR::BarbParams *)_rParams;
+    void thicknessChanged(double d);
+    /*void thicknessChanged(double d) {
+        VAPoR::BarbParams* bParams = (VAPoR::BarbParams*)_rParams;
         bParams->SetLineThickness(d);
-    }
+    }*/
 
 private:
     VAPoR::RenderParams *_rParams;
