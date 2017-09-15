@@ -35,7 +35,7 @@ public:
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
-    void initialize(VAPoR::ContourParams *cParams);
+    void Initialize(VAPoR::ContourParams *cParams);
 
 private:
     void   SetIsovalues();

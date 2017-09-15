@@ -72,7 +72,7 @@ void ContourEventRouter::_initializeTab()
     _updateTab();
     ContourParams *rParams = (ContourParams *)GetActiveParams();
 
-    _appearance->initialize(rParams);
+    _appearance->Initialize(rParams);
 
     cout << "ContourEventRouter::_initializeTab() : override param defaults here" << endl;
 }
@@ -81,6 +81,8 @@ void ContourEventRouter::_updateTab()
 {
     // The variable tab updates itself:
     _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
+
+    cout << "contourEventRouter updateTab()" << endl;
 
     _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
