@@ -45,7 +45,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams);
 
-    void initialize(VAPoR::ContourParams *cParams);
+    void Initialize(VAPoR::ContourParams *cParams);
 
   private:
     void SetIsovalues();
