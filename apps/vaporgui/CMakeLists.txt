@@ -51,6 +51,7 @@ set (SRCS
 	StatisticsParams.cpp
 	MiscParams.cpp
 	ContourSubtabs.cpp
+	BarbSubtabs.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
