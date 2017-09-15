@@ -21,6 +21,7 @@ plugins/visit/WASP/WASP.xml.bak
 plugins/visit/WASP/cmake_install.cmake
 plugins/visit/vdf.xml.bak
 plugins/visit/VDC/CMake*
+share/fonts/Pacifico.ttf
 
 # CMake
 Makefile
