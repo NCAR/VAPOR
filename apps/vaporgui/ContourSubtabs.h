@@ -49,7 +49,7 @@ public:
 		VAPoR::RenderParams *rParams
 	);
 
-	void initialize(VAPoR::ContourParams* cParams);
+	void Initialize(VAPoR::ContourParams* cParams);
 
 private:
 	void SetIsovalues(); 
