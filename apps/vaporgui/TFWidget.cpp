@@ -72,6 +72,9 @@ TFWidget::~TFWidget()
 
 void TFWidget::setCMVar(const QString &qvar)
 {
+    _paramsMgr->BeginSaveStateGroup("TFWidget::setCMVar(), "
+                                    "set colormapped variable");
+
     string var = qvar.toStdString();
     _rParams->SetColorMapVariableName(var);
 
@@ -99,6 +102,8 @@ void TFWidget::setCMVar(const QString &qvar)
         _rParams->SetUseSingleColor(false);
         if (!_rParams->GetMapperFunc(var)) _rParams->MakeMapperFunc(var);
     }
+
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void TFWidget::collapseColorVarSettings()
@@ -121,6 +126,7 @@ void TFWidget::collapseConstColorSettings()
 
 void TFWidget::setSingleColor()
 {
+    _paramsMgr->BeginSaveStateGroup("TFWidget::setSingleColor()");
     QPalette palette(colorDisplay->palette());
     QColor   color = QColorDialog::getColor(palette.color(QPalette::Base), this);
     if (!color.isValid()) return;
@@ -141,6 +147,7 @@ void TFWidget::setSingleColor()
     } else {
         colormapVarCombo->setCurrentIndex(0);
     }
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void TFWidget::enableTFWidget(bool state)
@@ -337,8 +344,6 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
         else {
             enableTFWidget(true);
         }
-    } else if (_flags & CONSTCOLOR) {
-        // collapseColorVarSettings();
     } else {
         collapseColorVarSettings();
         collapseConstColorSettings();
