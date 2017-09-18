@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <cassert>
+#include <memory>
 #include <vapor/common.h>
 
 #ifdef WIN32
