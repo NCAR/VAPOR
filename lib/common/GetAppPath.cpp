@@ -125,10 +125,12 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
         if (path.empty()) { path = get_path_from_bundle(myapp); }
         if (!path.empty()) {
             path.append("Contents/");
-            if ((resource.compare("lib") == 0) || (resource.compare("bin") == 0) || (resource.compare("") == 0)) {
+            if ((resource.compare("bin") == 0) || (resource.compare("") == 0)) {
                 path.append("MacOS");
             } else if (resource.compare("share") == 0) {
                 path.append("share");
+            } else if (resource.compare("lib") == 0) {
+                path.append("lib");
             } else {    // must be plugins
                 path.append("Plugins");
             }
