@@ -87,6 +87,9 @@ class PARAMS_API ContourParams : public RenderParams {
             string varName = GetVariableName();
             TransferFunction *tf = 0;
             tf = (TransferFunction *)GetMapperFunc(varName);
+            if (!tf) {
+                tf = MakeTransferFunc(varName);
+            }
             assert(tf);
 
             vector<double> vals = GetValueDoubleVec(_contoursTag);
