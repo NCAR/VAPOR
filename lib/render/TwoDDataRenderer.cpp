@@ -325,6 +325,10 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
     int             rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &g);
     if (rc < 0) return (-1);
 
+    cout << "TwoDRenderer::_paintGL() timestep: " << ts << endl;
+    cout << "minEx: " << minBoxReq[0] << " " << minBoxReq[1] << " " << minBoxReq[2] << endl;
+    cout << "maxEx: " << maxBoxReq[0] << " " << maxBoxReq[1] << " " << maxBoxReq[2] << endl;
+
     assert(g);
 
     if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
@@ -385,6 +389,10 @@ void TwoDDataRenderer::_gridStateSet()
     _currentHgtVar = rParams->GetHeightVariableName();
     _currentTimestep = rParams->GetCurrentTimestep();
     rParams->GetBox()->GetExtents(_currentBoxMinExts, _currentBoxMaxExts);
+
+    cout << "BarbRenderer::gridStateSet timestep: " << _currentTimestep << endl;
+    cout << "minEx: " << _currentBoxMinExts[0] << " " << _currentBoxMinExts[1] << " " << _currentBoxMinExts[2] << endl;
+    cout << "maxEx: " << _currentBoxMaxExts[0] << " " << _currentBoxMaxExts[1] << " " << _currentBoxMaxExts[2] << endl;
 }
 
 bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const
@@ -450,6 +458,8 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
     GLfloat *normals = (GLfloat *)_sb_normals.GetBuf();
     ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
+
+    cout << "verts[0] " << verts[0] << endl;
 
     // Construct indices for a triangle strip covering one row
     // of the mesh
