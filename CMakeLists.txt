@@ -33,8 +33,7 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# These need to be updatd to change for install build
-set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
+# These need to be updatd to change for install build set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
 set (BINDIR ${PROJECT_BINARY_DIR}/bin)
 set (ABS_TOP ${PROJECT_SOURCE_DIR})
 
@@ -136,7 +135,8 @@ endif (WIN32)
 if (APPLE)
 	if (${GENERATE_FULL_INSTALLER})
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${THIRD_PARTY_LIB_DIR}/python2.7)
+		message (${INSTALL_FRAMEWORKS})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
