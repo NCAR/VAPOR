@@ -96,7 +96,8 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
 #endif
     env.append("_HOME");
 
-    if (!((resource.compare("lib") == 0) || (resource.compare("bin") == 0) || (resource.compare("share") == 0) || (resource.compare("plugins") == 0) || (resource.compare("") == 0))) {
+    if (!((resource.compare("lib") == 0) || (resource.compare("bin") == 0) || (resource.compare("share") == 0) || (resource.compare("plugins") == 0) || (resource.compare("home") == 0)
+          || (resource.compare("") == 0))) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (unknown resources)");
         return ("");    // empty path, invalid resource
     }
@@ -131,6 +132,7 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
                 path.append("share");
             } else if (resource.compare("lib") == 0) {
                 path.append("lib");
+            } else if (resource.compare("home") == 0) {
             } else {    // must be plugins
                 path.append("Plugins");
             }
