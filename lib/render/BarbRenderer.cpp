@@ -73,6 +73,7 @@ int BarbRenderer::_paintGL(){
 	BarbParams* bParams = (BarbParams*) GetActiveParams();
 	size_t ts = bParams->GetCurrentTimestep();
 
+
 	int refLevel = bParams->GetRefinementLevel();
 	int lod = bParams->GetCompressionLevel();
 	vector<double> minExts, maxExts;
@@ -93,6 +94,12 @@ int BarbRenderer::_paintGL(){
 			_dataMgr, ts, varnames, minExts, maxExts, 
 			true, &refLevel, &lod, varData
 		);
+
+
+	cout << "BarbRenderer::_paintGL() timestep: " << ts << endl;
+	cout << "minEx: " << minExts[0] << " " << minExts[1] << " " << minExts[2] << endl;
+	cout << "maxEx: " << maxExts[0] << " " << maxExts[1] << " " << maxExts[2] << endl;
+
 	if(rc<0) return(rc);
 	varData.push_back(NULL);
 	varData.push_back(NULL);
@@ -349,7 +356,7 @@ int BarbRenderer::performRendering(
 	rakeGrid[1] = (int)longGrid[1];
 	rakeGrid[2] = (int)longGrid[2];
 	
-	renderScottsGrid(rakeGrid, rakeExts, variableData, timestep, 
+	renderGrid(rakeGrid, rakeExts, variableData, timestep, 
 		vectorLengthScale, rad, bParams);
 	
 	return 0;
@@ -367,7 +374,7 @@ float BarbRenderer::getHeightOffset(StructuredGrid* heightVar,
 	return offset;
 }
 
-void BarbRenderer::renderScottsGrid(int rakeGrid[3], double rakeExts[6],
+void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 	vector <StructuredGrid *> variableData, int timestep, 
 	float length,
 	float rad, const BarbParams* bParams) {
