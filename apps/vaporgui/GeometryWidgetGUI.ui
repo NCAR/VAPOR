@@ -72,6 +72,12 @@
           <layout class="QVBoxLayout" name="verticalLayout_36">
            <item>
             <widget class="QGroupBox" name="xMinMaxGroupBox">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>80</height>
+              </size>
+             </property>
              <property name="title">
               <string>X Coordinates</string>
              </property>
@@ -237,6 +243,12 @@
            </item>
            <item>
             <widget class="QGroupBox" name="yMinMaxGroupBox">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>80</height>
+              </size>
+             </property>
              <property name="title">
               <string>Y Coordinates</string>
              </property>
@@ -412,6 +424,12 @@
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>80</height>
+              </size>
              </property>
              <property name="title">
               <string>Z Coordinates</string>

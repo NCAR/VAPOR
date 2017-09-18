@@ -85,9 +85,9 @@ class RENDER_API BarbRenderer : public Renderer {
     float getHeightOffset(StructuredGrid *heightVar, float xCoord,
                           float yCoord, bool &missing);
 
-    void renderScottsGrid(int rakeGrid[3], double rakeExts[6],
-                          vector<StructuredGrid *> variableData, int timestep,
-                          float vectorLengthScale, float rad, const BarbParams *params);
+    void renderGrid(int rakeGrid[3], double rakeExts[6],
+                    vector<StructuredGrid *> variableData, int timestep,
+                    float vectorLengthScale, float rad, const BarbParams *params);
 
     bool GetColorMapping(TransferFunction *tf, float val);
 
