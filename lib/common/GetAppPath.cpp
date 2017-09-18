@@ -156,6 +156,7 @@ std::string Wasp::GetAppPath(
 				path.append("lib");
 			}
 			else if (resource.compare("home") == 0) {
+				path.erase(path.size() - 1, 1);
 			}
 			else {	// must be plugins
 				path.append("Plugins");
