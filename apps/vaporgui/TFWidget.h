@@ -56,6 +56,10 @@ public:
 	void loadInstalledTF(string varname);
 	void getRange(float range[2], float values[2]);
 
+	// Made public, to be called from EventRouter::Initialize
+	//
+	void setCMVar(const QString&);
+
 private slots:
 	void fileSaveTF();
 	void setRange();
@@ -64,7 +68,6 @@ private slots:
 	void autoUpdateHistoChecked(int state);
 	void colorInterpChanged(int index);
 	void loadTF();
-	void setCMVar(const QString&);
 	void setSingleColor();
 	void forwardTFChange();
 

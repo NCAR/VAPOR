@@ -333,6 +333,7 @@ int BarbRenderer::performRendering(
 	int nLights = vpParams->getNumLights();
 	float fcolor[3];
 	bParams->GetConstantColor(fcolor);
+	cout << "color " << fcolor[0] << " " << fcolor[1] << " " << fcolor[2] << endl;
 	if (nLights == 0) {
 		glDisable(GL_LIGHTING);
 	}
@@ -413,11 +414,11 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 						direction[dim] = variableData[dim]->GetValue(
 							xCoord, yCoord, zCoord
 						);
-					}
 
-					float missingVal = variableData[dim]->GetMissingValue();
-					if (direction[dim] == missingVal) {
-						missing = true;
+						float missingVal = variableData[dim]->GetMissingValue();
+						if (direction[dim] == missingVal) {
+							missing = true;
+						}
 					}
 				}
 

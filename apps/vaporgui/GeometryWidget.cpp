@@ -187,6 +187,10 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
 				}
 			}
 		}
+		else {
+			minFullExt.push_back(0.f);
+			maxFullExt.push_back(0.f);
+		}
 	}
 }
 
@@ -199,44 +203,43 @@ void GeometryWidget::updateCopyCombo() {
 	_dataSetNames = _paramsMgr->GetDataMgrNames();
 
 	for (int i=0; i<visNames.size(); i++) {
-	for (int ii=0; ii<_dataSetNames.size(); ii++) {
-
-		// Create a mapping of abreviated visualizer names to their
-		// actual string values. 
-		//
-		string visAbb = "Vis" + std::to_string(i);
-		_visNames[visAbb] = visNames[i];
-
-		string dataSetName = _dataSetNames[ii];
-
-
-		std::vector<string> typeNames;
-		typeNames = _paramsMgr->GetRenderParamsClassNames(visNames[i]);
-
-		for (int j=0; j<typeNames.size(); j++) {
-
-			// Abbreviate Params names by removing 'Params" from them.
-			// Then store them in a map for later reference.
+		for (int ii=0; ii<_dataSetNames.size(); ii++) {
+	
+			// Create a mapping of abreviated visualizer names to their
+			// actual string values. 
 			//
-			string typeAbb = typeNames[j];
-			int pos = typeAbb.find("Params");
-			typeAbb.erase(pos,6);
-			_renTypeNames[typeAbb] = typeNames[j];
-
-			std::vector<string> renNames;
-			renNames = _paramsMgr->GetRenderParamInstances(visNames[i],
-															typeNames[j]
-			);
-
-			for (int k=0; k<renNames.size(); k++) {
-				string displayName = visAbb + ":" + 
-									dataSetName + ":" +
-									typeAbb + ":" + renNames[k];
-				QString qDisplayName = QString::fromStdString(displayName);
-				copyCombo->addItem(qDisplayName);
+			string visAbb = "Vis" + std::to_string(i);
+			_visNames[visAbb] = visNames[i];
+	
+			string dataSetName = _dataSetNames[ii];
+	
+			std::vector<string> typeNames;
+			typeNames = _paramsMgr->GetRenderParamsClassNames(visNames[i]);
+	
+			for (int j=0; j<typeNames.size(); j++) {
+	
+				// Abbreviate Params names by removing 'Params" from them.
+				// Then store them in a map for later reference.
+				//
+				string typeAbb = typeNames[j];
+				int pos = typeAbb.find("Params");
+				typeAbb.erase(pos,6);
+				_renTypeNames[typeAbb] = typeNames[j];
+	
+				std::vector<string> renNames;
+				renNames = _paramsMgr->GetRenderParamInstances(visNames[i],
+																typeNames[j]
+				);
+	
+				for (int k=0; k<renNames.size(); k++) {
+					string displayName = visAbb + ":" + 
+										dataSetName + ":" +
+										typeAbb + ":" + renNames[k];
+					QString qDisplayName = QString::fromStdString(displayName);
+					copyCombo->addItem(qDisplayName);
+				}
 			}
 		}
-	}
 	}
 }
 
@@ -305,7 +308,6 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 				"not return valid values from GetVariableExtents()");
 		}
 	}
-
 	updateRangeLabels(minFullExt, maxFullExt);
 	updateCopyCombo();
 
