@@ -44,7 +44,7 @@ TFWidget::TFWidget(QWidget* parent)
 
 	setupUi(this);
 
-	_myRGB[0] = _myRGB[1] = _myRGB[2] = .1;
+	_myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
 
 	_minCombo = new Combo(minRangeEdit, minRangeSlider);
 	_maxCombo = new Combo(maxRangeEdit, maxRangeSlider);
@@ -99,12 +99,27 @@ void TFWidget::setCMVar(const QString& qvar) {
 		_rParams->SetColorMapVariableName(var);
 		_rParams->SetUseSingleColor(true);
 		_rParams->SetConstantColor(_myRGB);
+
+		colorSelectButton->setEnabled(true);
+		minRangeSlider->setEnabled(false);
+		minRangeEdit->setEnabled(false);
+		maxRangeSlider->setEnabled(false);
+		maxRangeEdit->setEnabled(false);
+		colorInterpCombo->setEnabled(false);
+		
 	}   
 	else {
 		_rParams->SetColorMapVariableName(var);
 		_rParams->SetUseSingleColor(false);
 		if (!_rParams->GetMapperFunc(var))
 			_rParams->MakeMapperFunc(var);
+
+		colorSelectButton->setEnabled(false);
+		minRangeSlider->setEnabled(true);
+		minRangeEdit->setEnabled(true);
+		maxRangeSlider->setEnabled(true);
+		maxRangeEdit->setEnabled(true);
+		colorInterpCombo->setEnabled(true);
 	}
 
 	_paramsMgr->EndSaveStateGroup();

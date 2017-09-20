@@ -86,6 +86,13 @@ void BarbEventRouter::GetWebHelp(
     )); 
 }
 
+void BarbEventRouter::_initializeTab() {
+	_updateTab();
+	BarbParams* rParams = (BarbParams*) GetActiveParams();
+
+	_appearance->Initialize(rParams);
+}
+
 void BarbEventRouter::_updateTab(){
 	//The variable tab updates itself:
 	_variables->Update(
