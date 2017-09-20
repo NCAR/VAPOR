@@ -76,7 +76,7 @@ void BarbParams::_init() {
     int rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
 
     SetUseSingleColor(true);
-    float rgb[] = {.95, .66, .27};
+    float rgb[] = {1.f, 1.f, 1.f};
     SetConstantColor(rgb);
 
     int grid[] = {4, 4, 1};

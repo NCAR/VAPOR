@@ -81,6 +81,13 @@ void BarbEventRouter::GetWebHelp(
                                     "http://www.vapor.ucar.edu/docs/vapor-gui-help/BarbAppearance"));
 }
 
+void BarbEventRouter::_initializeTab() {
+    _updateTab();
+    BarbParams *rParams = (BarbParams *)GetActiveParams();
+
+    _appearance->Initialize(rParams);
+}
+
 void BarbEventRouter::_updateTab() {
     //The variable tab updates itself:
     _variables->Update(
