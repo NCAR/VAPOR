@@ -49,6 +49,7 @@ public:
 
 protected:
     virtual void _updateTab();
+    virtual void _initializeTab();
 
 private:
     BarbEventRouter() {}

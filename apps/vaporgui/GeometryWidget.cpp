@@ -169,6 +169,9 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> 
                     if (maxVarExt[j] > maxFullExt[j]) { maxFullExt[j] = maxVarExt[j]; }
                 }
             }
+        } else {
+            minFullExt.push_back(0.f);
+            maxFullExt.push_back(0.f);
         }
     }
 }
@@ -273,7 +276,6 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
                               "not return valid values from GetVariableExtents()");
         }
     }
-
     updateRangeLabels(minFullExt, maxFullExt);
     updateCopyCombo();
 
