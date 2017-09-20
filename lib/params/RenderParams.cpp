@@ -451,8 +451,6 @@ void RenderParams::SetConstantColor(const float rgb[3]) {
         rgbv.push_back(v);
     }
     SetValueDoubleVec(_constantColorTag, "Specify constant color in RGB", rgbv);
-    cout << rgbv[0] << " " << rgbv[1] << " " << rgbv[2] << " color " << endl;
-    cout << endl;
 }
 
 void RenderParams::GetConstantColor(float rgb[3]) const {
