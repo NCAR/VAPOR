@@ -177,7 +177,11 @@ MappingFrame::~MappingFrame()
 }
 
 void MappingFrame::RefreshHistogram() {
-	string var = _rParams->GetVariableName();
+	string var = _rParams->GetColorMapVariableName();
+	if (var == "") {
+		var = _rParams->GetVariableName();
+	}
+//	string var = _rParams->GetVariableName();
 	size_t ts = _rParams->GetCurrentTimestep();	
 
 	float minRange = _rParams->MakeMapperFunc(var)->getMinMapValue();
@@ -355,16 +359,23 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	_rParams = rParams;
 	_paramsMgr = paramsMgr;
 
-	string varname = _rParams->GetVariableName();
-	
+	string varname = _rParams->GetColorMapVariableName();
+	if (varname == "") {
+		varname = _rParams->GetVariableName();
+	}
+
 	MapperFunction *mapper;
 	mapper = _rParams->GetMapperFunc(varname);
+	cout << "mapper var: " << varname << endl;
 	if (!mapper) {
 		mapper = _rParams->MakeMapperFunc(varname);
 		assert(mapper);
 	}
 
 	setMapperFunction(mapper);
+
+	vector<double> foo = _mapper->getMinMaxMapValue();
+	cout << "minMax " << foo[0] << " " << foo[1] << endl;
 
 	deselectWidgets();
 
@@ -2227,9 +2238,16 @@ float MappingFrame::getOpacityData(float value)
 Histo* MappingFrame::getHistogram()
 {
 	bool mustGet = _rParams->IsEnabled();
+	cout << "mustGet? " << mustGet << endl;
     if (_histogram && !mustGet) return _histogram;
     if (!mustGet) return 0;
-    string varname = _rParams->GetVariableName();
+
+	string varname = _rParams->GetColorMapVariableName();
+	if (varname == "") {
+		varname = _rParams->GetVariableName();
+	}
+//	string varname = _rParams->GetVariableName();
+
     MapperFunction* mapFunc = _rParams->MakeMapperFunc(varname);
     if (!mapFunc) return 0;
     if (_histogram) delete _histogram;
