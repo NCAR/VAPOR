@@ -55,6 +55,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadInstalledTF(string varname);
     void getRange(float range[2], float values[2]);
 
+  public slots:
     // Made public, to be called from EventRouter::Initialize
     //
     void setCMVar(const QString &);
