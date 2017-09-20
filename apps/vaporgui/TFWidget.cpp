@@ -92,6 +92,8 @@ void TFWidget::setCMVar(const QString &qvar)
         return;
     }
 
+    cout << "setCMVar " << var << endl;
+
     if (var == "Constant" || var == "") {
         var = "";
         _rParams->SetColorMapVariableName(var);

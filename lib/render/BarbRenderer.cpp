@@ -84,10 +84,6 @@ int BarbRenderer::_paintGL()
     //
     int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
 
-    cout << "BarbRenderer::_paintGL() timestep: " << ts << endl;
-    cout << "minEx: " << minExts[0] << " " << minExts[1] << " " << minExts[2] << endl;
-    cout << "maxEx: " << maxExts[0] << " " << maxExts[1] << " " << maxExts[2] << endl;
-
     if (rc < 0) return (rc);
     varData.push_back(NULL);
     varData.push_back(NULL);
@@ -300,7 +296,6 @@ int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel
     int   nLights = vpParams->getNumLights();
     float fcolor[3];
     bParams->GetConstantColor(fcolor);
-    cout << "color " << fcolor[0] << " " << fcolor[1] << " " << fcolor[2] << endl;
     if (nLights == 0) {
         glDisable(GL_LIGHTING);
     } else {
