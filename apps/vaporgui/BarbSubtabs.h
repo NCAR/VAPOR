@@ -50,6 +50,8 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
         _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
     }
+
+    void Initialize(VAPoR::BarbParams *rParams);
 };
 
 class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
