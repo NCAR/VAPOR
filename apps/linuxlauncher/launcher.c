@@ -26,7 +26,11 @@ int main(int argc, char **argv) {
     argv[0] = "@TARGET_NAME@";
 
     strcat(path, "/@TARGET_NAME@");
-    printf("PATH %s\n", path);
+
+    if (access(path, X_OK) == -1) {
+        fprintf(stderr, "Failed to run \"%s\"\n", path);
+        exit(1);
+    }
 
     execv(path, argv);
     return 0;
