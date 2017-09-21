@@ -257,6 +257,28 @@ public:
 	);
  }
 
+ //! Method to get the state of whether the current mapper function
+ //! applies color through a primary variable or secondary variable.
+ //! For example, Barbs may have a "Color Mapped Variable" that colors
+ //! the barbs according to a "Secondary variable", independent of
+ //! the vector variables that define the Barbs.  Isosurfaces can have
+ //! Secondary Variable colorings too.
+ //!
+ bool GetSecondaryVarMapper() {
+	return ((bool) GetValueLong(_autoUpdateHistoTag, (int) false));
+ }
+ 
+ //! Method to set the state of whether the current mapper function
+ //! applies color through a ColorMappedVariable, or a renderer's primary
+ //! variable.
+ //! \param[in] State of the Secondary Variable color setting
+ //
+ void SetSecondaryVarMapper(bool val) {
+	SetValueLong(
+		_secondaryVarMapperTag,"Apply color through a secondary color",val
+	);
+ }
+
 private:
 
 	
@@ -270,6 +292,7 @@ private:
  static const string _opacityMapsTag;
  static const string _opacityMapTag;
  static const string _autoUpdateHistoTag;
+ static const string _secondaryVarMapperTag;
 
  //
  // Size of lookup table.  Always 1<<8 currently!
