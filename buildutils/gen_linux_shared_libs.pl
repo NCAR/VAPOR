@@ -2,6 +2,9 @@
 
 use strict;
 use warnings;
+use File::Copy qw(copy);
+
+my $tmpDir = "/tmp/vapor_install_libs";
 
 if (scalar @ARGV < 1) {
 	print "Usage $0 input_bin [extra_lib [...]]\n";
@@ -19,11 +22,33 @@ for (my $i = 1; $i < scalar @ARGV; $i++) {
 }
 
 my $ldd = `ldd $ARGV[0]`;
+my @libs;
 
 foreach (split(/\n/, $ldd)) {
-	print "$1*\n" if m/=> (\/glade\S+\.so)/;
+	chomp;
+	push @libs, $1 if m/=> (\/glade\S+\.so\S*)/;
 
 	foreach my $e (@extras) {
-		print "$1*\n" if m/.*$e.*=> (\/.+.so)/;
+		push @libs, $1 if m/.*$e.*=> (\/.+.so\S*)/;
 	}
 }
+
+mkdir $tmpDir if (not -e $tmpDir);
+
+foreach my $l (@libs) {
+	my $real = $l;
+	while (-l $real) {
+		$real = readlink $real;
+	}
+	if (not $real =~ /^\//) {
+		$l =~ m/^.*\//;
+		$real = $&.$real;
+	}
+	$l =~ m/[^\/]+$/;
+	my $baseName = $&;
+	copy "$real", "$tmpDir/$baseName";
+	print "$tmpDir/$baseName\n";
+}
+
+# use Data::Dumper qw(Dumper);
+# print Dumper \@libs;
