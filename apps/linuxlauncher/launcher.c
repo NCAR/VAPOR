@@ -20,9 +20,14 @@ int main(int argc, char **argv)
 
     setenv("VAPOR_HOME", path, 1);
 
-    // TODO Append to path instead of overriding
     strcat(path, "/lib");
-    setenv("LD_LIBRARY_PATH", path, 1);
+    char *oldLibPath = getenv("LD_LIBRARY_PATH");
+    char *newLibPath = malloc(strlen(oldLibPath) + strlen(path) + 2);
+    strcpy(newLibPath, path);
+    strcat(newLibPath, ":");
+    strcat(newLibPath, oldLibPath);
+    setenv("LD_LIBRARY_PATH", newLibPath, 1);
+    free(newLibPath);
 
     argv[0] = "@TARGET_NAME@";
 
