@@ -20,3 +20,7 @@ if (BUILD_GUI)
 	add_subdirectory (vaporgui)
 	add_subdirectory (tiff2geotiff)
 endif()
+
+if (UNIX AND NOT APPLE)
+	add_subdirectory (linuxlauncher)
+endif ()
