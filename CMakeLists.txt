@@ -13,7 +13,7 @@ set (VERSION_RC alpha0)
 string (TIMESTAMP VERSION_DATE UTC)
 set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
 	add_definitions (-DWIN32)
@@ -71,9 +71,10 @@ elseif (APPLE)
 	set (CMAKE_INSTALL_PREFIX /Applications)
 else ()
 	find_library (GLEW GLEW)
-	set (INSTALL_BIN_DIR bin)
+	set (INSTALL_BIN_DIR lib)
 	set (INSTALL_LIB_DIR lib)
 	set (INSTALL_SHARE_DIR share)
+	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install_solid")
 endif ()
 
 add_subdirectory (apps)
@@ -150,5 +151,25 @@ if (APPLE)
 	endif (${GENERATE_FULL_INSTALLER})
 	set (CPACK_BINARY_DRAGNDROP ON)
 endif (APPLE)
+
+if (UNIX AND NOT APPLE)
+	if (${GENERATE_FULL_INSTALLER})
+		set (EXTRA_LIBS_SEARCH GLU expat)
+		install (CODE "execute_process(COMMAND
+		${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH}
+		OUTPUT_FILE ${CMAKE_BINARY_DIR}/libsResolved.txt)")
+		file (STRINGS ${CMAKE_BINARY_DIR}/libsResolved.txt INSTALL_LIBS)
+		install (
+			FILES ${INSTALL_LIBS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+	endif (${GENERATE_FULL_INSTALLER})
+endif (UNIX AND NOT APPLE)
 
 include (CPack)
