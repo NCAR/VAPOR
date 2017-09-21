@@ -39,7 +39,8 @@ const string MapperFunction::_opacityCompositionTag = "OpacityComposition";
 const string MapperFunction::_opacityScaleTag = "OpacityScale";
 const string MapperFunction::_opacityMapsTag = "OpacityMaps";
 const string MapperFunction::_opacityMapTag = "OpacityMap";
-const string MapperFunction::_autoUpdateHistoTag = "autoUpdateHisto";
+const string MapperFunction::_autoUpdateHistoTag = "AutoUpdateHisto";
+const string MapperFunction::_secondaryVarMapper = "SecondaryVarMapper";
 
 //----------------------------------------------------------------------------
 // Constructor for empty, default Mapper function
