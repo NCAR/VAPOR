@@ -1,16 +1,30 @@
-
 set (TARGETS
+	cf2vdc
+	ncdf2wasp
+	tiff2geotiff
 	vaporversion
+	vdccreate
+	wasp2raw
+	wrfvdccreate
+	cfvdccreate
+	raw2vdc
 	vaporgui
+	vdcdump
+	waspcreate
+	raw2wasp
+	vdc2raw
+	wasp2ncdf
+	wrf2vdc
 	)
 
+append (LAUNCHER_TARGETS _launcher ${TARGETS})
+set_property (GLOBAL PROPERTY LAUNCHER_TARGETS ${LAUNCHER_TARGETS})
+
 foreach (target ${TARGETS})
-	message ("generating ${target}_launcher")
 	set (TARGET_NAME ${target})
 	configure_file (launcher.c ${target}_launcher.c)
 	add_executable (
 		${target}_launcher
-		# EXCLUDE_FROM_ALL
 		${target}_launcher.c
 		)
 	set_target_properties(
