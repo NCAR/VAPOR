@@ -153,12 +153,16 @@ if (APPLE)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
+	set (EXTRA_LIBS_SEARCH GLU expat)
+	add_custom_target (
+		linuxpreinstall
+		COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH} >
+		${CMAKE_SOURCE_DIR}/buildutils/LinuxInstallLibs.txt
+		COMMAND touch ~/TEST
+		)
 	if (${GENERATE_FULL_INSTALLER})
-		set (EXTRA_LIBS_SEARCH GLU expat)
-		install (CODE "execute_process(COMMAND
-		${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH}
-		OUTPUT_FILE ${CMAKE_BINARY_DIR}/libsResolved.txt)")
-		file (STRINGS ${CMAKE_BINARY_DIR}/libsResolved.txt INSTALL_LIBS)
+		file (STRINGS buildutils/LinuxInstallLibs.txt INSTALL_LIBS)
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
