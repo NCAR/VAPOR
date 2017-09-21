@@ -43,6 +43,7 @@ set (PYTHONVERSION )
 set (THIRD_PARTY_LIB_DIR )
 set (THIRD_PARTY_INC_DIR )
 
+include (buildutils/UtilityFunctions.cmake)
 include (site.local OPTIONAL)
 
 include_directories (${THIRD_PARTY_INC_DIR})
