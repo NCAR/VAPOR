@@ -51,6 +51,7 @@ TFWidget::TFWidget(QWidget* parent)
 	_rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 	
 	connectWidgets();
+
 }
 
 void TFWidget::Reinit(Flags flags) {

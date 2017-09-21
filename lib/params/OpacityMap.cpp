@@ -88,8 +88,10 @@ OpacityMap::OpacityMap(
 	setMaxValue(bounds[1]);
 	vector<double> cps;
 	for (int i = 0; i<4; i++){
+	  cps.push_back(1.f);
 	  cps.push_back((double)i/3.);
-	  cps.push_back((double)i/3.);
+//	  cps.push_back((double)i/3.);
+//	  cps.push_back((double)i/3.);
 	}
 	SetControlPoints(cps);
 
