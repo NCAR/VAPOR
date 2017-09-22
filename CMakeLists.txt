@@ -155,13 +155,13 @@ if (APPLE)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
-	set (EXTRA_LIBS_SEARCH GLU expat)
+	set (EXTRA_LIBS_SEARCH GLU expat quadmath glut)
 	add_custom_target (
 		linuxpreinstall
 		COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH} >
 		${CMAKE_SOURCE_DIR}/buildutils/LinuxInstallLibs.txt
-		COMMAND touch ~/TEST
+		COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
 		)
 	if (${GENERATE_FULL_INSTALLER})
 		file (STRINGS buildutils/LinuxInstallLibs.txt INSTALL_LIBS)
