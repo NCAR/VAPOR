@@ -696,6 +696,13 @@
            <number>0</number>
           </property>
           <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="fidelityLayout">
             <property name="leftMargin">
              <number>0</number>
@@ -738,7 +745,10 @@
                <string>The fidelity setting controls both refinement and LOD.  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
               </property>
               <property name="title">
-               <string>low .. Fidelity .. high</string>
+               <string>low &lt; - - - &gt; high</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
