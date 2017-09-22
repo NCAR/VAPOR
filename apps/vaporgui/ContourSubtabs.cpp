@@ -49,11 +49,11 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax)
         // Apply settings to contour minimum and spacing, bounded only
         // by the min/max values of the variable.
         //
-        int                    lod = _cParams->GetCompressionLevel();
-        int                    level = _cParams->GetRefinementLevel();
-        int                    ts = _cParams->GetCurrentTimestep();
-        VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
-        float                  range[2];
+        int          lod = _cParams->GetCompressionLevel();
+        int          level = _cParams->GetRefinementLevel();
+        int          ts = _cParams->GetCurrentTimestep();
+        VAPoR::Grid *var = _dataMgr->GetVariable(ts, varname, level, lod);
+        float        range[2];
         var->GetRange(range);
         if (minOrMax)
             return range[1];
@@ -241,11 +241,11 @@ void ContourAppearanceSubtab::SetContourSpacing(double spacing)
         return;
     }
 
-    int                    lod = _cParams->GetCompressionLevel();
-    int                    level = _cParams->GetRefinementLevel();
-    int                    ts = _cParams->GetCurrentTimestep();
-    VAPoR::StructuredGrid *var = _dataMgr->GetVariable(ts, varname, level, lod);
-    float                  range[2];
+    int          lod = _cParams->GetCompressionLevel();
+    int          level = _cParams->GetRefinementLevel();
+    int          ts = _cParams->GetCurrentTimestep();
+    VAPoR::Grid *var = _dataMgr->GetVariable(ts, varname, level, lod);
+    float        range[2];
     var->GetRange(range);
     maxSpacing = (range[1] - range[0]) / (double)(numContours - 1);
     if (spacing > maxSpacing) spacing = maxSpacing;
