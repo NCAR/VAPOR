@@ -101,6 +101,7 @@ set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 set (CPACK_PACKAGE_EXECUTABLES vaporgui;VaporGUI)
 set (CPACK_BINARY_STGZ OFF)
 set (CPACK_BINARY_TGZ OFF)
+set (CPACK_BINARY_TZ OFF)
 
 if (WIN32)
 	set (PRE_INSTALL_LOCAL_PATH "buildutils/NSIS.preInstall.ini")
@@ -155,6 +156,7 @@ if (APPLE)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
+	set (CPACK_BINARY_STGZ ON)
 	set (EXTRA_LIBS_SEARCH GLU expat quadmath glut)
 	add_custom_target (
 		linuxpreinstall
