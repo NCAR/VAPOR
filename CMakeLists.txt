@@ -76,7 +76,7 @@ else ()
 	set (INSTALL_LIB_DIR lib)
 	set (INSTALL_LAUNCHER_DIR bin)
 	set (INSTALL_SHARE_DIR share)
-	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install_solid")
+	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install")
 endif ()
 
 add_subdirectory (apps)
