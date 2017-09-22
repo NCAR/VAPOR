@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <cassert>
+#include <memory>
 #include <vapor/common.h>
 
 #ifdef WIN32
@@ -44,7 +45,25 @@ class VDF_API Grid {
     //! Construct a structured or unstructured grid sampling a 3D or
     //! 2D scalar function
     //!
-    //! \param[in] dims Dimensions of arrays containing grid nodes.
+    //! \param[in] dims Dimensions of arrays containing grid data.
+    //!
+    //! \param[in] bs A vector with size matching \p dims, specifying the
+    //! dimensions of
+    //! each block storing the sampled scalar function.
+    //!
+    //! \param[in] blks An array of blocks containing the sampled function.
+    //! The dimensions of each block
+    //! is given by \p bs. The number of blocks is given by the product
+    //! of the terms:
+    //!
+    //! \code (((dims[i]-1) / bs[i]) + 1) \endcode
+    //!
+    //! over i = 0..dims.size()-1
+    //!
+    //! A shallow copy of the blocks is made by the constructor. Memory
+    //! referenced by the elements of \p blks should remain valid
+    //! until the class instance is destroyed.
+    //!
     //! \param[in] topology_dimension Topological dimension of
     //! grid: 2 or 3, for 2D or 3D, respectively. Grids with 2D
     //! topology are described by 2D spatial coordiantes, while
@@ -52,15 +71,52 @@ class VDF_API Grid {
     //!
     Grid(
         const std::vector<size_t> &dims,
+        const std::vector<size_t> &bs,
+        const std::vector<float *> &blks,
         size_t topology_dimension);
 
-    Grid();
+    Grid() = default;
+    virtual ~Grid() = default;
 
-    virtual ~Grid();
+    //! Return the dimensions of grid connectivity array
+    //!
+    //! \param[out] dims The value of \p dims parameter provided to
+    //! the constructor.
+    //!
+    const std::vector<size_t> &GetDimensions() const {
+        return (_dims);
+    }
+
+    //! Return the ijk dimensions of grid in blocks
+    //!
+    //! Returns the number of blocks defined along each axis of the grid
+    //!
+    //! \param[out] dims A two or three element array containing the grid
+    //! dimension in blocks
+    //!
+    //! \sa GetBlockSize();
+    //
+    const std::vector<size_t> &GetDimensionInBlks() const {
+        return (_bdims);
+    }
+
+    //! Return the internal blocking factor
+    //!
+    //! This method returns the internal blocking factor passed
+    //! to the constructor.
+    //
+    const std::vector<size_t> &GetBlockSize() const {
+        return (_bs);
+    }
+
+    //! Return the internal data structure containing a copy of the blocks
+    //! passed in by the constructor
+    //!
+    const std::vector<float *> &GetBlks() const { return (_blks); };
 
     //! Get the data value at the indicated grid point
     //!
-    //! This method provides read and write access to the scalar data value
+    //! This method provides read access to the scalar data value
     //! defined at the grid point indicated by \p indices. The range
     //! of valid indices is between zero and \a dim - 1, where \a dim
     //! is the dimesion of the grid returned by GetDimensions()
@@ -68,18 +124,31 @@ class VDF_API Grid {
     //! If any of the \p indecies are outside of the
     //! valid range the results are undefined
     //!
-    //! For 2D grids the \p k parameter is ignored.
+    //! \param[in] indices of grid point along fastest varying dimension. The
+    //! size of \p indices must be equal to that of the \p dims vector
+    //! returned by GetDimensions()
     //!
-    //! \param[in] indices of grid point along fastest varying dimension
-    //!
-    virtual float AccessIndex(const std::vector<size_t> &indices) const = 0;
+    virtual float AccessIndex(const std::vector<size_t> &indices) const;
 
     //! Set the data value at the indicated grid point
     //!
     //! This method sets the data value of the grid point indexed by
     //! \p indices to \p value.
     //!
-    virtual void SetValue(const std::vector<size_t> &indices, float value) = 0;
+    virtual void SetValue(const std::vector<size_t> &indices, float value);
+
+    //! This method provides an alternate interface to Grid::AccessIndex()
+    //! If the dimensionality of the grid as determined by GetDimensions() is
+    //! less than three subsequent parameters are ignored. Parameters
+    //! that are outside of range are clamped to boundaries.
+    //!
+    //! \param[in] i Index into first fastest varying dimension
+    //! \param[in] j Index into second fastest varying dimension
+    //! \param[in] k Index into third fastest varying dimension
+    //
+    virtual float AccessIJK(size_t i, size_t j, size_t k) const;
+
+    void SetValueIJK(size_t i, size_t j, size_t k, float v);
 
     //! Get the reconstructed value of the sampled scalar function
     //!
@@ -179,15 +248,6 @@ class VDF_API Grid {
     virtual void GetEnclosingRegion(
         const std::vector<double> &minu, const std::vector<double> &maxu,
         std::vector<size_t> &min, std::vector<size_t> &max) const = 0;
-
-    //! Return the dimensions of grid connectivity array
-    //!
-    //! \param[out] dims The value of \p dims parameter provided to
-    //! the constructor.
-    //!
-    std::vector<size_t> GetDimensions() const {
-        return (_dims);
-    }
 
     //! Return the value of the \a missing_value parameter
     //!
@@ -320,7 +380,7 @@ class VDF_API Grid {
     //! \param[out] range[2] A two-element array containing the mininum and
     //! maximum values, in that order
     //!
-    virtual void GetRange(float range[2]) const = 0;
+    virtual void GetRange(float range[2]) const;
 
     //! Return true if the specified point lies inside the grid
     //!
@@ -431,22 +491,291 @@ class VDF_API Grid {
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
-    virtual float _GetValueNearestNeighbor(
-        const std::vector<double> &coords) const = 0;
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    // Iterators
+    //
+    /////////////////////////////////////////////////////////////////////////////
 
-    virtual float _GetValueLinear(
-        const std::vector<double> &coords) const = 0;
+    //! Inside a box functor
+    //!
+    //! operator() returns true if point pt is on or inside the axis-aligned
+    //! box defined by min and max
+    //
+    class InsideBox {
+      public:
+        InsideBox(
+            const std::vector<double> &min, const std::vector<double> &max) : _min(min), _max(max) {}
+        InsideBox() {}
+
+        bool operator()(const std::vector<double> &pt) const {
+            for (int i = 0; i < _min.size(); i++) {
+                if (pt[i] < _min[i] || pt[i] > _max[i])
+                    return (false);
+            }
+            return (true);
+        }
+
+      private:
+        std::vector<double> _min;
+        std::vector<double> _max;
+    };
+
+    //
+    // Define polymorphic iterator that can be used with any
+    // class derived from this class
+    //
+    //
+
+    // Interface for iterator specializations
+    //
+    template <typename T>
+    class AbstractIterator {
+      public:
+        virtual ~AbstractIterator() {}
+        virtual void next() = 0;
+        virtual T &deref() const = 0;
+        virtual const void *address() const = 0;
+        virtual bool equal(const void *other) const = 0;
+        virtual std::unique_ptr<AbstractIterator> clone() const = 0;
+    };
+
+    // Overloaded operators that will act on spealizations of
+    // AbstractIterator
+    //
+    template <typename T>
+    class PolyIterator {
+      public:
+        PolyIterator(std::unique_ptr<AbstractIterator<T>> it) : _impl(std::move(it)) {}
+
+        PolyIterator(PolyIterator const &rhs) : _impl(rhs._impl->clone()) {}
+
+        PolyIterator &operator=(PolyIterator const &rhs) {
+            _impl = rhs._impl->clone();
+            return *this;
+        }
+
+        // PolyIterator has a unique_ptr member so we must provide
+        // std::move constructors
+        //
+        PolyIterator(PolyIterator &&rhs) {
+            _impl = std::move(rhs._impl);
+        }
+
+        PolyIterator &operator=(PolyIterator &&rhs) {
+            if (this != &rhs) {
+                _impl = std::move(rhs._impl);
+            }
+            return (*this);
+        }
+
+        PolyIterator() : _impl(nullptr) {}
+
+        PolyIterator &operator++() { // ++prefix
+            _impl->next();
+            return *this;
+        };
+        PolyIterator operator++(int) { // postfix++
+            assert(false && "Not implemented");
+            //return(*this);
+            return (PolyIterator());
+        };
+
+        const T &operator*() const {
+            return _impl->deref();
+        }
+
+        bool operator==(const PolyIterator &rhs) const {
+            return (_impl->equal(rhs._impl->address()));
+        }
+
+        bool operator!=(const PolyIterator &rhs) const {
+            return (!(*this == rhs));
+        }
+
+      private:
+        std::unique_ptr<AbstractIterator<T>> _impl;
+    };
+
+    //! Coordinate iterator. Iterates over grid node/cell coordinates
+    //!
+    //! The ConstCoordItr can be dererenced to return a grid node or
+    //! cell's coordinates. The determination, node or cell, is determined
+    //! by the location of the sampled data within the grid (node, face,
+    //! cell, etc)
+    //!
+    //!
+    //
+    typedef const std::vector<double> ConstCoordType;
+    typedef Grid::PolyIterator<ConstCoordType> ConstCoordItr;
+    typedef Grid::AbstractIterator<ConstCoordType> ConstCoordItrAbstract;
+
+    //! Return constant grid coordinate iterator
+    //
+    virtual ConstCoordItr ConstCoordBegin() const = 0;
+    virtual ConstCoordItr ConstCoordEnd() const = 0;
+
+    //! Node index iterator. Iterates over grid node indices
+    //!
+    //! The ConstNodeIterator is dereferenced to give the index of
+    //! a node within the grid
+    //!
+    typedef const std::vector<size_t> ConstIndexType;
+    typedef Grid::PolyIterator<ConstIndexType> ConstNodeIterator;
+    typedef Grid::AbstractIterator<ConstIndexType> ConstNodeIteratorAbstract;
+
+    //! Return constant grid node coordinate iterator
+    //!
+    //! If \p minu and \p maxu are specified the iterator is constrained to
+    //! operation within the axis-aligned box defined by \p minu and \p maxu.
+    //!
+    //! \param[in] minu Minimum box coordinate.
+    //! \param[in] maxu Maximum box coordinate.
+    //!
+    virtual ConstNodeIterator ConstNodeBegin() const = 0;
+    virtual ConstNodeIterator ConstNodeBegin(
+        const std::vector<double> &minu, const std::vector<double> &maxu) const = 0;
+    virtual ConstNodeIterator ConstNodeEnd() const = 0;
+
+    //! Cell index iterator. Iterates over grid cell indices
+    //
+    typedef Grid::PolyIterator<ConstIndexType> ConstCellIterator;
+    typedef Grid::AbstractIterator<ConstIndexType> ConstCellIteratorAbstract;
+
+    //! Return constant grid cell coordinate iterator
+    //!
+    //! If \p minu and \p maxu are specified the iterator is constrained to
+    //! operation within the axis-aligned box defined by \p minu and \p maxu.
+    //!
+    //! \param[in] minu Minimum box coordinate.
+    //! \param[in] maxu Maximum box coordinate.
+    //!
+    virtual ConstCellIterator ConstCellBegin() const = 0;
+    virtual ConstCellIterator ConstCellBegin(
+        const std::vector<double> &minu, const std::vector<double> &maxu) const = 0;
+    virtual ConstCellIterator ConstCellEnd() const = 0;
+
+    //! A forward iterator for accessing the data elements of the
+    //! structured grid.
+    //!
+    //! This class provides a C++ STL style Forward Iterator for
+    //! accessing grid elements passed to the constructor. All Forward
+    //! Iterator expressions are supported. In addition, the following
+    //! Random Access Iterator expressions are supported:
+    //!
+    //! \li \c a + n
+    //! \li \c n + a
+    //!
+    //! where \i a are objects of type ForwardIterator, and \i n is an int.
+    //!
+    //! N.B. this class does NOT need to be a template. It's a historical
+    //! implementation.
+    //
+    template <class T>
+    class VDF_API ForwardIterator {
+      public:
+        ForwardIterator(
+            T *rg,
+            bool begin = true,
+            const std::vector<double> &minu = {},
+            const std::vector<double> &maxu = {});
+        ForwardIterator();
+        ForwardIterator(const ForwardIterator<T> &) = default;
+        ForwardIterator(ForwardIterator<T> &&rhs);
+        ~ForwardIterator() {}
+
+        float &operator*() { return (*_itr); }
+
+        ForwardIterator<T> &operator++(); // ++prefix
+
+#ifdef DEAD
+        ForwardIterator<T> operator++(int); // postfix++
+
+        ForwardIterator<T> &operator+=(const long int &offset);
+        ForwardIterator<T> operator+(const long int &offset) const;
+#endif
+
+        ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
+        ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
+
+        bool operator==(const ForwardIterator<T> &rhs) {
+            return (_index == rhs._index && _rg == rhs._rg);
+        }
+        bool operator!=(const ForwardIterator<T> &rhs) {
+            return (!(*this == rhs));
+        }
+
+        const ConstCoordItr &GetCoordItr() {
+            return (_coordItr);
+        }
+
+        friend void swap(
+            Grid::ForwardIterator<T> &a,
+            Grid::ForwardIterator<T> &b) {
+            std::swap(a._rg, b._rg);
+            std::swap(a._coordItr, b._coordItr);
+            std::swap(a._index, b._index);
+            std::swap(a._end_index, b._end_index);
+            std::swap(a._xb, b._xb);
+            std::swap(a._itr, b._itr);
+            std::swap(a._pred, b._pred);
+        }
+
+      private:
+        T *_rg;
+        ConstCoordItr _coordItr;
+        std::vector<size_t> _index;     // current index into grid
+        std::vector<size_t> _end_index; // Last valid index
+        size_t _xb;                     // x index within a block
+        float *_itr;
+        InsideBox _pred;
+    };
+
+    typedef Grid::ForwardIterator<Grid> Iterator;
+    typedef Grid::ForwardIterator<Grid const> ConstIterator;
+
+    //! Construct a begin iterator that will iterate through elements
+    //! inside or on the box defined by \p minu and \p maxu
+    //
+    Iterator begin(
+        const std::vector<double> &minu, const std::vector<double> &maxu) {
+        return (Iterator(this, true, minu, maxu));
+    }
+    Iterator begin() { return (Iterator(this, true)); }
+
+    Iterator end() { return (Iterator(this, false)); }
+
+    ConstIterator cbegin(
+        const std::vector<double> &minu, const std::vector<double> &maxu) const {
+        return (ConstIterator(this, true, minu, maxu));
+    }
+    ConstIterator cbegin() const { return (ConstIterator(this, true)); }
+
+    ConstIterator cend() const { return (ConstIterator(this, false)); }
 
   protected:
+    virtual float GetValueNearestNeighbor(
+        const std::vector<double> &coords) const = 0;
+
+    virtual float GetValueLinear(
+        const std::vector<double> &coords) const = 0;
+
+    float *AccessIndex(
+        const std::vector<float *> &blks, const std::vector<size_t> &indices) const;
+
     void SetNodeOffset(size_t offset) {
         _nodeIDOffset = offset;
     }
+
     void SetCellOffset(size_t offset) {
         _cellIDOffset = offset;
     }
 
   private:
-    std::vector<size_t> _dims;   // dimensions of grid arrays
+    std::vector<size_t> _dims;  // dimensions of grid arrays
+    std::vector<size_t> _bs;    // dimensions of each block
+    std::vector<size_t> _bdims; // dimensions (specified in blocks) of ROI
+    std::vector<float *> _blks;
     std::vector<bool> _periodic; // periodicity of boundaries
     size_t _topologyDimension;
     float _missingValue;

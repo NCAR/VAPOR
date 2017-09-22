@@ -1,4 +1,5 @@
 if (BUILD_TEST_APPS)
 	add_subdirectory (datamgr)
+	add_subdirectory (grid_iter)
 	# add_subdirectory (controlExec)
 endif()
