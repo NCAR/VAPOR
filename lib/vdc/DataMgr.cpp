@@ -580,7 +580,7 @@ vector <size_t> DataMgr::GetCRatios(string varname) const {
 	return (var.GetCRatios());
 }
 
-StructuredGrid *DataMgr::GetVariable (
+Grid *DataMgr::GetVariable (
 	size_t ts, string varname, int level, int lod, bool lock
 ) {
 	SetDiagMsg(
@@ -594,7 +594,7 @@ StructuredGrid *DataMgr::GetVariable (
 	rc = _lod_correction(varname, lod);
 	if (rc<0) return(NULL);
 
-	StructuredGrid *rg = _getVariable(ts, varname, level, lod, lock, false);
+	Grid *rg = _getVariable(ts, varname, level, lod, lock, false);
 	if (! rg) {
 		SetErrMsg(
 			"Failed to read variable \"%s\" at time step (%d), and\n"
@@ -605,7 +605,7 @@ StructuredGrid *DataMgr::GetVariable (
 	return(rg);
 }
 
-StructuredGrid *DataMgr::GetVariable (
+Grid *DataMgr::GetVariable (
 	size_t ts, string varname, int level, int lod,
     vector <double> min, vector <double> max, bool lock
 ) {
@@ -649,7 +649,7 @@ StructuredGrid *DataMgr::GetVariable (
 
 }
 
-StructuredGrid *DataMgr::_getVariable(
+Grid *DataMgr::_getVariable(
 	size_t ts,
 	string varname,
 	int level,
@@ -795,7 +795,7 @@ int	DataMgr::_setupCoordVecs(
 	return(0);
 }
 
-StructuredGrid *DataMgr::_getVariable(
+Grid *DataMgr::_getVariable(
 	size_t ts,
 	string varname,
 	int level,
@@ -805,7 +805,7 @@ StructuredGrid *DataMgr::_getVariable(
 	bool	lock,
 	bool	dataless
 ) {
-	StructuredGrid *rg = NULL;
+	Grid *rg = NULL;
 
 	DC::DataVar dvar;
 	if (! DataMgr::GetDataVarInfo(varname, dvar)) {
@@ -878,7 +878,7 @@ StructuredGrid *DataMgr::_getVariable(
 	return(rg);
 }
 
-StructuredGrid *DataMgr::GetVariable(
+Grid *DataMgr::GetVariable(
 	size_t ts,
 	string varname,
 	int level,
@@ -912,7 +912,7 @@ StructuredGrid *DataMgr::GetVariable(
 		max.pop_back();
 	}
 
-	StructuredGrid *rg = _getVariable(
+	Grid *rg = _getVariable(
 		ts, varname, level, lod, min, max, lock, false
 	);
 	if (! rg) {
@@ -952,7 +952,7 @@ int DataMgr::GetVariableExtents(
 	}
 
 
-	StructuredGrid *rg = _getVariable(ts, varname, level, level, false, true);
+	Grid *rg = _getVariable(ts, varname, level, level, false, true);
 	if (! rg) return(-1);
 
 	rg->GetUserExtents(min, max);
@@ -992,7 +992,7 @@ int DataMgr::GetDataRange(
 		return(0);
 	}
 
-	const StructuredGrid *sg = DataMgr::GetVariable(
+	const Grid *sg = DataMgr::GetVariable(
 		ts, varname, level, lod, false
 	);
 	if (! sg) return(-1);
@@ -1002,7 +1002,7 @@ int DataMgr::GetDataRange(
 	//
 
 	range.clear(); range.push_back(0.0); range.push_back(0.0);
-	StructuredGrid::ConstIterator itr;
+	Grid::ConstIterator itr;
 	bool first = true;
 	float mv = sg->GetMissingValue();
 	for (itr = sg->cbegin(); itr!=sg->cend(); ++itr) {
@@ -1289,7 +1289,7 @@ void	DataMgr::Clear() {
 	
 
 void	DataMgr::UnlockGrid(
-	const StructuredGrid *rg
+	const Grid *rg
 ) {
 	SetDiagMsg("DataMgr::UnlockGrid()");
 	const vector <float *> &blks = rg->GetBlks();
@@ -1297,7 +1297,7 @@ void	DataMgr::UnlockGrid(
 
 	const LayeredGrid *lg = dynamic_cast<const LayeredGrid *>(rg);
 	if (lg) {
-		const StructuredGrid &rg = lg->GetZRG();
+		const Grid &rg = lg->GetZRG();
 		if (rg.GetBlks().size()) _unlock_blocks(rg.GetBlks()[0]);
 	}
 }
@@ -1683,7 +1683,7 @@ PipeLine *DataMgr::get_pipeline_for_var(string varname) const {
 	return(NULL);
 }
 
-StructuredGrid *DataMgr::execute_pipeline(
+Grid *DataMgr::execute_pipeline(
 	size_t ts,
 	string varname,
 	int level,
@@ -1715,8 +1715,8 @@ StructuredGrid *DataMgr::execute_pipeline(
 	//
 	// Ptrs to space for input and output variables
 	//
-	vector <const StructuredGrid *> in_grids;
-	vector <StructuredGrid *> out_grids;
+	vector <const Grid *> in_grids;
+	vector <Grid *> out_grids;
 
 	//
 	// Get input variables, and lock them into memory
@@ -1753,7 +1753,7 @@ StructuredGrid *DataMgr::execute_pipeline(
 			}
 		}
 
-		StructuredGrid *rg = GetGrid(
+		Grid *rg = GetGrid(
 						ts, input_varnames[i], level, lod, 
 						min_in, max_in, true
 		);
@@ -1795,7 +1795,7 @@ StructuredGrid *DataMgr::execute_pipeline(
 			for (int j=0;j<out_grids.size();j++) UnlockGrid(out_grids[j]);
 			return(NULL);
 		}
-		StructuredGrid *rg = _make_grid(
+		Grid *rg = _make_grid(
 			ts, v, level, lod, min, max, blks, 
 			xcblks, ycblks, zcblks
 		);
@@ -2461,7 +2461,7 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(
 //  bmaxvec: ROI offsets in blocks, full domain, data and coordinates
 //
 
-StructuredGrid *DataMgr::_make_grid(
+Grid *DataMgr::_make_grid(
 	int level,
 	int lod,
 	const DC::DataVar &var,
@@ -2534,7 +2534,7 @@ StructuredGrid *DataMgr::_make_grid(
 	}
 		
 
-	StructuredGrid *rg = NULL;
+	Grid *rg = NULL;
     if (grid_type == REGULAR) {
 		rg = _make_grid_regular(
 			dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]
@@ -2615,10 +2615,10 @@ int DataMgr::_find_bounding_grid(
 			"DataMgr::_find_bounding_grid() - coordinates not in cache"
 		);
 
-		// Get a "dataless" StructuredGrid - a StructuredGrid class the contains
+		// Get a "dataless" Grid - a Grid class the contains
 		// coordiante information, but not data
 		//
-		StructuredGrid *rg = _getVariable(ts, varname, level, lod, false, true);
+		Grid *rg = _getVariable(ts, varname, level, lod, false, true);
 		if (! rg) return(-1);
 
 		// Voxel and block min and max coordinates of entire grid

@@ -197,7 +197,7 @@ void MappingFrame::RefreshHistogram() {
 	vector<double> minExts, maxExts;
 	_rParams->GetBox()->GetExtents(minExts, maxExts);
 
-	StructuredGrid* grid;
+	Grid* grid;
 
 	int rc = DataMgrUtils::GetGrids(
 		_dataMgr, ts, var, minExts, maxExts, true,
@@ -207,7 +207,7 @@ void MappingFrame::RefreshHistogram() {
 
 	grid->SetInterpolationOrder(0);
 	
-	StructuredGrid::Iterator itr;
+	Grid::Iterator itr;
 
 	float v;
 	for (itr = grid->begin(minExts, maxExts); itr!=grid->end(); ++itr){

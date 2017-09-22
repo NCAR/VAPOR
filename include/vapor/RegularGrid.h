@@ -49,9 +49,8 @@ public:
 	const std::vector <double> &maxu
  );
 
- RegularGrid();
-
- virtual ~RegularGrid();
+ RegularGrid() = default;
+ virtual ~RegularGrid() = default;
 
 
  //! \copydoc Grid::GetUserExtents()
@@ -101,7 +100,7 @@ public:
  virtual bool InsideGrid(const std::vector <double> &coords) const override;
 
 
- class ConstCoordItrRG : public StructuredGrid::ConstCoordItrAbstract {
+ class ConstCoordItrRG : public Grid::ConstCoordItrAbstract {
  public:
   ConstCoordItrRG(const RegularGrid *rg, bool begin);
   ConstCoordItrRG(const ConstCoordItrRG &rhs);
@@ -111,7 +110,7 @@ public:
   virtual ~ConstCoordItrRG() {}
 
   virtual void next();
-  virtual const std::vector <double>  &deref() const {
+  virtual ConstCoordType &deref() const {
 	return(_coords);
   }
   virtual const void *address() const {return this; };
@@ -136,13 +135,13 @@ public:
  };
 
  virtual ConstCoordItr ConstCoordBegin() const override {
-	return ConstCoordItr(
+	return ConstCoordItr (
 		std::unique_ptr<ConstCoordItrAbstract> (new ConstCoordItrRG(this, true))
 	);
  }
  virtual ConstCoordItr ConstCoordEnd() const override {
-	return ConstCoordItr(
-		std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrRG(this, false))
+	return ConstCoordItr (
+		std::unique_ptr<ConstCoordItrAbstract> (new ConstCoordItrRG(this, false))
 	);
  }
 
@@ -150,11 +149,11 @@ public:
 
 
 protected:
- virtual float _GetValueNearestNeighbor(
+ virtual float GetValueNearestNeighbor(
 	const std::vector <double> &coords
  ) const override;
 
- virtual float _GetValueLinear(
+ virtual float GetValueLinear(
 	const std::vector <double> &coords
  ) const override;
 
