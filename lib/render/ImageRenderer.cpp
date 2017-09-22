@@ -518,7 +518,7 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr,
 
     // Get the height variable if one specified
     //
-    StructuredGrid *hgtGrid = NULL;
+    Grid *hgtGrid = NULL;
     string hgtVar = myParams->GetHeightVariableName();
     if (!hgtVar.empty()) {
         int rc = DataMgrUtils::GetGrids(dataMgr,
@@ -564,7 +564,7 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr,
 // Compute verts  for displayed, geo-referenced image
 //
 int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr,
-                                        StructuredGrid *hgtGrid,
+                                        Grid *hgtGrid,
                                         GLsizei width,
                                         GLsizei height,
                                         double defaultZ) {
@@ -640,7 +640,7 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr,
 // Compute verts  for displayed, non-georeferenced image
 //
 int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr,
-                                          StructuredGrid *hgtGrid,
+                                          Grid *hgtGrid,
                                           GLsizei width,
                                           GLsizei height,
                                           const vector<double> &minExt,
