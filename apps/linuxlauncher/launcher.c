@@ -18,6 +18,16 @@ int main(int argc, char **argv)
         p--;
     }
 
+#ifndef NDEBUG
+    int debug = 0;
+    if (argc > 1 && !strcmp("--launcher-debug", argv[1])) {
+        debug = 1;
+        argc--;
+        for (int i = 1; i < argc; i++) argv[i] = argv[i + 1];
+        argv[argc] = 0;
+    }
+#endif
+
     setenv("VAPOR_HOME", path, 1);
 
     strcat(path, "/lib");
@@ -27,6 +37,9 @@ int main(int argc, char **argv)
     strcat(newLibPath, ":");
     strcat(newLibPath, oldLibPath);
     setenv("LD_LIBRARY_PATH", newLibPath, 1);
+#ifndef NDEBUG
+    if (debug) printf("LD_LIBRARY_PATH=%s\n", newLibPath);
+#endif
     free(newLibPath);
 
     argv[0] = "@TARGET_NAME@";
