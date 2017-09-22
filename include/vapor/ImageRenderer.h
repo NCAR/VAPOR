@@ -18,7 +18,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/GeoImage.h>
-#include <vapor/StructuredGrid.h>
+#include <vapor/Grid.h>
 #include <vapor/utils.h>
 
 namespace VAPoR {
@@ -122,7 +122,7 @@ class RENDER_API ImageRenderer : public TwoDRenderer {
 
     int _getMeshDisplacedGeo(
         DataMgr *dataMgr,
-        StructuredGrid *hgtGrid,
+        Grid *hgtGrid,
         GLsizei width,
         GLsizei height,
         double defaultZ);
@@ -131,7 +131,7 @@ class RENDER_API ImageRenderer : public TwoDRenderer {
     //
     int _getMeshDisplacedNoGeo(
         DataMgr *dataMgr,
-        StructuredGrid *hgtGrid,
+        Grid *hgtGrid,
         GLsizei width,
         GLsizei height,
         const vector<double> &minExt,

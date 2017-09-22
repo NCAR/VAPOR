@@ -740,7 +740,7 @@ void Plot::savePlotToFile() {
 // Our sampling rate is based on how many voxels are crossed
 // between points a and b, multiplied by 2
 //
-int Plot::findNyquist(VAPoR::StructuredGrid *sg,
+int Plot::findNyquist(VAPoR::Grid *sg,
                       const double minu[3], const double maxu[3],
                       double &dX, double &dY, double &dZ) const {
 
@@ -1095,7 +1095,7 @@ int Plot::getSpatialVectors(
         maxUVec.push_back(maxu[1]);
         maxUVec.push_back(maxu[2]);
 
-        StructuredGrid *sg = _dm->GetVariable(
+        Grid *sg = _dm->GetVariable(
             ts, var, _refLevel, _cRatio, minUVec, maxUVec, false);
         if (!sg) {
             // N.B. In VAPOR 2.x libvdc functions post their own
@@ -1218,14 +1218,14 @@ int Plot::getTemporalVectors(
             size_t minv[3] = {ijk[0], ijk[1], ijk[2]};
             size_t maxv[3] = {ijk[0], ijk[1], ijk[2]};
 
-            //			StructuredGrid *sg = _dm->GetVariable(
+            //			Grid *sg = _dm->GetVariable(
             //				ts, var, _refLevel, _cRatio, minv, maxv, false
             //			);
             vector<double> uPoint;
             uPoint.push_back(xyz[0]);
             uPoint.push_back(xyz[1]);
             uPoint.push_back(xyz[2]);
-            StructuredGrid *sg = _dm->GetVariable(
+            Grid *sg = _dm->GetVariable(
                 ts, var, _refLevel, _cRatio, uPoint, uPoint, false);
             if (!sg) {
                 // N.B. In VAPOR 2.x libvdc functions post their own

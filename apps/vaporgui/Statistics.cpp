@@ -1447,7 +1447,7 @@ void Statistics::initRegion() {
         float range[2];
 
         for (int ts = _minTS; ts <= _maxTS; ts++) {
-            StructuredGrid *rGrid = NULL;
+            Grid *rGrid = NULL;
             float mv;
 
             cout << "MinMax ";
@@ -1498,7 +1498,7 @@ void Statistics::initRegion() {
         return true;
     }
 
-    void Statistics::getSinglePointTSMean(double &tsMean, int &missing, VAPoR::StructuredGrid *rGrid) {
+    void Statistics::getSinglePointTSMean(double &tsMean, int &missing, VAPoR::Grid *rGrid) {
         float val = rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
         float mv = rGrid->GetMissingValue();
         if (val != mv) {
@@ -1517,7 +1517,7 @@ void Statistics::initRegion() {
     }
 
     void Statistics::getMultiPointTSMean(double &tsMean, int &missing,
-                                         int &count, VAPoR::StructuredGrid *rGrid) {
+                                         int &count, VAPoR::Grid *rGrid) {
         double c = 0.0;
         double sum = 0;
         float val = 0.0;
@@ -1540,7 +1540,7 @@ void Statistics::initRegion() {
         ;
         cout << mv << endl;
 
-        VAPoR::StructuredGrid::Iterator itr;
+        VAPoR::Grid::Iterator itr;
         for (itr = rGrid->begin(_uCoordMin, _uCoordMax); itr != rGrid->end(); ++itr) {
             count++;
             val = *itr;
@@ -1583,7 +1583,7 @@ void Statistics::initRegion() {
             missing = 0;
             count = 0;
 
-            StructuredGrid *rGrid;
+            Grid *rGrid;
             rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
 
             if (!rGrid) {
@@ -1657,7 +1657,7 @@ void Statistics::initRegion() {
 
             mv = _rGrid->GetMissingValue();
 
-            StructuredGrid::Iterator itr;
+            Grid::Iterator itr;
             double c = 0.0;
 
             vector<size_t> dims = _rGrid->GetDimensions();
@@ -1753,7 +1753,7 @@ void Statistics::initRegion() {
 #endif
 
     void Statistics::getSinglePointTSStdDev(double &tsStdDev, int &globalCount,
-                                            int &spMissing, double mean, VAPoR::StructuredGrid *rGrid) {
+                                            int &spMissing, double mean, VAPoR::Grid *rGrid) {
         float mv = rGrid->GetMissingValue();
         float val = rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
         if (val != mv) {
@@ -1794,7 +1794,7 @@ void Statistics::initRegion() {
             deviations = 0;
             missing = 0;
 
-            StructuredGrid *rGrid;
+            Grid *rGrid;
             rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
 
             // Invalid regular grid.  Use previous timesteps and return.
@@ -1813,7 +1813,7 @@ void Statistics::initRegion() {
             }
 
             else {
-                StructuredGrid::Iterator itr;
+                Grid::Iterator itr;
                 double c = 0.0;
                 vector<size_t> dims;
                 dims = rGrid->GetDimensions();
@@ -1904,11 +1904,10 @@ void Statistics::initRegion() {
             }
 
             else {
-                //			VAPoR::StructuredGrid::Iterator itr;
-                StructuredGrid::ForwardIterator<StructuredGrid> itr;
+                Grid::ConstIterator itr;
                 double c = 0.0;
                 vector<size_t> dims = _rGrid->GetDimensions();
-                for (itr = _rGrid->begin(); itr != _rGrid->end(); ++itr) {
+                for (itr = _rGrid->cbegin(); itr != _rGrid->cend(); ++itr) {
                     val = *itr;
 
                     if (val != mv) { //sum += val;
@@ -1980,8 +1979,7 @@ void Statistics::initRegion() {
 
             float val;
             mv = _rGrid->GetMissingValue();
-            //		VAPoR::StructuredGrid::Iterator itr;
-            StructuredGrid::ForwardIterator<StructuredGrid> itr;
+            Grid::ConstIterator itr;
             // If _regionSelection==2, we are querying a single point.
             // So here we just call GetValue at that point.
             //
@@ -1991,7 +1989,7 @@ void Statistics::initRegion() {
                     allValues.push_back(val);
                 }
             } else {
-                for (itr = _rGrid->begin(); itr != _rGrid->end(); ++itr) {
+                for (itr = _rGrid->cbegin(); itr != _rGrid->cend(); ++itr) {
                     val = *itr;
 
                     if (val != mv)
