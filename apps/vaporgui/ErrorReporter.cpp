@@ -18,11 +18,14 @@
 //	Description:	Implements the ErrorReporter class
 
 #include <stdio.h>
-#include <execinfo.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+
+#if !defined(WIN32)
+    #include <execinfo.h>
+#endif
 
 #if defined(DARWIN)
     #include <CoreServices/CoreServices.h>
