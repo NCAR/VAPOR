@@ -90,11 +90,11 @@ public:
             // Apply settings to contour minimum and spacing, bounded only
             // by the min/max values of the variable.
             //
-            int                    lod = _cParams->GetCompressionLevel();
-            int                    level = _cParams->GetRefinementLevel();
-            int                    ts = _cParams->GetCurrentTimestep();
-            VAPoR::StructuredGrid *var = dataMgr->GetVariable(ts, varname, level, lod);
-            float                  range[2];
+            int          lod = _cParams->GetCompressionLevel();
+            int          level = _cParams->GetRefinementLevel();
+            int          ts = _cParams->GetCurrentTimestep();
+            VAPoR::Grid *var = dataMgr->GetVariable(ts, varname, level, lod);
+            float        range[2];
             var->GetRange(range);
 
             // Apply params to contour spacing

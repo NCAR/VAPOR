@@ -41,16 +41,7 @@ RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
     _SetExtents(minu, maxu);
 }
 
-RegularGrid::RegularGrid()
-{
-    _minu.clear();
-    _maxu.clear();
-    _delta.clear();
-}
-
-RegularGrid::~RegularGrid() {}
-
-float RegularGrid::_GetValueNearestNeighbor(const std::vector<double> &coords) const
+float RegularGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
     int ndim = GetTopologyDim();
     assert(coords.size() == ndim);
@@ -93,7 +84,7 @@ float RegularGrid::_GetValueNearestNeighbor(const std::vector<double> &coords) c
     return (AccessIJK(i, j, k));
 }
 
-float RegularGrid::_GetValueLinear(const std::vector<double> &coords) const
+float RegularGrid::GetValueLinear(const std::vector<double> &coords) const
 {
     int ndim = GetTopologyDim();
     assert(coords.size() == ndim);

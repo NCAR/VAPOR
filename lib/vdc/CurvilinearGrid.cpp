@@ -43,8 +43,6 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     _curvilinearGrid(xrg, yrg, zcoords, kdtree);
 }
 
-CurvilinearGrid::~CurvilinearGrid() {}
-
 void CurvilinearGrid::GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const
 {
     assert(min.size() == max.size());
@@ -365,7 +363,7 @@ void CurvilinearGrid::ConstCoordItrCG::next()
     }
 }
 
-float CurvilinearGrid::_GetValueNearestNeighbor(const std::vector<double> &coords) const
+float CurvilinearGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
     assert(coords.size() == GetTopologyDim());
 
@@ -386,7 +384,7 @@ float CurvilinearGrid::_GetValueNearestNeighbor(const std::vector<double> &coord
     return (AccessIJK(i, j, k));
 }
 
-float CurvilinearGrid::_GetValueLinear(const std::vector<double> &coords) const
+float CurvilinearGrid::GetValueLinear(const std::vector<double> &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
