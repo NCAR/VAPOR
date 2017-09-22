@@ -23,7 +23,8 @@ int main(int argc, char **argv)
 	if (argc > 1 && !strcmp("--launcher-debug", argv[1])) {
 		debug = 1;
 		argc--;
-		for (int i = 1; i < argc; i++)
+		int i;
+		for (i = 1; i < argc; i++)
 			argv[i] = argv[i+1];
 		argv[argc] = 0;
 	}
