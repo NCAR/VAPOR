@@ -56,7 +56,7 @@ void MyPython::Initialize() {
         pths.push_back("python2.7");
         m_pyHome = GetAppPath("VAPOR", "lib", pths, true);
 #else
-        m_pyHome = GetAppPath("VAPOR", "", pths, true);
+        m_pyHome = GetAppPath("VAPOR", "home", pths, true);
 #endif
     }
 

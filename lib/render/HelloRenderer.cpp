@@ -59,10 +59,10 @@ int HelloRenderer::_paintGL() {
 
     HelloParams *rParams = (HelloParams *)GetActiveParams();
 
-    //Next we need to get a StructuredGrid for the data we are rendering.
-    StructuredGrid *helloGrid;
+    //Next we need to get a Grid for the data we are rendering.
+    Grid *helloGrid;
 
-    //To obtain the StructuredGrid, we need the refinement level, variable, LOD, and extents:
+    //To obtain the Grid, we need the refinement level, variable, LOD, and extents:
     int actualRefLevel = rParams->GetRefinementLevel();
     int lod = rParams->GetCompressionLevel();
 
@@ -84,7 +84,7 @@ int HelloRenderer::_paintGL() {
     cout << "point1: " << point1[0] << " " << point1[1] << " " << point1[2] << endl;
     cout << "point2: " << point2[0] << " " << point2[1] << " " << point2[2] << endl;
 
-    //Finally, obtain the StructuredGrid of the data for the specified region, at requested refinement and lod,
+    //Finally, obtain the Grid of the data for the specified region, at requested refinement and lod,
     //using Renderer::getGrids()
     size_t timestep = rParams->GetCurrentTimestep();
 

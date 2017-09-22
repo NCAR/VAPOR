@@ -197,8 +197,10 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr) {
     dataMgr->GetVariableExtents(ts, var,
                                 level, varMin, varMax);
 
-    StructuredGrid *varGrid;
-    StructuredGrid *hgtGrid;
+    //StructuredGrid* varGrid;
+    //StructuredGrid* hgtGrid;
+    Grid *varGrid;
+    Grid *hgtGrid;
     vector<string> varname;
     varname.push_back(var);
     bool is3D = cParams->VariablesAre3D();

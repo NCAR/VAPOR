@@ -13,7 +13,7 @@ set (VERSION_RC alpha0)
 string (TIMESTAMP VERSION_DATE UTC)
 set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
 	add_definitions (-DWIN32)
@@ -33,8 +33,7 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# These need to be updatd to change for install build
-set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
+# These need to be updatd to change for install build set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
 set (BINDIR ${PROJECT_BINARY_DIR}/bin)
 set (ABS_TOP ${PROJECT_SOURCE_DIR})
 
@@ -44,6 +43,7 @@ set (PYTHONVERSION )
 set (THIRD_PARTY_LIB_DIR )
 set (THIRD_PARTY_INC_DIR )
 
+include (buildutils/UtilityFunctions.cmake)
 include (site.local OPTIONAL)
 
 include_directories (${THIRD_PARTY_INC_DIR})
@@ -72,9 +72,11 @@ elseif (APPLE)
 	set (CMAKE_INSTALL_PREFIX /Applications)
 else ()
 	find_library (GLEW GLEW)
-	set (INSTALL_BIN_DIR bin)
+	set (INSTALL_BIN_DIR lib)
 	set (INSTALL_LIB_DIR lib)
+	set (INSTALL_LAUNCHER_DIR bin)
 	set (INSTALL_SHARE_DIR share)
+	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install_solid")
 endif ()
 
 add_subdirectory (apps)
@@ -136,7 +138,8 @@ endif (WIN32)
 if (APPLE)
 	if (${GENERATE_FULL_INSTALLER})
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${THIRD_PARTY_LIB_DIR}/python2.7)
+		message (${INSTALL_FRAMEWORKS})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -150,5 +153,29 @@ if (APPLE)
 	endif (${GENERATE_FULL_INSTALLER})
 	set (CPACK_BINARY_DRAGNDROP ON)
 endif (APPLE)
+
+if (UNIX AND NOT APPLE)
+	set (EXTRA_LIBS_SEARCH GLU expat)
+	add_custom_target (
+		linuxpreinstall
+		COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH} >
+		${CMAKE_SOURCE_DIR}/buildutils/LinuxInstallLibs.txt
+		COMMAND touch ~/TEST
+		)
+	if (${GENERATE_FULL_INSTALLER})
+		file (STRINGS buildutils/LinuxInstallLibs.txt INSTALL_LIBS)
+		install (
+			FILES ${INSTALL_LIBS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+	endif (${GENERATE_FULL_INSTALLER})
+endif (UNIX AND NOT APPLE)
 
 include (CPack)
