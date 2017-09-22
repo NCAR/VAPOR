@@ -31,3 +31,4 @@ site.local
 bin
 /build
 /apps/vaporgui/ui/
+/buildutils/LinuxInstallLibs.txt

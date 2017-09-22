@@ -33,7 +33,7 @@ namespace VAPoR {
 //! multiple grid points better performance is achieved by using
 //! unit stride. The \a I axis varies fastest (has unit stride), 
 //! followed by \a J, then \a K. Best performance is achieved
-//! when using the class iterator: StructuredGrid::Iterator.
+//! when using the class iterator: Grid::Iterator.
 //!
 //! For methods that allow the specification of grid indecies or coordinates
 //! as a single parameter tuple (e.g. vector <double> coordinate) the 
@@ -48,8 +48,9 @@ namespace VAPoR {
 class VDF_API StructuredGrid : public Grid {
 public:
 
- //!
  //! Construct a structured grid sampling a 3D or 2D scalar function
+ //!
+ //! \copydoc Grid()
  //!
  //! The sampled function is represented as a 2D or 3D array, decomposed
  //! into smaller blocks (tiles in 2D). The dimensions of the array are not
@@ -62,84 +63,14 @@ public:
  //! Data can not be retrieved from a dataless StructuredGrid. However,
  //! coordinate access methods may still be invoked.
  //!
- //! \param[in] bs A two or three-element vector specifying the dimensions of
- //! each block storing the sampled scalar function. 
- //! \param[in] min A two or three-element vector specifying the ijk index
- //! of the first point in the grid. The first grid point need not coincide 
- //! with
- //! block boundaries. I.e. the indecies need not be (0,0,0): the first
- //! grid point is not required to be the first element of the array.
- //! \param[in] max A two or three-element vector specifying the ijk index
- //! of the last point in the grid
- //! \param[in] blks An array of blocks containing the sampled function. 
- //! The dimensions of each block 
- //! is given by \p bs. The number of blocks is given by the product 
- //! of the terms: 
- //!
- //! \code (max[i]/bs[i] - min[i]/bs[i] + 1) \endcode
- //!
- //! over i = 0..2 (3D), and i = 0..1 (2D).
- //!
- //! A shallow copy of the blocks is made by the constructor. Memory
- //! referenced by the elements of \p blks should remain valid 
- //! until the class instance is destroyed.
- //!
  StructuredGrid(
 	const std::vector <size_t> &dims,
 	const std::vector <size_t> &bs,
 	const std::vector <float *> &blks
  );
 
- StructuredGrid();
-
- virtual ~StructuredGrid();
-
- //! \copydoc Grid::AccessIndex()
- //
- float AccessIndex(const std::vector <size_t> &indices) const;
-
- //! \copydoc Grid::SetValue()
- //
- void SetValue(const std::vector <size_t> &indices, float value);
-
-
- //! Return value of grid at specified location
- //!
- //! This method provides an alternate interface to Grid::AccessIndex()
- //! If the dimensionality of the grid as determined by GetDimensions() is
- //! less than three subsequent parameters are ignored. Parameters
- //! that are outside of range are clamped to boundaries.
- //!
- //! \param[in] i Index into first fastest varying dimension
- //! \param[in] j Index into second fastest varying dimension
- //! \param[in] k Index into third fastest varying dimension
- //
- virtual float AccessIJK(size_t i, size_t j, size_t k) const;
-
- void SetValueIJK(size_t i, size_t j, size_t k, float v);
-
-
- //! Return the ijk dimensions of grid in blocks
- //!
- //! Returns the number of blocks defined along each axis of the grid
- //! 
- //! \param[out] dims A two or three element array containing the grid 
- //! dimension in blocks
- //!
- //! \sa GetBlockSize();
- //
- void GetDimensionInBlks(std::vector <size_t> &bdims) const {
-	bdims.clear();
-	for (int i=0; i<_bdims.size(); i++) bdims.push_back(_bdims[i]);
- }
- std::vector <size_t> GetDimensionInBlks() const {
-	return(_bdims);
- }
-
-
- //! \copydoc Grid::GetRange()
- //!
- virtual void GetRange(float range[2]) const;
+ StructuredGrid() = default;
+ virtual ~StructuredGrid() = default;
 
 
  //! \copydoc Grid::GetCellNodes()
@@ -147,448 +78,203 @@ public:
  virtual bool GetCellNodes(
 	const std::vector <size_t> &cindices,
 	std::vector <std::vector <size_t> > &nodes
- ) const;
+ ) const override;
 
  //! \copydoc Grid::GetCellNeighbors()
  //!
  virtual bool GetCellNeighbors(
 	const std::vector <size_t> &cindices,
 	std::vector <std::vector <size_t> > &cells
- ) const;
+ ) const override;
 
  //! \copydoc Grid::GetNodeCells()
  //!
  virtual bool GetNodeCells(
 	const std::vector <size_t> &indices,
 	std::vector <std::vector <size_t> > &cells
- ) const;
+ ) const override;
 
- //! Return the internal blocking factor
- //!
- //! This method returns the internal blocking factor passed 
- //! to the constructor.
+ virtual void ClampCoord(std::vector <double> &coords) const override;
+
+
+
+ /////////////////////////////////////////////////////////////////////////////
  //
- void GetBlockSize(std::vector <size_t> &bs) const {
-	bs = _bs;
- }
- std::vector <size_t> GetBlockSize() const {
-	return(_bs);
- }
-
- //! Return the internal data structure containing a copy of the blocks
- //! passed in by the constructor
- //!
- const std::vector <float *> &GetBlks() const { return(_blks); };
-
- virtual void ClampCoord(std::vector <double> &coords) const;
-
-
- // 
- // Define polymorphic iterator that can be used with any
- // class derived from this class
+ // Iterators
  //
- //
+ /////////////////////////////////////////////////////////////////////////////
 
- // Interface for iterator specializations
+
  //
- class ConstCoordItrAbstract {
+ // Node index iterator. Iterates over node indices
+ //
+ class ConstNodeIteratorSG : public Grid::ConstNodeIteratorAbstract {
  public:
+  ConstNodeIteratorSG(const StructuredGrid *rg, bool begin);
+  ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs);
+  ConstNodeIteratorSG();
 
-  virtual ~ConstCoordItrAbstract() {}
-  virtual void next() = 0;
-  virtual const std::vector <double>  &deref() const = 0;
-  virtual const void *address() const = 0;
-  virtual bool equal(const void* other) const = 0;
-  virtual std::unique_ptr<ConstCoordItrAbstract> clone() const = 0;
- };
+  virtual ~ConstNodeIteratorSG() {}
 
- // Overloaded operators that will act on spealizations of 
- // ConstCoordItrAbstract
- //
- class ConstCoordItr {
- public:
+  virtual void next();
+  virtual ConstIndexType &deref() const {
+	return(_index);
+  }
+  virtual const void *address() const {return this; };
 
-  ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract> it) : 
-	_impl(std::move(it)) {}
+  virtual bool equal(const void* rhs) const {
+	const ConstNodeIteratorSG *itrptr = 
+		static_cast<const ConstNodeIteratorSG *> (rhs);
 
-  ConstCoordItr(ConstCoordItr const &rhs) : _impl(rhs._impl->clone()) {}
-
-  ConstCoordItr &operator=(ConstCoordItr const &rhs) {
-	_impl = rhs._impl->clone(); return *this;
+	return(_index == itrptr->_index);
   }
 
-  // ConstCoordItr has a unique_ptr member so we must provide
-  // std::move constructors
-  //
-  ConstCoordItr(ConstCoordItr &&rhs) {
-	_impl = std::move(rhs._impl);
-  }
-
-  ConstCoordItr &operator=(ConstCoordItr &&rhs)  {
-	if (this != &rhs) {
-		_impl = std::move(rhs._impl);
-	}
-	return (*this);
-  }
-
-  ConstCoordItr() : _impl(nullptr) {}
-
-  ConstCoordItr &operator++ () {	// ++prefix
-	_impl->next(); return *this; 
-  };
-  ConstCoordItr operator++ (int) {	// postfix++
-	assert(false && "Not implemented");
-	//return(*this);
-	return(ConstCoordItr());
+  virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
+	return std::unique_ptr<ConstNodeIteratorAbstract> (new ConstNodeIteratorSG(*this));
   };
 
-  const std::vector<double>& operator*() const {
-	return _impl->deref();
-  }
+ protected:
+  std::vector <size_t> _dims;
+  std::vector<size_t> _index;
+  std::vector<size_t> _lastIndex;
 
-  bool operator==(const ConstCoordItr &rhs) const {
-	return (_impl->equal(rhs._impl->address()));
-  }
-
-  bool operator!=(const ConstCoordItr &rhs) const {
-	return (! (*this == rhs));
-  }
- private:
-
-  std::unique_ptr<ConstCoordItrAbstract> _impl;
- };
-
- virtual ConstCoordItr ConstCoordBegin() const = 0;
- virtual ConstCoordItr ConstCoordEnd() const = 0;
-
-
- // Inside a box functor
- //
- class InsideBox {
- public:
-  InsideBox(
-	const std::vector<double> &min, const std::vector<double> &max
-  ) : _min(min), _max(max) {}
-  InsideBox() {}
-
-  bool operator()(const std::vector<double> &pt) const {
-	for (int i=0; i<_min.size(); i++) {
-		if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
-	}
-	return(true);
-  }
- 
- private:
-  std::vector <double> _min;
-  std::vector <double> _max;
  };
 
 
- //! A forward iterator for accessing the data elements of the 
- //! structured grid.
- //!
- //! This class provides a C++ STL style Forward Iterator for 
- //! accessing grid elements passed to the constructor. All Forward
- //! Iterator expressions are supported. In addition, the following
- //! Random Access Iterator expressions are supported:
- //!
- //! \li \c a + n
- //! \li \c n + a
- //!
- //! where \i a are objects of type ForwardIterator, and \i n is an int.
- //
- template <class T>
- class VDF_API ForwardIterator {
+ class ConstNodeIteratorBoxSG : public ConstNodeIteratorSG {
  public:
-  ForwardIterator (
-	T *rg, 
-	const std::vector<double> &minu = {}, 
-	const std::vector<double> &maxu = {}
+  ConstNodeIteratorBoxSG(
+	const StructuredGrid *rg,
+	const std::vector <double> &minu, const std::vector <double> &maxu
   );
-  ForwardIterator ();
-  ForwardIterator (const ForwardIterator<T> &) = default;
-  ForwardIterator (ForwardIterator<T> &&rhs);
-  ~ForwardIterator () {}
+  ConstNodeIteratorBoxSG(const ConstNodeIteratorBoxSG &rhs);
+  ConstNodeIteratorBoxSG();
 
-  inline float &operator*() {return (*_itr);}
+  virtual ~ConstNodeIteratorBoxSG() {}
 
-  ForwardIterator<T> &operator++();	// ++prefix 
+  virtual void next();
 
-#ifdef	DEAD
-  ForwardIterator<T> operator++(int);	// postfix++
-  
-  ForwardIterator<T> &operator+=(const long int &offset);	
-  ForwardIterator<T> operator+(const long int &offset) const;
-#endif
-
-  ForwardIterator<T>& operator=(ForwardIterator<T> rhs);
-  ForwardIterator<T>& operator=(ForwardIterator<T> &rhs) = delete;
-
-  bool operator==(const ForwardIterator<T> &other);
-  bool operator!=(const ForwardIterator<T> &other);
- 
-  const ConstCoordItr &GetCoordItr() {
-	return(_coordItr);
-  }
-
-  friend void swap(
-	StructuredGrid::ForwardIterator<T> &a,
-	StructuredGrid::ForwardIterator<T> &b
-  ) {
-	std::swap(a._rg, b._rg);
-	std::swap(a._coordItr, b._coordItr);
-	std::swap(a._x, b._x);
-	std::swap(a._y, b._y);
-	std::swap(a._z, b._z);
-	std::swap(a._xb, b._xb);
-	std::swap(a._itr, b._itr);
-	for (int i=0; i<3; i++) {
-		std::swap(a._dims[i], b._dims[i]);
-		std::swap(a._bs[i], b._bs[i]);
-		std::swap(a._bdims[i], b._bdims[i]);
-	}
-	std::swap(a._ndim, b._ndim);
-	std::swap(a._end, b._end);
-	std::swap(a._pred, b._pred);
-
-  }
+  virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
+	return std::unique_ptr<ConstNodeIteratorAbstract> (new ConstNodeIteratorBoxSG(*this));
+  };
 
  private:
-  T *_rg;
+  InsideBox _pred;
   ConstCoordItr _coordItr;
-  size_t _x, _y, _z;	// current index into _rg->_min[3]
-  size_t _xb;	// x index within a block
-  float *_itr;
-  size_t _dims[3];
-  size_t _bs[3];
-  size_t _bdims[3];
-  int _ndim;
-  bool _end;
-  InsideBox _pred;
 
  };
 
- typedef StructuredGrid::ForwardIterator<StructuredGrid> Iterator;
- typedef StructuredGrid::ForwardIterator<StructuredGrid const> ConstIterator;
-
- //! Construct a begin iterator that will iterate through elements
- //! inside or on the box defined by \p minu and \p maxu
- //
- Iterator begin(
-	const std::vector <double> &minu, const std::vector <double>  &maxu
- ) {
-	return( Iterator(this, minu, maxu));
+ virtual ConstNodeIterator ConstNodeBegin() const override {
+	return ConstNodeIterator (
+		std::unique_ptr<ConstNodeIteratorAbstract> (
+			new ConstNodeIteratorSG(this, true)
+		)
+	);
  }
- Iterator begin() { return( Iterator(this)); }
 
- Iterator end() { return(Iterator()); }
-
-
-
- ConstIterator cbegin(
+ virtual ConstNodeIterator ConstNodeBegin(
 	const std::vector <double> &minu, const std::vector <double>  &maxu
- ) const {
-	return( ConstIterator(this, minu, maxu));
+ ) const override {
+	return ConstNodeIterator (
+		std::unique_ptr<ConstNodeIteratorAbstract> (
+			new ConstNodeIteratorBoxSG(this, minu, maxu)
+		)
+	);
  }
- ConstIterator cbegin() const { return( ConstIterator(this)); }
 
- ConstIterator cend() const { return(ConstIterator()); }
+ virtual ConstNodeIterator ConstNodeEnd() const override {
+	return ConstNodeIterator (
+		std::unique_ptr<ConstNodeIteratorAbstract> (
+			new ConstNodeIteratorSG(this, false)
+		)
+	);
+ }
 
 
- //! A forward iterator for accessing the cell IDs
- //! of a structured grid.
- //!
- //! This class provides a C++ STL style Forward Iterator for 
- //! accessing grid cell IDs.
- //! Iterator expressions are supported. 
- //!
+
+
  //
- template <class T>
- class VDF_API ForwardCellIterator {
+ // Cell index iterator. Iterates over cell indices
+ //
+ class ConstCellIteratorSG : public Grid::ConstCellIteratorAbstract {
  public:
-  ForwardCellIterator (
-	T *sg, 
-	const std::vector<double> &minu = {}, 
-	const std::vector<double> &maxu = {}
+  ConstCellIteratorSG(const StructuredGrid *rg, bool begin);
+  ConstCellIteratorSG(const ConstCellIteratorSG &rhs);
+  ConstCellIteratorSG();
+
+  virtual ~ConstCellIteratorSG() {}
+
+  virtual void next();
+  virtual ConstIndexType &deref() const {
+	return(_index);
+  }
+  virtual const void *address() const {return this; };
+
+  virtual bool equal(const void* rhs) const {
+	const ConstCellIteratorSG *itrptr = 
+		static_cast<const ConstCellIteratorSG *> (rhs);
+
+	return(_index == itrptr->_index);
+  }
+
+  virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
+	return std::unique_ptr<ConstCellIteratorAbstract> (new ConstCellIteratorSG(*this));
+  };
+
+ protected:
+  std::vector <size_t> _dims;
+  std::vector<size_t> _index;
+  std::vector<size_t> _lastIndex;
+ };
+
+ class ConstCellIteratorBoxSG : public ConstCellIteratorSG {
+ public:
+  ConstCellIteratorBoxSG(
+	const StructuredGrid *rg,
+	const std::vector <double> &minu, const std::vector <double> &maxu
   );
-  ForwardCellIterator (T *sg, bool begin);
-  ForwardCellIterator ();
-  ForwardCellIterator (const ForwardCellIterator<T> &) = default;
-  ForwardCellIterator (ForwardCellIterator<T> &&rhs);
-  ~ForwardCellIterator () {}
+  ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs);
+  ConstCellIteratorBoxSG();
 
-  std::vector <size_t> &operator*() {return (_cellIndex);}
+  virtual ~ConstCellIteratorBoxSG() {}
 
-  ForwardCellIterator<T> &operator++();	// ++prefix 
+  virtual void next();
 
-#ifdef	DEAD
-  ForwardCellIterator<T> operator++(int);	// postfix++
-  
-  ForwardCellIterator<T> &operator+=(const long int &offset);	
-  ForwardCellIterator<T> operator+(const long int &offset) const;
-#endif
-
-  ForwardCellIterator<T>& operator=(ForwardCellIterator<T> rhs);
-  ForwardCellIterator<T>& operator=(ForwardCellIterator<T> &rhs) = delete;
-
-  bool operator==(const ForwardCellIterator<T> &rhs) {
-	return(_cellIndex == rhs._cellIndex);
-  }
-  bool operator!=(const ForwardCellIterator<T> &rhs) {
-	return( ! (*this == rhs));
-  }
- 
-  friend void swap(
-	StructuredGrid::ForwardCellIterator<T> &a,
-	StructuredGrid::ForwardCellIterator<T> &b
-  ) {
-#ifdef	DEAD
-	std::swap(a._coordItr0, b._coordItr0);
-	std::swap(a._coordItr1, b._coordItr1);
-	std::swap(a._coordItr2, b._coordItr2);
-	std::swap(a._coordItr3, b._coordItr3);
-	std::swap(a._coordItr4, b._coordItr4);
-	std::swap(a._coordItr5, b._coordItr5);
-	std::swap(a._coordItr6, b._coordItr6);
-	std::swap(a._coordItr7, b._coordItr7);
-	std::swap(a._pred, b._pred);
-#endif
-	std::swap(a._sg, b._sg);
-	std::swap(a._dims, b._dims);
-	std::swap(a._cellIndex, b._cellIndex);
-  }
+  virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
+	return std::unique_ptr<ConstCellIteratorAbstract> (new ConstCellIteratorBoxSG(*this));
+  };
 
  private:
-#ifdef	DEAD
   InsideBox _pred;
-  ConstCoordItr _coordItr0;
-  ConstCoordItr _coordItr1;
-  ConstCoordItr _coordItr2;
-  ConstCoordItr _coordItr3;
-  ConstCoordItr _coordItr4;
-  ConstCoordItr _coordItr5;
-  ConstCoordItr _coordItr6;
-  ConstCoordItr _coordItr7;
-#endif
-  T *_sg;
-  std::vector <size_t> _dims;
-  std::vector<size_t> _cellIndex;
-
-  ForwardCellIterator<T> & next2d();
-  ForwardCellIterator<T> & next3d();
+  ConstCoordItr _coordItr;
 
  };
 
- typedef StructuredGrid::ForwardCellIterator<StructuredGrid const> ConstCellIterator;
+ virtual ConstCellIterator ConstCellBegin() const override {
+	return ConstCellIterator (
+		std::unique_ptr<ConstCellIteratorAbstract> (
+			new ConstCellIteratorSG(this, true)
+		)
+	);
+ }
 
-#ifdef	DEAD
- //! Construct a begin iterator that will iterate through elements
- //! inside or on the box defined by \p minu and \p maxu
- //
- CellIterator ConstCellBegin(
+ virtual ConstCellIterator ConstCellBegin(
 	const std::vector <double> &minu, const std::vector <double>  &maxu
- ) {
-	return( CellIterator(this, minu, maxu));
- }
-#endif
-
- ConstCellIterator ConstCellBegin() const {
-	return( ConstCellIterator(this, true)); 
- }
-
- ConstCellIterator ConstCellEnd() const {
-	return(ConstCellIterator(this, false));
+ ) const override {
+	return ConstCellIterator (
+		std::unique_ptr<ConstCellIteratorAbstract> (
+			new ConstCellIteratorBoxSG(this, minu, maxu)
+		)
+	);
  }
 
-
-
- //! A forward iterator for accessing the node IDs
- //! of a structured grid.
- //!
- //! This class provides a C++ STL style Forward Iterator for 
- //! accessing grid node IDs.
- //! Iterator expressions are supported. 
- //!
- //
- template <class T>
- class VDF_API ForwardNodeIterator {
- public:
-  ForwardNodeIterator (
-	T *sg, 
-	const std::vector<double> &minu = {}, 
-	const std::vector<double> &maxu = {}
-  );
-  ForwardNodeIterator (T *sg, bool begin);
-  ForwardNodeIterator ();
-  ForwardNodeIterator (const ForwardNodeIterator<T> &) = default;
-  ForwardNodeIterator (ForwardNodeIterator<T> &&rhs);
-  ~ForwardNodeIterator () {}
-
-  std::vector <size_t> &operator*() {return (_nodeIndex);}
-
-  ForwardNodeIterator<T> &operator++();	// ++prefix 
-
-#ifdef	DEAD
-  ForwardNodeIterator<T> operator++(int);	// postfix++
-  
-  ForwardNodeIterator<T> &operator+=(const long int &offset);	
-  ForwardNodeIterator<T> operator+(const long int &offset) const;
-#endif
-
-  ForwardNodeIterator<T>& operator=(ForwardNodeIterator<T> rhs);
-  ForwardNodeIterator<T>& operator=(ForwardNodeIterator<T> &rhs) = delete;
-
-  bool operator==(const ForwardNodeIterator<T> &rhs) {
-	return(_nodeIndex == rhs._nodeIndex);
-  }
-  bool operator!=(const ForwardNodeIterator<T> &rhs) {
-	return( ! (*this == rhs));
-  }
- 
-  friend void swap(
-	StructuredGrid::ForwardNodeIterator<T> &a,
-	StructuredGrid::ForwardNodeIterator<T> &b
-  ) {
-	std::swap(a._sg, b._sg);
-	std::swap(a._dims, b._dims);
-	std::swap(a._nodeIndex, b._nodeIndex);
-  }
-
- private:
-#ifdef	DEAD
-  InsideBox _pred;
-#endif
-  T *_sg;
-  std::vector <size_t> _dims;
-  std::vector<size_t> _nodeIndex;
-
-  ForwardNodeIterator<T> & next2d();
-  ForwardNodeIterator<T> & next3d();
-
- };
-
- typedef StructuredGrid::ForwardNodeIterator<StructuredGrid const> ConstNodeIterator;
-
-#ifdef	DEAD
- //! Construct a begin iterator that will iterate through elements
- //! inside or on the box defined by \p minu and \p maxu
- //
- NodeIterator ConstNodeBegin(
-	const std::vector <double> &minu, const std::vector <double>  &maxu
- ) {
-	return( NodeIterator(this, minu, maxu));
+ virtual ConstCellIterator ConstCellEnd() const override {
+	return ConstCellIterator (
+		std::unique_ptr<ConstCellIteratorAbstract> (
+			new ConstCellIteratorSG(this, false)
+		)
+	);
  }
-#endif
-
- ConstNodeIterator ConstNodeBegin() const {
-	return( ConstNodeIterator(this, true)); 
- }
-
- ConstNodeIterator ConstNodeEnd() const {
-	return(ConstNodeIterator(this, false));
- }
-
-
 
 
 
@@ -598,22 +284,7 @@ public:
 
 protected: 
 
-
- float *_AccessIndex(
-	const std::vector <float *> &blks, const std::vector <size_t> &indices
- ) const;
-
 private:
- std::vector <size_t> _bs;	// dimensions of each block
- std::vector <size_t> _bdims;	// dimensions (specified in blocks) of ROI 
- std::vector <float *> _blks;
-
- void _StructuredGrid(
-	const std::vector <size_t> &dims,
-	const std::vector <size_t> &bs, 
-	const std::vector <float *> &blks
- );
-
 
 };
 };
