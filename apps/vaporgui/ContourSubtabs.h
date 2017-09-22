@@ -108,7 +108,7 @@ public:
 			int lod = _cParams->GetCompressionLevel();
 			int level = _cParams->GetRefinementLevel();
 			int ts = _cParams->GetCurrentTimestep();
-			VAPoR::StructuredGrid* var = dataMgr->GetVariable(ts, varname, level, lod);
+			VAPoR::Grid* var = dataMgr->GetVariable(ts, varname, level, lod);
 			float range[2];
 			var->GetRange(range);
 			

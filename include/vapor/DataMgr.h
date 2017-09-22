@@ -384,7 +384,7 @@ std::vector <size_t> GetCRatios(string varname) const;
  //! \param[in] lod The level-of-detail parameter, \p lod, selects
  //! the approximation level. See DataMgr.
  //
- VAPoR::StructuredGrid *GetVariable (
+ VAPoR::Grid *GetVariable (
 	size_t ts, string varname, int level, int lod, bool lock=false
  );
 
@@ -394,7 +394,7 @@ std::vector <size_t> GetCRatios(string varname) const;
  //! a subregion is specified in the user coordinate system. 
  //! \p min and \p max specify the minimum and maximum extents of an 
  //! axis-aligned bounding box containing the region of interest. The
- //! VAPoR::StructuredGrid object returned contains the intersection 
+ //! VAPoR::Grid object returned contains the intersection 
  //! between the 
  //! specified 
  //! hyperslab and the variable's spatial domain (which is not necessarily 
@@ -412,16 +412,16 @@ std::vector <size_t> GetCRatios(string varname) const;
  //! the region-of-interest. The spatial dimensionality of the variable
  //! determines the number of elements in \p max.
  //!
- //! \note The StructuredGrid structure returned is allocated from the heap. 
+ //! \note The Grid structure returned is allocated from the heap. 
  //! it is the caller's responsiblity to delete the returned object
  //! when it is no longer in use.
  //!
- VAPoR::StructuredGrid *GetVariable (
+ VAPoR::Grid *GetVariable (
 	size_t ts, string varname, int level, int lod, 
 	std::vector <double> min, std::vector <double> max, bool lock=false
  );
 
- VAPoR::StructuredGrid *GetVariable(
+ VAPoR::Grid *GetVariable(
 	size_t ts, string varname, int level, int lod,
 	std::vector <size_t> min, std::vector <size_t> max, bool lock=false
  );
@@ -469,14 +469,14 @@ std::vector <size_t> GetCRatios(string varname) const;
  //! marked available for
  //! internal garbage collection during subsequent GetVariable() calls
  //!
- //! \param[in] rg A pointer to a StructuredGrid previosly
+ //! \param[in] rg A pointer to a Grid previosly
  //! returned by GetVariable()
  //!
  //! \retval status Returns a non-negative value on success
  //!
  //! \sa GetVariable()
  //
- void UnlockGrid(const VAPoR::StructuredGrid *rg);
+ void UnlockGrid(const VAPoR::Grid *rg);
 
  //! \copydoc DC::GetNumDimensions(
  //!   string varname, size_t &ndim
@@ -865,7 +865,7 @@ private:
     const std::vector <size_t> &bmax
  ) ;
 
- VAPoR::StructuredGrid *_make_grid(
+ VAPoR::Grid *_make_grid(
 	int level,
 	int lod,
 	const VAPoR::DC::DataVar &var,
@@ -900,7 +900,7 @@ int _setupCoordVecs(
 	vector < vector <size_t > > &bmaxvec
  ) const;
 
- VAPoR::StructuredGrid *_getVariable(
+ VAPoR::Grid *_getVariable(
     size_t ts,
     string varname,
     int level,
@@ -909,7 +909,7 @@ int _setupCoordVecs(
     bool    dataless
  ); 
 
- VAPoR::StructuredGrid *_getVariable(
+ VAPoR::Grid *_getVariable(
     size_t ts,
     string varname,
     int level,

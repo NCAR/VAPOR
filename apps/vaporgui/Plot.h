@@ -127,7 +127,7 @@ private:
 			QAbstractSpinBox* spinner, 
 			QTableWidgetItem* twi);
 
-	int findNyquist(VAPoR::StructuredGrid* sg,
+	int findNyquist(VAPoR::Grid* sg,
 		const double minu[3], const double maxu[3],
 		double &dX, double &dY, double &dZ
 	) const;

@@ -52,9 +52,10 @@ public:
 	const std::vector <double> &minu,
 	const std::vector <double> &maxu,
 	const RegularGrid &rg
-);
+ );
 
- virtual ~LayeredGrid();
+ LayeredGrid() = default;
+ virtual ~LayeredGrid() = default;
 
  //! \copydoc RegularGrid::GetValue()
  //!
@@ -157,7 +158,7 @@ public:
  //!
  const RegularGrid &GetZRG() const { return(_rg); };
 
- class ConstCoordItrLayered : public StructuredGrid::ConstCoordItrAbstract {
+ class ConstCoordItrLayered : public Grid::ConstCoordItrAbstract {
  public:
   ConstCoordItrLayered(const LayeredGrid *rg, bool begin);
   ConstCoordItrLayered(const ConstCoordItrLayered &rhs);
@@ -167,7 +168,7 @@ public:
   virtual ~ConstCoordItrLayered() {}
 
   virtual void next();
-  virtual const std::vector <double>  &deref() const {
+  virtual ConstCoordType &deref() const {
 	return(_coords);
   }
   virtual const void *address() const {return this; };
@@ -217,15 +218,11 @@ private:
 	const RegularGrid &rg
  );
 
- void _GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
- ) const;
-
- float _GetValueNearestNeighbor(
+ virtual float GetValueNearestNeighbor(
 	const std::vector <double> &coords
  ) const override;
 
- float _GetValueLinear(const std::vector <double> &coords) const override;
+ virtual float GetValueLinear(const std::vector <double> &coords) const override;
 
 
  //! 
