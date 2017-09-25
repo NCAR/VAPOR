@@ -25,7 +25,6 @@
 #define PLOT_H
 
 
-#include <Python.h>
 #include <vector>
 #include <qdialog.h>
 #include <QWidget>
@@ -37,6 +36,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
 #include "PlotParams.h"
+#include <vapor/MyPython.h>
 
 using namespace std;
 
