@@ -83,6 +83,7 @@ private slots:
  void itemChangeHack(QTableWidgetItem*);
  void selectInstance();
  void copyInstanceTo(int);
+ void checkboxChanged(int);
 
 signals:
  void newRenderer(string vizName, string renderClass, string renderInst);
