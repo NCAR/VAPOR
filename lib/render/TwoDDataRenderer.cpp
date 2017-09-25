@@ -556,6 +556,7 @@ int TwoDDataRenderer::_getMeshUnStructured(
 
     return (_getMeshUnStructuredHelper(dataMgr, g, defaultZ));
 #endif
+    return 0;
 }
 
 int TwoDDataRenderer::_getMeshUnStructuredHelper(
