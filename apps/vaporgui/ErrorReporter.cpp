@@ -20,11 +20,11 @@
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
 
 #if !defined(WIN32)
 #include <execinfo.h>
+#include <unistd.h>
 #endif
 
 #if defined(DARWIN)
@@ -49,6 +49,8 @@ using std::string;
 using std::vector;
 
 void _segFaultHandler(int sig) {
+    string details;
+#if !defined(WIN32)
     void *array[128];
     size_t size;
     size = backtrace(array, 128);
@@ -56,12 +58,12 @@ void _segFaultHandler(int sig) {
     backtrace_symbols_fd(array, size, STDERR_FILENO);
     char **backtrace_str = backtrace_symbols(array, 128);
 
-    string details;
     for (int i = 0; i < size; i++) {
         if (strlen(backtrace_str[i]) == 0)
             break;
         details += string(backtrace_str[i]) + "\n";
     }
+#endif
 
     ErrorReporter::Report("A memory error occured", ErrorReporter::Error, details);
     exit(1);

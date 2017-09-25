@@ -4,7 +4,7 @@
 
 #include <vapor/glutil.h>
 #include <vapor/ImageParams.h>
-#include <vapor/ImageRenderer.h>
+// #include <vapor/ImageRenderer.h>
 #include <ImageEventRouter.h>
 #include <EventRouter.h>
 #include <qlineedit.h>

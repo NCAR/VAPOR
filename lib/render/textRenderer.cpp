@@ -289,7 +289,7 @@ int TextObject::drawMe(float coords[3]) {
     _coords[0] = coords[0];
     _coords[1] = coords[1];
     _coords[2] = coords[2];
-    drawMe();
+    return drawMe();
 }
 
 int TextObject::drawMe(float coords[3], int timestep) {
