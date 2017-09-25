@@ -25,12 +25,12 @@
 #define PLOT_H
 
 
+#include <Python.h>
 #include <vector>
 #include <qdialog.h>
 #include <QWidget>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <Python.h>
 #include "ui_errMsg.h"
 #include "ui_plotWindow.h"
 #include "RangeController.h"
