@@ -49,6 +49,8 @@ TFWidget::TFWidget(QWidget* parent)
 	_minCombo = new Combo(minRangeEdit, minRangeSlider);
 	_maxCombo = new Combo(maxRangeEdit, maxRangeSlider);
 	_rangeCombo = new RangeCombo(_minCombo, _maxCombo);
+
+	cout << "tfwidget constructor " << colorMappingFrame << endl;
 	
 	connectWidgets();
 
@@ -56,6 +58,20 @@ TFWidget::TFWidget(QWidget* parent)
 
 void TFWidget::Reinit(Flags flags) {
 	_flags = flags;
+
+	// If const-color selection is a priority for the user,
+	// as is the case in barbs or isosurfaces, move the const
+	// color selector to the top.
+	//
+	if (_flags & PRIORITYCOLORVAR) {
+		QVBoxLayout* myLayout = (QVBoxLayout*)layout();
+
+		myLayout->removeWidget(constColorFrame);
+		myLayout->insertWidget(0, constColorFrame);
+
+		myLayout->removeWidget(colorMappingFrame);
+		myLayout->insertWidget(0, colorMappingFrame);
+	}
 }
 
 TFWidget::~TFWidget() {
@@ -254,7 +270,7 @@ void TFWidget::getRange(float range[2],
 						float values[2]) {
 
 	string varName;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varName = _rParams->GetColorMapVariableName();
 		if (varName == "") {
 			return;
@@ -283,7 +299,7 @@ void TFWidget::getRange(float range[2],
 
 void TFWidget::updateColorInterpolation() {
 	string varName;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varName = _rParams->GetColorMapVariableName();
 	}	
 	else {
@@ -315,7 +331,7 @@ void TFWidget::updateColorInterpolation() {
 
 void TFWidget::updateAutoUpdateHistoCheckbox() {
 	string varName;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varName = _rParams->GetColorMapVariableName();
 	}	
 	else {
@@ -369,14 +385,13 @@ void TFWidget::Update(DataMgr *dataMgr,
 	updateColorVarCombo();
 
 	string varName;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varName = _rParams->GetColorMapVariableName();
 		// If we are using a single color instead of a
 		// color mapped variable, disable the transfer function
 		//
 		if (varName == "") {
 			enableTFWidget(false);
-			return;
 		}
 
 		// Otherwise enable it and continue on to updating the
@@ -385,6 +400,8 @@ void TFWidget::Update(DataMgr *dataMgr,
 		else {
 			enableTFWidget(true);
 		}
+
+		
 	}
 	else {
 		collapseColorVarSettings();
@@ -415,6 +432,16 @@ void TFWidget::updateColorVarCombo() {
 		}
 	}
 	colormapVarCombo->setCurrentIndex(index);
+	
+	// Update selected color display
+	//	
+
+	float rgb[3];
+	_rParams->GetConstantColor(rgb);			
+	QColor color(rgb[0]*255, rgb[1]*255, rgb[2]*255);
+	QPalette palette(colorDisplay->palette());
+	palette.setColor(QPalette::Base, color);
+	colorDisplay->setPalette(palette);
 }
 
 void TFWidget::connectWidgets() {
@@ -453,7 +480,7 @@ void TFWidget::setRange() {
 
 void TFWidget::setRange(double min, double max) {
 	string varName;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varName = _rParams->GetColorMapVariableName();
 	}	
 	else {
@@ -485,7 +512,7 @@ void TFWidget::autoUpdateHistoChecked(int state) {
 
 void TFWidget::colorInterpChanged(int index) {
 	string varName;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varName = _rParams->GetColorMapVariableName();
 	}	
 	else {
@@ -507,7 +534,7 @@ void TFWidget::colorInterpChanged(int index) {
 
 void TFWidget::loadTF() {
 	string varname;
-	if (_flags & COLORMAPPED) {
+	if (_flags & COLORVAR) {
 		varname = _rParams->GetColorMapVariableName();
 	}	
 	else {
