@@ -25,8 +25,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     //! COLOR : RenderParams::GetColorMapVariableNames()
     //!
     enum Flags {
-        COLORMAPPED = (1u << 0),
-        CONSTCOLOR = (1u << 1)
+        COLORVAR = (1u << 0),
+        PRIORITYCOLORVAR = (1u << 1),
+        CONSTCOLOR = (1u << 2)
     };
 
     TFWidget(QWidget *parent = 0);
