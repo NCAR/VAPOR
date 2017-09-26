@@ -16,6 +16,11 @@ namespace VAPoR {
 	class ParamsMgr;
 }
 
+class CBWidget : public QWidget, public QTableWidgetItem {
+public:
+	CBWidget(QWidget* parent, QString type);
+};
+
 //! \class RenderHolder
 //! \ingroup Public_GUI
 //! \brief A class that manages the display of Renderer parameters
