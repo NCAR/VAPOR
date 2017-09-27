@@ -99,10 +99,6 @@ signals:
 private:
  VAPoR::ControlExec *_controlExec;
 
- void selectInstanceHelper(
-	string activeViz, string renderClass, string renderInst
- );
-
  void getRow(
 	int row, string &renderInst, string &renderClass, 
 	string &dataSetName, bool &enabled
