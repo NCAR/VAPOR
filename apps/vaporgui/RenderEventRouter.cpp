@@ -36,7 +36,7 @@ RenderParams *RenderEventRouter::GetActiveParams() const {
     assert(! _instName.empty());
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
- 
+
 	string winName, dataSetName, paramsType;
 	bool status = paramsMgr->RenderParamsLookup(
 		_instName, winName, dataSetName, paramsType

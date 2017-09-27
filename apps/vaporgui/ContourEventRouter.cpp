@@ -103,8 +103,6 @@ void ContourEventRouter::_updateTab(){
 		GetActiveParams()
 	);
 
-	cout << "contourEventRouter updateTab()" << endl;
-
 	_appearance->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
