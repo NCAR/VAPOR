@@ -184,10 +184,7 @@ void RenderHolder::deleteRenderer()
     // Make the renderer in the first row the active renderer
     //
     getRow(0, renderInst, renderClass, dataSetName, enabled);
-    cout << "renderHolder " << renderClass << " " << renderInst << endl;
     p->SetActiveRenderer(activeViz, renderClass, renderInst);
-
-    cout << "stackedWidget count " << stackedWidget->count() << endl;
 }
 
 void RenderHolder::checkboxChanged(int state)
@@ -217,6 +214,9 @@ void RenderHolder::checkboxChanged(int state)
 //
 void RenderHolder::changeChecked(int row, int col)
 {
+    CBWidget *foo = (CBWidget *)tableWidget->item(row, col);
+    cout << "property " << foo->property("row").toString().toStdString() << endl;
+
     GUIStateParams *p = getStateParams();
     string          activeViz = p->GetActiveVizName();
 
@@ -226,30 +226,18 @@ void RenderHolder::changeChecked(int row, int col)
     //
     string renderInst, renderClass, dataSetName;
     bool   enabled;
-    getRow(renderInst, renderClass, dataSetName, enabled);
+    //	getRow(renderInst, renderClass, dataSetName, enabled);
+    getRow(row, renderInst, renderClass, dataSetName, enabled);
 
     // Save current instance to state
     //
     p->SetActiveRenderer(activeViz, renderClass, renderInst);
-
-    cout << "changeChecked " << row << " " << col << " " << enabled << endl;
 
     int rc = _controlExec->ActivateRender(activeViz, dataSetName, renderClass, renderInst, enabled);
     if (rc < 0) {
         MSG_ERR("Can't create renderer");
         return;
     }
-}
-
-void RenderHolder::selectInstanceHelper(string activeViz, string renderClass, string renderInst)
-{
-    // Save current instance to state
-    //
-
-    GUIStateParams *p = getStateParams();
-    p->SetActiveRenderer(activeViz, renderClass, renderInst);
-
-    emit activeChanged(activeViz, renderClass, renderInst);
 }
 
 void RenderHolder::selectInstance()
@@ -263,7 +251,9 @@ void RenderHolder::selectInstance()
     bool   enabled;
     getRow(renderInst, renderClass, dataSetName, enabled);
 
-    selectInstanceHelper(activeViz, renderClass, renderInst);
+    p->SetActiveRenderer(activeViz, renderClass, renderInst);
+
+    emit activeChanged(activeViz, renderClass, renderInst);
 }
 
 // It is possible to select the check box without changing the currently
@@ -610,6 +600,8 @@ void RenderHolder::setRow(int row, const string &renderInst, const string &rende
         // checkBox->setCheckState(Qt::Unchecked);
         cbItem->setCheckState(Qt::Unchecked);
     }
+
+    cbItem->setProperty("row", row);
 
     //	connect(
     //		cbWidget,SIGNAL(clicked()), this,
