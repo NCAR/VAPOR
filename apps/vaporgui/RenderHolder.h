@@ -49,7 +49,12 @@ public:
 
     //! Specify the index of the page to be displayed of the stackedWidget.
     //! \param[in] indx page index
-    void SetCurrentIndex(int indx) { stackedWidget->setCurrentIndex(indx); }
+    void SetCurrentIndex(int indx)
+    {
+        stackedWidget->setCurrentIndex(indx);
+        stackedWidget->show();
+        cout << "sw currentIndex() " << indx << endl;
+    }
 
     //! Add a widget (EventRouter) to the QStackedWidget.
     //! \param[in] QWidget* Widget to be added

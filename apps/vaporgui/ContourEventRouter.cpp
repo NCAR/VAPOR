@@ -82,8 +82,6 @@ void ContourEventRouter::_updateTab()
     // The variable tab updates itself:
     _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
-    cout << "contourEventRouter updateTab()" << endl;
-
     _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
