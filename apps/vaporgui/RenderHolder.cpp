@@ -91,6 +91,8 @@ RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
 		stackedWidget->removeWidget(wid);
 		delete wid;
 	}
+
+	cout << "RenderHolder constructor " << stackedWidget->currentIndex() << endl;
 	
 }
 
@@ -188,7 +190,9 @@ void RenderHolder::deleteRenderer() {
 
 	// Check if there is anything to delete:
 	//
-	if (tableWidget->rowCount() == 0) return;
+	if (tableWidget->rowCount() == 0) {
+		return;
+	}
 
 	GUIStateParams *p = getStateParams();
 	string activeViz = p->GetActiveVizName();
@@ -207,15 +211,18 @@ void RenderHolder::deleteRenderer() {
 	_controlExec->RemoveRenderer(
 		activeViz, dataSetName, renderClass, renderInst
 	);
+	
+	// Update will rebuild the TableWidget with the updated state
+	//
+	Update();
 
 	// Make the renderer in the first row the active renderer
 	//
 	getRow(0, renderInst, renderClass, dataSetName, enabled);
+	cout << "renderHolder " << renderClass << " " << renderInst << endl;
 	p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
-	// Update will rebuild the TableWidget with the updated state
-	//
-	Update();
+	cout << "stackedWidget count " << stackedWidget->count() << endl;
 }
 
 void RenderHolder::checkboxChanged(int state) {
@@ -310,8 +317,6 @@ void RenderHolder::selectInstance() {
 void RenderHolder::itemChangeHack(QTableWidgetItem* item) {
 	int itemRow = item->row();
 	int tableRow = tableWidget->currentRow();
-
-	cout << "item change hack " << itemRow << " " << tableRow << endl;
 
 	if (itemRow != tableRow) {
 		tableWidget->setCurrentItem(item);
@@ -576,6 +581,15 @@ void RenderHolder::Update() {
 
 	updateDupCombo();
 
+	// If there are no rows, there are no renderers, so we now set
+	// the current active renderer to be "empty"
+	//
+	if (numRows == 0) {
+		p->SetActiveRenderer("", "", "");
+		SetCurrentIndex(-1);
+		stackedWidget->hide();
+	}
+
     tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
     tableWidget->resizeRowsToContents();
@@ -589,9 +603,15 @@ void RenderHolder::getRow(
 	renderClass.clear();
 	enabled = false;
 
-	if (tableWidget->rowCount() == 0) return;
+	if (tableWidget->rowCount() == 0) {
+		renderInst = "";
+		renderClass = "";
+		dataSetName = "";
+		enabled = false;
+		return;
+	}
 
-	cout << "row " << row << endl;
+	if (row == -1) row = tableWidget->rowCount() - 1;
 
 	QTableWidgetItem *item = tableWidget->item(row, 0);
 	renderInst = item->text().toStdString();
