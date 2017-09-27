@@ -53,7 +53,6 @@ class RenderHolder : public QWidget, public Ui_RenderSelector {
     void SetCurrentIndex(int indx) {
         stackedWidget->setCurrentIndex(indx);
         stackedWidget->show();
-        cout << "sw currentIndex() " << indx << endl;
     }
 
     //! Add a widget (EventRouter) to the QStackedWidget.
