@@ -95,9 +95,6 @@ class RenderHolder : public QWidget, public Ui_RenderSelector {
   private:
     VAPoR::ControlExec *_controlExec;
 
-    void selectInstanceHelper(
-        string activeViz, string renderClass, string renderInst);
-
     void getRow(
         int row, string &renderInst, string &renderClass,
         string &dataSetName, bool &enabled) const;
