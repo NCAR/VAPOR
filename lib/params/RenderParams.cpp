@@ -215,7 +215,11 @@ RenderParams::~RenderParams()
     if (_Colorbar) delete _Colorbar;
 }
 
-void RenderParams::SetEnabled(bool val) { SetValueLong(_EnabledTag, "enable/disable renderer", val); }
+void RenderParams::SetEnabled(bool val)
+{
+    cout << "RenderParams set to " << val << endl << endl;
+    SetValueLong(_EnabledTag, "enable/disable renderer", val);
+}
 
 void RenderParams::SetVariableName(string varname)
 {
