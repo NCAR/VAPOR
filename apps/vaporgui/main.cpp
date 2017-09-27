@@ -161,12 +161,12 @@ int main(int argc, char **argv) {
     vector<string> fpath;
     fpath.push_back("fonts");
     string fontFile = GetAppPath("VAPOR", "share", fpath);
-    fontFile = fontFile + "//arial.ttf";
+    fontFile = fontFile + "//arimo.ttf";
 
     QFontDatabase fdb;
     int result = fdb.addApplicationFont(QString::fromStdString(fontFile));
     QStringList fonts = fdb.families();
-    QFont f = fdb.font("Arial", "normal", 10);
+    QFont f = fdb.font("Arimo", "normal", 12);
 
     const char *useFont = std::getenv("USE_SYSTEM_FONT");
     if (!useFont) {
