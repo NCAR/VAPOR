@@ -5,7 +5,7 @@
 #include <vapor/MyBase.h>
 #include <GL/glew.h>
 #include <vapor/ImageParams.h>
-// #include <vapor/ImageRenderer.h>
+#include <vapor/ImageRenderer.h>
 #include <RenderEventRouter.h>
 #include <VariablesWidget.h>
 #include <ImageSubtabs.h>
@@ -29,9 +29,7 @@ public:
 
   static std::string GetClassType() 
   { 
-    // TODO 
-    // return(VAPoR::ImageRenderer::GetClassType());
-    return "NULL";
+    return(VAPoR::ImageRenderer::GetClassType());
   }
   std::string GetType() const
   {
