@@ -92,8 +92,6 @@ RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
 		delete wid;
 	}
 
-	cout << "RenderHolder constructor " << stackedWidget->currentIndex() << endl;
-	
 }
 
 int RenderHolder::AddWidget(QWidget* wid, const char* name, string tag){
@@ -482,7 +480,6 @@ void RenderHolder::updateDupCombo() {
 }
 
 void RenderHolder::Update() {
-	cout << "       UPDATE???? " << endl;
 	// Get active params from GUI state
 	//
 	GUIStateParams *p = getStateParams();
