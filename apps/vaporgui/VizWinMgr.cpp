@@ -836,6 +836,7 @@ void VizWinMgr::UpdateRouters() {
     p->GetActiveRenderer(activeViz, renderClass, instName);
 
     if (activeViz.size() && renderClass.size() && instName.size()) {
+
         EventRouter *eRouter = GetRenderEventRouter(
             activeViz, renderClass, instName);
 
