@@ -50,8 +50,6 @@ TFWidget::TFWidget(QWidget *parent)
     _maxCombo = new Combo(maxRangeEdit, maxRangeSlider);
     _rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 
-    cout << "tfwidget constructor " << colorMappingFrame << endl;
-
     connectWidgets();
 }
 
