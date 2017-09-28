@@ -18,9 +18,15 @@ add_library (render SHARED
 	VizFeatureRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
-
-	GeoImage.cpp
 	ControlExecutive.cpp
+	ContourRenderer.cpp
+	ImageRenderer.cpp
+	GeoImage.cpp
+	GeoImageGeoTiff.cpp
+	GeoImageTMS.cpp
+	GeoTile.cpp
+	GeoTileMercator.cpp
+	GeoTileEquirectangular.cpp
 )
 
 target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff)
