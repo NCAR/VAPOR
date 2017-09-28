@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>374</height>
+    <width>409</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
+    <width>16777215</width>
     <height>16777215</height>
    </size>
   </property>
@@ -109,7 +109,7 @@
          <widget class="QComboBox" name="dimensionCombo">
           <property name="minimumSize">
            <size>
-            <width>75</width>
+            <width>90</width>
             <height>0</height>
            </size>
           </property>
@@ -205,7 +205,7 @@
          <widget class="QComboBox" name="varnameCombo">
           <property name="minimumSize">
            <size>
-            <width>75</width>
+            <width>90</width>
             <height>0</height>
            </size>
           </property>
@@ -294,6 +294,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="varCombo1">
+          <property name="minimumSize">
+           <size>
+            <width>90</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>75</width>
@@ -333,6 +339,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="varCombo2">
+          <property name="minimumSize">
+           <size>
+            <width>90</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>75</width>
@@ -372,6 +384,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="varCombo3">
+          <property name="minimumSize">
+           <size>
+            <width>90</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>75</width>
@@ -451,6 +469,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="distvarCombo1">
+          <property name="minimumSize">
+           <size>
+            <width>90</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>75</width>
@@ -490,6 +514,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="distvarCombo2">
+          <property name="minimumSize">
+           <size>
+            <width>90</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>75</width>
@@ -529,6 +559,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="distvarCombo3">
+          <property name="minimumSize">
+           <size>
+            <width>90</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>75</width>
@@ -613,7 +649,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>75</width>
+            <width>90</width>
             <height>0</height>
            </size>
           </property>
@@ -804,7 +840,7 @@
              <widget class="QComboBox" name="lodCombo">
               <property name="minimumSize">
                <size>
-                <width>100</width>
+                <width>90</width>
                 <height>0</height>
                </size>
               </property>
@@ -890,7 +926,7 @@
              <widget class="QComboBox" name="refinementCombo">
               <property name="minimumSize">
                <size>
-                <width>100</width>
+                <width>90</width>
                 <height>0</height>
                </size>
               </property>

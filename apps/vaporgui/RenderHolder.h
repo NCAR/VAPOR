@@ -80,9 +80,9 @@ private:
 private slots:
     void newRenderer();
     void deleteRenderer();
-    void changeChecked(int i, int j);
+    // void changeChecked(int i, int j);
     void itemTextChange(QTableWidgetItem *);
-    void itemChangeHack(QTableWidgetItem *);
+    // void itemChangeHack(QTableWidgetItem*);
     void selectInstance();
     void copyInstanceTo(int);
     void checkboxChanged(int);
@@ -95,6 +95,8 @@ private:
     VAPoR::ControlExec *_controlExec;
 
     void getRow(int row, string &renderInst, string &renderClass, string &dataSetName, bool &enabled) const;
+
+    void getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const;
 
     void getRow(string &renderInst, string &renderClass, string &dataSetName, bool &enabled) const;
 
