@@ -220,6 +220,7 @@ private:
 	//Data menu
 	QAction* _dataImportWRF_Action;
 	QAction* _dataImportCF_Action;
+	QAction* _dataImportMPAS_Action;
 	QAction* _dataLoad_MetafileAction;
 	QAction* _dataClose_MetafileAction;
 	QAction* _fileNew_SessionAction;
@@ -277,6 +278,7 @@ private slots:
 	void closeData(string fileName="");
 	void importWRFData();
 	void importCFData();
+	void importMPASData();
 	void sessionNew();
 	void startAnimCapture();
 	void endAnimCapture();

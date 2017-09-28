@@ -53,6 +53,11 @@ RegularGrid::RegularGrid(
 	_SetExtents(minu, maxu);
 }
 
+size_t RegularGrid::GetNumCoordinates() const {
+	return(_minu.size());
+}
+
+
 
 float RegularGrid::GetValueNearestNeighbor(
 	const std::vector <double> &coords

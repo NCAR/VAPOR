@@ -1453,7 +1453,8 @@ void Statistics::getMultiPointTSMean(double &tsMean, int &missing,
 	cout << mv << endl;
 
 	VAPoR::Grid::Iterator itr;
-	for (itr=rGrid->begin(_uCoordMin, _uCoordMax); itr!=rGrid->end(); ++itr) 
+	VAPoR::Grid::Iterator enditr = rGrid->end();
+	for (itr=rGrid->begin(_uCoordMin, _uCoordMax); itr!=enditr; ++itr) 
 	{
 		count++;
 		val = *itr;
@@ -1505,8 +1506,6 @@ bool Statistics::calcMean(string varname) {
 
 		mv = rGrid->GetMissingValue();
 		
-		RegularGrid::Iterator itr;
-
 		vector<size_t> dims;
 		dims = rGrid->GetDimensions();//dims);
 
@@ -1568,7 +1567,6 @@ bool Statistics::calcMean(string varname) {
 
 		mv = _rGrid->GetMissingValue();
 
-		Grid::Iterator itr;
 		double c = 0.0;
 
 		vector <size_t> dims = _rGrid->GetDimensions();
@@ -1627,7 +1625,9 @@ bool Statistics::calcMean(string varname) {
 					_stats[varname].max = range[1];
 			}
 
-			for (itr=_rGrid->begin(); itr!=_rGrid->end(); ++itr) 
+			Grid::Iterator itr;
+			Grid::Iterator enditr = _rGrid->end();
+			for (itr=_rGrid->begin(); itr!=enditr; ++itr) 
 			{
 				count++;
 				val = *itr;
@@ -1729,10 +1729,11 @@ bool Statistics::calcStdDev(string varname) {
 
 		else {
 			Grid::Iterator itr;
+			Grid::Iterator enditr = rGrid->end();
 			double c = 0.0;
 			vector<size_t> dims;
 			dims = rGrid->GetDimensions();
-			for (itr=rGrid->begin(); itr!=rGrid->end(); ++itr) {
+			for (itr=rGrid->begin(); itr!=enditr; ++itr) {
 				val = *itr;
 	
 				if (val != mv) { //sum += val;
@@ -1817,9 +1818,10 @@ bool Statistics::calcStdDev(string varname) {
 
 		else {
 			Grid::ConstIterator itr;
+			Grid::ConstIterator enditr;
 			double c = 0.0;
 			vector <size_t> dims = _rGrid->GetDimensions();
-			for (itr=_rGrid->cbegin(); itr!=_rGrid->cend(); ++itr) {
+			for (itr=_rGrid->cbegin(); itr!=enditr; ++itr) {
 				val = *itr;
 	
 				if (val != mv) { //sum += val;
@@ -1893,7 +1895,6 @@ bool Statistics::calcMedian(string varname) {
 
 		float val;
 		mv = _rGrid->GetMissingValue();
-		Grid::ConstIterator itr;
 		// If _regionSelection==2, we are querying a single point.
 		// So here we just call GetValue at that point.
 		//
@@ -1904,7 +1905,9 @@ bool Statistics::calcMedian(string varname) {
 			}
 		}
 		else {
-			for (itr=_rGrid->cbegin(); itr!=_rGrid->cend(); ++itr) 
+			Grid::ConstIterator itr;
+			Grid::ConstIterator enditr = _rGrid->cend();
+			for (itr=_rGrid->cbegin(); itr!=enditr; ++itr) 
 			{
 				val = *itr;
 	
