@@ -16,7 +16,6 @@
 //	Description:	
 //
 #include <cstdlib>
-#include <Python.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/MyPython.h>
 
@@ -52,10 +51,10 @@ void MyPython::Initialize() {
 		// on Linux and Mac
 		//
 #ifdef _WINDOWS
-		pths.push_back("python2.7");
-		m_pyHome = GetAppPath("VAPOR","lib", pths, true);
-#else
+		pths.push_back("python27");
 		m_pyHome = GetAppPath("VAPOR","", pths, true);
+#else
+		m_pyHome = GetAppPath("VAPOR","home", pths, true);
 #endif
 	}
 

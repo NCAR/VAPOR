@@ -211,7 +211,7 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	bool is3D = cParams->VariablesAre3D();
 	string hgtVar = cParams->GetHeightVariableName();
 
-	varGrid = dataMgr->GetVariable(ts, var, level, lod);
+	varGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod);
 	varGrid->SetInterpolationOrder(1);
 
 	vector<double> boxMin, boxMax;

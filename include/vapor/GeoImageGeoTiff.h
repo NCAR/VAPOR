@@ -2,8 +2,13 @@
 #ifndef _GeoImageGeoTiff_h_
 #define _GeoImageGeoTiff_h_
 
+#ifdef WIN32
+#include <geotiff/xtiffio.h>
+#include <geotiff/geotiff.h>
+#else
 #include <xtiffio.h>
 #include <geotiff.h>
+#endif
 #include <vapor/MyBase.h>
 #include <vapor/UDUnitsClass.h>
 #include "GeoImage.h"

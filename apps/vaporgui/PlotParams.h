@@ -24,7 +24,7 @@
 
 namespace VAPoR{
 
-class PARAMS_API PlotParams : public ParamsBase {
+class PlotParams : public ParamsBase {
  public:
   PlotParams(ParamsBase::StateSave *ssave);
   PlotParams(ParamsBase::StateSave *ssave, XmlNode *node);
