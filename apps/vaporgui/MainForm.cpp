@@ -432,6 +432,9 @@ void MainForm::hookupSignals() {
         _dataImportCF_Action, SIGNAL(triggered()),
         this, SLOT(importCFData()));
     connect(
+        _dataImportMPAS_Action, SIGNAL(triggered()),
+        this, SLOT(importMPASData()));
+    connect(
         _captureMenu, SIGNAL(aboutToShow()),
         this, SLOT(initCaptureMenu()));
     connect(
@@ -546,6 +549,7 @@ void MainForm::createMenus() {
     _File->addAction(_dataClose_MetafileAction);
     _File->addAction(_dataImportWRF_Action);
     _File->addAction(_dataImportCF_Action);
+    _File->addAction(_dataImportMPAS_Action);
     _File->addAction(_fileNew_SessionAction);
     _File->addAction(_fileOpenAction);
     _File->addAction(_fileSaveAction);
@@ -616,6 +620,7 @@ void MainForm::createActions() {
     _dataClose_MetafileAction = new QAction(this);
     _dataImportWRF_Action = new QAction(this);
     _dataImportCF_Action = new QAction(this);
+    _dataImportMPAS_Action = new QAction(this);
     _fileNew_SessionAction = new QAction(this);
 
     _captureSingleJpegCaptureAction = new QAction(this);
@@ -728,6 +733,8 @@ void MainForm::languageChange() {
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
     _dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
     _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention output files to import into the current session");
+    _dataImportMPAS_Action->setText(tr("Import MPAS files in current session"));
+    _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the current session");
     _plotAction->setText("Plot Utility");
     _statsAction->setText("Data Statistics");
     _seedMeAction->setText("SeedMe Video Encoder");
@@ -1048,6 +1055,13 @@ void MainForm::importCFData() {
     vector<string> files;
     loadDataHelper(
         files, "NetCDF CF files", "", "cf", true);
+}
+
+void MainForm::importMPASData() {
+
+    vector<string> files;
+    loadDataHelper(
+        files, "MPAS files", "", "mpas", true);
 }
 
 vector<string> MainForm::myGetOpenFileNames(

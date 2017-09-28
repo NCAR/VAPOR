@@ -8,6 +8,7 @@
 #include <vapor/RegularGrid.h>
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
+#include <vapor/UnstructuredGrid2D.h>
 #include <vapor/KDTreeRG.h>
 
 #ifndef DataMgvV3_0_h
@@ -769,7 +770,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
         std::vector<size_t> bmin;
         std::vector<size_t> bmax;
         int lock_counter;
-        float *blks;
+        void *blks;
     } region_t;
 
     // a list of all allocated regions
@@ -813,6 +814,30 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const std::vector<size_t> &bmin,
         const std::vector<size_t> &bmax);
 
+    void _ugrid_setup(
+        const DC::DataVar &var,
+        std::vector<size_t> &vertexDims,
+        std::vector<size_t> &faceDims,
+        std::vector<size_t> &edgeDims,
+        UnstructuredGrid::Location &location, // node,face, edge
+        size_t &maxVertexPerFace,
+        size_t &maxFacePerVertex) const;
+
+    UnstructuredGrid2D *_make_grid_unstructured2d(
+        int level,
+        int lod,
+        const DC::DataVar &dvarinfo,
+        const vector<DC::CoordVar> &cvarsinfo,
+        const vector<size_t> &dims,
+        const vector<float *> &blkvec,
+        const vector<size_t> &bs,
+        const vector<size_t> &bmin,
+        const vector<size_t> &bmax,
+        const vector<int *> &conn_blkvec,
+        const vector<size_t> &conn_bs,
+        const vector<size_t> &conn_bmin,
+        const vector<size_t> &conn_bmax);
+
     VAPoR::Grid *_make_grid(
         int level,
         int lod,
@@ -822,7 +847,23 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const std::vector<float *> &blkvec,
         const std::vector<std::vector<size_t>> &bsvec,
         const std::vector<std::vector<size_t>> &bminvec,
-        const std::vector<std::vector<size_t>> &bmaxvec);
+        const std::vector<std::vector<size_t>> &bmaxvec,
+        const vector<int *> &conn_blkvec,
+        const vector<vector<size_t>> &conn_bsvec,
+        const vector<vector<size_t>> &conn_bminvec,
+        const vector<vector<size_t>> &conn_bmaxvec);
+
+    enum GridType {
+        UNDEFINED = 0,
+        REGULAR,
+        LAYERED,
+        CURVILINEAR,
+        UNSTRUC_2D,
+        UNSTRUC_LAYERED
+    };
+    GridType _get_grid_type(
+        const DC::DataVar &var,
+        const vector<DC::CoordVar> &cvarsinfo) const;
 
     int _find_bounding_grid(
         size_t ts, string varname, int level, int lod,
@@ -838,7 +879,20 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const vector<size_t> &max,
         vector<string> &varnames,
         vector<size_t> &roi_dims,
-        vector<vector<size_t>> &dimsvec,
+        vector<vector<size_t>> &dims_at_levelvec,
+        vector<vector<size_t>> &bsvec,
+        vector<vector<size_t>> &bs_at_levelvec,
+        vector<vector<size_t>> &bminvec,
+        vector<vector<size_t>> &bmaxvec) const;
+
+    int _setupConnVecs(
+        size_t ts,
+        string varname,
+        int level,
+        int lod,
+        const vector<size_t> &min,
+        const vector<size_t> &max,
+        vector<string> &varnames,
         vector<vector<size_t>> &dims_at_levelvec,
         vector<vector<size_t>> &bsvec,
         vector<vector<size_t>> &bs_at_levelvec,
@@ -863,7 +917,8 @@ class VDF_API DataMgr : public Wasp::MyBase {
         bool lock,
         bool dataless);
 
-    float *_get_region_from_cache(
+    template <typename T>
+    T *_get_region_from_cache(
         size_t ts,
         string varname,
         int level,
@@ -872,12 +927,14 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const std::vector<size_t> &bmax,
         bool lock);
 
-    float *_get_region_from_fs(
+    template <typename T>
+    T *_get_region_from_fs(
         size_t ts, string varname, int level, int lod,
         const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
         const std::vector<size_t> &bmax, bool lock);
 
-    float *_get_region(
+    template <typename T>
+    T *_get_region(
         size_t ts,
         string varname,
         int level,
@@ -888,6 +945,8 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const std::vector<size_t> &bmin,
         const std::vector<size_t> &bmax,
         bool lock);
+
+    template <typename T>
     int _get_regions(
         size_t ts,
         const std::vector<string> &varnames,
@@ -896,14 +955,14 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const std::vector<std::vector<size_t>> &bsvec,
         const std::vector<std::vector<size_t>> &bminvec,
         const std::vector<std::vector<size_t>> &bmaxvec,
-        std::vector<float *> &blkvec);
+        std::vector<T *> &blkvec);
 
-    void _unlock_blocks(const float *blks);
+    void _unlock_blocks(const void *blks);
 
     std::vector<string> _get_native_variables() const;
     std::vector<string> _get_derived_variables() const;
 
-    float *_alloc_region(
+    void *_alloc_region(
         size_t ts,
         string varname,
         int level,
@@ -932,11 +991,9 @@ class VDF_API DataMgr : public Wasp::MyBase {
     const KDTreeRG *_getKDTree2D(
         int level,
         int lod,
-        const vector<size_t> &bmin,
-        const vector<size_t> &bmax,
         const vector<DC::CoordVar> &cvarsinfo,
-        const RegularGrid &xrg,
-        const RegularGrid &yrg);
+        const Grid &xg,
+        const Grid &yg);
 };
 
 }; // namespace VAPoR
