@@ -117,6 +117,8 @@ TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string d
     _currentVarname.clear();
     _currentBoxMinExts.clear();
     _currentBoxMaxExts.clear();
+    _currentRefLevelTex = -1;
+    _currentLodTex = -1;
     _currentTimestepTex = 0;
     _currentHgtVar.clear();
     _currentBoxMinExtsTex.clear();
@@ -391,12 +393,15 @@ bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
+    int            refLevel = rParams->GetRefinementLevel();
+    int            lod = rParams->GetCompressionLevel();
     int            ts = rParams->GetCurrentTimestep();
     vector<double> boxMinExts, boxMaxExts;
     rParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
     string varname = rParams->GetVariableName();
 
-    return (_currentTimestepTex != ts || _currentBoxMinExtsTex != boxMinExts || _currentBoxMaxExtsTex != boxMaxExts || _currentVarname != varname);
+    return (_currentRefLevelTex != refLevel || _currentLodTex != lod || _currentTimestepTex != ts || _currentBoxMinExtsTex != boxMinExts || _currentBoxMaxExtsTex != boxMaxExts
+            || _currentVarname != varname);
 }
 
 void TwoDDataRenderer::_texStateSet(DataMgr *dataMgr)
@@ -404,6 +409,8 @@ void TwoDDataRenderer::_texStateSet(DataMgr *dataMgr)
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
     string          varname = rParams->GetVariableName();
 
+    _currentRefLevelTex = rParams->GetRefinementLevel();
+    _currentLodTex = rParams->GetCompressionLevel();
     _currentTimestepTex = rParams->GetCurrentTimestep();
     rParams->GetBox()->GetExtents(_currentBoxMinExtsTex, _currentBoxMaxExtsTex);
     _currentVarname = varname;
@@ -411,6 +418,8 @@ void TwoDDataRenderer::_texStateSet(DataMgr *dataMgr)
 
 void TwoDDataRenderer::_texStateClear()
 {
+    _currentRefLevelTex = 0;
+    _currentLodTex = 0;
     _currentTimestepTex = -1;
     _currentBoxMinExtsTex.clear();
     _currentBoxMaxExtsTex.clear();
@@ -480,7 +489,8 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
     //
     _nindices = 0;
     StructuredGrid::ConstCellIterator citr;
-    for (citr = g->ConstCellBegin(); citr != g->ConstCellEnd(); ++citr) {
+    StructuredGrid::ConstCellIterator endcitr = g->ConstCellEnd();
+    for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
         std::vector<std::vector<size_t>> nodes;
         g->GetCellNodes(*citr, nodes);
 
@@ -547,8 +557,9 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     // Visit each node in the grid, build a list of vertices
     //
     Grid::ConstNodeIterator nitr;
+    Grid::ConstNodeIterator endnitr = g->ConstNodeEnd();
     size_t                  voffset = 0;
-    for (nitr = g->ConstNodeBegin(); nitr != g->ConstNodeEnd(); ++nitr) {
+    for (nitr = g->ConstNodeBegin(); nitr != endnitr; ++nitr) {
         vector<double> coords;
 
         g->GetUserCoordinates(*nitr, coords);
@@ -579,9 +590,10 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     // array for the triangle list
     //
     StructuredGrid::ConstCellIterator citr;
+    StructuredGrid::ConstCellIterator endcitr = g->ConstCellEnd();
     size_t                            index = 0;
     size_t                            offset = g->GetNodeOffset();
-    for (citr = g->ConstCellBegin(); citr != g->ConstCellEnd(); ++citr) {
+    for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
         std::vector<std::vector<size_t>> nodes;
         g->GetCellNodes(*citr, nodes);
 
@@ -776,7 +788,9 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     GLfloat *texptr = texture;
 
     Grid::Iterator itr;
-    for (itr = g->begin(minBoxReq, maxBoxReq); itr != g->end(); ++itr) {
+    Grid::Iterator enditr = g->end();
+    //	for (itr = g->begin(minBoxReq, maxBoxReq); itr != enditr; ++itr) {
+    for (itr = g->begin(); itr != enditr; ++itr) {
         float v = *itr;
 
         if (v == g->GetMissingValue()) {

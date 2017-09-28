@@ -1405,7 +1405,7 @@ int NetCDFCollection::Read(float *data, int fd)
     return (0);
 }
 
-int NetCDFCollection::Read(char *data, int fd)
+template<typename T> int NetCDFCollection::_read_template(T *data, int fd)
 {
     std::map<int, fileHandle>::iterator itr;
     if ((itr = _ovr_table.find(fd)) == _ovr_table.end()) {
@@ -1464,6 +1464,10 @@ int NetCDFCollection::Read(char *data, int fd)
 
     return (NetCDFCollection::ReadNative(start, count, data, fd));
 }
+
+int NetCDFCollection::Read(char *data, int fd) { return (_read_template(data, fd)); }
+
+int NetCDFCollection::Read(int *data, int fd) { return (_read_template(data, fd)); }
 
 int NetCDFCollection::Close(int fd)
 {

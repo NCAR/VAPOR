@@ -41,6 +41,8 @@ RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
     _SetExtents(minu, maxu);
 }
 
+size_t RegularGrid::GetNumCoordinates() const { return (_minu.size()); }
+
 float RegularGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
     int ndim = GetTopologyDim();

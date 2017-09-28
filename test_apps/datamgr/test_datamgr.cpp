@@ -42,7 +42,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"nts", 1, "10", "Number of timesteps t
                                           "0 => use number of cores"},
                                          {"varname", 1, "", "Name of variable"},
                                          {"savefilebase", 1, "", "Base path name to output file"},
-                                         {"ftype", 1, "vdc", "data set type (vdc|wrf)"},
+                                         {"ftype", 1, "vdc", "data set type (vdc|wrf|cf|mpas)"},
                                          {"extents", 1, "",
                                           "Colon delimited 6-element vector "
                                           "specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"},
@@ -217,17 +217,23 @@ int main(int argc, char **argv)
 
             if (fp) {
                 Grid::Iterator itr;
+                Grid::Iterator enditr = g->end();
                 float          v;
-                for (itr = g->begin(); itr != g->end(); ++itr) {
+                for (itr = g->begin(); itr != enditr; ++itr) {
                     v = *itr;
                     fwrite(&v, sizeof(v), 1, fp);
                 }
                 fclose(fp);
             }
 
-            float r[2];
-            g->GetRange(r);
-            cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
+            //			float r[2];
+            //			g->GetRange(r);
+
+            //			cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
+
+            vector<double> rvec;
+            datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
+            cout << "Data Range : [" << rvec[0] << ", " << rvec[1] << "]" << endl;
 
             vector<size_t> dims = g->GetDimensions();
             cout << "Grid dimensions: [ ";
@@ -248,9 +254,10 @@ int main(int argc, char **argv)
             if (g->HasMissingData()) {
                 cout << "Missing data value : " << g->GetMissingValue() << endl;
                 Grid::Iterator itr;
+                Grid::Iterator enditr = g->end();
                 float          mv = g->GetMissingValue();
                 int            count = 0;
-                for (itr = g->begin(); itr != g->end(); ++itr) {
+                for (itr = g->begin(); itr != enditr; ++itr) {
                     if (*itr == mv) count++;
                 }
                 cout << "Num missing values : " << count << endl;
