@@ -64,6 +64,11 @@ string get_path_from_bundle(const string &app) {
     if (s.find(BINDIR) != string::npos)
         return "";
 
+    // Spaces are returned as %20. Quick fix below
+    size_t start;
+    while ((start = s.find("%20")) != std::string::npos)
+        s.replace(start, 3, " ");
+
     path = s;
     return (path);
 }
@@ -112,6 +117,7 @@ std::string Wasp::GetAppPath(
             (resource.compare("bin") == 0) ||
             (resource.compare("share") == 0) ||
             (resource.compare("plugins") == 0) ||
+            (resource.compare("home") == 0) ||
             (resource.compare("") == 0))) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (unknown resources)");
         return (""); // empty path, invalid resource
@@ -144,12 +150,15 @@ std::string Wasp::GetAppPath(
         if (!path.empty()) {
             path.append("Contents/");
             if (
-                (resource.compare("lib") == 0) ||
                 (resource.compare("bin") == 0) ||
                 (resource.compare("") == 0)) {
                 path.append("MacOS");
             } else if (resource.compare("share") == 0) {
                 path.append("share");
+            } else if (resource.compare("lib") == 0) {
+                path.append("lib");
+            } else if (resource.compare("home") == 0) {
+                path.erase(path.size() - 1, 1);
             } else { // must be plugins
                 path.append("Plugins");
             }
