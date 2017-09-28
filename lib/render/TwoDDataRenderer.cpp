@@ -507,6 +507,7 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
 
     return (_getMeshUnStructuredHelper(dataMgr, g, defaultZ));
 #endif
+    return 0;
 }
 
 int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g, double defaultZ)

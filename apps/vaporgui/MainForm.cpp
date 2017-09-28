@@ -384,6 +384,7 @@ void MainForm::hookupSignals()
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
     connect(_seedMeAction, SIGNAL(triggered()), this, SLOT(launchSeedMe()));
+    connect(_installCLIToolsAction, SIGNAL(triggered()), this, SLOT(installCLITools()));
     connect(_captureSingleJpegCaptureAction, SIGNAL(triggered()), this, SLOT(captureSingleJpeg()));
     connect(_captureStartJpegCaptureAction, SIGNAL(triggered()), this, SLOT(startAnimCapture()));
     connect(_captureEndJpegCaptureAction, SIGNAL(triggered()), this, SLOT(endAnimCapture()));
@@ -468,6 +469,9 @@ void MainForm::createMenus()
     buildWebHelpMenus();
     _webTabHelpMenu = new QMenu("Web Help: About the current tab", this);
     _helpMenu->addMenu(_webTabHelpMenu);
+#ifdef Darwin
+    _helpMenu->addAction(_installCLIToolsAction);
+#endif
 }
 
 void MainForm::createActions()
@@ -512,6 +516,8 @@ void MainForm::createActions()
     _plotAction->setEnabled(false);
     _statsAction = new QAction(this);
     _statsAction->setEnabled(false);
+
+    _installCLIToolsAction = new QAction(this);
 
     // Then do the actions for the toolbars:
     // Create an exclusive action group for the mouse mode toolbar:
@@ -603,6 +609,9 @@ void MainForm::languageChange()
 
     _whatsThisAction->setText(tr("Explain This"));
     _whatsThisAction->setToolTip(tr("Click here, then click over an object for context-sensitive help. "));
+
+    _installCLIToolsAction->setText("Install CLI Tools");
+    _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities location to path. Needs to updated if app bundle moved");
 
     _dataLoad_MetafileAction->setText(tr("Open a VDC in Current Session"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
@@ -1651,6 +1660,35 @@ void MainForm::launchSeedMe()
 {
     if (_seedMe == NULL) _seedMe = new SeedMe;
     _seedMe->Initialize();
+}
+
+void MainForm::installCLITools()
+{
+    vector<string> pths;
+    string         home = GetAppPath("VAPOR", "home", pths, true);
+    string         path = home + "/utilities";
+
+    home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
+
+    QMessageBox box;
+    box.addButton(QMessageBox::Ok);
+
+    string profilePath = string(getenv("HOME")) + "/.profile";
+    FILE * prof = fopen(profilePath.c_str(), "a");
+    if (prof) {
+        fprintf(prof, "\n");
+        fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
+        fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
+        fclose(prof);
+
+        box.setText("Environmental variables set in ~/.profile");
+        box.setInformativeText("Please log out and log back in for changes to take effect.");
+        box.setIcon(QMessageBox::Information);
+    } else {
+        box.setText("Unable to set environmental variables");
+        box.setIcon(QMessageBox::Critical);
+    }
+    box.exec();
 }
 
 void MainForm::launchStats()

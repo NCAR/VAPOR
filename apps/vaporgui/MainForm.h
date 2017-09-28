@@ -204,6 +204,7 @@ private:
     QAction *_helpIndexAction;
     QAction *_helpAboutAction;
     QAction *_whatsThisAction;
+    QAction *_installCLIToolsAction;
 
     // Data menu
     QAction *_dataImportWRF_Action;
@@ -272,6 +273,7 @@ private slots:
     void endAnimCapture();
     void captureSingleJpeg();
     void launchSeedMe();
+    void installCLITools();
     void launchStats();
     void launchPlotUtility();
     void batchSetup();
