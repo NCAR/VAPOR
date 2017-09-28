@@ -66,9 +66,10 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce)
     connect(
         dupCombo, SIGNAL(activated(int)),
         this, SLOT(copyInstanceTo(int)));
-    connect(
-        tableWidget, SIGNAL(cellChanged(int, int)), this,
-        SLOT(changeChecked(int, int)));
+    //	connect(
+    //		tableWidget,SIGNAL(cellChanged(int,int)), this,
+    //		SLOT(changeChecked(int,int))
+    //	);
     connect(
         tableWidget, SIGNAL(itemSelectionChanged()),
         this, SLOT(selectInstance()));
@@ -76,9 +77,10 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce)
         tableWidget, SIGNAL(itemChanged(QTableWidgetItem *)),
         this, SLOT(itemTextChange(QTableWidgetItem *)));
 
-    connect(
-        tableWidget, SIGNAL(itemClicked(QTableWidgetItem *)),
-        this, SLOT(itemChangeHack(QTableWidgetItem *)));
+    //	connect(
+    //		tableWidget, SIGNAL(itemClicked(QTableWidgetItem*)),
+    //		this, SLOT(itemChangeHack(QTableWidgetItem*))
+    //	);
 
     //Remove any existing widgets:
     for (int i = stackedWidget->count() - 1; i >= 0; i--) {
@@ -209,57 +211,63 @@ void RenderHolder::deleteRenderer() {
 }
 
 void RenderHolder::checkboxChanged(int state) {
-    //cout << sender()->isWidgetType() << " ...."  << endl;
-
-    //QTableWidgetItem* widget = (QTableWidgetItem*)(sender()->parentWidget());
     QWidget *widget = (QWidget *)sender();
 
-    cout << widget->parentWidget() << " ...." << endl;
+    //	cout << widget->property("row").toString().toStdString() << " 1" << endl;
+    //	cout << widget->parentWidget()->property("row").toString().toStdString() << " 2" << endl;
 
-    cout << widget->metaObject()->className() << "!!!" << endl;
-    cout << widget->parentWidget()->metaObject()->className() << "!!!" << endl;
-    cout << widget->parentWidget()->parentWidget()->metaObject()->className() << "!!!" << endl;
-    //	cout << (QTableWidgetItem*)widget->parentWidget()->parentWidget()->row() << "!!!" << endl;
-    //	cout << widget->parentWidget()->parentWidget()->parentWidget()->metaObject()->className() << "!!!" << endl;
-
-    QTableWidgetItem *twi = (QTableWidgetItem *)widget->parentWidget()->parentWidget();
-
-    itemChangeHack(twi);
-    int row = tableWidget->currentRow();
-    int col = 3;
-    changeChecked(row, col);
-}
-
-//Respond to check/uncheck enabled checkbox
-//
-void RenderHolder::changeChecked(int row, int col) {
-    CBWidget *foo = (CBWidget *)tableWidget->item(row, col);
-    cout << "property " << foo->property("row").toString().toStdString() << endl;
+    int row = widget->parentWidget()->property("row").toInt();
+    tableWidget->setCurrentCell(row, 3);
 
     GUIStateParams *p = getStateParams();
     string activeViz = p->GetActiveVizName();
 
-    if (col != 3)
-        return;
-
-    // Get the currently selected renderer.
-    //
     string renderInst, renderClass, dataSetName;
-    bool enabled;
-    //	getRow(renderInst, renderClass, dataSetName, enabled);
-    getRow(row, renderInst, renderClass, dataSetName, enabled);
+    getRow(row, renderInst, renderClass, dataSetName);
 
     // Save current instance to state
     //
     p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
     int rc = _controlExec->ActivateRender(
-        activeViz, dataSetName, renderClass, renderInst, enabled);
+        activeViz, dataSetName, renderClass, renderInst, state);
     if (rc < 0) {
         MSG_ERR("Can't create renderer");
         return;
     }
 }
+
+//Respond to check/uncheck enabled checkbox
+//
+/*void RenderHolder::changeChecked(int row, int col) {
+//	CBWidget* foo = (CBWidget*)tableWidget->item(row,col);
+	QWidget* foo = (CBWidget*)tableWidget->item(row,col);
+	cout << "property " << foo->property("row").toString().toStdString() << endl;
+
+	GUIStateParams *p = getStateParams();
+	string activeViz = p->GetActiveVizName();
+
+	if ( col != 3) return;
+
+	// Get the currently selected renderer.
+	//
+	string renderInst, renderClass, dataSetName;
+	bool enabled;
+//	getRow(renderInst, renderClass, dataSetName, enabled);
+	getRow(row, renderInst, renderClass, dataSetName, enabled);
+
+	// Save current instance to state
+	//
+	p->SetActiveRenderer(activeViz, renderClass, renderInst);
+
+	int rc = _controlExec->ActivateRender(
+		activeViz, dataSetName, renderClass, renderInst, enabled
+	);
+	if (rc<0) {
+		MSG_ERR("Can't create renderer");
+		return;
+	}
+}*/
 
 void RenderHolder::selectInstance() {
 
@@ -272,6 +280,8 @@ void RenderHolder::selectInstance() {
     bool enabled;
     getRow(renderInst, renderClass, dataSetName, enabled);
 
+    //	cout << "selectInstance " << activeViz << " " << renderClass << " " << renderInst << endl;
+
     p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
     emit activeChanged(activeViz, renderClass, renderInst);
@@ -281,38 +291,37 @@ void RenderHolder::selectInstance() {
 // selected row/column in the table widget. This is probably a bug
 // in Qt. This slot works around the problem by forcing the two to agree
 //
-void RenderHolder::itemChangeHack(QTableWidgetItem *item) {
-    int itemRow = item->row();
-    int tableRow = tableWidget->currentRow();
+/*void RenderHolder::itemChangeHack(QTableWidgetItem* item) {
+	int itemRow = item->row();
+	int tableRow = tableWidget->currentRow();
 
-    if (itemRow != tableRow) {
-        tableWidget->setCurrentItem(item);
-    }
-}
+	if (itemRow != tableRow) {
+		tableWidget->setCurrentItem(item);
+	}
+}*/
 
 void RenderHolder::itemTextChange(QTableWidgetItem *item) {
-
 #ifdef DEAD
     int row = item->row();
     int col = item->column();
     if (col != 0)
         return;
     int viznum = _controlExec->GetActiveVizIndex();
+
     //avoid responding to item creation:
     if (InstanceParams::GetNumInstances(viznum) <= row)
         return;
 
-    QString newtext = item->text();
-    string stdtext = newtext.toStdString();
+    string text = item->text().toStdString();
     RenderParams *rP = InstanceParams::GetRenderParamsInstance(viznum, row);
     if (stdtext == rP->GetRendererName())
         return;
-    string stdtext1 = uniqueName(stdtext);
+    string uniqueText = uniqueName(text);
 
-    if (stdtext1 != stdtext)
-        item->setText(QString(stdtext1.c_str()));
+    if (uniqueText != text)
+        item->setText(QString(uniqueText.c_str()));
 
-    rP->SetRendererName(stdtext1);
+    rP->SetRendererName(uniqueText);
 #endif
 }
 
@@ -552,6 +561,32 @@ void RenderHolder::Update() {
 
 void RenderHolder::getRow(
     int row, string &renderInst, string &renderClass,
+    string &dataSetName) const {
+    renderInst.clear();
+    renderClass.clear();
+
+    if (tableWidget->rowCount() == 0) {
+        renderInst = "";
+        renderClass = "";
+        dataSetName = "";
+        return;
+    }
+
+    if (row == -1)
+        row = tableWidget->rowCount() - 1;
+
+    QTableWidgetItem *item = tableWidget->item(row, 0);
+    renderInst = item->text().toStdString();
+
+    item = tableWidget->item(row, 1);
+    renderClass = item->text().toStdString();
+
+    item = tableWidget->item(row, 2);
+    dataSetName = item->text().toStdString();
+}
+
+void RenderHolder::getRow(
+    int row, string &renderInst, string &renderClass,
     string &dataSetName, bool &enabled) const {
     renderInst.clear();
     renderClass.clear();
@@ -577,14 +612,16 @@ void RenderHolder::getRow(
     item = tableWidget->item(row, 2);
     dataSetName = item->text().toStdString();
 
+    //	item = tableWidget->item(row,3);
+    //	enabled = item->checkState() == Qt::Checked;
+    enabled = 0;
+
     //	QWidget *cbItem = tableWidget->cellWidget(row,3);
     //	QCheckBox *checkBox = qobject_cast <QCheckBox*>
     //		(cbItem->layout()->itemAt(0)->widget());
     //	enabled = checkBox->checkState() == Qt::Checked;
 
     //	QCheckBox* cb = tableWidget->item(row,3);
-    item = tableWidget->item(row, 3);
-    enabled = item->checkState() == Qt::Checked;
 
     //	QWidget* widget = tableWidget->cellWidget(row,3);
     //	QCheckBox* checkbox = (QCheckBox*)widget->findChild<QCheckBox*>();;//tableWidget->cellWidget(row,3);
@@ -608,54 +645,57 @@ void RenderHolder::getRow(
 void RenderHolder::setRow(
     int row, const string &renderInst, const string &renderClass,
     const string &dataSetName, bool enabled) {
-
     int rowCount = tableWidget->rowCount();
     if (row >= rowCount) {
         tableWidget->setRowCount(rowCount + 1);
     }
 
     QTableWidgetItem *item = new QTableWidgetItem(renderInst.c_str());
+    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
     item->setTextAlignment(Qt::AlignCenter);
     tableWidget->setItem(row, 0, item);
 
+    //QBrush brush(QColor(145,145,145));
+
     item = new QTableWidgetItem(renderClass.c_str());
+    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+    //item->setForeground(brush);
     item->setTextAlignment(Qt::AlignCenter);
     tableWidget->setItem(row, 1, item);
 
     item = new QTableWidgetItem(dataSetName.c_str());
+    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+    //item->setForeground(brush);
     item->setTextAlignment(Qt::AlignCenter);
     tableWidget->setItem(row, 2, item);
 
-    //QWidget *cbWidget = new QWidget();
-    //	CBWidget *cbWidget = new CBWidget();
-    //QTableWidgetItem *cbWidget = new QTableWidgetItem();
-    //	QCheckBox *checkBox = new QCheckBox();
-    //	QHBoxLayout *cbLayout = new QHBoxLayout(cbWidget);
-    //	cbLayout->addWidget(checkBox);
-    //	cbLayout->setAlignment(Qt::AlignCenter);
-    //	cbLayout->setContentsMargins(0,0,0,0);
-    //pWidget->setLayout(pLayout);
-    //	tableWidget->setCellWidget(row,3,cbWidget);
+    QWidget *cbWidget = new QWidget();
+    QCheckBox *checkBox = new QCheckBox();
+    QHBoxLayout *cbLayout = new QHBoxLayout(cbWidget);
 
-    //item = new QTableWidgetItem(" ");
-    CBWidget *cbItem = new CBWidget(0, " ");
-    tableWidget->setItem(row, 3, cbItem);
-    cbItem->setStyleSheet("margin-left:50%; margin-right:50%;");
-    cbItem->setTextAlignment(Qt::AlignCenter);
+    cbLayout->addWidget(checkBox);
+    cbLayout->setAlignment(Qt::AlignCenter);
+    cbLayout->setContentsMargins(0, 0, 0, 0);
 
-    //	QCheckBox* cbItem = new QCheckBox();
-    //	cbItem->setStyleSheet("margin-left:50%; margin-right:50%;");
-    //	tableWidget->setCellWidget(row, 3, cbItem);
+    cbWidget->setProperty("row", row);
+    cbWidget->setLayout(cbLayout);
+
+    tableWidget->setCellWidget(row, 3, cbWidget);
+
+    /*CBWidget* cbItem = new CBWidget(0, " ");
+	tableWidget->setItem(row, 3, cbItem);
+	cbItem->setStyleSheet("margin-left:50%; margin-right:50%;");
+	cbItem->setTextAlignment(Qt::AlignCenter);*/
 
     if (enabled) {
-        //checkBox->setCheckState(Qt::Checked);
-        cbItem->setCheckState(Qt::Checked);
+        checkBox->setCheckState(Qt::Checked);
+        //		cbItem->setCheckState(Qt::Checked);
     } else {
-        //checkBox->setCheckState(Qt::Unchecked);
-        cbItem->setCheckState(Qt::Unchecked);
+        checkBox->setCheckState(Qt::Unchecked);
+        //		cbItem->setCheckState(Qt::Unchecked);
     }
 
-    cbItem->setProperty("row", row);
+    //	cbItem->setProperty("row", row);
 
     //	connect(
     //		cbWidget,SIGNAL(clicked()), this,
@@ -668,10 +708,9 @@ void RenderHolder::setRow(
     //		this, SLOT(itemChangeHack(QTableWidgetItem*))
     //	);
 
-    //	connect(
-    //		pCheckBox,SIGNAL(stateChanged(int)), this,
-    //		SLOT(checkboxChanged(int))
-    //	);
+    connect(
+        checkBox, SIGNAL(stateChanged(int)), this,
+        SLOT(checkboxChanged(int)));
 }
 
 void RenderHolder::setRow(
