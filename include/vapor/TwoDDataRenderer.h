@@ -90,6 +90,8 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     string _currentVarname;
     vector<double> _currentBoxMinExts;
     vector<double> _currentBoxMaxExts;
+    int _currentRefLevelTex;
+    int _currentLodTex;
     size_t _currentTimestepTex;
     string _currentHgtVar;
     vector<double> _currentBoxMinExtsTex;

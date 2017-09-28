@@ -1036,6 +1036,7 @@ class VDF_API VDC : public VAPoR::DC {
     //! \sa OpenVariableRead()
     //
     int virtual Read(float *data) = 0;
+    int virtual Read(int *data) = 0;
 
     //! Read a single slice of data from the currently opened variable
     //!
@@ -1105,6 +1106,8 @@ class VDF_API VDC : public VAPoR::DC {
     //!
     virtual int ReadRegionBlock(
         const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegionBlock(
+        const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
     //! Write an entire variable in one call
     //!

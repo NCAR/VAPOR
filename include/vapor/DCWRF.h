@@ -138,10 +138,9 @@ class VDF_API DCWRF : public VAPoR::DC {
 
     //! \copydoc DC::Read()
     //!
-    int virtual Read(float *data);
-    int virtual Read(int *data) {
-        SetErrMsg("Not implemented");
-        return (-1);
+    virtual int Read(float *data);
+    virtual int Read(int *data) {
+        return (_ncdfc->Read(data, _ovr_fd));
     }
 
     //! \copydoc DC::ReadSlice()
@@ -157,6 +156,10 @@ class VDF_API DCWRF : public VAPoR::DC {
     //!
     virtual int ReadRegionBlock(
         const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegionBlock(
+        const vector<size_t> &min, const vector<size_t> &max, int *region) {
+        return (DCWRF::Read(region));
+    }
 
     //! \copydoc DC::GetVar()
     //!
