@@ -96,15 +96,7 @@ class RenderHolder : public QWidget, public Ui_RenderSelector {
 
     void getRow(
         int row, string &renderInst, string &renderClass,
-        string &dataSetName, bool &enabled) const;
-
-    void getRow(
-        int row, string &renderInst, string &renderClass,
         string &dataSetName) const;
-
-    void getRow(
-        string &renderInst, string &renderClass,
-        string &dataSetName, bool &enabled) const;
 
     void setRow(
         int row, const string &renderInst,
