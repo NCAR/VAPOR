@@ -1003,27 +1003,39 @@ int DCMPAS::_InitMeshes(
 	NetCDFCollection *ncdfc
 ) {
 
+	// Max vertices or edges per cell
+	//
+	DC::Dimension dimension;
+	bool ok = GetDimension(maxEdgesDimName, dimension);
+	assert(ok);
+
 	//
 	// Dual meshes (triangle mesh)
+	// N.B. for the dual node the meanings of cellsOnVertexVarName,
+	// and verticesOnCellVarName are reversed.
 	//
 	// 2D, layered, and layered with staggered dimensions
 	//
 
 	vector <string> coordvars = {lonVertexVarName, latVertexVarName};
 	_meshMap[mesh2DTriName] = Mesh(
-		mesh2DTriName, 3, nCellsDimName, "", coordvars, verticesOnCellVarName
+		mesh2DTriName, 3, dimension.GetLength(), 
+		nCellsDimName, nVerticesDimName, coordvars, 
+		cellsOnVertexVarName, verticesOnCellVarName
 	);
 
 	coordvars = {lonVertexVarName, latVertexVarName, zGridM1VarName };
 	_meshMap[mesh3DTriName] = Mesh(
-		mesh3DTriName, 3, nCellsDimName, "", nVertLevelsDimName, coordvars, 
-		verticesOnCellVarName
+		mesh3DTriName, 3, dimension.GetLength(),
+		nCellsDimName, nVerticesDimName, nVertLevelsDimName, coordvars, 
+		cellsOnVertexVarName, verticesOnCellVarName
 	);
 
 	coordvars = {lonVertexVarName, latVertexVarName, zGridVarName };
 	_meshMap[mesh3DP1TriName] = Mesh(
-		mesh3DP1TriName, 3, nCellsDimName, "", nVertLevelsP1DimName, coordvars, 
-		verticesOnCellVarName
+		mesh3DP1TriName, 3, dimension.GetLength(),
+		nCellsDimName, nVerticesDimName, nVertLevelsP1DimName, coordvars, 
+		cellsOnVertexVarName, verticesOnCellVarName
 	);
 
 	//
@@ -1032,26 +1044,24 @@ int DCMPAS::_InitMeshes(
 	// 2D, layered, and layered with staggered dimensions
 	//
 
-	DC::Dimension dimension;
-	bool ok = GetDimension(maxEdgesDimName, dimension);
-	assert(ok);
-
 	coordvars = {lonCellVarName, latCellVarName};
 	_meshMap[mesh2DCellName] = Mesh(
-		mesh2DCellName, dimension.GetLength(), nVerticesDimName, 
-		"", coordvars, cellsOnVertexVarName
+		mesh2DCellName, dimension.GetLength(), 3, nVerticesDimName, 
+		nCellsDimName, coordvars, verticesOnCellVarName, cellsOnVertexVarName
 	);
 
 	coordvars = {lonCellVarName, latCellVarName, zGridM1VarName};
 	_meshMap[mesh3DCellName] = Mesh(
-		mesh3DCellName, dimension.GetLength(), nVerticesDimName, 
-		"", nVertLevelsDimName, coordvars, cellsOnVertexVarName
+		mesh3DCellName, dimension.GetLength(), 3, nVerticesDimName, 
+		nCellsDimName, nVertLevelsDimName, coordvars, verticesOnCellVarName,
+		cellsOnVertexVarName
 	);
 
 	coordvars = {lonCellVarName, latCellVarName, zGridVarName};
 	_meshMap[mesh3DP1CellName] = Mesh(
-		mesh3DP1CellName, dimension.GetLength(), nVerticesDimName, 
-		"", nVertLevelsP1DimName, coordvars, cellsOnVertexVarName
+		mesh3DP1CellName, dimension.GetLength(), 3, nVerticesDimName, 
+		nCellsDimName, nVertLevelsP1DimName, coordvars, verticesOnCellVarName,
+		cellsOnVertexVarName
 	);
 
 	return(0);

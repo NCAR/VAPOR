@@ -5,6 +5,8 @@ add_library (vdc SHARED
 	RegularGrid.cpp
 	LayeredGrid.cpp
 	CurvilinearGrid.cpp
+	UnstructuredGrid.cpp
+	UnstructuredGrid2D.cpp
 	NetCDFSimple.cpp
 	NetCDFCollection.cpp
 	NetCDFCFCollection.cpp
