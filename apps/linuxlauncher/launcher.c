@@ -34,6 +34,8 @@ int main(int argc, char **argv)
 
 	strcat(path, "/lib");
 	char *oldLibPath = getenv("LD_LIBRARY_PATH");
+	if (!oldLibPath)
+		oldLibPath = "";
 	char *newLibPath = malloc(strlen(oldLibPath) + strlen(path) + 2);
 	strcpy(newLibPath, path);
 	strcat(newLibPath, ":");
