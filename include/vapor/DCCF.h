@@ -77,6 +77,11 @@ public:
  //! \copydoc DC::GetDataVarInfo()
  //!
  virtual bool GetDataVarInfo( string varname, DC::DataVar &datavar) const;
+
+ virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+	return(false);
+ }
+
  
  //! \copydoc DC::GetBaseVarInfo()
  //

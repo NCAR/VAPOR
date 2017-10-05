@@ -12,3 +12,9 @@ VDC:
 
 CurvlinearGrid:
 	Broken with POP data in /glade/p/DASG/VAPOR/Data/POP/BryanASP/tenth_degree/daily
+
+DC:
+	periodicity should be a property of each coordinate variable, not 
+	a data variable property. I.e. each coordinate variable should have
+	a boolean flag indicating whether it is periodic or not. This would
+	make more sense for unstructured grids

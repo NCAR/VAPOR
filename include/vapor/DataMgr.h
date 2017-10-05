@@ -873,7 +873,9 @@ private:
 	std::vector <size_t> &edgeDims,
 	UnstructuredGrid::Location &location,  // node,face, edge
 	size_t &maxVertexPerFace,
-	size_t &maxFacePerVertex
+	size_t &maxFacePerVertex,
+	long &vertexOffset,
+	long &faceOffset
  ) const;
 
 UnstructuredGrid2D *_make_grid_unstructured2d(

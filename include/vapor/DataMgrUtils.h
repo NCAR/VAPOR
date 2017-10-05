@@ -174,6 +174,10 @@ namespace DataMgrUtils {
  //! of the variable. The GetAxes() method can be used to determine which
  //! coordinate axes the returned extents correspond to.
  //!
+ //! If \p varname is an empty string the function scans the list of 
+ //! available data variables looking for the highest dimension variable
+ //! available.
+ //!
  //! \param[in] timestep Time step of variable. Ignored for variables that
  //! are not time-varying.
  //! \param[in] Name of variable
