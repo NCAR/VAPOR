@@ -42,6 +42,7 @@ using namespace VAPoR;
 using namespace Wasp;
 
 const string ViewpointParams::_viewPointsTag = "Viewpoints";
+const string ViewpointParams::_transformsTag = "Transforms";
 const string ViewpointParams::_currentViewTag = "CurrentViewpoint";
 const string ViewpointParams::_homeViewTag = "HomeViewpoint";
 const string ViewpointParams::_lightDirectionsTag = "LightDirections";
@@ -70,6 +71,11 @@ ViewpointParams::ViewpointParams(
 
     Viewpoint homeVP(ssave);
     m_VPs->Insert(&homeVP, _homeViewTag);
+
+    _transforms = new ParamsContainer(ssave, _transformsTag);
+    _transforms->SetParent(this);
+
+    cout << "Constructor1 " << (_transforms == NULL) << " " << this << endl;
 }
 
 ViewpointParams::ViewpointParams(
@@ -91,11 +97,25 @@ ViewpointParams::ViewpointParams(
         m_VPs = new ParamsContainer(ssave, _viewPointsTag);
         m_VPs->SetParent(this);
     }
+
+    if (node->HasChild(_transformsTag)) {
+        // Node doesn't contain a transforms container
+        //
+        _transforms = new ParamsContainer(ssave, node->GetChild(_transformsTag));
+    } else {
+        _transforms = new ParamsContainer(ssave, _transformsTag);
+        _transforms->SetParent(this);
+    }
+
+    cout << "Constructor2 " << ((_transforms == NULL)) << endl;
 }
 
 ViewpointParams::ViewpointParams(const ViewpointParams &rhs) : ParamsBase(rhs) {
 
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
+    _transforms = new ParamsContainer(*(rhs._transforms));
+
+    cout << "Constructor3 " << (_transforms == NULL) << endl;
 }
 
 ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs) {
@@ -105,7 +125,9 @@ ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs) {
     ParamsBase::operator=(rhs);
 
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
+    _transforms = new ParamsContainer(*(rhs._transforms));
 
+    cout << "OpOverload " << (_transforms == NULL) << endl;
     return (*this);
 }
 
@@ -115,8 +137,14 @@ ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs) {
 ViewpointParams::~ViewpointParams() {
     MyBase::SetDiagMsg("ViewpointParams::~ViewpointParams() this=%p", this);
 
-    if (m_VPs)
+    if (m_VPs) {
         delete m_VPs;
+        m_VPs = NULL;
+    }
+    if (_transforms) {
+        delete _transforms;
+        _transforms = NULL;
+    }
 }
 
 //Reinitialize viewpoint settings, to center view on the center of full region.
@@ -141,13 +169,79 @@ void ViewpointParams::_init() {
         }
     }
 
-    SetStretchFactors(vector<double>(3, 1.0));
+    //SetStretchFactors(vector <double>(3,1.0));
 
     SetWindowSize(100, 100);
 
 #ifdef DEAD
     setupHomeView();
 #endif
+}
+
+void ViewpointParams::AddDatasetTransform(string datasetName) {
+    // If dataset is already loaded, do not add another
+    // transform for it
+    //
+    cout << "Adding dataset transform " << datasetName << endl;
+    if (std::find(_datasetNames.begin(),
+                  _datasetNames.end(), datasetName) != _datasetNames.end())
+        return;
+
+    // Add new dataset name to our reference list
+    //
+    _datasetNames.push_back(datasetName);
+
+    // Add new transform to our ParamsContainer, _transforms
+    //
+    Transform newTransform(_ssave);
+    _transforms->Insert(&newTransform, datasetName);
+    cout << "Added dataset transform" << endl;
+}
+
+vector<double> ViewpointParams::GetScales(string datasetName) {
+    Transform *t = (Transform *)_transforms->GetParams(datasetName);
+    assert(t != NULL);
+    return t->GetScales();
+}
+
+vector<double> ViewpointParams::GetRotations(string datasetName) {
+    Transform *t = (Transform *)_transforms->GetParams(datasetName);
+    assert(t != NULL);
+    return t->GetRotations();
+}
+
+vector<double> ViewpointParams::GetTranslations(string datasetName) {
+    Transform *t = (Transform *)_transforms->GetParams(datasetName);
+    assert(t != NULL);
+    return t->GetTranslations();
+}
+
+void ViewpointParams::SetScales(
+    string datasetName, vector<double> scale) {
+    Transform *t = (Transform *)_transforms->GetParams(datasetName);
+    assert(t != NULL);
+    t->SetScales(scale);
+}
+
+void ViewpointParams::SetRotations(
+    string datasetName, vector<double> rotation) {
+    Transform *t = (Transform *)_transforms->GetParams(datasetName);
+    assert(t != NULL);
+    t->SetRotations(rotation);
+}
+
+void ViewpointParams::SetTranslations(
+    string datasetName, vector<double> translation) {
+    Transform *t = (Transform *)_transforms->GetParams(datasetName);
+    assert(t != NULL);
+    t->SetTranslations(translation);
+
+    vector<double> foo;
+    foo = t->GetTranslations();
+    cout << endl;
+    cout << "ViewpointParams::SetTranslation " << translation[0] << " " << translation[1] << " " << translation[2] << endl;
+    cout << "ViewpointParams::GetTranslation " << foo[0] << " " << foo[1] << " " << foo[2] << endl
+         << endl;
 }
 
 double ViewpointParams::getLightDirection(int lightNum, int dir) const {
@@ -253,6 +347,7 @@ void ViewpointParams::setHomeViewpoint(Viewpoint *newVP) {
     m_VPs->Insert(newVP, _homeViewTag);
 }
 
+#ifdef DEAD
 vector<double> ViewpointParams::GetStretchFactors() const {
     vector<double> defaultvec(3, 1.);
     vector<double> val = GetValueDoubleVec(m_stretchFactorsTag, defaultvec);
@@ -277,6 +372,7 @@ void ViewpointParams::SetStretchFactors(vector<double> val) {
     }
     SetValueDoubleVec(m_stretchFactorsTag, "Scene scaling factors", val);
 }
+#endif
 
 #ifdef DEAD
 //Rescale viewing parameters when the scene is rescaled by factor
