@@ -20,6 +20,9 @@ using namespace std;
 
 namespace {
 
+// MPAS variable and dimension names are hard-wired in the NetCDF
+// file :-(
+
 // Dimension names
 //
 const string timeDimName = "Time";
@@ -74,19 +77,24 @@ const vector<string> requiredHorizCoordVarNames = {
 // Vertical coordinate variables
 //
 const string zGridVarName = "zgrid";
-const string zGridM1VarName = "zgridM1"; // derived variable
 
 // Time coordinate variables
 //
 const string xTimeVarName = "xtime";
 
-// Auxilliary variables
+// Auxilliary variables (connectivity variables and others)
 //
 const string cellsOnVertexVarName = "cellsOnVertex";
 const string verticesOnCellVarName = "verticesOnCell";
 const string verticesOnEdge = "verticesOnEdge";
 const string edgesOnCellVarName = "edgesOnCell";
 const string nEdgesOnCellVarName = "nEdgesOnCell";
+
+const vector<string> connectivityVarNames = {
+    cellsOnVertexVarName,
+    verticesOnCellVarName,
+    verticesOnEdge,
+    edgesOnCellVarName};
 
 const vector<string> requiredAuxVarNames = {
     cellsOnVertexVarName,
@@ -95,7 +103,7 @@ const vector<string> requiredAuxVarNames = {
     edgesOnCellVarName,
     nEdgesOnCellVarName};
 
-// Meshes
+// Meshes: dual mesh (triangle) and primal (hexagonal cell)
 //
 const string mesh2DTriName = "mesh2DTri";
 const string mesh3DTriName = "mesh3DTri";
@@ -108,6 +116,17 @@ const string mesh3DP1CellName = "mesh3DCell";
 //
 const string coreNameAttr = "core_name";
 const string onASphereAttr = "on_a_sphere";
+
+// Derived variable names. These don't appear in the MPAS output.
+// They are derived at run-time by the DCMPAS class
+//
+const string lonVertexVarNameDerived = lonVertexVarName + "X";
+const string latVertexVarNameDerived = latVertexVarName + "Y";
+const string lonCellVarNameDerived = lonCellVarName + "X";
+const string latCellVarNameDerived = latCellVarName + "Y";
+const string lonEdgeVarNameDerived = lonEdgeVarName + "X";
+const string latEdgeVarNameDerived = latEdgeVarName + "Y";
+const string zGridM1VarName = "zgridM1";
 
 const vector<string> requiredAttrNames = {
     coreNameAttr,
@@ -123,36 +142,63 @@ size_t vproduct(vector<size_t> a) {
     return (ntotal);
 }
 
+// Return the name of the mesh for a specific set of dimension names
+//
 string get_mesh_name(vector<string> dimnames) {
     assert(dimnames.size() == 1 || dimnames.size() == 2);
 
     if (dimnames[0] == nCellsDimName) {
         if ((dimnames.size() == 2) && (dimnames[1] == nVertLevelsDimName)) {
+
+            // 3D dual mesh, unstaggered
+            //
             return (mesh3DTriName);
         } else if ((dimnames.size() == 2) && (dimnames[1] == nVertLevelsP1DimName)) {
+            // 3D dual mesh, staggered
+            //
             return (mesh3DP1TriName);
         } else {
+            // 2D dual mesh
+            //
             return (mesh2DTriName);
         }
     }
 
     if (dimnames[0] == nVerticesDimName) {
         if ((dimnames.size() == 2) && (dimnames[1] == nVertLevelsDimName)) {
+
+            // 3D primal mesh, unstaggered
+            //
             return (mesh3DCellName);
         } else if ((dimnames.size() == 2) && (dimnames[1] == nVertLevelsP1DimName)) {
+            // 3D primal mesh, staggered
+            //
             return (mesh3DP1CellName);
         } else {
+
+            // 2D primal mesh
+            //
             return (mesh2DCellName);
         }
     }
     return ("");
 }
 
+// Is 'varname' a connectivity variable?
+//
+bool is_connectivity_var(string varname) {
+    return (
+        find(
+            connectivityVarNames.begin(),
+            connectivityVarNames.end(),
+            varname) != connectivityVarNames.end());
+}
 }; // namespace
 
 DCMPAS::DCMPAS() {
     _ncdfc = NULL;
     _ovr_fd = -1;
+    _ovr_varname.clear();
     _proj4String.clear();
     _proj4API = NULL;
     _dimsMap.clear();
@@ -193,6 +239,10 @@ int DCMPAS::Initialize(const vector<string> &files) {
         return (-1);
     }
 
+    // Create proj4 instance to project MPAS geographic coordinates to
+    // PCS coordinates. Currently VAPOR only works on Cartesian coordinates,
+    // not geographic (e.g. lat, lon, level)
+    //
     _proj4API = _create_proj4api(
         -180.0, 180.0, -90.0, 90.0, _proj4String);
     if (!_proj4API)
@@ -217,18 +267,8 @@ int DCMPAS::Initialize(const vector<string> &files) {
         return (-1);
     }
 
-    // !!!!!
+    // Make sure NetCDF file(s) have everything we need
     //
-    // Re-Initialize NetCDFCollection class now that we've created
-    // a derived variable representing the time coordinate.
-    //
-    vector<string> time_coordvar(1, xTimeVarName + "T");
-    rc = ncdfc->Initialize(files, time_dimnames, time_coordvar);
-    if (rc < 0) {
-        SetErrMsg("Failed to initialize netCDF data collection for reading");
-        return (-1);
-    }
-
     rc = _CheckRequiredFields(ncdfc);
     if (rc < 0)
         return (-1);
@@ -260,6 +300,8 @@ int DCMPAS::Initialize(const vector<string> &files) {
     if (rc < 0)
         return (-1);
 
+    // Finally, get metdata for all data variables
+    //
     rc = _InitDataVars(ncdfc);
     if (rc < 0)
         return (-1);
@@ -339,6 +381,19 @@ bool DCMPAS::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
     return (true);
 }
 
+bool DCMPAS::GetAuxVarInfo(string varname, DC::AuxVar &auxvar) const {
+
+    map<string, DC::AuxVar>::const_iterator itr;
+
+    itr = _auxVarsMap.find(varname);
+    if (itr == _auxVarsMap.end()) {
+        return (false);
+    }
+
+    auxvar = itr->second;
+    return (true);
+}
+
 bool DCMPAS::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
     map<string, DC::CoordVar>::const_iterator itr;
 
@@ -374,19 +429,19 @@ vector<string> DCMPAS::GetDataVarNames(int ndim, bool spatial) const {
     //
     vector<string> varnames;
     for (int i = 0; i < _cellVars.size(); i++) {
-        vector<string> dimnames = _ncdfc->GetSpatialDimNames(_cellVars[i]);
+        vector<string> dimnames = _GetSpatialDimNames(_ncdfc, _cellVars[i]);
         if (dimnames.size() + 1 == ndim) {
             varnames.push_back(_cellVars[i]);
         }
     }
     for (int i = 0; i < _pointVars.size(); i++) {
-        vector<string> dimnames = _ncdfc->GetSpatialDimNames(_pointVars[i]);
+        vector<string> dimnames = _GetSpatialDimNames(_ncdfc, _pointVars[i]);
         if (dimnames.size() + 1 == ndim) {
             varnames.push_back(_pointVars[i]);
         }
     }
     for (int i = 0; i < _edgeVars.size(); i++) {
-        vector<string> dimnames = _ncdfc->GetSpatialDimNames(_edgeVars[i]);
+        vector<string> dimnames = _GetSpatialDimNames(_ncdfc, _edgeVars[i]);
         if (dimnames.size() + 1 == ndim) {
             varnames.push_back(_edgeVars[i]);
         }
@@ -405,6 +460,19 @@ std::vector<string> DCMPAS::GetCoordVarNames() const {
     return (names);
 }
 
+std::vector<string> DCMPAS::GetAuxVarNames() const {
+    map<string, DC::AuxVar>::const_iterator itr;
+
+    vector<string> names;
+    for (itr = _auxVarsMap.begin(); itr != _auxVarsMap.end(); ++itr) {
+        names.push_back(itr->first);
+    }
+    return (names);
+}
+
+// Oops. Need to implement GetAtt() methods. Oh well. Not currently
+// used by vaporgui
+//
 bool DCMPAS::GetAtt(
     string varname, string attname, vector<double> &values) const {
     values.clear();
@@ -448,11 +516,190 @@ int DCMPAS::GetDimLensAtLevel(
     return (0);
 }
 
+// Read the MPAS nEdgesOnCell auxiliary variable and store it for
+// use later
+//
+int DCMPAS::_read_nEdgesOnCell(size_t ts) {
+
+    DC::Dimension dimension;
+    bool ok = GetDimension(nCellsDimName, dimension);
+    if (!ok) {
+        SetErrMsg(
+            "Invalid MPAS auxiliary variable: %s",
+            nEdgesOnCellVarName.c_str());
+        return (-1);
+    }
+
+    int *buf = (int *)_nEdgesOnCellBuf.Alloc(
+        dimension.GetLength() * sizeof(*buf));
+
+    int fd = _ncdfc->OpenRead(ts, nEdgesOnCellVarName);
+    if (fd < 0)
+        return (fd);
+
+    int rc = _ncdfc->Read(buf, fd);
+    if (rc < 0)
+        return (fd);
+
+    return (_ncdfc->Close(fd));
+}
+
+// Read a floating point variable (data or coordinate) into a SmartBuf
+//
+int DCMPAS::_readVarToSmartBuf(
+    size_t ts, string varname, Wasp::SmartBuf &smartBuf) {
+    vector<size_t> dims;
+    bool ok = GetVarDimLens(varname, true, dims);
+    assert(ok);
+
+    size_t n = vproduct(dims);
+    float *buf = (float *)smartBuf.Alloc(n * sizeof(*buf));
+
+    int fd = _ncdfc->OpenRead(ts, varname);
+    if (fd < 0)
+        return (fd);
+
+    int rc = _ncdfc->Read(buf, fd);
+    if (rc < 0)
+        return (fd);
+
+    return (_ncdfc->Close(fd));
+}
+
+// Read the longitude coordinates for cell and vertices. Need these
+// to split the periodic mesh
+//
+int DCMPAS::_readCoordinates(size_t ts) {
+
+    int rc = _readVarToSmartBuf(ts, lonCellVarName, _lonCellSmartBuf);
+    if (rc < 0)
+        return (rc);
+
+    rc = _readVarToSmartBuf(ts, lonVertexVarName, _lonVertexSmartBuf);
+    if (rc < 0)
+        return (rc);
+
+    return (0);
+}
+
+// MPAS uses an auxiliary array (the variable nEdgesOnCelll) to
+// indicate the number of elements (edges or vertices) in
+// multi-dimensional arrays with varying dimension lengths. But DC uses
+// a padding flag: -1. So using nEdgesOnCell we pad the fixed size
+// DC connectivity array with -1.
+//
+void DCMPAS::_addMissingFlag(int *data) const {
+
+    int *nEdgesOnCell = (int *)_nEdgesOnCellBuf.GetBuf();
+
+    DC::Dimension dimension;
+    bool ok = GetDimension(nCellsDimName, dimension);
+    assert(ok);
+
+    size_t nCells = dimension.GetLength();
+
+    ok = GetDimension(maxEdgesDimName, dimension);
+    assert(ok);
+
+    size_t nMaxEdges = dimension.GetLength();
+
+    // Add padding
+    //
+    for (size_t j = 0; j < nCells; j++) {
+        for (int i = nEdgesOnCell[j]; i < nMaxEdges; i++) {
+            data[j + i * nMaxEdges] = -1;
+        }
+    }
+}
+
+// MPAS data on sphere is periodic. But we're projecting the geographic
+// data to Cartesian coordinates. We need split the cells that straddle
+// the split location, here chose to be 180 (-180) degrees
+//
+void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
+
+    vector<size_t> connDims;
+    bool ok = GetVarDimLens(varname, true, connDims);
+    assert(ok && connDims.size() == 2);
+
+    // Dimensions for vertex lon
+    //
+    vector<size_t> lonVertexDims;
+    ok = GetVarDimLens(lonVertexVarName, true, lonVertexDims);
+    assert(ok && lonVertexDims.size() == 1);
+
+    // Dimensions for cell lon
+    //
+    vector<size_t> lonCellDims;
+    ok = GetVarDimLens(lonCellVarName, true, lonCellDims);
+    assert(ok && lonCellDims.size() == 1);
+
+    float *lonBuf1 = NULL;
+    float *lonBuf2 = NULL;
+    if (connDims[1] == lonVertexDims[0]) {
+        lonBuf1 = (float *)_lonVertexSmartBuf.GetBuf();
+        lonBuf2 = (float *)_lonCellSmartBuf.GetBuf();
+    } else if (connDims[1] == lonCellDims[0]) {
+        lonBuf1 = (float *)_lonCellSmartBuf.GetBuf();
+        lonBuf2 = (float *)_lonVertexSmartBuf.GetBuf();
+    } else {
+        assert(0);
+    }
+
+    // For each cell (vertex) in the connectivity array make sure
+    // that the cell's (vertices') coordinates and all of it's neighboring
+    // vertices (cells) are on the same side of the split line for
+    // longitude If not, introduce a split
+    // by changing the index of the offending vertices (cells) to -2,
+    // the boundary marker. This code assumes the valid lon coordiates
+    // are 0.0 .. 2*M_PI, as
+    // per the MPAS Mesh Specification, Version 1.0 (Oct. 8, 2015) document.
+    //
+    int n = connDims[0];
+    for (size_t j = 0; j < connDims[1]; j++) {
+        double lon1 = lonBuf1[j];
+
+        // Ha ha. despite MPAS documentation longitude may run -pi to pi
+        //
+        if (lon1 > M_PI)
+            lon1 -= 2 * M_PI;
+        for (size_t i = 0; i < n && connData[j * n + i] >= 0; i++) {
+            size_t index = connData[j * n + i] - 1; // Arrg. Index starts from 1!!
+            double lon2 = lonBuf2[index];
+
+            // Ha ha. despite MPAS documentation longitude may run -pi to pi
+            //
+            if (lon2 > M_PI)
+                lon2 -= 2 * M_PI;
+
+            // Ugh. Test for cell stradling -pi and pi
+            //
+            if (fabs(lon1 - lon2) > M_PI * 0.5) {
+                connData[j * n + i] = -2;
+            }
+        }
+    }
+}
+
 int DCMPAS::OpenVariableRead(
     size_t ts, string varname) {
     DCMPAS::CloseVariable();
 
     _ovr_fd = _ncdfc->OpenRead(ts, varname);
+
+    // Special handling for some auxiliary variables
+    //
+    _ovr_varname = varname;
+    if (_ovr_varname == verticesOnCellVarName) {
+        if (_read_nEdgesOnCell(ts) < 0)
+            return (-1);
+    }
+
+    if (is_connectivity_var(_ovr_varname)) {
+        if (_readCoordinates(ts) < 0)
+            return (-1);
+    }
+
     return (_ovr_fd);
 }
 
@@ -468,6 +715,22 @@ int DCMPAS::Read(float *data) {
     return (_ncdfc->Read(data, _ovr_fd));
 }
 
+int DCMPAS::Read(int *data) {
+    int rc = _ncdfc->Read(data, _ovr_fd);
+
+    // Special handling for some auxiliary variables
+    //
+    if (_ovr_varname == verticesOnCellVarName) {
+        _addMissingFlag(data);
+    }
+
+    if (is_connectivity_var(_ovr_varname)) {
+        _splitOnBoundary(_ovr_varname, data);
+    }
+
+    return (rc);
+}
+
 int DCMPAS::ReadSlice(float *slice) {
 
     return (_ncdfc->ReadSlice(slice, _ovr_fd));
@@ -475,6 +738,11 @@ int DCMPAS::ReadSlice(float *slice) {
 
 int DCMPAS::ReadRegion(
     const vector<size_t> &min, const vector<size_t> &max, float *region) {
+
+    // Need to reverse coordinate ordering for NetCDFCollection API, which
+    // orders coordinates from slowest to fastest. DC class expects order
+    // from fastest to slowest
+    //
     vector<size_t> ncdf_start = min;
     reverse(ncdf_start.begin(), ncdf_start.end());
 
@@ -561,6 +829,9 @@ bool DCMPAS::VariableExists(
     return (_ncdfc->VariableExists(ts, varname));
 }
 
+// Create proj4 class instance to convert from geographic to PCS
+// coordinates
+//
 Proj4API *DCMPAS::_create_proj4api(
     double lonmin, double lonmax, double latmin, double latmax,
     string &proj4string) const {
@@ -587,6 +858,11 @@ int DCMPAS::_InitCoordvars(
 
     string time_dim_name = "";
 
+    // longitude coordinates, native (those found in MPAS output files), and
+    // derived (those created on-the-fly by the DCMPAS class. The latter
+    // are longitude coordinate variables mapped to PCS coordinates (e.g
+    // meters on the ground)
+    //
     vector<string> cvars = {lonCellVarName, lonVertexVarName, lonEdgeVarName};
     for (int i = 0; i < cvars.size(); i++) {
         vector<bool> periodic(true);
@@ -602,6 +878,10 @@ int DCMPAS::_InitCoordvars(
             name, units, DC::FLOAT, periodic, axis, false,
             dimnames, vector<size_t>(), time_dim_name);
 
+        // Now do derived (meters on the ground) coordinate variable
+        // Here we're just adding it's metdata to the _coordVarsMap. Later
+        // we'll actually derive it.
+        //
         units = "meters";
         name += "X";
         dimnames = ncdfc->GetDimNames(name);
@@ -612,6 +892,8 @@ int DCMPAS::_InitCoordvars(
             dimnames, vector<size_t>(), time_dim_name);
     }
 
+    // LAtitude coordinate variables
+    //
     cvars = {latCellVarName, latVertexVarName, latEdgeVarName};
     for (int i = 0; i < cvars.size(); i++) {
         vector<bool> periodic(false);
@@ -661,30 +943,25 @@ int DCMPAS::_InitCoordvars(
         name, units, DC::FLOAT, periodic, axis, false,
         dimnames, vector<size_t>(), time_dim_name);
 
-#ifdef DEAD
-    // Time coordinate variables, native and derived
+    // Need a derived time coordinate variable. The native MPAS
+    // time coordinate variable is a formatted ASCII string like
+    // in WRF :-(
     //
-    units = "";
-    axis = 3;
-    name = xTimeVarName
-        dimnames = "";
-
-    _coordVarsMap[name] = CoordVar(
-        name, units, DC::FLOAT, periodic, axis, false,
-        dimnames, vector<size_t>(), xTimeVarName);
-#endif
 
     units = "seconds";
-    name += "T";
+    axis = 3;
+    name = xTimeVarName + "T";
     dimnames.clear();
 
     _coordVarsMap[name] = CoordVar(
         name, units, DC::FLOAT, periodic, axis, false,
-        dimnames, vector<size_t>(), xTimeVarName + "T");
+        dimnames, vector<size_t>(), timeDimName);
 
     return (0);
 }
 
+// Create all of the derived coordinate variables
+//
 int DCMPAS::_InitDerivedVars(
     NetCDFCollection *ncdfc) {
     int rc = _InitHorizontalCoordinatesDerived(ncdfc);
@@ -768,7 +1045,7 @@ int DCMPAS::_InitHorizontalCoordinatesDerived(
         DerivedVarHorizontal *derivedX;
         derivedX = new DerivedVarHorizontal(
             ncdfc, coordpairs[i].first, coordpairs[i].second,
-            _proj4API, true, true);
+            _proj4API, true, true, false);
         _derivedVars.push_back(derivedX);
 
         // Install the derived variable on the NetCDFCollection class. Then
@@ -781,7 +1058,7 @@ int DCMPAS::_InitHorizontalCoordinatesDerived(
         DerivedVarHorizontal *derivedY;
         derivedY = new DerivedVarHorizontal(
             ncdfc, coordpairs[i].first, coordpairs[i].second,
-            _proj4API, false, true);
+            _proj4API, false, true, false);
         _derivedVars.push_back(derivedY);
 
         ncdfc->InstallDerivedVar(name, derivedY);
@@ -924,6 +1201,22 @@ int DCMPAS::_GetVarCoordinates(
         dimnames.erase(dimnames.begin());
     }
 
+    if (find(_cellVars.begin(), _cellVars.end(), varname) != _cellVars.end()) {
+        sdimnames.push_back(nCellsDimName);
+        scoordvars.push_back(lonCellVarNameDerived);
+        scoordvars.push_back(latCellVarNameDerived);
+    } else if (find(_pointVars.begin(), _pointVars.end(), varname) != _pointVars.end()) {
+        sdimnames.push_back(nVerticesDimName);
+        scoordvars.push_back(lonVertexVarNameDerived);
+        scoordvars.push_back(latVertexVarNameDerived);
+    } else if (find(_edgeVars.begin(), _edgeVars.end(), varname) != _edgeVars.end()) {
+        sdimnames.push_back(nEdgesDimName);
+        scoordvars.push_back(lonEdgeVarNameDerived);
+        scoordvars.push_back(latEdgeVarNameDerived);
+    } else {
+        assert(0);
+    }
+
     // 3D variable?
     //
     if (dimnames.size() > 1) {
@@ -933,22 +1226,6 @@ int DCMPAS::_GetVarCoordinates(
         } else {
             scoordvars.push_back(zGridVarName);
         }
-    }
-
-    if (find(_cellVars.begin(), _cellVars.end(), varname) != _cellVars.end()) {
-        sdimnames.push_back(nCellsDimName);
-        scoordvars.push_back(lonCellVarName);
-        scoordvars.push_back(latCellVarName);
-    } else if (find(_pointVars.begin(), _pointVars.end(), varname) != _pointVars.end()) {
-        sdimnames.push_back(nVerticesDimName);
-        scoordvars.push_back(lonVertexVarName);
-        scoordvars.push_back(latVertexVarName);
-    } else if (find(_edgeVars.begin(), _edgeVars.end(), varname) != _edgeVars.end()) {
-        sdimnames.push_back(nEdgesDimName);
-        scoordvars.push_back(lonEdgeVarName);
-        scoordvars.push_back(latEdgeVarName);
-    } else {
-        assert(0);
     }
 
     return (0);
@@ -971,42 +1248,42 @@ int DCMPAS::_InitMeshes(
     // 2D, layered, and layered with staggered dimensions
     //
 
-    vector<string> coordvars = {lonVertexVarName, latVertexVarName};
+    vector<string> coordvars = {lonCellVarNameDerived, latCellVarNameDerived};
     _meshMap[mesh2DTriName] = Mesh(
         mesh2DTriName, 3, dimension.GetLength(),
         nCellsDimName, nVerticesDimName, coordvars,
         cellsOnVertexVarName, verticesOnCellVarName);
 
-    coordvars = {lonVertexVarName, latVertexVarName, zGridM1VarName};
+    coordvars = {lonCellVarNameDerived, latCellVarNameDerived, zGridM1VarName};
     _meshMap[mesh3DTriName] = Mesh(
         mesh3DTriName, 3, dimension.GetLength(),
         nCellsDimName, nVerticesDimName, nVertLevelsDimName, coordvars,
         cellsOnVertexVarName, verticesOnCellVarName);
 
-    coordvars = {lonVertexVarName, latVertexVarName, zGridVarName};
+    coordvars = {lonCellVarNameDerived, latCellVarNameDerived, zGridVarName};
     _meshMap[mesh3DP1TriName] = Mesh(
         mesh3DP1TriName, 3, dimension.GetLength(),
         nCellsDimName, nVerticesDimName, nVertLevelsP1DimName, coordvars,
         cellsOnVertexVarName, verticesOnCellVarName);
 
     //
-    // Primal meshes (triangle mesh)
+    // Primal meshes (hexagonal mesh)
     //
     // 2D, layered, and layered with staggered dimensions
     //
 
-    coordvars = {lonCellVarName, latCellVarName};
+    coordvars = {lonVertexVarNameDerived, latVertexVarNameDerived};
     _meshMap[mesh2DCellName] = Mesh(
         mesh2DCellName, dimension.GetLength(), 3, nVerticesDimName,
         nCellsDimName, coordvars, verticesOnCellVarName, cellsOnVertexVarName);
 
-    coordvars = {lonCellVarName, latCellVarName, zGridM1VarName};
+    coordvars = {lonVertexVarNameDerived, latVertexVarNameDerived, zGridM1VarName};
     _meshMap[mesh3DCellName] = Mesh(
         mesh3DCellName, dimension.GetLength(), 3, nVerticesDimName,
         nCellsDimName, nVertLevelsDimName, coordvars, verticesOnCellVarName,
         cellsOnVertexVarName);
 
-    coordvars = {lonCellVarName, latCellVarName, zGridVarName};
+    coordvars = {lonVertexVarNameDerived, latVertexVarNameDerived, zGridVarName};
     _meshMap[mesh3DP1CellName] = Mesh(
         mesh3DP1CellName, dimension.GetLength(), 3, nVerticesDimName,
         nCellsDimName, nVertLevelsP1DimName, coordvars, verticesOnCellVarName,
@@ -1042,13 +1319,23 @@ int DCMPAS::_InitAuxVars(
             continue;
         }
 
-        vector<string> dimnames = ncdfc->GetSpatialDimNames(vars[i]);
+        vector<string> dimnames = _GetSpatialDimNames(ncdfc, vars[i]);
         if (!dimnames.size())
             continue;
 
         _auxVarsMap[vars[i]] = AuxVar(
             vars[i], "", DC::INT32, "", vector<size_t>(),
             vector<size_t>(), periodic, dimnames);
+
+        // IDs in MPAS files start from 1, not 0 :-(
+        //
+        if (
+            vars[i] == cellsOnVertexVarName ||
+            vars[i] == verticesOnCellVarName ||
+            vars[i] == verticesOnEdge ||
+            vars[i] == edgesOnCellVarName) {
+            _auxVarsMap[vars[i]].SetOffset(-1);
+        }
     }
 
     return (0);
@@ -1064,7 +1351,8 @@ int DCMPAS::_InitDataVars(
     // spatial dimensions
     //
     vector<string> vars;
-    for (int i = 1; i < 3; i++) {
+    //	for (int i=1; i<3; i++) {
+    for (int i = 1; i < 2; i++) { // ONLY 2D VARIABLES SUPPORTED!!!
         vector<string> v = ncdfc->GetVariableNames(i, true);
         vars.insert(vars.end(), v.begin(), v.end());
     }
@@ -1086,7 +1374,7 @@ int DCMPAS::_InitDataVars(
         string time_dim_name;
         string time_coordvar;
 
-        vector<string> dimnames = ncdfc->GetSpatialDimNames(vars[i]);
+        vector<string> dimnames = _GetSpatialDimNames(ncdfc, vars[i]);
         if (!dimnames.size())
             continue;
 
@@ -1126,16 +1414,23 @@ int DCMPAS::_InitDataVars(
         if (!has_missing) {
             _dataVarsMap[vars[i]] = DataVar(
                 vars[i], units, DC::FLOAT, periodic, meshname,
-                vector<size_t>(), time_coordvar, DC::Mesh::VOLUME);
+                vector<size_t>(), time_coordvar, DC::Mesh::NODE);
         } else {
             _dataVarsMap[vars[i]] = DataVar(
                 vars[i], units, DC::FLOAT, periodic, meshname,
-                vector<size_t>(), time_coordvar, DC::Mesh::VOLUME,
+                vector<size_t>(), time_coordvar, DC::Mesh::NODE,
                 mv);
         }
     }
 
     return (0);
+}
+
+vector<string> DCMPAS::_GetSpatialDimNames(
+    NetCDFCollection *ncdfc, string varname) const {
+    vector<string> v = ncdfc->GetSpatialDimNames(varname);
+    reverse(v.begin(), v.end());
+    return (v);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1148,14 +1443,18 @@ int DCMPAS::_InitDataVars(
 // MPAS's native horizontal coordinate system is geographic. Need to
 // project from geographic to Cartographic using the Proj4 API
 //
+// N.B. This class **should** handle structured grids as well as
+// unstructured and could replace the structured version used by WRF, etc.
+//
 DCMPAS::DerivedVarHorizontal::DerivedVarHorizontal(
     NetCDFCollection *ncdfc, string lonname, string latname,
-    Proj4API *proj4API, bool xflag, bool uGridFlag) : DerivedVar(ncdfc) {
+    Proj4API *proj4API, bool xflag, bool uGridFlag, bool degrees) : DerivedVar(ncdfc) {
 
     _lonname = lonname;
     _latname = latname;
     _xflag = xflag;
     _uGridFlag = uGridFlag;
+    _degreesFlag = degrees;
     _oneDFlag = false;
     _time_dim = 1;
     _time_dim_name.clear();
@@ -1240,6 +1539,8 @@ int DCMPAS::DerivedVarHorizontal::Open(size_t ts) {
         SetErrMsg("Can't read %s variable", _latname.c_str());
         return (-1);
     }
+    _latfd = fd;
+
     _is_open = true;
 
     return (0);
@@ -1282,6 +1583,16 @@ int DCMPAS::DerivedVarHorizontal::Read(float *buf, int) {
     }
 
     size_t n = vproduct(_sdims);
+
+    // Convert from radians to degrees if necessary
+    //
+    if (!_degreesFlag) {
+        for (size_t i = 0; i < n; i++) {
+            _lonbuf[i] = _lonbuf[i] * 180.0 / M_PI;
+            _latbuf[i] = _latbuf[i] * 180.0 / M_PI;
+        }
+    }
+
     rc = _proj4API->Transform(_lonbuf, _latbuf, n);
     if (rc < 0)
         return (-1);

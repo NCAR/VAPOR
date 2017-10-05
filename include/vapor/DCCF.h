@@ -73,6 +73,10 @@ class VDF_API DCCF : public VAPoR::DC {
     //!
     virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const;
 
+    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+        return (false);
+    }
+
     //! \copydoc DC::GetBaseVarInfo()
     //
     virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;

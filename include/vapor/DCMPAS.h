@@ -73,6 +73,10 @@ class VDF_API DCMPAS : public VAPoR::DC {
     //!
     virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const;
 
+    //! \copydoc DC::GetAuxVarInfo()
+    //
+    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const;
+
     //! \copydoc DC::GetBaseVarInfo()
     //
     virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
@@ -84,13 +88,11 @@ class VDF_API DCMPAS : public VAPoR::DC {
     // override parent class!!
     virtual std::vector<string> GetDataVarNames(int ndim, bool spatial) const;
 
-    virtual std::vector<string> GetAuxVarNames() const {
-        return (vector<string>());
-    }
-
     //! \copydoc DC::GetCoordVarNames()
     //!
     virtual std::vector<string> GetCoordVarNames() const;
+
+    virtual std::vector<string> GetAuxVarNames() const;
 
     //! \copydoc DC::GetCoordVarNames()
     //!
@@ -148,9 +150,7 @@ class VDF_API DCMPAS : public VAPoR::DC {
     //! \copydoc DC::Read()
     //!
     virtual int Read(float *data);
-    virtual int Read(int *data) {
-        return (_ncdfc->Read(data, _ovr_fd));
-    }
+    virtual int Read(int *data);
 
     //! \copydoc DC::ReadSlice()
     //!
@@ -211,7 +211,8 @@ class VDF_API DCMPAS : public VAPoR::DC {
     NetCDFCollection *_ncdfc;
     VAPoR::UDUnits _udunits;
 
-    int _ovr_fd; // File descriptor for currently opened file
+    int _ovr_fd;         // File descriptor for currently opened file
+    string _ovr_varname; // File name for currently opened file
 
     string _proj4String;
     Proj4API *_proj4API;
@@ -224,6 +225,9 @@ class VDF_API DCMPAS : public VAPoR::DC {
     std::vector<string> _cellVars;
     std::vector<string> _pointVars;
     std::vector<string> _edgeVars;
+    Wasp::SmartBuf _nEdgesOnCellBuf;
+    Wasp::SmartBuf _lonCellSmartBuf;
+    Wasp::SmartBuf _lonVertexSmartBuf;
 
     Proj4API *_create_proj4api(
         double lonmin, double lonmax, double latmin, double latmax,
@@ -251,6 +255,17 @@ class VDF_API DCMPAS : public VAPoR::DC {
     int _InitAuxVars(NetCDFCollection *ncdfc);
     int _InitDataVars(NetCDFCollection *ncdfc);
 
+    vector<string> _GetSpatialDimNames(
+        NetCDFCollection *ncdfc, string varname) const;
+
+    int _read_nEdgesOnCell(size_t ts);
+    void _addMissingFlag(int *data) const;
+    int _readVarToSmartBuf(
+        size_t ts, string varname, Wasp::SmartBuf &smartBuf);
+    int _readCoordinates(size_t ts);
+
+    void _splitOnBoundary(string varname, int *connData) const;
+
     ///////////////////////////////////////////////////////////////////////////
     //
     //	Specializations of the NetCDFCollection::DerivedVar class used to
@@ -269,7 +284,7 @@ class VDF_API DCMPAS : public VAPoR::DC {
         DerivedVarHorizontal(
             NetCDFCollection *ncdfc, string lonname, string latname,
             Proj4API *proj4API, bool lonflag,
-            bool uGridFlag);
+            bool uGridFlag, bool degreesFlag);
         virtual ~DerivedVarHorizontal();
 
         virtual int Open(size_t ts);
@@ -289,6 +304,7 @@ class VDF_API DCMPAS : public VAPoR::DC {
         string _latname;                // name of latitude variable
         bool _xflag;                    // calculate X or Y Cartographic coordinates?
         bool _uGridFlag;                // unstructured grid?
+        bool _degreesFlag;              // Lat and lon are in degrees?
         bool _oneDFlag;                 // structured grid with lat and lon functions of one variable
         size_t _time_dim;               // number of time steps
         string _time_dim_name;          // Name of time dimension

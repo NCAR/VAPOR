@@ -851,11 +851,23 @@ int DataMgr::_setupConnVecs(
             return (-1);
         }
 
+        vector<size_t> conn_min = min;
+        vector<size_t> conn_max = max;
+
+        // Ugh. Connection variables have an additional dimension
+        // providing ID's for each entry in the connection variable array.
+        // This hack deals with that.
+        //
+        if (conn_min.size() < dims.size()) {
+            conn_min.insert(conn_min.cbegin(), 0);
+            conn_max.insert(conn_max.cbegin(), dims[0] - 1);
+        }
+
         // Map voxel coordinates into block coordinates
         //
         vector<size_t> bmin, bmax;
-        map_vox_to_blk(bs_at_level, min, bmin);
-        map_vox_to_blk(bs_at_level, max, bmax);
+        map_vox_to_blk(bs_at_level, conn_min, bmin);
+        map_vox_to_blk(bs_at_level, conn_max, bmax);
 
         bsvec.push_back(bs);
         dims_at_levelvec.push_back(dims_at_level);
@@ -1043,7 +1055,7 @@ int DataMgr::GetVariableExtents(
         return (0);
     }
 
-    Grid *rg = _getVariable(ts, varname, level, level, false, true);
+    Grid *rg = _getVariable(ts, varname, level, -1, false, true);
     if (!rg)
         return (-1);
 
@@ -2528,7 +2540,9 @@ void DataMgr::_ugrid_setup(
     std::vector<size_t> &edgeDims,
     UnstructuredGrid::Location &location, // node,face, edge
     size_t &maxVertexPerFace,
-    size_t &maxFacePerVertex) const {
+    size_t &maxFacePerVertex,
+    long &vertexOffset,
+    long &faceOffset) const {
     vertexDims.clear();
     faceDims.clear();
     edgeDims.clear();
@@ -2549,9 +2563,11 @@ void DataMgr::_ugrid_setup(
     faceDims.push_back(dimension.GetLength());
 
     dimname = m.GetEdgeDimName();
-    status = _dc->GetDimension(dimname, dimension);
-    assert(status);
-    edgeDims.push_back(dimension.GetLength());
+    if (dimname.size()) {
+        status = _dc->GetDimension(dimname, dimension);
+        assert(status);
+        edgeDims.push_back(dimension.GetLength());
+    }
 
     DC::Mesh::Location l = var.GetSamplingLocation();
     if (l == DC::Mesh::NODE) {
@@ -2566,6 +2582,24 @@ void DataMgr::_ugrid_setup(
 
     maxVertexPerFace = m.GetMaxNodesPerFace();
     maxFacePerVertex = m.GetMaxFacesPerNode();
+
+    string face_node_var;
+    string node_face_var;
+    string dummy;
+
+    bool ok = _dc->GetVarConnVars(
+        var.GetName(), face_node_var, node_face_var, dummy,
+        dummy, dummy, dummy);
+    assert(ok);
+
+    DC::AuxVar auxvar;
+    status = _dc->GetAuxVarInfo(face_node_var, auxvar);
+    assert(status);
+    vertexOffset = auxvar.GetOffset();
+
+    status = _dc->GetAuxVarInfo(node_face_var, auxvar);
+    assert(status);
+    faceOffset = auxvar.GetOffset();
 }
 
 UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
@@ -2588,10 +2622,7 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
     assert(dims.size() == bmax.size());
     assert(blkvec.size() == 3);
 
-    assert(conn_blkvec.size() == 3);
-    assert(conn_blkvec.size() == conn_bs.size());
-    assert(conn_blkvec.size() == conn_bmin.size());
-    assert(conn_blkvec.size() == conn_bmax.size());
+    assert(conn_blkvec.size() >= 2);
 
     vector<size_t> vertexDims;
     vector<size_t> faceDims;
@@ -2599,10 +2630,11 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
     UnstructuredGrid::Location location;
     size_t maxVertexPerFace;
     size_t maxFacePerVertex;
+    long vertexOffset, faceOffset;
 
     _ugrid_setup(
         dvarinfo, vertexDims, faceDims, edgeDims, location,
-        maxVertexPerFace, maxFacePerVertex);
+        maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
 
     size_t nblocks = 1;
     size_t block_size = 1;
@@ -2635,18 +2667,26 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
         ycblkptrs.push_back(blkvec[2] + i * block_size1d);
     }
 
+    // N.B. assumes blkvec contains contiguous blocks :-(
+    //
     const int *vertexOnFace = conn_blkvec[0];
     const int *faceOnVertex = conn_blkvec[1];
-    const int *faceOnFace = conn_blkvec[2];
+    const int *faceOnFace = conn_blkvec.size() == 3 ? conn_blkvec[2] : NULL;
 
     UnstructuredGridCoordless xug(
         vertexDims, faceDims, edgeDims, bs1d, xcblkptrs, 2,
         vertexOnFace, faceOnVertex, faceOnFace, location,
         maxVertexPerFace, maxFacePerVertex);
+    xug.SetNodeOffset(vertexOffset);
+    xug.SetCellOffset(faceOffset);
+
     UnstructuredGridCoordless yug(
         vertexDims, faceDims, edgeDims, bs1d, ycblkptrs, 2,
         vertexOnFace, faceOnVertex, faceOnFace, location,
         maxVertexPerFace, maxFacePerVertex);
+    yug.SetNodeOffset(vertexOffset);
+    yug.SetCellOffset(faceOffset);
+
     UnstructuredGridCoordless zug;
 
     const KDTreeRG *kdtree = _getKDTree2D(
@@ -2657,6 +2697,8 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
         vertexOnFace, faceOnVertex, faceOnFace, location,
         maxVertexPerFace, maxFacePerVertex,
         xug, yug, zug, kdtree);
+    g->SetNodeOffset(vertexOffset);
+    g->SetCellOffset(faceOffset);
 
     return (g);
 }
