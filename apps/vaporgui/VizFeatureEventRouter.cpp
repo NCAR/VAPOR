@@ -52,6 +52,8 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 
     setupUi(this);
 
+    cout << "VizFeatureEventRouter constructor" << endl;
+
     _animConnected = false;
     _ap = NULL;
 }
@@ -62,6 +64,7 @@ VizFeatureEventRouter::~VizFeatureEventRouter() {
  * Whenever a new vizfeaturetab is created it must be hooked up here
  ************************************************************/
 void VizFeatureEventRouter::hookUpTab() {
+    cout << "Hooking up VizFeatureEventRouter" << endl;
     connect(stretch0Edit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
     connect(stretch0Edit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
     connect(stretch1Edit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
@@ -237,10 +240,8 @@ void VizFeatureEventRouter::
 //Insert values from params into tab panel
 //
 void VizFeatureEventRouter::_updateTab() {
-#ifdef DEAD
     cout << "VizFeatureEventRouter::_updateTab() BLOCKED" << endl;
     return;
-#endif
 
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
 

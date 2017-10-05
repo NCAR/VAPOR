@@ -160,13 +160,30 @@ void TabManager::InstallWidgets() {
     _topWidgets[0] = _renderHolder;
     //Add the bottom widgets (eventrouter-based) to the nav and setting tabs:
     for (int topTab = 1; topTab < 3; topTab++) {
-        for (int j = 0; j < _widgets[topTab].size(); j++) {
-            QScrollArea *myScrollArea = new QScrollArea(_topWidgets[topTab]);
-            string tag = _widgetTags[topTab][j];
-            QTabWidget *qtw = (QTabWidget *)_topWidgets[topTab];
-            qtw->addTab(myScrollArea, QString::fromStdString(tag));
-            myScrollArea->setWidget(_widgets[topTab][j]);
-        }
+        //for (int j = 0; j< _widgets[topTab].size(); j++){
+
+        // Ugh.  I'm eliminating the for loop and setting the tabs
+        // explicitly, in order to have the 'VizFeatures' tab appear
+        // as the default.
+        // -Scott
+        QScrollArea *myScrollArea = new QScrollArea(_topWidgets[topTab]);
+        string tag = _widgetTags[topTab][1];
+        QTabWidget *qtw = (QTabWidget *)_topWidgets[topTab];
+        qtw->addTab(myScrollArea, QString::fromStdString(tag));
+        myScrollArea->setWidget(_widgets[topTab][1]);
+
+        myScrollArea = new QScrollArea(_topWidgets[topTab]);
+        tag = _widgetTags[topTab][0];
+        qtw = (QTabWidget *)_topWidgets[topTab];
+        qtw->addTab(myScrollArea, QString::fromStdString(tag));
+        myScrollArea->setWidget(_widgets[topTab][0]);
+
+        myScrollArea = new QScrollArea(_topWidgets[topTab]);
+        tag = _widgetTags[topTab][2];
+        qtw = (QTabWidget *)_topWidgets[topTab];
+        qtw->addTab(myScrollArea, QString::fromStdString(tag));
+        myScrollArea->setWidget(_widgets[topTab][2]);
+        //}
     }
     //Add all 3 top tabs to this
     for (int widType = 1; widType < 3; widType++) {

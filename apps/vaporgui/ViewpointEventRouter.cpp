@@ -1,8 +1,8 @@
 //************************************************************************
 //															*
-//		     Copyright (C)  2006										*
-//     University Corporation for Atmospheric Research					*
-//		     All Rights Reserved										*
+//			 Copyright (C)  2006										*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
 //															*
 //************************************************************************/
 //
@@ -65,6 +65,13 @@ ViewpointEventRouter::~ViewpointEventRouter() {
  * Whenever a new viztab is created it must be hooked up here
  ************************************************************/
 void ViewpointEventRouter::hookUpTab() {
+
+    connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
+            SLOT(scaleChanged(int, int)));
+    connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this,
+            SLOT(rotationChanged(int, int)));
+    connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)),
+            this, SLOT(translationChanged(int, int)));
 
     //connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
     //connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
@@ -171,6 +178,69 @@ void ViewpointEventRouter::GetWebHelp(
  * Slots associated with ViewpointTab:
  *********************************************************************************/
 
+void ViewpointEventRouter::scaleChanged(int row, int col) {
+    vector<double> scale;
+    QTableWidget *table = transformTable->scaleTable;
+    string dataset = table->item(row, 0)->text().toStdString();
+    double x = table->item(row, 1)->text().toDouble();
+    double y = table->item(row, 2)->text().toDouble();
+    double z = table->item(row, 3)->text().toDouble();
+    scale.push_back(x);
+    scale.push_back(y);
+    scale.push_back(z);
+
+    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<string> winNames = _controlExec->GetVisualizerNames();
+
+    VAPoR::ViewpointParams *vpp;
+    for (int i = 0; i < winNames.size(); i++) {
+        vpp = pm->GetViewpointParams(winNames[i]);
+        vpp->SetScales(dataset, scale);
+    }
+}
+
+void ViewpointEventRouter::rotationChanged(int row, int col) {
+    vector<double> rotation;
+    QTableWidget *table = transformTable->rotationTable;
+    string dataset = table->item(row, 0)->text().toStdString();
+    double x = table->item(row, 1)->text().toDouble();
+    double y = table->item(row, 2)->text().toDouble();
+    double z = table->item(row, 3)->text().toDouble();
+    rotation.push_back(x);
+    rotation.push_back(y);
+    rotation.push_back(z);
+
+    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<string> winNames = _controlExec->GetVisualizerNames();
+
+    VAPoR::ViewpointParams *vpp;
+    for (int i = 0; i < winNames.size(); i++) {
+        vpp = pm->GetViewpointParams(winNames[i]);
+        vpp->SetRotations(dataset, rotation);
+    }
+}
+
+void ViewpointEventRouter::translationChanged(int row, int col) {
+    vector<double> translation;
+    QTableWidget *table = transformTable->translationTable;
+    string dataset = table->item(row, 0)->text().toStdString();
+    double x = table->item(row, 1)->text().toDouble();
+    double y = table->item(row, 2)->text().toDouble();
+    double z = table->item(row, 3)->text().toDouble();
+    translation.push_back(x);
+    translation.push_back(y);
+    translation.push_back(z);
+
+    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<string> winNames = _controlExec->GetVisualizerNames();
+
+    VAPoR::ViewpointParams *vpp;
+    for (int i = 0; i < winNames.size(); i++) {
+        vpp = pm->GetViewpointParams(winNames[0]);
+        vpp->SetTranslations(dataset, translation);
+    }
+}
+
 void ViewpointEventRouter::
     setVtabTextChanged(const QString &) {
     SetTextChanged(true);
@@ -233,10 +303,111 @@ void ViewpointEventRouter::
     confirmText();
 }
 
+void ViewpointEventRouter::updateScales() {
+    QTableWidget *table = transformTable->scaleTable;
+
+    vector<double> sFactors;
+
+    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<string> winNames = _controlExec->GetVisualizerNames();
+
+    VAPoR::ViewpointParams *vpp;
+    vpp = pm->GetViewpointParams(winNames[0]);
+
+    vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
+    table->setRowCount(datasetNames.size());
+
+    for (int i = 0; i < datasetNames.size(); i++) {
+        sFactors = vpp->GetScales(datasetNames[i]);
+        updateTransformTable(table, datasetNames[i], sFactors, i);
+    }
+}
+
+void ViewpointEventRouter::updateTranslations() {
+    QTableWidget *table = transformTable->translationTable;
+
+    vector<double> translations;
+
+    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<string> winNames = _controlExec->GetVisualizerNames();
+
+    VAPoR::ViewpointParams *vpp;
+    vpp = pm->GetViewpointParams(winNames[0]);
+
+    vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
+    table->setRowCount(datasetNames.size());
+
+    for (int i = 0; i < datasetNames.size(); i++) {
+        translations = vpp->GetTranslations(datasetNames[i]);
+        cout << endl
+             << "ViewpointEventRouter, GetTranslations " << translations[0] << " " << translations[1] << " " << translations[2] << endl;
+        updateTransformTable(table, datasetNames[i], translations, i);
+    }
+}
+
+void ViewpointEventRouter::updateRotations() {
+    QTableWidget *table = transformTable->rotationTable;
+
+    vector<double> rotations;
+
+    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<string> winNames = _controlExec->GetVisualizerNames();
+
+    VAPoR::ViewpointParams *vpp;
+    vpp = pm->GetViewpointParams(winNames[0]);
+
+    vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
+    table->setRowCount(datasetNames.size());
+
+    for (int i = 0; i < datasetNames.size(); i++) {
+        rotations = vpp->GetRotations(datasetNames[i]);
+        updateTransformTable(table, datasetNames[i], rotations, i);
+    }
+}
+
+void ViewpointEventRouter::updateTransformTable(QTableWidget *table,
+                                                string dataSet, vector<double> values, int row) {
+
+    table->blockSignals(true);
+    table->clearContents();
+
+    QTableWidgetItem *item;
+
+    item = new QTableWidgetItem(QString::fromStdString(dataSet));
+    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+    item->setTextAlignment(Qt::AlignCenter);
+    table->setItem(row, 0, item);
+
+    item = new QTableWidgetItem(QString::number(values[0]));
+    item->setTextAlignment(Qt::AlignCenter);
+    table->setItem(row, 1, item);
+
+    item = new QTableWidgetItem(QString::number(values[1]));
+    item->setTextAlignment(Qt::AlignCenter);
+    table->setItem(row, 2, item);
+
+    item = new QTableWidgetItem(QString::number(values[2]));
+    item->setTextAlignment(Qt::AlignCenter);
+    table->setItem(row, 3, item);
+
+    QHeaderView *header = table->verticalHeader();
+    header->setResizeMode(QHeaderView::Stretch);
+    header->hide();
+
+    table->blockSignals(false);
+}
+
+void ViewpointEventRouter::updateTab() {
+    _updateTab();
+}
+
 //Insert values from params into tab panel
 //
 void ViewpointEventRouter::_updateTab() {
-    cout << "ViewpointEventRouter::_updateTab() BLOCKED" << endl;
+    updateScales();
+    updateTranslations();
+    updateRotations();
+
     return;
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
