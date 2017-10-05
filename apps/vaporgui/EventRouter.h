@@ -270,9 +270,8 @@ protected:
     //! This is invoked whenever the tab is redisplayed and the values in the
     //! tab need to be refreshed.
     //! If there is a VariablesWidget, _updateTab() must invoke
-    //! VariablesWidget::updateTab().
+    //! VariablesWidget::Update().
     //!
-    //! \param[in] p Params instance associated with the current active tab.
     virtual void _updateTab() = 0;
 
     //! Pure virtual method to respond to changes in text in the tab.
