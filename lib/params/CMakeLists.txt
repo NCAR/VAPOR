@@ -11,6 +11,7 @@ add_library (params SHARED
 	TwoDDataParams.cpp
 	BarbParams.cpp
 	Viewpoint.cpp
+	Transform.cpp
 	ViewpointParams.cpp
 	regionparams.cpp
 	ParamsMgr.cpp

@@ -1101,6 +1101,14 @@ void MainForm::loadDataHelper(
 		currentPaths.push_back(files[0]);
 		currentDataSets.push_back(dataSetName);
 		p->SetOpenDataSets(currentPaths, currentDataSets);
+
+		VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
+		VAPoR::ViewpointParams* vpp;
+		vector<string> winNames = _controlExec->GetVisualizerNames();
+		for (int i=0; i<winNames.size(); i++) {
+			vpp = pm->GetViewpointParams(winNames[i]);
+			vpp->AddDatasetTransform(dataSetName);
+		}
 	}
 
 	// Reinitialize all tabs
@@ -1850,6 +1858,7 @@ void MainForm::enableWidgets(bool onOff) {
 	_tabMgr->setEnabled(onOff);
 	_statsAction->setEnabled(onOff);
 	_plotAction->setEnabled(onOff);
+//	_seedMeAction->setEnabled(onOff);
 
 	AnimationEventRouter* aRouter = (AnimationEventRouter*)
 		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
@@ -1940,7 +1949,7 @@ void MainForm::captureSingleJpeg() {
 }
 
 void MainForm::launchSeedMe(){
-    if (_seedMe==NULL) _seedMe = new SeedMe;
+    if (_seedMe==NULL) _seedMe = new VAPoR::SeedMe;
     _seedMe->Initialize();
 }
 

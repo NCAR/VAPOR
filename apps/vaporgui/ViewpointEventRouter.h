@@ -81,6 +81,7 @@ public:
  }
  string GetType() const {return GetClassType(); }
 
+ virtual void updateTab();
 
 protected:
 	virtual void _confirmText();
@@ -93,11 +94,20 @@ private:
 	float _lastCamPos[3];
 	VizWinMgr *_vizMgr;
 	bool _panChanged;
+
+	void updateScales();
+	void updateTransformTable(QTableWidget* t, string dataSet,
+		vector<double> values, int row);
+	void updateRotations();
+	void updateTranslations();
 	
 private slots:
 	
 	void viewpointReturnPressed();
 	void setVtabTextChanged(const QString& qs);
+	void scaleChanged(int row, int col);
+	void translationChanged(int row, int col);
+	void rotationChanged(int row, int col);
 
 };
 

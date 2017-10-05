@@ -52,7 +52,7 @@ class QLabel;
 class QSpinBox;
 class QLineEdit;
 
-class SeedMe;
+//class SeedMe;
 class VizWindow;
 class VizWinMgr;
 class TabManager;
@@ -61,6 +61,10 @@ class VizSelectCombo;
 class BannerGUI;
 class Statistics;
 class Plot;
+
+namespace VAPoR {
+	class SeedMe;
+}
 
 class MainForm : public QMainWindow
 {
@@ -248,7 +252,7 @@ private:
 	
 	Statistics* _stats;
 	Plot* _plot;
-	SeedMe* _seedMe;
+	VAPoR::SeedMe* _seedMe;
 	BannerGUI* _banner;
 	static MainForm* _mainForm;
 	QMdiArea* _mdiArea;
