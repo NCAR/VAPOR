@@ -37,6 +37,25 @@
   <layout class="QHBoxLayout" name="horizontalLayout_7">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <item>
+      <widget class="TransformTable" name="transformTable" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>75</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>100</height>
+        </size>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QFrame" name="frame9">
        <property name="whatsThis">
@@ -1838,6 +1857,14 @@ with Lat/Lon</string>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>TransformTable</class>
+   <extends>QWidget</extends>
+   <header>TransformTable.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
