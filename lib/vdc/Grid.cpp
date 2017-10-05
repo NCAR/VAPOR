@@ -190,7 +190,7 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
     _dims = g->GetNodeDimensions();
     _index = vector<size_t>(_dims.size(), 0);
     _lastIndex = _index;
-    _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];
+    if (_dims.size()) _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];
 
     if (!begin) { _index = _lastIndex; }
 }
@@ -211,8 +211,10 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG() : ConstNodeIteratorAbstract()
 
 void Grid::ConstNodeIteratorSG::next()
 {
+    if (!_index.size()) return;
+
     _index[0]++;
-    if (_index[0] < _dims[0]) { return; }
+    if (_index[0] < _dims[0] || _dims.size() == 1) { return; }
 
     _index[0] = 0;
     _index[1]++;
@@ -275,7 +277,7 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG() : ConstCellIteratorAbstract()
 void Grid::ConstCellIteratorSG::next()
 {
     _index[0]++;
-    if (_index[0] < (_dims[0])) { return; }
+    if (_index[0] < (_dims[0]) || _dims.size() == 1) { return; }
 
     _index[0] = 0;
     _index[1]++;
@@ -325,7 +327,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     _rg = rg;
     _index = vector<size_t>(dims.size(), 0);
     _end_index = vector<size_t>(dims.size(), 0);
-    _end_index[dims.size() - 1] = dims[dims.size() - 1];
+    if (dims.size()) _end_index[dims.size() - 1] = dims[dims.size() - 1];
     if (!begin || !rg->GetBlks().size()) {
         _index = _end_index;
         return;
@@ -443,6 +445,8 @@ template<class T> Grid::ForwardIterator<T> Grid::ForwardIterator<T>::operator++(
 
 template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=(const long int &offset)
 {
+    if (!_index.size()) return (*this);
+
     const vector<size_t> &dims = _rg->GetDimensions();
     const vector<size_t> &bdims = rg->GetDimensionInBlks();
     const vector<size_t> &bs = rg->GetBlockSize();

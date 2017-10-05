@@ -225,6 +225,19 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname,
     minExts.clear();
     maxExts.clear();
 
+    // If varname not specified look for first variable of highest
+    // dimensionality
+    //
+    if (varname.empty()) {
+        vector<string> varnames;
+        for (int ndim = 3; ndim > 0; ndim--) {
+            varnames = dataMgr->GetDataVarNames(ndim, true);
+            if (!varnames.empty()) break;
+        }
+        varname = varnames.size() ? varnames[0] : "";
+    }
+    if (varname.empty()) return (false);
+
     size_t maxXForm;
     bool   status = DataMgrUtils::MaxXFormPresent(dataMgr, timestep, varname, maxXForm);
     if (!status) return (status);

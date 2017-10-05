@@ -750,7 +750,7 @@ private:
 
     void _ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
                       UnstructuredGrid::Location &location,    // node,face, edge
-                      size_t &maxVertexPerFace, size_t &maxFacePerVertex) const;
+                      size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset) const;
 
     UnstructuredGrid2D *_make_grid_unstructured2d(int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims, const vector<float *> &blkvec,
                                                   const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<int *> &conn_blkvec, const vector<size_t> &conn_bs,

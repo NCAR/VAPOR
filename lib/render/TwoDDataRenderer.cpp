@@ -329,11 +329,13 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
 
     assert(g);
 
+    double defaultZ = _getDefaultZ(dataMgr, ts);
+
     if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
-        rc = _getMeshStructured(dataMgr, dynamic_cast<StructuredGrid *>(g), minBoxReq[2]);
+        rc = _getMeshStructured(dataMgr, dynamic_cast<StructuredGrid *>(g), defaultZ);
         structuredMesh = true;
     } else {
-        rc = _getMeshUnStructured(dataMgr, g, minBoxReq[2]);
+        rc = _getMeshUnStructured(dataMgr, g, defaultZ);
         structuredMesh = false;
     }
 
@@ -474,7 +476,6 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
 //
 int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, double defaultZ)
 {
-#ifdef DEAD
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
     assert(g->GetTopologyDim() == 2);
@@ -488,8 +489,8 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
     // Count the number of triangle vertex indices needed
     //
     _nindices = 0;
-    StructuredGrid::ConstCellIterator citr;
-    StructuredGrid::ConstCellIterator endcitr = g->ConstCellEnd();
+    Grid::ConstCellIterator citr;
+    Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
         std::vector<std::vector<size_t>> nodes;
         g->GetCellNodes(*citr, nodes);
@@ -506,14 +507,11 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
     _sb_indices.Alloc(_nindices * sizeof(GLuint));
 
     return (_getMeshUnStructuredHelper(dataMgr, g, defaultZ));
-#endif
     return 0;
 }
 
 int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g, double defaultZ)
 {
-#ifdef DEAD
-
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
     // Construct the displaced (terrain following) grid using
     // a map projection, if specified.
@@ -590,10 +588,9 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     // and compute an index
     // array for the triangle list
     //
-    StructuredGrid::ConstCellIterator citr;
-    StructuredGrid::ConstCellIterator endcitr = g->ConstCellEnd();
-    size_t                            index = 0;
-    size_t                            offset = g->GetNodeOffset();
+    Grid::ConstCellIterator citr;
+    Grid::ConstCellIterator endcitr = g->ConstCellEnd();
+    size_t                  index = 0;
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
         std::vector<std::vector<size_t>> nodes;
         g->GetCellNodes(*citr, nodes);
@@ -603,9 +600,9 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
         // Compute triangle node indices
         //
         for (int i = 0; i < nodes.size() - 2; i++) {
-            indices[index++] = LinearizeCoords(nodes[0], dims) - offset;
-            indices[index++] = LinearizeCoords(nodes[i + 1], dims) - offset;
-            indices[index++] = LinearizeCoords(nodes[i + 2], dims) - offset;
+            indices[index++] = LinearizeCoords(nodes[0], dims);
+            indices[index++] = LinearizeCoords(nodes[i + 1], dims);
+            indices[index++] = LinearizeCoords(nodes[i + 2], dims);
         }
     }
 
@@ -614,7 +611,6 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
         delete hgtGrid;
     }
 
-#endif
     return (0);
 }
 
@@ -810,4 +806,15 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     dataMgr->UnlockGrid(g);
 
     return (texture);
+}
+
+double TwoDDataRenderer::_getDefaultZ(DataMgr *dataMgr, size_t ts) const
+{
+    vector<double> minExts;
+    vector<double> maxExts;
+
+    bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
+    assert(status);
+
+    return (minExts.size() == 3 ? minExts[2] : 0.0);
 }

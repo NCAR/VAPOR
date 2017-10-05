@@ -153,7 +153,18 @@ bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimensio
     status = GetMesh(mname, mesh);
     if (!status) return (false);
 
-    vector<string> dimnames = mesh.GetDimNames();
+    vector<string> dimnames;
+    if (mesh.GetMeshType() == Mesh::STRUCTURED) {
+        dimnames = mesh.GetDimNames();
+    } else {
+        switch (var.GetSamplingLocation()) {
+        case Mesh::NODE: dimnames.push_back(mesh.GetNodeDimName()); break;
+        case Mesh::EDGE: dimnames.push_back(mesh.GetEdgeDimName()); break;
+        case Mesh::FACE: dimnames.push_back(mesh.GetFaceDimName()); break;
+        case Mesh::VOLUME: assert(0 && "VOLUME cells not supported"); break;
+        }
+        if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) { dimnames.push_back(mesh.GetLayersDimName()); }
+    }
 
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim;
@@ -214,6 +225,26 @@ bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimensi
     return (true);
 }
 
+bool DC::_getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+{
+    dimensions.clear();
+
+    AuxVar var;
+    bool   status = GetAuxVarInfo(varname, var);
+    if (!status) return (false);
+
+    vector<string> dimnames = var.GetDimNames();
+
+    for (int i = 0; i < dimnames.size(); i++) {
+        Dimension dim;
+        status = GetDimension(dimnames[i], dim);
+        if (!status) return (false);
+
+        dimensions.push_back(dim);
+    }
+    return (true);
+}
+
 bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const
 {
     dimensions.clear();
@@ -222,6 +253,8 @@ bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &d
         return (_getDataVarDimensions(varname, spatial, dimensions));
     } else if (IsCoordVar(varname)) {
         return (_getCoordVarDimensions(varname, spatial, dimensions));
+    } else if (IsAuxVar(varname)) {
+        return (_getAuxVarDimensions(varname, dimensions));
     } else {
         return (false);
     }
