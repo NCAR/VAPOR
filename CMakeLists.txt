@@ -188,10 +188,19 @@ if (UNIX AND NOT APPLE)
 	endif (${GENERATE_FULL_INSTALLER})
 endif (UNIX AND NOT APPLE)
 
-add_custom_target (
-	installer
-	WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-	COMMAND cpack .
-	)
+if (UNIX AND NOT APPLE)
+	add_custom_target (
+		installer
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+		COMMAND cpack .
+		DEPENDS linuxpreinstall
+		)
+else ()
+	add_custom_target (
+		installer
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+		COMMAND cpack .
+		)
+endif ()
 
 include (CPack)
