@@ -45,7 +45,7 @@ namespace VAPoR {
 //! \b Y (or latitude), \b Z (height), and \b T (time)
 //!
 //! \li All data variables have a "coordinate" attribute identifying 
-//! the coordinate (or auxilliary coordinate) variables associated with
+//! the coordinate (or auxiliary coordinate) variables associated with
 //! each axis
 //!
 //! \li To be consistent with VAPOR, when specified in vector form the 
@@ -1422,6 +1422,7 @@ public:
 
   AuxVar() {
 	_dim_names.clear();
+	_offset = 0;
   }
 
   //! Construct Auxiliary variable definition 
@@ -1451,7 +1452,8 @@ public:
 		name, units, type, 
 		wname, cratios, bs, periodic
 	),
-	_dim_names(dim_names)
+	_dim_names(dim_names),
+	_offset(0)
   {}
 
   virtual ~AuxVar() {};
@@ -1461,10 +1463,18 @@ public:
   std::vector<string>  GetDimNames() const {return (_dim_names); };
   void SetDimNames(std::vector<string> dim_names) {_dim_names = dim_names; };
 
+  //! Access Auxiliary variable's offset
+  //!
+  //! The value of \p offset should be added to the Auxiliary variable's data
+  //
+  long GetOffset() const {return (_offset); };
+  void SetOffset(long offset) {_offset = offset; };
+
  VDF_API friend std::ostream &operator<<(std::ostream &o, const AuxVar &var);
 
  private:
   std::vector <string> _dim_names;
+  long _offset;
 
  };
 
@@ -1567,6 +1577,19 @@ public:
  //!
  virtual bool GetDataVarInfo( string varname, DC::DataVar &datavar) const = 0;
  
+ //! Return metadata about an auxiliary variable
+ //!
+ //! If the variable \p varname is defined as an auxiliary 
+ //! variable its metadata will
+ //! be returned in \p var.
+ //!
+ //! \retval bool If the named variable cannot be found false 
+ //! is returned and the values of \p var are undefined.
+ //!
+ //! \sa GetDataVarInfo(), GetCoordVarInfo()
+ //
+ virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const = 0;
+
  //! Return metadata about a data or coordinate variable
  //!
  //! If the variable \p varname is defined as either a 
@@ -1579,6 +1602,7 @@ public:
  //! \sa GetDataVarInfo(), GetCoordVarInfo()
  //
  virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const = 0;
+
 
 
  //! Return a list of names for all of the defined data variables.
@@ -2286,6 +2310,11 @@ private:
 
  virtual bool _getDataVarDimensions(
 	string varname, bool spatial,
+	vector <DC::Dimension> &dimensions
+ ) const;
+
+ virtual bool _getAuxVarDimensions(
+	string varname, 
 	vector <DC::Dimension> &dimensions
  ) const;
 

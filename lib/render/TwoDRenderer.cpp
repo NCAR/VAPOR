@@ -155,6 +155,7 @@ void TwoDRenderer::_openGLInit() {
 	glColor4f(1.0, 1.0, 1.0, opacity);
 
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+//	glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// will not correct blending, but will be OK wrt other opaque geometry.
