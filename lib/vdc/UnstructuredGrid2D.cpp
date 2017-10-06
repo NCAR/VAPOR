@@ -346,8 +346,8 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(
     long offset = GetCellOffset();
 
     for (int i = 0; i < _maxFacePerVertex; i++) {
-        size_t face = *ptr + offset;
-        if (face == GetMissingID())
+        long face = *ptr + offset;
+        if (face == GetMissingID() || face < 0)
             break;
         if (face == GetBoundaryID())
             continue;
@@ -372,8 +372,8 @@ bool UnstructuredGrid2D::_insideFace(
     long offset = GetNodeOffset();
 
     for (int i = 0; i < _maxVertexPerFace; i++) {
-        size_t vertex = *ptr + offset;
-        if (vertex == GetMissingID())
+        long vertex = *ptr + offset;
+        if (vertex == GetMissingID() || vertex < 0)
             break;
         verts[i * 2 + 0] = _xug.AccessIJK(vertex, 0, 0);
         verts[i * 2 + 1] = _yug.AccessIJK(vertex, 0, 0);
