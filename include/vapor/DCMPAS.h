@@ -286,6 +286,8 @@ private:
     NetCDFCollection *ncdfc, string varname
  ) const;
 
+ bool _isAtmosphere(NetCDFCollection *ncdfc) const;
+
  int _read_nEdgesOnCell(size_t ts);
  void _addMissingFlag(int *data) const;
  int _readVarToSmartBuf(
@@ -294,6 +296,7 @@ private:
  int _readCoordinates(size_t ts);
 
  void _splitOnBoundary(string varname, int *connData) const;
+
 
 
 
