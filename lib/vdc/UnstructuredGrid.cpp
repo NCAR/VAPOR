@@ -86,7 +86,7 @@ bool UnstructuredGrid::GetCellNodes(
 	if (cdims.size() == 1) {
 		for (int i=0; i<_maxVertexPerFace; i++, ptr++) {
 			vector <size_t> indices;
-			if (*ptr == GetMissingID()) break;
+			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
 
 			indices.push_back(*ptr + offset);
@@ -97,7 +97,7 @@ bool UnstructuredGrid::GetCellNodes(
 
 		for (int i=0; i<_maxVertexPerFace; i++, ptr++) {
 			vector <size_t> indices;
-			if (*ptr == GetMissingID()) break;
+			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
 
 			indices.push_back(*ptr + offset);
@@ -108,7 +108,7 @@ bool UnstructuredGrid::GetCellNodes(
 		ptr = _vertexOnFace + (_maxVertexPerFace * cindices[0]);
 		for (int i=0; i<_maxVertexPerFace; i++) {
 			vector <size_t> indices;
-			if (*ptr == GetMissingID()) break;
+			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
 
 			indices.push_back(*ptr + offset);
@@ -142,7 +142,7 @@ bool UnstructuredGrid::GetCellNeighbors(
 	if (cdims.size() == 1) {
 		for (int i=0; i<_maxVertexPerFace; i++) {
 			vector <size_t> indices;
-			if (*ptr == GetMissingID()) break;
+			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 
 			if (*ptr != GetBoundaryID()) {
 				indices.push_back(*ptr + offset);
@@ -155,7 +155,7 @@ bool UnstructuredGrid::GetCellNeighbors(
 
 		for (int i=0; i<_maxVertexPerFace; i++) {
 			vector <size_t> indices;
-			if (*ptr == GetMissingID()) break;
+			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 
 			if (*ptr != GetBoundaryID()) {
 				indices.push_back(*ptr + offset);
