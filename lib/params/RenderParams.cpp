@@ -456,12 +456,7 @@ void RenderParams::SetConstantColor(const float rgb[3]) {
 
 void RenderParams::GetConstantColor(float rgb[3]) const {
     vector<double> defaultv(3, 1.0);
-    defaultv[0] = 0.0;
-    defaultv[1] = 0.0;
-    defaultv[2] = 0.0;
     vector<double> rgbv = GetValueDoubleVec(_constantColorTag, defaultv);
-    for (int i = 0; i < 3; i++)
-        rgb[i] = 1.0;
 
     for (int i = 0; i < rgbv.size() && i < 3; i++) {
         float v = rgbv[i];
