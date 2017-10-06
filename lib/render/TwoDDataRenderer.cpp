@@ -108,21 +108,12 @@ void computeNormal(const Grid *hgtGrid, float x, float y, float dx, float dy, fl
 TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
 : TwoDRenderer(pm, winName, dataSetName, TwoDDataParams::GetClassType(), TwoDDataRenderer::GetClassType(), instName, dataMgr)
 {
+    _grid_state.clear();
+    _tex_state.clear();
+
     _texWidth = 0;
     _texHeight = 0;
     _texelSize = 8;
-    _currentTimestep = 0;
-    _currentRefLevel = -1;
-    _currentLod = -1;
-    _currentVarname.clear();
-    _currentBoxMinExts.clear();
-    _currentBoxMaxExts.clear();
-    _currentRefLevelTex = -1;
-    _currentLodTex = -1;
-    _currentTimestepTex = 0;
-    _currentHgtVar.clear();
-    _currentBoxMinExtsTex.clear();
-    _currentBoxMaxExtsTex.clear();
     _vertsWidth = 0;
     _vertsHeight = 0;
     _nindices = 0;
@@ -361,72 +352,56 @@ bool TwoDDataRenderer::_gridStateDirty() const
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
-    int            refLevel = rParams->GetRefinementLevel();
-    int            lod = rParams->GetCompressionLevel();
-    string         hgtVar = rParams->GetHeightVariableName();
-    int            ts = rParams->GetCurrentTimestep();
-    vector<double> boxMinExts, boxMaxExts;
-    rParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
+    DC::DataVar dvar;
+    _dataMgr->GetDataVarInfo(rParams->GetVariableName(), dvar);
 
-    return (refLevel != _currentRefLevel || lod != _currentLod || hgtVar != _currentHgtVar || ts != _currentTimestep || boxMinExts != _currentBoxMinExts || boxMaxExts != _currentBoxMaxExts);
+    vector<double> minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+
+    _grid_state_c current_state(rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(), dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
+
+    return (_grid_state != current_state);
 }
 
-void TwoDDataRenderer::_gridStateClear()
-{
-    _currentRefLevel = 0;
-    _currentLod = 0;
-    _currentHgtVar.clear();
-    _currentTimestep = -1;
-    _currentBoxMinExts.clear();
-    _currentBoxMaxExts.clear();
-}
+void TwoDDataRenderer::_gridStateClear() { _grid_state.clear(); }
 
 void TwoDDataRenderer::_gridStateSet()
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
-    _currentRefLevel = rParams->GetRefinementLevel();
-    _currentLod = rParams->GetCompressionLevel();
-    _currentHgtVar = rParams->GetHeightVariableName();
-    _currentTimestep = rParams->GetCurrentTimestep();
-    rParams->GetBox()->GetExtents(_currentBoxMinExts, _currentBoxMaxExts);
+
+    DC::DataVar dvar;
+    _dataMgr->GetDataVarInfo(rParams->GetVariableName(), dvar);
+
+    vector<double> minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+    string meshName;
+
+    _grid_state = _grid_state_c(rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(), dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
 }
 
 bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
-    int            refLevel = rParams->GetRefinementLevel();
-    int            lod = rParams->GetCompressionLevel();
-    int            ts = rParams->GetCurrentTimestep();
-    vector<double> boxMinExts, boxMaxExts;
-    rParams->GetBox()->GetExtents(boxMinExts, boxMaxExts);
-    string varname = rParams->GetVariableName();
+    vector<double> minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
 
-    return (_currentRefLevelTex != refLevel || _currentLodTex != lod || _currentTimestepTex != ts || _currentBoxMinExtsTex != boxMinExts || _currentBoxMaxExtsTex != boxMaxExts
-            || _currentVarname != varname);
+    _tex_state_c current_state(rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetVariableName(), rParams->GetCurrentTimestep(), minExts, maxExts);
+
+    return (_tex_state != current_state);
 }
 
 void TwoDDataRenderer::_texStateSet(DataMgr *dataMgr)
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
-    string          varname = rParams->GetVariableName();
 
-    _currentRefLevelTex = rParams->GetRefinementLevel();
-    _currentLodTex = rParams->GetCompressionLevel();
-    _currentTimestepTex = rParams->GetCurrentTimestep();
-    rParams->GetBox()->GetExtents(_currentBoxMinExtsTex, _currentBoxMaxExtsTex);
-    _currentVarname = varname;
+    vector<double> minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+
+    _tex_state = _tex_state_c(rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetVariableName(), rParams->GetCurrentTimestep(), minExts, maxExts);
 }
 
-void TwoDDataRenderer::_texStateClear()
-{
-    _currentRefLevelTex = 0;
-    _currentLodTex = 0;
-    _currentTimestepTex = -1;
-    _currentBoxMinExtsTex.clear();
-    _currentBoxMaxExtsTex.clear();
-    _currentVarname.clear();
-}
+void TwoDDataRenderer::_texStateClear() { _tex_state.clear(); }
 
 // Get mesh for a structured grid
 //
