@@ -150,16 +150,15 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
 	// Calculate the union of all field variable extents
 	// by iterating over the variables one at a time, indexed by i
 	//
-	for (int i=0; i<3; i++) {
+	for (int i=0; i<varNames.size(); i++) {
 		if (varNames[i] != "") {
 			int rc = _dataMgr->GetVariableExtents(ts, varNames[i], 
 								level, minFullExt, maxFullExt);
 			if (rc<0) {
 				char bufr[50];
-				sprintf(bufr, "Error: DataMgr could "
+				MyBase::SetErrMsg("Error: DataMgr could "
 					"not return valid values from GetVariableExtents()"
 					" for variable %s", varNames[i].c_str());
-				MyBase::SetErrMsg(bufr);
 			}
 
 			// If we are on the extents of the first
@@ -167,12 +166,8 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
 			// our initial condition...
 			//
 			if (i==0) {
-				minVarExt.push_back(minFullExt[0]);
-				minVarExt.push_back(minFullExt[1]);
-				minVarExt.push_back(minFullExt[2]);
-				maxVarExt.push_back(maxFullExt[0]);
-				maxVarExt.push_back(maxFullExt[1]);
-				maxVarExt.push_back(maxFullExt[2]);
+				minVarExt=minFullExt;
+				maxVarExt=maxFullExt;
 			}
 			else {
 				for (int j=0; j<3; j++) {
