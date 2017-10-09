@@ -105,6 +105,8 @@ int ContourRenderer::_paintGL() {
 
 int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr) {
 
+    EnableClipToBox();
+
     ContourParams *cParams = (ContourParams *)GetActiveParams();
 
     //Set up lighting
@@ -170,6 +172,9 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr) {
         }
     }
     glEnd();
+
+    DisableClippingPlanes();
+
     return 0;
 }
 /*
