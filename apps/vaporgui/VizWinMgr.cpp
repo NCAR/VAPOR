@@ -844,10 +844,12 @@ void VizWinMgr::UpdateRouters() {
 	for (int i=0; i<tabNames.size(); i++) {
 		string tab = tabNames[i];
 
+
 		EventRouter* eRouter = GetEventRouter(tab);
 		RenderEventRouter *reRouter = dynamic_cast<RenderEventRouter*>(eRouter);
 
 		if (reRouter) continue;	// Skip render event routers
+		cout << "updating tab: " << tab << endl;
 
 		QWidget* w = dynamic_cast<QWidget*> (eRouter);
 		assert(w);
