@@ -3,7 +3,7 @@
 
 #include <ostream>
 #include <vector>
-#include <vapor/RegularGrid.h>
+#include <vapor/Grid.h>
 
 struct kdtree;
 
@@ -25,44 +25,44 @@ public:
  //! Construct a 2D k-d tree for a structured grid
  //!
  //! Creates a 2D k-d space partitioning tree for a structured grid
- //! defined by a pair of RegularGrid instances. The data values of  the
- //! \p xrg and \p yrg
- //! RegularGrid instances provide the coordinates of all of the points
+ //! defined by a pair of Grid instances. The data values of  the
+ //! \p xg and \p yg
+ //! Grid instances provide the coordinates of all of the points
  //! to be inserted into the k-d tree.
  //!
- //! \param[in] xrg A RegularGrid instance giving the X user coordinates
+ //! \param[in] xg A Grid instance giving the X user coordinates
  //! for each point in the k-d tree.
- //! \param[in] yrg A RegularGrid instance giving the Y user coordinates
- //! for each point in the k-d tree. The \p xrg and \p yrg RegularGrid
+ //! \param[in] yg A Grid instance giving the Y user coordinates
+ //! for each point in the k-d tree. The \p xg and \p yg Grid
  //! instances must have identical configurations, differing only in their
  //! data values.
  //!
- //! \sa RegularGrid()
+ //! \sa Grid()
  //
  KDTreeRG(
-	const RegularGrid &xrg,
-	const RegularGrid &yrg
+	const Grid &xg,
+	const Grid &yg
  );
 
  //! Construct a 3D k-d tree for a structured grid
  //!
  //! Creates a 3D k-d space partitioning tree for a structured grid
  //!
- //! \param[in] xrg A RegularGrid instance giving the X user coordinates
+ //! \param[in] xg A Grid instance giving the X user coordinates
  //! for each point in the k-d tree.
- //! \param[in] yrg A RegularGrid instance giving the Y user coordinates
+ //! \param[in] yg A Grid instance giving the Y user coordinates
  //! for each point in the k-d tree.
- //! \param[in] zrg A RegularGrid instance giving the Z user coordinates
- //! for each point in the k-d tree. The \p xrg, \p yrg, and \p yrg RegularGrid
+ //! \param[in] zg A Grid instance giving the Z user coordinates
+ //! for each point in the k-d tree. The \p xg, \p yg, and \p yg Grid
  //! instances must have identical configurations, differing only in their
  //! data values.
  //!
- //! \sa KDTreeRG(const RegularGrid, const RegularGrid)
+ //! \sa KDTreeRG(const Grid, const Grid)
  //
  KDTreeRG(
-	const RegularGrid &xrg,
-	const RegularGrid &yrg,
-	const RegularGrid &zrg
+	const Grid &xg,
+	const Grid &yg,
+	const Grid &zg
  );
  virtual ~KDTreeRG();
 
@@ -70,8 +70,8 @@ public:
  //!
  //! This method returns the \a ijk indeces of the grid vertex nearest, by 
  //! measure of Cartesian distance, a specified point. The returned
- //! indeces may be used to access the \p xrg, \p yrg, and \p zrg 
- //! RegularGrid instances passed into the constructor.
+ //! indeces may be used to access the \p xg, \p yg, and \p zg 
+ //! Grid instances passed into the constructor.
  //!
  //! \param[in] coordu A 2D or 3D vector of user coordinates specifying
  //! the location of a point in space.
@@ -95,7 +95,7 @@ public:
  //! constructor.
  //!
  //! This method returns a two or three element vector containing the 
- //! dimensions of the RegularGrid class instances passed to the 
+ //! dimensions of the Grid class instances passed to the 
  //! constructor. 
  //!
  //! \retval vector 
@@ -135,9 +135,9 @@ public:
  //! until this class instance is destroyed.
  //!
  //! \param[in] min A two or three element vector of \a ijk coordinate indeces
- //! of the first grid point defined by \a xrg, \a yrg, and \a zrg.
+ //! of the first grid point defined by \a xg, \a yg, and \a zg.
  //! \param[in] max A two or three element vector of \a ijk coordinate indeces
- //! of the last grid point defined by \a xrg, \a yrg, and \a zrg.
+ //! of the last grid point defined by \a xg, \a yg, and \a zg.
  //!
  //! \note \p kdtreerg is shallow copied and the referenced contents 
  //! should remain valid
@@ -154,8 +154,8 @@ public:
  //!
  //! This method returns the \a ijk index of the grid vertex nearest, by 
  //! measure of Cartesian distance, a specified point. The returned
- //! indecies may be used to access the \p xrg, \p yrg, and \p zrg 
- //! RegularGrid instances passed into the constructor used to 
+ //! indecies may be used to access the \p xg, \p yg, and \p zg 
+ //! Grid instances passed into the constructor used to 
  //! create \p kdtreerg.
  //!
  //! \param[in] coordu A 2D or 3D vector of user coordinates specifying

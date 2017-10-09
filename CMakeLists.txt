@@ -40,6 +40,7 @@ set (ABS_TOP ${PROJECT_SOURCE_DIR})
 set (QTDIR )
 set (PYTHONDIR )
 set (PYTHONVERSION )
+set (NUMPY_INCLUDE_DIR )
 set (THIRD_PARTY_LIB_DIR )
 set (THIRD_PARTY_INC_DIR )
 
@@ -52,8 +53,8 @@ link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
-include_directories (${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/numpy/core/include)
-link_directories (${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/lib-dynload)
+include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
+link_directories (${PYTHONPATH}/lib-dynload)
 
 find_package (OpenGL REQUIRED)
 include_directories (${OPENGL_INCLUDE_DIRS})
@@ -76,7 +77,7 @@ else ()
 	set (INSTALL_LIB_DIR lib)
 	set (INSTALL_LAUNCHER_DIR bin)
 	set (INSTALL_SHARE_DIR share)
-	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install_solid")
+	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install")
 endif ()
 
 add_subdirectory (apps)
@@ -101,6 +102,7 @@ set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 set (CPACK_PACKAGE_EXECUTABLES vaporgui;VaporGUI)
 set (CPACK_BINARY_STGZ OFF)
 set (CPACK_BINARY_TGZ OFF)
+set (CPACK_BINARY_TZ OFF)
 
 if (WIN32)
 	set (PRE_INSTALL_LOCAL_PATH "buildutils/NSIS.preInstall.ini")
@@ -119,11 +121,16 @@ if (WIN32)
 			DESTINATION ${INSTALL_BIN_DIR}
 			COMPONENT Dependencies
 			)
+		install (
+			DIRECTORY ${PYTHONPATH}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
 	endif (${GENERATE_FULL_INSTALLER})
 
 	set (CPACK_NSIS_MODIFY_PATH ON)
 	set (CPACK_NSIS_URL_INFO_ABOUT "https://www.vapor.ucar.edu")
-	set (CPACK_NSIS_EXECUTABLES_DIRECTORY "") # Manually fixed in template file
+	set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".") # Manually fixed in template file
 	set (CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
 	set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 	
@@ -138,7 +145,7 @@ endif (WIN32)
 if (APPLE)
 	if (${GENERATE_FULL_INSTALLER})
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${THIRD_PARTY_LIB_DIR}/python2.7)
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH})
 		message (${INSTALL_FRAMEWORKS})
 		install (
 			FILES ${INSTALL_LIBS}
@@ -155,16 +162,19 @@ if (APPLE)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
-	set (EXTRA_LIBS_SEARCH GLU expat)
+	set (CPACK_BINARY_STGZ ON)
+	set (EXTRA_LIBS_SEARCH GLU expat quadmath glut)
 	add_custom_target (
 		linuxpreinstall
 		COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH} >
-		${CMAKE_SOURCE_DIR}/buildutils/LinuxInstallLibs.txt
-		COMMAND touch ~/TEST
+		${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt
+		COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
 		)
 	if (${GENERATE_FULL_INSTALLER})
-		file (STRINGS buildutils/LinuxInstallLibs.txt INSTALL_LIBS)
+		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
+			file (STRINGS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt INSTALL_LIBS)
+		endif ()
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -177,5 +187,20 @@ if (UNIX AND NOT APPLE)
 			)
 	endif (${GENERATE_FULL_INSTALLER})
 endif (UNIX AND NOT APPLE)
+
+if (UNIX AND NOT APPLE)
+	add_custom_target (
+		installer
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+		COMMAND cpack .
+		DEPENDS linuxpreinstall
+		)
+else ()
+	add_custom_target (
+		installer
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+		COMMAND cpack .
+		)
+endif ()
 
 include (CPack)

@@ -30,13 +30,13 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <Python.h>
 #include "ui_errMsg.h"
 #include "ui_plotWindow.h"
 #include "RangeController.h"
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
 #include "PlotParams.h"
+#include <vapor/MyPython.h>
 
 using namespace std;
 
