@@ -1670,7 +1670,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
             if (_plot) {
                 PlotParams *params;
                 params = (PlotParams *)paramsMgr->GetParams("PlotParams");
-                _plot->updateParams(params);
+                _plot->Update(params);
             }
             _vizWinMgr->UpdateRouters();
             _paramsStateChange = false;
