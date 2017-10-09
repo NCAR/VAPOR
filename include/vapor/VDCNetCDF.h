@@ -158,6 +158,7 @@ public:
     //! \copydoc VDC::ReadRegionBlock()
     //
     int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
+    int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region);
 
     //! \copydoc VDC::PutVar()
     //

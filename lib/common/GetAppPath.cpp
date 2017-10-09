@@ -59,6 +59,10 @@ string get_path_from_bundle(const string &app)
 
     if (s.find(BINDIR) != string::npos) return "";
 
+    // Spaces are returned as %20. Quick fix below
+    size_t start;
+    while ((start = s.find("%20")) != std::string::npos) s.replace(start, 3, " ");
+
     path = s;
     return (path);
 }

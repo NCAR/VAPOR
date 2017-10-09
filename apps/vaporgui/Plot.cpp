@@ -21,7 +21,7 @@
     #pragma warning(disable : 4100)
 #endif
 
-#include <Python.h>
+#include "Plot.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -33,12 +33,10 @@
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <vapor/MyPython.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgr.h>
 //#include "params.h"
 //#include "vizwinmgr.h"
-#include "Plot.h"
 #include "RangeController.h"
 
 #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION

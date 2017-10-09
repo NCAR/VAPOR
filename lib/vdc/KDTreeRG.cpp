@@ -17,16 +17,16 @@ KDTreeRG::KDTreeRG()
     _dims.clear();
 }
 
-KDTreeRG::KDTreeRG(const RegularGrid &xrg, const RegularGrid &yrg)
+KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg)
 {
-    assert(xrg.GetDimensions() == yrg.GetDimensions());
-    assert(xrg.GetDimensions().size() == 2);
+    assert(xg.GetDimensions() == yg.GetDimensions());
+    assert(xg.GetDimensions().size() <= 2);
 
     _kdtree = NULL;
     _offsets = NULL;
     _dims.clear();
 
-    _dims = xrg.GetDimensions();
+    _dims = xg.GetDimensions();
 
     // number of elements
     //
@@ -43,8 +43,8 @@ KDTreeRG::KDTreeRG(const RegularGrid &xrg, const RegularGrid &yrg)
 
     // Store the point coordinates and associated offsets in the k-d tree
     //
-    RegularGrid::ConstIterator xitr = xrg.cbegin();
-    RegularGrid::ConstIterator yitr = yrg.cbegin();
+    Grid::ConstIterator xitr = xg.cbegin();
+    Grid::ConstIterator yitr = yg.cbegin();
 
     float posXY[2];
     for (size_t i = 0; i < nelem; ++i, ++xitr, ++yitr) {
@@ -55,7 +55,7 @@ KDTreeRG::KDTreeRG(const RegularGrid &xrg, const RegularGrid &yrg)
     }
 }
 
-KDTreeRG::KDTreeRG(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg)
+KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg, const Grid &zg)
 {
     // Not implemented yet!
     assert(0);

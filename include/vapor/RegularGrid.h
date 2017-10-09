@@ -45,6 +45,8 @@ public:
     RegularGrid() = default;
     virtual ~RegularGrid() = default;
 
+    virtual size_t GetNumCoordinates() const override;
+
     //! \copydoc Grid::GetUserExtents()
     //
     virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;

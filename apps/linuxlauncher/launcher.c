@@ -23,7 +23,8 @@ int main(int argc, char **argv)
     if (argc > 1 && !strcmp("--launcher-debug", argv[1])) {
         debug = 1;
         argc--;
-        for (int i = 1; i < argc; i++) argv[i] = argv[i + 1];
+        int i;
+        for (i = 1; i < argc; i++) argv[i] = argv[i + 1];
         argv[argc] = 0;
     }
 #endif
@@ -32,6 +33,7 @@ int main(int argc, char **argv)
 
     strcat(path, "/lib");
     char *oldLibPath = getenv("LD_LIBRARY_PATH");
+    if (!oldLibPath) oldLibPath = "";
     char *newLibPath = malloc(strlen(oldLibPath) + strlen(path) + 2);
     strcpy(newLibPath, path);
     strcat(newLibPath, ":");

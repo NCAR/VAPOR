@@ -67,6 +67,8 @@ public:
     CurvilinearGrid() = default;
     virtual ~CurvilinearGrid() = default;
 
+    virtual size_t GetNumCoordinates() const override;
+
     // \copydoc GetGrid::GetUserExtents()
     //
     virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override

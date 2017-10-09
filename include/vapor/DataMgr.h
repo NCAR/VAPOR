@@ -8,6 +8,7 @@
 #include <vapor/RegularGrid.h>
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
+#include <vapor/UnstructuredGrid2D.h>
 #include <vapor/KDTreeRG.h>
 
 #ifndef DataMgvV3_0_h
@@ -719,7 +720,7 @@ private:
         std::vector<size_t> bmin;
         std::vector<size_t> bmax;
         int                 lock_counter;
-        float *             blks;
+        void *              blks;
     } region_t;
 
     // a list of all allocated regions
@@ -747,34 +748,52 @@ private:
     VAPoR::CurvilinearGrid *_make_grid_curvilinear(int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const std::vector<size_t> &dims, const std::vector<float *> &blkvec,
                                                    const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax);
 
+    void _ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
+                      UnstructuredGrid::Location &location,    // node,face, edge
+                      size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset) const;
+
+    UnstructuredGrid2D *_make_grid_unstructured2d(int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims, const vector<float *> &blkvec,
+                                                  const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<int *> &conn_blkvec, const vector<size_t> &conn_bs,
+                                                  const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax);
+
     VAPoR::Grid *_make_grid(int level, int lod, const VAPoR::DC::DataVar &var, const std::vector<size_t> &roi_dims, const std::vector<size_t> &dims, const std::vector<float *> &blkvec,
-                            const std::vector<std::vector<size_t>> &bsvec, const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec);
+                            const std::vector<std::vector<size_t>> &bsvec, const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec,
+                            const vector<int *> &conn_blkvec, const vector<vector<size_t>> &conn_bsvec, const vector<vector<size_t>> &conn_bminvec, const vector<vector<size_t>> &conn_bmaxvec);
+
+    enum GridType { UNDEFINED = 0, REGULAR, LAYERED, CURVILINEAR, UNSTRUC_2D, UNSTRUC_LAYERED };
+    GridType _get_grid_type(const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo) const;
 
     int _find_bounding_grid(size_t ts, string varname, int level, int lod, std::vector<double> min, std::vector<double> max, std::vector<size_t> &min_ui, std::vector<size_t> &max_ui);
 
     int _setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims,
-                        vector<vector<size_t>> &dimsvec, vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec,
-                        vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const;
+                        vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec,
+                        vector<vector<size_t>> &bmaxvec) const;
+
+    int _setupConnVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<vector<size_t>> &dims_at_levelvec,
+                       vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const;
 
     VAPoR::Grid *_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless);
 
     VAPoR::Grid *_getVariable(size_t ts, string varname, int level, int lod, std::vector<size_t> min, std::vector<size_t> max, bool lock, bool dataless);
 
-    float *_get_region_from_cache(size_t ts, string varname, int level, int lod, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax, bool lock);
+    template<typename T> T *_get_region_from_cache(size_t ts, string varname, int level, int lod, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax, bool lock);
 
-    float *_get_region_from_fs(size_t ts, string varname, int level, int lod, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax, bool lock);
+    template<typename T>
+    T *_get_region_from_fs(size_t ts, string varname, int level, int lod, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax, bool lock);
 
-    float *_get_region(size_t ts, string varname, int level, int nlevels, int lod, int nlods, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax,
-                       bool lock);
-    int    _get_regions(size_t ts, const std::vector<string> &varnames, int level, int lod, bool lock, const std::vector<std::vector<size_t>> &bsvec, const std::vector<std::vector<size_t>> &bminvec,
-                        const std::vector<std::vector<size_t>> &bmaxvec, std::vector<float *> &blkvec);
+    template<typename T>
+    T *_get_region(size_t ts, string varname, int level, int nlevels, int lod, int nlods, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax, bool lock);
 
-    void _unlock_blocks(const float *blks);
+    template<typename T>
+    int _get_regions(size_t ts, const std::vector<string> &varnames, int level, int lod, bool lock, const std::vector<std::vector<size_t>> &bsvec, const std::vector<std::vector<size_t>> &bminvec,
+                     const std::vector<std::vector<size_t>> &bmaxvec, std::vector<T *> &blkvec);
+
+    void _unlock_blocks(const void *blks);
 
     std::vector<string> _get_native_variables() const;
     std::vector<string> _get_derived_variables() const;
 
-    float *_alloc_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, std::vector<size_t> bs, int element_sz, bool lock, bool fill);
+    void *_alloc_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, std::vector<size_t> bs, int element_sz, bool lock, bool fill);
 
     void _free_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax);
 
@@ -784,7 +803,7 @@ private:
     int _level_correction(string varname, int &level) const;
     int _lod_correction(string varname, int &lod) const;
 
-    const KDTreeRG *_getKDTree2D(int level, int lod, const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<DC::CoordVar> &cvarsinfo, const RegularGrid &xrg, const RegularGrid &yrg);
+    const KDTreeRG *_getKDTree2D(int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg);
 };
 
 };    // namespace VAPoR

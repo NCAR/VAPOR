@@ -18,7 +18,13 @@
 using namespace std;
 using namespace VAPoR;
 
-StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, bs, blks, dims.size()) { assert(bs.size() == 2 || bs.size() == 3); }
+StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, bs, blks, dims.size())
+{
+    assert(bs.size() == 2 || bs.size() == 3);
+
+    _cellDims = Grid::GetDimensions();
+    for (int i = 0; i < _cellDims.size(); i++) { _cellDims[i]--; }
+}
 
 bool StructuredGrid::GetCellNodes(const std::vector<size_t> &cindices, std::vector<vector<size_t>> &nodes) const
 {
@@ -195,141 +201,6 @@ void StructuredGrid::ClampCoord(std::vector<double> &coords) const
             while (coords[i] > maxu[i]) coords[i] -= maxu[i] - minu[i];
         }
     }
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Iterators
-//
-/////////////////////////////////////////////////////////////////////////////
-
-StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG(const StructuredGrid *rg, bool begin) : ConstNodeIteratorAbstract()
-{
-    _dims = rg->GetDimensions();
-    _index = vector<size_t>(_dims.size(), 0);
-    _lastIndex = _index;
-    _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];
-
-    if (!begin) { _index = _lastIndex; }
-}
-
-StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs) : ConstNodeIteratorAbstract()
-{
-    _dims = rhs._dims;
-    _index = rhs._index;
-    _lastIndex = rhs._lastIndex;
-}
-
-StructuredGrid::ConstNodeIteratorSG::ConstNodeIteratorSG() : ConstNodeIteratorAbstract()
-{
-    _dims.clear();
-    _index.clear();
-    _lastIndex.clear();
-}
-
-void StructuredGrid::ConstNodeIteratorSG::next()
-{
-    _index[0]++;
-    if (_index[0] < _dims[0]) { return; }
-
-    _index[0] = 0;
-    _index[1]++;
-    if (_index[1] < _dims[1] || _dims.size() == 2) { return; }
-
-    _index[1] = 0;
-    _index[2]++;
-    if (_index[2] < _dims[2] || _dims.size() == 3) { return; }
-    assert(0 && "Invalid state");
-}
-
-StructuredGrid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG(const StructuredGrid *rg, const std::vector<double> &minu, const std::vector<double> &maxu)
-: ConstNodeIteratorSG(rg, true), _pred(minu, maxu)
-{
-    _coordItr = rg->ConstCoordBegin();
-
-    // Advance to first node inside box
-    //
-    if (!_pred(*_coordItr)) { next(); }
-}
-
-StructuredGrid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG(const ConstNodeIteratorBoxSG &rhs) : ConstNodeIteratorSG()
-{
-    _coordItr = rhs._coordItr;
-    _pred = rhs._pred;
-}
-
-StructuredGrid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG() : ConstNodeIteratorSG() {}
-
-void StructuredGrid::ConstNodeIteratorBoxSG::next()
-{
-    do {
-        ConstNodeIteratorSG::next();
-        ++_coordItr;
-    } while (!_pred(*_coordItr) && _index != _lastIndex);
-}
-
-StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG(const StructuredGrid *rg, bool begin) : ConstCellIteratorAbstract()
-{
-    _dims = rg->GetDimensions();
-    _index = vector<size_t>(_dims.size(), 0);
-    _lastIndex = _index;
-    _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1] - 1;
-    if (!begin) { _index = _lastIndex; }
-}
-
-StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG(const ConstCellIteratorSG &rhs) : ConstCellIteratorAbstract()
-{
-    _dims = rhs._dims;
-    _index = rhs._index;
-    _lastIndex = rhs._lastIndex;
-}
-
-StructuredGrid::ConstCellIteratorSG::ConstCellIteratorSG() : ConstCellIteratorAbstract()
-{
-    _dims.clear();
-    _index.clear();
-    _lastIndex.clear();
-}
-
-void StructuredGrid::ConstCellIteratorSG::next()
-{
-    _index[0]++;
-    if (_index[0] < (_dims[0] - 1)) { return; }
-
-    _index[0] = 0;
-    _index[1]++;
-    if (_index[1] < (_dims[1] - 1) || _dims.size() == 2) { return; }
-
-    _index[1] = 0;
-    _index[2]++;
-    if (_index[2] < (_dims[2] - 1) || _dims.size() == 3) { return; }
-    assert(0 && "Invalid state");
-}
-
-StructuredGrid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const StructuredGrid *rg, const std::vector<double> &minu, const std::vector<double> &maxu)
-: ConstCellIteratorSG(rg, true), _pred(minu, maxu)
-{
-    _coordItr = rg->ConstCoordBegin();
-
-    // Advance to first node inside box
-    //
-    if (!_pred(*_coordItr)) { next(); }
-}
-
-StructuredGrid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs) : ConstCellIteratorSG()
-{
-    _coordItr = rhs._coordItr;
-    _pred = rhs._pred;
-}
-
-StructuredGrid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG() : ConstCellIteratorSG() {}
-
-void StructuredGrid::ConstCellIteratorBoxSG::next()
-{
-    do {
-        ConstCellIteratorSG::next();
-        ++_coordItr;
-    } while (!_pred(*_coordItr) && _index != _lastIndex);
 }
 
 namespace VAPoR {

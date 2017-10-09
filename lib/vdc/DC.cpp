@@ -28,16 +28,19 @@ DC::BaseVar::BaseVar(string name, string units, XType type, std::vector<size_t> 
     _cratios.push_back(1);
 }
 
-void DC::Mesh::_Mesh(string name, std::vector<string> coord_vars, int max_nodes_per_face, Mesh::Type mtype)
+void DC::Mesh::_Mesh(string name, std::vector<string> coord_vars, int max_nodes_per_face, int max_faces_per_node, Mesh::Type mtype)
 {
     _name.clear();
     _dim_names.clear();
     _coord_vars.clear();
     _max_nodes_per_face = 1;
+    _max_faces_per_node = 1;
     _node_dim_name.clear();
     _face_dim_name.clear();
     _layers_dim_name.clear();
     _face_node_var.clear();
+    _node_face_var.clear();
+    _node_face_var.clear();
     _face_edge_var.clear();
     _face_face_var.clear();
     _edge_dim_name.clear();
@@ -48,36 +51,40 @@ void DC::Mesh::_Mesh(string name, std::vector<string> coord_vars, int max_nodes_
     _name = name;
     _coord_vars = coord_vars;
     _max_nodes_per_face = max_nodes_per_face;
+    _max_faces_per_node = max_faces_per_node;
     _mtype = mtype;
 }
 
 DC::Mesh::Mesh(std::string name, std::vector<string> dim_names, std::vector<string> coord_vars)
 {
-    _Mesh(name, coord_vars, 4, STRUCTURED);
+    _Mesh(name, coord_vars, 4, 4, STRUCTURED);
 
     if (_name.empty()) { _name = join(dim_names, "x"); }
 
     _dim_names = dim_names;
 }
 
-DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, std::string node_dim_name, std::string face_dim_name, std::vector<std::string> coord_vars, std::string face_node_var)
+DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per_node, std::string node_dim_name, std::string face_dim_name, std::vector<std::string> coord_vars,
+               std::string face_node_var, std::string node_face_var)
 {
-    _Mesh(name, coord_vars, max_nodes_per_face, UNSTRUC_2D);
+    _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_2D);
 
     _node_dim_name = node_dim_name;
     _face_dim_name = face_dim_name;
     _face_node_var = face_node_var;
+    _node_face_var = node_face_var;
 }
 
-DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, std::string node_dim_name, std::string face_dim_name, std::string layers_dim_name, std::vector<std::string> coord_vars,
-               std::string face_node_var)
+DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per_node, std::string node_dim_name, std::string face_dim_name, std::string layers_dim_name,
+               std::vector<std::string> coord_vars, std::string face_node_var, std::string node_face_var)
 {
-    _Mesh(name, coord_vars, max_nodes_per_face, UNSTRUC_LAYERED);
+    _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_LAYERED);
 
     _node_dim_name = node_dim_name;
     _face_dim_name = face_dim_name;
     _layers_dim_name = layers_dim_name;
     _face_node_var = face_node_var;
+    _node_face_var = node_face_var;
 }
 
 size_t DC::Mesh::GetTopologyDim() const { return (_coord_vars.size()); }
@@ -146,7 +153,18 @@ bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimensio
     status = GetMesh(mname, mesh);
     if (!status) return (false);
 
-    vector<string> dimnames = mesh.GetDimNames();
+    vector<string> dimnames;
+    if (mesh.GetMeshType() == Mesh::STRUCTURED) {
+        dimnames = mesh.GetDimNames();
+    } else {
+        switch (var.GetSamplingLocation()) {
+        case Mesh::NODE: dimnames.push_back(mesh.GetNodeDimName()); break;
+        case Mesh::EDGE: dimnames.push_back(mesh.GetEdgeDimName()); break;
+        case Mesh::FACE: dimnames.push_back(mesh.GetFaceDimName()); break;
+        case Mesh::VOLUME: assert(0 && "VOLUME cells not supported"); break;
+        }
+        if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) { dimnames.push_back(mesh.GetLayersDimName()); }
+    }
 
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim;
@@ -207,6 +225,26 @@ bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimensi
     return (true);
 }
 
+bool DC::_getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+{
+    dimensions.clear();
+
+    AuxVar var;
+    bool   status = GetAuxVarInfo(varname, var);
+    if (!status) return (false);
+
+    vector<string> dimnames = var.GetDimNames();
+
+    for (int i = 0; i < dimnames.size(); i++) {
+        Dimension dim;
+        status = GetDimension(dimnames[i], dim);
+        if (!status) return (false);
+
+        dimensions.push_back(dim);
+    }
+    return (true);
+}
+
 bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const
 {
     dimensions.clear();
@@ -215,6 +253,8 @@ bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &d
         return (_getDataVarDimensions(varname, spatial, dimensions));
     } else if (IsCoordVar(varname)) {
         return (_getCoordVarDimensions(varname, spatial, dimensions));
+    } else if (IsAuxVar(varname)) {
+        return (_getAuxVarDimensions(varname, dimensions));
     } else {
         return (false);
     }
@@ -397,6 +437,33 @@ bool DC::GetVarCoordVars(string varname, bool spatial, std::vector<string> &coor
     return (true);
 }
 
+bool DC::GetVarConnVars(string varname, string &face_node_var, string &node_face_var, string &face_edge_var, string &face_face_var, string &edge_node_var, string &edge_face_var) const
+{
+    face_node_var.clear();
+    node_face_var.clear();
+    face_edge_var.clear();
+    face_face_var.clear();
+    edge_node_var.clear();
+    edge_face_var.clear();
+
+    DataVar dvar;
+    bool    status = GetDataVarInfo(varname, dvar);
+    if (!status) return (false);
+
+    Mesh m;
+    status = GetMesh(dvar.GetMeshName(), m);
+    if (!status) return (false);
+
+    face_node_var = m.GetFaceNodeVar();
+    node_face_var = m.GetNodeFaceVar();
+    face_edge_var = m.GetFaceEdgeVar();
+    face_face_var = m.GetFaceFaceVar();
+    edge_node_var = m.GetEdgeNodeVar();
+    edge_face_var = m.GetEdgeFaceVar();
+
+    return (true);
+}
+
 bool DC::GetNumDimensions(string varname, size_t &ndim) const
 {
     ndim = 0;
@@ -454,10 +521,12 @@ std::ostream &operator<<(std::ostream &o, const DC::Mesh &m)
     o << endl;
 
     o << "   MaxNodesPerFace: " << m._max_nodes_per_face << endl;
+    o << "   MaxFacesPerNode: " << m._max_faces_per_node << endl;
     o << "   NodeDimName: " << m._node_dim_name << endl;
     o << "   FaceDimName: " << m._face_dim_name << endl;
     o << "   LayersDimName: " << m._layers_dim_name << endl;
     o << "   FaceNodeVar: " << m._face_node_var << endl;
+    o << "   NodeFaceVar: " << m._node_face_var << endl;
     o << "   FaceEdgeVar: " << m._face_edge_var << endl;
     o << "   FaceFaceVar: " << m._face_face_var << endl;
     o << "   EdgeDimName: " << m._edge_dim_name << endl;

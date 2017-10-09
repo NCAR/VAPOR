@@ -99,11 +99,13 @@ void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 
 void Grid::GetRange(float range[2]) const
 {
-    Grid::ConstIterator itr;
-    bool                first = true;
+    bool first = true;
     range[0] = range[1] = GetMissingValue();
-    float missingValue = GetMissingValue();
-    for (itr = this->cbegin(); itr != this->cend(); ++itr) {
+    float               missingValue = GetMissingValue();
+    Grid::ConstIterator itr;
+    Grid::ConstIterator enditr = this->cend();
+    //	for (itr = this->cbegin(); itr!=this->cend(); ++itr) {
+    for (itr = this->cbegin(); itr != enditr; ++itr) {
         if (first && *itr != missingValue) {
             range[0] = range[1] = *itr;
             first = false;
@@ -177,6 +179,141 @@ void Grid::SetInterpolationOrder(int order)
     _interpolationOrder = order;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Iterators
+//
+/////////////////////////////////////////////////////////////////////////////
+
+Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : ConstNodeIteratorAbstract()
+{
+    _dims = g->GetNodeDimensions();
+    _index = vector<size_t>(_dims.size(), 0);
+    _lastIndex = _index;
+    if (_dims.size()) _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];
+
+    if (!begin) { _index = _lastIndex; }
+}
+
+Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs) : ConstNodeIteratorAbstract()
+{
+    _dims = rhs._dims;
+    _index = rhs._index;
+    _lastIndex = rhs._lastIndex;
+}
+
+Grid::ConstNodeIteratorSG::ConstNodeIteratorSG() : ConstNodeIteratorAbstract()
+{
+    _dims.clear();
+    _index.clear();
+    _lastIndex.clear();
+}
+
+void Grid::ConstNodeIteratorSG::next()
+{
+    if (!_index.size()) return;
+
+    _index[0]++;
+    if (_index[0] < _dims[0] || _dims.size() == 1) { return; }
+
+    _index[0] = 0;
+    _index[1]++;
+    if (_index[1] < _dims[1] || _dims.size() == 2) { return; }
+
+    _index[1] = 0;
+    _index[2]++;
+    if (_index[2] < _dims[2] || _dims.size() == 3) { return; }
+    assert(0 && "Invalid state");
+}
+
+Grid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG(const Grid *g, const std::vector<double> &minu, const std::vector<double> &maxu) : ConstNodeIteratorSG(g, true), _pred(minu, maxu)
+{
+    _coordItr = g->ConstCoordBegin();
+
+    // Advance to first node inside box
+    //
+    if (!_pred(*_coordItr)) { next(); }
+}
+
+Grid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG(const ConstNodeIteratorBoxSG &rhs) : ConstNodeIteratorSG()
+{
+    _coordItr = rhs._coordItr;
+    _pred = rhs._pred;
+}
+
+Grid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG() : ConstNodeIteratorSG() {}
+
+void Grid::ConstNodeIteratorBoxSG::next()
+{
+    do {
+        ConstNodeIteratorSG::next();
+        ++_coordItr;
+    } while (!_pred(*_coordItr) && _index != _lastIndex);
+}
+
+Grid::ConstCellIteratorSG::ConstCellIteratorSG(const Grid *g, bool begin) : ConstCellIteratorAbstract()
+{
+    _dims = g->GetCellDimensions();
+    _index = vector<size_t>(_dims.size(), 0);
+    _lastIndex = _index;
+    _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];
+    if (!begin) { _index = _lastIndex; }
+}
+
+Grid::ConstCellIteratorSG::ConstCellIteratorSG(const ConstCellIteratorSG &rhs) : ConstCellIteratorAbstract()
+{
+    _dims = rhs._dims;
+    _index = rhs._index;
+    _lastIndex = rhs._lastIndex;
+}
+
+Grid::ConstCellIteratorSG::ConstCellIteratorSG() : ConstCellIteratorAbstract()
+{
+    _dims.clear();
+    _index.clear();
+    _lastIndex.clear();
+}
+
+void Grid::ConstCellIteratorSG::next()
+{
+    _index[0]++;
+    if (_index[0] < (_dims[0]) || _dims.size() == 1) { return; }
+
+    _index[0] = 0;
+    _index[1]++;
+    if (_index[1] < (_dims[1]) || _dims.size() == 2) { return; }
+
+    _index[1] = 0;
+    _index[2]++;
+    if (_index[2] < (_dims[2]) || _dims.size() == 3) { return; }
+    assert(0 && "Invalid state");
+}
+
+Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const Grid *g, const std::vector<double> &minu, const std::vector<double> &maxu) : ConstCellIteratorSG(g, true), _pred(minu, maxu)
+{
+    _coordItr = g->ConstCoordBegin();
+
+    // Advance to first node inside box
+    //
+    if (!_pred(*_coordItr)) { next(); }
+}
+
+Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs) : ConstCellIteratorSG()
+{
+    _coordItr = rhs._coordItr;
+    _pred = rhs._pred;
+}
+
+Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG() : ConstCellIteratorSG() {}
+
+void Grid::ConstCellIteratorBoxSG::next()
+{
+    do {
+        ConstCellIteratorSG::next();
+        ++_coordItr;
+    } while (!_pred(*_coordItr) && _index != _lastIndex);
+}
+
 //
 //
 // Iterators
@@ -190,7 +327,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     _rg = rg;
     _index = vector<size_t>(dims.size(), 0);
     _end_index = vector<size_t>(dims.size(), 0);
-    _end_index[dims.size() - 1] = dims[dims.size() - 1];
+    if (dims.size()) _end_index[dims.size() - 1] = dims[dims.size() - 1];
     if (!begin || !rg->GetBlks().size()) {
         _index = _end_index;
         return;
@@ -308,6 +445,8 @@ template<class T> Grid::ForwardIterator<T> Grid::ForwardIterator<T>::operator++(
 
 template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=(const long int &offset)
 {
+    if (!_index.size()) return (*this);
+
     const vector<size_t> &dims = _rg->GetDimensions();
     const vector<size_t> &bdims = rg->GetDimensionInBlks();
     const vector<size_t> &bs = rg->GetBlockSize();

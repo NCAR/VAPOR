@@ -155,7 +155,8 @@ int main(int argc, char **argv)
 
     size_t                     index = 0;
     RegularGrid::ConstIterator itr;
-    for (itr = rg->begin(); itr != rg->end(); ++itr) {
+    RegularGrid::ConstIterator enditr = rg->end();
+    for (itr = rg->begin(); itr != enditr; ++itr) {
         assert(*itr == (float)index);
         index++;
     }

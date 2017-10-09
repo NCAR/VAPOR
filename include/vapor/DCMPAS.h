@@ -71,6 +71,10 @@ public:
     //!
     virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const;
 
+    //! \copydoc DC::GetAuxVarInfo()
+    //
+    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const;
+
     //! \copydoc DC::GetBaseVarInfo()
     //
     virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
@@ -82,11 +86,11 @@ public:
     // override parent class!!
     virtual std::vector<string> GetDataVarNames(int ndim, bool spatial) const;
 
-    virtual std::vector<string> GetAuxVarNames() const { return (vector<string>()); }
-
     //! \copydoc DC::GetCoordVarNames()
     //!
     virtual std::vector<string> GetCoordVarNames() const;
+
+    virtual std::vector<string> GetAuxVarNames() const;
 
     //! \copydoc DC::GetCoordVarNames()
     //!
@@ -130,12 +134,8 @@ public:
 
     //! \copydoc DC::Read()
     //!
-    int virtual Read(float *data);
-    int virtual Read(int *data)
-    {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
+    virtual int Read(float *data);
+    virtual int Read(int *data);
 
     //! \copydoc DC::ReadSlice()
     //!
@@ -148,6 +148,7 @@ public:
     //! \copydoc DC::ReadRegionBlock()
     //!
     virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (DCMPAS::Read(region)); }
 
     //! \copydoc DC::GetVar()
     //!
@@ -181,7 +182,8 @@ private:
     NetCDFCollection *_ncdfc;
     VAPoR::UDUnits    _udunits;
 
-    int _ovr_fd;    // File descriptor for currently opened file
+    int    _ovr_fd;         // File descriptor for currently opened file
+    string _ovr_varname;    // File name for currently opened file
 
     string                                      _proj4String;
     Proj4API *                                  _proj4API;
@@ -194,6 +196,9 @@ private:
     std::vector<string>                         _cellVars;
     std::vector<string>                         _pointVars;
     std::vector<string>                         _edgeVars;
+    Wasp::SmartBuf                              _nEdgesOnCellBuf;
+    Wasp::SmartBuf                              _lonCellSmartBuf;
+    Wasp::SmartBuf                              _lonVertexSmartBuf;
 
     Proj4API *_create_proj4api(double lonmin, double lonmax, double latmin, double latmax, string &proj4string) const;
 
@@ -214,6 +219,17 @@ private:
     int _InitAuxVars(NetCDFCollection *ncdfc);
     int _InitDataVars(NetCDFCollection *ncdfc);
 
+    vector<string> _GetSpatialDimNames(NetCDFCollection *ncdfc, string varname) const;
+
+    bool _isAtmosphere(NetCDFCollection *ncdfc) const;
+
+    int  _read_nEdgesOnCell(size_t ts);
+    void _addMissingFlag(int *data) const;
+    int  _readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartBuf);
+    int  _readCoordinates(size_t ts);
+
+    void _splitOnBoundary(string varname, int *connData) const;
+
     ///////////////////////////////////////////////////////////////////////////
     //
     //	Specializations of the NetCDFCollection::DerivedVar class used to
@@ -229,7 +245,7 @@ private:
     //
     class DerivedVarHorizontal : public NetCDFCollection::DerivedVar {
     public:
-        DerivedVarHorizontal(NetCDFCollection *ncdfc, string lonname, string latname, Proj4API *proj4API, bool lonflag, bool uGridFlag);
+        DerivedVarHorizontal(NetCDFCollection *ncdfc, string lonname, string latname, Proj4API *proj4API, bool lonflag, bool uGridFlag, bool degreesFlag);
         virtual ~DerivedVarHorizontal();
 
         virtual int                 Open(size_t ts);
@@ -249,6 +265,7 @@ private:
         string              _latname;          // name of latitude variable
         bool                _xflag;            // calculate X or Y Cartographic coordinates?
         bool                _uGridFlag;        // unstructured grid?
+        bool                _degreesFlag;      // Lat and lon are in degrees?
         bool                _oneDFlag;         // structured grid with lat and lon functions of one variable
         size_t              _time_dim;         // number of time steps
         string              _time_dim_name;    // Name of time dimension
