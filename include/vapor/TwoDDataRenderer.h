@@ -81,19 +81,99 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     virtual GLuint GetAttribIndex() const { return (_vertexDataAttr); }
 
   private:
+    class _grid_state_c {
+      public:
+        _grid_state_c() = default;
+        _grid_state_c(
+            int refLevel,
+            int lod,
+            string hgtVar,
+            string meshName,
+            size_t ts,
+            vector<double> minExts,
+            vector<double> maxExts) : _refLevel(refLevel), _lod(lod), _hgtVar(hgtVar), _meshName(meshName),
+                                      _ts(ts), _minExts(minExts), _maxExts(maxExts) {}
+
+        void clear() {
+            _refLevel = _lod = -1;
+            _hgtVar = _meshName = "";
+            _ts = 0;
+            _minExts.clear();
+            _maxExts.clear();
+        }
+
+        bool operator==(const _grid_state_c &rhs) const {
+            return (
+                _refLevel == rhs._refLevel &&
+                _lod == rhs._lod &&
+                _hgtVar == rhs._hgtVar &&
+                _meshName == rhs._meshName &&
+                _ts == rhs._ts &&
+                _minExts == rhs._minExts &&
+                _maxExts == rhs._maxExts);
+        }
+        bool operator!=(const _grid_state_c &rhs) const {
+            return (!(*this == rhs));
+        }
+
+      private:
+        int _refLevel;
+        int _lod;
+        string _hgtVar;
+        string _meshName;
+        size_t _ts;
+        vector<double> _minExts;
+        vector<double> _maxExts;
+    };
+
+    class _tex_state_c {
+      public:
+        _tex_state_c() = default;
+        _tex_state_c(
+            int refLevel,
+            int lod,
+            string varname,
+            size_t ts,
+            vector<double> minExts,
+            vector<double> maxExts) : _refLevel(refLevel), _lod(lod), _varname(varname),
+                                      _ts(ts), _minExts(minExts), _maxExts(maxExts) {}
+
+        void clear() {
+            _refLevel = _lod = -1;
+            _varname = "";
+            _ts = 0;
+            _minExts.clear();
+            _maxExts.clear();
+        }
+
+        bool operator==(const _tex_state_c &rhs) const {
+            return (
+                _refLevel == rhs._refLevel &&
+                _lod == rhs._lod &&
+                _varname == rhs._varname &&
+                _ts == rhs._ts &&
+                _minExts == rhs._minExts &&
+                _maxExts == rhs._maxExts);
+        }
+        bool operator!=(const _tex_state_c &rhs) const {
+            return (!(*this == rhs));
+        }
+
+      private:
+        int _refLevel;
+        int _lod;
+        string _varname;
+        size_t _ts;
+        vector<double> _minExts;
+        vector<double> _maxExts;
+    };
+
+    _grid_state_c _grid_state;
+    _tex_state_c _tex_state;
+
     GLsizei _texWidth;
     GLsizei _texHeight;
     size_t _texelSize;
-    size_t _currentTimestep;
-    int _currentRefLevel;
-    int _currentLod;
-    string _currentVarname;
-    vector<double> _currentBoxMinExts;
-    vector<double> _currentBoxMaxExts;
-    size_t _currentTimestepTex;
-    string _currentHgtVar;
-    vector<double> _currentBoxMinExtsTex;
-    vector<double> _currentBoxMaxExtsTex;
     SmartBuf _sb_verts;
     SmartBuf _sb_normals;
     SmartBuf _sb_indices;
@@ -145,6 +225,8 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     const GLvoid *_getTexture(DataMgr *dataMgr);
 
     int _getOrientation(DataMgr *dataMgr, string varname);
+
+    double _getDefaultZ(DataMgr *dataMgr, size_t ts) const;
 };
 }; // namespace VAPoR
 

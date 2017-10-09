@@ -2,8 +2,13 @@
 #ifndef _GeoImageTMS_h_
 #define _GeoImageTMS_h_
 
+#ifdef WIN32
+#include <geotiff/xtiffio.h>
+#include <geotiff/geotiff.h>
+#else
 #include <xtiffio.h>
 #include <geotiff.h>
+#endif
 #include <vapor/MyBase.h>
 #include <vapor/UDUnitsClass.h>
 #include "GeoTileMercator.h"

@@ -1596,8 +1596,6 @@ void Statistics::initRegion() {
 
             mv = rGrid->GetMissingValue();
 
-            RegularGrid::Iterator itr;
-
             vector<size_t> dims;
             dims = rGrid->GetDimensions(); //dims);
 
@@ -1630,6 +1628,135 @@ void Statistics::initRegion() {
         return success;
     }
 
+<<<<<<< HEAD
+=======
+#ifdef DEAD bool Statistics::calcMean(string varname) {
+    float mv;
+    float val = 0;
+    double sum = 0;
+    double tsMean = 0;
+    long count = 0;
+    long missing = 0;
+    float range[2];
+    bool varIs3D = false;
+    bool success = true;
+
+    if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end())
+        varIs3D = true;
+
+    int spMissing = 0;
+    for (int ts = _minTS; ts <= _maxTS; ts++) {
+        sum = 0;
+        missing = 0;
+        count = 0;
+
+        _rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
+
+        if (!_rGrid) {
+            success = false;
+            continue;
+        }
+
+        mv = _rGrid->GetMissingValue();
+
+        double c = 0.0;
+
+        vector<size_t> dims = _rGrid->GetDimensions();
+
+        // If _regionSelection==2, we are querying a single point.
+        // So here we just call GetValue at that point.
+        //
+        if (_regionSelection == 2) {
+            val = _rGrid->GetValue(_extents[0], _extents[1], _extents[2]);
+            if (val != mv) {
+                tsMean += val;
+            } else {
+                spMissing++;
+            }
+
+            // Generate min and max values for our single-point calculation
+            // Initialize min and max with the first timestep, then overwrite
+            // if necessary.
+            if (ts == _minTS) {
+                _stats[varname].min = val;
+                _stats[varname].max = val;
+            } else {
+                if (val < _stats[varname].min)
+                    _stats[varname].min = val;
+                if (val > _stats[varname].max)
+                    _stats[varname].max = val;
+            }
+
+            // If our missing value count is equal to the number of timesteps,
+            // then all queries for this point have given us a missing value.
+            // We must set the mean to mv, otherwise it will be set to its default of 0.
+            //
+            if (spMissing == _maxTS - _minTS + 1) {
+                tsMean = mv;
+            }
+        }
+
+        // We are selecting a range of values, so we need to query each one.
+        //
+        else {
+            int count = 0;
+
+            // Generate min and max values for our multi-point calculation
+            //
+            _rGrid->GetRange(range);
+            if (ts == _minTS) {
+                _stats[varname].min = range[0];
+                _stats[varname].max = range[1];
+            } else {
+                if (range[0] < _stats[varname].min)
+                    _stats[varname].min = range[0];
+                if (range[1] > _stats[varname].max)
+                    _stats[varname].max = range[1];
+            }
+
+            Grid::Iterator itr;
+            Grid::Iterator enditr = _rGrid->end();
+            for (itr = _rGrid->begin(); itr != enditr; ++itr) {
+                count++;
+                val = *itr;
+                if (val != mv) {
+                    double y = val - c;
+                    double t = sum + y;
+                    c = t - sum - y;
+                    sum = t;
+                } else
+                    missing++;
+            }
+
+            count = _vCoordMax[0] - _vCoordMin[0] + 1;
+            count *= (_vCoordMax[1] - _vCoordMin[1] + 1);
+            if (std::find(_vars3d.begin(), _vars3d.end(), varname) != _vars3d.end()) {
+                count *= (_vCoordMax[2] - _vCoordMin[2] + 1);
+            }
+
+            count -= missing;
+            //assert (count >= 0);
+            if (count == 0)
+                tsMean = mv;
+            else
+                tsMean += sum / (double)count;
+        }
+    }
+
+    // Subtracting spMissing in the denominator is a hack to accomodate
+    // missing values that arise during the single-point calculation.
+    // This is due to the fact that if we have a missing value during
+    // single-point calculations, discarding that sample also means discarding
+    // that entire timestep.  This must be accounted for when we average over time.
+    // spMissing will always be 0 when we sample volumes of data.
+    //
+    _stats[varname].mean = tsMean / (double)(_maxTS - _minTS - spMissing + 1);
+    return success;
+}
+#endif
+
+
+>>>>>>> e8ace7f5ad022a2e37afce367272c8c3e7596622
     void Statistics::getSinglePointTSStdDev(double &tsStdDev, int &globalCount,
                                             int &spMissing, double mean, VAPoR::Grid *rGrid) {
         float mv = rGrid->GetMissingValue();
@@ -1691,6 +1818,7 @@ void Statistics::initRegion() {
             }
 
             else {
+<<<<<<< HEAD
                 StructuredGrid::Iterator itr;
                 StructuredGrid::Iterator endItr;
                 endItr = rGrid->end();
@@ -1699,6 +1827,14 @@ void Statistics::initRegion() {
                 vector<size_t> dims;
                 dims = rGrid->GetDimensions();
                 for (itr = rGrid->begin(); itr != endItr; ++itr) {
+=======
+            Grid::Iterator itr;
+            Grid::Iterator enditr = rGrid->end();
+            double c = 0.0;
+            vector<size_t> dims;
+            dims = rGrid->GetDimensions();
+            for (itr = rGrid->begin(); itr != enditr; ++itr) {
+>>>>>>> e8ace7f5ad022a2e37afce367272c8c3e7596622
                     val = *itr;
 
                     if (val != mv) { //sum += val;
@@ -1785,12 +1921,20 @@ void Statistics::initRegion() {
             }
 
             else {
+<<<<<<< HEAD
                 StructuredGrid::ForwardIterator<StructuredGrid> itr;
                 StructuredGrid::ForwardIterator<StructuredGrid> endItr;
                 endItr = _rGrid->end();
                 double c = 0.0;
                 vector<size_t> dims = _rGrid->GetDimensions();
                 for (itr = _rGrid->begin(); itr != endItr; ++itr) {
+=======
+                Grid::ConstIterator itr;
+                Grid::ConstIterator enditr;
+                double c = 0.0;
+                vector<size_t> dims = _rGrid->GetDimensions();
+                for (itr = _rGrid->cbegin(); itr != enditr; ++itr) {
+>>>>>>> e8ace7f5ad022a2e37afce367272c8c3e7596622
                     val = *itr;
 
                     if (val != mv) { //sum += val;
@@ -1862,8 +2006,11 @@ void Statistics::initRegion() {
 
             float val;
             mv = _rGrid->GetMissingValue();
+<<<<<<< HEAD
             Grid::ConstIterator itr;
             //Grid::ForwardIterator itr;
+=======
+>>>>>>> e8ace7f5ad022a2e37afce367272c8c3e7596622
             // If _regionSelection==2, we are querying a single point.
             // So here we just call GetValue at that point.
             //
@@ -1873,10 +2020,17 @@ void Statistics::initRegion() {
                     allValues.push_back(val);
                 }
             } else {
+<<<<<<< HEAD
                 //StructuredGrid::ForwardIterator<StructuredGrid> endItr;
                 Grid::ForwardIterator<const Grid> endItr;
                 endItr = _rGrid->cend();
-                for (itr = _rGrid->cbegin(); itr != endItr; ++itr) {
+                for (itr = _rGrid->cbegin(); itr != endItr; ++itr) 
+=======
+            Grid::ConstIterator itr;
+            Grid::ConstIterator enditr = _rGrid->cend();
+            for (itr = _rGrid->cbegin(); itr != enditr; ++itr) 
+>>>>>>> e8ace7f5ad022a2e37afce367272c8c3e7596622
+                {
                     val = *itr;
 
                     if (val != mv)

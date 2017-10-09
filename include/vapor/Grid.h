@@ -1,6 +1,7 @@
 #ifndef _Grid_
 #define _Grid_
 
+#include <iostream>
 #include <ostream>
 #include <vector>
 #include <cassert>
@@ -86,6 +87,17 @@ class VDF_API Grid {
     const std::vector<size_t> &GetDimensions() const {
         return (_dims);
     }
+
+    //! Return number of coordinates per grid point.
+    //!
+    //! This method returns the number of coordinates per grid point. For
+    //! grids with 3D topological cells the number is 3. For 2D topological
+    //! cells the number is either 2 or 3
+    //
+    virtual size_t GetNumCoordinates() const = 0;
+
+    virtual const std::vector<size_t> &GetNodeDimensions() const = 0;
+    virtual const std::vector<size_t> &GetCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -456,8 +468,14 @@ class VDF_API Grid {
     //! which coordinate axes are periodic.
     //
     virtual void SetPeriodic(const std::vector<bool> &periodic) {
-        assert(periodic.size() == _topologyDimension);
-        _periodic = periodic;
+        _periodic.clear();
+        int i = 0;
+        for (; i < periodic.size() && i < GetNumCoordinates(); i++) {
+            _periodic.push_back(periodic[i]);
+        }
+        for (; i < GetNumCoordinates(); i++) {
+            _periodic.push_back(false);
+        }
     }
 
     //! Check for periodic boundaries
@@ -481,13 +499,19 @@ class VDF_API Grid {
     //!
     //! Return the smallest node ID. The default is zero
     //
-    virtual size_t GetNodeOffset() const { return (_nodeIDOffset); }
+    virtual long GetNodeOffset() const { return (_nodeIDOffset); }
+    void SetNodeOffset(long offset) {
+        _nodeIDOffset = offset;
+    }
 
     //! Get the linear offset to the cell IDs
     //!
     //! Return the smallest Cell ID. The default is zero
     //
-    virtual size_t GetCellOffset() const { return (_cellIDOffset); }
+    virtual long GetCellOffset() const { return (_cellIDOffset); }
+    void SetCellOffset(long offset) {
+        _cellIDOffset = offset;
+    }
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
@@ -624,6 +648,71 @@ class VDF_API Grid {
     typedef Grid::PolyIterator<ConstIndexType> ConstNodeIterator;
     typedef Grid::AbstractIterator<ConstIndexType> ConstNodeIteratorAbstract;
 
+    //! Cell index iterator. Iterates over grid cell indices
+    //
+    typedef Grid::PolyIterator<ConstIndexType> ConstCellIterator;
+    typedef Grid::AbstractIterator<ConstIndexType> ConstCellIteratorAbstract;
+
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    // Iterators
+    //
+    /////////////////////////////////////////////////////////////////////////////
+
+    //
+    // Node index iterator. Iterates over node indices
+    //
+    class ConstNodeIteratorSG : public Grid::ConstNodeIteratorAbstract {
+      public:
+        ConstNodeIteratorSG(const Grid *g, bool begin);
+        ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs);
+        ConstNodeIteratorSG();
+
+        virtual ~ConstNodeIteratorSG() {}
+
+        virtual void next();
+        virtual ConstIndexType &deref() const {
+            return (_index);
+        }
+        virtual const void *address() const { return this; };
+
+        virtual bool equal(const void *rhs) const {
+            const ConstNodeIteratorSG *itrptr =
+                static_cast<const ConstNodeIteratorSG *>(rhs);
+            return (_index == itrptr->_index);
+        }
+
+        virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(*this));
+        };
+
+      protected:
+        std::vector<size_t> _dims;
+        std::vector<size_t> _index;
+        std::vector<size_t> _lastIndex;
+    };
+
+    class ConstNodeIteratorBoxSG : public ConstNodeIteratorSG {
+      public:
+        ConstNodeIteratorBoxSG(
+            const Grid *g,
+            const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstNodeIteratorBoxSG(const ConstNodeIteratorBoxSG &rhs);
+        ConstNodeIteratorBoxSG();
+
+        virtual ~ConstNodeIteratorBoxSG() {}
+
+        virtual void next();
+
+        virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorBoxSG(*this));
+        };
+
+      private:
+        InsideBox _pred;
+        ConstCoordItr _coordItr;
+    };
+
     //! Return constant grid node coordinate iterator
     //!
     //! If \p minu and \p maxu are specified the iterator is constrained to
@@ -632,15 +721,79 @@ class VDF_API Grid {
     //! \param[in] minu Minimum box coordinate.
     //! \param[in] maxu Maximum box coordinate.
     //!
-    virtual ConstNodeIterator ConstNodeBegin() const = 0;
-    virtual ConstNodeIterator ConstNodeBegin(
-        const std::vector<double> &minu, const std::vector<double> &maxu) const = 0;
-    virtual ConstNodeIterator ConstNodeEnd() const = 0;
+    virtual ConstNodeIterator ConstNodeBegin() const {
+        return ConstNodeIterator(
+            std::unique_ptr<ConstNodeIteratorAbstract>(
+                new ConstNodeIteratorSG(this, true)));
+    }
 
-    //! Cell index iterator. Iterates over grid cell indices
+    virtual ConstNodeIterator ConstNodeBegin(
+        const std::vector<double> &minu, const std::vector<double> &maxu) const {
+        return ConstNodeIterator(
+            std::unique_ptr<ConstNodeIteratorAbstract>(
+                new ConstNodeIteratorBoxSG(this, minu, maxu)));
+    }
+
+    virtual ConstNodeIterator ConstNodeEnd() const {
+        return ConstNodeIterator(
+            std::unique_ptr<ConstNodeIteratorAbstract>(
+                new ConstNodeIteratorSG(this, false)));
+    }
+
     //
-    typedef Grid::PolyIterator<ConstIndexType> ConstCellIterator;
-    typedef Grid::AbstractIterator<ConstIndexType> ConstCellIteratorAbstract;
+    // Cell index iterator. Iterates over cell indices
+    //
+    class ConstCellIteratorSG : public Grid::ConstCellIteratorAbstract {
+      public:
+        ConstCellIteratorSG(const Grid *g, bool begin);
+        ConstCellIteratorSG(const ConstCellIteratorSG &rhs);
+        ConstCellIteratorSG();
+
+        virtual ~ConstCellIteratorSG() {}
+
+        virtual void next();
+        virtual ConstIndexType &deref() const {
+            return (_index);
+        }
+        virtual const void *address() const { return this; };
+
+        virtual bool equal(const void *rhs) const {
+            const ConstCellIteratorSG *itrptr =
+                static_cast<const ConstCellIteratorSG *>(rhs);
+
+            return (_index == itrptr->_index);
+        }
+
+        virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(*this));
+        };
+
+      protected:
+        std::vector<size_t> _dims;
+        std::vector<size_t> _index;
+        std::vector<size_t> _lastIndex;
+    };
+
+    class ConstCellIteratorBoxSG : public ConstCellIteratorSG {
+      public:
+        ConstCellIteratorBoxSG(
+            const Grid *g,
+            const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs);
+        ConstCellIteratorBoxSG();
+
+        virtual ~ConstCellIteratorBoxSG() {}
+
+        virtual void next();
+
+        virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
+            return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorBoxSG(*this));
+        };
+
+      private:
+        InsideBox _pred;
+        ConstCoordItr _coordItr;
+    };
 
     //! Return constant grid cell coordinate iterator
     //!
@@ -650,10 +803,24 @@ class VDF_API Grid {
     //! \param[in] minu Minimum box coordinate.
     //! \param[in] maxu Maximum box coordinate.
     //!
-    virtual ConstCellIterator ConstCellBegin() const = 0;
+    virtual ConstCellIterator ConstCellBegin() const {
+        return ConstCellIterator(
+            std::unique_ptr<ConstCellIteratorAbstract>(
+                new ConstCellIteratorSG(this, true)));
+    }
+
     virtual ConstCellIterator ConstCellBegin(
-        const std::vector<double> &minu, const std::vector<double> &maxu) const = 0;
-    virtual ConstCellIterator ConstCellEnd() const = 0;
+        const std::vector<double> &minu, const std::vector<double> &maxu) const {
+        return ConstCellIterator(
+            std::unique_ptr<ConstCellIteratorAbstract>(
+                new ConstCellIteratorBoxSG(this, minu, maxu)));
+    }
+
+    virtual ConstCellIterator ConstCellEnd() const {
+        return ConstCellIterator(
+            std::unique_ptr<ConstCellIteratorAbstract>(
+                new ConstCellIteratorSG(this, false)));
+    }
 
     //! A forward iterator for accessing the data elements of the
     //! structured grid.
@@ -698,7 +865,7 @@ class VDF_API Grid {
         ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
-        bool operator==(const ForwardIterator<T> &rhs) {
+        bool operator==(const ForwardIterator<T> &rhs) const {
             return (_index == rhs._index && _rg == rhs._rg);
         }
         bool operator!=(const ForwardIterator<T> &rhs) {
@@ -763,14 +930,6 @@ class VDF_API Grid {
     float *AccessIndex(
         const std::vector<float *> &blks, const std::vector<size_t> &indices) const;
 
-    void SetNodeOffset(size_t offset) {
-        _nodeIDOffset = offset;
-    }
-
-    void SetCellOffset(size_t offset) {
-        _cellIDOffset = offset;
-    }
-
   private:
     std::vector<size_t> _dims;  // dimensions of grid arrays
     std::vector<size_t> _bs;    // dimensions of each block
@@ -781,8 +940,8 @@ class VDF_API Grid {
     float _missingValue;
     bool _hasMissing;
     int _interpolationOrder; // Order of interpolation
-    size_t _nodeIDOffset;
-    size_t _cellIDOffset;
+    long _nodeIDOffset;
+    long _cellIDOffset;
 
     virtual void _getUserCoordinatesHelper(
         const std::vector<double> &coords, double &x, double &y, double &z) const;

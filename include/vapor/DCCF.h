@@ -73,6 +73,10 @@ class VDF_API DCCF : public VAPoR::DC {
     //!
     virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const;
 
+    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+        return (false);
+    }
+
     //! \copydoc DC::GetBaseVarInfo()
     //
     virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
@@ -144,9 +148,8 @@ class VDF_API DCCF : public VAPoR::DC {
     //! \copydoc DC::Read()
     //!
     int virtual Read(float *data);
-    int virtual Read(int *data) {
-        SetErrMsg("Not implemented");
-        return (-1);
+    virtual int Read(int *data) {
+        return (_ncdfc->Read(data, _ovr_fd));
     }
 
     //! \copydoc DC::ReadSlice()
@@ -162,6 +165,10 @@ class VDF_API DCCF : public VAPoR::DC {
     //!
     virtual int ReadRegionBlock(
         const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegionBlock(
+        const vector<size_t> &min, const vector<size_t> &max, int *region) {
+        return (DCCF::Read(region));
+    }
 
     //! \copydoc DC::GetVar()
     //!
