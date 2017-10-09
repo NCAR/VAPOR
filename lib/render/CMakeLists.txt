@@ -7,12 +7,17 @@ add_library (render SHARED
 	ShaderProgram.cpp
 	TwoDDataRenderer.cpp
 	TwoDRenderer.cpp
+	GeoTile.cpp
+	GeoTileMercator.cpp
+	GeoTileEquirectangular.cpp
+	GeoImage.cpp
+	GeoImageTMS.cpp
+	GeoImageGeoTiff.cpp
+	ImageRenderer.cpp
 	Visualizer.cpp
 	VizFeatureRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
-
-	GeoImage.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 )

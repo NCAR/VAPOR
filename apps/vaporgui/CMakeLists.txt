@@ -109,6 +109,7 @@ set (UIS
 find_package(Qt4 REQUIRED)
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (APPLE)
@@ -117,7 +118,11 @@ if (APPLE)
 	set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	add_executable (vaporgui MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
 	set (INSTALL_BIN_DIR ".")
-else()
+elseif (WIN32)
+	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
+	configure_file (vaporgui.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
+	add_executable (vaporgui ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
+else ()
 	add_executable (vaporgui ${SRCS} ${UIS})
 endif()
 

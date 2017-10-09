@@ -34,7 +34,7 @@
 //! When this class is local, it controls the time-steps in one visualizer.
 //! The global (shared) MiscParams controls the animation in any number of visualizers.
 
-class PARAMS_API MiscParams : public VAPoR::ParamsBase {
+class MiscParams : public VAPoR::ParamsBase {
 
   public:
     MiscParams(

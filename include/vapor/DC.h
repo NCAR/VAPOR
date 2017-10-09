@@ -45,7 +45,7 @@ namespace VAPoR {
 //! \b Y (or latitude), \b Z (height), and \b T (time)
 //!
 //! \li All data variables have a "coordinate" attribute identifying
-//! the coordinate (or auxilliary coordinate) variables associated with
+//! the coordinate (or auxiliary coordinate) variables associated with
 //! each axis
 //!
 //! \li To be consistent with VAPOR, when specified in vector form the
@@ -289,6 +289,9 @@ class VDF_API DC : public Wasp::MyBase {
     //! \param[in] max_nodes_per_face Specifies maximum number of nodes
     //! (or edges) a face of the mesh may have.
     //!
+    //! \param[in] max_faces_per_node Specifies maximum number of faces
+    //! that may share a node
+    //!
     //! \param[in] node_dim_name A string containing the name of the dimension
     //! specifying the total number of nodes in the unstructured
     //! portion of the mesh; for layered-grid unstructured meshes \p node_dim_name
@@ -310,6 +313,21 @@ class VDF_API DC : public Wasp::MyBase {
     //! of the two dimensions. If a face has less corner nodes
     //! \p max_nodes_per_face then the last node indices shall be equal to -1.
     //! Indecies start from zero.
+    //!
+    //! \param[in] node_face_var  The name of a 2D Auxiliary variable
+    //! (See DC:AuxVar) with
+    //! integer type identifying for
+    //! every node the indices of the faces that share the node.
+    //! The faces should be
+    //! specified in anticlockwise direction as viewed from above The
+    //! connectivity array will be a matrix of size
+    //! node_dim x \p max_faces_per_node , where node_dim is the length of the
+    //! dimension named by \p node_dim_name, and is the slowest varying
+    //! of the two dimensions. If a node has less faces then
+    //! \p max_faces_per_node then the last face indices shall be equal to -1.
+    //! Indecies start from zero.
+    //!
+    //! \note The \p node_face_var is not defined by the UGRID conventions
     //!
     class Mesh {
       public:
@@ -336,10 +354,12 @@ class VDF_API DC : public Wasp::MyBase {
             _dim_names.clear();
             _coord_vars.clear();
             _max_nodes_per_face = 0;
+            _max_faces_per_node = 0;
             _node_dim_name.clear();
             _face_dim_name.clear();
             _layers_dim_name.clear();
             _face_node_var.clear();
+            _node_face_var.clear();
             _face_edge_var.clear();
             _face_face_var.clear();
             _edge_dim_name.clear();
@@ -374,10 +394,12 @@ class VDF_API DC : public Wasp::MyBase {
         Mesh(
             std::string name,
             size_t max_nodes_per_face,
+            size_t max_faces_per_node,
             std::string node_dim_name,
             std::string face_dim_name,
             std::vector<std::string> coord_vars,
-            std::string face_node_var);
+            std::string face_node_var,
+            std::string node_face_var);
 
         //! Construct unstructured layered mesh
         //!
@@ -389,11 +411,13 @@ class VDF_API DC : public Wasp::MyBase {
         Mesh(
             std::string name,
             size_t max_nodes_per_face,
+            size_t max_faces_per_node,
             std::string node_dim_name,
             std::string face_dim_name,
             std::string layers_dim_name,
             std::vector<std::string> coord_vars,
-            std::string face_node_var);
+            std::string face_node_var,
+            std::string node_face_var);
 
         //! Return the type of mesh
         //!
@@ -441,6 +465,13 @@ class VDF_API DC : public Wasp::MyBase {
         //!
         size_t GetMaxNodesPerFace() const { return (_max_nodes_per_face); };
 
+        //! Get the maximum number of faces per node
+        //!
+        //! Return the maximum number of faces that a node in the mesh may have.
+        //! For structured meshes this value is always four.
+        //!
+        size_t GetMaxFacesPerNode() const { return (_max_faces_per_node); };
+
         //! Get the name of the node dimension
         //!
         //! For unstructured meshes this method returns the name of the
@@ -461,6 +492,32 @@ class VDF_API DC : public Wasp::MyBase {
         //! node dimension. For other meshes an empty string is returned.
         //!
         string GetLayersDimName() const { return (_layers_dim_name); };
+
+        //! Get the name of face node connectivity var
+        //!
+        //! Return the name of the face node connecity variable
+        //!
+        string GetFaceNodeVar() const {
+            return (_face_node_var);
+        }
+        void SetFaceNodeVar(std::string face_node_var) {
+            if (_mtype == STRUCTURED)
+                return;
+            _face_node_var = face_node_var;
+        }
+
+        //! Get the name of node face connectivity var
+        //!
+        //! Return the name of the node face connecity variable
+        //!
+        string GetNodeFaceVar() const {
+            return (_node_face_var);
+        }
+        void SetNodeFaceVar(std::string node_face_var) {
+            if (_mtype == STRUCTURED)
+                return;
+            _node_face_var = _node_face_var;
+        }
 
         //! Set the name of the optional edge dimension
         //!
@@ -610,10 +667,12 @@ class VDF_API DC : public Wasp::MyBase {
         std::vector<string> _dim_names;
         std::vector<string> _coord_vars;
         size_t _max_nodes_per_face;
+        size_t _max_faces_per_node;
         string _node_dim_name;
         string _face_dim_name;
         string _layers_dim_name;
         string _face_node_var;
+        string _node_face_var;
         string _face_edge_var;
         string _face_face_var;
         string _edge_dim_name;
@@ -625,6 +684,7 @@ class VDF_API DC : public Wasp::MyBase {
             string name,
             std::vector<string> coord_vars,
             int max_nodes_per_face,
+            int max_faces_per_node,
             Type type);
     };
 
@@ -1313,6 +1373,7 @@ class VDF_API DC : public Wasp::MyBase {
       public:
         AuxVar() {
             _dim_names.clear();
+            _offset = 0;
         }
 
         //! Construct Auxiliary variable definition
@@ -1338,7 +1399,8 @@ class VDF_API DC : public Wasp::MyBase {
             std::vector<bool> periodic,
             std::vector<string> dim_names) : BaseVar(name, units, type,
                                                      wname, cratios, bs, periodic),
-                                             _dim_names(dim_names) {}
+                                             _dim_names(dim_names),
+                                             _offset(0) {}
 
         virtual ~AuxVar(){};
 
@@ -1347,10 +1409,18 @@ class VDF_API DC : public Wasp::MyBase {
         std::vector<string> GetDimNames() const { return (_dim_names); };
         void SetDimNames(std::vector<string> dim_names) { _dim_names = dim_names; };
 
+        //! Access Auxiliary variable's offset
+        //!
+        //! The value of \p offset should be added to the Auxiliary variable's data
+        //
+        long GetOffset() const { return (_offset); };
+        void SetOffset(long offset) { _offset = offset; };
+
         VDF_API friend std::ostream &operator<<(std::ostream &o, const AuxVar &var);
 
       private:
         std::vector<string> _dim_names;
+        long _offset;
     };
 
     //! Class constuctor
@@ -1442,6 +1512,19 @@ class VDF_API DC : public Wasp::MyBase {
     //! is returned and the values of \p datavar are undefined.
     //!
     virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const = 0;
+
+    //! Return metadata about an auxiliary variable
+    //!
+    //! If the variable \p varname is defined as an auxiliary
+    //! variable its metadata will
+    //! be returned in \p var.
+    //!
+    //! \retval bool If the named variable cannot be found false
+    //! is returned and the values of \p var are undefined.
+    //!
+    //! \sa GetDataVarInfo(), GetCoordVarInfo()
+    //
+    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const = 0;
 
     //! Return metadata about a data or coordinate variable
     //!
@@ -1750,6 +1833,8 @@ class VDF_API DC : public Wasp::MyBase {
     //!
     virtual int ReadRegionBlock(
         const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegionBlock(
+        const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
     //! Read an entire variable in one call
     //!
@@ -2099,6 +2184,18 @@ class VDF_API DC : public Wasp::MyBase {
     virtual bool GetVarCoordVars(
         string varname, bool spatial, std::vector<string> &coord_vars) const;
 
+    //! Get mesh connectivity variables for a data variable
+    //!
+    //! Return the mesh connectivity variables for a data variable. For
+    //! a structured grid all connectivity variables will be empty. For
+    //! an unstructured mesh only the \p face_node_var, \p node_face_var
+    //! are guaranteed to be set to valid variable names
+    //!
+    bool GetVarConnVars(
+        string varname, string &face_node_var, string &node_face_var,
+        string &face_edge_var, string &face_face_var, string &edge_node_var,
+        string &edge_face_var) const;
+
     //! Get the number of spatial dimensions for a variable
     //!
     //!
@@ -2118,6 +2215,10 @@ class VDF_API DC : public Wasp::MyBase {
 
     virtual bool _getDataVarDimensions(
         string varname, bool spatial,
+        vector<DC::Dimension> &dimensions) const;
+
+    virtual bool _getAuxVarDimensions(
+        string varname,
         vector<DC::Dimension> &dimensions) const;
 };
 }; // namespace VAPoR

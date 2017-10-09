@@ -528,22 +528,15 @@ class VDF_API VDC : public VAPoR::DC {
         string varname, std::vector<string> &dimnames, bool &time_varying,
         string &units, int &axis, XType &type, bool &compressed, bool &uniform) const;
 
-    //! Return a coordinate variable's definition
-    //!
-    //! Return a reference to a DC::CoordVar object describing
-    //! the coordinate variable named by \p varname
-    //!
-    //! \param[in] varname A string specifying the name of the coordinate
-    //! variable.
-    //! \param[out] coordvar A CoordVar object containing the definition
-    //! of the named variable.
-    //! \retval bool False is returned if the named coordinate variable does
-    //! not exist, and the contents of cvar will be undefined.
-    //!
-    //! \sa DefineCoordVar(), DefineCoordVarUniform(), SetCompressionBlock(),
-    //! SetPeriodicBoundary()
-    //!
+    //! \copydoc DC::GetCoordVarInfo()
+    //
     bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+
+    //! \copydoc DC::GetAuxVarInfo()
+    //
+    bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+        return (false);
+    }
 
     //! Define a data variable
     //!
@@ -639,33 +632,11 @@ class VDF_API VDC : public VAPoR::DC {
         string &units, XType &type, bool &compressed,
         string &maskvar) const;
 
-    //! Return a data variable's definition
-    //!
-    //! Return a reference to a DC::DataVar object describing
-    //! the data variable named by \p varname
-    //!
-    //! \param[in] varname A string specifying the name of the variable.
-    //! \param[out] datavar A DataVar object containing the definition
-    //! of the named Data variable.
-    //!
-    //! \retval bool If the named data variable cannot be found false
-    //! is returned and the values of \p datavar are undefined.
-    //!
-    //! \sa DefineCoordVar(), DefineCoordVarUniform(), SetCompressionBlock(),
-    //! SetPeriodicBoundary()
-    //!
+    //! \copydoc DC::GetDataVarInfo()
+    //
     bool GetDataVarInfo(string varname, DC::DataVar &datavar) const;
 
-    //! Return metadata about a data or coordinate variable
-    //!
-    //! If the variable \p varname is defined as either a
-    //! data or coordinate variable its metadata will
-    //! be returned in \p var.
-    //!
-    //! \retval bool If the named variable cannot be found false
-    //! is returned and the values of \p var are undefined.
-    //!
-    //! \sa GetDataVarInfo(), GetCoordVarInfo()
+    //! \copydoc DC::GetBaseVarInfo()
     //
     bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
 
@@ -1036,6 +1007,7 @@ class VDF_API VDC : public VAPoR::DC {
     //! \sa OpenVariableRead()
     //
     int virtual Read(float *data) = 0;
+    int virtual Read(int *data) = 0;
 
     //! Read a single slice of data from the currently opened variable
     //!
@@ -1105,6 +1077,8 @@ class VDF_API VDC : public VAPoR::DC {
     //!
     virtual int ReadRegionBlock(
         const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegionBlock(
+        const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
     //! Write an entire variable in one call
     //!

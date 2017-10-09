@@ -883,6 +883,18 @@ int VDCNetCDF::ReadRegionBlock(
     return (_ofi._wasp->GetVaraBlock(start, count, region));
 }
 
+int VDCNetCDF::ReadRegionBlock(
+    const vector<size_t> &min, const vector<size_t> &max, int *region) {
+    bool time_varying = VDC::IsTimeVarying(_ofi._varname);
+
+    vector<size_t> start;
+    vector<size_t> count;
+    vdc_2_ncdfcoords(
+        _ofi._file_ts, _ofi._file_ts, time_varying, min, max, start, count);
+
+    return (_ofi._wasp->GetVaraBlock(start, count, region));
+}
+
 int VDCNetCDF::PutVar(string varname, int lod, const float *data) {
     CloseVariable();
 

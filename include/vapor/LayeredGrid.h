@@ -55,6 +55,10 @@ class VDF_API LayeredGrid : public StructuredGrid {
     LayeredGrid() = default;
     virtual ~LayeredGrid() = default;
 
+    virtual size_t GetNumCoordinates() const override {
+        return (3);
+    }
+
     //! \copydoc RegularGrid::GetValue()
     //!
     float GetValue(const std::vector<double> &coords) const override;
