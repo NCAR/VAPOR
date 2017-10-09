@@ -319,13 +319,6 @@ void VariablesWidget::updateFidelity(
 		varname = varnames[0];
 	}
 
-	if (varname.empty()) {
-    cout << "TEST" << endl;
-		fidelityFrame->hide();
-		return;
-	}
-	fidelityFrame->show();
-
 	vector <size_t> cratios = _dataMgr->GetCRatios(varname);
 
 
