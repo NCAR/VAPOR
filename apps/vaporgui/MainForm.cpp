@@ -1786,6 +1786,17 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 		// Only update the GUI if the Params state has changed
 		//
 		if (_paramsStateChange) {
+			ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
+			if (_stats) {
+				StatisticsParams* params;
+				params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
+				_stats->updateParams(params);
+			}
+			if (_plot) {
+				PlotParams* params;
+				params = (PlotParams*)paramsMgr->GetParams("PlotParams");
+				_plot->updateParams(params);
+			}
 			_vizWinMgr->UpdateRouters();
 			_paramsStateChange = false;
 		}
@@ -1983,13 +1994,6 @@ void MainForm::installCLITools(){
 
 void MainForm::launchStats(){
     if (!_stats) _stats = new Statistics(this);
-//	DataStatus* ds = _controlExec->getDataStatus();
-//	string dm = ds->GetDataMgrNames()[0];
-//	DataMgr *dataMgr = ds->GetDataMgr(dm);
-//	if (dataMgr){
-//      _stats->initDataMgr(dataMgr);
-//        _stats->showMe();
-//    }
 	if (_controlExec) {
 		_stats->initControlExec(_controlExec);
 	} 
