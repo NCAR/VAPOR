@@ -53,8 +53,8 @@ link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
-include_directories (${NUMPY_INCLUDE_DIR})
-link_directories (${PYTHONDIR}/lib-dynload)
+include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
+link_directories (${PYTHONPATH}/lib-dynload)
 
 find_package (OpenGL REQUIRED)
 include_directories (${OPENGL_INCLUDE_DIRS})
@@ -122,7 +122,7 @@ if (WIN32)
 			COMPONENT Dependencies
 			)
 		install (
-			DIRECTORY ${PYTHONDIR}
+			DIRECTORY ${PYTHONPATH}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
@@ -145,7 +145,7 @@ endif (WIN32)
 if (APPLE)
 	if (${GENERATE_FULL_INSTALLER})
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${THIRD_PARTY_LIB_DIR}/python2.7)
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH})
 		message (${INSTALL_FRAMEWORKS})
 		install (
 			FILES ${INSTALL_LIBS}
