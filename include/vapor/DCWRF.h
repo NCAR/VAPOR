@@ -75,6 +75,12 @@ public:
  //! \copydoc DC::GetDataVarInfo()
  //!
  virtual bool GetDataVarInfo( string varname, DC::DataVar &datavar) const;
+
+ //! \copydoc DC::GetBaseVarInfo()
+ //
+ virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+	return(false);
+ }
  
  //! \copydoc DC::GetBaseVarInfo()
  //
@@ -155,10 +161,9 @@ public:
 
  //! \copydoc DC::Read()
  //!
- int virtual Read(float *data);
- int virtual Read(int *data) {
-	SetErrMsg("Not implemented");
-	return(-1);
+ virtual int Read(float *data);
+ virtual int Read(int *data) {
+	return(_ncdfc->Read(data, _ovr_fd));
  }
 
  //! \copydoc DC::ReadSlice()
@@ -176,6 +181,11 @@ public:
  virtual int ReadRegionBlock(
     const vector <size_t> &min, const vector <size_t> &max, float *region
  );
+ virtual int ReadRegionBlock(
+    const vector <size_t> &min, const vector <size_t> &max, int *region
+ ) {
+	return (DCWRF::Read(region));
+ }
 
  //! \copydoc DC::GetVar()
  //!

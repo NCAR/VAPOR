@@ -587,6 +587,7 @@ public:
 
  virtual int Read(float *data, int fd=0);
  virtual int Read(char *data, int fd=0);
+ virtual int Read(int *data, int fd=0);
 
  //! Read data from the currently opened variable on the native grid
  //!
@@ -909,6 +910,9 @@ int _GetTimesMap(
  int _get_var_index(
     const vector <NetCDFSimple::Variable> variables, string varname
  ) const;
+
+ template <typename T>
+ int _read_template(T *data, int fd);
 
 
 };

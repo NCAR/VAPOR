@@ -24,7 +24,7 @@
 
 namespace VAPoR{
 
-class PARAMS_API StatisticsParams : public ParamsBase {
+class StatisticsParams : public ParamsBase {
  public:
   StatisticsParams(ParamsBase::StateSave *ssave);
   StatisticsParams(ParamsBase::StateSave *ssave, XmlNode *node);
