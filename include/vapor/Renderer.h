@@ -238,29 +238,19 @@ protected:
     //! All OpenGL rendering is performed in the pure virtual paintGL method.
     virtual int _paintGL() = 0;
 
-    //! Enable specified clipping planes during the GL rendering
-    //! Must be invoked during _paintGL()
+    //! Enable specified clipping planes during the GL rendering. This
+    //! method clips the scene to the bounding box. See
+    //!! RenderParams::GetBox()
+    //! May be invoked during _paintGL() by classes derived from this class.
     //! Clipping planes are specified in User coordinates.
-    //! \sa disableClippingPlanes
-    //! \param[in] extents Specifies the user extents of the clipping bounds
-    void enableClippingPlanes(vector<double> minExts, vector<double> maxExts, vector<int> axes) const;
+    //! \sa DisableClippingPlanes
+    void EnableClipToBox() const;
 
-    //! Enable clipping planes associated with the full 3D data domain of the VDC.
-    //! \sa disableClippingPlanes
-    void enableFullClippingPlanes();
-
-#ifdef DEAD
-    //! Enable clipping planes associated with the current RegionParams extents
-    //! \sa disableClippingPlanes
-    void enableRegionClippingPlanes();
-#endif
-
-    //! Enable clipping planes associated with horizontal extents of the current VDC.
-    //! \sa disableClippingPlanes
-    void enable2DClippingPlanes();
-    //! Disable the clipping planes that were previously enabled during
-    //! enableClippingPlanes(), enableFullClippingPlanes(), enableRegionClippingPlanes, or enable2DClippingPlanes()
-    void disableClippingPlanes();
+    //! Disable clipping planes.
+    //! If clipping is enabled this  method should be called prior to
+    //! returning from _paintGL()
+    //
+    void DisableClippingPlanes();
 
     static const int _imgHgt;
     static const int _imgWid;
