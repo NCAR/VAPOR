@@ -87,6 +87,7 @@ public:
     ~Plot();
 
     void Initialize(VAPoR::ControlExec *ce, VizWinMgr *vwm);
+    void updateParams(VAPoR::PlotParams *pParams) { _params = pParams; }
 
 private:
     bool           init();
