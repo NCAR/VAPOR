@@ -6,7 +6,7 @@
 //
 //************************************************************************/
 //
-//      File:           SeedMe.cpp
+//      File:           seedMe.cpp
 //
 //                      Scott Pearse
 //                      National Center for Atmospheric Research
@@ -16,15 +16,14 @@
 //
 //
 
-//#include <Python.h>
-#include <cassert>
-#include <cstdio>
+#include <Python.h>
 #include <QDebug>
 #include <QFileDialog>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstdio>
 #include <vapor/GetAppPath.h>
 #include <vapor/CFuncs.h>
 //#include <vapor/MyPython.h>
@@ -32,17 +31,8 @@
 #include "ui_SeedMeGUI.h"
 
 using namespace std;
-
-//
-// TODO:
-//
-// We are using Wasp::GetAppPath instead of 2.x's static GetAppPath.
-// Is this sufficient?
-//
-// Import python/MyPython.h
-//
-// Find a substitute for VetsUtil::Splitpath() on lines 418 and 609
-//
+// using namespace VetsUtil;
+using namespace VAPoR;
 
 namespace {
 
@@ -53,7 +43,6 @@ template<typename T> string ToString(T val)
     return stream.str();
 }
 
-#ifdef FIXED
 // Make a python list of strings from a string vector
 //
 PyObject *makelist(const vector<string> &v)
@@ -63,7 +52,6 @@ PyObject *makelist(const vector<string> &v)
     for (size_t i = 0; i != v.size(); ++i) { PyList_SET_ITEM(l, i, PyString_FromString(v[i].c_str())); }
     return l;
 }
-#endif
 
 bool fexists(string filename)
 {
@@ -140,101 +128,95 @@ int SeedMe::getUploadScript()
     return (0);
 }
 
+// Constructor
+//
 SeedMe::SeedMe()
 {
     _firstTime = NULL;
     _errMsg = NULL;
-#ifdef FIXED
-    _pFunc = NULL;
-#endif
+    //	_pFunc = NULL;
     _image = NULL;
     _isInitialized = false;
     _titleWasBlank = true;
 
     setWindowTitle("SeedMe");
-
     setupUi(this);
+    connectWidgets();
 }
 
 SeedMe::~SeedMe()
 {
     if (_firstTime) delete _firstTime;
     if (_errMsg) delete _errMsg;
-#ifdef FIXED
-    if (_pFunc) Py_DECREF(_pFunc);
-#endif
+    //	if (_pFunc) Py_DECREF(_pFunc);
     if (_image) delete _image;
 }
 
-int SeedMe::initPython() { return 0; }
-/*
-    if (_isInitializedPython) return (0);   // Static one time initialization!
-
+int SeedMe::initPython()
+{
+    if (_isInitializedPython) return (0);    // Static one time initialization!
 
     // Ugh. Have to define a python object to enable capturing of
     // stderr to a string. Python API doesn't support a version of
     // PyErr_Print() that fetches the error to a C++ string. Give me
     // a break!
     //
-    std::string stdErr =
-    "import sys\n"
-    "class CatchErr:\n"
-    "	def __init__(self):\n"
-    "		self.value = 'SeedMe: '\n"
-    "	def write(self, txt):\n"
-    "		self.value += txt\n"
-    "	def flush(self):\n"
-    "		pass\n"
-    "catchErr = CatchErr()\n"
-    "sys.stderr = catchErr\n"
-    "sys.stdout = catchErr\n";
-
-
+    std::string stdErr = "import sys\n"
+                         "class CatchErr:\n"
+                         "	def __init__(self):\n"
+                         "		self.value = 'SeedMe: '\n"
+                         "	def write(self, txt):\n"
+                         "		self.value += txt\n"
+                         "	def flush(self):\n"
+                         "		pass\n"
+                         "catchErr = CatchErr()\n"
+                         "sys.stderr = catchErr\n"
+                         "sys.stdout = catchErr\n";
 
     // Use MyPython singleton class to initialize Python interpeter to
     // ensure it only gets initialized once.
     //
-    MyPython::Instance()->Initialize();
+    //	MyPython::Instance()->Initialize();
 
     // Catch stderr from Python to a string
     //
     int rc = PyRun_SimpleString(stdErr.c_str());
-    if (rc<0) {
+    if (rc < 0) {
         errReport(pyErr());
-        return(-1);
+        return (-1);
     }
 
     PyObject *pMain = PyImport_AddModule("__main__");
-    if (! pMain) {
+    if (!pMain) {
         errReport(pyErr());
-        return(-1);
+        return (-1);
     }
 
     // Create a new module object
     PyObject *pModule = PyModule_New("seedme_upload");
-    if (! pModule) {
+    if (!pModule) {
         errReport(pyErr());
-        return(-1);
+        return (-1);
     }
 
     rc = PyModule_AddStringConstant(pModule, "__file__", "");
-    if (rc<0) {
+    if (rc < 0) {
         errReport(pyErr());
         Py_DECREF(pModule);
-        return(-1);
+        return (-1);
     }
 
-    _pFunc = MyPython::CreatePyFunc(
-        "seedme_upload", "uploadFiles", _seedmeUploadScript.c_str()
-    );
-    if (! _pFunc) return(-1);
+    //	_pFunc = MyPython::CreatePyFunc(
+    //		"seedme_upload", "uploadFiles", _seedmeUploadScript.c_str()
+    //	);
+    //	if (! _pFunc) return(-1);
 
     _isInitializedPython = true;
 
     Py_DECREF(pModule);
 
-    return(0);
-}*/
+    return (0);
+}
 
 int SeedMe::init()
 {
@@ -256,24 +238,15 @@ int SeedMe::init()
     return (0);
 }
 
-// Not really an initialization routine. It's called more than once :-(
-//
-void SeedMe::Initialize()
+void SeedMe::CheckAPIKey()
 {
     // Hide API Key entry tools as decided on 10/17/2016
     //
     APIKeyButton->hide();
     APIKeyEdit->hide();
 
-    // Do one-time initialization. The Initialize() method is called
-    // every time SeedMe is launched.
-    //
     int rc = init();
     if (rc < 0) return;
-
-    LinkBrowser->clear();
-    LinkLabel->setStyleSheet("QLabel {color : black; }");
-    LinkLabel->setText("Video link:");
 
     vector<string> paths;
     paths.push_back("images");
@@ -302,8 +275,6 @@ void SeedMe::Initialize()
     activateWindow();
 
     SeedMeTabWidget->setCurrentIndex(0);
-
-    connectWidgets();
 }
 
 FirstTimeDialog::FirstTimeDialog(QWidget *parent) : QDialog(parent), Ui_FirstTimeDialog()
@@ -318,7 +289,7 @@ FirstTimeDialog::FirstTimeDialog(QWidget *parent) : QDialog(parent), Ui_FirstTim
     warning->setLayout(layout);
 
     // connect(browseAPIKeyButton, SIGNAL(pressed()), this, SLOT(browseAPIKey()));
-    connect(letsGoButton, SIGNAL(pressed()), this, SLOT(letsGo()));
+    connect(letsGoButton, SIGNAL(clicked()), this, SLOT(letsGo()));
 }
 
 void FirstTimeDialog::letsGo()
@@ -361,14 +332,14 @@ void SeedMe::connectWidgets()
 
     // Basic tab connections
     connect(ShareEdit, SIGNAL(textChanged()), this, SLOT(shareEditChanged()));
-    connect(GoButton, SIGNAL(pressed()), this, SLOT(go()));
+    connect(GoButton, SIGNAL(clicked()), this, SLOT(go()));
     connect(FramerateCombobox, SIGNAL(valueChanged(int)), this, SLOT(framerateComboChanged(int)));
     connect(OutputFilenameTextEdit, SIGNAL(textChanged()), this, SLOT(outputFilenameChanged()));
-    connect(SelectImagesButton, SIGNAL(pressed()), this, SLOT(selectImages()));
-    connect(RemoveImagesButton, SIGNAL(pressed()), this, SLOT(removeImages()));
-    connect(OutputFileButton, SIGNAL(pressed()), this, SLOT(selectOutFile()));
+    connect(SelectImagesButton, SIGNAL(clicked()), this, SLOT(selectImages()));
+    connect(RemoveImagesButton, SIGNAL(clicked()), this, SLOT(removeImages()));
+    connect(OutputFileButton, SIGNAL(clicked()), this, SLOT(selectOutFile()));
     connect(QualityComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(qualityComboChanged(int)));
-    connect(HelpButton, SIGNAL(pressed()), this, SLOT(showFirstTimeDialog()));
+    connect(HelpButton, SIGNAL(clicked()), this, SLOT(showFirstTimeDialog()));
 }
 
 void SeedMe::selectOutFile()
@@ -415,6 +386,18 @@ int SeedMe::affirmTitles()
     //
     OutputFilenameTextEdit->setText(QString::fromStdString(_outputFile + ext));
 
+    // Verify if we're overwriting existing video files
+    //
+    if (std::ifstream(_outputFile.c_str())) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        msgBox.setText("Target output file already exists. Are you sure to overwrite?");
+        msgBox.setStandardButtons(QMessageBox::Yes);
+        msgBox.addButton(QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No) { return (-1); }
+    }
+
     if (_videoTitle == "") {
         _titleWasBlank = true;
         string volume, dir, file;
@@ -439,8 +422,6 @@ int SeedMe::affirmTitles()
 
 void SeedMe::go()
 {
-#ifdef FIXED
-
     // Make sure we have valid parameters for upload script
     //
     int rc = affirmTitles();
@@ -533,7 +514,8 @@ void SeedMe::go()
         return;
     }
 
-    PyObject *pValue = PyObject_CallObject(_pFunc, pArgs);
+    //	PyObject *pValue = PyObject_CallObject(_pFunc, pArgs);
+    PyObject *pValue;
     Py_DECREF(pArgs);
     if (!pValue) {
         errReport(pyErr());
@@ -561,7 +543,6 @@ void SeedMe::go()
     } else {
         updateVideoLink(url);
     }
-#endif
 }
 
 void SeedMe::publicPressed()
@@ -660,7 +641,6 @@ void SeedMe::removeImages()
 //
 string SeedMe::pyErr() const
 {
-#ifdef FIXED
     PyObject *pMain = PyImport_AddModule("__main__");
 
     PyObject *catcher = NULL;
@@ -678,8 +658,6 @@ string SeedMe::pyErr() const
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
     return (PyString_AsString(output));
-#endif
-    return "";
 }
 
 void SeedMe::errReport(string msg) const

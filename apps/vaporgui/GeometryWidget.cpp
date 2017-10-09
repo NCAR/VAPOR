@@ -72,7 +72,12 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 void GeometryWidget::Reinit(Flags flags)
 {
     _flags = flags;
-    if (_flags & TWOD) { zMinMaxGroupBox->hide(); }
+    if (_flags & TWOD) {
+        zMinMaxGroupBox->hide();
+        minMaxTab->adjustSize();
+        xMinMaxGroupBox->adjustSize();
+        yMinMaxGroupBox->adjustSize();
+    }
 }
 
 GeometryWidget::~GeometryWidget()
