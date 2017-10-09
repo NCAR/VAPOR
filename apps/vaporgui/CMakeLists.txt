@@ -52,6 +52,8 @@ set (SRCS
 	MiscParams.cpp
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
+	TransformTable.h
+	OrientationAngles.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -92,6 +94,8 @@ set (UIS
 	SeedMeGUI.ui
 	firstTimeUser.ui
 	TFWidgetGUI.ui
+	StretchFactorTableGUI.ui
+	OrientationAnglesGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui
 	ImageAppearanceGUI.ui

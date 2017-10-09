@@ -379,7 +379,8 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 	
 	string winName = GetVisualizer();
 	ViewpointParams* vpParams =  _paramsMgr->GetViewpointParams(winName);
-	vector<double> scales = vpParams->GetStretchFactors();
+//	vector<double> scales = vpParams->GetStretchFactors();
+	vector<double> scales(3, 1.0);
 
 	Grid* heightVar = variableData[3];
 
