@@ -6,7 +6,7 @@
 //
 //************************************************************************/
 //
-//      File:           SeedMe.h
+//      File:           seedMe.h
 //
 //                      Scott Pearse
 //                      National Center for Atmospheric Research
@@ -25,6 +25,8 @@
 #include "ui_errMsg.h"
 #include "ui_SeedMeGUI.h"
 #include "ui_firstTimeUser.h"
+
+namespace VAPoR {
 
 class FirstTimeDialog : public QDialog, public Ui_FirstTimeDialog {
     Q_OBJECT
@@ -55,8 +57,11 @@ class SeedMe : public QWidget, public Ui_SeedMeGUI {
 
   public:
     SeedMe();
+    void Initialize() {
+        cout << "Implement SeedMe Initialize() method!" << endl;
+    }
     ~SeedMe();
-    void Initialize();
+    void CheckAPIKey();
 
   private:
     void connectWidgets();
@@ -108,4 +113,5 @@ class SeedMe : public QWidget, public Ui_SeedMeGUI {
     void removeImages();
 };
 
+}; // namespace VAPoR
 #endif

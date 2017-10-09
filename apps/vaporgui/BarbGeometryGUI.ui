@@ -41,7 +41,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
@@ -100,7 +100,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <property name="spacing">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
@@ -159,7 +159,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <property name="spacing">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
@@ -218,7 +218,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <property name="spacing">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
@@ -277,7 +277,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <property name="spacing">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
