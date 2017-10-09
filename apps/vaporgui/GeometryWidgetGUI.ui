@@ -7,15 +7,21 @@
     <x>0</x>
     <y>0</y>
     <width>422</width>
-    <height>544</height>
+    <height>470</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="2,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,1">
    <property name="spacing">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="sizeConstraint">
     <enum>QLayout::SetMinimumSize</enum>
@@ -24,7 +30,7 @@
     <number>0</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="rightMargin">
     <number>0</number>
@@ -75,7 +81,7 @@
        <item>
         <widget class="QTabWidget" name="minMaxTab">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -84,12 +90,42 @@
           <number>0</number>
          </property>
          <widget class="QWidget" name="tab_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <attribute name="title">
            <string>Min/Max</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_36">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMinimumSize</enum>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <widget class="QGroupBox" name="xMinMaxGroupBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -102,6 +138,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_14">
               <property name="spacing">
                <number>0</number>
+              </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMinimumSize</enum>
               </property>
               <property name="leftMargin">
                <number>0</number>
@@ -165,13 +204,6 @@
                       </property>
                       <property name="text">
                        <string>Max:</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_13">
-                      <property name="text">
-                       <string/>
                       </property>
                      </widget>
                     </item>
@@ -261,6 +293,12 @@
            </item>
            <item>
             <widget class="QGroupBox" name="yMinMaxGroupBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -273,6 +311,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_27">
               <property name="spacing">
                <number>0</number>
+              </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMinimumSize</enum>
               </property>
               <property name="leftMargin">
                <number>0</number>
@@ -438,7 +479,7 @@
            <item>
             <widget class="QGroupBox" name="zMinMaxGroupBox">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -455,6 +496,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_31">
               <property name="spacing">
                <number>0</number>
+              </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMinimumSize</enum>
               </property>
               <property name="leftMargin">
                <number>0</number>
@@ -643,7 +687,7 @@
        <item>
         <widget class="QTabWidget" name="centerSizeTab">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -652,12 +696,21 @@
           <number>0</number>
          </property>
          <widget class="QWidget" name="tab">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <attribute name="title">
            <string>Center/Size</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <property name="spacing">
             <number>0</number>
+           </property>
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMinimumSize</enum>
            </property>
            <property name="leftMargin">
             <number>0</number>
@@ -673,8 +726,14 @@
            </property>
            <item>
             <widget class="QTabWidget" name="tabWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="tab_2">
               <attribute name="title">
@@ -683,6 +742,9 @@
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <property name="spacing">
                 <number>0</number>
+               </property>
+               <property name="sizeConstraint">
+                <enum>QLayout::SetMinimumSize</enum>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -700,6 +762,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_10">
                  <property name="spacing">
                   <number>0</number>
+                 </property>
+                 <property name="sizeConstraint">
+                  <enum>QLayout::SetMinimumSize</enum>
                  </property>
                  <item>
                   <widget class="QLabel" name="label_26">
@@ -810,6 +875,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_11">
                  <property name="spacing">
                   <number>0</number>
+                 </property>
+                 <property name="sizeConstraint">
+                  <enum>QLayout::SetMinimumSize</enum>
                  </property>
                  <item>
                   <widget class="QLabel" name="label_27">
@@ -932,12 +1000,21 @@
               </layout>
              </widget>
              <widget class="QWidget" name="tab_6">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <attribute name="title">
                <string>Y</string>
               </attribute>
               <layout class="QVBoxLayout" name="verticalLayout_5">
                <property name="spacing">
                 <number>0</number>
+               </property>
+               <property name="sizeConstraint">
+                <enum>QLayout::SetMinimumSize</enum>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -955,6 +1032,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_19">
                  <property name="spacing">
                   <number>0</number>
+                 </property>
+                 <property name="sizeConstraint">
+                  <enum>QLayout::SetMinimumSize</enum>
                  </property>
                  <item>
                   <widget class="QLabel" name="label_29">
@@ -1065,6 +1145,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_13">
                  <property name="spacing">
                   <number>0</number>
+                 </property>
+                 <property name="sizeConstraint">
+                  <enum>QLayout::SetMinimumSize</enum>
                  </property>
                  <item>
                   <widget class="QLabel" name="label_28">
@@ -1187,12 +1270,21 @@
               </layout>
              </widget>
              <widget class="QWidget" name="tab_5">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <attribute name="title">
                <string>Z</string>
               </attribute>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <property name="spacing">
                 <number>0</number>
+               </property>
+               <property name="sizeConstraint">
+                <enum>QLayout::SetMinimumSize</enum>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -1210,6 +1302,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_21">
                  <property name="spacing">
                   <number>0</number>
+                 </property>
+                 <property name="sizeConstraint">
+                  <enum>QLayout::SetMinimumSize</enum>
                  </property>
                  <item>
                   <widget class="QLabel" name="label_30">
@@ -1320,6 +1415,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_23">
                  <property name="spacing">
                   <number>0</number>
+                 </property>
+                 <property name="sizeConstraint">
+                  <enum>QLayout::SetMinimumSize</enum>
                  </property>
                  <item>
                   <widget class="QLabel" name="label_31">
@@ -1434,7 +1532,7 @@
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
-                   <height>46</height>
+                   <height>0</height>
                   </size>
                  </property>
                 </spacer>
@@ -1450,9 +1548,18 @@
       </layout>
      </widget>
      <widget class="QWidget" name="page_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
        <property name="spacing">
         <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
        </property>
        <property name="leftMargin">
         <number>0</number>
@@ -1469,7 +1576,7 @@
        <item>
         <widget class="QTabWidget" name="singlePointTab">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -1512,6 +1619,9 @@
               <layout class="QHBoxLayout" name="horizontalLayout_48">
                <property name="spacing">
                 <number>0</number>
+               </property>
+               <property name="sizeConstraint">
+                <enum>QLayout::SetMinimumSize</enum>
                </property>
                <item>
                 <layout class="QVBoxLayout" name="verticalLayout_78">
@@ -1655,6 +1765,9 @@
                <property name="spacing">
                 <number>0</number>
                </property>
+               <property name="sizeConstraint">
+                <enum>QLayout::SetMinimumSize</enum>
+               </property>
                <item>
                 <layout class="QVBoxLayout" name="verticalLayout_80">
                  <property name="spacing">
@@ -1796,6 +1909,9 @@
               <layout class="QHBoxLayout" name="horizontalLayout_53">
                <property name="spacing">
                 <number>0</number>
+               </property>
+               <property name="sizeConstraint">
+                <enum>QLayout::SetMinimumSize</enum>
                </property>
                <item>
                 <layout class="QVBoxLayout" name="verticalLayout_83">
@@ -1945,139 +2061,156 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>100</height>
-      </size>
+    <widget class="QTabWidget" name="tabWidget_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>125</height>
-      </size>
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <property name="title">
-      <string>Copy region from renderer</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_8">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetMinAndMaxSize</enum>
+     <widget class="QWidget" name="tab_4">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_11">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Select renderer name</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QComboBox" name="copyCombo">
-            <property name="minimumSize">
-             <size>
-              <width>240</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>120</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <item>
+      <attribute name="title">
+       <string>Copy region from renderer</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_37">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_8">
              <property name="text">
-              <string>Name</string>
+              <string>Select renderer name</string>
              </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="copyButton">
-            <property name="minimumSize">
-             <size>
-              <width>145</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>125</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Copy</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </item>
-     </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QComboBox" name="copyCombo">
+             <property name="minimumSize">
+              <size>
+               <width>240</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>120</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="copyButton">
+             <property name="minimumSize">
+              <size>
+               <width>145</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>125</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Copy</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -2091,7 +2224,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>94</height>
+       <height>0</height>
       </size>
      </property>
     </spacer>

@@ -302,6 +302,9 @@ available from the right mouse button.</string>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
+         <property name="readOnly">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -503,6 +506,9 @@ how the histogram is scaled.</string>
       <property name="spacing">
        <number>0</number>
       </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
       <property name="rightMargin">
        <number>7</number>
       </property>
@@ -556,6 +562,9 @@ how the histogram is scaled.</string>
       <property name="spacing">
        <number>5</number>
       </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
@@ -589,6 +598,9 @@ how the histogram is scaled.</string>
           <width>25</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
