@@ -29,13 +29,13 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <Python.h>
 #include "ui_errMsg.h"
 #include "ui_plotWindow.h"
 #include "RangeController.h"
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
 #include "PlotParams.h"
-#include <vapor/MyPython.h>
 
 using namespace std;
 
@@ -112,6 +112,7 @@ class Plot : public QDialog, public Ui_PlotWindow {
     void enableZControllers(bool s);
     void destroyControllers();
     vector<string> getEnabledVars() const;
+    void buildVarTable();
 
     PyObject *createPyFunc(
         string moduleName, string funcName, string script) const;
@@ -186,6 +187,7 @@ class Plot : public QDialog, public Ui_PlotWindow {
     int _cRatio;
     int _refLevel;
     int _refLevels;
+    bool _updating;
 
     // All of the following vectors are used to store
     // spatial or temporal coordinates and extents:

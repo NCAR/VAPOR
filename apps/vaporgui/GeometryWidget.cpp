@@ -157,9 +157,9 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
             int rc = _dataMgr->GetVariableExtents(ts, varNames[i],
                                                   level, minFullExt, maxFullExt);
             if (rc < 0) {
-                char bufr[256];
-                sprintf(bufr, "Error: DataMgr could not return valid values from GetVariableExtents() for variable %s", varNames[i].c_str());
-                MyBase::SetErrMsg(bufr);
+                MyBase::SetErrMsg("Error: DataMgr could not return valid values"
+                                  " from GetVariableExtents() for variable %s",
+                                  varNames[i].c_str());
             }
 
             // If we are on the extents of the first
