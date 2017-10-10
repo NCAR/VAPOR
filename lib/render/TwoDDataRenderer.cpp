@@ -369,10 +369,6 @@ int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
 	);
 	if(rc<0) return (-1);
 
-    cout << "TwoDRenderer::_paintGL() timestep: " << ts << endl;
-    cout << "minEx: " << minBoxReq[0] << " " << minBoxReq[1] << " " << minBoxReq[2] << endl;
-    cout << "maxEx: " << maxBoxReq[0] << " " << maxBoxReq[1] << " " << maxBoxReq[2] << endl;
-
 	assert(g);
 
 	double defaultZ = _getDefaultZ(dataMgr, ts);
@@ -434,15 +430,22 @@ void TwoDDataRenderer::_gridStateClear() {
 void TwoDDataRenderer::_gridStateSet(
 ) {
 	TwoDDataParams *rParams = (TwoDDataParams *) GetActiveParams();
-	_currentRefLevel = rParams->GetRefinementLevel();
-	_currentLod = rParams->GetCompressionLevel();
-	_currentHgtVar = rParams->GetHeightVariableName();
-	_currentTimestep = rParams->GetCurrentTimestep();
-	rParams->GetBox()->GetExtents(_currentBoxMinExts, _currentBoxMaxExts);
 
-    cout << "BarbRenderer::gridStateSet timestep: " << _currentTimestep << endl;
-    cout << "minEx: " << _currentBoxMinExts[0] << " " << _currentBoxMinExts[1] << " " << _currentBoxMinExts[2] << endl;
-    cout << "maxEx: " << _currentBoxMaxExts[0] << " " << _currentBoxMaxExts[1] << " " << _currentBoxMaxExts[2] << endl;
+	DC::DataVar dvar;
+	_dataMgr->GetDataVarInfo(rParams->GetVariableName(), dvar);
+
+	vector <double> minExts, maxExts;
+	rParams->GetBox()->GetExtents(minExts, maxExts);
+	string meshName;
+
+	_grid_state = _grid_state_c(
+		rParams->GetRefinementLevel(),
+		rParams->GetCompressionLevel(),
+		rParams->GetHeightVariableName(),
+		dvar.GetMeshName(),
+		rParams->GetCurrentTimestep(),
+		minExts, maxExts
+	);
 }
 
 bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const {
@@ -520,8 +523,6 @@ int TwoDDataRenderer::_getMeshStructured(
 	GLfloat *verts = (GLfloat *) _sb_verts.GetBuf();
 	GLfloat *normals = (GLfloat *) _sb_normals.GetBuf();
 	ComputeNormals(verts, _vertsWidth, _vertsHeight, normals);
-
-	cout << "verts[0] " << verts[0] << endl;
 
 	// Construct indices for a triangle strip covering one row
 	// of the mesh

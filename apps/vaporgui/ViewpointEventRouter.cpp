@@ -353,7 +353,6 @@ void ViewpointEventRouter::updateTranslations() {
 
 	for (int i=0; i<datasetNames.size(); i++) {
 		translations = vpp->GetTranslations(datasetNames[i]);
-		cout << endl << "ViewpointEventRouter, GetTranslations " << translations[0] << " " << translations[1] << " " << translations[2] << endl;
 		updateTransformTable(table, datasetNames[i], translations, i);
 	} 
 }

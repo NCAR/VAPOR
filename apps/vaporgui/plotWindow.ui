@@ -789,7 +789,7 @@ Variable Attributes</string>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_2">
                  <item>
-                  <widget class="QLabel" name="label_2">
+                  <widget class="QLabel" name="spaceP1CopyLabel">
                    <property name="text">
                     <string>Copy point from:</string>
                    </property>
@@ -1210,7 +1210,7 @@ Variable Attributes</string>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_10">
                  <item>
-                  <widget class="QLabel" name="label_4">
+                  <widget class="QLabel" name="spaceP2CopyLabel">
                    <property name="text">
                     <string>Copy point from:</string>
                    </property>
@@ -1862,7 +1862,7 @@ Variable Attributes</string>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_11">
                  <item>
-                  <widget class="QLabel" name="label_11">
+                  <widget class="QLabel" name="timeCopyLabel">
                    <property name="text">
                     <string>Copy point from:</string>
                    </property>
