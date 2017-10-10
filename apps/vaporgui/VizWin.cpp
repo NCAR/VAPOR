@@ -677,6 +677,8 @@ void VizWin::SetTrackBall(const double posvec[3], const double dirvec[3], const 
 
     _trackBall->setFromFrame(posvec, dirvec, upvec, centerRot, true);
 
+    // Set the OpenGL matrix from the trackball
+    //
     glPushMatrix();
     _trackBall->TrackballSetMatrix();
 
@@ -687,6 +689,10 @@ void VizWin::SetTrackBall(const double posvec[3], const double dirvec[3], const 
     glGetDoublev(GL_MODELVIEW_MATRIX, m);
     glPopMatrix();
 
+    // Record the OpenGL matrix established via the trackball
+    //
+    paramsMgr->BeginSaveStateGroup("Navigate scene");
     vParams->SetModelViewMatrix(m);
     vParams->SetRotationCenter(centerRot);
+    paramsMgr->EndSaveStateGroup();
 }
