@@ -59,11 +59,12 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
 #endif
 
     //Methods to handle home viewpoint
-    void setHomeViewpoint();
-    void useHomeViewpoint();
+    void SetHomeViewpoint();
+    void UseHomeViewpoint();
+
+    void ViewAll();
     //Following are only accessible from main menu
-    void CenterFullDomain();
-    void CenterSubRegion(VAPoR::RegionParams *rParams);
+    void CenterSubRegion();
     void AlignView(int axis);
 
     //Set from probe:
@@ -88,6 +89,8 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
     float _lastCamPos[3];
     VizWinMgr *_vizMgr;
     bool _panChanged;
+
+    VAPoR::ParamsBase *GetActiveParams() const;
 
   private slots:
 

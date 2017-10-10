@@ -503,6 +503,21 @@ void MainForm::hookupSignals() {
     connect(
         _tabMgr, SIGNAL(ActiveEventRouterChanged(string)),
         this, SLOT(setActiveEventRouter(string)));
+    connect(
+        _homeAction, SIGNAL(triggered()),
+        this, SLOT(goHome()));
+    connect(
+        _viewAllAction, SIGNAL(triggered()),
+        this, SLOT(viewAll()));
+    connect(
+        _sethomeAction, SIGNAL(triggered()),
+        this, SLOT(setHome()));
+    connect(
+        alignViewCombo, SIGNAL(activated(int)),
+        this, SLOT(alignView(int)));
+    connect(
+        _viewRegionAction, SIGNAL(triggered()),
+        this, SLOT(viewRegion()));
 
     // Slots on the VizWinMgr
     //
@@ -512,21 +527,6 @@ void MainForm::hookupSignals() {
     connect(
         _cascadeAction, SIGNAL(triggered()),
         _vizWinMgr, SLOT(cascade()));
-    connect(
-        _homeAction, SIGNAL(triggered()),
-        _vizWinMgr, SLOT(home()));
-    connect(
-        _sethomeAction, SIGNAL(triggered()),
-        _vizWinMgr, SLOT(sethome()));
-    connect(
-        _viewAllAction, SIGNAL(triggered()),
-        _vizWinMgr, SLOT(viewAll()));
-    connect(
-        _viewRegionAction, SIGNAL(triggered()),
-        _vizWinMgr, SLOT(viewRegion()));
-    connect(
-        alignViewCombo, SIGNAL(activated(int)),
-        _vizWinMgr, SLOT(alignView(int)));
     connect(
         _windowSelector, SIGNAL(winActivated(const QString &)),
         _vizWinMgr, SLOT(winActivated(const QString &)));
@@ -1018,7 +1018,13 @@ void MainForm::loadDataHelper(
     // Reinitialize all tabs
     //
 
-    _vizWinMgr->viewAll();
+    viewAll();
+
+    vector<string> winNames = _paramsMgr->GetVisualizerNames();
+    for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+        vpParams->SetCurrentVPToHome();
+    }
 
     DataStatus *ds = _controlExec->getDataStatus();
     BoxSliderFrame::setDataStatus(ds);
@@ -1641,6 +1647,49 @@ void MainForm::setActiveEventRouter(string type) {
     buildWebTabHelpMenu(help);
 
     eRouter->updateTab();
+}
+
+void MainForm::goHome() {
+    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)
+                                        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+    assert(vRouter);
+
+    vRouter->UseHomeViewpoint();
+}
+
+void MainForm::viewAll() {
+    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)
+                                        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+    assert(vRouter);
+
+    vRouter->ViewAll();
+}
+
+void MainForm::setHome() {
+    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)
+                                        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+    assert(vRouter);
+
+    vRouter->SetHomeViewpoint();
+}
+
+void MainForm::alignView(int axis) {
+    if (axis < 1)
+        return;
+
+    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)
+                                        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+    assert(vRouter);
+
+    vRouter->AlignView(axis);
+}
+
+void MainForm::viewRegion() {
+    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)
+                                        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+    assert(vRouter);
+
+    vRouter->CenterSubRegion();
 }
 
 bool MainForm::event(QEvent *e) {
