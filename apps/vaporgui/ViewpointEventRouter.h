@@ -55,14 +55,6 @@ public:
 	//Methods to capture state at start and end of mouse moves:
 	//
 	
-#ifdef	DEAD
-	virtual void captureMouseDown(int button);
-	//When the mouse goes up, save the face displacement into the region.
-	virtual void captureMouseUp();
-	//When the spin is ended, it replaces captureMouseUp:
-	void endSpin();
-#endif
-	
 	//Methods to handle home viewpoint
 	void SetHomeViewpoint();
 	void UseHomeViewpoint();

@@ -590,19 +590,6 @@ void ViewpointEventRouter::ViewAll() {
 	
 }
 
-#ifdef	DEAD
-//Reinitialize Viewpoint tab settings, session has changed.
-//Note that this is called after the globalViewpointParams are set up, but before
-//any of the localViewpointParams are setup.
-void ViewpointEventRouter::
-_reinitTab(bool doOverride){
-	if (VizWinMgr::getInstance()->getNumVisualizers() > 1) LocalGlobal->setEnabled(true);
-	else LocalGlobal->setEnabled(false);
-	setEnabled(true);
-}
-#endif
-
-
 
 VAPoR::ParamsBase *ViewpointEventRouter::GetActiveParams() const {
 
