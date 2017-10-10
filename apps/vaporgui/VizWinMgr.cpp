@@ -819,7 +819,6 @@ void VizWinMgr::UpdateRouters() {
 
         if (reRouter)
             continue; // Skip render event routers
-        cout << "updating tab: " << tab << endl;
 
         QWidget *w = dynamic_cast<QWidget *>(eRouter);
         assert(w);

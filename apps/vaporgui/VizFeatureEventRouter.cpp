@@ -240,7 +240,6 @@ void VizFeatureEventRouter::
 //Insert values from params into tab panel
 //
 void VizFeatureEventRouter::_updateTab() {
-    cout << "VizFeatureEventRouter::_updateTab() BLOCKED" << endl;
     return;
 
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
