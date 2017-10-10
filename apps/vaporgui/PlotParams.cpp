@@ -118,7 +118,13 @@ vector<string> PlotParams::GetVarNames() const
     return varNames;
 }
 
-void PlotParams::SetVarNames(vector<string> varNames) { SetValueStringVec(_varsTag, "Variable names selected for plot", varNames); }
+void PlotParams::SetVarNames(vector<string> varNames)
+{
+    SetValueStringVec(_varsTag, "Variable names selected for plot", varNames);
+    cout << "PlotParams::SetVarNames ";
+    for (int i = 0; i < varNames.size(); i++) { cout << varNames[i] << " "; }
+    cout << endl;
+}
 
 void PlotParams::SetSpaceOrTime(string state)
 {
@@ -177,11 +183,13 @@ bool PlotParams::GetXConst() const
 {
     string sState = GetValueString(_xConstTag, "false");
     bool   state = (sState == "true") ? true : false;
+    cout << "GetXConst is " << state << endl;
     return state;
 }
 
 void PlotParams::SetXConst(bool state)
 {
+    cout << "SetXConst to " << state << endl;
     string sState = state ? "true" : "false";
     SetValueString(_xConstTag,
                    "Variable for keeping the min/max X coordinate "

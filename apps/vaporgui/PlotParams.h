@@ -33,8 +33,8 @@ public:
     int  GetRegionSelection() const;
     void SetRegionSelection(int state);
 
-    int  GetSpaceMinTS() const;
-    void SetSpaceMinTS(int ts);
+    // int GetSpaceMinTS() const;
+    // void SetSpaceMinTS(int ts);
 
     int  GetMaxTS() const;
     void SetMaxTS(int ts);

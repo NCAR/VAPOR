@@ -21,7 +21,7 @@
     #pragma warning(disable : 4100)
 #endif
 
-#include "Plot.h"
+#include <Python.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -33,10 +33,13 @@
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QKeyEvent>
+#include <vapor/MyPython.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgr.h>
 //#include "params.h"
 //#include "vizwinmgr.h"
+#include "Plot.h"
 #include "RangeController.h"
 
 #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
@@ -214,8 +217,10 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow()
     plotButton->setDefault(false);
 
     connect(plotButton, SIGNAL(pressed()), this, SLOT(go()));
-    connect(addVarCombo, SIGNAL(activated(int)), this, SLOT(newVarAdded(int)));
-    connect(removeVarCombo, SIGNAL(activated(int)), this, SLOT(removeVar(int)));
+    // connect(addVarCombo, SIGNAL(activated(int)), this, SLOT(newVarAdded(int)));
+    // connect(removeVarCombo, SIGNAL(activated(int)), this, SLOT(removeVar(int)));
+    connect(addVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(newVarAdded(int)));
+    connect(removeVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVar(int)));
     connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(reinitDataMgr()));
     connect(timeCopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
     connect(spaceP1CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
@@ -226,6 +231,13 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow()
         connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int)));
         if (i > 2) { connect(_timeCheckBoxes[i], SIGNAL(stateChanged(int)), this, SLOT(constCheckboxChanged(int))); }
     }
+
+    spaceP1CopyLabel->hide();
+    spaceP1CopyCombo->hide();
+    spaceP2CopyLabel->hide();
+    spaceP2CopyCombo->hide();
+    timeCopyLabel->hide();
+    timeCopyCombo->hide();
 }
 
 Plot::~Plot()
@@ -234,8 +246,6 @@ Plot::~Plot()
     if (_errMsg) delete _errMsg;
     if (_plotImage) delete _plotImage;
 }
-
-void Plot::Update(VAPoR::PlotParams pParams) { _params = pParams; }
 
 void Plot::destroyControllers()
 {
@@ -392,7 +402,13 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm)
     //
     initSSCs();
 
-    applyParams();
+    _params->SetXConst(0);
+    _params->SetYConst(0);
+    _params->SetZConst(0);
+    _params->SetTimeConst(0);
+
+    // applyParams();
+    Update(_params);
 
     showMe();
 }
@@ -428,6 +444,7 @@ void Plot::initCRatios()
     if (_params->GetCRatio() == -1) {
         _cRatio = _cRatios.size() - 1;
         cRatioCombo->setCurrentIndex(_cRatio);
+        _params->SetCRatio(_cRatio);
     }
     cRatioCombo->blockSignals(false);
 }
@@ -440,7 +457,10 @@ void Plot::initRefinement()
     _refLevel = _dm->GetNumRefLevels(_vars[0]);
     for (int i = 0; i <= _refLevel; i++) { refCombo->addItem(QString::number(i)); }
 
-    if (_params->GetRefinement() == -1) { refCombo->setCurrentIndex(_refLevel); }
+    if (_params->GetRefinement() == -1) {
+        refCombo->setCurrentIndex(_refLevel);
+        _params->SetRefinement(_refLevel);
+    }
 
     refCombo->blockSignals(false);
 }
@@ -1268,14 +1288,22 @@ void Plot::getPointFromRenderer()
 }
 #endif
 
-void Plot::applyParams()
+void Plot::Update(VAPoR::PlotParams *pParams)
 {
+    _updating = 1;
+    _params = pParams;
+
     vector<double> minSpace, maxSpace, timeExts;
     minSpace = _params->GetSpaceMinExtents();
     maxSpace = _params->GetSpaceMaxExtents();
 
     // If minSpace is empty, then we have an empty set of params.  Just return.
-    if (minSpace.empty()) { return; }
+    if (minSpace.empty()) {
+        cout << "Aborting Update()" << endl;
+        return;
+    }
+
+    cout << "updatingXRange " << minSpace[0] << " " << maxSpace[0] << endl;
 
     _spaceXRange->setUserMin(minSpace[0]);
     _spaceYRange->setUserMin(minSpace[1]);
@@ -1301,7 +1329,13 @@ void Plot::applyParams()
     int spaceTS = _params->GetSpaceTS();
     _spaceTimeRange->setUserMin(spaceTS);
 
+    // Clear and regenerate the variable table,
+    // and its associated combo boxes
+    //
+    for (int i = 1; i < removeVarCombo->count(); i++) { removeVarCombo->removeItem(i); }
     vector<string> vars = _params->GetVarNames();
+    for (int i = 0; i < _uVars.size(); i++) { variablesTable->removeRow(0); }
+    _uVars.clear();
     for (int i = 0; i < vars.size(); i++) {
         string var = vars[i];
         int    index = addVarCombo->findText(QString::fromStdString(var));
@@ -1314,32 +1348,56 @@ void Plot::applyParams()
     int cRatioIndex = _params->GetCRatio();
     cRatioCombo->setCurrentIndex(cRatioIndex);
 
+    // Update const checkboxes
+    //
+    for (int i = 0; i < 3; i++) { _spaceCheckBoxes[i]->blockSignals(true); }
+    _timeCheckBoxes[3]->blockSignals(true);
+
     bool xConst = _params->GetXConst();
-    if (xConst) {
-        _spaceXRange->setConst(xConst);
+    _spaceXRange->setConst(xConst);
+    if (xConst)
         _spaceCheckBoxes[0]->setCheckState(Qt::Checked);
-    }
+    else
+        _spaceCheckBoxes[0]->setCheckState(Qt::Unchecked);
+
     bool yConst = _params->GetYConst();
-    if (yConst) {
-        constCheckboxChanged(yConst);
+    constCheckboxChanged(yConst);
+    if (yConst)
         _spaceCheckBoxes[1]->setCheckState(Qt::Checked);
-    }
+    else
+        _spaceCheckBoxes[1]->setCheckState(Qt::Unchecked);
+
     bool zConst = _params->GetZConst();
-    if (zConst) {
-        constCheckboxChanged(zConst);
+    constCheckboxChanged(zConst);
+    if (zConst)
         _spaceCheckBoxes[2]->setCheckState(Qt::Checked);
-    }
+    else
+        _spaceCheckBoxes[2]->setCheckState(Qt::Unchecked);
+
+    for (int i = 0; i < 3; i++) { _spaceCheckBoxes[i]->blockSignals(false); }
+    _timeCheckBoxes[3]->blockSignals(false);
+
     bool tConst = _params->GetTimeConst();
-    if (tConst) {
-        constCheckboxChanged(tConst);
+    constCheckboxChanged(tConst);
+    if (tConst)
         _timeCheckBoxes[3]->setCheckState(Qt::Checked);
-    }
+    else
+        _timeCheckBoxes[3]->setCheckState(Qt::Unchecked);
+
+    cout << "consts " << xConst << " " << yConst << " " << zConst << " " << tConst << endl;
+    _updating = 0;
 }
 
 bool Plot::eventFilter(QObject *o, QEvent *e)
 {
+    ParamsMgr *pMgr = _controlExec->GetParamsMgr();
+    pMgr->BeginSaveStateGroup("Application of Plot eventFilter settings");
+
+    // if (_updating) return false;
     vector<double> spaceMinExts, spaceMaxExts, timeExts;
     int            spaceTS, minTimeTS, maxTimeTS;
+
+    if (e->type() == QEvent::KeyPress) cout << "Plot event filter " << _params << " " << ((QKeyEvent *)e)->text().toStdString() << endl;
 
     spaceMinExts.push_back(_spaceXRange->getUserMin());
     spaceMinExts.push_back(_spaceYRange->getUserMin());
@@ -1363,8 +1421,9 @@ bool Plot::eventFilter(QObject *o, QEvent *e)
     _params->SetSpaceTS(spaceTS);
     _params->SetTimeMinTS(minTimeTS);
     _params->SetTimeMaxTS(maxTimeTS);
-
     // return QObject::eventFilter(o,e);
+
+    pMgr->BeginSaveStateGroup("Application of Plot eventFilter settings");
     return false;
 }
 
@@ -1372,15 +1431,19 @@ void Plot::constCheckboxChanged(int state)
 {
     QObject *sender = QObject::sender();
     if (sender == _spaceCheckBoxes[0]) {
+        cout << "SetXConst" << endl;
         _spaceXRange->setConst(state);
         _params->SetXConst((bool)state);
     } else if (sender == _spaceCheckBoxes[1]) {
+        cout << "SetYConst" << endl;
         _spaceYRange->setConst(state);
         _params->SetYConst((bool)state);
     } else if (sender == _spaceCheckBoxes[2]) {
+        cout << "SetZConst" << endl;
         _spaceZRange->setConst(state);
         _params->SetZConst((bool)state);
     } else if (sender == _timeCheckBoxes[3]) {
+        cout << "SetTimeConst" << endl;
         _timeTimeRange->setConst(state);
         _params->SetTimeConst((bool)state);
     }
@@ -1501,16 +1564,14 @@ void Plot::initVariables()
 void Plot::newVarAdded(int index)
 {
     if (index == 0) return;
-    // string varName = addVarCombo->currentText().toStdString();
-    string varName = addVarCombo->itemText(index).toStdString();
+    QString varName = addVarCombo->itemText(index);
 
-    if (std::find(_uVars.begin(), _uVars.end(), varName) != _uVars.end()) return;
+    if (std::find(_uVars.begin(), _uVars.end(), varName.toStdString()) != _uVars.end()) return;
 
-    _uVars.push_back(varName);
-
+    _uVars.push_back(varName.toStdString());
     int rowCount = variablesTable->rowCount();
     variablesTable->insertRow(rowCount);
-    variablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
+    variablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(varName));
 
     QHeaderView *verticalHeader = variablesTable->verticalHeader();
     verticalHeader->setResizeMode(QHeaderView::Fixed);
@@ -1532,22 +1593,25 @@ void Plot::newVarAdded(int index)
     variablesTable->resizeRowsToContents();
     addVarCombo->setCurrentIndex(0);
 
-    removeVarCombo->addItem(QString::fromStdString(varName));
-    // addVarCombo->removeItem(index);
+    if (removeVarCombo->findText(varName) == -1) { removeVarCombo->addItem(varName); }
 
     // If all variables are 2D, disable Z axis controllers
     //
     bool varsAre2D = true;
     for (int i = 0; i < _uVars.size(); i++) {
-        //		if (_dm->GetVarType(_uVars[i]) == DataMgr::VAR3D) {
         size_t nDims;
         _dm->GetNumDimensions(_uVars[i], nDims);
         if (nDims == 3) { varsAre2D = false; }
     }
     varsAre2D ? enableZControllers(false) : enableZControllers(true);
 
-    _params->SetVarNames(_uVars);
+    // If we are adding a var through the gui, set params.
+    // Otherwise we are issuing an Update() and should not
+    // touch params.
+    if (sender()) { _params->SetVarNames(_uVars); }
 }
+
+void Plot::buildVarTable() {}
 
 void Plot::enableZControllers(bool s)
 {

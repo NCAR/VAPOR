@@ -227,7 +227,6 @@ void VizFeatureEventRouter::vizfeatureReturnPressed(void) { confirmText(); }
 //
 void VizFeatureEventRouter::_updateTab()
 {
-    cout << "VizFeatureEventRouter::_updateTab() BLOCKED" << endl;
     return;
 
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
