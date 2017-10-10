@@ -139,11 +139,6 @@ void VizWinMgr::createAllDefaultTabs() {
 
     // Renderer tabs
     //
-#ifdef DEAD
-    installTab(er->GetType(), ArrowEventRouter::CreateTab);
-    installTab(er->GetType(), IsolineEventRouter::CreateTab);
-    installTab(er->GetType(), ImageEventRouter::CreateTab);
-#endif
     parent = TabManager::getInstance()->GetSubTabWidget(0);
     er = new TwoDDataEventRouter(parent, _controlExec);
     installTab(er->GetType(), 0, er);
@@ -409,93 +404,20 @@ void VizWinMgr::winActivated(const QString &qS) {
  *	Slots associated with VizTab:
  ********************************************************************/
 
-void VizWinMgr::
-    home() {
-    VizWin *vw = getActiveVizWin();
-    if (!vw)
-        return;
-    getViewpointRouter()->useHomeViewpoint();
-}
-void VizWinMgr::
-    sethome() {
-    VizWin *vw = getActiveVizWin();
-    if (!vw)
-        return;
-    getViewpointRouter()->setHomeViewpoint();
-}
-
-void VizWinMgr::viewAll() {
-
-    DataStatus *dataStatus = _controlExec->getDataStatus();
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    size_t ts = _mainForm->GetAnimationParams()->GetCurrentTimestep();
-
-    vector<double> minExts, maxExts;
-    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
-    assert(minExts.size() == 3);
-    assert(maxExts.size() == 3);
-
-    double maxSide = max(
-        maxExts[2] - minExts[2],
-        max(maxExts[1] - minExts[1],
-            maxExts[0] - minExts[0]));
-
-    // calculate the camera position: center - 1.5*dirvec*maxSide;
-    // Position the camera 1.5*maxSide units away from the center, aimed
-    // at the center.
-    //
-
-    //Make sure the dirvec is normalized:
-    double dirvec[] = {0.0, 0.0, -1.0};
-    vnormal(dirvec);
-
-    double upvec[] = {0.0, 1.0, 0.0};
-
-    double posvec[3], center[3];
-    for (int i = 0; i < 3; i++) {
-        center[i] = 0.5f * (maxExts[i] + minExts[i]);
-        posvec[i] = center[i] - 1.5 * maxSide * dirvec[i];
-    }
-
-    SetTrackBall(posvec, dirvec, upvec, center, true);
-}
-
 void VizWinMgr::SetTrackBall(
     const double posvec[3], const double dirvec[3],
     const double upvec[3], const double centerRot[3],
     bool perspective) {
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    paramsMgr->BeginSaveStateGroup("Navigate scene");
+
     std::map<string, VizWin *>::iterator itr;
     for (itr = _vizWindow.begin(); itr != _vizWindow.end(); itr++) {
         VizWin *vw = itr->second;
         vw->SetTrackBall(posvec, dirvec, upvec, centerRot, true);
     }
-}
 
-void VizWinMgr::viewRegion() {
-    VizWin *vw = getActiveVizWin();
-    if (!vw)
-        return;
-
-    string vizName = GetActiveVizName();
-
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    RegionParams *rParams = paramsMgr->GetRegionParams(vizName);
-    assert(rParams);
-    getViewpointRouter()->CenterSubRegion(rParams);
-}
-void VizWinMgr::
-    alignView(int axis) {
-    VizWin *vw = getActiveVizWin();
-    if (!vw)
-        return;
-    if (axis < 1)
-        return;
-    //Always reset current item to first.
-    _mainForm->alignViewCombo->setCurrentIndex(0);
-#ifdef DEAD
-    vw->getVisualizer()->SetTrackballCoordsChanged(true);
-#endif
-    getViewpointRouter()->AlignView(axis);
+    paramsMgr->EndSaveStateGroup();
 }
 
 #ifdef DEAD
@@ -554,106 +476,6 @@ void VizWinMgr::
 
     //and then refresh the panel:
     _tabManager->show();
-}
-
-/*****************************************************************************
- * Called when the local/global selector is changed.
- * Separate versions for viztab, regiontab
- ******************************************************************************/
-void VizWinMgr::
-    setVpLocalGlobal(int val) {
-#ifdef DEAD
-    int activeViz = _controlExec->GetActiveVizIndex();
-    //If changes  to global, revert to global panel.
-    //If changes to local, may need to create a new local panel
-    //Switch local and global Trackball as appropriate
-    //If changes  to global, just revert to global panel.
-    //If changes to local, may need to create a new local panel
-
-    if (val == 0) { //toGlobal.
-        //First set the global status,
-        //then put  values in tab based on global settings.
-        //Note that updateDialog will trigger events changing values
-        //on the current dialog
-        ViewpointParams *vp = (ViewpointParams *)_paramsMgr->GetParamsInstance(Params::_viewpointParamsTag, activeViz, -1);
-        assert(vp);
-        getViewpointRouter()->SetLocal(vp, false);
-        getViewpointRouter()->updateTab();
-
-        _tabManager->show();
-    } else { //Local: Do we need to create new parameters?
-
-        ViewpointParams *vpParams = (ViewpointParams *)_paramsMgr->GetParamsInstance(Params::_viewpointParamsTag, activeViz, -1);
-        if (!vpParams) {
-            //create a new parameter panel, copied from global
-            ViewpointParams *vp = (ViewpointParams *)_paramsMgr->GetDefaultParams(Params::_viewpointParamsTag);
-            assert(vp);
-            vpParams = (ViewpointParams *)vp->deepCopy();
-            vpParams->SetVizNum(activeViz);
-            getViewpointRouter()->SetLocal(vpParams, true);
-            //No need to refresh anything, since the new parameters are same as old!
-        } else { //need to revert to existing local settings:
-            getViewpointRouter()->SetLocal(vpParams, true);
-            getViewpointRouter()->updateTab();
-
-            //and then refresh the panel:
-            _tabManager->show();
-        }
-    }
-#endif
-}
-
-/*****************************************************************************
- * Called when the region tab local/global selector is changed.
- * Affects only the front region tab
- ******************************************************************************/
-void VizWinMgr::
-    setRgLocalGlobal(int val) {
-#ifdef DEAD
-    int activeViz = _controlExec->GetActiveVizIndex();
-    //If changes  to global, just revert to global panel.
-    //If changes to local, may need to create a new local panel
-    //In either case need to force redraw.
-    //If change to local, and in region mode, need to redraw all global windows
-
-    if (val == 0) { //toGlobal.
-        //First set the global status,
-        //then put  values in tab based on global settings.
-        //Note that updateDialog will trigger events changing values
-        //on the current dialog
-        RegionParams *rp = (RegionParams *)_paramsMgr->GetParamsInstance(Params::_regionParamsTag, activeViz, -1);
-        assert(rp);
-        getRegionRouter()->SetLocal(rp, false);
-        getRegionRouter()->updateTab();
-        _tabManager->show();
-    } else { //Local: Do we need to create new parameters?
-             //need to revert to existing local settings:
-        RegionParams *rp = (RegionParams *)_paramsMgr->GetParamsInstance(Params::_regionParamsTag, activeViz, -1);
-        assert(rp);
-        getRegionRouter()->SetLocal(rp, true);
-        getRegionRouter()->updateTab();
-
-        //and then refresh the panel:
-        _tabManager->show();
-    }
-
-    //Specify if the active viz is sharing the region
-
-    Visualizer::setRegionShareFlag(val == 0);
-
-    //in region mode, refresh the global windows and this one
-    MouseModeParams *p = _mainForm->GetStateParams()->GetMouseModeParams();
-    if (p->GetCurrentMouseMode() == MouseModeParams::regionMode) {
-        map<int, VizWin *>::iterator it;
-        for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) {
-            int i = it->first;
-            RegionParams *rp = _paramsMgr->GetRegionParams(i);
-            assert(rp);
-            if ((!rp->IsLocal() || (i == activeViz)))
-                (it->second)->updateGL();
-        }
-    }
-#endif
 }
 
 EventRouter *VizWinMgr::GetEventRouter(string erType) const {
