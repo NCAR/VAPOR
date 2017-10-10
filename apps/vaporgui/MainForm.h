@@ -313,6 +313,22 @@ private slots:
 
 	void setActiveEventRouter(string type); 
 
+	// Change viewpoint to the current home viewpoint
+	void goHome(); 
+
+	// Move camera in or out to make entire volume visible
+	void viewAll();
+
+	// Set the current home viewpoint based on current viewpoint
+	void setHome();
+
+	// Align the camera to a specified axis
+	// param[in] axis 1,2, or 3.
+	void alignView(int axis);
+
+	//! Move camera in or out to make current region visible
+	void viewRegion();
+
 };
 #endif // MAINFORM_H
 
