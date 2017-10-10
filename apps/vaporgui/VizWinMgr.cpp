@@ -420,64 +420,6 @@ void VizWinMgr::SetTrackBall(
     paramsMgr->EndSaveStateGroup();
 }
 
-#ifdef DEAD
-//Reset the near/far distances for all the windows that
-//share a viewpoint, based on region in specified regionparams
-//
-void VizWinMgr::
-    resetViews(ViewpointParams *vp) {
-    int vizNum = vp->GetVizNum();
-    if (vizNum >= 0) {
-        Visualizer *glw = _vizWindow[vizNum]->getVisualizer();
-        if (glw)
-            glw->resetNearFar(vp);
-    }
-    if (vp->IsLocal())
-        return;
-    map<int, VizWin *>::iterator it;
-    for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) {
-        int i = it->first;
-        Params *vpParams = (ViewpointParams *)_paramsMgr->GetParamsInstance(Params::_viewpointParamsTag, i, -1);
-        if ((i != vizNum) && ((!vpParams) || !vpParams->IsLocal())) {
-            Visualizer *glw = (it->second)->getVisualizer();
-            if (glw)
-                glw->resetNearFar(vp);
-        }
-    }
-}
-#endif
-
-//Local global selector for all panels are similar.  First, Animation panel:
-//
-void VizWinMgr::
-    setAnimationLocalGlobal(int val) {
-#ifdef DEAD
-    //If changes to global, revert to global panel.
-    //If changes to local, may need to create a new local panel
-    int activeViz = _controlExec->GetActiveVizIndex();
-    if (val == 0) { //toGlobal.
-        //First set the global status,
-        //then put  values in tab based on global settings.
-        //Note that updateDialog will trigger events changing values
-        //on the current dialog
-        AnimationParams *ap = (AnimationParams *)_paramsMgr->GetParamsInstance(Params::_animationParamsTag, activeViz, -1);
-        assert(ap);
-        getAnimationRouter()->SetLocal(ap, false);
-        getAnimationRouter()->updateTab();
-        _tabManager->show();
-    } else { //Local: Do we need to create new parameters?
-             //need to revert to existing local settings:
-        AnimationParams *ap = (AnimationParams *)_paramsMgr->GetParamsInstance(Params::_animationParamsTag, activeViz, -1);
-        assert(ap);
-        getAnimationRouter()->SetLocal(ap, true);
-        getAnimationRouter()->updateTab();
-    }
-#endif
-
-    //and then refresh the panel:
-    _tabManager->show();
-}
-
 EventRouter *VizWinMgr::GetEventRouter(string erType) const {
     map<string, EventRouter *>::const_iterator itr;
     itr = _eventRouterMap.find(erType);
@@ -594,15 +536,6 @@ void VizWinMgr::removeVisualizer(string vizName) {
     killViz(vizName);
     fitSpace();
 }
-#ifdef DEAD
-void VizWinMgr::resetTrackball() {
-    vector<string> vizNames = _controlExec->GetVisualizerNames();
-    for (int i = 0; i < vizNames.size(); i++) {
-        Visualizer *viz = _controlExec->GetVisualizer(vizNames[i]);
-        viz->resetTrackball();
-    }
-}
-#endif
 
 void VizWinMgr::ReinitRouters() {
 

@@ -70,7 +70,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     }
 
     //! Set the current viewpoint to be the home viewpoint
-    void setCurrentVPToHome() {
+    void SetCurrentVPToHome() {
         Viewpoint *currentViewpoint = getCurrentViewpoint();
         setHomeViewpoint(currentViewpoint);
     }
@@ -143,7 +143,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //! \param[in] Viewpoint* viewpoint to be set
     //! \retval int 0 if successful
     //! \sa Viewpoint
-    void setCurrentViewpoint(Viewpoint *newVP);
+    void SetCurrentViewpoint(Viewpoint *newVP);
 
     //! Set the home viewpoint
     //! \param[in] Viewpoint* home viewpoint to be set
@@ -203,7 +203,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //! Obtain the home viewpoint
     //! \sa Viewpoint
     //! \retval Viewpoint* current home viewpoint.
-    virtual Viewpoint *getHomeViewpoint() const {
+    virtual Viewpoint *GetHomeViewpoint() const {
         Viewpoint *v = (Viewpoint *)m_VPs->GetParams(_homeViewTag);
         assert(v != NULL);
         return (v);
