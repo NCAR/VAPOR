@@ -219,7 +219,7 @@ void ViewpointParams::setSpecularCoeff(int lightNum, double val)
     SetValueDoubleVec(_specularCoeffTag, "Set specular coefficient", v);
 }
 
-void ViewpointParams::setCurrentViewpoint(Viewpoint *newVP) { m_VPs->Insert(newVP, _currentViewTag); }
+void ViewpointParams::SetCurrentViewpoint(Viewpoint *newVP) { m_VPs->Insert(newVP, _currentViewTag); }
 
 void ViewpointParams::setHomeViewpoint(Viewpoint *newVP) { m_VPs->Insert(newVP, _homeViewTag); }
 
