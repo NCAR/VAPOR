@@ -217,10 +217,6 @@ class VizWinMgr : public QObject {
         const double upvec[3], const double centerRot[3],
         bool perspective);
 
-    //! Set the current active Visualizer to use local or global Animation settings
-    //! \param[in] val is 0 for global, 1 for local.
-    void setAnimationLocalGlobal(int val);
-
     //! Invoke updateGL on all the visualizers that have dirty bit set.
     void updateDirtyWindows();
 
