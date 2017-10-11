@@ -987,6 +987,13 @@ void Statistics::refreshTable() {
 	generateTableColumns();
 }
 
+void Statistics::Update(VAPoR::StatisticsParams* sParams) {
+	initVariables();
+	initRefinement();
+	initCRatios();
+	initTimes();
+}
+
 void Statistics::update() {
 
 	if (!_regionInitialized) return;

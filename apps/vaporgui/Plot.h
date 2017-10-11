@@ -112,8 +112,8 @@ private:
 	void initSSCs();
 	void initCRatios();
 	void initRefinement();
-	void applyParams();
-	bool eventFilter(QObject* o, QEvent* e);
+	//void applyParams();
+	//bool eventFilter(QObject* o, QEvent* e);
 	void enableZControllers(bool s);
 	void destroyControllers();
 	vector<string> getEnabledVars() const;
@@ -282,9 +282,11 @@ private:
 
 	bool _triggeredByFriend;
 	bool _isInitialized;
+	string _spaceOrTime;
 
 public slots:
 	void go();
+	void tabChanged(int);
 //	void getPointFromRenderer();
 	void newVarAdded(int index);
 	void removeVar(int);
@@ -293,6 +295,9 @@ public slots:
 	void cRatioChanged(int i);
 	void constCheckboxChanged(int state);
 	void reinitDataMgr();
+	void spaceRangeChanged();
+	void timeRangeChanged();
+	void timeTimesChanged();
 };
 
 #endif // PLOT_H
