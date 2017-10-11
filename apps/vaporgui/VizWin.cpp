@@ -684,28 +684,6 @@ for (int j=0; j<4; j++) {
 cout << endl;
 #endif
 
-	//only paint if necessary
-	//Note that makeCurrent is needed when here we have multiple windows.
-
-#ifdef	DEAD
-	static bool first=true;
-	//first paint, just clear front and back buffers.
-	if (first && _winName.empty()){
-		glClearColor(0.,0.,0.,1.);
-		glClear(GL_COLOR_BUFFER_BIT);
-		swapBuffers();
-		glClear(GL_COLOR_BUFFER_BIT);
-		first = false;
-
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-
-		return;
-	}
-	int rc0 = printOpenGLErrorMsg("VizWindowPaintGL");
-#endif
 	
 	int rc = _controlExec->Paint(_winName, false);
 	if (rc < 0) {
