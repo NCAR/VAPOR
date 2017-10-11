@@ -216,8 +216,6 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow()
     plotButton->setDefault(false);
 
     connect(plotButton, SIGNAL(pressed()), this, SLOT(go()));
-    // connect(addVarCombo, SIGNAL(activated(int)), this, SLOT(newVarAdded(int)));
-    // connect(removeVarCombo, SIGNAL(activated(int)), this, SLOT(removeVar(int)));
     connect(addVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(newVarAdded(int)));
     connect(removeVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVar(int)));
     connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(reinitDataMgr()));
@@ -407,7 +405,6 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm)
     _params->SetZConst(0);
     _params->SetTimeConst(0);
 
-    // applyParams();
     Update(_params);
 
     showMe();
@@ -434,7 +431,6 @@ void Plot::showMe()
 
 void Plot::tabChanged(int tab)
 {
-    cout << "tabChanged " << tab << endl;
     if (tab == 0) {
         _spaceOrTime = "space";
     } else {
@@ -593,33 +589,6 @@ void Plot::initSSCs()
     _timeZRange->addObserver(_timeZLineEdit);
     _timeZRange->setUserMin((_extents[2] + _extents[5]) / 2.f);
 
-    /*spaceP1XSlider->installEventFilter(this);
-    spaceP2XSlider->installEventFilter(this);
-    spaceP1YSlider->installEventFilter(this);
-    spaceP2YSlider->installEventFilter(this);
-    spaceP1ZSlider->installEventFilter(this);
-    spaceP2ZSlider->installEventFilter(this);
-
-    spaceP1XEdit->installEventFilter(this);
-    spaceP2XEdit->installEventFilter(this);
-    spaceP1YEdit->installEventFilter(this);
-    spaceP2YEdit->installEventFilter(this);
-    spaceP1ZEdit->installEventFilter(this);
-    spaceP2ZEdit->installEventFilter(this);
-
-    spaceTimeSlider->installEventFilter(this);
-    timeTimeMinSlider->installEventFilter(this);
-    timeTimeMaxSlider->installEventFilter(this);
-
-    timeXSlider->installEventFilter(this);
-    timeYSlider->installEventFilter(this);
-    timeZSlider->installEventFilter(this);
-
-    timeXEdit->installEventFilter(this);
-    timeYEdit->installEventFilter(this);
-    timeZEdit->installEventFilter(this);
-    */
-
     connect(_spaceXRange, SIGNAL(valueChanged()), this, SLOT(spaceRangeChanged()));
     connect(_spaceYRange, SIGNAL(valueChanged()), this, SLOT(spaceRangeChanged()));
     connect(_spaceZRange, SIGNAL(valueChanged()), this, SLOT(spaceRangeChanged()));
@@ -696,8 +665,6 @@ void Plot::savePlotToFile()
 int Plot::findNyquist(VAPoR::Grid *sg, const double minu[3], const double maxu[3], double &dX, double &dY, double &dZ) const
 {
     vector<size_t> dims = sg->GetDimensions();
-    cout << "Dims " << dims.size() << endl;
-    for (int i = 0; i < dims.size(); i++) { cout << dims[i] << endl; }
 
     int s1, s2, s3;
     s1 = (int)dims[0];
@@ -716,15 +683,6 @@ int Plot::findNyquist(VAPoR::Grid *sg, const double minu[3], const double maxu[3
     dY = ((maxu[1] - minu[1]) / (double)(nsamples - 1));
     dZ = ((maxu[2] - minu[2]) / (double)(nsamples - 1));
 
-    cout << "deltas " << dX << " " << dY << " " << dZ << endl;
-    cout << minu[0] << " " << maxu[0] << endl;
-    cout << minu[1] << " " << maxu[1] << endl;
-    cout << minu[2] << " " << maxu[2] << endl;
-    cout << nsamples << endl;
-
-    // dX = 10000;
-    // dY = 100000;
-    // dZ = 1000;
     return nsamples;
 }
 
@@ -855,7 +813,6 @@ void Plot::go()
     //
     map<string, vector<float>> data;
     map<string, vector<float>> iData;
-    // if (spaceTimeTab->currentIndex()==0) {
     if (_spaceOrTime == "space") {
         // Get samples
         //
@@ -1051,7 +1008,6 @@ int Plot::getSpatialVectors(const vector<string> vars, map<string, vector<float>
             double yCoord = j * dY + minu[1];
             double zCoord = j * dZ + minu[2];
             float  val = sg->GetValue(xCoord, yCoord, zCoord);
-            cout << "get SG value " << j << " " << val << endl;
             // Map missing values to NaNs. matplotlib won't plot
             // these. May need to using a numpy masked array in future.
             //
@@ -1309,17 +1265,8 @@ void Plot::getPointFromRenderer()
 }
 #endif
 
-void Plot::Update(VAPoR::PlotParams *pParams)
+void Plot::updateSpaceTimeTabs()
 {
-    _updating = 1;
-    _params = pParams;
-
-    vector<double> minSpace, maxSpace, timeExts;
-    cout << "Updating with params inst " << _params << endl;
-    cout << "Updating with params node " << _params->GetNode() << endl;
-    minSpace = _params->GetSpaceMinExtents();
-    maxSpace = _params->GetSpaceMaxExtents();
-
     _spaceOrTime = _params->GetSpaceOrTime();
     spaceTimeTab->blockSignals(true);
     if (_spaceOrTime == "space") {
@@ -1328,12 +1275,13 @@ void Plot::Update(VAPoR::PlotParams *pParams)
         spaceTimeTab->setCurrentIndex(1);
     }
     spaceTimeTab->blockSignals(false);
+}
 
-    // If minSpace is empty, then we have an empty set of params.  Just return.
-    if (minSpace.empty()) {
-        cout << "Aborting Update()" << endl;
-        return;
-    }
+void Plot::updateRanges()
+{
+    vector<double> minSpace, maxSpace, timeExts;
+    minSpace = _params->GetSpaceMinExtents();
+    maxSpace = _params->GetSpaceMaxExtents();
 
     _spaceXRange->blockSignals(true);
     _spaceYRange->blockSignals(true);
@@ -1358,7 +1306,10 @@ void Plot::Update(VAPoR::PlotParams *pParams)
     _timeXRange->blockSignals(false);
     _timeYRange->blockSignals(false);
     _timeZRange->blockSignals(false);
+}
 
+void Plot::updateTimes()
+{
     int timeMinTS, timeMaxTS;
     timeMinTS = _params->GetTimeMinTS();
     timeMaxTS = _params->GetTimeMaxTS();
@@ -1371,35 +1322,37 @@ void Plot::Update(VAPoR::PlotParams *pParams)
     _spaceTimeRange->blockSignals(true);
     _spaceTimeRange->setUserMin(spaceTS);
     _spaceTimeRange->blockSignals(false);
+}
 
+void Plot::updateVariables()
+{
     // Clear and regenerate the variable table,
     // and its associated combo boxes
     //
     vector<string> vars = _params->GetVarNames();
     removeVarCombo->clear();
     removeVarCombo->addItem("Remove Variable:");
-    //	for (int i=1; i<removeVarCombo->count(); i++) {
-    //		removeVarCombo->removeItem(i);
-    //	}
 
     for (int i = 0; i < _uVars.size(); i++) { variablesTable->removeRow(0); }
     _uVars.clear();
-    cout << "Updating, var size " << vars.size();
     for (int i = 0; i < vars.size(); i++) {
         string var = vars[i];
         int    index = addVarCombo->findText(QString::fromStdString(var));
-        cout << " adding " << var << endl;
         newVarAdded(index);
     }
+}
 
+void Plot::updateRefCRatio()
+{
     int refIndex = _params->GetRefinement();
     refCombo->setCurrentIndex(refIndex);
 
     int cRatioIndex = _params->GetCRatio();
     cRatioCombo->setCurrentIndex(cRatioIndex);
+}
 
-    // Update const checkboxes
-    //
+void Plot::updateConstCheckboxes()
+{
     for (int i = 0; i < 3; i++) { _spaceCheckBoxes[i]->blockSignals(true); }
     _timeCheckBoxes[3]->blockSignals(true);
 
@@ -1433,8 +1386,18 @@ void Plot::Update(VAPoR::PlotParams *pParams)
         _timeCheckBoxes[3]->setCheckState(Qt::Checked);
     else
         _timeCheckBoxes[3]->setCheckState(Qt::Unchecked);
+}
 
-    _updating = 0;
+void Plot::Update(VAPoR::PlotParams *pParams)
+{
+    _params = pParams;
+
+    updateSpaceTimeTabs();
+    updateRanges();
+    updateTimes();
+    updateVariables();
+    updateRefCRatio();
+    updateConstCheckboxes();
 }
 
 void Plot::spaceRangeChanged()
@@ -1476,62 +1439,19 @@ void Plot::timeTimesChanged()
     pMgr->EndSaveStateGroup();
 }
 
-/*bool Plot::eventFilter(QObject *o, QEvent *e) {
-    return false;
-    ParamsMgr* pMgr = _controlExec->GetParamsMgr();
-    pMgr->BeginSaveStateGroup("Application of Plot eventFilter settings");
-
-    //if (_updating) return false;
-    vector<double> spaceMinExts, spaceMaxExts, timeExts;
-    int spaceTS, minTimeTS, maxTimeTS;
-
-    if (e->type() == QEvent::KeyPress)
-    cout << "Plot event filter " << _params << " " << ((QKeyEvent*)e)->text().toStdString() << endl;
-
-    spaceMinExts.push_back(_spaceXRange->getUserMin());
-    spaceMinExts.push_back(_spaceYRange->getUserMin());
-    spaceMinExts.push_back(_spaceZRange->getUserMin());
-    spaceMaxExts.push_back(_spaceXRange->getUserMax());
-    spaceMaxExts.push_back(_spaceYRange->getUserMax());
-    spaceMaxExts.push_back(_spaceZRange->getUserMax());
-    _params->SetSpaceMaxExtents(spaceMaxExts);
-    _params->SetSpaceMinExtents(spaceMinExts);
-
-    timeExts.push_back(_timeXRange->getUserMin());
-    timeExts.push_back(_timeYRange->getUserMin());
-    timeExts.push_back(_timeZRange->getUserMin());
-
-    _params->SetTimeExtents(timeExts);
-
-    spaceTS = _spaceTimeRange->getUserMin();
-    minTimeTS = _timeTimeRange->getUserMin();
-    maxTimeTS = _timeTimeRange->getUserMax();
-
-    _params->SetSpaceTS(spaceTS);
-    _params->SetTimeMinTS(minTimeTS);
-    _params->SetTimeMaxTS(maxTimeTS);
-    //return QObject::eventFilter(o,e);
-
-    return false;
-}*/
-
 void Plot::constCheckboxChanged(int state)
 {
     QObject *sender = QObject::sender();
     if (sender == _spaceCheckBoxes[0]) {
-        cout << "SetXConst" << endl;
         _spaceXRange->setConst(state);
         _params->SetXConst((bool)state);
     } else if (sender == _spaceCheckBoxes[1]) {
-        cout << "SetYConst" << endl;
         _spaceYRange->setConst(state);
         _params->SetYConst((bool)state);
     } else if (sender == _spaceCheckBoxes[2]) {
-        cout << "SetZConst" << endl;
         _spaceZRange->setConst(state);
         _params->SetZConst((bool)state);
     } else if (sender == _timeCheckBoxes[3]) {
-        cout << "SetTimeConst" << endl;
         _timeTimeRange->setConst(state);
         _params->SetTimeConst((bool)state);
     }
@@ -1756,7 +1676,6 @@ void Plot::removeVar(int index)
             break;
         }
     }
-    cout << "Remove Var" << endl;
     removeVarCombo->setCurrentIndex(0);
     _params->SetVarNames(_uVars);
     removeVarCombo->blockSignals(false);

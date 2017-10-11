@@ -87,28 +87,32 @@ public:
     ~Plot();
 
     void Initialize(VAPoR::ControlExec *ce, VizWinMgr *vwm);
-    void Update(VAPoR::PlotParams *pParams);    // {_params = pParams;}
+    void Update(VAPoR::PlotParams *pParams);
 
 private:
-    bool init();
-    void reject();
-    void print(bool doSpace) const;
-    void showMe();
-    void initTables();
-    void initTimes();
-    void initExtents(int ts);
-    void initPlotDlg();
-    void initVariables();
-    void initConstCheckboxes();
-    void initSSCs();
-    void initCRatios();
-    void initRefinement();
-    // void applyParams();
-    // bool eventFilter(QObject* o, QEvent* e);
+    bool           init();
+    void           reject();
+    void           print(bool doSpace) const;
+    void           showMe();
+    void           initTables();
+    void           initTimes();
+    void           initExtents(int ts);
+    void           initPlotDlg();
+    void           initVariables();
+    void           initConstCheckboxes();
+    void           initSSCs();
+    void           initCRatios();
+    void           initRefinement();
     void           enableZControllers(bool s);
     void           destroyControllers();
     vector<string> getEnabledVars() const;
     void           buildVarTable();
+    void           updateSpaceTimeTabs();
+    void           updateRanges();
+    void           updateTimes();
+    void           updateVariables();
+    void           updateRefCRatio();
+    void           updateConstCheckboxes();
 
     PyObject *createPyFunc(string moduleName, string funcName, string script) const;
 
@@ -134,10 +138,6 @@ private:
 
     PyObject *buildPyDict(const map<string, vector<float>> &data);
 
-    // void getSliders(
-    //	QObject*& sender, QComboBox*& qcb, SpaceSSC*& x, SpaceSSC*& y,
-    //	SpaceSSC*& z
-    //);
     void getRanges(QObject *&sender, QComboBox *&qcb, Range *&x, Range *&y, Range *&z);
 
     string pyErr() const;
@@ -256,7 +256,6 @@ private:
 public slots:
     void go();
     void tabChanged(int);
-    //	void getPointFromRenderer();
     void newVarAdded(int index);
     void removeVar(int);
     void savePlotToFile();
