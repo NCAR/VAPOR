@@ -95,9 +95,8 @@ void Range::setUserMin(double v) {
     if ((_constant) && (_userMin != _userMax))
         setUserMax(v);
 
-    cout << "Range::setUserMin " << _constant << endl;
-
     notifyObservers();
+    emit valueChanged();
 }
 
 void Range::setUserMax(double v) {
@@ -119,6 +118,7 @@ void Range::setUserMax(double v) {
         setUserMin(v);
 
     notifyObservers();
+    emit valueChanged();
 }
 
 void Range::setConst(bool c) {
@@ -191,12 +191,11 @@ MinMaxSlider::MinMaxSlider(Range *range,
     int position = _type == 0 ? 0 : _increments;
     _slider->setValue(position);
 
-    connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
-    //connect(_slider, SIGNAL(sliderReleased()), this, SLOT(updateValue()));
+    //connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
+    connect(_slider, SIGNAL(sliderReleased()), this, SLOT(updateValue()));
 }
 
 void MinMaxSlider::updateValue() {
-    cout << "MinMaxSlider::updateValue()" << endl;
     double val;
     int pos = _slider->value();
     if (pos == _increments)
@@ -266,8 +265,8 @@ SinglePointSlider::SinglePointSlider(Range *range,
 
     _slider->setValue(position);
 
-    connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
-    //connect(_slider, SIGNAL(sliderReleased(int)), this, SLOT(updateValue()));
+    //connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
+    connect(_slider, SIGNAL(sliderReleased(int)), this, SLOT(updateValue()));
 }
 
 void SinglePointSlider::notify() {
@@ -365,8 +364,8 @@ CenterSizeSlider::CenterSizeSlider(Range *range,
     int position = type == 0 ? _increments / 2 : _increments;
     _slider->setValue(position);
 
-    connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
-    //connect(_slider, SIGNAL(sliderReleased(int)), this, SLOT(updateValue()));
+    //connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
+    connect(_slider, SIGNAL(sliderReleased(int)), this, SLOT(updateValue()));
 }
 
 void CenterSizeSlider::updateValue() {
