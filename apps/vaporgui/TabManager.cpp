@@ -336,8 +336,6 @@ void TabManager::newRenderer(
 	size_t local_ts = dataStatus->MapGlobalToLocalTimeStep( dataSetName, ts);
 	rParams->SetCurrentTimestep(local_ts);
 
-cout << "Global, local ts " << ts << " " << local_ts << endl;
-
 	er->SetActive(renderInst);
 
 	// Ugh. Why isn't RenderEvenRouter base class a QWidget?

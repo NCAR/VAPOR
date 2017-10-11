@@ -156,6 +156,26 @@ protected:
 
 private:
 
+ class ParamsChangeEvent : public QEvent {
+ public:
+  ParamsChangeEvent() : QEvent(ParamsChangeEvent::type()) {}
+
+  virtual ~ParamsChangeEvent() {}
+
+  static QEvent::Type type() {
+	if (_customEventType == QEvent::None) {	// Register
+		int generatedType = QEvent::registerEventType();
+		_customEventType = static_cast<QEvent::Type>(generatedType);
+	}
+	return _customEventType;
+  }
+
+ private:
+  static QEvent::Type _customEventType;
+ };
+
+ void _stateChangeCB();
+
 	// Set the various widgets in the main window consistent with latest
 	// params settings:
 	//
@@ -261,8 +281,6 @@ private:
 	TabManager *_tabMgr;
 	VizWinMgr* _vizWinMgr;
 	string _capturingAnimationVizName;
-
-	bool _paramsStateChange;
 
 private slots:   
 	void sessionOpen(QString qfileName="");
