@@ -72,8 +72,6 @@ void EventRouter::
 
 void EventRouter::updateTab() {
 
-    cout << "EventRouter::updateTab() " << endl;
-
     //Obtain the Params instance that is currently active.
     ParamsBase *myParams = GetActiveParams();
 
@@ -87,7 +85,6 @@ void EventRouter::updateTab() {
     //
     string path = myParams->GetNode()->GetPath();
     if (find(_initPaths.begin(), _initPaths.end(), path) == _initPaths.end()) {
-        cout << "EventRouter::updateTab() not found " << path << endl;
         _initializeTab();
         _initPaths.push_back(path);
     }
