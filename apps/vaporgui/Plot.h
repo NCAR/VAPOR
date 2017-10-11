@@ -90,21 +90,21 @@ public:
     void Update(VAPoR::PlotParams *pParams);    // {_params = pParams;}
 
 private:
-    bool           init();
-    void           reject();
-    void           print(bool doSpace) const;
-    void           showMe();
-    void           initTables();
-    void           initTimes();
-    void           initExtents(int ts);
-    void           initPlotDlg();
-    void           initVariables();
-    void           initConstCheckboxes();
-    void           initSSCs();
-    void           initCRatios();
-    void           initRefinement();
-    void           applyParams();
-    bool           eventFilter(QObject *o, QEvent *e);
+    bool init();
+    void reject();
+    void print(bool doSpace) const;
+    void showMe();
+    void initTables();
+    void initTimes();
+    void initExtents(int ts);
+    void initPlotDlg();
+    void initVariables();
+    void initConstCheckboxes();
+    void initSSCs();
+    void initCRatios();
+    void initRefinement();
+    // void applyParams();
+    // bool eventFilter(QObject* o, QEvent* e);
     void           enableZControllers(bool s);
     void           destroyControllers();
     vector<string> getEnabledVars() const;
@@ -249,11 +249,13 @@ private:
     SinglePointLineEdit *_timeZLineEdit;
     MinMaxTableCell *    _timeZCell;
 
-    bool _triggeredByFriend;
-    bool _isInitialized;
+    bool   _triggeredByFriend;
+    bool   _isInitialized;
+    string _spaceOrTime;
 
 public slots:
     void go();
+    void tabChanged(int);
     //	void getPointFromRenderer();
     void newVarAdded(int index);
     void removeVar(int);
@@ -262,6 +264,9 @@ public slots:
     void cRatioChanged(int i);
     void constCheckboxChanged(int state);
     void reinitDataMgr();
+    void spaceRangeChanged();
+    void timeRangeChanged();
+    void timeTimesChanged();
 };
 
 #endif    // PLOT_H

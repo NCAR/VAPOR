@@ -135,7 +135,9 @@ protected:
 //! observed by a multitude of Observer widgets that need
 //! to update when extents are changed.
 //!
-class Range : public Observee {
+class Range : public QObject, public Observee {
+    Q_OBJECT
+
 public:
     //! Range constructor
     //! param[in] min The minimum value of the Range domain
@@ -189,6 +191,9 @@ public:
     //! \copydoc getConst()
     //
     void setConst(bool c);
+
+signals:
+    void valueChanged();
 
 private:
     double _domainMin;

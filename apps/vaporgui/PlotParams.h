@@ -45,8 +45,8 @@ public:
     vector<double> GetSpaceMaxExtents() const;
     void           SetSpaceMaxExtents(vector<double> maxExts);
 
-    vector<double> GetTimeExtents() const;
-    void           SetTimeExtents(vector<double> maxExts);
+    vector<double> GetTimePoint() const;
+    void           SetTimePoint(vector<double> maxExts);
 
     int  GetCRatio() const;
     void SetCRatio(int cRatio);
@@ -105,7 +105,7 @@ private:
     static const string _spaceMinExtentsTag;
     static const string _spaceMaxExtentsTag;
     static const string _spaceOrTimeTag;
-    static const string _timeExtentsTag;
+    static const string _timePointTag;
     static const string _timeMinTSTag;
     static const string _timeMaxTSTag;
     static const string _timeXTag;
