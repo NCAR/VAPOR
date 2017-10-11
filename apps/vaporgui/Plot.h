@@ -96,7 +96,7 @@ public:
 	~Plot();
 	
 	void Initialize(VAPoR::ControlExec* ce, VizWinMgr* vwm);
-	void Update(VAPoR::PlotParams* pParams);// {_params = pParams;}
+	void Update(VAPoR::PlotParams* pParams);
 
 private:
 	bool init();
@@ -112,12 +112,16 @@ private:
 	void initSSCs();
 	void initCRatios();
 	void initRefinement();
-	//void applyParams();
-	//bool eventFilter(QObject* o, QEvent* e);
 	void enableZControllers(bool s);
 	void destroyControllers();
 	vector<string> getEnabledVars() const;
 	void buildVarTable();
+	void updateSpaceTimeTabs();
+	void updateRanges();
+	void updateTimes();
+	void updateVariables();
+	void updateRefCRatio();
+	void updateConstCheckboxes();
 
 	PyObject *createPyFunc(
 		string moduleName, string funcName, string script
@@ -162,10 +166,6 @@ private:
 		const map <string, vector <float> > &data
 	) ;
 
-	//void getSliders(
-	//	QObject*& sender, QComboBox*& qcb, SpaceSSC*& x, SpaceSSC*& y, 
-	//	SpaceSSC*& z
-	//);
 	void getRanges(
 		QObject*& sender, QComboBox*& qcb, Range*& x, Range*& y, 
 		Range*& z
@@ -287,7 +287,6 @@ private:
 public slots:
 	void go();
 	void tabChanged(int);
-//	void getPointFromRenderer();
 	void newVarAdded(int index);
 	void removeVar(int);
 	void savePlotToFile();
