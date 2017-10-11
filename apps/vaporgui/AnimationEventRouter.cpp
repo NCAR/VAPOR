@@ -371,7 +371,6 @@ void AnimationEventRouter::AnimationReplay() {
 	
 	aParams->SetRepeating(replayButton->isChecked());
 	
-	_updateTab();
 
 }
 
@@ -380,7 +379,6 @@ void AnimationEventRouter::AnimationGoToBegin(){
 
 	setCurrentTimestep(aParams->GetStartTimestep());
 
-	_updateTab();
 }
 
 void AnimationEventRouter::AnimationGoToEnd(){
@@ -388,7 +386,6 @@ void AnimationEventRouter::AnimationGoToEnd(){
 
 	setCurrentTimestep(aParams->GetEndTimestep());
 
-	_updateTab();
 }
 
 void AnimationEventRouter::AnimationStepForward(){
@@ -403,7 +400,6 @@ void AnimationEventRouter::AnimationStepForward(){
 
 	setCurrentTimestep(currentFrame);
 	
-	_updateTab();
 }
 
 void AnimationEventRouter::AnimationStepReverse(){
@@ -418,7 +414,6 @@ void AnimationEventRouter::AnimationStepReverse(){
 
 	setCurrentTimestep(currentFrame);
 
-	_updateTab();
 }
 
 
@@ -427,7 +422,6 @@ void AnimationEventRouter::SetTimeStep(int ts) {
 
 	setCurrentTimestep((size_t) ts);
 
-	_updateTab();
 }
 
 void AnimationEventRouter::SetFrameStep(int step) {
@@ -435,7 +429,6 @@ void AnimationEventRouter::SetFrameStep(int step) {
 
 	aParams->SetFrameStepSize((size_t) step);
 
-	_updateTab();
 }
 
 void AnimationEventRouter::SetFrameRate(int rate) {
@@ -443,7 +436,6 @@ void AnimationEventRouter::SetFrameRate(int rate) {
 
 	aParams->SetMaxFrameRate(rate);
 
-	_updateTab();
 }
 
 
@@ -512,6 +504,9 @@ void AnimationEventRouter::playNextFrame() {
 
 	setCurrentTimestep(currentFrame);
 
+	// playNextFrame() is called via a timer and bypasses main event
+	// loop. So we need to call updateTab ourselves
+	//
 	_updateTab();
 	
 }
@@ -523,7 +518,6 @@ void AnimationEventRouter::setStart() {
 
 	aParams->SetStartTimestep(ts);
 
-	_updateTab();
 }
 
 void AnimationEventRouter::setEnd() {
@@ -533,7 +527,6 @@ void AnimationEventRouter::setEnd() {
 
 	aParams->SetEndTimestep(ts);
 
-	_updateTab();
 }
 
 void AnimationEventRouter::enableWidgets(bool on) {

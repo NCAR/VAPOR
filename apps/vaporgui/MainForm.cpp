@@ -32,6 +32,7 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
+#include <functional>
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
@@ -114,6 +115,9 @@ using namespace VAPoR;
 MainForm* MainForm::_mainForm = 0;
 ControlExec * MainForm::_controlExec = NULL;
 
+
+QEvent::Type MainForm::ParamsChangeEvent::_customEventType = QEvent::None;
+
 namespace {
 bool make_dataset_name(
 	const vector <string> &currentPaths,
@@ -184,7 +188,6 @@ MainForm::MainForm(
 	_seedMe = NULL;
 	_stats = NULL;
 	_plot = NULL;	
-	_paramsStateChange = true;
    
 
     createActions();
@@ -215,7 +218,9 @@ MainForm::MainForm(
 	_controlExec->SetSaveStateEnabled(false);
 
 	_paramsMgr = _controlExec->GetParamsMgr();
-	_paramsMgr->RegisterStateChangeFlag(&_paramsStateChange);
+	_paramsMgr->RegisterStateChangeCB(
+		std::bind(&MainForm::_stateChangeCB,this)
+	);
 
 	StartupParams *sP = GetStartupParams();
 	_controlExec->SetCacheSize(sP->GetCacheMB());
@@ -953,6 +958,14 @@ void MainForm::closeEvent(QCloseEvent* ){
 	delete _controlExec;
 }
 #endif
+
+void MainForm::_stateChangeCB() {
+        
+    // Generate an application event whenever state changes
+    //      
+    ParamsChangeEvent *event = new ParamsChangeEvent();
+    QApplication::postEvent(this, event);
+}
 
 void MainForm::undoRedoHelper(bool undo) {
 
@@ -1831,11 +1844,24 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	assert(_controlExec && _vizWinMgr);
 
+	// Only update the GUI if the Params state has changed
+	//
+	if (event->type() == ParamsChangeEvent::type()) {
+
+		_vizWinMgr->UpdateRouters();
+
+		_vizWinMgr->updateDirtyWindows();
+		return(false);
+	}
+
+	// Most other events result in a redraw. Not sure if this 
+	// is necessary
+	//
 	switch(event->type()) {
 	case (QEvent::MouseButtonPress):
 	case (QEvent::MouseButtonRelease):
-//	case (QEvent::MouseMove):
-	case (QEvent::KeyRelease):
+	case (QEvent::MouseMove):
+//	case (QEvent::KeyRelease):
 
 	// Not sure why Paint is needed. Who generates it?
 	//
@@ -1843,14 +1869,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 		_vizWinMgr->updateDirtyWindows();
 
-		// Only update the GUI if the Params state has changed
-		//
-		if (_paramsStateChange) {
-			_vizWinMgr->UpdateRouters();
-			_paramsStateChange = false;
-		}
-
-		//update();
 
 	break;
 	default:
@@ -1859,6 +1877,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 #endif
 	break;
 	}
+
 
 	// Pass event on to target
 	return(false);
