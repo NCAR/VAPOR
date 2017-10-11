@@ -296,8 +296,6 @@ void AnimationEventRouter::AnimationReplay()
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     aParams->SetRepeating(replayButton->isChecked());
-
-    _updateTab();
 }
 
 void AnimationEventRouter::AnimationGoToBegin()
@@ -305,8 +303,6 @@ void AnimationEventRouter::AnimationGoToBegin()
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     setCurrentTimestep(aParams->GetStartTimestep());
-
-    _updateTab();
 }
 
 void AnimationEventRouter::AnimationGoToEnd()
@@ -314,8 +310,6 @@ void AnimationEventRouter::AnimationGoToEnd()
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     setCurrentTimestep(aParams->GetEndTimestep());
-
-    _updateTab();
 }
 
 void AnimationEventRouter::AnimationStepForward()
@@ -330,8 +324,6 @@ void AnimationEventRouter::AnimationStepForward()
     if (currentFrame > endFrame) return;
 
     setCurrentTimestep(currentFrame);
-
-    _updateTab();
 }
 
 void AnimationEventRouter::AnimationStepReverse()
@@ -346,8 +338,6 @@ void AnimationEventRouter::AnimationStepReverse()
     if (currentFrame < startFrame) return;
 
     setCurrentTimestep(currentFrame);
-
-    _updateTab();
 }
 
 void AnimationEventRouter::SetTimeStep(int ts)
@@ -355,8 +345,6 @@ void AnimationEventRouter::SetTimeStep(int ts)
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     setCurrentTimestep((size_t)ts);
-
-    _updateTab();
 }
 
 void AnimationEventRouter::SetFrameStep(int step)
@@ -364,8 +352,6 @@ void AnimationEventRouter::SetFrameStep(int step)
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     aParams->SetFrameStepSize((size_t)step);
-
-    _updateTab();
 }
 
 void AnimationEventRouter::SetFrameRate(int rate)
@@ -373,8 +359,6 @@ void AnimationEventRouter::SetFrameRate(int rate)
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     aParams->SetMaxFrameRate(rate);
-
-    _updateTab();
 }
 
 // Following are set by gui, result in save history state.
@@ -439,6 +423,9 @@ void AnimationEventRouter::playNextFrame()
 
     setCurrentTimestep(currentFrame);
 
+    // playNextFrame() is called via a timer and bypasses main event
+    // loop. So we need to call updateTab ourselves
+    //
     _updateTab();
 }
 
@@ -449,8 +436,6 @@ void AnimationEventRouter::setStart()
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     aParams->SetStartTimestep(ts);
-
-    _updateTab();
 }
 
 void AnimationEventRouter::setEnd()
@@ -460,8 +445,6 @@ void AnimationEventRouter::setEnd()
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     aParams->SetEndTimestep(ts);
-
-    _updateTab();
 }
 
 void AnimationEventRouter::enableWidgets(bool on)

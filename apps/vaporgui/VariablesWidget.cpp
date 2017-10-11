@@ -271,7 +271,6 @@ void VariablesWidget::updateFidelity(RenderParams *rParams)
     }
 
     if (varname.empty()) {
-        cout << "TEST" << endl;
         fidelityFrame->hide();
         return;
     }

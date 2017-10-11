@@ -25,6 +25,7 @@
 #include <deque>
 #include <stack>
 #include <utility>
+#include <functional>
 
 #include <vapor/DataMgr.h>
 #include <vapor/ParamsBase.h>
@@ -402,7 +403,24 @@ public:
 
     size_t RedoSize() const { return (_ssave.RedoSize()); }
 
+    //! Register a boolean flag to capture state changes
+    //!
+    //! This method registers the address of boolean flag whose value
+    //! will be set whenever the parameter state changes. It is the user's
+    //! responsbility to clear (set to false) the flag. Note, for changes
+    //! grouped tegoer with BeginStateSaveGroup() the flag will not be set
+    //! until after EndStateSaveGroup() is called, and in the case of
+    //! nested groups, not until the last EndStateSaveGroup() invocation.
+    //
     void RegisterStateChangeFlag(bool *flag) { _ssave.RegisterStateChangeFlag(flag); }
+
+    //! Register a state change callback
+    //!
+    //! This method is similar to RegisterStateChangeFlag(). However, instead of
+    //! setting a boolean flag, the function specified by \p callback
+    //! will be invoked on state changes
+    //
+    void RegisterStateChangeCB(std::function<void()> callback) { _ssave.RegisterStateChangeCB(callback); }
 
     const XmlNode *GetXMLRoot() const { return (_rootSeparator->GetNode()); }
 
@@ -431,6 +449,7 @@ private:
         {
             _rootNode = rootNode;
             for (int i = 0; i < _stateChangeFlags.size(); i++) { *(_stateChangeFlags[i]) = true; }
+            for (int i = 0; i < _stateChangeCBs.size(); i++) { _stateChangeCBs[i](); }
         }
         void Save(const XmlNode *node, string description);
         void BeginGroup(string descripion);
@@ -455,6 +474,7 @@ private:
         size_t RedoSize() const { return (_redoStack.size()); }
 
         void RegisterStateChangeFlag(bool *flag) { _stateChangeFlags.push_back(flag); }
+        void RegisterStateChangeCB(std::function<void()> callback) { _stateChangeCBs.push_back(callback); }
 
     private:
         bool           _enabled;
@@ -467,7 +487,8 @@ private:
 
         void cleanStack(int maxN, std::deque<std::pair<string, XmlNode *>> &s);
 
-        std::vector<bool *> _stateChangeFlags;
+        std::vector<bool *>                _stateChangeFlags;
+        std::vector<std::function<void()>> _stateChangeCBs;
     };
 
     map<string, DataMgr *> _dataMgrMap;
