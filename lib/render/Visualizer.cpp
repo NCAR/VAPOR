@@ -175,6 +175,46 @@ int Visualizer::getCurrentTimestep() const {
 	return(min_ts);
 }
 
+void Visualizer::applyTransforms(int i) {
+	string datasetName = _renderer[i]->GetMyDatasetName();
+	string myName = _renderer[i]->GetMyName();
+	string myType = _renderer[i]->GetMyType();
+	//cout << "Rendering " << myName << " for " << datasetName << endl;
+
+	VAPoR::ViewpointParams* vpParams = getActiveViewpointParams();
+	vector<double> scales, rotations, translations;
+	scales = vpParams->GetScales(datasetName);
+	rotations = vpParams->GetRotations(datasetName);
+	translations = vpParams->GetTranslations(datasetName);
+
+	vector<double> minExts, maxExts;
+
+//  Box was returning extents of 0 and 1????
+//
+//	RegionParams* rParams = getActiveRegionParams();
+//	Box* box = rParams->GetBox();
+//	box->GetExtents(minExts, maxExts);
+
+	DataMgr* dMgr = m_dataStatus->GetDataMgr(datasetName);
+	dMgr->GetVariableExtents(0, "U", 3, minExts, maxExts);
+	
+	float xCenter = (minExts[0] + maxExts[0])/2.f;
+	float yCenter = (minExts[1] + maxExts[1])/2.f;
+	float zCenter = (minExts[2] + maxExts[2])/2.f;
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glTranslatef(xCenter, yCenter, zCenter);
+
+	glScalef(scales[0], scales[1], scales[2]);
+	glRotatef(rotations[0], 1, 0, 0);
+	glRotatef(rotations[1], 0, 1, 0);
+	glRotatef(rotations[2], 0, 0, 1);
+	glTranslatef(translations[0], translations[1], translations[2]);
+
+	glTranslatef(-xCenter, -yCenter, -zCenter);
+}
+
 int Visualizer::paintEvent()
 {
 	MyBase::SetDiagMsg("Visualizer::paintGL()");
@@ -243,12 +283,14 @@ int Visualizer::paintEvent()
 			glPushMatrix();
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+
 			if (! _renderer[i]->IsGLInitialized()) {
 				int myrc = _renderer[i]->initializeGL(m_shaderMgr);
 				if (myrc < 0) rc = -1;
 			}
 
 			if (_renderer[i]->IsGLInitialized()) {
+				applyTransforms(i);
 				int myrc = _renderer[i]->paintGL();
 				if (myrc < 0) rc = -1;
 			}
