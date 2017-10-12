@@ -66,7 +66,7 @@ public:
     int  initDataMgr(VAPoR::DataMgr *dm);
     void showMe();
     int  initialize();
-    void updateParams(VAPoR::StatisticsParams *sParams) { _params = sParams; }
+    void Update(VAPoR::StatisticsParams *sParams);
 
 private slots:
     void restoreExtents();
@@ -76,7 +76,7 @@ private slots:
     void refinementChanged(int);
     void cRatioChanged(int);
     void newVarAdded(int);
-    void updateButtonPressed() { update(); }
+    void updateButtonPressed() { updateStats(); }
     void initRegion();
     void copyActiveRegion();
     void varRemoved(int);
@@ -88,23 +88,25 @@ private slots:
 private:
     VAPoR::StatisticsParams *_params;
     void                     retrieveRangeParams();
-    bool                     eventFilter(QObject *o, QEvent *e);
-    int                      GetExtents(vector<double> &extents);
-    int                      initVariables();
-    void                     adjustTables();
-    void                     initCRatios();
-    void                     initRefinement();
-    void                     initTimes();
-    void                     initRangeControllers();
-    void                     setNewExtents();
-    void                     update();
-    void                     refreshTable();
-    void                     generateTableColumns();
-    void                     addCalculationToTable(string varname);
-    void                     makeItRed();
-    void                     updateSliders();
-    void                     errReport(string msg) const;
-    void                     rGridError(int ts, string varname);
+    // bool eventFilter(QObject* o, QEvent* e);
+    int  GetExtents(vector<double> &extents);
+    int  initVariables();
+    void adjustTables();
+    void initCRatios();
+    void initRefinement();
+    void initTimes();
+    void initRangeControllers();
+    void setNewExtents();
+    void updateStats();
+    void refreshTable();
+    void generateTableColumns();
+    void addCalculationToTable(string varname);
+    void makeItRed();
+    void updateSliders();
+    void errReport(string msg) const;
+    void rGridError(int ts, string varname);
+    void updateVariables();
+    void updateStatisticSelection();
 
     bool calcMinMax(string varname);
     bool calcMean(string varname);
@@ -113,7 +115,6 @@ private:
     void getSinglePointTSMean(double &tsMean, int &missing, VAPoR::Grid *rGrid);
     void getMultiPointTSMean(double &tsMean, int &missing, int &count, VAPoR::Grid *rGrid);
     void getSinglePointTSStdDev(double &tsStdDev, int &globalCount, int &spMissing, double mean, VAPoR::Grid *rGrid);
-    void Update(VAPoR::StatisticsParams *sParams);
 
     struct _statistics {
         size_t row;
@@ -221,6 +222,7 @@ private:
     size_t                   _minTS;
     size_t                   _maxTS;
     int                      _refLevel;
+    int                      _refLevels;
     int                      _regionSelection;
     size_t                   _cRatio;
     size_t                   _vCoordMin[3];

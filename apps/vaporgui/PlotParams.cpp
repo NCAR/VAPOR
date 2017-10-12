@@ -70,11 +70,7 @@ int PlotParams::GetSpaceTS() const
     return (int)maxTS;
 }
 
-void PlotParams::SetSpaceTS(int ts)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_spaceMaxTSTag, "Maximum selected spatial timestep for plot", (double)ts);
-}
+void PlotParams::SetSpaceTS(int ts) { SetValueDouble(_spaceMaxTSTag, "Maximum selected spatial timestep for plot", (double)ts); }
 
 vector<double> PlotParams::GetSpaceMinExtents() const
 {
@@ -87,11 +83,7 @@ vector<double> PlotParams::GetSpaceMinExtents() const
     return extents;
 }
 
-void PlotParams::SetSpaceMinExtents(vector<double> minExts)
-{
-    cout << "Plot set " << endl;
-    SetValueDoubleVec(_spaceMinExtentsTag, "Minimum spatial extents for plot", minExts);
-}
+void PlotParams::SetSpaceMinExtents(vector<double> minExts) { SetValueDoubleVec(_spaceMinExtentsTag, "Minimum spatial extents for plot", minExts); }
 
 vector<double> PlotParams::GetSpaceMaxExtents() const
 {
@@ -104,11 +96,7 @@ vector<double> PlotParams::GetSpaceMaxExtents() const
     return extents;
 }
 
-void PlotParams::SetSpaceMaxExtents(vector<double> maxExts)
-{
-    cout << "Plot set " << endl;
-    SetValueDoubleVec(_spaceMaxExtentsTag, "Maximum spatial extents for plot", maxExts);
-}
+void PlotParams::SetSpaceMaxExtents(vector<double> maxExts) { SetValueDoubleVec(_spaceMaxExtentsTag, "Maximum spatial extents for plot", maxExts); }
 
 vector<double> PlotParams::GetTimePoint() const
 {
@@ -121,11 +109,7 @@ vector<double> PlotParams::GetTimePoint() const
     return point;
 }
 
-void PlotParams::SetTimePoint(vector<double> extents)
-{
-    cout << "Plot set " << endl;
-    SetValueDoubleVec(_timePointTag, "Spatial extents for time plotting", extents);
-}
+void PlotParams::SetTimePoint(vector<double> extents) { SetValueDoubleVec(_timePointTag, "Spatial extents for time plotting", extents); }
 
 int PlotParams::GetCRatio() const
 {
@@ -133,11 +117,7 @@ int PlotParams::GetCRatio() const
     return cRatio;
 }
 
-void PlotParams::SetCRatio(int cRatio)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_cRatioTag, "Compression ratio for plot", cRatio);
-}
+void PlotParams::SetCRatio(int cRatio) { SetValueDouble(_cRatioTag, "Compression ratio for plot", cRatio); }
 
 int PlotParams::GetRefinement() const
 {
@@ -145,11 +125,7 @@ int PlotParams::GetRefinement() const
     return refinement;
 }
 
-void PlotParams::SetRefinement(int ref)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_refinementTag, "Refinement level for plot", ref);
-}
+void PlotParams::SetRefinement(int ref) { SetValueDouble(_refinementTag, "Refinement level for plot", ref); }
 
 vector<string> PlotParams::GetVarNames() const
 {
@@ -157,15 +133,10 @@ vector<string> PlotParams::GetVarNames() const
     return varNames;
 }
 
-void PlotParams::SetVarNames(vector<string> varNames)
-{
-    cout << "Plot set " << endl;
-    SetValueStringVec(_varsTag, "Variable names selected for plot", varNames);
-}
+void PlotParams::SetVarNames(vector<string> varNames) { SetValueStringVec(_varsTag, "Variable names selected for plot", varNames); }
 
 void PlotParams::SetSpaceOrTime(string state)
 {
-    cout << "Plot set " << endl;
     SetValueString(_spaceOrTimeTag,
                    "Configure plots to show trends in "
                    "space or time",
@@ -184,22 +155,14 @@ int PlotParams::GetTimeMinTS() const
     return ts;
 }
 
-void PlotParams::SetTimeMinTS(int time)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_timeMinTSTag, "Minimum timestep for temporal plot", time);
-}
-int PlotParams::GetTimeMaxTS() const
+void PlotParams::SetTimeMinTS(int time) { SetValueDouble(_timeMinTSTag, "Minimum timestep for temporal plot", time); }
+int  PlotParams::GetTimeMaxTS() const
 {
     int ts = (int)GetValueDouble(_timeMaxTSTag, 0);
     return ts;
 }
 
-void PlotParams::SetTimeMaxTS(int time)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_timeMaxTSTag, "Maximum timestep for temporal plot", time);
-}
+void PlotParams::SetTimeMaxTS(int time) { SetValueDouble(_timeMaxTSTag, "Maximum timestep for temporal plot", time); }
 
 double PlotParams::GetTimeXCoord() const
 {
@@ -207,11 +170,7 @@ double PlotParams::GetTimeXCoord() const
     return coord;
 }
 
-void PlotParams::SetTimeXCoord(double coord)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_timeXTag, "X coordinate for temporal plot", coord);
-}
+void PlotParams::SetTimeXCoord(double coord) { SetValueDouble(_timeXTag, "X coordinate for temporal plot", coord); }
 
 double PlotParams::GetTimeYCoord() const
 {
@@ -219,11 +178,7 @@ double PlotParams::GetTimeYCoord() const
     return coord;
 }
 
-void PlotParams::SetTimeYCoord(double coord)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_timeYTag, "Y coordinate for temporal plot", coord);
-}
+void PlotParams::SetTimeYCoord(double coord) { SetValueDouble(_timeYTag, "Y coordinate for temporal plot", coord); }
 
 double PlotParams::GetTimeZCoord() const
 {
@@ -231,11 +186,7 @@ double PlotParams::GetTimeZCoord() const
     return coord;
 }
 
-void PlotParams::SetTimeZCoord(double coord)
-{
-    cout << "Plot set " << endl;
-    SetValueDouble(_timeZTag, "Z coordinate for temporal plot", coord);
-}
+void PlotParams::SetTimeZCoord(double coord) { SetValueDouble(_timeZTag, "Z coordinate for temporal plot", coord); }
 
 bool PlotParams::GetXConst() const
 {
@@ -246,7 +197,6 @@ bool PlotParams::GetXConst() const
 
 void PlotParams::SetXConst(bool state)
 {
-    cout << "Plot set " << endl;
     string sState = state ? "true" : "false";
     SetValueString(_xConstTag,
                    "Variable for keeping the min/max X coordinate "
@@ -263,7 +213,6 @@ bool PlotParams::GetYConst() const
 
 void PlotParams::SetYConst(bool state)
 {
-    cout << "Plot set " << endl;
     string sState = state ? "true" : "false";
     SetValueString(_yConstTag,
                    "Variable for keeping the min/max Y coordinate "
@@ -280,7 +229,6 @@ bool PlotParams::GetZConst() const
 
 void PlotParams::SetZConst(bool state)
 {
-    cout << "Plot set " << endl;
     string sState = state ? "true" : "false";
     SetValueString(_zConstTag,
                    "Variable for keeping the min/max Z coordinate "
@@ -297,7 +245,6 @@ bool PlotParams::GetTimeConst() const
 
 void PlotParams::SetTimeConst(bool state)
 {
-    cout << "Plot set " << endl;
     string sState = state ? "true" : "false";
     SetValueString(_timeConstTag,
                    "Variable for keeping the min/max time "

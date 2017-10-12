@@ -1518,7 +1518,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
             if (_stats) {
                 StatisticsParams *params;
                 params = (StatisticsParams *)paramsMgr->GetParams("StatisticsParams");
-                _stats->updateParams(params);
+                _stats->Update(params);
             }
             if (_plot) {
                 PlotParams *params;
