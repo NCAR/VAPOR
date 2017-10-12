@@ -69,9 +69,13 @@ public:
 	//! \return type of renderer
 	string GetMyType() const {return(_classType);};
 
-	//! Identify the type of the current renderer 
-	//! \return type of renderer
+	//! Identify the params belonging to the current renderer 
+	//! \return params for renderer
 	string GetMyParamsType() const {return(_paramsType);};
+
+	//! Identifiy the dataset associated with the current renderer
+	//! \return dataset name
+	string GetMyDatasetName() const {return(_dataSetName);};
 
  //! Return boolean indicating whether initializeGL has been 
  //! successfully called
