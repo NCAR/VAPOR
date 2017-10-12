@@ -72,6 +72,11 @@ public:
     //! \return zero if successful.
     int paintEvent();
 
+    //! Apply user defined transforms to the current renderer being drawn
+    //! \param[in] renIndex The index of the current renderer being drawn,
+    //! referring to the _renderer list
+    void applyTransforms(int renIndex);
+
     //! Issue the OpenGL resize call.  Must be called from an OpenGL context.
     //! \param[in] w Window width in pixels.
     //! \param[in] h Window height in pixels.
