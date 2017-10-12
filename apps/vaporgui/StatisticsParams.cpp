@@ -137,7 +137,7 @@ void StatisticsParams::SetMaxExtents(vector<double> maxExts) {
 }
 
 int StatisticsParams::GetCRatio() {
-    int cRatio = (int)GetValueDouble(_cRatioTag, -1);
+    int cRatio = (int)GetValueDouble(_cRatioTag, 0);
     return cRatio;
 }
 
@@ -147,7 +147,7 @@ void StatisticsParams::SetCRatio(int cRatio) {
 }
 
 int StatisticsParams::GetRefinement() {
-    int refinement = (int)GetValueDouble(_refinementTag, -1);
+    int refinement = (int)GetValueDouble(_refinementTag, 0);
     return refinement;
 }
 
@@ -157,7 +157,7 @@ void StatisticsParams::SetRefinement(int ref) {
 }
 
 bool StatisticsParams::GetMinStat() {
-    if (GetValueString(_minStatTag, "false") == "false") {
+    if (GetValueString(_minStatTag, "true") == "false") {
         return false;
     } else {
         return true;
@@ -170,7 +170,7 @@ void StatisticsParams::SetMinStat(bool state) {
 }
 
 bool StatisticsParams::GetMaxStat() {
-    if (GetValueString(_maxStatTag, "false") == "false") {
+    if (GetValueString(_maxStatTag, "true") == "false") {
         return false;
     } else {
         return true;
@@ -183,7 +183,7 @@ void StatisticsParams::SetMaxStat(bool state) {
 }
 
 bool StatisticsParams::GetMeanStat() {
-    if (GetValueString(_meanStatTag, "false") == "false") {
+    if (GetValueString(_meanStatTag, "true") == "false") {
         return false;
     } else {
         return true;
