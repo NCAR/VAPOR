@@ -1814,6 +1814,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 				PlotParams* params;
 				params = (PlotParams*)paramsMgr->GetParams("PlotParams");
 				_plot->Update(params);
+				cout << "Mainform updated plot?" << endl;
 			}
 			_vizWinMgr->UpdateRouters();
 			_paramsStateChange = false;
