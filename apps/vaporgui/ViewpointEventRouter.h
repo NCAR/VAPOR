@@ -88,6 +88,12 @@ private:
 	VizWinMgr *_vizMgr;
 	bool _panChanged;
 
+	void updateScales();
+	void updateTransformTable(QTableWidget* t, string dataSet,
+		vector<double> values, int row);
+	void updateRotations();
+	void updateTranslations();
+
   VAPoR::ParamsBase *GetActiveParams() const;
 	
 private slots:
