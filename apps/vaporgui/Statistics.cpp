@@ -164,7 +164,6 @@ Statistics::~Statistics()
 
 void Statistics::Update(VAPoR::StatisticsParams *sParams)
 {
-    cout << "stats update" << endl;
     _params = sParams;
 
     vector<double> minExts, maxExts;
@@ -354,8 +353,6 @@ void Statistics::addStatistic(int index)
 
     pMgr->EndSaveStateGroup();
 
-    cout << "added stat" << endl;
-
     refreshTable();
     VariablesTable->resizeColumnsToContents();
     addStatCombo->setCurrentIndex(0);
@@ -407,13 +404,21 @@ void Statistics::initTimes()
 {
     MinTimestepSpinbox->setMinimum(0);
     MinTimestepSpinbox->setMaximum(_dm->GetNumTimeSteps(_defaultVar) - 1);
+
+    ParamsMgr *pMgr = _controlExec->GetParamsMgr();
+    pMgr->BeginSaveStateGroup("Initializing statistics time spin boxes");
     _minTS = _params->GetMinTS();
+    MinTimestepSpinbox->blockSignals(true);
+    MaxTimestepSpinbox->blockSignals(true);
     MinTimestepSpinbox->setValue(_minTS);
 
     MaxTimestepSpinbox->setMinimum(0);
     MaxTimestepSpinbox->setMaximum(_dm->GetNumTimeSteps(_defaultVar) - 1);
     _maxTS = _params->GetMaxTS();
     MaxTimestepSpinbox->setValue(_maxTS);
+    MinTimestepSpinbox->blockSignals(false);
+    MaxTimestepSpinbox->blockSignals(false);
+    pMgr->EndSaveStateGroup();
 }
 
 void Statistics::initRangeControllers()
@@ -910,16 +915,20 @@ void Statistics::initRegion()
 
         if (max < min) {
             min = max;
+            MinTimestepSpinbox->blockSignals(true);
             MinTimestepSpinbox->setValue(max);
+            MinTimestepSpinbox->blockSignals(false);
         }
 
         if ((min != _minTS) || (max != _maxTS)) {
             _minTS = min;
             _maxTS = max;
         }
-
+        ParamsMgr *pMgr = _controlExec->GetParamsMgr();
+        pMgr->BeginSaveStateGroup("Set Max timestep in Statistics app");
         _params->SetMinTS(_minTS);
         _params->SetMaxTS(_maxTS);
+        pMgr->EndSaveStateGroup();
 
         if (_autoUpdate)
             updateStats();
@@ -934,7 +943,9 @@ void Statistics::initRegion()
 
         if (min > max) {
             max = min;
+            MaxTimestepSpinbox->blockSignals(true);
             MaxTimestepSpinbox->setValue(min);
+            MaxTimestepSpinbox->blockSignals(false);
         }
 
         if ((min != _minTS) || (max != _maxTS)) {
@@ -942,8 +953,11 @@ void Statistics::initRegion()
             _maxTS = max;
         }
 
+        ParamsMgr *pMgr = _controlExec->GetParamsMgr();
+        pMgr->BeginSaveStateGroup("Set Min timestep in Statistics app");
         _params->SetMinTS(_minTS);
         _params->SetMaxTS(_maxTS);
+        pMgr->EndSaveStateGroup();
 
         initRegion();
         if (_autoUpdate)
@@ -989,7 +1003,6 @@ void Statistics::initRegion()
 
     void Statistics::refreshTable()
     {
-        cout << "refershing table" << endl;
         VariablesTable->clear();
         VariablesTable->setRowCount(0);
         VariablesTable->setColumnCount(0);
@@ -1225,11 +1238,9 @@ void Statistics::initRegion()
 
     void Statistics::varRemoved(int index)
     {
-        cout << endl << "REMOVING INDEX: " << index << endl << endl;
         if (index == 0) return;
         // string varName = RemoveVarCombo->currentText().toStdString();
         string varName = RemoveVarCombo->itemText(index).toStdString();
-        cout << "Removing :" << varName << ": " << index << endl;
         _stats.erase(varName);
 
         vector<string> varNames = _params->GetVarNames();
@@ -1468,14 +1479,6 @@ void Statistics::initRegion()
             Grid *rGrid = NULL;
             float mv;
 
-            /*cout << "MinMax ";
-        cout << _uCoordMin[0] << " ";
-        cout << _uCoordMin[1] << " ";
-        cout << _uCoordMin[2] << " ";
-        cout << _uCoordMax[0] << " ";
-        cout << _uCoordMax[1] << " ";
-        cout << _uCoordMax[2] << " " << endl;*/
-
             if (_regionSelection == 2) {
                 rGrid = _dm->GetVariable(ts, varname, _refLevel, _cRatio, _uCoordMin, _uCoordMax);
                 if (!rGrid) return false;
@@ -1538,14 +1541,6 @@ void Statistics::initRegion()
     _uCoordMax = _extents[5];
 */
 
-        /*cout << _uCoordMin[0] << " ";
-    cout << _uCoordMin[1] << " ";
-    cout << _uCoordMin[2] << " ";
-    cout << _uCoordMax[0] << " ";
-    cout << _uCoordMax[1] << " ";
-    cout << _uCoordMax[2] << " " << endl;;
-    cout << mv << endl;*/
-
         VAPoR::StructuredGrid::Iterator itr;
         VAPoR::StructuredGrid::Iterator endItr;
         endItr = rGrid->end();
@@ -1563,9 +1558,6 @@ void Statistics::initRegion()
         }
 
         count -= missing;
-
-        // cout << count << endl;
-        // cout << missing << endl;
 
         assert(count >= 0);
         if (count == 0)

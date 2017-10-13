@@ -256,7 +256,7 @@ SinglePointSlider::SinglePointSlider(Range *range, QSlider *slider, int defaultP
     _slider->setValue(position);
 
     // connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(updateValue()));
-    connect(_slider, SIGNAL(sliderReleased(int)), this, SLOT(updateValue()));
+    connect(_slider, SIGNAL(sliderReleased()), this, SLOT(updateValue()));
 }
 
 void SinglePointSlider::notify()

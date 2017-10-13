@@ -215,11 +215,7 @@ RenderParams::~RenderParams()
     if (_Colorbar) delete _Colorbar;
 }
 
-void RenderParams::SetEnabled(bool val)
-{
-    cout << "RenderParams set to " << val << endl << endl;
-    SetValueLong(_EnabledTag, "enable/disable renderer", val);
-}
+void RenderParams::SetEnabled(bool val) { SetValueLong(_EnabledTag, "enable/disable renderer", val); }
 
 void RenderParams::SetVariableName(string varname)
 {
@@ -640,7 +636,6 @@ RenderParams *RenParamsContainer::Create(string className, string name)
     ParamsSeparator mySep(_ssave, name);
     mySep.SetParent(_separator);
 
-    cout << "createInstance (rp): " << className << " " << name << endl;
     cout << (_dataMgr == NULL) << endl;
 
     // Create the desired class

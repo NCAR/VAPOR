@@ -391,7 +391,20 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                     else
                         missing = GetColorMapping(tf, val);
                 }
-                if (!missing) { drawBarb(point, end, rad * 10); }
+                if (!missing) {
+                    string                  datasetName = GetMyDatasetName();
+                    string                  myVisName = GetVisualizer();
+                    VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
+
+                    vector<double> scales = vpp->GetScales(datasetName);
+                    cout << "SCALES " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
+
+                    glMatrixMode(GL_MODELVIEW);
+                    glPushMatrix();
+                    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
+                    drawBarb(point, end, rad * 10);
+                    glPopMatrix();
+                }
             }
         }
     }
