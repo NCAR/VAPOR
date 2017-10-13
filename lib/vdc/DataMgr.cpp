@@ -878,8 +878,8 @@ int	DataMgr::_setupConnVecs(
 		// This hack deals with that.
 		//
 		if (conn_min.size() < dims.size()) {
-			conn_min.insert(conn_min.cbegin(), 0);
-			conn_max.insert(conn_max.cbegin(), dims[0] - 1);
+			conn_min.insert(conn_min.begin(), 0);
+			conn_max.insert(conn_max.begin(), dims[0] - 1);
 		}
 
 		// Map voxel coordinates into block coordinates
