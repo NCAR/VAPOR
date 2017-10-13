@@ -769,6 +769,7 @@ int Visualizer::paintEvent()
         vsub(center, pos, temp);
 
         // Apply stretch factor:
+
         vector<double> stretch = vpParams->GetStretchFactors();
         for (int i = 0; i < 3; i++) temp[i] = stretch[i] * temp[i];
         float distToScene = vlength(temp);
