@@ -201,16 +201,19 @@ void Visualizer::applyTransforms(int i) {
 	float xCenter = (minExts[0] + maxExts[0])/2.f;
 	float yCenter = (minExts[1] + maxExts[1])/2.f;
 	float zCenter = (minExts[2] + maxExts[2])/2.f;
+#endif
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glTranslatef(xCenter, yCenter, zCenter);
 
+#ifdef DEAD
+	glTranslatef(xCenter, yCenter, zCenter);
 	glScalef(scales[0], scales[1], scales[2]);
 	glRotatef(rotations[0], 1, 0, 0);
 	glRotatef(rotations[1], 0, 1, 0);
 	glRotatef(rotations[2], 0, 0, 1);
 #endif
+
 	glTranslatef(translations[0], translations[1], translations[2]);
 
 #ifdef DEAD
