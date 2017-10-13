@@ -74,8 +74,6 @@ ViewpointParams::ViewpointParams(
 
     _transforms = new ParamsContainer(ssave, _transformsTag);
     _transforms->SetParent(this);
-
-    cout << "Constructor1 " << (_transforms == NULL) << " " << this << endl;
 }
 
 ViewpointParams::ViewpointParams(
@@ -112,8 +110,6 @@ ViewpointParams::ViewpointParams(const ViewpointParams &rhs) : ParamsBase(rhs) {
 
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
     _transforms = new ParamsContainer(*(rhs._transforms));
-
-    cout << "Constructor3 " << (_transforms == NULL) << endl;
 }
 
 ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs) {
@@ -125,7 +121,6 @@ ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs) {
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
     _transforms = new ParamsContainer(*(rhs._transforms));
 
-    cout << "OpOverload " << (_transforms == NULL) << endl;
     return (*this);
 }
 
@@ -180,7 +175,6 @@ void ViewpointParams::AddDatasetTransform(string datasetName) {
     // If dataset is already loaded, do not add another
     // transform for it
     //
-    cout << "Adding dataset transform " << datasetName << endl;
     if (std::find(_datasetNames.begin(),
                   _datasetNames.end(), datasetName) != _datasetNames.end())
         return;
@@ -193,7 +187,6 @@ void ViewpointParams::AddDatasetTransform(string datasetName) {
     //
     Transform newTransform(_ssave);
     _transforms->Insert(&newTransform, datasetName);
-    cout << "Added dataset transform" << endl;
 }
 
 vector<double> ViewpointParams::GetScales(string datasetName) {
@@ -236,10 +229,6 @@ void ViewpointParams::SetTranslations(
 
     vector<double> foo;
     foo = t->GetTranslations();
-    cout << endl;
-    cout << "ViewpointParams::SetTranslation " << translation[0] << " " << translation[1] << " " << translation[2] << endl;
-    cout << "ViewpointParams::GetTranslation " << foo[0] << " " << foo[1] << " " << foo[2] << endl
-         << endl;
 }
 
 double ViewpointParams::getLightDirection(int lightNum, int dir) const {
