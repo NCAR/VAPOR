@@ -54,6 +54,11 @@ ViewpointEventRouter::ViewpointEventRouter(QWidget *parent, VizWinMgr *vizMgr, C
 
     _panChanged = false;
     for (int i = 0; i < 3; i++) _lastCamPos[i] = 0.f;
+
+    // Disable the scale and rotation tabs
+    // for Vapor3.0 Beta
+    transformTable->transformTabs->setTabEnabled(0, false);
+    transformTable->transformTabs->setTabEnabled(2, false);
 }
 
 ViewpointEventRouter::~ViewpointEventRouter() {}
