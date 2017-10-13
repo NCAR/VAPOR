@@ -302,6 +302,12 @@ void VariablesWidget::updateFidelity(
         varname = varnames[0];
     }
 
+    if (varname.empty()) {
+        fidelityFrame->hide();
+        return;
+    }
+    fidelityFrame->show();
+
     vector<size_t> cratios = _dataMgr->GetCRatios(varname);
 
     // Get the effective compression rates as a floating point value,
