@@ -239,7 +239,6 @@ RenderParams::~RenderParams() {
 
 
 void RenderParams::SetEnabled(bool val){
-	cout << "RenderParams set to " << val << endl << endl;
 	SetValueLong(_EnabledTag,"enable/disable renderer",val);
 
 }
@@ -704,7 +703,6 @@ RenderParams *RenParamsContainer::Create(string className, string name) {
 	ParamsSeparator mySep(_ssave, name);
 	mySep.SetParent(_separator);
 
-	cout << "createInstance (rp): " << className << " " << name << endl;
 	cout << (_dataMgr==NULL) << endl;
 
 	// Create the desired class
