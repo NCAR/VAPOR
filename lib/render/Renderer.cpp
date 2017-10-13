@@ -123,69 +123,53 @@ int Renderer::paintGL() {
     return (0);
 }
 
-void Renderer::enableClippingPlanes(
-    vector<double> minExts,
-    vector<double> maxExts,
-    vector<int> axes) const {
-#ifdef DEAD
+void Renderer::EnableClipToBox() const {
+
+    GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
+    GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
+    GLdouble y0Plane[] = {0.0, 1.0, 0.0, 0.0};
+    GLdouble y1Plane[] = {0.0, -1.0, 0.0, 0.0};
+    GLdouble z0Plane[] = {0.0, 0.0, 1.0, 0.0};
+    GLdouble z1Plane[] = {0.0, 0.0, -1.0, 0.0}; //z largest
 
     const RenderParams *rParams = GetActiveParams();
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-    vector<double> scales = rParams->GetStretchFactors();
-    glScaled(scales[0], scales[1], scales[2]);
-
-    GLdouble x0Plane[] = {1., 0., 0., 0.};
-    GLdouble x1Plane[] = {-1., 0., 0., 1.0};
-    GLdouble y0Plane[] = {0., 1., 0., 0.};
-    GLdouble y1Plane[] = {0., -1., 0., 1.};
-    GLdouble z0Plane[] = {0., 0., 1., 0.};
-    GLdouble z1Plane[] = {0., 0., -1., 1.}; //z largest
-
-    x0Plane[3] = -extents[0];
-    x1Plane[3] = extents[3];
-    y0Plane[3] = -extents[1];
-    y1Plane[3] = extents[4];
-    z0Plane[3] = -extents[2];
-    z1Plane[3] = extents[5];
-
-    glClipPlane(GL_CLIP_PLANE0, x0Plane);
-    glEnable(GL_CLIP_PLANE0);
-    glClipPlane(GL_CLIP_PLANE1, x1Plane);
-    glEnable(GL_CLIP_PLANE1);
-    glClipPlane(GL_CLIP_PLANE2, y0Plane);
-    glEnable(GL_CLIP_PLANE2);
-    glClipPlane(GL_CLIP_PLANE3, y1Plane);
-    glEnable(GL_CLIP_PLANE3);
-    glClipPlane(GL_CLIP_PLANE4, z0Plane);
-    glEnable(GL_CLIP_PLANE4);
-    glClipPlane(GL_CLIP_PLANE5, z1Plane);
-    glEnable(GL_CLIP_PLANE5);
-
-    glPopMatrix();
-#endif
-}
-
-void Renderer::enableFullClippingPlanes() {
-
-    const RenderParams *rParams = GetActiveParams();
-
-    size_t ts = rParams->GetCurrentTimestep();
-
-    vector<string> varnames = rParams->GetFieldVariableNames();
-    varnames.push_back(rParams->GetVariableName());
-
     vector<double> minExts, maxExts;
-    vector<int> axes;
-    DataMgrUtils::GetExtents(
-        _dataMgr, ts, varnames, minExts, maxExts, axes);
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+    assert(minExts.size() == maxExts.size());
+    assert(minExts.size() > 0 && minExts.size() < 4);
 
-    enableClippingPlanes(minExts, maxExts, axes);
+    int orientation = rParams->GetBox()->GetOrientation();
+
+    if (minExts.size() == 3 || orientation != 0) {
+        x0Plane[3] = -minExts[0];
+        x1Plane[3] = maxExts[0];
+        glEnable(GL_CLIP_PLANE0);
+        glClipPlane(GL_CLIP_PLANE0, x0Plane);
+        glEnable(GL_CLIP_PLANE1);
+        glClipPlane(GL_CLIP_PLANE1, x1Plane);
+    }
+
+    if (minExts.size() == 3 || orientation != 1) {
+        y0Plane[3] = -minExts[1];
+        y1Plane[3] = maxExts[1];
+        glEnable(GL_CLIP_PLANE2);
+        glClipPlane(GL_CLIP_PLANE2, y0Plane);
+        glEnable(GL_CLIP_PLANE3);
+        glClipPlane(GL_CLIP_PLANE3, y1Plane);
+    }
+
+    if (minExts.size() == 3 || orientation != 2) {
+        z0Plane[3] = -minExts[2];
+        z1Plane[3] = maxExts[2];
+        glEnable(GL_CLIP_PLANE4);
+        glClipPlane(GL_CLIP_PLANE4, z0Plane);
+        glEnable(GL_CLIP_PLANE5);
+        glClipPlane(GL_CLIP_PLANE5, z1Plane);
+    }
+    cout << endl;
 }
 
-void Renderer::disableClippingPlanes() {
+void Renderer::DisableClippingPlanes() {
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
     glDisable(GL_CLIP_PLANE2);
@@ -193,50 +177,6 @@ void Renderer::disableClippingPlanes() {
     glDisable(GL_CLIP_PLANE4);
     glDisable(GL_CLIP_PLANE5);
 }
-
-void Renderer::enable2DClippingPlanes() {
-#ifdef DEAD
-    GLdouble topPlane[] = {0., -1., 0., 1.};    //y = 1
-    GLdouble rightPlane[] = {-1., 0., 0., 1.0}; // x = 1
-    GLdouble leftPlane[] = {1., 0., 0., 0.001}; //x = -.001
-    GLdouble botPlane[] = {0., 1., 0., 0.001};  //y = -.001
-
-    const double *sizes = _dataStatus->getFullStretchedSizes();
-    topPlane[3] = sizes[1] * 1.001;
-    rightPlane[3] = sizes[0] * 1.001;
-
-    glClipPlane(GL_CLIP_PLANE0, topPlane);
-    glEnable(GL_CLIP_PLANE0);
-    glClipPlane(GL_CLIP_PLANE1, rightPlane);
-    glEnable(GL_CLIP_PLANE1);
-    glClipPlane(GL_CLIP_PLANE2, botPlane);
-    glEnable(GL_CLIP_PLANE2);
-    glClipPlane(GL_CLIP_PLANE3, leftPlane);
-    glEnable(GL_CLIP_PLANE3);
-#endif
-}
-
-#ifdef DEAD
-void Renderer::enableRegionClippingPlanes() {
-
-    size_t timeStep = GetCurrentTimestep();
-
-    RegionParams *myRegionParams = _paramsMgr->GetRegionParams();
-
-    double regExts[6];
-    myRegionParams->GetBox()->GetUserExtents(regExts, timeStep);
-
-    //
-    // add padding for floating point roundoff
-    //
-    for (int i = 0; i < 3; i++) {
-        regExts[i] = regExts[i] - ((regExts[3 + i] - regExts[i]) * 0.001);
-        regExts[i + 3] = regExts[i + 3] + ((regExts[3 + i] - regExts[i]) * 0.001);
-    }
-
-    enableClippingPlanes(regExts);
-}
-#endif
 
 #ifdef DEAD
 void Renderer::buildLocal2DTransform(int dataOrientation, float a[2], float b[2], float *constVal, int mappedDims[3]) {
