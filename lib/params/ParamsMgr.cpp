@@ -1149,7 +1149,9 @@ void ParamsMgr::PMgrStateSave::Save(
 	assert(_rootNode);
 	assert(node);
 
-	if (! GetEnabled()) return;
+	if (! GetEnabled()) {
+		return;
+	}
 
 	// Only save state if the node is a branch of the tree rooted at
 	// the node named by _rootTag
@@ -1171,16 +1173,11 @@ void ParamsMgr::PMgrStateSave::Save(
 		return;
 	}
 	
-
-	// Set state change flags
-	//
-	for (int i=0; i<_stateChangeFlags.size(); i++) {
-		*(_stateChangeFlags[i]) = true;
-	}
-
 	if (! _groups.empty()) {
 		return;
 	}
+
+
 
 	// Delete oldest elements if needed
 	// 
@@ -1194,6 +1191,15 @@ void ParamsMgr::PMgrStateSave::Save(
 	cout << "ParamsMgr::PMgrStateSave::Save() : saving node " << 
 		node->GetTag() << " : " << description << endl;
 #endif
+
+	// Set state change flags and CBs
+	//
+	for (int i=0; i<_stateChangeFlags.size(); i++) {
+		*(_stateChangeFlags[i]) = true;
+	}
+	for (int i=0; i<_stateChangeCBs.size(); i++) {
+		_stateChangeCBs[i]();
+	}
 }
 
 void ParamsMgr::PMgrStateSave::BeginGroup(string description) {
@@ -1239,6 +1245,15 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
 	cleanStack(_stackSize, _undoStack);
 
 	_undoStack.push_back(make_pair(desc, new XmlNode(*_rootNode)));
+
+	// Set state change flags and CBs
+	//
+	for (int i=0; i<_stateChangeFlags.size(); i++) {
+		*(_stateChangeFlags[i]) = true;
+	}
+	for (int i=0; i<_stateChangeCBs.size(); i++) {
+		_stateChangeCBs[i]();
+	}
 
 }
 

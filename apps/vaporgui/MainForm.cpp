@@ -32,6 +32,7 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
+#include <functional>
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
@@ -114,6 +115,9 @@ using namespace VAPoR;
 MainForm* MainForm::_mainForm = 0;
 ControlExec * MainForm::_controlExec = NULL;
 
+
+QEvent::Type MainForm::ParamsChangeEvent::_customEventType = QEvent::None;
+
 namespace {
 bool make_dataset_name(
 	const vector <string> &currentPaths,
@@ -184,7 +188,6 @@ MainForm::MainForm(
 	_seedMe = NULL;
 	_stats = NULL;
 	_plot = NULL;	
-	_paramsStateChange = true;
    
 
     createActions();
@@ -215,7 +218,9 @@ MainForm::MainForm(
 	_controlExec->SetSaveStateEnabled(false);
 
 	_paramsMgr = _controlExec->GetParamsMgr();
-	_paramsMgr->RegisterStateChangeFlag(&_paramsStateChange);
+	_paramsMgr->RegisterStateChangeCB(
+		std::bind(&MainForm::_stateChangeCB,this)
+	);
 
 	StartupParams *sP = GetStartupParams();
 	_controlExec->SetCacheSize(sP->GetCacheMB());
@@ -558,6 +563,26 @@ void MainForm::hookupSignals() {
 		_tabMgr, SIGNAL(ActiveEventRouterChanged(string)),
 		this, SLOT(setActiveEventRouter(string))
 	);
+	connect (
+		_homeAction, SIGNAL(triggered()),
+		this, SLOT(goHome())
+	);
+	connect (
+		_viewAllAction, SIGNAL(triggered()),
+		this, SLOT(viewAll())
+	);
+	connect (
+		_sethomeAction, SIGNAL(triggered()),
+		this, SLOT(setHome())
+	);
+	connect (
+		alignViewCombo, SIGNAL(activated(int)),
+		this, SLOT(alignView(int))
+	);
+	connect (
+		_viewRegionAction, SIGNAL(triggered()),
+		this, SLOT(viewRegion())
+	);
 
 	// Slots on the VizWinMgr
 	//
@@ -568,26 +593,6 @@ void MainForm::hookupSignals() {
 	connect (
 		_cascadeAction, SIGNAL(triggered()),
 		_vizWinMgr, SLOT(cascade())
-	);
-	connect (
-		_homeAction, SIGNAL(triggered()),
-		_vizWinMgr, SLOT(home())
-	);
-	connect (
-		_sethomeAction, SIGNAL(triggered()),
-		_vizWinMgr, SLOT(sethome())
-	);
-	connect (
-		_viewAllAction, SIGNAL(triggered()),
-		_vizWinMgr, SLOT(viewAll())
-	);
-	connect (
-		_viewRegionAction, SIGNAL(triggered()),
-		_vizWinMgr, SLOT(viewRegion())
-	);
-	connect (
-		alignViewCombo, SIGNAL(activated(int)),
-		_vizWinMgr, SLOT(alignView(int))
 	);
 	connect (
 		_windowSelector, SIGNAL(winActivated(const QString &)),
@@ -954,6 +959,14 @@ void MainForm::closeEvent(QCloseEvent* ){
 }
 #endif
 
+void MainForm::_stateChangeCB() {
+        
+    // Generate an application event whenever state changes
+    //      
+    ParamsChangeEvent *event = new ParamsChangeEvent();
+    QApplication::postEvent(this, event);
+}
+
 void MainForm::undoRedoHelper(bool undo) {
 
 	// Disable state saving
@@ -1122,7 +1135,13 @@ void MainForm::loadDataHelper(
 	// Reinitialize all tabs
 	//
 	
-	_vizWinMgr->viewAll();
+	viewAll();
+
+	vector <string> winNames = _paramsMgr->GetVisualizerNames();
+	for (int i=0; i<winNames.size(); i++) {
+		ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+		vpParams->SetCurrentVPToHome();
+	}
 
 	DataStatus* ds = _controlExec->getDataStatus();
 	BoxSliderFrame::setDataStatus(ds);
@@ -1135,7 +1154,7 @@ void MainForm::loadDataHelper(
 
 	update();
 	_tabMgr->Update();
-} 
+}
 
 //Load data into current session
 //If current session is at default then same as loadDefaultData
@@ -1778,6 +1797,50 @@ void MainForm::setActiveEventRouter(string type) {
 	eRouter->updateTab();
 }
 
+void MainForm::goHome() {
+	ViewpointEventRouter* vRouter = (ViewpointEventRouter*) 
+		_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+	assert(vRouter);
+
+	vRouter->UseHomeViewpoint();
+}
+
+void MainForm::viewAll() {
+	ViewpointEventRouter* vRouter = (ViewpointEventRouter*) 
+		_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+	assert(vRouter);
+
+	vRouter->ViewAll();
+}
+
+void MainForm::setHome() {
+	ViewpointEventRouter* vRouter = (ViewpointEventRouter*) 
+		_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+	assert(vRouter);
+
+	vRouter->SetHomeViewpoint();
+}
+
+void MainForm::alignView(int axis)
+{
+    if (axis < 1) return;
+
+	ViewpointEventRouter* vRouter = (ViewpointEventRouter*) 
+		_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+	assert(vRouter);
+
+    vRouter->AlignView(axis);
+} 
+
+void MainForm::viewRegion()
+{
+	ViewpointEventRouter* vRouter = (ViewpointEventRouter*) 
+		_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+	assert(vRouter);
+
+    vRouter->CenterSubRegion();
+} 
+
 
 bool MainForm::event(QEvent* e){
 
@@ -1789,38 +1852,42 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	assert(_controlExec && _vizWinMgr);
 
+	// Only update the GUI if the Params state has changed
+	//
+	if (event->type() == ParamsChangeEvent::type()) {
+		ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
+		if (_stats) {
+			StatisticsParams* params;
+			params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
+			_stats->Update(params);
+		}
+		if (_plot) {
+			PlotParams* params;
+			params = (PlotParams*)paramsMgr->GetParams("PlotParams");
+			_plot->Update(params);
+			cout << "Mainform updated plot?" << endl;
+		}
+
+		_vizWinMgr->UpdateRouters();
+
+		_vizWinMgr->updateDirtyWindows();
+		return(false);
+	}
+
+	// Most other events result in a redraw. Not sure if this 
+	// is necessary
+	//
 	switch(event->type()) {
 	case (QEvent::MouseButtonPress):
 	case (QEvent::MouseButtonRelease):
-//	case (QEvent::MouseMove):
-	case (QEvent::KeyRelease):
+	case (QEvent::MouseMove):
+//	case (QEvent::KeyRelease):
 
 	// Not sure why Paint is needed. Who generates it?
 	//
 	//case (QEvent::Paint):
 
-		_vizWinMgr->updateDirtyWindows();
-
-		// Only update the GUI if the Params state has changed
-		//
-		if (_paramsStateChange) {
-			ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
-			if (_stats) {
-				StatisticsParams* params;
-				params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
-				_stats->Update(params);
-			}
-			if (_plot) {
-				PlotParams* params;
-				params = (PlotParams*)paramsMgr->GetParams("PlotParams");
-				_plot->Update(params);
-				cout << "Mainform updated plot?" << endl;
-			}
-			_vizWinMgr->UpdateRouters();
-			_paramsStateChange = false;
-		}
-
-		//update();
+	_vizWinMgr->updateDirtyWindows();
 
 	break;
 	default:
@@ -1829,6 +1896,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 #endif
 	break;
 	}
+
 
 	// Pass event on to target
 	return(false);

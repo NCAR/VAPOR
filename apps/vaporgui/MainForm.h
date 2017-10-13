@@ -160,6 +160,26 @@ protected:
 
 private:
 
+ class ParamsChangeEvent : public QEvent {
+ public:
+  ParamsChangeEvent() : QEvent(ParamsChangeEvent::type()) {}
+
+  virtual ~ParamsChangeEvent() {}
+
+  static QEvent::Type type() {
+	if (_customEventType == QEvent::None) {	// Register
+		int generatedType = QEvent::registerEventType();
+		_customEventType = static_cast<QEvent::Type>(generatedType);
+	}
+	return _customEventType;
+  }
+
+ private:
+  static QEvent::Type _customEventType;
+ };
+
+ void _stateChangeCB();
+
 	// Set the various widgets in the main window consistent with latest
 	// params settings:
 	//
@@ -266,8 +286,6 @@ private:
 	VizWinMgr* _vizWinMgr;
 	string _capturingAnimationVizName;
 
-	bool _paramsStateChange;
-
 private slots:   
 	void sessionOpen(QString qfileName="");
 	void fileSave();
@@ -316,6 +334,22 @@ private slots:
 	void loadStartingPrefs();
 
 	void setActiveEventRouter(string type); 
+
+	// Change viewpoint to the current home viewpoint
+	void goHome(); 
+
+	// Move camera in or out to make entire volume visible
+	void viewAll();
+
+	// Set the current home viewpoint based on current viewpoint
+	void setHome();
+
+	// Align the camera to a specified axis
+	// param[in] axis 1,2, or 3.
+	void alignView(int axis);
+
+	//! Move camera in or out to make current region visible
+	void viewRegion();
 
 };
 #endif // MAINFORM_H

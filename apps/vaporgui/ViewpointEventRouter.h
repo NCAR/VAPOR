@@ -55,20 +55,13 @@ public:
 	//Methods to capture state at start and end of mouse moves:
 	//
 	
-#ifdef	DEAD
-	virtual void captureMouseDown(int button);
-	//When the mouse goes up, save the face displacement into the region.
-	virtual void captureMouseUp();
-	//When the spin is ended, it replaces captureMouseUp:
-	void endSpin();
-#endif
-	
 	//Methods to handle home viewpoint
-	void setHomeViewpoint();
-	void useHomeViewpoint();
+	void SetHomeViewpoint();
+	void UseHomeViewpoint();
+
+	void ViewAll();
 	//Following are only accessible from main menu
-	void CenterFullDomain();
-	void CenterSubRegion(VAPoR::RegionParams* rParams);
+	void CenterSubRegion();
 	void AlignView(int axis);
 
 	//Set from probe:
@@ -95,11 +88,7 @@ private:
 	VizWinMgr *_vizMgr;
 	bool _panChanged;
 
-	void updateScales();
-	void updateTransformTable(QTableWidget* t, string dataSet,
-		vector<double> values, int row);
-	void updateRotations();
-	void updateTranslations();
+  VAPoR::ParamsBase *GetActiveParams() const;
 	
 private slots:
 	
