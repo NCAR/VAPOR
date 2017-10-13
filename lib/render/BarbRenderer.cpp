@@ -291,7 +291,7 @@ int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel
     float thickness = bParams->GetLineThickness();
     // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
     float rad = (float)(1000 * thickness);
-    cout << "fudging barb line thickness.  Need stretch factors.  Fix me!" << endl;
+    // cout << "fudging barb line thickness.  Need stretch factors.  Fix me!" << endl;
     // Set up lighting and color
     int   nLights = vpParams->getNumLights();
     float fcolor[3];
