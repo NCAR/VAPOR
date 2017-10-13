@@ -627,29 +627,6 @@ void VizWin::paintGL()
     cout << endl;
 #endif
 
-    // only paint if necessary
-    // Note that makeCurrent is needed when here we have multiple windows.
-
-#ifdef DEAD
-    static bool first = true;
-    // first paint, just clear front and back buffers.
-    if (first && _winName.empty()) {
-        glClearColor(0., 0., 0., 1.);
-        glClear(GL_COLOR_BUFFER_BIT);
-        swapBuffers();
-        glClear(GL_COLOR_BUFFER_BIT);
-        first = false;
-
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-
-        return;
-    }
-    int rc0 = printOpenGLErrorMsg("VizWindowPaintGL");
-#endif
-
     int rc = _controlExec->Paint(_winName, false);
     if (rc < 0) { MSG_ERR("Paint failed"); }
     swapBuffers();
@@ -677,6 +654,8 @@ void VizWin::SetTrackBall(const double posvec[3], const double dirvec[3], const 
 
     _trackBall->setFromFrame(posvec, dirvec, upvec, centerRot, true);
 
+    // Set the OpenGL matrix from the trackball
+    //
     glPushMatrix();
     _trackBall->TrackballSetMatrix();
 
@@ -687,6 +666,10 @@ void VizWin::SetTrackBall(const double posvec[3], const double dirvec[3], const 
     glGetDoublev(GL_MODELVIEW_MATRIX, m);
     glPopMatrix();
 
+    // Record the OpenGL matrix established via the trackball
+    //
+    paramsMgr->BeginSaveStateGroup("Navigate scene");
     vParams->SetModelViewMatrix(m);
     vParams->SetRotationCenter(centerRot);
+    paramsMgr->EndSaveStateGroup();
 }

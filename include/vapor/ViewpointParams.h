@@ -66,7 +66,7 @@ public:
     double getExponent() const { return (GetValueDouble(_specularExpTag, _defaultSpecularExp)); }
 
     //! Set the current viewpoint to be the home viewpoint
-    void setCurrentVPToHome()
+    void SetCurrentVPToHome()
     {
         Viewpoint *currentViewpoint = getCurrentViewpoint();
         setHomeViewpoint(currentViewpoint);
@@ -135,7 +135,7 @@ public:
     //! \param[in] Viewpoint* viewpoint to be set
     //! \retval int 0 if successful
     //! \sa Viewpoint
-    void setCurrentViewpoint(Viewpoint *newVP);
+    void SetCurrentViewpoint(Viewpoint *newVP);
 
     //! Set the home viewpoint
     //! \param[in] Viewpoint* home viewpoint to be set
@@ -186,21 +186,16 @@ public:
     }
 
     //! Method to get stretch factors
-    vector<double> GetStretchFactors() const
-    {
-        cout << "ViewpointParams::GetStretchFactors() getting called.  Fix this!" << endl;
-        return vector<double>(3, 1.0);
-        // Transform* t = (Transform*) _transforms->GetParams();
-    }
+    vector<double> GetStretchFactors() const;
 
     //! method to set stretch factors
     //! \param[in] factors 3-vector of stretch factors
-    // void SetStretchFactors(vector<double> factors);
+    void SetStretchFactors(vector<double> factors);
 
     //! Obtain the home viewpoint
     //! \sa Viewpoint
     //! \retval Viewpoint* current home viewpoint.
-    virtual Viewpoint *getHomeViewpoint() const
+    virtual Viewpoint *GetHomeViewpoint() const
     {
         Viewpoint *v = (Viewpoint *)m_VPs->GetParams(_homeViewTag);
         assert(v != NULL);

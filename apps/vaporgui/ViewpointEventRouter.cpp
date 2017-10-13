@@ -481,8 +481,13 @@ void ViewpointEventRouter::_updateTab()
     lightSpec2->setEnabled(lightOn);
     lightDiff2->setEnabled(lightOn);
 }
-void ViewpointEventRouter::CenterSubRegion(RegionParams *rParams)
+
+void ViewpointEventRouter::CenterSubRegion()
 {
+    cout << "ViewpointEventRouter::CenterSubRegion not implemented" << endl;
+
+#ifdef DEAD
+
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
     // Find the largest of the dimensions of the current region, projected orthogonal to view
@@ -522,9 +527,6 @@ void ViewpointEventRouter::CenterSubRegion(RegionParams *rParams)
     // calculate the camera position: center - 1.5*dirvec*maxSide;
     // Position the camera 1.5*maxSide units away from the center, aimed
     // at the center
-#ifdef DEAD
-    Command *cmd = Command::CaptureStart(vpParams, "Center viewpoint on subregion");
-#endif
 
     double         posvec[3], center[3];
     vector<double> rotCtr;
@@ -535,16 +537,7 @@ void ViewpointEventRouter::CenterSubRegion(RegionParams *rParams)
 
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 
-#ifdef DEAD
-    Command::CaptureEnd(cmd, vpParams);
 #endif
-
-#ifdef DEAD
-    // modify near/far distance as needed:
-    VizWinMgr::getInstance()->resetViews(vpParams);
-#endif
-
-    updateTab();
 }
 
 // Align the view direction to one of the axes.
@@ -618,10 +611,6 @@ void ViewpointEventRouter::AlignView(int axis)
         }
     }
 
-#ifdef DEAD
-    Command *cmd = Command::CaptureStart(vpParams, "axis-align view");
-#endif
-
     vector<double> stretch = vpParams->GetStretchFactors();
 
     // Determine distance from center to camera, in stretched coordinates
@@ -640,12 +629,6 @@ void ViewpointEventRouter::AlignView(int axis)
     }
 
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
-
-#ifdef DEAD
-    Command::CaptureEnd(cmd, vpParams);
-    vpParams->VPSetChanged(true);
-#endif
-    updateTab();
 }
 
 // Reset the center of view.  Leave the camera where it is
@@ -684,91 +667,67 @@ void ViewpointEventRouter::SetCenter(const double *coords)
 #endif
 }
 
-void ViewpointEventRouter::setHomeViewpoint()
+void ViewpointEventRouter::SetHomeViewpoint()
 {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
-    vpParams->setCurrentVPToHome();
-    updateTab();
+    vpParams->SetCurrentVPToHome();
 }
-void ViewpointEventRouter::useHomeViewpoint()
+
+void ViewpointEventRouter::UseHomeViewpoint()
 {
-#ifdef DEAD
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
-    Viewpoint *homeViewpoint = vpParams->getHomeViewpoint();
-    Viewpoint *newViewpoint = (Viewpoint *)homeViewpoint->deepCopy();
+    Viewpoint *homeVP = vpParams->GetHomeViewpoint();
+    vpParams->SetCurrentViewpoint(homeVP);
 
-    vpParams->setCurrentViewpoint(newViewpoint);
-#endif
+    double posvec[3], dirvec[3], upvec[3], center[3];
+    vpParams->GetCameraPos(posvec);
+    vpParams->GetCameraViewDir(dirvec);
+    vpParams->GetCameraUpVec(upvec);
+    vpParams->GetRotationCenter(center);
 
-    updateTab();
+    _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
-#ifdef DEAD
-void ViewpointEventRouter::captureMouseUp()
+
+void ViewpointEventRouter::ViewAll()
 {
-    // Update the tab:
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+    size_t      ts = GetCurrentTimeStep();
 
-    if (_panChanged) {
-        // Apply the translation to the rotation
-        float  trans;
-        double newRot[3];
-        double camPos[3];
-        vpParams->GetCameraPos(camPos);
+    vector<double> minExts, maxExts;
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
+    assert(minExts.size() == 3);
+    assert(maxExts.size() == 3);
 
-        double rotCenter[3];
-        vpParams->GetRotationCenter(rotCenter);
+    double maxSide = max(maxExts[2] - minExts[2], max(maxExts[1] - minExts[1], maxExts[0] - minExts[0]));
 
-        for (int i = 0; i < 3; i++) {
-            trans = camPos[i] - _lastCamPos[i];
-            newRot[i] = rotCenter[i] + trans;
-        }
-        vpParams->SetRotationCenter(newRot);
-        _panChanged = false;
-    }
-    updateTab();
-
-    // Just rerender:
-    #ifdef DEAD
-    VizWinMgr::getInstance()->refreshViewpoint(vpParams);
-    #endif
-}
-// If the mouse drag resulted in a spin, the event is modified when
-// the spin is terminated:
-void ViewpointEventRouter::endSpin() { updateTab(); }
-#endif
-
-#ifdef DEAD
-// Reinitialize Viewpoint tab settings, session has changed.
-// Note that this is called after the globalViewpointParams are set up, but before
-// any of the localViewpointParams are setup.
-void ViewpointEventRouter::_reinitTab(bool doOverride)
-{
-    if (VizWinMgr::getInstance()->getNumVisualizers() > 1)
-        LocalGlobal->setEnabled(true);
-    else
-        LocalGlobal->setEnabled(false);
-    setEnabled(true);
-}
-#endif
-
-#ifdef DEAD
-// Save undo/redo state when user grabs a rake handle
-//
-void ViewpointEventRouter::captureMouseDown(int button)
-{
-    // If text has changed, will ignore it-- don't call confirmText()!
+    // calculate the camera position: center - 1.5*dirvec*maxSide;
+    // Position the camera 1.5*maxSide units away from the center, aimed
+    // at the center.
     //
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
-    SetTextChanged(false);
 
-    if (button == 2) {    // panning
-        // save current camera position
-        double camPos[3];
-        vpParams->GetCameraPos(camPos);
-        for (int i = 0; i < 3; i++) _lastCamPos[i] = camPos[i];
-        _panChanged = true;
+    // Make sure the dirvec is normalized:
+    double dirvec[] = {0.0, 0.0, -1.0};
+    vnormal(dirvec);
+
+    double upvec[] = {0.0, 1.0, 0.0};
+
+    double posvec[3], center[3];
+    for (int i = 0; i < 3; i++) {
+        center[i] = 0.5f * (maxExts[i] + minExts[i]);
+        posvec[i] = center[i] - 1.5 * maxSide * dirvec[i];
     }
+
+    _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-#endif
+VAPoR::ParamsBase *ViewpointEventRouter::GetActiveParams() const
+{
+    GUIStateParams *p = GetStateParams();
+    string          vizName = p->GetActiveVizName();
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    return (paramsMgr->GetViewpointParams(vizName));
+}

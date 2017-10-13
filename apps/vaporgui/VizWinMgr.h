@@ -202,12 +202,6 @@ public slots:
     //! Arrange the visualizers to tile the available space.
     void fitSpace();
 
-    //! Change viewpoint to the current home viewpoint
-    void home();
-
-    //! Set the current home viewpoint based on current viewpoint
-    void sethome();
-
     //! Respond to user request to activate a window:
     void winActivated(const QString &vizName);
 
@@ -216,29 +210,7 @@ public slots:
 
     // Slots that set viewpoint:
 
-    //! Move camera in or out to make entire volume visible
-    void viewAll();
-
     void SetTrackBall(const double posvec[3], const double dirvec[3], const double upvec[3], const double centerRot[3], bool perspective);
-
-    //! Move camera in or out to make current region visible
-    void viewRegion();
-
-    //! Align the camera to a specified axis
-    //! param[in] axis 1,2, or 3.
-    void alignView(int axis);
-
-    //! Set the current active visualizer to use local or global viewpoint
-    //! \param[in] val is 0 for global, 1 for local.
-    void setVpLocalGlobal(int val);
-
-    //! Set the current active Visualizer to use local or global Region settings
-    //! \param[in] val is 0 for global, 1 for local.
-    void setRgLocalGlobal(int val);
-
-    //! Set the current active Visualizer to use local or global Animation settings
-    //! \param[in] val is 0 for global, 1 for local.
-    void setAnimationLocalGlobal(int val);
 
     //! Invoke updateGL on all the visualizers that have dirty bit set.
     void updateDirtyWindows();

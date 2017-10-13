@@ -36,6 +36,8 @@ void main() {
 
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_Position = ftransform();
+	gl_ClipVertex = gl_ModelViewMatrix * gl_Vertex; 
+
 
 #ifdef  USE_VERTEX_ATTR 
 	vertexData = vertexDataAttr;

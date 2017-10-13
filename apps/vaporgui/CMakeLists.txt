@@ -42,7 +42,6 @@ set (SRCS
 	VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
-	MessageReporter.cpp
 	TrackBall.cpp
 	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
