@@ -303,10 +303,10 @@ void VariablesWidget::updateFidelity(
     }
 
     if (varname.empty()) {
-        fidelityFrame->hide();
+        fidelityTab->hide();
         return;
     }
-    fidelityFrame->show();
+    fidelityTab->show();
 
     vector<size_t> cratios = _dataMgr->GetCRatios(varname);
 
