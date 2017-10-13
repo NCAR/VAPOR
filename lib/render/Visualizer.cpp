@@ -168,15 +168,12 @@ void Visualizer::applyTransforms(int i) {
     string datasetName = _renderer[i]->GetMyDatasetName();
     string myName = _renderer[i]->GetMyName();
     string myType = _renderer[i]->GetMyType();
-    //cout << "Rendering " << myName << " for " << datasetName << endl;
 
     VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
     vector<double> scales, rotations, translations;
-    scales = vpParams->GetScales(datasetName);
-    rotations = vpParams->GetRotations(datasetName);
+    //	scales = vpParams->GetScales(datasetName);
+    //	rotations = vpParams->GetRotations(datasetName);
     translations = vpParams->GetTranslations(datasetName);
-
-    vector<double> minExts, maxExts;
 
     //  Box was returning extents of 0 and 1????
     //
@@ -184,6 +181,8 @@ void Visualizer::applyTransforms(int i) {
     //	Box* box = rParams->GetBox();
     //	box->GetExtents(minExts, maxExts);
 
+#ifdef DEAD
+    vector<double> minExts, maxExts;
     DataMgr *dMgr = m_dataStatus->GetDataMgr(datasetName);
     dMgr->GetVariableExtents(0, "U", 3, minExts, maxExts);
 
@@ -199,9 +198,12 @@ void Visualizer::applyTransforms(int i) {
     glRotatef(rotations[0], 1, 0, 0);
     glRotatef(rotations[1], 0, 1, 0);
     glRotatef(rotations[2], 0, 0, 1);
+#endif
     glTranslatef(translations[0], translations[1], translations[2]);
 
+#ifdef DEAD
     glTranslatef(-xCenter, -yCenter, -zCenter);
+#endif
 }
 
 int Visualizer::paintEvent() {
@@ -283,6 +285,7 @@ int Visualizer::paintEvent() {
                 if (_renderer[i]->IsGLInitialized()) {
                     applyTransforms(i);
                     int myrc = _renderer[i]->paintGL();
+                    glPopMatrix();
                     if (myrc < 0)
                         rc = -1;
                 }
