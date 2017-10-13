@@ -81,6 +81,8 @@ int TwoDRenderer::_paintGL() {
 		return(-1);
 	}
 
+	EnableClipToBox();
+
 	if (! _gridAligned) {
 		cout << "Aligned" << endl;
 		assert(_structuredMesh);
@@ -105,6 +107,7 @@ int TwoDRenderer::_paintGL() {
 
 		_renderMeshAligned();
 	}
+	DisableClippingPlanes();
 
 
 	return(0);
