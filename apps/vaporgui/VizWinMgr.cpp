@@ -607,8 +607,11 @@ void VizWinMgr::UpdateRouters() {
 		assert(w);
 		w->setEnabled(true);
 
+cout << "UPdating " << tab << endl;
+
 		eRouter->updateTab();
 	}
+cout << "Done UPdating " << endl;
 
 	// Now handle the active render event router. 
 	//
