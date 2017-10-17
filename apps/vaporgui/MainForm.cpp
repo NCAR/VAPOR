@@ -421,37 +421,40 @@ void MainForm::hookupSignals()
     connect(_windowSelector, SIGNAL(newWin()), _vizWinMgr, SLOT(LaunchVisualizer()));
 }
 
+QWidgetAction *MainForm::createTextSeparator(const QString &text)
+{
+    auto *pLabel = new QLabel(text);
+    pLabel->setMinimumWidth(this->minimumWidth() - 4);
+    // grayish style
+    // pLabel->setStyleSheet("background: #FF4B4B4B;");
+    // possible alignment
+    // pLabel->setAlignment(Qt::AlignCenter);
+    auto *separator = new QWidgetAction(this);
+    separator->setDefaultWidget(pLabel);
+    return separator;
+}
+
 void MainForm::createMenus()
 {
     // menubar
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
-
-    _dataMenu = _File->addMenu(tr("Data"));
-    _dataMenu->addAction(_dataLoad_MetafileAction);
-    _closeVDCMenu = _dataMenu->addMenu("Close VDC");
-    _importMenu = _dataMenu->addMenu("Import");
+    _File->addAction(createTextSeparator(" Data"));
+    _File->addAction(_dataLoad_MetafileAction);
+    _closeVDCMenu = _File->addMenu("Close VDC");
+    //_File->addAction(_dataClose_MetafileAction );
+    _importMenu = _File->addMenu("Import");
     _importMenu->addAction(_dataImportWRF_Action);
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
-
-    _sessionMenu = _File->addMenu(tr("Session"));
-    _sessionMenu->addAction(_fileNew_SessionAction);
-    _sessionMenu->addAction(_fileOpenAction);
-    _sessionMenu->addAction(_fileSaveAction);
-    _sessionMenu->addAction(_fileSaveAsAction);
-
-    /*	_File->addAction(_dataLoad_MetafileAction );
-    _File->addAction(_dataClose_MetafileAction );
-    _File->addAction(_dataImportWRF_Action);
-    _File->addAction(_dataImportCF_Action);
-    _File->addAction(_dataImportMPAS_Action);
+    _File->addSeparator();
+    _File->addAction(createTextSeparator(" Session"));
     _File->addAction(_fileNew_SessionAction);
     _File->addAction(_fileOpenAction);
     _File->addAction(_fileSaveAction);
     _File->addAction(_fileSaveAsAction);
     _File->addAction(_fileExitAction);
-*/
+
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
@@ -635,11 +638,11 @@ void MainForm::languageChange()
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
     _dataClose_MetafileAction->setText(tr("Close VDC"));
     _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
-    _dataImportWRF_Action->setText(tr("Import WRF-ARW files"));
+    _dataImportWRF_Action->setText(tr("WRF-ARW"));
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
-    _dataImportCF_Action->setText(tr("Import NetCDF CF files"));
+    _dataImportCF_Action->setText(tr("NetCDF-CF"));
     _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention output files to import into the current session");
-    _dataImportMPAS_Action->setText(tr("Import MPAS files"));
+    _dataImportMPAS_Action->setText(tr("MPAS"));
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the current session");
     _plotAction->setText("Plot Utility");
     _statsAction->setText("Data Statistics");
