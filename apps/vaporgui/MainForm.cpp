@@ -377,7 +377,6 @@ void MainForm::hookupSignals()
     connect(_editUndoRedoClearAction, SIGNAL(triggered()), this, SLOT(clear()));
     connect(_helpAboutAction, SIGNAL(triggered()), this, SLOT(helpAbout()));
     connect(_dataLoad_MetafileAction, SIGNAL(triggered()), this, SLOT(loadData()));
-    connect(_dataClose_MetafileAction, SIGNAL(triggered()), this, SLOT(closeData()));
     connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
     connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
     connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
@@ -904,6 +903,12 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
             vpp = pm->GetViewpointParams(winNames[i]);
             vpp->AddDatasetTransform(dataSetName);
         }
+
+        // Add menu option to close the dataset in the File menu
+        //
+        QAction *closeAction = new QAction(QString::fromStdString(dataSetName), _closeVDCMenu);
+        _closeVDCMenu->addAction(closeAction);
+        connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
     }
 
     // Reinitialize all tabs
@@ -941,7 +946,30 @@ void MainForm::loadData(string fileName)
     loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.*)", "vdc", false);
 }
 
-void MainForm::closeData(string fileName) { cout << "how do we close a dataset?" << endl; }
+void MainForm::closeData(string fileName)
+{
+    QAction *a = (QAction *)sender();
+
+    string dataSetName = a->text().toStdString();
+
+    GUIStateParams *p = GetStateParams();
+    vector<string>  currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    if (std::find(currentDataSets.begin(), currentDataSets.end(), dataSetName) != currentDataSets.end()) {
+        _controlExec->CloseData(dataSetName);
+        _closeVDCMenu->removeAction(a);
+    }
+
+    cout << "Closing datasets " << currentDataSets.size() << endl;
+
+    p = GetStateParams();
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    cout << "Closing datasets " << currentDataSets.size() << " " << currentDataSets[0] << endl;
+    if (currentDataSets.size() == 0) {
+        cout << "no datasets loaded" << endl;
+        _controlExec->LoadState();
+    }
+}
 
 // import WRF data into current session
 //
