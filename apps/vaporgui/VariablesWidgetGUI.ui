@@ -777,7 +777,7 @@
              <item>
               <widget class="QGroupBox" name="fidelityBox">
                <property name="whatsThis">
-                <string>The fidelity setting controls both refinement and LOD.  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
+                <string>The fidelity setting controls both refinement levels and level of detail (LOD).  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
                </property>
                <property name="title">
                 <string>low &lt; - - - &gt; high</string>
@@ -809,7 +809,7 @@
                 <string>Select the compression level of the current isoline/contour plane</string>
                </property>
                <property name="text">
-                <string>LOD</string>
+                <string>Level of Detail</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -855,7 +855,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the approximation level (compression) for the data being used to calculate contour lines.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="whatsThis">
-                <string>The Refinement parameter and (in the case of VDC2 data) the LOD parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
+                <string>The refinement level parameter and (in the case of VDC2 data) the level of detail (LOD) parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
                </property>
                <property name="maxCount">
                 <number>5</number>
@@ -901,7 +901,7 @@
                 <string>Select the refinement level (resolution) of the current isoline/contour plane</string>
                </property>
                <property name="text">
-                <string>Ref Level</string>
+                <string>Refinement Level</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -944,7 +944,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the refinement level (resolution) of the data used to calculate contour lines.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="whatsThis">
-                <string>The Refinement parameter and (in the case of VDC2 data) the LOD parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
+                <string>The refinement level parameter and (in the case of VDC2 data) the level of detail (LOD) parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
                </property>
                <property name="maxCount">
                 <number>5</number>
@@ -1008,10 +1008,10 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to set default Fidelity to current LOD and Refinement levels.  The default can optionally be saved in user preferences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to set default Fidelity to current LOD and refinement levels.  The default can optionally be saved in user preferences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="whatsThis">
-                <string>The fidelity setting controls both refinement and LOD.  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
+                <string>The fidelity setting controls both refinement levels and level of detail (LOD).  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
                </property>
                <property name="text">
                 <string>Default</string>

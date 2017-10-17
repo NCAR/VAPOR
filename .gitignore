@@ -31,5 +31,6 @@ CMakeCache.txt
 site.local
 bin
 /build
+/xcode
 /apps/vaporgui/ui/
 /buildutils/LinuxInstallLibs.txt
