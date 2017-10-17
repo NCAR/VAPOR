@@ -580,7 +580,7 @@ void MainForm::languageChange()
 {
     setWindowTitle(tr("VAPoR:  NCAR Visualization and Analysis Platform for Research"));
 
-    _fileNew_SessionAction->setText(tr("New Session"));
+    _fileNew_SessionAction->setText(tr("&New Session"));
 
     _fileNew_SessionAction->setToolTip("Restart the session with default settings");
     _fileNew_SessionAction->setShortcut(Qt::CTRL + Qt::Key_N);
@@ -615,7 +615,7 @@ void MainForm::languageChange()
     _installCLIToolsAction->setText("Install CLI Tools");
     _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities location to path. Needs to updated if app bundle moved");
 
-    _dataLoad_MetafileAction->setText(tr("Open a VDC in Current Session"));
+    _dataLoad_MetafileAction->setText(tr("Open a V&DC in Current Session"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
     _dataClose_MetafileAction->setText(tr("Close a VDC in Current Session"));
@@ -676,6 +676,14 @@ void MainForm::sessionOpenHelper(string fileName)
 //
 void MainForm::sessionOpen(QString qfileName)
 {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Are you sure?");
+    msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
+    msgBox.setStandardButtons(QMessageBox::Yes);
+    msgBox.addButton(QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    if (msgBox.exec() == QMessageBox::No) { return; }
+
     // This launches a panel that enables the
     // user to choose input session save files, then to
     // load that session
@@ -978,6 +986,17 @@ vector<string> MainForm::myGetOpenFileNames(string prompt, string dir, string fi
 
 void MainForm::sessionNew()
 {
+    GUIStateParams *p = GetStateParams();
+    if (p->GetCurrentSessionPath() != ".") {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
+        msgBox.setStandardButtons(QMessageBox::Yes);
+        msgBox.addButton(QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No) { return; }
+    }
+
     sessionOpenHelper("");
 
     _vizWinMgr->LaunchVisualizer();
@@ -988,7 +1007,7 @@ void MainForm::sessionNew()
     sessionPath = QDir::toNativeSeparators(sessionPath);
     string fileName = sessionPath.toStdString();
 
-    GUIStateParams *p = GetStateParams();
+    p = GetStateParams();
     p->SetCurrentSessionPath(fileName);
 }
 
