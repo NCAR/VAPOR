@@ -65,23 +65,33 @@ protected slots:
     void setDomainColor();
     void setRegionColor();
     void setBackgroundColor();
-    void setUseRegionFrame(bool);
-    void setUseDomainFrame(bool);
-    void annotationChanged();
-    void selectAxisColor();
+    void setUseRegionFrame();
+    void setUseDomainFrame();
+    void setAxisAnnotation();
+    void setAxisColor();
+    void setTimeColor();
     void setXTicOrient(int);
     void setYTicOrient(int);
     void setZTicOrient(int);
     void setLatLonAnnot(bool);
-    void setUseAxisArrows(bool);
+    void setUseAxisArrows();
     void timeAnnotationChanged();
     void timeLLXChanged();
     void timeLLYChanged();
     void timeSizeChanged();
-    void timeColorChanged();
 
 private:
     VizFeatureEventRouter() {}
+
+    void setColorHelper(QWidget *w, vector<double> &rgb);
+
+    void updateColorHelper(const vector<double> &rgb, QWidget *w);
+
+    void updateRegionColor();
+    void updateDomainColor();
+    void updateBackgroundColor();
+    void updateAxisColor();
+    void updateTimeColor();
 
     void invalidateText();
 
