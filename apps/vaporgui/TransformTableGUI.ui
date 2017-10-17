@@ -128,7 +128,7 @@
         <widget class="QTableWidget" name="translationTable">
          <column>
           <property name="text">
-           <string>Dataset</string>
+           <string>Target</string>
           </property>
           <property name="textAlignment">
            <set>AlignCenter</set>

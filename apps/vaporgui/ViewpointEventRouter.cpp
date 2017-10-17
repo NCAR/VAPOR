@@ -61,6 +61,7 @@ ViewpointEventRouter::ViewpointEventRouter(
 
 	// Disable the scale and rotation tabs
 	// for Vapor3.0 Beta
+	transformTable->Reinit((TransformTable::Flags)(TransformTable::VIEWPOINT));
 	transformTable->transformTabs->setTabEnabled(0, false);
 	transformTable->transformTabs->setTabEnabled(2, false);
 }
@@ -76,12 +77,12 @@ void
 ViewpointEventRouter::hookUpTab()
 {
 
-	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
-		SLOT(scaleChanged(int, int)));
-	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this, 
-		SLOT(rotationChanged(int, int)));
-	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)), 
-		this, SLOT(translationChanged(int, int)));
+//	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
+//		SLOT(scaleChanged(int, int)));
+//	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this, 
+//		SLOT(rotationChanged(int, int)));
+//	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)), 
+//		this, SLOT(translationChanged(int, int)));
 	
 	//connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
 	//connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
