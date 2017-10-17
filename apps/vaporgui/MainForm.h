@@ -207,7 +207,7 @@ class MainForm : public QMainWindow {
     QMenuBar *_main_Menubar;
     QMenu *_File;
     QMenu *_Edit;
-    QMenu *_Data;
+    QMenu *_Tools;
     QMenu *_captureMenu;
     QMenu *_helpMenu;
     QToolBar *_modeToolBar;
@@ -218,6 +218,12 @@ class MainForm : public QMainWindow {
     QMenu *_webPreferencesHelpMenu;
     QMenu *_webPythonHelpMenu;
     QMenu *_webVisualizationHelpMenu;
+
+    // Submenus under the File menu:
+    QMenu *_dataMenu;
+    QMenu *_closeVDCMenu;
+    QMenu *_importMenu;
+    QMenu *_sessionMenu;
 
     //File menu:
     QAction *_fileOpenAction;
