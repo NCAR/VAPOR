@@ -335,6 +335,39 @@ void ViewpointParams::setHomeViewpoint(Viewpoint *newVP) {
     m_VPs->Insert(newVP, _homeViewTag);
 }
 
+void ViewpointParams::SetWindowSize(size_t width, size_t height) {
+    vector<long> v;
+    v.push_back(width);
+    v.push_back(height);
+    SetValueLongVec(m_windowSizeTag, "Set window width and height", v);
+}
+
+void ViewpointParams::GetWindowSize(size_t &width, size_t &height) const {
+    vector<long> defaultv(2, 100);
+    vector<long> val = GetValueLongVec(m_windowSizeTag, defaultv);
+    width = val[0];
+    height = val[1];
+    printf("[%s:%i] %s: return width=%i height=%i\n", __FILE__, __LINE__, __func__, (int)width, (int)height);
+}
+
+void ViewpointParams::SetFOV(float v) {
+    if (v < 5)
+        v = 5;
+    if (v > 90)
+        v = 90;
+    SetValueDouble(m_fieldOfView, "Set Field of View", v);
+}
+
+double ViewpointParams::GetFOV() const {
+    double defaultv = 45.0;
+    double v = GetValueDouble(m_fieldOfView, defaultv);
+    if (v < 5)
+        v = 5;
+    if (v > 90)
+        v = 90;
+    return (v);
+}
+
 vector<double> ViewpointParams::GetStretchFactors() const {
     vector<double> defaultvec(3, 1.);
     vector<double> val = GetValueDoubleVec(m_stretchFactorsTag, defaultvec);
