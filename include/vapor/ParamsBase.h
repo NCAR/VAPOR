@@ -94,7 +94,8 @@ public:
  //! Create a ParamsBase object from an existing XmlNode tree
  //!
  //! This method will construct a ParamsBase object using an 
- //! existing XML tree
+ //! existing XML tree. Hence it should NOT do any initialization
+ //! that changes parameter values.
  //
  ParamsBase(
 	StateSave *ssave, XmlNode *node
