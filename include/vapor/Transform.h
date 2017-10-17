@@ -29,27 +29,39 @@ public:
 
     vector<double> GetRotations() const
     {
-        vector<double> rotation = GetValueDoubleVec(_rotationTag, _defaultRotation);
+        vector<double> defaultv(3, 0.0);
+        vector<double> rotation = GetValueDoubleVec(_rotationTag, defaultv);
         return rotation;
     }
 
-    void SetRotations(const vector<double> rotation) { SetValueDoubleVec(_rotationTag, "Set dataset rotation", rotation); }
+    void SetRotations(const vector<double> rotation) { SetValueDoubleVec(_rotationTag, "Set rotation transform", rotation); }
 
     vector<double> GetTranslations() const
     {
-        vector<double> translation = GetValueDoubleVec(_translationTag, _defaultTranslation);
+        vector<double> defaultv(3, 0.0);
+        vector<double> translation = GetValueDoubleVec(_translationTag, defaultv);
         return translation;
     }
 
-    void SetTranslations(const vector<double> translation) { SetValueDoubleVec(_translationTag, "Set dataset translation", translation); }
+    void SetTranslations(const vector<double> translation) { SetValueDoubleVec(_translationTag, "Set translation transform", translation); }
 
     vector<double> GetScales() const
     {
-        vector<double> scale = GetValueDoubleVec(_scaleTag, _defaultScale);
+        vector<double> defaultv(3, 1.0);
+        vector<double> scale = GetValueDoubleVec(_scaleTag, defaultv);
         return scale;
     }
 
-    void SetScales(const vector<double> scale) { SetValueDoubleVec(_scaleTag, "Set dataset scale", scale); }
+    void SetScales(const vector<double> scale) { SetValueDoubleVec(_scaleTag, "Set scale transform", scale); }
+
+    vector<double> GetOrigin() const
+    {
+        vector<double> defaultv(3, 0.0);
+        vector<double> origin = GetValueDoubleVec(_originTag, defaultv);
+        return origin;
+    }
+
+    void SetOrigin(const vector<double> origin) { SetValueDoubleVec(_originTag, "Set origin for transforms", origin); }
 
     static string GetClassType() { return ("Transform"); }
 
@@ -57,12 +69,7 @@ private:
     static const string _translationTag;
     static const string _rotationTag;
     static const string _scaleTag;
-
-    vector<double> _defaultTranslation;
-    vector<double> _defaultRotation;
-    vector<double> _defaultScale;
-
-    void _init();
+    static const string _originTag;
 };
 };    // namespace VAPoR
 
