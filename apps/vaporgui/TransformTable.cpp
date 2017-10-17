@@ -39,6 +39,9 @@ TransformTable::TransformTable(QWidget *parent)
     connect(scaleTable, SIGNAL(cellChanged(int, int)), this, SLOT(scaleChanged(int, int)));
     connect(rotationTable, SIGNAL(cellChanged(int, int)), this, SLOT(rotationChanged(int, int)));
     connect(translationTable, SIGNAL(cellChanged(int, int)), this, SLOT(translationChanged(int, int)));
+
+    _controlExec = NULL;
+    _rParams = NULL;
 }
 
 void TransformTable::Update(VAPoR::RenderParams *rParams)
