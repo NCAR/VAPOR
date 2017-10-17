@@ -426,8 +426,23 @@ void MainForm::createMenus()
     // menubar
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
-    _File->addAction(_dataLoad_MetafileAction);
-    _File->addAction(_dataClose_MetafileAction);
+
+    _dataMenu = _File->addMenu(tr("Data"));
+    _dataMenu->addAction(_dataLoad_MetafileAction);
+    _closeVDCMenu = _dataMenu->addMenu("Close VDC");
+    _importMenu = _dataMenu->addMenu("Import");
+    _importMenu->addAction(_dataImportWRF_Action);
+    _importMenu->addAction(_dataImportCF_Action);
+    _importMenu->addAction(_dataImportMPAS_Action);
+
+    _sessionMenu = _File->addMenu(tr("Session"));
+    _sessionMenu->addAction(_fileNew_SessionAction);
+    _sessionMenu->addAction(_fileOpenAction);
+    _sessionMenu->addAction(_fileSaveAction);
+    _sessionMenu->addAction(_fileSaveAsAction);
+
+    /*	_File->addAction(_dataLoad_MetafileAction );
+    _File->addAction(_dataClose_MetafileAction );
     _File->addAction(_dataImportWRF_Action);
     _File->addAction(_dataImportCF_Action);
     _File->addAction(_dataImportMPAS_Action);
@@ -436,16 +451,16 @@ void MainForm::createMenus()
     _File->addAction(_fileSaveAction);
     _File->addAction(_fileSaveAsAction);
     _File->addAction(_fileExitAction);
-
+*/
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
     _Edit->addAction(_editUndoRedoClearAction);
     _Edit->addSeparator();
 
-    _Data = menuBar()->addMenu(tr("Data"));
-    _Data->addAction(_plotAction);
-    _Data->addAction(_statsAction);
+    _Tools = menuBar()->addMenu(tr("Tools"));
+    _Tools->addAction(_plotAction);
+    _Tools->addAction(_statsAction);
 
     // Note that the ordering of the following 4 is significant, so that image
     // capture actions correctly activate each other.
@@ -580,19 +595,19 @@ void MainForm::languageChange()
 {
     setWindowTitle(tr("VAPoR:  NCAR Visualization and Analysis Platform for Research"));
 
-    _fileNew_SessionAction->setText(tr("New Session"));
+    _fileNew_SessionAction->setText(tr("New"));
 
     _fileNew_SessionAction->setToolTip("Restart the session with default settings");
     _fileNew_SessionAction->setShortcut(Qt::CTRL + Qt::Key_N);
 
-    _fileOpenAction->setText(tr("&Open Session"));
+    _fileOpenAction->setText(tr("&Open"));
     _fileOpenAction->setShortcut(tr("Ctrl+O"));
     _fileOpenAction->setToolTip("Launch a file open dialog to reopen a previously saved session file");
 
-    _fileSaveAction->setText(tr("&Save Session"));
+    _fileSaveAction->setText(tr("&Save"));
     _fileSaveAction->setShortcut(tr("Ctrl+S"));
     _fileSaveAction->setToolTip("Launch a file-save dialog to save the state of this session in current session file");
-    _fileSaveAsAction->setText(tr("Save Session As"));
+    _fileSaveAsAction->setText(tr("Save As..."));
 
     _fileSaveAsAction->setToolTip("Launch a file-save dialog to save the state of this session in another session file");
 
@@ -615,16 +630,16 @@ void MainForm::languageChange()
     _installCLIToolsAction->setText("Install CLI Tools");
     _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities location to path. Needs to updated if app bundle moved");
 
-    _dataLoad_MetafileAction->setText(tr("Open a VDC in Current Session"));
+    _dataLoad_MetafileAction->setText(tr("Open VDC"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
-    _dataClose_MetafileAction->setText(tr("Close a VDC in Current Session"));
+    _dataClose_MetafileAction->setText(tr("Close VDC"));
     _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
-    _dataImportWRF_Action->setText(tr("Import WRF-ARW files in current session"));
+    _dataImportWRF_Action->setText(tr("Import WRF-ARW files"));
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
-    _dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
+    _dataImportCF_Action->setText(tr("Import NetCDF CF files"));
     _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention output files to import into the current session");
-    _dataImportMPAS_Action->setText(tr("Import MPAS files in current session"));
+    _dataImportMPAS_Action->setText(tr("Import MPAS files"));
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the current session");
     _plotAction->setText("Plot Utility");
     _statsAction->setText("Data Statistics");
