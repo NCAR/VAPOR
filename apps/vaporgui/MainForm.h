@@ -33,6 +33,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QIcon>
+#include <QWidgetAction>
 #include <vapor/ControlExecutive.h>
 #include "GUIStateParams.h"
 #include "AppSettingsParams.h"
@@ -159,6 +160,7 @@ protected:
  bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+ QWidgetAction* createTextSeparator(const QString& text);
 
  class ParamsChangeEvent : public QEvent {
  public:
@@ -175,6 +177,7 @@ private:
   }
 
  private:
+
   static QEvent::Type _customEventType;
  };
 
