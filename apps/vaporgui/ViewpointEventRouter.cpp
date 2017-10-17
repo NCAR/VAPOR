@@ -196,7 +196,7 @@ void ViewpointEventRouter::GetWebHelp(
  * Slots associated with ViewpointTab:
  *********************************************************************************/
 
-void ViewpointEventRouter::scaleChanged(int row, int col) {
+/*void ViewpointEventRouter::scaleChanged(int row, int col) {
 	vector<double> scale;
 	QTableWidget* table = transformTable->scaleTable;
 	string dataset = table->item(row, 0)->text().toStdString();
@@ -258,6 +258,7 @@ void ViewpointEventRouter::translationChanged(int row, int col) {
 		vpp->SetTranslations(dataset, translation);
 	}
 }
+*/
 
 void ViewpointEventRouter::
 setVtabTextChanged(const QString& ){
@@ -323,6 +324,7 @@ viewpointReturnPressed(void){
 	confirmText();
 }
 
+/*
 void ViewpointEventRouter::updateScales() {
 	QTableWidget* table = transformTable->scaleTable;
 
@@ -414,7 +416,7 @@ void ViewpointEventRouter::updateTransformTable(QTableWidget* table,
 	
 	table->blockSignals(false);
 }
-
+*/
 void ViewpointEventRouter::updateTab() {
 	_updateTab();
 }
@@ -422,9 +424,10 @@ void ViewpointEventRouter::updateTab() {
 //Insert values from params into tab panel
 //
 void ViewpointEventRouter::_updateTab(){
-	updateScales();
-	updateTranslations();
-	updateRotations();
+	//updateScales();
+	//updateTranslations();
+	//updateRotations();
+	transformTable->Update(_controlExec);
 
 return;
 	
