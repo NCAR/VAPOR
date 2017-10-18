@@ -347,6 +347,16 @@
     </widget>
    </item>
    <item>
+    <widget class="TransformTable" name="widget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>80</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -366,6 +376,12 @@
    <class>GeometryWidget</class>
    <extends>QWidget</extends>
    <header>GeometryWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TransformTable</class>
+   <extends>QWidget</extends>
+   <header>TransformTable.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "vapor/MyBase.h"
+#include "vapor/ControlExecutive.h"
 #include "ui_TransformTableGUI.h"
 
 QT_USE_NAMESPACE
@@ -27,30 +28,49 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     Q_OBJECT
 
 public:
-    TransformTable(QWidget *parent)
-    {
-        setupUi(this);
-        scaleTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        translationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        rotationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    enum Flags { VIEWPOINT = (1u << 0), RENDERER = (1u << 1) };
 
-        scaleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-        rotationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-        translationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    };
+    TransformTable(QWidget *parent);
 
-    void Reinit(){};
+    void Reinit(Flags flags) { _flags = flags; }
 
-    virtual ~TransformTable() {}
+    virtual ~TransformTable(){};
 
-    virtual void Update(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams){};
+    // Update function for ViewpointParams transforms,
+    // which requires a ControlExec
+    //
+    virtual void Update(VAPoR::ControlExec *controlExec);
+
+    // Update function for RenderParams
+    //
+    virtual void Update(VAPoR::RenderParams *rParams);
 
 protected slots:
+    void scaleChanged(int row, int col);
+    void rotationChanged(int row, int col);
+    void translationChanged(int row, int col);
 
 private:
-    const VAPoR::DataMgr *_dataMgr;
-    VAPoR::ParamsMgr *    _paramsMgr;
-    VAPoR::RenderParams * _rParams;
+    const VAPoR::ControlExec *_controlExec;
+    const VAPoR::DataMgr *    _dataMgr;
+    VAPoR::ParamsMgr *        _paramsMgr;
+    VAPoR::RenderParams *     _rParams;
+    Flags                     _flags;
+
+    void updateTransformTable(QTableWidget *table, string target, vector<double> values, int row);
+    void updateViewpointScales();
+    void updateViewpointTranslations();
+    void updateViewpointRotations();
+    void updateRendererScales();
+    void updateRendererTranslations();
+    void updateRendererRotations();
+
+    void setViewpointScales(string dataset, vector<double> s);
+    void setViewpointTranslations(string dataset, vector<double> t);
+    void setViewpointRotations(string dataset, vector<double> r);
+    void setRendererScales(vector<double> s);
+    void setRendererTranslations(vector<double> t);
+    void setRendererRotations(vector<double> r);
 };
 
 #endif    // TRANSFORMTABLE_H
