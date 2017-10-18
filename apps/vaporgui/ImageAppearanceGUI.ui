@@ -93,7 +93,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="GeoTIFFCheckbox">
+        <widget class="QCheckBox" name="GeoRefCheckbox">
          <property name="text">
           <string/>
          </property>

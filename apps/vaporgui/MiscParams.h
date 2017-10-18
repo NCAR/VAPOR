@@ -101,35 +101,38 @@ class MiscParams : public VAPoR::ParamsBase {
         return val;
     }
 
-    void SetTimeAnnotColor(const float color[3]) {
-        vector<double> rgbv;
-        for (int i = 0; i < 3; i++) {
-            float v = color[i];
-            if (v < 0.0)
-                v = 0.0;
-            if (v > 1.0)
-                v = 1.0;
-            rgbv.push_back(v);
+    void SetTimeAnnotColor(const std::vector<double> &rgb) {
+        assert(rgb.size() == 3);
+        vector<double> v = rgb;
+        for (int i = 0; i < v.size(); i++) {
+            if (v[i] < 0.0)
+                v[i] = 0.0;
+            if (v[i] > 1.0)
+                v[i] = 1.0;
         }
         SetValueDoubleVec(_timeAnnotColorTag, "Specify time "
                                               "annotation color in RGB",
-                          rgbv);
+                          v);
+    }
+
+    void GetTimeAnnotColor(std::vector<double> &rgb) const {
+        rgb.clear();
+
+        vector<double> defaultv(3, 1.0);
+        rgb = GetValueDoubleVec(_timeAnnotColorTag, defaultv);
+        for (int i = 0; i < rgb.size(); i++) {
+            if (rgb[i] < 0.0)
+                rgb[i] = 0.0;
+            if (rgb[i] > 1.0)
+                rgb[i] = 1.0;
+        }
     }
 
     void GetTimeAnnotColor(float rgb[3]) const {
-        vector<double> defaultv(3, 1.0);
-        vector<double> rgbv = GetValueDoubleVec(_timeAnnotColorTag, defaultv);
+        vector<double> rgbv;
+        GetTimeAnnotColor(rgbv);
         for (int i = 0; i < 3; i++)
-            rgb[i] = 1.0;
-
-        for (int i = 0; i < rgbv.size() && i < 3; i++) {
-            float v = rgbv[i];
-            if (v < 0.0)
-                v = 0.0;
-            if (v > 1.0)
-                v = 1.0;
             rgb[i] = rgbv[i];
-        }
     }
 
     // Get static string identifier for this params class
