@@ -412,11 +412,6 @@ void VizFeatureRenderer::drawAxisTics() {
 
 	//TicLength needs to be stretched based on which axes are used for tic direction
 	
-	for (int i = 0; i<3; i++){
-		int j = ticDir[i];
-		sticLen.push_back(ticLengthA[i]*stretch[j]);
-	}
-	
 	glDisable(GL_LIGHTING);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -483,6 +478,7 @@ void VizFeatureRenderer::drawAxisTics() {
 	glDisable(GL_LINE_SMOOTH);
 	glPopAttrib();
 
+#ifdef	DEAD
 	int textSize = vfParams->GetAxisTextHeight();
 	
 	if (textSize > 0 && !_textObjectsValid){
@@ -540,6 +536,7 @@ void VizFeatureRenderer::drawAxisTics() {
 		}
 		_textObjectsValid = true;
 	}
+#endif
 }
 
 #ifdef DEAD
