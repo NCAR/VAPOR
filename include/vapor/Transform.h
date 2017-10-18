@@ -22,6 +22,11 @@ namespace VAPoR {
 class PARAMS_API Transform : public ParamsBase {
 
   public:
+    enum Flags {
+        VIEWPOINT = (1u << 0),
+        RENDERER = (1u << 1)
+    };
+
     Transform(ParamsBase::StateSave *ssave);
 
     Transform(ParamsBase::StateSave *ssave, XmlNode *node);
