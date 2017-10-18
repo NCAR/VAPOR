@@ -557,6 +557,7 @@ void VizWinMgr::Restart() {
 	for (int i=0; i<vizNames.size(); i++) {
 		attachVisualizer(vizNames[i]);
 	}
+	m_initialized = true;
 }
 
 void VizWinMgr::removeVisualizer(string vizName){
@@ -596,7 +597,6 @@ void VizWinMgr::UpdateRouters() {
 
 	for (int i=0; i<tabNames.size(); i++) {
 		string tab = tabNames[i];
-
 
 		EventRouter* eRouter = GetEventRouter(tab);
 		RenderEventRouter *reRouter = dynamic_cast<RenderEventRouter*>(eRouter);
