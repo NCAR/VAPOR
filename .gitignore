@@ -23,6 +23,8 @@ plugins/visit/vdf.xml.bak
 plugins/visit/VDC/CMake*
 share/fonts/Pacifico.ttf
 
+tags
+
 # CMake
 Makefile
 cmake_install.cmake
