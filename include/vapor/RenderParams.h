@@ -28,6 +28,7 @@
 #include <vapor/TransferFunction.h>
 #include <vapor/Box.h>
 #include <vapor/ColorbarPbase.h>
+#include <vapor/Transform.h>
 #include <vapor/DataMgr.h>
 
 namespace VAPoR {
@@ -324,6 +325,10 @@ public:
     //
     void SetCurrentTimestep(size_t ts) { SetValueLong(_currentTimestepTag, "Set timestep", (long)ts); }
 
+    //! Access the transform used by the renderer
+    //
+    virtual Transform *GetTransform() const { return _transform; }
+
     //! method to set stretch factors
     //! Always sets them in the global instance.
     //! Also saves previous values
@@ -351,6 +356,7 @@ private:
     ParamsContainer *_TFs;
     Box *            _Box;
     ColorbarPbase *  _Colorbar;
+    Transform *      _transform;
 
     static const string _EnabledTag;
     static const string _histoScaleTag;

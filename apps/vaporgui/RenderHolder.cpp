@@ -103,7 +103,8 @@ void RenderHolder::newRenderer()
     QDialog              nDialog(this);
     Ui_NewRendererDialog rDialog;
     rDialog.setupUi(&nDialog);
-    rDialog.rendererNameEdit->setText(" ");
+    rDialog.rendererNameEdit->setText("");
+    rDialog.rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
 
     // Set up the list of data set names in the dialog:
     //

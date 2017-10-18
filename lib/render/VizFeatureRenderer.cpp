@@ -307,16 +307,13 @@ void VizFeatureRenderer::InScenePaint(size_t ts)
 
     if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
 
-#ifdef DEAD
-    if (vfParams->ShowAxisArrows()) {
-        RegionParams *rParams = GetVisualizer()->getActiveRegionParams();
-        float         extents[6];
-        rParams->GetBox()->GetLocalExtents(extents, ts);
-        drawAxisArrows(extents);
+    if (vfParams->GetShowAxisArrows()) {
+        vector<double> minExts, maxExts;
+        m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
+        drawAxisArrows(minExts, maxExts);
     }
 
-    if (vfParams->GetAxisAnnotation()) { drawAxisTics(ts); }
-#endif
+    if (vfParams->GetAxisAnnotation()) { drawAxisTics(); }
 
     glPopAttrib();
     glMatrixMode(GL_MODELVIEW);
@@ -330,28 +327,35 @@ void VizFeatureRenderer::InScenePaint(size_t ts)
 
 void VizFeatureRenderer::OverlayPaint(size_t ts) {}
 
-void VizFeatureRenderer::drawAxisTics(size_t timestep)
+#endif
+
+void VizFeatureRenderer::drawAxisTics()
 {
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
 
+    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+
     // Modify minTic, maxTic, ticLength, axisOriginCoord to user coords
     // if using latLon, convert annotation axes to user coords
-    VizFeatureParams *vfParams = (VizFeatureParams *)_params;
-    vector<double>    axisOriginCoord = vfParams->GetAxisOrigin();
-    vector<double>    minTic = vfParams->GetMinTics();
-    vector<double>    maxTic = vfParams->GetMaxTics();
-    vector<double>    ticLength = vfParams->GetTicSize();
-    vector<long>      ticDir = vfParams->GetTicDirs();
-    vector<long>      numTics = vfParams->GetNumTics();
-    double            ticWidth = vfParams->GetTicWidth();
-    double            minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
+    //
+
+    vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
+    vector<double> minTic = vfParams->GetMinTics();
+    vector<double> maxTic = vfParams->GetMaxTics();
+    vector<double> ticLength = vfParams->GetTicSize();
+    vector<long>   ticDir = vfParams->GetTicDirs();
+    vector<long>   numTics = vfParams->GetNumTics();
+    double         ticWidth = vfParams->GetTicWidth();
+    double         minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
 
     double axisColor[3];
     vfParams->GetAxisColor(axisColor);
 
-    if (((VizFeatureParams *)_params)->GetLatLonAxes()) {
+    if (vfParams->GetLatLonAxes()) {
+#ifdef DEAD
         ConvertAxes(false, ticDir, minTic, maxTic, axisOriginCoord, ticLength, minTicA, maxTicA, axisOriginCoordA, ticLengthA);
+#endif
     } else {
         for (int i = 0; i < 3; i++) {    // copy values to (un-)modified _A variables
             minTicA[i] = minTic[i];
@@ -370,11 +374,8 @@ void VizFeatureRenderer::drawAxisTics(size_t timestep)
         sticMax.push_back(maxTicA[i]);
     }
 
-    #ifdef DEAD
+#ifdef DEAD
     vector<double> stretch = _dataStatus->getStretchFactors();
-    #else
-    vector<double> stretch(3, 1.0);
-    #endif
     for (int i = 0; i < stretch.size(); i++) {
         sorigin[i] *= stretch[i];
 
@@ -383,13 +384,9 @@ void VizFeatureRenderer::drawAxisTics(size_t timestep)
         sticMin[i] *= stretch[i];
         sticMax[i] *= stretch[i];
     }
+#endif
 
     // TicLength needs to be stretched based on which axes are used for tic direction
-
-    for (int i = 0; i < 3; i++) {
-        int j = ticDir[i];
-        sticLen.push_back(ticLengthA[i] * stretch[j]);
-    }
 
     glDisable(GL_LIGHTING);
 
@@ -469,6 +466,7 @@ void VizFeatureRenderer::drawAxisTics(size_t timestep)
     glDisable(GL_LINE_SMOOTH);
     glPopAttrib();
 
+#ifdef DEAD
     int textSize = vfParams->GetAxisTextHeight();
 
     if (textSize > 0 && !_textObjectsValid) {
@@ -523,7 +521,10 @@ void VizFeatureRenderer::drawAxisTics(size_t timestep)
         }
         _textObjectsValid = true;
     }
+#endif
 }
+
+#ifdef DEAD
 
 void VizFeatureRenderer::flatConvertFromLonLat(double x[2], double minLon, double maxLon, double minX, double maxX)
 {
@@ -630,25 +631,36 @@ void VizFeatureRenderer::ConvertAxes(bool toLatLon, const vector<long> ticDirs, 
         toTicLength[j] = dst * ticLengthFactor[j];
     }
 }
-
-void VizFeatureRenderer::drawAxisArrows(float *extents)
+//! Invalidate all the text caches at all time steps
+void VizFeatureRenderer::invalidateCache()
 {
+    TextObject::clearTextObjects(this);
+    _textObjectsValid = false;
+}
+
+#endif
+
+void VizFeatureRenderer::drawAxisArrows(vector<double> minExts, vector<double> maxExts)
+{
+    assert(minExts.size() == maxExts.size());
+    while (minExts.size() < 3) {
+        minExts.push_back(0.0);
+        maxExts.push_back(0.0);
+    }
+
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
 
     float origin[3];
     float maxLen = -1.f;
-    #ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-    #else
-    vector<double> stretch(3, 1.0);
-    #endif
-    vector<double> strExts;
-    for (int i = 0; i < 6; i++) strExts.push_back(stretch[i % 3] * extents[i]);
-    vector<double> axisArrowCoords = ((VizFeatureParams *)_params)->GetAxisArrowCoords();
+
+    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+
+    vector<double> axisArrowCoords = vfParams->GetAxisArrowCoords();
+
     for (int i = 0; i < 3; i++) {
-        origin[i] = strExts[i] + (axisArrowCoords[i]) * (strExts[i + 3] - strExts[i]);
-        if (extents[i + 3] - extents[i] > maxLen) { maxLen = strExts[i + 3] - strExts[i]; }
+        origin[i] = minExts[i] + (axisArrowCoords[i]) * (maxExts[i] - minExts[i]);
+        if (maxExts[i] - minExts[i] > maxLen) { maxLen = maxExts[i] - minExts[i]; }
     }
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     float len = maxLen * 0.2f;
@@ -727,11 +739,3 @@ void VizFeatureRenderer::drawAxisArrows(float *extents)
     // Revert to previous GL color state
     glPopAttrib();
 }
-//! Invalidate all the text caches at all time steps
-void VizFeatureRenderer::invalidateCache()
-{
-    TextObject::clearTextObjects(this);
-    _textObjectsValid = false;
-}
-
-#endif
