@@ -1,24 +1,24 @@
 /************************************************************************/
-//                                  *
-//           Copyright (C)  2004                *
-//     University Corporation for Atmospheric Research          *
-//           All Rights Reserved                *
-//                                  *
+//									*
+//		     Copyright (C)  2004				*
+//     University Corporation for Atmospheric Research			*
+//		     All Rights Reserved				*
+//									*
 /************************************************************************/
 
 //
-//  File:       MainForm.cpp
+//	File:		MainForm.cpp
 //
-//  Author:     Alan Norton
-//          National Center for Atmospheric Research
-//          PO 3000, Boulder, Colorado
+//	Author:		Alan Norton
+//			National Center for Atmospheric Research
+//			PO 3000, Boulder, Colorado
 //
-//  Date:       July 2004
+//	Date:		July 2004
 //
-//  Description:  Implementation of MainForm class
-//      This QMainWindow class supports all main window functionality
-//      including menus, tab dialog, docking, visualizer window,
-//      and some of the communication between these classes
+//	Description:  Implementation of MainForm class
+//		This QMainWindow class supports all main window functionality
+//		including menus, tab dialog, docking, visualizer window,
+//		and some of the communication between these classes
 //
 #define MIN_WINDOW_WIDTH 700
 #define MIN_WINDOW_HEIGHT 700
@@ -426,9 +426,6 @@ void MainForm::hookupSignals() {
         _dataLoad_MetafileAction, SIGNAL(triggered()),
         this, SLOT(loadData()));
     connect(
-        _dataClose_MetafileAction, SIGNAL(triggered()),
-        this, SLOT(closeData()));
-    connect(
         _dataImportWRF_Action, SIGNAL(triggered()),
         this, SLOT(importWRFData()));
     connect(
@@ -547,15 +544,33 @@ void MainForm::hookupSignals() {
         _vizWinMgr, SLOT(LaunchVisualizer()));
 }
 
+QWidgetAction *MainForm::createTextSeparator(const QString &text) {
+    auto *pLabel = new QLabel(text);
+    pLabel->setMinimumWidth(this->minimumWidth() - 4);
+    // grayish style
+    //pLabel->setStyleSheet("background: #FF4B4B4B;");
+    // possible alignment
+    // pLabel->setAlignment(Qt::AlignCenter);
+    auto *separator = new QWidgetAction(this);
+    separator->setDefaultWidget(pLabel);
+    return separator;
+}
+
 void MainForm::createMenus() {
+
     // menubar
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
+    _File->addAction(createTextSeparator(" Data"));
     _File->addAction(_dataLoad_MetafileAction);
-    _File->addAction(_dataClose_MetafileAction);
-    _File->addAction(_dataImportWRF_Action);
-    _File->addAction(_dataImportCF_Action);
-    _File->addAction(_dataImportMPAS_Action);
+    _closeVDCMenu = _File->addMenu("Close VDC");
+    //_File->addAction(_dataClose_MetafileAction );
+    _importMenu = _File->addMenu("Import");
+    _importMenu->addAction(_dataImportWRF_Action);
+    _importMenu->addAction(_dataImportCF_Action);
+    _importMenu->addAction(_dataImportMPAS_Action);
+    _File->addSeparator();
+    _File->addAction(createTextSeparator(" Session"));
     _File->addAction(_fileNew_SessionAction);
     _File->addAction(_fileOpenAction);
     _File->addAction(_fileSaveAction);
@@ -568,9 +583,9 @@ void MainForm::createMenus() {
     _Edit->addAction(_editUndoRedoClearAction);
     _Edit->addSeparator();
 
-    _Data = menuBar()->addMenu(tr("Data"));
-    _Data->addAction(_plotAction);
-    _Data->addAction(_statsAction);
+    _Tools = menuBar()->addMenu(tr("Tools"));
+    _Tools->addAction(_plotAction);
+    _Tools->addAction(_statsAction);
 
     //Note that the ordering of the following 4 is significant, so that image
     //capture actions correctly activate each other.
@@ -703,19 +718,19 @@ void MainForm::createActions() {
 void MainForm::languageChange() {
     setWindowTitle(tr("VAPoR:  NCAR Visualization and Analysis Platform for Research"));
 
-    _fileNew_SessionAction->setText(tr("&New Session"));
+    _fileNew_SessionAction->setText(tr("New"));
 
     _fileNew_SessionAction->setToolTip("Restart the session with default settings");
     _fileNew_SessionAction->setShortcut(Qt::CTRL + Qt::Key_N);
 
-    _fileOpenAction->setText(tr("&Open Session"));
+    _fileOpenAction->setText(tr("&Open"));
     _fileOpenAction->setShortcut(tr("Ctrl+O"));
     _fileOpenAction->setToolTip("Launch a file open dialog to reopen a previously saved session file");
 
-    _fileSaveAction->setText(tr("&Save Session"));
+    _fileSaveAction->setText(tr("&Save"));
     _fileSaveAction->setShortcut(tr("Ctrl+S"));
     _fileSaveAction->setToolTip("Launch a file-save dialog to save the state of this session in current session file");
-    _fileSaveAsAction->setText(tr("Save Session As"));
+    _fileSaveAsAction->setText(tr("Save As..."));
 
     _fileSaveAsAction->setToolTip("Launch a file-save dialog to save the state of this session in another session file");
 
@@ -738,16 +753,16 @@ void MainForm::languageChange() {
     _installCLIToolsAction->setText("Install CLI Tools");
     _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities location to path. Needs to updated if app bundle moved");
 
-    _dataLoad_MetafileAction->setText(tr("Open a V&DC in Current Session"));
+    _dataLoad_MetafileAction->setText(tr("Open VDC"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
-    _dataClose_MetafileAction->setText(tr("Close a VDC in Current Session"));
+    _dataClose_MetafileAction->setText(tr("Close VDC"));
     _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
-    _dataImportWRF_Action->setText(tr("Import WRF-ARW files in current session"));
+    _dataImportWRF_Action->setText(tr("WRF-ARW"));
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
-    _dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
+    _dataImportCF_Action->setText(tr("NetCDF-CF"));
     _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention output files to import into the current session");
-    _dataImportMPAS_Action->setText(tr("Import MPAS files in current session"));
+    _dataImportMPAS_Action->setText(tr("MPAS"));
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the current session");
     _plotAction->setText("Plot Utility");
     _statsAction->setText("Data Statistics");
@@ -821,9 +836,8 @@ void MainForm::sessionOpen(QString qfileName) {
         vector<string> files = myGetOpenFileNames(
             "Choose a VAPOR session file to restore a session",
             path, "Vapor 3 Session Save Files (*.vs3)", false);
-        if (files.empty()) {
+        if (files.empty())
             return;
-        }
 
         qfileName = files[0].c_str();
     }
@@ -1042,6 +1056,15 @@ void MainForm::loadDataHelper(
             vpp = pm->GetViewpointParams(winNames[i]);
             vpp->AddDatasetTransform(dataSetName);
         }
+
+        // Add menu option to close the dataset in the File menu
+        //
+        QAction *closeAction = new QAction(QString::fromStdString(dataSetName),
+                                           _closeVDCMenu);
+        _closeVDCMenu->addAction(closeAction);
+        connect(
+            closeAction, SIGNAL(triggered()),
+            this, SLOT(closeData()));
     }
 
     // Reinitialize all tabs
@@ -1084,7 +1107,28 @@ void MainForm::loadData(string fileName) {
 }
 
 void MainForm::closeData(string fileName) {
-    cout << "how do we close a dataset?" << endl;
+    QAction *a = (QAction *)sender();
+
+    string dataSetName = a->text().toStdString();
+
+    GUIStateParams *p = GetStateParams();
+    vector<string> currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    if (std::find(currentDataSets.begin(), currentDataSets.end(),
+                  dataSetName) != currentDataSets.end()) {
+        _controlExec->CloseData(dataSetName);
+        _closeVDCMenu->removeAction(a);
+    }
+
+    cout << "Closing datasets " << currentDataSets.size() << endl;
+
+    p = GetStateParams();
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    cout << "Closing datasets " << currentDataSets.size() << " " << currentDataSets[0] << endl;
+    if (currentDataSets.size() == 0) {
+        cout << "no datasets loaded" << endl;
+        _controlExec->LoadState();
+    }
 }
 
 //import WRF data into current session
@@ -1124,15 +1168,13 @@ vector<string> MainForm::myGetOpenFileNames(
         QStringList list = fileNames;
         QStringList::Iterator it = list.begin();
         while (it != list.end()) {
-            if (!it->isNull())
-                files.push_back((*it).toStdString());
+            files.push_back((*it).toStdString());
             ++it;
         }
     } else {
         QString fileName = QFileDialog::getOpenFileName(
             this, qPrompt, qDir, qFilter);
-        if (!fileName.isNull())
-            files.push_back(fileName.toStdString());
+        files.push_back(fileName.toStdString());
     }
 
     for (int i = 0; i < files.size(); i++) {
@@ -1758,7 +1800,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
             PlotParams *params;
             params = (PlotParams *)paramsMgr->GetParams("PlotParams");
             _plot->Update(params);
-            cout << "Mainform updated plot?" << endl;
         }
 
         _vizWinMgr->UpdateRouters();
@@ -1774,7 +1815,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     case (QEvent::MouseButtonPress):
     case (QEvent::MouseButtonRelease):
     case (QEvent::MouseMove):
-        //  case (QEvent::KeyRelease):
+        //	case (QEvent::KeyRelease):
 
         // Not sure why Paint is needed. Who generates it?
         //
@@ -1835,8 +1876,8 @@ void MainForm::enableWidgets(bool onOff) {
     _sethomeAction->setEnabled(onOff);
     _viewAllAction->setEnabled(onOff);
     _viewRegionAction->setEnabled(onOff);
-    //  _stepForwardAction->setEnabled(onOff);
-    //  _stepBackAction->setEnabled(onOff);
+    //	_stepForwardAction->setEnabled(onOff);
+    //	_stepBackAction->setEnabled(onOff);
     _interactiveRefinementSpin->setEnabled(onOff);
     alignViewCombo->setEnabled(onOff);
     _navigationAction->setEnabled(onOff);
@@ -1846,7 +1887,7 @@ void MainForm::enableWidgets(bool onOff) {
     _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);
     _plotAction->setEnabled(onOff);
-    //  _seedMeAction->setEnabled(onOff);
+    //	_seedMeAction->setEnabled(onOff);
 
     AnimationEventRouter *aRouter = (AnimationEventRouter *)
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());

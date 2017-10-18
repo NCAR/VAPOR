@@ -109,7 +109,17 @@ int Renderer::paintGL() {
 
     _timestep = rParams->GetCurrentTimestep();
 
+    vector<double> translate = rParams->GetTransform()->GetTranslations();
+    assert(translate.size() == 3);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glTranslatef(translate[0], translate[1], translate[2]);
+
     int rc = _paintGL();
+
+    glPopMatrix();
+
     if (rc < 0) {
         return (-1);
     }
