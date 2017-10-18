@@ -921,7 +921,6 @@ void MainForm::sessionOpen(QString qfileName)
 		qfileName = files[0].c_str();
 	}
 
-	
 	//Make sure the name ends with .vs3
 	if (! qfileName.endsWith(".vs3")){
 		return;
