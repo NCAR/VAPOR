@@ -1,24 +1,24 @@
 /************************************************************************/
-//									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
-//									*
+//                                  *
+//           Copyright (C)  2004                *
+//     University Corporation for Atmospheric Research          *
+//           All Rights Reserved                *
+//                                  *
 /************************************************************************/
 
 //
-//	File:		MainForm.cpp
+//  File:       MainForm.cpp
 //
-//	Author:		Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
+//  Author:     Alan Norton
+//          National Center for Atmospheric Research
+//          PO 3000, Boulder, Colorado
 //
-//	Date:		July 2004
+//  Date:       July 2004
 //
-//	Description:  Implementation of MainForm class
-//		This QMainWindow class supports all main window functionality
-//		including menus, tab dialog, docking, visualizer window,
-//		and some of the communication between these classes
+//  Description:  Implementation of MainForm class
+//      This QMainWindow class supports all main window functionality
+//      including menus, tab dialog, docking, visualizer window,
+//      and some of the communication between these classes
 //
 #define MIN_WINDOW_WIDTH  700
 #define MIN_WINDOW_HEIGHT 700
@@ -1605,7 +1605,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     case (QEvent::MouseButtonPress):
     case (QEvent::MouseButtonRelease):
     case (QEvent::MouseMove):
-        //	case (QEvent::KeyRelease):
+        //  case (QEvent::KeyRelease):
 
         // Not sure why Paint is needed. Who generates it?
         //
@@ -1667,8 +1667,8 @@ void MainForm::enableWidgets(bool onOff)
     _sethomeAction->setEnabled(onOff);
     _viewAllAction->setEnabled(onOff);
     _viewRegionAction->setEnabled(onOff);
-    //	_stepForwardAction->setEnabled(onOff);
-    //	_stepBackAction->setEnabled(onOff);
+    //  _stepForwardAction->setEnabled(onOff);
+    //  _stepBackAction->setEnabled(onOff);
     _interactiveRefinementSpin->setEnabled(onOff);
     alignViewCombo->setEnabled(onOff);
     _navigationAction->setEnabled(onOff);
@@ -1678,7 +1678,7 @@ void MainForm::enableWidgets(bool onOff)
     _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);
     _plotAction->setEnabled(onOff);
-    //	_seedMeAction->setEnabled(onOff);
+    //  _seedMeAction->setEnabled(onOff);
 
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
