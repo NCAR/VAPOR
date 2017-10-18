@@ -115,25 +115,25 @@ if (APPLE)
 	set (MACOSX_BUNDLE_ICON_FILE VAPOR.icns)
 	set (MACOSX_BUNDLE_ICON_FILE_PATH ${CMAKE_SOURCE_DIR}/share/images/VAPOR.icns)
 	set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-	add_executable (vaporgui MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
+	add_executable (vapor MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
-	configure_file (vaporgui.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
-	add_executable (vaporgui ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
+	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
+	add_executable (vapor ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 else ()
-	add_executable (vaporgui ${SRCS} ${UIS})
+	add_executable (vapor ${SRCS} ${UIS})
 endif()
 
-# target_link_libraries (vaporgui common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (vaporgui common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
+# target_link_libraries (vapor common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
 
 if (UNIX AND NOT APPLE)
-	target_link_libraries (vaporgui quadmath)
+	target_link_libraries (vapor quadmath)
 endif ()
 
 if (APPLE)
-	target_compile_options (vaporgui PRIVATE "-Wno-deprecated-declarations")
+	target_compile_options (vapor PRIVATE "-Wno-deprecated-declarations")
 endif ()
 
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
@@ -141,7 +141,7 @@ add_definitions (-DPYTHONDIR="${PYTHONDIR}")
 # add_definitions (-DPARAMS_EXPORTS)
 
 install (
-	TARGETS vaporgui
+	TARGETS vapor
 	DESTINATION ${INSTALL_BIN_DIR}
-	COMPONENT VaporGUI
+	COMPONENT vaporgui
 	)
