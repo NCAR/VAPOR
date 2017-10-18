@@ -61,7 +61,7 @@ ViewpointEventRouter::ViewpointEventRouter(
     // Disable the scale and rotation tabs
     // for Vapor3.0 Beta
     transformTable->Reinit((TransformTable::Flags)(TransformTable::VIEWPOINT));
-    transformTable->transformTabs->setTabEnabled(0, false);
+    //transformTable->transformTabs->setTabEnabled(0, false);
     transformTable->transformTabs->setTabEnabled(2, false);
 }
 
