@@ -58,6 +58,12 @@ ViewpointEventRouter::ViewpointEventRouter(
 	
 	_panChanged = false;
 	for (int i = 0; i<3; i++)_lastCamPos[i] = 0.f;
+
+	// Disable the scale and rotation tabs
+	// for Vapor3.0 Beta
+	transformTable->Reinit((TransformTable::Flags)(TransformTable::VIEWPOINT));
+	transformTable->transformTabs->setTabEnabled(0, false);
+	transformTable->transformTabs->setTabEnabled(2, false);
 }
 
 
@@ -71,12 +77,12 @@ void
 ViewpointEventRouter::hookUpTab()
 {
 
-	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
-		SLOT(scaleChanged(int, int)));
-	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this, 
-		SLOT(rotationChanged(int, int)));
-	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)), 
-		this, SLOT(translationChanged(int, int)));
+//	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
+//		SLOT(scaleChanged(int, int)));
+//	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this, 
+//		SLOT(rotationChanged(int, int)));
+//	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)), 
+//		this, SLOT(translationChanged(int, int)));
 	
 	//connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
 	//connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
@@ -190,7 +196,7 @@ void ViewpointEventRouter::GetWebHelp(
  * Slots associated with ViewpointTab:
  *********************************************************************************/
 
-void ViewpointEventRouter::scaleChanged(int row, int col) {
+/*void ViewpointEventRouter::scaleChanged(int row, int col) {
 	vector<double> scale;
 	QTableWidget* table = transformTable->scaleTable;
 	string dataset = table->item(row, 0)->text().toStdString();
@@ -252,6 +258,7 @@ void ViewpointEventRouter::translationChanged(int row, int col) {
 		vpp->SetTranslations(dataset, translation);
 	}
 }
+*/
 
 void ViewpointEventRouter::
 setVtabTextChanged(const QString& ){
@@ -317,6 +324,7 @@ viewpointReturnPressed(void){
 	confirmText();
 }
 
+/*
 void ViewpointEventRouter::updateScales() {
 	QTableWidget* table = transformTable->scaleTable;
 
@@ -408,7 +416,7 @@ void ViewpointEventRouter::updateTransformTable(QTableWidget* table,
 	
 	table->blockSignals(false);
 }
-
+*/
 void ViewpointEventRouter::updateTab() {
 	_updateTab();
 }
@@ -416,9 +424,10 @@ void ViewpointEventRouter::updateTab() {
 //Insert values from params into tab panel
 //
 void ViewpointEventRouter::_updateTab(){
-	updateScales();
-	updateTranslations();
-	updateRotations();
+	//updateScales();
+	//updateTranslations();
+	//updateRotations();
+	transformTable->Update(_controlExec);
 
 return;
 	
