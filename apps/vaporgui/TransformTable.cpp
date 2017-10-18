@@ -22,8 +22,11 @@
 #include <QFileDialog>
 #include "TransformTable.h"
 #include "vapor/RenderParams.h"
+#include "vapor/Transform.h"
 #include "vapor/ViewpointParams.h"
 #include "MainForm.h"
+
+using namespace VAPoR;
 
 TransformTable::TransformTable(QWidget *parent) {
     setupUi(this);
@@ -41,17 +44,15 @@ TransformTable::TransformTable(QWidget *parent) {
             SLOT(rotationChanged(int, int)));
     connect(translationTable, SIGNAL(cellChanged(int, int)),
             this, SLOT(translationChanged(int, int)));
-
-    _controlExec = NULL;
-    _rParams = NULL;
 }
 
-void TransformTable::Update(const std::map<string, Transform *>, &transforms) {
-    cout << "Updating TransformTable " << endl;
+void TransformTable::Update(const std::map<string, Transform *> &transforms) {
 
-    updateScales(transforms);
-    updateTranslations(transforms);
-    updateRotations(transforms);
+    _transforms = transforms;
+
+    updateScales();
+    updateTranslations();
+    updateRotations();
 }
 
 void TransformTable::updateTransformTable(QTableWidget *table,
@@ -85,66 +86,59 @@ void TransformTable::updateTransformTable(QTableWidget *table,
     table->blockSignals(false);
 }
 
-void TransformTable::updateScales(
-    const std::map<string, Transform *>, &transforms) {
+void TransformTable::updateScales() {
 
     QTableWidget *table = scaleTable;
 
-    table->setRowCount(transforms.size());
+    table->setRowCount(_transforms.size());
 
     std::map<string, Transform *>::const_iterator itr;
-    for (itr = tranforms.cbegin(); itr != transforms.cend(); ++itr) {
-        string target = itr.first;
-        const Transform *t = itr.second;
+    int row = 0;
+    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
+        string target = itr->first;
+        const Transform *t = itr->second;
 
-        updateTransformTable(table, target, t->GetScales(), i);
+        updateTransformTable(table, target, t->GetScales(), row);
+        row++;
     }
 }
 
-void TransformTable::updateViewpointTranslations() {
+void TransformTable::updateTranslations() {
     QTableWidget *table = translationTable;
 
-    vector<double> translations;
+    table->setRowCount(_transforms.size());
 
-    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-    vector<string> winNames = _controlExec->GetVisualizerNames();
+    std::map<string, Transform *>::const_iterator itr;
+    int row = 0;
+    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
+        string target = itr->first;
+        const Transform *t = itr->second;
 
-    VAPoR::ViewpointParams *vpp;
-    vpp = pm->GetViewpointParams(winNames[0]);
-
-    vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
-    table->setRowCount(datasetNames.size());
-
-    for (int i = 0; i < datasetNames.size(); i++) {
-        translations = vpp->GetTranslations(datasetNames[i]);
-        updateTransformTable(table, datasetNames[i], translations, i);
+        updateTransformTable(table, target, t->GetTranslations(), row);
+        row++;
     }
 }
 
-void TransformTable::updateViewpointRotations() {
+void TransformTable::updateRotations() {
     QTableWidget *table = rotationTable;
 
-    vector<double> rotations;
+    table->setRowCount(_transforms.size());
 
-    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-    vector<string> winNames = _controlExec->GetVisualizerNames();
+    std::map<string, Transform *>::const_iterator itr;
+    int row = 0;
+    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
+        string target = itr->first;
+        const Transform *t = itr->second;
 
-    VAPoR::ViewpointParams *vpp;
-    vpp = pm->GetViewpointParams(winNames[0]);
-
-    vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
-    table->setRowCount(datasetNames.size());
-
-    for (int i = 0; i < datasetNames.size(); i++) {
-        rotations = vpp->GetRotations(datasetNames[i]);
-        updateTransformTable(table, datasetNames[i], rotations, i);
+        updateTransformTable(table, target, t->GetRotations(), row);
+        row++;
     }
 }
 
 void TransformTable::scaleChanged(int row, int col) {
     vector<double> scale;
     QTableWidget *table = scaleTable;
-    string dataset = table->item(row, 0)->text().toStdString();
+    string target = table->item(row, 0)->text().toStdString();
     double x = table->item(row, 1)->text().toDouble();
     double y = table->item(row, 2)->text().toDouble();
     double z = table->item(row, 3)->text().toDouble();
@@ -152,36 +146,24 @@ void TransformTable::scaleChanged(int row, int col) {
     scale.push_back(y);
     scale.push_back(z);
 
-    if (_flags & VIEWPOINT) {
-        setViewpointScales(dataset, scale);
-    }
-    if (_flags & RENDERER) {
-        setRendererScales(scale);
-    }
+    setScales(target, scale);
 }
 
-void TransformTable::setViewpointScales(string dataset, vector<double> scale) {
-    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-    vector<string> winNames = _controlExec->GetVisualizerNames();
+void TransformTable::setScales(string target, vector<double> scale) {
 
-    VAPoR::ViewpointParams *vpp;
-    for (int i = 0; i < winNames.size(); i++) {
-        vpp = pm->GetViewpointParams(winNames[i]);
-        vpp->SetScales(dataset, scale);
-    }
-}
+    map<string, Transform *>::const_iterator itr;
+    itr = _transforms.find(target);
+    if (itr == _transforms.end())
+        return;
 
-void TransformTable::updateRendererScales() {
-}
-
-void TransformTable::setRendererScales(vector<double> scale) {
-    //_rParams->setScale(scale);
+    Transform *t = itr->second;
+    t->SetScales(scale);
 }
 
 void TransformTable::rotationChanged(int row, int col) {
     vector<double> rotation;
     QTableWidget *table = rotationTable;
-    string dataset = table->item(row, 0)->text().toStdString();
+    string target = table->item(row, 0)->text().toStdString();
     double x = table->item(row, 1)->text().toDouble();
     double y = table->item(row, 2)->text().toDouble();
     double z = table->item(row, 3)->text().toDouble();
@@ -189,37 +171,25 @@ void TransformTable::rotationChanged(int row, int col) {
     rotation.push_back(y);
     rotation.push_back(z);
 
-    if (_flags & VIEWPOINT) {
-        setViewpointRotations(dataset, rotation);
-    }
-    if (_flags & RENDERER) {
-        setRendererRotations(rotation);
-    }
+    setRotations(target, rotation);
 }
 
-void TransformTable::setViewpointRotations(string dataset,
-                                           vector<double> rotation) {
-    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-    vector<string> winNames = _controlExec->GetVisualizerNames();
+void TransformTable::setRotations(
+    string target,
+    vector<double> rotation) {
+    map<string, Transform *>::const_iterator itr;
+    itr = _transforms.find(target);
+    if (itr == _transforms.end())
+        return;
 
-    VAPoR::ViewpointParams *vpp;
-    for (int i = 0; i < winNames.size(); i++) {
-        vpp = pm->GetViewpointParams(winNames[i]);
-        vpp->SetRotations(dataset, rotation);
-    }
-}
-
-void TransformTable::updateRendererRotations() {
-}
-
-void TransformTable::setRendererRotations(vector<double> rotation) {
-    //_rParams->setRotations(scale);
+    Transform *t = itr->second;
+    t->SetRotations(rotation);
 }
 
 void TransformTable::translationChanged(int row, int col) {
     vector<double> translation;
     QTableWidget *table = translationTable;
-    string dataset = table->item(row, 0)->text().toStdString();
+    string target = table->item(row, 0)->text().toStdString();
     double x = table->item(row, 1)->text().toDouble();
     double y = table->item(row, 2)->text().toDouble();
     double z = table->item(row, 3)->text().toDouble();
@@ -227,37 +197,17 @@ void TransformTable::translationChanged(int row, int col) {
     translation.push_back(y);
     translation.push_back(z);
 
-    if (_flags & VIEWPOINT) {
-        setViewpointTranslations(dataset, translation);
-    }
-    if (_flags & RENDERER) {
-        setRendererTranslations(translation);
-    }
+    setTranslations(target, translation);
 }
 
-void TransformTable::setViewpointTranslations(string dataset,
-                                              vector<double> translation) {
-    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-    vector<string> winNames = _controlExec->GetVisualizerNames();
+void TransformTable::setTranslations(
+    string target,
+    vector<double> translation) {
+    map<string, Transform *>::const_iterator itr;
+    itr = _transforms.find(target);
+    if (itr == _transforms.end())
+        return;
 
-    VAPoR::ViewpointParams *vpp;
-    for (int i = 0; i < winNames.size(); i++) {
-        vpp = pm->GetViewpointParams(winNames[0]);
-        vpp->SetTranslations(dataset, translation);
-    }
-}
-
-void TransformTable::updateRendererTranslations() {
-
-    QTableWidget *table = translationTable;
-
-    table->setRowCount(1);
-
-    vector<double> translations;
-    translations = _rParams->GetTransform()->GetTranslations();
-    updateTransformTable(table, "", translations, 0);
-}
-
-void TransformTable::setRendererTranslations(vector<double> t) {
-    _rParams->GetTransform()->SetTranslations(t);
+    Transform *t = itr->second;
+    t->SetTranslations(translation);
 }

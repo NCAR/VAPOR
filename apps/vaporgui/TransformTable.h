@@ -46,15 +46,14 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     void translationChanged(int row, int col);
 
   private:
+    map<string, VAPoR::Transform *> _transforms;
+
     void updateTransformTable(QTableWidget *table,
                               string target, vector<double> values, int row);
 
-    void updateScales(
-        const std::map<string, VAPoR::Transform *> &transforms);
-    void updateTranslations(
-        const std::map<string, VAPoR::Transform *> &transforms);
-    void updateRotations(
-        const std::map<string, VAPoR::Transform *> &transforms);
+    void updateScales();
+    void updateTranslations();
+    void updateRotations();
 
     void setScales(string dataset, vector<double> s);
     void setTranslations(string dataset, vector<double> t);
