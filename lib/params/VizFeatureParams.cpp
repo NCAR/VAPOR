@@ -125,6 +125,17 @@ void VizFeatureParams::m_getColor(double color[3], string tag) const {
     }
 }
 
+void VizFeatureParams::_getColor(vector <double> &color, string tag) const {
+	color.clear();
+
+    vector <double> defaultv(3,1.0);
+    color =  GetValueDoubleVec(tag, defaultv);
+    for (int i=0; i<color.size(); i++) {
+        if (color[i] < 0.0) color[i] = 0.0;
+        if (color[i] > 1.0) color[i] = 1.0;
+    }
+}
+
 void VizFeatureParams::m_setColor(vector<double> color, string tag, string msg){
 
 	assert(color.size() == 3);
