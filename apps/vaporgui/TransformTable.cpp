@@ -46,29 +46,12 @@ TransformTable::TransformTable(QWidget *parent) {
     _rParams = NULL;
 }
 
-void TransformTable::Update(VAPoR::RenderParams *rParams) {
-    // This function should be called from within a RenderEventRouter
-    // or its subtabs
-    //
-    assert(_flags && RENDERER);
-    _rParams = rParams;
+void TransformTable::Update(const std::map<string, Transform *>, &transforms) {
+    cout << "Updating TransformTable " << endl;
 
-    cout << "Updating TransformTable for renderer" << endl;
-
-    updateRendererScales();
-    updateRendererTranslations();
-    updateRendererRotations();
-}
-
-void TransformTable::Update(VAPoR::ControlExec *controlExec) {
-    // This function should be called within the ViewpointEventRouter
-    //
-    assert(_flags && VIEWPOINT);
-    _controlExec = controlExec;
-
-    updateViewpointScales();
-    updateViewpointRotations();
-    updateViewpointTranslations();
+    updateScales(transforms);
+    updateTranslations(transforms);
+    updateRotations(transforms);
 }
 
 void TransformTable::updateTransformTable(QTableWidget *table,
@@ -102,23 +85,19 @@ void TransformTable::updateTransformTable(QTableWidget *table,
     table->blockSignals(false);
 }
 
-void TransformTable::updateViewpointScales() {
+void TransformTable::updateScales(
+    const std::map<string, Transform *>, &transforms) {
+
     QTableWidget *table = scaleTable;
 
-    vector<double> sFactors;
+    table->setRowCount(transforms.size());
 
-    VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-    vector<string> winNames = _controlExec->GetVisualizerNames();
+    std::map<string, Transform *>::const_iterator itr;
+    for (itr = tranforms.cbegin(); itr != transforms.cend(); ++itr) {
+        string target = itr.first;
+        const Transform *t = itr.second;
 
-    VAPoR::ViewpointParams *vpp;
-    vpp = pm->GetViewpointParams(winNames[0]);
-
-    vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
-    table->setRowCount(datasetNames.size());
-
-    for (int i = 0; i < datasetNames.size(); i++) {
-        sFactors = vpp->GetScales(datasetNames[i]);
-        updateTransformTable(table, datasetNames[i], sFactors, i);
+        updateTransformTable(table, target, t->GetScales(), i);
     }
 }
 
@@ -173,10 +152,10 @@ void TransformTable::scaleChanged(int row, int col) {
     scale.push_back(y);
     scale.push_back(z);
 
-    if (_flags && VIEWPOINT) {
+    if (_flags & VIEWPOINT) {
         setViewpointScales(dataset, scale);
     }
-    if (_flags && RENDERER) {
+    if (_flags & RENDERER) {
         setRendererScales(scale);
     }
 }
@@ -210,10 +189,10 @@ void TransformTable::rotationChanged(int row, int col) {
     rotation.push_back(y);
     rotation.push_back(z);
 
-    if (_flags && VIEWPOINT) {
+    if (_flags & VIEWPOINT) {
         setViewpointRotations(dataset, rotation);
     }
-    if (_flags && RENDERER) {
+    if (_flags & RENDERER) {
         setRendererRotations(rotation);
     }
 }
@@ -248,10 +227,10 @@ void TransformTable::translationChanged(int row, int col) {
     translation.push_back(y);
     translation.push_back(z);
 
-    if (_flags && VIEWPOINT) {
+    if (_flags & VIEWPOINT) {
         setViewpointTranslations(dataset, translation);
     }
-    if (_flags && RENDERER) {
+    if (_flags & RENDERER) {
         setRendererTranslations(translation);
     }
 }
@@ -275,10 +254,10 @@ void TransformTable::updateRendererTranslations() {
     table->setRowCount(1);
 
     vector<double> translations;
-    translations = _rParams->GetTranslations();
+    translations = _rParams->GetTransform()->GetTranslations();
     updateTransformTable(table, "", translations, 0);
 }
 
 void TransformTable::setRendererTranslations(vector<double> t) {
-    //_rParams->setTranslations(t);
+    _rParams->GetTransform()->SetTranslations(t);
 }

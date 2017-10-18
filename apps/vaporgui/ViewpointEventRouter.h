@@ -84,6 +84,7 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
     VizWinMgr *_vizMgr;
     bool _panChanged;
 
+    void updateTransforms();
     void updateScales();
     //	void updateTransformTable(QTableWidget* t, string dataSet,
     //		vector<double> values, int row);
