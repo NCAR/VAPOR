@@ -161,6 +161,9 @@ public:
   {
 		setupUi(this);
 		_geometryWidget->Reinit( GeometryWidget::TWOD);
+		_transformTable->Reinit((TransformTable::Flags)
+			(TransformTable::RENDERER)
+		);
 	}
 	
 	void Update(  VAPoR::ParamsMgr *paramsMgr,
@@ -168,6 +171,7 @@ public:
 		            VAPoR::RenderParams *rParams) 
   {
 		_geometryWidget->Update(paramsMgr, dataMgr, rParams);
+		_transformTable->Update(rParams);
 	}
 
 

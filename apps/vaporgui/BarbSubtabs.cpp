@@ -5,6 +5,7 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);
 	_geometryWidget->Reinit((GeometryWidget::Flags)
 	((GeometryWidget::VECTOR) | (GeometryWidget::THREED)));
+	_transformTable->Reinit((TransformTable::Flags)(TransformTable::RENDERER));
 
 	_xDimCombo = new Combo(xDimEdit, xDimSlider, true);
 	_yDimCombo = new Combo(yDimEdit, yDimSlider, true);
@@ -40,6 +41,8 @@ void BarbGeometrySubtab::Update(VAPoR::ParamsMgr* paramsMgr,
 
 	double thickness = _rParams->GetLineThickness();
 	_thicknessCombo->Update(.1, 1.5, thickness);
+
+	_transformTable->Update(rParams);
 }
 
 void BarbGeometrySubtab::xDimChanged(int i) {

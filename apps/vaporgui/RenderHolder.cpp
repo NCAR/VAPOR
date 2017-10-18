@@ -439,7 +439,7 @@ void RenderHolder::Update() {
 
 	// Rebuild everything from scratch
 	//
-	tableWidget->clearContents();
+	//tableWidget->clearContents();
 
 	// Get ALL of the renderer instance names defined for this visualizer
 	//
