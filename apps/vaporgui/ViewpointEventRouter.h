@@ -84,11 +84,12 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
     VizWinMgr *_vizMgr;
     bool _panChanged;
 
+    void updateTransforms();
     void updateScales();
-    void updateTransformTable(QTableWidget *t, string dataSet,
-                              vector<double> values, int row);
-    void updateRotations();
-    void updateTranslations();
+    //	void updateTransformTable(QTableWidget* t, string dataSet,
+    //		vector<double> values, int row);
+    //	void updateRotations();
+    //	void updateTranslations();
 
     VAPoR::ParamsBase *GetActiveParams() const;
 
@@ -96,9 +97,9 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
 
     void viewpointReturnPressed();
     void setVtabTextChanged(const QString &qs);
-    void scaleChanged(int row, int col);
-    void translationChanged(int row, int col);
-    void rotationChanged(int row, int col);
+    //	void scaleChanged(int row, int col);
+    //	void translationChanged(int row, int col);
+    //	void rotationChanged(int row, int col);
 };
 
 #endif //VIEWPOINTEVENTROUTER_H
