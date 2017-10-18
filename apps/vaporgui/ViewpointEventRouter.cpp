@@ -62,9 +62,12 @@ ViewpointEventRouter::~ViewpointEventRouter() {}
  ************************************************************/
 void ViewpointEventRouter::hookUpTab()
 {
-    connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this, SLOT(scaleChanged(int, int)));
-    connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this, SLOT(rotationChanged(int, int)));
-    connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)), this, SLOT(translationChanged(int, int)));
+    //	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
+    //		SLOT(scaleChanged(int, int)));
+    //	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this,
+    //		SLOT(rotationChanged(int, int)));
+    //	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)),
+    //		this, SLOT(translationChanged(int, int)));
 
     // connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
     // connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
@@ -82,18 +85,22 @@ void ViewpointEventRouter::hookUpTab()
     connect(lightPos20, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
     connect(lightPos21, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
     connect(lightPos22, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPos0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPos1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPos2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(viewDir0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(viewDir1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(viewDir2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(upVec0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(upVec1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(upVec2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenter0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenter1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenter2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
+
+    // Camera stuff
+    //
+    connect(viewDir0, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(viewDir1, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(viewDir2, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(upVec0, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(upVec1, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(upVec2, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(camPos0, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(camPos1, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(camPos2, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(rotCenter0, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(rotCenter1, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+    connect(rotCenter2, SIGNAL(returnPressed()), this, SLOT(setCameraChanged()));
+
     connect(lightDiff0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
     connect(lightDiff1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
     connect(lightDiff2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
@@ -230,6 +237,60 @@ void ViewpointEventRouter::translationChanged(int row, int col)
 }
 
 void ViewpointEventRouter::setVtabTextChanged(const QString &) { SetTextChanged(true); }
+
+void ViewpointEventRouter::setCameraChanged()
+{
+    cout << "ViewpointEventRouter::setCameraChanged()" << endl;
+
+    double posvec[3], dirvec[3], upvec[3], center[3];
+
+    center[0] = rotCenter0->text().toFloat();
+    center[1] = rotCenter1->text().toFloat();
+    center[2] = rotCenter2->text().toFloat();
+
+    posvec[0] = camPos0->text().toFloat();
+    posvec[1] = camPos1->text().toFloat();
+    posvec[2] = camPos2->text().toFloat();
+
+    dirvec[0] = viewDir0->text().toFloat();
+    dirvec[1] = viewDir1->text().toFloat();
+    dirvec[2] = viewDir2->text().toFloat();
+
+    upvec[0] = upVec0->text().toFloat();
+    upvec[1] = upVec1->text().toFloat();
+    upvec[2] = upVec2->text().toFloat();
+
+    _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
+}
+
+void ViewpointEventRouter::updateCameraChanged()
+{
+    cout << "ViewpointEventRouter::setCameraChanged()" << endl;
+    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+
+    double posvec[3], dirvec[3], upvec[3], center[3];
+    vpParams->GetCameraPos(posvec);
+    vpParams->GetCameraViewDir(dirvec);
+    vpParams->GetCameraUpVec(upvec);
+    vpParams->GetRotationCenter(center);
+
+    camPos0->setText(QString::number(posvec[0]));
+    camPos1->setText(QString::number(posvec[1]));
+    camPos2->setText(QString::number(posvec[2]));
+
+    viewDir0->setText(QString::number(dirvec[0]));
+    viewDir1->setText(QString::number(dirvec[1]));
+    viewDir2->setText(QString::number(dirvec[2]));
+
+    upVec0->setText(QString::number(upvec[0]));
+    upVec1->setText(QString::number(upvec[1]));
+    upVec2->setText(QString::number(upvec[2]));
+
+    rotCenter0->setText(QString::number(center[0]));
+    rotCenter1->setText(QString::number(center[1]));
+    rotCenter2->setText(QString::number(center[2]));
+}
+
 // Put all text changes into the params
 void ViewpointEventRouter::_confirmText()
 {
@@ -262,25 +323,6 @@ void ViewpointEventRouter::_confirmText()
     vpParams->setSpecularCoeff(1, lightSpec1->text().toFloat());
     vpParams->setSpecularCoeff(2, lightSpec2->text().toFloat());
     vpParams->setExponent(shininessEdit->text().toInt());
-
-    double posvec[3], dirvec[3], upvec[3], center[3];
-    center[0] = rotCenter0->text().toFloat();
-    center[1] = rotCenter1->text().toFloat();
-    center[2] = rotCenter2->text().toFloat();
-
-    posvec[0] = camPos0->text().toFloat();
-    posvec[1] = camPos1->text().toFloat();
-    posvec[2] = camPos2->text().toFloat();
-
-    dirvec[0] = viewDir0->text().toFloat();
-    dirvec[1] = viewDir1->text().toFloat();
-    dirvec[2] = viewDir2->text().toFloat();
-
-    upvec[0] = upVec0->text().toFloat();
-    upvec[1] = upVec1->text().toFloat();
-    upvec[2] = upVec2->text().toFloat();
-
-    _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
 void ViewpointEventRouter::viewpointReturnPressed(void) { confirmText(); }
@@ -385,9 +427,11 @@ void ViewpointEventRouter::updateTab() { _updateTab(); }
 //
 void ViewpointEventRouter::_updateTab()
 {
+    cout << "ViewpointEventRouter::_updateTab() " << endl;
     updateScales();
     updateTranslations();
     updateRotations();
+    updateCameraChanged();
 
     return;
 
@@ -413,29 +457,6 @@ void ViewpointEventRouter::_updateTab()
 
     latLonFrame->hide();
     // Always display the current values of the campos and rotcenter
-
-    double posvec[3], dirvec[3], upvec[3], center[3];
-    vpParams->GetCameraPos(posvec);
-    vpParams->GetCameraViewDir(dirvec);
-    vpParams->GetCameraUpVec(upvec);
-    vpParams->GetRotationCenter(center);
-
-    camPos0->setText(strng.setNum(posvec[0], 'g', 3));
-    camPos1->setText(strng.setNum(posvec[1], 'g', 3));
-    camPos2->setText(strng.setNum(posvec[2], 'g', 3));
-
-    viewDir0->setText(strng.setNum(dirvec[0], 'g', 3));
-    viewDir1->setText(strng.setNum(dirvec[1], 'g', 3));
-    viewDir2->setText(strng.setNum(dirvec[2], 'g', 3));
-
-    upVec0->setText(strng.setNum(upvec[0], 'g', 3));
-    upVec1->setText(strng.setNum(upvec[1], 'g', 3));
-    upVec2->setText(strng.setNum(upvec[2], 'g', 3));
-
-    // perspectiveCombo->setCurrentIndex(currentViewpoint->hasPerspective());
-    rotCenter0->setText(strng.setNum(center[0], 'g', 3));
-    rotCenter1->setText(strng.setNum(center[1], 'g', 3));
-    rotCenter2->setText(strng.setNum(center[2], 'g', 3));
 
     lightPos00->setText(QString::number(vpParams->getLightDirection(0, 0)));
     lightPos01->setText(QString::number(vpParams->getLightDirection(0, 1)));
