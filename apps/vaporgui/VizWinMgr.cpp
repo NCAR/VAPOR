@@ -485,7 +485,6 @@ void VizWinMgr::Restart()
 
     vector<string> vizNames = _controlExec->GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) { attachVisualizer(vizNames[i]); }
-
     m_initialized = true;
 }
 

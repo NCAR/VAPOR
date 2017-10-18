@@ -34,6 +34,8 @@ void BarbGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dat
 
     double thickness = _rParams->GetLineThickness();
     _thicknessCombo->Update(.1, 1.5, thickness);
+
+    _transformTable->Update(rParams->GetTransform());
 }
 
 void BarbGeometrySubtab::xDimChanged(int i)
