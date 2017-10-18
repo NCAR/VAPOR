@@ -73,7 +73,6 @@ void TransformTable::updateTransformTable(QTableWidget *table,
                                           string target, vector<double> values, int row) {
 
     table->blockSignals(true);
-    table->clearContents();
 
     QTableWidgetItem *item;
 
