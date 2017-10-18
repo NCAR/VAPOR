@@ -93,16 +93,19 @@ private:
 		vector<double> values, int row);
 	void updateRotations();
 	void updateTranslations();
+	void updateCameraChanged();
 
   VAPoR::ParamsBase *GetActiveParams() const;
 	
 private slots:
+	void setCameraChanged();
 	
 	void viewpointReturnPressed();
 	void setVtabTextChanged(const QString& qs);
 	void scaleChanged(int row, int col);
 	void translationChanged(int row, int col);
 	void rotationChanged(int row, int col);
+
 
 };
 
