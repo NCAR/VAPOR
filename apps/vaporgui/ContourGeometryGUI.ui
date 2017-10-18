@@ -65,7 +65,7 @@
     </widget>
    </item>
    <item>
-    <widget class="TransformTable" name="widget" native="true">
+    <widget class="TransformTable" name="_transformTable" native="true">
      <property name="minimumSize">
       <size>
        <width>0</width>

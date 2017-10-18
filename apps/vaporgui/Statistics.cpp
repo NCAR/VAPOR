@@ -131,6 +131,7 @@ QDialog(parent), Ui_StatsWindow(){
 	setupUi(this);
 	setWindowTitle("Statistics");
 	adjustTables();
+	VariablesTable->installEventFilter(this);
 	/*minXSlider->installEventFilter(this);
 	minXEdit->installEventFilter(this);
 	maxXSlider->installEventFilter(this);
@@ -160,6 +161,24 @@ Statistics::~Statistics() {
 	if (_xRange) delete _xRange;
 	if (_yRange) delete _yRange;
 	if (_zRange) delete _zRange;
+}
+
+bool Statistics::eventFilter(QObject *object, QEvent* event) {
+	if (object==VariablesTable && event->type() == QEvent::KeyPress) {
+		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+		if (keyEvent->key() == Qt::Key_Delete) {
+			int row = VariablesTable->currentRow();
+			if (row<0) return false;
+
+			QTableWidgetItem* i = VariablesTable->verticalHeaderItem(row);
+			QString text = i->text();
+			int index = RemoveVarCombo->findText(text);
+			varRemoved(index);
+			return true;
+		}
+		return false;
+	}
+	return false;
 }
 
 void Statistics::Update(VAPoR::StatisticsParams* sParams) {
