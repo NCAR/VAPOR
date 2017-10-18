@@ -182,9 +182,11 @@ void Visualizer::applyTransforms(int i) {
 
 	VAPoR::ViewpointParams* vpParams = getActiveViewpointParams();
 	vector<double> scales, rotations, translations;
-	scales = vpParams->GetScales(datasetName);
-//	rotations = vpParams->GetRotations(datasetName);
-	translations = vpParams->GetTranslations(datasetName);
+	Transform *t = vpParams->GetTransform(datasetName);
+	assert(t);
+	scales = t->GetScales();
+//	rotations = t->GetRotations();
+	translations = t->GetTranslations();
 
 
 //  Box was returning extents of 0 and 1????

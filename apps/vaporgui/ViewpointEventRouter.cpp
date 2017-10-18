@@ -61,7 +61,6 @@ ViewpointEventRouter::ViewpointEventRouter(
 
 	// Disable the scale and rotation tabs
 	// for Vapor3.0 Beta
-	transformTable->Reinit((TransformTable::Flags)(TransformTable::VIEWPOINT));
 	//transformTable->transformTabs->setTabEnabled(0, false);
 	transformTable->transformTabs->setTabEnabled(2, false);
 }
@@ -421,13 +420,40 @@ void ViewpointEventRouter::updateTab() {
 	_updateTab();
 }
 
+void ViewpointEventRouter::updateTransforms() {
+
+	map <string, Transform *> transformMap;
+
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	vector <string> winNames = paramsMgr->GetVisualizerNames();
+	for (int i=0; i<winNames.size(); i++) {
+		ViewpointParams *vParams = paramsMgr->GetViewpointParams(winNames[i]);
+		if (! vParams) continue;
+
+		vector <string> names = vParams->GetTransformNames();
+
+		for (int j=0; j<names.size(); j++) {
+			transformMap[names[j]] = vParams->GetTransform(names[j]);
+		}
+	}
+
+	
+
+	transformTable->Update(transformMap);
+}
+
 //Insert values from params into tab panel
 //
 void ViewpointEventRouter::_updateTab(){
+
+	updateTransforms();
+
 	//updateScales();
 	//updateTranslations();
 	//updateRotations();
-	transformTable->Update(_controlExec);
+
+
+	
 
 return;
 	
