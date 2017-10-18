@@ -272,15 +272,25 @@ public:
  getCurrentViewpoint()->SetProjectionMatrix(m);
  }
 
+ //! Access the transform for a data set
+ //!
+ //! Access the transform for data set \p dataSetName
+ //!
+ //! \retval Returns NULL if \p dataSetName is unknown
+ //
+ virtual Transform* GetTransform(string dataSetName) const {
+    return ((Transform *) _transforms->GetParams(dataSetName));
+ }
+ 
  void AddDatasetTransform(string datasetName);
 
- vector<double> GetScales(string datasetName);
- vector<double> GetRotations(string datasetName);
- vector<double> GetTranslations(string datasetName);
-
- void SetScales(string datasetName, vector<double> scale);
- void SetRotations(string datasetName, vector<double> rotation);
- void SetTranslations(string datasetName, vector<double> translation);
+ //! Return list of transform names.
+ //!
+ //! Return the list of transform names added with AddDatasetTransform()
+ //
+ vector <string> GetTransformNames() const {
+	return (_transforms->GetNames());
+ }
 
 #ifdef DEAD
 //! Determine the current diameter of the visible scene.
@@ -334,8 +344,6 @@ private:
  static const string m_windowSizeTag;
  static const string m_stretchFactorsTag;
  static const string m_fieldOfView;
-
- vector<string> _datasetNames;
 
  //defaults:
  static double _defaultLightDirection[3][4];

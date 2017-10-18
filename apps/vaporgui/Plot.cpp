@@ -1453,7 +1453,6 @@ void Plot::updateConstCheckboxes() {
 }
 
 void Plot::Update(VAPoR::PlotParams* pParams) {
-	cout << "Plot updating" << endl;
 	_params = pParams;
 
 	updateSpaceTimeTabs();
