@@ -27,6 +27,7 @@
 
 #include <vapor/ViewpointParams.h>
 #include <vapor/glutil.h>
+#include <vapor/debug.h>
 
 double VAPoR::ViewpointParams::_defaultLightDirection[3][4] = {
     {0.f, 0.f, 1.f, 0.f},
@@ -340,6 +341,8 @@ void ViewpointParams::SetWindowSize(size_t width, size_t height) {
     v.push_back(width);
     v.push_back(height);
     SetValueLongVec(m_windowSizeTag, "Set window width and height", v);
+    printf("[%s:%i] %s: set width=%i height=%i\n", __FILE__, __LINE__, __func__, (int)width, (int)height);
+    //dBreak();
 }
 
 void ViewpointParams::GetWindowSize(size_t &width, size_t &height) const {
@@ -347,7 +350,7 @@ void ViewpointParams::GetWindowSize(size_t &width, size_t &height) const {
     vector<long> val = GetValueLongVec(m_windowSizeTag, defaultv);
     width = val[0];
     height = val[1];
-    printf("[%s:%i] %s: return width=%i height=%i\n", __FILE__, __LINE__, __func__, (int)width, (int)height);
+    //printf("[%s:%i] %s: return width=%i height=%i\n", __FILE__, __LINE__, __func__, (int)width, (int)height);
 }
 
 void ViewpointParams::SetFOV(float v) {
