@@ -898,9 +898,11 @@ void MainForm::sessionOpen(QString qfileName)
 
 		vector <string> files = myGetOpenFileNames(
 			"Choose a VAPOR session file to restore a session", 
-			path, "Vapor 3 Session Save Files (*.vs3)", false
-		);
-		if (files.empty()) return;
+			path, "Vapor 3 Session Save Files (*.vs3)", false );
+		if (files.empty()) 
+        {
+            return;
+        }
 
 		qfileName = files[0].c_str();
 	}
@@ -1235,7 +1237,8 @@ vector <string> MainForm::myGetOpenFileNames(
 		QStringList list = fileNames;
 		QStringList::Iterator it = list.begin();
 		while(it != list.end()) {
-			files.push_back((*it).toStdString());
+            if( !it->isNull() )
+			    files.push_back((*it).toStdString());
 			++it;
 		}
 	}
@@ -1243,7 +1246,8 @@ vector <string> MainForm::myGetOpenFileNames(
 		QString fileName = QFileDialog::getOpenFileName(
 			this, qPrompt, qDir, qFilter
 		);
-		files.push_back(fileName.toStdString());
+        if( !fileName.isNull() )
+		    files.push_back(fileName.toStdString());
 	}
 
 	for (int i=0; i<files.size(); i++) {
