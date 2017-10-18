@@ -268,6 +268,14 @@ void TransformTable::setViewpointTranslations(string dataset,
 }
 
 void TransformTable::updateRendererTranslations() {
+
+    QTableWidget *table = translationTable;
+
+    table->setRowCount(1);
+
+    vector<double> translations;
+    translations = _rParams->GetTranslations();
+    updateTransformTable(table, "", translations, 0);
 }
 
 void TransformTable::setRendererTranslations(vector<double> t) {
