@@ -63,6 +63,9 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
 
     //! Obtain domain frame color
     void GetDomainColor(double color[3]) const;
+    void GetDomainColor(std::vector<double> &color) const {
+        _getColor(color, _domainColorTag);
+    }
 
     //! Set domain frame color
     void SetDomainColor(vector<double> color);
@@ -83,15 +86,21 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
 
     //! Obtain region frame color
     void GetRegionColor(double color[3]) const;
+    void GetRegionColor(std::vector<double> &color) const {
+        _getColor(color, _regionColorTag);
+    }
 
     //! Set region frame color
     void SetRegionColor(vector<double> color);
 
     //! Obtain background color
     void GetBackgroundColor(double color[3]) const;
+    void GetBackgroundColor(std::vector<double> &color) const {
+        _getColor(color, _backgroundColorTag);
+    }
 
     //! Set background color
-    void SetBackgroundColor(vector<double> color);
+    void SetBackgroundColor(std::vector<double> color);
 
     //! Enable or disable axis annotation
     void SetAxisAnnotation(bool val) {
@@ -105,6 +114,9 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
 
     //! Obtain axis color
     void GetAxisColor(double color[3]) const;
+    void GetAxisColor(std::vector<double> &color) const {
+        _getColor(color, _axisColorTag);
+    }
 
     //! Set axis color
     void SetAxisColor(vector<double> color);
@@ -188,7 +200,7 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     //! Get tic size on x,y,z axes
     vector<double> GetAxisArrowCoords() const;
 
-    bool ShowAxisArrows() const {
+    bool GetShowAxisArrows() const {
         return (0 != GetValueLong(_showAxisArrowsTag, (long)false));
     }
 
@@ -231,6 +243,7 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     void _init();
 
     void m_getColor(double color[3], string tag) const;
+    void _getColor(vector<double> &color, string tag) const;
     void m_setColor(vector<double> color, string tag, string msg);
 };
 
