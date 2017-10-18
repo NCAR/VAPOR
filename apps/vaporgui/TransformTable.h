@@ -9,10 +9,8 @@
 QT_USE_NAMESPACE
 
 namespace VAPoR {
-class RenderParams;
-class ParamsMgr;
-class DataMgr;
-} // namespace VAPoR
+class Transform;
+}
 
 class RenderEventRouter;
 
@@ -29,27 +27,18 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     Q_OBJECT
 
   public:
-    enum Flags {
-        VIEWPOINT = (1u << 0),
-        RENDERER = (1u << 1)
-    };
-
     TransformTable(QWidget *parent);
-
-    void Reinit(Flags flags) { _flags = flags; }
 
     virtual ~TransformTable(){};
 
-    // Update function for ViewpointParams transforms,
-    // which requires a ControlExec
-    //
     virtual void Update(
-        VAPoR::ControlExec *controlExec);
-
-    // Update function for RenderParams
-    //
+        const std::map<string, VAPoR::Transform *> &transforms);
     virtual void Update(
-        VAPoR::RenderParams *rParams);
+        VAPoR::Transform *transform) {
+        map<string, VAPoR::Transform *> tMap;
+        tMap[""] = transform;
+        Update(tMap);
+    }
 
   protected slots:
     void scaleChanged(int row, int col);
@@ -57,27 +46,19 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     void translationChanged(int row, int col);
 
   private:
-    const VAPoR::ControlExec *_controlExec;
-    const VAPoR::DataMgr *_dataMgr;
-    VAPoR::ParamsMgr *_paramsMgr;
-    VAPoR::RenderParams *_rParams;
-    Flags _flags;
-
     void updateTransformTable(QTableWidget *table,
                               string target, vector<double> values, int row);
-    void updateViewpointScales();
-    void updateViewpointTranslations();
-    void updateViewpointRotations();
-    void updateRendererScales();
-    void updateRendererTranslations();
-    void updateRendererRotations();
 
-    void setViewpointScales(string dataset, vector<double> s);
-    void setViewpointTranslations(string dataset, vector<double> t);
-    void setViewpointRotations(string dataset, vector<double> r);
-    void setRendererScales(vector<double> s);
-    void setRendererTranslations(vector<double> t);
-    void setRendererRotations(vector<double> r);
+    void updateScales(
+        const std::map<string, VAPoR::Transform *> &transforms);
+    void updateTranslations(
+        const std::map<string, VAPoR::Transform *> &transforms);
+    void updateRotations(
+        const std::map<string, VAPoR::Transform *> &transforms);
+
+    void setScales(string dataset, vector<double> s);
+    void setTranslations(string dataset, vector<double> t);
+    void setRotations(string dataset, vector<double> r);
 };
 
 #endif //TRANSFORMTABLE_H
