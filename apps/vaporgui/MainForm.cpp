@@ -693,6 +693,14 @@ void MainForm::sessionOpenHelper(string fileName)
 //
 void MainForm::sessionOpen(QString qfileName)
 {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Are you sure?");
+    msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
+    msgBox.setStandardButtons(QMessageBox::Yes);
+    msgBox.addButton(QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    if (msgBox.exec() == QMessageBox::No) { return; }
+
     // This launches a panel that enables the
     // user to choose input session save files, then to
     // load that session
@@ -1024,6 +1032,17 @@ vector<string> MainForm::myGetOpenFileNames(string prompt, string dir, string fi
 
 void MainForm::sessionNew()
 {
+    GUIStateParams *p = GetStateParams();
+    if (p->GetCurrentSessionPath() != ".") {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
+        msgBox.setStandardButtons(QMessageBox::Yes);
+        msgBox.addButton(QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No) { return; }
+    }
+
     sessionOpenHelper("");
 
     _vizWinMgr->LaunchVisualizer();
@@ -1034,7 +1053,7 @@ void MainForm::sessionNew()
     sessionPath = QDir::toNativeSeparators(sessionPath);
     string fileName = sessionPath.toStdString();
 
-    GUIStateParams *p = GetStateParams();
+    p = GetStateParams();
     p->SetCurrentSessionPath(fileName);
 }
 
