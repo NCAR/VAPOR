@@ -88,6 +88,7 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
         setupUi(this);
         _geometryWidget->Reinit(
             GeometryWidget::TWOD);
+        _transformTable->Reinit((TransformTable::Flags)(TransformTable::RENDERER));
     }
 
     void Update(
@@ -95,6 +96,7 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
         VAPoR::DataMgr *dataMgr,
         VAPoR::RenderParams *rParams) {
         _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+        _transformTable->Update(rParams);
     }
 
   private:
