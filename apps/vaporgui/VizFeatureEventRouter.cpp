@@ -54,6 +54,30 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 
     cout << "VizFeatureEventRouter constructor" << endl;
 
+    // Disabled for now. Need to add support in VizFeatureRenderer
+    //
+    xMinTicEdit->setEnabled(false);
+    yMinTicEdit->setEnabled(false);
+    zMinTicEdit->setEnabled(false);
+    xMaxTicEdit->setEnabled(false);
+    yMaxTicEdit->setEnabled(false);
+    zMaxTicEdit->setEnabled(false);
+    xNumTicsEdit->setEnabled(false);
+    yNumTicsEdit->setEnabled(false);
+    zNumTicsEdit->setEnabled(false);
+    xTicSizeEdit->setEnabled(false);
+    yTicSizeEdit->setEnabled(false);
+    zTicSizeEdit->setEnabled(false);
+    axisOriginXEdit->setEnabled(false);
+    axisOriginYEdit->setEnabled(false);
+    axisOriginZEdit->setEnabled(false);
+    xTicOrientCombo->setEnabled(false);
+    yTicOrientCombo->setEnabled(false);
+    zTicOrientCombo->setEnabled(false);
+    labelHeightEdit->setEnabled(false);
+    labelDigitsEdit->setEnabled(false);
+    ticWidthEdit->setEnabled(false);
+
     _animConnected = false;
     _ap = NULL;
 }
