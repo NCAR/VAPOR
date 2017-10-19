@@ -54,13 +54,17 @@ ViewpointEventRouter::ViewpointEventRouter(
 
     _vizMgr = vizMgr;
 
-    _panChanged = false;
-    for (int i = 0; i < 3; i++)
-        _lastCamPos[i] = 0.f;
+    // Not implemented
+    //
+    camPosLat->setEnabled(false);
+    camPosLon->setEnabled(false);
+    rotCenterLat->setEnabled(false);
+    rotCenterLon->setEnabled(false);
 }
 
 ViewpointEventRouter::~ViewpointEventRouter() {
 }
+
 /**********************************************************
  * Whenever a new viztab is created it must be hooked up here
  ************************************************************/
@@ -75,48 +79,37 @@ void ViewpointEventRouter::hookUpTab() {
 
     //connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
     //connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
+
     connect(
-        camPosLat, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        numLights, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        camPosLon, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos00, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        rotCenterLat, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos01, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        rotCenterLon, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos02, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        numLights, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos10, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        lightPos00, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos11, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        lightPos01, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos12, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        lightPos02, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos20, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        lightPos10, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos21, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        lightPos11, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightPos12, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightPos20, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightPos21, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightPos22, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
+        lightPos22, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
 
     // Camera stuff
     //
@@ -158,140 +151,45 @@ void ViewpointEventRouter::hookUpTab() {
         this, SLOT(setCameraChanged()));
 
     connect(
-        lightDiff0, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightDiff1, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightDiff2, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightSpec0, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightSpec1, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        lightSpec2, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        shininessEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        ambientEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-    connect(
-        stereoSeparationEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVtabTextChanged(const QString &)));
-
-    //Connect all the returnPressed signals, these will update the visualizer.
-    connect(
         camPosLat, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        this, SLOT(setCameraLatLonChanged()));
     connect(
         camPosLon, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        this, SLOT(setCameraLatLonChanged()));
     connect(
         rotCenterLat, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        this, SLOT(setCameraLatLonChanged()));
     connect(
         rotCenterLon, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos00, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos01, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos02, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos10, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos11, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos12, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos20, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos21, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightPos22, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightDiff0, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightDiff1, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightDiff2, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightSpec0, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightSpec1, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        lightSpec2, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        shininessEdit, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        ambientEdit, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        this, SLOT(setCameraLatLonChanged()));
 
     connect(
-        camPos0, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        lightDiff0, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        camPos1, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        lightDiff1, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        camPos2, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        lightDiff2, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        viewDir0, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        lightSpec0, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        viewDir1, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        lightSpec1, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        viewDir2, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        lightSpec2, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        upVec0, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        shininessEdit, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
-        upVec1, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        upVec2, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        rotCenter0, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        rotCenter1, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        rotCenter2, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
-    connect(
-        numLights, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        ambientEdit, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
     connect(
         stereoSeparationEdit, SIGNAL(returnPressed()),
-        this, SLOT(viewpointReturnPressed()));
+        this, SLOT(notImplemented()));
 
     connect(
         LocalGlobal, SIGNAL(activated(int)), VizWinMgr::getInstance(), SLOT(setVpLocalGlobal(int)));
@@ -417,6 +315,14 @@ void ViewpointEventRouter::setCameraChanged() {
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
+void ViewpointEventRouter::setCameraLatLonChanged() {
+    cout << "Not implemented" << endl;
+}
+
+void ViewpointEventRouter::notImplemented() {
+    cout << "Not implemented" << endl;
+}
+
 void ViewpointEventRouter::updateCameraChanged() {
 
     cout << "ViewpointEventRouter::setCameraChanged()" << endl;
@@ -445,12 +351,13 @@ void ViewpointEventRouter::updateCameraChanged() {
     rotCenter2->setText(QString::number(center[2]));
 }
 
-//Put all text changes into the params
-void ViewpointEventRouter::_confirmText() {
+void ViewpointEventRouter::setLightChanged() {
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
-    size_t timeStep = GetCurrentTimeStep();
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    paramsMgr->BeginSaveStateGroup("Light changed");
 
     //Get the light directions from the gui:
     vpParams->setNumLights(numLights->text().toInt());
@@ -477,11 +384,60 @@ void ViewpointEventRouter::_confirmText() {
     vpParams->setSpecularCoeff(1, lightSpec1->text().toFloat());
     vpParams->setSpecularCoeff(2, lightSpec2->text().toFloat());
     vpParams->setExponent(shininessEdit->text().toInt());
+
+    paramsMgr->EndSaveStateGroup();
 }
 
-void ViewpointEventRouter::
-    viewpointReturnPressed(void) {
-    confirmText();
+void ViewpointEventRouter::updateLightChanged() {
+
+    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+
+    lightPos00->setText(QString::number(vpParams->getLightDirection(0, 0)));
+    lightPos01->setText(QString::number(vpParams->getLightDirection(0, 1)));
+    lightPos02->setText(QString::number(vpParams->getLightDirection(0, 2)));
+
+    lightPos10->setText(QString::number(vpParams->getLightDirection(1, 0)));
+    lightPos11->setText(QString::number(vpParams->getLightDirection(1, 1)));
+    lightPos12->setText(QString::number(vpParams->getLightDirection(1, 2)));
+
+    lightPos20->setText(QString::number(vpParams->getLightDirection(2, 0)));
+    lightPos21->setText(QString::number(vpParams->getLightDirection(2, 1)));
+    lightPos22->setText(QString::number(vpParams->getLightDirection(2, 2)));
+
+    ambientEdit->setText(QString::number(vpParams->getAmbientCoeff()));
+    lightDiff0->setText(QString::number(vpParams->getDiffuseCoeff(0)));
+    lightDiff1->setText(QString::number(vpParams->getDiffuseCoeff(1)));
+    lightDiff2->setText(QString::number(vpParams->getDiffuseCoeff(2)));
+    lightSpec0->setText(QString::number(vpParams->getSpecularCoeff(0)));
+    lightSpec1->setText(QString::number(vpParams->getSpecularCoeff(1)));
+    lightSpec2->setText(QString::number(vpParams->getSpecularCoeff(2)));
+    shininessEdit->setText(QString::number(vpParams->getExponent()));
+
+    int nLights = vpParams->getNumLights();
+    numLights->setText(QString::number(nLights));
+
+    //Enable light direction text boxes as needed:
+    bool lightOn;
+    lightOn = (nLights > 0);
+    lightPos00->setEnabled(lightOn);
+    lightPos01->setEnabled(lightOn);
+    lightPos02->setEnabled(lightOn);
+    lightSpec0->setEnabled(lightOn);
+    lightDiff0->setEnabled(lightOn);
+    shininessEdit->setEnabled(lightOn);
+    ambientEdit->setEnabled(lightOn);
+    lightOn = (nLights > 1);
+    lightPos10->setEnabled(lightOn);
+    lightPos11->setEnabled(lightOn);
+    lightPos12->setEnabled(lightOn);
+    lightSpec1->setEnabled(lightOn);
+    lightDiff1->setEnabled(lightOn);
+    lightOn = (nLights > 2);
+    lightPos20->setEnabled(lightOn);
+    lightPos21->setEnabled(lightOn);
+    lightPos22->setEnabled(lightOn);
+    lightSpec2->setEnabled(lightOn);
+    lightDiff2->setEnabled(lightOn);
 }
 
 void ViewpointEventRouter::updateScales() {
@@ -588,6 +544,7 @@ void ViewpointEventRouter::_updateTab() {
     updateTranslations();
     updateRotations();
     updateCameraChanged();
+    updateLightChanged();
 
     return;
 
@@ -602,9 +559,6 @@ void ViewpointEventRouter::_updateTab() {
 #endif
         LocalGlobal->setCurrentIndex(0);
 
-    int nLights = vpParams->getNumLights();
-    numLights->setText(strng.setNum(nLights));
-
     GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
 
@@ -613,50 +567,6 @@ void ViewpointEventRouter::_updateTab() {
 
     latLonFrame->hide();
     //Always display the current values of the campos and rotcenter
-
-    lightPos00->setText(QString::number(vpParams->getLightDirection(0, 0)));
-    lightPos01->setText(QString::number(vpParams->getLightDirection(0, 1)));
-    lightPos02->setText(QString::number(vpParams->getLightDirection(0, 2)));
-
-    lightPos10->setText(QString::number(vpParams->getLightDirection(1, 0)));
-    lightPos11->setText(QString::number(vpParams->getLightDirection(1, 1)));
-    lightPos12->setText(QString::number(vpParams->getLightDirection(1, 2)));
-
-    lightPos20->setText(QString::number(vpParams->getLightDirection(2, 0)));
-    lightPos21->setText(QString::number(vpParams->getLightDirection(2, 1)));
-    lightPos22->setText(QString::number(vpParams->getLightDirection(2, 2)));
-
-    ambientEdit->setText(QString::number(vpParams->getAmbientCoeff()));
-    lightDiff0->setText(QString::number(vpParams->getDiffuseCoeff(0)));
-    lightDiff1->setText(QString::number(vpParams->getDiffuseCoeff(1)));
-    lightDiff2->setText(QString::number(vpParams->getDiffuseCoeff(2)));
-    lightSpec0->setText(QString::number(vpParams->getSpecularCoeff(0)));
-    lightSpec1->setText(QString::number(vpParams->getSpecularCoeff(1)));
-    lightSpec2->setText(QString::number(vpParams->getSpecularCoeff(2)));
-    shininessEdit->setText(QString::number(vpParams->getExponent()));
-
-    //Enable light direction text boxes as needed:
-    bool lightOn;
-    lightOn = (nLights > 0);
-    lightPos00->setEnabled(lightOn);
-    lightPos01->setEnabled(lightOn);
-    lightPos02->setEnabled(lightOn);
-    lightSpec0->setEnabled(lightOn);
-    lightDiff0->setEnabled(lightOn);
-    shininessEdit->setEnabled(lightOn);
-    ambientEdit->setEnabled(lightOn);
-    lightOn = (nLights > 1);
-    lightPos10->setEnabled(lightOn);
-    lightPos11->setEnabled(lightOn);
-    lightPos12->setEnabled(lightOn);
-    lightSpec1->setEnabled(lightOn);
-    lightDiff1->setEnabled(lightOn);
-    lightOn = (nLights > 2);
-    lightPos20->setEnabled(lightOn);
-    lightPos21->setEnabled(lightOn);
-    lightPos22->setEnabled(lightOn);
-    lightSpec2->setEnabled(lightOn);
-    lightDiff2->setEnabled(lightOn);
 }
 
 void ViewpointEventRouter::CenterSubRegion() {

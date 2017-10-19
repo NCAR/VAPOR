@@ -72,7 +72,7 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
     virtual void updateTab();
 
   protected:
-    virtual void _confirmText();
+    virtual void _confirmText(){};
     virtual void _updateTab();
 
   private:
@@ -80,9 +80,7 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
 
     virtual void wheelEvent(QWheelEvent *) {}
 
-    float _lastCamPos[3];
     VizWinMgr *_vizMgr;
-    bool _panChanged;
 
     void updateScales();
     void updateTransformTable(QTableWidget *t, string dataSet,
@@ -90,13 +88,16 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
     void updateRotations();
     void updateTranslations();
     void updateCameraChanged();
+    void updateLightChanged();
 
     VAPoR::ParamsBase *GetActiveParams() const;
 
   private slots:
     void setCameraChanged();
+    void setCameraLatLonChanged();
+    void setLightChanged();
+    void notImplemented();
 
-    void viewpointReturnPressed();
     void setVtabTextChanged(const QString &qs);
     void scaleChanged(int row, int col);
     void translationChanged(int row, int col);
