@@ -598,7 +598,6 @@ void VizWinMgr::UpdateRouters() {
 	for (int i=0; i<tabNames.size(); i++) {
 		string tab = tabNames[i];
 
-
 		EventRouter* eRouter = GetEventRouter(tab);
 		RenderEventRouter *reRouter = dynamic_cast<RenderEventRouter*>(eRouter);
 
