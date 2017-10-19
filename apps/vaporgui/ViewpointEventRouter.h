@@ -77,10 +77,7 @@ private:
 
     VizWinMgr *_vizMgr;
 
-    void updateScales();
-    void updateTransformTable(QTableWidget *t, string dataSet, vector<double> values, int row);
-    void updateRotations();
-    void updateTranslations();
+    void updateTransforms();
     void updateCameraChanged();
     void updateLightChanged();
 
@@ -91,11 +88,6 @@ private slots:
     void setCameraLatLonChanged();
     void setLightChanged();
     void notImplemented();
-
-    void setVtabTextChanged(const QString &qs);
-    void scaleChanged(int row, int col);
-    void translationChanged(int row, int col);
-    void rotationChanged(int row, int col);
 };
 
 #endif    // VIEWPOINTEVENTROUTER_H
