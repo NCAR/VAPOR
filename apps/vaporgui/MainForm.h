@@ -175,6 +175,8 @@ class MainForm : public QMainWindow {
     };
 
     void _stateChangeCB();
+    bool _stateChangeFlag;
+    bool _firstSession;
 
     // Set the various widgets in the main window consistent with latest
     // params settings:
