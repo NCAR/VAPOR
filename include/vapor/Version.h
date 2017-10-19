@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <vapor/MyBase.h>
 #include <vapor/common.h>
+#include <vapor/CMakeConfig.h>
 
 using namespace std;
 
@@ -61,7 +62,7 @@ public:
 
  //! Return the sub minor version number
  //
- static string GetRC() { return("beta"); }
+ static string GetRC() { return(VERSION_RC); }
 
  //! Return the canonical version number as a formatted string
  //!
@@ -78,7 +79,7 @@ public:
  //! advanced.
  //
  static const string &GetDateString() {
-	_dateString.assign("Thu Aug 31 15:57:28 MDT 2017"); return(_dateString);
+	_dateString.assign(VERSION_DATE); return(_dateString);
  }
 
  //! Parse a version string into it's component major, minor,
@@ -92,9 +93,9 @@ public:
  static int Compare(std::string ver1, std::string ver2);
 
 private:
- static const int _majorVersion = 3;
- static const int _minorVersion = 0;
- static const int _minorMinorVersion = 0;
+ static const int _majorVersion = MAJOR;
+ static const int _minorVersion = MINOR;
+ static const int _minorMinorVersion = MICRO;
  static string _formatString;
  static string _dateString;
 
