@@ -407,7 +407,15 @@ int ControlExec::EnableImageCapture(string filename, string winName)
         SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
         return -1;
     }
-    if (v->setImageCaptureEnabled(true, filename)) return -1;
+    if (v->setImageCaptureEnabled(true, filename)) {
+        SetErrMsg("Visualizer (%s) failed to enable capturing  image.", winName.c_str());
+        return -1;
+    }
+    if (v->paintEvent())    // paint with image capture enabled
+    {
+        SetErrMsg("Visualizer (%s) failed to paint and thus not capturing image.", winName.c_str());
+        return -1;
+    }
     return 0;
 }
 
