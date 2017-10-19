@@ -81,13 +81,13 @@ void MouseModeParams::RegisterMouseMode(
 //! Also calls InstallExtensionMouseModes() to register extension modes.
 void MouseModeParams::_setUpDefault() {
     RegisterMouseMode(GetNavigateModeName(), 0, wheel);
-    RegisterMouseMode("Region", 1, cube);
-    RegisterMouseMode("Barb rake", 1, arrowrake);
-    RegisterMouseMode("Contours", 3, isoline);
+    //RegisterMouseMode("Region", 1, cube);
+    //RegisterMouseMode("Barb rake", 1, arrowrake );
+    //RegisterMouseMode("Contours", 3, isoline);
     //RegisterMouseMode(Params::GetClassType(),1, "Flow rake",rake );
     //RegisterMouseMode(Params::GetClassType(),3,"Probe", probe);
-    RegisterMouseMode("2D Data", 2, twoDData);
-    RegisterMouseMode("Image", 2, twoDImage);
+    //RegisterMouseMode("2D Data", 2, twoDData);
+    //RegisterMouseMode("Image", 2, twoDImage);
 }
 
 void MouseModeParams::SetCurrentMouseMode(string t) {

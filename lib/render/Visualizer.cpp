@@ -171,9 +171,11 @@ void Visualizer::applyTransforms(int i) {
 
     VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
     vector<double> scales, rotations, translations;
-    //	scales = vpParams->GetScales(datasetName);
-    //	rotations = vpParams->GetRotations(datasetName);
-    translations = vpParams->GetTranslations(datasetName);
+    Transform *t = vpParams->GetTransform(datasetName);
+    assert(t);
+    scales = t->GetScales();
+    //	rotations = t->GetRotations();
+    translations = t->GetTranslations();
 
     //  Box was returning extents of 0 and 1????
     //
@@ -196,12 +198,12 @@ void Visualizer::applyTransforms(int i) {
 
 #ifdef DEAD
     glTranslatef(xCenter, yCenter, zCenter);
-    glScalef(scales[0], scales[1], scales[2]);
     glRotatef(rotations[0], 1, 0, 0);
     glRotatef(rotations[1], 0, 1, 0);
     glRotatef(rotations[2], 0, 0, 1);
 #endif
 
+    glScalef(scales[0], scales[1], scales[2]);
     glTranslatef(translations[0], translations[1], translations[2]);
 
 #ifdef DEAD

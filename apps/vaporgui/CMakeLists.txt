@@ -51,8 +51,7 @@ set (SRCS
 	MiscParams.cpp
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
-	TransformTable.h
-	OrientationAngles.h
+	TransformTable.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -61,6 +60,8 @@ set (SRCS
 	Plot.h
 	BarbSubtabs.h
 	ColorbarWidget.h
+	OrientationAngles.h
+	TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
 )
