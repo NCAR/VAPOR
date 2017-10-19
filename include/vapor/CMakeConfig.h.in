@@ -10,6 +10,6 @@
 #define MINOR @VERSION_MINOR@
 #define MICRO @VERSION_MICRO@
 #define VERSION_RC "@VERSION_RC@"
-#define DATE "@VERSION_DATE@"
+#define VERSION_DATE "@VERSION_DATE@"
 
 #endif

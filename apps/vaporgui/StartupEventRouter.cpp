@@ -64,7 +64,8 @@ StartupEventRouter::StartupEventRouter(
 	tfPathButton->setIcon(QIcon(*fileopenIcon));
 	flowPathButton->setIcon(QIcon(*fileopenIcon));
 	pythonPathButton->setIcon(QIcon(*fileopenIcon));
-	setSettingsChanged(false);
+	setSettingsChanged(false);  
+    _settingsChanged = false;   // this is a quick hack
 	_savedStartupParams = 0;
 	_textChangedFlag = false;
 }
