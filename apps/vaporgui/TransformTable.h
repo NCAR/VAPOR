@@ -41,10 +41,8 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     }
 
   protected slots:
-    void scaleChanged(int row, int col);
-    void rotationChanged(int row, int col);
-    void translationChanged(QTableWidget *table, int row, int col);
-    void translationChanged();
+    void transformChanged(QTableWidget *table, int row, int col);
+    void transformChanged();
 
   private:
     map<string, VAPoR::Transform *> _transforms;
