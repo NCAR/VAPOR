@@ -153,6 +153,7 @@ int ControlExec::ResizeViz(string winName, int width, int height){
 	return 0;
 }
 
+
 int ControlExec::Paint(string winName, bool force){
 	Visualizer* v = getVisualizer(winName);
 	if (!v) {
@@ -493,7 +494,14 @@ int ControlExec::EnableImageCapture(string filename, string winName)
 		SetErrMsg("Visualizer (%s) failed to enable capturing  image.", winName.c_str());
         return -1;
     }
-    if( v->paintEvent() )   // paint with image capture enabled
+
+	// Disable state saving when capturing an image
+	//
+	bool enabled = _paramsMgr->GetSaveStateEnabled();
+	_paramsMgr->SetSaveStateEnabled(false);
+    int rc =  v->paintEvent();   // paint with image capture enabled
+	_paramsMgr->SetSaveStateEnabled(enabled);
+    if( rc != 0 )
     {
 		SetErrMsg("Visualizer (%s) failed to paint and thus not capturing image.", winName.c_str());
         return -1;
