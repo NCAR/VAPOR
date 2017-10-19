@@ -30,7 +30,7 @@ public:
 
     virtual ~ImageRenderer();
 
-    static std::string GetClassType() { return ("ImageRenderer"); }
+    static std::string GetClassType() { return ("Image"); }
 
     /*static Renderer* CreateInstance( Visualizer* v, RenderParams* rp, ShaderMgr *sm)
   {
