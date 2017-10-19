@@ -188,7 +188,8 @@ MainForm::MainForm(
 	_seedMe = NULL;
 	_stats = NULL;
 	_plot = NULL;	
-   
+    _stateChangeFlag = false; 
+    _firstSession    = true;
 
     createActions();
     createMenus();
@@ -221,6 +222,7 @@ MainForm::MainForm(
 	_paramsMgr->RegisterStateChangeCB(
 		std::bind(&MainForm::_stateChangeCB,this)
 	);
+	_paramsMgr->RegisterStateChangeFlag( &_stateChangeFlag );
 
 	StartupParams *sP = GetStartupParams();
 	_controlExec->SetCacheSize(sP->GetCacheMB());
@@ -290,7 +292,6 @@ MainForm::MainForm(
 	app->installEventFilter(this);
 
 	_controlExec->SetSaveStateEnabled(true);
-
 }
 
 /*
@@ -894,14 +895,21 @@ void MainForm::sessionOpenHelper(string fileName) {
 //
 void MainForm::sessionOpen(QString qfileName)
 {
-    QMessageBox msgBox; 
-    msgBox.setWindowTitle("Are you sure?");
-    msgBox.setText( "The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?" );
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.addButton(QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    if(msgBox.exec() == QMessageBox::No){
-        return;
+    if( _firstSession )
+    {
+        _firstSession = false;
+    }
+    else if( _stateChangeFlag )
+    {
+		QMessageBox msgBox; 
+		msgBox.setWindowTitle("Are you sure?");
+		msgBox.setText( "The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session." );
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if(msgBox.exec() == QMessageBox::No)
+        {
+			return;
+		}
     }
 
 	// This launches a panel that enables the
@@ -930,6 +938,8 @@ void MainForm::sessionOpen(QString qfileName)
 	sessionOpenHelper(fileName);
 
 	_vizWinMgr->Restart();
+
+    _stateChangeFlag = false;
 }
 
 
@@ -943,6 +953,8 @@ void MainForm::fileSave()
 		MSG_ERR("Saving session file");
 		return;
 	}
+
+    _stateChangeFlag = false;
 }
 
 
@@ -1303,20 +1315,23 @@ vector <string> MainForm::myGetOpenFileNames(
 	return(files);
 }
 
-void MainForm::sessionNew(){
-
-	GUIStateParams *p = GetStateParams();
-    if( p->GetCurrentSessionPath() != "." )
+void MainForm::sessionNew()
+{
+    if( _firstSession )
     {
-			QMessageBox msgBox; 
-			msgBox.setWindowTitle("Are you sure?");
-			msgBox.setText( "The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?" );
-			msgBox.setStandardButtons(QMessageBox::Yes);
-			msgBox.addButton(QMessageBox::No);
-			msgBox.setDefaultButton(QMessageBox::No);
-			if(msgBox.exec() == QMessageBox::No){
-				return;
-			}
+        _firstSession = false;
+    }
+    else if( _stateChangeFlag )
+    {
+		QMessageBox msgBox; 
+		msgBox.setWindowTitle("Are you sure?");
+		msgBox.setText( "The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session." );
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if(msgBox.exec() == QMessageBox::No)
+        {
+			return;
+		}
     }
 
 	sessionOpenHelper("");
@@ -1329,9 +1344,10 @@ void MainForm::sessionNew(){
 	sessionPath = QDir::toNativeSeparators(sessionPath);
 	string fileName = sessionPath.toStdString();
 
-
-	p = GetStateParams();
+	GUIStateParams* p = GetStateParams();
 	p->SetCurrentSessionPath(fileName);
+
+    _stateChangeFlag = false;
 }
 	
 	

@@ -48,9 +48,8 @@ public:
 
 
 protected slots:
- void scaleChanged(int row, int col);
- void rotationChanged(int row, int col);
- void translationChanged(int row, int col);
+ void transformChanged(QTableWidget* table, int row, int col);
+ void transformChanged();
 
 private:
  map <string, VAPoR::Transform *> _transforms;
