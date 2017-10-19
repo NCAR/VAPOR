@@ -39,6 +39,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextStream>
+#include <QPushButton>
 
 #include "vapor/MyBase.h"
 #include "vapor/Version.h"
@@ -103,8 +104,10 @@ void ErrorReporter::Report(string msg, Type severity, string details)
     QMessageBox box;
     box.setText("An error has occured");
     box.setInformativeText(msg.c_str());
-    box.addButton(QMessageBox::Ok);
-    box.addButton(QMessageBox::Save);
+    // box.addButton(QMessageBox::Ok);
+    // box.addButton(QMessageBox::Save);
+    box.addButton("Ok", QMessageBox::AcceptRole);
+    box.addButton("Save Log", QMessageBox::ApplyRole);
 
     if (details == "") {
         while (e->_log.size()) {
@@ -122,10 +125,12 @@ void ErrorReporter::Report(string msg, Type severity, string details)
     case Error: box.setIcon(QMessageBox::Critical); break;
     }
 
-    int ret = box.exec();
+    int                     ret = box.exec();
+    QAbstractButton *       clicked = box.clickedButton();
+    QMessageBox::ButtonRole role = box.buttonRole(clicked);
 
-    switch (ret) {
-    case QMessageBox::Save: {
+    switch (role) {
+    case QMessageBox::ApplyRole: {
         QString fileName = QFileDialog::getSaveFileName(NULL, "Save Error Log", QString(), "Text (*.txt);;All Files (*)");
         if (fileName.isEmpty())
             return;
@@ -144,8 +149,8 @@ void ErrorReporter::Report(string msg, Type severity, string details)
         }
         break;
     }
-    case QMessageBox::Ok: break;
-    default: break;
+    case QMessageBox::AcceptRole: break;
+    default: printf("Uknown Messagebox role %i\n", role);
     }
 }
 
