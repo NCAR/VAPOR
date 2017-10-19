@@ -159,38 +159,17 @@ public:
 	//! \param[in] width width of window in pixels
 	//! \param[in] height height of window in pixels
 	//!
-	void SetWindowSize(size_t width, size_t height) {
-		vector <long> v;
-		v.push_back(width);
-		v.push_back(height);
-		SetValueLongVec(m_windowSizeTag,"Set window width and height", v);
-	}
+	void SetWindowSize(size_t width, size_t height);
 
 	//! Get widow width and height
 	//!
 	//! \param[out] width width of window in pixels
 	//! \param[out] height height of window in pixels
 	//!
-	void GetWindowSize(size_t &width, size_t &height) const {
-		vector <long> defaultv(2,100);
-		vector <long> val = GetValueLongVec(m_windowSizeTag,defaultv);
-		width = val[0];
-		height = val[1];
-	}
+	void GetWindowSize(size_t &width, size_t &height) const;
 
-	void SetFOV(float v) {
-		if (v<5) v=5;
-		if (v>90) v=90;
-		SetValueDouble(m_fieldOfView, "Set Field of View", v);
-	}
-
-	double GetFOV() const {
-		double defaultv = 45.0;
-		double v = GetValueDouble(m_fieldOfView, defaultv);
-		if (v<5) v=5;
-		if (v>90) v=90;
-		return(v);
-	}
+	void SetFOV(float v);
+	double GetFOV() const;
 
 	//! Method to get stretch factors
 	vector<double> GetStretchFactors() const ;
@@ -272,15 +251,25 @@ public:
  getCurrentViewpoint()->SetProjectionMatrix(m);
  }
 
+ //! Access the transform for a data set
+ //!
+ //! Access the transform for data set \p dataSetName
+ //!
+ //! \retval Returns NULL if \p dataSetName is unknown
+ //
+ virtual Transform* GetTransform(string dataSetName) const {
+    return ((Transform *) _transforms->GetParams(dataSetName));
+ }
+ 
  void AddDatasetTransform(string datasetName);
 
- vector<double> GetScales(string datasetName);
- vector<double> GetRotations(string datasetName);
- vector<double> GetTranslations(string datasetName);
-
- void SetScales(string datasetName, vector<double> scale);
- void SetRotations(string datasetName, vector<double> rotation);
- void SetTranslations(string datasetName, vector<double> translation);
+ //! Return list of transform names.
+ //!
+ //! Return the list of transform names added with AddDatasetTransform()
+ //
+ vector <string> GetTransformNames() const {
+	return (_transforms->GetNames());
+ }
 
 #ifdef DEAD
 //! Determine the current diameter of the visible scene.
@@ -334,8 +323,6 @@ private:
  static const string m_windowSizeTag;
  static const string m_stretchFactorsTag;
  static const string m_fieldOfView;
-
- vector<string> _datasetNames;
 
  //defaults:
  static double _defaultLightDirection[3][4];
