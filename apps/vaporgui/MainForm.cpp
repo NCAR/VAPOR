@@ -2111,7 +2111,6 @@ void MainForm::captureSingleJpeg() {
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
 	_controlExec->EnableImageCapture(filepath, vizName);
-	
 }
 
 void MainForm::launchSeedMe(){

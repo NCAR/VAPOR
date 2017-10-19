@@ -191,8 +191,10 @@ public:
 			return -1;
 		}
 		_imageCaptureEnabled = onOff;
-		if (onOff) _captureImageFile = filename;
-		else _captureImageFile = "";
+		if (onOff) 
+            _captureImageFile = filename;
+		else 
+            _captureImageFile = "";
 		return 0;
 	}
 
