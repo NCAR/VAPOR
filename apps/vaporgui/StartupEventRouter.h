@@ -61,7 +61,11 @@ public:
 
 private slots:
 
-    void setStartupTextChanged(const QString &qs);
+    void saveStartup();
+    void setStartupChanged();
+    void setDirChanged();
+
+    void setStartupTextChanged(const QString &qs) {}
     void startupReturnPressed();
     void chooseSessionPath();
     void chooseMetadataPath();
@@ -78,12 +82,15 @@ private slots:
     void changeTextureSize(bool val);
     void winLockChanged(bool val);
     void setAutoStretch(bool val);
-    void apply();
     void restoreDefaults();
     void tabChanged(int topIndex, int subIndex);
 
 private:
     StartupEventRouter() {}
+
+    void   updateStartupChanged();
+    void   updateDirChanged();
+    string choosePathHelper(string current, string help);
 
     void         invalidateText();
     virtual void _confirmText();
@@ -92,6 +99,9 @@ private:
 
     bool           _settingsChanged;
     StartupParams *_savedStartupParams;
+    string         _startupPath;
+
+    void loadDefaultsFromStartupFile();
 };
 
 #endif    // STARTUPEVENTROUTER_H
