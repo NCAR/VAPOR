@@ -49,8 +49,6 @@ VizFeatureEventRouter::VizFeatureEventRouter(QWidget *parent, ControlExec *ce) :
 {
     setupUi(this);
 
-    cout << "VizFeatureEventRouter constructor" << endl;
-
     // Disabled for now. Need to add support in VizFeatureRenderer
     //
     xMinTicEdit->setEnabled(false);
