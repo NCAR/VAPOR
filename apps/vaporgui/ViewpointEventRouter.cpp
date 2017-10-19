@@ -54,9 +54,15 @@ ViewpointEventRouter::ViewpointEventRouter(
 
     _vizMgr = vizMgr;
 
-    _panChanged = false;
-    for (int i = 0; i < 3; i++)
-        _lastCamPos[i] = 0.f;
+    // Not implemented
+    //
+    camPosLat->setEnabled(false);
+    camPosLon->setEnabled(false);
+    rotCenterLat->setEnabled(false);
+    rotCenterLon->setEnabled(false);
+    stereoCombo->setEnabled(false);
+    latLonCheckbox->setEnabled(false);
+    stereoSeparationEdit->setEnabled(false);
 
     // Disable the scale and rotation tabs
     // for Vapor3.0 Beta
@@ -66,96 +72,130 @@ ViewpointEventRouter::ViewpointEventRouter(
 
 ViewpointEventRouter::~ViewpointEventRouter() {
 }
+
 /**********************************************************
  * Whenever a new viztab is created it must be hooked up here
  ************************************************************/
 void ViewpointEventRouter::hookUpTab() {
 
-    //	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
-    //		SLOT(scaleChanged(int, int)));
-    //	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this,
-    //		SLOT(rotationChanged(int, int)));
-    //	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)),
-    //		this, SLOT(translationChanged(int, int)));
-
     //connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
     //connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
-    connect(camPosLat, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPosLon, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenterLat, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenterLon, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(numLights, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos00, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos01, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos02, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos10, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos11, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos12, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos20, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos21, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightPos22, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPos0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPos1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(camPos2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(viewDir0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(viewDir1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(viewDir2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(upVec0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(upVec1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(upVec2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenter0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenter1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(rotCenter2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightDiff0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightDiff1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightDiff2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightSpec0, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightSpec1, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(lightSpec2, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(shininessEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(ambientEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
-    connect(stereoSeparationEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVtabTextChanged(const QString &)));
 
-    //Connect all the returnPressed signals, these will update the visualizer.
-    connect(camPosLat, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(camPosLon, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(rotCenterLat, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(rotCenterLon, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos00, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos01, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos02, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos10, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos11, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos12, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos20, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos21, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightPos22, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightDiff0, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightDiff1, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightDiff2, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightSpec0, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightSpec1, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(lightSpec2, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(shininessEdit, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(ambientEdit, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
+    connect(
+        numLights, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos00, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos01, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos02, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos10, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos11, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos12, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos20, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos21, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightPos22, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
 
-    connect(camPos0, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(camPos1, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(camPos2, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(viewDir0, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(viewDir1, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(viewDir2, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(upVec0, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(upVec1, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(upVec2, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(rotCenter0, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(rotCenter1, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(rotCenter2, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(numLights, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
-    connect(stereoSeparationEdit, SIGNAL(returnPressed()), this, SLOT(viewpointReturnPressed()));
+    // Camera stuff
+    //
+    connect(
+        viewDir0, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        viewDir1, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        viewDir2, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        upVec0, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        upVec1, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        upVec2, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        camPos0, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        camPos1, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        camPos2, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        rotCenter0, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        rotCenter1, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
+    connect(
+        rotCenter2, SIGNAL(returnPressed()),
+        this, SLOT(setCameraChanged()));
 
-    connect(LocalGlobal, SIGNAL(activated(int)), VizWinMgr::getInstance(), SLOT(setVpLocalGlobal(int)));
-    connect(VizWinMgr::getInstance(), SIGNAL(enableMultiViz(bool)), LocalGlobal, SLOT(setEnabled(bool)));
+    connect(
+        camPosLat, SIGNAL(returnPressed()),
+        this, SLOT(setCameraLatLonChanged()));
+    connect(
+        camPosLon, SIGNAL(returnPressed()),
+        this, SLOT(setCameraLatLonChanged()));
+    connect(
+        rotCenterLat, SIGNAL(returnPressed()),
+        this, SLOT(setCameraLatLonChanged()));
+    connect(
+        rotCenterLon, SIGNAL(returnPressed()),
+        this, SLOT(setCameraLatLonChanged()));
+
+    connect(
+        lightDiff0, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightDiff1, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightDiff2, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightSpec0, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightSpec1, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        lightSpec2, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        shininessEdit, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        ambientEdit, SIGNAL(returnPressed()),
+        this, SLOT(setLightChanged()));
+    connect(
+        stereoSeparationEdit, SIGNAL(returnPressed()),
+        this, SLOT(notImplemented()));
+
+    connect(
+        LocalGlobal, SIGNAL(activated(int)), VizWinMgr::getInstance(), SLOT(setVpLocalGlobal(int)));
+    connect(
+        VizWinMgr::getInstance(), SIGNAL(enableMultiViz(bool)), LocalGlobal, SLOT(setEnabled(bool)));
 }
 
 void ViewpointEventRouter::GetWebHelp(
@@ -183,80 +223,71 @@ void ViewpointEventRouter::GetWebHelp(
  * Slots associated with ViewpointTab:
  *********************************************************************************/
 
-/*void ViewpointEventRouter::scaleChanged(int row, int col) {
-	vector<double> scale;
-	QTableWidget* table = transformTable->scaleTable;
-	string dataset = table->item(row, 0)->text().toStdString();
-	double x = table->item(row, 1)->text().toDouble();
-	double y = table->item(row, 2)->text().toDouble();
-	double z = table->item(row, 3)->text().toDouble();
-	scale.push_back(x);
-	scale.push_back(y);
-	scale.push_back(z);
+void ViewpointEventRouter::setCameraChanged() {
 
-	VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
-	vector<string> winNames = _controlExec->GetVisualizerNames();
-	
-	VAPoR::ViewpointParams* vpp; 
-	for (int i=0; i<winNames.size(); i++) {
-		vpp = pm->GetViewpointParams(winNames[i]);
-		vpp->SetScales(dataset, scale);
-	}
+    double posvec[3], dirvec[3], upvec[3], center[3];
+
+    center[0] = rotCenter0->text().toFloat();
+    center[1] = rotCenter1->text().toFloat();
+    center[2] = rotCenter2->text().toFloat();
+
+    posvec[0] = camPos0->text().toFloat();
+    posvec[1] = camPos1->text().toFloat();
+    posvec[2] = camPos2->text().toFloat();
+
+    dirvec[0] = viewDir0->text().toFloat();
+    dirvec[1] = viewDir1->text().toFloat();
+    dirvec[2] = viewDir2->text().toFloat();
+
+    upvec[0] = upVec0->text().toFloat();
+    upvec[1] = upVec1->text().toFloat();
+    upvec[2] = upVec2->text().toFloat();
+
+    _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-void ViewpointEventRouter::rotationChanged(int row, int col) {
-	vector<double> rotation;
-	QTableWidget* table = transformTable->rotationTable;
-	string dataset = table->item(row, 0)->text().toStdString();
-	double x = table->item(row, 1)->text().toDouble();
-	double y = table->item(row, 2)->text().toDouble();
-	double z = table->item(row, 3)->text().toDouble();
-	rotation.push_back(x);
-	rotation.push_back(y);
-	rotation.push_back(z);
-
-	VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
-	vector<string> winNames = _controlExec->GetVisualizerNames();
-	
-	VAPoR::ViewpointParams* vpp; 
-	for (int i=0; i<winNames.size(); i++) {
-		vpp = pm->GetViewpointParams(winNames[i]);
-		vpp->SetRotations(dataset, rotation);
-	}
+void ViewpointEventRouter::setCameraLatLonChanged() {
+    cout << "Not implemented" << endl;
 }
 
-void ViewpointEventRouter::translationChanged(int row, int col) {
-	vector<double> translation;
-	QTableWidget* table = transformTable->translationTable;
-	string dataset = table->item(row, 0)->text().toStdString();
-	double x = table->item(row, 1)->text().toDouble();
-	double y = table->item(row, 2)->text().toDouble();
-	double z = table->item(row, 3)->text().toDouble();
-	translation.push_back(x);
-	translation.push_back(y);
-	translation.push_back(z);
-
-	VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
-	vector<string> winNames = _controlExec->GetVisualizerNames();
-	
-	VAPoR::ViewpointParams* vpp; 
-	for (int i=0; i<winNames.size(); i++) {
-		vpp = pm->GetViewpointParams(winNames[0]);
-		vpp->SetTranslations(dataset, translation);
-	}
+void ViewpointEventRouter::notImplemented() {
+    cout << "Not implemented" << endl;
 }
-*/
 
-void ViewpointEventRouter::
-    setVtabTextChanged(const QString &) {
-    SetTextChanged(true);
-}
-//Put all text changes into the params
-void ViewpointEventRouter::_confirmText() {
+void ViewpointEventRouter::updateCameraChanged() {
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
-    size_t timeStep = GetCurrentTimeStep();
+    double posvec[3], dirvec[3], upvec[3], center[3];
+    vpParams->GetCameraPos(posvec);
+    vpParams->GetCameraViewDir(dirvec);
+    vpParams->GetCameraUpVec(upvec);
+    vpParams->GetRotationCenter(center);
+
+    camPos0->setText(QString::number(posvec[0]));
+    camPos1->setText(QString::number(posvec[1]));
+    camPos2->setText(QString::number(posvec[2]));
+
+    viewDir0->setText(QString::number(dirvec[0]));
+    viewDir1->setText(QString::number(dirvec[1]));
+    viewDir2->setText(QString::number(dirvec[2]));
+
+    upVec0->setText(QString::number(upvec[0]));
+    upVec1->setText(QString::number(upvec[1]));
+    upVec2->setText(QString::number(upvec[2]));
+
+    rotCenter0->setText(QString::number(center[0]));
+    rotCenter1->setText(QString::number(center[1]));
+    rotCenter2->setText(QString::number(center[2]));
+}
+
+void ViewpointEventRouter::setLightChanged() {
+
+    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    paramsMgr->BeginSaveStateGroup("Light changed");
 
     //Get the light directions from the gui:
     vpParams->setNumLights(numLights->text().toInt());
@@ -284,206 +315,12 @@ void ViewpointEventRouter::_confirmText() {
     vpParams->setSpecularCoeff(2, lightSpec2->text().toFloat());
     vpParams->setExponent(shininessEdit->text().toInt());
 
-    double posvec[3], dirvec[3], upvec[3], center[3];
-    center[0] = rotCenter0->text().toFloat();
-    center[1] = rotCenter1->text().toFloat();
-    center[2] = rotCenter2->text().toFloat();
-
-    posvec[0] = camPos0->text().toFloat();
-    posvec[1] = camPos1->text().toFloat();
-    posvec[2] = camPos2->text().toFloat();
-
-    dirvec[0] = viewDir0->text().toFloat();
-    dirvec[1] = viewDir1->text().toFloat();
-    dirvec[2] = viewDir2->text().toFloat();
-
-    upvec[0] = upVec0->text().toFloat();
-    upvec[1] = upVec1->text().toFloat();
-    upvec[2] = upVec2->text().toFloat();
-
-    _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
+    paramsMgr->EndSaveStateGroup();
 }
 
-void ViewpointEventRouter::
-    viewpointReturnPressed(void) {
-    confirmText();
-}
-
-/*
-void ViewpointEventRouter::updateScales() {
-	QTableWidget* table = transformTable->scaleTable;
-
-	vector<double> sFactors;
-
-	VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
-	vector<string> winNames = _controlExec->GetVisualizerNames();
-	
-	VAPoR::ViewpointParams* vpp; 
-	vpp = pm->GetViewpointParams(winNames[0]);
-
-	vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
-	table->setRowCount(datasetNames.size());
-	
-	for (int i=0; i<datasetNames.size(); i++) {
-		sFactors = vpp->GetScales(datasetNames[i]);
-		updateTransformTable(table, datasetNames[i], sFactors, i);
-	} 
-}
-
-void ViewpointEventRouter::updateTranslations() {
-	QTableWidget* table = transformTable->translationTable;
-
-	vector<double> translations;
-
-	VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
-	vector<string> winNames = _controlExec->GetVisualizerNames();
-
-	VAPoR::ViewpointParams* vpp; 
-	vpp = pm->GetViewpointParams(winNames[0]);
-
-	vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
-	table->setRowCount(datasetNames.size());
-
-	for (int i=0; i<datasetNames.size(); i++) {
-		translations = vpp->GetTranslations(datasetNames[i]);
-		updateTransformTable(table, datasetNames[i], translations, i);
-	} 
-}
-
-void ViewpointEventRouter::updateRotations() {
-	QTableWidget* table = transformTable->rotationTable;
-
-	vector<double> rotations;
-
-	VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
-	vector<string> winNames = _controlExec->GetVisualizerNames();
-
-	VAPoR::ViewpointParams* vpp; 
-	vpp = pm->GetViewpointParams(winNames[0]);
-
-	vector<string> datasetNames = _controlExec->getDataStatus()->GetDataMgrNames();
-	table->setRowCount(datasetNames.size());
-	
-	for (int i=0; i<datasetNames.size(); i++) {
-		rotations = vpp->GetRotations(datasetNames[i]);
-		updateTransformTable(table, datasetNames[i], rotations, i);
-	} 
-}
-
-void ViewpointEventRouter::updateTransformTable(QTableWidget* table,
-	string dataSet, vector<double> values, int row) {
-
-	table->blockSignals(true);
-	table->clearContents();
-
-	QTableWidgetItem* item;
-
-	item = new QTableWidgetItem(QString::fromStdString(dataSet));
-	item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(row, 0, item);
-
-	item = new QTableWidgetItem(QString::number(values[0]));
-	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(row, 1, item);
-
-	item = new QTableWidgetItem(QString::number(values[1]));
-	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(row, 2, item);
-
-	item = new QTableWidgetItem(QString::number(values[2]));
-	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(row, 3, item);
-
- 	QHeaderView* header = table->verticalHeader();
-    header->setResizeMode(QHeaderView::Stretch);
-	header->hide();
-	
-	table->blockSignals(false);
-}
-*/
-void ViewpointEventRouter::updateTab() {
-    _updateTab();
-}
-
-void ViewpointEventRouter::updateTransforms() {
-
-    map<string, Transform *> transformMap;
-
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    vector<string> winNames = paramsMgr->GetVisualizerNames();
-    for (int i = 0; i < winNames.size(); i++) {
-        ViewpointParams *vParams = paramsMgr->GetViewpointParams(winNames[i]);
-        if (!vParams)
-            continue;
-
-        vector<string> names = vParams->GetTransformNames();
-
-        for (int j = 0; j < names.size(); j++) {
-            transformMap[names[j]] = vParams->GetTransform(names[j]);
-        }
-    }
-
-    transformTable->Update(transformMap);
-}
-
-//Insert values from params into tab panel
-//
-void ViewpointEventRouter::_updateTab() {
-
-    updateTransforms();
-
-    //updateScales();
-    //updateTranslations();
-    //updateRotations();
-
-    return;
+void ViewpointEventRouter::updateLightChanged() {
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
-
-    QString strng;
-
-#ifdef DEAD
-    if (vpParams->IsLocal())
-        LocalGlobal->setCurrentIndex(1);
-    else
-#endif
-        LocalGlobal->setCurrentIndex(0);
-
-    int nLights = vpParams->getNumLights();
-    numLights->setText(strng.setNum(nLights));
-
-    GUIStateParams *p = GetStateParams();
-    string vizName = p->GetActiveVizName();
-
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    size_t ts = GetCurrentTimeStep();
-
-    latLonFrame->hide();
-    //Always display the current values of the campos and rotcenter
-
-    double posvec[3], dirvec[3], upvec[3], center[3];
-    vpParams->GetCameraPos(posvec);
-    vpParams->GetCameraViewDir(dirvec);
-    vpParams->GetCameraUpVec(upvec);
-    vpParams->GetRotationCenter(center);
-
-    camPos0->setText(strng.setNum(posvec[0], 'g', 3));
-    camPos1->setText(strng.setNum(posvec[1], 'g', 3));
-    camPos2->setText(strng.setNum(posvec[2], 'g', 3));
-
-    viewDir0->setText(strng.setNum(dirvec[0], 'g', 3));
-    viewDir1->setText(strng.setNum(dirvec[1], 'g', 3));
-    viewDir2->setText(strng.setNum(dirvec[2], 'g', 3));
-
-    upVec0->setText(strng.setNum(upvec[0], 'g', 3));
-    upVec1->setText(strng.setNum(upvec[1], 'g', 3));
-    upVec2->setText(strng.setNum(upvec[2], 'g', 3));
-
-    //perspectiveCombo->setCurrentIndex(currentViewpoint->hasPerspective());
-    rotCenter0->setText(strng.setNum(center[0], 'g', 3));
-    rotCenter1->setText(strng.setNum(center[1], 'g', 3));
-    rotCenter2->setText(strng.setNum(center[2], 'g', 3));
 
     lightPos00->setText(QString::number(vpParams->getLightDirection(0, 0)));
     lightPos01->setText(QString::number(vpParams->getLightDirection(0, 1)));
@@ -505,6 +342,9 @@ void ViewpointEventRouter::_updateTab() {
     lightSpec1->setText(QString::number(vpParams->getSpecularCoeff(1)));
     lightSpec2->setText(QString::number(vpParams->getSpecularCoeff(2)));
     shininessEdit->setText(QString::number(vpParams->getExponent()));
+
+    int nLights = vpParams->getNumLights();
+    numLights->setText(QString::number(nLights));
 
     //Enable light direction text boxes as needed:
     bool lightOn;
@@ -528,6 +368,63 @@ void ViewpointEventRouter::_updateTab() {
     lightPos22->setEnabled(lightOn);
     lightSpec2->setEnabled(lightOn);
     lightDiff2->setEnabled(lightOn);
+}
+
+void ViewpointEventRouter::updateTab() {
+    _updateTab();
+}
+
+void ViewpointEventRouter::updateTransforms() {
+
+    map<string, Transform *> transformMap;
+
+    // build a list of transforms for each data set
+    //
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+    for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *vParams = paramsMgr->GetViewpointParams(winNames[i]);
+        if (!vParams)
+            continue;
+
+        vector<string> names = vParams->GetTransformNames();
+
+        for (int j = 0; j < names.size(); j++) {
+            transformMap[names[j]] = vParams->GetTransform(names[j]);
+        }
+    }
+
+    transformTable->Update(transformMap);
+}
+
+//Insert values from params into tab panel
+//
+void ViewpointEventRouter::_updateTab() {
+    updateCameraChanged();
+    updateLightChanged();
+    updateTransforms();
+
+    return;
+
+    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+
+    QString strng;
+
+#ifdef DEAD
+    if (vpParams->IsLocal())
+        LocalGlobal->setCurrentIndex(1);
+    else
+#endif
+        LocalGlobal->setCurrentIndex(0);
+
+    GUIStateParams *p = GetStateParams();
+    string vizName = p->GetActiveVizName();
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    size_t ts = GetCurrentTimeStep();
+
+    latLonFrame->hide();
+    //Always display the current values of the campos and rotcenter
 }
 
 void ViewpointEventRouter::CenterSubRegion() {
