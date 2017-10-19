@@ -173,63 +173,11 @@ void ViewpointParams::_init() {
 }
 
 void ViewpointParams::AddDatasetTransform(string datasetName) {
-    // If dataset is already loaded, do not add another
-    // transform for it
-    //
-    if (std::find(_datasetNames.begin(),
-                  _datasetNames.end(), datasetName) != _datasetNames.end())
-        return;
-
-    // Add new dataset name to our reference list
-    //
-    _datasetNames.push_back(datasetName);
 
     // Add new transform to our ParamsContainer, _transforms
     //
     Transform newTransform(_ssave);
     _transforms->Insert(&newTransform, datasetName);
-}
-
-vector<double> ViewpointParams::GetScales(string datasetName) {
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    return t->GetScales();
-}
-
-vector<double> ViewpointParams::GetRotations(string datasetName) {
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    return t->GetRotations();
-}
-
-vector<double> ViewpointParams::GetTranslations(string datasetName) {
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    return t->GetTranslations();
-}
-
-void ViewpointParams::SetScales(
-    string datasetName, vector<double> scale) {
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    t->SetScales(scale);
-}
-
-void ViewpointParams::SetRotations(
-    string datasetName, vector<double> rotation) {
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    t->SetRotations(rotation);
-}
-
-void ViewpointParams::SetTranslations(
-    string datasetName, vector<double> translation) {
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    t->SetTranslations(translation);
-
-    vector<double> foo;
-    foo = t->GetTranslations();
 }
 
 double ViewpointParams::getLightDirection(int lightNum, int dir) const {
@@ -333,6 +281,39 @@ void ViewpointParams::SetCurrentViewpoint(Viewpoint *newVP) {
 
 void ViewpointParams::setHomeViewpoint(Viewpoint *newVP) {
     m_VPs->Insert(newVP, _homeViewTag);
+}
+
+void ViewpointParams::SetWindowSize(size_t width, size_t height) {
+    vector<long> v;
+    v.push_back(width);
+    v.push_back(height);
+    SetValueLongVec(m_windowSizeTag, "Set window width and height", v);
+}
+
+void ViewpointParams::GetWindowSize(size_t &width, size_t &height) const {
+    vector<long> defaultv(2, 100);
+    vector<long> val = GetValueLongVec(m_windowSizeTag, defaultv);
+    width = val[0];
+    height = val[1];
+    printf("[%s:%i] %s: return width=%i height=%i\n", __FILE__, __LINE__, __func__, (int)width, (int)height);
+}
+
+void ViewpointParams::SetFOV(float v) {
+    if (v < 5)
+        v = 5;
+    if (v > 90)
+        v = 90;
+    SetValueDouble(m_fieldOfView, "Set Field of View", v);
+}
+
+double ViewpointParams::GetFOV() const {
+    double defaultv = 45.0;
+    double v = GetValueDouble(m_fieldOfView, defaultv);
+    if (v < 5)
+        v = 5;
+    if (v > 90)
+        v = 90;
+    return (v);
 }
 
 vector<double> ViewpointParams::GetStretchFactors() const {
