@@ -20,6 +20,7 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include <QLineEdit>
 #include "TransformTable.h"
 #include "vapor/RenderParams.h"
 #include "vapor/Transform.h"
@@ -60,24 +61,36 @@ void TransformTable::updateTransformTable(QTableWidget *table,
 
     table->blockSignals(true);
 
-    QTableWidgetItem *item;
+    QLineEdit *item;
 
-    item = new QTableWidgetItem(QString::fromStdString(target));
-    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 0, item);
+    item = new QLineEdit(table);
+    item->setText(QString::fromStdString(target));
+    item->setAlignment(Qt::AlignCenter);
+    item->setReadOnly(true);
+    table->setCellWidget(row, 0, item);
 
-    item = new QTableWidgetItem(QString::number(values[0]));
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 1, item);
+    item = new QLineEdit(table);
+    item->setText(QString::number(values[0]));
+    item->setValidator(new QDoubleValidator(item));
+    item->setAlignment(Qt::AlignCenter);
+    table->setCellWidget(row, 1, item);
 
-    item = new QTableWidgetItem(QString::number(values[1]));
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 2, item);
+    connect(item, SIGNAL(editingFinished()), this,
+            SLOT(translationChanged(int, int)));
+    //connect(rotationTable, SIGNAL(cellChanged(int, int)), this,
+    //    SLOT(rotationChanged(int, int)));
 
-    item = new QTableWidgetItem(QString::number(values[2]));
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 3, item);
+    item = new QLineEdit(table);
+    item->setText(QString::number(values[1]));
+    item->setValidator(new QDoubleValidator(item));
+    item->setAlignment(Qt::AlignCenter);
+    table->setCellWidget(row, 2, item);
+
+    item = new QLineEdit(table);
+    item->setText(QString::number(values[2]));
+    item->setValidator(new QDoubleValidator(item));
+    item->setAlignment(Qt::AlignCenter);
+    table->setCellWidget(row, 3, item);
 
     QHeaderView *header = table->verticalHeader();
     header->setResizeMode(QHeaderView::Stretch);
@@ -187,6 +200,7 @@ void TransformTable::setRotations(
 }
 
 void TransformTable::translationChanged(int row, int col) {
+    cout << "translationChanged " << endl;
     vector<double> translation;
     QTableWidget *table = translationTable;
     string target = table->item(row, 0)->text().toStdString();
