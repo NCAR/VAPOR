@@ -295,7 +295,6 @@ void ViewpointParams::GetWindowSize(size_t &width, size_t &height) const {
     vector<long> val = GetValueLongVec(m_windowSizeTag, defaultv);
     width = val[0];
     height = val[1];
-    printf("[%s:%i] %s: return width=%i height=%i\n", __FILE__, __LINE__, __func__, (int)width, (int)height);
 }
 
 void ViewpointParams::SetFOV(float v) {
