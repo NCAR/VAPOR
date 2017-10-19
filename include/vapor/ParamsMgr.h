@@ -443,9 +443,9 @@ class PARAMS_API ParamsMgr : public MyBase {
     //! This method registers the address of boolean flag whose value
     //! will be set whenever the parameter state changes. It is the user's
     //! responsbility to clear (set to false) the flag. Note, for changes
-    //! grouped tegoer with BeginStateSaveGroup() the flag will not be set
-    //! until after EndStateSaveGroup() is called, and in the case of
-    //! nested groups, not until the last EndStateSaveGroup() invocation.
+    //! grouped tegoer with BeginSaveStateGroup() the flag will not be set
+    //! until after EndSaveStateGroup() is called, and in the case of
+    //! nested groups, not until the last EndSaveStateGroup() invocation.
     //
     void RegisterStateChangeFlag(bool *flag) {
         _ssave.RegisterStateChangeFlag(flag);
