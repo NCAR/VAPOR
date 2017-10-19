@@ -275,6 +275,9 @@ MainForm::MainForm(
     app->installEventFilter(this);
 
     _controlExec->SetSaveStateEnabled(true);
+
+    _stateChangeFlag = false;
+    _paramsMgr->RegisterStateChangeFlag(&_stateChangeFlag);
 }
 
 /*
@@ -815,14 +818,15 @@ void MainForm::sessionOpenHelper(string fileName) {
 // Open session file
 //
 void MainForm::sessionOpen(QString qfileName) {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Are you sure?");
-    msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.addButton(QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    if (msgBox.exec() == QMessageBox::No) {
-        return;
+    if (_stateChangeFlag) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        msgBox.setText("The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session.");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No) {
+            return;
+        }
     }
 
     // This launches a panel that enables the
@@ -851,6 +855,8 @@ void MainForm::sessionOpen(QString qfileName) {
     sessionOpenHelper(fileName);
 
     _vizWinMgr->Restart();
+
+    _stateChangeFlag = false;
 }
 
 void MainForm::fileSave() {
@@ -862,6 +868,8 @@ void MainForm::fileSave() {
         MSG_ERR("Saving session file");
         return;
     }
+
+    _stateChangeFlag = false;
 }
 
 void MainForm::fileSaveAs() {
@@ -1191,12 +1199,11 @@ vector<string> MainForm::myGetOpenFileNames(
 void MainForm::sessionNew() {
 
     GUIStateParams *p = GetStateParams();
-    if (p->GetCurrentSessionPath() != ".") {
+    if (_stateChangeFlag) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Are you sure?");
-        msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
-        msgBox.setStandardButtons(QMessageBox::Yes);
-        msgBox.addButton(QMessageBox::No);
+        msgBox.setText("The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session.");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         if (msgBox.exec() == QMessageBox::No) {
             return;
@@ -1215,6 +1222,8 @@ void MainForm::sessionNew() {
 
     p = GetStateParams();
     p->SetCurrentSessionPath(fileName);
+
+    _stateChangeFlag = false;
 }
 
 //
