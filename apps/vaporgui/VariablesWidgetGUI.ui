@@ -89,7 +89,7 @@
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Isolines can be calculated from 3D variables along arbitrarily oriented planes, or from 2D variables along a horizontally oriented plane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>Variable Dimension:</string>
+               <string>Variable Dimension</string>
               </property>
              </widget>
             </item>
@@ -620,7 +620,7 @@
             <item>
              <widget class="QLabel" name="variableLabel_2">
               <property name="text">
-               <string>Height Variable:</string>
+               <string>Height Variable</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -757,7 +757,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Isolines can be calculated from 3D variables along arbitrarily oriented planes, or from 2D variables along a horizontally oriented plane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
-                <string>Fidelity:</string>
+                <string>Fidelity</string>
                </property>
               </widget>
              </item>

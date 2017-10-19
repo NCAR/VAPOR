@@ -143,6 +143,9 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const
 
     _Colorbar = new ColorbarPbase(ssave);
     _Colorbar->SetParent(this);
+
+    _transform = new Transform(ssave);
+    _transform->SetParent(this);
 }
 
 RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node, int maxdim) : ParamsBase(ssave, node)
@@ -180,6 +183,15 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNo
         _Colorbar = new ColorbarPbase(ssave);
         _Colorbar->SetParent(this);
     }
+
+    if (node->HasChild(Transform::GetClassType())) {
+        _transform = new Transform(ssave, node->GetChild(Transform::GetClassType()));
+    } else {
+        // Node doesn't contain a Transform
+        //
+        _transform = new Transform(ssave);
+        _transform->SetParent(this);
+    }
 }
 
 RenderParams::RenderParams(const RenderParams &rhs) : ParamsBase(rhs)
@@ -189,6 +201,7 @@ RenderParams::RenderParams(const RenderParams &rhs) : ParamsBase(rhs)
     _TFs = new ParamsContainer(*(rhs._TFs));
     _Box = new Box(*(rhs._Box));
     _Colorbar = new ColorbarPbase(*(rhs._Colorbar));
+    _transform = new Transform(*(rhs._transform));
 }
 
 RenderParams &RenderParams::operator=(const RenderParams &rhs)
@@ -196,6 +209,7 @@ RenderParams &RenderParams::operator=(const RenderParams &rhs)
     if (_TFs) delete _TFs;
     if (_Box) delete _Box;
     if (_Colorbar) delete _Colorbar;
+    if (_transform) delete _transform;
 
     ParamsBase::operator=(rhs);
 
@@ -204,6 +218,7 @@ RenderParams &RenderParams::operator=(const RenderParams &rhs)
     _TFs = new ParamsContainer(*(rhs._TFs));
     _Box = new Box(*(rhs._Box));
     _Colorbar = new ColorbarPbase(*(rhs._Colorbar));
+    _transform = new Transform(*(rhs._transform));
 
     return (*this);
 }
@@ -213,6 +228,7 @@ RenderParams::~RenderParams()
     if (_TFs) delete _TFs;
     if (_Box) delete _Box;
     if (_Colorbar) delete _Colorbar;
+    if (_transform) delete _transform;
 }
 
 void RenderParams::SetEnabled(bool val) { SetValueLong(_EnabledTag, "enable/disable renderer", val); }
