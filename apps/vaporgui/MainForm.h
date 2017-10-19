@@ -181,7 +181,8 @@ private:
   static QEvent::Type _customEventType;
  };
 
- void _stateChangeCB();
+    void _stateChangeCB();
+    bool _stateChangeFlag;
 
 	// Set the various widgets in the main window consistent with latest
 	// params settings:
