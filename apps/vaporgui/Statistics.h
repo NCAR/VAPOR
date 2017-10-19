@@ -89,7 +89,7 @@ class Statistics : public QDialog, public Ui_StatsWindow {
   private:
     VAPoR::StatisticsParams *_params;
     void retrieveRangeParams();
-    //bool eventFilter(QObject* o, QEvent* e);
+    bool eventFilter(QObject *o, QEvent *e);
     int GetExtents(vector<double> &extents);
     int initVariables();
     void adjustTables();
