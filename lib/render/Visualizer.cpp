@@ -225,6 +225,7 @@ void Visualizer::applyTransforms(int i) {
 
 int Visualizer::paintEvent()
 {
+    cout << "paintEvent() " << endl;
 	MyBase::SetDiagMsg("Visualizer::paintGL()");
 
 	//Do not proceed if there is no DataMgr
@@ -281,7 +282,7 @@ int Visualizer::paintEvent()
 		//If a renderer is not initialized, or if its bypass flag is set, then don't render.
 		//Otherwise push and pop the GL matrix stack, and all attribs
 #ifdef	DEAD
-		if(_renderer[i]->isInitialized() && !(_renderer[i]->doAlwaysBypass(timeStep))) {
+		if(_renderer[i]->isInitialized() && !(_renderer[i]->doAlwaysBypass(timeStep)))
 #endif
 		{
 			// Push or reset state
@@ -333,8 +334,12 @@ int Visualizer::paintEvent()
 	//Perform final touch-up on the final images, before capturing or displaying them.
 	glFlush();
 	
-	if (_imageCaptureEnabled) captureImage(_captureImageFile);
-	else if (_animationCaptureEnabled) {
+	if (_imageCaptureEnabled) 
+    {
+        captureImage(_captureImageFile);
+    }
+	else if (_animationCaptureEnabled) 
+    {
 		captureImage(_captureImageFile);
 		incrementPath(_captureImageFile);
 	}
@@ -926,8 +931,8 @@ void Visualizer::renderManip(){
 }
 #endif
 
-int Visualizer::
-captureImage(string filename){
+int Visualizer:: captureImage(string filename)
+{
 	ViewpointParams* vpParams = getActiveViewpointParams();
 
 	size_t width, height;
@@ -967,10 +972,9 @@ captureImage(string filename){
 	//
 	if (suffix == ".jpg"){
 		//int quality = getJpegQuality();
-		int quality = 99;
+		int quality = 100;
 		int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
 		if (rc){
-			//Error!
 			SetErrMsg("Image Capture Error; Error writing jpeg file %s",
 				(const char*)filename.c_str());
 			delete [] buf;
