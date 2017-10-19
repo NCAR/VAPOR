@@ -451,14 +451,26 @@ void ControlExec::CloseData(string dataSetName) {
 }
 
 int ControlExec::EnableImageCapture(string filename, string winName) {
-
     Visualizer *v = getVisualizer(winName);
     if (!v) {
         SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
         return -1;
     }
-    if (v->setImageCaptureEnabled(true, filename))
+    if (v->setImageCaptureEnabled(true, filename)) {
+        SetErrMsg("Visualizer (%s) failed to enable capturing  image.", winName.c_str());
         return -1;
+    }
+
+    // Disable state saving when capturing an image
+    //
+    bool enabled = _paramsMgr->GetSaveStateEnabled();
+    _paramsMgr->SetSaveStateEnabled(false);
+    int rc = v->paintEvent(); // paint with image capture enabled
+    _paramsMgr->SetSaveStateEnabled(enabled);
+    if (rc != 0) {
+        SetErrMsg("Visualizer (%s) failed to paint and thus not capturing image.", winName.c_str());
+        return -1;
+    }
     return 0;
 }
 
