@@ -62,6 +62,9 @@ ViewpointEventRouter::ViewpointEventRouter(
 	camPosLon->setEnabled(false);
 	rotCenterLat->setEnabled(false);
 	rotCenterLon->setEnabled(false);
+	stereoCombo->setEnabled(false);
+	latLonCheckbox->setEnabled(false);
+	stereoSeparationEdit->setEnabled(false);
 
 	// Disable the scale and rotation tabs
 	// for Vapor3.0 Beta
@@ -79,13 +82,6 @@ ViewpointEventRouter::~ViewpointEventRouter(){
  ************************************************************/
 void ViewpointEventRouter::hookUpTab() {
 
-//	connect(transformTable->scaleTable, SIGNAL(cellChanged(int, int)), this,
-//		SLOT(scaleChanged(int, int)));
-//	connect(transformTable->rotationTable, SIGNAL(cellChanged(int, int)), this, 
-//		SLOT(rotationChanged(int, int)));
-//	connect(transformTable->translationTable, SIGNAL(cellChanged(int, int)), 
-//		this, SLOT(translationChanged(int, int)));
-	
 	//connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
 	//connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
 
