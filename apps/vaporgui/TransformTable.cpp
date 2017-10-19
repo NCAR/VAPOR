@@ -20,11 +20,13 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include <QLineEdit>
 #include "TransformTable.h"
 #include "vapor/RenderParams.h"
 #include "vapor/Transform.h"
 #include "vapor/ViewpointParams.h"
 #include "MainForm.h"
+#include <typeinfo>
 
 using namespace VAPoR;
 
@@ -38,10 +40,6 @@ TransformTable::TransformTable(QWidget *parent)
     scaleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     rotationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     translationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-
-    connect(scaleTable, SIGNAL(cellChanged(int, int)), this, SLOT(scaleChanged(int, int)));
-    connect(rotationTable, SIGNAL(cellChanged(int, int)), this, SLOT(rotationChanged(int, int)));
-    connect(translationTable, SIGNAL(cellChanged(int, int)), this, SLOT(translationChanged(int, int)));
 }
 
 void TransformTable::Update(const std::map<string, Transform *> &transforms)
@@ -57,24 +55,40 @@ void TransformTable::updateTransformTable(QTableWidget *table, string target, ve
 {
     table->blockSignals(true);
 
-    QTableWidgetItem *item;
+    QLineEdit *item;
 
-    item = new QTableWidgetItem(QString::fromStdString(target));
-    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 0, item);
+    item = new QLineEdit(table);
+    item->setText(QString::fromStdString(target));
+    item->setAlignment(Qt::AlignCenter);
+    item->setReadOnly(true);
+    table->setCellWidget(row, 0, item);
 
-    item = new QTableWidgetItem(QString::number(values[0]));
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 1, item);
+    item = new QLineEdit(table);
+    item->setText(QString::number(values[0]));
+    item->setValidator(new QDoubleValidator(item));
+    item->setAlignment(Qt::AlignCenter);
+    item->setProperty("row", row);
+    item->setProperty("col", 1);
+    connect(item, SIGNAL(editingFinished()), this, SLOT(transformChanged()));
+    table->setCellWidget(row, 1, item);
 
-    item = new QTableWidgetItem(QString::number(values[1]));
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 2, item);
+    item = new QLineEdit(table);
+    item->setText(QString::number(values[1]));
+    item->setValidator(new QDoubleValidator(item));
+    item->setAlignment(Qt::AlignCenter);
+    item->setProperty("row", row);
+    item->setProperty("col", 2);
+    connect(item, SIGNAL(editingFinished()), this, SLOT(transformChanged()));
+    table->setCellWidget(row, 2, item);
 
-    item = new QTableWidgetItem(QString::number(values[2]));
-    item->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, 3, item);
+    item = new QLineEdit(table);
+    item->setText(QString::number(values[2]));
+    item->setValidator(new QDoubleValidator(item));
+    item->setAlignment(Qt::AlignCenter);
+    item->setProperty("row", row);
+    item->setProperty("col", 3);
+    connect(item, SIGNAL(editingFinished()), this, SLOT(transformChanged()));
+    table->setCellWidget(row, 3, item);
 
     QHeaderView *header = table->verticalHeader();
     header->setResizeMode(QHeaderView::Stretch);
@@ -134,21 +148,6 @@ void TransformTable::updateRotations()
     }
 }
 
-void TransformTable::scaleChanged(int row, int col)
-{
-    vector<double> scale;
-    QTableWidget * table = scaleTable;
-    string         target = table->item(row, 0)->text().toStdString();
-    double         x = table->item(row, 1)->text().toDouble();
-    double         y = table->item(row, 2)->text().toDouble();
-    double         z = table->item(row, 3)->text().toDouble();
-    scale.push_back(x);
-    scale.push_back(y);
-    scale.push_back(z);
-
-    setScales(target, scale);
-}
-
 void TransformTable::setScales(string target, vector<double> scale)
 {
     map<string, Transform *>::const_iterator itr;
@@ -157,21 +156,6 @@ void TransformTable::setScales(string target, vector<double> scale)
 
     Transform *t = itr->second;
     t->SetScales(scale);
-}
-
-void TransformTable::rotationChanged(int row, int col)
-{
-    vector<double> rotation;
-    QTableWidget * table = rotationTable;
-    string         target = table->item(row, 0)->text().toStdString();
-    double         x = table->item(row, 1)->text().toDouble();
-    double         y = table->item(row, 2)->text().toDouble();
-    double         z = table->item(row, 3)->text().toDouble();
-    rotation.push_back(x);
-    rotation.push_back(y);
-    rotation.push_back(z);
-
-    setRotations(target, rotation);
 }
 
 void TransformTable::setRotations(string target, vector<double> rotation)
@@ -184,19 +168,41 @@ void TransformTable::setRotations(string target, vector<double> rotation)
     t->SetRotations(rotation);
 }
 
-void TransformTable::translationChanged(int row, int col)
+void TransformTable::transformChanged()
+{
+    QLineEdit *   le = (QLineEdit *)sender();
+    QTableWidget *table = (QTableWidget *)(le->parentWidget()->parentWidget());
+    int           row = sender()->property("row").toInt();
+    int           col = sender()->property("col").toInt();
+    transformChanged(table, row, col);
+}
+
+void TransformTable::transformChanged(QTableWidget *table, int row, int col)
 {
     vector<double> translation;
-    QTableWidget * table = translationTable;
-    string         target = table->item(row, 0)->text().toStdString();
-    double         x = table->item(row, 1)->text().toDouble();
-    double         y = table->item(row, 2)->text().toDouble();
-    double         z = table->item(row, 3)->text().toDouble();
+    QLineEdit *    le;
+    le = (QLineEdit *)table->cellWidget(row, 0);
+    string target = le->text().toStdString();
+
+    le = (QLineEdit *)table->cellWidget(row, 1);
+    double x = le->text().toDouble();
+
+    le = (QLineEdit *)table->cellWidget(row, 2);
+    double y = le->text().toDouble();
+
+    le = (QLineEdit *)table->cellWidget(row, 3);
+    double z = le->text().toDouble();
+
     translation.push_back(x);
     translation.push_back(y);
     translation.push_back(z);
 
-    setTranslations(target, translation);
+    if (table->objectName() == "translationTable")
+        setTranslations(target, translation);
+    else if (table->objectName() == "scaleTable")
+        setScales(target, translation);
+    else if (table->objectName() == "rotationTable")
+        setRotations(target, translation);
 }
 
 void TransformTable::setTranslations(string target, vector<double> translation)
