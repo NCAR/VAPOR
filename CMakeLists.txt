@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.1)
-project (VAPOR)
+project (VAPOR3)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -66,9 +66,9 @@ if (WIN32)
 	set (INSTALL_SHARE_DIR share)
 elseif (APPLE)
 	find_library (GLEW GLEW)
-	set (INSTALL_BIN_DIR ./vaporgui.app/Contents/utilities)
-	set (INSTALL_SHARE_DIR ./vaporgui.app/Contents/share)
-	set (INSTALL_LIB_DIR ./vaporgui.app/Contents/lib)
+	set (INSTALL_BIN_DIR ./vapor.app/Contents/utilities)
+	set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
+	set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
 	set (CMAKE_INSTALL_PREFIX /Applications)
 else ()
@@ -99,7 +99,7 @@ set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_RC})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "VAPOR")
 set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
-set (CPACK_PACKAGE_EXECUTABLES vaporgui;VaporGUI)
+set (CPACK_PACKAGE_EXECUTABLES vapor;vapor)
 set (CPACK_BINARY_STGZ OFF)
 set (CPACK_BINARY_TGZ OFF)
 set (CPACK_BINARY_TZ OFF)
@@ -170,7 +170,7 @@ if (UNIX AND NOT APPLE)
 	add_custom_target (
 		linuxpreinstall
 		COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vaporgui ${EXTRA_LIBS_SEARCH} >
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vapor ${EXTRA_LIBS_SEARCH} >
 		${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt
 		COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
 		)
