@@ -321,7 +321,10 @@ void MainForm::createToolBars()
 
     // Viz tool bar:
     //
-    _vizToolBar = addToolBar("");
+    _vizToolBar = addToolBar("Viewpoint Toolbar");
+    QString vizHelpString = QString("The tools in the Viewpoint Toolbar help") + " you with shortcuts that bookmark importation viewpoints in your "
+                          + "scene, orient your viewpoint along axes, and configure your " + "visualizers";
+    _vizToolBar->setWhatsThis(vizHelpString);
 
     // Add a QComboBox to toolbar to select window
     _windowSelector = new VizSelectCombo(this);
