@@ -188,6 +188,8 @@ MainForm::MainForm(
 	_seedMe = NULL;
 	_stats = NULL;
 	_plot = NULL;	
+    _stateChangeFlag = false; 
+    _firstSession    = true;
 
     createActions();
     createMenus();
@@ -220,6 +222,7 @@ MainForm::MainForm(
 	_paramsMgr->RegisterStateChangeCB(
 		std::bind(&MainForm::_stateChangeCB,this)
 	);
+	_paramsMgr->RegisterStateChangeFlag( &_stateChangeFlag );
 
 	StartupParams *sP = GetStartupParams();
 	_controlExec->SetCacheSize(sP->GetCacheMB());
@@ -289,9 +292,6 @@ MainForm::MainForm(
 	app->installEventFilter(this);
 
 	_controlExec->SetSaveStateEnabled(true);
-
-    _stateChangeFlag = false; 
-	_paramsMgr->RegisterStateChangeFlag( &_stateChangeFlag );
 }
 
 /*
@@ -895,7 +895,11 @@ void MainForm::sessionOpenHelper(string fileName) {
 //
 void MainForm::sessionOpen(QString qfileName)
 {
-    if( _stateChangeFlag )
+    if( _firstSession )
+    {
+        _firstSession = false;
+    }
+    else if( _stateChangeFlag )
     {
 		QMessageBox msgBox; 
 		msgBox.setWindowTitle("Are you sure?");
@@ -1311,10 +1315,13 @@ vector <string> MainForm::myGetOpenFileNames(
 	return(files);
 }
 
-void MainForm::sessionNew(){
-
-	GUIStateParams *p = GetStateParams();
-    if( _stateChangeFlag )
+void MainForm::sessionNew()
+{
+    if( _firstSession )
+    {
+        _firstSession = false;
+    }
+    else if( _stateChangeFlag )
     {
 		QMessageBox msgBox; 
 		msgBox.setWindowTitle("Are you sure?");
@@ -1337,7 +1344,7 @@ void MainForm::sessionNew(){
 	sessionPath = QDir::toNativeSeparators(sessionPath);
 	string fileName = sessionPath.toStdString();
 
-	p = GetStateParams();
+	GUIStateParams* p = GetStateParams();
 	p->SetCurrentSessionPath(fileName);
 
     _stateChangeFlag = false;
