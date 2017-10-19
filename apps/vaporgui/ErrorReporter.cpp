@@ -29,7 +29,7 @@
 
 #if defined(DARWIN)
     #include <CoreServices/CoreServices.h>
-#elif defined(LINUX)
+#elif defined(linux)
     #include <sys/utsname.h>
 #elif defined(WIN32)
     #include <windows.h>
@@ -160,21 +160,20 @@ string                 ErrorReporter::GetSystemInformation()
     Gestalt(gestaltSystemVersionMinor, &minor);
     Gestalt(gestaltSystemVersionBugFix, &rev);
     ret += "OS: Mac OS X " + to_string(major) + "." + to_string(minor) + "." + to_string(rev) + "\n";
-#elif defined(LINUX)
-    // struct utsname info;
-    // uname(&info);
-    // ret += "OS: " + string(info.sysname) + " " + string(info.release) + " " + string(info.version) "\n";
-    // ret += "Distro:\n";
-    // char buffer[128];
-    // std::shared_ptr<FILE> pipe(popen("lsb_release", "r"), pclose);
-    // if (pipe) {
-    // 	while (!feof(pipe.get())) {
-    // 		if (fgets(buffer, 128, pipe.get()) != std::nullptr)
-    // 			ret += buffer;
-    // 	}
-    // } else  {
-    // 	fprintf(stderr, "popen failed\n");
-    // }
+#elif defined(linux)
+    struct utsname info;
+    uname(&info);
+    ret += "OS: " + string(info.sysname) + " " + string(info.release) + " " + string(info.version) + "\n";
+    ret += "Distro:\n";
+    char  buffer[128];
+    FILE *pipe = popen("lsb_release", "r"), pclose;
+    if (pipe) {
+        while (!feof(pipe)) {
+            if (fgets(buffer, 128, pipe) != 0) ret += string(buffer);
+        }
+    } else {
+        fprintf(stderr, "popen failed\n");
+    }
 #elif defined(WIN32)
     // DWORD version = 0;
     // DWORD major = 0;
