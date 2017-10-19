@@ -39,7 +39,7 @@ public:
 
   static std::string GetClassType()
   {
-    return ("ImageRenderer");
+    return ("Image");
   }
 
   /*static Renderer* CreateInstance( Visualizer* v, RenderParams* rp, ShaderMgr *sm) 
