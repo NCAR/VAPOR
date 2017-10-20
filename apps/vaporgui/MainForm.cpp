@@ -175,6 +175,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     _seedMe = NULL;
     _stats = NULL;
     _plot = NULL;
+    _stateChangeFlag = false;
+    _firstSession = true;
 
     createActions();
     createMenus();
@@ -204,6 +206,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
 
     _paramsMgr = _controlExec->GetParamsMgr();
     _paramsMgr->RegisterStateChangeCB(std::bind(&MainForm::_stateChangeCB, this));
+    _paramsMgr->RegisterStateChangeFlag(&_stateChangeFlag);
 
     StartupParams *sP = GetStartupParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
@@ -377,7 +380,6 @@ void MainForm::hookupSignals()
     connect(_editUndoRedoClearAction, SIGNAL(triggered()), this, SLOT(clear()));
     connect(_helpAboutAction, SIGNAL(triggered()), this, SLOT(helpAbout()));
     connect(_dataLoad_MetafileAction, SIGNAL(triggered()), this, SLOT(loadData()));
-    connect(_dataClose_MetafileAction, SIGNAL(triggered()), this, SLOT(closeData()));
     connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
     connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
     connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
@@ -421,16 +423,34 @@ void MainForm::hookupSignals()
     connect(_windowSelector, SIGNAL(newWin()), _vizWinMgr, SLOT(LaunchVisualizer()));
 }
 
+QWidgetAction *MainForm::createTextSeparator(const QString &text)
+{
+    auto *pLabel = new QLabel(text);
+    pLabel->setMinimumWidth(this->minimumWidth() - 4);
+    // grayish style
+    // pLabel->setStyleSheet("background: #FF4B4B4B;");
+    // possible alignment
+    // pLabel->setAlignment(Qt::AlignCenter);
+    auto *separator = new QWidgetAction(this);
+    separator->setDefaultWidget(pLabel);
+    return separator;
+}
+
 void MainForm::createMenus()
 {
     // menubar
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
+    _File->addAction(createTextSeparator(" Data"));
     _File->addAction(_dataLoad_MetafileAction);
-    _File->addAction(_dataClose_MetafileAction);
-    _File->addAction(_dataImportWRF_Action);
-    _File->addAction(_dataImportCF_Action);
-    _File->addAction(_dataImportMPAS_Action);
+    _closeVDCMenu = _File->addMenu("Close VDC");
+    //_File->addAction(_dataClose_MetafileAction );
+    _importMenu = _File->addMenu("Import");
+    _importMenu->addAction(_dataImportWRF_Action);
+    _importMenu->addAction(_dataImportCF_Action);
+    _importMenu->addAction(_dataImportMPAS_Action);
+    _File->addSeparator();
+    _File->addAction(createTextSeparator(" Session"));
     _File->addAction(_fileNew_SessionAction);
     _File->addAction(_fileOpenAction);
     _File->addAction(_fileSaveAction);
@@ -443,9 +463,9 @@ void MainForm::createMenus()
     _Edit->addAction(_editUndoRedoClearAction);
     _Edit->addSeparator();
 
-    _Data = menuBar()->addMenu(tr("Data"));
-    _Data->addAction(_plotAction);
-    _Data->addAction(_statsAction);
+    _Tools = menuBar()->addMenu(tr("Tools"));
+    _Tools->addAction(_plotAction);
+    _Tools->addAction(_statsAction);
 
     // Note that the ordering of the following 4 is significant, so that image
     // capture actions correctly activate each other.
@@ -580,19 +600,19 @@ void MainForm::languageChange()
 {
     setWindowTitle(tr("VAPoR:  NCAR Visualization and Analysis Platform for Research"));
 
-    _fileNew_SessionAction->setText(tr("&New Session"));
+    _fileNew_SessionAction->setText(tr("New"));
 
     _fileNew_SessionAction->setToolTip("Restart the session with default settings");
     _fileNew_SessionAction->setShortcut(Qt::CTRL + Qt::Key_N);
 
-    _fileOpenAction->setText(tr("&Open Session"));
+    _fileOpenAction->setText(tr("&Open"));
     _fileOpenAction->setShortcut(tr("Ctrl+O"));
     _fileOpenAction->setToolTip("Launch a file open dialog to reopen a previously saved session file");
 
-    _fileSaveAction->setText(tr("&Save Session"));
+    _fileSaveAction->setText(tr("&Save"));
     _fileSaveAction->setShortcut(tr("Ctrl+S"));
     _fileSaveAction->setToolTip("Launch a file-save dialog to save the state of this session in current session file");
-    _fileSaveAsAction->setText(tr("Save Session As"));
+    _fileSaveAsAction->setText(tr("Save As..."));
 
     _fileSaveAsAction->setToolTip("Launch a file-save dialog to save the state of this session in another session file");
 
@@ -615,16 +635,16 @@ void MainForm::languageChange()
     _installCLIToolsAction->setText("Install CLI Tools");
     _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities location to path. Needs to updated if app bundle moved");
 
-    _dataLoad_MetafileAction->setText(tr("Open a V&DC in Current Session"));
+    _dataLoad_MetafileAction->setText(tr("Open VDC"));
     _dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
     _dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
-    _dataClose_MetafileAction->setText(tr("Close a VDC in Current Session"));
+    _dataClose_MetafileAction->setText(tr("Close VDC"));
     _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
-    _dataImportWRF_Action->setText(tr("Import WRF-ARW files in current session"));
+    _dataImportWRF_Action->setText(tr("WRF-ARW"));
     _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into the current session");
-    _dataImportCF_Action->setText(tr("Import NetCDF CF files in current session"));
+    _dataImportCF_Action->setText(tr("NetCDF-CF"));
     _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention output files to import into the current session");
-    _dataImportMPAS_Action->setText(tr("Import MPAS files in current session"));
+    _dataImportMPAS_Action->setText(tr("MPAS"));
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the current session");
     _plotAction->setText("Plot Utility");
     _statsAction->setText("Data Statistics");
@@ -676,13 +696,16 @@ void MainForm::sessionOpenHelper(string fileName)
 //
 void MainForm::sessionOpen(QString qfileName)
 {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Are you sure?");
-    msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.addButton(QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    if (msgBox.exec() == QMessageBox::No) { return; }
+    if (_firstSession) {
+        _firstSession = false;
+    } else if (_stateChangeFlag) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        msgBox.setText("The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session.");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No) { return; }
+    }
 
     // This launches a panel that enables the
     // user to choose input session save files, then to
@@ -705,6 +728,8 @@ void MainForm::sessionOpen(QString qfileName)
     sessionOpenHelper(fileName);
 
     _vizWinMgr->Restart();
+
+    _stateChangeFlag = false;
 }
 
 void MainForm::fileSave()
@@ -716,6 +741,8 @@ void MainForm::fileSave()
         MSG_ERR("Saving session file");
         return;
     }
+
+    _stateChangeFlag = false;
 }
 
 void MainForm::fileSaveAs()
@@ -894,6 +921,12 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
             vpp = pm->GetViewpointParams(winNames[i]);
             vpp->AddDatasetTransform(dataSetName);
         }
+
+        // Add menu option to close the dataset in the File menu
+        //
+        QAction *closeAction = new QAction(QString::fromStdString(dataSetName), _closeVDCMenu);
+        _closeVDCMenu->addAction(closeAction);
+        connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
     }
 
     // Reinitialize all tabs
@@ -931,7 +964,30 @@ void MainForm::loadData(string fileName)
     loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.*)", "vdc", false);
 }
 
-void MainForm::closeData(string fileName) { cout << "how do we close a dataset?" << endl; }
+void MainForm::closeData(string fileName)
+{
+    QAction *a = (QAction *)sender();
+
+    string dataSetName = a->text().toStdString();
+
+    GUIStateParams *p = GetStateParams();
+    vector<string>  currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    if (std::find(currentDataSets.begin(), currentDataSets.end(), dataSetName) != currentDataSets.end()) {
+        _controlExec->CloseData(dataSetName);
+        _closeVDCMenu->removeAction(a);
+    }
+
+    cout << "Closing datasets " << currentDataSets.size() << endl;
+
+    p = GetStateParams();
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    cout << "Closing datasets " << currentDataSets.size() << " " << currentDataSets[0] << endl;
+    if (currentDataSets.size() == 0) {
+        cout << "no datasets loaded" << endl;
+        _controlExec->LoadState();
+    }
+}
 
 // import WRF data into current session
 //
@@ -986,13 +1042,13 @@ vector<string> MainForm::myGetOpenFileNames(string prompt, string dir, string fi
 
 void MainForm::sessionNew()
 {
-    GUIStateParams *p = GetStateParams();
-    if (p->GetCurrentSessionPath() != ".") {
+    if (_firstSession) {
+        _firstSession = false;
+    } else if (_stateChangeFlag) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Are you sure?");
-        msgBox.setText("The current session settings are about to lose. You can choose \"No\" now to go back and save the current session. Do you want to continue?");
-        msgBox.setStandardButtons(QMessageBox::Yes);
-        msgBox.addButton(QMessageBox::No);
+        msgBox.setText("The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session.");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         if (msgBox.exec() == QMessageBox::No) { return; }
     }
@@ -1007,8 +1063,10 @@ void MainForm::sessionNew()
     sessionPath = QDir::toNativeSeparators(sessionPath);
     string fileName = sessionPath.toStdString();
 
-    p = GetStateParams();
+    GUIStateParams *p = GetStateParams();
     p->SetCurrentSessionPath(fileName);
+
+    _stateChangeFlag = false;
 }
 
 //
@@ -1589,7 +1647,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
             PlotParams *params;
             params = (PlotParams *)paramsMgr->GetParams("PlotParams");
             _plot->Update(params);
-            cout << "Mainform updated plot?" << endl;
         }
 
         _vizWinMgr->UpdateRouters();

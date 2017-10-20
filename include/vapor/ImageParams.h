@@ -30,10 +30,11 @@ public:
     }
 
     //
-    // Get and set ifGeoTIFF
+    // Get and set ifGeoRef
     //
-    bool GetIsGeoTIFF() const { return (0 != GetValueLong(_isGeoTIFFTag, (long)false)); }
-    void SetIsGeoTIFF(bool val) { SetValueLong(_isGeoTIFFTag, "if the image has geo reference", (long)val); }
+    bool GetIsGeoRef() const { return (GetValueLong(_isGeoRefTag, (long)true)); }
+
+    void SetIsGeoRef(bool val) { SetValueLong(_isGeoRefTag, "Geo-reference the image", (long)val); }
 
     //
     // Get and set ignoreTransparency
@@ -72,7 +73,7 @@ public:
 
 private:
     static const std::string _fileNameTag;
-    static const std::string _isGeoTIFFTag;
+    static const std::string _isGeoRefTag;
     static const std::string _ignoreTransparencyTag;
     static const std::string _opacityTag;
     static const std::string _orientationTag;    // If it's X-Y (orientation = 2)

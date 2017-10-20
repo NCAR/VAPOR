@@ -33,6 +33,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QIcon>
+#include <QWidgetAction>
 #include <vapor/ControlExecutive.h>
 #include "GUIStateParams.h"
 #include "AppSettingsParams.h"
@@ -154,6 +155,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+    QWidgetAction *createTextSeparator(const QString &text);
+
     class ParamsChangeEvent : public QEvent {
     public:
         ParamsChangeEvent() : QEvent(ParamsChangeEvent::type()) {}
@@ -174,6 +177,8 @@ private:
     };
 
     void _stateChangeCB();
+    bool _stateChangeFlag;
+    bool _firstSession;
 
     // Set the various widgets in the main window consistent with latest
     // params settings:
@@ -206,7 +211,7 @@ private:
     QMenuBar * _main_Menubar;
     QMenu *    _File;
     QMenu *    _Edit;
-    QMenu *    _Data;
+    QMenu *    _Tools;
     QMenu *    _captureMenu;
     QMenu *    _helpMenu;
     QToolBar * _modeToolBar;
@@ -217,6 +222,12 @@ private:
     QMenu *    _webPreferencesHelpMenu;
     QMenu *    _webPythonHelpMenu;
     QMenu *    _webVisualizationHelpMenu;
+
+    // Submenus under the File menu:
+    QMenu *_dataMenu;
+    QMenu *_closeVDCMenu;
+    QMenu *_importMenu;
+    QMenu *_sessionMenu;
 
     // File menu:
     QAction *_fileOpenAction;

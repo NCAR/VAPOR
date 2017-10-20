@@ -165,64 +165,10 @@ void ViewpointParams::_init()
 
 void ViewpointParams::AddDatasetTransform(string datasetName)
 {
-    // If dataset is already loaded, do not add another
-    // transform for it
-    //
-    if (std::find(_datasetNames.begin(), _datasetNames.end(), datasetName) != _datasetNames.end()) return;
-
-    // Add new dataset name to our reference list
-    //
-    _datasetNames.push_back(datasetName);
-
     // Add new transform to our ParamsContainer, _transforms
     //
     Transform newTransform(_ssave);
     _transforms->Insert(&newTransform, datasetName);
-}
-
-vector<double> ViewpointParams::GetScales(string datasetName)
-{
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    return t->GetScales();
-}
-
-vector<double> ViewpointParams::GetRotations(string datasetName)
-{
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    return t->GetRotations();
-}
-
-vector<double> ViewpointParams::GetTranslations(string datasetName)
-{
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    return t->GetTranslations();
-}
-
-void ViewpointParams::SetScales(string datasetName, vector<double> scale)
-{
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    t->SetScales(scale);
-}
-
-void ViewpointParams::SetRotations(string datasetName, vector<double> rotation)
-{
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    t->SetRotations(rotation);
-}
-
-void ViewpointParams::SetTranslations(string datasetName, vector<double> translation)
-{
-    Transform *t = (Transform *)_transforms->GetParams(datasetName);
-    assert(t != NULL);
-    t->SetTranslations(translation);
-
-    vector<double> foo;
-    foo = t->GetTranslations();
 }
 
 double ViewpointParams::getLightDirection(int lightNum, int dir) const

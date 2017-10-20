@@ -49,7 +49,29 @@ VizFeatureEventRouter::VizFeatureEventRouter(QWidget *parent, ControlExec *ce) :
 {
     setupUi(this);
 
-    cout << "VizFeatureEventRouter constructor" << endl;
+    // Disabled for now. Need to add support in VizFeatureRenderer
+    //
+    xMinTicEdit->setEnabled(false);
+    yMinTicEdit->setEnabled(false);
+    zMinTicEdit->setEnabled(false);
+    xMaxTicEdit->setEnabled(false);
+    yMaxTicEdit->setEnabled(false);
+    zMaxTicEdit->setEnabled(false);
+    xNumTicsEdit->setEnabled(false);
+    yNumTicsEdit->setEnabled(false);
+    zNumTicsEdit->setEnabled(false);
+    xTicSizeEdit->setEnabled(false);
+    yTicSizeEdit->setEnabled(false);
+    zTicSizeEdit->setEnabled(false);
+    axisOriginXEdit->setEnabled(false);
+    axisOriginYEdit->setEnabled(false);
+    axisOriginZEdit->setEnabled(false);
+    xTicOrientCombo->setEnabled(false);
+    yTicOrientCombo->setEnabled(false);
+    zTicOrientCombo->setEnabled(false);
+    labelHeightEdit->setEnabled(false);
+    labelDigitsEdit->setEnabled(false);
+    ticWidthEdit->setEnabled(false);
 
     _animConnected = false;
     _ap = NULL;
@@ -61,21 +83,13 @@ VizFeatureEventRouter::~VizFeatureEventRouter() {}
  ************************************************************/
 void VizFeatureEventRouter::hookUpTab()
 {
-    cout << "Hooking up VizFeatureEventRouter" << endl;
-    connect(stretch0Edit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(stretch0Edit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(stretch1Edit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(stretch1Edit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(stretch2Edit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(stretch2Edit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-
     connect(backgroundColorButton, SIGNAL(clicked()), this, SLOT(setBackgroundColor()));
     connect(domainColorButton, SIGNAL(clicked()), this, SLOT(setDomainColor()));
-    connect(domainFrameCheckbox, SIGNAL(toggled(bool)), this, SLOT(setUseDomainFrame(bool)));
-    connect(regionFrameCheckbox, SIGNAL(toggled(bool)), this, SLOT(setUseRegionFrame(bool)));
+    connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setUseDomainFrame()));
+    connect(regionFrameCheckbox, SIGNAL(clicked()), this, SLOT(setUseRegionFrame()));
     connect(regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
-    connect(axisAnnotationCheckbox, SIGNAL(clicked()), this, SLOT(annotationChanged()));
-    connect(axisArrowCheckbox, SIGNAL(toggled(bool)), this, SLOT(setUseAxisArrows(bool)));
+    connect(axisAnnotationCheckbox, SIGNAL(clicked()), this, SLOT(setAxisAnnotation()));
+    connect(axisArrowCheckbox, SIGNAL(clicked()), this, SLOT(setUseAxisArrows()));
     connect(arrowXEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
     connect(arrowYEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
     connect(arrowZEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
@@ -125,13 +139,13 @@ void VizFeatureEventRouter::hookUpTab()
     connect(arrowYEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
     connect(arrowZEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
 
-    connect(axisColorButton, SIGNAL(clicked()), this, SLOT(selectAxisColor()));
+    connect(axisColorButton, SIGNAL(clicked()), this, SLOT(setAxisColor()));
 
     connect(timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
     connect(timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
     connect(timeLLYEdit, SIGNAL(returnPressed()), this, SLOT(timeLLYChanged()));
     connect(timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
-    connect(timeColorButton, SIGNAL(pressed()), this, SLOT(timeColorChanged()));
+    connect(timeColorButton, SIGNAL(clicked()), this, SLOT(setTimeColor()));
 }
 
 void VizFeatureEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
@@ -170,6 +184,7 @@ void VizFeatureEventRouter::confirmText()
 
 void VizFeatureEventRouter::_confirmText()
 {
+#ifdef DEAD
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
 
     vector<double> stretch;
@@ -219,6 +234,7 @@ void VizFeatureEventRouter::_confirmText()
     dvals[2] = arrowZEdit->text().toDouble();
     vParams->SetAxisArrowCoords(dvals);
     invalidateText();
+#endif
 }
 
 void VizFeatureEventRouter::vizfeatureReturnPressed(void) { confirmText(); }
@@ -227,9 +243,34 @@ void VizFeatureEventRouter::vizfeatureReturnPressed(void) { confirmText(); }
 //
 void VizFeatureEventRouter::_updateTab()
 {
-    return;
+    updateRegionColor();
+    updateDomainColor();
+    updateBackgroundColor();
+    updateAxisColor();
+    updateTimeColor();
 
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+
+    domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
+    regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
+
+    bool axisAnnot = vParams->GetAxisAnnotation();
+    axisAnnotationCheckbox->setChecked(axisAnnot);
+    if (axisAnnot) {
+        axisAnnotationFrame->show();
+    } else {
+        axisAnnotationFrame->hide();
+    }
+
+    // Axis arrows:
+    //
+    vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
+    arrowXEdit->setText(QString::number(axisArrowCoords[0]));
+    arrowYEdit->setText(QString::number(axisArrowCoords[1]));
+    arrowZEdit->setText(QString::number(axisArrowCoords[2]));
+    axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
+
+    return;
 
     QPalette pal(regionColorEdit->palette());
     double   clr[3];
@@ -248,9 +289,6 @@ void VizFeatureEventRouter::_updateTab()
     pal2.setColor(QPalette::Base, newColor);
     backgroundColorEdit->setPalette(pal2);
 
-    domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
-    regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
-
 #ifdef DEAD
     string projString = _controlExec->GetDataMgr()->GetMapProjection();
 #else
@@ -266,13 +304,7 @@ void VizFeatureEventRouter::_updateTab()
     xTicOrientCombo->setCurrentIndex(ticDir[0] - 1);
     yTicOrientCombo->setCurrentIndex(ticDir[1] / 2);
     zTicOrientCombo->setCurrentIndex(ticDir[2]);
-    bool axisAnnot = vParams->GetAxisAnnotation();
-    axisAnnotationCheckbox->setChecked(axisAnnot);
-    if (axisAnnot) {
-        axisAnnotationFrame->show();
-    } else {
-        axisAnnotationFrame->hide();
-    }
+
     vector<long>   numtics = vParams->GetNumTics();
     vector<double> mintics = vParams->GetMinTics();
     vector<double> maxtics = vParams->GetMaxTics();
@@ -303,77 +335,130 @@ void VizFeatureEventRouter::_updateTab()
     pal3.setColor(QPalette::Base, newColor);
     axisColorEdit->setPalette(pal3);
 
-    // Axis arrows:
-    vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
-    arrowXEdit->setText(QString::number(axisArrowCoords[0]));
-    arrowYEdit->setText(QString::number(axisArrowCoords[1]));
-    arrowZEdit->setText(QString::number(axisArrowCoords[2]));
-    axisArrowCheckbox->setChecked(vParams->ShowAxisArrows());
-
     adjustSize();
+}
+
+void VizFeatureEventRouter::setColorHelper(QWidget *w, vector<double> &rgb)
+{
+    rgb.clear();
+
+    QPalette pal(w->palette());
+    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
+
+    rgb.push_back(newColor.red() / 255.0);
+    rgb.push_back(newColor.green() / 255.0);
+    rgb.push_back(newColor.blue() / 255.0);
+}
+
+void VizFeatureEventRouter::updateColorHelper(const vector<double> &rgb, QWidget *w)
+{
+    assert(rgb.size() == 3);
+
+    QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
+
+    QPalette pal;
+    pal.setColor(QPalette::Base, color);
+    w->setPalette(pal);
 }
 
 void VizFeatureEventRouter::setRegionColor()
 {
-    QPalette pal(regionColorEdit->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-    if (!newColor.isValid()) return;
-    pal.setColor(QPalette::Base, newColor);
-    regionColorEdit->setPalette(pal);
     vector<double> rgb;
-    rgb.push_back((double)newColor.red() / 256.);
-    rgb.push_back((double)newColor.green() / 256.);
-    rgb.push_back((double)newColor.blue() / 256.);
-    confirmText();
+
+    setColorHelper(regionColorEdit, rgb);
+    if (rgb.size() != 3) return;
+
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetRegionColor(rgb);
 }
+
+void VizFeatureEventRouter::updateRegionColor()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vector<double>    rgb;
+    vfParams->GetRegionColor(rgb);
+
+    updateColorHelper(rgb, regionColorEdit);
+}
+
 void VizFeatureEventRouter::setDomainColor()
 {
-    QPalette pal(domainColorEdit->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-    if (!newColor.isValid()) return;
-    pal.setColor(QPalette::Base, newColor);
-    domainColorEdit->setPalette(pal);
     vector<double> rgb;
-    rgb.push_back((double)newColor.red() / 256.);
-    rgb.push_back((double)newColor.green() / 256.);
-    rgb.push_back((double)newColor.blue() / 256.);
-    confirmText();
+
+    setColorHelper(domainColorEdit, rgb);
+    if (rgb.size() != 3) return;
+
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetDomainColor(rgb);
 }
+
+void VizFeatureEventRouter::updateDomainColor()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vector<double>    rgb;
+    vfParams->GetDomainColor(rgb);
+
+    updateColorHelper(rgb, domainColorEdit);
+}
+
 void VizFeatureEventRouter::setBackgroundColor()
 {
-    QPalette pal(backgroundColorEdit->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-    if (!newColor.isValid()) return;
-    pal.setColor(QPalette::Base, newColor);
-    backgroundColorEdit->setPalette(pal);
     vector<double> rgb;
-    rgb.push_back((double)newColor.red() / 256.);
-    rgb.push_back((double)newColor.green() / 256.);
-    rgb.push_back((double)newColor.blue() / 256.);
-    confirmText();
+
+    setColorHelper(backgroundColorEdit, rgb);
+    if (rgb.size() != 3) return;
+
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetBackgroundColor(rgb);
-    invalidateText();
 }
-void VizFeatureEventRouter::selectAxisColor()
+
+void VizFeatureEventRouter::updateBackgroundColor()
 {
-    QPalette pal(axisColorEdit->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-    if (!newColor.isValid()) return;
-    pal.setColor(QPalette::Base, newColor);
-    axisColorEdit->setPalette(pal);
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vector<double>    rgb;
+    vfParams->GetBackgroundColor(rgb);
+
+    updateColorHelper(rgb, backgroundColorEdit);
+}
+
+void VizFeatureEventRouter::setAxisColor()
+{
     vector<double> rgb;
-    rgb.push_back((double)newColor.red() / 256.);
-    rgb.push_back((double)newColor.green() / 256.);
-    rgb.push_back((double)newColor.blue() / 256.);
-    confirmText();
+
+    setColorHelper(axisColorEdit, rgb);
+    if (rgb.size() != 3) return;
+
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetAxisColor(rgb);
-    invalidateText();
+}
+
+void VizFeatureEventRouter::updateAxisColor()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vector<double>    rgb;
+    vfParams->GetAxisColor(rgb);
+
+    updateColorHelper(rgb, axisColorEdit);
+}
+
+void VizFeatureEventRouter::setTimeColor()
+{
+    vector<double> rgb;
+
+    setColorHelper(timeColorEdit, rgb);
+    if (rgb.size() != 3) return;
+
+    MiscParams *miscParams = GetMiscParams();
+    miscParams->SetTimeAnnotColor(rgb);
+}
+
+void VizFeatureEventRouter::updateTimeColor()
+{
+    MiscParams *   miscParams = GetMiscParams();
+    vector<double> rgb;
+    miscParams->GetTimeAnnotColor(rgb);
+
+    updateColorHelper(rgb, timeColorEdit);
 }
 
 void VizFeatureEventRouter::timeAnnotationChanged()
@@ -427,24 +512,6 @@ void VizFeatureEventRouter::timeSizeChanged()
     MiscParams *miscParams = GetMiscParams();
     float       size = timeSizeEdit->text().toFloat();
     miscParams->SetTimeAnnotSize(size);
-    drawTimeStamp();
-}
-
-void VizFeatureEventRouter::timeColorChanged()
-{
-    MiscParams *miscParams = GetMiscParams();
-
-    QPalette pal(timeColorEdit->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-    if (!newColor.isValid()) return;
-    pal.setColor(QPalette::Base, newColor);
-    timeColorEdit->setPalette(pal);
-    // vector<float> rgb;
-    float rgb[3];
-    rgb[0] = ((float)newColor.red() / 256.);
-    rgb[1] = ((float)newColor.green() / 256.);
-    rgb[2] = ((float)newColor.blue() / 256.);
-    miscParams->SetTimeAnnotColor(rgb);
     drawTimeStamp();
 }
 
@@ -512,23 +579,21 @@ void VizFeatureEventRouter::setLatLonAnnot(bool val)
     vfParams->SetLatLonAxes(val);
     invalidateText();
 }
-void VizFeatureEventRouter::setUseDomainFrame(bool val)
-{
-    confirmText();
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
 
-    vfParams->SetUseDomainFrame(val);
+void VizFeatureEventRouter::setUseDomainFrame()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
 }
-void VizFeatureEventRouter::setUseRegionFrame(bool val)
-{
-    confirmText();
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
 
-    vfParams->SetUseRegionFrame(val);
+void VizFeatureEventRouter::setUseRegionFrame()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
 }
 
 // Response to a click on axisAnnotation checkbox:
-void VizFeatureEventRouter::annotationChanged()
+void VizFeatureEventRouter::setAxisAnnotation()
 {
     bool annotate = axisAnnotationCheckbox->isChecked();
     if (annotate) {
@@ -536,15 +601,14 @@ void VizFeatureEventRouter::annotationChanged()
     } else {
         axisAnnotationFrame->hide();
     }
-    invalidateText();
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetAxisAnnotation(annotate);
 }
-void VizFeatureEventRouter::setUseAxisArrows(bool val)
+
+void VizFeatureEventRouter::setUseAxisArrows()
 {
-    confirmText();
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetShowAxisArrows(val);
+    vfParams->SetShowAxisArrows(axisArrowCheckbox->isChecked());
 }
 
 void VizFeatureEventRouter::invalidateText()

@@ -66,7 +66,7 @@ public:
         setupUi(this);
         _opacityCombo = new Combo(OpacityEdit, OpacitySlider);
 
-        connect(GeoTIFFCheckbox, SIGNAL(clicked()), this, SLOT(GeoTIFFClicked()));
+        connect(GeoRefCheckbox, SIGNAL(clicked()), this, SLOT(GeoRefClicked()));
         connect(IgnoreTransparencyCheckbox, SIGNAL(clicked()), this, SLOT(IgnoreTransparencyClicked()));
         connect(_opacityCombo, SIGNAL(valueChanged(double)), this, SLOT(OpacityChanged()));
         connect(SelectImagePushButton, SIGNAL(clicked()), this, SLOT(SelectImage()));
@@ -76,8 +76,8 @@ public:
     {
         _rParams = (ImageParams *)rParams;
 
-        bool state = _rParams->GetIsGeoTIFF();
-        GeoTIFFCheckbox->setChecked(state);
+        bool state = _rParams->GetIsGeoRef();
+        GeoRefCheckbox->setChecked(state);
         state = _rParams->GetIgnoreTransparency();
         IgnoreTransparencyCheckbox->setChecked(state);
 
@@ -97,7 +97,7 @@ public:
     }
 
 private slots:
-    void GeoTIFFClicked() { _rParams->SetIsGeoTIFF(GeoTIFFCheckbox->isChecked()); }
+    void GeoRefClicked() { _rParams->SetIsGeoRef(GeoRefCheckbox->isChecked()); }
 
     void IgnoreTransparencyClicked() { _rParams->SetIgnoreTransparency(IgnoreTransparencyCheckbox->isChecked()); }
 
@@ -137,7 +137,11 @@ public:
         _geometryWidget->Reinit(GeometryWidget::TWOD);
     }
 
-    void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams) { _geometryWidget->Update(paramsMgr, dataMgr, rParams); }
+    void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
+    {
+        _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+        _transformTable->Update(rParams->GetTransform());
+    }
 
 private:
 };
