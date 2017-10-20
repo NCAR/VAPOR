@@ -102,11 +102,18 @@ class RENDER_API VizFeatureRenderer : public MyBase {
 #ifdef DEAD
     //! Render the region frame
     void drawRegionBounds(size_t ts) const;
-    //! Draw the axis lines, while building text labels.
-    void drawAxisTics(size_t timestep);
-    //! Draw Axis arrows
-    void drawAxisArrows(float *extents);
+#endif
 
+    // Draw the axis lines, while building text labels.
+    //
+    void drawAxisTics();
+
+    // Draw Axis arrows
+    //
+    void drawAxisArrows(
+        std::vector<double> minExts, std::vector<double> maxExts);
+
+#ifdef DEAD
     //! Static method to convert axis coordinates between user and lat-lon
     //! It is OK for outputs to equal corresponding inputs.
     //! \param[in] toLatLon indicates whether conversion is to LatLon (true) or to user (false)
