@@ -4,6 +4,7 @@
 
 #include <QObject>
 #include "vapor/MyBase.h"
+#include "vapor/ControlExecutive.h"
 #include "ui_TransformTableGUI.h"
 
 QT_USE_NAMESPACE
@@ -11,9 +12,7 @@ QT_USE_NAMESPACE
 
 
 namespace VAPoR {
-	class RenderParams;
-	class ParamsMgr;
-	class DataMgr;
+	class Transform;
 }
 
 class RenderEventRouter;
@@ -32,34 +31,39 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
 
 public: 
 
- TransformTable(QWidget* parent) {
-	setupUi(this);
-	scaleTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	translationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	rotationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	
-	scaleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-	rotationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-	translationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
- };
+ TransformTable(QWidget* parent);
 
- void Reinit() {};
-
- virtual ~TransformTable(){}
+ virtual ~TransformTable() {};
 
  virtual void Update(
-	const VAPoR::DataMgr *dataMgr,
-	VAPoR::ParamsMgr *paramsMgr,
-	VAPoR::RenderParams *rParams
- ) {};
+	const std::map <string, VAPoR::Transform *> &transforms
+ );
+ virtual void Update(
+	VAPoR::Transform *transform
+ ) {
+	map <string, VAPoR::Transform*> tMap;
+	tMap[""] = transform;
+	Update(tMap);
+ }
+
 
 protected slots:
+ void transformChanged(QTableWidget* table, int row, int col);
+ void transformChanged();
 
 private:
- const VAPoR::DataMgr *_dataMgr;
- VAPoR::ParamsMgr *_paramsMgr;
- VAPoR::RenderParams *_rParams;
+ map <string, VAPoR::Transform *> _transforms;
+
+ void updateTransformTable(QTableWidget* table,
+	string target, vector<double> values, int row);
+
+ void updateScales();
+ void updateTranslations();
+ void updateRotations();
  
+ void setScales(string dataset, vector<double> s);
+ void setTranslations(string dataset, vector<double> t);
+ void setRotations(string dataset, vector<double> r);
 };
 
 #endif //TRANSFORMTABLE_H 

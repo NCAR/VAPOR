@@ -165,7 +165,7 @@ void	DefineMaskVars(
 
 
 		rc = vdc.DefineDataVar(
-			maskvar, dimnames, dimnames, "", DC::INT8, true
+			maskvar, dimnames, dimnames, "", DC::INT8, compress
 		);
 
 		if (rc<0) {

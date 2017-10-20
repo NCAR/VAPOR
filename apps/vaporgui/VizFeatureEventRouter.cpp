@@ -55,7 +55,29 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 
 	setupUi(this);
 
-	cout << "VizFeatureEventRouter constructor" << endl;
+	// Disabled for now. Need to add support in VizFeatureRenderer
+	//
+	xMinTicEdit->setEnabled(false);
+	yMinTicEdit->setEnabled(false);
+	zMinTicEdit->setEnabled(false);
+	xMaxTicEdit->setEnabled(false);
+	yMaxTicEdit->setEnabled(false);
+	zMaxTicEdit->setEnabled(false);
+	xNumTicsEdit->setEnabled(false);
+	yNumTicsEdit->setEnabled(false);
+	zNumTicsEdit->setEnabled(false);
+	xTicSizeEdit->setEnabled(false);
+	yTicSizeEdit->setEnabled(false);
+	zTicSizeEdit->setEnabled(false);
+	axisOriginXEdit->setEnabled(false);
+	axisOriginYEdit->setEnabled(false);
+	axisOriginZEdit->setEnabled(false);
+	xTicOrientCombo->setEnabled(false);
+	yTicOrientCombo->setEnabled(false);
+	zTicOrientCombo->setEnabled(false);
+	labelHeightEdit->setEnabled(false);
+	labelDigitsEdit->setEnabled(false);
+	ticWidthEdit->setEnabled(false);
 
 	_animConnected = false;
 	_ap = NULL;
@@ -71,77 +93,246 @@ VizFeatureEventRouter::~VizFeatureEventRouter(){
 void
 VizFeatureEventRouter::hookUpTab()
 {
-	cout << "Hooking up VizFeatureEventRouter" << endl;
-	connect (stretch0Edit, SIGNAL( textChanged(const QString&) ), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (stretch0Edit, SIGNAL( returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (stretch1Edit, SIGNAL( textChanged(const QString&) ), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (stretch1Edit, SIGNAL( returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (stretch2Edit, SIGNAL( textChanged(const QString&) ), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (stretch2Edit, SIGNAL( returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	
-	connect (backgroundColorButton, SIGNAL(clicked()), this, SLOT(setBackgroundColor()));
-	connect (domainColorButton, SIGNAL(clicked()), this, SLOT(setDomainColor()));
-	connect (domainFrameCheckbox, SIGNAL(toggled(bool)),this, SLOT(setUseDomainFrame(bool)));
-	connect (regionFrameCheckbox, SIGNAL(toggled(bool)),this, SLOT(setUseRegionFrame(bool)));
-	connect (regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
-	connect (axisAnnotationCheckbox, SIGNAL(clicked()), this, SLOT(annotationChanged()));
-	connect (axisArrowCheckbox, SIGNAL(toggled(bool)),this, SLOT(setUseAxisArrows(bool)));
-	connect (arrowXEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (arrowYEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (arrowZEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
+	connect (
+		backgroundColorButton, SIGNAL(clicked()),
+		 this, SLOT(setBackgroundColor())
+	);
+	connect (
+		domainColorButton, SIGNAL(clicked()),
+		 this, SLOT(setDomainColor())
+	);
+	connect (
+		domainFrameCheckbox, SIGNAL(clicked()),
+		this, SLOT(setUseDomainFrame())
+	);
+	connect (
+		regionFrameCheckbox, SIGNAL(clicked()),
+		this, SLOT(setUseRegionFrame())
+	);
+	connect (
+		regionColorButton, SIGNAL(clicked()),
+		 this, SLOT(setRegionColor())
+	);
+	connect (
+		axisAnnotationCheckbox, SIGNAL(clicked()),
+		 this, SLOT(setAxisAnnotation())
+	);
+	connect (
+		axisArrowCheckbox, SIGNAL(clicked()),
+		this, SLOT(setUseAxisArrows())
+	);
+	connect (
+		arrowXEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		arrowYEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		arrowZEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
 	//Slots associated with axis annotation:
-	connect (xMinTicEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (yMinTicEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (zMinTicEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (xMaxTicEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (yMaxTicEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (zMaxTicEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (xNumTicsEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (yNumTicsEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (zNumTicsEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (xTicSizeEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (yTicSizeEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (zTicSizeEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (axisOriginYEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (axisOriginZEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (axisOriginXEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (latLonCheckbox, SIGNAL(toggled(bool)), this, SLOT(setLatLonAnnot(bool)));
-	connect (xTicOrientCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrient(int)));
-	connect (yTicOrientCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrient(int)));
-	connect (zTicOrientCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrient(int)));
-	connect (labelHeightEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (labelDigitsEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
-	connect (ticWidthEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setVizFeatureTextChanged(const QString&)));
+	connect (
+		xMinTicEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		yMinTicEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		zMinTicEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		xMaxTicEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		yMaxTicEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		zMaxTicEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		xNumTicsEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		yNumTicsEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		zNumTicsEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		xTicSizeEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		yTicSizeEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		zTicSizeEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		axisOriginYEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		axisOriginZEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		axisOriginXEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		latLonCheckbox, SIGNAL(toggled(bool)),
+		 this, SLOT(setLatLonAnnot(bool))
+	);
+	connect (
+		xTicOrientCombo, SIGNAL(activated(int)),
+		 this, SLOT(setXTicOrient(int))
+	);
+	connect (
+		yTicOrientCombo, SIGNAL(activated(int)),
+		 this, SLOT(setYTicOrient(int))
+	);
+	connect (
+		zTicOrientCombo, SIGNAL(activated(int)),
+		 this, SLOT(setZTicOrient(int))
+	);
+	connect (
+		labelHeightEdit, SIGNAL(textChanged(const QString&)),
+		 this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		labelDigitsEdit, SIGNAL(textChanged(const QString&)),
+		this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
+	connect (
+		ticWidthEdit, SIGNAL(textChanged(const QString&)),
+		this, SLOT(setVizFeatureTextChanged(const QString&))
+	);
 
-	connect (xMinTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (yMinTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (zMinTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (xMaxTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (yMaxTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (zMaxTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (xNumTicsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (yNumTicsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (zNumTicsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (xTicSizeEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (yTicSizeEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (zTicSizeEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (axisOriginYEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (axisOriginZEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (axisOriginXEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (labelHeightEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (labelDigitsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (ticWidthEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (arrowXEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (arrowYEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-	connect (arrowZEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
+	connect (
+		xMinTicEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		yMinTicEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		zMinTicEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		xMaxTicEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		yMaxTicEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		zMaxTicEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		xNumTicsEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		yNumTicsEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		zNumTicsEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		xTicSizeEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		yTicSizeEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		zTicSizeEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		axisOriginYEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		axisOriginZEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		axisOriginXEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		labelHeightEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		labelDigitsEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		ticWidthEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		arrowXEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		arrowYEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
+	connect (
+		arrowZEdit, SIGNAL(returnPressed()),
+		this, SLOT(vizfeatureReturnPressed())
+	);
 
-	connect (axisColorButton,SIGNAL(clicked()), this, SLOT(selectAxisColor()));
+	connect (
+		axisColorButton,SIGNAL(clicked()),
+		this, SLOT(setAxisColor())
+	);
 
-	connect (timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
-	connect (timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
-	connect (timeLLYEdit, SIGNAL(returnPressed()), this, SLOT(timeLLYChanged()));
-	connect (timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
-	connect (timeColorButton, SIGNAL(pressed()), this, SLOT(timeColorChanged()));
+	connect (
+		timeCombo, SIGNAL(activated(int)),
+		this, SLOT(timeAnnotationChanged())
+	);
+	connect (
+		timeLLXEdit, SIGNAL(returnPressed()),
+		this, SLOT(timeLLXChanged())
+	);
+	connect (
+		timeLLYEdit, SIGNAL(returnPressed()),
+		this, SLOT(timeLLYChanged())
+	);
+	connect (
+		timeSizeEdit, SIGNAL(returnPressed()),
+		this, SLOT(timeSizeChanged())
+	);
+	connect (
+		timeColorButton, SIGNAL(clicked()),
+		this, SLOT(setTimeColor())
+	);
 }
 
 void VizFeatureEventRouter::GetWebHelp(
@@ -186,6 +377,7 @@ void VizFeatureEventRouter::confirmText(){
 }
 
 void VizFeatureEventRouter::_confirmText(){
+#ifdef	DEAD
 	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
 
 	vector<double> stretch;
@@ -235,6 +427,7 @@ void VizFeatureEventRouter::_confirmText(){
 	dvals[2] = arrowZEdit->text().toDouble();
 	vParams->SetAxisArrowCoords(dvals);
 	invalidateText();
+#endif
 }
 
 void VizFeatureEventRouter::
@@ -245,9 +438,35 @@ vizfeatureReturnPressed(void){
 //Insert values from params into tab panel
 //
 void VizFeatureEventRouter::_updateTab(){
-return;
+	updateRegionColor();
+	updateDomainColor();
+	updateBackgroundColor();
+	updateAxisColor();
+	updateTimeColor();
 
 	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
+
+	domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
+	regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
+
+	bool axisAnnot = vParams->GetAxisAnnotation();
+	axisAnnotationCheckbox->setChecked(axisAnnot);
+	if (axisAnnot){
+		axisAnnotationFrame->show();
+	} else {
+		axisAnnotationFrame->hide();
+	}
+
+	// Axis arrows:
+	//
+	vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
+	arrowXEdit->setText(QString::number(axisArrowCoords[0]));
+	arrowYEdit->setText(QString::number(axisArrowCoords[1]));
+	arrowZEdit->setText(QString::number(axisArrowCoords[2]));
+	axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
+
+return;
+
 	
 	QPalette pal(regionColorEdit->palette());
 	double clr[3];
@@ -266,8 +485,6 @@ return;
 	pal2.setColor(QPalette::Base, newColor);
 	backgroundColorEdit->setPalette(pal2);
 	
-	domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
-	regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
 
 #ifdef	DEAD
 	string projString = _controlExec->GetDataMgr()->GetMapProjection();
@@ -283,13 +500,8 @@ return;
 	xTicOrientCombo->setCurrentIndex(ticDir[0]-1);
 	yTicOrientCombo->setCurrentIndex(ticDir[1]/2);
 	zTicOrientCombo->setCurrentIndex(ticDir[2]);
-	bool axisAnnot = vParams->GetAxisAnnotation();
-	axisAnnotationCheckbox->setChecked(axisAnnot);
-	if (axisAnnot){
-		axisAnnotationFrame->show();
-	} else {
-		axisAnnotationFrame->hide();
-	}
+
+
 	vector<long> numtics = vParams->GetNumTics();
 	vector<double> mintics = vParams->GetMinTics();
 	vector<double> maxtics = vParams->GetMaxTics();
@@ -320,80 +532,137 @@ return;
 	pal3.setColor(QPalette::Base, newColor);
 	axisColorEdit->setPalette(pal3);
 
-	//Axis arrows:
-	vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
-	arrowXEdit->setText(QString::number(axisArrowCoords[0]));
-	arrowYEdit->setText(QString::number(axisArrowCoords[1]));
-	arrowZEdit->setText(QString::number(axisArrowCoords[2]));
-	axisArrowCheckbox->setChecked(vParams->ShowAxisArrows());
 	
 	adjustSize();
+}
+
+void VizFeatureEventRouter::setColorHelper(
+	QWidget *w, vector <double> &rgb
+) {
+	rgb.clear();
+
+	QPalette pal(w->palette());
+	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
+
+	
+	rgb.push_back(newColor.red() / 255.0);
+	rgb.push_back(newColor.green() / 255.0);
+	rgb.push_back(newColor.blue() / 255.0);
+}
+
+void VizFeatureEventRouter::updateColorHelper(
+	const vector <double> &rgb, QWidget *w
+) {
+	assert(rgb.size() == 3);
+
+	QColor color((int)(rgb[0]*255.0), (int)(rgb[1]*255.0), (int)(rgb[2]*255.0));
+
+	QPalette pal;
+	pal.setColor(QPalette::Base, color);
+	w->setPalette(pal);
 }
 
 
 void VizFeatureEventRouter::setRegionColor(){
 	
-	QPalette pal(regionColorEdit->palette());
-	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-	if (!newColor.isValid()) return;
-	pal.setColor(QPalette::Base, newColor);
-	regionColorEdit->setPalette(pal);
-	vector<double> rgb;
-	rgb.push_back((double)newColor.red()/256.);
-	rgb.push_back((double)newColor.green()/256.);
-	rgb.push_back((double)newColor.blue()/256.);
-	confirmText();
+	vector <double> rgb;
+
+	setColorHelper(regionColorEdit, rgb);
+	if (rgb.size() != 3) return;
+
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetRegionColor(rgb);
 	
 }
+
+void VizFeatureEventRouter::updateRegionColor() {
+
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector <double> rgb;
+	vfParams->GetRegionColor(rgb);
+
+	updateColorHelper(rgb, regionColorEdit);
+}
+
 void VizFeatureEventRouter::setDomainColor(){
-	QPalette pal(domainColorEdit->palette());
-	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-	if (!newColor.isValid()) return;
-	pal.setColor(QPalette::Base, newColor);
-	domainColorEdit->setPalette(pal);
-	vector<double> rgb;
-	rgb.push_back((double)newColor.red()/256.);
-	rgb.push_back((double)newColor.green()/256.);
-	rgb.push_back((double)newColor.blue()/256.);
-	confirmText();
+	vector <double> rgb;
+
+	setColorHelper(domainColorEdit, rgb);
+	if (rgb.size() != 3) return;
+
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetDomainColor(rgb);
-	
 }
-void VizFeatureEventRouter::setBackgroundColor(){
-	QPalette pal(backgroundColorEdit->palette());
-	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-	if (!newColor.isValid()) return;
-	pal.setColor(QPalette::Base, newColor);
-	backgroundColorEdit->setPalette(pal);
-	vector<double> rgb;
-	rgb.push_back((double)newColor.red()/256.);
-	rgb.push_back((double)newColor.green()/256.);
-	rgb.push_back((double)newColor.blue()/256.);
-	confirmText();
+
+void VizFeatureEventRouter::updateDomainColor() {
+
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector <double> rgb;
+	vfParams->GetDomainColor(rgb);
+
+	updateColorHelper(rgb, domainColorEdit);
+}
+
+
+
+void VizFeatureEventRouter::setBackgroundColor() {
+	vector <double> rgb;
+
+	setColorHelper(backgroundColorEdit, rgb);
+	if (rgb.size() != 3) return;
+
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetBackgroundColor(rgb);
-	invalidateText();
-	
 }
-void VizFeatureEventRouter::selectAxisColor(){
-	QPalette pal(axisColorEdit->palette());
-	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-	if (!newColor.isValid()) return;
-	pal.setColor(QPalette::Base, newColor);
-	axisColorEdit->setPalette(pal);
-	vector<double> rgb;
-	rgb.push_back((double)newColor.red()/256.);
-	rgb.push_back((double)newColor.green()/256.);
-	rgb.push_back((double)newColor.blue()/256.);
-	confirmText();
+
+
+void VizFeatureEventRouter::updateBackgroundColor() {
+
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector <double> rgb;
+	vfParams->GetBackgroundColor(rgb);
+
+	updateColorHelper(rgb, backgroundColorEdit);
+}
+
+void VizFeatureEventRouter::setAxisColor(){
+	vector <double> rgb;
+
+	setColorHelper(axisColorEdit, rgb);
+	if (rgb.size() != 3) return;
+
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetAxisColor(rgb);
-	invalidateText();
-	
 }
+
+void VizFeatureEventRouter::updateAxisColor() {
+
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector <double> rgb;
+	vfParams->GetAxisColor(rgb);
+
+	updateColorHelper(rgb, axisColorEdit);
+}
+
+void VizFeatureEventRouter::setTimeColor() {
+	vector <double> rgb;
+
+	setColorHelper(timeColorEdit, rgb);
+	if (rgb.size() != 3) return;
+
+	MiscParams* miscParams = GetMiscParams();
+	miscParams->SetTimeAnnotColor(rgb);
+}
+
+void VizFeatureEventRouter::updateTimeColor() {
+
+	MiscParams* miscParams = GetMiscParams();
+	vector <double> rgb;
+	miscParams->GetTimeAnnotColor(rgb);
+
+	updateColorHelper(rgb, timeColorEdit);
+}
+
 
 void VizFeatureEventRouter::timeAnnotationChanged() {
 	if (_animConnected==false){
@@ -447,22 +716,6 @@ void VizFeatureEventRouter::timeSizeChanged() {
 	drawTimeStamp();
 }
 
-void VizFeatureEventRouter::timeColorChanged() {
-	MiscParams* miscParams = GetMiscParams();
-
-	QPalette pal(timeColorEdit->palette());
-	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-	if (!newColor.isValid()) return;
-	pal.setColor(QPalette::Base, newColor);
-	timeColorEdit->setPalette(pal);
-	//vector<float> rgb;
-	float rgb[3];
-	rgb[0] = ((float)newColor.red()/256.);
-	rgb[1] = ((float)newColor.green()/256.);
-	rgb[2] = ((float)newColor.blue()/256.);
-	miscParams->SetTimeAnnotColor(rgb);
-	drawTimeStamp();
-}
 
 void VizFeatureEventRouter::drawTimeStep(string myString) {
 	_controlExec->ClearText();
@@ -525,43 +778,33 @@ void VizFeatureEventRouter::setLatLonAnnot(bool val){
 	invalidateText();
 	
 }
-void VizFeatureEventRouter::
-setUseDomainFrame(bool val){
-	
-	confirmText();
-	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
-	
-	vfParams->SetUseDomainFrame(val);
-	
-}
-void VizFeatureEventRouter::
-setUseRegionFrame(bool val){
-	
-	confirmText();
-	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
-	
-	vfParams->SetUseRegionFrame(val);
 
+void VizFeatureEventRouter::setUseDomainFrame(){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
+}
+
+
+void VizFeatureEventRouter::setUseRegionFrame(){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
 }
 
 // Response to a click on axisAnnotation checkbox:
-void VizFeatureEventRouter::annotationChanged(){
+void VizFeatureEventRouter::setAxisAnnotation(){
 	bool annotate = axisAnnotationCheckbox->isChecked();
 	if (annotate){
 		axisAnnotationFrame->show();
 	} else {
 		axisAnnotationFrame->hide();
 	}
-	invalidateText();
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetAxisAnnotation(annotate);
-
 }
-void VizFeatureEventRouter::setUseAxisArrows(bool val){
-	confirmText();
+
+void VizFeatureEventRouter::setUseAxisArrows(){
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
-	vfParams->SetShowAxisArrows(val);
-	
+	vfParams->SetShowAxisArrows(axisArrowCheckbox->isChecked());
 }
 
 void VizFeatureEventRouter::invalidateText()

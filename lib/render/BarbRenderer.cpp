@@ -442,7 +442,10 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 					string myVisName = GetVisualizer();
 					VAPoR::ViewpointParams* vpp = _paramsMgr->GetViewpointParams(myVisName); 
 					
-					vector<double> scales = vpp->GetScales(datasetName);
+
+					Transform *t = vpp->GetTransform(datasetName);
+					assert(t);
+					vector<double> scales = t->GetScales();
 					
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
