@@ -123,8 +123,9 @@ void RenderHolder::newRenderer() {
     //
     rDialog.rendererCombo->clear();
     for (int i = 0; i < renderClasses.size(); i++) {
-        rDialog.rendererCombo->addItem(
-            QString::fromStdString(renderClasses[i]));
+        // Excludes the Hello renderer. Comment out this line to include it.
+        if (renderClasses[i] != "Hello")
+            rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i]));
     }
     if (nDialog.exec() != QDialog::Accepted)
         return;
