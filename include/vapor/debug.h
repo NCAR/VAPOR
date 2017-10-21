@@ -17,6 +17,7 @@
 #define dLog(...)
 #define dBreak()
 #define dBreakIf(x)
+#define dBreakCount(x)
 #else
 #define dLog(...)                     \
     {                                 \
@@ -34,6 +35,12 @@
         if (x) {      \
             dBreak(); \
         }             \
+    }
+#define dBreakCount(x)        \
+    {                         \
+        static int count = 0; \
+        if (++count == (x))   \
+            dBreak();         \
     }
 #endif
 
