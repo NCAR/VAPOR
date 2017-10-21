@@ -58,7 +58,7 @@ ControlExec::~ControlExec() {
 }
 
 
-int ControlExec::NewVisualizer(string winName) {
+int ControlExec::NewVisualizer(string winName, vector<string> withDatasets) {
 
 	// Remove if already exists. Else no-op
 	//
@@ -73,6 +73,11 @@ int ControlExec::NewVisualizer(string winName) {
 		SetErrMsg("Failed to create Visualizer parameters");
 		return -1;
 	}
+    
+    // Add dataset transforms for existing datasets
+    for (int i = 0; i < withDatasets.size(); i++) {
+        vpParams->AddDatasetTransform(withDatasets[i]);
+    }
 
 	Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
 	_visualizers[winName] = viz;
