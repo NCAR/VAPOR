@@ -791,7 +791,7 @@ void MainForm::languageChange()
 {
 	setWindowTitle( tr( "VAPoR:  NCAR Visualization and Analysis Platform for Research" ) );
 
-    _fileNew_SessionAction->setText( tr( "New" ) );
+    _fileNew_SessionAction->setText( tr( "&New" ) );
     
 	_fileNew_SessionAction->setToolTip("Restart the session with default settings");
 	_fileNew_SessionAction->setShortcut( Qt::CTRL + Qt::Key_N );
@@ -827,7 +827,7 @@ void MainForm::languageChange()
 	_installCLIToolsAction->setText("Install CLI Tools");
 	_installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities location to path. Needs to updated if app bundle moved");
 	
-    _dataLoad_MetafileAction->setText( tr( "Open VDC" ) );
+    _dataLoad_MetafileAction->setText( tr( "Open V&DC" ) );
 	_dataLoad_MetafileAction->setToolTip("Specify a VDC data set to be loaded in current session");
 	_dataLoad_MetafileAction->setShortcut(tr("Ctrl+D"));
     _dataClose_MetafileAction->setText( tr( "Close VDC" ) );
@@ -924,7 +924,8 @@ void MainForm::sessionOpen(QString qfileName)
 			"Choose a VAPOR session file to restore a session", 
 			path, "Vapor 3 Session Save Files (*.vs3)", false
 		);
-		if (files.empty()) return;
+		if (files.empty()) 
+            return;
 
 		qfileName = files[0].c_str();
 	}
@@ -1278,9 +1279,8 @@ void MainForm::importMPASData()
 }
 
 vector <string> MainForm::myGetOpenFileNames(
-	string prompt, string dir, string filter, bool multi
-) {
-
+	string prompt, string dir, string filter, bool multi) 
+{
 	QString qPrompt(prompt.c_str());
 	QString qDir(dir.c_str());
 	QString qFilter(filter.c_str());
@@ -1292,16 +1292,18 @@ vector <string> MainForm::myGetOpenFileNames(
 		);
 		QStringList list = fileNames;
 		QStringList::Iterator it = list.begin();
-		while(it != list.end()) {
-			files.push_back((*it).toStdString());
+		while(it != list.end()) 
+        {
+            if( !it->isNull() )
+			    files.push_back((*it).toStdString());
 			++it;
 		}
 	}
 	else {
 		QString fileName = QFileDialog::getOpenFileName(
-			this, qPrompt, qDir, qFilter
-		);
-		files.push_back(fileName.toStdString());
+			this, qPrompt, qDir, qFilter );
+        if( !fileName.isNull() )
+		    files.push_back(fileName.toStdString());
 	}
 
 	for (int i=0; i<files.size(); i++) {
