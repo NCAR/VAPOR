@@ -509,7 +509,7 @@ void RenderHolder::Update() {
 	// the current active renderer to be "empty"
 	//
 	if (numRows == 0) {
-		p->SetActiveRenderer("", "", "");
+		p->SetActiveRenderer(activeViz, "", "");
 		SetCurrentIndex(-1);
 		stackedWidget->hide();
 	}
