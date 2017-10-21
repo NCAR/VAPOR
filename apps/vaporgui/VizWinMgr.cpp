@@ -284,7 +284,12 @@ void VizWinMgr::LaunchVisualizer()
 
 	string vizName = make_viz_name(_controlExec->GetVisualizerNames());
 
-	int rc = _controlExec->NewVisualizer(vizName);
+    VAPoR::ParamsMgr* pm = _controlExec->GetParamsMgr();
+    GUIStateParams *p = (GUIStateParams *)pm->GetParams(GUIStateParams::GetClassType());
+    vector <string> currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    
+	int rc = _controlExec->NewVisualizer(vizName, currentDataSets);
 	if (rc<0) {
 		cerr << "ERROR MESSAGE" << endl;
 #ifdef	DEAD
