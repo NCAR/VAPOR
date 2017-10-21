@@ -17,10 +17,12 @@
 #define dLog(...)
 #define dBreak()
 #define dBreakIf(x)
+#define dBreakCount(x)
 #else
 #define dLog(...) { dLog_pre(); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); }
 #define dBreak() { dLog("Breakpoint"); raise(SIGTRAP); }
 #define dBreakIf(x) { if (x) { dBreak(); } }
+#define dBreakCount(x) { static int count = 0; if (++count == (x)) dBreak(); }
 #endif
 
 #endif
