@@ -112,6 +112,12 @@ class RENDER_API ControlExec : public MyBase {
     //! existing visualizer will be destroyed and a new one created
     //! with the same name.
     //!
+    //! \param[in] withDatasets is the list of currently opened datasets.
+    //! When a dataset is loaded, it loops over the existing visualizers
+    //! and adds params for the currently loading dataset. Since datasets
+    //! could've been loaded prior to the creation of this visualizer,
+    //! they need to be manually added here.
+    //!
     //! \note Need to establish what OpenGL state mgt, if any, is performed
     //! by UI. For example, who calls swapbuffers?
     //!
@@ -121,7 +127,7 @@ class RENDER_API ControlExec : public MyBase {
     //! hints about what kind of graphics context is needed
     //! (e.g. double buffering)
     //
-    int NewVisualizer(string name);
+    int NewVisualizer(string name, vector<string> withDatasets);
 
     //! Delete an existing visualizer
     //!
