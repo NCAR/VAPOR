@@ -65,7 +65,6 @@ VizWin::VizWin(
 	_buttonNum = 0;
 
 	setMouseTracking(false);	// Only track mouse when button clicked/held
-	dLog("W=%i\t H=%i", width(), height());
 }
 /*
  *  Destroys the object and frees any allocated resources
@@ -635,9 +634,17 @@ void VizWin::setFocus(){
 
 
 void VizWin::paintGL() {
+	static bool firstRun = true;
 
 	if (! FrameBufferReady()) {
 		return;
+	}
+
+	if (firstRun) {
+		ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+		ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
+		vParams->SetWindowSize(width(), height());
+		firstRun = false;
 	}
 
 	glClearColor(0.,0.,0.,1.);
