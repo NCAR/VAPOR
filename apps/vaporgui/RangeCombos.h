@@ -60,6 +60,7 @@ private slots:
  // Slot for QSlider events
  //
  void setSlider();
+ void setSliderMini( int pos );
 
 public slots:
 
