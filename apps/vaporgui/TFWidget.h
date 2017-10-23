@@ -54,7 +54,6 @@ public:
 
 	void loadTF(string varname);
 
-	void loadInstalledTF(string varname);
 	void getRange(float range[2], float values[2]);
 
 public slots:

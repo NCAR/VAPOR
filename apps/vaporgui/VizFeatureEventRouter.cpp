@@ -380,9 +380,6 @@ void VizFeatureEventRouter::_confirmText(){
 	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
 
 	vector<double> stretch;
-	stretch.push_back(stretch0Edit->text().toDouble());
-	stretch.push_back(stretch1Edit->text().toDouble());
-	stretch.push_back(stretch2Edit->text().toDouble());
 	//Force them to have minimum = 1:
 	double minfactor = 1.e32;
 	for (int i = 0; i<3; i++){

@@ -106,13 +106,6 @@ class ColorbarWidget;
 //! Provide text descriptions and URLs for Web-based help as described 
 //! under EventRouter::makeWebHelpActions()
 //!
-//! If there is a MappingFrame in the tab, invoke EventRouter::loadTF(), 
-//! EventRouter::fileSaveTF(), 
-//! EventRouter::loadInstalledTF(), EventRouter::saveTF() to load and 
-//! save the transfer functions.  Refer to MappingFrame documentation 
-//! for additional instructions.
-//!
-//!
 //! If there is a MouseMode (manipulator) associated with the tab, 
 //! then EventRouter::captureMouseUp() and 
 //! EventRouter::captureMouseDown() must be implemented.
@@ -186,37 +179,6 @@ public:
  virtual void UpdateMapBounds() {}
 #endif
 
-#ifdef DEAD
- //! Launch a dialog to save the current transfer function to file.
- //!
- //! \param[in] rParams RenderParams instance associated with the 
- //! transfer function
- //
- void fileSaveTF();
- 
- //! Launch a dialog to enable user to load an installed transfer function.
- //!
- //! \param[in] varname name of the variable associated with the TF.
- void loadInstalledTF(string varname);
- 
- //! Launch a dialog to enable user to load a transfer function from 
- //! session or file.
- //!
- //! \param[in] varname name of the variable associated with the 
- //! TF.
- void loadTF(string varname);
- 
- //! Launch a dialog to enable user to load a transfer function from file.
- //!
- //! \param[in] varname name of the variable associated with the TF.
- //! \param[in] startPath file path for the dialog to initially present to user
- //! \param[in] savePath indicates whether or not the resulting path should 
- //! be saved to user preferences.
- void fileLoadTF(
-	string varname, const char* startPath, 
-	bool savePath
- );
-#endif
  
  //! Obtain the current valid histogram.  Optionally will construct a new 
  //! one if needed.
