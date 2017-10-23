@@ -377,6 +377,7 @@ void VizFeatureEventRouter::confirmText(){
 }
 
 void VizFeatureEventRouter::_confirmText(){
+#ifdef	DEAD
 	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
 
 	vector<double> stretch;
@@ -423,6 +424,7 @@ void VizFeatureEventRouter::_confirmText(){
 	dvals[2] = arrowZEdit->text().toDouble();
 	vParams->SetAxisArrowCoords(dvals);
 	invalidateText();
+#endif
 }
 
 void VizFeatureEventRouter::
