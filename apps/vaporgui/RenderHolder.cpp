@@ -114,7 +114,10 @@ void RenderHolder::newRenderer()
     // Set up the list of renderer names in the dialog:
     //
     rDialog.rendererCombo->clear();
-    for (int i = 0; i < renderClasses.size(); i++) { rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i])); }
+    for (int i = 0; i < renderClasses.size(); i++) {
+        // Excludes the Hello renderer. Comment out this line to include it.
+        if (renderClasses[i] != "Hello") rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i]));
+    }
     if (nDialog.exec() != QDialog::Accepted) return;
 
     int    selection = rDialog.rendererCombo->currentIndex();
@@ -446,7 +449,7 @@ void RenderHolder::Update()
     // the current active renderer to be "empty"
     //
     if (numRows == 0) {
-        p->SetActiveRenderer("", "", "");
+        p->SetActiveRenderer(activeViz, "", "");
         SetCurrentIndex(-1);
         stackedWidget->hide();
     }
