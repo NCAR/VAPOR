@@ -59,6 +59,7 @@ class Combo : public QWidget {
     // Slot for QSlider events
     //
     void setSlider();
+    void setSliderMini(int pos);
 
   public slots:
 
