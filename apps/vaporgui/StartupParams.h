@@ -44,6 +44,12 @@ public:
     //! Destructor
     ~StartupParams();
 
+    //! Reset defaults
+    //!
+    //! Reset startup defaults to "factory" settings
+    //
+    void Reinit();
+
     //! Provide a short name suitable for use in the GUI tab
     //! \retval string name
     const std::string getShortName() { return _shortName; }
@@ -191,10 +197,12 @@ public:
 
     // Get static string identifier for this params class
     //
-    static string GetClassType() { return (m_classType); }
+    static string GetClassType() { return (_classType); }
+
+    int SaveStartup() const;
 
 private:
-    static const string m_classType;
+    static const string _classType;
     static const string _shortName;
     static const string _cacheMBTag;
     static const string _texSizeTag;
@@ -214,6 +222,9 @@ private:
     static const string _numExecutionThreads;
 
     void _init();
+    bool _loadFromStartupFile();
+
+    string _startupPath;
 };
 
 #endif    // STARTUPPARAMS_H
