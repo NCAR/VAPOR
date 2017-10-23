@@ -19,6 +19,8 @@ Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType) {
     _value = _minValid;
     _intType = intType;
 
+    _floatPrecision = 6; // 6 is default in QT
+
     _lineEdit = NULL;
     _lineEditValidator = NULL;
     _slider = NULL;
@@ -99,7 +101,7 @@ void Combo::Update(double min, double max, double value) {
     if (_intType) {
         _lineEdit->setText(QString::number((int)value));
     } else {
-        _lineEdit->setText(QString::number(value));
+        _lineEdit->setText(QString::number(value, 'g', _floatPrecision));
     }
     _lineEdit->blockSignals(oldState);
 
@@ -134,7 +136,7 @@ void Combo::setLineEdit() {
         if (_intType) {
             _lineEdit->setText(QString::number((int)value));
         } else {
-            _lineEdit->setText(QString::number(value));
+            _lineEdit->setText(QString::number(value, 'g', _floatPrecision));
         }
     }
     if (value > _maxValid) {
@@ -142,7 +144,7 @@ void Combo::setLineEdit() {
         if (_intType) {
             _lineEdit->setText(QString::number((int)value));
         } else {
-            _lineEdit->setText(QString::number(value));
+            _lineEdit->setText(QString::number(value, 'g', _floatPrecision));
         }
     }
 
@@ -195,7 +197,7 @@ void Combo::setSliderMini(int pos) {
     if (_intType)
         _lineEdit->setText(QString::number((int)value));
     else
-        _lineEdit->setText(QString::number(value));
+        _lineEdit->setText(QString::number(value, 'g', _floatPrecision));
     _lineEdit->blockSignals(oldState);
 }
 
@@ -205,6 +207,11 @@ void Combo::SetSliderLineEdit(double value) {
     // and the new value
     //
     Update(_minValid, _maxValid, value);
+}
+
+void Combo::SetPrecision(int precision) {
+    if (precision > 0)
+        _floatPrecision = precision;
 }
 
 //////////////////////////////////////////////////////
