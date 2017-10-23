@@ -39,7 +39,6 @@ Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType) {
         _lineEdit, SIGNAL(returnPressed()),
         this, SLOT(setLineEdit()));
 
-    //	_slider = new QSlider(Qt::Horizontal);
     _slider = slider;
     _slider->setFocusPolicy(Qt::StrongFocus);
     _slider->setSingleStep(1);
@@ -52,6 +51,9 @@ Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType) {
     connect(
         _slider, SIGNAL(sliderReleased()),
         this, SLOT(setSlider()));
+
+    // update values displayed in the _lineEdit without incurring any state upate.
+    connect(_slider, SIGNAL(sliderMoved(int)), this, SLOT(setSliderMini(int)));
 
     // This is the aggregate slot that is fired when either the _slider
     // or the _lineEdit  object change value
@@ -90,9 +92,6 @@ void Combo::Update(double min, double max, double value) {
     // and perform range checking inside the slot for returnPressed()
     //
     // Currently we use option (2)
-    //
-    //	_lineEditValidator->setBottom(_minValid);
-    //	_lineEditValidator->setTop(_maxValid);
 
     // Update the GUI to reflect the new values
     //
@@ -151,7 +150,6 @@ void Combo::setLineEdit() {
         return;
 
     _value = value;
-    //emit valueChanged(_intType ? (int) value : value);
     if (_intType) {
         emit valueChanged((int)value);
     } else {
@@ -174,12 +172,31 @@ void Combo::setSlider() {
         return;
 
     _value = value;
-    //emit valueChanged(_intType ? (int) value : value);
     if (_intType) {
         emit valueChanged((int)value);
     } else {
         emit valueChanged(value);
     }
+}
+
+// This mini version only changes the values displayed in _lineEdit,
+// but not emit any other signals.
+void Combo::setSliderMini(int pos) {
+    int min = _slider->minimum();
+    int max = _slider->maximum();
+
+    assert(min <= pos && max >= pos);
+
+    double value = ((double)(pos - min) / (double)(max - min)) *
+                       (_maxValid - _minValid) +
+                   _minValid;
+
+    bool oldState = _lineEdit->blockSignals(true);
+    if (_intType)
+        _lineEdit->setText(QString::number((int)value));
+    else
+        _lineEdit->setText(QString::number(value));
+    _lineEdit->blockSignals(oldState);
 }
 
 void Combo::SetSliderLineEdit(double value) {
