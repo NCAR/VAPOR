@@ -139,7 +139,7 @@ void RenderHolder::newRenderer() {
 	string renderClass = renderClasses[selection];
 #endif
 
-    int helloIdx = 0;
+    int helloIdx = 9999;   // cannot have this many renderers...
 	for (int i = 0; i<renderClasses.size(); i++)
     {
         if( renderClasses[i] != "Hello" ) // Excludes the Hello renderer. 
