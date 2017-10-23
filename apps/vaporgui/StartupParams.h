@@ -52,6 +52,12 @@ public:
  //! Destructor
  ~StartupParams();
 
+ //! Reset defaults
+ //!
+ //! Reset startup defaults to "factory" settings
+ //
+ void Reinit();
+
 
  //! Provide a short name suitable for use in the GUI tab
  //! \retval string name
@@ -228,32 +234,37 @@ public:
  // Get static string identifier for this params class
  //
  static string GetClassType() {
-	return(m_classType);
+	return(_classType);
  }
+
+ int SaveStartup() const;
 	
 	
 private:
 	
-	static const string m_classType;
-	static const string _shortName;
-	static const string _cacheMBTag;
-	static const string _texSizeTag;
-	static const string _texSizeEnableTag;
-	static const string _winSizeTag;
-	static const string _winSizeLockTag;
-	static const string _currentPrefsPathTag;
-	static const string _sessionDirTag;
-	static const string _metadataDirTag;
-	static const string _imageDirTag;
-	static const string _tfDirTag;
-	static const string _flowDirTag;
-	static const string _pythonDirTag;
-	static const string _fidelityDefault2DTag;
-	static const string _fidelityDefault3DTag;
-	static const string _autoStretchTag;
-	static const string _numExecutionThreads;
-	
-	void _init();
+ static const string _classType;
+ static const string _shortName;
+ static const string _cacheMBTag;
+ static const string _texSizeTag;
+ static const string _texSizeEnableTag;
+ static const string _winSizeTag;
+ static const string _winSizeLockTag;
+ static const string _currentPrefsPathTag;
+ static const string _sessionDirTag;
+ static const string _metadataDirTag;
+ static const string _imageDirTag;
+ static const string _tfDirTag;
+ static const string _flowDirTag;
+ static const string _pythonDirTag;
+ static const string _fidelityDefault2DTag;
+ static const string _fidelityDefault3DTag;
+ static const string _autoStretchTag;
+ static const string _numExecutionThreads;
+
+ void _init();
+ bool _loadFromStartupFile();
+
+string _startupPath;
 };
 
 #endif //STARTUPPARAMS_H 
