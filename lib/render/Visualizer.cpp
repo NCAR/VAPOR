@@ -225,7 +225,6 @@ void Visualizer::applyTransforms(int i) {
 
 int Visualizer::paintEvent()
 {
-    cout << "paintEvent() " << endl;
 	MyBase::SetDiagMsg("Visualizer::paintGL()");
 
 	//Do not proceed if there is no DataMgr
