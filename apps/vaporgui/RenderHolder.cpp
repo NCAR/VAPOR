@@ -95,6 +95,12 @@ void RenderHolder::newRenderer()
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
 
     vector<string> renderClasses = _controlExec->GetAllRenderClasses();
+    for (vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++) {
+        if (*it == "Hello") {
+            renderClasses.erase(it);
+            break;
+        }
+    }
 
     // Launch a dialog to select a renderer type, visualizer, name
     // Then insert a horizontal line with text and checkbox.
@@ -115,26 +121,10 @@ void RenderHolder::newRenderer()
     //
     rDialog.rendererCombo->clear();
 
-#if DEBUG_HELLO
     for (int i = 0; i < renderClasses.size(); i++) { rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i])); }
     if (nDialog.exec() != QDialog::Accepted) return;
     int    selection = rDialog.rendererCombo->currentIndex();
     string renderClass = renderClasses[selection];
-
-#else
-
-    int helloIdx = 9999;    // cannot have this many renderers...
-    for (int i = 0; i < renderClasses.size(); i++) {
-        if (renderClasses[i] != "Hello")    // Excludes the Hello renderer.
-            rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i]));
-        else
-            helloIdx = i;
-    }
-    if (nDialog.exec() != QDialog::Accepted) return;
-    int selection = rDialog.rendererCombo->currentIndex();
-    if (selection >= helloIdx) selection++;
-    string renderClass = renderClasses[selection];
-#endif
 
     selection = rDialog.dataMgrCombo->currentIndex();
     string dataSetName = dataSetNames[selection];
