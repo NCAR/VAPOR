@@ -202,21 +202,21 @@ string ErrorReporter::GetSystemInformation()
 		fprintf(stderr, "popen failed\n");
 	}
 #elif defined(WIN32)
-	// DWORD version = 0;
-	// DWORD major = 0;
-	// DWORD minor = 0;
-	// DWORD build = 0;
-	// 
-	// vrsion = GetVersion();
-	// 
-	// major = (DWORD)(LOBYTE(LOWORD(version)));
-	// minor = (DWORD)(HIBYTE(LOWORD(version)));
-	// 
-	// if (version < 0x80000000) {
-	//     build = (DWORD)(HIWORD(version));
-	// }
+	DWORD version = 0;
+	DWORD major = 0;
+	DWORD minor = 0;
+	DWORD build = 0;
+	
+	version = GetVersion();
+	
+	major = (DWORD)(LOBYTE(LOWORD(version)));
+	minor = (DWORD)(HIBYTE(LOWORD(version)));
+	
+	if (version < 0x80000000) {
+	    build = (DWORD)(HIWORD(version));
+	}
 
-	// ret += "OS: Windows " + to_string(major) + "." + to_string(minor) + " (" + to_string(build) + ")\n";
+	ret += "OS: Windows " + to_string(major) + "." + to_string(minor) + " (" + to_string(build) + ")\n";
 #else
 	return "Unsupported Platform";
 #endif
