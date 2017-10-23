@@ -75,6 +75,14 @@ class GUIStateParams : public VAPoR::ParamsBase {
 
     //! method identifies the current session file
     //! \retval session file path
+    string GetCurrentImageSavePath() const;
+
+    //! method sets the current session path
+    //! \param[in] path string
+    void SetCurrentImageSavePath(string path);
+
+    //! method identifies the current session file
+    //! \retval session file path
     string GetCurrentTFPath();
 
     //! method sets the current session path
@@ -130,6 +138,7 @@ class GUIStateParams : public VAPoR::ParamsBase {
     static const string m_sessionFileTag;
     static const string m_openDataTag;
     static const string m_imagePathTag;
+    static const string m_imageSavePathTag;
     static const string m_pythonPathTag;
     static const string m_flowPathTag;
     static const string m_tfPathTag;
