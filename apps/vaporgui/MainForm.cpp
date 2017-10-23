@@ -215,6 +215,8 @@ MainForm::MainForm(
         std::bind(&MainForm::_stateChangeCB, this));
     _paramsMgr->RegisterStateChangeFlag(&_stateChangeFlag);
 
+    // Set Defaults from startup file
+    //
     StartupParams *sP = GetStartupParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
     _controlExec->SetNumThreads(sP->GetNumExecutionThreads());
@@ -811,8 +813,14 @@ void MainForm::sessionOpenHelper(string fileName) {
 
     // ControlExec::LoadState invalidates params state
     //
+    StartupParams *sP = GetStartupParams();
     GUIStateParams *newP = GetStateParams();
     newP->SetCurrentSessionPath(fileName);
+    newP->SetCurrentSessionPath(sP->GetSessionDir());
+    newP->SetCurrentImagePath(sP->GetImageDir());
+    newP->SetCurrentTFPath(sP->GetTFDir());
+    newP->SetCurrentPythonPath(sP->GetPythonDir());
+    newP->SetCurrentFlowPath(sP->GetFlowDir());
 }
 
 // Open session file
@@ -1951,8 +1959,8 @@ void MainForm::enableAnimationWidgets(bool on) {
 //
 void MainForm::captureSingleJpeg() {
     showCitationReminder();
-    StartupParams *startupP = GetStartupParams();
-    string imageDir = startupP->GetImageDir();
+    GUIStateParams *p = GetStateParams();
+    string imageDir = p->GetCurrentImageSavePath();
 
     QFileDialog fileDialog(this,
                            "Specify single image capture file name",
@@ -1980,10 +1988,9 @@ void MainForm::captureSingleJpeg() {
     string filepath = fileInfo->absoluteFilePath().toStdString();
 
     //Save the path for future captures
-    startupP->SetImageDir(fileInfo->absolutePath().toStdString());
+    p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
 
     //Turn on "image capture mode" in the current active visualizer
-    GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
     _controlExec->EnableImageCapture(filepath, vizName);
 }
@@ -2042,8 +2049,8 @@ void MainForm::launchPlotUtility() {
 //Then start file saving mode.
 void MainForm::startAnimCapture() {
     showCitationReminder();
-    StartupParams *startupP = GetStartupParams();
-    string imageDir = startupP->GetImageDir();
+    GUIStateParams *p = GetStateParams();
+    string imageDir = p->GetCurrentImageSavePath();
     QFileDialog fileDialog(this,
                            "Specify first file name for image capture sequence",
                            imageDir.c_str(),
@@ -2067,7 +2074,7 @@ void MainForm::startAnimCapture() {
     if (suffix == "tiff")
         suffix = "tif";
     //Save the path for future captures
-    startupP->SetImageDir(fileInfo->absolutePath().toStdString());
+    p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
 
     QString fileBaseName = fileInfo->baseName();
     //See if it ends with digits.  If not, append them
@@ -2109,7 +2116,6 @@ void MainForm::startAnimCapture() {
     filePath += suffix;
     string fpath = filePath.toStdString();
     //Turn on "image capture mode" in the current active visualizer
-    GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
     _controlExec->EnableAnimationCapture(vizName, true, fpath);
     _capturingAnimationVizName = vizName;
