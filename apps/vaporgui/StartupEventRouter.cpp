@@ -46,10 +46,6 @@
 #include "StartupParams.h"
 #include "ErrorReporter.h"
 
-namespace {
-string StartupFile = ".vapor3_startup";
-}
-
 using namespace VAPoR;
 
 StartupEventRouter::StartupEventRouter(
@@ -66,20 +62,9 @@ StartupEventRouter::StartupEventRouter(
     tfPathButton->setIcon(QIcon(*fileopenIcon));
     flowPathButton->setIcon(QIcon(*fileopenIcon));
     pythonPathButton->setIcon(QIcon(*fileopenIcon));
-    setSettingsChanged(false);
-    _settingsChanged = false; // this is a quick hack
-    _savedStartupParams = 0;
-    _textChangedFlag = false;
-
-    _startupPath = QDir::homePath().toStdString();
-    _startupPath += QDir::separator().toAscii();
-    _startupPath += StartupFile;
-    loadDefaultsFromStartupFile();
 }
 
 StartupEventRouter::~StartupEventRouter() {
-    if (_savedStartupParams)
-        delete _savedStartupParams;
 }
 
 /**********************************************************
@@ -87,9 +72,14 @@ StartupEventRouter::~StartupEventRouter() {
  ************************************************************/
 void StartupEventRouter::hookUpTab() {
 
+    // Save and restore
+    //
     connect(
         applyButton, SIGNAL(clicked()),
         this, SLOT(saveStartup()));
+    connect(
+        defaultButton, SIGNAL(clicked()),
+        this, SLOT(restoreDefaults()));
 
     // General Startup Settings
     //
@@ -105,6 +95,15 @@ void StartupEventRouter::hookUpTab() {
     connect(
         winHeightEdit, SIGNAL(returnPressed()),
         this, SLOT(setStartupChanged()));
+    connect(
+        textureSizeCheckbox, SIGNAL(toggled(bool)),
+        this, SLOT(changeTextureSize(bool)));
+    connect(
+        lockSizeCheckbox, SIGNAL(toggled(bool)),
+        this, SLOT(winLockChanged(bool)));
+    connect(
+        autoStretchCheckbox, SIGNAL(toggled(bool)),
+        this, SLOT(setAutoStretch(bool)));
 
     // Default directories
     //
@@ -127,9 +126,6 @@ void StartupEventRouter::hookUpTab() {
         pythonPathEdit, SIGNAL(returnPressed()),
         this, SLOT(setDirChanged()));
 
-    connect(
-        defaultButton, SIGNAL(clicked()),
-        this, SLOT(restoreDefaults()));
     connect(
         sessionPathButton, SIGNAL(clicked()),
         this, SLOT(chooseSessionPath()));
@@ -166,20 +162,6 @@ void StartupEventRouter::hookUpTab() {
     connect(
         pythonLatestButton, SIGNAL(clicked()),
         this, SLOT(copyLatestPython()));
-    connect(
-        textureSizeCheckbox, SIGNAL(toggled(bool)),
-        this, SLOT(changeTextureSize(bool)));
-    connect(
-        lockSizeCheckbox, SIGNAL(toggled(bool)),
-        this, SLOT(winLockChanged(bool)));
-    connect(
-        autoStretchCheckbox, SIGNAL(toggled(bool)),
-        this, SLOT(setAutoStretch(bool)));
-
-    TabManager *tabMgr = TabManager::getInstance();
-    connect(
-        tabMgr, SIGNAL(tabLeft(int, int)),
-        this, SLOT(tabChanged(int, int)));
 }
 
 void StartupEventRouter::GetWebHelp(
@@ -199,26 +181,10 @@ void StartupEventRouter::saveStartup() {
 
     StartupParams *sParams = (StartupParams *)GetActiveParams();
 
-    ofstream fileout;
-    string s;
-
-    fileout.open(_startupPath.c_str());
-    if (!fileout) {
-        MyBase::SetErrMsg(
-            "Unable to open output startup file \"_startupPath.c_str()\" : %M");
-        MSG_ERR("File open fail");
-        return;
+    int rc = sParams->SaveStartup();
+    if (rc < 0) {
+        MSG_ERR("Failed to save startup file");
     }
-
-    const XmlNode *node = sParams->GetNode();
-    XmlNode::streamOut(fileout, *node);
-    if (fileout.bad()) {
-        MyBase::SetErrMsg(
-            "Unable to write output startup file \"_startupPath.c_str()\" : %M");
-        MSG_ERR("File write fail");
-    }
-
-    fileout.close();
 }
 
 void StartupEventRouter::setStartupChanged() {
@@ -240,15 +206,17 @@ void StartupEventRouter::updateStartupChanged() {
 
     StartupParams *sParams = (StartupParams *)GetActiveParams();
 
-    XmlNode *node = sParams->GetNode();
-
     cacheSizeEdit->setText(QString::number(sParams->GetCacheMB()));
     textureSizeEdit->setText(QString::number(sParams->GetTextureSize()));
+    textureSizeCheckbox->setChecked(sParams->GetTexSizeEnable());
 
     size_t w, h;
     sParams->GetWinSize(w, h);
     winWidthEdit->setText(QString::number(w));
     winHeightEdit->setText(QString::number(h));
+    lockSizeCheckbox->setChecked(sParams->GetWinSizeLock());
+
+    autoStretchCheckbox->setChecked(sParams->GetAutoStretch());
 }
 
 void StartupEventRouter::setDirChanged() {
@@ -279,46 +247,11 @@ void StartupEventRouter::updateDirChanged() {
     pythonPathEdit->setText(QString::fromStdString(sParams->GetPythonDir()));
 }
 
-void StartupEventRouter::confirmText() {
-}
-
-void StartupEventRouter::_confirmText() {
-    StartupParams *sParams = (StartupParams *)GetActiveParams();
-}
-
-void StartupEventRouter::
-    startupReturnPressed(void) {
-    confirmText();
-}
-
 //Insert values from params into tab panel
 //
 void StartupEventRouter::_updateTab() {
     updateStartupChanged();
     updateDirChanged();
-
-    return;
-
-#ifdef DEAD
-    cout << "StartupEventRouter::_updateTab() BLOCKED" << endl;
-    return;
-#endif
-
-    StartupParams *sParams = (StartupParams *)GetActiveParams();
-
-    cacheSizeEdit->setText(QString::number(sParams->GetCacheMB()));
-    textureSizeEdit->setText(QString::number(sParams->GetTextureSize()));
-
-    size_t w, h;
-    sParams->GetWinSize(w, h);
-    winWidthEdit->setText(QString::number(w));
-    winHeightEdit->setText(QString::number(h));
-
-    autoStretchCheckbox->setChecked(sParams->GetAutoStretch());
-    lockSizeCheckbox->setChecked(sParams->GetWinSizeLock());
-    textureSizeCheckbox->setChecked(sParams->GetTexSizeEnable());
-    setSettingsChanged(false);
-    adjustSize();
 }
 
 string StartupEventRouter::choosePathHelper(string current, string help) {
@@ -414,176 +347,106 @@ void StartupEventRouter::copyLatestSession() {
     GUIStateParams *p = GetStateParams();
     string latestPath = p->GetCurrentSessionPath();
 
-    size_t pos = latestPath.find_last_of("\\/");
-    if (pos != string::npos)
-        latestPath = latestPath.substr(0, pos);
+    QFileInfo qFileInfo(QString(latestPath.c_str()));
+
+    string path = qFileInfo.path().toStdString();
+
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    if (latestPath == sParams->GetSessionDir())
-        return;
-    setSettingsChanged(true);
-    sParams->SetSessionDir(latestPath);
-    sessionPathEdit->setText(latestPath.c_str());
+
+    sParams->SetSessionDir(path);
+    sessionPathEdit->setText(path.c_str());
 }
+
 void StartupEventRouter::copyLatestMetadata() {
     GUIStateParams *p = GetStateParams();
-
     vector<string> paths, names;
     p->GetOpenDataSets(paths, names);
+
     string latestPath = paths.size() ? paths[paths.size() - 1] : ".";
 
-    size_t pos = latestPath.find_last_of("\\/");
-    if (pos != string::npos)
-        latestPath = latestPath.substr(0, pos);
+    QFileInfo qFileInfo(QString(latestPath.c_str()));
+
+    string path = qFileInfo.path().toStdString();
+
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    if (latestPath == sParams->GetMetadataDir())
-        return;
-    setSettingsChanged(true);
-    sParams->SetMetadataDir(latestPath);
-    metadataPathEdit->setText(latestPath.c_str());
+
+    sParams->SetMetadataDir(path);
+    metadataPathEdit->setText(path.c_str());
 }
+
 void StartupEventRouter::copyLatestTF() {
     GUIStateParams *p = GetStateParams();
-
     string latestPath = p->GetCurrentTFPath();
-    size_t pos = latestPath.find_last_of("\\/");
-    if (pos != string::npos)
-        latestPath = latestPath.substr(0, pos);
+
+    QFileInfo qFileInfo(QString(latestPath.c_str()));
+
+    string path = qFileInfo.path().toStdString();
+
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    if (latestPath == sParams->GetTFDir())
-        return;
-    setSettingsChanged(true);
-    sParams->SetTFDir(latestPath);
-    tfPathEdit->setText(latestPath.c_str());
+
+    sParams->SetTFDir(path);
+    tfPathEdit->setText(path.c_str());
 }
+
 void StartupEventRouter::copyLatestImage() {
     GUIStateParams *p = GetStateParams();
     string latestPath = p->GetCurrentImagePath();
 
-    size_t pos = latestPath.find_last_of("\\/");
-    if (pos != string::npos)
-        latestPath = latestPath.substr(0, pos);
+    QFileInfo qFileInfo(QString(latestPath.c_str()));
+
+    string path = qFileInfo.path().toStdString();
+
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    if (latestPath == sParams->GetImageDir())
-        return;
-    setSettingsChanged(true);
-    sParams->SetImageDir(latestPath);
-    imagePathEdit->setText(latestPath.c_str());
+
+    sParams->SetImageDir(path);
+    imagePathEdit->setText(path.c_str());
 }
+
 void StartupEventRouter::copyLatestFlow() {
     GUIStateParams *p = GetStateParams();
     string latestPath = p->GetCurrentFlowPath();
 
-    size_t pos = latestPath.find_last_of("\\/");
-    if (pos != string::npos)
-        latestPath = latestPath.substr(0, pos);
+    QFileInfo qFileInfo(QString(latestPath.c_str()));
+
+    string path = qFileInfo.path().toStdString();
+
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    if (latestPath == sParams->GetFlowDir())
-        return;
-    setSettingsChanged(true);
-    sParams->SetFlowDir(latestPath);
-    flowPathEdit->setText(latestPath.c_str());
+
+    sParams->SetFlowDir(path);
+    flowPathEdit->setText(path.c_str());
 }
+
 void StartupEventRouter::copyLatestPython() {
     GUIStateParams *p = GetStateParams();
     string latestPath = p->GetCurrentPythonPath();
 
-    size_t pos = latestPath.find_last_of("\\/");
-    if (pos != string::npos)
-        latestPath = latestPath.substr(0, pos);
+    QFileInfo qFileInfo(QString(latestPath.c_str()));
+
+    string path = qFileInfo.path().toStdString();
+
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    if (latestPath == sParams->GetPythonDir())
-        return;
-    setSettingsChanged(true);
-    sParams->SetPythonDir(latestPath);
-    pythonPathEdit->setText(latestPath.c_str());
+
+    sParams->SetPythonDir(path);
+    pythonPathEdit->setText(path.c_str());
 }
+
 void StartupEventRouter::changeTextureSize(bool val) {
-    confirmText();
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    setSettingsChanged(true);
     sParams->SetTexSizeEnable(val);
 }
+
 void StartupEventRouter::winLockChanged(bool val) {
-    confirmText();
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    setSettingsChanged(true);
     sParams->SetWinSizeLock(val);
 }
+
 void StartupEventRouter::setAutoStretch(bool val) {
-    confirmText();
     StartupParams *sParams = (StartupParams *)GetActiveParams();
-    setSettingsChanged(true);
     sParams->SetAutoStretch(val);
 }
 
 void StartupEventRouter::restoreDefaults() {
-#ifdef DEAD
-    StartupParams *sParams = (StartupParams *)GetActiveParams();
-    setSettingsChanged(true);
-
-    Command *cmd = Command::CaptureStart(sParams, "Restore defaults");
-    sParams->restart();
-    Command::CaptureEnd(cmd, sParams);
-#endif
-    updateTab();
-}
-
-void StartupEventRouter::tabChanged(int topIndex, int subIndex) {
-#ifdef DEAD
-    if (topIndex != _topTabIndex)
-        return;
-    if (subIndex != _subTabIndex)
-        return;
-#endif
-
-    if (_settingsChanged || _textChangedFlag) {
-        //Tell user to save preferences
-        QMessageBox msgBox;
-        msgBox.setText("Startup settings have changed.");
-        msgBox.setInformativeText("Do you want to save your settings?");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        int ret = msgBox.exec();
-        if (ret == QMessageBox::Save) {
-            saveStartup();
-        } else {
-#ifdef DEAD
-            //revert to saved settings
-            assert(_savedStartupParams);
-            StartupParams *sParams = (StartupParams *)_paramsMgr->GetDefaultParams(StartupParams::_startupParamsTag);
-            assert(sParams);
-            ParamNode *copyNode = _savedStartupParams->GetRootNode()->deepCopy();
-            delete sParams->GetRootNode();
-            sParams->SetRootParamNode(copyNode);
-            delete _savedStartupParams;
-            _savedStartupParams = 0;
-#endif
-        }
-        _settingsChanged = false;
-    }
-}
-void StartupEventRouter::setSettingsChanged(bool didchange) {
-#ifdef DEAD
-    // Copy the params before the first change
-    if (didchange && !_settingsChanged) {
-        StartupParams *sParams = (StartupParams *)GetActiveParams();
-        _savedStartupParams = (StartupParams *)sParams->deepCopy(sParams->GetRootNode()->deepCopy());
-    }
-    _settingsChanged = didchange;
-#endif
-}
-
-void StartupEventRouter::loadDefaultsFromStartupFile() {
     StartupParams *sParams = (StartupParams *)GetActiveParams();
 
-    XmlNode *node = sParams->GetNode();
-    assert(node != NULL);
-
-    bool enabled = MyBase::GetEnableErrMsg();
-    MyBase::EnableErrMsg(false);
-
-    XmlParser xmlparser;
-    int rc = xmlparser.LoadFromFile(node, _startupPath);
-
-    MyBase::EnableErrMsg(enabled);
+    sParams->Reinit();
 }
