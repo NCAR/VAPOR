@@ -50,7 +50,7 @@ VizFeatureRenderer::VizFeatureRenderer(
 	vector<string> fpath;
 	fpath.push_back("fonts");
 	_fontFile = GetAppPath("VAPOR", "share", fpath);
-	_fontFile = _fontFile + "//arial.ttf";
+	_fontFile = _fontFile + "//arimo.ttf";
 }
 
 //----------------------------------------------------------------------------
