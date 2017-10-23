@@ -114,14 +114,27 @@ void RenderHolder::newRenderer()
     // Set up the list of renderer names in the dialog:
     //
     rDialog.rendererCombo->clear();
-    for (int i = 0; i < renderClasses.size(); i++) {
-        // Excludes the Hello renderer. Comment out this line to include it.
-        if (renderClasses[i] != "Hello") rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i]));
-    }
-    if (nDialog.exec() != QDialog::Accepted) return;
 
+#if DEBUG_HELLO
+    for (int i = 0; i < renderClasses.size(); i++) { rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i])); }
+    if (nDialog.exec() != QDialog::Accepted) return;
     int    selection = rDialog.rendererCombo->currentIndex();
     string renderClass = renderClasses[selection];
+
+#else
+
+    int helloIdx = 9999;    // cannot have this many renderers...
+    for (int i = 0; i < renderClasses.size(); i++) {
+        if (renderClasses[i] != "Hello")    // Excludes the Hello renderer.
+            rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i]));
+        else
+            helloIdx = i;
+    }
+    if (nDialog.exec() != QDialog::Accepted) return;
+    int selection = rDialog.rendererCombo->currentIndex();
+    if (selection >= helloIdx) selection++;
+    string renderClass = renderClasses[selection];
+#endif
 
     selection = rDialog.dataMgrCombo->currentIndex();
     string dataSetName = dataSetNames[selection];
