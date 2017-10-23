@@ -60,7 +60,7 @@ OptionParser::OptDescRec_T	set_opts[] = {
 		"0 => use number of cores"
 	},
 	{
-		"vars3d",1, "var1",
+		"vars3d",1, "",
 		"Colon delimited list of 3D variable names (compressed) "
 		"to be included in "
 		"the VDC"
