@@ -48,6 +48,11 @@ class Combo : public QWidget {
     //
     double GetValue() const { return (_value); };
 
+    // set how many digits to show for floating-point precision
+    // This setting won't change anything for displaying integers.
+    // The input precision value should be at least 1.
+    void SetPrecision(int precision);
+
     void SetEnabled(bool on);
 
   private slots:
@@ -79,6 +84,8 @@ class Combo : public QWidget {
     double _maxValid;
     double _value;
     bool _intType;
+
+    int _floatPrecision; // how many digits after the decimal point?
 
     QLineEdit *_lineEdit;
     QValidator *_lineEditValidator;

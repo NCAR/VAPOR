@@ -70,6 +70,7 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
         _rParams = NULL;
         setupUi(this);
         _opacityCombo = new Combo(OpacityEdit, OpacitySlider);
+        _opacityCombo->SetPrecision(2);
 
         connect(GeoRefCheckbox, SIGNAL(clicked()), this, SLOT(GeoRefClicked()));
         connect(IgnoreTransparencyCheckbox, SIGNAL(clicked()), this, SLOT(IgnoreTransparencyClicked()));
