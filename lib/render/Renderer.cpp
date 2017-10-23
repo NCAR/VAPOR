@@ -54,7 +54,7 @@ Renderer::Renderer(const ParamsMgr *pm, string winName, string dataSetName, stri
     vector<string> fpath;
     fpath.push_back("fonts");
     _fontFile = GetAppPath("VAPOR", "share", fpath);
-    _fontFile = _fontFile + "//arial.ttf";
+    _fontFile = _fontFile + "//arimo.ttf";
 }
 
 RendererBase::RendererBase(const ParamsMgr *pm, string winName, string dataSetName, string paramsType, string classType, string instName, DataMgr *dataMgr)
