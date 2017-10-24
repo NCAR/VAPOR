@@ -100,12 +100,15 @@ void RenderHolder::newRenderer() {
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
 
     vector<string> renderClasses = _controlExec->GetAllRenderClasses();
+
+#ifdef HELLO_RENDERER
     for (vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++) {
         if (*it == "Hello") {
             renderClasses.erase(it);
             break;
         }
     }
+#endif
 
     // Launch a dialog to select a renderer type, visualizer, name
     // Then insert a horizontal line with text and checkbox.
