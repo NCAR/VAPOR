@@ -726,6 +726,11 @@ void MainForm::sessionOpen(QString qfileName)
         GUIStateParams *p = GetStateParams();
         string          path = p->GetCurrentSessionPath();
 
+        if (path == "JustInMemory") {
+            QString sessionPath = QDir::homePath();
+            path = QDir::toNativeSeparators(sessionPath).toStdString();
+        }
+
         vector<string> files = myGetOpenFileNames("Choose a VAPOR session file to restore a session", path, "Vapor 3 Session Save Files (*.vs3)", false);
         if (files.empty()) return;
 
@@ -748,9 +753,18 @@ void MainForm::fileSave()
     GUIStateParams *p = GetStateParams();
     string          path = p->GetCurrentSessionPath();
 
+    if (path == "JustInMemory") {
+        QString sessionPath = QDir::homePath();
+        sessionPath = QDir::toNativeSeparators(sessionPath);
+        QString fileName = QFileDialog::getSaveFileName(this, "Choose the fileName to save the current session", sessionPath, "Vapor 3 Session Files (*.vs3)");
+        path = fileName.toStdString();
+    }
+
     if (_controlExec->SaveSession(path) < 0) {
-        MSG_ERR("Saving session file");
+        MSG_ERR("Saving session file failed");
         return;
+    } else {
+        p->SetCurrentSessionPath(path);
     }
 
     _stateChangeFlag = false;
@@ -759,19 +773,24 @@ void MainForm::fileSave()
 void MainForm::fileSaveAs()
 {
     GUIStateParams *p = GetStateParams();
-    string          defaultPath = p->GetCurrentSessionPath();
+    QString         path = QString::fromStdString(p->GetCurrentSessionPath());
 
-    QString fileName = QFileDialog::getSaveFileName(this, "Choose the fileName to save the current session", defaultPath.c_str(), "Vapor 3 Session Files (*.vs3)");
-    string  path = fileName.toStdString();
-
-    if (_controlExec->SaveSession(path)) {
-        MSG_ERR("Saving session file");
-        return;
+    if (path == "JustInMemory") {
+        QString homePath = QDir::homePath();
+        path = QDir::toNativeSeparators(homePath);
     }
 
-    // Save to use a default for fileSave()
-    //
-    p->SetCurrentSessionPath(path);
+    QString fileName = QFileDialog::getSaveFileName(this, "Choose the fileName to save the current session", path, "Vapor 3 Session Files (*.vs3)");
+    string  newPath = fileName.toStdString();
+
+    if (_controlExec->SaveSession(newPath)) {
+        MSG_ERR("Saving session file failed");
+        return;
+    } else {
+        // Save to use a default for fileSave()
+        //
+        p->SetCurrentSessionPath(path.toStdString());
+    }
 }
 
 void MainForm::fileExit() { close(); }
@@ -1068,12 +1087,7 @@ void MainForm::sessionNew()
 
     _vizWinMgr->LaunchVisualizer();
 
-    QString sessionPath = QDir::homePath();
-    assert(!sessionPath.isEmpty());
-    sessionPath.append("/VaporSaved.vs3");
-    sessionPath = QDir::toNativeSeparators(sessionPath);
-    string fileName = sessionPath.toStdString();
-
+    string          fileName = "JustInMemory";
     GUIStateParams *p = GetStateParams();
     p->SetCurrentSessionPath(fileName);
 
