@@ -235,13 +235,6 @@ void ViewpointEventRouter::hookUpTab() {
 	
 	
 
-	connect (
-		LocalGlobal, SIGNAL (activated (int)), VizWinMgr::getInstance(), SLOT (setVpLocalGlobal(int))
-	);
-	connect (
-		VizWinMgr::getInstance(), SIGNAL(enableMultiViz(bool)), LocalGlobal, SLOT(setEnabled(bool))
-	);
-
 }
 
 void ViewpointEventRouter::GetWebHelp(
@@ -465,15 +458,6 @@ return;
 	QString strng;
 	
 	
-#ifdef	DEAD
-	if (vpParams->IsLocal())
-		LocalGlobal->setCurrentIndex(1);
-	else 
-#endif
-		LocalGlobal->setCurrentIndex(0);
-	
-
-
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
 
