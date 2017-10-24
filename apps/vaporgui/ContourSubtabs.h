@@ -53,7 +53,7 @@ public:
 
 private:
 	void SetIsovalues(); 
-	double GetContourMinOrMax(bool minOrMax);
+	double GetContourMinOrMax(string minOrMax);
 
 	VAPoR::ContourParams* _cParams;
 	VAPoR::DataMgr* _dataMgr;

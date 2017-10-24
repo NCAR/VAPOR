@@ -650,6 +650,8 @@ void VariablesWidget::updateDims(RenderParams *rParams) {
 
 	int index = ndim == 2 ? 0 : 1;
 	dimensionCombo->setCurrentIndex(index);
+
+	_rParams->_initBox();
 }
 
 

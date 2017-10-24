@@ -59,7 +59,8 @@ void TFWidget::Reinit(Flags flags) {
 
 	// If const-color selection is a priority for the user,
 	// as is the case in barbs or isosurfaces, move the const
-	// color selector to the top.
+	// color selector to the top of the gui.  This is just to
+	// improve the layout of the interface.
 	//
 	if (_flags & PRIORITYCOLORVAR) {
 		QVBoxLayout* myLayout = (QVBoxLayout*)layout();

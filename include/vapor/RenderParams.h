@@ -135,8 +135,6 @@ public:
 	string GetFirstVariableName() const ;
 
 	//! Specify field variable names; e.g. used in flow integration
-	//! can be 0 or 3 strings
-	//! \param[in] string varNames. If any element is "0" the element
 	//! will be quietly 
 	//! set to the empty string, "".
 	//
@@ -388,9 +386,10 @@ public:
 	//!
 	virtual bool usingVariable(const std::string& varname) = 0;
 	
-protected:
-	DataMgr *_dataMgr;
+ 	void _initBox();
 
+protected:
+ DataMgr *_dataMgr;
 
 	
 private:
@@ -423,7 +422,7 @@ private:
  static const string _currentTimestepTag;
 
  void _init();
- void _initBox();
+ //void _initBox();
 };
 
 

@@ -20,7 +20,6 @@
 //
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <cstring>
 #include <string>
 #include <cassert>
@@ -265,7 +264,6 @@ void RenderParams::SetEnabled(bool val){
 }
 
 void RenderParams::SetVariableName(string varname){
-
 	varname = string_replace(varname, "0", "NULL");
 	varname = string_replace(varname, "", "NULL");
 
@@ -723,8 +721,6 @@ RenderParams *RenParamsContainer::Create(string className, string name) {
 	//
 	ParamsSeparator mySep(_ssave, name);
 	mySep.SetParent(_separator);
-
-	cout << (_dataMgr==NULL) << endl;
 
 	// Create the desired class
 	//

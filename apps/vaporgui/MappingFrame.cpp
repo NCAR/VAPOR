@@ -206,7 +206,6 @@ void MappingFrame::RefreshHistogram() {
 	if (rc) return;
 
 	grid->SetInterpolationOrder(0);
-	
 
 	float v;
 	Grid::Iterator itr;
@@ -214,6 +213,7 @@ void MappingFrame::RefreshHistogram() {
 	for (itr = grid->begin(minExts, maxExts); itr!=enditr; ++itr){
 		v = *itr;
 		if (v==grid->GetMissingValue()) continue;
+		
 		_histogram->addToBin(v);
 	}
 	delete grid;
@@ -347,11 +347,11 @@ void MappingFrame::setVariableName(std::string name)
 //----------------------------------------------------------------------------
 // Synchronize the frame with the underlying params
 //----------------------------------------------------------------------------
-//void MappingFrame::updateTab()
 void MappingFrame::Update(DataMgr *dataMgr,
 						ParamsMgr *paramsMgr,
 						RenderParams *rParams)
 {
+
 	assert(dataMgr);
 	assert(paramsMgr);
 	assert(rParams);
@@ -392,9 +392,14 @@ void MappingFrame::Update(DataMgr *dataMgr,
 //#ifdef	DEAD
 		vector<double> isovals = ((ContourParams*) rParams)->GetIsovalues();
 		setIsolineSliders(isovals);
-		for (int i = 0; i<isovals.size(); i++){
-			_isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
-		}
+
+		// setIsolineSliders(isovals) does the same thing as this for-loop!
+		// why are we doing this twice?????  Commenting for now.  Will it break?
+		//
+//		for (int i = 0; i<isovals.size(); i++){
+//			_isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
+//			cout << "Setting " << varname << " isovalue " << _isolineSliders[i] << " to " << i << endl;
+//		}
 //#endif
 	}
 
@@ -1005,7 +1010,9 @@ void MappingFrame::paintGL()
 	  return;
   }
 
-  if(_isolineSlidersEnabled) rc = drawIsolineSliders();
+  if(_isolineSlidersEnabled) {
+	rc = drawIsolineSliders();
+  }
   if (rc < 0) {
       MSG_ERR("MappingFrame");
       oglPopState();
@@ -2083,8 +2090,9 @@ float MappingFrame::xDataToWorld(float x)
   float minVal = _minValue;
   float maxVal = _maxValue;
 
+  float val = (x - minVal) / (maxVal - minVal);
   if (maxVal == minVal) return(0.0);
-  return (x - minVal) / (maxVal - minVal);
+  return val; //(x - minVal) / (maxVal - minVal);
 }
 
 //----------------------------------------------------------------------------
@@ -2570,6 +2578,8 @@ void MappingFrame::setIsolineSliders(const vector<double>& sliderVals){
 	//set the isovalues
 	for (int i = 0; i< _isolineSliders.size(); i++){ 
 		_isolineSliders[i]->setIsoValue(xDataToWorld(sliderVals[i]));
+  
+  		float val = (sliderVals[i] - _minValue) / (_maxValue - _minValue);
 	}
 }
 
