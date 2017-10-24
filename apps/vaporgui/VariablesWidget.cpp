@@ -290,9 +290,7 @@ void VariablesWidget::getCmpFactors(
     }
 }
 
-void VariablesWidget::updateFidelity(
-    RenderParams *rParams) {
-
+void VariablesWidget::updateFidelity(RenderParams *rParams) {
     string varname;
     if (_dspFlags & SCALAR) {
         varname = rParams->GetVariableName();
