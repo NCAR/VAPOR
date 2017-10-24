@@ -305,10 +305,8 @@ void VariablesWidget::getCmpFactors(
 	}
 }
 
-void VariablesWidget::updateFidelity(
-	RenderParams* rParams
-) {
-
+void VariablesWidget::updateFidelity( RenderParams* rParams) 
+{
 	string varname;
 	if (_dspFlags & SCALAR) {
 		varname = rParams->GetVariableName();
@@ -326,7 +324,6 @@ void VariablesWidget::updateFidelity(
 	fidelityTab->show();
 
 	vector <size_t> cratios = _dataMgr->GetCRatios(varname);
-
 
 	// Get the effective compression rates as a floating point value,
 	// and as a string that can be displayed, for the LOD and refinement
@@ -396,9 +393,6 @@ void VariablesWidget::updateFidelity(
 		}
 	} while (l<lodCFs.size() && m < multiresCFs.size());
 		
-
-
-
 	// Remove buttons from the group
 	//
 	QList<QAbstractButton*> btns = _fidelityButtons->buttons();
@@ -437,7 +431,8 @@ void VariablesWidget::uncheckFidelity() {
 
 	// Unset all fidelity buttons
 	//
-	if (! _fidelityButtons) return;
+	if (! _fidelityButtons) 
+        return;
 
 	QList<QAbstractButton*> btns = _fidelityButtons->buttons();
 	for (int i = 0; i<btns.size(); i++){
