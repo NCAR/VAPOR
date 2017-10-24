@@ -86,7 +86,7 @@ class IsoSlider : public DomainWidget
 	virtual void drag(float dx, float dy=0.0, float dz=0.0); 
 	virtual int paintGL();
 
-	void setIsoValue(float val) { setDomain(val - 0.01, val + 0.01); }
+	void setIsoValue(float val) { cout << "setIsoValue " << val << endl; setDomain(val - 0.01, val + 0.01); }
 
  protected:
 	 float _lineWidth;
