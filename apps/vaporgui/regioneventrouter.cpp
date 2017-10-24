@@ -101,8 +101,6 @@ RegionEventRouter::hookUpTab()
 	//connect (variableCombo, SIGNAL(activated(int)), this, SLOT(setVarNum(int)));
 	//connect (timestepSpin, SIGNAL(valueChanged(int)), this, SLOT(setTimeStep(int)));
 
-	connect (LocalGlobal, SIGNAL (activated (int)), VizWinMgr::getInstance(), SLOT (setRgLocalGlobal(int)));
-	connect (VizWinMgr::getInstance(), SIGNAL(enableMultiViz(bool)), LocalGlobal, SLOT(setEnabled(bool)));
 
 }
 
@@ -297,14 +295,6 @@ maxGridZLabel->setText(QString::number(-1));
 
 	
 
-#ifdef	DEAD
-	if (rParams->IsLocal())
-		LocalGlobal->setCurrentIndex(1);
-	else 
-#endif
-		LocalGlobal->setCurrentIndex(0);
-
-	
 	minMaxLonLatFrame->hide();
 	
     relabel();
@@ -389,8 +379,6 @@ vector<string> varNames(1,"N/A");
 		refinementCombo->addItem(QString::number(i));
 	}
 	*/
-	if (VizWinMgr::getInstance()->getNumVisualizers() > 1) LocalGlobal->setEnabled(true);
-	else LocalGlobal->setEnabled(false);
 	//Set up the copy combos
 	copyBoxFromCombo->clear();
 	copyBoxToCombo->clear();
