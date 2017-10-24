@@ -100,14 +100,6 @@ class MappingFrame;
 //! include the VariablesWidget as a tab inside this gui tab.
 //! Note that the VariablesWidget handles its own signals and slots.
 //!
-//!
-//! If there is a MappingFrame in the tab, invoke EventRouter::loadTF(),
-//! EventRouter::fileSaveTF(),
-//! EventRouter::loadInstalledTF(), EventRouter::saveTF() to load and
-//! save the transfer functions.  Refer to MappingFrame documentation
-//! for additional instructions.
-//!
-//!
 //! If there is a MouseMode (manipulator) associated with the tab,
 //! then EventRouter::captureMouseUp() and
 //! EventRouter::captureMouseDown() must be implemented.
