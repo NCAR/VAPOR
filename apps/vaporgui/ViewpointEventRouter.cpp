@@ -191,11 +191,6 @@ void ViewpointEventRouter::hookUpTab() {
     connect(
         stereoSeparationEdit, SIGNAL(returnPressed()),
         this, SLOT(notImplemented()));
-
-    connect(
-        LocalGlobal, SIGNAL(activated(int)), VizWinMgr::getInstance(), SLOT(setVpLocalGlobal(int)));
-    connect(
-        VizWinMgr::getInstance(), SIGNAL(enableMultiViz(bool)), LocalGlobal, SLOT(setEnabled(bool)));
 }
 
 void ViewpointEventRouter::GetWebHelp(
@@ -409,13 +404,6 @@ void ViewpointEventRouter::_updateTab() {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
     QString strng;
-
-#ifdef DEAD
-    if (vpParams->IsLocal())
-        LocalGlobal->setCurrentIndex(1);
-    else
-#endif
-        LocalGlobal->setCurrentIndex(0);
 
     GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();

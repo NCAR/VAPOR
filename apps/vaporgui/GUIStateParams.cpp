@@ -20,6 +20,7 @@
 #endif
 
 #include <iostream>
+#include <QDir>
 
 #include "GUIStateParams.h"
 
@@ -30,6 +31,7 @@ const string GUIStateParams::m_pathParamsTag = "PathParamsTag";
 const string GUIStateParams::m_sessionFileTag = "SessionFileTag";
 const string GUIStateParams::m_openDataTag = "OpenDataTag";
 const string GUIStateParams::m_imagePathTag = "ImagePathTag";
+const string GUIStateParams::m_imageSavePathTag = "ImageSavePathTag";
 const string GUIStateParams::m_pythonPathTag = "PythonPathTag";
 const string GUIStateParams::m_flowPathTag = "FlowPathTag";
 const string GUIStateParams::m_tfPathTag = "TFPathTag";
@@ -133,7 +135,7 @@ void GUIStateParams::SetActiveRenderer(
 //! method identifies the current session file
 //! \retval session file path
 string GUIStateParams::GetCurrentSessionPath() const {
-    return (GetValueString(m_sessionFileTag, "."));
+    return (GetValueString(m_sessionFileTag, QDir::homePath().toStdString()));
 }
 
 //! method sets the current session path
@@ -145,7 +147,7 @@ void GUIStateParams::SetCurrentSessionPath(string path) {
 //! method identifies the current session file
 //! \retval session file path
 string GUIStateParams::GetCurrentImagePath() const {
-    return (GetValueString(m_imagePathTag, "."));
+    return (GetValueString(m_imagePathTag, QDir::homePath().toStdString()));
 }
 
 //! method sets the current session path
@@ -156,8 +158,20 @@ void GUIStateParams::SetCurrentImagePath(string path) {
 
 //! method identifies the current session file
 //! \retval session file path
+string GUIStateParams::GetCurrentImageSavePath() const {
+    return (GetValueString(m_imageSavePathTag, QDir::homePath().toStdString()));
+}
+
+//! method sets the current session path
+//! \param[in] path string
+void GUIStateParams::SetCurrentImageSavePath(string path) {
+    SetValueString(m_imageSavePathTag, "Set current image path", path);
+}
+
+//! method identifies the current session file
+//! \retval session file path
 string GUIStateParams::GetCurrentTFPath() {
-    return (GetValueString(m_tfPathTag, "."));
+    return (GetValueString(m_tfPathTag, QDir::homePath().toStdString()));
 }
 
 //! method sets the current session path
@@ -169,7 +183,7 @@ void GUIStateParams::SetCurrentTFPath(string path) {
 //! method identifies the current session file
 //! \retval session file path
 string GUIStateParams::GetCurrentPythonPath() const {
-    return (GetValueString(m_pythonPathTag, "."));
+    return (GetValueString(m_pythonPathTag, QDir::homePath().toStdString()));
 }
 
 //! method sets the current session path
@@ -181,7 +195,7 @@ void GUIStateParams::SetCurrentPythonPath(string path) {
 //! method identifies the current session file
 //! \retval session file path
 string GUIStateParams::GetCurrentFlowPath() const {
-    return (GetValueString(m_flowPathTag, "."));
+    return (GetValueString(m_flowPathTag, QDir::homePath().toStdString()));
 }
 
 //! method sets the current session path
