@@ -42,10 +42,6 @@ public:
 
     //! For the StartupEventRouter, we must override confirmText method on base class,
     //! so that text changes issue Command::CaptureStart and Command::CaptureEnd,
-    //! supplying a special UndoRedo helper method
-    //!
-    virtual void confirmText();
-
     //! Connect signals and slots from tab
     virtual void hookUpTab();
 
@@ -59,10 +55,16 @@ public:
     static string GetClassType() { return ("Startup"); }
     string        GetType() const { return GetClassType(); }
 
+protected:
+    virtual void _updateTab();
+    virtual void _confirmText() {}
+
 private slots:
 
-    void setStartupTextChanged(const QString &qs);
-    void startupReturnPressed();
+    void saveStartup();
+    void setStartupChanged();
+    void setDirChanged();
+
     void chooseSessionPath();
     void chooseMetadataPath();
     void chooseImagePath();
@@ -78,20 +80,14 @@ private slots:
     void changeTextureSize(bool val);
     void winLockChanged(bool val);
     void setAutoStretch(bool val);
-    void apply();
     void restoreDefaults();
-    void tabChanged(int topIndex, int subIndex);
 
 private:
     StartupEventRouter() {}
 
-    void         invalidateText();
-    virtual void _confirmText();
-    virtual void _updateTab();
-    void         setSettingsChanged(bool);
-
-    bool           _settingsChanged;
-    StartupParams *_savedStartupParams;
+    void   updateStartupChanged();
+    void   updateDirChanged();
+    string choosePathHelper(string current, string help);
 };
 
 #endif    // STARTUPEVENTROUTER_H
