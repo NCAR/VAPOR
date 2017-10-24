@@ -77,6 +77,14 @@ public:
  //! method sets the current session path
  //! \param[in] path string
  void SetCurrentImagePath(string path);
+
+ //! method identifies the current session file
+ //! \retval session file path
+ string  GetCurrentImageSavePath() const;
+
+ //! method sets the current session path
+ //! \param[in] path string
+ void SetCurrentImageSavePath(string path);
  
  //! method identifies the current session file
  //! \retval session file path
@@ -142,6 +150,7 @@ private:
  static const string m_sessionFileTag;
  static const string m_openDataTag;
  static const string m_imagePathTag;
+ static const string m_imageSavePathTag;
  static const string m_pythonPathTag;
  static const string m_flowPathTag;
  static const string m_tfPathTag;
