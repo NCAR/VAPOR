@@ -1072,14 +1072,6 @@ void MainForm::loadDataHelper(
         currentDataSets.push_back(dataSetName);
         p->SetOpenDataSets(currentPaths, currentDataSets);
 
-        VAPoR::ParamsMgr *pm = _controlExec->GetParamsMgr();
-        VAPoR::ViewpointParams *vpp;
-        vector<string> winNames = _controlExec->GetVisualizerNames();
-        for (int i = 0; i < winNames.size(); i++) {
-            vpp = pm->GetViewpointParams(winNames[i]);
-            vpp->AddDatasetTransform(dataSetName);
-        }
-
         // Add menu option to close the dataset in the File menu
         //
         QAction *closeAction = new QAction(QString::fromStdString(dataSetName),
