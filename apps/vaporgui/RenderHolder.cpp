@@ -102,8 +102,15 @@ void RenderHolder::newRenderer() {
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	vector <string> dataSetNames = paramsMgr->GetDataMgrNames();
 
-
 	vector <string> renderClasses = _controlExec->GetAllRenderClasses();
+    for( vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++ )
+    {
+        if( *it == "Hello" )
+        {
+            renderClasses.erase( it );
+            break;
+        }
+    }
 
 	// Launch a dialog to select a renderer type, visualizer, name
 	// Then insert a horizontal line with text and checkbox.
@@ -127,13 +134,13 @@ void RenderHolder::newRenderer() {
 	// Set up the list of renderer names in the dialog:
 	//
 	rDialog.rendererCombo->clear();
-	for (int i = 0; i<renderClasses.size(); i++){
-		rDialog.rendererCombo->addItem(
-			QString::fromStdString(renderClasses[i])
-		);
-	}
-	if (nDialog.exec() != QDialog::Accepted) return;
-	
+
+	for (int i = 0; i<renderClasses.size(); i++)
+    {
+		rDialog.rendererCombo->addItem( QString::fromStdString(renderClasses[i]) );
+    }
+	if (nDialog.exec() != QDialog::Accepted) 
+        return;
 	int selection = rDialog.rendererCombo->currentIndex();
 	string renderClass = renderClasses[selection];
 
@@ -509,7 +516,7 @@ void RenderHolder::Update() {
 	// the current active renderer to be "empty"
 	//
 	if (numRows == 0) {
-		p->SetActiveRenderer("", "", "");
+		p->SetActiveRenderer(activeViz, "", "");
 		SetCurrentIndex(-1);
 		stackedWidget->hide();
 	}
