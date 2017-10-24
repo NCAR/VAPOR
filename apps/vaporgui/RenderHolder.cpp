@@ -164,21 +164,26 @@ void RenderHolder::newRenderer() {
 	renderInst = uniqueName(renderInst);
 	qname = QString(renderInst.c_str());
 
-	int rc = _controlExec->ActivateRender(
-		activeViz, dataSetName, renderClass, renderInst, false
-	);
-	if (rc<0) {
-		MSG_ERR("Can't create renderer");
-		return;
-	}
+	paramsMgr->BeginSaveStateGroup("Create new renderer");
 
-	// Save current instance to state
-	//
-	p->SetActiveRenderer(activeViz, renderClass, renderInst);
+		int rc = _controlExec->ActivateRender(
+			activeViz, dataSetName, renderClass, renderInst, false
+		);
+		if (rc<0) {
+			paramsMgr->EndSaveStateGroup();
+			MSG_ERR("Can't create renderer");
+			return;
+		}
 
-	Update();
+		// Save current instance to state
+		//
+		p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
-	emit newRenderer(activeViz, renderClass, renderInst);
+		Update();
+
+		emit newRenderer(activeViz, renderClass, renderInst);
+
+	paramsMgr->EndSaveStateGroup();
 
 }
 
