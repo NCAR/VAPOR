@@ -88,9 +88,6 @@ void RegionEventRouter::hookUpTab()
     // connect (refinementCombo, SIGNAL(activated(int)), this, SLOT(setNumRefinements(int)));
     // connect (variableCombo, SIGNAL(activated(int)), this, SLOT(setVarNum(int)));
     // connect (timestepSpin, SIGNAL(valueChanged(int)), this, SLOT(setTimeStep(int)));
-
-    connect(LocalGlobal, SIGNAL(activated(int)), VizWinMgr::getInstance(), SLOT(setRgLocalGlobal(int)));
-    connect(VizWinMgr::getInstance(), SIGNAL(enableMultiViz(bool)), LocalGlobal, SLOT(setEnabled(bool)));
 }
 
 void RegionEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
@@ -243,13 +240,6 @@ void RegionEventRouter::_updateTab()
     }
 #endif
 
-#ifdef DEAD
-    if (rParams->IsLocal())
-        LocalGlobal->setCurrentIndex(1);
-    else
-#endif
-        LocalGlobal->setCurrentIndex(0);
-
     minMaxLonLatFrame->hide();
 
     relabel();
@@ -326,10 +316,6 @@ void RegionEventRouter::_reinitTab(bool doOverride)
         refinementCombo->addItem(QString::number(i));
     }
     */
-    if (VizWinMgr::getInstance()->getNumVisualizers() > 1)
-        LocalGlobal->setEnabled(true);
-    else
-        LocalGlobal->setEnabled(false);
     // Set up the copy combos
     copyBoxFromCombo->clear();
     copyBoxToCombo->clear();
