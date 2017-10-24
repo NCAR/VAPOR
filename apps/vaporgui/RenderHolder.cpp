@@ -204,23 +204,29 @@ void RenderHolder::deleteRenderer() {
 	int row = tableWidget->currentRow();
 	getRow(row, renderInst, renderClass, dataSetName);
 
-	int rc = _controlExec->ActivateRender(
-		activeViz, dataSetName, renderClass, renderInst, false
-	);
-	assert(rc == 0);
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	paramsMgr->BeginSaveStateGroup("Delete renderer");
 
-	_controlExec->RemoveRenderer(
-		activeViz, dataSetName, renderClass, renderInst
-	);
+		int rc = _controlExec->ActivateRender(
+			activeViz, dataSetName, renderClass, renderInst, false
+		);
+		assert(rc == 0);
+
+		_controlExec->RemoveRenderer(
+			activeViz, dataSetName, renderClass, renderInst
+		);
 	
-	// Update will rebuild the TableWidget with the updated state
-	//
-	Update();
+		// Update will rebuild the TableWidget with the updated state
+		//
+		p->SetActiveRenderer(activeViz, "", "");
+		Update();
 
-	// Make the renderer in the first row the active renderer
-	//
-	getRow(0, renderInst, renderClass, dataSetName);
-	p->SetActiveRenderer(activeViz, renderClass, renderInst);
+		// Make the renderer in the first row the active renderer
+		//
+		getRow(0, renderInst, renderClass, dataSetName);
+		p->SetActiveRenderer(activeViz, renderClass, renderInst);
+
+	paramsMgr->EndSaveStateGroup();
 }
 
 void RenderHolder::checkboxChanged(int state) {
@@ -524,6 +530,12 @@ void RenderHolder::Update() {
 		p->SetActiveRenderer(activeViz, "", "");
 		SetCurrentIndex(-1);
 		stackedWidget->hide();
+		deleteButton->setEnabled(false);
+		dupCombo->setEnabled(false);
+	}
+	else {
+		deleteButton->setEnabled(true);
+		dupCombo->setEnabled(true);
 	}
 
     tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
