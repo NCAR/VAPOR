@@ -171,19 +171,7 @@ void VizWinMgr::createAllDefaultTabs() {
  ***********************************************************************/
 VizWinMgr::~VizWinMgr()
 {
-	
-	std::map<string, VizWin*>::iterator it;
-	for(it = _vizWindow.begin(); it != _vizWindow.end(); it++){
-		VizWin* win = it->second;
-		string winName= it->first;
-		assert(win != 0);
-		delete win;
-		delete _vizMdiWin[winName];
-		
-	}
 	if (m_trackBall) delete m_trackBall;
-    
-	
 }
 
 void VizWinMgr::vizAboutToDisappear(string vizName)  {
@@ -205,10 +193,7 @@ void VizWinMgr::vizAboutToDisappear(string vizName)  {
 
 	// Remove the vizwin and the vizmdiwin
 	//
-	if (_vizWindow[vizName]) delete _vizWindow[vizName];
 	_vizWindow.erase(vizName);
-
-	if (_vizMdiWin[vizName]) delete _vizMdiWin[vizName];
 	_vizMdiWin.erase(vizName);
 
 	// If we are deleting the active viz, pick a new active viz
