@@ -1,20 +1,20 @@
 //************************************************************************
-//																	  *
-//		   Copyright (C)  2016										*
-//	 University Corporation for Atmospheric Research				  *
-//		   All Rights Reserved										*
-//																	  *
+//                                                                    *
+//         Copyright (C)  2016                                      *
+//   University Corporation for Atmospheric Research                  *
+//         All Rights Reserved                                      *
+//                                                                    *
 //************************************************************************/
 //
-//  File:	   Statistics.h
+//  File:      Statistics.h
 //
-//  Author:	 Scott Pearse
-//		  National Center for Atmospheric Research
-//		  PO 3000, Boulder, Colorado
+//  Author:  Scott Pearse
+//        National Center for Atmospheric Research
+//        PO 3000, Boulder, Colorado
 //
-//  Date:	   August 2016
+//  Date:      August 2016
 //
-//  Description:	Implements the Statistics class.
+//  Description:    Implements the Statistics class.
 //
 #ifdef WIN32
 #pragma warning(disable : 4100)
@@ -45,201 +45,124 @@
 //!
 
 namespace VAPoR {
-	class RenderParams;
-	class ParamsMgr;
-	class DataMgr;
+    class RenderParams;
+    class ParamsMgr;
+    class DataMgr;
 }
 
 class sErrMsg : public QDialog, public Ui_ErrMsg {
-	Q_OBJECT
-	public:
-		sErrMsg() {setupUi(this);}
+    Q_OBJECT
+    public:
+        sErrMsg() {setupUi(this);}
 };
 
 class Statistics : public QDialog, public Ui_StatsWindow {
 
-	Q_OBJECT
+    Q_OBJECT
 
+    public:
+        Statistics(QWidget* parent);
+        ~Statistics();  
+        int initControlExec(VAPoR::ControlExec* ce);
+        int initDataMgr(VAPoR::DataMgr* dm);
+        void showMe();
+        int initialize();
+        void Update(VAPoR::StatisticsParams* sParams);
 
-	public:
-		Statistics(QWidget* parent);
-		~Statistics();	
-		int initControlExec(VAPoR::ControlExec* ce);
-		int initDataMgr(VAPoR::DataMgr* dm);
-		void showMe();
-		int initialize();
-		void Update(VAPoR::StatisticsParams* sParams);
+    private slots:
+        void restoreExtents();
+        void minTSChanged();
+        void maxTSChanged();
+        void autoUpdateClicked();
+        void refinementChanged(int);
+        void cRatioChanged(int);
+        void newVarAdded(int);
+        void updateButtonPressed() {updateStats();}
+        void initRegion();
+        void varRemoved(int);
+        void exportText();
+        void rangeComboChanged();
+        void addStatistic(int);
+        void removeStatistic(int);
 
-	private slots:
-		void restoreExtents();
-		void minTSChanged();
-		void maxTSChanged();
-		void autoUpdateClicked();
-		void refinementChanged(int);
-		void cRatioChanged(int);
-		void newVarAdded(int);
-		void updateButtonPressed() {updateStats();}
-		void initRegion();
-		void copyActiveRegion();
-		void varRemoved(int);
-		void exportText();
-		void regionSlidersChanged();
-		void addStatistic(int);
-		void removeStatistic(int);
+    private:
+        VAPoR::StatisticsParams* _params;
+        void retrieveRangeParams();
+        bool eventFilter(QObject* o, QEvent* e);
+        int GetExtents(vector<double>& extents);
+        int initVariables();
+        void adjustTables();  // ???
+        void initCRatios();
+        void initRefinement();
+        void initTimes();
+        // Need replacement
+        void initRanges();
+        void setNewExtents();
+        void updateStats();
+        void refreshTable();
+        void generateTableColumns();
+        void addCalculationToTable(string varname);
+        void updateRangeCombo();
+        void makeItRed();
+        void errReport(string msg) const;
+        void rGridError(int ts, string varname);
+        void updateVariables();
+        void updateStatisticSelection();
 
-	private:
-		VAPoR::StatisticsParams* _params;
-		void retrieveRangeParams();
-		bool eventFilter(QObject* o, QEvent* e);
-		int GetExtents(vector<double>& extents);
-		int initVariables();
-		void adjustTables();
-		void initCRatios();
-		void initRefinement();
-		void initTimes();
-		void initRangeControllers();
-		void setNewExtents();
-		void updateStats();
-		void refreshTable();
-		void generateTableColumns();
-		void addCalculationToTable(string varname);
-		void makeItRed();
-		void updateSliders();
-		void errReport(string msg) const;
-		void rGridError(int ts, string varname);
-		void updateVariables();
-		void updateStatisticSelection();
+        bool calcMinMax(string varname);
+        bool calcMean(string varname);
+        bool calcMedian(string varname);
+        bool calcStdDev(string varname);
+        void getMultiPointTSMean(double &tsMean, int &missing, int &count, VAPoR::Grid* rGrid);
 
-		bool calcMinMax(string varname);
-		bool calcMean(string varname);
-		bool calcMedian(string varname);
-		bool calcStdDev(string varname);
-		void getSinglePointTSMean(double &tsMean,
-			int &missing, VAPoR::Grid* rGrid);
-		void getMultiPointTSMean(double &tsMean,
-			int &missing, int &count, VAPoR::Grid* rGrid);
-		void getSinglePointTSStdDev(double &tsStdDev,
-			int &globalCount, int &spMissing, double mean,
-			VAPoR::Grid* rGrid);
+        struct _statistics {
+            size_t row;
+            double min;
+            double max;
+            double mean;
+            double median;
+            double stddev;
+        };
 
-		struct _statistics {
-			size_t row;
-			double min;
-			double max;
-			double mean;
-			double median;
-			double stddev;
-		};
+        unsigned char _MIN;
+        unsigned char _MAX;
+        unsigned char _MEAN;
+        unsigned char _SIGMA;
+        unsigned char _MEDIAN;
+        unsigned char _calculations;
 
-		unsigned char _MIN;
-		unsigned char _MAX;
-		unsigned char _MEAN;
-		unsigned char _SIGMA;
-		unsigned char _MEDIAN;
-		unsigned char _calculations;
+        sErrMsg* _errMsg;
 
-		sErrMsg* _errMsg;
+        Range* _xRange;
+        Range* _yRange;
+        Range* _zRange;
 
-		Range* _xRange;
-		MinMaxSlider* _xMinSlider;
-		MinMaxSlider* _xMaxSlider;
-		MinMaxLineEdit* _xMinLineEdit;
-		MinMaxLineEdit* _xMaxLineEdit;
-		SinglePointSlider* _xSinglePointSlider;
-		SinglePointLineEdit* _xSinglePointLineEdit;
-		CenterSizeSlider* _xCenterSlider;
-		CenterSizeSlider* _xSizeSlider;
-		CenterSizeLineEdit* _xCenterLineEdit;
-		CenterSizeLineEdit* _xSizeLineEdit;
-		MinMaxTableCell* _xMinCell;
-		MinMaxTableCell* _xMaxCell;
-		MinMaxLabel* _minXMinLabel;
-		MinMaxLabel* _minXMaxLabel;
-		MinMaxLabel* _maxXMinLabel;
-		MinMaxLabel* _maxXMaxLabel;
-		MinMaxLabel* _centerXMinLabel;
-		MinMaxLabel* _centerXMaxLabel;
-		SizeLabel* _sizeXMinLabel;
-		SizeLabel* _sizeXMaxLabel;
-		MinMaxLabel* _spXMinLabel;
-		MinMaxLabel* _spXMaxLabel;
-
-		Range* _yRange;
-		MinMaxSlider* _yMinSlider;
-		MinMaxSlider* _yMaxSlider;
-		MinMaxLineEdit* _yMinLineEdit;
-		MinMaxLineEdit* _yMaxLineEdit;
-		SinglePointSlider* _ySinglePointSlider;
-		SinglePointLineEdit* _ySinglePointLineEdit;
-		CenterSizeSlider* _yCenterSlider;
-		CenterSizeSlider* _ySizeSlider;
-		CenterSizeLineEdit* _yCenterLineEdit;
-		CenterSizeLineEdit* _ySizeLineEdit;
-		MinMaxTableCell* _yMinCell;
-		MinMaxTableCell* _yMaxCell;
-		MinMaxLabel* _minYMinLabel;
-		MinMaxLabel* _minYMaxLabel;
-		MinMaxLabel* _maxYMinLabel;
-		MinMaxLabel* _maxYMaxLabel;
-		MinMaxLabel* _centerYMinLabel;
-		MinMaxLabel* _centerYMaxLabel;
-		SizeLabel* _sizeYMinLabel;
-		SizeLabel* _sizeYMaxLabel;
-		MinMaxLabel* _spYMinLabel;
-		MinMaxLabel* _spYMaxLabel;
-
-		Range* _zRange;
-		MinMaxSlider* _zMinSlider;
-		MinMaxSlider* _zMaxSlider;
-		MinMaxLineEdit* _zMinLineEdit;
-		MinMaxLineEdit* _zMaxLineEdit;
-		SinglePointSlider* _zSinglePointSlider;
-		SinglePointLineEdit* _zSinglePointLineEdit;
-		CenterSizeSlider* _zCenterSlider;
-		CenterSizeSlider* _zSizeSlider;
-		CenterSizeLineEdit* _zCenterLineEdit;
-		CenterSizeLineEdit* _zSizeLineEdit;
-		MinMaxTableCell* _zMinCell;
-		MinMaxTableCell* _zMaxCell;
-		MinMaxLabel* _minZMinLabel;
-		MinMaxLabel* _minZMaxLabel;
-		MinMaxLabel* _maxZMinLabel;
-		MinMaxLabel* _maxZMaxLabel;
-		MinMaxLabel* _centerZMinLabel;
-		MinMaxLabel* _centerZMaxLabel;
-		SizeLabel* _sizeZMinLabel;
-		SizeLabel* _sizeZMaxLabel;
-		MinMaxLabel* _spZMinLabel;
-		MinMaxLabel* _spZMaxLabel;
-
-		VAPoR::ControlExec* _controlExec;
-		VAPoR::DataStatus* _dataStatus;
-		VAPoR::DataMgr* _dm;
-		VAPoR::Grid* _rGrid;
-		string _defaultVar;
-		vector<string> _vars;
-		vector<string> _vars3d;
-		vector<size_t> _cRatios;
-		vector<double> _extents;
-		vector<double> _fullExtents;
-		vector<double> _uCoordMin;
-		vector<double> _uCoordMax;
-		map<string, _statistics> _stats;
-		size_t _minTS;
-		size_t _maxTS;
-		int _refLevel;
-		int _refLevels;
-		int _regionSelection;
-		size_t _cRatio;
-		size_t _vCoordMin[3];
-		size_t _vCoordMax[3];
-		size_t _minTime;
-		size_t _maxTime;
-		bool _autoUpdate;
-		bool _regionInitialized;
-		bool _initialized;
-		bool _slidersInitialized;
-
-		
+        VAPoR::ControlExec* _controlExec;
+        VAPoR::DataStatus* _dataStatus;
+        VAPoR::DataMgr* _dm;
+        VAPoR::Grid* _rGrid;
+        string _defaultVar;
+        vector<string> _vars;
+        vector<string> _vars3d;
+        vector<size_t> _cRatios;
+        vector<double>  _extents;
+        vector<double>  _fullExtents;
+        vector<double>  _uCoordMin;
+        vector<double>  _uCoordMax;
+        size_t          _vCoordMin[3];
+        size_t          _vCoordMax[3];
+        map<string, _statistics> _stats;
+        size_t _minTS;      // what's the difference of these 2 pairs?
+        size_t _maxTS;      // 
+        size_t _minTime;    // what's the difference of these 2 pairs?
+        size_t _maxTime;    // 
+        int _refLevel;      // what's the difference of these 2 variables?
+        int _refLevels;     //
+        int _regionSelection;
+        size_t _cRatio;
+        bool _autoUpdate;
+        bool _regionInitialized;
+        bool _initialized;
+        bool _rangeComboInitialized;
 };
 #endif
