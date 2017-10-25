@@ -516,7 +516,8 @@ void VizWinMgr::Restart() {
     for (int i = 0; i < vizNames.size(); i++) {
         attachVisualizer(vizNames[i]);
     }
-    m_initialized = true;
+
+    ReinitRouters();
 }
 
 void VizWinMgr::removeVisualizer(string vizName) {
@@ -525,6 +526,10 @@ void VizWinMgr::removeVisualizer(string vizName) {
 }
 
 void VizWinMgr::ReinitRouters() {
+    m_initialized = false;
+
+    if (_controlExec->GetDataNames().size() == 0)
+        return;
 
     DataStatus *dataStatus = _controlExec->getDataStatus();
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
