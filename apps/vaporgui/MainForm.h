@@ -154,7 +154,9 @@ class MainForm : public QMainWindow {
     bool eventFilter(QObject *obj, QEvent *event);
 
   private:
-    // QWidgetAction* createTextSeparator(const QString& text);
+#if 0
+ QWidgetAction* createTextSeparator(const QString& text);
+#endif
 
     class ParamsChangeEvent : public QEvent {
       public:
