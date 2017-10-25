@@ -428,20 +428,22 @@ void MainForm::hookupSignals()
     connect(_windowSelector, SIGNAL(newWin()), _vizWinMgr, SLOT(LaunchVisualizer()));
 }
 
-QWidgetAction *MainForm::createTextSeparator(const QString &text)
+/*
+QWidgetAction* MainForm::createTextSeparator(const QString& text)
 {
-    auto *pLabel = new QLabel(text);
+    auto* pLabel = new QLabel(text);
     pLabel->setMinimumWidth(this->minimumWidth() - 4);
     // grayish style
-    // pLabel->setStyleSheet("background: #FF4B4B4B;");
+    //pLabel->setStyleSheet("background: #FF4B4B4B;");
     // possible alignment
     // pLabel->setAlignment(Qt::AlignCenter);
-    auto *separator = new QWidgetAction(this);
+    auto* separator = new QWidgetAction(this);
 
     // This triggers a bug in Qt and prevents the app from exiting on window close
     separator->setDefaultWidget(pLabel);
     return separator;
 }
+*/
 
 void MainForm::createMenus()
 {

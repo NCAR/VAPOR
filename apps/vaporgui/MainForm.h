@@ -155,7 +155,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-    QWidgetAction *createTextSeparator(const QString &text);
+    // QWidgetAction* createTextSeparator(const QString& text);
 
     class ParamsChangeEvent : public QEvent {
     public:
