@@ -141,7 +141,7 @@ void VizWinMgr::createAllDefaultTabs()
     er = new TwoDDataEventRouter(parent, _controlExec);
     installTab(er->GetType(), 0, er);
 
-#ifdef HELLO_RENDERER
+#ifndef HELLO_RENDERER
     parent = TabManager::getInstance()->GetSubTabWidget(0);
     er = new HelloEventRouter(parent, _controlExec);
     installTab(er->GetType(), 0, er);
