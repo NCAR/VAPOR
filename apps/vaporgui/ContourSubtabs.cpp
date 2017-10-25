@@ -43,6 +43,8 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		//  
 		double min = _cParams->GetContourMin();
 		string varname = _cParams->GetVariableName();
+		if (varname.empty()) return(0.0);
+
 		double spacing, maxSpacing;
 		if (locked) {
 			// Update contour minimum combo
@@ -129,6 +131,8 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 
 		_cParams = cParams;
 		string varname = _cParams->GetVariableName();
+		if (varname.empty()) return;
+
 		VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
 		double lower = mf->getMinMapValue();
 		double upper = mf->getMaxMapValue();
@@ -195,6 +199,7 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 
 		bool locked = _cParams->GetLockToTF();
 		string varname = _cParams->GetVariableName();
+		if (varname.empty()) return;
 
 		// If we're locked to the transfer function and our span exceeds
 		// the TF max value, adjust our spacing to make room for the added
@@ -242,6 +247,8 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		bool locked = _cParams->GetLockToTF();
 		double min = _cParams->GetContourMin();
 		string varname = _cParams->GetVariableName();
+		if (varname.empty()) return;
+
 		int numContours = _cParams->GetNumContours();
 		double maxSpacing;
 
