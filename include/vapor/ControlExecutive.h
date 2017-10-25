@@ -282,6 +282,12 @@ public:
     //!
     void CloseData(string dataSetName);
 
+    //! Return list of currently open data set names
+    //!
+    //! \sa OpenData(), CloseData()
+    //
+    std::vector<string> GetDataNames() const { return (_paramsMgr->GetDataMgrNames()); }
+
     //! Obtain the current DataStatus
     //! Needed to store in GUI when the DataStatus changes.
     //! \return DataStatus*
