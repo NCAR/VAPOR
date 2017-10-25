@@ -52,7 +52,7 @@ ControlExec::~ControlExec() {
 #endif
 }
 
-int ControlExec::NewVisualizer(string winName, vector<string> withDatasets) {
+int ControlExec::NewVisualizer(string winName) {
 
     // Remove if already exists. Else no-op
     //
