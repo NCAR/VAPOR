@@ -428,7 +428,7 @@ void MainForm::hookupSignals()
     connect(_windowSelector, SIGNAL(newWin()), _vizWinMgr, SLOT(LaunchVisualizer()));
 }
 
-/*
+#if 0
 QWidgetAction* MainForm::createTextSeparator(const QString& text)
 {
     auto* pLabel = new QLabel(text);
@@ -439,11 +439,11 @@ QWidgetAction* MainForm::createTextSeparator(const QString& text)
     // pLabel->setAlignment(Qt::AlignCenter);
     auto* separator = new QWidgetAction(this);
 
-    // This triggers a bug in Qt and prevents the app from exiting on window close
+	// This triggers a bug in Qt and prevents the app from exiting on window close
     separator->setDefaultWidget(pLabel);
     return separator;
 }
-*/
+#endif
 
 void MainForm::createMenus()
 {
