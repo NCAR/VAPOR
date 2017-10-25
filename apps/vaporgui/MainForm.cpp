@@ -562,6 +562,8 @@ QWidgetAction *MainForm::createTextSeparator(const QString &text) {
     // possible alignment
     // pLabel->setAlignment(Qt::AlignCenter);
     auto *separator = new QWidgetAction(this);
+
+    // This triggers a bug in Qt and prevents the app from exiting on window close
     separator->setDefaultWidget(pLabel);
     return separator;
 }
@@ -571,7 +573,7 @@ void MainForm::createMenus() {
     // menubar
     _main_Menubar = menuBar();
     _File = menuBar()->addMenu(tr("File"));
-    _File->addAction(createTextSeparator(" Data"));
+    // _File->addAction(createTextSeparator(" Data"));
     _File->addAction(_dataLoad_MetafileAction);
     _closeVDCMenu = _File->addMenu("Close VDC");
     //_File->addAction(_dataClose_MetafileAction );
@@ -580,7 +582,7 @@ void MainForm::createMenus() {
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
     _File->addSeparator();
-    _File->addAction(createTextSeparator(" Session"));
+    // _File->addAction(createTextSeparator(" Session"));
     _File->addAction(_fileNew_SessionAction);
     _File->addAction(_fileOpenAction);
     _File->addAction(_fileSaveAction);
@@ -728,19 +730,19 @@ void MainForm::createActions() {
 void MainForm::languageChange() {
     setWindowTitle(tr("VAPoR:  NCAR Visualization and Analysis Platform for Research"));
 
-    _fileNew_SessionAction->setText(tr("&New"));
+    _fileNew_SessionAction->setText(tr("&New Session"));
 
     _fileNew_SessionAction->setToolTip("Restart the session with default settings");
     _fileNew_SessionAction->setShortcut(Qt::CTRL + Qt::Key_N);
 
-    _fileOpenAction->setText(tr("&Open"));
+    _fileOpenAction->setText(tr("&Open Session"));
     _fileOpenAction->setShortcut(tr("Ctrl+O"));
     _fileOpenAction->setToolTip("Launch a file open dialog to reopen a previously saved session file");
 
-    _fileSaveAction->setText(tr("&Save"));
+    _fileSaveAction->setText(tr("&Save Session"));
     _fileSaveAction->setShortcut(tr("Ctrl+S"));
     _fileSaveAction->setToolTip("Launch a file-save dialog to save the state of this session in current session file");
-    _fileSaveAsAction->setText(tr("Save As..."));
+    _fileSaveAsAction->setText(tr("Save Session As..."));
 
     _fileSaveAsAction->setToolTip("Launch a file-save dialog to save the state of this session in another session file");
 
