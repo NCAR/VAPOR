@@ -622,6 +622,7 @@ void MainForm::hookupSignals() {
 	);
 }
 
+/*
 QWidgetAction* MainForm::createTextSeparator(const QString& text)
 {
     auto* pLabel = new QLabel(text);
@@ -636,6 +637,7 @@ QWidgetAction* MainForm::createTextSeparator(const QString& text)
     separator->setDefaultWidget(pLabel);
     return separator;
 }
+*/
 
 void MainForm::createMenus(){
 	
