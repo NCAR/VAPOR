@@ -106,6 +106,8 @@ private:
     Combo * _frameRateCombo;
     QTimer *_myTimer;
     int     _direction;
+    bool    _widgetsEnabled;
+    bool    _animationOn;
 
 private slots:
 
