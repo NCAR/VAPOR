@@ -978,6 +978,10 @@ void MainForm::fileSave()
         QString fileName = QFileDialog::getSaveFileName( this, 
                             "Choose the fileName to save the current session",
                             sessionPath, "Vapor 3 Session Files (*.vs3)" );
+        if( fileName.isNull() )
+        {
+            return;
+        }
         path = fileName.toStdString();
     }
 
@@ -1008,22 +1012,27 @@ void MainForm::fileSaveAs()
     }
 	
    	QString fileName = QFileDialog::getSaveFileName( this, 
-        "Choose the fileName to save the current session",
-        path, "Vapor 3 Session Files (*.vs3)");
+                        "Choose the fileName to save the current session",
+                        path, "Vapor 3 Session Files (*.vs3)");
+    if( fileName.isNull() )
+    {
+        return;
+    }
 	string newPath = fileName.toStdString();
 
-	if (_controlExec->SaveSession(newPath)){
+	if (_controlExec->SaveSession(newPath))
+    {
 		MSG_ERR("Saving session file failed");
-		    return;
+		return;
 	}
     else
     {
         // Save to use a default for fileSave()
         //
         p->SetCurrentSessionPath( path.toStdString() );
+        _stateChangeFlag = false;
     }
 }
-
 
 
 void MainForm::fileExit()
