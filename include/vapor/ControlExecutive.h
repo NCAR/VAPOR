@@ -127,7 +127,7 @@ class RENDER_API ControlExec : public MyBase {
     //! hints about what kind of graphics context is needed
     //! (e.g. double buffering)
     //
-    int NewVisualizer(string name, vector<string> withDatasets);
+    int NewVisualizer(string name);
 
     //! Delete an existing visualizer
     //!
