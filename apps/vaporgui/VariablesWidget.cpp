@@ -191,6 +191,7 @@ void VariablesWidget::setHeightVarName(const QString &qname) {
 }
 
 //Occurs when user clicks a fidelity radio button
+//
 void VariablesWidget::setFidelity(int buttonID) {
     assert(_rParams);
 
@@ -216,10 +217,9 @@ void VariablesWidget::setFidelity(int buttonID) {
 // fidelity settings the default.
 
 void VariablesWidget::SetFidelityDefault() {
+
 #ifdef DEAD
-
     //Check current values of LOD and refinement and their combos.
-
     _renderEV->confirmText();
     _dataStatus->setFidelityDefault(rParams);
     StartupParams *sParams = (StartupParams *)_paramsMgr->GetDefaultParams(StartupParams::_startupParamsTag);
@@ -290,9 +290,7 @@ void VariablesWidget::getCmpFactors(
     }
 }
 
-void VariablesWidget::updateFidelity(
-    RenderParams *rParams) {
-
+void VariablesWidget::updateFidelity(RenderParams *rParams) {
     string varname;
     if (_dspFlags & SCALAR) {
         varname = rParams->GetVariableName();
@@ -331,7 +329,7 @@ void VariablesWidget::updateFidelity(
     //
     lodCombo->clear();
     for (int i = 0; i < lodStrs.size(); i++) {
-        QString s = QString(lodStrs[i].c_str());
+        QString s = QString::fromStdString(lodStrs[i]);
         lodCombo->addItem(s);
     }
     lodCombo->setCurrentIndex(lod);
@@ -354,7 +352,6 @@ void VariablesWidget::updateFidelity(
     // Linearize the LOD and refinement compression ratios so that
     // when combined they increase (decrease) monotonically
     //
-
     _fidelityLodIdx.clear();
     _fidelityMultiresIdx.clear();
     _fidelityLodStrs.clear();
@@ -388,6 +385,7 @@ void VariablesWidget::updateFidelity(
     QHBoxLayout *hlay = (QHBoxLayout *)fidelityBox->layout();
     QLayoutItem *child;
     while ((child = hlay->takeAt(0)) != 0) {
+        delete child->widget();
         delete child;
     }
 
@@ -397,9 +395,7 @@ void VariablesWidget::updateFidelity(
         hlay->addWidget(rd);
 
         _fidelityButtons->addButton(rd, i);
-        QString qs = "Refinement " +
-                     QString(_fidelityMultiresStrs[i].c_str()) + "\nLOD " +
-                     QString(_fidelityLodStrs[i].c_str());
+        QString qs = "Refinement " + QString::fromStdString(_fidelityMultiresStrs[i]) + "\nLOD " + QString::fromStdString(_fidelityLodStrs[i]);
 
         rd->setToolTip(qs);
 
@@ -407,7 +403,6 @@ void VariablesWidget::updateFidelity(
             rd->setChecked(true);
         }
     }
-    fidelityBox->setLayout(hlay);
 }
 
 void VariablesWidget::uncheckFidelity() {
@@ -633,6 +628,5 @@ void VariablesWidget::Update(
     updateDims(rParams);
 
     updateVariableCombos(rParams);
-
     updateFidelity(rParams);
 }
