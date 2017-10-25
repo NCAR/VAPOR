@@ -93,6 +93,9 @@ AnimationEventRouter::AnimationEventRouter(
     currentFrameEdit->setReadOnly(true);
     frame->setEnabled(false);
     gridLayout->setEnabled(false);
+
+    _widgetsEnabled = true;
+    _animationOn = false;
 }
 
 AnimationEventRouter::~AnimationEventRouter() {
@@ -226,7 +229,17 @@ void AnimationEventRouter::_updateTab() {
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     size_t numTS = dataStatus->GetTimeCoordinates().size();
-    assert(numTS >= 1);
+    if (numTS == 0) {
+
+        // no data
+        if (_widgetsEnabled)
+            enableWidgets(false);
+        return;
+    }
+
+    if (!_widgetsEnabled && !_animationOn) {
+        enableWidgets(true);
+    }
 
     size_t startFrame = aParams->GetStartTimestep();
     size_t endFrame = aParams->GetEndTimestep();
@@ -302,6 +315,7 @@ void AnimationEventRouter::_updateTab() {
 
 void AnimationEventRouter::AnimationPause() {
     enableWidgets(true);
+    _animationOn = false;
 
     playForwardButton->setChecked(false);
     playReverseButton->setChecked(false);
@@ -312,6 +326,7 @@ void AnimationEventRouter::AnimationPause() {
 
 void AnimationEventRouter::AnimationPlayReverse() {
     enableWidgets(false);
+    _animationOn = true;
 
     playForwardButton->setChecked(false);
     playReverseButton->setChecked(true);
@@ -322,6 +337,7 @@ void AnimationEventRouter::AnimationPlayReverse() {
 void AnimationEventRouter::AnimationPlayForward() {
 
     enableWidgets(false);
+    _animationOn = true;
 
     playForwardButton->setChecked(true);
     playReverseButton->setChecked(false);
@@ -495,6 +511,8 @@ void AnimationEventRouter::enableWidgets(bool on) {
     _timestepSelectCombo->SetEnabled(on);
     _frameStepCombo->SetEnabled(on);
     _frameRateCombo->SetEnabled(on);
+
+    _widgetsEnabled = on;
 }
 
 #ifdef DEAD
