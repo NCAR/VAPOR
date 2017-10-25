@@ -755,6 +755,7 @@ void MainForm::fileSave()
 
     if (path == "JustInMemory") {
         QString sessionPath = QDir::homePath();
+        sessionPath.append("/My_Vapor_Session.vs3");
         sessionPath = QDir::toNativeSeparators(sessionPath);
         QString fileName = QFileDialog::getSaveFileName(this, "Choose the fileName to save the current session", sessionPath, "Vapor 3 Session Files (*.vs3)");
         path = fileName.toStdString();
@@ -777,6 +778,7 @@ void MainForm::fileSaveAs()
 
     if (path == "JustInMemory") {
         QString homePath = QDir::homePath();
+        homePath.append("/My_Vapor_Session.vs3");
         path = QDir::toNativeSeparators(homePath);
     }
 
