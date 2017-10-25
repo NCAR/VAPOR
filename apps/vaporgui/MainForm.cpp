@@ -554,7 +554,7 @@ void MainForm::hookupSignals() {
         _vizWinMgr, SLOT(LaunchVisualizer()));
 }
 
-/*
+#if 0
 QWidgetAction* MainForm::createTextSeparator(const QString& text)
 {
     auto* pLabel = new QLabel(text);
@@ -569,7 +569,7 @@ QWidgetAction* MainForm::createTextSeparator(const QString& text)
     separator->setDefaultWidget(pLabel);
     return separator;
 }
-*/
+#endif
 
 void MainForm::createMenus() {
 
