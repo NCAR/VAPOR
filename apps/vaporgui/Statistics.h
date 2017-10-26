@@ -77,7 +77,10 @@ class Statistics : public QDialog, public Ui_StatsWindow {
         void refinementChanged(int);
         void cRatioChanged(int);
         void newVarAdded(int);
-        void updateButtonPressed() {updateStats();}
+        void updateButtonPressed() 
+        {
+            updateStats();
+        }
         void initRegion();
         void varRemoved(int);
         void exportText();
