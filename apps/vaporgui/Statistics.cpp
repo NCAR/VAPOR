@@ -104,6 +104,7 @@ bool Statistics::eventFilter(QObject *object, QEvent *event)
 
 void Statistics::Update(VAPoR::StatisticsParams *sParams)
 {
+#if 0
     _params = sParams;
 
     vector<double> minExts, maxExts;
@@ -143,14 +144,15 @@ void Statistics::Update(VAPoR::StatisticsParams *sParams)
 
     _autoUpdate = _params->GetAutoUpdate();
     UpdateCheckbox->blockSignals(true);
-    if (!_autoUpdate)
+    if (!_autoUpdate) 
         UpdateCheckbox->setCheckState(Qt::Unchecked);
-    else
+    else 
         UpdateCheckbox->setCheckState(Qt::Checked);
     UpdateCheckbox->blockSignals(false);
 
     updateStatisticSelection();
     updateVariables();
+#endif
 }
 
 int Statistics::initDataMgr(DataMgr *dm)
@@ -215,7 +217,9 @@ int Statistics::initialize()
     // 0 = center/size, 1 = min/max, 2 = center/size
     //
     //_regionSelection = 0;
+#if 0
     _regionSelection = _params->GetRegionSelection();
+#endif
     // stackedSliderWidget->setCurrentIndex(_regionSelection);
 
     generateTableColumns();
@@ -390,23 +394,33 @@ void Statistics::initRanges()
 
 void Statistics::initCRatios()
 {
+#if 0
     _cRatios = _dm->GetCRatios(_defaultVar);
 
     _cRatio = _params->GetCRatio();
-    if (_cRatio == -1) { _cRatio = _cRatios.size() - 1; }
+    if (_cRatio == -1) {
+        _cRatio = _cRatios.size()-1;
+    }
 
-    for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it) { CRatioCombo->addItem("1:" + QString::number(*it)); }
+    for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it){
+        CRatioCombo->addItem("1:"+QString::number(*it));
+    }
 
     CRatioCombo->setCurrentIndex(_cRatio);
+#endif
 }
 
 void Statistics::initRefinement()
 {
+#if 0
     _refLevel = _params->GetRefinement();
     _refLevels = _dm->GetNumRefLevels(_defaultVar);
 
-    for (int i = 0; i <= _refLevels; i++) { RefCombo->addItem(QString::number(i)); }
+    for (int i=0; i<=_refLevels; i++){
+        RefCombo->addItem(QString::number(i));
+    }
     RefCombo->setCurrentIndex(_refLevel);
+#endif
 }
 
 // In Vapor 2.x, the function call:
@@ -491,6 +505,7 @@ void Statistics::retrieveRangeParams()
     // incremented our minimum timestep, and we need to set params
     // accordingly.
     //
+#if 0
     vector<double> minExtents, maxExtents;
     minExtents = _params->GetMinExtents();
     maxExtents = _params->GetMaxExtents();
@@ -505,7 +520,7 @@ void Statistics::retrieveRangeParams()
         maxExtents.push_back(_extents[5]);
         _params->SetMinExtents(minExtents);
         _params->SetMaxExtents(maxExtents);
-
+        
         _xRange->setUserMin(_extents[0]);
         _yRange->setUserMin(_extents[1]);
         _zRange->setUserMin(_extents[2]);
@@ -524,45 +539,54 @@ void Statistics::retrieveRangeParams()
         _zRange->setUserMin(minExtents[2]);
         _zRange->setUserMax(maxExtents[2]);
     }
+#endif
 }
 
 void Statistics::setNewExtents()
 {
+#if 0
     _xRange->setDomainMin(_fullExtents[0]);
     _xRange->setDomainMax(_fullExtents[3]);
     _yRange->setDomainMin(_fullExtents[1]);
     _yRange->setDomainMax(_fullExtents[4]);
     _zRange->setDomainMin(_fullExtents[2]);
     _zRange->setDomainMax(_fullExtents[5]);
+#endif
 }
 
 void Statistics::updateRangeCombo() {}
 
 int Statistics::initVariables()
 {
+#if 0
     vector<string> vars;
     vars = _dm->GetDataVarNames(3, true);
-    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
+    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it){
         _vars.push_back(*it);
         _vars3d.push_back(*it);
     }
     vars = _dm->GetDataVarNames(2, true);
-    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) { _vars.push_back(*it); }
+    for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it){
+        _vars.push_back(*it);
+    }
 
     sort(_vars.begin(), _vars.end());
-
+    
     // Add variables to combo box
     //
-    for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { NewVarCombo->addItem(QString::fromStdString(*it)); }
+    for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it){
+        NewVarCombo->addItem(QString::fromStdString(*it));
+    }
 
     vector<string> pVars = _params->GetVarNames();
     if (pVars.size() > 0) {
-        for (int i = 0; i < pVars.size(); i++) {
+        for (int i=0; i<pVars.size(); i++) {
             QString varName = QString::fromStdString(pVars[i]);
-            int     index = NewVarCombo->findText(varName);
+            int index = NewVarCombo->findText(varName);
             addVariable(index);
         }
     }
+#endif
 
     return 0;
 }
@@ -673,22 +697,24 @@ void Statistics::autoUpdateClicked()
 
 void Statistics::refinementChanged(int index)
 {
+#if 0
     _refLevel = index;
     _params->SetRefinement(_refLevel);
-    if (_autoUpdate)
+    if (_autoUpdate) 
         updateStats();
-    else
-        (makeItRed());
+    else (makeItRed());
+#endif
 }
 
 void Statistics::cRatioChanged(int index)
 {
+#if 0
     _cRatio = index;
     _params->SetCRatio(_cRatio);
-    if (_autoUpdate)
+    if (_autoUpdate) 
         updateStats();
-    else
-        (makeItRed());
+    else (makeItRed());
+#endif
 }
 
 void Statistics::refreshTable()
@@ -880,19 +906,20 @@ void Statistics::exportText()
 
 void Statistics::removeVariable(int index)
 {
+#if 0
     if (index == 0) return;
-    // string varName = RemoveVarCombo->currentText().toStdString();
     string varName = RemoveVarCombo->itemText(index).toStdString();
     _stats.erase(varName);
 
     vector<string> varNames = _params->GetVarNames();
-    varNames.erase(std::remove(varNames.begin(), varNames.end(), varName), varNames.end());
+    varNames.erase(std::remove(varNames.begin(), varNames.end(), varName),
+        varNames.end());
     _params->SetVarNames(varNames);
 
     RemoveVarCombo->setCurrentIndex(0);
     RemoveVarCombo->removeItem(index);
 
-    for (int i = 0; i < VariablesTable->rowCount(); i++) {
+    for (int i=0; i<VariablesTable->rowCount(); i++) {
         QString s = VariablesTable->verticalHeaderItem(i)->text();
         if (varName == s.toStdString()) {
             VariablesTable->removeRow(i);
@@ -901,10 +928,12 @@ void Statistics::removeVariable(int index)
     }
 
     if (_autoUpdate) updateStats();
+#endif
 }
 
 void Statistics::updateVariables()
 {
+#if 0
     // Clear and regenerate the variable table,
     // and its associated combo boxes
     //
@@ -914,9 +943,9 @@ void Statistics::updateVariables()
     // in the current state
     //
     vector<string> addUs;
-    for (int i = 0; i < vars.size(); i++) {
+    for (int i=0; i<vars.size(); i++) {
         string varname = vars[i];
-        bool   found = false;
+        bool found = false;
         // If we can't find the params variable in _stats,
         // push it to the addUs vector to add once outside
         // the loop.  Don't modify _stats while looping through it.
@@ -926,7 +955,7 @@ void Statistics::updateVariables()
         }
         if (!found) addUs.push_back(varname);
     }
-    for (int i = 0; i < addUs.size(); i++) {
+    for (int i=0; i<addUs.size(); i++) {
         int index = NewVarCombo->findText(QString::fromStdString(addUs[i]));
         addVariable(index);
     }
@@ -944,11 +973,12 @@ void Statistics::updateVariables()
             removeUs.push_back(varname);
         }
     }
-    for (int i = 0; i < removeUs.size(); i++) {
+    for (int i=0; i<removeUs.size(); i++) {
         string varname = removeUs[i];
-        int    index = RemoveVarCombo->findText(QString::fromStdString(varname));
+        int index = RemoveVarCombo->findText(QString::fromStdString(varname));
         removeVariable(index);
     }
+#endif
 }
 
 void Statistics::updateStatisticSelection()
@@ -994,6 +1024,7 @@ void Statistics::addVariable(int index)
         if (it->first == varName) return;
     }
 
+#if 0
     // Add variable to parameter database
     //
     vector<string> varNames = _params->GetVarNames();
@@ -1011,10 +1042,10 @@ void Statistics::addVariable(int index)
     verticalHeader->setDefaultSectionSize(20);
 
     int colCount = VariablesTable->columnCount();
-    for (int j = 0; j < colCount; j++) {
-        QTableWidgetItem *twi = new QTableWidgetItem("");
+    for (int j=0; j<colCount; j++){
+        QTableWidgetItem* twi = new QTableWidgetItem("");
         twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-        VariablesTable->setItem(rowCount, j, twi);
+        VariablesTable->setItem(rowCount,j,twi);
     }
 
     NewVarCombo->setCurrentIndex(0);
@@ -1022,10 +1053,13 @@ void Statistics::addVariable(int index)
     RemoveVarCombo->addItem(QString::fromStdString(varName));
     VariablesTable->resizeRowsToContents();
 
-    if (_autoUpdate) {
+    if (_autoUpdate) 
+    {
         updateStats();
-    } else
+    }
+    else 
         (makeItRed());
+#endif
 }
 
 void Statistics::rangeComboChanged()
@@ -1034,7 +1068,8 @@ void Statistics::rangeComboChanged()
     // int index = regionSelectorCombo->currentIndex();
     //_regionSelection = index;
 
-    _extents.resize(6);
+#if 0
+    _extents.resize( 6 );
     vector<double> minExts(3, 0.0);
     vector<double> maxExts(3, 0.0);
     minExts[0] = _extents[0] = _xRange->getUserMin();
@@ -1044,31 +1079,41 @@ void Statistics::rangeComboChanged()
     maxExts[1] = _extents[4] = _yRange->getUserMax();
     maxExts[2] = _extents[5] = _zRange->getUserMax();
 
-    ParamsMgr *pMgr = _controlExec->GetParamsMgr();
+    ParamsMgr* pMgr = _controlExec->GetParamsMgr();
     pMgr->BeginSaveStateGroup("Statistics range change");
     _params->SetMinExtents(minExts);
     _params->SetMaxExtents(maxExts);
     pMgr->EndSaveStateGroup();
 
-    if (_regionSelection == 0) { RestoreExtentsButton->setEnabled(true); }
-    if (_regionSelection == 1) { RestoreExtentsButton->setEnabled(true); }
-    if (_regionSelection == 2) {
+    if (_regionSelection == 0) 
+    {
+        RestoreExtentsButton->setEnabled(true);
+    }
+    if (_regionSelection == 1) 
+    {
+        RestoreExtentsButton->setEnabled(true);
+    }
+    if (_regionSelection == 2) 
+    {
         RestoreExtentsButton->setEnabled(false);
 
-        double xMid = (_xRange->getDomainMin() + _xRange->getDomainMax()) / 2.f;
+        double xMid = (_xRange->getDomainMin() + _xRange->getDomainMax())/2.f;
         _xRange->setUserMin(xMid);
         _xRange->setUserMax(xMid);
 
-        double yMid = (_yRange->getDomainMin() + _yRange->getDomainMax()) / 2.f;
+        double yMid = (_yRange->getDomainMin() + _yRange->getDomainMax())/2.f;
         _yRange->setUserMin(yMid);
         _yRange->setUserMax(yMid);
 
-        double zMid = (_zRange->getDomainMin() + _zRange->getDomainMax()) / 2.f;
+        double zMid = (_zRange->getDomainMin() + _zRange->getDomainMax())/2.f;
         _zRange->setUserMin(zMid);
         _zRange->setUserMax(zMid);
-    } else {
+    }
+    else 
+    {
         RestoreExtentsButton->setEnabled(true);
     }
+#endif
 }
 
 void Statistics::rGridError(int ts, string varname)

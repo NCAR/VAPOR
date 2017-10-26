@@ -49,9 +49,9 @@ const string StatisticsParams::_stdDevStatTag = "StdDevStat";
 //
 static ParamsRegistrar<StatisticsParams> registrar(StatisticsParams::GetClassType());
 
-StatisticsParams::StatisticsParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, StatisticsParams::GetClassType()) {}
+StatisticsParams::StatisticsParams(DataMgr *dmgr, ParamsBase::StateSave *ssave) : RenderParams(dmgr, ssave, StatisticsParams::GetClassType()) {}
 
-StatisticsParams::StatisticsParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
+StatisticsParams::StatisticsParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dmgr, ssave, node)
 {
     // If node isn't tagged correctly we correct the tag and reinitialize
     // from scratch;
