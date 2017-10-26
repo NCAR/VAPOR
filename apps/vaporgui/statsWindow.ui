@@ -307,7 +307,7 @@
            <item>
             <widget class="QLabel" name="RefLabel">
              <property name="text">
-              <string>Refinement:</string>
+              <string>Refinement</string>
              </property>
             </widget>
            </item>
@@ -402,7 +402,7 @@
            <item>
             <widget class="QLabel" name="MinTimestepLabel">
              <property name="text">
-              <string>Minimum Timestep:</string>
+              <string>Minimum Timestep</string>
              </property>
             </widget>
            </item>
