@@ -15,8 +15,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 	Q_OBJECT
 
 public:
-	//! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to
-	//! be supported
+	//! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to be supported
 	//
 	enum Flags {
 		TWOD = (1u << 0), 

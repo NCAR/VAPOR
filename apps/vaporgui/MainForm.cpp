@@ -1983,9 +1983,11 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	// Only update the GUI if the Params state has changed
 	//
-	if (event->type() == ParamsChangeEvent::type()) {
+	if (event->type() == ParamsChangeEvent::type()) 
+    {
 		ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
-		if (_stats) {
+		if (_stats) 
+        {
 			StatisticsParams* params;
 			params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
 			_stats->Update(params);

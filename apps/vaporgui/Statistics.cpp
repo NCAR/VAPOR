@@ -97,7 +97,7 @@ bool Statistics::eventFilter(QObject *object, QEvent* event) {
             QTableWidgetItem* i = VariablesTable->verticalHeaderItem(row);
             QString text = i->text();
             int index = RemoveVarCombo->findText(text);
-            varRemoved(index);
+            removeVariable(index);
             return true;
         }
         return false;
@@ -105,7 +105,8 @@ bool Statistics::eventFilter(QObject *object, QEvent* event) {
     return false;
 }
 
-void Statistics::Update(VAPoR::StatisticsParams* sParams) {
+void Statistics::Update(VAPoR::StatisticsParams* sParams) 
+{
     _params = sParams;
 
     vector<double> minExts, maxExts;
@@ -145,8 +146,10 @@ void Statistics::Update(VAPoR::StatisticsParams* sParams) {
 
     _autoUpdate = _params->GetAutoUpdate();
     UpdateCheckbox->blockSignals(true);
-    if (!_autoUpdate) UpdateCheckbox->setCheckState(Qt::Unchecked);
-    else UpdateCheckbox->setCheckState(Qt::Checked);
+    if (!_autoUpdate) 
+        UpdateCheckbox->setCheckState(Qt::Unchecked);
+    else 
+        UpdateCheckbox->setCheckState(Qt::Checked);
     UpdateCheckbox->blockSignals(false);
 
     updateStatisticSelection();
@@ -250,9 +253,9 @@ int Statistics::initialize(){
     connect(UpdateButton, SIGNAL(pressed()), this, SLOT(updateButtonPressed()));
     connect(RefCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(refinementChanged(int)));
     connect(CRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
-    connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(newVarAdded(int)));
+    connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(addVariable(int)));
     connect(RestoreExtentsButton, SIGNAL(pressed()), this, SLOT(restoreExtents()));
-    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(varRemoved(int)));
+    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVariable(int)));
     connect(ExportButton, SIGNAL(clicked()), this, SLOT(exportText()));
     //connect(regionSelectorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(rangeComboChanged()));
     //connect(copyActiveRegionButton, SIGNAL(pressed()), this, SLOT(copyActiveRegion()));
@@ -300,7 +303,8 @@ void Statistics::addStatistic(int index) {
     VariablesTable->resizeColumnsToContents();
     addStatCombo->setCurrentIndex(0);
 
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
 }
 
 void Statistics::removeStatistic(int index) {
@@ -331,7 +335,8 @@ void Statistics::removeStatistic(int index) {
     VariablesTable->resizeColumnsToContents();
     removeStatCombo->setCurrentIndex(0);
 
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
 }
 
 void Statistics::errReport(string msg) const {
@@ -571,7 +576,7 @@ int Statistics::initVariables() {
         for (int i=0; i<pVars.size(); i++) {
             QString varName = QString::fromStdString(pVars[i]);
             int index = NewVarCombo->findText(varName);
-            newVarAdded(index);
+            addVariable(index);
         }
     }
 
@@ -628,7 +633,8 @@ void Statistics::maxTSChanged() {
     _params->SetMaxTS(_maxTS);
     pMgr->EndSaveStateGroup();
     
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
     else (makeItRed());
 }
 
@@ -655,7 +661,8 @@ void Statistics::minTSChanged() {
     pMgr->EndSaveStateGroup();
 
     initRegion();
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
     else (makeItRed());
 }
 
@@ -665,21 +672,24 @@ void Statistics::autoUpdateClicked() {
     UpdateButton->setEnabled(!_autoUpdate);
     _params->SetAutoUpdate(_autoUpdate);
 
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
     else (makeItRed());
 }
 
 void Statistics::refinementChanged(int index) {
     _refLevel = index;
     _params->SetRefinement(_refLevel);
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
     else (makeItRed());
 }
 
 void Statistics::cRatioChanged(int index) {
     _cRatio = index;
     _params->SetCRatio(_cRatio);
-    if (_autoUpdate) updateStats();
+    if (_autoUpdate) 
+        updateStats();
     else (makeItRed());
 }
 
@@ -693,9 +703,10 @@ void Statistics::refreshTable() {
     generateTableColumns();
 }
 
-void Statistics::updateStats() {
-
-    if (!_regionInitialized) return;
+void Statistics::updateStats() 
+{
+    if (!_regionInitialized) 
+        return;
 
     refreshTable();
 
@@ -716,23 +727,31 @@ void Statistics::updateStats() {
     // a callback that can trigger an infinite cascade of error msg
     // popups :-(
     //
-    bool enable = MyBase::EnableErrMsg(false);
+    //bool enable = MyBase::EnableErrMsg(false);
     bool success = true;
-    for (it_type it = _stats.begin(); it!=_stats.end(); it++){
+    for (it_type it = _stats.begin(); it!=_stats.end(); it++)
+    {
         varName = it->first;
 
-        if ((_calculations & _MIN) ||
-            (_calculations & _MAX)) {
+        // Sam:
+        //  EVERY stats gets re-calculated...
+        //  Very bad design choice.
+
+        if ((_calculations & _MIN) || (_calculations & _MAX)) 
+        {
             success &= calcMinMax(varName);
         }
 
-        if (_calculations & _MEAN) {
+        if (_calculations & _MEAN) 
+        {
             success &= calcMean(varName);
         }
-        if (_calculations & _SIGMA) {
+        if (_calculations & _SIGMA) 
+        {
             success &= calcStdDev(varName);
         }
-        if (_calculations & _MEDIAN) {
+        if (_calculations & _MEDIAN) 
+        {
             success &= calcMedian(varName);
         }
     
@@ -740,15 +759,14 @@ void Statistics::updateStats() {
     }
 
     if (! success) {
-        string myErr;
-        myErr = "Warning: Not all requested variables and/or timesteps available.\n"
-        "Some statistics may be incorrect!\n";
+        string myErr = "Warning: Not all requested variables and/or timesteps available.\n \
+                        Some statistics may be incorrect!\n";
         errReport(myErr);
     }
 
     // Restore error reporting
     //
-    MyBase::EnableErrMsg(enable);
+    //MyBase::EnableErrMsg(enable);
 
     VariablesTable->resizeRowsToContents();
 }
@@ -878,7 +896,7 @@ void Statistics::exportText() {
   }
 }
 
-void Statistics::varRemoved(int index) {
+void Statistics::removeVariable(int index) {
     if (index == 0) return;
     //string varName = RemoveVarCombo->currentText().toStdString();
     string varName = RemoveVarCombo->itemText(index).toStdString();
@@ -927,7 +945,7 @@ void Statistics::updateVariables() {
     }
     for (int i=0; i<addUs.size(); i++) {
         int index = NewVarCombo->findText(QString::fromStdString(addUs[i]));
-        newVarAdded(index);
+        addVariable(index);
     }
 
     // Remove variables in _stats that do not exist in the
@@ -946,7 +964,7 @@ void Statistics::updateVariables() {
     for (int i=0; i<removeUs.size(); i++) {
         string varname = removeUs[i];
         int index = RemoveVarCombo->findText(QString::fromStdString(varname));
-        varRemoved(index);
+        removeVariable(index);
     }
 }
 
@@ -969,9 +987,11 @@ void Statistics::updateStatisticSelection() {
     }
 }
 
-void Statistics::newVarAdded(int index) {
-    if (index == 0) return;
-    //string varName = NewVarCombo->currentText().toStdString();
+void Statistics::addVariable(int index) 
+{
+    if (index == 0) 
+        return;
+
     string varName = NewVarCombo->itemText(index).toStdString();
 
     // Return if we already have the designated variable
@@ -1009,10 +1029,12 @@ void Statistics::newVarAdded(int index) {
     RemoveVarCombo->addItem(QString::fromStdString(varName));
     VariablesTable->resizeRowsToContents();
 
-    if (_autoUpdate) {
-            updateStats();
+    if (_autoUpdate) 
+    {
+        updateStats();
     }
-    else (makeItRed());
+    else 
+        (makeItRed());
 }
 
 void Statistics::rangeComboChanged() {

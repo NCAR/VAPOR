@@ -20,82 +20,82 @@
 #ifndef STATISTICSPARAMS_H
 #define STATISTICSPARAMS_H
 
-#include <vapor/ParamsBase.h>
+#include <vapor/RenderParams.h>
 
 namespace VAPoR{
 
-class StatisticsParams : public ParamsBase {
- public:
-  StatisticsParams(ParamsBase::StateSave *ssave);
-  StatisticsParams(ParamsBase::StateSave *ssave, XmlNode *node);
-  ~StatisticsParams();
+class StatisticsParams : public RenderParams {
+public:
+    StatisticsParams(DataMgr* dmgr, ParamsBase::StateSave *ssave);
+    StatisticsParams(DataMgr* dmgr, ParamsBase::StateSave *ssave, XmlNode *node);
+    ~StatisticsParams();
 
-  bool GetAutoUpdate();
-  void SetAutoUpdate(bool state);
+    bool GetAutoUpdate();
+    void SetAutoUpdate(bool state);
 
-  int GetRegionSelection();
-  void SetRegionSelection(int state);
+    //int GetRegionSelection();
+    //void SetRegionSelection(int state);
 
-  int GetMinTS();
-  void SetMinTS(int ts);
+    int GetMinTS();
+    void SetMinTS(int ts);
 
-  int GetMaxTS();
-  void SetMaxTS(int ts);
+    int GetMaxTS();
+    void SetMaxTS(int ts);
 
-  vector<double> GetMinExtents();
-  void SetMinExtents(vector<double> minExts);
+    //vector<double> GetMinExtents();
+    //void SetMinExtents(vector<double> minExts);
+    //vector<double> GetMaxExtents();
+    //void SetMaxExtents(vector<double> maxExts);
 
-  vector<double> GetMaxExtents();
-  void SetMaxExtents(vector<double> maxExts);
+    //int GetCRatio();
+    //void SetCRatio(int cRatio);
+    //int GetRefinement();
+    //void SetRefinement(int ref);
 
-  int GetCRatio();
-  void SetCRatio(int cRatio);
+    bool GetMinStat();
+    void SetMinStat(bool state);
 
-  int GetRefinement();
-  void SetRefinement(int ref);
+    bool GetMaxStat();
+    void SetMaxStat(bool state);
 
-  bool GetMinStat();
-  void SetMinStat(bool state);
+    bool GetMeanStat();
+    void SetMeanStat(bool state);
 
-  bool GetMaxStat();
-  void SetMaxStat(bool state);
+    bool GetMedianStat();
+    void SetMedianStat(bool state);
 
-  bool GetMeanStat();
-  void SetMeanStat(bool state);
+    bool GetStdDevStat();
+    void SetStdDevStat(bool state);
 
-  bool GetMedianStat();
-  void SetMedianStat(bool state);
+    // should be using RenderParams::GetAuxVariableNames()
+    //vector<string> GetVarNames();
+    //void SetVarNames(vector<string> varNames);
 
-  bool GetStdDevStat();
-  void SetStdDevStat(bool state);
+    // Get static string id for this params class
+    //
+    static string GetClassType() 
+    {
+        return("StatisticsParams");
+    }
 
-  vector<string> GetVarNames();
-  void SetVarNames(vector<string> varNames);
-
-  // Get static string id for this params class
-  //
-  static string GetClassType() {
-	return("StatisticsParams");
-  }
-
- private:
-  static const string _varsTag;
-  static const string _vars3dTag;
-  static const string _statisticsTag;
-  static const string _dataSourceTag;
-  static const string _refinementTag;
-  static const string _cRatioTag;
-  static const string _minTSTag;
-  static const string _maxTSTag;
-  static const string _autoUpdateTag;
-  static const string _minExtentsTag;
-  static const string _maxExtentsTag;
-  static const string _regionSelectTag;
-  static const string _minStatTag;
-  static const string _maxStatTag;
-  static const string _meanStatTag;
-  static const string _medianStatTag;
-  static const string _stdDevStatTag;
+private:
+    //static const string _varsTag;
+    //static const string _vars3dTag;
+    static const string _statisticsTag;
+    static const string _dataSourceTag;
+    //static const string _refinementTag;
+    //static const string _cRatioTag;
+    static const string _minTSTag;
+    static const string _maxTSTag;
+    static const string _autoUpdateTag;
+    //static const string _minExtentsTag;
+    //static const string _maxExtentsTag;
+    //static const string _regionSelectTag;
+    static const string _minStatTag;
+    static const string _maxStatTag;
+    static const string _meanStatTag;
+    static const string _medianStatTag;
+    static const string _stdDevStatTag;
 };
 
 }; // End namespace VAPoR

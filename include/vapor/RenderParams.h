@@ -33,8 +33,6 @@
 
 namespace VAPoR{
 
-
-
 //! \class RenderParams
 //! \ingroup Public_Params
 //! \brief A Params subclass for managing parameters used by Renderers
