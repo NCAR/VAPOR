@@ -8,6 +8,8 @@
 
 namespace VAPoR {
 
+class Contours;
+
 //! \class ContourParams
 //! \brief Class that supports drawing Contours based on 2D or 3D vector field
 //! \author Scott Pearse
@@ -20,7 +22,15 @@ public:
 
  ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
 
+ ContourParams(const ContourParams &rhs);
+
+ ContourParams &operator=( const ContourParams& rhs);
+
  virtual ~ContourParams();
+
+ Contours* GetContours();
+
+ void MakeNewContours(string varName);
 
  //! \copydoc RenderParams::IsOpaque()
  virtual bool IsOpaque() const;
@@ -47,13 +57,9 @@ public:
 	return false;
  }
 
- int GetNumContours() const {
-	return (int)GetValueDouble(_numContoursTag, 3.0);
- }
+ int GetNumContours();
 
- void SetNumContours(int num) {
-	SetValueDouble(_numContoursTag, "Number of contours", (double)num);
- }
+ void SetNumContours(int num);
 
  //! Determine line thickness in voxels
  //! \retval double line thickness
@@ -65,24 +71,16 @@ public:
 	SetValueDouble(_thicknessScaleTag, "Contour thickness", val);
  }
 
- double GetContourMin() const {
-	return (GetValueDouble(_contourMinTag, 0.f));
- }
+ double GetContourMin();
 
- void SetContourMin(double val) {
-	SetValueDouble(_contourMinTag, "Contour minimum value", val);
- }
+ void SetContourMin(double val);
 
- double GetContourSpacing() const {
-	return (GetValueDouble(_contourSpacingTag, 1.f));
- }
+ double GetContourSpacing();
 
- void SetContourSpacing(double val) {
-	SetValueDouble(_contourSpacingTag, "Spacing between contours", val);
- }
+ void SetContourSpacing(double val);
 
  void GetLineColor(int lineNum, float color[3]) {
-
+	GetConstantColor(color);
 	string cmVar = GetColorMapVariableName();
 	if ((cmVar == "") || (cmVar == "Default")) {
 		string varName = GetVariableName();
@@ -93,7 +91,8 @@ public:
 		}  
 		assert(tf);
 
-		vector<double> vals = GetValueDoubleVec(_contoursTag);
+		//vector<double> vals = GetValueDoubleVec(_contoursTag);
+		vector<double> vals = GetIsovalues(varName);
 		double val = vals[lineNum];
 
 		tf->rgbValue(val, color);
@@ -124,15 +123,9 @@ public:
 	}
  }
 
- vector<double> GetIsovalues() const {
-	vector<double> vals;
-	vals = GetValueDoubleVec(_contoursTag);
-	return vals;
- }
+ vector<double> GetIsovalues(string varName);
 
- void SetIsovalues(vector<double> vals) {
-	SetValueDoubleVec(_contoursTag, "Isovalue list", vals);
- }
+ void SetIsovalues(string varName, vector<double> vals);
 
  // Get static string identifier for this params class
  //
@@ -200,8 +193,56 @@ private:
  static const string _contourMinTag;
  static const string _contourSpacingTag;
  static const string _lockToTFTag;
+ ParamsContainer* _contours;
 
 }; //End of Class ContourParams
+
+class PARAMS_API Contours : public ParamsBase {
+public:
+
+ Contours(ParamsBase::StateSave *ssave);
+
+ Contours(ParamsBase::StateSave *ssave, XmlNode *node);
+
+ virtual ~Contours();
+
+ vector<double> GetIsovalues() const;
+
+ void SetIsovalues(vector<double> vals);
+
+ double GetMin() const {
+	return GetValueDouble(_minTag, 0.);
+ }
+
+ void SetMin(double min) {
+	SetValueDouble(_minTag, "Set contour minimum", min);
+ }
+
+ int GetCount() const {
+	return (int)GetValueDouble(_countTag, 7.);
+ }
+
+ void SetCount(int count) {
+	SetValueDouble(_countTag, "Set contour count", (double)count);
+ }
+
+ double GetSpacing() const {
+	return GetValueDouble(_spacingTag, 1.);
+ }
+
+ void SetSpacing(double spacing) {
+	SetValueDouble(_spacingTag, "Set contour spacing", spacing);
+ }
+
+ static string GetClassType() {
+  return("Contours");
+ }
+
+private:
+ static const string _minTag;
+ static const string _countTag;
+ static const string _spacingTag;
+};
 };
 
 #endif 
