@@ -216,7 +216,7 @@ int Statistics::initialize()
     //
     //_regionSelection = 0;
     _regionSelection = _params->GetRegionSelection();
-    stackedSliderWidget->setCurrentIndex(_regionSelection);
+    // stackedSliderWidget->setCurrentIndex(_regionSelection);
 
     generateTableColumns();
 
