@@ -95,6 +95,9 @@ int ContourRenderer::_paintGL()
 {
 	SetDiagMsg("ContourRenderer::_paintGL()");
 
+	ContourParams* cParams = (ContourParams*)GetActiveParams();
+	if (cParams->GetVariableName().empty()) return(0);
+
 	if (!cacheIsValid(GetCurrentTimestep())){
 		if (buildLineCache(_dataMgr) != 0) return -1;
 		updateCacheKey((int)GetCurrentTimestep());
