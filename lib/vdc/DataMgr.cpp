@@ -1977,6 +1977,10 @@ int DataMgr::_get_time_coordinates(vector<double> &timecoords)
         for (int j = 0; j < n; j++) { timecoords.push_back(buf[j]); }
         delete[] buf;
     }
+
+    // No time coordinates present
+    //
+    if (timecoords.empty()) { timecoords.push_back(0.0); }
     return (0);
 }
 
