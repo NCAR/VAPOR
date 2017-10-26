@@ -3,9 +3,6 @@
 #include <vapor/RenderParams.h>
 #include <vapor/ContourParams.h>
 
-// using namespace Wasp;
-// using namespace VAPoR;
-
 namespace VAPoR {
 
 //
@@ -25,27 +22,55 @@ const string ContourParams::_contourMinTag = "ContourMinimum";
 const string ContourParams::_contourSpacingTag = "ContourSpacing";
 const string ContourParams::_lockToTFTag = "LockToTF";
 
-ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, ContourParams::GetClassType())
+ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, ContourParams::GetClassType(), 2)
 {
     SetDiagMsg("ContourParams::ContourParams() this=%p", this);
+
+    _contours = new ParamsContainer(ssave, _contoursTag);
+    _contours->SetParent(this);
 
     _init();
 }
 
-ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node)
+ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 2)
 {
     SetDiagMsg("ContourParams::ContourParams() this=%p", this);
 
     // If node isn't tagged correctly we correct the tag and reinitialize
     // from scratch;
     //
-    if (node->GetTag() != ContourParams::GetClassType()) {
-        node->SetTag(ContourParams::GetClassType());
-        _init();
+    if (node->GetTag() != ContourParams::GetClassType()) { node->SetTag(ContourParams::GetClassType()); }
+
+    if (node->HasChild(_contoursTag)) {
+        _contours = new ParamsContainer(ssave, node->GetChild(_contoursTag));
+    } else {
+        // Node doesn't contain a contours container
+        _contours = new ParamsContainer(ssave, _contoursTag);
+        _contours->SetParent(this);
     }
 }
 
-ContourParams::~ContourParams() { SetDiagMsg("ContourParams::~ContourParams() this=%p", this); }
+ContourParams::ContourParams(const ContourParams &rhs) : RenderParams(rhs) { _contours = new ParamsContainer(*(rhs._contours)); }
+
+ContourParams &ContourParams::operator=(const ContourParams &rhs)
+{
+    if (_contours) delete _contours;
+
+    ParamsBase::operator=(rhs);
+    _contours = new ParamsContainer(*(rhs._contours));
+
+    return (*this);
+}
+
+ContourParams::~ContourParams()
+{
+    SetDiagMsg("ContourParams::~ContourParams() this=%p", this);
+
+    if (_contours != NULL) {
+        delete _contours;
+        _contours = NULL;
+    }
+}
 
 bool ContourParams::IsOpaque() const { return true; }
 
@@ -56,6 +81,52 @@ bool ContourParams::usingVariable(const std::string &varname)
     return (varname.compare(GetVariableName()) == 0);
 }
 
+vector<double> ContourParams::GetIsovalues(string varName)
+{
+    Contours *c = (Contours *)_contours->GetParams(varName);
+    if (c == NULL) {
+        MakeNewContours(varName);
+        c = (Contours *)_contours->GetParams(varName);
+    }
+    return c->GetIsovalues();
+}
+
+void ContourParams::SetIsovalues(string varName, vector<double> vals)
+{
+    Contours *c = (Contours *)_contours->GetParams(varName);
+    if (c == NULL) {
+        MakeNewContours(varName);
+        c = (Contours *)_contours->GetParams(varName);
+    }
+    c->SetIsovalues(vals);
+}
+
+Contours *ContourParams::GetContours()
+{
+    string    varName = GetVariableName();
+    Contours *c = (Contours *)_contours->GetParams(varName);
+    if (c == NULL) {
+        MakeNewContours(varName);
+        c = (Contours *)_contours->GetParams(varName);
+    }
+    return c;
+}
+
+void ContourParams::MakeNewContours(string varName)
+{
+    Contours newContours(_ssave);
+    _contours->Insert(&newContours, varName);
+
+    MapperFunction *mf = GetMapperFunc(varName);
+    if (mf == NULL) { mf = MakeMapperFunc(varName); }
+    vector<double> minMax = mf->getMinMaxMapValue();
+
+    Contours *c = (Contours *)_contours->GetParams(varName);
+    c->SetMin(minMax[0]);
+    double spacing = (minMax[1] - minMax[0]) / ((double)c->GetCount() - 1);
+    c->SetSpacing(spacing);
+}
+
 // Set everything to default values
 void ContourParams::_init()
 {
@@ -63,7 +134,7 @@ void ContourParams::_init()
 
     // Only 2D variables supported. Override base class
     //
-    vector<string> varnames = _dataMgr->GetDataVarNames(3, true);
+    vector<string> varnames = _dataMgr->GetDataVarNames(2, true);
     string         varname;
 
     if (!varnames.empty()) varname = varnames[0];
@@ -84,7 +155,7 @@ void ContourParams::_init()
     // method.
     //
     assert(rc >= 0);
-    assert(minExt.size() == maxExt.size() && minExt.size() == 3);
+    assert(minExt.size() == maxExt.size() && minExt.size() >= 2);
 
     GetBox()->SetExtents(minExt, maxExt);
 
@@ -93,10 +164,45 @@ void ContourParams::_init()
     int            numContours = GetNumContours();
     double         min = GetContourMin();
     for (size_t i = 0; i < numContours; i++) { cVals.push_back(min + spacing * i); }
-    SetIsovalues(cVals);
+    SetIsovalues(varname, cVals);
 
     // GetBox()->SetPlanar(true);
     // GetBox()->SetOrientation(2);
 }
 
+int ContourParams::GetNumContours()
+{
+    Contours *c = GetContours();
+    return c->GetCount();
+}
+
+void ContourParams::SetNumContours(int num)
+{
+    Contours *c = GetContours();
+    c->SetCount(num);
+}
+
+double ContourParams::GetContourMin()
+{
+    Contours *c = GetContours();
+    return c->GetMin();
+}
+
+void ContourParams::SetContourMin(double min)
+{
+    Contours *c = GetContours();
+    c->SetMin(min);
+}
+
+double ContourParams::GetContourSpacing()
+{
+    Contours *c = GetContours();
+    return c->GetSpacing();
+}
+
+void ContourParams::SetContourSpacing(double spacing)
+{
+    Contours *c = GetContours();
+    c->SetSpacing(spacing);
+}
 };    // end namespace VAPoR
