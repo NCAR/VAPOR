@@ -26,18 +26,18 @@
 
 using namespace VAPoR;
 
-const string StatisticsParams::_varsTag = "Vars";
-const string StatisticsParams::_vars3dTag = "Vars3d";
+//const string StatisticsParams::_varsTag = "Vars";
+//const string StatisticsParams::_vars3dTag = "Vars3d";
 const string StatisticsParams::_statisticsTag = "Statistics";
 const string StatisticsParams::_dataSourceTag = "DataSource";
-const string StatisticsParams::_refinementTag = "Refinement";
-const string StatisticsParams::_cRatioTag = "Lod";
+//const string StatisticsParams::_refinementTag = "Refinement";
+//const string StatisticsParams::_cRatioTag = "Lod";
 const string StatisticsParams::_minTSTag = "MinTS";
 const string StatisticsParams::_maxTSTag = "MaxTS";
 const string StatisticsParams::_autoUpdateTag = "AutoUpdate";
-const string StatisticsParams::_minExtentsTag = "MinExtents";
-const string StatisticsParams::_maxExtentsTag = "MaxExtents";
-const string StatisticsParams::_regionSelectTag = "RegionSelect";
+//const string StatisticsParams::_minExtentsTag = "MinExtents";
+//const string StatisticsParams::_maxExtentsTag = "MaxExtents";
+//const string StatisticsParams::_regionSelectTag = "RegionSelect";
 const string StatisticsParams::_minStatTag = "MinStat";
 const string StatisticsParams::_maxStatTag = "MaxStat";
 const string StatisticsParams::_meanStatTag = "MeanStat";
@@ -85,17 +85,17 @@ void StatisticsParams::SetAutoUpdate(bool state) {
     SetValueString(_autoUpdateTag, "State of statistics auto-update",
                    sState);
 }
-
+/*
 int StatisticsParams::GetRegionSelection() {
-    double state = GetValueDouble(_regionSelectTag, 0.f);
-    return (int)state;
+	double state = GetValueDouble(_regionSelectTag, 0.f);
+	return (int)state;
 }
 
 void StatisticsParams::SetRegionSelection(int state) {
-    SetValueDouble(_regionSelectTag,
-                   "State of statistics region selector", (double)state);
+	SetValueDouble(_regionSelectTag, 
+		"State of statistics region selector", (double)state);
 }
-
+*/
 int StatisticsParams::GetMinTS() {
     double minTS = GetValueDouble(_minTSTag, 0.f);
     return (int)minTS;
@@ -116,45 +116,47 @@ void StatisticsParams::SetMaxTS(int ts) {
                    "Maximum selected timestep for statistics", (double)ts);
 }
 
+/*
 vector<double> StatisticsParams::GetMinExtents() {
-    vector<double> extents = GetValueDoubleVec(_minExtentsTag);
-    return extents;
+	vector<double> extents = GetValueDoubleVec(_minExtentsTag);
+	return extents;
 }
 
 void StatisticsParams::SetMinExtents(vector<double> minExts) {
-    SetValueDoubleVec(_minExtentsTag, "Minimum extents for statistics",
-                      minExts);
+	SetValueDoubleVec(_minExtentsTag, "Minimum extents for statistics",
+		minExts);
 }
 
 vector<double> StatisticsParams::GetMaxExtents() {
-    vector<double> extents = GetValueDoubleVec(_maxExtentsTag);
-    return extents;
+	vector<double> extents = GetValueDoubleVec(_maxExtentsTag);
+	return extents;
 }
 
 void StatisticsParams::SetMaxExtents(vector<double> maxExts) {
-    SetValueDoubleVec(_maxExtentsTag, "Maximum extents for statistics",
-                      maxExts);
+	SetValueDoubleVec(_maxExtentsTag, "Maximum extents for statistics",
+		maxExts);
 }
 
 int StatisticsParams::GetCRatio() {
-    int cRatio = (int)GetValueDouble(_cRatioTag, 0);
-    return cRatio;
+	int cRatio = (int)GetValueDouble(_cRatioTag, 0);
+	return cRatio;
 }
 
 void StatisticsParams::SetCRatio(int cRatio) {
-    SetValueDouble(_cRatioTag, "Compression ratio for statistics",
-                   cRatio);
+	SetValueDouble(_cRatioTag, "Compression ratio for statistics",
+		cRatio);
 }
 
 int StatisticsParams::GetRefinement() {
-    int refinement = (int)GetValueDouble(_refinementTag, 0);
-    return refinement;
+	int refinement = (int)GetValueDouble(_refinementTag, 0);
+	return refinement;
 }
 
 void StatisticsParams::SetRefinement(int ref) {
-    SetValueDouble(_refinementTag, "Refinement level for statistics",
-                   ref);
+	SetValueDouble(_refinementTag, "Refinement level for statistics",
+		ref);
 }
+*/
 
 bool StatisticsParams::GetMinStat() {
     if (GetValueString(_minStatTag, "true") == "false") {
@@ -222,12 +224,14 @@ void StatisticsParams::SetStdDevStat(bool state) {
                    s);
 }
 
+/*
 vector<string> StatisticsParams::GetVarNames() {
-    vector<string> varNames = GetValueStringVec(_varsTag);
-    return varNames;
+	vector<string> varNames = GetValueStringVec(_varsTag);
+	return varNames;
 }
 
 void StatisticsParams::SetVarNames(vector<string> varNames) {
-    SetValueStringVec(_varsTag, "Variable names selected for statistics",
-                      varNames);
+	SetValueStringVec(_varsTag, "Variable names selected for statistics",
+		varNames);
 }
+*/
