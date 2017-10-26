@@ -167,8 +167,8 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level, std::vector<double> 
                 }
             }
         } else {
-            minFullExt.push_back(0.f);
-            maxFullExt.push_back(0.f);
+            minFullExt.push_back(0.0f);
+            maxFullExt.push_back(0.0f);
         }
     }
 }

@@ -45,7 +45,6 @@
 //!
 
 namespace VAPoR {
-class RenderParams;
 class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
@@ -75,10 +74,10 @@ private slots:
     void autoUpdateClicked();
     void refinementChanged(int);
     void cRatioChanged(int);
-    void newVarAdded(int);
+    void addVariable(int);
+    void removeVariable(int);
     void updateButtonPressed() { updateStats(); }
     void initRegion();
-    void varRemoved(int);
     void exportText();
     void rangeComboChanged();
     void addStatistic(int);

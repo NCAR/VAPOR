@@ -94,7 +94,7 @@ bool Statistics::eventFilter(QObject *object, QEvent *event)
             QTableWidgetItem *i = VariablesTable->verticalHeaderItem(row);
             QString           text = i->text();
             int               index = RemoveVarCombo->findText(text);
-            varRemoved(index);
+            removeVariable(index);
             return true;
         }
         return false;
@@ -247,9 +247,9 @@ int Statistics::initialize()
     connect(UpdateButton, SIGNAL(pressed()), this, SLOT(updateButtonPressed()));
     connect(RefCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(refinementChanged(int)));
     connect(CRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
-    connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(newVarAdded(int)));
+    connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(addVariable(int)));
     connect(RestoreExtentsButton, SIGNAL(pressed()), this, SLOT(restoreExtents()));
-    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(varRemoved(int)));
+    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVariable(int)));
     connect(ExportButton, SIGNAL(clicked()), this, SLOT(exportText()));
     // connect(regionSelectorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(rangeComboChanged()));
     // connect(copyActiveRegionButton, SIGNAL(pressed()), this, SLOT(copyActiveRegion()));
@@ -560,7 +560,7 @@ int Statistics::initVariables()
         for (int i = 0; i < pVars.size(); i++) {
             QString varName = QString::fromStdString(pVars[i]);
             int     index = NewVarCombo->findText(varName);
-            newVarAdded(index);
+            addVariable(index);
         }
     }
 
@@ -725,10 +725,14 @@ void Statistics::updateStats()
     // a callback that can trigger an infinite cascade of error msg
     // popups :-(
     //
-    bool enable = MyBase::EnableErrMsg(false);
+    // bool enable = MyBase::EnableErrMsg(false);
     bool success = true;
     for (it_type it = _stats.begin(); it != _stats.end(); it++) {
         varName = it->first;
+
+        // Sam:
+        //  EVERY stats gets re-calculated...
+        //  Very bad design choice.
 
         if ((_calculations & _MIN) || (_calculations & _MAX)) { success &= calcMinMax(varName); }
 
@@ -740,15 +744,14 @@ void Statistics::updateStats()
     }
 
     if (!success) {
-        string myErr;
-        myErr = "Warning: Not all requested variables and/or timesteps available.\n"
-                "Some statistics may be incorrect!\n";
+        string myErr = "Warning: Not all requested variables and/or timesteps available.\n \
+                        Some statistics may be incorrect!\n";
         errReport(myErr);
     }
 
     // Restore error reporting
     //
-    MyBase::EnableErrMsg(enable);
+    // MyBase::EnableErrMsg(enable);
 
     VariablesTable->resizeRowsToContents();
 }
@@ -875,7 +878,7 @@ void Statistics::exportText()
     }
 }
 
-void Statistics::varRemoved(int index)
+void Statistics::removeVariable(int index)
 {
     if (index == 0) return;
     // string varName = RemoveVarCombo->currentText().toStdString();
@@ -925,7 +928,7 @@ void Statistics::updateVariables()
     }
     for (int i = 0; i < addUs.size(); i++) {
         int index = NewVarCombo->findText(QString::fromStdString(addUs[i]));
-        newVarAdded(index);
+        addVariable(index);
     }
 
     // Remove variables in _stats that do not exist in the
@@ -944,7 +947,7 @@ void Statistics::updateVariables()
     for (int i = 0; i < removeUs.size(); i++) {
         string varname = removeUs[i];
         int    index = RemoveVarCombo->findText(QString::fromStdString(varname));
-        varRemoved(index);
+        removeVariable(index);
     }
 }
 
@@ -978,10 +981,10 @@ void Statistics::updateStatisticSelection()
     }
 }
 
-void Statistics::newVarAdded(int index)
+void Statistics::addVariable(int index)
 {
     if (index == 0) return;
-    // string varName = NewVarCombo->currentText().toStdString();
+
     string varName = NewVarCombo->itemText(index).toStdString();
 
     // Return if we already have the designated variable
