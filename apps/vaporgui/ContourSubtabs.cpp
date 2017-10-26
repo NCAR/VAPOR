@@ -3,17 +3,14 @@
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
 
-		_TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR));
+		_TFWidget->Reinit((TFWidget::Flags)(0));
 		_TFWidget->mappingFrame->setIsolineSliders(true);
 		_TFWidget->mappingFrame->setOpacityMapping(false);
-
-	
 
 		_lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
 		_countCombo = new Combo(contourCountEdit, contourCountSlider, true);
 		_cMinCombo = new Combo(contourMinEdit, contourMinSlider);
 		_spacingCombo = new Combo(contourSpacingEdit, contourSpacingSlider);
-
 	
 		connect(_lineWidthCombo, SIGNAL(valueChanged(double)), this,
 			SLOT(SetLineThickness(double)));
@@ -32,7 +29,7 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 			SLOT(EndTFChange()));
 }
 
-double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
+double ContourAppearanceSubtab::GetContourMinOrMax(string minOrMax) {
 
 		bool locked = _cParams->GetLockToTF();
 		lockToTFCheckbox->setChecked(locked);
@@ -52,7 +49,7 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 			VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
 			double lower = mf->getMinMapValue();
 			double upper = mf->getMaxMapValue();
-			if (minOrMax) return upper;
+			if (minOrMax == "max") return upper;
 			else return lower;
 		}
 		else {
@@ -65,7 +62,7 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 			VAPoR::Grid* var = _dataMgr->GetVariable(ts, varname, level, lod);
 			float range[2];
 			var->GetRange(range);
-			if (minOrMax) return range[1];
+			if (minOrMax == "max") return range[1];
 			else return range[0];
 		}   
 	}
@@ -85,7 +82,6 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		// Apply params to lineThickness.  Get range
 		// for thickness from gl system call
 		//
-		_cParams = (VAPoR::ContourParams*)rParams;
 		GLfloat lineWidthRange[2] = {0.f, 0.f};
 		glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
 		_lineWidthCombo->Update(lineWidthRange[0], lineWidthRange[1],
@@ -108,15 +104,12 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		//
 		int numContours = _cParams->GetNumContours();
 		_countCombo->Update(1, 50, numContours);
-		QSlider* s = _countCombo->GetSlider();
-		cout << "num contour updated ";
-		cout << s->value() << endl;
 
 		// Update contour spacing and minimum settings, which may
 		// or may not be locked within the transfer function bounds.
 		//
-		double minComboMin = GetContourMinOrMax(false);
-		double minComboMax = GetContourMinOrMax(true);
+		double minComboMin = GetContourMinOrMax("min");
+		double minComboMax = GetContourMinOrMax("max");
 		double minVal = _cParams->GetContourMin();
 		_cMinCombo->Update(minComboMin, minComboMax, minVal);
 
@@ -165,14 +158,12 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		_paramsMgr->BeginSaveStateGroup("Transfer function change completed."
 			"Update contours.");
 
-		cout << "END TF CHANGE" << endl;
 
-		double min = GetContourMinOrMax(false);
-		double max = GetContourMinOrMax(true);
+		double min = GetContourMinOrMax("min");
+		double max = GetContourMinOrMax("max");
 		double minVal = _cParams->GetContourMin();
 		if (minVal < min) minVal = min;
 		if (minVal > max) minVal = max;
-		cout << "TF min " << minVal << endl;
 		_cMinCombo->Update(min, max, minVal);
 		_cParams->SetContourMin(minVal);
 
@@ -215,15 +206,14 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		_cParams->SetNumContours(count);
 		SetIsovalues();
 
-		cout << "set contour count " << count << endl;
 		_paramsMgr->EndSaveStateGroup();
 	}
 
 	void ContourAppearanceSubtab::SetContourMinimum(double min) {
 		_paramsMgr->BeginSaveStateGroup("Set contour minimum.");
 
-		double minRange = GetContourMinOrMax(0);
-		double maxRange = GetContourMinOrMax(1);
+		double minRange = GetContourMinOrMax("min");
+		double maxRange = GetContourMinOrMax("max");
 
 		if (min < minRange) min = minRange;
 		if (min > maxRange) min = maxRange;
@@ -232,8 +222,7 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		double spacing = (maxRange - min) / (double)(numContours-1);
 		_cParams->SetContourSpacing(spacing);
 
-		double test = GetContourMinOrMax(0);
-		cout << minRange << " ! " << maxRange << endl;
+		double test = GetContourMinOrMax("min");
 
 		_cParams->SetContourMin(min);
 

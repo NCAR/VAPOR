@@ -3,6 +3,7 @@
 #define CONTOURPARAMS_H
 
 #include <string>
+
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
 
@@ -21,6 +22,8 @@ public:
  ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
 
  virtual ~ContourParams();
+
+ virtual void SetVariableName(string varname);
 
  //! \copydoc RenderParams::IsOpaque()
  virtual bool IsOpaque() const;

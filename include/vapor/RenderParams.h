@@ -135,8 +135,6 @@ public:
 	string GetFirstVariableName() const ;
 
 	//! Specify field variable names; e.g. used in flow integration
-	//! can be 0 or 3 strings
-	//! \param[in] string varNames. If any element is "0" the element
 	//! will be quietly 
 	//! set to the empty string, "".
 	//
@@ -388,10 +386,11 @@ public:
 	//!
 	virtual bool usingVariable(const std::string& varname) = 0;
 	
+ 	void _initBox();
+
 protected:
-	DataMgr *_dataMgr;
-
-
+ DataMgr *_dataMgr;
+ static const string _variableNameTag;
 	
 private:
 
@@ -409,7 +408,6 @@ private:
  static const string _heightVariableNameTag;
  static const string _colorMapVariableNameTag;
  static const string _terrainMapTag;
- static const string _variableNameTag;
  static const string _fieldVariableNamesTag;
  static const string _auxVariableNamesTag;
  static const string _distribVariableNamesTag;
@@ -423,7 +421,7 @@ private:
  static const string _currentTimestepTag;
 
  void _init();
- void _initBox();
+ //void _initBox();
 };
 
 

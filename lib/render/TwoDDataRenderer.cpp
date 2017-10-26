@@ -356,6 +356,9 @@ int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
 	size_t ts = rParams->GetCurrentTimestep();
 	rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
+	cout << "TwoDDataExtents " << minBoxReq[0] << " " << minBoxReq[1] << " " << minBoxReq[2] << endl;
+	cout << "TwoDDataExtents " << maxBoxReq[0] << " " << maxBoxReq[1] << " " << maxBoxReq[2] << endl;
+
 	string varname = rParams->GetVariableName();
 	int orientation = _getOrientation(dataMgr, varname);
 	if (orientation != 2) {
