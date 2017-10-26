@@ -365,11 +365,11 @@ void MappingFrame::Update(DataMgr *dataMgr,
     } else if (_isolineSlidersEnabled) {
         //Synchronize sliders with isovalues
         //#ifdef	DEAD
-        vector<double> isovals = ((ContourParams *)rParams)->GetIsovalues();
+        vector<double> isovals = ((ContourParams *)rParams)->GetIsovalues(varname);
         setIsolineSliders(isovals);
-        for (int i = 0; i < isovals.size(); i++) {
-            _isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
-        }
+        //		for (int i = 0; i<isovals.size(); i++){
+        //			_isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
+        //		}
         //#endif
     }
 
