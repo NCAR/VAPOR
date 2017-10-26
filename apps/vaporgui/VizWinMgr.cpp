@@ -270,7 +270,7 @@ void VizWinMgr::LaunchVisualizer()
 {
 
 	string vizName = make_viz_name(_controlExec->GetVisualizerNames());
-
+    
 	int rc = _controlExec->NewVisualizer(vizName);
 	if (rc<0) {
 		cerr << "ERROR MESSAGE" << endl;

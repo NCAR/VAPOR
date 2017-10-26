@@ -255,14 +255,10 @@ public:
  //!
  //! Access the transform for data set \p dataSetName
  //!
- //! \retval Returns NULL if \p dataSetName is unknown
+ //! \retval Returns a new transform if one does not exist
  //
- virtual Transform* GetTransform(string dataSetName) const {
-    return ((Transform *) _transforms->GetParams(dataSetName));
- }
+ virtual Transform* GetTransform(string dataSetName);
  
- void AddDatasetTransform(string datasetName);
-
  //! Return list of transform names.
  //!
  //! Return the list of transform names added with AddDatasetTransform()
