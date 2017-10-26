@@ -102,12 +102,10 @@ void TFWidget::setCMVar(const QString& qvar) {
 			colorDisplay->setEnabled(true);
 			colorSelectButton->setEnabled(true);
 			_rParams->SetUseSingleColor(true);
-			setSingleColor();
+			//setSingleColor();
 		}
 		return;
 	}
-
-	cout << "setCMVar " << var << endl;
 
 	if (var == "Constant" || var == "") {
 		var = ""; 
@@ -400,14 +398,19 @@ void TFWidget::Update(DataMgr *dataMgr,
 		
 	}
 	else {
-		collapseColorVarSettings();
-		collapseConstColorSettings();
+		//collapseColorVarSettings();
+	}
+	if (_flags & CONSTCOLOR) {
+	}
+	else {
+		//collapseConstColorSettings();
 	}
 
 	updateSliders();
 }
 
 void TFWidget::updateColorVarCombo() {
+	colormapVarCombo->blockSignals(true);
 	int index = colormapVarCombo->currentIndex();
 
 	if (_flags & CONSTCOLOR) {
@@ -438,6 +441,8 @@ void TFWidget::updateColorVarCombo() {
 	QPalette palette(colorDisplay->palette());
 	palette.setColor(QPalette::Base, color);
 	colorDisplay->setPalette(palette);
+
+	colormapVarCombo->blockSignals(false);
 }
 
 void TFWidget::connectWidgets() {

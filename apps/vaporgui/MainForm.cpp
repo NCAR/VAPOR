@@ -1277,13 +1277,9 @@ void MainForm::closeData(string fileName) {
 		_closeVDCMenu->removeAction(a);
 	}
 	
-	cout << "Closing datasets " << currentDataSets.size() << endl;
-	
 	p = GetStateParams();
 	p->GetOpenDataSets(currentPaths, currentDataSets);
-	cout << "Closing datasets " << currentDataSets.size() << " " << currentDataSets[0] << endl;
 	if (currentDataSets.size()==0) {
-		cout << "no datasets loaded" << endl;
 		_controlExec->LoadState();
 	}
 }

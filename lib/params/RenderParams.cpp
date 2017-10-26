@@ -123,6 +123,8 @@ void RenderParams::_initBox() {
 		maxExt.push_back(0.0);
 	}
 
+	cout << "_initBox " << varname << " " << planar << endl;
+
 	_Box->SetExtents(minExt, maxExt);
 	_Box->SetPlanar(planar);	
 	

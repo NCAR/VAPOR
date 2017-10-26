@@ -645,6 +645,10 @@ void VariablesWidget::updateDims(RenderParams *rParams) {
 
 	int index = ndim == 2 ? 0 : 1;
 	dimensionCombo->setCurrentIndex(index);
+
+	// Nono!  Do not do this!  We want to
+	// keep our old Box after var dimension change!
+	//_rParams->_initBox();
 }
 
 
