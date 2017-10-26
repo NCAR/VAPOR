@@ -585,23 +585,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QStackedWidget" name="stackedSliderWidget">
-         <property name="currentIndex">
-          <number>0</number>
+        <widget class="GeometryWidget" name="_geometryWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>100</height>
+          </size>
          </property>
-         <widget class="QWidget" name="page">
-          <layout class="QHBoxLayout" name="horizontalLayout_10"/>
-         </widget>
-         <widget class="QWidget" name="page_5">
-          <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-         </widget>
-         <widget class="QWidget" name="page_2">
-          <layout class="QHBoxLayout" name="horizontalLayout_8"/>
-         </widget>
         </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
        </item>
        <item>
         <widget class="QPushButton" name="RestoreExtentsButton">
@@ -616,6 +607,14 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GeometryWidget</class>
+   <extends>QWidget</extends>
+   <header>GeometryWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
