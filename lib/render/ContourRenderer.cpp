@@ -155,9 +155,11 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 		cParams->GetLineColor(iso, lineColor);
 		glColor3fv(lineColor);
 		
+		bool dontDraw;
 		pair<int,int> mapPair = make_pair(timestep, iso);
 		vector<float*> lines = _lineCache[mapPair];
 		for (int linenum = 0; linenum < lines.size(); linenum++){
+			dontDraw = false;
 			pointa[0] = lines[linenum][0];
 			pointa[1] = lines[linenum][1];
 			pointb[0] = lines[linenum][2];
@@ -175,9 +177,7 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 			if (mapToTerrain) {
 				if (isnan(pointa[0]) || isnan(pointa[1]) ||
 					isnan(pointb[0]) ||	isnan(pointb[1])) {
-					pointa[2] = 0.f; //boxMinExt[2];
-					pointb[2] = 0.f; //boxMinExt[2];
-
+					dontDraw = true;
 				}
 				else {
 					pointa[2] = heightGrid->GetValue(pointa[0], pointa[1]);
@@ -185,13 +185,13 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 				}
 			}
 			else {
-				double zSpan = boxMaxExt[2] - boxMinExt[2];
-				pointa[2] = 500.f;//(1+pointa[2]) * zSpan;
-				pointb[2] = 500.f;//(1+pointb[2]) * zSpan;
+				pointa[2] = 500.f;
+				pointb[2] = 500.f;
 			}
-
-			glVertex3dv(pointa);
-			glVertex3dv(pointb);
+			if (!dontDraw) {
+				glVertex3dv(pointa);
+				glVertex3dv(pointb);
+			}
 		}
 	}
 	glEnd();
