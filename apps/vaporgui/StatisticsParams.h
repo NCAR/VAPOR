@@ -77,6 +77,14 @@ class StatisticsParams : public RenderParams {
         return ("StatisticsParams");
     }
 
+    // virtual functions required by RenderParams
+    virtual bool IsOpaque() const {
+        return true;
+    }
+    virtual bool usingVariable(const std::string &varname) {
+        return false;
+    }
+
   private:
     //static const string _varsTag;
     //static const string _vars3dTag;
