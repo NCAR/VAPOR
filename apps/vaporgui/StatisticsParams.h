@@ -24,7 +24,8 @@
 
 namespace VAPoR{
 
-class StatisticsParams : public RenderParams {
+class StatisticsParams : public RenderParams 
+{
 public:
     StatisticsParams(DataMgr* dmgr, ParamsBase::StateSave *ssave);
     StatisticsParams(DataMgr* dmgr, ParamsBase::StateSave *ssave, XmlNode *node);
@@ -76,6 +77,16 @@ public:
     static string GetClassType() 
     {
         return("StatisticsParams");
+    }
+
+    // virtual functions required by RenderParams
+    virtual bool IsOpaque() const
+    {
+        return true; 
+    }
+    virtual bool usingVariable( const std::string& varname )
+    {
+        return false;
     }
 
 private:
