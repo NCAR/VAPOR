@@ -36,8 +36,11 @@ const string ParamsMgr::_rootTag = "VAPOR";
 const string ParamsMgr::_globalTag = "Global";
 const string ParamsMgr::_windowsTag = "Windows";
 const string ParamsMgr::_renderersTag = "Renderers";
+const string ParamsMgr::_appRenderersTag = "AppRenderers";
 
-void ParamsMgr::_init(vector <string> appParams, XmlNode *node) {
+void ParamsMgr::_init(
+	vector <string> appParams, XmlNode *node
+) {
 
 	_renderParamsMap.clear();
 
@@ -86,21 +89,15 @@ void ParamsMgr::_init(vector <string> appParams, XmlNode *node) {
 		}
 	}
 
-}
 
-ParamsMgr::ParamsMgr() {
-	_appParamNames.clear();
-	_dataMgrMap.clear();
-
-	_ssave.SetEnabled(false);
-    _init(vector <string> (), NULL);
-	_ssave.SetEnabled(true);
 }
 
 ParamsMgr::ParamsMgr(
-	std::vector <string> appParamNames
+	std::vector <string> appParamNames,
+	std::vector <string> appRenderParamNames
 ) {
 	_appParamNames = appParamNames;
+	_appRenderParamNames = appRenderParamNames;
 	_dataMgrMap.clear();
 
 	_ssave.SetEnabled(false);
@@ -128,6 +125,11 @@ void ParamsMgr::_destroy() {
 	_viewpointParamsMap.clear();
 
 	if (_otherParams) delete _otherParams;
+
+	map <string, RenParamsContainer *>::iterator itr;
+	for (itr = _otherRenParams.begin(); itr != _otherRenParams.end(); ++itr) {
+		if (itr->second) delete itr->second;
+	}
 
 	if (_rootSeparator) delete _rootSeparator;
 }
@@ -232,6 +234,52 @@ void ParamsMgr::addDataMgrMerge(string dataSetName) {
 	}
 
 	delete windowsSep;
+
+	_initAppRenParams(dataSetName);
+}
+
+void ParamsMgr::_initAppRenParams(string dataSetName) {
+
+	// Deal with any application render Params registered by the application
+	//
+
+	ParamsSeparator *appRenParamsSep = new ParamsSeparator(
+		_rootSeparator, _appRenderersTag
+	);
+
+	// Delete any existing container for this data set
+	//
+    map <string, RenParamsContainer *>::const_iterator itr;
+    itr = _otherRenParams.find(dataSetName);
+    RenParamsContainer *rpc = itr == _otherRenParams.end() ? NULL : itr->second;
+	if (rpc) delete rpc;
+
+	if (appRenParamsSep->HasChild(dataSetName)) {
+		XmlNode *node = appRenParamsSep->GetNode()->GetChild(dataSetName);
+        assert(node);
+
+        rpc = new RenParamsContainer(
+            _dataMgrMap[dataSetName], &_ssave, node
+        );
+    }
+    else  {
+        rpc = new RenParamsContainer(
+            _dataMgrMap[dataSetName], &_ssave, dataSetName
+        );
+        rpc->GetSeparator()->SetParent(appRenParamsSep);
+    }
+
+	delete appRenParamsSep;
+		
+	// Now add any application render params to the container for this
+	// data set
+	//
+	for (int i=0; i<_appRenderParamNames.size(); i++) {
+		if (! rpc->GetParams(_appRenderParamNames[i])) {
+			rpc->Create(_appRenderParamNames[i], _appRenderParamNames[i]);
+		}
+	}
+	_otherRenParams[dataSetName] = rpc;
 }
 
 void ParamsMgr::AddDataMgr(string dataSetName, DataMgr *dataMgr) {
@@ -247,6 +295,7 @@ void ParamsMgr::AddDataMgr(string dataSetName, DataMgr *dataMgr) {
 	else {
 		addDataMgrNew();
 	}
+
 }
 
 void ParamsMgr::RemoveDataMgr(string dataSetName) {
