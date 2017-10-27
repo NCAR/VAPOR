@@ -155,7 +155,7 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
     for (int i = 0; i < varNames.size(); i++) {
         if (varNames[i] != "") {
             int rc = _dataMgr->GetVariableExtents(ts, varNames[i],
-                                                  level, minFullExt, maxFullExt);
+                                                  level, minVarExt, maxVarExt);
             if (rc < 0) {
                 MyBase::SetErrMsg("Error: DataMgr could not return valid values"
                                   " from GetVariableExtents() for variable %s",
@@ -167,8 +167,8 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
             // our initial condition...
             //
             if (i == 0) {
-                minVarExt = minFullExt;
-                maxVarExt = maxFullExt;
+                minFullExt = minVarExt;
+                maxFullExt = maxVarExt;
             } else {
                 for (int j = 0; j < 3; j++) {
                     // ...Otherwise run our comparisons
