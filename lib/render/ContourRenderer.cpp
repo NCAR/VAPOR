@@ -65,7 +65,9 @@ ContourRenderer::~ContourRenderer()
 
     // for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
     for (size_t ts = 0; ts <= 0; ts++) {
-        cout << "Fudging timestep info in ContourRenderer.  Fix me!" << endl;
+        cout << "Fudging timestep info in ContourRenderer.";
+        cout << " How do we get time range information from a Renderer class?";
+        cout << " Fix me!" << endl;
         invalidateLineCache((int)ts);
     }
     _lineCache.clear();
@@ -111,31 +113,20 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr)
     // Determine if terrain mapping will be used
     string          hgtVar = cParams->GetHeightVariableName();
     bool            mapToTerrain = (!hgtVar.empty() && !cParams->VariablesAre3D());
-    StructuredGrid *heightGrid;
+    StructuredGrid *heightGrid = NULL;
     int             ts = GetCurrentTimestep();
     float           boxexts[6];
     double          userExts[6];
 
-    if (mapToTerrain) {
-        // See bottom of file!
-        heightGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod, boxMin, boxMax);
-        // Obtain the height corresponding to point1 and point2
-        // float z1 = heightGrid->GetValue(point1[0]+userExts[0],point1[1]+userExts[1],0.);
-        // float z2 = heightGrid->GetValue(point2[0]+userExts[0],point2[1]+userExts[1],0.);
-        // point1[2] = z1+boxexts[2]-userExts[2];
-        // point2[2] = z2+boxexts[2]-userExts[2];
-    }
-
-    glBegin(GL_LINES);
-
-    vector<double> boxMinExt, boxMaxExt;
-    cParams->GetBox()->GetExtents(boxMinExt, boxMaxExt);
-
     string         var = cParams->GetVariableName();
     int            level = cParams->GetRefinementLevel();
     int            lod = cParams->GetCompressionLevel();
-    vector<double> varDomainMin, varDomainMax;
-    dataMgr->GetVariableExtents(ts, var, level, varDomainMin, varDomainMax);
+    vector<double> boxMinExt, boxMaxExt;
+    cParams->GetBox()->GetExtents(boxMinExt, boxMaxExt);
+
+    if (mapToTerrain) { heightGrid = (StructuredGrid *)dataMgr->GetVariable(ts, hgtVar, level, lod, boxMinExt, boxMaxExt); }
+
+    glBegin(GL_LINES);
 
     double pointa[3], pointb[3];    // points in cache
     pointa[2] = pointb[2] = 0.;
@@ -153,24 +144,24 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr)
             pointb[0] = lines[linenum][2];
             pointb[1] = lines[linenum][3];
 
-            if (mapToTerrain) { cout << "map to terrain not implemented" << endl; }
-
             // Scale the cached points {-1:1} to the user extents
             double xSpan = boxMaxExt[0] - boxMinExt[0];
-            // double xSpan = varDomainMax[0] - varDomainMin[0];
-            // pointa[0] = (1+pointa[0])/2.f * xSpan + varDomainMin[0];//boxMinExt[0];
-            // pointb[0] = (1+pointb[0])/2.f * xSpan + varDomainMin[0];//boxMinExt[0];
             pointa[0] = (1 + pointa[0]) / 2.f * xSpan + boxMinExt[0];
             pointb[0] = (1 + pointb[0]) / 2.f * xSpan + boxMinExt[0];
-            // cout << "Point A/B " << pointa[0] << " " << pointb[0] << endl;
 
             double ySpan = boxMaxExt[1] - boxMinExt[1];
             pointa[1] = (1 + pointa[1]) / 2.f * ySpan + boxMinExt[1];
             pointb[1] = (1 + pointb[1]) / 2.f * ySpan + boxMinExt[1];
 
             if (mapToTerrain) {
-                heightGrid pointa[2] = heightGrid->GetValue(pointa[0], pointa[1]);
-                pointb[2] = heightGrid->GetValue(pointb[0], pointb[1]);
+                if (isnan(pointa[0]) || isnan(pointa[1]) || isnan(pointb[0]) || isnan(pointb[1])) {
+                    pointa[2] = 0.f;    // boxMinExt[2];
+                    pointb[2] = 0.f;    // boxMinExt[2];
+
+                } else {
+                    pointa[2] = heightGrid->GetValue(pointa[0], pointa[1]);
+                    pointb[2] = heightGrid->GetValue(pointb[0], pointb[1]);
+                }
             } else {
                 double zSpan = boxMaxExt[2] - boxMinExt[2];
                 pointa[2] = 500.f;    //(1+pointa[2]) * zSpan;
