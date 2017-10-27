@@ -1568,7 +1568,8 @@ DCMPAS::DerivedVarWRFTime::DerivedVarWRFTime(NetCDFCollection *ncdfc, const UDUn
 
     // Allocate buffer large enough for staggered variable
     //
-    _buf = new char[dimLens[1]];
+    _buf_size = dimLens[1] + 1;    // +1 for \0
+    _buf = new char[_buf_size];
 }
 
 DCMPAS::DerivedVarWRFTime::~DerivedVarWRFTime()
@@ -1600,6 +1601,7 @@ int DCMPAS::DerivedVarWRFTime::Read(float *buf, int)
         return (-1);
     }
 
+    memset(_buf, 0, _buf_size);
     int rc = _ncdfc->Read(_buf, _fd);
     if (rc < 0) {
         SetErrMsg("Can't read %s variable", _wrfTimeVar.c_str());
