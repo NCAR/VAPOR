@@ -125,9 +125,15 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr) {
     int ts = GetCurrentTimestep();
     float boxexts[6];
     double userExts[6];
+
     if (mapToTerrain) {
         // See bottom of file!
-        cout << "map to terrain not implemented" << endl;
+        heightGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod, boxMin, boxMax);
+        //Obtain the height corresponding to point1 and point2
+        //float z1 = heightGrid->GetValue(point1[0]+userExts[0],point1[1]+userExts[1],0.);
+        //float z2 = heightGrid->GetValue(point2[0]+userExts[0],point2[1]+userExts[1],0.);
+        //point1[2] = z1+boxexts[2]-userExts[2];
+        //point2[2] = z2+boxexts[2]-userExts[2];
     }
 
     glBegin(GL_LINES);
@@ -175,9 +181,15 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr) {
             pointa[1] = (1 + pointa[1]) / 2.f * ySpan + boxMinExt[1];
             pointb[1] = (1 + pointb[1]) / 2.f * ySpan + boxMinExt[1];
 
-            double zSpan = boxMaxExt[2] - boxMinExt[2];
-            pointa[2] = 500.f; //(1+pointa[2]) * zSpan;
-            pointb[2] = 500.f; //(1+pointb[2]) * zSpan;
+            if (mapToTerrain) {
+                heightGrid
+                    pointa[2] = heightGrid->GetValue(pointa[0], pointa[1]);
+                pointb[2] = heightGrid->GetValue(pointb[0], pointb[1]);
+            } else {
+                double zSpan = boxMaxExt[2] - boxMinExt[2];
+                pointa[2] = 500.f; //(1+pointa[2]) * zSpan;
+                pointb[2] = 500.f; //(1+pointb[2]) * zSpan;
+            }
 
             glVertex3dv(pointa);
             glVertex3dv(pointb);
