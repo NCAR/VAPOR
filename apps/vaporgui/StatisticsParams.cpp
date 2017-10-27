@@ -28,7 +28,7 @@ using namespace VAPoR;
 
 //const string StatisticsParams::_varsTag = "Vars";
 //const string StatisticsParams::_vars3dTag = "Vars3d";
-const string StatisticsParams::_statisticsTag = "Statistics";
+//const string StatisticsParams::_statisticsTag = "Statistics";
 const string StatisticsParams::_dataSourceTag = "DataSource";
 //const string StatisticsParams::_refinementTag = "Refinement";
 //const string StatisticsParams::_cRatioTag = "Lod";
@@ -47,7 +47,7 @@ const string StatisticsParams::_stdDevStatTag = "StdDevStat";
 //
 // Register class with object factory!!!
 //
-static ParamsRegistrar<StatisticsParams> registrar(StatisticsParams::GetClassType());
+static RenParamsRegistrar<StatisticsParams> registrar(StatisticsParams::GetClassType());
 
 StatisticsParams::StatisticsParams(DataMgr *dmgr, ParamsBase::StateSave *ssave)
     : RenderParams(dmgr, ssave, StatisticsParams::GetClassType()) {}
