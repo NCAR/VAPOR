@@ -52,20 +52,20 @@ class StatisticsParams : public RenderParams {
     //int GetRefinement();
     //void SetRefinement(int ref);
 
-    bool GetMinStat();
-    void SetMinStat(bool state);
+    bool GetMinEnabled();
+    void SetMinEnabled(bool state);
 
-    bool GetMaxStat();
-    void SetMaxStat(bool state);
+    bool GetMaxEnabled();
+    void SetMaxEnabled(bool state);
 
-    bool GetMeanStat();
-    void SetMeanStat(bool state);
+    bool GetMeanEnabled();
+    void SetMeanEnabled(bool state);
 
-    bool GetMedianStat();
-    void SetMedianStat(bool state);
+    bool GetMedianEnabled();
+    void SetMedianEnabled(bool state);
 
-    bool GetStdDevStat();
-    void SetStdDevStat(bool state);
+    bool GetStdDevEnabled();
+    void SetStdDevEnabled(bool state);
 
     // should be using RenderParams::GetAuxVariableNames()
     //vector<string> GetVarNames();
@@ -88,8 +88,8 @@ class StatisticsParams : public RenderParams {
   private:
     //static const string _varsTag;
     //static const string _vars3dTag;
-    static const string _statisticsTag;
-    static const string _dataSourceTag;
+    //static const string _statisticsTag;
+    //static const string _dataSourceTag;
     //static const string _refinementTag;
     //static const string _cRatioTag;
     static const string _minTSTag;
@@ -98,11 +98,11 @@ class StatisticsParams : public RenderParams {
     //static const string _minExtentsTag;
     //static const string _maxExtentsTag;
     //static const string _regionSelectTag;
-    static const string _minStatTag;
-    static const string _maxStatTag;
-    static const string _meanStatTag;
-    static const string _medianStatTag;
-    static const string _stdDevStatTag;
+    static const string _minEnabledTag;
+    static const string _maxEnabledTag;
+    static const string _meanEnabledTag;
+    static const string _medianEnabledTag;
+    static const string _stdDevEnabledTag;
 };
 
 };     // End namespace VAPoR
