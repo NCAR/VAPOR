@@ -53,8 +53,6 @@ class PARAMS_API ParamsMgr : public MyBase {
 	
 public: 
 
- ParamsMgr();
-
  //! ParamsMgr constructor
  //!
  //! \param[in] appParamsNames A vector of unique ParamsBase class 
@@ -64,9 +62,19 @@ public:
  //! If any of the class names in \p appParamsNames were not 
  //! previously registered via ParamsRegistrar() they will be ignored.
  //!
+ //! \param[in] appRenderParamsNames A vector of unique RenderParams class 
+ //! names previously
+ //! registered with RenParamsRegistrar(). The ParamsMgr will construct
+ //! these application-defined render params classes as needed.
+ //! If any of the class names in \p appRenderParamsNames were not 
+ //! previously registered via RenParamsRegistrar() they will be ignored.
+ //!
  //! \sa ParamsRegistrar()
  //
- ParamsMgr(std::vector <string> appParamNames);
+ ParamsMgr(
+	std::vector <string> appParamNames = std::vector <string> (),
+	std::vector <string> appRenderParamNames = std::vector <string> ()
+ );
 
  //! Destroy object
  //!
@@ -378,16 +386,38 @@ public:
  //! Optain any paramers registered by the application
  //!
  //! This method returns params that have been registered on the
- //! ParamsMgr via RegisterAppParams();
+ //! ParamsMgr via the constructor
  //!
  //! \retval params Pointer to requested params on success, or NULL
  //! on failure. Fails if \p classType was not registred with 
- //! RegisterAppParams()
+ //! the constructor or ParamsRegistrar
  //!
- //! \sa RegisterAppParams()
+ //! \sa ParamsMgr()
  //
  ParamsBase *GetParams(string classType) {
 	return(_otherParams->GetParams(classType));
+ }
+
+ //! Optain any render paramers registered by the application
+ //!
+ //! This method returns params that have been registered on the
+ //! ParamsMgr via RegisterAppParams() for the data set named
+ //! by \p dataSetName;
+ //!
+ //! \param[in] dataSetName  
+ //! \param[in] classType 
+ //!
+ //! \retval params Pointer to requested params on success, or NULL
+ //! on failure. Fails if \p classType was not registred with 
+ //! the constructor or RenParamsRegistrar
+ //! 
+ //!
+ //! \sa ParamsMgr()
+ //
+ RenderParams *GetAppRenderParams(string dataSetName, string classType) {
+	std::map <string, RenParamsContainer *>::const_iterator itr;
+	itr = _otherRenParams.find(dataSetName);
+	return(itr != _otherRenParams.cend() ? itr->second->GetParams(classType) : NULL);
  }
 
  
@@ -572,6 +602,7 @@ private:
  ParamsSeparator *_rootSeparator;
  XmlNode _prevState;
  std::vector <string> _appParamNames;
+ std::vector <string> _appRenderParamNames;
 
  // Map of RenParamsContainers referenced by Window Name, then by
  // data set name, and finally Renderer Name.
@@ -583,14 +614,18 @@ private:
  map <string, ViewpointParams *> _viewpointParamsMap;
 
  ParamsContainer *_otherParams;
+ std::map <string, RenParamsContainer *> _otherRenParams;
+
  PMgrStateSave _ssave;
 
  static const string _rootTag;
  static const string _globalTag;
  static const string _renderersTag;
+ static const string _appRenderersTag;
  static const string _windowsTag;
 
  void _init(std::vector <string> appParamNames, XmlNode *node);
+ void _initAppRenParams(string dataSetName);
  void _destroy();
 
  const map <string, map <string, RenParamsContainer *>> *getWinMap3(
