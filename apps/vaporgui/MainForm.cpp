@@ -195,13 +195,14 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     myParams.push_back(StartupParams::GetClassType());
     myParams.push_back(AnimationParams::GetClassType());
     myParams.push_back(MiscParams::GetClassType());
-    myParams.push_back(StatisticsParams::GetClassType());
     myParams.push_back(PlotParams::GetClassType());
 
+    vector<string> myRenParams;
+    myRenParams.push_back(StatisticsParams::GetClassType());
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
     //
-    _controlExec = new ControlExec(myParams);
+    _controlExec = new ControlExec(myParams, myRenParams);
     _controlExec->SetSaveStateEnabled(false);
 
     _paramsMgr = _controlExec->GetParamsMgr();
