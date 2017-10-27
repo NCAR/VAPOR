@@ -36,3 +36,10 @@ bin
 /xcode
 /apps/vaporgui/ui/
 /buildutils/LinuxInstallLibs.txt
+
+
+# vim swap files
+apps/vaporgui/*.swp
+include/vapor/*.swp
+lib/render/*.swp
+lib/params/*.swp
