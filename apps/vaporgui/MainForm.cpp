@@ -2209,8 +2209,10 @@ void MainForm::installCLITools(){
 }
 
 void MainForm::launchStats(){
-    if (!_stats) _stats = new Statistics(this);
-	if (_controlExec) {
+    if (!_stats) 
+        _stats = new Statistics(this);
+	if (_controlExec) 
+    {
 		_stats->initControlExec(_controlExec);
 	} 
 	_stats->showMe();   
