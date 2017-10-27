@@ -19,7 +19,8 @@ public:
     //
     // Get and set image file path
     //
-    void        SetImagePath(std::string file) { SetValueString(_fileNameTag, "Set image file path", file); }
+    void SetImagePath(std::string file) { SetValueString(_fileNameTag, "Set image file path", file); }
+
     std::string GetImagePath() const
     {
         std::vector<std::string> paths;
