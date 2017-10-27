@@ -172,7 +172,7 @@ void GeometryWidget::GetVectorExtents(size_t ts, int level,
 				maxFullExt=maxVarExt;
 			}
 			else {
-				for (int j=0; j<3; j++) {
+				for (int j=0; j < minVarExt.size(); j++) {
 					// ...Otherwise run our comparisons
 					//
 					if (minVarExt[j] < minFullExt[j]) {
