@@ -145,6 +145,19 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
         }
     }
 
+    // Sigh. Look for CAM's Z3 (geopotential height) variable, which
+    // does not follow CF conventions :-(
+    //
+    if (_camZ3Exists(vars)) {
+        _auxCoordinateVars.push_back("Z3");
+
+        DerivedVar_vertStag *derived_var = new DerivedVar_vertStag(this, "Z3", "ilev");
+        string               stagVar = "Z3P1";
+        NetCDFCFCollection::InstallDerivedCoordVar(stagVar, derived_var, 2);
+
+        _derivedVarsMap[stagVar] = derived_var;
+    }
+
     //
     // sort and remove duplicate auxiliary coordinate variables
     //
@@ -255,6 +268,27 @@ int NetCDFCFCollection::GetVarCoordVarNames(string var, vector<string> &cvars) c
         }
     }
 
+    // Ugh. Stupid hack to make Z3 the vertical coordinate variable
+    // for 3D CAM variables
+    //
+    if (!hasVertCoord) {
+        vector<string> v, vars;
+        v = NetCDFCollection::GetVariableNames(3, false);
+        vars.insert(vars.end(), v.begin(), v.end());
+        v = NetCDFCollection::GetVariableNames(4, false);
+        vars.insert(vars.end(), v.begin(), v.end());
+
+        if (_camZ3Exists(vars) && dimnames.size() >= 3) {
+            if (find(dimnames.begin(), dimnames.end(), "lev") != dimnames.end()) {
+                tmpcvars.push_back("Z3");
+                hasVertCoord = true;
+            } else if (find(dimnames.begin(), dimnames.end(), "ilev") != dimnames.end()) {
+                tmpcvars.push_back("Z3P1");
+                hasVertCoord = true;
+            }
+        }
+    }
+
     //
     // Now see if any "coordinate variables" for which we haven't
     // already identified a coord var exist.
@@ -362,6 +396,44 @@ int NetCDFCFCollection::GetVarCoordVarNames(string var, vector<string> &cvars) c
     assert(cvars.size() == tmpcvars.size());
 
     return (0);
+}
+
+bool NetCDFCFCollection::IsVertCoordVarPressure(string var) const
+{
+    if (!IsVertCoordVar(var)) return (false);
+
+    NetCDFSimple::Variable varinfo;
+
+    bool enable = EnableErrMsg(false);
+    int  rc = NetCDFCollection::GetVariableInfo(var, varinfo);
+    if (rc < 0) {
+        EnableErrMsg(enable);
+        return (false);
+    }
+
+    string unit;
+    varinfo.GetAtt("units", unit);
+    if (unit.empty()) return (false);    // No coordinates attribute found
+
+    return (_udunit->IsPressureUnit(unit));
+}
+
+bool NetCDFCFCollection::IsVertCoordVarLength(string var) const
+{
+    if (!IsVertCoordVar(var)) return (false);
+
+    NetCDFSimple::Variable varinfo;
+
+    bool enable = EnableErrMsg(false);
+    int  rc = NetCDFCollection::GetVariableInfo(var, varinfo);
+    EnableErrMsg(enable);
+    if (rc < 0) { return (false); }
+
+    string unit;
+    varinfo.GetAtt("units", unit);
+    if (unit.empty()) return (false);    // No coordinates attribute found
+
+    return (_udunit->IsLengthUnit(unit));
 }
 
 bool NetCDFCFCollection::IsVertCoordVarUp(string cvar) const
@@ -893,6 +965,10 @@ bool NetCDFCFCollection::_IsVertCoordVar(const NetCDFSimple::Variable &varinfo) 
 
     if (StrCmpNoCase(s, "model_level_number") == 0) return (true);
 
+    // Check for CAM Z3 Geopotential height variable
+    //
+    if (_camZ3Exists(vector<string>(1, varinfo.GetName()))) return (true);
+
     string unit;
     varinfo.GetAtt("units", unit);
     if (unit.empty()) return (false);    // No coordinates attribute found
@@ -966,6 +1042,24 @@ void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMa
             if (_GetMissingValue(vars[i], attname, mv)) { missingValueMap[vars[i]] = mv; }
         }
     }
+}
+
+bool NetCDFCFCollection::_camZ3Exists(const vector<string> &vars) const
+{
+    const string z3Name = "Z3";
+
+    vector<string>::const_iterator itr;
+    itr = (find(vars.cbegin(), vars.cend(), z3Name));
+    if (itr == vars.cend()) return (false);
+
+    NetCDFSimple::Variable varinfo;
+    (void)NetCDFCollection::GetVariableInfo(z3Name, varinfo);
+
+    string s;
+    varinfo.GetAtt("long_name", s);
+
+    if (StrCmpNoCase(s, "Geopotential Height (above sea level)") == 0) { return (true); }
+    return (false);
 }
 
 NetCDFCFCollection::DerivedVar_ocean_s_coordinate_g1::DerivedVar_ocean_s_coordinate_g1(NetCDFCFCollection *ncdfcf, const std::map<string, string> &formula_map) : DerivedVar(ncdfcf)
@@ -1974,3 +2068,101 @@ int NetCDFCFCollection::DerivedVarTime::ReadSlice(float *slice, int)
 }
 
 int NetCDFCFCollection::DerivedVarTime::SeekSlice(int offset, int whence, int) { return (0); }
+
+NetCDFCFCollection::DerivedVar_vertStag::DerivedVar_vertStag(NetCDFCFCollection *ncdfcf, string unstagVar, string stagDimName) : DerivedVar(ncdfcf)
+{
+    _unstagVar = unstagVar;
+    _dims.clear();
+    _dimnames.clear();
+    _sliceBuf = NULL;
+    _fd = -1;
+
+    _dims = _ncdfc->GetSpatialDims(unstagVar);
+    assert(_dims.size() == 3);
+    _dims[0] += 1;
+
+    _dimnames = _ncdfc->GetSpatialDimNames(unstagVar);
+    _dimnames[0] = stagDimName;
+}
+
+NetCDFCFCollection::DerivedVar_vertStag::~DerivedVar_vertStag()
+{
+    if (_sliceBuf) delete[] _sliceBuf;
+}
+
+int NetCDFCFCollection::DerivedVar_vertStag::Open(size_t)
+{
+    _slice_num = 0;
+
+    size_t nx = _dims[2];
+    size_t ny = _dims[1];
+
+    if (!_sliceBuf) _sliceBuf = new float[nx * ny * 2];
+
+    _fd = _ncdfc->OpenRead(0, _unstagVar);
+    if (_fd < 0) return (-1);
+    if (_fd < 0) return (_fd);
+
+    return (0);
+}
+
+int NetCDFCFCollection::DerivedVar_vertStag::Close(int) { return (_ncdfc->Close(_fd)); }
+
+int NetCDFCFCollection::DerivedVar_vertStag::Read(float *buf, int)
+{
+    size_t nx = _dims[2];
+    size_t ny = _dims[1];
+    size_t nz = _dims[0];
+
+    for (size_t i = 0; i < nx * ny; i++) {
+        int rc = ReadSlice(buf, _fd);
+        if (rc < 0) return (-1);
+        buf += nx * ny;
+    }
+
+    return (0);
+}
+
+int NetCDFCFCollection::DerivedVar_vertStag::ReadSlice(float *slice, int fd)
+{
+    size_t nx = _dims[2];
+    size_t ny = _dims[1];
+    size_t nz = _dims[0];
+
+    if (_slice_num >= nz) return (0);
+
+    float *slice1, *slice2;
+    if (_slice_num == 0) {
+        slice1 = _sliceBuf;
+        slice2 = _sliceBuf + (nx * ny);
+        int rc = _ncdfc->ReadSlice(slice1, _fd);
+        if (rc < 0) return (-1);
+    } else if (_slice_num == 1) {
+        slice1 = _sliceBuf;
+        slice2 = _sliceBuf + (nx * ny);
+    } else if (_slice_num == nz - 1) {
+        slice1 = _slice_num % 2 ? _sliceBuf : _sliceBuf + (nx * ny);
+        slice2 = _slice_num % 2 ? _sliceBuf + (nx * ny) : _sliceBuf;
+    } else {
+        slice1 = _slice_num % 2 ? _sliceBuf + (nx * ny) : _sliceBuf;
+        slice2 = _slice_num % 2 ? _sliceBuf : _sliceBuf + (nx * ny);
+        int rc = _ncdfc->ReadSlice(slice2, _fd);
+        if (rc < 0) return (-1);
+    }
+
+    if (_slice_num == 0) {
+        for (size_t i = 0; i < nx * ny; i++) { slice[i] = slice1[i] + (-0.5 * (slice2[i] - slice1[i])); }
+    } else if (_slice_num == nz - 1) {
+        for (size_t i = 0; i < nx * ny; i++) { slice[i] = slice2[i] + (-0.5 * (slice1[i] - slice2[i])); }
+    } else {
+        for (size_t i = 0; i < nx * ny; i++) { slice[i] = 0.5 * (slice1[i] + slice2[i]); }
+    }
+    _slice_num++;
+    return (1);
+}
+
+int NetCDFCFCollection::DerivedVar_vertStag::SeekSlice(int offset, int whence, int)
+{
+    assert(0 && "Not implemented");
+    return (0);
+}
