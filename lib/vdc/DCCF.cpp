@@ -223,10 +223,10 @@ vector<string> DCCF::GetDataVarNames(int ndim, bool spatial) const
 {
     // 3D VARIABLES NOT CURRENTLY SUPPORTED
     //
-    if ((spatial && ndim > 2) || (!spatial && ndim > 3)) {
-        cerr << "DCCF::GetDataVarNames() : 3D VARIABLES NOT SUPPORTED" << endl;
-        return (vector<string>());
-    }
+    //	if ((spatial && ndim > 2) || (! spatial && ndim > 3)) {
+    //		cerr << "DCCF::GetDataVarNames() : 3D VARIABLES NOT SUPPORTED" << endl;
+    //		return(vector <string> ());
+    //	}
 
     return (DC::GetDataVarNames(ndim, spatial));
 }
@@ -845,16 +845,24 @@ int DCCF::_InitVerticalCoordinates(NetCDFCFCollection *ncdfc)
     // Now get all of the vertical coordinate variable names
     // for each of the 1D, 2D and 3D data variables
     //
-    vector<string> cvars;
+    vector<string> derived_cvars, cvars;
     for (int i = 0; i < dvars.size(); i++) {
         string vertcvar;
+
+        if (dvars[i] == "ABSORB") { cout << "ABSORB......" << endl; }
+        if (dvars[i] == "CMFMC") { cout << "CMFMC......" << endl; }
+        if (dvars[i] == "hyam") { cout << "hyam......" << endl; }
 
         int rc = _get_vertical_coordvar(ncdfc, dvars[i], vertcvar);
         if (rc < 0) return (-1);
 
         if (vertcvar.empty()) continue;
 
-        cvars.push_back(vertcvar);
+        if (ncdfc->IsVertCoordVarLength(vertcvar)) {
+            cvars.push_back(vertcvar);
+        } else {
+            derived_cvars.push_back(vertcvar);
+        }
     }
 
     // Remove duplicates
@@ -864,13 +872,24 @@ int DCCF::_InitVerticalCoordinates(NetCDFCFCollection *ncdfc)
     last = unique(cvars.begin(), cvars.end());
     cvars.erase(last, cvars.end());
 
+    sort(derived_cvars.begin(), derived_cvars.end());
+    last = unique(derived_cvars.begin(), derived_cvars.end());
+    derived_cvars.erase(last, derived_cvars.end());
+
     // Create a new derived vertical coordinate variable for each native
     // vertical coordinate variable using the NetCDFCFCollection class
     // built-in standard vertical coordinate converts
     //
-    int rc = _InitVerticalCoordinatesDerived(ncdfc, cvars);
+    int rc = _InitVerticalCoordinatesDerived(ncdfc, derived_cvars);
     if (rc < 0) return (-1);
 
+    // Add derived vertical coordinate vars
+    //
+    rc = _AddCoordvars(ncdfc, derived_cvars);
+    if (rc < 0) return (-1);
+
+    // Add native vertical coordinate vars
+    //
     rc = _AddCoordvars(ncdfc, cvars);
     if (rc < 0) return (-1);
 
@@ -1047,7 +1066,7 @@ int DCCF::_GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<s
     // Coordinate variables returned by ncdfc are assumed to be lat, lon,
     // height, time. For each native coordinate variable a derived
     // coordinate variable has been created in Cartographic coordinates with
-    // elevtion expressed in meters, and time in seconds
+    // elevation expressed in meters, and time in seconds
     //
     for (int i = 0; i < scoordvars.size(); i++) {
         string xcv;
@@ -1056,7 +1075,11 @@ int DCCF::_GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<s
         } else if (ncdfc->IsLatCoordVar(scoordvars[i])) {
             xcv = scoordvars[i] + "Y";
         } else if (ncdfc->IsVertCoordVar(scoordvars[i])) {
-            xcv = scoordvars[i] + "Z";
+            if (ncdfc->IsVertCoordVarLength(scoordvars[i])) {
+                xcv = scoordvars[i];    // Not derived
+            } else {
+                xcv = scoordvars[i] + "Z";
+            }
         } else if (ncdfc->IsTimeCoordVar(scoordvars[i])) {
             xcv = scoordvars[i] + "T";
         }
@@ -1101,7 +1124,7 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc)
     // For each variable add a member to _dataVarsMap
     //
     for (int i = 0; i < vars.size(); i++) {
-        cout << "Var i " << i << " " << vars[i] << endl;
+        if (vars[i] == "ABSORB") { cout << "ABSORB....\n"; }
 
         // variable type must be float or int
         //
