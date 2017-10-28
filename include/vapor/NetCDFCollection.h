@@ -10,6 +10,7 @@
 #include <map>
 
 #include <sstream>
+#include <netcdf.h>
 #include <vapor/MyBase.h>
 #include <vapor/NetCDFSimple.h>
 
@@ -789,6 +790,21 @@ public:
   virtual string  GetTimeDimName() const = 0;
   virtual bool GetMissingValue(double &mv) const = 0;
   virtual size_t  GetNumTimeSteps() const {return(GetTimeDim());}
+  virtual std::vector <string> GetAttNames() const {
+	return(std::vector <string>());
+  }
+  virtual int GetAttType(string name) const {
+	return(NC_DOUBLE);
+  }
+  virtual void GetAtt(string name, std::vector <double> &values) const {
+	values.clear();
+  }
+  virtual void GetAtt(string name, std::vector <long> &values) const {
+	values.clear();
+  }
+  virtual void GetAtt(string name, string &values) const {
+	values.clear();
+  }
  protected:
   NetCDFCollection *_ncdfc;
  };
