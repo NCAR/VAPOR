@@ -1267,7 +1267,7 @@ void *RunWriteThreadCompressed(void *arg) {
             double dummy2 = 0;
             return (RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
         }
-    }
+    } break;
     case NC_DOUBLE: {
         double dummy1 = 0.0;
         if (s._block_type == NC_INT64) {
@@ -1277,7 +1277,7 @@ void *RunWriteThreadCompressed(void *arg) {
             double dummy2 = 0;
             return (RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
         }
-    }
+    } break;
     case NC_INT: {
         int dummy1 = 0.0;
         if (s._block_type == NC_INT64) {
@@ -1287,7 +1287,7 @@ void *RunWriteThreadCompressed(void *arg) {
             double dummy2 = 0;
             return (RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
         }
-    }
+    } break;
     case NC_SHORT: {
         int16_t dummy1 = 0.0;
         if (s._block_type == NC_INT64) {
@@ -1297,9 +1297,10 @@ void *RunWriteThreadCompressed(void *arg) {
             double dummy2 = 0;
             return (RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
         }
-    }
+    } break;
     default:
-        assert(0);
+        cerr << "Data type " << s._data_type << endl;
+        assert(0 && s._data_type);
         return (NULL);
     }
 }
