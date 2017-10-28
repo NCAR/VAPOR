@@ -436,7 +436,14 @@ vector<string> DataMgr::GetDataVarNames() const {
     //
     // NEED TO HANDLE DERIVED VARS
     //
-    return (_dc->GetDataVarNames());
+    vector<string> vars = _dc->GetDataVarNames();
+    vector<string> validVars;
+    for (int i = 0; i < vars.size(); i++) {
+        if (_get_grid_type(vars[i]) != UNDEFINED) {
+            validVars.push_back(vars[i]);
+        }
+    }
+    return (validVars);
 }
 
 vector<string> DataMgr::GetDataVarNames(int ndim, bool spatial) const {
@@ -446,7 +453,14 @@ vector<string> DataMgr::GetDataVarNames(int ndim, bool spatial) const {
     //
     // NEED TO HANDLE DERIVED VARS
     //
-    return (_dc->GetDataVarNames(ndim, spatial));
+    vector<string> vars = _dc->GetDataVarNames(ndim, spatial);
+    vector<string> validVars;
+    for (int i = 0; i < vars.size(); i++) {
+        if (_get_grid_type(vars[i]) != UNDEFINED) {
+            validVars.push_back(vars[i]);
+        }
+    }
+    return (validVars);
 }
 
 vector<string> DataMgr::GetCoordVarNames() const {
@@ -2841,6 +2855,30 @@ DataMgr::GridType DataMgr::_get_grid_type(
         }
     }
     return (grid_type);
+}
+
+DataMgr::GridType DataMgr::_get_grid_type(string varname) const {
+
+    vector<string> cvars;
+    string dummy;
+    int rc = _get_coord_vars(varname, cvars, dummy);
+    assert(rc == 0);
+
+    vector<DC::CoordVar> cvarsinfo;
+    for (int i = 0; i < cvars.size(); i++) {
+        DC::CoordVar cvarinfo;
+
+        bool ok = GetCoordVarInfo(cvars[i], cvarinfo);
+        assert(ok);
+
+        cvarsinfo.push_back(cvarinfo);
+    }
+
+    DC::DataVar dvar;
+    bool status = DataMgr::GetDataVarInfo(varname, dvar);
+    assert(status);
+
+    return (_get_grid_type(dvar, cvarsinfo));
 }
 
 // Find the grid coordinates, in voxels, for the region containing
