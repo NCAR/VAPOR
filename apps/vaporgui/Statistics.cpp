@@ -158,45 +158,46 @@ void Statistics::Update(VAPoR::StatisticsParams* sParams)
 #endif
 }
 
-int Statistics::initDataMgr(DataMgr* dm) {
-    if (dm!=NULL) {
-        _dm = dm;
-    }
-    else { return -1;}
-    initialize();
-    return 0;
-}
-
 int Statistics::initControlExec(ControlExec* ce) {
-    if (ce!=NULL) {
+    if (ce!=NULL) 
+    {
         _controlExec = ce;
     }
-    else { return -1;}
-
-    ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
-    _params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
+    else 
+    { 
+        return -1;
+    }
 
     _dataStatus = _controlExec->getDataStatus();
     vector<string> dmNames = _dataStatus->GetDataMgrNames();
+    assert( dmNames.size() > 0 )
+
     dataMgrCombo->clear();
-    for (int i=0; i<dmNames.size(); i++) {
+    for (int i=0; i<dmNames.size(); i++) 
+    {
         QString item = QString::fromStdString(dmNames[i]);
         dataMgrCombo->addItem(item);
     }
+    dataMgrCombo->setCurrentIndex( 0 );
 
-    DataMgr* dm = _dataStatus->GetDataMgr(dmNames[0]);
-    initDataMgr(dm);
+    _dmgr = _dataStatus->GetDataMgr(dmNames[0]);
+    assert( _dmgr );
+
+    initialize();
 
     return 0;
 }
 
-int Statistics::initialize(){
-
+int Statistics::initialize()
+{
     // This is a bitmask to define which statistics to calculate/display.
     // If a statistic variable is set to 0x00 or undefined, it will not
     // be applied.  The _calculations variable is used as a filter, and
     // is all-inclusive by default.
     //
+    StatisticsParams* params = ParamsMgr::GetAppRenderParams(
+                    dataMgrCombo->currentText.toStdString(), StatisticParams::GetClassType());
+    /*
     _MIN = 0x01;
     _MAX = 0x02;
     _MEAN = 0x04;
@@ -209,12 +210,13 @@ int Statistics::initialize(){
         _SIGMA = 0x08;
     }
     _calculations = 0xFF;
+    */
 
-    if (_dm==NULL) return -1;
+    //if (_dm==NULL) return -1;
 
     _errMsg = new sErrMsg;
-    _autoUpdate = _params->GetAutoUpdate();
-    UpdateCheckbox->setChecked(_autoUpdate);
+    //_autoUpdate = _params->GetAutoUpdate();
+    UpdateCheckbox->setChecked( params->GetAutoUpdate() );
 
     // for _regionSelection,
     // 0 = center/size, 1 = min/max, 2 = center/size
