@@ -144,7 +144,7 @@ void DefineMaskVars(
             exit(1);
 
         rc = vdc.DefineDataVar(
-            maskvar, dimnames, dimnames, "", DC::INT8, compress);
+            maskvar, dimnames, vector<string>(), "", DC::INT8, compress);
 
         if (rc < 0) {
             exit(1);
@@ -332,9 +332,6 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < datanames.size(); i++) {
 
-            if (datanames[i] == "ABSORB") {
-                cout << "ABSORB.....\n";
-            }
             DC::DataVar dvar;
             dccf.GetDataVarInfo(datanames[i], dvar);
 
