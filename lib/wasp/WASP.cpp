@@ -1301,7 +1301,8 @@ void *RunWriteThreadCompressed(void *arg) {
 		}
 	}
 	break;
-	case NC_INT: {
+	case NC_INT:
+	case NC_UINT: {
 		int dummy1 = 0.0;
 		if (s._block_type == NC_INT64) {
 			long dummy2 = 0;
@@ -1313,8 +1314,21 @@ void *RunWriteThreadCompressed(void *arg) {
 		}
 	}
 	break;
-	case NC_SHORT: {
+	case NC_SHORT:
+	case NC_USHORT: {
 		int16_t dummy1 = 0.0;
+		if (s._block_type == NC_INT64) {
+			long dummy2 = 0;
+			return(RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
+		}
+		else {
+			double dummy2 = 0;
+			return(RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
+		}
+	}
+	case NC_BYTE:
+	case NC_UBYTE: {
+		int8_t dummy1 = 0;
 		if (s._block_type == NC_INT64) {
 			long dummy2 = 0;
 			return(RunWriteThreadCompressedTemplate(s, dummy1, dummy2));
