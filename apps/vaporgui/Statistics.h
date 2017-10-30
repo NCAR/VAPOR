@@ -41,6 +41,7 @@ class DataMgr;
 
 class sErrMsg : public QDialog, public Ui_ErrMsg {
     Q_OBJECT
+
 public:
     sErrMsg() { setupUi(this); }
 };
@@ -53,8 +54,8 @@ public:
     ~Statistics();
     int  initControlExec(VAPoR::ControlExec *ce);
     void showMe();
-    int  initialize();    // connecting slots
-    void Update(VAPoR::StatisticsParams *sParams);
+    int  Initialize();    // connecting slots ?
+    bool Update(VAPoR::StatisticsParams *sParams);
 
 protected:
     // Keeps the current variables shown and their statistical values.
@@ -62,19 +63,19 @@ protected:
     //
     class ValidStats {
     public:
-        bool addVariable(std::string);
+        bool AddVariable(std::string);
         // bool removeVariable( std::string );
 
-        bool add3MStats(std::string, const double *);    // Min, Max, Mean
-        bool addMedian(std::string, double);
-        bool addStddev(std::string, double);
+        bool Add3MStats(std::string, const double *);    // Min, Max, Mean
+        bool AddMedian(std::string, double);
+        bool AddStddev(std::string, double);
 
         // invalid values are represented as nan.
-        bool get3MStats(std::string, double *);
-        bool getMedian(std::string, double *);
-        bool getStddev(std::string, double *);
+        bool Get3MStats(std::string, double *);
+        bool GetMedian(std::string, double *);
+        bool GetStddev(std::string, double *);
 
-        bool invalidAll();
+        bool InvalidAll();
 
     private:
         std::vector<std::string> _variables;
@@ -83,34 +84,35 @@ protected:
                                                 // 2: mean
                                                 // 3: median
                                                 // 4: stddev
-        int getVarIdx(std::string);             // -1: not exist
+        int _getVarIdx(std::string);            // -1: not exist
                                                 // >=0: a valid index
     };                                          // finish ValidStats
 
 private slots:
     /*
-        void restoreExtents();
-        void minTSChanged();
-        void maxTSChanged();
-        void autoUpdateClicked();
-        void refinementChanged(int);
-        void cRatioChanged(int);
-        void addVariable(int);
-        void removeVariable(int);
-        void initRegion();
-        void exportText();
-        void rangeComboChanged();
-        void addStatistic(int);
-        void removeStatistic(int);
-        void updateButtonPressed()
-        {
-            updateStats();
-        }
-        */
+    void restoreExtents();
+    void minTSChanged();
+    void maxTSChanged();
+    void autoUpdateClicked();
+    void refinementChanged(int);
+    void cRatioChanged(int);
+    void addVariable(int);
+    void removeVariable(int);
+    void initRegion();
+    void exportText();
+    void rangeComboChanged();
+    void addStatistic(int);
+    void removeStatistic(int);
+    void updateButtonPressed()
+    {
+        updateStats();
+    }
+    */
 
 private:
     sErrMsg *_errMsg;
 
+    // VAPoR::StatisticsParams* _params; // don't hold it!
     VAPoR::ControlExec *_controlExec;
     VAPoR::DataStatus * _dataStatus;
     VAPoR::DataMgr *    _dmgr;
