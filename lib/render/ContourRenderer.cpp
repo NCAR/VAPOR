@@ -158,6 +158,7 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 		bool dontDraw;
 		pair<int,int> mapPair = make_pair(timestep, iso);
 		vector<float*> lines = _lineCache[mapPair];
+		float defaultZ = _getDefaultZ(dataMgr, timestep);
 		for (int linenum = 0; linenum < lines.size(); linenum++){
 			dontDraw = false;
 			pointa[0] = lines[linenum][0];
@@ -185,8 +186,8 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 				}
 			}
 			else {
-				pointa[2] = _getDefaultZ(dataMgr, timestep);
-				pointb[2] = _getDefaultZ(dataMgr, timestep);
+				pointa[2] = defaultZ;
+				pointb[2] = defaultZ;
 			}
 			if (!dontDraw) {
 				glVertex3dv(pointa);
