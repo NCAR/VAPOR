@@ -74,44 +74,47 @@ public:
 
     void SetContourSpacing(double val);
 
-    void GetLineColor(int lineNum, float color[3])
-    {
-        GetConstantColor(color);
-        string cmVar = GetColorMapVariableName();
-        if ((cmVar == "") || (cmVar == "Default")) {
-            string            varName = GetVariableName();
-            TransferFunction *tf = 0;
-            tf = (TransferFunction *)GetMapperFunc(varName);
-            if (!tf) { tf = MakeTransferFunc(varName); }
-            assert(tf);
-
-            // vector<double> vals = GetValueDoubleVec(_contoursTag);
-            vector<double> vals = GetIsovalues(varName);
-            double         val = vals[lineNum];
-
-            tf->rgbValue(val, color);
-        } else {
-            GetConstantColor(color);
+    void GetLineColor(int lineNum, float color[3]); /* {
+    GetConstantColor(color);
+    string cmVar = GetColorMapVariableName();
+    if ((cmVar == "") || (cmVar == "Default")) {
+        string varName = GetVariableName();
+        TransferFunction* tf = 0;
+        tf = (TransferFunction*)GetMapperFunc(varName);
+        if (! tf) {
+            tf = MakeTransferFunc(varName);
         }
+        assert(tf);
+
+        //vector<double> vals = GetValueDoubleVec(_contoursTag);
+        vector<double> vals = GetIsovalues(varName);
+        double val = vals[lineNum];
+
+        tf->rgbValue(val, color);
     }
+    else {
+        GetConstantColor(color);
+    }
+ }*/
 
     void SetLineColor(vector<double> vec) { SetValueDoubleVec(_lineColorTag, "Line color", vec); }
 
-    void SetLockToTF(bool lock)
-    {
-        string l = "false";
-        if (lock) { l = "true"; }
-        SetValueString(_lockToTFTag, "Lock settings to TF", l);
+    void SetLockToTF(bool lock); /* {
+    string l = "false";
+    if (lock) {
+        l = "true";
     }
+    SetValueString(_lockToTFTag, "Lock settings to TF", l);
+ }*/
 
-    bool GetLockToTF()
-    {
-        if (GetValueString(_lockToTFTag, "true") == "true") {
-            return true;
-        } else {
-            return false;
-        }
+    bool GetLockToTF() const; /* {
+    if (GetValueString(_lockToTFTag, "true")=="true") {
+        return true;
     }
+    else {
+        return false;
+    }
+ }*/
 
     vector<double> GetIsovalues(string varName);
 
@@ -137,31 +140,29 @@ public:
 
     void SetTextDensity(int density) { SetValueDouble(_textDensityTag, "Density of isovalue annotations", density); }
 
-    bool GetTextEnabled() const
-    {
-        if (GetValueString(_textEnabledTag, "false") == "false") {
-            return false;
-        } else {
-            return true;
-        }
+    bool GetTextEnabled() const; /* {
+    if (GetValueString(_textEnabledTag, "false")=="false") {
+        return false;
     }
-
-    void SetTFLock(bool lock)
-    {
-        string l = "false";
-        if (lock) l = "true";
-        SetValueString(_lockToTFTag,
-                       "Lock contours to transfer function"
-                       " bounds",
-                       l);
-    }
-
-    bool GetTFLock()
-    {
-        string l = GetValueString(_lockToTFTag, "true");
-        if (l == "false") return false;
+    else {
         return true;
     }
+ }*/
+
+    void SetTFLock(bool lock); /*{
+    string l = "false";
+    if (lock)
+        l = "true";
+    SetValueString(_lockToTFTag, "Lock contours to transfer function"
+        " bounds", l
+    );
+ }*/
+
+    bool GetTFLock(); /* {
+    string l = GetValueString(_lockToTFTag, "true");
+    if (l=="false") return false;
+    return true;
+ }*/
 
 private:
     void                _init();
