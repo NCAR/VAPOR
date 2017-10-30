@@ -197,31 +197,6 @@
                  <string>Add Statistic</string>
                 </property>
                </item>
-               <item>
-                <property name="text">
-                 <string>Min</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Max</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Mean</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Median</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>StdDev</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>
@@ -229,31 +204,6 @@
                <item>
                 <property name="text">
                  <string>Remove Statistic</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Min</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Max</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Mean</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Median</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>StdDev</string>
                 </property>
                </item>
               </widget>
