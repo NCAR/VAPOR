@@ -190,6 +190,11 @@ int DataMgrUtils::GetGrids(
     int *refLevel, int *lod, Grid **gridptr) {
     *gridptr = NULL;
 
+    if (varname == "") {
+        MyBase::SetErrMsg("Cannot get grid for variable \"\"");
+        return -1;
+    }
+
     vector<string> varnames;
     varnames.push_back(varname);
     vector<Grid *> grids;
