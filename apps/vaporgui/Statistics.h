@@ -60,34 +60,37 @@ class Statistics : public QDialog, public Ui_StatsWindow {
 
   protected:
     // Keeps the current variables shown and their statistical values.
-    // Only valid values are kept; invalid rows/columns are erased.
-    // Min, max, mean, Median values are always kept in sync, i.e.,
-    //    set and get at the same time, valid or invalid at the same time.
-    // Stddev acts separately
+    // Invalid values are stored as std::nan("1");
     //
     class ValidStats {
       public:
         bool addVariable(std::string);
-        bool removeVariable(std::string);
+        //bool removeVariable( std::string );
 
-        bool add4MStats(std::string, const double *); // Min, Max, Mean, Median
+        bool add3MStats(std::string, const double *); // Min, Max, Mean
+        bool addMedian(std::string, double);
         bool addStddev(std::string, double);
 
         // invalid values are represented as nan.
-        bool get4MStats(std::string, double *);
+        bool get3MStats(std::string, double *);
+        bool getMedian(std::string, double *);
         bool getStddev(std::string, double *);
 
-      private:
-        std::vector<std::string> variables;
-        std::vector<double> values[5]; // 0: min
-                                       // 1: max
-                                       // 2: mean
-                                       // 3: median
-                                       // 4: stddev
-    }
+        bool invalidAll();
 
-    private slots :
-        /*
+      private:
+        std::vector<std::string> _variables;
+        std::vector<double> _values[5]; // 0: min
+                                        // 1: max
+                                        // 2: mean
+                                        // 3: median
+                                        // 4: stddev
+        int getVarIdx(std::string);     // -1: not exist
+                                        // >=0: a valid index
+    };                                  // finish ValidStats
+
+  private slots:
+    /*
         void restoreExtents();
         void minTSChanged();
         void maxTSChanged();
@@ -107,7 +110,8 @@ class Statistics : public QDialog, public Ui_StatsWindow {
         }
         */
 
-        private : sErrMsg *_errMsg;
+  private:
+    sErrMsg *_errMsg;
 
     VAPoR::ControlExec *_controlExec;
     VAPoR::DataStatus *_dataStatus;
