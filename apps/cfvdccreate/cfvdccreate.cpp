@@ -136,7 +136,7 @@ void DefineMaskVars(const DCCF &dccf, VDCNetCDF &vdc)
         int rc = vdc.SetCompressionBlock(mybs, mywname, cratios);
         if (rc < 0) exit(1);
 
-        rc = vdc.DefineDataVar(maskvar, dimnames, dimnames, "", DC::INT8, compress);
+        rc = vdc.DefineDataVar(maskvar, dimnames, vector<string>(), "", DC::INT8, compress);
 
         if (rc < 0) { exit(1); }
     }
