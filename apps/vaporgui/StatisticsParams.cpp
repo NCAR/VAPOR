@@ -61,7 +61,7 @@ StatisticsParams::~StatisticsParams()
 
 bool StatisticsParams::GetAutoUpdate()
 {
-    return(GetValueLong(_autoUpdateTag, (long)true));
+    return(GetValueLong(_autoUpdateTag, (long)false));
 }
 
 void StatisticsParams::SetAutoUpdate(bool val) 
@@ -121,7 +121,7 @@ void StatisticsParams::SetMeanEnabled(bool state)
 
 bool StatisticsParams::GetMedianEnabled() 
 {
-    return GetValueLong(_medianEnabledTag, (long)true);
+    return GetValueLong(_medianEnabledTag, (long)false);
 }
 
 void StatisticsParams::SetMedianEnabled(bool state) 
@@ -131,7 +131,7 @@ void StatisticsParams::SetMedianEnabled(bool state)
 
 bool StatisticsParams::GetStdDevEnabled() 
 {
-    return GetValueLong(_stdDevEnabledTag, (long)true);
+    return GetValueLong(_stdDevEnabledTag, (long)false);
 }
 
 void StatisticsParams::SetStdDevEnabled(bool state) 
