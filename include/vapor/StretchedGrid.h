@@ -1,201 +1,226 @@
 #ifndef _StretchedGrid_
 #define _StretchedGrid_
-
-#include <vector>
 #include <vapor/common.h>
-#include "RegularGrid.h"
-#ifdef _WINDOWS
-#pragma warning(disable : 4251 4100)
-#endif
+#include <vapor/Grid.h>
+#include <vapor/StructuredGrid.h>
 
 
 namespace VAPoR {
-
 //! \class StretchedGrid
 //!
 //! \brief This class implements a 2D or 3D stretched grid.
 //!
-//! This class implements a 2D or 3D stretched grid: a generalization
-//! of a regular grid where the spacing of grid points along each dimension
-//! may vary along the dimension.  I.e. the coordinates along each
-//! dimension are a function of the dimension index. E.g. x = x(i), 
-//! for some monotonically increasing function x(i).
+//! This class implements a 2D or 3D stretched grid: a 
+//! specialization of StructuredGrid class where cells are 
+//! quadrilaterals (2D), or cuboids (3D). Hence, stretched grids are 
+//! topologically, but the location of each grid point is expressed
+//! by functions:
+//!
+//! \code
+//! x = X(i)
+//! y = Y(j)
+//! z = Z(k)
+//! \endcode
+//!
 //!
 //
-
-class VDF_API StretchedGrid : public RegularGrid {
+class VDF_API StretchedGrid : public StructuredGrid {
 public:
 
+ //! \copydoc StructuredGrid::StructuredGrid()
  //!
- //! Construct a stretched grid sampling a 3D or 2D scalar function
+ //! Construct a regular grid sampling a 3D or 2D scalar function.
  //!
- //! \param[in] bs A three-element vector specifying the dimensions of
- //! each block storing the sampled scalar function.
- //! \param[in] min A three-element vector specifying the ijk index
- //! of the first point in the grid. The first grid point need not coincide 
- //! with
- //! block boundaries. I.e. the indecies need not be (0,0,0)
- //! \param[in] max A three-element vector specifying the ijk index
- //! of the last point in the grid
- //! \param[in] extents A six-element vector specifying the user coordinates
- //! of the first (first three elements) and last (last three elements) of
- //! the grid points indicated by \p min and \p max, respectively.
- //! Theses extents are ignored for any axis for which a coordinate 
- //! array (\p xcoords, \p ycoords, or \p zcoords) is provided.
- //! \param[in] periodic A three-element boolean vector indicating
- //! which i,j,k indecies, respectively, are periodic. The varying 
- //! dimension may not be periodic.
- //! \param[in] blks An array of blocks containing the sampled function.
- //! The dimensions of each block
- //! is given by \p bs. The number of blocks is given by the product
- //! of the terms:
+ //! This constructor instantiates a stretched grid  where the x,y,z
+ //! user coordinates are expressed as follows:
  //!
- //! \code (max[i]/bs[i] - min[i]/bs[i] + 1) \endcode
+ //! \code
+ //! x = X(i)
+ //! y = Y(j)
+ //! z = Z(k)
+ //! \endcode
  //!
- //! over i = 0..2.
+ //! The X, Y, and Z user coordinates are specified with \p xcoords, \p xcoords,
+ //! and \p zcoords (if 3D), respectively.
  //!
- //! \param[in] xcoords A vector of length (max[0]-min[0]+1) specifying
- //! the user coordinate of each grid point along the X dimension. If
- //! length(xcoord) != max[0]-min[0]+1 then the grid spacing is assumed to 
- //! be uniform.
- //! \param[in] ycoords A vector of length (max[1]-min[1]+1) specifying
- //! the user coordinate of each grid point along the Y dimension. If
- //! length(ycoord) != max[1]-min[1]+1 then the grid spacing is assumed to 
- //! be uniform.
- //! \param[in] zcoords A vector of length (max[2]-min[2]+1) specifying
- //! the user coordinate of each grid point along the Z dimension. If
- //! length(zcoord) != max[2]-min[2]+1 then the grid spacing is assumed to 
- //! be uniform.
+ //! Adds new parameters:
  //!
+ //! \param[in] xcoords  A 1D vector whose size matches that of the I
+ //! dimension of this class, and whose values specify the X user coordinates.
+ //! \param[in] ycoords  A 1D vector whose size matches that of the J
+ //! dimension of this class, and whose values specify the Y user coordinates.
+ //! \param[in] zcoords  A 1D vector whose size matches that of the K
+ //! dimension of this class, and whose values specify the Z user coordinates.
+ //!
+ //! \sa RegularGrid()
+ //
  StretchedGrid(
-	const size_t bs[3],
-	const size_t min[3],
-	const size_t max[3],
-	const double extents[6],
-	const bool periodic[3],
-	float ** blks,
+	const std::vector <size_t> &dims,
+	const std::vector <size_t> &bs,
+	const std::vector <float *> &blks,
 	const std::vector <double> &xcoords,
 	const std::vector <double> &ycoords,
 	const std::vector <double> &zcoords
-);
-
- //! 
- //! Construct a stretched grid sampling a 3D or 2D scalar function
- //! that contains missing values.
- //!
- //! This constructor adds a parameter, \p missing_value, that specifies 
- //! the value of missing values in the sampled function. When 
- //! reconstructing the function at arbitrary coordinates special 
- //! consideration is given to grid points with missing values that 
- //! are used in the reconstruction.
- //! 
- //! \sa GetValue()
- //!
- StretchedGrid(
-	const size_t bs[3],
-	const size_t min[3],
-	const size_t max[3],
-	const double extents[6],
-	const bool periodic[3],
-	float ** blks,
-	const std::vector <double> &xcoords,
-	const std::vector <double> &ycoords,
-	const std::vector <double> &zcoords,
-	float missing_value
  );
 
+ StretchedGrid() = default;
+ virtual ~StretchedGrid() = default;
 
- //! \copydoc RegularGrid::GetValue()
- //!
- float GetValue(double x, double y, double z) const;
+ virtual size_t GetNumCoordinates() const override;
 
- //! \copydoc RegularGrid::GetUserExtents()
- //!
- virtual void GetUserExtents(double extents[6]) const {
-	for (int i=0; i<6; i++) extents[i] = _extents[i];
+
+ // \copydoc GetGrid::GetUserExtents()
+ //
+ virtual void GetUserExtents(
+    std::vector <double> &minu, std::vector <double> &maxu
+ ) const override {
+	minu = _minu;
+	maxu = _maxu;
  }
 
 
- //! \copydoc RegularGrid::GetVBoundingBox()
- //!
+ // \copydoc GetGrid::GetBoundingBox()
+ //
  virtual void GetBoundingBox(
-    const size_t min[3],
-    const size_t max[3],
-    double extents[6]
- ) const;
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	std::vector <double> &minu, std::vector <double> &maxu
+ ) const override;
 
- //! \copydoc RegularGrid::GetEnclosingRegion()
- //!
+ // \copydoc GetGrid::GetEnclosingRegion()
+ //
  virtual void    GetEnclosingRegion(
-	const double minu[3], const double maxu[3], size_t min[3], size_t max[3]
- ) const;
+	const std::vector <double> &minu, const std::vector <double> &maxu,
+	std::vector <size_t> &min, std::vector <size_t> &max
+ ) const override;
 
 
- //! \copydoc RegularGrid::GetUserCoordinates()
- //!
- int GetUserCoordinates(
-	size_t i, size_t j, size_t k, 
-	double *x, double *y, double *z
- ) const;
+ // \copydoc GetGrid::GetUserCoordinates()
+ //
+ virtual void GetUserCoordinates(
+	const std::vector <size_t> &indices,
+	std::vector <double> &coords
+ ) const override;
 
- //! \copydoc RegularGrid::GetIJKIndex()
- //!
- void GetIJKIndex(
-	double x, double y, double z,
-	size_t *i, size_t *j, size_t *k
- ) const;
+ // \copydoc GetGrid::GetIndices()
+ //
+ virtual void GetIndices(
+	const std::vector <double> &coords,
+	std::vector <size_t> &indices
+ ) const override;
 
- //! \copydoc RegularGrid::GetIJKIndexFloor()
+ //! \copydoc Grid::GetIndicesCell
  //!
- void GetIJKIndexFloor(
-	double x, double y, double z,
-	size_t *i, size_t *j, size_t *k
- ) const;
+ virtual bool GetIndicesCell(
+	const std::vector <double> &coords,
+	std::vector <size_t> &indices
+ ) const override;
 
- int Reshape(
-	const size_t min[3],
-	const size_t max[3],
-	const bool periodic[3]
- );
+ // \copydoc GetGrid::InsideGrid()
+ //
+ virtual bool InsideGrid(const std::vector <double> &coords) const override;
 
- //! \copydoc RegularGrid::GetMinCellExtents()
+ //! Returns reference to vector containing X user coordinates
  //!
- virtual void GetMinCellExtents(double *x, double *y, double *z) const;
+ //! Returns reference to vector passed to constructor 
+ //! containing X user coordinates
+ //!
+ const std::vector <double> &GetXCoords() const { return(_xcoords); };
 
- //! Return the user coordinate maps
+ //! Returns reference to vector containing Y user coordinates
  //!
- //! Returns the user coordinate maps used to initialize the constructor.
+ //! Returns reference to vector passed to constructor 
+ //! containing Y user coordinates
  //!
- //! \note The returned vector will be of length zero if the dimension
- //! associated with the vector is not stretched.
+ const std::vector <double> &GetYCoords() const { return(_ycoords); };
+
+ //! Returns reference to vector containing Z user coordinates
  //!
- //! \param [out] Vector of X user coordinates
- //! \param [out] Vector of Y user coordinates
- //! \param [out] Vector of Z user coordinates
+ //! Returns reference to vector passed to constructor 
+ //! containing Z user coordinates
  //!
- void GetUserCoordinateMaps(
-	std::vector <double> &xcoords,
-	std::vector <double> &ycoords,
-	std::vector <double> &zcoords
- ) const {
-	xcoords = _xcoords; ycoords = _ycoords; zcoords = _zcoords;
+ const std::vector <double> &GetZCoords() const { return(_zcoords); };
+
+ class ConstCoordItrSG : public Grid::ConstCoordItrAbstract {
+ public:
+  ConstCoordItrSG(const StretchedGrid *cg, bool begin);
+  ConstCoordItrSG(const ConstCoordItrSG &rhs);
+  
+
+  ConstCoordItrSG();
+  virtual ~ConstCoordItrSG() {}
+
+  virtual void next();
+  virtual ConstCoordType &deref() const {
+	return(_coords);
+  }
+  virtual const void *address() const {return this; };
+
+  virtual bool equal(const void* rhs) const {
+	const ConstCoordItrSG *itrptr = 
+		static_cast<const ConstCoordItrSG *> (rhs);
+
+	return(_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+  }
+
+  virtual std::unique_ptr<ConstCoordItrAbstract> clone() const {
+	return std::unique_ptr<ConstCoordItrAbstract> (new ConstCoordItrSG(*this));
+  };
+
+ private:
+	const StretchedGrid *_sg;
+	size_t _x, _y, _z;
+	std::vector <double> _coords;
  };
 
+ virtual ConstCoordItr ConstCoordBegin() const override {
+	return ConstCoordItr(
+		std::unique_ptr<ConstCoordItrAbstract> (new ConstCoordItrSG(this, true))
+	);
+ }
+ virtual ConstCoordItr ConstCoordEnd() const override {
+	return ConstCoordItr(
+		std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrSG(this, false))
+	);
+ }
+
+protected:
+ virtual float GetValueNearestNeighbor(
+	const std::vector <double> &coords
+ ) const override;
+
+ virtual float GetValueLinear(
+	const std::vector <double> &coords
+ ) const override;
 
 
 private:
- size_t _min[3];
- size_t _max[3];
- double _delta[3];
- double _extents[6];
  std::vector <double> _xcoords;
  std::vector <double> _ycoords;
  std::vector <double> _zcoords;
+ std::vector <double> _minu;
+ std::vector <double> _maxu;
 
- float _GetValueNearestNeighbor(double x, double y, double z) const;
- float _GetValueLinear(double x, double y, double z) const;
- float _GetValueQuadratic(double x, double y, double z) const;
+ void _stretchedGrid(
+	const std::vector <double> &xcoords,
+	const std::vector <double> &ycoords,
+	const std::vector <double> &zcoords
+ );
 
+ void _GetUserExtents(
+	std::vector <double> &minu, std::vector <double> &maxu
+ ) const ;
+
+ int _binarySearchRange(
+	const std::vector <double> &sorted, double x, size_t &i
+ ) const;
+
+ bool _insideGrid(
+	double x, double y, double z,
+	size_t &i, size_t &j, size_t &k,
+	double xwgt[2], double ywgt[2], double zwgt[2]
+ ) const;
+
+ virtual void _getMinCellExtents(std::vector <double> &minCellExtents) const; 
 
 };
 };

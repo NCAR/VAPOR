@@ -294,10 +294,15 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 	std::vector<double> minFullExt, maxFullExt;
 
 	if (_flags & VECTOR) {
+		std::vector<string> varNames = _rParams->GetFieldVariableNames();
+		if (varNames.empty()) return;
+
 		GetVectorExtents(ts, level, minFullExt, maxFullExt);
 	}
 	else {
 		string varName = _rParams->GetVariableName();
+		if (varName.empty()) return;
+
 		int rc = _dataMgr->GetVariableExtents(ts, varName, 
 							level, minFullExt, maxFullExt);
 		if (rc<0) {

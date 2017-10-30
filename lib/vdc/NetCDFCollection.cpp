@@ -620,6 +620,25 @@ bool NetCDFCollection::_GetVariableInfo(
 		}
 
 		varinfo = NetCDFSimple::Variable(varname, dimnames, 0, NC_FLOAT);
+		vector <string> attnames = derivedVar->GetAttNames();
+		for (int i=0; i<attnames.size(); i++) {
+			string s = attnames[i];
+			if (derivedVar->GetAttType(s) == NC_CHAR) {
+				string values;
+				derivedVar->GetAtt(s, values);
+				varinfo.SetAtt(s, values);
+			}
+			else if (derivedVar->GetAttType(s) == NC_INT64) {
+				vector <long> values;
+				derivedVar->GetAtt(s, values);
+				varinfo.SetAtt(s, values);
+			}
+			else if (derivedVar->GetAttType(s) == NC_DOUBLE) {
+				vector <double> values;
+				derivedVar->GetAtt(s, values);
+				varinfo.SetAtt(s, values);
+			}
+		}
 		return(true);
 	}
 
