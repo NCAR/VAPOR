@@ -361,9 +361,6 @@ int	main(int argc, char **argv) {
 
 		for (int i=0; i<datanames.size(); i++) {
 
-if (datanames[i] == "ABSORB") {
-cout << "ABSORB.....\n";
-}
 			DC::DataVar dvar;
 			dccf.GetDataVarInfo(datanames[i], dvar);
 
