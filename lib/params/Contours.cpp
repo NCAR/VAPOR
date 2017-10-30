@@ -5,23 +5,24 @@
 using namespace VAPoR;
 using namespace Wasp;
 
-static ParamsRegistrar<Contours> registrar(Contours::GetClassType());
+static ParamsRegistrar<ContourParams::Contours> 
+	registrar(ContourParams::Contours::GetClassType());
 
-const string Contours::_minTag = "Min";
-const string Contours::_countTag = "Count";
-const string Contours::_spacingTag = "Spacing";
+const string ContourParams::Contours::_minTag = "Min";
+const string ContourParams::Contours::_countTag = "Count";
+const string ContourParams::Contours::_spacingTag = "Spacing";
 
-Contours::Contours(ParamsBase::StateSave* ssave)
+ContourParams::Contours::Contours(ParamsBase::StateSave* ssave)
     : ParamsBase(ssave, Contours::GetClassType()) {}
 
-Contours::Contours(ParamsBase::StateSave* ssave, XmlNode* node)
+ContourParams::Contours::Contours(ParamsBase::StateSave* ssave, XmlNode* node)
     : ParamsBase(ssave, node) {}
 
-Contours::~Contours() {
+ContourParams::Contours::~Contours() {
     MyBase::SetDiagMsg("Contours::~Contours() this=%p", this);
 }
 
-vector<double> Contours::GetIsovalues() const {
+vector<double> ContourParams::Contours::GetIsovalues() const {
     vector<double> vals;
     double min = GetMin();
     int count = GetCount();
@@ -34,7 +35,7 @@ vector<double> Contours::GetIsovalues() const {
     return vals;
 }
 
-void Contours::SetIsovalues(vector<double> vals) {
+void ContourParams::Contours::SetIsovalues(vector<double> vals) {
     double min = vals[0];
     int count = vals.size();
     double spacing;

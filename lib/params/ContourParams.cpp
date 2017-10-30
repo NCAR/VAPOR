@@ -10,7 +10,7 @@ namespace VAPoR{
 // Register class with object factory!!!
 //
 static RenParamsRegistrar<ContourParams> registrar(ContourParams::GetClassType());
-static ParamsRegistrar<Contours> registrar2(Contours::GetClassType());
+//static ParamsRegistrar<Contours> registrar2(Contours::GetClassType());
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
 const string ContourParams::_varsAre3dTag = "VarsAre3D";
@@ -23,6 +23,9 @@ const string ContourParams::_textEnabledTag = "TextEnabled";
 const string ContourParams::_contourMinTag = "ContourMinimum";
 const string ContourParams::_contourSpacingTag = "ContourSpacing";
 const string ContourParams::_lockToTFTag = "LockToTF";
+//const string Contours::_minTag = "Min";
+//const string Contours::_countTag = "Count";
+//const string Contours::_spacingTag = "Spacing";
 
 ContourParams::ContourParams(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave
@@ -110,12 +113,12 @@ void ContourParams::SetIsovalues(string varName, vector<double> vals) {
 	c->SetIsovalues(vals);
 }
 
-Contours* ContourParams::GetContours() {
+ContourParams::Contours* ContourParams::GetContours() {
 	string varName = GetVariableName();
-	Contours* c = (Contours*)_contours->GetParams(varName);
+	ContourParams::Contours* c = (ContourParams::Contours*)_contours->GetParams(varName);
 	if (c == NULL) {
 		MakeNewContours(varName);
-		c = (Contours*)_contours->GetParams(varName);
+		c = (ContourParams::Contours*)_contours->GetParams(varName);
 	}	  
 	return c;
 }
