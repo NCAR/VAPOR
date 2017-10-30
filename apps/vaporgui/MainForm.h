@@ -160,7 +160,9 @@ protected:
  bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+#if 0
  QWidgetAction* createTextSeparator(const QString& text);
+#endif
 
  class ParamsChangeEvent : public QEvent {
  public:

@@ -3,6 +3,7 @@ add_library (vdc SHARED
 	Grid.cpp
 	StructuredGrid.cpp
 	RegularGrid.cpp
+	StretchedGrid.cpp
 	LayeredGrid.cpp
 	CurvilinearGrid.cpp
 	UnstructuredGrid.cpp
