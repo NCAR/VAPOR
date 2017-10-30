@@ -136,7 +136,7 @@ void DefineMaskVars(const DCCF &dccf, VDCNetCDF &vdc)
         int rc = vdc.SetCompressionBlock(mybs, mywname, cratios);
         if (rc < 0) exit(1);
 
-        rc = vdc.DefineDataVar(maskvar, dimnames, dimnames, "", DC::INT8, compress);
+        rc = vdc.DefineDataVar(maskvar, dimnames, vector<string>(), "", DC::INT8, compress);
 
         if (rc < 0) { exit(1); }
     }
@@ -300,7 +300,6 @@ int main(int argc, char **argv)
         if (rc < 0) return (1);
 
         for (int i = 0; i < datanames.size(); i++) {
-            if (datanames[i] == "ABSORB") { cout << "ABSORB.....\n"; }
             DC::DataVar dvar;
             dccf.GetDataVarInfo(datanames[i], dvar);
 
