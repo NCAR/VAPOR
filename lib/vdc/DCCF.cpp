@@ -950,16 +950,6 @@ int DCCF::_InitVerticalCoordinates(
     for (int i = 0; i < dvars.size(); i++) {
         string vertcvar;
 
-        if (dvars[i] == "ABSORB") {
-            cout << "ABSORB......" << endl;
-        }
-        if (dvars[i] == "CMFMC") {
-            cout << "CMFMC......" << endl;
-        }
-        if (dvars[i] == "hyam") {
-            cout << "hyam......" << endl;
-        }
-
         int rc = _get_vertical_coordvar(ncdfc, dvars[i], vertcvar);
         if (rc < 0)
             return (-1);
@@ -1255,10 +1245,6 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc) {
     // For each variable add a member to _dataVarsMap
     //
     for (int i = 0; i < vars.size(); i++) {
-
-        if (vars[i] == "ABSORB") {
-            cout << "ABSORB....\n";
-        }
 
         // variable type must be float or int
         //
