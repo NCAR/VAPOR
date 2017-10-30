@@ -84,6 +84,9 @@
            <property name="spacing">
             <number>0</number>
            </property>
+           <property name="topMargin">
+            <number>15</number>
+           </property>
            <property name="bottomMargin">
             <number>0</number>
            </property>
@@ -317,6 +320,12 @@
        </item>
        <item>
         <widget class="Line" name="line_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>3</verstretch>
+          </sizepolicy>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
