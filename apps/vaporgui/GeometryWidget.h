@@ -50,9 +50,6 @@ private:
 	void connectWidgets();
 	void updateRangeLabels(std::vector<double> minExt,
 							std::vector<double> maxExt);
-	void GetVectorExtents(size_t ts, int level,
-						std::vector<double> &minFullExt,
-						std::vector<double> &maxFullExt);
 	void updateCopyCombo();
 
 	VAPoR::ParamsMgr* _paramsMgr;

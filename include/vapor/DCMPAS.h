@@ -429,6 +429,7 @@ private:
   string _time_dim_name; // Name of time dimension
   bool _is_open;	// Open for reading?
   char *_buf;	// boundary points of lat and lon
+  size_t _buf_size;
   int _fd;
 
  };
