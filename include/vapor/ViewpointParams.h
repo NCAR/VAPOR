@@ -252,13 +252,9 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //!
     //! Access the transform for data set \p dataSetName
     //!
-    //! \retval Returns NULL if \p dataSetName is unknown
+    //! \retval Returns a new transform if one does not exist
     //
-    virtual Transform *GetTransform(string dataSetName) const {
-        return ((Transform *)_transforms->GetParams(dataSetName));
-    }
-
-    void AddDatasetTransform(string datasetName);
+    virtual Transform *GetTransform(string dataSetName);
 
     //! Return list of transform names.
     //!

@@ -813,7 +813,6 @@ const GLvoid *TwoDDataRenderer::_getTexture(
     // See if already in cache
     //
     if (!_texStateDirty(dataMgr) && _sb_texture.GetBuf()) {
-        cout << "_getTexture already cached" << endl;
         return ((const GLvoid *)_sb_texture.GetBuf());
     }
     _texStateClear();
