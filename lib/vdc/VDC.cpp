@@ -517,6 +517,7 @@ void VDC::_DefineMesh(
 int VDC::_DefineDataVar(
     string varname, vector<string> dim_names, vector<string> coord_vars,
     string units, XType type, bool compressed, double mv, string maskvar) {
+
     if (!_defineMode) {
         SetErrMsg("Not in define mode");
         return (-1);
@@ -1387,7 +1388,11 @@ bool VDC::_valid_dims(
         bool match = false;
         for (int j = 0; j < dims1.size(); j++) {
 
-            if (dims0[i].GetName() == dims1[j].GetName()) {
+            // Different names ok as long has have same length
+            //
+            //if (dims0[i].GetName() == dims1[j].GetName())
+
+            if (dims0[i].GetLength() == dims1[j].GetLength()) {
                 match = true;
 
                 // Must have same blocking or no blocking
@@ -1555,7 +1560,7 @@ bool VDC::_ValidDefineDataVar(
     if (coord_vars.size() > 0) {
         map<string, CoordVar>::const_iterator itr;
         itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
-        if (itr != _coordVars.end()) {
+        if (itr != _coordVars.end() && itr->second.GetAxis() == 3) {
             dim_names.pop_back();
             dimensions.pop_back();
             coord_vars.pop_back();
