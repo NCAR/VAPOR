@@ -26,7 +26,6 @@
 
 using namespace VAPoR;
 
-const string StatisticsParams::_dataSourceTag = "DataSource";
 const string StatisticsParams::_minTSTag = "MinTS";
 const string StatisticsParams::_maxTSTag = "MaxTS";
 const string StatisticsParams::_autoUpdateTag = "AutoUpdate";
