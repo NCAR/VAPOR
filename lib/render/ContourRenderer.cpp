@@ -177,8 +177,8 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr) {
                     pointb[2] = heightGrid->GetValue(pointb[0], pointb[1]);
                 }
             } else {
-                pointa[2] = 500.f;
-                pointb[2] = 500.f;
+                pointa[2] = _getDefaultZ(dataMgr, timestep);
+                pointb[2] = _getDefaultZ(dataMgr, timestep);
             }
             if (!dontDraw) {
                 glVertex3dv(pointa);
