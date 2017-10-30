@@ -95,12 +95,15 @@ void RenderHolder::newRenderer()
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
 
     vector<string> renderClasses = _controlExec->GetAllRenderClasses();
+
+#ifndef HELLO_RENDERER
     for (vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++) {
         if (*it == "Hello") {
             renderClasses.erase(it);
             break;
         }
     }
+#endif
 
     // Launch a dialog to select a renderer type, visualizer, name
     // Then insert a horizontal line with text and checkbox.
@@ -179,6 +182,9 @@ void RenderHolder::deleteRenderer()
     int    row = tableWidget->currentRow();
     getRow(row, renderInst, renderClass, dataSetName);
 
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    paramsMgr->BeginSaveStateGroup("Delete renderer");
+
     int rc = _controlExec->ActivateRender(activeViz, dataSetName, renderClass, renderInst, false);
     assert(rc == 0);
 
@@ -186,12 +192,15 @@ void RenderHolder::deleteRenderer()
 
     // Update will rebuild the TableWidget with the updated state
     //
+    p->SetActiveRenderer(activeViz, "", "");
     Update();
 
     // Make the renderer in the first row the active renderer
     //
     getRow(0, renderInst, renderClass, dataSetName);
     p->SetActiveRenderer(activeViz, renderClass, renderInst);
+
+    paramsMgr->EndSaveStateGroup();
 }
 
 void RenderHolder::checkboxChanged(int state)
@@ -460,6 +469,11 @@ void RenderHolder::Update()
         p->SetActiveRenderer(activeViz, "", "");
         SetCurrentIndex(-1);
         stackedWidget->hide();
+        deleteButton->setEnabled(false);
+        dupCombo->setEnabled(false);
+    } else {
+        deleteButton->setEnabled(true);
+        dupCombo->setEnabled(true);
     }
 
     tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);

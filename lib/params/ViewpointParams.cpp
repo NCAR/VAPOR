@@ -162,12 +162,13 @@ void ViewpointParams::_init()
 #endif
 }
 
-void ViewpointParams::AddDatasetTransform(string datasetName)
+Transform *ViewpointParams::GetTransform(string dataSetName)
 {
-    // Add new transform to our ParamsContainer, _transforms
-    //
-    Transform newTransform(_ssave);
-    _transforms->Insert(&newTransform, datasetName);
+    if (_transforms->GetParams(dataSetName) == NULL) {
+        Transform newTransform(_ssave);
+        _transforms->Insert(&newTransform, dataSetName);
+    }
+    return (Transform *)_transforms->GetParams(dataSetName);
 }
 
 double ViewpointParams::getLightDirection(int lightNum, int dir) const
