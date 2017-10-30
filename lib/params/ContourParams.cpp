@@ -10,6 +10,7 @@ namespace VAPoR{
 // Register class with object factory!!!
 //
 static RenParamsRegistrar<ContourParams> registrar(ContourParams::GetClassType());
+static ParamsRegistrar<Contours> registrar2(Contours::GetClassType());
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
 const string ContourParams::_varsAre3dTag = "VarsAre3D";
@@ -208,4 +209,70 @@ void ContourParams::SetContourSpacing(double spacing) {
 	Contours* c = GetContours();
 	c->SetSpacing(spacing);
 }
+
+void ContourParams::GetLineColor(int lineNum, float color[3]) {
+    GetConstantColor(color);
+    string cmVar = GetColorMapVariableName();
+    if ((cmVar == "") || (cmVar == "Default")) {
+        string varName = GetVariableName();
+        TransferFunction* tf = 0;
+        tf = (TransferFunction*)GetMapperFunc(varName);
+        if (! tf) {
+            tf = MakeTransferFunc(varName);
+        }   
+        assert(tf);
+
+        vector<double> vals = GetIsovalues(varName);
+        double val = vals[lineNum];
+
+        tf->rgbValue(val, color);
+    }   
+    else {
+        GetConstantColor(color);
+    }   
+}
+
+void ContourParams::SetLockToTF(bool lock) {
+    string l = "false";
+    if (lock) {
+        l = "true";
+    }   
+    SetValueString(_lockToTFTag, "Lock settings to TF", l); 
+}
+
+bool ContourParams::GetLockToTF() const {
+    if (GetValueString(_lockToTFTag, "true")=="true") {
+        return true;
+    }   
+    else {
+        return false;
+    }   
+}
+
+bool ContourParams::GetTextEnabled() const {
+    if (GetValueString(_textEnabledTag, "false")=="false") {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+void ContourParams::SetTFLock(bool lock) {
+    string l = "false";
+    if (lock)
+        l = "true";
+    SetValueString(_lockToTFTag, "Lock contours to transfer function"   
+        " bounds", l
+    );
+}
+
+bool ContourParams::GetTFLock() {
+    string l = GetValueString(_lockToTFTag, "true");
+    if (l=="false") return false;
+    return true;
+}
+
+
+
 }; // end namespace VAPoR
