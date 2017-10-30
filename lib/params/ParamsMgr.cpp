@@ -1045,13 +1045,12 @@ bool ParamsMgr::undoRedoHelper() {
 
 bool ParamsMgr::Undo() {
 
-    (void)_ssave.Undo();
+    bool status = _ssave.Undo();
 
-    bool status = undoRedoHelper();
     if (!status)
         return (status);
 
-    return (true);
+    return (undoRedoHelper());
 }
 
 bool ParamsMgr::Redo() {
