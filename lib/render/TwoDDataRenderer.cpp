@@ -710,10 +710,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 {
     // See if already in cache
     //
-    if (!_texStateDirty(dataMgr) && _sb_texture.GetBuf()) {
-        cout << "_getTexture already cached" << endl;
-        return ((const GLvoid *)_sb_texture.GetBuf());
-    }
+    if (!_texStateDirty(dataMgr) && _sb_texture.GetBuf()) { return ((const GLvoid *)_sb_texture.GetBuf()); }
     _texStateClear();
 
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();

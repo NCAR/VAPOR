@@ -34,6 +34,8 @@ double ContourAppearanceSubtab::GetContourMinOrMax(string minOrMax)
     //
     // double min = _cParams->GetContourMin();
     string varname = _cParams->GetVariableName();
+    if (varname.empty()) return (0.0);
+
     double spacing, maxSpacing;
     if (locked) {
         // Update contour minimum combo
@@ -131,7 +133,9 @@ void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams *cParams)
     _paramsMgr->BeginSaveStateGroup("Initialize ContourAppearanceSubtab");
 
     _cParams = cParams;
-    string                 varname = _cParams->GetVariableName();
+    string varname = _cParams->GetVariableName();
+    if (varname.empty()) return;
+
     VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
     double                 lower = mf->getMinMapValue();
     double                 upper = mf->getMaxMapValue();
