@@ -21,7 +21,9 @@ public:
     {
         setupUi(this);
         _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::VECTOR | VariablesWidget::HGT | VariablesWidget::COLOR),
-                                 (VariablesWidget::DimFlags)(VariablesWidget::TWOD | VariablesWidget::THREED));
+                                 //(VariablesWidget::DimFlags)(VariablesWidget::TWOD | VariablesWidget::THREED));
+                                 (VariablesWidget::DimFlags)(VariablesWidget::TWOD));
+        //(VariablesWidget::DimFlags)(VariablesWidget::THREED));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
