@@ -20,6 +20,7 @@
 #endif
 #include "vapor/glutil.h" // Must be included first!!!
 #include "Statistics.h"
+#include "GUIStateParams.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -42,13 +43,13 @@ Statistics::Statistics(QWidget* parent) : QDialog(parent), Ui_StatsWindow()
 {
     _errMsg = NULL;
     _controlExec = NULL;
-    _dataStatus = NULL;
-    _rGrid = NULL;
     
     setupUi(this);
     setWindowTitle("Statistics");
     //adjustTables();
     //VariablesTable->installEventFilter(this); //for responding to keyboard?
+
+    Connect();
 }
 
 Statistics::~Statistics() 
@@ -61,20 +62,47 @@ Statistics::~Statistics()
 }
 
 
-bool Statistics::Update( VAPoR::StatisticsParams* params )
+
+bool Statistics::Update() 
 {
+cout << "update called" << endl;
+    // Initialize pointers
+    VAPoR::DataStatus* dataStatus = _controlExec->getDataStatus();
+    std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
+    assert( dmNames.size() > 0 );
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string currentDatasetName = guiParams->GetStatsDatasetName();
+    assert( currentDatasetName != "" );
+    VAPoR::DataMgr* currentDmgr = dataStatus->GetDataMgr( currentDatasetName );
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>(_controlExec->GetParamsMgr()->
+                      GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
+
+    // Update DataMgrCombo 
+    DataMgrCombo->clear();
+    int currentIdx = -1;
+    for (int i=0; i<dmNames.size(); i++) 
+    {
+        QString item = QString::fromStdString(dmNames[i]);
+        DataMgrCombo->addItem(item);
+        if( dmNames[i] == currentDatasetName )
+            currentIdx = i;
+    }
+    assert( currentIdx != -1 );
+    DataMgrCombo->setCurrentIndex( currentIdx );
+
     // Update Timesteps
-    int minTS = params->GetMinTS();
+    int minTS = statsParams->GetMinTS();
     MinTimestepSpinbox->blockSignals(true);
     MinTimestepSpinbox->setValue( minTS );
     MinTimestepSpinbox->blockSignals(false);
-    int maxTS = params->GetMaxTS();
+    int maxTS = statsParams->GetMaxTS();
     MaxTimestepSpinbox->blockSignals(true);
     MaxTimestepSpinbox->setValue( maxTS );
     MaxTimestepSpinbox->blockSignals(false);
 
     // Update auto-update checkbox
-    bool autoUpdate = params->GetAutoUpdate();
+    bool autoUpdate = statsParams->GetAutoUpdate();
     UpdateCheckbox->blockSignals(true);
     if (autoUpdate) 
         UpdateCheckbox->setCheckState(Qt::Checked);
@@ -83,8 +111,8 @@ bool Statistics::Update( VAPoR::StatisticsParams* params )
     UpdateCheckbox->blockSignals(false);
 
     // Update available variables
-    std::vector<std::string> availVars   = _dmgr->GetDataVarNames(3, true);
-    std::vector<std::string> availVars2D = _dmgr->GetDataVarNames(2, true);
+    std::vector<std::string> availVars   = currentDmgr->GetDataVarNames(3, true);
+    std::vector<std::string> availVars2D = currentDmgr->GetDataVarNames(2, true);
     for( int i = 0; i < availVars2D.size(); i++ )
         availVars.push_back( availVars2D[i] );
     sort( availVars.begin(), availVars.end());
@@ -92,30 +120,33 @@ bool Statistics::Update( VAPoR::StatisticsParams* params )
     {
         NewVarCombo->addItem(QString::fromStdString(*it));
     }
+    NewVarCombo->setCurrentIndex( 0 );
+    RemoveVarCombo->setCurrentIndex( 0 );
 
     // Update statistics to calculate
-    if( params->GetMinEnabled() )
-        removeStatCombo->addItem( QString::fromAscii("Min") );
+    if( statsParams->GetMinEnabled() )
+        RemoveStatCombo->addItem( QString::fromAscii("Min") );
     else
-        addStatCombo->addItem( QString::fromAscii("Min") );
-    if( params->GetMaxEnabled() )
-        removeStatCombo->addItem( QString::fromAscii("Max") );
+        AddStatCombo->addItem( QString::fromAscii("Min") );
+    if( statsParams->GetMaxEnabled() )
+        RemoveStatCombo->addItem( QString::fromAscii("Max") );
     else
-        addStatCombo->addItem( QString::fromAscii("Max") );
-    if( params->GetMeanEnabled() )
-        removeStatCombo->addItem( QString::fromAscii("Mean") );
+        AddStatCombo->addItem( QString::fromAscii("Max") );
+    if( statsParams->GetMeanEnabled() )
+        RemoveStatCombo->addItem( QString::fromAscii("Mean") );
     else
-        addStatCombo->addItem( QString::fromAscii("Mean") );
-    if( params->GetMedianEnabled() )
-        removeStatCombo->addItem( QString::fromAscii("Median") );
+        AddStatCombo->addItem( QString::fromAscii("Mean") );
+    if( statsParams->GetMedianEnabled() )
+        RemoveStatCombo->addItem( QString::fromAscii("Median") );
     else
-        addStatCombo->addItem( QString::fromAscii("Median") );
-    if( params->GetStdDevEnabled() )
-        removeStatCombo->addItem( QString::fromAscii("StdDev") );
+        AddStatCombo->addItem( QString::fromAscii("Median") );
+    if( statsParams->GetStdDevEnabled() )
+        RemoveStatCombo->addItem( QString::fromAscii("StdDev") );
     else
-        addStatCombo->addItem( QString::fromAscii("StdDev") );
+        AddStatCombo->addItem( QString::fromAscii("StdDev") );
+    AddStatCombo->setCurrentIndex(0);
+    RemoveStatCombo->setCurrentIndex(0);
 
-    return 0;
 
 
     return true;
@@ -171,45 +202,27 @@ int Statistics::initControlExec(ControlExec* ce)
         return -1;
     }
 
-    _dataStatus = _controlExec->getDataStatus();
-    vector<string> dmNames = _dataStatus->GetDataMgrNames();
-    assert( dmNames.size() > 0 );
-    _dmgr = _dataStatus->GetDataMgr(dmNames[0]);
-
-    // Update dataMgrCombo 
-    dataMgrCombo->clear();
-    for (int i=0; i<dmNames.size(); i++) 
+    // Store the actuve dataset name 
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    if( dsName == "" )      // not initialized yet
     {
-        QString item = QString::fromStdString(dmNames[i]);
-        dataMgrCombo->addItem(item);
+        VAPoR::DataStatus* dataStatus = _controlExec->getDataStatus();
+        std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
+        assert( dmNames.size() > 0 );
+        guiParams->SetStatsDatasetName( dmNames[0] );
     }
-    dataMgrCombo->setCurrentIndex( 0 );
+    dsName = guiParams->GetStatsDatasetName();
 
-    StatisticsParams* params = dynamic_cast<StatisticsParams*>
-            (_controlExec->GetParamsMgr()->GetAppRenderParams(dmNames[0], StatisticsParams::GetClassType()));
-
-    this->Update( params );
+    //this->Update( params );
 
     return 0;
 }
 
-#if 0
-bool Statistics::InitializeGUIWidgets()
+bool Statistics::Connect()
 {
-    dataMgrCombo->clear();
-    for (int i=0; i<dmNames.size(); i++) 
-    {
-        QString item = QString::fromStdString(dmNames[i]);
-        dataMgrCombo->addItem(item);
-    }
-    dataMgrCombo->setCurrentIndex( 0 );
-
-}
-#endif
-
-int Statistics::Initialize()
-{
-cout << "initialize called" << endl;
+    connect( NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)) );
 #if 0
     // This is a bitmask to define which statistics to calculate/display.
     // If a statistic variable is set to 0x00 or undefined, it will not
@@ -286,13 +299,79 @@ cout << "initialize called" << endl;
     connect(ExportButton, SIGNAL(clicked()), this, SLOT(exportText()));
     //connect(regionSelectorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(rangeComboChanged()));
     //connect(copyActiveRegionButton, SIGNAL(pressed()), this, SLOT(copyActiveRegion()));
-    connect(addStatCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(addStatistic(int)));
-    connect(removeStatCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeStatistic(int)));
+    connect(AddStatCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(addStatistic(int)));
+    connect(RemoveStatCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeStatistic(int)));
     
     _initialized = 1;
     
 #endif
-    return 0;
+    return true;
+}
+
+void Statistics::_newVarChanged( int index )
+{
+    if (index == 0) 
+        return;
+
+    // Add this variable to "Remove a Variable" list
+    RemoveVarCombo->addItem( NewVarCombo->itemText(index) );
+    std::string varName = NewVarCombo->itemText(index).toStdString();
+
+    // Remove this variable from "Add a Variable" list
+    NewVarCombo->blockSignals( true );
+    NewVarCombo->setCurrentIndex( 0 );
+    NewVarCombo->blockSignals( false );
+    NewVarCombo->removeItem( index );
+
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* params = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    // Add variable to parameter database
+    //
+    std::vector<std::string> existingVars = params->GetAuxVariableNames();
+    for( int i = 0; i < existingVars.size(); i++ )
+        cout << existingVars[i] << endl;
+    existingVars.push_back( varName );
+    params->SetAuxVariableNames( existingVars );
+    existingVars = params->GetAuxVariableNames();
+    for( int i = 0; i < existingVars.size(); i++ )
+        cout << existingVars[i] << endl;
+
+
+#if 0
+    vector<string> varNames = _params->GetVarNames();
+    varNames.push_back(varName);
+    _params->SetVarNames(varNames);
+
+    _stats[varName] = _statistics();
+
+    int rowCount = VariablesTable->rowCount();
+    VariablesTable->insertRow(rowCount);
+    VariablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
+
+    QHeaderView *verticalHeader = VariablesTable->verticalHeader();
+    verticalHeader->setResizeMode(QHeaderView::Fixed);
+    verticalHeader->setDefaultSectionSize(20);
+
+    int colCount = VariablesTable->columnCount();
+    for (int j=0; j<colCount; j++){
+        QTableWidgetItem* twi = new QTableWidgetItem("");
+        twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        VariablesTable->setItem(rowCount,j,twi);
+    }
+
+    NewVarCombo->setCurrentIndex(0);
+
+    RemoveVarCombo->addItem(QString::fromStdString(varName));
+    VariablesTable->resizeRowsToContents();
+
+    if (_autoUpdate) {
+            updateStats();
+    }
+    else (makeItRed());
+#endif
 }
 
 
