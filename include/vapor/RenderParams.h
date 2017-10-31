@@ -376,6 +376,8 @@ class PARAMS_API RenderParams : public ParamsBase {
     //!
     virtual bool usingVariable(const std::string &varname) = 0;
 
+    void _initBox();
+
   protected:
     DataMgr *_dataMgr;
 
@@ -408,7 +410,7 @@ class PARAMS_API RenderParams : public ParamsBase {
     static const string _currentTimestepTag;
 
     void _init();
-    void _initBox();
+    //void _initBox();
 };
 
 //////////////////////////////////////////////////////////////////////////
