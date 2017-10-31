@@ -4,6 +4,7 @@
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);
 	_geometryWidget->Reinit((GeometryWidget::Flags)
+	//((GeometryWidget::VECTOR) | (GeometryWidget::TWOD)));
 	((GeometryWidget::VECTOR) | (GeometryWidget::THREED)));
 
 	_xDimCombo = new Combo(xDimEdit, xDimSlider, true);
