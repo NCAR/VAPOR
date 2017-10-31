@@ -21,6 +21,7 @@
 #include <qwidget.h>
 #include <QFileDialog>
 #include "vapor/RenderParams.h"
+#include "vapor/DataMgrUtils.h"
 #include "MainForm.h"
 #include "GeometryWidget.h"
 
@@ -142,52 +143,6 @@ void GeometryWidget::updateRangeLabels(
     zMinMaxGroupBox->setTitle(zTitle);
 }
 
-void GeometryWidget::GetVectorExtents(size_t ts, int level,
-                                      std::vector<double> &minFullExt,
-                                      std::vector<double> &maxFullExt) {
-
-    std::vector<string> varNames = _rParams->GetFieldVariableNames();
-    std::vector<double> minVarExt, maxVarExt;
-
-    // Calculate the union of all field variable extents
-    // by iterating over the variables one at a time, indexed by i
-    //
-    for (int i = 0; i < varNames.size(); i++) {
-        if (varNames[i] != "") {
-            int rc = _dataMgr->GetVariableExtents(ts, varNames[i],
-                                                  level, minFullExt, maxFullExt);
-            if (rc < 0) {
-                MyBase::SetErrMsg("Error: DataMgr could not return valid values"
-                                  " from GetVariableExtents() for variable %s",
-                                  varNames[i].c_str());
-            }
-
-            // If we are on the extents of the first
-            // variable, just apply those extents as
-            // our initial condition...
-            //
-            if (i == 0) {
-                minVarExt = minFullExt;
-                maxVarExt = maxFullExt;
-            } else {
-                for (int j = 0; j < 3; j++) {
-                    // ...Otherwise run our comparisons
-                    //
-                    if (minVarExt[j] < minFullExt[j]) {
-                        minFullExt[j] = minVarExt[j];
-                    }
-                    if (maxVarExt[j] > maxFullExt[j]) {
-                        maxFullExt[j] = maxVarExt[j];
-                    }
-                }
-            }
-        } else {
-            minFullExt.push_back(0.f);
-            maxFullExt.push_back(0.f);
-        }
-    }
-}
-
 void GeometryWidget::updateCopyCombo() {
     copyCombo->clear();
 
@@ -289,9 +244,17 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     std::vector<double> minFullExt, maxFullExt;
 
     if (_flags & VECTOR) {
-        GetVectorExtents(ts, level, minFullExt, maxFullExt);
+        std::vector<string> varNames = _rParams->GetFieldVariableNames();
+        if (varNames.empty())
+            return;
+
+        vector<int> axes;
+        DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExt, maxFullExt, axes);
     } else {
         string varName = _rParams->GetVariableName();
+        if (varName.empty())
+            return;
+
         int rc = _dataMgr->GetVariableExtents(ts, varName,
                                               level, minFullExt, maxFullExt);
         if (rc < 0) {
