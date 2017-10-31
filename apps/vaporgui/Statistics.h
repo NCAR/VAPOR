@@ -54,8 +54,7 @@ public:
     ~Statistics();
     int  initControlExec(VAPoR::ControlExec *ce);
     void showMe();
-    int  Initialize();    // connecting slots ?
-    bool Update(VAPoR::StatisticsParams *sParams);
+    bool Update();
 
 protected:
     // Keeps the current variables shown and their statistical values.
@@ -86,9 +85,12 @@ protected:
                                                 // 4: stddev
         int _getVarIdx(std::string);            // -1: not exist
                                                 // >=0: a valid index
-    };                                          // finish ValidStats
+    };                                          // finish class ValidStats
+
+    bool Connect();    // connect slots
 
 private slots:
+    void _newVarChanged(int);
     /*
     void restoreExtents();
     void minTSChanged();
@@ -110,12 +112,11 @@ private slots:
     */
 
 private:
-    sErrMsg *_errMsg;
-
-    // VAPoR::StatisticsParams* _params; // don't hold it!
+    ValidStats          _validStats;
+    sErrMsg *           _errMsg;
     VAPoR::ControlExec *_controlExec;
-    VAPoR::DataStatus * _dataStatus;
-    VAPoR::DataMgr *    _dmgr;
-    VAPoR::Grid *       _rGrid;
+    // VAPoR::DataStatus*  _dataStatus;
+    // VAPoR::DataMgr*     _dmgr;
+    // VAPoR::Grid*        _rGrid;
 };
 #endif
