@@ -195,6 +195,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="AddStatCombo">
+               <property name="duplicatesEnabled">
+                <bool>false</bool>
+               </property>
                <item>
                 <property name="text">
                  <string>Add a Statistic</string>
@@ -204,6 +207,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="RemoveStatCombo">
+               <property name="duplicatesEnabled">
+                <bool>true</bool>
+               </property>
                <item>
                 <property name="text">
                  <string>Remove a Statistic</string>
