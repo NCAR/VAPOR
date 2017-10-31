@@ -71,6 +71,7 @@ protected:
     public:
         bool AddVariable( std::string );
         //bool removeVariable( std::string );
+        size_t GetVariableCount();
         
         bool Add3MStats( std::string, const double* );   // Min, Max, Mean
         bool AddMedian(  std::string, double );
@@ -82,6 +83,9 @@ protected:
         bool GetStddev( std::string, double* );
 
         bool InvalidAll();
+
+        std::string GetDatasetName();
+        bool SetDatasetName( std::string& );
         
     private:
         std::vector<std::string>    _variables;
@@ -92,6 +96,7 @@ protected:
                                                 // 4: stddev
         int _getVarIdx( std::string );           // -1: not exist
                                                 // >=0: a valid index
+        std::string _datasetName;
     };  // finish class ValidStats
 
     bool Connect();   // connect slots 
@@ -126,6 +131,8 @@ private:
     //VAPoR::DataStatus*  _dataStatus;
     //VAPoR::DataMgr*     _dmgr;
     //VAPoR::Grid*        _rGrid; 
+
+    void _updateVarTable();
 
 };
 #endif

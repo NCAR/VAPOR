@@ -67,8 +67,6 @@ bool Statistics::Update()
 {
     // Initialize pointers
     VAPoR::DataStatus* dataStatus = _controlExec->getDataStatus();
-    std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
-    assert( dmNames.size() > 0 );
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
                     (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
     std::string currentDatasetName = guiParams->GetStatsDatasetName();
@@ -78,6 +76,8 @@ bool Statistics::Update()
                       GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
 
     // Update DataMgrCombo 
+    std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
+    assert( dmNames.size() > 0 );
     DataMgrCombo->clear();
     int currentIdx = -1;
     for (int i=0; i<dmNames.size(); i++) 
@@ -176,7 +176,25 @@ bool Statistics::Update()
     AddStatCombo->setCurrentIndex(0);
     RemoveStatCombo->setCurrentIndex(0);
 
-    // Update Statistics table
+    this->_updateVarTable();
+
+    return true;
+}
+
+void Statistics::_updateVarTable()
+{
+    // Initialize pointers
+    VAPoR::DataStatus* dataStatus = _controlExec->getDataStatus();
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string currentDatasetName = guiParams->GetStatsDatasetName();
+    assert( currentDatasetName != "" );
+    VAPoR::DataMgr* currentDmgr = dataStatus->GetDataMgr( currentDatasetName );
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>(_controlExec->GetParamsMgr()->
+                      GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
+
+    // Update Statistics table header
+    VariablesTable->clear();
     QStringList header;
     header << "Variable";
     if( statsParams->GetMinEnabled() )
@@ -193,40 +211,78 @@ bool Statistics::Update()
     VariablesTable->setHorizontalHeaderLabels( header );
     VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
+    // Update cells
+    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
+    assert( enabledVars.size() == _validStats.GetVariableCount() );
+    VariablesTable->setRowCount( enabledVars.size() );
+    for( int row = 0; row < enabledVars.size(); row++ )
+    {
+        VariablesTable->setItem( row, 0, 
+            new QTableWidgetItem( QString::fromStdString(enabledVars[row]) ));
 
-    return true;
-#if 0
-    _params = sParams;
-
-    vector<double> minExts, maxExts;
-    minExts = _params->GetMinExtents();
-    maxExts = _params->GetMaxExtents();
-
-    _xRange->blockSignals(true);
-    _yRange->blockSignals(true);
-    _zRange->blockSignals(true);
-    _xRange->setUserMin(minExts[0]);
-    _yRange->setUserMin(minExts[1]);
-    _zRange->setUserMin(minExts[2]);
-    _xRange->setUserMax(maxExts[0]);
-    _yRange->setUserMax(maxExts[1]);
-    _zRange->setUserMax(maxExts[2]);
-    _xRange->blockSignals(false);
-    _yRange->blockSignals(false);
-    _zRange->blockSignals(false);
-
-    _cRatio = _params->GetCRatio();
-    CRatioCombo->blockSignals(true);
-    CRatioCombo->setCurrentIndex(_cRatio);
-    CRatioCombo->blockSignals(false);
-    _refLevel = _params->GetRefinement();
-    RefCombo->blockSignals(true);
-    RefCombo->setCurrentIndex(_refLevel);
-    RefCombo->blockSignals(false);
-
-    updateStatisticSelection();
-    updateVariables();
-#endif
+        double m3[3], median, stddev;
+        _validStats.Get3MStats( enabledVars[row], m3 );
+        _validStats.GetMedian(  enabledVars[row], &median );
+        _validStats.GetStddev(  enabledVars[row], &stddev );
+        
+        QBrush brush(QColor(255,0,0));
+        int column = 1;
+        if( statsParams->GetMinEnabled() )
+        {
+            if( !std::isnan( m3[0] ) )
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
+            else
+            {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground( brush );
+            }
+            column++;
+        }
+        if( statsParams->GetMaxEnabled() )
+        {
+            if( !std::isnan( m3[1] ) )
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1])));
+            else
+            {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground( brush );
+            }
+            column++;
+        }
+        if( statsParams->GetMeanEnabled() )
+        {
+            if( !std::isnan( m3[2] ) )
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2])));
+            else
+            {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground( brush );
+            }
+            column++;
+        }
+        if( statsParams->GetMedianEnabled() )
+        {
+            if( !std::isnan( median ) )
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median)));
+            else
+            {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground( brush );
+            }
+            column++;
+        }
+        if( statsParams->GetStdDevEnabled() )
+        {
+            if( !std::isnan( stddev ) )
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev)));
+            else
+            {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground( brush );
+            }
+            column++;
+        }
+    }
 }
 
 void Statistics::showMe()
@@ -247,7 +303,7 @@ int Statistics::initControlExec(ControlExec* ce)
         return -1;
     }
 
-    // Store the actuve dataset name 
+    // Store the active dataset name 
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
                     (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
     std::string dsName = guiParams->GetStatsDatasetName();
@@ -259,6 +315,7 @@ int Statistics::initControlExec(ControlExec* ce)
         guiParams->SetStatsDatasetName( dmNames[0] );
     }
     dsName = guiParams->GetStatsDatasetName();
+    _validStats.SetDatasetName( dsName );
 
     //this->Update( params );
 
@@ -375,12 +432,16 @@ void Statistics::_newVarChanged( int index )
     NewVarCombo->blockSignals( false );
     NewVarCombo->removeItem( index );
 
-    // Add a variable to parameter 
+    // Add this variable to parameter 
     std::vector<std::string> vars = statsParams->GetAuxVariableNames();
     vars.push_back( varName );
     statsParams->SetAuxVariableNames( vars );
-    std::vector<std::string> rt = statsParams->GetAuxVariableNames();
 
+    // Add this variable to _validStats
+    _validStats.AddVariable( varName );
+
+    // Update VariableTable
+    this->_updateVarTable();
 
 #if 0
     vector<string> varNames = _params->GetVarNames();
@@ -591,3 +652,24 @@ bool Statistics::ValidStats::InvalidAll()
     return true;
 }
 
+std::string Statistics::ValidStats::GetDatasetName()
+{
+    return _datasetName;
+}
+
+bool Statistics::ValidStats::SetDatasetName( std::string& dsName )
+{
+    if( dsName != _datasetName )
+    {
+        _datasetName = dsName;
+        _variables.clear();
+        for( int i = 0; i < 5; i++ )
+            _values[i].clear();
+    }
+    return true;
+}
+
+size_t Statistics::ValidStats::GetVariableCount()
+{
+    return _variables.size();
+}
