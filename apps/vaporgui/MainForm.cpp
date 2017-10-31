@@ -1665,11 +1665,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     //
     if (event->type() == ParamsChangeEvent::type()) {
         ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-        if (_stats) {
-            StatisticsParams *params;
-            params = (StatisticsParams *)paramsMgr->GetParams("StatisticsParams");
-            _stats->Update(params);
-        }
+        if (_stats) { _stats->Update(); }
         if (_plot) {
             PlotParams *params;
             params = (PlotParams *)paramsMgr->GetParams("PlotParams");
