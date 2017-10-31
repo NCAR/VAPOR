@@ -63,7 +63,7 @@ ContourRenderer::ContourRenderer(const ParamsMgr* pm,
 	_componentLength.clear();
 	_endEdge.clear();
 	_numIsovalsCached = 0;
-	_gridSize = 0;
+	_sampleSize = 0;
 	_objectNums.clear();
 
 }
@@ -133,15 +133,29 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 	int ts = GetCurrentTimestep();
 	float boxexts[6];
 	double userExts[6];
+	
 	if (mapToTerrain) {
 		// See bottom of file!
-		cout << "map to terrain not implemented" << endl;
+		heightGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod, boxMin, boxMax);
+		//Obtain the height corresponding to point1 and point2
+		//float z1 = heightGrid->GetValue(point1[0]+userExts[0],point1[1]+userExts[1],0.);
+		//float z2 = heightGrid->GetValue(point2[0]+userExts[0],point2[1]+userExts[1],0.);
+		//point1[2] = z1+boxexts[2]-userExts[2];
+		//point2[2] = z2+boxexts[2]-userExts[2];
 	}
 
 	glBegin(GL_LINES);
 
-	vector<double> minExt, maxExt;
-	cParams->GetBox()->GetExtents(minExt, maxExt);
+	vector<double> boxMinExt, boxMaxExt;
+	cParams->GetBox()->GetExtents(boxMinExt, boxMaxExt);
+
+	string var = cParams->GetVariableName();
+	int level = cParams->GetRefinementLevel();
+	int lod = cParams->GetCompressionLevel();
+	vector<double> varDomainMin, varDomainMax;
+	dataMgr->GetVariableExtents(ts, var, 
+		level, varDomainMin, varDomainMax);
+	
 	double pointa[3],pointb[3]; //points in cache
 	pointa[2]=pointb[2] = 0.;
 
@@ -163,18 +177,30 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 			}
 
 			// Scale the cached points {-1:1} to the user extents
-			double xSpan = maxExt[0] - minExt[0];
-			pointa[0] = (1+pointa[0])/2.f * xSpan + minExt[0];
-			pointb[0] = (1+pointb[0])/2.f * xSpan + minExt[0];
+			double xSpan = boxMaxExt[0] - boxMinExt[0];
+			//double xSpan = varDomainMax[0] - varDomainMin[0];
+			//pointa[0] = (1+pointa[0])/2.f * xSpan + varDomainMin[0];//boxMinExt[0];
+			//pointb[0] = (1+pointb[0])/2.f * xSpan + varDomainMin[0];//boxMinExt[0];
+			pointa[0] = (1+pointa[0])/2.f * xSpan + boxMinExt[0];
+			pointb[0] = (1+pointb[0])/2.f * xSpan + boxMinExt[0];
+			//cout << "Point A/B " << pointa[0] << " " << pointb[0] << endl;
 
-			double ySpan = maxExt[1] - minExt[1];
-			pointa[1] = (1+pointa[1])/2.f * ySpan + minExt[1];
-			pointb[1] = (1+pointb[1])/2.f * ySpan + minExt[1];
 
-			double zSpan = maxExt[2] - minExt[2];
-			pointa[2] = 500.f;//(1+pointa[2]) * zSpan;
-			pointb[2] = 500.f;//(1+pointb[2]) * zSpan;
-			
+			double ySpan = boxMaxExt[1] - boxMinExt[1];
+			pointa[1] = (1+pointa[1])/2.f * ySpan + boxMinExt[1];
+			pointb[1] = (1+pointb[1])/2.f * ySpan + boxMinExt[1];
+
+			if (mapToTerrain) {
+				heightGrid
+				pointa[2] = heightGrid->GetValue(pointa[0], pointa[1]);
+				pointb[2] = heightGrid->GetValue(pointb[0], pointb[1]);
+			}
+			else {
+				double zSpan = boxMaxExt[2] - boxMinExt[2];
+				pointa[2] = 500.f;//(1+pointa[2]) * zSpan;
+				pointb[2] = 500.f;//(1+pointb[2]) * zSpan;
+			}
+
 			glVertex3dv(pointa);
 			glVertex3dv(pointb);
 		}
@@ -221,15 +247,24 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	bool is3D = cParams->VariablesAre3D();
 	string hgtVar = cParams->GetHeightVariableName();
 
-	varGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod);
-	varGrid->SetInterpolationOrder(1);
+//	varGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod);
+//	varGrid->SetInterpolationOrder(1);
 
 	vector<double> boxMin, boxMax;
 	cParams->GetBox()->GetExtents(boxMin, boxMax);
 
-	//_gridSize = 1000;
-	_gridSize = 25;
-	float* dataVals = new float[_gridSize*_gridSize];
+	vector<double> domainMin, domainMax;
+	dataMgr->GetVariableExtents(ts, var, level, domainMin, domainMax);
+
+	varGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod, boxMin, boxMax);
+	varGrid->SetInterpolationOrder(1);
+
+	//_sampleSize = 1000;
+	//_sampleSize = 25;
+	_sampleSize = 200;
+	float domainFraction = (boxMax[0]-boxMin[0])/(domainMax[0]-domainMin[0]);
+	_sampleSize = (int)(_sampleSize*domainFraction);
+	float* dataVals = new float[_sampleSize*_sampleSize];
 
 	//Set up to transform from isoline plane into volume:
 	float a[2],b[2],constValue[2];
@@ -242,36 +277,38 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	//vector<double> dataCoords(3);
 	double dataCoords[3];
 
-	double iIncrement = (boxMax[0] - boxMin[0]) / (float)_gridSize;
-	double jIncrement = (boxMax[1] - boxMin[1]) / (float)_gridSize;
+	double iIncrement = (boxMax[0] - boxMin[0]) / (float)_sampleSize;
+	double jIncrement = (boxMax[1] - boxMin[1]) / (float)_sampleSize;
+//	double iIncrement = (domainMax[0] - domainMin[0])/ (float)_sampleSize;
+//	double jIncrement = (domainMax[1] - domainMin[1])/ (float)_sampleSize;
 
 	vector<double> minu, maxu;
 	varGrid->GetUserExtents(minu, maxu);
 
-	boxMin[0] = minu[0];
-	boxMax[0] = maxu[0];
-	boxMin[1] = minu[1];
-	boxMax[1] = maxu[1];
+//	boxMin[0] = minu[0];
+//	boxMax[0] = maxu[0];
+//	boxMin[1] = minu[1];
+//	boxMax[1] = maxu[1];
 
 	float mv = varGrid->GetMissingValue();
-	for (int i = 0; i<_gridSize; i++){
-//		planeCoords[0] = -1. + 2.*(double)i/(_gridSize-1.);
-		for (int j = 0; j<_gridSize; j++){
-			dataVals[i+j*_gridSize] = mv;  
+	for (int i = 0; i<_sampleSize; i++){
+//		planeCoords[0] = -1. + 2.*(double)i/(_sampleSize-1.);
+		for (int j = 0; j<_sampleSize; j++){
+			dataVals[i+j*_sampleSize] = mv;  
 
 //			int orientation = cParams->GetBox()->GetOrientation();
 			dataCoords[0] = i*iIncrement + boxMin[0];
 			dataCoords[1] = j*jIncrement + boxMin[1];
 			dataCoords[2] = (varMax[2] - varMin[2])/2.f;
 
-//			planeCoords[1] = -1. + 2.*(double)j/(_gridSize-1.);
+//			planeCoords[1] = -1. + 2.*(double)j/(_sampleSize-1.);
 			//2D transform is a*x + b
 //			dataCoords[0] = a[0]*planeCoords[0] + b[0];
 //			dataCoords[1] = a[1]*planeCoords[1] + b[1];
 //			dataCoords[2] = 0.;
 			//double val = varGrid->GetValue(dataCoords);
 			double val = varGrid->GetValue(dataCoords[0], dataCoords[1], dataCoords[2]);
-			dataVals[i+j*_gridSize] = val;
+			dataVals[i+j*_sampleSize] = val;
 			//if (j/500==0)
 				//cout << var << " " << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << " " << val << endl;
 			//find the coords that the texture maps to
@@ -281,7 +318,7 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 //				dataCoords[k] += minExts[k]; //Convert to user coordinates.
 //			}
 //			if(dataOK) { //find the coordinate in the data array
-//				dataVals[i+j*_gridSize] = isolineGrid[0]->GetValue(dataCoords[0],dataCoords[1],dataCoords[2]);
+//				dataVals[i+j*_sampleSize] = isolineGrid[0]->GetValue(dataCoords[0],dataCoords[1],dataCoords[2]);
 //			}
 			//cout << "coords " << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << endl;
 		}
@@ -291,7 +328,7 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 //	if (varname.size()>1)dataMgr->UnlockGrid(isolineGrid);
 	//Loop over each isovalue and cell, and classify the cell as to which edges are crossed by the isoline.
 	//when there is an isoline crossing, a line segment is saved in the cache, defined by the two endpoints.
-	const vector<double>& isovals = cParams->GetIsovalues();
+	const vector<double>& isovals = cParams->GetIsovalues(var);
 	
 	//Clear the textObjects (if they exist)
 //	TextObject::clearTextObjects(this);
@@ -347,17 +384,17 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float* dataVals){
 	// These remap as follows: 3->2; 5->5; 6->3; 9->1; 10->6; 12->4; 15-> 7 or 8
 	int intersectionCode = 0;
 	//check for crossing between (i,j) and (i+1,j)
-	if((dataVals[i+_gridSize*j] < isoval &&  dataVals[i+1+_gridSize*j] >= isoval) ||
-			(dataVals[i+_gridSize*j] >= isoval &&  dataVals[i+1+_gridSize*j] < isoval)) intersectionCode+=1;
+	if((dataVals[i+_sampleSize*j] < isoval &&  dataVals[i+1+_sampleSize*j] >= isoval) ||
+			(dataVals[i+_sampleSize*j] >= isoval &&  dataVals[i+1+_sampleSize*j] < isoval)) intersectionCode+=1;
 	//check for crossing between (i+1,j+1) and (i+1,j)
-	if((dataVals[i+1+_gridSize*j] < isoval &&  dataVals[i+1+_gridSize*(j+1)] >= isoval) ||
-			(dataVals[i+1+_gridSize*j] >= isoval &&  dataVals[i+1+_gridSize*(j+1)] < isoval)) intersectionCode+=2;
+	if((dataVals[i+1+_sampleSize*j] < isoval &&  dataVals[i+1+_sampleSize*(j+1)] >= isoval) ||
+			(dataVals[i+1+_sampleSize*j] >= isoval &&  dataVals[i+1+_sampleSize*(j+1)] < isoval)) intersectionCode+=2;
 	//check for crossing between (i,j+1) and (i+1,j+1)
-	if((dataVals[i+_gridSize*(j+1)] < isoval &&  dataVals[i+1+_gridSize*(j+1)] >= isoval) ||
-			(dataVals[i+_gridSize*(j+1)] >= isoval &&  dataVals[i+1+_gridSize*(j+1)] < isoval)) intersectionCode+=4;
+	if((dataVals[i+_sampleSize*(j+1)] < isoval &&  dataVals[i+1+_sampleSize*(j+1)] >= isoval) ||
+			(dataVals[i+_sampleSize*(j+1)] >= isoval &&  dataVals[i+1+_sampleSize*(j+1)] < isoval)) intersectionCode+=4;
 	//check for crossing between (i,j+1) and (i,j)
-	if((dataVals[i+_gridSize*j] < isoval &&  dataVals[i+_gridSize*(j+1)] >= isoval) ||
-			(dataVals[i+_gridSize*j] >= isoval &&  dataVals[i+_gridSize*(j+1)] < isoval)) intersectionCode+=8;
+	if((dataVals[i+_sampleSize*j] < isoval &&  dataVals[i+_sampleSize*(j+1)] >= isoval) ||
+			(dataVals[i+_sampleSize*j] >= isoval &&  dataVals[i+_sampleSize*(j+1)] < isoval)) intersectionCode+=8;
 
 	int ecode;
 	float avgvalue;
@@ -379,9 +416,9 @@ int ContourRenderer::edgeCode(int i, int j, float isoval, float* dataVals){
 			ecode = 4; break;
 		case(15):  //disambiguate 7 and 8, based on whether or not average is on same side of isovalue as (i,j) vertex.
 				//average is used as best approximation of value at center of cell.
-			avgvalue = 0.25*(dataVals[i+_gridSize*j]+dataVals[i+_gridSize*(j+1)]+dataVals[i+1+_gridSize*(j+1)]+ dataVals[i+1+_gridSize*j]);
-			if( ((dataVals[i+_gridSize*j] < isoval) && (avgvalue < isoval)) ||
-				((dataVals[i+_gridSize*j] > isoval) && (avgvalue > isoval)) ) {
+			avgvalue = 0.25*(dataVals[i+_sampleSize*j]+dataVals[i+_sampleSize*(j+1)]+dataVals[i+1+_sampleSize*(j+1)]+ dataVals[i+1+_sampleSize*j]);
+			if( ((dataVals[i+_sampleSize*j] < isoval) && (avgvalue < isoval)) ||
+				((dataVals[i+_sampleSize*j] > isoval) && (avgvalue > isoval)) ) {
 					//average agrees with (i,j), so use segments that connect 0-1 and 1-2 edge [case 2] as well as 2-3 and 3-0 [case 4]
 				ecode = 7;
 			} else //use segments that connect edges 1-2 and 2-3 as well as 3-0 and 0-1 [case 1 and case 3]
@@ -463,7 +500,8 @@ void ContourRenderer::traverseCurves(int iso){
 	int timestep = (int)GetCurrentTimestep();
 	//string isoText = std::to_string((long double)(cParams->GetIsovalues()[iso]));
 	string isoText;
-	doubleToString((cParams->GetIsovalues()[iso]), isoText, cParams->GetNumDigits());
+	string varName = cParams->GetVariableName();
+	doubleToString((cParams->GetIsovalues(varName)[iso]), isoText, cParams->GetNumDigits());
 	
 	//Repeat the following until no more edges are found:
 	//Find an unmarked edge.  Mark it.
@@ -600,7 +638,7 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso){
 	//If the interval is shorter than the component and larger than 0.1 times the component, then just one annotation is generated
 	float A = 3.;
 	
-	float g = (float)_gridSize;
+	float g = (float)_sampleSize;
 	if (g < 2*A) g = 2*A;
 	int annotSpace = (2- g/A) + (g/A -1.f)/cParams->GetTextDensity();
 	int numAnnotations = 0;
@@ -710,7 +748,8 @@ void ContourRenderer::attachAnnotation(int numComponents, int iso){
 
 void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 	ContourParams* cParams = (ContourParams*)GetActiveParams();
-	const vector<double>& isovals = cParams->GetIsovalues();
+	string varName = cParams->GetVariableName();
+	const vector<double>& isovals = cParams->GetIsovalues(varName);
 	if(cParams->GetTextDensity() > 0. && cParams->GetTextEnabled()) { //create a textObject to hold annotation of this isovalue
 		//BLACK background!
 		float bgc[4] = {0,0,0,1.};
@@ -723,7 +762,7 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 		vec.push_back("fonts");
 		vec.push_back("Vera.ttf");
 		string isoText;
-		doubleToString((cParams->GetIsovalues()[iso]), isoText, cParams->GetNumDigits());
+		doubleToString((cParams->GetIsovalues(varName)[iso]), isoText, cParams->GetNumDigits());
 //		int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR","share",vec).c_str(),(int)cParams->GetTextSize(),lineColor, bgc,(int)cParams->GetTextLabelType(), isoText);
 //		_objectNums[iso] = objNum;
 	}
@@ -739,11 +778,11 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 	int segIndex;
 	size_t timestep = GetCurrentTimestep();
 	//loop over cells (identified by lower-left vertices
-	for (int i = 0; i<_gridSize-1; i++){
-		for (int j = 0; j<_gridSize-1; j++){
+	for (int i = 0; i<_sampleSize-1; i++){
+		for (int j = 0; j<_sampleSize-1; j++){
 			//Determine which case is associated with cell cornered at i,j
-			if (0) {//(dataVals[i+j*_gridSize] == mv) || (dataVals[i+1+j*_gridSize] == mv) ||
-				//(dataVals[i+(j+1)*_gridSize] == mv) || (dataVals[i+1+(j+1)*_gridSize] == mv)) {
+			if (0) {//(dataVals[i+j*_sampleSize] == mv) || (dataVals[i+1+j*_sampleSize] == mv) ||
+				//(dataVals[i+(j+1)*_sampleSize] == mv) || (dataVals[i+1+(j+1)*_sampleSize] == mv)) {
 				cellCase = 0;
 			}
 			else
@@ -755,8 +794,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					break;
 				case(1): //lines intersect 0-3 [point 1] and 0-1 [point 2]
 					{
-					y2 = -1. + 2.*(double)(j)/(_gridSize-1.);
-					x1 = -1. + 2.*(double)(i)/(_gridSize-1.);
+					y2 = -1. + 2.*(double)(j)/(_sampleSize-1.);
+					x1 = -1. + 2.*(double)(i)/(_sampleSize-1.);
 						
 					x2 = interp_i(i,j,isoval, dataVals);
 					y1 = interp_j(i,j,isoval, dataVals);
@@ -769,8 +808,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					break;
 				case(2): //lines intersect between vertices 0-1 [1] and vertices 1-2 [2]
 					{
-					y1 = -1. + 2.*(double)j/(_gridSize-1.);
-					x2 = -1. + 2.*(double)(i+1)/(_gridSize-1.);
+					y1 = -1. + 2.*(double)j/(_sampleSize-1.);
+					x2 = -1. + 2.*(double)(i+1)/(_sampleSize-1.);
 					x1 = interp_i(i,j,isoval,dataVals);
 					y2 = interp_j(i+1,j,isoval,dataVals);
 					//line segment connects horizontal edge i,j with vertical edge (i+1,j)
@@ -782,8 +821,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					break;
 				case(3): //lines intersect 1-2 [1] and 2-3 [2]
 					{
-					y2 = -1. + 2.*(double)(j+1)/(_gridSize-1.);
-					x1 = -1. + 2.*(double)(i+1)/(_gridSize-1.);
+					y2 = -1. + 2.*(double)(j+1)/(_sampleSize-1.);
+					x1 = -1. + 2.*(double)(i+1)/(_sampleSize-1.);
 					x2 = interp_i(i,j+1,isoval,dataVals);
 					y1 = interp_j(i+1,j,isoval,dataVals);
 					//line segment connects horizontal edge i,j+1 with vertical edge (i+1,j)
@@ -795,8 +834,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					break;
 				case(4): //lines intersect 2-3 [1] and 0-3 [2]
 					{
-					y1 = -1. + 2.*(double)(j+1)/(_gridSize-1.);
-					x2 = -1. + 2.*(double)(i)/(_gridSize-1.);
+					y1 = -1. + 2.*(double)(j+1)/(_sampleSize-1.);
+					x2 = -1. + 2.*(double)(i)/(_sampleSize-1.);
 					x1 = interp_i(i,j+1,isoval,dataVals);
 					y2 = interp_j(i,j,isoval,dataVals);
 					//line segment connects horizontal edge i,j+1 with vertical edge (i,j)
@@ -809,8 +848,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					
 				case(5): //lines intersect 0-1 [1] and 2-3 [2]
 					{
-					y2 = -1. + 2.*(double)(j+1)/(_gridSize-1.);
-					y1 = -1. + 2.*(double)(j)/(_gridSize-1.);
+					y2 = -1. + 2.*(double)(j+1)/(_sampleSize-1.);
+					y1 = -1. + 2.*(double)(j)/(_sampleSize-1.);
 					x1 = interp_i(i,j,isoval,dataVals);
 					x2 = interp_i(i,j+1,isoval,dataVals);
 					//line segment connects horizontal edge i,j with horizontal edge (i,j+1)
@@ -822,8 +861,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					break;
 				case(6): //line intersect 1-2 [1] and 0-3 [2]
 					{
-					x1 = -1. + 2.*(double)(i+1)/(_gridSize-1.);
-					x2 = -1. + 2.*(double)(i)/(_gridSize-1.);
+					x1 = -1. + 2.*(double)(i+1)/(_sampleSize-1.);
+					x2 = -1. + 2.*(double)(i)/(_sampleSize-1.);
 					y1 = interp_j(i+1,j,isoval,dataVals);
 					y2 = interp_j(i,j,isoval,dataVals);
 					//line segment connects vertical edge i+1,j with vertical edge (i,j)
@@ -836,8 +875,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 				case(7): //both cases 2 and 4
 					//lines intersect between vertices 0-1 [1] and vertices 1-2 [2]
 					{
-					y1 = -1. + 2.*(double)j/(_gridSize-1.);
-					x2 = -1. + 2.*(double)(i+1)/(_gridSize-1.);
+					y1 = -1. + 2.*(double)j/(_sampleSize-1.);
+					x2 = -1. + 2.*(double)(i+1)/(_sampleSize-1.);
 					x1 = interp_i(i,j,isoval,dataVals);
 					y2 = interp_j(i+1,j,isoval,dataVals);
 					//line segment connects horizontal edge i,j with vertical edge (i+1,j)
@@ -846,8 +885,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					segIndex = addLineSegment(timestep,iso,x1,y1,x2,y2);
 					addEdges(segIndex,edge1,edge2);
 					//lines intersect 2-3 [1] and 0-3 [2]
-					y1 = -1. + 2.*(double)(j+1)/(_gridSize-1.);
-					x2 = -1. + 2.*(double)(i)/(_gridSize-1.);
+					y1 = -1. + 2.*(double)(j+1)/(_sampleSize-1.);
+					x2 = -1. + 2.*(double)(i)/(_sampleSize-1.);
 					x1 = interp_i(i,j+1,isoval,dataVals);
 					y2 = interp_j(i,j,isoval,dataVals);
 					//line segment connects horizontal edge i,j+1 with vertical edge (i,j)
@@ -860,8 +899,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 				case(8):  //both cases 1 and 3
 					//lines intersect 0-3 [point 1] and 0-1 [point 2]
 					{
-					y2 = -1. + 2.*(double)(j)/(_gridSize-1.);
-					x1 = -1. + 2.*(double)(i)/(_gridSize-1.);
+					y2 = -1. + 2.*(double)(j)/(_sampleSize-1.);
+					x1 = -1. + 2.*(double)(i)/(_sampleSize-1.);
 					x2 = interp_i(i,j,isoval, dataVals);
 					y1 = interp_j(i,j,isoval, dataVals);
 					//line segment connects horizontal edge i,j with vertical edge (i,j)
@@ -870,8 +909,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					segIndex = addLineSegment(timestep,iso,x1,y1,x2,y2);
 					addEdges(segIndex,edge1,edge2);
 					//lines intersect 1-2 [1] and 2-3 [2]
-					y2 = -1. + 2.*(double)(j+1)/(_gridSize-1.);
-					x1 = -1. + 2.*(double)(i+1)/(_gridSize-1.);
+					y2 = -1. + 2.*(double)(j+1)/(_sampleSize-1.);
+					x1 = -1. + 2.*(double)(i+1)/(_sampleSize-1.);
 					x2 = interp_i(i,j+1,isoval,dataVals);
 					y1 = interp_j(i+1,j,isoval,dataVals);
 					//line segment connects horizontal edge i,j+1 with vertical edge (i+1,j)
@@ -908,20 +947,24 @@ bool ContourRenderer::cacheIsValid(int timestep){
 	if (thisKey->refLevel != cParams->GetRefinementLevel()) return false;
 	if (thisKey->textDensity != cParams->GetTextDensity()) return false;
 	if (thisKey->textEnabled != cParams->GetTextEnabled()) return false;
-	vector<double> ivals = cParams->GetIsovalues();
+	string varName = cParams->GetVariableName();
+	vector<double> ivals = cParams->GetIsovalues(varName);
 	if (ivals.size() != thisKey->isovals.size()) return false;
 	for (int i = 0; i< ivals.size(); i++) {
 		if (ivals[i] != thisKey->isovals[i]) return false;
 	}
 	if (thisKey->is3D != cParams->VariablesAre3D()) return false;
-//	Box* bx = cParams->GetBox();
-//	vector<double> exts = bx->GetLocalExtents();
+	Box* bx = cParams->GetBox();
+	vector<double> minExt, maxExt;
+	bx->GetExtents(minExt, maxExt);
 //	vector<double> angls = bx->GetAngles();
-//	for (int i = 0; i<3; i++){
-//		if (thisKey->extents[i] != exts[i]) return false;
-//		if (thisKey->extents[i+3] != exts[i+3]) return false;
+
+	int dimSize = minExt.size();
+	for (int i = 0; i<minExt.size(); i++){
+		if (thisKey->extents[i] != minExt[i]) return false;
+		if (thisKey->extents[i+minExt.size()] != maxExt[i]) return false;
 //		if (thisKey->angles[i] != angls[i]) return false;
-//	}
+	}
 	return true;
 }
 void ContourRenderer::updateCacheKey(int timestep){
@@ -935,11 +978,23 @@ void ContourRenderer::updateCacheKey(int timestep){
 	thisKey->refLevel = cParams->GetRefinementLevel(); 
 	thisKey->textDensity = cParams->GetTextDensity();
 	thisKey->textEnabled = cParams->GetTextEnabled();
-	thisKey->isovals = cParams->GetIsovalues();
+	string varName = cParams->GetVariableName();
+	thisKey->isovals = cParams->GetIsovalues(varName);
 	thisKey->is3D = cParams->VariablesAre3D();
 	Box* bx = cParams->GetBox();
 	thisKey->angles = bx->GetAngles();
-//	thisKey->extents = bx->GetLocalExtents();
+
+	vector<double> minExt, maxExt, extents;
+	bx->GetExtents(minExt, maxExt);
+	
+	int dimSize = minExt.size();
+	for (int i=0; i<minExt.size(); i++){
+		extents.push_back(minExt[i]);
+	}
+	for (int i=0; i<maxExt.size(); i++) {
+		extents.push_back(maxExt[i]);
+	}
+	thisKey->extents = extents;
 
 	cacheKeys[timestep] = thisKey;
 }
