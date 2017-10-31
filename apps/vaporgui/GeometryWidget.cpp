@@ -354,7 +354,5 @@ void GeometryWidget::setRange(double min, double max) {
     minExt[dimension] = min;
     maxExt[dimension] = max;
 
-    cout << "Setting Box Extents " << box << " " << minExt[0] << " " << minExt[1] << endl;
-    cout << "Setting Box Extents " << box << " " << maxExt[0] << " " << maxExt[1] << endl;
     box->SetExtents(minExt, maxExt);
 }
