@@ -36,6 +36,7 @@ const string GUIStateParams::m_imageSavePathTag= "ImageSavePathTag";
 const string GUIStateParams::m_pythonPathTag= "PythonPathTag";
 const string GUIStateParams::m_flowPathTag= "FlowPathTag";
 const string GUIStateParams::m_tfPathTag= "TFPathTag";
+const string GUIStateParams::m_statsDatasetNameTag = "StatsDatasetNameTag";
 
 //
 // Register class with object factory!!!
@@ -283,3 +284,12 @@ void GUIStateParams::ActiveRenderer::GetActiveRenderer(
 	renderInst = v[1];
 }
 
+std::string GUIStateParams::GetStatsDatasetName() const
+{
+    return GetValueString(m_statsDatasetNameTag, "");
+}
+
+void GUIStateParams::SetStatsDatasetName(std::string name)
+{
+    SetValueString(m_statsDatasetNameTag, "Name of the active data set in Statistics", name);
+}
