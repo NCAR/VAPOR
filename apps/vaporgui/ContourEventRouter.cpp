@@ -92,7 +92,6 @@ void ContourEventRouter::_initializeTab() {
 
 	_appearance->Initialize(rParams);
 
-	cout << "ContourEventRouter::_initializeTab() : override param defaults here" << endl;
 	rParams->SetVariables3D(false);
 }
 
