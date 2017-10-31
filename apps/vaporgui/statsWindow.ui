@@ -65,6 +65,9 @@
              <height>120</height>
             </size>
            </property>
+           <attribute name="horizontalHeaderVisible">
+            <bool>true</bool>
+           </attribute>
            <attribute name="horizontalHeaderDefaultSectionSize">
             <number>129</number>
            </attribute>
@@ -75,6 +78,9 @@
             <bool>false</bool>
            </attribute>
            <attribute name="horizontalHeaderStretchLastSection">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
           </widget>
