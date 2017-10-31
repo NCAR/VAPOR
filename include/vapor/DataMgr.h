@@ -6,6 +6,7 @@
 #include <vapor/DC.h>
 #include <vapor/MyBase.h>
 #include <vapor/RegularGrid.h>
+#include <vapor/StretchedGrid.h>
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
 #include <vapor/UnstructuredGrid2D.h>
@@ -847,6 +848,14 @@ private:
     const std::vector <size_t> &bmax
  ) const;
 
+ VAPoR::StretchedGrid *_make_grid_stretched(
+    const std::vector <size_t> &dims,
+    const std::vector <float *> &blkvec,
+    const std::vector <size_t> &bs,
+    const std::vector <size_t> &bmin,
+    const std::vector <size_t> &bmax
+ ) const;
+
  VAPoR::LayeredGrid *_make_grid_layered(
     const std::vector <size_t> &dims,
     const std::vector <float *> &blkvec,
@@ -911,12 +920,15 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
  );
 
  enum GridType {
-	UNDEFINED = 0, REGULAR, LAYERED, CURVILINEAR, UNSTRUC_2D, UNSTRUC_LAYERED
+	UNDEFINED = 0, REGULAR, STRETCHED, LAYERED, 
+	CURVILINEAR, UNSTRUC_2D, UNSTRUC_LAYERED
  };
  GridType _get_grid_type(
 	const DC::DataVar &var,
 	const vector <DC::CoordVar> &cvarsinfo
  ) const;
+
+ GridType _get_grid_type(string varname) const;
 
  int _find_bounding_grid(
     size_t ts, string varname, int level, int lod,

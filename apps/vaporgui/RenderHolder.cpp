@@ -104,7 +104,7 @@ void RenderHolder::newRenderer() {
 
 	vector <string> renderClasses = _controlExec->GetAllRenderClasses();
 
-#ifdef HELLO_RENDERER
+#ifndef HELLO_RENDERER
     for( vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++ )
     {
         if( *it == "Hello" )
