@@ -70,7 +70,7 @@ protected:
     {
     public:
         bool AddVariable( std::string );
-        //bool removeVariable( std::string );
+        bool RemoveVariable( std::string );
         size_t GetVariableCount();
         
         bool Add3MStats( std::string, const double* );   // Min, Max, Mean
@@ -94,7 +94,7 @@ protected:
                                                 // 2: mean
                                                 // 3: median
                                                 // 4: stddev
-        int _getVarIdx( std::string );           // -1: not exist
+        int _getVarIdx( std::string );          // -1: not exist
                                                 // >=0: a valid index
         std::string _datasetName;
     };  // finish class ValidStats
@@ -103,6 +103,7 @@ protected:
 
 private slots:
     void _newVarChanged( int );
+    void _removeVarChanged( int );
     /*
     void restoreExtents();
     void minTSChanged();
