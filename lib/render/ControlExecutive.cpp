@@ -222,7 +222,6 @@ int ControlExec::ActivateRender(
     RenderParams *rp = ren->GetActiveParams();
     assert(rp);
 
-    cout << "ControlExec setting " << renderName << " to " << on << endl;
     rp->SetEnabled(on);
 
     _paramsMgr->EndSaveStateGroup();
