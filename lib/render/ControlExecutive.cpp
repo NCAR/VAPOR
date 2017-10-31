@@ -287,6 +287,16 @@ int ControlExec::ActivateRender(
 void ControlExec::RemoveRenderer(
     string winName, string dataSetName, string renderType, string renderName) {
 
+    // No-op if tuple of winName, dataSetName, renderType, and
+    // renderName is unknown
+    //
+    string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
+
+    RenderParams *rParams = _paramsMgr->GetRenderParams(
+        winName, dataSetName, paramsType, renderName);
+    if (!rParams)
+        return;
+
     Visualizer *v = getVisualizer(winName);
     if (!v)
         return;
@@ -298,8 +308,6 @@ void ControlExec::RemoveRenderer(
     v->RemoveRenderer(ren);
 
     delete ren;
-
-    string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 
     _paramsMgr->RemoveRenderParamsInstance(
         winName, dataSetName, paramsType, renderName);
@@ -445,7 +453,30 @@ int ControlExec::OpenData(
 
 void ControlExec::CloseData(string dataSetName) {
 
+    if (!_dataStatus->GetDataMgr(dataSetName))
+        return;
+
     _dataStatus->Close(dataSetName);
+
+    // Remove any renderers associated with this data set
+    //
+    vector<string> winNames = GetVisualizerNames();
+    for (int i = 0; i < winNames.size(); i++) {
+        vector<string> renderTypes = GetRenderClassNames(winNames[i]);
+        for (int j = 0; j < renderTypes.size(); j++) {
+            vector<string> renderNames = GetRenderInstances(
+                winNames[i], renderTypes[j]);
+            for (int k = 0; k < renderNames.size(); k++) {
+
+                // This is a no-op if the tuple of window, data set,
+                // render type, and render instance does not exist
+                //
+                RemoveRenderer(
+                    winNames[i], dataSetName, renderTypes[j], renderNames[k]);
+            }
+        }
+    }
+
     _paramsMgr->RemoveDataMgr(dataSetName);
 }
 
