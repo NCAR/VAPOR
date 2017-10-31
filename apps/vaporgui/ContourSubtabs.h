@@ -24,7 +24,8 @@ public:
 		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
 			(VariablesWidget::SCALAR | VariablesWidget::HGT),
 			(VariablesWidget::DimFlags)
-			(VariablesWidget::THREED | VariablesWidget::TWOD));
+			//(VariablesWidget::THREED | VariablesWidget::TWOD));
+			(VariablesWidget::TWOD));
 	}
 
 	void Update(
@@ -52,8 +53,9 @@ public:
 	void Initialize(VAPoR::ContourParams* cParams);
 
 private:
-	void SetIsovalues(); 
-	double GetContourMinOrMax(bool minOrMax);
+	double GetContourMinOrMax(string minOrMax);
+	void enableSliders();
+	void disableSliders();
 
 	VAPoR::ContourParams* _cParams;
 	VAPoR::DataMgr* _dataMgr;
@@ -65,6 +67,7 @@ private:
 
 
 private slots:
+	void SetContourValues(); 
 	void MappingChanged() {
 		cout << "mapping changed!" << endl;
 	}
