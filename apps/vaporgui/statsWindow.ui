@@ -159,6 +159,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="NewVarCombo">
+               <property name="insertPolicy">
+                <enum>QComboBox::InsertAlphabetically</enum>
+               </property>
                <item>
                 <property name="text">
                  <string>Add a Variable</string>
@@ -168,6 +171,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="RemoveVarCombo">
+               <property name="insertPolicy">
+                <enum>QComboBox::InsertAlphabetically</enum>
+               </property>
                <item>
                 <property name="text">
                  <string>Remove a Variable</string>
@@ -201,6 +207,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="AddStatCombo">
+               <property name="insertPolicy">
+                <enum>QComboBox::InsertAlphabetically</enum>
+               </property>
                <property name="duplicatesEnabled">
                 <bool>false</bool>
                </property>
@@ -213,6 +222,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="RemoveStatCombo">
+               <property name="insertPolicy">
+                <enum>QComboBox::InsertAlphabetically</enum>
+               </property>
                <property name="duplicatesEnabled">
                 <bool>true</bool>
                </property>
