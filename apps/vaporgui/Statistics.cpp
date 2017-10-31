@@ -151,6 +151,23 @@ bool Statistics::Update() {
     AddStatCombo->setCurrentIndex(0);
     RemoveStatCombo->setCurrentIndex(0);
 
+    // Update Statistics table
+    QStringList header;
+    header << "Variable";
+    if (statsParams->GetMinEnabled())
+        header << "Min";
+    if (statsParams->GetMaxEnabled())
+        header << "Max";
+    if (statsParams->GetMeanEnabled())
+        header << "Mean";
+    if (statsParams->GetMedianEnabled())
+        header << "Median";
+    if (statsParams->GetStdDevEnabled())
+        header << "StdDev";
+    VariablesTable->setColumnCount(header.size());
+    VariablesTable->setHorizontalHeaderLabels(header);
+    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
     return true;
 #if 0
     _params = sParams;
