@@ -29,7 +29,7 @@ public:
 
     virtual ~ContourParams();
 
-    Contours *GetContours();
+    Contours *GetCurrentContours();
 
     void MakeNewContours(string varName);
 
@@ -76,51 +76,17 @@ public:
 
     void SetContourSpacing(double val);
 
-    void GetLineColor(int lineNum, float color[3]); /* {
-    GetConstantColor(color);
-    string cmVar = GetColorMapVariableName();
-    if ((cmVar == "") || (cmVar == "Default")) {
-        string varName = GetVariableName();
-        TransferFunction* tf = 0;
-        tf = (TransferFunction*)GetMapperFunc(varName);
-        if (! tf) {
-            tf = MakeTransferFunc(varName);
-        }
-        assert(tf);
-
-        //vector<double> vals = GetValueDoubleVec(_contoursTag);
-        vector<double> vals = GetIsovalues(varName);
-        double val = vals[lineNum];
-
-        tf->rgbValue(val, color);
-    }
-    else {
-        GetConstantColor(color);
-    }
- }*/
+    void GetLineColor(int lineNum, float color[3]);
 
     void SetLineColor(vector<double> vec) { SetValueDoubleVec(_lineColorTag, "Line color", vec); }
 
-    void SetLockToTF(bool lock); /* {
-    string l = "false";
-    if (lock) {
-        l = "true";
-    }
-    SetValueString(_lockToTFTag, "Lock settings to TF", l);
- }*/
+    void SetLockToTF(bool lock);
 
-    bool GetLockToTF() const; /* {
-    if (GetValueString(_lockToTFTag, "true")=="true") {
-        return true;
-    }
-    else {
-        return false;
-    }
- }*/
+    bool GetLockToTF() const;
 
-    vector<double> GetIsovalues(string varName);
+    vector<double> GetContourValues(string varName);
 
-    void SetIsovalues(string varName, vector<double> vals);
+    void SetContourValues(string varName, vector<double> vals);
 
     // Get static string identifier for this params class
     //
@@ -132,7 +98,7 @@ public:
         return (int)val;
     }
 
-    void SetNumDigits(int digits) { SetValueDouble(_numDigitsTag, "Number of digits in isovalue annotation", digits); }
+    void SetNumDigits(int digits) { SetValueDouble(_numDigitsTag, "Number of digits in contour annotation", digits); }
 
     int GetTextDensity() const
     {
@@ -140,31 +106,11 @@ public:
         return (int)val;
     }
 
-    void SetTextDensity(int density) { SetValueDouble(_textDensityTag, "Density of isovalue annotations", density); }
+    void SetTextDensity(int density) { SetValueDouble(_textDensityTag, "Density of contour annotations", density); }
 
-    bool GetTextEnabled() const; /* {
-    if (GetValueString(_textEnabledTag, "false")=="false") {
-        return false;
-    }
-    else {
-        return true;
-    }
- }*/
-
-    void SetTFLock(bool lock); /*{
-    string l = "false";
-    if (lock)
-        l = "true";
-    SetValueString(_lockToTFTag, "Lock contours to transfer function"
-        " bounds", l
-    );
- }*/
-
-    bool GetTFLock(); /* {
-    string l = GetValueString(_lockToTFTag, "true");
-    if (l=="false") return false;
-    return true;
- }*/
+    bool GetTextEnabled() const;
+    void SetTFLock(bool lock);
+    bool GetTFLock();
 
 private:
     void                _init();
@@ -181,8 +127,6 @@ private:
     static const string _lockToTFTag;
     ParamsContainer *   _contours;
 
-    //}; //End of Class ContourParams
-
 public:
     class PARAMS_API Contours : public ParamsBase {
     public:
@@ -192,28 +136,24 @@ public:
 
         virtual ~Contours();
 
-        vector<double> GetIsovalues() const;
+        vector<double> GetContourValues() const
+        {
+            vector<double> defaultv(7, 0.);
+            if (!_node->HasElementDouble(_valuesTag)) return defaultv;
 
-        void SetIsovalues(vector<double> vals);
+            vector<double> val = GetValueDoubleVec(_valuesTag);
+            return val;
+        }
 
-        double GetMin() const { return GetValueDouble(_minTag, 0.); }
+        void SetContourValues(vector<double> vals) { SetValueDoubleVec(_valuesTag, "Set contour values", vals); }
 
-        void SetMin(double min) { SetValueDouble(_minTag, "Set contour minimum", min); }
-
-        int GetCount() const { return (int)GetValueDouble(_countTag, 7.); }
-
-        void SetCount(int count) { SetValueDouble(_countTag, "Set contour count", (double)count); }
-
-        double GetSpacing() const { return GetValueDouble(_spacingTag, 1.); }
-
-        void SetSpacing(double spacing) { SetValueDouble(_spacingTag, "Set contour spacing", spacing); }
-
+        double        GetMin() const;
+        int           GetCount() const;      // {
+        double        GetSpacing() const;    //{
         static string GetClassType() { return ("Contours"); }
 
     private:
-        static const string _minTag;
-        static const string _countTag;
-        static const string _spacingTag;
+        static const string _valuesTag;
     };
 
 };    // End of Class ContourParams

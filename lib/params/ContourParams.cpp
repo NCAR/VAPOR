@@ -8,8 +8,8 @@ namespace VAPoR {
 //
 // Register class with object factory!!!
 //
-static RenParamsRegistrar<ContourParams> registrar(ContourParams::GetClassType());
-// static ParamsRegistrar<Contours> registrar2(Contours::GetClassType());
+static RenParamsRegistrar<ContourParams>        registrar(ContourParams::GetClassType());
+static ParamsRegistrar<ContourParams::Contours> registrar2(ContourParams::Contours::GetClassType());
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
 const string ContourParams::_varsAre3dTag = "VarsAre3D";
@@ -22,9 +22,7 @@ const string ContourParams::_textEnabledTag = "TextEnabled";
 const string ContourParams::_contourMinTag = "ContourMinimum";
 const string ContourParams::_contourSpacingTag = "ContourSpacing";
 const string ContourParams::_lockToTFTag = "LockToTF";
-// const string Contours::_minTag = "Min";
-// const string Contours::_countTag = "Count";
-// const string Contours::_spacingTag = "Spacing";
+const string ContourParams::Contours::_valuesTag = "Values";
 
 ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, ContourParams::GetClassType(), 2)
 {
@@ -85,27 +83,28 @@ bool ContourParams::usingVariable(const std::string &varname)
     return (varname.compare(GetVariableName()) == 0);
 }
 
-vector<double> ContourParams::GetIsovalues(string varName)
+vector<double> ContourParams::GetContourValues(string varName)
 {
     Contours *c = (Contours *)_contours->GetParams(varName);
     if (c == NULL) {
         MakeNewContours(varName);
         c = (Contours *)_contours->GetParams(varName);
     }
-    return c->GetIsovalues();
+    return c->GetContourValues();
 }
 
-void ContourParams::SetIsovalues(string varName, vector<double> vals)
+void ContourParams::SetContourValues(string varName, vector<double> vals)
 {
     Contours *c = (Contours *)_contours->GetParams(varName);
     if (c == NULL) {
         MakeNewContours(varName);
         c = (Contours *)_contours->GetParams(varName);
     }
-    c->SetIsovalues(vals);
+    int s = vals.size();
+    c->SetContourValues(vals);
 }
 
-ContourParams::Contours *ContourParams::GetContours()
+ContourParams::Contours *ContourParams::GetCurrentContours()
 {
     string                   varName = GetVariableName();
     ContourParams::Contours *c = (ContourParams::Contours *)_contours->GetParams(varName);
@@ -119,16 +118,17 @@ ContourParams::Contours *ContourParams::GetContours()
 void ContourParams::MakeNewContours(string varName)
 {
     Contours newContours(_ssave);
-    _contours->Insert(&newContours, varName);
 
     MapperFunction *mf = GetMapperFunc(varName);
     if (mf == NULL) { mf = MakeMapperFunc(varName); }
     vector<double> minMax = mf->getMinMaxMapValue();
+    int            numContours = newContours.GetContourValues().size();
+    double         spacing = (minMax[1] - minMax[0]) / (numContours - 1);
+    vector<double> vals;
+    for (int i = 0; i < numContours; i++) { vals.push_back(minMax[0] + i * spacing); }
+    newContours.SetContourValues(vals);
 
-    Contours *c = (Contours *)_contours->GetParams(varName);
-    c->SetMin(minMax[0]);
-    double spacing = (minMax[1] - minMax[0]) / ((double)c->GetCount() - 1);
-    c->SetSpacing(spacing);
+    _contours->Insert(&newContours, varName);
 }
 
 // Set everything to default values
@@ -162,52 +162,31 @@ void ContourParams::_init()
     assert(minExt.size() == maxExt.size() && minExt.size() >= 2);
 
     GetBox()->SetExtents(minExt, maxExt);
-
-    vector<double> cVals;
-    int            spacing = GetContourSpacing();
-    int            numContours = GetNumContours();
-    double         min = GetContourMin();
-    for (size_t i = 0; i < numContours; i++) { cVals.push_back(min + spacing * i); }
-    SetIsovalues(varname, cVals);
-
-    // GetBox()->SetPlanar(true);
-    // GetBox()->SetOrientation(2);
 }
 
 int ContourParams::GetNumContours()
 {
-    Contours *c = GetContours();
-    return c->GetCount();
-}
-
-void ContourParams::SetNumContours(int num)
-{
-    Contours *c = GetContours();
-    c->SetCount(num);
+    Contours *     c = GetCurrentContours();
+    vector<double> vals = c->GetContourValues();
+    return vals.size();
 }
 
 double ContourParams::GetContourMin()
 {
-    Contours *c = GetContours();
-    return c->GetMin();
-}
-
-void ContourParams::SetContourMin(double min)
-{
-    Contours *c = GetContours();
-    c->SetMin(min);
+    Contours *     c = GetCurrentContours();
+    vector<double> vals = c->GetContourValues();
+    return vals[0];
 }
 
 double ContourParams::GetContourSpacing()
 {
-    Contours *c = GetContours();
-    return c->GetSpacing();
-}
+    Contours *     c = GetCurrentContours();
+    vector<double> vals = c->GetContourValues();
 
-void ContourParams::SetContourSpacing(double spacing)
-{
-    Contours *c = GetContours();
-    c->SetSpacing(spacing);
+    if (vals.size() < 2)
+        return 1;
+    else
+        return vals[1] - vals[0];
 }
 
 void ContourParams::GetLineColor(int lineNum, float color[3])
@@ -221,7 +200,7 @@ void ContourParams::GetLineColor(int lineNum, float color[3])
         if (!tf) { tf = MakeTransferFunc(varName); }
         assert(tf);
 
-        vector<double> vals = GetIsovalues(varName);
+        vector<double> vals = GetContourValues(varName);
         double         val = vals[lineNum];
 
         tf->rgbValue(val, color);
@@ -271,5 +250,11 @@ bool ContourParams::GetTFLock()
     if (l == "false") return false;
     return true;
 }
+
+ContourParams::Contours::Contours(ParamsBase::StateSave *ssave) : ParamsBase(ssave, Contours::GetClassType()) {}
+
+ContourParams::Contours::Contours(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {}
+
+ContourParams::Contours::~Contours() { MyBase::SetDiagMsg("Contours::~Contours() this=%p", this); }
 
 };    // end namespace VAPoR

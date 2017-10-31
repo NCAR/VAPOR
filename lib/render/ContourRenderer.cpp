@@ -293,7 +293,7 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr)
     //	if (varname.size()>1)dataMgr->UnlockGrid(isolineGrid);
     // Loop over each isovalue and cell, and classify the cell as to which edges are crossed by the isoline.
     // when there is an isoline crossing, a line segment is saved in the cache, defined by the two endpoints.
-    const vector<double> &isovals = cParams->GetIsovalues(var);
+    const vector<double> &isovals = cParams->GetContourValues(var);
 
     // Clear the textObjects (if they exist)
     //	TextObject::clearTextObjects(this);
@@ -459,7 +459,7 @@ void ContourRenderer::traverseCurves(int iso)
     // string isoText = std::to_string((long double)(cParams->GetIsovalues()[iso]));
     string isoText;
     string varName = cParams->GetVariableName();
-    doubleToString((cParams->GetIsovalues(varName)[iso]), isoText, cParams->GetNumDigits());
+    doubleToString((cParams->GetContourValues(varName)[iso]), isoText, cParams->GetNumDigits());
 
     // Repeat the following until no more edges are found:
     // Find an unmarked edge.  Mark it.
@@ -707,7 +707,7 @@ void ContourRenderer::buildEdges(int iso, float *dataVals, float mv)
 {
     ContourParams *       cParams = (ContourParams *)GetActiveParams();
     string                varName = cParams->GetVariableName();
-    const vector<double> &isovals = cParams->GetIsovalues(varName);
+    const vector<double> &isovals = cParams->GetContourValues(varName);
     if (cParams->GetTextDensity() > 0. && cParams->GetTextEnabled()) {    // create a textObject to hold annotation of this isovalue
         // BLACK background!
         float bgc[4] = {0, 0, 0, 1.};
@@ -720,7 +720,7 @@ void ContourRenderer::buildEdges(int iso, float *dataVals, float mv)
         vec.push_back("fonts");
         vec.push_back("Vera.ttf");
         string isoText;
-        doubleToString((cParams->GetIsovalues(varName)[iso]), isoText, cParams->GetNumDigits());
+        doubleToString((cParams->GetContourValues(varName)[iso]), isoText, cParams->GetNumDigits());
         //		int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR","share",vec).c_str(),(int)cParams->GetTextSize(),lineColor, bgc,(int)cParams->GetTextLabelType(), isoText);
         //		_objectNums[iso] = objNum;
     }
@@ -896,7 +896,7 @@ bool ContourRenderer::cacheIsValid(int timestep)
     if (thisKey->textDensity != cParams->GetTextDensity()) return false;
     if (thisKey->textEnabled != cParams->GetTextEnabled()) return false;
     string         varName = cParams->GetVariableName();
-    vector<double> ivals = cParams->GetIsovalues(varName);
+    vector<double> ivals = cParams->GetContourValues(varName);
     if (ivals.size() != thisKey->isovals.size()) return false;
     for (int i = 0; i < ivals.size(); i++) {
         if (ivals[i] != thisKey->isovals[i]) return false;
@@ -927,7 +927,7 @@ void ContourRenderer::updateCacheKey(int timestep)
     thisKey->textDensity = cParams->GetTextDensity();
     thisKey->textEnabled = cParams->GetTextEnabled();
     string varName = cParams->GetVariableName();
-    thisKey->isovals = cParams->GetIsovalues(varName);
+    thisKey->isovals = cParams->GetContourValues(varName);
     thisKey->is3D = cParams->VariablesAre3D();
     Box *bx = cParams->GetBox();
     thisKey->angles = bx->GetAngles();

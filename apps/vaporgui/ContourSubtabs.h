@@ -40,8 +40,9 @@ public:
     void Initialize(VAPoR::ContourParams *cParams);
 
 private:
-    void   SetIsovalues();
     double GetContourMinOrMax(string minOrMax);
+    void   enableSliders();
+    void   disableSliders();
 
     VAPoR::ContourParams *_cParams;
     VAPoR::DataMgr *      _dataMgr;
@@ -52,6 +53,7 @@ private:
     Combo *               _spacingCombo;
 
 private slots:
+    void SetContourValues();
     void MappingChanged() { cout << "mapping changed!" << endl; }
 
     void EndTFChange();
