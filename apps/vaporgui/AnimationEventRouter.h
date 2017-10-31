@@ -111,6 +111,8 @@ class AnimationEventRouter : public QWidget, public Ui_AnimationTab, public Even
     Combo *_frameRateCombo;
     QTimer *_myTimer;
     int _direction;
+    bool _widgetsEnabled;
+    bool _animationOn;
 
   private slots:
 
