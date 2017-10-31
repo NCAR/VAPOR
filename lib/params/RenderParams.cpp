@@ -58,7 +58,8 @@ vector <string> string_replace(vector <string> v, string olds, string news) {
 }
 
 string string_replace(string s, string olds, string news) {
-	if (s == olds) s = news;
+	if (s == olds) 
+        s = news;
 	return(s);
 }
 	
@@ -401,25 +402,27 @@ void RenderParams::SetFieldVariableNames(vector<string> varnames){
 //	setAllBypass(false);
 }
 
-vector<string> RenderParams::GetAuxVariableNames()  const {
-	vector <string> defaultv(1, "");
+vector<string> RenderParams::GetAuxVariableNames()  const 
+{
+    /* sam changed its behavior. 
+     * no other places use this function though.
+    vector <string> defaultv(1, "");
 	vector <string> varnames;
-
 	varnames = GetValueStringVec(_auxVariableNamesTag, defaultv);
-
 	varnames = string_replace(varnames, "NULL", "");
-
-	return(varnames);
+	return(varnames); 
+     */
+    return  GetValueStringVec(_auxVariableNamesTag);
 }
 
-void RenderParams::SetAuxVariableNames(vector<string> varnames){
-
+void RenderParams::SetAuxVariableNames(vector<string> varnames)
+{
+    /* sam changed its behavior. 
+     * no other places use this function though.
 	varnames = string_replace(varnames, "0", "NULL");
 	varnames = string_replace(varnames, "", "NULL");
-
-	SetValueStringVec(
-		_auxVariableNamesTag, "Specify auxiliary varnames", varnames
-	);
+     */
+	SetValueStringVec( _auxVariableNamesTag, "Specify auxiliary varnames", varnames);
 }
 
 
