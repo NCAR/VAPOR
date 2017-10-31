@@ -59,7 +59,6 @@ Statistics::~Statistics() {
 }
 
 bool Statistics::Update() {
-    cout << "update called" << endl;
     // Initialize pointers
     VAPoR::DataStatus *dataStatus = _controlExec->getDataStatus();
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
@@ -114,26 +113,41 @@ bool Statistics::Update() {
     RemoveVarCombo->setCurrentIndex(0);
 
     // Update statistics to calculate
-    if (statsParams->GetMinEnabled())
-        RemoveStatCombo->addItem(QString::fromAscii("Min"));
-    else
-        AddStatCombo->addItem(QString::fromAscii("Min"));
-    if (statsParams->GetMaxEnabled())
-        RemoveStatCombo->addItem(QString::fromAscii("Max"));
-    else
-        AddStatCombo->addItem(QString::fromAscii("Max"));
-    if (statsParams->GetMeanEnabled())
-        RemoveStatCombo->addItem(QString::fromAscii("Mean"));
-    else
-        AddStatCombo->addItem(QString::fromAscii("Mean"));
-    if (statsParams->GetMedianEnabled())
-        RemoveStatCombo->addItem(QString::fromAscii("Median"));
-    else
-        AddStatCombo->addItem(QString::fromAscii("Median"));
-    if (statsParams->GetStdDevEnabled())
-        RemoveStatCombo->addItem(QString::fromAscii("StdDev"));
-    else
-        AddStatCombo->addItem(QString::fromAscii("StdDev"));
+    if (statsParams->GetMinEnabled()) {
+        if (RemoveStatCombo->findText(QString::fromAscii("Min")) == -1)
+            RemoveStatCombo->addItem(QString::fromAscii("Min"));
+    } else {
+        if (AddStatCombo->findText(QString::fromAscii("Min")) == -1)
+            AddStatCombo->addItem(QString::fromAscii("Min"));
+    }
+    if (statsParams->GetMaxEnabled()) {
+        if (RemoveStatCombo->findText(QString::fromAscii("Max")) == -1)
+            RemoveStatCombo->addItem(QString::fromAscii("Max"));
+    } else {
+        if (AddStatCombo->findText(QString::fromAscii("Max")) == -1)
+            AddStatCombo->addItem(QString::fromAscii("Max"));
+    }
+    if (statsParams->GetMeanEnabled()) {
+        if (RemoveStatCombo->findText(QString::fromAscii("Mean")) == -1)
+            RemoveStatCombo->addItem(QString::fromAscii("Mean"));
+    } else {
+        if (AddStatCombo->findText(QString::fromAscii("Mean")) == -1)
+            AddStatCombo->addItem(QString::fromAscii("Mean"));
+    }
+    if (statsParams->GetMedianEnabled()) {
+        if (RemoveStatCombo->findText(QString::fromAscii("Median")) == -1)
+            RemoveStatCombo->addItem(QString::fromAscii("Median"));
+    } else {
+        if (AddStatCombo->findText(QString::fromAscii("Median")) == -1)
+            AddStatCombo->addItem(QString::fromAscii("Median"));
+    }
+    if (statsParams->GetStdDevEnabled()) {
+        if (RemoveStatCombo->findText(QString::fromAscii("StdDev")) == -1)
+            RemoveStatCombo->addItem(QString::fromAscii("StdDev"));
+    } else {
+        if (AddStatCombo->findText(QString::fromAscii("StdDev")) == -1)
+            AddStatCombo->addItem(QString::fromAscii("StdDev"));
+    }
     AddStatCombo->setCurrentIndex(0);
     RemoveStatCombo->setCurrentIndex(0);
 
