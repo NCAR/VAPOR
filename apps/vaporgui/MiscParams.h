@@ -90,14 +90,12 @@ class MiscParams : public VAPoR::ParamsBase {
     }
 
     void SetTimeAnnotSize(float size) {
-        cout << "SetTimeAnnotSize() " << size << endl;
         SetValueLong(_timeAnnotSizeTag,
                      "Set the text size of the time annotation", (long)size);
     }
 
     int GetTimeAnnotSize() const {
         int val = (int)GetValueLong(_timeAnnotSizeTag, 20);
-        cout << "GetTimeAnnotSize() " << val << endl;
         return val;
     }
 
