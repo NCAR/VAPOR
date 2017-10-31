@@ -8,6 +8,8 @@
 
 namespace VAPoR {
 
+//class ContourParams::Contours;
+
 //! \class ContourParams
 //! \brief Class that supports drawing Contours based on 2D or 3D vector field
 //! \author Scott Pearse
@@ -15,12 +17,21 @@ namespace VAPoR {
 //! \date June 2017
 class PARAMS_API ContourParams : public RenderParams {
 public:
+ class Contours;
 
  ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave);
 
  ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
 
+ ContourParams(const ContourParams &rhs);
+
+ ContourParams &operator=( const ContourParams& rhs);
+
  virtual ~ContourParams();
+
+ Contours* GetCurrentContours();
+
+ void MakeNewContours(string varName);
 
  //! \copydoc RenderParams::IsOpaque()
  virtual bool IsOpaque() const;
@@ -47,13 +58,9 @@ public:
 	return false;
  }
 
- int GetNumContours() const {
-	return (int)GetValueDouble(_numContoursTag, 3.0);
- }
+ int GetNumContours();
 
- void SetNumContours(int num) {
-	SetValueDouble(_numContoursTag, "Number of contours", (double)num);
- }
+ void SetNumContours(int num);
 
  //! Determine line thickness in voxels
  //! \retval double line thickness
@@ -65,74 +72,27 @@ public:
 	SetValueDouble(_thicknessScaleTag, "Contour thickness", val);
  }
 
- double GetContourMin() const {
-	return (GetValueDouble(_contourMinTag, 0.f));
- }
+ double GetContourMin();
 
- void SetContourMin(double val) {
-	SetValueDouble(_contourMinTag, "Contour minimum value", val);
- }
+ void SetContourMin(double val);
 
- double GetContourSpacing() const {
-	return (GetValueDouble(_contourSpacingTag, 1.f));
- }
+ double GetContourSpacing();
 
- void SetContourSpacing(double val) {
-	SetValueDouble(_contourSpacingTag, "Spacing between contours", val);
- }
+ void SetContourSpacing(double val);
 
- void GetLineColor(int lineNum, float color[3]) {
-
-	string cmVar = GetColorMapVariableName();
-	if ((cmVar == "") || (cmVar == "Default")) {
-		string varName = GetVariableName();
-		TransferFunction* tf = 0;
-		tf = (TransferFunction*)GetMapperFunc(varName);
-		if (! tf) {
-			tf = MakeTransferFunc(varName);
-		}  
-		assert(tf);
-
-		vector<double> vals = GetValueDoubleVec(_contoursTag);
-		double val = vals[lineNum];
-
-		tf->rgbValue(val, color);
-	}
-	else {
-		GetConstantColor(color);
-	}
- }
+ void GetLineColor(int lineNum, float color[3]);
 
  void SetLineColor(vector<double> vec) {
 	SetValueDoubleVec(_lineColorTag, "Line color", vec);
  }
 
- void SetLockToTF(bool lock) {
-	string l = "false";
-	if (lock) {
-		l = "true";
-	}
-	SetValueString(_lockToTFTag, "Lock settings to TF", l);
- }
+ void SetLockToTF(bool lock);
 
- bool GetLockToTF() {
-	if (GetValueString(_lockToTFTag, "true")=="true") {
-		return true;
-	}
-	else {
-		return false;
-	}
- }
+ bool GetLockToTF() const; 
 
- vector<double> GetIsovalues() const {
-	vector<double> vals;
-	vals = GetValueDoubleVec(_contoursTag);
-	return vals;
- }
+ vector<double> GetContourValues(string varName);
 
- void SetIsovalues(vector<double> vals) {
-	SetValueDoubleVec(_contoursTag, "Isovalue list", vals);
- }
+ void SetContourValues(string varName, vector<double> vals);
 
  // Get static string identifier for this params class
  //
@@ -146,7 +106,7 @@ public:
  }
 
  void SetNumDigits(int digits) {
-	SetValueDouble(_numDigitsTag, "Number of digits in isovalue annotation",
+	SetValueDouble(_numDigitsTag, "Number of digits in contour annotation",
 		digits
 	);
  }
@@ -157,34 +117,14 @@ public:
  }
 
  void SetTextDensity(int density) {
-	SetValueDouble(_textDensityTag, "Density of isovalue annotations",
+	SetValueDouble(_textDensityTag, "Density of contour annotations",
 		density
 	);
  }
 
- bool GetTextEnabled() const {
-	if (GetValueString(_textEnabledTag, "false")=="false") {
-		return false;
-	}
-	else {
-		return true;
-	}
- }
-
- void SetTFLock(bool lock) {
-	string l = "false";
-	if (lock)
-		l = "true";
- 	SetValueString(_lockToTFTag, "Lock contours to transfer function"	
-		" bounds", l
-	);
- }
-
- bool GetTFLock() {
-	string l = GetValueString(_lockToTFTag, "true");
-	if (l=="false") return false;
-	return true;
- }
+ bool GetTextEnabled() const;
+ void SetTFLock(bool lock); 
+ bool GetTFLock();
 
 private:
 
@@ -200,8 +140,43 @@ private:
  static const string _contourMinTag;
  static const string _contourSpacingTag;
  static const string _lockToTFTag;
+ ParamsContainer* _contours;
+
+public:
+ class PARAMS_API Contours : public ParamsBase {
+ public:
+
+  Contours(ParamsBase::StateSave *ssave);
+
+  Contours(ParamsBase::StateSave *ssave, XmlNode *node);
+
+  virtual ~Contours();
+
+  vector<double> GetContourValues() const {
+	vector<double> defaultv(7, 0.);
+	if (! _node->HasElementDouble(_valuesTag)) return defaultv;
+
+	vector<double> val = GetValueDoubleVec(_valuesTag);
+	return val;
+  }
+
+  void SetContourValues(vector<double> vals) {
+	SetValueDoubleVec(_valuesTag, "Set contour values", vals);
+  }
+
+  double GetMin() const;
+  int GetCount() const;// {
+  double GetSpacing() const; //{
+  static string GetClassType() {
+   return("Contours");
+  }
+
+ private:
+	static const string _valuesTag;
+ };
 
 }; //End of Class ContourParams
+
 };
 
 #endif 
