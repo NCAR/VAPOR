@@ -154,9 +154,9 @@ class RENDER_API ContourRenderer : public Renderer {
     //! \param[in] dataVals array of floating point values of variable at all grid corners
     //! \return interpolated isovalue
     float interp_j(int i, int j, float isoval, float *dataVals) {
-        return (-1. + 2. * (double)(j) / ((double)_gridSize - 1.)                                                                    //y coordinate at (i,j)
-                + 2. / (double)(_gridSize - 1.)                                                                                      //y grid spacing
-                      * (isoval - dataVals[i + _gridSize * j]) / (dataVals[i + _gridSize * (j + 1)] - dataVals[i + _gridSize * j])); //ratio: 1 is iso at top, 0 if iso at bottom
+        return (-1. + 2. * (double)(j) / ((double)_sampleSize - 1.)                                                                        //y coordinate at (i,j)
+                + 2. / (double)(_sampleSize - 1.)                                                                                          //y grid spacing
+                      * (isoval - dataVals[i + _sampleSize * j]) / (dataVals[i + _sampleSize * (j + 1)] - dataVals[i + _sampleSize * j])); //ratio: 1 is iso at top, 0 if iso at bottom
     }
 
     //! Interpolate to find x coordinate of isovalue on the grid line from (i,j) to (i+1,j)
@@ -166,9 +166,9 @@ class RENDER_API ContourRenderer : public Renderer {
     //! \param[in] dataVals array of floating point values of variable at all grid corners
     //! \return interpolated isovalue
     float interp_i(int i, int j, float isoval, float *dataVals) {
-        return (-1. + 2. * (double)(i) / ((double)_gridSize - 1.)                                                                    //x coordinate at (i,j)
-                + 2. / (double)(_gridSize - 1.)                                                                                      //x grid spacing
-                      * (isoval - dataVals[i + _gridSize * j]) / (dataVals[i + 1 + _gridSize * (j)] - dataVals[i + _gridSize * j])); //ratio: 1 is iso at right, 0 if iso at left
+        return (-1. + 2. * (double)(i) / ((double)_sampleSize - 1.)                                                                        //x coordinate at (i,j)
+                + 2. / (double)(_sampleSize - 1.)                                                                                          //x grid spacing
+                      * (isoval - dataVals[i + _sampleSize * j]) / (dataVals[i + 1 + _sampleSize * (j)] - dataVals[i + _sampleSize * j])); //ratio: 1 is iso at right, 0 if iso at left
     }
 
     //! Construct the cache of edges associated with a particular isovalue
@@ -231,7 +231,7 @@ class RENDER_API ContourRenderer : public Renderer {
     vector<pair<int, int>> _endEdge;                     //indicates and ending edge for each component
 
     int _numIsovalsCached;
-    int _gridSize;
+    int _sampleSize;
     std::map<int, int> _objectNums;
 };
 }; // namespace VAPoR
