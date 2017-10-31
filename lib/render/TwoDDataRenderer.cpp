@@ -779,14 +779,3 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 
     return (texture);
 }
-
-double TwoDDataRenderer::_getDefaultZ(DataMgr *dataMgr, size_t ts) const
-{
-    vector<double> minExts;
-    vector<double> maxExts;
-
-    bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
-    assert(status);
-
-    return (minExts.size() == 3 ? minExts[2] : 0.0);
-}
