@@ -73,15 +73,16 @@ bool Statistics::Update()
     // Update DataMgrCombo
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
     assert(dmNames.size() > 0);
-    DataMgrCombo->clear();
+    DataMgrCombo->blockSignals(true);
     int currentIdx = -1;
     for (int i = 0; i < dmNames.size(); i++) {
         QString item = QString::fromStdString(dmNames[i]);
-        DataMgrCombo->addItem(item);
+        if (DataMgrCombo->findText(item) == -1) DataMgrCombo->addItem(item);
         if (dmNames[i] == currentDatasetName) currentIdx = i;
     }
     assert(currentIdx != -1);
     DataMgrCombo->setCurrentIndex(currentIdx);
+    DataMgrCombo->blockSignals(false);
 
     // Update Timesteps
     int minTS = statsParams->GetMinTS();
@@ -102,16 +103,39 @@ bool Statistics::Update()
         UpdateCheckbox->setCheckState(Qt::Unchecked);
     UpdateCheckbox->blockSignals(false);
 
-    // Update available variables
+    // Update "Add a Variable"
     std::vector<std::string> availVars = currentDmgr->GetDataVarNames(3, true);
     std::vector<std::string> availVars2D = currentDmgr->GetDataVarNames(2, true);
     for (int i = 0; i < availVars2D.size(); i++) availVars.push_back(availVars2D[i]);
-    sort(availVars.begin(), availVars.end());
+    // remove variables already enabled
+    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
+    for (int i = 0; i < enabledVars.size(); i++)
+        for (int rmIdx = 0; rmIdx < availVars.size(); rmIdx++)
+            if (availVars[rmIdx] == enabledVars[i]) {
+                availVars.erase(availVars.begin() + rmIdx);
+                break;
+            }
+    std::sort(availVars.begin(), availVars.end());
+    NewVarCombo->blockSignals(true);
+    NewVarCombo->clear();
+    NewVarCombo->addItem(QString::fromAscii("Add a Variable"));
     for (std::vector<std::string>::iterator it = availVars.begin(); it != availVars.end(); ++it) { NewVarCombo->addItem(QString::fromStdString(*it)); }
     NewVarCombo->setCurrentIndex(0);
+    NewVarCombo->blockSignals(false);
+
+    // Update "Remove a Variable"
+    assert(enabledVars.size() == _validStats.GetVariableCount());
+    std::sort(enabledVars.begin(), enabledVars.end());
+    RemoveVarCombo->blockSignals(true);
+    RemoveVarCombo->clear();
+    RemoveVarCombo->addItem(QString::fromAscii("Remove a Variable"));
+    for (int i = 0; i < enabledVars.size(); i++) { RemoveVarCombo->addItem(QString::fromStdString(enabledVars[i])); }
     RemoveVarCombo->setCurrentIndex(0);
+    RemoveVarCombo->blockSignals(false);
 
     // Update statistics to calculate
+    AddStatCombo->blockSignals(true);
+    RemoveStatCombo->blockSignals(true);
     if (statsParams->GetMinEnabled()) {
         if (RemoveStatCombo->findText(QString::fromAscii("Min")) == -1) RemoveStatCombo->addItem(QString::fromAscii("Min"));
     } else {
@@ -139,6 +163,8 @@ bool Statistics::Update()
     }
     AddStatCombo->setCurrentIndex(0);
     RemoveStatCombo->setCurrentIndex(0);
+    AddStatCombo->blockSignals(false);
+    RemoveStatCombo->blockSignals(false);
 
     this->_updateVarTable();
 
@@ -169,6 +195,7 @@ void Statistics::_updateVarTable()
     VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
     // Update cells
+    QBrush                   brush(QColor(255, 0, 0));
     std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
     assert(enabledVars.size() == _validStats.GetVariableCount());
     VariablesTable->setRowCount(enabledVars.size());
@@ -180,8 +207,7 @@ void Statistics::_updateVarTable()
         _validStats.GetMedian(enabledVars[row], &median);
         _validStats.GetStddev(enabledVars[row], &stddev);
 
-        QBrush brush(QColor(255, 0, 0));
-        int    column = 1;
+        int column = 1;
         if (statsParams->GetMinEnabled()) {
             if (!std::isnan(m3[0]))
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
@@ -266,88 +292,7 @@ int Statistics::initControlExec(ControlExec *ce)
 bool Statistics::Connect()
 {
     connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)));
-#if 0
-    // This is a bitmask to define which statistics to calculate/display.
-    // If a statistic variable is set to 0x00 or undefined, it will not
-    // be applied.  The _calculations variable is used as a filter, and
-    // is all-inclusive by default.
-    //
-    StatisticsParams* params = ParamsMgr::GetAppRenderParams(
-                    dataMgrCombo->currentText.toStdString(), StatisticParams::GetClassType());
-    /*
-    _MIN = 0x01;
-    _MAX = 0x02;
-    _MEAN = 0x04;
-    _MEDIAN = 0x00;
-    if (_params->GetMedianStat()) {
-        _MEDIAN = 0x10;
-    }
-    _SIGMA = 0x00;
-    if (_params->GetStdDevStat()) {
-        _SIGMA = 0x08;
-    }
-    _calculations = 0xFF;
-    */
-
-    //if (_dm==NULL) return -1;
-
-    _errMsg = new sErrMsg;
-    //_autoUpdate = _params->GetAutoUpdate();
-    UpdateCheckbox->setChecked( params->GetAutoUpdate() );
-
-    // for _regionSelection,
-    // 0 = center/size, 1 = min/max, 2 = center/size
-    //
-    //_regionSelection = 0;
-    #if 0
-    _regionSelection = _params->GetRegionSelection();
-    #endif
-    //stackedSliderWidget->setCurrentIndex(_regionSelection);
-
-    generateTableColumns();
-
-
-    initVariables();
-    _defaultVar = _vars3d[0];
-    if (_defaultVar=="") {
-        return -1;
-    }
-
-    initTimes();
-
-    initCRatios();
-    
-    initRefinement();
-
-    initRegion();
-
-    initRanges();
-
-    retrieveRangeParams();
-    _regionInitialized = 1;
-
-    ExportButton->setEnabled(true);
-    
-    if (_initialized==1) return 0;
-
-    connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(minTSChanged()));
-    connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(maxTSChanged()));
-    connect(UpdateCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateClicked()));
-    connect(UpdateButton, SIGNAL(pressed()), this, SLOT(updateButtonPressed()));
-    connect(RefCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(refinementChanged(int)));
-    connect(CRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
-    connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(addVariable(int)));
-    connect(RestoreExtentsButton, SIGNAL(pressed()), this, SLOT(restoreExtents()));
-    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVariable(int)));
-    connect(ExportButton, SIGNAL(clicked()), this, SLOT(exportText()));
-    //connect(regionSelectorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(rangeComboChanged()));
-    //connect(copyActiveRegionButton, SIGNAL(pressed()), this, SLOT(copyActiveRegion()));
-    connect(AddStatCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(addStatistic(int)));
-    connect(RemoveStatCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeStatistic(int)));
-    
-    _initialized = 1;
-
-#endif
+    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)));
     return true;
 }
 
@@ -359,10 +304,10 @@ void Statistics::_newVarChanged(int index)
     GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    std::string       varName = NewVarCombo->itemText(index).toStdString();
 
     // Add this variable to "Remove a Variable" list
     RemoveVarCombo->addItem(NewVarCombo->itemText(index));
-    std::string varName = NewVarCombo->itemText(index).toStdString();
 
     // Remove this variable from "Add a Variable" list
     NewVarCombo->blockSignals(true);
@@ -380,39 +325,44 @@ void Statistics::_newVarChanged(int index)
 
     // Update VariableTable
     this->_updateVarTable();
+}
 
-#if 0
-    vector<string> varNames = _params->GetVarNames();
-    varNames.push_back(varName);
-    _params->SetVarNames(varNames);
+void Statistics::_removeVarChanged(int index)
+{
+    if (index == 0) return;
 
-    _stats[varName] = _statistics();
+    // Initialize pointers
+    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string       dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    std::string       varName = RemoveVarCombo->itemText(index).toStdString();
 
-    int rowCount = VariablesTable->rowCount();
-    VariablesTable->insertRow(rowCount);
-    VariablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(QString::fromStdString(varName)));
+    // Add this variable to "Add a Variable" list
+    NewVarCombo->addItem(RemoveVarCombo->itemText(index));
 
-    QHeaderView *verticalHeader = VariablesTable->verticalHeader();
-    verticalHeader->setResizeMode(QHeaderView::Fixed);
-    verticalHeader->setDefaultSectionSize(20);
+    // Remove this variable from "Remove a Variable" list
+    RemoveVarCombo->blockSignals(true);
+    RemoveVarCombo->setCurrentIndex(0);
+    RemoveVarCombo->blockSignals(false);
+    RemoveVarCombo->removeItem(index);
 
-    int colCount = VariablesTable->columnCount();
-    for (int j=0; j<colCount; j++){
-        QTableWidgetItem* twi = new QTableWidgetItem("");
-        twi->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-        VariablesTable->setItem(rowCount,j,twi);
-    }
+    // Remove this variable from parameter
+    std::vector<std::string> vars = statsParams->GetAuxVariableNames();
+    int                      rmIdx = -1;
+    for (int i = 0; i < vars.size(); i++)
+        if (vars[i] == varName) {
+            rmIdx = i;
+            break;
+        }
+    assert(rmIdx != -1);
+    vars.erase(vars.begin() + rmIdx);
+    statsParams->SetAuxVariableNames(vars);
 
-    NewVarCombo->setCurrentIndex(0);
+    // Remove this variable from _validStats
+    _validStats.RemoveVariable(varName);
 
-    RemoveVarCombo->addItem(QString::fromStdString(varName));
-    VariablesTable->resizeRowsToContents();
-
-    if (_autoUpdate) {
-            updateStats();
-    }
-    else (makeItRed());
-#endif
+    // Update VariableTable
+    this->_updateVarTable();
 }
 
 #if 0
@@ -500,12 +450,27 @@ int Statistics::ValidStats::_getVarIdx(std::string varName)
 
 bool Statistics::ValidStats::AddVariable(std::string newVar)
 {
+    if (newVar == "") return false;
     if (_getVarIdx(newVar) != -1)    // this variable already exists.
         return false;
 
     _variables.push_back(newVar);
     for (int i = 0; i < 5; i++) {
         _values[i].push_back(std::nan("1"));
+        assert(_values[i].size() == _variables.size());
+    }
+    return true;
+}
+
+bool Statistics::ValidStats::RemoveVariable(std::string varname)
+{
+    int rmIdx = _getVarIdx(varname);
+    if (rmIdx == -1)    // this variable doesn't exist.
+        return false;
+
+    _variables.erase(_variables.begin() + rmIdx);
+    for (int i = 0; i < 5; i++) {
+        _values[i].erase(_values[i].begin() + rmIdx);
         assert(_values[i].size() == _variables.size());
     }
     return true;

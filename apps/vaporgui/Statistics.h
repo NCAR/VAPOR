@@ -62,8 +62,8 @@ protected:
     //
     class ValidStats {
     public:
-        bool AddVariable(std::string);
-        // bool removeVariable( std::string );
+        bool   AddVariable(std::string);
+        bool   RemoveVariable(std::string);
         size_t GetVariableCount();
 
         bool Add3MStats(std::string, const double *);    // Min, Max, Mean
@@ -96,6 +96,7 @@ protected:
 
 private slots:
     void _newVarChanged(int);
+    void _removeVarChanged(int);
     /*
     void restoreExtents();
     void minTSChanged();
