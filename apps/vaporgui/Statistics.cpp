@@ -313,6 +313,13 @@ void Statistics::_newVarChanged( int index )
     if (index == 0) 
         return;
 
+    // Initialize pointers
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+
     // Add this variable to "Remove a Variable" list
     RemoveVarCombo->addItem( NewVarCombo->itemText(index) );
     std::string varName = NewVarCombo->itemText(index).toStdString();
@@ -323,21 +330,11 @@ void Statistics::_newVarChanged( int index )
     NewVarCombo->blockSignals( false );
     NewVarCombo->removeItem( index );
 
-    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
-                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
-    std::string dsName = guiParams->GetStatsDatasetName();
-    StatisticsParams* params = dynamic_cast<StatisticsParams*>
-            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    // Add variable to parameter database
-    //
-    std::vector<std::string> existingVars = params->GetAuxVariableNames();
-    for( int i = 0; i < existingVars.size(); i++ )
-        cout << existingVars[i] << endl;
-    existingVars.push_back( varName );
-    params->SetAuxVariableNames( existingVars );
-    existingVars = params->GetAuxVariableNames();
-    for( int i = 0; i < existingVars.size(); i++ )
-        cout << existingVars[i] << endl;
+    // Add a variable to parameter 
+    std::vector<std::string> vars = statsParams->GetAuxVariableNames();
+    vars.push_back( varName );
+    statsParams->SetAuxVariableNames( vars );
+    std::vector<std::string> rt = statsParams->GetAuxVariableNames();
 
 
 #if 0
