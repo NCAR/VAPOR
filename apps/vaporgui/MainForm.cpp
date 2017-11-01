@@ -172,7 +172,6 @@ MainForm::MainForm(
 
     // For vertical screens, reverse aspect ratio for window size
     QSize screenSize = QDesktopWidget().availableGeometry().size();
-    printf("Size(%i, %i)\n", screenSize.width(), screenSize.height());
     if (screenSize.width() < screenSize.height())
         resize(screenSize.width() * .7, screenSize.width() * .7 * screenSize.width() / (float)screenSize.height());
     else
