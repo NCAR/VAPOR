@@ -163,12 +163,12 @@ public:
 		);
 	}
 
-	//! Pure virtual method sets current number of refinements of this Params.
+	//! Virtual method sets current number of refinements of this Params.
 	//! \param[in] int refinements
 	//!
 	virtual void SetRefinementLevel(int numrefinements);
 
-	//! Pure virtual method indicates current number of refinements of this Params.
+	//! Virtual method indicates current number of refinements of this Params.
 	//! \retval integer number of refinements
 	//!
 	virtual int GetRefinementLevel() const ;
@@ -178,7 +178,7 @@ public:
 	//!
 	virtual int GetCompressionLevel() const ;
 
-	//! Pure virtual method sets current Compression level.
+	//! Virtual method sets current Compression level.
 	//! \param[in] val  compression level, 0 is most compressed
 	//!
 	virtual void SetCompressionLevel(int val);
