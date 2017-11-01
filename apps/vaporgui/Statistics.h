@@ -101,6 +101,8 @@ private slots:
     void _removeCalcChanged(int);
     void _refinementChanged(int);
     void _lodChanged(int);
+    void _minTSChanged(int);
+    void _maxTSChanged(int);
     /*
     void restoreExtents();
     void minTSChanged();

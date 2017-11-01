@@ -33,11 +33,11 @@ public:
     bool GetAutoUpdate();
     void SetAutoUpdate(bool state);
 
-    int  GetMinTS();
-    void SetMinTS(int ts);
+    int  GetCurrentMinTS();
+    void SetCurrentMinTS(int ts);
 
-    int  GetMaxTS();
-    void SetMaxTS(int ts);
+    int  GetCurrentMaxTS();
+    void SetCurrentMaxTS(int ts);
 
     bool GetMinEnabled();
     void SetMinEnabled(bool state);
