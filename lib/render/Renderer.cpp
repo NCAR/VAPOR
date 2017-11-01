@@ -101,6 +101,18 @@ int RendererBase::initializeGL(ShaderMgr *sm) {
     return (0);
 }
 
+double Renderer::_getDefaultZ(
+    DataMgr *dataMgr, size_t ts) const {
+
+    vector<double> minExts;
+    vector<double> maxExts;
+
+    bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
+    assert(status);
+
+    return (minExts.size() == 3 ? minExts[2] : 0.0);
+}
+
 int Renderer::paintGL() {
     const RenderParams *rParams = GetActiveParams();
 
