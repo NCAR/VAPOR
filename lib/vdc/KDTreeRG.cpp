@@ -77,7 +77,7 @@ void KDTreeRG::Nearest(
 	const vector <float> &coordu,
 	vector <size_t> &coord
 ) const {
-	assert(coordu.size() == _dims.size());
+//	assert(coordu.size() == _dims.size());
 	coord.clear();
 
 	float posXY[] = {coordu[0], coordu[1]};

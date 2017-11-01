@@ -110,6 +110,19 @@ int RendererBase::initializeGL(ShaderMgr *sm) {
 	return(0);
 }
 
+double Renderer::_getDefaultZ(
+	DataMgr *dataMgr, size_t ts
+) const {
+	
+	vector <double> minExts;
+	vector <double> maxExts;
+
+	bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
+	assert(status);
+
+	return(minExts.size() == 3 ? minExts[2] : 0.0); 
+}
+
 int Renderer::paintGL() {
 	const RenderParams *rParams = GetActiveParams();
 
@@ -153,8 +166,8 @@ void Renderer::EnableClipToBox() const {
 	GLdouble z1Plane[] = {0.0, 0.0, -1.0, 0.0};//z largest
 
 	const RenderParams *rParams = GetActiveParams();
-    vector<double> minExts, maxExts;
-    rParams->GetBox()->GetExtents(minExts, maxExts);
+	vector<double> minExts, maxExts;
+	rParams->GetBox()->GetExtents(minExts, maxExts);
 	assert(minExts.size() == maxExts.size());
 	assert(minExts.size() > 0 && minExts.size() < 4);
 
