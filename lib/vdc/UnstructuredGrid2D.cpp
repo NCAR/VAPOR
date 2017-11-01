@@ -132,7 +132,7 @@ void UnstructuredGrid2D::GetUserCoordinates(
 void UnstructuredGrid2D::GetIndices(
     const std::vector<double> &coords,
     std::vector<size_t> &indices) const {
-    assert(coords.size() == GetNumCoordinates());
+
     indices.clear();
 
     // Clamp coordinates on periodic boundaries to grid extents
@@ -146,11 +146,8 @@ void UnstructuredGrid2D::GetIndices(
 bool UnstructuredGrid2D::GetIndicesCell(
     const std::vector<double> &coords,
     std::vector<size_t> &indices) const {
-    assert(coords.size() == GetNumCoordinates());
     indices.clear();
 
-    // Clamp coordinates on periodic boundaries to grid extents
-    //
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
@@ -167,11 +164,6 @@ bool UnstructuredGrid2D::GetIndicesCell(
 }
 
 bool UnstructuredGrid2D::InsideGrid(const std::vector<double> &coords) const {
-    assert(coords.size() == GetNumCoordinates());
-
-    // Clamp coordinates on periodic boundaries to reside within the
-    // grid extents
-    //
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
@@ -226,7 +218,7 @@ float UnstructuredGrid2D::GetValueLinear(
     if (!inside)
         return (GetMissingValue());
     assert(face_indices.size() == 1);
-    assert(face_indices[0] < GetDimensions()[0]);
+    assert(face_indices[0] < GetCellDimensions()[0]);
 
     const int *ptr = _vertexOnFace + (face_indices[0] * _maxVertexPerFace);
 
@@ -356,6 +348,7 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(
             face_indices.push_back(face);
             return (true);
         }
+        ptr++;
     }
 
     return (false);
@@ -380,6 +373,11 @@ bool UnstructuredGrid2D::_insideFace(
         ptr++;
         nlambda++;
     }
+
+    // Should we test the line case where nlambda == 2?
+    //
+    if (nlambda < 3)
+        return (false);
 
     return (WachspressCoords2D(verts, pt, nlambda, lambda));
 }
