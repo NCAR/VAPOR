@@ -93,7 +93,7 @@ void TFWidget::setCMVar(const QString& qvar) {
 	_rParams->SetColorMapVariableName(var);
 
 	if (_flags & CONSTCOLOR) {
-		if (var == "Default") {
+		if (var == "Map to var") {
 			colorDisplay->setEnabled(false);
 			colorSelectButton->setEnabled(false);
 			_rParams->SetUseSingleColor(false);
