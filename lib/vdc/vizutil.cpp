@@ -163,6 +163,8 @@ double VAPoR::SignedTriArea2D(const double a[2], const double b[2], const double
 
 bool VAPoR::WachspressCoords2D(const double verts[], const double pt[], int n, double lambda[])
 {
+    if (n == 0) return (false);
+
     for (int i = 0; i < n; i++) lambda[i] = 0.0;
 
     double       wTotal = 0.0;

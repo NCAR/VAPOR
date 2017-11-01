@@ -114,6 +114,30 @@ public:
     //
     virtual bool IsVertCoordVar(string var) const { return (std::find(_vertCoordVars.begin(), _vertCoordVars.end(), var) != _vertCoordVars.end()); }
 
+    //! Return boolean indicating whether the named variable represents
+    //! a vertical pressure coordinate.
+    //!
+    //! This method returns true if the variable named by \p var is a
+    //! vertical coordinate variable with units of pressure.
+    //! See section 4.3 of the CF spec.
+    //!
+    //! \retval true if \p var is a vertical pressure coordinate variable,
+    //! false otherwise
+    //
+    virtual bool IsVertCoordVarPressure(string var) const;
+
+    //! Return boolean indicating whether the named variable represents
+    //! a vertical length coordinate.
+    //!
+    //! This method returns true if the variable named by \p var is a
+    //! vertical coordinate variable with units of length (e.g. meters)
+    //! See section 4.3 of the CF spec.
+    //!
+    //! \retval true if \p var is a vertical length coordinate variable,
+    //! false otherwise
+    //
+    virtual bool IsVertCoordVarLength(string var) const;
+
     //! Return true if the increasing direction of the named vertical coordinate
     //! variable is up
     //!
@@ -576,6 +600,42 @@ private:
         double *            _timecoords;
     };
 
+    class DerivedVar_vertStag : public NetCDFCollection::DerivedVar {
+    public:
+        DerivedVar_vertStag(NetCDFCFCollection *ncdfcf, string unstagVar, string stagDimName);
+        virtual ~DerivedVar_vertStag();
+        virtual int                 Open(size_t ts);
+        virtual int                 ReadSlice(float *slice, int);
+        virtual int                 Read(float *buf, int);
+        virtual int                 SeekSlice(int offset, int whence, int fd);
+        virtual int                 Close(int);
+        virtual bool                TimeVarying() const { return (_ncdfc->IsTimeVarying(_unstagVar)); };
+        virtual std::vector<size_t> GetSpatialDims() const { return (_dims); }
+        virtual std::vector<string> GetSpatialDimNames() const { return (_dimnames); }
+        virtual size_t              GetTimeDim() const { return (_ncdfc->GetTimeDim(_unstagVar)); }
+        virtual string              GetTimeDimName() const { return (_ncdfc->GetTimeDimName(_unstagVar)); };
+        virtual bool                GetMissingValue(double &mv) const
+        {
+            mv = 0.0;
+            return (false);
+        }
+        virtual std::vector<string> GetAttNames() const { return (std::vector<string>(1, "units")); }
+        virtual int                 GetAttType(string name) const { return (NC_CHAR); }
+        virtual void                GetAtt(string name, string &values) const
+        {
+            values.clear();
+            if (name == "units") values = "meters";
+        }
+
+    private:
+        string              _unstagVar;
+        std::vector<size_t> _dims;
+        std::vector<string> _dimnames;
+        size_t              _slice_num;
+        float *             _sliceBuf;
+        int                 _fd;
+    };
+
     std::map<string, DerivedVar *> _derivedVarsMap;
     std::vector<std::string>       _coordinateVars;
     std::vector<std::string>       _auxCoordinateVars;
@@ -667,6 +727,8 @@ private:
     void _GetMissingValueMap(map<string, double> &missingValueMap) const;
 
     int _parse_formula(string formula_terms, map<string, string> &parsed_terms) const;
+
+    bool _camZ3Exists(const std::vector<string> &vars) const;
 };
 };    // namespace VAPoR
 

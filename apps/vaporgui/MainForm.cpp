@@ -859,10 +859,6 @@ void MainForm::undoRedoHelper(bool undo)
         _vizWinMgr->SetTrackBall(pos, dir, up, center, true);
     }
 
-    // Needed?
-    //
-    _tabMgr->Update();
-
     // Restore state saving
     //
     _controlExec->SetSaveStateEnabled(enabled);
@@ -982,7 +978,6 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
 
     update();
-    _tabMgr->Update();
 }
 
 // Load data into current session
@@ -1002,23 +997,30 @@ void MainForm::closeData(string fileName)
 
     string dataSetName = a->text().toStdString();
 
+    _controlExec->CloseData(dataSetName);
+    _closeVDCMenu->removeAction(a);
+
     GUIStateParams *p = GetStateParams();
     vector<string>  currentPaths, currentDataSets;
     p->GetOpenDataSets(currentPaths, currentDataSets);
-    if (std::find(currentDataSets.begin(), currentDataSets.end(), dataSetName) != currentDataSets.end()) {
-        _controlExec->CloseData(dataSetName);
-        _closeVDCMenu->removeAction(a);
-    }
 
-    cout << "Closing datasets " << currentDataSets.size() << endl;
+    vector<string>::iterator itr;
 
-    p = GetStateParams();
-    p->GetOpenDataSets(currentPaths, currentDataSets);
-    cout << "Closing datasets " << currentDataSets.size() << " " << currentDataSets[0] << endl;
-    if (currentDataSets.size() == 0) {
-        cout << "no datasets loaded" << endl;
-        _controlExec->LoadState();
-    }
+    itr = std::find(currentDataSets.begin(), currentDataSets.end(), dataSetName);
+    assert(itr != currentDataSets.end());
+
+    // Find offset from begining of currentDataSets to itr so that we
+    // can access same element from currentPaths. Why I love c++. Sigh
+    //
+    std::vector<string>::difference_type offset = std::distance(currentDataSets.begin(), itr);
+    currentDataSets.erase(currentDataSets.begin() + offset);
+    currentPaths.erase(currentPaths.begin() + offset);
+
+    p->SetOpenDataSets(currentPaths, currentDataSets);
+
+    if (currentDataSets.size() == 0) { enableWidgets(false); }
+
+    _vizWinMgr->ReinitRouters();
 }
 
 // import WRF data into current session
@@ -1674,6 +1676,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         _vizWinMgr->UpdateRouters();
 
+        _tabMgr->Update();
         _vizWinMgr->updateDirtyWindows();
         return (false);
     }

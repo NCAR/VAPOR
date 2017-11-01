@@ -372,7 +372,12 @@ vector<string> DataMgr::GetDataVarNames() const
     //
     // NEED TO HANDLE DERIVED VARS
     //
-    return (_dc->GetDataVarNames());
+    vector<string> vars = _dc->GetDataVarNames();
+    vector<string> validVars;
+    for (int i = 0; i < vars.size(); i++) {
+        if (_get_grid_type(vars[i]) != UNDEFINED) { validVars.push_back(vars[i]); }
+    }
+    return (validVars);
 }
 
 vector<string> DataMgr::GetDataVarNames(int ndim, bool spatial) const
@@ -381,7 +386,12 @@ vector<string> DataMgr::GetDataVarNames(int ndim, bool spatial) const
     //
     // NEED TO HANDLE DERIVED VARS
     //
-    return (_dc->GetDataVarNames(ndim, spatial));
+    vector<string> vars = _dc->GetDataVarNames(ndim, spatial);
+    vector<string> validVars;
+    for (int i = 0; i < vars.size(); i++) {
+        if (_get_grid_type(vars[i]) != UNDEFINED) { validVars.push_back(vars[i]); }
+    }
+    return (validVars);
 }
 
 vector<string> DataMgr::GetCoordVarNames() const
@@ -2016,6 +2026,42 @@ RegularGrid *DataMgr::_make_grid_regular(const vector<size_t> &dims, const vecto
     return (rg);
 }
 
+StretchedGrid *DataMgr::_make_grid_stretched(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax
+
+) const
+{
+    assert(dims.size() == bs.size());
+    assert(dims.size() == bmin.size());
+    assert(dims.size() == bmax.size());
+
+    size_t nblocks = 1;
+    size_t block_size = 1;
+    for (int i = 0; i < bs.size(); i++) {
+        nblocks *= bmax[i] - bmin[i] + 1;
+        block_size *= bs[i];
+    }
+
+    vector<float *> blkptrs;
+    if (blkvec[0]) {
+        for (int i = 0; i < nblocks; i++) { blkptrs.push_back(blkvec[0] + i * block_size); }
+    }
+
+    vector<double> xcoords;
+    for (int i = 0; i < dims[0]; i++) xcoords.push_back(blkvec[1][i]);
+
+    vector<double> ycoords;
+    for (int i = 0; i < dims[1]; i++) ycoords.push_back(blkvec[2][i]);
+
+    vector<double> zcoords;
+    if (dims.size() == 3) {
+        for (int i = 0; i < dims[2]; i++) zcoords.push_back(blkvec[3][i]);
+    }
+
+    StretchedGrid *sg = new StretchedGrid(dims, bs, blkptrs, xcoords, ycoords, zcoords);
+
+    return (sg);
+}
+
 LayeredGrid *DataMgr::_make_grid_layered(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax) const
 {
     assert(dims.size() == bs.size());
@@ -2285,6 +2331,8 @@ Grid *DataMgr::_make_grid(int level, int lod, const DC::DataVar &var, const vect
     Grid *rg = NULL;
     if (grid_type == REGULAR) {
         rg = _make_grid_regular(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
+    } else if (grid_type == STRETCHED) {
+        rg = _make_grid_stretched(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
     } else if (grid_type == LAYERED) {
         rg = _make_grid_layered(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
     } else if (grid_type == CURVILINEAR) {
@@ -2339,12 +2387,45 @@ DataMgr::GridType DataMgr::_get_grid_type(const DC::DataVar &var, const vector<D
         if (cdimnames[i].size() != 1 || !cvarsinfo[i].GetUniform()) { grid_type = UNDEFINED; }
     }
     if (!grid_type) {
+        grid_type = STRETCHED;
+        for (int i = 0; i < cdimnames.size(); i++) {
+            if (cdimnames[i].size() != 1) {
+                grid_type = UNDEFINED;
+                break;
+            }
+        }
+    }
+    if (!grid_type) {
         if (cdimnames.size() == 3 && cvarsinfo[0].GetUniform() && cvarsinfo[1].GetUniform() && cdimnames[2].size() == 3) { grid_type = LAYERED; }
     }
     if (!grid_type) {
         if ((cdimnames.size() == 2 || (cdimnames.size() == 3 && cdimnames[2].size() == 1)) && cdimnames[0].size() == 2 && cdimnames[1].size() == 2) { grid_type = CURVILINEAR; }
     }
     return (grid_type);
+}
+
+DataMgr::GridType DataMgr::_get_grid_type(string varname) const
+{
+    vector<string> cvars;
+    string         dummy;
+    int            rc = _get_coord_vars(varname, cvars, dummy);
+    assert(rc == 0);
+
+    vector<DC::CoordVar> cvarsinfo;
+    for (int i = 0; i < cvars.size(); i++) {
+        DC::CoordVar cvarinfo;
+
+        bool ok = GetCoordVarInfo(cvars[i], cvarinfo);
+        assert(ok);
+
+        cvarsinfo.push_back(cvarinfo);
+    }
+
+    DC::DataVar dvar;
+    bool        status = DataMgr::GetDataVarInfo(varname, dvar);
+    assert(status);
+
+    return (_get_grid_type(dvar, cvarsinfo));
 }
 
 // Find the grid coordinates, in voxels, for the region containing

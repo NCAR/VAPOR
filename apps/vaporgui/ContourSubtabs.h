@@ -21,7 +21,9 @@ public:
     ContourVariablesSubtab(QWidget *parent)
     {
         setupUi(this);
-        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT), (VariablesWidget::DimFlags)(VariablesWidget::THREED | VariablesWidget::TWOD));
+        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT), (VariablesWidget::DimFlags)
+                                 //(VariablesWidget::THREED | VariablesWidget::TWOD));
+                                 (VariablesWidget::TWOD));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
@@ -38,8 +40,9 @@ public:
     void Initialize(VAPoR::ContourParams *cParams);
 
 private:
-    void   SetIsovalues();
-    double GetContourMinOrMax(bool minOrMax);
+    double GetContourMinOrMax(string minOrMax);
+    void   enableSliders();
+    void   disableSliders();
 
     VAPoR::ContourParams *_cParams;
     VAPoR::DataMgr *      _dataMgr;
@@ -50,6 +53,7 @@ private:
     Combo *               _spacingCombo;
 
 private slots:
+    void SetContourValues();
     void MappingChanged() { cout << "mapping changed!" << endl; }
 
     void EndTFChange();

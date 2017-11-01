@@ -156,7 +156,11 @@ public:
     size_t GetBoundaryID() const { return (_boundaryID); }
     void   SetBoundaryID(size_t v) { _boundaryID = v; }
 
-    virtual void ClampCoord(std::vector<double> &) const override {}
+    virtual void ClampCoord(std::vector<double> &coords) const override
+    {
+        assert(coords.size() >= GetNumCoordinates());
+        while (coords.size() > GetNumCoordinates()) { coords.pop_back(); }
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     //
