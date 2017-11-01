@@ -27,6 +27,10 @@ class BarbVariablesSubtab : public QWidget, public Ui_BarbVariablesGUI {
         //(VariablesWidget::DimFlags)(VariablesWidget::THREED));
     }
 
+    void Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr);
+    void pushVarStartingWithLetter(vector<string> searchVars,
+                                   vector<string> &returnVars, char letter);
+
     void Update(
         VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
@@ -68,7 +72,7 @@ class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
         VAPoR::DataMgr *dataMgr,
         VAPoR::RenderParams *rParams);
     // {
-    //	_rParams = rParams;
+    //	_bParams = rParams;
     //	_geometryWidget->Update(paramsMgr, dataMgr, rParams);
     //}
 
@@ -80,7 +84,7 @@ class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
     void thicknessChanged(double d);
 
   private:
-    VAPoR::BarbParams *_rParams;
+    VAPoR::BarbParams *_bParams;
     Combo *_xDimCombo;
     Combo *_yDimCombo;
     Combo *_zDimCombo;

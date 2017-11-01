@@ -86,7 +86,7 @@ void BarbParams::_init() {
     // method.
     //
     assert(rc >= 0);
-    assert(minExt.size() == maxExt.size() && minExt.size() == 3);
+    assert(minExt.size() == maxExt.size() && minExt.size() == 2);
 
     GetBox()->SetExtents(minExt, maxExt);
     //GetBox()->SetPlanar(true);
