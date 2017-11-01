@@ -63,8 +63,8 @@ ContourRenderer::ContourRenderer(const ParamsMgr* pm,
 	_componentLength.clear();
 	_endEdge.clear();
 	_numIsovalsCached = 0;
-	_sampleSize = 0;
 	_objectNums.clear();
+	_sampleSize = 400;
 
 }
 
@@ -228,35 +228,18 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	int level = cParams->GetRefinementLevel();
 	int lod = cParams->GetCompressionLevel();
 	vector<double> varMin, varMax;
-	dataMgr->GetVariableExtents(ts, var, 
-		level, varMin, varMax);
+	dataMgr->GetVariableExtents(ts, var, level, varMin, varMax);
 	
-	//StructuredGrid* varGrid;
-	//StructuredGrid* hgtGrid;
 	Grid* varGrid;
-	Grid* hgtGrid;
-	vector<string>varname;
-	varname.push_back(var);
-	bool is3D = cParams->VariablesAre3D();
-	string hgtVar = cParams->GetHeightVariableName();
-
-//	varGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod);
-//	varGrid->SetInterpolationOrder(1);
 
 	vector<double> boxMin, boxMax;
 	cParams->GetBox()->GetExtents(boxMin, boxMax);
 
-	vector<double> domainMin, domainMax;
-	dataMgr->GetVariableExtents(ts, var, level, domainMin, domainMax);
-
-	varGrid = (StructuredGrid *)dataMgr->GetVariable(ts, var, level, lod, boxMin, boxMax);
+	varGrid = (StructuredGrid *)dataMgr->GetVariable(
+		ts, var, level, lod, boxMin, boxMax
+	);
 	varGrid->SetInterpolationOrder(1);
 
-	//_sampleSize = 1000;
-	//_sampleSize = 25;
-	_sampleSize = 200;
-	float domainFraction = (boxMax[0]-boxMin[0])/(domainMax[0]-domainMin[0]);
-	_sampleSize = (int)(_sampleSize*domainFraction);
 	float* dataVals = new float[_sampleSize*_sampleSize];
 
 	//Set up to transform from isoline plane into volume:
@@ -266,65 +249,40 @@ int ContourRenderer::buildLineCache(DataMgr* dataMgr){
 	// We are currently only supporting axis-orthogonal planes.  When we
 	// support arbitrarily rotated planes, planeCoords[] will be a 3 element
 	// array.
-//	double planeCoords[2]; 
-	//vector<double> dataCoords(3);
-	double dataCoords[3];
 
-	double iIncrement = (boxMax[0] - boxMin[0]) / (float)_sampleSize;
-	double jIncrement = (boxMax[1] - boxMin[1]) / (float)_sampleSize;
-//	double iIncrement = (domainMax[0] - domainMin[0])/ (float)_sampleSize;
-//	double jIncrement = (domainMax[1] - domainMin[1])/ (float)_sampleSize;
+	assert(_sampleSize > 1);
+	double iIncrement = (boxMax[0] - boxMin[0]) / (float)(_sampleSize - 1);
+	double jIncrement = (boxMax[1] - boxMin[1]) / (float)(_sampleSize - 1);
 
 	vector<double> minu, maxu;
 	varGrid->GetUserExtents(minu, maxu);
 
-//	boxMin[0] = minu[0];
-//	boxMax[0] = maxu[0];
-//	boxMin[1] = minu[1];
-//	boxMax[1] = maxu[1];
+	float z = boxMin.size() == 3 ? (boxMax[2] + boxMin[2]) / 2.0 : 0.0;
+	for (int j = 0; j<_sampleSize; j++){
+		double y = j*jIncrement + boxMin[1];
 
-	float mv = varGrid->GetMissingValue();
-	for (int i = 0; i<_sampleSize; i++){
-//		planeCoords[0] = -1. + 2.*(double)i/(_sampleSize-1.);
-		for (int j = 0; j<_sampleSize; j++){
-			dataVals[i+j*_sampleSize] = mv;  
+		for (int i = 0; i<_sampleSize; i++){
 
-//			int orientation = cParams->GetBox()->GetOrientation();
-			dataCoords[0] = i*iIncrement + boxMin[0];
-			dataCoords[1] = j*jIncrement + boxMin[1];
-			dataCoords[2] = (varMax[2] - varMin[2])/2.f;
+			double x = i*iIncrement + boxMin[0];
 
-//			planeCoords[1] = -1. + 2.*(double)j/(_sampleSize-1.);
-			//2D transform is a*x + b
-//			dataCoords[0] = a[0]*planeCoords[0] + b[0];
-//			dataCoords[1] = a[1]*planeCoords[1] + b[1];
-//			dataCoords[2] = 0.;
-			//double val = varGrid->GetValue(dataCoords);
-			double val = varGrid->GetValue(dataCoords[0], dataCoords[1], dataCoords[2]);
+			double val = varGrid->GetValue(x,y,z);
 			dataVals[i+j*_sampleSize] = val;
-			//if (j/500==0)
-				//cout << var << " " << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << " " << val << endl;
-			//find the coords that the texture maps to
-//			bool dataOK = true;
-//			for (int k = 0; k< 3; k++){
-//				if (dataCoords[k] < extExtents[k] || dataCoords[k] > extExtents[k+3]) dataOK = false;
-//				dataCoords[k] += minExts[k]; //Convert to user coordinates.
-//			}
-//			if(dataOK) { //find the coordinate in the data array
-//				dataVals[i+j*_sampleSize] = isolineGrid[0]->GetValue(dataCoords[0],dataCoords[1],dataCoords[2]);
-//			}
-			//cout << "coords " << dataCoords[0] << " " << dataCoords[1] << " " << dataCoords[2] << endl;
+
 		}
 	}
-	//Unlock the StructuredGrid
+	float mv = varGrid->GetMissingValue();
+
+	// Unlock the StructuredGrid
+	//
 	dataMgr->UnlockGrid(varGrid);
-//	if (varname.size()>1)dataMgr->UnlockGrid(isolineGrid);
+
 	//Loop over each isovalue and cell, and classify the cell as to which edges are crossed by the isoline.
 	//when there is an isoline crossing, a line segment is saved in the cache, defined by the two endpoints.
 	const vector<double>& isovals = cParams->GetContourValues(var);
 	
 	//Clear the textObjects (if they exist)
 //	TextObject::clearTextObjects(this);
+
 	
 	_objectNums.clear();
 	for (int iso = 0; iso < isovals.size(); iso++){
@@ -771,11 +729,17 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 	int segIndex;
 	size_t timestep = GetCurrentTimestep();
 	//loop over cells (identified by lower-left vertices
-	for (int i = 0; i<_sampleSize-1; i++){
-		for (int j = 0; j<_sampleSize-1; j++){
+	for (int j = 0; j<_sampleSize-1; j++){
+		for (int i = 0; i<_sampleSize-1; i++){
+
 			//Determine which case is associated with cell cornered at i,j
-			if (0) {//(dataVals[i+j*_sampleSize] == mv) || (dataVals[i+1+j*_sampleSize] == mv) ||
-				//(dataVals[i+(j+1)*_sampleSize] == mv) || (dataVals[i+1+(j+1)*_sampleSize] == mv)) {
+			if (
+				(dataVals[i+j*_sampleSize] == mv) || 
+				(dataVals[i+1+j*_sampleSize] == mv) ||
+				(dataVals[i+(j+1)*_sampleSize] == mv) || 
+				(dataVals[i+1+(j+1)*_sampleSize] == mv)
+			) {
+
 				cellCase = 0;
 			}
 			else
@@ -917,8 +881,8 @@ void ContourRenderer::buildEdges(int iso, float* dataVals, float mv){
 					assert(0);
 
 			}
-		} //for j
-	} //for i
+		} 
+	} 
 
 	//Now traverse the edges to determine the isolines in order
 	if(cParams->GetTextDensity() > 0. && cParams->GetTextEnabled()) {
