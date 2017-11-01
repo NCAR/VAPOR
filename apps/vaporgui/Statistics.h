@@ -97,6 +97,8 @@ protected:
 private slots:
     void _newVarChanged(int);
     void _removeVarChanged(int);
+    void _newCalcChanged(int);
+    void _removeCalcChanged(int);
     /*
     void restoreExtents();
     void minTSChanged();
