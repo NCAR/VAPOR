@@ -83,16 +83,6 @@ bool Statistics::Update() {
     DataMgrCombo->setCurrentIndex(currentIdx);
     DataMgrCombo->blockSignals(false);
 
-    // Update Timesteps
-    int minTS = statsParams->GetMinTS();
-    MinTimestepSpinbox->blockSignals(true);
-    MinTimestepSpinbox->setValue(minTS);
-    MinTimestepSpinbox->blockSignals(false);
-    int maxTS = statsParams->GetMaxTS();
-    MaxTimestepSpinbox->blockSignals(true);
-    MaxTimestepSpinbox->setValue(maxTS);
-    MaxTimestepSpinbox->blockSignals(false);
-
     // Update auto-update checkbox
     bool autoUpdate = statsParams->GetAutoUpdate();
     UpdateCheckbox->blockSignals(true);
@@ -172,55 +162,66 @@ bool Statistics::Update() {
     RemoveCalcCombo->blockSignals(false);
 
     // Update LOD, Refinement
-    if (enabledVars.size() > 0) {
-        RefCombo->blockSignals(true);
-        LODCombo->blockSignals(true);
-        RefCombo->clear();
-        LODCombo->clear();
+    RefCombo->blockSignals(true);
+    LODCombo->blockSignals(true);
+    RefCombo->clear();
+    LODCombo->clear();
 
-        int numRefLevels = currentDmgr->GetNumRefLevels(enabledVars[0]);
-        vector<size_t> availLODs = currentDmgr->GetCRatios(enabledVars[0]);
-        for (int i = 1; i < enabledVars.size(); i++) // sanity check
-        {
-            assert(numRefLevels == currentDmgr->GetNumRefLevels(enabledVars[i]));
-            assert(availLODs.size() == currentDmgr->GetCRatios(enabledVars[i]).size());
-        }
-
-        std::string referenceVar;
-        if (availVars3D.size() > 0)
-            referenceVar = availVars3D[0];
-        else
-            referenceVar = availVars[0];
-
-        // work on refinement levels
-        std::vector<size_t> dims, blockSizes;
-        for (int level = 0; level < numRefLevels; level++) {
-            currentDmgr->GetDimLensAtLevel(referenceVar, level, dims, blockSizes);
-            QString line = QString::number(level);
-            line += " (";
-            for (int i = 0; i < dims.size(); i++) {
-                line += QString::number(dims[i]);
-                line += "x";
-            }
-            line.remove(line.size() - 1, 1);
-            line += ")";
-            RefCombo->addItem(line);
-        }
-        RefCombo->setCurrentIndex(statsParams->GetRefinementLevel());
-
-        // work on LOD levels
-        for (int lod = 0; lod < availLODs.size(); lod++) {
-            QString line = QString::number(lod);
-            line += " (";
-            line += QString::number(availLODs[lod]);
-            line += ":1)";
-            LODCombo->addItem(line);
-        }
-        LODCombo->setCurrentIndex(statsParams->GetCompressionLevel());
-
-        RefCombo->blockSignals(false);
-        LODCombo->blockSignals(false);
+    int numRefLevels = currentDmgr->GetNumRefLevels(availVars[0]);
+    vector<size_t> availLODs = currentDmgr->GetCRatios(availVars[0]);
+    // sanity check on enabledVars.
+    for (int i = 1; i < enabledVars.size(); i++) {
+        assert(numRefLevels == currentDmgr->GetNumRefLevels(enabledVars[i]));
+        assert(availLODs.size() == currentDmgr->GetCRatios(enabledVars[i]).size());
     }
+
+    std::string referenceVar;
+    if (availVars3D.size() > 0)
+        referenceVar = availVars3D[0];
+    else
+        referenceVar = availVars[0];
+
+    // add refinement levels
+    std::vector<size_t> dims, blockSizes;
+    for (int level = 0; level < numRefLevels; level++) {
+        currentDmgr->GetDimLensAtLevel(referenceVar, level, dims, blockSizes);
+        QString line = QString::number(level);
+        line += " (";
+        for (int i = 0; i < dims.size(); i++) {
+            line += QString::number(dims[i]);
+            line += "x";
+        }
+        line.remove(line.size() - 1, 1);
+        line += ")";
+        RefCombo->addItem(line);
+    }
+    RefCombo->setCurrentIndex(statsParams->GetRefinementLevel());
+
+    // add LOD levels
+    for (int lod = 0; lod < availLODs.size(); lod++) {
+        QString line = QString::number(lod);
+        line += " (";
+        line += QString::number(availLODs[lod]);
+        line += ":1)";
+        LODCombo->addItem(line);
+    }
+    LODCombo->setCurrentIndex(statsParams->GetCompressionLevel());
+
+    RefCombo->blockSignals(false);
+    LODCombo->blockSignals(false);
+
+    // Update timesteps
+    MinTimestepSpinbox->blockSignals(true);
+    MinTimestepSpinbox->setMinimum(0);
+    MinTimestepSpinbox->setMaximum(currentDmgr->GetNumTimeSteps(availVars[0]) - 1);
+    MinTimestepSpinbox->setValue(statsParams->GetCurrentMinTS());
+    MinTimestepSpinbox->blockSignals(false);
+
+    MaxTimestepSpinbox->blockSignals(true);
+    MaxTimestepSpinbox->setMinimum(0);
+    MaxTimestepSpinbox->setMaximum(currentDmgr->GetNumTimeSteps(availVars[0]) - 1);
+    MaxTimestepSpinbox->setValue(statsParams->GetCurrentMaxTS());
+    MaxTimestepSpinbox->blockSignals(false);
 
     return true;
 }
@@ -351,7 +352,55 @@ bool Statistics::Connect() {
     connect(RemoveCalcCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeCalcChanged(int)));
     connect(RefCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_refinementChanged(int)));
     connect(LODCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)));
+    connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)));
+    connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)));
     return true;
+}
+
+void Statistics::_minTSChanged(int val) {
+    assert(val >= 0);
+
+    // Initialize pointers
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+
+    // Add this minTS to parameter if different
+    if (val != statsParams->GetCurrentMinTS()) {
+        statsParams->SetCurrentMinTS(val);
+        _validStats.InvalidAll();
+        this->_updateVarTable();
+
+        if (val > statsParams->GetCurrentMaxTS()) {
+            statsParams->SetCurrentMaxTS(val);
+            MaxTimestepSpinbox->blockSignals(true);
+            MaxTimestepSpinbox->setValue(val);
+            MaxTimestepSpinbox->blockSignals(false);
+        }
+    }
+}
+
+void Statistics::_maxTSChanged(int val) {
+    assert(val >= 0);
+
+    // Initialize pointers
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+
+    // Add this maxTS to parameter if different
+    if (val != statsParams->GetCurrentMaxTS()) {
+        statsParams->SetCurrentMaxTS(val);
+        _validStats.InvalidAll();
+        this->_updateVarTable();
+
+        if (val < statsParams->GetCurrentMinTS()) {
+            statsParams->SetCurrentMinTS(val);
+            MinTimestepSpinbox->blockSignals(true);
+            MinTimestepSpinbox->setValue(val);
+            MinTimestepSpinbox->blockSignals(false);
+        }
+    }
 }
 
 void Statistics::_lodChanged(int index) {
