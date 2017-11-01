@@ -1,654 +1,600 @@
+#include <stdio.h>
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <cfloat>
+#include <vapor/utils.h>
 #include <vapor/StretchedGrid.h>
-#ifdef _WINDOWS
-#pragma warning(disable : 4251 4100)
-#endif
+#include <vapor/KDTreeRG.h>
+#include <vapor/vizutil.h>
 
 using namespace std;
 using namespace VAPoR;
 
-StretchedGrid::StretchedGrid(
-    const size_t bs[3],
-    const size_t min[3],
-    const size_t max[3],
-    const double extents[6],
-    const bool periodic[3],
-    float **blks,
+void StretchedGrid::_stretchedGrid(
     const vector<double> &xcoords,
     const vector<double> &ycoords,
-    const vector<double> &zcoords) : RegularGrid(bs, min, max, extents, periodic, blks) {
-
-    for (int i = 0; i < 3; i++) {
-        _min[i] = min[i];
-        _max[i] = max[i];
-        _delta[i] = 0.0;
-        _extents[i] = extents[i];
-        _extents[i + 3] = extents[i + 3];
-    }
+    const vector<double> &zcoords) {
+    assert(xcoords.size() != 0);
+    assert(ycoords.size() != 0);
 
     _xcoords.clear();
     _ycoords.clear();
     _zcoords.clear();
+    _minu.clear();
+    _maxu.clear();
+    _xcoords = xcoords;
+    _ycoords = ycoords;
+    _zcoords = zcoords;
 
-    size_t xdim = max[0] - min[0] + 1;
-    if (xcoords.size() >= xdim) {
-        for (int i = 0; i < xdim; i++)
-            _xcoords.push_back(xcoords[i]);
-        _extents[0] = _xcoords[0];
-        _extents[3] = _xcoords[xdim - 1];
-    } else {
-        _delta[0] = (extents[3] - extents[0]) / (double)(_max[0] - _min[0]);
-    }
-
-    size_t ydim = max[1] - min[1] + 1;
-    if (ycoords.size() >= ydim) {
-        for (int i = 0; i < ydim; i++)
-            _ycoords.push_back(ycoords[i]);
-        _extents[1] = _ycoords[0];
-        _extents[4] = _ycoords[ydim - 1];
-    } else {
-        _delta[1] = (extents[4] - extents[1]) / (double)(_max[1] - _min[1]);
-    }
-
-    size_t zdim = max[2] - min[2] + 1;
-    if (zcoords.size() >= zdim) {
-        for (int i = 0; i < zdim; i++)
-            _zcoords.push_back(zcoords[i]);
-        _extents[2] = _zcoords[0];
-        _extents[5] = _zcoords[zdim - 1];
-    } else {
-        _delta[2] = (extents[5] - extents[2]) / (double)(_max[2] - _min[2]);
-    }
-    RegularGrid::_SetExtents(_extents);
+    // Get the user extents now. Do this only once.
+    //
+    _GetUserExtents(_minu, _maxu);
 }
 
 StretchedGrid::StretchedGrid(
-    const size_t bs[3],
-    const size_t min[3],
-    const size_t max[3],
-    const double extents[6],
-    const bool periodic[3],
-    float **blks,
+    const vector<size_t> &dims,
+    const vector<size_t> &bs,
+    const vector<float *> &blks,
     const vector<double> &xcoords,
     const vector<double> &ycoords,
-    const vector<double> &zcoords,
-    float missing_value) : RegularGrid(bs, min, max, extents, periodic, blks, missing_value) {
+    const vector<double> &zcoords) : StructuredGrid(dims, bs, blks) {
 
-    for (int i = 0; i < 3; i++) {
-        _min[i] = min[i];
-        _max[i] = max[i];
-        _delta[i] = 0.0;
-        _extents[i] = extents[i];
-        _extents[i + 3] = extents[i + 3];
-    }
+    assert(bs.size() == dims.size());
+    assert(bs.size() >= 1 && bs.size() <= 3);
 
-    _xcoords.clear();
-    _ycoords.clear();
-    _zcoords.clear();
-
-    size_t xdim = max[0] - min[0] + 1;
-    if (xcoords.size() >= xdim) {
-        for (int i = 0; i < xdim; i++)
-            _xcoords.push_back(xcoords[i]);
-
-        _extents[0] = _xcoords[0];
-        _extents[3] = _xcoords[xdim - 1];
-    } else {
-        _delta[0] = (extents[3] - extents[0]) / (double)(_max[0] - _min[0]);
-    }
-
-    size_t ydim = max[1] - min[1] + 1;
-    if (ycoords.size() >= ydim) {
-        for (int i = 0; i < ydim; i++)
-            _ycoords.push_back(ycoords[i]);
-        _extents[1] = _ycoords[0];
-        _extents[4] = _ycoords[ydim - 1];
-    } else {
-        _delta[1] = (extents[4] - extents[1]) / (double)(_max[1] - _min[1]);
-    }
-
-    size_t zdim = max[2] - min[2] + 1;
-    if (zcoords.size() >= zdim) {
-        for (int i = 0; i < zdim; i++)
-            _zcoords.push_back(zcoords[i]);
-        _extents[2] = _zcoords[0];
-        _extents[5] = _zcoords[zdim - 1];
-    } else {
-        _delta[2] = (extents[5] - extents[2]) / (double)(_max[2] - _min[2]);
-    }
-    RegularGrid::_SetExtents(_extents);
+    _stretchedGrid(xcoords, ycoords, zcoords);
 }
 
-float StretchedGrid::GetValue(double x, double y, double z) const {
-
-    RegularGrid::ClampCoord(x, y, z);
-
-    // At this point xyz should be within the bounds _minu, _maxu
-    //
-    if (!RegularGrid::InsideGrid(x, y, z))
-        return (GetMissingValue());
-
-    int order = RegularGrid::GetInterpolationOrder();
-    if (order == 0) {
-        return (_GetValueNearestNeighbor(x, y, z));
-    } else if (order == 1) {
-        return (_GetValueLinear(x, y, z));
-    } else {
-        return (quadraticInterpolation(x, y, z));
-    }
-}
-
-float StretchedGrid::_GetValueNearestNeighbor(
-    double x, double y, double z) const {
-
-    // Get the indecies of the cell containing the point
-    //
-    size_t i, j, k;
-    GetIJKIndexFloor(x, y, z, &i, &j, &k);
-
-    double iwgt = 0.0;
-    if (i < (_max[0] - _min[0])) {
-        if (_xcoords.size()) {
-            iwgt = (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
-        } else if (_delta[0] != 0.0) {
-            iwgt = ((x - _extents[0]) - (i * _delta[0])) / _delta[0];
-        }
-    }
-    double jwgt = 0.0;
-    if (j < (_max[1] - _min[1])) {
-        if (_ycoords.size()) {
-            jwgt = (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
-        } else if (_delta[1] != 0.0) {
-            jwgt = ((y - _extents[1]) - (j * _delta[1])) / _delta[1];
-        }
-    }
-    double kwgt = 0.0;
-    if (k < (_max[2] - _min[2])) {
-        if (_zcoords.size()) {
-            kwgt = (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
-        } else if (_delta[2] != 0.0) {
-            kwgt = ((z - _extents[2]) - (k * _delta[2])) / _delta[2];
-        }
-    }
-
-    if (iwgt > 0.5)
-        i++;
-    if (jwgt > 0.5)
-        j++;
-    if (kwgt > 0.5)
-        k++;
-
-    return (AccessIJK(i, j, k));
-}
-
-float StretchedGrid::_GetValueLinear(double x, double y, double z) const {
-
-    // Get the indecies of the cell containing the point
-    //
-    size_t i, j, k;
-    GetIJKIndexFloor(x, y, z, &i, &j, &k);
-
-    double iwgt = 0.0;
-    if (i < (_max[0] - _min[0])) {
-        if (_xcoords.size()) {
-            iwgt = (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
-        } else if (_delta[0] != 0.0) {
-            iwgt = ((x - _extents[0]) - (i * _delta[0])) / _delta[0];
-        }
-    }
-    double jwgt = 0.0;
-    if (j < (_max[1] - _min[1])) {
-        if (_ycoords.size()) {
-            jwgt = (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
-        } else if (_delta[1] != 0.0) {
-            jwgt = ((y - _extents[1]) - (j * _delta[1])) / _delta[1];
-        }
-    }
-    double kwgt = 0.0;
-    if (k < (_max[2] - _min[2])) {
-        if (_zcoords.size()) {
-            kwgt = (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
-        } else if (_delta[2] != 0.0) {
-            kwgt = ((z - _extents[2]) - (k * _delta[2])) / _delta[2];
-        }
-    }
-
-    double p0, p1, p2, p3, p4, p5, p6, p7;
-
-    p0 = AccessIJK(i, j, k);
-    if (p0 == GetMissingValue())
-        return (GetMissingValue());
-
-    if (iwgt != 0.0) {
-        p1 = AccessIJK(i + 1, j, k);
-        if (p1 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p1 = 0.0;
-
-    if (jwgt != 0.0) {
-        p2 = AccessIJK(i, j + 1, k);
-        if (p2 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p2 = 0.0;
-
-    if (iwgt != 0.0 && jwgt != 0.0) {
-        p3 = AccessIJK(i + 1, j + 1, k);
-        if (p3 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p3 = 0.0;
-
-    if (kwgt != 0.0) {
-        p4 = AccessIJK(i, j, k + 1);
-        if (p4 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p4 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0) {
-        p5 = AccessIJK(i + 1, j, k + 1);
-        if (p5 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p5 = 0.0;
-
-    if (kwgt != 0.0 && jwgt != 0.0) {
-        p6 = AccessIJK(i, j + 1, k + 1);
-        if (p6 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p6 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0 && jwgt != 0.0) {
-        p7 = AccessIJK(i + 1, j + 1, k + 1);
-        if (p7 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p7 = 0.0;
-
-    double c0 = p0 + iwgt * (p1 - p0) + jwgt * ((p2 + iwgt * (p3 - p2)) - (p0 + iwgt * (p1 - p0)));
-    double c1 = p4 + iwgt * (p5 - p4) + jwgt * ((p6 + iwgt * (p7 - p6)) - (p4 + iwgt * (p5 - p4)));
-
-    return (c0 + kwgt * (c1 - c0));
-}
-
-float StretchedGrid::_GetValueQuadratic(double x, double y, double z) const {
-
-    // Get the indecies of the cell containing the point
-    //
-    size_t i, j, k;
-    GetIJKIndexFloor(x, y, z, &i, &j, &k);
-
-    double iwgt = 0.0;
-    if (i < (_max[0] - _min[0])) {
-        if (_xcoords.size()) {
-            iwgt = (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
-        } else if (_delta[0] != 0.0) {
-            iwgt = ((x - _extents[0]) - (i * _delta[0])) / _delta[0];
-        }
-    }
-    double jwgt = 0.0;
-    if (j < (_max[1] - _min[1])) {
-        if (_ycoords.size()) {
-            jwgt = (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
-        } else if (_delta[1] != 0.0) {
-            jwgt = ((y - _extents[1]) - (j * _delta[1])) / _delta[1];
-        }
-    }
-    double kwgt = 0.0;
-    if (k < (_max[2] - _min[2])) {
-        if (_zcoords.size()) {
-            kwgt = (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
-        } else if (_delta[2] != 0.0) {
-            kwgt = ((z - _extents[2]) - (k * _delta[2])) / _delta[2];
-        }
-    }
-
-    double p0, p1, p2, p3, p4, p5, p6, p7;
-
-    p0 = AccessIJK(i, j, k);
-    if (p0 == GetMissingValue())
-        return (GetMissingValue());
-
-    if (iwgt != 0.0) {
-        p1 = AccessIJK(i + 1, j, k);
-        if (p1 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p1 = 0.0;
-
-    if (jwgt != 0.0) {
-        p2 = AccessIJK(i, j + 1, k);
-        if (p2 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p2 = 0.0;
-
-    if (iwgt != 0.0 && jwgt != 0.0) {
-        p3 = AccessIJK(i + 1, j + 1, k);
-        if (p3 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p3 = 0.0;
-
-    if (kwgt != 0.0) {
-        p4 = AccessIJK(i, j, k + 1);
-        if (p4 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p4 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0) {
-        p5 = AccessIJK(i + 1, j, k + 1);
-        if (p5 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p5 = 0.0;
-
-    if (kwgt != 0.0 && jwgt != 0.0) {
-        p6 = AccessIJK(i, j + 1, k + 1);
-        if (p6 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p6 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0 && jwgt != 0.0) {
-        p7 = AccessIJK(i + 1, j + 1, k + 1);
-        if (p7 == GetMissingValue())
-            return (GetMissingValue());
-    } else
-        p7 = 0.0;
-
-    double c0 = p0 + iwgt * (p1 - p0) + jwgt * ((p2 + iwgt * (p3 - p2)) - (p0 + iwgt * (p1 - p0)));
-    double c1 = p4 + iwgt * (p5 - p4) + jwgt * ((p6 + iwgt * (p7 - p6)) - (p4 + iwgt * (p5 - p4)));
-
-    return (c0 + kwgt * (c1 - c0));
-}
-int StretchedGrid::GetUserCoordinates(
-    size_t i, size_t j, size_t k,
-    double *x, double *y, double *z) const {
-
-    if (i > _max[0] - _min[0])
-        return (-1);
-    if (j > _max[1] - _min[1])
-        return (-1);
-    if (k > _max[2] - _min[2])
-        return (-1);
-
-    RegularGrid::GetUserCoordinates(i, j, k, x, y, z);
-
-    if (_xcoords.size())
-        *x = _xcoords[i];
-    if (_ycoords.size())
-        *y = _ycoords[j];
-    if (_zcoords.size())
-        *z = _zcoords[k];
-
-    return (0);
+size_t StretchedGrid::GetNumCoordinates() const {
+    return (_zcoords.size() == 0 ? 2 : 3);
 }
 
 void StretchedGrid::GetBoundingBox(
-    const size_t min[3],
-    const size_t max[3],
-    double extents[6]) const {
-    StretchedGrid::GetUserCoordinates(
-        min[0], min[1], min[2], &(extents[0]), &(extents[1]), &(extents[2]));
-    StretchedGrid::GetUserCoordinates(
-        max[0], max[1], max[2], &(extents[3]), &(extents[4]), &(extents[5]));
+    const std::vector<size_t> &min, const std::vector<size_t> &max,
+    std::vector<double> &minu, std::vector<double> &maxu) const {
+    assert(min.size() == max.size());
+    assert(min.size() == GetNumCoordinates());
+
+    for (int i = 0; i < min.size(); i++) {
+        assert(min[i] <= max[i]);
+    }
+
+    minu.clear();
+    maxu.clear();
+
+    for (int i = 0; i < min.size(); i++) {
+        minu.push_back(0.0);
+        maxu.push_back(0.0);
+    }
+
+    minu[0] = _xcoords[min[0]];
+    maxu[0] = _xcoords[max[0]];
+    minu[1] = _ycoords[min[1]];
+    maxu[1] = _ycoords[max[1]];
+
+    // We're done if 2D grid
+    //
+    if (GetNumCoordinates() == 2)
+        return;
+
+    minu[2] = _zcoords[min[2]];
+    maxu[2] = _zcoords[max[2]];
 }
 
 void StretchedGrid::GetEnclosingRegion(
-    const double minu[3], const double maxu[3],
-    size_t min[3], size_t max[3]) const {
+    const std::vector<double> &minu, const std::vector<double> &maxu,
+    std::vector<size_t> &min, std::vector<size_t> &max) const {
+    assert(minu.size() == maxu.size());
+    assert(minu.size() == GetNumCoordinates());
 
-    size_t dims[3];
-    StretchedGrid::GetDimensions(dims);
-    for (int i = 0; i < 3; i++) {
+    // Initialize voxels coords to full grid
+    //
+    vector<size_t> dims = GetDimensions();
+    for (int i = 0; i < dims.size(); i++) {
         min[i] = 0;
         max[i] = dims[i] - 1;
     }
 
-    size_t temp_min[3], temp_max[3];
-    StretchedGrid::GetIJKIndex(
-        minu[0], minu[1], minu[2], &temp_min[0], &temp_min[1], &temp_min[2]);
-    StretchedGrid::GetIJKIndex(
-        maxu[0], maxu[1], maxu[2], &temp_max[0], &temp_max[1], &temp_max[2]);
+    float xmin = minu[0];
+    int imin = min[0];
+    bool outside = true;
+    for (int i = 0; i < _xcoords.size() && outside; i++) {
+        if (_xcoords[i] < xmin)
+            outside = false;
+        if (outside)
+            imin = i;
+    }
+    min[0] = imin;
 
-    double temp_minu[3], temp_maxu[3];
+    float xmax = maxu[0];
+    int imax = max[0];
+    outside = true;
+    for (int i = _xcoords.size() - 1; i >= min[0] && outside; i--) {
+        if (_xcoords[i] > xmax)
+            outside = false;
+        if (outside)
+            imax = i;
+    }
+    max[0] = imax;
 
-    StretchedGrid::GetUserCoordinates(
-        temp_min[0], temp_min[1], temp_min[2],
-        &temp_minu[0], &temp_minu[1], &temp_minu[2]);
-    StretchedGrid::GetUserCoordinates(
-        temp_max[0], temp_max[1], temp_max[2],
-        &temp_maxu[0], &temp_maxu[1], &temp_maxu[2]);
+    float ymin = minu[1];
+    int jmin = min[1];
+    outside = true;
+    for (int j = 0; j < _ycoords.size() && outside; j++) {
+        if (_ycoords[j] < ymin)
+            outside = false;
+        if (outside)
+            jmin = j;
+    }
+    min[1] = jmin;
 
-    double extents[6];
-    StretchedGrid::GetUserExtents(extents);
+    float ymax = maxu[1];
+    int jmax = max[1];
+    outside = true;
+    for (int j = _ycoords.size() - 1; j >= min[1] && outside; j--) {
+        if (_ycoords[j] > ymax)
+            outside = false;
+        if (outside)
+            jmax = j;
+    }
+    max[1] = jmax;
 
-    for (int i = 0; i < 3; i++) {
-        if (extents[i] < extents[i + 3]) {
-            if (temp_minu[i] > minu[i] && (temp_min[i] > 0)) {
-                temp_min[i]--;
-            }
-            if (temp_maxu[i] < maxu[i] && (temp_max[i] < (dims[i] - 1))) {
-                temp_max[i]++;
-            }
+    if (dims.size() < 3)
+        return; // 2D => we're done.
+
+    // Finally, get Z
+    //
+    float zmin = minu[2];
+    int kmin = min[2];
+    outside = true;
+    for (int k = 0; k < _zcoords.size() && outside; k++) {
+        if (_zcoords[k] < zmin)
+            outside = false;
+        if (outside)
+            kmin = k;
+    }
+    min[2] = kmin;
+
+    float zmax = maxu[2];
+    int kmax = max[2];
+    outside = true;
+    for (int k = _zcoords.size() - 1; k >= min[2] && outside; k--) {
+        if (_zcoords[k] > zmax)
+            outside = false;
+        if (outside)
+            kmax = k;
+    }
+    max[2] = kmax;
+}
+
+void StretchedGrid::GetUserCoordinates(
+    const std::vector<size_t> &indices,
+    std::vector<double> &coords) const {
+    assert(indices.size() == GetDimensions().size());
+
+    coords.clear();
+
+    vector<size_t> dims = StructuredGrid::GetDimensions();
+
+    vector<size_t> cIndices = indices;
+    for (int i = 0; i < cIndices.size(); i++) {
+        if (cIndices[i] >= dims[i]) {
+            cIndices[i] = dims[i] - 1;
+        }
+    }
+    coords.push_back(_xcoords[cIndices[0]]);
+    coords.push_back(_ycoords[cIndices[1]]);
+
+    if (GetNumCoordinates() > 2) {
+        coords.push_back(_zcoords[cIndices[2]]);
+    }
+}
+
+void StretchedGrid::GetIndices(
+    const std::vector<double> &coords,
+    std::vector<size_t> &indices) const {
+    assert(coords.size() >= GetNumCoordinates());
+    indices.clear();
+
+    // Clamp coordinates on periodic boundaries to grid extents
+    //
+    vector<double> cCoords = coords;
+    ClampCoord(cCoords);
+
+    size_t i;
+    int rc = _binarySearchRange(_zcoords, cCoords[0], i);
+    if (rc < 0) {
+        indices.push_back(0);
+    } else if (rc > 0) {
+        indices.push_back(i);
+    } else {
+        indices.push_back(GetDimensions()[0] - 1);
+    }
+
+    size_t j;
+    rc = _binarySearchRange(_zcoords, cCoords[1], j);
+    if (rc < 0) {
+        indices.push_back(0);
+    } else if (rc > 0) {
+        indices.push_back(j);
+    } else {
+        indices.push_back(GetDimensions()[1] - 1);
+    }
+
+    if (cCoords.size() == 2)
+        return;
+
+    size_t k;
+    rc = _binarySearchRange(_zcoords, cCoords[2], k);
+    if (rc < 0) {
+        indices.push_back(0);
+    } else if (rc > 0) {
+        indices.push_back(k);
+    } else {
+        indices.push_back(GetDimensions()[2] - 1);
+    }
+}
+
+bool StretchedGrid::GetIndicesCell(
+    const std::vector<double> &coords,
+    std::vector<size_t> &indices) const {
+    assert(coords.size() >= GetNumCoordinates());
+
+    // Clamp coordinates on periodic boundaries to grid extents
+    //
+    vector<double> cCoords = coords;
+    ClampCoord(cCoords);
+
+    double x = cCoords[0];
+    double y = cCoords[1];
+    double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+
+    double xwgt[2], ywgt[2], zwgt[2];
+    size_t i, j, k;
+    bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
+
+    if (!inside)
+        return (false);
+
+    indices.push_back(i);
+    indices.push_back(j);
+
+    if (GetNumCoordinates() == 2)
+        return (true);
+
+    indices.push_back(k);
+
+    return (true);
+}
+
+bool StretchedGrid::InsideGrid(const std::vector<double> &coords) const {
+    assert(coords.size() == GetNumCoordinates());
+
+    // Clamp coordinates on periodic boundaries to reside within the
+    // grid extents
+    //
+    vector<double> cCoords = coords;
+    ClampCoord(cCoords);
+
+    // Do a quick check to see if the point is completely outside of
+    // the grid bounds.
+    //
+    for (int i = 0; i < cCoords.size(); i++) {
+        if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i])
+            return (false);
+    }
+
+    double xwgt[2], ywgt[2], zwgt[2];
+    size_t i, j, k; // not used
+    double x = cCoords[0];
+    double y = cCoords[1];
+    double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+
+    bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
+
+    return (inside);
+}
+
+StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(
+    const StretchedGrid *sg, bool begin) : ConstCoordItrAbstract() {
+    _sg = sg;
+    vector<size_t> dims = _sg->GetDimensions();
+    if (begin) {
+        _x = 0;
+        _y = 0;
+        _z = 0;
+    } else {
+        _x = 0;
+        _y = dims.size() == 2 ? dims[1] : 0;
+        _z = dims.size() == 3 ? dims[2] : 0;
+    }
+    _coords.push_back(_sg->_xcoords[0]);
+    _coords.push_back(_sg->_ycoords[0]);
+    if (dims.size() == 3) {
+        _coords.push_back(_sg->_zcoords[0]);
+    }
+}
+
+StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(
+    const ConstCoordItrSG &rhs) : ConstCoordItrAbstract() {
+    _sg = rhs._sg;
+    _x = rhs._x;
+    _y = rhs._y;
+    _z = rhs._z;
+    _coords = rhs._coords;
+}
+
+StretchedGrid::ConstCoordItrSG::ConstCoordItrSG() : ConstCoordItrAbstract() {
+    _sg = NULL;
+    _x = 0;
+    _y = 0;
+    _z = 0;
+    _coords.clear();
+}
+
+void StretchedGrid::ConstCoordItrSG::next() {
+
+    const vector<size_t> &dims = _sg->GetDimensions();
+
+    _x++;
+
+    if (_x < dims[0]) {
+        _coords[0] = _sg->_xcoords[_x];
+        _coords[1] = _sg->_ycoords[_y];
+        return;
+    }
+
+    _x = 0;
+    _y++;
+
+    if (_y < dims[1]) {
+        _coords[0] = _sg->_xcoords[_x];
+        _coords[1] = _sg->_ycoords[_y];
+        return;
+    }
+
+    if (dims.size() == 2)
+        return;
+
+    _y = 0;
+    _z++;
+    if (_z < dims[2]) {
+        _coords[0] = _sg->_xcoords[_x];
+        _coords[1] = _sg->_ycoords[_y];
+        _coords[2] = _sg->_zcoords[_z];
+        return;
+    }
+}
+
+float StretchedGrid::GetValueNearestNeighbor(
+    const std::vector<double> &coords) const {
+    assert(coords.size() == GetNumCoordinates());
+
+    // Clamp coordinates on periodic boundaries to grid extents
+    //
+    vector<double> cCoords = coords;
+    ClampCoord(cCoords);
+
+    double xwgt[2], ywgt[2], zwgt[2];
+    size_t i, j, k;
+    double x = cCoords[0];
+    double y = cCoords[1];
+    double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+    bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
+
+    if (!inside)
+        return (GetMissingValue());
+
+    return (AccessIJK(i, j, k));
+}
+
+float StretchedGrid::GetValueLinear(
+    const std::vector<double> &coords) const {
+
+    // Clamp coordinates on periodic boundaries to grid extents
+    //
+    vector<double> cCoords = coords;
+    ClampCoord(cCoords);
+
+    // handlese case where grid is 2D. I.e. if 2d then zwgt[0] == 1 &&
+    // zwgt[1] = 0.0
+    //
+    double xwgt[2], ywgt[2], zwgt[2];
+    size_t i, j, k;
+    double x = cCoords[0];
+    double y = cCoords[1];
+    double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+    bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
+
+    if (!inside)
+        return (GetMissingValue());
+
+    vector<size_t> dims = GetDimensions();
+    assert(i < dims[0] - 1);
+    assert(j < dims[1] - 1);
+    if (dims.size() > 2)
+        assert(k < dims[2] - 1);
+
+    float v0 = AccessIJK(i, j, k) * xwgt[0] +
+               AccessIJK(i + 1, j, k) * xwgt[1] +
+               AccessIJK(i + 1, j + 1, k) * ywgt[0] +
+               AccessIJK(i, j + 1, k) * ywgt[1];
+
+    if (GetNumCoordinates() == 2)
+        return (v0);
+
+    float v1 = AccessIJK(i, j, k + 1) * xwgt[0] +
+               AccessIJK(i + 1, j, k + 1) * xwgt[1] +
+               AccessIJK(i + 1, j + 1, k + 1) * ywgt[0] +
+               AccessIJK(i, j + 1, k + 1) * ywgt[1];
+
+    // Linearly interpolate along Z axis
+    //
+    return (v0 * zwgt[0] + v1 * zwgt[1]);
+}
+
+void StretchedGrid::_GetUserExtents(
+    vector<double> &minext, vector<double> &maxext) const {
+
+    vector<size_t> dims = StructuredGrid::GetDimensions();
+
+    vector<size_t> min, max;
+    for (int i = 0; i < dims.size(); i++) {
+        min.push_back(0);
+        max.push_back(dims[i] - 1);
+    }
+
+    StretchedGrid::GetBoundingBox(min, max, minext, maxext);
+}
+
+// Perform a binary search in a sorted 1D vector of values for the
+// entry that it closest to 'x'. Return the offset 'i' of 'x' in
+// 'sorted'
+//
+int StretchedGrid::_binarySearchRange(
+    const vector<double> &sorted,
+    double x,
+    size_t &i) const {
+    i = 0;
+
+    // See if above or below the array
+    //
+    if (x < sorted[0])
+        return (-1);
+    if (x > sorted[sorted.size() - 1])
+        return (1);
+
+    // Binary search for starting index of cell containing x
+    //
+    size_t i0 = 0;
+    size_t i1 = sorted.size() - 1;
+    double x0 = sorted[i0];
+    double x1 = sorted[i1];
+    while (i1 - i0 > 1) {
+
+        x1 = sorted[(i0 + i1) >> 1];
+        if (x1 == x) { // pathological case
+            i0 = (i0 + i1) >> 1;
+            break;
+        }
+
+        // if the signs of differences change then the coordinate
+        // is between x0 and x1
+        //
+        if ((x - x0) * (x - x1) <= 0.0) {
+            i1 = (i0 + i1) >> 1;
         } else {
-            if (temp_minu[i] < minu[i] && (temp_min[i] > 0)) {
-                temp_min[i]--;
-            }
-            if (temp_maxu[i] > maxu[i] && (temp_max[i] < (dims[i] - 1))) {
-                temp_max[i]++;
-            }
+            i0 = (i0 + i1) >> 1;
+            x0 = x1;
         }
-        min[i] = temp_min[i];
-        max[i] = temp_max[i];
     }
+    i = i0;
+    return (0);
 }
-void StretchedGrid::GetIJKIndex(
+
+// Search for a point inside the grid. If the point is inside return true,
+// and provide the weights/coordinates for the point within
+// the XYZ cell containing the point
+// If the point is outside of the
+// grid the values of 'xwgt', 'ywgt', and 'zwgt' are not defined
+//
+bool StretchedGrid::_insideGrid(
     double x, double y, double z,
-    size_t *i, size_t *j, size_t *k) const {
+    size_t &i, size_t &j, size_t &k,
+    double xwgt[2], double ywgt[2], double zwgt[2]) const {
+    for (int l = 0; l < 2; l++) {
+        xwgt[l] = 0.0;
+        ywgt[l] = 0.0;
+        zwgt[l] = 0.0;
+    }
+    i = j = k = 0;
 
-    RegularGrid::ClampCoord(x, y, z);
+    int rc = _binarySearchRange(_xcoords, x, i);
 
-    size_t dims[3];
-    RegularGrid::GetDimensions(dims);
+    if (rc != 0)
+        return (false);
 
-    size_t i0, j0, k0;
-    StretchedGrid::GetIJKIndexFloor(x, y, z, &i0, &j0, &k0);
+    xwgt[0] = 1.0 - (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
+    xwgt[1] = 1.0 - xwgt[0];
 
+    rc = _binarySearchRange(_ycoords, y, j);
+
+    if (rc != 0)
+        return (false);
+
+    ywgt[0] = 1.0 - (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
+    ywgt[1] = 1.0 - ywgt[0];
+
+    if (GetNumCoordinates() == 2) {
+        zwgt[0] = 1.0;
+        zwgt[1] = 0.0;
+        return (true);
+    }
+
+    // Now verify that Z coordinate of point is in grid, and find
+    // its interpolation weights if so.
     //
-    // Point with coordinates x,y,z is in cell with index i0,j0,k0, but
-    // may be closer to adjacent cell grid points.
-    //
+    rc = _binarySearchRange(_zcoords, z, k);
 
-    if (i0 < dims[0] - 1) {
-        if (_xcoords.size()) {
-            if (((_xcoords[i0 + 1] - _xcoords[i0]) != 0.0) &&
-                fabs((x - _xcoords[i0]) / (_xcoords[i0 + 1] - _xcoords[i0])) > 0.5) {
+    if (rc != 0)
+        return (false);
 
-                i0++;
-            }
-        } else if ((_delta[0] != 0.0) &&
-                   (((x - _extents[0]) - (i0 * _delta[0])) / _delta[0]) > 0.5) {
+    zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
+    zwgt[1] = 1.0 - zwgt[0];
 
-            i0++;
-        }
-    }
-
-    if (j0 < dims[1] - 1) {
-        if (_ycoords.size()) {
-            if (((_ycoords[j0 + 1] - _ycoords[j0]) != 0.0) &&
-                fabs((y - _ycoords[j0]) / (_ycoords[j0 + 1] - _ycoords[j0])) > 0.5) {
-
-                j0++;
-            }
-        } else if ((_delta[1] != 0.0) &&
-                   (((y - _extents[1]) - (j0 * _delta[1])) / _delta[1]) > 0.5) {
-
-            j0++;
-        }
-    }
-
-    if (k0 < dims[2] - 1) {
-        if (_zcoords.size()) {
-            if (((_zcoords[k0 + 1] - _zcoords[k0]) != 0.0) &&
-                fabs((z - _zcoords[k0]) / (_zcoords[k0 + 1] - _zcoords[k0])) > 0.5) {
-
-                k0++;
-            }
-        } else if ((_delta[2] != 0.0) &&
-                   (((z - _extents[0]) - (k0 * _delta[2])) / _delta[2]) > 0.5) {
-
-            k0++;
-        }
-    }
-
-    *i = i0;
-    *j = j0;
-    *k = k0;
+    return (true);
 }
 
-void StretchedGrid::GetIJKIndexFloor(
-    double x, double y, double z,
-    size_t *i, size_t *j, size_t *k) const {
+void StretchedGrid::_getMinCellExtents(
+    vector<double> &minCellExtents) const {
 
-    RegularGrid::ClampCoord(x, y, z);
+    minCellExtents.clear();
 
-    size_t dims[3];
-    RegularGrid::GetDimensions(dims);
+    vector<size_t> dims = StructuredGrid::GetDimensions();
 
+    // Find minimum cell extents along X
     //
-    // Get IJK indecies for any non-stretched coords, or a coordinate on
-    // the boundary or outside the grid. The indecies returned
-    // for any stretched coords are bogus.
+    float minx = _xcoords[1] - _xcoords[0];
+    float x0 = _xcoords[0];
+    for (int i = 1; i < dims[0]; i++) {
+        float x1 = _xcoords[i];
+
+        if ((x1 - x0) < minx)
+            minx = x1 - x0;
+
+        x1 = x0;
+    }
+    minCellExtents.push_back(minx);
+
+    // Find minimum cell extents along Y
     //
-    RegularGrid::GetIJKIndexFloor(x, y, z, i, j, k);
+    float miny = _ycoords[1] - _ycoords[0];
+    float y0 = _ycoords[0];
+    for (int j = 1; j < dims[1]; j++) {
+        float y1 = _ycoords[j];
 
+        if ((y1 - y0) < miny)
+            miny = y1 - y0;
+
+        y1 = y0;
+    }
+    minCellExtents.push_back(miny);
+
+    if (dims.size() < 3 || dims[2] < 2)
+        return;
+
+    // Find minimum cell extents along Z
     //
-    // Now get indecies for stretched coords not on or outside boundary
-    //
-    if (_xcoords.size() != 0 && ((x - _extents[0]) * (x - _extents[3]) < 0)) {
-        size_t i0 = 0;
-        size_t i1 = dims[0] - 1;
-        double x0 = _xcoords[i0];
-        double x1 = _xcoords[i1];
-        while (i1 - i0 > 1) {
+    float minz = _zcoords[1] - _zcoords[0];
+    float z0 = _zcoords[0];
+    for (int k = 1; k < dims[2]; k++) {
+        float z1 = _zcoords[k];
 
-            x1 = _xcoords[(i0 + i1) >> 1];
-            if (x1 == x) { // pathological case
-                //*i = (i0+i1)>>1;
-                i0 = (i0 + i1) >> 1;
-                break;
-            }
+        if ((z1 - z0) < minz)
+            minz = z1 - z0;
 
-            // if the signs of differences change then the coordinate
-            // is between x0 and x1
-            //
-            if ((x - x0) * (x - x1) <= 0.0) {
-                i1 = (i0 + i1) >> 1;
-            } else {
-                i0 = (i0 + i1) >> 1;
-                x0 = x1;
-            }
-        }
-        *i = i0;
+        z1 = z0;
     }
-
-    if (_ycoords.size() != 0 && ((y - _extents[1]) * (y - _extents[4]) < 0)) {
-        size_t j0 = 0;
-        size_t j1 = dims[1] - 1;
-        double y0 = _ycoords[j0];
-        double y1 = _ycoords[j1];
-        while (j1 - j0 > 1) {
-
-            y1 = _ycoords[(j0 + j1) >> 1];
-            if (y1 == y) { // pathological case
-                //*j = (j0+j1)>>1;
-                j0 = (j0 + j1) >> 1;
-                break;
-            }
-
-            // if the signs of differences change then the coordinate
-            // is between y0 and y1
-            //
-            if ((y - y0) * (y - y1) <= 0.0) {
-                j1 = (j0 + j1) >> 1;
-            } else {
-                j0 = (j0 + j1) >> 1;
-                y0 = y1;
-            }
-        }
-        *j = j0;
-    }
-
-    if (_zcoords.size() != 0 && ((z - _extents[2]) * (z - _extents[5]) < 0)) {
-        size_t k0 = 0;
-        size_t k1 = dims[2] - 1;
-        double z0 = _zcoords[k0];
-        double z1 = _zcoords[k1];
-        while (k1 - k0 > 1) {
-
-            z1 = _zcoords[(k0 + k1) >> 1];
-            if (z1 == z) { // pathological case
-                //*k = (k0+k1)>>1;
-                k0 = (k0 + k1) >> 1;
-                break;
-            }
-
-            // if the signs of differences change then the coordinate
-            // is between z0 and z1
-            //
-            if ((z - z0) * (z - z1) <= 0.0) {
-                k1 = (k0 + k1) >> 1;
-            } else {
-                k0 = (k0 + k1) >> 1;
-                z0 = z1;
-            }
-        }
-        *k = k0;
-    }
-}
-
-void StretchedGrid::GetMinCellExtents(double *x, double *y, double *z) const {
-
-    *x = _delta[0];
-    *y = _delta[1];
-    *z = _delta[2];
-
-    if (_xcoords.size()) {
-        for (int i = 0; i < _xcoords.size() - 1; i++) {
-            double tmp = fabs(_xcoords[i] - _xcoords[i + 1]);
-
-            if (i == 0)
-                *x = tmp;
-            if (tmp < *x)
-                *x = tmp;
-        }
-    }
-    if (_ycoords.size()) {
-        for (int i = 0; i < _ycoords.size() - 1; i++) {
-            double tmp = fabs(_ycoords[i] - _ycoords[i + 1]);
-
-            if (i == 0)
-                *y = tmp;
-            if (tmp < *y)
-                *y = tmp;
-        }
-    }
-    if (_zcoords.size()) {
-        for (int i = 0; i < _zcoords.size() - 1; i++) {
-            double tmp = fabs(_zcoords[i] - _zcoords[i + 1]);
-
-            if (i == 0)
-                *z = tmp;
-            if (tmp < *z)
-                *z = tmp;
-        }
-    }
+    minCellExtents.push_back(minz);
 }
