@@ -37,6 +37,10 @@ public:
  //
  void Update(double minValid, double maxValid, double value);
 
+ void Update(double value) {
+	Update(_minValid, _maxValid, value);
+ }
+
  // Returns a pointer the QSlider object 
  //
  QSlider *GetSlider() const {return(_slider); };

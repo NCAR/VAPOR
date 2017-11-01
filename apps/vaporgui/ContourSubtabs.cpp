@@ -3,7 +3,7 @@
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
 
-		_TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR));
+		_TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTCOLOR));
 		_TFWidget->mappingFrame->setIsolineSliders(true);
 		_TFWidget->mappingFrame->setOpacityMapping(false);
 
@@ -32,7 +32,7 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 			SLOT(EndTFChange()));
 }
 
-double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
+	double ContourAppearanceSubtab::GetContourMinOrMax(string minOrMax) {
 
 		bool locked = _cParams->GetLockToTF();
 		lockToTFCheckbox->setChecked(locked);
@@ -41,7 +41,7 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		// to the transfer function if we're locking to it (via 'locked'
 		// parameter).  If not, restrict according to variable min/max.
 		//  
-		double min = _cParams->GetContourMin();
+		//double min = _cParams->GetContourMin();
 		string varname = _cParams->GetVariableName();
 		if (varname.empty()) return(0.0);
 
@@ -52,7 +52,8 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 			VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
 			double lower = mf->getMinMapValue();
 			double upper = mf->getMaxMapValue();
-			if (minOrMax) return upper;
+
+			if (minOrMax == "max") return upper;
 			else return lower;
 		}
 		else {
@@ -65,7 +66,7 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 			VAPoR::Grid* var = _dataMgr->GetVariable(ts, varname, level, lod);
 			float range[2];
 			var->GetRange(range);
-			if (minOrMax) return range[1];
+			if (minOrMax == "max") return range[1];
 			else return range[0];
 		}   
 	}
@@ -85,7 +86,6 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		// Apply params to lineThickness.  Get range
 		// for thickness from gl system call
 		//
-		_cParams = (VAPoR::ContourParams*)rParams;
 		GLfloat lineWidthRange[2] = {0.f, 0.f};
 		glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
 		_lineWidthCombo->Update(lineWidthRange[0], lineWidthRange[1],
@@ -108,22 +108,34 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		//
 		int numContours = _cParams->GetNumContours();
 		_countCombo->Update(1, 50, numContours);
-		QSlider* s = _countCombo->GetSlider();
-		cout << "num contour updated ";
-		cout << s->value() << endl;
 
 		// Update contour spacing and minimum settings, which may
 		// or may not be locked within the transfer function bounds.
 		//
-		double minComboMin = GetContourMinOrMax(false);
-		double minComboMax = GetContourMinOrMax(true);
+		double minComboMin = GetContourMinOrMax("min");
+		double minComboMax = GetContourMinOrMax("max");
 		double minVal = _cParams->GetContourMin();
 		_cMinCombo->Update(minComboMin, minComboMax, minVal);
 
 		double spacing = _cParams->GetContourSpacing();
 		double maxSpacing = (minComboMax - minVal) / (double)(numContours-1);
-		if (spacing > maxSpacing) spacing = maxSpacing;
+
+		// Using this equation omits the space-slider jump after being moved.  Why?
+		//double maxSpacing = (minComboMax - minComboMin) / (double)(numContours-1);
 		_spacingCombo->Update(0, maxSpacing, spacing);
+
+	}
+
+	void ContourAppearanceSubtab::disableSliders() {
+		_cMinCombo->blockSignals(true);
+		_countCombo->blockSignals(true);
+		_spacingCombo->blockSignals(true);
+	}
+
+	void ContourAppearanceSubtab::enableSliders() {
+		_countCombo->blockSignals(false);
+		_cMinCombo->blockSignals(false);
+		_spacingCombo->blockSignals(false);
 	}
 
 	void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams* cParams) {
@@ -136,13 +148,16 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
 		double lower = mf->getMinMapValue();
 		double upper = mf->getMaxMapValue();
-		int count = 7;
+		int count = _cParams->GetNumContours();
 		double spacing = (upper - lower) / (double)(count-1);
-	
-		_cParams->SetNumContours(count);
-		_cParams->SetContourMin(lower);
-		_cParams->SetContourSpacing(spacing);
-		SetIsovalues(); 
+
+		disableSliders();
+		_cMinCombo->Update(lower, upper, lower);
+		_countCombo->Update(1, 50, count);
+		_spacingCombo->Update(0, upper-lower, spacing);
+		enableSliders();
+
+		SetContourValues(); 
 		
 		_paramsMgr->EndSaveStateGroup();
 	}
@@ -150,34 +165,31 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 	// Do not BeginSaveStateGroup here!  This funciton
 	// is always encapsulated by a Begin/EndSaveStateGroup.
 	//
-	void ContourAppearanceSubtab::SetIsovalues() {
+	void ContourAppearanceSubtab::SetContourValues() {
 		vector<double> cVals;
-		int numContours = _cParams->GetNumContours();
-		double spacing = _cParams->GetContourSpacing();
-		double min = _cParams->GetContourMin();
+		int numContours = _countCombo->GetValue();
+		double spacing = _spacingCombo->GetValue();
+		double min = _cMinCombo->GetValue();
+		
 		for (size_t i=0; i<numContours; i++) {
 			cVals.push_back(min + spacing*i);
 		}
-		_cParams->SetIsovalues(cVals);
+		string varName = _cParams->GetVariableName();
+		_cParams->SetContourValues(varName, cVals);
 	}
 
 	void ContourAppearanceSubtab::EndTFChange() {
-		_paramsMgr->BeginSaveStateGroup("Transfer function change completed."
-			"Update contours.");
-
-		cout << "END TF CHANGE" << endl;
-
-		double min = GetContourMinOrMax(false);
-		double max = GetContourMinOrMax(true);
-		double minVal = _cParams->GetContourMin();
-		if (minVal < min) minVal = min;
+		double min = GetContourMinOrMax("min");
+		double max = GetContourMinOrMax("max");
+		double minVal = _cMinCombo->GetValue();
+		bool locked = _cParams->GetTFLock();
+		if (locked) minVal = min;
 		if (minVal > max) minVal = max;
-		cout << "TF min " << minVal << endl;
-		_cMinCombo->Update(min, max, minVal);
-		_cParams->SetContourMin(minVal);
 
-		int numContours = _cParams->GetNumContours();
-		double spacing = _cParams->GetContourSpacing();
+		_cMinCombo->Update(min, max, minVal);
+
+		int numContours = _countCombo->GetValue();
+		double spacing = _spacingCombo->GetValue();
 		double maxSpacing = (max - minVal) / (double)(numContours-1);
 		double span = spacing*(numContours-1) + minVal;
 		
@@ -186,89 +198,65 @@ double ContourAppearanceSubtab::GetContourMinOrMax(bool minOrMax) {
 		}
 		
 		_spacingCombo->Update(0, maxSpacing, spacing);
-		_cParams->SetContourSpacing(spacing);
-		SetIsovalues();
-		
-		_paramsMgr->EndSaveStateGroup();
+		SetContourValues();
 	}
 
 	void ContourAppearanceSubtab::SetContourCount(int count) {
-		_paramsMgr->BeginSaveStateGroup("Set contour count.");
-
-		if (count < 1) count = 1;
+		disableSliders();
+	
+		_countCombo->Update(1, 50, count);
 
 		bool locked = _cParams->GetLockToTF();
-		string varname = _cParams->GetVariableName();
-		if (varname.empty()) return;
-
-		// If we're locked to the transfer function and our span exceeds
-		// the TF max value, adjust our spacing to make room for the added
-		// contours
-		//
 		if (locked) {
+			double lower, upper, spacing; 
+			string varname = _cParams->GetVariableName();
 			VAPoR::MapperFunction* mf = _cParams->GetMapperFunc(varname);
-			double lower = mf->getMinMapValue();
-			double upper = mf->getMaxMapValue();
-			double spacing = (upper - lower) / (double)(count-1);
-			_cParams->SetContourSpacing(spacing);
-		}
-		_cParams->SetNumContours(count);
-		SetIsovalues();
+			lower = mf->getMinMapValue();
+			upper = mf->getMaxMapValue();
+			spacing = (upper - lower) / (count-1);
 
-		cout << "set contour count " << count << endl;
-		_paramsMgr->EndSaveStateGroup();
+			_cMinCombo->Update(lower, upper, lower);
+			_spacingCombo->Update(0, upper-lower, spacing);
+		}
+
+		SetContourValues();
+		enableSliders();	
 	}
 
-	void ContourAppearanceSubtab::SetContourMinimum(double min) {
-		_paramsMgr->BeginSaveStateGroup("Set contour minimum.");
+	void ContourAppearanceSubtab::SetContourMinimum(double value) {
+		disableSliders();
 
-		double minRange = GetContourMinOrMax(0);
-		double maxRange = GetContourMinOrMax(1);
+		double min = GetContourMinOrMax("min");
+		double max = GetContourMinOrMax("max");
+		_cMinCombo->Update(min, max, value);
 
-		if (min < minRange) min = minRange;
-		if (min > maxRange) min = maxRange;
+		double spacing = _spacingCombo->GetValue();
+		double count = _countCombo->GetValue();
+		bool locked = _cParams->GetLockToTF();
+		
+		if (!locked) {
+			double maxContour = value + spacing*(count-1);
+			if (maxContour > max) {
+				spacing = (max-value)/(count-1);
+				_spacingCombo->Update(0, spacing, spacing);
+			}
+		}
 
-		int numContours = _cParams->GetNumContours();
-		double spacing = (maxRange - min) / (double)(numContours-1);
-		_cParams->SetContourSpacing(spacing);
-
-		double test = GetContourMinOrMax(0);
-		cout << minRange << " ! " << maxRange << endl;
-
-		_cParams->SetContourMin(min);
-
-		SetIsovalues();
-		_paramsMgr->EndSaveStateGroup();
+		SetContourValues();
+		enableSliders();
 	}
 
 	void ContourAppearanceSubtab::SetContourSpacing(double spacing) {
-		_paramsMgr->BeginSaveStateGroup("Set contour spacing.");
+		disableSliders();
 
-		bool locked = _cParams->GetLockToTF();
-		double min = _cParams->GetContourMin();
-		string varname = _cParams->GetVariableName();
-		if (varname.empty()) return;
+		double min = GetContourMinOrMax("min");
+		double max = GetContourMinOrMax("max");
+		int count = _cParams->GetNumContours();
+		double maxSpacing = (max-min)/(count-1);
+		_spacingCombo->Update(0, maxSpacing, spacing);
 
-		int numContours = _cParams->GetNumContours();
-		double maxSpacing;
-
-		if (numContours <= 1) {
-			_cParams->SetContourSpacing(1);
-			return;
-		}
-
-		int lod = _cParams->GetCompressionLevel();
-		int level = _cParams->GetRefinementLevel();
-		int ts = _cParams->GetCurrentTimestep();
-		VAPoR::Grid* var = _dataMgr->GetVariable(ts, varname, level, lod);
-		float range[2];
-		var->GetRange(range);
-		maxSpacing = (range[1] - range[0])/(double)(numContours-1);
-		if (spacing > maxSpacing) spacing = maxSpacing;
-		_cParams->SetContourSpacing(spacing);
-		SetIsovalues();
-		
-		_paramsMgr->EndSaveStateGroup();
+		SetContourValues();
+		enableSliders();
 	}
 
 	void ContourAppearanceSubtab::LockToTFChecked(bool checked) {

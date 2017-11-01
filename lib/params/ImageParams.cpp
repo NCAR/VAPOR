@@ -29,7 +29,7 @@ ImageParams::ImageParams( DataMgr*                dataManager,
                           XmlNode*                node )
             : RenderParams( dataManager, 
                             stateSave, 
-                            ImageParams::GetClassType(), 
+                            node,
                             2 )
 {
   SetDiagMsg("ImageParams::ImageParams() this=%p", this);

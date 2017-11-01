@@ -839,7 +839,6 @@ const GLvoid *TwoDDataRenderer::_getTexture(
 	// See if already in cache
 	//
 	if (! _texStateDirty(dataMgr) && _sb_texture.GetBuf()) {
-		cout << "_getTexture already cached" << endl;
 		return ((const GLvoid *) _sb_texture.GetBuf());
 	}
 	_texStateClear();
@@ -916,18 +915,4 @@ const GLvoid *TwoDDataRenderer::_getTexture(
 	dataMgr->UnlockGrid(g);
 
 	return(texture);
-}
-
-
-double TwoDDataRenderer::_getDefaultZ(
-	DataMgr *dataMgr, size_t ts
-) const {
-	
-    vector <double> minExts;
-	vector <double> maxExts;
-
-	bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
-	assert(status);
-
-	return(minExts.size() == 3 ? minExts[2] : 0.0);	
 }
