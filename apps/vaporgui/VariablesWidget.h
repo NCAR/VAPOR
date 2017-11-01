@@ -81,6 +81,8 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams);
 
+    string getNDimsTag() { return _nDimsTag; }
+
   protected slots:
     //! Connected to the image file text editor
     void setNumRefinements(int num);
