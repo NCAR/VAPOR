@@ -228,6 +228,7 @@ void RenderHolder::deleteRenderer() {
 		//
 		getRow(0, renderInst, renderClass, dataSetName);
 		p->SetActiveRenderer(activeViz, renderClass, renderInst);
+        emit activeChanged(activeViz, renderClass, renderInst);
 
 	paramsMgr->EndSaveStateGroup();
 }

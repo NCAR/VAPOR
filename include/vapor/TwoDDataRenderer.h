@@ -246,8 +246,6 @@ private:
 
  int _getOrientation( DataMgr *dataMgr, string varname);
 
- double _getDefaultZ(DataMgr *dataMgr, size_t ts) const;
-
 };
 };
 
