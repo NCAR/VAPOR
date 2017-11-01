@@ -98,10 +98,10 @@ ViewpointParams::ViewpointParams(
     }
 
     if (node->HasChild(_transformsTag)) {
-        // Node doesn't contain a transforms container
-        //
         _transforms = new ParamsContainer(ssave, node->GetChild(_transformsTag));
     } else {
+        // Node doesn't contain a transforms container
+        //
         _transforms = new ParamsContainer(ssave, _transformsTag);
         _transforms->SetParent(this);
     }
