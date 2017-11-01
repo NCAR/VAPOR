@@ -69,22 +69,22 @@ void StatisticsParams::SetAutoUpdate(bool val)
     SetValueLong( _autoUpdateTag, "if we want stats auto-update", (long)val );
 }
 
-int StatisticsParams::GetMinTS() 
+int StatisticsParams::GetCurrentMinTS() 
 {
     return (int)(GetValueDouble(_minTSTag, 0.0));
 }
 
-void StatisticsParams::SetMinTS(int ts) 
+void StatisticsParams::SetCurrentMinTS(int ts) 
 {
     SetValueDouble(_minTSTag, "Minimum selected timestep for statistics", (double)ts);
 }
 
-int StatisticsParams::GetMaxTS() 
+int StatisticsParams::GetCurrentMaxTS() 
 {
-    return (double)(GetValueDouble(_maxTSTag, 0.0));
+    return (int)(GetValueDouble(_maxTSTag, 0.0));
 }
 
-void StatisticsParams::SetMaxTS(int ts) 
+void StatisticsParams::SetCurrentMaxTS(int ts) 
 {
     SetValueDouble(_maxTSTag, "Maximum selected timestep for statistics", (double)ts);
 }
