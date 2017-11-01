@@ -316,11 +316,6 @@
              <property name="frame">
               <bool>true</bool>
              </property>
-             <item>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </item>
             </widget>
            </item>
           </layout>
@@ -364,11 +359,6 @@
              <property name="frame">
               <bool>true</bool>
              </property>
-             <item>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </item>
             </widget>
            </item>
           </layout>
