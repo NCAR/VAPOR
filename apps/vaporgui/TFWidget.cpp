@@ -409,7 +409,7 @@ void TFWidget::updateColorVarCombo() {
 
     if (_flags & CONSTCOLOR) {
         colormapVarCombo->clear();
-        colormapVarCombo->addItem(QString("Default"));
+        colormapVarCombo->addItem(QString("Map to var"));
         colormapVarCombo->addItem(QString("Constant"));
     } else {
         int ndim = _rParams->GetValueLong(_nDimsTag, 3);
