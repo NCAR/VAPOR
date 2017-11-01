@@ -152,56 +152,30 @@ bool Statistics::Update()
     // Update statistics to calculate
     AddStatCombo->blockSignals( true );
     RemoveStatCombo->blockSignals( true );
+    AddStatCombo->clear();
+    RemoveStatCombo->clear();
+    AddStatCombo->addItem(      QString::fromAscii("Add a Calculation") );
+    RemoveStatCombo->addItem(   QString::fromAscii("Remove a Calculation") );
     if( statsParams->GetMinEnabled() )
-    {
-        if( RemoveStatCombo->findText(QString::fromAscii("Min")) == -1 )
-            RemoveStatCombo->addItem( QString::fromAscii("Min") );
-    }
+        RemoveStatCombo->addItem( QString::fromAscii("Min") );
     else
-    {
-        if( AddStatCombo->findText(QString::fromAscii("Min")) == -1 )
-            AddStatCombo->addItem( QString::fromAscii("Min") );
-    }
+        AddStatCombo->addItem( QString::fromAscii("Min") );
     if( statsParams->GetMaxEnabled() )
-    {
-        if( RemoveStatCombo->findText(QString::fromAscii("Max")) == -1 )
-            RemoveStatCombo->addItem( QString::fromAscii("Max") );
-    }
+        RemoveStatCombo->addItem( QString::fromAscii("Max") );
     else
-    {
-        if( AddStatCombo->findText(QString::fromAscii("Max")) == -1 )
-            AddStatCombo->addItem( QString::fromAscii("Max") );
-    }
+        AddStatCombo->addItem( QString::fromAscii("Max") );
     if( statsParams->GetMeanEnabled() )
-    {
-        if( RemoveStatCombo->findText(QString::fromAscii("Mean")) == -1 )
-            RemoveStatCombo->addItem( QString::fromAscii("Mean") );
-    }
+        RemoveStatCombo->addItem( QString::fromAscii("Mean") );
     else
-    {
-        if( AddStatCombo->findText(QString::fromAscii("Mean")) == -1 )
-            AddStatCombo->addItem( QString::fromAscii("Mean") );
-    }
+        AddStatCombo->addItem( QString::fromAscii("Mean") );
     if( statsParams->GetMedianEnabled() )
-    {
-        if( RemoveStatCombo->findText(QString::fromAscii("Median")) == -1 )
-            RemoveStatCombo->addItem( QString::fromAscii("Median") );
-    }
+        RemoveStatCombo->addItem( QString::fromAscii("Median") );
     else
-    {
-        if( AddStatCombo->findText(QString::fromAscii("Median")) == -1 )
-            AddStatCombo->addItem( QString::fromAscii("Median") );
-    }
+        AddStatCombo->addItem( QString::fromAscii("Median") );
     if( statsParams->GetStdDevEnabled() )
-    {
-        if( RemoveStatCombo->findText(QString::fromAscii("StdDev")) == -1 )
-            RemoveStatCombo->addItem( QString::fromAscii("StdDev") );
-    }
+        RemoveStatCombo->addItem( QString::fromAscii("StdDev") );
     else
-    {
-        if( AddStatCombo->findText(QString::fromAscii("StdDev")) == -1 )
-            AddStatCombo->addItem( QString::fromAscii("StdDev") );
-    }
+        AddStatCombo->addItem( QString::fromAscii("StdDev") );
     AddStatCombo->setCurrentIndex(0);
     RemoveStatCombo->setCurrentIndex(0);
     AddStatCombo->blockSignals( false );
