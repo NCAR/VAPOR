@@ -7,8 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>916</width>
-    <height>660</height>
+    <height>709</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -19,7 +25,7 @@
      <x>10</x>
      <y>10</y>
      <width>899</width>
-     <height>656</height>
+     <height>685</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -32,7 +38,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>10</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
           <number>10</number>
@@ -243,7 +249,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>10</number>
+          <number>5</number>
          </property>
          <property name="bottomMargin">
           <number>10</number>
@@ -263,6 +269,9 @@
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+             <property name="margin">
+              <number>5</number>
              </property>
             </widget>
            </item>
@@ -375,7 +384,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>10</number>
+          <number>5</number>
          </property>
          <property name="bottomMargin">
           <number>10</number>
@@ -392,6 +401,9 @@
             <widget class="QLabel" name="TemporalExtentsLabel">
              <property name="text">
               <string>Temporal Extents</string>
+             </property>
+             <property name="margin">
+              <number>5</number>
              </property>
             </widget>
            </item>
@@ -478,7 +490,10 @@
           <number>5</number>
          </property>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item>
             <widget class="QPushButton" name="ExportButton">
              <property name="enabled">
@@ -517,13 +532,6 @@
              </property>
             </spacer>
            </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <property name="spacing">
-            <number>0</number>
-           </property>
            <item>
             <widget class="QPushButton" name="UpdateButton">
              <property name="minimumSize">
@@ -547,7 +555,7 @@
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
+               <width>20</width>
                <height>20</height>
               </size>
              </property>
