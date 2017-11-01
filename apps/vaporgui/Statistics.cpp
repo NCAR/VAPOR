@@ -172,11 +172,12 @@ bool Statistics::Update() {
     RemoveCalcCombo->blockSignals(false);
 
     // Update LOD, Refinement
-    RefCombo->blockSignals(true);
-    LODCombo->blockSignals(true);
-    RefCombo->clear();
-    LODCombo->clear();
     if (enabledVars.size() > 0) {
+        RefCombo->blockSignals(true);
+        LODCombo->blockSignals(true);
+        RefCombo->clear();
+        LODCombo->clear();
+
         int numRefLevels = currentDmgr->GetNumRefLevels(enabledVars[0]);
         vector<size_t> availLODs = currentDmgr->GetCRatios(enabledVars[0]);
         for (int i = 1; i < enabledVars.size(); i++) // sanity check
@@ -216,9 +217,10 @@ bool Statistics::Update() {
             LODCombo->addItem(line);
         }
         LODCombo->setCurrentIndex(statsParams->GetCompressionLevel());
+
+        RefCombo->blockSignals(false);
+        LODCombo->blockSignals(false);
     }
-    RefCombo->blockSignals(false);
-    LODCombo->blockSignals(false);
 
     return true;
 }
@@ -338,8 +340,6 @@ int Statistics::initControlExec(ControlExec *ce) {
     }
     dsName = guiParams->GetStatsDatasetName();
     _validStats.SetDatasetName(dsName);
-
-    //this->Update( params );
 
     return 0;
 }
@@ -684,3 +684,55 @@ bool Statistics::ValidStats::SetDatasetName(std::string &dsName) {
 size_t Statistics::ValidStats::GetVariableCount() {
     return _variables.size();
 }
+
+#if 0
+void Statistics::exportText() {
+	_extents[0] = _xRange->getUserMin();
+	_extents[1] = _yRange->getUserMin();
+	_extents[2] = _zRange->getUserMin();
+	_extents[3] = _xRange->getUserMax();
+	_extents[4] = _yRange->getUserMax();
+	_extents[5] = _zRange->getUserMax();
+
+	QString fName = QFileDialog::getSaveFileName(this,"Select file to write statistics into:", "", "*.txt");
+  if( !fName.isEmpty() )
+  {
+    ofstream file;
+    file.open(fName.toStdString().c_str());
+    if (file.fail()) {
+      std::ostringstream ss;
+      ss << "Failed to open file ";
+      ss << fName.toStdString();
+      ss << " for writing.";
+      string myErr = ss.str();
+      errReport(myErr);
+    }
+      
+    file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
+
+    typedef std::map<string, _statistics>::iterator it_type;
+    for (it_type it = _stats.begin(); it!=_stats.end(); it++){
+      file << it->first << ",";
+      file << it->second.min << ",";
+      file << it->second.max << ",";
+      file << it->second.mean << ",";
+      file << it->second.stddev;
+      file << endl;
+    }
+
+    file << endl;
+
+    file << "Dependent Variable\nDimension,Min,Max" << endl;
+    file << "X," << _extents[0] << "," << _extents[3] << endl;
+    file << "Y," << _extents[1] << "," << _extents[4] << endl;
+    file << "Z," << _extents[2] << "," << _extents[5] << endl;
+
+    file << endl;
+
+    file << "Temporal Extents\nStartTime,EndTime" << endl;
+    file << _minTS << "," << _maxTS << endl;
+
+    file.close();
+  }
+}
+#endif
