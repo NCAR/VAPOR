@@ -58,6 +58,7 @@ public:
 	//! Sets _initialized to true if successful.
     virtual int	initializeGL(ShaderMgr *sm);
 
+
 	//! Obtain the Visualizer associated with this Renderer
 	string GetVisualizer() { return _winName;}
 
@@ -137,6 +138,11 @@ public:
 	
 	virtual ~Renderer();
 
+	//! Get default z value at the base of the domain.  Useful
+	//! for applying a height value to 2D renderers.
+	//! \param[in] dataMgr Current (valid) dataMgr
+	//! \retval default height value for current dataset
+	double _getDefaultZ(DataMgr* dataMgr, size_t ts) const;
 
 	//! All OpenGL rendering is performed in the paintGL method.
 	//! This invokes _paintGL on the renderer subclass

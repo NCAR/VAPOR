@@ -74,6 +74,9 @@ float *Grid::AccessIndex(
 	const std::vector <size_t> &indices
 ) const {
 
+	size_t bs[] = {0,0,0};
+	size_t bdims[] = {0,0,0};
+
 	assert(indices.size() >= GetDimensions().size());
 
 	if (! blks.size()) return(NULL);
@@ -84,18 +87,20 @@ float *Grid::AccessIndex(
 		if (indices[i] >= dims[i]) {
 			return(NULL);
 		}
+		bs[i] = _bs[i];
+		bdims[i] = _bdims[i];
 	}
 
-	size_t xb = indices[0] / _bs[0];
-	size_t yb = ndim > 1 ? indices[1] / _bs[1] : 0;
-	size_t zb = ndim > 2 ? indices[2] / _bs[2] : 0;
+	size_t xb = indices[0] / bs[0];
+	size_t yb = ndim > 1 ? indices[1] / bs[1] : 0;
+	size_t zb = ndim > 2 ? indices[2] / bs[2] : 0;
 
-	size_t x = indices[0] % _bs[0];
-	size_t y = ndim > 1 ? indices[1] % _bs[1] : 0;
-	size_t z = ndim > 2 ? indices[2] % _bs[2] : 0;
+	size_t x = indices[0] % bs[0];
+	size_t y = ndim > 1 ? indices[1] % bs[1] : 0;
+	size_t z = ndim > 2 ? indices[2] % bs[2] : 0;
 
-	float *blk = blks[zb*_bdims[0]*_bdims[1] + yb*_bdims[0] + xb];
-	return(&blk[z*_bs[0]*_bs[1] + y*_bs[0] + x]);
+	float *blk = blks[zb*bdims[0]*bdims[1] + yb*bdims[0] + xb];
+	return(&blk[z*bs[0]*bs[1] + y*bs[0] + x]);
 }
 
 float Grid::AccessIJK(size_t i, size_t j, size_t k) const {
