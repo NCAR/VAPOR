@@ -26,6 +26,9 @@ public:
         //(VariablesWidget::DimFlags)(VariablesWidget::THREED));
     }
 
+    void Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr);
+    void pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter);
+
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
 };
 
@@ -56,7 +59,7 @@ public:
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
     // {
-    //	_rParams = rParams;
+    //	_bParams = rParams;
     //	_geometryWidget->Update(paramsMgr, dataMgr, rParams);
     //}
 
@@ -68,7 +71,7 @@ private slots:
     void thicknessChanged(double d);
 
 private:
-    VAPoR::BarbParams *_rParams;
+    VAPoR::BarbParams *_bParams;
     Combo *            _xDimCombo;
     Combo *            _yDimCombo;
     Combo *            _zDimCombo;
