@@ -61,8 +61,6 @@ Statistics::~Statistics()
     }
 }
 
-
-
 bool Statistics::Update() 
 {
     // Initialize pointers
@@ -149,39 +147,53 @@ bool Statistics::Update()
     RemoveVarCombo->setCurrentIndex( 0 );
     RemoveVarCombo->blockSignals( false );
 
-    // Update statistics to calculate
-    AddStatCombo->blockSignals( true );
-    RemoveStatCombo->blockSignals( true );
-    AddStatCombo->clear();
-    RemoveStatCombo->clear();
-    AddStatCombo->addItem(      QString::fromAscii("Add a Calculation") );
-    RemoveStatCombo->addItem(   QString::fromAscii("Remove a Calculation") );
-    if( statsParams->GetMinEnabled() )
-        RemoveStatCombo->addItem( QString::fromAscii("Min") );
-    else
-        AddStatCombo->addItem( QString::fromAscii("Min") );
-    if( statsParams->GetMaxEnabled() )
-        RemoveStatCombo->addItem( QString::fromAscii("Max") );
-    else
-        AddStatCombo->addItem( QString::fromAscii("Max") );
-    if( statsParams->GetMeanEnabled() )
-        RemoveStatCombo->addItem( QString::fromAscii("Mean") );
-    else
-        AddStatCombo->addItem( QString::fromAscii("Mean") );
-    if( statsParams->GetMedianEnabled() )
-        RemoveStatCombo->addItem( QString::fromAscii("Median") );
-    else
-        AddStatCombo->addItem( QString::fromAscii("Median") );
-    if( statsParams->GetStdDevEnabled() )
-        RemoveStatCombo->addItem( QString::fromAscii("StdDev") );
-    else
-        AddStatCombo->addItem( QString::fromAscii("StdDev") );
-    AddStatCombo->setCurrentIndex(0);
-    RemoveStatCombo->setCurrentIndex(0);
-    AddStatCombo->blockSignals( false );
-    RemoveStatCombo->blockSignals( false );
-
     this->_updateVarTable();
+
+    // Update calculations
+    NewCalcCombo->blockSignals( true );
+    RemoveCalcCombo->blockSignals( true );
+    NewCalcCombo->clear();
+    RemoveCalcCombo->clear();
+    NewCalcCombo->addItem(      QString::fromAscii("Add a Calculation") );
+    RemoveCalcCombo->addItem(   QString::fromAscii("Remove a Calculation") );
+    if( statsParams->GetMinEnabled() )
+        RemoveCalcCombo->addItem( QString::fromAscii("Min") );
+    else
+        NewCalcCombo->addItem( QString::fromAscii("Min") );
+    if( statsParams->GetMaxEnabled() )
+        RemoveCalcCombo->addItem( QString::fromAscii("Max") );
+    else
+        NewCalcCombo->addItem( QString::fromAscii("Max") );
+    if( statsParams->GetMeanEnabled() )
+        RemoveCalcCombo->addItem( QString::fromAscii("Mean") );
+    else
+        NewCalcCombo->addItem( QString::fromAscii("Mean") );
+    if( statsParams->GetMedianEnabled() )
+        RemoveCalcCombo->addItem( QString::fromAscii("Median") );
+    else
+        NewCalcCombo->addItem( QString::fromAscii("Median") );
+    if( statsParams->GetStdDevEnabled() )
+        RemoveCalcCombo->addItem( QString::fromAscii("StdDev") );
+    else
+        NewCalcCombo->addItem( QString::fromAscii("StdDev") );
+    NewCalcCombo->setCurrentIndex(0);
+    RemoveCalcCombo->setCurrentIndex(0);
+    NewCalcCombo->blockSignals( false );
+    RemoveCalcCombo->blockSignals( false );
+
+    // Update Refinement
+    RefCombo->blockSignals( true );
+    RefCombo->clear();
+    if( enabledVars.size() > 0 )
+    {
+        int numRefLevels = currentDmgr->GetNumRefLevels( enabledVars[0] );
+        for( int i = 1; i < enabledVars.size(); i++ )
+            assert( numRefLevels == currentDmgr->GetNumRefLevels( enabledVars[i] ));
+        for( int i = 0; i < numRefLevels; i++ )
+            RefCombo->addItem( QString::number( i ) );
+        RefCombo->setCurrentIndex( statsParams->GetRefinementLevel() );
+    }
+    RefCombo->blockSignals( false );
 
     return true;
 }
@@ -329,15 +341,81 @@ int Statistics::initControlExec(ControlExec* ce)
 
 bool Statistics::Connect()
 {
-    connect( NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)) );
-    connect( RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)) );
+    connect( NewVarCombo,       SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)) );
+    connect( RemoveVarCombo,    SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)) );
+    connect( NewCalcCombo,      SIGNAL(currentIndexChanged(int)), this, SLOT(_newCalcChanged(int)) );
+    connect( RemoveCalcCombo,   SIGNAL(currentIndexChanged(int)), this, SLOT(_removeCalcChanged(int)) );
     return true;
 }
 
+void Statistics::_newCalcChanged( int index )
+{
+    assert( index > 0 );
+
+    // Initialize pointers
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    std::string calcName = NewCalcCombo->itemText(index).toStdString();
+
+    // Add this calculation to parameter 
+    if( calcName == "Min" )
+        statsParams->SetMinEnabled( true );
+    else if( calcName == "Max" )
+        statsParams->SetMaxEnabled( true );
+    else if( calcName == "Mean" )
+        statsParams->SetMeanEnabled( true );
+    else if( calcName == "Median" )
+        statsParams->SetMedianEnabled( true );
+    else if( calcName == "StdDev" )
+        statsParams->SetStdDevEnabled( true );
+    else
+    {
+        // REPORT ERROR!!
+    }
+
+    // Update VariableTable
+    this->_updateVarTable();
+}
+
+void Statistics::_removeCalcChanged( int index )
+{
+    assert( index > 0 );
+
+    // Initialize pointers
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    std::string calcName = RemoveCalcCombo->itemText(index).toStdString();
+
+    // Remove this calculation from parameter 
+    if( calcName == "Min" )
+        statsParams->SetMinEnabled( false );
+    else if( calcName == "Max" )
+        statsParams->SetMaxEnabled( false );
+    else if( calcName == "Mean" )
+        statsParams->SetMeanEnabled( false );
+    else if( calcName == "Median" )
+        statsParams->SetMedianEnabled( false );
+    else if( calcName == "StdDev" )
+        statsParams->SetStdDevEnabled( false );
+    else
+    {
+        // REPORT ERROR!!
+    }
+
+    // Update VariableTable
+    this->_updateVarTable();
+}
+
+
 void Statistics::_newVarChanged( int index )
 {
-    if (index == 0) 
-        return;
+    assert( index > 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -346,15 +424,6 @@ void Statistics::_newVarChanged( int index )
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
     std::string varName = NewVarCombo->itemText(index).toStdString();
-
-    // Add this variable to "Remove a Variable" list
-    RemoveVarCombo->addItem( NewVarCombo->itemText(index) );
-
-    // Remove this variable from "Add a Variable" list
-    NewVarCombo->blockSignals( true );
-    NewVarCombo->setCurrentIndex( 0 );
-    NewVarCombo->blockSignals( false );
-    NewVarCombo->removeItem( index );
 
     // Add this variable to parameter 
     std::vector<std::string> vars = statsParams->GetAuxVariableNames();
@@ -370,8 +439,7 @@ void Statistics::_newVarChanged( int index )
 
 void Statistics::_removeVarChanged( int index )
 {
-    if (index == 0) 
-        return;
+    assert( index > 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -380,15 +448,6 @@ void Statistics::_removeVarChanged( int index )
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
     std::string varName = RemoveVarCombo->itemText(index).toStdString();
-
-    // Add this variable to "Add a Variable" list
-    NewVarCombo->addItem( RemoveVarCombo->itemText(index) );
-
-    // Remove this variable from "Remove a Variable" list
-    RemoveVarCombo->blockSignals( true );
-    RemoveVarCombo->setCurrentIndex( 0 );
-    RemoveVarCombo->blockSignals( false );
-    RemoveVarCombo->removeItem( index );
 
     // Remove this variable from parameter 
     std::vector<std::string> vars = statsParams->GetAuxVariableNames();
