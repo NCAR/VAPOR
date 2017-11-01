@@ -60,7 +60,7 @@ void BarbParams::_init() {
 
     // Only 2D variables supported. Override base class
     //
-    vector<string> varnames = _dataMgr->GetDataVarNames(3, true);
+    vector<string> varnames = _dataMgr->GetDataVarNames(2, true);
     string varname;
 
     if (!varnames.empty())
