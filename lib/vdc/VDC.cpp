@@ -175,6 +175,7 @@ int VDC::DefineDimension(string name, size_t length) {
     }
 
     if (!_ValidDefineDimension(name, length)) {
+        SetErrMsg("Invalid definition for variable %s", name.c_str());
         return (-1);
     }
 
@@ -516,6 +517,7 @@ void VDC::_DefineMesh(
 int VDC::_DefineDataVar(
     string varname, vector<string> dim_names, vector<string> coord_vars,
     string units, XType type, bool compressed, double mv, string maskvar) {
+
     if (!_defineMode) {
         SetErrMsg("Not in define mode");
         return (-1);
@@ -555,7 +557,7 @@ int VDC::_DefineDataVar(
     if (coord_vars.size() > 0) {
         map<string, CoordVar>::const_iterator itr;
         itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
-        if (itr != _coordVars.end()) {
+        if (itr != _coordVars.end() && itr->second.GetAxis() == 3) {
             time_coord_var = coord_vars[coord_vars.size() - 1];
             dim_names.pop_back();
             coord_vars.pop_back();
@@ -1311,10 +1313,12 @@ bool VDC::_ValidDefineCoordVar(
         return (false);
     }
 
+#ifdef DEAD
     if (compressed && type != FLOAT) {
         SetErrMsg("Only FLOAT data supported with compressed variables");
         return (false);
     }
+#endif
 
     //
     // IF this is a dimension coordinate variable (a variable with
@@ -1384,7 +1388,11 @@ bool VDC::_valid_dims(
         bool match = false;
         for (int j = 0; j < dims1.size(); j++) {
 
-            if (dims0[i].GetName() == dims1[j].GetName()) {
+            // Different names ok as long has have same length
+            //
+            //if (dims0[i].GetName() == dims1[j].GetName())
+
+            if (dims0[i].GetLength() == dims1[j].GetLength()) {
                 match = true;
 
                 // Must have same blocking or no blocking
@@ -1446,7 +1454,7 @@ bool VDC::_valid_mask_var(
     // variable dimensions
     //
     vector<DC::Dimension> mdimensions;
-    bool ok = VDC::GetVarDimensions(varname, false, mdimensions);
+    bool ok = VDC::GetVarDimensions(maskvar, false, mdimensions);
     assert(ok);
 
     while (dimensions.size() > mdimensions.size())
@@ -1521,32 +1529,30 @@ bool VDC::_ValidDefineDataVar(
         return (false);
     }
 
+#ifdef DEAD
     if (compressed && type != FLOAT) {
         SetErrMsg("Only FLOAT data supported with compressed variables");
         return (false);
     }
+#endif
 
     //
     // If multidimensional the dimensions and coord names must be
     // ordered X, Y, Z, T
     //
 
-    printf("Axis Order: ");
     if (coord_vars.size() > 1) {
         map<string, CoordVar>::const_iterator itr;
         int axis = -1;
         for (int i = 0; i < coord_vars.size(); i++) {
             itr = _coordVars.find(coord_vars[i]);
             assert(itr != _coordVars.end()); // already checked for existance
-            printf("%s(%i) ", itr->second.GetName().c_str(), itr->second.GetAxis());
             if (itr->second.GetAxis() <= axis) {
                 SetErrMsg("Dimensions must be ordered X, Y, Z, T");
-                printf("\n");
                 return (false);
             }
             axis = itr->second.GetAxis();
         }
-        printf("\n");
     }
 
     // Check for a time coordinate
@@ -1554,7 +1560,7 @@ bool VDC::_ValidDefineDataVar(
     if (coord_vars.size() > 0) {
         map<string, CoordVar>::const_iterator itr;
         itr = _coordVars.find(coord_vars[coord_vars.size() - 1]);
-        if (itr != _coordVars.end()) {
+        if (itr != _coordVars.end() && itr->second.GetAxis() == 3) {
             dim_names.pop_back();
             dimensions.pop_back();
             coord_vars.pop_back();
