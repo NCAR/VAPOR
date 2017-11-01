@@ -162,11 +162,6 @@
                <property name="insertPolicy">
                 <enum>QComboBox::InsertAlphabetically</enum>
                </property>
-               <item>
-                <property name="text">
-                 <string>Add a Variable</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>
@@ -174,11 +169,6 @@
                <property name="insertPolicy">
                 <enum>QComboBox::InsertAlphabetically</enum>
                </property>
-               <item>
-                <property name="text">
-                 <string>Remove a Variable</string>
-                </property>
-               </item>
               </widget>
              </item>
             </layout>
@@ -213,11 +203,6 @@
                <property name="duplicatesEnabled">
                 <bool>false</bool>
                </property>
-               <item>
-                <property name="text">
-                 <string>Add a Statistic</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>
@@ -228,11 +213,6 @@
                <property name="duplicatesEnabled">
                 <bool>true</bool>
                </property>
-               <item>
-                <property name="text">
-                 <string>Remove a Statistic</string>
-                </property>
-               </item>
               </widget>
              </item>
             </layout>
