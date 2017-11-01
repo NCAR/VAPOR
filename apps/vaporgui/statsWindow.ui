@@ -31,6 +31,12 @@
          <property name="spacing">
           <number>0</number>
          </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <property name="spacing">
@@ -46,6 +52,9 @@
              </property>
              <property name="text">
               <string>Variable Statistics</string>
+             </property>
+             <property name="margin">
+              <number>5</number>
              </property>
             </widget>
            </item>
@@ -91,7 +100,7 @@
             <number>0</number>
            </property>
            <property name="topMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="bottomMargin">
             <number>0</number>
@@ -196,7 +205,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="AddStatCombo">
+              <widget class="QComboBox" name="NewCalcCombo">
                <property name="insertPolicy">
                 <enum>QComboBox::InsertAlphabetically</enum>
                </property>
@@ -206,7 +215,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="RemoveStatCombo">
+              <widget class="QComboBox" name="RemoveCalcCombo">
                <property name="insertPolicy">
                 <enum>QComboBox::InsertAlphabetically</enum>
                </property>
@@ -236,6 +245,9 @@
          <property name="topMargin">
           <number>10</number>
          </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
          <item>
           <layout class="QHBoxLayout" name="CompressionLabelLayout">
            <property name="spacing">
@@ -253,6 +265,36 @@
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
             </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="CRatioLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="CRatioLabel">
+             <property name="text">
+              <string>Level of Detail</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QComboBox" name="LODCombo"/>
            </item>
           </layout>
          </item>
@@ -290,36 +332,6 @@
            </item>
           </layout>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="CRatioLayout">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="CRatioLabel">
-             <property name="text">
-              <string>Level of Detail</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QComboBox" name="CRatioCombo"/>
-           </item>
-          </layout>
-         </item>
         </layout>
        </item>
        <item>
@@ -339,6 +351,12 @@
         <layout class="QVBoxLayout" name="TimeLayout" stretch="0,0,0">
          <property name="spacing">
           <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
          </property>
          <item>
           <layout class="QHBoxLayout" name="TemporalExtentsLayout">
