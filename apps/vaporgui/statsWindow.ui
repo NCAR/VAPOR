@@ -249,7 +249,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>5</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
           <number>10</number>
@@ -260,7 +260,7 @@
             <number>0</number>
            </property>
            <property name="bottomMargin">
-            <number>5</number>
+            <number>0</number>
            </property>
            <item>
             <widget class="QLabel" name="CompressionLabel">
@@ -316,6 +316,11 @@
              <property name="frame">
               <bool>true</bool>
              </property>
+             <item>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>
@@ -359,6 +364,11 @@
              <property name="frame">
               <bool>true</bool>
              </property>
+             <item>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>
@@ -384,7 +394,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>5</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
           <number>10</number>
@@ -395,7 +405,7 @@
             <number>0</number>
            </property>
            <property name="bottomMargin">
-            <number>3</number>
+            <number>0</number>
            </property>
            <item>
             <widget class="QLabel" name="TemporalExtentsLabel">
@@ -592,6 +602,9 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="margin">
+          <number>5</number>
          </property>
         </widget>
        </item>
