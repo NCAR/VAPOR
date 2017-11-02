@@ -187,7 +187,7 @@ class MappingFrame : public QGLWidget {
     void updateMap();
 
   private:
-    void setMapperFunction(VAPoR::MapperFunction *mapper);
+    void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
     bool colorMapping() const { return _colorMappingEnabled; }
     bool opacityMapping() const { return _opacityMappingEnabled; }
@@ -235,6 +235,7 @@ class MappingFrame : public QGLWidget {
     void resizeGL(int w, int h);
     //Virtual, Reimplemented here:
 
+    int drawHistogram();
     int drawOpacityCurve();
     int drawOpacityWidgets();
     int drawDomainSlider();
