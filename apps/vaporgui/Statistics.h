@@ -72,6 +72,7 @@ protected:
         bool AddVariable( std::string );
         bool RemoveVariable( std::string );
         size_t GetVariableCount();
+        std::string GetVariableName( int i );
         
         bool Add3MStats( std::string, const double* );   // Min, Max, Mean
         bool AddMedian(  std::string, double );
@@ -110,6 +111,7 @@ private slots:
     void _lodChanged( int );
     void _minTSChanged( int );
     void _maxTSChanged( int );
+    void _updateButtonClicked();
     /*
     void restoreExtents();
     void minTSChanged();
@@ -136,9 +138,11 @@ private:
     sErrMsg*            _errMsg;
     VAPoR::ControlExec* _controlExec;
 
+    void                _updateStatsTable();
+
     // calculations should put results in _validStats directly.
-    //bool                _calc3M( std::string );
-    //bool                _calcMedian( std::string );
-    //bool                _calcStddev( std::string );
+    bool                _calc3M( std::string );
+    bool                _calcMedian( std::string );
+    bool                _calcStddev( std::string );
 };
 #endif
