@@ -1294,7 +1294,6 @@ void MainForm::closeData(string fileName) {
 
 	if (currentDataSets.size()==0) {
 		enableWidgets(false);
-
 	}
 
 	_vizWinMgr->ReinitRouters();
@@ -2029,9 +2028,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	break;
 	default:
-#ifdef	DEAD
-		cout << "UNHANDLED EVENT TYPE " << event->type() << endl;
-#endif
 	break;
 	}
 
@@ -2096,25 +2092,8 @@ void MainForm::enableWidgets(bool onOff) {
 	_plotAction->setEnabled(onOff);
 //	_seedMeAction->setEnabled(onOff);
 
-	AnimationEventRouter* aRouter = (AnimationEventRouter*)
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+	_vizWinMgr->EnableRouters(onOff);
 
-	aRouter->setEnabled(onOff);
-
-	RegionEventRouter* rRouter = (RegionEventRouter*)
-		_vizWinMgr->GetEventRouter(RegionEventRouter::GetClassType());
-
-	rRouter->setEnabled(onOff);
-
-	ViewpointEventRouter* vRouter = (ViewpointEventRouter*)
-		_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
-
-	vRouter->setEnabled(onOff);
-
-	VizFeatureEventRouter* vfRouter = (VizFeatureEventRouter*)
-		_vizWinMgr->GetEventRouter(VizFeatureEventRouter::GetClassType());
-
-	vfRouter->setEnabled(onOff);
 }
 
 void MainForm::enableAnimationWidgets(bool on) {
