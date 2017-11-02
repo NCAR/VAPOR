@@ -1700,11 +1700,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         _vizWinMgr->updateDirtyWindows();
 
         break;
-    default:
-#ifdef DEAD
-        cout << "UNHANDLED EVENT TYPE " << event->type() << endl;
-#endif
-        break;
+    default: break;
     }
 
     // Pass event on to target
@@ -1766,21 +1762,7 @@ void MainForm::enableWidgets(bool onOff)
     _plotAction->setEnabled(onOff);
     //	_seedMeAction->setEnabled(onOff);
 
-    AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-    aRouter->setEnabled(onOff);
-
-    RegionEventRouter *rRouter = (RegionEventRouter *)_vizWinMgr->GetEventRouter(RegionEventRouter::GetClassType());
-
-    rRouter->setEnabled(onOff);
-
-    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)_vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
-
-    vRouter->setEnabled(onOff);
-
-    VizFeatureEventRouter *vfRouter = (VizFeatureEventRouter *)_vizWinMgr->GetEventRouter(VizFeatureEventRouter::GetClassType());
-
-    vfRouter->setEnabled(onOff);
+    _vizWinMgr->EnableRouters(onOff);
 }
 
 void MainForm::enableAnimationWidgets(bool on)

@@ -71,6 +71,13 @@ VizWin::~VizWin()
 }
 void VizWin::closeEvent(QCloseEvent *e)
 {
+    // Remove the visualizer. This must be done inside of VizWin so that
+    // the OpenGL context can be made current because removing a visualizer
+    // triggers OpenGL calls in the renderer destructors
+    //
+    makeCurrent();
+    _controlExec->RemoveVisualizer(_winName);
+
     // Tell the winmgr that we are closing:
     _vizWinMgr->vizAboutToDisappear(_winName);
     QWidget::closeEvent(e);
