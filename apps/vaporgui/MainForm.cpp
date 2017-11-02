@@ -1099,15 +1099,6 @@ void MainForm::loadDataHelper(
         currentPaths.push_back(files[0]);
         currentDataSets.push_back(dataSetName);
         p->SetOpenDataSets(currentPaths, currentDataSets);
-
-        // Add menu option to close the dataset in the File menu
-        //
-        QAction *closeAction = new QAction(QString::fromStdString(dataSetName),
-                                           _closeVDCMenu);
-        _closeVDCMenu->addAction(closeAction);
-        connect(
-            closeAction, SIGNAL(triggered()),
-            this, SLOT(closeData()));
     }
 
     // Reinitialize all tabs
@@ -1130,7 +1121,7 @@ void MainForm::loadDataHelper(
 
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
 
-    update();
+    //	update();
 }
 
 //Load data into current session
@@ -1154,7 +1145,6 @@ void MainForm::closeData(string fileName) {
     string dataSetName = a->text().toStdString();
 
     _controlExec->CloseData(dataSetName);
-    _closeVDCMenu->removeAction(a);
 
     GUIStateParams *p = GetStateParams();
     vector<string> currentPaths, currentDataSets;
@@ -1337,7 +1327,7 @@ void MainForm::pauseClick() {
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationPause();
-    update();
+    //	update();
 }
 
 void MainForm::playForward() {
@@ -1345,7 +1335,7 @@ void MainForm::playForward() {
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationPlayForward();
-    update();
+    //	update();
 }
 
 void MainForm::playBackward() {
@@ -1353,7 +1343,7 @@ void MainForm::playBackward() {
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationPlayReverse();
-    update();
+    //	update();
 }
 
 void MainForm::stepBack() {
@@ -1361,7 +1351,7 @@ void MainForm::stepBack() {
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationStepReverse();
-    update();
+    //	update();
 }
 
 void MainForm::stepForward() {
@@ -1369,7 +1359,7 @@ void MainForm::stepForward() {
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationStepForward();
-    update();
+    //	update();
 }
 
 void MainForm::setAnimationOnOff(bool on) {
@@ -1388,7 +1378,7 @@ void MainForm::setAnimationOnOff(bool on) {
 
 void MainForm::setAnimationDraw() {
     _vizWinMgr->updateDirtyWindows();
-    update();
+    //update();
 }
 
 //Respond to a change in the text in the animation toolbar
@@ -1399,7 +1389,7 @@ void MainForm::setTimestep() {
                                         _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->SetTimeStep(timestep);
-    update();
+    //	update();
 }
 
 void MainForm::enableKeyframing(bool ison) {
@@ -1854,6 +1844,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
         _tabMgr->Update();
         _vizWinMgr->updateDirtyWindows();
+
+        update();
+
         return (false);
     }
 
@@ -1874,14 +1867,35 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
         break;
     default:
-#ifdef DEAD
-        cout << "UNHANDLED EVENT TYPE " << event->type() << endl;
-#endif
         break;
     }
 
     // Pass event on to target
     return (false);
+}
+
+void MainForm::updateMenus() {
+
+    GUIStateParams *p = GetStateParams();
+
+    // Close menu
+    //
+    _closeVDCMenu->clear();
+    vector<string> currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    for (int i = 0; i < currentDataSets.size(); i++) {
+
+        // Add menu option to close the dataset in the File menu
+        //
+        QAction *closeAction = new QAction(
+            QString::fromStdString(currentDataSets[i]),
+            _closeVDCMenu);
+        _closeVDCMenu->addAction(closeAction);
+
+        connect(
+            closeAction, SIGNAL(triggered()),
+            this, SLOT(closeData()));
+    }
 }
 
 void MainForm::update() {
@@ -1892,6 +1906,8 @@ void MainForm::update() {
     size_t timestep = aParams->GetCurrentTimestep();
 
     _timeStepEdit->setText(QString::number((int)timestep));
+
+    updateMenus();
 
 #ifdef DEAD
     // Get the current mode setting from MouseModeParams
@@ -1938,25 +1954,7 @@ void MainForm::enableWidgets(bool onOff) {
     _plotAction->setEnabled(onOff);
     //	_seedMeAction->setEnabled(onOff);
 
-    AnimationEventRouter *aRouter = (AnimationEventRouter *)
-                                        _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-    aRouter->setEnabled(onOff);
-
-    RegionEventRouter *rRouter = (RegionEventRouter *)
-                                     _vizWinMgr->GetEventRouter(RegionEventRouter::GetClassType());
-
-    rRouter->setEnabled(onOff);
-
-    ViewpointEventRouter *vRouter = (ViewpointEventRouter *)
-                                        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
-
-    vRouter->setEnabled(onOff);
-
-    VizFeatureEventRouter *vfRouter = (VizFeatureEventRouter *)
-                                          _vizWinMgr->GetEventRouter(VizFeatureEventRouter::GetClassType());
-
-    vfRouter->setEnabled(onOff);
+    _vizWinMgr->EnableRouters(onOff);
 }
 
 void MainForm::enableAnimationWidgets(bool on) {

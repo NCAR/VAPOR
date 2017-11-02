@@ -78,7 +78,7 @@ class RENDER_API BarbRenderer : public Renderer {
     //! \param[in] Grid Grid used in rendering.
     //! The first three are the vector field, Grid[3] is the Height variable, Grid[4] is the color variable.
     //! \retval int zero if successful
-    int performRendering(const BarbParams *rParams,
+    int performRendering(BarbParams *rParams,
                          int actualRefLevel, float vectorScale,
                          vector<Grid *> variableData);
 
@@ -87,7 +87,7 @@ class RENDER_API BarbRenderer : public Renderer {
 
     void renderGrid(int rakeGrid[3], double rakeExts[6],
                     vector<Grid *> variableData, int timestep,
-                    float vectorLengthScale, float rad, const BarbParams *params);
+                    float vectorLengthScale, float rad, BarbParams *params);
 
     bool GetColorMapping(TransferFunction *tf, float val, float clut[256 * 4]);
 
