@@ -55,10 +55,11 @@ namespace {
 
 
 void oglPushState() {
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
 	glMatrixMode(GL_TEXTURE);
 	glPushMatrix();
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 
@@ -67,12 +68,15 @@ void oglPushState() {
 }
 
 void oglPopState() {
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
+  glPopAttrib();
+
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
-  glPopAttrib();
+
   glMatrixMode(GL_TEXTURE);
+  glPopMatrix();
+
+  glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
 }
 
@@ -184,8 +188,8 @@ void MappingFrame::RefreshHistogram() {
 //	string var = _rParams->GetVariableName();
 	size_t ts = _rParams->GetCurrentTimestep();	
 
-	float minRange = _rParams->MakeMapperFunc(var)->getMinMapValue();
-	float maxRange = _rParams->MakeMapperFunc(var)->getMaxMapValue();
+	float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
+	float maxRange = _rParams->GetMapperFunc(var)->getMaxMapValue();
 	if (!_histogram)
 		_histogram = new Histo(256, minRange, maxRange);
 	else 
@@ -224,11 +228,12 @@ void MappingFrame::RefreshHistogram() {
 //----------------------------------------------------------------------------
 void MappingFrame::setMapperFunction(MapperFunction *mapper)
 {
+  assert(mapper);
   deleteOpacityWidgets();
   
   _mapper = mapper;
   
-  if (_mapper && _opacityMappingEnabled)
+  if (_opacityMappingEnabled)
   {
     //
     // Create a new opacity widget for each opacity map in the mapper function
@@ -260,13 +265,7 @@ void MappingFrame::setMapperFunction(MapperFunction *mapper)
 
   if (_colorMappingEnabled)
   {
-	  if (_mapper) {
-#ifdef	DEAD
-		  _mapper->GetColorMap()->setMapper(_mapper);
-#endif
-		  _colorbarWidget->setColormap(_mapper->GetColorMap());
-	  } else 
-		_colorbarWidget->setColormap(NULL);
+	  _colorbarWidget->setColormap(_mapper->GetColorMap());
   }
   
 }
@@ -369,10 +368,7 @@ void MappingFrame::Update(DataMgr *dataMgr,
 
 	MapperFunction *mapper;
 	mapper = _rParams->GetMapperFunc(varname);
-	if (!mapper) {
-		mapper = _rParams->MakeMapperFunc(varname);
-		assert(mapper);
-	}
+	assert(mapper);
 
 	setMapperFunction(mapper);
 
@@ -389,13 +385,8 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	}
 	else if (_isolineSlidersEnabled){
 		//Synchronize sliders with isovalues
-//#ifdef	DEAD
 		vector<double> isovals = ((ContourParams*) rParams)->GetContourValues(varname);
 		setIsolineSliders(isovals);
-//		for (int i = 0; i<isovals.size(); i++){
-//			_isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
-//		}
-//#endif
 	}
 
 	_domainSlider->setDomain(xDataToWorld(getMinDomainBound()), 
@@ -403,7 +394,6 @@ void MappingFrame::Update(DataMgr *dataMgr,
 
 	_updateTexture = true;
 
-	update();
 }
 
 //----------------------------------------------------------------------------
@@ -861,34 +851,15 @@ void MappingFrame::deleteOpacityWidgets()
   _opacityWidgets.clear();
 }
 
-//-----------------------------------------------------------------------------
-// Set up the OpenGL view port, matrix mode, etc.
-//----------------------------------------------------------------------------
 void MappingFrame::resizeGL(int width, int height)
 {
-	
-	printOpenGLErrorMsg("MappingFrameResizeEvent");
-	
-	resize();
-	/*
-  // Update the size of the drawing rectangle
-  //
-  glViewport( 0, 0, (GLint)width, (GLint)height );
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glMatrixMode(GL_MODELVIEW);
-  */
-  qglClearColor(QColor(0,0,0)); 
-  
-  printOpenGLErrorMsg("MappingFrameResizeEvent");
 }
 	
 //----------------------------------------------------------------------------
 // Draw the frame's contents
 //----------------------------------------------------------------------------
-void MappingFrame::paintGL()
-{
+void MappingFrame::paintGL() {
+
   // On Mac Qt invokes paintGL when frame frame buffer isn't ready :-(
   //
   if (! FrameBufferReady()) {
@@ -896,7 +867,35 @@ void MappingFrame::paintGL()
   }
 
   if (!_mapper) return;
+
+  glShadeModel( GL_SMOOTH );
+  //
+  // Enable lighting for opacity widget handles
+  //
+  static float ambient[]  = {0.2, 0.2, 0.2, 1.0};
+  static float diffuse[]  = {1.0, 1.0, 1.0, 1.0};
+  static float specular[] = {0.0, 0.0,  0.0, 0.0};
+  static float lightpos[] = {0.0, 1.0, 5000000.0};
+
+  glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+  glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+
+  glEnable(GL_LIGHT0);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 128);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
+  glDisable(GL_CULL_FACE);
+
   resize();
+
   int rc = printOpenGLErrorMsg("MappingFrame::paintGL");
   if (rc < 0){
       MSG_ERR("MappingFrame::paintGL");
@@ -912,7 +911,9 @@ void MappingFrame::paintGL()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(_minX, _maxX, _minY, _maxY, -1.0, 1.0);
+
   glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 
   qglClearColor(palette().color(QPalette::Background));
 
@@ -1102,9 +1103,6 @@ void MappingFrame::initializeGL()
   setAutoBufferSwap(false);
   qglClearColor(QColor(0,0,0)); 
 
-  glShadeModel( GL_SMOOTH );
-
-
   //
   // Initialize the histogram texture
   //
@@ -1116,31 +1114,6 @@ void MappingFrame::initializeGL()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  //
-  // Enable lighting for opacity widget handles
-  //
-  static float ambient[]  = {0.2, 0.2, 0.2, 1.0};
-  static float diffuse[]  = {1.0, 1.0, 1.0, 1.0};
-  static float specular[] = {0.0, 0.0,  0.0, 0.0};
-  static float lightpos[] = {0.0, 1.0, 5000000.0};
-
-  glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-  glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-
-  glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 128);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glDisable(GL_CULL_FACE);
 
   if (_colorMappingEnabled)
   {
@@ -1185,8 +1158,6 @@ int MappingFrame::drawOpacityCurve()
 
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_BLEND);
-//    glEnable(GL_LIGHT0);
- //   glEnable(GL_LIGHTING);
   }
   int rc = printOpenGLErrorMsg("DrawOpacityCurve");
   if (rc < 0) return -1;
@@ -2246,8 +2217,9 @@ Histo* MappingFrame::getHistogram()
 	}
 //	string varname = _rParams->GetVariableName();
 
-    MapperFunction* mapFunc = _rParams->MakeMapperFunc(varname);
-    if (!mapFunc) return 0;
+    MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
+	assert(mapFunc);
+
     if (_histogram) delete _histogram;
 
     _histogram = new Histo(256,mapFunc->getMinMapValue(),
@@ -2540,19 +2512,6 @@ void MappingFrame::setIsolineSlider(int index)
   updateGL();
 #endif
   
-}
-void MappingFrame::paintEvent(QPaintEvent* event)
-{
-	printOpenGLErrorMsg("MappingFramePaintEvent");
-
-	  QGLWidget::paintEvent(event);
-	  printOpenGLErrorMsg("MappingFramePaintEvent");
-	
-}
-void MappingFrame::updateGL(){
-	
-	QGLWidget::updateGL();
-	return;
 }
 
 void MappingFrame::setIsolineSliders(const vector<double>& sliderVals){
