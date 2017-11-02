@@ -127,85 +127,7 @@ bool Statistics::Update() {
     RemoveVarCombo->blockSignals(false);
 
     // Update Statistics table: header
-    VariablesTable->clear();
-    QStringList header;
-    header << "Variable";
-    if (statsParams->GetMinEnabled())
-        header << "Min";
-    if (statsParams->GetMaxEnabled())
-        header << "Max";
-    if (statsParams->GetMeanEnabled())
-        header << "Mean";
-    if (statsParams->GetMedianEnabled())
-        header << "Median";
-    if (statsParams->GetStdDevEnabled())
-        header << "StdDev";
-    VariablesTable->setColumnCount(header.size());
-    VariablesTable->setHorizontalHeaderLabels(header);
-    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-
-    // Update Statistics table: cells
-    QBrush brush(QColor(255, 0, 0));
-    VariablesTable->setRowCount(enabledVars.size());
-    for (int row = 0; row < enabledVars.size(); row++) {
-        VariablesTable->setItem(row, 0,
-                                new QTableWidgetItem(QString::fromStdString(enabledVars[row])));
-
-        double m3[3], median, stddev;
-        _validStats.Get3MStats(enabledVars[row], m3);
-        _validStats.GetMedian(enabledVars[row], &median);
-        _validStats.GetStddev(enabledVars[row], &stddev);
-
-        int column = 1;
-        if (statsParams->GetMinEnabled()) {
-            if (!std::isnan(m3[0]))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetMaxEnabled()) {
-            if (!std::isnan(m3[1]))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1])));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetMeanEnabled()) {
-            if (!std::isnan(m3[2]))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2])));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetMedianEnabled()) {
-            if (!std::isnan(median))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median)));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetStdDevEnabled()) {
-            if (!std::isnan(stddev))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev)));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-    }
-    for (int r = 0; r < VariablesTable->rowCount(); r++)
-        for (int c = 0; c < VariablesTable->columnCount(); c++)
-            VariablesTable->item(r, c)->setFlags(Qt::NoItemFlags);
+    this->_updateStatsTable();
 
     // Update calculations
     NewCalcCombo->blockSignals(true);
@@ -307,6 +229,99 @@ bool Statistics::Update() {
     return true;
 }
 
+void Statistics::_updateStatsTable() {
+    // Initialize pointers
+    VAPoR::DataStatus *dataStatus = _controlExec->getDataStatus();
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string currentDatasetName = guiParams->GetStatsDatasetName();
+    assert(currentDatasetName != "");
+    VAPoR::DataMgr *currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
+
+    // Update Statistics Table: header
+    VariablesTable->clear();
+    QStringList header;
+    header << "Variable";
+    if (statsParams->GetMinEnabled())
+        header << "Min";
+    if (statsParams->GetMaxEnabled())
+        header << "Max";
+    if (statsParams->GetMeanEnabled())
+        header << "Mean";
+    if (statsParams->GetMedianEnabled())
+        header << "Median";
+    if (statsParams->GetStdDevEnabled())
+        header << "StdDev";
+    VariablesTable->setColumnCount(header.size());
+    VariablesTable->setHorizontalHeaderLabels(header);
+    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    // Update Statistics Table: cells
+    QBrush brush(QColor(255, 0, 0));
+    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
+    assert(enabledVars.size() == _validStats.GetVariableCount());
+    VariablesTable->setRowCount(enabledVars.size());
+    for (int row = 0; row < enabledVars.size(); row++) {
+        VariablesTable->setItem(row, 0,
+                                new QTableWidgetItem(QString::fromStdString(enabledVars[row])));
+
+        double m3[3], median, stddev;
+        _validStats.Get3MStats(enabledVars[row], m3);
+        _validStats.GetMedian(enabledVars[row], &median);
+        _validStats.GetStddev(enabledVars[row], &stddev);
+
+        int column = 1;
+        if (statsParams->GetMinEnabled()) {
+            if (!std::isnan(m3[0]))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetMaxEnabled()) {
+            if (!std::isnan(m3[1]))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1])));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetMeanEnabled()) {
+            if (!std::isnan(m3[2]))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2])));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetMedianEnabled()) {
+            if (!std::isnan(median))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median)));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetStdDevEnabled()) {
+            if (!std::isnan(stddev))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev)));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+    }
+    for (int r = 0; r < VariablesTable->rowCount(); r++)
+        for (int c = 0; c < VariablesTable->columnCount(); c++)
+            VariablesTable->item(r, c)->setFlags(Qt::NoItemFlags);
+}
+
 void Statistics::showMe() {
     show();
     raise();
@@ -345,7 +360,22 @@ bool Statistics::Connect() {
     connect(LODCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)));
     connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)));
     connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)));
+    connect(UpdateButton, SIGNAL(clicked()), this, SLOT(_updateButtonClicked()));
     return true;
+}
+
+void Statistics::_updateButtonClicked() {
+    for (int i = 0; i < _validStats.GetVariableCount(); i++) {
+        std::string varname = _validStats.GetVariableName(i);
+        double m3[3], median, stddev;
+        _validStats.Get3MStats(varname, m3);
+        _validStats.GetMedian(varname, &median);
+        _validStats.GetStddev(varname, &stddev);
+        if (std::isnan(m3[2])) {
+            _calc3M(varname);
+            _updateStatsTable();
+        }
+    }
 }
 
 void Statistics::_minTSChanged(int val) {
@@ -515,6 +545,61 @@ void Statistics::_removeVarChanged(int index) {
 
     // Remove this variable from _validStats
     _validStats.RemoveVariable(varName);
+}
+
+bool Statistics::_calc3M(std::string varname) {
+    // Initialize pointers
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    VAPoR::DataMgr *currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
+
+    int minTS = statsParams->GetCurrentMinTS();
+    int maxTS = statsParams->GetCurrentMaxTS();
+    if (!currentDmgr->IsTimeVarying(varname))
+        maxTS = minTS;
+    std::vector<double> minExtent, maxExtent;
+    statsParams->GetBox()->GetExtents(minExtent, maxExtent);
+
+    double c = 0.0;
+    double sum = 0.0;
+    double min = std::numeric_limits<double>::max();
+    double max = std::numeric_limits<double>::min();
+    long count = 0;
+
+    for (int ts = minTS; ts <= maxTS; ts++) {
+        VAPoR::Grid *grid = currentDmgr->GetVariable(ts, varname,
+                                                     statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
+                                                     minExtent, maxExtent);
+        Grid::ConstIterator endItr = grid->cend();
+        float missingVal = grid->GetMissingValue();
+
+        Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent);
+        for (it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it)
+        //for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        {
+            std::cout << "examine a grid point" << std::endl;
+            if (*it != missingVal) {
+                min = min < *it ? min : *it;
+                max = max > *it ? max : *it;
+                double y = *it - c;
+                double t = sum + y;
+                c = t - sum - y;
+                sum = t;
+                count++;
+            }
+        }
+        std::cout << "finish a TS" << std::endl;
+    }
+
+    if (count > 0) {
+        double m3[3] = {min, max, sum / (double)count};
+        _validStats.Add3MStats(varname, m3);
+    } else {
+        // Report ERROR!!
+    }
+
+    return true;
 }
 
 #if 0
@@ -709,16 +794,23 @@ size_t Statistics::ValidStats::GetVariableCount() {
     return _variables.size();
 }
 
+std::string Statistics::ValidStats::GetVariableName(int i) {
+    if (i < _variables.size())
+        return _variables.at(i);
+    else
+        return std::string("");
+}
+
 #if 0
 void Statistics::exportText() {
-	_extents[0] = _xRange->getUserMin();
-	_extents[1] = _yRange->getUserMin();
-	_extents[2] = _zRange->getUserMin();
-	_extents[3] = _xRange->getUserMax();
-	_extents[4] = _yRange->getUserMax();
-	_extents[5] = _zRange->getUserMax();
+    _extents[0] = _xRange->getUserMin();
+    _extents[1] = _yRange->getUserMin();
+    _extents[2] = _zRange->getUserMin();
+    _extents[3] = _xRange->getUserMax();
+    _extents[4] = _yRange->getUserMax();
+    _extents[5] = _zRange->getUserMax();
 
-	QString fName = QFileDialog::getSaveFileName(this,"Select file to write statistics into:", "", "*.txt");
+    QString fName = QFileDialog::getSaveFileName(this,"Select file to write statistics into:", "", "*.txt");
   if( !fName.isEmpty() )
   {
     ofstream file;
