@@ -574,10 +574,7 @@ bool Statistics::_calc3M(std::string varname) {
         Grid::ConstIterator endItr = grid->cend();
         float missingVal = grid->GetMissingValue();
 
-        Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent);
-        for (it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it)
-        //for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
-        {
+        for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             std::cout << "examine a grid point" << std::endl;
             if (*it != missingVal) {
                 min = min < *it ? min : *it;
@@ -589,7 +586,6 @@ bool Statistics::_calc3M(std::string varname) {
                 count++;
             }
         }
-        std::cout << "finish a TS" << std::endl;
     }
 
     if (count > 0) {
