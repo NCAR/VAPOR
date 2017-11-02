@@ -123,8 +123,8 @@ TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string d
 
     _cMapTexID = 0;
 
-    TwoDDataParams *  rp = (TwoDDataParams *)GetActiveParams();
-    TransferFunction *tf = rp->MakeTransferFunc(rp->GetVariableName());
+    TwoDDataParams *rp = (TwoDDataParams *)GetActiveParams();
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
 
     _colormapsize = tf->getNumEntries();
     _colormap = new GLfloat[_colormapsize * 4];
@@ -203,7 +203,7 @@ int TwoDDataRenderer::_paintGL()
 
     TwoDDataParams *rp = (TwoDDataParams *)GetActiveParams();
 
-    TransferFunction *tf = rp->MakeTransferFunc(rp->GetVariableName());
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
     tf->makeLut(_colormap);
     vector<double> crange = tf->getMinMaxMapValue();
 

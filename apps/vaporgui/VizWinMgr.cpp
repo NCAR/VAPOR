@@ -199,9 +199,6 @@ void VizWinMgr::vizAboutToDisappear(string vizName)
         setActiveViz(itr->first);
     }
 
-    // Remove the visualizer
-    _controlExec->RemoveVisualizer(vizName);
-
     // Remove the visualizer from the vizSelectCombo
     emit(removeViz(QString::fromStdString(vizName)));
 
@@ -454,6 +451,20 @@ void VizWinMgr::updateDirtyWindows()
 
 void VizWinMgr::setEnabled(bool onOff) { _tabManager->setEnabled(onOff); }
 
+void VizWinMgr::EnableRouters(bool onOff)
+{
+    map<string, EventRouter *>::iterator itr;
+    for (itr = _eventRouterMap.begin(); itr != _eventRouterMap.end(); ++itr) {
+        // Ugh! EventRouter base class does not inheret from QWidget, but
+        // derived classes *should*. No way to enforce this.
+        //
+
+        QWidget *w = dynamic_cast<QWidget *>(itr->second);
+        assert(w);
+        w->setEnabled(onOff);
+    }
+}
+
 void VizWinMgr::Shutdown()
 {
     vector<string> vizNames = GetVisualizerNames();
@@ -461,6 +472,8 @@ void VizWinMgr::Shutdown()
     for (int i = 0; i < vizNames.size(); i++) { killViz(vizNames[i]); }
     assert(_vizMdiWin.empty());
     assert(_vizWindow.empty());
+
+    EnableRouters(false);
 
     m_initialized = false;
 }
@@ -505,9 +518,11 @@ void VizWinMgr::ReinitRouters()
     scale[0] = scale[1] = scale[2] = max(maxExts[0] - minExts[0], (maxExts[1] - minExts[1]));
     m_trackBall->SetScale(scale);
 
+    m_initialized = true;
+
     UpdateRouters();
 
-    m_initialized = true;
+    EnableRouters(true);
 }
 
 void VizWinMgr::UpdateRouters()
@@ -526,10 +541,6 @@ void VizWinMgr::UpdateRouters()
 
         if (reRouter) continue;    // Skip render event routers
 
-        QWidget *w = dynamic_cast<QWidget *>(eRouter);
-        assert(w);
-        w->setEnabled(true);
-
         eRouter->updateTab();
     }
 
@@ -543,10 +554,6 @@ void VizWinMgr::UpdateRouters()
 
     if (activeViz.size() && renderClass.size() && instName.size()) {
         EventRouter *eRouter = GetRenderEventRouter(activeViz, renderClass, instName);
-
-        QWidget *w = dynamic_cast<QWidget *>(eRouter);
-        assert(w);
-        w->setEnabled(true);
 
         eRouter->updateTab();
     }
