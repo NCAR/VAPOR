@@ -4,7 +4,6 @@ add_library (params SHARED
 	ColorMap.cpp
 	OpacityMap.cpp
 	MapperFunction.cpp
-	TransferFunction.cpp
 	Box.cpp
 	ColorbarPbase.cpp
 	RenderParams.cpp
