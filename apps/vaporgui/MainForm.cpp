@@ -948,12 +948,6 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
         currentPaths.push_back(files[0]);
         currentDataSets.push_back(dataSetName);
         p->SetOpenDataSets(currentPaths, currentDataSets);
-
-        // Add menu option to close the dataset in the File menu
-        //
-        QAction *closeAction = new QAction(QString::fromStdString(dataSetName), _closeVDCMenu);
-        _closeVDCMenu->addAction(closeAction);
-        connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
     }
 
     // Reinitialize all tabs
@@ -976,7 +970,7 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
 
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
 
-    update();
+    //	update();
 }
 
 // Load data into current session
@@ -997,7 +991,6 @@ void MainForm::closeData(string fileName)
     string dataSetName = a->text().toStdString();
 
     _controlExec->CloseData(dataSetName);
-    _closeVDCMenu->removeAction(a);
 
     GUIStateParams *p = GetStateParams();
     vector<string>  currentPaths, currentDataSets;
@@ -1167,7 +1160,7 @@ void MainForm::pauseClick()
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationPause();
-    update();
+    //	update();
 }
 
 void MainForm::playForward()
@@ -1175,7 +1168,7 @@ void MainForm::playForward()
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationPlayForward();
-    update();
+    //	update();
 }
 
 void MainForm::playBackward()
@@ -1183,7 +1176,7 @@ void MainForm::playBackward()
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationPlayReverse();
-    update();
+    //	update();
 }
 
 void MainForm::stepBack()
@@ -1191,7 +1184,7 @@ void MainForm::stepBack()
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationStepReverse();
-    update();
+    //	update();
 }
 
 void MainForm::stepForward()
@@ -1199,7 +1192,7 @@ void MainForm::stepForward()
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->AnimationStepForward();
-    update();
+    //	update();
 }
 
 void MainForm::setAnimationOnOff(bool on)
@@ -1219,7 +1212,7 @@ void MainForm::setAnimationOnOff(bool on)
 void MainForm::setAnimationDraw()
 {
     _vizWinMgr->updateDirtyWindows();
-    update();
+    // update();
 }
 
 // Respond to a change in the text in the animation toolbar
@@ -1230,7 +1223,7 @@ void MainForm::setTimestep()
     AnimationEventRouter *aRouter = (AnimationEventRouter *)_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
     aRouter->SetTimeStep(timestep);
-    update();
+    //	update();
 }
 
 void MainForm::enableKeyframing(bool ison)
@@ -1681,6 +1674,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         _tabMgr->Update();
         _vizWinMgr->updateDirtyWindows();
+
+        update();
+
         return (false);
     }
 
@@ -1707,6 +1703,25 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     return (false);
 }
 
+void MainForm::updateMenus()
+{
+    GUIStateParams *p = GetStateParams();
+
+    // Close menu
+    //
+    _closeVDCMenu->clear();
+    vector<string> currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+    for (int i = 0; i < currentDataSets.size(); i++) {
+        // Add menu option to close the dataset in the File menu
+        //
+        QAction *closeAction = new QAction(QString::fromStdString(currentDataSets[i]), _closeVDCMenu);
+        _closeVDCMenu->addAction(closeAction);
+
+        connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
+    }
+}
+
 void MainForm::update()
 {
     assert(_controlExec);
@@ -1715,6 +1730,8 @@ void MainForm::update()
     size_t           timestep = aParams->GetCurrentTimestep();
 
     _timeStepEdit->setText(QString::number((int)timestep));
+
+    updateMenus();
 
 #ifdef DEAD
     // Get the current mode setting from MouseModeParams
