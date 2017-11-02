@@ -268,7 +268,7 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     glEnd();
 }
 
-int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
+int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
 {
     assert(variableData.size() == 5);
 
@@ -335,7 +335,7 @@ float BarbRenderer::getHeightOffset(Grid *heightVar, float xCoord, float yCoord,
     return offset;
 }
 
-void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, const BarbParams *bParams)
+void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, BarbParams *bParams)
 {
     assert(variableData.size() == 5);
 

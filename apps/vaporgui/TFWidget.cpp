@@ -123,7 +123,6 @@ void TFWidget::setCMVar(const QString &qvar)
     } else {
         _rParams->SetColorMapVariableName(var);
         _rParams->SetUseSingleColor(false);
-        if (!_rParams->GetMapperFunc(var)) _rParams->MakeMapperFunc(var);
 
         colorSelectButton->setEnabled(false);
         minRangeSlider->setEnabled(true);
@@ -212,11 +211,8 @@ void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
     // Force name to end with .tf3
     if (!s.endsWith(".tf3")) { s += ".tf3"; }
 
-    TransferFunction *tf = _rParams->GetTransferFunc(varname);
-    if (!tf) {
-        tf = _rParams->MakeTransferFunc(varname);
-        assert(tf);
-    }
+    MapperFunction *tf = _rParams->GetMapperFunc(varname);
+    assert(tf);
 
     int rc = tf->LoadFromFile(s.toStdString());
     if (rc < 0) { MSG_ERR("Error loading transfer function"); }
@@ -238,11 +234,8 @@ void TFWidget::fileSaveTF()
     string varname = _rParams->GetVariableName();
     if (varname.empty()) return;
 
-    TransferFunction *tf = _rParams->GetTransferFunc(varname);
-    if (!tf) {
-        tf = _rParams->MakeTransferFunc(varname);
-        assert(tf);
-    }
+    MapperFunction *tf = _rParams->GetMapperFunc(varname);
+    assert(tf);
 
     int rc = tf->SaveToFile(s.toStdString());
     if (rc < 0) {
@@ -293,7 +286,7 @@ void TFWidget::updateColorInterpolation()
     if (varName == "") { return; }
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
-    if (tf == NULL) { tf = _rParams->MakeMapperFunc(varName); }
+    assert(tf);
 
     TFInterpolator::type t = tf->getColorInterpType();
     colorInterpCombo->blockSignals(true);

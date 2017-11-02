@@ -24,6 +24,7 @@
 #endif
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <cassert>
 #include <algorithm>
 #include <vapor/MapperFunction.h>
@@ -42,11 +43,16 @@ const string MapperFunction::_opacityMapTag = "OpacityMap";
 const string MapperFunction::_autoUpdateHistoTag = "AutoUpdateHisto";
 const string MapperFunction::_secondaryVarMapperTag = "SecondaryVarMapper";
 
+//
+// Register class with object factory!!!
+//
+static ParamsRegistrar<MapperFunction> registrar(MapperFunction::GetClassType());
+
 //----------------------------------------------------------------------------
 // Constructor for empty, default Mapper function
 //----------------------------------------------------------------------------
 
-MapperFunction::MapperFunction(ParamsBase::StateSave *ssave, const string &classname) : ParamsBase(ssave, classname), _numEntries(256)
+MapperFunction::MapperFunction(ParamsBase::StateSave *ssave) : ParamsBase(ssave, MapperFunction::GetClassType()), _numEntries(256)
 {
     m_colorMap = NULL;
     m_opacityMaps = NULL;
@@ -143,6 +149,62 @@ MapperFunction::~MapperFunction()
     if (m_colorMap) delete m_colorMap;
 
     if (m_opacityMaps) delete m_opacityMaps;
+}
+
+//----------------------------------------------------------------------------
+// Create a mapper function by parsing a file.
+//----------------------------------------------------------------------------
+int MapperFunction::LoadFromFile(string path)
+{
+    XmlParser xmlparser;
+
+    XmlNode *node = new XmlNode();
+
+    int rc = xmlparser.LoadFromFile(node, path);
+    if (rc < 0) {
+        MyBase::SetErrMsg("Failed to read file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    // Create a new MapperFunction from the XmlNode tree
+    //
+    XmlNode *       parent = this->GetNode()->GetParent();
+    MapperFunction *newTF = new MapperFunction(_ssave, node);
+
+    // Assign (copy) new TF to this object
+    //
+    *this = *newTF;
+    this->GetNode()->SetParent(parent);
+
+    // Delete the new tree
+    //
+    delete newTF;
+
+    return (0);
+}
+
+//----------------------------------------------------------------------------
+// Save the mapper function to a file.
+//----------------------------------------------------------------------------
+int MapperFunction::SaveToFile(string path)
+{
+    ofstream out(path);
+    if (!out) {
+        MyBase::SetErrMsg("Failed to open file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    XmlNode *node = GetNode();
+
+    out << *node;
+
+    if (out.bad()) {
+        MyBase::SetErrMsg("Failed to write file %s : %M", path.c_str());
+        return (-1);
+    }
+    out.close();
+
+    return (0);
 }
 
 //----------------------------------------------------------------------------
@@ -407,74 +469,3 @@ string MapperFunction::_make_omap_name(int index) const
     ss << index;
     return (ss.str());
 }
-
-#ifdef DEAD
-MFContainer::MFContainer()
-{
-    _params = NULL;
-    _tag = "";
-}
-
-MFContainer::MFContainer(RenderParams *p, string tag)
-{
-    _params = p;
-    _tag = tag;
-}
-
-MFContainer::~MFContainer() {}
-
-void MFContainer::Insert(string name, MapperFunction *mf)
-{
-    assert(_params != NULL);
-
-    vector<string> path;
-    path.push_back(_tag + "Container");
-    path.push_back(name);
-    path.push_back(_tag);
-
-    _params->SetParamsBase(path, mf);
-}
-
-MapperFunction *MFContainer::GetMF(string name) const
-{
-    vector<string> path;
-    path.push_back(_tag + "Container");
-    path.push_back(name);
-    path.push_back(_tag);
-    return ((MapperFunction *)_params->GetParamsBase(path));
-
-    return (NULL);
-}
-
-void MFContainer::Clear()
-{
-    vector<string> names = MFContainer::GetNames();
-
-    for (int i = 0; i < names.size(); i++) { MFContainer::Erase(names[i]); }
-};
-
-void MFContainer::Erase(string name)
-{
-    vector<string> path;
-    path.push_back(_tag + "Container");
-    path.push_back(name);
-    path.push_back(_tag);
-    _params->RemoveParamsBase(path, NULL);
-}
-
-vector<string> MFContainer::GetNames() const
-{
-    vector<string> names;
-
-    ParamNode *parentNode = _params->GetRootNode()->GetNode(_tag + "Container");
-    if (!parentNode) return (names);
-
-    int n = parentNode->GetNumChildren();
-    for (int i = 0; i < n; i++) {
-        ParamNode *child = parentNode->GetChild(i);
-        names.push_back(child->Tag());
-    }
-
-    return (names);
-}
-#endif

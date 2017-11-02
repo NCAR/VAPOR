@@ -45,7 +45,7 @@ const string RenderParams::_constantColorTag = "ConstantColor";
 const string RenderParams::_constantOpacityTag = "ConstantOpacity";
 const string RenderParams::_CompressionLevelTag = "CompressionLevel";
 const string RenderParams::_RefinementLevelTag = "RefinementLevel";
-const string RenderParams::_transferFunctionsTag = "TransferFunctions";
+const string RenderParams::_transferFunctionsTag = "MapperFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
 const string RenderParams::_currentTimestepTag = "CurrentTimestep";
 
@@ -282,23 +282,16 @@ void RenderParams::SetColorbarPbase(ColorbarPbase *pb)
     _Colorbar->SetParent(this);
 }
 
-TransferFunction *RenderParams::GetTransferFunc(string varname) const
+MapperFunction *RenderParams::GetMapperFunc(string varname)
 {
-    TransferFunction *tfptr = (TransferFunction *)_TFs->GetParams(varname);
-
-    return (tfptr);
-}
-
-TransferFunction *RenderParams::MakeTransferFunc(string varname)
-{
-    TransferFunction *tfptr = (TransferFunction *)_TFs->GetParams(varname);
+    MapperFunction *tfptr = (MapperFunction *)_TFs->GetParams(varname);
 
     if (tfptr) return (tfptr);
 
     string s = "Make transfer function for " + varname;
     _ssave->BeginGroup(s);
 
-    TransferFunction tf(_ssave);
+    MapperFunction tf(_ssave);
 
     vector<string> varnames = _dataMgr->GetDataVarNames();
     if (find(varnames.begin(), varnames.end(), varname) != varnames.end()) {
@@ -308,7 +301,7 @@ TransferFunction *RenderParams::MakeTransferFunc(string varname)
     }
 
     _TFs->Insert(&tf, varname);
-    tfptr = (TransferFunction *)_TFs->GetParams(varname);
+    tfptr = (MapperFunction *)_TFs->GetParams(varname);
     assert(tfptr != NULL);
 
     _ssave->EndGroup();
@@ -316,7 +309,7 @@ TransferFunction *RenderParams::MakeTransferFunc(string varname)
     return (tfptr);
 }
 
-void RenderParams::SetTransferFunc(string varname, TransferFunction *mf)
+void RenderParams::SetMapperFunc(string varname, MapperFunction *mf)
 {
     if (_TFs->GetParams(varname)) { _TFs->Remove(varname); }
 
