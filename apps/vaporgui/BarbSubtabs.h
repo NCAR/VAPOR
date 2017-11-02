@@ -69,9 +69,11 @@ private slots:
 	void zDimChanged(int i);
 	void lengthChanged(double d);
 	void thicknessChanged(double d);
+	double CalculateDomainLength(int ts);
 
 private:
 	VAPoR::BarbParams* _bParams;
+	VAPoR::DataMgr* _dataMgr;
 	Combo* _xDimCombo;
 	Combo* _yDimCombo;
 	Combo* _zDimCombo;

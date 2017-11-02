@@ -367,9 +367,12 @@ void MappingFrame::Update(DataMgr *dataMgr,
 
 	if (varname.empty()) return;
 
+	cout << "Varname: " << varname << endl;
+
 	MapperFunction *mapper;
 	mapper = _rParams->GetMapperFunc(varname);
 	if (!mapper) {
+		cout << "creating new mapper function" << endl;
 		mapper = _rParams->MakeMapperFunc(varname);
 		assert(mapper);
 	}
@@ -382,6 +385,8 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	_histogram = getHistogram();
 	_minValue = getMinEditBound();
 	_maxValue = getMaxEditBound();
+
+	cout << "Histogram: " << _histogram << endl;
 
 	if (_isoSliderEnabled) {
 		//	   _isoVal = ((ParamsIso*)params)->GetIsoValue();
@@ -940,6 +945,7 @@ void MappingFrame::paintGL()
 
     if (_updateTexture)
     {
+		cout << "Updating texture for histogram (paintGL)" << endl;
       updateTexture();
     }
 	
@@ -1303,6 +1309,8 @@ void MappingFrame::updateTexture()
 		{
 			binValue = MIN(1.0, (stretch * _histogram->getBinSize(x) / 
 			   _histogram->getMaxBinSize()));
+			cout << "MappingFrame::updateTexture() " << stretch << " " << x << " " 
+				<<  _histogram->getBinSize(x) << " " << _histogram->getMaxBinSize() << endl;
 			break;
 		}
 
