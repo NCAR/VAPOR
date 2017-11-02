@@ -185,15 +185,12 @@ void MappingFrame::RefreshHistogram() {
 	if (var == "") {
 		var = _rParams->GetVariableName();
 	}
-//	string var = _rParams->GetVariableName();
 	size_t ts = _rParams->GetCurrentTimestep();	
 
 	float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
 	float maxRange = _rParams->GetMapperFunc(var)->getMaxMapValue();
-	if (!_histogram)
-		_histogram = new Histo(256, minRange, maxRange);
-	else 
-		_histogram->reset(256, minRange, maxRange);
+
+	_histogram->reset(256, minRange, maxRange);
 
 	int refLevel = _rParams->GetRefinementLevel();
 	int lod = _rParams->GetCompressionLevel();
@@ -207,10 +204,10 @@ void MappingFrame::RefreshHistogram() {
 		_dataMgr, ts, var, minExts, maxExts, true,
 		&refLevel, &lod, &grid
 	);
-	if (rc) return;
-
-	grid->SetInterpolationOrder(0);
-	
+	if (rc < 0) {
+		MSG_ERR("Couldn't get data for Histogram");
+		return;
+	}
 
 	float v;
 	Grid::Iterator itr;
@@ -226,7 +223,7 @@ void MappingFrame::RefreshHistogram() {
 //----------------------------------------------------------------------------
 // Set the underlying mapper function that this frame represents
 //----------------------------------------------------------------------------
-void MappingFrame::setMapperFunction(MapperFunction *mapper)
+void MappingFrame::updateMapperFunction(MapperFunction *mapper)
 {
   assert(mapper);
   deleteOpacityWidgets();
@@ -370,7 +367,7 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	mapper = _rParams->GetMapperFunc(varname);
 	assert(mapper);
 
-	setMapperFunction(mapper);
+	updateMapperFunction(mapper);
 
 	deselectWidgets();
 
@@ -457,10 +454,7 @@ QString MappingFrame::tipText(const QPoint &pos, bool isIso)
 //----------------------------------------------------------------------------
 int MappingFrame::histoValue(const QPoint &p)
 {
-  if (!_histogram)
-  {
-    return -1;
-  }
+  assert(_histogram);
   
   QPoint pos = mapFromParent(p);
  
@@ -868,32 +862,6 @@ void MappingFrame::paintGL() {
 
   if (!_mapper) return;
 
-  glShadeModel( GL_SMOOTH );
-  //
-  // Enable lighting for opacity widget handles
-  //
-  static float ambient[]  = {0.2, 0.2, 0.2, 1.0};
-  static float diffuse[]  = {1.0, 1.0, 1.0, 1.0};
-  static float specular[] = {0.0, 0.0,  0.0, 0.0};
-  static float lightpos[] = {0.0, 1.0, 5000000.0};
-
-  glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-  glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-
-  glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 128);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glDisable(GL_CULL_FACE);
-
   resize();
 
   int rc = printOpenGLErrorMsg("MappingFrame::paintGL");
@@ -919,6 +887,8 @@ void MappingFrame::paintGL() {
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  // Why is this needed?
+  //
   glColor3f(0.0, 0.0, 0.0);
   glBegin(GL_QUADS);
   {
@@ -929,45 +899,14 @@ void MappingFrame::paintGL() {
   }
   glEnd();
 
+  // Draw histogram
   //
-  // Draw Histogram
-  //
-  if (_histogram)
-  {
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, _texid);
-
-    if (_updateTexture)
-    {
-      updateTexture();
-    }
-	
-    
-    glColor3f(0.0, 0.784, 0.784);
-
-	glBegin(GL_QUADS);
-    {
-      glTexCoord2f(0.0f, 0.0f);
-      glVertex2f(xDataToWorld(_histogram->getMinData()), 0.0);
-      
-      glTexCoord2f(0.0f, 1.0f);
-      glVertex2f(xDataToWorld(_histogram->getMinData()), 1.0);
-      
-      glTexCoord2f(1.0f, 1.0f);
-      glVertex2f(xDataToWorld(_histogram->getMaxData()), 1.0);
-      
-      glTexCoord2f(1.0f, 0.0f); 
-      glVertex2f(xDataToWorld(_histogram->getMaxData()), 0.0); 
-    }
-	glEnd();
-
-    glDisable(GL_TEXTURE_2D);
+  rc = drawHistogram();
+  if (rc < 0) {
+      MSG_ERR("MappingFrame");
+	  oglPopState();
+	  return;
   }
-
-//  glEnable(GL_LIGHTING);
-//  glEnable(GL_LIGHT0);
 
   //
   // Draw Opacity Widgets
@@ -1123,6 +1062,48 @@ void MappingFrame::initializeGL()
 }
 
 //----------------------------------------------------------------------------
+// Draw the histogram
+//----------------------------------------------------------------------------
+int MappingFrame::drawHistogram() {
+
+  //
+  // Draw Histogram
+  //
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, _texid);
+
+    if (_updateTexture)
+    {
+      updateTexture();
+    }
+	
+    
+    glColor3f(0.0, 0.784, 0.784);
+
+	glBegin(GL_QUADS);
+    {
+      glTexCoord2f(0.0f, 0.0f);
+      glVertex2f(xDataToWorld(_histogram->getMinData()), 0.0);
+      
+      glTexCoord2f(0.0f, 1.0f);
+      glVertex2f(xDataToWorld(_histogram->getMinData()), 1.0);
+      
+      glTexCoord2f(1.0f, 1.0f);
+      glVertex2f(xDataToWorld(_histogram->getMaxData()), 1.0);
+      
+      glTexCoord2f(1.0f, 0.0f); 
+      glVertex2f(xDataToWorld(_histogram->getMaxData()), 0.0); 
+    }
+	glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
+  return(printOpenGLErrorMsg("MappingFrame::paintGL"));
+}
+
+//----------------------------------------------------------------------------
 // Draw the opacity curve
 //----------------------------------------------------------------------------
 int MappingFrame::drawOpacityCurve()
@@ -1254,8 +1235,6 @@ int MappingFrame::drawColorbar()
 //----------------------------------------------------------------------------
 void MappingFrame::updateTexture()
 {
-	if (! _histogram && _mapper) return;
-
 	float stretch;
 	stretch = _rParams->GetHistoStretch();
 
@@ -2207,10 +2186,6 @@ float MappingFrame::getOpacityData(float value)
 //----------------------------------------------------------------------------
 Histo* MappingFrame::getHistogram()
 {
-	bool mustGet = _rParams->IsEnabled();
-    if (_histogram && !mustGet) return _histogram;
-    if (!mustGet) return 0;
-
 	string varname = _rParams->GetColorMapVariableName();
 	if (varname == "") {
 		varname = _rParams->GetVariableName();
@@ -2224,6 +2199,7 @@ Histo* MappingFrame::getHistogram()
 
     _histogram = new Histo(256,mapFunc->getMinMapValue(),
 		mapFunc->getMaxMapValue());
+
     RefreshHistogram();
     return _histogram;
 }
