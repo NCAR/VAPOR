@@ -97,6 +97,8 @@ public:
 		setupUi(this);
 		_geometryWidget->Reinit(
 			GeometryWidget::TWOD);
+
+		_orientationAngles->hide();
 	}
 	
 	void Update(
