@@ -46,7 +46,7 @@ class PARAMS_API MapperFunction : public ParamsBase
 public:
 	
  MapperFunction(
-	ParamsBase::StateSave *ssave, const string &classname
+	ParamsBase::StateSave *ssave
  );
 
  MapperFunction(
@@ -61,6 +61,22 @@ public:
 
 
  virtual ~MapperFunction();
+
+ //! Save this transfer function to a file
+ //! \param[in] path Path of output file
+ //
+ int SaveToFile(string path);
+
+ //! Load a transfer function from a file, 
+ //! \param[in] path Path of input file
+ //
+ int LoadFromFile(string path);
+
+ // Get static string identifier for this params class
+ //
+ static string GetClassType() {
+	return("MapperFunctionParams");
+ }
 
  //! Determine the opacity value at a particular data value
  //! \param[in] point float data value

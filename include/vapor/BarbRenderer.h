@@ -87,7 +87,7 @@ namespace VAPoR {
 //! \param[in] Grid Grid used in rendering.
 //! The first three are the vector field, Grid[3] is the Height variable, Grid[4] is the color variable.
 //! \retval int zero if successful
-	int performRendering(const BarbParams* rParams,
+	int performRendering(BarbParams* rParams,
 		int actualRefLevel,float vectorScale, 
 		vector <Grid *> variableData
 	);
@@ -97,9 +97,9 @@ namespace VAPoR {
 
 	void renderGrid(int rakeGrid[3],double rakeExts[6],
 		vector <Grid *> variableData, int timestep,
-		float vectorLengthScale, float rad, const BarbParams* params);
+		float vectorLengthScale, float rad, BarbParams* params);
 
-	bool GetColorMapping(TransferFunction* tf, float val);
+	bool GetColorMapping(MapperFunction* tf, float val);
 
 //! Protected method to draw one barb (a hexagonal tube with a cone barbhead)
 //! \param[in] const float startPoint[3] beginning position of barb
