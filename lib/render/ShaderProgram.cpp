@@ -29,21 +29,25 @@ ShaderProgram::ShaderProgram()
 	_shaderObjects.clear();
 }
 
-
 //----------------------------------------------------------------------------
 // Destructor
 //----------------------------------------------------------------------------
 ShaderProgram::~ShaderProgram()
 {	
+	if (! glIsProgram(_program)) return;
+
 	printOpenGLError();
 	for (std::map< std::string, GLuint>::const_iterator iter = _shaderObjects.begin();
 		 iter != _shaderObjects.end(); iter++ ){
 		
 		GLuint shader = iter->second;
+		if (! glIsShader(shader)) continue;
+
 #ifdef DEBUG
 		std::cout << "Attempting to delete shader obj: " << shader << " prog: " << _program << std::endl;
 #endif		
 		glDetachShader(_program, shader);
+
 #ifdef DEBUG		
 		if (printOpenGLError() != 0 )
 			std::cout << "Delete " << shader << " FAILED" << std::endl;

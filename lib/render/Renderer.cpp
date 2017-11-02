@@ -288,7 +288,7 @@ int Renderer::makeColorbarTexture(){
 
 	if (_colorbarTexture) delete _colorbarTexture;
 
-	const RenderParams *rParams = GetActiveParams();
+	RenderParams *rParams = GetActiveParams();
 	ColorbarPbase* cbpb = rParams->GetColorbarPbase();
 	if (!cbpb) return -1;
 	
@@ -441,7 +441,7 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			float fbWidth,	float fbHeight, 
 			float llx, float lly, float urx, float ury) {
 
-	const RenderParams *rParams = GetActiveParams();
+	RenderParams *rParams = GetActiveParams();
 	MapperFunction* mf = rParams->GetMapperFunc(rParams->GetVariableName());
 	float numEntries = mf->getNumEntries();
 
