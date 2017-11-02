@@ -51,14 +51,16 @@ public:
     void Initialize(VAPoR::BarbParams *rParams);
 
 private slots:
-    void xDimChanged(int i);
-    void yDimChanged(int i);
-    void zDimChanged(int i);
-    void lengthChanged(double d);
-    void thicknessChanged(double d);
+    void   xDimChanged(int i);
+    void   yDimChanged(int i);
+    void   zDimChanged(int i);
+    void   lengthChanged(double d);
+    void   thicknessChanged(double d);
+    double CalculateDomainLength(int ts);
 
 private:
     VAPoR::BarbParams *_bParams;
+    VAPoR::DataMgr *   _dataMgr;
     Combo *            _xDimCombo;
     Combo *            _yDimCombo;
     Combo *            _zDimCombo;

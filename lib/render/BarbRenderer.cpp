@@ -120,6 +120,7 @@ int BarbRenderer::_paintGL()
     }
 
     float vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
+    cout << "lengths: " << bParams->GetLengthScale() << " " << _vectorScaleFactor << endl;
 
     //
     // Perform OpenGL rendering of barbs
