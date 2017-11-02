@@ -46,8 +46,7 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
 
     setupUi(this);
     setWindowTitle("Statistics");
-    // adjustTables();
-    // VariablesTable->installEventFilter(this); //for responding to keyboard?
+    _geometryWidget->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
 
     Connect();
 }
@@ -123,7 +122,79 @@ bool Statistics::Update()
     RemoveVarCombo->setCurrentIndex(0);
     RemoveVarCombo->blockSignals(false);
 
-    this->_updateVarTable();
+    // Update Statistics table: header
+    VariablesTable->clear();
+    QStringList header;
+    header << "Variable";
+    if (statsParams->GetMinEnabled()) header << "Min";
+    if (statsParams->GetMaxEnabled()) header << "Max";
+    if (statsParams->GetMeanEnabled()) header << "Mean";
+    if (statsParams->GetMedianEnabled()) header << "Median";
+    if (statsParams->GetStdDevEnabled()) header << "StdDev";
+    VariablesTable->setColumnCount(header.size());
+    VariablesTable->setHorizontalHeaderLabels(header);
+    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    // Update Statistics table: cells
+    QBrush brush(QColor(255, 0, 0));
+    VariablesTable->setRowCount(enabledVars.size());
+    for (int row = 0; row < enabledVars.size(); row++) {
+        VariablesTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(enabledVars[row])));
+
+        double m3[3], median, stddev;
+        _validStats.Get3MStats(enabledVars[row], m3);
+        _validStats.GetMedian(enabledVars[row], &median);
+        _validStats.GetStddev(enabledVars[row], &stddev);
+
+        int column = 1;
+        if (statsParams->GetMinEnabled()) {
+            if (!std::isnan(m3[0]))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetMaxEnabled()) {
+            if (!std::isnan(m3[1]))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1])));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetMeanEnabled()) {
+            if (!std::isnan(m3[2]))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2])));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetMedianEnabled()) {
+            if (!std::isnan(median))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median)));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+        if (statsParams->GetStdDevEnabled()) {
+            if (!std::isnan(stddev))
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev)));
+            else {
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->item(row, column)->setForeground(brush);
+            }
+            column++;
+        }
+    }
+    for (int r = 0; r < VariablesTable->rowCount(); r++)
+        for (int c = 0; c < VariablesTable->columnCount(); c++) VariablesTable->item(r, c)->setFlags(Qt::NoItemFlags);
 
     // Update calculations
     NewCalcCombo->blockSignals(true);
@@ -219,92 +290,10 @@ bool Statistics::Update()
     MaxTimestepSpinbox->setValue(statsParams->GetCurrentMaxTS());
     MaxTimestepSpinbox->blockSignals(false);
 
+    // Update geometry extents
+    _geometryWidget->Update(_controlExec->GetParamsMgr(), currentDmgr, statsParams);
+
     return true;
-}
-
-void Statistics::_updateVarTable()
-{
-    // Initialize pointers
-    VAPoR::DataStatus *dataStatus = _controlExec->getDataStatus();
-    GUIStateParams *   guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string        currentDatasetName = guiParams->GetStatsDatasetName();
-    assert(currentDatasetName != "");
-    VAPoR::DataMgr *  currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
-    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
-
-    // Update Statistics table header
-    VariablesTable->clear();
-    QStringList header;
-    header << "Variable";
-    if (statsParams->GetMinEnabled()) header << "Min";
-    if (statsParams->GetMaxEnabled()) header << "Max";
-    if (statsParams->GetMeanEnabled()) header << "Mean";
-    if (statsParams->GetMedianEnabled()) header << "Median";
-    if (statsParams->GetStdDevEnabled()) header << "StdDev";
-    VariablesTable->setColumnCount(header.size());
-    VariablesTable->setHorizontalHeaderLabels(header);
-    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-
-    // Update cells
-    QBrush                   brush(QColor(255, 0, 0));
-    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
-    assert(enabledVars.size() == _validStats.GetVariableCount());
-    VariablesTable->setRowCount(enabledVars.size());
-    for (int row = 0; row < enabledVars.size(); row++) {
-        VariablesTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(enabledVars[row])));
-
-        double m3[3], median, stddev;
-        _validStats.Get3MStats(enabledVars[row], m3);
-        _validStats.GetMedian(enabledVars[row], &median);
-        _validStats.GetStddev(enabledVars[row], &stddev);
-
-        int column = 1;
-        if (statsParams->GetMinEnabled()) {
-            if (!std::isnan(m3[0]))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetMaxEnabled()) {
-            if (!std::isnan(m3[1]))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1])));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetMeanEnabled()) {
-            if (!std::isnan(m3[2]))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2])));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetMedianEnabled()) {
-            if (!std::isnan(median))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median)));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-        if (statsParams->GetStdDevEnabled()) {
-            if (!std::isnan(stddev))
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev)));
-            else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
-                VariablesTable->item(row, column)->setForeground(brush);
-            }
-            column++;
-        }
-    }
 }
 
 void Statistics::showMe()
@@ -364,7 +353,6 @@ void Statistics::_minTSChanged(int val)
     if (val != statsParams->GetCurrentMinTS()) {
         statsParams->SetCurrentMinTS(val);
         _validStats.InvalidAll();
-        this->_updateVarTable();
 
         if (val > statsParams->GetCurrentMaxTS()) {
             statsParams->SetCurrentMaxTS(val);
@@ -388,7 +376,6 @@ void Statistics::_maxTSChanged(int val)
     if (val != statsParams->GetCurrentMaxTS()) {
         statsParams->SetCurrentMaxTS(val);
         _validStats.InvalidAll();
-        this->_updateVarTable();
 
         if (val < statsParams->GetCurrentMinTS()) {
             statsParams->SetCurrentMinTS(val);
@@ -413,7 +400,6 @@ void Statistics::_lodChanged(int index)
     if (lod != statsParams->GetCompressionLevel()) {
         statsParams->SetCompressionLevel(lod);
         _validStats.InvalidAll();
-        this->_updateVarTable();
     }
 }
 
@@ -431,7 +417,6 @@ void Statistics::_refinementChanged(int index)
     if (refLevel != statsParams->GetRefinementLevel()) {
         statsParams->SetRefinementLevel(refLevel);
         _validStats.InvalidAll();
-        this->_updateVarTable();
     }
 }
 
@@ -459,9 +444,6 @@ void Statistics::_newCalcChanged(int index)
     else {
         // REPORT ERROR!!
     }
-
-    // Update VariableTable
-    this->_updateVarTable();
 }
 
 void Statistics::_removeCalcChanged(int index)
@@ -488,9 +470,6 @@ void Statistics::_removeCalcChanged(int index)
     else {
         // REPORT ERROR!!
     }
-
-    // Update VariableTable
-    this->_updateVarTable();
 }
 
 void Statistics::_newVarChanged(int index)
@@ -510,9 +489,6 @@ void Statistics::_newVarChanged(int index)
 
     // Add this variable to _validStats
     _validStats.AddVariable(varName);
-
-    // Update VariableTable
-    this->_updateVarTable();
 }
 
 void Statistics::_removeVarChanged(int index)
@@ -539,9 +515,6 @@ void Statistics::_removeVarChanged(int index)
 
     // Remove this variable from _validStats
     _validStats.RemoveVariable(varName);
-
-    // Update VariableTable
-    this->_updateVarTable();
 }
 
 #if 0
