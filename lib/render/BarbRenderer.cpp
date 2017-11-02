@@ -300,7 +300,7 @@ void BarbRenderer::drawBarb(const float startPoint[3],
 }
 
 int BarbRenderer::performRendering(
-	const BarbParams* bParams,	int actualRefLevel, float vectorLengthScale, 
+	BarbParams* bParams,	int actualRefLevel, float vectorLengthScale, 
 	vector <Grid *> variableData
 ){
 	assert(variableData.size() == 5);
@@ -373,7 +373,7 @@ float BarbRenderer::getHeightOffset(Grid* heightVar,
 void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 	vector <Grid *> variableData, int timestep, 
 	float length,
-	float rad, const BarbParams* bParams) {
+	float rad, BarbParams* bParams) {
 
 	assert(variableData.size() == 5);
 	
