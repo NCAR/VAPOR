@@ -137,11 +137,6 @@ class MappingFrame : public QGLWidget {
     //! Specify the variable associated with the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
     void setVariableName(std::string name);
 
-    //! Update the display of the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
-    void update() {
-        QGLWidget::update();
-    }
-
     //! Identify the current mapperFunction associated with the MappingFrame.
     //! Needed by various GLWidgets embedded in the MappingFrame
     //! \return MapperFunction* associated with this MappingFrame.
@@ -215,7 +210,6 @@ class MappingFrame : public QGLWidget {
     void newHsv(int h, int s, int v);
     void bindColorToOpacity();
     void bindOpacityToColor();
-    void updateGL();
 
   signals:
     //
@@ -240,7 +234,6 @@ class MappingFrame : public QGLWidget {
     void paintGL();
     void resizeGL(int w, int h);
     //Virtual, Reimplemented here:
-    void paintEvent(QPaintEvent *event);
 
     int drawOpacityCurve();
     int drawOpacityWidgets();

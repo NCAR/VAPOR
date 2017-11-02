@@ -10,7 +10,7 @@
 #include <QFileDialog>
 #include <vector>
 #include <string>
-#include <vapor/TransferFunction.h>
+#include <vapor/MapperFunction.h>
 #include "VizWin.h"
 #include "vapor/BarbParams.h"
 #include "VariablesWidget.h"
