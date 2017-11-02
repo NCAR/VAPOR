@@ -129,10 +129,10 @@ class Statistics : public QDialog, public Ui_StatsWindow {
     ValidStats _validStats;
     sErrMsg *_errMsg;
     VAPoR::ControlExec *_controlExec;
-    //VAPoR::DataStatus*  _dataStatus;
-    //VAPoR::DataMgr*     _dmgr;
-    //VAPoR::Grid*        _rGrid;
 
-    void _updateVarTable();
+    // calculations should put results in _validStats directly.
+    //bool                _calc3M( std::string );
+    //bool                _calcMedian( std::string );
+    //bool                _calcStddev( std::string );
 };
 #endif
