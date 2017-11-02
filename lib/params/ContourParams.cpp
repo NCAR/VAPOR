@@ -124,9 +124,7 @@ void ContourParams::MakeNewContours(string varName) {
     Contours newContours(_ssave);
 
     MapperFunction *mf = GetMapperFunc(varName);
-    if (mf == NULL) {
-        mf = MakeMapperFunc(varName);
-    }
+    assert(mf);
     vector<double> minMax = mf->getMinMaxMapValue();
     int numContours = newContours.GetContourValues().size();
     double spacing = (minMax[1] - minMax[0]) / (numContours - 1);
@@ -200,11 +198,8 @@ void ContourParams::GetLineColor(int lineNum, float color[3]) {
     string cmVar = GetColorMapVariableName();
     if ((cmVar == "") || (cmVar == "Default")) {
         string varName = GetVariableName();
-        TransferFunction *tf = 0;
-        tf = (TransferFunction *)GetMapperFunc(varName);
-        if (!tf) {
-            tf = MakeTransferFunc(varName);
-        }
+        MapperFunction *tf = 0;
+        tf = (MapperFunction *)GetMapperFunc(varName);
         assert(tf);
 
         vector<double> vals = GetContourValues(varName);

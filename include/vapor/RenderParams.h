@@ -25,7 +25,7 @@
 #include <map>
 #include <vapor/common.h>
 #include <vapor/ParamsBase.h>
-#include <vapor/TransferFunction.h>
+#include <vapor/MapperFunction.h>
 #include <vapor/Box.h>
 #include <vapor/ColorbarPbase.h>
 #include <vapor/Transform.h>
@@ -209,37 +209,19 @@ class PARAMS_API RenderParams : public ParamsBase {
     //! \return 0 if successful.
     virtual void SetColorbarPbase(ColorbarPbase *pb);
 
-    //! Obtain current MapperFunction (if it exists)
-    //! Default is NULL
-    //! If different mapper functions are provided for each variable, then
-    //! this is the MapperFunction
-    //! associated with the the variable returned by GetVariableName()
-    //
-    virtual TransferFunction *GetTransferFunc(string varname) const;
-
-    virtual MapperFunction *GetMapperFunc(string varname) const {
-        return (RenderParams::GetTransferFunc(varname));
-    }
-
-    //! Return transfer function for a variable
+    //! Obtain current MapperFunction
     //!
-    //! If a transfer function for \p varname doesn't already
-    //! exist one is created.
+    //! Get a MapperFunction for the variable \p varname.
+    //! If one does not exist it is created.
     //
-    virtual TransferFunction *MakeTransferFunc(string varname);
+    virtual MapperFunction *GetMapperFunc(string varname);
 
-    virtual MapperFunction *MakeMapperFunc(string varname) {
-        return (RenderParams::MakeTransferFunc(varname));
-    }
-
-    //! Set current MapperFunction (if it exists)
-    //! Default does nothing
-    //! Must be overridden in derived classes with IsoControls or
-    //! TransferFunctions.
+    //! Set current MapperFunction
+    //!
     //! \param[in] varname Name of variable associated with mapping
-    //! \param[in] MapperFunction* mapper
+    //! \param[in] tf
     //
-    virtual void SetTransferFunc(string varname, TransferFunction *);
+    virtual void SetMapperFunc(string varname, MapperFunction *tf);
 
     //! Virtual method to return the Box associated with a Params class.
     //! By default returns NULL.
