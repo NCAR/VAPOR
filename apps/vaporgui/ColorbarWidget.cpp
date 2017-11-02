@@ -113,6 +113,12 @@ void ColorbarWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams
     _dataMgr = dataMgr;
     _cbPbase = rParams->GetColorbarPbase();
 
+    if (_cbPbase->IsEnabled()) {
+        enableCheckbox->setCheckState(Qt::Checked);
+    } else {
+        enableCheckbox->setCheckState(Qt::Unchecked);
+    }
+
     string title = _cbPbase->GetTitle();
     titleEdit->blockSignals(true);
     titleEdit->setText(QString::fromStdString(title));
