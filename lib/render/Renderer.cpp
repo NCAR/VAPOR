@@ -131,10 +131,24 @@ int Renderer::paintGL() {
 	_timestep = rParams->GetCurrentTimestep();
 
 	vector <double> translate = rParams->GetTransform()->GetTranslations();
+	vector <double> rotate    = rParams->GetTransform()->GetRotations();
+	vector <double> scale     = rParams->GetTransform()->GetScales();
+	vector <double> origin    = rParams->GetTransform()->GetOrigin();
 	assert(translate.size() == 3);
+	assert(rotate.size()    == 3);
+	assert(scale.size()     == 3);
+	assert(origin.size()    == 3);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
+
+	glTranslatef(-origin[0], -origin[1], -origin[2]);
+	glScalef(scale[0], scale[1], scale[2]);
+	glRotatef(rotate[0], 1, 0, 0);
+	glRotatef(rotate[1], 0, 1, 0);
+	glRotatef(rotate[2], 0, 0, 1);
+	glTranslatef(origin[0], origin[1], origin[2]);
+
 	glTranslatef(translate[0], translate[1], translate[2]);
 
 		int rc = _paintGL();
