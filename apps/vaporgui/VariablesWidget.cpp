@@ -103,7 +103,7 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component)
     assert(component >= 0 && component <= 2);
 
     if (!(_dspFlags & VECTOR)) return;
-    if ((!(_dimFlags & THREED)) && component == 2) return;
+    // if ((! (_dimFlags & THREED)) && component == 2) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -493,7 +493,6 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
 
         for (int i = 0; i < setVars.size(); i++) {
             if (setVars[i] != setVarsReq[i]) {
-                cout << "Field var " << i << " " << setVars[i] << endl;
                 rParams->SetFieldVariableNames(setVars);
                 break;
             }
