@@ -55,10 +55,11 @@ namespace {
 
 void oglPushState()
 {
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
 
@@ -68,12 +69,15 @@ void oglPushState()
 
 void oglPopState()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
+    glPopAttrib();
+
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
-    glPopAttrib();
+
     glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 }
 
@@ -133,15 +137,12 @@ void MappingFrame::RefreshHistogram()
 {
     string var = _rParams->GetColorMapVariableName();
     if (var == "") { var = _rParams->GetVariableName(); }
-    //	string var = _rParams->GetVariableName();
     size_t ts = _rParams->GetCurrentTimestep();
 
-    float minRange = _rParams->MakeMapperFunc(var)->getMinMapValue();
-    float maxRange = _rParams->MakeMapperFunc(var)->getMaxMapValue();
-    if (!_histogram)
-        _histogram = new Histo(256, minRange, maxRange);
-    else
-        _histogram->reset(256, minRange, maxRange);
+    float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
+    float maxRange = _rParams->GetMapperFunc(var)->getMaxMapValue();
+
+    _histogram->reset(256, minRange, maxRange);
 
     int refLevel = _rParams->GetRefinementLevel();
     int lod = _rParams->GetCompressionLevel();
@@ -152,9 +153,10 @@ void MappingFrame::RefreshHistogram()
     Grid *grid;
 
     int rc = DataMgrUtils::GetGrids(_dataMgr, ts, var, minExts, maxExts, true, &refLevel, &lod, &grid);
-    if (rc) return;
-
-    grid->SetInterpolationOrder(0);
+    if (rc < 0) {
+        MSG_ERR("Couldn't get data for Histogram");
+        return;
+    }
 
     float          v;
     Grid::Iterator itr;
@@ -170,13 +172,14 @@ void MappingFrame::RefreshHistogram()
 //----------------------------------------------------------------------------
 // Set the underlying mapper function that this frame represents
 //----------------------------------------------------------------------------
-void MappingFrame::setMapperFunction(MapperFunction *mapper)
+void MappingFrame::updateMapperFunction(MapperFunction *mapper)
 {
+    assert(mapper);
     deleteOpacityWidgets();
 
     _mapper = mapper;
 
-    if (_mapper && _opacityMappingEnabled) {
+    if (_opacityMappingEnabled) {
         //
         // Create a new opacity widget for each opacity map in the mapper function
         //
@@ -199,15 +202,7 @@ void MappingFrame::setMapperFunction(MapperFunction *mapper)
         _compTypeSubMenu->actions()[MapperFunction::MULTIPLICATION]->setChecked(type == MapperFunction::MULTIPLICATION);
     }
 
-    if (_colorMappingEnabled) {
-        if (_mapper) {
-#ifdef DEAD
-            _mapper->GetColorMap()->setMapper(_mapper);
-#endif
-            _colorbarWidget->setColormap(_mapper->GetColorMap());
-        } else
-            _colorbarWidget->setColormap(NULL);
-    }
+    if (_colorMappingEnabled) { _colorbarWidget->setColormap(_mapper->GetColorMap()); }
 }
 
 //----------------------------------------------------------------------------
@@ -289,12 +284,9 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     MapperFunction *mapper;
     mapper = _rParams->GetMapperFunc(varname);
-    if (!mapper) {
-        mapper = _rParams->MakeMapperFunc(varname);
-        assert(mapper);
-    }
+    assert(mapper);
 
-    setMapperFunction(mapper);
+    updateMapperFunction(mapper);
 
     deselectWidgets();
 
@@ -307,20 +299,13 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
         //	   _isoSlider->setIsoValue(xDataToWorld(_isoVal));
     } else if (_isolineSlidersEnabled) {
         // Synchronize sliders with isovalues
-        //#ifdef	DEAD
         vector<double> isovals = ((ContourParams *)rParams)->GetContourValues(varname);
         setIsolineSliders(isovals);
-        //		for (int i = 0; i<isovals.size(); i++){
-        //			_isolineSliders[i]->setIsoValue(xDataToWorld((float)isovals[i]));
-        //		}
-        //#endif
     }
 
     _domainSlider->setDomain(xDataToWorld(getMinDomainBound()), xDataToWorld(getMaxDomainBound()));
 
     _updateTexture = true;
-
-    update();
 }
 
 //----------------------------------------------------------------------------
@@ -369,7 +354,7 @@ QString MappingFrame::tipText(const QPoint &pos, bool isIso)
 //----------------------------------------------------------------------------
 int MappingFrame::histoValue(const QPoint &p)
 {
-    if (!_histogram) { return -1; }
+    assert(_histogram);
 
     QPoint pos = mapFromParent(p);
 
@@ -713,27 +698,7 @@ void MappingFrame::deleteOpacityWidgets()
     _opacityWidgets.clear();
 }
 
-//-----------------------------------------------------------------------------
-// Set up the OpenGL view port, matrix mode, etc.
-//----------------------------------------------------------------------------
-void MappingFrame::resizeGL(int width, int height)
-{
-    printOpenGLErrorMsg("MappingFrameResizeEvent");
-
-    resize();
-    /*
-  // Update the size of the drawing rectangle
-  //
-  glViewport( 0, 0, (GLint)width, (GLint)height );
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glMatrixMode(GL_MODELVIEW);
-  */
-    qglClearColor(QColor(0, 0, 0));
-
-    printOpenGLErrorMsg("MappingFrameResizeEvent");
-}
+void MappingFrame::resizeGL(int width, int height) {}
 
 //----------------------------------------------------------------------------
 // Draw the frame's contents
@@ -745,7 +710,9 @@ void MappingFrame::paintGL()
     if (!FrameBufferReady()) { return; }
 
     if (!_mapper) return;
+
     resize();
+
     int rc = printOpenGLErrorMsg("MappingFrame::paintGL");
     if (rc < 0) {
         MSG_ERR("MappingFrame::paintGL");
@@ -761,12 +728,16 @@ void MappingFrame::paintGL()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(_minX, _maxX, _minY, _maxY, -1.0, 1.0);
+
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     qglClearColor(palette().color(QPalette::Background));
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Why is this needed?
+    //
     glColor3f(0.0, 0.0, 0.0);
     glBegin(GL_QUADS);
     {
@@ -777,40 +748,14 @@ void MappingFrame::paintGL()
     }
     glEnd();
 
+    // Draw histogram
     //
-    // Draw Histogram
-    //
-    if (_histogram) {
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHTING);
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _texid);
-
-        if (_updateTexture) { updateTexture(); }
-
-        glColor3f(0.0, 0.784, 0.784);
-
-        glBegin(GL_QUADS);
-        {
-            glTexCoord2f(0.0f, 0.0f);
-            glVertex2f(xDataToWorld(_histogram->getMinData()), 0.0);
-
-            glTexCoord2f(0.0f, 1.0f);
-            glVertex2f(xDataToWorld(_histogram->getMinData()), 1.0);
-
-            glTexCoord2f(1.0f, 1.0f);
-            glVertex2f(xDataToWorld(_histogram->getMaxData()), 1.0);
-
-            glTexCoord2f(1.0f, 0.0f);
-            glVertex2f(xDataToWorld(_histogram->getMaxData()), 0.0);
-        }
-        glEnd();
-
-        glDisable(GL_TEXTURE_2D);
+    rc = drawHistogram();
+    if (rc < 0) {
+        MSG_ERR("MappingFrame");
+        oglPopState();
+        return;
     }
-
-    //  glEnable(GL_LIGHTING);
-    //  glEnable(GL_LIGHT0);
 
     //
     // Draw Opacity Widgets
@@ -944,8 +889,6 @@ void MappingFrame::initializeGL()
     setAutoBufferSwap(false);
     qglClearColor(QColor(0, 0, 0));
 
-    glShadeModel(GL_SMOOTH);
-
     //
     // Initialize the histogram texture
     //
@@ -958,33 +901,46 @@ void MappingFrame::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    //
-    // Enable lighting for opacity widget handles
-    //
-    static float ambient[] = {0.2, 0.2, 0.2, 1.0};
-    static float diffuse[] = {1.0, 1.0, 1.0, 1.0};
-    static float specular[] = {0.0, 0.0, 0.0, 0.0};
-    static float lightpos[] = {0.0, 1.0, 5000000.0};
-
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 128);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glDisable(GL_CULL_FACE);
-
     if (_colorMappingEnabled) { _colorbarWidget->initializeGL(); }
     printOpenGLErrorMsg("MappingFrame");
+}
+
+//----------------------------------------------------------------------------
+// Draw the histogram
+//----------------------------------------------------------------------------
+int MappingFrame::drawHistogram()
+{
+    //
+    // Draw Histogram
+    //
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, _texid);
+
+    if (_updateTexture) { updateTexture(); }
+
+    glColor3f(0.0, 0.784, 0.784);
+
+    glBegin(GL_QUADS);
+    {
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(xDataToWorld(_histogram->getMinData()), 0.0);
+
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(xDataToWorld(_histogram->getMinData()), 1.0);
+
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(xDataToWorld(_histogram->getMaxData()), 1.0);
+
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(xDataToWorld(_histogram->getMaxData()), 0.0);
+    }
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
+    return (printOpenGLErrorMsg("MappingFrame::paintGL"));
 }
 
 //----------------------------------------------------------------------------
@@ -1019,8 +975,6 @@ int MappingFrame::drawOpacityCurve()
 
         glDisable(GL_LINE_SMOOTH);
         glDisable(GL_BLEND);
-        //    glEnable(GL_LIGHT0);
-        //   glEnable(GL_LIGHTING);
     }
     int rc = printOpenGLErrorMsg("DrawOpacityCurve");
     if (rc < 0) return -1;
@@ -1111,8 +1065,6 @@ int MappingFrame::drawColorbar()
 //----------------------------------------------------------------------------
 void MappingFrame::updateTexture()
 {
-    if (!_histogram && _mapper) return;
-
     float stretch;
     stretch = _rParams->GetHistoStretch();
 
@@ -1920,19 +1872,17 @@ float MappingFrame::getOpacityData(float value)
 //----------------------------------------------------------------------------
 Histo *MappingFrame::getHistogram()
 {
-    bool mustGet = _rParams->IsEnabled();
-    if (_histogram && !mustGet) return _histogram;
-    if (!mustGet) return 0;
-
     string varname = _rParams->GetColorMapVariableName();
     if (varname == "") { varname = _rParams->GetVariableName(); }
     //	string varname = _rParams->GetVariableName();
 
-    MapperFunction *mapFunc = _rParams->MakeMapperFunc(varname);
-    if (!mapFunc) return 0;
+    MapperFunction *mapFunc = _rParams->GetMapperFunc(varname);
+    assert(mapFunc);
+
     if (_histogram) delete _histogram;
 
     _histogram = new Histo(256, mapFunc->getMinMapValue(), mapFunc->getMaxMapValue());
+
     RefreshHistogram();
     return _histogram;
 }
@@ -2191,18 +2141,6 @@ void MappingFrame::setIsolineSlider(int index)
 
     updateGL();
 #endif
-}
-void MappingFrame::paintEvent(QPaintEvent *event)
-{
-    printOpenGLErrorMsg("MappingFramePaintEvent");
-
-    QGLWidget::paintEvent(event);
-    printOpenGLErrorMsg("MappingFramePaintEvent");
-}
-void MappingFrame::updateGL()
-{
-    QGLWidget::updateGL();
-    return;
 }
 
 void MappingFrame::setIsolineSliders(const vector<double> &sliderVals)

@@ -185,6 +185,7 @@ private:
     // Set the various widgets in the main window consistent with latest
     // params settings:
     //
+    void                updateMenus();
     void                update();
     virtual void        undoRedoHelper(bool undo);
     std::vector<string> myGetOpenFileNames(string prompt, string dir, string filter, bool multi);

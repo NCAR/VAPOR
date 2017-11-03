@@ -123,8 +123,8 @@ TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string d
 
     _cMapTexID = 0;
 
-    TwoDDataParams *  rp = (TwoDDataParams *)GetActiveParams();
-    TransferFunction *tf = rp->MakeTransferFunc(rp->GetVariableName());
+    TwoDDataParams *rp = (TwoDDataParams *)GetActiveParams();
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
 
     _colormapsize = tf->getNumEntries();
     _colormap = new GLfloat[_colormapsize * 4];
@@ -203,7 +203,7 @@ int TwoDDataRenderer::_paintGL()
 
     TwoDDataParams *rp = (TwoDDataParams *)GetActiveParams();
 
-    TransferFunction *tf = rp->MakeTransferFunc(rp->GetVariableName());
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
     tf->makeLut(_colormap);
     vector<double> crange = tf->getMinMaxMapValue();
 
@@ -752,10 +752,9 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
         _texHeight = 1;
     }
 
-    size_t   texSize = _texWidth * _texHeight;
-    GLfloat *texture = (float *)_sb_texture.Alloc(texSize * _texelSize);
-    GLfloat *texptr = texture;
-
+    size_t         texSize = _texWidth * _texHeight;
+    GLfloat *      texture = (float *)_sb_texture.Alloc(texSize * _texelSize);
+    GLfloat *      texptr = texture;
     Grid::Iterator itr;
     Grid::Iterator enditr = g->end();
     //	for (itr = g->begin(minBoxReq, maxBoxReq); itr != enditr; ++itr) {

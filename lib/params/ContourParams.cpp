@@ -120,7 +120,7 @@ void ContourParams::MakeNewContours(string varName)
     Contours newContours(_ssave);
 
     MapperFunction *mf = GetMapperFunc(varName);
-    if (mf == NULL) { mf = MakeMapperFunc(varName); }
+    assert(mf);
     vector<double> minMax = mf->getMinMaxMapValue();
     int            numContours = newContours.GetContourValues().size();
     double         spacing = (minMax[1] - minMax[0]) / (numContours - 1);
@@ -149,7 +149,7 @@ void ContourParams::_init()
     if (varname.empty()) return;
 
     vector<double> minExt, maxExt;
-    int            rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
+    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
     SetUseSingleColor(true);
     float rgb[] = {.95, .66, .27};
@@ -194,10 +194,9 @@ void ContourParams::GetLineColor(int lineNum, float color[3])
     GetConstantColor(color);
     string cmVar = GetColorMapVariableName();
     if ((cmVar == "") || (cmVar == "Default")) {
-        string            varName = GetVariableName();
-        TransferFunction *tf = 0;
-        tf = (TransferFunction *)GetMapperFunc(varName);
-        if (!tf) { tf = MakeTransferFunc(varName); }
+        string          varName = GetVariableName();
+        MapperFunction *tf = 0;
+        tf = (MapperFunction *)GetMapperFunc(varName);
         assert(tf);
 
         vector<double> vals = GetContourValues(varName);

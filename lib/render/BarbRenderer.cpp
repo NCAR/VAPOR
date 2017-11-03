@@ -267,7 +267,7 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     glEnd();
 }
 
-int BarbRenderer::performRendering(const BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
+int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
 {
     assert(variableData.size() == 5);
 
@@ -335,7 +335,7 @@ float BarbRenderer::getHeightOffset(Grid *heightVar, float xCoord, float yCoord,
     return offset;
 }
 
-void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, const BarbParams *bParams)
+void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, BarbParams *bParams)
 {
     assert(variableData.size() == 5);
 
@@ -382,8 +382,8 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                 bool   doColorMapping;
                 doColorMapping = (colorVar != "") && (colorVar != "Constant");
                 if (doColorMapping) {
-                    TransferFunction *tf = 0;
-                    tf = (TransferFunction *)bParams->GetMapperFunc(colorVar);
+                    MapperFunction *tf = 0;
+                    tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
                     assert(tf);
                     float val = variableData[4]->GetValue(point[0], point[1], point[2]);
                     if (val == variableData[4]->GetMissingValue())
@@ -412,7 +412,7 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
     return;
 }
 
-bool BarbRenderer::GetColorMapping(TransferFunction *tf, float val)
+bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val)
 {
     bool missing = false;
 

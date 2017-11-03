@@ -123,7 +123,7 @@ public:
     //! Each QLineEdit has a connection to a setTextChanged and enterPressed
     //! slot, to register when the value has changed,
     //! and when the user has pressed enter over the lineEdit.
-    //! If there is a TransferFunction editor or IsoSelection panel in the
+    //! If there is a MapperFunction editor or IsoSelection panel in the
     //! tab, call MappingFrame::hookup() in this method
     //!
     virtual void hookUpTab() {}
