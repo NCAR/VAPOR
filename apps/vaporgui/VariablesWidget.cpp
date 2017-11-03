@@ -572,6 +572,7 @@ void VariablesWidget::updateVariableCombos(RenderParams* rParams) {
 
 		for (int i=0; i<setVars.size(); i++) {
 			if (setVars[i] != setVarsReq[i]) {
+				cout << "Field var " << i << " " << setVars[i] << endl;
 				rParams->SetFieldVariableNames(setVars);
 				break;
 			}
