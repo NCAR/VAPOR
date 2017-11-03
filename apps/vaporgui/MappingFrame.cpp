@@ -205,8 +205,8 @@ void MappingFrame::RefreshHistogram() {
         return;
     }
 
-    cout << "Fudging box Z maximum!  Fix Grid!!" << endl;
-    maxExts[2] = 5.f;
+    //cout << "Fudging box Z maximum!  Fix Grid!!" << endl;
+    //maxExts[2] = 5.f;
 
     float v;
     Grid::Iterator itr;
