@@ -242,6 +242,7 @@ int ContourRenderer::buildLineCache(DataMgr *dataMgr)
             dataVals[i + j * _sampleSize] = val;
         }
     }
+
     float mv = varGrid->GetMissingValue();
 
     // Unlock the StructuredGrid
@@ -692,6 +693,7 @@ void ContourRenderer::buildEdges(int iso, float *dataVals, float mv)
     float  x1, y1, x2, y2;    // coordinates of intersection points
     int    segIndex;
     size_t timestep = GetCurrentTimestep();
+
     // loop over cells (identified by lower-left vertices
     for (int j = 0; j < _sampleSize - 1; j++) {
         for (int i = 0; i < _sampleSize - 1; i++) {

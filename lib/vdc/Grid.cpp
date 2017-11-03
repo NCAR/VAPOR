@@ -133,9 +133,11 @@ float Grid::GetValue(const std::vector<double> &coords) const
     //
     ClampCoord(clampedCoords);
 
+#ifdef DEAD
     // At this point xyz should be within the grid bounds
     //
     if (!InsideGrid(clampedCoords)) return (_missingValue);
+#endif
 
     if (_interpolationOrder == 0) {
         return (GetValueNearestNeighbor(clampedCoords));
