@@ -47,9 +47,9 @@ double ContourAppearanceSubtab::GetContourMinOrMax(string minOrMax) {
     if (locked) {
         // Update contour minimum combo
         //
-        VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
-        double lower = mf->getMinMapValue();
-        double upper = mf->getMaxMapValue();
+        VAPoR::MapperFunction *tf = _cParams->GetMapperFunc(varname);
+        double lower = tf->getMinMapValue();
+        double upper = tf->getMaxMapValue();
 
         if (minOrMax == "max")
             return upper;
@@ -144,9 +144,9 @@ void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams *cParams) {
     if (varname.empty())
         return;
 
-    VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
-    double lower = mf->getMinMapValue();
-    double upper = mf->getMaxMapValue();
+    VAPoR::MapperFunction *tf = _cParams->GetMapperFunc(varname);
+    double lower = tf->getMinMapValue();
+    double upper = tf->getMaxMapValue();
     int count = _cParams->GetNumContours();
     double spacing = (upper - lower) / (double)(count - 1);
 
@@ -211,9 +211,9 @@ void ContourAppearanceSubtab::SetContourCount(int count) {
     if (locked) {
         double lower, upper, spacing;
         string varname = _cParams->GetVariableName();
-        VAPoR::MapperFunction *mf = _cParams->GetMapperFunc(varname);
-        lower = mf->getMinMapValue();
-        upper = mf->getMaxMapValue();
+        VAPoR::MapperFunction *tf = _cParams->GetMapperFunc(varname);
+        lower = tf->getMinMapValue();
+        upper = tf->getMaxMapValue();
         spacing = (upper - lower) / (count - 1);
 
         _cMinCombo->Update(lower, upper, lower);
