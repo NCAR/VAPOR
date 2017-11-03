@@ -41,6 +41,9 @@ public:
 				VAPoR::DataMgr* dataMgr,
 				VAPoR::RenderParams* rParams);
 
+signals:
+    void valueChanged();
+
 private slots:
 	void setRange(double min, double max);
 	void copyRegion();

@@ -599,7 +599,7 @@
         </widget>
        </item>
        <item>
-        <widget class="GeometryWidget" name="_geometryWidget" native="true">
+        <widget class="GeometryWidget" name="MyGeometryWidget" native="true">
          <property name="minimumSize">
           <size>
            <width>0</width>
