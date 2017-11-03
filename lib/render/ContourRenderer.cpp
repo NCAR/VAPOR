@@ -64,6 +64,7 @@ ContourRenderer::~ContourRenderer()
     // De-allocate cache
     // Using original code due to data structure mess
     // Assuming it is correct
+    // TODO Stas check in debugger
     for (auto it = _lineCache.begin(); it != _lineCache.end(); it++) { invalidateLineCache(it->first.first); }
 
     // for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
