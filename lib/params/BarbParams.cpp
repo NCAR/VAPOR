@@ -79,7 +79,7 @@ void BarbParams::_init() {
 	if (varname.empty()) return;
 
     vector <double> minExt, maxExt;
-    int rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
+    int rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
 	SetUseSingleColor(true);
 	float rgb[] = {1.f,1.f,1.f};

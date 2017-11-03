@@ -322,6 +322,9 @@ bool CurvilinearGrid::InsideGrid(const std::vector <double> &coords) const {
 	
 	bool inside = _insideGrid(x, y, z, i, j, k, lambda, zwgt);
 
+
+	
+
 	return(inside);
 }
 
@@ -422,7 +425,6 @@ void CurvilinearGrid::ConstCoordItrCG::next() {
 
 
 
-
 float CurvilinearGrid::GetValueNearestNeighbor(
 	const std::vector <double> &coords
 ) const {
@@ -444,6 +446,50 @@ float CurvilinearGrid::GetValueNearestNeighbor(
 
 	return(AccessIJK(i,j,k));
 }
+
+namespace {
+
+float interpolateQuad(
+	const float values[4], const double lambda[4], float mv
+) {
+	
+	double lambda0[] = { lambda[0], lambda[1], lambda[2], lambda[3] };
+
+	// Look for missing values. If found, zero out weight
+	//
+	float wTotal = 0.0;
+	int nMissing = 0;
+	for (int i=0; i<4; i++) {
+		if (values[i] == mv) {
+			lambda0[i] = 0.0;
+			nMissing++;
+		}
+		else {
+			wTotal += lambda0[i];
+		}
+	}
+
+	// Re-normalize weights if we have missing values
+	//
+	if (nMissing) {
+		wTotal = 1.0 / wTotal;
+		for (int i=0; i<4; i++) {
+			lambda0[i] *= wTotal;
+		}
+	}
+
+	float v = 0.0;
+	if (nMissing == 4) {
+		v = mv;
+	} else {
+		for (int i=0; i<4; i++) {
+			v += values[i] * lambda0[i];
+		}
+	}
+
+	return(v);
+}
+};
 
 float CurvilinearGrid::GetValueLinear(
 	const std::vector <double> &coords
@@ -467,7 +513,9 @@ float CurvilinearGrid::GetValueLinear(
 	bool inside = _insideGrid(x, y, z, i, j, k, lambda, zwgt);
 
 
-	if (! inside) return(GetMissingValue());
+	float mv = GetMissingValue();
+
+	if (! inside) return(mv);
 
 	// Use Wachspress coordinates as weights to do linear interpolation
 	// along XY plane
@@ -477,21 +525,35 @@ float CurvilinearGrid::GetValueLinear(
 	assert(j<dims[1]-1);
 	if (dims.size() > 2) assert(k<dims[2]-1);
 
-	float v0 = AccessIJK(i,j,k) * lambda[0] + 
-		AccessIJK(i+1,j,k) * lambda[1] +
-		AccessIJK(i+1,j+1,k) * lambda[2] +
-		AccessIJK(i,j+1,k) * lambda[2];
+	float v0s[] = {
+		AccessIJK(i,j,k),
+		AccessIJK(i+1,j,k),
+		AccessIJK(i+1,j+1,k),
+		AccessIJK(i,j+1,k)
+	};
+
+	float v0 = interpolateQuad(v0s, lambda, mv);
 
 	if (GetNumCoordinates() == 2) return(v0);
 
-	float v1 = AccessIJK(i,j,k+1) * lambda[0] + 
-		AccessIJK(i+1,j,k+1) * lambda[1] +
-		AccessIJK(i+1,j+1,k+1) * lambda[2] +
-		AccessIJK(i,j+1,k+1) * lambda[2];
+	if (v0 == mv) zwgt[0] = 0.0;
+
+	float v1s[] = {
+		AccessIJK(i,j,k+1),
+		AccessIJK(i+1,j,k+1),
+		AccessIJK(i+1,j+1,k+1),
+		AccessIJK(i,j+1,k+1)
+	};
+
+	float v1 = interpolateQuad(v1s, lambda, mv);
+
+	if (v1 == mv) zwgt[1] = 0.0;
 
 	// Linearly interpolate along Z axis
 	//
-	return(v0*zwgt[0] + v1*zwgt[1]);
+	if (zwgt[0] == 0.0) return (v1);
+	else if (zwgt[1] == 0.0) return (v0);
+	else return(v0*zwgt[0] + v1*zwgt[1]);
 
 }
 
@@ -603,21 +665,27 @@ bool CurvilinearGrid::_insideGrid(
 	bool inside = false;
 	double pt[] = {x,y};
 	double verts[8];
-	for (j=j0; j<=j1 && !inside; j++) {
-	for (i=i0; i<=i1 && !inside; i++) {
-		verts[0] = _xrg.AccessIJK(i,j,0);
-		verts[1] = _yrg.AccessIJK(i,j,0);
-		verts[2] = _xrg.AccessIJK(i+1,j,0);
-		verts[3] = _yrg.AccessIJK(i+1,j,0);
-		verts[4] = _xrg.AccessIJK(i+1,j+1,0);
-		verts[5] = _yrg.AccessIJK(i+1,j+1,0);
-		verts[6] = _xrg.AccessIJK(i,j+1,0);
-		verts[7] = _yrg.AccessIJK(i,j+1,0);
+	for (int jj=j0; jj<=j1 && !inside; jj++) {
+	for (int ii=i0; ii<=i1 && !inside; ii++) {
+		verts[0] = _xrg.AccessIJK(ii,jj,0);
+		verts[1] = _yrg.AccessIJK(ii,jj,0);
+		verts[2] = _xrg.AccessIJK(ii+1,jj,0);
+		verts[3] = _yrg.AccessIJK(ii+1,jj,0);
+		verts[4] = _xrg.AccessIJK(ii+1,jj+1,0);
+		verts[5] = _yrg.AccessIJK(ii+1,jj+1,0);
+		verts[6] = _xrg.AccessIJK(ii,jj+1,0);
+		verts[7] = _yrg.AccessIJK(ii,jj+1,0);
 		inside = VAPoR::WachspressCoords2D(verts, pt, 4, lambda);
+		if (inside) {
+			i = ii;
+			j = jj;
+		}
 	}
 	}
 
-	if (! inside) return(false);
+	if (! inside) {
+		return(false);
+	}
 
 	if (GetNumCoordinates() == 2) {
 		zwgt[0] = 1.0;
