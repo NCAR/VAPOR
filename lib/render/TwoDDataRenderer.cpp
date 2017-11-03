@@ -891,7 +891,6 @@ const GLvoid *TwoDDataRenderer::_getTexture(
     size_t texSize = _texWidth * _texHeight;
     GLfloat *texture = (float *) _sb_texture.Alloc(texSize * _texelSize);
 	GLfloat *texptr = texture;
-
 	Grid::Iterator itr;
 	Grid::Iterator enditr = g->end();
 //	for (itr = g->begin(minBoxReq, maxBoxReq); itr != enditr; ++itr) {
