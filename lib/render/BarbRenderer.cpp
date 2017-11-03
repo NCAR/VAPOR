@@ -382,9 +382,9 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
     string colorVar = bParams->GetColorMapVariableName();
     float clut[256 * 4];
     bool doColorMapping = (colorVar != "") && (colorVar != "Constant");
-    TransferFunction *tf = 0;
+    MapperFunction *tf = 0;
     if (doColorMapping) {
-        tf = (TransferFunction *)bParams->GetMapperFunc(colorVar);
+        tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
         assert(tf);
         tf->makeLut(clut);
     }
@@ -452,7 +452,7 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
     return;
 }
 
-bool BarbRenderer::GetColorMapping(TransferFunction *tf, float val, float clut[256 * 4]) {
+bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4]) {
     bool missing = false;
 
     //	float clut[256*4];

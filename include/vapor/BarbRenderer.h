@@ -89,7 +89,7 @@ class RENDER_API BarbRenderer : public Renderer {
                     vector<Grid *> variableData, int timestep,
                     float vectorLengthScale, float rad, BarbParams *params);
 
-    bool GetColorMapping(TransferFunction *tf, float val, float clut[256 * 4]);
+    bool GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4]);
 
     //! Protected method to draw one barb (a hexagonal tube with a cone barbhead)
     //! \param[in] const float startPoint[3] beginning position of barb
