@@ -35,6 +35,7 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams,
     pushVarStartingWithLetter(varNames, defaultVars, 'u');
     pushVarStartingWithLetter(varNames, defaultVars, 'v');
 
+    cout << "BarbVariablesSubtab::Initialize" << endl;
     bParams->SetFieldVariableNames(defaultVars);
 }
 
@@ -47,6 +48,8 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent) {
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {
     setupUi(this);
     _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::PRIORITYCOLORVAR));
+
+    zDimFrame->hide();
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
