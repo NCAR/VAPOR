@@ -34,7 +34,6 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
 	pushVarStartingWithLetter(varNames, defaultVars, 'u');
 	pushVarStartingWithLetter(varNames, defaultVars, 'v');
 
-	cout << "BarbVariablesSubtab::Initialize" << endl;	
 	bParams->SetFieldVariableNames(defaultVars);
 }
 
