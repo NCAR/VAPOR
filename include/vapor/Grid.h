@@ -490,7 +490,7 @@ public:
 
         bool operator()(const std::vector<double> &pt) const
         {
-            for (int i = 0; i < _min.size(); i++) {
+            for (int i = 0; i < _min.size() && i < pt.size(); i++) {
                 if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
             }
             return (true);
