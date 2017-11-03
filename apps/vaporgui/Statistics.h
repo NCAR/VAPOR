@@ -105,6 +105,7 @@ private slots:
     void _minTSChanged(int);
     void _maxTSChanged(int);
     void _updateButtonClicked();
+    void _geometryValueChanged();
     /*
     void restoreExtents();
     void minTSChanged();

@@ -46,7 +46,7 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
 
     setupUi(this);
     setWindowTitle("Statistics");
-    _geometryWidget->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
+    MyGeometryWidget->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
 
     Connect();
 }
@@ -220,7 +220,7 @@ bool Statistics::Update()
     MaxTimestepSpinbox->blockSignals(false);
 
     // Update geometry extents
-    _geometryWidget->Update(_controlExec->GetParamsMgr(), currentDmgr, statsParams);
+    MyGeometryWidget->Update(_controlExec->GetParamsMgr(), currentDmgr, statsParams);
 
     return true;
 }
@@ -263,9 +263,10 @@ void Statistics::_updateStatsTable()
 
         int column = 1;
         if (statsParams->GetMinEnabled()) {
-            if (!std::isnan(m3[0]))
+            if (!std::isnan(m3[0])) {
+                cerr << m3[0] << endl;
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
-            else {
+            } else {
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
                 VariablesTable->item(row, column)->setForeground(brush);
             }
@@ -310,6 +311,11 @@ void Statistics::_updateStatsTable()
     }
     for (int r = 0; r < VariablesTable->rowCount(); r++)
         for (int c = 0; c < VariablesTable->columnCount(); c++) VariablesTable->item(r, c)->setFlags(Qt::NoItemFlags);
+
+    VariablesTable->repaint();
+    VariablesTable->update();
+    VariablesTable->setUpdatesEnabled(true);
+    VariablesTable->viewport()->update();
 }
 
 void Statistics::showMe()
@@ -354,19 +360,32 @@ bool Statistics::Connect()
     connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)));
     connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)));
     connect(UpdateButton, SIGNAL(clicked()), this, SLOT(_updateButtonClicked()));
+    connect(MyGeometryWidget, SIGNAL(valueChanged()), this, SLOT(_geometryValueChanged()));
     return true;
 }
 
+void Statistics::_geometryValueChanged() { _validStats.InvalidAll(); }
+
 void Statistics::_updateButtonClicked()
 {
+    // Initialize pointers
+    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string       dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+
     for (int i = 0; i < _validStats.GetVariableCount(); i++) {
         std::string varname = _validStats.GetVariableName(i);
         double      m3[3], median, stddev;
         _validStats.Get3MStats(varname, m3);
         _validStats.GetMedian(varname, &median);
         _validStats.GetStddev(varname, &stddev);
-        if (std::isnan(m3[2])) {
+        if ((statsParams->GetMinEnabled() || statsParams->GetMaxEnabled() || statsParams->GetMinEnabled()) && std::isnan(m3[2])) {
             _calc3M(varname);
+            _updateStatsTable();
+        }
+        cerr << "take a break" << endl;
+        if (statsParams->GetMedianEnabled() && std::isnan(median)) {
+            _calcMedian(varname);
             _updateStatsTable();
         }
     }
@@ -575,7 +594,6 @@ bool Statistics::_calc3M(std::string varname)
         float               missingVal = grid->GetMissingValue();
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
-            std::cout << "examine a grid point" << std::endl;
             if (*it != missingVal) {
                 min = min < *it ? min : *it;
                 max = max > *it ? max : *it;
@@ -592,11 +610,51 @@ bool Statistics::_calc3M(std::string varname)
         double m3[3] = {min, max, sum / (double)count};
         _validStats.Add3MStats(varname, m3);
     } else {
+        std::cerr << "Error: Zero value got selected!!" << std::endl;
         // Report ERROR!!
     }
 
     return true;
 }
+
+bool Statistics::_calcMedian(std::string varname)
+{
+    // Initialize pointers
+    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string       dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    VAPoR::DataMgr *  currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
+
+    int minTS = statsParams->GetCurrentMinTS();
+    int maxTS = statsParams->GetCurrentMaxTS();
+    if (!currentDmgr->IsTimeVarying(varname)) maxTS = minTS;
+    std::vector<double> minExtent, maxExtent;
+    statsParams->GetBox()->GetExtents(minExtent, maxExtent);
+
+    std::vector<float> buffer;
+    for (int ts = minTS; ts <= maxTS; ts++) {
+        VAPoR::Grid *       grid = currentDmgr->GetVariable(ts, varname, statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(), minExtent, maxExtent);
+        Grid::ConstIterator endItr = grid->cend();
+        float               missingVal = grid->GetMissingValue();
+
+        for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
+            if (*it != missingVal) buffer.push_back(*it);
+        }
+    }
+
+    if (buffer.size() > 0) {
+        std::sort(buffer.begin(), buffer.end());
+        double median = buffer.at(buffer.size() / 2);
+        _validStats.AddMedian(varname, median);
+    } else {
+        std::cerr << "Error: Zero value got selected!!" << std::endl;
+        // Report ERROR!!
+    }
+
+    return true;
+}
+
+bool Statistics::_calcStddev(std::string varname) {}
 
 #if 0
 void Statistics::errReport(string msg) const {
