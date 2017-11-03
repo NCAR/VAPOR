@@ -32,11 +32,10 @@ ControlExec::ControlExec(
 
 ControlExec::~ControlExec() {
 
+#ifdef  DEBUG
 	cout << "Allocated XmlNode count before delete " <<
 		XmlNode::GetAllocatedNodes().size() << endl;
 
-//#define DEBUG
-#ifdef  DEBUG
 	const vector <XmlNode *> &nodes = XmlNode::GetAllocatedNodes();
 	for (int i=0; i<nodes.size(); i++) {
 		cout << "   " << nodes[i]->GetTag() << " " << XmlNode::streamOut(cout, nodes[i]) << endl;
@@ -46,10 +45,10 @@ ControlExec::~ControlExec() {
 	if (_paramsMgr) delete _paramsMgr;
 	if (_dataStatus) delete _dataStatus;
 
-	cout << "Allocated XmlNode count after delete " <<
-		XmlNode::GetAllocatedNodes().size() << endl;
 
 #ifdef  DEBUG
+	cout << "Allocated XmlNode count after delete " <<
+		XmlNode::GetAllocatedNodes().size() << endl;
 
 	for (int i=0; i<nodes.size(); i++) {
 		cout << "   " << nodes[i]->GetTag() << " " << XmlNode::streamOut(cout, nodes[i]) << endl;

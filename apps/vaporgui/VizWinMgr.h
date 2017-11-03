@@ -233,6 +233,10 @@ public slots:
 
  void ReinitRouters();
 
+ //! Enable or disable widgets associated with all event routers
+ //
+ void EnableRouters(bool onOff);
+
  //! Force all the EventRouters to update based on the
  //! state of the Params for the active window.
  void UpdateRouters();

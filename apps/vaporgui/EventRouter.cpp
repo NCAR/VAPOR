@@ -137,4 +137,3 @@ void EventRouter::confirmText(){
 	//We may need to redisplay the tab (e.g. if Validate() resulted in a change).
 	updateTab();
 }
-
