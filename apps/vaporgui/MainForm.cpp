@@ -33,6 +33,7 @@
 #include <sstream>
 #include <iostream>
 #include <functional>
+#include <QDesktopWidget>
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
 #include <vapor/ControlExecutive.h>
@@ -162,6 +163,13 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     _capturingAnimationVizName = "";
     _interactiveRefinementSpin = 0;
     _modeStatusWidget = 0;
+
+    // For vertical screens, reverse aspect ratio for window size
+    QSize screenSize = QDesktopWidget().availableGeometry().size();
+    if (screenSize.width() < screenSize.height())
+        resize(screenSize.width() * .7, screenSize.width() * .7 * screenSize.width() / (float)screenSize.height());
+    else
+        resize(screenSize.width() * .7, screenSize.height() * .7);
 
     setWindowIcon(QPixmap(vapor_icon___));
 
