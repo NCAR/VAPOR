@@ -74,16 +74,19 @@ ContourRenderer::ContourRenderer(const ParamsMgr* pm,
 
 ContourRenderer::~ContourRenderer()
 {
-	//De-allocate cache
+	// De-allocate cache
+	// Using original code due to data structure mess
+	// Assuming it is correct
+	for (auto it = _lineCache.begin(); it != _lineCache.end(); it++) {
+		invalidateLineCache(it->first.first);
+	}
 	
 	//for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
 	for (size_t ts = 0; ts <= 0; ts++){
 		cout << "Fudging timestep info in ContourRenderer."; 
 		cout << " How do we get time range information from a Renderer class?";
-		cout << " Fix me!" << endl;
-		invalidateLineCache((int)ts);
+		cout << " Fix me: Scott!" << endl;
 	}
-	_lineCache.clear();
 	//TextObject::clearTextObjects(this);	
 }
 
