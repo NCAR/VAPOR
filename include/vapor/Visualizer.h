@@ -148,6 +148,11 @@ public:
 	//! \param[out] Renderer instance that is inserted in the queue
 	//! \return position in the renderer queue
 	int insertSortedRenderer(Renderer* ren){return insertRenderer(ren, 5);}
+    
+    //! Move the renderer to the front of the render queue
+    //! \param[out] Renderer instance that is moved to front
+    //! \return 1 on success. -1 on failure.
+    int moveRendererToFront(const Renderer* ren);
 	
 	//! Remove a specific renderer from the renderer queue
 	//! \param[in] r renderer will be removed
