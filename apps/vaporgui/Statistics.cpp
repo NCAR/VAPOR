@@ -76,12 +76,12 @@ bool Statistics::Update()
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
     assert( dmNames.size() > 0 );
     DataMgrCombo->blockSignals( true );
+    DataMgrCombo->clear();
     int currentIdx = -1;
     for (int i=0; i<dmNames.size(); i++) 
     {
         QString item = QString::fromStdString(dmNames[i]);
-        if( DataMgrCombo->findText(item) == -1 )
-            DataMgrCombo->addItem(item);
+        DataMgrCombo->addItem(item);
         if( dmNames[i] == currentDatasetName )
             currentIdx = i;
     }
@@ -374,13 +374,9 @@ void Statistics::showMe()
 int Statistics::initControlExec(ControlExec* ce) 
 {
     if (ce!=NULL) 
-    {
         _controlExec = ce;
-    }
     else 
-    { 
         return -1;
-    }
 
     // Store the active dataset name 
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -388,8 +384,7 @@ int Statistics::initControlExec(ControlExec* ce)
     std::string dsName = guiParams->GetStatsDatasetName();
     if( dsName == "" )      // not initialized yet
     {
-        VAPoR::DataStatus* dataStatus = _controlExec->getDataStatus();
-        std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
+        std::vector<std::string> dmNames = _controlExec->getDataStatus()->GetDataMgrNames();
         assert( dmNames.size() > 0 );
         guiParams->SetStatsDatasetName( dmNames[0] );
     }
@@ -411,7 +406,27 @@ bool Statistics::Connect()
     connect( MaxTimestepSpinbox,       SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)) );
     connect( UpdateButton,      SIGNAL(clicked()),                this, SLOT(_updateButtonClicked()));
     connect( MyGeometryWidget,  SIGNAL(valueChanged()),           this, SLOT(_geometryValueChanged()));
+    connect( DataMgrCombo,      SIGNAL(currentIndexChanged(int)), this, SLOT(_dataSourceChanged(int)) );
     return true;
+}
+
+void Statistics::_dataSourceChanged( int index )
+{
+    std::string newDataSourceName = DataMgrCombo->itemText(index).toStdString();
+
+    // Initialize pointers
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>(_controlExec->GetParamsMgr()->
+                    GetAppRenderParams( newDataSourceName, StatisticsParams::GetClassType()));
+
+    guiParams->SetStatsDatasetName( newDataSourceName );
+    _validStats.SetDatasetName( newDataSourceName );
+
+    // add variables to _validStats if there are any
+    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
+    for( int i = 0; i < enabledVars.size(); i++ )
+        _validStats.AddVariable( enabledVars[i] );
 }
 
 void Statistics::_geometryValueChanged()
@@ -990,6 +1005,7 @@ bool Statistics::ValidStats::SetDatasetName( std::string& dsName )
         for( int i = 0; i < 5; i++ )
             _values[i].clear();
     }
+    _count.clear();
     return true;
 }
 
