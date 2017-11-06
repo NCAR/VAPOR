@@ -305,7 +305,7 @@ void ContourRenderer::invalidateLineCache(int timestep){
 	for (int iso = 0; iso<numisovals; iso++){
 		pair<int,int> indexpair = make_pair(timestep,iso);
 		for (int i = 0; i< _lineCache[indexpair].size(); i++){
-			delete _lineCache[indexpair][i];
+			delete [] _lineCache[indexpair][i];
 		}
 		_lineCache[indexpair].clear();
 	}
