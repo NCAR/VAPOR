@@ -273,7 +273,7 @@ void ContourRenderer::invalidateLineCache(int timestep)
     int numisovals = numIsovalsInCache();
     for (int iso = 0; iso < numisovals; iso++) {
         pair<int, int> indexpair = make_pair(timestep, iso);
-        for (int i = 0; i < _lineCache[indexpair].size(); i++) { delete _lineCache[indexpair][i]; }
+        for (int i = 0; i < _lineCache[indexpair].size(); i++) { delete[] _lineCache[indexpair][i]; }
         _lineCache[indexpair].clear();
     }
     deleteCacheKey(timestep);
