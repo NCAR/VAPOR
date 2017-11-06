@@ -747,6 +747,8 @@ private:
 
     int _get_default_projection(string &projection);
 
+    VAPoR::RegularGrid *_make_grid_empty(string varname) const;
+
     VAPoR::RegularGrid *_make_grid_regular(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
                                            const std::vector<size_t> &bmax) const;
 
