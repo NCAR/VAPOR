@@ -245,6 +245,13 @@ class VDF_API DataMgr : public Wasp::MyBase {
         return (_timeCoordinates);
     };
 
+    //! Get time coordinate var name
+    //!
+    //! Return the name of the time coordinate variable. If no time coordinate
+    //! variable is defined the empty string is returned.
+    //
+    string GetTimeCoordVarName() const;
+
     //! Return an ordered list of a data variable's coordinate names
     //!
     //! Returns a list of a coordinate variable names for the variable
