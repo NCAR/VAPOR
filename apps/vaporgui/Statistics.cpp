@@ -90,7 +90,7 @@ bool Statistics::Update()
     DataMgrCombo->blockSignals( false );
 
     // Update auto-update checkbox
-    bool autoUpdate = statsParams->GetAutoUpdate();
+    bool autoUpdate = statsParams->GetAutoUpdateEnabled();
     UpdateCheckbox->blockSignals(true);
     if (autoUpdate) 
         UpdateCheckbox->setCheckState(Qt::Checked);
@@ -407,7 +407,28 @@ bool Statistics::Connect()
     connect( UpdateButton,      SIGNAL(clicked()),                this, SLOT(_updateButtonClicked()));
     connect( MyGeometryWidget,  SIGNAL(valueChanged()),           this, SLOT(_geometryValueChanged()));
     connect( DataMgrCombo,      SIGNAL(currentIndexChanged(int)), this, SLOT(_dataSourceChanged(int)) );
+    connect( UpdateCheckbox,    SIGNAL(stateChanged(int)),        this, SLOT(_autoUpdateClicked(int)));
     return true;
+}
+
+void Statistics::_autoUpdateClicked( int state )
+{
+    // Initialize pointers
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+
+    if( state == 0 )        // unchecked
+        statsParams->SetAutoUpdateEnabled( false );
+    else if( state == 2 )   // checked
+        statsParams->SetAutoUpdateEnabled( true );
+    else
+    {
+        std::cerr << "Dont know what this state is!!!" << std::endl;
+        // REPORT ERROR!!!
+    }
 }
 
 void Statistics::_dataSourceChanged( int index )
@@ -431,7 +452,18 @@ void Statistics::_dataSourceChanged( int index )
 
 void Statistics::_geometryValueChanged()
 {
+    // Initialize pointers
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+
     _validStats.InvalidAll();
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_updateButtonClicked()
@@ -495,6 +527,10 @@ void Statistics::_minTSChanged( int val )
             MaxTimestepSpinbox->blockSignals( false );
         }
     }
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_maxTSChanged( int val )
@@ -522,6 +558,10 @@ void Statistics::_maxTSChanged( int val )
             MinTimestepSpinbox->blockSignals( false );
         }
     }
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_lodChanged( int index )
@@ -542,6 +582,10 @@ void Statistics::_lodChanged( int index )
         statsParams->SetCompressionLevel( lod );
         _validStats.InvalidAll();
     }
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_refinementChanged( int index )
@@ -562,6 +606,10 @@ void Statistics::_refinementChanged( int index )
         statsParams->SetRefinementLevel( refLevel );
         _validStats.InvalidAll();
     }
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_newCalcChanged( int index )
@@ -591,6 +639,10 @@ void Statistics::_newCalcChanged( int index )
     {
         // REPORT ERROR!!
     }
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_removeCalcChanged( int index )
@@ -641,6 +693,10 @@ void Statistics::_newVarChanged( int index )
 
     // Add this variable to _validStats
     _validStats.AddVariable( varName );
+
+    // Auto-update if enabled
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
 void Statistics::_removeVarChanged( int index )
