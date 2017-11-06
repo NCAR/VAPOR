@@ -609,6 +609,11 @@ void VizFeatureEventRouter::timeAnnotationChanged() {
         miscParams->SetTimeStamp(true);
         miscParams->SetTimeStep(false);
         _controlExec->ClearText();
+        drawTimeUser();
+    } else if (index == 3) {
+        miscParams->SetTimeStamp(true);
+        miscParams->SetTimeStep(false);
+        _controlExec->ClearText();
         drawTimeStamp();
     } else {
         miscParams->SetTimeStamp(false);
@@ -657,7 +662,7 @@ void VizFeatureEventRouter::drawTimeStep(string myString) {
     _controlExec->DrawText(myString, x, y, size, color, 1);
 }
 
-void VizFeatureEventRouter::drawTimeStamp() {
+void VizFeatureEventRouter::drawTimeUser() {
     MiscParams *mp = GetMiscParams();
     if (mp->GetTimeStep() == true) {
         drawTimeStep();
@@ -673,6 +678,18 @@ void VizFeatureEventRouter::drawTimeStamp() {
     ss << myTime;
     std::string myString = ss.str();
     drawTimeStep(myString);
+}
+
+void VizFeatureEventRouter::drawTimeStamp() {
+    MiscParams *mp = GetMiscParams();
+    if (mp->GetTimeStep() == true) {
+        drawTimeStep();
+        return;
+    }
+
+    size_t ts = GetCurrentTimeStep();
+    DataStatus *ds = _controlExec->getDataStatus();
+    drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
 }
 
 void VizFeatureEventRouter::setXTicOrient(int) {
