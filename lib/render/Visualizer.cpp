@@ -561,7 +561,7 @@ int Visualizer::pointIsOnBox(double corners[8][3], double pickPt[2])
     return -1;
 }
 
-int Visualizer::moveRendererToFront(const Renderer *ren)
+void Visualizer::moveRendererToFront(const Renderer *ren)
 {
     int renIndex = -1;
     for (int i = 0; i < _renderer.size(); i++) {
@@ -570,10 +570,8 @@ int Visualizer::moveRendererToFront(const Renderer *ren)
             break;
         }
     }
-    if (renIndex == -1) {
-        SetErrMsg("Renderer not found.");
-        return -1;
-    }
+    assert(renIndex != -1);
+
     Renderer *save = _renderer[renIndex];
     int       saveOrder = _renderOrder[renIndex];
     for (int i = _renderer.size() - 2; i >= renIndex; i--) {
@@ -583,7 +581,6 @@ int Visualizer::moveRendererToFront(const Renderer *ren)
     }
     _renderer[_renderer.size() - 1] = save;
     _renderOrder[_renderer.size() - 1] = saveOrder;
-    return 0;
 }
 
 /*
