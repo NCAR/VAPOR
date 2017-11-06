@@ -51,9 +51,9 @@ StatisticsParams::StatisticsParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, 
 
 StatisticsParams::~StatisticsParams() { MyBase::SetDiagMsg("StatisticsParams::~StatisticsParams() this=%p", this); }
 
-bool StatisticsParams::GetAutoUpdate() { return (GetValueLong(_autoUpdateTag, (long)false)); }
+bool StatisticsParams::GetAutoUpdateEnabled() { return (GetValueLong(_autoUpdateTag, (long)false)); }
 
-void StatisticsParams::SetAutoUpdate(bool val) { SetValueLong(_autoUpdateTag, "if we want stats auto-update", (long)val); }
+void StatisticsParams::SetAutoUpdateEnabled(bool val) { SetValueLong(_autoUpdateTag, "if we want stats auto-update", (long)val); }
 
 int StatisticsParams::GetCurrentMinTS() { return (int)(GetValueDouble(_minTSTag, 0.0)); }
 
