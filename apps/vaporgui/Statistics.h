@@ -111,6 +111,7 @@ class Statistics : public QDialog, public Ui_StatsWindow {
     void _maxTSChanged(int);
     void _updateButtonClicked();
     void _geometryValueChanged();
+    void _dataSourceChanged(int);
     /*
     void restoreExtents();
     void minTSChanged();
