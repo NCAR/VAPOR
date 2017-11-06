@@ -256,9 +256,9 @@ void Statistics::_updateStatsTable()
                       GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
 
     // Update Statistics Table: header
-    VariablesTable->clear();
+    VariablesTable->clear();    // this also deletes the items properly.
     QStringList header;
-    header << "Variable";
+    header << "Variable" << "No. of Samples";
     if( statsParams->GetMinEnabled() )
         header << "Min";
     if( statsParams->GetMaxEnabled() )
@@ -280,20 +280,28 @@ void Statistics::_updateStatsTable()
     VariablesTable->setRowCount( enabledVars.size() );
     for( int row = 0; row < enabledVars.size(); row++ )
     {
-        VariablesTable->setItem( row, 0, 
-            new QTableWidgetItem( QString::fromStdString(enabledVars[row]) ));
-
         double m3[3], median, stddev;
+        long   count;
         _validStats.Get3MStats( enabledVars[row], m3 );
         _validStats.GetMedian(  enabledVars[row], &median );
         _validStats.GetStddev(  enabledVars[row], &stddev );
+        _validStats.GetCount(   enabledVars[row], &count );
         
-        int column = 1;
+        VariablesTable->setItem( row, 0, new QTableWidgetItem( QString::fromStdString(enabledVars[row]) ));
+        if( count == -1 )
+        {
+            VariablesTable->setItem( row, 1, new QTableWidgetItem(QString::fromAscii("??")));
+            VariablesTable->item(    row, 1)->setForeground( brush );
+        }
+        else 
+            VariablesTable->setItem( row, 1, new QTableWidgetItem( QString::number(count) ));
+
+        int column = 2;
         if( statsParams->GetMinEnabled() )
         {
             if( !std::isnan( m3[0] ) )
             {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0])));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0], 'g', 3)));
             }
             else
             {
@@ -305,7 +313,7 @@ void Statistics::_updateStatsTable()
         if( statsParams->GetMaxEnabled() )
         {
             if( !std::isnan( m3[1] ) )
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1])));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1], 'g', 3)));
             else
             {
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
@@ -316,7 +324,7 @@ void Statistics::_updateStatsTable()
         if( statsParams->GetMeanEnabled() )
         {
             if( !std::isnan( m3[2] ) )
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2])));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2], 'g', 3)));
             else
             {
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
@@ -327,7 +335,7 @@ void Statistics::_updateStatsTable()
         if( statsParams->GetMedianEnabled() )
         {
             if( !std::isnan( median ) )
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median)));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median, 'g', 3)));
             else
             {
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
@@ -338,7 +346,7 @@ void Statistics::_updateStatsTable()
         if( statsParams->GetStdDevEnabled() )
         {
             if( !std::isnan( stddev ) )
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev)));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev, 'g', 3)));
             else
             {
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
@@ -700,11 +708,12 @@ bool Statistics::_calc3M( std::string varname )
         double m3[3] = {min, max, sum/(double)count};
         _validStats.Add3MStats( varname, m3 );
     }
-    else
+    else    // count == 0
     {
-        std::cerr << "Error: Zero value got selected!!" << std::endl;
-        // Report ERROR!!
+        //std::cerr << "Error: Zero value got selected!!" << std::endl;
     }
+
+    _validStats.AddCount( varname, count );
 
     return true;
 }
@@ -750,9 +759,10 @@ bool Statistics::_calcMedian( std::string varname )
     }
     else
     {
-        std::cerr << "Error: Zero value got selected!!" << std::endl;
-        // Report ERROR!!
+        //std::cerr << "Error: Zero value got selected!!" << std::endl;
     }
+        
+    _validStats.AddCount(  varname, buffer.size() );
 
     return true;
 }
@@ -805,89 +815,23 @@ bool Statistics::_calcStddev( std::string varname )
     }
     
     if( count > 0 )
+    {
         _validStats.AddStddev( varname, std::sqrt( sum / (double)count ));
+    }
     else
     {
-        std::cerr << "Error: Zero value got selected!!" << std::endl;
-        // Report ERROR!!
+        //std::cerr << "Error: Zero value got selected!!" << std::endl;
     }
+       
+    _validStats.AddCount(  varname, count );
 
     return true;
 }
 
-#if 0
-void Statistics::errReport(string msg) const {
-    _errMsg->errorList->setText(QString::fromStdString(msg));
-    _errMsg->show();
-    _errMsg->raise();
-    _errMsg->activateWindow();
-}
-#endif
-
-#if 0
-void Statistics::initTimes() 
-{
-    MinTimestepSpinbox->setMinimum(0);
-    MinTimestepSpinbox->setMaximum(_dm->GetNumTimeSteps(_defaultVar)-1);
-    
-    ParamsMgr* pMgr = _controlExec->GetParamsMgr();
-    pMgr->BeginSaveStateGroup("Initializing statistics time spin boxes");
-    _minTS = _params->GetMinTS();
-    MinTimestepSpinbox->blockSignals(true);
-    MaxTimestepSpinbox->blockSignals(true);
-    MinTimestepSpinbox->setValue(_minTS);
-
-    MaxTimestepSpinbox->setMinimum(0);
-    MaxTimestepSpinbox->setMaximum(_dm->GetNumTimeSteps(_defaultVar)-1);
-    _maxTS = _params->GetMaxTS();   
-    MaxTimestepSpinbox->setValue(_maxTS);
-    MinTimestepSpinbox->blockSignals(false);
-    MaxTimestepSpinbox->blockSignals(false);
-    pMgr->EndSaveStateGroup();
-}
-#endif
-
-#if 0
-void Statistics::initRanges() 
-{
-}
-#endif
-
-#if 0
-void Statistics::initCRatios() 
-{
-    _cRatios = _dm->GetCRatios(_defaultVar);
-
-    _cRatio = _params->GetCRatio();
-    if (_cRatio == -1) {
-        _cRatio = _cRatios.size()-1;
-    }
-
-    for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it){
-        CRatioCombo->addItem("1:"+QString::number(*it));
-    }
-
-    CRatioCombo->setCurrentIndex(_cRatio);
-}
-#endif
-
-#if 0
-void Statistics::initRefinement() 
-{
-    _refLevel = _params->GetRefinement();
-    _refLevels = _dm->GetNumRefLevels(_defaultVar);
-
-    for (int i=0; i<=_refLevels; i++){
-        RefCombo->addItem(QString::number(i));
-    }
-    RefCombo->setCurrentIndex(_refLevel);
-}
-#endif
-
 
 // ValidStats class
 //
-int Statistics::ValidStats::_getVarIdx( std::string varName )
+int Statistics::ValidStats::_getVarIdx( std::string& varName )
 {
     int idx = -1;
     for( int i = 0; i < _variables.size(); i++ )
@@ -901,7 +845,7 @@ int Statistics::ValidStats::_getVarIdx( std::string varName )
     return idx;
 }
 
-bool Statistics::ValidStats::AddVariable( std::string newVar )
+bool Statistics::ValidStats::AddVariable( std::string& newVar )
 {
     if( newVar == "" )
         return false;
@@ -914,10 +858,12 @@ bool Statistics::ValidStats::AddVariable( std::string newVar )
         _values[i].push_back( std::nan("1") );
         assert( _values[i].size() == _variables.size() );
     }
+    _count.push_back( -1 );
+    assert( _count.size() == _variables.size() );
     return true;
 }
 
-bool Statistics::ValidStats::RemoveVariable( std::string varname )
+bool Statistics::ValidStats::RemoveVariable( std::string& varname )
 {
     int rmIdx = _getVarIdx( varname );
     if( rmIdx == -1 )                   // this variable doesn't exist.
@@ -929,10 +875,12 @@ bool Statistics::ValidStats::RemoveVariable( std::string varname )
         _values[i].erase( _values[i].begin() + rmIdx );
         assert( _values[i].size() == _variables.size() );
     }
+    _count.erase( _count.begin() + rmIdx );
+    assert( _count.size() == _variables.size() );
     return true;
 }
 
-bool Statistics::ValidStats::Add3MStats( std::string varName, const double* input3M )
+bool Statistics::ValidStats::Add3MStats( std::string& varName, const double* input3M )
 {
     int idx = _getVarIdx( varName );
     if( idx == -1 )     // This variable doesn't exist
@@ -945,7 +893,7 @@ bool Statistics::ValidStats::Add3MStats( std::string varName, const double* inpu
     return true;
 }
 
-bool Statistics::ValidStats::AddMedian( std::string varName, double inputMedian )
+bool Statistics::ValidStats::AddMedian( std::string& varName, double inputMedian )
 {
     int idx = _getVarIdx( varName );
     if( idx == -1 )     // This variable doesn't exist
@@ -955,7 +903,7 @@ bool Statistics::ValidStats::AddMedian( std::string varName, double inputMedian 
     return true;
 }
 
-bool Statistics::ValidStats::AddStddev( std::string varName, double inputStddev )
+bool Statistics::ValidStats::AddStddev( std::string& varName, double inputStddev )
 {
     int idx = _getVarIdx( varName );
     if( idx == -1 )     // This variable doesn't exist
@@ -965,7 +913,17 @@ bool Statistics::ValidStats::AddStddev( std::string varName, double inputStddev 
     return true;
 }
 
-bool Statistics::ValidStats::Get3MStats( std::string varName, double* output3M )
+bool Statistics::ValidStats::AddCount( std::string& varName, long inputCount )
+{
+    int idx = _getVarIdx( varName );
+    if( idx == -1 )     // This variable doesn't exist
+        return false;
+
+    _count[idx] = inputCount;
+    return true;
+}
+
+bool Statistics::ValidStats::Get3MStats( std::string& varName, double* output3M )
 {
     int idx = _getVarIdx( varName );
     if( idx == -1 )     // This variable doesn't exist
@@ -978,7 +936,7 @@ bool Statistics::ValidStats::Get3MStats( std::string varName, double* output3M )
     return true;
 }
 
-bool Statistics::ValidStats::GetMedian( std::string varName, double* outputMedian )
+bool Statistics::ValidStats::GetMedian( std::string& varName, double* outputMedian )
 {
     int idx = _getVarIdx( varName );
     if( idx == -1 )     // This variable doesn't exist
@@ -988,7 +946,7 @@ bool Statistics::ValidStats::GetMedian( std::string varName, double* outputMedia
     return true;
 }
 
-bool Statistics::ValidStats::GetStddev( std::string varName, double* outputStddev )
+bool Statistics::ValidStats::GetStddev( std::string& varName, double* outputStddev )
 {
     int idx = _getVarIdx( varName );
     if( idx == -1 )     // This variable doesn't exist
@@ -998,11 +956,23 @@ bool Statistics::ValidStats::GetStddev( std::string varName, double* outputStdde
     return true;
 }
 
+bool Statistics::ValidStats::GetCount( std::string& varName, long* outputCount )
+{
+    int idx = _getVarIdx( varName );
+    if( idx == -1 )     // This variable doesn't exist
+        return false;
+
+    *outputCount = _count[idx];
+    return true;
+}
+
 bool Statistics::ValidStats::InvalidAll()
 {
     for( int i = 0; i < 5; i++ )
         for( int j = 0; j < _values[i].size(); j++ )
             _values[i][j] = std::nan("1");
+    for( int i = 0; i < _count.size(); i++ )
+        _count[i] = -1;
     return true;
 }
 
