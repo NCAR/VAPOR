@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
-<TransferFunction Type="ParamsBase" >
+<MapperFunctionParams>
 <OpacityComposition Type="Long">
   0 
 </OpacityComposition>
@@ -9,26 +9,29 @@
 <OpacityScale Type="Double">
   1 
 </OpacityScale>
-<Colormap Type="ParamsBase" >
+<ColorMapParams>
+<DataBounds Type="Double">
+ -1 0
+</DataBounds>
 <ColorInterpolationType Type="Long">
   4 
 </ColorInterpolationType>
 <ColorMapControlPoints Type="Double">
   0.3760445713996887 0.8470588326454163 0.5333333611488342 0 0.9944289922714233 0.7176470756530762 0.7607843279838562 0.9900000095367432 
 </ColorMapControlPoints>
-</Colormap>
-<OpacityMaps Type="ParamNode" >
-<OpacityMap1Tag Type="ParamNode" >
-<OpacityMap Type="ParamsBase" >
+</ColorMapParams>
+<OpacityMaps>
+<OpacityMap_0>
+<OpacityMapParams>Type="ParamsBase" >
+<DataBounds Type="Double">
+ -1 0
+</DataBounds>
 <Enabled Type="Long">
   1 
 </Enabled>
 <OpacityInterpolation Type="Long">
   0 
 </OpacityInterpolation>
-<OpacityMapIndex Type="Long">
-  1 
-</OpacityMapIndex>
 <Type Type="Long">
   0 
 </Type>
@@ -53,7 +56,7 @@
 <SSq Type="Double">
   0.1 
 </SSq>
-</OpacityMap>
-</OpacityMap1Tag>
+</OpacityMapParams>
+</OpacityMap_0>
 </OpacityMaps>
-</TransferFunction>
+</MapperFunctionParams>
