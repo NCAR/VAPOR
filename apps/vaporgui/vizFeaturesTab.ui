@@ -1516,7 +1516,7 @@ with Lat/Lon</string>
                <number>0</number>
               </property>
               <property name="maxCount">
-               <number>3</number>
+               <number>4</number>
               </property>
               <item>
                <property name="text">
@@ -1530,7 +1530,12 @@ with Lat/Lon</string>
               </item>
               <item>
                <property name="text">
-                <string>Date/time stamp</string>
+                <string>User time</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Formatted date/time</string>
                </property>
               </item>
              </widget>

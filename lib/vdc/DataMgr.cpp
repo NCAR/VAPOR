@@ -403,6 +403,18 @@ vector<string> DataMgr::GetCoordVarNames() const
     return (_dc->GetCoordVarNames());
 }
 
+string DataMgr::GetTimeCoordVarName() const
+{
+    if (!_dc) return ("");
+
+    // Assumes only one time coordinate variable is defined. Yikes!
+    //
+    vector<string> vars1d = DataMgr::GetCoordVarNames(1, false);
+    if (!vars1d.size()) return ("");
+
+    return (vars1d[0]);
+}
+
 vector<string> DataMgr::GetCoordVarNames(int ndim, bool spatial) const
 {
     if (!_dc) { return (vector<string>()); }
@@ -1973,24 +1985,24 @@ int DataMgr::_get_time_coordinates(vector<double> &timecoords)
 {
     timecoords.clear();
 
-    vector<string> vars1d = DataMgr::GetCoordVarNames(1, false);
-
-    for (int i = 0; i < vars1d.size(); i++) {
-        if (!IsTimeVarying(vars1d[i])) continue;    // not a time coordinate
-
-        size_t n = DataMgr::GetNumTimeSteps(vars1d[i]);
-
-        float *buf = new float[n];
-        int    rc = _dc->GetVar(vars1d[i], -1, -1, buf);
-        if (rc < 0) { return (-1); }
-
-        for (int j = 0; j < n; j++) { timecoords.push_back(buf[j]); }
-        delete[] buf;
-    }
+    string timeCoordVar = GetTimeCoordVarName();
 
     // No time coordinates present
     //
-    if (timecoords.empty()) { timecoords.push_back(0.0); }
+    if (timeCoordVar.empty()) {
+        timecoords.push_back(0.0);
+        return (0);
+    }
+
+    size_t n = DataMgr::GetNumTimeSteps(timeCoordVar);
+
+    float *buf = new float[n];
+    int    rc = _dc->GetVar(timeCoordVar, -1, -1, buf);
+    if (rc < 0) { return (-1); }
+
+    for (int j = 0; j < n; j++) { timecoords.push_back(buf[j]); }
+    delete[] buf;
+
     return (0);
 }
 
