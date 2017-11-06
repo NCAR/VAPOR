@@ -125,6 +125,7 @@ GeometryWidget::~GeometryWidget()
 
 void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt)
 {
+    if (!minExt.size()) return;
     QString xTitle = QString("X Coordinates         Min:") + QString::number(minExt[0]) + QString("         Max:") + QString::number(maxExt[0]);
     xMinMaxGroupBox->setTitle(xTitle);
 
@@ -232,6 +233,8 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     if (_flags & VECTOR) {
         std::vector<string> varNames = _rParams->GetFieldVariableNames();
         if (varNames.empty()) return;
+
+        if ((varNames[0] == "") && (varNames[1] == "") && (varNames[2] == "")) return;
 
         vector<int> axes;
         DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExt, maxFullExt, axes);

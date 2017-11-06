@@ -77,6 +77,8 @@ public:
     {
         setupUi(this);
         _geometryWidget->Reinit(GeometryWidget::TWOD);
+
+        _orientationAngles->hide();
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)

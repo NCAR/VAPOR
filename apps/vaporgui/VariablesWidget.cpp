@@ -103,7 +103,7 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component)
     assert(component >= 0 && component <= 2);
 
     if (!(_dspFlags & VECTOR)) return;
-    if ((!(_dimFlags & THREED)) && component == 2) return;
+    // if ((! (_dimFlags & THREED)) && component == 2) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -270,7 +270,7 @@ void VariablesWidget::updateFidelity(RenderParams *rParams)
     }
 
     if (varname.empty()) {
-        fidelityTab->hide();
+        // fidelityTab->hide();
         return;
     }
     fidelityTab->show();
@@ -418,7 +418,6 @@ void VariablesWidget::showHideVar(bool on)
 
     if ((_dspFlags & VECTOR) && on) {
         fieldVariableFrame->show();
-        if (!(_dimFlags & THREED)) { varCombo3->hide(); }
     } else {
         fieldVariableFrame->hide();
     }

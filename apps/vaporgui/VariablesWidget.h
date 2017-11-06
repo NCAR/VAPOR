@@ -76,6 +76,8 @@ public:
 
     virtual void Update(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
+    string getNDimsTag() { return _nDimsTag; }
+
 protected slots:
     //! Connected to the image file text editor
     void setNumRefinements(int num);

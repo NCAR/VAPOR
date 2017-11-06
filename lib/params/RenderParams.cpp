@@ -106,7 +106,7 @@ void RenderParams::_initBox()
     if (varname.empty()) return;
 
     vector<double> minExt, maxExt;
-    int            rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
+    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
     // Crap. No error handling from constructor. Need Initialization()
     // method.
