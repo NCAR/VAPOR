@@ -116,6 +116,7 @@ private:
 	virtual void _updateTab();
 
 	void drawTimeStamp();
+	void drawTimeUser();
 	void drawTimeStep(string text="");
 
 	AnimationParams* _ap;
