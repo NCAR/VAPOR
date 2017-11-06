@@ -115,7 +115,7 @@ public:
  //! method sets and gets the active data set name in Statistics
  //!
  std::string    GetStatsDatasetName() const ;
- void           SetStatsDatasetName(std::string name);
+ void           SetStatsDatasetName(std::string& name);
 
  // Get static string identifier for this params class
  //
