@@ -84,11 +84,20 @@ class RENDER_API ContourRenderer : public Renderer {
     bool cacheIsValid(int timestep);
 
   private:
-    int GetCurrentTimestep() { return 0; }
+    int GetCurrentTimestep();
 
     //! Invalidate the cache of contours at a single time step
     //! \param[in] timestep is the Time Step to be invalidated.
     void invalidateLineCache(int timestep);
+
+    // Check to make sure a point is within a variable's bounds
+    // \param[in] x coordinate
+    // \param[in] y coordinate
+    // \param[in] z coordinate
+    // \param[in] Vector describing minimum data bounds
+    // \param[in] Vector describing maximum data bounds
+    bool pointWithinBounds(double x, double y, double z,
+                           vector<double> varMin, vector<double> varMax);
 
     //! Rebuild the entire line cache at the current time step
     //! \param[in] dmgr Current DataMgr
