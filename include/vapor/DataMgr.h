@@ -798,6 +798,8 @@ class VDF_API DataMgr : public Wasp::MyBase {
 
     int _get_default_projection(string &projection);
 
+    VAPoR::RegularGrid *_make_grid_empty(string varname) const;
+
     VAPoR::RegularGrid *_make_grid_regular(
         const std::vector<size_t> &dims,
         const std::vector<float *> &blkvec,
