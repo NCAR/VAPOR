@@ -73,7 +73,6 @@ int BarbRenderer::_paintGL(){
 	BarbParams* bParams = (BarbParams*) GetActiveParams();
 	size_t ts = bParams->GetCurrentTimestep();
 
-
 	int refLevel = bParams->GetRefinementLevel();
 	int lod = bParams->GetCompressionLevel();
 	vector<double> minExts, maxExts;
@@ -317,7 +316,7 @@ int BarbRenderer::performRendering(
 	rakeExts[3] = rMaxExtents[0];
 	rakeExts[4] = rMaxExtents[1];
 	rakeExts[5] = rMaxExtents[2];
-	
+
 	string winName = GetVisualizer();
 	ViewpointParams* vpParams =  _paramsMgr->GetViewpointParams(winName);
 	//Barb thickness is .001*LineThickness*viewDiameter.
