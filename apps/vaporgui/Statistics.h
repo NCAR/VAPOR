@@ -69,19 +69,21 @@ protected:
     class ValidStats
     {
     public:
-        bool AddVariable( std::string );
-        bool RemoveVariable( std::string );
+        bool AddVariable( std::string& );
+        bool RemoveVariable( std::string& );
         size_t GetVariableCount();
         std::string GetVariableName( int i );
         
-        bool Add3MStats( std::string, const double* );   // Min, Max, Mean
-        bool AddMedian(  std::string, double );
-        bool AddStddev(  std::string, double );
+        bool Add3MStats( std::string&, const double* );   // Min, Max, Mean
+        bool AddMedian(  std::string&, double );
+        bool AddStddev(  std::string&, double );
+        bool AddCount(   std::string&, long );
 
         // invalid values are represented as nan.
-        bool Get3MStats( std::string, double* );
-        bool GetMedian( std::string, double* );
-        bool GetStddev( std::string, double* );
+        bool Get3MStats( std::string&, double* );
+        bool GetMedian(  std::string&, double* );
+        bool GetStddev(  std::string&, double* );
+        bool GetCount(   std::string&, long* );
 
         bool InvalidAll();
 
@@ -95,7 +97,8 @@ protected:
                                                 // 2: mean
                                                 // 3: median
                                                 // 4: stddev
-        int _getVarIdx( std::string );          // -1: not exist
+        std::vector<long>           _count;     // number of samples
+        int _getVarIdx( std::string& );          // -1: not exist
                                                 // >=0: a valid index
         std::string _datasetName;
     };  // finish class ValidStats
