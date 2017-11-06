@@ -30,8 +30,8 @@ class StatisticsParams : public RenderParams {
     StatisticsParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, XmlNode *node);
     ~StatisticsParams();
 
-    bool GetAutoUpdate();
-    void SetAutoUpdate(bool state);
+    bool GetAutoUpdateEnabled();
+    void SetAutoUpdateEnabled(bool state);
 
     int GetCurrentMinTS();
     void SetCurrentMinTS(int ts);
