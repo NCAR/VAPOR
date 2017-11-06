@@ -85,13 +85,9 @@ ContourRenderer::~ContourRenderer()
 	for (int i = 0; i < timestepsToDelete.size(); i++)
 		invalidateLineCache(timestepsToDelete[i]);
 	
-	//for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
-	for (size_t ts = 0; ts <= 0; ts++){
-		cout << "Fudging timestep info in ContourRenderer."; 
-		cout << " How do we get time range information from a Renderer class?";
-		cout << " Fix me: Scott!" << endl;
-	}
-	//TextObject::clearTextObjects(this);	
+	// Fix me!: Scott
+	// Fudging timestep info in ContourRenderer.
+	// How do we get time range information from a Renderer class?
 }
 
 
