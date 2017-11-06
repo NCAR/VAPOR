@@ -88,7 +88,25 @@ public:
 
     void GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<double> &minExts, vector<double> &maxExts) const;
 
-    vector<double> GetTimeCoordinates() const { return (_timeCoords); }
+    //! Return the aggregated time coordinates for all data sets
+    //!
+    //! This method returns the aggregated time coordinates in
+    //! user defined units for all of the currently opened data sets
+    //! The time coordinates vector monotonically increasing, and contains
+    //! no duplicates.
+    //!
+    //! \sa GetTimeCoordsFormatted()
+    //
+    const vector<double> &GetTimeCoordinates() const { return (_timeCoords); }
+
+    //! Returns a vector of formatted time coordinate strings
+    //!
+    //! This method interprets the values returned by GetTimeCoordinates()
+    //! as seconds since the EPOCH and uses UDUNITS2 to encode the values
+    //! the values as year, month, day, hour, minute, second, which are
+    //! then formatted as a date-time string.
+    //
+    const vector<string> &GetTimeCoordsFormatted() const { return (_timeCoordsFormatted); }
 
     //! Map a global to a local time step
     //!
@@ -150,6 +168,7 @@ private:
     map<string, vector<string>> getFirstVars(const vector<string> &dataSetNames) const;
 
     void reset_time();
+    void reset_time_helper();
 
 #ifndef DOXYGEN_SKIP_THIS
 
@@ -158,6 +177,7 @@ private:
     map<string, DataMgr *>      _dataMgrs;
     map<string, vector<size_t>> _timeMap;
     vector<double>              _timeCoords;
+    vector<string>              _timeCoordsFormatted;
 
 #endif    // DOXYGEN_SKIP_THIS
 };
