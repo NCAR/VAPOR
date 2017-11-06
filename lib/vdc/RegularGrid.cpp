@@ -261,6 +261,7 @@ void RegularGrid::GetEnclosingRegion(
 void RegularGrid::GetUserCoordinates(
     const std::vector<size_t> &indices,
     std::vector<double> &coords) const {
+
     coords.clear();
 
     vector<size_t> dims = GetDimensions();

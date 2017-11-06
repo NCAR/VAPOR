@@ -135,6 +135,9 @@ void Grid::GetRange(float range[2]) const {
 }
 
 float Grid::GetValue(const std::vector<double> &coords) const {
+    if (!_blks.size())
+        return (GetMissingValue());
+
     vector<double> clampedCoords = coords;
 
     // Clamp coordinates on periodic boundaries to grid extents
