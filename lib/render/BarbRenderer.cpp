@@ -70,6 +70,8 @@ int BarbRenderer::_paintGL() {
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     size_t ts = bParams->GetCurrentTimestep();
 
+    cout << "Current timestep " << ts << endl;
+
     int refLevel = bParams->GetRefinementLevel();
     int lod = bParams->GetCompressionLevel();
     vector<double> minExts, maxExts;
