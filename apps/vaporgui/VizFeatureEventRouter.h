@@ -106,6 +106,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     virtual void _updateTab();
 
     void drawTimeStamp();
+    void drawTimeUser();
     void drawTimeStep(string text = "");
 
     AnimationParams *_ap;
