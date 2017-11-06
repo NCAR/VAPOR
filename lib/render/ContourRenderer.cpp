@@ -73,8 +73,7 @@ ContourRenderer::ContourRenderer(const ParamsMgr *pm,
 ContourRenderer::~ContourRenderer() {
     // De-allocate cache
     // Using original code due to data structure mess
-    // Assuming it is correct
-    // TODO Stas check in debugger
+    // Assuming original code is correct (which it is not. This needs to be addressed at some point: issue #217)
     vector<int> timestepsToDelete;
     for (auto it = _lineCache.begin(); it != _lineCache.end(); it++)
         if (std::find(timestepsToDelete.begin(), timestepsToDelete.end(), it->first.first) == timestepsToDelete.end())
