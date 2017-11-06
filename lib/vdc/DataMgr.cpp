@@ -674,6 +674,10 @@ Grid *DataMgr::GetVariable (
 	);
 	if (rc<0) return(NULL);
 
+	if (! min_ui.size()) {
+		return(_make_grid_empty(varname));
+	}
+
 	return(DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui));
 
 }
@@ -2437,6 +2441,25 @@ int DataMgr::_get_time_coordinates(vector <double> &timecoords) {
 	return(0);
 }
 
+RegularGrid *DataMgr::_make_grid_empty(string varname) const {
+
+	vector <size_t> dims;
+	vector <size_t> bs;
+	vector <double> minu, maxu;
+	vector <float *> blkptrs;
+
+	size_t ndim;
+	GetNumDimensions(varname, ndim);
+	for (int i=0; i<ndim; i++) {
+		dims.push_back(1);
+		bs.push_back(1);
+		minu.push_back(0.0);
+		maxu.push_back(0.0);
+	}
+	return(new RegularGrid(dims, bs, blkptrs, minu, maxu));
+}
+
+
 RegularGrid *DataMgr::_make_grid_regular(
 	const vector <size_t> &dims,
     const vector <float *> &blkvec,
@@ -3131,8 +3154,7 @@ int DataMgr::_find_bounding_grid(
 	vector <size_t> bmin, bmax;
 	bool ok = blkexts.Intersect(min, max, bmin, bmax);
 	if (! ok) {
-		SetErrMsg("Invalid variable coordinates");
-		return(-1);
+		return(0);	// No intersection
 	}
 
 	// Finally, map from block to voxel coordinates
