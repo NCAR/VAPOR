@@ -35,10 +35,12 @@ TransformTable::TransformTable(QWidget* parent) {
     scaleTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     translationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     rotationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    originTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         
     scaleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     rotationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     translationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    originTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 }
 
 void TransformTable::Update(const std::map <string, Transform *> &transforms) {
@@ -48,6 +50,7 @@ void TransformTable::Update(const std::map <string, Transform *> &transforms) {
 	updateScales();
 	updateTranslations();
 	updateRotations();
+	updateOrigin();
 }
 
 void TransformTable::updateTransformTable(QTableWidget* table,
@@ -151,6 +154,22 @@ void TransformTable::updateRotations() {
     }
 }
 
+void TransformTable::updateOrigin() {
+    QTableWidget* table = originTable;
+
+    table->setRowCount(_transforms.size());
+
+	std::map <string, Transform *>::const_iterator itr;
+	int row = 0;
+	for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
+		string target = itr->first;
+		const Transform *t = itr->second;
+
+        updateTransformTable(table, target, t->GetOrigin(), row);
+		row++;
+    }
+}
+
 void TransformTable::setScales(string target, vector<double> scale) {
 
 	map <string, Transform *>::const_iterator itr;
@@ -161,6 +180,15 @@ void TransformTable::setScales(string target, vector<double> scale) {
 	t->SetScales(scale);
 }
 
+void TransformTable::setOrigin(string target, vector<double> origin) {
+
+	map <string, Transform *>::const_iterator itr;
+	itr = _transforms.find(target);
+	if (itr == _transforms.end()) return;
+
+	Transform *t = itr->second;
+	t->SetOrigin(origin);
+}
 
 void TransformTable::setRotations(
 	string target, 
@@ -209,6 +237,8 @@ void TransformTable::transformChanged(QTableWidget* table,
 		setScales(target, translation);
 	else if (table->objectName() == "rotationTable")
 		setRotations(target, translation);
+	else if (table->objectName() == "originTable")
+		setOrigin(target, translation);
 }
 
 void TransformTable::setTranslations(
