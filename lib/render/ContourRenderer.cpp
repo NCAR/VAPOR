@@ -65,7 +65,11 @@ ContourRenderer::~ContourRenderer()
     // Using original code due to data structure mess
     // Assuming it is correct
     // TODO Stas check in debugger
-    for (auto it = _lineCache.begin(); it != _lineCache.end(); it++) { invalidateLineCache(it->first.first); }
+    vector<int> timestepsToDelete;
+    for (auto it = _lineCache.begin(); it != _lineCache.end(); it++)
+        if (std::find(timestepsToDelete.begin(), timestepsToDelete.end(), it->first.first) == timestepsToDelete.end()) timestepsToDelete.push_back(it->first.first);
+
+    for (int i = 0; i < timestepsToDelete.size(); i++) invalidateLineCache(timestepsToDelete[i]);
 
     // for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
     for (size_t ts = 0; ts <= 0; ts++) {
