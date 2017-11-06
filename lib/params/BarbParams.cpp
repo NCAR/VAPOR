@@ -60,7 +60,7 @@ void BarbParams::_init() {
 
     // Only 2D variables supported. Override base class
     //
-    vector<string> varnames = _dataMgr->GetDataVarNames(3, true);
+    vector<string> varnames = _dataMgr->GetDataVarNames(2, true);
     string varname;
 
     if (!varnames.empty())
@@ -73,7 +73,7 @@ void BarbParams::_init() {
         return;
 
     vector<double> minExt, maxExt;
-    int rc = _dataMgr->GetVariableExtents(0, varname, -1, minExt, maxExt);
+    int rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
     SetUseSingleColor(true);
     float rgb[] = {1.f, 1.f, 1.f};
@@ -86,7 +86,7 @@ void BarbParams::_init() {
     // method.
     //
     assert(rc >= 0);
-    assert(minExt.size() == maxExt.size() && minExt.size() == 3);
+    assert(minExt.size() == maxExt.size() && minExt.size() == 2);
 
     GetBox()->SetExtents(minExt, maxExt);
     //GetBox()->SetPlanar(true);
