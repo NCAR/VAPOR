@@ -62,19 +62,21 @@ protected:
     //
     class ValidStats {
     public:
-        bool        AddVariable(std::string);
-        bool        RemoveVariable(std::string);
+        bool        AddVariable(std::string &);
+        bool        RemoveVariable(std::string &);
         size_t      GetVariableCount();
         std::string GetVariableName(int i);
 
-        bool Add3MStats(std::string, const double *);    // Min, Max, Mean
-        bool AddMedian(std::string, double);
-        bool AddStddev(std::string, double);
+        bool Add3MStats(std::string &, const double *);    // Min, Max, Mean
+        bool AddMedian(std::string &, double);
+        bool AddStddev(std::string &, double);
+        bool AddCount(std::string &, long);
 
         // invalid values are represented as nan.
-        bool Get3MStats(std::string, double *);
-        bool GetMedian(std::string, double *);
-        bool GetStddev(std::string, double *);
+        bool Get3MStats(std::string &, double *);
+        bool GetMedian(std::string &, double *);
+        bool GetStddev(std::string &, double *);
+        bool GetCount(std::string &, long *);
 
         bool InvalidAll();
 
@@ -83,13 +85,14 @@ protected:
 
     private:
         std::vector<std::string> _variables;
-        std::vector<double>      _values[5];    // 0: min
-                                                // 1: max
-                                                // 2: mean
-                                                // 3: median
-                                                // 4: stddev
-        int _getVarIdx(std::string);            // -1: not exist
-                                                // >=0: a valid index
+        std::vector<double>      _values[5];            // 0: min
+                                                        // 1: max
+                                                        // 2: mean
+                                                        // 3: median
+                                                        // 4: stddev
+        std::vector<long> _count;                       // number of samples
+        int               _getVarIdx(std::string &);    // -1: not exist
+                                                        // >=0: a valid index
         std::string _datasetName;
     };    // finish class ValidStats
 
