@@ -53,10 +53,12 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     void updateScales();
     void updateTranslations();
     void updateRotations();
+    void updateOrigin();
 
     void setScales(string dataset, vector<double> s);
     void setTranslations(string dataset, vector<double> t);
     void setRotations(string dataset, vector<double> r);
+    void setOrigin(string dataset, vector<double> o);
 };
 
 #endif //TRANSFORMTABLE_H
