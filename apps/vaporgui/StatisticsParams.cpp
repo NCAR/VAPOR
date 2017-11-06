@@ -59,12 +59,12 @@ StatisticsParams::~StatisticsParams()
     MyBase::SetDiagMsg("StatisticsParams::~StatisticsParams() this=%p",this);
 }
 
-bool StatisticsParams::GetAutoUpdate()
+bool StatisticsParams::GetAutoUpdateEnabled()
 {
     return(GetValueLong(_autoUpdateTag, (long)false));
 }
 
-void StatisticsParams::SetAutoUpdate(bool val) 
+void StatisticsParams::SetAutoUpdateEnabled(bool val) 
 {
     SetValueLong( _autoUpdateTag, "if we want stats auto-update", (long)val );
 }
