@@ -264,6 +264,6 @@ std::string GUIStateParams::GetStatsDatasetName() const {
     return GetValueString(m_statsDatasetNameTag, "");
 }
 
-void GUIStateParams::SetStatsDatasetName(std::string name) {
+void GUIStateParams::SetStatsDatasetName(std::string &name) {
     SetValueString(m_statsDatasetNameTag, "Name of the active data set in Statistics", name);
 }
