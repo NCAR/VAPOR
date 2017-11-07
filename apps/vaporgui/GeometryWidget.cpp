@@ -48,6 +48,8 @@ std::vector<std::string> split(const std::string &s, char delim) {
 GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWidgetGUI() {
     setupUi(this);
 
+    _useAuxVariables = false;
+
     _paramsMgr = NULL;
     _dataMgr = NULL;
     _rParams = NULL;
@@ -70,6 +72,10 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
     xMinMaxGroupBox->setFont(myFont);
 }
 
+bool GeometryWidget::SetUseAuxVariables(bool val) {
+    _useAuxVariables = val;
+}
+
 void GeometryWidget::Reinit(Flags flags) {
     _flags = flags;
     if (_flags & TWOD) {
@@ -77,6 +83,8 @@ void GeometryWidget::Reinit(Flags flags) {
         minMaxTab->adjustSize();
         xMinMaxGroupBox->adjustSize();
         yMinMaxGroupBox->adjustSize();
+    } else if (_flags & THREED) {
+        zMinMaxGroupBox->show();
     }
 }
 
@@ -124,27 +132,27 @@ GeometryWidget::~GeometryWidget() {
 void GeometryWidget::updateRangeLabels(
     std::vector<double> minExt,
     std::vector<double> maxExt) {
-    if (!minExt.size())
-        return;
-    QString xTitle = QString("X Coordinates         Min:") +
-                     QString::number(minExt[0]) +
-                     QString("         Max:") +
-                     QString::number(maxExt[0]);
+    QString xTitle = QString("X Coordinates    Min:") +
+                     QString::number(minExt[0], 'g', 3) +
+                     QString("    Max:") +
+                     QString::number(maxExt[0], 'g', 3);
     xMinMaxGroupBox->setTitle(xTitle);
 
-    QString yTitle = QString("Y Coordinates         Min:") +
-                     QString::number(minExt[1]) +
-                     QString("         Max:") +
-                     QString::number(maxExt[1]);
+    QString yTitle = QString("Y Coordinates    Min:") +
+                     QString::number(minExt[1], 'g', 3) +
+                     QString("    Max:") +
+                     QString::number(maxExt[1], 'g', 3);
     yMinMaxGroupBox->setTitle(yTitle);
 
     if (minExt.size() < 3) {
-        zMinMaxGroupBox->setTitle(QString("You shouldn't see this"));
+        this->Reinit((GeometryWidget::Flags)(GeometryWidget::TWOD));
+        zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
-        QString zTitle = QString("Z Coordinates         Min:") +
-                         QString::number(minExt[2]) +
-                         QString("         Max:") +
-                         QString::number(maxExt[2]);
+        this->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
+        QString zTitle = QString("Z Coordinates    Min:") +
+                         QString::number(minExt[2], 'g', 3) +
+                         QString("    Max:") +
+                         QString::number(maxExt[2], 'g', 3);
         zMinMaxGroupBox->setTitle(zTitle);
     }
 }
@@ -198,34 +206,37 @@ void GeometryWidget::updateCopyCombo() {
 }
 
 void GeometryWidget::copyRegion() {
-
     string copyString = copyCombo->currentText().toStdString();
-    std::vector<std::string> elems = split(copyString, ':');
-    string visualizer = _visNames[elems[0]];
-    string dataSetName = elems[1];
-    string renType = _renTypeNames[elems[2]];
-    string renderer = elems[3];
+    if (copyString != "") {
+        std::vector<std::string> elems = split(copyString, ':');
+        string visualizer = _visNames[elems[0]];
+        string dataSetName = elems[1];
+        string renType = _renTypeNames[elems[2]];
+        string renderer = elems[3];
 
-    RenderParams *copyParams = _paramsMgr->GetRenderParams(
-        visualizer,
-        dataSetName,
-        renType,
-        renderer);
-    assert(copyParams);
+        RenderParams *copyParams = _paramsMgr->GetRenderParams(
+            visualizer,
+            dataSetName,
+            renType,
+            renderer);
+        assert(copyParams);
 
-    Box *copyBox = copyParams->GetBox();
-    std::vector<double> minExtents, maxExtents;
-    copyBox->GetExtents(minExtents, maxExtents);
+        Box *copyBox = copyParams->GetBox();
+        std::vector<double> minExtents, maxExtents;
+        copyBox->GetExtents(minExtents, maxExtents);
 
-    Box *myBox = _rParams->GetBox();
-    std::vector<double> myMin, myMax;
-    myBox->GetExtents(myMin, myMax);
-    assert(minExtents.size() == maxExtents.size());
-    for (int i = 0; i < minExtents.size(); i++) {
-        myMin[i] = minExtents[i];
-        myMax[i] = maxExtents[i];
+        Box *myBox = _rParams->GetBox();
+        std::vector<double> myMin, myMax;
+        myBox->GetExtents(myMin, myMax);
+        assert(minExtents.size() == maxExtents.size());
+        for (int i = 0; i < minExtents.size(); i++) {
+            myMin[i] = minExtents[i];
+            myMax[i] = maxExtents[i];
+        }
+        myBox->SetExtents(myMin, myMax);
+
+        emit valueChanged();
     }
-    myBox->SetExtents(myMin, myMax);
 }
 
 void GeometryWidget::Update(ParamsMgr *paramsMgr,
@@ -256,7 +267,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     int level = _rParams->GetRefinementLevel();
     std::vector<double> minFullExt, maxFullExt;
 
-    if (_flags & VECTOR) {
+    if (_useAuxVariables) // for Statistics
+    {
+        std::vector<std::string> auxVarNames = _rParams->GetAuxVariableNames();
+        if (auxVarNames.empty())
+            return;
+        else {
+            vector<int> axes;
+            DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExt, maxFullExt, axes);
+        }
+    } else if (_flags & VECTOR) {
         std::vector<string> varNames = _rParams->GetFieldVariableNames();
         if (varNames.empty())
             return;
@@ -334,6 +354,7 @@ void GeometryWidget::setRange(double min, double max) {
     //
     minExt[dimension] = min;
     maxExt[dimension] = max;
-
     box->SetExtents(minExt, maxExt);
+
+    emit valueChanged();
 }

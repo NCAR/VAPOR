@@ -27,6 +27,7 @@ class PARAMS_API ImageParams : public RenderParams {
     void SetImagePath(std::string file) {
         SetValueString(_fileNameTag, "Set image file path", file);
     }
+
     std::string GetImagePath() const {
         std::vector<std::string> paths;
         paths.push_back("images/NaturalEarth.tms");

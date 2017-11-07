@@ -17,9 +17,10 @@ using namespace VAPoR;
 using namespace std;
 
 ControlExec::ControlExec(
-    vector<string> appParamsNames, size_t cacheSizeMB, int nThreads) : MyBase() {
+    vector<string> appParamsNames, vector<string> appRenderParamNames,
+    size_t cacheSizeMB, int nThreads) : MyBase() {
 
-    _paramsMgr = new ParamsMgr(appParamsNames);
+    _paramsMgr = new ParamsMgr(appParamsNames, appRenderParamNames);
     _dataStatus = new DataStatus(cacheSizeMB, nThreads);
     _shaderMgrs.clear();
     _visualizers.clear();
