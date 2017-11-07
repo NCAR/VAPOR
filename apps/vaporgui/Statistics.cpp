@@ -661,7 +661,7 @@ bool Statistics::_calc3M(std::string varname) {
     double c = 0.0;
     double sum = 0.0;
     double min = std::numeric_limits<double>::max();
-    double max = std::numeric_limits<double>::min();
+    double max = -min;
     long count = 0;
 
     for (int ts = minTS; ts <= maxTS; ts++) {
@@ -673,9 +673,10 @@ bool Statistics::_calc3M(std::string varname) {
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             if (*it != missingVal) {
-                min = min < *it ? min : *it;
-                max = max > *it ? max : *it;
-                double y = *it - c;
+                double val = std::abs((double)(*it)) < 1e-38 ? 0.0 : *it;
+                min = min < val ? min : val;
+                max = max > val ? max : val;
+                double y = val - c;
                 double t = sum + y;
                 c = t - sum - y;
                 sum = t;
@@ -721,7 +722,7 @@ bool Statistics::_calcMedian(std::string varname) {
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             if (*it != missingVal)
-                buffer.push_back(*it);
+                buffer.push_back(std::abs((double)(*it) < 1e-38 ? 0.0 : *it));
         }
     }
 
@@ -769,8 +770,8 @@ bool Statistics::_calcStddev(std::string varname) {
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             if (*it != missingVal) {
-
-                double y = (*it - m3[2]) * (*it - m3[2]) - c;
+                double val = std::abs((double)(*it)) < 1e-38 ? 0.0 : *it;
+                double y = (val - m3[2]) * (val - m3[2]) - c;
                 double t = sum + y;
                 c = t - sum - y;
                 sum = t;
@@ -815,6 +816,8 @@ bool Statistics::ValidStats::AddVariable(std::string &newVar) {
         assert(_values[i].size() == _variables.size());
     }
     _count.push_back(-1);
+    if (_count.size() != _variables.size())
+        std::cerr << "_count.size() = " << _count.size() << ",  _variables.size() = " << _variables.size() << std::endl;
     assert(_count.size() == _variables.size());
     return true;
 }
