@@ -473,6 +473,19 @@ vector<string> DataMgr::GetCoordVarNames() const {
     return (_dc->GetCoordVarNames());
 }
 
+string DataMgr::GetTimeCoordVarName() const {
+    if (!_dc)
+        return ("");
+
+    // Assumes only one time coordinate variable is defined. Yikes!
+    //
+    vector<string> vars1d = DataMgr::GetCoordVarNames(1, false);
+    if (!vars1d.size())
+        return ("");
+
+    return (vars1d[0]);
+}
+
 vector<string> DataMgr::GetCoordVarNames(int ndim, bool spatial) const {
     if (!_dc) {
         return (vector<string>());
@@ -648,6 +661,10 @@ Grid *DataMgr::GetVariable(
         ts, varname, level, lod, min, max, min_ui, max_ui);
     if (rc < 0)
         return (NULL);
+
+    if (!min_ui.size()) {
+        return (_make_grid_empty(varname));
+    }
 
     return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui));
 }
@@ -2371,33 +2388,47 @@ int DataMgr::_get_coord_vars(
 int DataMgr::_get_time_coordinates(vector<double> &timecoords) {
     timecoords.clear();
 
-    vector<string> vars1d = DataMgr::GetCoordVarNames(1, false);
-
-    for (int i = 0; i < vars1d.size(); i++) {
-
-        if (!IsTimeVarying(vars1d[i]))
-            continue; // not a time coordinate
-
-        size_t n = DataMgr::GetNumTimeSteps(vars1d[i]);
-
-        float *buf = new float[n];
-        int rc = _dc->GetVar(vars1d[i], -1, -1, buf);
-        if (rc < 0) {
-            return (-1);
-        }
-
-        for (int j = 0; j < n; j++) {
-            timecoords.push_back(buf[j]);
-        }
-        delete[] buf;
-    }
+    string timeCoordVar = GetTimeCoordVarName();
 
     // No time coordinates present
     //
-    if (timecoords.empty()) {
+    if (timeCoordVar.empty()) {
         timecoords.push_back(0.0);
+        return (0);
     }
+
+    size_t n = DataMgr::GetNumTimeSteps(timeCoordVar);
+
+    float *buf = new float[n];
+    int rc = _dc->GetVar(timeCoordVar, -1, -1, buf);
+    if (rc < 0) {
+        return (-1);
+    }
+
+    for (int j = 0; j < n; j++) {
+        timecoords.push_back(buf[j]);
+    }
+    delete[] buf;
+
     return (0);
+}
+
+RegularGrid *DataMgr::_make_grid_empty(string varname) const {
+
+    vector<size_t> dims;
+    vector<size_t> bs;
+    vector<double> minu, maxu;
+    vector<float *> blkptrs;
+
+    size_t ndim;
+    GetNumDimensions(varname, ndim);
+    for (int i = 0; i < ndim; i++) {
+        dims.push_back(1);
+        bs.push_back(1);
+        minu.push_back(0.0);
+        maxu.push_back(0.0);
+    }
+    return (new RegularGrid(dims, bs, blkptrs, minu, maxu));
 }
 
 RegularGrid *DataMgr::_make_grid_regular(
@@ -3061,8 +3092,7 @@ int DataMgr::_find_bounding_grid(
     vector<size_t> bmin, bmax;
     bool ok = blkexts.Intersect(min, max, bmin, bmax);
     if (!ok) {
-        SetErrMsg("Invalid variable coordinates");
-        return (-1);
+        return (0); // No intersection
     }
 
     // Finally, map from block to voxel coordinates
