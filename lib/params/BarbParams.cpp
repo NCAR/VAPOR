@@ -68,7 +68,7 @@ void BarbParams::_init() {
 
 	// Only 2D variables supported. Override base class
 	//
-    vector <string> varnames = _dataMgr->GetDataVarNames(3, true);
+    vector <string> varnames = _dataMgr->GetDataVarNames(2, true);
 	string varname;
 
 	if (! varnames.empty()) varname = varnames[0];
@@ -92,7 +92,7 @@ void BarbParams::_init() {
 	// method.
 	//
 	assert (rc >=0);
-	assert(minExt.size()==maxExt.size() && minExt.size()==3);
+	assert(minExt.size()==maxExt.size() && minExt.size()==2);
 
 	GetBox()->SetExtents(minExt, maxExt);
 	//GetBox()->SetPlanar(true);	
