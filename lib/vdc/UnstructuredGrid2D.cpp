@@ -365,7 +365,7 @@ bool UnstructuredGrid2D::_insideFace(
     double *lambda, int &nlambda, double zwgt[2]) const {
     nlambda = 0;
 
-    double verts = new double[_maxVertexPerFace * 2];
+    double *verts = new double[_maxVertexPerFace * 2];
 
     const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
     long offset = GetNodeOffset();
