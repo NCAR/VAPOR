@@ -217,13 +217,14 @@ MainForm::MainForm(
 	myParams.push_back(StartupParams::GetClassType());
 	myParams.push_back(AnimationParams::GetClassType());
 	myParams.push_back(MiscParams::GetClassType());
-	myParams.push_back(StatisticsParams::GetClassType());
 	myParams.push_back(PlotParams::GetClassType());
 	
+	vector <string> myRenParams;
+	myRenParams.push_back(StatisticsParams::GetClassType());
 	// Create the Control executive before the VizWinMgr. Disable
 	// state saving until completely initalized
 	//
-	_controlExec = new ControlExec(myParams);
+	_controlExec = new ControlExec(myParams, myRenParams);
 	_controlExec->SetSaveStateEnabled(false);
 
 	_paramsMgr = _controlExec->GetParamsMgr();
@@ -1987,12 +1988,12 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	// Only update the GUI if the Params state has changed
 	//
-	if (event->type() == ParamsChangeEvent::type()) {
+	if (event->type() == ParamsChangeEvent::type()) 
+    {
 		ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
-		if (_stats) {
-			StatisticsParams* params;
-			params = (StatisticsParams*)paramsMgr->GetParams("StatisticsParams");
-			_stats->Update(params);
+		if (_stats) 
+        {
+			_stats->Update();
 		}
 		if (_plot) {
 			PlotParams* params;
@@ -2230,8 +2231,10 @@ void MainForm::installCLITools(){
 }
 
 void MainForm::launchStats(){
-    if (!_stats) _stats = new Statistics(this);
-	if (_controlExec) {
+    if (!_stats) 
+        _stats = new Statistics(this);
+	if (_controlExec) 
+    {
 		_stats->initControlExec(_controlExec);
 	} 
 	_stats->showMe();   

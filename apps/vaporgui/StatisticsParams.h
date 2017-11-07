@@ -8,11 +8,11 @@
 //
 //  File:       StatisticsParams.h
 //
-//  Author:     Scott Pearse
+//  Author:     Samuel Li
 //          National Center for Atmospheric Research
 //          PO 3000, Boulder, Colorado
 //
-//  Date:       August 2017
+//  Date:       November 2017
 //
 //  Description:    Defines the StatisticsParams class.
 //
@@ -20,83 +20,66 @@
 #ifndef STATISTICSPARAMS_H
 #define STATISTICSPARAMS_H
 
-#include <vapor/ParamsBase.h>
+#include <vapor/RenderParams.h>
 
 namespace VAPoR{
 
-class StatisticsParams : public ParamsBase {
- public:
-  StatisticsParams(ParamsBase::StateSave *ssave);
-  StatisticsParams(ParamsBase::StateSave *ssave, XmlNode *node);
-  ~StatisticsParams();
+class StatisticsParams : public RenderParams 
+{
+public:
+    StatisticsParams(DataMgr* dmgr, ParamsBase::StateSave *ssave);
+    StatisticsParams(DataMgr* dmgr, ParamsBase::StateSave *ssave, XmlNode *node);
+    ~StatisticsParams();
 
-  bool GetAutoUpdate();
-  void SetAutoUpdate(bool state);
+    bool GetAutoUpdateEnabled();
+    void SetAutoUpdateEnabled(bool state);
 
-  int GetRegionSelection();
-  void SetRegionSelection(int state);
+    int GetCurrentMinTS();
+    void SetCurrentMinTS(int ts);
 
-  int GetMinTS();
-  void SetMinTS(int ts);
+    int GetCurrentMaxTS();
+    void SetCurrentMaxTS(int ts);
 
-  int GetMaxTS();
-  void SetMaxTS(int ts);
+    bool GetMinEnabled();
+    void SetMinEnabled(bool state);
 
-  vector<double> GetMinExtents();
-  void SetMinExtents(vector<double> minExts);
+    bool GetMaxEnabled();
+    void SetMaxEnabled(bool state);
 
-  vector<double> GetMaxExtents();
-  void SetMaxExtents(vector<double> maxExts);
+    bool GetMeanEnabled();
+    void SetMeanEnabled(bool state);
 
-  int GetCRatio();
-  void SetCRatio(int cRatio);
+    bool GetMedianEnabled();
+    void SetMedianEnabled(bool state);
 
-  int GetRefinement();
-  void SetRefinement(int ref);
+    bool GetStdDevEnabled();
+    void SetStdDevEnabled(bool state);
 
-  bool GetMinStat();
-  void SetMinStat(bool state);
+    static string GetClassType() 
+    {
+        return("StatisticsParams");
+    }
 
-  bool GetMaxStat();
-  void SetMaxStat(bool state);
+    // virtual functions required by RenderParams
+    virtual bool IsOpaque() const
+    {
+        return true; 
+    }
+    virtual bool usingVariable( const std::string& varname )
+    {
+        return false;
+    }
 
-  bool GetMeanStat();
-  void SetMeanStat(bool state);
-
-  bool GetMedianStat();
-  void SetMedianStat(bool state);
-
-  bool GetStdDevStat();
-  void SetStdDevStat(bool state);
-
-  vector<string> GetVarNames();
-  void SetVarNames(vector<string> varNames);
-
-  // Get static string id for this params class
-  //
-  static string GetClassType() {
-	return("StatisticsParams");
-  }
-
- private:
-  static const string _varsTag;
-  static const string _vars3dTag;
-  static const string _statisticsTag;
-  static const string _dataSourceTag;
-  static const string _refinementTag;
-  static const string _cRatioTag;
-  static const string _minTSTag;
-  static const string _maxTSTag;
-  static const string _autoUpdateTag;
-  static const string _minExtentsTag;
-  static const string _maxExtentsTag;
-  static const string _regionSelectTag;
-  static const string _minStatTag;
-  static const string _maxStatTag;
-  static const string _meanStatTag;
-  static const string _medianStatTag;
-  static const string _stdDevStatTag;
+private:
+    static const string _minTSTag;
+    static const string _maxTSTag;
+    static const string _autoUpdateTag;
+    static const string _minEnabledTag;
+    static const string _maxEnabledTag;
+    static const string _meanEnabledTag;
+    static const string _medianEnabledTag;
+    static const string _stdDevEnabledTag;
 };
 
 }; // End namespace VAPoR
-#endif // STATISTICSPARAMS_H
+#endif 
