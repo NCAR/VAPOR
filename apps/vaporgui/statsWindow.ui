@@ -544,7 +544,7 @@
               <string>Update Statistics</string>
              </property>
              <property name="default">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -605,13 +605,6 @@
            <width>0</width>
            <height>100</height>
           </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="RestoreExtentsButton">
-         <property name="text">
-          <string>Restore Full Extents</string>
          </property>
         </widget>
        </item>
