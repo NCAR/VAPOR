@@ -195,6 +195,8 @@ int ContourRenderer::_initializeGL()
 
 bool ContourRenderer::pointWithinBounds(double x, double y, double z, vector<double> varMin, vector<double> varMax)
 {
+    return true;
+
     bool withinBounds = true;
 
     if (x < varMin[0]) withinBounds = false;
