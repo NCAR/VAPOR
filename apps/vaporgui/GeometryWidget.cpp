@@ -219,7 +219,15 @@ void GeometryWidget::copyRegion() {
 	copyBox->GetExtents(minExtents, maxExtents);
 
 	Box* myBox = _rParams->GetBox();
-	myBox->SetExtents(minExtents, maxExtents);
+	std::vector<double> myMin, myMax;
+    myBox->GetExtents( myMin, myMax );
+    assert( minExtents.size() == maxExtents.size() );
+    for( int i = 0; i < minExtents.size(); i++ )
+    {
+        myMin[i] = minExtents[i];
+        myMax[i] = maxExtents[i];
+    }
+	myBox->SetExtents( myMin, myMax );
 }
 
 void GeometryWidget::Update(ParamsMgr *paramsMgr,
