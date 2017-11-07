@@ -196,36 +196,37 @@ void GeometryWidget::updateCopyCombo() {
 }
 
 void GeometryWidget::copyRegion() {
-
     string copyString = copyCombo->currentText().toStdString();
-    std::vector<std::string> elems = split(copyString, ':');
-    string visualizer = _visNames[elems[0]];
-    string dataSetName = elems[1];
-    string renType = _renTypeNames[elems[2]];
-    string renderer = elems[3];
+    if (copyString != "") {
+        std::vector<std::string> elems = split(copyString, ':');
+        string visualizer = _visNames[elems[0]];
+        string dataSetName = elems[1];
+        string renType = _renTypeNames[elems[2]];
+        string renderer = elems[3];
 
-    RenderParams *copyParams = _paramsMgr->GetRenderParams(
-        visualizer,
-        dataSetName,
-        renType,
-        renderer);
-    assert(copyParams);
+        RenderParams *copyParams = _paramsMgr->GetRenderParams(
+            visualizer,
+            dataSetName,
+            renType,
+            renderer);
+        assert(copyParams);
 
-    Box *copyBox = copyParams->GetBox();
-    std::vector<double> minExtents, maxExtents;
-    copyBox->GetExtents(minExtents, maxExtents);
+        Box *copyBox = copyParams->GetBox();
+        std::vector<double> minExtents, maxExtents;
+        copyBox->GetExtents(minExtents, maxExtents);
 
-    Box *myBox = _rParams->GetBox();
-    std::vector<double> myMin, myMax;
-    myBox->GetExtents(myMin, myMax);
-    assert(minExtents.size() == maxExtents.size());
-    for (int i = 0; i < minExtents.size(); i++) {
-        myMin[i] = minExtents[i];
-        myMax[i] = maxExtents[i];
+        Box *myBox = _rParams->GetBox();
+        std::vector<double> myMin, myMax;
+        myBox->GetExtents(myMin, myMax);
+        assert(minExtents.size() == maxExtents.size());
+        for (int i = 0; i < minExtents.size(); i++) {
+            myMin[i] = minExtents[i];
+            myMax[i] = maxExtents[i];
+        }
+        myBox->SetExtents(myMin, myMax);
+
+        emit valueChanged();
     }
-    myBox->SetExtents(myMin, myMax);
-
-    emit valueChanged();
 }
 
 void GeometryWidget::Update(ParamsMgr *paramsMgr,
