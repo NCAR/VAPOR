@@ -88,9 +88,9 @@ void ControlPointEditor::initWidgets() {
 
     _nullButton->hide();
 
-    _okButton->setDefault(false);
+    _okButton->setDefault(true);
     _cancelButton->setDefault(false);
-    _nullButton->setDefault(true);
+    //_nullButton->setDefault(true);
 }
 
 //----------------------------------------------------------------------------
