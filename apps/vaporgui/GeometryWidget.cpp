@@ -83,6 +83,8 @@ void GeometryWidget::Reinit(Flags flags) {
         minMaxTab->adjustSize();
         xMinMaxGroupBox->adjustSize();
         yMinMaxGroupBox->adjustSize();
+    } else if (_flags & THREED) {
+        zMinMaxGroupBox->show();
     }
 }
 
@@ -143,8 +145,10 @@ void GeometryWidget::updateRangeLabels(
     yMinMaxGroupBox->setTitle(yTitle);
 
     if (minExt.size() < 3) {
+        this->Reinit((GeometryWidget::Flags)(GeometryWidget::TWOD));
         zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
+        this->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
         QString zTitle = QString("Z Coordinates    Min:") +
                          QString::number(minExt[2], 'g', 3) +
                          QString("    Max:") +
