@@ -48,6 +48,8 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 {
     setupUi(this);
 
+    _useAuxVariables = false;
+
     _paramsMgr = NULL;
     _dataMgr = NULL;
     _rParams = NULL;
@@ -69,6 +71,8 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
     QFont myFont = font();
     xMinMaxGroupBox->setFont(myFont);
 }
+
+bool GeometryWidget::SetUseAuxVariables(bool val) { _useAuxVariables = val; }
 
 void GeometryWidget::Reinit(Flags flags)
 {
@@ -125,16 +129,16 @@ GeometryWidget::~GeometryWidget()
 
 void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt)
 {
-    QString xTitle = QString("X Coordinates         Min:") + QString::number(minExt[0]) + QString("         Max:") + QString::number(maxExt[0]);
+    QString xTitle = QString("X Coordinates    Min:") + QString::number(minExt[0], 'g', 3) + QString("    Max:") + QString::number(maxExt[0], 'g', 3);
     xMinMaxGroupBox->setTitle(xTitle);
 
-    QString yTitle = QString("Y Coordinates         Min:") + QString::number(minExt[1]) + QString("         Max:") + QString::number(maxExt[1]);
+    QString yTitle = QString("Y Coordinates    Min:") + QString::number(minExt[1], 'g', 3) + QString("    Max:") + QString::number(maxExt[1], 'g', 3);
     yMinMaxGroupBox->setTitle(yTitle);
 
     if (minExt.size() < 3) {
-        zMinMaxGroupBox->setTitle(QString("You shouldn't see this"));
+        zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
-        QString zTitle = QString("Z Coordinates         Min:") + QString::number(minExt[2]) + QString("         Max:") + QString::number(maxExt[2]);
+        QString zTitle = QString("Z Coordinates    Min:") + QString::number(minExt[2], 'g', 3) + QString("    Max:") + QString::number(maxExt[2], 'g', 3);
         zMinMaxGroupBox->setTitle(zTitle);
     }
 }
@@ -240,7 +244,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     int                 level = _rParams->GetRefinementLevel();
     std::vector<double> minFullExt, maxFullExt;
 
-    if (_flags & VECTOR) {
+    if (_useAuxVariables)    // for Statistics
+    {
+        std::vector<std::string> auxVarNames = _rParams->GetAuxVariableNames();
+        if (auxVarNames.empty())
+            return;
+        else {
+            vector<int> axes;
+            DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExt, maxFullExt, axes);
+        }
+    } else if (_flags & VECTOR) {
         std::vector<string> varNames = _rParams->GetFieldVariableNames();
         if (varNames.empty()) return;
 

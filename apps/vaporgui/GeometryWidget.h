@@ -37,6 +37,8 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
 
+    bool SetUseAuxVariables(bool);    // for Statistics utility
+
 signals:
     void valueChanged();
 
@@ -70,6 +72,8 @@ private:
     std::map<std::string, std::string> _renTypeNames;
 
     Flags _flags;
+
+    bool _useAuxVariables;    // for Statistics utility
 
     static const std::string _nDimsTag;
 };
