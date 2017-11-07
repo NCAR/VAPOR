@@ -201,6 +201,8 @@ void GeometryWidget::copyRegion()
 
     Box *myBox = _rParams->GetBox();
     myBox->SetExtents(minExtents, maxExtents);
+
+    emit valueChanged();
 }
 
 void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams *rParams)
