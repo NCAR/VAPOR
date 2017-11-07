@@ -246,7 +246,7 @@ void OpacityMap::controlPointOpacity(int index, float opacity)
   else if (opacity > 1.0) opacity = 1.;
   
   cps[index*2]=opacity;
- 
+  SetControlPoints(cps);
 }
 
 
