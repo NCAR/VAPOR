@@ -274,6 +274,8 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
     // about what coordinate axis the coordinate extents apply to
     //
     for (int i = 0; i < varnames.size(); i++) {
+        if (varnames[i] == "") { continue; }
+
         vector<double> varMinExts;
         vector<double> varMaxExts;
         vector<int>    varAxes;

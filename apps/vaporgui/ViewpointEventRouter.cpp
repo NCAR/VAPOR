@@ -61,11 +61,6 @@ ViewpointEventRouter::ViewpointEventRouter(QWidget *parent, VizWinMgr *vizMgr, C
     stereoCombo->setEnabled(false);
     latLonCheckbox->setEnabled(false);
     stereoSeparationEdit->setEnabled(false);
-
-    // Disable the scale and rotation tabs
-    // for Vapor3.0 Beta
-    // transformTable->transformTabs->setTabEnabled(0, false);
-    transformTable->transformTabs->setTabEnabled(2, false);
 }
 
 ViewpointEventRouter::~ViewpointEventRouter() {}

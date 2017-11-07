@@ -199,8 +199,15 @@ void GeometryWidget::copyRegion()
     std::vector<double> minExtents, maxExtents;
     copyBox->GetExtents(minExtents, maxExtents);
 
-    Box *myBox = _rParams->GetBox();
-    myBox->SetExtents(minExtents, maxExtents);
+    Box *               myBox = _rParams->GetBox();
+    std::vector<double> myMin, myMax;
+    myBox->GetExtents(myMin, myMax);
+    assert(minExtents.size() == maxExtents.size());
+    for (int i = 0; i < minExtents.size(); i++) {
+        myMin[i] = minExtents[i];
+        myMax[i] = maxExtents[i];
+    }
+    myBox->SetExtents(myMin, myMax);
 
     emit valueChanged();
 }
@@ -234,6 +241,8 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     if (_flags & VECTOR) {
         std::vector<string> varNames = _rParams->GetFieldVariableNames();
         if (varNames.empty()) return;
+
+        if ((varNames[0] == "") && (varNames[1] == "") && (varNames[2] == "")) return;
 
         vector<int> axes;
         DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExt, maxFullExt, axes);

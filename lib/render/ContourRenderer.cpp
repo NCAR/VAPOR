@@ -62,16 +62,17 @@ ContourRenderer::ContourRenderer(const ParamsMgr *pm, string winName, string dat
 ContourRenderer::~ContourRenderer()
 {
     // De-allocate cache
+    // Using original code due to data structure mess
+    // Assuming original code is correct (which it is not. This needs to be addressed at some point: issue #217)
+    vector<int> timestepsToDelete;
+    for (auto it = _lineCache.begin(); it != _lineCache.end(); it++)
+        if (std::find(timestepsToDelete.begin(), timestepsToDelete.end(), it->first.first) == timestepsToDelete.end()) timestepsToDelete.push_back(it->first.first);
 
-    // for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
-    for (size_t ts = 0; ts <= 0; ts++) {
-        cout << "Fudging timestep info in ContourRenderer.";
-        cout << " How do we get time range information from a Renderer class?";
-        cout << " Fix me!" << endl;
-        invalidateLineCache((int)ts);
-    }
-    _lineCache.clear();
-    // TextObject::clearTextObjects(this);
+    for (int i = 0; i < timestepsToDelete.size(); i++) invalidateLineCache(timestepsToDelete[i]);
+
+    // Fix me!: Scott
+    // Fudging timestep info in ContourRenderer.
+    // How do we get time range information from a Renderer class?
 }
 
 // Perform the rendering
@@ -271,7 +272,7 @@ void ContourRenderer::invalidateLineCache(int timestep)
     int numisovals = numIsovalsInCache();
     for (int iso = 0; iso < numisovals; iso++) {
         pair<int, int> indexpair = make_pair(timestep, iso);
-        for (int i = 0; i < _lineCache[indexpair].size(); i++) { delete _lineCache[indexpair][i]; }
+        for (int i = 0; i < _lineCache[indexpair].size(); i++) { delete[] _lineCache[indexpair][i]; }
         _lineCache[indexpair].clear();
     }
     deleteCacheKey(timestep);

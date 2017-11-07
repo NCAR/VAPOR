@@ -1717,13 +1717,19 @@ void MainForm::updateMenus()
     _closeVDCMenu->clear();
     vector<string> currentPaths, currentDataSets;
     p->GetOpenDataSets(currentPaths, currentDataSets);
-    for (int i = 0; i < currentDataSets.size(); i++) {
-        // Add menu option to close the dataset in the File menu
-        //
-        QAction *closeAction = new QAction(QString::fromStdString(currentDataSets[i]), _closeVDCMenu);
-        _closeVDCMenu->addAction(closeAction);
+    int size = currentDataSets.size();
+    if (size < 1)
+        _closeVDCMenu->setEnabled(false);
+    else {
+        _closeVDCMenu->setEnabled(true);
+        for (int i = 0; i < currentDataSets.size(); i++) {
+            // Add menu option to close the dataset in the File menu
+            //
+            QAction *closeAction = new QAction(QString::fromStdString(currentDataSets[i]), _closeVDCMenu);
+            _closeVDCMenu->addAction(closeAction);
 
-        connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
+            connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
+        }
     }
 }
 
