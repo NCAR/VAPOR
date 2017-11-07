@@ -86,6 +86,8 @@ public:
 	VAPoR::ParamsMgr *paramsMgr,
 	VAPoR::RenderParams *rParams
  );
+ 
+ string getNDimsTag() {return _nDimsTag;}
 
 protected slots:
  //! Connected to the image file text editor
@@ -127,6 +129,7 @@ protected slots:
 
  //! Respond to choosing the variable dimension
  void setVariableDims(int);
+
 
 private:
  const VAPoR::DataMgr *_dataMgr;

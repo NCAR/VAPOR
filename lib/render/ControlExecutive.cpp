@@ -236,6 +236,7 @@ int ControlExec::ActivateRender(
 	assert(rp);
 
 	rp->SetEnabled(on);
+	v->moveRendererToFront(ren);
 
 	_paramsMgr->EndSaveStateGroup();
 
