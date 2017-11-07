@@ -356,6 +356,7 @@ bool UnstructuredGrid2D::_insideGridFaceCentered(
 	double *lambda, int &nlambda, double zwgt[2]
 ) const {
 	assert(0 && "Not supported");
+	return false;
 }
 
 bool UnstructuredGrid2D::_insideGridNodeCentered(
