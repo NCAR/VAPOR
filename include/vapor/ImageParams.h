@@ -32,6 +32,7 @@ public:
   {
     SetValueString( _fileNameTag, "Set image file path", file );
   }
+
   std::string GetImagePath( ) const
   {
     std::vector<std::string> paths;
@@ -46,7 +47,7 @@ public:
   // Get and set ifGeoRef
   // 
   bool GetIsGeoRef() const {
-	return(GetValueLong(_isGeoRefTag, (long) true));
+	return (GetValueLong(_isGeoRefTag, (long)true));
   }
 
   void SetIsGeoRef( bool val ) {
