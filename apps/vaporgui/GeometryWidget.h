@@ -41,6 +41,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
                 VAPoR::DataMgr *dataMgr,
                 VAPoR::RenderParams *rParams);
 
+    bool SetUseAuxVariables(bool); // for Statistics utility
+
   signals:
     void valueChanged();
 
@@ -75,6 +77,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     std::map<std::string, std::string> _renTypeNames;
 
     Flags _flags;
+
+    bool _useAuxVariables; // for Statistics utility
 
     static const std::string _nDimsTag;
 };
