@@ -28,7 +28,7 @@
      <height>685</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="2,1,0">
+   <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="3,0,2">
     <item>
      <widget class="QWidget" name="widget_3" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
