@@ -182,8 +182,8 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr* dataMgr){
 			pointb[1] = (1+pointb[1])/2.f * ySpan + boxMinExt[1];
 
 			if (mapToTerrain) {
-				if (isnan(pointa[0]) || isnan(pointa[1]) ||
-					isnan(pointb[0]) ||	isnan(pointb[1])) {
+				if (std::isnan(pointa[0]) || std::isnan(pointa[1]) ||
+					std::isnan(pointb[0]) || std::isnan(pointb[1])) {
 					dontDraw = true;
 				}
 				else {
