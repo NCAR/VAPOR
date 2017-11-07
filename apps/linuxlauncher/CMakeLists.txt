@@ -8,7 +8,7 @@ set (TARGETS
 	wrfvdccreate
 	cfvdccreate
 	raw2vdc
-	vaporgui
+	vapor
 	vdcdump
 	waspcreate
 	raw2wasp
