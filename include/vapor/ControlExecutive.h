@@ -34,15 +34,6 @@ class RENDER_API ControlExec : public MyBase {
         size_t cacheSize = 1000, int nThreads = 0);
     virtual ~ControlExec();
 
-    //! Initialize the control executive
-    //!
-    //! \sa ParamsMgr();
-    //
-    ControlExec() {
-        ControlExec(
-            std::vector<string>(), std::vector<string>(), 1000, 0); // Full function needed for WIN32
-    }
-
     //! Set the ControlExec to a default state:
     //! Remove all visualizers
     //
