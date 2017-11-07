@@ -456,6 +456,7 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
 
     float maxWidth = 0;
     int   numtics = cbpb->GetNumTicks();
+    int   fontSize = cbpb->GetFontSize();
     for (int tic = 0; tic < numtics; tic++) {
         // Find numeric data value associated with our current text label
         //
@@ -474,7 +475,7 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
         }
         _textObject = new TextObject();
         //_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
-        _textObject->Initialize(_fontFile, textString, 20, dummy, 0, txtColor, bgColor);
+        _textObject->Initialize(_fontFile, textString, fontSize, dummy, 0, txtColor, bgColor);
         float texWidth = _textObject->getWidth();
         float texHeight = _textObject->getHeight();
 
