@@ -78,3 +78,7 @@
         #define JPEG_EXTERN(type) extern "C" type
     #endif    // ifeq JPEG_EXPORTS
 #endif        // end !Win32
+
+#ifndef M_PI
+    #define M_PI 3.1415926535897932384626433832795
+#endif
