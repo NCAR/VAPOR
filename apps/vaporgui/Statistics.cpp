@@ -7,11 +7,11 @@
 //
 //  File:      Statistics.cpp
 //
-//  Author:  Scott Pearse
+//  Author:  Samuel Li
 //        National Center for Atmospheric Research
 //        PO 3000, Boulder, Colorado
 //
-//  Date:      August 2016
+//  Date:      November 2017
 //
 //  Description:    Implements the Statistics class.
 //
