@@ -1108,6 +1108,8 @@ void Statistics::_exportTextClicked()
         std::string dsName = guiParams->GetStatsDatasetName();
         StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
                 (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+        VAPoR::DataMgr* currentDmgr = _controlExec->getDataStatus()->GetDataMgr( dsName );
+        std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
 
         file << "Variable, No_of_Samples";
         if( statsParams->GetMinEnabled() )
@@ -1122,6 +1124,7 @@ void Statistics::_exportTextClicked()
             file << ", Stddev";
         file << endl;
     
+        bool has3DVar = false;
         for( int i = 0; i < _validStats.GetVariableCount(); i++ )
         {
             std::string varname = _validStats.GetVariableName( i );            
@@ -1143,6 +1146,10 @@ void Statistics::_exportTextClicked()
             if( statsParams->GetStdDevEnabled() )
                 file << ", " << stddev;
             file << endl;
+
+            for( int j = 0; j < availVars3D.size(); j++ )
+                if( availVars3D[j] == varname )
+                    has3DVar = true;
         }
 
         file << endl;
@@ -1153,7 +1160,8 @@ void Statistics::_exportTextClicked()
         file << "Spatial Extents:" << endl;
         file << "X min = " << myMin[0] << ",    X max = " << myMax[0] << endl;
         file << "Y min = " << myMin[1] << ",    Y max = " << myMax[1] << endl;
-        if( myMin.size() == 3 && myMax.size() == 3 )
+        //if( myMin.size() == 3 && myMax.size() == 3 )
+        if( has3DVar )
             file << "Z min = " << myMin[2] << ",    Z max = " << myMax[2] << endl;
 
         file << endl;
