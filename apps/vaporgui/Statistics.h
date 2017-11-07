@@ -111,25 +111,7 @@ private slots:
     void _geometryValueChanged();
     void _dataSourceChanged(int);
     void _autoUpdateClicked(int);
-    /*
-    void restoreExtents();
-    void minTSChanged();
-    void maxTSChanged();
-    void autoUpdateClicked();
-    void refinementChanged(int);
-    void cRatioChanged(int);
-    void addVariable(int);
-    void removeVariable(int);
-    void initRegion();
-    void exportText();
-    void rangeComboChanged();
-    void addStatistic(int);
-    void removeStatistic(int);
-    void updateButtonPressed()
-    {
-        updateStats();
-    }
-    */
+    void _exportTextClicked();
 
 private:
     ValidStats          _validStats;
