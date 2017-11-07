@@ -6,6 +6,10 @@
 
 #define DLOG_BASENAME_ONLY 1
 
+#ifdef WIN32
+#undef DLOG_BASENAME_ONLY
+#endif
+
 #if DLOG_BASENAME_ONLY
 #include <libgen.h>
 #define dLog_pre() fprintf(stderr, "[%s:%i:%s] ", basename(__FILE__), __LINE__, __func__)
