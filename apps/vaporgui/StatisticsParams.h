@@ -8,11 +8,11 @@
 //
 //  File:       StatisticsParams.h
 //
-//  Author:     Scott Pearse
+//  Author:     Samuel Li
 //          National Center for Atmospheric Research
 //          PO 3000, Boulder, Colorado
 //
-//  Date:       August 2017
+//  Date:       November 2017
 //
 //  Description:    Defines the StatisticsParams class.
 //
