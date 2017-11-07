@@ -14,8 +14,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     Q_OBJECT
 
 public:
-    //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to
-    //! be supported
+    //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to be supported
     //
     enum Flags { TWOD = (1u << 0), THREED = (1u << 1), VECTOR = (1u << 2) };
 
@@ -37,6 +36,11 @@ public:
     }
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
+
+    bool SetUseAuxVariables(bool);    // for Statistics utility
+
+signals:
+    void valueChanged();
 
 private slots:
     void setRange(double min, double max);
@@ -68,6 +72,8 @@ private:
     std::map<std::string, std::string> _renTypeNames;
 
     Flags _flags;
+
+    bool _useAuxVariables;    // for Statistics utility
 
     static const std::string _nDimsTag;
 };
