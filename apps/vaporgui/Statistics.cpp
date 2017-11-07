@@ -409,6 +409,7 @@ bool Statistics::Connect()
     connect( MyGeometryWidget,  SIGNAL(valueChanged()),           this, SLOT(_geometryValueChanged()));
     connect( DataMgrCombo,      SIGNAL(currentIndexChanged(int)), this, SLOT(_dataSourceChanged(int)) );
     connect( UpdateCheckbox,    SIGNAL(stateChanged(int)),        this, SLOT(_autoUpdateClicked(int)));
+    connect( ExportButton,      SIGNAL(clicked()),                this, SLOT(_exportTextClicked()));
     return true;
 }
 
@@ -1082,54 +1083,87 @@ std::string Statistics::ValidStats::GetVariableName( int i )
         return std::string("");
 }
 
-#if 0
-void Statistics::exportText() {
-    _extents[0] = _xRange->getUserMin();
-    _extents[1] = _yRange->getUserMin();
-    _extents[2] = _zRange->getUserMin();
-    _extents[3] = _xRange->getUserMax();
-    _extents[4] = _yRange->getUserMax();
-    _extents[5] = _zRange->getUserMax();
+void Statistics::_exportTextClicked() 
+{
+    QString homePath = QDir::homePath();
+    homePath.append("/Variable_Statistics.txt");
+    QString path = QDir::toNativeSeparators(homePath);
+    QString fName = QFileDialog::getSaveFileName(this, "Select file to save statistics:", path, 
+                                                "Comma-separated values (*.csv)");
+    if( !fName.isEmpty() )
+    {
+        ofstream file;
+        file.open(fName.toStdString().c_str());
+        if (file.fail()) {
+          std::ostringstream ss;
+          ss << "Failed to open file ";
+          ss << fName.toStdString();
+          ss << " for writing.";
+          return;
+        }
+          
+        // Initialize pointers
+        GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                        (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+        std::string dsName = guiParams->GetStatsDatasetName();
+        StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+                (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
-    QString fName = QFileDialog::getSaveFileName(this,"Select file to write statistics into:", "", "*.txt");
-  if( !fName.isEmpty() )
-  {
-    ofstream file;
-    file.open(fName.toStdString().c_str());
-    if (file.fail()) {
-      std::ostringstream ss;
-      ss << "Failed to open file ";
-      ss << fName.toStdString();
-      ss << " for writing.";
-      string myErr = ss.str();
-      errReport(myErr);
+        file << "Variable, No_of_Samples";
+        if( statsParams->GetMinEnabled() )
+            file << ", Min";
+        if( statsParams->GetMaxEnabled() )
+            file << ", Max";
+        if( statsParams->GetMeanEnabled() )
+            file << ", Mean";
+        if( statsParams->GetMedianEnabled() )
+            file << ", Median";
+        if( statsParams->GetStdDevEnabled() )
+            file << ", Stddev";
+        file << endl;
+    
+        for( int i = 0; i < _validStats.GetVariableCount(); i++ )
+        {
+            std::string varname = _validStats.GetVariableName( i );            
+            double m3[3], median, stddev;
+            long   count;
+            _validStats.Get3MStats( varname, m3 );
+            _validStats.GetMedian(  varname, &median );
+            _validStats.GetStddev(  varname, &stddev );
+            _validStats.GetCount(   varname, &count );
+            file << varname << ", " << count ;
+            if( statsParams->GetMinEnabled() )
+                file << ", " << m3[0];
+            if( statsParams->GetMaxEnabled() )
+                file << ", " << m3[1];
+            if( statsParams->GetMeanEnabled() )
+                file << ", " << m3[2];
+            if( statsParams->GetMedianEnabled() )
+                file << ", " << median;
+            if( statsParams->GetStdDevEnabled() )
+                file << ", " << stddev;
+            file << endl;
+        }
+
+        file << endl;
+
+        /*
+        std::vector<double> myMin, myMax;
+        statsParams->GetBox()->GetExtents( myMin, myMax );
+
+        file << "Spatial Extents:" << endl;
+        file << "X min = " << myMin[0] << ",    X max = " << myMax[0] << endl;
+        file << "Y min = " << myMin[1] << ",    Y max = " << myMax[1] << endl;
+        if( myMin.size() == 3 && myMax.size() == 3 )
+            file << "Z min = " << myMin[2] << ",    Z max = " << myMax[2] << endl;
+        */
+
+        file << endl;
+
+        file << "Temporal Extents:" << endl;
+        file << "Minimum Timestep = " << statsParams->GetCurrentMinTS() 
+             << ",    Maximum Timestep = " << statsParams->GetCurrentMaxTS() << endl;
+
+        file.close();
     }
-      
-    file << "Variable Statistics\nVariable,Min,Max,Mean,StdDev" << endl;
-
-    typedef std::map<string, _statistics>::iterator it_type;
-    for (it_type it = _stats.begin(); it!=_stats.end(); it++){
-      file << it->first << ",";
-      file << it->second.min << ",";
-      file << it->second.max << ",";
-      file << it->second.mean << ",";
-      file << it->second.stddev;
-      file << endl;
-    }
-
-    file << endl;
-
-    file << "Dependent Variable\nDimension,Min,Max" << endl;
-    file << "X," << _extents[0] << "," << _extents[3] << endl;
-    file << "Y," << _extents[1] << "," << _extents[4] << endl;
-    file << "Z," << _extents[2] << "," << _extents[5] << endl;
-
-    file << endl;
-
-    file << "Temporal Extents\nStartTime,EndTime" << endl;
-    file << _minTS << "," << _maxTS << endl;
-
-    file.close();
-  }
 }
-#endif
