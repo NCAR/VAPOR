@@ -952,7 +952,7 @@ std::string Statistics::ValidStats::GetVariableName(int i) {
 
 void Statistics::_exportTextClicked() {
     QString homePath = QDir::homePath();
-    homePath.append("/Variable_Statistics.txt");
+    homePath.append("/Variable_Statistics.csv");
     QString path = QDir::toNativeSeparators(homePath);
     QString fName = QFileDialog::getSaveFileName(this, "Select file to save statistics:", path,
                                                  "Comma-separated values (*.csv)");
@@ -1009,16 +1009,14 @@ void Statistics::_exportTextClicked() {
 
         file << endl;
 
-        /*
         std::vector<double> myMin, myMax;
-        statsParams->GetBox()->GetExtents( myMin, myMax );
+        statsParams->GetBox()->GetExtents(myMin, myMax);
 
         file << "Spatial Extents:" << endl;
         file << "X min = " << myMin[0] << ",    X max = " << myMax[0] << endl;
         file << "Y min = " << myMin[1] << ",    Y max = " << myMax[1] << endl;
-        if( myMin.size() == 3 && myMax.size() == 3 )
+        if (myMin.size() == 3 && myMax.size() == 3)
             file << "Z min = " << myMin[2] << ",    Z max = " << myMax[2] << endl;
-        */
 
         file << endl;
 
