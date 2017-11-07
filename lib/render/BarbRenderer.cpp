@@ -315,7 +315,6 @@ int BarbRenderer::performRendering(
     float thickness = bParams->GetLineThickness();
     //float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
     float rad = (float)(1000 * thickness);
-    //cout << "fudging barb line thickness.  Need stretch factors.  Fix me!" << endl;
     //Set up lighting and color
     int nLights = vpParams->getNumLights();
     float fcolor[3];
@@ -379,6 +378,16 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
     float yStride = (rakeExts[4] - rakeExts[1]) / ((float)rakeGrid[1] + 1);
     float zStride = (rakeExts[5] - rakeExts[2]) / ((float)rakeGrid[2] + 1);
 
+    string colorVar = bParams->GetColorMapVariableName();
+    float clut[256 * 4];
+    bool doColorMapping = (colorVar != "") && (colorVar != "Constant");
+    MapperFunction *tf = 0;
+    if (doColorMapping) {
+        tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
+        assert(tf);
+        tf->makeLut(clut);
+    }
+
     float xCoord, yCoord, zCoord;
     for (int k = 1; k <= rakeGrid[2]; k++) {
         zCoord = zStride * k + rakeExts[2];
@@ -412,19 +421,14 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
                 end[1] = point[1] + scales[1] * direction[1] * length;
                 end[2] = point[2] + scales[2] * direction[2] * length;
 
-                string colorVar = bParams->GetColorMapVariableName();
-                bool doColorMapping;
-                doColorMapping = (colorVar != "") && (colorVar != "Constant");
                 if (doColorMapping) {
-                    MapperFunction *tf = 0;
-                    tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
-                    assert(tf);
                     float val = variableData[4]->GetValue(point[0],
                                                           point[1], point[2]);
                     if (val == variableData[4]->GetMissingValue())
                         missing = true;
-                    else
-                        missing = GetColorMapping(tf, val);
+                    else {
+                        missing = GetColorMapping(tf, val, clut);
+                    }
                 }
                 if (!missing) {
                     string datasetName = GetMyDatasetName();
@@ -447,11 +451,11 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
     return;
 }
 
-bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val) {
+bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4]) {
     bool missing = false;
 
-    float clut[256 * 4];
-    tf->makeLut(clut);
+    //	float clut[256*4];
+    //	tf->makeLut(clut);
 
     float mappedColor[4] = {0., 0., 0., 0.};
     //Use the transfer function to map the data:

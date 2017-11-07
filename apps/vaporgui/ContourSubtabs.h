@@ -92,6 +92,8 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
         setupUi(this);
         _geometryWidget->Reinit(
             GeometryWidget::TWOD);
+
+        _orientationAngles->hide();
     }
 
     void Update(
