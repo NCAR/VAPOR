@@ -74,6 +74,7 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 
 bool GeometryWidget::SetUseAuxVariables(bool val) {
     _useAuxVariables = val;
+    return val;
 }
 
 void GeometryWidget::Reinit(Flags flags) {
