@@ -180,7 +180,10 @@ float UnstructuredGrid2D::GetValueLinear(const std::vector<double> &coords) cons
     //
     bool inside = _insideGrid(cCoords, face_indices, lambda, nlambda, zwgt);
 
-    if (!inside) return (GetMissingValue());
+    if (!inside) {
+        delete[] lambda;
+        return (GetMissingValue());
+    }
     assert(face_indices.size() == 1);
     assert(face_indices[0] < GetCellDimensions()[0]);
 
@@ -330,7 +333,10 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], double *lambda, 
 
     // Should we test the line case where nlambda == 2?
     //
-    if (nlambda < 3) return (false);
+    if (nlambda < 3) {
+        delete[] verts;
+        return (false);
+    }
 
     bool ret = WachspressCoords2D(verts, pt, nlambda, lambda);
 
