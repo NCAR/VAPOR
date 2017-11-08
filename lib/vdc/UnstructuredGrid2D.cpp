@@ -151,7 +151,7 @@ bool UnstructuredGrid2D::GetIndicesCell(
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
-    double lambda[_maxVertexPerFace];
+    double *lambda = new double[_maxVertexPerFace];
     int nlambda;
     double zwgt[2];
 
@@ -159,6 +159,8 @@ bool UnstructuredGrid2D::GetIndicesCell(
     //
     bool status = _insideGridNodeCentered(
         cCoords, indices, lambda, nlambda, zwgt);
+
+    delete[] lambda;
 
     return (status);
 }
@@ -167,7 +169,7 @@ bool UnstructuredGrid2D::InsideGrid(const std::vector<double> &coords) const {
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
-    double lambda[_maxVertexPerFace];
+    double *lambda = new double[_maxVertexPerFace];
     int nlambda;
     double zwgt[2];
     vector<size_t> indices;
@@ -176,6 +178,8 @@ bool UnstructuredGrid2D::InsideGrid(const std::vector<double> &coords) const {
     //
     bool status = _insideGridNodeCentered(
         cCoords, indices, lambda, nlambda, zwgt);
+
+    delete[] lambda;
 
     return (status);
 }
@@ -205,7 +209,7 @@ float UnstructuredGrid2D::GetValueLinear(
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
-    double lambda[_maxVertexPerFace];
+    double *lambda = new double[_maxVertexPerFace];
     int nlambda;
     double zwgt[2];
     vector<size_t> face_indices;
@@ -215,8 +219,10 @@ float UnstructuredGrid2D::GetValueLinear(
     bool inside = _insideGrid(
         cCoords, face_indices, lambda, nlambda, zwgt);
 
-    if (!inside)
+    if (!inside) {
+        delete[] lambda;
         return (GetMissingValue());
+    }
     assert(face_indices.size() == 1);
     assert(face_indices[0] < GetCellDimensions()[0]);
 
@@ -228,6 +234,8 @@ float UnstructuredGrid2D::GetValueLinear(
         value += AccessIJK(*ptr + offset, 0, 0) * lambda[i];
         ptr++;
     }
+
+    delete[] lambda;
 
     return ((float)value);
 }
@@ -313,6 +321,7 @@ bool UnstructuredGrid2D::_insideGridFaceCentered(
     vector<size_t> &indices,
     double *lambda, int &nlambda, double zwgt[2]) const {
     assert(0 && "Not supported");
+    return false;
 }
 
 bool UnstructuredGrid2D::_insideGridNodeCentered(
@@ -359,7 +368,7 @@ bool UnstructuredGrid2D::_insideFace(
     double *lambda, int &nlambda, double zwgt[2]) const {
     nlambda = 0;
 
-    double verts[_maxVertexPerFace * 2];
+    double *verts = new double[_maxVertexPerFace * 2];
 
     const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
     long offset = GetNodeOffset();
@@ -376,8 +385,14 @@ bool UnstructuredGrid2D::_insideFace(
 
     // Should we test the line case where nlambda == 2?
     //
-    if (nlambda < 3)
+    if (nlambda < 3) {
+        delete[] verts;
         return (false);
+    }
 
-    return (WachspressCoords2D(verts, pt, nlambda, lambda));
+    bool ret = WachspressCoords2D(verts, pt, nlambda, lambda);
+
+    delete[] verts;
+
+    return ret;
 }
