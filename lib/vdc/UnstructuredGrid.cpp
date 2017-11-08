@@ -202,6 +202,7 @@ bool UnstructuredGrid::GetNodeCells(
 	assert (indices.size() == dims.size());
 
 	assert(0 && "GetNodeCells() Not supported");
+	return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////
