@@ -5,8 +5,13 @@
 #include <cmath>
 #include <cstdio>
 #include <sys/stat.h>
-#include <geotiff.h>
-#include <geo_normalize.h>
+#ifdef WIN32
+    #include <geotiff/geotiff.h>
+    #include <geotiff/geo_normalize.h>
+#else
+    #include <geotiff.h>
+    #include <geo_normalize.h>
+#endif
 
 #include <vapor/Proj4API.h>
 #include <vapor/GeoUtil.h>
