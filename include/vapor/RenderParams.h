@@ -444,7 +444,7 @@ class PARAMS_API RenParamsFactory {
 /////////////////////////////////////////////////////////////////////////
 
 template <class T>
-class PARAMS_API RenParamsRegistrar {
+class RenParamsRegistrar {
   public:
     RenParamsRegistrar(string classType) {
 
