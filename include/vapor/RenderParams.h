@@ -463,7 +463,7 @@ private:
 /////////////////////////////////////////////////////////////////////////
 
 template<class T>
-class PARAMS_API RenParamsRegistrar {
+class RenParamsRegistrar {
 public:
  RenParamsRegistrar(string classType) {
 
