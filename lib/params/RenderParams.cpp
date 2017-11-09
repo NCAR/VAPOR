@@ -531,8 +531,13 @@ RenParamsContainer::RenParamsContainer(DataMgr *dataMgr, ParamsBase::StateSave *
         string eleName = eleNameNode->GetTag();
         string classname = eleNode->GetTag();
 
-        _elements[eleName] = RenParamsFactory::Instance()->CreateInstance(classname, dataMgr, ssave, eleNode);
-        assert(_elements[eleName] != NULL);
+        RenderParams *rParams = RenParamsFactory::Instance()->CreateInstance(classname, dataMgr, ssave, eleNode);
+        if (rParams == NULL) {
+            SetDiagMsg("RenParamsContainer::RenParamsContainer() unrecognized class: %s", classname.c_str());
+
+            continue;
+        }
+        _elements[eleName] = rParams;
     }
 }
 
