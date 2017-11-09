@@ -78,10 +78,8 @@ protected:
         bool GetStddev(std::string &, double *);
         bool GetCount(std::string &, long *);
 
-        bool InvalidAll();
-
-        std::string GetDatasetName();
-        bool        SetDatasetName(std::string &);
+        bool InvalidAll();    // keep existing variables, but set values to nan
+        bool Clear();         // clear all variables and values.
 
     private:
         std::vector<std::string> _variables;
@@ -93,8 +91,7 @@ protected:
         std::vector<long> _count;                       // number of samples
         int               _getVarIdx(std::string &);    // -1: not exist
                                                         // >=0: a valid index
-        std::string _datasetName;
-    };    // finish class ValidStats
+    };                                                  // finish class ValidStats
 
     bool Connect();    // connect slots
 
