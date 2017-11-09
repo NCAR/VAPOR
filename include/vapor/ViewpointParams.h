@@ -79,8 +79,9 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //! Set the number of directional light sources
     //! \param[in] int number of lights (0,1,2)
     //! \retval 0 on success
-    void setNumLights(int nlights) {
-        assert(nlights >= 0 && nlights <= 2);
+    void setNumLights(size_t nlights) {
+        if (nlights > 3)
+            nlights = 3;
         SetValueLong(_numLightsTag, "Set number of lights", nlights);
     }
 
