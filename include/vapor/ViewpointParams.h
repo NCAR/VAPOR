@@ -57,7 +57,12 @@ public:
     //! lighting is on or not (i.e. if there are more than 0 lights).
     //! Note that only the first (light 0) is used in DVR and Isosurface rendering.
     //! \retval int number of lights (0,1,2)
-    int getNumLights() const { return (GetValueLong(_numLightsTag, _defaultNumLights)); }
+    int getNumLights() const
+    {
+        size_t n = (size_t)GetValueLong(_numLightsTag, _defaultNumLights);
+        if (n > 2) n = 2;
+        return (n);
+    }
 
     //! Obtain the current specular exponent.
     //! This value should be used in setting the material properties
@@ -75,9 +80,9 @@ public:
     //! Set the number of directional light sources
     //! \param[in] int number of lights (0,1,2)
     //! \retval 0 on success
-    void setNumLights(int nlights)
+    void setNumLights(size_t nlights)
     {
-        assert(nlights >= 0 && nlights <= 2);
+        if (nlights > 2) nlights = 2;
         SetValueLong(_numLightsTag, "Set number of lights", nlights);
     }
 
