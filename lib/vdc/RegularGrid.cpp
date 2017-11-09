@@ -59,6 +59,9 @@ float RegularGrid::GetValueNearestNeighbor(
     int ndim = GetTopologyDim();
     assert(coords.size() == ndim);
 
+    if (!InsideGrid(coords))
+        return (GetMissingValue());
+
     size_t i = 0;
     size_t j = 0;
     size_t k = 0;
@@ -114,6 +117,9 @@ float RegularGrid::GetValueLinear(const std::vector<double> &coords) const {
 
     int ndim = GetTopologyDim();
     assert(coords.size() == ndim);
+
+    if (!InsideGrid(coords))
+        return (GetMissingValue());
 
     size_t i = 0;
     size_t j = 0;
