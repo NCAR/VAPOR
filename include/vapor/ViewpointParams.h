@@ -75,9 +75,9 @@ public:
     //! Set the number of directional light sources
     //! \param[in] int number of lights (0,1,2)
     //! \retval 0 on success
-    void setNumLights(int nlights)
+    void setNumLights(size_t nlights)
     {
-        assert(nlights >= 0 && nlights <= 2);
+        if (nlights > 3) nlights = 3;
         SetValueLong(_numLightsTag, "Set number of lights", nlights);
     }
 
