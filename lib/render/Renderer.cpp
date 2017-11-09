@@ -474,7 +474,6 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
             _textObject = NULL;
         }
         _textObject = new TextObject();
-        //_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
         _textObject->Initialize(_fontFile, textString, fontSize, dummy, 0, txtColor, bgColor);
         float texWidth = _textObject->getWidth();
         float texHeight = _textObject->getHeight();
@@ -531,12 +530,18 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
             delete _textObject;
             _textObject = NULL;
         }
+
+        vector<string> fpath;
+        fpath.push_back("fonts");
+        string fontFile = GetAppPath("VAPOR", "share", fpath);
+        fontFile = fontFile + "//arimo.ttf";
+
         txtColor[0] = bgColor[0];
         txtColor[1] = bgColor[1];
         txtColor[2] = bgColor[2];
         txtColor[3] = 1.f;
         _textObject = new TextObject();
-        _textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf", title, 20, dummy, 0, txtColor, bgColor);
+        _textObject->Initialize(fontFile, title, 20, dummy, 0, txtColor, bgColor);
         Tuy -= _textObject->getHeight();
         float coords[] = {Tlx, Tuy, 0.f};
         _textObject->drawMe(coords);
