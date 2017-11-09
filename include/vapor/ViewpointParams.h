@@ -59,7 +59,10 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //! Note that only the first (light 0) is used in DVR and Isosurface rendering.
     //! \retval int number of lights (0,1,2)
     int getNumLights() const {
-        return (GetValueLong(_numLightsTag, _defaultNumLights));
+        size_t n = (size_t)GetValueLong(_numLightsTag, _defaultNumLights);
+        if (n > 2)
+            n = 2;
+        return (n);
     }
 
     //! Obtain the current specular exponent.
@@ -79,8 +82,9 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //! Set the number of directional light sources
     //! \param[in] int number of lights (0,1,2)
     //! \retval 0 on success
-    void setNumLights(int nlights) {
-        assert(nlights >= 0 && nlights <= 2);
+    void setNumLights(size_t nlights) {
+        if (nlights > 2)
+            nlights = 2;
         SetValueLong(_numLightsTag, "Set number of lights", nlights);
     }
 
