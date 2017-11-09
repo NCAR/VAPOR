@@ -78,6 +78,7 @@ private slots:
 private:
 	void collapseAutoUpdateHistoCheckbox();
 	string getVariableName();
+	void setNativeTranferFunction(string var);
 	void configureConstColorWidgets(string var);
 	void connectWidgets();
 	void updateSliders();
