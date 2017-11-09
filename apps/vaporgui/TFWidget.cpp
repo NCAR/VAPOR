@@ -100,6 +100,14 @@ TFWidget::~TFWidget() {
     }
 }
 
+void TFWidget::setNativeTransferFunction(string var) {
+    TransferFunction *tf = GetTransferFunc(var);
+    if (tf == NULL) {
+        _rParams->MakeMapperFunc(var);
+    }
+    _rParams->SetTransferFunc(var, tf);
+}
+
 void TFWidget::configureConstColorWidgets(string var) {
     if (var == "Map to var") {
         colorDisplay->setEnabled(false);
@@ -107,6 +115,8 @@ void TFWidget::configureConstColorWidgets(string var) {
 
         colorInterpCombo->setEnabled(true);
         colorInterpLabel->setEnabled(true);
+
+        setNativeTransferFunction(var);
 
         _rParams->SetUseSingleColor(false);
     } else if (var == "Constant") {
@@ -129,6 +139,7 @@ void TFWidget::setCMVar(const QString &qvar) {
 
     if (_flags & CONSTCOLOR) {
         configureConstColorWidgets(var);
+        _paramsMgr->EndSaveStateGroup();
         return;
     }
 
