@@ -60,7 +60,7 @@ public:
 public slots:
     // Made public, to be called from EventRouter::Initialize
     //
-    void setCMVar(const QString &);
+    void setColorMapping(const QString &);
 
 private slots:
     void fileSaveTF();
@@ -76,8 +76,10 @@ private slots:
 private:
     void   collapseAutoUpdateHistoCheckbox();
     string getVariableName();
-    void   setNativeTranferFunction(string var);
+    void   setNativeTransferFunction(string var);
     void   configureConstColorWidgets(string var);
+    void   configureConstantColor(string var);
+    void   configureColorMappingToVariable(string var);
     void   connectWidgets();
     void   updateSliders();
     void   updateAutoUpdateHistoCheckbox();

@@ -102,42 +102,72 @@ TFWidget::~TFWidget()
 
 void TFWidget::setNativeTransferFunction(string var)
 {
-    TransferFunction *tf = GetTransferFunc(var);
-    if (tf == NULL) { _rParams->MakeMapperFunc(var); }
-    _rParams->SetTransferFunc(var, tf);
+    cout << "setNativeTransferFunction() " << var << endl;
+
+    MapperFunction *mf = _rParams->GetMapperFunc(var);
+
+    cout << "null? " << (mf == NULL) << endl;
+
+    _rParams->SetMapperFunc(var, mf);
+}
+
+void TFWidget::configureColorMappingToVariable(string var)
+{
+    cout << "configureColorMappingToVariable() " << var << endl;
+    colorDisplay->setEnabled(false);
+    colorSelectButton->setEnabled(false);
+
+    colorInterpCombo->setEnabled(true);
+    colorInterpLabel->setEnabled(true);
+
+    setNativeTransferFunction(var);
+
+    _rParams->SetUseSingleColor(false);
+}
+
+void TFWidget::configureConstantColor(string var)
+{
+    cout << "configureConstantColor() " << endl;
+
+    colorDisplay->setEnabled(true);
+    colorSelectButton->setEnabled(true);
+
+    colorInterpCombo->setEnabled(false);
+    colorInterpLabel->setEnabled(false);
+
+    // We still need the native transfer function to be drawn,
+    // even though it's not mapping our colors
+    setNativeTransferFunction("CANWAT");
+
+    _rParams->SetUseSingleColor(true);
+    _rParams->SetConstantColor(_myRGB);
 }
 
 void TFWidget::configureConstColorWidgets(string var)
 {
+    cout << "configureConstColorWidgets() " << var << endl;
     if (var == "Map to var") {
-        colorDisplay->setEnabled(false);
-        colorSelectButton->setEnabled(false);
-
-        colorInterpCombo->setEnabled(true);
-        colorInterpLabel->setEnabled(true);
-
-        setNativeTransferFunction(var);
-
-        _rParams->SetUseSingleColor(false);
-    } else if (var == "Constant") {
-        colorDisplay->setEnabled(true);
-        colorSelectButton->setEnabled(true);
-
-        colorInterpCombo->setEnabled(false);
-        colorInterpLabel->setEnabled(false);
-
-        _rParams->SetUseSingleColor(true);
+        configureColorMappingToVariable(var);
+    } else if ((var == "Constant") || (var == "")) {
+        configureConstantColor(var);
     }
 }
 
-void TFWidget::setCMVar(const QString &qvar)
+void TFWidget::setColorMapping(const QString &qvar)
 {
-    _paramsMgr->BeginSaveStateGroup("TFWidget::setCMVar(), "
+    _paramsMgr->BeginSaveStateGroup("TFWidget::setColorMapping(), "
                                     "set colormapped variable");
 
     string var = qvar.toStdString();
     _rParams->SetColorMapVariableName(var);
 
+    cout << "setColorMapping() " << var << endl;
+
+    if ((_flags & CONSTCOLOR) & (_flags & SECONDARY_COLORVAR)) {}
+
+    // If the render supports native coloring, and
+    // coloring according to a constant color
+    //
     if (_flags & CONSTCOLOR) {
         configureConstColorWidgets(var);
         _paramsMgr->EndSaveStateGroup();
@@ -457,7 +487,7 @@ void TFWidget::connectWidgets()
     connect(colorInterpCombo, SIGNAL(activated(int)), this, SLOT(colorInterpChanged(int)));
     connect(loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
-    connect(colormapVarCombo, SIGNAL(activated(const QString &)), this, SLOT(setCMVar(const QString &)));
+    connect(colormapVarCombo, SIGNAL(activated(const QString &)), this, SLOT(setColorMapping(const QString &)));
     connect(colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
     connect(mappingFrame, SIGNAL(endChange()), this, SLOT(forwardTFChange()));
