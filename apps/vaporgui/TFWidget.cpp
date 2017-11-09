@@ -100,6 +100,14 @@ TFWidget::~TFWidget() {
 	}   
 }
 
+void TFWidget::setNativeTransferFunction(string var) {
+	TransferFunction* tf = GetTransferFunc(var);
+	if (tf==NULL) {
+		_rParams->MakeMapperFunc(var);
+	}
+	_rParams->SetTransferFunc(var, tf);
+}
+
 void TFWidget::configureConstColorWidgets(string var) {
 	if (var == "Map to var") {
 		colorDisplay->setEnabled(false);
@@ -107,6 +115,8 @@ void TFWidget::configureConstColorWidgets(string var) {
 
 		colorInterpCombo->setEnabled(true);
 		colorInterpLabel->setEnabled(true);
+	
+		setNativeTransferFunction(var);
 
 		_rParams->SetUseSingleColor(false);
 	}
@@ -130,6 +140,7 @@ void TFWidget::setCMVar(const QString& qvar) {
 
 	if (_flags & CONSTCOLOR) {
 		configureConstColorWidgets(var);
+		_paramsMgr->EndSaveStateGroup();
 		return;
 	}
 
@@ -252,33 +263,33 @@ void TFWidget::fileLoadTF(
 }
 
 void TFWidget::fileSaveTF() {
-    //Launch a file save dialog, open resulting file
-    GUIStateParams *p;
+	//Launch a file save dialog, open resulting file
+	GUIStateParams *p;
 	p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    string path = p->GetCurrentTFPath();
+	string path = p->GetCurrentTFPath();
 
-    QString s = QFileDialog::getSaveFileName(0,
-            "Choose a filename to save the transfer function",
-            path.c_str(), "Vapor 3 Transfer Functions (*.tf3)"
-    );  
-    //Did the user cancel?
-    if (s.length()== 0) return;
-    //Force the name to end with .tf3
-    if (!s.endsWith(".tf3")){
-        s += ".tf3";
-    }   
-    
-    string varname = _rParams->GetVariableName();
+	QString s = QFileDialog::getSaveFileName(0,
+			"Choose a filename to save the transfer function",
+			path.c_str(), "Vapor 3 Transfer Functions (*.tf3)"
+	);  
+	//Did the user cancel?
+	if (s.length()== 0) return;
+	//Force the name to end with .tf3
+	if (!s.endsWith(".tf3")){
+		s += ".tf3";
+	}   
+	
+	string varname = _rParams->GetVariableName();
 	if (varname.empty()) return;
 
-    MapperFunction *tf = _rParams->GetMapperFunc(varname);
+	MapperFunction *tf = _rParams->GetMapperFunc(varname);
 	assert(tf);
 
-    int rc = tf->SaveToFile(s.toStdString());
-    if (rc<0) {
+	int rc = tf->SaveToFile(s.toStdString());
+	if (rc<0) {
 		MSG_ERR("Failed to write output file");
-        return;
-    }   
+		return;
+	}   
 }
 
 string TFWidget::getVariableName() {
@@ -556,13 +567,13 @@ void TFWidget::loadTF() {
 	}
 	if (varname.empty()) return;
 
-    //Ignore TF's in session, for now.
+	//Ignore TF's in session, for now.
 
 	GUIStateParams *p;
 	p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    string path = p->GetCurrentTFPath();
+	string path = p->GetCurrentTFPath();
 
-    fileLoadTF(varname, p->GetCurrentTFPath().c_str(),true);
+	fileLoadTF(varname, p->GetCurrentTFPath().c_str(),true);
 
 	Update(_dataMgr, _paramsMgr, _rParams);
 }
