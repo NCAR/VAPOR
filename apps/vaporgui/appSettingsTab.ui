@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>400</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -38,9 +38,28 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QLabel" name="textLabel1_9">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Coming Soon: General Application Settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="_10">
        <item>
         <widget class="QPushButton" name="saveButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -70,7 +89,7 @@
        <item>
         <widget class="QPushButton" name="defaultButton">
          <property name="enabled">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="minimumSize">
           <size>
@@ -114,19 +133,6 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="textLabel1_9">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;General Application Settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="_3">
        <item>
         <layout class="QVBoxLayout" name="_4">
@@ -134,6 +140,9 @@
           <layout class="QGridLayout" name="_5">
            <item row="1" column="1">
             <widget class="QLineEdit" name="autosaveIntervalEdit">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -160,7 +169,7 @@
            <item row="0" column="2">
             <widget class="QLineEdit" name="jpegQualityEdit">
              <property name="enabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -187,6 +196,9 @@
            </item>
            <item row="1" column="0">
             <widget class="QCheckBox" name="autosaveCheckbox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
               <string>Check to enable automatic session saving</string>
              </property>
@@ -200,6 +212,9 @@
            </item>
            <item row="1" column="2">
             <widget class="QLabel" name="textLabel1_8">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="minimumSize">
               <size>
                <width>85</width>
@@ -241,6 +256,9 @@
            </item>
            <item row="0" column="0">
             <widget class="QLabel" name="textLabel1_2_3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
               <string>Specify a value between 1 and 100 to control the image quality in a saved jpeg file.</string>
              </property>
@@ -256,6 +274,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="warnMissingDataCheckbox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>When checked a warning message will be presented if data is unavailable</string>
            </property>
@@ -269,6 +290,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="lowerAccuracyCheckbox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>If requested refinement or compression level is unavailable, use the highest available level, with no warning message</string>
            </property>
@@ -279,6 +303,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="trackMouseCheckbox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Check to display position, color, opacity at mouse position in editor</string>
            </property>
@@ -292,6 +319,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="noShowCitationCheckbox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Don't display the reminder to cite VAPOR when an image is saved.</string>
            </property>
@@ -302,6 +332,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="logfileCheckbox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Check box to write errors, warnings, diagnostics, etc. to specified log file</string>
            </property>
@@ -314,6 +347,9 @@
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QCheckBox" name="silenceCheckbox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
               <string>Check to silence all popups.  Uncheck to resume popups that have not been silenced.</string>
              </property>
@@ -324,6 +360,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="unsilenceButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
               <string>Click to make all silenced messages display when appropriate.</string>
              </property>
@@ -357,6 +396,9 @@
          <layout class="QVBoxLayout" name="_7">
           <item>
            <widget class="QLabel" name="textLabel1_4">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>&lt;b&gt;File Names for Monitoring Progress&lt;/b&gt;</string>
             </property>
@@ -372,6 +414,9 @@
            <layout class="QHBoxLayout" name="_8">
             <item>
              <widget class="QLabel" name="textLabel1_2_4">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Log File Name</string>
               </property>
@@ -399,7 +444,7 @@
             <item>
              <widget class="QLineEdit" name="logFilePathEdit">
               <property name="enabled">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <property name="minimumSize">
                <size>
@@ -423,6 +468,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="logFilePathButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -446,6 +494,9 @@
            <layout class="QHBoxLayout" name="_9">
             <item>
              <widget class="QLabel" name="textLabel1_2_5_2_2">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="toolTip">
                <string>Name of file where sessions are automatically saved</string>
               </property>
@@ -479,7 +530,7 @@
             <item>
              <widget class="QLineEdit" name="autosaveFilenameEdit">
               <property name="enabled">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <property name="minimumSize">
                <size>
@@ -500,6 +551,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="autosavePathButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
