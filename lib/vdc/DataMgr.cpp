@@ -582,6 +582,10 @@ int DataMgr::GetNumTimeSteps(string varname) const {
     return (_dc->GetNumTimeSteps(varname));
 }
 
+int DataMgr::GetNumTimeSteps() const {
+    return (_timeCoordinates.size() - 1);
+}
+
 size_t DataMgr::GetNumRefLevels(string varname) const {
     if (!_dc) {
         return (1);
