@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>1017</height>
+    <height>1250</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -51,11 +51,20 @@ the probe panels).</string>
     <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
       <widget class="QLabel" name="label_3">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="whatsThis">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The full data domain is specified by selecting one or more variables and clicking the &amp;quot;Reset Domain&amp;quot; button.  The domain will be the smallest axis-aligned box that contains the extents of all the selected variables. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Domain-defining variable(s)</string>
+        <string>Coming Soon: Current Region of Interest</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -66,6 +75,9 @@ the probe panels).</string>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QListWidget" name="domainVariableList">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="maximumSize">
           <size>
            <width>150</width>
@@ -97,6 +109,9 @@ the probe panels).</string>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
           <widget class="QComboBox" name="addVariableCombo">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -112,6 +127,9 @@ the probe panels).</string>
          </item>
          <item>
           <widget class="QPushButton" name="removeVariableButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>200</width>
@@ -125,6 +143,9 @@ the probe panels).</string>
          </item>
          <item>
           <widget class="QPushButton" name="resetDomainButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Click to set the current domain to the extents of the selected variables</string>
            </property>
@@ -176,6 +197,9 @@ the probe panels).</string>
        </item>
        <item>
         <widget class="QLabel" name="textLabel6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Scope:</string>
          </property>
@@ -189,6 +213,9 @@ the probe panels).</string>
        </item>
        <item>
         <widget class="QComboBox" name="LocalGlobal">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>120</width>
@@ -260,6 +287,9 @@ share the same region settings.</string>
      </item>
      <item>
       <widget class="BoxSliderFrame" name="boxSliderFrame">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -302,6 +332,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="textLabel1_11">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Min and max user coordinates of smallest box containing the isoline</string>
            </property>
@@ -334,6 +367,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="textLabel1_11_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Min and max grid coordinates of smallest box containing the isoline at full resolution</string>
            </property>
@@ -354,6 +390,9 @@ share the same region settings.</string>
         <layout class="QHBoxLayout" name="_12">
          <item>
           <widget class="QLabel" name="textLabel9">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Min:</string>
            </property>
@@ -367,6 +406,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="minUserXLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -389,6 +431,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="minUserYLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -411,6 +456,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="minUserZLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -449,6 +497,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="minGridXLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Min and max grid coordinates of smallest box containing the contour planar surface at full resolution&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -465,6 +516,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="minGridYLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Min and max grid coordinates of smallest box containing the contour planar surface at full resolution&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -481,6 +535,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="minGridZLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Min and max grid coordinates of smallest box containing the contour planar surface at full resolution&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -501,6 +558,9 @@ share the same region settings.</string>
         <layout class="QHBoxLayout" name="_13">
          <item>
           <widget class="QLabel" name="textLabel9_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Max</string>
            </property>
@@ -514,6 +574,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="maxUserXLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -536,6 +599,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="maxUserYLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -558,6 +624,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="maxUserZLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -596,6 +665,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="maxGridXLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Min and max grid coordinates of smallest box containing the contour planar surface at full resolution&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -612,6 +684,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="maxGridYLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Min and max grid coordinates of smallest box containing the contour planar surface at full resolution&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -628,6 +703,9 @@ share the same region settings.</string>
          </item>
          <item>
           <widget class="QLabel" name="maxGridZLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Min and max grid coordinates of smallest box containing the contour planar surface at full resolution&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -661,6 +739,9 @@ share the same region settings.</string>
            <layout class="QHBoxLayout" name="_16">
             <item>
              <widget class="QLabel" name="textLabel9_2_3">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -680,6 +761,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="maxLonLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -702,6 +786,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="maxLatLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -728,6 +815,9 @@ share the same region settings.</string>
            <layout class="QHBoxLayout" name="_17">
             <item>
              <widget class="QLabel" name="textLabel9_2_2_3">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -747,6 +837,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="minLonLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -769,6 +862,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="minLatLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -832,6 +928,9 @@ share the same region settings.</string>
        </item>
        <item>
         <widget class="QPushButton" name="setFullRegionButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Click to maximize the region within the full domain</string>
          </property>
@@ -878,6 +977,9 @@ share the same region settings.</string>
       <layout class="QGridLayout" name="_2">
        <item row="0" column="4">
         <widget class="QLabel" name="label_2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="whatsThis">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The extents being used in one tab can be copied to another tab using the &amp;quot;Copy Box&amp;quot; button. Select the &amp;quot;From:&amp;quot; tab and the &amp;quot;To:&amp;quot; tab associated with the extents to be copied, make sure that the current instances in each of these tabs are the ones that are to be copied, and that these extents are associated with the current active visualizer (if there is more than one visualizer). The extents of the source box should be within the current data domain. Note: when copying a 2D box to a 3D box, the 3D box retains its vertical size. When copying a 3D box to a 2D box the vertical extents of the 3D box are ignored. When copying a rotated 3D box (Probe or Contours) the rotation is ignored. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -888,6 +990,9 @@ share the same region settings.</string>
        </item>
        <item row="0" column="3">
         <widget class="QComboBox" name="copyBoxFromCombo">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>60</width>
@@ -941,6 +1046,9 @@ share the same region settings.</string>
        </item>
        <item row="0" column="2">
         <widget class="QLabel" name="label">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="whatsThis">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The extents being used in one tab can be copied to another tab using the &amp;quot;Copy Box&amp;quot; button. Select the &amp;quot;From:&amp;quot; tab and the &amp;quot;To:&amp;quot; tab associated with the extents to be copied, make sure that the current instances in each of these tabs are the ones that are to be copied, and that these extents are associated with the current active visualizer (if there is more than one visualizer). The extents of the source box should be within the current data domain. Note: when copying a 2D box to a 3D box, the 3D box retains its vertical size. When copying a 3D box to a 2D box the vertical extents of the 3D box are ignored. When copying a rotated 3D box (Probe or Contours) the rotation is ignored. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -951,6 +1059,9 @@ share the same region settings.</string>
        </item>
        <item row="0" column="5">
         <widget class="QComboBox" name="copyBoxToCombo">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>60</width>
@@ -972,6 +1083,9 @@ share the same region settings.</string>
        </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="copyBoxButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Click to copy box extents between current instances</string>
          </property>
@@ -1021,6 +1135,9 @@ share the same region settings.</string>
        </item>
        <item>
         <widget class="QPushButton" name="loadRegionsButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Load a file that specifies region extents for various time steps</string>
          </property>
@@ -1050,6 +1167,9 @@ share the same region settings.</string>
        </item>
        <item>
         <widget class="QPushButton" name="saveRegionsButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Save the current list of region extents to a file</string>
          </property>
@@ -1079,6 +1199,9 @@ share the same region settings.</string>
        </item>
        <item>
         <widget class="QPushButton" name="adjustExtentsButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Allow the extents at this time step to differ from extents at other time steps</string>
          </property>
@@ -1170,6 +1293,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="textLabel5">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="font">
                <font/>
               </property>
@@ -1222,6 +1348,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="textLabel4_2">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Refinement:</string>
               </property>
@@ -1232,6 +1361,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QComboBox" name="refinementCombo">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="toolTip">
                <string>Specify a refinement level for region information</string>
               </property>
@@ -1278,6 +1410,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="textLabel3_2">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Variable:</string>
               </property>
@@ -1288,6 +1423,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QComboBox" name="variableCombo">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>100</width>
@@ -1337,6 +1475,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QLabel" name="textLabel2_4">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Timestep:</string>
               </property>
@@ -1347,6 +1488,9 @@ share the same region settings.</string>
             </item>
             <item>
              <widget class="QSpinBox" name="timestepSpin">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>53</width>
@@ -1408,6 +1552,9 @@ share the same region settings.</string>
            <layout class="QGridLayout" name="gLayout">
             <item row="0" column="0">
              <widget class="QLabel" name="textLabel8">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>30</width>
@@ -1427,6 +1574,9 @@ share the same region settings.</string>
             </item>
             <item row="0" column="1" colspan="2">
              <widget class="QLabel" name="textLabel1">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>VDC Extents</string>
               </property>
@@ -1440,6 +1590,9 @@ share the same region settings.</string>
             </item>
             <item row="0" column="3" colspan="2">
              <widget class="QLabel" name="textLabel1_3">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Variable Extents</string>
               </property>
@@ -1453,6 +1606,9 @@ share the same region settings.</string>
             </item>
             <item row="0" column="5" colspan="2">
              <widget class="QLabel" name="textLabel1_4">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Region Extents</string>
               </property>
@@ -1484,6 +1640,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="xUserLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -1509,6 +1668,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="yUserLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -1534,6 +1696,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="zUserLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -1563,6 +1728,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="textLabel3_2_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Min</string>
                 </property>
@@ -1576,6 +1744,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minXFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>51</width>
@@ -1612,6 +1783,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minYFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1642,6 +1816,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minZFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1676,6 +1853,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="textLabel4_2_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Max</string>
                 </property>
@@ -1689,6 +1869,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxXFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>51</width>
@@ -1725,6 +1908,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxYFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1755,6 +1941,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxZFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1789,6 +1978,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="textLabel3_2_2_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Extents of specified variable in this VDC</string>
                 </property>
@@ -1805,6 +1997,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minVarXLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>51</width>
@@ -1841,6 +2036,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minVarYLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1871,6 +2069,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minVarZLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1905,6 +2106,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="textLabel4_2_2_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Max</string>
                 </property>
@@ -1918,6 +2122,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxVarXLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>51</width>
@@ -1954,6 +2161,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxVarYLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -1984,6 +2194,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxVarZLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -2018,6 +2231,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="textLabel3_2_2_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Extents of current region (or -1 if data not available)</string>
                 </property>
@@ -2034,6 +2250,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minXSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>51</width>
@@ -2070,6 +2289,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minYSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -2100,6 +2322,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minZSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -2134,6 +2359,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="textLabel4_2_2_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Extents of current region (or -1 if data not available)</string>
                 </property>
@@ -2150,6 +2378,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxXSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>51</width>
@@ -2186,6 +2417,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxYSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -2216,6 +2450,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxZSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>60</width>
@@ -2250,6 +2487,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout" name="verticalLayout">
               <item>
                <widget class="QLabel" name="xVoxelLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -2275,6 +2515,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="yVoxelLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -2300,6 +2543,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="zVoxelLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -2329,6 +2575,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="minXVoxFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Full voxel Extents of current Vapor Data Collection at specified refinement</string>
                 </property>
@@ -2345,6 +2594,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minYVoxFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Full voxel Extents of current Vapor Data Collection at specified refinement</string>
                 </property>
@@ -2361,6 +2613,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minZVoxFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Full voxel Extents of current Vapor Data Collection at specified refinement</string>
                 </property>
@@ -2381,6 +2636,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="maxXVoxFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Full voxel Extents of current Vapor Data Collection at specified refinement</string>
                 </property>
@@ -2397,6 +2655,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxYVoxFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Full voxel Extents of current Vapor Data Collection at specified refinement</string>
                 </property>
@@ -2413,6 +2674,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxZVoxFullLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Full voxel Extents of current Vapor Data Collection at specified refinement</string>
                 </property>
@@ -2433,6 +2697,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="minXVoxVarLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Voxel extents of specified variable at specified refinement</string>
                 </property>
@@ -2449,6 +2716,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minYVoxVarLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Voxel extents of specified variable at specified refinement</string>
                 </property>
@@ -2465,6 +2735,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="minZVoxVarLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Voxel extents of specified variable at specified refinement</string>
                 </property>
@@ -2485,6 +2758,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="maxXVoxVarLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Voxel extents of specified variable at specified refinement</string>
                 </property>
@@ -2501,6 +2777,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxYVoxVarLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Voxel extents of specified variable at specified refinement</string>
                 </property>
@@ -2517,6 +2796,9 @@ share the same region settings.</string>
               </item>
               <item>
                <widget class="QLabel" name="maxZVoxVarLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Voxel extents of specified variable at specified refinement</string>
                 </property>
@@ -2537,6 +2819,9 @@ share the same region settings.</string>
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="minXVoxSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2557,6 +2842,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <widget class="QLabel" name="minYVoxSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2577,6 +2865,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <widget class="QLabel" name="minZVoxSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2601,6 +2892,9 @@ p, li { white-space: pre-wrap; }
              <layout class="QVBoxLayout">
               <item>
                <widget class="QLabel" name="maxXVoxSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2621,6 +2915,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <widget class="QLabel" name="maxYVoxSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2641,6 +2938,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <widget class="QLabel" name="maxZVoxSelectedLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2678,6 +2978,9 @@ p, li { white-space: pre-wrap; }
                 <layout class="QHBoxLayout">
                  <item>
                   <widget class="QLabel" name="textLabel9_2_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
                     <string>Upper-right lon/lat</string>
                    </property>
@@ -2691,6 +2994,9 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QLabel" name="maxVarLonLabel">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>70</width>
@@ -2719,6 +3025,9 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QLabel" name="maxVarLatLabel">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>70</width>
@@ -2751,6 +3060,9 @@ p, li { white-space: pre-wrap; }
                 <layout class="QHBoxLayout">
                  <item>
                   <widget class="QLabel" name="textLabel9_2_2_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
                     <string>Lower-left lon/lat</string>
                    </property>
@@ -2764,6 +3076,9 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QLabel" name="minVarLonLabel">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>70</width>
@@ -2792,6 +3107,9 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QLabel" name="minVarLatLabel">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>70</width>
@@ -2845,6 +3163,9 @@ p, li { white-space: pre-wrap; }
             </item>
             <item>
              <widget class="QLabel" name="textLabel6_3">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Selected Data Size (MB):</string>
               </property>
@@ -2855,6 +3176,9 @@ p, li { white-space: pre-wrap; }
             </item>
             <item>
              <widget class="QLabel" name="selectedDataSizeLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>50</width>
