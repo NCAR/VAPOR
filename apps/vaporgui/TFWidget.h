@@ -25,9 +25,12 @@ public:
 	//! COLOR : RenderParams::GetColorMapVariableNames()
 	//! 
 	enum Flags {
-		COLORVAR = (1u << 0),
-		PRIORITYCOLORVAR = (1u << 1), 
-		CONSTCOLOR = (1u << 2)
+		SECONDARY_COLORVAR = (1u << 0),
+		CONSTCOLOR = (1u << 1),
+
+		// PRIORITY_COLORVAR just moves the color mapped variable
+		// settings up higher in the gui for better visibility
+		PRIORITY_COLORVAR = (1u << 2)
 	};  
 
 	TFWidget(QWidget *parent=0);
@@ -73,6 +76,9 @@ private slots:
 	void forwardTFChange();
 
 private:
+	void collapseAutoUpdateHistoCheckbox();
+	string getVariableName();
+	void configureConstColorWidgets(string var);
 	void connectWidgets();
 	void updateSliders();
 	void updateAutoUpdateHistoCheckbox();
