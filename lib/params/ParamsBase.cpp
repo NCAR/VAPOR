@@ -332,8 +332,13 @@ ParamsContainer::ParamsContainer(ParamsBase::StateSave *ssave, XmlNode *node)
         string eleName = eleNameNode->GetTag();
         string classname = eleNode->GetTag();
 
-        _elements[eleName] = ParamsFactory::Instance()->CreateInstance(classname, ssave, eleNode);
-        assert(_elements[eleName] != NULL);
+        ParamsBase *pB = ParamsFactory::Instance()->CreateInstance(classname, ssave, eleNode);
+        if (pB == NULL) {
+            SetDiagMsg("ParamsContainer::ParamsContainer() unrecognized class: %s", classname.c_str());
+            continue;
+        }
+
+        _elements[eleName] = pB;
     }
 }
 
