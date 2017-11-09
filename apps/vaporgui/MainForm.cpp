@@ -1007,6 +1007,7 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     DataStatus *ds = _controlExec->getDataStatus();
     BoxSliderFrame::setDataStatus(ds);
 
+    _tabMgr->Update();
     _vizWinMgr->ReinitRouters();
 
     enableWidgets(true);
@@ -1041,6 +1042,7 @@ void MainForm::closeData(string fileName)
 
     if (currentDataSets.size() == 0) { enableWidgets(false); }
 
+    _tabMgr->Update();
     _vizWinMgr->ReinitRouters();
 }
 
