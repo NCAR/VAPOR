@@ -130,6 +130,7 @@ void ParamsMgr::_destroy() {
 	for (itr = _otherRenParams.begin(); itr != _otherRenParams.end(); ++itr) {
 		if (itr->second) delete itr->second;
 	}
+	_otherRenParams.clear();
 
 	if (_rootSeparator) delete _rootSeparator;
 }
