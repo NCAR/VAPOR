@@ -283,10 +283,10 @@ void Statistics::_updateStatsTable()
     {
         double m3[3], median, stddev;
         long   count;
+        _validStats.GetCount(   enabledVars[row], &count );
         _validStats.Get3MStats( enabledVars[row], m3 );
         _validStats.GetMedian(  enabledVars[row], &median );
         _validStats.GetStddev(  enabledVars[row], &stddev );
-        _validStats.GetCount(   enabledVars[row], &count );
         
         VariablesTable->setItem( row, 0, new QTableWidgetItem( QString::fromStdString(enabledVars[row]) ));
         if( count == -1 )
@@ -480,13 +480,20 @@ void Statistics::_updateButtonClicked()
     for( int i = 0; i < _validStats.GetVariableCount(); i++ )
     {
         std::string varname = _validStats.GetVariableName(i);
+        long   count;
+        _validStats.GetCount(   varname, &count );
+        if( count == -1 )
+        {
+            _calc3M( varname );
+            _updateStatsTable();
+        }
         double m3[3], median, stddev;
         _validStats.Get3MStats( varname, m3 );
         _validStats.GetMedian ( varname, &median );
         _validStats.GetStddev ( varname, &stddev );
         if( ( statsParams->GetMinEnabled() || 
               statsParams->GetMaxEnabled() ||
-              statsParams->GetMinEnabled()    )  && std::isnan(m3[2]) )
+              statsParams->GetMeanEnabled()    )  && std::isnan(m3[2]) )
         {
             _calc3M( varname );
             _updateStatsTable();
@@ -864,7 +871,10 @@ bool Statistics::_calcStddev( std::string varname )
     double m3[3];
     _validStats.Get3MStats( varname, m3 );
     if( std::isnan( m3[2] ) )
+    {
         this->_calc3M( varname );
+        _validStats.Get3MStats( varname, m3 );
+    }
 
     for( int ts = minTS; ts <= maxTS; ts++ )
     {
