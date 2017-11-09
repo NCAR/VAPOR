@@ -247,6 +247,7 @@ public:
  void GetTimeCoordinates(std::vector <double> &timecoords) const {
 	timecoords = _timeCoordinates;
  };
+
  std::vector <double> GetTimeCoordinates() const {
 	return(_timeCoordinates);
  };
@@ -366,6 +367,14 @@ public:
  //! \sa IsTimeVarying()
  //
  int GetNumTimeSteps(string varname) const;
+
+
+ //! Return the maximum time dimension length for this data set
+ //!
+ //! Returns the number of time steps (length of the time dimension)
+ //! for any variable is defined. 
+ //
+ int GetNumTimeSteps() const;
 
  //! \copydoc DC::GetNumRefLevels()
  //
