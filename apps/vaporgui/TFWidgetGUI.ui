@@ -209,6 +209,9 @@ available from the right mouse button.</string>
        </property>
        <item>
         <widget class="QSlider" name="opacitySlider">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Scale Opacity Values</string>
          </property>
