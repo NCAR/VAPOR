@@ -131,13 +131,13 @@ int Renderer::paintGL() {
 	_timestep = rParams->GetCurrentTimestep();
 
 	vector <double> translate = rParams->GetTransform()->GetTranslations();
-	vector <double> rotate    = rParams->GetTransform()->GetRotations();
-	vector <double> scale     = rParams->GetTransform()->GetScales();
-	vector <double> origin    = rParams->GetTransform()->GetOrigin();
+	vector <double> rotate	= rParams->GetTransform()->GetRotations();
+	vector <double> scale	 = rParams->GetTransform()->GetScales();
+	vector <double> origin	= rParams->GetTransform()->GetOrigin();
 	assert(translate.size() == 3);
-	assert(rotate.size()    == 3);
-	assert(scale.size()     == 3);
-	assert(origin.size()    == 3);
+	assert(rotate.size()	== 3);
+	assert(scale.size()	 == 3);
+	assert(origin.size()	== 3);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -498,7 +498,6 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			_textObject = NULL;
 		}
 		_textObject = new TextObject();
-		//_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
 		_textObject->Initialize(_fontFile,
 	   		 textString, fontSize, dummy, 0, txtColor, bgColor);
 		float texWidth = _textObject->getWidth();
@@ -560,12 +559,18 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			delete _textObject;
 			_textObject = NULL;
 		}
+
+		vector<string> fpath;
+		fpath.push_back("fonts");
+		string fontFile = GetAppPath("VAPOR", "share", fpath);
+		fontFile = fontFile + "//arimo.ttf";
+
 		txtColor[0] = bgColor[0];
 		txtColor[1] = bgColor[1];
 		txtColor[2] = bgColor[2];
 		txtColor[3] = 1.f;
 		_textObject = new TextObject();
-		_textObject->Initialize("/Users/pearse/Downloads/pacifico/Pacifico.ttf",
+		_textObject->Initialize(fontFile,
 	   		 title, 20, dummy, 0, txtColor, bgColor);
 		Tuy -= _textObject->getHeight();
 		float coords[] = {Tlx, Tuy, 0.f};
