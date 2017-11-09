@@ -1266,6 +1266,7 @@ void MainForm::loadDataHelper(
 	DataStatus* ds = _controlExec->getDataStatus();
 	BoxSliderFrame::setDataStatus(ds);
 
+	_tabMgr->Update();
 	_vizWinMgr->ReinitRouters();
 
 	enableWidgets(true);
@@ -1308,6 +1309,7 @@ void MainForm::closeData(string fileName) {
 		enableWidgets(false);
 	}
 
+	_tabMgr->Update();
 	_vizWinMgr->ReinitRouters();
 }
 	
