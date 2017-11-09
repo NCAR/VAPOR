@@ -348,15 +348,15 @@ int Statistics::initControlExec(ControlExec *ce)
         return -1;
 
     // Store the active dataset name
-    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string     dsName = guiParams->GetStatsDatasetName();
-    if (dsName == "")    // not initialized yet
-    {
-        std::vector<std::string> dmNames = _controlExec->getDataStatus()->GetDataMgrNames();
-        assert(dmNames.size() > 0);
-        guiParams->SetStatsDatasetName(dmNames[0]);
+    std::vector<std::string> dmNames = _controlExec->getDataStatus()->GetDataMgrNames();
+    if (dmNames.empty())
+        return -1;
+    else {
+        GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+        std::string     dsName = guiParams->GetStatsDatasetName();
+        if (dsName == "" || dsName == "NULL")    // not initialized yet
+            guiParams->SetStatsDatasetName(dmNames[0]);
     }
-    dsName = guiParams->GetStatsDatasetName();
 
     return 0;
 }
