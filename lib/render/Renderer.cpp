@@ -196,7 +196,6 @@ void Renderer::EnableClipToBox() const
         glEnable(GL_CLIP_PLANE5);
         glClipPlane(GL_CLIP_PLANE5, z1Plane);
     }
-    cout << endl;
 }
 
 void Renderer::DisableClippingPlanes()
