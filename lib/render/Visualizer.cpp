@@ -744,7 +744,9 @@ Renderer* Visualizer::getRenderer(string type, string instance) const {
 int Visualizer::placeLights(){
 	if(printOpenGLError()) return -1;
 	const ViewpointParams* vpParams = getActiveViewpointParams();
-	int nLights = vpParams->getNumLights();
+	size_t nLights = vpParams->getNumLights();
+	if (nLights > 3) nLights = 3;
+
 	float lightDirs[3][4];
 	for (int j = 0; j<nLights; j++){
 		for (int i = 0; i<4; i++){
