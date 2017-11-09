@@ -165,7 +165,6 @@ MainForm::MainForm(
 	_stats = NULL;
 	_plot = NULL;	
     _stateChangeFlag = false; 
-    _firstSession    = true;
 
     createActions();
     createMenus();
@@ -899,11 +898,7 @@ void MainForm::sessionOpenHelper(string fileName) {
 //
 void MainForm::sessionOpen(QString qfileName)
 {
-    if( _firstSession )
-    {
-        _firstSession = false;
-    }
-    else if( _stateChangeFlag )
+    if( _stateChangeFlag )
     {
 		QMessageBox msgBox; 
 		msgBox.setWindowTitle("Are you sure?");
@@ -1386,11 +1381,7 @@ vector <string> MainForm::myGetOpenFileNames(
 
 void MainForm::sessionNew()
 {
-    if( _firstSession )
-    {
-        _firstSession = false;
-    }
-    else if( _stateChangeFlag )
+    if( _stateChangeFlag )
     {
 		QMessageBox msgBox; 
 		msgBox.setWindowTitle("Are you sure?");
