@@ -480,8 +480,14 @@ string DataMgr::GetTimeCoordVarName() const {
     // Assumes only one time coordinate variable is defined. Yikes!
     //
     vector<string> vars1d = DataMgr::GetCoordVarNames(1, false);
-    if (!vars1d.size())
-        return ("");
+
+    for (int i = 0; i < vars1d.size(); i++) {
+        DC::CoordVar var;
+        bool ok = GetCoordVarInfo(vars1d[i], var);
+        assert(ok);
+        if (!var.GetTimeDimName().empty())
+            return (vars1d[i]);
+    }
 
     return (vars1d[0]);
 }
