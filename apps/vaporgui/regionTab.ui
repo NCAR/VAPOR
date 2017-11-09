@@ -54,17 +54,7 @@ the probe panels).</string>
        <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="whatsThis">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The full data domain is specified by selecting one or more variables and clicking the &amp;quot;Reset Domain&amp;quot; button.  The domain will be the smallest axis-aligned box that contains the extents of all the selected variables. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Coming Soon: Current Region of Interest</string>
+        <string>Coming Soon: Region of Interest Settings</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
