@@ -63,16 +63,19 @@ Statistics::~Statistics()
 bool Statistics::Update()
 {
     // Initialize pointers
-    VAPoR::DataStatus *dataStatus = _controlExec->getDataStatus();
-    GUIStateParams *   guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string        currentDatasetName = guiParams->GetStatsDatasetName();
-    assert(currentDatasetName != "");
+    VAPoR::DataStatus *      dataStatus = _controlExec->getDataStatus();
+    std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
+    if (dmNames.empty()) {
+        this->close();
+        return false;
+    }
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string     currentDatasetName = guiParams->GetStatsDatasetName();
+    assert(currentDatasetName != "" && currentDatasetName != "NULL");
     VAPoR::DataMgr *  currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
 
     // Update DataMgrCombo
-    std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
-    assert(dmNames.size() > 0);
     DataMgrCombo->blockSignals(true);
     DataMgrCombo->clear();
     int currentIdx = -1;
@@ -350,7 +353,6 @@ int Statistics::initControlExec(ControlExec *ce)
         guiParams->SetStatsDatasetName(dmNames[0]);
     }
     dsName = guiParams->GetStatsDatasetName();
-    _validStats.SetDatasetName(dsName);
 
     return 0;
 }
@@ -399,9 +401,9 @@ void Statistics::_dataSourceChanged(int index)
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(newDataSourceName, StatisticsParams::GetClassType()));
 
     guiParams->SetStatsDatasetName(newDataSourceName);
-    _validStats.SetDatasetName(newDataSourceName);
 
     // add variables to _validStats if there are any
+    _validStats.Clear();
     std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
     for (int i = 0; i < enabledVars.size(); i++) _validStats.AddVariable(enabledVars[i]);
 }
@@ -925,15 +927,10 @@ bool Statistics::ValidStats::InvalidAll()
     return true;
 }
 
-std::string Statistics::ValidStats::GetDatasetName() { return _datasetName; }
-
-bool Statistics::ValidStats::SetDatasetName(std::string &dsName)
+bool Statistics::ValidStats::Clear()
 {
-    if (dsName != _datasetName) {
-        _datasetName = dsName;
-        _variables.clear();
-        for (int i = 0; i < 5; i++) _values[i].clear();
-    }
+    _variables.clear();
+    for (int i = 0; i < 5; i++) _values[i].clear();
     _count.clear();
     return true;
 }
