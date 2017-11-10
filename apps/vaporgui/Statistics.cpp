@@ -170,7 +170,6 @@ bool Statistics::Update() {
     LODCombo->blockSignals(true);
     RefCombo->clear();
     LODCombo->clear();
-
     int numRefLevels = currentDmgr->GetNumRefLevels(availVars[0]);
     vector<size_t> availLODs = currentDmgr->GetCRatios(availVars[0]);
     // sanity check on enabledVars.
@@ -178,7 +177,6 @@ bool Statistics::Update() {
         assert(numRefLevels == currentDmgr->GetNumRefLevels(enabledVars[i]));
         assert(availLODs.size() == currentDmgr->GetCRatios(enabledVars[i]).size());
     }
-
     std::string referenceVar;
     if (availVars3D.size() > 0)
         referenceVar = availVars3D[0];
@@ -210,7 +208,6 @@ bool Statistics::Update() {
         LODCombo->addItem(line);
     }
     LODCombo->setCurrentIndex(statsParams->GetCompressionLevel());
-
     RefCombo->blockSignals(false);
     LODCombo->blockSignals(false);
 
@@ -686,7 +683,7 @@ bool Statistics::_calc3M(std::string varname) {
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             if (*it != missingVal) {
-                double val = std::abs((double)(*it)) < 1e-38 ? 0.0 : *it;
+                double val = std::abs(*it) < 1e-38 ? 0.0 : *it;
                 min = min < val ? min : val;
                 max = max > val ? max : val;
                 double y = val - c;
@@ -735,7 +732,7 @@ bool Statistics::_calcMedian(std::string varname) {
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             if (*it != missingVal)
-                buffer.push_back(std::abs((double)(*it) < 1e-38 ? 0.0 : *it));
+                buffer.push_back(std::abs(*it) < 1e-38 ? 0.0 : *it);
         }
     }
 
@@ -785,7 +782,7 @@ bool Statistics::_calcStddev(std::string varname) {
 
         for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
             if (*it != missingVal) {
-                double val = std::abs((double)(*it)) < 1e-38 ? 0.0 : *it;
+                double val = std::abs(*it) < 1e-38 ? 0.0 : *it;
                 double y = (val - m3[2]) * (val - m3[2]) - c;
                 double t = sum + y;
                 c = t - sum - y;
@@ -958,10 +955,10 @@ std::string Statistics::ValidStats::GetVariableName(int i) {
 
 void Statistics::_exportTextClicked() {
     QString homePath = QDir::homePath();
-    homePath.append("/Variable_Statistics.csv");
+    homePath.append("/Variable_Statistics.txt");
     QString path = QDir::toNativeSeparators(homePath);
     QString fName = QFileDialog::getSaveFileName(this, "Select file to save statistics:", path,
-                                                 "Comma-separated values (*.csv)");
+                                                 "Comma-separated values (*.txt)");
     if (!fName.isEmpty()) {
         ofstream file;
         file.open(fName.toStdString().c_str());
@@ -980,7 +977,8 @@ void Statistics::_exportTextClicked() {
         VAPoR::DataMgr *currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
 
-        file << "Variable, No_of_Samples";
+        file << "#Variable Statistics" << endl;
+        file << "Variable_Name, No_of_Samples";
         if (statsParams->GetMinEnabled())
             file << ", Min";
         if (statsParams->GetMaxEnabled())
@@ -1025,18 +1023,21 @@ void Statistics::_exportTextClicked() {
         std::vector<double> myMin, myMax;
         statsParams->GetBox()->GetExtents(myMin, myMax);
 
-        file << "Spatial Extents:" << endl;
+        file << "#Spatial Extents:" << endl;
         file << "X min = " << myMin[0] << ",    X max = " << myMax[0] << endl;
         file << "Y min = " << myMin[1] << ",    Y max = " << myMax[1] << endl;
-        //if( myMin.size() == 3 && myMax.size() == 3 )
         if (has3DVar)
             file << "Z min = " << myMin[2] << ",    Z max = " << myMax[2] << endl;
-
         file << endl;
 
-        file << "Temporal Extents:" << endl;
+        file << "#Temporal Extents:" << endl;
         file << "Minimum Timestep = " << statsParams->GetCurrentMinTS()
              << ",    Maximum Timestep = " << statsParams->GetCurrentMaxTS() << endl;
+        file << endl;
+
+        file << "#Compression Parameters:" << endl;
+        file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
+        file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
 
         file.close();
     }
