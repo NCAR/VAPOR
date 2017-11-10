@@ -633,11 +633,10 @@ void Visualizer::moveRendererToFront(const Renderer* ren)
 
 	Renderer *save = _renderer[renIndex];
 	int saveOrder = _renderOrder[renIndex];
-    for (int i = _renderer.size() - 2; i >= renIndex; i--) {
+
+    for (int i = renIndex; i < _renderer.size()-1; i++) {
 		_renderer[i] = _renderer[i+1];
 		_renderOrder[i] = _renderOrder[i+1];
-		if (i == renIndex)
-			break;
 	}
 	_renderer[_renderer.size() - 1] = save;
 	_renderOrder[_renderer.size() - 1] = saveOrder;
