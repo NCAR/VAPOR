@@ -152,6 +152,7 @@ void ContourParams::_init() {
 	if (! varnames.empty()) varname = varnames[0];
 	SetVariableName(varname);
 
+
 	// Initialize 2D box
 	//
 	if (varname.empty()) return;
@@ -159,8 +160,8 @@ void ContourParams::_init() {
 	vector <double> minExt, maxExt;
 	int rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
-	SetUseSingleColor(true);
-	float rgb[] = {.95,.66,.27};
+	SetUseSingleColor(false);
+	float rgb[] = {1.,1.,1.};
 	SetConstantColor(rgb);
 
 	// Crap. No error handling from constructor. Need Initialization()
@@ -193,9 +194,10 @@ double ContourParams::GetContourSpacing() {
 }
 
 void ContourParams::GetLineColor(int lineNum, float color[3]) {
-	GetConstantColor(color);
-	string cmVar = GetColorMapVariableName();
-	if ((cmVar == "") || (cmVar == "Default")) {
+	if (UseSingleColor()) {
+		GetConstantColor(color);
+	}   
+	else {	
 		string varName = GetVariableName();
 		MapperFunction* tf = 0;
 		tf = (MapperFunction*)GetMapperFunc(varName);
@@ -205,9 +207,6 @@ void ContourParams::GetLineColor(int lineNum, float color[3]) {
 		double val = vals[lineNum];
 
 		tf->rgbValue(val, color);
-	}   
-	else {
-		GetConstantColor(color);
 	}   
 }
 
