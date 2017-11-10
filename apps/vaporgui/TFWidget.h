@@ -57,11 +57,6 @@ public:
 
     void getRange(float range[2], float values[2]);
 
-public slots:
-    // Made public, to be called from EventRouter::Initialize
-    //
-    void setColorMapping(const QString &);
-
 private slots:
     void fileSaveTF();
     void setRange();
@@ -70,25 +65,17 @@ private slots:
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void setSingleColor();
     void forwardTFChange();
 
 private:
     void   collapseAutoUpdateHistoCheckbox();
     string getVariableName();
-    void   configureDefaultColoring();
-    void   configureColorWidgets(string var);
-    void   configureConstantColor(string var);
-    void   configureColorMappingToVariable(string var);
     void   connectWidgets();
     void   updateSliders();
     void   updateAutoUpdateHistoCheckbox();
     void   updateColorInterpolation();
     void   updateMappingFrame();
-    void   updateColorVarCombo();
     void   enableTFWidget(bool state);
-    void   collapseColorVarSettings();
-    void   collapseConstColorSettings();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);

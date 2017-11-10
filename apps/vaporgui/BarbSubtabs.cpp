@@ -168,5 +168,4 @@ void BarbAppearanceSubtab::Initialize(VAPoR::BarbParams *bParams)
     float rgb[] = {1.f, 1.f, 1.f};
     bParams->SetConstantColor(rgb);
     bParams->SetColorMapVariableName("Constant");
-    _TFWidget->setColorMapping("Constant");
 }
