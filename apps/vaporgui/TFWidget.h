@@ -79,7 +79,7 @@ private:
 	void collapseAutoUpdateHistoCheckbox();
 	string getVariableName();
 	void setNativeTransferFunction(string var);
-	void configureConstColorWidgets(string var);
+	void configureColorWidgets(string var);
 	void configureConstantColor(string var);
 	void configureColorMappingToVariable(string var);
 	void connectWidgets();
