@@ -417,9 +417,13 @@ void Plot::reinitDataMgr()
     string      dmName = dataMgrCombo->currentText().toStdString();
     _dm = ds->GetDataMgr(dmName);
 
+    cerr << dmName << endl;
+
     if (_dm == NULL) {
         string err = "Could not find DataMgr named " + dmName;
         errReport(err);
+    } else {
+        initVariables();
     }
 }
 
@@ -1567,7 +1571,9 @@ void Plot::initConstCheckboxes()
 //
 void Plot::initVariables()
 {
+    addVarCombo->blockSignals(true);
     _vars.clear();
+    _vars3d.clear();
     addVarCombo->clear();    // Clear old variables
     addVarCombo->addItem("Add Variable:");
     vector<string> vars;
@@ -1584,6 +1590,7 @@ void Plot::initVariables()
 
     // Add variables to combo box
     for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { addVarCombo->addItem(QString::fromStdString(*it)); }
+    addVarCombo->blockSignals(false);
 }
 
 void Plot::newVarAdded(int index)
