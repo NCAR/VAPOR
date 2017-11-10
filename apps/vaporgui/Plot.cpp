@@ -1544,14 +1544,23 @@ void Plot::print(bool doSpace) const {
 void Plot::initTimes() {
 	_timeExtents.clear();
 	_timeExtents.push_back(0);
-	_timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0])-1);
+	//_timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0])-1);
+	_timeExtents.push_back(_dm->GetNumTimeSteps());
 }
 
 void Plot::initExtents(int ts) {
 	vector<double> minExts, maxExts;
 
-	int rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel,
-									minExts, maxExts);
+    int rc = -1;
+    if( !_vars3d.empty() )
+	    rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel, minExts, maxExts);
+    else if( !_vars.empty() )
+	    rc = _dm->GetVariableExtents(ts, _vars[0], _refLevel, minExts, maxExts);
+    else
+    {
+        // No Valid Variable from this DataMgr!!!
+    }
+        
 	if (rc<0) {
 		string myErr;
 		myErr = "Plot could not find minimum and maximum extents"
