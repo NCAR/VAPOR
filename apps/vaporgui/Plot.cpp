@@ -393,6 +393,7 @@ void Plot::Initialize(ControlExec* ce, VizWinMgr* vwm) {
 	_dm = ds->GetDataMgr(dataMgrs[0]);
 	assert(_dm != NULL);
 
+    dataMgrCombo->clear();
 	for (int i=0; i<dataMgrs.size(); i++) {
 		dataMgrCombo->addItem(QString::fromStdString(dataMgrs[i]));
 	}
@@ -643,9 +644,8 @@ void Plot::savePlotToFile() {
 	QFileInfo* fileInfo = new QFileInfo(f);
 		if (fileInfo->suffix() != "png" ) {
 		fileName.append(".png");
-	
 
-		// Verify if we're overwriting existing video files
+		// Verify if we're overwriting existing files
 		//	  
 		if( std::ifstream( fileName.c_str() ) )
 		{
