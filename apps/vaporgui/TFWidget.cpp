@@ -100,11 +100,15 @@ TFWidget::~TFWidget()
     }
 }
 
-void TFWidget::setNativeTransferFunction(string var)
+void TFWidget::configureDefaultColoring()
 {
-    cout << "setNativeTransferFunction() " << var << endl;
+    colorDisplay->setEnabled(false);
+    colorSelectButton->setEnabled(false);
+    colorInterpCombo->setEnabled(true);
+    colorInterpLabel->setEnabled(true);
 
-    if (var != "Constant") mappingFrame->setVariableName(var);
+    _rParams->SetColorMapVariableName("");
+    _rParams->SetUseSingleColor(false);
     // MapperFunction* mf = _rParams->GetMapperFunc(var);
 
     // cout << "null? " << (mf==NULL) << endl;
@@ -114,95 +118,56 @@ void TFWidget::setNativeTransferFunction(string var)
 
 void TFWidget::configureColorMappingToVariable(string var)
 {
-    cout << "configureColorMappingToVariable() " << var << endl;
+    cout << "configureColorMappingToVariable " << var << endl;
     colorDisplay->setEnabled(false);
     colorSelectButton->setEnabled(false);
-
     colorInterpCombo->setEnabled(true);
     colorInterpLabel->setEnabled(true);
 
-    setNativeTransferFunction(var);
-
+    _rParams->SetColorMapVariableName(var);
     _rParams->SetUseSingleColor(false);
 }
 
 void TFWidget::configureConstantColor(string var)
 {
-    cout << "configureConstantColor() " << endl;
-
     colorDisplay->setEnabled(true);
     colorSelectButton->setEnabled(true);
-
     colorInterpCombo->setEnabled(false);
     colorInterpLabel->setEnabled(false);
 
-    // We still need the native transfer function to be drawn,
-    // even though it's not mapping our colors
-    //	setNativeTransferFunction(var);
-
+    // Note: Constant color is associated with empty string,
+    // so set rParams with ""
     _rParams->SetColorMapVariableName(var);
     _rParams->SetConstantColor(_myRGB);
     _rParams->SetUseSingleColor(true);
 }
 
-void TFWidget::configureColorWidgets(string var)
+void TFWidget::configureColorWidgets(string selection)
 {
-    cout << "configureColorWidgets() " << var << endl;
-    if (var == "Map to var") {
-        configureColorMappingToVariable(var);
-    } else if ((var == "Constant") || (var == "")) {
+    string var;
+    if (selection == "Map to var") {
+        var = _rParams->GetVariableName();
+        configureDefaultColoring();
+    } else if ((selection == "Constant") || (selection == "")) {
+        var = "";
         configureConstantColor(var);
+    } else {
+        var = selection;
+        configureColorMappingToVariable(var);
     }
 }
 
-void TFWidget::setColorMapping(const QString &qvar)
+void TFWidget::setColorMapping(const QString &qselection)
 {
+    string selection = qselection.toStdString();
+
     _paramsMgr->BeginSaveStateGroup("TFWidget::setColorMapping(), "
                                     "set colormapped variable");
 
-    string var = qvar.toStdString();
-    if (var != "Constant") _rParams->SetColorMapVariableName(var);
+    configureColorWidgets(selection);
 
-    cout << "setColorMapping() " << var << endl;
-
-    if ((_flags & CONSTCOLOR) & (_flags & SECONDARY_COLORVAR)) {}
-
-    // If the render supports native coloring, and
-    // coloring according to a constant color
-    //
-    if (_flags & CONSTCOLOR) {
-        configureColorWidgets(var);
-        _paramsMgr->EndSaveStateGroup();
-        return;
-    }
-
-    /*
-    if (var == "Constant" || var == "") {
-        var = "";
-        _rParams->SetColorMapVariableName(var);
-        _rParams->SetUseSingleColor(true);
-        _rParams->SetConstantColor(_myRGB);
-
-        colorSelectButton->setEnabled(true);
-        minRangeSlider->setEnabled(false);
-        minRangeEdit->setEnabled(false);
-        maxRangeSlider->setEnabled(false);
-        maxRangeEdit->setEnabled(false);
-        colorInterpCombo->setEnabled(false);
-    }
-    else {
-        _rParams->SetColorMapVariableName(var);
-        _rParams->SetUseSingleColor(false);
-
-        colorSelectButton->setEnabled(false);
-        minRangeSlider->setEnabled(true);
-        minRangeEdit->setEnabled(true);
-        maxRangeSlider->setEnabled(true);
-        maxRangeEdit->setEnabled(true);
-        colorInterpCombo->setEnabled(true);
-    }
-*/
     _paramsMgr->EndSaveStateGroup();
+    return;
 }
 
 void TFWidget::collapseColorVarSettings()
@@ -333,7 +298,7 @@ void TFWidget::getRange(float range[2], float values[2])
     range[0] = range[1] = 0.0;
     values[0] = values[1] = 0.0;
     string varName = getVariableName();
-    if (varName.empty()) return;
+    if (varName.empty() || varName == "Constant") return;
 
     size_t ts = _rParams->GetCurrentTimestep();
     int    ref = _rParams->GetRefinementLevel();

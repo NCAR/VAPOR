@@ -76,7 +76,7 @@ private slots:
 private:
     void   collapseAutoUpdateHistoCheckbox();
     string getVariableName();
-    void   setNativeTransferFunction(string var);
+    void   configureDefaultColoring();
     void   configureColorWidgets(string var);
     void   configureConstantColor(string var);
     void   configureColorMappingToVariable(string var);
