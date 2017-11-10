@@ -135,7 +135,7 @@
             <widget class="QComboBox" name="DataMgrCombo">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>280</width>
                <height>0</height>
               </size>
              </property>
