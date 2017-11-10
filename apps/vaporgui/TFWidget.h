@@ -55,6 +55,7 @@ public:
 	void loadTF(string varname);
 
 	void getRange(float range[2], float values[2]);
+	float getOpacity();
 
 public slots:
 	// Made public, to be called from EventRouter::Initialize
@@ -71,6 +72,7 @@ private slots:
 	void loadTF();
 	void setSingleColor();
 	void forwardTFChange();
+	void opacitySliderChanged(int value);
 
 private:
 	void connectWidgets();
