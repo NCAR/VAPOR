@@ -219,12 +219,14 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow() {
     connect(removeVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVar(int)));
     connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(reinitDataMgr()));
+#ifdef GETPOINTFROMRENDERER
     connect(timeCopyCombo, SIGNAL(activated(int)),
             this, SLOT(getPointFromRenderer()));
     connect(spaceP1CopyCombo, SIGNAL(activated(int)),
             this, SLOT(getPointFromRenderer()));
     connect(spaceP2CopyCombo, SIGNAL(activated(int)),
             this, SLOT(getPointFromRenderer()));
+#endif
     connect(refCombo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(refinementChanged(int)));
     connect(cRatioCombo, SIGNAL(currentIndexChanged(int)),
@@ -1342,7 +1344,7 @@ void Plot::getRanges(QObject *&sender, QComboBox *&qcb, Range *&x, Range *&y, Ra
     }
 }
 
-#ifdef DEAD
+#ifdef GETPOINTFROMRENDERER
 void Plot::getPointFromRenderer() {
     QComboBox *qcb = NULL;
     Range *x = NULL;
