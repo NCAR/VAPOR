@@ -64,9 +64,6 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
 
   private slots:
     void SetContourValues();
-    void MappingChanged() {
-        cout << "mapping changed!" << endl;
-    }
 
     void EndTFChange();
 
