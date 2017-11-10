@@ -190,7 +190,7 @@ class MainForm : public QMainWindow {
 
     void closeDataHelper(string dataSetName);
 
-    void openDataHelper(
+    bool openDataHelper(
         const std::vector<string> &files, string dataSetName, string format);
 
     void loadDataHelper(
