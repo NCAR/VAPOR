@@ -366,6 +366,11 @@ int Renderer::makeColorbarTexture() {
 
     //Draw colors
     //With no tics, use the whole scale
+    bool useConstantColor = rParams->UseSingleColor();
+    float rgb[3];
+    if (useConstantColor)
+        rParams->GetConstantColor(rgb);
+
     if (numtics == 0)
         numtics = 1000;
     double A = (mf->getMaxMapValue() - mf->getMinMapValue()) * (double)(numtics) /
@@ -376,9 +381,9 @@ int Renderer::makeColorbarTexture() {
     for (int line = _imgHgt - 2 * lineWidth - 5; line > 2 * lineWidth + 5; line--) {
         float ycoord = A * (float)line + B;
 
-        float rgb[3];
         unsigned char rgbByte;
-        mf->rgbValue(ycoord, rgb);
+        if (!useConstantColor)
+            mf->rgbValue(ycoord, rgb);
 
         for (int col = 2 * lineWidth; col < (int)(_imgWid * .35); col++) {
             for (int k = 0; k < 3; k++) {
@@ -414,8 +419,7 @@ void Renderer::renderColorbar() {
     glEnable(GL_TEXTURE_2D);
 
     //create a polygon appropriately positioned in the scene.  It's inside the unit cube--
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                 _colorbarTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE, _colorbarTexture);
 
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
