@@ -1178,7 +1178,7 @@ void MainForm::closeDataHelper(string dataSetName) {
 // Open a data set and remove from database. If data with same name 
 // already exists close it first.
 //
-void MainForm::openDataHelper(
+bool MainForm::openDataHelper(
 	const vector <string> &files,
 	string dataSetName,
 	string format
@@ -1202,7 +1202,7 @@ void MainForm::openDataHelper(
 	int rc = _controlExec->OpenData(files, dataSetName, format);
 	if (rc<0) {
 		MSG_ERR("Failed to load data");
-		return;
+		return (false);;
 	}
 
 	// Update the database
@@ -1210,6 +1210,8 @@ void MainForm::openDataHelper(
 	currentPaths.push_back(files[0]);
 	currentDataSets.push_back(dataSetName);
 	p->SetOpenDataSets(currentPaths, currentDataSets);
+
+	return(true);
 }
 
 void MainForm::loadDataHelper(
@@ -1245,7 +1247,8 @@ void MainForm::loadDataHelper(
 	//
 	string dataSetName = makename(myFiles[0]);
 
-	openDataHelper(myFiles, dataSetName, format);
+	bool status = openDataHelper(myFiles, dataSetName, format);
+	if (! status) return;
 
 	// Reinitialize all tabs
 	//
