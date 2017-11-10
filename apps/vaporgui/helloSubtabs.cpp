@@ -11,5 +11,6 @@ HelloVariablesSubtab::HelloVariablesSubtab(QWidget* parent)
 
 	_variablesWidget->Reinit(
 	(VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
-	(VariablesWidget::THREED));
+	(VariablesWidget::THREED),
+	(VariablesWidget::ColorFlags)(0));
 }
