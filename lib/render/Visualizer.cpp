@@ -741,7 +741,10 @@ int Visualizer::placeLights() {
     if (printOpenGLError())
         return -1;
     const ViewpointParams *vpParams = getActiveViewpointParams();
-    int nLights = vpParams->getNumLights();
+    size_t nLights = vpParams->getNumLights();
+    if (nLights > 3)
+        nLights = 3;
+
     float lightDirs[3][4];
     for (int j = 0; j < nLights; j++) {
         for (int i = 0; i < 4; i++) {
@@ -991,17 +994,8 @@ int Visualizer::captureImage(string filename) {
 
     //Now call the Jpeg or tiff library to compress and write the file
     //
-    if (suffix == ".jpg") {
-        //int quality = getJpegQuality();
-        int quality = 100;
-        int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
-        if (rc) {
-            SetErrMsg("Image Capture Error; Error writing jpeg file %s",
-                      (const char *)filename.c_str());
-            delete[] buf;
-            return -1;
-        }
-    } else { //capture the tiff file, one scanline at a time
+    if (suffix == ".tif") //capture the tiff file, one scanline at a time
+    {
         uint32 imagelength = (uint32)width;
         uint32 imagewidth = (uint32)height;
         assert(tiffFile);
@@ -1021,6 +1015,14 @@ int Visualizer::captureImage(string filename) {
             }
         }
         TIFFClose(tiffFile);
+    } else {
+        int quality = 95;
+        int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
+        if (rc) {
+            SetErrMsg("Image Capture Error; Error writing jpeg file %s",
+                      (const char *)filename.c_str());
+            return -1;
+        }
     }
 
     delete[] buf;
@@ -1097,6 +1099,10 @@ void Visualizer::renderColorbars(int timeStep) {
         //truncate the last 4 characters (remove .tif or .jpg)
         string s1 = s.substr(0, s.length() - 4);
         string s_end = s.substr(s.length() - 4);
+        if (s_end == "jpeg") {
+            s1 = s.substr(0, s.length() - 5);
+            s_end = s.substr(s.length() - 5);
+        }
         //Find digits (before .tif or .jpg)
         size_t lastpos = s1.find_last_not_of("0123456789");
         assert(lastpos < s1.length());
