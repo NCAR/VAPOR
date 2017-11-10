@@ -497,8 +497,6 @@ void Plot::reinitDataMgr() {
     string dmName = dataMgrCombo->currentText().toStdString();
     _dm = ds->GetDataMgr(dmName);
 
-    cerr << dmName << endl;
-
     if (_dm == NULL) {
         string err = "Could not find DataMgr named " + dmName;
         errReport(err);
