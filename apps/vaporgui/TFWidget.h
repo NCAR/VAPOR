@@ -23,7 +23,14 @@ public:
     //! HGT : RenderParams::GetHeightVariableName()
     //! COLOR : RenderParams::GetColorMapVariableNames()
     //!
-    enum Flags { COLORVAR = (1u << 0), PRIORITYCOLORVAR = (1u << 1), CONSTCOLOR = (1u << 2) };
+    enum Flags {
+        SECONDARY_COLORVAR = (1u << 0),
+        CONSTCOLOR = (1u << 1),
+
+        // PRIORITY_COLORVAR just moves the color mapped variable
+        // settings up higher in the gui for better visibility
+        PRIORITY_COLORVAR = (1u << 2)
+    };
 
     TFWidget(QWidget *parent = 0);
 
@@ -50,11 +57,6 @@ public:
 
     void getRange(float range[2], float values[2]);
 
-public slots:
-    // Made public, to be called from EventRouter::Initialize
-    //
-    void setCMVar(const QString &);
-
 private slots:
     void fileSaveTF();
     void setRange();
@@ -63,19 +65,17 @@ private slots:
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void setSingleColor();
     void forwardTFChange();
 
 private:
-    void connectWidgets();
-    void updateSliders();
-    void updateAutoUpdateHistoCheckbox();
-    void updateColorInterpolation();
-    void updateMappingFrame();
-    void updateColorVarCombo();
-    void enableTFWidget(bool state);
-    void collapseColorVarSettings();
-    void collapseConstColorSettings();
+    void   collapseAutoUpdateHistoCheckbox();
+    string getVariableName();
+    void   connectWidgets();
+    void   updateSliders();
+    void   updateAutoUpdateHistoCheckbox();
+    void   updateColorInterpolation();
+    void   updateMappingFrame();
+    void   enableTFWidget(bool state);
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);

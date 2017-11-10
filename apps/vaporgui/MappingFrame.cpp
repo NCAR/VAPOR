@@ -282,8 +282,7 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     string varname = _rParams->GetColorMapVariableName();
     if (varname == "") { varname = _rParams->GetVariableName(); }
-
-    if (varname.empty()) return;
+    if (varname.empty() || varname == "Constant") return;
 
     MapperFunction *mapper;
     mapper = _rParams->GetMapperFunc(varname);
