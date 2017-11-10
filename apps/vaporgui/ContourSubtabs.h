@@ -53,7 +53,6 @@ private:
 
 private slots:
     void SetContourValues();
-    void MappingChanged() { cout << "mapping changed!" << endl; }
 
     void EndTFChange();
 

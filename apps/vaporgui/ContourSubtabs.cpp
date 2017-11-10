@@ -18,8 +18,6 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
     connect(_cMinCombo, SIGNAL(valueChanged(double)), this, SLOT(SetContourMinimum(double)));
     connect(_spacingCombo, SIGNAL(valueChanged(double)), this, SLOT(SetContourSpacing(double)));
     connect(lockToTFCheckbox, SIGNAL(toggled(bool)), this, SLOT(LockToTFChecked(bool)));
-
-    connect(_TFWidget->mappingFrame, SIGNAL(mappingChanged()), this, SLOT(MappingChanged()));
     connect(_TFWidget, SIGNAL(emitChange()), this, SLOT(EndTFChange()));
 }
 
