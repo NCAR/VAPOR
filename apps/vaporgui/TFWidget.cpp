@@ -103,11 +103,13 @@ TFWidget::~TFWidget() {
 void TFWidget::setNativeTransferFunction(string var) {
     cout << "setNativeTransferFunction() " << var << endl;
 
-    MapperFunction *mf = _rParams->GetMapperFunc(var);
+    if (var != "Constant")
+        mappingFrame->setVariableName(var);
+    //MapperFunction* mf = _rParams->GetMapperFunc(var);
 
-    cout << "null? " << (mf == NULL) << endl;
+    //cout << "null? " << (mf==NULL) << endl;
 
-    _rParams->SetMapperFunc(var, mf);
+    //_rParams->SetMapperFunc(var, mf);
 }
 
 void TFWidget::configureColorMappingToVariable(string var) {
@@ -134,14 +136,15 @@ void TFWidget::configureConstantColor(string var) {
 
     // We still need the native transfer function to be drawn,
     // even though it's not mapping our colors
-    setNativeTransferFunction("CANWAT");
+    //	setNativeTransferFunction(var);
 
-    _rParams->SetUseSingleColor(true);
+    _rParams->SetColorMapVariableName(var);
     _rParams->SetConstantColor(_myRGB);
+    _rParams->SetUseSingleColor(true);
 }
 
-void TFWidget::configureConstColorWidgets(string var) {
-    cout << "configureConstColorWidgets() " << var << endl;
+void TFWidget::configureColorWidgets(string var) {
+    cout << "configureColorWidgets() " << var << endl;
     if (var == "Map to var") {
         configureColorMappingToVariable(var);
     } else if ((var == "Constant") ||
@@ -155,7 +158,8 @@ void TFWidget::setColorMapping(const QString &qvar) {
                                     "set colormapped variable");
 
     string var = qvar.toStdString();
-    _rParams->SetColorMapVariableName(var);
+    if (var != "Constant")
+        _rParams->SetColorMapVariableName(var);
 
     cout << "setColorMapping() " << var << endl;
 
@@ -167,35 +171,37 @@ void TFWidget::setColorMapping(const QString &qvar) {
     // coloring according to a constant color
     //
     if (_flags & CONSTCOLOR) {
-        configureConstColorWidgets(var);
+        configureColorWidgets(var);
         _paramsMgr->EndSaveStateGroup();
         return;
     }
 
-    if (var == "Constant" || var == "") {
-        var = "";
-        _rParams->SetColorMapVariableName(var);
-        _rParams->SetUseSingleColor(true);
-        _rParams->SetConstantColor(_myRGB);
+    /*
+	if (var == "Constant" || var == "") {
+		var = ""; 
+		_rParams->SetColorMapVariableName(var);
+		_rParams->SetUseSingleColor(true);
+		_rParams->SetConstantColor(_myRGB);
 
-        colorSelectButton->setEnabled(true);
-        minRangeSlider->setEnabled(false);
-        minRangeEdit->setEnabled(false);
-        maxRangeSlider->setEnabled(false);
-        maxRangeEdit->setEnabled(false);
-        colorInterpCombo->setEnabled(false);
-    } else {
-        _rParams->SetColorMapVariableName(var);
-        _rParams->SetUseSingleColor(false);
+		colorSelectButton->setEnabled(true);
+		minRangeSlider->setEnabled(false);
+		minRangeEdit->setEnabled(false);
+		maxRangeSlider->setEnabled(false);
+		maxRangeEdit->setEnabled(false);
+		colorInterpCombo->setEnabled(false);
+	}   
+	else {
+		_rParams->SetColorMapVariableName(var);
+		_rParams->SetUseSingleColor(false);
 
-        colorSelectButton->setEnabled(false);
-        minRangeSlider->setEnabled(true);
-        minRangeEdit->setEnabled(true);
-        maxRangeSlider->setEnabled(true);
-        maxRangeEdit->setEnabled(true);
-        colorInterpCombo->setEnabled(true);
-    }
-
+		colorSelectButton->setEnabled(false);
+		minRangeSlider->setEnabled(true);
+		minRangeEdit->setEnabled(true);
+		maxRangeSlider->setEnabled(true);
+		maxRangeEdit->setEnabled(true);
+		colorInterpCombo->setEnabled(true);
+	}
+*/
     _paramsMgr->EndSaveStateGroup();
 }
 
