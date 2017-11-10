@@ -1,8 +1,8 @@
 //************************************************************************
 //														*
-//		     Copyright (C)  2015									*
-//     University Corporation for Atmospheric Research					*
-//		     All Rights Reserved										*
+//			 Copyright (C)  2015									*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
 //														*
 //************************************************************************/
 //
@@ -21,6 +21,7 @@
 #include <qwidget.h>
 #include <QFileDialog>
 #include <qradiobutton.h>
+#include <qcolordialog.h>
 #include "vapor/RenderParams.h"
 #include "vapor/ParamsMgr.h"
 #include "vapor/DataMgr.h"
@@ -39,7 +40,7 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 	_fidelityButtons = new QButtonGroup(fidelityBox);
 	_fidelityButtons->setExclusive(true);
 
-    QHBoxLayout* hlay = new QHBoxLayout(fidelityBox);
+	QHBoxLayout* hlay = new QHBoxLayout(fidelityBox);
 	hlay->setAlignment(Qt::AlignHCenter);
 	fidelityBox->setLayout(hlay);
 
@@ -91,15 +92,22 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 		heightCombo, SIGNAL(activated(const QString&)),this,
 		SLOT(setHeightVarName(const QString&))
 	);
-
 	connect(
 		_fidelityButtons,SIGNAL(buttonClicked(int)),
 		this, SLOT(setFidelity(int))
 	);
+	connect(
+		colormapVarCombo, SIGNAL(activated(const QString&)),
+		this, SLOT(setColorMapping(const QString&))
+	);
+	connect(
+		colorSelectButton, SIGNAL(pressed()),
+		this, SLOT(setSingleColor())
+	);
 
 	// Legacy crap. Should remove
 	//
-    distribVariableFrame->hide();
+	distribVariableFrame->hide();
 
 #ifdef	DEAD
 	if (! (dspFlags & COLOR)) {
@@ -111,17 +119,44 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 
 void VariablesWidget::Reinit(
 	DisplayFlags dspFlags,
-	DimFlags dimFlags) {
+	DimFlags dimFlags,
+	ColorFlags colorFlags) {
 
 
-    _dspFlags = dspFlags;
-    _dimFlags = dimFlags;
+	_dspFlags = dspFlags;
+	_dimFlags = dimFlags;
+	_colorFlags = colorFlags;
 
 	showHideVar(true);
 
 	if (! ((_dimFlags & TWOD) && (_dimFlags & THREED)) ) {
 		dimensionFrame->hide();
 	}
+
+	if (!(_colorFlags & CONST) &&
+		!(_colorFlags & COLORVAR)) {
+		collapseColorVarSettings();
+		collapseConstColorSettings();
+	}
+}
+
+void VariablesWidget::collapseColorVarSettings() {
+    colormapVarCombo->hide();
+    colormapVarCombo->resize(0,0);
+    colorVarLabel->hide();
+    colorVarLabel->resize(0,0);
+}
+
+void VariablesWidget::collapseConstColorSettings() {
+    colorDisplay->hide();
+    colorDisplay->resize(0,0);
+    constColorLabel->hide();
+    constColorLabel->resize(0,0);
+    colorSelectButton->hide();
+    colorSelectButton->resize(0,0);
+    constColorFrame->hide();
+    constColorFrame->resize(0,0);
+    adjustSize();
 }
 
 void VariablesWidget::setNumRefinements(int num) {
@@ -224,6 +259,146 @@ void VariablesWidget::setFidelity(int buttonID){
 	//
 	lodCombo->setCurrentIndex(lod);
 	refinementCombo->setCurrentIndex(ref);
+}
+
+void VariablesWidget::setSingleColor() {
+	_paramsMgr->BeginSaveStateGroup("VariablesWidget::setSingleColor()");
+	QPalette palette(colorDisplay->palette());
+	QColor color = QColorDialog::getColor(palette.color(QPalette::Base), this);
+	if (!color.isValid()) return;
+
+	palette.setColor(QPalette::Base, color);
+	colorDisplay->setPalette(palette);
+
+	qreal rgb[3];
+	color.getRgbF(&rgb[0], &rgb[1], &rgb[2]);
+	float myRGB[3];
+	myRGB[0] = rgb[0];
+	myRGB[1] = rgb[1];
+	myRGB[2] = rgb[2];
+
+	_rParams->SetConstantColor(myRGB);
+	_rParams->SetUseSingleColor(true);
+	if (_colorFlags & CONST) {
+		colormapVarCombo->setCurrentIndex(1);
+	}   
+	else {
+		colormapVarCombo->setCurrentIndex(0);
+	}   
+	_paramsMgr->EndSaveStateGroup();
+}
+
+void VariablesWidget::configureDefaultColoring() {
+	colorDisplay->setEnabled(false);
+	colorSelectButton->setEnabled(false);
+	//colorInterpCombo->setEnabled(true);
+	//colorInterpLabel->setEnabled(true);
+
+	_rParams->SetColorMapVariableName("");
+	_rParams->SetUseSingleColor(false);
+}
+
+void VariablesWidget::configureColorMappingToVariable(string var) {
+	cout << "configureColorMappingToVariable " << var << endl;
+	colorDisplay->setEnabled(false);
+	colorSelectButton->setEnabled(false);
+	//colorInterpCombo->setEnabled(true);
+	//colorInterpLabel->setEnabled(true);
+
+	_rParams->SetColorMapVariableName(var);
+	_rParams->SetUseSingleColor(false);
+}
+
+void VariablesWidget::configureConstantColor(string var) {
+	colorDisplay->setEnabled(true);
+	colorSelectButton->setEnabled(true);
+	//colorInterpCombo->setEnabled(false);
+	//colorInterpLabel->setEnabled(false);
+
+	// Note: Constant color is associated with empty string, 
+	// so set rParams with ""
+	_rParams->SetColorMapVariableName(var);
+	_rParams->SetUseSingleColor(true);
+}
+
+void VariablesWidget::configureColorWidgets(string selection) {
+	string var;
+	if (selection == "Primary") {
+		var = _rParams->GetVariableName();
+		configureDefaultColoring();
+	}
+	else if ((selection == "Constant") ||
+			 (selection == "")) {
+		var = "";
+		configureConstantColor(var);
+	}
+	else {
+		var = selection;
+		configureColorMappingToVariable(var);
+	}
+}
+
+void VariablesWidget::setColorMapping(const QString& qselection) {
+	string selection = qselection.toStdString();
+
+	_paramsMgr->BeginSaveStateGroup("VariablesWidget::setColorMapping(), "
+		"set colormapped variable");
+
+	configureColorWidgets(selection);
+
+	_paramsMgr->EndSaveStateGroup();
+	return;
+}
+
+void VariablesWidget::updateColorVarCombo() {
+	colormapVarCombo->blockSignals(true);
+	int index = colormapVarCombo->currentIndex();
+	
+	colormapVarCombo->clear();
+
+	if (_colorFlags & PRIMARY) {
+		colormapVarCombo->addItem(QString("Primary"));
+	}
+	if (_colorFlags & CONST) {
+		colormapVarCombo->addItem(QString("Constant"));
+	}
+	if (_colorFlags & COLORVAR) {
+		int ndim = _rParams->GetValueLong(_nDimsTag, 3);
+		assert(ndim == 2 || ndim == 3);
+
+		vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
+
+		for (int i=0; i<vars.size(); i++) {
+			colormapVarCombo->addItem(QString::fromStdString(vars[i]));
+		}
+	}
+
+	QString qs;
+	if (_rParams->UseSingleColor()) {
+		qs = QString("Constant");
+		index = colormapVarCombo->findText(qs);
+	}
+	else if (_rParams->GetColorMapVariableName() != "") {
+		string cmVarName = _rParams->GetColorMapVariableName();
+		qs = QString::fromStdString(cmVarName);
+		index = colormapVarCombo->findText(qs);
+	}
+	else {
+		qs = QString("Primary");
+	}
+	colormapVarCombo->setCurrentIndex(index);
+	
+	// Update selected color display
+	//  
+
+	float rgb[3];
+	_rParams->GetConstantColor(rgb);
+	QColor color(rgb[0]*255, rgb[1]*255, rgb[2]*255);
+	QPalette palette(colorDisplay->palette());
+	palette.setColor(QPalette::Base, color);
+	colorDisplay->setPalette(palette);
+
+	colormapVarCombo->blockSignals(false);
 }
 
 // User clicks on SetDefault button, need to make current 
@@ -404,24 +579,24 @@ void VariablesWidget::updateFidelity( RenderParams* rParams)
 	QHBoxLayout* hlay = (QHBoxLayout*) fidelityBox->layout();
 	QLayoutItem *child;
 	while ((child = hlay->takeAt(0)) != 0) {
-        delete child->widget();
+		delete child->widget();
 		delete child;
 	}
 
 	int numButtons = _fidelityLodStrs.size();
 	for (int i = 0; i<numButtons; i++)
-    {
+	{
 		QRadioButton * rd = new QRadioButton();
 		hlay->addWidget(rd);
 
 		_fidelityButtons->addButton(rd, i);
 		QString qs = "Refinement " + QString::fromStdString(_fidelityMultiresStrs[i])
-		             + "\nLOD " + QString::fromStdString(_fidelityLodStrs[i]);
+					 + "\nLOD " + QString::fromStdString(_fidelityLodStrs[i]);
 
 		rd->setToolTip(qs);
 
 		if (lod == _fidelityLodIdx[i] && refLevel == _fidelityMultiresIdx[i]) 
-        {
+		{
 			rd->setChecked(true);
 		}
 	}
@@ -432,7 +607,7 @@ void VariablesWidget::uncheckFidelity() {
 	// Unset all fidelity buttons
 	//
 	if (! _fidelityButtons) 
-        return;
+		return;
 
 	QList<QAbstractButton*> btns = _fidelityButtons->buttons();
 	for (int i = 0; i<btns.size(); i++){
@@ -666,5 +841,6 @@ void VariablesWidget::Update(
 
 	updateVariableCombos(rParams);
 	updateFidelity(rParams);
+	updateColorVarCombo();
 }
 

@@ -21,7 +21,9 @@ public:
 		setupUi(this);
 		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
 			(VariablesWidget::SCALAR | VariablesWidget::HGT),
-			VariablesWidget::TWOD);
+			(VariablesWidget::DimFlags)(VariablesWidget::TWOD),
+			(VariablesWidget::ColorFlags)
+			(VariablesWidget::PRIMARY));
 	}
 
 	void Update(
