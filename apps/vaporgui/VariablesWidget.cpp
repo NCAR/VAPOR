@@ -246,8 +246,6 @@ void VariablesWidget::configureDefaultColoring()
 {
     colorDisplay->setEnabled(false);
     colorSelectButton->setEnabled(false);
-    // colorInterpCombo->setEnabled(true);
-    // colorInterpLabel->setEnabled(true);
 
     _rParams->SetColorMapVariableName("");
     _rParams->SetUseSingleColor(false);
@@ -255,11 +253,8 @@ void VariablesWidget::configureDefaultColoring()
 
 void VariablesWidget::configureColorMappingToVariable(string var)
 {
-    cout << "configureColorMappingToVariable " << var << endl;
     colorDisplay->setEnabled(false);
     colorSelectButton->setEnabled(false);
-    // colorInterpCombo->setEnabled(true);
-    // colorInterpLabel->setEnabled(true);
 
     _rParams->SetColorMapVariableName(var);
     _rParams->SetUseSingleColor(false);
@@ -269,8 +264,6 @@ void VariablesWidget::configureConstantColor(string var)
 {
     colorDisplay->setEnabled(true);
     colorSelectButton->setEnabled(true);
-    // colorInterpCombo->setEnabled(false);
-    // colorInterpLabel->setEnabled(false);
 
     // Note: Constant color is associated with empty string,
     // so set rParams with ""

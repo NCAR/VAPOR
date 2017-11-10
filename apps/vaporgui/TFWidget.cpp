@@ -109,16 +109,10 @@ void TFWidget::configureDefaultColoring()
 
     _rParams->SetColorMapVariableName("");
     _rParams->SetUseSingleColor(false);
-    // MapperFunction* mf = _rParams->GetMapperFunc(var);
-
-    // cout << "null? " << (mf==NULL) << endl;
-
-    //_rParams->SetMapperFunc(var, mf);
 }
 
 void TFWidget::configureColorMappingToVariable(string var)
 {
-    cout << "configureColorMappingToVariable " << var << endl;
     colorDisplay->setEnabled(false);
     colorSelectButton->setEnabled(false);
     colorInterpCombo->setEnabled(true);
