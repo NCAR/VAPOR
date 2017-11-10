@@ -20,7 +20,8 @@ public:
     BarbVariablesSubtab(QWidget *parent)
     {
         setupUi(this);
-        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::VECTOR | VariablesWidget::HGT | VariablesWidget::COLOR), (VariablesWidget::DimFlags)(VariablesWidget::TWOD));
+        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::VECTOR | VariablesWidget::HGT | VariablesWidget::COLOR), (VariablesWidget::DimFlags)(VariablesWidget::TWOD),
+                                 (VariablesWidget::ColorFlags)(VariablesWidget::CONST | VariablesWidget::COLORVAR));
         //(VariablesWidget::DimFlags)(VariablesWidget::THREED));
     }
 
