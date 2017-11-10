@@ -135,10 +135,10 @@ GeometryWidget::~GeometryWidget()
 
 void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt)
 {
-    QString xTitle = QString("X Coordinates    Min:") + QString::number(minExt[0], 'g', 3) + QString("    Max:") + QString::number(maxExt[0], 'g', 3);
+    QString xTitle = QString("X Coordinates    Min: ") + QString::number(minExt[0], 'g', 3) + QString("    Max: ") + QString::number(maxExt[0], 'g', 3);
     xMinMaxGroupBox->setTitle(xTitle);
 
-    QString yTitle = QString("Y Coordinates    Min:") + QString::number(minExt[1], 'g', 3) + QString("    Max:") + QString::number(maxExt[1], 'g', 3);
+    QString yTitle = QString("Y Coordinates    Min: ") + QString::number(minExt[1], 'g', 3) + QString("    Max: ") + QString::number(maxExt[1], 'g', 3);
     yMinMaxGroupBox->setTitle(yTitle);
 
     if (minExt.size() < 3) {
@@ -146,7 +146,7 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
         zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
         this->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
-        QString zTitle = QString("Z Coordinates    Min:") + QString::number(minExt[2], 'g', 3) + QString("    Max:") + QString::number(maxExt[2], 'g', 3);
+        QString zTitle = QString("Z Coordinates    Min: ") + QString::number(minExt[2], 'g', 3) + QString("    Max: ") + QString::number(maxExt[2], 'g', 3);
         zMinMaxGroupBox->setTitle(zTitle);
     }
 }

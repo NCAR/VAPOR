@@ -115,40 +115,14 @@ ControlExec *MainForm::_controlExec = NULL;
 QEvent::Type MainForm::ParamsChangeEvent::_customEventType = QEvent::None;
 
 namespace {
-bool make_dataset_name(const vector<string> &currentPaths, const vector<string> &currentNames, const string &newPath, string &dataSetName
 
-)
+string makename(string file)
 {
-    dataSetName.clear();
+    QFileInfo qFileInfo(QString(file.c_str()));
 
-    assert(currentPaths.size() == currentNames.size());
-
-    string volume, dir, file;
-    Wasp::Splitpath(newPath, volume, dir, file, false);
-
-    Wasp::StrRmWhiteSpace(file);
-
-    // Remove any file extension
-    //
-    if (file.find(".") != std::string::npos) { file.erase(file.find_last_of("."), string::npos); }
-
-    for (int i = 0; i < currentNames.size(); i++) {
-        if (currentNames[i] == file) {
-            if (currentPaths[i] == newPath) {
-                //
-                // path and data set name already exist
-                dataSetName = file;
-                return (false);
-            } else {
-                file += "1";
-                dataSetName = file;
-                return (true);
-            }
-        }
-    }
-    dataSetName = file;
-    return (true);
+    return (qFileInfo.fileName().toStdString());
 }
+
 };    // namespace
 
 // Only the main program should call the constructor:
@@ -163,6 +137,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     _capturingAnimationVizName = "";
     _interactiveRefinementSpin = 0;
     _modeStatusWidget = 0;
+    _recentPath.clear();
 
     // For vertical screens, reverse aspect ratio for window size
     QSize screenSize = QDesktopWidget().availableGeometry().size();
@@ -184,7 +159,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     _stats = NULL;
     _plot = NULL;
     _stateChangeFlag = false;
-    _firstSession = true;
 
     createActions();
     createMenus();
@@ -689,10 +663,12 @@ void MainForm::sessionOpenHelper(string fileName)
 
     _vizWinMgr->Shutdown();
 
+    // Close any open data sets
+    //
     GUIStateParams *p = GetStateParams();
     vector<string>  currentPaths, currentDataSets;
     p->GetOpenDataSets(currentPaths, currentDataSets);
-    for (int i = 0; i < currentDataSets.size(); i++) { _controlExec->CloseData(currentDataSets[i]); }
+    for (int i = 0; i < currentDataSets.size(); i++) { closeDataHelper(currentDataSets[i]); }
 
     if (!fileName.empty()) {
         int rc = _controlExec->LoadState(fileName);
@@ -704,10 +680,16 @@ void MainForm::sessionOpenHelper(string fileName)
         _controlExec->LoadState();
     }
 
+    // Ugh. Load state will of course set open data sets in database
+    //
+    GUIStateParams *newP = GetStateParams();
+    newP->GetOpenDataSets(currentPaths, currentDataSets);
+    _recentPath = currentPaths.size() ? currentPaths[currentPaths.size() - 1] : ".";
+    newP->SetOpenDataSets(vector<string>(), vector<string>());
+
     // ControlExec::LoadState invalidates params state
     //
-    StartupParams * sP = GetStartupParams();
-    GUIStateParams *newP = GetStateParams();
+    StartupParams *sP = GetStartupParams();
     newP->SetCurrentSessionPath(fileName);
     newP->SetCurrentSessionPath(sP->GetSessionDir());
     newP->SetCurrentImagePath(sP->GetImageDir());
@@ -720,9 +702,7 @@ void MainForm::sessionOpenHelper(string fileName)
 //
 void MainForm::sessionOpen(QString qfileName)
 {
-    if (_firstSession) {
-        _firstSession = false;
-    } else if (_stateChangeFlag) {
+    if (_stateChangeFlag) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Are you sure?");
         msgBox.setText("The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session.");
@@ -922,8 +902,72 @@ void MainForm::batchSetup()
     // Here we provide panel to setup batch runs
 }
 
-void MainForm::loadDataHelper(vector<string> files, string prompt, string filter, string format, bool multi)
+// Close a data set and remove from database
+//
+void MainForm::closeDataHelper(string dataSetName)
 {
+    GUIStateParams *p = GetStateParams();
+    vector<string>  currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+
+    // Remove from database
+    //
+    vector<string>::iterator itr;
+
+    itr = std::find(currentDataSets.begin(), currentDataSets.end(), dataSetName);
+    if (itr == currentDataSets.end()) return;
+
+    // Find offset from begining of currentDataSets to itr so that we
+    // can access same element from currentPaths. Why I love c++. Sigh
+    //
+    std::vector<string>::difference_type offset = std::distance(currentDataSets.begin(), itr);
+    currentDataSets.erase(currentDataSets.begin() + offset);
+    currentPaths.erase(currentPaths.begin() + offset);
+    p->SetOpenDataSets(currentPaths, currentDataSets);
+
+    _controlExec->CloseData(dataSetName);
+}
+
+// Open a data set and remove from database. If data with same name
+// already exists close it first.
+//
+bool MainForm::openDataHelper(const vector<string> &files, string dataSetName, string format)
+{
+    GUIStateParams *p = GetStateParams();
+    vector<string>  currentPaths, currentDataSets;
+    p->GetOpenDataSets(currentPaths, currentDataSets);
+
+    // If data set with this name already exists, close it
+    //
+    for (int i = 0; i < currentDataSets.size(); i++) {
+        if (currentDataSets[i] == dataSetName) {
+            closeDataHelper(dataSetName);
+            p->GetOpenDataSets(currentPaths, currentDataSets);
+        }
+    }
+
+    // Open the data set
+    //
+    int rc = _controlExec->OpenData(files, dataSetName, format);
+    if (rc < 0) {
+        MSG_ERR("Failed to load data");
+        return (false);
+        ;
+    }
+
+    // Update the database
+    //
+    currentPaths.push_back(files[0]);
+    currentDataSets.push_back(dataSetName);
+    p->SetOpenDataSets(currentPaths, currentDataSets);
+
+    return (true);
+}
+
+void MainForm::loadDataHelper(const vector<string> &files, string prompt, string filter, string format, bool multi)
+{
+    vector<string> myFiles = files;
+
     GUIStateParams *p = GetStateParams();
     vector<string>  currentPaths, currentDataSets;
     p->GetOpenDataSets(currentPaths, currentDataSets);
@@ -933,31 +977,22 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
     // create a datamanager using those files
     // or metafiles.
     //
-    if (files.empty()) {
-        string defaultPath = currentPaths.size() ? currentPaths[currentPaths.size() - 1] : ".";
+    if (myFiles.empty()) {
+        string defaultPath = currentPaths.size() ? currentPaths[currentPaths.size() - 1] : _recentPath;
 
-        files = myGetOpenFileNames(prompt, defaultPath, filter, multi);
+        defaultPath = defaultPath.empty() ? "." : defaultPath;
+
+        myFiles = myGetOpenFileNames(prompt, defaultPath, filter, multi);
     }
 
-    if (files.empty()) return;
+    if (myFiles.empty()) return;
 
-    // Generate a new data set name if needed (not re-opening the same
-    // file)
+    // Generate data set name
     //
-    string dataSetName;
-    bool   newDataSet = make_dataset_name(currentPaths, currentDataSets, files[0], dataSetName);
+    string dataSetName = makename(myFiles[0]);
 
-    int rc = _controlExec->OpenData(files, dataSetName, format);
-    if (rc < 0) {
-        MSG_ERR("Failed to load data");
-        return;
-    }
-
-    if (newDataSet) {
-        currentPaths.push_back(files[0]);
-        currentDataSets.push_back(dataSetName);
-        p->SetOpenDataSets(currentPaths, currentDataSets);
-    }
+    bool status = openDataHelper(myFiles, dataSetName, format);
+    if (!status) return;
 
     // Reinitialize all tabs
     //
@@ -973,6 +1008,7 @@ void MainForm::loadDataHelper(vector<string> files, string prompt, string filter
     DataStatus *ds = _controlExec->getDataStatus();
     BoxSliderFrame::setDataStatus(ds);
 
+    _tabMgr->Update();
     _vizWinMgr->ReinitRouters();
 
     enableWidgets(true);
@@ -999,28 +1035,15 @@ void MainForm::closeData(string fileName)
 
     string dataSetName = a->text().toStdString();
 
-    _controlExec->CloseData(dataSetName);
+    closeDataHelper(dataSetName);
 
     GUIStateParams *p = GetStateParams();
     vector<string>  currentPaths, currentDataSets;
     p->GetOpenDataSets(currentPaths, currentDataSets);
 
-    vector<string>::iterator itr;
-
-    itr = std::find(currentDataSets.begin(), currentDataSets.end(), dataSetName);
-    assert(itr != currentDataSets.end());
-
-    // Find offset from begining of currentDataSets to itr so that we
-    // can access same element from currentPaths. Why I love c++. Sigh
-    //
-    std::vector<string>::difference_type offset = std::distance(currentDataSets.begin(), itr);
-    currentDataSets.erase(currentDataSets.begin() + offset);
-    currentPaths.erase(currentPaths.begin() + offset);
-
-    p->SetOpenDataSets(currentPaths, currentDataSets);
-
     if (currentDataSets.size() == 0) { enableWidgets(false); }
 
+    _tabMgr->Update();
     _vizWinMgr->ReinitRouters();
 }
 
@@ -1077,9 +1100,7 @@ vector<string> MainForm::myGetOpenFileNames(string prompt, string dir, string fi
 
 void MainForm::sessionNew()
 {
-    if (_firstSession) {
-        _firstSession = false;
-    } else if (_stateChangeFlag) {
+    if (_stateChangeFlag) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Are you sure?");
         msgBox.setText("The current session settings are not saved. Do you want to continue? \nYou can choose \"No\" now to go back and save the current session.");
@@ -1825,7 +1846,7 @@ void MainForm::captureSingleJpeg()
     GUIStateParams *p = GetStateParams();
     string          imageDir = p->GetCurrentImageSavePath();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), "Jpeg or Tiff images (*.jpg *.tif)");
+    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), "Jpeg images (*.jpg *.jpeg)");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
@@ -1838,8 +1859,8 @@ void MainForm::captureSingleJpeg()
     // Extract the path, and the root name, from the returned string.
     QFileInfo *fileInfo = new QFileInfo(fn);
     QString    suffix = fileInfo->suffix();
-    if (suffix != "jpg" && suffix != "tif") {
-        MSG_ERR("Image capture file name must end with .jpg or .tif");
+    if (suffix != "jpg" && suffix != "jpeg") {
+        MSG_ERR("Image capture file name must end with .jpg or .jpeg");
         return;
     }
 
@@ -1909,7 +1930,7 @@ void MainForm::startAnimCapture()
     showCitationReminder();
     GUIStateParams *p = GetStateParams();
     string          imageDir = p->GetCurrentImageSavePath();
-    QFileDialog     fileDialog(this, "Specify first file name for image capture sequence", imageDir.c_str(), "Jpeg or Tiff images (*.jpg *.tif )");
+    QFileDialog     fileDialog(this, "Specify first file name for image capture sequence", imageDir.c_str(), "Jpeg images (*.jpg *.jpeg )");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
@@ -1922,8 +1943,7 @@ void MainForm::startAnimCapture()
     QFileInfo *fileInfo = new QFileInfo(s);
 
     QString suffix = fileInfo->suffix();
-    if (suffix != "jpg" && suffix != "tif" && suffix != "tiff") suffix = "jpg";
-    if (suffix == "tiff") suffix = "tif";
+    if (suffix != "jpg" && suffix != "jpeg") suffix = "jpeg";
     // Save the path for future captures
     p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
 
