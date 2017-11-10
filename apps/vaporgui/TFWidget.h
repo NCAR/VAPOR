@@ -54,6 +54,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadTF(string varname);
 
     void getRange(float range[2], float values[2]);
+    float getOpacity();
 
   public slots:
     // Made public, to be called from EventRouter::Initialize
@@ -70,6 +71,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadTF();
     void setSingleColor();
     void forwardTFChange();
+    void opacitySliderChanged(int value);
 
   private:
     void connectWidgets();
