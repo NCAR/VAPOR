@@ -209,9 +209,6 @@ void MappingFrame::RefreshHistogram() {
 		return;
 	}
 
-	//cout << "Fudging box Z maximum!  Fix Grid!!" << endl;
-	//maxExts[2] = 5.f;
-
 	float v;
 	Grid::Iterator itr;
 	Grid::Iterator enditr = grid->end();
@@ -373,7 +370,6 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	updateMapperFunction(mapper);
 
 	deselectWidgets();
-
 
 	_histogram = getHistogram();
 	_minValue = getMinEditBound();
