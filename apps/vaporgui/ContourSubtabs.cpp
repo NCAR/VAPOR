@@ -71,9 +71,6 @@ void ContourAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *
     _dataMgr = dataMgr;
     _paramsMgr = paramsMgr;
 
-    _TFWidget->Update(dataMgr, paramsMgr, _cParams);
-    _ColorbarWidget->Update(dataMgr, paramsMgr, _cParams);
-
     // Apply params to lineThickness.  Get range
     // for thickness from gl system call
     //
@@ -97,6 +94,10 @@ void ContourAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *
     //
     int numContours = _cParams->GetNumContours();
     _countCombo->Update(1, 50, numContours);
+    if (_cParams->GetNumContours() < 2) {
+        contourSpacingSlider->setEnabled(false);
+        contourSpacingEdit->setEnabled(false);
+    }
 
     // Update contour spacing and minimum settings, which may
     // or may not be locked within the transfer function bounds.
@@ -112,6 +113,9 @@ void ContourAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *
     // Using this equation omits the space-slider jump after being moved.  Why?
     // double maxSpacing = (minComboMax - minComboMin) / (double)(numContours-1);
     _spacingCombo->Update(0, maxSpacing, spacing);
+
+    _TFWidget->Update(dataMgr, paramsMgr, _cParams);
+    _ColorbarWidget->Update(dataMgr, paramsMgr, _cParams);
 }
 
 void ContourAppearanceSubtab::disableSliders()
@@ -194,14 +198,22 @@ void ContourAppearanceSubtab::SetContourCount(int count)
 {
     disableSliders();
 
-    _countCombo->Update(1, 50, count);
+    //_countCombo->Update(1, 50, count);
 
-    bool locked = _cParams->GetLockToTF();
+    int                    previousCount = _cParams->GetNumContours();
+    bool                   locked = _cParams->GetLockToTF();
+    double                 lower, upper, spacing;
+    string                 varname = _cParams->GetVariableName();
+    VAPoR::MapperFunction *tf = _cParams->GetMapperFunc(varname);
     if (locked) {
-        double                 lower, upper, spacing;
-        string                 varname = _cParams->GetVariableName();
-        VAPoR::MapperFunction *tf = _cParams->GetMapperFunc(varname);
         lower = tf->getMinMapValue();
+        upper = tf->getMaxMapValue();
+        spacing = (upper - lower) / (count - 1);
+
+        _cMinCombo->Update(lower, upper, lower);
+        _spacingCombo->Update(0, upper - lower, spacing);
+    } else if (previousCount == 1) {
+        lower = _cParams->GetContourMin();
         upper = tf->getMaxMapValue();
         spacing = (upper - lower) / (count - 1);
 
@@ -209,7 +221,10 @@ void ContourAppearanceSubtab::SetContourCount(int count)
         _spacingCombo->Update(0, upper - lower, spacing);
     }
 
+    _countCombo->Update(1, 50, count);
+
     SetContourValues();
+
     enableSliders();
 }
 
@@ -239,11 +254,13 @@ void ContourAppearanceSubtab::SetContourMinimum(double value)
 
 void ContourAppearanceSubtab::SetContourSpacing(double spacing)
 {
+    int count = _cParams->GetNumContours();
+    if (count < 2) return;
+
     disableSliders();
 
     double min = GetContourMinOrMax("min");
     double max = GetContourMinOrMax("max");
-    int    count = _cParams->GetNumContours();
     double maxSpacing = (max - min) / (count - 1);
     _spacingCombo->Update(0, maxSpacing, spacing);
 
