@@ -72,19 +72,32 @@ bool Statistics::Update()
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string     currentDatasetName = guiParams->GetStatsDatasetName();
     assert(currentDatasetName != "" && currentDatasetName != "NULL");
-    VAPoR::DataMgr *  currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
-    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
+    int currentIdx = -1;
+    for (int i = 0; i < dmNames.size(); i++)
+        if (currentDatasetName == dmNames[i]) {
+            currentIdx = i;
+            break;
+        }
+    if (currentIdx == -1)    // currentDatasetName is closed!!!
+    {
+        currentDatasetName = dmNames[0];
+        currentIdx = 0;
+        guiParams->SetStatsDatasetName(currentDatasetName);
+
+        _validStats.Clear();    // since the old dataset is closed, we clear all stats.
+    }
+    VAPoR::DataMgr *         currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
+    StatisticsParams *       statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
+    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
+    if (_validStats.GetVariableCount() == 0)    // likely because the current data set is switched
+    {
+        for (int i = 0; i < enabledVars.size(); i++) _validStats.AddVariable(enabledVars[i]);
+    }
 
     // Update DataMgrCombo
     DataMgrCombo->blockSignals(true);
     DataMgrCombo->clear();
-    int currentIdx = -1;
-    for (int i = 0; i < dmNames.size(); i++) {
-        QString item = QString::fromStdString(dmNames[i]);
-        DataMgrCombo->addItem(item);
-        if (dmNames[i] == currentDatasetName) currentIdx = i;
-    }
-    assert(currentIdx != -1);
+    for (int i = 0; i < dmNames.size(); i++) DataMgrCombo->addItem(QString::fromStdString(dmNames[i]));
     DataMgrCombo->setCurrentIndex(currentIdx);
     DataMgrCombo->blockSignals(false);
 
@@ -101,8 +114,6 @@ bool Statistics::Update()
     std::vector<std::string> availVars = currentDmgr->GetDataVarNames(2, true);
     std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
     for (int i = 0; i < availVars3D.size(); i++) availVars.push_back(availVars3D[i]);
-    // remove variables already enabled
-    std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
     for (int i = 0; i < enabledVars.size(); i++)
         for (int rmIdx = 0; rmIdx < availVars.size(); rmIdx++)
             if (availVars[rmIdx] == enabledVars[i]) {
