@@ -7,13 +7,10 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 		_TFWidget->mappingFrame->setIsolineSliders(true);
 		_TFWidget->mappingFrame->setOpacityMapping(false);
 
-	
-
 		_lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
 		_countCombo = new Combo(contourCountEdit, contourCountSlider, true);
 		_cMinCombo = new Combo(contourMinEdit, contourMinSlider);
 		_spacingCombo = new Combo(contourSpacingEdit, contourSpacingSlider);
-
 	
 		connect(_lineWidthCombo, SIGNAL(valueChanged(double)), this,
 			SLOT(SetLineThickness(double)));
@@ -25,9 +22,6 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 			SLOT(SetContourSpacing(double)));
 		connect(lockToTFCheckbox, SIGNAL(toggled(bool)), this,
 			SLOT(LockToTFChecked(bool)));
-
-		connect(_TFWidget->mappingFrame, SIGNAL(mappingChanged()), this,
-			SLOT(MappingChanged()));
 		connect(_TFWidget, SIGNAL(emitChange()), this,
 			SLOT(EndTFChange()));
 }
