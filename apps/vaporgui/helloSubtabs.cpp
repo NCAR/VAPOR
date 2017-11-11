@@ -7,5 +7,5 @@ HelloVariablesSubtab::HelloVariablesSubtab(QWidget *parent) : QWidget(parent), U
 {
     setupUi(this);
 
-    _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT), (VariablesWidget::THREED));
+    _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT), (VariablesWidget::THREED), (VariablesWidget::ColorFlags)(0));
 }

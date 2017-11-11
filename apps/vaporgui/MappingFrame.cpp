@@ -282,8 +282,7 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     string varname = _rParams->GetColorMapVariableName();
     if (varname == "") { varname = _rParams->GetVariableName(); }
-
-    if (varname.empty()) return;
+    if (varname.empty() || varname == "Constant") return;
 
     MapperFunction *mapper;
     mapper = _rParams->GetMapperFunc(varname);
@@ -1349,6 +1348,7 @@ void MappingFrame::select(int hits, GLuint *selectionBuffer, Qt::KeyboardModifie
     } else if ((int)selectionBuffer[hitOffset + 3] > (int)ISO_WIDGET)    // must have selected one of the isoline widgets
     {
         deselectWidgets();
+        return;
         int selectedIndex = (int)selectionBuffer[hitOffset + 3] - (int)ISO_WIDGET - 1;
         _lastSelected = _isolineSliders[selectedIndex];
         _lastSelectedIndex = selectedIndex;

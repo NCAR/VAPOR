@@ -47,7 +47,7 @@ public:
     ImageVariablesSubtab(QWidget *parent)
     {
         setupUi(this);
-        _variablesWidget->Reinit(VariablesWidget::HGT, VariablesWidget::TWOD);
+        _variablesWidget->Reinit(VariablesWidget::HGT, VariablesWidget::TWOD, (VariablesWidget::ColorFlags)(0));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
