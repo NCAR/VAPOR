@@ -454,6 +454,7 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm) {
     _dm = ds->GetDataMgr(dataMgrs[0]);
     assert(_dm != NULL);
 
+    dataMgrCombo->clear();
     for (int i = 0; i < dataMgrs.size(); i++) {
         dataMgrCombo->addItem(QString::fromStdString(dataMgrs[i]));
     }
@@ -499,6 +500,8 @@ void Plot::reinitDataMgr() {
     if (_dm == NULL) {
         string err = "Could not find DataMgr named " + dmName;
         errReport(err);
+    } else {
+        initVariables();
     }
 }
 
@@ -709,7 +712,7 @@ void Plot::savePlotToFile() {
     if (fileInfo->suffix() != "png") {
         fileName.append(".png");
 
-        // Verify if we're overwriting existing video files
+        // Verify if we're overwriting existing files
         //
         if (std::ifstream(fileName.c_str())) {
             QMessageBox msgBox;
@@ -1605,14 +1608,22 @@ void Plot::print(bool doSpace) const {
 void Plot::initTimes() {
     _timeExtents.clear();
     _timeExtents.push_back(0);
-    _timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0]) - 1);
+    //_timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0])-1);
+    _timeExtents.push_back(_dm->GetNumTimeSteps());
 }
 
 void Plot::initExtents(int ts) {
     vector<double> minExts, maxExts;
 
-    int rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel,
-                                     minExts, maxExts);
+    int rc = -1;
+    if (!_vars3d.empty())
+        rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel, minExts, maxExts);
+    else if (!_vars.empty())
+        rc = _dm->GetVariableExtents(ts, _vars[0], _refLevel, minExts, maxExts);
+    else {
+        // No Valid Variable from this DataMgr!!!
+    }
+
     if (rc < 0) {
         string myErr;
         myErr = "Plot could not find minimum and maximum extents"
@@ -1675,7 +1686,9 @@ void Plot::initConstCheckboxes() {
 // Called whenever list of variables changes
 //
 void Plot::initVariables() {
+    addVarCombo->blockSignals(true);
     _vars.clear();
+    _vars3d.clear();
     addVarCombo->clear(); // Clear old variables
     addVarCombo->addItem("Add Variable:");
     vector<string> vars;
@@ -1696,6 +1709,7 @@ void Plot::initVariables() {
     for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) {
         addVarCombo->addItem(QString::fromStdString(*it));
     }
+    addVarCombo->blockSignals(false);
 }
 
 void Plot::newVarAdded(int index) {
