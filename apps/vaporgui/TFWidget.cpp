@@ -181,6 +181,15 @@ void TFWidget::getRange(float range[2], float values[2])
     values[1] = tf->getMaxMapValue();
 }
 
+float TFWidget::getOpacity()
+{
+    string          varName = _rParams->GetVariableName();
+    MapperFunction *tf = _rParams->GetMapperFunc(varName);
+    assert(tf);
+
+    return tf->getOpacityScale();
+}
+
 void TFWidget::updateColorInterpolation()
 {
     string varName = getVariableName();
@@ -228,6 +237,7 @@ void TFWidget::updateSliders()
     float range[2], values[2];
     getRange(range, values);
     _rangeCombo->Update(range[0], range[1], values[0], values[1]);
+    opacitySlider->setValue(getOpacity() * 100);
 }
 
 void TFWidget::updateMappingFrame()
@@ -282,9 +292,19 @@ void TFWidget::connectWidgets()
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
     connect(mappingFrame, SIGNAL(endChange()), this, SLOT(forwardTFChange()));
+    connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
 }
 
 void TFWidget::forwardTFChange() { emit emitChange(); }
+
+void TFWidget::opacitySliderChanged(int value)
+{
+    string          varName = _rParams->GetVariableName();
+    MapperFunction *tf = _rParams->GetMapperFunc(varName);
+    assert(tf);
+    tf->setOpacityScale(value / 100.f);
+    emit emitChange();
+}
 
 void TFWidget::setRange()
 {

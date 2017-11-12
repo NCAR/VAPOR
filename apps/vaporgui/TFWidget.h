@@ -55,7 +55,8 @@ public:
 
     void loadTF(string varname);
 
-    void getRange(float range[2], float values[2]);
+    void  getRange(float range[2], float values[2]);
+    float getOpacity();
 
 private slots:
     void fileSaveTF();
@@ -66,6 +67,7 @@ private slots:
     void colorInterpChanged(int index);
     void loadTF();
     void forwardTFChange();
+    void opacitySliderChanged(int value);
 
 private:
     void   collapseAutoUpdateHistoCheckbox();
