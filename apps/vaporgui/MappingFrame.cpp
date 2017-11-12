@@ -136,7 +136,7 @@ MappingFrame::~MappingFrame()
 void MappingFrame::RefreshHistogram()
 {
     string var = _rParams->GetColorMapVariableName();
-    if (var == "") { var = _rParams->GetVariableName(); }
+    if (var == "" || var == "Constant") { var = _rParams->GetVariableName(); }
     size_t ts = _rParams->GetCurrentTimestep();
 
     float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
@@ -281,7 +281,7 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
     _paramsMgr = paramsMgr;
 
     string varname = _rParams->GetColorMapVariableName();
-    if (varname == "") { varname = _rParams->GetVariableName(); }
+    if (varname == "" || varname == "Constant") { varname = _rParams->GetVariableName(); }
     if (varname.empty() || varname == "Constant") return;
 
     MapperFunction *mapper;
@@ -1876,7 +1876,7 @@ float MappingFrame::getOpacityData(float value)
 Histo *MappingFrame::getHistogram()
 {
     string varname = _rParams->GetColorMapVariableName();
-    if (varname == "") { varname = _rParams->GetVariableName(); }
+    if (varname == "" | varname == "Constant") { varname = _rParams->GetVariableName(); }
     //	string varname = _rParams->GetVariableName();
 
     MapperFunction *mapFunc = _rParams->GetMapperFunc(varname);
