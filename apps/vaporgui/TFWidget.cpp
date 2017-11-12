@@ -282,6 +282,7 @@ void TFWidget::Update(DataMgr *dataMgr,
     }
 
     updateSliders();
+    updateHisto();
 }
 
 void TFWidget::connectWidgets() {
