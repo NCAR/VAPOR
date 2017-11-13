@@ -218,6 +218,54 @@ map <string, vector <string>> DataStatus::getFirstVars(
 }
 
 void DataStatus::GetActiveExtents(
+	const ParamsMgr *paramsMgr, string winName, string datasetName, size_t ts,
+	vector <double> &minExts, vector <double> &maxExts
+) const {
+
+	vector <string> dataSetNames = GetDataMgrNames();
+	
+	map <string, vector <string>> varMap;
+
+	bool foundOne = false;
+	for (int i=0; i<dataSetNames.size(); i++) {
+		if (dataSetNames[i] != datasetName)
+			continue;
+
+		vector <RenderParams *> rParams;
+		paramsMgr->GetRenderParams(winName, dataSetNames[i], rParams);
+
+		vector <string> varnames;
+		for (int j=0; j<rParams.size(); j++) {
+			if (! rParams[j]->IsEnabled()) continue;
+			string varname = rParams[j]->GetVariableName();
+			if (! varname.empty()) {
+				varnames.push_back(varname);
+			}
+
+			vector <string> fvarnames = rParams[j]->GetFieldVariableNames();
+			for (int k=0; k<fvarnames.size(); k++) {
+				if (! fvarnames[k].empty()) {
+					varnames.push_back(fvarnames[k]);
+				}
+			}
+		}
+		if (varnames.size()) {
+			foundOne = true;
+		}
+		varMap[dataSetNames[i]] = varnames;
+	}
+
+	// If we didn't find any enabled variable use the first variables
+	// found in each data set
+	//
+	if (! foundOne) {
+		varMap = getFirstVars(dataSetNames);
+	}
+
+	GetExtents(ts, varMap, minExts, maxExts);
+}
+
+void DataStatus::GetActiveExtents(
 	const ParamsMgr *paramsMgr, string winName, size_t ts,
 	vector <double> &minExts, vector <double> &maxExts
 ) const {
