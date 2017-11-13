@@ -56,7 +56,9 @@ class PARAMS_API DataStatus {
     }
     virtual ~DataStatus();
 
-    int Open(const std::vector<string> &files, string name, string format);
+    int Open(
+        const std::vector<string> &files, const std::vector<string> &options,
+        string name, string format);
 
     void Close(string name);
 
@@ -173,6 +175,8 @@ class PARAMS_API DataStatus {
     void SetCacheSize(size_t sizeMB) {
         _cacheSize = sizeMB;
     }
+
+    string GetMapProjection(string dataSetName) const;
 
     //! Determine the minimum time step for which there is any data.
     //! \retval size_t value of smallest time step

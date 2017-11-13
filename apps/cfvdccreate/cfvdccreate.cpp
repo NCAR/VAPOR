@@ -216,12 +216,12 @@ int main(int argc, char **argv) {
     }
 
     size_t chunksize = 1024 * 1024 * 4;
-    int rc = vdc.Initialize(master, VDC::W, chunksize);
+    int rc = vdc.Initialize(master, vector<string>(), VDC::W, chunksize);
     if (rc < 0)
         return (1);
 
     DCCF dccf;
-    rc = dccf.Initialize(cffiles);
+    rc = dccf.Initialize(cffiles, vector<string>());
     if (rc < 0) {
         return (1);
     }

@@ -71,6 +71,9 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
 
     virtual void updateTab();
 
+  signals:
+    void Proj4StringChanged();
+
   protected:
     virtual void _confirmText(){};
     virtual void _updateTab();
