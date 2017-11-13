@@ -146,6 +146,15 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const
 
     _transform = new Transform(ssave);
     _transform->SetParent(this);
+
+    vector<double> minExt;
+    vector<double> maxExt;
+    vector<double> origin;
+
+    _Box->GetExtents(minExt, maxExt);
+    origin.resize(minExt.size());
+    for (int i = 0; i < minExt.size(); i++) origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5;
+    _transform->SetOrigin(origin);
 }
 
 RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node, int maxdim) : ParamsBase(ssave, node)
