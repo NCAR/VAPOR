@@ -53,7 +53,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
-      <number>0</number>
+      <number>-1</number>
      </property>
      <property name="sizeConstraint">
       <enum>QLayout::SetMaximumSize</enum>
