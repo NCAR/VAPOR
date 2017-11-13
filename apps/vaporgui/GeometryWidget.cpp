@@ -83,9 +83,12 @@ void GeometryWidget::Reinit(Flags flags) {
 	_flags = flags;
 	if (_flags & TWOD) {
 		zMinMaxGroupBox->hide();
+		zMinMaxGroupBox->resize(0,0);
+		tab_3->adjustSize();
 		minMaxTab->adjustSize();
 		xMinMaxGroupBox->adjustSize();
 		yMinMaxGroupBox->adjustSize();
+		adjustSize();
 	}
     else if(_flags & THREED )
     {
