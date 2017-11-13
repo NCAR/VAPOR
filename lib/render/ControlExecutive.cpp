@@ -463,10 +463,11 @@ int ControlExec::openDataHelper(bool reportErrs) {
 }
 
 int ControlExec::OpenData(
-	vector <string> files, string dataSetName, string typ
+	const std::vector <string> &files, const std::vector <string> &options,
+	string dataSetName, string typ
 ) {
 
-	int rc = _dataStatus->Open(files, dataSetName, typ);
+	int rc = _dataStatus->Open(files, options, dataSetName, typ);
 	if (rc < 0) {
 		SetErrMsg("Failure to open data set of type \"%s\"", typ.c_str());
 		return -1;

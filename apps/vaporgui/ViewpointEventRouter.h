@@ -76,6 +76,9 @@ public:
 
  virtual void updateTab();
 
+signals:
+ void Proj4StringChanged();
+
 protected:
 	virtual void _confirmText() {};
 	virtual void _updateTab();
@@ -91,6 +94,7 @@ private:
 	void updateLightChanged();
 
   VAPoR::ParamsBase *GetActiveParams() const;
+
 	
 private slots:
 	void setCameraChanged();
