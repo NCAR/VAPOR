@@ -697,7 +697,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="colorSettingsTab">
      <property name="currentIndex">
       <number>0</number>
      </property>
