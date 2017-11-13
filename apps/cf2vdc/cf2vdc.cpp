@@ -279,12 +279,12 @@ int main(int argc, char **argv) {
     VDCNetCDF vdc(opt.nthreads);
 
     size_t chunksize = 1024 * 1024 * 4;
-    int rc = vdc.Initialize(master, VDC::A, chunksize);
+    int rc = vdc.Initialize(master, vector<string>(), VDC::A, chunksize);
     if (rc < 0)
         exit(1);
 
     DCCF dccf;
-    rc = dccf.Initialize(cffiles);
+    rc = dccf.Initialize(cffiles, vector<string>());
     if (rc < 0) {
         exit(1);
     }
