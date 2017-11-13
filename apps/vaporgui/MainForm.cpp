@@ -566,7 +566,7 @@ void MainForm::hookupSignals() {
 		this, SLOT(viewRegion())
 	);
 
-	// Slots on the VizWinMgr
+	// Signals on the VizWinMgr
 	//
 	connect (
 		_tileAction, SIGNAL(triggered()),
@@ -595,6 +595,16 @@ void MainForm::hookupSignals() {
 	connect (
 		_windowSelector, SIGNAL(newWin()),
 		_vizWinMgr, SLOT(LaunchVisualizer())
+	);
+
+	// Slots on the ViewpointEventRouter
+	//
+	ViewpointEventRouter* vpRouter = (ViewpointEventRouter*)
+        _vizWinMgr->GetEventRouter(ViewpointEventRouter::GetClassType());
+
+	connect(
+		vpRouter, SIGNAL(Proj4StringChanged()), 
+		this, SLOT( setProj4String())
 	);
 }
 
@@ -857,10 +867,9 @@ void MainForm::sessionOpenHelper(string fileName) {
 	// Close any open data sets
 	//
 	GUIStateParams *p = GetStateParams();
-	vector <string> currentPaths, currentDataSets;
-	p->GetOpenDataSets(currentPaths, currentDataSets);
-	for (int i=0; i<currentDataSets.size(); i++) {
-		closeDataHelper(currentDataSets[i]);
+	vector <string> dataSetNames = p->GetOpenDataSetNames();
+	for (int i=0; i<dataSetNames.size(); i++) {
+		closeDataHelper(dataSetNames[i]);
 	}
 
 	if (! fileName.empty()) {
@@ -877,9 +886,18 @@ void MainForm::sessionOpenHelper(string fileName) {
 	// Ugh. Load state will of course set open data sets in database
 	//
 	GUIStateParams *newP = GetStateParams();
-	newP->GetOpenDataSets(currentPaths, currentDataSets);
-	_recentPath = currentPaths.size() ? currentPaths[currentPaths.size()-1] : ".";
-	newP->SetOpenDataSets(vector <string>(), vector <string>());
+	dataSetNames = newP->GetOpenDataSetNames();
+	if (dataSetNames.size()) {
+		vector <string> p = newP->GetOpenDataSetPaths(dataSetNames[dataSetNames.size()-1]);
+		_recentPath = p[p.size()-1];
+	}
+	else {
+		_recentPath = ".";
+	}
+
+	for (int i=0; i<dataSetNames.size(); i++) {
+		newP->RemoveOpenDateSet(dataSetNames[i]);
+	}
 
 
 	// ControlExec::LoadState invalidates params state
@@ -1152,25 +1170,8 @@ void MainForm::batchSetup(){
 //
 void MainForm::closeDataHelper(string dataSetName) {
 	GUIStateParams *p = GetStateParams();
-	vector <string> currentPaths, currentDataSets;
-	p->GetOpenDataSets(currentPaths, currentDataSets);
 
-	// Remove from database
-	//
-	vector <string>::iterator itr;
-
-	itr = std::find(currentDataSets.begin(),currentDataSets.end(), dataSetName);
-	if (itr == currentDataSets.end()) return;
-
-	// Find offset from begining of currentDataSets to itr so that we
-	// can access same element from currentPaths. Why I love c++. Sigh
-	//
-	std::vector<string>::difference_type offset = std::distance(
-		currentDataSets.begin(), itr
-	);
-	currentDataSets.erase(currentDataSets.begin() + offset);
-	currentPaths.erase(currentPaths.begin() + offset);
-	p->SetOpenDataSets(currentPaths, currentDataSets);
+	p->RemoveOpenDateSet(dataSetName);
 
 	_controlExec->CloseData(dataSetName);
 }
@@ -1179,37 +1180,34 @@ void MainForm::closeDataHelper(string dataSetName) {
 // already exists close it first.
 //
 bool MainForm::openDataHelper(
-	const vector <string> &files,
 	string dataSetName,
-	string format
+	string format,
+	const vector <string> &files,
+	const vector <string> &options
 ) {
 
 	GUIStateParams *p = GetStateParams();
-	vector <string> currentPaths, currentDataSets;
-	p->GetOpenDataSets(currentPaths, currentDataSets);
+	vector <string> dataSetNames =  p->GetOpenDataSetNames();
 
 	// If data set with this name already exists, close it
 	//
-	for (int i=0; i<currentDataSets.size(); i++) {
-		if (currentDataSets[i] == dataSetName) {
+	for (int i=0; i<dataSetNames.size(); i++) {
+		if (dataSetNames[i] == dataSetName) {
 			closeDataHelper(dataSetName);
-			p->GetOpenDataSets(currentPaths, currentDataSets);
 		}
 	}
 
 	// Open the data set
 	//
-	int rc = _controlExec->OpenData(files, dataSetName, format);
+	int rc = _controlExec->OpenData(
+		files, options, dataSetName, format
+	);
 	if (rc<0) {
 		MSG_ERR("Failed to load data");
 		return (false);;
 	}
 
-	// Update the database
-	//
-	currentPaths.push_back(files[0]);
-	currentDataSets.push_back(dataSetName);
-	p->SetOpenDataSets(currentPaths, currentDataSets);
+	p->InsertOpenDateSet(dataSetName, format, files);
 
 	return(true);
 }
@@ -1221,8 +1219,7 @@ void MainForm::loadDataHelper(
 	vector <string> myFiles = files;
 
 	GUIStateParams *p = GetStateParams();
-	vector <string> currentPaths, currentDataSets;
-	p->GetOpenDataSets(currentPaths, currentDataSets);
+	vector <string> dataSetNames =  p->GetOpenDataSetNames();
 
 	// This launches a panel that enables the
     // user to choose input data files, then to
@@ -1230,11 +1227,14 @@ void MainForm::loadDataHelper(
     // or metafiles.  
 	//
 	if (myFiles.empty()) {
-
-		string defaultPath = currentPaths.size() ? 
-			currentPaths[currentPaths.size()-1] : _recentPath;
-
-		defaultPath = defaultPath.empty() ? "." : defaultPath; 
+		string defaultPath = ".";
+		if (dataSetNames.size()) {
+			string lastData = dataSetNames[dataSetNames.size()-1];
+			defaultPath = p->GetOpenDataSetPaths(lastData)[0];
+		}
+		else {
+			defaultPath = _recentPath;
+		}
 
 		myFiles = myGetOpenFileNames(
 			prompt, defaultPath, filter, multi
@@ -1247,7 +1247,7 @@ void MainForm::loadDataHelper(
 	//
 	string dataSetName = makename(myFiles[0]);
 
-	bool status = openDataHelper(myFiles, dataSetName, format);
+	bool status = openDataHelper(dataSetName, format, myFiles );
 	if (! status) return;
 
 	// Reinitialize all tabs
@@ -1300,10 +1300,9 @@ void MainForm::closeData(string fileName) {
 	closeDataHelper(dataSetName);
 
 	GUIStateParams *p = GetStateParams();
-	vector <string> currentPaths, currentDataSets;
-	p->GetOpenDataSets(currentPaths, currentDataSets);
+	vector <string> dataSetNames = p->GetOpenDataSetNames();
 
-	if (currentDataSets.size()==0) {
+	if (dataSetNames.size()==0) {
 		enableWidgets(false);
 	}
 
@@ -1984,6 +1983,37 @@ void MainForm::viewRegion()
     vRouter->CenterSubRegion();
 } 
 
+void MainForm::setProj4String() {
+	GUIStateParams *p = GetStateParams();
+
+	
+	vector <string> dataSets =  p->GetOpenDataSetNames();
+
+	string proj4String = p->GetProjectionString();
+
+	DataStatus* ds = _controlExec->getDataStatus();
+
+	// Close and re-open any data set that doesn't have a matching
+	// proj4 string
+	//
+	for (int i=0; i<dataSets.size(); i++ ) {
+		string currentString = ds->GetMapProjection(dataSets[i]);
+
+		if (currentString != proj4String) { 
+			closeDataHelper(dataSets[i]);
+		}
+
+		vector <string> options = {
+			"-proj4", 
+			proj4String
+		};
+		(void) openDataHelper(
+			dataSets[i], p->GetOpenDataSetFormat(dataSets[i]),
+			p->GetOpenDataSetPaths(dataSets[i]), options
+		);
+	}
+}
+
 
 bool MainForm::event(QEvent* e){
 
@@ -2054,19 +2084,18 @@ void MainForm::updateMenus() {
 	// Close menu
 	//
 	_closeVDCMenu->clear();
-	vector <string> currentPaths, currentDataSets;
-	p->GetOpenDataSets(currentPaths, currentDataSets);
-	int size = currentDataSets.size();
+	vector <string> dataSetNames = p->GetOpenDataSetNames();
+	int size = dataSetNames.size();
 	if (size < 1)
 		_closeVDCMenu->setEnabled(false);
 	else {
 		_closeVDCMenu->setEnabled(true);
-		for (int i=0; i<currentDataSets.size(); i++) {
+		for (int i=0; i<dataSetNames.size(); i++) {
 
 			// Add menu option to close the dataset in the File menu
 			//
 			QAction* closeAction = new QAction(
-				QString::fromStdString(currentDataSets[i]),
+				QString::fromStdString(dataSetNames[i]),
 				_closeVDCMenu
 			);
 			_closeVDCMenu->addAction(closeAction);

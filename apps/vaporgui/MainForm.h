@@ -199,7 +199,10 @@ private:
 	void closeDataHelper(string dataSetName);
 
 	bool openDataHelper(
-		const std::vector <string> &files, string dataSetName, string format
+		string dataSetName,
+		string format,
+		const vector <string> &files,
+		const vector <string> &options = vector <string> ()
 	);
 
 	void loadDataHelper(
@@ -372,6 +375,8 @@ private slots:
 
 	//! Move camera in or out to make current region visible
 	void viewRegion();
+
+	void setProj4String();
 
 };
 #endif // MAINFORM_H

@@ -397,7 +397,9 @@ DataMgr::~DataMgr(
 
 }
 
-int DataMgr::Initialize(const vector <string> &files) {
+int DataMgr::Initialize(
+	const vector <string> &files, const std::vector <string> &options
+) {
 
 	Clear();
 	if (_dc) delete _dc;
@@ -422,7 +424,7 @@ int DataMgr::Initialize(const vector <string> &files) {
 		return(-1);
 	}
 
-	int rc = _dc->Initialize(files);
+	int rc = _dc->Initialize(files, options);
 	if (rc<0) {
 		SetErrMsg("Failed to initialize data importer");
 		return(-1);

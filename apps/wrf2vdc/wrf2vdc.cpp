@@ -219,11 +219,11 @@ int	main(int argc, char **argv) {
 
 
 	size_t chunksize = 1024*1024*4;
-	int rc = vdc.Initialize(master, VDC::A, chunksize);
+	int rc = vdc.Initialize(master, vector <string> (), VDC::A, chunksize);
 	if (rc<0) exit(1);
 
 	DCWRF	dcwrf;
-	rc = dcwrf.Initialize(wrffiles);
+	rc = dcwrf.Initialize(wrffiles, vector <string> ());
 	if (rc<0) {
 		exit(1);
 	}
