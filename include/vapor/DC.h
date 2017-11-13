@@ -1298,10 +1298,13 @@ public:
     //! \param[in] path Path name of file that contains, or will
     //! contain, the DC master file for this data collection
     //!
+    //! \param[in] options A vector of option pairs (name, value) that
+    //! may be accepted by the derived class.
+    //!
     //! \retval status A negative int is returned on failure
     //!
     //
-    virtual int Initialize(const vector<string> &paths) = 0;
+    virtual int Initialize(const std::vector<string> &paths, const std::vector<string> &options = std::vector<string>()) = 0;
 
     //! Return a dimensions's definition
     //!

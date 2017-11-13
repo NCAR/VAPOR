@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 
     VDCNetCDF vdc(opt.nthreads);
 
-    int rc = vdc.Initialize(vdcmaster, VDC::R, 4 * 1024 * 1024);
+    int rc = vdc.Initialize(vdcmaster, vector<string>(), VDC::R, 4 * 1024 * 1024);
     if (rc < 0) exit(1);
 
     vector<size_t> dims;

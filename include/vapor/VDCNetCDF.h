@@ -101,12 +101,12 @@ public:
     //! \param[in] chunksizehint : NetCDF chunk size hint.  A value of
     //! zero results in NC_SIZEHINT_DEFAULT being used.
     //
-    virtual int Initialize(const vector<string> &paths, AccessMode mode, size_t chunksizehint = 0);
-    virtual int Initialize(string path, AccessMode mode, size_t chunksizehint = 0)
+    virtual int Initialize(const vector<string> &paths, const vector<string> &options, AccessMode mode, size_t chunksizehint = 0);
+    virtual int Initialize(string path, const vector<string> &options, AccessMode mode, size_t chunksizehint = 0)
     {
         std::vector<string> paths;
         paths.push_back(path);
-        return (Initialize(paths, mode, chunksizehint));
+        return (Initialize(paths, options, mode, chunksizehint));
     }
 
     //! Return the master file size threshold

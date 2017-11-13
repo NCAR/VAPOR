@@ -222,8 +222,8 @@ public:
     //!
     //! \sa EndDefine();
     //
-    virtual int Initialize(const std::vector<string> &paths, AccessMode mode);
-    virtual int Initialize(const std::vector<string> &paths) { return (Initialize(paths, R)); }
+    virtual int Initialize(const std::vector<string> &paths, const std::vector<string> &options, AccessMode mode);
+    virtual int Initialize(const std::vector<string> &paths, const std::vector<string> &options) { return (Initialize(paths, options, R)); }
 
     //! Sets various parameters for storage blocks for subsequent variable
     //! definitions
@@ -1180,6 +1180,7 @@ public:
     friend std::ostream &operator<<(std::ostream &o, const VDC &vdc);
 
 private:
+    string              _proj4StringOption;
     std::vector<string> _newUniformVars;
 
 protected:

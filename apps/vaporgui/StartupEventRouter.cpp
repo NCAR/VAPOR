@@ -286,10 +286,14 @@ void StartupEventRouter::copyLatestSession()
 void StartupEventRouter::copyLatestMetadata()
 {
     GUIStateParams *p = GetStateParams();
-    vector<string>  paths, names;
-    p->GetOpenDataSets(paths, names);
+    vector<string>  names = p->GetOpenDataSetNames();
 
-    string latestPath = paths.size() ? paths[paths.size() - 1] : ".";
+    string latestPath;
+    if (names.size()) {
+        latestPath = p->GetOpenDataSetPaths(names[names.size() - 1])[0];
+    } else {
+        latestPath = ".";
+    }
 
     QFileInfo qFileInfo(QString(latestPath.c_str()));
 

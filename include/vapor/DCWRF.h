@@ -47,7 +47,7 @@ public:
     //!
     //! \sa EndDefine();
     //
-    virtual int Initialize(const vector<string> &paths);
+    virtual int Initialize(const vector<string> &paths, const std::vector<string> &options);
 
     //! \copydoc DC::GetDimension()
     //!
@@ -194,7 +194,8 @@ private:
 
     int      _ovr_fd;         // File descriptor for currently opened file
     string   _ovr_varname;    // name of currently opened variable
-    string   _projString;
+    string   _proj4String;
+    string   _proj4StringOption;
     Proj4API _proj4API;
 
     class DerivedVarHorizontal;

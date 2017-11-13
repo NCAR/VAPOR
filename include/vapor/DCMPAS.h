@@ -49,7 +49,7 @@ public:
     //!
     //! \sa EndDefine();
     //
-    virtual int Initialize(const vector<string> &paths);
+    virtual int Initialize(const vector<string> &paths, const std::vector<string> &options);
 
     //! \copydoc DC::GetDimension()
     //!
@@ -185,6 +185,7 @@ private:
     int    _ovr_fd;         // File descriptor for currently opened file
     string _ovr_varname;    // File name for currently opened file
 
+    string                                      _proj4StringOption;
     string                                      _proj4String;
     Proj4API *                                  _proj4API;
     std::map<string, DC::Dimension>             _dimsMap;

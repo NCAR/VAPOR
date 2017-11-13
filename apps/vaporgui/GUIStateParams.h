@@ -53,9 +53,17 @@ public:
     //! \param[in] path string
     void SetCurrentSessionPath(string path);
 
-    //! Static method identifies the current session file
-    //! \retval session file path
-    void GetOpenDataSets(std::vector<string> &paths, std::vector<string> &names) const;
+    //! Get names of currently opened data sets
+    //!
+    std::vector<string> GetOpenDataSetNames() const { return (m_openDataSets->GetNames()); }
+
+    std::vector<string> GetOpenDataSetPaths(string dataSetName) const;
+
+    string GetOpenDataSetFormat(string dataSetName) const;
+
+    void RemoveOpenDateSet(string dataSetName) { m_openDataSets->Remove(dataSetName); }
+
+    void InsertOpenDateSet(string dataSetName, string format, const std::vector<string> &paths);
 
     //! method sets the current session path
     //! \param[in] path string
@@ -108,6 +116,37 @@ public:
     std::string GetStatsDatasetName() const;
     void        SetStatsDatasetName(std::string &name);
 
+    void SetProjectionString(string proj4String) { SetValueString(m_proj4StringTag, "Set Proj4 projection string", proj4String); }
+
+    string GetProjectionString() const
+    {
+        string defaultv;
+        return (GetValueString(m_proj4StringTag, defaultv));
+    }
+
+    class DataSetParam : public ParamsBase {
+    public:
+        DataSetParam(VAPoR::ParamsBase::StateSave *ssave) : ParamsBase(ssave, DataSetParam::GetClassType()) {}
+
+        DataSetParam(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node) : ParamsBase(ssave, node) {}
+
+        virtual ~DataSetParam(){};
+
+        void SetPaths(const std::vector<string> &paths) { SetValueStringVec(m_dataSetPathsTag, "Data set paths", paths); }
+
+        std::vector<string> GetPaths() const { return (GetValueStringVec(m_dataSetPathsTag)); };
+
+        void SetFormat(string format) { SetValueString(m_dataSetFormatTag, "Data set format", format); }
+
+        string GetFormat() const { return (GetValueString(m_dataSetFormatTag, "vdc")); }
+
+        static string GetClassType() { return ("DataSetParam"); }
+
+    private:
+        static const string m_dataSetPathsTag;
+        static const string m_dataSetFormatTag;
+    };
+
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("GUIStateParams"); }
@@ -133,15 +172,18 @@ private:
     static const string m_activeVisualizer;
     static const string m_pathParamsTag;
     static const string m_sessionFileTag;
-    static const string m_openDataTag;
     static const string m_imagePathTag;
     static const string m_imageSavePathTag;
     static const string m_pythonPathTag;
     static const string m_flowPathTag;
     static const string m_tfPathTag;
     static const string m_statsDatasetNameTag;
+    static const string m_proj4StringTag;
+    static const string m_openDataSetsTag;
 
     MouseModeParams *m_mouseModeParams;
+
+    VAPoR::ParamsContainer *m_openDataSets;
 
     void _init();
 };

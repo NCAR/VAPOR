@@ -137,7 +137,7 @@ public:
     //! message will be logged with MyBase::SetErrMsg()
     //!
     //
-    virtual int Initialize(const std::vector<string> &files);
+    virtual int Initialize(const vector<string> &paths, const std::vector<string> &options);
 
     //! \copydoc DC::GetDimensionNames()
     //
