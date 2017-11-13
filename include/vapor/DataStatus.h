@@ -83,12 +83,19 @@ class PARAMS_API DataStatus {
     //! If no variable is active all elements of \p minExts will be zero,
     //! and all elements of maxExts will be one.
     //!
+    //! \param[in] datasetName If provided, will only return extents for
+    //! that dataset.
+    //!
     //! \param[in] paramsMgr Active variables are determined by
     //! querying the ParamsMgr.
     //! \param[out] minExts
     //!
     //! \sa ParamsMgr::GetRenderParams()
     //
+    void GetActiveExtents(
+        const ParamsMgr *paramsMgr, string winName, string datasetName, size_t ts,
+        vector<double> &minExts, vector<double> &maxExts) const;
+
     void GetActiveExtents(
         const ParamsMgr *paramsMgr, string winName, size_t ts,
         vector<double> &minExts, vector<double> &maxExts) const;

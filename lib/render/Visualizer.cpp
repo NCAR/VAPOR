@@ -204,12 +204,12 @@ void Visualizer::applyTransforms(int i) {
     glRotatef(rotations[2], 0, 0, 1);
 #endif
 
-    glTranslatef(-origin[0], -origin[1], -origin[2]);
+    glTranslatef(origin[0], origin[1], origin[2]);
     glScalef(scales[0], scales[1], scales[2]);
     glRotatef(rotations[0], 1, 0, 0);
     glRotatef(rotations[1], 0, 1, 0);
     glRotatef(rotations[2], 0, 0, 1);
-    glTranslatef(origin[0], origin[1], origin[2]);
+    glTranslatef(-origin[0], -origin[1], -origin[2]);
 
     glTranslatef(translations[0], translations[1], translations[2]);
 
