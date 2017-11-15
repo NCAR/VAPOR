@@ -137,6 +137,7 @@ void VariablesWidget::Reinit(
 		!(_colorFlags & COLORVAR)) {
 		collapseColorVarSettings();
 		collapseConstColorSettings();
+		colorSettingsTab->hide();
 	}
 }
 
