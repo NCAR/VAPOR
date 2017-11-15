@@ -177,6 +177,7 @@ class PARAMS_API DataStatus {
     }
 
     string GetMapProjection(string dataSetName) const;
+    string GetMapProjectionDefault(string dataSetName) const;
 
     //! Determine the minimum time step for which there is any data.
     //! \retval size_t value of smallest time step

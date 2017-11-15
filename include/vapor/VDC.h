@@ -784,6 +784,10 @@ class VDF_API VDC : public VAPoR::DC {
     //
     virtual string GetMapProjection() const;
 
+    virtual string GetMapProjectionDefault() const {
+        return (GetMapProjection());
+    }
+
     //! Set a map projection string for a data variable
     //!
     //! This method sets a properly formatted Proj4 map projection string

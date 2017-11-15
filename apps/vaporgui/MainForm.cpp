@@ -1842,6 +1842,8 @@ void MainForm::viewRegion() {
 void MainForm::setProj4String() {
     GUIStateParams *p = GetStateParams();
 
+    _App->removeEventFilter(this);
+
     vector<string> dataSets = p->GetOpenDataSetNames();
 
     string proj4String = p->GetProjectionString();
@@ -1855,16 +1857,23 @@ void MainForm::setProj4String() {
         string currentString = ds->GetMapProjection(dataSets[i]);
 
         if (currentString != proj4String) {
-            closeDataHelper(dataSets[i]);
-        }
 
-        vector<string> options = {
-            "-proj4",
-            proj4String};
-        (void)openDataHelper(
-            dataSets[i], p->GetOpenDataSetFormat(dataSets[i]),
-            p->GetOpenDataSetPaths(dataSets[i]), options);
+            // Save list of files and format before close so we can re-open
+            //
+            vector<string> files = p->GetOpenDataSetPaths(dataSets[i]);
+            string format = p->GetOpenDataSetFormat(dataSets[i]);
+
+            closeDataHelper(dataSets[i]);
+
+            vector<string> options = {
+                "-proj4",
+                proj4String};
+
+            (void)openDataHelper(dataSets[i], format, files, options);
+        }
     }
+
+    _App->installEventFilter(this);
 }
 
 bool MainForm::event(QEvent *e) {

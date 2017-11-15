@@ -109,6 +109,12 @@ class VDF_API DCCF : public VAPoR::DC {
     //!
     virtual string GetMapProjection() const;
 
+    //! \copydoc DC::GetMapProjectionDefault()
+    //!
+    virtual string GetMapProjectionDefault() const {
+        return (_proj4StringDefault);
+    }
+
     //! \copydoc DC::GetAtt()
     //!
     virtual bool GetAtt(
@@ -216,6 +222,7 @@ class VDF_API DCCF : public VAPoR::DC {
     int _ovr_fd; // File descriptor for currently opened file
 
     string _proj4StringOption;
+    string _proj4StringDefault;
     string _proj4String;
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar> _coordVarsMap;
