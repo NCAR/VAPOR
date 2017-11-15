@@ -119,6 +119,12 @@ public:
 	return(_proj4String);
  }
 
+ //! \copydoc DC::GetMapProjectionDefault(string)
+ //!
+ virtual string GetMapProjectionDefault() const {
+	return(_proj4StringDefault);
+ }
+
 
  //! \copydoc DC::GetAtt()
  //!
@@ -241,6 +247,7 @@ private:
  string _ovr_varname;	// File name for currently opened file
 
  string _proj4StringOption;
+ string _proj4StringDefault;
  string _proj4String;
  Proj4API *_proj4API;
  std::map <string, DC::Dimension> _dimsMap;

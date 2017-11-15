@@ -335,6 +335,14 @@ string DataStatus::GetMapProjection(string dataSetName) const {
 
 }
 
+string DataStatus::GetMapProjectionDefault(string dataSetName) const {
+	DataMgr *dataMgr = GetDataMgr(dataSetName);
+	if (! dataMgr) return("");
+
+	return(dataMgr->GetMapProjectionDefault());
+
+}
+
 namespace {
 int find_nearest(const vector <double> &timeCoords, double time) {
 	if (! timeCoords.size()) return(-1);
