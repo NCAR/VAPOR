@@ -6,7 +6,7 @@
 //															*
 //************************************************************************/
 //
-//	File:		ViewpointEventRouter.cpp
+//	File:		NavigationEventRouter.cpp
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -33,10 +33,10 @@
 #include <qlabel.h>
 #include <qfiledialog.h>
 #include <qmessagebox.h>
-#include "ViewpointEventRouter.h"
+#include "NavigationEventRouter.h"
 #include "vapor/ViewpointParams.h"
 #include "vapor/ControlExecutive.h"
-#include "ui_vizTab.h"
+#include "ui_NavigationTab.h"
 #include "VizWinMgr.h"
 #include <vector>
 #include <string>
@@ -46,7 +46,7 @@
 
 using namespace VAPoR;
 
-ViewpointEventRouter::ViewpointEventRouter(QWidget *parent, VizWinMgr *vizMgr, ControlExec *ce) : QWidget(parent), Ui_VizTab(), EventRouter(ce, ViewpointParams::GetClassType())
+NavigationEventRouter::NavigationEventRouter(QWidget *parent, VizWinMgr *vizMgr, ControlExec *ce) : QWidget(parent), Ui_NavigationTab(), EventRouter(ce, ViewpointParams::GetClassType())
 {
     setupUi(this);
 
@@ -63,12 +63,12 @@ ViewpointEventRouter::ViewpointEventRouter(QWidget *parent, VizWinMgr *vizMgr, C
     stereoSeparationEdit->setEnabled(false);
 }
 
-ViewpointEventRouter::~ViewpointEventRouter() {}
+NavigationEventRouter::~NavigationEventRouter() {}
 
 /**********************************************************
  * Whenever a new viztab is created it must be hooked up here
  ************************************************************/
-void ViewpointEventRouter::hookUpTab()
+void NavigationEventRouter::hookUpTab()
 {
     // connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
     // connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
@@ -115,7 +115,7 @@ void ViewpointEventRouter::hookUpTab()
     connect(stereoSeparationEdit, SIGNAL(returnPressed()), this, SLOT(notImplemented()));
 }
 
-void ViewpointEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
+void NavigationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();
 
@@ -132,7 +132,7 @@ void ViewpointEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
  * Slots associated with ViewpointTab:
  *********************************************************************************/
 
-void ViewpointEventRouter::setCameraChanged()
+void NavigationEventRouter::setCameraChanged()
 {
     double posvec[3], dirvec[3], upvec[3], center[3];
 
@@ -155,11 +155,11 @@ void ViewpointEventRouter::setCameraChanged()
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-void ViewpointEventRouter::setCameraLatLonChanged() { cout << "Not implemented" << endl; }
+void NavigationEventRouter::setCameraLatLonChanged() { cout << "Not implemented" << endl; }
 
-void ViewpointEventRouter::notImplemented() { cout << "Not implemented" << endl; }
+void NavigationEventRouter::notImplemented() { cout << "Not implemented" << endl; }
 
-void ViewpointEventRouter::updateCameraChanged()
+void NavigationEventRouter::updateCameraChanged()
 {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -186,7 +186,7 @@ void ViewpointEventRouter::updateCameraChanged()
     rotCenter2->setText(QString::number(center[2]));
 }
 
-void ViewpointEventRouter::setLightChanged()
+void NavigationEventRouter::setLightChanged()
 {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -223,7 +223,7 @@ void ViewpointEventRouter::setLightChanged()
     paramsMgr->EndSaveStateGroup();
 }
 
-void ViewpointEventRouter::updateLightChanged()
+void NavigationEventRouter::updateLightChanged()
 {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -275,9 +275,9 @@ void ViewpointEventRouter::updateLightChanged()
     lightDiff2->setEnabled(lightOn);
 }
 
-void ViewpointEventRouter::updateTab() { _updateTab(); }
+void NavigationEventRouter::updateTab() { _updateTab(); }
 
-void ViewpointEventRouter::updateTransforms()
+void NavigationEventRouter::updateTransforms()
 {
     map<string, Transform *> transformMap;
 
@@ -299,7 +299,7 @@ void ViewpointEventRouter::updateTransforms()
 
 // Insert values from params into tab panel
 //
-void ViewpointEventRouter::_updateTab()
+void NavigationEventRouter::_updateTab()
 {
     updateCameraChanged();
     updateLightChanged();
@@ -321,9 +321,9 @@ void ViewpointEventRouter::_updateTab()
     // Always display the current values of the campos and rotcenter
 }
 
-void ViewpointEventRouter::CenterSubRegion()
+void NavigationEventRouter::CenterSubRegion()
 {
-    cout << "ViewpointEventRouter::CenterSubRegion not implemented" << endl;
+    cout << "NavigationEventRouter::CenterSubRegion not implemented" << endl;
 
 #ifdef DEAD
 
@@ -382,7 +382,7 @@ void ViewpointEventRouter::CenterSubRegion()
 // Align the view direction to one of the axes.
 // axis is 2,3,4 for +X,Y,Z,  and 5,6,7 for -X,-Y,-Z
 //
-void ViewpointEventRouter::AlignView(int axis)
+void NavigationEventRouter::AlignView(int axis)
 {
     float axes[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
 
@@ -471,7 +471,7 @@ void ViewpointEventRouter::AlignView(int axis)
 }
 
 // Reset the center of view.  Leave the camera where it is
-void ViewpointEventRouter::SetCenter(const double *coords)
+void NavigationEventRouter::SetCenter(const double *coords)
 {
 #ifdef DEAD
     double           vdir[3];
@@ -506,13 +506,13 @@ void ViewpointEventRouter::SetCenter(const double *coords)
 #endif
 }
 
-void ViewpointEventRouter::SetHomeViewpoint()
+void NavigationEventRouter::SetHomeViewpoint()
 {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
     vpParams->SetCurrentVPToHome();
 }
 
-void ViewpointEventRouter::UseHomeViewpoint()
+void NavigationEventRouter::UseHomeViewpoint()
 {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -528,7 +528,7 @@ void ViewpointEventRouter::UseHomeViewpoint()
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-void ViewpointEventRouter::ViewAll()
+void NavigationEventRouter::ViewAll()
 {
     DataStatus *dataStatus = _controlExec->getDataStatus();
     ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
@@ -561,7 +561,7 @@ void ViewpointEventRouter::ViewAll()
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-VAPoR::ParamsBase *ViewpointEventRouter::GetActiveParams() const
+VAPoR::ParamsBase *NavigationEventRouter::GetActiveParams() const
 {
     GUIStateParams *p = GetStateParams();
     string          vizName = p->GetActiveVizName();
