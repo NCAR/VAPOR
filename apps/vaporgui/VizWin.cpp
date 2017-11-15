@@ -32,7 +32,7 @@
 #include "TabManager.h"
 #include "MouseModeParams.h"
 #include "qdatetime.h"
-#include "ViewpointEventRouter.h"
+#include "NavigationEventRouter.h"
 #include "MainForm.h"
 #include "ErrorReporter.h"
 #include "images/vapor-icon-32.xpm"
@@ -302,7 +302,7 @@ void VizWin::mousePressEventNavigate(QMouseEvent* e) {
 #endif
 		
 #ifdef	DEAD
-	ViewpointEventRouter* vep = VizWinMgr::getInstance()->getViewpointRouter();
+	NavigationEventRouter* vep = VizWinMgr::getInstance()->getViewpointRouter();
 	vep->captureMouseDown(_buttonNum);
 #endif
 		
@@ -476,11 +476,11 @@ void VizWin::mouseReleaseEventNavigate(QMouseEvent*e) {
 #ifdef	DEAD
 		if (!doSpin) {
 			//terminate current mouse motion
-			_vizWinMgr->getEventRouter(ViewpointEventRouter::GetClassType())->captureMouseUp();
+			_vizWinMgr->getEventRouter(NavigationEventRouter::GetClassType())->captureMouseUp();
 		}
 		
 		//Force redisplay of tab and visualizer
-		_vizWinMgr->getEventRouter(ViewpointEventRouter::GetClassType())->updateTab();
+		_vizWinMgr->getEventRouter(NavigationEventRouter::GetClassType())->updateTab();
 #endif
 	}
 
