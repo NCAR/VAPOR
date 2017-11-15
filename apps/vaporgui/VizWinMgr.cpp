@@ -46,7 +46,7 @@
 #include "VizFeatureEventRouter.h"
 #include "AppSettingsEventRouter.h"
 #include "StartupEventRouter.h"
-#include "ViewpointEventRouter.h"
+#include "NavigationEventRouter.h"
 #include "HelloEventRouter.h"
 #include "TrackBall.h"
 #include "VizWin.h"
@@ -122,7 +122,7 @@ void VizWinMgr::createAllDefaultTabs() {
     installTab(er->GetType(), 1, er);
 
     parent = TabManager::getInstance()->GetSubTabWidget(1);
-    er = new ViewpointEventRouter(parent, this, _controlExec);
+    er = new NavigationEventRouter(parent, this, _controlExec);
     installTab(er->GetType(), 1, er);
 
     parent = TabManager::getInstance()->GetSubTabWidget(1);
@@ -467,9 +467,9 @@ AnimationEventRouter *VizWinMgr::getAnimationRouter() {
                 GetEventRouter(AnimationEventRouter::GetClassType()));
 }
 
-ViewpointEventRouter *VizWinMgr::getViewpointRouter() {
-    return ((ViewpointEventRouter *)
-                GetEventRouter(ViewpointEventRouter::GetClassType()));
+NavigationEventRouter *VizWinMgr::getViewpointRouter() {
+    return ((NavigationEventRouter *)
+                GetEventRouter(NavigationEventRouter::GetClassType()));
 }
 
 RegionEventRouter *VizWinMgr::getRegionRouter() {

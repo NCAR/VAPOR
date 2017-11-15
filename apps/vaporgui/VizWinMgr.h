@@ -44,7 +44,7 @@ class MainForm;
 class VizWin;
 class AnimationEventRouter;
 class RegionEventRouter;
-class ViewpointEventRouter;
+class NavigationEventRouter;
 class Trackball;
 
 //! \class VizWinMgr
@@ -154,9 +154,9 @@ class VizWinMgr : public QObject {
     //! \retval AnimationEventRouter*
     AnimationEventRouter *getAnimationRouter();
 
-    //! Obtain the (unique) ViewpointEventRouter in the GUI
-    //! \retval ViewpointEventRouter*
-    ViewpointEventRouter *getViewpointRouter();
+    //! Obtain the (unique) NavigationEventRouter in the GUI
+    //! \retval NavigationEventRouter*
+    NavigationEventRouter *getViewpointRouter();
 
     //! @name Internal
     //! Internal methods not intended for general use

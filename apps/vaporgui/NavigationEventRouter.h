@@ -6,7 +6,7 @@
 //									*
 //************************************************************************/
 //
-//	File:		ViewpointEventRouter.h
+//	File:		NavigationEventRouter.h
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -14,7 +14,7 @@
 //
 //	Date:		May 2006
 //
-//	Description:	Defines the ViewpointEventRouter class.
+//	Description:	Defines the NavigationEventRouter class.
 //		This class handles events for the viewpoint params
 //
 #ifndef VIEWPOINTEVENTROUTER_H
@@ -23,7 +23,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "ui_vizTab.h"
+#include "ui_NavigationTab.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -32,14 +32,14 @@ class RegionParams;
 
 class VizWinMgr;
 
-class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRouter {
+class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public EventRouter {
 
     Q_OBJECT
 
   public:
-    ViewpointEventRouter(
+    NavigationEventRouter(
         QWidget *parent, VizWinMgr *vizMgr, VAPoR::ControlExec *ce);
-    virtual ~ViewpointEventRouter();
+    virtual ~NavigationEventRouter();
     //Connect signals and slots from tab
     virtual void hookUpTab();
 
@@ -79,7 +79,7 @@ class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRoute
     virtual void _updateTab();
 
   private:
-    ViewpointEventRouter() {}
+    NavigationEventRouter() {}
 
     virtual void wheelEvent(QWheelEvent *) {}
 
