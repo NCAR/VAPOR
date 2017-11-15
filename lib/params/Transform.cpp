@@ -64,8 +64,6 @@ void Transform::SetOrigin(const vector<double> origin)
 {
     SetValueDoubleVec(_originTag, "Set origin for transforms", origin);
     SetOriginInitialized(true);
-    printf("Origin set to [");
-    for (int i = 0; i < origin.size(); i++) printf("%g%s", origin[i], i + 1 == origin.size() ? "]\n" : ", ");
 }
 
 bool Transform::IsOriginInitialized() const { return GetValueLong(_originInitializedTag, false); }
