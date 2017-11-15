@@ -186,6 +186,7 @@ public:
 	}
 
 	string GetMapProjection(string dataSetName) const;
+	string GetMapProjectionDefault(string dataSetName) const;
 	
 
 	//! Determine the minimum time step for which there is any data.

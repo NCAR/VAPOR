@@ -405,7 +405,10 @@ int DataMgr::Initialize(
 	if (_dc) delete _dc;
 
 	_dc = NULL;
-	if (files.empty()) return(0);
+	if (files.empty()) {
+		SetErrMsg("Empty file list");
+		return(-1);
+	}
 
 	if (_format.compare("vdc") == 0) {
 		_dc = new VDCNetCDF(_nthreads);

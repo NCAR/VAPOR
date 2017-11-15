@@ -37,6 +37,7 @@ DCCF::DCCF() {
 	_ovr_fd = -1;
 
 	_proj4StringOption.clear();
+	_proj4StringDefault.clear();
 	_proj4String.clear();
 	_dimsMap.clear();
 	_coordVarsMap.clear();
@@ -657,7 +658,14 @@ int DCCF::_InitHorizontalCoordinatesDerived(
 	// if variable does not provide its own map projection
 	//
 
+	_proj4API = _create_proj4api(
+		lonmin, lonmax, latmin, latmax, _proj4StringDefault
+	);
+	_proj4String = _proj4StringDefault;
+
 	if (! _proj4StringOption.empty()) {
+		delete _proj4API;
+
 		_proj4API = new Proj4API();
 
 		int rc = _proj4API->Initialize("", _proj4StringOption);
@@ -666,11 +674,6 @@ int DCCF::_InitHorizontalCoordinatesDerived(
 			SetErrMsg("Invalid map projection : %s",_proj4StringOption.c_str());
 		}
 		_proj4String = _proj4StringOption;
-	}
-	else {
-		_proj4API = _create_proj4api(
-			lonmin, lonmax, latmin, latmax, _proj4String
-		);
 	}
 
 	if (! _proj4API) return(-1);
