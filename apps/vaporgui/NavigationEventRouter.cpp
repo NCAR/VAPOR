@@ -407,7 +407,7 @@ void NavigationEventRouter::updateProjections() {
     string dataSetName, projString;
     for (int i = 0; i < numDataMgrs; i++) {
         dataSetName = dataMgrs[i];
-        projString = dataStatus->GetMapProjection(dataSetName);
+        projString = dataStatus->GetMapProjectionDefault(dataSetName);
         usingCurrentProj = projString == currentProj;
         createProjCell(i, projString);
         createProjCheckBox(i, usingCurrentProj);

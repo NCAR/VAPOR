@@ -1709,6 +1709,10 @@ class VDF_API DC : public Wasp::MyBase {
     //
     virtual string GetMapProjection() const = 0;
 
+    //! Get default map projection, if any
+    //!
+    virtual string GetMapProjectionDefault() const = 0;
+
     //! Open the named variable for reading
     //!
     //! This method prepares a data or coordinate variable, indicated by a
