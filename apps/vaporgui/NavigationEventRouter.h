@@ -81,8 +81,15 @@ private:
     VizWinMgr *_vizMgr;
 
     void updateTransforms();
-    void updateCameraChanged();
-    void updateLightChanged();
+    void updateProjections();
+    // void appendProjTable(int row, string projString, bool usingCurrentProj);
+    void   createProjCell(int row, string projString);
+    void   createCustomCell(int row, string projString);
+    void   createProjCheckBox(int row, bool usingCurrentProj);
+    void   resizeProjTable();
+    string getCustomProjString();
+    void   updateCameraChanged();
+    void   updateLightChanged();
 
     VAPoR::ParamsBase *GetActiveParams() const;
 
@@ -91,6 +98,9 @@ private slots:
     void setCameraLatLonChanged();
     void setLightChanged();
     void notImplemented();
+    void customProjStringChanged();
+    void projCheckboxChanged();
+    void customCheckboxChanged();
 };
 
 #endif    // VIEWPOINTEVENTROUTER_H

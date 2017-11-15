@@ -28,6 +28,7 @@
 #include <qrect.h>
 #include <qlineedit.h>
 #include <qcheckbox.h>
+#include <QTextEdit>
 
 #include <qcombobox.h>
 #include <qlabel.h>
@@ -297,6 +298,171 @@ void NavigationEventRouter::updateTransforms()
     transformTable->Update(transformMap);
 }
 
+void NavigationEventRouter::updateProjections()
+{
+    DataStatus *   dataStatus = _controlExec->getDataStatus();
+    vector<string> dataMgrs = dataStatus->GetDataMgrNames();
+
+    GUIStateParams *params = GetStateParams();
+    string          currentProj = params->GetProjectionString();
+
+    int    numDataMgrs = dataMgrs.size();
+    string customProj = getCustomProjString();
+
+    datasetProjectionTable->clear();
+    datasetProjectionTable->setRowCount(numDataMgrs + 1);
+
+    // Set up table with dataset projection strings
+    //
+    bool   usingCurrentProj;
+    string dataSetName, projString;
+    for (int i = 0; i < numDataMgrs; i++) {
+        dataSetName = dataMgrs[i];
+        projString = dataStatus->GetMapProjection(dataSetName);
+        usingCurrentProj = projString == currentProj;
+        createProjCell(i, projString);
+        createProjCheckBox(i, usingCurrentProj);
+    }
+
+    // Apply the user's custom proj string if needed
+    //
+    usingCurrentProj = customProj == currentProj;
+    createCustomCell(numDataMgrs, customProj);
+    createProjCheckBox(numDataMgrs, usingCurrentProj);
+
+    resizeProjTable();
+}
+
+string NavigationEventRouter::getCustomProjString()
+{
+    int               row = datasetProjectionTable->rowCount();
+    QTableWidgetItem *item = datasetProjectionTable->item(row - 1, 0);
+
+    string customProj;
+    if (item == NULL)
+        customProj = "";
+    else
+        customProj = item->text().toStdString();
+
+    if (customProj == "") customProj = "Custom";
+
+    return customProj;
+}
+
+void NavigationEventRouter::resizeProjTable()
+{
+    datasetProjectionTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    datasetProjectionTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    datasetProjectionTable->verticalHeader()->hide();
+    datasetProjectionTable->resizeRowsToContents();
+}
+
+void NavigationEventRouter::createProjCheckBox(int row, bool usingCurrentProj)
+{
+    QWidget *    checkBoxWidget = new QWidget();
+    QCheckBox *  checkBox = new QCheckBox();
+    QHBoxLayout *checkBoxLayout = new QHBoxLayout(checkBoxWidget);
+
+    checkBoxLayout->addWidget(checkBox);
+    checkBoxLayout->setAlignment(Qt::AlignCenter);
+    checkBoxLayout->setContentsMargins(0, 0, 0, 0);
+    checkBoxLayout->setSizeConstraint(QLayout::SetNoConstraint);
+
+    checkBoxWidget->setProperty("row", row);
+    checkBoxWidget->setLayout(checkBoxLayout);
+    datasetProjectionTable->setCellWidget(row, 1, checkBoxWidget);
+
+    Qt::CheckState cs = usingCurrentProj ? Qt::Checked : Qt::Unchecked;
+    checkBox->blockSignals(true);
+    checkBox->setCheckState(cs);
+    checkBox->blockSignals(false);
+
+    if (row == datasetProjectionTable->rowCount() - 1) {
+        connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(customCheckboxChanged()));
+    } else {
+        connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(projCheckboxChanged()));
+    }
+}
+
+void NavigationEventRouter::createProjCell(int row, string projString)
+{
+    QLabel *label = new QLabel(datasetProjectionTable);
+    label->setText(QString::fromStdString(projString));
+    label->setAlignment(Qt::AlignCenter);
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    label->setWordWrap(true);
+
+    // If this is the last row, the item should be editable for custom
+    // proj strings from the user
+    //
+    datasetProjectionTable->setCellWidget(row, 0, label);
+}
+
+void NavigationEventRouter::createCustomCell(int row, string projString)
+{
+    QTextEdit *textEdit = new QTextEdit(datasetProjectionTable);
+    textEdit->setText(QString::fromStdString(projString));
+    textEdit->setAlignment(Qt::AlignCenter);
+
+    // If this is the last row, the item should be editable for custom
+    // proj strings from the user
+    //
+    // if (row != datasetProjectionTable->rowCount()) textEdit->setReadOnly(true);
+    datasetProjectionTable->setCellWidget(row, 0, textEdit);
+
+    connect(textEdit, SIGNAL(textChanged()), this, SLOT(customProjStringChanged()));
+}
+
+void NavigationEventRouter::projCheckboxChanged()
+{
+    QCheckBox *checkBox = (QCheckBox *)sender();
+    int        row = checkBox->parentWidget()->property("row").toInt();
+
+    QLabel *label;
+    label = qobject_cast<QLabel *>(datasetProjectionTable->cellWidget(row, 0));
+    string proj = label->text().toStdString();
+
+    GUIStateParams *params = GetStateParams();
+    if (checkBox->checkState() > 0) {
+        params->SetProjectionString(proj);
+    } else {
+        params->SetProjectionString("");
+    }
+    emit Proj4StringChanged();
+}
+
+void NavigationEventRouter::customCheckboxChanged()
+{
+    QCheckBox *checkBox = (QCheckBox *)sender();
+    int        row = checkBox->parentWidget()->property("row").toInt();
+
+    QTextEdit *textEdit;
+    textEdit = qobject_cast<QTextEdit *>(datasetProjectionTable->cellWidget(row, 0));
+    string proj = textEdit->toPlainText().toStdString();
+
+    GUIStateParams *params = GetStateParams();
+    if (checkBox->checkState() > 0) {
+        params->SetProjectionString(proj);
+    } else {
+        params->SetProjectionString("");
+    }
+    emit Proj4StringChanged();
+}
+
+// If the custom proj string gets changed, we do not want to keep updating
+// it as the user types in their new string.  Just disable the global
+// projection, and let the user re-enable their selection when they're
+// done entering text
+void NavigationEventRouter::customProjStringChanged()
+{
+    GUIStateParams *params = GetStateParams();
+    string          currentProj = params->GetProjectionString();
+    if (currentProj != "") {
+        params->SetProjectionString("");
+        emit Proj4StringChanged();
+    }
+}
+
 // Insert values from params into tab panel
 //
 void NavigationEventRouter::_updateTab()
@@ -304,6 +470,7 @@ void NavigationEventRouter::_updateTab()
     updateCameraChanged();
     updateLightChanged();
     updateTransforms();
+    updateProjections();
 
     return;
 
