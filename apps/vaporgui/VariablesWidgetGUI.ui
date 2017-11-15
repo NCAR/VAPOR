@@ -40,6 +40,12 @@
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget_2">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>160</height>
+      </size>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -698,6 +704,12 @@
    </item>
    <item>
     <widget class="QTabWidget" name="colorSettingsTab">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -876,6 +888,12 @@
    </item>
    <item>
     <widget class="QTabWidget" name="fidelityTab">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>175</height>
+      </size>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>

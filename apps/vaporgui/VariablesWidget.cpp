@@ -80,6 +80,7 @@ void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags, ColorFlag
     if (!(_colorFlags & CONST) && !(_colorFlags & COLORVAR)) {
         collapseColorVarSettings();
         collapseConstColorSettings();
+        colorSettingsTab->hide();
     }
 }
 

@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,0,2">
    <property name="spacing">
-    <number>0</number>
+    <number>-1</number>
    </property>
    <property name="sizeConstraint">
     <enum>QLayout::SetMaximumSize</enum>
@@ -24,7 +24,7 @@
     <number>0</number>
    </property>
    <property name="topMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
     <number>0</number>
@@ -91,6 +91,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>TransformTable</class>
+   <extends>QWidget</extends>
+   <header>TransformTable.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>GeometryWidget</class>
    <extends>QWidget</extends>
    <header>GeometryWidget.h</header>
@@ -100,12 +106,6 @@
    <class>OrientationAngles</class>
    <extends>QWidget</extends>
    <header>OrientationAngles.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>TransformTable</class>
-   <extends>QWidget</extends>
-   <header>TransformTable.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
