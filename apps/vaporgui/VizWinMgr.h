@@ -45,7 +45,7 @@ class MainForm;
 class VizWin;
 class AnimationEventRouter;
 class RegionEventRouter;
-class ViewpointEventRouter;
+class NavigationEventRouter;
 class Trackball;
 
 
@@ -156,9 +156,9 @@ public:
 	//! \retval AnimationEventRouter* 
 	AnimationEventRouter* getAnimationRouter();
 
-	//! Obtain the (unique) ViewpointEventRouter in the GUI
-	//! \retval ViewpointEventRouter* 
-	ViewpointEventRouter* getViewpointRouter();
+	//! Obtain the (unique) NavigationEventRouter in the GUI
+	//! \retval NavigationEventRouter* 
+	NavigationEventRouter* getViewpointRouter();
 
 	
 //! @name Internal
