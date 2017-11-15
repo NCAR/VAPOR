@@ -99,6 +99,10 @@ public:
     //!
     virtual string GetMapProjection() const;
 
+    //! \copydoc DC::GetMapProjection()
+    //!
+    virtual string GetMapProjectionDefault() const { return (_proj4StringDefault); }
+
     //! \copydoc DC::GetAtt()
     //!
     virtual bool GetAtt(string varname, string attname, vector<double> &values) const;
@@ -196,6 +200,7 @@ private:
     string   _ovr_varname;    // name of currently opened variable
     string   _proj4String;
     string   _proj4StringOption;
+    string   _proj4StringDefault;
     Proj4API _proj4API;
 
     class DerivedVarHorizontal;

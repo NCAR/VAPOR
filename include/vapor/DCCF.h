@@ -102,6 +102,10 @@ public:
     //!
     virtual string GetMapProjection() const;
 
+    //! \copydoc DC::GetMapProjectionDefault()
+    //!
+    virtual string GetMapProjectionDefault() const { return (_proj4StringDefault); }
+
     //! \copydoc DC::GetAtt()
     //!
     virtual bool GetAtt(string varname, string attname, vector<double> &values) const;
@@ -184,6 +188,7 @@ private:
     int _ovr_fd;    // File descriptor for currently opened file
 
     string                                      _proj4StringOption;
+    string                                      _proj4StringDefault;
     string                                      _proj4String;
     std::map<string, DC::Dimension>             _dimsMap;
     std::map<string, DC::CoordVar>              _coordVarsMap;

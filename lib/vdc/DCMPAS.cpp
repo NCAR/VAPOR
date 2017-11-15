@@ -169,6 +169,7 @@ DCMPAS::DCMPAS()
     _ovr_fd = -1;
     _ovr_varname.clear();
     _proj4StringOption.clear();
+    _proj4StringDefault.clear();
     _proj4String.clear();
     _proj4API = NULL;
     _dimsMap.clear();
@@ -210,11 +211,18 @@ int DCMPAS::Initialize(const vector<string> &files, const std::vector<string> &o
         return (-1);
     }
 
+    // Create a default proj4 string
+    //
+    _proj4API = _create_proj4api(-180.0, 180.0, -90.0, 90.0, _proj4StringDefault);
+    _proj4String = _proj4StringOption;
+
     // Create proj4 instance to project MPAS geographic coordinates to
     // PCS coordinates. Currently VAPOR only works on Cartesian coordinates,
     // not geographic (e.g. lat, lon, level)
     //
     if (!_proj4StringOption.empty()) {
+        delete _proj4API;
+
         _proj4API = new Proj4API();
 
         int rc = _proj4API->Initialize("", _proj4StringOption);
@@ -223,9 +231,8 @@ int DCMPAS::Initialize(const vector<string> &files, const std::vector<string> &o
             SetErrMsg("Invalid map projection : %s", _proj4StringOption.c_str());
         }
         _proj4String = _proj4StringOption;
-    } else {
-        _proj4API = _create_proj4api(-180.0, 180.0, -90.0, 90.0, _proj4String);
     }
+
     if (!_proj4API) return (-1);
 
     NetCDFCollection *ncdfc = new NetCDFCollection();

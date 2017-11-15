@@ -42,6 +42,7 @@ DCWRF::DCWRF()
     _ovr_varname.clear();
     _proj4String.clear();
     _proj4StringOption.clear();
+    _proj4StringDefault.clear();
 
     _derivedX = NULL;
     _derivedY = NULL;
@@ -785,26 +786,26 @@ int DCWRF::_InitProjection(NetCDFCollection *ncdfc, float radius)
     _proj4String.clear();
     _mapProj = 0;
 
-    if (_proj4StringOption.empty()) {
-        vector<long> ivalues;
-        ncdfc->GetAtt("", "MAP_PROJ", ivalues);
-        if (ivalues.size() != 1) {
-            SetErrMsg("Error reading required attribute : MAP_PROJ");
-            return (-1);
-        }
-        _mapProj = ivalues[0];
-
-        int rc = _GetProj4String(ncdfc, radius, _mapProj, _proj4String);
-        if (rc < 0) return (rc);
-    } else {
-        _proj4String = _proj4StringOption;
+    vector<long> ivalues;
+    ncdfc->GetAtt("", "MAP_PROJ", ivalues);
+    if (ivalues.size() != 1) {
+        SetErrMsg("Error reading required attribute : MAP_PROJ");
+        return (-1);
     }
+    _mapProj = ivalues[0];
+
+    int rc = _GetProj4String(ncdfc, radius, _mapProj, _proj4StringDefault);
+    if (rc < 0) return (rc);
+
+    _proj4String = _proj4StringDefault;
+
+    if (!_proj4StringOption.empty()) { _proj4String = _proj4StringOption; }
 
     //
     // Set up projection transforms to/from geographic and cartographic
     // coordinates
     //
-    int rc = _proj4API.Initialize("", _proj4String);
+    rc = _proj4API.Initialize("", _proj4String);
     if (rc < 0) {
         SetErrMsg("Proj4API::Initalize(, %s)", _proj4String.c_str());
         return (-1);
