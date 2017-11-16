@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="GeometryWidget" name="_geometryWidget" native="true">
      <property name="minimumSize">
@@ -51,15 +63,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GeometryWidget</class>
-   <extends>QWidget</extends>
-   <header>GeometryWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>TransformTable</class>
    <extends>QWidget</extends>
    <header>TransformTable.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GeometryWidget</class>
+   <extends>QWidget</extends>
+   <header>GeometryWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

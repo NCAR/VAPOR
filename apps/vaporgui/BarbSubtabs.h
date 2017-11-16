@@ -69,6 +69,8 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
     double CalculateDomainLength(int ts);
 
   private:
+    void hideZDimWidgets();
+
     VAPoR::BarbParams *_bParams;
     VAPoR::DataMgr *_dataMgr;
     Combo *_xDimCombo;
