@@ -133,7 +133,7 @@ int VDC_Initialize(VDC *p, const char *path, int mode) {
         am = VDC::A;
 
     VAPoR::VDCNetCDF *pnc = (VAPoR::VDCNetCDF *)p;
-    int ret = pnc->Initialize(string(path), am, 0);
+    int ret = pnc->Initialize(string(path), vector<string>(), am, 0);
     // pnc->SetFill(0x100); // Required to disable set_fill
     return ret;
 }

@@ -1440,10 +1440,15 @@ class VDF_API DC : public Wasp::MyBase {
     //! \param[in] path Path name of file that contains, or will
     //! contain, the DC master file for this data collection
     //!
+    //! \param[in] options A vector of option pairs (name, value) that
+    //! may be accepted by the derived class.
+    //!
     //! \retval status A negative int is returned on failure
     //!
     //
-    virtual int Initialize(const vector<string> &paths) = 0;
+    virtual int Initialize(
+        const std::vector<string> &paths,
+        const std::vector<string> &options = std::vector<string>()) = 0;
 
     //! Return a dimensions's definition
     //!
@@ -1703,6 +1708,10 @@ class VDF_API DC : public Wasp::MyBase {
     //!
     //
     virtual string GetMapProjection() const = 0;
+
+    //! Get default map projection, if any
+    //!
+    virtual string GetMapProjectionDefault() const = 0;
 
     //! Open the named variable for reading
     //!

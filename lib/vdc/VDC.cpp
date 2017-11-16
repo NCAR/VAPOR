@@ -93,9 +93,19 @@ VDC::VDC() {
     _dimsMap.clear();
     _atts.clear();
     _newUniformVars.clear();
+    _proj4StringOption.clear();
 }
 
-int VDC::Initialize(const vector<string> &paths, AccessMode mode) {
+int VDC::Initialize(
+    const vector<string> &paths, const vector<string> &options,
+    AccessMode mode) {
+    _proj4StringOption.clear();
+    if (options.size() >= 2) {
+        if (options[0] == "-proj4") {
+            _proj4StringOption = options[1];
+        }
+    }
+
     if (!paths.size()) {
         SetErrMsg("Invalid argument");
         return (-1);
@@ -968,6 +978,13 @@ DC::XType VDC::GetAttType(
 string VDC::GetMapProjection(
     string varname) const {
 
+    // Shoot. This doens't do anything. I.e. it doesn't force data to
+    // be reprojected
+    //
+    if (!_proj4StringOption.empty()) {
+        return (_proj4StringOption);
+    }
+
     string attname = "MapProjection";
 
     vector<string> attnames = VDC::GetAttNames(varname);
@@ -990,6 +1007,10 @@ string VDC::GetMapProjection(
 }
 
 string VDC::GetMapProjection() const {
+
+    if (!_proj4StringOption.empty()) {
+        return (_proj4StringOption);
+    }
 
     string attname = "MapProjection";
 
