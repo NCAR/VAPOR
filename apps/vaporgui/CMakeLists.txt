@@ -75,7 +75,6 @@ set (UIS
 	appSettingsTab.ui
 	vizFeaturesTab.ui
 	ControlPointEditorBase.ui
-	barbAppearanceSubtab.ui
 	newRendererDialog.ui
 	renderselector.ui
 	helloLayoutSubtab.ui
