@@ -67,7 +67,7 @@ DataStatus::DataStatus(size_t cacheSize, int nThreads)
     reset_time();
 }
 
-int DataStatus::Open(const std::vector<string> &files, string name, string format)
+int DataStatus::Open(const std::vector<string> &files, const std::vector<string> &options, string name, string format)
 {
     if (name.empty()) name = "DataSet1";
 
@@ -75,7 +75,7 @@ int DataStatus::Open(const std::vector<string> &files, string name, string forma
 
     DataMgr *dataMgr = new DataMgr(format, _cacheSize, _nThreads);
 
-    int rc = dataMgr->Initialize(files);
+    int rc = dataMgr->Initialize(files, options);
     if (rc < 0) {
         delete dataMgr;
         return (-1);
@@ -295,6 +295,22 @@ void DataStatus::MapLocalToGlobalTimeRange(string dataSetName, size_t local_ts, 
 
     min_ts = itr1 - ref.begin();
     max_ts = ref.rend() - itr2 - 1;
+}
+
+string DataStatus::GetMapProjection(string dataSetName) const
+{
+    DataMgr *dataMgr = GetDataMgr(dataSetName);
+    if (!dataMgr) return ("");
+
+    return (dataMgr->GetMapProjection());
+}
+
+string DataStatus::GetMapProjectionDefault(string dataSetName) const
+{
+    DataMgr *dataMgr = GetDataMgr(dataSetName);
+    if (!dataMgr) return ("");
+
+    return (dataMgr->GetMapProjectionDefault());
 }
 
 namespace {

@@ -6,7 +6,7 @@
 //									*
 //************************************************************************/
 //
-//	File:		ViewpointEventRouter.h
+//	File:		NavigationEventRouter.h
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -14,7 +14,7 @@
 //
 //	Date:		May 2006
 //
-//	Description:	Defines the ViewpointEventRouter class.
+//	Description:	Defines the NavigationEventRouter class.
 //		This class handles events for the viewpoint params
 //
 #ifndef VIEWPOINTEVENTROUTER_H
@@ -23,7 +23,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "ui_vizTab.h"
+#include "ui_NavigationTab.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -32,12 +32,12 @@ class RegionParams;
 
 class VizWinMgr;
 
-class ViewpointEventRouter : public QWidget, public Ui_VizTab, public EventRouter {
+class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public EventRouter {
     Q_OBJECT
 
 public:
-    ViewpointEventRouter(QWidget *parent, VizWinMgr *vizMgr, VAPoR::ControlExec *ce);
-    virtual ~ViewpointEventRouter();
+    NavigationEventRouter(QWidget *parent, VizWinMgr *vizMgr, VAPoR::ControlExec *ce);
+    virtual ~NavigationEventRouter();
     // Connect signals and slots from tab
     virtual void hookUpTab();
 
@@ -66,20 +66,30 @@ public:
 
     virtual void updateTab();
 
+signals:
+    void Proj4StringChanged();
+
 protected:
     virtual void _confirmText(){};
     virtual void _updateTab();
 
 private:
-    ViewpointEventRouter() {}
+    NavigationEventRouter() {}
 
     virtual void wheelEvent(QWheelEvent *) {}
 
     VizWinMgr *_vizMgr;
 
     void updateTransforms();
-    void updateCameraChanged();
-    void updateLightChanged();
+    void updateProjections();
+    // void appendProjTable(int row, string projString, bool usingCurrentProj);
+    void   createProjCell(int row, string projString);
+    void   createCustomCell(int row, string projString);
+    void   createProjCheckBox(int row, bool usingCurrentProj);
+    void   resizeProjTable();
+    string getCustomProjString();
+    void   updateCameraChanged();
+    void   updateLightChanged();
 
     VAPoR::ParamsBase *GetActiveParams() const;
 
@@ -88,6 +98,9 @@ private slots:
     void setCameraLatLonChanged();
     void setLightChanged();
     void notImplemented();
+    void customProjStringChanged();
+    void projCheckboxChanged();
+    void customCheckboxChanged();
 };
 
 #endif    // VIEWPOINTEVENTROUTER_H
