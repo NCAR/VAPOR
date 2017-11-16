@@ -44,7 +44,7 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     setupUi(this);
     _TFWidget->Reinit((TFWidget::Flags)(TFWidget::SECONDARY_COLORVAR | TFWidget::PRIORITY_COLORVAR));
 
-    zDimFrame->hide();
+    hideZDimWidgets();
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
@@ -57,6 +57,19 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     connect(_zDimCombo, SIGNAL(valueChanged(int)), this, SLOT(zDimChanged(int)));
     connect(_lengthCombo, SIGNAL(valueChanged(double)), this, SLOT(lengthChanged(double)));
     connect(_thicknessCombo, SIGNAL(valueChanged(double)), this, SLOT(thicknessChanged(double)));
+}
+
+void BarbAppearanceSubtab::hideZDimWidgets()
+{
+    zDimLabel->hide();
+    zDimSlider->hide();
+    zDimEdit->hide();
+    zDimLabel->resize(0, 0);
+    zDimSlider->resize(0, 0);
+    zDimEdit->resize(0, 0);
+    tab->adjustSize();
+    BarbLayoutTab->adjustSize();
+    adjustSize();
 }
 
 /*void BarbGeometrySubtab::Update(VAPoR::ParamsMgr* paramsMgr,

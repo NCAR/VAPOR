@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>410</width>
-    <height>120</height>
+    <height>100</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>120</height>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>113</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -28,6 +34,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>0</number>
+   </property>
+   <property name="sizeConstraint">
+    <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -43,6 +52,12 @@
    </property>
    <item>
     <widget class="QTabWidget" name="transformTabs">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -50,7 +65,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="scaleTab">
       <attribute name="title">
@@ -74,6 +89,12 @@
        </property>
        <item>
         <widget class="QTableWidget" name="scaleTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <column>
           <property name="text">
            <string>Target</string>
@@ -132,6 +153,12 @@
        </property>
        <item>
         <widget class="QTableWidget" name="translationTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <column>
           <property name="text">
            <string>Target</string>
@@ -190,6 +217,12 @@
        </property>
        <item>
         <widget class="QTableWidget" name="rotationTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <column>
           <property name="text">
            <string>Target</string>
@@ -248,6 +281,12 @@
        </property>
        <item>
         <widget class="QTableWidget" name="originTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <column>
           <property name="text">
            <string>Target</string>
