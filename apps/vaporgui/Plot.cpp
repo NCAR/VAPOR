@@ -219,9 +219,11 @@ Plot::Plot(QWidget *parent) : QDialog(parent), Ui_PlotWindow()
     connect(addVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(newVarAdded(int)));
     connect(removeVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(removeVar(int)));
     connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(reinitDataMgr()));
+#ifdef GETPOINTFROMRENDERER
     connect(timeCopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
     connect(spaceP1CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
     connect(spaceP2CopyCombo, SIGNAL(activated(int)), this, SLOT(getPointFromRenderer()));
+#endif
     connect(refCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(refinementChanged(int)));
     connect(cRatioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cRatioChanged(int)));
     for (int i = 0; i < 4; i++) {
@@ -376,6 +378,7 @@ void Plot::Initialize(ControlExec *ce, VizWinMgr *vwm)
     _dm = ds->GetDataMgr(dataMgrs[0]);
     assert(_dm != NULL);
 
+    dataMgrCombo->clear();
     for (int i = 0; i < dataMgrs.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(dataMgrs[i])); }
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -419,6 +422,8 @@ void Plot::reinitDataMgr()
     if (_dm == NULL) {
         string err = "Could not find DataMgr named " + dmName;
         errReport(err);
+    } else {
+        initVariables();
     }
 }
 
@@ -627,7 +632,7 @@ void Plot::savePlotToFile()
     if (fileInfo->suffix() != "png") {
         fileName.append(".png");
 
-        // Verify if we're overwriting existing video files
+        // Verify if we're overwriting existing files
         //
         if (std::ifstream(fileName.c_str())) {
             QMessageBox msgBox;
@@ -1214,7 +1219,7 @@ void Plot::getRanges(QObject *&sender, QComboBox *&qcb, Range *&x, Range *&y, Ra
     }
 }
 
-#ifdef DEAD
+#ifdef GETPOINTFROMRENDERER
 void Plot::getPointFromRenderer()
 {
     QComboBox *qcb = NULL;
@@ -1485,14 +1490,23 @@ void Plot::initTimes()
 {
     _timeExtents.clear();
     _timeExtents.push_back(0);
-    _timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0]) - 1);
+    //_timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0])-1);
+    _timeExtents.push_back(_dm->GetNumTimeSteps());
 }
 
 void Plot::initExtents(int ts)
 {
     vector<double> minExts, maxExts;
 
-    int rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel, minExts, maxExts);
+    int rc = -1;
+    if (!_vars3d.empty())
+        rc = _dm->GetVariableExtents(ts, _vars3d[0], _refLevel, minExts, maxExts);
+    else if (!_vars.empty())
+        rc = _dm->GetVariableExtents(ts, _vars[0], _refLevel, minExts, maxExts);
+    else {
+        // No Valid Variable from this DataMgr!!!
+    }
+
     if (rc < 0) {
         string myErr;
         myErr = "Plot could not find minimum and maximum extents"
@@ -1557,7 +1571,9 @@ void Plot::initConstCheckboxes()
 //
 void Plot::initVariables()
 {
+    addVarCombo->blockSignals(true);
     _vars.clear();
+    _vars3d.clear();
     addVarCombo->clear();    // Clear old variables
     addVarCombo->addItem("Add Variable:");
     vector<string> vars;
@@ -1574,6 +1590,7 @@ void Plot::initVariables()
 
     // Add variables to combo box
     for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { addVarCombo->addItem(QString::fromStdString(*it)); }
+    addVarCombo->blockSignals(false);
 }
 
 void Plot::newVarAdded(int index)

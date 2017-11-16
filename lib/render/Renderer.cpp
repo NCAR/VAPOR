@@ -353,6 +353,10 @@ int Renderer::makeColorbarTexture()
 
     // Draw colors
     // With no tics, use the whole scale
+    bool  useConstantColor = rParams->UseSingleColor();
+    float rgb[3];
+    if (useConstantColor) rParams->GetConstantColor(rgb);
+
     if (numtics == 0) numtics = 1000;
     double A = (mf->getMaxMapValue() - mf->getMinMapValue()) * (double)(numtics) / ((double)(1. - numtics) * (double)_imgHgt);
     double B = mf->getMaxMapValue() - A * (double)_imgHgt * .5 / (double)(numtics);
@@ -361,9 +365,8 @@ int Renderer::makeColorbarTexture()
     for (int line = _imgHgt - 2 * lineWidth - 5; line > 2 * lineWidth + 5; line--) {
         float ycoord = A * (float)line + B;
 
-        float         rgb[3];
         unsigned char rgbByte;
-        mf->rgbValue(ycoord, rgb);
+        if (!useConstantColor) mf->rgbValue(ycoord, rgb);
 
         for (int col = 2 * lineWidth; col < (int)(_imgWid * .35); col++) {
             for (int k = 0; k < 3; k++) {

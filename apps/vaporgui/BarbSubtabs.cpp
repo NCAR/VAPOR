@@ -42,7 +42,7 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent)
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::PRIORITYCOLORVAR));
+    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::SECONDARY_COLORVAR | TFWidget::PRIORITY_COLORVAR));
 
     zDimFrame->hide();
 
@@ -168,5 +168,4 @@ void BarbAppearanceSubtab::Initialize(VAPoR::BarbParams *bParams)
     float rgb[] = {1.f, 1.f, 1.f};
     bParams->SetConstantColor(rgb);
     bParams->SetColorMapVariableName("Constant");
-    _TFWidget->setCMVar("Constant");
 }
