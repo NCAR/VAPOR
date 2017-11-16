@@ -142,12 +142,12 @@ int Renderer::paintGL() {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
-	glTranslatef(-origin[0], -origin[1], -origin[2]);
+	glTranslatef(origin[0], origin[1], origin[2]);
 	glScalef(scale[0], scale[1], scale[2]);
 	glRotatef(rotate[0], 1, 0, 0);
 	glRotatef(rotate[1], 0, 1, 0);
 	glRotatef(rotate[2], 0, 0, 1);
-	glTranslatef(origin[0], origin[1], origin[2]);
+	glTranslatef(-origin[0], -origin[1], -origin[2]);
 
 	glTranslatef(translate[0], translate[1], translate[2]);
 
