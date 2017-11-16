@@ -49,7 +49,8 @@ class VDF_API DCCF : public VAPoR::DC {
     //!
     //! \sa EndDefine();
     //
-    virtual int Initialize(const vector<string> &paths);
+    virtual int Initialize(
+        const vector<string> &paths, const std::vector<string> &options);
 
     //! \copydoc DC::GetDimension()
     //!
@@ -107,6 +108,12 @@ class VDF_API DCCF : public VAPoR::DC {
     //! \copydoc DC::GetMapProjection()
     //!
     virtual string GetMapProjection() const;
+
+    //! \copydoc DC::GetMapProjectionDefault()
+    //!
+    virtual string GetMapProjectionDefault() const {
+        return (_proj4StringDefault);
+    }
 
     //! \copydoc DC::GetAtt()
     //!
@@ -214,13 +221,15 @@ class VDF_API DCCF : public VAPoR::DC {
 
     int _ovr_fd; // File descriptor for currently opened file
 
-    std::map<string, string> _proj4Strings;
+    string _proj4StringOption;
+    string _proj4StringDefault;
+    string _proj4String;
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar> _coordVarsMap;
     std::map<string, DC::Mesh> _meshMap;
     std::map<string, DC::DataVar> _dataVarsMap;
     std::map<string, string> _coordVarKeys;
-    std::vector<Proj4API *> _proj4APIs;
+    Proj4API *_proj4API;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
 
     int _get_latlon_coordvars(

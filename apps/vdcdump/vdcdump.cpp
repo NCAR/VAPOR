@@ -355,7 +355,8 @@ int main(int argc, char **argv) {
     }
 
     VDCNetCDF vdc(1);
-    int rc = vdc.Initialize(string(argv[1]), VDC::R, 4 * 1024 * 1024);
+    int rc = vdc.Initialize(
+        string(argv[1]), vector<string>(), VDC::R, 4 * 1024 * 1024);
     if (rc < 0)
         exit(1);
 

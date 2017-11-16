@@ -37,7 +37,9 @@ DCCF::DCCF() {
 
     _ovr_fd = -1;
 
-    _proj4Strings.clear();
+    _proj4StringOption.clear();
+    _proj4StringDefault.clear();
+    _proj4String.clear();
     _dimsMap.clear();
     _coordVarsMap.clear();
     _dataVarsMap.clear();
@@ -49,11 +51,8 @@ DCCF::DCCF() {
 DCCF::~DCCF() {
     if (_ncdfc)
         delete _ncdfc;
-    for (int i = 0; i < _proj4APIs.size(); i++) {
-        if (_proj4APIs[i])
-            delete _proj4APIs[i];
-    }
-    _proj4APIs.clear();
+    if (_proj4API)
+        delete _proj4API;
 
     for (int i = 0; i < _derivedVars.size(); i++) {
         if (_derivedVars[i])
@@ -62,13 +61,20 @@ DCCF::~DCCF() {
     _derivedVars.clear();
 }
 
-int DCCF::Initialize(const vector<string> &files) {
+int DCCF::Initialize(
+    const vector<string> &paths, const std::vector<string> &options) {
+    _proj4StringOption.clear();
+    if (options.size() >= 2) {
+        if (options[0] == "-proj4") {
+            _proj4StringOption = options[1];
+        }
+    }
 
     NetCDFCFCollection *ncdfc = new NetCDFCFCollection();
 
     // Initialize the NetCDFCFCollection class.
     //
-    int rc = ncdfc->Initialize(files);
+    int rc = ncdfc->Initialize(paths);
     if (rc < 0) {
         SetErrMsg("Failed to initialize netCDF data collection for reading");
         return (-1);
@@ -100,7 +106,7 @@ int DCCF::Initialize(const vector<string> &files) {
     // variables found in CF data are projected to cartographic
     // coordinates using Proj4
     //
-    // Initializes members: _coordVarMap, _proj4APIs, _proj4Strings;
+    // Initializes members: _coordVarMap, _proj4API,
     //
     rc = _InitHorizontalCoordinates(ncdfc);
     if (rc < 0) {
@@ -316,33 +322,11 @@ string DCCF::GetMapProjection(string varname) const {
     // No projection string defined in the NetCDF file for this
     // variable. So we use a synthesized one
     //
-
-    // Find coordinate lat-lon coordinate pair for this variable
-    //
-    map<string, string>::const_iterator itr = _coordVarKeys.find(varname);
-    if (itr == _coordVarKeys.end())
-        return ("");
-
-    string key = itr->second;
-
-    // Now get projection for this coordinate pair
-    //
-    map<string, string>::const_iterator itr1 = _proj4Strings.find(key);
-    if (itr1 == _proj4Strings.end())
-        return ("");
-
-    proj4string = itr1->second;
-    return (proj4string);
+    return (_proj4String);
 }
 
 string DCCF::GetMapProjection() const {
-    if (!_proj4Strings.empty()) {
-
-        map<string, string>::const_iterator itr = _proj4Strings.begin();
-        return (itr->second);
-    }
-
-    return ("");
+    return (_proj4String);
 }
 
 int DCCF::OpenVariableRead(
@@ -565,6 +549,7 @@ Proj4API *DCCF::_create_proj4api(
 
     int rc = proj4api->Initialize("", proj4string);
     if (rc < 0) {
+        delete proj4api;
         SetErrMsg("Invalid map projection : %s", proj4string.c_str());
         return (NULL);
     }
@@ -649,28 +634,29 @@ int DCCF::_InitHorizontalCoordinatesDerived(
             latmax = my_latmax;
     }
 
-    // Synthesize a proj4 string for each coordinate pair. Only used
+    // Synthesize a proj4 string
     // if variable does not provide its own map projection
     //
-    for (int i = 0; i < coordpairs.size(); i++) {
 
-        // Generate a proj4string and create a Proj4API instance for
-        // each coordinate pair
-        //
-        string proj4string;
-        Proj4API *proj4API = _create_proj4api(
-            lonmin, lonmax, latmin, latmax, proj4string);
+    _proj4API = _create_proj4api(
+        lonmin, lonmax, latmin, latmax, _proj4StringDefault);
+    _proj4String = _proj4StringDefault;
 
-        if (!proj4API)
-            return (-1);
+    if (!_proj4StringOption.empty()) {
+        delete _proj4API;
 
-        // Save Proj4APIs and proj4 strings for later use
-        //
-        _proj4APIs.push_back(proj4API);
+        _proj4API = new Proj4API();
 
-        string key = coordpairs[i].first + ":" + coordpairs[i].second;
-        _proj4Strings[key] = proj4string;
+        int rc = _proj4API->Initialize("", _proj4StringOption);
+        if (rc < 0) {
+            delete _proj4API;
+            SetErrMsg("Invalid map projection : %s", _proj4StringOption.c_str());
+        }
+        _proj4String = _proj4StringOption;
     }
+
+    if (!_proj4API)
+        return (-1);
 
     // Create derived variables and find min and max lat-lon coordinate
     // extents.
@@ -722,7 +708,7 @@ int DCCF::_InitHorizontalCoordinatesDerived(
         DerivedVarHorizontal *derivedX;
         derivedX = new DerivedVarHorizontal(
             ncdfc, coordpairs[i].first, coordpairs[i].second,
-            londims, _proj4APIs[i], true);
+            londims, _proj4API, true);
         _derivedVars.push_back(derivedX);
 
         // Install the derived variable on the NetCDFCFCollection class. Then
@@ -745,7 +731,7 @@ int DCCF::_InitHorizontalCoordinatesDerived(
         DerivedVarHorizontal *derivedY;
         derivedY = new DerivedVarHorizontal(
             ncdfc, coordpairs[i].first, coordpairs[i].second,
-            latdims, _proj4APIs[i], false);
+            latdims, _proj4API, false);
         _derivedVars.push_back(derivedY);
 
         ncdfc->InstallDerivedCoordVar(name, derivedY, 1);
@@ -768,12 +754,12 @@ int DCCF::_InitHorizontalCoordinatesDerived(
 // of the latitude coordinate (geographic coordinates), and "lon" are the
 // names of the longitude coordinate. E.g. TLAT => TLATY, ULON => ULONX
 //
-// Initializes _proj4APIs, _proj4Strings, _coordVarKeys
+// Initializes _proj4API, _proj4String, _coordVarKeys
 //
 int DCCF::_InitHorizontalCoordinates(
     NetCDFCFCollection *ncdfc) {
-    _proj4APIs.clear();
-    _proj4Strings.clear();
+    _proj4API = NULL;
+    _proj4String.clear();
     _coordVarKeys.clear();
 
     //

@@ -29,18 +29,23 @@ using namespace VAPoR;
 const string GUIStateParams::m_activeVisualizer = "ActiveVisualizer";
 const string GUIStateParams::m_pathParamsTag = "PathParamsTag";
 const string GUIStateParams::m_sessionFileTag = "SessionFileTag";
-const string GUIStateParams::m_openDataTag = "OpenDataTag";
 const string GUIStateParams::m_imagePathTag = "ImagePathTag";
 const string GUIStateParams::m_imageSavePathTag = "ImageSavePathTag";
 const string GUIStateParams::m_pythonPathTag = "PythonPathTag";
 const string GUIStateParams::m_flowPathTag = "FlowPathTag";
 const string GUIStateParams::m_tfPathTag = "TFPathTag";
 const string GUIStateParams::m_statsDatasetNameTag = "StatsDatasetNameTag";
+const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
+const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
+const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
+const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
 
 //
 // Register class with object factory!!!
 //
 static ParamsRegistrar<GUIStateParams> registrar(GUIStateParams::GetClassType());
+static ParamsRegistrar<GUIStateParams::DataSetParam> registrar_dsp(
+    GUIStateParams::DataSetParam::GetClassType());
 
 //----------------------------------------------------------------------------
 // Constructor
@@ -55,6 +60,11 @@ GUIStateParams::GUIStateParams(
 
     m_mouseModeParams = new MouseModeParams(ssave);
     m_mouseModeParams->GetNode()->SetParent(GetNode());
+
+    // Create a Params container for multiple opacity maps
+    //
+    m_openDataSets = new ParamsContainer(ssave, m_openDataSetsTag);
+    m_openDataSets->SetParent(this);
 }
 
 GUIStateParams::GUIStateParams(
@@ -82,6 +92,15 @@ GUIStateParams::GUIStateParams(
     } else {
         m_activeRenderer = new ActiveRenderer(ssave);
         m_activeRenderer->GetNode()->SetParent(GetNode());
+    }
+
+    if (node->HasChild(m_openDataSetsTag)) {
+        m_openDataSets = new ParamsContainer(ssave, node->GetChild(m_openDataSetsTag));
+    } else {
+        // Node doesn't contain a opacity map
+        //
+        m_openDataSets = new ParamsContainer(ssave, m_openDataSetsTag);
+        m_openDataSets->SetParent(this);
     }
 }
 
@@ -213,30 +232,42 @@ MouseModeParams *GUIStateParams::GetMouseModeParams() const {
 // Funcs
 //----------------------------------------------------------------------------
 
-void GUIStateParams::SetOpenDataSets(
-    const std::vector<string> &paths, const std::vector<string> &names) {
-    assert(paths.size() == names.size());
+vector<string> GUIStateParams::GetOpenDataSetPaths(string dataSetName) const {
+    DataSetParam *dsParams = (DataSetParam *)m_openDataSets->GetParams(
+        dataSetName);
 
-    vector<string> v;
-    for (int i = 0; i < paths.size(); i++) {
-        v.push_back(names[i]);
-        v.push_back(paths[i]);
+    if (!dsParams) {
+        return (vector<string>());
     }
-    SetValueStringVec(m_openDataTag, "open data sets", v);
+
+    vector<string> paths = dsParams->GetPaths();
+    if (paths.empty())
+        paths.push_back("");
+
+    return (paths);
 }
 
-void GUIStateParams::GetOpenDataSets(
-    std::vector<string> &paths, std::vector<string> &names) const {
-    paths.clear();
-    names.clear();
+string GUIStateParams::GetOpenDataSetFormat(string dataSetName) const {
+    DataSetParam *dsParams = (DataSetParam *)m_openDataSets->GetParams(
+        dataSetName);
 
-    std::vector<string> v = GetValueStringVec(m_openDataTag);
-    assert((v.size() % 2) == 0);
-
-    for (int i = 0; i < v.size(); i += 2) {
-        names.push_back(v[i]);
-        paths.push_back(v[i + 1]);
+    if (!dsParams) {
+        return ("");
     }
+
+    return (dsParams->GetFormat());
+}
+
+void GUIStateParams::InsertOpenDateSet(
+    string dataSetName, string format, const vector<string> &paths) {
+
+    m_openDataSets->Remove(dataSetName);
+
+    DataSetParam dsParam(_ssave);
+    dsParam.SetPaths(paths);
+    dsParam.SetFormat(format);
+
+    m_openDataSets->Insert(&dsParam, dataSetName);
 }
 
 void GUIStateParams::_init() {

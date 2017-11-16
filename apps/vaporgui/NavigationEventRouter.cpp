@@ -6,7 +6,7 @@
 //															*
 //************************************************************************/
 //
-//	File:		ViewpointEventRouter.cpp
+//	File:		NavigationEventRouter.cpp
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -28,15 +28,16 @@
 #include <qrect.h>
 #include <qlineedit.h>
 #include <qcheckbox.h>
+#include <QTextEdit>
 
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qfiledialog.h>
 #include <qmessagebox.h>
-#include "ViewpointEventRouter.h"
+#include "NavigationEventRouter.h"
 #include "vapor/ViewpointParams.h"
 #include "vapor/ControlExecutive.h"
-#include "ui_vizTab.h"
+#include "ui_NavigationTab.h"
 #include "VizWinMgr.h"
 #include <vector>
 #include <string>
@@ -46,9 +47,9 @@
 
 using namespace VAPoR;
 
-ViewpointEventRouter::ViewpointEventRouter(
+NavigationEventRouter::NavigationEventRouter(
     QWidget *parent, VizWinMgr *vizMgr, ControlExec *ce) : QWidget(parent),
-                                                           Ui_VizTab(),
+                                                           Ui_NavigationTab(),
                                                            EventRouter(ce, ViewpointParams::GetClassType()) {
     setupUi(this);
 
@@ -65,13 +66,13 @@ ViewpointEventRouter::ViewpointEventRouter(
     stereoSeparationEdit->setEnabled(false);
 }
 
-ViewpointEventRouter::~ViewpointEventRouter() {
+NavigationEventRouter::~NavigationEventRouter() {
 }
 
 /**********************************************************
  * Whenever a new viztab is created it must be hooked up here
  ************************************************************/
-void ViewpointEventRouter::hookUpTab() {
+void NavigationEventRouter::hookUpTab() {
 
     //connect (stereoCombo, SIGNAL (activated(int)), this, SLOT (SetStereoMode(int)));
     //connect (latLonCheckbox, SIGNAL (toggled(bool)), this, SLOT(ToggleLatLon(bool)));
@@ -188,7 +189,7 @@ void ViewpointEventRouter::hookUpTab() {
         this, SLOT(notImplemented()));
 }
 
-void ViewpointEventRouter::GetWebHelp(
+void NavigationEventRouter::GetWebHelp(
     vector<pair<string, string>> &help) const {
     help.clear();
 
@@ -213,7 +214,7 @@ void ViewpointEventRouter::GetWebHelp(
  * Slots associated with ViewpointTab:
  *********************************************************************************/
 
-void ViewpointEventRouter::setCameraChanged() {
+void NavigationEventRouter::setCameraChanged() {
 
     double posvec[3], dirvec[3], upvec[3], center[3];
 
@@ -236,15 +237,15 @@ void ViewpointEventRouter::setCameraChanged() {
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-void ViewpointEventRouter::setCameraLatLonChanged() {
+void NavigationEventRouter::setCameraLatLonChanged() {
     cout << "Not implemented" << endl;
 }
 
-void ViewpointEventRouter::notImplemented() {
+void NavigationEventRouter::notImplemented() {
     cout << "Not implemented" << endl;
 }
 
-void ViewpointEventRouter::updateCameraChanged() {
+void NavigationEventRouter::updateCameraChanged() {
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -271,7 +272,7 @@ void ViewpointEventRouter::updateCameraChanged() {
     rotCenter2->setText(QString::number(center[2]));
 }
 
-void ViewpointEventRouter::setLightChanged() {
+void NavigationEventRouter::setLightChanged() {
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -308,7 +309,7 @@ void ViewpointEventRouter::setLightChanged() {
     paramsMgr->EndSaveStateGroup();
 }
 
-void ViewpointEventRouter::updateLightChanged() {
+void NavigationEventRouter::updateLightChanged() {
 
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
@@ -360,11 +361,12 @@ void ViewpointEventRouter::updateLightChanged() {
     lightDiff2->setEnabled(lightOn);
 }
 
-void ViewpointEventRouter::updateTab() {
+void NavigationEventRouter::updateTab() {
     _updateTab();
 }
 
-void ViewpointEventRouter::updateTransforms() {
+void NavigationEventRouter::updateTransforms() {
+
     map<string, Transform *> transformMap;
 
     // build a list of transforms for each data set
@@ -403,12 +405,175 @@ void ViewpointEventRouter::updateTransforms() {
     transformTable->Update(transformMap);
 }
 
+void NavigationEventRouter::updateProjections() {
+    DataStatus *dataStatus = _controlExec->getDataStatus();
+    vector<string> dataMgrs = dataStatus->GetDataMgrNames();
+
+    GUIStateParams *params = GetStateParams();
+    string currentProj = params->GetProjectionString();
+
+    int numDataMgrs = dataMgrs.size();
+    string customProj = getCustomProjString();
+
+    datasetProjectionTable->clear();
+    datasetProjectionTable->setRowCount(numDataMgrs + 1);
+
+    // Set up table with dataset projection strings
+    //
+    bool usingCurrentProj;
+    string dataSetName, projString;
+    for (int i = 0; i < numDataMgrs; i++) {
+        dataSetName = dataMgrs[i];
+        projString = dataStatus->GetMapProjectionDefault(dataSetName);
+        usingCurrentProj = projString == currentProj;
+        createProjCell(i, projString);
+        createProjCheckBox(i, usingCurrentProj);
+    }
+
+    // Apply the user's custom proj string if needed
+    //
+    usingCurrentProj = customProj == currentProj;
+    createCustomCell(numDataMgrs, customProj);
+    createProjCheckBox(numDataMgrs, usingCurrentProj);
+
+    resizeProjTable();
+}
+
+string NavigationEventRouter::getCustomProjString() {
+    int row = datasetProjectionTable->rowCount();
+    QTableWidgetItem *item = datasetProjectionTable->item(row - 1, 0);
+
+    string customProj;
+    if (item == NULL)
+        customProj = "";
+    else
+        customProj = item->text().toStdString();
+
+    if (customProj == "")
+        customProj = "Custom";
+
+    return customProj;
+}
+
+void NavigationEventRouter::resizeProjTable() {
+    datasetProjectionTable->horizontalHeader()->setResizeMode(
+        0, QHeaderView::Stretch);
+    datasetProjectionTable->verticalHeader()->setResizeMode(
+        QHeaderView::Stretch);
+    datasetProjectionTable->verticalHeader()->hide();
+    datasetProjectionTable->resizeRowsToContents();
+}
+
+void NavigationEventRouter::createProjCheckBox(int row, bool usingCurrentProj) {
+    QWidget *checkBoxWidget = new QWidget();
+    QCheckBox *checkBox = new QCheckBox();
+    QHBoxLayout *checkBoxLayout = new QHBoxLayout(checkBoxWidget);
+
+    checkBoxLayout->addWidget(checkBox);
+    checkBoxLayout->setAlignment(Qt::AlignCenter);
+    checkBoxLayout->setContentsMargins(0, 0, 0, 0);
+    checkBoxLayout->setSizeConstraint(QLayout::SetNoConstraint);
+
+    checkBoxWidget->setProperty("row", row);
+    checkBoxWidget->setLayout(checkBoxLayout);
+    datasetProjectionTable->setCellWidget(row, 1, checkBoxWidget);
+
+    Qt::CheckState cs = usingCurrentProj ? Qt::Checked : Qt::Unchecked;
+    checkBox->blockSignals(true);
+    checkBox->setCheckState(cs);
+    checkBox->blockSignals(false);
+
+    if (row == datasetProjectionTable->rowCount() - 1) {
+        connect(checkBox, SIGNAL(stateChanged(int)), this,
+                SLOT(customCheckboxChanged()));
+    } else {
+        connect(checkBox, SIGNAL(stateChanged(int)), this,
+                SLOT(projCheckboxChanged()));
+    }
+}
+
+void NavigationEventRouter::createProjCell(int row, string projString) {
+    QLabel *label = new QLabel(datasetProjectionTable);
+    label->setText(QString::fromStdString(projString));
+    label->setAlignment(Qt::AlignCenter);
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    label->setWordWrap(true);
+
+    // If this is the last row, the item should be editable for custom
+    // proj strings from the user
+    //
+    datasetProjectionTable->setCellWidget(row, 0, label);
+}
+
+void NavigationEventRouter::createCustomCell(int row, string projString) {
+    QTextEdit *textEdit = new QTextEdit(datasetProjectionTable);
+    textEdit->setText(QString::fromStdString(projString));
+    textEdit->setAlignment(Qt::AlignCenter);
+
+    // If this is the last row, the item should be editable for custom
+    // proj strings from the user
+    //
+    //if (row != datasetProjectionTable->rowCount()) textEdit->setReadOnly(true);
+    datasetProjectionTable->setCellWidget(row, 0, textEdit);
+
+    connect(textEdit, SIGNAL(textChanged()), this,
+            SLOT(customProjStringChanged()));
+}
+
+void NavigationEventRouter::projCheckboxChanged() {
+    QCheckBox *checkBox = (QCheckBox *)sender();
+    int row = checkBox->parentWidget()->property("row").toInt();
+
+    QLabel *label;
+    label = qobject_cast<QLabel *>(datasetProjectionTable->cellWidget(row, 0));
+    string proj = label->text().toStdString();
+
+    GUIStateParams *params = GetStateParams();
+    if (checkBox->checkState() > 0) {
+        params->SetProjectionString(proj);
+    } else {
+        params->SetProjectionString("");
+    }
+    emit Proj4StringChanged();
+}
+
+void NavigationEventRouter::customCheckboxChanged() {
+    QCheckBox *checkBox = (QCheckBox *)sender();
+    int row = checkBox->parentWidget()->property("row").toInt();
+
+    QTextEdit *textEdit;
+    textEdit = qobject_cast<QTextEdit *>(datasetProjectionTable->cellWidget(row, 0));
+    string proj = textEdit->toPlainText().toStdString();
+
+    GUIStateParams *params = GetStateParams();
+    if (checkBox->checkState() > 0) {
+        params->SetProjectionString(proj);
+    } else {
+        params->SetProjectionString("");
+    }
+    emit Proj4StringChanged();
+}
+
+// If the custom proj string gets changed, we do not want to keep updating
+// it as the user types in their new string.  Just disable the global
+// projection, and let the user re-enable their selection when they're
+// done entering text
+void NavigationEventRouter::customProjStringChanged() {
+    GUIStateParams *params = GetStateParams();
+    string currentProj = params->GetProjectionString();
+    if (currentProj != "") {
+        params->SetProjectionString("");
+        emit Proj4StringChanged();
+    }
+}
+
 //Insert values from params into tab panel
 //
-void ViewpointEventRouter::_updateTab() {
+void NavigationEventRouter::_updateTab() {
     updateCameraChanged();
     updateLightChanged();
     updateTransforms();
+    updateProjections();
 
     return;
 
@@ -426,9 +591,9 @@ void ViewpointEventRouter::_updateTab() {
     //Always display the current values of the campos and rotcenter
 }
 
-void ViewpointEventRouter::CenterSubRegion() {
+void NavigationEventRouter::CenterSubRegion() {
 
-    cout << "ViewpointEventRouter::CenterSubRegion not implemented" << endl;
+    cout << "NavigationEventRouter::CenterSubRegion not implemented" << endl;
 
 #ifdef DEAD
 
@@ -492,7 +657,7 @@ void ViewpointEventRouter::CenterSubRegion() {
 //Align the view direction to one of the axes.
 //axis is 2,3,4 for +X,Y,Z,  and 5,6,7 for -X,-Y,-Z
 //
-void ViewpointEventRouter::AlignView(int axis) {
+void NavigationEventRouter::AlignView(int axis) {
 
     float axes[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
 
@@ -592,7 +757,7 @@ void ViewpointEventRouter::AlignView(int axis) {
 }
 
 //Reset the center of view.  Leave the camera where it is
-void ViewpointEventRouter::
+void NavigationEventRouter::
     SetCenter(const double *coords) {
 #ifdef DEAD
     double vdir[3];
@@ -631,12 +796,12 @@ void ViewpointEventRouter::
 #endif
 }
 
-void ViewpointEventRouter::SetHomeViewpoint() {
+void NavigationEventRouter::SetHomeViewpoint() {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
     vpParams->SetCurrentVPToHome();
 }
 
-void ViewpointEventRouter::UseHomeViewpoint() {
+void NavigationEventRouter::UseHomeViewpoint() {
     ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
 
     Viewpoint *homeVP = vpParams->GetHomeViewpoint();
@@ -651,7 +816,7 @@ void ViewpointEventRouter::UseHomeViewpoint() {
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-void ViewpointEventRouter::ViewAll() {
+void NavigationEventRouter::ViewAll() {
 
     DataStatus *dataStatus = _controlExec->getDataStatus();
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -687,7 +852,7 @@ void ViewpointEventRouter::ViewAll() {
     _vizMgr->SetTrackBall(posvec, dirvec, upvec, center, true);
 }
 
-VAPoR::ParamsBase *ViewpointEventRouter::GetActiveParams() const {
+VAPoR::ParamsBase *NavigationEventRouter::GetActiveParams() const {
 
     GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();

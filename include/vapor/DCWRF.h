@@ -47,7 +47,8 @@ class VDF_API DCWRF : public VAPoR::DC {
     //!
     //! \sa EndDefine();
     //
-    virtual int Initialize(const vector<string> &paths);
+    virtual int Initialize(
+        const vector<string> &paths, const std::vector<string> &options);
 
     //! \copydoc DC::GetDimension()
     //!
@@ -104,6 +105,12 @@ class VDF_API DCWRF : public VAPoR::DC {
     //! \copydoc DC::GetMapProjection()
     //!
     virtual string GetMapProjection() const;
+
+    //! \copydoc DC::GetMapProjection()
+    //!
+    virtual string GetMapProjectionDefault() const {
+        return (_proj4StringDefault);
+    }
 
     //! \copydoc DC::GetAtt()
     //!
@@ -225,7 +232,9 @@ class VDF_API DCWRF : public VAPoR::DC {
 
     int _ovr_fd;         // File descriptor for currently opened file
     string _ovr_varname; // name of currently opened variable
-    string _projString;
+    string _proj4String;
+    string _proj4StringOption;
+    string _proj4StringDefault;
     Proj4API _proj4API;
 
     class DerivedVarHorizontal;
