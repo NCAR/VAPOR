@@ -34,6 +34,7 @@ const string Transform::_translationTag = "Translation";
 const string Transform::_rotationTag = "Rotation";
 const string Transform::_scaleTag = "Scale";
 const string Transform::_originTag = "Origin";
+const string Transform::_originInitializedTag = "OriginInitialized";
 
 //
 // Register class with object factory!!!
@@ -56,4 +57,23 @@ Transform::Transform(
 //----------------------------------------------------------------------------
 Transform::~Transform() {
     MyBase::SetDiagMsg("Transform::~Transform() this=%p", this);
+}
+
+vector<double> Transform::GetOrigin() const {
+    vector<double> defaultv(3, 0.0);
+    vector<double> origin = GetValueDoubleVec(_originTag, defaultv);
+    return origin;
+}
+
+void Transform::SetOrigin(const vector<double> origin) {
+    SetValueDoubleVec(_originTag, "Set origin for transforms", origin);
+    SetOriginInitialized(true);
+}
+
+bool Transform::IsOriginInitialized() const {
+    return GetValueLong(_originInitializedTag, false);
+}
+
+void Transform::SetOriginInitialized(bool value) {
+    SetValueLong(_originInitializedTag, "Set is origin initialized for transforms", value);
 }
