@@ -447,17 +447,13 @@ vector <string> DataMgr::GetDataVarNames() const {
 	if (!_dc) {
 		return(vector <string>());
 	}
-	// 
-	// NEED TO HANDLE DERIVED VARS
-	//
-	vector <string> vars = _dc->GetDataVarNames();
-	vector <string> validVars;
-	for (int i=0; i<vars.size(); i++) {
-		if (_get_grid_type(vars[i]) != UNDEFINED) {
-			validVars.push_back(vars[i]);
-		}
+
+	vector <string> validvars;
+	for (int i=1; i<=4; i++) {
+		vector <string> vars = GetDataVarNames(i, false);
+		validvars.insert(validvars.end(), vars.begin(), vars.end());
 	}
-	return(validVars);
+	return(validvars);
 }
 
 vector <string> DataMgr::GetDataVarNames(int ndim, bool spatial) const {
@@ -470,9 +466,18 @@ vector <string> DataMgr::GetDataVarNames(int ndim, bool spatial) const {
 	vector <string> vars = _dc->GetDataVarNames(ndim, spatial);
 	vector <string> validVars;
 	for (int i=0; i<vars.size(); i++) {
-		if (_get_grid_type(vars[i]) != UNDEFINED) {
-			validVars.push_back(vars[i]);
-		}
+
+		// If we don't have a grid class to support this variable reject it
+		//
+		if (_get_grid_type(vars[i]) == UNDEFINED) continue;
+
+		// If the variable is missing coordinate variables reject it
+		//
+		vector <string> coordvars;
+		GetVarCoordVars(vars[i], spatial, coordvars); 
+		if (coordvars.size() < ndim) continue;
+
+		validVars.push_back(vars[i]);
 	}
 	return(validVars);
 }

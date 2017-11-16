@@ -24,8 +24,9 @@ public:
 		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
 			(VariablesWidget::SCALAR | VariablesWidget::HGT),
 			(VariablesWidget::DimFlags)
-			//(VariablesWidget::THREED | VariablesWidget::TWOD));
-			(VariablesWidget::TWOD));
+			(VariablesWidget::TWOD),
+			(VariablesWidget::ColorFlags)
+			(VariablesWidget::CONST | VariablesWidget::PRIMARY));
 	}
 
 	void Update(
@@ -68,9 +69,6 @@ private:
 
 private slots:
 	void SetContourValues(); 
-	void MappingChanged() {
-		cout << "mapping changed!" << endl;
-	}
 
 	void EndTFChange();
 
