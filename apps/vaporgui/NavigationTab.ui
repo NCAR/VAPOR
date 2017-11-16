@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VizTab</class>
- <widget class="QWidget" name="VizTab">
+ <class>NavigationTab</class>
+ <widget class="QWidget" name="NavigationTab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -44,7 +44,7 @@ scene.</string>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
-      <number>0</number>
+      <number>10</number>
      </property>
      <item>
       <widget class="TransformTable" name="transformTable" native="true">
@@ -66,6 +66,61 @@ scene.</string>
          <height>120</height>
         </size>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTabWidget" name="datasetProjectionTab">
+       <property name="toolTip">
+        <string>Configure which projections to render your datasets with, via this table.</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This table shows a list of the projections used in your currently loaded datasets.  To apply a single projection across all loaded datasets, select that projection's corresponding checkbox.  If no checkboxes are selected, all datasets will default to their native projections.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;A custom projection string may be used by editing the last row's 'Custom' string, and then enabling it via its checkbox.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Dataset Projections</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTableWidget" name="datasetProjectionTable">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>115</height>
+            </size>
+           </property>
+           <column>
+            <property name="text">
+             <string>Proj string</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Enabled</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
      <item>

@@ -397,13 +397,18 @@ DataMgr::~DataMgr(
 
 }
 
-int DataMgr::Initialize(const vector <string> &files) {
+int DataMgr::Initialize(
+	const vector <string> &files, const std::vector <string> &options
+) {
 
 	Clear();
 	if (_dc) delete _dc;
 
 	_dc = NULL;
-	if (files.empty()) return(0);
+	if (files.empty()) {
+		SetErrMsg("Empty file list");
+		return(-1);
+	}
 
 	if (_format.compare("vdc") == 0) {
 		_dc = new VDCNetCDF(_nthreads);
@@ -422,7 +427,7 @@ int DataMgr::Initialize(const vector <string> &files) {
 		return(-1);
 	}
 
-	int rc = _dc->Initialize(files);
+	int rc = _dc->Initialize(files, options);
 	if (rc<0) {
 		SetErrMsg("Failed to initialize data importer");
 		return(-1);

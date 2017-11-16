@@ -139,7 +139,9 @@ public:
  //! message will be logged with MyBase::SetErrMsg()
  //!
  //
- virtual int Initialize(const std::vector <string> &files);
+ virtual int Initialize(
+	const vector <string> &paths, const std::vector <string> &options
+ );
 
 
  //! \copydoc DC::GetDimensionNames()
@@ -551,15 +553,11 @@ std::vector <size_t> GetCRatios(string varname) const;
 	return(_dc->GetMapProjection());
  }
 
- //! Return default Map Projection string, if any
- //!
- //! This method returns the default Proj4 Map Projection string,
- //! if any are define. The VDC can support multiple Proj4 projection
- //! strings, one per variable. This method returns the first
- //! Proj4 projection string found.
+ //! \copydoc DC::GetMapProjectionDefault() const;
  //
- string GetDefaultMapProjection() const {
-	return(_defaultMapProjectionStr);
+ virtual string GetMapProjectionDefault() const {
+	assert(_dc != NULL);
+	return(_dc->GetMapProjectionDefault());
  }
 
 #ifdef	DEAD

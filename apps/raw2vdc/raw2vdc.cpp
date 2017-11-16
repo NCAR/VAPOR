@@ -174,7 +174,7 @@ int	main(int argc, char **argv) {
 
 	VDCNetCDF   vdc(opt.nthreads);
 
-	int rc = vdc.Initialize(master, VDC::A, 4*1024*1024);
+	int rc = vdc.Initialize(master, vector <string> (), VDC::A, 4*1024*1024);
 
 	vector <size_t> sdims;
 	if (! vdc.GetVarDimLens(opt.varname, true, sdims)) {
