@@ -221,7 +221,7 @@ int	main(int argc, char **argv) {
 	}
 
 	size_t chunksize = 1024*1024*4;
-	int rc = vdc.Initialize(master, VDC::W, chunksize);
+	int rc = vdc.Initialize(master, vector <string> (), VDC::W, chunksize);
 	if (rc<0) exit(1);
 
 	vector <string> dimnames;

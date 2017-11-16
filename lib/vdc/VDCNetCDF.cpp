@@ -178,11 +178,12 @@ VDCNetCDF::~VDCNetCDF() {
 
 
 int VDCNetCDF::Initialize(
-	const vector <string> &paths, AccessMode mode, size_t chunksizehint
+	const vector <string> &paths, const vector <string> &options,
+	AccessMode mode, size_t chunksizehint
 ) {
 	_chunksizehint =  chunksizehint;
 
-	int rc = VDC::Initialize(paths, mode);
+	int rc = VDC::Initialize(paths, options, mode);
 	if (rc<0) return(-1);
 
 	if (mode == VDC::W) {
