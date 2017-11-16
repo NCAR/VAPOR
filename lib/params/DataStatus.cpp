@@ -219,7 +219,7 @@ map <string, vector <string>> DataStatus::getFirstVars(
 }
 
 void DataStatus::GetActiveExtents(
-	const ParamsMgr *paramsMgr, string winName, size_t ts,
+	const ParamsMgr *paramsMgr, string winName, string datasetName, size_t ts,
 	vector <double> &minExts, vector <double> &maxExts
 ) const {
 
@@ -228,31 +228,29 @@ void DataStatus::GetActiveExtents(
 	map <string, vector <string>> varMap;
 
 	bool foundOne = false;
-	for (int i=0; i<dataSetNames.size(); i++) {
 
-		vector <RenderParams *> rParams;
-		paramsMgr->GetRenderParams(winName, dataSetNames[i], rParams);
+	vector <RenderParams *> rParams;
+	paramsMgr->GetRenderParams(winName, datasetName, rParams);
 
-		vector <string> varnames;
-		for (int j=0; j<rParams.size(); j++) {
-			if (! rParams[j]->IsEnabled()) continue;
-			string varname = rParams[j]->GetVariableName();
-			if (! varname.empty()) {
-				varnames.push_back(varname);
-			}
+	vector <string> varnames;
+	for (int j=0; j<rParams.size(); j++) {
+		if (! rParams[j]->IsEnabled()) continue;
+		string varname = rParams[j]->GetVariableName();
+		if (! varname.empty()) {
+			varnames.push_back(varname);
+		}
 
-			vector <string> fvarnames = rParams[j]->GetFieldVariableNames();
-			for (int k=0; k<fvarnames.size(); k++) {
-				if (! fvarnames[k].empty()) {
-					varnames.push_back(fvarnames[k]);
-				}
+		vector <string> fvarnames = rParams[j]->GetFieldVariableNames();
+		for (int k=0; k<fvarnames.size(); k++) {
+			if (! fvarnames[k].empty()) {
+				varnames.push_back(fvarnames[k]);
 			}
 		}
-		if (varnames.size()) {
-			foundOne = true;
-		}
-		varMap[dataSetNames[i]] = varnames;
 	}
+	if (varnames.size()) {
+		foundOne = true;
+	}
+	varMap[datasetName] = varnames;
 
 	// If we didn't find any enabled variable use the first variables
 	// found in each data set
@@ -262,6 +260,31 @@ void DataStatus::GetActiveExtents(
 	}
 
 	GetExtents(ts, varMap, minExts, maxExts);
+}
+
+void DataStatus::GetActiveExtents(
+	const ParamsMgr *paramsMgr, string winName, size_t ts,
+	vector <double> &minExts, vector <double> &maxExts
+) const {
+    
+    minExts.resize(3, std::numeric_limits<double>::max());
+    maxExts.resize(3, std::numeric_limits<double>::lowest());
+
+	vector <string> dataSetNames = GetDataMgrNames();
+
+	for (int i=0; i<dataSetNames.size(); i++) {
+        vector <double> minWExts, maxWExts;
+        GetActiveExtents(paramsMgr, winName, dataSetNames[i], ts, minWExts, maxWExts);
+        
+        for (int j=0; j<minWExts.size(); j++) {
+            if (minWExts[j] < minExts[j]) {
+                minExts[j] = minWExts[j];
+            }
+            if (maxWExts[j] > maxExts[j]) {
+                maxExts[j] = maxWExts[j];
+            }
+        }
+	}
 }
 
 void DataStatus::GetActiveExtents(
@@ -287,6 +310,10 @@ void DataStatus::GetActiveExtents(
 			}
 		}
 	}
+    int s = minExts.size();
+    printf("GetActiveExtents [");
+    for (int i = 0; i < s*2; i++)
+        printf("%g%s", i<s?minExts[i]:maxExts[i-s], i+1==s?"] [":i+1==2*s?"]\n":", ");
 }
 
 size_t DataStatus::MapGlobalToLocalTimeStep(

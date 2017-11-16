@@ -68,15 +68,11 @@ public:
 	SetValueDoubleVec(_scaleTag, "Set scale transform", scale);
  }
 
- vector<double> GetOrigin() const {
-	vector <double> defaultv(3,0.0);
-	vector<double> origin = GetValueDoubleVec(_originTag, defaultv);
-	return origin;
- }
+ vector<double> GetOrigin() const;
+ void SetOrigin(const vector<double> origin);
 
- void SetOrigin(const vector<double> origin) {
-	SetValueDoubleVec(_originTag, "Set origin for transforms", origin);
- }
+ bool IsOriginInitialized() const;
+ void SetOriginInitialized(bool value);
 
  static string GetClassType() {
   return("Transform");
@@ -88,6 +84,7 @@ private:
  static const string _rotationTag;
  static const string _scaleTag;
  static const string _originTag;
+ static const string _originInitializedTag;
 
 
 };
