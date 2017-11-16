@@ -267,7 +267,7 @@ public:
 	//! Indicate if a single (constant) color is being used
 	//! \return true if constant single color is used
 	bool UseSingleColor() const {
-		return (0 != GetValueLong(_useSingleColorTag, (int) true));
+		return (0 != GetValueLong(_useSingleColorTag, (int) false));
 	}
 
 	//! Specify the variable being used for color mapping

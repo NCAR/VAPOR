@@ -1534,6 +1534,11 @@ void MainForm::setAnimationOnOff(bool on) {
 		playBackwardAction->setChecked(false);
 		enableAnimationWidgets(true);
 		_App->installEventFilter(this);
+
+		// Generate an event and force an update
+		//
+		ParamsChangeEvent *event = new ParamsChangeEvent();
+		QApplication::postEvent(this, event);
 	}
 }
 

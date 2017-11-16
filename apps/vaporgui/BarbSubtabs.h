@@ -23,8 +23,9 @@ public:
 		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
 			(VariablesWidget::VECTOR | VariablesWidget::HGT |
 			VariablesWidget::COLOR),
-			//(VariablesWidget::DimFlags)(VariablesWidget::TWOD | VariablesWidget::THREED));
-			(VariablesWidget::DimFlags)(VariablesWidget::TWOD));
+			(VariablesWidget::DimFlags)(VariablesWidget::TWOD),
+			(VariablesWidget::ColorFlags)
+			(VariablesWidget::CONST | VariablesWidget::COLORVAR));
 			//(VariablesWidget::DimFlags)(VariablesWidget::THREED));
 	}
 
