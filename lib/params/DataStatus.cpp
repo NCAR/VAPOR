@@ -311,9 +311,6 @@ void DataStatus::GetActiveExtents(
 		}
 	}
     int s = minExts.size();
-    printf("GetActiveExtents [");
-    for (int i = 0; i < s*2; i++)
-        printf("%g%s", i<s?minExts[i]:maxExts[i-s], i+1==s?"] [":i+1==2*s?"]\n":", ");
 }
 
 size_t DataStatus::MapGlobalToLocalTimeStep(
