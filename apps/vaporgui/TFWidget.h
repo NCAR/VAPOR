@@ -25,9 +25,12 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     //! COLOR : RenderParams::GetColorMapVariableNames()
     //!
     enum Flags {
-        COLORVAR = (1u << 0),
-        PRIORITYCOLORVAR = (1u << 1),
-        CONSTCOLOR = (1u << 2)
+        SECONDARY_COLORVAR = (1u << 0),
+        CONSTCOLOR = (1u << 1),
+
+        // PRIORITY_COLORVAR just moves the color mapped variable
+        // settings up higher in the gui for better visibility
+        PRIORITY_COLORVAR = (1u << 2)
     };
 
     TFWidget(QWidget *parent = 0);
@@ -54,11 +57,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadTF(string varname);
 
     void getRange(float range[2], float values[2]);
-
-  public slots:
-    // Made public, to be called from EventRouter::Initialize
-    //
-    void setCMVar(const QString &);
+    float getOpacity();
 
   private slots:
     void fileSaveTF();
@@ -68,19 +67,18 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void setSingleColor();
     void forwardTFChange();
+    void opacitySliderChanged(int value);
 
   private:
+    void collapseAutoUpdateHistoCheckbox();
+    string getVariableName();
     void connectWidgets();
     void updateSliders();
     void updateAutoUpdateHistoCheckbox();
     void updateColorInterpolation();
     void updateMappingFrame();
-    void updateColorVarCombo();
     void enableTFWidget(bool state);
-    void collapseColorVarSettings();
-    void collapseConstColorSettings();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
