@@ -241,13 +241,13 @@ bool Statistics::Update()
     // Update timesteps
     MinTimestepSpinbox->blockSignals( true );
     MinTimestepSpinbox->setMinimum(0);
-    MinTimestepSpinbox->setMaximum( currentDmgr->GetNumTimeSteps( ) - 1);
+    MinTimestepSpinbox->setMaximum( currentDmgr->GetNumTimeSteps( ));
     MinTimestepSpinbox->setValue( statsParams->GetCurrentMinTS() );
     MinTimestepSpinbox->blockSignals( false );
 
     MaxTimestepSpinbox->blockSignals( true );
     MaxTimestepSpinbox->setMinimum(0);
-    MaxTimestepSpinbox->setMaximum( currentDmgr->GetNumTimeSteps( ) - 1);
+    MaxTimestepSpinbox->setMaximum( currentDmgr->GetNumTimeSteps( ));
     MaxTimestepSpinbox->setValue( statsParams->GetCurrentMaxTS() );
     MaxTimestepSpinbox->blockSignals( false );
 
