@@ -1101,6 +1101,25 @@ std::string Statistics::ValidStats::GetVariableName( int i )
         return std::string("");
 }
 
+bool Statistics::ValidStats::operator==( const VAPoR::StatisticsParams* rhs ) const
+{
+    std::vector<double> myMin, myMax;
+    rhs->GetBox()->GetExtents( myMin, myMax );
+    std::vector<float>  paramsMin, paramsMax;
+    for( int i = 0; i < myMin.size(); i++ )
+    {
+        paramsMin.push_back( myMin[i] );
+        paramsMax.push_back( myMax[i] );
+    }
+    return ( _variables         == rhs->GetAuxVariableNames()   &&
+             currentExtentMin   == paramsMin                    &&
+             currentExtentMax   == paramsMax                    &&
+             currentTimeStep[0] == rhs->GetCurrentMinTS()       &&
+             currentTimeStep[1] == rhs->GetCurrentMaxTS()       &&
+             currentLOD         == rhs->GetCompressionLevel()   &&
+             currentRefLev      == rhs->GetRefinementLevel()       );
+}
+
 void Statistics::_exportTextClicked() 
 {
     QString homePath = QDir::homePath();
@@ -1189,8 +1208,10 @@ void Statistics::_exportTextClicked()
         file << endl;
 
         file << "#Compression Parameters:" << endl;
-        file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
-        file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
+        //file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
+        //file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
+        file << "Level of Detail:  " << statsParams->GetCompressionLevel() << endl;
+        file << "Refinement Level: " << statsParams->GetRefinementLevel() << endl;
 
         file.close();
     }

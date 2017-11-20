@@ -88,15 +88,22 @@ protected:
         bool InvalidAll();  // keep existing variables, but set values to nan
         bool Clear();       // clear all variables and values.
         
+        // keeps the current parameters, and make them public.
+        std::vector<float>          currentExtentMin,   currentExtentMax;
+        int                         currentTimeStep[2], currentLOD, currentRefLev;
+
+        bool operator==( const VAPoR::StatisticsParams* rhs ) const;
+        
     private:
         std::vector<std::string>    _variables;
-        std::vector<double>         _values[5];  // 0: min
+        std::vector<double>         _values[5]; // 0: min
                                                 // 1: max
                                                 // 2: mean
                                                 // 3: median
                                                 // 4: stddev
         std::vector<long>           _count;     // number of samples
-        int _getVarIdx( std::string& );          // -1: not exist
+
+        int _getVarIdx( std::string& );         // -1: not exist
                                                 // >=0: a valid index
     };  // finish class ValidStats
 
