@@ -157,28 +157,31 @@ static int insert_rec(struct kdnode **nptr, const double *pos, void *data, int d
     int new_dir;
     struct kdnode *node;
 
-    if (!*nptr) {
-        if (!(node = malloc(sizeof *node))) {
-            return -1;
+    new_dir = dir;
+    while (*nptr) {
+        node = *nptr;
+        new_dir = (node->dir + 1) % dim;
+        if (pos[node->dir] < node->pos[node->dir]) {
+            *nptr = node->left;
+        } else {
+            *nptr = node->right;
         }
-        if (!(node->pos = malloc(dim * sizeof *node->pos))) {
-            free(node);
-            return -1;
-        }
-        memcpy(node->pos, pos, dim * sizeof *node->pos);
-        node->data = data;
-        node->dir = dir;
-        node->left = node->right = 0;
-        *nptr = node;
-        return 0;
     }
 
-    node = *nptr;
-    new_dir = (node->dir + 1) % dim;
-    if (pos[node->dir] < node->pos[node->dir]) {
-        return insert_rec(&(*nptr)->left, pos, data, new_dir, dim);
+    if (!(node = malloc(sizeof *node))) {
+        return -1;
     }
-    return insert_rec(&(*nptr)->right, pos, data, new_dir, dim);
+    if (!(node->pos = malloc(dim * sizeof *node->pos))) {
+        free(node);
+        return -1;
+    }
+
+    memcpy(node->pos, pos, dim * sizeof *node->pos);
+    node->data = data;
+    node->dir = new_dir;
+    node->left = node->right = 0;
+    *nptr = node;
+    return 0;
 }
 
 int kd_insert(struct kdtree *tree, const double *pos, void *data) {
