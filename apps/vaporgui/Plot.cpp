@@ -1490,8 +1490,7 @@ void Plot::initTimes()
 {
     _timeExtents.clear();
     _timeExtents.push_back(0);
-    //_timeExtents.push_back(_dm->GetNumTimeSteps(_vars3d[0])-1);
-    _timeExtents.push_back(_dm->GetNumTimeSteps());
+    _timeExtents.push_back(_dm->GetNumTimeSteps() - 1);
 }
 
 void Plot::initExtents(int ts)
