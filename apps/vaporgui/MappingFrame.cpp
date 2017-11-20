@@ -181,10 +181,9 @@ MappingFrame::~MappingFrame()
 }
 
 void MappingFrame::RefreshHistogram() {
-	string var = _rParams->GetColorMapVariableName();
-	if (var == "" || var == "Constant") {
-		var = _rParams->GetVariableName();
-	}
+	string var;
+	var = _rParams->GetColorMapVariableName();
+
 	size_t ts = _rParams->GetCurrentTimestep();	
 
 	float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
@@ -356,10 +355,8 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	_rParams = rParams;
 	_paramsMgr = paramsMgr;
 
-	string varname = _rParams->GetColorMapVariableName();
-	if (varname == "" || varname == "Constant") {
-		varname = _rParams->GetVariableName();
-	}
+	string varname;
+	varname = _rParams->GetColorMapVariableName();
 
 	if (varname.empty()) return;
 
@@ -957,6 +954,7 @@ void MappingFrame::paintGL() {
   // select points
   //
 
+  _variableName = _rParams->GetColorMapVariableName();
   if (_variableName != "" ){
 		//allow for 4 pixels per character in name:
 		int wx = (width() - _variableName.size()*8)/2;
@@ -2186,11 +2184,8 @@ float MappingFrame::getOpacityData(float value)
 //----------------------------------------------------------------------------
 Histo* MappingFrame::getHistogram()
 {
-	string varname = _rParams->GetColorMapVariableName();
-	if (varname == "" | varname == "Constant") {
-		varname = _rParams->GetVariableName();
-	}
-//	string varname = _rParams->GetVariableName();
+	string varname;
+	varname = _rParams->GetColorMapVariableName();
 
     MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
 	assert(mapFunc);
