@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>427</width>
-    <height>430</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -43,7 +43,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>160</height>
+       <height>250</height>
       </size>
      </property>
      <property name="currentIndex">
@@ -698,41 +698,6 @@
          </layout>
         </widget>
        </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTabWidget" name="colorSettingsTab">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>100</height>
-      </size>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="tab_3">
-      <attribute name="title">
-       <string>Color Settings</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
        <item>
         <widget class="QFrame" name="colorMappingFrame">
          <layout class="QHBoxLayout" name="colorMappingLayout_2">
@@ -754,7 +719,7 @@
           <item>
            <widget class="QLabel" name="colorVarLabel">
             <property name="text">
-             <string>Color mapping</string>
+             <string>Color mapped variable</string>
             </property>
            </widget>
           </item>
@@ -798,85 +763,6 @@
               <string>Constant</string>
              </property>
             </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="constColorFrame">
-         <layout class="QHBoxLayout" name="constColorLayout_2">
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>4</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="constColorLabel">
-            <property name="text">
-             <string>Constant color</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_16">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>0</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="colorDisplay">
-            <property name="maximumSize">
-             <size>
-              <width>25</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="colorSelectButton">
-            <property name="minimumSize">
-             <size>
-              <width>95</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Select</string>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>16</width>
-              <height>16</height>
-             </size>
-            </property>
            </widget>
           </item>
          </layout>
