@@ -82,10 +82,13 @@ protected:
         bool Clear();         // clear all variables and values.
 
         // keeps the current parameters, and make them public.
+        std::string        currentDataSourceName;
         std::vector<float> currentExtentMin, currentExtentMax;
         int                currentTimeStep[2], currentLOD, currentRefLev;
 
-        bool operator==(const VAPoR::StatisticsParams *rhs) const;
+        bool HaveSameParams(const VAPoR::StatisticsParams *rhs) const;
+        bool UpdateMyParams(const VAPoR::StatisticsParams *rhs);
+        bool SetCurrentExtents(std::vector<double> &min, std::vector<double> &max);
 
     private:
         std::vector<std::string> _variables;
