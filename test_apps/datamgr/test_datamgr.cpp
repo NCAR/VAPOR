@@ -158,7 +158,7 @@ int main(int argc, char **argv)
     for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
 
     DataMgr datamgr(opt.ftype, opt.memsize, opt.nthreads);
-    int     rc = datamgr.Initialize(files);
+    int     rc = datamgr.Initialize(files, vector<string>());
     if (rc < 0) exit(1);
 
     print_info(datamgr, opt.verbose);
