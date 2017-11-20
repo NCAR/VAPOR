@@ -3,7 +3,7 @@
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent) {
     setupUi(this);
 
-    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTCOLOR));
+    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONST));
     _TFWidget->mappingFrame->setIsolineSliders(true);
     _TFWidget->mappingFrame->setOpacityMapping(false);
 
@@ -205,8 +205,6 @@ void ContourAppearanceSubtab::EndTFChange() {
 
 void ContourAppearanceSubtab::SetContourCount(int count) {
     disableSliders();
-
-    //_countCombo->Update(1, 50, count);
 
     int previousCount = _cParams->GetNumContours();
     bool locked = _cParams->GetLockToTF();
