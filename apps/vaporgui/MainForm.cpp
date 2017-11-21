@@ -1008,28 +1008,16 @@ void MainForm::undo() {
     if (!_controlExec->UndoSize())
         return;
     undoRedoHelper(true);
-
-    if (!_controlExec->UndoSize()) {
-        _editUndoAction->setEnabled(false);
-    }
-    _editRedoAction->setEnabled(true);
 }
 
 void MainForm::redo() {
     if (!_controlExec->RedoSize())
         return;
     undoRedoHelper(false);
-
-    if (!_controlExec->RedoSize()) {
-        _editRedoAction->setEnabled(false);
-    }
-    _editUndoAction->setEnabled(true);
 }
 
 void MainForm::clear() {
     _controlExec->UndoRedoClear();
-    //_editUndoAction->setEnabled(false);
-    _editRedoAction->setEnabled(true);
 }
 
 void MainForm::helpIndex() {
@@ -1983,6 +1971,16 @@ void MainForm::updateMenus() {
                 this, SLOT(closeData()));
         }
     }
+
+    if (!_controlExec->UndoSize()) {
+        _editUndoAction->setEnabled(false);
+    }
+    _editRedoAction->setEnabled(true);
+
+    if (!_controlExec->RedoSize()) {
+        _editRedoAction->setEnabled(false);
+    }
+    _editUndoAction->setEnabled(true);
 }
 
 void MainForm::update() {
