@@ -22,6 +22,7 @@
 #define STARTUPPARAMS_H
 
 
+#include <QDir>
 #include <vector>
 #include <vapor/ParamsBase.h>
 
@@ -158,7 +159,11 @@ public:
 	void GetWinSize(size_t &width, size_t &height) const;
 	
 	string GetSessionDir() const {
-		return GetValueString(_sessionDirTag,string("."));
+		string dir = GetValueString(_sessionDirTag,string("."));
+		if (dir == "~") {
+			dir = QDir::homePath().toStdString();
+		}
+		return(dir);
 	}
 
 	void SetSessionDir(string name){
@@ -166,7 +171,11 @@ public:
 	}
 
 	string GetMetadataDir() const {
-		return GetValueString(_metadataDirTag,string("."));
+		string dir = GetValueString(_metadataDirTag,string("."));
+		if (dir == "~") {
+			dir = QDir::homePath().toStdString();
+		}
+		return(dir);
 	}
 
 	void SetMetadataDir(string dir){
@@ -174,7 +183,11 @@ public:
 	}
 
 	string GetImageDir() const {
-		return GetValueString(_imageDirTag,string("."));
+		string dir = GetValueString(_imageDirTag,string("."));
+		if (dir == "~") {
+			dir = QDir::homePath().toStdString();
+		}
+		return(dir);
 	}
  
 	void SetImageDir(string dir){
@@ -182,7 +195,11 @@ public:
 	}
  
 	string GetTFDir() const {
-		return GetValueString(_tfDirTag,string("."));
+		string dir = GetValueString(_tfDirTag,string("."));
+		if (dir == "~") {
+			dir = QDir::homePath().toStdString();
+		}
+		return(dir);
 	}
  
 	void SetTFDir(string dir){
@@ -190,7 +207,11 @@ public:
 	}
 
 	string GetFlowDir() const {
-		return GetValueString(_flowDirTag,string("."));
+		string dir = GetValueString(_flowDirTag,string("."));
+		if (dir == "~") {
+			dir = QDir::homePath().toStdString();
+		}
+		return(dir);
 	}
 
 	void SetFlowDir(string dir){
@@ -198,7 +219,11 @@ public:
 	}
 
 	string GetPythonDir() const {
-		return GetValueString(_pythonDirTag,string("."));
+		string dir = GetValueString(_pythonDirTag,string("."));
+		if (dir == "~") {
+			dir = QDir::homePath().toStdString();
+		}
+		return(dir);
 	}
 
 	void SetPythonDir(string dir){
