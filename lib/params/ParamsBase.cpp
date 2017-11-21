@@ -28,6 +28,16 @@
 
 using namespace VAPoR;
 
+namespace {
+
+void string_replace(vector<string> &v, string olds, string news)
+{
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i] == olds) { v[i] = news; }
+    }
+}
+};    // namespace
+
 ParamsBase::ParamsBase(StateSave *ssave, const string &classname)
 {
     assert(ssave != NULL);
@@ -173,6 +183,9 @@ vector<string> ParamsBase::GetValueStringVec(const string tag) const
 
     vector<string> v;
     _node->GetElementStringVec(tag, v);
+
+    string_replace(v, "NULL", "");
+
     return (v);
 }
 
@@ -182,6 +195,9 @@ vector<string> ParamsBase::GetValueStringVec(const string tag, const vector<stri
 
     vector<string> v;
     _node->GetElementStringVec(tag, v);
+
+    string_replace(v, "NULL", "");
+
     if (v.size() < defaultVal.size()) {
         for (int i = v.size(); i < defaultVal.size(); i++) { v.push_back(defaultVal[i]); }
     } else if (v.size() > defaultVal.size()) {
@@ -241,7 +257,12 @@ void ParamsBase::SetValueStringVec(const string &tag, string description, const 
     vector<string> current = GetValueStringVec(tag);
     if (current == values) return;
 
-    _node->SetElementStringVec(tag, values);
+    // Replace empty strings with a token
+    //
+    vector<string> my_values = values;
+    string_replace(my_values, "", "NULL");
+
+    _node->SetElementStringVec(tag, my_values);
 
     _ssave->Save(_node, description);
 }
