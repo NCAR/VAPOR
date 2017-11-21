@@ -68,6 +68,8 @@ public:
         virtual void Save(const XmlNode *node, string description) {}
         virtual void BeginGroup(string description) {}
         virtual void EndGroup() {}
+        virtual void SetEnabled(bool onOff) {}
+        virtual bool GetEnabled() const { return (false); }
     };
 
     // NO DEFAULT CONSTRUCTOR

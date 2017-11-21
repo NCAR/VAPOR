@@ -306,7 +306,10 @@ void NavigationEventRouter::updateTransforms()
                 origin.resize(minExts.size());
                 for (int k = 0; k < minExts.size(); k++) origin[k] = minExts[k] + (maxExts[k] - minExts[k]) * 0.5;
 
+                bool enabled = paramsMgr->GetSaveStateEnabled();
+                paramsMgr->SetSaveStateEnabled(false);
                 t->SetOrigin(origin);
+                paramsMgr->SetSaveStateEnabled(enabled);
             }
 
             transformMap[names[j]] = t;
