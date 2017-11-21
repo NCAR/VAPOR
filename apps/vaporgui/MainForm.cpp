@@ -127,6 +127,16 @@ string makename(string file) {
 	return( qFileInfo.fileName().toStdString());
 }
 
+string concatpath(string s1, string s2) {
+	string s;
+	if (! s1.empty()) {
+		s = s1 + "/" + s2;
+	}
+	else {
+		s = s2;
+	}
+	return(QDir::toNativeSeparators(s.c_str()).toStdString());
+}
 };
 
 //Only the main program should call the constructor:
@@ -273,6 +283,7 @@ MainForm::MainForm(
 	app->installEventFilter(this);
 
 	_controlExec->SetSaveStateEnabled(true);
+	_stateChangeFlag = false;
 }
 
 /*
@@ -904,8 +915,14 @@ void MainForm::sessionOpenHelper(string fileName) {
 	// ControlExec::LoadState invalidates params state
 	//
 	StartupParams *sP = GetStartupParams();
-	newP->SetCurrentSessionPath(fileName);
-	newP->SetCurrentSessionPath(sP->GetSessionDir());
+	if (fileName.empty()) {
+		newP->SetCurrentSessionPath(
+			concatpath(sP->GetSessionDir(), "My_Vapor_Session.vs3")
+		);
+	}
+	else {
+		newP->SetCurrentSessionPath(fileName);
+	}
 	newP->SetCurrentImagePath(sP->GetImageDir());
 	newP->SetCurrentTFPath(sP->GetTFDir());
 	newP->SetCurrentPythonPath(sP->GetPythonDir());
@@ -935,14 +952,9 @@ void MainForm::sessionOpen(QString qfileName)
 	// load that session
 	//
 	if (qfileName==""){	
-		GUIStateParams *p = GetStateParams();
-		string path = p->GetCurrentSessionPath();
 
-        if( path == "JustInMemory")
-        {
-            QString sessionPath = QDir::homePath();
-            path = QDir::toNativeSeparators(sessionPath).toStdString();
-        }
+		StartupParams *sP = GetStartupParams();
+		string path = sP->GetSessionDir();
 
 		vector <string> files = myGetOpenFileNames(
 			"Choose a VAPOR session file to restore a session", 
@@ -974,19 +986,14 @@ void MainForm::fileSave()
 	GUIStateParams *p = GetStateParams();
 	string path = p->GetCurrentSessionPath();
 
-    if( path == "JustInMemory" )
-    {
-        QString sessionPath = QDir::homePath();
-        sessionPath.append("/My_Vapor_Session.vs3");
-        sessionPath = QDir::toNativeSeparators(sessionPath);
-        QString fileName = QFileDialog::getSaveFileName( this, 
-                            "Choose the fileName to save the current session",
-                            sessionPath, "Vapor 3 Session Files (*.vs3)" );
-        if( fileName.isNull() )
-        {
-            return;
-        }
-        path = fileName.toStdString();
+    if( path.empty()) {
+		vector <string> files = myGetOpenFileNames(
+			"Choose a VAPOR session file to restore a session", 
+			path, "Vapor 3 Session Save Files (*.vs3)", false
+		);
+		if (files.empty()) return;
+
+        path = files[0];
     }
 
 	if( _controlExec->SaveSession(path) < 0 )
@@ -994,48 +1001,34 @@ void MainForm::fileSave()
 		MSG_ERR("Saving session file failed");
 		return;
 	}
-    else
-    {
-	    p->SetCurrentSessionPath(path);
-    }
 
+	p->SetCurrentSessionPath(path);
     _stateChangeFlag = false;
 }
-
 
 void MainForm::fileSaveAs()
 {
 	GUIStateParams *p = GetStateParams();
-	QString path = QString::fromStdString( p->GetCurrentSessionPath() );
-    
-    if( path == "JustInMemory" )
-    {
-        QString homePath = QDir::homePath();
-        homePath.append("/My_Vapor_Session.vs3");
-        path = QDir::toNativeSeparators(homePath);
-    }
-	
-   	QString fileName = QFileDialog::getSaveFileName( this, 
-                        "Choose the fileName to save the current session",
-                        path, "Vapor 3 Session Files (*.vs3)");
-    if( fileName.isNull() )
-    {
-        return;
-    }
-	string newPath = fileName.toStdString();
+	string path = p->GetCurrentSessionPath();
 
-	if (_controlExec->SaveSession(newPath))
-    {
+	vector <string> files = myGetOpenFileNames(
+		"Choose a VAPOR session file to restore a session", 
+		path, "Vapor 3 Session Save Files (*.vs3)", false
+	);
+	if (files.empty()) return;
+
+	path = files[0];
+    
+	if (_controlExec->SaveSession(path)) {
+
 		MSG_ERR("Saving session file failed");
 		return;
 	}
-    else
-    {
-        // Save to use a default for fileSave()
-        //
-        p->SetCurrentSessionPath( path.toStdString() );
-        _stateChangeFlag = false;
-    }
+
+	// Save to use a default for fileSave()
+	//
+	p->SetCurrentSessionPath(path);
+	_stateChangeFlag = false;
 }
 
 
@@ -1296,7 +1289,7 @@ void MainForm::loadDataHelper(
 
 	_timeStepEditValidator->setRange(0,ds->GetTimeCoordinates().size()-1);
 
-//	update();
+
 }
 
 //Load data into current session
@@ -1424,10 +1417,6 @@ void MainForm::sessionNew()
 	sessionOpenHelper("");
 
 	_vizWinMgr->LaunchVisualizer();
-
-    string fileName = "JustInMemory";
-	GUIStateParams* p = GetStateParams();
-	p->SetCurrentSessionPath(fileName);
 
     _stateChangeFlag = false;
 	_sessionNewFlag = true;
