@@ -22,7 +22,7 @@
 #include <cstring>
 #include <string>
 #include <cassert>
-#include <StatisticsParams.h>
+#include <vapor/StatisticsParams.h>
 
 using namespace VAPoR;
 
@@ -64,7 +64,7 @@ void StatisticsParams::SetAutoUpdateEnabled(bool val) {
     SetValueLong(_autoUpdateTag, "if we want stats auto-update", (long)val);
 }
 
-int StatisticsParams::GetCurrentMinTS() {
+int StatisticsParams::GetCurrentMinTS() const {
     return (int)(GetValueDouble(_minTSTag, 0.0));
 }
 
@@ -72,7 +72,7 @@ void StatisticsParams::SetCurrentMinTS(int ts) {
     SetValueDouble(_minTSTag, "Minimum selected timestep for statistics", (double)ts);
 }
 
-int StatisticsParams::GetCurrentMaxTS() {
+int StatisticsParams::GetCurrentMaxTS() const {
     return (int)(GetValueDouble(_maxTSTag, 0.0));
 }
 

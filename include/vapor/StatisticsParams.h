@@ -33,10 +33,10 @@ class StatisticsParams : public RenderParams {
     bool GetAutoUpdateEnabled();
     void SetAutoUpdateEnabled(bool state);
 
-    int GetCurrentMinTS();
+    int GetCurrentMinTS() const;
     void SetCurrentMinTS(int ts);
 
-    int GetCurrentMaxTS();
+    int GetCurrentMaxTS() const;
     void SetCurrentMaxTS(int ts);
 
     bool GetMinEnabled();
