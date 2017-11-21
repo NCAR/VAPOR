@@ -443,6 +443,10 @@ void Plot::reinitDataMgr() {
 	}
     else
     {
+        variablesTable->clearContents();
+        int numOfRows = variablesTable->rowCount();
+        for( int i = 0; i < numOfRows; i++ )
+            variablesTable->removeRow( 0 );
         initVariables();
     }
 }
@@ -832,6 +836,11 @@ vector<string> Plot::getEnabledVars() const {
 			enabledVars.push_back(varName);
 		}
 	}
+    // For some reasons it returns empty strings.
+    // Detect and erase them!
+    for( vector<string>::iterator it = enabledVars.begin(); it != enabledVars.end(); ++it )
+        if( it->empty() )
+            enabledVars.erase( it );
 	return enabledVars;
 }
 
