@@ -61,6 +61,7 @@ void BarbParams::_init()
 
     if (!varnames.empty()) varname = varnames[0];
     SetVariableName(varname);
+    SetColorMapVariableName(varnames[0]);
 
     // Initialize 2D box
     //
