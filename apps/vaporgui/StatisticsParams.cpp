@@ -22,7 +22,7 @@
 #include <cstring>
 #include <string>
 #include <cassert>
-#include <vapor/StatisticsParams.h>
+#include <StatisticsParams.h>
 
 using namespace VAPoR;
 

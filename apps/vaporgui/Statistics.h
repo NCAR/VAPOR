@@ -32,7 +32,7 @@
     #include "ui_errMsg.h"
     #include "RangeController.h"
     #include <RangeCombos.h>
-    #include <vapor/StatisticsParams.h>
+    #include <StatisticsParams.h>
 
 namespace VAPoR {
 class ParamsMgr;
