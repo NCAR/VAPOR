@@ -159,6 +159,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     _stats = NULL;
     _plot = NULL;
     _stateChangeFlag = false;
+    _sessionNewFlag = true;
 
     createActions();
     createMenus();
@@ -750,6 +751,7 @@ void MainForm::sessionOpen(QString qfileName)
     _vizWinMgr->Restart();
 
     _stateChangeFlag = false;
+    _sessionNewFlag = false;
 }
 
 void MainForm::fileSave()
@@ -988,12 +990,31 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     // Reinitialize all tabs
     //
 
-    viewAll();
+    if (_sessionNewFlag) {
+        viewAll();
 
-    vector<string> winNames = _paramsMgr->GetVisualizerNames();
-    for (int i = 0; i < winNames.size(); i++) {
-        ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-        vpParams->SetCurrentVPToHome();
+        vector<string> winNames = _paramsMgr->GetVisualizerNames();
+        for (int i = 0; i < winNames.size(); i++) {
+            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+            vpParams->SetCurrentVPToHome();
+        }
+        _sessionNewFlag = false;
+    } else {
+        // Ugh. Trackball isn't integrated with Params database so need to
+        // handle undo/redo manually. I.e. get modelview matrix params from
+        // database and set them in the TrackBall
+        //
+        vector<string> winNames = _paramsMgr->GetVisualizerNames();
+        for (int i = 0; i < winNames.size(); i++) {
+            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+            double           pos[3], dir[3], up[3], center[3];
+            vpParams->GetCameraPos(pos);
+            vpParams->GetCameraViewDir(dir);
+            vpParams->GetCameraUpVec(up);
+            vpParams->GetRotationCenter(center);
+
+            _vizWinMgr->SetTrackBall(pos, dir, up, center, true);
+        }
     }
 
     DataStatus *ds = _controlExec->getDataStatus();
@@ -1108,6 +1129,7 @@ void MainForm::sessionNew()
     p->SetCurrentSessionPath(fileName);
 
     _stateChangeFlag = false;
+    _sessionNewFlag = true;
 }
 
 //
