@@ -88,7 +88,7 @@ void RenderParams::_init() {
     SetVariableName(varname);
     SetFieldVariableNames(fieldVarNames);
     SetHeightVariableName("");
-    SetColorMapVariableName("");
+    SetColorMapVariableName(varname);
 
     SetRefinementLevel(0);
     SetCompressionLevel(0);
