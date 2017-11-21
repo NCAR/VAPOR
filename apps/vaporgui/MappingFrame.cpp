@@ -93,7 +93,7 @@ MappingFrame::MappingFrame(QWidget *parent)
   _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL), _deleteOpacityWidgetAction(NULL), _addColorControlPointAction(NULL), _addOpacityControlPointAction(NULL),
   _deleteControlPointAction(NULL), _lastx(0), _lasty(0), _editMode(true), _clickedPos(0, 0), _minValueStart(0.0), _maxValueStart(1.0), _isoVal(0.0), _button(Qt::LeftButton), _minX(-0.035),
   _maxX(1.035), _minY(-0.35), _maxY(1.3), _minValue(0.0), _maxValue(1.0), _colorbarHeight(16), _domainBarHeight(16), _domainLabelHeight(10), _domainHeight(_domainBarHeight + _domainLabelHeight + 3),
-  _axisRegionHeight(20), _opacityGap(4), _bottomGap(10), _dataMgr(NULL), _rParams(NULL)
+  _axisRegionHeight(20), _opacityGap(4), _bottomGap(10), _dataMgr(NULL), _rParams(NULL), _mousePressFlag(false)
 {
     initWidgets();
     initConnections();
@@ -1508,7 +1508,6 @@ void MappingFrame::resize()
 //----------------------------------------------------------------------------
 void MappingFrame::mousePressEvent(QMouseEvent *event)
 {
-    _paramsMgr->BeginSaveStateGroup("MappingFrame mousePressEvent");
     select(event->x(), event->y(), event->modifiers());
 
     _lastx = xViewToWorld(event->x());
@@ -1521,6 +1520,8 @@ void MappingFrame::mousePressEvent(QMouseEvent *event)
     _button = event->buttons();
 
     if (_editMode && (_button == Qt::LeftButton || _button == Qt::MidButton)) {
+        _paramsMgr->BeginSaveStateGroup("Transfer Function Editor edit");
+        _mousePressFlag = true;
         if (_lastSelected) {
             if (_lastSelected != _domainSlider) {
                 if (_lastSelected == _colorbarWidget) {
@@ -1537,7 +1538,10 @@ void MappingFrame::mousePressEvent(QMouseEvent *event)
                 emit startChange("Domain slider move");
         }
 
-    } else if (!_editMode && (_button == Qt::LeftButton)) {
+    } else if (!_editMode && (_button == Qt::LeftButton))
+        _paramsMgr->BeginSaveStateGroup("Transfer Function Editor edit");
+    _mousePressFlag = true;
+    {
         emit startChange("Mapping window zoom/pan");
     }
 
@@ -1574,7 +1578,10 @@ void MappingFrame::mouseReleaseEvent(QMouseEvent *event)
         emit updateParams();
     }
 
-    _paramsMgr->EndSaveStateGroup();
+    if (_mousePressFlag) {
+        _paramsMgr->EndSaveStateGroup();
+        _mousePressFlag = false;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1638,6 +1645,7 @@ void MappingFrame::mouseMoveEvent(QMouseEvent *event)
 void MappingFrame::contextMenuEvent(QContextMenuEvent * /*event*/)
 {
     if (_mapper == NULL) { return; }
+    _paramsMgr->BeginSaveStateGroup("Transfer Function Editor edit");
 
     OpacityWidget *opacWidget = dynamic_cast<OpacityWidget *>(_lastSelected);
 
@@ -1719,6 +1727,7 @@ void MappingFrame::contextMenuEvent(QContextMenuEvent * /*event*/)
     }
 
     _contextMenu->exec(_contextPoint);
+    _paramsMgr->EndSaveStateGroup();
 }
 
 //----------------------------------------------------------------------------
