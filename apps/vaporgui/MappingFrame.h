@@ -370,6 +370,7 @@ class MappingFrame : public QGLWidget {
     const int _bottomGap;
     VAPoR::DataMgr *_dataMgr;
     VAPoR::RenderParams *_rParams;
+    bool _mousePressFlag;
     VAPoR::ParamsMgr *_paramsMgr;
 
     QStringList _axisTexts;
