@@ -47,6 +47,7 @@ set (SRCS
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
 	PlotParams.cpp
+	StatisticsParams.cpp
 	MiscParams.cpp
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
