@@ -92,7 +92,6 @@ void BarbEventRouter::_initializeTab() {
 	DataMgr* dataMgr = GetActiveDataMgr();
 
 	_variables->Initialize(rParams, dataMgr);
-	_appearance->Initialize(rParams);
 }
 
 void BarbEventRouter::_updateTab(){
