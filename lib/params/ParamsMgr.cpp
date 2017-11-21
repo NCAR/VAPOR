@@ -1226,8 +1226,6 @@ void ParamsMgr::PMgrStateSave::Save(
 		return;
 	}
 
-
-
 	// Delete oldest elements if needed
 	// 
 	cleanStack(_stackSize, _undoStack);
@@ -1240,6 +1238,10 @@ void ParamsMgr::PMgrStateSave::Save(
 	cout << "ParamsMgr::PMgrStateSave::Save() : saving node " << 
 		node->GetTag() << " : " << description << endl;
 #endif
+
+	// Clear redo stack 
+	//
+	cleanStack(0, _redoStack);
 
 	// Set state change flags and CBs
 	//
@@ -1292,6 +1294,10 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
 	// Delete oldest elements if needed
 	// 
 	cleanStack(_stackSize, _undoStack);
+
+	// Clear redo stack 
+	//
+	cleanStack(0, _redoStack);
 
 	_undoStack.push_back(make_pair(desc, new XmlNode(*_rootNode)));
 
