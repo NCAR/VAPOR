@@ -155,7 +155,7 @@ void GUIStateParams::SetActiveRenderer(
 //! method identifies the current session file
 //! \retval session file path
 string GUIStateParams::GetCurrentSessionPath() const {
-    return (GetValueString(m_sessionFileTag, QDir::homePath().toStdString()));
+    return (GetValueString(m_sessionFileTag, "bogus.vs3"));
 }
 
 //! method sets the current session path
