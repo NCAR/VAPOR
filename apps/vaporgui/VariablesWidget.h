@@ -150,7 +150,6 @@ private:
  //void configureColorMappingToVariable(string var);
  //void configureConstantColor(string var);
  void configureColorWidgets(string selection);
- void updateColorVarCombo();
  void collapseColorVarSettings();
 
  // Get the compression rates as a fraction for both the LOD and
