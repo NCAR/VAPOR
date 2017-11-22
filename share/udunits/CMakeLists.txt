@@ -1,7 +1,0 @@
-file (GLOB XML_FILES *.xml)
-
-install (
-	FILES ${XML_FILES}
-	DESTINATION ${INSTALL_SHARE_DIR}/udunits
-	COMPONENT Share
-	)

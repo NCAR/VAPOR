@@ -1,10 +1,17 @@
 add_subdirectory (Doxygen)
 if (${GENERATE_FULL_INSTALLER})
-	add_subdirectory (fonts)
-	add_subdirectory (images)
-	add_subdirectory (shaders)
-	add_subdirectory (udunits)
-	add_subdirectory (python)
-	add_subdirectory (palettes)
-	add_subdirectory (examples)
+	set (SHARE_DIRS
+		fonts
+		images
+		shaders
+		udunits
+		python
+		palettes
+		examples
+	)
+	install (
+		DIRECTORY ${SHARE_DIRS}
+		DESTINATION ${INSTALL_SHARE_DIR}
+		COMPONENT Share
+	)
 endif (${GENERATE_FULL_INSTALLER})
