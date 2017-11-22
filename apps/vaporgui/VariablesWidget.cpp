@@ -237,39 +237,15 @@ void VariablesWidget::setFidelity(int buttonID) {
     refinementCombo->setCurrentIndex(ref);
 }
 
-void VariablesWidget::setColorMappedVariable(const QString &qselection) {
-    string var = qselection.toStdString();
-    _rParams->SetColorMapVariableName(var);
-    return;
-}
+void VariablesWidget::setColorMappedVariable(const QString &qname) {
+    assert(_rParams);
 
-void VariablesWidget::updateColorVarCombo() {
-    colormapVarCombo->blockSignals(true);
-    int index = colormapVarCombo->currentIndex();
+    if (!(_colorFlags & COLORVAR))
+        return;
 
-    colormapVarCombo->clear();
-
-    if (_colorFlags & COLORVAR) {
-        int ndim = _rParams->GetValueLong(_nDimsTag, 3);
-        assert(ndim == 2 || ndim == 3);
-
-        vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
-
-        for (int i = 0; i < vars.size(); i++) {
-            colormapVarCombo->addItem(QString::fromStdString(vars[i]));
-        }
-    }
-
-    QString qs;
-    if (_rParams->GetColorMapVariableName() != "") {
-        string cmVarName = _rParams->GetColorMapVariableName();
-        qs = QString::fromStdString(cmVarName);
-        index = colormapVarCombo->findText(qs);
-    }
-
-    colormapVarCombo->setCurrentIndex(index);
-
-    colormapVarCombo->blockSignals(false);
+    string name = qname.toStdString();
+    name = name == "0" ? "" : name;
+    _rParams->SetColorMapVariableName(name);
 }
 
 // User clicks on SetDefault button, need to make current
@@ -540,31 +516,29 @@ void VariablesWidget::showHideVar(bool on) {
 string VariablesWidget::updateVarCombo(
     QComboBox *varCombo, const vector<string> &varnames, bool doZero,
     string currentVar) {
-    varCombo->clear();
-    if (doZero) {
-        varCombo->setMaxCount(varnames.size() + 1);
-        varCombo->addItem(QString("0"));
-    } else {
-        varCombo->setMaxCount(varnames.size());
+    vector<string> my_varnames = varnames;
+    my_varnames.insert(my_varnames.begin(), "0");
+    if (currentVar == "") {
+        currentVar = "0";
     }
 
+    varCombo->clear();
+    varCombo->setMaxCount(my_varnames.size());
+
     int currentIndex = -1;
-    for (int i = 0; i < varnames.size(); i++) {
-        const string s = varnames[i];
+    for (int i = 0; i < my_varnames.size(); i++) {
+        const string s = my_varnames[i];
         varCombo->addItem(QString::fromStdString(s));
         if (s == currentVar) {
             currentIndex = i;
-            if (doZero) {
-                currentIndex++;
-            }
         }
     }
     if (currentIndex == -1) {
         varCombo->setCurrentIndex(0);
-        return (varCombo->currentText().toStdString());
+        return (my_varnames[0]);
     } else {
         varCombo->setCurrentIndex(currentIndex);
-        return (currentVar);
+        return (my_varnames[currentIndex]);
     }
 }
 
@@ -586,7 +560,12 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
         string setVarReq = rParams->GetVariableName();
         string setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
         if (setVar != setVarReq) {
+            bool enabled = _paramsMgr->GetSaveStateEnabled();
+            _paramsMgr->SetSaveStateEnabled(false);
+
             rParams->SetVariableName(setVar);
+
+            _paramsMgr->SetSaveStateEnabled(enabled);
         }
     }
 
@@ -600,23 +579,34 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
         setVars.push_back(updateVarCombo(varCombo2, vars, true, setVarsReq[1]));
         setVars.push_back(updateVarCombo(varCombo3, vars, true, setVarsReq[2]));
 
+        bool enabled = _paramsMgr->GetSaveStateEnabled();
+        _paramsMgr->SetSaveStateEnabled(false);
+
         for (int i = 0; i < setVars.size(); i++) {
             if (setVars[i] != setVarsReq[i]) {
+
                 rParams->SetFieldVariableNames(setVars);
-                break;
             }
         }
+
+        _paramsMgr->SetSaveStateEnabled(enabled);
     }
 
-#ifdef DEAD
-    if (_dspFlags & COLOR) {
-        updateVarCombo(colorVarCombo, vars, true);
+    if (_colorFlags & COLORVAR) {
+        vector<string> vars = _dataMgr->GetDataVarNames(2, true);
+        string setVarReq = rParams->GetColorMapVariableName();
 
-        vector<string> varnames;
-        varnames.push_back(colorVarCombo->currentText().toStdString());
-        rParams->SetColorMapVariableNames(varnames);
+        string setVar = updateVarCombo(colormapVarCombo, vars, true, setVarReq);
+
+        if (setVar != setVarReq) {
+            bool enabled = _paramsMgr->GetSaveStateEnabled();
+            _paramsMgr->SetSaveStateEnabled(false);
+
+            rParams->SetColorMapVariableName(setVar);
+
+            _paramsMgr->SetSaveStateEnabled(enabled);
+        }
     }
-#endif
 
     if (_dspFlags & HGT) {
         vector<string> vars = _dataMgr->GetDataVarNames(2, true);
@@ -625,7 +615,12 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
         string setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
 
         if (setVar != setVarReq) {
+            bool enabled = _paramsMgr->GetSaveStateEnabled();
+            _paramsMgr->SetSaveStateEnabled(false);
+
             rParams->SetHeightVariableName(setVar);
+
+            _paramsMgr->SetSaveStateEnabled(enabled);
         }
     }
 }
@@ -689,5 +684,4 @@ void VariablesWidget::Update(
 
     updateVariableCombos(rParams);
     updateFidelity(rParams);
-    updateColorVarCombo();
 }
