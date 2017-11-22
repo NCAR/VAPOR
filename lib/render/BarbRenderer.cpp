@@ -120,7 +120,7 @@ int BarbRenderer::_paintGL(){
 	// Get grids for our auxillary variables
 	//
 	string colorVar = bParams->GetColorMapVariableName();
-	if (!bParams->UseSingleColor()) {
+	if (!bParams->UseSingleColor() && !colorVar.empty()) {
 		Grid *sg;
 		int rc = DataMgrUtils::GetGrids(
 				_dataMgr, ts, colorVar, minExts, maxExts, 
@@ -390,8 +390,7 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 
 	string colorVar = bParams->GetColorMapVariableName();
 	float clut[256*4];
-	//bool doColorMapping = (colorVar != "") && (colorVar != "Constant");
-	bool doColorMapping = !bParams->UseSingleColor();
+	bool doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
 	MapperFunction* tf = 0;
 	if (doColorMapping) {
 		tf = (MapperFunction*)bParams->GetMapperFunc(colorVar);
