@@ -641,18 +641,18 @@ void VizWin::setFocus(){
 
 
 void VizWin::paintGL() {
-	static bool firstRun = true;
 
 	if (! FrameBufferReady()) {
 		return;
 	}
 
-	if (firstRun) {
-		ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-		ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
-		vParams->SetWindowSize(width(), height());
-		firstRun = false;
-	}
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
+
+	bool enabled = _controlExec->GetSaveStateEnabled();
+	_controlExec->SetSaveStateEnabled(false);
+	vParams->SetWindowSize(width(), height());
+	_controlExec->SetSaveStateEnabled(enabled);
 
 	glClearColor(0.,0.,0.,1.);
 	glClear(GL_COLOR_BUFFER_BIT);
