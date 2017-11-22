@@ -2978,7 +2978,8 @@ DataMgr::GridType DataMgr::_get_grid_type(string varname) const {
         DC::CoordVar cvarinfo;
 
         bool ok = GetCoordVarInfo(cvars[i], cvarinfo);
-        assert(ok);
+        if (!ok)
+            return (UNDEFINED);
 
         cvarsinfo.push_back(cvarinfo);
     }
