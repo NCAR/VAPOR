@@ -429,6 +429,12 @@ public:
 
     bool GetSaveStateEnabled() const { return (_paramsMgr->GetSaveStateEnabled()); }
 
+    //! Re-base state saving
+    //!
+    //! Set's the base state to the current node
+    //!
+    void RebaseStateSave() { _paramsMgr->RebaseStateSave(); }
+
     //! Capture the next rendered image to a file
     //! When this method is called, the next time Paint() is called for
     //! the specified visualizer, the rendered image
