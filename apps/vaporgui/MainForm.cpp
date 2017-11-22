@@ -267,6 +267,7 @@ MainForm::MainForm(
     app->installEventFilter(this);
 
     _controlExec->SetSaveStateEnabled(true);
+    _controlExec->RebaseStateSave();
     _stateChangeFlag = false;
 }
 
@@ -1972,15 +1973,8 @@ void MainForm::updateMenus() {
         }
     }
 
-    if (!_controlExec->UndoSize()) {
-        _editUndoAction->setEnabled(false);
-    }
-    _editRedoAction->setEnabled(true);
-
-    if (!_controlExec->RedoSize()) {
-        _editRedoAction->setEnabled(false);
-    }
-    _editUndoAction->setEnabled(true);
+    _editUndoAction->setEnabled((bool)_controlExec->UndoSize());
+    _editRedoAction->setEnabled((bool)_controlExec->RedoSize());
 }
 
 void MainForm::update() {
