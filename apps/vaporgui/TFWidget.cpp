@@ -140,7 +140,10 @@ void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
     MapperFunction *tf = _rParams->GetMapperFunc(varname);
     assert(tf);
 
-    int rc = tf->LoadFromFile(s.toStdString());
+    vector<double> defaultRange;
+    _dataMgr->GetDataRange(0, varname, 0, 0, defaultRange);
+
+    int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
     if (rc < 0) { MSG_ERR("Error loading transfer function"); }
 }
 
