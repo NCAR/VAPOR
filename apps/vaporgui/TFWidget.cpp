@@ -83,7 +83,7 @@ void TFWidget::showConstColorWidgets()
 void TFWidget::Reinit(Flags flags)
 {
     _flags = flags;
-    if ((_flags & CONST))
+    if ((_flags & CONSTANT))
         showConstColorWidgets();
     else
         collapseConstColorWidgets();
