@@ -46,7 +46,7 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent) {
 
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {
     setupUi(this);
-    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::PRIORITY_COLORVAR | TFWidget::CONST));
+    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::PRIORITY_COLORVAR | TFWidget::CONSTANT));
 
     hideZDimWidgets();
 
