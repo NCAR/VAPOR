@@ -29,7 +29,7 @@ public:
 		COLORVAR = (1u << 0),
 
 		// We can map the color of our renderer to a constant value
-		CONST = (1u << 1),
+		CONSTANT = (1u << 1),
 
 		// PRIORITY_COLORVAR just moves the color mapped variable
 		// settings up higher in the gui for better visibility
