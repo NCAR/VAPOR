@@ -1003,6 +1003,7 @@ bool Statistics::ValidStats::UpdateMyParams(const VAPoR::StatisticsParams *rhs)
     currentTimeStep[1] = rhs->GetCurrentMaxTS();
     currentLOD = rhs->GetCompressionLevel();
     currentRefLev = rhs->GetRefinementLevel();
+    return true;
 }
 
 bool Statistics::ValidStats::SetCurrentExtents(std::vector<double> &min, std::vector<double> &max)
