@@ -12,6 +12,7 @@
 #include <limits>
 #endif
 
+#include <vapor/utils.h>
 #include "vapor/RegularGrid.h"
 
 using namespace std;
@@ -387,25 +388,18 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(
 	_minu = rg->_minu;
 	_delta = rg->_delta;
 	_coords = rg->_minu;
-	if (begin) {
-		_x = 0;
-		_y = 0;
-		_z = 0;
-	}
-	else {
-		_x = 0;
-		_y = _dims.size() == 2 ? _dims[1] : 0;
-		_z = _dims.size() == 3 ? _dims[2] : 0;
-	}
+
+    _index = vector<size_t> (_dims.size(), 0);
+    if (! begin) {
+		_index[_dims.size()-1] = _dims[_dims.size()-1];
+    }
 }
 
 
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG(
 	const ConstCoordItrRG &rhs
 ) : ConstCoordItrAbstract() {
-	_x = rhs._x;
-	_y = rhs._y;
-	_z = rhs._z;
+	_index = rhs._index;
 	_dims = rhs._dims;
 	_minu = rhs._minu;
 	_delta = rhs._delta;
@@ -413,9 +407,7 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(
 }
 
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG() : ConstCoordItrAbstract() {
-	_x = 0;
-	_y = 0;
-	_z = 0;
+	_index.clear();
 	_dims.clear();
 	_minu.clear();
 	_delta.clear();
@@ -425,18 +417,18 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG() : ConstCoordItrAbstract() {
 
 void RegularGrid::ConstCoordItrRG::next() {
 
-	_x++;
+	_index[0]++;
 	_coords[0] += _delta[0];
-	if (_x < _dims[0]) {
+	if (_index[0] < _dims[0]) {
 		return;
 	}
 
-	_x = 0;
+	_index[0] = 0;
 	_coords[0] = _minu[0];
-	_y++;
+	_index[1]++;
 	_coords[1] += _delta[1];
 
-	if (_y < _dims[1]) {
+	if (_index[1] < _dims[1]) {
 		return;
 	}
 
@@ -444,11 +436,35 @@ void RegularGrid::ConstCoordItrRG::next() {
 		return;
 	}
 
-	_y = 0;
+	_index[1] = 0;
 	_coords[1] = _minu[1];
-	_z++;
+	_index[2]++;
 	_coords[2] += _delta[2];
+}
 
+void RegularGrid::ConstCoordItrRG::next(const long &offset) {
+
+    if (! _index.size()) return;
+
+    vector <size_t> maxIndex; ;
+	for (int i=0; i<_dims.size(); i++) maxIndex.push_back(_dims[i]-1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
+    if (newIndexL < 0) {
+        newIndexL = 0;
+    }
+    if (newIndexL > maxIndexL) {
+		_index = vector<size_t> (_dims.size(), 0);
+		_index[_dims.size()-1] = _dims[_dims.size()-1];
+        return;
+    }
+
+    _index = Wasp::VectorizeCoords(newIndexL, _dims);
+
+	for (int i=0; i<_dims.size(); i++) {
+		_coords[i] = i * _delta[i] + _minu[i];
+	}
 
 }
 
