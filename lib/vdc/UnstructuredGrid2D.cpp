@@ -246,6 +246,20 @@ void UnstructuredGrid2D::ConstCoordItrU2D::next()
     _coords[2] = *_zCoordItr;
 }
 
+void UnstructuredGrid2D::ConstCoordItrU2D::next(const long &offset)
+{
+    _xCoordItr += offset;
+    _yCoordItr += offset;
+
+    _coords[0] = *_xCoordItr;
+    _coords[1] = *_yCoordItr;
+
+    if (_ncoords < 3) return;
+
+    _zCoordItr += offset;
+    _coords[2] = *_zCoordItr;
+}
+
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const UnstructuredGrid2D &ug)
 {

@@ -131,6 +131,7 @@ public:
         virtual ~ConstCoordItrCG() {}
 
         virtual void            next();
+        virtual void            next(const long &offset);
         virtual ConstCoordType &deref() const { return (_coords); }
         virtual const void *    address() const { return this; };
 
@@ -138,14 +139,14 @@ public:
         {
             const ConstCoordItrCG *itrptr = static_cast<const ConstCoordItrCG *>(rhs);
 
-            return (_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+            return (_index == itrptr->_index);
         }
 
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrCG(*this)); };
 
     private:
         const CurvilinearGrid *_cg;
-        size_t                 _x, _y, _z;
+        std::vector<size_t>    _index;
         std::vector<double>    _coords;
         ConstIterator          _xCoordItr;
         ConstIterator          _yCoordItr;
