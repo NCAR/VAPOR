@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <cfloat>
+#include "vapor/utils.h"
 #include "vapor/LayeredGrid.h"
 #include "vapor/glutil.h"
 
@@ -516,24 +517,19 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
     _minu = lg->_minu;
     _delta = lg->_delta;
     _coords = lg->_minu;
-    if (begin) {
-        _zCoordItr = lg->_rg.cbegin();
-        _x = 0;
-        _y = 0;
-        _z = 0;
-    } else {
+
+    _index = vector<size_t>(_dims.size(), 0);
+    _zCoordItr = lg->_rg.cbegin();
+
+    if (!begin) {
+        _index[_dims.size() - 1] = _dims[_dims.size() - 1];
         _zCoordItr = lg->_rg.cend();
-        _x = 0;
-        _y = 0;
-        _z = _dims[2];
     }
 }
 
 LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
     const ConstCoordItrLayered &rhs) : ConstCoordItrAbstract() {
-    _x = rhs._x;
-    _y = rhs._y;
-    _z = rhs._z;
+    _index = rhs._index;
     _dims = rhs._dims;
     _minu = rhs._minu;
     _delta = rhs._delta;
@@ -542,9 +538,7 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
 }
 
 LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered() : ConstCoordItrAbstract() {
-    _x = 0;
-    _y = 0;
-    _z = 0;
+    _index.clear();
     _dims.clear();
     _minu.clear();
     _delta.clear();
@@ -553,31 +547,60 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered() : ConstCoordItrAbstrac
 
 void LayeredGrid::ConstCoordItrLayered::next() {
 
-    _x++;
+    _index[0]++;
     ++_zCoordItr;
     _coords[0] += _delta[0];
-    if (_x < _dims[0]) {
+    if (_index[0] < _dims[0]) {
         _coords[2] = *_zCoordItr;
         return;
     }
 
-    _x = 0;
+    _index[0] = 0;
     _coords[0] = _minu[0];
-    _y++;
+    _index[1]++;
     _coords[1] += _delta[1];
 
-    if (_y < _dims[1]) {
+    if (_index[1] < _dims[1]) {
         _coords[2] = *_zCoordItr;
         return;
     }
 
-    _y = 0;
+    _index[1] = 0;
     _coords[1] = _minu[1];
-    _z++;
-    if (_z < _dims[2]) {
+    _index[2]++;
+    if (_index[2] < _dims[2]) {
         _coords[2] = *_zCoordItr;
         return;
     }
+}
+
+void LayeredGrid::ConstCoordItrLayered::next(const long &offset) {
+
+    if (!_index.size())
+        return;
+
+    vector<size_t> maxIndex;
+    ;
+    for (int i = 0; i < _dims.size(); i++)
+        maxIndex.push_back(_dims[i] - 1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
+    if (newIndexL < 0) {
+        newIndexL = 0;
+    }
+    if (newIndexL > maxIndexL) {
+        _index = vector<size_t>(_dims.size(), 0);
+        _index[_dims.size() - 1] = _dims[_dims.size() - 1];
+        return;
+    }
+
+    _index = Wasp::VectorizeCoords(newIndexL, _dims);
+    _zCoordItr += offset;
+
+    _coords[0] = _index[0] * _delta[0] + _minu[0];
+    _coords[1] = _index[1] * _delta[1] + _minu[1];
+    _coords[2] = *_zCoordItr;
 }
 
 void LayeredGrid::_getBilinearWeights(const vector<double> &coords,

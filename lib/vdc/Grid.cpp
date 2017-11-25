@@ -118,7 +118,6 @@ void Grid::GetRange(float range[2]) const {
     float missingValue = GetMissingValue();
     Grid::ConstIterator itr;
     Grid::ConstIterator enditr = this->cend();
-    //	for (itr = this->cbegin(); itr!=this->cend(); ++itr) {
     for (itr = this->cbegin(); itr != enditr; ++itr) {
         if (first && *itr != missingValue) {
             range[0] = range[1] = *itr;
@@ -130,6 +129,59 @@ void Grid::GetRange(float range[2]) const {
                 range[0] = *itr;
             else if (*itr > range[1] && *itr != missingValue)
                 range[1] = *itr;
+        }
+    }
+}
+
+void Grid::GetRange(
+    std::vector<size_t> min, std::vector<size_t> max,
+    float range[2]) const {
+
+    const vector<size_t> &dims = GetDimensions();
+
+    assert(min.size() == max.size());
+    assert(min.size() >= dims.size());
+
+    while (min.size() > dims.size()) {
+        min.pop_back();
+        max.pop_back();
+    }
+
+    float mv = GetMissingValue();
+
+    range[0] = range[1] = mv;
+
+    size_t jmin = 0;
+    size_t jmax = 0;
+    if (dims.size() > 1) {
+        jmin = min[1];
+        jmax = max[1];
+    }
+
+    size_t kmin = 0;
+    size_t kmax = 0;
+    if (dims.size() > 2) {
+        kmin = min[2];
+        kmax = max[2];
+    }
+
+    bool first = true;
+    for (size_t k = kmin; k <= kmax; k++) {
+        for (size_t j = jmin; j <= jmax; j++) {
+            for (size_t i = min[0]; i <= max[0]; i++) {
+                float v = AccessIJK(i, j, k);
+                if (first && v != mv) {
+                    range[0] = range[1] = v;
+                    first = false;
+                }
+
+                if (!first) {
+                    if (v < range[0] && v != mv)
+                        range[0] = v;
+                    else if (v > range[1] && v != mv)
+                        range[1] = v;
+                }
+            }
         }
     }
 }
@@ -262,6 +314,25 @@ void Grid::ConstNodeIteratorSG::next() {
     assert(0 && "Invalid state");
 }
 
+void Grid::ConstNodeIteratorSG::next(const long &offset) {
+
+    if (!_index.size())
+        return;
+
+    vector<size_t> maxIndex;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
+    if (newIndexL < 0) {
+        newIndexL = 0;
+    }
+    if (newIndexL > maxIndexL) {
+        _index = _lastIndex;
+        return;
+    }
+
+    _index = Wasp::VectorizeCoords(newIndexL, _dims);
+}
+
 Grid::ConstNodeIteratorBoxSG::ConstNodeIteratorBoxSG(
     const Grid *g,
     const std::vector<double> &minu, const std::vector<double> &maxu) : ConstNodeIteratorSG(g, true), _pred(minu, maxu) {
@@ -290,6 +361,16 @@ void Grid::ConstNodeIteratorBoxSG::next() {
         ConstNodeIteratorSG::next();
         ++_coordItr;
     } while (!_pred(*_coordItr) && _index != _lastIndex);
+}
+
+void Grid::ConstNodeIteratorBoxSG::next(const long &offset) {
+
+    _coordItr += offset;
+
+    while (!_pred(*_coordItr) && _index != _lastIndex) {
+        ConstNodeIteratorSG::next();
+        ++_coordItr;
+    }
 }
 
 Grid::ConstCellIteratorSG::ConstCellIteratorSG(
@@ -339,6 +420,22 @@ void Grid::ConstCellIteratorSG::next() {
     assert(0 && "Invalid state");
 }
 
+void Grid::ConstCellIteratorSG::next(const long &offset) {
+
+    vector<size_t> maxIndex;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
+    if (newIndexL < 0) {
+        newIndexL = 0;
+    }
+    if (newIndexL > maxIndexL) {
+        _index = _lastIndex;
+        return;
+    }
+
+    _index = Wasp::VectorizeCoords(newIndexL, _dims);
+}
+
 Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(
     const Grid *g,
     const std::vector<double> &minu, const std::vector<double> &maxu) : ConstCellIteratorSG(g, true), _pred(minu, maxu) {
@@ -367,6 +464,16 @@ void Grid::ConstCellIteratorBoxSG::next() {
         ConstCellIteratorSG::next();
         ++_coordItr;
     } while (!_pred(*_coordItr) && _index != _lastIndex);
+}
+
+void Grid::ConstCellIteratorBoxSG::next(const long &offset) {
+
+    _coordItr += offset;
+
+    while (!_pred(*_coordItr) && _index != _lastIndex) {
+        ConstCellIteratorSG::next();
+        ++_coordItr;
+    }
 }
 
 //
@@ -507,7 +614,6 @@ Grid::ForwardIterator<T>
     return (*this);
 }
 
-#ifdef DEAD
 template <class T>
 Grid::ForwardIterator<T> Grid::ForwardIterator<T>::
 operator++(int) {
@@ -521,60 +627,106 @@ template <class T>
 Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::
 operator+=(const long int &offset) {
 
-    if (!_index.size())
+    if (!_rg->GetBlks().size())
         return (*this);
 
     const vector<size_t> &dims = _rg->GetDimensions();
-    const vector<size_t> &bdims = rg->GetDimensionInBlks();
-    const vector<size_t> &bs = rg->GetBlockSize();
+    const vector<size_t> &bdims = _rg->GetDimensionInBlks();
+    const vector<size_t> &bs = _rg->GetBlockSize();
 
-    vector<size_t> min, max;
-    for (int i = 0; i < dims.size(); i++) {
-        min.push_back(0);
-        max.push_back(0);
+    vector<size_t> maxIndex;
+    for (int i = 0; i < dims.size(); i++)
+        maxIndex.push_back(dims[i] - 1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    if (newIndexL < 0) {
+        newIndexL = 0;
+    }
+    if (newIndexL > maxIndexL) {
+        _index = _end_index;
+        return (*this);
     }
 
-    vector<size_t> xyz;
-    if (dims.size() > 0)
-        xyz.push_back(_index[0]);
-    if (dims.size() > 1)
-        xyz.push_back(_index[1]);
-    if (dims.size() > 2)
-        xyz.push_back(_index[2]);
+    _index = Wasp::VectorizeCoords(newIndexL, dims);
 
-    long newoffset = Wasp::LinearizeCoords(xyz, min, max) + offset;
-
-    size_t maxoffset = Wasp::LinearizeCoords(max, min, max);
-
-    if (newoffset < 0 || newoffset > maxoffset) {
-        Set to End !!return (*this);
-    }
-
-    xyz = Wasp::VectorizeCoords(offset, min, max);
-
-    if (dims.size() > 0)
-        _index[0] = xyz[0];
-    if (dims.size() > 1)
-        _index[1] = xyz[1];
-    if (dims.size() > 2)
-        _index[2] = xyz[2];
-    _xb = _index[0] % bs[0];
-
-    size_t xb = _index[0] / bs[0];
-
-    size_t yb = _index[1] / bs[1];
+    size_t xb = 0;
+    size_t yb = 0;
     size_t zb = 0;
+    size_t x = 0;
+    size_t y = 0;
+    size_t z = 0;
+
+    _xb = xb = _index[0] / bs[0];
+    yb = _index[1] / bs[1];
+    zb = 0;
     if (dims.size() == 3)
         zb = _index[2] / bs[2];
 
-    size_t x = _index[0] % bs[0];
-    size_t y = _index[1] % bs[1];
-    size_t z = 0;
+    x = _index[0] % bs[0];
+    y = _index[1] % bs[1];
+    z = 0;
     if (dims.size() == 3)
         z = _index[2] % bs[2];
 
     float *blk = _rg->GetBlks()[zb * bdims[0] * bdims[1] + yb * bdims[0] + xb];
     _itr = &blk[z * bs[0] * bs[1] + y * bs[0] + x];
+
+    _coordItr += offset;
+
+    while (!_pred(*_coordItr) && _index != _end_index) {
+
+        _xb++;
+        _itr++;
+        _index[0]++;
+        ++_coordItr;
+
+        if (_xb < bs[0] && _index[0] < dims[0]) {
+
+            if (_pred(*_coordItr)) {
+                return (*this);
+            }
+
+            continue;
+        }
+
+        _xb = 0;
+        if (_index[0] >= dims[0]) {
+            if (dims.size() == 1) {
+                return (*this); // last element
+            }
+            _index[0] = _xb = 0;
+            _index[1]++;
+        }
+
+        if (_index[1] >= dims[1]) {
+            if (dims.size() == 2) {
+                return (*this); // last element
+            }
+            _index[1] = 0;
+            _index[2]++;
+        }
+
+        if (dims.size() == 3 && _index[2] >= dims[2]) {
+            return (*this); // last element
+        }
+
+        xb = _index[0] / bs[0];
+        yb = _index[1] / bs[1];
+        zb = 0;
+        if (dims.size() == 3)
+            zb = _index[2] / bs[2];
+
+        x = _index[0] % bs[0];
+        y = _index[1] % bs[1];
+        z = 0;
+        if (dims.size() == 3)
+            z = _index[2] % bs[2];
+
+        float *blk = _rg->GetBlks()[zb * bdims[0] * bdims[1] + yb * bdims[0] + xb];
+        _itr = &blk[z * bs[0] * bs[1] + y * bs[0] + x];
+    }
+
     return (*this);
 }
 
@@ -587,8 +739,6 @@ operator+(const long int &offset) const {
     temp += offset;
     return (temp);
 }
-
-#endif
 
 // Need this so that template definitions can be made in .cpp file, not .h file
 //
