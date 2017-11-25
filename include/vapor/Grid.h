@@ -393,6 +393,9 @@ class VDF_API Grid {
     //! maximum values, in that order
     //!
     virtual void GetRange(float range[2]) const;
+    virtual void GetRange(
+        std::vector<size_t> min, std::vector<size_t> max,
+        float range[2]) const;
 
     //! Return true if the specified point lies inside the grid
     //!
@@ -558,6 +561,7 @@ class VDF_API Grid {
       public:
         virtual ~AbstractIterator() {}
         virtual void next() = 0;
+        virtual void next(const long &offset) = 0;
         virtual T &deref() const = 0;
         virtual const void *address() const = 0;
         virtual bool equal(const void *other) const = 0;
@@ -599,11 +603,23 @@ class VDF_API Grid {
             _impl->next();
             return *this;
         };
+
         PolyIterator operator++(int) { // postfix++
-            assert(false && "Not implemented");
-            //return(*this);
-            return (PolyIterator());
+            PolyIterator temp(*this);
+            ++(*this);
+            return (temp);
         };
+
+        PolyIterator &operator+=(const long &offset) {
+            _impl->next(offset);
+            return (*this);
+        };
+
+        PolyIterator operator+(const long &offset) const {
+            PolyIterator temp(*this);
+            temp += offset;
+            return (temp);
+        }
 
         const T &operator*() const {
             return _impl->deref();
@@ -671,6 +687,7 @@ class VDF_API Grid {
         virtual ~ConstNodeIteratorSG() {}
 
         virtual void next();
+        virtual void next(const long &offset);
         virtual ConstIndexType &deref() const {
             return (_index);
         }
@@ -703,6 +720,7 @@ class VDF_API Grid {
         virtual ~ConstNodeIteratorBoxSG() {}
 
         virtual void next();
+        virtual void next(const long &offset);
 
         virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const {
             return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorBoxSG(*this));
@@ -752,6 +770,7 @@ class VDF_API Grid {
         virtual ~ConstCellIteratorSG() {}
 
         virtual void next();
+        virtual void next(const long &offset);
         virtual ConstIndexType &deref() const {
             return (_index);
         }
@@ -785,6 +804,7 @@ class VDF_API Grid {
         virtual ~ConstCellIteratorBoxSG() {}
 
         virtual void next();
+        virtual void next(const long &offset);
 
         virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const {
             return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorBoxSG(*this));
@@ -855,12 +875,10 @@ class VDF_API Grid {
 
         ForwardIterator<T> &operator++(); // ++prefix
 
-#ifdef DEAD
         ForwardIterator<T> operator++(int); // postfix++
 
         ForwardIterator<T> &operator+=(const long int &offset);
         ForwardIterator<T> operator+(const long int &offset) const;
-#endif
 
         ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
