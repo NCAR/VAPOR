@@ -150,6 +150,7 @@ public:
   virtual ~ConstCoordItrSG() {}
 
   virtual void next();
+  virtual void next(const long &offset);
   virtual ConstCoordType &deref() const {
 	return(_coords);
   }
@@ -159,7 +160,7 @@ public:
 	const ConstCoordItrSG *itrptr = 
 		static_cast<const ConstCoordItrSG *> (rhs);
 
-	return(_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+	return(_index == itrptr->_index);
   }
 
   virtual std::unique_ptr<ConstCoordItrAbstract> clone() const {
@@ -168,7 +169,7 @@ public:
 
  private:
 	const StretchedGrid *_sg;
-	size_t _x, _y, _z;
+	std::vector <size_t> _index;
 	std::vector <double> _coords;
  };
 
