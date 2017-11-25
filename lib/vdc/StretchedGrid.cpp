@@ -305,16 +305,12 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(
 ) : ConstCoordItrAbstract() {
 	_sg = sg;
 	vector <size_t> dims = _sg->GetDimensions();
-	if (begin) {
-		_x = 0;
-		_y = 0;
-		_z = 0;
+
+	_index = vector<size_t> (dims.size(), 0);
+	if (! begin) {
+		_index[dims.size()-1] = dims[dims.size()-1];
 	}
-	else {
-		_x = 0;
-		_y = dims.size() == 2 ? dims[1] : 0;
-		_z = dims.size() == 3 ? dims[2] : 0;
-	}
+
 	_coords.push_back(_sg->_xcoords[0]);
 	_coords.push_back(_sg->_ycoords[0]);
 	if (dims.size() == 3) {
@@ -327,17 +323,13 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(
 	const ConstCoordItrSG &rhs
 ) : ConstCoordItrAbstract() {
 	_sg = rhs._sg;
-	_x = rhs._x;
-	_y = rhs._y;
-	_z = rhs._z;
+	_index = rhs._index;
 	_coords = rhs._coords;
 }
 
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG() : ConstCoordItrAbstract() {
 	_sg = NULL;
-	_x = 0;
-	_y = 0;
-	_z = 0;
+	_index.clear();
 	_coords.clear();
 }
 
@@ -346,34 +338,64 @@ void StretchedGrid::ConstCoordItrSG::next() {
 
 	const vector <size_t> &dims = _sg->GetDimensions();
 
-	_x++;
+	_index[0]++;
 
-	if (_x < dims[0]) {
-		_coords[0] = _sg->_xcoords[_x];
-		_coords[1] = _sg->_ycoords[_y];
+	if (_index[0] < dims[0]) {
+		_coords[0] = _sg->_xcoords[_index[0]];
+		_coords[1] = _sg->_ycoords[_index[1]];
 		return;
 	}
 
-	_x = 0;
-	_y++;
+	_index[0] = 0;
+	_index[1]++;
 
-	if (_y < dims[1]) {
-		_coords[0] = _sg->_xcoords[_x];
-		_coords[1] = _sg->_ycoords[_y];
+	if (_index[1] < dims[1]) {
+		_coords[0] = _sg->_xcoords[_index[0]];
+		_coords[1] = _sg->_ycoords[_index[1]];
 		return;
 	}
 
 	if (dims.size() == 2) return;
 
 
-	_y = 0;
-	_z++;
-	if (_z < dims[2]) {
-		_coords[0] = _sg->_xcoords[_x];
-		_coords[1] = _sg->_ycoords[_y];
-		_coords[2] = _sg->_zcoords[_z];
+	_index[1] = 0;
+	_index[2]++;
+	if (_index[2] < dims[2]) {
+		_coords[0] = _sg->_xcoords[_index[0]];
+		_coords[1] = _sg->_ycoords[_index[1]];
+		_coords[2] = _sg->_zcoords[_index[2]];
 		return;
 	}
+}
+
+void StretchedGrid::ConstCoordItrSG::next(const long &offset) {
+
+	const vector <size_t> &dims = _sg->GetDimensions();
+
+	if (! _index.size()) return;
+
+	vector <size_t> maxIndex; ;
+	for (int i=0; i<dims.size(); i++) maxIndex.push_back(dims[i]-1);
+
+	long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
+	long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+	if (newIndexL < 0) {
+		newIndexL = 0;
+	}
+	if (newIndexL > maxIndexL) {
+		_index = vector<size_t> (dims.size(), 0);
+		_index[dims.size()-1] = dims[dims.size()-1];
+		return;
+	}
+
+	_index = Wasp::VectorizeCoords(newIndexL, dims);
+
+	_coords[0] = _sg->_xcoords[_index[0]];
+	_coords[1] = _sg->_ycoords[_index[1]];
+
+	if (dims.size() == 2) return;
+
+	_coords[2] = _sg->_zcoords[_index[2]];
 }
 
 
