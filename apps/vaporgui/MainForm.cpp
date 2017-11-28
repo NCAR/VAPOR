@@ -988,14 +988,13 @@ void MainForm::fileSave()
 	string path = p->GetCurrentSessionPath();
 
     if( path.empty()) {
-		vector <string> files = myGetOpenFileNames(
-			"Choose a VAPOR session file to restore a session", 
-			path, "Vapor 3 Session Save Files (*.vs3)", false
+		QString fileName = QFileDialog::getSaveFileName(
+			this, tr("Save VAPOR session file"),
+			tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)")
 		);
-		if (files.empty()) return;
-
-        path = files[0];
-    }
+		path = fileName.toStdString();
+	}
+    if( path.empty()) return;
 
 	if( _controlExec->SaveSession(path) < 0 )
     {
@@ -1012,14 +1011,14 @@ void MainForm::fileSaveAs()
 	GUIStateParams *p = GetStateParams();
 	string path = p->GetCurrentSessionPath();
 
-	vector <string> files = myGetOpenFileNames(
-		"Choose a VAPOR session file to restore a session", 
-		path, "Vapor 3 Session Save Files (*.vs3)", false
+	QString fileName = QFileDialog::getSaveFileName(
+		this, tr("Save VAPOR session file"),
+		tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)")
 	);
-	if (files.empty()) return;
+	path = fileName.toStdString();
 
-	path = files[0];
-    
+	if (path.empty()) return;
+
 	if (_controlExec->SaveSession(path)) {
 
 		MSG_ERR("Saving session file failed");
