@@ -458,18 +458,13 @@ vector <size_t> vdiff(vector <size_t> a, vector <size_t> b) {
 
 // Determine POD type 
 //
-template <class T>
-int NetCDFType(T dummy) {
-
-	if (std::is_same<T, float>::value) return(NC_FLOAT);
-	if (std::is_same<T, double>::value) return(NC_DOUBLE);
-	if (std::is_same<T, char>::value) return(NC_BYTE);
-	if (std::is_same<T, unsigned char>::value) return(NC_UBYTE);
-	if (std::is_same<T, int16_t>::value) return(NC_SHORT);
-	if (std::is_same<T, int>::value) return(NC_INT);
-	if (std::is_same<T, long>::value) return(NC_INT64);
-	return(NC_NAT);
-}
+int NetCDFType(float dummy)         { return NC_FLOAT; }
+int NetCDFType(double dummy)        { return NC_DOUBLE; }
+int NetCDFType(char dummy)          { return NC_BYTE; }
+int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
+int NetCDFType(int16_t dummy)       { return NC_SHORT; }
+int NetCDFType(int dummy)           { return NC_INT; }
+int NetCDFType(long dummy)          { return NC_INT64; }
 
 // Extract a single block of data from an array. Perform padding as
 // needed based on mode value if this is a boundary block
