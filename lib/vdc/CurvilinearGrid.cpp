@@ -20,10 +20,6 @@ void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid
     _xrg = xrg;
     _yrg = yrg;
     _zcoords = zcoords;
-
-    // Get the user extents now. Do this only once.
-    //
-    _GetUserExtents(_minu, _maxu);
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
