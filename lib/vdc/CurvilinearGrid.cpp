@@ -25,10 +25,6 @@ void CurvilinearGrid::_curvilinearGrid(
 	_yrg = yrg;
 	_zcoords = zcoords;
 
-	// Get the user extents now. Do this only once.
-	//
-	_GetUserExtents(_minu, _maxu);
-
 }
 
 CurvilinearGrid::CurvilinearGrid(
