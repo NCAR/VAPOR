@@ -2109,7 +2109,7 @@ void MainForm::launchSeedMe() {
 void MainForm::installCLITools() {
     vector<string> pths;
     string home = GetAppPath("VAPOR", "home", pths, true);
-    string path = home + "/utilities";
+    string path = home + "/MacOS";
 
     home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
 
