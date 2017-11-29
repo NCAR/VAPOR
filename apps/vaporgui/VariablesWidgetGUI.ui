@@ -850,6 +850,12 @@
            </item>
            <item>
             <widget class="QGroupBox" name="fidelityBox">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>100</height>
+              </size>
+             </property>
              <property name="whatsThis">
               <string>The fidelity setting controls both refinement levels and level of detail (LOD).  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
              </property>
