@@ -4,7 +4,6 @@
 #ifndef	_GetAppPath_h_
 #define	_GetAppPath_h_
 #include <vapor/MyBase.h>
-#include <vapor/Version.h>
 
 namespace Wasp {
 
