@@ -1,11 +1,6 @@
 #ifndef CMAKECONFIG_H
 #define CMAKECONFIG_H
 
-#define DSO_DIR "@DSO_DIR@"
-#define BINDIR  "@BINDIR@"
-#define ABS_TOP "@ABS_TOP@"
-#define QTDIR   "@QTDIR@"
-
 #define MAJOR @VERSION_MAJOR@
 #define MINOR @VERSION_MINOR@
 #define MICRO @VERSION_MICRO@
