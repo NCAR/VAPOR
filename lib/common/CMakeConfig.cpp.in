@@ -10,3 +10,5 @@ const char VERSION_COMMIT[]      = "@VERSION_COMMIT@";
 const char VERSION_STRING[]      = "@VERSION_STRING@";
 const char VERSION_STRING_FULL[] = "@VERSION_STRING_FULL@";
 
+const char SOURCE_DIR[]          = "@PROJECT_SOURCE_DIR@";
+
