@@ -65,6 +65,17 @@ public:
     //
     static const string &GetVersionString();
 
+    //! Return the full version as a formatted string
+    //!
+    //! Return the version as a formatted string of
+    //! the form: MAJOR.MINOR.MICRO.RC.COMMIT
+    //
+    static const string &GetFullVersionString();
+
+    //! Return the git hash of the current build
+    //
+    static const string GetBuildHash();
+
     //! Return a string containing the date  associated with the version number
     //!
     //! This method returns the value of the RCS \p Date keyword. In general,

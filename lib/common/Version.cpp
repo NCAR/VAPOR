@@ -29,6 +29,19 @@ const string &Version::GetVersionString()
     return (_formatString);
 }
 
+const string &Version::GetFullVersionString()
+{
+    ostringstream oss;
+    oss << _majorVersion << "." << _minorVersion << "." << _minorMinorVersion;
+    if (GetRC().length()) oss << "." << GetRC();
+    oss << "." << GetBuildHash();
+    _formatString = oss.str();
+    StrRmWhiteSpace(_formatString);
+    return (_formatString);
+}
+
+const string Version::GetBuildHash() { return string(VERSION_COMMIT); }
+
 int Version::Compare(int major, int minor, int minorminor)
 {
     if (major != _majorVersion) { return (major > _majorVersion ? -1 : 1); }
