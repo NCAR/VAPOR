@@ -14,7 +14,6 @@
 #endif
 #include <vapor/MyBase.h>
 #include "vapor/GetAppPath.h"
-#include "vapor/CMakeConfig.h"
 #ifdef WIN32
     #pragma warning(disable : 4996)
 #endif
@@ -56,8 +55,6 @@ string get_path_from_bundle(const string &app)
     strncpy(componentStr, (const char *)&buffer[range.location], range.length);
     componentStr[range.length] = 0;
     string s = componentStr;
-
-    if (s.find(BINDIR) != string::npos) return "";
 
     // Spaces are returned as %20. Quick fix below
     size_t start;
@@ -144,23 +141,6 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
         }
     }
 #endif
-    // #ifndef WIN32 //For both Linux and Mac:
-    if (path.empty()) {
-        if (resource.compare("lib") == 0) {
-            path.append(DSO_DIR);
-        } else if (resource.compare("bin") == 0) {
-            path.append(BINDIR);
-        } else if (resource.compare("share") == 0) {
-            path.append(ABS_TOP);
-            path.append(separator);
-            path.append("share");
-        } else if (resource.compare("plugins") == 0) {
-            path.append(QTDIR);
-            path.append(separator);
-            path.append("plugins");
-        }
-    }
-    // #endif
 
     if (path.empty()) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (path empty)");
