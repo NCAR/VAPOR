@@ -88,9 +88,9 @@ public:
  static int Compare(std::string ver1, std::string ver2);
 
 private:
- static const int _majorVersion = MAJOR;
- static const int _minorVersion = MINOR;
- static const int _minorMinorVersion = MICRO;
+ static const int _majorVersion;
+ static const int _minorVersion;
+ static const int _minorMinorVersion;
  static string _formatString;
  static string _dateString;
 

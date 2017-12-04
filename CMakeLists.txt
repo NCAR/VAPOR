@@ -38,7 +38,6 @@ option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" ON)
 
-include_directories ("${PROJECT_BINARY_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

@@ -1,0 +1,12 @@
+#include "vapor/CMakeConfig.h"
+
+const int MAJOR = @VERSION_MAJOR@;
+const int MINOR = @VERSION_MINOR@;
+const int MICRO = @VERSION_MICRO@;
+
+const char VERSION_RC[]          = "@VERSION_RC@";
+const char VERSION_DATE[]        = "@VERSION_DATE@";
+const char VERSION_COMMIT[]      = "@VERSION_COMMIT@";
+const char VERSION_STRING[]      = "@VERSION_STRING@";
+const char VERSION_STRING_FULL[] = "@VERSION_STRING_FULL@";
+
