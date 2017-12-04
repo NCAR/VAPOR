@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     }
 
     if (opt._long) {
-        cout << "Vapor version " << Version::GetVersionString() << " (" << Version::GetDateString() << ")" << endl;
+        cout << "Vapor version " << Version::GetFullVersionString() << " (" << Version::GetDateString() << ")" << endl;
     } else if (opt.numeric) {
         cout << Version::GetMajor() << "." << Version::GetMinor() << "." << Version::GetMinorMinor() << endl;
     } else {
