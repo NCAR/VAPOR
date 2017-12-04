@@ -15,6 +15,10 @@ using namespace std;
 string Version::_formatString;
 string Version::_dateString;
 
+const int Version::_majorVersion = MAJOR;
+const int Version::_minorVersion = MINOR;
+const int Version::_minorMinorVersion = MICRO;
+
 const string &Version::GetVersionString()
 {
     ostringstream oss;
