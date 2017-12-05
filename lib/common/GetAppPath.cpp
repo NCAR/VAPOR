@@ -7,6 +7,7 @@
 #include <cctype>
 #include <cassert>
 #include <sys/stat.h>
+#include "vapor/CMakeConfig.h"
 #ifdef Darwin
 #include <CoreFoundation/CFBundle.h>
 #include <CoreFoundation/CFString.h>
@@ -69,6 +70,11 @@ string get_path_from_bundle(const string &app) {
     return (path);
 }
 #endif
+
+bool pathExists(const string path) {
+    struct STAT64 statbuf;
+    return STAT64(path.c_str(), &statbuf) >= 0;
+}
 
 std::string Wasp::GetAppPath(
     const string &app,
@@ -162,6 +168,17 @@ std::string Wasp::GetAppPath(
     }
 #endif
 
+    if (!pathExists(path))
+        path = "";
+
+    if (path.empty()) {
+        if (resource.compare("share") == 0) {
+            path.append(SOURCE_DIR);
+            path.append(separator);
+            path.append("share");
+        }
+    }
+
     if (path.empty()) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (path empty)");
         return (path);
@@ -180,8 +197,7 @@ std::string Wasp::GetAppPath(
         path.append(paths[i]);
     }
 
-    struct STAT64 statbuf;
-    if (STAT64(path.c_str(), &statbuf) < 0) {
+    if (!pathExists(path)) {
         MyBase::SetDiagMsg("GetAppPath() return : empty (path does not exist)");
         return ("");
     }
