@@ -1,0 +1,41 @@
+
+if (APPLE)
+	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64)
+elseif (UNIX AND NOT APPLE)
+	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64)
+else ()
+	set (THIRD_PARTY_DIR "C:/Vapor3rdParty2015")
+endif ()
+
+# Yellowstone and Geyser configuration
+# --------------------------------------------------------------------------------
+cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
+if (HOSTNAME MATCHES "yslogin[0-9]+" OR HOSTNAME MATCHES "geyser[0-9]+")
+	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2014/Linux_x86_64)
+	set (CMAKE_CXX_COMPILER /glade/apps/opt/modulefiles/ge/cmpwrappers/g++)
+endif ()
+# --------------------------------------------------------------------------------
+
+if (UNIX)
+	set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib")
+	set (QTDIR ${THIRD_PARTY_DIR})
+	set (PYTHONVERSION 2.7)
+	set (PYTHONDIR ${THIRD_PARTY_DIR})
+	set (PYTHONPATH ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION})
+elseif (WIN32)
+	set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/releaseLib64")
+	set (QTDIR "C:/Qt-2015/4.8.7v2")
+	set (PYTHONVERSION 27)
+	set (PYTHONDIR ${THIRD_PARTY_DIR}/python${PYTHONVERSION})
+	set (PYTHONPATH ${PYTHONDIR})
+endif ()
+
+set (THIRD_PARTY_INC_DIR "${THIRD_PARTY_DIR}/include")
+
+if (WIN32)
+	set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/releaseLib64")
+	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/Lib/site-packages/numpy/core/include")
+else ()
+	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/site-packages/numpy/core/include")
+endif ()
+

@@ -30,7 +30,7 @@ Makefile
 cmake_install.cmake
 CmakeFiles
 CMakeCache.txt
-site.local
+/site.local
 bin
 /build
 /xcode
