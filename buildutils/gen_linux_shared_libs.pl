@@ -21,7 +21,7 @@ for (my $i = 1; $i < scalar @ARGV; $i++) {
 	push @extras, $ARGV[$i];
 }
 
-my $ldd = `ldd $ARGV[0]`;
+my $ldd = `ldd "$ARGV[0]"`;
 my @libs;
 
 foreach (split(/\n/, $ldd)) {

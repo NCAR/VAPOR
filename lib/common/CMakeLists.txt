@@ -1,3 +1,5 @@
+configure_file (CMakeConfig.cpp.in CMakeConfig.cpp)
+
 add_library (common SHARED
 	common.cpp
 	MyBase.cpp
@@ -10,6 +12,7 @@ add_library (common SHARED
 	utils.cpp
 	glutil.cpp
 	MyPython.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 	)
 
 
