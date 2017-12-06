@@ -116,6 +116,8 @@ void VariablesWidget::Reinit(
     if (_colorFlags ^ COLORVAR) {
         collapseColorVarSettings();
     }
+
+    variableSelectionWidget->adjustSize();
 }
 
 void VariablesWidget::collapseColorVarSettings() {
