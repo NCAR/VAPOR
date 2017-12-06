@@ -221,7 +221,7 @@ int DataMgrUtils::GetGrids(
 
 	vector <double> minExtsReq, maxExtsReq;
 	for (int i=0; i<3; i++) {
-		minExtsReq.push_back(std::numeric_limits< double >::min());
+		minExtsReq.push_back(-1*std::numeric_limits< double >::max());
 	}
 
 	for (int i=0; i<3; i++) {
