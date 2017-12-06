@@ -333,6 +333,8 @@ void VariablesWidget::updateFidelity(RenderParams *rParams) {
         vector<string> varnames = rParams->GetFieldVariableNames();
         assert(varnames.size());
         varname = varnames[0];
+    } else {
+        varname = rParams->GetHeightVariableName();
     }
 
     if (varname.empty()) {
