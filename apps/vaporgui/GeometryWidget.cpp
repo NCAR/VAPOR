@@ -94,6 +94,8 @@ void GeometryWidget::Reinit(Flags flags) {
     {
 		zMinMaxGroupBox->show();
     }
+	stackedSliderWidget->adjustSize();
+	minMaxTab->adjustSize();
 }
 
 GeometryWidget::~GeometryWidget() {
