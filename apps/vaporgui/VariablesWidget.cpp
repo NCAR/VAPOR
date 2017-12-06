@@ -352,6 +352,9 @@ void VariablesWidget::updateFidelity( RenderParams* rParams)
 		assert(varnames.size());
 		varname = varnames[0];
 	}
+	else {
+		varname = rParams->GetHeightVariableName();
+	}
 
 	if (varname.empty()) {
 		//fidelityTab->hide();
