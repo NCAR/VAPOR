@@ -553,45 +553,6 @@ void RenderHolder::setRow(int row, const string &renderInst, const string &rende
     setTypeCell(renderClass, row);
     setDataSetCell(dataSetName, row);
     setCheckboxCell(row, enabled);
-    // QTableWidgetItem *item = new QTableWidgetItem(renderInst.c_str());
-    // item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setTextAlignment(Qt::AlignCenter);
-    // tableWidget->setItem(row, 0, item);
-
-    // QTableWidgetItem* item = new QTableWidgetItem(renderClass.c_str());
-    // item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setTextAlignment(Qt::AlignCenter);
-    // tableWidget->setItem(row, 1, item);
-
-    // item = new QTableWidgetItem(dataSetName.c_str());
-    // item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setTextAlignment(Qt::AlignCenter);
-    // tableWidget->setItem(row, 2, item);
-
-    // QWidget *cbWidget = new QWidget();
-    // QCheckBox *checkBox = new QCheckBox();
-    // QHBoxLayout *cbLayout = new QHBoxLayout(cbWidget);
-
-    // cbLayout->addWidget(checkBox);
-    // cbLayout->setAlignment(Qt::AlignCenter);
-    // cbLayout->setContentsMargins(0,0,0,0);
-
-    // cbWidget->setProperty("row", row);
-    // cbWidget->setLayout(cbLayout);
-
-    // tableWidget->setCellWidget(row,3,cbWidget);
-
-    // if (enabled) {
-    //	checkBox->setCheckState(Qt::Checked);
-    //}
-    // else {
-    //	checkBox->setCheckState(Qt::Unchecked);
-    //}
-
-    // connect(
-    //	checkBox,SIGNAL(stateChanged(int)), this,
-    //	SLOT(checkboxChanged(int))
-    //);
 }
 
 void RenderHolder::setRow(const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
