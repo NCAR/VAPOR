@@ -219,11 +219,11 @@ void ContourParams::SetLockToTF(bool lock) {
 }
 
 bool ContourParams::GetLockToTF() const {
-	if (GetValueString(_lockToTFTag, "true")=="true") {
-		return true;
+	if (GetValueString(_lockToTFTag, "false")=="false") {
+		return false;
 	}   
 	else {
-		return false;
+		return true;
 	}   
 }
 
