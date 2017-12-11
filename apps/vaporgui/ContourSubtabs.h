@@ -14,6 +14,8 @@ namespace VAPoR {
 	class DataMgr;
 }
 
+class SpacingCombo;
+
 class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
 
 	Q_OBJECT
@@ -63,7 +65,8 @@ private:
 	Combo* _lineWidthCombo;
 	Combo* _countCombo;
 	Combo* _cMinCombo;
-	Combo* _spacingCombo;
+	//Combo* _spacingCombo;
+	SpacingCombo* _spacingCombo;
 
 	int _numContours;
 	double _spacing;
@@ -115,4 +118,28 @@ public:
 private:
 };
 
+// Wish I could make SpacingCombo nested within ContourAppearanceSubtab,
+// however Qt does not support MetaObject features with nested classes :\
+class SpacingCombo : public Combo {
+
+class SpacingCombo : public Combo {
+	Q_OBJECT
+
+	public:
+	 void Update(double min, double max, double value);
+
+	 SpacingCombo(
+		QLineEdit* edit, 
+		QSlider* slider, 
+		bool intType = false) : Combo(edit, slider, intType) {
+			_lineEdit->disconnect();
+			connect(_lineEdit, SIGNAL(returnPressed()),
+				//this, SLOT(SpacingCombo::setLineEdit()));
+				this, SLOT(setLineEdit()));
+			// break Combo's setLineEdit connection
+			// connect returnPressed with overridden setLineEdit function
+		}
+	private slots: 
+		void setLineEdit();
+};
 #endif //CONTOURSUBTABS_H
