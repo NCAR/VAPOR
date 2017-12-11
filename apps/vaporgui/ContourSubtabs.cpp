@@ -11,7 +11,8 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
     _lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
     _countCombo = new Combo(contourCountEdit, contourCountSlider, true);
     _cMinCombo = new Combo(contourMinEdit, contourMinSlider);
-    _spacingCombo = new Combo(contourSpacingEdit, contourSpacingSlider);
+    //_spacingCombo = new Combo(contourSpacingEdit, contourSpacingSlider);
+    _spacingCombo = new SpacingCombo(contourSpacingEdit, contourSpacingSlider);
 
     connect(_lineWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(SetLineThickness(double)));
     connect(_countCombo, SIGNAL(valueChanged(int)), this, SLOT(SetNumContours(int)));
@@ -210,8 +211,9 @@ void ContourAppearanceSubtab::SetContourSpacing(double spacing)
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
     if (_contourMax > maxBound) {
-        _contourMin = maxBound - _spacing * (_numContours - 1);
-        _contourMax = maxBound;
+        double range = maxBound - minBound;
+        _numContours = range / _spacing;
+        _contourMax = _contourMin + (_numContours - 1) * _spacing;
     }
 
     SetContourValues();
@@ -224,4 +226,77 @@ void ContourAppearanceSubtab::ContourBoundsChanged(int index)
         EndTFChange();
     } else
         _cParams->SetLockToTF(true);
+}
+
+void SpacingCombo::Update(double min, double max, double value)
+{
+    // Make sure all parameters are valid. If not make them valid
+    //
+    // Should we issue a signal to notify the change of input
+    // parameters?
+    //
+    if (min >= max) max = min;
+    if (value < min) value = min;
+
+    _minValid = min;
+    _maxValid = max;
+    _value = value;
+
+    // Update validator
+    //
+    // Note: The QDoubleValidator has unexpected behavior and permits
+    // values outside of the the valid range. Possible options to correct
+    // this are:
+    //
+    // 1. Subclass QDoubleValidator to perform the expected behavior
+    // 2. Use QDoubleValidator only to ensure that input is a double,
+    // and perform range checking inside the slot for returnPressed()
+    //
+    // Currently we use option (2)
+
+    // Update the GUI to reflect the new values
+    //
+    bool oldState = _lineEdit->blockSignals(true);
+    if (_intType) {
+        _lineEdit->setText(QString::number((int)value));
+    } else {
+        _lineEdit->setText(QString::number(value, 'g', _floatPrecision));
+    }
+    _lineEdit->blockSignals(oldState);
+
+    int pos = 0;
+    if (_minValid != _maxValid) { pos = (int)(((value - _minValid) / (_maxValid - _minValid)) * (_slider->maximum() - _slider->minimum()) + _slider->minimum()); }
+
+    oldState = _slider->blockSignals(true);
+    _slider->setSliderPosition(pos);
+    _slider->blockSignals(oldState);
+}
+
+void SpacingCombo::setLineEdit()
+{
+    double value = _lineEdit->text().toDouble();
+
+    // The Qt QDoubleValidator class doesn't work as expected. Values
+    // outside of valid range (set with setTop() and setBottom()) do not
+    // trigger the returnPressed() slot, but the QLineEdit will still
+    // display the out-of-range value. Below, we force out of range
+    // values to be in range, and update the GUI to reflect the valid value
+    //
+    if (value < _minValid) {
+        value = _minValid;
+        if (_intType) {
+            _lineEdit->setText(QString::number((int)value));
+        } else {
+            _lineEdit->setText(QString::number(value, 'g', _floatPrecision));
+        }
+    }
+
+    if (value == _value) return;
+
+    _value = value;
+    if (_intType) {
+        emit valueChanged((int)value);
+    } else {
+        emit valueChanged(value);
+    }
 }
