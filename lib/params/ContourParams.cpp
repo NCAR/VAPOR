@@ -171,10 +171,21 @@ void ContourParams::_init() {
     GetBox()->SetExtents(minExt, maxExt);
 }
 
-int ContourParams::GetNumContours() {
+int ContourParams::GetContourCount() {
     Contours *c = GetCurrentContours();
     vector<double> vals = c->GetContourValues();
     return vals.size();
+}
+
+void ContourParams::SetContourCount(int count) {
+    string varname = GetVariableName();
+    double min = GetContourMin();
+    double spacing = GetContourSpacing();
+    vector<double> values;
+    for (int i = 0; i < count; i++) {
+        values.push_back(min + i * spacing);
+    }
+    SetContourValues(varname, values);
 }
 
 double ContourParams::GetContourMin() {
