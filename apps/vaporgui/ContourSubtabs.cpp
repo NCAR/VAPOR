@@ -69,14 +69,14 @@ void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams *cParams)
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
 
-    _numContours = _cParams->GetNumContours();
-    _contourMin = minBound;
-    _contourMax = maxBound;
-    double spacing = (_contourMax - _contourMin) / (double)(_numContours - 1);
+    int    numContours = _cParams->GetNumContours();
+    double contourMin = minBound;
+    double contourMax = maxBound;
+    double spacing = (contourMax - contourMin);
 
-    _cMinCombo->Update(minBound, maxBound, _contourMin);
-    _countCombo->Update(1, 50, _numContours);
-    _spacingCombo->Update(0, _spacing, _spacing);
+    _cMinCombo->Update(minBound, maxBound, contourMin);
+    _countCombo->Update(1, 50, numContours);
+    _spacingCombo->Update(0, spacing, spacing);
 
     SetContourValues();
 
@@ -86,7 +86,11 @@ void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams *cParams)
 void ContourAppearanceSubtab::SetContourValues()
 {
     vector<double> cVals;
-    for (size_t i = 0; i < _numContours; i++) { cVals.push_back(_contourMin + _spacing * i); }
+
+    double spacing = _cParams->GetContourSpacing();
+    double contourMin = _cParams->GetContourMin();
+
+    for (size_t i = 0; i < _numContours; i++) { cVals.push_back(contourMin + spacing * i); }
 
     string varName = _cParams->GetVariableName();
     _cParams->SetContourValues(varName, cVals);
@@ -100,23 +104,31 @@ void ContourAppearanceSubtab::EndTFChange()
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
 
+    double spacing = _cParams->GetContourSpacing();
+    double contourMin = _cParams->GetContourMin();
+    int    count = _cParams->GetContourCount();
+
     // Check that our minimum is still valid, adjust if not
-    if (_contourMin < minBound) {
-        _contourMin = minBound;
-        _contourMax = _contourMin + _spacing * (_numContours - 1);
-    } else if (_contourMin > maxBound) {
-        _contourMin = maxBound;
+    if (contourMin < minBound) {
+        contourMin = minBound;
+        _contourMax = _contourMin + spacing * (_numContours - 1);
+    } else if (contourMin > maxBound) {
+        contourMin = maxBound;
         _contourMax = maxBound;
     }
-    _cMinCombo->Update(minBound, maxBound, _contourMin);
+    _cMinCombo->Update(minBound, maxBound, contourMin);
 
     // Check that our spacing is still valid, adjust if not
-    if (_contourMax > maxBound) { _spacing = (maxBound - _contourMin) / (_numContours - 1); }
+    if (_contourMax > maxBound) { spacing = (maxBound - contourMin) / (count - 1); }
+    double maxSpacing = (maxBound - minBound);
+    _spacingCombo->Update(0, maxSpacing, spacing);
 
-    double maxSpacing = (maxBound - minBound) / (_numContours - 1);
-    _spacingCombo->Update(0, maxSpacing, _spacing);
-
+    // Set values in params database
+    _paramsMgr->BeginSaveStateGroup("Contour TF changed");
+    _cParams->SetContourSpacing(spacing);
+    _cParams->SetContourMin(contourMin);
     SetContourValues();
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void ContourAppearanceSubtab::GetContourBounds(double &min, double &max)
@@ -155,7 +167,6 @@ void ContourAppearanceSubtab::enableSpacingWidgets()
 
 // Always adjust _count here
 // Never change _contourMin here
-// Adjust _spacing to accomodate new contours, if _maxContour exeeds bounds
 void ContourAppearanceSubtab::SetNumContours(int count)
 {
     // Band-aid
@@ -165,57 +176,76 @@ void ContourAppearanceSubtab::SetNumContours(int count)
     else
         enableSpacingWidgets();
 
-    _numContours = count;
-    _contourMax = _contourMin + _spacing * (_numContours - 1);
-
+    double spacing = _cParams->GetContourSpacing();
+    double contourMin = _cParams->GetContourMin();
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
+    _contourMax = contourMin + spacing * (count - 1);
+
+    // Adjust spacing if necessary
     if (_contourMax > maxBound) {    // Adjust spacing
-        _spacing = (maxBound - _contourMin) / (_numContours - 1);
+        double contourMin = _cParams->GetContourMin();
+        spacing = (maxBound - contourMin) / (count - 1);
         _contourMax = _contourMin + _spacing * _numContours;
     }
 
+    _paramsMgr->BeginSaveStateGroup("Number of contours changed");
+    _cParams->SetNumContours(count);
+    _cParams->SetContourSpacing(spacing);
+    _cParams->SetContourMin(contourMin);
     SetContourValues();
+    _paramsMgr->EndSaveStateGroup();
 }
 
-// Always adjust _contourMin and _contourMax here
-// Never adjust _numContours here
-// Adjustment of _contourMin will always adjust the spacing if our
-// maximum contour is greater than our maximum bound.
+// Always adjust contourMin and _contourMax here
+// Adjust numContours here if necessary if we exceed our bounds
 void ContourAppearanceSubtab::SetContourMinimum(double min)
 {
     _contourMin = min;
     _contourMax = _contourMin + _spacing * (_numContours - 1);
 
+    int    numContours = _cParams->GetNumContours();
+    double spacing = _cParams->GetContourSpacing();
+
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
-    if (_contourMax > maxBound) {    // Adjust spacing
-        _spacing = (maxBound - _contourMin) / (_numContours - 1);
-        _contourMax = _contourMin + _spacing * _numContours;
+    if (_contourMax > maxBound) {    // Adjust numContours
+        double range = maxBound - min;
+        numContours = range / spacing;
+        _contourMax = _contourMin + spacing * numContours;
     }
 
+    _paramsMgr->BeginSaveStateGroup("Contour minimum changed");
+    _cParams->SetContourMin(min);
+    _cParams->SetNumContours(numContours);
     SetContourValues();
+    _paramsMgr->EndSaveStateGroup();
 }
 
-// Always adjust _spacing and _contourMax here
-// Never adjust _numContours here
-// If _contourMax > maxBound, push _contourMin back until equal to minBound
+// Always adjust spacing and _contourMax here
+// Adjust numContours if we exceed our bounds
 void ContourAppearanceSubtab::SetContourSpacing(double spacing)
 {
-    if (_numContours == 1) return;
+    int numContours = _cParams->GetNumContours();
+    if (numContours == 1) return;
 
-    _spacing = spacing;
-    _contourMax = _contourMin + _spacing * (_numContours - 1);
+    double contourMin = _cParams->GetContourMin();
+    _contourMax = contourMin + spacing * (numContours - 1);
 
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
     if (_contourMax > maxBound) {
-        double range = maxBound - minBound;
-        _numContours = 1 + range / _spacing;
-        _contourMax = _contourMin + (_numContours - 1) * _spacing;
+        double range = maxBound - contourMin;
+        numContours = 1 + range / spacing;
+        cout << "adjustig num contours via spacing change" << endl;
+        _contourMax = contourMin + (numContours - 1) * spacing;
     }
 
+    _paramsMgr->BeginSaveStateGroup("Contour spacing changed");
+    _cParams->SetContourSpacing(spacing);
+    _cParams->SetContourCount(numContours);
     SetContourValues();
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void ContourAppearanceSubtab::ContourBoundsChanged(int index)
