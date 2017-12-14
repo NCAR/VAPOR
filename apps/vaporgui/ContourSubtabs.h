@@ -52,14 +52,8 @@ private:
     Combo *               _cMinCombo;
     Combo *               _spacingCombo;
 
-    int    _numContours;
-    double _spacing;
-    double _contourMin;
-    double _contourMax;
-    double _lineWidth;
-
 private slots:
-    void SetContourValues();
+    void SetContourValues(int numContours, double contourMin, double spacing);
 
     void EndTFChange();
 

@@ -13,14 +13,11 @@ static ParamsRegistrar<ContourParams::Contours> registrar2(ContourParams::Contou
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
 const string ContourParams::_varsAre3dTag = "VarsAre3D";
-const string ContourParams::_numContoursTag = "NumIsovalues";
 const string ContourParams::_contoursTag = "Contours";
 const string ContourParams::_numDigitsTag = "NumDigits";
 const string ContourParams::_textDensityTag = "TextDensity";
 const string ContourParams::_lineColorTag = "LineColor";
 const string ContourParams::_textEnabledTag = "TextEnabled";
-const string ContourParams::_contourMinTag = "ContourMinimum";
-const string ContourParams::_contourSpacingTag = "ContourSpacing";
 const string ContourParams::_lockToTFTag = "LockToTF";
 const string ContourParams::Contours::_valuesTag = "Values";
 
@@ -169,16 +166,6 @@ int ContourParams::GetContourCount()
     Contours *     c = GetCurrentContours();
     vector<double> vals = c->GetContourValues();
     return vals.size();
-}
-
-void ContourParams::SetContourCount(int count)
-{
-    string         varname = GetVariableName();
-    double         min = GetContourMin();
-    double         spacing = GetContourSpacing();
-    vector<double> values;
-    for (int i = 0; i < count; i++) { values.push_back(min + i * spacing); }
-    SetContourValues(varname, values);
 }
 
 double ContourParams::GetContourMin()
