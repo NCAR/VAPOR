@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>1070</height>
+    <height>1095</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -145,7 +145,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -156,14 +156,14 @@
           <number>10</number>
          </property>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Line Width</string>
+            <string>Contour Maximum</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_2">
+          <spacer name="horizontalSpacer_4">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -176,20 +176,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QSlider" name="lineWidthSlider">
-           <property name="minimumSize">
-            <size>
-             <width>150</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineWidthEdit">
+          <widget class="QLabel" name="contourMaxLabel">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -202,6 +189,9 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
@@ -210,7 +200,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -221,7 +211,7 @@
           <number>10</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_11">
+          <widget class="QLabel" name="label_9">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -229,12 +219,12 @@
             </size>
            </property>
            <property name="text">
-            <string>Count</string>
+            <string>Contour Minimum</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSlider" name="contourCountSlider">
+          <widget class="QSlider" name="contourMinSlider">
            <property name="maximumSize">
             <size>
              <width>150</width>
@@ -247,7 +237,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="contourCountEdit">
+          <widget class="QLineEdit" name="contourMinEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -338,7 +328,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -349,7 +339,7 @@
           <number>10</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_9">
+          <widget class="QLabel" name="label_11">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -357,12 +347,12 @@
             </size>
            </property>
            <property name="text">
-            <string>Contour Minimum</string>
+            <string>Count</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSlider" name="contourMinSlider">
+          <widget class="QSlider" name="contourCountSlider">
            <property name="maximumSize">
             <size>
              <width>150</width>
@@ -375,7 +365,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="contourMinEdit">
+          <widget class="QLineEdit" name="contourCountEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -402,7 +392,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -413,14 +403,14 @@
           <number>10</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="label">
            <property name="text">
-            <string>Contour Maximum</string>
+            <string>Line Width</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_4">
+          <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -433,7 +423,20 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="contourMaxLabel">
+          <widget class="QSlider" name="lineWidthSlider">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineWidthEdit">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -445,9 +448,6 @@
              <width>100</width>
              <height>16777215</height>
             </size>
-           </property>
-           <property name="text">
-            <string>TextLabel</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
