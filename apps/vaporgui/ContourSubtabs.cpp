@@ -123,9 +123,10 @@ void ContourAppearanceSubtab::EndTFChange() {
     if (contourMin < minBound) {
         contourMin = minBound;
         contourMax = contourMin + spacing * (count - 1);
-    } else if (contourMin > maxBound) {
-        contourMin = maxBound;
+    }
+    if (contourMax > maxBound) {
         contourMax = maxBound;
+        spacing = (contourMax - contourMin) / (count - 1);
     }
     _cMinCombo->Update(minBound, maxBound, contourMin);
 

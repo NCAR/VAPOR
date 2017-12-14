@@ -240,7 +240,7 @@ void ContourParams::SetTFLock(bool lock) {
 }
 
 bool ContourParams::GetTFLock() {
-    string l = GetValueString(_lockToTFTag, "true");
+    string l = GetValueString(_lockToTFTag, "false");
     if (l == "false")
         return false;
     return true;
