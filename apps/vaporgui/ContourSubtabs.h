@@ -82,7 +82,7 @@ private slots:
 		_cParams->SetLineThickness(val);
 	}
 
-	void SetNumContours(int count);
+	void SetContourCount(int count);
 
 	void SetContourMinimum(double min);
 
