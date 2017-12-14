@@ -60,8 +60,6 @@ public:
 
  int GetContourCount();
 
- void SetContourCount(int count);
-
  //! Determine line thickness in voxels
  //! \retval double line thickness
  double GetLineThickness() const {
@@ -73,8 +71,6 @@ public:
  }
 
  double GetContourMin();
-
- void SetContourMin(double val);
 
  double GetContourSpacing();
 
@@ -131,14 +127,11 @@ private:
  void _init();
  static const string _thicknessScaleTag;
  static const string _varsAre3dTag;
- static const string _numContoursTag;
  static const string _lineColorTag;
  static const string _contoursTag;
  static const string _numDigitsTag;
  static const string _textDensityTag;
  static const string _textEnabledTag;
- static const string _contourMinTag;
- static const string _contourSpacingTag;
  static const string _lockToTFTag;
  ParamsContainer* _contours;
 
