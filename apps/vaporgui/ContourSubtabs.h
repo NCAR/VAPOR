@@ -61,8 +61,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
     Combo *_lineWidthCombo;
     Combo *_countCombo;
     Combo *_cMinCombo;
-    //Combo* _spacingCombo;
-    SpacingCombo *_spacingCombo;
+    Combo *_spacingCombo;
 
     int _numContours;
     double _spacing;
@@ -112,28 +111,4 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
   private:
 };
 
-// Wish I could make SpacingCombo nested within ContourAppearanceSubtab,
-// however Qt does not support MetaObject features with nested classes :\
-class SpacingCombo : public Combo {
-
-class SpacingCombo : public Combo {
-    Q_OBJECT
-
-  public:
-    void Update(double min, double max, double value);
-
-    SpacingCombo(
-        QLineEdit *edit,
-        QSlider *slider,
-        bool intType = false) : Combo(edit, slider, intType) {
-        _lineEdit->disconnect();
-        connect(_lineEdit, SIGNAL(returnPressed()),
-                //this, SLOT(SpacingCombo::setLineEdit()));
-                this, SLOT(setLineEdit()));
-        // break Combo's setLineEdit connection
-        // connect returnPressed with overridden setLineEdit function
-    }
-  private slots:
-    void setLineEdit();
-};
 #endif //CONTOURSUBTABS_H
