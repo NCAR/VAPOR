@@ -58,9 +58,9 @@ public:
         return false;
     }
 
-    int GetNumContours();
+    int GetContourCount();
 
-    void SetNumContours(int num);
+    void SetContourCount(int count);
 
     //! Determine line thickness in voxels
     //! \retval double line thickness

@@ -14,7 +14,7 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
     _spacingCombo = new Combo(contourSpacingEdit, contourSpacingSlider);
 
     connect(_lineWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(SetLineThickness(double)));
-    connect(_countCombo, SIGNAL(valueChanged(int)), this, SLOT(SetNumContours(int)));
+    connect(_countCombo, SIGNAL(valueChanged(int)), this, SLOT(SetContourCount(int)));
     connect(_cMinCombo, SIGNAL(valueChanged(double)), this, SLOT(SetContourMinimum(double)));
     connect(_spacingCombo, SIGNAL(valueChanged(double)), this, SLOT(SetContourSpacing(double)));
     connect(boundsCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ContourBoundsChanged(int)));
@@ -38,7 +38,7 @@ void ContourAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *
     else
         boundsCombo->setCurrentIndex(0);
 
-    _numContours = _cParams->GetNumContours();
+    _numContours = _cParams->GetContourCount();
     _countCombo->Update(1, 50, _numContours);
 
     double minBound, maxBound;
@@ -69,7 +69,7 @@ void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams *cParams)
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
 
-    int    numContours = _cParams->GetNumContours();
+    int    numContours = _cParams->GetContourCount();
     double contourMin = minBound;
     double contourMax = maxBound;
     double spacing = (contourMax - contourMin);
@@ -89,8 +89,9 @@ void ContourAppearanceSubtab::SetContourValues()
 
     double spacing = _cParams->GetContourSpacing();
     double contourMin = _cParams->GetContourMin();
+    int    contourCount = _cParams->GetContourCount();
 
-    for (size_t i = 0; i < _numContours; i++) { cVals.push_back(contourMin + spacing * i); }
+    for (size_t i = 0; i < contourCount; i++) { cVals.push_back(contourMin + spacing * i); }
 
     string varName = _cParams->GetVariableName();
     _cParams->SetContourValues(varName, cVals);
@@ -167,7 +168,7 @@ void ContourAppearanceSubtab::enableSpacingWidgets()
 
 // Always adjust _count here
 // Never change _contourMin here
-void ContourAppearanceSubtab::SetNumContours(int count)
+void ContourAppearanceSubtab::SetContourCount(int count)
 {
     // Band-aid
     // Don't let user mess with spacing if there's only one contour
@@ -190,7 +191,7 @@ void ContourAppearanceSubtab::SetNumContours(int count)
     }
 
     _paramsMgr->BeginSaveStateGroup("Number of contours changed");
-    _cParams->SetNumContours(count);
+    _cParams->SetContourCount(count);
     _cParams->SetContourSpacing(spacing);
     _cParams->SetContourMin(contourMin);
     SetContourValues();
@@ -204,7 +205,7 @@ void ContourAppearanceSubtab::SetContourMinimum(double min)
     _contourMin = min;
     _contourMax = _contourMin + _spacing * (_numContours - 1);
 
-    int    numContours = _cParams->GetNumContours();
+    int    numContours = _cParams->GetContourCount();
     double spacing = _cParams->GetContourSpacing();
 
     double minBound, maxBound;
@@ -217,7 +218,7 @@ void ContourAppearanceSubtab::SetContourMinimum(double min)
 
     _paramsMgr->BeginSaveStateGroup("Contour minimum changed");
     _cParams->SetContourMin(min);
-    _cParams->SetNumContours(numContours);
+    _cParams->SetContourCount(numContours);
     SetContourValues();
     _paramsMgr->EndSaveStateGroup();
 }
@@ -226,7 +227,7 @@ void ContourAppearanceSubtab::SetContourMinimum(double min)
 // Adjust numContours if we exceed our bounds
 void ContourAppearanceSubtab::SetContourSpacing(double spacing)
 {
-    int numContours = _cParams->GetNumContours();
+    int numContours = _cParams->GetContourCount();
     if (numContours == 1) return;
 
     double contourMin = _cParams->GetContourMin();
