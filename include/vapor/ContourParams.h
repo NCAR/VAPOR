@@ -58,8 +58,6 @@ public:
 	return false;
  }
 
- int GetContourCount();
-
  //! Determine line thickness in voxels
  //! \retval double line thickness
  double GetLineThickness() const {
@@ -69,10 +67,14 @@ public:
  void SetLineThickness(double val) {
 	SetValueDouble(_thicknessScaleTag, "Contour thickness", val);
  }
+ 
+ int GetContourCount();
 
  double GetContourMin();
 
  double GetContourSpacing();
+
+ double GetContourMax();
 
  void SetContourSpacing(double val);
 

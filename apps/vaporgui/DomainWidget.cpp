@@ -108,6 +108,7 @@ int DomainWidget::paintGL()
       if (_orientation == Qt::Horizontal)
       {
         float y = (_maxY + _minY) / 2.0;
+		cout << "miny/maxy " << _minY << " " << _maxY << endl;
 
         glColor3f(1, 0.3, 0.3);
 
@@ -364,4 +365,213 @@ int IsoSlider::paintGL(){
 	  int rc = printOpenGLError();
 	  if (rc < 0) return -1;
 	  return 0;
+}
+
+ContourRangeSlider::ContourRangeSlider(QWidget* parent, float min, float max) :
+  DomainWidget(parent, Qt::Horizontal, min, max)
+{
+  _minY = 1.0;
+  _maxY = 1.02;
+}
+
+//----------------------------------------------------------------------------
+// Render the widget
+//----------------------------------------------------------------------------
+int ContourRangeSlider::paintGL()
+{
+  int rc = printOpenGLErrorMsg("DomainWidget");
+  if (rc < 0) return -1;
+  float length = 0.03;
+
+  glPushName(_id);
+  glPushMatrix();
+  {
+    if (_enabled)
+    {
+#ifdef Darwin
+      // 
+      // Mac version is not rendering the gluCylinders for some
+      // reason. Replace with simplier geometry for the Mac.
+      //
+      if (_orientation == Qt::Horizontal)
+      {
+        float y = (_maxY + _minY) / 2.0;
+		cout << "crs miny/maxy " << _minY << " " << _maxY << endl;
+
+        glColor3f(1, 0.3, 0.3);
+
+        glPushMatrix();
+        {
+          glPushName(LEFT);
+          glBegin(GL_TRIANGLES);
+          glVertex3f(_minValue-length, y, 0.0);
+          glVertex3f(_minValue, y+_handleRadius, 0.0);
+          glVertex3f(_minValue, y-_handleRadius, 0.0);
+          glEnd();
+          glPopName();
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+          glPushName(RIGHT);
+          glBegin(GL_TRIANGLES);
+          glVertex3f(_maxValue+length, y, 0.0);
+          glVertex3f(_maxValue, y+_handleRadius, 0.0);
+          glVertex3f(_maxValue, y-_handleRadius, 0.0);
+          glEnd();
+          glPopName();
+        }
+        glPopMatrix();
+
+        glColor3f(0.7, 0.0, 0.0);
+      
+        glPushMatrix();
+        {
+          glPushName(BAR);
+          glBegin(GL_QUADS);
+          glVertex3f(_minValue, y + 0.4*_handleRadius, 0.0);
+          glVertex3f(_maxValue, y + 0.4*_handleRadius, 0.0);
+          glVertex3f(_maxValue, y - 0.4*_handleRadius, 0.0);
+          glVertex3f(_minValue, y - 0.4*_handleRadius, 0.0);
+          glEnd();
+          glPopName();
+        }
+        glPopMatrix();
+      }
+      else // Vertical
+      {
+        float x = 1 - (_maxY + _minY) / 2.0;
+
+        glColor3f(1, 0.3, 0.3);
+
+        glPushMatrix();
+        {
+          glPushName(LEFT);
+          glBegin(GL_TRIANGLES);
+          glVertex3f(x, _minValue-length, 0.0);
+          glVertex3f(x+_handleRadius, _minValue, 0.0);
+          glVertex3f(x-_handleRadius, _minValue, 0.0);
+          glEnd();
+          glPopName();
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+          glPushName(RIGHT);
+          glBegin(GL_TRIANGLES);
+          glVertex3f(x, _maxValue+length, 0.0);
+          glVertex3f(x+_handleRadius, _maxValue, 0.0);
+          glVertex3f(x-_handleRadius, _maxValue, 0.0);
+          glEnd();
+          glPopName();
+        }
+        glPopMatrix();
+
+        glColor3f(0.7, 0.0, 0.0);
+      
+        glPushMatrix();
+        {
+          glPushName(BAR);
+          glBegin(GL_QUADS);
+          glVertex3f(x + 0.4*_handleRadius, _minValue, 0.0);
+          glVertex3f(x + 0.4*_handleRadius, _maxValue, 0.0);
+          glVertex3f(x - 0.4*_handleRadius, _maxValue, 0.0);
+          glVertex3f(x - 0.4*_handleRadius, _minValue, 0.0);
+          glEnd();
+          glPopName();
+        }
+        glPopMatrix();
+      }
+#else      
+      if (_orientation == Qt::Horizontal)
+      {
+        float y = (_maxY + _minY) / 2.0;
+
+        glColor3f(1, 0.3, 0.3);
+
+        glPushMatrix();
+        {
+          glPushName(LEFT);
+          glTranslatef(_minValue-length, y, 0.0);
+          glRotatef(90, 0, 1, 0);
+          gluCylinder(_quadHandle, 0.0, _handleRadius, length, 10, 2);
+          glPopName();
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+          glPushName(RIGHT);
+          glTranslatef(_maxValue, y, 0.0);
+          glRotatef(90, 0, 1, 0);
+          gluCylinder(_quadHandle, _handleRadius, 0.0, length, 10, 2);
+          glPopName();
+        }
+        glPopMatrix();
+
+        glColor3f(0.7, 0.0, 0.0);
+      
+        glPushMatrix();
+        {
+          glPushName(BAR);
+          glTranslatef(_minValue, y, 0.0);
+          glRotatef(90, 0, 1, 0);
+          gluCylinder(_quadHandle, 0.4*_handleRadius, 0.4*_handleRadius, 
+                      width(), 10, 2);
+          
+          glPopName();
+        }
+        glPopMatrix();
+      }
+      else // Vertical
+      {
+        float x = 1 - (_maxY + _minY) / 2.0;
+
+        glColor3f(1, 0.3, 0.3);
+
+        glPushMatrix();
+        {
+          glPushName(LEFT);
+          glTranslatef(x, _minValue-length, 0.0);
+          glRotatef(90, -1, 0, 0);
+          gluCylinder(_quadHandle, 0.0, _handleRadius, length, 10, 2);
+          glPopName();
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+          glPushName(RIGHT);
+          glTranslatef(x, _maxValue, 0.0);
+          glRotatef(90, -1, 0, 0);
+          gluCylinder(_quadHandle, _handleRadius, 0.0, length, 10, 2);
+          glPopName();
+        }
+        glPopMatrix();
+
+        glColor3f(0.7, 0.0, 0.0);
+      
+        glPushMatrix();
+        {
+          glPushName(BAR);
+          glTranslatef(x, _minValue, 0.0);
+          glRotatef(90, -1, 0, 0);
+          gluCylinder(_quadHandle, 0.4*_handleRadius, 0.4*_handleRadius, 
+                      width(), 10, 2);
+          
+          glPopName();
+        }
+        glPopMatrix();
+      }
+#endif
+    }
+  }  
+  glPopMatrix();
+  glPopName();
+
+  rc = printOpenGLErrorMsg("DomainWidget");
+  if (rc < 0) return -1;
+  return 0;
 }
