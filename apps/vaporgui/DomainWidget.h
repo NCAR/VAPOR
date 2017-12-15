@@ -46,7 +46,7 @@ public:
   float minValue() const  { return _minValue; } // world-coordinates
   float maxValue() const  { return _maxValue; } // world-coordinates
 
-  void setDomain(float minv, float maxv) { _minValue = minv; _maxValue = maxv;}
+  virtual void setDomain(float minv, float maxv) { cout << "setDomain " << minv << " " << maxv << endl;_minValue = minv; _maxValue = maxv;}
 
   virtual void setGeometry(float x0, float x1, float y0, float y1);
 
@@ -64,9 +64,7 @@ public:
     
   float _minValue;
   float _maxValue;
-
- private:
-
+  
   //
   // Frame data
   //
@@ -94,3 +92,8 @@ class IsoSlider : public DomainWidget
 
 #endif // DomainWidget_H
 
+class ContourRangeSlider : public DomainWidget {
+ public:
+	ContourRangeSlider(QWidget *parent, float min=0.0, float max=1.0);
+	virtual int paintGL();
+};
