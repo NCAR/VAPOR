@@ -49,6 +49,7 @@ class OpacityWidget;
 class GLColorbarWidget;
 class Histo;
 class DomainWidget;
+class ContourRangeSlider;
 class IsoSlider;
 class GLWidget;
 class RenderEventRouter;
@@ -104,6 +105,11 @@ public:
     //! Should be specified in the RenderEventRouter constructor
     //! \param[in] flag set true if one iso Slider will be enabled.
     void setIsoSlider(bool flag) { _isoSliderEnabled = flag; }
+
+    //! Specifiy the beginning and end points of the ContourRangeSlider
+    //! \param[in] minimum data value to indicate with the ContourRangeSlider
+    //! \param[in] maximum data value to indicate with the ContourRangeSlider
+    void setContourRangeSliderExtents(double min, double max);
 
     //! Enable or disable the use of multiple iso sliders in an IsoControl editor
     //! Should be specified in the RenderEventRouter constructor
@@ -179,6 +185,7 @@ private:
     bool    colorMapping() const { return _colorMappingEnabled; }
     bool    opacityMapping() const { return _opacityMappingEnabled; }
     bool    isoSliderEnabled() const { return _isoSliderEnabled; }
+    bool    contourRangeSlider() const { return _contourRangeSliderEnabled; }
     bool    isolineSlidersEnabled() const { return _isolineSlidersEnabled; }
     void    setIsoValue(float val) { _isoVal = val; }
     QString tipText(const QPoint &pos, bool isIso = false);
@@ -295,6 +302,7 @@ private:
     bool                _opacityMappingEnabled;
     bool                _colorMappingEnabled;
     bool                _isoSliderEnabled;
+    bool                _contourRangeSliderEnabled;
     bool                _isolineSlidersEnabled;
     vector<IsoSlider *> _isolineSliders;
     int                 _lastSelectedIndex;
@@ -305,6 +313,7 @@ private:
 
     std::map<int, OpacityWidget *> _opacityWidgets;
     DomainWidget *                 _domainSlider;
+    ContourRangeSlider *           _contourRangeSlider;
     IsoSlider *                    _isoSlider;
     GLColorbarWidget *             _colorbarWidget;
     GLWidget *                     _lastSelected;
