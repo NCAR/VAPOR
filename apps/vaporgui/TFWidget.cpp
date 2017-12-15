@@ -213,14 +213,21 @@ void TFWidget::updateColorInterpolation() {
 	
 	TFInterpolator::type t = tf->getColorInterpType();
 	colorInterpCombo->blockSignals(true);
-	if (t == TFInterpolator::diverging) {
+	if (t == TFInterpolator::correctiveDiverging) {
+		cout << "A" << endl;
 		colorInterpCombo->setCurrentIndex(0);
 	}
-	else if (t == TFInterpolator::discrete) {
+	else if (t == TFInterpolator::diverging) {
+		cout << "B" << endl;
 		colorInterpCombo->setCurrentIndex(1);
 	}
-	else {
+	else if (t == TFInterpolator::discrete) {
+		cout << "C" << endl;
 		colorInterpCombo->setCurrentIndex(2);
+	}
+	else {
+		cout << "D" << endl;
+		colorInterpCombo->setCurrentIndex(3);
 	}
 	colorInterpCombo->blockSignals(false);
 }
@@ -385,12 +392,15 @@ void TFWidget::colorInterpChanged(int index) {
 	MapperFunction* tf = _rParams->GetMapperFunc(varName);
 
 	if (index==0) {
-		tf->setColorInterpType(TFInterpolator::diverging);
+		tf->setColorInterpType(TFInterpolator::correctiveDiverging);
 	}
 	else if (index==1) {
-		tf->setColorInterpType(TFInterpolator::discrete);
+		tf->setColorInterpType(TFInterpolator::diverging);
 	}
 	else if (index==2) {
+		tf->setColorInterpType(TFInterpolator::discrete);
+	}
+	else if (index==3) {
 		tf->setColorInterpType(TFInterpolator::linear);
 	}
 	updateHisto();	
