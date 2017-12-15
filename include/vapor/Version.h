@@ -1,8 +1,3 @@
-//
-//      $Id$
-//
-//	WARNING: Version.h is generated automatically from Version.h.sed
-//
 //************************************************************************
 //								*
 //		     Copyright (C)  2004			*
@@ -71,6 +66,17 @@ class COMMON_API Version : public MyBase {
     //
     static const string &GetVersionString();
 
+    //! Return the full version as a formatted string
+    //!
+    //! Return the version as a formatted string of
+    //! the form: MAJOR.MINOR.MICRO.RC.COMMIT
+    //
+    static const string &GetFullVersionString();
+
+    //! Return the git hash of the current build
+    //
+    static const string GetBuildHash();
+
     //! Return a string containing the date  associated with the version number
     //!
     //! This method returns the value of the RCS \p Date keyword. In general,
@@ -92,9 +98,9 @@ class COMMON_API Version : public MyBase {
     static int Compare(std::string ver1, std::string ver2);
 
   private:
-    static const int _majorVersion = MAJOR;
-    static const int _minorVersion = MINOR;
-    static const int _minorMinorVersion = MICRO;
+    static const int _majorVersion;
+    static const int _minorVersion;
+    static const int _minorMinorVersion;
     static string _formatString;
     static string _dateString;
 };

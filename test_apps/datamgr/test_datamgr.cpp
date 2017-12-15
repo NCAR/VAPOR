@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
     }
 
     DataMgr datamgr(opt.ftype, opt.memsize, opt.nthreads);
-    int rc = datamgr.Initialize(files);
+    int rc = datamgr.Initialize(files, vector<string>());
     if (rc < 0)
         exit(1);
 

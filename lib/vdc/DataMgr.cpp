@@ -593,7 +593,7 @@ int DataMgr::GetNumTimeSteps(string varname) const {
 }
 
 int DataMgr::GetNumTimeSteps() const {
-    return (_timeCoordinates.size() - 1);
+    return (_timeCoordinates.size());
 }
 
 size_t DataMgr::GetNumRefLevels(string varname) const {
@@ -2978,7 +2978,8 @@ DataMgr::GridType DataMgr::_get_grid_type(string varname) const {
         DC::CoordVar cvarinfo;
 
         bool ok = GetCoordVarInfo(cvars[i], cvarinfo);
-        assert(ok);
+        if (!ok)
+            return (UNDEFINED);
 
         cvarsinfo.push_back(cvarinfo);
     }
