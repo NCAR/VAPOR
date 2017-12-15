@@ -180,6 +180,12 @@ double ContourParams::GetContourMin() {
     return vals[0];
 }
 
+double ContourParams::GetContourMax() {
+    Contours *c = GetCurrentContours();
+    vector<double> vals = c->GetContourValues();
+    return vals[vals.size() - 1];
+}
+
 double ContourParams::GetContourSpacing() {
     Contours *c = GetCurrentContours();
     vector<double> vals = c->GetContourValues();
