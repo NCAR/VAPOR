@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>435</height>
+    <height>444</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -575,10 +575,15 @@ how the histogram is scaled.</string>
            <widget class="QComboBox" name="colorInterpCombo">
             <property name="minimumSize">
              <size>
-              <width>120</width>
+              <width>170</width>
               <height>0</height>
              </size>
             </property>
+            <item>
+             <property name="text">
+              <string>Corrective Diverging</string>
+             </property>
+            </item>
             <item>
              <property name="text">
               <string>Diverging</string>
