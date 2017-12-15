@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2004				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -31,7 +31,7 @@ public:
     ~TFInterpolator();
 
     // Default is linear
-    enum type { linear, discrete, logarithm, exponential, diverging };
+    enum type { linear, discrete, logarithm, exponential, diverging, correctiveDiverging };
     // Determine the interpolated value at intermediate value 0<=r<=1
     // where the value at left and right endpoint is known
     // This method is just a stand-in until we get more sophistication
@@ -63,8 +63,19 @@ public:
     //! \param[in] RGB2 End point color for diverging color map.
     //! \param[in] The output interpolated RGB value in the divergent map
     //! \param[in] The interpolation weight of the current color in the color map
+    //! \param[in] Set whether we insert white space between two saturated color control points
     //! \retval Return status, 1 = success
-    static int divergentInterpolation(float rgb1[3], float rgb2[3], float output[3], float interp);
+    static int divergentInterpolation(float rgb1[3], float rgb2[3], float output[3], float interp, bool corrective = false);
+
+    //! Interpolation algorithm that applies a corrective white space
+    //! between two saturated color control points
+    //!
+    //! \param[in] RGB1 Start point color for diverging color map
+    //! \param[in] RGB2 End point color for diverging color map.
+    //! \param[in] The output interpolated RGB value in the divergent map
+    //! \param[in] The interpolation weight of the current color in the color map
+    //! \param[in] Set whether we insert white space between two saturated color control points
+    static void correctiveDivergentInterpolation(float rgb1[3], float rgb2[3], float output[3], float interp);
 
     //! A function to provide an adjusted hue when interpolating
     //! to an unsaturated color in Msh space
