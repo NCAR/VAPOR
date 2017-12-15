@@ -1,21 +1,29 @@
 cmake_minimum_required (VERSION 3.1)
 project (VAPOR3)
 
+include (buildutils/UtilityFunctions.cmake)
+include (buildutils/GetGitRevisionDescription.cmake)
+
 set (CMAKE_CXX_STANDARD 11)
 
 # set(CMAKE_VERBOSE_MAKEFILE on)
 set (CMAKE_BUILD_TYPE Debug)
-
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG" AND UNIX)
-	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
-endif ()
+set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 0)
 set (VERSION_MICRO 0)
 set (VERSION_RC beta)
+get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
+execute_process (
+	COMMAND git rev-parse --short ${VERSION_COMMIT}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	OUTPUT_VARIABLE VERSION_COMMIT 
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 string (TIMESTAMP VERSION_DATE UTC)
 set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
+set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT})
 
 if (APPLE)
 	add_definitions (-DDarwin)
@@ -30,16 +38,11 @@ option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" ON)
 
-include_directories ("${PROJECT_BINARY_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# These need to be updatd to change for install build set (DSO_DIR ${PROJECT_BINARY_DIR}/bin)
-set (BINDIR ${PROJECT_BINARY_DIR}/bin)
-set (ABS_TOP ${PROJECT_SOURCE_DIR})
 
 set (QTDIR )
 set (PYTHONDIR )
@@ -48,7 +51,6 @@ set (NUMPY_INCLUDE_DIR )
 set (THIRD_PARTY_LIB_DIR )
 set (THIRD_PARTY_INC_DIR )
 
-include (buildutils/UtilityFunctions.cmake)
 include (site.local OPTIONAL)
 
 include_directories (${THIRD_PARTY_INC_DIR})
@@ -74,7 +76,7 @@ if (WIN32)
 	set (INSTALL_SHARE_DIR share)
 elseif (APPLE)
 	find_library (GLEW GLEW)
-	set (INSTALL_BIN_DIR ./vapor.app/Contents/utilities)
+	set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
 	set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
 	set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")

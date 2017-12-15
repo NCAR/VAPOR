@@ -85,7 +85,7 @@ struct kdres {
 #define SQ(x) ((x) * (x))
 
 static void clear_rec(struct kdnode *node, void (*destr)(void *));
-static int  insert_rec(struct kdnode **node, const double *pos, void *data, int dir, int dim);
+static int  insert_rec(struct kdnode **node, const double *pos, void *data, int dim);
 static int  rlist_insert(struct res_node *list, struct kdnode *item, double dist_sq);
 static void clear_results(struct kdres *set);
 
@@ -150,34 +150,52 @@ void kd_clear(struct kdtree *tree)
 
 void kd_data_destructor(struct kdtree *tree, void (*destr)(void *)) { tree->destr = destr; }
 
-static int insert_rec(struct kdnode **nptr, const double *pos, void *data, int dir, int dim)
+static int insert_rec(struct kdnode **root, const double *pos, void *data, int dim)
 {
-    int            new_dir;
-    struct kdnode *node;
+    int new_dir = 0;
 
-    if (!*nptr) {
-        if (!(node = malloc(sizeof *node))) { return -1; }
-        if (!(node->pos = malloc(dim * sizeof *node->pos))) {
-            free(node);
-            return -1;
+    struct kdnode *parent = *root;
+    struct kdnode *node = parent;
+    while (node) {
+        parent = node;
+        new_dir = (node->dir + 1) % dim;
+        if (pos[node->dir] < node->pos[node->dir]) {
+            node = node->left;
+        } else {
+            node = node->right;
         }
-        memcpy(node->pos, pos, dim * sizeof *node->pos);
-        node->data = data;
-        node->dir = dir;
-        node->left = node->right = 0;
-        *nptr = node;
+    }
+
+    if (!(node = malloc(sizeof *node))) { return -1; }
+    if (!(node->pos = malloc(dim * sizeof *node->pos))) {
+        free(node);
+        return -1;
+    }
+
+    memcpy(node->pos, pos, dim * sizeof *node->pos);
+    node->data = data;
+    node->dir = new_dir;
+    node->left = node->right = 0;
+
+    // root of tree?
+    //
+    if (!*root) {
+        *root = node;
         return 0;
     }
 
-    node = *nptr;
-    new_dir = (node->dir + 1) % dim;
-    if (pos[node->dir] < node->pos[node->dir]) { return insert_rec(&(*nptr)->left, pos, data, new_dir, dim); }
-    return insert_rec(&(*nptr)->right, pos, data, new_dir, dim);
+    if (pos[parent->dir] < parent->pos[parent->dir]) {
+        parent->left = node;
+    } else {
+        parent->right = node;
+    }
+
+    return 0;
 }
 
 int kd_insert(struct kdtree *tree, const double *pos, void *data)
 {
-    if (insert_rec(&tree->root, pos, data, 0, tree->dim)) { return -1; }
+    if (insert_rec(&tree->root, pos, data, tree->dim)) { return -1; }
 
     if (tree->rect == 0) {
         tree->rect = hyperrect_create(tree->dim, pos, pos);

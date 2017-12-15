@@ -54,6 +54,7 @@ void TwoDDataParams::_init()
 
     if (!varnames.empty()) varname = varnames[0];
     SetVariableName(varname);
+    SetColorMapVariableName(varname);
 
     // Initialize 2D box
     //

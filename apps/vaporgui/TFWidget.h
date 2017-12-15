@@ -24,8 +24,11 @@ public:
     //! COLOR : RenderParams::GetColorMapVariableNames()
     //!
     enum Flags {
-        SECONDARY_COLORVAR = (1u << 0),
-        CONSTCOLOR = (1u << 1),
+        // We can map our renderer's colors to a secondary color variable
+        COLORVAR = (1u << 0),
+
+        // We can map the color of our renderer to a constant value
+        CONSTANT = (1u << 1),
 
         // PRIORITY_COLORVAR just moves the color mapped variable
         // settings up higher in the gui for better visibility
@@ -68,9 +71,13 @@ private slots:
     void loadTF();
     void forwardTFChange();
     void opacitySliderChanged(int value);
+    void setSingleColor();
+    void setUsingSingleColor(int checkState);
 
 private:
     void   collapseAutoUpdateHistoCheckbox();
+    void   collapseConstColorWidgets();
+    void   showConstColorWidgets();
     string getVariableName();
     void   connectWidgets();
     void   updateSliders();
@@ -78,6 +85,7 @@ private:
     void   updateColorInterpolation();
     void   updateMappingFrame();
     void   enableTFWidget(bool state);
+    void   updateConstColorWidgets();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
@@ -87,7 +95,6 @@ private:
     bool  _textChanged = false;
     float _myRGB[3];
 
-    // VAPoR::ControlExec* _controlExec;
     RenderEventRouter *  _eventRouter;
     VAPoR::ParamsMgr *   _paramsMgr;
     VAPoR::DataMgr *     _dataMgr;

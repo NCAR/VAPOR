@@ -450,6 +450,11 @@ public:
     //
     void RegisterStateChangeCB(std::function<void()> callback) { _ssave.RegisterStateChangeCB(callback); }
 
+    //! Reinit state saving
+    //!
+    //!
+    void RebaseStateSave() { _ssave.Rebase(); }
+
     const XmlNode *GetXMLRoot() const { return (_rootSeparator->GetNode()); }
 
     //! Return true if any state changes made since last call
@@ -476,8 +481,13 @@ private:
         void Reinit(const XmlNode *rootNode)
         {
             _rootNode = rootNode;
-            for (int i = 0; i < _stateChangeFlags.size(); i++) { *(_stateChangeFlags[i]) = true; }
-            for (int i = 0; i < _stateChangeCBs.size(); i++) { _stateChangeCBs[i](); }
+            emitStateChange();
+        }
+
+        void Rebase()
+        {
+            if (_state0) delete _state0;
+            _state0 = new XmlNode(*_rootNode);
         }
         void Save(const XmlNode *node, string description);
         void BeginGroup(string descripion);
@@ -492,6 +502,7 @@ private:
         bool GetEnabled() const { return (_enabled); }
 
         const XmlNode *GetTop(string &description) const;
+        const XmlNode *GetBase() const { return (_state0); }
 
         bool Undo();
         bool Redo();
@@ -508,15 +519,17 @@ private:
         bool           _enabled;
         int            _stackSize;
         const XmlNode *_rootNode;
+        const XmlNode *_state0;
 
         std::stack<string>                       _groups;
         std::deque<std::pair<string, XmlNode *>> _undoStack;
         std::deque<std::pair<string, XmlNode *>> _redoStack;
 
-        void cleanStack(int maxN, std::deque<std::pair<string, XmlNode *>> &s);
-
         std::vector<bool *>                _stateChangeFlags;
         std::vector<std::function<void()>> _stateChangeCBs;
+
+        void cleanStack(int maxN, std::deque<std::pair<string, XmlNode *>> &s);
+        void emitStateChange();
     };
 
     map<string, DataMgr *> _dataMgrMap;

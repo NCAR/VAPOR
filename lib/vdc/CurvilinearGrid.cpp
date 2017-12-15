@@ -20,10 +20,6 @@ void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid
     _xrg = xrg;
     _yrg = yrg;
     _zcoords = zcoords;
-
-    // Get the user extents now. Do this only once.
-    //
-    _GetUserExtents(_minu, _maxu);
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
@@ -63,11 +59,11 @@ void CurvilinearGrid::GetBoundingBox(const std::vector<size_t> &min, const std::
     // Get the horiztonal (X & Y) extents by visiting every point
     // on a single plane (horizontal coordinates are constant over Z).
     //
-    vector<size_t> min2d = {min[0], max[1]};
+    vector<size_t> min2d = {min[0], min[1]};
     vector<size_t> max2d = {max[0], max[1]};
     float          xrange[2], yrange[2];
-    _xrg.GetRange(xrange);
-    _yrg.GetRange(yrange);
+    _xrg.GetRange(min2d, max2d, xrange);
+    _yrg.GetRange(min2d, max2d, yrange);
 
     minu[0] = xrange[0];
     minu[1] = yrange[0];
@@ -289,18 +285,14 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
 {
     _cg = cg;
     vector<size_t> dims = _cg->GetDimensions();
+    _index = vector<size_t>(dims.size(), 0);
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
         _yCoordItr = _cg->_yrg.cbegin();
-        _x = 0;
-        _y = 0;
-        _z = 0;
     } else {
         _xCoordItr = _cg->_xrg.cend();
         _yCoordItr = _cg->_yrg.cend();
-        _x = 0;
-        _y = dims.size() == 2 ? dims[1] : 0;
-        _z = dims.size() == 3 ? dims[2] : 0;
+        _index[dims.size() - 1] = dims[dims.size() - 1];
     }
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
@@ -310,9 +302,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : ConstCoordItrAbstract()
 {
     _cg = rhs._cg;
-    _x = rhs._x;
-    _y = rhs._y;
-    _z = rhs._z;
+    _index = rhs._index;
     _coords = rhs._coords;
     _xCoordItr = rhs._xCoordItr;
     _yCoordItr = rhs._yCoordItr;
@@ -321,9 +311,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()
 {
     _cg = NULL;
-    _x = 0;
-    _y = 0;
-    _z = 0;
+    _index.clear();
     _coords.clear();
 }
 
@@ -331,20 +319,20 @@ void CurvilinearGrid::ConstCoordItrCG::next()
 {
     const vector<size_t> &dims = _cg->GetDimensions();
 
-    _x++;
+    _index[0]++;
     ++_xCoordItr;
     ++_yCoordItr;
 
-    if (_x < dims[0]) {
+    if (_index[0] < dims[0]) {
         _coords[0] = *_xCoordItr;
         _coords[1] = *_yCoordItr;
         return;
     }
 
-    _x = 0;
-    _y++;
+    _index[0] = 0;
+    _index[1]++;
 
-    if (_y < dims[1]) {
+    if (_index[1] < dims[1]) {
         _coords[0] = *_xCoordItr;
         _coords[1] = *_yCoordItr;
         return;
@@ -352,17 +340,53 @@ void CurvilinearGrid::ConstCoordItrCG::next()
 
     if (dims.size() == 2) return;
 
-    _y = 0;
-    _z++;
-    if (_z < dims[2]) {
+    _index[1] = 0;
+    _index[2]++;
+    if (_index[2] < dims[2]) {
         _xCoordItr = _cg->_xrg.cbegin();
         _yCoordItr = _cg->_yrg.cbegin();
 
         _coords[0] = *_xCoordItr;
         _coords[1] = *_yCoordItr;
-        _coords[2] = _cg->_zcoords[_z];
+        _coords[2] = _cg->_zcoords[_index[2]];
         return;
     }
+}
+
+void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
+{
+    if (!_index.size()) return;
+
+    const vector<size_t> &dims = _cg->GetDimensions();
+
+    vector<size_t> maxIndex;
+    ;
+    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    if (newIndexL < 0) { newIndexL = 0; }
+    if (newIndexL > maxIndexL) {
+        _index = vector<size_t>(dims.size(), 0);
+        _index[dims.size() - 1] = dims[dims.size() - 1];
+        return;
+    }
+
+    size_t index2DL = _index[1] * dims[0] + _index[0];
+
+    _index = Wasp::VectorizeCoords(newIndexL, dims);
+
+    size_t offset2D = (long)(_index[1] * dims[0] + _index[0]) - (long)index2DL;
+
+    _xCoordItr += offset2D;
+    _yCoordItr += offset2D;
+
+    _coords[0] = *_xCoordItr;
+    _coords[1] = *_yCoordItr;
+
+    if (dims.size() == 2) return;
+
+    _coords[2] = _cg->_zcoords[_index[2]];
 }
 
 float CurvilinearGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const

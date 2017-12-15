@@ -1,7 +1,0 @@
-file (GLOB PALETTE_FILES *.tf3)
-
-install (
-	FILES ${PALETTE_FILES}
-	DESTINATION ${INSTALL_SHARE_DIR}/palettes
-	COMPONENT Share
-	)

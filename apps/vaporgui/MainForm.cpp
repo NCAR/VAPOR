@@ -123,6 +123,16 @@ string makename(string file)
     return (qFileInfo.fileName().toStdString());
 }
 
+string concatpath(string s1, string s2)
+{
+    string s;
+    if (!s1.empty()) {
+        s = s1 + "/" + s2;
+    } else {
+        s = s2;
+    }
+    return (QDir::toNativeSeparators(s.c_str()).toStdString());
+}
 };    // namespace
 
 // Only the main program should call the constructor:
@@ -159,6 +169,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     _stats = NULL;
     _plot = NULL;
     _stateChangeFlag = false;
+    _sessionNewFlag = true;
 
     createActions();
     createMenus();
@@ -253,6 +264,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     app->installEventFilter(this);
 
     _controlExec->SetSaveStateEnabled(true);
+    _controlExec->RebaseStateSave();
+    _stateChangeFlag = false;
 }
 
 /*
@@ -701,8 +714,11 @@ void MainForm::sessionOpenHelper(string fileName)
     // ControlExec::LoadState invalidates params state
     //
     StartupParams *sP = GetStartupParams();
-    newP->SetCurrentSessionPath(fileName);
-    newP->SetCurrentSessionPath(sP->GetSessionDir());
+    if (fileName.empty()) {
+        newP->SetCurrentSessionPath(concatpath(sP->GetSessionDir(), "My_Vapor_Session.vs3"));
+    } else {
+        newP->SetCurrentSessionPath(fileName);
+    }
     newP->SetCurrentImagePath(sP->GetImageDir());
     newP->SetCurrentTFPath(sP->GetTFDir());
     newP->SetCurrentPythonPath(sP->GetPythonDir());
@@ -727,13 +743,8 @@ void MainForm::sessionOpen(QString qfileName)
     // load that session
     //
     if (qfileName == "") {
-        GUIStateParams *p = GetStateParams();
-        string          path = p->GetCurrentSessionPath();
-
-        if (path == "JustInMemory") {
-            QString sessionPath = QDir::homePath();
-            path = QDir::toNativeSeparators(sessionPath).toStdString();
-        }
+        StartupParams *sP = GetStartupParams();
+        string         path = sP->GetSessionDir();
 
         vector<string> files = myGetOpenFileNames("Choose a VAPOR session file to restore a session", path, "Vapor 3 Session Save Files (*.vs3)", false);
         if (files.empty()) return;
@@ -750,6 +761,7 @@ void MainForm::sessionOpen(QString qfileName)
     _vizWinMgr->Restart();
 
     _stateChangeFlag = false;
+    _sessionNewFlag = false;
 }
 
 void MainForm::fileSave()
@@ -757,49 +769,40 @@ void MainForm::fileSave()
     GUIStateParams *p = GetStateParams();
     string          path = p->GetCurrentSessionPath();
 
-    if (path == "JustInMemory") {
-        QString sessionPath = QDir::homePath();
-        sessionPath.append("/My_Vapor_Session.vs3");
-        sessionPath = QDir::toNativeSeparators(sessionPath);
-        QString fileName = QFileDialog::getSaveFileName(this, "Choose the fileName to save the current session", sessionPath, "Vapor 3 Session Files (*.vs3)");
-        if (fileName.isNull()) { return; }
+    if (path.empty()) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save VAPOR session file"), tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)"));
         path = fileName.toStdString();
     }
+    if (path.empty()) return;
 
     if (_controlExec->SaveSession(path) < 0) {
         MSG_ERR("Saving session file failed");
         return;
-    } else {
-        p->SetCurrentSessionPath(path);
     }
 
+    p->SetCurrentSessionPath(path);
     _stateChangeFlag = false;
 }
 
 void MainForm::fileSaveAs()
 {
     GUIStateParams *p = GetStateParams();
-    QString         path = QString::fromStdString(p->GetCurrentSessionPath());
+    string          path = p->GetCurrentSessionPath();
 
-    if (path == "JustInMemory") {
-        QString homePath = QDir::homePath();
-        homePath.append("/My_Vapor_Session.vs3");
-        path = QDir::toNativeSeparators(homePath);
-    }
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save VAPOR session file"), tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)"));
+    path = fileName.toStdString();
 
-    QString fileName = QFileDialog::getSaveFileName(this, "Choose the fileName to save the current session", path, "Vapor 3 Session Files (*.vs3)");
-    if (fileName.isNull()) { return; }
-    string newPath = fileName.toStdString();
+    if (path.empty()) return;
 
-    if (_controlExec->SaveSession(newPath)) {
+    if (_controlExec->SaveSession(path)) {
         MSG_ERR("Saving session file failed");
         return;
-    } else {
-        // Save to use a default for fileSave()
-        //
-        p->SetCurrentSessionPath(path.toStdString());
-        _stateChangeFlag = false;
     }
+
+    // Save to use a default for fileSave()
+    //
+    p->SetCurrentSessionPath(path);
+    _stateChangeFlag = false;
 }
 
 void MainForm::fileExit() { close(); }
@@ -867,26 +870,15 @@ void MainForm::undo()
 {
     if (!_controlExec->UndoSize()) return;
     undoRedoHelper(true);
-
-    if (!_controlExec->UndoSize()) { _editUndoAction->setEnabled(false); }
-    _editRedoAction->setEnabled(true);
 }
 
 void MainForm::redo()
 {
     if (!_controlExec->RedoSize()) return;
     undoRedoHelper(false);
-
-    if (!_controlExec->RedoSize()) { _editRedoAction->setEnabled(false); }
-    _editUndoAction->setEnabled(true);
 }
 
-void MainForm::clear()
-{
-    _controlExec->UndoRedoClear();
-    //_editUndoAction->setEnabled(false);
-    _editRedoAction->setEnabled(true);
-}
+void MainForm::clear() { _controlExec->UndoRedoClear(); }
 
 void MainForm::helpIndex() {}
 
@@ -988,12 +980,31 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     // Reinitialize all tabs
     //
 
-    viewAll();
+    if (_sessionNewFlag) {
+        viewAll();
 
-    vector<string> winNames = _paramsMgr->GetVisualizerNames();
-    for (int i = 0; i < winNames.size(); i++) {
-        ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-        vpParams->SetCurrentVPToHome();
+        vector<string> winNames = _paramsMgr->GetVisualizerNames();
+        for (int i = 0; i < winNames.size(); i++) {
+            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+            vpParams->SetCurrentVPToHome();
+        }
+        _sessionNewFlag = false;
+    } else {
+        // Ugh. Trackball isn't integrated with Params database so need to
+        // handle undo/redo manually. I.e. get modelview matrix params from
+        // database and set them in the TrackBall
+        //
+        vector<string> winNames = _paramsMgr->GetVisualizerNames();
+        for (int i = 0; i < winNames.size(); i++) {
+            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+            double           pos[3], dir[3], up[3], center[3];
+            vpParams->GetCameraPos(pos);
+            vpParams->GetCameraViewDir(dir);
+            vpParams->GetCameraUpVec(up);
+            vpParams->GetRotationCenter(center);
+
+            _vizWinMgr->SetTrackBall(pos, dir, up, center, true);
+        }
     }
 
     DataStatus *ds = _controlExec->getDataStatus();
@@ -1005,8 +1016,6 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     enableWidgets(true);
 
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
-
-    //	update();
 }
 
 // Load data into current session
@@ -1103,11 +1112,8 @@ void MainForm::sessionNew()
 
     _vizWinMgr->LaunchVisualizer();
 
-    string          fileName = "JustInMemory";
-    GUIStateParams *p = GetStateParams();
-    p->SetCurrentSessionPath(fileName);
-
     _stateChangeFlag = false;
+    _sessionNewFlag = true;
 }
 
 //
@@ -1781,6 +1787,9 @@ void MainForm::updateMenus()
             connect(closeAction, SIGNAL(triggered()), this, SLOT(closeData()));
         }
     }
+
+    _editUndoAction->setEnabled((bool)_controlExec->UndoSize());
+    _editRedoAction->setEnabled((bool)_controlExec->RedoSize());
 }
 
 void MainForm::update()
@@ -1913,7 +1922,7 @@ void MainForm::installCLITools()
 {
     vector<string> pths;
     string         home = GetAppPath("VAPOR", "home", pths, true);
-    string         path = home + "/utilities";
+    string         path = home + "/MacOS";
 
     home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
 
