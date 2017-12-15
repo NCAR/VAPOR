@@ -309,15 +309,13 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
         int    size = isovals.size();
         double start = xDataToWorld(isovals[0]);
         double end = xDataToWorld(isovals[size - 1]);
-        setContourRangeSliderExtents(start, end);
+        _contourRangeSlider->setDomain(start, end);
     }
 
     _domainSlider->setDomain(xDataToWorld(getMinDomainBound()), xDataToWorld(getMaxDomainBound()));
 
     _updateTexture = true;
 }
-
-void MappingFrame::setContourRangeSliderExtents(double start, double end) { _contourRangeSlider->setDomain(start, end); }
 
 //----------------------------------------------------------------------------
 // Return a tool tip.  Slightly different for iso Selection
@@ -1025,7 +1023,8 @@ int MappingFrame::drawDomainSlider()
     glPushName(DOMAIN_WIDGET);
 
     int rc = _domainSlider->paintGL();
-    rc = _contourRangeSlider->paintGL();
+
+    if (_isolineSlidersEnabled) { rc = _contourRangeSlider->paintGL(); }
 
     glPopName();
     return rc;
@@ -1488,7 +1487,8 @@ void MappingFrame::resize()
     float domainWidth = unitPerPixel * _domainBarHeight;
 
     _domainSlider->setGeometry(_minX, _maxX, _maxY - domainWidth, _maxY);
-    _contourRangeSlider->setGeometry(_minX, _maxX, _maxY - domainWidth - .1, _maxY - .1);
+
+    if (_isolineSlidersEnabled) { _contourRangeSlider->setGeometry(_minX, _maxX, _maxY - 2 * domainWidth - .05, _maxY - 2 * domainWidth); }
 
     float bGap = unitPerPixel * _bottomGap;
 

@@ -38,7 +38,7 @@ public:
 
     virtual void setDomain(float minv, float maxv)
     {
-        cout << "setDomain " << minv << " " << maxv << endl;
+        // cout << "setDomain " << minv << " " << maxv << endl;
         _minValue = minv;
         _maxValue = maxv;
     }
