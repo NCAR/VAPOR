@@ -5,7 +5,6 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include <cstdint>
 #include <netcdf.h>
 #include <vapor/NetCDFCpp.h>
 #include <vapor/Compressor.h>

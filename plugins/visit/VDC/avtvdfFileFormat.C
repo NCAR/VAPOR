@@ -113,7 +113,7 @@ avtvdfFileFormat::avtvdfFileFormat(const char *filename,
 //	MyBase::SetDiagMsgCB(debug_callback);
 
 	num_levels = vdc_md->GetNumTransforms() + 1; 
-	maxts = vdc_md->GetNumTimeSteps(),
+	maxts = vdc_md->GetNumTimeSteps() - 1;
 	tsteps = new int[maxts];
 	ntsteps = 0;
 

@@ -98,11 +98,7 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 	);
 	connect(
 		colormapVarCombo, SIGNAL(activated(const QString&)),
-		this, SLOT(setColorMapping(const QString&))
-	);
-	connect(
-		colorSelectButton, SIGNAL(pressed()),
-		this, SLOT(setSingleColor())
+		this, SLOT(setColorMappedVariable(const QString&))
 	);
 
 	// Legacy crap. Should remove
@@ -122,7 +118,6 @@ void VariablesWidget::Reinit(
 	DimFlags dimFlags,
 	ColorFlags colorFlags) {
 
-
 	_dspFlags = dspFlags;
 	_dimFlags = dimFlags;
 	_colorFlags = colorFlags;
@@ -133,12 +128,12 @@ void VariablesWidget::Reinit(
 		dimensionFrame->hide();
 	}
 
-	if (!(_colorFlags & CONST) &&
-		!(_colorFlags & COLORVAR)) {
+	//if (!(_colorFlags & COLORVAR)) {
+	if (_colorFlags ^ COLORVAR) {
 		collapseColorVarSettings();
-		collapseConstColorSettings();
-		colorSettingsTab->hide();
 	}
+
+	variableSelectionWidget->adjustSize();
 }
 
 void VariablesWidget::collapseColorVarSettings() {
@@ -146,18 +141,6 @@ void VariablesWidget::collapseColorVarSettings() {
     colormapVarCombo->resize(0,0);
     colorVarLabel->hide();
     colorVarLabel->resize(0,0);
-}
-
-void VariablesWidget::collapseConstColorSettings() {
-    colorDisplay->hide();
-    colorDisplay->resize(0,0);
-    constColorLabel->hide();
-    constColorLabel->resize(0,0);
-    colorSelectButton->hide();
-    colorSelectButton->resize(0,0);
-    constColorFrame->hide();
-    constColorFrame->resize(0,0);
-    adjustSize();
 }
 
 void VariablesWidget::setNumRefinements(int num) {
@@ -173,11 +156,19 @@ void VariablesWidget::setNumRefinements(int num) {
 void VariablesWidget::setVarName(const QString& qname){
 	assert(_rParams);
 
+	_paramsMgr->BeginSaveStateGroup("Set variable and possible color "
+		"variable name");
+
 	if (! (_dspFlags & SCALAR)) return;
 
 	string name = qname.toStdString();
 	name = name == "0" ? "" : name;
 	_rParams->SetVariableName(name);
+
+	if (! (_colorFlags & COLORVAR))
+		_rParams->SetColorMapVariableName(name);
+
+	_paramsMgr->EndSaveStateGroup();
 }
 
 void VariablesWidget::setVectorVarName(const QString& qname, int component) {
@@ -262,138 +253,16 @@ void VariablesWidget::setFidelity(int buttonID){
 	refinementCombo->setCurrentIndex(ref);
 }
 
-void VariablesWidget::setSingleColor() {
-	_paramsMgr->BeginSaveStateGroup("VariablesWidget::setSingleColor()");
-	QPalette palette(colorDisplay->palette());
-	QColor color = QColorDialog::getColor(palette.color(QPalette::Base), this);
-	if (!color.isValid()) return;
+void VariablesWidget::setColorMappedVariable(const QString& qname) {
+	assert(_rParams);
 
-	palette.setColor(QPalette::Base, color);
-	colorDisplay->setPalette(palette);
+	if (! (_colorFlags & COLORVAR)) return;
 
-	qreal rgb[3];
-	color.getRgbF(&rgb[0], &rgb[1], &rgb[2]);
-	float myRGB[3];
-	myRGB[0] = rgb[0];
-	myRGB[1] = rgb[1];
-	myRGB[2] = rgb[2];
-
-	_rParams->SetConstantColor(myRGB);
-	_rParams->SetUseSingleColor(true);
-	if (_colorFlags & CONST) {
-		colormapVarCombo->setCurrentIndex(1);
-	}   
-	else {
-		colormapVarCombo->setCurrentIndex(0);
-	}   
-	_paramsMgr->EndSaveStateGroup();
+	string name = qname.toStdString();
+	name = name == "0" ? "" : name;
+	_rParams->SetColorMapVariableName(name);
 }
 
-void VariablesWidget::configureDefaultColoring() {
-	colorDisplay->setEnabled(false);
-	colorSelectButton->setEnabled(false);
-
-	_rParams->SetColorMapVariableName("");
-	_rParams->SetUseSingleColor(false);
-}
-
-void VariablesWidget::configureColorMappingToVariable(string var) {
-	colorDisplay->setEnabled(false);
-	colorSelectButton->setEnabled(false);
-
-	_rParams->SetColorMapVariableName(var);
-	_rParams->SetUseSingleColor(false);
-}
-
-void VariablesWidget::configureConstantColor(string var) {
-	colorDisplay->setEnabled(true);
-	colorSelectButton->setEnabled(true);
-
-	// Note: Constant color is associated with empty string, 
-	// so set rParams with ""
-	_rParams->SetColorMapVariableName(var);
-	_rParams->SetUseSingleColor(true);
-}
-
-void VariablesWidget::configureColorWidgets(string selection) {
-	string var;
-	if (selection == "Primary") {
-		var = _rParams->GetVariableName();
-		configureDefaultColoring();
-	}
-	else if ((selection == "Constant") ||
-			 (selection == "")) {
-		var = "";
-		configureConstantColor(var);
-	}
-	else {
-		var = selection;
-		configureColorMappingToVariable(var);
-	}
-}
-
-void VariablesWidget::setColorMapping(const QString& qselection) {
-	string selection = qselection.toStdString();
-
-	_paramsMgr->BeginSaveStateGroup("VariablesWidget::setColorMapping(), "
-		"set colormapped variable");
-
-	configureColorWidgets(selection);
-
-	_paramsMgr->EndSaveStateGroup();
-	return;
-}
-
-void VariablesWidget::updateColorVarCombo() {
-	colormapVarCombo->blockSignals(true);
-	int index = colormapVarCombo->currentIndex();
-	
-	colormapVarCombo->clear();
-
-	if (_colorFlags & PRIMARY) {
-		colormapVarCombo->addItem(QString("Primary"));
-	}
-	if (_colorFlags & CONST) {
-		colormapVarCombo->addItem(QString("Constant"));
-	}
-	if (_colorFlags & COLORVAR) {
-		int ndim = _rParams->GetValueLong(_nDimsTag, 3);
-		assert(ndim == 2 || ndim == 3);
-
-		vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
-
-		for (int i=0; i<vars.size(); i++) {
-			colormapVarCombo->addItem(QString::fromStdString(vars[i]));
-		}
-	}
-
-	QString qs;
-	if (_rParams->UseSingleColor()) {
-		qs = QString("Constant");
-		index = colormapVarCombo->findText(qs);
-	}
-	else if (_rParams->GetColorMapVariableName() != "") {
-		string cmVarName = _rParams->GetColorMapVariableName();
-		qs = QString::fromStdString(cmVarName);
-		index = colormapVarCombo->findText(qs);
-	}
-	else {
-		qs = QString("Primary");
-	}
-	colormapVarCombo->setCurrentIndex(index);
-	
-	// Update selected color display
-	//  
-
-	float rgb[3];
-	_rParams->GetConstantColor(rgb);
-	QColor color(rgb[0]*255, rgb[1]*255, rgb[2]*255);
-	QPalette palette(colorDisplay->palette());
-	palette.setColor(QPalette::Base, color);
-	colorDisplay->setPalette(palette);
-
-	colormapVarCombo->blockSignals(false);
-}
 
 // User clicks on SetDefault button, need to make current 
 // fidelity settings the default.
@@ -484,6 +353,9 @@ void VariablesWidget::updateFidelity( RenderParams* rParams)
 		vector <string> varnames = rParams->GetFieldVariableNames();
 		assert(varnames.size());
 		varname = varnames[0];
+	}
+	else {
+		varname = rParams->GetHeightVariableName();
 	}
 
 	if (varname.empty()) {
@@ -676,36 +548,32 @@ string VariablesWidget::updateVarCombo(
 	QComboBox *varCombo, const vector <string> &varnames, bool doZero, 
 	string currentVar
 ) {
-	varCombo->clear();
-	if (doZero) {
-		varCombo->setMaxCount(varnames.size()+1);
-		varCombo->addItem(QString("0"));
-	}
-	else {
-		varCombo->setMaxCount(varnames.size());
+	vector <string> my_varnames = varnames;
+	my_varnames.insert(my_varnames.begin(), "0");
+	if (currentVar == "") {
+		currentVar = "0";
 	}
 
+	varCombo->clear();
+	varCombo->setMaxCount(my_varnames.size());
+
 	int currentIndex = -1;
-	for (int i = 0; i< varnames.size(); i++) {
-		const string s = varnames[i];
+	for (int i = 0; i< my_varnames.size(); i++) {
+		const string s = my_varnames[i];
 		varCombo->addItem(QString::fromStdString(s));
 		if (s == currentVar) {
 			currentIndex = i;
-			if (doZero) {
-				currentIndex++;
-			}
 		}
 	}
 	if (currentIndex == -1) {
 		varCombo->setCurrentIndex(0);
-		return (varCombo->currentText().toStdString());
+		return(my_varnames[0]);
 	}
 	else {
 		varCombo->setCurrentIndex(currentIndex);
-		return(currentVar);
+		return(my_varnames[currentIndex]);
 	}
 }
-
 
 void VariablesWidget::updateVariableCombos(RenderParams* rParams) {
 
@@ -725,7 +593,12 @@ void VariablesWidget::updateVariableCombos(RenderParams* rParams) {
 		string setVarReq = rParams->GetVariableName();
 		string setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
 		if (setVar != setVarReq) {
+			bool enabled = _paramsMgr->GetSaveStateEnabled();
+			_paramsMgr->SetSaveStateEnabled(false);
+
 			rParams->SetVariableName(setVar);
+
+			_paramsMgr->SetSaveStateEnabled(enabled);
 		}
 	}
 	
@@ -739,25 +612,35 @@ void VariablesWidget::updateVariableCombos(RenderParams* rParams) {
 		setVars.push_back(updateVarCombo(varCombo2, vars, true, setVarsReq[1]));
 		setVars.push_back(updateVarCombo(varCombo3, vars, true, setVarsReq[2]));
 
+		bool enabled = _paramsMgr->GetSaveStateEnabled();
+		_paramsMgr->SetSaveStateEnabled(false);
+
 		for (int i=0; i<setVars.size(); i++) {
 			if (setVars[i] != setVarsReq[i]) {
+
 				rParams->SetFieldVariableNames(setVars);
-				break;
+
 			}
 		}
+
+		_paramsMgr->SetSaveStateEnabled(enabled);
 	}
 
-#ifdef	DEAD
-	if (_dspFlags & COLOR) {
-		updateVarCombo(colorVarCombo, vars, true);
+	if (_colorFlags & COLORVAR) {
+		vector<string> vars = _dataMgr->GetDataVarNames(2,true);
+		string setVarReq = rParams->GetColorMapVariableName();
 
-		vector <string> varnames;
-		varnames.push_back(colorVarCombo->currentText().toStdString());
-		rParams->SetColorMapVariableNames(varnames);
+		string setVar = updateVarCombo(colormapVarCombo, vars, true, setVarReq);
 
-		
+		if (setVar != setVarReq) {
+			bool enabled = _paramsMgr->GetSaveStateEnabled();
+			_paramsMgr->SetSaveStateEnabled(false);
+
+			rParams->SetColorMapVariableName(setVar);
+
+			_paramsMgr->SetSaveStateEnabled(enabled);
+		}
 	}
-#endif
 
 	if (_dspFlags & HGT) {
 		vector<string> vars = _dataMgr->GetDataVarNames(2,true);
@@ -766,10 +649,14 @@ void VariablesWidget::updateVariableCombos(RenderParams* rParams) {
 		string setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
 
 		if (setVar != setVarReq) {
+			bool enabled = _paramsMgr->GetSaveStateEnabled();
+			_paramsMgr->SetSaveStateEnabled(false);
+
 			rParams->SetHeightVariableName(setVar);
+
+			_paramsMgr->SetSaveStateEnabled(enabled);
 		}
 	}
-
 }
 
 void VariablesWidget::updateDims(RenderParams *rParams) {
@@ -835,6 +722,5 @@ void VariablesWidget::Update(
 
 	updateVariableCombos(rParams);
 	updateFidelity(rParams);
-	updateColorVarCombo();
 }
 
