@@ -1068,8 +1068,11 @@ bool ParamsMgr::undoRedoHelper() {
     // Get top of **undo** stack
     //
     const XmlNode *newNode = _ssave.GetTop(description);
+    if (!newNode) {
+        newNode = _ssave.GetBase();
+    }
     if (!newNode)
-        return (false); // nothing to undo
+        return (false); // nothing to undo - shouldnt get here
 
     // Need to disable state saving so the undo itself doesn't trigger
     // saving of intermediate state
@@ -1116,6 +1119,7 @@ ParamsMgr::PMgrStateSave::PMgrStateSave(int stackSize) : StateSave() {
     _enabled = true;
     _stackSize = stackSize;
     _rootNode = NULL;
+    _state0 = NULL;
     _undoStack.clear();
     _redoStack.clear();
 }
@@ -1124,6 +1128,8 @@ ParamsMgr::PMgrStateSave::~PMgrStateSave() {
 
     cleanStack(0, _undoStack);
     cleanStack(0, _redoStack);
+    if (_state0)
+        delete _state0;
 }
 
 void ParamsMgr::PMgrStateSave::Save(
@@ -1157,6 +1163,10 @@ void ParamsMgr::PMgrStateSave::Save(
         return;
     }
 
+    if (!_state0) {
+        _state0 = new XmlNode(*_rootNode);
+    }
+
     // Delete oldest elements if needed
     //
     cleanStack(_stackSize, _undoStack);
@@ -1169,14 +1179,11 @@ void ParamsMgr::PMgrStateSave::Save(
     cout << "ParamsMgr::PMgrStateSave::Save() : saving node " << node->GetTag() << " : " << description << endl;
 #endif
 
-    // Set state change flags and CBs
+    // Clear redo stack
     //
-    for (int i = 0; i < _stateChangeFlags.size(); i++) {
-        *(_stateChangeFlags[i]) = true;
-    }
-    for (int i = 0; i < _stateChangeCBs.size(); i++) {
-        _stateChangeCBs[i]();
-    }
+    cleanStack(0, _redoStack);
+
+    emitStateChange();
 }
 
 void ParamsMgr::PMgrStateSave::BeginGroup(string description) {
@@ -1215,6 +1222,10 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
         return;
     }
 
+    if (!_state0) {
+        _state0 = new XmlNode(*_rootNode);
+    }
+
 #ifdef DEBUG
     cout << "ParamsMgr::PMgrStateSave::EndGroup() : saving "
          << " : " << desc << endl;
@@ -1224,16 +1235,13 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
     //
     cleanStack(_stackSize, _undoStack);
 
+    // Clear redo stack
+    //
+    cleanStack(0, _redoStack);
+
     _undoStack.push_back(make_pair(desc, new XmlNode(*_rootNode)));
 
-    // Set state change flags and CBs
-    //
-    for (int i = 0; i < _stateChangeFlags.size(); i++) {
-        *(_stateChangeFlags[i]) = true;
-    }
-    for (int i = 0; i < _stateChangeCBs.size(); i++) {
-        _stateChangeCBs[i]();
-    }
+    emitStateChange();
 }
 
 const XmlNode *ParamsMgr::PMgrStateSave::GetTop(
@@ -1266,6 +1274,8 @@ bool ParamsMgr::PMgrStateSave::Undo() {
 
     _undoStack.pop_back();
 
+    emitStateChange();
+
     return (true);
 }
 
@@ -1284,6 +1294,8 @@ bool ParamsMgr::PMgrStateSave::Redo() {
     _undoStack.push_back(p1);
 
     _redoStack.pop_back();
+
+    emitStateChange();
 
     return (true);
 }
@@ -1311,5 +1323,17 @@ void ParamsMgr::PMgrStateSave::cleanStack(
         }
 
         s.pop_front();
+    }
+}
+
+void ParamsMgr::PMgrStateSave::emitStateChange() {
+
+    // Trigger state change flags and CBs
+    //
+    for (int i = 0; i < _stateChangeFlags.size(); i++) {
+        *(_stateChangeFlags[i]) = true;
+    }
+    for (int i = 0; i < _stateChangeCBs.size(); i++) {
+        _stateChangeCBs[i]();
     }
 }

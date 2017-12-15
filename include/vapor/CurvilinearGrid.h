@@ -79,6 +79,9 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     //
     virtual void GetUserExtents(
         std::vector<double> &minu, std::vector<double> &maxu) const override {
+        if (!_minu.size()) {
+            _GetUserExtents(_minu, _maxu);
+        }
         minu = _minu;
         maxu = _maxu;
     }
@@ -147,6 +150,7 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
         virtual ~ConstCoordItrCG() {}
 
         virtual void next();
+        virtual void next(const long &offset);
         virtual ConstCoordType &deref() const {
             return (_coords);
         }
@@ -156,7 +160,7 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
             const ConstCoordItrCG *itrptr =
                 static_cast<const ConstCoordItrCG *>(rhs);
 
-            return (_x == itrptr->_x && _y == itrptr->_y && _z == itrptr->_z);
+            return (_index == itrptr->_index);
         }
 
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const {
@@ -165,7 +169,7 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
 
       private:
         const CurvilinearGrid *_cg;
-        size_t _x, _y, _z;
+        std::vector<size_t> _index;
         std::vector<double> _coords;
         ConstIterator _xCoordItr;
         ConstIterator _yCoordItr;
@@ -189,8 +193,8 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
 
   private:
     std::vector<double> _zcoords;
-    std::vector<double> _minu;
-    std::vector<double> _maxu;
+    mutable std::vector<double> _minu;
+    mutable std::vector<double> _maxu;
     const KDTreeRG *_kdtree;
     RegularGrid _xrg;
     RegularGrid _yrg;

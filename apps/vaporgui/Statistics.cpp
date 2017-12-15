@@ -82,6 +82,7 @@ bool Statistics::Update() {
         guiParams->SetStatsDatasetName(currentDatasetName);
 
         _validStats.Clear(); // since the old dataset is closed, we clear all stats.
+        _validStats.currentDataSourceName = currentDatasetName;
     }
     VAPoR::DataMgr *currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
@@ -90,6 +91,12 @@ bool Statistics::Update() {
     {
         for (int i = 0; i < enabledVars.size(); i++)
             _validStats.AddVariable(enabledVars[i]);
+    }
+
+    // detect params changed by undo/redo
+    if (_validStats.currentDataSourceName != currentDatasetName || !_validStats.HaveSameParams(statsParams)) {
+        _validStats.currentDataSourceName = currentDatasetName;
+        _validStats.UpdateMyParams(statsParams);
     }
 
     // Update DataMgrCombo
@@ -417,6 +424,8 @@ void Statistics::_dataSourceChanged(int index) {
 
     guiParams->SetStatsDatasetName(newDataSourceName);
 
+    _validStats.currentDataSourceName = newDataSourceName;
+
     // add variables to _validStats if there are any
     _validStats.Clear();
     std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
@@ -431,6 +440,10 @@ void Statistics::_geometryValueChanged() {
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
     _validStats.InvalidAll();
+
+    std::vector<double> myMin, myMax;
+    statsParams->GetBox()->GetExtents(myMin, myMax);
+    _validStats.SetCurrentExtents(myMin, myMax);
 
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled())
@@ -494,6 +507,8 @@ void Statistics::_minTSChanged(int val) {
         }
     }
 
+    _validStats.currentTimeStep[0] = val;
+
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled())
         _updateButtonClicked();
@@ -520,6 +535,8 @@ void Statistics::_maxTSChanged(int val) {
         }
     }
 
+    _validStats.currentTimeStep[1] = val;
+
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled())
         _updateButtonClicked();
@@ -540,6 +557,8 @@ void Statistics::_lodChanged(int index) {
         _validStats.InvalidAll();
     }
 
+    _validStats.currentLOD = lod;
+
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled())
         _updateButtonClicked();
@@ -559,6 +578,8 @@ void Statistics::_refinementChanged(int index) {
         statsParams->SetRefinementLevel(refLevel);
         _validStats.InvalidAll();
     }
+
+    _validStats.currentRefLev = refLevel;
 
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled())
@@ -965,6 +986,53 @@ std::string Statistics::ValidStats::GetVariableName(int i) {
         return std::string("");
 }
 
+bool Statistics::ValidStats::HaveSameParams(const VAPoR::StatisticsParams *rhs) const {
+    std::vector<double> myMin, myMax;
+    rhs->GetBox()->GetExtents(myMin, myMax);
+    std::vector<float> paramsMin, paramsMax;
+    for (int i = 0; i < myMin.size(); i++) {
+        paramsMin.push_back((float)myMin[i]);
+        paramsMax.push_back((float)myMax[i]);
+    }
+    return (_variables == rhs->GetAuxVariableNames() &&
+            currentExtentMin == paramsMin &&
+            currentExtentMax == paramsMax &&
+            currentTimeStep[0] == rhs->GetCurrentMinTS() &&
+            currentTimeStep[1] == rhs->GetCurrentMaxTS() &&
+            currentLOD == rhs->GetCompressionLevel() &&
+            currentRefLev == rhs->GetRefinementLevel());
+}
+
+bool Statistics::ValidStats::UpdateMyParams(const VAPoR::StatisticsParams *rhs) {
+    this->Clear();
+    std::vector<std::string> enabledVars = rhs->GetAuxVariableNames();
+    for (int i = 0; i < enabledVars.size(); i++)
+        this->AddVariable(enabledVars[i]);
+    std::vector<double> myMin, myMax;
+    rhs->GetBox()->GetExtents(myMin, myMax);
+    this->SetCurrentExtents(myMin, myMax);
+    currentTimeStep[0] = rhs->GetCurrentMinTS();
+    currentTimeStep[1] = rhs->GetCurrentMaxTS();
+    currentLOD = rhs->GetCompressionLevel();
+    currentRefLev = rhs->GetRefinementLevel();
+    return true;
+}
+
+bool Statistics::ValidStats::SetCurrentExtents(std::vector<double> &min, std::vector<double> &max) {
+    currentExtentMin.clear();
+    currentExtentMax.clear();
+    if (min.size() != max.size()) {
+        // REPORT ERROR!!
+        return false;
+    }
+    for (int i = 0; i < min.size(); i++) {
+        currentExtentMin.push_back((float)min[i]);
+        currentExtentMax.push_back((float)max[i]);
+    }
+
+    return true;
+}
+
 void Statistics::_exportTextClicked() {
     QString homePath = QDir::homePath();
     homePath.append("/Variable_Statistics.txt");
@@ -1048,8 +1116,10 @@ void Statistics::_exportTextClicked() {
         file << endl;
 
         file << "#Compression Parameters:" << endl;
-        file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
-        file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
+        //file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
+        //file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
+        file << "Level of Detail:  " << statsParams->GetCompressionLevel() << endl;
+        file << "Refinement Level: " << statsParams->GetRefinementLevel() << endl;
 
         file.close();
     }

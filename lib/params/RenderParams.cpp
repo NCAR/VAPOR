@@ -88,7 +88,7 @@ void RenderParams::_init() {
     SetVariableName(varname);
     SetFieldVariableNames(fieldVarNames);
     SetHeightVariableName("");
-    SetColorMapVariableName("");
+    SetColorMapVariableName(varname);
 
     SetRefinementLevel(0);
     SetCompressionLevel(0);
@@ -325,8 +325,10 @@ MapperFunction *RenderParams::GetMapperFunc(string varname) {
     if (tfptr)
         return (tfptr);
 
-    string s = "Make transfer function for " + varname;
-    _ssave->BeginGroup(s);
+    // Disable state saving for Get function
+    //
+    bool enabled = _ssave->GetEnabled();
+    _ssave->SetEnabled(false);
 
     MapperFunction tf(_ssave);
 
@@ -342,7 +344,7 @@ MapperFunction *RenderParams::GetMapperFunc(string varname) {
     tfptr = (MapperFunction *)_TFs->GetParams(varname);
     assert(tfptr != NULL);
 
-    _ssave->EndGroup();
+    _ssave->SetEnabled(enabled);
 
     return (tfptr);
 }
