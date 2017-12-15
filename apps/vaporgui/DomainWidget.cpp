@@ -108,7 +108,6 @@ int DomainWidget::paintGL()
       if (_orientation == Qt::Horizontal)
       {
         float y = (_maxY + _minY) / 2.0;
-		cout << "miny/maxy " << _minY << " " << _maxY << endl;
 
         glColor3f(1, 0.3, 0.3);
 
@@ -370,8 +369,10 @@ int IsoSlider::paintGL(){
 ContourRangeSlider::ContourRangeSlider(QWidget* parent, float min, float max) :
   DomainWidget(parent, Qt::Horizontal, min, max)
 {
-  _minY = 1.0;
-  _maxY = 1.02;
+  //_minY = 1.0;
+  //_maxY = 1.02;
+	_minY = -.10;
+	_maxY = 0.06;
 }
 
 //----------------------------------------------------------------------------
@@ -396,17 +397,15 @@ int ContourRangeSlider::paintGL()
       if (_orientation == Qt::Horizontal)
       {
         float y = (_maxY + _minY) / 2.0;
-		cout << "crs miny/maxy " << _minY << " " << _maxY << endl;
 
-        glColor3f(1, 0.3, 0.3);
+        glColor3f(1.f, 1.f, 0.f);
 
         glPushMatrix();
         {
           glPushName(LEFT);
-          glBegin(GL_TRIANGLES);
-          glVertex3f(_minValue-length, y, 0.0);
-          glVertex3f(_minValue, y+_handleRadius, 0.0);
-          glVertex3f(_minValue, y-_handleRadius, 0.0);
+          glBegin(GL_LINES);
+          glVertex3f(_minValue, y+2*_handleRadius, 0.0);
+          glVertex3f(_minValue, y-2*_handleRadius, 0.0);
           glEnd();
           glPopName();
         }
@@ -415,16 +414,15 @@ int ContourRangeSlider::paintGL()
         glPushMatrix();
         {
           glPushName(RIGHT);
-          glBegin(GL_TRIANGLES);
-          glVertex3f(_maxValue+length, y, 0.0);
-          glVertex3f(_maxValue, y+_handleRadius, 0.0);
-          glVertex3f(_maxValue, y-_handleRadius, 0.0);
+          glBegin(GL_LINES);
+          glVertex3f(_maxValue, y+2*_handleRadius, 0.0);
+          glVertex3f(_maxValue, y-2*_handleRadius, 0.0);
           glEnd();
           glPopName();
         }
         glPopMatrix();
 
-        glColor3f(0.7, 0.0, 0.0);
+        glColor3f(1.f, 1.0, 0.0);
       
         glPushMatrix();
         {
@@ -443,7 +441,7 @@ int ContourRangeSlider::paintGL()
       {
         float x = 1 - (_maxY + _minY) / 2.0;
 
-        glColor3f(1, 0.3, 0.3);
+        glColor3f(1.f, 1.f, 0.f);
 
         glPushMatrix();
         {
@@ -469,7 +467,7 @@ int ContourRangeSlider::paintGL()
         }
         glPopMatrix();
 
-        glColor3f(0.7, 0.0, 0.0);
+        glColor3f(1.0, 1.0, 0.0);
       
         glPushMatrix();
         {
@@ -489,7 +487,7 @@ int ContourRangeSlider::paintGL()
       {
         float y = (_maxY + _minY) / 2.0;
 
-        glColor3f(1, 0.3, 0.3);
+        glColor3f(1.0, 1.0, 0.0);
 
         glPushMatrix();
         {
@@ -529,7 +527,7 @@ int ContourRangeSlider::paintGL()
       {
         float x = 1 - (_maxY + _minY) / 2.0;
 
-        glColor3f(1, 0.3, 0.3);
+        glColor3f(1, 1, 0);
 
         glPushMatrix();
         {
@@ -551,7 +549,7 @@ int ContourRangeSlider::paintGL()
         }
         glPopMatrix();
 
-        glColor3f(0.7, 0.0, 0.0);
+        glColor3f(1, 1, 0.0);
       
         glPushMatrix();
         {

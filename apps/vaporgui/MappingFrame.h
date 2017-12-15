@@ -124,11 +124,6 @@ public:
   //! \param[in] flag set true if one iso Slider will be enabled.
   void setIsoSlider(bool flag) {_isoSliderEnabled = flag;}
 
-  //! Specifiy the beginning and end points of the ContourRangeSlider
-  //! \param[in] minimum data value to indicate with the ContourRangeSlider
-  //! \param[in] maximum data value to indicate with the ContourRangeSlider
-  void setContourRangeSliderExtents(double min, double max);
-
   //! Enable or disable the use of multiple iso sliders in an IsoControl editor
   //! Should be specified in the RenderEventRouter constructor
   //! \param[in] flag set true if multiple iso Sliders will be enabled.

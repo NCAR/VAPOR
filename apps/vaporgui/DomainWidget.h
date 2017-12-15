@@ -46,7 +46,10 @@ public:
   float minValue() const  { return _minValue; } // world-coordinates
   float maxValue() const  { return _maxValue; } // world-coordinates
 
-  virtual void setDomain(float minv, float maxv) { cout << "setDomain " << minv << " " << maxv << endl;_minValue = minv; _maxValue = maxv;}
+  virtual void setDomain(float minv, float maxv) { 
+	//cout << "setDomain " << minv << " " << maxv << endl;
+	_minValue = minv; _maxValue = maxv;
+	}
 
   virtual void setGeometry(float x0, float x1, float y0, float y1);
 
