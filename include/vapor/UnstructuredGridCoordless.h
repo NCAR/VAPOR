@@ -130,6 +130,7 @@ void GetIndices(
   virtual ~ConstCoordItrUCoordless() {}
 
   virtual void next() {}
+  virtual void next(const long &offset) {}
   virtual ConstCoordType &deref() const {
 	return(_coords);
   }

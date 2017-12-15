@@ -185,6 +185,7 @@ private:
 
     void _stateChangeCB();
     bool _stateChangeFlag;
+    bool _sessionNewFlag;
 
 	// Set the various widgets in the main window consistent with latest
 	// params settings:

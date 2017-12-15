@@ -184,7 +184,7 @@ void ErrorReporter::Report(string msg, Type severity, string details)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 string ErrorReporter::GetSystemInformation()
 {
-	string ret = "Vapor " + Wasp::Version::GetVersionString() + "\n";
+	string ret = "Vapor " + Wasp::Version::GetFullVersionString() + "\n";
 #if defined(DARWIN)
 	SInt32 major, minor, rev;
 	Gestalt(gestaltSystemVersionMajor,  &major);

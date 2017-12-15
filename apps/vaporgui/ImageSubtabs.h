@@ -143,8 +143,11 @@ private slots:
                           tr("Specify installed image to load"),
                           QString::fromStdString(installedImagePath),
                           tr("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)") );
-    SelectImageEdit->setText(fileName);
-    _rParams->SetImagePath( fileName.toStdString() );
+    if( !fileName.isNull() )    // upon cancel, QFileDialog returns a Null string.
+    {
+        SelectImageEdit->setText(fileName);
+        _rParams->SetImagePath( fileName.toStdString() );
+    }
   }
 
 private:

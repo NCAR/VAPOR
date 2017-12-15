@@ -25,8 +25,7 @@ public:
 			(VariablesWidget::SCALAR | VariablesWidget::HGT),
 			(VariablesWidget::DimFlags)
 			(VariablesWidget::TWOD),
-			(VariablesWidget::ColorFlags)
-			(VariablesWidget::CONST | VariablesWidget::PRIMARY));
+			(VariablesWidget::ColorFlags)(0));
 	}
 
 	void Update(
