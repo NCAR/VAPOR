@@ -380,14 +380,16 @@ int Renderer::makeColorbarTexture()
 
 void Renderer::renderColorbar()
 {
+    const RenderParams *rParams = GetActiveParams();
+    if (!rParams->IsEnabled()) return;
+
     GLint dims[4] = {0};
     glGetIntegerv(GL_VIEWPORT, dims);
     GLint fbWidth = dims[2];
     GLint fbHeight = dims[3];
 
-    float               whitecolor[4] = {1., 1., 1., 1.f};
-    const RenderParams *rParams = GetActiveParams();
-    ColorbarPbase *     cbpb = rParams->GetColorbarPbase();
+    float          whitecolor[4] = {1., 1., 1., 1.f};
+    ColorbarPbase *cbpb = rParams->GetColorbarPbase();
     if (!cbpb || !cbpb->IsEnabled()) return;
     if (makeColorbarTexture()) return;
 
