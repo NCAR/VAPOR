@@ -118,6 +118,8 @@ void VariablesWidget::Reinit(
     }
 
     variableSelectionWidget->adjustSize();
+
+    _fidelityWidget->Reinit((FidelityWidget::DisplayFlags)dspFlags);
 }
 
 void VariablesWidget::collapseColorVarSettings() {
@@ -688,4 +690,6 @@ void VariablesWidget::Update(
 
     updateVariableCombos(rParams);
     updateFidelity(rParams);
+
+    _fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
 }
