@@ -235,7 +235,6 @@ void valueChanged(int row, int column, int &value);
 
 Value VaporTable::GetValue(int row, int col)
 {
-    std::cout << "GetValue " << row << " " << col << "\n";
     std::string value;
     int         nRows = _table->rowCount();
     int         nCols = _table->columnCount();
