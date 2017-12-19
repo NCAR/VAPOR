@@ -5,6 +5,8 @@
 #include <QObject>
 #include "vapor/MyBase.h"
 #include "ui_VariablesWidgetGUI.h"
+#include "VaporTable.h"
+
 
 QT_USE_NAMESPACE
 
@@ -96,6 +98,8 @@ public:
  string getNDimsTag() {return _nDimsTag;}
 
 protected slots:
+ void printTableContents();
+
  //! Connected to the image file text editor
  void setNumRefinements(int num);
 
@@ -184,6 +188,8 @@ private:
  void updateVariableCombos(VAPoR::RenderParams* params);
 
  void updateDims(VAPoR::RenderParams *rParams);
+
+ VaporTable* _vaporTable;
 
  QButtonGroup* _fidelityButtons;
 
