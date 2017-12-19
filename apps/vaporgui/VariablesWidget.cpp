@@ -36,6 +36,13 @@ VariablesWidget::VariablesWidget(QWidget *parent)
 
     setupUi(this);
 
+    _vaporTable = new VaporTable(testTable, 0, 1);
+    _vaporTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::STRING),
+                        (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+
+    connect(_vaporTable, SIGNAL(valueChanged()),
+            this, SLOT(printTableContents()));
+
     _fidelityButtons = new QButtonGroup(fidelityBox);
     _fidelityButtons->setExclusive(true);
 
@@ -95,6 +102,15 @@ VariablesWidget::VariablesWidget(QWidget *parent)
         colorVarCombo->hide();
     }
 #endif
+}
+
+void VariablesWidget::printTableContents() {
+    vector<string> vec;
+    _vaporTable->GetValues(vec);
+    int size = vec.size();
+    for (int i = 0; i < size; i++)
+        cout << vec[i] << " ";
+    cout << endl;
 }
 
 void VariablesWidget::Reinit(
@@ -688,4 +704,20 @@ void VariablesWidget::Update(
 
     updateVariableCombos(rParams);
     updateFidelity(rParams);
+
+    vector<double> values;
+    for (int i = 0; i < 15; i++)
+        values.push_back((double)i);
+
+    vector<string> vHeader, hHeader;
+    vHeader.push_back("one");
+    vHeader.push_back("two");
+    vHeader.push_back("three");
+    hHeader.push_back("uno");
+    hHeader.push_back("dos");
+    hHeader.push_back("tres");
+    hHeader.push_back("quatro");
+    hHeader.push_back("cinco");
+
+    _vaporTable->Update(3, 5, values, vHeader, hHeader);
 }
