@@ -52,6 +52,7 @@ set (SRCS
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
 	TransformTable.cpp
+	VaporTable.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -64,6 +65,7 @@ set (SRCS
 	TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
+	VaporTable.h
 )
 
 set (UIS 
@@ -103,6 +105,7 @@ set (UIS
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
 	ContourVariablesGUI.ui
+	VaporTableGUI.ui
 )
 
 find_package(Qt4 REQUIRED)
