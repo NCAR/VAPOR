@@ -7,6 +7,7 @@
 #include "qtableview.h"
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
+#include "VaporTable.h"
 #include "ui_renderselector.h"
 
 QT_USE_NAMESPACE
@@ -97,6 +98,8 @@ signals:
  
 private:
  VAPoR::ControlExec *_controlExec;
+
+ VaporTable *_vaporTable;
 
  void getRow(
 	int row, string &renderInst, string &renderClass, 
