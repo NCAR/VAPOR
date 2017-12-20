@@ -47,18 +47,20 @@ RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
 	setupUi(this);
 	_controlExec = ce;
 
-	tableWidget->setColumnCount(4);
-	QStringList headerText;
-	headerText << " Name " << " Type " << " Data Set " << "Enabled";
-	tableWidget->setHorizontalHeaderLabels(headerText);
-	tableWidget->verticalHeader()->hide();
-	tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-	tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-	tableWidget->setFocusPolicy(Qt::ClickFocus);
+	//tableWidget->setColumnCount(4);
+//	QStringList headerText;
+//	headerText << " Name " << " Type " << " Data Set " << "Enabled";
+	//tableWidget->setHorizontalHeaderLabels(headerText);
+	//tableWidget->verticalHeader()->hide();
+	//tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+	//tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+	//tableWidget->setFocusPolicy(Qt::ClickFocus);
 	
-	tableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignHCenter);
-	tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	tableWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	//tableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignHCenter);
+	//tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	//tableWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
+	_vaporTable = new VaporTable(tableWidget, false, true);
 
 	connect(newButton, SIGNAL(clicked()), this, SLOT(newRenderer()));
 	connect(deleteButton, SIGNAL(clicked()),this,SLOT(deleteRenderer()));
@@ -66,14 +68,14 @@ RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
 		dupCombo, SIGNAL(activated(int)),
 		this, SLOT(copyInstanceTo(int))
 	);
-	connect(
-		tableWidget, SIGNAL(itemSelectionChanged()), 
-		this, SLOT(selectInstance())
-	);
-	connect(
-		tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)),
-		this, SLOT(itemTextChange(QTableWidgetItem*))
-	);
+//	connect(
+//		tableWidget, SIGNAL(itemSelectionChanged()), 
+//		this, SLOT(selectInstance())
+//	);
+//	connect(
+//		tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)),
+//		this, SLOT(itemTextChange(QTableWidgetItem*))
+//	);
 
 	//Remove any existing widgets:
 	for (int i = stackedWidget->count()-1; i>=0; i--){
@@ -237,7 +239,7 @@ void RenderHolder::checkboxChanged(int state) {
 	QWidget* widget = (QWidget*)sender();
 
 	int row = widget->parentWidget()->property("row").toInt();
-	tableWidget->setCurrentCell(row, 3);
+	//tableWidget->setCurrentCell(row, 3);
 
 	GUIStateParams *p = getStateParams();
 	string activeViz = p->GetActiveVizName();
@@ -458,7 +460,7 @@ void RenderHolder::Update() {
 
 	// Disable signals. Is this needed?
 	//
-	bool oldState = tableWidget->blockSignals(true);
+	//bool oldState = tableWidget->blockSignals(true);
 
 	// Rebuild everything from scratch
 	//
@@ -480,7 +482,7 @@ void RenderHolder::Update() {
 	// Add one row in tableWidget for each RenderParams that is associated 
 	// with activeViz:
 	
-	tableWidget->setRowCount(numRows);
+	//tableWidget->setRowCount(numRows);
 	map <string, vector <string>>::iterator itr;
 	int selectedRow = -1;
 	int row = 0;
@@ -519,10 +521,10 @@ void RenderHolder::Update() {
 	// Renable signals before calling tableWidget::selectRow(), which will
 	// trigger a itemSelectionChanged signal
 	//
-	tableWidget->blockSignals(oldState);
+	//tableWidget->blockSignals(oldState);
 
 	if (numRows > 0 && selectedRow >= 0) {
-		tableWidget->selectRow(selectedRow);
+		//tableWidget->selectRow(selectedRow);
 	}
 
 	updateDupCombo();
@@ -542,9 +544,9 @@ void RenderHolder::Update() {
 		dupCombo->setEnabled(true);
 	}
 
-    tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    tableWidget->resizeRowsToContents();
+    //tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    //tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    //tableWidget->resizeRowsToContents();
 }
 
 void RenderHolder::getRow(
@@ -579,13 +581,13 @@ void RenderHolder::setRow(
 ) {
 	int rowCount = tableWidget->rowCount();
 	if (row >= rowCount) {
-		tableWidget->setRowCount(rowCount+1);
+		//tableWidget->setRowCount(rowCount+1);
 	}
 
 	QTableWidgetItem *item = new QTableWidgetItem(renderInst.c_str());
 	item->setFlags(item->flags() ^ Qt::ItemIsEditable);
 	item->setTextAlignment(Qt::AlignCenter);
-	tableWidget->setItem(row, 0, item);
+	//tableWidget->setItem(row, 0, item);
 
 	//QBrush brush(QColor(145,145,145));
 
@@ -593,13 +595,13 @@ void RenderHolder::setRow(
 	item->setFlags(item->flags() ^ Qt::ItemIsEditable);
 	//item->setForeground(brush);
 	item->setTextAlignment(Qt::AlignCenter);
-	tableWidget->setItem(row, 1, item);
+	//tableWidget->setItem(row, 1, item);
 
 	item = new QTableWidgetItem(dataSetName.c_str());
 	item->setFlags(item->flags() ^ Qt::ItemIsEditable);
 	//item->setForeground(brush);
 	item->setTextAlignment(Qt::AlignCenter);
-	tableWidget->setItem(row, 2, item);
+	//tableWidget->setItem(row, 2, item);
 
 
 	QWidget *cbWidget = new QWidget();
@@ -613,7 +615,7 @@ void RenderHolder::setRow(
 	cbWidget->setProperty("row", row);
 	cbWidget->setLayout(cbLayout);
 	
-	tableWidget->setCellWidget(row,3,cbWidget);
+	//tableWidget->setCellWidget(row,3,cbWidget);
 
 
 	if (enabled) {
