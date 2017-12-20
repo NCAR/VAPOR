@@ -53,6 +53,7 @@ set (SRCS
 	BarbSubtabs.cpp
 	TransformTable.cpp
 	VaporTable.cpp
+	FidelityWidget.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -66,6 +67,7 @@ set (SRCS
 	ImageSubtabs.h
 	ContourSubtabs.h
 	VaporTable.h
+	FidelityWidget.h
 )
 
 set (UIS 
@@ -105,7 +107,7 @@ set (UIS
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
 	ContourVariablesGUI.ui
-	VaporTableGUI.ui
+	FidelityWidgetGUI.ui
 )
 
 find_package(Qt4 REQUIRED)

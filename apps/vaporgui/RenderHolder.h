@@ -83,7 +83,7 @@ private:
  std::string uniqueName(std::string name);
 
 private slots:
- void newRenderer();
+ void showNewRendererDialog();
  void deleteRenderer();
  //void changeChecked(int i, int j);
  void itemTextChange(QTableWidgetItem*);
@@ -93,7 +93,7 @@ private slots:
  void checkboxChanged(int);
 
 signals:
- void newRenderer(string vizName, string renderClass, string renderInst);
+ void newRendererSignal(string vizName, string renderClass, string renderInst);
  void activeChanged(string vizName, string renderClass, string renderInst);
  
 private:
@@ -105,6 +105,11 @@ private:
 	int row, string &renderInst, string &renderClass, 
 	string &dataSetName
  ) const;
+
+ void setNameCell(string renderInst, int row);
+ void setTypeCell(string renderClass, int row);
+ void setDataSetCell(string dataSetName, int row);
+ void setCheckboxCell(int row, bool enabled);
 
  void setRow(
 	int row, const string &renderInst, 
