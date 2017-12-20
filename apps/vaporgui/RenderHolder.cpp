@@ -60,7 +60,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), 
 
     _vaporTable = new VaporTable(tableWidget, false, true);
 
-    connect(newButton, SIGNAL(clicked()), this, SLOT(newRenderer()));
+    connect(newButton, SIGNAL(clicked()), this, SLOT(showNewRendererDialog()));
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRenderer()));
     connect(dupCombo, SIGNAL(activated(int)), this, SLOT(copyInstanceTo(int)));
     //	connect(
@@ -94,21 +94,12 @@ int RenderHolder::AddWidget(QWidget *wid, const char *name, string tag)
 //
 // Slots:
 //
-void RenderHolder::newRenderer()
+void RenderHolder::showNewRendererDialog()
 {
     ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
 
     vector<string> renderClasses = _controlExec->GetAllRenderClasses();
-
-#ifndef HELLO_RENDERER
-    for (vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++) {
-        if (*it == "Hello") {
-            renderClasses.erase(it);
-            break;
-        }
-    }
-#endif
 
     // Launch a dialog to select a renderer type, visualizer, name
     // Then insert a horizontal line with text and checkbox.
@@ -167,7 +158,7 @@ void RenderHolder::newRenderer()
 
     Update();
 
-    emit newRenderer(activeViz, renderClass, renderInst);
+    emit newRendererSignal(activeViz, renderClass, renderInst);
 
     paramsMgr->EndSaveStateGroup();
 }
@@ -309,7 +300,7 @@ void RenderHolder::copyInstanceTo(int item)
 
     Update();
 
-    emit newRenderer(activeViz, activeRenderClass, renderInst);
+    emit newRendererSignal(activeViz, activeRenderClass, renderInst);
 }
 
 std::string RenderHolder::uniqueName(std::string name)
@@ -513,32 +504,32 @@ void RenderHolder::getRow(int row, string &renderInst, string &renderClass, stri
     dataSetName = item->text().toStdString();
 }
 
-void RenderHolder::setRow(int row, const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
+void RenderHolder::setNameCell(string renderInst, int row)
 {
-    int rowCount = tableWidget->rowCount();
-    if (row >= rowCount) {
-        // tableWidget->setRowCount(rowCount+1);
-    }
-
     QTableWidgetItem *item = new QTableWidgetItem(renderInst.c_str());
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
     item->setTextAlignment(Qt::AlignCenter);
-    // tableWidget->setItem(row, 0, item);
+    tableWidget->setItem(row, 0, item);
+}
 
-    // QBrush brush(QColor(145,145,145));
-
-    item = new QTableWidgetItem(renderClass.c_str());
+void RenderHolder::setTypeCell(string renderClass, int row)
+{
+    QTableWidgetItem *item = new QTableWidgetItem(renderClass.c_str());
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setForeground(brush);
     item->setTextAlignment(Qt::AlignCenter);
-    // tableWidget->setItem(row, 1, item);
+    tableWidget->setItem(row, 1, item);
+}
 
-    item = new QTableWidgetItem(dataSetName.c_str());
+void RenderHolder::setDataSetCell(string dataSetName, int row)
+{
+    QTableWidgetItem *item = new QTableWidgetItem(dataSetName.c_str());
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setForeground(brush);
     item->setTextAlignment(Qt::AlignCenter);
-    // tableWidget->setItem(row, 2, item);
+    tableWidget->setItem(row, 2, item);
+}
 
+void RenderHolder::setCheckboxCell(int row, bool enabled)
+{
     QWidget *    cbWidget = new QWidget();
     QCheckBox *  checkBox = new QCheckBox();
     QHBoxLayout *cbLayout = new QHBoxLayout(cbWidget);
@@ -550,7 +541,7 @@ void RenderHolder::setRow(int row, const string &renderInst, const string &rende
     cbWidget->setProperty("row", row);
     cbWidget->setLayout(cbLayout);
 
-    // tableWidget->setCellWidget(row,3,cbWidget);
+    tableWidget->setCellWidget(row, 3, cbWidget);
 
     if (enabled) {
         checkBox->setCheckState(Qt::Checked);
@@ -559,6 +550,17 @@ void RenderHolder::setRow(int row, const string &renderInst, const string &rende
     }
 
     connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(checkboxChanged(int)));
+}
+
+void RenderHolder::setRow(int row, const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
+{
+    int rowCount = tableWidget->rowCount();
+    if (row >= rowCount) { tableWidget->setRowCount(rowCount + 1); }
+
+    setNameCell(renderInst, row);
+    setTypeCell(renderClass, row);
+    setDataSetCell(dataSetName, row);
+    setCheckboxCell(row, enabled);
 }
 
 void RenderHolder::setRow(const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
