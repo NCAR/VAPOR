@@ -8,6 +8,7 @@
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
 #include "ui_renderselector.h"
+#include "ui_NewerRendererDialog.h"
 
 QT_USE_NAMESPACE
 
@@ -15,6 +16,29 @@ namespace VAPoR {
 class ControlExec;
 class ParamsMgr;
 } // namespace VAPoR
+
+class MyDialog : public QDialog, public Ui_NewerRendererDialog {
+
+    Q_OBJECT
+
+  public:
+    MyDialog(QWidget *parent);
+
+  private slots:
+    void barbChecked(bool state);
+    void contourChecked(bool state);
+    void imageChecked(bool state);
+    void twoDDataChecked(bool state);
+
+  private:
+    void setUpImage(std::string imageName, QLabel *label);
+    void uncheckAllButtons();
+
+    static const std::string barbDescription;
+    static const std::string contourDescription;
+    static const std::string imageDescription;
+    static const std::string twoDDataDescription;
+};
 
 class CBWidget : public QWidget, public QTableWidgetItem {
   public:
@@ -93,6 +117,7 @@ class RenderHolder : public QWidget, public Ui_RenderSelector {
 
   private:
     VAPoR::ControlExec *_controlExec;
+    MyDialog *_myDialog;
 
     void getRow(
         int row, string &renderInst, string &renderClass,

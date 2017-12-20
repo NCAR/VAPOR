@@ -27,10 +27,12 @@
 #include <vapor/ParamsMgr.h>
 #include "qdialog.h"
 #include "ui_newRendererDialog.h"
+#include "ui_NewerRendererDialog.h"
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
+#include <vapor/GetAppPath.h>
 
 using namespace VAPoR;
 
@@ -38,12 +40,100 @@ namespace {
 const string DuplicateInStr = "Duplicate in:";
 };
 
+const std::string MyDialog::barbDescription = "Barb Renderer\n\nDisplays an "
+                                              "array of arrows with the users domain, with custom dimensions that are "
+                                              "defined by the user in the X, Y, and Z axes.\n\nThe arrows represent a vector "
+                                              "whos direction is determined by up to three user-defined variables.\n\nBarbs "
+                                              "can have a constant color applied to them, or they may be colored according "
+                                              "to an additional user-defined variable.";
+
 CBWidget::CBWidget(QWidget *parent, QString text) : QWidget(parent), QTableWidgetItem(text){};
+
+MyDialog::MyDialog(QWidget *parent) : QDialog(parent), Ui_NewerRendererDialog() {
+    setupUi(this);
+
+    setUpImage("Barbs.png", bigDisplay);
+    descriptionLabel->setText(QString::fromStdString(barbDescription));
+
+    setUpImage("Barbs_small.png", barbLabel);
+    setUpImage("Contours_small.png", contourLabel);
+    setUpImage("Image_small.png", imageLabel);
+    setUpImage("TwoDData_small.png", twoDDataLabel);
+
+    connect(barbButton, SIGNAL(toggled(bool)), this, SLOT(barbChecked(bool)));
+    connect(contourButton, SIGNAL(toggled(bool)), this, SLOT(contourChecked(bool)));
+    connect(imageButton, SIGNAL(toggled(bool)), this, SLOT(imageChecked(bool)));
+    connect(twoDDataButton, SIGNAL(toggled(bool)), this, SLOT(twoDDataChecked(bool)));
+};
+
+void MyDialog::setUpImage(std::string imageName, QLabel *label) {
+    std::vector<std::string> imagePath = std::vector<std::string>();
+    imagePath.push_back("Images");
+    imagePath.push_back(imageName);
+    QPixmap thumbnail(GetAppPath("VAPOR", "share", imagePath).c_str());
+    label->setPixmap(thumbnail);
+}
+
+void MyDialog::barbChecked(bool state) {
+    uncheckAllButtons();
+    barbButton->blockSignals(true);
+    barbButton->setChecked(true);
+    barbButton->blockSignals(false);
+    setUpImage("Barbs.png", bigDisplay);
+    descriptionLabel->setText(QString::fromStdString(barbDescription));
+}
+
+void MyDialog::contourChecked(bool state) {
+    uncheckAllButtons();
+    contourButton->blockSignals(true);
+    contourButton->setChecked(true);
+    contourButton->blockSignals(false);
+    setUpImage("Contours.png", bigDisplay);
+    descriptionLabel->setText(QString::fromStdString("Contour description"));
+}
+
+void MyDialog::imageChecked(bool state) {
+    uncheckAllButtons();
+    imageButton->blockSignals(true);
+    imageButton->setChecked(true);
+    imageButton->blockSignals(false);
+    setUpImage("Image.png", bigDisplay);
+    descriptionLabel->setText(QString::fromStdString("Image description"));
+}
+
+void MyDialog::twoDDataChecked(bool state) {
+    uncheckAllButtons();
+    twoDDataButton->blockSignals(true);
+    twoDDataButton->setChecked(true);
+    twoDDataButton->blockSignals(false);
+    setUpImage("TwoDData.png", bigDisplay);
+    descriptionLabel->setText(QString::fromStdString("TwoDData description"));
+}
+
+void MyDialog::uncheckAllButtons() {
+    barbButton->blockSignals(true);
+    contourButton->blockSignals(true);
+    imageButton->blockSignals(true);
+    twoDDataButton->blockSignals(true);
+
+    barbButton->setChecked(false);
+    contourButton->setChecked(false);
+    imageButton->setChecked(false);
+    twoDDataButton->setChecked(false);
+
+    barbButton->blockSignals(false);
+    contourButton->blockSignals(false);
+    imageButton->blockSignals(false);
+    twoDDataButton->blockSignals(false);
+}
 
 RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce)
     : QWidget(parent), Ui_RenderSelector() {
     setupUi(this);
     _controlExec = ce;
+
+    //_newerRendererDialog = new NewerRendererDialog(this, _controlExec);
+    _myDialog = new MyDialog(this);
 
     tableWidget->setColumnCount(4);
     QStringList headerText;
@@ -126,8 +216,10 @@ void RenderHolder::showNewRendererDialog() {
     for (int i = 0; i < renderClasses.size(); i++) {
         rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i]));
     }
-    if (nDialog.exec() != QDialog::Accepted)
+    if (nDialog.exec() != QDialog::Accepted) {
+        _myDialog->exec();
         return;
+    }
     int selection = rDialog.rendererCombo->currentIndex();
     string renderClass = renderClasses[selection];
 
