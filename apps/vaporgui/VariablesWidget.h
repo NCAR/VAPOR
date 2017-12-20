@@ -91,21 +91,6 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
     string getNDimsTag() { return _nDimsTag; }
 
   protected slots:
-    void printTableContents();
-
-    //! Connected to the image file text editor
-    void setNumRefinements(int num);
-
-    //! Connected to the compression ratio selector, setting the lod index.
-    void setCompRatio(int num);
-
-    //! Connected to the fidelity button selector, setting the fidelity index.
-    void setFidelity(int buttonID);
-
-    //! Connected to the fidelity setDefault button, setting current
-    //! fidelity as default
-    void SetFidelityDefault();
-
     //! Respond to selecting the single (primary) variable of field
     void setVarName(const QString &);
 
@@ -148,28 +133,6 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
     void configureColorWidgets(string selection);
     void collapseColorVarSettings();
 
-    // Get the compression rates as a fraction for both the LOD and
-    // Refinment parameters. Also format these factors into a displayable
-    // string
-    //
-    void getCmpFactors(
-        string varname, vector<float> &lodCF, vector<string> &lodStr,
-        vector<float> &multiresCF, vector<string> &multiresStr) const;
-
-    void uncheckFidelity();
-
-    void setupFidelity(
-        VAPoR::RenderParams *dParams
-#ifdef DEAD
-        ,
-        bool useDefault
-#endif
-    );
-
-    //! Set the fidelity gui elements based on values in a RenderParams
-    //! \param[in] rp The RenderParams instance being used.
-    void updateFidelity(VAPoR::RenderParams *rp);
-
     void showHideVar(bool on);
 
     string updateVarCombo(
@@ -182,20 +145,11 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
 
     VaporTable *_vaporTable;
 
-    QButtonGroup *_fidelityButtons;
-
     DisplayFlags _dspFlags;
     DimFlags _dimFlags;
     ColorFlags _colorFlags;
 
     static string _nDimsTag;
-
-    // Support for fidelity settings
-    //
-    std::vector<int> _fidelityLodIdx;
-    std::vector<int> _fidelityMultiresIdx;
-    std::vector<string> _fidelityLodStrs;
-    std::vector<string> _fidelityMultiresStrs;
 };
 
 #endif //VARIABLESWIDGET_H
