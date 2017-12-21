@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewerRendererDialog</class>
- <widget class="QDialog" name="NewerRendererDialog">
+ <class>NewRendererDialog</class>
+ <widget class="QDialog" name="NewRendererDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -313,6 +313,12 @@
        </item>
        <item>
         <widget class="QLabel" name="descriptionLabel">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
            <width>300</width>
@@ -374,7 +380,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>NewerRendererDialog</receiver>
+   <receiver>NewRendererDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -390,7 +396,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>NewerRendererDialog</receiver>
+   <receiver>NewRendererDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

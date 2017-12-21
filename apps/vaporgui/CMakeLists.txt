@@ -78,7 +78,7 @@ set (UIS
 	vizFeaturesTab.ui
 	ControlPointEditorBase.ui
 	newRendererDialog.ui
-	NewerRendererDialog.ui
+	NewRendererDialog.ui
 	renderselector.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
