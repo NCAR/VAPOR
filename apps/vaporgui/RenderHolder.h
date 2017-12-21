@@ -22,7 +22,9 @@ class MyDialog : public QDialog, public Ui_NewerRendererDialog {
 	Q_OBJECT
 
 public:
- MyDialog(QWidget *parent);
+ MyDialog(QWidget *parent, VAPoR::ControlExec* ce);
+
+ std::string getSelectedRenderer() {return _selectedRenderer;}
 
 private slots:
  void barbChecked(bool state);
@@ -33,11 +35,15 @@ private slots:
 private:
  void setUpImage(std::string imageName, QLabel *label);
  void uncheckAllButtons();
+ void initializeImages();
+ void initializeDataSources(VAPoR::ControlExec* ce);
 
  static const std::string barbDescription;
  static const std::string contourDescription;
  static const std::string imageDescription;
  static const std::string twoDDataDescription;
+
+ std::string _selectedRenderer;
 };
 
 class CBWidget : public QWidget, public QTableWidgetItem {
