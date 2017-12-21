@@ -40,28 +40,28 @@ namespace {
 	const string DuplicateInStr = "Duplicate in:";
 };
 
-const std::string MyDialog::barbDescription = "Barb Renderer\n\nDisplays an "
+const std::string MyDialog::barbDescription = "Displays an "
 	"array of arrows with the users domain, with custom dimensions that are "
-	"defined by the user in the X, Y, and Z axes.\n\nThe arrows represent a vector "
+	"defined by the user in the X, Y, and Z axes.  The arrows represent a vector "
 	"whos direction is determined by up to three user-defined variables.\n\nBarbs "
 	"can have a constant color applied to them, or they may be colored according "
 	"to an additional user-defined variable.\n\n [hyperlink to online doc]";
 
-const std::string MyDialog::contourDescription = "Contour Renderer\n\nDisplays "
+const std::string MyDialog::contourDescription = "Displays "
 	"a series of user defined contours along a two dimensional plane within the "
 	"user's domain.\n\nContours may hae constant coloration, or may be colored "
 	"according to a secondary variable.\n\nContours may be displaced by a height "
 	"variable.\n\n [hyperlink to online doc]";
 
-const std::string MyDialog::imageDescription = "Image Renderer\n\nDisplays a "
+const std::string MyDialog::imageDescription = "Displays a "
 	"georeferenced image that is automatically reprojected and fit to the user's"
 	"data, as long as the data contains georeference metadata.  The image "
 	"renderer may be offset by a height variable to show bathymetry or mountainous"
 	" terrain.\n\n [hyperlink to online doc]";
 
-const std::string MyDialog::twoDDataDescription = "TwoDData Renderer\n\nDisplays "
+const std::string MyDialog::twoDDataDescription = "Displays "
 	"the user's 2D data variables along the plane described by the source data "
-	"file.\n\nThese 2D variables may be offset by a height variable.\n\n."
+	"file.\n\nThese 2D variables may be offset by a height variable.\n\n"
 	"[hyperlink to online doc]";
 
 CBWidget::CBWidget(QWidget* parent, QString text) : 
@@ -97,6 +97,7 @@ void MyDialog::initializeDataSources(ControlExec *ce) {
 
 void MyDialog::initializeImages() {
 	setUpImage("Barbs.png", bigDisplay);
+	titleLabel->setText("\nBarb Renderer");
 	descriptionLabel->setText(QString::fromStdString(barbDescription));
 	_selectedRenderer = "Barb";
 
@@ -121,6 +122,7 @@ void MyDialog::barbChecked(bool state) {
 	barbButton->setChecked(true);
 	barbButton->blockSignals(false);
 	setUpImage("Barbs.png", bigDisplay);
+	titleLabel->setText("\nBarb Renderer");
 	descriptionLabel->setText(QString::fromStdString(barbDescription));
 	_selectedRenderer = "Barb";
 }
@@ -131,6 +133,7 @@ void MyDialog::contourChecked(bool state) {
 	contourButton->setChecked(true);
 	contourButton->blockSignals(false);
 	setUpImage("Contours.png", bigDisplay);
+	titleLabel->setText("\nContour Renderer");
 	descriptionLabel->setText(QString::fromStdString(contourDescription));
 	_selectedRenderer = "Contour";
 }
@@ -141,6 +144,7 @@ void MyDialog::imageChecked(bool state) {
 	imageButton->setChecked(true);
 	imageButton->blockSignals(false);
 	setUpImage("Image.png", bigDisplay);
+	titleLabel->setText("\nImage Renderer");
 	descriptionLabel->setText(QString::fromStdString(imageDescription));
 	_selectedRenderer = "Image";
 }
@@ -151,6 +155,7 @@ void MyDialog::twoDDataChecked(bool state) {
 	twoDDataButton->setChecked(true);
 	twoDDataButton->blockSignals(false);
 	setUpImage("TwoDData.png", bigDisplay);
+	titleLabel->setText("\nTwoDData Renderer");
 	descriptionLabel->setText(QString::fromStdString(twoDDataDescription));
 	_selectedRenderer = "TwoDData";
 }
