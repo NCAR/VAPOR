@@ -8,7 +8,7 @@
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
 #include "ui_renderselector.h"
-#include "ui_NewerRendererDialog.h"
+#include "ui_NewRendererDialog.h"
 
 QT_USE_NAMESPACE
 
@@ -17,12 +17,12 @@ class ControlExec;
 class ParamsMgr;
 } // namespace VAPoR
 
-class MyDialog : public QDialog, public Ui_NewerRendererDialog {
+class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
 
     Q_OBJECT
 
   public:
-    MyDialog(QWidget *parent, VAPoR::ControlExec *ce);
+    NewRendererDialog(QWidget *parent, VAPoR::ControlExec *ce);
 
     std::string getSelectedRenderer() { return _selectedRenderer; }
 
@@ -123,7 +123,7 @@ class RenderHolder : public QWidget, public Ui_RenderSelector {
 
   private:
     VAPoR::ControlExec *_controlExec;
-    MyDialog *_myDialog;
+    NewRendererDialog *_newRendererDialog;
 
     void getRow(
         int row, string &renderInst, string &renderClass,

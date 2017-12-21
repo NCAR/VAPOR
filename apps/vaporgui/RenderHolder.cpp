@@ -26,8 +26,7 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
 #include "qdialog.h"
-#include "ui_newRendererDialog.h"
-#include "ui_NewerRendererDialog.h"
+#include "ui_NewRendererDialog.h"
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderEventRouter.h"
@@ -40,33 +39,33 @@ namespace {
 const string DuplicateInStr = "Duplicate in:";
 };
 
-const std::string MyDialog::barbDescription = "Displays an "
-                                              "array of arrows with the users domain, with custom dimensions that are "
-                                              "defined by the user in the X, Y, and Z axes.  The arrows represent a vector "
-                                              "whos direction is determined by up to three user-defined variables.\n\nBarbs "
-                                              "can have a constant color applied to them, or they may be colored according "
-                                              "to an additional user-defined variable.\n\n [hyperlink to online doc]";
+const std::string NewRendererDialog::barbDescription = "Displays an "
+                                                       "array of arrows with the users domain, with custom dimensions that are "
+                                                       "defined by the user in the X, Y, and Z axes.  The arrows represent a vector "
+                                                       "whos direction is determined by up to three user-defined variables.\n\nBarbs "
+                                                       "can have a constant color applied to them, or they may be colored according "
+                                                       "to an additional user-defined variable.\n\n [hyperlink to online doc]";
 
-const std::string MyDialog::contourDescription = "Displays "
-                                                 "a series of user defined contours along a two dimensional plane within the "
-                                                 "user's domain.\n\nContours may hae constant coloration, or may be colored "
-                                                 "according to a secondary variable.\n\nContours may be displaced by a height "
-                                                 "variable.\n\n [hyperlink to online doc]";
+const std::string NewRendererDialog::contourDescription = "Displays "
+                                                          "a series of user defined contours along a two dimensional plane within the "
+                                                          "user's domain.\n\nContours may hae constant coloration, or may be colored "
+                                                          "according to a secondary variable.\n\nContours may be displaced by a height "
+                                                          "variable.\n\n [hyperlink to online doc]";
 
-const std::string MyDialog::imageDescription = "Displays a "
-                                               "georeferenced image that is automatically reprojected and fit to the user's"
-                                               "data, as long as the data contains georeference metadata.  The image "
-                                               "renderer may be offset by a height variable to show bathymetry or mountainous"
-                                               " terrain.\n\n [hyperlink to online doc]";
+const std::string NewRendererDialog::imageDescription = "Displays a "
+                                                        "georeferenced image that is automatically reprojected and fit to the user's"
+                                                        "data, as long as the data contains georeference metadata.  The image "
+                                                        "renderer may be offset by a height variable to show bathymetry or mountainous"
+                                                        " terrain.\n\n [hyperlink to online doc]";
 
-const std::string MyDialog::twoDDataDescription = "Displays "
-                                                  "the user's 2D data variables along the plane described by the source data "
-                                                  "file.\n\nThese 2D variables may be offset by a height variable.\n\n"
-                                                  "[hyperlink to online doc]";
+const std::string NewRendererDialog::twoDDataDescription = "Displays "
+                                                           "the user's 2D data variables along the plane described by the source data "
+                                                           "file.\n\nThese 2D variables may be offset by a height variable.\n\n"
+                                                           "[hyperlink to online doc]";
 
 CBWidget::CBWidget(QWidget *parent, QString text) : QWidget(parent), QTableWidgetItem(text){};
 
-MyDialog::MyDialog(QWidget *parent, ControlExec *controlExec) : QDialog(parent), Ui_NewerRendererDialog() {
+NewRendererDialog::NewRendererDialog(QWidget *parent, ControlExec *controlExec) : QDialog(parent), Ui_NewRendererDialog() {
     setupUi(this);
 
     rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
@@ -81,7 +80,7 @@ MyDialog::MyDialog(QWidget *parent, ControlExec *controlExec) : QDialog(parent),
     connect(twoDDataButton, SIGNAL(toggled(bool)), this, SLOT(twoDDataChecked(bool)));
 };
 
-void MyDialog::initializeDataSources(ControlExec *ce) {
+void NewRendererDialog::initializeDataSources(ControlExec *ce) {
     ParamsMgr *paramsMgr = ce->GetParamsMgr();
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
 
@@ -92,7 +91,7 @@ void MyDialog::initializeDataSources(ControlExec *ce) {
     }
 }
 
-void MyDialog::initializeImages() {
+void NewRendererDialog::initializeImages() {
     setUpImage("Barbs.png", bigDisplay);
     titleLabel->setText("\nBarb Renderer");
     descriptionLabel->setText(QString::fromStdString(barbDescription));
@@ -104,7 +103,7 @@ void MyDialog::initializeImages() {
     setUpImage("TwoDData_small.png", twoDDataLabel);
 }
 
-void MyDialog::setUpImage(std::string imageName, QLabel *label) {
+void NewRendererDialog::setUpImage(std::string imageName, QLabel *label) {
     std::vector<std::string> imagePath = std::vector<std::string>();
     imagePath.push_back("Images");
     imagePath.push_back(imageName);
@@ -112,7 +111,7 @@ void MyDialog::setUpImage(std::string imageName, QLabel *label) {
     label->setPixmap(thumbnail);
 }
 
-void MyDialog::barbChecked(bool state) {
+void NewRendererDialog::barbChecked(bool state) {
     uncheckAllButtons();
     barbButton->blockSignals(true);
     barbButton->setChecked(true);
@@ -123,7 +122,7 @@ void MyDialog::barbChecked(bool state) {
     _selectedRenderer = "Barb";
 }
 
-void MyDialog::contourChecked(bool state) {
+void NewRendererDialog::contourChecked(bool state) {
     uncheckAllButtons();
     contourButton->blockSignals(true);
     contourButton->setChecked(true);
@@ -134,7 +133,7 @@ void MyDialog::contourChecked(bool state) {
     _selectedRenderer = "Contour";
 }
 
-void MyDialog::imageChecked(bool state) {
+void NewRendererDialog::imageChecked(bool state) {
     uncheckAllButtons();
     imageButton->blockSignals(true);
     imageButton->setChecked(true);
@@ -145,7 +144,7 @@ void MyDialog::imageChecked(bool state) {
     _selectedRenderer = "Image";
 }
 
-void MyDialog::twoDDataChecked(bool state) {
+void NewRendererDialog::twoDDataChecked(bool state) {
     uncheckAllButtons();
     twoDDataButton->blockSignals(true);
     twoDDataButton->setChecked(true);
@@ -156,7 +155,7 @@ void MyDialog::twoDDataChecked(bool state) {
     _selectedRenderer = "TwoDData";
 }
 
-void MyDialog::uncheckAllButtons() {
+void NewRendererDialog::uncheckAllButtons() {
     barbButton->blockSignals(true);
     contourButton->blockSignals(true);
     imageButton->blockSignals(true);
@@ -179,7 +178,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce)
     _controlExec = ce;
 
     //_newerRendererDialog = new NewerRendererDialog(this, _controlExec);
-    _myDialog = new MyDialog(this, ce);
+    _newRendererDialog = new NewRendererDialog(this, ce);
 
     tableWidget->setColumnCount(4);
     QStringList headerText;
@@ -243,19 +242,19 @@ void RenderHolder::showNewRendererDialog() {
 
     // Set up the list of data set names in the dialog:
     //
-    _myDialog->dataMgrCombo->clear();
+    _newRendererDialog->dataMgrCombo->clear();
     for (int i = 0; i < dataSetNames.size(); i++) {
-        _myDialog->dataMgrCombo->addItem(
+        _newRendererDialog->dataMgrCombo->addItem(
             QString::fromStdString(dataSetNames[i]));
     }
 
-    if (_myDialog->exec() != QDialog::Accepted) {
+    if (_newRendererDialog->exec() != QDialog::Accepted) {
         return;
     }
 
-    string renderClass = _myDialog->getSelectedRenderer();
+    string renderClass = _newRendererDialog->getSelectedRenderer();
 
-    int selection = _myDialog->dataMgrCombo->currentIndex();
+    int selection = _newRendererDialog->dataMgrCombo->currentIndex();
     string dataSetName = dataSetNames[selection];
 
     GUIStateParams *p = getStateParams();
@@ -263,7 +262,7 @@ void RenderHolder::showNewRendererDialog() {
 
     // figure out the name
     //
-    QString qname = _myDialog->rendererNameEdit->text();
+    QString qname = _newRendererDialog->rendererNameEdit->text();
     string renderInst = qname.toStdString();
 
     // Check that it's not all blanks:
