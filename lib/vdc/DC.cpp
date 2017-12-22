@@ -57,6 +57,8 @@ void DC::Mesh::_Mesh(string name, std::vector<string> coord_vars, int max_nodes_
 
 DC::Mesh::Mesh(std::string name, std::vector<string> dim_names, std::vector<string> coord_vars)
 {
+    assert(coord_vars.size() >= dim_names.size());
+
     _Mesh(name, coord_vars, 4, 4, STRUCTURED);
 
     if (_name.empty()) { _name = join(dim_names, "x"); }
@@ -67,17 +69,23 @@ DC::Mesh::Mesh(std::string name, std::vector<string> dim_names, std::vector<stri
 DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per_node, std::string node_dim_name, std::string face_dim_name, std::vector<std::string> coord_vars,
                std::string face_node_var, std::string node_face_var)
 {
+    assert(coord_vars.size() >= 2);
+
     _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_2D);
 
     _node_dim_name = node_dim_name;
     _face_dim_name = face_dim_name;
     _face_node_var = face_node_var;
     _node_face_var = node_face_var;
+
+    _dim_names.push_back(node_dim_name);
 }
 
 DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per_node, std::string node_dim_name, std::string face_dim_name, std::string layers_dim_name,
                std::vector<std::string> coord_vars, std::string face_node_var, std::string node_face_var)
 {
+    assert(coord_vars.size() == 3);
+
     _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_LAYERED);
 
     _node_dim_name = node_dim_name;
@@ -85,11 +93,23 @@ DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per
     _layers_dim_name = layers_dim_name;
     _face_node_var = face_node_var;
     _node_face_var = node_face_var;
+
+    _dim_names.push_back(node_dim_name);
+    _dim_names.push_back(layers_dim_name);
 }
 
-size_t DC::Mesh::GetTopologyDim() const { return (_dim_names.size()); }
+size_t DC::Mesh::GetTopologyDim() const
+{
+    switch (_mtype) {
+    case STRUCTURED: return (_dim_names.size()); break;
+    case UNSTRUC_2D: return (2); break;
+    case UNSTRUC_LAYERED: return (3); break;
+    case UNSTRUC_3D: return (3); break;
+    default: assert(0 && "Invalid mesh type"); break;
+    }
+}
 
-vector<string> DC::GetDataVarNames(int ndim, bool spatial) const
+vector<string> DC::GetDataVarNames(int ndim) const
 {
     vector<string> names, allnames;
 
@@ -108,31 +128,6 @@ vector<string> DC::GetDataVarNames(int ndim, bool spatial) const
         if (!ok) continue;
 
         size_t d = mesh.GetTopologyDim();
-
-        if (!spatial && IsTimeVarying(allnames[i])) { d++; }
-
-        if (d == ndim) { names.push_back(allnames[i]); }
-    }
-    return (names);
-}
-
-vector<string> DC::GetCoordVarNames(int ndim, bool spatial) const
-{
-    vector<string> names, allnames;
-
-    allnames = GetCoordVarNames();
-
-    for (int i = 0; i < allnames.size(); i++) {
-        CoordVar cvar;
-        bool     ok = GetCoordVarInfo(allnames[i], cvar);
-        if (!ok) continue;
-
-        vector<string> dim_names = cvar.GetDimNames();
-        size_t         d = dim_names.size();
-
-        // if not spatial add time dimension if it exists.
-        //
-        if (!spatial && !cvar.GetTimeDimName().empty()) { d++; }
 
         if (d == ndim) { names.push_back(allnames[i]); }
     }
@@ -343,6 +338,21 @@ size_t DC::GetVarTopologyDim(string varname) const
     return (mesh.GetTopologyDim());
 }
 
+size_t DC::GetVarGeometryDim(string varname) const
+{
+    DataVar var;
+    bool    status = GetDataVarInfo(varname, var);
+    if (!status) return (0);
+
+    string mname = var.GetMeshName();
+
+    Mesh mesh;
+    status = GetMesh(mname, mesh);
+    if (!status) return (0);
+
+    return (mesh.GetGeometryDim());
+}
+
 bool DC::IsTimeVarying(string varname) const
 {
     if (IsAuxVar(varname)) return (false);
@@ -356,7 +366,7 @@ bool DC::IsTimeVarying(string varname) const
         return (!var.GetTimeCoordVar().empty());
     }
 
-    // If var is a coordinate variable and it's axis is Time
+    // If var is a coordinate variable and it has a time dimension
     //
     if (IsCoordVar(varname)) {
         CoordVar var;
@@ -464,34 +474,44 @@ bool DC::GetVarConnVars(string varname, string &face_node_var, string &node_face
     return (true);
 }
 
-bool DC::GetNumDimensions(string varname, size_t &ndim) const
+size_t DC::GetNumDimensions(string varname) const
 {
-    ndim = 0;
-
     DataVar dvar;
     bool    status = GetDataVarInfo(varname, dvar);
 
     if (status) {
         Mesh m;
         status = GetMesh(dvar.GetMeshName(), m);
-        if (!status) return (false);
+        if (!status) return (0);
 
-        switch (m.GetMeshType()) {
-        case Mesh::UNSTRUC_2D: ndim = 2; break;
-        case Mesh::UNSTRUC_LAYERED: ndim = 3; break;
-        case Mesh::UNSTRUC_3D: ndim = 3; break;
-        case Mesh::STRUCTURED: ndim = m.GetDimNames().size(); break;
-        default: ndim = 0;
-        }
-        return (true);
+        return (m.GetDimNames().size());
     }
 
     CoordVar cvar;
     status = GetCoordVarInfo(varname, cvar);
-    if (!status) return (0);
+    if (status) return (cvar.GetDimNames().size());
 
-    ndim = cvar.GetDimNames().size();
-    return (true);
+    AuxVar avar;
+    status = GetAuxVarInfo(varname, avar);
+    if (status) return (avar.GetDimNames().size());
+
+    return (0);
+}
+
+std::vector<string> DC::GetTimeCoordVarNames() const
+{
+    vector<string> cvars = GetCoordVarNames();
+
+    vector<string> timeCoordVars;
+
+    for (int i = 0; i < cvars.size(); i++) {
+        CoordVar cvar;
+        bool     status = GetCoordVarInfo(cvars[i], cvar);
+        assert(status);
+
+        if (cvar.GetAxis() == 3) { timeCoordVars.push_back(cvars[i]); }
+    }
+    return (timeCoordVars);
 }
 
 namespace VAPoR {

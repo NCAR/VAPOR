@@ -27,7 +27,7 @@ namespace VAPoR {
 //! operations. Derived implementations of the DC base class are
 //! required to support the API.
 //!
-//! Variables in a DC may have 1, 2, or 3 spatial dimensions, and 0 or 1
+//! Variables in a DC may have 1, 2, or 3 topological dimensions, and 0 or 1
 //! temporal dimensions.
 //!
 //! The DC is structured in the spirit of the "NetCDF Climate and Forecast
@@ -37,12 +37,9 @@ namespace VAPoR {
 //! more restrictive than the CF in a number of areas. Particular
 //! items of note include:
 //!
-//! \li The API supports variables with 1 to 4 dimensions only.
+//! \li The API supports variables with 0 to 3 topological dimensions only.
 //!
 //! \li Coordinate variables representing time must be 1D
-//!
-//! \li Each dimension is associated with exactly one axis: \b X (or longitude)
-//! \b Y (or latitude), \b Z (height), and \b T (time)
 //!
 //! \li All data variables have a "coordinate" attribute identifying
 //! the coordinate (or auxiliary coordinate) variables associated with
@@ -55,6 +52,9 @@ namespace VAPoR {
 //! 'dims' is a vector of dimensions, then dims[0] is the fastest varying
 //! dimension, dim[1] is the next fastest, and so on. This ordering is the
 //! opposite of the ordering used by NetCDF.
+//!
+//! \li The API supports unstructured grids and attempts to follow
+//! the UGRID conventions.
 //!
 //! This class inherits from Wasp::MyBase. Unless otherwise documented
 //! any method that returns an integer value is returning status. A negative
@@ -158,7 +158,7 @@ public:
     //! \brief Metadata describing a named dimension length
     //!
     //! Describes an array dimension with a name and an
-    //! associated length. Dimension lengths may vary over time.
+    //! associated length. Dimension lengths may vary (e.g. over time).
     //!
     class Dimension {
     public:
@@ -173,9 +173,6 @@ public:
         //! \param[in] name The name of dimension
         //! \param[in] lengths A vector of dimension lengths.
         //!
-        //! \version 3.1
-        //! Removed axis argument, changed length from scalar to vector
-        //!
         Dimension(std::string name, std::vector<size_t> lengths)
         {
             _name = name;
@@ -186,12 +183,6 @@ public:
         //!
         //! \param[in] name The name of dimension
         //! \param[in] length The dimension length.
-        //! \deprecated \param[in] axis The dimension axis, an integer in the range 0..3
-        //! indicating X (or longitude), Y (latitude), Z (height), and T (time),
-        //! respectively.
-        //!
-        //! \version 3.1
-        //! Removed axis argument, changed length from scalar to vector
         //!
         Dimension(std::string name, size_t length)
         {
@@ -271,11 +262,7 @@ public:
     //! assumed to be zero. The dimensionality of the coordinate variable
     //! may be less than that of the dimensionality of the grid, in which
     //! case the coordinates along the unspecified dimension are assumed
-    //! invariant. For time varying meshes - those with a time-vayring
-    //! dimesion - a time coordinate variable may be specified.
-    //! The dimension names of a coordinate variable must be a subset
-    //! of the dimension names of any data variable associated with the
-    //! mesh.
+    //! invariant.
     //!
     //! \param[in] max_nodes_per_face Specifies maximum number of nodes
     //! (or edges) a face of the mesh may have.
@@ -372,7 +359,9 @@ public:
         //! spatial dimensions of
         //! the mesh. The ordering is from fastest varying dimension to slowest.
         //! The number of elements in \p dim_names determines the dimensionality
-        //! of the mesh.
+        //! of the mesh, but not, in general, the topological dimension of the
+        //! mesh. The rank of \p dim_names defines
+        //! the topological dimension.
         //!
         Mesh(std::string name, std::vector<string> dim_names, std::vector<string> coord_vars);
 
@@ -421,7 +410,8 @@ public:
         //! topological dimensionality of the mesh.
         //!
         //! For
-        //! unstructured meshes the returned vector is empty();
+        //! unstructured meshes the returned contains the names of the
+        //! node dimensions.
         //
         std::vector<string> GetDimNames() const { return (_dim_names); };
 
@@ -431,6 +421,17 @@ public:
         //! the nodes of the mesh.
         //
         std::vector<string> GetCoordVars() const { return (_coord_vars); };
+
+        //! Get geometric dimension of cells
+        //!
+        //! Returns the geometric dimension of the cells in the mesh. I.e.
+        //! the number of spatial spatial coordinates for each grid point.
+        //! Valid values are 0..3. The geometric dimension must be equal to
+        //! or greater than the topology dimension.
+        //!
+        //! \sa GetTopologyDim()
+        //
+        size_t GetGeometryDim() const { return (_coord_vars.size()); }
 
         //! Get the maximum number of nodes per face
         //!
@@ -619,11 +620,15 @@ public:
         //
         std::string GetEdgeFaceVar() const { return (_edge_face_var); }
 
-        //! Get topological dimension of mesh
+        //! Get topological dimension of the mesh
         //!
-        //! Return the number of dimensions for the mesh. I.e. the number
-        //! of coordinates needed to describe each node position.
+        //! Return the number of topological dimensions for the mesh cells. Valid
+        //! values are in the range 0..3, with, for example, 0 corresponding
+        //! to points; 1 to lines; 2 to triangles, quadrilaterals, etc.; and
+        //! 3 to hexahedron, tetrahedron, etc.
         //!
+        //! \sa GetGeometryDim()
+        //
         size_t GetTopologyDim() const;
 
         friend std::ostream &operator<<(std::ostream &o, const Mesh &mesh);
@@ -749,26 +754,20 @@ public:
         //! Constructor
         //!
         //! \param[in] name The variable's name
-        //! \deprecated \param[in] dimensions An ordered vector specifying the variable's spatial
-        //! and/or temporal dimensions
         //!
         //! \param[in] units A string recognized by Udunits-2 specifying the
         //! unit measure for the variable. An empty string indicates that the
         //! variable is unitless.
         //! \param[in] type The external storage type for variable data
-        //! \param[in] bs An ordered array specifying the storage
-        //! blocking
-        //! factor for the variable. Results are undefined if the rank of
-        //! of \p bs does not match that of the spatial dimensions.
-        //!
         //! \param[in] wname The wavelet family name for compressed variables
         //! \param[in] cratios Specifies a vector of compression factors for
         //! compressed variable definitions. If empty, or if cratios.size()==1
         //! and cratios[0]==1, the variable is not
         //! compressed
-        //! \deprecated \param[in] periodic An ordered array of booleans
-        //! specifying the
-        //! spatial boundary periodicity.
+        //! \param[in] bs An ordered array specifying the storage
+        //! blocking
+        //! factor for the variable.
+        //!
         //! \deprecated Results are undefined if the rank of
         //! of \p periodic does not match that of \p dimensions.
         //!
@@ -804,10 +803,6 @@ public:
         //
         string GetName() const { return (_name); };
         void   SetName(string name) { _name = name; };
-
-        //! \deprecated Access variable's dimension names
-        //
-        // std::vector <DC::Dimension> GetDimensions() const;
 
         //! Access variable units
         //
@@ -1002,10 +997,6 @@ public:
         //!  std::vector <size_t> cratios,
         //!  std::vector <bool> periodic)
         //!
-        //! \deprecated \param[in] coord_vars Names of coordinate
-        //! variables associated
-        //! with this variables dimensions
-        //!
         //! \param[in] mesh Name of mesh upon which this variable is sampled
         //!
         //! \param[in] time_coord_var Name of time coordinate variable. If
@@ -1039,10 +1030,6 @@ public:
         //!  string wname,
         //!  std::vector <size_t> cratios,
         //!  std::vector <bool> periodic)
-        //!
-        //! \deprecated \param[in] coord_vars Names of coordinate variables
-        //! associated
-        //! with this variables dimensions
         //!
         //! \param[in] mesh Name of mesh upon which this variable is sampled
         //!
@@ -1415,7 +1402,6 @@ public:
     virtual std::vector<string> GetCoordVarNames() const = 0;
 
     //! Return a list of names for all of the defined Auxiliary variables.
-    //! \version 3.1
     //!
     //! Returns a list of names for all Auxiliary variables defined
     //!
@@ -1425,7 +1411,7 @@ public:
 
     //! Return the number of refinement levels for the indicated variable
     //!
-    //! Compressed variables have a multi-resolution grid representation.
+    //! Compressed variables may have a multi-resolution grid representation.
     //! This method returns the number of levels in the hiearchy. A value
     //! of one indicates that only the native resolution is available.
     //! A value of two indicates that two levels, the native plus the
@@ -1491,11 +1477,11 @@ public:
     //!
     virtual XType GetAttType(string varname, string attname) const = 0;
 
-    //! Return a variable's dimension lengths at a specified refinement level
+    //! Return a variable's array dimension lengths at a specified refinement level
     //!
-    //! Compressed variables have a multi-resolution grid representation.
-    //! This method returns the variable's ordered spatial and
-    //! temporal dimension lengths,
+    //! Compressed variables may have a multi-resolution grid representation.
+    //! This method returns the variable's ordered array
+    //! dimension lengths,
     //! and block dimensions
     //! at the multiresolution refinement level specified by \p level.
     //!
@@ -1512,7 +1498,8 @@ public:
     //!
     //! \retval status Zero is returned upon success, otherwise -1.
     //!
-    //! \note This method is not well defined for unstructured grids.
+    //! \note For unstructured grids the number of dimensions may be
+    //! less than the topological dimension returned by DC::Mesh::GetTopologyDim().
     //!
     //! \sa VAPoR::DC, DC::DataVar::GetBS(), DC::GetVarDimLens()
     //
@@ -1625,24 +1612,22 @@ public:
 
     //! Read a single slice of data from the currently opened variable
     //!
-    //! Decompress, as necessary, and read a single slice (2D array) of
+    //! Decompress, as necessary, and read a single hyperslice of
     //! data from the variable
     //! indicated by the most recent call to OpenVariableRead().
-    //! The dimensions of a slices are NX by NY,
-    //! where NX is the dimension of the array along the fastest varying
-    //! spatial dimension, specified
-    //! in grid points, and NY is the length of the second fastest varying
-    //! dimension at the currently opened grid refinement level. See
+    //! The dimensions of a slice are given by the product of the
+    //! n-1 fastest varying dimensions returned by GetDimLensAtLevel() for
+    //! for the currently opened grid refinement level. See
     //! OpenVariableRead().
     //!
     //! This method should be called exactly NZ times for each opened variable,
-    //! where NZ is the dimension of third, and slowest varying dimension.
-    //! In the case of a 2D variable, NZ is 1.
+    //! where NZ is the dimension of slowest varying dimension returned by
+    //! GetDimLensAtLevel().
     //!
     //! It is the caller's responsibility to ensure \p slice points
     //! to adequate space.
     //!
-    //! \param[out] slice A 2D slice of data
+    //! \param[out] slice A slice of data
     //! \retval status Returns a non-negative value on success
     //!
     //! \sa OpenVariableRead()
@@ -1670,7 +1655,7 @@ public:
     //! \param[out] region The requested volume subregion
     //!
     //! \retval status Returns a non-negative value on success
-    //! \sa OpenVariableRead(), GetDimension(), GetDimensionNames()
+    //! \sa OpenVariableRead(), GetDimLensAtLevel(), GetDimensionNames()
     //
     virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
 
@@ -1770,30 +1755,16 @@ public:
     //
     /////////////////////////////////////////////////////////////////////
 
-    //! Return a list of data variables with a given dimension rank
+    //! Return a list of data variables with a given topological dimension
     //!
     //! Returns a list of all data variables defined having a
-    //! dimension rank of \p ndim. If \p spatial is true, only the spatial
-    //! dimension rank of the variable is compared against \p ndim
+    //! a topological dimension \p ndim.
     //!
-    //! \param[in] ndim Rank of dimensions for comparision
-    //! \param[in] spatial If true only compare spatial dimensions against \p ndim
+    //! \param[in] ndim Topological dimension
     //!
+    //! \sa GetVarTopologyDim()
     //
-    virtual std::vector<string> GetDataVarNames(int ndim, bool spatial) const;
-
-    //
-    //! Return a list of coordinate variables with a given dimension rank
-    //!
-    //! Returns a list of all coordinate variables defined having a
-    //! dimension rank of \p ndim. If \p spatial is true, only the spatial
-    //! dimension rank of the variable is compared against \p ndim
-    //!
-    //! \param[in] ndim Rank of dimensions for comparision
-    //! \param[in] spatial If true only compare spatial dimensions against \p ndim
-    //!
-    //
-    virtual std::vector<string> GetCoordVarNames(int ndim, bool spatial) const;
+    virtual std::vector<string> GetDataVarNames(int ndim) const;
 
     //
     //! Return an ordered list of the variables dimensions
@@ -1893,13 +1864,26 @@ public:
 
     //! Return the topological dimension of a variable
     //!
-    //! Return the number of spatial coordinate variables needed to describe
-    //! the postion of each grid point (node) in a variables mesh.
+    //! Return the topological dimension of the mesh the defines
+    //! the variable data \p varname
     //!
     //! \retval dim Topological dimension or zero if variable is not known
-    //! or has no coordinates.
+    //!
+    //! \sa DC::Mesh::GetTopologyDim()
     //
     virtual size_t GetVarTopologyDim(string varname) const;
+
+    //! Return the geometric dimension of a variable
+    //!
+    //! Return the geometric dimension of the mesh the defines
+    //! the variable data \p varname. I.e. return the number of spatial coordinate
+    //! variables associated with each node in the mesh.
+    //!
+    //! \retval dim Geometric dimension or zero if variable is not known
+    //!
+    //! \sa DC::Mesh::GetGeometryDim()
+    //
+    virtual size_t GetVarGeometryDim(string varname) const;
 
     //! Return a boolean indicating whether a variable is time varying
     //!
@@ -2031,17 +2015,24 @@ public:
     //!
     bool GetVarConnVars(string varname, string &face_node_var, string &node_face_var, string &face_edge_var, string &face_face_var, string &edge_node_var, string &edge_face_var) const;
 
-    //! Get the number of spatial dimensions for a variable
+    //! Get the rank of a variable
     //!
+    //! This method returns the number of rank of the array describing a
+    //! variable. For structured data variables the rank is equal to
+    //! the topological dimension (See GetTopologyDim()).
     //!
     //! \param[in] varname Name of variable to query
-    //! \param[out] ndim An int in the range 0..3. If the variable is
-    //! a time coordinate variable \p ndim will be set to 0.
     //!
-    //! \retval True is returned on success. A value of false is
-    //! returned if the variable name is unknown.
+    //! \retval Array rank. A value between 0 and 3, inclusive. If
+    //! \p varname is unknown 0 is returned.
     //!
-    virtual bool GetNumDimensions(string varname, size_t &ndim) const;
+    virtual size_t GetNumDimensions(string varname) const;
+
+    //! Return a list of all of the available time coordinate variables
+    //!
+    //! This method returns all time coordinate variables defined
+    //!
+    std::vector<string> GetTimeCoordVarNames() const;
 
 private:
     virtual bool _getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const;

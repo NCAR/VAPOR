@@ -183,24 +183,19 @@ public:
     //! \test New in 3.0
     virtual std::vector<string> GetDataVarNames() const;
 
-    //! Return a list of data variables with a given dimension rank
+    //! Return a list of data variables with a given spatial dimension rank
     //!
     //! This method returns a list of all data variables defined
     //! in the data set with the specified dimension rank (number of dimensions).
-    //! Data variables may have 0 to 3 spatial dimensions, and 0 of 1 time
-    //! dimension.
+    //! Data variables may have 0 to 3 spatial dimensions
     //!
     //! \param[in] ndim Variable rank (number of dimensions)
-    //! \param[in] spatial A boolean, if true, indicates that only the variable's
-    //! spatial rank should be compared against \p ndim.  Otherwise the sum
-    //! of the number of spatial dimensions plus the time dimension (if time
-    //! varying) is compared agains \p ndim.
     //!
     //! \retval list A vector containing a list of all the data variable names
     //! with the specified number of dimensions (rank).
     //!
     //! \test New in 3.0
-    virtual std::vector<string> GetDataVarNames(int ndim, bool spatial) const;
+    virtual std::vector<string> GetDataVarNames(int ndim) const;
 
     //! Return a list of names for all of the defined coordinate variables.
     //!
@@ -213,21 +208,6 @@ public:
     //! \sa GetDataVarNames()
     //!
     virtual std::vector<string> GetCoordVarNames() const;
-
-    //! Return a list of coordinate variables with a given dimension rank
-    //!
-    //! This method returns a list of all coordinate variables defined
-    //! in the coordinate set with the specified dimensionality
-    //!
-    //! \param[in] ndim Variable rank
-    //! \param[in] spatial A boolean indicating whether only the variables
-    //! spatial rank should be compared against \p ndim
-    //!
-    //! \retval list A vector containing a list of all the coordinate
-    //! variable names
-    //! with the specified number of dimensions.
-    //!
-    virtual std::vector<string> GetCoordVarNames(int ndim, bool spatial) const;
 
     //! Get time coordinates
     //!
@@ -467,10 +447,10 @@ public:
     void UnlockGrid(const VAPoR::Grid *rg);
 
     //! \copydoc DC::GetNumDimensions(
-    //!   string varname, size_t &ndim
+    //!   string varname
     //! ) const;
     //
-    bool GetNumDimensions(string varname, size_t &ndim) const;
+    size_t GetNumDimensions(string varname) const;
 
     //! \copydoc DC:GetVarTopologyDim()
     //!

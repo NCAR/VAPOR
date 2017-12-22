@@ -196,10 +196,10 @@ double getVoxelSize(size_t timestep, string varname, int refLevel, int dir);
 
 //! Determine the number of active 3D variables.  This includes 3D variables in the VDC as well as any 3D derived variables
 //! \return number of active 3D variables
-int getNumActiveVariables3D() { return _dataMgr->GetDataVarNames(3, true).size(); }
+int getNumActiveVariables3D() { return _dataMgr->GetDataVarNames(3).size(); }
 //! Determine the number of active 2D variables.  This includes 2D variables in the VDC as well as any 2D derived variables
 //! \return number of active 2D variables
-int getNumActiveVariables2D() { return _dataMgr->GetDataVarNames(2, true).size(); }
+int getNumActiveVariables2D() { return _dataMgr->GetDataVarNames(2).size(); }
 //! Determine the number of active variables.  This includes variables in the VDC as well as any derived variables
 //! \return number of active variables
 int getNumActiveVariables() { return getNumActiveVariables3D() + getNumActiveVariables2D(); }

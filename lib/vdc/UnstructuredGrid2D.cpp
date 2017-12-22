@@ -33,7 +33,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
     assert(location == NODE);
 }
 
-size_t UnstructuredGrid2D::GetNumCoordinates() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
+size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
 
 void UnstructuredGrid2D::GetUserExtents(vector<double> &minu, vector<double> &maxu) const
 {
@@ -50,7 +50,7 @@ void UnstructuredGrid2D::GetUserExtents(vector<double> &minu, vector<double> &ma
     minu.push_back(range[0]);
     maxu.push_back(range[1]);
 
-    if (GetNumCoordinates() < 3) return;
+    if (GetGeometryDim() < 3) return;
 
     _zug.GetRange(range);
     minu.push_back(range[0]);
@@ -59,14 +59,20 @@ void UnstructuredGrid2D::GetUserExtents(vector<double> &minu, vector<double> &ma
 
 void UnstructuredGrid2D::GetBoundingBox(const vector<size_t> &min, const vector<size_t> &max, vector<double> &minu, vector<double> &maxu) const
 {
-    assert(min.size() == max.size());
-    assert(min.size() == GetDimensions().size());
-    int ncoords = GetNumCoordinates();
+    vector<size_t> cMin = min;
+    ClampIndex(cMin);
+
+    vector<size_t> cMax = max;
+    ClampIndex(cMax);
+
+    assert(cMin.size() == cMax.size());
+
+    int ncoords = GetGeometryDim();
     minu = vector<double>(ncoords, 0.0);
     maxu = vector<double>(ncoords, 0.0);
 
-    size_t start = Wasp::LinearizeCoords(min, GetDimensions());
-    size_t stop = Wasp::LinearizeCoords(max, GetDimensions());
+    size_t start = Wasp::LinearizeCoords(cMin, GetDimensions());
+    size_t stop = Wasp::LinearizeCoords(cMax, GetDimensions());
 
     // Currently only support ++ opererator for ConstCoordItr. So random
     // access is tricky.
@@ -85,16 +91,28 @@ void UnstructuredGrid2D::GetBoundingBox(const vector<size_t> &min, const vector<
     }
 }
 
-void UnstructuredGrid2D::GetEnclosingRegion(const vector<double> &minu, const vector<double> &maxu, vector<size_t> &min, vector<size_t> &max) const { assert(0 && "Not implemented"); }
+void UnstructuredGrid2D::GetEnclosingRegion(const vector<double> &minu, const vector<double> &maxu, vector<size_t> &min, vector<size_t> &max) const
+{
+    vector<double> cMinu = minu;
+    ClampCoord(cMinu);
+
+    vector<double> cMaxu = maxu;
+    ClampCoord(cMaxu);
+
+    assert(0 && "Not implemented");
+}
 
 void UnstructuredGrid2D::GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
 {
-    assert(indices.size() == 1);
+    vector<size_t> cIndices = indices;
+    ClampIndex(cIndices);
+
+    assert(cIndices.size() == 1);
     coords.clear();
 
-    coords.push_back(_xug.AccessIndex(indices));
-    coords.push_back(_yug.AccessIndex(indices));
-    if (GetNumCoordinates() == 3) { coords.push_back(_zug.AccessIndex(indices)); }
+    coords.push_back(_xug.AccessIndex(cIndices));
+    coords.push_back(_yug.AccessIndex(cIndices));
+    if (GetGeometryDim() == 3) { coords.push_back(_zug.AccessIndex(cIndices)); }
 }
 
 void UnstructuredGrid2D::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
@@ -209,7 +227,7 @@ float UnstructuredGrid2D::GetValueLinear(const std::vector<double> &coords) cons
 
 UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D(const UnstructuredGrid2D *ug, bool begin) : ConstCoordItrAbstract()
 {
-    _ncoords = ug->GetNumCoordinates();
+    _ncoords = ug->GetGeometryDim();
     _coords = vector<double>(_ncoords, 0.0);
     if (begin) {
         _xCoordItr = ug->_xug.cbegin();
