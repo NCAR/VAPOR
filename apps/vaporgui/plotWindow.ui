@@ -34,15 +34,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Dependent
-Variable Attributes</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <string>Variables</string>
           </property>
          </widget>
         </item>
@@ -102,70 +94,7 @@ Variable Attributes</string>
          </widget>
         </item>
         <item>
-         <widget class="QTableWidget" name="variablesTable">
-          <column>
-           <property name="text">
-            <string>Enabled</string>
-           </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
-           </property>
-          </column>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Refinement:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QComboBox" name="refCombo"/>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Level of detail:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cRatioCombo"/>
-          </item>
-         </layout>
+         <widget class="QTableWidget" name="variablesTable"/>
         </item>
        </layout>
       </widget>
@@ -231,11 +160,6 @@ Variable Attributes</string>
             <column>
              <property name="text">
               <string>Point 2</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Const</string>
              </property>
             </column>
            </widget>
