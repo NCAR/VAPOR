@@ -1354,6 +1354,11 @@ int DCWRF::_InitVars(NetCDFCollection *ncdfc) {
 
         bool ok = _GetVarCoordinates(
             ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
+
+        if (sdimnames.size() != scoordvars.size()) {
+            cerr << "DCWRF::_InitVars() SKIPPING VARIABLE " << vars[i] << endl;
+            continue;
+        }
         if (!ok)
             continue;
         //if (! ok) {

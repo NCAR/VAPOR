@@ -1703,12 +1703,12 @@ void Plot::initVariables() {
     addVarCombo->addItem("Add Variable:");
     vector<string> vars;
 
-    vars = _dm->GetDataVarNames(3, true);
+    vars = _dm->GetDataVarNames(3);
     for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
         _vars.push_back(*it);
         _vars3d.push_back(*it);
     }
-    vars = _dm->GetDataVarNames(2, true);
+    vars = _dm->GetDataVarNames(2);
     for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
         _vars.push_back(*it);
     }
@@ -1764,8 +1764,7 @@ void Plot::newVarAdded(int index) {
     //
     bool varsAre2D = true;
     for (int i = 0; i < _uVars.size(); i++) {
-        size_t nDims;
-        _dm->GetNumDimensions(_uVars[i], nDims);
+        size_t nDims = _dm->GetVarTopologyDim(_uVars[i]);
         if (nDims == 3) {
             varsAre2D = false;
         }

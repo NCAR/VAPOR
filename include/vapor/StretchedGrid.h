@@ -63,7 +63,7 @@ class VDF_API StretchedGrid : public StructuredGrid {
     StretchedGrid() = default;
     virtual ~StretchedGrid() = default;
 
-    virtual size_t GetNumCoordinates() const override;
+    virtual size_t GetGeometryDim() const override;
 
     // \copydoc GetGrid::GetUserExtents()
     //

@@ -86,9 +86,6 @@ class VDF_API DCCF : public VAPoR::DC {
     //!
     virtual std::vector<string> GetDataVarNames() const;
 
-    // override parent class!!
-    virtual std::vector<string> GetDataVarNames(int ndim, bool spatial) const;
-
     virtual std::vector<string> GetAuxVarNames() const {
         return (vector<string>());
     }
