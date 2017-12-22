@@ -233,10 +233,10 @@ QDialog(parent), Ui_PlotWindow() {
 	connect(spaceP2CopyCombo, SIGNAL(activated(int)), 
 		this, SLOT(getPointFromRenderer()));
 #endif
-	connect(refCombo, SIGNAL(currentIndexChanged(int)), 
-		this, SLOT(refinementChanged(int)));
-	connect(cRatioCombo, SIGNAL(currentIndexChanged(int)), 
-		this, SLOT(cRatioChanged(int)));
+	//connect(refCombo, SIGNAL(currentIndexChanged(int)), 
+	//	this, SLOT(refinementChanged(int)));
+	//connect(cRatioCombo, SIGNAL(currentIndexChanged(int)), 
+	//	this, SLOT(cRatioChanged(int)));
 	for (int i=0; i<4; i++) {
 		connect(_spaceCheckBoxes[i], SIGNAL(stateChanged(int)), 
 			this, SLOT(constCheckboxChanged(int)));
@@ -470,36 +470,36 @@ void Plot::tabChanged(int tab) {
 void Plot::initCRatios() {
 	_cRatios = _dm->GetCRatios(_vars[0]);
 
-	cRatioCombo->blockSignals(true);
-	cRatioCombo->clear();
+	//cRatioCombo->blockSignals(true);
+	//cRatioCombo->clear();
 
 	for (std::vector<size_t>::iterator it = _cRatios.begin(); it != _cRatios.end(); ++it){
-		cRatioCombo->addItem("1:"+QString::number(*it));
+		//cRatioCombo->addItem("1:"+QString::number(*it));
 	}
 
 	if (_params->GetCRatio()==-1) {
 		_cRatio = _cRatios.size()-1;
-		cRatioCombo->setCurrentIndex(_cRatio);
+		//cRatioCombo->setCurrentIndex(_cRatio);
 		_params->SetCRatio(_cRatio);
 	}
-	cRatioCombo->blockSignals(false);
+	//cRatioCombo->blockSignals(false);
 }
 
 void Plot::initRefinement() {
-	refCombo->blockSignals(true);
+	//refCombo->blockSignals(true);
 
-	refCombo->clear();
+	//refCombo->clear();
 	_refLevel = _dm->GetNumRefLevels(_vars[0]);
 	for (int i=0; i<=_refLevel; i++){
-		refCombo->addItem(QString::number(i));
+	//	refCombo->addItem(QString::number(i));
 	}
 
 	if (_params->GetRefinement() == -1) {
-		refCombo->setCurrentIndex(_refLevel);
-		_params->SetRefinement(_refLevel);
+	//	refCombo->setCurrentIndex(_refLevel);
+	//	_params->SetRefinement(_refLevel);
 	}
 
-	refCombo->blockSignals(false);
+	//refCombo->blockSignals(false);
 }
 
 void Plot::initSSCs() {
@@ -1429,10 +1429,10 @@ void Plot::updateVariables() {
 
 void Plot::updateRefCRatio() {
 	int refIndex = _params->GetRefinement();
-	refCombo->setCurrentIndex(refIndex);
+	//refCombo->setCurrentIndex(refIndex);
 
 	int cRatioIndex = _params->GetCRatio();
-	cRatioCombo->setCurrentIndex(cRatioIndex);
+	//cRatioCombo->setCurrentIndex(cRatioIndex);
 }
 
 void Plot::updateConstCheckboxes() {
