@@ -26,7 +26,7 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
 	int ndim = bParams->GetValueLong(nDimsTag, 3);
 	assert(ndim==2 || ndim==3);
 
-	vector<string> varNames = dataMgr->GetDataVarNames(ndim, 3);
+	vector<string> varNames = dataMgr->GetDataVarNames(3);
 	vector<string> defaultVars;
 
 	if (varNames.size() < 2) return;

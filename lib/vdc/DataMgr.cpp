@@ -449,21 +449,21 @@ vector <string> DataMgr::GetDataVarNames() const {
 	}
 
 	vector <string> validvars;
-	for (int i=1; i<=4; i++) {
-		vector <string> vars = GetDataVarNames(i, false);
+	for (int ndim=2; ndim<=3; ndim++) {
+		vector <string> vars = GetDataVarNames(ndim);
 		validvars.insert(validvars.end(), vars.begin(), vars.end());
 	}
 	return(validvars);
 }
 
-vector <string> DataMgr::GetDataVarNames(int ndim, bool spatial) const {
+vector <string> DataMgr::GetDataVarNames(int ndim) const {
 	if (!_dc) {
 		return(vector <string>());
 	}
 	// 
 	// NEED TO HANDLE DERIVED VARS
 	//
-	vector <string> vars = _dc->GetDataVarNames(ndim, spatial);
+	vector <string> vars = _dc->GetDataVarNames(ndim);
 	vector <string> validVars;
 	for (int i=0; i<vars.size(); i++) {
 
@@ -474,7 +474,7 @@ vector <string> DataMgr::GetDataVarNames(int ndim, bool spatial) const {
 		// If the variable is missing coordinate variables reject it
 		//
 		vector <string> coordvars;
-		GetVarCoordVars(vars[i], spatial, coordvars); 
+		GetVarCoordVars(vars[i], true, coordvars); 
 		if (coordvars.size() < ndim) continue;
 
 		validVars.push_back(vars[i]);
@@ -495,31 +495,11 @@ vector <string> DataMgr::GetCoordVarNames() const {
 string DataMgr::GetTimeCoordVarName() const {
 	if (!_dc) return("");
 
-	// Assumes only one time coordinate variable is defined. Yikes!
-	//
-	vector <string> vars1d = DataMgr::GetCoordVarNames(1,false);
+	vector <string> cvars = _dc->GetTimeCoordVarNames();
+	if (! cvars.size()) return("");
 
-	for (int i=0; i<vars1d.size(); i++) {
-		DC::CoordVar var;
-		bool ok = GetCoordVarInfo(vars1d[i], var);
-		assert(ok);
-		if (! var.GetTimeDimName().empty()) return(vars1d[i]);
-	}
+	return(cvars[0]);
 
-	return(vars1d[0]);
-}
-
-
-
-vector <string> DataMgr::GetCoordVarNames(int ndim, bool spatial) const {
-	if (!_dc) {
-		return(vector <string> ());
-	}
-
-	// 
-	// NEED TO HANDLE DERIVED VARS
-	//
-	return (_dc->GetCoordVarNames(ndim, spatial));
 }
 
 bool DataMgr::GetVarCoordVars(
@@ -1505,12 +1485,12 @@ void	DataMgr::UnlockGrid(
 	}
 }
 
-bool DataMgr::GetNumDimensions(string varname, size_t &ndim) const {
+size_t DataMgr::GetNumDimensions(string varname) const {
 
 	if (!_dc) {
 		return(0);
 	}
-	return(_dc->GetNumDimensions(varname, ndim));
+	return(_dc->GetNumDimensions(varname));
 }
 
 size_t DataMgr::GetVarTopologyDim(string varname) const {
@@ -2469,8 +2449,7 @@ RegularGrid *DataMgr::_make_grid_empty(string varname) const {
 	vector <double> minu, maxu;
 	vector <float *> blkptrs;
 
-	size_t ndim;
-	GetNumDimensions(varname, ndim);
+	size_t ndim = GetNumDimensions(varname);
 	for (int i=0; i<ndim; i++) {
 		dims.push_back(1);
 		bs.push_back(1);

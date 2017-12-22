@@ -43,14 +43,14 @@ CurvilinearGrid::CurvilinearGrid(
 	// Only support 2D X & Y coordinates currently. I.e. only support
 	// "layered" curvilinear grids
 	//
-	assert(xrg.GetTopologyDim() == 2);
-	assert(yrg.GetTopologyDim() == 2);
+	assert(xrg.GetDimensions().size() == 2);
+	assert(yrg.GetDimensions().size() == 2);
 	assert(kdtree->GetDimensions().size() == 2);
 
 	_curvilinearGrid(xrg, yrg, zcoords, kdtree);
 }
 
-size_t CurvilinearGrid::GetNumCoordinates() const {
+size_t CurvilinearGrid::GetGeometryDim() const {
 	return(_zcoords.size() == 0 ? 2 : 3);
 }
 
@@ -60,17 +60,21 @@ void CurvilinearGrid::GetBoundingBox(
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	std::vector <double> &minu, std::vector <double> &maxu
 ) const {
-	assert(min.size() == max.size());
-	assert(min.size() == GetNumCoordinates());
 
-	for (int i=0; i<min.size(); i++) {
-		assert(min[i] <= max[i]);
+	vector <size_t> cMin = min;
+	ClampIndex(cMin);
+
+	vector <size_t> cMax = max;
+	ClampIndex(cMax);
+
+	for (int i=0; i<cMin.size(); i++) {
+		assert(cMin[i] <= cMax[i]);
 	}
 
 	minu.clear();
 	maxu.clear();
 	
-	for (int i=0; i<min.size(); i++) {
+	for (int i=0; i<cMin.size(); i++) {
 		minu.push_back(0.0);
 		maxu.push_back(0.0);
 	}
@@ -79,8 +83,8 @@ void CurvilinearGrid::GetBoundingBox(
 	// Get the horiztonal (X & Y) extents by visiting every point
 	// on a single plane (horizontal coordinates are constant over Z).
 	//
-	vector <size_t> min2d = {min[0], min[1]};
-	vector <size_t> max2d = {max[0], max[1]};
+	vector <size_t> min2d = {cMin[0], cMin[1]};
+	vector <size_t> max2d = {cMax[0], cMax[1]};
 	float xrange[2], yrange[2];
 	_xrg.GetRange(min2d, max2d, xrange);
 	_yrg.GetRange(min2d, max2d, yrange);
@@ -92,10 +96,10 @@ void CurvilinearGrid::GetBoundingBox(
 
 	// We're done if 2D grid
 	//
-	if (GetNumCoordinates() == 2) return;
+	if (GetGeometryDim() == 2) return;
 
-	minu[2] = _zcoords[min[2]];
-	maxu[2] = _zcoords[max[2]];
+	minu[2] = _zcoords[cMin[2]];
+	maxu[2] = _zcoords[cMax[2]];
 }
 
 
@@ -103,8 +107,16 @@ void CurvilinearGrid::GetEnclosingRegion(
 	const std::vector <double> &minu, const std::vector <double> &maxu,
 	std::vector <size_t> &min, std::vector <size_t> &max
 ) const {
-	assert(minu.size() == maxu.size());
-	assert(minu.size() == GetNumCoordinates());
+
+	// Clamp coordinates on periodic boundaries to grid extents
+	//
+	vector <double> cMinu = minu;
+	ClampCoord(cMinu);
+
+	vector <double> cMaxu = maxu;
+	ClampCoord(cMaxu);
+
+	assert(cMinu.size() == cMaxu.size());
 
 	// Initialize voxels coords to full grid
 	//
@@ -120,8 +132,8 @@ void CurvilinearGrid::GetEnclosingRegion(
 
 	// Find min and max Y voxel
 	//
-	float xmin = minu[0];
-	float ymin = minu[1];
+	float xmin = cMinu[0];
+	float ymin = cMinu[1];
 	int jmin = min[1];
 	bool outside = true;
 	for (int j=0; j<dims[1] && outside; j++) {
@@ -135,8 +147,8 @@ void CurvilinearGrid::GetEnclosingRegion(
 	}
 	min[1] = jmin;
 
-	float xmax = maxu[0];
-	float ymax = maxu[1];
+	float xmax = cMaxu[0];
+	float ymax = cMaxu[1];
 	int jmax = max[1];
 	outside = true;
 	for (int j=dims[1]-1; j>=0 && outside; j--) {
@@ -182,7 +194,7 @@ void CurvilinearGrid::GetEnclosingRegion(
 
 	// Finally, get Z
 	//
-	float zmin = minu[2];
+	float zmin = cMinu[2];
 	int kmin = min[2];
 	outside = true;
 	for (int k=0; k<_zcoords.size() && outside; k++) {
@@ -191,7 +203,7 @@ void CurvilinearGrid::GetEnclosingRegion(
 	}
 	min[2] = kmin;
 
-	float zmax = maxu[2];
+	float zmax = cMaxu[2];
 	int kmax = max[2];
 	outside = true;
 	for (int k=_zcoords.size()-1; k>=min[2] && outside; k--) {
@@ -206,23 +218,18 @@ void CurvilinearGrid::GetUserCoordinates(
 	const std::vector <size_t> &indices,
 	std::vector <double> &coords
 ) const {
-	assert(indices.size() == GetDimensions().size());
+    vector <size_t> cIndices = indices;
+    ClampIndex(cIndices);
 
 	coords.clear();
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();
 
-	vector <size_t> cIndices = indices;
-	for (int i=0; i<cIndices.size(); i++) {
-		if (cIndices[i] >= dims[i]) {
-			cIndices[i] = dims[i]-1;
-		}
-	}
 	vector <size_t> cIndices2D = {cIndices[0], cIndices[1]};
 
 	coords.push_back(_xrg.AccessIndex(cIndices2D));
 	coords.push_back(_yrg.AccessIndex(cIndices2D));
-	if (GetNumCoordinates() > 2) {
+	if (GetGeometryDim() > 2) {
 		coords.push_back(_zcoords[cIndices[2]]);
 	}
 
@@ -232,7 +239,6 @@ void CurvilinearGrid::GetIndices(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
 ) const {
-	assert(coords.size() >= GetNumCoordinates());
 	indices.clear();
 
 	// Clamp coordinates on periodic boundaries to grid extents
@@ -264,7 +270,6 @@ bool CurvilinearGrid::GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
 ) const {
-	assert(coords.size() >= GetNumCoordinates());
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
@@ -273,7 +278,7 @@ bool CurvilinearGrid::GetIndicesCell(
 	
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	
 
 	double lambda[4], zwgt[2];
@@ -285,7 +290,7 @@ bool CurvilinearGrid::GetIndicesCell(
 	indices.push_back(i);
 	indices.push_back(j);
 
-	if (GetNumCoordinates() == 2) return(true);
+	if (GetGeometryDim() == 2) return(true);
 
 	indices.push_back(k);
 
@@ -295,7 +300,6 @@ bool CurvilinearGrid::GetIndicesCell(
 
 
 bool CurvilinearGrid::InsideGrid(const std::vector <double> &coords) const {
-	assert(coords.size() == GetNumCoordinates());
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents 
@@ -314,7 +318,7 @@ bool CurvilinearGrid::InsideGrid(const std::vector <double> &coords) const {
 	size_t i,j,k;	// not used
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	
 	bool inside = _insideGrid(x, y, z, i, j, k, lambda, zwgt);
 
@@ -453,7 +457,6 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset) {
 float CurvilinearGrid::GetValueNearestNeighbor(
 	const std::vector <double> &coords
 ) const {
-	assert(coords.size() == GetNumCoordinates());
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
@@ -464,7 +467,7 @@ float CurvilinearGrid::GetValueNearestNeighbor(
 	size_t i,j,k;
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	bool inside = _insideGrid(x, y, z, i, j, k, lambda, zwgt);
 
 	if (! inside) return(GetMissingValue());
@@ -534,7 +537,7 @@ float CurvilinearGrid::GetValueLinear(
 	size_t i,j,k;
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	bool inside = _insideGrid(x, y, z, i, j, k, lambda, zwgt);
 
 
@@ -559,7 +562,7 @@ float CurvilinearGrid::GetValueLinear(
 
 	float v0 = interpolateQuad(v0s, lambda, mv);
 
-	if (GetNumCoordinates() == 2) return(v0);
+	if (GetGeometryDim() == 2) return(v0);
 
 	if (v0 == mv) zwgt[0] = 0.0;
 
@@ -712,7 +715,7 @@ bool CurvilinearGrid::_insideGrid(
 		return(false);
 	}
 
-	if (GetNumCoordinates() == 2) {
+	if (GetGeometryDim() == 2) {
 		zwgt[0] = 1.0;
 		zwgt[1] = 0.0;
 		return(true);
