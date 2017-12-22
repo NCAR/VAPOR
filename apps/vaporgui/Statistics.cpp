@@ -1,9 +1,10 @@
-//                                                                    *
-//         Copyright (C)  2016                                      *
-//   University Corporation for Atmospheric Research                  *
-//         All Rights Reserved                                      *
-//                                                                    *
-//************************************************************************/
+//************************************************************************
+//                                                                       *
+//         Copyright (C)  2016                                           *
+//   University Corporation for Atmospheric Research                     *
+//         All Rights Reserved                                           *
+//                                                                       *
+//************************************************************************
 //
 //  File:      Statistics.cpp
 //
@@ -181,50 +182,59 @@ bool Statistics::Update()
     RemoveCalcCombo->blockSignals(false);
 
     // Update LOD, Refinement
-    RefCombo->blockSignals(true);
-    LODCombo->blockSignals(true);
+    FidelityWidget::DisplayFlags dspFlags;
+    MyFidelityWidget->Reinit(dspFlags);
+    MyFidelityWidget->Update(currentDmgr, _controlExec->GetParamsMgr(), statsParams);
+#if 0
+    RefCombo->blockSignals( true );
+    LODCombo->blockSignals( true );
     RefCombo->clear();
     LODCombo->clear();
-    int            numRefLevels = currentDmgr->GetNumRefLevels(availVars[0]);
-    vector<size_t> availLODs = currentDmgr->GetCRatios(availVars[0]);
+    int numRefLevels = currentDmgr->GetNumRefLevels( availVars[0] );
+    vector<size_t> availLODs = currentDmgr->GetCRatios( availVars[0] );
     // sanity check on enabledVars.
-    for (int i = 1; i < enabledVars.size(); i++) {
-        assert(numRefLevels == currentDmgr->GetNumRefLevels(enabledVars[i]));
-        assert(availLODs.size() == currentDmgr->GetCRatios(enabledVars[i]).size());
+    for( int i = 1; i < enabledVars.size(); i++ )   
+    {
+        assert( numRefLevels == currentDmgr->GetNumRefLevels( enabledVars[i] ));
+        assert( availLODs.size() == currentDmgr->GetCRatios(  enabledVars[i] ).size() );
     }
     std::string referenceVar;
-    if (availVars3D.size() > 0)
+    if( availVars3D.size() > 0 )
         referenceVar = availVars3D[0];
     else
         referenceVar = availVars[0];
 
     // add refinement levels
     std::vector<size_t> dims, blockSizes;
-    for (int level = 0; level < numRefLevels; level++) {
-        currentDmgr->GetDimLensAtLevel(referenceVar, level, dims, blockSizes);
-        QString line = QString::number(level);
+    for( int level = 0; level < numRefLevels; level++ )
+    {
+        currentDmgr->GetDimLensAtLevel( referenceVar, level, dims, blockSizes );
+        QString line = QString::number( level );
         line += " (";
-        for (int i = 0; i < dims.size(); i++) {
+        for( int i = 0; i < dims.size(); i++ )
+        {
             line += QString::number(dims[i]);
             line += "x";
         }
-        line.remove(line.size() - 1, 1);
+        line.remove( line.size()-1, 1 );
         line += ")";
-        RefCombo->addItem(line);
+        RefCombo->addItem( line );
     }
-    RefCombo->setCurrentIndex(statsParams->GetRefinementLevel());
+    RefCombo->setCurrentIndex( statsParams->GetRefinementLevel() );
 
     // add LOD levels
-    for (int lod = 0; lod < availLODs.size(); lod++) {
-        QString line = QString::number(lod);
+    for( int lod = 0; lod < availLODs.size(); lod++ )
+    {
+        QString line = QString::number( lod );
         line += " (";
-        line += QString::number(availLODs[lod]);
+        line += QString::number( availLODs[lod] );
         line += ":1)";
-        LODCombo->addItem(line);
+        LODCombo->addItem( line );
     }
-    LODCombo->setCurrentIndex(statsParams->GetCompressionLevel());
-    RefCombo->blockSignals(false);
-    LODCombo->blockSignals(false);
+    LODCombo->setCurrentIndex( statsParams->GetCompressionLevel() );
+    RefCombo->blockSignals( false );
+    LODCombo->blockSignals( false );
+#endif
 
     // Update timesteps
     MinTimestepSpinbox->blockSignals(true);
@@ -382,8 +392,8 @@ bool Statistics::Connect()
     connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)));
     connect(NewCalcCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newCalcChanged(int)));
     connect(RemoveCalcCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeCalcChanged(int)));
-    connect(RefCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_refinementChanged(int)));
-    connect(LODCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)));
+    // connect( RefCombo,          SIGNAL(currentIndexChanged(int)), this, SLOT(_refinementChanged(int)) );
+    // connect( LODCombo,          SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)) );
     connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)));
     connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)));
     connect(UpdateButton, SIGNAL(clicked()), this, SLOT(_updateButtonClicked()));
@@ -536,49 +546,59 @@ void Statistics::_maxTSChanged(int val)
     if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
 }
 
-void Statistics::_lodChanged(int index)
+#if 0
+void Statistics::_lodChanged( int index )
 {
-    assert(index >= 0);
+    assert( index >= 0 );
 
     // Initialize pointers
-    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string       dsName = guiParams->GetStatsDatasetName();
-    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    int               lod = index;
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    int lod = index;
 
     // Add this lod level to parameter if different
-    if (lod != statsParams->GetCompressionLevel()) {
-        statsParams->SetCompressionLevel(lod);
+    if( lod != statsParams->GetCompressionLevel() )
+    {
+        statsParams->SetCompressionLevel( lod );
         _validStats.InvalidAll();
     }
 
     _validStats.currentLOD = lod;
 
     // Auto-update if enabled
-    if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
 
-void Statistics::_refinementChanged(int index)
+void Statistics::_refinementChanged( int index )
 {
-    assert(index >= 0);
+    assert( index >= 0 );
 
     // Initialize pointers
-    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string       dsName = guiParams->GetStatsDatasetName();
-    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    int               refLevel = index;
+    GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
+                    (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
+    std::string dsName = guiParams->GetStatsDatasetName();
+    StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
+            (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    int refLevel = index; 
 
     // Add this refinement level to parameter if different
-    if (refLevel != statsParams->GetRefinementLevel()) {
-        statsParams->SetRefinementLevel(refLevel);
+    if( refLevel != statsParams->GetRefinementLevel() )
+    {
+        statsParams->SetRefinementLevel( refLevel );
         _validStats.InvalidAll();
     }
 
     _validStats.currentRefLev = refLevel;
 
     // Auto-update if enabled
-    if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
+    if( statsParams->GetAutoUpdateEnabled() )
+        _updateButtonClicked();
 }
+#endif
 
 void Statistics::_newCalcChanged(int index)
 {
