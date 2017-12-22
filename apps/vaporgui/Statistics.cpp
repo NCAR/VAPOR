@@ -1,9 +1,10 @@
-//                                                                    *
-//         Copyright (C)  2016                                      *
-//   University Corporation for Atmospheric Research                  *
-//         All Rights Reserved                                      *
-//                                                                    *
-//************************************************************************/
+//************************************************************************
+//                                                                       *
+//         Copyright (C)  2016                                           *
+//   University Corporation for Atmospheric Research                     *
+//         All Rights Reserved                                           *
+//                                                                       *
+//************************************************************************
 //
 //  File:      Statistics.cpp
 //
@@ -197,6 +198,10 @@ bool Statistics::Update()
     RemoveCalcCombo->blockSignals( false );
 
     // Update LOD, Refinement
+    FidelityWidget::DisplayFlags dspFlags;
+    MyFidelityWidget->Reinit( dspFlags );
+    MyFidelityWidget->Update( currentDmgr,  _controlExec->GetParamsMgr(), statsParams );
+#if 0
     RefCombo->blockSignals( true );
     LODCombo->blockSignals( true );
     RefCombo->clear();
@@ -245,6 +250,7 @@ bool Statistics::Update()
     LODCombo->setCurrentIndex( statsParams->GetCompressionLevel() );
     RefCombo->blockSignals( false );
     LODCombo->blockSignals( false );
+#endif
 
     // Update timesteps
     MinTimestepSpinbox->blockSignals( true );
@@ -426,8 +432,8 @@ bool Statistics::Connect()
     connect( RemoveVarCombo,    SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)) );
     connect( NewCalcCombo,      SIGNAL(currentIndexChanged(int)), this, SLOT(_newCalcChanged(int)) );
     connect( RemoveCalcCombo,   SIGNAL(currentIndexChanged(int)), this, SLOT(_removeCalcChanged(int)) );
-    connect( RefCombo,          SIGNAL(currentIndexChanged(int)), this, SLOT(_refinementChanged(int)) );
-    connect( LODCombo,          SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)) );
+    //connect( RefCombo,          SIGNAL(currentIndexChanged(int)), this, SLOT(_refinementChanged(int)) );
+    //connect( LODCombo,          SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)) );
     connect( MinTimestepSpinbox,       SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)) );
     connect( MaxTimestepSpinbox,       SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)) );
     connect( UpdateButton,      SIGNAL(clicked()),                this, SLOT(_updateButtonClicked()));
@@ -608,6 +614,7 @@ void Statistics::_maxTSChanged( int val )
         _updateButtonClicked();
 }
 
+#if 0
 void Statistics::_lodChanged( int index )
 {
     assert( index >= 0 );
@@ -659,6 +666,7 @@ void Statistics::_refinementChanged( int index )
     if( statsParams->GetAutoUpdateEnabled() )
         _updateButtonClicked();
 }
+#endif
 
 void Statistics::_newCalcChanged( int index )
 {
