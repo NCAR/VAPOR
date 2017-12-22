@@ -55,7 +55,7 @@ class VDF_API LayeredGrid : public StructuredGrid {
     LayeredGrid() = default;
     virtual ~LayeredGrid() = default;
 
-    virtual size_t GetNumCoordinates() const override {
+    virtual size_t GetGeometryDim() const override {
         return (3);
     }
 

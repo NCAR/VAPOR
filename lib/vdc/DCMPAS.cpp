@@ -447,34 +447,6 @@ std::vector<string> DCMPAS::GetDataVarNames() const {
     return (names);
 }
 
-vector<string> DCMPAS::GetDataVarNames(int ndim, bool spatial) const {
-
-    // Storage of unstrucured data is linearized in 2D. Thus a 3D
-    // variable has 2 NetCDF dimensions, etc.
-    //
-    vector<string> varnames;
-    for (int i = 0; i < _cellVars.size(); i++) {
-        vector<string> dimnames = _GetSpatialDimNames(_ncdfc, _cellVars[i]);
-        if (dimnames.size() + 1 == ndim) {
-            varnames.push_back(_cellVars[i]);
-        }
-    }
-    for (int i = 0; i < _pointVars.size(); i++) {
-        vector<string> dimnames = _GetSpatialDimNames(_ncdfc, _pointVars[i]);
-        if (dimnames.size() + 1 == ndim) {
-            varnames.push_back(_pointVars[i]);
-        }
-    }
-    for (int i = 0; i < _edgeVars.size(); i++) {
-        vector<string> dimnames = _GetSpatialDimNames(_ncdfc, _edgeVars[i]);
-        if (dimnames.size() + 1 == ndim) {
-            varnames.push_back(_edgeVars[i]);
-        }
-    }
-
-    return (varnames);
-}
-
 std::vector<string> DCMPAS::GetCoordVarNames() const {
     map<string, DC::CoordVar>::const_iterator itr;
 

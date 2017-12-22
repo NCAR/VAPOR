@@ -82,7 +82,7 @@ void DefineMaskVars(
     //
     vector<pair<string, vector<string>>> dimpairs;
     for (int d = 1; d < 4; d++) {
-        vector<string> datanames = dccf.DC::GetDataVarNames(d, true);
+        vector<string> datanames = dccf.DC::GetDataVarNames(d);
 
         for (int i = 0; i < datanames.size(); i++) {
 
@@ -156,7 +156,7 @@ void defineMapProjection(const DCCF &dcwrf, VDCNetCDF &vdc) {
 
     string proj4string;
     for (int d = 2; d < 4 && proj4string.empty(); d++) {
-        vector<string> varnames = dcwrf.DC::GetDataVarNames(d, true);
+        vector<string> varnames = dcwrf.DC::GetDataVarNames(d);
 
         for (int i = 0; i < varnames.size(); i++) {
             string proj4string = dcwrf.GetMapProjection(varnames[i]);
@@ -245,48 +245,43 @@ int main(int argc, char **argv) {
     //
     // Define coordinate variables
     //
-    for (int d = 0; d < 4; d++) {
-        vector<string> coordnames = dccf.DC::GetCoordVarNames(d, true);
+    vector<size_t> cratios(1, 1);
+    vector<string> coordnames = dccf.GetCoordVarNames();
+
+    for (int i = 0; i < coordnames.size(); i++) {
+        DC::CoordVar cvar;
+        dccf.GetCoordVarInfo(coordnames[i], cvar);
+
+        vector<string> sdimnames;
+        string time_dimname;
+
+        bool ok = dccf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
+        assert(ok);
 
         //
         // Time coordinate and 1D coordinates are not blocked
         //
-        vector<size_t> mybs;
-        if (d < 2) {
+        vector<size_t> mybs = opt.bs;
+        if (sdimnames.size() < 2) {
             mybs.clear();
-        } else {
-            mybs = opt.bs;
         }
-
-        vector<size_t> cratios(1, 1);
 
         rc = vdc.SetCompressionBlock(mybs, opt.wname, cratios);
         if (rc < 0)
             return (1);
 
-        for (int i = 0; i < coordnames.size(); i++) {
-            DC::CoordVar cvar;
-            dccf.GetCoordVarInfo(coordnames[i], cvar);
+        if (cvar.GetUniform()) {
+            rc = vdc.DefineCoordVarUniform(
+                cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
+                cvar.GetAxis(), cvar.GetXType(), false);
+        } else {
+            rc = vdc.DefineCoordVar(
+                cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
+                cvar.GetAxis(), cvar.GetXType(), false);
+        }
 
-            vector<string> sdimnames;
-            string time_dimname;
-
-            bool ok = dccf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
-            assert(ok);
-
-            if (cvar.GetUniform()) {
-                rc = vdc.DefineCoordVarUniform(
-                    cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
-                    cvar.GetAxis(), cvar.GetXType(), false);
-            } else {
-                rc = vdc.DefineCoordVar(
-                    cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
-                    cvar.GetAxis(), cvar.GetXType(), false);
-            }
-
-            if (rc < 0) {
-                return (1);
-            }
+        if (rc < 0) {
+            return (1);
         }
     }
 
@@ -298,10 +293,10 @@ int main(int argc, char **argv) {
     // Define data variables
     //
     for (int d = 0; d < 4; d++) {
-        vector<string> datanames = dccf.DC::GetDataVarNames(d, true);
+        vector<string> datanames = dccf.DC::GetDataVarNames(d);
 
         //
-        // Time coordinate and 1D coordinates are not blocked
+        // 1D coordinates are not blocked
         //
         string mywname;
         vector<size_t> mybs;

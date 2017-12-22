@@ -281,7 +281,7 @@ bool DataMgrUtils::GetExtents(
     if (varname.empty()) {
         vector<string> varnames;
         for (int ndim = 3; ndim > 0; ndim--) {
-            varnames = dataMgr->GetDataVarNames(ndim, true);
+            varnames = dataMgr->GetDataVarNames(ndim);
             if (!varnames.empty())
                 break;
         }

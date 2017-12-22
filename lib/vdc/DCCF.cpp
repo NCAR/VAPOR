@@ -244,18 +244,6 @@ std::vector<string> DCCF::GetDataVarNames() const {
     return (names);
 }
 
-vector<string> DCCF::GetDataVarNames(int ndim, bool spatial) const {
-
-    // 3D VARIABLES NOT CURRENTLY SUPPORTED
-    //
-    //	if ((spatial && ndim > 2) || (! spatial && ndim > 3)) {
-    //		cerr << "DCCF::GetDataVarNames() : 3D VARIABLES NOT SUPPORTED" << endl;
-    //		return(vector <string> ());
-    //	}
-
-    return (DC::GetDataVarNames(ndim, spatial));
-}
-
 std::vector<string> DCCF::GetCoordVarNames() const {
     map<string, DC::CoordVar>::const_iterator itr;
 
