@@ -57,7 +57,7 @@ public:
  LayeredGrid() = default;
  virtual ~LayeredGrid() = default;
 
- virtual size_t GetNumCoordinates() const override {
+ virtual size_t GetGeometryDim() const override {
 	return(3);
  }
 

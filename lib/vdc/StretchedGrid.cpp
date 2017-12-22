@@ -49,7 +49,7 @@ StretchedGrid::StretchedGrid(
 	_stretchedGrid(xcoords, ycoords, zcoords);
 }
 
-size_t StretchedGrid::GetNumCoordinates() const {
+size_t StretchedGrid::GetGeometryDim() const {
 	return(_zcoords.size() == 0 ? 2 : 3);
 }
 
@@ -58,32 +58,38 @@ void StretchedGrid::GetBoundingBox(
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	std::vector <double> &minu, std::vector <double> &maxu
 ) const {
-	assert(min.size() == max.size());
-	assert(min.size() == GetNumCoordinates());
 
-	for (int i=0; i<min.size(); i++) {
-		assert(min[i] <= max[i]);
+	vector <size_t> cMin = min;
+	ClampIndex(cMin);
+
+	vector <size_t> cMax = max;
+	ClampIndex(cMax); 
+
+	assert(cMin.size() == cMax.size());
+
+	for (int i=0; i<cMin.size(); i++) {
+		assert(cMin[i] <= cMax[i]);
 	}
 
 	minu.clear();
 	maxu.clear();
 	
-	for (int i=0; i<min.size(); i++) {
+	for (int i=0; i<cMin.size(); i++) {
 		minu.push_back(0.0);
 		maxu.push_back(0.0);
 	}
 
-	minu[0] = _xcoords[min[0]];
-	maxu[0] = _xcoords[max[0]];
-	minu[1] = _ycoords[min[1]];
-	maxu[1] = _ycoords[max[1]];
+	minu[0] = _xcoords[cMin[0]];
+	maxu[0] = _xcoords[cMax[0]];
+	minu[1] = _ycoords[cMin[1]];
+	maxu[1] = _ycoords[cMax[1]];
 
 	// We're done if 2D grid
 	//
-	if (GetNumCoordinates() == 2) return;
+	if (GetGeometryDim() == 2) return;
 
-	minu[2] = _zcoords[min[2]];
-	maxu[2] = _zcoords[max[2]];
+	minu[2] = _zcoords[cMin[2]];
+	maxu[2] = _zcoords[cMax[2]];
 }
 
 
@@ -91,8 +97,14 @@ void StretchedGrid::GetEnclosingRegion(
 	const std::vector <double> &minu, const std::vector <double> &maxu,
 	std::vector <size_t> &min, std::vector <size_t> &max
 ) const {
-	assert(minu.size() == maxu.size());
-	assert(minu.size() == GetNumCoordinates());
+
+	vector <double> cMinu = minu;
+	ClampCoord(cMinu);
+
+	vector <double> cMaxu = maxu;
+	ClampCoord(cMaxu);
+
+	assert(cMinu.size() == cMaxu.size());
 
 	// Initialize voxels coords to full grid
 	//
@@ -102,7 +114,7 @@ void StretchedGrid::GetEnclosingRegion(
 		max[i] = dims[i] - 1;
 	}
 
-	float xmin = minu[0];
+	float xmin = cMinu[0];
 	int imin = min[0];
 	bool outside = true;
 	for (int i=0; i<_xcoords.size() && outside; i++) {
@@ -111,7 +123,7 @@ void StretchedGrid::GetEnclosingRegion(
 	}
 	min[0] = imin;
 
-	float xmax = maxu[0];
+	float xmax = cMaxu[0];
 	int imax = max[0];
 	outside = true;
 	for (int i=_xcoords.size()-1; i>=min[0] && outside; i--) {
@@ -120,7 +132,7 @@ void StretchedGrid::GetEnclosingRegion(
 	}
 	max[0] = imax;
 
-	float ymin = minu[1];
+	float ymin = cMinu[1];
 	int jmin = min[1];
 	outside = true;
 	for (int j=0; j<_ycoords.size() && outside; j++) {
@@ -129,7 +141,7 @@ void StretchedGrid::GetEnclosingRegion(
 	}
 	min[1] = jmin;
 
-	float ymax = maxu[1];
+	float ymax = cMaxu[1];
 	int jmax = max[1];
 	outside = true;
 	for (int j=_ycoords.size()-1; j>=min[1] && outside; j--) {
@@ -143,7 +155,7 @@ void StretchedGrid::GetEnclosingRegion(
 
 	// Finally, get Z
 	//
-	float zmin = minu[2];
+	float zmin = cMinu[2];
 	int kmin = min[2];
 	outside = true;
 	for (int k=0; k<_zcoords.size() && outside; k++) {
@@ -152,7 +164,7 @@ void StretchedGrid::GetEnclosingRegion(
 	}
 	min[2] = kmin;
 
-	float zmax = maxu[2];
+	float zmax = cMaxu[2];
 	int kmax = max[2];
 	outside = true;
 	for (int k=_zcoords.size()-1; k>=min[2] && outside; k--) {
@@ -167,22 +179,18 @@ void StretchedGrid::GetUserCoordinates(
 	const std::vector <size_t> &indices,
 	std::vector <double> &coords
 ) const {
-	assert(indices.size() == GetDimensions().size());
+
+    vector <size_t> cIndices = indices;
+    ClampIndex(cIndices);
 
 	coords.clear();
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();
 
-	vector <size_t> cIndices = indices;
-	for (int i=0; i<cIndices.size(); i++) {
-		if (cIndices[i] >= dims[i]) {
-			cIndices[i] = dims[i]-1;
-		}
-	}
 	coords.push_back(_xcoords[cIndices[0]]);
 	coords.push_back(_ycoords[cIndices[1]]);
 
-	if (GetNumCoordinates() > 2) {
+	if (GetGeometryDim() > 2) {
 		coords.push_back(_zcoords[cIndices[2]]);
 	}
 }
@@ -191,7 +199,6 @@ void StretchedGrid::GetIndices(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
 ) const {
-	assert(coords.size() >= GetNumCoordinates());
 	indices.clear();
 
 	// Clamp coordinates on periodic boundaries to grid extents
@@ -243,7 +250,6 @@ bool StretchedGrid::GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
 ) const {
-	assert(coords.size() >= GetNumCoordinates());
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
@@ -252,7 +258,7 @@ bool StretchedGrid::GetIndicesCell(
 	
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	
 	double xwgt[2], ywgt[2], zwgt[2];
 	size_t i, j, k;
@@ -263,7 +269,7 @@ bool StretchedGrid::GetIndicesCell(
 	indices.push_back(i);
 	indices.push_back(j);
 
-	if (GetNumCoordinates() == 2) return(true);
+	if (GetGeometryDim() == 2) return(true);
 
 	indices.push_back(k);
 
@@ -273,7 +279,6 @@ bool StretchedGrid::GetIndicesCell(
 
 
 bool StretchedGrid::InsideGrid(const std::vector <double> &coords) const {
-	assert(coords.size() == GetNumCoordinates());
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents 
@@ -292,7 +297,7 @@ bool StretchedGrid::InsideGrid(const std::vector <double> &coords) const {
 	size_t i,j,k;	// not used
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	
 	bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
 
@@ -403,7 +408,6 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset) {
 float StretchedGrid::GetValueNearestNeighbor(
 	const std::vector <double> &coords
 ) const {
-	assert(coords.size() == GetNumCoordinates());
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
@@ -414,7 +418,7 @@ float StretchedGrid::GetValueNearestNeighbor(
 	size_t i,j,k;
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
 
 	if (! inside) return(GetMissingValue());
@@ -438,7 +442,7 @@ float StretchedGrid::GetValueLinear(
 	size_t i,j,k;
 	double x = cCoords[0];
 	double y = cCoords[1];
-	double z = GetNumCoordinates() == 3 ? cCoords[2] : 0.0;
+	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 	bool inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
 
 
@@ -454,7 +458,7 @@ float StretchedGrid::GetValueLinear(
 		AccessIJK(i+1,j+1,k) * ywgt[0] +
 		AccessIJK(i,j+1,k) * ywgt[1];
 
-	if (GetNumCoordinates() == 2) return(v0);
+	if (GetGeometryDim() == 2) return(v0);
 
 	float v1 = AccessIJK(i,j,k+1) * xwgt[0] + 
 		AccessIJK(i+1,j,k+1) * xwgt[1] +
@@ -561,7 +565,7 @@ bool StretchedGrid::_insideGrid(
 	ywgt[0] = 1.0 - (y - _ycoords[j]) / (_ycoords[j+1] - _ycoords[j]);
 	ywgt[1] = 1.0 - ywgt[0];
 
-	if (GetNumCoordinates() == 2) {
+	if (GetGeometryDim() == 2) {
 		zwgt[0] = 1.0;
 		zwgt[1] = 0.0;
 		return(true);

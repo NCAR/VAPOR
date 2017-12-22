@@ -74,30 +74,31 @@ float *Grid::AccessIndex(
 	const std::vector <size_t> &indices
 ) const {
 
+	std::vector <size_t> cIndices = indices;
+	ClampIndex(cIndices);
+
 	size_t bs[] = {0,0,0};
 	size_t bdims[] = {0,0,0};
-
-	assert(indices.size() >= GetDimensions().size());
 
 	if (! blks.size()) return(NULL);
 
 	vector <size_t> dims = GetDimensions();
 	size_t ndim = dims.size();
 	for (int i=0; i<ndim; i++) {
-		if (indices[i] >= dims[i]) {
+		if (cIndices[i] >= dims[i]) {
 			return(NULL);
 		}
 		bs[i] = _bs[i];
 		bdims[i] = _bdims[i];
 	}
 
-	size_t xb = indices[0] / bs[0];
-	size_t yb = ndim > 1 ? indices[1] / bs[1] : 0;
-	size_t zb = ndim > 2 ? indices[2] / bs[2] : 0;
+	size_t xb = cIndices[0] / bs[0];
+	size_t yb = ndim > 1 ? cIndices[1] / bs[1] : 0;
+	size_t zb = ndim > 2 ? cIndices[2] / bs[2] : 0;
 
-	size_t x = indices[0] % bs[0];
-	size_t y = ndim > 1 ? indices[1] % bs[1] : 0;
-	size_t z = ndim > 2 ? indices[2] % bs[2] : 0;
+	size_t x = cIndices[0] % bs[0];
+	size_t y = ndim > 1 ? cIndices[1] % bs[1] : 0;
+	size_t z = ndim > 2 ? cIndices[2] % bs[2] : 0;
 
 	float *blk = blks[zb*bdims[0]*bdims[1] + yb*bdims[0] + xb];
 	return(&blk[z*bs[0]*bs[1] + y*bs[0] + x]);
@@ -139,15 +140,16 @@ void Grid::GetRange(
 	float range[2]
 ) const {
 
+	vector <size_t> cMin = min;
+	ClampIndex(cMin);
+
+	vector <size_t> cMax = max;
+	ClampIndex(cMax);
+
 	const vector <size_t> &dims = GetDimensions();
 
-    assert(min.size() == max.size());
-    assert(min.size() >= dims.size());
+    assert(cMin.size() == cMax.size());
 
-	while(min.size() > dims.size()) {
-		min.pop_back();
-		max.pop_back();
-	}
 
 	float mv = GetMissingValue();
 
@@ -156,21 +158,21 @@ void Grid::GetRange(
 	size_t jmin = 0;
 	size_t jmax = 0;
 	if (dims.size() > 1) {
-		jmin = min[1];
-		jmax = max[1];
+		jmin = cMin[1];
+		jmax = cMax[1];
 	}
 
 	size_t kmin = 0;
 	size_t kmax = 0;
 	if (dims.size() > 2) {
-		kmin = min[2];
-		kmax = max[2];
+		kmin = cMin[2];
+		kmax = cMax[2];
 	}
 
 	bool first = true;
 	for (size_t k=kmin; k<=kmax; k++) {
 	for (size_t j=jmin; j<=jmax; j++) {
-	for (size_t i=min[0]; i<=max[0]; i++) {
+	for (size_t i=cMin[0]; i<=cMax[0]; i++) {
 		float v = AccessIJK(i,j,k);
 		if (first &&  v != mv) {
 			range[0] = range[1] = v;
