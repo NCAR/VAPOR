@@ -20,8 +20,8 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 		SLOT(SetContourMinimum(double)));
 	connect(_spacingCombo, SIGNAL(valueChanged(double)), this,
 		SLOT(SetContourSpacing(double)));
-	connect(boundsCombo, SIGNAL(currentIndexChanged(int)), this,
-		SLOT(ContourBoundsChanged(int)));
+//	connect(boundsCombo, SIGNAL(currentIndexChanged(int)), this,
+//		SLOT(ContourBoundsChanged(int)));
 	connect(_TFWidget, SIGNAL(emitChange()), this,
 		SLOT(EndTFChange()));
 }
@@ -43,8 +43,8 @@ void ContourAppearanceSubtab::Update(
 	);
 
 	bool lock = _cParams->GetTFLock();
-	if (lock) boundsCombo->setCurrentIndex(1);
-	else boundsCombo->setCurrentIndex(0);
+//	if (lock) boundsCombo->setCurrentIndex(1);
+//	else boundsCombo->setCurrentIndex(0);
 
 	double count = _cParams->GetContourCount();
 	_countCombo->Update(1, 50, count);
@@ -61,7 +61,7 @@ void ContourAppearanceSubtab::Update(
 	double contourMax = contourMin + (count-1)*(spacing);
 	contourMax = contourMin + spacing*(count-1);
 	QString QContourMax = QString::number(contourMax);
-	contourMaxLabel->setText(QContourMax);
+//	contourMaxLabel->setText(QContourMax);
 
 	_TFWidget->Update(dataMgr, paramsMgr, _cParams);
 	_ColorbarWidget->Update(dataMgr, paramsMgr, _cParams);
