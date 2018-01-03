@@ -97,6 +97,8 @@ public:
  string getNDimsTag() {return _nDimsTag;}
 
 protected slots:
+ void printTableContents();
+
  //! Respond to selecting the single (primary) variable of field 
  void setVarName(const QString&);
 
