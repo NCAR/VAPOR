@@ -1,8 +1,8 @@
 
 //															*
-//		     Copyright (C)  2014										*
-//     University Corporation for Atmospheric Research					*
-//		     All Rights Reserved										*
+//			 Copyright (C)  2014										*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
 //															*
 //************************************************************************/
 //
@@ -26,11 +26,12 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
 #include "qdialog.h"
-#include "ui_newRendererDialog.h"
+#include "ui_NewRendererDialog.h"
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
+#include <vapor/GetAppPath.h>
 
 using namespace VAPoR;
 
@@ -38,12 +39,152 @@ namespace {
 const string DuplicateInStr = "Duplicate in:";
 };
 
+const std::string NewRendererDialog::barbDescription = "Displays an "
+                                                       "array of arrows with the users domain, with custom dimensions that are "
+                                                       "defined by the user in the X, Y, and Z axes.  The arrows represent a vector "
+                                                       "whos direction is determined by up to three user-defined variables.\n\nBarbs "
+                                                       "can have a constant color applied to them, or they may be colored according "
+                                                       "to an additional user-defined variable.\n\n [hyperlink to online doc]";
+
+const std::string NewRendererDialog::contourDescription = "Displays "
+                                                          "a series of user defined contours along a two dimensional plane within the "
+                                                          "user's domain.\n\nContours may hae constant coloration, or may be colored "
+                                                          "according to a secondary variable.\n\nContours may be displaced by a height "
+                                                          "variable.\n\n [hyperlink to online doc]";
+
+const std::string NewRendererDialog::imageDescription = "Displays a "
+                                                        "georeferenced image that is automatically reprojected and fit to the user's"
+                                                        "data, as long as the data contains georeference metadata.  The image "
+                                                        "renderer may be offset by a height variable to show bathymetry or mountainous"
+                                                        " terrain.\n\n [hyperlink to online doc]";
+
+const std::string NewRendererDialog::twoDDataDescription = "Displays "
+                                                           "the user's 2D data variables along the plane described by the source data "
+                                                           "file.\n\nThese 2D variables may be offset by a height variable.\n\n"
+                                                           "[hyperlink to online doc]";
+
 CBWidget::CBWidget(QWidget *parent, QString text) : QWidget(parent), QTableWidgetItem(text){};
+
+NewRendererDialog::NewRendererDialog(QWidget *parent, ControlExec *controlExec) : QDialog(parent), Ui_NewRendererDialog()
+{
+    setupUi(this);
+
+    rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
+    dataMgrCombo->clear();
+
+    initializeImages();
+    initializeDataSources(controlExec);
+
+    connect(barbButton, SIGNAL(toggled(bool)), this, SLOT(barbChecked(bool)));
+    connect(contourButton, SIGNAL(toggled(bool)), this, SLOT(contourChecked(bool)));
+    connect(imageButton, SIGNAL(toggled(bool)), this, SLOT(imageChecked(bool)));
+    connect(twoDDataButton, SIGNAL(toggled(bool)), this, SLOT(twoDDataChecked(bool)));
+};
+
+void NewRendererDialog::initializeDataSources(ControlExec *ce)
+{
+    ParamsMgr *    paramsMgr = ce->GetParamsMgr();
+    vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
+
+    dataMgrCombo->clear();
+    for (int i = 0; i < dataSetNames.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(dataSetNames[i])); }
+}
+
+void NewRendererDialog::initializeImages()
+{
+    setUpImage("Barbs.png", bigDisplay);
+    titleLabel->setText("\nBarb Renderer");
+    descriptionLabel->setText(QString::fromStdString(barbDescription));
+    _selectedRenderer = "Barb";
+
+    setUpImage("Barbs_small.png", barbLabel);
+    setUpImage("Contours_small.png", contourLabel);
+    setUpImage("Image_small.png", imageLabel);
+    setUpImage("TwoDData_small.png", twoDDataLabel);
+}
+
+void NewRendererDialog::setUpImage(std::string imageName, QLabel *label)
+{
+    std::vector<std::string> imagePath = std::vector<std::string>();
+    imagePath.push_back("Images");
+    imagePath.push_back(imageName);
+    QPixmap thumbnail(GetAppPath("VAPOR", "share", imagePath).c_str());
+    label->setPixmap(thumbnail);
+}
+
+void NewRendererDialog::barbChecked(bool state)
+{
+    uncheckAllButtons();
+    barbButton->blockSignals(true);
+    barbButton->setChecked(true);
+    barbButton->blockSignals(false);
+    setUpImage("Barbs.png", bigDisplay);
+    titleLabel->setText("\nBarb Renderer");
+    descriptionLabel->setText(QString::fromStdString(barbDescription));
+    _selectedRenderer = "Barb";
+}
+
+void NewRendererDialog::contourChecked(bool state)
+{
+    uncheckAllButtons();
+    contourButton->blockSignals(true);
+    contourButton->setChecked(true);
+    contourButton->blockSignals(false);
+    setUpImage("Contours.png", bigDisplay);
+    titleLabel->setText("\nContour Renderer");
+    descriptionLabel->setText(QString::fromStdString(contourDescription));
+    _selectedRenderer = "Contour";
+}
+
+void NewRendererDialog::imageChecked(bool state)
+{
+    uncheckAllButtons();
+    imageButton->blockSignals(true);
+    imageButton->setChecked(true);
+    imageButton->blockSignals(false);
+    setUpImage("Image.png", bigDisplay);
+    titleLabel->setText("\nImage Renderer");
+    descriptionLabel->setText(QString::fromStdString(imageDescription));
+    _selectedRenderer = "Image";
+}
+
+void NewRendererDialog::twoDDataChecked(bool state)
+{
+    uncheckAllButtons();
+    twoDDataButton->blockSignals(true);
+    twoDDataButton->setChecked(true);
+    twoDDataButton->blockSignals(false);
+    setUpImage("TwoDData.png", bigDisplay);
+    titleLabel->setText("\nTwoDData Renderer");
+    descriptionLabel->setText(QString::fromStdString(twoDDataDescription));
+    _selectedRenderer = "TwoDData";
+}
+
+void NewRendererDialog::uncheckAllButtons()
+{
+    barbButton->blockSignals(true);
+    contourButton->blockSignals(true);
+    imageButton->blockSignals(true);
+    twoDDataButton->blockSignals(true);
+
+    barbButton->setChecked(false);
+    contourButton->setChecked(false);
+    imageButton->setChecked(false);
+    twoDDataButton->setChecked(false);
+
+    barbButton->blockSignals(false);
+    contourButton->blockSignals(false);
+    imageButton->blockSignals(false);
+    twoDDataButton->blockSignals(false);
+}
 
 RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_RenderSelector()
 {
     setupUi(this);
     _controlExec = ce;
+
+    //_newerRendererDialog = new NewerRendererDialog(this, _controlExec);
+    _newRendererDialog = new NewRendererDialog(this, ce);
 
     tableWidget->setColumnCount(4);
     QStringList headerText;
@@ -61,7 +202,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), 
     tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     tableWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-    connect(newButton, SIGNAL(clicked()), this, SLOT(newRenderer()));
+    connect(newButton, SIGNAL(clicked()), this, SLOT(showNewRendererDialog()));
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRenderer()));
     connect(dupCombo, SIGNAL(activated(int)), this, SLOT(copyInstanceTo(int)));
     connect(tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectInstance()));
@@ -89,47 +230,27 @@ int RenderHolder::AddWidget(QWidget *wid, const char *name, string tag)
 //
 // Slots:
 //
-void RenderHolder::newRenderer()
+void RenderHolder::showNewRendererDialog()
 {
     ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
 
     vector<string> renderClasses = _controlExec->GetAllRenderClasses();
 
-#ifndef HELLO_RENDERER
-    for (vector<string>::iterator it = renderClasses.begin(); it != renderClasses.end(); it++) {
-        if (*it == "Hello") {
-            renderClasses.erase(it);
-            break;
-        }
-    }
-#endif
-
     // Launch a dialog to select a renderer type, visualizer, name
     // Then insert a horizontal line with text and checkbox.
     // The new line becomes selected.
 
-    QDialog              nDialog(this);
-    Ui_NewRendererDialog rDialog;
-    rDialog.setupUi(&nDialog);
-    rDialog.rendererNameEdit->setText("");
-    rDialog.rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
-
     // Set up the list of data set names in the dialog:
     //
-    rDialog.dataMgrCombo->clear();
-    for (int i = 0; i < dataSetNames.size(); i++) { rDialog.dataMgrCombo->addItem(QString::fromStdString(dataSetNames[i])); }
+    _newRendererDialog->dataMgrCombo->clear();
+    for (int i = 0; i < dataSetNames.size(); i++) { _newRendererDialog->dataMgrCombo->addItem(QString::fromStdString(dataSetNames[i])); }
 
-    // Set up the list of renderer names in the dialog:
-    //
-    rDialog.rendererCombo->clear();
+    if (_newRendererDialog->exec() != QDialog::Accepted) { return; }
 
-    for (int i = 0; i < renderClasses.size(); i++) { rDialog.rendererCombo->addItem(QString::fromStdString(renderClasses[i])); }
-    if (nDialog.exec() != QDialog::Accepted) return;
-    int    selection = rDialog.rendererCombo->currentIndex();
-    string renderClass = renderClasses[selection];
+    string renderClass = _newRendererDialog->getSelectedRenderer();
 
-    selection = rDialog.dataMgrCombo->currentIndex();
+    int    selection = _newRendererDialog->dataMgrCombo->currentIndex();
     string dataSetName = dataSetNames[selection];
 
     GUIStateParams *p = getStateParams();
@@ -137,7 +258,7 @@ void RenderHolder::newRenderer()
 
     // figure out the name
     //
-    QString qname = rDialog.rendererNameEdit->text();
+    QString qname = _newRendererDialog->rendererNameEdit->text();
     string  renderInst = qname.toStdString();
 
     // Check that it's not all blanks:
@@ -162,7 +283,7 @@ void RenderHolder::newRenderer()
 
     Update();
 
-    emit newRenderer(activeViz, renderClass, renderInst);
+    emit newRendererSignal(activeViz, renderClass, renderInst);
 
     paramsMgr->EndSaveStateGroup();
 }
@@ -304,7 +425,7 @@ void RenderHolder::copyInstanceTo(int item)
 
     Update();
 
-    emit newRenderer(activeViz, activeRenderClass, renderInst);
+    emit newRendererSignal(activeViz, activeRenderClass, renderInst);
 }
 
 std::string RenderHolder::uniqueName(std::string name)
@@ -506,30 +627,32 @@ void RenderHolder::getRow(int row, string &renderInst, string &renderClass, stri
     dataSetName = item->text().toStdString();
 }
 
-void RenderHolder::setRow(int row, const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
+void RenderHolder::setNameCell(string renderInst, int row)
 {
-    int rowCount = tableWidget->rowCount();
-    if (row >= rowCount) { tableWidget->setRowCount(rowCount + 1); }
-
     QTableWidgetItem *item = new QTableWidgetItem(renderInst.c_str());
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
     item->setTextAlignment(Qt::AlignCenter);
     tableWidget->setItem(row, 0, item);
+}
 
-    // QBrush brush(QColor(145,145,145));
-
-    item = new QTableWidgetItem(renderClass.c_str());
+void RenderHolder::setTypeCell(string renderClass, int row)
+{
+    QTableWidgetItem *item = new QTableWidgetItem(renderClass.c_str());
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setForeground(brush);
     item->setTextAlignment(Qt::AlignCenter);
     tableWidget->setItem(row, 1, item);
+}
 
-    item = new QTableWidgetItem(dataSetName.c_str());
+void RenderHolder::setDataSetCell(string dataSetName, int row)
+{
+    QTableWidgetItem *item = new QTableWidgetItem(dataSetName.c_str());
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-    // item->setForeground(brush);
     item->setTextAlignment(Qt::AlignCenter);
     tableWidget->setItem(row, 2, item);
+}
 
+void RenderHolder::setCheckboxCell(int row, bool enabled)
+{
     QWidget *    cbWidget = new QWidget();
     QCheckBox *  checkBox = new QCheckBox();
     QHBoxLayout *cbLayout = new QHBoxLayout(cbWidget);
@@ -542,7 +665,6 @@ void RenderHolder::setRow(int row, const string &renderInst, const string &rende
     cbWidget->setLayout(cbLayout);
 
     tableWidget->setCellWidget(row, 3, cbWidget);
-
     if (enabled) {
         checkBox->setCheckState(Qt::Checked);
     } else {
@@ -550,6 +672,17 @@ void RenderHolder::setRow(int row, const string &renderInst, const string &rende
     }
 
     connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(checkboxChanged(int)));
+}
+
+void RenderHolder::setRow(int row, const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
+{
+    int rowCount = tableWidget->rowCount();
+    if (row >= rowCount) { tableWidget->setRowCount(rowCount + 1); }
+
+    setNameCell(renderInst, row);
+    setTypeCell(renderClass, row);
+    setDataSetCell(dataSetName, row);
+    setCheckboxCell(row, enabled);
 }
 
 void RenderHolder::setRow(const string &renderInst, const string &renderClass, const string &dataSetName, bool enabled)
