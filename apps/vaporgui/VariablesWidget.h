@@ -91,7 +91,7 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
     string getNDimsTag() { return _nDimsTag; }
 
   protected slots:
-    void printTableContents();
+    void printTableContents(int row, int col);
 
     //! Respond to selecting the single (primary) variable of field
     void setVarName(const QString &);

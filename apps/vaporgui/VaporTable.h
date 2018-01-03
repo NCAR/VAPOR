@@ -64,15 +64,18 @@ class VaporTable : public QWidget {
     void setCellMutability(int row, int col);
 
   public slots:
-    void emitMySignal() { emit valueChanged(); }
+    void emitValueChanged();
+    //void emitCellClicked();
 
   signals:
 
-    // This signal is emitted whenever a cell gets changed
-    //
-    void valueChanged();
+    void valueChanged(int row, int col);
+    void cellClicked(int row, int col);
 
   private:
+    void emitCellClicked(QObject *object);
+    bool eventFilter(QObject *object, QEvent *event);
+
     std::vector<std::string> convertToString(std::vector<int> values);
 
     std::vector<std::string> convertToString(std::vector<double> values);
