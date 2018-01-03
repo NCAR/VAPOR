@@ -182,6 +182,8 @@ RenderHolder::RenderHolder(QWidget* parent, ControlExec *ce)
 	setupUi(this);
 	_controlExec = ce;
 
+	_newRendererDialog = new NewRendererDialog(this, ce);
+
 	//tableWidget->setColumnCount(4);
 //	QStringList headerText;
 //	headerText << " Name " << " Type " << " Data Set " << "Enabled";
@@ -556,6 +558,21 @@ void RenderHolder::updateDupCombo() {
 		
 }
 
+/*void RenderHolder::Update() {
+	int rows, cols;
+	std::vector<std::string> values;
+
+	// Get active params from GUI state
+	//
+	GUIStateParams *p = getStateParams();
+	string activeViz = p->GetActiveVizName();
+
+	string activeRenderClass, activeRenderInst;
+ 	p->GetActiveRenderer(
+		activeViz, activeRenderClass, activeRenderInst
+	);
+}*/
+
 void RenderHolder::Update() {
 	// Get active params from GUI state
 	//
@@ -579,6 +596,13 @@ void RenderHolder::Update() {
 	//
 	map <string, vector <string>> renderInstsMap;
 	vector <string> classNames = _controlExec->GetRenderClassNames(activeViz);
+
+	cout << "classNames = _controlExec->GetRenderClassNames(activeViz)" << endl;
+	for (int i=0; i<classNames.size(); i++)
+		cout << classNames[i] << " ";
+
+	cout << endl << endl;;
+
 	int numRows = 0;
 	for (int i = 0; i<classNames.size(); i++) {
 		vector <string> renderInsts = _controlExec->GetRenderInstances(

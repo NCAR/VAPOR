@@ -108,6 +108,8 @@ void VaporTable::setTableCells(std::vector<std::string> values) {
 			QString qVal = QString::fromStdString(value);
 
 			QLineEdit* edit = createLineEdit(qVal);
+			edit->setProperty("row", j);
+			edit->setProperty("col", i);
 			_table->setCellWidget(j, i, edit);
 		}
 	}
@@ -169,8 +171,18 @@ void VaporTable::addCheckbox(int row, int column, bool checked) {
 		checkBox->setCheckState(Qt::Unchecked);
 	}
 
+	// The chekbox and the widget can both be clicked,
+	// so I've given both objects row and column
+	// properties to relay if needed
+	checkBox->setProperty("row", row);
+	checkBox->setProperty("col", column);	
+	cbWidget->setProperty("row", row);
+	cbWidget->setProperty("col", column);
+
 	connect(checkBox, SIGNAL(stateChanged(int)),
-		this, SLOT(emitMySignal()));
+		this, SLOT(emitValueChanged()));
+	
+	cbWidget->installEventFilter(this);
 }
 
 QLineEdit* VaporTable::createLineEdit(QString val) {
@@ -189,9 +201,30 @@ QLineEdit* VaporTable::createLineEdit(QString val) {
 	edit->setAlignment(Qt::AlignHCenter);
 
 	connect(edit, SIGNAL(editingFinished()),
-		this, SLOT(emitMySignal()));
+		this, SLOT(emitValueChanged()));
+
+	edit->installEventFilter(this);
 
 	return edit;
+}
+
+void VaporTable::emitValueChanged() {
+	QObject *obj = sender();
+	int row = obj->property("row").toInt();
+	int col = obj->property("col").toInt();
+	emit valueChanged(row, col);
+}
+
+void VaporTable::emitCellClicked(QObject* obj) {
+	int row = obj->property("row").toInt();
+	int col = obj->property("col").toInt();
+	emit cellClicked(row, col);
+}
+
+bool VaporTable::eventFilter(QObject* object, QEvent* event) {
+	if (event->type() == QEvent::MouseButtonPress)
+		emitCellClicked(object);
+	return false;
 }
 
 void VaporTable::setValidator(QLineEdit *edit) {
@@ -251,9 +284,9 @@ void VaporTable::setCheckboxesInFinalColumn(bool enabled) {
 	_lastColIsCheckboxes = enabled;
 }
 
-void valueChanged(int row, int column, std::string &value);
-void valueChanged(int row, int column, double &value);
-void valueChanged(int row, int column, int &value);
+//void valueChanged(int row, int column, std::string &value);
+//void valueChanged(int row, int column, double &value);
+//void valueChanged(int row, int column, int &value);
 
 Value VaporTable::GetValue(int row, int col) {
 	std::string value;
