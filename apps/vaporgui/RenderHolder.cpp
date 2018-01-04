@@ -173,7 +173,7 @@ void NewRendererDialog::uncheckAllButtons() {
 }
 
 RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce)
-    : QWidget(parent), Ui_RenderSelector() {
+    : QWidget(parent), Ui_LeftPanel() {
     setupUi(this);
     _controlExec = ce;
     _newRendererDialog = new NewRendererDialog(this, ce);

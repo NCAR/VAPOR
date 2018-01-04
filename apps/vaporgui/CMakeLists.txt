@@ -82,6 +82,7 @@ set (UIS
 	newRendererDialog.ui
 	NewRendererDialog.ui
 	renderselector.ui
+	LeftPanel.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	TwoDAppearanceGUI.ui

@@ -9,6 +9,7 @@
 #include <vapor/MyBase.h>
 #include "VaporTable.h"
 #include "ui_renderselector.h"
+#include "ui_LeftPanel.h"
 #include "ui_NewRendererDialog.h"
 
 QT_USE_NAMESPACE
@@ -64,7 +65,7 @@ class CBWidget : public QWidget, public QTableWidgetItem {
 //! QStackedWidget that displays the various parameters associated
 //! with the selected renderer.
 //!
-class RenderHolder : public QWidget, public Ui_RenderSelector {
+class RenderHolder : public QWidget, public Ui_LeftPanel {
 
     Q_OBJECT
 
