@@ -108,6 +108,8 @@ private:
  }
 
  void updateDupCombo();
+ void makeRendererTableHeaders(vector<string> &table);
+
 
  //Convert name to a unique name (among renderer names)
  std::string uniqueName(std::string name);
@@ -121,6 +123,8 @@ private slots:
  void selectInstance();
  void copyInstanceTo(int);
  void checkboxChanged(int);
+ void activeRendererChanged(int row, int col);
+ void tableValueChanged(int row, int col);
 
 signals:
  void newRendererSignal(string vizName, string renderClass, string renderInst);
@@ -141,6 +145,9 @@ private:
  void setTypeCell(string renderClass, int row);
  void setDataSetCell(string dataSetName, int row);
  void setCheckboxCell(int row, bool enabled);
+ void highlightActiveRow(int row);
+ void changeRendererName(int row, int col);
+ VAPoR::RenderParams* getRenderParamsFromCell(int row, int col);
 
  void setRow(
 	int row, const string &renderInst, 
