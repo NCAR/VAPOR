@@ -121,7 +121,7 @@ void VaporTable::addCheckboxes(std::vector<std::string> values) {
 
     if (_lastColIsCheckboxes) {
         for (int j = 0; j < rows; j++) {
-            int index = j * (cols - 1) + (cols - 1);
+            int index = j * cols + (cols - 1);
             bool checked = isValueChecked(values, index);
             addCheckbox(j, cols - 1, checked);
         }
