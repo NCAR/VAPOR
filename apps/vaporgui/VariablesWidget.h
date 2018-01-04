@@ -98,6 +98,7 @@ public:
 
 protected slots:
  void printTableContents(int row, int col);
+ void printTableContents2(int row, int col);
 
  //! Respond to selecting the single (primary) variable of field 
  void setVarName(const QString&);

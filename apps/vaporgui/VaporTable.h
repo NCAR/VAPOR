@@ -64,6 +64,10 @@ public:
  // I think we may need something like this.  TBD...
  void setCellMutability(int row, int col);
 
+ int rowCount() {return _table->rowCount();}
+ int columnCount() {return _table->columnCount();}
+ QWidget* cellWidget(int row, int col) {return _table->cellWidget(row, col);}
+
 public slots:
  void emitValueChanged();
  //void emitCellClicked();
