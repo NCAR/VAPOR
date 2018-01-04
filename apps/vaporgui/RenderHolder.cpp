@@ -185,31 +185,14 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), 
 
     _newRendererDialog = new NewRendererDialog(this, ce);
 
-    // tableWidget->setColumnCount(4);
-    //	QStringList headerText;
-    //	headerText << " Name " << " Type " << " Data Set " << "Enabled";
-    // tableWidget->setHorizontalHeaderLabels(headerText);
-    // tableWidget->verticalHeader()->hide();
-    // tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    // tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    // tableWidget->setFocusPolicy(Qt::ClickFocus);
-    // tableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignHCenter);
-    // tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    // tableWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-
     _vaporTable = new VaporTable(tableWidget, false, true);
+
+    connect(_vaporTable, SIGNAL(cellClicked(int, int)), this, SLOT(activeRendererChanged(int, int)));
+    connect(_vaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(tableValueChanged(int, int)));
 
     connect(newButton, SIGNAL(clicked()), this, SLOT(showNewRendererDialog()));
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRenderer()));
     connect(dupCombo, SIGNAL(activated(int)), this, SLOT(copyInstanceTo(int)));
-    //	connect(
-    //		tableWidget, SIGNAL(itemSelectionChanged()),
-    //		this, SLOT(selectInstance())
-    //	);
-    //	connect(
-    //		tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)),
-    //		this, SLOT(itemTextChange(QTableWidgetItem*))
-    //	);
 
     // Remove any existing widgets:
     for (int i = stackedWidget->count() - 1; i >= 0; i--) {
@@ -344,6 +327,96 @@ void RenderHolder::checkboxChanged(int state)
     // Save current instance to state
     //
     p->SetActiveRenderer(activeViz, renderClass, renderInst);
+
+    int rc = _controlExec->ActivateRender(activeViz, dataSetName, renderClass, renderInst, state);
+    if (rc < 0) {
+        MSG_ERR("Can't create renderer");
+        return;
+    }
+}
+
+void RenderHolder::activeRendererChanged(int row, int col)
+{
+    GUIStateParams *p = getStateParams();
+    string          activeViz = p->GetActiveVizName();
+    string          renderClass = _vaporTable->GetValue(row, 0);
+    string          renderInst = _vaporTable->GetValue(row, 1);
+    p->SetActiveRenderer(activeViz, renderClass, renderInst);
+    emit activeChanged(activeViz, renderClass, renderInst);
+    highlightActiveRow(row);
+}
+
+void RenderHolder::highlightActiveRow(int row)
+{
+    QString selectionColor = "{ background: rgb(0, 255, 255);"
+                             " selection-background-color: rgb(233, 99, 0); }";
+    QString normalColor = "{ background: rgb(255,255,255);"
+                          " selection-background-color: rgb(233, 99, 0); }";
+
+    for (int i = 0; i < _vaporTable->rowCount(); i++) {
+        for (int j = 0; j < _vaporTable->columnCount(); j++) {
+            QWidget *  cell = _vaporTable->cellWidget(i, j);
+            QLineEdit *le = qobject_cast<QLineEdit *>(cell);
+            if (le) {
+                if (i == row)
+                    le->setStyleSheet("QLineEdit " + selectionColor);
+                else
+                    le->setStyleSheet("QLineEdit " + normalColor);
+            } else {
+                if (i == row)
+                    cell->setStyleSheet("QWidget " + selectionColor);
+                else
+                    cell->setStyleSheet("QWidget " + normalColor);
+            }
+        }
+    }
+}
+
+VAPoR::RenderParams *RenderHolder::getRenderParamsFromCell(int row, int col)
+{
+    GUIStateParams *p = getStateParams();
+    string          activeViz = p->GetActiveVizName();
+    string          activeRenderClass, activeRenderInst;
+    p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
+
+    string renderClass = _vaporTable->GetValue(row, 0);
+    string renderInst = _vaporTable->GetValue(row, 1);
+    string dataSetName = _vaporTable->GetValue(row, 2);
+
+    RenderParams *rParams = _controlExec->GetRenderParams(activeViz, dataSetName, activeRenderClass, activeRenderInst);
+    return rParams;
+}
+
+void RenderHolder::changeRendererName(int row, int col)
+{
+    cout << "Change renderer name" << endl;
+    RenderParams *rP = getRenderParamsFromCell(row, col);
+
+    string text = _vaporTable->GetValue(row, col);
+    string uniqueText = uniqueName(text);
+    if (text == rP->GetRendererName()) return;
+
+    if (uniqueText != text) item->setText(QString(uniqueText.c_str()));
+
+    rP->SetRendererName(uniqueText);
+}
+
+void RenderHolder::tableValueChanged(int row, int col)
+{
+    cout << "Renderer state changed" << endl;
+
+    if (col == 0) {
+        changeRendererName(row, col);
+        return;
+    }
+
+    GUIStateParams *p = getStateParams();
+    string          activeViz = p->GetActiveVizName();
+    string          renderClass = _vaporTable->GetValue(row, 0);
+    string          renderInst = _vaporTable->GetValue(row, 1);
+    string          dataSetName = _vaporTable->GetValue(row, 2);
+    int             state = _vaporTable->GetValue(row, 3);
+    // p->SetActiveRenderer(activeViz, renderClass, renderInst);
 
     int rc = _controlExec->ActivateRender(activeViz, dataSetName, renderClass, renderInst, state);
     if (rc < 0) {
@@ -517,23 +590,19 @@ void RenderHolder::updateDupCombo()
     dupCombo->setCurrentIndex(0);
 }
 
-/*void RenderHolder::Update() {
-    int rows, cols;
-    std::vector<std::string> values;
-
-    // Get active params from GUI state
-    //
-    GUIStateParams *p = getStateParams();
-    string activeViz = p->GetActiveVizName();
-
-    string activeRenderClass, activeRenderInst;
-    p->GetActiveRenderer(
-        activeViz, activeRenderClass, activeRenderInst
-    );
-}*/
+void RenderHolder::makeRendererTableHeaders(vector<string> &tableValues)
+{
+    tableValues.push_back("Name");
+    tableValues.push_back("Type");
+    tableValues.push_back("Data Set");
+    tableValues.push_back("Enabled");
+}
 
 void RenderHolder::Update()
 {
+    int                      rows, cols;
+    std::vector<std::string> values;
+
     // Get active params from GUI state
     //
     GUIStateParams *p = getStateParams();
@@ -542,36 +611,21 @@ void RenderHolder::Update()
     string activeRenderClass, activeRenderInst;
     p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
 
-    // Disable signals. Is this needed?
-    //
-    // bool oldState = tableWidget->blockSignals(true);
-
-    // Rebuild everything from scratch
-    //
-    // tableWidget->clearContents();
-
     // Get ALL of the renderer instance names defined for this visualizer
     //
     map<string, vector<string>> renderInstsMap;
     vector<string>              classNames = _controlExec->GetRenderClassNames(activeViz);
-
-    cout << "classNames = _controlExec->GetRenderClassNames(activeViz)" << endl;
-    for (int i = 0; i < classNames.size(); i++) cout << classNames[i] << " ";
-
-    cout << endl << endl;
-    ;
-
-    int numRows = 0;
+    int                         numRows = 0;
     for (int i = 0; i < classNames.size(); i++) {
         vector<string> renderInsts = _controlExec->GetRenderInstances(activeViz, classNames[i]);
         renderInstsMap[classNames[i]] = renderInsts;
         numRows += renderInsts.size();
     }
 
-    // Add one row in tableWidget for each RenderParams that is associated
-    // with activeViz:
-
     // tableWidget->setRowCount(numRows);
+    vector<string> tableValues, rowHeader, colHeader;
+    makeRendererTableHeaders(colHeader);
+
     map<string, vector<string>>::iterator itr;
     int                                   selectedRow = -1;
     int                                   row = 0;
@@ -596,15 +650,25 @@ void RenderHolder::Update()
 
             setRow(row, renderInst, className, dataSetName, rParams->IsEnabled());
 
+            string enabled = rParams->IsEnabled() ? "1" : "0";
+            tableValues.push_back(renderInst);
+            tableValues.push_back(className);
+            tableValues.push_back(dataSetName);
+            tableValues.push_back(enabled);
+
             row++;
         }
     }
 
+    for (int i = 0; i < tableValues.size(); i++) cout << tableValues[i] << " ";
+    cout << endl << endl;
+
+    _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
+    highlightActiveRow(selectedRow);
+
     // Renable signals before calling tableWidget::selectRow(), which will
     // trigger a itemSelectionChanged signal
     //
-    // tableWidget->blockSignals(oldState);
-
     if (numRows > 0 && selectedRow >= 0) {
         // tableWidget->selectRow(selectedRow);
     }
@@ -624,10 +688,6 @@ void RenderHolder::Update()
         deleteButton->setEnabled(true);
         dupCombo->setEnabled(true);
     }
-
-    // tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    // tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    // tableWidget->resizeRowsToContents();
 }
 
 void RenderHolder::getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const
