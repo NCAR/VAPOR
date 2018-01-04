@@ -105,6 +105,7 @@ class RenderHolder : public QWidget, public Ui_RenderSelector {
 
     void updateDupCombo();
     void makeRendererTableHeaders(vector<string> &table);
+    void initializeNewRendererDialog(vector<string> datasetNames);
 
     //Convert name to a unique name (among renderer names)
     std::string uniqueName(std::string name);
