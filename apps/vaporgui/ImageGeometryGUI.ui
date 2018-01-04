@@ -10,12 +10,24 @@
     <height>302</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="GeometryWidget" name="_geometryWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -26,6 +38,12 @@
    </item>
    <item>
     <widget class="TransformTable" name="_transformTable" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -39,6 +57,9 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Maximum</enum>
+     </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
@@ -51,15 +72,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GeometryWidget</class>
-   <extends>QWidget</extends>
-   <header>GeometryWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>TransformTable</class>
    <extends>QWidget</extends>
    <header>TransformTable.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GeometryWidget</class>
+   <extends>QWidget</extends>
+   <header>GeometryWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
