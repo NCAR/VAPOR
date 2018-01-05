@@ -50,10 +50,6 @@ void ContourAppearanceSubtab::Update(
     double maxSpacing = (maxBound - minBound);
     _spacingCombo->Update(0, maxSpacing, spacing);
 
-    double contourMax = contourMin + (count - 1) * (spacing);
-    contourMax = contourMin + spacing * (count - 1);
-    QString QContourMax = QString::number(contourMax);
-
     _TFWidget->Update(dataMgr, paramsMgr, _cParams);
     _ColorbarWidget->Update(dataMgr, paramsMgr, _cParams);
 }
@@ -93,6 +89,22 @@ void ContourAppearanceSubtab::SetContourValues(
         cVals.push_back(contourMin + spacing * i);
     }
 
+    double minBound, maxBound;
+    GetContourBounds(minBound, maxBound);
+    if (maxBound < cVals[contourCount - 1]) {
+        contourCountEdit->setStyleSheet("background-color: red; "
+                                        "color: white;");
+        contourCountEdit->setToolTip(
+            "If the Contour Count display is red, one or\n"
+            "more contours have exeeded the bounds of the\n"
+            "current variable data range.  Not all contours\n"
+            "indicated by Count are being rendered.");
+    } else {
+        contourCountEdit->setStyleSheet("background-color: white; "
+                                        "color: black;");
+        contourCountEdit->setToolTip("");
+    }
+
     string varName = _cParams->GetVariableName();
     _cParams->SetContourValues(varName, cVals);
 }
@@ -104,7 +116,6 @@ void ContourAppearanceSubtab::EndTFChange() {
     double spacing = _cParams->GetContourSpacing();
     double contourMin = _cParams->GetContourMin();
     int count = _cParams->GetContourCount();
-    double contourMax = contourMin + spacing * (count - 1);
 
     _cMinCombo->Update(minBound, maxBound, contourMin);
 
@@ -130,7 +141,6 @@ void ContourAppearanceSubtab::SetContourCount(int count) {
     double spacing = _cParams->GetContourSpacing();
     double contourMin = _cParams->GetContourMin();
     double minBound, maxBound;
-    double contourMax = contourMin + spacing * (count - 1);
 
     SetContourValues(count, contourMin, spacing);
 }
@@ -138,20 +148,16 @@ void ContourAppearanceSubtab::SetContourCount(int count) {
 void ContourAppearanceSubtab::SetContourMinimum(double min) {
     double spacing = _cParams->GetContourSpacing();
     int count = _cParams->GetContourCount();
-    double contourMax = min + spacing * (count - 1);
 
     SetContourValues(count, min, spacing);
 }
 
-// Always adjust spacing and _contourMax here
-// Adjust count if we exceed our bounds
 void ContourAppearanceSubtab::SetContourSpacing(double spacing) {
     int count = _cParams->GetContourCount();
     if (count == 1)
         return;
 
     double min = _cParams->GetContourMin();
-    double contourMax = min + spacing * (count - 1);
 
     SetContourValues(count, min, spacing);
 }
