@@ -437,20 +437,6 @@ void VariablesWidget::Update(
 
 	updateVariableCombos(rParams);
 
-	vector<double> values;
-	for (int i=0; i<15; i++)
-		values.push_back((double)i);
-
-	vector<string> vHeader, hHeader;
-	vHeader.push_back("one");
-	vHeader.push_back("two");
-	vHeader.push_back("three");
-	hHeader.push_back("uno");
-	hHeader.push_back("dos");
-	hHeader.push_back("tres");
-	hHeader.push_back("quatro");
-	hHeader.push_back("cinco");
-	
 	_fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
 }
 
