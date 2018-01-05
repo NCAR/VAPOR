@@ -92,59 +92,7 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Soft </string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>5</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -205,32 +153,10 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QRadioButton" name="radioButton_2">
-           <property name="minimumSize">
-            <size>
-             <width>19</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>19</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Often times a set of contour parameters (Spacing, Conunt, or Minimum) will be set so that some contours fall outside a variable's range, resulting in that contours absence.  Users can select one of these parameters to be soft, so that it will accomodate the values of the other two settings.</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,1,1,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,1,1">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -291,32 +217,10 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QRadioButton" name="radioButton_3">
-           <property name="minimumSize">
-            <size>
-             <width>19</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>19</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Often times a set of contour parameters (Spacing, Conunt, or Minimum) will be set so that some contours fall outside a variable's range, resulting in that contours absence.  Users can select one of these parameters to be soft, so that it will accomodate the values of the other two settings.</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,1,1,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,1,1">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -377,32 +281,10 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QRadioButton" name="radioButton">
-           <property name="minimumSize">
-            <size>
-             <width>19</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>19</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Often times a set of contour parameters (Spacing, Conunt, or Minimum) will be set so that some contours fall outside a variable's range, resulting in that contours absence.  Users can select one of these parameters to be soft, so that it will accomodate the values of the other two settings.</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,1,1,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,1,1">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -460,19 +342,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="minimumSize">
-            <size>
-             <width>17</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
            </property>
           </widget>
          </item>
