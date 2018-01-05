@@ -97,9 +97,6 @@ public:
  string getNDimsTag() {return _nDimsTag;}
 
 protected slots:
- void printTableContents(int row, int col);
- void printTableContents2(int row, int col);
-
  //! Respond to selecting the single (primary) variable of field 
  void setVarName(const QString&);
 
@@ -153,6 +150,7 @@ private:
  void updateVariableCombos(VAPoR::RenderParams* params);
 
  void updateDims(VAPoR::RenderParams *rParams);
+
 
  DisplayFlags _dspFlags;
  DimFlags _dimFlags;

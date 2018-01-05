@@ -81,7 +81,6 @@ set (UIS
 	ControlPointEditorBase.ui
 	newRendererDialog.ui
 	NewRendererDialog.ui
-	renderselector.ui
 	LeftPanel.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
