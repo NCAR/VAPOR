@@ -39,18 +39,6 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 
 	setupUi(this);
 
-	testTable->setFocusPolicy(Qt::ClickFocus);
-	testTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-	testTable->setSelectionMode(QAbstractItemView::SingleSelection);
-	_vaporTable = new VaporTable(testTable, 0, 1);
-	_vaporTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::STRING),
-		(VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE));
-
-	connect(_vaporTable, SIGNAL(cellClicked(int, int)),
-		this, SLOT(printTableContents(int, int)));
-	connect(_vaporTable, SIGNAL(valueChanged(int, int)),
-		this, SLOT(printTableContents2(int, int)));
-
 	connect (
 		varnameCombo,SIGNAL(activated(const QString&)), this,
 		SLOT(setVarName(const QString&))
@@ -102,43 +90,6 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 	}
 #endif
 
-}
-
-void VariablesWidget::printTableContents2(int row, int col) {
-	cout << "value changed " << row << " " << col << endl;
-}
-
-void VariablesWidget::printTableContents(int row, int col) {
-	cout << "changed r/c " << row << " " << col << endl;
-	//testTable->selectRow(row);
-
-	for (int i=0; i<testTable->rowCount(); i++) {
-	for (int j=0; j<testTable->columnCount(); j++) {
-		QWidget* cell = testTable->cellWidget(i,j);
-		QLineEdit *le = qobject_cast<QLineEdit *>(cell);
-		//QCheckBox *cb = qobject_cast<QCheckBox *>(cell);
-		if (le) {
-			if (i == row) 
-				le->setStyleSheet("QLineEdit { background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-			else 
-				le->setStyleSheet("QLineEdit { background: rgb(255,255,255); selection-background-color: rgb(233, 99, 0); }");
-		}
-		else {
-			if (i == row) 
-				cell->setStyleSheet("QWidget { background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-			else 
-				cell->setStyleSheet("QWidget { background: rgb(255,255,255); selection-background-color: rgb(233, 99, 0); }");
-		
-		}
-	}
-	}
-
-	vector<string> vec;
-	_vaporTable->GetValues(vec);
-	int size = vec.size();
-	for (int i=0; i<size; i++)
-		cout << vec[i] << " ";
-	cout << endl;
 }
 
 void VariablesWidget::Reinit(
@@ -500,8 +451,6 @@ void VariablesWidget::Update(
 	hHeader.push_back("quatro");
 	hHeader.push_back("cinco");
 	
-	_vaporTable->Update(3, 5, values, vHeader, hHeader);
-
 	_fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
 }
 

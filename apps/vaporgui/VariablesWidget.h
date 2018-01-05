@@ -154,8 +154,6 @@ private:
 
  void updateDims(VAPoR::RenderParams *rParams);
 
- VaporTable* _vaporTable;
-
  DisplayFlags _dspFlags;
  DimFlags _dimFlags;
  ColorFlags _colorFlags;
