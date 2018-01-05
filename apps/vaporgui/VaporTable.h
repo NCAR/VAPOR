@@ -2,6 +2,7 @@
 #define VAPORTABLE_H
 
 #include <QWidget>
+#include <QTableWidget>
 #include <sstream>
 
 struct Value;
@@ -51,6 +52,7 @@ class VaporTable : public QWidget {
     void Reinit(ValidatorFlags vFlags, MutabilityFlags mFlags);
 
     Value GetValue(int row, int col);
+    std::string GetStringValue(int row, int col);
 
     // Dump all values in the table back to the user
     void GetValues(std::vector<std::string> &vec);

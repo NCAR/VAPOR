@@ -114,12 +114,8 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
   private slots:
     void showNewRendererDialog();
     void deleteRenderer();
-    //void changeChecked(int i, int j);
     void itemTextChange(QTableWidgetItem *);
-    //void itemChangeHack(QTableWidgetItem*);
-    void selectInstance();
     void copyInstanceTo(int);
-    void checkboxChanged(int);
     void activeRendererChanged(int row, int col);
     void tableValueChanged(int row, int col);
 
@@ -132,26 +128,20 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
     NewRendererDialog *_newRendererDialog;
 
     VaporTable *_vaporTable;
+    int _currentRow;
 
     void getRow(
         int row, string &renderInst, string &renderClass,
         string &dataSetName) const;
 
-    void setNameCell(string renderInst, int row);
-    void setTypeCell(string renderClass, int row);
-    void setDataSetCell(string dataSetName, int row);
-    void setCheckboxCell(int row, bool enabled);
+    void makeConnections();
+    void clearStackedWidget();
+    void initializeSplitter();
+    string getActiveRendererClass();
+    string getActiveRendererInst();
     void highlightActiveRow(int row);
     void changeRendererName(int row, int col);
     VAPoR::RenderParams *getRenderParamsFromCell(int row, int col);
-
-    void setRow(
-        int row, const string &renderInst,
-        const string &renderClass, const string &dataSetName, bool enabled);
-
-    void setRow(
-        const string &renderInst, const string &renderClass,
-        const string &dataSetName, bool enabled);
 
 #endif //DOXYGEN_SKIP_THIS
 };

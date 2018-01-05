@@ -308,6 +308,28 @@ Value VaporTable::GetValue(int row, int col) {
     return {value};
 }
 
+std::string VaporTable::GetStringValue(int row, int col) {
+    std::string value;
+    int nRows = _table->rowCount();
+    int nCols = _table->columnCount();
+
+    QWidget *widget = _table->cellWidget(row, col);
+
+    if ((col == nCols - 1 && _lastColIsCheckboxes) ||
+        (row == nRows - 1 && _lastRowIsCheckboxes)) {
+        QCheckBox *checkBox = widget->findChild<QCheckBox *>();
+        if (checkBox->isChecked())
+            value = "1";
+        else
+            value = "0";
+    } else {
+        QString qvalue = ((QLineEdit *)widget)->text();
+        value = qvalue.toStdString();
+    }
+
+    return value;
+}
+
 void VaporTable::GetValues(std::vector<std::string> &vec) {
     vec.clear();
 
