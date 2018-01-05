@@ -7,8 +7,8 @@
 #include "qtableview.h"
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
+#include <QMessageBox>
 #include "VaporTable.h"
-#include "ui_renderselector.h"
 #include "ui_LeftPanel.h"
 #include "ui_NewRendererDialog.h"
 
@@ -25,7 +25,15 @@ class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
 public:
     NewRendererDialog(QWidget *parent, VAPoR::ControlExec *ce);
 
-    std::string getSelectedRenderer() { return _selectedRenderer; }
+    std::string  getSelectedRenderer() { return _selectedRenderer; }
+    QMessageBox *msgBox;
+    void         mouseDoubleClickEvent(QMouseEvent *event)
+    {
+        msgBox = new QMessageBox();
+        msgBox->setWindowTitle("Hello");
+        msgBox->setText("You Double Clicked Mouse Button");
+        msgBox->show();
+    };
 
 private slots:
     void barbChecked(bool state);
