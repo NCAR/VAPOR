@@ -14,6 +14,8 @@ class ParamsMgr;
 class DataMgr;
 } // namespace VAPoR
 
+class SpacingCombo;
+
 class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
 
     Q_OBJECT
@@ -49,9 +51,9 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
     void Initialize(VAPoR::ContourParams *cParams);
 
   private:
-    double GetContourMinOrMax(string minOrMax);
-    void enableSliders();
-    void disableSliders();
+    void GetContourBounds(double &min, double &max);
+    void enableSpacingWidgets();
+    void disableSpacingWidgets();
 
     VAPoR::ContourParams *_cParams;
     VAPoR::DataMgr *_dataMgr;
@@ -62,7 +64,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
     Combo *_spacingCombo;
 
   private slots:
-    void SetContourValues();
+    void SetContourValues(int numContours, double contourMin, double spacing);
 
     void EndTFChange();
 
@@ -76,7 +78,7 @@ class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {
 
     void SetContourSpacing(double spacing);
 
-    void LockToTFChecked(bool checked);
+    void ContourBoundsChanged(int index);
 };
 
 class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
