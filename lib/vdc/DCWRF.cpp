@@ -86,7 +86,7 @@ DCWRF::~DCWRF() {
 }
 
 
-int DCWRF::Initialize(
+int DCWRF::initialize(
 	const vector <string> &files, const std::vector <string> &options
 ) {
 	_proj4StringOption.clear();
@@ -196,7 +196,7 @@ int DCWRF::Initialize(
 }
 
 
-bool DCWRF::GetDimension(
+bool DCWRF::getDimension(
 	string dimname, DC::Dimension &dimension
 ) const {
 	map <string, DC::Dimension>::const_iterator itr;
@@ -208,7 +208,7 @@ bool DCWRF::GetDimension(
 	return(true); 
 }
 
-std::vector <string> DCWRF::GetDimensionNames() const {
+std::vector <string> DCWRF::getDimensionNames() const {
 	map <string, DC::Dimension>::const_iterator itr;
 
 	vector <string> names;
@@ -220,7 +220,7 @@ std::vector <string> DCWRF::GetDimensionNames() const {
 	return(names);
 }
 
-vector <string> DCWRF::GetMeshNames() const {
+vector <string> DCWRF::getMeshNames() const {
 	vector <string> mesh_names;
 	std::map <string, Mesh>::const_iterator itr = _meshMap.begin();
 	for (;itr!=_meshMap.end(); ++itr) {
@@ -229,7 +229,7 @@ vector <string> DCWRF::GetMeshNames() const {
 	return(mesh_names);
 }
 
-bool DCWRF::GetMesh(
+bool DCWRF::getMesh(
 	string mesh_name, DC::Mesh &mesh
 ) const {
 
@@ -240,7 +240,7 @@ bool DCWRF::GetMesh(
 	return(true);
 }
 
-bool DCWRF::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
+bool DCWRF::getCoordVarInfo(string varname, DC::CoordVar &cvar) const {
 
 	map <string, DC::CoordVar>::const_iterator itr;
 
@@ -253,7 +253,7 @@ bool DCWRF::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
 	return(true);
 }
 
-bool DCWRF::GetDataVarInfo( string varname, DC::DataVar &datavar) const {
+bool DCWRF::getDataVarInfo( string varname, DC::DataVar &datavar) const {
 
 	map <string, DC::DataVar>::const_iterator itr;
 
@@ -266,7 +266,7 @@ bool DCWRF::GetDataVarInfo( string varname, DC::DataVar &datavar) const {
 	return(true);
 }
 
-bool DCWRF::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
+bool DCWRF::getBaseVarInfo(string varname, DC::BaseVar &var) const {
 	map <string, DC::CoordVar>::const_iterator itr;
 
 	itr = _coordVarsMap.find(varname);
@@ -285,7 +285,7 @@ bool DCWRF::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
 }
 
 
-std::vector <string> DCWRF::GetDataVarNames() const {
+std::vector <string> DCWRF::getDataVarNames() const {
 	map <string, DC::DataVar>::const_iterator itr;
 
 	vector <string> names;
@@ -296,7 +296,7 @@ std::vector <string> DCWRF::GetDataVarNames() const {
 }
 
 
-std::vector <string> DCWRF::GetCoordVarNames() const {
+std::vector <string> DCWRF::getCoordVarNames() const {
 	map <string, DC::CoordVar>::const_iterator itr;
 
 	vector <string> names;
@@ -306,7 +306,7 @@ std::vector <string> DCWRF::GetCoordVarNames() const {
 	return(names);
 }
 
-bool DCWRF::GetAtt(
+bool DCWRF::getAtt(
 	string varname, string attname, vector <double> &values
 ) const {
 	values.clear();
@@ -314,7 +314,7 @@ bool DCWRF::GetAtt(
 	return(true);
 }
 
-bool DCWRF::GetAtt(
+bool DCWRF::getAtt(
 	string varname, string attname, vector <long> &values
 ) const {
 	values.clear();
@@ -322,7 +322,7 @@ bool DCWRF::GetAtt(
 	return(true);
 }
 
-bool DCWRF::GetAtt(
+bool DCWRF::getAtt(
 	string varname, string attname, string &values
 ) const {
 	values.clear();
@@ -330,13 +330,13 @@ bool DCWRF::GetAtt(
 	return(true);
 }
 
-std::vector <string> DCWRF::GetAttNames(string varname) const {
+std::vector <string> DCWRF::getAttNames(string varname) const {
 	vector <string> names;
 	names = _ncdfc->GetAttNames(varname);
 	return(names);
 }
 
-DC::XType DCWRF::GetAttType(string varname, string attname) const {
+DC::XType DCWRF::getAttType(string varname, string attname) const {
 	int itype = _ncdfc->GetAttType(varname, attname);
 	switch (itype) {
 		case NC_FLOAT: return XType::FLOAT; break;
@@ -348,7 +348,7 @@ DC::XType DCWRF::GetAttType(string varname, string attname) const {
 	}
 }
 
-int DCWRF::GetDimLensAtLevel(
+int DCWRF::getDimLensAtLevel(
 	string varname, int, std::vector <size_t> &dims_at_level,
 	std::vector <size_t> &bs_at_level
 ) const {
@@ -365,7 +365,7 @@ int DCWRF::GetDimLensAtLevel(
 	return(0);
 }
 
-string DCWRF::GetMapProjection(string varname) const {
+string DCWRF::getMapProjection(string varname) const {
 
 	map <string, DC::DataVar>::const_iterator itr = _dataVarsMap.find(varname);
 
@@ -374,15 +374,15 @@ string DCWRF::GetMapProjection(string varname) const {
 	return(_proj4String);
 }
 
-string DCWRF::GetMapProjection() const {
+string DCWRF::getMapProjection() const {
 	return(_proj4String);
 }
 
 
-int DCWRF::OpenVariableRead(
+int DCWRF::openVariableRead(
 	size_t ts, string varname
 ) {
-	DCWRF::CloseVariable();
+	DCWRF::closeVariable();
 
 	if (ts >= _timeLookup.size()) {
 		SetErrMsg("Time step out of range : %d", ts);
@@ -399,7 +399,7 @@ int DCWRF::OpenVariableRead(
 }
 
 
-int DCWRF::CloseVariable() {
+int DCWRF::closeVariable() {
 	if (_ovr_fd < 0) return (0);
 	int rc = _ncdfc->Close(_ovr_fd);
 	_ovr_fd = -1;
@@ -408,113 +408,43 @@ int DCWRF::CloseVariable() {
 	return(rc);
 }
 
-int DCWRF::Read(float *data) {
+int DCWRF::read(float *data) {
 	return(_ncdfc->Read(data, _ovr_fd));
 }
 
-int DCWRF::ReadSlice(float *slice) {
+int DCWRF::readSlice(float *slice) {
 
 	return(_ncdfc->ReadSlice(slice, _ovr_fd));
 }
 
-int DCWRF::ReadRegion(
-	const vector <size_t> &min, const vector <size_t> &max, float *region
+template <class T>
+int DCWRF::_readRegionTemplate(
+	const vector <size_t> &min, const vector <size_t> &max, T *region
 ) {
 	assert(min.size() == max.size());
 
-	vector <size_t> dims_at_level, bs_at_level;
+	vector <size_t> ncdf_start = min;
+	reverse(ncdf_start.begin(), ncdf_start.end());
 
-	int rc = GetDimLensAtLevel(_ovr_varname, 0, dims_at_level, bs_at_level);
-	if (rc<0) return(rc);
+	vector <size_t> ncdf_max = max;
+	reverse(ncdf_max.begin(), ncdf_max.end());
 
-	if (IsTimeVarying(_ovr_varname)) {
-		dims_at_level.pop_back();
-		bs_at_level.pop_back();
+	vector <size_t> ncdf_count;
+	for (int i=0; i<ncdf_start.size(); i++) {
+		ncdf_count.push_back(ncdf_max[i] - ncdf_start[i] + 1);
 	}
 
-	if (dims_at_level.size() != min.size()) {
-		SetErrMsg("Invalid parameters");
-		return(-1);
-	}
-
-	bool ok = true;
-	for (int i=0; i<dims_at_level.size() && i<min.size(); i++) {
-		if (min[i] != 0) ok = false;
-		if (max[i] != dims_at_level[i] - 1) ok = false;
-	}
-	if (! ok) {
-		SetErrMsg("Region sub-setting not supported");
-		return(-1);
-	}
-
-	return(DCWRF::Read(region));
-
+    return(_ncdfc->Read(ncdf_start, ncdf_count, region, _ovr_fd));
 }
 
-int DCWRF::ReadRegionBlock(
+int DCWRF::readRegionBlock(
 	const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
 	//return(DCWRF::ReadRegion(min, max, region));
-	return (DCWRF::Read(region));
+	return (DCWRF::read(region));
 }
 
-int DCWRF::GetVar(string varname, float *data) {
-
-	vector <size_t> dimlens;
-	bool ok = GetVarDimLens(varname, true, dimlens);
-	if (!ok) {
-		SetErrMsg("Undefined variable name : %s", varname.c_str());
-		return(-1);
-	}
-
-	int nts = 1;	// num time steps
-	bool time_varying = IsTimeVarying(varname);
-	if (time_varying) {
-		nts = GetNumTimeSteps(varname);
-	}
-
-	// Number of grid points for variable
-	//
-	size_t sz = 1;
-	for (int i=0; i<dimlens.size(); i++) {
-		sz *= dimlens[i];
-	}
-		
-	//
-	// Read one time step at a time
-	//
-	float *ptr = data;
-	for (int ts=0; ts<nts; ts++) {
-		int rc = DCWRF::OpenVariableRead(ts, varname);
-		if (rc<0) return(-1);
-
-		rc = DCWRF::Read(ptr);
-		if (rc<0) return(-1);
-
-		rc = DCWRF::CloseVariable();
-		if (rc<0) return(-1);
-		
-		ptr += sz;	// Advance buffer past current time step
-	}
-	return(0);
-}
-
-int DCWRF::GetVar(
-	size_t ts, string varname, float *data
-) {
-	int rc = DCWRF::OpenVariableRead(ts, varname);
-	if (rc<0) return(-1);
-
-	rc = DCWRF::Read(data);
-	if (rc<0) return(-1);
-
-	rc = DCWRF::CloseVariable();
-	if (rc<0) return(-1);
-
-	return(0);
-}
-
-bool DCWRF::VariableExists(
+bool DCWRF::variableExists(
 	size_t ts, string varname, int, int 
 ) const {
     if (ts >= _timeLookup.size()) {

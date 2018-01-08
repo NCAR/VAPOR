@@ -34,6 +34,7 @@ public:
  DCWRF();
  virtual ~DCWRF();
 
+protected:
  //! Initialize the DCWRF class
  //!
  //! Prepare a WRF data set for reading. This method prepares
@@ -50,101 +51,103 @@ public:
  //!
  //! \sa EndDefine();
  //
- virtual int Initialize(
+ virtual int initialize(
 	const vector <string> &paths, const std::vector <string> &options
  );
 
+
  //! \copydoc DC::GetDimension()
  //!
- virtual bool GetDimension(
+ virtual bool getDimension(
 	string dimname, DC::Dimension &dimension
  ) const;
 
- //! \copydoc DC::GetDimensionNames()
+ //! \copydoc DC::getDimensionNames()
  //!
- virtual std::vector <string> GetDimensionNames() const;
+ virtual std::vector <string> getDimensionNames() const;
 
- std::vector <string> GetMeshNames() const;
+ //! \copydoc DC::getMeshNames()
+ //!
+ std::vector <string> getMeshNames() const;
 
- virtual bool GetMesh(
+ //! \copydoc DC::GetMesh()
+ //!
+ virtual bool getMesh(
 	string mesh_name, DC::Mesh &mesh
  ) const;
 
  //! \copydoc DC::GetCoordVarInfo()
  //!
- virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+ virtual bool getCoordVarInfo(string varname, DC::CoordVar &cvar) const;
 
  //! \copydoc DC::GetDataVarInfo()
  //!
- virtual bool GetDataVarInfo( string varname, DC::DataVar &datavar) const;
+ virtual bool getDataVarInfo( string varname, DC::DataVar &datavar) const;
 
  //! \copydoc DC::GetBaseVarInfo()
  //
- virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+ virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const {
 	return(false);
  }
  
  //! \copydoc DC::GetBaseVarInfo()
  //
- virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
-
+ virtual bool getBaseVarInfo(string varname, DC::BaseVar &var) const;
 
  //! \copydoc DC::GetDataVarNames()
  //!
- virtual std::vector <string> GetDataVarNames() const;
-
- virtual std::vector <string> GetAuxVarNames() const {
-    return (vector <string> ());
- }
-
+ virtual std::vector <string> getDataVarNames() const;
 
  //! \copydoc DC::GetCoordVarNames()
  //!
- virtual std::vector <string> GetCoordVarNames() const;
+ virtual std::vector <string> getCoordVarNames() const;
 
+ virtual std::vector <string> getAuxVarNames() const {
+    return (vector <string> ());
+ }
 
  //! \copydoc DC::GetNumRefLevels()
  //!
- virtual size_t GetNumRefLevels(string varname) const { return(1); }
+ virtual size_t getNumRefLevels(string varname) const { return(1); }
 
  //! \copydoc DC::GetMapProjection(string)
  //!
- virtual string GetMapProjection(string varname) const;
+ virtual string getMapProjection(string varname) const;
 
  //! \copydoc DC::GetMapProjection()
  //!
- virtual string GetMapProjection() const;
+ virtual string getMapProjection() const;
 
  //! \copydoc DC::GetMapProjection()
  //!
- virtual string GetMapProjectionDefault() const {
+ virtual string getMapProjectionDefault() const {
 	return(_proj4StringDefault);
  }
 
 
  //! \copydoc DC::GetAtt()
  //!
- virtual bool GetAtt(
+ virtual bool getAtt(
 	string varname, string attname, vector <double> &values
  ) const;
- virtual bool GetAtt(
+ virtual bool getAtt(
 	string varname, string attname, vector <long> &values
  ) const;
- virtual bool GetAtt(
+ virtual bool getAtt(
 	string varname, string attname, string &values
  ) const;
 
  //! \copydoc DC::GetAttNames()
  //!
- virtual std::vector <string> GetAttNames(string varname) const;
+ virtual std::vector <string> getAttNames(string varname) const;
 
  //! \copydoc DC::GetAttType()
  //!
- virtual XType GetAttType(string varname, string attname) const;
+ virtual XType getAttType(string varname, string attname) const;
 
  //! \copydoc DC::GetDimLensAtLevel()
  //!
- virtual int GetDimLensAtLevel(
+ virtual int getDimLensAtLevel(
 	string varname, int level, std::vector <size_t> &dims_at_level,
 	std::vector <size_t> &bs_at_level
  ) const;
@@ -152,85 +155,59 @@ public:
 
  //! \copydoc DC::OpenVariableRead()
  //!
- virtual int OpenVariableRead(
+ virtual int openVariableRead(
 	size_t ts, string varname, int , int 
  ) {
-	return(DCWRF::OpenVariableRead(ts, varname));
+	return(DCWRF::openVariableRead(ts, varname));
  }
 
- virtual int OpenVariableRead(
+ virtual int openVariableRead(
 	size_t ts, string varname
  );
 
 
  //! \copydoc DC::CloseVariable()
  //!
- virtual int CloseVariable();
+ virtual int closeVariable();
 
  //! \copydoc DC::Read()
  //!
- virtual int Read(float *data);
- virtual int Read(int *data) {
+ virtual int read(float *data);
+ virtual int read(int *data) {
 	return(_ncdfc->Read(data, _ovr_fd));
  }
 
  //! \copydoc DC::ReadSlice()
  //!
- virtual int ReadSlice(float *slice);
+ virtual int readSlice(float *slice);
 
  //! \copydoc DC::ReadRegion()
  //
- virtual int ReadRegion(
+ virtual int readRegion(
     const vector <size_t> &min, const vector <size_t> &max, float *region
- );
+ ) {
+	return(_readRegionTemplate(min, max, region));
+ }
+ virtual int readRegion(
+    const vector <size_t> &min, const vector <size_t> &max, int *region
+ ) {
+	return(_readRegionTemplate(min, max, region));
+ }
 
  //! \copydoc DC::ReadRegionBlock()
  //!
- virtual int ReadRegionBlock(
+ virtual int readRegionBlock(
     const vector <size_t> &min, const vector <size_t> &max, float *region
  );
- virtual int ReadRegionBlock(
+ virtual int readRegionBlock(
     const vector <size_t> &min, const vector <size_t> &max, int *region
  ) {
-	return (DCWRF::Read(region));
+	return (DCWRF::read(region));
  }
-
- //! \copydoc DC::GetVar()
- //!
- virtual int GetVar(string varname, int, int, float *data) {
-	return(DCWRF::GetVar(varname, data));
- }
-
- virtual int GetVar(string varname, int, int, int *data) {
-	SetErrMsg("Not implemented");
-	return(-1);
- }
-
- virtual int GetVar(string varname, float *data);
-
- //! \copydoc DC::GetVar()
- //!
- virtual int GetVar(
-	size_t ts, string varname, int, int, float *data
- ) {
-	return(DCWRF::GetVar(ts, varname, data));
- }
-
- virtual int GetVar(
-	size_t ts, string varname, int, int, int *data
- ) {
-	SetErrMsg("Not implemented");
-	return(-1);
- }
-
- virtual int GetVar(
-	size_t ts, string varname, float *data
- );
-
 
  //! \copydoc DC::VariableExists()
  //!
- virtual bool VariableExists(
+ virtual bool variableExists(
     size_t ts,
     string varname,
     int reflevel = 0,
@@ -335,6 +312,11 @@ private:
  ); 
 
  int _InitVars(NetCDFCollection *ncdfc);
+
+ template <class T>
+ int _readRegionTemplate(
+	const vector <size_t> &min, const vector <size_t> &max, T *region
+ );
 
  ///////////////////////////////////////////////////////////////////////////
  //
