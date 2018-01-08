@@ -15,14 +15,11 @@ static ParamsRegistrar<ContourParams::Contours>
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
 const string ContourParams::_varsAre3dTag = "VarsAre3D";
-const string ContourParams::_numContoursTag = "NumIsovalues";
 const string ContourParams::_contoursTag = "Contours";
 const string ContourParams::_numDigitsTag = "NumDigits";
 const string ContourParams::_textDensityTag = "TextDensity";
 const string ContourParams::_lineColorTag = "LineColor";
 const string ContourParams::_textEnabledTag = "TextEnabled";
-const string ContourParams::_contourMinTag = "ContourMinimum";
-const string ContourParams::_contourSpacingTag = "ContourSpacing";
 const string ContourParams::_lockToTFTag = "LockToTF";
 const string ContourParams::Contours::_valuesTag = "Values";
 
@@ -173,7 +170,7 @@ void ContourParams::_init() {
 	GetBox()->SetExtents(minExt, maxExt);
 }
 
-int ContourParams::GetNumContours() {
+int ContourParams::GetContourCount() {
 	Contours* c = GetCurrentContours();
 	vector<double> vals = c->GetContourValues();
 	return vals.size();
@@ -183,6 +180,12 @@ double ContourParams::GetContourMin() {
 	Contours* c = GetCurrentContours();
 	vector<double> vals = c->GetContourValues();
 	return vals[0];
+}
+
+double ContourParams::GetContourMax() {
+	Contours* c = GetCurrentContours();
+	vector<double> vals = c->GetContourValues();
+	return vals[vals.size()-1];
 }
 
 double ContourParams::GetContourSpacing() {
@@ -219,11 +222,11 @@ void ContourParams::SetLockToTF(bool lock) {
 }
 
 bool ContourParams::GetLockToTF() const {
-	if (GetValueString(_lockToTFTag, "true")=="true") {
-		return true;
+	if (GetValueString(_lockToTFTag, "false")=="false") {
+		return false;
 	}   
 	else {
-		return false;
+		return true;
 	}   
 }
 
@@ -246,7 +249,7 @@ void ContourParams::SetTFLock(bool lock) {
 }
 
 bool ContourParams::GetTFLock() {
-	string l = GetValueString(_lockToTFTag, "true");
+	string l = GetValueString(_lockToTFTag, "false");
 	if (l=="false") return false;
 	return true;
 }
