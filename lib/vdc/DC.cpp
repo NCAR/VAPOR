@@ -21,6 +21,16 @@ string join(const vector<string> &v, string separator) {
     return (s);
 }
 
+// Product of elements in a vector
+//
+size_t vproduct(vector<size_t> a) {
+    size_t ntotal = 1;
+
+    for (int i = 0; i < a.size(); i++)
+        ntotal *= a[i];
+    return (ntotal);
+}
+
 }; // namespace
 
 DC::BaseVar::BaseVar(
@@ -148,6 +158,45 @@ size_t DC::Mesh::GetTopologyDim() const {
         assert(0 && "Invalid mesh type");
         break;
     }
+}
+
+DC::DC() {
+    _ovrTS = 0;
+    _ovrVarName.clear();
+    _ovrLevel = 0;
+    _ovrLOD = 0;
+    _ovrSliceNum = 0;
+}
+
+int DC::GetHyperSliceInfo(
+    string varname, int level, std::vector<size_t> &hslice_dims,
+    size_t &nslice) {
+    hslice_dims.clear();
+    nslice = 0;
+
+    vector<size_t> dims_at_level;
+    vector<size_t> bs_at_level;
+
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    if (rc < 0)
+        return (-1);
+
+    if (dims_at_level.size() == 0)
+        return (0);
+
+    hslice_dims = dims_at_level;
+
+    if (dims_at_level.size() == 1) {
+        nslice = 1;
+        return (0);
+    }
+
+    int dim = hslice_dims.size() - 1;
+
+    hslice_dims[dim] = 1;
+    nslice = dims_at_level[dim] / hslice_dims[dim];
+
+    return (0);
 }
 
 vector<string> DC::GetDataVarNames(int ndim) const {
@@ -307,6 +356,120 @@ bool DC::_getAuxVarDimensions(
         dimensions.push_back(dim);
     }
     return (true);
+}
+
+int DC::_openVariableRead(
+    size_t ts, string varname, int level, int lod) {
+    _ovrTS = ts;
+    _ovrVarName = varname;
+    _ovrLevel = level;
+    _ovrLOD = lod;
+    _ovrSliceNum = 0;
+    return (openVariableRead(ts, varname, level, lod));
+}
+
+int DC::_closeVariable() {
+    if (_ovrVarName.empty())
+        return (0);
+
+    return (closeVariable());
+}
+
+template <class T>
+int DC::_readSliceTemplate(T *slice) {
+    vector<size_t> dims_at_level;
+    vector<size_t> bs_at_level;
+
+    int rc = GetDimLensAtLevel(
+        _ovrVarName, _ovrLevel, dims_at_level, bs_at_level);
+    if (rc < 0)
+        return (rc);
+
+    vector<size_t> hslice_dims;
+    size_t nslice;
+    rc = GetHyperSliceInfo(_ovrVarName, _ovrLevel, hslice_dims, nslice);
+    if (rc < 0)
+        return (rc);
+    assert(hslice_dims.size() == dims_at_level.size());
+
+    if (_ovrSliceNum >= nslice)
+        return (0); // Done reading;
+
+    vector<size_t> min;
+    vector<size_t> max;
+    int dim = 0;
+    for (; dim < hslice_dims.size() - 1; dim++) {
+        min.push_back(0);
+        max.push_back(hslice_dims[dim] - 1);
+    };
+    min.push_back(_ovrSliceNum * hslice_dims[dim]);
+    max.push_back(min[dim] + hslice_dims[dim] - 1);
+
+    // Last slice is a partial read if not block-aligned
+    //
+    if (max[dim] >= dims_at_level[dim]) {
+        max[dim] = dims_at_level[dim] - 1;
+    }
+
+    rc = ReadRegion(min, max, slice);
+    if (rc < 0)
+        return (rc);
+
+    _ovrSliceNum++;
+
+    return (rc);
+}
+
+template <class T>
+int DC::_getVarTemplate(string varname, int level, int lod, T *data) {
+    CloseVariable();
+
+    vector<size_t> dims_at_level;
+    vector<size_t> dummy;
+    int rc = GetDimLensAtLevel(
+        varname, level, dims_at_level, dummy);
+    if (rc < 0)
+        return (-1);
+
+    // Number of per time step
+    //
+    size_t var_size = 1;
+    for (int i = 0; i < dims_at_level.size(); i++) {
+        var_size *= dims_at_level[i];
+    }
+
+    size_t numts = GetNumTimeSteps(varname);
+
+    T *ptr = data;
+    for (size_t ts = 0; ts < numts; ts++) {
+        rc = GetVar(ts, varname, level, lod, ptr);
+        if (rc < 0)
+            return (-1);
+
+        ptr += var_size;
+    }
+
+    return (0);
+}
+
+template <class T>
+int DC::_getVarTemplate(
+    size_t ts, string varname, int level, int lod, T *data) {
+    CloseVariable();
+
+    int rc = OpenVariableRead(ts, varname, level, lod);
+    if (rc < 0)
+        return (-1);
+
+    rc = Read(data);
+    if (rc < 0)
+        return (-1);
+
+    rc = CloseVariable();
+    if (rc < 0)
+        return (-1);
+
+    return (0);
 }
 
 bool DC::GetVarDimensions(
