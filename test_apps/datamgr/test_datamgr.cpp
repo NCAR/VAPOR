@@ -99,7 +99,7 @@ void print_info(DataMgr &datamgr, bool verbose)
 
     for (int d = 1; d < 4; d++) {
         cout << d << "D variables: ";
-        vars = datamgr.GetDataVarNames(d, true);
+        vars = datamgr.GetDataVarNames(d);
         for (int i = 0; i < vars.size(); i++) {
             cout << vars[i] << endl;
 

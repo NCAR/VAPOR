@@ -48,6 +48,12 @@ public:
     VDCNetCDF(int numthreads = 0, size_t master_theshold = 10 * 1024 * 1024, size_t variable_threshold = 100 * 1024 * 1024);
     virtual ~VDCNetCDF();
 
+    //! \copydoc DC:GetHyperSliceInfo()
+    //!
+    //! Override base class to ensure hyperslices are block aligned
+    //!
+    virtual int GetHyperSliceInfo(string varname, int level, std::vector<size_t> &dims, size_t &nslice);
+
     //! Return path to the data directory
     //!
     //! Return the file path to the data directory associated with the
@@ -84,7 +90,7 @@ public:
 
     //! \copydoc VDC::GetDimLensAtLevel()
     //
-    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, vector<size_t> &bs_at_level) const;
+    virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, vector<size_t> &bs_at_level) const;
 
     //! Return true if a data directory exists for the master file
     //! named by \p path
@@ -121,68 +127,37 @@ public:
     //
     size_t GetVariableThreshold() const { return _variable_threshold; };
 
-    //! \copydoc VDC::OpenVariableRead()
-    //
-    int OpenVariableRead(size_t ts, string varname, int level = 0, int lod = -1);
-
-    //! \copydoc VDC::CloseVariable()
-    //
-    int CloseVariable();
-
     //! \copydoc VDC::OpenVariableWrite()
     //
     int OpenVariableWrite(size_t ts, string varname, int lod = -1);
 
+    int CloseVariableWrite() { return (closeVariable()); };
+
     //! \copydoc VDC::Write()
     //
-    int Write(const float *region);
+    int Write(const float *region) { return (_writeTemplate(region)); }
+    int Write(const int *region) { return (_writeTemplate(region)); }
 
-    int WriteSlice(const float *slice);
-    int WriteSlice(const unsigned char *slice);
-
-    //! \copydoc VDC::Read()
-    //
-    int Read(float *data);
-
-    int Read(int *data);
-
-    //! \copydoc VDC::ReadSlice()
-    //
-    int ReadSlice(float *slice);
-    int ReadSlice(unsigned char *slice);
-
-    //! \copydoc VDC::ReadRegion()
-    //
-    int ReadRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
-
-    //! \copydoc VDC::ReadRegionBlock()
-    //
-    int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
-    int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region);
+    int WriteSlice(const float *slice) { return (_writeSliceTemplate(_ofi._wasp, slice)); };
+    int WriteSlice(const int *slice) { return (_writeSliceTemplate(_ofi._wasp, slice)); };
+    int WriteSlice(const unsigned char *slice) { return (_writeSliceTemplate(_ofi._wasp, slice)); }
 
     //! \copydoc VDC::PutVar()
     //
-    int PutVar(string varname, int lod, const float *data);
+    int PutVar(string varname, int lod, const float *data) { return (_putVarTemplate(varname, lod, data)); }
+    int PutVar(string varname, int lod, const int *data) { return (_putVarTemplate(varname, lod, data)); }
 
     //! \copydoc VDC::PutVar()
     //
-    int PutVar(size_t ts, string varname, int lod, const float *data);
+    int PutVar(size_t ts, string varname, int lod, const float *data) { return (_putVarTemplate(ts, varname, lod, data)); }
+    int PutVar(size_t ts, string varname, int lod, const int *data) { return (_putVarTemplate(ts, varname, lod, data)); }
 
-    //! \copydoc VDC::GetVar()
-    //
-    int GetVar(string varname, int level, int lod, float *data);
-    int GetVar(string varname, int level, int lod, int *data);
-
-    //! \copydoc VDC::GetVar()
-    //
-    int GetVar(size_t ts, string varname, int level, int lod, float *data);
-    int GetVar(size_t ts, string varname, int level, int lod, int *data);
+    int CopyVar(DC &dc, string varname, int srclod, int dstlod);
+    int CopyVar(DC &dc, size_t ts, string varname, int srclod, int dstlod);
 
     //! \copydoc VDC::CompressionInfo()
     //
     bool CompressionInfo(std::vector<size_t> bs, string wname, size_t &nlevels, size_t &maxcratio) const;
-
-    virtual bool VariableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
     //! Enable or disable the NetCDF fill-value mode
     //!
@@ -199,6 +174,25 @@ protected:
     virtual int _WriteMasterMeta();
     virtual int _ReadMasterMeta();
     #endif
+
+    int openVariableRead(size_t ts, string varname, int level = 0, int lod = -1);
+
+    int closeVariable();
+
+    int read(float *data);
+
+    int read(int *data);
+
+    int readSlice(float *slice);
+    int readSlice(unsigned char *slice);
+
+    int readRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+    int readRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, int *region);
+
+    int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
+    int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region);
+
+    virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
 private:
     int   _version;
@@ -250,7 +244,9 @@ private:
     int _WriteMasterCoordVarsDefs();
     int _WriteMasterDataVarsDefs();
 
-    template<class T> int _WriteSlice(WASP *file, const T *slice);
+    template<class T> int _writeTemplate(const T *data);
+
+    template<class T> int _writeSliceTemplate(WASP *file, const T *slice);
 
     int _ReadMasterDimensions();
     int _ReadMasterAttributes(string prefix, map<string, Attribute> &atts);
@@ -279,9 +275,13 @@ private:
 
     int _ReadHelper(vector<size_t> &start, vector<size_t> &count) const;
 
-    template<class T> int _GetVar(string varname, int level, int lod, T *data);
+    template<class T> int _putVarTemplate(string varname, int lod, const T *data);
 
-    template<class T> int _GetVar(size_t ts, string varname, int level, int lod, T *data);
+    template<class T> int _putVarTemplate(size_t ts, string varname, int lod, const T *data);
+
+    int _copyVar0d(DC &dc, size_t ts, const BaseVar &varInfo);
+
+    template<class T> int _copyVarHelper(DC &dc, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer);
 };
 };    // namespace VAPoR
 

@@ -9,6 +9,39 @@ using namespace VAPoR;
 using namespace Wasp;
 using namespace std;
 
+namespace {
+
+bool readSliceOK(vector<size_t> dims, size_t start[], size_t count[])
+{
+    if (dims.size() == 3) {
+        if (count[0] != 1) return (false);
+        for (int i = 1; i < dims.size(); i++) {
+            if (count[i] != dims[i]) return (false);
+            if (start[i] != 0) return (false);
+        }
+        return (true);
+    } else if (dims.size() == 2) {
+        for (int i = 0; i < dims.size(); i++) {
+            if (count[i] != dims[i]) return (false);
+            if (start[i] != 0) return (false);
+        }
+        return (true);
+    }
+
+    return (false);
+}
+
+bool readOK(vector<size_t> dims, size_t start[], size_t count[])
+{
+    if (dims.size() != 1) return (false);
+    if (count[0] != dims[0]) return (false);
+    if (start[0] != 0) return (false);
+
+    return (true);
+}
+
+};    // namespace
+
 NetCDFCollection::NetCDFCollection()
 {
     _variableList.clear();
@@ -653,8 +686,16 @@ int NetCDFCollection::ReadNative(size_t start[], size_t count[], float *data, in
     fileHandle &fh = itr->second;
 
     if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
+        vector<size_t> dims = fh._derived_var->GetSpatialDims();
+
+        if (readSliceOK(dims, start, count)) {
+            return (fh._derived_var->ReadSlice(data, fh._fd));
+        } else if (readOK(dims, start, count)) {
+            return (fh._derived_var->Read(data, fh._fd));
+        } else {
+            SetErrMsg("Not implemented");
+            return (-1);
+        }
     }
 
     int idx = 0;
@@ -1294,14 +1335,23 @@ int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd)
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
+
     fileHandle &fh = itr->second;
     if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
+        vector<size_t> dims = fh._derived_var->GetSpatialDims();
+
+        if (readSliceOK(dims, start, count)) {
+            return (fh._derived_var->ReadSlice(data, fh._fd));
+        } else if (readOK(dims, start, count)) {
+            return (fh._derived_var->Read(data, fh._fd));
+        } else {
+            SetErrMsg("Not implemented");
+            return (-1);
+        }
     }
 
     const TimeVaryingVar &var = fh._tvvars;
-    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::Read(start, count, data, fd)); }
+    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadNative(start, count, data, fd)); }
 
     SetErrMsg("Not implemented");
     return (-1);
@@ -1335,7 +1385,7 @@ int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd)
     }
 
     const TimeVaryingVar &var = fh._tvvars;
-    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::Read(start, count, data, fd)); }
+    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadNative(start, count, data, fd)); }
 
     SetErrMsg("Not implemented");
     return (-1);

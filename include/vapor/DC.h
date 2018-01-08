@@ -13,19 +13,19 @@ namespace VAPoR {
 //! \class DC
 //! \ingroup Public_VDC
 //!
-//! \brief Defines API for reading a collection of data.
+//! \brief A Template Method design pattern for reading a collection of data.
 //!
 //! \author John Clyne
 //! \date    January, 2015
 //!
-//! The abstract Data Collection (DC) class defines an API for
+//! The Data Collection (DC) class defines an Template Method for
 //! reading metadata and sampled
 //! data from a data collection.  A data collection is a set of
 //! related data, most typically the discrete outputs from a single numerical
-//! simulation. The DC class is an abstract virtual
-//! class, providing a public API, but performing no actual storage
-//! operations. Derived implementations of the DC base class are
-//! required to support the API.
+//! simulation. The DC class is a Template Method: if provides an
+//! abstract interface for accessing a data collection, and a set of
+//! protected pure virtual functions that must be implemented by
+//! derived classes providing access to a particular file format.
 //!
 //! Variables in a DC may have 1, 2, or 3 topological dimensions, and 0 or 1
 //! temporal dimensions.
@@ -1271,8 +1271,9 @@ public:
     //! Class constuctor
     //!
     //!
-    DC(){};
-    virtual ~DC() {}
+    DC();
+
+    virtual ~DC(){};
 
     //! Initialize the DC class
     //!
@@ -1291,7 +1292,7 @@ public:
     //! \retval status A negative int is returned on failure
     //!
     //
-    virtual int Initialize(const std::vector<string> &paths, const std::vector<string> &options = std::vector<string>()) = 0;
+    virtual int Initialize(const std::vector<string> &paths, const std::vector<string> &options = std::vector<string>()) { return (initialize(paths, options)); }
 
     //! Return a dimensions's definition
     //!
@@ -1304,21 +1305,21 @@ public:
     //! \param[out] dimension The returned Dimension object reference
     //! \retval bool If the named dimension can not be found false is returned.
     //!
-    virtual bool GetDimension(string dimname, DC::Dimension &dimension) const = 0;
+    virtual bool GetDimension(string dimname, DC::Dimension &dimension) const { return (getDimension(dimname, dimension)); }
 
     //! Return names of all defined dimensions
     //!
     //! This method returns the list of names of all of the dimensions
     //! defined in the DC.
     //!
-    virtual std::vector<string> GetDimensionNames() const = 0;
+    virtual std::vector<string> GetDimensionNames() const { return (getDimensionNames()); }
 
     //! Return names of all defined meshes
     //!
     //! This method returns the list of names of all of the meshes
     //! defined in the DC.
     //!
-    virtual std::vector<string> GetMeshNames() const = 0;
+    virtual std::vector<string> GetMeshNames() const { return (getMeshNames()); }
 
     //! Return a Mesh's definition
     //!
@@ -1329,7 +1330,7 @@ public:
     //! \param[out] mesh The returned Mesh object reference
     //! \retval bool If the named mesh can not be found false is returned.
     //!
-    virtual bool GetMesh(string mesh_name, DC::Mesh &mesh) const = 0;
+    virtual bool GetMesh(string mesh_name, DC::Mesh &mesh) const { return (getMesh(mesh_name, mesh)); }
 
     //! Return a coordinate variable's definition
     //!
@@ -1343,7 +1344,7 @@ public:
     //! \retval bool False is returned if the named coordinate variable does
     //! not exist, and the contents of \p cvar will be undefined.
     //!
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const = 0;
+    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const { return (getCoordVarInfo(varname, cvar)); }
 
     //! Return a data variable's definition
     //!
@@ -1357,7 +1358,7 @@ public:
     //! \retval bool If the named data variable cannot be found false
     //! is returned and the values of \p datavar are undefined.
     //!
-    virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const = 0;
+    virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const { return (getDataVarInfo(varname, datavar)); }
 
     //! Return metadata about an auxiliary variable
     //!
@@ -1370,7 +1371,7 @@ public:
     //!
     //! \sa GetDataVarInfo(), GetCoordVarInfo()
     //
-    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const = 0;
+    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const { return (getAuxVarInfo(varname, var)); }
 
     //! Return metadata about a data or coordinate variable
     //!
@@ -1383,7 +1384,7 @@ public:
     //!
     //! \sa GetDataVarInfo(), GetCoordVarInfo()
     //
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const = 0;
+    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const { return (getBaseVarInfo(varname, var)); }
 
     //! Return a list of names for all of the defined data variables.
     //!
@@ -1391,7 +1392,7 @@ public:
     //!
     //! \sa DC::DataVar
     //
-    virtual std::vector<string> GetDataVarNames() const = 0;
+    virtual std::vector<string> GetDataVarNames() const { return (getDataVarNames()); }
 
     //! Return a list of names for all of the defined coordinate variables.
     //!
@@ -1399,7 +1400,7 @@ public:
     //!
     //! \sa DC::CoordVar
     //
-    virtual std::vector<string> GetCoordVarNames() const = 0;
+    virtual std::vector<string> GetCoordVarNames() const { return (getCoordVarNames()); }
 
     //! Return a list of names for all of the defined Auxiliary variables.
     //!
@@ -1407,7 +1408,7 @@ public:
     //!
     //! \sa DC::AuxVar
     //
-    virtual std::vector<string> GetAuxVarNames() const = 0;
+    virtual std::vector<string> GetAuxVarNames() const { return (getAuxVarNames()); }
 
     //! Return the number of refinement levels for the indicated variable
     //!
@@ -1424,7 +1425,7 @@ public:
     //! returned. Otherwise the total number of levels in the multi-resolution
     //! hierarchy are returned.
     //
-    virtual size_t GetNumRefLevels(string varname) const = 0;
+    virtual size_t GetNumRefLevels(string varname) const { return (getNumRefLevels(varname)); }
 
     //! Read an attribute
     //!
@@ -1445,9 +1446,11 @@ public:
     //! the variable or the attribute is undefined.
     //!
     //
-    virtual bool GetAtt(string varname, string attname, vector<double> &values) const = 0;
-    virtual bool GetAtt(string varname, string attname, vector<long> &values) const = 0;
-    virtual bool GetAtt(string varname, string attname, string &values) const = 0;
+    virtual bool GetAtt(string varname, string attname, vector<double> &values) const { return (getAtt(varname, attname, values)); }
+
+    virtual bool GetAtt(string varname, string attname, vector<long> &values) const { return (getAtt(varname, attname, values)); }
+
+    virtual bool GetAtt(string varname, string attname, string &values) const { return (getAtt(varname, attname, values)); }
 
     //! Return a list of available attribute's names
     //!
@@ -1462,7 +1465,7 @@ public:
     //!
     //! \sa GetAtt()
     //
-    virtual std::vector<string> GetAttNames(string varname) const = 0;
+    virtual std::vector<string> GetAttNames(string varname) const { return (getAttNames(varname)); }
 
     //! Return the external data type for an attribute
     //!
@@ -1475,7 +1478,7 @@ public:
     //! \retval If an attribute named by \p name does not exist, a
     //! negative value is returned.
     //!
-    virtual XType GetAttType(string varname, string attname) const = 0;
+    virtual XType GetAttType(string varname, string attname) const { return (getAttType(varname, attname)); }
 
     //! Return a variable's array dimension lengths at a specified refinement level
     //!
@@ -1503,7 +1506,10 @@ public:
     //!
     //! \sa VAPoR::DC, DC::DataVar::GetBS(), DC::GetVarDimLens()
     //
-    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const = 0;
+    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+    {
+        return (getDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
+    }
 
     //! Return a Proj4 map projection string.
     //!
@@ -1523,7 +1529,7 @@ public:
     //! string is returned.
     //!
     //
-    virtual string GetMapProjection(string varname) const = 0;
+    virtual string GetMapProjection(string varname) const { return (getMapProjection(varname)); }
 
     //! Return default Proj4 map projection string.
     //!
@@ -1543,11 +1549,11 @@ public:
     //! string is returned.
     //!
     //
-    virtual string GetMapProjection() const = 0;
+    virtual string GetMapProjection() const { return (getMapProjection()); }
 
     //! Get default map projection, if any
     //!
-    virtual string GetMapProjectionDefault() const = 0;
+    virtual string GetMapProjectionDefault() const { return (getMapProjectionDefault()); }
 
     //! Open the named variable for reading
     //!
@@ -1581,7 +1587,7 @@ public:
     //!
     //! \sa GetNumRefLevels(), DC::BaseVar::GetCRatios(), OpenVariableRead()
     //
-    virtual int OpenVariableRead(size_t ts, string varname, int level = 0, int lod = 0) = 0;
+    virtual int OpenVariableRead(size_t ts, string varname, int level = 0, int lod = 0) { return (_openVariableRead(ts, varname, level, lod)); }
 
     //! Close the currently opened variable
     //!
@@ -1589,7 +1595,7 @@ public:
     //!
     //! \sa  OpenVariableRead()
     //
-    virtual int CloseVariable() = 0;
+    virtual int CloseVariable() { return (_closeVariable()); }
 
     //! Read all spatial values of the currently opened variable
     //!
@@ -1607,8 +1613,9 @@ public:
     //!
     //! \sa OpenVariableRead()
     //
-    int virtual Read(float *data) = 0;
-    int virtual Read(int *data) = 0;
+    int virtual Read(float *data) { return (read(data)); }
+
+    int virtual Read(int *data) { return (read(data)); }
 
     //! Read a single slice of data from the currently opened variable
     //!
@@ -1632,7 +1639,8 @@ public:
     //!
     //! \sa OpenVariableRead()
     //!
-    virtual int ReadSlice(float *slice) = 0;
+    virtual int ReadSlice(float *slice) { return (_readSliceTemplate(slice)); }
+    virtual int ReadSlice(int *slice) { return (_readSliceTemplate(slice)); }
 
     //! Read in and return a subregion from the currently opened
     //! variable
@@ -1657,7 +1665,8 @@ public:
     //! \retval status Returns a non-negative value on success
     //! \sa OpenVariableRead(), GetDimLensAtLevel(), GetDimensionNames()
     //
-    virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegion(min, max, region)); }
+    virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegion(min, max, region)); }
 
     //! Read in and return a blocked subregion from the currently opened
     //! variable.
@@ -1672,8 +1681,8 @@ public:
     //! \li The hyperslab copied to \p region will preserve its underlying
     //! storage blocking (the data will not be contiguous)
     //!
-    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
-    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
+    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegionBlock(min, max, region)); }
+    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegionBlock(min, max, region)); }
 
     //! Read an entire variable in one call
     //!
@@ -1699,8 +1708,8 @@ public:
     //! \retval status A negative int is returned on failure
     //!
     //
-    virtual int GetVar(string varname, int level, int lod, float *data) = 0;
-    virtual int GetVar(string varname, int level, int lod, int *data) = 0;
+    virtual int GetVar(string varname, int level, int lod, float *data) { return (_getVarTemplate(varname, level, lod, data)); }
+    virtual int GetVar(string varname, int level, int lod, int *data) { return (_getVarTemplate(varname, level, lod, data)); }
 
     //! Read an entire variable at a given time step in one call
     //!
@@ -1729,8 +1738,8 @@ public:
     //! \retval status A negative int is returned on failure
     //!
     //
-    virtual int GetVar(size_t ts, string varname, int level, int lod, float *data) = 0;
-    virtual int GetVar(size_t ts, string varname, int level, int lod, int *data) = 0;
+    virtual int GetVar(size_t ts, string varname, int level, int lod, float *data) { return (_getVarTemplate(ts, varname, level, lod, data)); }
+    virtual int GetVar(size_t ts, string varname, int level, int lod, int *data) { return (_getVarTemplate(ts, varname, level, lod, data)); }
 
     //! Returns true if indicated data volume is available
     //!
@@ -1745,15 +1754,22 @@ public:
     //! \param[in] lod Compression level of detail requested.
     //! refinement level contained in the DC.
     //
-    virtual bool VariableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const = 0;
+    virtual bool VariableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const { return (variableExists(ts, varname, reflevel, lod)); };
 
-    /////////////////////////////////////////////////////////////////////
-    //
-    // The following are convenience methods provided by the DC base
-    // class. In general they should NOT need to be reimplimented by
-    // derived classes.
-    //
-    /////////////////////////////////////////////////////////////////////
+    //! Get dimensions of hyperslice read by ReadSlice
+    //!
+    //! Returns the dimensions of a hyperslice when the variable
+    //! \p varname is opened at level \p level and read using ReadSlice();
+    //!
+    //! \param[in] varname A valid variable name
+    //! \param[in] reflevel Refinement level requested.
+    //! \param[out] dims An ordered vector containing the variable's
+    //! hyperslice dimensions at the specified refinement level
+    //! \param[out] nslice Number of hyperslices
+    //!
+    //! \sa GetDimLensAtLevel(), OpenVariableRead(), ReadSlice()
+    //!
+    virtual int GetHyperSliceInfo(string varname, int level, std::vector<size_t> &dims, size_t &nslice);
 
     //! Return a list of data variables with a given topological dimension
     //!
@@ -2034,12 +2050,153 @@ public:
     //!
     std::vector<string> GetTimeCoordVarNames() const;
 
+protected:
+    //! \copydoc Initialize()
+    //
+    virtual int initialize(const std::vector<string> &paths, const std::vector<string> &options = std::vector<string>()) = 0;
+
+    //! \copydoc GetDimension()
+    //
+    virtual bool getDimension(string dimname, DC::Dimension &dimension) const = 0;
+
+    //! \copydoc GetDimensionNames()
+    //
+    virtual std::vector<string> getDimensionNames() const = 0;
+
+    //! \copydoc GetMeshNames()
+    //
+    virtual std::vector<string> getMeshNames() const = 0;
+
+    //! \copydoc GetMesh()
+    //
+    virtual bool getMesh(string mesh_name, DC::Mesh &mesh) const = 0;
+
+    //! \copydoc GetCoordVarInfo()
+    //
+    virtual bool getCoordVarInfo(string varname, DC::CoordVar &cvar) const = 0;
+
+    //! \copydoc GetDataVarInfo()
+    //
+    virtual bool getDataVarInfo(string varname, DC::DataVar &datavar) const = 0;
+
+    //! \copydoc GetAuxVarInfo()
+    //
+    virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const = 0;
+
+    //! \copydoc GetBaseVarInfo()
+    //
+    virtual bool getBaseVarInfo(string varname, DC::BaseVar &var) const = 0;
+
+    //! \copydoc GetDataVarNames()
+    //
+    virtual std::vector<string> getDataVarNames() const = 0;
+
+    //! \copydoc GetCoordVarNames()
+    //
+    virtual std::vector<string> getCoordVarNames() const = 0;
+
+    //! \copydoc GetAuxVarNames()
+    //
+    virtual std::vector<string> getAuxVarNames() const = 0;
+
+    //! \copydoc GetNumRefLevels()
+    //
+    virtual size_t getNumRefLevels(string varname) const = 0;
+
+    //! \copydoc GetAtt(string varname, string attname, vector <double> &values)
+    //
+    virtual bool getAtt(string varname, string attname, vector<double> &values) const = 0;
+
+    //! \copydoc GetAtt(string varname, string attname, vector <long> &values)
+    //
+    virtual bool getAtt(string varname, string attname, vector<long> &values) const = 0;
+
+    //! \copydoc GetAtt(string varname, string attname, string &values)
+    //
+    virtual bool getAtt(string varname, string attname, string &values) const = 0;
+
+    //! \copydoc GetAttNames()
+    //
+    virtual std::vector<string> getAttNames(string varname) const = 0;
+
+    //! \copydoc GetAttType()
+    //
+    virtual XType getAttType(string varname, string attname) const = 0;
+
+    //! \copydoc GetDimLensAtLevel()
+    //
+    virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const = 0;
+
+    //! \copydoc GetMapProjection(string varname)
+    //
+    virtual string getMapProjection(string varname) const = 0;
+
+    //! \copydoc GetMapProjection()
+    //
+    virtual string getMapProjection() const = 0;
+
+    //! \copydoc GetMapProjectionDefault()
+    //
+    virtual string getMapProjectionDefault() const = 0;
+
+    //! \copydoc OpenVariableRead()
+    //
+    virtual int openVariableRead(size_t ts, string varname, int level = 0, int lod = 0) = 0;
+
+    //! \copydoc CloseVariable()
+    //
+    virtual int closeVariable() = 0;
+
+    //! \copydoc Read()
+    //
+    virtual int read(float *data) = 0;
+
+    //! \copydoc Read()
+    //
+    virtual int read(int *data) = 0;
+
+    //! \copydoc readSlice()
+    //
+    virtual int readSlice(float *slice) = 0;
+
+    //! \copydoc ReadRegion()
+    //
+    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+
+    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
+
+    //! \copydoc ReadRegionBlock()
+    //
+    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+
+    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
+
+    //! \copydoc VariableExists()
+    //
+    virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const = 0;
+
 private:
+    size_t _ovrTS;
+    string _ovrVarName;
+    int    _ovrLevel;
+    int    _ovrLOD;
+    int    _ovrSliceNum;
+
     virtual bool _getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const;
 
     virtual bool _getDataVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const;
 
     virtual bool _getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions) const;
+
+    virtual int _openVariableRead(size_t ts, string varname, int level = 0, int lod = 0);
+
+    virtual int _closeVariable();
+
+    template<class T> int _readSliceTemplate(T *slice);
+
+    template<class T> int _getVarTemplate(string varname, int level, int lod, T *data);
+
+    template<class T> int _getVarTemplate(size_t ts, string varname, int level, int lod, T *data);
 };
 };    // namespace VAPoR
 

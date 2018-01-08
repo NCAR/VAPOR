@@ -111,6 +111,19 @@ size_t vproduct(vector<size_t> a)
     return (ntotal);
 }
 
+size_t gcd(size_t n1, size_t n2)
+{
+    size_t tmp;
+    while (n2 != 0) {
+        tmp = n1;
+        n1 = n2;
+        n2 = tmp % n2;
+    }
+    return n1;
+}
+
+size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
+
 };    // namespace
 
 VDCNetCDF::VDCNetCDF(int nthreads, size_t master_threshold, size_t variable_threshold) : VDC()
@@ -134,11 +147,42 @@ VDCNetCDF::~VDCNetCDF()
     }
 }
 
+int VDCNetCDF::GetHyperSliceInfo(string varname, int level, std::vector<size_t> &hslice_dims, size_t &nslice)
+{
+    hslice_dims.clear();
+    nslice = 0;
+
+    vector<size_t> dims_at_level;
+    vector<size_t> bs_at_level;
+
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    if (rc < 0) return (-1);
+
+    if (dims_at_level.size() == 0) return (0);
+
+    hslice_dims = dims_at_level;
+
+    if (dims_at_level.size() == 1) {
+        nslice = 1;
+        return (0);
+    }
+
+    int dim = hslice_dims.size() - 1;
+
+    // This is where we override the DC::GetHyperSliceInfo() method.
+    // Need to preserve block alignment.
+    //
+    hslice_dims[dim] = bs_at_level[dim];
+    nslice = (dims_at_level[dim] - 1) / hslice_dims[dim] + 1;
+
+    return (0);
+}
+
 int VDCNetCDF::Initialize(const vector<string> &paths, const vector<string> &options, AccessMode mode, size_t chunksizehint)
 {
     _chunksizehint = chunksizehint;
 
-    int rc = VDC::Initialize(paths, options, mode);
+    int rc = VDC::initialize(paths, options, mode);
     if (rc < 0) return (-1);
 
     if (mode == VDC::W) {
@@ -252,7 +296,7 @@ int VDCNetCDF::GetPath(string varname, size_t ts, string &path, size_t &file_ts,
     return (0);
 }
 
-int VDCNetCDF::GetDimLensAtLevel(string varname, int level, vector<size_t> &dims_at_level, vector<size_t> &bs_at_level) const
+int VDCNetCDF::getDimLensAtLevel(string varname, int level, vector<size_t> &dims_at_level, vector<size_t> &bs_at_level) const
 {
     dims_at_level.clear();
     bs_at_level.clear();
@@ -348,13 +392,13 @@ string VDCNetCDF::_get_mask_varname(string varname) const
 {
     VDC::DataVar dvar;
 
-    if (VDC::GetDataVarInfo(varname, dvar)) { return (dvar.GetMaskvar()); }
+    if (VDC::getDataVarInfo(varname, dvar)) { return (dvar.GetMaskvar()); }
     return ("");
 }
 
-int VDCNetCDF::OpenVariableRead(size_t ts, string varname, int level, int lod)
+int VDCNetCDF::openVariableRead(size_t ts, string varname, int level, int lod)
 {
-    CloseVariable();
+    closeVariable();
 
     int nlevels = VDC::GetNumRefLevels(varname);
 
@@ -404,17 +448,17 @@ int VDCNetCDF::OpenVariableRead(size_t ts, string varname, int level, int lod)
 
 int VDCNetCDF::OpenVariableWrite(size_t ts, string varname, int lod)
 {
-    CloseVariable();
+    closeVariable();
 
     VDC::BaseVar *varptr;
 
     VDC::DataVar  dvar;
     VDC::CoordVar cvar;
     bool          isdvar;
-    if (VDC::GetDataVarInfo(varname, dvar)) {
+    if (VDC::getDataVarInfo(varname, dvar)) {
         varptr = &dvar;
         isdvar = true;
-    } else if (VDC::GetCoordVarInfo(varname, cvar)) {
+    } else if (VDC::getCoordVarInfo(varname, cvar)) {
         varptr = &cvar;
         isdvar = false;
     } else {
@@ -494,7 +538,7 @@ int VDCNetCDF::OpenVariableWrite(size_t ts, string varname, int lod)
     return (0);
 }
 
-int VDCNetCDF::CloseVariable()
+int VDCNetCDF::closeVariable()
 {
     if (_ofi._wasp) { _ofi._wasp->CloseVar(); }
     if (_ofi._wasp && _ofi._wasp != _master) {
@@ -533,7 +577,7 @@ unsigned char *VDCNetCDF::_read_mask_var(vector<size_t> start, vector<size_t> co
     return (mask);
 }
 
-int VDCNetCDF::Write(const float *data)
+template<class T> int VDCNetCDF::_writeTemplate(const T *data)
 {
     if (!_ofi._wasp || !_ofi._write) {
         SetErrMsg("No variable open for writing");
@@ -562,7 +606,57 @@ int VDCNetCDF::Write(const float *data)
     return (_ofi._wasp->PutVara(start, count, data, mask));
 }
 
-template<class T> int VDCNetCDF::_WriteSlice(WASP *file, const T *slice)
+template<class T> int VDCNetCDF::_writeSliceTemplate(WASP *file, const T *slice)
+{
+    if (!_ofi._wasp || !_ofi._write) {
+        SetErrMsg("No variable open for writing");
+        return (-1);
+    }
+    vector<size_t> dims_at_level;
+    vector<size_t> bs_at_level;
+
+    int rc = GetDimLensAtLevel(_ofi._varname, _ofi._level, dims_at_level, bs_at_level);
+    if (rc < 0) return (rc);
+
+    vector<size_t> hslice_dims;
+    size_t         nslice;
+    rc = GetHyperSliceInfo(_ofi._varname, _ofi._level, hslice_dims, nslice);
+    if (rc < 0) return (rc);
+    assert(hslice_dims.size() == dims_at_level.size());
+
+    if (_ofi._slice_num >= nslice) return (0);    // Done writing;
+
+    vector<size_t> min;
+    vector<size_t> max;
+    int            dim = 0;
+    for (; dim < hslice_dims.size() - 1; dim++) {
+        min.push_back(0);
+        max.push_back(hslice_dims[dim] - 1);
+    };
+    min.push_back(_ofi._slice_num * hslice_dims[dim]);
+    max.push_back(min[dim] + hslice_dims[dim] - 1);
+
+    // Last slice is a partial read if not block-aligned
+    //
+    if (max[dim] >= dims_at_level[dim]) { max[dim] = dims_at_level[dim] - 1; }
+
+    //
+    // Map from VDC to NetCDF coordinates
+    //
+    vector<size_t> start;
+    vector<size_t> count;
+    vdc_2_ncdfcoords(_ofi._file_ts, _ofi._file_ts, IsTimeVarying(_ofi._varname), min, max, start, count);
+
+    rc = file->PutVara(start, count, slice);
+    if (rc < 0) return (rc);
+
+    _ofi._slice_num++;
+
+    return (rc);
+}
+
+#ifdef DEAD
+template<class T> int VDCNetCDF::_writeSliceTemplate(WASP *file, const T *slice)
 {
     if (!_ofi._wasp || !_ofi._write) {
         SetErrMsg("No variable open for writing");
@@ -616,10 +710,7 @@ template<class T> int VDCNetCDF::_WriteSlice(WASP *file, const T *slice)
     }
     return (0);
 }
-
-int VDCNetCDF::WriteSlice(const float *slice) { return (_WriteSlice(_ofi._wasp, slice)); }
-
-int VDCNetCDF::WriteSlice(const unsigned char *slice) { return (_WriteSlice(_ofi._wasp, slice)); }
+#endif
 
 int VDCNetCDF::_ReadHelper(vector<size_t> &start, vector<size_t> &count) const
 {
@@ -644,7 +735,7 @@ int VDCNetCDF::_ReadHelper(vector<size_t> &start, vector<size_t> &count) const
     return (0);
 }
 
-int VDCNetCDF::Read(float *data)
+int VDCNetCDF::read(float *data)
 {
     vector<size_t> start;
     vector<size_t> count;
@@ -655,7 +746,7 @@ int VDCNetCDF::Read(float *data)
     return (_ofi._wasp->GetVara(start, count, data));
 }
 
-int VDCNetCDF::Read(int *data)
+int VDCNetCDF::read(int *data)
 {
     vector<size_t> start;
     vector<size_t> count;
@@ -723,11 +814,11 @@ template<class T> int VDCNetCDF::_ReadSlice(WASP *file, T *slice)
     return (0);
 }
 
-int VDCNetCDF::ReadSlice(float *slice) { return (_ReadSlice(_ofi._wasp, slice)); }
+int VDCNetCDF::readSlice(float *slice) { return (_ReadSlice(_ofi._wasp, slice)); }
 
-int VDCNetCDF::ReadSlice(unsigned char *slice) { return (_ReadSlice(_ofi._wasp, slice)); }
+int VDCNetCDF::readSlice(unsigned char *slice) { return (_ReadSlice(_ofi._wasp, slice)); }
 
-int VDCNetCDF::ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float *region)
+int VDCNetCDF::readRegion(const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
     bool time_varying = VDC::IsTimeVarying(_ofi._varname);
 
@@ -738,7 +829,18 @@ int VDCNetCDF::ReadRegion(const vector<size_t> &min, const vector<size_t> &max, 
     return (_ofi._wasp->GetVara(start, count, region));
 }
 
-int VDCNetCDF::ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region)
+int VDCNetCDF::readRegion(const vector<size_t> &min, const vector<size_t> &max, int *region)
+{
+    bool time_varying = VDC::IsTimeVarying(_ofi._varname);
+
+    vector<size_t> start;
+    vector<size_t> count;
+    vdc_2_ncdfcoords(_ofi._file_ts, _ofi._file_ts, time_varying, min, max, start, count);
+
+    return (_ofi._wasp->GetVara(start, count, region));
+}
+
+int VDCNetCDF::readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
     bool time_varying = VDC::IsTimeVarying(_ofi._varname);
 
@@ -749,7 +851,7 @@ int VDCNetCDF::ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &
     return (_ofi._wasp->GetVaraBlock(start, count, region));
 }
 
-int VDCNetCDF::ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region)
+int VDCNetCDF::readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region)
 {
     bool time_varying = VDC::IsTimeVarying(_ofi._varname);
 
@@ -760,9 +862,9 @@ int VDCNetCDF::ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &
     return (_ofi._wasp->GetVaraBlock(start, count, region));
 }
 
-int VDCNetCDF::PutVar(string varname, int lod, const float *data)
+template<class T> int VDCNetCDF::_putVarTemplate(string varname, int lod, const T *data)
 {
-    CloseVariable();
+    closeVariable();
 
     vector<size_t> dims_at_level;
     vector<size_t> dummy;
@@ -779,7 +881,7 @@ int VDCNetCDF::PutVar(string varname, int lod, const float *data)
 
         int numts = VDC::GetNumTimeSteps(varname);
 
-        const float *ptr = data;
+        const T *ptr = data;
         for (size_t ts = 0; ts < numts; ts++) {
             rc = VDCNetCDF::PutVar(ts, varname, lod, ptr);
             if (rc < 0) return (-1);
@@ -816,9 +918,9 @@ int VDCNetCDF::PutVar(string varname, int lod, const float *data)
     return (0);
 }
 
-int VDCNetCDF::PutVar(size_t ts, string varname, int lod, const float *data)
+template<class T> int VDCNetCDF::_putVarTemplate(size_t ts, string varname, int lod, const T *data)
 {
-    CloseVariable();
+    closeVariable();
 
     int rc = VDCNetCDF::OpenVariableWrite(ts, varname, lod);
     if (rc < 0) return (-1);
@@ -826,96 +928,161 @@ int VDCNetCDF::PutVar(size_t ts, string varname, int lod, const float *data)
     rc = VDCNetCDF::Write(data);
     if (rc < 0) return (-1);
 
-    rc = CloseVariable();
+    rc = closeVariable();
     if (rc < 0) return (-1);
 
     return (0);
 }
 
-template<class T> int VDCNetCDF::_GetVar(string varname, int level, int lod, T *data)
+int VDCNetCDF::_copyVar0d(DC &dc, size_t ts, const BaseVar &varInfo)
 {
-    CloseVariable();
+    if (varInfo.GetXType() == FLOAT || varInfo.GetXType() == DOUBLE) {
+        float buf;
 
-    int nlevels = VDC::GetNumRefLevels(varname);
+        int rc = dc.GetVar(ts, varInfo.GetName(), -1, -1, &buf);
+        if (rc < 0) return (rc);
 
-    int clevel, flevel;
-    levels(level, nlevels, clevel, flevel);
+        rc = PutVar(ts, varInfo.GetName(), -1, &buf);
+        if (rc < 0) return (rc);
+    } else {
+        int buf;
 
-    vector<size_t> dims_at_level;
-    vector<size_t> dummy;
-    int            rc = VDCNetCDF::GetDimLensAtLevel(varname, clevel, dims_at_level, dummy);
-    if (rc < 0) return (-1);
+        int rc = dc.GetVar(ts, varInfo.GetName(), -1, -1, &buf);
+        if (rc < 0) return (rc);
 
-    // If not a 1D time-varying variable.
-    //
-    if (!(VDC::IsTimeVarying(varname) && dims_at_level.size() == 1)) {
-        // Number of per time step
-        //
-        size_t var_size = 1;
-        for (int i = 0; i < dims_at_level.size(); i++) var_size *= dims_at_level[i];
+        rc = PutVar(ts, varInfo.GetName(), -1, &buf);
+        if (rc < 0) return (rc);
+    }
+    return (0);
+}
 
-        size_t numts = VDC::GetNumTimeSteps(varname);
+template<class T> int VDCNetCDF::_copyVarHelper(DC &dc, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer)
+{
+    assert(buffer_dims.size() == src_hslice_dims.size());
+    assert(buffer_dims.size() == dst_hslice_dims.size());
 
-        T *ptr = data;
-        for (size_t ts = 0; ts < numts; ts++) {
-            rc = VDCNetCDF::GetVar(ts, varname, clevel, lod, ptr);
+    size_t dim = buffer_dims.size() - 1;
+
+    size_t src_slice_count = 0;
+    size_t dst_slice_count = 0;
+    while (src_slice_count < src_nslice) {
+        T * bufptr = buffer;
+        int n = buffer_dims[dim] / src_hslice_dims[dim];
+
+        for (int i = 0; i < n && src_slice_count < src_nslice; i++) {
+            int rc = dc.ReadSlice(bufptr);
             if (rc < 0) return (-1);
+            bufptr += vproduct(src_hslice_dims);
 
-            ptr += var_size;
+            src_slice_count++;
         }
 
-        return (0);
+        bufptr = buffer;
+        n = buffer_dims[dim] / dst_hslice_dims[dim];
+
+        for (int i = 0; i < n && dst_slice_count < dst_nslice; i++) {
+            int rc = WriteSlice(bufptr);
+            if (rc < 0) return (-1);
+
+            bufptr += vproduct(dst_hslice_dims);
+
+            dst_slice_count++;
+        }
     }
+    return (0);
+}
 
-    // Read 1D time-varying variables directly with
-    // NetCDFCpp class
-    //
-
-    VDC::BaseVar var;
-    if (!VDC::GetBaseVarInfo(varname, var)) {
-        SetErrMsg("Undefined variable name : %s", varname.c_str());
-        return (false);
-    }
-
-    // Don't currently handle case where a variable is split across
-    // multiple files.
-    //
-    if (!_var_in_master(var)) {
-        SetErrMsg("Distributed variable reads not supported");
+int VDCNetCDF::CopyVar(DC &dc, size_t ts, string varname, int srclod, int dstlod)
+{
+    BaseVar varInfo;
+    bool    status = dc.GetBaseVarInfo(varname, varInfo);
+    if (!status) {
+        SetErrMsg("Invalid source variable name : %s", varname.c_str());
         return (-1);
     }
 
-    // N.B. calling NetCDFCpp::GetVar()
+    // Get the dimensions of a hyper slice for the source and destination
+    // varible
     //
-    rc = ((NetCDFCpp *)_master)->GetVar(varname, data);
-    if (rc < 0) return (-1);
+    vector<size_t> src_hslice_dims;
+    size_t         src_nslice;
+    int            rc = dc.GetHyperSliceInfo(varname, -1, src_hslice_dims, src_nslice);
+    if (rc < 0) return (rc);
 
-    return (0);
+    vector<size_t> dst_hslice_dims;
+    size_t         dst_nslice;
+    rc = GetHyperSliceInfo(varname, -1, dst_hslice_dims, dst_nslice);
+    if (rc < 0) return (rc);
+
+    if (src_hslice_dims.size() != dst_hslice_dims.size()) {
+        SetErrMsg("Incompatible source and destination variable definitions");
+        return (-1);
+    }
+
+    if (src_hslice_dims.size() == 0) { return (_copyVar0d(dc, ts, varInfo)); }
+
+    // n-1 fastest varying dimensions must be the same for both hyper-slices.
+    // Slowest dimension may be different.
+    //
+    int    dim = src_hslice_dims.size() - 1;
+    size_t src_dimlen = src_hslice_dims[dim];
+    size_t dst_dimlen = dst_hslice_dims[dim];
+
+    for (int i = 0; i < src_hslice_dims.size() - 1; i++) {
+        if (src_hslice_dims[i] != dst_hslice_dims[i]) {
+            SetErrMsg("Incompatible source and destination variable definitions");
+            return (-1);
+        }
+    }
+
+    // Find the slice dimension for slowest varying dimension, the Least
+    // Common Multiple for the source and destination
+    //
+    size_t slice_dim = lcm(src_dimlen, dst_dimlen);
+
+    // Common (fastest-varying) dimensions for both variables, plus
+    // the lcm of the slowest varying dimension for the source
+    // and destination.
+    //
+    vector<size_t> buffer_dims = src_hslice_dims;
+    buffer_dims.pop_back();    // Remove slowest varying dimension
+    buffer_dims.push_back(slice_dim);
+
+    rc = dc.OpenVariableRead(ts, varname, srclod);
+    if (rc < 0) return (rc);
+
+    rc = OpenVariableWrite(ts, varname, dstlod);
+    if (rc < 0) return (rc);
+
+    if (varInfo.GetXType() == FLOAT || varInfo.GetXType() == DOUBLE) {
+        size_t bufsize = vproduct(buffer_dims);
+        float *buffer = new float[bufsize];
+
+        rc = _copyVarHelper(dc, buffer_dims, src_hslice_dims, dst_hslice_dims, src_nslice, dst_nslice, buffer);
+        delete[] buffer;
+    } else {
+        size_t bufsize = vproduct(buffer_dims);
+        int *  buffer = new int[bufsize];
+
+        rc = _copyVarHelper(dc, buffer_dims, src_hslice_dims, dst_hslice_dims, src_nslice, dst_nslice, buffer);
+        delete[] buffer;
+    }
+
+    dc.CloseVariable();
+    CloseVariableWrite();
+
+    return (rc);
 }
 
-int VDCNetCDF::GetVar(string varname, int level, int lod, float *data) { return (_GetVar(varname, level, lod, data)); }
-
-int VDCNetCDF::GetVar(string varname, int level, int lod, int *data) { return (_GetVar(varname, level, lod, data)); }
-
-template<class T> int VDCNetCDF::_GetVar(size_t ts, string varname, int level, int lod, T *data)
+int VDCNetCDF::CopyVar(DC &dc, string varname, int srclod, int dstlod)
 {
-    CloseVariable();
-
-    int rc = VDCNetCDF::OpenVariableRead(ts, varname, level, lod);
-    if (rc < 0) return (-1);
-
-    rc = VDCNetCDF::Read(data);
-    if (rc < 0) return (-1);
-
-    rc = VDCNetCDF::CloseVariable();
-    if (rc < 0) return (-1);
-
+    size_t numTS = dc.GetNumTimeSteps(varname);
+    for (size_t ts = 0; ts < numTS; ts++) {
+        int rc = CopyVar(dc, ts, varname, srclod, dstlod);
+        if (rc < 0) return (rc);
+    }
     return (0);
 }
-
-int VDCNetCDF::GetVar(size_t ts, string varname, int level, int lod, float *data) { return (_GetVar(ts, varname, level, lod, data)); }
-
-int VDCNetCDF::GetVar(size_t ts, string varname, int level, int lod, int *data) { return (_GetVar(ts, varname, level, lod, data)); }
 
 bool VDCNetCDF::CompressionInfo(std::vector<size_t> bs, string wname, size_t &nlevels, size_t &maxcratio) const
 {
@@ -927,7 +1094,7 @@ bool VDCNetCDF::CompressionInfo(std::vector<size_t> bs, string wname, size_t &nl
     return (WASP::InqCompressionInfo(bs, wname, nlevels, maxcratio));
 }
 
-bool VDCNetCDF::VariableExists(size_t ts, string varname, int level, int lod) const
+bool VDCNetCDF::variableExists(size_t ts, string varname, int level, int lod) const
 {
     VDC::BaseVar var;
     if (!VDC::GetBaseVarInfo(varname, var)) return (false);
