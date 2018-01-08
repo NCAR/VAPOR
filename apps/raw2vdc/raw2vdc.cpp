@@ -176,19 +176,27 @@ int	main(int argc, char **argv) {
 
 	int rc = vdc.Initialize(master, vector <string> (), VDC::A, 4*1024*1024);
 
-	vector <size_t> sdims;
-	if (! vdc.GetVarDimLens(opt.varname, true, sdims)) {
-		MyBase::SetErrMsg("VDC corrupt, invalid dimensions");
-		exit(1);
+	vector <size_t> hslice_dims;
+	size_t nslice;
+	rc = vdc.GetHyperSliceInfo(opt.varname, -1, hslice_dims, nslice);
+	if (rc<0) {
+		MyBase::SetErrMsg("Invalid variable name : %s", opt.varname.c_str());
+		return(1);
 	}
 
-	if (sdims.size() < 1) {
-		MyBase::SetErrMsg("Variable must be 1D, 2D or 3D");
-		exit(1);
+	size_t nelements = 1;
+	for (int i=0; i<hslice_dims.size(); i++) {
+		nelements *= hslice_dims[i];
 	}
 
-	size_t nelements = sdims[0];
-	if (sdims.size() > 1) nelements *= sdims[1];
+	vector <size_t> dimlens;
+	bool ok = vdc.GetVarDimLens(opt.varname, true, dimlens);
+	assert(ok==true);
+
+	size_t ntotal = 1;
+	for (int i=0; i<dimlens.size(); i++) {
+		ntotal *= dimlens[i];
+	}
 
 	float *slice = new float[nelements];
 
@@ -201,17 +209,18 @@ int	main(int argc, char **argv) {
 	rc = vdc.OpenVariableWrite(opt.ts, opt.varname, opt.lod);
 	if (rc<0) exit(1);
 
-	size_t nz = sdims.size() > 2 ? sdims[2] : 1;
-
-	for (size_t i=0; i<nz; i++) {
+	for (size_t i=0; i<nslice; i++) {
+		nelements = nelements < ntotal ? nelements : ntotal;
 		int rc = read_data(fp, opt.type, opt.swapbytes, nelements, slice);
 		if (rc<0) exit(1);
+
+		ntotal -= nelements;
 
 		rc = vdc.WriteSlice(slice);
 		if (rc<0) exit(1);
 	}
 
-	rc = vdc.CloseVariable();
+	rc = vdc.CloseVariableWrite();
 	if (rc<0) exit(1);
 
 	fclose(fp);

@@ -50,133 +50,6 @@ OptionParser::Option_T	get_options[] = {
 
 string ProgName;
 
-SmartBuf dataBuffer;
-
-// Copy a variable with 2 or 3 spatial dimensions
-//
-int CopyVar2d3d(
-	DC &dc, VDC &vdc, const vector <size_t> &dimlens,
-	size_t ts, string varname, int lod
-) {
-
-	assert(dimlens.size()==2 || dimlens.size() == 3);
-	
-	int rc = dc.OpenVariableRead(ts,varname, -1, -1);
-	if (rc<0) {
-		MyBase::SetErrMsg(
-			"Failed to open variable %s for reading\n", varname.c_str()
-		);
-		return(-1);
-	}
-
-    rc = vdc.OpenVariableWrite(ts, varname, lod);
-    if (rc<0) {
-		MyBase::SetErrMsg(
-			"Failed to open variable %s for writing\n", varname.c_str()
-		);
-		return(-1);
-	}
-
-    size_t nz = dimlens.size() > 2 ? dimlens[dimlens.size()-1] : 1;
-
-	size_t sz = dimlens[0] * dimlens[1];
-	float *buf = (float *) dataBuffer.Alloc(sz*sizeof(*buf));
-
-    for (size_t i=0; i<nz; i++) {
-        rc = dc.ReadSlice(buf);
-		if (rc<0) {
-			MyBase::SetErrMsg(
-				"Failed to read variable %s\n", varname.c_str()
-			);
-			return(-1);
-		}
-
-        int rc = vdc.WriteSlice(buf);
-		if (rc<0) {
-			MyBase::SetErrMsg(
-				"Failed to write variable %s\n", varname.c_str()
-			);
-			return(-1);
-		}
-	}
-
-    (void) dc.CloseVariable();
-    rc = vdc.CloseVariable();
-	if (rc<0) {
-		MyBase::SetErrMsg(
-			"Failed to write variable %s\n", varname.c_str()
-		);
-		return(-1);
-	}
-
-	return(0);
-}
-
-// Copy a variable with 0 or 1 spatial dimensions
-//
-int CopyVar0d1d(
-	DC &dc, VDC &vdc, const vector <size_t> &dimlens,
-	size_t ts, string varname, int lod
-) {
-
-	assert(dimlens.size()==0 || dimlens.size() == 1);
-
-	size_t sz=1;
-	for (int i=0; i<dimlens.size(); i++) {
-		sz *= dimlens[i];
-	}
-
-	float *buf = (float *) dataBuffer.Alloc(sz * sizeof(*buf));
-
-	int rc = dc.GetVar(ts, varname, -1, -1, buf);
-	if (rc<0) {
-		MyBase::SetErrMsg(
-			"Failed to read variable %s\n", varname.c_str()
-		);
-		return(-1);
-	}
-
-	rc = vdc.PutVar(ts, varname, lod, buf);
-	if (rc<0) {
-		MyBase::SetErrMsg(
-			"Failed to write variable %s\n", varname.c_str()
-		);
-		return(-1);
-	}
-
-	return(0);
-}
-
-
-int CopyVar(
-	DC &dc, VDC &vdc,
-	size_t ts, string varname, int lod
-) {
-
-
-	vector <size_t> dimlens;
-	if (dc.IsTimeVarying(varname)) {
-		bool ok = dc.GetVarDimLens(varname, true, dimlens);
-		assert(ok==true);
-
-		// Must be time coordinate variable. Write one elment at at time. sigh
-		//
-		if (dimlens.empty()) dimlens.push_back(1);
-	}
-	
-	assert(dimlens.size() > 0 && dimlens.size() < 4);
-
-	// Call appropriate copy method based on number of spatial dimensions
-	//
-	if (dimlens.size() == 0 || dimlens.size() == 1) {
-		return(CopyVar0d1d(dc, vdc, dimlens, ts, varname, lod));
-	}
-	else {
-		return(CopyVar2d3d(dc, vdc, dimlens, ts, varname, lod));
-	}
-}
-	
-
 int	main(int argc, char **argv) {
 
 	OptionParser op;
@@ -228,17 +101,6 @@ int	main(int argc, char **argv) {
 		exit(1);
 	}
 
-	// Necessary????
-	//
-//	rc = vdc.EndDefine();
-//	if (rc<0) {
-//		MyBase::SetErrMsg(
-//			"Failed to write VDC master file : %s", master.c_str()
-////		);
-//		exit(1);
-//	}
-
-
 	vector <string> varnames = dcwrf.GetCoordVarNames();
 	for (int i=0; i<varnames.size(); i++) {
 		int nts = dcwrf.GetNumTimeSteps(varnames[i]);
@@ -249,7 +111,7 @@ int	main(int argc, char **argv) {
 
 		for (int ts=0; ts<nts; ts++) {
 			cout << "  Time step " << ts << endl;
-			int rc = CopyVar(dcwrf, vdc, ts, varnames[i], -1);
+			int rc = vdc.CopyVar(dcwrf, ts, varnames[i], -1, -1);
 			if (rc<0) exit(1);
 		}
 	}
@@ -271,7 +133,7 @@ int	main(int argc, char **argv) {
 
 			cout << "  Time step " << ts << endl;
 
-			int rc = CopyVar(dcwrf, vdc, ts, varnames[i], -1);
+			int rc = vdc.CopyVar(dcwrf, ts, varnames[i], -1, -1);
 			if (rc<0) exit(1);
 		}
 	}
