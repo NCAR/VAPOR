@@ -8,13 +8,13 @@
 //----------------------------------------------------------------------------
 
 #ifndef DomainWidget_H
-#define DomainWidget_H
+    #define DomainWidget_H
 
-#include "GLWidget.h"
-#include <vapor/MyBase.h>
+    #include "GLWidget.h"
+    #include <vapor/MyBase.h>
 
-#include <qobject.h>
-#include <iostream>
+    #include <qobject.h>
+    #include <iostream>
 using namespace std;
 
 class GLUquadric;
@@ -36,8 +36,9 @@ public:
     float minValue() const { return _minValue; }    // world-coordinates
     float maxValue() const { return _maxValue; }    // world-coordinates
 
-    void setDomain(float minv, float maxv)
+    virtual void setDomain(float minv, float maxv)
     {
+        // cout << "setDomain " << minv << " " << maxv << endl;
         _minValue = minv;
         _maxValue = maxv;
     }
@@ -58,7 +59,6 @@ protected:
     float _minValue;
     float _maxValue;
 
-private:
     //
     // Frame data
     //
@@ -82,3 +82,9 @@ protected:
 };
 
 #endif    // DomainWidget_H
+
+class ContourRangeSlider : public DomainWidget {
+public:
+    ContourRangeSlider(QWidget *parent, float min = 0.0, float max = 1.0);
+    virtual int paintGL();
+};
