@@ -225,7 +225,7 @@ DCMPAS::~DCMPAS() {
     _derivedVars.clear();
 }
 
-int DCMPAS::Initialize(
+int DCMPAS::initialize(
     const vector<string> &files, const std::vector<string> &options) {
     _proj4StringOption.clear();
     if (options.size() >= 2) {
@@ -336,7 +336,7 @@ int DCMPAS::Initialize(
     return (0);
 }
 
-bool DCMPAS::GetDimension(
+bool DCMPAS::getDimension(
     string dimname, DC::Dimension &dimension) const {
     map<string, DC::Dimension>::const_iterator itr;
 
@@ -348,7 +348,7 @@ bool DCMPAS::GetDimension(
     return (true);
 }
 
-std::vector<string> DCMPAS::GetDimensionNames() const {
+std::vector<string> DCMPAS::getDimensionNames() const {
     map<string, DC::Dimension>::const_iterator itr;
 
     vector<string> names;
@@ -360,7 +360,7 @@ std::vector<string> DCMPAS::GetDimensionNames() const {
     return (names);
 }
 
-vector<string> DCMPAS::GetMeshNames() const {
+vector<string> DCMPAS::getMeshNames() const {
     vector<string> mesh_names;
     std::map<string, Mesh>::const_iterator itr = _meshMap.begin();
     for (; itr != _meshMap.end(); ++itr) {
@@ -369,7 +369,7 @@ vector<string> DCMPAS::GetMeshNames() const {
     return (mesh_names);
 }
 
-bool DCMPAS::GetMesh(
+bool DCMPAS::getMesh(
     string mesh_name, DC::Mesh &mesh) const {
 
     map<string, Mesh>::const_iterator itr = _meshMap.find(mesh_name);
@@ -380,7 +380,7 @@ bool DCMPAS::GetMesh(
     return (true);
 }
 
-bool DCMPAS::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
+bool DCMPAS::getCoordVarInfo(string varname, DC::CoordVar &cvar) const {
 
     map<string, DC::CoordVar>::const_iterator itr;
 
@@ -393,7 +393,7 @@ bool DCMPAS::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
     return (true);
 }
 
-bool DCMPAS::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
+bool DCMPAS::getDataVarInfo(string varname, DC::DataVar &datavar) const {
 
     map<string, DC::DataVar>::const_iterator itr;
 
@@ -406,7 +406,7 @@ bool DCMPAS::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
     return (true);
 }
 
-bool DCMPAS::GetAuxVarInfo(string varname, DC::AuxVar &auxvar) const {
+bool DCMPAS::getAuxVarInfo(string varname, DC::AuxVar &auxvar) const {
 
     map<string, DC::AuxVar>::const_iterator itr;
 
@@ -419,7 +419,7 @@ bool DCMPAS::GetAuxVarInfo(string varname, DC::AuxVar &auxvar) const {
     return (true);
 }
 
-bool DCMPAS::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
+bool DCMPAS::getBaseVarInfo(string varname, DC::BaseVar &var) const {
     map<string, DC::CoordVar>::const_iterator itr;
 
     itr = _coordVarsMap.find(varname);
@@ -437,7 +437,7 @@ bool DCMPAS::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
     return (false);
 }
 
-std::vector<string> DCMPAS::GetDataVarNames() const {
+std::vector<string> DCMPAS::getDataVarNames() const {
     map<string, DC::DataVar>::const_iterator itr;
 
     vector<string> names;
@@ -447,7 +447,7 @@ std::vector<string> DCMPAS::GetDataVarNames() const {
     return (names);
 }
 
-std::vector<string> DCMPAS::GetCoordVarNames() const {
+std::vector<string> DCMPAS::getCoordVarNames() const {
     map<string, DC::CoordVar>::const_iterator itr;
 
     vector<string> names;
@@ -457,7 +457,7 @@ std::vector<string> DCMPAS::GetCoordVarNames() const {
     return (names);
 }
 
-std::vector<string> DCMPAS::GetAuxVarNames() const {
+std::vector<string> DCMPAS::getAuxVarNames() const {
     map<string, DC::AuxVar>::const_iterator itr;
 
     vector<string> names;
@@ -470,34 +470,34 @@ std::vector<string> DCMPAS::GetAuxVarNames() const {
 // Oops. Need to implement GetAtt() methods. Oh well. Not currently
 // used by vaporgui
 //
-bool DCMPAS::GetAtt(
+bool DCMPAS::getAtt(
     string varname, string attname, vector<double> &values) const {
     values.clear();
     return (false);
 }
 
-bool DCMPAS::GetAtt(
+bool DCMPAS::getAtt(
     string varname, string attname, vector<long> &values) const {
     values.clear();
     return (false);
 }
 
-bool DCMPAS::GetAtt(
+bool DCMPAS::getAtt(
     string varname, string attname, string &values) const {
     values.clear();
     return (false);
 }
 
-std::vector<string> DCMPAS::GetAttNames(string varname) const {
+std::vector<string> DCMPAS::getAttNames(string varname) const {
     vector<string> names;
     return (names);
 }
 
-DC::XType DCMPAS::GetAttType(string varname, string attname) const {
+DC::XType DCMPAS::getAttType(string varname, string attname) const {
     return (DC::FLOAT);
 }
 
-int DCMPAS::GetDimLensAtLevel(
+int DCMPAS::getDimLensAtLevel(
     string varname, int, std::vector<size_t> &dims_at_level,
     std::vector<size_t> &bs_at_level) const {
     dims_at_level.clear();
@@ -678,9 +678,9 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
     }
 }
 
-int DCMPAS::OpenVariableRead(
+int DCMPAS::openVariableRead(
     size_t ts, string varname) {
-    DCMPAS::CloseVariable();
+    closeVariable();
 
     _ovr_fd = _ncdfc->OpenRead(ts, varname);
 
@@ -700,7 +700,7 @@ int DCMPAS::OpenVariableRead(
     return (_ovr_fd);
 }
 
-int DCMPAS::CloseVariable() {
+int DCMPAS::closeVariable() {
     if (_ovr_fd < 0)
         return (0);
     int rc = _ncdfc->Close(_ovr_fd);
@@ -708,11 +708,11 @@ int DCMPAS::CloseVariable() {
     return (rc);
 }
 
-int DCMPAS::Read(float *data) {
+int DCMPAS::read(float *data) {
     return (_ncdfc->Read(data, _ovr_fd));
 }
 
-int DCMPAS::Read(int *data) {
+int DCMPAS::read(int *data) {
     int rc = _ncdfc->Read(data, _ovr_fd);
 
     // Special handling for some auxiliary variables
@@ -728,13 +728,14 @@ int DCMPAS::Read(int *data) {
     return (rc);
 }
 
-int DCMPAS::ReadSlice(float *slice) {
+int DCMPAS::readSlice(float *slice) {
 
     return (_ncdfc->ReadSlice(slice, _ovr_fd));
 }
 
-int DCMPAS::ReadRegion(
-    const vector<size_t> &min, const vector<size_t> &max, float *region) {
+template <class T>
+int DCMPAS::_readRegionTemplate(
+    const vector<size_t> &min, const vector<size_t> &max, T *region) {
 
     // Need to reverse coordinate ordering for NetCDFCollection API, which
     // orders coordinates from slowest to fastest. DC class expects order
@@ -754,74 +755,13 @@ int DCMPAS::ReadRegion(
     return (_ncdfc->Read(ncdf_start, ncdf_count, region, _ovr_fd));
 }
 
-int DCMPAS::ReadRegionBlock(
+int DCMPAS::readRegionBlock(
     const vector<size_t> &min, const vector<size_t> &max, float *region) {
     //return(DCMPAS::ReadRegion(min, max, region));
-    return (DCMPAS::Read(region));
+    return (DCMPAS::read(region));
 }
 
-int DCMPAS::GetVar(string varname, float *data) {
-
-    vector<size_t> dimlens;
-    bool ok = GetVarDimLens(varname, true, dimlens);
-    if (!ok) {
-        SetErrMsg("Undefined variable name : %s", varname.c_str());
-        return (-1);
-    }
-
-    int nts = 1; // num time steps
-    bool time_varying = IsTimeVarying(varname);
-    if (time_varying) {
-        nts = GetNumTimeSteps(varname);
-    }
-
-    // Number of grid points for variable
-    //
-    size_t sz = 1;
-    for (int i = 0; i < dimlens.size(); i++) {
-        sz *= dimlens[i];
-    }
-
-    //
-    // Read one time step at a time
-    //
-    float *ptr = data;
-    for (int ts = 0; ts < nts; ts++) {
-        int rc = DCMPAS::OpenVariableRead(ts, varname);
-        if (rc < 0)
-            return (-1);
-
-        rc = DCMPAS::Read(ptr);
-        if (rc < 0)
-            return (-1);
-
-        rc = DCMPAS::CloseVariable();
-        if (rc < 0)
-            return (-1);
-
-        ptr += sz; // Advance buffer past current time step
-    }
-    return (0);
-}
-
-int DCMPAS::GetVar(
-    size_t ts, string varname, float *data) {
-    int rc = DCMPAS::OpenVariableRead(ts, varname);
-    if (rc < 0)
-        return (-1);
-
-    rc = DCMPAS::Read(data);
-    if (rc < 0)
-        return (-1);
-
-    rc = DCMPAS::CloseVariable();
-    if (rc < 0)
-        return (-1);
-
-    return (0);
-}
-
-bool DCMPAS::VariableExists(
+bool DCMPAS::variableExists(
     size_t ts, string varname, int, int) const {
     return (_ncdfc->VariableExists(ts, varname));
 }

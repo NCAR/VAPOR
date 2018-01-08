@@ -96,7 +96,7 @@ VDC::VDC() {
     _proj4StringOption.clear();
 }
 
-int VDC::Initialize(
+int VDC::initialize(
     const vector<string> &paths, const vector<string> &options,
     AccessMode mode) {
     _proj4StringOption.clear();
@@ -221,7 +221,7 @@ int VDC::DefineDimension(string name, size_t length, int axis) {
         name, sdimnames, time_dim_name, "", axis, XType::FLOAT, false));
 }
 
-bool VDC::GetDimension(string name, Dimension &dimension) const {
+bool VDC::getDimension(string name, Dimension &dimension) const {
 
     map<string, Dimension>::const_iterator itr = _dimsMap.find(name);
     if (itr == _dimsMap.end())
@@ -231,7 +231,7 @@ bool VDC::GetDimension(string name, Dimension &dimension) const {
     return (true);
 }
 
-vector<string> VDC::GetDimensionNames() const {
+vector<string> VDC::getDimensionNames() const {
     vector<string> dim_names;
     std::map<string, Dimension>::const_iterator itr = _dimsMap.begin();
     for (; itr != _dimsMap.end(); ++itr) {
@@ -240,7 +240,7 @@ vector<string> VDC::GetDimensionNames() const {
     return (dim_names);
 }
 
-vector<string> VDC::GetMeshNames() const {
+vector<string> VDC::getMeshNames() const {
     vector<string> mesh_names;
     std::map<string, Mesh>::const_iterator itr = _meshes.begin();
     for (; itr != _meshes.end(); ++itr) {
@@ -249,7 +249,7 @@ vector<string> VDC::GetMeshNames() const {
     return (mesh_names);
 }
 
-bool VDC::GetMesh(
+bool VDC::getMesh(
     string mesh_name, DC::Mesh &mesh) const {
 
     map<string, Mesh>::const_iterator itr = _meshes.find(mesh_name);
@@ -461,35 +461,7 @@ int VDC::DefineCoordVarUniform(
     return (0);
 }
 
-bool VDC::GetCoordVarInfo(
-    string varname, vector<string> &dim_names, bool &time_varying,
-    string &units, int &axis, XType &type, bool &compressed, bool &uniform) const {
-    dim_names.clear();
-    units.erase();
-
-    map<string, CoordVar>::const_iterator itr = _coordVars.find(varname);
-
-    if (itr == _coordVars.end())
-        return (false);
-
-    time_varying = IsTimeVarying(varname);
-
-    vector<DC::Dimension> dimensions;
-    bool ok = GetVarDimensions(varname, false, dimensions);
-    assert(ok);
-
-    for (int i = 0; i < dimensions.size(); i++) {
-        dim_names.push_back(dimensions[i].GetName());
-    }
-    units = itr->second.GetUnits();
-    axis = itr->second.GetAxis();
-    type = itr->second.GetXType();
-    compressed = itr->second.IsCompressed();
-    uniform = itr->second.GetUniform();
-    return (true);
-}
-
-bool VDC::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
+bool VDC::getCoordVarInfo(string varname, DC::CoordVar &cvar) const {
 
     map<string, CoordVar>::const_iterator itr = _coordVars.find(varname);
     if (itr == _coordVars.end())
@@ -499,7 +471,7 @@ bool VDC::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
     return (true);
 }
 
-bool VDC::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
+bool VDC::getBaseVarInfo(string varname, DC::BaseVar &var) const {
 
     map<string, CoordVar>::const_iterator itr1 = _coordVars.find(varname);
     if (itr1 != _coordVars.end()) {
@@ -556,7 +528,7 @@ int VDC::_DefineDataVar(
     vector<Dimension> dimensions;
     for (int i = 0; i < dim_names.size(); i++) {
         Dimension dimension;
-        VDC::GetDimension(dim_names[i], dimension);
+        VDC::getDimension(dim_names[i], dimension);
         assert(!dimension.GetName().empty());
         dimensions.push_back(dimension);
     }
@@ -623,41 +595,7 @@ int VDC::DefineDataVar(
                             units, type, true, mv, maskvar));
 }
 
-bool VDC::GetDataVarInfo(
-    string varname, vector<string> &dim_names, vector<string> &coord_vars,
-    bool &time_varying,
-    string &units, XType &type, bool &compressed,
-    string &maskvar) const {
-    dim_names.clear();
-    units.erase();
-
-    map<string, DataVar>::const_iterator ditr = _dataVars.find(varname);
-    if (ditr == _dataVars.end())
-        return (false);
-
-    map<string, Mesh>::const_iterator mitr = _meshes.find(ditr->second.GetMeshName());
-    if (mitr == _meshes.end())
-        return (false);
-
-    time_varying = IsTimeVarying(varname);
-
-    vector<DC::Dimension> dimensions;
-    bool ok = GetVarDimensions(varname, false, dimensions);
-    assert(ok);
-
-    for (int i = 0; i < dimensions.size(); i++) {
-        dim_names.push_back(dimensions[i].GetName());
-    }
-
-    coord_vars = mitr->second.GetCoordVars();
-    units = ditr->second.GetUnits();
-    type = ditr->second.GetXType();
-    compressed = ditr->second.IsCompressed();
-    maskvar = ditr->second.GetMaskvar();
-    return (true);
-}
-
-bool VDC::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
+bool VDC::getDataVarInfo(string varname, DC::DataVar &datavar) const {
 
     map<string, DataVar>::const_iterator itr = _dataVars.find(varname);
 
@@ -668,7 +606,7 @@ bool VDC::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
     return (true);
 }
 
-vector<string> VDC::GetDataVarNames() const {
+vector<string> VDC::getDataVarNames() const {
     vector<string> names;
 
     map<string, DataVar>::const_iterator itr;
@@ -678,7 +616,7 @@ vector<string> VDC::GetDataVarNames() const {
     return (names);
 }
 
-vector<string> VDC::GetCoordVarNames() const {
+vector<string> VDC::getCoordVarNames() const {
     vector<string> names;
 
     map<string, CoordVar>::const_iterator itr;
@@ -688,7 +626,7 @@ vector<string> VDC::GetCoordVarNames() const {
     return (names);
 }
 
-size_t VDC::GetNumRefLevels(string varname) const {
+size_t VDC::getNumRefLevels(string varname) const {
 
     vector<size_t> bs;
     string wname;
@@ -787,7 +725,7 @@ int VDC::PutAtt(
     return (0);
 }
 
-bool VDC::GetAtt(
+bool VDC::getAtt(
     string varname, string attname, vector<double> &values) const {
     values.clear();
 
@@ -822,7 +760,7 @@ bool VDC::GetAtt(
     return (true);
 }
 
-bool VDC::GetAtt(
+bool VDC::getAtt(
     string varname, string attname, vector<long> &values) const {
     values.clear();
 
@@ -856,7 +794,7 @@ bool VDC::GetAtt(
     return (true);
 }
 
-bool VDC::GetAtt(
+bool VDC::getAtt(
     string varname, string attname, string &values) const {
     values.clear();
 
@@ -915,7 +853,7 @@ int VDC::CopyAtt(
     return 0;
 }
 
-vector<string> VDC::GetAttNames(
+vector<string> VDC::getAttNames(
     string varname) const {
     vector<string> attnames;
 
@@ -941,7 +879,7 @@ vector<string> VDC::GetAttNames(
     return (attnames);
 }
 
-DC::XType VDC::GetAttType(
+DC::XType VDC::getAttType(
     string varname,
     string attname) const {
 
@@ -975,7 +913,7 @@ DC::XType VDC::GetAttType(
     return (INVALID);
 }
 
-string VDC::GetMapProjection(
+string VDC::getMapProjection(
     string varname) const {
 
     // Shoot. This doens't do anything. I.e. it doesn't force data to
@@ -987,7 +925,7 @@ string VDC::GetMapProjection(
 
     string attname = "MapProjection";
 
-    vector<string> attnames = VDC::GetAttNames(varname);
+    vector<string> attnames = VDC::getAttNames(varname);
     if (find(attnames.begin(), attnames.end(), attname) == attnames.end()) {
 
         // Return default map projection.
@@ -995,18 +933,18 @@ string VDC::GetMapProjection(
         // N.B. WE SHOULD BE VERIFYING THAT THIS IS A GEOREFERENCED
         // VARIABLE!!!
         //
-        return (VDC::GetMapProjection());
+        return (VDC::getMapProjection());
     }
 
     string proj4string;
-    bool status = VDC::GetAtt(varname, attname, proj4string);
+    bool status = VDC::getAtt(varname, attname, proj4string);
     if (status)
         return (proj4string);
 
     return ("");
 }
 
-string VDC::GetMapProjection() const {
+string VDC::getMapProjection() const {
 
     if (!_proj4StringOption.empty()) {
         return (_proj4StringOption);
@@ -1014,13 +952,13 @@ string VDC::GetMapProjection() const {
 
     string attname = "MapProjection";
 
-    vector<string> attnames = VDC::GetAttNames("");
+    vector<string> attnames = VDC::getAttNames("");
     if (find(attnames.begin(), attnames.end(), attname) == attnames.end()) {
         return ("");
     }
 
     string proj4string;
-    bool status = VDC::GetAtt("", attname, proj4string);
+    bool status = VDC::getAtt("", attname, proj4string);
     if (status)
         return (proj4string);
 
@@ -1065,7 +1003,7 @@ int VDC::EndDefine() {
     for (int i = 0; i < _newUniformVars.size(); i++) {
 
         vector<DC::Dimension> dimensions;
-        bool ok = VDC::GetVarDimensions(_newUniformVars[i], false, dimensions);
+        bool ok = GetVarDimensions(_newUniformVars[i], false, dimensions);
         assert(ok);
 
         if (dimensions.size() != 1)
@@ -1475,7 +1413,7 @@ bool VDC::_valid_mask_var(
     // variable dimensions
     //
     vector<DC::Dimension> mdimensions;
-    bool ok = VDC::GetVarDimensions(maskvar, false, mdimensions);
+    bool ok = GetVarDimensions(maskvar, false, mdimensions);
     assert(ok);
 
     while (dimensions.size() > mdimensions.size())
