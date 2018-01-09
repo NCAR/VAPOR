@@ -65,7 +65,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="scaleTab">
       <attribute name="title">
@@ -95,38 +95,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <column>
-          <property name="text">
-           <string>Target</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>X</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Y</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Z</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
         </widget>
        </item>
       </layout>
@@ -159,38 +127,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <column>
-          <property name="text">
-           <string>Target</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>X</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Y</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Z</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
         </widget>
        </item>
       </layout>
@@ -223,38 +159,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <column>
-          <property name="text">
-           <string>Target</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>X</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Y</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Z</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
         </widget>
        </item>
       </layout>
@@ -287,26 +191,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <column>
-          <property name="text">
-           <string>Target</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>X</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Y</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Z</string>
-          </property>
-         </column>
         </widget>
        </item>
       </layout>
