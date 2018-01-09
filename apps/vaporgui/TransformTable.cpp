@@ -35,19 +35,19 @@ TransformTable::TransformTable(QWidget *parent)
     setupUi(this);
 
     _scaleTable = new VaporTable(scaleTable);
-    _scaleTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    _scaleTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     connect(_scaleTable, SIGNAL(valueChanged(int, int)), this, SLOT(ScaleChanged(int, int)));
 
     _translationTable = new VaporTable(translationTable);
-    _translationTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    _translationTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     connect(_translationTable, SIGNAL(valueChanged(int, int)), this, SLOT(TranslationChanged(int, int)));
 
     _rotationTable = new VaporTable(rotationTable);
-    _rotationTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    _rotationTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     connect(_rotationTable, SIGNAL(valueChanged(int, int)), this, SLOT(RotationChanged(int, int)));
 
     _originTable = new VaporTable(originTable);
-    _originTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    _originTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     connect(_originTable, SIGNAL(valueChanged(int, int)), this, SLOT(OriginChanged(int, int)));
 
     _horizontalHeaders.push_back("X");

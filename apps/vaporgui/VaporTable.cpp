@@ -1,21 +1,33 @@
+//*************************************************************************
+//                                                                        *
+//   Copyright (C)  2017                                                  *
+//   University Corporation for Atmospheric Research                      *
+//   All Rights Reserved                                                  *
+//                                                                        *
+//************************************************************************/
+//
+//    File:      VaporTable.cpp
+//
+//    Author:  Scott Pearse
+//    National Center for Atmospheric Research
+//    PO 3000, Boulder, Colorado
+//
+//  Date:      December 2017
+//
+
 #include <QtGui>
 #include <iostream>
 #include <cassert>
 #include <stdlib.h>
-
 #include "VaporTable.h"
-
-//////////////////////////////////////////////////////
-//
-// VaporTable
-//
-//////////////////////////////////////////////////////
 
 VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastColIsCheckboxes)
 {
     _table = table;
     _lastRowIsCheckboxes = lastRowIsCheckboxes;
     _lastColIsCheckboxes = lastColIsCheckboxes;
+    _activeRow = -1;
+    _activeCol = -1;
 }
 
 // Clear current table, then generate table of rows x columns
@@ -45,12 +57,16 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
     setHorizontalHeader(colHeaders);
 
     addCheckboxes(values);
+
+    if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
+    if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
 }
 
-void VaporTable::Reinit(VaporTable::ValidatorFlags vFlags, VaporTable::MutabilityFlags mFlags)
+void VaporTable::Reinit(VaporTable::ValidatorFlags vFlags, VaporTable::MutabilityFlags mFlags, VaporTable::HighlightFlags hFlags)
 {
     _validatorFlags = vFlags;
     _mutabilityFlags = mFlags;
+    _highlightFlags = hFlags;
 }
 
 std::vector<std::string> VaporTable::convertToString(std::vector<int> values)
@@ -200,13 +216,25 @@ void VaporTable::emitValueChanged()
     QObject *obj = sender();
     int      row = obj->property("row").toInt();
     int      col = obj->property("col").toInt();
-    emit     valueChanged(row, col);
+
+    _activeRow = row;
+    _activeCol = col;
+    if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
+    if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
+
+    emit valueChanged(row, col);
 }
 
 void VaporTable::emitCellClicked(QObject *obj)
 {
-    int  row = obj->property("row").toInt();
-    int  col = obj->property("col").toInt();
+    int row = obj->property("row").toInt();
+    int col = obj->property("col").toInt();
+
+    _activeRow = row;
+    _activeCol = col;
+    if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
+    if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
+
     emit cellClicked(row, col);
 }
 
@@ -372,6 +400,62 @@ void VaporTable::GetValues(std::vector<double> &vec)
         for (int j = 0; j < nCols; j++) {
             double cellVal = GetValue(i, j);
             vec.push_back(cellVal);
+        }
+    }
+}
+
+void VaporTable::highlightActiveRow(int row)
+{
+    if (row < 0) return;
+
+    QString selectionColor = "{ background: rgb(0, 255, 255);"
+                             " selection-background-color: rgb(233, 99, 0); }";
+    QString normalColor = "{ background: rgb(255,255,255);"
+                          " selection-background-color: rgb(233, 99, 0); }";
+
+    for (int i = 0; i < _table->rowCount(); i++) {
+        for (int j = 0; j < _table->columnCount(); j++) {
+            QWidget *  cell = _table->cellWidget(i, j);
+            QLineEdit *le = qobject_cast<QLineEdit *>(cell);
+            if (le) {
+                if (i == row)
+                    le->setStyleSheet("QLineEdit " + selectionColor);
+                else
+                    le->setStyleSheet("QLineEdit " + normalColor);
+            } else {
+                if (i == row)
+                    cell->setStyleSheet("QWidget " + selectionColor);
+                else
+                    cell->setStyleSheet("QWidget " + normalColor);
+            }
+        }
+    }
+}
+
+void VaporTable::highlightActiveCol(int col)
+{
+    if (col < 0) return;
+
+    QString selectionColor = "{ background: rgb(0, 255, 255);"
+                             " selection-background-color: rgb(233, 99, 0); }";
+    QString normalColor = "{ background: rgb(255,255,255);"
+                          " selection-background-color: rgb(233, 99, 0); }";
+
+    for (int i = 0; i < _table->rowCount(); i++) {
+        for (int j = 0; j < _table->columnCount(); j++) {
+            QWidget *  cell = _table->cellWidget(i, j);
+            QLineEdit *le = qobject_cast<QLineEdit *>(cell);
+            if (le) {
+                if (j == col)
+                    le->setStyleSheet("QLineEdit " + selectionColor);
+                else
+                    le->setStyleSheet("QLineEdit " + normalColor);
+            } else {
+                if (j == col)
+                    cell->setStyleSheet("QWidget " + selectionColor);
+                else
+                    cell->setStyleSheet("QWidget " + normalColor);
+            }
         }
     }
 }

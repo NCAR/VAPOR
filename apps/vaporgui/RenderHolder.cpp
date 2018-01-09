@@ -185,6 +185,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), 
     _controlExec = ce;
     _newRendererDialog = new NewRendererDialog(this, ce);
     _vaporTable = new VaporTable(tableWidget, false, true);
+    _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(0), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _currentRow = 0;
 
     makeConnections();
@@ -330,35 +331,6 @@ void RenderHolder::activeRendererChanged(int row, int col)
     string          rendererType = _vaporTable->GetValue(row, 1);
     p->SetActiveRenderer(activeViz, rendererType, rendererName);
     emit activeChanged(activeViz, rendererType, rendererName);
-    highlightActiveRow(row);
-}
-
-void RenderHolder::highlightActiveRow(int row)
-{
-    QString selectionColor = "{ background: rgb(0, 255, 255);"
-                             " selection-background-color: rgb(233, 99, 0); }";
-    QString normalColor = "{ background: rgb(255,255,255);"
-                          " selection-background-color: rgb(233, 99, 0); }";
-
-    for (int i = 0; i < _vaporTable->RowCount(); i++) {
-        for (int j = 0; j < _vaporTable->ColumnCount(); j++) {
-            QWidget *  cell = _vaporTable->CellWidget(i, j);
-            QLineEdit *le = qobject_cast<QLineEdit *>(cell);
-            if (le) {
-                if (i == row)
-                    le->setStyleSheet("QLineEdit " + selectionColor);
-                else
-                    le->setStyleSheet("QLineEdit " + normalColor);
-            } else {
-                if (i == row)
-                    cell->setStyleSheet("QWidget " + selectionColor);
-                else
-                    cell->setStyleSheet("QWidget " + normalColor);
-            }
-        }
-    }
-
-    _currentRow = row;
 }
 
 VAPoR::RenderParams *RenderHolder::getRenderParamsFromCell(int row, int col)
@@ -599,8 +571,8 @@ void RenderHolder::Update()
     makeRendererTableHeaders(colHeader);
 
     map<string, vector<string>>::iterator itr;
-    int                                   selectedRow = -1;
-    int                                   row = 0;
+    //	int selectedRow = -1;
+    int row = 0;
     for (itr = rendererNamesMap.begin(); itr != rendererNamesMap.end(); ++itr) {
         vector<string> rendererNames = itr->second;
 
@@ -613,10 +585,6 @@ void RenderHolder::Update()
             bool   status = _controlExec->RenderLookup(rendererName, dummy1, dataSetName, dummy2);
             assert(status);
 
-            // Is this the currently selected render instance?
-            //
-            if (rendererName == activeRenderInst && className == activeRenderClass) { selectedRow = row; }
-
             RenderParams *rParams = _controlExec->GetRenderParams(activeViz, dataSetName, className, rendererName);
             assert(rParams);
 
@@ -625,13 +593,10 @@ void RenderHolder::Update()
             tableValues.push_back(className);
             tableValues.push_back(dataSetName);
             tableValues.push_back(enabled);
-
-            row++;
         }
     }
 
     _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
-    highlightActiveRow(selectedRow);
 
     updateDupCombo();
 
