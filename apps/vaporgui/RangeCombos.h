@@ -83,7 +83,7 @@ class Combo : public QWidget {
     void valueChanged(double value);
     void valueChanged(int value);
 
-  private:
+  protected:
     double _minValid;
     double _maxValid;
     double _value;
