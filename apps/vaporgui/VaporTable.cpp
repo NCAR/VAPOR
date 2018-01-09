@@ -297,11 +297,11 @@ std::string VaporTable::GetVerticalHeaderItem(int index) {
     return str.toStdString();
 }
 
-void VaporTable::setCheckboxesInFinalRow(bool enabled) {
+void VaporTable::SetCheckboxesInFinalRow(bool enabled) {
     _lastRowIsCheckboxes = enabled;
 }
 
-void VaporTable::setCheckboxesInFinalColumn(bool enabled) {
+void VaporTable::SetCheckboxesInFinalColumn(bool enabled) {
     _lastColIsCheckboxes = enabled;
 }
 
