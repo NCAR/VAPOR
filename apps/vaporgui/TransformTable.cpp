@@ -33,216 +33,191 @@ using namespace VAPoR;
 TransformTable::TransformTable(QWidget *parent)
 {
     setupUi(this);
-    scaleTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    translationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    rotationTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    originTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    scaleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    rotationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    translationTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    originTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    _scaleTable = new VaporTable(scaleTable);
+    _scaleTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    connect(_scaleTable, SIGNAL(valueChanged(int, int)), this, SLOT(ScaleChanged(int, int)));
+
+    _translationTable = new VaporTable(translationTable);
+    _translationTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    connect(_translationTable, SIGNAL(valueChanged(int, int)), this, SLOT(TranslationChanged(int, int)));
+
+    _rotationTable = new VaporTable(rotationTable);
+    _rotationTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    connect(_rotationTable, SIGNAL(valueChanged(int, int)), this, SLOT(RotationChanged(int, int)));
+
+    _originTable = new VaporTable(originTable);
+    _originTable->Reinit((VaporTable::ValidatorFlags)(VaporTable::DOUBLE), (VaporTable::MutabilityFlags)(VaporTable::MUTABLE));
+    connect(_originTable, SIGNAL(valueChanged(int, int)), this, SLOT(OriginChanged(int, int)));
+
+    _horizontalHeaders.push_back("X");
+    _horizontalHeaders.push_back("Y");
+    _horizontalHeaders.push_back("Z");
 }
 
 void TransformTable::Update(const std::map<string, Transform *> &transforms)
 {
     _transforms = transforms;
 
-    updateScales();
-    updateTranslations();
-    updateRotations();
-    updateOrigin();
-}
-
-void TransformTable::updateTransformTable(QTableWidget *table, string target, vector<double> values, int row)
-{
-    table->blockSignals(true);
-
-    QLineEdit *item;
-
-    item = new QLineEdit(table);
-    item->setText(QString::fromStdString(target));
-    item->setAlignment(Qt::AlignCenter);
-    item->setReadOnly(true);
-    table->setCellWidget(row, 0, item);
-
-    item = new QLineEdit(table);
-    item->setText(QString::number(values[0]));
-    item->setValidator(new QDoubleValidator(item));
-    item->setAlignment(Qt::AlignCenter);
-    item->setProperty("row", row);
-    item->setProperty("col", 1);
-    connect(item, SIGNAL(editingFinished()), this, SLOT(transformChanged()));
-    table->setCellWidget(row, 1, item);
-
-    item = new QLineEdit(table);
-    item->setText(QString::number(values[1]));
-    item->setValidator(new QDoubleValidator(item));
-    item->setAlignment(Qt::AlignCenter);
-    item->setProperty("row", row);
-    item->setProperty("col", 2);
-    connect(item, SIGNAL(editingFinished()), this, SLOT(transformChanged()));
-    table->setCellWidget(row, 2, item);
-
-    item = new QLineEdit(table);
-    item->setText(QString::number(values[2]));
-    item->setValidator(new QDoubleValidator(item));
-    item->setAlignment(Qt::AlignCenter);
-    item->setProperty("row", row);
-    item->setProperty("col", 3);
-    connect(item, SIGNAL(editingFinished()), this, SLOT(transformChanged()));
-    table->setCellWidget(row, 3, item);
-
-    QHeaderView *header = table->verticalHeader();
-    header->setResizeMode(QHeaderView::Stretch);
-    header->hide();
-
-    table->blockSignals(false);
-}
-
-void TransformTable::updateScales()
-{
-    QTableWidget *table = scaleTable;
-
-    table->setRowCount(_transforms.size());
-
-    std::map<string, Transform *>::const_iterator itr;
-    int                                           row = 0;
-    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
-        string           target = itr->first;
-        const Transform *t = itr->second;
-
-        updateTransformTable(table, target, t->GetScales(), row);
-        row++;
+    _verticalHeaders.clear();
+    int                                     numDatasets = transforms.size();
+    map<std::string, Transform *>::iterator it;
+    for (it = _transforms.begin(); it != _transforms.end(); ++it) {
+        string datasetName = it->first;
+        if (datasetName == "") datasetName = " ";
+        _verticalHeaders.push_back(datasetName);
     }
+
+    UpdateScales();
+    UpdateTranslations();
+    UpdateRotations();
+    UpdateOrigins();
 }
 
-void TransformTable::updateTranslations()
+void TransformTable::UpdateScales()
 {
-    QTableWidget *table = translationTable;
-
-    table->setRowCount(_transforms.size());
-
-    std::map<string, Transform *>::const_iterator itr;
-    int                                           row = 0;
-    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
-        string           target = itr->first;
-        const Transform *t = itr->second;
-
-        updateTransformTable(table, target, t->GetTranslations(), row);
-        row++;
+    int                                     numDatasets = 0;
+    std::vector<double>                     allScales;
+    std::vector<double>                     transformScales;
+    map<std::string, Transform *>::iterator it;
+    for (it = _transforms.begin(); it != _transforms.end(); it++) {
+        numDatasets++;
+        Transform *t = it->second;
+        transformScales = t->GetScales();
+        for (int i = 0; i < transformScales.size(); i++) { allScales.push_back(transformScales[i]); }
     }
+
+    if (_verticalHeaders.size()) _scaleTable->Update(numDatasets, 3, allScales, _verticalHeaders, _horizontalHeaders);
 }
 
-void TransformTable::updateRotations()
+void TransformTable::UpdateTranslations()
 {
-    QTableWidget *table = rotationTable;
-
-    table->setRowCount(_transforms.size());
-
-    std::map<string, Transform *>::const_iterator itr;
-    int                                           row = 0;
-    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
-        string           target = itr->first;
-        const Transform *t = itr->second;
-
-        updateTransformTable(table, target, t->GetRotations(), row);
-        row++;
+    int                                     numDatasets = 0;
+    std::vector<double>                     allTranslations;
+    std::vector<double>                     transformTranslations;
+    map<std::string, Transform *>::iterator it;
+    for (it = _transforms.begin(); it != _transforms.end(); it++) {
+        numDatasets++;
+        Transform *t = it->second;
+        transformTranslations = t->GetTranslations();
+        for (int i = 0; i < transformTranslations.size(); i++) { allTranslations.push_back(transformTranslations[i]); }
     }
+
+    _translationTable->Update(numDatasets, 3, allTranslations, _verticalHeaders, _horizontalHeaders);
 }
 
-void TransformTable::updateOrigin()
+void TransformTable::UpdateRotations()
 {
-    QTableWidget *table = originTable;
-
-    table->setRowCount(_transforms.size());
-
-    std::map<string, Transform *>::const_iterator itr;
-    int                                           row = 0;
-    for (itr = _transforms.cbegin(); itr != _transforms.cend(); ++itr) {
-        string           target = itr->first;
-        const Transform *t = itr->second;
-
-        updateTransformTable(table, target, t->GetOrigin(), row);
-        row++;
+    int                                     numDatasets = 0;
+    std::vector<double>                     allRotations;
+    std::vector<double>                     transformRotations;
+    map<std::string, Transform *>::iterator it;
+    for (it = _transforms.begin(); it != _transforms.end(); it++) {
+        numDatasets++;
+        Transform *t = it->second;
+        transformRotations = t->GetRotations();
+        for (int i = 0; i < transformRotations.size(); i++) { allRotations.push_back(transformRotations[i]); }
     }
+
+    _rotationTable->Update(numDatasets, 3, allRotations, _verticalHeaders, _horizontalHeaders);
 }
 
-void TransformTable::setScales(string target, vector<double> scale)
+void TransformTable::UpdateOrigins()
 {
+    int                                     numDatasets = 0;
+    std::vector<double>                     allOrigins;
+    std::vector<double>                     transformOrigins;
+    map<std::string, Transform *>::iterator it;
+    for (it = _transforms.begin(); it != _transforms.end(); it++) {
+        numDatasets++;
+        Transform *t = it->second;
+        transformOrigins = t->GetOrigin();
+        for (int i = 0; i < transformOrigins.size(); i++) { allOrigins.push_back(transformOrigins[i]); }
+    }
+
+    _originTable->Update(numDatasets, 3, allOrigins, _verticalHeaders, _horizontalHeaders);
+}
+
+void TransformTable::ScaleChanged(int row, int col)
+{
+    double xScale = _scaleTable->GetValue(row, 0);
+    double yScale = _scaleTable->GetValue(row, 1);
+    double zScale = _scaleTable->GetValue(row, 2);
+
+    std::vector<double> scales;
+    scales.push_back(xScale);
+    scales.push_back(yScale);
+    scales.push_back(zScale);
+
+    string target = _scaleTable->GetVerticalHeaderItem(row);
+
     map<string, Transform *>::const_iterator itr;
     itr = _transforms.find(target);
     if (itr == _transforms.end()) return;
 
     Transform *t = itr->second;
-    t->SetScales(scale);
+    t->SetScales(scales);
 }
 
-void TransformTable::setOrigin(string target, vector<double> origin)
+void TransformTable::TranslationChanged(int row, int col)
 {
+    double xTranslation = _translationTable->GetValue(row, 0);
+    double yTranslation = _translationTable->GetValue(row, 1);
+    double zTranslation = _translationTable->GetValue(row, 2);
+
+    std::vector<double> translations;
+    translations.push_back(xTranslation);
+    translations.push_back(yTranslation);
+    translations.push_back(zTranslation);
+
+    string target = _translationTable->GetVerticalHeaderItem(row);
+
     map<string, Transform *>::const_iterator itr;
     itr = _transforms.find(target);
     if (itr == _transforms.end()) return;
 
     Transform *t = itr->second;
-    t->SetOrigin(origin);
+    t->SetTranslations(translations);
 }
 
-void TransformTable::setRotations(string target, vector<double> rotation)
+void TransformTable::RotationChanged(int row, int col)
 {
+    double xRotation = _rotationTable->GetValue(row, 0);
+    double yRotation = _rotationTable->GetValue(row, 1);
+    double zRotation = _rotationTable->GetValue(row, 2);
+
+    std::vector<double> rotations;
+    rotations.push_back(xRotation);
+    rotations.push_back(yRotation);
+    rotations.push_back(zRotation);
+
+    string target = _rotationTable->GetVerticalHeaderItem(row);
+
     map<string, Transform *>::const_iterator itr;
     itr = _transforms.find(target);
     if (itr == _transforms.end()) return;
 
     Transform *t = itr->second;
-    t->SetRotations(rotation);
+    t->SetRotations(rotations);
 }
 
-void TransformTable::transformChanged()
+void TransformTable::OriginChanged(int row, int col)
 {
-    QLineEdit *   le = (QLineEdit *)sender();
-    QTableWidget *table = (QTableWidget *)(le->parentWidget()->parentWidget());
-    int           row = sender()->property("row").toInt();
-    int           col = sender()->property("col").toInt();
-    transformChanged(table, row, col);
-}
+    double xOrigin = _originTable->GetValue(row, 0);
+    double yOrigin = _originTable->GetValue(row, 1);
+    double zOrigin = _originTable->GetValue(row, 2);
 
-void TransformTable::transformChanged(QTableWidget *table, int row, int col)
-{
-    vector<double> translation;
-    QLineEdit *    le;
-    le = (QLineEdit *)table->cellWidget(row, 0);
-    string target = le->text().toStdString();
+    std::vector<double> origins;
+    origins.push_back(xOrigin);
+    origins.push_back(yOrigin);
+    origins.push_back(zOrigin);
 
-    le = (QLineEdit *)table->cellWidget(row, 1);
-    double x = le->text().toDouble();
+    string target = _originTable->GetVerticalHeaderItem(row);
 
-    le = (QLineEdit *)table->cellWidget(row, 2);
-    double y = le->text().toDouble();
-
-    le = (QLineEdit *)table->cellWidget(row, 3);
-    double z = le->text().toDouble();
-
-    translation.push_back(x);
-    translation.push_back(y);
-    translation.push_back(z);
-
-    if (table->objectName() == "translationTable")
-        setTranslations(target, translation);
-    else if (table->objectName() == "scaleTable")
-        setScales(target, translation);
-    else if (table->objectName() == "rotationTable")
-        setRotations(target, translation);
-    else if (table->objectName() == "originTable")
-        setOrigin(target, translation);
-}
-
-void TransformTable::setTranslations(string target, vector<double> translation)
-{
     map<string, Transform *>::const_iterator itr;
     itr = _transforms.find(target);
     if (itr == _transforms.end()) return;
 
     Transform *t = itr->second;
-    t->SetTranslations(translation);
+    t->SetOrigin(origins);
 }
