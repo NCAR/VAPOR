@@ -98,6 +98,7 @@ MappingFrame::MappingFrame(QWidget *parent)
       _editButton(NULL),
       _variableName(""),
       _domainSlider(new DomainWidget(this)),
+      _contourRangeSlider(new ContourRangeSlider(this)),
       _isoSlider(new IsoSlider(this)),
       _colorbarWidget(new GLColorbarWidget(this, NULL)),
       _lastSelected(NULL),
@@ -158,6 +159,9 @@ MappingFrame::~MappingFrame() {
 
     delete _domainSlider;
     _domainSlider = NULL;
+
+    delete _contourRangeSlider;
+    _contourRangeSlider = NULL;
 
     delete _colorbarWidget;
     _colorbarWidget = NULL;
@@ -358,6 +362,11 @@ void MappingFrame::Update(DataMgr *dataMgr,
         //Synchronize sliders with isovalues
         vector<double> isovals = ((ContourParams *)rParams)->GetContourValues(varname);
         setIsolineSliders(isovals);
+
+        int size = isovals.size();
+        double start = xDataToWorld(isovals[0]);
+        double end = xDataToWorld(isovals[size - 1]);
+        _contourRangeSlider->setDomain(start, end);
     }
 
     _domainSlider->setDomain(xDataToWorld(getMinDomainBound()),
@@ -1097,6 +1106,10 @@ int MappingFrame::drawDomainSlider() {
 
     int rc = _domainSlider->paintGL();
 
+    if (_isolineSlidersEnabled) {
+        rc = _contourRangeSlider->paintGL();
+    }
+
     glPopName();
     return rc;
 }
@@ -1572,6 +1585,10 @@ void MappingFrame::resize() {
     float domainWidth = unitPerPixel * _domainBarHeight;
 
     _domainSlider->setGeometry(_minX, _maxX, _maxY - domainWidth, _maxY);
+
+    if (_isolineSlidersEnabled) {
+        _contourRangeSlider->setGeometry(_minX, _maxX, _maxY - 2 * domainWidth - .05, _maxY - 2 * domainWidth);
+    }
 
     float bGap = unitPerPixel * _bottomGap;
 
