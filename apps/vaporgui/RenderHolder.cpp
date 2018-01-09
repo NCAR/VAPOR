@@ -353,9 +353,9 @@ void RenderHolder::highlightActiveRow(int row) {
 	QString normalColor = "{ background: rgb(255,255,255);"
 		" selection-background-color: rgb(233, 99, 0); }";
 
-	for (int i=0; i<_vaporTable->rowCount(); i++) {
-		for (int j=0; j<_vaporTable->columnCount(); j++) {
-			QWidget* cell = _vaporTable->cellWidget(i,j);
+	for (int i=0; i<_vaporTable->RowCount(); i++) {
+		for (int j=0; j<_vaporTable->ColumnCount(); j++) {
+			QWidget* cell = _vaporTable->CellWidget(i,j);
 			QLineEdit *le = qobject_cast<QLineEdit *>(cell);
 			if (le) {
 				if (i == row) 
@@ -707,7 +707,7 @@ void RenderHolder::getRow(
 		return;
 	}
 
-	if (row == -1) row = _vaporTable->rowCount() - 1;
+	if (row == -1) row = _vaporTable->RowCount() - 1;
 
 	rendererName = _vaporTable->GetStringValue(row, 0);
 	rendererType = _vaporTable->GetStringValue(row, 1);
