@@ -283,9 +283,9 @@ std::string VaporTable::GetVerticalHeaderItem(int index)
     return str.toStdString();
 }
 
-void VaporTable::setCheckboxesInFinalRow(bool enabled) { _lastRowIsCheckboxes = enabled; }
+void VaporTable::SetCheckboxesInFinalRow(bool enabled) { _lastRowIsCheckboxes = enabled; }
 
-void VaporTable::setCheckboxesInFinalColumn(bool enabled) { _lastColIsCheckboxes = enabled; }
+void VaporTable::SetCheckboxesInFinalColumn(bool enabled) { _lastColIsCheckboxes = enabled; }
 
 Value VaporTable::GetValue(int row, int col)
 {
