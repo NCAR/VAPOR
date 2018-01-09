@@ -234,7 +234,6 @@ void VaporTable::setValidator(QLineEdit *edit) {
     }
     if (_validatorFlags & STRING) {
         QRegExpValidator *validator;
-        //validator = new QRegExpValidator(QRegExp("[a-zA-Z0-9]{1-64}"));
         validator = new QRegExpValidator(QRegExp(".{1,64}"));
         edit->setValidator(validator);
     }
@@ -255,6 +254,18 @@ void VaporTable::setHorizontalHeader(std::vector<std::string> header) {
     _table->resizeColumnsToContents();
     _table->setHorizontalHeaderLabels(list);
     _table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    QTableWidgetItem *headerItem;
+    for (int i = 0; i < size; i++) {
+        headerItem = _table->horizontalHeaderItem(i);
+        if (headerItem)
+            headerItem->setToolTip(list[i]);
+    }
+}
+
+std::string VaporTable::GetHorizontalHeaderItem(int index) {
+    QString str = _table->horizontalHeaderItem(index)->text();
+    return str.toStdString();
 }
 
 void VaporTable::setVerticalHeader(std::vector<std::string> header) {
@@ -272,6 +283,18 @@ void VaporTable::setVerticalHeader(std::vector<std::string> header) {
     _table->setVerticalHeaderLabels(list);
     _table->resizeRowsToContents();
     _table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    QTableWidgetItem *headerItem;
+    for (int i = 0; i < size; i++) {
+        headerItem = _table->verticalHeaderItem(i);
+        if (headerItem)
+            headerItem->setToolTip(list[i]);
+    }
+}
+
+std::string VaporTable::GetVerticalHeaderItem(int index) {
+    QString str = _table->verticalHeaderItem(index)->text();
+    return str.toStdString();
 }
 
 void VaporTable::setCheckboxesInFinalRow(bool enabled) {
@@ -281,10 +304,6 @@ void VaporTable::setCheckboxesInFinalRow(bool enabled) {
 void VaporTable::setCheckboxesInFinalColumn(bool enabled) {
     _lastColIsCheckboxes = enabled;
 }
-
-//void valueChanged(int row, int column, std::string &value);
-//void valueChanged(int row, int column, double &value);
-//void valueChanged(int row, int column, int &value);
 
 Value VaporTable::GetValue(int row, int col) {
     std::string value;

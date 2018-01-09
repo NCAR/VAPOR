@@ -59,6 +59,9 @@ class VaporTable : public QWidget {
     void GetValues(std::vector<int> &vec);
     void GetValues(std::vector<double> &vec);
 
+    std::string GetVerticalHeaderItem(int index);
+    std::string GetHorizontalHeaderItem(int index);
+
     void setCheckboxesInFinalColumn(bool enabled);
     void setCheckboxesInFinalRow(bool enabled);
 
