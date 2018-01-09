@@ -14,6 +14,11 @@ class VaporTable : public QWidget {
 
 public:
 
+ enum HighlightFlags {
+	ROWS = (1u << 0),
+	COLS = (1u << 1),
+ };
+
  enum MutabilityFlags {
 	MUTABLE = (1u << 0),
 	IMMUTABLE = (1u << 1),
@@ -50,7 +55,10 @@ public:
 	std::vector<std::string> rowHeaders = std::vector<std::string>(),
 	std::vector<std::string> colHeaders = std::vector<std::string>());
 
- void Reinit(ValidatorFlags vFlags, MutabilityFlags mFlags);
+ void Reinit(ValidatorFlags vFlags, 
+		MutabilityFlags mFlags,
+		HighlightFlags hFlags
+	);
  
  Value GetValue(int row, int col);
  std::string GetStringValue(int row, int col);
@@ -106,12 +114,19 @@ private:
 
  bool isValueChecked(std::vector<std::string> values, int index);
 
+ void highlightActiveRow(int row);
+ 
+ void highlightActiveCol(int col);
+
+ int _activeRow;
+ int _activeCol;
  bool _lastRowIsCheckboxes;
  bool _lastColIsCheckboxes;
  QTableWidget *_table;
 
  MutabilityFlags _mutabilityFlags;
  ValidatorFlags _validatorFlags;
+ HighlightFlags _highlightFlags;
 };
 
 // A way to return a generic built-in type, so that the user can do:
