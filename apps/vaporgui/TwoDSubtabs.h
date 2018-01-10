@@ -60,7 +60,8 @@ class TwoDGeometrySubtab : public QWidget, public Ui_TwoDGeometryGUI {
     TwoDGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            GeometryWidget::TWOD);
+            (GeometryWidget::TWOD),
+            (GeometryWidget::MINMAX));
     }
 
     void Update(
