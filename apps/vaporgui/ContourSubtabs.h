@@ -94,7 +94,8 @@ public:
 		setupUi(this);
 		_geometryWidget->Reinit(
 			GeometryWidget::TWOD,
-			GeometryWidget::MINMAX);
+			GeometryWidget::MINMAX,
+			GeometryWidget::SCALAR);
 
 		_orientationAngles->hide();
 	}
