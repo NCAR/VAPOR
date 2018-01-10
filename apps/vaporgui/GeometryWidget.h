@@ -1,5 +1,5 @@
-#ifndef REGIONSLIDERWIDGET_H
-#define REGIONSLIDERWIDGET_H
+#ifndef GEOMETRYWIDGET_H
+#define GEOMETRYWIDGET_H
 
 #include "ui_GeometryWidgetGUI.h"
 #include "RangeCombos.h"
@@ -17,15 +17,20 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 public:
 	//! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to be supported
 	//
-	enum Flags {
+	enum DimFlags {
 		TWOD = (1u << 0), 
 		THREED = (1u << 1), 
 		VECTOR = (1u << 2)
 	};
 
+	enum DisplayFlags {
+		SINGLEPOINT = (1u << 0),
+		MINMAX = (1u << 1),
+	};
+
 	GeometryWidget(QWidget *parent=0);
 
-	void Reinit(Flags flags);
+	void Reinit(DimFlags dimFlags, DisplayFlags displayFlags);
 
 	~GeometryWidget();
 
@@ -47,18 +52,43 @@ signals:
     void valueChanged();
 
 private slots:
-	void setRange(double min, double max);
+	void setPoint(double point);
+	void setRange(double min, double max, int dim=-1);
 	void copyRegion();
 
 private:
+	void adjustLayoutToMinMax();
+	void adjustLayoutToSinglePoint();
+	void adjustLayoutTo2D();
 	void connectWidgets();
-	void updateRangeLabels(std::vector<double> minExt,
-							std::vector<double> maxExt);
+	void updateRangeLabels(
+		std::vector<double> minExt,
+		std::vector<double> maxExt);
 	void updateCopyCombo();
+	void updateDimFlags();
+	void updateBoxCombos(
+		std::vector<double> &minFullExt,
+		std::vector<double> &maxFullExt);
+
+	bool getStatisticsExtents(
+		std::vector<double> &minFullExts,
+		std::vector<double> &maxFullExts);
+
+	bool getVectorExtents(
+		std::vector<double> &minFullExts,
+		std::vector<double> &maxFullExts);
+
+	bool getVariableExtents(
+		std::vector<double> &minFullExts,
+		std::vector<double> &maxFullExts);
 
 	VAPoR::ParamsMgr* _paramsMgr;
 	VAPoR::DataMgr* _dataMgr;
 	VAPoR::RenderParams* _rParams;
+
+	Combo* _spXCombo;
+	Combo* _spYCombo;
+	Combo* _spZCombo;
 
 	Combo* _minXCombo;
 	Combo* _maxXCombo;
@@ -76,11 +106,12 @@ private:
 	std::map<std::string, std::string> _visNames;
 	std::map<std::string, std::string> _renTypeNames;
 
-	Flags _flags;
+	DimFlags _dimFlags;
+	DisplayFlags _displayFlags;
 
     bool  _useAuxVariables;     // for Statistics utility
 
 	static const std::string _nDimsTag;
 };
 
-#endif //REGIONSLIDERWIDGET_H
+#endif //GEOMETRYWIDGET_H
