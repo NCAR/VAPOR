@@ -170,7 +170,8 @@ public:
 		setupUi(this);
 		_geometryWidget->Reinit( 
 			GeometryWidget::TWOD,
-			GeometryWidget::MINMAX);
+			GeometryWidget::MINMAX,
+			GeometryWidget::SCALAR);
 	}
 	
 	void Update(  VAPoR::ParamsMgr *paramsMgr,

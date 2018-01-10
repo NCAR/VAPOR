@@ -49,8 +49,6 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 			QWidget(parent), Ui_GeometryWidgetGUI() {
 	setupUi(this);
 
-	_useAuxVariables = false;
-
 	_paramsMgr = NULL;
 	_dataMgr = NULL;
 	_rParams = NULL;
@@ -77,12 +75,6 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 	xMinMaxGroupBox->setFont(myFont);
 }
 	
-bool GeometryWidget::SetUseAuxVariables( bool val )
-{
-	_useAuxVariables = val;
-	return val;
-}
-
 void GeometryWidget::adjustLayoutToSinglePoint() {
 	QSizePolicy::Policy minimum = QSizePolicy::Minimum;
 	QSizePolicy::Policy ignored = QSizePolicy::Ignored;
@@ -136,11 +128,14 @@ void GeometryWidget::adjustLayoutTo2D() {
 	adjustSize();
 }
 
-void GeometryWidget::Reinit(DimFlags dimFlags,
-	DisplayFlags displayFlags) {
+void GeometryWidget::Reinit(
+	DimFlags dimFlags,
+	DisplayFlags displayFlags,
+	VariableFlags varFlags) {
 
 	_dimFlags = dimFlags;
 	_displayFlags = displayFlags;
+	_varFlags = varFlags;
 
 	if (_dimFlags & TWOD) {
 		adjustLayoutTo2D();
@@ -236,15 +231,19 @@ void GeometryWidget::updateRangeLabels(
 
 	if (minExt.size() < 3) 
 	{
-		this->Reinit((GeometryWidget::DimFlags) (GeometryWidget::TWOD),
-			(GeometryWidget::DisplayFlags)(0) );
+		Reinit(
+			GeometryWidget::TWOD,
+			_displayFlags,
+			_varFlags);
 		zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
 		zSinglePointGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
 	} 
 	else 
 	{
-		this->Reinit((GeometryWidget::DimFlags) (GeometryWidget::THREED),
-			(GeometryWidget::DisplayFlags)(0) );
+		Reinit(
+			GeometryWidget::THREED,
+			_displayFlags,
+			_varFlags);
 		QString zTitle = QString("Z Coordinates	Min: ") + 
 			QString::number(minExt[2], 'g', 3) +
 			QString("	Max: ") + 
@@ -353,7 +352,7 @@ void GeometryWidget::updateDimFlags() {
 	}
 }
 
-bool GeometryWidget::getStatisticsExtents(
+bool GeometryWidget::getAuxiliaryExtents(
 	std::vector<double> &minFullExts,
 	std::vector<double> &maxFullExts) {
 
@@ -458,11 +457,11 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 	//
 	std::vector<double> minFullExt, maxFullExt;
 
-	if( _useAuxVariables )  // for Statistics
+	if( _varFlags & AUXILIARY )  // for Statistics
 	{
-		if (!getStatisticsExtents(minFullExt, maxFullExt)) return;
+		if (!getAuxiliaryExtents(minFullExt, maxFullExt)) return;
 	}
-	else if (_dimFlags & VECTOR) {	// for vector renderers, ie Barbs
+	else if (_varFlags & VECTOR) {	// for vector renderers, ie Barbs
 		if (!getVectorExtents(minFullExt, maxFullExt)) return;
 	}
 	else {	// for single variable renderers (most cases)
