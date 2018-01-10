@@ -16,7 +16,16 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 public:
     //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to be supported
     //
-    enum DimFlags { TWOD = (1u << 0), THREED = (1u << 1), VECTOR = (1u << 2) };
+    enum DimFlags {
+        TWOD = (1u << 0),
+        THREED = (1u << 1),
+    };
+
+    enum VariableFlags {
+        SCALAR = (1u << 0),
+        VECTOR = (1u << 1),
+        AUXILIARY = (1u << 2),
+    };
 
     enum DisplayFlags {
         SINGLEPOINT = (1u << 0),
@@ -25,7 +34,7 @@ public:
 
     GeometryWidget(QWidget *parent = 0);
 
-    void Reinit(DimFlags dimFlags, DisplayFlags displayFlags);
+    void Reinit(DimFlags dimFlags, DisplayFlags displayFlags, VariableFlags varFlags);
 
     ~GeometryWidget();
 
@@ -41,8 +50,6 @@ public:
     }
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
-
-    bool SetUseAuxVariables(bool);    // for Statistics utility
 
 signals:
     void valueChanged();
@@ -62,7 +69,7 @@ private:
     void updateDimFlags();
     void updateBoxCombos(std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
 
-    bool getStatisticsExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
+    bool getAuxiliaryExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
 
     bool getVectorExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
 
@@ -92,8 +99,9 @@ private:
     std::map<std::string, std::string> _visNames;
     std::map<std::string, std::string> _renTypeNames;
 
-    DimFlags     _dimFlags;
-    DisplayFlags _displayFlags;
+    DimFlags      _dimFlags;
+    VariableFlags _varFlags;
+    DisplayFlags  _displayFlags;
 
     bool _useAuxVariables;    // for Statistics utility
 
