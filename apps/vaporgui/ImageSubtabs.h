@@ -152,7 +152,8 @@ class ImageGeometrySubtab : public QWidget, public Ui_ImageGeometryGUI {
         setupUi(this);
         _geometryWidget->Reinit(
             GeometryWidget::TWOD,
-            GeometryWidget::MINMAX);
+            GeometryWidget::MINMAX,
+            GeometryWidget::SCALAR);
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr,

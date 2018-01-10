@@ -90,7 +90,8 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
         setupUi(this);
         _geometryWidget->Reinit(
             GeometryWidget::TWOD,
-            GeometryWidget::MINMAX);
+            GeometryWidget::MINMAX,
+            GeometryWidget::SCALAR);
 
         _orientationAngles->hide();
     }

@@ -20,7 +20,12 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     enum DimFlags {
         TWOD = (1u << 0),
         THREED = (1u << 1),
-        VECTOR = (1u << 2)
+    };
+
+    enum VariableFlags {
+        SCALAR = (1u << 0),
+        VECTOR = (1u << 1),
+        AUXILIARY = (1u << 2),
     };
 
     enum DisplayFlags {
@@ -30,7 +35,10 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 
     GeometryWidget(QWidget *parent = 0);
 
-    void Reinit(DimFlags dimFlags, DisplayFlags displayFlags);
+    void Reinit(
+        DimFlags dimFlags,
+        DisplayFlags displayFlags,
+        VariableFlags varFlags);
 
     ~GeometryWidget();
 
@@ -45,8 +53,6 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     void Update(VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::DataMgr *dataMgr,
                 VAPoR::RenderParams *rParams);
-
-    bool SetUseAuxVariables(bool); // for Statistics utility
 
   signals:
     void valueChanged();
@@ -70,7 +76,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
         std::vector<double> &minFullExt,
         std::vector<double> &maxFullExt);
 
-    bool getStatisticsExtents(
+    bool getAuxiliaryExtents(
         std::vector<double> &minFullExts,
         std::vector<double> &maxFullExts);
 
@@ -107,6 +113,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     std::map<std::string, std::string> _renTypeNames;
 
     DimFlags _dimFlags;
+    VariableFlags _varFlags;
     DisplayFlags _displayFlags;
 
     bool _useAuxVariables; // for Statistics utility
