@@ -46,7 +46,7 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
 
     setupUi(this);
     setWindowTitle("Statistics");
-    MyGeometryWidget->Reinit((GeometryWidget::Flags)(GeometryWidget::THREED));
+    MyGeometryWidget->Reinit((GeometryWidget::DimFlags)(GeometryWidget::THREED), (GeometryWidget::DisplayFlags)(0));
     MyGeometryWidget->SetUseAuxVariables(true);
 
     Connect();
