@@ -1,20 +1,20 @@
 //************************************************************************
-//						      *
-//	   Copyright (C)  2017				    *
-//     University Corporation for Atmospheric Research		  *
+//							  *
+//	   Copyright (C)  2017					*
+//	 University Corporation for Atmospheric Research		  *
 //	   All Rights Reserved					*
-//						      *
+//							  *
 //************************************************************************/
 //
-//  File:       GeometryWidget.cpp
+//  File:	   GeometryWidget.cpp
 //
-//  Author:     Scott Pearse
+//  Author:	 Scott Pearse
 //	  National Center for Atmospheric Research
 //	  PO 3000, Boulder, Colorado
 //
-//  Date:       March 2017
+//  Date:	   March 2017
 //
-//  Description:    Implements the GeometryWidget class.  This provides
+//  Description:	Implements the GeometryWidget class.  This provides
 //  a widget that is inserted in the "Appearance" tab of various Renderer GUIs
 //
 #include <sstream>
@@ -31,29 +31,33 @@ const string GeometryWidget::_nDimsTag = "ActiveDimension";
 
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
-    std::stringstream ss;
-    ss.str(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        *(result++) = item;
-    }
+	std::stringstream ss;
+	ss.str(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		*(result++) = item;
+	}
 }
 
 std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
+	std::vector<std::string> elems;
+	split(s, delim, std::back_inserter(elems));
+	return elems;
 }
 
 GeometryWidget::GeometryWidget(QWidget* parent) : 
 			QWidget(parent), Ui_GeometryWidgetGUI() {
 	setupUi(this);
 
-    _useAuxVariables = false;
+	_useAuxVariables = false;
 
 	_paramsMgr = NULL;
 	_dataMgr = NULL;
 	_rParams = NULL;
+
+	_spXCombo = new Combo(xEdit, xSlider);
+	_spYCombo = new Combo(yEdit, ySlider);
+	_spZCombo = new Combo(zEdit, zSlider);
 
 	_minXCombo = new Combo(minXEdit, minXSlider);
 	_maxXCombo = new Combo(maxXEdit, maxXSlider);
@@ -72,33 +76,106 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 	QFont myFont = font();
 	xMinMaxGroupBox->setFont(myFont);
 }
-    
+	
 bool GeometryWidget::SetUseAuxVariables( bool val )
 {
-    _useAuxVariables = val;
+	_useAuxVariables = val;
 	return val;
 }
 
-void GeometryWidget::Reinit(Flags flags) {
-	_flags = flags;
-	if (_flags & TWOD) {
-		zMinMaxGroupBox->hide();
-		zMinMaxGroupBox->resize(0,0);
-		tab_3->adjustSize();
-		minMaxTab->adjustSize();
-		xMinMaxGroupBox->adjustSize();
-		yMinMaxGroupBox->adjustSize();
-		adjustSize();
+void GeometryWidget::adjustLayoutToSinglePoint() {
+	QSizePolicy::Policy minimum = QSizePolicy::Minimum;
+	QSizePolicy::Policy ignored = QSizePolicy::Ignored;
+
+	singlePointPage->setSizePolicy(minimum, minimum);
+	singlePointTab->setSizePolicy(minimum, minimum);
+
+	minMaxPage->setSizePolicy(ignored, ignored);
+	minMaxTab->setSizePolicy(ignored, ignored);
+
+	centerSizePage->setSizePolicy(ignored, ignored);
+	centerSizeTab->setSizePolicy(ignored, ignored);
+
+	stackedSliderWidget->adjustSize();
+	adjustSize();
+}
+
+void GeometryWidget::adjustLayoutToMinMax() {
+	QSizePolicy::Policy minimum = QSizePolicy::Minimum;
+	QSizePolicy::Policy ignored = QSizePolicy::Ignored;
+
+	singlePointPage->setSizePolicy(ignored, ignored);
+	singlePointTab->setSizePolicy(ignored, ignored);
+
+	minMaxPage->setSizePolicy(minimum, minimum);
+	minMaxTab->setSizePolicy(minimum, minimum);
+
+	centerSizePage->setSizePolicy(ignored, ignored);
+	centerSizeTab->setSizePolicy(ignored, ignored);
+
+	stackedSliderWidget->adjustSize();
+	adjustSize();
+}
+
+void GeometryWidget::adjustLayoutTo2D() {
+	zMinMaxGroupBox->hide();
+	zMinMaxGroupBox->resize(0,0);
+	minMaxContainerWidget->adjustSize();
+	minMaxTab->adjustSize();
+	xMinMaxGroupBox->adjustSize();
+	yMinMaxGroupBox->adjustSize();
+
+	zSinglePointGroupBox->hide();
+	zSinglePointGroupBox->resize(0,0);
+	singlePointContainerWidget->adjustSize();
+	singlePointTab->adjustSize();
+	xSinglePointGroupBox->adjustSize();	
+	ySinglePointGroupBox->adjustSize();	
+
+	stackedSliderWidget->adjustSize();
+	adjustSize();
+}
+
+void GeometryWidget::Reinit(DimFlags dimFlags,
+	DisplayFlags displayFlags) {
+
+	_dimFlags = dimFlags;
+	_displayFlags = displayFlags;
+
+	if (_dimFlags & TWOD) {
+		adjustLayoutTo2D();
 	}
-    else if(_flags & THREED )
-    {
+	else if(_dimFlags & THREED )
+	{
 		zMinMaxGroupBox->show();
-    }
+	}
+
+	if (_displayFlags & MINMAX) {
+		adjustLayoutToMinMax();
+		stackedSliderWidget->setCurrentIndex(0);
+	}
+	else if (_displayFlags & SINGLEPOINT) {
+		adjustLayoutToSinglePoint();
+		stackedSliderWidget->setCurrentIndex(1);
+	}
+
 	stackedSliderWidget->adjustSize();
 	minMaxTab->adjustSize();
 }
 
 GeometryWidget::~GeometryWidget() {
+	if (_spXCombo) {
+		delete _spXCombo;
+		_spXCombo = NULL;
+	}
+	if (_spYCombo) {
+		delete _spYCombo;
+		_spYCombo = NULL;
+	}
+	if (_spZCombo) {
+		delete _spZCombo;
+		_spZCombo = NULL;
+	}
 	if (_minXCombo) {
 		delete _minXCombo;
 		_minXCombo = NULL;
@@ -142,31 +219,38 @@ GeometryWidget::~GeometryWidget() {
 void GeometryWidget::updateRangeLabels(
 							std::vector<double> minExt,
 							std::vector<double> maxExt) {
-	QString xTitle = QString("X Coordinates    Min: ") + 
+	QString xTitle = QString("X Coordinates	Min: ") + 
 		QString::number(minExt[0], 'g', 3) + 
-		QString("    Max: ") + 
+		QString("	Max: ") + 
 		QString::number(maxExt[0], 'g', 3);
 	xMinMaxGroupBox->setTitle(xTitle);
+	xSinglePointGroupBox->setTitle(xTitle);
+	
 
-	QString yTitle = QString("Y Coordinates    Min: ") + 
+	QString yTitle = QString("Y Coordinates	Min: ") + 
 		QString::number(minExt[1], 'g', 3) +
-		QString("    Max: ") + 
+		QString("	Max: ") + 
 		QString::number(maxExt[1], 'g', 3);
 	yMinMaxGroupBox->setTitle(yTitle);
+	ySinglePointGroupBox->setTitle(yTitle);
 
 	if (minExt.size() < 3) 
-    {
-        this->Reinit((GeometryWidget::Flags) (GeometryWidget::TWOD) );
+	{
+		this->Reinit((GeometryWidget::DimFlags) (GeometryWidget::TWOD),
+			(GeometryWidget::DisplayFlags)(0) );
 		zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
+		zSinglePointGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
 	} 
-    else 
-    {
-        this->Reinit((GeometryWidget::Flags) (GeometryWidget::THREED) );
-		QString zTitle = QString("Z Coordinates    Min: ") + 
+	else 
+	{
+		this->Reinit((GeometryWidget::DimFlags) (GeometryWidget::THREED),
+			(GeometryWidget::DisplayFlags)(0) );
+		QString zTitle = QString("Z Coordinates	Min: ") + 
 			QString::number(minExt[2], 'g', 3) +
-			QString("    Max: ") + 
+			QString("	Max: ") + 
 			QString::number(maxExt[2], 'g', 3);
 		zMinMaxGroupBox->setTitle(zTitle);
+		zSinglePointGroupBox->setTitle(xTitle);
 	}
 }
 
@@ -221,105 +305,108 @@ void GeometryWidget::updateCopyCombo() {
 
 void GeometryWidget::copyRegion() 
 {
-    string copyString = copyCombo->currentText().toStdString();
-    if( copyString != "" )
-    {
-        std::vector<std::string> elems = split(copyString, ':');
-        string visualizer = _visNames[elems[0]];
-        string dataSetName = elems[1];
-        string renType = _renTypeNames[elems[2]];
-        string renderer = elems[3];
+	string copyString = copyCombo->currentText().toStdString();
+	if( copyString != "" )
+	{
+		std::vector<std::string> elems = split(copyString, ':');
+		string visualizer = _visNames[elems[0]];
+		string dataSetName = elems[1];
+		string renType = _renTypeNames[elems[2]];
+		string renderer = elems[3];
 
-        RenderParams* copyParams = _paramsMgr->GetRenderParams(
-                                                    visualizer, 
-                                                    dataSetName,
-                                                    renType, 
-                                                    renderer);
-        assert(copyParams);
+		RenderParams* copyParams = _paramsMgr->GetRenderParams(
+													visualizer, 
+													dataSetName,
+													renType, 
+													renderer);
+		assert(copyParams);
 
-        Box* copyBox = copyParams->GetBox();
-        std::vector<double> minExtents, maxExtents;
-        copyBox->GetExtents(minExtents, maxExtents);
+		Box* copyBox = copyParams->GetBox();
+		std::vector<double> minExtents, maxExtents;
+		copyBox->GetExtents(minExtents, maxExtents);
 
-        Box* myBox = _rParams->GetBox();
-        std::vector<double> myMin, myMax;
-        myBox->GetExtents( myMin, myMax );
-        assert( minExtents.size() == maxExtents.size() );
-        for( int i = 0; i < minExtents.size(); i++ )
-        {
-            myMin[i] = minExtents[i];
-            myMax[i] = maxExtents[i];
-        }
-        myBox->SetExtents( myMin, myMax );
+		Box* myBox = _rParams->GetBox();
+		std::vector<double> myMin, myMax;
+		myBox->GetExtents( myMin, myMax );
+		assert( minExtents.size() == maxExtents.size() );
+		for( int i = 0; i < minExtents.size(); i++ )
+		{
+			myMin[i] = minExtents[i];
+			myMax[i] = maxExtents[i];
+		}
+		myBox->SetExtents( myMin, myMax );
 
-        emit valueChanged();
-    }
+		emit valueChanged();
+	}
 }
 
-void GeometryWidget::Update(ParamsMgr *paramsMgr,
-							DataMgr* dataMgr,
-							RenderParams* rParams) {
-
-	assert(paramsMgr);
-	assert(dataMgr);
-	assert(rParams);
-
-	_paramsMgr = paramsMgr;
-	_dataMgr = dataMgr;
-	_rParams = rParams;
-
+void GeometryWidget::updateDimFlags() {
 	int ndim = _rParams->GetValueLong(_nDimsTag,3);
 	assert(ndim==2 || ndim==3);
 	if (ndim==2) {
-		_flags = (Flags)(_flags | TWOD);
-		_flags = (Flags)(_flags & ~(THREED));
+		_dimFlags = (DimFlags)(_dimFlags | TWOD);
+		_dimFlags = (DimFlags)(_dimFlags & ~(THREED));
 	}
 	else {
-		_flags = (Flags)(_flags | THREED);
-		_flags = (Flags)(_flags & ~(TWOD));
+		_dimFlags = (DimFlags)(_dimFlags | THREED);
+		_dimFlags = (DimFlags)(_dimFlags & ~(TWOD));
 	}
+}
 
-	// Get current domain extents
-	//
+bool GeometryWidget::getStatisticsExtents(
+	std::vector<double> &minFullExts,
+	std::vector<double> &maxFullExts) {
+
+	size_t ts = _rParams->GetCurrentTimestep();
+	std::vector<std::string> auxVarNames = _rParams->GetAuxVariableNames();
+	if( auxVarNames.empty() )
+		return false;
+	else
+	{
+		vector<int> axes;
+		DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExts, maxFullExts, axes);
+	}
+	return true;
+}
+
+bool GeometryWidget::getVectorExtents(
+	std::vector<double> &minFullExts,
+	std::vector<double> &maxFullExts) {
+	
+	size_t ts = _rParams->GetCurrentTimestep();
+	std::vector<string> varNames = _rParams->GetFieldVariableNames();
+	if (varNames.empty()) return false;
+
+	if ((varNames[0] == "") &&
+		(varNames[1] == "") &&
+		(varNames[2] == "")) return false;
+
+	vector<int> axes;
+	DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExts, maxFullExts, axes);
+	return true;
+}
+
+bool GeometryWidget::getVariableExtents(
+	std::vector<double> &minFullExts,
+	std::vector<double> &maxFullExts) {
+
 	size_t ts = _rParams->GetCurrentTimestep();
 	int level = _rParams->GetRefinementLevel();
-	std::vector<double> minFullExt, maxFullExt;
+	string varName = _rParams->GetVariableName();
 
-    if( _useAuxVariables )  // for Statistics
-    {
-        std::vector<std::string> auxVarNames = _rParams->GetAuxVariableNames();
-        if( auxVarNames.empty() )
-            return;
-        else
-        {
-            vector<int> axes;
-            DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExt, maxFullExt, axes);
-        }
-    }
-	else if (_flags & VECTOR) {
-		std::vector<string> varNames = _rParams->GetFieldVariableNames();
-		if (varNames.empty()) return;
-
-		if ((varNames[0] == "") &&
-			(varNames[1] == "") &&
-			(varNames[2] == "")) return;
-
-		vector<int> axes;
-		DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExt, maxFullExt, axes);
+	if (varName.empty()) return false;
+	int rc = _dataMgr->GetVariableExtents(ts, varName, 
+						level, minFullExts, maxFullExts);
+	if (rc<0) {
+		MyBase::SetErrMsg("Error: DataMgr could "
+			"not return valid values from GetVariableExtents()");
 	}
-	else {
-		string varName = _rParams->GetVariableName();
-		if (varName.empty()) return;
+	return true;
+}
 
-		int rc = _dataMgr->GetVariableExtents(ts, varName, 
-							level, minFullExt, maxFullExt);
-		if (rc<0) {
-			MyBase::SetErrMsg("Error: DataMgr could "
-				"not return valid values from GetVariableExtents()");
-		}
-	}
-	updateRangeLabels(minFullExt, maxFullExt);
-	updateCopyCombo();
+void GeometryWidget::updateBoxCombos(
+	std::vector<double> &minFullExt,
+	std::vector<double> &maxFullExt) {
 
 	// Get current user selected extents
 	//
@@ -335,16 +422,65 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 		if (maxExt[i] > maxFullExt[i]) maxExt[i] = maxFullExt[i];
 	}
 
+	// Update RangeCombos
+	//
 	_xRangeCombo->Update(minFullExt[0], maxFullExt[0], minExt[0], maxExt[0]);
 	_yRangeCombo->Update(minFullExt[1], maxFullExt[1], minExt[1], maxExt[1]);
 	if (!box->IsPlanar()) {
 		_zRangeCombo->Update(minFullExt[2], maxFullExt[2],
 							 minExt[2], maxExt[2]);
 	}
+
+	// Update single-point combos
+	//
+	_spXCombo->Update(minFullExt[0], maxFullExt[0], minExt[0]);
+	_spYCombo->Update(minFullExt[1], maxFullExt[1], minExt[1]);
+	if (!box->IsPlanar()) {
+		_spZCombo->Update(minFullExt[2], maxFullExt[2], minExt[2]);
+	}
 }
 
+void GeometryWidget::Update(ParamsMgr *paramsMgr,
+							DataMgr* dataMgr,
+							RenderParams* rParams) {
+
+	assert(paramsMgr);
+	assert(dataMgr);
+	assert(rParams);
+
+	_paramsMgr = paramsMgr;
+	_dataMgr = dataMgr;
+	_rParams = rParams;
+
+	updateDimFlags();
+
+	// Get current domain extents
+	//
+	std::vector<double> minFullExt, maxFullExt;
+
+	if( _useAuxVariables )  // for Statistics
+	{
+		if (!getStatisticsExtents(minFullExt, maxFullExt)) return;
+	}
+	else if (_dimFlags & VECTOR) {	// for vector renderers, ie Barbs
+		if (!getVectorExtents(minFullExt, maxFullExt)) return;
+	}
+	else {	// for single variable renderers (most cases)
+		if (!getVariableExtents(minFullExt, maxFullExt)) return;
+	}
+
+	updateRangeLabels(minFullExt, maxFullExt);
+	updateCopyCombo();
+	updateBoxCombos(minFullExt, maxFullExt);
+}
 
 void GeometryWidget::connectWidgets() {
+	connect(_spXCombo, SIGNAL(valueChanged(double)), this,
+		SLOT(setPoint(double)));
+	connect(_spYCombo, SIGNAL(valueChanged(double)), this,
+		SLOT(setPoint(double)));
+	connect(_spZCombo, SIGNAL(valueChanged(double)), this,
+		SLOT(setPoint(double)));
 	connect(_xRangeCombo, SIGNAL(valueChanged(double,double)), 
 		this, SLOT(setRange(double, double)));
 	connect(_yRangeCombo, SIGNAL(valueChanged(double,double)), 
@@ -354,11 +490,21 @@ void GeometryWidget::connectWidgets() {
 	connect(copyButton, SIGNAL(released()), this, SLOT(copyRegion()));
 }	
 
-void GeometryWidget::setRange(double min, double max) {
+void GeometryWidget::setPoint(double point) {
 	size_t dimension;
-	if (QObject::sender() == _xRangeCombo) dimension = 0;
-	else if (QObject::sender() == _yRangeCombo) dimension = 1;
+	if (QObject::sender() == _spXCombo) dimension = 0;
+	else if (QObject::sender() == _spYCombo) dimension = 1;
 	else dimension = 2;
+
+	setRange(point, point, dimension);
+}
+
+void GeometryWidget::setRange(double min, double max, int dimension) {
+	if (dimension == -1) {
+		if (QObject::sender() == _xRangeCombo) dimension = 0;
+		else if (QObject::sender() == _yRangeCombo) dimension = 1;
+		else dimension = 2;
+	}
 
 	std::vector<double> minExt, maxExt;
 	Box* box = _rParams->GetBox();
@@ -370,5 +516,5 @@ void GeometryWidget::setRange(double min, double max) {
 	maxExt[dimension] = max;
 	box->SetExtents(minExt, maxExt);
 
-    emit valueChanged();
+	emit valueChanged();
 }
