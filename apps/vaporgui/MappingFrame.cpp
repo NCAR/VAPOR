@@ -186,6 +186,7 @@ MappingFrame::~MappingFrame()
 }
 
 void MappingFrame::RefreshHistogram() {
+	cout << "begin refresh histogram" << endl;
 	string var;
 	var = _rParams->GetColorMapVariableName();
 
@@ -222,6 +223,7 @@ void MappingFrame::RefreshHistogram() {
 		_histogram->addToBin(v);
 	}
 	delete grid;
+	cout << "end refresh histogram" << endl;
 }
 
 //----------------------------------------------------------------------------
