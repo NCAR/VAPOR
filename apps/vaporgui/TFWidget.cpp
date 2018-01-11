@@ -275,6 +275,9 @@ void TFWidget::updateSliders() {
 	getRange(range, values);
 	_rangeCombo->Update(range[0], range[1], values[0], values[1]);
 	opacitySlider->setValue(getOpacity() * 100);
+
+	minLabel->setText(QString::number(range[0]));
+	maxLabel->setText(QString::number(range[1]));
 }
 
 void TFWidget::updateMappingFrame() {
