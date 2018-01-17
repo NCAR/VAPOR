@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>854</height>
+    <height>856</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,16 +39,16 @@
     <enum>QLayout::SetMaximumSize</enum>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>12</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>12</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>12</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>12</number>
    </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
