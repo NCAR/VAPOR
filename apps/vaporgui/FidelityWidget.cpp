@@ -6,9 +6,11 @@
 //														                  *
 //************************************************************************/
 //
-//	File:		variablesWidget.cpp
+//	File:		FidelityWidget.cpp
 //
-//	Author:	Scott Pearse
+//		Author: John Clyne
+//			Scott Pearse
+//			Alan Norton
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //
@@ -177,9 +179,12 @@ void FidelityWidget::updateFidelity() {
     }
 
     if (varname.empty()) {
+        fidelityTab->setEnabled(false);
         //fidelityTab->hide();
         return;
     }
+
+    fidelityTab->setEnabled(true);
     fidelityTab->show();
 
     vector<size_t> cratios = _dataMgr->GetCRatios(varname);
