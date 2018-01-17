@@ -5,6 +5,8 @@
 #include <QObject>
 #include "vapor/MyBase.h"
 #include "ui_VariablesWidgetGUI.h"
+#include "VaporTable.h"
+
 
 QT_USE_NAMESPACE
 
@@ -148,6 +150,7 @@ private:
  void updateVariableCombos(VAPoR::RenderParams* params);
 
  void updateDims(VAPoR::RenderParams *rParams);
+
 
  DisplayFlags _dspFlags;
  DimFlags _dimFlags;

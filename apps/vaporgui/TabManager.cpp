@@ -22,6 +22,7 @@
 #include <qtabwidget.h>
 #include <qwidget.h>
 #include <QScrollArea>
+#include <QSizePolicy>
 #include "TabManager.h"
 #include "ui_NavigationTab.h"
 #include "RenderEventRouter.h"
@@ -72,7 +73,6 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce)
 void TabManager::AddWidget(QWidget* wid, string tag, int tagType){
 	_widgets[tagType].push_back(wid);
 	_widgetTags[tagType].push_back(tag);
-	
 }
 
 void TabManager::ShowRenderWidget(string tag){

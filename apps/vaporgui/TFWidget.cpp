@@ -49,17 +49,6 @@ TFWidget::TFWidget(QWidget* parent)
 	_rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 
 	connectWidgets();
-
-	collapseAutoUpdateHistoCheckbox();
-}
-
-void TFWidget::collapseAutoUpdateHistoCheckbox() {
-	autoUpdateHistoLabel->hide();
-	autoUpdateHistoLabel->resize(0,0);
-	autoUpdateHistoCheckbox->hide();
-	autoUpdateHistoCheckbox->resize(0,0);
-	autoUpdateHistoFrame->resize(0,7);
-	adjustSize();
 }
 
 void TFWidget::collapseConstColorWidgets() {
@@ -180,23 +169,12 @@ void TFWidget::fileSaveTF() {
 	}   
 }
 
-string TFWidget::getVariableName() {
-	string varName = "";
-	if (_flags & COLORVAR) {
-		varName = _rParams->GetColorMapVariableName();
-	}	
-	else {
-		varName = _rParams->GetVariableName();
-	}
-	return varName;
-}
-
 void TFWidget::getRange(float range[2], 
 						float values[2]) {
 
 	range[0] = range[1] = 0.0;
 	values[0] = values[1] = 0.0;
-	string varName = getVariableName();
+	string varName = getCurrentVarName();
 	if (varName.empty() || varName=="Constant") return;
 
 	size_t ts = _rParams->GetCurrentTimestep();
@@ -226,13 +204,7 @@ float TFWidget::getOpacity()
 }
 
 void TFWidget::updateColorInterpolation() {
-	string varName = getVariableName();
-	if (varName == "") {
-		return;
-	}
-
-	MapperFunction* tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
+	MapperFunction* tf = getCurrentMapperFunction();
 	
 	TFInterpolator::type t = tf->getColorInterpType();
 	colorInterpCombo->blockSignals(true);
@@ -249,12 +221,7 @@ void TFWidget::updateColorInterpolation() {
 }
 
 void TFWidget::updateAutoUpdateHistoCheckbox() {
-	string varName = getVariableName();
-	
-	return;
-
-	MapperFunction* tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
+	MapperFunction* tf = getCurrentMapperFunction();
 
 	// Update the state of autoUpdateHisto according to params
 	//
@@ -275,6 +242,9 @@ void TFWidget::updateSliders() {
 	getRange(range, values);
 	_rangeCombo->Update(range[0], range[1], values[0], values[1]);
 	opacitySlider->setValue(getOpacity() * 100);
+
+	minLabel->setText(QString::number(range[0]));
+	maxLabel->setText(QString::number(range[1]));
 }
 
 void TFWidget::updateMappingFrame() {
@@ -298,7 +268,6 @@ void TFWidget::Update(DataMgr *dataMgr,
 	updateMappingFrame();
 	updateColorInterpolation();
 	updateSliders();
-	updateHisto();
 	updateConstColorWidgets();
 }
 
@@ -381,41 +350,40 @@ void TFWidget::setRange() {
 }
 
 void TFWidget::setRange(double min, double max) {
-	string varName;
-	if (_flags & COLORVAR) {
-		varName = _rParams->GetColorMapVariableName();
-	}	
-	else {
-		varName = _rParams->GetVariableName();
-	}
-	if (varName.empty()) return;
-
-	MapperFunction* tf = _rParams->GetMapperFunc(varName);
+	MapperFunction* tf = getCurrentMapperFunction();
 
 	tf->setMinMapValue(min);
 	tf->setMaxMapValue(max);
 
-	if (_autoUpdateHisto) {
-		updateHisto();
-	}
-	else mappingFrame->fitToView(); 
+	updateHisto();
 	emit emitChange();
 }
 
 void TFWidget::updateHisto() {
-	mappingFrame->fitToView();
-	mappingFrame->updateMap();
-	mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+	bool buttonRequest = sender() == updateHistoButton ? true : false;
+	if (autoUpdateHisto() || buttonRequest) {
+		MapperFunction *mf = getCurrentMapperFunction();
+		mappingFrame->updateMapperFunction(mf);
+		bool force = true;
+		mappingFrame->RefreshHistogram(force);
+		updateMappingFrame();
+	}
+	else mappingFrame->fitToView();
 }
 
 void TFWidget::autoUpdateHistoChecked(int state) {
-	if (state==0) _autoUpdateHisto = false;
-	else _autoUpdateHisto = true;
+	bool bstate;
+	if (state==0) bstate = false;
+	else bstate = true;
+	
+	MapperFunction *tf = getCurrentMapperFunction();
+
+	tf->SetAutoUpdateHisto(bstate);
+
 	updateHisto();
 }
 
 void TFWidget::setSingleColor() {
-	_paramsMgr->BeginSaveStateGroup("VariablesWidget::setSingleColor()");
 	QPalette palette(colorDisplay->palette());
 	QColor color = QColorDialog::getColor(palette.color(QPalette::Base), this);
 	if (!color.isValid()) return;
@@ -431,12 +399,9 @@ void TFWidget::setSingleColor() {
 	myRGB[2] = rgb[2];
 
 	_rParams->SetConstantColor(myRGB);
-	_paramsMgr->EndSaveStateGroup();
 }
 
 void TFWidget::setUsingSingleColor(int state) {
-	_paramsMgr->BeginSaveStateGroup("Set the use of a single color"
-		" in renderer");
 	if (state > 0) {
 		 _rParams->SetUseSingleColor(true);
 
@@ -445,20 +410,10 @@ void TFWidget::setUsingSingleColor(int state) {
 		_rParams->SetUseSingleColor(false);
 
 	}
-	_paramsMgr->EndSaveStateGroup();
 }
 
 void TFWidget::colorInterpChanged(int index) {
-	string varName;
-	if (_flags & COLORVAR) {
-		varName = _rParams->GetColorMapVariableName();
-	}	
-	else {
-		varName = _rParams->GetVariableName();
-	}
-	if (varName.empty()) return;
-
-	MapperFunction* tf = _rParams->GetMapperFunc(varName);
+	MapperFunction* tf = getCurrentMapperFunction();
 
 	if (index==0) {
 		tf->setColorInterpType(TFInterpolator::diverging);
@@ -473,13 +428,7 @@ void TFWidget::colorInterpChanged(int index) {
 }
 
 void TFWidget::loadTF() {
-	string varname;
-	if (_flags & COLORVAR) {
-		varname = _rParams->GetColorMapVariableName();
-	}	
-	else {
-		varname = _rParams->GetVariableName();
-	}
+	string varname = getCurrentVarName();
 	if (varname.empty()) return;
 
 	//Ignore TF's in session, for now.
@@ -492,30 +441,27 @@ void TFWidget::loadTF() {
 
 	Update(_dataMgr, _paramsMgr, _rParams);
 }
-	
 
-#ifdef DEAD
-void TFWidget::makeItRed(QLineEdit* edit) {
-	QPalette p;
-	p.setColor(QPalette::Base, QColor(255,150,150));
-	edit->setPalette(p);
+bool TFWidget::autoUpdateHisto() {
+	MapperFunction *tf = getCurrentMapperFunction();
+	if (tf->GetAutoUpdateHisto()) return true;
+	else return false;
+}	
+
+string TFWidget::getCurrentVarName() {
+	string varname = "";
+	if (_flags & COLORVAR) {
+		varname = _rParams->GetColorMapVariableName();
+	}	
+	else {
+		varname = _rParams->GetVariableName();
+	}
+	return varname;
 }
 
-void TFWidget::makeItWhite(QLineEdit* edit) {
-	QPalette p;
-	p.setColor(QPalette::Base, QColor(255,255,255));
-	edit->setPalette(p);
+MapperFunction* TFWidget::getCurrentMapperFunction() {
+	string varname = getCurrentVarName();
+	MapperFunction *tf = _rParams->GetMapperFunc(varname);
+	assert(tf);
+	return tf;
 }
-
-void TFWidget::makeItGreen(QLineEdit* edit) {
-	QPalette p;
-	p.setColor(QPalette::Base, QColor(150,255,150));
-	edit->setPalette(p);
-}
-
-void TFWidget::makeItYellow(QLineEdit* edit) {
-	QPalette p;
-	p.setColor(QPalette::Base, QColor(255,255,150));
-	edit->setPalette(p);
-}
-#endif
