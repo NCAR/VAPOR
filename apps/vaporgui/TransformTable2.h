@@ -37,15 +37,13 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     virtual void Update(
         VAPoR::Transform *transform) {
         map<string, VAPoR::Transform *> tMap;
-        tMap[" "] = transform;
+        tMap[""] = transform;
         Update(tMap);
     }
 
   protected slots:
-    void ScaleChanged(int row, int col);
-    void TranslationChanged(int row, int col);
-    void RotationChanged(int row, int col);
-    void OriginChanged(int row, int col);
+    void transformChanged(QTableWidget *table, int row, int col);
+    void transformChanged();
 
   private:
     VaporTable *_scaleTable;
@@ -58,10 +56,18 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
 
     map<string, VAPoR::Transform *> _transforms;
 
-    void UpdateScales();
-    void UpdateTranslations();
-    void UpdateRotations();
-    void UpdateOrigins();
+    void updateTransformTable(QTableWidget *table,
+                              string target, vector<double> values, int row);
+
+    void updateScales();
+    void updateTranslations();
+    void updateRotations();
+    void updateOrigin();
+
+    void setScales(string dataset, vector<double> s);
+    void setTranslations(string dataset, vector<double> t);
+    void setRotations(string dataset, vector<double> r);
+    void setOrigin(string dataset, vector<double> o);
 };
 
 #endif //TRANSFORMTABLE_H
