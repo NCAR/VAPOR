@@ -36,8 +36,6 @@ public:
  enum DisplayFlags {
 	SCALAR = (1u << 0), 
 	VECTOR = (1u << 1), 
-	HGT = (1u << 2), 
-	COLOR = (1u << 3), 
  };
 
  FidelityWidget(QWidget* parent);
