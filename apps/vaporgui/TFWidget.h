@@ -83,7 +83,6 @@ private:
     bool                   autoUpdateHisto();
     string                 getCurrentVarName();
     VAPoR::MapperFunction *getCurrentMapperFunction();
-    bool                   isRefreshingSmart();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);

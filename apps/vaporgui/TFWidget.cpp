@@ -346,12 +346,10 @@ void TFWidget::setRange(double min, double max)
 void TFWidget::updateHisto()
 {
     bool buttonRequest = sender() == updateHistoButton ? true : false;
-    cout << "button pressed? " << buttonRequest << endl;
     if (autoUpdateHisto() || buttonRequest) {
-        if (isRefreshingSmart()) mappingFrame->RefreshHistogram();
-        // mappingFrame->fitToView();
-        // mappingFrame->updateMap();
-        // mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+        MapperFunction *mf = getCurrentMapperFunction();
+        mappingFrame->updateMapperFunction(mf);
+        mappingFrame->RefreshHistogram();
     } else
         mappingFrame->fitToView();
 }
@@ -433,7 +431,6 @@ void TFWidget::loadTF()
 bool TFWidget::autoUpdateHisto()
 {
     MapperFunction *tf = getCurrentMapperFunction();
-    cout << "autoUpdateHisto() " << tf->GetAutoUpdateHisto() << endl;
     if (tf->GetAutoUpdateHisto())
         return true;
     else
@@ -457,18 +454,4 @@ MapperFunction *TFWidget::getCurrentMapperFunction()
     MapperFunction *tf = _rParams->GetMapperFunc(varname);
     assert(tf);
     return tf;
-}
-
-bool TFWidget::isRefreshingSmart()
-{
-    float dummyRange[2], currentRange[2];
-    getRange(dummyRange, currentRange);
-
-    float currentSpan = currentRange[1] - currentRange[0];
-    float savedSpan = _savedMapperValues[1] - _savedMapperValues[0];
-
-    if ((currentSpan > savedSpan) || (currentSpan < .9 * savedSpan))
-        return true;
-    else
-        return false;
 }

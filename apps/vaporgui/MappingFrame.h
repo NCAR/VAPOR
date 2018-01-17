@@ -149,6 +149,8 @@ public:
     }
     // static void SetControlExec(VAPoR::ControlExec* ce){_controlExec = ce;}
 
+    void updateMapperFunction(VAPoR::MapperFunction *mapper);
+
 signals:
 
     //! Signal that is invoked when user starts to modify the transfer function.
@@ -175,7 +177,7 @@ public slots:
     void updateMap();
 
 private:
-    void updateMapperFunction(VAPoR::MapperFunction *mapper);
+    // void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
     bool    colorMapping() const { return _colorMappingEnabled; }
     bool    opacityMapping() const { return _opacityMappingEnabled; }
@@ -188,6 +190,7 @@ private:
     float   xVariable(const QPoint &pos);
     float   yVariable(const QPoint &pos);
     bool    canBind();
+    bool    shouldWeRefreshHistogram(VAPoR::MapperFunction *mf) const;
 
 protected slots:
     void setEditMode(bool);
