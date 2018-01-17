@@ -185,17 +185,59 @@ MappingFrame::~MappingFrame()
   _axisTextPos.clear();
 }
 
+bool MappingFrame::shouldWeRefreshHistogram(MapperFunction* mf) const {
+	bool shouldWe = false;
+	if (_histogram==NULL) shouldWe = true;
+
+	size_t ts = _rParams->GetCurrentTimestep();	
+	if (ts != mf->getTimestepOfUpdate()) {
+		shouldWe = true;
+		mf->setTimestepOfUpdate(ts);
+	}
+
+	string varName = _rParams->GetColorMapVariableName();
+	if (varName != mf->getVariableNameOfUpdate()) {
+		shouldWe = true;
+		mf->setVariableNameOfUpdate(varName);
+	}
+	
+/*	float minRange = mf->getMinMapValue();
+	float maxRange = mf->getMaxMapValue();
+	float minPrevious = mf->getMinOfUpdate();
+	float maxPrevious = mf->getMaxOfUpdate();
+	float newRange = maxRange - minRange;
+	float rangeOfUpdate = maxPrevious - minPrevious;
+
+	// If our range has been reduced by more than 10% of our alst refresh size,
+	// then we will refresh.
+	if (newRange < .9*rangeOfUpdate) shouldWe = true;
+
+	// If our range has grown, we will not refresh.
+	if (newRange > rangeOfUpdate) shouldWe = true;
+*/
+
+	return shouldWe;
+}
+
 void MappingFrame::RefreshHistogram() {
-	cout << "begin refresh histogram" << endl;
+
 	string var;
 	var = _rParams->GetColorMapVariableName();
+	MapperFunction* mf = _rParams->GetMapperFunc(var);
+
+	cout << "refreshing " << mf << " " << var << " " << mf->getMinMapValue() << " " << mf->getMaxMapValue() << endl;
+ 
+	if (_histogram) delete _histogram;
+	_histogram = new Histo(256,mf->getMinMapValue(),
+	mf->getMaxMapValue());
+
+//	float minRange = mf->getMinMapValue();
+//	float maxRange = mf->getMaxMapValue();
+	//mf->setBoundsOfUpdate(minRange, maxRange); 
 
 	size_t ts = _rParams->GetCurrentTimestep();	
 
-	float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
-	float maxRange = _rParams->GetMapperFunc(var)->getMaxMapValue();
-
-	_histogram->reset(256, minRange, maxRange);
+//	_histogram->reset(256, minRange, maxRange);
 
 	int refLevel = _rParams->GetRefinementLevel();
 	int lod = _rParams->GetCompressionLevel();
@@ -223,7 +265,6 @@ void MappingFrame::RefreshHistogram() {
 		_histogram->addToBin(v);
 	}
 	delete grid;
-	cout << "end refresh histogram" << endl;
 }
 
 //----------------------------------------------------------------------------
@@ -233,7 +274,9 @@ void MappingFrame::updateMapperFunction(MapperFunction *mapper)
 {
   assert(mapper);
   deleteOpacityWidgets();
-  
+ 
+  cout << "updateMapperFunction() " << endl;
+ 
   _mapper = mapper;
   
   if (_opacityMappingEnabled)
@@ -354,6 +397,7 @@ void MappingFrame::Update(DataMgr *dataMgr,
 						ParamsMgr *paramsMgr,
 						RenderParams *rParams)
 {
+	cout << "MappiongFrame::Update()" << endl;
 	assert(dataMgr);
 	assert(paramsMgr);
 	assert(rParams);
@@ -398,7 +442,6 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	xDataToWorld(getMaxDomainBound()));
 
 	_updateTexture = true;
-
 }
 
 //----------------------------------------------------------------------------
@@ -2214,16 +2257,12 @@ Histo* MappingFrame::getHistogram()
 {
 	string varname;
 	varname = _rParams->GetColorMapVariableName();
-
-    MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
+	MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
 	assert(mapFunc);
 
-    if (_histogram) delete _histogram;
-
-    _histogram = new Histo(256,mapFunc->getMinMapValue(),
-		mapFunc->getMaxMapValue());
-
-    RefreshHistogram();
+	if (shouldWeRefreshHistogram(mapFunc)) {	
+	    RefreshHistogram();
+	}
     return _histogram;
 }
 
