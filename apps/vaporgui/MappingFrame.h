@@ -32,6 +32,7 @@
 #include <QPaintEvent>
 #include <QMouseEvent>
 #include "vapor/Visualizer.h"
+#include "GUIStateParams.h"
 
 #include <qpoint.h>
 #include <list>
@@ -89,7 +90,7 @@ public:
     MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
 
-    void RefreshHistogram();
+    void RefreshHistogram(bool force = false);
 
     //! Enable or disable the color mapping in the Transfer Function.
     //! Should be specified in the RenderEventRouter constructor
@@ -149,6 +150,8 @@ public:
     }
     // static void SetControlExec(VAPoR::ControlExec* ce){_controlExec = ce;}
 
+    void updateMapperFunction(VAPoR::MapperFunction *mapper);
+
 signals:
 
     //! Signal that is invoked when user starts to modify the transfer function.
@@ -175,7 +178,7 @@ public slots:
     void updateMap();
 
 private:
-    void updateMapperFunction(VAPoR::MapperFunction *mapper);
+    // void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
     bool    colorMapping() const { return _colorMappingEnabled; }
     bool    opacityMapping() const { return _opacityMappingEnabled; }
@@ -188,6 +191,10 @@ private:
     float   xVariable(const QPoint &pos);
     float   yVariable(const QPoint &pos);
     bool    canBind();
+    bool    skipRefreshHistogram() const;
+    void    updateHistogram();
+    string  getActiveRendererName() const;
+    void    populateHistogram();
 
 protected slots:
     void setEditMode(bool);
@@ -293,6 +300,7 @@ private:
     QTabWidget *           _myTabWidget;
     VAPoR::MapperFunction *_mapper;
     Histo *                _histogram;
+    map<string, Histo *>   _histogramMap;
 
     bool                _opacityMappingEnabled;
     bool                _colorMappingEnabled;
