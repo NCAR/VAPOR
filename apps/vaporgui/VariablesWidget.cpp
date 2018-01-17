@@ -20,6 +20,8 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include <QLineEdit>
+#include <QCheckBox>
 #include <qradiobutton.h>
 #include <qcolordialog.h>
 #include "vapor/RenderParams.h"

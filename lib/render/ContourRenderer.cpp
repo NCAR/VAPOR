@@ -135,7 +135,7 @@ int ContourRenderer::performRendering(size_t timestep, DataMgr *dataMgr)
     double pointa[3], pointb[3];    // points in cache
     pointa[2] = pointb[2] = 0.;
 
-    for (int iso = 0; iso < cParams->GetNumContours(); iso++) {
+    for (int iso = 0; iso < cParams->GetContourCount(); iso++) {
         float lineColor[3];
         cParams->GetLineColor(iso, lineColor);
         glColor3fv(lineColor);
@@ -305,12 +305,12 @@ void ContourRenderer::setupCache()
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     // for (size_t ts = _dataStatus->getMinTimestep(); ts <= _dataStatus->getMaxTimestep(); ts++){
     for (size_t ts = GetCurrentTimestep(); ts <= GetCurrentTimestep(); ts++) {
-        for (int iso = 0; iso < cParams->GetNumContours(); iso++) {
+        for (int iso = 0; iso < cParams->GetContourCount(); iso++) {
             pair<int, int> indexpair = make_pair((int)ts, iso);
             _lineCache[indexpair] = *(new vector<float *>);
         }
     }
-    _numIsovalsCached = cParams->GetNumContours();
+    _numIsovalsCached = cParams->GetContourCount();
 }
 // Classify a cell to one of 9 possibilities:
 // 0: no crossing
