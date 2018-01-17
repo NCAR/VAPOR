@@ -52,6 +52,7 @@ set (SRCS
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
 	TransformTable.cpp
+	VaporTable.cpp
 	FidelityWidget.cpp
 
 	# Need to include all files that request .ui files
@@ -65,6 +66,7 @@ set (SRCS
 	TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
+	VaporTable.h
 	FidelityWidget.h
 )
 
@@ -78,7 +80,7 @@ set (UIS
 	vizFeaturesTab.ui
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
-	renderselector.ui
+	LeftPanel.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	TwoDAppearanceGUI.ui
