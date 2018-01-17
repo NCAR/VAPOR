@@ -213,6 +213,7 @@ private:
   bool skipRefreshHistogram() const;
   void updateHistogram();
   string getActiveRendererName() const;
+  void populateHistogram();
   
 protected slots:
   void setEditMode(bool);
