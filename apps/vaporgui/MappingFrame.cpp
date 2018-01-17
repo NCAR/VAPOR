@@ -99,6 +99,7 @@ MappingFrame::MappingFrame(QWidget* parent)
 	_editButton(NULL),
     _variableName(""),
     _domainSlider(new DomainWidget(this)),
+	_contourRangeSlider(new ContourRangeSlider(this)),
 	_isoSlider(new IsoSlider(this)),
     _colorbarWidget(new GLColorbarWidget(this, NULL)),
     _lastSelected(NULL),
@@ -161,6 +162,9 @@ MappingFrame::~MappingFrame()
   delete _domainSlider;
   _domainSlider = NULL;
 
+  delete _contourRangeSlider;
+  _contourRangeSlider = NULL;
+
   delete _colorbarWidget;
   _colorbarWidget = NULL;
 
@@ -181,17 +185,63 @@ MappingFrame::~MappingFrame()
   _axisTextPos.clear();
 }
 
-void MappingFrame::RefreshHistogram() {
-	string var;
-	var = _rParams->GetColorMapVariableName();
+bool MappingFrame::skipRefreshHistogram() const {
+	bool skip = true;
+	if (_histogram==NULL) return false;
 
 	size_t ts = _rParams->GetCurrentTimestep();	
+	if (ts != _histogram->getTimestepOfUpdate()) {
+		skip = false;
+	}
 
-	float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
-	float maxRange = _rParams->GetMapperFunc(var)->getMaxMapValue();
+	string varName = _rParams->GetColorMapVariableName();
+	if (varName != _histogram->getVarnameOfUpdate()) {
+		skip = false;
+	}
+	
+	return skip;
+}
 
-	_histogram->reset(256, minRange, maxRange);
+string MappingFrame::getActiveRendererName() const {
+    GUIStateParams *p = 
+	(GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+	string activeViz = p->GetActiveVizName();
+	string activeRenderClass, activeRenderInst;
+	p->GetActiveRenderer(
+		activeViz, activeRenderClass, activeRenderInst
+	);
+	return activeRenderInst;
+}
 
+void MappingFrame::RefreshHistogram(bool force) {
+	string rendererName = getActiveRendererName();
+	_histogram = _histogramMap[rendererName];
+
+	if (!force) {	
+		if (skipRefreshHistogram()) return;
+	}
+
+	string var;
+	var = _rParams->GetColorMapVariableName();
+	MapperFunction* mf = _rParams->GetMapperFunc(var);
+
+	float minRange = mf->getMinMapValue();
+	float maxRange = mf->getMaxMapValue();
+	size_t ts = _rParams->GetCurrentTimestep();	
+
+	if (_histogram) delete _histogram;
+	_histogram = NULL;
+	_histogram = new Histo(256, minRange,
+	maxRange, var, ts);
+
+	populateHistogram();
+	
+	_histogramMap[rendererName] = _histogram;
+}
+
+void MappingFrame::populateHistogram() {
+	string var = _rParams->GetColorMapVariableName();
+	size_t ts = _rParams->GetCurrentTimestep();	
 	int refLevel = _rParams->GetRefinementLevel();
 	int lod = _rParams->GetCompressionLevel();
 
@@ -227,7 +277,7 @@ void MappingFrame::updateMapperFunction(MapperFunction *mapper)
 {
   assert(mapper);
   deleteOpacityWidgets();
-  
+ 
   _mapper = mapper;
   
   if (_opacityMappingEnabled)
@@ -369,7 +419,7 @@ void MappingFrame::Update(DataMgr *dataMgr,
 
 	deselectWidgets();
 
-	_histogram = getHistogram();
+	RefreshHistogram();
 	_minValue = getMinEditBound();
 	_maxValue = getMaxEditBound();
 
@@ -381,13 +431,17 @@ void MappingFrame::Update(DataMgr *dataMgr,
 		//Synchronize sliders with isovalues
 		vector<double> isovals = ((ContourParams*) rParams)->GetContourValues(varname);
 		setIsolineSliders(isovals);
+		
+		int size = isovals.size();
+		double start = xDataToWorld(isovals[0]);
+		double end = xDataToWorld(isovals[size-1]);
+		_contourRangeSlider->setDomain(start, end);
 	}
 
 	_domainSlider->setDomain(xDataToWorld(getMinDomainBound()), 
 	xDataToWorld(getMaxDomainBound()));
 
 	_updateTexture = true;
-
 }
 
 //----------------------------------------------------------------------------
@@ -1178,6 +1232,10 @@ int MappingFrame::drawDomainSlider()
   glPushName(DOMAIN_WIDGET);
 
   int rc = _domainSlider->paintGL();
+
+  if (_isolineSlidersEnabled) {
+  	rc = _contourRangeSlider->paintGL();
+  }
   
   glPopName();
   return rc;
@@ -1712,6 +1770,10 @@ void MappingFrame::resize()
 
   _domainSlider->setGeometry(_minX, _maxX, _maxY-domainWidth, _maxY);
 
+  if (_isolineSlidersEnabled){
+    _contourRangeSlider->setGeometry(_minX, _maxX, _maxY-2*domainWidth-.05, _maxY-2*domainWidth);
+  }
+
   float bGap   = unitPerPixel * _bottomGap;
 
   if (_colorbarWidget)
@@ -2191,21 +2253,19 @@ float MappingFrame::getOpacityData(float value)
 //----------------------------------------------------------------------------
 // Return the histogram
 //----------------------------------------------------------------------------
-Histo* MappingFrame::getHistogram()
-{
-	string varname;
-	varname = _rParams->GetColorMapVariableName();
+Histo* MappingFrame::getHistogram() {
+	//string varname;
+	//varname = _rParams->GetColorMapVariableName();
+	//MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
+	//assert(mapFunc);
 
-    MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
-	assert(mapFunc);
+	//if (skipRefreshHistogram(mapFunc)) {	
+	if (skipRefreshHistogram()) {	
+	    RefreshHistogram();
+	}
 
-    if (_histogram) delete _histogram;
-
-    _histogram = new Histo(256,mapFunc->getMinMapValue(),
-		mapFunc->getMaxMapValue());
-
-    RefreshHistogram();
-    return _histogram;
+	string rendererName = _rParams->GetName();
+	return _histogramMap[rendererName];
 }
 
 //----------------------------------------------------------------------------
