@@ -346,6 +346,8 @@ void TFWidget::updateHisto()
 {
     bool buttonRequest = sender() == updateHistoButton ? true : false;
     if (autoUpdateHisto() || buttonRequest) {
+        MapperFunction *mf = getCurrentMapperFunction();
+        mappingFrame->updateMapperFunction(mf);
         bool force = true;
         mappingFrame->RefreshHistogram(force);
         updateMappingFrame();
