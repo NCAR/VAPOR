@@ -125,7 +125,6 @@ void ContourAppearanceSubtab::EndTFChange() {
 void ContourAppearanceSubtab::GetContourBounds(double &min, double &max) {
     double lower, upper, spacing;
     string varname = _cParams->GetVariableName();
-    bool locked = _cParams->GetLockToTF();
 
     size_t ts = _cParams->GetCurrentTimestep();
     int level = _cParams->GetRefinementLevel();
@@ -160,12 +159,4 @@ void ContourAppearanceSubtab::SetContourSpacing(double spacing) {
     double min = _cParams->GetContourMin();
 
     SetContourValues(count, min, spacing);
-}
-
-void ContourAppearanceSubtab::ContourBoundsChanged(int index) {
-    if (index == 0) {
-        _cParams->SetLockToTF(false);
-        EndTFChange();
-    } else
-        _cParams->SetLockToTF(true);
 }
