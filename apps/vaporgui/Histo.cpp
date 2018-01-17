@@ -35,8 +35,6 @@ Histo::Histo(
 
     _varnameOfUpdate = var;
     _timestepOfUpdate = ts;
-
-    cout << "Histo::Histo " << mnData << " " << mxData << endl;
 }
 
 #ifdef DEAD
