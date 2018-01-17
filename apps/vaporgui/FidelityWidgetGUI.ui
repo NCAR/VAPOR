@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -37,6 +37,12 @@
    </property>
    <item>
     <widget class="QTabWidget" name="fidelityTab">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
@@ -203,26 +209,6 @@
              <property name="maxCount">
               <number>5</number>
              </property>
-             <item>
-              <property name="text">
-               <string>500:1</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>100:1</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10:1</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1:1</string>
-              </property>
-             </item>
             </widget>
            </item>
           </layout>
@@ -292,31 +278,6 @@
              <property name="maxCount">
               <number>5</number>
              </property>
-             <item>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>3</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>5</string>
-              </property>
-             </item>
             </widget>
            </item>
           </layout>
