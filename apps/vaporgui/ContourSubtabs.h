@@ -54,18 +54,11 @@ private:
 
 private slots:
     void SetContourValues(int numContours, double contourMin, double spacing);
-
     void EndTFChange();
-
     void SetLineThickness(double val) { _cParams->SetLineThickness(val); }
-
     void SetContourCount(int count);
-
     void SetContourMinimum(double min);
-
     void SetContourSpacing(double spacing);
-
-    void ContourBoundsChanged(int index);
 };
 
 class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
@@ -75,7 +68,7 @@ public:
     ContourGeometrySubtab(QWidget *parent)
     {
         setupUi(this);
-        _geometryWidget->Reinit(GeometryWidget::TWOD);
+        _geometryWidget->Reinit(GeometryWidget::TWOD, GeometryWidget::MINMAX, GeometryWidget::SCALAR);
 
         _orientationAngles->hide();
     }
