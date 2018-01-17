@@ -118,14 +118,6 @@ class PARAMS_API MapperFunction : public ParamsBase {
         return (getMinMaxMapValue()[1]);
     };
 
-    float getMinOfUpdate() const {
-        return (getBoundsOfUpdate()[0]);
-    };
-
-    float getMaxOfUpdate() const {
-        return (getBoundsOfUpdate()[1]);
-    };
-
     //! Set both minimum and maximum mapping (histo) values
     //! \param[in] val1 minimum value
     //! \param[in] val2 maximum value
@@ -137,32 +129,6 @@ class PARAMS_API MapperFunction : public ParamsBase {
 
     void setMaxMapValue(float val) {
         setMinMaxMapValue(getMinMapValue(), val);
-    }
-
-    void setBoundsOfUpdate(float val1, float val2);
-
-    vector<double> getBoundsOfUpdate() const;
-
-    void setTimestepOfUpdate(size_t ts) {
-        SetValueDouble(
-            _timestepOfUpdateTag,
-            "Timestep of last histogram update",
-            ts);
-    }
-
-    size_t getTimestepOfUpdate() const {
-        return (size_t)GetValueDouble(_timestepOfUpdateTag, 0.0);
-    }
-
-    void setVariableNameOfUpdate(string varName) {
-        SetValueString(
-            _variableNameOfUpdateTag,
-            "Variable name of last histogram update",
-            varName);
-    }
-
-    string getVariableNameOfUpdate() const {
-        return GetValueString(_variableNameOfUpdateTag, "");
     }
 
     //! Obtain min and max mapping (histo) values
@@ -332,9 +298,6 @@ class PARAMS_API MapperFunction : public ParamsBase {
     static const string _opacityMapTag;
     static const string _autoUpdateHistoTag;
     static const string _secondaryVarMapperTag;
-    static const string _dataBoundsOfUpdateTag;
-    static const string _variableNameOfUpdateTag;
-    static const string _timestepOfUpdateTag;
 
     //
     // Size of lookup table.  Always 1<<8 currently!

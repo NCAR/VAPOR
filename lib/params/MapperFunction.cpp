@@ -42,9 +42,6 @@ const string MapperFunction::_opacityMapsTag = "OpacityMaps";
 const string MapperFunction::_opacityMapTag = "OpacityMap";
 const string MapperFunction::_autoUpdateHistoTag = "AutoUpdateHisto";
 const string MapperFunction::_secondaryVarMapperTag = "SecondaryVarMapper";
-const string MapperFunction::_dataBoundsOfUpdateTag = "DataBoundsOfUpdate";
-const string MapperFunction::_variableNameOfUpdateTag = "VariableNameOfUpdate";
-const string MapperFunction::_timestepOfUpdateTag = "TimeStepOfUpdate";
 
 //
 // Register class with object factory!!!
@@ -293,23 +290,6 @@ void MapperFunction::makeLut(float *clut) const {
         cmap->color(v).toRGB(&clut[4 * i]);
         clut[4 * i + 3] = getOpacityValueData(v);
     }
-}
-
-void MapperFunction::setBoundsOfUpdate(float val1, float val2) {
-    vector<double> updatedBounds;
-    updatedBounds.push_back(val1);
-    updatedBounds.push_back(val2);
-    SetValueDoubleVec(_dataBoundsOfUpdateTag, "Saving the updated bounds of"
-                                              " the MapperFunction",
-                      updatedBounds);
-}
-
-vector<double> MapperFunction::getBoundsOfUpdate() const {
-    vector<double> updatedBounds, defaultBounds;
-    defaultBounds.push_back(std::numeric_limits<double>::lowest());
-    defaultBounds.push_back(std::numeric_limits<double>::max());
-    updatedBounds = GetValueDoubleVec(_dataBoundsOfUpdateTag, defaultBounds);
-    return updatedBounds;
 }
 
 //! Set both minimum and maximum mapping (histo) values
