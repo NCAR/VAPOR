@@ -136,55 +136,25 @@ MappingFrame::~MappingFrame()
     _axisTextPos.clear();
 }
 
-// bool MappingFrame::skipRefreshHistogram(MapperFunction* mf) const {
 bool MappingFrame::skipRefreshHistogram() const
 {
     bool skip = true;
-    if (_histogram == NULL) {
-        cout << "NULL _histogram" << endl;
-        return false;
-    }
+    if (_histogram == NULL) return false;
 
     size_t ts = _rParams->GetCurrentTimestep();
-    if (ts != _histogram->getTimestepOfUpdate()) {
-        skip = false;
-        cout << "differentTimestep in _histogram " << _histogram->getTimestepOfUpdate() << " " << ts << endl;
-        // mf->setTimestepOfUpdate(ts);
-    }
+    if (ts != _histogram->getTimestepOfUpdate()) { skip = false; }
 
     string varName = _rParams->GetColorMapVariableName();
-    if (varName != _histogram->getVarnameOfUpdate()) {
-        skip = false;
-        cout << "differentVarname in _histogram " << _histogram->getVarnameOfUpdate() << " " << varName << endl;
-        // mf->setVariableNameOfUpdate(varName);
-    }
-
-    /*	float minRange = mf->getMinMapValue();
-    float maxRange = mf->getMaxMapValue();
-    float minPrevious = mf->getMinOfUpdate();
-    float maxPrevious = mf->getMaxOfUpdate();
-    float newRange = maxRange - minRange;
-    float rangeOfUpdate = maxPrevious - minPrevious;
-
-    // If our range has been reduced by more than 10% of our alst refresh size,
-    // then we will refresh.
-    if (newRange < .9*rangeOfUpdate) shouldWe = true;
-
-    // If our range has grown, we will not refresh.
-    if (newRange > rangeOfUpdate) shouldWe = true;
-*/
+    if (varName != _histogram->getVarnameOfUpdate()) { skip = false; }
 
     return skip;
 }
 
 string MappingFrame::getActiveRendererName() const
 {
-    // assert(_controlExec != NULL);
-    GUIStateParams *p =    //(GUIStateParams *) _controlExec->
-                           //     GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-        (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    string activeViz = p->GetActiveVizName();
-    string activeRenderClass, activeRenderInst;
+    GUIStateParams *p = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string          activeViz = p->GetActiveVizName();
+    string          activeRenderClass, activeRenderInst;
     p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
     return activeRenderInst;
 }
@@ -194,8 +164,6 @@ void MappingFrame::RefreshHistogram(bool force)
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
-    cout << endl << endl << endl << "MappingFrame::RefreshHistogram " << _histogram << " " << rendererName << endl;
-
     if (!force) {
         if (skipRefreshHistogram()) return;
     }
@@ -204,20 +172,25 @@ void MappingFrame::RefreshHistogram(bool force)
     var = _rParams->GetColorMapVariableName();
     MapperFunction *mf = _rParams->GetMapperFunc(var);
 
-    cout << "refreshing " << mf << " " << var << " " << mf->getMinMapValue() << " " << mf->getMaxMapValue() << endl;
-
-    float minRange = mf->getMinMapValue();
-    float maxRange = mf->getMaxMapValue();
-    // mf->setBoundsOfUpdate(minRange, maxRange);
-
+    float  minRange = mf->getMinMapValue();
+    float  maxRange = mf->getMaxMapValue();
     size_t ts = _rParams->GetCurrentTimestep();
 
     if (_histogram) delete _histogram;
     _histogram = NULL;
     _histogram = new Histo(256, minRange, maxRange, var, ts);
 
-    int refLevel = _rParams->GetRefinementLevel();
-    int lod = _rParams->GetCompressionLevel();
+    populateHistogram();
+
+    _histogramMap[rendererName] = _histogram;
+}
+
+void MappingFrame::populateHistogram()
+{
+    string var = _rParams->GetColorMapVariableName();
+    size_t ts = _rParams->GetCurrentTimestep();
+    int    refLevel = _rParams->GetRefinementLevel();
+    int    lod = _rParams->GetCompressionLevel();
 
     vector<double> minExts, maxExts;
     _rParams->GetBox()->GetExtents(minExts, maxExts);
@@ -239,8 +212,6 @@ void MappingFrame::RefreshHistogram(bool force)
         _histogram->addToBin(v);
     }
     delete grid;
-
-    _histogramMap[rendererName] = _histogram;
 }
 
 //----------------------------------------------------------------------------
@@ -364,7 +335,6 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     deselectWidgets();
 
-    //_histogram = getHistogram();
     RefreshHistogram();
     _minValue = getMinEditBound();
     _maxValue = getMaxEditBound();

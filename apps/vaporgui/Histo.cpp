@@ -31,8 +31,6 @@ Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
 
     _varnameOfUpdate = var;
     _timestepOfUpdate = ts;
-
-    cout << "Histo::Histo " << mnData << " " << mxData << endl;
 }
 
 #ifdef DEAD
