@@ -4,6 +4,7 @@
 #include <QObject>
 #include "vapor/MyBase.h"
 #include "ui_VariablesWidgetGUI.h"
+#include "VaporTable.h"
 
 QT_USE_NAMESPACE
 
