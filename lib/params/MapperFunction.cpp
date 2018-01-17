@@ -43,7 +43,6 @@ const string MapperFunction::_opacityMapTag = "OpacityMap";
 const string MapperFunction::_autoUpdateHistoTag = "AutoUpdateHisto";
 const string MapperFunction::_secondaryVarMapperTag = "SecondaryVarMapper";
 
-
 //
 // Register class with object factory!!!
 //
