@@ -32,6 +32,7 @@
 #include <QPaintEvent>
 #include <QMouseEvent>
 #include "vapor/Visualizer.h"
+#include "GUIStateParams.h"
 
 #include <qpoint.h>
 #include <list>
@@ -101,7 +102,7 @@ class MappingFrame : public QGLWidget {
     MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
 
-    void RefreshHistogram();
+    void RefreshHistogram(bool force = false);
 
     //! Enable or disable the color mapping in the Transfer Function.
     //! Should be specified in the RenderEventRouter constructor
@@ -203,7 +204,9 @@ class MappingFrame : public QGLWidget {
     float xVariable(const QPoint &pos);
     float yVariable(const QPoint &pos);
     bool canBind();
-    bool shouldWeRefreshHistogram(VAPoR::MapperFunction *mf) const;
+    bool skipRefreshHistogram() const;
+    void updateHistogram();
+    string getActiveRendererName() const;
 
   protected slots:
     void setEditMode(bool);
@@ -309,6 +312,7 @@ class MappingFrame : public QGLWidget {
     QTabWidget *_myTabWidget;
     VAPoR::MapperFunction *_mapper;
     Histo *_histogram;
+    map<string, Histo *> _histogramMap;
 
     bool _opacityMappingEnabled;
     bool _colorMappingEnabled;
