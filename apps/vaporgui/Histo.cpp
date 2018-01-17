@@ -27,7 +27,7 @@ Histo::Histo(int numberBins, float mnData, float mxData){
 	_minData = mnData;
 	_maxData = mxData;
 	_binArray = new int[_numBins];
-	reset();
+	reset(numberBins);
 }
 
 #ifdef	DEAD
