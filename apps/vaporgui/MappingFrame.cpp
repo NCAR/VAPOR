@@ -136,20 +136,61 @@ MappingFrame::~MappingFrame()
     _axisTextPos.clear();
 }
 
-void MappingFrame::RefreshHistogram()
+bool MappingFrame::skipRefreshHistogram() const
 {
-    string var;
-    var = _rParams->GetColorMapVariableName();
+    bool skip = true;
+    if (_histogram == NULL) return false;
 
     size_t ts = _rParams->GetCurrentTimestep();
+    if (ts != _histogram->getTimestepOfUpdate()) { skip = false; }
 
-    float minRange = _rParams->GetMapperFunc(var)->getMinMapValue();
-    float maxRange = _rParams->GetMapperFunc(var)->getMaxMapValue();
+    string varName = _rParams->GetColorMapVariableName();
+    if (varName != _histogram->getVarnameOfUpdate()) { skip = false; }
 
-    _histogram->reset(256, minRange, maxRange);
+    return skip;
+}
 
-    int refLevel = _rParams->GetRefinementLevel();
-    int lod = _rParams->GetCompressionLevel();
+string MappingFrame::getActiveRendererName() const
+{
+    GUIStateParams *p = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string          activeViz = p->GetActiveVizName();
+    string          activeRenderClass, activeRenderInst;
+    p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
+    return activeRenderInst;
+}
+
+void MappingFrame::RefreshHistogram(bool force)
+{
+    string rendererName = getActiveRendererName();
+    _histogram = _histogramMap[rendererName];
+
+    if (!force) {
+        if (skipRefreshHistogram()) return;
+    }
+
+    string var;
+    var = _rParams->GetColorMapVariableName();
+    MapperFunction *mf = _rParams->GetMapperFunc(var);
+
+    float  minRange = mf->getMinMapValue();
+    float  maxRange = mf->getMaxMapValue();
+    size_t ts = _rParams->GetCurrentTimestep();
+
+    if (_histogram) delete _histogram;
+    _histogram = NULL;
+    _histogram = new Histo(256, minRange, maxRange, var, ts);
+
+    populateHistogram();
+
+    _histogramMap[rendererName] = _histogram;
+}
+
+void MappingFrame::populateHistogram()
+{
+    string var = _rParams->GetColorMapVariableName();
+    size_t ts = _rParams->GetCurrentTimestep();
+    int    refLevel = _rParams->GetRefinementLevel();
+    int    lod = _rParams->GetCompressionLevel();
 
     vector<double> minExts, maxExts;
     _rParams->GetBox()->GetExtents(minExts, maxExts);
@@ -294,7 +335,7 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     deselectWidgets();
 
-    _histogram = getHistogram();
+    RefreshHistogram();
     _minValue = getMinEditBound();
     _maxValue = getMaxEditBound();
 
@@ -1896,18 +1937,16 @@ float MappingFrame::getOpacityData(float value)
 //----------------------------------------------------------------------------
 Histo *MappingFrame::getHistogram()
 {
-    string varname;
-    varname = _rParams->GetColorMapVariableName();
+    // string varname;
+    // varname = _rParams->GetColorMapVariableName();
+    // MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
+    // assert(mapFunc);
 
-    MapperFunction *mapFunc = _rParams->GetMapperFunc(varname);
-    assert(mapFunc);
+    // if (skipRefreshHistogram(mapFunc)) {
+    if (skipRefreshHistogram()) { RefreshHistogram(); }
 
-    if (_histogram) delete _histogram;
-
-    _histogram = new Histo(256, mapFunc->getMinMapValue(), mapFunc->getMaxMapValue());
-
-    RefreshHistogram();
-    return _histogram;
+    string rendererName = _rParams->GetName();
+    return _histogramMap[rendererName];
 }
 
 //----------------------------------------------------------------------------

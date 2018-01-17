@@ -25,7 +25,7 @@
 
 class Histo {
 public:
-    Histo(int numberBins, float mnData, float mxData);
+    Histo(int numberBins, float mnData, float mxData, string var, int ts);
 
 #ifdef DEAD
     // Special constructor for unsigned char data:
@@ -46,6 +46,9 @@ public:
     float getMinData() { return _minData; }
     float getMaxData() { return _maxData; }
 
+    int    getTimestepOfUpdate() { return _timestepOfUpdate; }
+    string getVarnameOfUpdate() { return _varnameOfUpdate; }
+
 private:
     Histo() {}
     int * _binArray;
@@ -54,6 +57,9 @@ private:
     float _minData, _maxData;
     int   _maxBinSize;
     int   _largestBin;
+
+    int    _timestepOfUpdate;
+    string _varnameOfUpdate;
 };
 
 #endif    // HISTO_H
