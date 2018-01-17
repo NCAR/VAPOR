@@ -84,7 +84,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     bool autoUpdateHisto();
     string getCurrentVarName();
     VAPoR::MapperFunction *getCurrentMapperFunction();
-    bool isRefreshingSmart();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
