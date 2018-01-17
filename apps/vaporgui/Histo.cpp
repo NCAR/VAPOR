@@ -22,12 +22,23 @@ using namespace VAPoR;
 using namespace Wasp;
 
 
-Histo::Histo(int numberBins, float mnData, float mxData){
+Histo::Histo(
+	int numberBins, 
+	float mnData, 
+	float mxData, 
+	string var,
+	int ts
+){
 	_numBins = numberBins;
 	_minData = mnData;
 	_maxData = mxData;
 	_binArray = new int[_numBins];
 	reset(numberBins);
+
+	_varnameOfUpdate = var;
+	_timestepOfUpdate = ts;
+
+	cout << "Histo::Histo " << mnData << " " << mxData << endl;
 }
 
 #ifdef	DEAD
