@@ -95,14 +95,18 @@ void VariablesWidget::Reinit(
         dimensionFrame->hide();
     }
 
-    //if (!(_colorFlags & COLORVAR)) {
     if (_colorFlags ^ COLORVAR) {
         collapseColorVarSettings();
     }
 
     variableSelectionWidget->adjustSize();
 
-    _fidelityWidget->Reinit((FidelityWidget::DisplayFlags)dspFlags);
+    FidelityWidget::DisplayFlags fdf;
+    if (_dimFlags & VariablesWidget::SCALAR)
+        fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::SCALAR);
+    if (_dimFlags & VariablesWidget::VECTOR)
+        fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::VECTOR);
+    _fidelityWidget->Reinit(fdf);
 }
 
 void VariablesWidget::collapseColorVarSettings() {
