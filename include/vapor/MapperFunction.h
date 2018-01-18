@@ -124,6 +124,7 @@ public:
 	return(getMinMaxMapValue()[1]);
  };
 
+
  //! Set both minimum and maximum mapping (histo) values
  //! \param[in] val1 minimum value
  //! \param[in] val2 maximum value
@@ -302,7 +303,7 @@ private:
  //
  // XML tags
  //
-
+ 
  static const string _dataBoundsTag;
  static const string _opacityCompositionTag;
  static const string _opacityScaleTag;
