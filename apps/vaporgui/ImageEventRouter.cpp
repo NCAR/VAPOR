@@ -16,8 +16,12 @@ using namespace VAPoR;
 ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce)
     : QTabWidget(parent),
       RenderEventRouter(ce, ImageParams::GetClassType()) {
+
+    sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
+
     _variables = new ImageVariablesSubtab(this);
     QScrollArea *qsvar = new QScrollArea(this);
+    qsvar->sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
     qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _variables->adjustSize();
     qsvar->setWidget(_variables);
