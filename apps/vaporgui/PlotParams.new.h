@@ -9,8 +9,8 @@
 //  File:       StatisticsParams.h
 //
 //  Author:     Samuel Li
-//          National Center for Atmospheric Research
-//          PO 3000, Boulder, Colorado
+//              National Center for Atmospheric Research
+//              PO 3000, Boulder, Colorado
 //
 //  Date:       December 2017
 //
@@ -30,29 +30,18 @@ class PlotParams : public RenderParams {
     PlotParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, XmlNode *node);
     ~PlotParams();
 
-    bool GetAutoUpdateEnabled();
-    void SetAutoUpdateEnabled(bool state);
+    int GetMinTS() const;
+    void SetMinTS(int ts);
 
-    int GetCurrentMinTS() const;
-    void SetCurrentMinTS(int ts);
+    int GetMaxTS() const;
+    void SetMaxTS(int ts);
 
-    int GetCurrentMaxTS() const;
-    void SetCurrentMaxTS(int ts);
+    int GetOneTS() const;
+    void SetOneTS(int ts);
 
-    bool GetMinEnabled();
-    void SetMinEnabled(bool state);
-
-    bool GetMaxEnabled();
-    void SetMaxEnabled(bool state);
-
-    bool GetMeanEnabled();
-    void SetMeanEnabled(bool state);
-
-    bool GetMedianEnabled();
-    void SetMedianEnabled(bool state);
-
-    bool GetStdDevEnabled();
-    void SetStdDevEnabled(bool state);
+    bool GetSpaceTimeMode() const;
+    void SetSpaceMode();
+    void SetTimeMode();
 
     static string GetClassType() {
         return ("StatisticsParams");
@@ -69,12 +58,8 @@ class PlotParams : public RenderParams {
   private:
     static const string _minTSTag;
     static const string _maxTSTag;
-    static const string _autoUpdateTag;
-    static const string _minEnabledTag;
-    static const string _maxEnabledTag;
-    static const string _meanEnabledTag;
-    static const string _medianEnabledTag;
-    static const string _stdDevEnabledTag;
+    static const string _oneTSTag;
+    static const string _spaceTimeTag; // Space=true, Time=false
 };
 
 }; // End namespace VAPoR
