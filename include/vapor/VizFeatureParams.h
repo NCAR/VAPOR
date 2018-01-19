@@ -102,7 +102,7 @@ public:
     void SetNumTics(vector<long> ticnums);
 
     //! Get number of tics in x,y,z direction
-    vector<long> GetNumTics() const;
+    vector<double> GetNumTics() const;
 
     //! Set axis origin
     void SetAxisOrigin(vector<double> orig);
@@ -148,7 +148,7 @@ public:
         if (val < 1) val = 1;
         SetValueLong(_axisTextHeightTag, "Set axis text height", val);
     }
-    long GetAxisDigits() const { return GetValueLong(_axisDigitsTag, 4); }
+    long GetAxisDigits() const { return GetValueLong(_axisDigitsTag, 2); }
     void SetAxisDigits(long val)
     {
         if (val < 0) val = 4;
@@ -171,6 +171,10 @@ public:
 
     void SetShowAxisArrows(bool val) { SetValueLong(_showAxisArrowsTag, "Toggle Axis Arrows", val); }
 
+    void SetAxisFontSize(int size);
+
+    int GetAxisFontSize();
+
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("VizFeatureParams"); }
@@ -187,6 +191,7 @@ private:
     static const string   _axisColorTag;
     static const string   _axisDigitsTag;
     static const string   _axisTextHeightTag;
+    static const string   _axisFontSizeTag;
     static const string   _ticWidthTag;
     static const string   _ticDirsTag;
     static const string   _ticSizeTag;

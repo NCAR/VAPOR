@@ -40,6 +40,7 @@ const string   VizFeatureParams::_axisAnnotationEnabledTag = "AxisAnnotation";
 const string   VizFeatureParams::_axisColorTag = "AxisColor";
 const string   VizFeatureParams::_axisDigitsTag = "AxisDigits";
 const string   VizFeatureParams::_axisTextHeightTag = "AxisTextHeight";
+const string   VizFeatureParams::_axisFontSizeTag = "AxisFontSize";
 const string   VizFeatureParams::_ticWidthTag = "TicWidths";
 const string   VizFeatureParams::_ticDirsTag = "TicDirections";
 const string   VizFeatureParams::_ticSizeTag = "TicSizes";
@@ -83,21 +84,21 @@ void VizFeatureParams::_init()
     SetBackgroundColor(clr);
     SetUseRegionFrame(false);
     SetUseDomainFrame(true);
-    SetAxisAnnotation(false);
-    vector<long>   lvec(3, 0);
+    //	SetAxisAnnotation(false);
+    //	vector<long> lvec(3,0);
     vector<double> dvec(3, 0.0);
-    SetMinTics(dvec);
-    SetMaxTics(dvec);
+    //	SetMinTics(dvec);
+    //	SetMaxTics(dvec);
     SetAxisArrowCoords(dvec);
-    SetNumTics(lvec);
-    SetTicSize(dvec);
-    lvec[0] = 1;
-    SetTicDirs(lvec);
-    SetAxisTextHeight(10);
-    SetAxisOrigin(dvec);
-    SetLatLonAxes(false);
-    SetTicWidth(1.);
-    SetAxisDigits(4);
+    //	SetNumTics(lvec);
+    //	SetTicSize(dvec);
+    //	lvec[0]=1;
+    //	SetTicDirs(lvec);
+    //	SetAxisTextHeight(10);
+    //	SetAxisOrigin(dvec);
+    //	SetLatLonAxes(false);
+    //	SetTicWidth(1.);
+    //	SetAxisDigits(4);
     SetShowAxisArrows(false);
 }
 
@@ -150,6 +151,10 @@ void VizFeatureParams::GetAxisColor(double color[3]) const { m_getColor(color, _
 
 void VizFeatureParams::SetAxisColor(vector<double> color) { m_setColor(color, _axisColorTag, "Set axis color"); }
 
+void VizFeatureParams::SetAxisFontSize(int size) { SetValueDouble(_axisFontSizeTag, "Axis annotation font size", size); }
+
+int VizFeatureParams::GetAxisFontSize() { return (int)GetValueDouble(_axisFontSizeTag, 10); }
+
 void VizFeatureParams::SetNumTics(vector<long> val)
 {
     assert(val.size() == 3);
@@ -161,10 +166,10 @@ void VizFeatureParams::SetNumTics(vector<long> val)
     SetValueLongVec(_numTicsTag, "Set number of axis tics", val);
 }
 
-vector<long> VizFeatureParams::GetNumTics() const
+vector<double> VizFeatureParams::GetNumTics() const
 {
-    vector<long> defaultv(3, 6);
-    vector<long> val = GetValueLongVec(_numTicsTag, defaultv);
+    vector<double> defaultv(3, 6);
+    vector<double> val = GetValueDoubleVec(_numTicsTag, defaultv);
 
     for (int i = 0; i < val.size(); i++) {
         if (val[i] < 0) val[i] = 0;
@@ -206,7 +211,11 @@ void VizFeatureParams::SetMaxTics(vector<double> val)
 vector<double> VizFeatureParams::GetMaxTics() const
 {
     vector<double> defaultv(3, 1.0);
-    return GetValueDoubleVec(_maxTicsTag, defaultv);
+    // return GetValueDoubleVec(_maxTicsTag, defaultv);
+    vector<double> myVec = GetValueDoubleVec(_maxTicsTag, defaultv);
+    cout << "sz " << myVec.size() << endl;
+    cout << "myVec " << myVec[0] << " " << myVec[1] << " " << myVec[2] << endl;
+    return myVec;
 }
 
 void VizFeatureParams::SetTicSize(vector<double> val)
@@ -224,6 +233,7 @@ vector<double> VizFeatureParams::GetTicSize() const
 void VizFeatureParams::SetTicDirs(vector<long> val)
 {
     assert(val.size() == 3);
+    cout << "Setting tic dirs " << val[0] << " " << val[1] << " " << val[2] << endl;
     SetValueLongVec(_ticDirsTag, "Set tic direction", val);
 }
 

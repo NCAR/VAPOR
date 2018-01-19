@@ -24,6 +24,8 @@
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
 #include "ui_vizFeaturesTab.h"
+#include "RangeCombos.h"
+#include "VaporTable.h"
 
 QT_USE_NAMESPACE
 
@@ -59,6 +61,16 @@ public:
     string        GetType() const { return GetClassType(); }
 
 protected slots:
+    void setAxisAnnotation(bool);
+    void setLatLonAnnotation(bool);
+    void setAxisTextSize(int);
+    void setAxisDigits(int);
+    void setAxisTicWidth(double);
+    void setAxisColor();
+    void axisAnnotationTableChanged();
+    void setXTicOrientation(int);
+    void setYTicOrientation(int);
+    void setZTicOrientation(int);
 
     void setVizFeatureTextChanged(const QString &qs);
     void vizfeatureReturnPressed();
@@ -67,20 +79,26 @@ protected slots:
     void setBackgroundColor();
     void setUseRegionFrame();
     void setUseDomainFrame();
-    void setAxisAnnotation();
-    void setAxisColor();
+    void setAxisAnnotation2();
     void setTimeColor();
-    void setXTicOrient(int);
-    void setYTicOrient(int);
-    void setZTicOrient(int);
     void setLatLonAnnot(bool);
     void setUseAxisArrows();
     void timeAnnotationChanged();
     void timeLLXChanged();
     void timeLLYChanged();
     void timeSizeChanged();
+    void setXTicOrient(int);
+    void setYTicOrient(int);
+    void setZTicOrient(int);
 
 private:
+    Combo *     _textSizeCombo;
+    Combo *     _digitsCombo;
+    Combo *     _ticWidthCombo;
+    VaporTable *_annotationVaporTable;
+
+    void connectAnnotationWidgets();
+
     VizFeatureEventRouter() {}
 
     void setColorHelper(QWidget *w, vector<double> &rgb);
@@ -92,6 +110,7 @@ private:
     void updateBackgroundColor();
     void updateAxisColor();
     void updateTimeColor();
+    void updateAxisAnnotations();
 
     void invalidateText();
 
