@@ -59,6 +59,11 @@ class VaporTable : public QWidget {
                 HighlightFlags hFlags);
 
     Value GetValue(int row, int col);
+    template <typename T>
+    std::vector<T> GetRow(int row);
+    //std::vector<double> GetRow(int row);
+    //std::vector<int> GetRow(int row);
+    //std::vector<string> GetRow(int row);
     std::string GetStringValue(int row, int col);
 
     // Dump all values in the table back to the user
