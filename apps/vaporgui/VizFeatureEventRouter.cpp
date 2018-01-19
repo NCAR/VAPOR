@@ -55,9 +55,19 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 
 	setupUi(this);
 
+	_textSizeCombo = new Combo(axisTextSizeEdit, axisTextSizeSlider, true);
+	_digitsCombo = new Combo(axisDigitsEdit, axisDigitsSlider, true);
+	_ticWidthCombo = new Combo(ticWidthEdit, ticWidthSlider);
+	_annotationVaporTable = new VaporTable(axisAnnotationTable);
+	_annotationVaporTable->Reinit((VaporTable::DOUBLE),
+		(VaporTable::MUTABLE),
+		(VaporTable::HighlightFlags)(0));
+
+	connectAnnotationWidgets();
+
 	// Disabled for now. Need to add support in VizFeatureRenderer
 	//
-	xMinTicEdit->setEnabled(false);
+	/*xMinTicEdit->setEnabled(false);
 	yMinTicEdit->setEnabled(false);
 	zMinTicEdit->setEnabled(false);
 	xMaxTicEdit->setEnabled(false);
@@ -77,7 +87,7 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 	zTicOrientCombo->setEnabled(false);
 	labelHeightEdit->setEnabled(false);
 	labelDigitsEdit->setEnabled(false);
-	ticWidthEdit->setEnabled(false);
+	ticWidthEdit->setEnabled(false);*/
 
 	_animConnected = false;
 	_ap = NULL;
@@ -87,6 +97,32 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 VizFeatureEventRouter::~VizFeatureEventRouter(){
 	
 }
+
+void VizFeatureEventRouter::connectAnnotationWidgets() {
+	connect(axisAnnotationEnabledCheckbox, SIGNAL(toggled(bool)),
+		this, SLOT(setAxisAnnotation(bool)));
+	connect(latLonAnnotationCheckbox, SIGNAL(toggled(bool)),
+		this, SLOT(setLatLonAnnotation(bool)));
+	connect(_textSizeCombo, SIGNAL(valueChanged(int)),
+		this, SLOT(setAxisTextSize(int)));
+	connect(_digitsCombo, SIGNAL(valueChanged(int)),
+		this, SLOT(setAxisDigits(int)));
+	connect(_ticWidthCombo, SIGNAL(valueChanged(double)),
+		this, SLOT(setAxisTicWidth(double)));
+	connect(axisColorButton, SIGNAL(pressed()),
+		this, SLOT(setAxisColor()));
+	connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)),
+		this, SLOT(axisAnnotationTableChanged()));
+	connect (xTicOrientationCombo, SIGNAL(activated(int)),
+		this, SLOT(setXTicOrientation(int)));
+	connect (yTicOrientationCombo, SIGNAL(activated(int)),
+		this, SLOT(setYTicOrientation(int)));
+	connect (zTicOrientationCombo, SIGNAL(activated(int)),
+		this, SLOT(setZTicOrientation(int)));
+	connect (_annotationVaporTable, SIGNAL(valueChanged(int, int)),
+		this, SLOT(axisAnnotationTableChanged()));
+}
+
 /**********************************************************
  * Whenever a new vizfeaturetab is created it must be hooked up here
  ************************************************************/
@@ -115,7 +151,7 @@ VizFeatureEventRouter::hookUpTab()
 	);
 	connect (
 		axisAnnotationCheckbox, SIGNAL(clicked()),
-		 this, SLOT(setAxisAnnotation())
+		 this, SLOT(setAxisAnnotation2())
 	);
 	connect (
 		axisArrowCheckbox, SIGNAL(clicked()),
@@ -438,8 +474,8 @@ void VizFeatureEventRouter::_updateTab(){
 	updateRegionColor();
 	updateDomainColor();
 	updateBackgroundColor();
-	updateAxisColor();
 	updateTimeColor();
+	updateAxisAnnotations();
 
 	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
 
@@ -493,18 +529,72 @@ return;
 		latLonCheckbox->setEnabled(true);
 		latLonCheckbox->setChecked(vParams->GetLatLonAxes());
 	}
+
+
+
+	
+	adjustSize();
+}
+
+void VizFeatureEventRouter::updateAxisAnnotations() {
+	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
+	double clr[3];
+
+	bool annotationEnabled = vParams->GetAxisAnnotation();
+	if (annotationEnabled) 
+		axisAnnotationEnabledCheckbox->setCheckState(Qt::Checked);
+	else 
+		axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
+
+	bool annotateLatLon = vParams->GetLatLonAxes();
+	if (annotateLatLon)
+		latLonAnnotationCheckbox->setCheckState(Qt::Checked);
+	else
+		latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
+
+	int textSize = vParams->GetAxisFontSize();
+	_textSizeCombo->Update(4,50,textSize);
+
+	int numDigits = vParams->GetAxisDigits();
+	_digitsCombo->Update(1, 12, numDigits);
+
+	double ticWidth = vParams->GetTicWidth();
+	_ticWidthCombo->Update(0, 50, ticWidth);
+	
 	vector<long> ticDir = vParams->GetTicDirs();
-	xTicOrientCombo->setCurrentIndex(ticDir[0]-1);
-	yTicOrientCombo->setCurrentIndex(ticDir[1]/2);
-	zTicOrientCombo->setCurrentIndex(ticDir[2]);
+	xTicOrientationCombo->setCurrentIndex(ticDir[0]-1);
+	yTicOrientationCombo->setCurrentIndex(ticDir[1]/2);
+	zTicOrientationCombo->setCurrentIndex(ticDir[2]);
 
+	// Parameters for the table/
+	vector<double> values;
+	vector<double> numtics = vParams->GetNumTics();
+	values.insert(values.end(), numtics.begin(), numtics.end());
+	vector<double> ticSizes = vParams->GetTicSize();
+	values.insert(values.end(), ticSizes.begin(), ticSizes.end());
+	vector<double> minTics = vParams->GetMinTics();
+	values.insert(values.end(), minTics.begin(), minTics.end());
+	vector<double> maxTics = vParams->GetMaxTics();
+	values.insert(values.end(), maxTics.begin(), maxTics.end());
+	vector<double> orig = vParams->GetAxisOrigin();
+	values.insert(values.end(), orig.begin(), orig.end());
 
-	vector<long> numtics = vParams->GetNumTics();
+	vector<string> rowHeaders;
+	rowHeaders.push_back("# Tics          ");
+	rowHeaders.push_back("Size            ");
+	rowHeaders.push_back("Min             ");
+	rowHeaders.push_back("Max             ");
+	rowHeaders.push_back("Origin          ");
+
+	vector<string> colHeaders;
+	colHeaders.push_back("X");
+	colHeaders.push_back("Y");
+	colHeaders.push_back("Z");
+
+	_annotationVaporTable->Update(5, 3, values, rowHeaders, colHeaders);
+	
 	vector<double> mintics = vParams->GetMinTics();
 	vector<double> maxtics = vParams->GetMaxTics();
-	vector<double> ticSizes = vParams->GetTicSize();
-	
-	vector<double> orig = vParams->GetAxisOrigin();
 	axisOriginXEdit->setText(QString::number(orig[0]));
 	axisOriginYEdit->setText(QString::number(orig[1]));
 	axisOriginZEdit->setText(QString::number(orig[2]));
@@ -525,12 +615,16 @@ return;
 	ticWidthEdit->setText(QString::number(vParams->GetTicWidth()));
 	QPalette pal3(axisColorEdit->palette());
 	vParams->GetAxisColor(clr);
-	newColor = QColor((int)(clr[0]*255),(int)(clr[1]*255),(int)(clr[2]*255));
+	QColor newColor = QColor((int)(clr[0]*255),(int)(clr[1]*255),(int)(clr[2]*255));
 	pal3.setColor(QPalette::Base, newColor);
 	axisColorEdit->setPalette(pal3);
-
 	
-	adjustSize();
+	updateAxisColor();
+}
+
+void VizFeatureEventRouter::axisAnnotationTableChanged() {
+	vector<double> values = _annotationVaporTable->GetRow<double>(0);
+	cout << values[0] << " " << values[1] << " " << values[2] << endl;
 }
 
 void VizFeatureEventRouter::setColorHelper(
@@ -767,6 +861,35 @@ void VizFeatureEventRouter::drawTimeStamp() {
 	drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
 }
 
+void VizFeatureEventRouter::setAxisDigits(int digits) {
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetAxisDigits(digits);
+}
+
+void VizFeatureEventRouter::setAxisTicWidth(double width) {
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetTicWidth(width);
+}
+
+void VizFeatureEventRouter::setXTicOrientation(int){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector<long> ticDir = vfParams->GetTicDirs();
+	ticDir[0] = xTicOrientationCombo->currentIndex()+1;  // Y(1) or Z(2)
+	vfParams->SetTicDirs(ticDir);
+}
+void VizFeatureEventRouter::setYTicOrientation(int){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector<long> ticDir = vfParams->GetTicDirs();
+	ticDir[1] = yTicOrientationCombo->currentIndex()*2;  // X(0) or Z(2)
+	vfParams->SetTicDirs(ticDir);
+}
+void VizFeatureEventRouter::setZTicOrientation(int){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vector<long> ticDir = vfParams->GetTicDirs();
+	ticDir[2] = zTicOrientationCombo->currentIndex();    // X(0) or Y(1)
+	vfParams->SetTicDirs(ticDir);
+}
+
 void VizFeatureEventRouter::setXTicOrient(int){
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vector<long> ticDir = vfParams->GetTicDirs();
@@ -786,6 +909,7 @@ void VizFeatureEventRouter::setZTicOrient(int){
 	vfParams->SetTicDirs(ticDir);
 }
 	
+
 void VizFeatureEventRouter::setLatLonAnnot(bool val){
 	confirmText();
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
@@ -805,8 +929,23 @@ void VizFeatureEventRouter::setUseRegionFrame(){
 	vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
 }
 
+void VizFeatureEventRouter::setAxisAnnotation(bool toggled){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetAxisAnnotation(toggled);
+}
+
+void VizFeatureEventRouter::setLatLonAnnotation(bool val){
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetLatLonAxes(val);
+}
+
+void VizFeatureEventRouter::setAxisTextSize(int size) {
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	vfParams->SetAxisFontSize(size);
+}
+
 // Response to a click on axisAnnotation checkbox:
-void VizFeatureEventRouter::setAxisAnnotation(){
+void VizFeatureEventRouter::setAxisAnnotation2(){
 	bool annotate = axisAnnotationCheckbox->isChecked();
 	if (annotate){
 		axisAnnotationFrame->show();

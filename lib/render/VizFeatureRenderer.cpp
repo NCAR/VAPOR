@@ -352,6 +352,38 @@ void VizFeatureRenderer::OverlayPaint(size_t ts) {
 #endif
 
 void VizFeatureRenderer::drawAxisTics() {
+	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+	vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
+//	cout << "GetAxisOrigin() " << axisOriginCoord[0] << " " << axisOriginCoord[1] << " " << axisOriginCoord[2] << endl;
+
+	vector<double> minTic = vfParams->GetMinTics();
+//	cout << "GetMinTics() " << minTic[0] << " " << minTic[1] << " " << minTic[2] << endl;
+
+	vector<double> maxTic = vfParams->GetMaxTics();
+//	cout << "GetMaxTics() " << maxTic[0] << " " << maxTic[1] << " " << maxTic[2] << endl;
+
+	vector<double> ticLength = vfParams->GetTicSize();
+//	cout << "GetTicSize() " << ticLength[0] << " " << ticLength[1] << " " << ticLength[2] << endl;
+
+	vector<long> ticDir = vfParams->GetTicDirs();
+//	cout << "GetTicDirs() " << ticDir[0] << " " << ticDir[1] << " " << ticDir[2] << endl;
+
+	vector<double> numTics = vfParams->GetNumTics();
+//	cout << "GetNumTics() " << numTics[0] << " " << numTics[1] << " " << numTics[2] << endl;
+
+	double ticWidth = vfParams->GetTicWidth();
+//	cout << "GetTicWidth() " << ticWidth << endl;
+	
+	double axisColor[3];
+	vfParams->GetAxisColor(axisColor);
+//	cout << "GetAxisColor() " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;			
+
+	int fontSize = vfParams->GetAxisFontSize();
+//	cout << "GetAxisFontSize() " << fontSize << endl;
+}
+
+void VizFeatureRenderer::drawAxisTics2() {
+cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 	// Preserve the current GL color state
 	glPushAttrib(GL_CURRENT_BIT);	
 
@@ -359,6 +391,7 @@ void VizFeatureRenderer::drawAxisTics() {
 	
 	// Modify minTic, maxTic, ticLength, axisOriginCoord to user coords
 	// if using latLon, convert annotation axes to user coords
+
 	//
 
 	vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
@@ -366,7 +399,7 @@ void VizFeatureRenderer::drawAxisTics() {
 	vector<double> maxTic = vfParams->GetMaxTics();
 	vector<double> ticLength = vfParams->GetTicSize();
 	vector<long> ticDir = vfParams->GetTicDirs();
-	vector<long> numTics = vfParams->GetNumTics();
+	vector<double> numTics = vfParams->GetNumTics();
 	double ticWidth = vfParams->GetTicWidth();
 	double minTicA[3],maxTicA[3],ticLengthA[3], axisOriginCoordA[3];
 
@@ -374,6 +407,7 @@ void VizFeatureRenderer::drawAxisTics() {
 	vfParams->GetAxisColor(axisColor);
 			
 	if (vfParams->GetLatLonAxes()) {
+		cout << "Entering dead code for lat/lon annotations" << endl;
 #ifdef	DEAD
 		ConvertAxes(
 			false,ticDir,minTic,maxTic,axisOriginCoord,ticLength,

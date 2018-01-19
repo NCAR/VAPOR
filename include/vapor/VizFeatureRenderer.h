@@ -112,6 +112,7 @@ private:
  // Draw the axis lines, while building text labels.
  //
  void drawAxisTics();
+ void drawAxisTics2();
 
  // Draw Axis arrows
  //
