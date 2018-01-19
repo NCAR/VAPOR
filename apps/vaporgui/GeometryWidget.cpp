@@ -114,15 +114,11 @@ void GeometryWidget::adjustLayoutTo2D() {
 	zMinMaxGroupBox->resize(0,0);
 	minMaxContainerWidget->adjustSize();
 	minMaxTab->adjustSize();
-	xMinMaxGroupBox->adjustSize();
-	yMinMaxGroupBox->adjustSize();
 
 	zSinglePointGroupBox->hide();
 	zSinglePointGroupBox->resize(0,0);
 	singlePointContainerWidget->adjustSize();
 	singlePointTab->adjustSize();
-	xSinglePointGroupBox->adjustSize();	
-	ySinglePointGroupBox->adjustSize();	
 
 	stackedSliderWidget->adjustSize();
 	adjustSize();
