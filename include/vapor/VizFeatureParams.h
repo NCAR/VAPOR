@@ -125,7 +125,7 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     void SetNumTics(vector<long> ticnums);
 
     //! Get number of tics in x,y,z direction
-    vector<long> GetNumTics() const;
+    vector<double> GetNumTics() const;
 
     //! Set axis origin
     void SetAxisOrigin(vector<double> orig);
@@ -176,7 +176,7 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
         SetValueLong(_axisTextHeightTag, "Set axis text height", val);
     }
     long GetAxisDigits() const {
-        return GetValueLong(_axisDigitsTag, 4);
+        return GetValueLong(_axisDigitsTag, 2);
     }
     void SetAxisDigits(long val) {
         if (val < 0)
@@ -208,6 +208,10 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
         SetValueLong(_showAxisArrowsTag, "Toggle Axis Arrows", val);
     }
 
+    void SetAxisFontSize(int size);
+
+    int GetAxisFontSize();
+
     // Get static string identifier for this params class
     //
     static string GetClassType() {
@@ -226,6 +230,7 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     static const string _axisColorTag;
     static const string _axisDigitsTag;
     static const string _axisTextHeightTag;
+    static const string _axisFontSizeTag;
     static const string _ticWidthTag;
     static const string _ticDirsTag;
     static const string _ticSizeTag;

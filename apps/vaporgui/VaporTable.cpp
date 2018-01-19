@@ -362,6 +362,21 @@ Value VaporTable::GetValue(int row, int col) {
     return {value};
 }
 
+template <typename T>
+std::vector<T> VaporTable::GetRow(int row) {
+    //std::vector<double> VaporTable::GetRow(int row) {
+    std::string value;
+    int nRows = _table->rowCount();
+    int nCols = _table->columnCount();
+    std::vector<T> values;
+
+    for (int col = 0; col < nCols; col++) {
+        T value = GetValue(row, col);
+        values.push_back(value);
+    }
+    return values;
+}
+
 std::string VaporTable::GetStringValue(int row, int col) {
     std::string value;
     int nRows = _table->rowCount();
