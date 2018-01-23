@@ -59,14 +59,13 @@ public:
 		MutabilityFlags mFlags,
 		HighlightFlags hFlags
 	);
- 
+
  Value GetValue(int row, int col);
- template<typename T>std::vector<T> GetRow(int row);
- //std::vector<double> GetRow(int row);
- //std::vector<int> GetRow(int row);
- //std::vector<string> GetRow(int row);
  std::string GetStringValue(int row, int col);
 
+ //template <class T> 
+ //void GetRow(int row, std::vector<T> & values);
+ 
  // Dump all values in the table back to the user
  void GetValues(std::vector<std::string> &vec);
  void GetValues(std::vector<int> &vec);

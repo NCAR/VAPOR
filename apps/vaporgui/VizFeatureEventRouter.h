@@ -111,6 +111,8 @@ private:
 	Combo* _ticWidthCombo;
 	VaporTable* _annotationVaporTable;
 
+	vector<double> getTableRow(int row);
+
 	void connectAnnotationWidgets();
 
 	VizFeatureEventRouter() {}
@@ -129,8 +131,19 @@ private:
 	void updateAxisColor();
 	void updateTimeColor();
 	void updateAxisAnnotations();
+	void updateAnnotationCheckbox();
+	void updateLatLonCheckbox();
+	void updateAnnotationTable();
+	void updateTicOrientationCombos();
+	void updateOldGui();
 
 	void invalidateText();
+
+	void getActiveExtents(
+		vector<double> &minExts, vector<double> &maxExts);
+	void initializeAnnotations();
+	void initializeAnnotationExtents();
+	void initializeTicSizes();
 
 	virtual void _confirmText();
 	virtual void _updateTab();
@@ -141,6 +154,7 @@ private:
 
 	AnimationParams* _ap;
 	bool _animConnected;
+	bool _annotationsInitialized;
 };
 
 #endif //VIZFEATUREEVENTROUTER_H 

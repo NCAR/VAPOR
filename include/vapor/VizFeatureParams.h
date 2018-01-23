@@ -130,7 +130,7 @@ public:
 	void SetAxisColor(vector<double> color);
 
 	//! Set number of tics in x,y,z direction
-	void SetNumTics(vector<long> ticnums);
+	void SetNumTics(vector<double> ticnums);
 
 	//! Get number of tics in x,y,z direction
 	vector<double> GetNumTics() const;
@@ -160,10 +160,10 @@ public:
 	vector<double> GetTicSize() const;
 
 	//! Set tic direction on x,y,z axes
-	void SetTicDirs(vector<long> ticdirs);
+	void SetTicDirs(vector<double> ticdirs);
 
 	//! Get tic direction on x,y,z axes
-	vector<long> GetTicDirs() const;
+	vector<double> GetTicDirs() const;
 
 	//! Get tic width
 	double GetTicWidth() const{
