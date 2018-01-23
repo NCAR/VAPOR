@@ -792,7 +792,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLineEdit" name="axisColorEdit_2">
+            <widget class="QLineEdit" name="axisColorEdit">
              <property name="maximumSize">
               <size>
                <width>25</width>
@@ -1136,7 +1136,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="axisColorEdit">
+                 <widget class="QLineEdit" name="oldAxisColorEdit">
                   <property name="minimumSize">
                    <size>
                     <width>40</width>
