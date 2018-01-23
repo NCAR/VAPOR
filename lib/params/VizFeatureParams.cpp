@@ -48,7 +48,7 @@ const string VizFeatureParams::_minTicsTag = "TicMinPositions";
 const string VizFeatureParams::_maxTicsTag = "TicMaxPositions";
 const string VizFeatureParams::_numTicsTag = "NumberTics";
 const string VizFeatureParams::_latLonAxesTag = "LatLonAxes";
-const string VizFeatureParams::_axisOriginTag = "NumberTics";
+const string VizFeatureParams::_axisOriginTag = "AxisOrigin";
 const string VizFeatureParams::_showAxisArrowsTag = "ShowAxisArrows";
 const string VizFeatureParams::_axisArrowCoordsTag = "AxisArrowCoords";
 vector<double> VizFeatureParams::_previousStretch;
@@ -184,7 +184,7 @@ int VizFeatureParams::GetAxisFontSize() {
     return (int)GetValueDouble(_axisFontSizeTag, 10);
 }
 
-void VizFeatureParams::SetNumTics(vector<long> val) {
+void VizFeatureParams::SetNumTics(vector<double> val) {
     assert(val.size() == 3);
     for (int i = 0; i < val.size(); i++) {
         if (val[i] < 0)
@@ -193,11 +193,11 @@ void VizFeatureParams::SetNumTics(vector<long> val) {
             val[i] = 100;
     }
 
-    SetValueLongVec(_numTicsTag, "Set number of axis tics", val);
+    SetValueDoubleVec(_numTicsTag, "Set number of axis tics", val);
 }
 
 vector<double> VizFeatureParams::GetNumTics() const {
-    vector<double> defaultv(3, 6);
+    vector<double> defaultv(3, 6.0);
     vector<double> val = GetValueDoubleVec(_numTicsTag, defaultv);
 
     for (int i = 0; i < val.size(); i++) {
@@ -238,8 +238,6 @@ vector<double> VizFeatureParams::GetMaxTics() const {
     vector<double> defaultv(3, 1.0);
     //return GetValueDoubleVec(_maxTicsTag, defaultv);
     vector<double> myVec = GetValueDoubleVec(_maxTicsTag, defaultv);
-    cout << "sz " << myVec.size() << endl;
-    cout << "myVec " << myVec[0] << " " << myVec[1] << " " << myVec[2] << endl;
     return myVec;
 }
 
@@ -253,16 +251,15 @@ vector<double> VizFeatureParams::GetTicSize() const {
     return GetValueDoubleVec(_ticSizeTag, defaultv);
 }
 
-void VizFeatureParams::SetTicDirs(vector<long> val) {
+void VizFeatureParams::SetTicDirs(vector<double> val) {
     assert(val.size() == 3);
-    cout << "Setting tic dirs " << val[0] << " " << val[1] << " " << val[2] << endl;
-    SetValueLongVec(_ticDirsTag, "Set tic direction", val);
+    SetValueDoubleVec(_ticDirsTag, "Set tic direction", val);
 }
 
-vector<long> VizFeatureParams::GetTicDirs() const {
-    vector<long> defaultv(3, 0);
+vector<double> VizFeatureParams::GetTicDirs() const {
+    vector<double> defaultv(3, 0);
     defaultv[0] = 1;
-    return GetValueLongVec(_ticDirsTag, defaultv);
+    return GetValueDoubleVec(_ticDirsTag, defaultv);
 }
 
 void VizFeatureParams::SetAxisArrowCoords(vector<double> val) {
