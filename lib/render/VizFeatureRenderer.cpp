@@ -351,38 +351,38 @@ void VizFeatureRenderer::OverlayPaint(size_t ts) {
 
 #endif
 
-void VizFeatureRenderer::drawAxisTics() {
+void VizFeatureRenderer::drawAxisTics2() {
 	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 	vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
-//	cout << "GetAxisOrigin() " << axisOriginCoord[0] << " " << axisOriginCoord[1] << " " << axisOriginCoord[2] << endl;
+	cout << "GetAxisOrigin() " << axisOriginCoord[0] << " " << axisOriginCoord[1] << " " << axisOriginCoord[2] << endl;
 
 	vector<double> minTic = vfParams->GetMinTics();
-//	cout << "GetMinTics() " << minTic[0] << " " << minTic[1] << " " << minTic[2] << endl;
+	cout << "GetMinTics() " << minTic[0] << " " << minTic[1] << " " << minTic[2] << endl;
 
 	vector<double> maxTic = vfParams->GetMaxTics();
-//	cout << "GetMaxTics() " << maxTic[0] << " " << maxTic[1] << " " << maxTic[2] << endl;
+	cout << "GetMaxTics() " << maxTic[0] << " " << maxTic[1] << " " << maxTic[2] << endl;
 
 	vector<double> ticLength = vfParams->GetTicSize();
-//	cout << "GetTicSize() " << ticLength[0] << " " << ticLength[1] << " " << ticLength[2] << endl;
+	cout << "GetTicSize() " << ticLength[0] << " " << ticLength[1] << " " << ticLength[2] << endl;
 
-	vector<long> ticDir = vfParams->GetTicDirs();
-//	cout << "GetTicDirs() " << ticDir[0] << " " << ticDir[1] << " " << ticDir[2] << endl;
+	vector<double> ticDir = vfParams->GetTicDirs();
+	cout << "GetTicDirs() " << ticDir[0] << " " << ticDir[1] << " " << ticDir[2] << endl;
 
 	vector<double> numTics = vfParams->GetNumTics();
-//	cout << "GetNumTics() " << numTics[0] << " " << numTics[1] << " " << numTics[2] << endl;
+	cout << "GetNumTics() " << numTics[0] << " " << numTics[1] << " " << numTics[2] << endl;
 
 	double ticWidth = vfParams->GetTicWidth();
-//	cout << "GetTicWidth() " << ticWidth << endl;
+	cout << "GetTicWidth() " << ticWidth << endl;
 	
 	double axisColor[3];
 	vfParams->GetAxisColor(axisColor);
-//	cout << "GetAxisColor() " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;			
+	cout << "GetAxisColor() " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;			
 
 	int fontSize = vfParams->GetAxisFontSize();
-//	cout << "GetAxisFontSize() " << fontSize << endl;
+	cout << "GetAxisFontSize() " << fontSize << endl;
 }
 
-void VizFeatureRenderer::drawAxisTics2() {
+void VizFeatureRenderer::drawAxisTics() {
 cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 	// Preserve the current GL color state
 	glPushAttrib(GL_CURRENT_BIT);	
@@ -398,7 +398,7 @@ cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 	vector<double> minTic = vfParams->GetMinTics();
 	vector<double> maxTic = vfParams->GetMaxTics();
 	vector<double> ticLength = vfParams->GetTicSize();
-	vector<long> ticDir = vfParams->GetTicDirs();
+	vector<double> ticDir = vfParams->GetTicDirs();
 	vector<double> numTics = vfParams->GetNumTics();
 	double ticWidth = vfParams->GetTicWidth();
 	double minTicA[3],maxTicA[3],ticLengthA[3], axisOriginCoordA[3];
@@ -430,6 +430,7 @@ cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 		sorigin.push_back( axisOriginCoordA[i]);
 		sticMin.push_back(minTicA[i]);
 		sticMax.push_back(maxTicA[i]);
+		sticLen.push_back(ticLengthA[i]);
 	}
 
 #ifdef	DEAD

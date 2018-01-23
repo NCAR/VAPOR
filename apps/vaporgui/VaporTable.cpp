@@ -33,7 +33,6 @@ VaporTable::VaporTable(
 }
 
 // Clear current table, then generate table of rows x columns
-// Determine template type and set validators on all cells accordingly
 // Determine if checkboxes are needed
 // Convert values, rowHeaders, and colHeaders to QStrings, then populate
 void VaporTable::Update(int rows, int cols,
@@ -343,6 +342,7 @@ Value VaporTable::GetValue(int row, int col) {
 	int nCols = _table->columnCount();
 
 	QWidget *widget = _table->cellWidget(row, col);
+	assert(widget);
 
 	if ((col==nCols-1 && _lastColIsCheckboxes) ||
 		(row==nRows-1 && _lastRowIsCheckboxes)) 
@@ -359,20 +359,16 @@ Value VaporTable::GetValue(int row, int col) {
 	return { value };  
 }
 
-template <typename T>
-std::vector<T> VaporTable::GetRow(int row) {
-//std::vector<double> VaporTable::GetRow(int row) {
-	std::string value;
-	int nRows = _table->rowCount();
-	int nCols = _table->columnCount();
-	std::vector<T> values;
+/*template <class T>
+void VaporTable::GetRow(int row, std::vector<T> & values) {
+	values.clear();
 
+	int nCols = _table->columnCount();
 	for (int col=0; col<nCols; col++) {
-		T value = GetValue(row, col);
-		values.push_back(value);
+		T v = GetValue(row, col);
+		values.push_back(v);
 	}
-	return values;  
-}
+}*/
 
 std::string VaporTable::GetStringValue(int row, int col) {
 	std::string value;
