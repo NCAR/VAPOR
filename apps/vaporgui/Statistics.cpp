@@ -62,7 +62,7 @@ Statistics::~Statistics()
 bool Statistics::Update()
 {
     // Initialize pointers
-    VAPoR::DataStatus *      dataStatus = _controlExec->getDataStatus();
+    VAPoR::DataStatus *      dataStatus = _controlExec->GetDataStatus();
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
     if (dmNames.empty()) {
         this->close();
@@ -247,7 +247,7 @@ bool Statistics::Update()
 void Statistics::_updateStatsTable()
 {
     // Initialize pointers
-    VAPoR::DataStatus *dataStatus = _controlExec->getDataStatus();
+    VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
     GUIStateParams *   guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string        currentDatasetName = guiParams->GetStatsDatasetName();
     assert(currentDatasetName != "");
@@ -362,7 +362,7 @@ int Statistics::initControlExec(ControlExec *ce)
         return -1;
 
     // Store the active dataset name
-    std::vector<std::string> dmNames = _controlExec->getDataStatus()->GetDataMgrNames();
+    std::vector<std::string> dmNames = _controlExec->GetDataStatus()->GetDataMgrNames();
     if (dmNames.empty())
         return -1;
     else {
@@ -688,7 +688,7 @@ bool Statistics::_calc3M(std::string varname)
     GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    VAPoR::DataMgr *  currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
+    VAPoR::DataMgr *  currentDmgr = _controlExec->GetDataStatus()->GetDataMgr(dsName);
 
     int minTS = statsParams->GetCurrentMinTS();
     int maxTS = statsParams->GetCurrentMaxTS();
@@ -740,7 +740,7 @@ bool Statistics::_calcMedian(std::string varname)
     GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    VAPoR::DataMgr *  currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
+    VAPoR::DataMgr *  currentDmgr = _controlExec->GetDataStatus()->GetDataMgr(dsName);
 
     int minTS = statsParams->GetCurrentMinTS();
     int maxTS = statsParams->GetCurrentMaxTS();
@@ -778,7 +778,7 @@ bool Statistics::_calcStddev(std::string varname)
     GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    VAPoR::DataMgr *  currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
+    VAPoR::DataMgr *  currentDmgr = _controlExec->GetDataStatus()->GetDataMgr(dsName);
 
     int minTS = statsParams->GetCurrentMinTS();
     int maxTS = statsParams->GetCurrentMaxTS();
@@ -1042,7 +1042,7 @@ void Statistics::_exportTextClicked()
         GUIStateParams *         guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
         std::string              dsName = guiParams->GetStatsDatasetName();
         StatisticsParams *       statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-        VAPoR::DataMgr *         currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
+        VAPoR::DataMgr *         currentDmgr = _controlExec->GetDataStatus()->GetDataMgr(dsName);
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
 
         file << "#Variable Statistics" << endl;

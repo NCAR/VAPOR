@@ -287,7 +287,7 @@ public:
     //! Obtain the current DataStatus
     //! Needed to store in GUI when the DataStatus changes.
     //! \return DataStatus*
-    DataStatus *getDataStatus() const { return _dataStatus; }
+    DataStatus *GetDataStatus() const { return _dataStatus; }
 
     //! Get RenderParams for an active renderer
     //!

@@ -154,7 +154,6 @@ vector<double> ParamsBase::GetValueDoubleVec(const string tag) const
 
 vector<double> ParamsBase::GetValueDoubleVec(const string tag, const vector<double> &defaultVal) const
 {
-    if (tag == "TicMaxPositions") cout << "Has tag? " << _node->HasElementDouble(tag) << endl;
     if (!_node->HasElementDouble(tag)) return (defaultVal);
 
     vector<double> v = _node->GetElementDouble(tag);

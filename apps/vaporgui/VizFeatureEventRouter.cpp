@@ -81,6 +81,7 @@ VizFeatureEventRouter::VizFeatureEventRouter(QWidget *parent, ControlExec *ce) :
     labelDigitsEdit->setEnabled(false);
     ticWidthEdit->setEnabled(false);*/
 
+    _annotationsInitialized = false;
     _animConnected = false;
     _ap = NULL;
 }
@@ -325,38 +326,39 @@ void VizFeatureEventRouter::_updateTab()
     adjustSize();
 }
 
-void VizFeatureEventRouter::updateAxisAnnotations()
+void VizFeatureEventRouter::updateAnnotationCheckbox()
 {
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
-    double            clr[3];
-
-    bool annotationEnabled = vParams->GetAxisAnnotation();
+    bool              annotationEnabled = vParams->GetAxisAnnotation();
     if (annotationEnabled)
         axisAnnotationEnabledCheckbox->setCheckState(Qt::Checked);
     else
         axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
+}
 
-    bool annotateLatLon = vParams->GetLatLonAxes();
+void VizFeatureEventRouter::updateLatLonCheckbox()
+{
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    bool              annotateLatLon = vParams->GetLatLonAxes();
     if (annotateLatLon)
         latLonAnnotationCheckbox->setCheckState(Qt::Checked);
     else
         latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
+}
 
-    int textSize = vParams->GetAxisFontSize();
-    _textSizeCombo->Update(4, 50, textSize);
-
-    int numDigits = vParams->GetAxisDigits();
-    _digitsCombo->Update(1, 12, numDigits);
-
-    double ticWidth = vParams->GetTicWidth();
-    _ticWidthCombo->Update(0, 50, ticWidth);
-
-    vector<long> ticDir = vParams->GetTicDirs();
+void VizFeatureEventRouter::updateTicOrientationCombos()
+{
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    vector<double>    ticDir = vParams->GetTicDirs();
     xTicOrientationCombo->setCurrentIndex(ticDir[0] - 1);
     yTicOrientationCombo->setCurrentIndex(ticDir[1] / 2);
     zTicOrientationCombo->setCurrentIndex(ticDir[2]);
+}
 
-    // Parameters for the table/
+void VizFeatureEventRouter::updateAnnotationTable()
+{
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+
     vector<double> values;
     vector<double> numtics = vParams->GetNumTics();
     values.insert(values.end(), numtics.begin(), numtics.end());
@@ -382,9 +384,26 @@ void VizFeatureEventRouter::updateAxisAnnotations()
     colHeaders.push_back("Z");
 
     _annotationVaporTable->Update(5, 3, values, rowHeaders, colHeaders);
+}
 
+void VizFeatureEventRouter::updateOldGui()
+{
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    vector<double>    values;
+    vector<double>    numtics = vParams->GetNumTics();
+    values.insert(values.end(), numtics.begin(), numtics.end());
+    vector<double> ticSizes = vParams->GetTicSize();
+    values.insert(values.end(), ticSizes.begin(), ticSizes.end());
+    vector<double> minTics = vParams->GetMinTics();
+    values.insert(values.end(), minTics.begin(), minTics.end());
+    vector<double> maxTics = vParams->GetMaxTics();
+    values.insert(values.end(), maxTics.begin(), maxTics.end());
+    vector<double> orig = vParams->GetAxisOrigin();
+    values.insert(values.end(), orig.begin(), orig.end());
     vector<double> mintics = vParams->GetMinTics();
     vector<double> maxtics = vParams->GetMaxTics();
+
+    double clr[3];
     axisOriginXEdit->setText(QString::number(orig[0]));
     axisOriginYEdit->setText(QString::number(orig[1]));
     axisOriginZEdit->setText(QString::number(orig[2]));
@@ -408,14 +427,119 @@ void VizFeatureEventRouter::updateAxisAnnotations()
     QColor newColor = QColor((int)(clr[0] * 255), (int)(clr[1] * 255), (int)(clr[2] * 255));
     pal3.setColor(QPalette::Base, newColor);
     axisColorEdit->setPalette(pal3);
+}
 
+void VizFeatureEventRouter::getActiveExtents(vector<double> &minExts, vector<double> &maxExts)
+{
+    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
+    size_t      ts = GetCurrentTimeStep();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
+}
+
+void VizFeatureEventRouter::initializeTicSizes()
+{
+    vector<double> ticSizes, minExts, maxExts;
+    getActiveExtents(minExts, maxExts);
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+
+    // Initialize tic length to 2.5% of the domain that they're oriented on.
+    // X starts oriented on Y,
+    // Y starts oriented on X,
+    // Z starts oriented on X
+    double xTicSize = (maxExts[1] - minExts[1]) * .025;
+    double yzTicSize = (maxExts[0] - minExts[0]) * .025;
+    ticSizes.push_back(xTicSize);
+    ticSizes.push_back(yzTicSize);
+    ticSizes.push_back(yzTicSize);
+    vfParams->SetTicSize(ticSizes);
+}
+
+void VizFeatureEventRouter::initializeAnnotationExtents()
+{
+    vector<double> minExts, maxExts;
+    getActiveExtents(minExts, maxExts);
+
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vfParams->SetMinTics(minExts);
+    vfParams->SetMaxTics(maxExts);
+    vfParams->SetAxisOrigin(minExts);
+}
+
+void VizFeatureEventRouter::initializeAnnotations()
+{
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    paramsMgr->BeginSaveStateGroup("Initialize axis annotation table");
+
+    initializeAnnotationExtents();
+    initializeTicSizes();
+
+    paramsMgr->EndSaveStateGroup();
+
+    _annotationsInitialized = true;
+}
+
+void VizFeatureEventRouter::updateAxisAnnotations()
+{
+    if (!_annotationsInitialized) initializeAnnotations();
+
+    updateAnnotationCheckbox();
+    updateLatLonCheckbox();
+    updateTicOrientationCombos();
+    updateAnnotationTable();
     updateAxisColor();
+
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+
+    int textSize = vParams->GetAxisFontSize();
+    _textSizeCombo->Update(4, 50, textSize);
+
+    int numDigits = vParams->GetAxisDigits();
+    _digitsCombo->Update(1, 12, numDigits);
+
+    GLdouble minMax[2];
+    glGetDoublev(GL_ALIASED_LINE_WIDTH_RANGE, minMax);
+    double ticWidth = vParams->GetTicWidth();
+    _ticWidthCombo->Update(minMax[0], minMax[1], ticWidth);
 }
 
 void VizFeatureEventRouter::axisAnnotationTableChanged()
 {
-    vector<double> values = _annotationVaporTable->GetRow<double>(0);
-    cout << values[0] << " " << values[1] << " " << values[2] << endl;
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+
+    vector<double> values;
+    values = getTableRow(0);
+    vfParams->SetNumTics(values);
+
+    /*vector<double> foo;
+    _annotationVaporTable->GetRow(0, foo);
+
+    for (int i=0; i<3; i++) {
+        cout << "v&foo " << i << " " << values[i] << " " << foo[i] << endl;
+    }*/
+
+    values = getTableRow(1);
+    vfParams->SetTicSize(values);
+
+    values = getTableRow(2);
+    vfParams->SetMinTics(values);
+
+    values = getTableRow(3);
+    vfParams->SetMaxTics(values);
+
+    values = getTableRow(4);
+    vfParams->SetAxisOrigin(values);
+}
+
+vector<double> VizFeatureEventRouter::getTableRow(int row)
+{
+    vector<double> contents;
+    cout << row << endl;
+    for (int col = 0; col < 3; col++) {
+        double val = _annotationVaporTable->GetValue(row, col);
+        contents.push_back(val);
+    }
+    return contents;
 }
 
 void VizFeatureEventRouter::setColorHelper(QWidget *w, vector<double> &rgb)
@@ -518,6 +642,7 @@ void VizFeatureEventRouter::updateAxisColor()
     vector<double>    rgb;
     vfParams->GetAxisColor(rgb);
 
+    updateColorHelper(rgb, oldAxisColorEdit);
     updateColorHelper(rgb, axisColorEdit);
 }
 
@@ -625,7 +750,7 @@ void VizFeatureEventRouter::drawTimeUser()
     }
 
     size_t         ts = GetCurrentTimeStep();
-    DataStatus *   ds = _controlExec->getDataStatus();
+    DataStatus *   ds = _controlExec->GetDataStatus();
     vector<double> timeCoords = ds->GetTimeCoordinates();
 
     double             myTime = timeCoords[ts];
@@ -644,7 +769,7 @@ void VizFeatureEventRouter::drawTimeStamp()
     }
 
     size_t      ts = GetCurrentTimeStep();
-    DataStatus *ds = _controlExec->getDataStatus();
+    DataStatus *ds = _controlExec->GetDataStatus();
     drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
 }
 
@@ -663,21 +788,21 @@ void VizFeatureEventRouter::setAxisTicWidth(double width)
 void VizFeatureEventRouter::setXTicOrientation(int)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<double>    ticDir = vfParams->GetTicDirs();
     ticDir[0] = xTicOrientationCombo->currentIndex() + 1;    // Y(1) or Z(2)
     vfParams->SetTicDirs(ticDir);
 }
 void VizFeatureEventRouter::setYTicOrientation(int)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<double>    ticDir = vfParams->GetTicDirs();
     ticDir[1] = yTicOrientationCombo->currentIndex() * 2;    // X(0) or Z(2)
     vfParams->SetTicDirs(ticDir);
 }
 void VizFeatureEventRouter::setZTicOrientation(int)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<double>    ticDir = vfParams->GetTicDirs();
     ticDir[2] = zTicOrientationCombo->currentIndex();    // X(0) or Y(1)
     vfParams->SetTicDirs(ticDir);
 }
@@ -685,21 +810,21 @@ void VizFeatureEventRouter::setZTicOrientation(int)
 void VizFeatureEventRouter::setXTicOrient(int)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<double>    ticDir = vfParams->GetTicDirs();
     ticDir[0] = xTicOrientCombo->currentIndex() + 1;
     vfParams->SetTicDirs(ticDir);
 }
 void VizFeatureEventRouter::setYTicOrient(int)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<double>    ticDir = vfParams->GetTicDirs();
     ticDir[1] = yTicOrientCombo->currentIndex() * 2;
     vfParams->SetTicDirs(ticDir);
 }
 void VizFeatureEventRouter::setZTicOrient(int)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<long>      ticDir = vfParams->GetTicDirs();
+    vector<double>    ticDir = vfParams->GetTicDirs();
     ticDir[2] = zTicOrientCombo->currentIndex();
     vfParams->SetTicDirs(ticDir);
 }
