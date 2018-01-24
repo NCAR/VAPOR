@@ -8,13 +8,13 @@
 //
 //  File:       plot.h
 //
-//  Author:     Scott Pearse
-//          National Center for Atmospheric Research
-//          PO 3000, Boulder, Colorado
+//  Author:     Samuel Li
+//              National Center for Atmospheric Research
+//              PO 3000, Boulder, Colorado
 //
-//  Date:       September 2016
+//  Date:       January 2018
 //
-//  Description:    Implements the matPlotLib Plot class.
+//  Description:    Implements the Plot class.
 //
 
 #ifdef WIN32
@@ -54,7 +54,7 @@ class VizWinMgr;
 
 // Override QLineEdit's focusOutEvent to add min/max extent
 // validation when the user clicks away from the text box
-class NewLineEdit : public QLineEdit {
+/*class NewLineEdit : public QLineEdit {
 	Q_OBJECT
 
 	//using QLineEdit::QLineEdit;
@@ -72,7 +72,7 @@ private:
   {
 		QLineEdit::focusOutEvent(e);
   }
-};
+};*/
 
 class pErrMsg : public QDialog, public Ui_ErrMsg {
 	Q_OBJECT
@@ -80,12 +80,12 @@ class pErrMsg : public QDialog, public Ui_ErrMsg {
 		pErrMsg() {setupUi(this);}
 };
 
-class absSpinBox : public QAbstractSpinBox {
+/*class absSpinBox : public QAbstractSpinBox {
 	public:
 		void setValue(int i) {}
 		void setValue(double d) {}
 		void setText(QString s) {}
-};
+};*/
 	
 class Plot : public QDialog, public Ui_PlotWindow
 {
