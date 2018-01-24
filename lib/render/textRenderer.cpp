@@ -22,8 +22,16 @@
 //#include <vapor/glutil.h> // Must be included first!!!
 //#include <gl/glew.h>
 #include <cmath>
+#include <array>
 #include <iostream>
 #include <FTGL/ftgl.h>
+
+#include <vapor/glutil.h>
+#ifdef Darwin
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
 //#include <vapor/params.h>
 
 //#include "glwindow.h"
@@ -34,65 +42,28 @@
 using namespace VAPoR;
 //struct GLWindow;		// just to retrieve window size
 
-TextContainer::TextContainer(string fontFile,
-                             int fontSize,
-                             float txtColor[4],
-                             float bgColor[4],
-                             int type) {
-    //						QGLWidget *myGivenWindow) {
-
-    _font = fontFile;
-    _size = fontSize;
-    _type = type;
-    _txtColor[0] = txtColor[0];
-    _txtColor[1] = txtColor[1];
-    _txtColor[2] = txtColor[2];
-    _txtColor[3] = txtColor[3];
-    _bgColor[0] = bgColor[0];
-    _bgColor[1] = bgColor[1];
-    _bgColor[2] = bgColor[2];
-    _bgColor[3] = bgColor[3];
-    //	_myWindow	= myGivenWindow;
-}
-
-int TextContainer::addText(string text, float coords[3]) {
-    TextObject *to = new TextObject();
-    to->Initialize(_font, text, _size, coords, _type,
-                   _txtColor, _bgColor); //,_myWindow);
-    TextObjects.push_back(to);
-
-    return 0;
-}
-
-void TextContainer::drawText() {
-    for (size_t i = 0; i < TextObjects.size(); i++) {
-        TextObjects[i]->drawMe();
-    }
-}
-
-TextContainer::~TextContainer() {
-    for (size_t i = 0; i < TextObjects.size(); i++) {
-        delete TextObjects[i];
-    }
-}
-
 TextObject::TextObject() {
+    _pixmap = NULL;
+    _vpParams = NULL;
+    _orientationFlag = BOTTOMLEFT;
+    _typeFlag = LABEL;
 }
 
-int TextObject::Initialize(string inFont,
-                           string inText,
-                           int inSize,
-                           float inCoords[3],
-                           int inType,
-                           float txtColor[4],
-                           float bgColor[4]) {
-    //						QGLWidget *myGivenWindow = NULL) {
-
+int TextObject::Initialize(
+    string inFont,
+    string inText,
+    int inSize,
+    double inCoords[3],
+    TypeFlag inType,
+    //int inType,
+    double txtColor[4],
+    double bgColor[4],
+    ViewpointParams *vpParams) {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     _pixmap = new FTPixmapFont(inFont.c_str());
     _text = inText;
     _size = inSize;
-    _type = inType;
+    _typeFlag = inType;
     _font = inFont;
     _coords[0] = inCoords[0];
     _coords[1] = inCoords[1];
@@ -105,17 +76,17 @@ int TextObject::Initialize(string inFont,
     _txtColor[1] = txtColor[1];
     _txtColor[2] = txtColor[2];
     _txtColor[3] = txtColor[3];
-    //	_myWindow	 = myGivenWindow;
     _fbo = 0;
     _fboTexture = 0;
+    _vpParams = vpParams;
 
     if (inType == 1) {
 #ifdef NEEDSTRETCH
         //Convert user to local/stretched coordinates in cube
         DataStatus *ds = DataStatus::getInstance();
         const vector<double> &fullUsrExts = ds->getDataMgr()->GetExtents();
-        float sceneScaleFactor = 1. / ViewpointParams::getMaxStretchedCubeSide();
-        const float *scales = ds->getStretchFactors();
+        double sceneScaleFactor = 1. / ViewpointParams::getMaxStretchedCubeSide();
+        const double *scales = ds->getStretchFactors();
         for (int i = 0; i < 3; i++) {
             _3Dcoords[i] = _coords[i] - fullUsrExts[i];
             _3Dcoords[i] *= sceneScaleFactor;
@@ -125,7 +96,6 @@ int TextObject::Initialize(string inFont,
     }
 
     _pixmap->FaceSize(_size);
-    //	_myWindow->makeCurrent();
     findBBoxSize();
     initFrameBufferTexture();
     initFrameBuffer();
@@ -190,10 +160,10 @@ int TextObject::initFrameBuffer(void) {
     // Save previous color state
     // Then render the background and text to our texture
     // Then finally reset colors to their previous state
-    float txColors[4];
-    float bgColors[4];
-    glGetFloatv(GL_COLOR_CLEAR_VALUE, bgColors);
-    glGetFloatv(GL_CURRENT_COLOR, txColors);
+    double txColors[4];
+    double bgColors[4];
+    glGetDoublev(GL_COLOR_CLEAR_VALUE, bgColors);
+    glGetDoublev(GL_CURRENT_COLOR, txColors);
     glClearColor(_bgColor[0], _bgColor[1], _bgColor[2], _bgColor[3]);
     glColor4f(_txtColor[0], _txtColor[1], _txtColor[2], _txtColor[3]);
     glWindowPos2f(0, 0);
@@ -239,8 +209,8 @@ void TextObject::findBBoxSize() {
     _width = (int)(up.X() - lo.X() + xPadding);
 }
 
-int TextObject::applyViewerMatrix(float coords[3]) {
-    if ((_type == 0) || (_type == 1)) {
+int TextObject::applyViewerMatrix(double coords[3]) {
+    if ((_typeFlag == LABEL) || (_typeFlag == BILLBOARD)) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
@@ -252,7 +222,7 @@ int TextObject::applyViewerMatrix(float coords[3]) {
     }
 #ifdef NEEDSTRETCH
     if (_type == 1) {
-        float newCoords[3] = {0.f, 0.f, 0.f};
+        double newCoords[3] = {0.f, 0.f, 0.f};
 
         GLWindow *castWin;
         castWin = dynamic_cast<GLWindow *>(_myWindow);
@@ -264,7 +234,7 @@ int TextObject::applyViewerMatrix(float coords[3]) {
         GLWindow *castWin;
         castWin = dynamic_cast<GLWindow *>(_myWindow);
         ViewpointParams *myViewParams = castWin->getActiveViewpointParams();
-        float *viewDir;
+        double *viewDir;
         viewDir = myViewParams->getViewDir();
         //glPushMatrix();
         //glRotatef(-90.0,1.0,0.0,0.0);
@@ -276,7 +246,7 @@ int TextObject::applyViewerMatrix(float coords[3]) {
 
 void TextObject::removeViewerMatrix() {
     glEnable(GL_BLEND);
-    if ((_type == 0) || (_type == 1)) {
+    if ((_typeFlag == LABEL) || (_typeFlag == BILLBOARD)) {
         glPopAttrib();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
@@ -285,182 +255,23 @@ void TextObject::removeViewerMatrix() {
     }
 }
 
-int TextObject::drawMe(float coords[3]) {
+//void TextObject::applyOffset() {
+
+//}
+
+int TextObject::drawMe(double coords[3]) {
     _coords[0] = coords[0];
     _coords[1] = coords[1];
     _coords[2] = coords[2];
-    return drawMe();
-}
 
-int TextObject::drawMe(float coords[3], int timestep) {
-
-#ifdef NEEDSTRETCH
-    //Convert user to local coordinates
-    DataStatus *ds = DataStatus::getInstance();
-    const vector<double> &fullUsrExts = ds->getDataMgr()->GetExtents((size_t)timestep);
-    float sceneScaleFactor = 1. / ViewpointParams::getMaxStretchedCubeSide();
-    const float *scales = ds->getStretchFactors();
-    for (int i = 0; i < 3; i++) {
-        coords[i] = coords[i] - fullUsrExts[i];
-        coords[i] *= sceneScaleFactor;
-        coords[i] *= scales[i];
-    }
-#endif
-
-    applyViewerMatrix(coords);
-    //else applyViewerMatrix();
-
-    glBindTexture(GL_TEXTURE_2D, _fboTexture);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-#ifdef NEEDSTRETCH
-    float fltTxtWidth, fltTxtHeight, llx, lly, urx, ury;
-    if (_type == 1) {
-        fltTxtWidth = (float)_width / (float)_myWindow->width();
-        fltTxtHeight = (float)_height / (float)_myWindow->height();
-        llx = 2. * coords[0] / (float)_myWindow->width() - 1.f;
-        lly = 2. * coords[1] / (float)_myWindow->height() - 1.f;
-        urx = llx + 2. * fltTxtWidth;
-        ury = lly + 2. * fltTxtHeight;
-
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(llx, lly, .0f); //coords[2]);//.0f);
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex3f(llx, ury, .0f); //coords[2]);//.0f);
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex3f(urx, ury, .0f); //coords[2]);//.0f);
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex3f(urx, lly, .0f); //coords[2]);//.0f);
-        glEnd();
-    }
-
-    if (_type == 2) {
-        fltTxtWidth = (float)_width / (float)_myWindow->width();
-        fltTxtHeight = (float)_height / (float)_myWindow->height();
-        llx = coords[0];
-        lly = coords[1];
-        urx = llx + (float)_width / (float)_myWindow->width();
-        ury = lly + (float)_height / (float)_myWindow->height();
-
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(llx, lly, coords[2]); //coords[2]);//.0f);
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex3f(llx, ury, coords[2]); //coords[2]);//.0f);
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex3f(urx, ury, coords[2]); //.0f);
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex3f(urx, lly, coords[2]); //.0f);
-        glEnd();
-    }
-
-    if (_type == 3) {
-        fltTxtWidth = (float)_width / (float)_myWindow->width();
-        fltTxtHeight = (float)_height / (float)_myWindow->height();
-        llx = coords[0];
-        lly = coords[1];
-
-        GLWindow *castWin;
-        castWin = dynamic_cast<GLWindow *>(_myWindow);
-        ViewpointParams *myViewParams = castWin->getActiveViewpointParams();
-        float *viewDir;
-        float *upDir;
-        float rightDir[3];
-        viewDir = myViewParams->getViewDir();
-        upDir = myViewParams->getUpVec();
-        rightDir[0] = viewDir[1] * upDir[2] - viewDir[2] * upDir[1];
-        rightDir[1] = viewDir[2] * upDir[0] - viewDir[0] * upDir[2];
-        rightDir[2] = viewDir[0] * upDir[1] - viewDir[1] * upDir[0];
-
-        float llz;
-        float ulx, uly, ulz;
-        float urx, ury, urz;
-        float lrx, lry, lrz;
-
-        llx = coords[0];
-        lly = coords[1];
-        llz = coords[2];
-
-        ulx = llx + upDir[0] * fltTxtHeight;
-        uly = lly + upDir[1] * fltTxtHeight;
-        ulz = llz + upDir[2] * fltTxtHeight;
-
-        urx = ulx + rightDir[0] * fltTxtWidth;
-        ury = uly + rightDir[1] * fltTxtWidth;
-        urz = ulz + rightDir[2] * fltTxtWidth;
-
-        lrx = urx - upDir[0] * fltTxtHeight;
-        lry = ury - upDir[1] * fltTxtHeight;
-        lrz = urz - upDir[2] * fltTxtHeight;
-
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(llx, lly, llz);
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex3f(ulx, uly, ulz);
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex3f(urx, ury, urz);
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex3f(lrx, lry, lrz);
-        glEnd();
-    }
-#endif
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    removeViewerMatrix();
-
-    GLenum glErr;
-    glErr = glGetError();
-    char *errString;
-    if (glErr != GL_NO_ERROR) {
-        errString = (char *)gluErrorString(glErr);
-        Wasp::MyBase::SetErrMsg(errString);
-
-        // Loop through remaining errors, if any
-        glErr = glGetError();
-        while (glErr != GL_NO_ERROR) {
-            errString = (char *)gluErrorString(glErr);
-            Wasp::MyBase::SetErrMsg(errString);
-        }
-        return -1;
-    }
-    return 0;
-}
-
-int TextObject::drawMe() {
     applyViewerMatrix();
 
     glBindTexture(GL_TEXTURE_2D, _fboTexture);
 
-    GLint dims[4] = {0};
-    glGetIntegerv(GL_VIEWPORT, dims);
-    GLint fbWidth = dims[2];
-    GLint fbHeight = dims[3];
-
-    float fltTxtWidth = (float)_width / (float)fbWidth;
-    float fltTxtHeight = (float)_height / (float)fbHeight;
-
-    //	float llx = 2.*_coords[0]/(float)_myWindow->width() - 1.f;
-    //	float lly = 2.*_coords[1]/(float)_myWindow->height() - 1.f;
-    float llx = 2. * _coords[0] / (float)fbWidth - 1.f;
-    float lly = 2. * _coords[1] / (float)fbHeight - 1.f;
-    float urx = llx + 2. * fltTxtWidth;
-    float ury = lly + 2. * fltTxtHeight;
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(llx, lly, .0f);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(llx, ury, .0f);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(urx, ury, .0f);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(urx, lly, .0f);
-    glEnd();
+    if (_typeFlag & LABEL)
+        drawLabel();
+    if (_typeFlag & BILLBOARD)
+        drawBillboard();
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -477,4 +288,95 @@ int TextObject::drawMe() {
         }
     }
     return 0;
+}
+
+bool TextObject::projectPointToWin(double cubeCoords[3], double winCoords[2]) {
+    double depth;
+    GLdouble wCoords[2];
+    GLdouble cbCoords[3];
+    for (int i = 0; i < 3; i++)
+        cbCoords[i] = (double)cubeCoords[i];
+
+    double mvMatrix[16];
+    double pMatrix[16];
+    _vpParams->GetModelViewMatrix(mvMatrix);
+    _vpParams->GetProjectionMatrix(pMatrix);
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    bool success = (0 != gluProject(
+                             cbCoords[0], cbCoords[1], cbCoords[2], mvMatrix,
+                             pMatrix, viewport, wCoords,
+                             (wCoords + 1), (GLdouble *)(&depth)));
+    if (!success)
+        return false;
+    winCoords[0] = wCoords[0];
+    winCoords[1] = wCoords[1];
+    return (depth > 0.0);
+}
+
+void TextObject::drawLabel() {
+    GLint dims[4];
+    glGetIntegerv(GL_VIEWPORT, dims);
+    GLint fbWidth = dims[2];
+    GLint fbHeight = dims[3];
+
+    double fltTxtWidth = (double)_width / (double)fbWidth;
+    double fltTxtHeight = (double)_height / (double)fbHeight;
+
+    double llx = 2. * _coords[0] / (double)fbWidth - 1.f;
+    double lly = 2. * _coords[1] / (double)fbHeight - 1.f;
+    double urx = llx + 2. * fltTxtWidth;
+    double ury = lly + 2. * fltTxtHeight;
+
+    //applyOffset(llx, lly, urx, ury);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(llx, lly, .0f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(llx, ury, .0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(urx, ury, .0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(urx, lly, .0f);
+    glEnd();
+}
+
+void TextObject::drawBillboard() {
+    GLint dims[4] = {0};
+    glGetIntegerv(GL_VIEWPORT, dims);
+    GLint fbWidth = dims[2];
+    GLint fbHeight = dims[3];
+
+    double fltTxtWidth = (double)_width / (double)fbWidth;
+    double fltTxtHeight = (double)_height / (double)fbHeight;
+
+    double newCoords[3];
+    projectPointToWin(_coords, _coords);
+
+    //double llx = 2.*newCoords[0]/(double)fbWidth - 1.f;
+    //double lly = 2.*newCoords[1]/(double)fbHeight - 1.f;
+    double llx = 2. * _coords[0] / (double)fbWidth - 1.f;
+    double lly = 2. * _coords[1] / (double)fbHeight - 1.f;
+    double urx = llx + 2. * fltTxtWidth;
+    double ury = lly + 2. * fltTxtHeight;
+
+    //	applyOffset(llx, lly, urx, ury);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(llx, lly, .0f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(llx, ury, .0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(urx, ury, .0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(urx, lly, .0f);
+    glEnd();
 }
