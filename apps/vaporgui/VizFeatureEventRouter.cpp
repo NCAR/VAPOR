@@ -944,6 +944,7 @@ void VizFeatureEventRouter::drawTimeStep(string myString) {
 	float color[3];
 	mp->GetTimeAnnotColor(color);
 
+	cout << "Drawing timestep" << endl;
 	_controlExec->DrawText(myString, x, y, size, color, 1);
 }
 

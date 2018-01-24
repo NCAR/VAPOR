@@ -188,9 +188,9 @@ void VizFeatureRenderer::DrawText() {
 }
 
 void VizFeatureRenderer::DrawText(vector<billboard> billboards) {
-	float txtColor[] = {1.f, 1.f, 1.f, 1.f};
-	float bgColor[] = {0.f, 0.f, 0.f, 0.f};
-	float coords[] = {67.5f,31.6f,0.f}; 
+	double txtColor[] = {1.f, 1.f, 1.f, 1.f};
+	double bgColor[] = {0.f, 0.f, 0.f, 0.f};
+	double coords[] = {67.5f,31.6f,0.f}; 
 
 	for (int i=0; i<billboards.size(); i++) {
 		string text = billboards[i].text;
@@ -208,7 +208,7 @@ void VizFeatureRenderer::DrawText(vector<billboard> billboards) {
    
 		_textObject = new TextObject();
 		_textObject->Initialize(_fontFile,
-			text, size, coords, 0, txtColor, bgColor
+			text, size, coords, TextObject::LABEL, txtColor, bgColor
 		);
 		_textObject->drawMe(coords);
 	}
@@ -383,7 +383,6 @@ void VizFeatureRenderer::drawAxisTics2() {
 }
 
 void VizFeatureRenderer::drawAxisTics() {
-cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 	// Preserve the current GL color state
 	glPushAttrib(GL_CURRENT_BIT);	
 
@@ -462,6 +461,8 @@ cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 	glVertex3d(sorigin[0],sticMax[1],sorigin[2]);
 	glVertex3d(sorigin[0],sorigin[1],sticMin[2]);
 	glVertex3d(sorigin[0],sorigin[1],sticMax[2]);
+	glEnd();
+	glDisable(GL_LINE_SMOOTH);
 	double pointOnAxis[3];
 	double ticVec[3], drawPosn[3];
 	//Now draw tic marks for x:
@@ -474,9 +475,14 @@ cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 		for (int i = 0; i< numTics[0]; i++){
 			pointOnAxis[0] = sticMin[0] + (float)i* (sticMax[0] - sticMin[0])/(float)(numTics[0]-1);
 			vsub(pointOnAxis, ticVec, drawPosn);
+			glEnable(GL_LINE_SMOOTH);
+			glBegin(GL_LINES);
 			glVertex3dv(drawPosn);
 			vadd(pointOnAxis, ticVec, drawPosn);
 			glVertex3dv(drawPosn);
+			glEnd();
+			glDisable(GL_LINE_SMOOTH);
+			renderText(drawPosn[0], drawPosn[1]);
 		}
 	}
 	//Now draw tic marks for y:
@@ -489,9 +495,13 @@ cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 		for (int i = 0; i< numTics[1]; i++){
 			pointOnAxis[1] = sticMin[1] + (float)i* (sticMax[1] - sticMin[1])/(float)(numTics[1]-1);
 			vsub(pointOnAxis, ticVec, drawPosn);
+			glEnable(GL_LINE_SMOOTH);
+			glBegin(GL_LINES);
 			glVertex3dv(drawPosn);
 			vadd(pointOnAxis, ticVec, drawPosn);
 			glVertex3dv(drawPosn);
+			glEnd();
+			glDisable(GL_LINE_SMOOTH);
 		}
 	}
 	//Now draw tic marks for z:
@@ -503,75 +513,54 @@ cout << "void VizFeatureRenderer::drawAxisTics() {" << endl;
 		else ticVec[1] = sticLen[2];
 		for (int i = 0; i< numTics[2]; i++){
 			pointOnAxis[2] = sticMin[2] + (float)i* (sticMax[2] - sticMin[2])/(float)(numTics[2]-1);
+			glEnable(GL_LINE_SMOOTH);
+			glBegin(GL_LINES);
 			vsub(pointOnAxis, ticVec, drawPosn);
 			glVertex3dv(drawPosn);
 			vadd(pointOnAxis, ticVec, drawPosn);
 			glVertex3dv(drawPosn);
+			glEnd();
+			glDisable(GL_LINE_SMOOTH);
 		}
 	}
-	glEnd();
-	glDisable(GL_LINE_SMOOTH);
 	glPopAttrib();
+}
 
-#ifdef	DEAD
-	int textSize = vfParams->GetAxisTextHeight();
+void VizFeatureRenderer::renderText(double llx, double lly) {
+
+	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+
+	double fgr = 1.f;// - bgc[0];
+	double fgg = 1.f;// - bgc[1];
+	double fgb = 1.f;// - bgc[2];
+
+	double txtColor[] = {fgr, fgg, fgb, 1.};
+	double bgColor[] = {0.f, 0.f, 0.f, 0.f};
+	int precision = 2;
+	double dummy[] = {0.,0.,0.}; 
+
+
+	double maxWidth = 0;
+	int fontSize = 50;//cbpb->GetFontSize();
+	string textString = "Foobar"; //ss.str();
+
+	if (_textObject!=NULL) {
+		delete _textObject;
+		_textObject = NULL;
+	}   
+	_textObject = new TextObject();
+	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+	_textObject->Initialize(
+		_fontFile, textString, fontSize, dummy, TextObject::BILLBOARD, 
+		txtColor, bgColor, vpParams
+	);
 	
-	if (textSize > 0 && !_textObjectsValid){
-		TextObject::clearTextObjects(this);
-		//prepare to render text.
-		//TextObject coordinates are not stretched.
-		float bgc[4] = {0,0,0,1.};
-		double clr[3];
-		vfParams->GetBackgroundColor(clr);
-		for (int i = 0; i<3; i++) bgc[i] = (float)clr[i];			
-		vector<string> fontpath;
-		fontpath.push_back("fonts");
-		fontpath.push_back("Vera.ttf");
-		int digits = vfParams->GetAxisDigits();
-		float textColor[4];
-		for (int i = 0; i<3; i++) textColor[i] = (float)axisColor[i];
-		textColor[3] = 1.f;
-		string labelText;
-		//Now draw text x:
-		if (numTics[0] > 1 && ticLengthA[0] > 0.f){
-			pointOnAxis[1] = axisOriginCoordA[1];
-			pointOnAxis[2] = axisOriginCoordA[2];
-			for (int i = 0; i< numTics[0]; i++){
-				pointOnAxis[0] = minTicA[0] + (float)i* (maxTicA[0] - minTicA[0])/(float)(numTics[0]-1);
-				doubleToString(pointOnAxis[0], labelText, digits);
-				int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR","share",fontpath).c_str(),
-					textSize,textColor, bgc,1, labelText);
-				TextObject::addText(this, objNum,pointOnAxis);
-			}
-		}
-		//Now draw tic marks for y:
-		if (numTics[1] > 1 && ticLengthA[1] > 0.f){
-			pointOnAxis[0] = axisOriginCoordA[0];
-			pointOnAxis[2] = axisOriginCoordA[2];
-			
-			for (int i = 0; i< numTics[1]; i++){
-				pointOnAxis[1] = minTicA[1] + (float)i* (maxTicA[1] - minTicA[1])/(float)(numTics[1]-1);
-				doubleToString(pointOnAxis[1], labelText, digits);
-				int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR","share",fontpath).c_str(),
-					textSize,textColor, bgc,1, labelText);
-				TextObject::addText(this, objNum,pointOnAxis);
-			}
-		}
-		//Now draw tic marks for z:
-		if (numTics[2] > 1 && ticLengthA[2] > 0.f){
-			pointOnAxis[0] = axisOriginCoordA[0];
-			pointOnAxis[1] = axisOriginCoordA[1];
-			for (int i = 0; i< numTics[2]; i++){
-				pointOnAxis[2] = minTicA[2] + (float)i* (maxTicA[2] - minTicA[2])/(float)(numTics[2]-1);
-				doubleToString(pointOnAxis[2], labelText, digits);
-				int objNum = TextObject::addTextObject(this, GetAppPath("VAPOR","share",fontpath).c_str(),
-					textSize,textColor, bgc,1, labelText);
-				TextObject::addText(this, objNum,pointOnAxis);
-			}
-		}
-		_textObjectsValid = true;
-	}
-#endif
+	double texWidth = _textObject->getWidth();
+	double texHeight = _textObject->getHeight();
+
+	double coords[] = {llx, lly, 0.f};
+	_textObject->drawMe(coords);
+	return;
 }
 
 #ifdef DEAD
@@ -598,6 +587,7 @@ void VizFeatureRenderer::flatConvertFromLonLat(double x[2], double minLon, doubl
 		Handle error
 	}
 }
+
 void VizFeatureRenderer::ConvertAxes(bool toLatLon, const vector<long> ticDirs, const vector<double> fromMinTic, const vector<double> fromMaxTic, const vector<double> fromOrigin, const vector<double> fromTicLength,
 		double toMinTic[3],double toMaxTic[3], double toOrigin[3], double toTicLength[3]){
 	double ticLengthFactor[3], xmin[2],ymin[2],xmax[2],ymax[2];
@@ -707,7 +697,7 @@ void VizFeatureRenderer::drawAxisArrows(
 	float origin[3];
 	float maxLen = -1.f;
 
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
 	vector<double> axisArrowCoords = vfParams->GetAxisArrowCoords();
 
