@@ -23,6 +23,8 @@
 #include <vapor/glutil.h>    //Must be included first!
 #include <vapor/MyBase.h>
 #include <vapor/common.h>
+#include <vapor/ParamsMgr.h>
+#include <vapor/ViewpointParams.h>
 
 class FTPixmapFont;
 
@@ -39,24 +41,37 @@ class FTPixmapFont;
 namespace VAPoR {
 class RENDER_API TextObject {
 public:
-    //! Default constructor.
+    enum OrientationFlag {
+        BOTTOMLEFT = (1u << 0),
+        CENTERLEFT = (1u << 1),
+        TOPLEFT = (1u << 2),
+        CENTERTOP = (1u << 3),
+        TOPRIGHT = (1u << 4),
+        CENTERRIGHT = (1u << 5),
+        BOTTOMRIGHT = (1u << 6),
+        CENTERBOTTOM = (1u << 7),
+    };
+
+    enum TypeFlag {
+        LABEL = (1u << 0),
+        BILLBOARD = (1u << 1),
+        INSCENE = (1u << 2),
+        THREED = (1u << 3),
+    };
+
     TextObject();
 
-    //! Initialize a text object after creation.
-    int Initialize(string inFont, string inText, int inSize, float inCoords[3], int inType, float txtColor[4], float bgColor[4]);
-    //				QGLWidget *myWindow);
+    int Initialize(string inFont, string inText, int inSize, double inCoords[3], TypeFlag inType, double txtColor[4], double bgColor[4], ViewpointParams *vpParams = NULL);
     ~TextObject();
 
-    //! Draw Text Object at default coordinates specified in TextObject::Initialize()
-    int drawMe();
     //! Draw Text Object at specified x, y, z coordinate
-    int drawMe(float coords[3]);
+    int drawMe(double coords[3]);
     //! Draw Text Object at specified x, y, z coordinate, at specified time step
-    int drawMe(float coords[3], int timestep);
+    int drawMe(double coords[3], int timestep);
 
-    float getWidth() { return _width; }
+    double getWidth() { return _width; }
 
-    float getHeight() { return _height; }
+    double getHeight() { return _height; }
 
     //! Sets the variables \p _width and \p _height.
     //! These define the size of the texture box that text will be drawn on to
@@ -69,7 +84,7 @@ public:
     //! to draw the appropriate type of text object.
     // void applyViewerMatrix();
     // float * applyViewerMatrix(float coords[3]);
-    int applyViewerMatrix(float coords[3] = NULL);
+    int applyViewerMatrix(double coords[3] = NULL);
 
     //! Resets the state of the GL machine to what it was before
     //! our text rendering.
@@ -79,6 +94,10 @@ public:
 
 private:
     void initFrameBufferTexture(void);
+    bool projectPointToWin(double coords[3], double newCoords[3]);
+    bool projectPointToWin(float coords[3], double newCoords[3]);
+    void drawLabel();
+    void drawBillboard();
 
     GLuint _fbo;
     GLuint _fboTexture;
@@ -86,41 +105,27 @@ private:
     int _width;     // Width of our texture
     int _height;    // Height of our texture
 
-    FTPixmapFont *_pixmap;         // FTGL pixmap object
-    string        _font;           // font file
-    string        _text;           // text to display
-    int           _size;           // font size
-    float         _txtColor[4];    // text color
-    float         _bgColor[4];     // background color
-    float         _coords[3];      // text coordates
-    float         _3Dcoords[3];    // 3D coordinates used if we draw text within the scene
-    int           _type;           // in front of scene, following a point in domain, or within
-                                   // type 0 - Label - text drawn in 2d on top of the scene
-                                   // type 1 - Billboard - text drawn in 2d, following a point in the scene
-                                   // type 2 - In-Scene - text drawn within the scene
-                                   // type 3 - 3D - text drawn within the scene, facing the user
+    OrientationFlag _orientationFlag;
+    TypeFlag        _typeFlag;
+
+    ViewpointParams *_vpParams;
+    FTPixmapFont *   _pixmap;         // FTGL pixmap object
+    string           _font;           // font file
+    string           _text;           // text to display
+    int              _size;           // font size
+    double           _txtColor[4];    // text color
+    double           _bgColor[4];     // background color
+    double           _coords[3];      // text coordates
+    double           _3Dcoords[3];    // 3D coordinates used if we draw text within the scene
+
+    int _type;
+    // type 0 - Label - text drawn in 2d on top of the scene.
+    //		Takes pixel coordinates.
+    // type 1 - Billboard - text drawn in 2d, following a point in the scene
+    // type 2 - In-Scene - text drawn within the scene
+    // type 3 - 3D - text drawn within the scene, facing the user
+    // types 1, 2, and 3 take world coordinates
 };
-
-class RENDER_API TextContainer {
-public:
-    TextContainer(string fontFile, int fontSize, float txtColor[4], float bgColor[4], int type);
-    //				QGLWidget *myGivenWindow);
-    ~TextContainer();
-
-    int  addText(string text, float coords[3]);
-    void deleteText();
-    void drawText();
-
-private:
-    string               _font;
-    int                  _size;
-    int                  _type;
-    vector<TextObject *> TextObjects;
-    //	QGLWidget *_myWindow;
-    float _txtColor[4];
-    float _bgColor[4];
-};
-
 };    // namespace VAPoR
 
-#endif    // _TextRenderer_H_
+#endif
