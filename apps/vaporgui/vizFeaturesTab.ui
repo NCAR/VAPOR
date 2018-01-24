@@ -524,7 +524,7 @@
            <item>
             <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Annotation with lat/lon values</string>
+              <string>Annotate with lat/lon values</string>
              </property>
             </widget>
            </item>

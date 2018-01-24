@@ -466,21 +466,21 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 
 	//determine text color; the compliment of the background color:
 	//
-	float fgr = 1.f - bgc[0];
-	float fgg = 1.f - bgc[1];
-	float fgb = 1.f - bgc[2];
+	double fgr = 1.f - bgc[0];
+	double fgg = 1.f - bgc[1];
+	double fgb = 1.f - bgc[2];
 
-	float txtColor[] = {fgr, fgg, fgb, 1.};
-	float bgColor[] = {(float)bgc[0], (float)bgc[1], (float)bgc[2], 0.};
+	double txtColor[] = {fgr, fgg, fgb, 1.};
+	double bgColor[] = {(double)bgc[0], (double)bgc[1], (double)bgc[2], 0.};
 	int precision = (int)cbpb->GetNumDigits();
-	float dummy[] = {0.,0.,0.}; // Dummy coordinates.  We won't know the correct 
+	double dummy[] = {0.,0.,0.}; // Dummy coordinates.  We won't know the correct 
 								// coords until we know image size.
 
 	// Corners in texture coordinates, to be derived later
 	//
-	float Trx, Tlx, Tly, Tuy;
+	double Trx, Tlx, Tly, Tuy;
 
-	float maxWidth = 0;
+	double maxWidth = 0;
 	int numtics = cbpb->GetNumTicks();
 	int fontSize = cbpb->GetFontSize();
 	for (int tic = 0; tic < numtics; tic++){
@@ -488,7 +488,7 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 		//
 		int mapIndex = (1.f/((float)numtics*2.f) + (float)tic/(float)numtics)
 			* numEntries;
-		float textValue = mf->mapIndexToFloat(mapIndex);
+		double textValue = mf->mapIndexToFloat(mapIndex);
 		stringstream ss;
 		ss << fixed << setprecision(precision) << textValue;
 		string textString = ss.str();
@@ -501,10 +501,12 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			_textObject = NULL;
 		}
 		_textObject = new TextObject();
-		_textObject->Initialize(_fontFile,
-	   		 textString, fontSize, dummy, 0, txtColor, bgColor);
-		float texWidth = _textObject->getWidth();
-		float texHeight = _textObject->getHeight();
+		_textObject->Initialize(
+			_fontFile, textString, fontSize, dummy, TextObject::LABEL, 
+			txtColor, bgColor
+		);
+		double texWidth = _textObject->getWidth();
+		double texHeight = _textObject->getHeight();
 
 
 		// llx and lly are in visualizer coordinates between -1 and 1
@@ -518,21 +520,21 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 
 		// Start at lower left corner
 		//
-		float Tx = Tlx;
-		float Ty = Tuy;
+		double Tx = Tlx;
+		double Ty = Tuy;
 
 		// Calculate Y offset to align with tick marks
 		//
 		Ty -= texHeight/2.f;  // Center the text vertically, at the bottom of the colorbar
-		float ticOffset = (Tly-Tuy) * 1.f / (float)numtics;
+		double ticOffset = (Tly-Tuy) * 1.f / (float)numtics;
 		Ty += ticOffset/2.f;  // Initial offset from bottom of colorbar
 		Ty += ticOffset*tic;  // Offset applied per tick mark
 
 
 		// Calculate X offset to allign with tick marks
 		//
-		float cbWidth = Trx - Tlx;
-		float rightShift = cbWidth * .5;
+		double cbWidth = Trx - Tlx;
+		double rightShift = cbWidth * .5;
 		Tx += rightShift;
 
 		// Now that we know the x offset, check if the colorbar box is big enough
@@ -549,7 +551,7 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			cbpb->SetSize(size);
 		}
 
-		float inCoords[] = {Tx, Ty, 0};
+		double inCoords[] = {Tx, Ty, 0};
 
 		_textObject->drawMe(inCoords);
 	}
@@ -563,20 +565,15 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			_textObject = NULL;
 		}
 
-		vector<string> fpath;
-		fpath.push_back("fonts");
-		string fontFile = GetAppPath("VAPOR", "share", fpath);
-		fontFile = fontFile + "//arimo.ttf";
-
 		txtColor[0] = bgColor[0];
 		txtColor[1] = bgColor[1];
 		txtColor[2] = bgColor[2];
 		txtColor[3] = 1.f;
 		_textObject = new TextObject();
-		_textObject->Initialize(fontFile,
-	   		 title, 20, dummy, 0, txtColor, bgColor);
+		_textObject->Initialize(_fontFile,
+	   		 title, 20, dummy, TextObject::LABEL, txtColor, bgColor);
 		Tuy -= _textObject->getHeight();
-		float coords[] = {Tlx, Tuy, 0.f};
+		double coords[] = {Tlx, Tuy, 0.f};
 		_textObject->drawMe(coords);
 		
 	}
