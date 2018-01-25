@@ -19,7 +19,6 @@
 #ifdef WIN32
     #pragma warning(disable : 4100)
 #endif
-#include "vapor/glutil.h"    // Must be included first!!!
 #include "Statistics.h"
 #include "GUIStateParams.h"
 
