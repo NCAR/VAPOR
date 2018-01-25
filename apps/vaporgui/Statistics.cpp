@@ -48,6 +48,8 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow() {
     MyGeometryWidget->Reinit(GeometryWidget::THREED,
                              GeometryWidget::MINMAX,
                              GeometryWidget::AUXILIARY);
+    FidelityWidget::DisplayFlags dspFlags = FidelityWidget::AUXILIARY;
+    MyFidelityWidget->Reinit(dspFlags);
 
     Connect();
 }
@@ -186,8 +188,6 @@ bool Statistics::Update() {
     RemoveCalcCombo->blockSignals(false);
 
     // Update LOD, Refinement
-    FidelityWidget::DisplayFlags dspFlags = FidelityWidget::AUXILIARY;
-    MyFidelityWidget->Reinit(dspFlags);
     MyFidelityWidget->Update(currentDmgr, _controlExec->GetParamsMgr(), statsParams);
 
     // Update timesteps
@@ -1008,8 +1008,10 @@ void Statistics::_exportTextClicked() {
             file << endl;
 
             for (int j = 0; j < availVars3D.size(); j++)
-                if (availVars3D[j] == varname)
+                if (availVars3D[j] == varname) {
                     has3DVar = true;
+                    break;
+                }
         }
 
         file << endl;
@@ -1018,22 +1020,24 @@ void Statistics::_exportTextClicked() {
         statsParams->GetBox()->GetExtents(myMin, myMax);
 
         file << "#Spatial Extents:" << endl;
-        file << "X min = " << myMin[0] << ",    X max = " << myMax[0] << endl;
-        file << "Y min = " << myMin[1] << ",    Y max = " << myMax[1] << endl;
-        if (has3DVar)
-            file << "Z min = " << myMin[2] << ",    Z max = " << myMax[2] << endl;
+        file << "X min = " << myMin[0] << endl;
+        file << "X max = " << myMax[0] << endl;
+        file << "Y min = " << myMin[1] << endl;
+        file << "Y max = " << myMax[1] << endl;
+        if (has3DVar) {
+            file << "Z min = " << myMin[2] << endl;
+            file << "Z max = " << myMax[2] << endl;
+        }
         file << endl;
 
         file << "#Temporal Extents:" << endl;
-        file << "Minimum Timestep = " << statsParams->GetCurrentMinTS()
-             << ",    Maximum Timestep = " << statsParams->GetCurrentMaxTS() << endl;
+        file << "Minimum Timestep = " << statsParams->GetCurrentMinTS() << endl;
+        file << "Maximum Timestep = " << statsParams->GetCurrentMaxTS() << endl;
         file << endl;
 
         file << "#Compression Parameters:" << endl;
-        //file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
-        //file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
-        file << "Level of Detail:  " << statsParams->GetCompressionLevel() << endl;
-        file << "Refinement Level: " << statsParams->GetRefinementLevel() << endl;
+        file << "Level of Detail  =  " << MyFidelityWidget->GetCurrentLodString() << endl;
+        file << "Refinement Level = " << MyFidelityWidget->GetCurrentMultiresString() << endl;
 
         file.close();
     }
