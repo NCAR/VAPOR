@@ -185,7 +185,7 @@ void VizFeatureParams::SetAxisFontSize(int size) {
 }
 
 int VizFeatureParams::GetAxisFontSize() {
-	return (int)GetValueDouble(_axisFontSizeTag, 10);
+	return (int)GetValueDouble(_axisFontSizeTag, 24);
 }
 
 void VizFeatureParams::SetNumTics(vector<double> val){

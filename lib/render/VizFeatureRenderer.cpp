@@ -20,6 +20,8 @@
 #include <cstdio>
 #include <cstring>
 #include <cfloat>
+#include <sstream>
+#include <iomanip>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -208,7 +210,7 @@ void VizFeatureRenderer::DrawText(vector<billboard> billboards) {
    
 		_textObject = new TextObject();
 		_textObject->Initialize(_fontFile,
-			text, size, coords, TextObject::LABEL, txtColor, bgColor
+			text, size, txtColor, bgColor
 		);
 		_textObject->drawMe(coords);
 	}
@@ -475,6 +477,7 @@ void VizFeatureRenderer::drawAxisTics() {
 		for (int i = 0; i< numTics[0]; i++){
 			pointOnAxis[0] = sticMin[0] + (float)i* (sticMax[0] - sticMin[0])/(float)(numTics[0]-1);
 			vsub(pointOnAxis, ticVec, drawPosn);
+			renderText(pointOnAxis[0], drawPosn[0], drawPosn[1]);
 			glEnable(GL_LINE_SMOOTH);
 			glBegin(GL_LINES);
 			glVertex3dv(drawPosn);
@@ -482,7 +485,6 @@ void VizFeatureRenderer::drawAxisTics() {
 			glVertex3dv(drawPosn);
 			glEnd();
 			glDisable(GL_LINE_SMOOTH);
-			renderText(drawPosn[0], drawPosn[1]);
 		}
 	}
 	//Now draw tic marks for y:
@@ -526,38 +528,38 @@ void VizFeatureRenderer::drawAxisTics() {
 	glPopAttrib();
 }
 
-void VizFeatureRenderer::renderText(double llx, double lly) {
+void VizFeatureRenderer::renderText(double text, double llx, double lly) {
 
 	VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
-	double fgr = 1.f;// - bgc[0];
-	double fgg = 1.f;// - bgc[1];
-	double fgb = 1.f;// - bgc[2];
+	vector<double> axisColor, txtBackground;
+	vfParams->GetAxisColor(axisColor);
+	vfParams->GetBackgroundColor(txtBackground);
+	axisColor.push_back(1.f); // alpha channel
+	txtBackground.push_back(1.f); // alpha channel
 
-	double txtColor[] = {fgr, fgg, fgb, 1.};
+	double txtColor[] = {axisColor[0], axisColor[1], axisColor[2], 1.};
 	double bgColor[] = {0.f, 0.f, 0.f, 0.f};
-	int precision = 2;
-	double dummy[] = {0.,0.,0.}; 
-
-
-	double maxWidth = 0;
-	int fontSize = 50;//cbpb->GetFontSize();
-	string textString = "Foobar"; //ss.str();
+	int precision = (int)vfParams->GetAxisDigits();
+	int fontSize = vfParams->GetAxisFontSize();
+	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+	
+	std::stringstream ss;
+	ss << fixed << setprecision(precision) << text;
+	string textString = ss.str();
 
 	if (_textObject!=NULL) {
 		delete _textObject;
 		_textObject = NULL;
 	}   
 	_textObject = new TextObject();
-	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 	_textObject->Initialize(
-		_fontFile, textString, fontSize, dummy, TextObject::BILLBOARD, 
-		txtColor, bgColor, vpParams
+		_fontFile, textString, fontSize,
+		//txtColor, bgColor, vpParams, TextObject::BILLBOARD, 
+		axisColor, txtBackground, vpParams, TextObject::BILLBOARD, 
+		TextObject::CENTERTOP
 	);
 	
-	double texWidth = _textObject->getWidth();
-	double texHeight = _textObject->getHeight();
-
 	double coords[] = {llx, lly, 0.f};
 	_textObject->drawMe(coords);
 	return;
