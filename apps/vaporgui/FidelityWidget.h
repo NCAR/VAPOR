@@ -84,9 +84,6 @@ private:
 
  void setupFidelity(
 	VAPoR::RenderParams* dParams
-#ifdef	DEAD
-	, bool useDefault
-#endif
  );
 
  //! Set the fidelity gui elements based on values in a RenderParams
