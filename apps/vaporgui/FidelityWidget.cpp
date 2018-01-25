@@ -188,8 +188,9 @@ void FidelityWidget::updateFidelity()
 	else if (_dspFlags & HEIGHT) {
 		varname = _rParams->GetHeightVariableName();
 	}
-	else if (_dspFlags & AUXILLARY) {
-		varname = _rParams->GetAuxVariableNames()[0];
+	else if (_dspFlags & AUXILIARY) {
+		vector<string> varnames = _rParams->GetAuxVariableNames();
+		if (varnames.size()) varname = varnames[0];
 	}
 	else if (_dspFlags & COLOR) {
 		varname = _rParams->GetColorMapVariableName();

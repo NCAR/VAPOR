@@ -37,7 +37,7 @@ public:
 	SCALAR = (1u << 0), 
 	VECTOR = (1u << 1), 
 	COLOR = (1u << 2),
- 	AUXILLARY = (1u << 3),
+ 	AUXILIARY = (1u << 3),
 	HEIGHT = (1u << 4),
 	};
 
