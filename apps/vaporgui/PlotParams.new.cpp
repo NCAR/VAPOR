@@ -82,7 +82,7 @@ void PlotParams::SetOneTS(int ts) {
     SetValueDouble(_oneTSTag, "One timestep set", (double)ts);
 }
 
-bool PlotParams::GetSpaceTimeMode() {
+bool PlotParams::GetSpaceTimeMode() const {
     return GetValueLong(_spaceTimeTag, (long)true);
 }
 
