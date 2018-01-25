@@ -1907,7 +1907,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
         if (_plot) {
             PlotParams *params;
             params = (PlotParams *)paramsMgr->GetParams("PlotParams");
-            _plot->Update(params);
+            _plot->Update();
         }
 
         _vizWinMgr->UpdateRouters();
@@ -2146,7 +2146,7 @@ void MainForm::launchStats() {
 void MainForm::launchPlotUtility() {
     if (!_plot)
         _plot = new Plot(this);
-    _plot->Initialize(_controlExec, _vizWinMgr);
+    //_plot->Initialize(_controlExec, _vizWinMgr);
 }
 
 //Begin capturing animation images.
