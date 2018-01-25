@@ -274,12 +274,14 @@ void FidelityWidget::Update(const DataMgr *dataMgr,
         lodCombo->addItem(s);
     }
     lodCombo->setCurrentIndex(lod);
+    _currentLodStr = lodStrs.at(lod);
 
     refinementCombo->clear();
     for (int i = 0; i < multiresStrs.size(); i++) {
         refinementCombo->addItem(QString(multiresStrs[i].c_str()));
     }
     refinementCombo->setCurrentIndex(refLevel);
+    _currentMultiresStr = multiresStrs.at(refLevel);
 
     if (lodReq != lod) {
         _rParams->SetCompressionLevel(lod);
@@ -344,4 +346,12 @@ void FidelityWidget::Update(const DataMgr *dataMgr,
             rd->setChecked(true);
         }
     }
+}
+
+std::string FidelityWidget::GetCurrentLodString() const {
+    return _currentLodStr;
+}
+
+std::string FidelityWidget::GetCurrentMultiresString() const {
+    return _currentMultiresStr;
 }
