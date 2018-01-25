@@ -96,11 +96,10 @@ private:
 
  // Support for fidelity settings
  //
- std::vector <int> _fidelityLodIdx;
- std::vector <int> _fidelityMultiresIdx;
- std::vector <string> _fidelityLodStrs;
- std::vector <string> _fidelityMultiresStrs;
-
+ std::vector <int>      _fidelityLodIdx;
+ std::vector <int>      _fidelityMultiresIdx;
+ std::vector <string>   _fidelityLodStrs;
+ std::vector <string>   _fidelityMultiresStrs;
 };
 
 #endif //FIDELITYWIDGET_H 
