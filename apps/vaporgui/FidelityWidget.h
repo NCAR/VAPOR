@@ -81,9 +81,6 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     void setupFidelity(
         VAPoR::RenderParams *dParams);
 
-    //! Set the fidelity gui elements based on values in a RenderParams
-    void updateFidelity();
-
     QButtonGroup *_fidelityButtons;
 
     // Support for fidelity settings
