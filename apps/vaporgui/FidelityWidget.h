@@ -42,6 +42,9 @@ public:
 
     virtual void Update(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
+    std::string GetCurrentLodString() const;
+    std::string GetCurrentMultiresString() const;
+
 protected slots:
     //! Connected to the image file text editor
     void setNumRefinements(int num);
@@ -80,6 +83,8 @@ private:
     std::vector<int>    _fidelityMultiresIdx;
     std::vector<string> _fidelityLodStrs;
     std::vector<string> _fidelityMultiresStrs;
+    std::string         _currentLodStr;
+    std::string         _currentMultiresStr;
 };
 
 #endif    // FIDELITYWIDGET_H
