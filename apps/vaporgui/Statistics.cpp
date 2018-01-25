@@ -180,7 +180,7 @@ bool Statistics::Update()
     RemoveCalcCombo->blockSignals(false);
 
     // Update LOD, Refinement
-    FidelityWidget::DisplayFlags dspFlags;
+    FidelityWidget::DisplayFlags dspFlags = FidelityWidget::AUXILIARY;
     MyFidelityWidget->Reinit(dspFlags);
     MyFidelityWidget->Update(currentDmgr, _controlExec->GetParamsMgr(), statsParams);
 
