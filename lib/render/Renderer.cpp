@@ -502,9 +502,10 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 		}
 		_textObject = new TextObject();
 		_textObject->Initialize(
-			_fontFile, textString, fontSize, dummy, TextObject::LABEL, 
+			_fontFile, textString, fontSize, 
 			txtColor, bgColor
 		);
+		_textObject->SetOrientation(TextObject::CENTERLEFT);
 		double texWidth = _textObject->getWidth();
 		double texHeight = _textObject->getHeight();
 
@@ -525,7 +526,6 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 
 		// Calculate Y offset to align with tick marks
 		//
-		Ty -= texHeight/2.f;  // Center the text vertically, at the bottom of the colorbar
 		double ticOffset = (Tly-Tuy) * 1.f / (float)numtics;
 		Ty += ticOffset/2.f;  // Initial offset from bottom of colorbar
 		Ty += ticOffset*tic;  // Offset applied per tick mark
@@ -571,11 +571,11 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 		txtColor[3] = 1.f;
 		_textObject = new TextObject();
 		_textObject->Initialize(_fontFile,
-	   		 title, 20, dummy, TextObject::LABEL, txtColor, bgColor);
+	   		 title, fontSize, txtColor, bgColor);
+		_textObject->SetOrientation(TextObject::CENTERLEFT);
 		Tuy -= _textObject->getHeight();
 		double coords[] = {Tlx, Tuy, 0.f};
 		_textObject->drawMe(coords);
-		
 	}
 
 	if (_textObject!=NULL) {
