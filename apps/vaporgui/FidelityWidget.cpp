@@ -162,13 +162,16 @@ void FidelityWidget::updateFidelity()
         vector<string> varnames = _rParams->GetFieldVariableNames();
         assert(varnames.size());
         varname = varnames[0];
-    } else {
+    } else if (_dspFlags & HEIGHT) {
         varname = _rParams->GetHeightVariableName();
+    } else if (_dspFlags & AUXILLIARY) {
+        varname = _rParams->GetAuxVariableNames()[0];
+    } else if (_dspFlags & COLOR) {
+        varname = _rParams->GetColorMapVariableName();
     }
 
     if (varname.empty()) {
         fidelityTab->setEnabled(false);
-        // fidelityTab->hide();
         return;
     }
 
