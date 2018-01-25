@@ -53,6 +53,9 @@ public:
 	VAPoR::ParamsMgr *paramsMgr,
 	VAPoR::RenderParams *rParams
  );
+
+ std::string GetCurrentLodString() const;
+ std::string GetCurrentMultiresString() const;
  
 protected slots:
  //! Connected to the image file text editor
@@ -69,34 +72,36 @@ protected slots:
  void SetFidelityDefault();
 
 private:
- DisplayFlags _dspFlags;
- const VAPoR::DataMgr *_dataMgr;
- VAPoR::ParamsMgr *_paramsMgr;
- VAPoR::RenderParams *_rParams;
- 
- // Get the compression rates as a fraction for both the LOD and
- // Refinment parameters. Also format these factors into a displayable
- // string
- //
- void getCmpFactors(
-	string varname, vector <float> &lodCF, vector <string> &lodStr,
-	vector <float> &multiresCF, vector <string> &multiresStr
- ) const;
+     DisplayFlags _dspFlags;
+     const VAPoR::DataMgr *_dataMgr;
+     VAPoR::ParamsMgr *_paramsMgr;
+     VAPoR::RenderParams *_rParams;
+     
+     // Get the compression rates as a fraction for both the LOD and
+     // Refinment parameters. Also format these factors into a displayable
+     // string
+     //
+     void getCmpFactors(
+        string varname, vector <float> &lodCF, vector <string> &lodStr,
+        vector <float> &multiresCF, vector <string> &multiresStr
+     ) const;
 
- void uncheckFidelity();
+     void uncheckFidelity();
 
- void setupFidelity(
-	VAPoR::RenderParams* dParams
- );
+     void setupFidelity(
+        VAPoR::RenderParams* dParams
+     );
 
- QButtonGroup* _fidelityButtons;
+     QButtonGroup* _fidelityButtons;
 
- // Support for fidelity settings
- //
- std::vector <int>      _fidelityLodIdx;
- std::vector <int>      _fidelityMultiresIdx;
- std::vector <string>   _fidelityLodStrs;
- std::vector <string>   _fidelityMultiresStrs;
+     // Support for fidelity settings
+     //
+     std::vector <int>      _fidelityLodIdx;
+     std::vector <int>      _fidelityMultiresIdx;
+     std::vector <string>   _fidelityLodStrs;
+     std::vector <string>   _fidelityMultiresStrs;
+     std::string            _currentLodStr;
+     std::string            _currentMultiresStr;
 };
 
 #endif //FIDELITYWIDGET_H 
