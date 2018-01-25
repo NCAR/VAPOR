@@ -50,19 +50,18 @@ TextObject::TextObject()
     _typeFlag = LABEL;
 }
 
-int TextObject::Initialize(string inFont, string inText, int inSize, double inCoords[3], TypeFlag inType,
-                           // int inType,
-                           double txtColor[4], double bgColor[4], ViewpointParams *vpParams)
+int TextObject::Initialize(string font, string text, int size, double txtColor[4], double bgColor[4], ViewpointParams *vpParams, TypeFlag type, OrientationFlag orientation)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
-    _pixmap = new FTPixmapFont(inFont.c_str());
-    _text = inText;
-    _size = inSize;
-    _typeFlag = inType;
-    _font = inFont;
-    _coords[0] = inCoords[0];
-    _coords[1] = inCoords[1];
-    _coords[2] = inCoords[2];
+    _pixmap = new FTPixmapFont(font.c_str());
+    _text = text;
+    _size = size;
+    _typeFlag = type;
+    _orientationFlag = orientation;
+    _font = font;
+    _coords[0] = 0.;
+    _coords[1] = 0.;
+    _coords[2] = 0.;
     _bgColor[0] = bgColor[0];
     _bgColor[1] = bgColor[1];
     _bgColor[2] = bgColor[2];
@@ -75,8 +74,8 @@ int TextObject::Initialize(string inFont, string inText, int inSize, double inCo
     _fboTexture = 0;
     _vpParams = vpParams;
 
-    if (inType == 1) {
 #ifdef NEEDSTRETCH
+    if (inType == 1) {
         // Convert user to local/stretched coordinates in cube
         DataStatus *          ds = DataStatus::getInstance();
         const vector<double> &fullUsrExts = ds->getDataMgr()->GetExtents();
@@ -87,8 +86,8 @@ int TextObject::Initialize(string inFont, string inText, int inSize, double inCo
             _3Dcoords[i] *= sceneScaleFactor;
             _3Dcoords[i] *= scales[i];
         }
-#endif
     }
+#endif
 
     _pixmap->FaceSize(_size);
     findBBoxSize();
@@ -96,6 +95,13 @@ int TextObject::Initialize(string inFont, string inText, int inSize, double inCo
     initFrameBuffer();
     glPopAttrib();
     return 0;
+}
+
+int TextObject::Initialize(string font, string text, int size, vector<double> txtColor, vector<double> bgColor, ViewpointParams *vpParams, TypeFlag type, OrientationFlag orientation)
+{
+    double txtColorArray[4] = {txtColor[0], txtColor[1], txtColor[2], txtColor[3]};
+    double bgColorArray[4] = {bgColor[0], bgColor[1], bgColor[2], bgColor[3]};
+    return Initialize(font, text, size, txtColorArray, bgColorArray, vpParams, type, orientation);
 }
 
 TextObject::~TextObject()
@@ -268,8 +274,7 @@ int TextObject::drawMe(double coords[3])
 
     glBindTexture(GL_TEXTURE_2D, _fboTexture);
 
-    if (_typeFlag & LABEL) drawLabel();
-    if (_typeFlag & BILLBOARD) drawBillboard();
+    if ((_typeFlag & LABEL) || (_typeFlag & BILLBOARD)) drawOnScreen();
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -288,7 +293,44 @@ int TextObject::drawMe(double coords[3])
     return 0;
 }
 
-bool TextObject::projectPointToWin(double cubeCoords[3], double winCoords[2])
+void TextObject::applyOffset(double &llx, double &lly, double &urx, double &ury)
+{
+    double width = urx - llx;
+    double height = ury - lly;
+    double xOffset = 0.;
+    double yOffset = 0.;
+
+    if (_orientationFlag & BOTTOMLEFT)
+        return;
+    else if (_orientationFlag & CENTERLEFT)
+        yOffset -= height / 2.;
+    else if (_orientationFlag & TOPLEFT)
+        yOffset -= height;
+    else if (_orientationFlag & CENTERTOP) {
+        xOffset -= width / 2.;
+        yOffset -= height;
+    } else if (_orientationFlag & TOPRIGHT) {
+        xOffset -= width;
+        yOffset -= height;
+    } else if (_orientationFlag & CENTERRIGHT) {
+        xOffset -= width;
+        yOffset -= height / 2.;
+    } else if (_orientationFlag & BOTTOMRIGHT)
+        xOffset -= width;
+    else if (_orientationFlag & CENTERBOTTOM)
+        xOffset -= width / 2.;
+    else if (_orientationFlag & DEADCENTER) {
+        xOffset -= width / 2.;
+        yOffset -= height / 2.;
+    }
+
+    llx += xOffset;
+    urx += xOffset;
+    lly += yOffset;
+    ury += yOffset;
+}
+
+bool TextObject::projectPointToWin(double cubeCoords[3])
 {
     double   depth;
     GLdouble wCoords[2];
@@ -305,8 +347,8 @@ bool TextObject::projectPointToWin(double cubeCoords[3], double winCoords[2])
 
     bool success = (0 != gluProject(cbCoords[0], cbCoords[1], cbCoords[2], mvMatrix, pMatrix, viewport, wCoords, (wCoords + 1), (GLdouble *)(&depth)));
     if (!success) return false;
-    winCoords[0] = wCoords[0];
-    winCoords[1] = wCoords[1];
+    cubeCoords[0] = wCoords[0];
+    cubeCoords[1] = wCoords[1];
     return (depth > 0.0);
 }
 
@@ -325,7 +367,7 @@ void TextObject::drawLabel()
     double urx = llx + 2. * fltTxtWidth;
     double ury = lly + 2. * fltTxtHeight;
 
-    // applyOffset(llx, lly, urx, ury);
+    applyOffset(llx, lly, urx, ury);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -341,27 +383,26 @@ void TextObject::drawLabel()
     glEnd();
 }
 
-void TextObject::drawBillboard()
+void TextObject::drawOnScreen()
 {
     GLint dims[4] = {0};
     glGetIntegerv(GL_VIEWPORT, dims);
     GLint fbWidth = dims[2];
     GLint fbHeight = dims[3];
 
-    double fltTxtWidth = (double)_width / (double)fbWidth;
-    double fltTxtHeight = (double)_height / (double)fbHeight;
+    double txtWidth = (double)_width / (double)fbWidth;
+    double txtHeight = (double)_height / (double)fbHeight;
 
-    double newCoords[3];
-    projectPointToWin(_coords, _coords);
+    if (_typeFlag & BILLBOARD) projectPointToWin(_coords);
 
     // double llx = 2.*newCoords[0]/(double)fbWidth - 1.f;
     // double lly = 2.*newCoords[1]/(double)fbHeight - 1.f;
     double llx = 2. * _coords[0] / (double)fbWidth - 1.f;
     double lly = 2. * _coords[1] / (double)fbHeight - 1.f;
-    double urx = llx + 2. * fltTxtWidth;
-    double ury = lly + 2. * fltTxtHeight;
+    double urx = llx + 2. * txtWidth;
+    double ury = lly + 2. * txtHeight;
 
-    //	applyOffset(llx, lly, urx, ury);
+    applyOffset(llx, lly, urx, ury);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

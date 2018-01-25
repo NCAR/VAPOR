@@ -50,6 +50,7 @@ public:
         CENTERRIGHT = (1u << 5),
         BOTTOMRIGHT = (1u << 6),
         CENTERBOTTOM = (1u << 7),
+        DEADCENTER = (1u << 8),
     };
 
     enum TypeFlag {
@@ -61,7 +62,9 @@ public:
 
     TextObject();
 
-    int Initialize(string inFont, string inText, int inSize, double inCoords[3], TypeFlag inType, double txtColor[4], double bgColor[4], ViewpointParams *vpParams = NULL);
+    int Initialize(string font, string text, int size, double txtColor[4], double bgColor[4], ViewpointParams *vpParams = NULL, TypeFlag type = LABEL, OrientationFlag orientation = DEADCENTER);
+    int Initialize(string font, string text, int size, vector<double> txtColor, vector<double> bgColor, ViewpointParams *vpParams = NULL, TypeFlag type = LABEL,
+                   OrientationFlag orientation = DEADCENTER);
     ~TextObject();
 
     //! Draw Text Object at specified x, y, z coordinate
@@ -92,12 +95,15 @@ public:
 
     void setType(int type) { _type = type; }
 
+    void SetOrientation(OrientationFlag flag) { _orientationFlag = flag; }
+
 private:
     void initFrameBufferTexture(void);
-    bool projectPointToWin(double coords[3], double newCoords[3]);
-    bool projectPointToWin(float coords[3], double newCoords[3]);
+    void applyOffset(double &llx, double &lly, double &urx, double &ury);
+    void applyOffset2(double &xCoord, double &yCoord, double texWidth, double texHgt);
+    bool projectPointToWin(double coords[3]);
     void drawLabel();
-    void drawBillboard();
+    void drawOnScreen();
 
     GLuint _fbo;
     GLuint _fboTexture;

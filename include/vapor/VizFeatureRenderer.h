@@ -104,7 +104,7 @@ private:
     //
     void drawAxisTics();
     void drawAxisTics2();
-    void renderText(double llx, double lly);
+    void renderText(double text, double llx, double lly);
 
     // Draw Axis arrows
     //
