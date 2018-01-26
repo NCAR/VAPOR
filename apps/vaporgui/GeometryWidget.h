@@ -51,6 +51,8 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
 
+    void hideSinglePointTabHeader();
+
 signals:
     void valueChanged();
 
