@@ -54,6 +54,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
                 VAPoR::DataMgr *dataMgr,
                 VAPoR::RenderParams *rParams);
 
+    void hideSinglePointTabHeader();
+
   signals:
     void valueChanged();
 
