@@ -1,22 +1,22 @@
 //*************************************************************************
-//														                  *
-//			 Copyright (C)  2015									      *
-//	 University Corporation for Atmospheric Research					  *
-//			 All Rights Reserved										  *
-//														                  *
+//                                                                        *
+//           Copyright (C)  2015                                          *
+//   University Corporation for Atmospheric Research                      *
+//           All Rights Reserved                                          *
+//                                                                        *
 //************************************************************************/
 //
-//	File:		FidelityWidget.cpp
+//  File:       FidelityWidget.cpp
 //
-//		Author: John Clyne
-//			Scott Pearse
-//			Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
+//      Author: John Clyne
+//          Scott Pearse
+//          Alan Norton
+//          National Center for Atmospheric Research
+//          PO 3000, Boulder, Colorado
 //
-//	Date:		December 2017
+//  Date:       December 2017
 //
-//	Description:	Implements the FidelityWidget class.
+//  Description:    Implements the FidelityWidget class.
 //
 #include <sstream>
 #include <qwidget.h>
@@ -153,22 +153,78 @@ void FidelityWidget::getCmpFactors(string varname, vector<float> &lodCF, vector<
     }
 }
 
-void FidelityWidget::updateFidelity()
+void FidelityWidget::uncheckFidelity()
 {
+    // Unset all fidelity buttons
+    //
+    if (!_fidelityButtons) return;
+
+    QList<QAbstractButton *> btns = _fidelityButtons->buttons();
+    for (int i = 0; i < btns.size(); i++) {
+        if (btns[i]->isChecked()) { btns[i]->setChecked(false); }
+    }
+}
+
+void FidelityWidget::setCompRatio(int num)
+{
+    assert(_rParams);
+
+    _rParams->SetCompressionLevel(num);
+
+    lodCombo->setCurrentIndex(num);
+
+    // Fidelity no longer valid
+    //
+    uncheckFidelity();
+}
+
+void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
+{
+    assert(dataMgr);
+    assert(paramsMgr);
+    assert(rParams);
+
+    _dataMgr = dataMgr;
+    _paramsMgr = paramsMgr;
+    _rParams = rParams;
+
     string varname;
     if (_dspFlags & SCALAR) {
         varname = _rParams->GetVariableName();
     } else if (_dspFlags & VECTOR) {
         vector<string> varnames = _rParams->GetFieldVariableNames();
-        assert(varnames.size());
-        varname = varnames[0];
-    } else {
+        if (varnames.size() > 0) {
+            varname = varnames[0];
+            size_t vardim;
+            for (int i = 0; i < varnames.size(); i++) {
+                assert(_dataMgr->GetNumDimensions(varnames[i], vardim));
+                if (vardim == 3) {
+                    varname = varnames[i];
+                    break;
+                }
+            }
+        }
+    } else if (_dspFlags & HEIGHT) {
         varname = _rParams->GetHeightVariableName();
+    } else if (_dspFlags & AUXILIARY) {
+        vector<string> varnames = _rParams->GetAuxVariableNames();
+        if (varnames.size() > 0) {
+            varname = varnames[0];
+            size_t vardim;
+            for (int i = 0; i < varnames.size(); i++) {
+                assert(_dataMgr->GetNumDimensions(varnames[i], vardim));
+                if (vardim == 3) {
+                    varname = varnames[i];
+                    break;
+                }
+            }
+        }
+    } else if (_dspFlags & COLOR) {
+        varname = _rParams->GetColorMapVariableName();
     }
 
     if (varname.empty()) {
         fidelityTab->setEnabled(false);
-        // fidelityTab->hide();
         return;
     }
 
@@ -202,10 +258,12 @@ void FidelityWidget::updateFidelity()
         lodCombo->addItem(s);
     }
     lodCombo->setCurrentIndex(lod);
+    _currentLodStr = lodStrs.at(lod);
 
     refinementCombo->clear();
     for (int i = 0; i < multiresStrs.size(); i++) { refinementCombo->addItem(QString(multiresStrs[i].c_str())); }
     refinementCombo->setCurrentIndex(refLevel);
+    _currentMultiresStr = multiresStrs.at(refLevel);
 
     if (lodReq != lod) { _rParams->SetCompressionLevel(lod); }
     if (refLevelReq != refLevel) { _rParams->SetRefinementLevel(refLevel); }
@@ -264,40 +322,6 @@ void FidelityWidget::updateFidelity()
     }
 }
 
-void FidelityWidget::uncheckFidelity()
-{
-    // Unset all fidelity buttons
-    //
-    if (!_fidelityButtons) return;
+std::string FidelityWidget::GetCurrentLodString() const { return _currentLodStr; }
 
-    QList<QAbstractButton *> btns = _fidelityButtons->buttons();
-    for (int i = 0; i < btns.size(); i++) {
-        if (btns[i]->isChecked()) { btns[i]->setChecked(false); }
-    }
-}
-
-void FidelityWidget::setCompRatio(int num)
-{
-    assert(_rParams);
-
-    _rParams->SetCompressionLevel(num);
-
-    lodCombo->setCurrentIndex(num);
-
-    // Fidelity no longer valid
-    //
-    uncheckFidelity();
-}
-
-void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
-{
-    assert(dataMgr);
-    assert(paramsMgr);
-    assert(rParams);
-
-    _dataMgr = dataMgr;
-    _paramsMgr = paramsMgr;
-    _rParams = rParams;
-
-    updateFidelity();
-}
+std::string FidelityWidget::GetCurrentMultiresString() const { return _currentMultiresStr; }
