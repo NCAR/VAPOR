@@ -73,6 +73,12 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 
 	QFont myFont = font();
 	xMinMaxGroupBox->setFont(myFont);
+    
+}
+
+void GeometryWidget::hideSinglePointTabHeader()
+{
+    singlePointTab->setStyleSheet("QTabBar::tab { height: 0px }");
 }
 	
 void GeometryWidget::adjustLayoutToSinglePoint() {
