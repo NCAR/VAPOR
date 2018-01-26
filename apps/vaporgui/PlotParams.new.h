@@ -6,7 +6,7 @@
 //                                                                       *
 //************************************************************************
 //
-//  File:       StatisticsParams.h
+//  File:       PlotParams.h
 //
 //  Author:     Samuel Li
 //              National Center for Atmospheric Research
@@ -44,7 +44,7 @@ class PlotParams : public RenderParams {
     void SetTimeMode();
 
     static string GetClassType() {
-        return ("StatisticsParams");
+        return ("PlotParams");
     }
 
     // virtual functions required by RenderParams
