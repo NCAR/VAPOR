@@ -957,7 +957,8 @@ void Statistics::_exportTextClicked()
         VAPoR::DataMgr *         currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
 
-        file << "#Variable Statistics" << endl;
+        file << "Data Source = " << guiParams->GetStatsDatasetName() << endl << endl;
+        file << "#Variable Statistics:" << endl;
         file << "Variable_Name, No_of_Samples";
         if (statsParams->GetMinEnabled()) file << ", Min";
         if (statsParams->GetMaxEnabled()) file << ", Max";
