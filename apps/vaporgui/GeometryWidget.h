@@ -71,7 +71,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
         std::vector<double> minExt,
         std::vector<double> maxExt);
     void updateCopyCombo();
-    void updateDimFlags();
+    //void updateDimFlags();
     void updateBoxCombos(
         std::vector<double> &minFullExt,
         std::vector<double> &maxFullExt);
