@@ -195,10 +195,10 @@ MainForm::MainForm(
 	myParams.push_back(StartupParams::GetClassType());
 	myParams.push_back(AnimationParams::GetClassType());
 	myParams.push_back(MiscParams::GetClassType());
-	myParams.push_back(PlotParams::GetClassType());
 	
 	vector <string> myRenParams;
 	myRenParams.push_back(StatisticsParams::GetClassType());
+	myRenParams.push_back(PlotParams::GetClassType());
 	// Create the Control executive before the VizWinMgr. Disable
 	// state saving until completely initalized
 	//
@@ -2050,8 +2050,8 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 			_stats->Update();
 		}
 		if (_plot) {
-			PlotParams* params;
-			params = (PlotParams*)paramsMgr->GetParams("PlotParams");
+			//PlotParams* params;
+			//params = (PlotParams*)paramsMgr->GetParams("PlotParams");
 			_plot->Update();
 		}
 
@@ -2298,8 +2298,13 @@ void MainForm::launchStats(){
 }
 
 void MainForm::launchPlotUtility(){
-    if (! _plot) _plot = new Plot(this);
-    //_plot->Initialize(_controlExec, _vizWinMgr);
+    if (! _plot) 
+        _plot = new Plot(this);
+	if (_controlExec) 
+    {
+		_plot->initControlExec(_controlExec);
+	} 
+	_plot->showMe();   
 }
 
 
