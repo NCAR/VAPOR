@@ -143,6 +143,7 @@ void GeometryWidget::Reinit(
 	else if(_dimFlags & THREED )
 	{
 		zMinMaxGroupBox->show();
+		zSinglePointGroupBox->show();
 	}
 
 	if (_displayFlags & MINMAX) {
