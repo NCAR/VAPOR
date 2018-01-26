@@ -65,10 +65,10 @@
         </layout>
        </item>
        <item>
-        <widget class="QComboBox" name="RemoveVarCombo"/>
+        <widget class="QComboBox" name="NewVarCombo"/>
        </item>
        <item>
-        <widget class="QComboBox" name="NewVarCombo"/>
+        <widget class="QComboBox" name="RemoveVarCombo"/>
        </item>
        <item>
         <widget class="QLabel" name="label">
@@ -81,7 +81,7 @@
         <widget class="QTableWidget" name="VariablesTable"/>
        </item>
        <item>
-        <widget class="FidelityWidget" name="widget_2" native="true"/>
+        <widget class="FidelityWidget" name="MyFidelityWidget" native="true"/>
        </item>
       </layout>
      </item>
@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTabWidget" name="spaceTimeTab">
+      <widget class="QTabWidget" name="SpaceTimeTab">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -115,13 +115,20 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tab_3">
+       <widget class="QWidget" name="SpaceTab">
         <attribute name="title">
          <string>Space</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="GeometryWidget" name="widget" native="true"/>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="GeometryWidget" name="P1Widget" native="true"/>
+           </item>
+           <item>
+            <widget class="GeometryWidget" name="P2Widget" native="true"/>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QLabel" name="label_5">
@@ -152,7 +159,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_2">
+       <widget class="QWidget" name="TimeTab">
         <attribute name="title">
          <string>Time</string>
         </attribute>
