@@ -293,6 +293,26 @@ void VizFeatureRenderer::drawRegionBounds(size_t ts) const {
 
 #endif
 
+void VizFeatureRenderer::applyTransform(Transform *t) {
+    vector<double> scale = t->GetScales();
+    vector<double> origin = t->GetOrigin();
+    vector<double> translate = t->GetTranslations();
+    vector<double> rotate = t->GetRotations();
+    assert(translate.size() == 3);
+    assert(rotate.size() == 3);
+    assert(scale.size() == 3);
+    assert(origin.size() == 3);
+
+    glTranslatef(origin[0], origin[1], origin[2]);
+    glScalef(scale[0], scale[1], scale[2]);
+    glRotatef(rotate[0], 1, 0, 0);
+    glRotatef(rotate[1], 0, 1, 0);
+    glRotatef(rotate[2], 0, 0, 1);
+    glTranslatef(-origin[0], -origin[1], -origin[2]);
+
+    glTranslatef(translate[0], translate[1], translate[2]);
+}
+
 void VizFeatureRenderer::InScenePaint(size_t ts) {
 
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
@@ -303,6 +323,17 @@ void VizFeatureRenderer::InScenePaint(size_t ts) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    vector<string> winNames = m_paramsMgr->GetVisualizerNames();
+    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(winNames[0]);
+
+    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    Transform *t = vpParams->GetTransform(names[0]);
+    applyTransform(t);
+
+    double mvMatrix[16];
+    glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
+    vpParams->SetModelViewMatrix(mvMatrix);
 
 #ifdef DEAD
     if (vfParams->GetUseRegionFrame())
@@ -329,6 +360,9 @@ void VizFeatureRenderer::InScenePaint(size_t ts) {
     glPopMatrix();
     glMatrixMode(GL_TEXTURE);
     glPopMatrix();
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
+    vpParams->SetModelViewMatrix(mvMatrix);
     printOpenGLErrorMsg(m_winName.c_str());
 }
 
@@ -339,48 +373,12 @@ void VizFeatureRenderer::OverlayPaint(size_t ts) {
 
 #endif
 
-void VizFeatureRenderer::drawAxisTics2() {
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
-    vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
-    cout << "GetAxisOrigin() " << axisOriginCoord[0] << " " << axisOriginCoord[1] << " " << axisOriginCoord[2] << endl;
-
-    vector<double> minTic = vfParams->GetMinTics();
-    cout << "GetMinTics() " << minTic[0] << " " << minTic[1] << " " << minTic[2] << endl;
-
-    vector<double> maxTic = vfParams->GetMaxTics();
-    cout << "GetMaxTics() " << maxTic[0] << " " << maxTic[1] << " " << maxTic[2] << endl;
-
-    vector<double> ticLength = vfParams->GetTicSize();
-    cout << "GetTicSize() " << ticLength[0] << " " << ticLength[1] << " " << ticLength[2] << endl;
-
-    vector<double> ticDir = vfParams->GetTicDirs();
-    cout << "GetTicDirs() " << ticDir[0] << " " << ticDir[1] << " " << ticDir[2] << endl;
-
-    vector<double> numTics = vfParams->GetNumTics();
-    cout << "GetNumTics() " << numTics[0] << " " << numTics[1] << " " << numTics[2] << endl;
-
-    double ticWidth = vfParams->GetTicWidth();
-    cout << "GetTicWidth() " << ticWidth << endl;
-
-    double axisColor[3];
-    vfParams->GetAxisColor(axisColor);
-    cout << "GetAxisColor() " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;
-
-    int fontSize = vfParams->GetAxisFontSize();
-    cout << "GetAxisFontSize() " << fontSize << endl;
-}
-
 void VizFeatureRenderer::drawAxisTics() {
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
 
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
-    // Modify minTic, maxTic, ticLength, axisOriginCoord to user coords
-    // if using latLon, convert annotation axes to user coords
-
-    //
-
     vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
     vector<double> minTic = vfParams->GetMinTics();
     vector<double> maxTic = vfParams->GetMaxTics();
@@ -388,10 +386,10 @@ void VizFeatureRenderer::drawAxisTics() {
     vector<double> ticDir = vfParams->GetTicDirs();
     vector<double> numTics = vfParams->GetNumTics();
     double ticWidth = vfParams->GetTicWidth();
-    double minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
-
     double axisColor[3];
     vfParams->GetAxisColor(axisColor);
+
+    double minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
 
     if (vfParams->GetLatLonAxes()) {
         cout << "Entering dead code for lat/lon annotations" << endl;
@@ -419,18 +417,6 @@ void VizFeatureRenderer::drawAxisTics() {
         sticLen.push_back(ticLengthA[i]);
     }
 
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-    for (int i = 0; i < stretch.size(); i++) {
-        sorigin[i] *= stretch[i];
-
-        // minTic and maxTic can be regarded as points in world space, defining
-        // corners of a box that's projected to axes.
-        sticMin[i] *= stretch[i];
-        sticMax[i] *= stretch[i];
-    }
-#endif
-
     //TicLength needs to be stretched based on which axes are used for tic direction
 
     glDisable(GL_LIGHTING);
@@ -451,6 +437,7 @@ void VizFeatureRenderer::drawAxisTics() {
     glEnd();
     glDisable(GL_LINE_SMOOTH);
     double pointOnAxis[3];
+    double unstretchedCoordinate;
     double ticVec[3], drawPosn[3];
     //Now draw tic marks for x:
     if (numTics[0] > 1 && ticLength[0] > 0.f) {
@@ -466,7 +453,10 @@ void VizFeatureRenderer::drawAxisTics() {
         for (int i = 0; i < numTics[0]; i++) {
             pointOnAxis[0] = sticMin[0] + (float)i * (sticMax[0] - sticMin[0]) / (float)(numTics[0] - 1);
             vsub(pointOnAxis, ticVec, drawPosn);
-            renderText(pointOnAxis[0], drawPosn[0], drawPosn[1]);
+
+            unstretchedCoordinate = pointOnAxis[0] - sticMin[0] + minTicA[0];
+            renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1]);
+
             glEnable(GL_LINE_SMOOTH);
             glBegin(GL_LINES);
             glVertex3dv(drawPosn);
@@ -490,6 +480,10 @@ void VizFeatureRenderer::drawAxisTics() {
         for (int i = 0; i < numTics[1]; i++) {
             pointOnAxis[1] = sticMin[1] + (float)i * (sticMax[1] - sticMin[1]) / (float)(numTics[1] - 1);
             vsub(pointOnAxis, ticVec, drawPosn);
+
+            unstretchedCoordinate = pointOnAxis[1] - sticMin[1] + minTicA[1];
+            renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1]);
+
             glEnable(GL_LINE_SMOOTH);
             glBegin(GL_LINES);
             glVertex3dv(drawPosn);
@@ -512,9 +506,13 @@ void VizFeatureRenderer::drawAxisTics() {
             ticVec[1] = sticLen[2];
         for (int i = 0; i < numTics[2]; i++) {
             pointOnAxis[2] = sticMin[2] + (float)i * (sticMax[2] - sticMin[2]) / (float)(numTics[2] - 1);
+            vsub(pointOnAxis, ticVec, drawPosn);
+
+            unstretchedCoordinate = pointOnAxis[2] - sticMin[2] + minTicA[2];
+            renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1], drawPosn[2]);
+
             glEnable(GL_LINE_SMOOTH);
             glBegin(GL_LINES);
-            vsub(pointOnAxis, ticVec, drawPosn);
             glVertex3dv(drawPosn);
             vadd(pointOnAxis, ticVec, drawPosn);
             glVertex3dv(drawPosn);
@@ -525,7 +523,15 @@ void VizFeatureRenderer::drawAxisTics() {
     glPopAttrib();
 }
 
-void VizFeatureRenderer::renderText(double text, double llx, double lly) {
+Transform *VizFeatureRenderer::getCurrentTransform() {
+    vector<string> winNames = m_paramsMgr->GetVisualizerNames();
+    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(winNames[0]);
+    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    Transform *t = vpParams->GetTransform(names[0]);
+    return t;
+}
+
+void VizFeatureRenderer::renderText(double text, double llx, double lly, double llz) {
 
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
@@ -552,18 +558,20 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly) {
     _textObject = new TextObject();
     _textObject->Initialize(
         _fontFile, textString, fontSize,
-        //txtColor, bgColor, vpParams, TextObject::BILLBOARD,
         axisColor, txtBackground, vpParams, TextObject::BILLBOARD,
         TextObject::CENTERTOP);
 
-    double coords[] = {llx, lly, 0.f};
+    double coords[] = {llx, lly, llz};
     _textObject->drawMe(coords);
     return;
 }
 
 #ifdef DEAD
 
-void VizFeatureRenderer::flatConvertFromLonLat(double x[2], double minLon, double maxLon, double minX, double maxX) {
+void VizFeatureRenderer::flatConvertFromLonLat(
+    double x[2],
+    double minLon, double maxLon,
+    double minX, double maxX) {
     if (x[1] > 90.)
         x[1] = 90.;
     if (x[1] < -90.)
@@ -587,8 +595,17 @@ void VizFeatureRenderer::flatConvertFromLonLat(double x[2], double minLon, doubl
     }
 }
 
-void VizFeatureRenderer::ConvertAxes(bool toLatLon, const vector<long> ticDirs, const vector<double> fromMinTic, const vector<double> fromMaxTic, const vector<double> fromOrigin, const vector<double> fromTicLength,
-                                     double toMinTic[3], double toMaxTic[3], double toOrigin[3], double toTicLength[3]) {
+void VizFeatureRenderer::ConvertAxes(
+    bool toLatLon,
+    const vector<long> ticDirs,
+    const vector<double> fromMinTic,
+    const vector<double> fromMaxTic,
+    const vector<double> fromOrigin,
+    const vector<double> fromTicLength,
+    double toMinTic[3],
+    double toMaxTic[3],
+    double toOrigin[3],
+    double toTicLength[3]) {
     double ticLengthFactor[3], xmin[2], ymin[2], xmax[2], ymax[2];
     //Copy the z coordinates.
     toMinTic[2] = fromMinTic[2];
