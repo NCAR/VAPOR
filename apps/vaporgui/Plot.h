@@ -59,6 +59,10 @@ protected:
     bool Connect();
 
 private slots:
+    void _newVarChanged(int);
+    void _removeVarChanged(int);
+    void _dataSourceChanged(int);
+    void _plotClicked();
 
 private:
     VAPoR::ControlExec *_controlExec;

@@ -64,7 +64,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="dataMgrCombo">
+           <widget class="QComboBox" name="DataMgrCombo">
             <property name="minimumSize">
              <size>
               <width>150</width>
@@ -76,22 +76,10 @@
          </layout>
         </item>
         <item>
-         <widget class="QComboBox" name="addVarCombo">
-          <item>
-           <property name="text">
-            <string>Add Variable</string>
-           </property>
-          </item>
-         </widget>
+         <widget class="QComboBox" name="NewVarCombo"/>
         </item>
         <item>
-         <widget class="QComboBox" name="removeVarCombo">
-          <item>
-           <property name="text">
-            <string>Remove Variable:</string>
-           </property>
-          </item>
-         </widget>
+         <widget class="QComboBox" name="RemoveVarCombo"/>
         </item>
         <item>
          <widget class="QTableWidget" name="variablesTable"/>
