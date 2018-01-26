@@ -133,16 +133,7 @@ void TextObject::initFrameBufferTexture(void)
     // Do write to the z buffer
     glDepthMask(GL_TRUE);
 
-    GLenum glErr;
-    glErr = glGetError();
-    char *errString;
-    if (glErr != GL_NO_ERROR) {
-        while (glErr != GL_NO_ERROR) {
-            errString = (char *)gluErrorString(glErr);
-            Wasp::MyBase::SetErrMsg(errString);
-            glErr = glGetError();
-        }
-    }
+    processErrors("TextObject::initFrameBufferTexture()");
 }
 
 int TextObject::initFrameBuffer(void)
@@ -196,6 +187,9 @@ int TextObject::initFrameBuffer(void)
             glErr = glGetError();
         }
     }
+
+    processErrors("TextObject::initFrameBuffer()");
+
     return 0;
 }
 
@@ -260,9 +254,44 @@ void TextObject::removeViewerMatrix()
     }
 }
 
-// void TextObject::applyOffset() {
+void TextObject::applyTransform(Transform *t)
+{
+    vector<double> scale = t->GetScales();
+    vector<double> origin = t->GetOrigin();
+    vector<double> translate = t->GetTranslations();
+    vector<double> rotate = t->GetRotations();
+    assert(translate.size() == 3);
+    assert(rotate.size() == 3);
+    assert(scale.size() == 3);
+    assert(origin.size() == 3);
 
-//}
+    glTranslatef(origin[0], origin[1], origin[2]);
+    glScalef(scale[0], scale[1], scale[2]);
+    glRotatef(rotate[0], 1, 0, 0);
+    glRotatef(rotate[1], 0, 1, 0);
+    glRotatef(rotate[2], 0, 0, 1);
+    glTranslatef(-origin[0], -origin[1], -origin[2]);
+
+    glTranslatef(translate[0], translate[1], translate[2]);
+    processErrors("TextObject::applyTransform()");
+}
+
+void TextObject::processErrors(string functionName)
+{
+    GLenum glErr;
+    glErr = glGetError();
+    string      cppErrString;
+    const char *errString;
+    if (glErr != GL_NO_ERROR) {
+        while (glErr != GL_NO_ERROR) {
+            cppErrString.append((char *)(gluErrorString(glErr)));
+            cppErrString += " " + functionName;
+            errString = cppErrString.c_str();
+            Wasp::MyBase::SetErrMsg(errString);
+            glErr = glGetError();
+        }
+    }
+}
 
 int TextObject::drawMe(double coords[3])
 {
@@ -280,16 +309,8 @@ int TextObject::drawMe(double coords[3])
 
     removeViewerMatrix();
 
-    GLenum glErr;
-    glErr = glGetError();
-    char *errString;
-    if (glErr != GL_NO_ERROR) {
-        while (glErr != GL_NO_ERROR) {
-            errString = (char *)gluErrorString(glErr);
-            Wasp::MyBase::SetErrMsg(errString);
-            glErr = glGetError();
-        }
-    }
+    processErrors("TextObject::drawMe()");
+
     return 0;
 }
 
