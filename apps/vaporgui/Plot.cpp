@@ -33,6 +33,16 @@ Plot::Plot(QWidget *parent) {
 
     setupUi(this);
     setWindowTitle("Plot Utility");
+    P1Widget->Reinit(GeometryWidget::THREED,
+                     GeometryWidget::SINGLEPOINT,
+                     //GeometryWidget::MINMAX,
+                     GeometryWidget::AUXILIARY);
+    P2Widget->Reinit(GeometryWidget::THREED,
+                     GeometryWidget::SINGLEPOINT,
+                     //GeometryWidget::MINMAX,
+                     GeometryWidget::AUXILIARY);
+
+    //MyFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
 
     Connect();
 }
@@ -150,6 +160,10 @@ void Plot::Update() {
     VariablesTable->update();
     VariablesTable->repaint();
     VariablesTable->viewport()->update();
+
+    // Update geometry extents
+    P1Widget->Update(_controlExec->GetParamsMgr(), currentDmgr, plotParams);
+    P2Widget->Update(_controlExec->GetParamsMgr(), currentDmgr, plotParams);
 }
 
 void Plot::Connect() {

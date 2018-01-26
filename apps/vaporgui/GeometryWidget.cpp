@@ -140,6 +140,7 @@ void GeometryWidget::Reinit(
         adjustLayoutTo2D();
     } else if (_dimFlags & THREED) {
         zMinMaxGroupBox->show();
+        zSinglePointGroupBox->show();
     }
 
     if (_displayFlags & MINMAX) {
