@@ -49,8 +49,7 @@ Statistics::Statistics(QWidget* parent) : QDialog(parent), Ui_StatsWindow()
     MyGeometryWidget->Reinit( GeometryWidget::THREED,
                               GeometryWidget::MINMAX,
                               GeometryWidget::AUXILIARY );
-    FidelityWidget::DisplayFlags dspFlags = FidelityWidget::AUXILIARY;
-    MyFidelityWidget->Reinit( dspFlags );
+    MyFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
 
     Connect();
 }
