@@ -25,6 +25,7 @@
 #include <vapor/common.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
+#include <vapor/Transform.h>
 
 class FTPixmapFont;
 
@@ -83,6 +84,10 @@ namespace VAPoR {
 				OrientationFlag orientation = DEADCENTER);
 	~TextObject();
 
+	// If the scene has a transform applied to it, we must apply
+	// that transform to our text objects too
+	void applyTransform(Transform *t);
+
 //! Draw Text Object at specified x, y, z coordinate
 	int drawMe(double coords[3]);
 //! Draw Text Object at specified x, y, z coordinate, at specified time step
@@ -110,6 +115,8 @@ namespace VAPoR {
 	void removeViewerMatrix();
 
 	void setType(int type) {_type = type;}
+
+	void processErrors(string functionName);
 	
 	void SetOrientation(OrientationFlag flag) {_orientationFlag = flag;}
 

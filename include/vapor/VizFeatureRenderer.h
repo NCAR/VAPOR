@@ -23,6 +23,7 @@
 #include <vapor/Grid.h>
 #include <vapor/Renderer.h>
 #include <vapor/textRenderer.h>
+#include <vapor/Transform.h>
 
 namespace VAPoR {
 
@@ -112,8 +113,9 @@ private:
  // Draw the axis lines, while building text labels.
  //
  void drawAxisTics();
- void drawAxisTics2();
- void renderText(double text, double llx, double lly);
+ void applyTransform(Transform *t);
+ void renderText(double text, double llx, double lly, double llz = 0.f);
+ Transform* getCurrentTransform();
 
  // Draw Axis arrows
  //
