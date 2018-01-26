@@ -56,7 +56,7 @@ public:
     void Update();
 
 protected:
-    bool Connect();
+    void Connect();
 
 private slots:
     void _newVarChanged(int);

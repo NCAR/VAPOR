@@ -127,13 +127,73 @@ void Plot::Update()
     for (int i = 0; i < enabledVars.size(); i++) RemoveVarCombo->addItem(QString::fromStdString(enabledVars[i]));
     RemoveVarCombo->setCurrentIndex(0);
     RemoveVarCombo->blockSignals(false);
+
+    // Update "Variable Table"
+    VariablesTable->clear();    // This also deletes the items properly.
+    QStringList header;         // Start from the header
+    header << "Enabled Variables";
+    VariablesTable->setColumnCount(header.size());
+    VariablesTable->setHorizontalHeaderLabels(header);
+    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    VariablesTable->horizontalHeader()->setFixedHeight(30);
+    VariablesTable->verticalHeader()->setFixedWidth(30);
+
+    VariablesTable->setRowCount(enabledVars.size());    // Then work on the cells
+    for (int row = 0; row < enabledVars.size(); row++) {
+        QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdString(enabledVars[row]));
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextAlignment(Qt::AlignCenter);
+        VariablesTable->setItem(row, 0, item);
+    }
+    VariablesTable->update();
+    VariablesTable->repaint();
+    VariablesTable->viewport()->update();
 }
 
-bool Plot::Connect() { return true; }
+void Plot::Connect()
+{
+    connect(NewVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)));
+    connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)));
+}
 
-void Plot::_newVarChanged(int) {}
+void Plot::_newVarChanged(int index)
+{
+    assert(index > 0);
 
-void Plot::_removeVarChanged(int) {}
+    // Initialize pointers
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string     dsName = guiParams->GetPlotDatasetName();
+    PlotParams *    plotParams = dynamic_cast<PlotParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, PlotParams::GetClassType()));
+    std::string     varName = NewVarCombo->itemText(index).toStdString();
+
+    // Add this variable to parameter
+    std::vector<std::string> vars = plotParams->GetAuxVariableNames();
+    vars.push_back(varName);
+    plotParams->SetAuxVariableNames(vars);
+}
+
+void Plot::_removeVarChanged(int index)
+{
+    assert(index > 0);
+
+    // Initialize pointers
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string     dsName = guiParams->GetPlotDatasetName();
+    PlotParams *    plotParams = dynamic_cast<PlotParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, PlotParams::GetClassType()));
+    std::string     varName = RemoveVarCombo->itemText(index).toStdString();
+
+    // Remove this variable from parameter
+    std::vector<std::string> vars = plotParams->GetAuxVariableNames();
+    int                      rmIdx = -1;
+    for (int i = 0; i < vars.size(); i++)
+        if (vars[i] == varName) {
+            rmIdx = i;
+            break;
+        }
+    assert(rmIdx != -1);
+    vars.erase(vars.begin() + rmIdx);
+    plotParams->SetAuxVariableNames(vars);
+}
 
 void Plot::_dataSourceChanged(int) {}
 
