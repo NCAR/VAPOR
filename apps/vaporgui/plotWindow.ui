@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>717</width>
+    <width>885</width>
     <height>651</height>
    </rect>
   </property>
@@ -119,29 +119,69 @@
         <attribute name="title">
          <string>Space</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <widget class="QTabWidget" name="P1P2Widget">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="GeometryWidget" name="P1Widget">
+            <attribute name="title">
+             <string>Tab 1</string>
+            </attribute>
+           </widget>
+           <widget class="GeometryWidget" name="P2Widget">
+            <attribute name="title">
+             <string>Tab 2</string>
+            </attribute>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="MinTimeLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item>
-            <widget class="GeometryWidget" name="P1Widget" native="true"/>
+            <widget class="QLabel" name="TimeStepLabel">
+             <property name="text">
+              <string>Time Step:</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <widget class="GeometryWidget" name="P2Widget" native="true"/>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::MinimumExpanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="TimestepSpinbox"/>
            </item>
           </layout>
          </item>
          <item>
-          <widget class="QLabel" name="label_5">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
-           <property name="text">
-            <string>Temporal Coordinate:</string>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
            </property>
-          </widget>
+          </spacer>
          </item>
          <item>
           <widget class="Line" name="line_3">
