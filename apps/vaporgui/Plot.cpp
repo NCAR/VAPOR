@@ -33,16 +33,18 @@ Plot::Plot(QWidget *parent) {
 
     setupUi(this);
     setWindowTitle("Plot Utility");
+    P1P2Widget->setTabText(0, QString::fromAscii("Point 1 Position"));
+    P1P2Widget->setTabText(1, QString::fromAscii("Point 2 Position"));
     P1Widget->Reinit(GeometryWidget::THREED,
                      GeometryWidget::SINGLEPOINT,
-                     //GeometryWidget::MINMAX,
                      GeometryWidget::AUXILIARY);
     P2Widget->Reinit(GeometryWidget::THREED,
                      GeometryWidget::SINGLEPOINT,
-                     //GeometryWidget::MINMAX,
                      GeometryWidget::AUXILIARY);
+    P1Widget->hideSinglePointTabHeader();
+    P2Widget->hideSinglePointTabHeader();
 
-    //MyFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
+    MyFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
 
     Connect();
 }
@@ -160,6 +162,9 @@ void Plot::Update() {
     VariablesTable->update();
     VariablesTable->repaint();
     VariablesTable->viewport()->update();
+
+    // Update LOD, Refinement
+    MyFidelityWidget->Update(currentDmgr, _controlExec->GetParamsMgr(), statsParams);
 
     // Update geometry extents
     P1Widget->Update(_controlExec->GetParamsMgr(), currentDmgr, plotParams);

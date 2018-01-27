@@ -69,15 +69,19 @@ void PlotParams::SetMaxTS(int ts) {
     SetValueDouble(_maxTSTag, "Maximum timestep set", (double)ts);
 }
 
-int PlotParams::GetOneTS() const {
-    assert(this->GetSpaceTimeMode()); // make sure we're at "space" mode
+/*
+int PlotParams::GetOneTS() const
+{
+    assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     return (int)(GetValueDouble(_oneTSTag, 0.0));
 }
 
-void PlotParams::SetOneTS(int ts) {
-    assert(this->GetSpaceTimeMode()); // make sure we're at "space" mode
+void PlotParams::SetOneTS(int ts) 
+{
+    assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     SetValueDouble(_oneTSTag, "One timestep set", (double)ts);
 }
+*/
 
 bool PlotParams::GetSpaceTimeMode() const {
     return GetValueLong(_spaceTimeTag, (long)true);
