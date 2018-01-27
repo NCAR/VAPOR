@@ -36,8 +36,8 @@ class PlotParams : public RenderParams {
     int GetMaxTS() const;
     void SetMaxTS(int ts);
 
-    int GetOneTS() const;
-    void SetOneTS(int ts);
+    //    int  GetOneTS() const;    // RenderParams provides this parameter
+    //    void SetOneTS( int ts );
 
     bool GetSpaceTimeMode() const;
     void SetSpaceMode();
