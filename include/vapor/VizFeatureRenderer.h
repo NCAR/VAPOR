@@ -24,6 +24,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/textRenderer.h>
 #include <vapor/Transform.h>
+#include <vapor/DataMgrUtils.h>
 
 namespace VAPoR {
 
@@ -111,6 +112,7 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     void applyTransform(Transform *t);
     void renderText(double text, double llx, double lly, double llz = 0.f);
     Transform *getCurrentTransform();
+    void convertPointToLonLat(double &xCoord, double &yCoord);
 
     // Draw Axis arrows
     //
