@@ -24,21 +24,23 @@
 
 namespace VAPoR {
 
+/// PlotParams inherits RenderParams.
 class PlotParams : public RenderParams {
 public:
+    /// Constructor 1
     PlotParams(DataMgr *dmgr, ParamsBase::StateSave *ssave);
+    /// Constructor 2
     PlotParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, XmlNode *node);
+    /// Destructor
     ~PlotParams();
 
+    /// In ``time mode,'' these 4 methods get/set the time range.
     int  GetMinTS() const;
     void SetMinTS(int ts);
-
     int  GetMaxTS() const;
     void SetMaxTS(int ts);
 
-    //    int  GetOneTS() const;    // RenderParams provides this parameter
-    //    void SetOneTS( int ts );
-
+    /// Get/set the current operational mode: space or time.
     bool GetSpaceTimeMode() const;
     void SetSpaceMode();
     void SetTimeMode();
