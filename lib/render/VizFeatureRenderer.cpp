@@ -385,18 +385,11 @@ void VizFeatureRenderer::drawAxisTics()
 
     double minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
 
-    if (vfParams->GetLatLonAxes()) {
-        cout << "Entering dead code for lat/lon annotations" << endl;
-#ifdef DEAD
-        ConvertAxes(false, ticDir, minTic, maxTic, axisOriginCoord, ticLength, minTicA, maxTicA, axisOriginCoordA, ticLengthA);
-#endif
-    } else {
-        for (int i = 0; i < 3; i++) {    // copy values to (un-)modified _A variables
-            minTicA[i] = minTic[i];
-            maxTicA[i] = maxTic[i];
-            ticLengthA[i] = ticLength[i];
-            axisOriginCoordA[i] = axisOriginCoord[i];
-        }
+    for (int i = 0; i < 3; i++) {    // copy values to (un-)modified _A variables
+        minTicA[i] = minTic[i];
+        maxTicA[i] = maxTic[i];
+        ticLengthA[i] = ticLength[i];
+        axisOriginCoordA[i] = axisOriginCoord[i];
     }
 
     vector<double> sorigin, sticMin, sticMax, sticLen;
@@ -431,6 +424,7 @@ void VizFeatureRenderer::drawAxisTics()
     double pointOnAxis[3];
     double unstretchedCoordinate;
     double ticVec[3], drawPosn[3];
+
     // Now draw tic marks for x:
     if (numTics[0] > 1 && ticLength[0] > 0.f) {
         pointOnAxis[1] = sorigin[1];
@@ -447,6 +441,10 @@ void VizFeatureRenderer::drawAxisTics()
             vsub(pointOnAxis, ticVec, drawPosn);
 
             unstretchedCoordinate = pointOnAxis[0] - sticMin[0] + minTicA[0];
+            if (vfParams->GetLatLonAxes()) {
+                double tmpYCoord = sticMin[1];
+                convertPointToLonLat(unstretchedCoordinate, tmpYCoord);
+            }
             renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1]);
 
             glEnable(GL_LINE_SMOOTH);
@@ -474,6 +472,10 @@ void VizFeatureRenderer::drawAxisTics()
             vsub(pointOnAxis, ticVec, drawPosn);
 
             unstretchedCoordinate = pointOnAxis[1] - sticMin[1] + minTicA[1];
+            if (vfParams->GetLatLonAxes()) {
+                double tmpXCoord = sticMin[0];
+                convertPointToLonLat(tmpXCoord, unstretchedCoordinate);
+            }
             renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1]);
 
             glEnable(GL_LINE_SMOOTH);
@@ -513,6 +515,19 @@ void VizFeatureRenderer::drawAxisTics()
         }
     }
     glPopAttrib();
+}
+
+void VizFeatureRenderer::convertPointToLonLat(double &xCoord, double &yCoord)
+{
+    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    DataMgr *      dataMgr = m_dataStatus->GetDataMgr(names[0]);
+    double         coords[2] = {xCoord, yCoord};
+
+    int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1);
+    if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coords[0], coords[1]); }
+
+    xCoord = coords[0];
+    yCoord = coords[1];
 }
 
 Transform *VizFeatureRenderer::getCurrentTransform()
