@@ -26,6 +26,7 @@
 #include "ui_vizFeaturesTab.h"
 #include "RangeCombos.h"
 #include "VaporTable.h"
+#include <vapor/AxisAnnotation.h>
 
 QT_USE_NAMESPACE
 
@@ -66,6 +67,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     string GetType() const { return GetClassType(); }
 
   protected slots:
+    void setAxisDataMgr(int);
     void setAxisAnnotation(bool);
     void setLatLonAnnotation(bool);
     void setAxisTextSize(int);
@@ -84,7 +86,6 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void setBackgroundColor();
     void setUseRegionFrame();
     void setUseDomainFrame();
-    void setAxisAnnotation2();
     void setTimeColor();
     void setLatLonAnnot(bool);
     void setUseAxisArrows();
@@ -92,9 +93,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void timeLLXChanged();
     void timeLLYChanged();
     void timeSizeChanged();
-    void setXTicOrient(int);
-    void setYTicOrient(int);
-    void setZTicOrient(int);
+    void setCurrentDataMgr(int);
 
   private:
     Combo *_textSizeCombo;
@@ -120,6 +119,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void updateAxisColor();
     void updateTimeColor();
     void updateAxisAnnotations();
+    void updateDataMgrCombo();
     void updateAnnotationCheckbox();
     void updateLatLonCheckbox();
     void updateAnnotationTable();
@@ -133,6 +133,8 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void initializeAnnotations();
     void initializeAnnotationExtents();
     void initializeTicSizes();
+
+    VAPoR::AxisAnnotation *_currentAxisAnnotation;
 
     virtual void _confirmText();
     virtual void _updateTab();

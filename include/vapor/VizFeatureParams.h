@@ -25,6 +25,7 @@
 
 #include <vapor/common.h>
 #include <vapor/ParamsBase.h>
+#include <vapor/AxisAnnotation.h>
 
 using namespace Wasp;
 
@@ -101,6 +102,9 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
 
     //! Set background color
     void SetBackgroundColor(std::vector<double> color);
+
+    void SetActiveDataMgr(string dmName);
+    string GetActiveDataMgr() const;
 
     //! Enable or disable axis annotation
     void SetAxisAnnotation(bool val) {
@@ -194,6 +198,16 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
         return (0 != GetValueLong(_latLonAxesTag, (long)false));
     }
 
+    string GetAxisDataMgr() const {
+        return GetValueString(_axisDataMgrTag, "");
+    }
+
+    void SetAxisDataMgr(string dataMgr) {
+        SetValueString(_axisDataMgrTag,
+                       "Set DataManager currently associated with the axis annotations",
+                       dataMgr);
+    }
+
     //! Set axis arrow position
     void SetAxisArrowCoords(vector<double> coords);
 
@@ -223,10 +237,13 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     static void changeStretch(vector<double> prevStretch, vector<double> newStretch);
 #endif
 
+    VAPoR::AxisAnnotation *_axisAnnotation;
+
     static const string _domainColorTag;
     static const string _domainFrameTag;
     static const string _regionFrameTag;
     static const string _regionColorTag;
+    static const string _activDataMgrTag;
     static const string _axisColorTag;
     static const string _axisDigitsTag;
     static const string _axisTextHeightTag;
@@ -241,8 +258,10 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     static const string _backgroundColorTag;
     static const string _axisAnnotationEnabledTag;
     static const string _latLonAxesTag;
+    static const string _axisDataMgrTag;
     static const string _axisArrowCoordsTag;
     static const string _showAxisArrowsTag;
+    static const string _activeDataMgrTag;
     static vector<double> _previousStretch;
 
     void _init();
