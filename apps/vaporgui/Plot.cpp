@@ -182,7 +182,7 @@ void Plot::Update()
     VariablesTable->viewport()->update();
 
     // Update LOD, Refinement
-    MyFidelityWidget->Update( currentDmgr,  _controlExec->GetParamsMgr(), statsParams );
+    MyFidelityWidget->Update( currentDmgr,  _controlExec->GetParamsMgr(), plotParams );
 
     // Update geometry extents
     P1Widget->Update( _controlExec->GetParamsMgr(), currentDmgr, plotParams );
@@ -244,4 +244,22 @@ void Plot::_dataSourceChanged( int )
 {}
     
 void Plot::_plotClicked()
+{}
+    
+void Plot::_spaceTimeModeChanged( bool )
+{}
+
+void Plot::_spaceModeP1P2Changed()
+{}
+
+void Plot::_spaceModeTimeChanged()
+{}
+
+void Plot::_timeModePointChanged()
+{}
+
+void Plot::_timeModeT1T2Changed()
+{}
+
+void Plot::_fidelityChanged()
 {}
