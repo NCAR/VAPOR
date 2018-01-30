@@ -27,7 +27,8 @@ public:
 signals:
     void PointChanged();
 
-    protect : int             _dimensionality;
+private:
+    int                       _dimensionality;
     std::vector<QSlider *>    _sliders;      /// _sliders.size() == _dimensionality
     std::vector<QLineEdits *> _lineEdits;    /// _lineEdits.size() == _dimensionality
 }
