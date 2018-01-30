@@ -27,6 +27,7 @@
 #include "ui_vizFeaturesTab.h"
 #include "RangeCombos.h"
 #include "VaporTable.h"
+#include <vapor/AxisAnnotation.h>
 
 QT_USE_NAMESPACE
 
@@ -74,6 +75,7 @@ public:
 
 	
 protected slots:
+	void setAxisDataMgr(int);
 	void setAxisAnnotation(bool);
 	void setLatLonAnnotation(bool);
 	void setAxisTextSize(int);
@@ -92,17 +94,14 @@ protected slots:
 	void setBackgroundColor();
 	void setUseRegionFrame();
 	void setUseDomainFrame();
-void setAxisAnnotation2();
 	void setTimeColor();
-void setLatLonAnnot(bool);
+	void setLatLonAnnot(bool);
 	void setUseAxisArrows();
 	void timeAnnotationChanged();
 	void timeLLXChanged();
 	void timeLLYChanged();
 	void timeSizeChanged();
-	void setXTicOrient(int);
-	void setYTicOrient(int);
-	void setZTicOrient(int);
+	void setCurrentDataMgr(int);
 
 private:
 
@@ -131,6 +130,7 @@ private:
 	void updateAxisColor();
 	void updateTimeColor();
 	void updateAxisAnnotations();
+	void updateDataMgrCombo();
 	void updateAnnotationCheckbox();
 	void updateLatLonCheckbox();
 	void updateAnnotationTable();
@@ -144,6 +144,8 @@ private:
 	void initializeAnnotations();
 	void initializeAnnotationExtents();
 	void initializeTicSizes();
+
+	VAPoR::AxisAnnotation* _currentAxisAnnotation;
 
 	virtual void _confirmText();
 	virtual void _updateTab();

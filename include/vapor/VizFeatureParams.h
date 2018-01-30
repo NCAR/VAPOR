@@ -26,6 +26,7 @@
 
 #include <vapor/common.h>
 #include <vapor/ParamsBase.h>
+#include <vapor/AxisAnnotation.h>
 
 using namespace Wasp;
 
@@ -109,6 +110,8 @@ public:
 	//! Set background color
 	void SetBackgroundColor(std::vector<double> color);
 
+	void SetActiveDataMgr(string dmName);
+	string GetActiveDataMgr() const;
 
 	//! Enable or disable axis annotation
 	void SetAxisAnnotation(bool val){
@@ -199,6 +202,17 @@ public:
 		return (0 != GetValueLong(_latLonAxesTag, (long) false));
 	}
 
+	string GetAxisDataMgr() const {
+		return GetValueString(_axisDataMgrTag, "");
+	}
+
+	void SetAxisDataMgr(string dataMgr) {
+		SetValueString(_axisDataMgrTag, 
+			"Set DataManager currently associated with the axis annotations",
+			 dataMgr
+		);
+	}
+
 	//! Set axis arrow position
 	void SetAxisArrowCoords(vector<double> coords);
 
@@ -229,10 +243,13 @@ private:
 	static void changeStretch(vector<double> prevStretch, vector<double> newStretch);
 #endif
 
+	VAPoR::AxisAnnotation* _axisAnnotation;
+
 	static const string _domainColorTag;
 	static const string _domainFrameTag;
 	static const string _regionFrameTag;
 	static const string _regionColorTag;
+	static const string _activDataMgrTag;
 	static const string _axisColorTag;
 	static const string _axisDigitsTag;
 	static const string _axisTextHeightTag;
@@ -247,15 +264,17 @@ private:
 	static const string _backgroundColorTag;
 	static const string _axisAnnotationEnabledTag;
 	static const string _latLonAxesTag;
+	static const string _axisDataMgrTag;
 	static const string _axisArrowCoordsTag;
 	static const string _showAxisArrowsTag;
+	static const string _activeDataMgrTag;
 	static vector<double> _previousStretch;
 
 	void _init();
 
- void m_getColor(double color[3], string tag) const;
- void _getColor(vector <double> &color, string tag) const;
- void m_setColor(vector<double> color, string tag, string msg);
+	void m_getColor(double color[3], string tag) const;
+	void _getColor(vector <double> &color, string tag) const;
+	void m_setColor(vector<double> color, string tag, string msg);
 	
 };
 
