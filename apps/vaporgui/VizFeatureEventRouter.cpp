@@ -27,7 +27,8 @@
 #include <qmessagebox.h>
 #include <qlineedit.h>
 #include "GL/glew.h"
-#include "vapor/VizFeatureParams.h"
+#include <vapor/VizFeatureParams.h>
+
 #include "ui_vizFeaturesTab.h"
 #include "qcolordialog.h"
 
@@ -49,6 +50,8 @@ VizFeatureEventRouter::VizFeatureEventRouter(QWidget *parent, ControlExec *ce) :
 {
     setupUi(this);
 
+    _currentAxisAnnotation = NULL;
+
     _textSizeCombo = new Combo(axisTextSizeEdit, axisTextSizeSlider, true);
     _digitsCombo = new Combo(axisDigitsEdit, axisDigitsSlider, true);
     _ticWidthCombo = new Combo(ticWidthEdit, ticWidthSlider);
@@ -56,30 +59,6 @@ VizFeatureEventRouter::VizFeatureEventRouter(QWidget *parent, ControlExec *ce) :
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
 
     connectAnnotationWidgets();
-
-    // Disabled for now. Need to add support in VizFeatureRenderer
-    //
-    /*xMinTicEdit->setEnabled(false);
-    yMinTicEdit->setEnabled(false);
-    zMinTicEdit->setEnabled(false);
-    xMaxTicEdit->setEnabled(false);
-    yMaxTicEdit->setEnabled(false);
-    zMaxTicEdit->setEnabled(false);
-    xNumTicsEdit->setEnabled(false);
-    yNumTicsEdit->setEnabled(false);
-    zNumTicsEdit->setEnabled(false);
-    xTicSizeEdit->setEnabled(false);
-    yTicSizeEdit->setEnabled(false);
-    zTicSizeEdit->setEnabled(false);
-    axisOriginXEdit->setEnabled(false);
-    axisOriginYEdit->setEnabled(false);
-    axisOriginZEdit->setEnabled(false);
-    xTicOrientCombo->setEnabled(false);
-    yTicOrientCombo->setEnabled(false);
-    zTicOrientCombo->setEnabled(false);
-    labelHeightEdit->setEnabled(false);
-    labelDigitsEdit->setEnabled(false);
-    ticWidthEdit->setEnabled(false);*/
 
     _annotationsInitialized = false;
     _animConnected = false;
@@ -100,7 +79,9 @@ void VizFeatureEventRouter::connectAnnotationWidgets()
     connect(xTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrientation(int)));
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
-    connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
+    // connect(dataMgrSelectorCombo, SIGNAL(currentIndexChanged(int)),
+    //	this, SLOT(setCurrentDataMgr(int)));
+    connect(dataMgrSelectorCombo, SIGNAL(activated(int)), this, SLOT(setCurrentDataMgr(int)));
 }
 
 /**********************************************************
@@ -113,58 +94,13 @@ void VizFeatureEventRouter::hookUpTab()
     connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setUseDomainFrame()));
     connect(regionFrameCheckbox, SIGNAL(clicked()), this, SLOT(setUseRegionFrame()));
     connect(regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
-    connect(axisAnnotationCheckbox, SIGNAL(clicked()), this, SLOT(setAxisAnnotation2()));
     connect(axisArrowCheckbox, SIGNAL(clicked()), this, SLOT(setUseAxisArrows()));
     connect(arrowXEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
     connect(arrowYEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
     connect(arrowZEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    // Slots associated with axis annotation:
-    connect(xMinTicEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(yMinTicEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(zMinTicEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(xMaxTicEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(yMaxTicEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(zMaxTicEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(xNumTicsEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(yNumTicsEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(zNumTicsEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(xTicSizeEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(yTicSizeEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(zTicSizeEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(axisOriginYEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(axisOriginZEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(axisOriginXEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(latLonCheckbox, SIGNAL(toggled(bool)), this, SLOT(setLatLonAnnot(bool)));
-    connect(xTicOrientCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrient(int)));
-    connect(yTicOrientCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrient(int)));
-    connect(zTicOrientCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrient(int)));
-    connect(labelHeightEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(labelDigitsEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(ticWidthEdit, SIGNAL(textChanged(const QString &)), this, SLOT(setVizFeatureTextChanged(const QString &)));
-
-    connect(xMinTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(yMinTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(zMinTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(xMaxTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(yMaxTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(zMaxTicEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(xNumTicsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(yNumTicsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(zNumTicsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(xTicSizeEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(yTicSizeEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(zTicSizeEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(axisOriginYEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(axisOriginZEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(axisOriginXEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(labelHeightEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(labelDigitsEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-    connect(ticWidthEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
     connect(arrowXEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
     connect(arrowYEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
     connect(arrowZEdit, SIGNAL(returnPressed()), this, SLOT(vizfeatureReturnPressed()));
-
-    connect(axisColorButton, SIGNAL(clicked()), this, SLOT(setAxisColor()));
 
     connect(timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
     connect(timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
@@ -276,14 +212,6 @@ void VizFeatureEventRouter::_updateTab()
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
     regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
 
-    bool axisAnnot = vParams->GetAxisAnnotation();
-    axisAnnotationCheckbox->setChecked(axisAnnot);
-    if (axisAnnot) {
-        axisAnnotationFrame->show();
-    } else {
-        axisAnnotationFrame->hide();
-    }
-
     // Axis arrows:
     //
     vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
@@ -311,19 +239,29 @@ void VizFeatureEventRouter::_updateTab()
     pal2.setColor(QPalette::Base, newColor);
     backgroundColorEdit->setPalette(pal2);
 
-#ifdef DEAD
-    string projString = _controlExec->GetDataMgr()->GetMapProjection();
-#else
-    string projString;
-#endif
-    if (projString.size() == 0)
-        latLonCheckbox->setEnabled(false);
-    else {
-        latLonCheckbox->setEnabled(true);
-        latLonCheckbox->setChecked(vParams->GetLatLonAxes());
+    adjustSize();
+}
+
+void VizFeatureEventRouter::updateDataMgrCombo()
+{
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    string            currentSelection = vParams->GetActiveDataMgr();
+
+    ParamsMgr *    pMgr = _controlExec->GetParamsMgr();
+    vector<string> names = pMgr->GetDataMgrNames();
+
+    dataMgrSelectorCombo->clear();
+    for (int i = 0; i < names.size(); i++) {
+        QString name = QString::fromStdString(names[i]);
+        dataMgrSelectorCombo->addItem(name);
     }
 
-    adjustSize();
+    QString qCurrentSelection = QString::fromStdString(currentSelection);
+    int     index = dataMgrSelectorCombo->findText(qCurrentSelection);
+    if (index > 0)
+        dataMgrSelectorCombo->setCurrentIndex(index);
+    else
+        dataMgrSelectorCombo->setCurrentIndex(0);
 }
 
 void VizFeatureEventRouter::updateAnnotationCheckbox()
@@ -338,6 +276,18 @@ void VizFeatureEventRouter::updateAnnotationCheckbox()
 
 void VizFeatureEventRouter::updateLatLonCheckbox()
 {
+    string      dmName = dataMgrSelectorCombo->currentText().toStdString();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    DataMgr *   dataMgr = dataStatus->GetDataMgr(dmName);
+    assert(dataMgr);
+    string projString = dataMgr->GetMapProjection();
+
+    if (projString.size() == 0) {
+        latLonAnnotationCheckbox->setEnabled(false);
+        return;
+    } else
+        latLonAnnotationCheckbox->setEnabled(true);
+
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
     bool              annotateLatLon = vParams->GetLatLonAxes();
     if (annotateLatLon)
@@ -384,49 +334,6 @@ void VizFeatureEventRouter::updateAnnotationTable()
     colHeaders.push_back("Z");
 
     _annotationVaporTable->Update(5, 3, values, rowHeaders, colHeaders);
-}
-
-void VizFeatureEventRouter::updateOldGui()
-{
-    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    values;
-    vector<double>    numtics = vParams->GetNumTics();
-    values.insert(values.end(), numtics.begin(), numtics.end());
-    vector<double> ticSizes = vParams->GetTicSize();
-    values.insert(values.end(), ticSizes.begin(), ticSizes.end());
-    vector<double> minTics = vParams->GetMinTics();
-    values.insert(values.end(), minTics.begin(), minTics.end());
-    vector<double> maxTics = vParams->GetMaxTics();
-    values.insert(values.end(), maxTics.begin(), maxTics.end());
-    vector<double> orig = vParams->GetAxisOrigin();
-    values.insert(values.end(), orig.begin(), orig.end());
-    vector<double> mintics = vParams->GetMinTics();
-    vector<double> maxtics = vParams->GetMaxTics();
-
-    double clr[3];
-    axisOriginXEdit->setText(QString::number(orig[0]));
-    axisOriginYEdit->setText(QString::number(orig[1]));
-    axisOriginZEdit->setText(QString::number(orig[2]));
-    xMinTicEdit->setText(QString::number(mintics[0]));
-    yMinTicEdit->setText(QString::number(mintics[1]));
-    zMinTicEdit->setText(QString::number(mintics[2]));
-    xMaxTicEdit->setText(QString::number(maxtics[0]));
-    yMaxTicEdit->setText(QString::number(maxtics[1]));
-    zMaxTicEdit->setText(QString::number(maxtics[2]));
-    xTicSizeEdit->setText(QString::number(ticSizes[0]));
-    yTicSizeEdit->setText(QString::number(ticSizes[1]));
-    zTicSizeEdit->setText(QString::number(ticSizes[2]));
-    xNumTicsEdit->setText(QString::number(numtics[0]));
-    yNumTicsEdit->setText(QString::number(numtics[1]));
-    zNumTicsEdit->setText(QString::number(numtics[2]));
-    labelHeightEdit->setText(QString::number(vParams->GetAxisTextHeight()));
-    labelDigitsEdit->setText(QString::number(vParams->GetAxisDigits()));
-    ticWidthEdit->setText(QString::number(vParams->GetTicWidth()));
-    QPalette pal3(axisColorEdit->palette());
-    vParams->GetAxisColor(clr);
-    QColor newColor = QColor((int)(clr[0] * 255), (int)(clr[1] * 255), (int)(clr[2] * 255));
-    pal3.setColor(QPalette::Base, newColor);
-    axisColorEdit->setPalette(pal3);
 }
 
 void VizFeatureEventRouter::getActiveExtents(vector<double> &minExts, vector<double> &maxExts)
@@ -483,6 +390,7 @@ void VizFeatureEventRouter::updateAxisAnnotations()
 {
     if (!_annotationsInitialized) initializeAnnotations();
 
+    updateDataMgrCombo();
     updateAnnotationCheckbox();
     updateLatLonCheckbox();
     updateTicOrientationCombos();
@@ -511,13 +419,6 @@ void VizFeatureEventRouter::axisAnnotationTableChanged()
     values = getTableRow(0);
     vfParams->SetNumTics(values);
 
-    /*vector<double> foo;
-    _annotationVaporTable->GetRow(0, foo);
-
-    for (int i=0; i<3; i++) {
-        cout << "v&foo " << i << " " << values[i] << " " << foo[i] << endl;
-    }*/
-
     values = getTableRow(1);
     vfParams->SetTicSize(values);
 
@@ -529,6 +430,23 @@ void VizFeatureEventRouter::axisAnnotationTableChanged()
 
     values = getTableRow(4);
     vfParams->SetAxisOrigin(values);
+}
+
+void VizFeatureEventRouter::setCurrentDataMgr(int index)
+{
+    QString qDataMgr = dataMgrSelectorCombo->itemText(index);
+    string  dataMgr = qDataMgr.toStdString();
+
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vfParams->SetActiveDataMgr(dataMgr);
+}
+
+void VizFeatureEventRouter::setAxisDataMgr(int index)
+{
+    string dataMgr = dataMgrSelectorCombo->currentText().toStdString();
+
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    vfParams->SetAxisDataMgr(dataMgr);
 }
 
 vector<double> VizFeatureEventRouter::getTableRow(int row)
@@ -642,7 +560,6 @@ void VizFeatureEventRouter::updateAxisColor()
     vector<double>    rgb;
     vfParams->GetAxisColor(rgb);
 
-    updateColorHelper(rgb, oldAxisColorEdit);
     updateColorHelper(rgb, axisColorEdit);
 }
 
@@ -808,28 +725,6 @@ void VizFeatureEventRouter::setZTicOrientation(int)
     vfParams->SetTicDirs(ticDir);
 }
 
-void VizFeatureEventRouter::setXTicOrient(int)
-{
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    ticDir = vfParams->GetTicDirs();
-    ticDir[0] = xTicOrientCombo->currentIndex() + 1;
-    vfParams->SetTicDirs(ticDir);
-}
-void VizFeatureEventRouter::setYTicOrient(int)
-{
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    ticDir = vfParams->GetTicDirs();
-    ticDir[1] = yTicOrientCombo->currentIndex() * 2;
-    vfParams->SetTicDirs(ticDir);
-}
-void VizFeatureEventRouter::setZTicOrient(int)
-{
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    ticDir = vfParams->GetTicDirs();
-    ticDir[2] = zTicOrientCombo->currentIndex();
-    vfParams->SetTicDirs(ticDir);
-}
-
 void VizFeatureEventRouter::setLatLonAnnot(bool val)
 {
     confirmText();
@@ -866,19 +761,6 @@ void VizFeatureEventRouter::setAxisTextSize(int size)
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetAxisFontSize(size);
-}
-
-// Response to a click on axisAnnotation checkbox:
-void VizFeatureEventRouter::setAxisAnnotation2()
-{
-    bool annotate = axisAnnotationCheckbox->isChecked();
-    if (annotate) {
-        axisAnnotationFrame->show();
-    } else {
-        axisAnnotationFrame->hide();
-    }
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetAxisAnnotation(annotate);
 }
 
 void VizFeatureEventRouter::setUseAxisArrows()

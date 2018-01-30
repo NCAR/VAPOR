@@ -36,6 +36,7 @@ const string   VizFeatureParams::_domainColorTag = "DomainColor";
 const string   VizFeatureParams::_regionFrameTag = "RegionFrame";
 const string   VizFeatureParams::_regionColorTag = "RegionColor";
 const string   VizFeatureParams::_backgroundColorTag = "BackgroundColor";
+const string   VizFeatureParams::_activeDataMgrTag = "ActiveDataMgr";
 const string   VizFeatureParams::_axisAnnotationEnabledTag = "AxisAnnotation";
 const string   VizFeatureParams::_axisColorTag = "AxisColor";
 const string   VizFeatureParams::_axisDigitsTag = "AxisDigits";
@@ -47,6 +48,7 @@ const string   VizFeatureParams::_ticSizeTag = "TicSizes";
 const string   VizFeatureParams::_minTicsTag = "TicMinPositions";
 const string   VizFeatureParams::_maxTicsTag = "TicMaxPositions";
 const string   VizFeatureParams::_numTicsTag = "NumberTics";
+const string   VizFeatureParams::_axisDataMgrTag = "AxisDataMgr";
 const string   VizFeatureParams::_latLonAxesTag = "LatLonAxes";
 const string   VizFeatureParams::_axisOriginTag = "AxisOrigin";
 const string   VizFeatureParams::_showAxisArrowsTag = "ShowAxisArrows";
@@ -146,6 +148,14 @@ void VizFeatureParams::SetRegionColor(vector<double> color) { m_setColor(color, 
 void VizFeatureParams::GetBackgroundColor(double color[3]) const { m_getColor(color, _backgroundColorTag); }
 
 void VizFeatureParams::SetBackgroundColor(vector<double> color) { m_setColor(color, _backgroundColorTag, "Set background color"); }
+
+string VizFeatureParams::GetActiveDataMgr() const { return GetValueString(_activeDataMgrTag, ""); }
+
+void VizFeatureParams::SetActiveDataMgr(string dmName)
+{
+    string msg = "Setting active DataMgr w.r.t. axis annotations";
+    SetValueString(_activeDataMgrTag, msg, dmName);
+}
 
 void VizFeatureParams::GetAxisColor(double color[3]) const { m_getColor(color, _axisColorTag); }
 
