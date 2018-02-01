@@ -1,5 +1,5 @@
-#include "qslideredit.h"
-#include "ui_qslideredit.h"
+#include "QSliderEdit.h"
+#include "ui_QSliderEdit.h"
 
 #include <cmath>
 #include <iostream>
@@ -74,6 +74,6 @@ void QSliderEdit::SetDecimals(int dec) {
         ;
 }
 
-double QSliderEdit::GetCurrentVal() {
+double QSliderEdit::GetCurrentValue() {
     return (_ui->_myLineEdit->text().toDouble());
 }

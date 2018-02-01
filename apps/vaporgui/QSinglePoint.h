@@ -14,13 +14,19 @@ class QSinglePoint : public QWidget {
     explicit QSinglePoint(QWidget *parent = 0);
     ~QSinglePoint();
 
+    void SetDimensionality(int);
+    int GetDimensionality();
+    void GetCurrentPoint(std::vector<double> &);
+
   signals:
+    void PointUpdated();
 
   private slots:
-    void _pointChanged(double);
+    void _coordinateChanged(double);
 
   private:
     Ui::QSinglePoint *_ui;
+    int _dimensionality;
 };
 
 #endif // QSINGLEPOINT_H

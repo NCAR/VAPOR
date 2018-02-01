@@ -219,7 +219,7 @@
   <customwidget>
    <class>QSinglePoint</class>
    <extends>QWidget</extends>
-   <header location="global">qsinglepoint.h</header>
+   <header location="global">QSinglePoint.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
