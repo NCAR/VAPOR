@@ -26,6 +26,11 @@ QSliderEdit::QSliderEdit(QWidget *parent) :
 QSliderEdit::~QSliderEdit()
 {
     delete _ui;
+    if( _validator )
+    {
+        delete _validator;
+        _validator = NULL;
+    }
 }
 
     
