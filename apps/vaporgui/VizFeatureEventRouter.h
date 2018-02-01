@@ -124,17 +124,14 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void updateLatLonCheckbox();
     void updateAnnotationTable();
     void updateTicOrientationCombos();
-    void updateOldGui();
 
-    void invalidateText();
+    AxisAnnotation *_getCurrentAxisAnnotation();
 
     void getActiveExtents(
         vector<double> &minExts, vector<double> &maxExts);
     void initializeAnnotations();
     void initializeAnnotationExtents();
     void initializeTicSizes();
-
-    VAPoR::AxisAnnotation *_currentAxisAnnotation;
 
     virtual void _confirmText();
     virtual void _updateTab();

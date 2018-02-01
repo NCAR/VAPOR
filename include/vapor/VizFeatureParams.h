@@ -60,6 +60,10 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     VizFeatureParams(
         ParamsBase::StateSave *ssave, XmlNode *node);
 
+    //! Copy from already existing instance
+    //
+    VizFeatureParams(const VizFeatureParams &rhs);
+
     virtual ~VizFeatureParams(){};
 
     //! Obtain domain frame color
@@ -103,127 +107,57 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     //! Set background color
     void SetBackgroundColor(std::vector<double> color);
 
-    void SetActiveDataMgr(string dmName);
-    string GetActiveDataMgr() const;
+    /*void SetAxisAnnotationEnabled(bool val);
+	bool GetAxisAnnotationEnabled() const;
 
-    //! Enable or disable axis annotation
-    void SetAxisAnnotation(bool val) {
-        SetValueLong(_axisAnnotationEnabledTag, "toggle axis annotation", (long)val);
-    }
+	std::vector<double> GetAxisColor() const;
+	void SetAxisColor(std::vector<double> color);
 
-    //! query axis annotation enabled
-    bool GetAxisAnnotation() const {
-        return (0 != GetValueLong(_axisAnnotationEnabledTag, (long)false));
-    }
+	std::vector<double> GetAxisBackgroundColor() const;
+	void SetAxisBackgroundColor(std::vector<double> color);
 
-    //! Obtain axis color
-    void GetAxisColor(double color[3]) const;
-    void GetAxisColor(std::vector<double> &color) const {
-        _getColor(color, _axisColorTag);
-    }
+	void SetNumTics(std::vector<double> ticnums);
+	vector<double> GetNumTics() const;
 
-    //! Set axis color
-    void SetAxisColor(vector<double> color);
+	void SetAxisOrigin(std::vector<double> orig);
+	std::vector<double> GetAxisOrigin() const;
 
-    //! Set number of tics in x,y,z direction
-    void SetNumTics(vector<double> ticnums);
+	void SetMinTics(std::vector<double> minTics);
+	std::vector<double> GetMinTics() const;
 
-    //! Get number of tics in x,y,z direction
-    vector<double> GetNumTics() const;
+	void SetMaxTics(std::vector<double> maxTics);
+	std::vector<double> GetMaxTics() const;
 
-    //! Set axis origin
-    void SetAxisOrigin(vector<double> orig);
+	void SetTicSize(std::vector<double> ticSizes);
+	std::vector<double> GetTicSize() const;
 
-    //! Get min tic mark in x,y,z axes
-    vector<double> GetAxisOrigin() const;
+	void SetTicDirs(std::vector<double> ticDirs);
+	std::vector<double> GetTicDirs() const;
 
-    //! Set min tic mark in x,y,z axes
-    void SetMinTics(vector<double> ticmins);
+	double GetTicWidth() const;
+	void SetTicWidth(double val);
 
-    //! Get min tic mark in x,y,z axes
-    vector<double> GetMinTics() const;
+	long GetAxisTextHeight() const;
+	void SetAxisTextHeight(long val);
 
-    //! Set max tic mark in x,y,z axes
-    void SetMaxTics(vector<double> ticmaxs);
+	long GetAxisDigits() const;
+	void SetAxisDigits(long val);
 
-    //! Get max tic mark in x,y,z axes
-    vector<double> GetMaxTics() const;
+	void SetLatLonAxesEnabled(bool val);
+	bool GetLatLonAxesEnabled() const;*/
 
-    //! Set tic size on x,y,z axes
-    void SetTicSize(vector<double> ticsizes);
+    string GetCurrentAxisDataMgr() const;
+    void SetCurrentAxisDataMgr(string dataMgr);
 
-    //! Get tic size on x,y,z axes
-    vector<double> GetTicSize() const;
+    AxisAnnotation *GetAxisAnnotation(string dataMgr = "");
 
-    //! Set tic direction on x,y,z axes
-    void SetTicDirs(vector<double> ticdirs);
+    void SetAxisArrowCoords(std::vector<double> coords);
+    std::vector<double> GetAxisArrowCoords() const;
 
-    //! Get tic direction on x,y,z axes
-    vector<double> GetTicDirs() const;
-
-    //! Get tic width
-    double GetTicWidth() const {
-        return GetValueDouble(_ticWidthTag, 1.0);
-    }
-    //! Set tic width
-    void SetTicWidth(double val) {
-        if (val < 1)
-            val = 1;
-        SetValueDouble(_ticWidthTag, "Set tic width", val);
-    }
-    long GetAxisTextHeight() const {
-        return GetValueLong(_axisTextHeightTag, 10);
-    }
-    void SetAxisTextHeight(long val) {
-        if (val < 1)
-            val = 1;
-        SetValueLong(_axisTextHeightTag, "Set axis text height", val);
-    }
-    long GetAxisDigits() const {
-        return GetValueLong(_axisDigitsTag, 2);
-    }
-    void SetAxisDigits(long val) {
-        if (val < 0)
-            val = 4;
-        SetValueLong(_axisDigitsTag, "Set axis num digits", val);
-    }
-
-    //! Enable or disable axis annotation
-    void SetLatLonAxes(bool val) {
-        SetValueLong(_latLonAxesTag, "toggle axes lat/lon", (long)val);
-    }
-
-    //! query axis annotation enabled
-    bool GetLatLonAxes() const {
-        return (0 != GetValueLong(_latLonAxesTag, (long)false));
-    }
-
-    string GetAxisDataMgr() const {
-        return GetValueString(_axisDataMgrTag, "");
-    }
-
-    void SetAxisDataMgr(string dataMgr) {
-        SetValueString(_axisDataMgrTag,
-                       "Set DataManager currently associated with the axis annotations",
-                       dataMgr);
-    }
-
-    //! Set axis arrow position
-    void SetAxisArrowCoords(vector<double> coords);
-
-    //! Get tic size on x,y,z axes
-    vector<double> GetAxisArrowCoords() const;
-
-    bool GetShowAxisArrows() const {
-        return (0 != GetValueLong(_showAxisArrowsTag, (long)false));
-    }
-
-    void SetShowAxisArrows(bool val) {
-        SetValueLong(_showAxisArrowsTag, "Toggle Axis Arrows", val);
-    }
+    bool GetShowAxisArrows() const;
+    void SetShowAxisArrows(bool val);
 
     void SetAxisFontSize(int size);
-
     int GetAxisFontSize();
 
     // Get static string identifier for this params class
@@ -237,13 +171,13 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     static void changeStretch(vector<double> prevStretch, vector<double> newStretch);
 #endif
 
-    VAPoR::AxisAnnotation *_axisAnnotation;
+    ParamsContainer *_axisAnnotations;
 
     static const string _domainColorTag;
     static const string _domainFrameTag;
     static const string _regionFrameTag;
     static const string _regionColorTag;
-    static const string _activDataMgrTag;
+
     static const string _axisColorTag;
     static const string _axisDigitsTag;
     static const string _axisTextHeightTag;
@@ -257,11 +191,12 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     static const string _axisOriginTag;
     static const string _backgroundColorTag;
     static const string _axisAnnotationEnabledTag;
+    static const string _axisAnnotationsTag;
     static const string _latLonAxesTag;
-    static const string _axisDataMgrTag;
+
     static const string _axisArrowCoordsTag;
     static const string _showAxisArrowsTag;
-    static const string _activeDataMgrTag;
+    static const string _currentAxisDataMgrTag;
     static vector<double> _previousStretch;
 
     void _init();
