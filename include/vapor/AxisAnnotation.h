@@ -76,6 +76,9 @@ class PARAMS_API AxisAnnotation : public ParamsBase {
     void SetAxisFontSize(int size);
     int GetAxisFontSize() const;
 
+    bool GetAxisAnnotationInitialized() const;
+    void SetAxisAnnotationInitialized(bool val);
+
     static string GetClassType() {
         return ("AxisAnnotation");
     }
@@ -96,6 +99,7 @@ class PARAMS_API AxisAnnotation : public ParamsBase {
     static const string _annotationEnabledTag;
     static const string _latLonAxesTag;
     static const string _dataMgrTag;
+    static const string _initializedTag;
 };
 }; // namespace VAPoR
 

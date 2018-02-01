@@ -284,18 +284,18 @@ int VizFeatureParams::GetAxisFontSize() {
 }
 */
 
-string VizFeatureParams::GetCurrentAxisDataMgr() const {
+string VizFeatureParams::GetCurrentAxisDataMgrName() const {
     return GetValueString(_currentAxisDataMgrTag, "");
 }
-void VizFeatureParams::SetCurrentAxisDataMgr(string dmName) {
+void VizFeatureParams::SetCurrentAxisDataMgrName(string dmName) {
     string msg = "Setting current DataMgr w.r.t. axis annotations";
     SetValueString(_currentAxisDataMgrTag, msg, dmName);
 }
 
 AxisAnnotation *VizFeatureParams::GetAxisAnnotation(string dataMgr) {
     if (dataMgr == "")
-        dataMgr = GetCurrentAxisDataMgr();
-    assert(dataMgr != "");
+        dataMgr = GetCurrentAxisDataMgrName();
+    //assert(dataMgr!="");
 
     if (_axisAnnotations->GetParams(dataMgr) == NULL) {
         AxisAnnotation newAnnotation(_ssave);
