@@ -10,17 +10,16 @@ QSliderEdit::QSliderEdit(QWidget *parent) :
 {
     _ui->setupUi(this);
 
-    _validator = new QDoubleValidator2( _ui->_myLineEdit );
+    _validator = new QDoubleValidator2( _ui->myLineEdit );
     _validator->setDecimals( 4 );
-    _ui->_myLineEdit->setValidator( _validator );
+    _ui->myLineEdit->setValidator( _validator );
 
-    // Connect slots
-    connect( _ui->_mySlider,    SIGNAL(valueChanged(int)),  // for update LineEdit
-             this,              SLOT(_mySlider_valueChanged(int)));
-    connect( _ui->_mySlider,    SIGNAL(sliderReleased()),   // for emit a signal
-             this,              SLOT(_mySlider_released()));
-    connect( _ui->_myLineEdit,  SIGNAL(returnPressed()),    // for emit a signal
-             this,              SLOT(_myLineEdit_valueChanged()));
+    connect( _ui->mySlider,    SIGNAL(valueChanged(int)),  // for update LineEdit
+             this,             SLOT(_mySlider_valueChanged(int)));
+    connect( _ui->mySlider,    SIGNAL(sliderReleased()),   // for emit a signal
+             this,             SLOT(_mySlider_released()));
+    connect( _ui->myLineEdit,  SIGNAL(returnPressed()),    // for emit a signal
+             this,             SLOT(_myLineEdit_valueChanged()));
 }
 
 QSliderEdit::~QSliderEdit()
@@ -36,38 +35,38 @@ QSliderEdit::~QSliderEdit()
     
 void QSliderEdit::SetText( const QString& text )
 {
-    _ui->_myLabel->setText( text );
+    _ui->myLabel->setText( text );
 }
     
 void QSliderEdit::SetExtents( double min, double max )
 {
     _validator->setBottom( min );
     _validator->setTop(    max );
-    _ui->_mySlider->setRange( std::floor(min), std::ceil(max) );
+    _ui->mySlider->setRange( std::floor(min), std::ceil(max) );
 }
 
 void QSliderEdit::_mySlider_valueChanged(int value)
 {
     QString text = QString::number( value );
     _validator->fixup( text );
-    _ui->_myLineEdit->blockSignals( true );
-    _ui->_myLineEdit->setText( text );
-    _ui->_myLineEdit->blockSignals( false );
+    _ui->myLineEdit->blockSignals( true );
+    _ui->myLineEdit->setText( text );
+    _ui->myLineEdit->blockSignals( false );
 }
 
 void QSliderEdit::_mySlider_released()
 {
     // The value displayed in the LineEdit should be returned
-    emit valueChanged( _ui->_myLineEdit->text().toDouble() );
+    emit valueChanged( _ui->myLineEdit->text().toDouble() );
 }
     
 void QSliderEdit::_myLineEdit_valueChanged()
 {
-    double val = _ui->_myLineEdit->text().toDouble();
+    double val = _ui->myLineEdit->text().toDouble();
 
-    _ui->_mySlider->blockSignals( true );
-    _ui->_mySlider->setSliderPosition( std::round(val) );
-    _ui->_mySlider->blockSignals( false );
+    _ui->mySlider->blockSignals( true );
+    _ui->mySlider->setSliderPosition( std::round(val) );
+    _ui->mySlider->blockSignals( false );
 
     emit valueChanged( val );
 }
@@ -93,5 +92,19 @@ void QSliderEdit::SetDecimals( int dec )
     
 double QSliderEdit::GetCurrentValue()
 {
-    return (_ui->_myLineEdit->text().toDouble() );
+    return (_ui->myLineEdit->text().toDouble() );
+}
+
+double QSliderEdit::SetValue( double value )
+{
+    QString text = QString::number( value );
+    _validator->fixup( text );
+    _ui->myLineEdit->blockSignals( true );
+    _ui->myLineEdit->setText( text );
+    _ui->myLineEdit->blockSignals( false );
+
+    double val = _ui->myLineEdit->text().toDouble();
+    _ui->mySlider->blockSignals( true );
+    _ui->mySlider->setSliderPosition( std::round(val) );
+    _ui->mySlider->blockSignals( false );
 }

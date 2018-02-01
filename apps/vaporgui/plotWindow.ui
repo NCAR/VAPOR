@@ -18,7 +18,7 @@
     <enum>QLayout::SetMinimumSize</enum>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,0,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetMinimumSize</enum>
      </property>
@@ -205,7 +205,10 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QSinglePoint" name="widget" native="true"/>
+          <widget class="QSinglePoint" name="timeModeSinglePoint" native="true"/>
+         </item>
+         <item>
+          <widget class="QRange" name="timeModeTimeRange" native="true"/>
          </item>
         </layout>
        </widget>
@@ -232,6 +235,12 @@
    <class>FidelityWidget</class>
    <extends>QWidget</extends>
    <header>FidelityWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QRange</class>
+   <extends>QWidget</extends>
+   <header location="global">QRange.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

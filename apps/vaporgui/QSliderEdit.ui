@@ -15,14 +15,14 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,12,4">
    <item>
-    <widget class="QLabel" name="_myLabel">
+    <widget class="QLabel" name="myLabel">
      <property name="text">
       <string>TextLabel</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QSlider" name="_mySlider">
+    <widget class="QSlider" name="mySlider">
      <property name="minimumSize">
       <size>
        <width>50</width>
@@ -35,7 +35,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="_myLineEdit"/>
+    <widget class="QLineEdit" name="myLineEdit"/>
    </item>
   </layout>
  </widget>

@@ -55,6 +55,7 @@ set (SRCS
 	VaporTable.cpp
 	FidelityWidget.cpp
 	QSliderEdit.cpp
+	QRange.cpp
 	QSinglePoint.cpp
 
 	# Need to include all files that request .ui files
@@ -71,6 +72,7 @@ set (SRCS
 	VaporTable.h
 	FidelityWidget.h
 	QSliderEdit.h
+	QRange.h
 	QSinglePoint.h
 )
 
@@ -113,6 +115,7 @@ set (UIS
 	ContourVariablesGUI.ui
 	FidelityWidgetGUI.ui
 	QSliderEdit.ui
+	QRange.ui
 	QSinglePoint.ui
 )
 

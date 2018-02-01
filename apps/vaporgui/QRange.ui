@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QSinglePoint</class>
- <widget class="QWidget" name="QSinglePoint">
+ <class>QRange</class>
+ <widget class="QWidget" name="QRange">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>527</width>
+    <height>126</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QFrame" name="frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -24,16 +24,10 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QSliderEdit" name="xSliderEdit" native="true"/>
+       <widget class="QSliderEdit" name="minSliderEdit" native="true"/>
       </item>
       <item>
-       <widget class="QSliderEdit" name="ySliderEdit" native="true"/>
-      </item>
-      <item>
-       <widget class="QSliderEdit" name="zSliderEdit" native="true"/>
-      </item>
-      <item>
-       <widget class="QSliderEdit" name="tSliderEdit" native="true"/>
+       <widget class="QSliderEdit" name="maxSliderEdit" native="true"/>
       </item>
      </layout>
     </widget>
