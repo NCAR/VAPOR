@@ -43,6 +43,7 @@ void QSliderEdit::_mySlider_valueChanged(int value) {
 }
 
 void QSliderEdit::_mySlider_released() {
+    // The value displayed in the LineEdit should be returned
     emit valueChanged(_ui->_myLineEdit->text().toDouble());
 }
 
