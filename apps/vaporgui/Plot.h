@@ -56,6 +56,8 @@ class Plot : public QDialog, public Ui_PlotWindow {
     /// Pass in the ControlExec pointer.
     ///   Note: this is the only reference for a Plot class to retrieve other
     ///         VAPoR information, e.g., Params, DataMgr, etc.
+
+    /* put it in constructor */
     int initControlExec(VAPoR::ControlExec *ce);
 
     /// Something QT requires? I'm not sure...
