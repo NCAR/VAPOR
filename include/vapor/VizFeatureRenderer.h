@@ -54,7 +54,7 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     virtual ~VizFeatureRenderer();
 
     //! Render the in-scene features
-    void InScenePaint(size_t ts, string dataMgrName);
+    void InScenePaint(size_t ts);
 
     //! Render the overlay features
     void OverlayPaint(size_t ts);
@@ -108,7 +108,7 @@ class RENDER_API VizFeatureRenderer : public MyBase {
 
     // Draw the axis lines, while building text labels.
     //
-    void drawAxisTics(string dataMgrName);
+    void drawAxisTics();
     void applyTransform(Transform *t);
     void renderText(double text, double llx, double lly, double llz = 0.f);
     Transform *getCurrentTransform();
