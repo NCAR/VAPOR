@@ -74,12 +74,12 @@ AxisAnnotation::~AxisAnnotation()
 	MyBase::SetDiagMsg("AxisAnnotation::~AxisAnnotation() this=%p", this);
 }
 
-void AxisAnnotation::SetAxisAnnotation(bool val){
+void AxisAnnotation::SetAxisAnnotationEnabled(bool val){
 	string msg = "Toggle axis annotation on/off";
 	SetValueLong(_annotationEnabledTag, msg, (long)val);
 }
 
-bool AxisAnnotation::GetAxisAnnotation() const{
+bool AxisAnnotation::GetAxisAnnotationEnabled() const{
 	return (0 != GetValueLong(_annotationEnabledTag, (long) false));
 }
 
@@ -205,11 +205,11 @@ void AxisAnnotation::SetAxisDigits(long numDigits){
 	SetValueLong(_digitsTag, "Set axis num digits", numDigits);
 }
 
-void AxisAnnotation::SetLatLonAxes(bool val){
+void AxisAnnotation::SetLatLonAxesEnabled(bool val){
 	SetValueLong(_latLonAxesTag, "toggle axes lat/lon", (long)val);
 }
 
-bool AxisAnnotation::GetLatLonAxes() const{
+bool AxisAnnotation::GetLatLonAxesEnabled() const{
 	return (0 != GetValueLong(_latLonAxesTag, (long) false));
 }
 

@@ -985,39 +985,6 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout">
-       <item>
-        <widget class="QCheckBox" name="axisAnnotationCheckbox">
-         <property name="toolTip">
-          <string>Check to provide axes with coordinates and tic marks</string>
-         </property>
-         <property name="whatsThis">
-          <string>Check this checkbox to provide coordinate axes and to specify how the axes will be marked and labelled.</string>
-         </property>
-         <property name="text">
-          <string>Enable axis annotation</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="spacer21_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>81</width>
-           <height>21</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
       <widget class="QFrame" name="timeframe">
        <property name="whatsThis">
         <string>Each frame of an animation can be identified with either the time step number or (with WRF data) the date/time stamp of the data in the image.</string>
