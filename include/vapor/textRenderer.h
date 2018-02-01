@@ -68,6 +68,15 @@ namespace VAPoR {
 				string font,
 				string text,
 				int size,
+				float txtColor[4],
+				float bgColor[4],
+				ViewpointParams *vpParams= NULL,
+				TypeFlag type = LABEL,
+				OrientationFlag orientation = DEADCENTER);
+	int Initialize(
+				string font,
+				string text,
+				int size,
 				double txtColor[4],
 				double bgColor[4],
 				ViewpointParams *vpParams= NULL,
@@ -142,8 +151,8 @@ private:
 	string			_font;			 // font file
 	string			_text;			 // text to display
 	int				_size;			 // font size
-	double			_txtColor[4];	  // text color
-	double			_bgColor[4];	   // background color
+	float			_txtColor[4];	  // text color
+	float			_bgColor[4];	   // background color
 	double			_coords[3];		// text coordates
 	double			_3Dcoords[3];		 // 3D coordinates used if we draw text within the scene
 		
