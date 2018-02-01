@@ -54,8 +54,8 @@ set (SRCS
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
-	qslideredit.cpp
-	qsinglepoint.cpp
+	QSliderEdit.cpp
+	QSinglePoint.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -70,8 +70,8 @@ set (SRCS
 	ContourSubtabs.h
 	VaporTable.h
 	FidelityWidget.h
-	qslideredit.h
-	qsinglepoint.h
+	QSliderEdit.h
+	QSinglePoint.h
 )
 
 set (UIS 
@@ -112,8 +112,8 @@ set (UIS
 	ContourGeometryGUI.ui
 	ContourVariablesGUI.ui
 	FidelityWidgetGUI.ui
-	qslideredit.ui
-	qsinglepoint.ui
+	QSliderEdit.ui
+	QSinglePoint.ui
 )
 
 find_package(Qt4 REQUIRED)
