@@ -18,7 +18,7 @@ public:
     void   SetText(const QString &text);    // for the label
     void   SetDecimals(int dec);            // how many digits after the decimal point
     void   SetExtents(double min, double max);
-    double GetCurrentVal();
+    double GetCurrentValue();
 
 signals:
     // This is the only signal a QSliderEdit emits.
