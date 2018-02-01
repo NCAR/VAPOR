@@ -23,6 +23,10 @@ QSliderEdit::QSliderEdit(QWidget *parent) : QWidget(parent),
 
 QSliderEdit::~QSliderEdit() {
     delete _ui;
+    if (_validator) {
+        delete _validator;
+        _validator = NULL;
+    }
 }
 
 void QSliderEdit::SetText(const QString &text) {
