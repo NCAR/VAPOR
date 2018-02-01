@@ -45,9 +45,6 @@ protected slots:
     void RotationChanged(int row, int col);
     void OriginChanged(int row, int col);
 
-signals:
-    void TransformChanged();
-
 private:
     VaporTable *_scaleTable;
     VaporTable *_translationTable;

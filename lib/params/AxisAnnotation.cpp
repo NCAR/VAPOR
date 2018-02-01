@@ -63,13 +63,13 @@ AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
 //----------------------------------------------------------------------------
 AxisAnnotation::~AxisAnnotation() { MyBase::SetDiagMsg("AxisAnnotation::~AxisAnnotation() this=%p", this); }
 
-void AxisAnnotation::SetAxisAnnotation(bool val)
+void AxisAnnotation::SetAxisAnnotationEnabled(bool val)
 {
     string msg = "Toggle axis annotation on/off";
     SetValueLong(_annotationEnabledTag, msg, (long)val);
 }
 
-bool AxisAnnotation::GetAxisAnnotation() const { return (0 != GetValueLong(_annotationEnabledTag, (long)false)); }
+bool AxisAnnotation::GetAxisAnnotationEnabled() const { return (0 != GetValueLong(_annotationEnabledTag, (long)false)); }
 
 std::vector<double> AxisAnnotation::GetAxisBackgroundColor() const
 {
@@ -206,9 +206,9 @@ void AxisAnnotation::SetAxisDigits(long numDigits)
     SetValueLong(_digitsTag, "Set axis num digits", numDigits);
 }
 
-void AxisAnnotation::SetLatLonAxes(bool val) { SetValueLong(_latLonAxesTag, "toggle axes lat/lon", (long)val); }
+void AxisAnnotation::SetLatLonAxesEnabled(bool val) { SetValueLong(_latLonAxesTag, "toggle axes lat/lon", (long)val); }
 
-bool AxisAnnotation::GetLatLonAxes() const { return (0 != GetValueLong(_latLonAxesTag, (long)false)); }
+bool AxisAnnotation::GetLatLonAxesEnabled() const { return (0 != GetValueLong(_latLonAxesTag, (long)false)); }
 
 string AxisAnnotation::GetAxisDataMgr() const { return GetValueString(_dataMgrTag, ""); }
 

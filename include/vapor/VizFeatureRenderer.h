@@ -52,7 +52,7 @@ public:
     virtual ~VizFeatureRenderer();
 
     //! Render the in-scene features
-    void InScenePaint(size_t ts);
+    void InScenePaint(size_t ts, string dataMgrName);
 
     //! Render the overlay features
     void OverlayPaint(size_t ts);
@@ -104,7 +104,7 @@ private:
 
     // Draw the axis lines, while building text labels.
     //
-    void       drawAxisTics();
+    void       drawAxisTics(string dataMgrName);
     void       applyTransform(Transform *t);
     void       renderText(double text, double llx, double lly, double llz = 0.f);
     Transform *getCurrentTransform();
