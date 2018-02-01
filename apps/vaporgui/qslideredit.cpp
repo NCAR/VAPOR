@@ -40,7 +40,11 @@ void QSliderEdit::_mySlider_valueChanged(int value)
     _ui->_myLineEdit->blockSignals(false);
 }
 
-void QSliderEdit::_mySlider_released() { emit valueChanged(_ui->_myLineEdit->text().toDouble()); }
+void QSliderEdit::_mySlider_released()
+{
+    // The value displayed in the LineEdit should be returned
+    emit valueChanged(_ui->_myLineEdit->text().toDouble());
+}
 
 void QSliderEdit::_myLineEdit_valueChanged()
 {
