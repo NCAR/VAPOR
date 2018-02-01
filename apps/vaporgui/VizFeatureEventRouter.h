@@ -75,13 +75,13 @@ public:
 
 	
 protected slots:
-	void setAxisDataMgr(int);
 	void setAxisAnnotation(bool);
 	void setLatLonAnnotation(bool);
 	void setAxisTextSize(int);
 	void setAxisDigits(int);
 	void setAxisTicWidth(double);
 	void setAxisColor();
+	void setAxisBackgroundColor();
 	void axisAnnotationTableChanged();
 	void setXTicOrientation(int);
 	void setYTicOrientation(int);
@@ -101,7 +101,7 @@ protected slots:
 	void timeLLXChanged();
 	void timeLLYChanged();
 	void timeSizeChanged();
-	void setCurrentDataMgr(int);
+	void setCurrentAxisDataMgr(int);
 
 private:
 
@@ -128,6 +128,7 @@ private:
 	void updateDomainColor();
 	void updateBackgroundColor();
 	void updateAxisColor();
+	void updateAxisBackgroundColor();
 	void updateTimeColor();
 	void updateAxisAnnotations();
 	void updateDataMgrCombo();
@@ -136,13 +137,13 @@ private:
 	void updateAnnotationTable();
 	void updateTicOrientationCombos();
 
-	AxisAnnotation* _getCurrentAxisAnnotation();
+	VAPoR::AxisAnnotation* _getCurrentAxisAnnotation();
 
 	void getActiveExtents(
 		vector<double> &minExts, vector<double> &maxExts);
-	void initializeAnnotations();
-	void initializeAnnotationExtents();
-	void initializeTicSizes();
+	void initializeAnnotation(VAPoR::AxisAnnotation* aa);
+	void initializeAnnotationExtents(VAPoR::AxisAnnotation* aa);
+	void initializeTicSizes(VAPoR::AxisAnnotation* aa);
 
 	virtual void _confirmText();
 	virtual void _updateTab();
