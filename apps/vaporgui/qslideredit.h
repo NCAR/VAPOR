@@ -15,8 +15,8 @@ public:
     explicit QSliderEdit(QWidget *parent = 0);
     ~QSliderEdit();
 
-    void   SetText(std::string &text);    // for the label
-    void   SetDecimals(int dec);          // how many digits after the decimal point
+    void   SetText(const QString &text);    // for the label
+    void   SetDecimals(int dec);            // how many digits after the decimal point
     void   SetExtents(double min, double max);
     double GetCurrentVal();
 
