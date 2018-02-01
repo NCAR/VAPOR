@@ -16,7 +16,7 @@ QSliderEdit::QSliderEdit(QWidget *parent) : QWidget(parent),
             this, SLOT(_mySlider_valueChanged(int)));
     connect(_ui->_mySlider, SIGNAL(sliderReleased()), // for emit a signal
             this, SLOT(_mySlider_released()));
-    connect(_ui->_myLineEdit, SIGNAL(returnPressed()),
+    connect(_ui->_myLineEdit, SIGNAL(returnPressed()), // for emit a signal
             this, SLOT(_myLineEdit_valueChanged()));
 }
 
@@ -35,19 +35,15 @@ void QSliderEdit::SetExtents(double min, double max) {
 }
 
 void QSliderEdit::_mySlider_valueChanged(int value) {
-    double val = (double)value;
-    if (val < _validator->bottom())
-        val = _validator->bottom();
-    else if (val > _validator->top())
-        val = _validator->top();
-
+    QString text = QString::number(value);
+    _validator->fixup(text);
     _ui->_myLineEdit->blockSignals(true);
-    _ui->_myLineEdit->setText(QString::number(val));
+    _ui->_myLineEdit->setText(text);
     _ui->_myLineEdit->blockSignals(false);
 }
 
 void QSliderEdit::_mySlider_released() {
-    emit valueChanged((double)_ui->_mySlider->value());
+    emit valueChanged(_ui->_myLineEdit->text().toDouble());
 }
 
 void QSliderEdit::_myLineEdit_valueChanged() {
@@ -61,7 +57,11 @@ void QSliderEdit::_myLineEdit_valueChanged() {
 }
 
 void QSliderEdit::SetDecimals(int dec) {
-    _validator->setDecimals(dec);
+    if (dec > 0)
+        _validator->setDecimals(dec);
+    else
+        // raise error
+        ;
 }
 
 double QSliderEdit::GetCurrentVal() {
