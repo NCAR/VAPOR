@@ -8,9 +8,8 @@ QSinglePoint::QSinglePoint(QWidget *parent) : QWidget(parent), _ui(new Ui::QSing
 {
     _ui->setupUi(this);
 
-    _ui->_xSliderEdit->SetExtents(50.5, 100.5);
+    _ui->_xSliderEdit->SetExtents(50.0, 100.0);
     _ui->_ySliderEdit->SetExtents(50.5, 100.5);
-    _ui->_xSliderEdit->SetDecimals(1);
 
     // Connect signals and slots
     connect(_ui->_xSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(_pointChanged(double)));

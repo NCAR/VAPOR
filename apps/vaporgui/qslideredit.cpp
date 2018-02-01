@@ -2,6 +2,7 @@
 #include "ui_qslideredit.h"
 
 #include <cmath>
+#include <iostream>
 
 QSliderEdit::QSliderEdit(QWidget *parent) : QWidget(parent), _ui(new Ui::QSliderEdit)
 {
@@ -57,7 +58,14 @@ void QSliderEdit::SetDecimals(int dec)
 {
     if (dec > 0)
         _validator->setDecimals(dec);
-    else
+    else if (dec == 0) {
+        // if the extents ARE essentially integers
+        if (std::floor(_validator->top()) == _validator->top() && std::floor(_validator->bottom()) == _validator->bottom())
+            _validator->setDecimals(dec);
+        else
+            std::cerr << "QSliderEdit extents aren't integers while ZERO decimal is set" << std::endl;
+
+    } else
         // raise error
         ;
 }
