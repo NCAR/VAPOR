@@ -29,9 +29,9 @@ QSliderEdit::~QSliderEdit()
 }
 
     
-void QSliderEdit::SetText( std::string& text )
+void QSliderEdit::SetText( const QString& text )
 {
-    _ui->_myLabel->setText( QString::fromStdString( text ) );
+    _ui->_myLabel->setText( text );
 }
     
 void QSliderEdit::SetExtents( double min, double max )
