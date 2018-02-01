@@ -15,34 +15,6 @@ namespace VAPoR {
 	class DataMgr;
 
 //
-// A derived QDoubleValidator that also implements the fixup function.
-//
-class VaporDoubleValidator : public QDoubleValidator
-{
-public:
-  VaporDoubleValidator( QObject * parent = 0 ) 
-    : QDoubleValidator( parent = 0 )
-  {}
-  VaporDoubleValidator( double bottom, double top, int decimals, QObject * parent = 0 )
-    : QDoubleValidator( bottom, top, decimals, parent = 0)
-  {}
-
-  //
-  // overload fixup() from QValidator
-  //
-  void fixup( QString& input ) const
-  {
-    double val = input.toFloat();
-    if( val > top() )
-      val = top();
-    else if ( val < bottom() )
-      val = bottom();
-
-    input = QString::number( val );
-  }
-};
-
-//
 // ImageVariablesSubtab class
 //
 class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
