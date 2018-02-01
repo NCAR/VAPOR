@@ -31,6 +31,4 @@ private:
     int                       _dimensionality;
     std::vector<QSlider *>    _sliders;      /// _sliders.size() == _dimensionality
     std::vector<QLineEdits *> _lineEdits;    /// _lineEdits.size() == _dimensionality
-
-    /* put sliders and line edits into Combos */
-}
+};
