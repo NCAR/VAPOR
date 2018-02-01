@@ -28,8 +28,8 @@ class PARAMS_API AxisAnnotation : public ParamsBase {
     AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node);
     virtual ~AxisAnnotation();
 
-    void SetAxisAnnotation(bool val);
-    bool GetAxisAnnotation() const;
+    void SetAxisAnnotationEnabled(bool val);
+    bool GetAxisAnnotationEnabled() const;
 
     vector<double> GetAxisBackgroundColor() const;
     void SetAxisBackgroundColor(vector<double> color);
@@ -64,8 +64,8 @@ class PARAMS_API AxisAnnotation : public ParamsBase {
     long GetAxisDigits() const;
     void SetAxisDigits(long val);
 
-    void SetLatLonAxes(bool val);
-    bool GetLatLonAxes() const;
+    void SetLatLonAxesEnabled(bool val);
+    bool GetLatLonAxesEnabled() const;
 
     string GetAxisDataMgr() const;
     void SetAxisDataMgr(string dataMgr);

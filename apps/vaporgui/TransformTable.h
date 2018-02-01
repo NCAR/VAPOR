@@ -47,9 +47,6 @@ class TransformTable : public QWidget, public Ui_TransformTableGUI {
     void RotationChanged(int row, int col);
     void OriginChanged(int row, int col);
 
-  signals:
-    void TransformChanged();
-
   private:
     VaporTable *_scaleTable;
     VaporTable *_translationTable;
