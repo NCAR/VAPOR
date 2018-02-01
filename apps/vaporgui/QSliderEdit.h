@@ -19,6 +19,7 @@ public:
     void   SetDecimals(int dec);            // how many digits after the decimal point
     void   SetExtents(double min, double max);
     double GetCurrentValue();
+    double SetValue(double);
 
 signals:
     // This is the only signal a QSliderEdit emits.
