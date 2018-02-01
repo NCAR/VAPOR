@@ -14,6 +14,8 @@ public:
     explicit QSinglePoint(QWidget *parent = 0);
     ~QSinglePoint();
 
+    void SetExtents(const std::vector<double> &min, const std::vector<double> &max);
+
     void SetDimensionality(int);
     int  GetDimensionality();
     void GetCurrentPoint(std::vector<double> &);

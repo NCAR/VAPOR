@@ -21,7 +21,14 @@ QSliderEdit::QSliderEdit(QWidget *parent) : QWidget(parent), _ui(new Ui::QSlider
             this, SLOT(_myLineEdit_valueChanged()));
 }
 
-QSliderEdit::~QSliderEdit() { delete _ui; }
+QSliderEdit::~QSliderEdit()
+{
+    delete _ui;
+    if (_validator) {
+        delete _validator;
+        _validator = NULL;
+    }
+}
 
 void QSliderEdit::SetText(const QString &text) { _ui->_myLabel->setText(text); }
 
