@@ -18,7 +18,7 @@ public:
 
     /// Set Spatial Extents
     ///   Note: extents.size() == _dimensionality * 2
-    void SetSpatialExtents(std::vector<double> &extents);
+    void SetSpatialExtents(std::vector<double> &min, std::vector<double> &max);
 
     /// Get Current Point Coordinates
     ///   Note: point.size() == _dimensionality
@@ -31,4 +31,6 @@ private:
     int                       _dimensionality;
     std::vector<QSlider *>    _sliders;      /// _sliders.size() == _dimensionality
     std::vector<QLineEdits *> _lineEdits;    /// _lineEdits.size() == _dimensionality
+
+    /* put sliders and line edits into Combos */
 }
