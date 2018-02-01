@@ -90,47 +90,8 @@ public:
     //! Set background color
     void SetBackgroundColor(std::vector<double> color);
 
-    /*void SetAxisAnnotationEnabled(bool val);
-    bool GetAxisAnnotationEnabled() const;
-
-    std::vector<double> GetAxisColor() const;
-    void SetAxisColor(std::vector<double> color);
-
-    std::vector<double> GetAxisBackgroundColor() const;
-    void SetAxisBackgroundColor(std::vector<double> color);
-
-    void SetNumTics(std::vector<double> ticnums);
-    vector<double> GetNumTics() const;
-
-    void SetAxisOrigin(std::vector<double> orig);
-    std::vector<double> GetAxisOrigin() const;
-
-    void SetMinTics(std::vector<double> minTics);
-    std::vector<double> GetMinTics() const;
-
-    void SetMaxTics(std::vector<double> maxTics);
-    std::vector<double> GetMaxTics() const;
-
-    void SetTicSize(std::vector<double> ticSizes);
-    std::vector<double> GetTicSize() const;
-
-    void SetTicDirs(std::vector<double> ticDirs);
-    std::vector<double> GetTicDirs() const;
-
-    double GetTicWidth() const;
-    void SetTicWidth(double val);
-
-    long GetAxisTextHeight() const;
-    void SetAxisTextHeight(long val);
-
-    long GetAxisDigits() const;
-    void SetAxisDigits(long val);
-
-    void SetLatLonAxesEnabled(bool val);
-    bool GetLatLonAxesEnabled() const;*/
-
-    string GetCurrentAxisDataMgr() const;
-    void   SetCurrentAxisDataMgr(string dataMgr);
+    string GetCurrentAxisDataMgrName() const;
+    void   SetCurrentAxisDataMgrName(string dataMgr);
 
     AxisAnnotation *GetAxisAnnotation(string dataMgr = "");
 

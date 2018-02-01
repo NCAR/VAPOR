@@ -45,6 +45,7 @@ const string AxisAnnotation::_numTicsTag = "NumberTics";
 const string AxisAnnotation::_dataMgrTag = "AxisDataMgr";
 const string AxisAnnotation::_latLonAxesTag = "LatLonAxes";
 const string AxisAnnotation::_originTag = "AxisOrigin";
+const string AxisAnnotation::_initializedTag = "AxisAnnotaitonInitialized";
 
 //
 // Register class with object factory!!!
@@ -73,7 +74,7 @@ bool AxisAnnotation::GetAxisAnnotationEnabled() const { return (0 != GetValueLon
 
 std::vector<double> AxisAnnotation::GetAxisBackgroundColor() const
 {
-    vector<double> defaultv(3, 1.0);
+    vector<double> defaultv(3, 0.0);
     vector<double> val = GetValueDoubleVec(_backgroundColorTag, defaultv);
     return val;
 }
@@ -222,3 +223,11 @@ void AxisAnnotation::SetAxisDataMgr(string dataMgr)
 void AxisAnnotation::SetAxisFontSize(int size) { SetValueDouble(_fontSizeTag, "Axis annotation font size", size); }
 
 int AxisAnnotation::GetAxisFontSize() const { return (int)GetValueDouble(_fontSizeTag, 24); }
+
+void AxisAnnotation::SetAxisAnnotationInitialized(bool val)
+{
+    string msg = "Axis annotation object initialized";
+    SetValueDouble(_initializedTag, msg, val);
+}
+
+bool AxisAnnotation::GetAxisAnnotationInitialized() const { return (bool)GetValueDouble(_initializedTag, false); }

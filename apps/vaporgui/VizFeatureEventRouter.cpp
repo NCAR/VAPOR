@@ -73,13 +73,12 @@ void VizFeatureEventRouter::connectAnnotationWidgets()
     connect(_digitsCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisDigits(int)));
     connect(_ticWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(setAxisTicWidth(double)));
     connect(axisColorButton, SIGNAL(pressed()), this, SLOT(setAxisColor()));
+    connect(axisBackgroundColorButton, SIGNAL(pressed()), this, SLOT(setAxisBackgroundColor()));
     connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
     connect(xTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrientation(int)));
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
-    // connect(dataMgrSelectorCombo, SIGNAL(currentIndexChanged(int)),
-    //	this, SLOT(setCurrentDataMgr(int)));
-    connect(dataMgrSelectorCombo, SIGNAL(activated(int)), this, SLOT(setCurrentDataMgr(int)));
+    connect(dataMgrSelectorCombo, SIGNAL(activated(int)), this, SLOT(setCurrentAxisDataMgr(int)));
 }
 
 /**********************************************************
@@ -241,18 +240,20 @@ void VizFeatureEventRouter::_updateTab()
 
 void VizFeatureEventRouter::updateDataMgrCombo()
 {
+    // Save current selection
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
-    string            currentSelection = vParams->GetCurrentAxisDataMgr();
+    string            currentSelection = vParams->GetCurrentAxisDataMgrName();
 
+    // Repopulate the combo's entries
     ParamsMgr *    pMgr = _controlExec->GetParamsMgr();
     vector<string> names = pMgr->GetDataMgrNames();
-
     dataMgrSelectorCombo->clear();
     for (int i = 0; i < names.size(); i++) {
         QString name = QString::fromStdString(names[i]);
         dataMgrSelectorCombo->addItem(name);
     }
 
+    // Reset the saved selection
     QString qCurrentSelection = QString::fromStdString(currentSelection);
     int     index = dataMgrSelectorCombo->findText(qCurrentSelection);
     if (index > 0)
@@ -337,7 +338,13 @@ void VizFeatureEventRouter::updateAnnotationTable()
 AxisAnnotation *VizFeatureEventRouter::_getCurrentAxisAnnotation()
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    AxisAnnotation *  aa = vfParams->GetAxisAnnotation();
+    string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
+    AxisAnnotation *  aa = vfParams->GetAxisAnnotation(dataMgr);
+
+    bool initialized = aa->GetAxisAnnotationInitialized();
+    cout << "_getCurrent " << dataMgr << " " << initialized << endl;
+    if (!initialized) initializeAnnotation(aa);
+
     return aa;
 }
 
@@ -349,11 +356,10 @@ void VizFeatureEventRouter::getActiveExtents(vector<double> &minExts, vector<dou
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
 }
 
-void VizFeatureEventRouter::initializeTicSizes()
+void VizFeatureEventRouter::initializeTicSizes(AxisAnnotation *aa)
 {
     vector<double> ticSizes, minExts, maxExts;
     getActiveExtents(minExts, maxExts);
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
 
     // Initialize tic length to 2.5% of the domain that they're oriented on.
     // X starts oriented on Y,
@@ -364,36 +370,41 @@ void VizFeatureEventRouter::initializeTicSizes()
     ticSizes.push_back(xTicSize);
     ticSizes.push_back(yzTicSize);
     ticSizes.push_back(yzTicSize);
-    vfParams->SetTicSize(ticSizes);
+
+    // AxisAnnotation* aa = _getCurrentAxisAnnotation();
+    aa->SetTicSize(ticSizes);
 }
 
-void VizFeatureEventRouter::initializeAnnotationExtents()
+void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
 {
     vector<double> minExts, maxExts;
     getActiveExtents(minExts, maxExts);
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetMinTics(minExts);
-    vfParams->SetMaxTics(maxExts);
-    vfParams->SetAxisOrigin(minExts);
+    // AxisAnnotation* aa = _getCurrentAxisAnnotation();
+    aa->SetMinTics(minExts);
+    aa->SetMaxTics(maxExts);
+    aa->SetAxisOrigin(minExts);
 }
 
-void VizFeatureEventRouter::initializeAnnotations()
+void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Initialize axis annotation table");
 
-    initializeAnnotationExtents();
-    initializeTicSizes();
+    cout << "Initializing Axis for " << aa->GetAxisDataMgr() << endl;
+
+    initializeAnnotationExtents(aa);
+    initializeTicSizes(aa);
 
     paramsMgr->EndSaveStateGroup();
 
-    _annotationsInitialized = true;
+    aa->SetAxisAnnotationInitialized(true);
+    //_annotationsInitialized = true;
 }
 
 void VizFeatureEventRouter::updateAxisAnnotations()
 {
-    if (!_annotationsInitialized) initializeAnnotations();
+    // if (!_annotationsInitialized) initializeAnnotation();
 
     updateDataMgrCombo();
     updateAnnotationCheckbox();
@@ -401,57 +412,51 @@ void VizFeatureEventRouter::updateAxisAnnotations()
     updateTicOrientationCombos();
     updateAnnotationTable();
     updateAxisColor();
+    updateAxisBackgroundColor();
 
-    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
 
-    int textSize = vParams->GetAxisFontSize();
+    int textSize = aa->GetAxisFontSize();
     _textSizeCombo->Update(4, 50, textSize);
 
-    int numDigits = vParams->GetAxisDigits();
+    int numDigits = aa->GetAxisDigits();
     _digitsCombo->Update(1, 12, numDigits);
 
     GLdouble minMax[2];
     glGetDoublev(GL_ALIASED_LINE_WIDTH_RANGE, minMax);
-    double ticWidth = vParams->GetTicWidth();
+    double ticWidth = aa->GetTicWidth();
     _ticWidthCombo->Update(minMax[0], minMax[1], ticWidth);
 }
 
 void VizFeatureEventRouter::axisAnnotationTableChanged()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    // VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
 
     vector<double> values;
     values = getTableRow(0);
-    vfParams->SetNumTics(values);
+    aa->SetNumTics(values);
 
     values = getTableRow(1);
-    vfParams->SetTicSize(values);
+    aa->SetTicSize(values);
 
     values = getTableRow(2);
-    vfParams->SetMinTics(values);
+    aa->SetMinTics(values);
 
     values = getTableRow(3);
-    vfParams->SetMaxTics(values);
+    aa->SetMaxTics(values);
 
     values = getTableRow(4);
-    vfParams->SetAxisOrigin(values);
+    aa->SetAxisOrigin(values);
 }
 
-void VizFeatureEventRouter::setCurrentDataMgr(int index)
+void VizFeatureEventRouter::setCurrentAxisDataMgr(int index)
 {
     QString qDataMgr = dataMgrSelectorCombo->itemText(index);
     string  dataMgr = qDataMgr.toStdString();
 
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetCurrentAxisDataMgr(dataMgr);
-}
-
-void VizFeatureEventRouter::setAxisDataMgr(int index)
-{
-    string dataMgr = dataMgrSelectorCombo->currentText().toStdString();
-
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetCurrentAxisDataMgr(dataMgr);
+    vfParams->SetCurrentAxisDataMgrName(dataMgr);
 }
 
 vector<double> VizFeatureEventRouter::getTableRow(int row)
@@ -555,17 +560,39 @@ void VizFeatureEventRouter::setAxisColor()
     setColorHelper(axisColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetAxisColor(rgb);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetAxisColor(rgb);
+}
+
+void VizFeatureEventRouter::setAxisBackgroundColor()
+{
+    vector<double> rgb;
+
+    setColorHelper(axisBackgroundColorEdit, rgb);
+    if (rgb.size() != 3) return;
+
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetAxisBackgroundColor(rgb);
 }
 
 void VizFeatureEventRouter::updateAxisColor()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    rgb;
-    rgb = vfParams->GetAxisColor();
+    vector<double>  rgb;
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    rgb = aa->GetAxisColor();
 
     updateColorHelper(rgb, axisColorEdit);
+}
+
+void VizFeatureEventRouter::updateAxisBackgroundColor()
+{
+    vector<double>  rgb;
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    rgb = aa->GetAxisBackgroundColor();
+
+    cout << "updateAxisBackgroundColor " << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
+
+    updateColorHelper(rgb, axisBackgroundColorEdit);
 }
 
 void VizFeatureEventRouter::setTimeColor()
@@ -698,43 +725,42 @@ void VizFeatureEventRouter::drawTimeStamp()
 
 void VizFeatureEventRouter::setAxisDigits(int digits)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetAxisDigits(digits);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetAxisDigits(digits);
 }
 
 void VizFeatureEventRouter::setAxisTicWidth(double width)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetTicWidth(width);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetTicWidth(width);
 }
 
 void VizFeatureEventRouter::setXTicOrientation(int)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    ticDir = vfParams->GetTicDirs();
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    vector<double>  ticDir = aa->GetTicDirs();
     ticDir[0] = xTicOrientationCombo->currentIndex() + 1;    // Y(1) or Z(2)
-    vfParams->SetTicDirs(ticDir);
+    aa->SetTicDirs(ticDir);
 }
 void VizFeatureEventRouter::setYTicOrientation(int)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    ticDir = vfParams->GetTicDirs();
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    vector<double>  ticDir = aa->GetTicDirs();
     ticDir[1] = yTicOrientationCombo->currentIndex() * 2;    // X(0) or Z(2)
-    vfParams->SetTicDirs(ticDir);
+    aa->SetTicDirs(ticDir);
 }
 void VizFeatureEventRouter::setZTicOrientation(int)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vector<double>    ticDir = vfParams->GetTicDirs();
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    vector<double>  ticDir = aa->GetTicDirs();
     ticDir[2] = zTicOrientationCombo->currentIndex();    // X(0) or Y(1)
-    vfParams->SetTicDirs(ticDir);
+    aa->SetTicDirs(ticDir);
 }
 
 void VizFeatureEventRouter::setLatLonAnnot(bool val)
 {
-    confirmText();
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetLatLonAxesEnabled(val);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetLatLonAxesEnabled(val);
 }
 
 void VizFeatureEventRouter::setUseDomainFrame()
@@ -751,20 +777,20 @@ void VizFeatureEventRouter::setUseRegionFrame()
 
 void VizFeatureEventRouter::setAxisAnnotation(bool toggled)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetAxisAnnotationEnabled(toggled);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetAxisAnnotationEnabled(toggled);
 }
 
 void VizFeatureEventRouter::setLatLonAnnotation(bool val)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetLatLonAxesEnabled(val);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetLatLonAxesEnabled(val);
 }
 
 void VizFeatureEventRouter::setAxisTextSize(int size)
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetAxisFontSize(size);
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    aa->SetAxisFontSize(size);
 }
 
 void VizFeatureEventRouter::setUseAxisArrows()

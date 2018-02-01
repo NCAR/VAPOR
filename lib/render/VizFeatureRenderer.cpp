@@ -347,7 +347,8 @@ void VizFeatureRenderer::InScenePaint(size_t ts)
         drawAxisArrows(minExts, maxExts);
     }
 
-    if (vfParams->GetAxisAnnotation()) { drawAxisTics(); }
+    AxisAnnotation *aa = vfParams->GetAxisAnnotation();
+    if (aa->GetAxisAnnotationEnabled()) { drawAxisTics(); }
 
     glPopAttrib();
     glMatrixMode(GL_MODELVIEW);
@@ -373,15 +374,18 @@ void VizFeatureRenderer::drawAxisTics()
 
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
 
-    vector<double> axisOriginCoord = vfParams->GetAxisOrigin();
-    vector<double> minTic = vfParams->GetMinTics();
-    vector<double> maxTic = vfParams->GetMaxTics();
-    vector<double> ticLength = vfParams->GetTicSize();
-    vector<double> ticDir = vfParams->GetTicDirs();
-    vector<double> numTics = vfParams->GetNumTics();
-    double         ticWidth = vfParams->GetTicWidth();
-    double         axisColor[3];
-    vfParams->GetAxisColor(axisColor);
+    vector<string>  names = m_paramsMgr->GetDataMgrNames();
+    AxisAnnotation *aa = vfParams->GetAxisAnnotation(names[0]);
+
+    vector<double> axisOriginCoord = aa->GetAxisOrigin();
+    vector<double> minTic = aa->GetMinTics();
+    vector<double> maxTic = aa->GetMaxTics();
+    vector<double> ticLength = aa->GetTicSize();
+    vector<double> ticDir = aa->GetTicDirs();
+    vector<double> numTics = aa->GetNumTics();
+    double         ticWidth = aa->GetTicWidth();
+    // double axisColor[3];
+    vector<double> axisColor = aa->GetAxisColor();
 
     double minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
 
@@ -441,7 +445,7 @@ void VizFeatureRenderer::drawAxisTics()
             vsub(pointOnAxis, ticVec, drawPosn);
 
             unstretchedCoordinate = pointOnAxis[0] - sticMin[0] + minTicA[0];
-            if (vfParams->GetLatLonAxes()) {
+            if (aa->GetLatLonAxesEnabled()) {
                 double tmpYCoord = sticMin[1];
                 convertPointToLonLat(unstretchedCoordinate, tmpYCoord);
             }
@@ -472,7 +476,7 @@ void VizFeatureRenderer::drawAxisTics()
             vsub(pointOnAxis, ticVec, drawPosn);
 
             unstretchedCoordinate = pointOnAxis[1] - sticMin[1] + minTicA[1];
-            if (vfParams->GetLatLonAxes()) {
+            if (aa->GetLatLonAxesEnabled()) {
                 double tmpXCoord = sticMin[0];
                 convertPointToLonLat(tmpXCoord, unstretchedCoordinate);
             }
@@ -542,17 +546,20 @@ Transform *VizFeatureRenderer::getCurrentTransform()
 void VizFeatureRenderer::renderText(double text, double llx, double lly, double llz)
 {
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    string            currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
+    AxisAnnotation *  aa = vfParams->GetAxisAnnotation(currentAxisDataMgr);
 
     vector<double> axisColor, txtBackground;
-    vfParams->GetAxisColor(axisColor);
-    vfParams->GetBackgroundColor(txtBackground);
-    axisColor.push_back(1.f);        // alpha channel
-    txtBackground.push_back(1.f);    // alpha channel
+    axisColor = aa->GetAxisColor();
+    txtBackground = aa->GetAxisBackgroundColor();
+    //	cout << "A " <<  aa->GetAxisDataMgr() << " " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;
+    //	cout << "B " << aa->GetAxisDataMgr() << " " << txtBackground[0] << " " << txtBackground[1] << " " << txtBackground[2] << endl << endl;
+    axisColor.push_back(1.0);        // alpha channel
+    txtBackground.push_back(1.0);    // alpha channel
 
-    double           txtColor[] = {axisColor[0], axisColor[1], axisColor[2], 1.};
-    double           bgColor[] = {0.f, 0.f, 0.f, 0.f};
-    int              precision = (int)vfParams->GetAxisDigits();
-    int              fontSize = vfParams->GetAxisFontSize();
+    int precision = (int)aa->GetAxisDigits();
+    int fontSize = aa->GetAxisFontSize();
+
     ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
     std::stringstream ss;
@@ -563,8 +570,14 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly, double 
         delete _textObject;
         _textObject = NULL;
     }
+
+    // float godHelpMe[] = {(float)axisColor[0], (float)axisColor[1], (float)axisColor[2], (float)axisColor[3]};
+    // float godHelpMe2[] = {(float)txtBackground[0], (float)txtBackground[1], (float)txtBackground[2], (float)txtBackground[3]};
+
     _textObject = new TextObject();
-    _textObject->Initialize(_fontFile, textString, fontSize, axisColor, txtBackground, vpParams, TextObject::BILLBOARD, TextObject::CENTERTOP);
+    _textObject->Initialize(_fontFile, textString, fontSize, axisColor, txtBackground, vpParams, TextObject::BILLBOARD,
+                            // godHelpMe, godHelpMe2, vpParams, TextObject::BILLBOARD,
+                            TextObject::CENTERTOP);
 
     double coords[] = {llx, lly, llz};
     _textObject->drawMe(coords);
