@@ -15,60 +15,27 @@
 //  Date:       January 2018
 //
 
-#ifdef WIN32
-    #pragma warning(disable : 4100)
-#endif
-
 #ifndef PLOT_H
-    #define PLOT_H
+#define PLOT_H
 
-    #include <vector>
-    #include <qdialog.h>
-    #include <QWidget>
-    #include <QLineEdit>
-    #include <QCheckBox>
-    #include <Python.h>
-    #include "ui_errMsg.h"
-    #include "ui_plotWindow.h"
-    #include "RangeController.h"
-    #include <vapor/DataMgr.h>
-    #include <vapor/ControlExecutive.h>
-    #include "PlotParams.h"
+#include <vector>
+#include <QWidget>
+#include "ui_plotWindow.h"
+#include <vapor/ParamsMgr.h>
+#include <vapor/DataStatus.h>
+#include "PlotParams.h"
 
 using namespace VAPoR;
-
-// Sam: what's this?
-class pErrMsg : public QDialog, public Ui_ErrMsg {
-    Q_OBJECT
-public:
-    pErrMsg() { setupUi(this); }
-};
 
 class Plot : public QDialog, public Ui_PlotWindow {
     Q_OBJECT
 
 public:
-    /// Constructor
-    Plot(QWidget *parent);
-    /// Destructor
+    Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, VQWidget *parent = 0);
     ~Plot();
-
-    /// Pass in the ControlExec pointer.
-    ///   Note: this is the only reference for a Plot class to retrieve other
-    ///         VAPoR information, e.g., Params, DataMgr, etc.
-
-    /* put it in constructor */
-    int initControlExec(VAPoR::ControlExec *ce);
-
-    /// Something QT requires? I'm not sure...
-    void showMe();
 
     /// This is called whenever there's a change to the parameters.
     void Update();
-
-protected:
-    /// Connect signals from widgets with slots
-    void Connect();
 
 private slots:
     /// Update list of enabled variables upon add/remove events
@@ -90,7 +57,8 @@ private slots:
     void _plotClicked();
 
 private:
-    VAPoR::ControlExec *_controlExec;
+    VAPoR::DataStatus *_dataStatus;
+    VAPoR::ParamsMgr * _paramsMgr;
 };
 
 #endif    // PLOT_H

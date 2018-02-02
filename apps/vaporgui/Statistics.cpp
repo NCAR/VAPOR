@@ -63,7 +63,6 @@ Statistics::~Statistics()
 bool Statistics::Update()
 {
     // Initialize pointers
-    /* Keep DataStatus and ParamsMgr pointers. */
     VAPoR::DataStatus *      dataStatus = _controlExec->getDataStatus();
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
     if (dmNames.empty()) {

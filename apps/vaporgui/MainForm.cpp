@@ -1956,9 +1956,14 @@ void MainForm::launchStats()
 
 void MainForm::launchPlotUtility()
 {
-    if (!_plot) _plot = new Plot(this);
-    if (_controlExec) { _plot->initControlExec(_controlExec); }
-    _plot->showMe();
+    if (!_plot) {
+        assert(_controlExec->getDataStatus());
+        assert(_controlExec->GetParamsMgr());
+        _plot = new Plot(_controlExec->getDataStatus(), _controlExec->GetParamsMgr(), this);
+    } else {
+        _plot->show();
+        _plot->activateWindow();
+    }
 }
 
 // Begin capturing animation images.
