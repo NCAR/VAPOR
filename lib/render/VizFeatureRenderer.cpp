@@ -377,147 +377,115 @@ void VizFeatureRenderer::drawAxisTics()
     vector<string>  names = m_paramsMgr->GetDataMgrNames();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation(names[0]);
 
-    vector<double> axisOriginCoord = aa->GetAxisOrigin();
+    vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
     vector<double> maxTic = aa->GetMaxTics();
     vector<double> ticLength = aa->GetTicSize();
     vector<double> ticDir = aa->GetTicDirs();
     vector<double> numTics = aa->GetNumTics();
-    double         ticWidth = aa->GetTicWidth();
-    // double axisColor[3];
+    double         width = aa->GetTicWidth();
     vector<double> axisColor = aa->GetAxisColor();
 
-    double minTicA[3], maxTicA[3], ticLengthA[3], axisOriginCoordA[3];
+    _drawAxes(minTic, maxTic, origin, axisColor, width);
 
-    for (int i = 0; i < 3; i++) {    // copy values to (un-)modified _A variables
-        minTicA[i] = minTic[i];
-        maxTicA[i] = maxTic[i];
-        ticLengthA[i] = ticLength[i];
-        axisOriginCoordA[i] = axisOriginCoord[i];
-    }
-
-    vector<double> sorigin, sticMin, sticMax, sticLen;
-    vector<double> lorigin, lticMin, lticMax;
-    // Need both stretched and unstretched coordinates
-    for (int i = 0; i < 3; i++) {
-        sorigin.push_back(axisOriginCoordA[i]);
-        sticMin.push_back(minTicA[i]);
-        sticMax.push_back(maxTicA[i]);
-        sticLen.push_back(ticLengthA[i]);
-    }
-
-    // TicLength needs to be stretched based on which axes are used for tic direction
-
-    glDisable(GL_LIGHTING);
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    glColor3d(axisColor[0], axisColor[1], axisColor[2]);
-    glLineWidth(ticWidth);
-    // Draw lines on x-axis:
-    glEnable(GL_LINE_SMOOTH);
-    glBegin(GL_LINES);
-    glVertex3d(sticMin[0], sorigin[1], sorigin[2]);
-    glVertex3d(sticMax[0], sorigin[1], sorigin[2]);
-    glVertex3d(sorigin[0], sticMin[1], sorigin[2]);
-    glVertex3d(sorigin[0], sticMax[1], sorigin[2]);
-    glVertex3d(sorigin[0], sorigin[1], sticMin[2]);
-    glVertex3d(sorigin[0], sorigin[1], sticMax[2]);
-    glEnd();
-    glDisable(GL_LINE_SMOOTH);
     double pointOnAxis[3];
-    double unstretchedCoordinate;
     double ticVec[3], drawPosn[3];
+
+    double startPosn[3], endPosn[3];
 
     // Now draw tic marks for x:
     if (numTics[0] > 1 && ticLength[0] > 0.f) {
-        pointOnAxis[1] = sorigin[1];
-        pointOnAxis[2] = sorigin[2];
+        pointOnAxis[1] = origin[1];
+        pointOnAxis[2] = origin[2];
         ticVec[0] = 0.f;
         ticVec[1] = 0.f;
         ticVec[2] = 0.f;
         if (ticDir[0] == 1)
-            ticVec[1] = sticLen[0];
+            ticVec[1] = ticLength[0];
         else
-            ticVec[2] = sticLen[0];
+            ticVec[2] = ticLength[0];
         for (int i = 0; i < numTics[0]; i++) {
-            pointOnAxis[0] = sticMin[0] + (float)i * (sticMax[0] - sticMin[0]) / (float)(numTics[0] - 1);
-            vsub(pointOnAxis, ticVec, drawPosn);
+            pointOnAxis[0] = minTic[0] + (float)i * (maxTic[0] - minTic[0]) / (float)(numTics[0] - 1);
 
-            unstretchedCoordinate = pointOnAxis[0] - sticMin[0] + minTicA[0];
-            if (aa->GetLatLonAxesEnabled()) {
-                double tmpYCoord = sticMin[1];
-                convertPointToLonLat(unstretchedCoordinate, tmpYCoord);
-            }
-            renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1]);
-
-            glEnable(GL_LINE_SMOOTH);
-            glBegin(GL_LINES);
-            glVertex3dv(drawPosn);
-            vadd(pointOnAxis, ticVec, drawPosn);
-            glVertex3dv(drawPosn);
-            glEnd();
-            glDisable(GL_LINE_SMOOTH);
+            vsub(pointOnAxis, ticVec, startPosn);
+            vadd(pointOnAxis, ticVec, endPosn);
+            _drawTic(startPosn, endPosn, width, axisColor);
+            renderText(pointOnAxis[0], startPosn[0], startPosn[1]);
         }
     }
     // Now draw tic marks for y:
-    if (numTics[1] > 1 && sticLen[1] > 0.f) {
-        pointOnAxis[0] = sorigin[0];
-        pointOnAxis[2] = sorigin[2];
+    if (numTics[1] > 1 && ticLength[1] > 0.f) {
+        pointOnAxis[0] = origin[0];
+        pointOnAxis[2] = origin[2];
         ticVec[0] = 0.f;
         ticVec[1] = 0.f;
         ticVec[2] = 0.f;
         if (ticDir[1] == 0)
-            ticVec[0] = sticLen[1];
+            ticVec[0] = ticLength[1];
         else
-            ticVec[2] = sticLen[1];
+            ticVec[2] = ticLength[1];
         for (int i = 0; i < numTics[1]; i++) {
-            pointOnAxis[1] = sticMin[1] + (float)i * (sticMax[1] - sticMin[1]) / (float)(numTics[1] - 1);
-            vsub(pointOnAxis, ticVec, drawPosn);
-
-            unstretchedCoordinate = pointOnAxis[1] - sticMin[1] + minTicA[1];
-            if (aa->GetLatLonAxesEnabled()) {
-                double tmpXCoord = sticMin[0];
-                convertPointToLonLat(tmpXCoord, unstretchedCoordinate);
-            }
-            renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1]);
-
-            glEnable(GL_LINE_SMOOTH);
-            glBegin(GL_LINES);
-            glVertex3dv(drawPosn);
-            vadd(pointOnAxis, ticVec, drawPosn);
-            glVertex3dv(drawPosn);
-            glEnd();
-            glDisable(GL_LINE_SMOOTH);
+            pointOnAxis[1] = minTic[1] + (float)i * (maxTic[1] - minTic[1]) / (float)(numTics[1] - 1);
+            vsub(pointOnAxis, ticVec, startPosn);
+            vadd(pointOnAxis, ticVec, endPosn);
+            _drawTic(startPosn, endPosn, width, axisColor);
+            renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
         }
     }
     // Now draw tic marks for z:
-    if (numTics[2] > 1 && sticLen[2] > 0.f) {
-        pointOnAxis[0] = sorigin[0];
-        pointOnAxis[1] = sorigin[1];
+    if (numTics[2] > 1 && ticLength[2] > 0.f) {
+        pointOnAxis[0] = origin[0];
+        pointOnAxis[1] = origin[1];
         ticVec[0] = 0.f;
         ticVec[1] = 0.f;
         ticVec[2] = 0.f;
         if (ticDir[2] == 0)
-            ticVec[0] = sticLen[2];
+            ticVec[0] = ticLength[2];
         else
-            ticVec[1] = sticLen[2];
+            ticVec[1] = ticLength[2];
         for (int i = 0; i < numTics[2]; i++) {
-            pointOnAxis[2] = sticMin[2] + (float)i * (sticMax[2] - sticMin[2]) / (float)(numTics[2] - 1);
-            vsub(pointOnAxis, ticVec, drawPosn);
-
-            unstretchedCoordinate = pointOnAxis[2] - sticMin[2] + minTicA[2];
-            renderText(unstretchedCoordinate, drawPosn[0], drawPosn[1], drawPosn[2]);
-
-            glEnable(GL_LINE_SMOOTH);
-            glBegin(GL_LINES);
-            glVertex3dv(drawPosn);
-            vadd(pointOnAxis, ticVec, drawPosn);
-            glVertex3dv(drawPosn);
-            glEnd();
-            glDisable(GL_LINE_SMOOTH);
+            pointOnAxis[2] = minTic[2] + (float)i * (maxTic[2] - minTic[2]) / (float)(numTics[2] - 1);
+            vsub(pointOnAxis, ticVec, startPosn);
+            vadd(pointOnAxis, ticVec, endPosn);
+            _drawTic(startPosn, endPosn, width, axisColor);
+            renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
         }
     }
+    glPopAttrib();
+}
+
+void VizFeatureRenderer::_drawAxes(std::vector<double> min, std::vector<double> max, std::vector<double> origin, std::vector<double> color, double width)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glDisable(GL_LIGHTING);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glColor4d(color[0], color[1], color[2], color[3]);
+    glLineWidth(width);
+    glEnable(GL_LINE_SMOOTH);
+    glBegin(GL_LINES);
+    glVertex3d(min[0], origin[1], origin[2]);
+    glVertex3d(max[0], origin[1], origin[2]);
+    glVertex3d(origin[0], min[1], origin[2]);
+    glVertex3d(origin[0], max[1], origin[2]);
+    glVertex3d(origin[0], origin[1], min[2]);
+    glVertex3d(origin[0], origin[1], max[2]);
+    glEnd();
+    glDisable(GL_LINE_SMOOTH);
+    // glEnable(GL_LIGHTING);
+    glPopAttrib();
+}
+
+void VizFeatureRenderer::_drawTic(double startPosn[], double endPosn[], double width, std::vector<double> color)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4d(color[0], color[1], color[2], color[3]);
+    glLineWidth(width);
+    glEnable(GL_LINE_SMOOTH);
+    glBegin(GL_LINES);
+    glVertex3dv(startPosn);
+    glVertex3dv(endPosn);
+    glEnd();
+    glDisable(GL_LINE_SMOOTH);
     glPopAttrib();
 }
 
@@ -577,13 +545,8 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly, double 
         _textObject = NULL;
     }
 
-    // float godHelpMe[] = {(float)axisColor[0], (float)axisColor[1], (float)axisColor[2], (float)axisColor[3]};
-    // float godHelpMe2[] = {(float)txtBackground[0], (float)txtBackground[1], (float)txtBackground[2], (float)txtBackground[3]};
-
     _textObject = new TextObject();
-    _textObject->Initialize(_fontFile, textString, fontSize, axisColor, txtBackground, vpParams, TextObject::BILLBOARD,
-                            // godHelpMe, godHelpMe2, vpParams, TextObject::BILLBOARD,
-                            TextObject::CENTERTOP);
+    _textObject->Initialize(_fontFile, textString, fontSize, axisColor, txtBackground, vpParams, TextObject::BILLBOARD, TextObject::CENTERTOP);
 
     double coords[] = {llx, lly, llz};
     _textObject->drawMe(coords);
