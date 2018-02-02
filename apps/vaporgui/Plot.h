@@ -31,7 +31,7 @@ class Plot : public QDialog, public Ui_PlotWindow {
     Q_OBJECT
 
 public:
-    Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, VQWidget *parent = 0);
+    Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent = 0);
     ~Plot();
 
     /// This is called whenever there's a change to the parameters.

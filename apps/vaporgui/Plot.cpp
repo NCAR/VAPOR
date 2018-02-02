@@ -23,16 +23,16 @@
 #include <numpy/ndarrayobject.h>
 
 // Constructor
-Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, VQWidget *parent = 0)
+Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent)
 {
     _dataStatus = status;
     _paramsMgr = manager;
 
     // Store the active dataset name
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
-    if (dmNames.empty())
-        return -1;
-    else {
+    if (dmNames.empty()) {
+        std::cerr << "No data set chosen yet. Plot shouldn't run into this condition." << std::endl;
+    } else {
         GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
         std::string     dsName = guiParams->GetStatsDatasetName();
         if (dsName == "" || dsName == "NULL")    // not initialized yet
@@ -42,8 +42,8 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, VQWidget *paren
     // Do some QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
-    P1P2Widget->setTabText(0, QString::fromAscii("Point 1 Position"));
-    P1P2Widget->setTabText(1, QString::fromAscii("Point 2 Position"));
+    p1P2Widget->setTabText(0, QString::fromAscii("Point 1 Position"));
+    p1P2Widget->setTabText(1, QString::fromAscii("Point 2 Position"));
     myFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
 
     // Connect signals with slots
@@ -144,10 +144,6 @@ void Plot::Update()
 
     // Update LOD, Refinement
     myFidelityWidget->Update(currentDmgr, _paramsMgr, plotParams);
-
-    // Update geometry extents
-    P1Widget->Update(_paramsMgr, currentDmgr, plotParams);
-    P2Widget->Update(_paramsMgr, currentDmgr, plotParams);
 }
 
 void Plot::_newVarChanged(int index)
@@ -158,7 +154,7 @@ void Plot::_newVarChanged(int index)
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     std::string     dsName = guiParams->GetPlotDatasetName();
     PlotParams *    plotParams = dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType()));
-    std::string     varName = NewVarCombo->itemText(index).toStdString();
+    std::string     varName = newVarCombo->itemText(index).toStdString();
 
     // Add this variable to parameter
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
@@ -174,7 +170,7 @@ void Plot::_removeVarChanged(int index)
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     std::string     dsName = guiParams->GetPlotDatasetName();
     PlotParams *    plotParams = dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType()));
-    std::string     varName = RemoveVarCombo->itemText(index).toStdString();
+    std::string     varName = removeVarCombo->itemText(index).toStdString();
 
     // Remove this variable from parameter
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
