@@ -420,7 +420,6 @@ AxisAnnotation* VizFeatureEventRouter::_getCurrentAxisAnnotation() {
 	AxisAnnotation* aa = vfParams->GetAxisAnnotation(dataMgr);
 
 	bool initialized = aa->GetAxisAnnotationInitialized();
-	cout << "_getCurrent " << dataMgr << " " << initialized << endl;
 	if (!initialized)
 		initializeAnnotation(aa);
 
@@ -466,8 +465,6 @@ void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation* aa) {
 void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
 	ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
 	paramsMgr->BeginSaveStateGroup("Initialize axis annotation table");	
-
-	cout << "Initializing Axis for " << aa->GetAxisDataMgr() << endl;
 
 	initializeAnnotationExtents(aa);
 	initializeTicSizes(aa);
@@ -634,7 +631,7 @@ void VizFeatureEventRouter::setAxisColor(){
 	vector <double> rgb;
 
 	setColorHelper(axisColorEdit, rgb);
-	if (rgb.size() != 3) return;
+	if (rgb.size() == 3) rgb.push_back(1.f);
 
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	aa->SetAxisColor(rgb);
@@ -644,7 +641,7 @@ void VizFeatureEventRouter::setAxisBackgroundColor(){
 	vector <double> rgb;
 
 	setColorHelper(axisBackgroundColorEdit, rgb);
-	if (rgb.size() != 3) return;
+	if (rgb.size() == 3) rgb.push_back(1.f);
 
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	aa->SetAxisBackgroundColor(rgb);
@@ -662,8 +659,6 @@ void VizFeatureEventRouter::updateAxisBackgroundColor() {
 	vector <double> rgb;
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	rgb = aa->GetAxisBackgroundColor();
-
-	cout << "updateAxisBackgroundColor " << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
 
 	updateColorHelper(rgb, axisBackgroundColorEdit);
 }
