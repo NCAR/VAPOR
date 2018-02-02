@@ -154,7 +154,6 @@ private:
 
 	AnimationParams* _ap;
 	bool _animConnected;
-	bool _annotationsInitialized;
 };
 
 #endif //VIZFEATUREEVENTROUTER_H 
