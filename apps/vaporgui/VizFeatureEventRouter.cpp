@@ -63,7 +63,8 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 
     connectAnnotationWidgets();
 
-    _annotationsInitialized = false;
+    setCurrentAxisDataMgr(0);
+
     _animConnected = false;
     _ap = NULL;
 }
@@ -448,7 +449,6 @@ void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
     paramsMgr->EndSaveStateGroup();
 
     aa->SetAxisAnnotationInitialized(true);
-    //_annotationsInitialized = true;
 }
 
 void VizFeatureEventRouter::updateAxisAnnotations() {
