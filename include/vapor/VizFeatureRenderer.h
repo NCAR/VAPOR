@@ -95,6 +95,17 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     TextObject *_textObject;
     string _fontFile;
 
+    void _drawAxes(
+        std::vector<double> min,
+        std::vector<double> max,
+        std::vector<double> origin,
+        std::vector<double> color,
+        double width);
+    void _drawTic(double startPosn[],
+                  double endPosn[],
+                  double width,
+                  std::vector<double> color);
+
     //! Render the domain fram
     void drawDomainFrame(size_t ts) const;
 
