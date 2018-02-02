@@ -41,9 +41,9 @@ public:
     void SetMaxTS(int ts);
 
     /// Get/set the current operational mode: space or time.
+    /// true == Space; false == time
     bool GetSpaceTimeMode() const;
-    void SetSpaceMode();
-    void SetTimeMode();
+    void SetSpaceTimeMode(bool);
 
     static string GetClassType() { return ("PlotParams"); }
 
@@ -54,7 +54,6 @@ public:
 private:
     static const string _minTSTag;
     static const string _maxTSTag;
-    static const string _oneTSTag;
     static const string _spaceTimeTag;    // Space=true, Time=false
 };
 
