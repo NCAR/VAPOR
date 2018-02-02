@@ -53,7 +53,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QComboBox" name="DataMgrCombo">
+          <widget class="QComboBox" name="dataMgrCombo">
            <property name="minimumSize">
             <size>
              <width>150</width>
@@ -65,10 +65,10 @@
         </layout>
        </item>
        <item>
-        <widget class="QComboBox" name="NewVarCombo"/>
+        <widget class="QComboBox" name="newVarCombo"/>
        </item>
        <item>
-        <widget class="QComboBox" name="RemoveVarCombo"/>
+        <widget class="QComboBox" name="removeVarCombo"/>
        </item>
        <item>
         <widget class="QLabel" name="label">
@@ -78,10 +78,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QTableWidget" name="VariablesTable"/>
+        <widget class="QTableWidget" name="variablesTable"/>
        </item>
        <item>
-        <widget class="FidelityWidget" name="MyFidelityWidget" native="true"/>
+        <widget class="FidelityWidget" name="myFidelityWidget" native="true"/>
        </item>
       </layout>
      </item>
@@ -113,7 +113,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="SpaceTab">
         <attribute name="title">
@@ -121,16 +121,16 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QTabWidget" name="P1P2Widget">
+          <widget class="QTabWidget" name="p1P2Widget">
            <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="GeometryWidget" name="P1Widget">
+           <widget class="QWidget" name="p1Widget">
             <attribute name="title">
              <string>Tab 1</string>
             </attribute>
            </widget>
-           <widget class="GeometryWidget" name="P2Widget">
+           <widget class="QWidget" name="p2Widget">
             <attribute name="title">
              <string>Tab 2</string>
             </attribute>
@@ -149,39 +149,7 @@
              </property>
             </widget>
            </item>
-           <item>
-            <spacer name="horizontalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::MinimumExpanding</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="TimestepSpinbox"/>
-           </item>
           </layout>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item>
           <widget class="Line" name="line_3">
@@ -223,12 +191,6 @@
    <class>QSinglePoint</class>
    <extends>QWidget</extends>
    <header location="global">QSinglePoint.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GeometryWidget</class>
-   <extends>QWidget</extends>
-   <header>GeometryWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
