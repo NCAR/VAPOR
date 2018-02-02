@@ -65,8 +65,9 @@ VizFeatureEventRouter::VizFeatureEventRouter(
 		(VaporTable::HighlightFlags)(0));
 
 	connectAnnotationWidgets();
+	
+	setCurrentAxisDataMgr(0);
 
-	_annotationsInitialized = false;
 	_animConnected = false;
 	_ap = NULL;
 }
@@ -472,8 +473,6 @@ void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
 	paramsMgr->EndSaveStateGroup();
 
 	aa->SetAxisAnnotationInitialized(true);
-	//_annotationsInitialized = true;
-	
 }
 
 void VizFeatureEventRouter::updateAxisAnnotations() {
