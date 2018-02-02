@@ -532,8 +532,6 @@ void VizFeatureEventRouter::setColorHelper(
 
 void VizFeatureEventRouter::updateColorHelper(
     const vector<double> &rgb, QWidget *w) {
-    assert(rgb.size() == 3);
-
     QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
 
     QPalette pal;
