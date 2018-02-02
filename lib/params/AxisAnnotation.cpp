@@ -74,20 +74,22 @@ bool AxisAnnotation::GetAxisAnnotationEnabled() const { return (0 != GetValueLon
 
 std::vector<double> AxisAnnotation::GetAxisBackgroundColor() const
 {
-    vector<double> defaultv(3, 0.0);
+    vector<double> defaultv(4, 0.0);
     vector<double> val = GetValueDoubleVec(_backgroundColorTag, defaultv);
+    if (val == defaultv) val[3] = 1.f;
     return val;
 }
 
 void AxisAnnotation::SetAxisBackgroundColor(std::vector<double> color)
 {
     string msg = "Axis annotation background color";
+    if (color.size() == 3) color.push_back(1.f);
     SetValueDoubleVec(_backgroundColorTag, msg, color);
 }
 
 std::vector<double> AxisAnnotation::GetAxisColor() const
 {
-    vector<double> defaultv(3, 1.0);
+    vector<double> defaultv(4, 1.0);
     vector<double> val = GetValueDoubleVec(_colorTag, defaultv);
     return val;
 }

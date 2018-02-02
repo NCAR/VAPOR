@@ -554,8 +554,14 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly, double 
     txtBackground = aa->GetAxisBackgroundColor();
     //	cout << "A " <<  aa->GetAxisDataMgr() << " " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;
     //	cout << "B " << aa->GetAxisDataMgr() << " " << txtBackground[0] << " " << txtBackground[1] << " " << txtBackground[2] << endl << endl;
-    axisColor.push_back(1.0);        // alpha channel
-    txtBackground.push_back(1.0);    // alpha channel
+    //	axisColor.push_back(1.f); 		// alpha channel
+    //	txtBackground.push_back(1.f);	// alpha channel
+
+    //	float axisColor[] = {1.f, 0.f, 0.f, 1.f};
+    //	float txtBackground[] = {0.f, 1.f, 0.f, 1.f};
+
+    // float axisColor[] =
+    // float txtBackground[] = {0.f, 1.f, 0.f, 1.f};
 
     int precision = (int)aa->GetAxisDigits();
     int fontSize = aa->GetAxisFontSize();

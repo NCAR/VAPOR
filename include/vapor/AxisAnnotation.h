@@ -30,6 +30,7 @@ public:
     bool GetAxisAnnotationEnabled() const;
 
     vector<double> GetAxisBackgroundColor() const;
+    void           GetAxisBackgroundColor(float bgColor[]) const;
     void           SetAxisBackgroundColor(vector<double> color);
 
     vector<double> GetAxisColor() const;

@@ -48,14 +48,24 @@ TextObject::TextObject()
     _vpParams = NULL;
     _orientationFlag = BOTTOMLEFT;
     _typeFlag = LABEL;
-    _txtColor[0] = 1.f;
+    /*_txtColor[0] = 1.f;
     _txtColor[1] = 1.f;
     _txtColor[2] = 1.f;
     _txtColor[3] = 1.f;
     _bgColor[0] = 0.f;
     _bgColor[1] = 0.f;
     _bgColor[2] = 0.f;
-    _bgColor[3] = 1.f;
+    _bgColor[3] = 1.f;*/
+}
+
+TextObject::~TextObject()
+{
+    if (_pixmap) {
+        delete _pixmap;
+        _pixmap = nullptr;
+    }
+    glDeleteTextures(1, &_fboTexture);
+    glDeleteBuffers(1, &_fbo);
 }
 
 int TextObject::Initialize(string font, string text, int size, vector<double> txtColor, vector<double> bgColor, ViewpointParams *vpParams, TypeFlag type, OrientationFlag orientation)
@@ -75,6 +85,7 @@ int TextObject::Initialize(string font, string text, int size, vector<double> tx
 
 int TextObject::Initialize(string font, string text, int size, double txtColor[4], double bgColor[4], ViewpointParams *vpParams, TypeFlag type, OrientationFlag orientation)
 {
+    cout << "DOUBLE ARRAY CONSTRUCTOR" << endl;
     float txtColorArray[] = {(float)txtColor[0], (float)txtColor[1], (float)txtColor[2], (float)txtColor[3]};
     float bgColorArray[] = {(float)bgColor[0], (float)bgColor[1], (float)bgColor[2], (float)bgColor[3]};
 
@@ -83,6 +94,8 @@ int TextObject::Initialize(string font, string text, int size, double txtColor[4
 
 int TextObject::Initialize(string font, string text, int size, float txtColor[4], float bgColor[4], ViewpointParams *vpParams, TypeFlag type, OrientationFlag orientation)
 {
+    cout << "					txtColor " << txtColor[0] << " " << txtColor[1] << " " << txtColor[2] << " " << txtColor[3] << endl;
+    cout << "					bgColor " << bgColor[0] << " " << bgColor[1] << " " << bgColor[2] << " " << bgColor[3] << endl;
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     _pixmap = new FTPixmapFont(font.c_str());
     _text = text;
@@ -93,14 +106,23 @@ int TextObject::Initialize(string font, string text, int size, float txtColor[4]
     _coords[0] = 0.;
     _coords[1] = 0.;
     _coords[2] = 0.;
-    _bgColor[0] = bgColor[0];
-    _bgColor[1] = bgColor[1];
-    _bgColor[2] = bgColor[2];
-    _bgColor[3] = bgColor[3];
-    _txtColor[0] = txtColor[0];
-    _txtColor[1] = txtColor[1];
-    _txtColor[2] = txtColor[2];
-    _txtColor[3] = txtColor[3];
+    _bgColor[0] = 0.f;    // bgColor[0];
+    _bgColor[1] = 1.f;    // bgColor[1];
+    _bgColor[2] = 0.f;    // bgColor[2];
+    _bgColor[3] = 1.f;    // bgColor[3];
+
+    _txtColor[0] = 1.f;    // txtColor[0];
+    _txtColor[1] = 0.f;    // txtColor[1];
+    _txtColor[2] = 0.f;    // txtColor[2];
+    _txtColor[3] = 1.f;    // txtColor[3];
+    //_bgColor[0]   = (float)bgColor[0];
+    //_bgColor[1]   = (float)bgColor[1];
+    //_bgColor[2]   = (float)bgColor[2];
+    _bgColor[3] = .9999f;    //(float)bgColor[3];
+    //_txtColor[0]  = (float)txtColor[0];
+    //_txtColor[1]  = (float)txtColor[1];
+    //_txtColor[2]  = (float)txtColor[2];
+    _txtColor[3] = .9999f;    //(float)txtColor[3];
     _fbo = 0;
     _fboTexture = 0;
     _vpParams = vpParams;
@@ -126,13 +148,6 @@ int TextObject::Initialize(string font, string text, int size, float txtColor[4]
     initFrameBuffer();
     glPopAttrib();
     return 0;
-}
-
-TextObject::~TextObject()
-{
-    delete _pixmap;
-    glDeleteTextures(1, &_fboTexture);
-    glDeleteBuffers(1, &_fbo);
 }
 
 void TextObject::initFrameBufferTexture(void)
@@ -182,19 +197,20 @@ int TextObject::initFrameBuffer(void)
     glGetDoublev(GL_COLOR_CLEAR_VALUE, bgColors);
     glGetDoublev(GL_CURRENT_COLOR, txColors);
 
-    cout << "bg: " << _bgColor[0] << " " << _bgColor[1] << " " << _bgColor[2] << " " << _bgColor[3] << endl;
-    cout << "tx: " << _txtColor[0] << " " << _txtColor[1] << " " << _txtColor[2] << " " << _txtColor[3] << endl;
-
     //	glColor4f(_txtColor[0],_txtColor[1],_txtColor[2],_txtColor[3]);
-    // glColor4f(1.f,0.f,0.f,1.f);
-    float clearR = 0.f;
-    float clearG = 1.f;
-    float clearB = 0.f;
-    float clearA = 1.f;
-    glClearColor(_bgColor[0], _bgColor[1], _bgColor[2], _bgColor[3]);
-    glColor4f(_txtColor[0], _txtColor[1], _txtColor[2], _txtColor[3]);
-    glClear(GL_COLOR_BUFFER_BIT);    //| GL_DEPTH_BUFFER_BIT);
-                                     //	glClearColor(clearR, clearG, clearB, clearA);
+    //	glClearColor(_bgColor[0],_bgColor[1],_bgColor[2],_bgColor[3]);
+    glClearColor(0.f, 1.f, 1.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColor4f(1.f, 1.f, 0.f, 1.f);
+    //	glGetDoublev(GL_COLOR_CLEAR_VALUE,bgColors);
+    //	glGetDoublev(GL_CURRENT_COLOR,txColors);
+    cout << "bg: " << _bgColor[0] << " " << _bgColor[1] << " " << _bgColor[2] << " " << _bgColor[3] << endl;
+    //	cout << "bg: " << bgColors[0] << " " << bgColors[1] << " " << bgColors[2] << " " << bgColors[3] << endl << endl;
+    cout << "tx: " << _txtColor[0] << " " << _txtColor[1] << " " << _txtColor[2] << " " << _txtColor[3] << endl;
+    //	cout << "tx: " << txColors[0] << " " << txColors[1] << " " << txColors[2] << " " << txColors[3] << endl;
+
+    // glColor4f(_txtColor[0],_txtColor[1],_txtColor[2],_txtColor[3]);
+    //	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glWindowPos2f(0, 0);
     int xRenderOffset = _size / 30 + 1;                                                       //_size/24 + 1;
     int yRenderOffset = (int)(-_pixmap->BBox(_text.c_str()).Lower().Y() + _size / 16 + 1);    //+4
@@ -221,13 +237,13 @@ int TextObject::initFrameBuffer(void)
         }
     }
 
-    double txtColor[4];
-    double bgColor[4];
-    glGetDoublev(GL_COLOR_CLEAR_VALUE, bgColor);
-    glGetDoublev(GL_CURRENT_COLOR, txtColor);
-    cout << "ag: " << bgColor[0] << " " << bgColor[1] << " " << bgColor[2] << " " << bgColor[3] << endl;
-    cout << "ax: " << txtColor[0] << " " << txtColor[1] << " " << txtColor[2] << " " << txtColor[3] << endl;
-    cout << endl;
+    //	double txtColor[4];
+    //	double bgColor[4];
+    //	glGetDoublev(GL_COLOR_CLEAR_VALUE,bgColor);
+    //	glGetDoublev(GL_CURRENT_COLOR,txtColor);
+    //	cout << "ag: " << bgColor[0] << " " << bgColor[1] << " " << bgColor[2] << " " << bgColor[3] << endl;
+    //	cout << "ax: " << txtColor[0] << " " << txtColor[1] << " " << txtColor[2] << " " << txtColor[3] << endl;
+    //	cout << endl;
 
     //	glColor4f(txColors[0],txColors[1],txColors[2],txColors[3]);
     //	glClearColor(bgColors[0],bgColors[1],bgColors[2],bgColors[3]);
@@ -334,6 +350,7 @@ void TextObject::processErrors(string functionName)
             errString = cppErrString.c_str();
             Wasp::MyBase::SetErrMsg(errString);
             glErr = glGetError();
+            cout << " ERROR " << errString << endl;
         }
     }
 }
@@ -343,6 +360,10 @@ int TextObject::drawMe(double coords[3])
     _coords[0] = coords[0];
     _coords[1] = coords[1];
     _coords[2] = coords[2];
+
+    double bgColors[4];
+    glGetDoublev(GL_COLOR_CLEAR_VALUE, bgColors);
+    cout << "drawME " << bgColors[0] << " " << bgColors[1] << " " << bgColors[2] << " " << bgColors[3] << endl;
 
     applyViewerMatrix();
 

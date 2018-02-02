@@ -69,10 +69,6 @@ public:
                    OrientationFlag orientation = DEADCENTER);
     ~TextObject();
 
-    // If the scene has a transform applied to it, we must apply
-    // that transform to our text objects too
-    void applyTransform(Transform *t);
-
     //! Draw Text Object at specified x, y, z coordinate
     int drawMe(double coords[3]);
     //! Draw Text Object at specified x, y, z coordinate, at specified time step
@@ -86,32 +82,32 @@ public:
     //! These define the size of the texture box that text will be drawn on to
     void findBBoxSize(void);
 
-    //! Generates a new framebuffer object and assigns it a unique identifier
-    int initFrameBuffer(void);
-
-    //! Saves the current GL state and applies transformations
-    //! to draw the appropriate type of text object.
-    // void applyViewerMatrix();
-    // float * applyViewerMatrix(float coords[3]);
-    int applyViewerMatrix(double coords[3] = NULL);
-
     //! Resets the state of the GL machine to what it was before
     //! our text rendering.
     void removeViewerMatrix();
 
     void setType(int type) { _type = type; }
 
-    void processErrors(string functionName);
-
     void SetOrientation(OrientationFlag flag) { _orientationFlag = flag; }
 
 private:
+    //! Saves the current GL state and applies transformations
+    //! to draw the appropriate type of text object.
+    // void applyViewerMatrix();
+    // float * applyViewerMatrix(float coords[3]);
+    int  applyViewerMatrix(double coords[3] = NULL);
+    void processErrors(string functionName);
+    int  initFrameBuffer(void);
     void initFrameBufferTexture(void);
     void applyOffset(double &llx, double &lly, double &urx, double &ury);
     void applyOffset2(double &xCoord, double &yCoord, double texWidth, double texHgt);
     bool projectPointToWin(double coords[3]);
     void drawLabel();
     void drawOnScreen();
+
+    // If the scene has a transform applied to it, we must apply
+    // that transform to our text objects too
+    void applyTransform(Transform *t);
 
     GLuint _fbo;
     GLuint _fboTexture;
