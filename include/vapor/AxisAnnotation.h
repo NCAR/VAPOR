@@ -32,6 +32,7 @@ class PARAMS_API AxisAnnotation : public ParamsBase {
     bool GetAxisAnnotationEnabled() const;
 
     vector<double> GetAxisBackgroundColor() const;
+    void GetAxisBackgroundColor(float bgColor[]) const;
     void SetAxisBackgroundColor(vector<double> color);
 
     vector<double> GetAxisColor() const;
