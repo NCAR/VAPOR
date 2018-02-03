@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTabWidget" name="SpaceTimeTab">
+      <widget class="QTabWidget" name="spaceTimeTab">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -113,9 +113,9 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
-       <widget class="QWidget" name="SpaceTab">
+       <widget class="QWidget" name="spaceTab">
         <attribute name="title">
          <string>Space</string>
         </attribute>
@@ -159,7 +159,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="plotButton">
+          <widget class="QPushButton" name="spaceTabPlotButton">
            <property name="text">
             <string>Plot</string>
            </property>
@@ -167,16 +167,36 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="TimeTab">
+       <widget class="QWidget" name="timeTab">
         <attribute name="title">
          <string>Time</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QSinglePoint" name="timeModeSinglePoint" native="true"/>
+          <widget class="QSinglePoint" name="timeTabSinglePoint" native="true"/>
          </item>
          <item>
-          <widget class="QRange" name="timeModeTimeRange" native="true"/>
+          <widget class="QRange" name="timeTabTimeRange" native="true"/>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>3</height>
+            </size>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="timeTabPlotButton">
+           <property name="text">
+            <string>Plot</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
