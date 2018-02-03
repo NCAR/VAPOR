@@ -19,6 +19,8 @@ public:
     void SetDimensionality(int);
     int  GetDimensionality();
     void GetCurrentPoint(std::vector<double> &);
+    void SetMainLabel(const QString &);
+    void SetDecimals(int dec);    // how many digits after the decimal point
 
 signals:
     void PointUpdated();

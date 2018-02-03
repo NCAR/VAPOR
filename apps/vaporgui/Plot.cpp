@@ -28,27 +28,42 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     _dataStatus = status;
     _paramsMgr = manager;
 
-    // Store the active dataset name
+    // Get the active dataset name
+    std::string              currentDatasetName;
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
     if (dmNames.empty()) {
         std::cerr << "No data set chosen yet. Plot shouldn't run into this condition." << std::endl;
     } else {
         GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
-        std::string     dsName = guiParams->GetStatsDatasetName();
-        if (dsName == "" || dsName == "NULL")    // not initialized yet
-            guiParams->SetPlotDatasetName(dmNames[0]);
+        currentDatasetName = guiParams->GetPlotDatasetName();
+        if (currentDatasetName == "" || currentDatasetName == "NULL")    // not initialized yet
+        {
+            currentDatasetName = dmNames[0];
+            guiParams->SetPlotDatasetName(currentDatasetName);
+        }
     }
 
-    // Do some QT stuff
+    VAPoR::DataMgr *currentDmgr = _dataStatus->GetDataMgr(currentDatasetName);
+    PlotParams *    plotParams = dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(currentDatasetName, PlotParams::GetClassType()));
+
+    // Do some static QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
+    myFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
+    spaceTimeTab->setCurrentIndex(0);      // default to load space tab
+    plotParams->SetSpaceTimeMode(true);    //
+
     p1P2Widget->setTabText(0, QString::fromAscii("Point 1 Position"));
     p1P2Widget->setTabText(1, QString::fromAscii("Point 2 Position"));
-    myFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
+    timeTabSinglePoint->SetMainLabel(QString::fromAscii("Select a data point in space:"));
+    timeTabTimeRange->SetMainLabel(QString::fromAscii("Select the minimum and maximum time steps:"));
+    timeTabTimeRange->SetDecimals(0);
 
     // Connect signals with slots
     connect(newVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)));
     connect(removeVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)));
+    connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_dataSourceChanged(int)));
+    connect(spaceTimeTab, SIGNAL(currentChanged(int)), this, SLOT(_spaceTimeModeChanged(int)));
 
     // Put the current window on top
     show();
@@ -166,11 +181,8 @@ void Plot::_removeVarChanged(int index)
 {
     assert(index > 0);
 
-    // Initialize pointers
-    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
-    std::string     dsName = guiParams->GetPlotDatasetName();
-    PlotParams *    plotParams = dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType()));
-    std::string     varName = removeVarCombo->itemText(index).toStdString();
+    PlotParams *plotParams = _getCurrentPlotParams();
+    std::string varName = removeVarCombo->itemText(index).toStdString();
 
     // Remove this variable from parameter
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
@@ -185,11 +197,18 @@ void Plot::_removeVarChanged(int index)
     plotParams->SetAuxVariableNames(vars);
 }
 
-void Plot::_dataSourceChanged(int) {}
-
 void Plot::_plotClicked() {}
 
-void Plot::_spaceTimeModeChanged(bool) {}
+void Plot::_spaceTimeModeChanged(int mode)
+{
+    PlotParams *plotParams = _getCurrentPlotParams();
+    if (mode == 0)
+        plotParams->SetSpaceTimeMode(true);
+    else if (mode == 1)
+        plotParams->SetSpaceTimeMode(false);
+    else
+        std::cerr << "Plot: spaceTimeTab value not known!" << std::endl;
+}
 
 void Plot::_spaceModeP1P2Changed() {}
 
@@ -200,3 +219,20 @@ void Plot::_timeModePointChanged() {}
 void Plot::_timeModeT1T2Changed() {}
 
 void Plot::_fidelityChanged() {}
+
+void Plot::_dataSourceChanged(int index)
+{
+    std::string newDataSourceName = dataMgrCombo->itemText(index).toStdString();
+
+    // Inform GUIStateParams the change of data source.
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+
+    guiParams->SetPlotDatasetName(newDataSourceName);
+}
+
+PlotParams *Plot::_getCurrentPlotParams() const
+{
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    std::string     dsName = guiParams->GetPlotDatasetName();
+    return (dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType())));
+}

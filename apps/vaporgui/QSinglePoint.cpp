@@ -64,3 +64,13 @@ void QSinglePoint::SetExtents(const std::vector<double> &min, const std::vector<
     if (_dimensionality >= 3) _ui->zSliderEdit->SetExtents(min[2], max[2]);
     if (_dimensionality >= 4) _ui->tSliderEdit->SetExtents(min[3], max[3]);
 }
+
+void QSinglePoint::SetMainLabel(const QString &label) { _ui->mainLabel->setText(label); }
+
+void QSinglePoint::SetDecimals(int dec)
+{
+    _ui->xSliderEdit->SetDecimals(dec);
+    _ui->ySliderEdit->SetDecimals(dec);
+    _ui->zSliderEdit->SetDecimals(dec);
+    _ui->tSliderEdit->SetDecimals(dec);
+}

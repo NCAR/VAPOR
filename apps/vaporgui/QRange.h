@@ -16,6 +16,8 @@ public:
 
     void SetExtents(double min, double max);
     void GetRange(double[2]);
+    void SetMainLabel(const QString &);
+    void SetDecimals(int dec);    // how many digits after the decimal point
 
 signals:
     void RangeChanged();

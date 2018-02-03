@@ -46,7 +46,7 @@ private slots:
     void _dataSourceChanged(int);
 
     /// Clean up data points for plotting when the following events happen
-    void _spaceTimeModeChanged(bool);
+    void _spaceTimeModeChanged(int);
     void _spaceModeP1P2Changed();
     void _spaceModeTimeChanged();
     void _timeModePointChanged();
@@ -59,6 +59,8 @@ private slots:
 private:
     VAPoR::DataStatus *_dataStatus;
     VAPoR::ParamsMgr * _paramsMgr;
+
+    PlotParams *_getCurrentPlotParams() const;
 };
 
 #endif    // PLOT_H
