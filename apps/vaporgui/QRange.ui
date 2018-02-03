@@ -22,7 +22,14 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,2,2">
+      <item>
+       <widget class="QLabel" name="mainLabel">
+        <property name="text">
+         <string>A Range</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QSliderEdit" name="minSliderEdit" native="true"/>
       </item>
