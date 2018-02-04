@@ -16,14 +16,14 @@ class QDoubleValidator2 : public QDoubleValidator {
     //
     // overload fixup() from QDoubleValidator
     //
-    void fixup(QString &input) const {
+    virtual void fixup(QString &input) const override {
         double val = input.toDouble();
         if (val > top())
             val = top();
         else if (val < bottom())
             val = bottom();
 
-        input = QString::number(val);
+        input = QString::number(val, 'g', this->decimals());
     }
 };
 
