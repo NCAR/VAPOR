@@ -32,15 +32,14 @@ void QSinglePoint::_coordinateChanged(double value)    // value isn't used thoug
 
 void QSinglePoint::SetDimensionality(int dim)
 {
-    assert(dim >= 2);
-    assert(dim <= 4);
+    assert(dim >= 2 && dim <= 4);
     _dimensionality = dim;
     _ui->xSliderEdit->setVisible(true);
     _ui->ySliderEdit->setVisible(true);
     _ui->zSliderEdit->setVisible(false);
     _ui->tSliderEdit->setVisible(false);
     if (dim >= 3) _ui->zSliderEdit->setVisible(true);
-    if (dim >= 4) _ui->tSliderEdit->setVisible(true);
+    if (dim == 4) _ui->tSliderEdit->setVisible(true);
 }
 
 int QSinglePoint::GetDimensionality() { return _dimensionality; }

@@ -6,8 +6,6 @@
 //                                                                      *
 //************************************************************************/
 //
-//  File:       plot.h
-//
 //  Author:     Samuel Li
 //              National Center for Atmospheric Research
 //              PO 3000, Boulder, Colorado
@@ -17,6 +15,7 @@
 
 #include "GUIStateParams.h"
 #include <vapor/GetAppPath.h>
+#include <vapor/DataMgrUtils.h>
 #include "Plot.h"
 
 #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
@@ -159,22 +158,30 @@ void Plot::Update()
 
     // Update LOD, Refinement
     myFidelityWidget->Update(currentDmgr, _paramsMgr, plotParams);
+
+    // Update time mode tab
+    _setWidgetExtents();
 }
 
 void Plot::_newVarChanged(int index)
 {
     assert(index > 0);
 
-    // Initialize pointers
-    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
-    std::string     dsName = guiParams->GetPlotDatasetName();
-    PlotParams *    plotParams = dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType()));
-    std::string     varName = newVarCombo->itemText(index).toStdString();
+    std::string varName = newVarCombo->itemText(index).toStdString();
 
     // Add this variable to parameter
+    PlotParams *             plotParams = this->_getCurrentPlotParams();
+    VAPoR::DataMgr *         dataMgr = this->_getCurrentDataMgr();
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
     vars.push_back(varName);
     plotParams->SetAuxVariableNames(vars);
+
+    // Find out if there are 3D variables.
+    std::vector<double> min, max;
+    std::vector<int>    axes;
+    VAPoR::DataMgrUtils::GetExtents(dataMgr, 0, vars, min, max, axes);
+    assert(axes.size() == 2 || axes.size() == 3);
+    timeTabSinglePoint->SetDimensionality(axes.size());
 }
 
 void Plot::_removeVarChanged(int index)
@@ -230,9 +237,32 @@ void Plot::_dataSourceChanged(int index)
     guiParams->SetPlotDatasetName(newDataSourceName);
 }
 
-PlotParams *Plot::_getCurrentPlotParams() const
+VAPoR::PlotParams *Plot::_getCurrentPlotParams() const
 {
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     std::string     dsName = guiParams->GetPlotDatasetName();
     return (dynamic_cast<PlotParams *>(_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType())));
+}
+
+VAPoR::DataMgr *Plot::_getCurrentDataMgr() const
+{
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    std::string     currentDatasetName = guiParams->GetPlotDatasetName();
+    assert(currentDatasetName != "" && currentDatasetName != "NULL");
+
+    return (_dataStatus->GetDataMgr(currentDatasetName));
+}
+
+void Plot::_setWidgetExtents()
+{
+    VAPoR::PlotParams *      plotParams = this->_getCurrentPlotParams();
+    VAPoR::DataMgr *         dataMgr = this->_getCurrentDataMgr();
+    size_t                   ts = plotParams->GetCurrentTimestep();
+    std::vector<std::string> allVars = plotParams->GetAuxVariableNames();
+    std::vector<double>      minFullExtents, maxFullExtents;
+    if (!allVars.empty()) {
+        std::vector<int> axes;
+        VAPoR::DataMgrUtils::GetExtents(dataMgr, ts, allVars, minFullExtents, maxFullExtents, axes);
+        timeTabSinglePoint->SetExtents(minFullExtents, maxFullExtents);
+    }
 }

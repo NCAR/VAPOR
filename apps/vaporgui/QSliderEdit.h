@@ -19,7 +19,7 @@ public:
     void   SetDecimals(int dec);            // how many digits after the decimal point
     void   SetExtents(double min, double max);
     double GetCurrentValue();
-    double SetValue(double);
+    void   SetValue(double);
 
 signals:
     // This is the only signal a QSliderEdit emits.
@@ -33,6 +33,7 @@ private slots:
 private:
     Ui::QSliderEdit *  _ui;
     QDoubleValidator2 *_validator;
+    int                _decimals;
 };
 
 #endif    // QSLIDEREDIT_H

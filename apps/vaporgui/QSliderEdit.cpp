@@ -8,15 +8,16 @@ QSliderEdit::QSliderEdit(QWidget *parent) : QWidget(parent), _ui(new Ui::QSlider
 {
     _ui->setupUi(this);
 
+    _decimals = 2;
     _validator = new QDoubleValidator2(_ui->myLineEdit);
-    _validator->setDecimals(4);
+    _validator->setDecimals(_decimals);
     _ui->myLineEdit->setValidator(_validator);
 
     connect(_ui->mySlider, SIGNAL(valueChanged(int)),    // for update LineEdit
             this, SLOT(_mySlider_valueChanged(int)));
     connect(_ui->mySlider, SIGNAL(sliderReleased()),    // for emit a signal
             this, SLOT(_mySlider_released()));
-    connect(_ui->myLineEdit, SIGNAL(returnPressed()),    // for emit a signal
+    connect(_ui->myLineEdit, SIGNAL(editingFinished()),    // for emit a signal
             this, SLOT(_myLineEdit_valueChanged()));
 }
 
@@ -40,7 +41,7 @@ void QSliderEdit::SetExtents(double min, double max)
 
 void QSliderEdit::_mySlider_valueChanged(int value)
 {
-    QString text = QString::number(value);
+    QString text = QString::number(value, 'g', _decimals);
     _validator->fixup(text);
     _ui->myLineEdit->blockSignals(true);
     _ui->myLineEdit->setText(text);
@@ -66,13 +67,15 @@ void QSliderEdit::_myLineEdit_valueChanged()
 
 void QSliderEdit::SetDecimals(int dec)
 {
-    if (dec > 0)
+    if (dec > 0) {
+        _decimals = dec;
         _validator->setDecimals(dec);
-    else if (dec == 0) {
+    } else if (dec == 0) {
         // if the extents ARE essentially integers
-        if (std::floor(_validator->top()) == _validator->top() && std::floor(_validator->bottom()) == _validator->bottom())
+        if (std::floor(_validator->top()) == _validator->top() && std::floor(_validator->bottom()) == _validator->bottom()) {
+            _decimals = dec;
             _validator->setDecimals(dec);
-        else
+        } else
             std::cerr << "QSliderEdit extents aren't integers while ZERO decimal is set" << std::endl;
 
     } else
@@ -82,7 +85,7 @@ void QSliderEdit::SetDecimals(int dec)
 
 double QSliderEdit::GetCurrentValue() { return (_ui->myLineEdit->text().toDouble()); }
 
-double QSliderEdit::SetValue(double value)
+void QSliderEdit::SetValue(double value)
 {
     QString text = QString::number(value);
     _validator->fixup(text);

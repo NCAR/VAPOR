@@ -6,8 +6,6 @@
 //                                                                      *
 //************************************************************************/
 //
-//  File:       Plot.h
-//
 //  Author:     Samuel Li
 //              National Center for Atmospheric Research
 //              PO 3000, Boulder, Colorado
@@ -60,7 +58,11 @@ private:
     VAPoR::DataStatus *_dataStatus;
     VAPoR::ParamsMgr * _paramsMgr;
 
-    PlotParams *_getCurrentPlotParams() const;
+    /// Access functions to other pointers
+    VAPoR::PlotParams *_getCurrentPlotParams() const;
+    VAPoR::DataMgr *   _getCurrentDataMgr() const;
+
+    void _setWidgetExtents();
 };
 
 #endif    // PLOT_H
