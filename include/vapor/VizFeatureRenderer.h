@@ -113,9 +113,9 @@ private:
 	void drawDomainFrame(size_t ts) const;
 
 
- void getDomainExtents(
-	vector <double> &minExts, vector <double> &maxExts
- ) const;
+ std::vector<double> getDomainExtents() const;
+ AxisAnnotation* getAxisAnnotation();
+
 
 #ifdef	DEAD
 //! Render the region frame
