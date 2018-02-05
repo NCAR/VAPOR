@@ -100,7 +100,7 @@ private:
 
     std::vector<double> getDomainExtents() const;
     AxisAnnotation *    getAxisAnnotation();
-    void                scaleNormalizedCoordinates(std::vector<double> &origin, std::vector<double> &minTics, std::vector<double> &maxTis);
+    void                scaleNormalizedCoordinatesToWorld(std::vector<double> &coords);
 
 #ifdef DEAD
     //! Render the region frame
@@ -113,6 +113,8 @@ private:
     void       applyTransform(Transform *t);
     void       renderText(double text, double llx, double lly, double llz = 0.f);
     Transform *getCurrentTransform();
+    void       convertPointToLon(double &xCoord);
+    void       convertPointToLat(double &yCoord);
     void       convertPointToLonLat(double &xCoord, double &yCoord);
 
     // Draw Axis arrows

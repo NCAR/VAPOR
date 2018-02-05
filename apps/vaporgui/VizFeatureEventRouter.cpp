@@ -305,21 +305,53 @@ void VizFeatureEventRouter::updateTicOrientationCombos()
     zTicOrientationCombo->setCurrentIndex(ticDir[2]);
 }
 
+void VizFeatureEventRouter::scaleNormalizedCoordsToWorld(std::vector<double> &coords)
+{
+    std::vector<double> extents = getDomainExtents();
+    for (int i = 0; i < 3; i++) {
+        double offset = coords[i] * (extents[i + 3] - extents[i]);
+        double minimum = extents[i];
+        coords[i] = offset + minimum;
+    }
+}
+
+void VizFeatureEventRouter::scaleWorldCoordsToNormalized(std::vector<double> &coords)
+{
+    std::vector<double> extents = getDomainExtents();
+    for (int i = 0; i < 3; i++) {
+        double point = coords[i] - extents[i];
+        double magnitude = extents[i + 3] - extents[i];
+        coords[i] = point / magnitude;
+    }
+}
+
 void VizFeatureEventRouter::updateAnnotationTable()
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
 
-    vector<double> values;
+    vector<double> tableValues;
+
     vector<double> numtics = aa->GetNumTics();
-    values.insert(values.end(), numtics.begin(), numtics.end());
+    tableValues.insert(tableValues.end(), numtics.begin(), numtics.end());
+
     vector<double> ticSizes = aa->GetTicSize();
-    values.insert(values.end(), ticSizes.begin(), ticSizes.end());
+    tableValues.insert(tableValues.end(), ticSizes.begin(), ticSizes.end());
+
     vector<double> minTics = aa->GetMinTics();
-    values.insert(values.end(), minTics.begin(), minTics.end());
+    cout << "n2w " << minTics[0];
+    scaleNormalizedCoordsToWorld(minTics);
+    cout << " " << minTics[0] << endl;
+    tableValues.insert(tableValues.end(), minTics.begin(), minTics.end());
+
     vector<double> maxTics = aa->GetMaxTics();
-    values.insert(values.end(), maxTics.begin(), maxTics.end());
-    vector<double> orig = aa->GetAxisOrigin();
-    values.insert(values.end(), orig.begin(), orig.end());
+    cout << "n2w " << maxTics[0];
+    scaleNormalizedCoordsToWorld(maxTics);
+    cout << " " << maxTics[0] << endl;
+    tableValues.insert(tableValues.end(), maxTics.begin(), maxTics.end());
+
+    vector<double> origin = aa->GetAxisOrigin();
+    scaleNormalizedCoordsToWorld(origin);
+    tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
     vector<string> rowHeaders;
     rowHeaders.push_back("# Tics          ");
@@ -333,7 +365,7 @@ void VizFeatureEventRouter::updateAnnotationTable()
     colHeaders.push_back("Y");
     colHeaders.push_back("Z");
 
-    _annotationVaporTable->Update(5, 3, values, rowHeaders, colHeaders);
+    _annotationVaporTable->Update(5, 3, tableValues, rowHeaders, colHeaders);
 }
 
 AxisAnnotation *VizFeatureEventRouter::_getCurrentAxisAnnotation()
@@ -348,12 +380,16 @@ AxisAnnotation *VizFeatureEventRouter::_getCurrentAxisAnnotation()
     return aa;
 }
 
-void VizFeatureEventRouter::getActiveExtents(vector<double> &minExts, vector<double> &maxExts)
+std::vector<double> VizFeatureEventRouter::getDomainExtents() const
 {
-    ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
-    size_t      ts = GetCurrentTimeStep();
-    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    ParamsMgr *         paramsMgr = _controlExec->GetParamsMgr();
+    size_t              ts = GetCurrentTimeStep();
+    DataStatus *        dataStatus = _controlExec->GetDataStatus();
+    std::vector<double> minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
+
+    std::vector<double> extents = {minExts[0], minExts[1], minExts[2], maxExts[0], maxExts[1], maxExts[2]};
+    return extents;
 }
 
 // Initialize tic length to 2.5% of the domain that they're oriented on.
@@ -365,10 +401,9 @@ void VizFeatureEventRouter::initializeTicSizes(AxisAnnotation *aa)
 
 void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
 {
-    vector<double> minExts, maxExts;
-    getActiveExtents(minExts, maxExts);
+    vector<double> minExts = {0.0, 0.0, 0.0};
+    vector<double> maxExts = {1.0, 1.0, 1.0};
 
-    // AxisAnnotation* aa = _getCurrentAxisAnnotation();
     aa->SetMinTics(minExts);
     aa->SetMaxTics(maxExts);
     aa->SetAxisOrigin(minExts);
@@ -389,8 +424,6 @@ void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa)
 
 void VizFeatureEventRouter::updateAxisAnnotations()
 {
-    // if (!_annotationsInitialized) initializeAnnotation();
-
     updateDataMgrCombo();
     updateAnnotationCheckbox();
     updateLatLonCheckbox();
@@ -415,23 +448,33 @@ void VizFeatureEventRouter::updateAxisAnnotations()
 
 void VizFeatureEventRouter::axisAnnotationTableChanged()
 {
-    // VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
 
     vector<double> values;
     values = getTableRow(0);
     aa->SetNumTics(values);
 
+    values.clear();
     values = getTableRow(1);
     aa->SetTicSize(values);
 
+    values.clear();
     values = getTableRow(2);
+    cout << "er w2n min " << values[0] << " ";
+    scaleWorldCoordsToNormalized(values);
+    cout << " " << values[0] << endl;
     aa->SetMinTics(values);
 
+    values.clear();
     values = getTableRow(3);
+    cout << "er w2n max " << values[0] << " ";
+    scaleWorldCoordsToNormalized(values);
+    cout << " " << values[0] << endl;
     aa->SetMaxTics(values);
 
+    values.clear();
     values = getTableRow(4);
+    scaleWorldCoordsToNormalized(values);
     aa->SetAxisOrigin(values);
 }
 
@@ -448,7 +491,6 @@ void VizFeatureEventRouter::setCurrentAxisDataMgr(int index)
 vector<double> VizFeatureEventRouter::getTableRow(int row)
 {
     vector<double> contents;
-    cout << row << endl;
     for (int col = 0; col < 3; col++) {
         double val = _annotationVaporTable->GetValue(row, col);
         contents.push_back(val);

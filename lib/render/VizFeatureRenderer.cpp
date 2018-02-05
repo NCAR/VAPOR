@@ -367,13 +367,16 @@ void VizFeatureRenderer::OverlayPaint(size_t ts) {}
 
 #endif
 
-void VizFeatureRenderer::scaleNormalizedCoordinates(std::vector<double> &origin, std::vector<double> &minTics, std::vector<double> &maxTics)
+void VizFeatureRenderer::scaleNormalizedCoordinatesToWorld(std::vector<double> &coords)
 {
     std::vector<double> extents = getDomainExtents();
     for (int i = 0; i < 3; i++) {
-        origin[i] = origin[i] * (extents[i + 3] - extents[i]);
-        minTics[i] = origin[i] * (extents[i + 3] - extents[i]);
-        maxTics[i] = origin[i] * (extents[i + 3] - extents[i]);
+        double offset = coords[i] * (extents[i + 3] - extents[i]);
+        double minimum = extents[i];
+        coords[i] = offset + minimum;
+        // origin[i] = origin[i] * (extents[i+3]-extents[i]);
+        // minTics[i] = origin[i] * (extents[i+3]-extents[i]);
+        // maxTics[i] = origin[i] * (extents[i+3]-extents[i]);
     }
 }
 
@@ -390,13 +393,20 @@ void VizFeatureRenderer::drawAxisTics()
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
     vector<double> maxTic = aa->GetMaxTics();
-    scaleNormalizedCoordinates(origin, minTic, maxTic);
+    scaleNormalizedCoordinatesToWorld(origin);
+    cout << "Re n2w min " << minTic[0];
+    scaleNormalizedCoordinatesToWorld(minTic);
+    cout << " " << minTic[0] << endl;
+    cout << "Re n2w max " << minTic[1];
+    scaleNormalizedCoordinatesToWorld(maxTic);
+    cout << " " << minTic[1] << endl;
 
     vector<double> ticLength = aa->GetTicSize();
     vector<double> ticDir = aa->GetTicDirs();
     vector<double> numTics = aa->GetNumTics();
-    double         width = aa->GetTicWidth();
     vector<double> axisColor = aa->GetAxisColor();
+    double         width = aa->GetTicWidth();
+    bool           latLon = aa->GetLatLonAxesEnabled();
 
     _drawAxes(minTic, maxTic, origin, axisColor, width);
 
@@ -407,63 +417,61 @@ void VizFeatureRenderer::drawAxisTics()
     double startPosn[3], endPosn[3];
 
     // Now draw tic marks for x:
-    if (numTics[0] > 1 && ticLength[0] > 0.f) {
-        pointOnAxis[1] = origin[1];
-        pointOnAxis[2] = origin[2];
-        ticVec[0] = 0.f;
-        ticVec[1] = 0.f;
-        ticVec[2] = 0.f;
-        if (ticDir[0] == 1)
-            ticVec[1] = ticLength[0];
-        else
-            ticVec[2] = ticLength[0];
-        for (int i = 0; i < numTics[0]; i++) {
-            pointOnAxis[0] = minTic[0] + (float)i * (maxTic[0] - minTic[0]) / (float)(numTics[0] - 1);
+    pointOnAxis[1] = origin[1];
+    pointOnAxis[2] = origin[2];
+    ticVec[0] = 0.f;
+    ticVec[1] = 0.f;
+    ticVec[2] = 0.f;
+    if (ticDir[0] == 1)
+        ticVec[1] = ticLength[0];
+    else
+        ticVec[2] = ticLength[0];
+    for (int i = 0; i < numTics[0]; i++) {
+        pointOnAxis[0] = minTic[0] + (float)i * (maxTic[0] - minTic[0]) / (float)(numTics[0] - 1);
+        double text = pointOnAxis[0];
+        if (latLon) convertPointToLon(text);
+        vsub(pointOnAxis, ticVec, startPosn);
+        vadd(pointOnAxis, ticVec, endPosn);
+        _drawTic(startPosn, endPosn, width, axisColor);
+        renderText(text, startPosn[0], startPosn[1]);
+    }
 
-            vsub(pointOnAxis, ticVec, startPosn);
-            vadd(pointOnAxis, ticVec, endPosn);
-            _drawTic(startPosn, endPosn, width, axisColor);
-            renderText(pointOnAxis[0], startPosn[0], startPosn[1]);
-        }
-    }
     // Now draw tic marks for y:
-    if (numTics[1] > 1 && ticLength[1] > 0.f) {
-        pointOnAxis[0] = origin[0];
-        pointOnAxis[2] = origin[2];
-        ticVec[0] = 0.f;
-        ticVec[1] = 0.f;
-        ticVec[2] = 0.f;
-        if (ticDir[1] == 0)
-            ticVec[0] = ticLength[1];
-        else
-            ticVec[2] = ticLength[1];
-        for (int i = 0; i < numTics[1]; i++) {
-            pointOnAxis[1] = minTic[1] + (float)i * (maxTic[1] - minTic[1]) / (float)(numTics[1] - 1);
-            vsub(pointOnAxis, ticVec, startPosn);
-            vadd(pointOnAxis, ticVec, endPosn);
-            _drawTic(startPosn, endPosn, width, axisColor);
-            renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
-        }
+    pointOnAxis[0] = origin[0];
+    pointOnAxis[2] = origin[2];
+    ticVec[0] = 0.f;
+    ticVec[1] = 0.f;
+    ticVec[2] = 0.f;
+    if (ticDir[1] == 0)
+        ticVec[0] = ticLength[1];
+    else
+        ticVec[2] = ticLength[1];
+    for (int i = 0; i < numTics[1]; i++) {
+        pointOnAxis[1] = minTic[1] + (float)i * (maxTic[1] - minTic[1]) / (float)(numTics[1] - 1);
+        vsub(pointOnAxis, ticVec, startPosn);
+        vadd(pointOnAxis, ticVec, endPosn);
+        _drawTic(startPosn, endPosn, width, axisColor);
+        renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
     }
+
     // Now draw tic marks for z:
-    if (numTics[2] > 1 && ticLength[2] > 0.f) {
-        pointOnAxis[0] = origin[0];
-        pointOnAxis[1] = origin[1];
-        ticVec[0] = 0.f;
-        ticVec[1] = 0.f;
-        ticVec[2] = 0.f;
-        if (ticDir[2] == 0)
-            ticVec[0] = ticLength[2];
-        else
-            ticVec[1] = ticLength[2];
-        for (int i = 0; i < numTics[2]; i++) {
-            pointOnAxis[2] = minTic[2] + (float)i * (maxTic[2] - minTic[2]) / (float)(numTics[2] - 1);
-            vsub(pointOnAxis, ticVec, startPosn);
-            vadd(pointOnAxis, ticVec, endPosn);
-            _drawTic(startPosn, endPosn, width, axisColor);
-            renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
-        }
+    pointOnAxis[0] = origin[0];
+    pointOnAxis[1] = origin[1];
+    ticVec[0] = 0.f;
+    ticVec[1] = 0.f;
+    ticVec[2] = 0.f;
+    if (ticDir[2] == 0)
+        ticVec[0] = ticLength[2];
+    else
+        ticVec[1] = ticLength[2];
+    for (int i = 0; i < numTics[2]; i++) {
+        pointOnAxis[2] = minTic[2] + (float)i * (maxTic[2] - minTic[2]) / (float)(numTics[2] - 1);
+        vsub(pointOnAxis, ticVec, startPosn);
+        vadd(pointOnAxis, ticVec, endPosn);
+        _drawTic(startPosn, endPosn, width, axisColor);
+        renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
     }
+
     glPopAttrib();
 }
 
@@ -500,6 +508,18 @@ void VizFeatureRenderer::_drawTic(double startPosn[], double endPosn[], double w
     glEnd();
     glDisable(GL_LINE_SMOOTH);
     glPopAttrib();
+}
+
+void VizFeatureRenderer::convertPointToLon(double &xCoord)
+{
+    double dummy = 0.;
+    convertPointToLonLat(xCoord, dummy);
+}
+
+void VizFeatureRenderer::convertPointToLat(double &yCoord)
+{
+    double dummy = 0.;
+    convertPointToLonLat(dummy, yCoord);
 }
 
 void VizFeatureRenderer::convertPointToLonLat(double &xCoord, double &yCoord)
@@ -555,9 +575,11 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly, double 
     AxisAnnotation *    aa = getAxisAnnotation();
     std::vector<double> axisColor = aa->GetAxisColor();
     std::vector<double> txtBackground = aa->GetAxisBackgroundColor();
-    int                 precision = (int)aa->GetAxisDigits();
     int                 fontSize = aa->GetAxisFontSize();
+    bool                latLon = aa->GetLatLonAxesEnabled();
+    ViewpointParams *   vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
+    int               precision = (int)aa->GetAxisDigits();
     std::stringstream ss;
     ss << fixed << setprecision(precision) << text;
     string textString = ss.str();
@@ -566,22 +588,14 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly, double 
         delete _textObject;
         _textObject = NULL;
     }
-
-    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
     _textObject = new TextObject();
     _textObject->Initialize(_fontFile, textString, fontSize, axisColor, txtBackground, vpParams, TextObject::BILLBOARD, TextObject::CENTERTOP);
 
-    std::vector<double> extents = getDomainExtents();
     std::vector<double> coord = {llx, lly, llz};
 
     _textObject->drawMe(coord);
     ;
 
-    //_textObject->drawMe(coord, extents);
-
-    // double coords[] = {llx, lly, llz};
-    // std::vector<double> extents = {minx, maxx, miny, maxy, minz, maxz};
-    //_textObject->drawMe(coords);
     return;
 }
 
