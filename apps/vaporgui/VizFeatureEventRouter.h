@@ -128,8 +128,10 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
 
     VAPoR::AxisAnnotation *_getCurrentAxisAnnotation();
 
-    void getActiveExtents(
-        vector<double> &minExts, vector<double> &maxExts);
+    std::vector<double> getDomainExtents() const;
+    void scaleNormalizedCoordsToWorld(std::vector<double> &coords);
+    void scaleWorldCoordsToNormalized(std::vector<double> &coords);
+
     void initializeAnnotation(VAPoR::AxisAnnotation *aa);
     void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
     void initializeTicSizes(VAPoR::AxisAnnotation *aa);
