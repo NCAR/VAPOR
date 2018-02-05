@@ -527,6 +527,7 @@ void VizFeatureEventRouter::setCurrentAxisDataMgr(int index) {
 	
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetCurrentAxisDataMgrName(dataMgr);
+	cout << "Setting dm to " << dataMgr << endl;
 }
 
 vector<double> VizFeatureEventRouter::getTableRow(int row) {
