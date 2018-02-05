@@ -291,6 +291,12 @@ void TextObject::processErrors(string functionName)
     }
 }
 
+int TextObject::drawMe(std::vector<double> coord)
+{
+    double coordArray[] = {coord[0], coord[1], coord[2]};
+    return drawMe(coordArray);
+}
+
 int TextObject::drawMe(double coords[3])
 {
     _coords[0] = coords[0];

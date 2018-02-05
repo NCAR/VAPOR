@@ -69,10 +69,9 @@ public:
                    OrientationFlag orientation = DEADCENTER);
     ~TextObject();
 
-    //! Draw Text Object at specified x, y, z coordinate
     int drawMe(double coords[3]);
-    //! Draw Text Object at specified x, y, z coordinate, at specified time step
-    int drawMe(double coords[3], int timestep);
+    int drawMe(std::vector<double> coords);
+    int drawMe(double coords[3], int ts);
 
     double getWidth() { return _width; }
 

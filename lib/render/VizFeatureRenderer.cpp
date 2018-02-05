@@ -377,6 +377,9 @@ void VizFeatureRenderer::drawAxisTics()
     vector<string>  names = m_paramsMgr->GetDataMgrNames();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation(names[0]);
 
+    // Need to scale origin, minTic, and maxTic according to extents
+    //
+
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
     vector<double> maxTic = aa->GetMaxTics();
@@ -390,7 +393,8 @@ void VizFeatureRenderer::drawAxisTics()
 
     double pointOnAxis[3];
     double ticVec[3], drawPosn[3];
-
+    // std::vector<double> ticVec(0,3);      // Need vsub and vadd for vectors in glutil.h!
+    // std::vector<double> drawPosn(0,3);
     double startPosn[3], endPosn[3];
 
     // Now draw tic marks for x:
@@ -511,30 +515,39 @@ Transform *VizFeatureRenderer::getCurrentTransform()
     return t;
 }
 
-void VizFeatureRenderer::renderText(double text, double llx, double lly, double llz)
+AxisAnnotation *VizFeatureRenderer::getAxisAnnotation()
 {
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
     string            currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
     AxisAnnotation *  aa = vfParams->GetAxisAnnotation(currentAxisDataMgr);
+    return aa;
+}
 
-    vector<double> axisColor, txtBackground;
-    axisColor = aa->GetAxisColor();
-    txtBackground = aa->GetAxisBackgroundColor();
-    //	cout << "A " <<  aa->GetAxisDataMgr() << " " << axisColor[0] << " " << axisColor[1] << " " << axisColor[2] << endl;
-    //	cout << "B " << aa->GetAxisDataMgr() << " " << txtBackground[0] << " " << txtBackground[1] << " " << txtBackground[2] << endl << endl;
-    //	axisColor.push_back(1.f); 		// alpha channel
-    //	txtBackground.push_back(1.f);	// alpha channel
+std::vector<double> VizFeatureRenderer::getDomainExtents() const
+{
+    // 93  const ParamsMgr* m_paramsMgr;
+    // 94  const DataStatus* m_dataStatus;
+    // 95  string m_winName;
+    // 96  ShaderMgr *m_shaderMgr;
 
-    //	float axisColor[] = {1.f, 0.f, 0.f, 1.f};
-    //	float txtBackground[] = {0.f, 1.f, 0.f, 1.f};
+    int            ts = 0;    // rParams->GetCurrentTimestep();
+    vector<double> minExts, maxExts;
+    m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
 
-    // float axisColor[] =
-    // float txtBackground[] = {0.f, 1.f, 0.f, 1.f};
+    std::vector<double> extents;
+    for (int i = 0; i < 3; i++) { extents.push_back(minExts[i]); }
+    for (int i = 0; i < 3; i++) { extents.push_back(maxExts[i]); }
 
-    int precision = (int)aa->GetAxisDigits();
-    int fontSize = aa->GetAxisFontSize();
+    return extents;
+}
 
-    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+void VizFeatureRenderer::renderText(double text, double llx, double lly, double llz)
+{
+    AxisAnnotation *    aa = getAxisAnnotation();
+    std::vector<double> axisColor = aa->GetAxisColor();
+    std::vector<double> txtBackground = aa->GetAxisBackgroundColor();
+    int                 precision = (int)aa->GetAxisDigits();
+    int                 fontSize = aa->GetAxisFontSize();
 
     std::stringstream ss;
     ss << fixed << setprecision(precision) << text;
@@ -545,11 +558,21 @@ void VizFeatureRenderer::renderText(double text, double llx, double lly, double 
         _textObject = NULL;
     }
 
+    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
     _textObject = new TextObject();
     _textObject->Initialize(_fontFile, textString, fontSize, axisColor, txtBackground, vpParams, TextObject::BILLBOARD, TextObject::CENTERTOP);
 
-    double coords[] = {llx, lly, llz};
-    _textObject->drawMe(coords);
+    std::vector<double> extents = getDomainExtents();
+    std::vector<double> coord = {llx, lly, llz};
+
+    _textObject->drawMe(coord);
+    ;
+
+    //_textObject->drawMe(coord, extents);
+
+    // double coords[] = {llx, lly, llz};
+    // std::vector<double> extents = {minx, maxx, miny, maxy, minz, maxz};
+    //_textObject->drawMe(coords);
     return;
 }
 
