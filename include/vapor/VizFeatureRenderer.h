@@ -100,6 +100,7 @@ private:
 
     std::vector<double> getDomainExtents() const;
     AxisAnnotation *    getAxisAnnotation();
+    void                scaleNormalizedCoordinates(std::vector<double> &origin, std::vector<double> &minTics, std::vector<double> &maxTis);
 
 #ifdef DEAD
     //! Render the region frame

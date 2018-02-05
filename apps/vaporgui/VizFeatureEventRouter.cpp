@@ -356,22 +356,10 @@ void VizFeatureEventRouter::getActiveExtents(vector<double> &minExts, vector<dou
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
 }
 
+// Initialize tic length to 2.5% of the domain that they're oriented on.
 void VizFeatureEventRouter::initializeTicSizes(AxisAnnotation *aa)
 {
-    vector<double> ticSizes, minExts, maxExts;
-    getActiveExtents(minExts, maxExts);
-
-    // Initialize tic length to 2.5% of the domain that they're oriented on.
-    // X starts oriented on Y,
-    // Y starts oriented on X,
-    // Z starts oriented on X
-    double xTicSize = (maxExts[1] - minExts[1]) * .025;
-    double yzTicSize = (maxExts[0] - minExts[0]) * .025;
-    ticSizes.push_back(xTicSize);
-    ticSizes.push_back(yzTicSize);
-    ticSizes.push_back(yzTicSize);
-
-    // AxisAnnotation* aa = _getCurrentAxisAnnotation();
+    vector<double> ticSizes(3, .025);
     aa->SetTicSize(ticSizes);
 }
 
