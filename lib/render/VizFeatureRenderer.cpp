@@ -374,6 +374,18 @@ void VizFeatureRenderer::OverlayPaint(size_t ts) {
 
 #endif
 
+void VizFeatureRenderer::scaleNormalizedCoordinates(
+    std::vector<double> &origin,
+    std::vector<double> &minTics,
+    std::vector<double> &maxTics) {
+    std::vector<double> extents = getDomainExtents();
+    for (int i = 0; i < 3; i++) {
+        origin[i] = origin[i] * (extents[i + 3] - extents[i]);
+        minTics[i] = origin[i] * (extents[i + 3] - extents[i]);
+        maxTics[i] = origin[i] * (extents[i + 3] - extents[i]);
+    }
+}
+
 void VizFeatureRenderer::drawAxisTics() {
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
@@ -383,12 +395,11 @@ void VizFeatureRenderer::drawAxisTics() {
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation(names[0]);
 
-    // Need to scale origin, minTic, and maxTic according to extents
-    //
-
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
     vector<double> maxTic = aa->GetMaxTics();
+    scaleNormalizedCoordinates(origin, minTic, maxTic);
+
     vector<double> ticLength = aa->GetTicSize();
     vector<double> ticDir = aa->GetTicDirs();
     vector<double> numTics = aa->GetNumTics();
