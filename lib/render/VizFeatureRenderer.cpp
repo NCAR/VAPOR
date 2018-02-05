@@ -456,7 +456,7 @@ void VizFeatureRenderer::drawAxisTics()
         _drawTic(startPosn, endPosn, width, axisColor);
 
         double text = pointOnAxis[1];
-        if (latLon) convertPointToLon(text);
+        if (latLon) convertPointToLat(text);
         renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
     }
 
