@@ -447,12 +447,14 @@ void VizFeatureRenderer::drawAxisTics() {
 	else ticVec[2] = ticLength[0];
 	for (int i = 0; i< numTics[0]; i++){
 		pointOnAxis[0] = minTic[0] + (float)i* (maxTic[0] - minTic[0])/(float)(numTics[0]-1);
+		vsub(pointOnAxis, ticVec, startPosn);
+		vadd(pointOnAxis, ticVec, endPosn);
+		
+		_drawTic(startPosn, endPosn, width, axisColor);
+		
 		double text = pointOnAxis[0];
 		if (latLon)
 			convertPointToLon(text);
-		vsub(pointOnAxis, ticVec, startPosn);
-		vadd(pointOnAxis, ticVec, endPosn);
-		_drawTic(startPosn, endPosn, width, axisColor);
 		renderText(text, startPosn[0], startPosn[1]);
 	}
 	
@@ -466,7 +468,12 @@ void VizFeatureRenderer::drawAxisTics() {
 		pointOnAxis[1] = minTic[1] + (float)i* (maxTic[1] - minTic[1])/(float)(numTics[1]-1);
 		vsub(pointOnAxis, ticVec, startPosn);
 		vadd(pointOnAxis, ticVec, endPosn);
+		
 		_drawTic(startPosn, endPosn, width, axisColor);
+
+		double text = pointOnAxis[1];
+		if (latLon)
+			convertPointToLon(text);
 		renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
 	}
 
