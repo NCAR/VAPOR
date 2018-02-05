@@ -473,7 +473,7 @@ void VizFeatureRenderer::drawAxisTics() {
 
 		double text = pointOnAxis[1];
 		if (latLon)
-			convertPointToLon(text);
+			convertPointToLat(text);
 		renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
 	}
 
