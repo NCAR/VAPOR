@@ -35,11 +35,9 @@ public:
     /// Destructor
     ~PlotParams();
 
-    /// In ``time mode,'' these 4 methods get/set the time range.
-    int  GetMinTS() const;
-    void SetMinTS(int ts);
-    int  GetMaxTS() const;
-    void SetMaxTS(int ts);
+    /// In ``time mode,'' these 2 methods get/set the time range.
+    std::vector<long int> GetMinMaxTS( ) const;
+    void SetMinMaxTS( const std::vector<long int>& );
 
     /// In ``time mode,'' these 2 methods get/set the single point position
     std::vector<double> GetSinglePoint() const;
@@ -72,8 +70,7 @@ public:
     }
 
 private:
-    static const string _minTSTag;
-    static const string _maxTSTag;
+    static const string _minMaxTSTag;
     static const string _spaceTimeTag;  // Space=true, Time=false
 
     static const string _p1Tag;         // point1 in space mode
