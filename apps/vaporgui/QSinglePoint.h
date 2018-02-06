@@ -23,7 +23,7 @@ public:
     void SetDecimals(int dec);    // how many digits after the decimal point
 
 signals:
-    void PointUpdated();
+    void pointUpdated();
 
 private slots:
     void _coordinateChanged(double);

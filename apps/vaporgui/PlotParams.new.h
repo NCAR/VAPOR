@@ -40,6 +40,16 @@ public:
     int  GetMaxTS() const;
     void SetMaxTS(int ts);
 
+    /// In ``time mode,'' these 2 methods get/set the single point position
+    std::vector<double> GetSinglePoint() const;
+    void                SetSinglePoint(const std::vector<double> &point);
+
+    /// In ``space mode,'' these 4 methods get/set the point 1 and point 2 positions
+    std::vector<double> GetPoint1() const;
+    std::vector<double> GetPoint2() const;
+    void                SetPoint1(const std::vector<double> &point);
+    void                SetPoint2(const std::vector<double> &point);
+
     /// Get/set the current operational mode: space or time.
     /// true == Space; false == time
     bool GetSpaceTimeMode() const;
@@ -55,6 +65,10 @@ private:
     static const string _minTSTag;
     static const string _maxTSTag;
     static const string _spaceTimeTag;    // Space=true, Time=false
+
+    static const string _p1Tag;          // point1 in space mode
+    static const string _p2Tag;          // point2 in space mode
+    static const string _singlePtTag;    // a single point in time mode
 };
 
 };    // End namespace VAPoR

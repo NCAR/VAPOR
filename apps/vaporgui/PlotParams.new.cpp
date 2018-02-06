@@ -28,6 +28,10 @@ const string PlotParams::_minTSTag = "MinTS";
 const string PlotParams::_maxTSTag = "MaxTS";
 const string PlotParams::_spaceTimeTag = "SpaceTime";
 
+const string PlotParams::_p1Tag = "Point2";
+const string PlotParams::_p2Tag = "Point1";
+const string PlotParams::_singlePtTag = "SinglePoint";
+
 //
 // Register class with object factory!!!
 //
@@ -71,3 +75,42 @@ void PlotParams::SetMaxTS(int ts)
 bool PlotParams::GetSpaceTimeMode() const { return GetValueLong(_spaceTimeTag, (long)true); }
 
 void PlotParams::SetSpaceTimeMode(bool val) { SetValueLong(_spaceTimeTag, "Set Space or Time mode", (long)val); }
+
+std::vector<double> PlotParams::GetSinglePoint() const
+{
+    assert(!this->GetSpaceTimeMode());    // make sure we're at "time" mode
+    std::vector<double> vec(3, 0.0);
+    return GetValueDoubleVec(_singlePtTag, vec);
+}
+
+void PlotParams::SetSinglePoint(const std::vector<double> &point)
+{
+    assert(!this->GetSpaceTimeMode());    // make sure we're at "time" mode
+    SetValueDoubleVec(_singlePtTag, "Single point in the time mode", point);
+}
+
+std::vector<double> PlotParams::GetPoint1() const
+{
+    assert(this->GetSpaceTimeMode());    // make sure we're at "space" mode
+    std::vector<double> vec(3, 0.0);
+    return GetValueDoubleVec(_p1Tag, vec);
+}
+
+void PlotParams::SetPoint1(const std::vector<double> &point)
+{
+    assert(this->GetSpaceTimeMode());    // make sure we're at "space" mode
+    SetValueDoubleVec(_p1Tag, "Point 1 in the space mode", point);
+}
+
+std::vector<double> PlotParams::GetPoint2() const
+{
+    assert(this->GetSpaceTimeMode());    // make sure we're at "space" mode
+    std::vector<double> vec(3, 0.0);
+    return GetValueDoubleVec(_p2Tag, vec);
+}
+
+void PlotParams::SetPoint2(const std::vector<double> &point)
+{
+    assert(this->GetSpaceTimeMode());    // make sure we're at "space" mode
+    SetValueDoubleVec(_p2Tag, "Point 2 in the space mode", point);
+}
