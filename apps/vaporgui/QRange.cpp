@@ -20,24 +20,25 @@ void QRange::SetExtents(double min, double max)
     _ui->maxSliderEdit->SetExtents(min, max);
 }
 
-void QRange::GetRange(double range[2])
+void QRange::GetRange(std::vector<double> &range)
 {
-    range[0] = _ui->minSliderEdit->GetCurrentValue();
-    range[1] = _ui->maxSliderEdit->GetCurrentValue();
+    range.clear();
+    range.push_back(_ui->minSliderEdit->GetCurrentValue());
+    range.push_back(_ui->maxSliderEdit->GetCurrentValue());
 }
 
 void QRange::_minChanged(double value)
 {
     if (value > _ui->maxSliderEdit->GetCurrentValue()) _ui->maxSliderEdit->SetValue(value);
 
-    emit RangeChanged();
+    emit rangeChanged();
 }
 
 void QRange::_maxChanged(double value)
 {
     if (value < _ui->minSliderEdit->GetCurrentValue()) _ui->minSliderEdit->SetValue(value);
 
-    emit RangeChanged();
+    emit rangeChanged();
 }
 
 void QRange::SetMainLabel(const QString &label) { _ui->mainLabel->setText(label); }

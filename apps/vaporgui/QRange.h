@@ -15,12 +15,12 @@ public:
     ~QRange();
 
     void SetExtents(double min, double max);
-    void GetRange(double[2]);
+    void GetRange(std::vector<double> &range);
     void SetMainLabel(const QString &);
     void SetDecimals(int dec);    // how many digits after the decimal point
 
 signals:
-    void RangeChanged();
+    void rangeChanged();
 
 private slots:
     void _minChanged(double);
