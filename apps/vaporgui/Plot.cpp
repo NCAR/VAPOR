@@ -63,6 +63,8 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     connect(removeVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)));
     connect(dataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_dataSourceChanged(int)));
     connect(spaceTimeTab, SIGNAL(currentChanged(int)), this, SLOT(_spaceTimeModeChanged(int)));
+    connect(timeTabSinglePoint, SIGNAL(pointUpdated()), this, SLOT(_timeModePointChanged()));
+    connect(timeTabTimeRange, SIGNAL(rangeChanged()), this, SLOT(_timeModeT1T2Changed()));
 
     // Put the current window on top
     show();
@@ -159,13 +161,13 @@ void Plot::Update()
     // Update LOD, Refinement
     myFidelityWidget->Update(currentDmgr, _paramsMgr, plotParams);
 
-    // Update time mode tab
+    // Update widgets
     _setWidgetExtents();
 }
 
 void Plot::_newVarChanged(int index)
 {
-    assert(index > 0);
+    if (index == 0) return;
 
     std::string varName = newVarCombo->itemText(index).toStdString();
 
@@ -186,7 +188,7 @@ void Plot::_newVarChanged(int index)
 
 void Plot::_removeVarChanged(int index)
 {
-    assert(index > 0);
+    if (index == 0) return;
 
     PlotParams *plotParams = _getCurrentPlotParams();
     std::string varName = removeVarCombo->itemText(index).toStdString();
@@ -221,9 +223,37 @@ void Plot::_spaceModeP1P2Changed() {}
 
 void Plot::_spaceModeTimeChanged() {}
 
-void Plot::_timeModePointChanged() {}
+void Plot::_timeModePointChanged()
+{
+    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
+    assert(!plotParams->GetSpaceTimeMode());
 
-void Plot::_timeModeT1T2Changed() {}
+    std::vector<double> currentPoint;
+    timeTabSinglePoint->GetCurrentPoint(currentPoint);
+
+    std::cerr << "Time mode new point: ";
+    for (int i = 0; i < currentPoint.size(); i++) std::cerr << currentPoint[i] << ",  ";
+    std::cerr << std::endl;
+
+    plotParams->SetSinglePoint(currentPoint);
+}
+
+void Plot::_timeModeT1T2Changed()
+{
+    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
+    assert(!plotParams->GetSpaceTimeMode());
+
+    std::vector<double> range;
+    timeTabTimeRange->GetRange(range);
+    assert(range.size() == 2);
+    std::vector<long int> rangeInt;
+    rangeInt.push_back((long int)range[0]);
+    rangeInt.push_back((long int)range[1]);
+
+    std::cerr << "Time mode new time range: " << rangeInt[0] << ",  " << rangeInt[1] << std::endl;
+
+    plotParams->SetMinMaxTS(rangeInt);
+}
 
 void Plot::_fidelityChanged() {}
 
@@ -265,4 +295,8 @@ void Plot::_setWidgetExtents()
         VAPoR::DataMgrUtils::GetExtents(dataMgr, ts, allVars, minFullExtents, maxFullExtents, axes);
         timeTabSinglePoint->SetExtents(minFullExtents, maxFullExtents);
     }
+
+    int numOfTimeSteps = dataMgr->GetNumTimeSteps();
+    timeTabTimeRange->SetExtents(0.0, (double)(numOfTimeSteps - 1));
+    timeTabTimeRange->SetDecimals(0);
 }
