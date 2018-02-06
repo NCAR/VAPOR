@@ -24,8 +24,8 @@
 
 using namespace VAPoR;
 
-const string PlotParams::_minTSTag = "MinTS";
-const string PlotParams::_maxTSTag = "MaxTS";
+const string PlotParams::_minMaxTSTag = "MinMaxTS";
+// const string PlotParams::_maxTSTag = "MaxTS";
 const string PlotParams::_spaceTimeTag = "SpaceTime";
 
 const string PlotParams::_p1Tag = "Point2";
@@ -48,28 +48,19 @@ PlotParams::PlotParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, XmlNode *nod
 
 PlotParams::~PlotParams() { MyBase::SetDiagMsg("PlotParams::~PlotParams() this=%p", this); }
 
-int PlotParams::GetMinTS() const
+std::vector<long int> PlotParams::GetMinMaxTS() const
 {
     assert(!this->GetSpaceTimeMode());    // make sure we're at "time" mode
-    return (int)(GetValueDouble(_minTSTag, 0.0));
+
+    std::vector<long int> vec(2, 0);
+    return GetValueLongVec(_minMaxTSTag, vec);
 }
 
-void PlotParams::SetMinTS(int ts)
+void PlotParams::SetMinMaxTS(const std::vector<long int> &minmax)
 {
     assert(!this->GetSpaceTimeMode());    // make sure we're at "time" mode
-    SetValueDouble(_minTSTag, "Minimum timestep set", (double)ts);
-}
 
-int PlotParams::GetMaxTS() const
-{
-    assert(!this->GetSpaceTimeMode());    // make sure we're at "time" mode
-    return (int)(GetValueDouble(_maxTSTag, 0.0));
-}
-
-void PlotParams::SetMaxTS(int ts)
-{
-    assert(!this->GetSpaceTimeMode());    // make sure we're at "time" mode
-    SetValueDouble(_maxTSTag, "Maximum timestep set", (double)ts);
+    SetValueLongVec(_minMaxTSTag, "Time range in the Time mode", minmax);
 }
 
 bool PlotParams::GetSpaceTimeMode() const { return GetValueLong(_spaceTimeTag, (long)true); }
