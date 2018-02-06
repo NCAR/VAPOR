@@ -411,10 +411,10 @@ void VizFeatureRenderer::drawAxisTics()
     _drawAxes(minTic, maxTic, origin, axisColor, width);
 
     double pointOnAxis[3];
-    double ticVec[3], drawPosn[3];
-    // std::vector<double> ticVec(0,3);      // Need vsub and vadd for vectors in glutil.h!
-    // std::vector<double> drawPosn(0,3);
+    double ticVec[3];
     double startPosn[3], endPosn[3];
+
+    vector<double> extents = getDomainExtents();
 
     // Now draw tic marks for x:
     pointOnAxis[1] = origin[1];
@@ -422,10 +422,16 @@ void VizFeatureRenderer::drawAxisTics()
     ticVec[0] = 0.f;
     ticVec[1] = 0.f;
     ticVec[2] = 0.f;
-    if (ticDir[0] == 1)
-        ticVec[1] = ticLength[0];
-    else
-        ticVec[2] = ticLength[0];
+    double scaleFactor;
+    if (ticDir[0] == 1) {
+        cout << "Y" << endl;
+        scaleFactor = extents[4] - extents[1];    // Y
+        ticVec[1] = ticLength[0] * scaleFactor;
+    } else {
+        cout << "Z:" << endl;
+        scaleFactor = extents[5] - extents[2];    // Z
+        ticVec[2] = ticLength[0] * scaleFactor;
+    }
     for (int i = 0; i < numTics[0]; i++) {
         pointOnAxis[0] = minTic[0] + (float)i * (maxTic[0] - minTic[0]) / (float)(numTics[0] - 1);
         vsub(pointOnAxis, ticVec, startPosn);
@@ -444,10 +450,13 @@ void VizFeatureRenderer::drawAxisTics()
     ticVec[0] = 0.f;
     ticVec[1] = 0.f;
     ticVec[2] = 0.f;
-    if (ticDir[1] == 0)
-        ticVec[0] = ticLength[1];
-    else
-        ticVec[2] = ticLength[1];
+    if (ticDir[1] == 0) {
+        scaleFactor = extents[4] - extents[1];
+        ticVec[0] = ticLength[1] * scaleFactor;
+    } else {
+        scaleFactor = extents[5] - extents[2];
+        ticVec[2] = ticLength[1] * scaleFactor;
+    }
     for (int i = 0; i < numTics[1]; i++) {
         pointOnAxis[1] = minTic[1] + (float)i * (maxTic[1] - minTic[1]) / (float)(numTics[1] - 1);
         vsub(pointOnAxis, ticVec, startPosn);
@@ -457,7 +466,7 @@ void VizFeatureRenderer::drawAxisTics()
 
         double text = pointOnAxis[1];
         if (latLon) convertPointToLat(text);
-        renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
+        renderText(text, startPosn[0], startPosn[1]);
     }
 
     // Now draw tic marks for z:
@@ -466,16 +475,19 @@ void VizFeatureRenderer::drawAxisTics()
     ticVec[0] = 0.f;
     ticVec[1] = 0.f;
     ticVec[2] = 0.f;
-    if (ticDir[2] == 0)
-        ticVec[0] = ticLength[2];
-    else
-        ticVec[1] = ticLength[2];
+    if (ticDir[2] == 0) {
+        scaleFactor = extents[3] - extents[0];
+        ticVec[0] = ticLength[2] * scaleFactor;
+    } else {
+        scaleFactor = extents[4] - extents[1];
+        ticVec[1] = ticLength[2] * scaleFactor;
+    }
     for (int i = 0; i < numTics[2]; i++) {
         pointOnAxis[2] = minTic[2] + (float)i * (maxTic[2] - minTic[2]) / (float)(numTics[2] - 1);
         vsub(pointOnAxis, ticVec, startPosn);
         vadd(pointOnAxis, ticVec, endPosn);
         _drawTic(startPosn, endPosn, width, axisColor);
-        renderText(pointOnAxis[1], startPosn[0], startPosn[1]);
+        renderText(pointOnAxis[2], startPosn[0], startPosn[1], startPosn[2]);
     }
 
     glPopAttrib();

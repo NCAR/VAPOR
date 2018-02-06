@@ -328,6 +328,7 @@ void VizFeatureEventRouter::scaleWorldCoordsToNormalized(std::vector<double> &co
 void VizFeatureEventRouter::updateAnnotationTable()
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    bool            annotationEnabled = aa->GetAxisAnnotationEnabled();
 
     vector<double> tableValues;
 
@@ -338,19 +339,28 @@ void VizFeatureEventRouter::updateAnnotationTable()
     tableValues.insert(tableValues.end(), ticSizes.begin(), ticSizes.end());
 
     vector<double> minTics = aa->GetMinTics();
-    cout << "n2w " << minTics[0];
     scaleNormalizedCoordsToWorld(minTics);
-    cout << " " << minTics[0] << endl;
+    if (annotationEnabled)
+        if (annotationEnabled) {
+            convertPCSToLon(minTics[0]);
+            convertPCSToLat(minTics[1]);
+        }
     tableValues.insert(tableValues.end(), minTics.begin(), minTics.end());
 
     vector<double> maxTics = aa->GetMaxTics();
-    cout << "n2w " << maxTics[0];
     scaleNormalizedCoordsToWorld(maxTics);
-    cout << " " << maxTics[0] << endl;
+    if (annotationEnabled) {
+        convertPCSToLon(maxTics[0]);
+        convertPCSToLat(maxTics[1]);
+    }
     tableValues.insert(tableValues.end(), maxTics.begin(), maxTics.end());
 
     vector<double> origin = aa->GetAxisOrigin();
     scaleNormalizedCoordsToWorld(origin);
+    if (annotationEnabled) {
+        convertPCSToLon(origin[0]);
+        convertPCSToLat(origin[1]);
+    }
     tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
     vector<string> rowHeaders;
@@ -366,6 +376,62 @@ void VizFeatureEventRouter::updateAnnotationTable()
     colHeaders.push_back("Z");
 
     _annotationVaporTable->Update(5, 3, tableValues, rowHeaders, colHeaders);
+}
+
+void VizFeatureEventRouter::convertPCSToLon(double &xCoord)
+{
+    double dummy = 0.;
+    convertPCSToLonLat(xCoord, dummy);
+}
+
+void VizFeatureEventRouter::convertPCSToLat(double &yCoord)
+{
+    double dummy = 0.;
+    convertPCSToLonLat(dummy, yCoord);
+}
+
+void VizFeatureEventRouter::convertPCSToLonLat(double &xCoord, double &yCoord)
+{
+    ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
+    vector<string> names = paramsMgr->GetDataMgrNames();
+    DataStatus *   dataStatus = _controlExec->GetDataStatus();
+    DataMgr *      dataMgr = dataStatus->GetDataMgr(names[0]);
+
+    double coords[2] = {xCoord, yCoord};
+
+    int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1);
+    if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coords[0], coords[1]); }
+
+    xCoord = coords[0];
+    yCoord = coords[1];
+}
+
+void VizFeatureEventRouter::convertLonToPCS(double &xCoord)
+{
+    double dummy = 0.;
+    convertLonLatToPCS(xCoord, dummy);
+}
+
+void VizFeatureEventRouter::convertLatToPCS(double &yCoord)
+{
+    double dummy = 0.;
+    convertLonLatToPCS(dummy, yCoord);
+}
+
+void VizFeatureEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
+{
+    ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
+    vector<string> names = paramsMgr->GetDataMgrNames();
+    DataStatus *   dataStatus = _controlExec->GetDataStatus();
+    DataMgr *      dataMgr = dataStatus->GetDataMgr(names[0]);
+
+    double coords[2] = {xCoord, yCoord};
+
+    int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1);
+    if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coords[0], coords[1]); }
+
+    xCoord = coords[0];
+    yCoord = coords[1];
 }
 
 AxisAnnotation *VizFeatureEventRouter::_getCurrentAxisAnnotation()
@@ -449,33 +515,40 @@ void VizFeatureEventRouter::updateAxisAnnotations()
 void VizFeatureEventRouter::axisAnnotationTableChanged()
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    bool            annotateLatLon = aa->GetLatLonAxesEnabled();
 
-    vector<double> values;
-    values = getTableRow(0);
-    aa->SetNumTics(values);
+    std::vector<double> numTics = getTableRow(0);
+    aa->SetNumTics(numTics);
 
-    values.clear();
-    values = getTableRow(1);
-    aa->SetTicSize(values);
+    std::vector<double> ticSizes = getTableRow(1);
+    aa->SetTicSize(ticSizes);
 
-    values.clear();
-    values = getTableRow(2);
-    cout << "er w2n min " << values[0] << " ";
-    scaleWorldCoordsToNormalized(values);
-    cout << " " << values[0] << endl;
-    aa->SetMinTics(values);
+    std::vector<double> minTics = getTableRow(2);
+    if (annotateLatLon) {
+        convertLonToPCS(minTics[0]);
+        convertLatToPCS(minTics[1]);
+    }
+    scaleWorldCoordsToNormalized(minTics);
+    aa->SetMinTics(minTics);
 
-    values.clear();
-    values = getTableRow(3);
-    cout << "er w2n max " << values[0] << " ";
-    scaleWorldCoordsToNormalized(values);
-    cout << " " << values[0] << endl;
-    aa->SetMaxTics(values);
+    std::vector<double> maxTics = getTableRow(3);
+    if (annotateLatLon) {
+        convertLonToPCS(maxTics[0]);
+        convertLatToPCS(maxTics[1]);
+    }
+    scaleWorldCoordsToNormalized(maxTics);
+    aa->SetMaxTics(maxTics);
 
-    values.clear();
-    values = getTableRow(4);
-    scaleWorldCoordsToNormalized(values);
-    aa->SetAxisOrigin(values);
+    std::vector<double> origins = getTableRow(4);
+    cout << "origins X " << origins[0] << endl;
+    if (annotateLatLon) {
+        convertLonToPCS(origins[0]);
+        convertLatToPCS(origins[1]);
+    }
+    cout << "latlon X " << origins[0] << endl;
+    scaleWorldCoordsToNormalized(origins);
+    cout << "scaled X " << origins[0] << endl;
+    aa->SetAxisOrigin(origins);
 }
 
 void VizFeatureEventRouter::setCurrentAxisDataMgr(int index)

@@ -124,6 +124,12 @@ private:
     std::vector<double> getDomainExtents() const;
     void                scaleNormalizedCoordsToWorld(std::vector<double> &coords);
     void                scaleWorldCoordsToNormalized(std::vector<double> &coords);
+    void                convertPCSToLon(double &xCoord);
+    void                convertPCSToLat(double &yCoord);
+    void                convertPCSToLonLat(double &xCoord, double &yCoord);
+    void                convertLonLatToPCS(double &xCoord, double &yCoord);
+    void                convertLonToPCS(double &xCoord);
+    void                convertLatToPCS(double &yCoord);
 
     void initializeAnnotation(VAPoR::AxisAnnotation *aa);
     void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
