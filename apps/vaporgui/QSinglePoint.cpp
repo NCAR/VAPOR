@@ -37,7 +37,7 @@ QSinglePoint::~QSinglePoint()
     
 void QSinglePoint::_coordinateChanged( double value )  // value isn't used though
 {
-    emit PointUpdated();
+    emit pointUpdated();
 }
 
     
