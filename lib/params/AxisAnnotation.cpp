@@ -224,7 +224,7 @@ void AxisAnnotation::SetAxisDataMgr(string dataMgr)
 
 void AxisAnnotation::SetAxisFontSize(int size) { SetValueDouble(_fontSizeTag, "Axis annotation font size", size); }
 
-int AxisAnnotation::GetAxisFontSize() const { return (int)GetValueDouble(_fontSizeTag, 24); }
+int AxisAnnotation::GetAxisFontSize() const { return (int)GetValueDouble(_fontSizeTag, 16); }
 
 void AxisAnnotation::SetAxisAnnotationInitialized(bool val)
 {
