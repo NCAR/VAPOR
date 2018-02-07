@@ -113,7 +113,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="spaceTab">
         <attribute name="title">
@@ -121,21 +121,10 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QTabWidget" name="p1P2Widget">
-           <property name="currentIndex">
-            <number>0</number>
-           </property>
-           <widget class="QWidget" name="p1Widget">
-            <attribute name="title">
-             <string>Tab 1</string>
-            </attribute>
-           </widget>
-           <widget class="QWidget" name="p2Widget">
-            <attribute name="title">
-             <string>Tab 2</string>
-            </attribute>
-           </widget>
-          </widget>
+          <widget class="QSinglePoint" name="spaceTabP1" native="true"/>
+         </item>
+         <item>
+          <widget class="QSinglePoint" name="spaceTabP2" native="true"/>
          </item>
          <item>
           <layout class="QHBoxLayout" name="MinTimeLayout">
@@ -145,11 +134,14 @@
            <item>
             <widget class="QLabel" name="TimeStepLabel">
              <property name="text">
-              <string>Time Step:</string>
+              <string>Select one time step:</string>
              </property>
             </widget>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QSliderEdit" name="spaceTabTimeSelector" native="true"/>
          </item>
          <item>
           <widget class="Line" name="line_3">
@@ -223,6 +215,12 @@
    <class>QRange</class>
    <extends>QWidget</extends>
    <header location="global">QRange.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QSliderEdit</class>
+   <extends>QWidget</extends>
+   <header location="global">QSliderEdit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
