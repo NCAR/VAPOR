@@ -16,7 +16,7 @@ public:
     explicit QSliderEdit(QWidget *parent = 0);
     ~QSliderEdit();
 
-    void    SetText( const QString& text );        // for the label
+    void    SetLabel( const QString& text );
     void    SetDecimals( int dec );                // how many digits after the decimal point
     void    SetExtents( double min, double max ); 
     double  GetCurrentValue();
@@ -33,7 +33,7 @@ private slots:
 
 private:
     Ui::QSliderEdit*    _ui;
-    QDoubleValidator2*  _validator;
+    QDoubleValidator2*  _validator; // it does NOT handle decimals
     int                 _decimals;
 };
 
