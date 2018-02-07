@@ -6,8 +6,8 @@ QRange::QRange(QWidget *parent) :
 {
     _ui->setupUi(this);
 
-    _ui->minSliderEdit->SetText( QString::fromAscii("min:") );
-    _ui->maxSliderEdit->SetText( QString::fromAscii("max:") );
+    _ui->minSliderEdit->SetText( QString::fromAscii("Min:") );
+    _ui->maxSliderEdit->SetText( QString::fromAscii("Max:") );
 
     connect( _ui->minSliderEdit,   SIGNAL( valueChanged( double ) ),
              this,                 SLOT(   _minChanged(  double )));
