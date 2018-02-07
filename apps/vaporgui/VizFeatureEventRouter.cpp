@@ -339,7 +339,7 @@ void VizFeatureEventRouter::updateDataMgrCombo() {
 	// Reset the saved selection
 	QString qCurrentSelection = QString::fromStdString(currentSelection);
 	int index = dataMgrSelectorCombo->findText(qCurrentSelection);
-	if (index > 0)
+	if (index > 0) 
 		dataMgrSelectorCombo->setCurrentIndex(index);
 	else
 		dataMgrSelectorCombo->setCurrentIndex(0);
@@ -409,7 +409,7 @@ void VizFeatureEventRouter::scaleWorldCoordsToNormalized(
 
 void VizFeatureEventRouter::updateAnnotationTable() {
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
-	bool annotationEnabled = aa->GetAxisAnnotationEnabled();
+	bool annotationEnabled = aa->GetLatLonAxesEnabled();
 
 	vector<double> tableValues;
 
@@ -421,7 +421,6 @@ void VizFeatureEventRouter::updateAnnotationTable() {
 	
 	vector<double> minTics = aa->GetMinTics();
 	scaleNormalizedCoordsToWorld(minTics);
-	if (annotationEnabled)
 	if (annotationEnabled) {
 		convertPCSToLon(minTics[0]);
 		convertPCSToLat(minTics[1]);
@@ -474,23 +473,28 @@ void VizFeatureEventRouter::convertPCSToLat(
 void VizFeatureEventRouter::convertPCSToLonLat(
     double &xCoord, double &yCoord
 ) {
-	ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
-    vector<string> names = paramsMgr->GetDataMgrNames();
+	//ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
+    //vector<string> names = paramsMgr->GetDataMgrNames();
+	//DataStatus *dataStatus = _controlExec->GetDataStatus();
+    //DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
+
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
-    DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	string dataMgrName = vfParams->GetCurrentAxisDataMgrName();
+    DataMgr* dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
     double coords[2] = {xCoord, yCoord};
- 
+	double coordsForError[2] = {coords[0], coords[1]};
+
     int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1); 
     if (!rc) {
         MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat",
-            coords[0], coords[1]);
+            coordsForError[0], coordsForError[1]);
     }   
 
     xCoord = coords[0];
     yCoord = coords[1];
 }
-
 
 void VizFeatureEventRouter::convertLonToPCS(
 	double &xCoord) {
@@ -507,17 +511,22 @@ void VizFeatureEventRouter::convertLatToPCS(
 void VizFeatureEventRouter::convertLonLatToPCS(
     double &xCoord, double &yCoord
 ) {
-	ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
-    vector<string> names = paramsMgr->GetDataMgrNames();
+	//ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
+    //vector<string> names = paramsMgr->GetDataMgrNames();
+	//DataStatus *dataStatus = _controlExec->GetDataStatus();
+    //DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
-    DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	string dataMgrName = vfParams->GetCurrentAxisDataMgrName();
+    DataMgr* dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
     double coords[2] = {xCoord, yCoord};
+	double coordsForError[2] = {coords[0], coords[1]};
  
     int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1); 
     if (!rc) {
-        MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat",
-            coords[0], coords[1]);
+        MyBase::SetErrMsg("Could not convert point %f, %f to PCS",
+            coordsForError[0], coordsForError[1]);
     }   
 
     xCoord = coords[0];
@@ -555,12 +564,16 @@ void VizFeatureEventRouter::initializeTicSizes(AxisAnnotation* aa) {
 }
 
 void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation* aa) {
-	vector<double> minExts = {0.0, 0.0, 0.0};
-	vector<double> maxExts = {1.0, 1.0, 1.0};
+	vector<double> minExts(3, 0.0);
+	vector<double> maxExts(3, 1.0);
 	
 	aa->SetMinTics(minExts);
 	aa->SetMaxTics(maxExts);	
 	aa->SetAxisOrigin(minExts);
+
+	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
+	string dataMgr = vfParams->GetCurrentAxisDataMgrName();
+	aa->SetAxisDataMgr(dataMgr);
 }
 
 void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
@@ -625,14 +638,11 @@ void VizFeatureEventRouter::axisAnnotationTableChanged() {
 	aa->SetMaxTics(maxTics);
 
 	std::vector<double> origins = getTableRow(4);
-	cout << "origins X " << origins[0] << endl;
 	if (annotateLatLon) {
 		convertLonToPCS(origins[0]);
 		convertLatToPCS(origins[1]);
 	}
-	cout << "latlon X " << origins[0] << endl;
 	scaleWorldCoordsToNormalized(origins);
-	cout << "scaled X " << origins[0] << endl;
 	aa->SetAxisOrigin(origins);
 }
 

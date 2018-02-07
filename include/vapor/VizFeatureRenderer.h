@@ -94,6 +94,7 @@ private:
  const DataStatus* m_dataStatus;
  string m_winName;
  ShaderMgr *m_shaderMgr;
+ int _currentTimestep;
  bool _textObjectsValid;
  TextObject* _textObject;
  string _fontFile;
@@ -114,7 +115,8 @@ private:
 
 
  std::vector<double> getDomainExtents() const;
- AxisAnnotation* getAxisAnnotation();
+ AxisAnnotation* getCurrentAxisAnnotation();
+ string getCurrentAxisDataMgrName() const;
  void scaleNormalizedCoordinatesToWorld(
 	std::vector<double> &coords);
 
@@ -126,9 +128,9 @@ private:
 
  // Draw the axis lines, while building text labels.
  //
- void drawAxisTics();
+ void drawAxisTics(AxisAnnotation* aa=NULL);
  void applyTransform(Transform *t);
- void renderText(double text, double llx, double lly, double llz = 0.f);
+ void renderText(double text, double coords[], AxisAnnotation *aa = NULL);
  Transform* getCurrentTransform();
  void convertPointToLon(double &xCoord);
  void convertPointToLat(double &yCoord);
