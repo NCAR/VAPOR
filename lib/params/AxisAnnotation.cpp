@@ -235,7 +235,7 @@ void AxisAnnotation::SetAxisFontSize(int size) {
 }
 
 int AxisAnnotation::GetAxisFontSize() const {
-    return (int)GetValueDouble(_fontSizeTag, 24);
+    return (int)GetValueDouble(_fontSizeTag, 16);
 }
 
 void AxisAnnotation::SetAxisAnnotationInitialized(bool val) {

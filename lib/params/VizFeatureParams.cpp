@@ -287,6 +287,7 @@ int VizFeatureParams::GetAxisFontSize() {
 string VizFeatureParams::GetCurrentAxisDataMgrName() const {
     return GetValueString(_currentAxisDataMgrTag, "");
 }
+
 void VizFeatureParams::SetCurrentAxisDataMgrName(string dmName) {
     string msg = "Setting current DataMgr w.r.t. axis annotations";
     SetValueString(_currentAxisDataMgrTag, msg, dmName);
@@ -295,13 +296,16 @@ void VizFeatureParams::SetCurrentAxisDataMgrName(string dmName) {
 AxisAnnotation *VizFeatureParams::GetAxisAnnotation(string dataMgr) {
     if (dataMgr == "")
         dataMgr = GetCurrentAxisDataMgrName();
-    //assert(dataMgr!="");
+
+    vector<string> names = _axisAnnotations->GetNames();
 
     if (_axisAnnotations->GetParams(dataMgr) == NULL) {
         AxisAnnotation newAnnotation(_ssave);
+        cout << "making new axis annotation " << dataMgr << endl;
         _axisAnnotations->Insert(&newAnnotation, dataMgr);
     }
-    return (AxisAnnotation *)_axisAnnotations->GetParams(dataMgr);
+    AxisAnnotation *aa = (AxisAnnotation *)_axisAnnotations->GetParams(dataMgr);
+    return aa;
 }
 
 void VizFeatureParams::SetShowAxisArrows(bool val) {
