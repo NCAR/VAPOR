@@ -11,10 +11,10 @@ QSinglePoint::QSinglePoint(QWidget *parent) : QWidget(parent), _ui(new Ui::QSing
 
     SetDimensionality(3);    // default to have 3 dimensions
 
-    _ui->xSliderEdit->SetText(QString::fromAscii("X"));
-    _ui->ySliderEdit->SetText(QString::fromAscii("Y"));
-    _ui->zSliderEdit->SetText(QString::fromAscii("Z"));
-    _ui->tSliderEdit->SetText(QString::fromAscii("T"));
+    _ui->xSliderEdit->SetLabel(QString::fromAscii("X"));
+    _ui->ySliderEdit->SetLabel(QString::fromAscii("Y"));
+    _ui->zSliderEdit->SetLabel(QString::fromAscii("Z"));
+    _ui->tSliderEdit->SetLabel(QString::fromAscii("T"));
 
     // Connect signals and slots
     connect(_ui->xSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(_coordinateChanged(double)));

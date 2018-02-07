@@ -6,6 +6,7 @@
 //
 
 #include <QDoubleValidator>
+#include <iostream>
 
 class QDoubleValidator2 : public QDoubleValidator {
 public:
@@ -23,7 +24,7 @@ public:
         else if (val < bottom())
             val = bottom();
 
-        input = QString::number(val, 'g', this->decimals());
+        input = QString::number(val);
     }
 };
 

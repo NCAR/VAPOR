@@ -8,9 +8,8 @@ QSliderEdit::QSliderEdit(QWidget *parent) : QWidget(parent), _ui(new Ui::QSlider
 {
     _ui->setupUi(this);
 
-    _decimals = 2;
+    _decimals = 4;
     _validator = new QDoubleValidator2(_ui->myLineEdit);
-    _validator->setDecimals(_decimals);
     _ui->myLineEdit->setValidator(_validator);
 
     connect(_ui->mySlider, SIGNAL(valueChanged(int)),    // for update LineEdit
@@ -30,7 +29,7 @@ QSliderEdit::~QSliderEdit()
     }
 }
 
-void QSliderEdit::SetText(const QString &text) { _ui->myLabel->setText(text); }
+void QSliderEdit::SetLabel(const QString &text) { _ui->myLabel->setText(text); }
 
 void QSliderEdit::SetExtents(double min, double max)
 {
@@ -41,10 +40,16 @@ void QSliderEdit::SetExtents(double min, double max)
 
 void QSliderEdit::_mySlider_valueChanged(int value)
 {
-    QString text = QString::number(value, 'g', _decimals);
-    _validator->fixup(text);
+    double dval = (double)value;
+    if (dval > _validator->top())
+        dval = _validator->top();
+    else if (dval < _validator->bottom())
+        dval = _validator->bottom();
     _ui->myLineEdit->blockSignals(true);
-    _ui->myLineEdit->setText(text);
+    if (_decimals > 0)
+        _ui->myLineEdit->setText(QString::number(dval, 'g', _decimals));
+    else
+        _ui->myLineEdit->setText(QString::number((long int)dval, 10));
     _ui->myLineEdit->blockSignals(false);
 }
 
@@ -67,14 +72,12 @@ void QSliderEdit::_myLineEdit_valueChanged()
 
 void QSliderEdit::SetDecimals(int dec)
 {
-    if (dec > 0) {
+    if (dec > 0)
         _decimals = dec;
-        _validator->setDecimals(dec);
-    } else if (dec == 0) {
+    else if (dec == 0) {
         // if the extents ARE essentially integers
         if (std::floor(_validator->top()) == _validator->top() && std::floor(_validator->bottom()) == _validator->bottom()) {
             _decimals = dec;
-            _validator->setDecimals(dec);
         } else
             std::cerr << "QSliderEdit extents aren't integers while ZERO decimal is set" << std::endl;
 
@@ -87,14 +90,15 @@ double QSliderEdit::GetCurrentValue() { return (_ui->myLineEdit->text().toDouble
 
 void QSliderEdit::SetValue(double value)
 {
-    QString text = QString::number(value);
-    _validator->fixup(text);
+    if (value > _validator->top())
+        value = _validator->top();
+    else if (value < _validator->bottom())
+        value = _validator->bottom();
     _ui->myLineEdit->blockSignals(true);
-    _ui->myLineEdit->setText(text);
+    _ui->myLineEdit->setText(QString::number(value, 'g', _decimals));
     _ui->myLineEdit->blockSignals(false);
 
-    double val = _ui->myLineEdit->text().toDouble();
     _ui->mySlider->blockSignals(true);
-    _ui->mySlider->setSliderPosition(std::round(val));
+    _ui->mySlider->setSliderPosition(std::round(value));
     _ui->mySlider->blockSignals(false);
 }
