@@ -2,7 +2,7 @@
 #define QSLIDEREDIT_H
 
 #include <QWidget>
-#include "QDoubleValidator2.h"
+#include <QDoubleValidator>
 
 namespace Ui {
 class QSliderEdit;
@@ -32,8 +32,10 @@ class QSliderEdit : public QWidget {
 
   private:
     Ui::QSliderEdit *_ui;
-    QDoubleValidator2 *_validator; // it does NOT handle decimals
+    QDoubleValidator *_validator; // it does NOT handle decimals, nor min and max extents.
     int _decimals;
+    double _min, _max;
+    void _lineEditSetValue(double);
 };
 
 #endif // QSLIDEREDIT_H
