@@ -59,11 +59,13 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
     
     timeTabSinglePoint->SetMainLabel( QString::fromAscii("Select one data point in space:") );
     timeTabTimeRange->SetMainLabel(   QString::fromAscii("Select the minimum and maximum time steps:") );
-    timeTabTimeRange->SetDecimals( 0 );
 
     spaceTabP1->SetMainLabel( QString::fromAscii("Select spatial location of Point 1") );
     spaceTabP2->SetMainLabel( QString::fromAscii("Select spatial location of Point 2") );
-    spaceTabTimeSelector->SetText( QString::fromAscii("T") );
+    spaceTabTimeSelector->SetLabel( QString::fromAscii("T") );
+
+    // set widget extents
+    _setWidgetExtents();
 
     // Connect signals with slots
     connect( newVarCombo,           SIGNAL(  currentIndexChanged(int) ), 
@@ -78,6 +80,12 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
              this,                  SLOT  (  _timeModePointChanged() ) );
     connect( timeTabTimeRange,      SIGNAL(  rangeChanged() ),
              this,                  SLOT  (  _timeModeT1T2Changed() ) );
+    connect( spaceTabTimeSelector,  SIGNAL(  valueChanged( double ) ),
+             this,                  SLOT  (  _spaceModeTimeChanged( double ) ) );
+    connect( spaceTabP1,            SIGNAL(  pointUpdated() ),
+             this,                  SLOT  (  _spaceModeP1Changed() ) );
+    connect( spaceTabP2,            SIGNAL(  pointUpdated() ),
+             this,                  SLOT  (  _spaceModeP2Changed() ) );
 
     // Put the current window on top
     show();
@@ -187,9 +195,6 @@ void Plot::Update()
 
     // Update LOD, Refinement
     myFidelityWidget->Update( currentDmgr,  _paramsMgr, plotParams );
-
-    // Update widgets 
-    _setWidgetExtents();
 }
 
 
@@ -240,13 +245,16 @@ void Plot::_removeVarChanged( int index )
     plotParams->SetAuxVariableNames( vars );
 
     // Find out if there are 3D variables.
-    std::vector<double> min, max;
-    std::vector<int>    axes;
-    VAPoR::DataMgrUtils::GetExtents( dataMgr, 0, vars, min, max, axes );
-    assert( axes.size() == 2 || axes.size() == 3 );
-    timeTabSinglePoint->SetDimensionality( axes.size() );
-    spaceTabP1->SetDimensionality( axes.size() );
-    spaceTabP2->SetDimensionality( axes.size() );
+    if( vars.size() > 0 )
+    {
+        std::vector<double> min, max;
+        std::vector<int>    axes;
+        VAPoR::DataMgrUtils::GetExtents( dataMgr, 0, vars, min, max, axes );
+        assert( axes.size() == 2 || axes.size() == 3 );
+        timeTabSinglePoint->SetDimensionality( axes.size() );
+        spaceTabP1->SetDimensionality( axes.size() );
+        spaceTabP2->SetDimensionality( axes.size() );
+    }
 }
     
 void Plot::_plotClicked()
@@ -264,11 +272,34 @@ void Plot::_spaceTimeModeChanged( int mode )
         
 }
 
-void Plot::_spaceModeP1P2Changed()
-{}
+void Plot::_spaceModeP1Changed()
+{
+    std::vector<double> pt;
+    spaceTabP1->GetCurrentPoint( pt );
+    assert( pt.size() ==  2 || pt.size() == 3 );
+    
+    VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
+    plotParams->SetPoint1( pt );
+}
 
-void Plot::_spaceModeTimeChanged()
-{}
+void Plot::_spaceModeP2Changed()
+{
+    std::vector<double> pt;
+    spaceTabP1->GetCurrentPoint( pt );
+    assert( pt.size() ==  2 || pt.size() == 3 );
+    
+    VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
+    plotParams->SetPoint2( pt );
+}
+
+void Plot::_spaceModeTimeChanged( double val )
+{
+    long int lval = (long int)val;
+    assert( lval == std::floor(val) );
+    
+    VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
+    plotParams->SetCurrentTimestep( lval );
+}
 
 void Plot::_timeModePointChanged()
 {
@@ -277,6 +308,7 @@ void Plot::_timeModePointChanged()
     
     std::vector<double> currentPoint;
     timeTabSinglePoint->GetCurrentPoint( currentPoint );
+    assert( currentPoint.size() ==  2 || currentPoint.size() == 3 );
 
     plotParams->SetSinglePoint( currentPoint );
 }
@@ -331,20 +363,22 @@ VAPoR::DataMgr* Plot::_getCurrentDataMgr() const
     
 void Plot::_setWidgetExtents()
 {
-    VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
-    VAPoR::DataMgr*    dataMgr          = this->_getCurrentDataMgr();    
-    size_t             ts               = plotParams->GetCurrentTimestep();
-    std::vector<std::string> allVars    = plotParams->GetAuxVariableNames();
-    std::vector<double>      minFullExtents, maxFullExtents;
-    if( !allVars.empty() )
-    {
-        std::vector<int> axes;
-        VAPoR::DataMgrUtils::GetExtents( dataMgr, ts, allVars, minFullExtents, maxFullExtents, axes );
-        timeTabSinglePoint->SetExtents( minFullExtents, maxFullExtents );
-        spaceTabP1->SetExtents( minFullExtents, maxFullExtents );
-        spaceTabP2->SetExtents( minFullExtents, maxFullExtents );
-    }
+    VAPoR::PlotParams* plotParams        = this->_getCurrentPlotParams();
+    VAPoR::DataMgr*    dataMgr           = this->_getCurrentDataMgr();    
 
+    // Set spatial extents
+    std::vector<std::string> availVars   = dataMgr->GetDataVarNames(2, true);
+    std::vector<std::string> availVars3D = dataMgr->GetDataVarNames(3, true);
+    for( int i = 0; i < availVars3D.size(); i++ )
+        availVars.push_back( availVars3D[i] );
+    std::vector<double>      minFullExtents, maxFullExtents;
+    std::vector<int> axes;
+    VAPoR::DataMgrUtils::GetExtents( dataMgr, 0, availVars3D, minFullExtents, maxFullExtents, axes );
+    timeTabSinglePoint->SetExtents( minFullExtents, maxFullExtents );
+    spaceTabP1->SetExtents( minFullExtents, maxFullExtents );
+    spaceTabP2->SetExtents( minFullExtents, maxFullExtents );
+
+    // Set temporal extents
     int numOfTimeSteps = dataMgr->GetNumTimeSteps();
     timeTabTimeRange->SetExtents(0.0, (double)(numOfTimeSteps - 1) );
     timeTabTimeRange->SetDecimals(0);
