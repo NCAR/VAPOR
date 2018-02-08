@@ -18,6 +18,7 @@ public:
     //
     virtual void fixup(QString &input) const override
     {
+        std::cerr << "before fixup: " << input.toStdString() << std::endl;
         double val = input.toDouble();
         if (val > top())
             val = top();
@@ -25,6 +26,7 @@ public:
             val = bottom();
 
         input = QString::number(val);
+        std::cerr << "after fixup: " << input.toStdString() << std::endl;
     }
 };
 
