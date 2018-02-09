@@ -53,7 +53,8 @@ private slots:
     void _fidelityChanged();
 
     /// Plot when the plot button is clicked
-    void _plotClicked();
+    void _spaceTabPlotClicked();
+    void _timeTabPlotClicked();
 
 private:
     VAPoR::DataStatus *_dataStatus;
