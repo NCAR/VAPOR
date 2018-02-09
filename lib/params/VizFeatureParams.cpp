@@ -277,7 +277,6 @@ AxisAnnotation *VizFeatureParams::GetAxisAnnotation(string dataMgr)
 
     if (_axisAnnotations->GetParams(dataMgr) == NULL) {
         AxisAnnotation newAnnotation(_ssave);
-        cout << "making new axis annotation " << dataMgr << endl;
         _axisAnnotations->Insert(&newAnnotation, dataMgr);
     }
     AxisAnnotation *aa = (AxisAnnotation *)_axisAnnotations->GetParams(dataMgr);

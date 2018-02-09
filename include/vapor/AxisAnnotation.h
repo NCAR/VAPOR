@@ -66,8 +66,8 @@ public:
     void SetLatLonAxesEnabled(bool val);
     bool GetLatLonAxesEnabled() const;
 
-    string GetAxisDataMgr() const;
-    void   SetAxisDataMgr(string dataMgr);
+    string GetDataMgrName() const;
+    void   SetDataMgrName(string dataMgr);
 
     bool GetShowAxisArrows() const;
     void SetShowAxisArrows(bool val);
