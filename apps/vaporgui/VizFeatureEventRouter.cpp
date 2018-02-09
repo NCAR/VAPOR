@@ -92,7 +92,7 @@ void VizFeatureEventRouter::connectAnnotationWidgets() {
 		this, SLOT(setAxisColor()));
 	connect(axisBackgroundColorButton, SIGNAL(pressed()),
 		this, SLOT(setAxisBackgroundColor()));
-	connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)),
+	connect(_annotationVaporTable, SIGNAL(returnPressed()),
 		this, SLOT(axisAnnotationTableChanged()));
 	connect (xTicOrientationCombo, SIGNAL(activated(int)),
 		this, SLOT(setXTicOrientation(int)));
@@ -341,8 +341,10 @@ void VizFeatureEventRouter::updateDataMgrCombo() {
 	int index = dataMgrSelectorCombo->findText(qCurrentSelection);
 	if (index > 0) 
 		dataMgrSelectorCombo->setCurrentIndex(index);
-	else
+	else {
 		dataMgrSelectorCombo->setCurrentIndex(0);
+		setCurrentAxisDataMgr(0);
+	}
 }
 
 void VizFeatureEventRouter::updateAnnotationCheckbox() {
@@ -573,7 +575,8 @@ void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation* aa) {
 
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	string dataMgr = vfParams->GetCurrentAxisDataMgrName();
-	aa->SetAxisDataMgr(dataMgr);
+	cout << "initializing axis for " << dataMgr << endl;
+	aa->SetDataMgrName(dataMgr);
 }
 
 void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
@@ -652,7 +655,6 @@ void VizFeatureEventRouter::setCurrentAxisDataMgr(int index) {
 	
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	vfParams->SetCurrentAxisDataMgrName(dataMgr);
-	cout << "Setting dm to " << dataMgr << endl;
 }
 
 vector<double> VizFeatureEventRouter::getTableRow(int row) {
@@ -880,7 +882,6 @@ void VizFeatureEventRouter::drawTimeStep(string myString) {
 	float color[3];
 	mp->GetTimeAnnotColor(color);
 
-	cout << "Drawing timestep" << endl;
 	_controlExec->DrawText(myString, x, y, size, color, 1);
 }
 
