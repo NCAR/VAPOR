@@ -86,6 +86,11 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
              this,                  SLOT  (  _spaceModeP1Changed() ) );
     connect( spaceTabP2,            SIGNAL(  pointUpdated() ),
              this,                  SLOT  (  _spaceModeP2Changed() ) );
+    connect( spaceTabPlotButton,    SIGNAL(  clicked() ) ,
+             this,                  SLOT  ( _spaceTabPlotClicked() ));
+    connect( timeTabPlotButton,     SIGNAL(  clicked() ) ,
+             this,                  SLOT  ( _timeTabPlotClicked() ));
+ 
 
     // Put the current window on top
     show();
@@ -257,9 +262,6 @@ void Plot::_removeVarChanged( int index )
     }
 }
     
-void Plot::_plotClicked()
-{}
-    
 void Plot::_spaceTimeModeChanged( int mode )
 {
     PlotParams* plotParams = _getCurrentPlotParams();
@@ -385,3 +387,36 @@ void Plot::_setWidgetExtents()
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1) );
     spaceTabTimeSelector->SetDecimals(0);
 }
+    
+void Plot::_spaceTabPlotClicked()
+{}
+
+void Plot::_timeTabPlotClicked()
+{
+    VAPoR::PlotParams* plotParams        = this->_getCurrentPlotParams();
+    VAPoR::DataMgr*    dataMgr           = this->_getCurrentDataMgr();    
+    assert( !plotParams->GetSpaceTimeMode() );
+    int refinementLevel                  = plotParams->GetRefinementLevel();
+    int compressLevel                    = plotParams->GetCompressionLevel();
+
+    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+    std::map<std::string, std::vector<float> > plotSequence, plotIndex;
+
+    std::vector<double>     singlePt     = plotParams->GetSinglePoint();
+    std::vector<long int>   minMaxTS     = plotParams->GetMinMaxTS();
+
+    for( int v = 0; v < enabledVars.size(); v++ )
+    {
+        std::vector<float> sequence, index;
+        for( int t = minMaxTS[0]; t <= minMaxTS[1]; t++ )
+        {
+            VAPoR::Grid* grid = dataMgr->GetVariable( t, enabledVars[v], 
+                                refinementLevel, compressLevel ); 
+            sequence.push_back( grid->GetValue( singlePt ) );
+            // todo: study passing vectors to python
+        }
+    }
+
+    _dm->GetTimeCoordinates(timeCoords);
+}
+
