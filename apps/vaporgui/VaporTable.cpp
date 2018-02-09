@@ -219,6 +219,9 @@ QLineEdit *VaporTable::createLineEdit(QString val) {
     connect(edit, SIGNAL(editingFinished()),
             this, SLOT(emitValueChanged()));
 
+    connect(edit, SIGNAL(returnPressed()),
+            this, SLOT(emitReturnPressed()));
+
     edit->installEventFilter(this);
 
     return edit;
@@ -237,6 +240,10 @@ void VaporTable::emitValueChanged() {
         highlightActiveCol(_activeCol);
 
     emit valueChanged(row, col);
+}
+
+void VaporTable::emitReturnPressed() {
+    emit returnPressed();
 }
 
 void VaporTable::emitCellClicked(QObject *obj) {

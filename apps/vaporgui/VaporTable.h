@@ -85,11 +85,13 @@ class VaporTable : public QWidget {
   public slots:
     void emitValueChanged();
     //void emitCellClicked();
+    void emitReturnPressed();
 
   signals:
 
     void valueChanged(int row, int col);
     void cellClicked(int row, int col);
+    void returnPressed();
 
   private:
     void emitCellClicked(QObject *object);
