@@ -114,11 +114,12 @@ private:
 	void drawDomainFrame(size_t ts) const;
 
 
- std::vector<double> getDomainExtents() const;
+ std::vector<double> getDomainExtents(string dmName = "") const;
  AxisAnnotation* getCurrentAxisAnnotation();
- string getCurrentAxisDataMgrName() const;
+ string getCurrentDataMgrName() const;
  void scaleNormalizedCoordinatesToWorld(
-	std::vector<double> &coords);
+	std::vector<double> &coords,
+	string dataMgrName);
 
 
 #ifdef	DEAD
@@ -131,10 +132,10 @@ private:
  void drawAxisTics(AxisAnnotation* aa=NULL);
  void applyTransform(Transform *t);
  void renderText(double text, double coords[], AxisAnnotation *aa = NULL);
- Transform* getCurrentTransform();
- void convertPointToLon(double &xCoord);
- void convertPointToLat(double &yCoord);
- void convertPointToLonLat(double &xCoord, double &yCoord);
+ Transform* getTransform(string dataMgr="");
+ void convertPointToLon(double &xCoord, string dataMgr="");
+ void convertPointToLat(double &yCoord, string dataMgr="");
+ void convertPointToLonLat(double &xCoord, double &yCoord, string dataMgr="");
 
  // Draw Axis arrows
  //
