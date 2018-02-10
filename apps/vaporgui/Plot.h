@@ -50,7 +50,7 @@ private slots:
     void _spaceModeTimeChanged(double);
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
-    void _fidelityChanged();
+    // void _fidelityChanged();
 
     /// Plot when the plot button is clicked
     void _spaceTabPlotClicked();
@@ -59,6 +59,7 @@ private slots:
 private:
     VAPoR::DataStatus *_dataStatus;
     VAPoR::ParamsMgr * _paramsMgr;
+    int                _spaceModeNumOfSamples;
 
     /// Access functions to other pointers
     VAPoR::PlotParams *_getCurrentPlotParams() const;
