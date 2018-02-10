@@ -26,6 +26,7 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
 {
     _dataStatus = status;
     _paramsMgr  = manager;
+    _spaceModeNumOfSamples = 100;
 
     // Get the active dataset name 
     std::string currentDatasetName;
@@ -296,11 +297,11 @@ void Plot::_spaceModeP2Changed()
 
 void Plot::_spaceModeTimeChanged( double val )
 {
-    long int lval = (long int)val;
-    assert( lval == std::floor(val) );
+    assert( val == std::floor(val) );
+    int ival = (int)val;
     
     VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
-    plotParams->SetCurrentTimestep( lval );
+    plotParams->SetCurrentTimestep( ival );
 }
 
 void Plot::_timeModePointChanged()
@@ -329,9 +330,6 @@ void Plot::_timeModeT1T2Changed()
 
     plotParams->SetMinMaxTS( rangeInt );
 }    
-
-void Plot::_fidelityChanged()
-{}
 
 void Plot::_dataSourceChanged( int index )
 {
@@ -389,34 +387,73 @@ void Plot::_setWidgetExtents()
 }
     
 void Plot::_spaceTabPlotClicked()
-{}
+{
+    VAPoR::PlotParams* plotParams        = this->_getCurrentPlotParams();
+    VAPoR::DataMgr*    dataMgr           = this->_getCurrentDataMgr();    
+    assert( !plotParams->GetSpaceTimeMode() );
+
+    int refinementLevel                  = plotParams->GetRefinementLevel();
+    int compressLevel                    = plotParams->GetCompressionLevel();
+    int currentTS                        = (int)plotParams->GetCurrentTimestep();
+    std::vector<double>     point1       = plotParams->GetPoint1();
+    std::vector<double>     point2       = plotParams->GetPoint2();
+    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+
+    std::vector<double>     p1p2span;
+    for( int i = 0; i < point1.size(); i++ )
+        p1p2span.push_back( point2[i] - point1[i] );
+
+    std::vector< std::vector<float> >    sequences;
+    for( int v = 0; v < enabledVars.size(); v++ )
+    {
+        std::vector<float> seq(_spaceModeNumOfSamples, 0.0);
+        VAPoR::Grid* grid = dataMgr->GetVariable( currentTs, enabledVars[v],
+                            refinementLevel, compressLevel );
+        for( int i = 0; i < _spaceModeNumOfSamples; i++ )
+        {
+            std::vector<double>     sample;
+            if( i == 0 )
+                sample = point1;
+            else if( i == _spaceModeNumOfSamples - 1 )
+                sample = point2;
+            else
+            {
+                for( int j = 0; j < point1.size(); j++ )
+                    sample.push_back( (double)i / (double)(_spaceModeNumOfSamples-1) * 
+                                       p1p2span[j] + point1[j] );
+            }
+            seq[i] = grid->GetValue( sample );
+        }
+        sequences.push_back( seq );
+    }
+    // TODO: pass sequences to python plotting script.
+}
 
 void Plot::_timeTabPlotClicked()
 {
     VAPoR::PlotParams* plotParams        = this->_getCurrentPlotParams();
     VAPoR::DataMgr*    dataMgr           = this->_getCurrentDataMgr();    
     assert( !plotParams->GetSpaceTimeMode() );
+
     int refinementLevel                  = plotParams->GetRefinementLevel();
     int compressLevel                    = plotParams->GetCompressionLevel();
-
-    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
-    std::map<std::string, std::vector<float> > plotSequence, plotIndex;
-
     std::vector<double>     singlePt     = plotParams->GetSinglePoint();
     std::vector<long int>   minMaxTS     = plotParams->GetMinMaxTS();
+    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
+    std::vector< std::vector<float> >    sequences;
     for( int v = 0; v < enabledVars.size(); v++ )
     {
-        std::vector<float> sequence, index;
+        std::vector<float> seq;
         for( int t = minMaxTS[0]; t <= minMaxTS[1]; t++ )
         {
             VAPoR::Grid* grid = dataMgr->GetVariable( t, enabledVars[v], 
                                 refinementLevel, compressLevel ); 
-            sequence.push_back( grid->GetValue( singlePt ) );
-            // todo: study passing vectors to python
+            seq.push_back( grid->GetValue( singlePt ) );
         }
+        sequences.push_back( seq );
     }
-
-    _dm->GetTimeCoordinates(timeCoords);
 }
 
+
+//void Plot::_fidelityChanged() {}
