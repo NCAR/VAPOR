@@ -398,13 +398,14 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
 		tf->makeLut(clut);
 	}
 
-	float xCoord, yCoord, zCoord;
+	float xCoord, yCoord, zCoordGrid, zCoord;
 	for (int k = 1; k<=rakeGrid[2]; k++){
-		zCoord = zStride * k + rakeExts[2];
+		zCoordGrid = zStride * k + rakeExts[2];
 		for (int j = 1; j<=rakeGrid[1]; j++){
 			yCoord = yStride * j + rakeExts[1];
 			for (int i = 1; i<=rakeGrid[0]; i++){
 				xCoord = xStride * i + rakeExts[0];
+				zCoord = zCoordGrid;
 
 				bool missing = false;
 				if (heightVar) {

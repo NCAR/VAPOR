@@ -39,15 +39,16 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
 
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);
-	_geometryWidget->Reinit((GeometryWidget::Flags)
-	((GeometryWidget::VECTOR) | (GeometryWidget::TWOD)));
-	//((GeometryWidget::VECTOR) | (GeometryWidget::THREED)));
+	_geometryWidget->Reinit(
+		(GeometryWidget::DimFlags)((GeometryWidget::VECTOR) | (GeometryWidget::TWOD)),
+		GeometryWidget::MINMAX,
+		GeometryWidget::VECTOR);
 }
 
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget* parent) {
 	setupUi(this);
 	_TFWidget->Reinit((TFWidget::Flags)
-		(TFWidget::COLORVAR | TFWidget::PRIORITY_COLORVAR | TFWidget::CONSTANT));
+		(TFWidget::COLORVAR | TFWidget::CONSTANT));
 
 	hideZDimWidgets();
 

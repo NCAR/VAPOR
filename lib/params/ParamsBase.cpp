@@ -175,6 +175,7 @@ vector <double> ParamsBase::GetValueDoubleVec( const string tag) const {
 vector <double> ParamsBase::GetValueDoubleVec( const string tag, 
                                                const vector<double>& defaultVal) const 
 {
+	if (tag == "PreviousDataBounds") cout << "No tag? " << !_node->HasElementDouble(tag) << " ";
 	if (! _node->HasElementDouble(tag)) return(defaultVal);
 
 	vector <double> v = _node->GetElementDouble(tag);
@@ -189,6 +190,7 @@ vector <double> ParamsBase::GetValueDoubleVec( const string tag,
 		}
 	}
 
+	if (tag == "PreviousDataBounds") cout << v[0] << " " << v[1] << endl;
 	return(v);
 }
 
