@@ -80,6 +80,18 @@ void TFWidget::showConstColorWidgets()
     colorSelectButton->show();
 }
 
+void TFWidget::hideWhitespaceFrame()
+{
+    whitespaceFrame->hide();
+    //	whitespaceFrame->resize(0,0);
+}
+
+void TFWidget::showWhitespaceFrame()
+{
+    cout << "Show" << endl;
+    whitespaceFrame->show();
+}
+
 void TFWidget::Reinit(Flags flags)
 {
     _flags = flags;
@@ -227,18 +239,23 @@ void TFWidget::updateColorInterpolation()
 
     TFInterpolator::type t = tf->getColorInterpType();
     colorInterpCombo->blockSignals(true);
-    if (t == TFInterpolator::correctiveDiverging) {
-        cout << "A" << endl;
-        colorInterpCombo->setCurrentIndex(0);
-    } else if (t == TFInterpolator::diverging) {
+    //	if (t == TFInterpolator::correctiveDiverging) {
+    //		cout << "A" << endl;
+    //		colorInterpCombo->setCurrentIndex(0);
+    //	}
+    //	else if (t == TFInterpolator::diverging) {
+    if (t == TFInterpolator::diverging) {
         cout << "B" << endl;
-        colorInterpCombo->setCurrentIndex(1);
+        colorInterpCombo->setCurrentIndex(0);
+        showWhitespaceFrame();
     } else if (t == TFInterpolator::discrete) {
         cout << "C" << endl;
-        colorInterpCombo->setCurrentIndex(2);
+        colorInterpCombo->setCurrentIndex(1);
+        hideWhitespaceFrame();
     } else {
         cout << "D" << endl;
-        colorInterpCombo->setCurrentIndex(3);
+        colorInterpCombo->setCurrentIndex(2);
+        hideWhitespaceFrame();
     }
     colorInterpCombo->blockSignals(false);
 }

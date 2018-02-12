@@ -78,6 +78,8 @@ private:
     void   collapseAutoUpdateHistoCheckbox();
     void   collapseConstColorWidgets();
     void   showConstColorWidgets();
+    void   showWhitespaceFrame();
+    void   hideWhitespaceFrame();
     string getVariableName();
     void   connectWidgets();
     void   updateSliders();
