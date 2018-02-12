@@ -94,12 +94,16 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void timeLLYChanged();
     void timeSizeChanged();
     void setCurrentAxisDataMgr(int);
+    void copyRegionFromRenderer();
 
   private:
     Combo *_textSizeCombo;
     Combo *_digitsCombo;
     Combo *_ticWidthCombo;
     VaporTable *_annotationVaporTable;
+
+    std::map<std::string, std::string> _visNames;
+    std::map<std::string, std::string> _renTypeNames;
 
     vector<double> getTableRow(int row);
 
@@ -121,6 +125,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void updateTimeColor();
     void updateAxisAnnotations();
     void updateDataMgrCombo();
+    void updateCopyRegionCombo();
     void updateAnnotationCheckbox();
     void updateLatLonCheckbox();
     void updateAnnotationTable();
