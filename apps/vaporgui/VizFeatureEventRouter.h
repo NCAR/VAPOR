@@ -102,6 +102,7 @@ protected slots:
 	void timeLLYChanged();
 	void timeSizeChanged();
 	void setCurrentAxisDataMgr(int);
+	void copyRegionFromRenderer();
 
 private:
 
@@ -109,6 +110,9 @@ private:
 	Combo* _digitsCombo;
 	Combo* _ticWidthCombo;
 	VaporTable* _annotationVaporTable;
+
+	std::map<std::string, std::string> _visNames;
+	std::map<std::string, std::string> _renTypeNames;
 
 	vector<double> getTableRow(int row);
 
@@ -132,6 +136,7 @@ private:
 	void updateTimeColor();
 	void updateAxisAnnotations();
 	void updateDataMgrCombo();
+	void updateCopyRegionCombo();
 	void updateAnnotationCheckbox();
 	void updateLatLonCheckbox();
 	void updateAnnotationTable();

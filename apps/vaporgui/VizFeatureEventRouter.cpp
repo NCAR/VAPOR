@@ -47,6 +47,26 @@
 
 using namespace VAPoR;
 
+namespace {
+
+template<typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+}
+
 VizFeatureEventRouter::VizFeatureEventRouter(
 	QWidget *parent, ControlExec *ce
 ) : QWidget(parent),
@@ -102,6 +122,8 @@ void VizFeatureEventRouter::connectAnnotationWidgets() {
 		this, SLOT(setZTicOrientation(int)));
 	connect(dataMgrSelectorCombo, SIGNAL(activated(int)),
 		this, SLOT(setCurrentAxisDataMgr(int)));
+	connect(copyRegionButton, SIGNAL(pressed()),
+		this, SLOT(copyRegionFromRenderer()));
 }
 
 /**********************************************************
@@ -347,6 +369,97 @@ void VizFeatureEventRouter::updateDataMgrCombo() {
 	}
 }
 
+void VizFeatureEventRouter::copyRegionFromRenderer() 
+{
+	string copyString = copyRegionCombo->currentText().toStdString();
+	if( copyString == "" ) return;
+
+	std::vector<std::string> elems = split(copyString, ':');
+	string visualizer = _visNames[elems[0]];
+	string dataSetName = elems[1];
+	string renType = _renTypeNames[elems[2]];
+	string renderer = elems[3];
+
+	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
+	RenderParams* copyParams = paramsMgr->GetRenderParams(
+												visualizer, 
+												dataSetName,
+												renType, 
+												renderer);
+	assert(copyParams);
+
+	Box* copyBox = copyParams->GetBox();
+	std::vector<double> minExtents, maxExtents;
+	copyBox->GetExtents(minExtents, maxExtents);
+
+	AxisAnnotation* aa = _getCurrentAxisAnnotation();
+	if (copyBox->IsPlanar()) {
+		std::vector<double>currentMin = aa->GetMinTics();
+		std::vector<double>currentMax = aa->GetMaxTics();
+		scaleNormalizedCoordsToWorld(currentMin);
+		scaleNormalizedCoordsToWorld(currentMax);
+		minExtents.push_back(currentMin[2]);
+		maxExtents.push_back(currentMax[2]);
+	}
+
+	scaleWorldCoordsToNormalized(minExtents);
+	scaleWorldCoordsToNormalized(maxExtents);
+
+	paramsMgr->BeginSaveStateGroup("Copying extents from renderer to"
+		" AxisAnnotation");
+	aa->SetAxisOrigin(minExtents);
+	aa->SetMinTics(minExtents);
+	aa->SetMaxTics(maxExtents);
+	paramsMgr->EndSaveStateGroup();
+}
+
+void VizFeatureEventRouter::updateCopyRegionCombo() {
+	copyRegionCombo->clear();
+
+	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
+	std::string dataSetName = vParams->GetCurrentAxisDataMgrName();
+
+	_visNames.clear();
+
+	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
+	std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
+	for (int i=0; i<visNames.size(); i++) {
+		// Create a mapping of abreviated visualizer names to their
+		// actual string values. 
+		//
+		string visAbb = "Vis" + std::to_string(i);
+		_visNames[visAbb] = visNames[i];
+
+		std::vector<string> typeNames;
+		typeNames = paramsMgr->GetRenderParamsClassNames(visNames[i]);
+	
+		for (int j=0; j<typeNames.size(); j++) {
+	
+			// Abbreviate Params names by removing 'Params" from them.
+			// Then store them in a map for later reference.
+			//
+			string typeAbb = typeNames[j];
+			int pos = typeAbb.find("Params");
+			typeAbb.erase(pos,6);
+			_renTypeNames[typeAbb] = typeNames[j];
+	
+			std::vector<string> renNames;
+			renNames = paramsMgr->GetRenderParamInstances(
+				visNames[i],
+				typeNames[j]
+			);
+
+			for (int k=0; k<renNames.size(); k++) {
+				string displayName = visAbb + ":" + 
+									dataSetName + ":" +
+									typeAbb + ":" + renNames[k];
+				QString qDisplayName = QString::fromStdString(displayName);
+				copyRegionCombo->addItem(qDisplayName);
+			}
+		}
+	}
+}
+
 void VizFeatureEventRouter::updateAnnotationCheckbox() {
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	bool annotationEnabled = aa->GetAxisAnnotationEnabled();
@@ -391,22 +504,22 @@ void VizFeatureEventRouter::scaleNormalizedCoordsToWorld(
 	std::vector<double> &coords
 ) {
 	std::vector<double> extents = getDomainExtents();
-    for (int i=0; i<3; i++) {
+	for (int i=0; i<3; i++) {
 		double offset = coords[i]*(extents[i+3]-extents[i]);
 		double minimum = extents[i];
-        coords[i] = offset + minimum;
-    }   
+		coords[i] = offset + minimum;
+	}   
 }
 
 void VizFeatureEventRouter::scaleWorldCoordsToNormalized(
 	std::vector<double> &coords
 ) {
    std::vector<double> extents = getDomainExtents();
-    for (int i=0; i<3; i++) {
+	for (int i=0; i<3; i++) {
 		double point = coords[i]-extents[i];
 		double magnitude = extents[i+3]-extents[i];
 		coords[i] = point/magnitude;
-    }   
+	}   
 }
 
 void VizFeatureEventRouter::updateAnnotationTable() {
@@ -446,11 +559,11 @@ void VizFeatureEventRouter::updateAnnotationTable() {
 	tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
 	vector<string> rowHeaders;
-	rowHeaders.push_back("# Tics          ");
-	rowHeaders.push_back("Size            ");
-	rowHeaders.push_back("Min             ");
-	rowHeaders.push_back("Max             ");
-	rowHeaders.push_back("Origin          ");
+	rowHeaders.push_back("# Tics		  ");
+	rowHeaders.push_back("Size			");
+	rowHeaders.push_back("Min			 ");
+	rowHeaders.push_back("Max			 ");
+	rowHeaders.push_back("Origin		  ");
 
 	vector<string> colHeaders;
 	colHeaders.push_back("X");
@@ -461,41 +574,41 @@ void VizFeatureEventRouter::updateAnnotationTable() {
 }
 
 void VizFeatureEventRouter::convertPCSToLon(
-    double &xCoord) {
-    double dummy = 0.; 
-    convertPCSToLonLat(xCoord, dummy); 
+	double &xCoord) {
+	double dummy = 0.; 
+	convertPCSToLonLat(xCoord, dummy); 
 }
 
 void VizFeatureEventRouter::convertPCSToLat(
-    double &yCoord) {
-    double dummy = 0.; 
-    convertPCSToLonLat(dummy, yCoord); 
+	double &yCoord) {
+	double dummy = 0.; 
+	convertPCSToLonLat(dummy, yCoord); 
 }
 
 void VizFeatureEventRouter::convertPCSToLonLat(
-    double &xCoord, double &yCoord
+	double &xCoord, double &yCoord
 ) {
 	//ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
-    //vector<string> names = paramsMgr->GetDataMgrNames();
+	//vector<string> names = paramsMgr->GetDataMgrNames();
 	//DataStatus *dataStatus = _controlExec->GetDataStatus();
-    //DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
+	//DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
 
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	string dataMgrName = vfParams->GetCurrentAxisDataMgrName();
-    DataMgr* dataMgr = dataStatus->GetDataMgr(dataMgrName);
+	DataMgr* dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
-    double coords[2] = {xCoord, yCoord};
+	double coords[2] = {xCoord, yCoord};
 	double coordsForError[2] = {coords[0], coords[1]};
 
-    int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1); 
-    if (!rc) {
-        MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat",
-            coordsForError[0], coordsForError[1]);
-    }   
+	int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1); 
+	if (!rc) {
+		MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat",
+			coordsForError[0], coordsForError[1]);
+	}   
 
-    xCoord = coords[0];
-    yCoord = coords[1];
+	xCoord = coords[0];
+	yCoord = coords[1];
 }
 
 void VizFeatureEventRouter::convertLonToPCS(
@@ -511,28 +624,28 @@ void VizFeatureEventRouter::convertLatToPCS(
 }
 
 void VizFeatureEventRouter::convertLonLatToPCS(
-    double &xCoord, double &yCoord
+	double &xCoord, double &yCoord
 ) {
 	//ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
-    //vector<string> names = paramsMgr->GetDataMgrNames();
+	//vector<string> names = paramsMgr->GetDataMgrNames();
 	//DataStatus *dataStatus = _controlExec->GetDataStatus();
-    //DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
+	//DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	string dataMgrName = vfParams->GetCurrentAxisDataMgrName();
-    DataMgr* dataMgr = dataStatus->GetDataMgr(dataMgrName);
+	DataMgr* dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
-    double coords[2] = {xCoord, yCoord};
+	double coords[2] = {xCoord, yCoord};
 	double coordsForError[2] = {coords[0], coords[1]};
  
-    int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1); 
-    if (!rc) {
-        MyBase::SetErrMsg("Could not convert point %f, %f to PCS",
-            coordsForError[0], coordsForError[1]);
-    }   
+	int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1); 
+	if (!rc) {
+		MyBase::SetErrMsg("Could not convert point %f, %f to PCS",
+			coordsForError[0], coordsForError[1]);
+	}   
 
-    xCoord = coords[0];
-    yCoord = coords[1];
+	xCoord = coords[0];
+	yCoord = coords[1];
 }
 
 AxisAnnotation* VizFeatureEventRouter::_getCurrentAxisAnnotation() {
@@ -575,7 +688,6 @@ void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation* aa) {
 
 	VizFeatureParams* vfParams = (VizFeatureParams*)GetActiveParams();
 	string dataMgr = vfParams->GetCurrentAxisDataMgrName();
-	cout << "initializing axis for " << dataMgr << endl;
 	aa->SetDataMgrName(dataMgr);
 }
 
@@ -593,6 +705,7 @@ void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
 
 void VizFeatureEventRouter::updateAxisAnnotations() {
 	updateDataMgrCombo();
+	updateCopyRegionCombo();
 	updateAnnotationCheckbox();
 	updateLatLonCheckbox();
 	updateTicOrientationCombos();	
@@ -940,7 +1053,7 @@ void VizFeatureEventRouter::setYTicOrientation(int){
 void VizFeatureEventRouter::setZTicOrientation(int){
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	vector<double> ticDir = aa->GetTicDirs();
-	ticDir[2] = zTicOrientationCombo->currentIndex();    // X(0) or Y(1)
+	ticDir[2] = zTicOrientationCombo->currentIndex();	// X(0) or Y(1)
 	aa->SetTicDirs(ticDir);
 }
 
