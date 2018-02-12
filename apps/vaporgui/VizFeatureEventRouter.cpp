@@ -637,6 +637,7 @@ void VizFeatureEventRouter::axisAnnotationTableChanged()
     bool            annotateLatLon = aa->GetLatLonAxesEnabled();
 
     std::vector<double> numTics = getTableRow(0);
+    for (int i = 0; i < numTics.size(); i++) { numTics[i] = round(numTics[i]); }
     aa->SetNumTics(numTics);
 
     std::vector<double> ticSizes = getTableRow(1);
