@@ -79,6 +79,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void collapseAutoUpdateHistoCheckbox();
     void collapseConstColorWidgets();
     void showConstColorWidgets();
+    void showWhitespaceFrame();
+    void hideWhitespaceFrame();
     string getVariableName();
     void connectWidgets();
     void updateSliders();
