@@ -488,8 +488,6 @@ void VizFeatureRenderer::drawAxisTics(AxisAnnotation *aa)
         pointOnAxis[2] = minTic[2] + (float)i * (maxTic[2] - minTic[2]) / (float)(numTics[2] - 1);
         vsub(pointOnAxis, ticVec, startPosn);
         vadd(pointOnAxis, ticVec, endPosn);
-        // cout << "SP " << startPosn[0] << " " << startPosn[1] << " " << startPosn[2] << endl;
-        // cout << "POA " << pointOnAxis[0] << " " << pointOnAxis[1] << " " << pointOnAxis[2] << endl;
         _drawTic(startPosn, endPosn, width, axisColor);
         renderText(pointOnAxis[2], startPosn, aa);
     }
@@ -585,7 +583,6 @@ string VizFeatureRenderer::getCurrentDataMgrName() const
 {
     VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
     string            currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
-    cout << "currentDM " << currentAxisDataMgr << endl;
     return currentAxisDataMgr;
 }
 
@@ -597,19 +594,9 @@ std::vector<double> VizFeatureRenderer::getDomainExtents(string dmName) const
 
     m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, dmName, ts, minExts, maxExts);
 
-    //	vector<int> axes;
-    //	DataMgr* dataMgr = m_dataStatus->GetDataMgr(dmName);
-    //	vector<string> varnames = dataMgr->GetDataVarNames();
-    //	DataMgrUtils::GetExtents(dataMgr, ts, varnames,
-    //		minExts, maxExts, axes);
-
     std::vector<double> extents;
     for (int i = 0; i < 3; i++) { extents.push_back(minExts[i]); }
     for (int i = 0; i < 3; i++) { extents.push_back(maxExts[i]); }
-
-    cout << "domainExtents " << endl;
-    for (int i = 0; i < 6; i++) cout << extents[i] << " ";
-    cout << endl;
 
     return extents;
 }

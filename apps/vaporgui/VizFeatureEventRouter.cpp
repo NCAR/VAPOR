@@ -46,6 +46,25 @@
 
 using namespace VAPoR;
 
+namespace {
+
+template<typename Out> void split(const std::string &s, char delim, Out result)
+{
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) { *(result++) = item; }
+}
+
+std::vector<std::string> split(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+}    // namespace
+
 VizFeatureEventRouter::VizFeatureEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_vizFeaturesTab(), EventRouter(ce, VizFeatureParams::GetClassType())
 {
     setupUi(this);
@@ -80,6 +99,7 @@ void VizFeatureEventRouter::connectAnnotationWidgets()
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
     connect(dataMgrSelectorCombo, SIGNAL(activated(int)), this, SLOT(setCurrentAxisDataMgr(int)));
+    connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
 }
 
 /**********************************************************
@@ -265,6 +285,88 @@ void VizFeatureEventRouter::updateDataMgrCombo()
     }
 }
 
+void VizFeatureEventRouter::copyRegionFromRenderer()
+{
+    string copyString = copyRegionCombo->currentText().toStdString();
+    if (copyString == "") return;
+
+    std::vector<std::string> elems = split(copyString, ':');
+    string                   visualizer = _visNames[elems[0]];
+    string                   dataSetName = elems[1];
+    string                   renType = _renTypeNames[elems[2]];
+    string                   renderer = elems[3];
+
+    ParamsMgr *   paramsMgr = _controlExec->GetParamsMgr();
+    RenderParams *copyParams = paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
+    assert(copyParams);
+
+    Box *               copyBox = copyParams->GetBox();
+    std::vector<double> minExtents, maxExtents;
+    copyBox->GetExtents(minExtents, maxExtents);
+
+    AxisAnnotation *aa = _getCurrentAxisAnnotation();
+    if (copyBox->IsPlanar()) {
+        std::vector<double> currentMin = aa->GetMinTics();
+        std::vector<double> currentMax = aa->GetMaxTics();
+        scaleNormalizedCoordsToWorld(currentMin);
+        scaleNormalizedCoordsToWorld(currentMax);
+        minExtents.push_back(currentMin[2]);
+        maxExtents.push_back(currentMax[2]);
+    }
+
+    scaleWorldCoordsToNormalized(minExtents);
+    scaleWorldCoordsToNormalized(maxExtents);
+
+    paramsMgr->BeginSaveStateGroup("Copying extents from renderer to"
+                                   " AxisAnnotation");
+    aa->SetAxisOrigin(minExtents);
+    aa->SetMinTics(minExtents);
+    aa->SetMaxTics(maxExtents);
+    paramsMgr->EndSaveStateGroup();
+}
+
+void VizFeatureEventRouter::updateCopyRegionCombo()
+{
+    copyRegionCombo->clear();
+
+    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
+
+    _visNames.clear();
+
+    ParamsMgr *              paramsMgr = _controlExec->GetParamsMgr();
+    std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
+    for (int i = 0; i < visNames.size(); i++) {
+        // Create a mapping of abreviated visualizer names to their
+        // actual string values.
+        //
+        string visAbb = "Vis" + std::to_string(i);
+        _visNames[visAbb] = visNames[i];
+
+        std::vector<string> typeNames;
+        typeNames = paramsMgr->GetRenderParamsClassNames(visNames[i]);
+
+        for (int j = 0; j < typeNames.size(); j++) {
+            // Abbreviate Params names by removing 'Params" from them.
+            // Then store them in a map for later reference.
+            //
+            string typeAbb = typeNames[j];
+            int    pos = typeAbb.find("Params");
+            typeAbb.erase(pos, 6);
+            _renTypeNames[typeAbb] = typeNames[j];
+
+            std::vector<string> renNames;
+            renNames = paramsMgr->GetRenderParamInstances(visNames[i], typeNames[j]);
+
+            for (int k = 0; k < renNames.size(); k++) {
+                string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
+                QString qDisplayName = QString::fromStdString(displayName);
+                copyRegionCombo->addItem(qDisplayName);
+            }
+        }
+    }
+}
+
 void VizFeatureEventRouter::updateAnnotationCheckbox()
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
@@ -365,11 +467,11 @@ void VizFeatureEventRouter::updateAnnotationTable()
     tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
     vector<string> rowHeaders;
-    rowHeaders.push_back("# Tics          ");
-    rowHeaders.push_back("Size            ");
-    rowHeaders.push_back("Min             ");
-    rowHeaders.push_back("Max             ");
-    rowHeaders.push_back("Origin          ");
+    rowHeaders.push_back("# Tics		  ");
+    rowHeaders.push_back("Size			");
+    rowHeaders.push_back("Min			 ");
+    rowHeaders.push_back("Max			 ");
+    rowHeaders.push_back("Origin		  ");
 
     vector<string> colHeaders;
     colHeaders.push_back("X");
@@ -488,7 +590,6 @@ void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
 
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
-    cout << "initializing axis for " << dataMgr << endl;
     aa->SetDataMgrName(dataMgr);
 }
 
@@ -508,6 +609,7 @@ void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa)
 void VizFeatureEventRouter::updateAxisAnnotations()
 {
     updateDataMgrCombo();
+    updateCopyRegionCombo();
     updateAnnotationCheckbox();
     updateLatLonCheckbox();
     updateTicOrientationCombos();
