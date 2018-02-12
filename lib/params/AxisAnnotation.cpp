@@ -130,7 +130,7 @@ std::vector<double> AxisAnnotation::GetNumTics() const {
 }
 
 void AxisAnnotation::SetAxisOrigin(vector<double> orig) {
-    assert(orig.size() == 3);
+	assert(orig.size() == 3);
     SetValueDoubleVec(_originTag, "Set axis val", orig);
 }
 
