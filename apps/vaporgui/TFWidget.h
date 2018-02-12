@@ -30,10 +30,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
         // We can map the color of our renderer to a constant value
         CONSTANT = (1u << 1),
-
-        // PRIORITY_COLORVAR just moves the color mapped variable
-        // settings up higher in the gui for better visibility
-        PRIORITY_COLORVAR = (1u << 2)
     };
 
     TFWidget(QWidget *parent = 0);
@@ -76,7 +72,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void setUsingSingleColor(int checkState);
 
   private:
-    void collapseAutoUpdateHistoCheckbox();
     void collapseConstColorWidgets();
     void showConstColorWidgets();
     void showWhitespaceFrame();
@@ -89,6 +84,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateMappingFrame();
     void enableTFWidget(bool state);
     void updateConstColorWidgets();
+    bool autoUpdateHisto();
+    string getCurrentVarName();
+    VAPoR::MapperFunction *getCurrentMapperFunction();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
@@ -97,6 +95,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     bool _discreteColormap = false;
     bool _textChanged = false;
     float _myRGB[3];
+    float _savedMapperValues[2];
 
     RenderEventRouter *_eventRouter;
     VAPoR::ParamsMgr *_paramsMgr;

@@ -378,7 +378,7 @@ void NavigationEventRouter::updateTransforms() {
         if (!vParams)
             continue;
 
-        vector<string> names = vParams->GetTransformNames();
+        vector<string> names = paramsMgr->GetDataMgrNames();
 
         for (int j = 0; j < names.size(); j++) {
             Transform *t = vParams->GetTransform(names[j]);
@@ -400,11 +400,9 @@ void NavigationEventRouter::updateTransforms() {
                 t->SetOrigin(origin);
                 paramsMgr->SetSaveStateEnabled(enabled);
             }
-
             transformMap[names[j]] = t;
         }
     }
-
     transformTable->Update(transformMap);
 }
 
