@@ -84,7 +84,7 @@ class COMMON_API MyPython : public Wasp::MyBase {
   private:
     static MyPython *m_instance;
     static bool m_isInitialized;
-    static string m_pyHome;
+    // static string m_pyHome;
 
     MyPython() {}                     // Don't implement
     MyPython(MyPython const &);       // Don't Implement
