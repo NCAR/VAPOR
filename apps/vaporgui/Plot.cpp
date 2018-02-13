@@ -21,8 +21,8 @@
 #include <vapor/DataMgrUtils.h>
 #include "Plot.h"
 
-#define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
-#include <numpy/ndarrayobject.h>
+// #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
+// #include <numpy/ndarrayobject.h>
 
 // Constructor
 Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent)
@@ -409,6 +409,7 @@ void Plot::_spaceTabPlotClicked()
     }
 
     // TODO: pass sequences to python plotting script.
+    _invokePython();
 }
 
 void Plot::_timeTabPlotClicked()
@@ -432,14 +433,40 @@ void Plot::_timeTabPlotClicked()
         }
         sequences.push_back(seq);
     }
+}
 
-    QTemporaryFile qtfile;
-    qtfile.setAutoRemove(true);
-    QString qtfilename;
-    if (qtfile.open()) {
-        qtfilename = qtfile.fileName();
-        std::cerr << "tmp file: " << qtfilename.toStdString() << std::endl;
+void Plot::_invokePython()
+{
+    /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
+    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+    Py_Initialize();
+    assert(Py_IsInitialized());
+    PyRun_SimpleString("import sys");
+    pName = PyString_FromString("plottest");
+    pModule = PyImport_Import(pName);
+    Py_DECREF(pName);
+
+    if (pModule != NULL) {
+        pFunc = PyObject_GetAttrString(pModule, "plotSine");
+        if (pFunc && PyCallable_Check(pFunc)) {
+            pArgs = PyTuple_New(1);
+            pValue = PyString_FromString("New Title");
+            PyTuple_SetItem(pArgs, 0, pValue);
+
+            pValue = PyObject_CallObject(pFunc, pArgs);
+            printf("Result of call: %ld\n", PyInt_AsLong(pValue));
+            Py_DECREF(pValue);
+        } else
+            std::cerr << "pFunc failed" << std::endl;
+
+        Py_XDECREF(pFunc);
+        Py_DECREF(pModule);
+    } else {
+        std::cerr << "pModule failed:" << std::endl;
+        PyErr_Print();
     }
+
+    Py_Finalize();
 }
 
 // void Plot::_fidelityChanged() {}

@@ -70,6 +70,7 @@ private:
     VAPoR::DataMgr *   _getCurrentDataMgr() const;
 
     void _setWidgetExtents();
+    void _invokePython();
 };
 
 #endif    // PLOT_H
