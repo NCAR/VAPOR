@@ -37,7 +37,6 @@ class PARAMS_API TFInterpolator {
         logarithm,
         exponential,
         diverging,
-        correctiveDiverging
     };
     //Determine the interpolated value at intermediate value 0<=r<=1
     //where the value at left and right endpoint is known
