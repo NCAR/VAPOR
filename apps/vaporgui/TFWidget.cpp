@@ -52,11 +52,8 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
 
 void TFWidget::collapseConstColorWidgets()
 {
-    useConstColorLabel->hide();
-    useConstColorCheckbox->hide();
-    constColorLabel->hide();
-    colorDisplay->hide();
-    colorSelectButton->hide();
+    useConstColorFrame->hide();
+    constColorFrame->hide();
 }
 
 void TFWidget::showConstColorWidgets()
@@ -66,19 +63,12 @@ void TFWidget::showConstColorWidgets()
     constColorLabel->show();
     colorDisplay->show();
     colorSelectButton->show();
+    constColorFrame->show();
 }
 
-void TFWidget::hideWhitespaceFrame()
-{
-    whitespaceFrame->hide();
-    //	whitespaceFrame->resize(0,0);
-}
+void TFWidget::hideWhitespaceFrame() { whitespaceFrame->hide(); }
 
-void TFWidget::showWhitespaceFrame()
-{
-    cout << "Show" << endl;
-    whitespaceFrame->show();
-}
+void TFWidget::showWhitespaceFrame() { whitespaceFrame->show(); }
 
 void TFWidget::Reinit(Flags flags)
 {
@@ -212,25 +202,23 @@ void TFWidget::updateColorInterpolation()
 
     TFInterpolator::type t = tf->getColorInterpType();
     colorInterpCombo->blockSignals(true);
-    //	if (t == TFInterpolator::correctiveDiverging) {
-    //		cout << "A" << endl;
-    //		colorInterpCombo->setCurrentIndex(0);
-    //	}
-    //	else if (t == TFInterpolator::diverging) {
     if (t == TFInterpolator::diverging) {
-        cout << "B" << endl;
         colorInterpCombo->setCurrentIndex(0);
         showWhitespaceFrame();
     } else if (t == TFInterpolator::discrete) {
-        cout << "C" << endl;
         colorInterpCombo->setCurrentIndex(1);
         hideWhitespaceFrame();
     } else {
-        cout << "D" << endl;
         colorInterpCombo->setCurrentIndex(2);
         hideWhitespaceFrame();
     }
     colorInterpCombo->blockSignals(false);
+
+    int useWhitespace = tf->getUseWhitespace();
+    if (useWhitespace)
+        whitespaceCheckbox->setCheckState(Qt::Checked);
+    else
+        whitespaceCheckbox->setCheckState(Qt::Unchecked);
 }
 
 void TFWidget::updateAutoUpdateHistoCheckbox()
@@ -326,6 +314,7 @@ void TFWidget::connectWidgets()
     connect(updateHistoButton, SIGNAL(pressed()), this, SLOT(updateHisto()));
     connect(autoUpdateHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateHistoChecked(int)));
     connect(colorInterpCombo, SIGNAL(activated(int)), this, SLOT(colorInterpChanged(int)));
+    connect(whitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
     connect(loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
@@ -427,14 +416,19 @@ void TFWidget::colorInterpChanged(int index)
     MapperFunction *tf = getCurrentMapperFunction();
 
     if (index == 0) {
-        tf->setColorInterpType(TFInterpolator::correctiveDiverging);
-    } else if (index == 1) {
         tf->setColorInterpType(TFInterpolator::diverging);
-    } else if (index == 2) {
+    } else if (index == 1) {
         tf->setColorInterpType(TFInterpolator::discrete);
-    } else if (index == 3) {
+    } else if (index == 2) {
         tf->setColorInterpType(TFInterpolator::linear);
     }
+    updateHisto();
+}
+
+void TFWidget::setUseWhitespace(int state)
+{
+    MapperFunction *tf = getCurrentMapperFunction();
+    tf->setUseWhitespace(state);
     updateHisto();
 }
 

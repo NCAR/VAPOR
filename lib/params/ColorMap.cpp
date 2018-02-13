@@ -29,6 +29,7 @@ using namespace Wasp;
 //----------------------------------------------------------------------------
 const string ColorMap::_controlPointsTag = "ColorMapControlPoints";
 const string ColorMap::_interpTypeTag = "ColorInterpolationType";
+const string ColorMap::_useWhitespaceTag = "UseWhitespace";
 const string ColorMap::_dataBoundsTag = "DataBounds";
 
 //
@@ -124,7 +125,8 @@ void ColorMap::Color::toRGB(float *rgb)
 
 ColorMap::ColorMap(ParamsBase::StateSave *ssave) : ParamsBase(ssave, ColorMap::GetClassType())
 {
-    SetInterpType(TFInterpolator::correctiveDiverging);
+    SetInterpType(TFInterpolator::diverging);
+    SetUseWhitespace(1);
 
     // Create a default color map with 4 control points:
     //
@@ -316,6 +318,36 @@ void ColorMap::move(int index, float delta)
     }
 }
 
+ColorMap::Color ColorMap::getDivergingColor(float ratio, float index) const
+{
+    vector<double> cps = GetControlPoints();
+    float          hsv1[3] = {(float)cps[4 * index], (float)cps[4 * index + 1], (float)cps[4 * index + 2]};
+    float          hsv2[3] = {(float)cps[4 * index + 4], (float)cps[4 * index + 5], (float)cps[4 * index + 6]};
+    float          rgb1[3], rgb2[3];
+    float          rgbOutput[3], hsvOutput[3];
+
+    TFInterpolator::hsv2rgb(hsv1, rgb1);
+    rgb1[0] = rgb1[0] * 255.0;
+    rgb1[1] = rgb1[1] * 255.0;
+    rgb1[2] = rgb1[2] * 255.0;
+
+    TFInterpolator::hsv2rgb(hsv2, rgb2);
+    rgb2[0] = rgb2[0] * 255.0;
+    rgb2[1] = rgb2[1] * 255.0;
+    rgb2[2] = rgb2[2] * 255.0;
+
+    if (GetUseWhitespace())
+        TFInterpolator::correctiveDivergentInterpolation(rgb2, rgb1, rgbOutput, ratio);
+    else
+        TFInterpolator::divergentInterpolation(rgb2, rgb1, rgbOutput, ratio);
+    TFInterpolator::rgb2hsv(rgbOutput, hsvOutput);
+
+    // Normalize HSV output
+    hsvOutput[0] = hsvOutput[0] / 360.0;
+    hsvOutput[2] = (float)hsvOutput[2] / 255.0;
+    return Color(hsvOutput[0], hsvOutput[1], hsvOutput[2]);
+}
+
 //----------------------------------------------------------------------------
 // Interpolate a color at the value (data coordinates)
 //
@@ -342,54 +374,9 @@ ColorMap::Color ColorMap::color(float value) const
     if (ratio > 0.f && ratio < 1.f) {
         TFInterpolator::type itype = GetInterpType();
         if (itype == TFInterpolator::diverging) {
-            float hsv1[3] = {(float)cps[4 * index], (float)cps[4 * index + 1], (float)cps[4 * index + 2]};
-            float hsv2[3] = {(float)cps[4 * index + 4], (float)cps[4 * index + 5], (float)cps[4 * index + 6]};
-            float rgb1[3], rgb2[3];
-            float rgbOutput[3], hsvOutput[3];
-
-            TFInterpolator::hsv2rgb(hsv1, rgb1);
-            rgb1[0] = rgb1[0] * 255.0;
-            rgb1[1] = rgb1[1] * 255.0;
-            rgb1[2] = rgb1[2] * 255.0;
-
-            TFInterpolator::hsv2rgb(hsv2, rgb2);
-            rgb2[0] = rgb2[0] * 255.0;
-            rgb2[1] = rgb2[1] * 255.0;
-            rgb2[2] = rgb2[2] * 255.0;
-
-            TFInterpolator::divergentInterpolation(rgb2, rgb1, rgbOutput, ratio);
-            TFInterpolator::rgb2hsv(rgbOutput, hsvOutput);
-
-            // Normalize HSV output
-            hsvOutput[0] = hsvOutput[0] / 360.0;
-            hsvOutput[2] = (float)hsvOutput[2] / 255.0;
-
-            return Color(hsvOutput[0], hsvOutput[1], hsvOutput[2]);
-        }
-        if (itype == TFInterpolator::correctiveDiverging) {
-            float hsv1[3] = {(float)cps[4 * index], (float)cps[4 * index + 1], (float)cps[4 * index + 2]};
-            float hsv2[3] = {(float)cps[4 * index + 4], (float)cps[4 * index + 5], (float)cps[4 * index + 6]};
-            float rgb1[3], rgb2[3];
-            float rgbOutput[3], hsvOutput[3];
-
-            TFInterpolator::hsv2rgb(hsv1, rgb1);
-            rgb1[0] = rgb1[0] * 255.0;
-            rgb1[1] = rgb1[1] * 255.0;
-            rgb1[2] = rgb1[2] * 255.0;
-
-            TFInterpolator::hsv2rgb(hsv2, rgb2);
-            rgb2[0] = rgb2[0] * 255.0;
-            rgb2[1] = rgb2[1] * 255.0;
-            rgb2[2] = rgb2[2] * 255.0;
-
-            TFInterpolator::correctiveDivergentInterpolation(rgb2, rgb1, rgbOutput, ratio);
-            TFInterpolator::rgb2hsv(rgbOutput, hsvOutput);
-
-            // Normalize HSV output
-            hsvOutput[0] = hsvOutput[0] / 360.0;
-            hsvOutput[2] = (float)hsvOutput[2] / 255.0;
-
-            return Color(hsvOutput[0], hsvOutput[1], hsvOutput[2]);
+            ColorMap::Color divergingColor;
+            divergingColor = getDivergingColor(ratio, index);
+            return divergingColor;
         } else if (itype == TFInterpolator::linear) {
             float h = TFInterpolator::interpCirc(itype,
                                                  cps[4 * index],    // hue
@@ -469,6 +456,20 @@ void ColorMap::SetControlPoints(const vector<double> &controlPoints)
 }
 
 void ColorMap::SetInterpType(TFInterpolator::type t) { SetValueLong(_interpTypeTag, "Set Color Interpolation", (long)t); }
+
+void ColorMap::SetUseWhitespace(int state)
+{
+    SetValueDouble(_useWhitespaceTag,
+                   "Set the use of whitespace for "
+                   "diverging colormaps",
+                   (double)state);
+}
+
+int ColorMap::GetUseWhitespace() const
+{
+    double x = GetValueDouble(_useWhitespaceTag, 1.f);
+    return (int)x;
+}
 
 void ColorMap::SetDataBounds(const vector<double> &bounds)
 {

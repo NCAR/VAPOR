@@ -69,6 +69,7 @@ private slots:
     void opacitySliderChanged(int value);
     void setSingleColor();
     void setUsingSingleColor(int checkState);
+    void setUseWhitespace(int state);
 
 private:
     void                   collapseConstColorWidgets();

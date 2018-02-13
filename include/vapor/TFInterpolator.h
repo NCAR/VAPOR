@@ -31,7 +31,13 @@ public:
     ~TFInterpolator();
 
     // Default is linear
-    enum type { linear, discrete, logarithm, exponential, diverging, correctiveDiverging };
+    enum type {
+        linear,
+        discrete,
+        logarithm,
+        exponential,
+        diverging,
+    };
     // Determine the interpolated value at intermediate value 0<=r<=1
     // where the value at left and right endpoint is known
     // This method is just a stand-in until we get more sophistication
