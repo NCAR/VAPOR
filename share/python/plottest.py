@@ -1,7 +1,7 @@
-def plottest( title = "About as simple as it gets, folks" ):
-    import matplotlib.pyplot as plt
-    import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
 
+def plottest( title = "About as simple as it gets, folks" ):
     # Data for plotting
     t = np.arange(0.0, 2.0, 0.01)
     s = 1 + np.sin(2 * np.pi * t)
