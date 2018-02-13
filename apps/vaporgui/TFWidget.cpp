@@ -240,6 +240,7 @@ void TFWidget::updateSliders() {
 	//
 	float range[2], values[2];
 	getRange(range, values);
+
 	_rangeCombo->Update(range[0], range[1], values[0], values[1]);
 	opacitySlider->setValue(getOpacity() * 100);
 
@@ -367,8 +368,12 @@ void TFWidget::updateHisto() {
 		bool force = true;
 		mappingFrame->RefreshHistogram(force);
 		updateMappingFrame();
+		updateHistoButton->setEnabled(false);
 	}
-	else mappingFrame->fitToView();
+	else {
+		mappingFrame->fitToView();
+		updateHistoButton->setEnabled(true);
+	}
 }
 
 void TFWidget::autoUpdateHistoChecked(int state) {
