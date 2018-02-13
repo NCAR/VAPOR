@@ -24,7 +24,7 @@ using namespace Wasp;
 
 MyPython *MyPython::m_instance = NULL;
 bool MyPython::m_isInitialized = false;
-string MyPython::m_pyHome;
+//string MyPython::m_pyHome;
 
 MyPython *MyPython::Instance() {
 	if (! m_instance) {
@@ -36,6 +36,7 @@ MyPython *MyPython::Instance() {
 void MyPython::Initialize() {
 	if (m_isInitialized) return;
 
+	/*
 	m_pyHome.clear();
 
 	char *s = getenv("VAPOR_PYTHONHOME");
@@ -58,7 +59,6 @@ void MyPython::Initialize() {
 #endif
 	}
 
-	/*
 	if (! m_pyHome.empty()) {
 		struct STAT64 statbuf;
 		if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
@@ -78,6 +78,12 @@ void MyPython::Initialize() {
 	*/
 
 	Py_Initialize();
+
+    std::vector<std::string> dummy;
+    std::string path = Wasp::GetAppPath("VAPOR","share", dummy);
+    path = "sys.path.append('" + path + "/python')\n";
+    PyRun_SimpleString("import sys\n");
+    PyRun_SimpleString( path.c_str() );
 
 	m_isInitialized = true;
 }
