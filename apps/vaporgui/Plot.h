@@ -60,6 +60,10 @@ private:
     VAPoR::DataStatus *_dataStatus;
     VAPoR::ParamsMgr * _paramsMgr;
     int                _spaceModeNumOfSamples;
+    QDialog *          _plotDialog;
+    QLabel *           _plotPathLabel;
+    QLabel *           _plotImageLabel;
+    QVBoxLayout *      _plotLayout;
 
     /// Access functions to other pointers
     VAPoR::PlotParams *_getCurrentPlotParams() const;

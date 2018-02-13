@@ -13,6 +13,9 @@
 //  Date:       January 2018
 //
 
+#include <Python.h>
+
+#include <QTemporaryFile>
 #include "GUIStateParams.h"
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgrUtils.h>
@@ -75,6 +78,15 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     connect(spaceTabP2, SIGNAL(pointUpdated()), this, SLOT(_spaceModeP2Changed()));
     connect(spaceTabPlotButton, SIGNAL(clicked()), this, SLOT(_spaceTabPlotClicked()));
     connect(timeTabPlotButton, SIGNAL(clicked()), this, SLOT(_timeTabPlotClicked()));
+
+    // Create widgets for the plot window
+    _plotDialog = new QDialog(this);
+    _plotPathLabel = new QLabel(this);
+    _plotImageLabel = new QLabel(this);
+    _plotLayout = new QVBoxLayout();
+    _plotDialog->setLayout(_plotLayout);
+    _plotLayout->addWidget(_plotPathLabel);
+    _plotLayout->addWidget(_plotImageLabel);
 
     // Put the current window on top
     show();
@@ -348,7 +360,7 @@ void Plot::_spaceTabPlotClicked()
 {
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
-    assert(!plotParams->GetSpaceTimeMode());
+    assert(plotParams->GetSpaceTimeMode());
 
     int                      refinementLevel = plotParams->GetRefinementLevel();
     int                      compressLevel = plotParams->GetCompressionLevel();
@@ -363,7 +375,7 @@ void Plot::_spaceTabPlotClicked()
     std::vector<std::vector<float>> sequences;
     for (int v = 0; v < enabledVars.size(); v++) {
         std::vector<float> seq(_spaceModeNumOfSamples, 0.0);
-        VAPoR::Grid *      grid = dataMgr->GetVariable(currentTs, enabledVars[v], refinementLevel, compressLevel);
+        VAPoR::Grid *      grid = dataMgr->GetVariable(currentTS, enabledVars[v], refinementLevel, compressLevel);
         for (int i = 0; i < _spaceModeNumOfSamples; i++) {
             std::vector<double> sample;
             if (i == 0)
@@ -377,6 +389,25 @@ void Plot::_spaceTabPlotClicked()
         }
         sequences.push_back(seq);
     }
+
+    QTemporaryFile file;
+    if (file.open()) {
+        QString filename = file.fileName() + QString::fromAscii(".png");
+
+        QString command = QString::fromAscii("cp /home/shaomeng/plottest.png ");
+        command = command + filename;
+        system(command.toAscii());
+
+        QImage plot(filename);
+        _plotPathLabel->setText(QString::fromAscii("This plot is located on disk:  ") + filename);
+        _plotImageLabel->setPixmap(QPixmap::fromImage(plot));
+        _plotDialog->show();
+        _plotDialog->raise();
+        _plotDialog->activateWindow();
+
+        file.close();
+    }
+
     // TODO: pass sequences to python plotting script.
 }
 
@@ -400,6 +431,14 @@ void Plot::_timeTabPlotClicked()
             seq.push_back(grid->GetValue(singlePt));
         }
         sequences.push_back(seq);
+    }
+
+    QTemporaryFile qtfile;
+    qtfile.setAutoRemove(true);
+    QString qtfilename;
+    if (qtfile.open()) {
+        qtfilename = qtfile.fileName();
+        std::cerr << "tmp file: " << qtfilename.toStdString() << std::endl;
     }
 }
 
