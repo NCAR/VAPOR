@@ -14,6 +14,7 @@
 //
 
 #include <Python.h>
+#include <vapor/MyPython.h>
 
 #include <QTemporaryFile>
 #include "GUIStateParams.h"
@@ -439,9 +440,27 @@ void Plot::_invokePython()
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
-    Py_Initialize();
+    // Py_Initialize();
+    Wasp::MyPython::Instance()->Initialize();
     assert(Py_IsInitialized());
-    PyRun_SimpleString("import sys");
+    PyRun_SimpleString("import sys\n");
+
+    // std::string stdErr = "import sys\n"
+    //                        "class CatchErr:\n"
+    //                        "   def __init__(self):\n"
+    //                        "       self.value = 'Plot: '\n"
+    //                        "   def write(self, txt):\n"
+    //                        "       self.value += txt\n"
+    //                        "catchErr = CatchErr()\n"
+    //                        "sys.stderr = catchErr\n";
+    // PyRun_SimpleString(stdErr.c_str());
+    // PyObject *pMain = PyImport_AddModule("__main__");
+    // if( pMain == NULL )
+    //    PyErr_Print();
+    // pModule = PyModule_New("plotModule");
+    // if( pModule == NULL )
+    //    PyErr_Print();
+
     pName = PyString_FromString("plottest");
     pModule = PyImport_Import(pName);
     Py_DECREF(pName);
@@ -466,7 +485,7 @@ void Plot::_invokePython()
         PyErr_Print();
     }
 
-    Py_Finalize();
+    // Py_Finalize();
 }
 
 // void Plot::_fidelityChanged() {}
