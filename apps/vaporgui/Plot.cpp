@@ -440,30 +440,13 @@ void Plot::_invokePython()
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
-    // Py_Initialize();
     Wasp::MyPython::Instance()->Initialize();
     assert(Py_IsInitialized());
-    PyRun_SimpleString("import sys\n");
 
-    // std::string stdErr = "import sys\n"
-    //                        "class CatchErr:\n"
-    //                        "   def __init__(self):\n"
-    //                        "       self.value = 'Plot: '\n"
-    //                        "   def write(self, txt):\n"
-    //                        "       self.value += txt\n"
-    //                        "catchErr = CatchErr()\n"
-    //                        "sys.stderr = catchErr\n";
-    // PyRun_SimpleString(stdErr.c_str());
-    // PyObject *pMain = PyImport_AddModule("__main__");
-    // if( pMain == NULL )
-    //    PyErr_Print();
-    // pModule = PyModule_New("plotModule");
-    // if( pModule == NULL )
-    //    PyErr_Print();
+    PyRun_SimpleString("print (sys.path)\n");
 
     pName = PyString_FromString("plottest");
     pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
 
     if (pModule != NULL) {
         pFunc = PyObject_GetAttrString(pModule, "plotSine");
@@ -473,19 +456,27 @@ void Plot::_invokePython()
             PyTuple_SetItem(pArgs, 0, pValue);
 
             pValue = PyObject_CallObject(pFunc, pArgs);
-            printf("Result of call: %ld\n", PyInt_AsLong(pValue));
-            Py_DECREF(pValue);
-        } else
-            std::cerr << "pFunc failed" << std::endl;
+            if (pValue != NULL) {
+                printf("Result of call: %ld\n", PyInt_AsLong(pValue));
+            } else {
+                std::cerr << "pFunc failed to execute" << std::endl;
+                PyErr_Print();
+            }
+        } else {
+            std::cerr << "pFunc NULL" << std::endl;
+            PyErr_Print();
+        }
 
-        Py_XDECREF(pFunc);
-        Py_DECREF(pModule);
     } else {
-        std::cerr << "pModule failed:" << std::endl;
+        std::cerr << "pModule NULL:" << std::endl;
         PyErr_Print();
     }
 
-    // Py_Finalize();
+    if (pName) Py_DECREF(pName);
+    if (pArgs) Py_DECREF(pArgs);
+    if (pValue) Py_DECREF(pValue);
+    if (pFunc) Py_XDECREF(pFunc);
+    if (pModule) Py_DECREF(pModule);
 }
 
 // void Plot::_fidelityChanged() {}
