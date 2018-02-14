@@ -76,12 +76,17 @@ void MyPython::Initialize()
     }
     */
 
+    // Prevent python from attempting to write a .pyc file on disk.
+    //
+    putenv("PYTHONDONTWRITEBYTECODE=1");
     Py_Initialize();
+
+    PyRun_SimpleString("import sys\n");
+    PyRun_SimpleString("import os\n");
 
     std::vector<std::string> dummy;
     std::string              path = Wasp::GetAppPath("VAPOR", "share", dummy);
     path = "sys.path.append('" + path + "/python')\n";
-    PyRun_SimpleString("import sys\n");
     PyRun_SimpleString(path.c_str());
 
     m_isInitialized = true;
