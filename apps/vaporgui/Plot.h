@@ -61,7 +61,8 @@ private:
     VAPoR::ParamsMgr * _paramsMgr;
     int                _spaceModeNumOfSamples;
     QDialog *          _plotDialog;
-    QLabel *           _plotPathLabel;
+    QLabel *           _plotLabel;
+    QLineEdit *        _plotPathEdit;
     QLabel *           _plotImageLabel;
     QVBoxLayout *      _plotLayout;
 
@@ -70,7 +71,7 @@ private:
     VAPoR::DataMgr *   _getCurrentDataMgr() const;
 
     void _setWidgetExtents();
-    void _invokePython();
+    void _invokePython(QString &, std::vector<std::string> &, std::vector<std::vector<float>> &);
 };
 
 #endif    // PLOT_H

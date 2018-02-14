@@ -16,6 +16,7 @@
 #include <Python.h>
 #include <vapor/MyPython.h>
 
+#include <QLineEdit>
 #include <QTemporaryFile>
 #include "GUIStateParams.h"
 #include <vapor/GetAppPath.h>
@@ -82,11 +83,16 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
 
     // Create widgets for the plot window
     _plotDialog = new QDialog(this);
-    _plotPathLabel = new QLabel(this);
+    _plotLabel = new QLabel(this);
+    _plotLabel->setText(QString::fromAscii("  Plot is on disk:  "));
+    _plotPathEdit = new QLineEdit(this);
+    _plotPathEdit->setReadOnly(true);
+    _plotPathEdit->setTextMargins(6, 0, 6, 0);
     _plotImageLabel = new QLabel(this);
     _plotLayout = new QVBoxLayout();
     _plotDialog->setLayout(_plotLayout);
-    _plotLayout->addWidget(_plotPathLabel);
+    _plotLayout->addWidget(_plotLabel);
+    _plotLayout->addWidget(_plotPathEdit);
     _plotLayout->addWidget(_plotImageLabel);
 
     // Put the current window on top
@@ -395,22 +401,24 @@ void Plot::_spaceTabPlotClicked()
     if (file.open()) {
         QString filename = file.fileName() + QString::fromAscii(".png");
 
-        QString command = QString::fromAscii("cp /home/shaomeng/plottest.png ");
-        command = command + filename;
-        system(command.toAscii());
+        // QString command = QString::fromAscii("cp /home/shaomeng/plottest.png ");
+        // QString command = QString::fromAscii("cp /Users/shaomeng/vq.png ");
+        // command         = command + filename;
+        // system( command.toAscii() );
+
+        _invokePython(filename, enabledVars, sequences);
 
         QImage plot(filename);
-        _plotPathLabel->setText(QString::fromAscii("This plot is located on disk:  ") + filename);
+        _plotPathEdit->setText(filename);
         _plotImageLabel->setPixmap(QPixmap::fromImage(plot));
         _plotDialog->show();
         _plotDialog->raise();
         _plotDialog->activateWindow();
 
         file.close();
+    } else {
+        std::cerr << "QT temporary file not able to open" << std::endl;
     }
-
-    // TODO: pass sequences to python plotting script.
-    _invokePython();
 }
 
 void Plot::_timeTabPlotClicked()
@@ -436,47 +444,61 @@ void Plot::_timeTabPlotClicked()
     }
 }
 
-void Plot::_invokePython()
+void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars, std::vector<std::vector<float>> &sequences)
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
     Wasp::MyPython::Instance()->Initialize();
     assert(Py_IsInitialized());
 
+    PyRun_SimpleString("print(os.environ['PYTHONDONTWRITEBYTECODE'])\n");
     PyRun_SimpleString("print (sys.path)\n");
 
     pName = PyString_FromString("plottest");
     pModule = PyImport_Import(pName);
 
-    if (pModule != NULL) {
-        pFunc = PyObject_GetAttrString(pModule, "plotSine");
-        if (pFunc && PyCallable_Check(pFunc)) {
-            pArgs = PyTuple_New(1);
-            pValue = PyString_FromString("New Title");
-            PyTuple_SetItem(pArgs, 0, pValue);
+    if (pModule == NULL) {
+        std::cerr << "pModule NULL!!" << std::endl;
+        PyErr_Print();
+        return;
+    }
+    pFunc = PyObject_GetAttrString(pModule, "plotSine");
+    if (pFunc && PyCallable_Check(pFunc)) {
+        pArgs = PyTuple_New(2);
 
-            pValue = PyObject_CallObject(pFunc, pArgs);
-            if (pValue != NULL) {
-                printf("Result of call: %ld\n", PyInt_AsLong(pValue));
-            } else {
-                std::cerr << "pFunc failed to execute" << std::endl;
-                PyErr_Print();
-            }
+        // Set the 1st argument
+        pValue = PyString_FromString(outFile.toAscii());
+        PyTuple_SetItem(pArgs, 0, pValue);    // pValue is stolen!
+
+        // Set the 2nd argument
+        PyObject *pListOfStrings = PyList_New(enabledVars.size());
+        assert(pListOfStrings);
+        for (int i = 0; i < enabledVars.size(); i++) {
+            pValue = PyString_FromString(enabledVars[i].c_str());
+            int rt = PyList_SetItem(pListOfStrings, i, pValue);    // pValue is stolen!
+            assert(rt == 0);
+        }
+        PyTuple_SetItem(pArgs, 1, pListOfStrings);    // pListOfStrings is stolen!
+
+        pValue = PyObject_CallObject(pFunc, pArgs);
+        if (pValue != NULL) {
+            printf("Result of call: %ld\n", PyInt_AsLong(pValue));
         } else {
-            std::cerr << "pFunc NULL" << std::endl;
+            std::cerr << "pFunc failed to execute" << std::endl;
             PyErr_Print();
         }
 
+        Py_XDECREF(pListOfStrings);
     } else {
-        std::cerr << "pModule NULL:" << std::endl;
+        std::cerr << "pFunc NULL" << std::endl;
         PyErr_Print();
     }
 
-    if (pName) Py_DECREF(pName);
-    if (pArgs) Py_DECREF(pArgs);
-    if (pValue) Py_DECREF(pValue);
-    if (pFunc) Py_XDECREF(pFunc);
-    if (pModule) Py_DECREF(pModule);
+    Py_XDECREF(pName);
+    Py_XDECREF(pArgs);
+    Py_XDECREF(pValue);
+    Py_XDECREF(pFunc);
+    Py_XDECREF(pModule);
 }
 
 // void Plot::_fidelityChanged() {}
