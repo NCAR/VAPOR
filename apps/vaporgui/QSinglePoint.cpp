@@ -73,3 +73,13 @@ void QSinglePoint::SetDecimals(int dec)
     _ui->zSliderEdit->SetDecimals(dec);
     _ui->tSliderEdit->SetDecimals(dec);
 }
+
+void QSinglePoint::SetValue(const std::vector<double> &point)
+{
+    assert(point.size() == _dimensionality);
+
+    _ui->xSliderEdit->SetValue(point[0]);
+    _ui->ySliderEdit->SetValue(point[1]);
+    if (_dimensionality >= 3) _ui->zSliderEdit->SetValue(point[2]);
+    if (_dimensionality >= 4) _ui->tSliderEdit->SetValue(point[3]);
+}

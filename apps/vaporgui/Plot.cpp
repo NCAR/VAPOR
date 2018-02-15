@@ -354,6 +354,9 @@ void Plot::_setWidgetExtents()
     timeTabSinglePoint->SetExtents(minFullExtents, maxFullExtents);
     spaceTabP1->SetExtents(minFullExtents, maxFullExtents);
     spaceTabP2->SetExtents(minFullExtents, maxFullExtents);
+    spaceTabP1->SetValue(minFullExtents);
+    spaceTabP2->SetValue(maxFullExtents);
+    timeTabSinglePoint->SetValue(minFullExtents);
 
     // Set temporal extents
     int numOfTimeSteps = dataMgr->GetNumTimeSteps();
@@ -361,6 +364,7 @@ void Plot::_setWidgetExtents()
     timeTabTimeRange->SetDecimals(0);
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1));
     spaceTabTimeSelector->SetDecimals(0);
+    spaceTabTimeSelector->SetValue(0.0);
 }
 
 void Plot::_spaceTabPlotClicked()
