@@ -462,15 +462,15 @@ void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars
         PyErr_Print();
         return;
     }
-    pFunc = PyObject_GetAttrString(pModule, "plotSine");
+    pFunc = PyObject_GetAttrString(pModule, "plotSequence");
     if (pFunc && PyCallable_Check(pFunc)) {
         pArgs = PyTuple_New(2);
 
-        // Set the 1st argument
+        // Set the 1st argument: output file name
         pValue = PyString_FromString(outFile.toAscii());
         PyTuple_SetItem(pArgs, 0, pValue);    // pValue is stolen!
 
-        // Set the 2nd argument
+        // Set the 2nd argument: variable names
         PyObject *pListOfStrings = PyList_New(enabledVars.size());
         assert(pListOfStrings);
         for (int i = 0; i < enabledVars.size(); i++) {
@@ -479,6 +479,24 @@ void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars
             assert(rt == 0);
         }
         PyTuple_SetItem(pArgs, 1, pListOfStrings);    // pListOfStrings is stolen!
+
+        // Set the 3rd argument: sequence values (Y axis)
+        PyObject *pListOfLists = PyList_New(sequences.size());
+        assert(pListOfLists);
+        for (int i = 0; i < sequences.size(); i++)    // for each sequence
+        {
+            PyObject *pListOfFloats = PyList_New(sequences[i].size());
+            assert(pListOfFloats);
+            for (int j = 0; j < sequences[i].size(); j++) {
+                int rt = PyList_SetItem(pListOfFloats, j, PyFloat_FromDouble(sequences[i][j]));
+                assert(rt == 0);
+            }
+            PyList_SetItem(pListOfLists, i, pListOfFloats);
+            Py_XDECREF(pListOfFloats);
+        }
+        PyTuple_SetItem(pArgs, 2, pListOfLists);
+
+        // Set the 4th argument: X axis values
 
         pValue = PyObject_CallObject(pFunc, pArgs);
         if (pValue != NULL) {
@@ -489,6 +507,7 @@ void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars
         }
 
         Py_XDECREF(pListOfStrings);
+        Py_XDECREF(pListOfLists);
     } else {
         std::cerr << "pFunc NULL" << std::endl;
         PyErr_Print();
