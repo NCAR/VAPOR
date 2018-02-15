@@ -1,6 +1,5 @@
 # outFile is a string
 # varNames is a list of strings
-
 def plotSine( outFile, varNames ):
     import matplotlib
     matplotlib.use('AGG')
@@ -24,13 +23,45 @@ def plotSine( outFile, varNames ):
     ax.grid()
 
     fig.savefig( outFile )
-    # plt.show()
+    plt.show()
 
     return 0
 
 
+# outFile   : string
+# varNames  : list of strings
+# sequences : list of list of floats. Has the Y values of the plot
+# xValues   : list of floats.         has the X values of the plot
+def plotSequences( outFile, varNames, sequences, xValues ):
+    import matplotlib
+    matplotlib.use('AGG')
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for i in range(len(varNames)):
+        ax.plot( xValues, sequences[i], label=varNames[i] )
+
+    ax.set(xlabel='Samples', ylabel='Values', title="Vapor Plot Utility")
+    ax.set_xticks( xValues )
+    ax.legend()
+
+    fig.savefig( outFile )
+
+    return 0
+
 if __name__ == "__main__":
     outFile = "/tmp/a.png"
-    varNames = []
-    varNames.append( "variable 1" );
-    plotSine( outFile, varNames )
+    varNames = ["var1", "var2"]
+    xValues  = (0, 1, 2, 3, 4)
+    sequences = []
+    seq = []
+    for i in range(5):
+        seq.append( i+5 )
+    sequences.append( seq )
+    seq = []
+    for i in range(5):
+        seq.append( 10-i )
+    sequences.append( seq )
+        
+ #   plotSine( outFile, varNames )
+    plotSequences( outFile, varNames, sequences, xValues )
