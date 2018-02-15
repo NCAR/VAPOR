@@ -42,7 +42,7 @@ def plotSequences( outFile, varNames, sequences, xValues ):
         ax.plot( xValues, sequences[i], label=varNames[i] )
 
     ax.set(xlabel='Samples', ylabel='Values', title="Vapor Plot Utility")
-    ax.set_xticks( xValues )
+    #ax.set_xticks( xValues )
     ax.legend()
 
     fig.savefig( outFile )
