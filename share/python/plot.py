@@ -38,12 +38,13 @@ def plotSequences( outFile, varNames, sequences, xValues ):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    for i in range(len(varNames)):
-        ax.plot( xValues, sequences[i], label=varNames[i] )
+    if len(varNames) > 0:
+        for i in range(len(varNames)):
+            ax.plot( xValues, sequences[i], label=varNames[i] )
+        ax.legend()
 
     ax.set(xlabel='Samples', ylabel='Values', title="Vapor Plot Utility")
     #ax.set_xticks( xValues )
-    ax.legend()
 
     fig.savefig( outFile )
 

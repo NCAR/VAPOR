@@ -21,6 +21,7 @@ class QSinglePoint : public QWidget {
     void GetCurrentPoint(std::vector<double> &);
     void SetMainLabel(const QString &);
     void SetDecimals(int dec); // how many digits after the decimal point
+    void SetValue(const std::vector<double> &);
 
   signals:
     void pointUpdated();
