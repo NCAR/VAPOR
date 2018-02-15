@@ -397,6 +397,13 @@ void Plot::_spaceTabPlotClicked()
         sequences.push_back(seq);
     }
 
+    // Make X axis array. Here in space mode, it's simply from 0 to 1.
+    std::vector<float> xValues;
+    float              stepSize = 1.0f / (float)(_spaceModeNumOfSamples - 1);
+    for (int i = 0; i < _spaceModeNumOfSamples - 1; i++) xValues.push_back(stepSize * (float)i);
+    xValues.push_back(1.0f);
+
+    // Call python routines.
     QTemporaryFile file;
     if (file.open()) {
         QString filename = file.fileName() + QString::fromAscii(".png");
@@ -406,7 +413,7 @@ void Plot::_spaceTabPlotClicked()
         // command         = command + filename;
         // system( command.toAscii() );
 
-        _invokePython(filename, enabledVars, sequences);
+        _invokePython(filename, enabledVars, sequences, xValues);
 
         QImage plot(filename);
         _plotPathEdit->setText(filename);
@@ -444,7 +451,7 @@ void Plot::_timeTabPlotClicked()
     }
 }
 
-void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars, std::vector<std::vector<float>> &sequences)
+void Plot::_invokePython(const QString &outFile, const std::vector<std::string> &enabledVars, const std::vector<std::vector<float>> &sequences, const std::vector<float> &xValues)
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
@@ -454,7 +461,7 @@ void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars
     PyRun_SimpleString("print(os.environ['PYTHONDONTWRITEBYTECODE'])\n");
     PyRun_SimpleString("print (sys.path)\n");
 
-    pName = PyString_FromString("plottest");
+    pName = PyString_FromString("plot");
     pModule = PyImport_Import(pName);
 
     if (pModule == NULL) {
@@ -462,9 +469,9 @@ void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars
         PyErr_Print();
         return;
     }
-    pFunc = PyObject_GetAttrString(pModule, "plotSequence");
+    pFunc = PyObject_GetAttrString(pModule, "plotSequences");
     if (pFunc && PyCallable_Check(pFunc)) {
-        pArgs = PyTuple_New(2);
+        pArgs = PyTuple_New(4);
 
         // Set the 1st argument: output file name
         pValue = PyString_FromString(outFile.toAscii());
@@ -485,18 +492,25 @@ void Plot::_invokePython(QString &outFile, std::vector<std::string> &enabledVars
         assert(pListOfLists);
         for (int i = 0; i < sequences.size(); i++)    // for each sequence
         {
-            PyObject *pListOfFloats = PyList_New(sequences[i].size());
-            assert(pListOfFloats);
+            PyObject *pList = PyList_New(sequences[i].size());
+            assert(pList);
             for (int j = 0; j < sequences[i].size(); j++) {
-                int rt = PyList_SetItem(pListOfFloats, j, PyFloat_FromDouble(sequences[i][j]));
+                int rt = PyList_SetItem(pList, j, PyFloat_FromDouble(sequences[i][j]));
                 assert(rt == 0);
             }
-            PyList_SetItem(pListOfLists, i, pListOfFloats);
-            Py_XDECREF(pListOfFloats);
+            PyList_SetItem(pListOfLists, i, pList);
+            Py_XDECREF(pList);
         }
         PyTuple_SetItem(pArgs, 2, pListOfLists);
 
         // Set the 4th argument: X axis values
+        PyObject *pListOfFloats = PyList_New(xValues.size());
+        assert(pListOfFloats);
+        for (int i = 0; i < xValues.size(); i++) {
+            int rt = PyList_SetItem(pListOfFloats, i, PyFloat_FromDouble(xValues[i]));
+            assert(rt == 0);
+        }
+        PyTuple_SetItem(pArgs, 3, pListOfFloats);
 
         pValue = PyObject_CallObject(pFunc, pArgs);
         if (pValue != NULL) {
