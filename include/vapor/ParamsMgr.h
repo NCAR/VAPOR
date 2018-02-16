@@ -32,7 +32,7 @@
 #include <vapor/RenderParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
-#include <vapor/VizFeatureParams.h>
+#include <vapor/AnnotationsParams.h>
 
 namespace VAPoR {
 
@@ -327,15 +327,15 @@ public:
     //
     RegionParams *GetRegionParams(string winName) const { return ((RegionParams *)_otherParams->GetParams(RegionParams::GetClassType())); };
 
-    //! Obtain the VizFeatureParams that are applicable in a particular Visualizer
+    //! Obtain the AnnotationsParams that are applicable in a particular Visualizer
     //! window.
     //!
-    //! Return the VizFeatureParams instance associated with the
+    //! Return the AnnotationsParams instance associated with the
     //! window named by \p winName in the current session state
     //!
-    //! \retval ptr VizFeatureParams instance that is applicable.
+    //! \retval ptr AnnotationsParams instance that is applicable.
     //
-    VizFeatureParams *GetVizFeatureParams(string winName) const { return ((VizFeatureParams *)_otherParams->GetParams(VizFeatureParams::GetClassType())); };
+    AnnotationsParams *GetAnnotationsParams(string winName) const { return ((AnnotationsParams *)_otherParams->GetParams(AnnotationsParams::GetClassType())); };
 
     //! Optain any paramers registered by the application
     //!

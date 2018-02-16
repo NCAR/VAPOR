@@ -27,7 +27,7 @@
 #include <vapor/DataStatus.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/Renderer.h>
-#include <vapor/VizFeatureRenderer.h>
+#include <vapor/AnnotationsRenderer.h>
 
 namespace VAPoR {
 
@@ -58,9 +58,9 @@ public:
     //! \retval RegionParams* current active RegionParams
     RegionParams *getActiveRegionParams() const;
 
-    //! Method that returns the VizFeatureParams that is active in this window.
-    //! \retval VizFeatureParams* current active VizFeatureParams
-    VizFeatureParams *getActiveVizFeatureParams() const;
+    //! Method that returns the AnnotationsParams that is active in this window.
+    //! \retval AnnotationsParams* current active AnnotationsParams
+    AnnotationsParams *getActiveAnnotationsParams() const;
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
     //! \param[in] sm A pointer to a ShaderMgr
@@ -131,9 +131,9 @@ public:
     Renderer *getRenderer(string type, string instance) const;
 
 #ifdef DEAD
-    //! Identify the VizFeatureRenderer associated with this Visualizer
+    //! Identify the AnnotationsRenderer associated with this Visualizer
     //! \return associated RenderParams instance
-    VizFeatureRenderer *getVizFeatureRenderer() { return _vizFeatures; }
+    AnnotationsRenderer *getAnnotationsRenderer() { return _vizFeatures; }
 #endif
 
     //! Insert a renderer in the queue using the default (5) render order
@@ -304,12 +304,12 @@ private:
 
     static void incrementPath(string &s);
 
-    const ParamsMgr *   m_paramsMgr;
-    const DataStatus *  m_dataStatus;
-    string              m_winName;
-    ShaderMgr *         m_shaderMgr;
-    VizFeatureRenderer *m_vizFeatures;
-    bool                m_viewpointDirty;
+    const ParamsMgr *    m_paramsMgr;
+    const DataStatus *   m_dataStatus;
+    string               m_winName;
+    ShaderMgr *          m_shaderMgr;
+    AnnotationsRenderer *m_vizFeatures;
+    bool                 m_viewpointDirty;
 
     //! There's a separate manipholder for each window
 #ifdef DEAD

@@ -1,4 +1,4 @@
-//-- VizFeatureRenderer.h ----------------------------------------------------------
+//-- AnnotationsRenderer.h ----------------------------------------------------------
 //
 //                   Copyright (C)  2011
 //     University Corporation for Atmospheric Research
@@ -6,19 +6,19 @@
 //
 //----------------------------------------------------------------------------
 //
-//      File:           VizFeatureRenderer.h
+//      File:           AnnotationsRenderer.h
 //
 //      Author:         Alan Norton
 //
 //
-//      Description:  Definition of VizFeatureRenderer class
+//      Description:  Definition of AnnotationsRenderer class
 //
 //
 //
 //----------------------------------------------------------------------------
 
-#ifndef VIZFEATURERENDERER_H
-#define VIZFEATURERENDERER_H
+#ifndef ANNOTATIONSRENDERER_H
+#define ANNOTATIONSRENDERER_H
 
 #include <vapor/Grid.h>
 #include <vapor/Renderer.h>
@@ -30,26 +30,26 @@ namespace VAPoR {
 
 class DataStatus;
 
-//! \class VizFeatureRenderer
-//! \brief Class that draws various geometry as specified by VizFeatureParams
+//! \class AnnotationsRenderer
+//! \brief Class that draws various geometry as specified by AnnotationsParams
 //! \author Alan Norton
 //! \version 3.0
 //! \date July 2015
 
-class RENDER_API VizFeatureRenderer : public MyBase {
+class RENDER_API AnnotationsRenderer : public MyBase {
 private:
     struct billboard;
 
 public:
     //! Constructor, must invoke Renderer constructor
-    VizFeatureRenderer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName);
+    AnnotationsRenderer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName);
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
     //! \param[in] sm A pointer to a ShaderMgr
     void InitializeGL(ShaderMgr *sm);
 
     //! Destructor
-    virtual ~VizFeatureRenderer();
+    virtual ~AnnotationsRenderer();
 
     //! Render the in-scene features
     void InScenePaint(size_t ts);
@@ -147,4 +147,4 @@ private:
 
 };    // namespace VAPoR
 
-#endif    // VIZFEATURERENDERER_H
+#endif    // ANNOTATIONSRENDERER_H

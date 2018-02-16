@@ -43,7 +43,7 @@
 #include "MouseModeParams.h"
 #include "AnimationEventRouter.h"
 #include "regioneventrouter.h"
-#include "VizFeatureEventRouter.h"
+#include "AnnotationsEventRouter.h"
 #include "AppSettingsEventRouter.h"
 #include "StartupEventRouter.h"
 #include "NavigationEventRouter.h"
@@ -128,7 +128,7 @@ void VizWinMgr::createAllDefaultTabs()
     installTab(er->GetType(), 1, er);
 
     parent = TabManager::getInstance()->GetSubTabWidget(2);
-    er = new VizFeatureEventRouter(parent, _controlExec);
+    er = new AnnotationsEventRouter(parent, _controlExec);
     installTab(er->GetType(), 2, er);
 
     parent = TabManager::getInstance()->GetSubTabWidget(2);
