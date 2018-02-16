@@ -37,14 +37,19 @@ def plotSequences( outFile, varNames, sequences, xValues ):
     matplotlib.use('AGG')
     import matplotlib.pyplot as plt
 
+    print ("sequences:")
+    print (sequences)
+    print ("xValues:")
+    print (xValues)
+
     fig, ax = plt.subplots(figsize=(10, 6))
     if len(varNames) > 0:
         for i in range(len(varNames)):
             ax.plot( xValues, sequences[i], label=varNames[i] )
-        ax.legend()
+        ax.legend(loc='best')
 
     ax.set(xlabel='Samples', ylabel='Values', title="Vapor Plot Utility")
-    #ax.set_xticks( xValues )
+    #ax.set_xticks( xValues ) # give it fixed xticks
 
     fig.savefig( outFile )
 
