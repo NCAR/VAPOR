@@ -31,7 +31,6 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
 {
     _dataStatus = status;
     _paramsMgr  = manager;
-    _spaceModeNumOfSamples = 100;
 
     // Get the active dataset name 
     std::string currentDatasetName;
@@ -70,8 +69,14 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
     spaceTabP2->SetMainLabel( QString::fromAscii("Select spatial location of Point 2") );
     spaceTabTimeSelector->SetLabel( QString::fromAscii("T") );
 
+
     // set widget extents
     _setWidgetExtents();
+    numOfSamplesSelector->SetExtents( 50.0, 200.0 );
+    numOfSamplesSelector->SetDecimals( 0 );
+    numOfSamplesSelector->SetValue( 100.0 );
+    numOfSamplesSelector->SetLabel( QString::fromAscii("Num") );
+    plotParams->SetNumOfSamples( 100 );
 
     // Connect signals with slots
     connect( newVarCombo,           SIGNAL(  currentIndexChanged(int) ), 
@@ -96,6 +101,8 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
              this,                  SLOT  ( _spaceTabPlotClicked() ));
     connect( timeTabPlotButton,     SIGNAL(  clicked() ) ,
              this,                  SLOT  ( _timeTabPlotClicked() ));
+    connect( numOfSamplesSelector,  SIGNAL(  valueChanged( double ) ) ,
+             this,                  SLOT  ( _numberOfSamplesChanged( double ) ));
  
 
     // Create widgets for the plot window
@@ -453,6 +460,7 @@ void Plot::_spaceTabPlotClicked()
     std::vector<double>      point1      = plotParams->GetPoint1();
     std::vector<double>      point2      = plotParams->GetPoint2();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+    int numOfSamples                     = plotParams->GetNumOfSamples();
 
     std::vector<double>     p1p2span;
     for( int i = 0; i < point1.size(); i++ )
@@ -461,21 +469,21 @@ void Plot::_spaceTabPlotClicked()
     std::vector< std::vector<float> >    sequences;
     for( int v = 0; v < enabledVars.size(); v++ )
     {
-        std::vector<float> seq(_spaceModeNumOfSamples, 0.0);
+        std::vector<float> seq(numOfSamples, 0.0);
         VAPoR::Grid* grid = dataMgr->GetVariable( currentTS, enabledVars[v],
                             refinementLevel, compressLevel );
         float missingVal  = grid->GetMissingValue();
-        for( int i = 0; i < _spaceModeNumOfSamples; i++ )
+        for( int i = 0; i < numOfSamples; i++ )
         {
             std::vector<double>     sample;
             if( i == 0 )
                 sample = point1;
-            else if( i == _spaceModeNumOfSamples - 1 )
+            else if( i == numOfSamples - 1 )
                 sample = point2;
             else
             {
                 for( int j = 0; j < point1.size(); j++ )
-                    sample.push_back( (double)i / (double)(_spaceModeNumOfSamples-1) * 
+                    sample.push_back( (double)i / (double)(numOfSamples-1) * 
                                        p1p2span[j] + point1[j] );
             }
             float fieldVal = grid->GetValue( sample );
@@ -489,7 +497,7 @@ void Plot::_spaceTabPlotClicked()
     
     // Make X axis array. Here in space mode; it simply indicates every sample
     std::vector<float> xValues;
-    for( int i = 0; i < _spaceModeNumOfSamples; i++ )
+    for( int i = 0; i < numOfSamples; i++ )
         xValues.push_back( (float)i );
 
     // Call python routines.
@@ -652,9 +660,12 @@ void Plot::_invokePython( const QString&                              outFile,
     Py_XDECREF( pValue );
     Py_XDECREF( pFunc );
     Py_XDECREF( pModule );
-
-    // TODO: maybe eliminate the need of passing the X axis
 }
     
 
-//void Plot::_fidelityChanged() {}
+void Plot::_numberOfSamplesChanged( double value ) 
+{
+    long val = (long int)value;
+    PlotParams* plotParams = this->_getCurrentPlotParams();
+    plotParams->SetNumOfSamples( val );
+}

@@ -54,6 +54,9 @@ public:
     bool GetSpaceTimeMode() const;
     void SetSpaceTimeMode( bool );
 
+    long GetNumOfSamples() const;
+    void SetNumOfSamples( long );
+
     static string GetClassType() 
     {
         return("PlotParams");
@@ -75,6 +78,7 @@ private:
 
     static const string _p1Tag;         // point1 in space mode
     static const string _p2Tag;         // point2 in space mode
+    static const string _numSamplesTag; // number of samples in space mode
     static const string _singlePtTag;   // a single point in time mode
 };
 
