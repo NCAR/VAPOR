@@ -122,7 +122,7 @@ void VizWin::getNearFarDist(
     double minProj = std::numeric_limits<double>::max();
 #endif
 
-    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
     AnimationParams *p = _mainForm->GetAnimationParams();
@@ -651,7 +651,7 @@ void VizWin::paintGL() {
     glClearColor(0., 0., 0., 1.);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
     if (!dataStatus->GetDataMgrNames().size())
         return;
 
