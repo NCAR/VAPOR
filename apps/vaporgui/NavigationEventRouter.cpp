@@ -438,7 +438,7 @@ void NavigationEventRouter::updateTransforms() {
 				vector<double> minExts;
 				vector<double> maxExts;
 				vector<double> origin;
-				DataStatus *dataStatus = _controlExec->getDataStatus();
+				DataStatus *dataStatus = _controlExec->GetDataStatus();
 
 				dataStatus->GetActiveExtents(paramsMgr, winNames[i], names[j], ts, minExts, maxExts);
 				origin.resize(minExts.size());
@@ -457,7 +457,7 @@ void NavigationEventRouter::updateTransforms() {
 }
 
 void NavigationEventRouter::updateProjections() {
-	DataStatus* dataStatus = _controlExec->getDataStatus();
+	DataStatus* dataStatus = _controlExec->GetDataStatus();
 	vector<string> dataMgrs = dataStatus->GetDataMgrNames();
 	
 	GUIStateParams *params = GetStateParams();
@@ -856,7 +856,7 @@ void NavigationEventRouter::UseHomeViewpoint() {
 
 void NavigationEventRouter::ViewAll() {
 
-	DataStatus *dataStatus = _controlExec->getDataStatus();
+	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	size_t ts = GetCurrentTimeStep();
 

@@ -390,7 +390,7 @@ void Plot::Initialize(ControlExec* ce, VizWinMgr* vwm) {
 
 	assert(ce != NULL);
 	_controlExec = ce;
-	DataStatus* ds = _controlExec->getDataStatus();
+	DataStatus* ds = _controlExec->GetDataStatus();
 	vector<string> dataMgrs = ds->GetDataMgrNames();
 	_dm = ds->GetDataMgr(dataMgrs[0]);
 	assert(_dm != NULL);
@@ -433,7 +433,7 @@ void Plot::Initialize(ControlExec* ce, VizWinMgr* vwm) {
 }
 
 void Plot::reinitDataMgr() {
-	DataStatus* ds = _controlExec->getDataStatus();
+	DataStatus* ds = _controlExec->GetDataStatus();
 	string dmName = dataMgrCombo->currentText().toStdString();
 	_dm = ds->GetDataMgr(dmName);
 
