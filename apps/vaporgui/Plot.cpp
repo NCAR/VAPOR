@@ -320,10 +320,6 @@ void Plot::_spaceModeP1Changed()
 {
     std::vector<double> pt;
     spaceTabP1->GetCurrentPoint( pt );
-    std::cerr << "P1 value: " << std::endl;
-    for( int i = 0; i < pt.size(); i++ )
-        std::cerr << "  " << pt[i] << ",  ";
-    std::cerr << std::endl;
     assert( pt.size() ==  2 || pt.size() == 3 );
     
     VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
@@ -333,11 +329,7 @@ void Plot::_spaceModeP1Changed()
 void Plot::_spaceModeP2Changed()
 {
     std::vector<double> pt;
-    spaceTabP1->GetCurrentPoint( pt );
-    std::cerr << "P2 value: " << std::endl;
-    for( int i = 0; i < pt.size(); i++ )
-        std::cerr << "  " << pt[i] << ",  ";
-    std::cerr << std::endl;
+    spaceTabP2->GetCurrentPoint( pt );
     assert( pt.size() ==  2 || pt.size() == 3 );
     
     VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
@@ -462,9 +454,6 @@ void Plot::_spaceTabPlotClicked()
     std::vector<double>      point2      = plotParams->GetPoint2();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
-    std::cerr << "point 1: (" << point1[0] << ",  " << point1[1] << ",  " << point1[2] << ")\n";
-    std::cerr << "point 2: (" << point2[0] << ",  " << point2[1] << ",  " << point2[2] << ")\n";
-
     std::vector<double>     p1p2span;
     for( int i = 0; i < point1.size(); i++ )
         p1p2span.push_back( point2[i] - point1[i] );
@@ -492,19 +481,14 @@ void Plot::_spaceTabPlotClicked()
             }
             float fieldVal = grid->GetValue( sample );
             if( fieldVal == missingVal )
-                seq[i] = 0.0;
+                seq[i] = std::nanf("1");
             else
                 seq[i] = fieldVal;
         }
         sequences.push_back( seq );
     }
     
-    //for( int i = 0; i < sequences[0].size(); i++ )
-    //{
-    //    std::cerr << sequences[0][i] << std::endl;
-    //}
-
-    // Make X axis array. Here in space mode, it's simply from 0 to 1.
+    // Make X axis array. Here in space mode; it simply indicates every sample
     std::vector<float> xValues;
     for( int i = 0; i < _spaceModeNumOfSamples; i++ )
         xValues.push_back( (float)i );
@@ -572,9 +556,6 @@ void Plot::_invokePython( const QString&                              outFile,
     Wasp::MyPython::Instance()->Initialize();
     assert( Py_IsInitialized() );
 
-    //PyRun_SimpleString("print(os.environ['PYTHONDONTWRITEBYTECODE'])\n");
-    //PyRun_SimpleString("print (sys.path)\n");
-
     pName   = PyString_FromString( "plot" );
     pModule = PyImport_Import( pName );
 
@@ -631,18 +612,11 @@ void Plot::_invokePython( const QString&                              outFile,
         PyTuple_SetItem( pArgs, 3, pListOfFloats );
 
         pValue  = PyObject_CallObject( pFunc, pArgs );
-        if( pValue != NULL )
-        {
-            printf("Result of call: %ld\n", PyInt_AsLong(pValue));
-        }
-        else
+        if( pValue == NULL )
         {
             std::cerr << "pFunc failed to execute" << std::endl;
             PyErr_Print();
         }
-
-        Py_XDECREF( pListOfStrings );
-        Py_XDECREF( pListOfLists );
     }
     else
     {
@@ -656,6 +630,7 @@ void Plot::_invokePython( const QString&                              outFile,
     Py_XDECREF( pFunc );
     Py_XDECREF( pModule );
 
+    // TODO: maybe eliminate the need of passing the X axis
 }
     
 
