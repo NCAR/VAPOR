@@ -69,8 +69,7 @@ void PlotParams::SetSpaceTimeMode(bool val) { SetValueLong(_spaceTimeTag, "Set S
 std::vector<double> PlotParams::GetSinglePoint() const
 {
     // assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
-    std::vector<double> vec(3, 0.0);
-    return GetValueDoubleVec(_singlePtTag, vec);
+    return GetValueDoubleVec(_singlePtTag);
 }
 
 void PlotParams::SetSinglePoint(const std::vector<double> &point)
@@ -82,8 +81,7 @@ void PlotParams::SetSinglePoint(const std::vector<double> &point)
 std::vector<double> PlotParams::GetPoint1() const
 {
     // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
-    std::vector<double> vec(3, 0.0);
-    return GetValueDoubleVec(_p1Tag, vec);
+    return GetValueDoubleVec(_p1Tag);
 }
 
 void PlotParams::SetPoint1(const std::vector<double> &point)
@@ -95,8 +93,7 @@ void PlotParams::SetPoint1(const std::vector<double> &point)
 std::vector<double> PlotParams::GetPoint2() const
 {
     // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
-    std::vector<double> vec(3, 0.0);
-    return GetValueDoubleVec(_p2Tag, vec);
+    return GetValueDoubleVec(_p2Tag);
 }
 
 void PlotParams::SetPoint2(const std::vector<double> &point)
