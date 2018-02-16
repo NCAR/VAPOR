@@ -465,7 +465,6 @@ void Plot::_spaceTabPlotClicked()
         VAPoR::Grid* grid = dataMgr->GetVariable( currentTS, enabledVars[v],
                             refinementLevel, compressLevel );
         float missingVal  = grid->GetMissingValue();
-        std::cerr << "missing value = " << missingVal << std::endl;
         for( int i = 0; i < _spaceModeNumOfSamples; i++ )
         {
             std::vector<double>     sample;
@@ -507,15 +506,11 @@ void Plot::_spaceTabPlotClicked()
         _plotDialog->show();
         _plotDialog->raise();
         _plotDialog->activateWindow();
-    
 
         file.close();
     } 
     else
-    {
         std::cerr << "QT temporary file not able to open" << std::endl;
-    }
-
 }
 
 void Plot::_timeTabPlotClicked()
@@ -538,11 +533,39 @@ void Plot::_timeTabPlotClicked()
         {
             VAPoR::Grid* grid = dataMgr->GetVariable( t, enabledVars[v], 
                                 refinementLevel, compressLevel ); 
-            seq.push_back( grid->GetValue( singlePt ) );
+            float missingVal  = grid->GetMissingValue();
+            float fieldVal    = grid->GetValue( singlePt );
+            if( fieldVal     != grid->GetMissingValue() )
+                seq.push_back( fieldVal );
+            else
+                seq.push_back( std::nanf("1") );
         }
         sequences.push_back( seq );
     }
 
+    std::vector<float> xValues;
+    for( int i = minMaxTS[0]; i <= minMaxTS[1]; i++ )
+        xValues.push_back( (float)i );
+
+    // Call python routines.
+    QTemporaryFile  file;
+    if( file.open() )
+    {
+        QString filename = file.fileName() + QString::fromAscii(".png");
+
+        _invokePython( filename, enabledVars, sequences, xValues );
+
+        QImage plot( filename );
+        _plotPathEdit->setText( filename );
+        _plotImageLabel->setPixmap( QPixmap::fromImage( plot ) );
+        _plotDialog->show();
+        _plotDialog->raise();
+        _plotDialog->activateWindow();
+
+        file.close();
+    } 
+    else
+        std::cerr << "QT temporary file not able to open" << std::endl;
 }
 
     
