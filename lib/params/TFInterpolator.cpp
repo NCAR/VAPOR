@@ -105,7 +105,9 @@ float *TFInterpolator::genDivergentMap(float rgb1[3], float rgb2[3], int numColo
     return colorMap1;
 }
 
-int TFInterpolator::divergentInterpolation(float rgb1[3], float rgb2[3], float output[3], float interp)
+void TFInterpolator::correctiveDivergentInterpolation(float rgb1[3], float rgb2[3], float output[3], float interp) { divergentInterpolation(rgb1, rgb2, output, interp, true); }
+
+int TFInterpolator::divergentInterpolation(float rgb1[3], float rgb2[3], float output[3], float interp, bool corrective)
 {
     interp = 1 - interp;
     static float msh1[3], msh2[3], mshMid[3];
@@ -123,24 +125,26 @@ int TFInterpolator::divergentInterpolation(float rgb1[3], float rgb2[3], float o
     h2 = msh2[2];
 
     // If pohsv[1] are saturated and distinct, place white in the middle
-    if ((s1 > 0.05) && (s2 > .05) && (fabs(h1 - h2) > (3.1415 / 3.0))) {
-        float Mmid;
-        if ((m1 > m2) && (m1 > 88.f))
-            Mmid = m1;
-        else if ((m2 > m1) && (m2 > 88.f))
-            Mmid = m2;
-        else
-            Mmid = 88.f;
-        if (interp < 0.5) {
-            m2 = Mmid;
-            s2 = 0.0;
-            h2 = 0.0;
-            interp = 2 * interp;
-        } else {
-            m1 = Mmid;
-            s1 = 0.0;
-            h1 = 0.0;
-            interp = 2 * interp - 1;
+    if (corrective) {
+        if ((s1 > 0.05) && (s2 > .05) && (fabs(h1 - h2) > (3.1415 / 3.0))) {
+            float Mmid;
+            if ((m1 > m2) && (m1 > 88.f))
+                Mmid = m1;
+            else if ((m2 > m1) && (m2 > 88.f))
+                Mmid = m2;
+            else
+                Mmid = 88.f;
+            if (interp < 0.5) {
+                m2 = Mmid;
+                s2 = 0.0;
+                h2 = 0.0;
+                interp = 2 * interp;
+            } else {
+                m1 = Mmid;
+                s1 = 0.0;
+                h1 = 0.0;
+                interp = 2 * interp - 1;
+            }
         }
     }
 
