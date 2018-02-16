@@ -107,57 +107,45 @@ VizWinMgr::VizWinMgr(ControlExec *ce)
 // Create the global params and the default renderer params:
 void VizWinMgr::createAllDefaultTabs()
 {
-    QWidget *parent;
+    QWidget *    RenderersTab = TabManager::getInstance()->GetSubTabWidget(0);
+    QWidget *    NavigationTab = TabManager::getInstance()->GetSubTabWidget(1);
+    QWidget *    SettingsTab = TabManager::getInstance()->GetSubTabWidget(2);
+    EventRouter *er;
 
-    // Install built-in tabs
-    //
-    parent = TabManager::getInstance()->GetSubTabWidget(2);
-    EventRouter *er = new StartupEventRouter(parent, _controlExec);
-    installTab(er->GetType(), 2, er);
-
-    parent = TabManager::getInstance()->GetSubTabWidget(1);
-    er = new AnimationEventRouter(parent, _controlExec);
-    installTab(er->GetType(), 1, er);
-
-    parent = TabManager::getInstance()->GetSubTabWidget(1);
-    er = new NavigationEventRouter(parent, this, _controlExec);
-    installTab(er->GetType(), 1, er);
-
-    parent = TabManager::getInstance()->GetSubTabWidget(1);
-    er = new RegionEventRouter(parent, _controlExec);
-    installTab(er->GetType(), 1, er);
-
-    parent = TabManager::getInstance()->GetSubTabWidget(2);
-    er = new AnnotationsEventRouter(parent, _controlExec);
-    installTab(er->GetType(), 2, er);
-
-    parent = TabManager::getInstance()->GetSubTabWidget(2);
-    er = new AppSettingsEventRouter(parent, _controlExec);
-    installTab(er->GetType(), 2, er);
-
-    // Renderer tabs
-    //
-    parent = TabManager::getInstance()->GetSubTabWidget(0);
-    er = new TwoDDataEventRouter(parent, _controlExec);
+    er = new TwoDDataEventRouter(RenderersTab, _controlExec);
     installTab(er->GetType(), 0, er);
 
 #ifndef HELLO_RENDERER
-    parent = TabManager::getInstance()->GetSubTabWidget(0);
-    er = new HelloEventRouter(parent, _controlExec);
+    er = new HelloEventRouter(RenderersTab, _controlExec);
     installTab(er->GetType(), 0, er);
 #endif
 
-    parent = TabManager::getInstance()->GetSubTabWidget(0);
-    er = new BarbEventRouter(parent, this, _controlExec);
+    er = new BarbEventRouter(RenderersTab, this, _controlExec);
     installTab(er->GetType(), 0, er);
 
-    parent = TabManager::getInstance()->GetSubTabWidget(0);
-    er = new ImageEventRouter(parent, _controlExec);
+    er = new ImageEventRouter(RenderersTab, _controlExec);
     installTab(er->GetType(), 0, er);
 
-    parent = TabManager::getInstance()->GetSubTabWidget(0);
-    er = new ContourEventRouter(parent, this, _controlExec);
+    er = new ContourEventRouter(RenderersTab, this, _controlExec);
     installTab(er->GetType(), 0, er);
+
+    er = new AnnotationsEventRouter(NavigationTab, _controlExec);
+    installTab(er->GetType(), 1, er);
+
+    er = new NavigationEventRouter(NavigationTab, this, _controlExec);
+    installTab(er->GetType(), 1, er);
+
+    er = new AnimationEventRouter(NavigationTab, _controlExec);
+    installTab(er->GetType(), 1, er);
+
+    er = new RegionEventRouter(NavigationTab, _controlExec);
+    installTab(er->GetType(), 1, er);
+
+    er = new StartupEventRouter(SettingsTab, _controlExec);
+    installTab(er->GetType(), 2, er);
+
+    er = new AppSettingsEventRouter(SettingsTab, _controlExec);
+    installTab(er->GetType(), 2, er);
 
     // set up widgets in tabs:
     _tabManager->InstallWidgets();
