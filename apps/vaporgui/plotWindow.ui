@@ -127,21 +127,72 @@
           <widget class="QSinglePoint" name="spaceTabP2" native="true"/>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="MinTimeLayout">
-           <property name="spacing">
-            <number>0</number>
+          <widget class="QFrame" name="timeStepSelectorFrame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
            </property>
-           <item>
-            <widget class="QLabel" name="TimeStepLabel">
-             <property name="text">
-              <string>Select one time step:</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <property name="lineWidth">
+            <number>1</number>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <property name="spacing">
+             <number>-1</number>
+            </property>
+            <property name="leftMargin">
+             <number>12</number>
+            </property>
+            <property name="topMargin">
+             <number>12</number>
+            </property>
+            <property name="rightMargin">
+             <number>12</number>
+            </property>
+            <property name="bottomMargin">
+             <number>12</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="timeStepLabel">
+              <property name="text">
+               <string>Select one time step:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSliderEdit" name="spaceTabTimeSelector" native="true"/>
+            </item>
+           </layout>
+          </widget>
          </item>
          <item>
-          <widget class="QSliderEdit" name="spaceTabTimeSelector" native="true"/>
+          <widget class="QFrame" name="numOfSamplesFrame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="numOfSamplesLabel">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text">
+               <string>Select one time step:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSliderEdit" name="widget" native="true"/>
+            </item>
+           </layout>
+          </widget>
          </item>
          <item>
           <widget class="Line" name="line_3">
