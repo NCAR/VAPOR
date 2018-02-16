@@ -23,7 +23,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "ui_vizFeaturesTab.h"
+#include "ui_AnnotationsGUI.h"
 #include "RangeCombos.h"
 #include "VaporTable.h"
 #include <vapor/AxisAnnotation.h>
@@ -34,7 +34,7 @@ namespace VAPoR {
 class ControlExec;
 }
 
-class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public EventRouter {
+class VizFeatureEventRouter : public QWidget, public Ui_AnnotationsGUI, public EventRouter {
     Q_OBJECT
 
 public:

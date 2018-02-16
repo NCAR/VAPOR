@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>vizFeaturesTab</class>
- <widget class="QWidget" name="vizFeaturesTab">
+ <class>AnnotationsGUI</class>
+ <widget class="QWidget" name="AnnotationsGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -39,7 +39,7 @@
     <number>0</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>12</number>
    </property>
    <property name="rightMargin">
     <number>0</number>
@@ -415,7 +415,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="axisTab">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -991,7 +991,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="tabWidget_2">
+    <widget class="QTabWidget" name="arrowsTab">
      <property name="currentIndex">
       <number>0</number>
      </property>
