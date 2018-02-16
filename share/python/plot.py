@@ -37,11 +37,6 @@ def plotSequences( outFile, varNames, sequences, xValues ):
     matplotlib.use('AGG')
     import matplotlib.pyplot as plt
 
-    print ("sequences:")
-    print (sequences)
-    print ("xValues:")
-    print (xValues)
-
     fig, ax = plt.subplots(figsize=(10, 6))
     if len(varNames) > 0:
         for i in range(len(varNames)):
@@ -61,12 +56,13 @@ if __name__ == "__main__":
     xValues  = (0, 1, 2, 3, 4)
     sequences = []
     seq = []
-    for i in range(5):
-        seq.append( i+5 )
+    for i in range(4):
+        seq.append( float(i+5) )
+    seq.append( float('nan') )
     sequences.append( seq )
     seq = []
     for i in range(5):
-        seq.append( 10-i )
+        seq.append( float(10-i) )
     sequences.append( seq )
         
  #   plotSine( outFile, varNames )
