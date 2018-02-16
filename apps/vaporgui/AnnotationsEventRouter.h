@@ -62,7 +62,7 @@ class AnnotationsEventRouter : public QWidget, public Ui_AnnotationsGUI, public 
     // Get static string identifier for this router class
     //
     static string GetClassType() {
-        return ("VizFeature");
+        return ("Annotations");
     }
     string GetType() const { return GetClassType(); }
 
