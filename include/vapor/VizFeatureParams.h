@@ -25,6 +25,7 @@
 
 #include <vapor/common.h>
 #include <vapor/ParamsBase.h>
+#include <vapor/AxisAnnotation.h>
 
 using namespace Wasp;
 
@@ -56,6 +57,10 @@ public:
     //
     VizFeatureParams(ParamsBase::StateSave *ssave, XmlNode *node);
 
+    //! Copy from already existing instance
+    //
+    VizFeatureParams(const VizFeatureParams &rhs);
+
     virtual ~VizFeatureParams(){};
 
     //! Obtain domain frame color
@@ -85,91 +90,19 @@ public:
     //! Set background color
     void SetBackgroundColor(std::vector<double> color);
 
-    //! Enable or disable axis annotation
-    void SetAxisAnnotation(bool val) { SetValueLong(_axisAnnotationEnabledTag, "toggle axis annotation", (long)val); }
+    string GetCurrentAxisDataMgrName() const;
+    void   SetCurrentAxisDataMgrName(string dataMgr);
 
-    //! query axis annotation enabled
-    bool GetAxisAnnotation() const { return (0 != GetValueLong(_axisAnnotationEnabledTag, (long)false)); }
+    AxisAnnotation *GetAxisAnnotation(string dataMgr = "");
 
-    //! Obtain axis color
-    void GetAxisColor(double color[3]) const;
-    void GetAxisColor(std::vector<double> &color) const { _getColor(color, _axisColorTag); }
+    void                SetAxisArrowCoords(std::vector<double> coords);
+    std::vector<double> GetAxisArrowCoords() const;
 
-    //! Set axis color
-    void SetAxisColor(vector<double> color);
+    bool GetShowAxisArrows() const;
+    void SetShowAxisArrows(bool val);
 
-    //! Set number of tics in x,y,z direction
-    void SetNumTics(vector<long> ticnums);
-
-    //! Get number of tics in x,y,z direction
-    vector<long> GetNumTics() const;
-
-    //! Set axis origin
-    void SetAxisOrigin(vector<double> orig);
-
-    //! Get min tic mark in x,y,z axes
-    vector<double> GetAxisOrigin() const;
-
-    //! Set min tic mark in x,y,z axes
-    void SetMinTics(vector<double> ticmins);
-
-    //! Get min tic mark in x,y,z axes
-    vector<double> GetMinTics() const;
-
-    //! Set max tic mark in x,y,z axes
-    void SetMaxTics(vector<double> ticmaxs);
-
-    //! Get max tic mark in x,y,z axes
-    vector<double> GetMaxTics() const;
-
-    //! Set tic size on x,y,z axes
-    void SetTicSize(vector<double> ticsizes);
-
-    //! Get tic size on x,y,z axes
-    vector<double> GetTicSize() const;
-
-    //! Set tic direction on x,y,z axes
-    void SetTicDirs(vector<long> ticdirs);
-
-    //! Get tic direction on x,y,z axes
-    vector<long> GetTicDirs() const;
-
-    //! Get tic width
-    double GetTicWidth() const { return GetValueDouble(_ticWidthTag, 1.0); }
-    //! Set tic width
-    void SetTicWidth(double val)
-    {
-        if (val < 1) val = 1;
-        SetValueDouble(_ticWidthTag, "Set tic width", val);
-    }
-    long GetAxisTextHeight() const { return GetValueLong(_axisTextHeightTag, 10); }
-    void SetAxisTextHeight(long val)
-    {
-        if (val < 1) val = 1;
-        SetValueLong(_axisTextHeightTag, "Set axis text height", val);
-    }
-    long GetAxisDigits() const { return GetValueLong(_axisDigitsTag, 4); }
-    void SetAxisDigits(long val)
-    {
-        if (val < 0) val = 4;
-        SetValueLong(_axisDigitsTag, "Set axis num digits", val);
-    }
-
-    //! Enable or disable axis annotation
-    void SetLatLonAxes(bool val) { SetValueLong(_latLonAxesTag, "toggle axes lat/lon", (long)val); }
-
-    //! query axis annotation enabled
-    bool GetLatLonAxes() const { return (0 != GetValueLong(_latLonAxesTag, (long)false)); }
-
-    //! Set axis arrow position
-    void SetAxisArrowCoords(vector<double> coords);
-
-    //! Get tic size on x,y,z axes
-    vector<double> GetAxisArrowCoords() const;
-
-    bool GetShowAxisArrows() const { return (0 != GetValueLong(_showAxisArrowsTag, (long)false)); }
-
-    void SetShowAxisArrows(bool val) { SetValueLong(_showAxisArrowsTag, "Toggle Axis Arrows", val); }
+    void SetAxisFontSize(int size);
+    int  GetAxisFontSize();
 
     // Get static string identifier for this params class
     //
@@ -180,25 +113,32 @@ private:
     static void changeStretch(vector<double> prevStretch, vector<double> newStretch);
 #endif
 
-    static const string   _domainColorTag;
-    static const string   _domainFrameTag;
-    static const string   _regionFrameTag;
-    static const string   _regionColorTag;
-    static const string   _axisColorTag;
-    static const string   _axisDigitsTag;
-    static const string   _axisTextHeightTag;
-    static const string   _ticWidthTag;
-    static const string   _ticDirsTag;
-    static const string   _ticSizeTag;
-    static const string   _minTicsTag;
-    static const string   _maxTicsTag;
-    static const string   _numTicsTag;
-    static const string   _axisOriginTag;
-    static const string   _backgroundColorTag;
-    static const string   _axisAnnotationEnabledTag;
-    static const string   _latLonAxesTag;
+    ParamsContainer *_axisAnnotations;
+
+    static const string _domainColorTag;
+    static const string _domainFrameTag;
+    static const string _regionFrameTag;
+    static const string _regionColorTag;
+
+    static const string _axisColorTag;
+    static const string _axisDigitsTag;
+    static const string _axisTextHeightTag;
+    static const string _axisFontSizeTag;
+    static const string _ticWidthTag;
+    static const string _ticDirsTag;
+    static const string _ticSizeTag;
+    static const string _minTicsTag;
+    static const string _maxTicsTag;
+    static const string _numTicsTag;
+    static const string _axisOriginTag;
+    static const string _backgroundColorTag;
+    static const string _axisAnnotationEnabledTag;
+    static const string _axisAnnotationsTag;
+    static const string _latLonAxesTag;
+
     static const string   _axisArrowCoordsTag;
     static const string   _showAxisArrowsTag;
+    static const string   _currentAxisDataMgrTag;
     static vector<double> _previousStretch;
 
     void _init();

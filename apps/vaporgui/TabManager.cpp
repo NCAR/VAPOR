@@ -313,7 +313,7 @@ void TabManager::newRenderer(string activeViz, string renderClass, string render
     AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = aParams->GetCurrentTimestep();
 
-    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
 
     RenderParams *rParams = er->GetActiveParams();
     size_t        local_ts = dataStatus->MapGlobalToLocalTimeStep(dataSetName, ts);
