@@ -215,10 +215,13 @@ void Plot::_newVarChanged(int index)
 
     spaceTabP1->SetExtents(min, max);
     spaceTabP2->SetExtents(min, max);
+    timeTabSinglePoint->SetExtents(min, max);
     spaceTabP1->SetValue(min);
     spaceTabP2->SetValue(max);
-    timeTabSinglePoint->SetExtents(min, max);
     timeTabSinglePoint->SetValue(min);
+    plotParams->SetPoint1(min);
+    plotParams->SetPoint2(max);
+    plotParams->SetSinglePoint(min);
 }
 
 void Plot::_removeVarChanged(int index)
@@ -257,6 +260,10 @@ void Plot::_removeVarChanged(int index)
         spaceTabP2->SetValue(max);
         timeTabSinglePoint->SetExtents(min, max);
         timeTabSinglePoint->SetValue(min);
+
+        plotParams->SetPoint1(min);
+        plotParams->SetPoint2(max);
+        plotParams->SetSinglePoint(min);
     }
 }
 
@@ -275,6 +282,9 @@ void Plot::_spaceModeP1Changed()
 {
     std::vector<double> pt;
     spaceTabP1->GetCurrentPoint(pt);
+    std::cerr << "P1 value: " << std::endl;
+    for (int i = 0; i < pt.size(); i++) std::cerr << "  " << pt[i] << ",  ";
+    std::cerr << std::endl;
     assert(pt.size() == 2 || pt.size() == 3);
 
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
@@ -285,6 +295,9 @@ void Plot::_spaceModeP2Changed()
 {
     std::vector<double> pt;
     spaceTabP1->GetCurrentPoint(pt);
+    std::cerr << "P2 value: " << std::endl;
+    for (int i = 0; i < pt.size(); i++) std::cerr << "  " << pt[i] << ",  ";
+    std::cerr << std::endl;
     assert(pt.size() == 2 || pt.size() == 3);
 
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
@@ -379,6 +392,16 @@ void Plot::_setWidgetExtents()
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1));
     spaceTabTimeSelector->SetDecimals(0);
     spaceTabTimeSelector->SetValue(0.0);
+
+    // Update parameters
+    plotParams->SetPoint1(minFullExtents);
+    plotParams->SetPoint2(maxFullExtents);
+    plotParams->SetSinglePoint(minFullExtents);
+    plotParams->SetCurrentTimestep(0.0);
+    std::vector<long int> rangeInt;
+    rangeInt.push_back((long int)0);
+    rangeInt.push_back((long int)(numOfTimeSteps - 1));
+    plotParams->SetMinMaxTS(rangeInt);
 }
 
 void Plot::_spaceTabPlotClicked()
@@ -394,6 +417,9 @@ void Plot::_spaceTabPlotClicked()
     std::vector<double>      point2 = plotParams->GetPoint2();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
+    std::cerr << "point 1: (" << point1[0] << ",  " << point1[1] << ",  " << point1[2] << ")\n";
+    std::cerr << "point 2: (" << point2[0] << ",  " << point2[1] << ",  " << point2[2] << ")\n";
+
     std::vector<double> p1p2span;
     for (int i = 0; i < point1.size(); i++) p1p2span.push_back(point2[i] - point1[i]);
 
@@ -401,6 +427,8 @@ void Plot::_spaceTabPlotClicked()
     for (int v = 0; v < enabledVars.size(); v++) {
         std::vector<float> seq(_spaceModeNumOfSamples, 0.0);
         VAPoR::Grid *      grid = dataMgr->GetVariable(currentTS, enabledVars[v], refinementLevel, compressLevel);
+        float              missingVal = grid->GetMissingValue();
+        std::cerr << "missing value = " << missingVal << std::endl;
         for (int i = 0; i < _spaceModeNumOfSamples; i++) {
             std::vector<double> sample;
             if (i == 0)
@@ -410,26 +438,28 @@ void Plot::_spaceTabPlotClicked()
             else {
                 for (int j = 0; j < point1.size(); j++) sample.push_back((double)i / (double)(_spaceModeNumOfSamples - 1) * p1p2span[j] + point1[j]);
             }
-            seq[i] = grid->GetValue(sample);
+            float fieldVal = grid->GetValue(sample);
+            if (fieldVal == missingVal)
+                seq[i] = 0.0;
+            else
+                seq[i] = fieldVal;
         }
         sequences.push_back(seq);
     }
 
+    // for( int i = 0; i < sequences[0].size(); i++ )
+    //{
+    //    std::cerr << sequences[0][i] << std::endl;
+    //}
+
     // Make X axis array. Here in space mode, it's simply from 0 to 1.
     std::vector<float> xValues;
-    float              stepSize = 1.0f / (float)(_spaceModeNumOfSamples - 1);
-    for (int i = 0; i < _spaceModeNumOfSamples - 1; i++) xValues.push_back(stepSize * (float)i);
-    xValues.push_back(1.0f);
+    for (int i = 0; i < _spaceModeNumOfSamples; i++) xValues.push_back((float)i);
 
     // Call python routines.
     QTemporaryFile file;
     if (file.open()) {
         QString filename = file.fileName() + QString::fromAscii(".png");
-
-        // QString command = QString::fromAscii("cp /home/shaomeng/plottest.png ");
-        // QString command = QString::fromAscii("cp /Users/shaomeng/vq.png ");
-        // command         = command + filename;
-        // system( command.toAscii() );
 
         _invokePython(filename, enabledVars, sequences, xValues);
 
@@ -476,8 +506,8 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
     Wasp::MyPython::Instance()->Initialize();
     assert(Py_IsInitialized());
 
-    PyRun_SimpleString("print(os.environ['PYTHONDONTWRITEBYTECODE'])\n");
-    PyRun_SimpleString("print (sys.path)\n");
+    // PyRun_SimpleString("print(os.environ['PYTHONDONTWRITEBYTECODE'])\n");
+    // PyRun_SimpleString("print (sys.path)\n");
 
     pName = PyString_FromString("plot");
     pModule = PyImport_Import(pName);
@@ -517,7 +547,6 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
                 assert(rt == 0);
             }
             PyList_SetItem(pListOfLists, i, pList);
-            Py_XDECREF(pList);
         }
         PyTuple_SetItem(pArgs, 2, pListOfLists);
 

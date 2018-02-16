@@ -78,7 +78,10 @@ void MyPython::Initialize()
 
     // Prevent python from attempting to write a .pyc file on disk.
     //
-    putenv("PYTHONDONTWRITEBYTECODE=1");
+    const char *env = "PYTHONDONTWRITEBYTECODE=1";
+    char        env2[256];
+    strcpy(env2, env);    // All this trouble is to eliminate a compiler warning
+    putenv(env2);
     Py_Initialize();
 
     PyRun_SimpleString("import sys\n");
