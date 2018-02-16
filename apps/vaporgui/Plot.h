@@ -50,7 +50,7 @@ private slots:
     void _spaceModeTimeChanged(double);
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
-    // void _fidelityChanged();
+    void _numberOfSamplesChanged(double);
 
     /// Plot when the plot button is clicked
     void _spaceTabPlotClicked();
@@ -59,7 +59,6 @@ private slots:
 private:
     VAPoR::DataStatus *_dataStatus;
     VAPoR::ParamsMgr * _paramsMgr;
-    int                _spaceModeNumOfSamples;
     QDialog *          _plotDialog;
     QLabel *           _plotLabel;
     QLineEdit *        _plotPathEdit;

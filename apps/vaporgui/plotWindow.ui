@@ -132,7 +132,7 @@
             <enum>QFrame::StyledPanel</enum>
            </property>
            <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
+            <enum>QFrame::Plain</enum>
            </property>
            <property name="lineWidth">
             <number>1</number>
@@ -184,21 +184,14 @@
                <enum>QFrame::Plain</enum>
               </property>
               <property name="text">
-               <string>Select one time step:</string>
+               <string>Select number of samples between the two points:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QSliderEdit" name="widget" native="true"/>
+             <widget class="QSliderEdit" name="numOfSamplesSelector" native="true"/>
             </item>
            </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
           </widget>
          </item>
          <item>
@@ -220,19 +213,6 @@
          </item>
          <item>
           <widget class="QRange" name="timeTabTimeRange" native="true"/>
-         </item>
-         <item>
-          <widget class="Line" name="line_2">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>3</height>
-            </size>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="timeTabPlotButton">

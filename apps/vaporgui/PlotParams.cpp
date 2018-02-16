@@ -30,6 +30,7 @@ const string PlotParams::_spaceTimeTag = "SpaceTime";
 
 const string PlotParams::_p1Tag = "Point2";
 const string PlotParams::_p2Tag = "Point1";
+const string PlotParams::_numSamplesTag = "NumberOfSamplesTag";
 const string PlotParams::_singlePtTag = "SinglePoint";
 
 //
@@ -101,3 +102,7 @@ void PlotParams::SetPoint2(const std::vector<double> &point)
     // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     SetValueDoubleVec(_p2Tag, "Point 2 in the space mode", point);
 }
+
+void PlotParams::SetNumOfSamples(long val) { SetValueLong(_numSamplesTag, "Set number of samples", (long)val); }
+
+long PlotParams::GetNumOfSamples() const { return GetValueLong(_numSamplesTag, 100); }

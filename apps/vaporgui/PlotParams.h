@@ -53,6 +53,9 @@ public:
     bool GetSpaceTimeMode() const;
     void SetSpaceTimeMode(bool);
 
+    long GetNumOfSamples() const;
+    void SetNumOfSamples(long);
+
     static string GetClassType() { return ("PlotParams"); }
 
     // virtual functions required by RenderParams
@@ -63,9 +66,10 @@ private:
     static const string _minMaxTSTag;
     static const string _spaceTimeTag;    // Space=true, Time=false
 
-    static const string _p1Tag;          // point1 in space mode
-    static const string _p2Tag;          // point2 in space mode
-    static const string _singlePtTag;    // a single point in time mode
+    static const string _p1Tag;            // point1 in space mode
+    static const string _p2Tag;            // point2 in space mode
+    static const string _numSamplesTag;    // number of samples in space mode
+    static const string _singlePtTag;      // a single point in time mode
 };
 
 };    // End namespace VAPoR
