@@ -179,7 +179,7 @@ void AnimationEventRouter::GetWebHelp(
 }
 
 void AnimationEventRouter::setCurrentTimestep(size_t ts) const {
-    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
     // First set current *global* timestep in AnimationParams
@@ -225,7 +225,7 @@ void AnimationEventRouter::_updateTab() {
     const int minFrameRate = 1;
     const int maxFrameRate = 60;
 
-    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
     size_t numTS = dataStatus->GetTimeCoordinates().size();
