@@ -66,6 +66,8 @@ public:
 	return (TFInterpolator::type) GetValueLong(_interpTypeTag, defaultv);
  }
  void SetInterpType(TFInterpolator::type t);
+ void SetUseWhitespace(int state);
+ int GetUseWhitespace() const;
 
  int numControlPoints() {
 	return (int)(GetControlPoints().size()/4); 
@@ -85,7 +87,8 @@ public:
  void move(int index, float delta);
   
  Color color(float value) const;
-
+ Color getDivergingColor(float ratio, float index) const;
+ Color getCorrectiveDivergingColor(float ratio, float index) const;
 
  // Method to obtain the control points as a double vector, with 
  // 4 entries for each control point
@@ -120,6 +123,7 @@ public:
 private:
  static const string _controlPointsTag; 
  static const string _interpTypeTag;
+ static const string _useWhitespaceTag;
  static const string _dataBoundsTag;
 
  int leftIndex(float val) const;
