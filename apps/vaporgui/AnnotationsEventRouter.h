@@ -6,7 +6,7 @@
 //									*
 //************************************************************************/
 //
-//	File:		VizFeatureEventRouter.h
+//	File:		AnnotationsEventRouter.h
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -14,7 +14,7 @@
 //
 //	Date:		June, 2015
 //
-//	Description:	Defines the VizFeatureEventRouter class.
+//	Description:	Defines the AnnotationsEventRouter class.
 //		This class handles events for the VizFeature params
 //
 #ifndef VIZFEATUREEVENTROUTER_H
@@ -34,17 +34,17 @@ namespace VAPoR {
 class ControlExec;
 }
 
-class VizFeatureEventRouter : public QWidget, public Ui_AnnotationsGUI, public EventRouter {
+class AnnotationsEventRouter : public QWidget, public Ui_AnnotationsGUI, public EventRouter {
 
     Q_OBJECT
 
   public:
-    VizFeatureEventRouter(
+    AnnotationsEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce);
 
-    virtual ~VizFeatureEventRouter();
+    virtual ~AnnotationsEventRouter();
 
-    //! For the VizFeatureEventRouter, we must override confirmText method on base class,
+    //! For the AnnotationsEventRouter, we must override confirmText method on base class,
     //! so that text changes issue Command::CaptureStart and Command::CaptureEnd,
     //! supplying a special UndoRedo helper method
     //!
@@ -109,7 +109,7 @@ class VizFeatureEventRouter : public QWidget, public Ui_AnnotationsGUI, public E
 
     void connectAnnotationWidgets();
 
-    VizFeatureEventRouter() {}
+    AnnotationsEventRouter() {}
 
     void setColorHelper(
         QWidget *w, vector<double> &rgb);

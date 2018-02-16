@@ -14,7 +14,7 @@ set (SRCS
 	StartupEventRouter.cpp
 	AppSettingsEventRouter.cpp
 	VizSelectCombo.cpp
-	VizFeatureEventRouter.cpp
+	AnnotationsEventRouter.cpp
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp

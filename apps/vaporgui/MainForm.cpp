@@ -45,7 +45,7 @@
 #include "TabManager.h"
 #include "NavigationEventRouter.h"
 #include "regioneventrouter.h"
-#include "VizFeatureEventRouter.h"
+#include "AnnotationsEventRouter.h"
 #include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
