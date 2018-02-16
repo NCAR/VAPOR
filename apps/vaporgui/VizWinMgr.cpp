@@ -144,8 +144,8 @@ void VizWinMgr::createAllDefaultTabs()
     er = new StartupEventRouter(SettingsTab, _controlExec);
     installTab(er->GetType(), 2, er);
 
-    er = new AppSettingsEventRouter(SettingsTab, _controlExec);
-    installTab(er->GetType(), 2, er);
+    //	er = new AppSettingsEventRouter(SettingsTab, _controlExec);
+    //	installTab(er->GetType(), 2, er);
 
     // set up widgets in tabs:
     _tabManager->InstallWidgets();
