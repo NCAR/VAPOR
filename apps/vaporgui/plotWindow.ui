@@ -113,7 +113,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="spaceTab">
         <attribute name="title">
@@ -174,7 +174,7 @@
            <property name="frameShadow">
             <enum>QFrame::Plain</enum>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="numOfSamplesLabel">
               <property name="frameShape">
@@ -184,12 +184,12 @@
                <enum>QFrame::Plain</enum>
               </property>
               <property name="text">
-               <string>Select number of samples between the two points:</string>
+               <string>Number of samples between two points:  </string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QSliderEdit" name="numOfSamplesSelector" native="true"/>
+             <widget class="QLineEdit" name="numOfSamplesLineEdit"/>
             </item>
            </layout>
           </widget>
