@@ -15,7 +15,8 @@ public:
     ~QRange();
 
     void SetExtents(double min, double max);
-    void GetRange(std::vector<double> &range);
+    void GetValue(double &smallVal, double &bigVal);
+    void SetValue(double smallVal, double bigVal);
     void SetMainLabel(const QString &);
     void SetDecimals(int dec);    // how many digits after the decimal point
 

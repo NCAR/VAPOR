@@ -37,7 +37,12 @@ void QSliderEdit::SetExtents(double min, double max)
 {
     _min = min;
     _max = max;
-    //_ui->mySlider->setRange( std::floor(min), std::ceil(max) );
+}
+
+void QSliderEdit::GetExtents(double &min, double &max)
+{
+    min = _min;
+    max = _max;
 }
 
 void QSliderEdit::_lineEditSetValue(double dval)
@@ -65,15 +70,13 @@ void QSliderEdit::_mySlider_released()
 void QSliderEdit::_myLineEdit_valueChanged()
 {
     double val = _ui->myLineEdit->text().toDouble();
-    bool   updateLineEdit = false;
     if (val > _max) {
         val = _max;
-        updateLineEdit = true;
+        this->_lineEditSetValue(val);
     } else if (val < _min) {
         val = _min;
-        updateLineEdit = true;
+        this->_lineEditSetValue(val);
     }
-    if (updateLineEdit) this->_lineEditSetValue(val);
 
     _ui->mySlider->blockSignals(true);
     _ui->mySlider->setSliderPosition(std::round((val - _min) * 1000.0 / (_max - _min)));

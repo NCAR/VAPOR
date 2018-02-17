@@ -66,11 +66,8 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
 
     // set widget extents
     _setWidgetExtents();
-    numOfSamplesSelector->SetExtents(50.0, 200.0);
-    numOfSamplesSelector->SetDecimals(0);
-    numOfSamplesSelector->SetValue(100.0);
-    numOfSamplesSelector->SetLabel(QString::fromAscii("Num"));
-    plotParams->SetNumOfSamples(100);
+    _validator = new QIntValidator(numOfSamplesLineEdit);
+    numOfSamplesLineEdit->setValidator(_validator);
 
     // Connect signals with slots
     connect(newVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newVarChanged(int)));
@@ -84,7 +81,7 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     connect(spaceTabP2, SIGNAL(pointUpdated()), this, SLOT(_spaceModeP2Changed()));
     connect(spaceTabPlotButton, SIGNAL(clicked()), this, SLOT(_spaceTabPlotClicked()));
     connect(timeTabPlotButton, SIGNAL(clicked()), this, SLOT(_timeTabPlotClicked()));
-    connect(numOfSamplesSelector, SIGNAL(valueChanged(double)), this, SLOT(_numberOfSamplesChanged(double)));
+    connect(numOfSamplesLineEdit, SIGNAL(editingFinished()), this, SLOT(_numberOfSamplesChanged()));
 
     // Create widgets for the plot window
     _plotDialog = new QDialog(this);
@@ -194,6 +191,30 @@ void Plot::Update()
 
     // Update LOD, Refinement
     myFidelityWidget->Update(currentDmgr, _paramsMgr, plotParams);
+
+    // Update Space Tab
+    // spaceTabP1->blockSignals( true );
+    spaceTabP1->SetValue(plotParams->GetPoint1());
+    // spaceTabP1->blockSignals( false );
+    // spaceTabP2->blockSignals( true );
+    spaceTabP2->SetValue(plotParams->GetPoint2());
+    // spaceTabP2->blockSignals( false );
+    // spaceTabTimeSelector->blockSignals( true );
+    spaceTabTimeSelector->SetValue((int)plotParams->GetCurrentTimestep());
+    // spaceTabTimeSelector->blockSignals( false );
+    // numOfSamplesLineEdit->blockSignals( true );
+    numOfSamplesLineEdit->setText(QString::number(plotParams->GetNumOfSamples(), 10));
+    // numOfSamplesLineEdit->blockSignals( false );
+
+    // Update Time Tab
+    std::vector<double> currentPoint = plotParams->GetSinglePoint();
+    assert(currentPoint.size() == 2 || currentPoint.size() == 3);
+    // timeTabSinglePoint->blockSignals( true );
+    timeTabSinglePoint->SetDimensionality(currentPoint.size());
+    timeTabSinglePoint->SetValue(currentPoint);
+    // timeTabSinglePoint->blockSignals( false );
+    std::vector<long> range = plotParams->GetMinMaxTS();
+    timeTabTimeRange->SetValue((double)range[0], (double)range[1]);
 }
 
 void Plot::_newVarChanged(int index)
@@ -329,12 +350,11 @@ void Plot::_timeModeT1T2Changed()
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     assert(!plotParams->GetSpaceTimeMode());
 
-    std::vector<double> range;
-    timeTabTimeRange->GetRange(range);
-    assert(range.size() == 2);
+    double smallVal, bigVal;
+    timeTabTimeRange->GetValue(smallVal, bigVal);
     std::vector<long int> rangeInt;
-    rangeInt.push_back((long int)range[0]);
-    rangeInt.push_back((long int)range[1]);
+    rangeInt.push_back((long int)smallVal);
+    rangeInt.push_back((long int)bigVal);
 
     plotParams->SetMinMaxTS(rangeInt);
 }
@@ -589,9 +609,16 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
     Py_XDECREF(pModule);
 }
 
-void Plot::_numberOfSamplesChanged(double value)
+void Plot::_numberOfSamplesChanged()
 {
-    long        val = (long int)value;
+    long val = numOfSamplesLineEdit->text().toLong();
+    long minSamples = 50;
+    if (val < minSamples) {
+        val = minSamples;
+        numOfSamplesLineEdit->blockSignals(true);
+        numOfSamplesLineEdit->setText(QString::number(val, 10));
+        numOfSamplesLineEdit->blockSignals(false);
+    }
     PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetNumOfSamples(val);
 }
