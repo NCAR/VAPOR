@@ -50,8 +50,8 @@ class PlotParams : public RenderParams {
 
     /// Get/set the current operational mode: space or time.
     /// true == Space; false == time
-    bool GetSpaceTimeMode() const;
-    void SetSpaceTimeMode(bool);
+    //bool GetSpaceTimeMode() const;
+    //void SetSpaceTimeMode( bool );
 
     long GetNumOfSamples() const;
     void SetNumOfSamples(long);
@@ -70,7 +70,7 @@ class PlotParams : public RenderParams {
 
   private:
     static const string _minMaxTSTag;
-    static const string _spaceTimeTag; // Space=true, Time=false
+    //static const string _spaceTimeTag;  // Space=true, Time=false
 
     static const string _p1Tag;         // point1 in space mode
     static const string _p2Tag;         // point2 in space mode
