@@ -26,7 +26,7 @@ using namespace VAPoR;
 
 const string PlotParams::_minMaxTSTag = "MinMaxTS";
 // const string PlotParams::_maxTSTag = "MaxTS";
-const string PlotParams::_spaceTimeTag = "SpaceTime";
+// const string PlotParams::_spaceTimeTag = "SpaceTime";
 
 const string PlotParams::_p1Tag = "Point2";
 const string PlotParams::_p2Tag = "Point1";
@@ -63,9 +63,16 @@ void PlotParams::SetMinMaxTS(const std::vector<long int> &minmax)
     SetValueLongVec(_minMaxTSTag, "Time range in the Time mode", minmax);
 }
 
-bool PlotParams::GetSpaceTimeMode() const { return GetValueLong(_spaceTimeTag, (long)true); }
-
-void PlotParams::SetSpaceTimeMode(bool val) { SetValueLong(_spaceTimeTag, "Set Space or Time mode", (long)val); }
+/*
+bool PlotParams::GetSpaceTimeMode() const
+{
+    return GetValueLong(_spaceTimeTag, (long)true);
+}
+void PlotParams::SetSpaceTimeMode(bool val)
+{
+    SetValueLong(_spaceTimeTag, "Set Space or Time mode", (long)val);
+}
+*/
 
 std::vector<double> PlotParams::GetSinglePoint() const
 {

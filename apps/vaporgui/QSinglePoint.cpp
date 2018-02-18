@@ -55,8 +55,8 @@ void QSinglePoint::GetCurrentPoint(std::vector<double> &point)
 
 void QSinglePoint::SetExtents(const std::vector<double> &min, const std::vector<double> &max)
 {
-    assert(min.size() == _dimensionality);
-    assert(max.size() == _dimensionality);
+    // assert( min.size() == _dimensionality );
+    // assert( max.size() == _dimensionality );
 
     _ui->xSliderEdit->SetExtents(min[0], max[0]);
     _ui->ySliderEdit->SetExtents(min[1], max[1]);
@@ -76,7 +76,12 @@ void QSinglePoint::SetDecimals(int dec)
 
 void QSinglePoint::SetValue(const std::vector<double> &point)
 {
-    assert(point.size() == _dimensionality);
+    if (point.size() != _dimensionality) {
+        std::cerr << "Assertion caught!" << std::endl;
+        for (int i = 0; i < point.size(); i++) std::cerr << point[i] << ",  ";
+        std::cerr << std::endl << "Dimension = " << _dimensionality << std::endl;
+    }
+    // assert( point.size() == _dimensionality );
 
     _ui->xSliderEdit->SetValue(point[0]);
     _ui->ySliderEdit->SetValue(point[1]);
