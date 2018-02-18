@@ -46,7 +46,7 @@ private slots:
     void _dataSourceChanged( int );
 
     /// Clean up data points for plotting when the following events happen
-    void _spaceTimeModeChanged( int );
+    //void _spaceTimeModeChanged( int );
     void _spaceModeP1Changed();
     void _spaceModeP2Changed();
     void _spaceModeTimeChanged( double );
@@ -72,7 +72,7 @@ private:
     VAPoR::PlotParams*      _getCurrentPlotParams() const;
     VAPoR::DataMgr*         _getCurrentDataMgr() const;
 
-    void                    _setWidgetExtents();
+    void                    _setInitialExtents();
     void                    _invokePython(  const QString&, 
                                             const std::vector<std::string>&,
                                             const std::vector<std::vector<float> >&, 
