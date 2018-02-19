@@ -17,6 +17,7 @@ def plotSequences( outFile, varNames, sequences, xValues ):
     #ax.set_xticks( xValues ) # give it fixed xticks
 
     fig.savefig( outFile )
+    plt.close( fig )
 
     return 0
 
