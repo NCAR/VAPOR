@@ -44,7 +44,6 @@ class Plot : public QDialog, public Ui_PlotWindow {
     void _dataSourceChanged(int);
 
     /// Clean up data points for plotting when the following events happen
-    //void _spaceTimeModeChanged( int );
     void _spaceModeP1Changed();
     void _spaceModeP2Changed();
     void _spaceModeTimeChanged(double);
