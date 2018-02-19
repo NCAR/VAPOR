@@ -25,9 +25,6 @@
 using namespace VAPoR;
 
 const string PlotParams::_minMaxTSTag = "MinMaxTS";
-// const string PlotParams::_maxTSTag = "MaxTS";
-// const string PlotParams::_spaceTimeTag = "SpaceTime";
-
 const string PlotParams::_p1Tag = "Point2";
 const string PlotParams::_p2Tag = "Point1";
 const string PlotParams::_numSamplesTag = "NumberOfSamplesTag";
@@ -49,66 +46,21 @@ PlotParams::PlotParams(DataMgr *dmgr, ParamsBase::StateSave *ssave, XmlNode *nod
 
 PlotParams::~PlotParams() { MyBase::SetDiagMsg("PlotParams::~PlotParams() this=%p", this); }
 
-std::vector<long int> PlotParams::GetMinMaxTS() const
-{
-    // assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
+std::vector<long int> PlotParams::GetMinMaxTS() const { return GetValueLongVec(_minMaxTSTag); }
 
-    std::vector<long int> vec(2, 0);
-    return GetValueLongVec(_minMaxTSTag, vec);
-}
+void PlotParams::SetMinMaxTS(const std::vector<long int> &minmax) { SetValueLongVec(_minMaxTSTag, "Time range in the Time mode", minmax); }
 
-void PlotParams::SetMinMaxTS(const std::vector<long int> &minmax)
-{
-    // assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
-    SetValueLongVec(_minMaxTSTag, "Time range in the Time mode", minmax);
-}
+std::vector<double> PlotParams::GetSinglePoint() const { return GetValueDoubleVec(_singlePtTag); }
 
-/*
-bool PlotParams::GetSpaceTimeMode() const
-{
-    return GetValueLong(_spaceTimeTag, (long)true);
-}
-void PlotParams::SetSpaceTimeMode(bool val)
-{
-    SetValueLong(_spaceTimeTag, "Set Space or Time mode", (long)val);
-}
-*/
+void PlotParams::SetSinglePoint(const std::vector<double> &point) { SetValueDoubleVec(_singlePtTag, "Single point in the time mode", point); }
 
-std::vector<double> PlotParams::GetSinglePoint() const
-{
-    // assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
-    return GetValueDoubleVec(_singlePtTag);
-}
+std::vector<double> PlotParams::GetPoint1() const { return GetValueDoubleVec(_p1Tag); }
 
-void PlotParams::SetSinglePoint(const std::vector<double> &point)
-{
-    // assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
-    SetValueDoubleVec(_singlePtTag, "Single point in the time mode", point);
-}
+void PlotParams::SetPoint1(const std::vector<double> &point) { SetValueDoubleVec(_p1Tag, "Point 1 in the space mode", point); }
 
-std::vector<double> PlotParams::GetPoint1() const
-{
-    // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
-    return GetValueDoubleVec(_p1Tag);
-}
+std::vector<double> PlotParams::GetPoint2() const { return GetValueDoubleVec(_p2Tag); }
 
-void PlotParams::SetPoint1(const std::vector<double> &point)
-{
-    // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
-    SetValueDoubleVec(_p1Tag, "Point 1 in the space mode", point);
-}
-
-std::vector<double> PlotParams::GetPoint2() const
-{
-    // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
-    return GetValueDoubleVec(_p2Tag);
-}
-
-void PlotParams::SetPoint2(const std::vector<double> &point)
-{
-    // assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
-    SetValueDoubleVec(_p2Tag, "Point 2 in the space mode", point);
-}
+void PlotParams::SetPoint2(const std::vector<double> &point) { SetValueDoubleVec(_p2Tag, "Point 2 in the space mode", point); }
 
 void PlotParams::SetNumOfSamples(long val) { SetValueLong(_numSamplesTag, "Set number of samples", (long)val); }
 
