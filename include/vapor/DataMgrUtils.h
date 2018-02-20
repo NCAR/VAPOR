@@ -8,7 +8,7 @@
 //
 //	File:		DataMgrUtils.h
 //
-//	Author:		Alan Norton
+//	Author:		John Clyne
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //

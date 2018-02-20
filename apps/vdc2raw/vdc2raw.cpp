@@ -125,7 +125,7 @@ void process_volume(
     }
 
     size_t nelements = 1;
-    for (int i = 0; i < hslice_dims.size() && i < 2; i++) {
+    for (int i = 0; i < hslice_dims.size(); i++) {
         nelements *= hslice_dims[i];
     }
     float *buffer = new float[nelements];
@@ -135,12 +135,12 @@ void process_volume(
         ntotal *= dims[i];
     }
 
-    rc = vdc.OpenVariableRead(ts, varname, level, lod);
-    if (rc < 0)
+    int fd = vdc.OpenVariableRead(ts, varname, level, lod);
+    if (fd < 0)
         exit(1);
 
     for (size_t i = 0; i < nslice; i++) {
-        rc = vdc.ReadSlice(buffer);
+        rc = vdc.ReadSlice(fd, buffer);
         if (rc < 0)
             exit(1);
 
@@ -153,7 +153,7 @@ void process_volume(
         ntotal -= nelements;
     }
 
-    rc = vdc.CloseVariable();
+    rc = vdc.CloseVariable(fd);
     if (rc < 0)
         exit(1);
 
@@ -183,8 +183,8 @@ void process_region(
     min_bound.push_back(xregion[0] < 0 ? 0 : xregion[0]);
     max_bound.push_back(xregion[1] < 0 ? dims[0] - 1 : xregion[1]);
 
-    int rc = vdc.OpenVariableRead(ts, varname, level, lod);
-    if (rc < 0)
+    int fd = vdc.OpenVariableRead(ts, varname, level, lod);
+    if (fd < 0)
         exit(1);
 
     if (dims.size() > 1) {
@@ -203,7 +203,7 @@ void process_region(
 
     float *region = new float[nelements];
 
-    rc = vdc.ReadRegion(min_bound, max_bound, region);
+    int rc = vdc.ReadRegion(fd, min_bound, max_bound, region);
     if (rc < 0)
         exit(1);
 
@@ -213,7 +213,7 @@ void process_region(
 
     delete[] region;
 
-    rc = vdc.CloseVariable();
+    rc = vdc.CloseVariable(fd);
     if (rc < 0)
         exit(1);
 }
