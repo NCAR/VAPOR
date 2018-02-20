@@ -15,6 +15,7 @@
 
 #include <Python.h>
 #include <vapor/MyPython.h>
+#include <vapor/DC.h>
 
 #include <QLineEdit>
 #include <QTemporaryFile>
@@ -237,28 +238,28 @@ void Plot::Update()
         timeTabSinglePoint->SetExtents( min, max);
 
         std::vector<double> pt = plotParams->GetPoint1();
-        if( pt.size() > 0 )
+        if( pt.size() == axes.size() )
             spaceTabP1->SetValue( pt );
         else
         {
-            spaceTabP1->SetValue( min);
+            spaceTabP1->SetValue(  min );
             plotParams->SetPoint1( min );
         }
         pt = plotParams->GetPoint2();
-        if( pt.size() > 0 )
+        if( pt.size() == axes.size() )
             spaceTabP2->SetValue( pt );
         else
         {
-            spaceTabP2->SetValue( max);
+            spaceTabP2->SetValue(  max );
             plotParams->SetPoint2( max );
         }
         pt = plotParams->GetSinglePoint( );
-        if( pt.size() > 0 )
+        if( pt.size() == axes.size() )
             timeTabSinglePoint->SetValue( pt );
         else
         {
             timeTabSinglePoint->SetValue( min );
-            plotParams->SetSinglePoint( min );
+            plotParams->SetSinglePoint(   min );
         }
     }
 
@@ -274,6 +275,10 @@ void Plot::Update()
     {
         int numOfTimeSteps = currentDmgr->GetNumTimeSteps();
         timeTabTimeRange->SetValue( (double)0, (double)(numOfTimeSteps - 1) );
+        std::vector<long int> rangeInt;
+        rangeInt.push_back( (long int)0 );
+        rangeInt.push_back( (long int)(numOfTimeSteps-1) );
+        plotParams->SetMinMaxTS( rangeInt );
     }
 
     // Update number of samples
@@ -438,16 +443,6 @@ void Plot::_setInitialExtents()
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1) );
     spaceTabTimeSelector->SetDecimals(0);
     spaceTabTimeSelector->SetValue(0.0);
-
-    // Update parameters
-    /*plotParams->SetPoint1( minFullExtents );
-    plotParams->SetPoint2( maxFullExtents );
-    plotParams->SetSinglePoint( minFullExtents );
-    plotParams->SetCurrentTimestep( 0.0 );
-    std::vector<long int> rangeInt;
-    rangeInt.push_back( (long int)0 );
-    rangeInt.push_back( (long int)(numOfTimeSteps-1) );
-    plotParams->SetMinMaxTS( rangeInt );*/
 }
     
 void Plot::_spaceTabPlotClicked()
@@ -496,10 +491,27 @@ void Plot::_spaceTabPlotClicked()
         sequences.push_back( seq );
     }
     
-    // Make X axis array. Here in space mode; it simply indicates every sample
+    // Decide X label and values
+    std::string xLabel = _getXLabel();
     std::vector<float> xValues;
-    for( int i = 0; i < numOfSamples; i++ )
-        xValues.push_back( (float)i );
+    if( !xLabel.empty() )   // If xLabel isn't empty, we calculate the actual distances
+    {
+        float dist = 0.0f;
+        for( int i = 0; i < p1p2span.size(); i++ )
+            dist += p1p2span[i] * p1p2span[i];
+        dist = std::sqrt( dist );
+        float stepsize = dist / (float)(numOfSamples-1);
+        for( int i = 0; i < numOfSamples; i++ )
+            xValues.push_back( (float)i * stepsize );
+    }
+    else
+    {
+        for( int i = 0; i < numOfSamples; i++ )
+            xValues.push_back( (float)i );
+    }
+    
+    // Decide Y label and values
+    std::string yLabel = _getYLabel();
 
     // Call python routines.
     QTemporaryFile  file;
@@ -507,7 +519,7 @@ void Plot::_spaceTabPlotClicked()
     {
         QString filename = file.fileName() + QString::fromAscii(".png");
 
-        _invokePython( filename, enabledVars, sequences, xValues );
+        _invokePython( filename, enabledVars, sequences, xValues, xLabel, yLabel );
 
         QImage plot( filename );
         _plotPathEdit->setText( filename );
@@ -552,8 +564,12 @@ void Plot::_timeTabPlotClicked()
     }
 
     std::vector<float> xValues;
-    for( int i = minMaxTS[0]; i <= minMaxTS[1]; i++ )
-        xValues.push_back( (float)i );
+    if( minMaxTS.size() > 0 )
+        for( int i = minMaxTS[0]; i <= minMaxTS[1]; i++ )
+            xValues.push_back( (float)i );
+
+    // Decide Y label and values
+    std::string yLabel = _getYLabel();
 
     // Call python routines.
     QTemporaryFile  file;
@@ -561,7 +577,8 @@ void Plot::_timeTabPlotClicked()
     {
         QString filename = file.fileName() + QString::fromAscii(".png");
 
-        _invokePython( filename, enabledVars, sequences, xValues );
+        const std::string xLabel = "Time Steps";
+        _invokePython( filename, enabledVars, sequences, xValues, xLabel, yLabel );
 
         QImage plot( filename );
         _plotPathEdit->setText( filename );
@@ -580,7 +597,9 @@ void Plot::_timeTabPlotClicked()
 void Plot::_invokePython( const QString&                              outFile, 
                           const std::vector< std::string >&           enabledVars,
                           const std::vector< std::vector<float> >&    sequences, 
-                          const std::vector<float>&                   xValues )
+                          const std::vector<float>&                   xValues, 
+                          const std::string&                          xLabel,
+                          const std::string&                          yLabel )
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
@@ -599,7 +618,7 @@ void Plot::_invokePython( const QString&                              outFile,
     pFunc = PyObject_GetAttrString( pModule, "plotSequences" );
     if( pFunc && PyCallable_Check(pFunc) )
     {
-        pArgs   = PyTuple_New(4);
+        pArgs   = PyTuple_New(6);
 
         // Set the 1st argument: output file name
         pValue  = PyString_FromString( outFile.toAscii() );
@@ -642,6 +661,14 @@ void Plot::_invokePython( const QString&                              outFile,
         }
         PyTuple_SetItem( pArgs, 3, pListOfFloats );
 
+        // Set the 5th argument: X axis label
+        pValue  = PyString_FromString( xLabel.c_str() ); 
+        PyTuple_SetItem( pArgs, 4, pValue );
+
+        // Set the 6th argument: Y axis label
+        pValue  = PyString_FromString( yLabel.c_str() ); 
+        PyTuple_SetItem( pArgs, 5, pValue );
+
         pValue  = PyObject_CallObject( pFunc, pArgs );
         if( pValue == NULL )
         {
@@ -676,4 +703,70 @@ void Plot::_numberOfSamplesChanged( )
     }
     PlotParams* plotParams = this->_getCurrentPlotParams();
     plotParams->SetNumOfSamples( val );
+}
+   
+ 
+std::string Plot::_getXLabel()
+{
+    PlotParams*              plotParams  = this->_getCurrentPlotParams();
+    VAPoR::DataMgr*          dataMgr     = this->_getCurrentDataMgr();    
+    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+    std::vector<std::string> units;
+
+    for( int i = 0; i < enabledVars.size(); i++ )
+    {
+        VAPoR::DC::DataVar  dataVar;
+        dataMgr->GetDataVarInfo( enabledVars[i], dataVar );
+        std::string         meshName = dataVar.GetMeshName();
+        VAPoR::DC::Mesh     mesh;
+        dataMgr->GetMesh(   meshName, mesh );
+        std::vector<std::string> coordVarNames = mesh.GetCoordVars();
+        for( int j = 0; j < coordVarNames.size(); j++ )
+        {
+            VAPoR::DC::CoordVar  coordVar;
+            dataMgr->GetCoordVarInfo( coordVarNames[j], coordVar );
+            units.push_back( coordVar.GetUnits() );
+        }
+    }
+
+    std::string empty;
+    if( units.size() == 0 )
+        return empty;
+    else
+    {
+        std::string label = units[0];
+        for( int i = 1; i < units.size(); i++ )
+            if( units[i] != label )
+                return empty;
+
+        return label;
+    }
+}
+ 
+std::string Plot::_getYLabel()
+{
+    PlotParams*              plotParams  = this->_getCurrentPlotParams();
+    VAPoR::DataMgr*          dataMgr     = this->_getCurrentDataMgr();    
+    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+    std::vector<std::string> units;
+
+    for( int i = 0; i < enabledVars.size(); i++ )
+    {
+        VAPoR::DC::DataVar  dataVar;
+        dataMgr->GetDataVarInfo( enabledVars[i], dataVar );
+        units.push_back( dataVar.GetUnits() );
+    }
+
+    std::string empty;
+    if( units.size() == 0 )
+        return empty;
+    else
+    {
+        std::string label = units[0];
+        for( int i = 1; i < units.size(); i++ )
+            if( units[i] != label )
+                return empty;
+
+        return label;
+    }
 }
