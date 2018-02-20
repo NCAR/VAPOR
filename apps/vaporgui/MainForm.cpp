@@ -1127,7 +1127,8 @@ void MainForm::loadDataHelper(
     //
     string dataSetName = makename(myFiles[0]);
 
-    bool status = openDataHelper(dataSetName, format, myFiles);
+    vector<string> options = {"-project_to_pcs"};
+    bool status = openDataHelper(dataSetName, format, myFiles, options);
     if (!status)
         return;
 
@@ -1879,7 +1880,8 @@ void MainForm::setProj4String() {
 
             vector<string> options = {
                 "-proj4",
-                proj4String};
+                proj4String,
+                "project_to_pcs"};
 
             (void)openDataHelper(dataSets[i], format, files, options);
         }
