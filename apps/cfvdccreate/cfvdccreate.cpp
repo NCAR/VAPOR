@@ -174,20 +174,9 @@ void	DefineMaskVars(
 	}
 }
 
-void defineMapProjection(const DCCF    &dcwrf, VDCNetCDF &vdc) {
+void defineMapProjection(const DCCF    &dc, VDCNetCDF &vdc) {
 
-	string proj4string;
-	for (int d=2; d<4 && proj4string.empty(); d++) {
-		vector <string> varnames = dcwrf.DC::GetDataVarNames(d);
-
-		for (int i=0; i<varnames.size(); i++) {
-			string proj4string = dcwrf.GetMapProjection(varnames[i]);
-			if (! proj4string.empty()) {
-				vdc.SetMapProjection(proj4string);
-				break;
-			}
-		}
-	}
+	vdc.SetMapProjection(dc.GetMapProjection());
 }
 
 int	main(int argc, char **argv) {
@@ -308,6 +297,11 @@ int	main(int argc, char **argv) {
 		if (rc<0) {
 			return(1);
 		}
+
+		rc = vdc.CopyAtt(dccf, cvar.GetName());
+		if (rc<0) {
+			return(1);
+		}
 	}
 
 	DefineMaskVars(dccf, vdc);
@@ -388,6 +382,11 @@ int	main(int argc, char **argv) {
 
 			}
 
+			if (rc<0) {
+				return(1);
+			}
+
+			rc = vdc.CopyAtt(dccf, dvar.GetName());
 			if (rc<0) {
 				return(1);
 			}
