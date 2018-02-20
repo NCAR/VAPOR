@@ -272,17 +272,19 @@ int  VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char **
 int VDC_OpenVariableRead(VDC *p, size_t ts, const char *varname, int level, int lod)
 { VDC_DEBUG_called(); return p->OpenVariableRead(ts, string(varname), level, lod); }
 
-int VDC_CloseVariable(VDC *p)
-{ VDC_DEBUG_called(); return p->CloseVariable(); }
+int VDC_CloseVariable(VDC *p, int fd)
+{ VDC_DEBUG_called(); return p->CloseVariable(fd); }
 
-int VDC_Read(VDC *p, float *region)
-{ VDC_DEBUG_called(); return p->Read(region); }
+int VDC_Read(VDC *p, int fd, float *region)
+{ VDC_DEBUG_called(); return p->Read(fd, region); }
 
-int VDC_ReadSlice(VDC *p, float *slice)
-{ VDC_DEBUG_called(); return p->ReadSlice(slice); }
+int VDC_ReadSlice(VDC *p, int fd, float *slice)
+{ VDC_DEBUG_called(); return p->ReadSlice(fd, slice); }
 
-int VDC_ReadRegion(VDC *p, const size_t *min, const size_t *max, const int dims, float *region)
-{
+int VDC_ReadRegion(
+	VDC *p, int fd, const size_t *min, const size_t *max, const int 
+	dims, float *region) {
+
 	VDC_DEBUG_called(); 
 	vector<size_t> min_v;
 	vector<size_t> max_v;
@@ -290,7 +292,7 @@ int VDC_ReadRegion(VDC *p, const size_t *min, const size_t *max, const int dims,
 		min_v.push_back(min[i]);
 		max_v.push_back(max[i]);
 	}
-	return p->ReadRegion(min_v, max_v, region);
+	return p->ReadRegion(fd, min_v, max_v, region);
 }
 
 int VDC_GetVar(VDC *p, const char *varname, int level, int lod, float *data)
