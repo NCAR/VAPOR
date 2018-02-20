@@ -430,18 +430,12 @@ protected:
 
     virtual int openVariableRead(size_t ts, string varname, int level = 0, int lod = 0) = 0;
 
-    virtual int closeVariable() = 0;
+    virtual int closeVariable(int fd) = 0;
 
-    int virtual read(float *data) = 0;
-    int virtual read(int *data) = 0;
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
 
-    virtual int readSlice(float *slice) = 0;
-    virtual int readSlice(unsigned char *slice) = 0;
-
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
-
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
 public:
     //! Define a coordinate variable
@@ -632,6 +626,24 @@ public:
     //
     int CopyAtt(const DC &src, string varname, string attname);
 
+    //! Copy attributes
+    //!
+    //! This method copies attributes from the src DC. The attributes can either
+    //! be "global", if \p varname is the empty string, or bound to a variable
+    //! if \p varname indentifies a variable in the src DC. All attributes
+    //! associated with \p varname are copied.
+    //!
+    //! \param[in] src The source DC from which to copy.
+    //! \param[in] varname The name of the variable the attribute is bound to,
+    //! or the empty string if the attribute is global
+    //!
+    //! \retval status A negative int is returned on failure. 0 returned on
+    //! success.
+    //!
+    //! \sa PutAtt()
+    //
+    int CopyAtt(const DC &src, string varname);
+
     //! Set a map projection string for a data variable
     //!
     //! This method sets a properly formatted Proj4 map projection string
@@ -728,7 +740,7 @@ public:
     //
     virtual int OpenVariableWrite(size_t ts, string varname, int lod = -1) = 0;
 
-    virtual int CloseVariableWrite() = 0;
+    virtual int CloseVariableWrite(int fd) = 0;
 
     //! Write all spatial values to the currently opened variable
     //!
@@ -743,8 +755,8 @@ public:
     //!
     //! \sa OpenVariableWrite()
     //
-    virtual int Write(const float *data) = 0;
-    virtual int Write(const int *data) = 0;
+    virtual int Write(int fd, const float *data) = 0;
+    virtual int Write(int fd, const int *data) = 0;
 
     //! Write a single slice of data to the currently opened variable
     //!
@@ -767,9 +779,9 @@ public:
     //!
     //! \sa OpenVariableWrite()
     //!
-    virtual int WriteSlice(const float *slice) = 0;
-    virtual int WriteSlice(const int *slice) = 0;
-    virtual int WriteSlice(const unsigned char *slice) = 0;
+    virtual int WriteSlice(int fd, const float *slice) = 0;
+    virtual int WriteSlice(int fd, const int *slice) = 0;
+    virtual int WriteSlice(int fd, const unsigned char *slice) = 0;
 
     //! Write an entire variable in one call
     //!

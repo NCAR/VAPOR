@@ -769,6 +769,17 @@ int VDC::CopyAtt(const DC &src, string varname, string attname)
     return 0;
 }
 
+int VDC::CopyAtt(const DC &src, string varname)
+{
+    vector<string> names = src.GetAttNames(varname);
+
+    for (int i = 0; i < names.size(); i++) {
+        int rc = CopyAtt(src, varname, names[i]);
+        if (rc < 0) return (-1);
+    }
+    return (0);
+}
+
 vector<string> VDC::getAttNames(string varname) const
 {
     vector<string> attnames;
@@ -916,201 +927,6 @@ int VDC::EndDefine()
     }
 
     return (0);
-}
-
-VDC::Attribute::Attribute(string name, XType type, const vector<float> &values)
-{
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<float> &values)
-{
-    _values.clear();
-    vector<double> dvec;
-    for (int i = 0; i < values.size(); i++) { dvec.push_back((double)values[i]); }
-    VDC::Attribute::SetValues(dvec);
-}
-
-VDC::Attribute::Attribute(string name, XType type, const vector<double> &values)
-{
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<double> &values)
-{
-    _values.clear();
-    for (int i = 0; i < values.size(); i++) {
-        podunion pod;
-        if (_type == FLOAT) {
-            pod.f = (float)values[i];
-        } else if (_type == DOUBLE) {
-            pod.d = (double)values[i];
-        } else if (_type == INT32) {
-            pod.i = (int)values[i];
-        } else if (_type == INT64) {
-            pod.l = (int)values[i];
-        } else if (_type == TEXT) {
-            pod.c = (char)values[i];
-        }
-        _values.push_back(pod);
-    }
-}
-
-VDC::Attribute::Attribute(string name, XType type, const vector<int> &values)
-{
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<int> &values)
-{
-    _values.clear();
-    vector<long> lvec;
-    for (int i = 0; i < values.size(); i++) { lvec.push_back((long)values[i]); }
-    VDC::Attribute::SetValues(lvec);
-}
-
-VDC::Attribute::Attribute(string name, XType type, const vector<long> &values)
-{
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<long> &values)
-{
-    _values.clear();
-
-    for (int i = 0; i < values.size(); i++) {
-        podunion pod;
-        if (_type == FLOAT) {
-            pod.f = (float)values[i];
-        } else if (_type == DOUBLE) {
-            pod.d = (double)values[i];
-        } else if (_type == INT32) {
-            pod.i = (int)values[i];
-        } else if (_type == INT64) {
-            pod.l = (long)values[i];
-        } else if (_type == TEXT) {
-            pod.c = (char)values[i];
-        }
-        _values.push_back(pod);
-    }
-}
-
-VDC::Attribute::Attribute(string name, XType type, const string &values)
-{
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const string &values)
-{
-    _values.clear();
-    for (int i = 0; i < values.size(); i++) {
-        podunion pod;
-        if (_type == FLOAT) {
-            pod.f = (float)values[i];
-        } else if (_type == DOUBLE) {
-            pod.d = (double)values[i];
-        } else if (_type == INT32) {
-            pod.i = (int)values[i];
-        } else if (_type == INT64) {
-            pod.l = (long)values[i];
-        } else if (_type == TEXT) {
-            pod.c = (char)values[i];
-        }
-        _values.push_back(pod);
-    }
-}
-
-void VDC::Attribute::GetValues(vector<float> &values) const
-{
-    values.clear();
-
-    vector<double> dvec;
-    VDC::Attribute::GetValues(dvec);
-    for (int i = 0; i < dvec.size(); i++) { values.push_back((float)dvec[i]); }
-}
-
-void VDC::Attribute::GetValues(vector<double> &values) const
-{
-    values.clear();
-
-    for (int i = 0; i < _values.size(); i++) {
-        podunion pod = _values[i];
-        if (_type == FLOAT) {
-            values.push_back((double)pod.f);
-        } else if (_type == DOUBLE) {
-            values.push_back((double)pod.d);
-        } else if (_type == INT32) {
-            values.push_back((double)pod.i);
-        } else if (_type == INT64) {
-            values.push_back((double)pod.l);
-        } else if (_type == TEXT) {
-            values.push_back((double)pod.c);
-        }
-    }
-}
-
-void VDC::Attribute::GetValues(vector<int> &values) const
-{
-    values.clear();
-
-    vector<long> lvec;
-    VDC::Attribute::GetValues(lvec);
-    for (int i = 0; i < lvec.size(); i++) { values.push_back((int)lvec[i]); }
-}
-
-void VDC::Attribute::GetValues(vector<long> &values) const
-{
-    values.clear();
-
-    for (int i = 0; i < _values.size(); i++) {
-        podunion pod = _values[i];
-        if (_type == FLOAT) {
-            values.push_back((long)pod.f);
-        } else if (_type == DOUBLE) {
-            values.push_back((long)pod.d);
-        } else if (_type == INT32) {
-            values.push_back((long)pod.i);
-        } else if (_type == INT64) {
-            values.push_back((long)pod.l);
-        } else if (_type == TEXT) {
-            values.push_back((long)pod.c);
-        }
-    }
-}
-
-void VDC::Attribute::GetValues(string &values) const
-{
-    values.clear();
-
-    for (int i = 0; i < _values.size(); i++) {
-        podunion pod = _values[i];
-        if (_type == FLOAT) {
-            values += (char)pod.f;
-        } else if (_type == DOUBLE) {
-            values += (char)pod.d;
-        } else if (_type == INT32) {
-            values += (char)pod.i;
-        } else if (_type == INT64) {
-            values += (char)pod.l;
-        } else if (_type == TEXT) {
-            values += (char)pod.c;
-        }
-    }
 }
 
 bool VDC::_ValidDefineDimension(string name, size_t length) const

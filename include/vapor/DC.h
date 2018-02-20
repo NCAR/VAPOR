@@ -421,6 +421,7 @@ public:
         //! the nodes of the mesh.
         //
         std::vector<string> GetCoordVars() const { return (_coord_vars); };
+        void                SetCoordVars(std::vector<string> coord_vars) { _coord_vars = coord_vars; };
 
         //! Get geometric dimension of cells
         //!
@@ -845,8 +846,18 @@ public:
 
         //! Access variable attributes
         //
-        std::map<string, Attribute> GetAttributes() const { return (_atts); };
-        void                        SetAttributes(std::map<string, Attribute> &atts) { _atts = atts; };
+        const std::map<string, Attribute> &GetAttributes() const { return (_atts); };
+        void                               SetAttributes(std::map<string, Attribute> &atts) { _atts = atts; };
+
+        bool GetAttribute(string name, Attribute &att) const
+        {
+            std::map<string, Attribute>::const_iterator itr = _atts.find(name);
+            if (itr == _atts.end()) return (false);
+            att = itr->second;
+            return (true);
+        }
+
+        void SetAttribute(const Attribute &att) { _atts[att.GetName()] = att; }
 
         //! Return true if no wavelet is defined
         //
@@ -1511,37 +1522,13 @@ public:
         return (getDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
     }
 
-    //! Return a Proj4 map projection string.
-    //!
-    //! For georeference data sets that have map projections this
-    //! method returns a properly formatted Proj4 projection string
-    //! for mapping from geographic to cartographic coordinates for
-    //! the variable indicated by \p varname. If no
-    //! such projection exists, or if \p varname is not recognized,
-    //! an empty string is returned.
-    //!
-    //! \param[in] varname A string specifying the name of the data
-    //! variable.
-    //!
-    //! \retval  projstring An empty string if a Proj4 map projection is
-    //! not available for the named variable, otherwise a properly
-    //! formatted Proj4 projection
-    //! string is returned.
-    //!
-    //
-    virtual string GetMapProjection(string varname) const { return (getMapProjection(varname)); }
-
     //! Return default Proj4 map projection string.
     //!
     //! For georeference data sets that have map projections this
     //! method returns the default properly formatted Proj4 projection string
-    //! for mapping from geographic to cartographic coordinates for
-    //! the variable indicated by \p varname. If no
-    //! such projection exists, an empty string is returned.
-    //! This projection string will be associated with any variable
-    //! that has lat-lan coordinates, and does not have a
-    //! variable-specific projection string defined.
-    //! See GetMapProjection(string)
+    //! for mapping from geographic to cartographic coordinates.
+    //! If no
+    //! projection exists, an empty string is returned.
     //!
     //! \retval  projstring An empty string if a Proj4 map projection is
     //! not available for the named variable, otherwise a properly
@@ -1550,10 +1537,6 @@ public:
     //!
     //
     virtual string GetMapProjection() const { return (getMapProjection()); }
-
-    //! Get default map projection, if any
-    //!
-    virtual string GetMapProjectionDefault() const { return (getMapProjectionDefault()); }
 
     //! Open the named variable for reading
     //!
@@ -1583,7 +1566,9 @@ public:
     //! \param[in] lod Approximation level of the variable. A value of -1
     //! indicates the maximum approximation level defined for the DC.
     //! Ignored if the variable is not compressed.
-    //! \retval status Returns a non-negative value on success
+    //!
+    //! \retval status Returns a non-negative file descriptor on success
+    //!
     //!
     //! \sa GetNumRefLevels(), DC::BaseVar::GetCRatios(), OpenVariableRead()
     //
@@ -1592,10 +1577,11 @@ public:
     //! Close the currently opened variable
     //!
     //! Close the handle for variable opened with OpenVariableRead()
+    //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
     //!
     //! \sa  OpenVariableRead()
     //
-    virtual int CloseVariable() { return (_closeVariable()); }
+    virtual int CloseVariable(int fd) { return (_closeVariable(fd)); }
 
     //! Read all spatial values of the currently opened variable
     //!
@@ -1608,14 +1594,15 @@ public:
     //! It is the caller's responsibility to ensure \p data points
     //! to adequate space.
     //!
+    //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
     //! \param[out] data An array of data to be written
     //! \retval status Returns a non-negative value on success
     //!
     //! \sa OpenVariableRead()
     //
-    int virtual Read(float *data) { return (read(data)); }
+    int virtual Read(int fd, float *data) { return (_readTemplate(fd, data)); }
 
-    int virtual Read(int *data) { return (read(data)); }
+    int virtual Read(int fd, int *data) { return (_readTemplate(fd, data)); }
 
     //! Read a single slice of data from the currently opened variable
     //!
@@ -1634,13 +1621,14 @@ public:
     //! It is the caller's responsibility to ensure \p slice points
     //! to adequate space.
     //!
+    //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
     //! \param[out] slice A slice of data
     //! \retval status Returns a non-negative value on success
     //!
     //! \sa OpenVariableRead()
     //!
-    virtual int ReadSlice(float *slice) { return (_readSliceTemplate(slice)); }
-    virtual int ReadSlice(int *slice) { return (_readSliceTemplate(slice)); }
+    virtual int ReadSlice(int fd, float *slice) { return (_readSliceTemplate(fd, slice)); }
+    virtual int ReadSlice(int fd, int *slice) { return (_readSliceTemplate(fd, slice)); }
 
     //! Read in and return a subregion from the currently opened
     //! variable
@@ -1658,6 +1646,7 @@ public:
     //! returned is stored in the memory region pointed to by \p region. It
     //! is the caller's responsbility to ensure adequate space is available.
     //!
+    //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
     //! \param[in] min Minimum region extents in grid coordinates
     //! \param[in] max Maximum region extents in grid coordinates
     //! \param[out] region The requested volume subregion
@@ -1665,8 +1654,8 @@ public:
     //! \retval status Returns a non-negative value on success
     //! \sa OpenVariableRead(), GetDimLensAtLevel(), GetDimensionNames()
     //
-    virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegion(min, max, region)); }
-    virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegion(min, max, region)); }
+    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegion(fd, min, max, region)); }
+    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegion(fd, min, max, region)); }
 
     //! Read in and return a blocked subregion from the currently opened
     //! variable.
@@ -1674,6 +1663,7 @@ public:
     //! This method is identical to ReadRegion() with the exceptions
     //! that for compressed variables:
     //!
+    //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
     //! \li The vectors \p start and \p count must be aligned
     //! with the underlying storage block of the variable. See
     //! DC::SetCompressionBlock()
@@ -1681,8 +1671,8 @@ public:
     //! \li The hyperslab copied to \p region will preserve its underlying
     //! storage blocking (the data will not be contiguous)
     //!
-    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegionBlock(min, max, region)); }
-    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegionBlock(min, max, region)); }
+    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegionBlock(fd, min, max, region)); }
+    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegionBlock(fd, min, max, region)); }
 
     //! Read an entire variable in one call
     //!
@@ -2050,7 +2040,46 @@ public:
     //!
     std::vector<string> GetTimeCoordVarNames() const;
 
+    class FileTable {
+    public:
+        FileTable();
+        virtual ~FileTable();
+
+        class FileObject {
+        public:
+            FileObject() : _ts(0), _varname(""), _level(0), _lod(0), _slice(0), _aux(0) {}
+
+            FileObject(size_t ts, string varname, int level = 0, int lod = 0, int aux = 0) : _ts(ts), _varname(varname), _level(level), _lod(lod), _slice(0), _aux(aux) {}
+
+            size_t GetTS() const { return (_ts); }
+            string GetVarname() const { return (_varname); }
+            int    GetLevel() const { return (_level); }
+            int    GetLOD() const { return (_lod); }
+            int    GetSlice() const { return (_slice); }
+            void   SetSlice(int slice) { _slice = slice; }
+            int    GetAux() const { return (_aux); }
+
+        private:
+            size_t _ts;
+            string _varname;
+            int    _level;
+            int    _lod;
+            int    _slice;
+            int    _aux;
+        };
+
+        int         AddEntry(FileObject *obj);
+        FileObject *GetEntry(int fd) const;
+        void        RemoveEntry(int fd);
+        vector<int> GetEntries() const;
+
+    private:
+        std::vector<FileTable::FileObject *> _table;
+    };
+
 protected:
+    DC::FileTable _fileTable;
+
     //! \copydoc Initialize()
     //
     virtual int initialize(const std::vector<string> &paths, const std::vector<string> &options = std::vector<string>()) = 0;
@@ -2127,17 +2156,9 @@ protected:
     //
     virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const = 0;
 
-    //! \copydoc GetMapProjection(string varname)
-    //
-    virtual string getMapProjection(string varname) const = 0;
-
     //! \copydoc GetMapProjection()
     //
     virtual string getMapProjection() const = 0;
-
-    //! \copydoc GetMapProjectionDefault()
-    //
-    virtual string getMapProjectionDefault() const = 0;
 
     //! \copydoc OpenVariableRead()
     //
@@ -2145,43 +2166,25 @@ protected:
 
     //! \copydoc CloseVariable()
     //
-    virtual int closeVariable() = 0;
-
-    //! \copydoc Read()
-    //
-    virtual int read(float *data) = 0;
-
-    //! \copydoc Read()
-    //
-    virtual int read(int *data) = 0;
-
-    //! \copydoc readSlice()
-    //
-    virtual int readSlice(float *slice) = 0;
+    virtual int closeVariable(int fd) = 0;
 
     //! \copydoc ReadRegion()
     //
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
 
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
     //! \copydoc ReadRegionBlock()
     //
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
 
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
     //! \copydoc VariableExists()
     //
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const = 0;
 
 private:
-    size_t _ovrTS;
-    string _ovrVarName;
-    int    _ovrLevel;
-    int    _ovrLOD;
-    int    _ovrSliceNum;
-
     virtual bool _getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const;
 
     virtual bool _getDataVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const;
@@ -2190,9 +2193,11 @@ private:
 
     virtual int _openVariableRead(size_t ts, string varname, int level = 0, int lod = 0);
 
-    virtual int _closeVariable();
+    virtual int _closeVariable(int fd);
 
-    template<class T> int _readSliceTemplate(T *slice);
+    template<class T> int _readSliceTemplate(int fd, T *slice);
+
+    template<class T> int _readTemplate(int fd, T *data);
 
     template<class T> int _getVarTemplate(string varname, int level, int lod, T *data);
 

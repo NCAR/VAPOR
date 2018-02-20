@@ -33,6 +33,7 @@ bool readSliceOK(vector<size_t> dims, size_t start[], size_t count[])
 
 bool readOK(vector<size_t> dims, size_t start[], size_t count[])
 {
+    if (dims.size() == 0) return (true);
     if (dims.size() != 1) return (false);
     if (count[0] != dims[0]) return (false);
     if (start[0] != 0) return (false);
@@ -868,6 +869,8 @@ int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vec
     lastd = unique(times.begin(), times.end());
     times.erase(lastd, times.end());
 
+    if (times.empty()) { times.push_back(0.0); }
+
     //
     // Create an entry for constant variables, which are defined at all times
     //
@@ -878,6 +881,11 @@ int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vec
 int NetCDFCollection::_InitializeTimesMapCase1(const vector<string> &files, map<string, vector<double>> &timesMap) const
 {
     timesMap.clear();
+
+    // If only on file and no time dimensions than there is no
+    //
+    if (files.size() < 2) return (0);
+
     map<string, double> currentTime;    // current time for each variable
 
     // Case 1: No TDs or TCVs => synthesize TCV
@@ -1642,7 +1650,9 @@ int NetCDFCollection::TimeVaryingVar::Insert(const NetCDFSimple *netcdf, const N
     if (variable.GetDimNames().size()) {
         string s = variable.GetDimNames()[0];
 
-        if (time_dimnames.empty()) {    // Handle ITVV case
+        // Handle ITVV case
+        //
+        if (time_dimnames.empty() && timesmap.size() > 1) {
             time_varying = true;
             time_name = "";
         } else if (find(time_dimnames.begin(), time_dimnames.end(), s) != time_dimnames.end()) {

@@ -32,6 +32,201 @@ size_t vproduct(vector<size_t> a)
 
 };    // namespace
 
+DC::Attribute::Attribute(string name, XType type, const vector<float> &values)
+{
+    _name = name;
+    _type = type;
+    _values.clear();
+    Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector<float> &values)
+{
+    _values.clear();
+    vector<double> dvec;
+    for (int i = 0; i < values.size(); i++) { dvec.push_back((double)values[i]); }
+    DC::Attribute::SetValues(dvec);
+}
+
+DC::Attribute::Attribute(string name, XType type, const vector<double> &values)
+{
+    _name = name;
+    _type = type;
+    _values.clear();
+    Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector<double> &values)
+{
+    _values.clear();
+    for (int i = 0; i < values.size(); i++) {
+        podunion pod;
+        if (_type == FLOAT) {
+            pod.f = (float)values[i];
+        } else if (_type == DOUBLE) {
+            pod.d = (double)values[i];
+        } else if (_type == INT32) {
+            pod.i = (int)values[i];
+        } else if (_type == INT64) {
+            pod.l = (int)values[i];
+        } else if (_type == TEXT) {
+            pod.c = (char)values[i];
+        }
+        _values.push_back(pod);
+    }
+}
+
+DC::Attribute::Attribute(string name, XType type, const vector<int> &values)
+{
+    _name = name;
+    _type = type;
+    _values.clear();
+    Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector<int> &values)
+{
+    _values.clear();
+    vector<long> lvec;
+    for (int i = 0; i < values.size(); i++) { lvec.push_back((long)values[i]); }
+    DC::Attribute::SetValues(lvec);
+}
+
+DC::Attribute::Attribute(string name, XType type, const vector<long> &values)
+{
+    _name = name;
+    _type = type;
+    _values.clear();
+    Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector<long> &values)
+{
+    _values.clear();
+
+    for (int i = 0; i < values.size(); i++) {
+        podunion pod;
+        if (_type == FLOAT) {
+            pod.f = (float)values[i];
+        } else if (_type == DOUBLE) {
+            pod.d = (double)values[i];
+        } else if (_type == INT32) {
+            pod.i = (int)values[i];
+        } else if (_type == INT64) {
+            pod.l = (long)values[i];
+        } else if (_type == TEXT) {
+            pod.c = (char)values[i];
+        }
+        _values.push_back(pod);
+    }
+}
+
+DC::Attribute::Attribute(string name, XType type, const string &values)
+{
+    _name = name;
+    _type = type;
+    _values.clear();
+    Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const string &values)
+{
+    _values.clear();
+    for (int i = 0; i < values.size(); i++) {
+        podunion pod;
+        if (_type == FLOAT) {
+            pod.f = (float)values[i];
+        } else if (_type == DOUBLE) {
+            pod.d = (double)values[i];
+        } else if (_type == INT32) {
+            pod.i = (int)values[i];
+        } else if (_type == INT64) {
+            pod.l = (long)values[i];
+        } else if (_type == TEXT) {
+            pod.c = (char)values[i];
+        }
+        _values.push_back(pod);
+    }
+}
+
+void DC::Attribute::GetValues(vector<float> &values) const
+{
+    values.clear();
+
+    vector<double> dvec;
+    DC::Attribute::GetValues(dvec);
+    for (int i = 0; i < dvec.size(); i++) { values.push_back((float)dvec[i]); }
+}
+
+void DC::Attribute::GetValues(vector<double> &values) const
+{
+    values.clear();
+
+    for (int i = 0; i < _values.size(); i++) {
+        podunion pod = _values[i];
+        if (_type == FLOAT) {
+            values.push_back((double)pod.f);
+        } else if (_type == DOUBLE) {
+            values.push_back((double)pod.d);
+        } else if (_type == INT32) {
+            values.push_back((double)pod.i);
+        } else if (_type == INT64) {
+            values.push_back((double)pod.l);
+        } else if (_type == TEXT) {
+            values.push_back((double)pod.c);
+        }
+    }
+}
+
+void DC::Attribute::GetValues(vector<int> &values) const
+{
+    values.clear();
+
+    vector<long> lvec;
+    DC::Attribute::GetValues(lvec);
+    for (int i = 0; i < lvec.size(); i++) { values.push_back((int)lvec[i]); }
+}
+
+void DC::Attribute::GetValues(vector<long> &values) const
+{
+    values.clear();
+
+    for (int i = 0; i < _values.size(); i++) {
+        podunion pod = _values[i];
+        if (_type == FLOAT) {
+            values.push_back((long)pod.f);
+        } else if (_type == DOUBLE) {
+            values.push_back((long)pod.d);
+        } else if (_type == INT32) {
+            values.push_back((long)pod.i);
+        } else if (_type == INT64) {
+            values.push_back((long)pod.l);
+        } else if (_type == TEXT) {
+            values.push_back((long)pod.c);
+        }
+    }
+}
+
+void DC::Attribute::GetValues(string &values) const
+{
+    values.clear();
+
+    for (int i = 0; i < _values.size(); i++) {
+        podunion pod = _values[i];
+        if (_type == FLOAT) {
+            values += (char)pod.f;
+        } else if (_type == DOUBLE) {
+            values += (char)pod.d;
+        } else if (_type == INT32) {
+            values += (char)pod.i;
+        } else if (_type == INT64) {
+            values += (char)pod.l;
+        } else if (_type == TEXT) {
+            values += (char)pod.c;
+        }
+    }
+}
+
 DC::BaseVar::BaseVar(string name, string units, XType type, std::vector<size_t> bs, std::vector<bool> periodic) : _name(name), _units(units), _type(type), _bs(bs), _periodic(periodic)
 {
     _wname = "";
@@ -119,14 +314,7 @@ size_t DC::Mesh::GetTopologyDim() const
     }
 }
 
-DC::DC()
-{
-    _ovrTS = 0;
-    _ovrVarName.clear();
-    _ovrLevel = 0;
-    _ovrLOD = 0;
-    _ovrSliceNum = 0;
-}
+DC::DC() {}
 
 int DC::GetHyperSliceInfo(string varname, int level, std::vector<size_t> &hslice_dims, size_t &nslice)
 {
@@ -287,38 +475,36 @@ bool DC::_getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions)
     return (true);
 }
 
-int DC::_openVariableRead(size_t ts, string varname, int level, int lod)
-{
-    _ovrTS = ts;
-    _ovrVarName = varname;
-    _ovrLevel = level;
-    _ovrLOD = lod;
-    _ovrSliceNum = 0;
-    return (openVariableRead(ts, varname, level, lod));
-}
+int DC::_openVariableRead(size_t ts, string varname, int level, int lod) { return (openVariableRead(ts, varname, level, lod)); }
 
-int DC::_closeVariable()
-{
-    if (_ovrVarName.empty()) return (0);
+int DC::_closeVariable(int fd) { return (closeVariable(fd)); }
 
-    return (closeVariable());
-}
-
-template<class T> int DC::_readSliceTemplate(T *slice)
+template<class T> int DC::_readSliceTemplate(int fd, T *slice)
 {
     vector<size_t> dims_at_level;
     vector<size_t> bs_at_level;
 
-    int rc = GetDimLensAtLevel(_ovrVarName, _ovrLevel, dims_at_level, bs_at_level);
+    FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+
+    string varname = f->GetVarname();
+    int    level = f->GetLevel();
+    int    sliceNum = f->GetSlice();
+
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
     if (rc < 0) return (rc);
 
     vector<size_t> hslice_dims;
     size_t         nslice;
-    rc = GetHyperSliceInfo(_ovrVarName, _ovrLevel, hslice_dims, nslice);
+    rc = GetHyperSliceInfo(varname, level, hslice_dims, nslice);
     if (rc < 0) return (rc);
     assert(hslice_dims.size() == dims_at_level.size());
 
-    if (_ovrSliceNum >= nslice) return (0);    // Done reading;
+    if (sliceNum >= nslice) return (0);    // Done reading;
 
     vector<size_t> min;
     vector<size_t> max;
@@ -327,25 +513,50 @@ template<class T> int DC::_readSliceTemplate(T *slice)
         min.push_back(0);
         max.push_back(hslice_dims[dim] - 1);
     };
-    min.push_back(_ovrSliceNum * hslice_dims[dim]);
+    min.push_back(sliceNum * hslice_dims[dim]);
     max.push_back(min[dim] + hslice_dims[dim] - 1);
 
     // Last slice is a partial read if not block-aligned
     //
     if (max[dim] >= dims_at_level[dim]) { max[dim] = dims_at_level[dim] - 1; }
 
-    rc = ReadRegion(min, max, slice);
+    rc = ReadRegion(fd, min, max, slice);
     if (rc < 0) return (rc);
 
-    _ovrSliceNum++;
+    sliceNum++;
+    f->SetSlice(sliceNum);
 
     return (rc);
 }
 
+template<class T> int DC::_readTemplate(int fd, T *data)
+{
+    vector<size_t> dims_at_level;
+    vector<size_t> bs_at_level;
+
+    FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+    string varname = f->GetVarname();
+    int    level = f->GetLevel();
+
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    if (rc < 0) return (rc);
+
+    vector<size_t> min, max;
+    for (int i = 0; i < dims_at_level.size(); i++) {
+        min.push_back(0);
+        max.push_back(dims_at_level[i] - 1);
+    }
+
+    return (ReadRegion(fd, min, max, data));
+}
+
 template<class T> int DC::_getVarTemplate(string varname, int level, int lod, T *data)
 {
-    CloseVariable();
-
     vector<size_t> dims_at_level;
     vector<size_t> dummy;
     int            rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
@@ -371,18 +582,15 @@ template<class T> int DC::_getVarTemplate(string varname, int level, int lod, T 
 
 template<class T> int DC::_getVarTemplate(size_t ts, string varname, int level, int lod, T *data)
 {
-    CloseVariable();
+    int fd = OpenVariableRead(ts, varname, level, lod);
+    if (fd < 0) return (-1);
 
-    int rc = OpenVariableRead(ts, varname, level, lod);
-    if (rc < 0) return (-1);
+    int rc = Read(fd, data);
+    if (fd < 0) return (-1);
 
-    rc = Read(data);
-    if (rc < 0) return (-1);
+    rc = CloseVariable(fd);
 
-    rc = CloseVariable();
-    if (rc < 0) return (-1);
-
-    return (0);
+    return (rc);
 }
 
 bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const
@@ -657,6 +865,59 @@ std::vector<string> DC::GetTimeCoordVarNames() const
         if (cvar.GetAxis() == 3) { timeCoordVars.push_back(cvars[i]); }
     }
     return (timeCoordVars);
+}
+
+DC::FileTable::FileTable() { _table.clear(); }
+
+DC::FileTable::~FileTable()
+{
+    for (int i = 0; i < _table.size(); i++) {
+        if (_table[i]) delete _table[i];
+        _table[i] = NULL;
+    }
+}
+
+int DC::FileTable::AddEntry(DC::FileTable::FileObject *obj)
+{
+    // Try to re-use an existing entry;
+    //
+    for (int i = 0; i < _table.size(); i++) {
+        if (!_table[i]) {
+            _table[i] = obj;
+            return (i);
+        }
+    }
+
+    // Create new entry
+    //
+    _table.push_back(obj);
+    return (_table.size() - 1);
+}
+
+DC::FileTable::FileObject *DC::FileTable::GetEntry(int fd) const
+{
+    if (fd < 0) return (NULL);
+
+    if (fd < _table.size()) return (_table[fd]);
+
+    return (NULL);
+}
+
+void DC::FileTable::RemoveEntry(int fd)
+{
+    if (fd < 0 || fd >= _table.size()) return;
+
+    _table[fd] = NULL;
+}
+
+vector<int> DC::FileTable::GetEntries() const
+{
+    vector<int> fds;
+
+    for (int i = 0; i < _table.size(); i++) {
+        if (_table[i]) { fds.push_back(i); }
+    }
+    return (fds);
 }
 
 namespace VAPoR {

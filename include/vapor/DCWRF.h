@@ -4,14 +4,19 @@
 #include <iostream>
 #include <vapor/MyBase.h>
 #include <vapor/NetCDFCollection.h>
-#include <vapor/Proj4API.h>
 #include <vapor/UDUnitsClass.h>
+#include <vapor/DerivedVarMgr.h>
+#include <vapor/DerivedVar.h>
 #include <vapor/DC.h>
 
 #ifndef _DCWRF_H_
     #define _DCWRF_H_
 
 namespace VAPoR {
+
+class DerivedCoordVar_CF1D;
+class DerivedCoordVar_WRFTime;
+class DerivedCoordVar_Staggered;
 
 //!
 //! \class DCWRF
@@ -96,17 +101,9 @@ protected:
     //!
     virtual size_t getNumRefLevels(string varname) const { return (1); }
 
-    //! \copydoc DC::GetMapProjection(string)
-    //!
-    virtual string getMapProjection(string varname) const;
-
     //! \copydoc DC::GetMapProjection()
     //!
     virtual string getMapProjection() const;
-
-    //! \copydoc DC::GetMapProjection()
-    //!
-    virtual string getMapProjectionDefault() const { return (_proj4StringDefault); }
 
     //! \copydoc DC::GetAtt()
     //!
@@ -134,26 +131,18 @@ protected:
 
     //! \copydoc DC::CloseVariable()
     //!
-    virtual int closeVariable();
-
-    //! \copydoc DC::Read()
-    //!
-    virtual int read(float *data);
-    virtual int read(int *data) { return (_ncdfc->Read(data, _ovr_fd)); }
-
-    //! \copydoc DC::ReadSlice()
-    //!
-    virtual int readSlice(float *slice);
+    virtual int closeVariable(int fd);
 
     //! \copydoc DC::ReadRegion()
     //
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(min, max, region)); }
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(min, max, region)); }
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::ReadRegionBlock()
     //!
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (DCWRF::read(region)); }
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
+
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::VariableExists()
     //!
@@ -178,29 +167,22 @@ private:
     float _p2si;
     float _mapProj;
 
-    int      _ovr_fd;         // File descriptor for currently opened file
-    string   _ovr_varname;    // name of currently opened variable
-    string   _proj4String;
-    string   _proj4StringOption;
-    string   _proj4StringDefault;
-    Proj4API _proj4API;
+    string        _proj4String;
+    DerivedVarMgr _dvm;
 
-    class DerivedVarHorizontal;
-    DerivedVarHorizontal *_derivedX;
-    DerivedVarHorizontal *_derivedY;
-    DerivedVarHorizontal *_derivedXU;
-    DerivedVarHorizontal *_derivedYU;
-    DerivedVarHorizontal *_derivedXV;
-    DerivedVarHorizontal *_derivedYV;
+    class WRFFileObject : public DC::FileTable::FileObject {
+    public:
+        WRFFileObject(size_t ts, string varname, int level, int lod, int fd, bool derivedFlag) : FileObject(ts, varname, level, lod, fd), _derivedFlag(derivedFlag) {}
 
-    class DerivedVarElevation;
-    DerivedVarElevation *_derivedElev;
-    DerivedVarElevation *_derivedElevU;
-    DerivedVarElevation *_derivedElevV;
-    DerivedVarElevation *_derivedElevW;
+        bool GetDerivedFlag() const { return (_derivedFlag); }
 
-    class DerivedVarTime;
-    DerivedVarTime *_derivedTime;
+    private:
+        bool _derivedFlag;
+    };
+
+    std::vector<DerivedVar *> _derivedVars;
+
+    DerivedCoordVar_WRFTime *_derivedTime;
 
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar>  _coordVarsMap;
@@ -218,11 +200,13 @@ private:
 
     int _InitProjection(NetCDFCollection *ncdfc, float radius);
 
-    DerivedVarHorizontal *_InitHorizontalCoordinatesHelper(NetCDFCollection *ncdfc, Proj4API *proj4API, string name, string fastest_dim, int axis, vector<size_t> latlondims);
+    DerivedCoordVar_Staggered *_makeDerivedHorizontal(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames);
 
-    int _InitHorizontalCoordinates(NetCDFCollection *ncdfc, Proj4API *proj4API);
+    int _InitHorizontalCoordinatesHelper(NetCDFCollection *ncdfc, string name, int axis);
 
-    DCWRF::DerivedVarElevation *_InitVerticalCoordinatesHelper(NetCDFCollection *ncdfc, string name, vector<string> sdimnames);
+    int _InitHorizontalCoordinates(NetCDFCollection *ncdfc);
+
+    DerivedCoordVar_CF1D *_InitVerticalCoordinatesHelper(string varName, string dimName);
 
     int _InitVerticalCoordinates(NetCDFCollection *ncdfc);
 
@@ -236,7 +220,9 @@ private:
 
     int _InitVars(NetCDFCollection *ncdfc);
 
-    template<class T> int _readRegionTemplate(const vector<size_t> &min, const vector<size_t> &max, T *region);
+    template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
+
+    template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -282,7 +268,6 @@ private:
         float *             _xysliceBuf;       // buffer for horizontal extrapolation
         int                 _PHfd;
         int                 _PHBfd;           // file descriptors
-        bool                _is_open;         // variable open for reading?
         bool                _xextrapolate;    // need extrapolation along X?
         bool                _yextrapolate;    // need extrapolation along Y?
         bool                _zinterpolate;    // need interpolation along Z?
@@ -290,51 +275,6 @@ private:
         bool                _firstSlice;      // true if first slice for current open variable
 
         int _ReadSlice(float *slice);
-    };
-
-    //
-    // Horizontal coordinate  derived variables. This class computes
-    // horizontal coordinate variables in meters by using a map projection
-    // from geographic to cartographic coordinates
-    //
-    class DerivedVarHorizontal : public NetCDFCollection::DerivedVar {
-    public:
-        DerivedVarHorizontal(NetCDFCollection *ncdfc, string name, const vector<DC::Dimension> &dims, const vector<size_t> latlondims, Proj4API *proj4API);
-        virtual ~DerivedVarHorizontal();
-
-        virtual int                 Open(size_t ts);
-        virtual int                 ReadSlice(float *slice, int);
-        virtual int                 Read(float *buf, int);
-        virtual int                 SeekSlice(int offset, int whence, int);
-        virtual int                 Close(int fd);
-        virtual bool                TimeVarying() const { return (true); };
-        virtual std::vector<size_t> GetSpatialDims() const { return (_sdims); }
-        virtual std::vector<string> GetSpatialDimNames() const { return (_sdimnames); }
-        virtual size_t              GetTimeDim() const { return (_time_dim); }
-        virtual string              GetTimeDimName() const { return (_time_dim_name); }
-        virtual bool                GetMissingValue(double &mv) const { return (false); }
-
-    private:
-        string              _name;             // name of derived variable
-        size_t              _time_dim;         // number of time steps
-        string              _time_dim_name;    // Name of time dimension
-        std::vector<size_t> _sdims;            // spatial dimensions
-        std::vector<string> _sdimnames;        // spatial dimension names
-        size_t              _nx;
-        size_t              _ny;            // spatial dimensions  of XLONG and XLAT variables
-        bool                _is_open;       // Open for reading?
-        float *             _coords;        // cached coordinates
-        float *             _sliceBuf;      // space for reading lat an lon variables
-        float *             _lonBdryBuf;    // boundary points of lat and lon
-        float *             _latBdryBuf;    // boundary points of lat and lon
-        size_t              _ncoords;       // length of coords
-        size_t              _cached_ts;     // 	 time step of cached coordinate
-        string              _lonname;
-        string              _latname;    // name of lat and lon coordinate variables
-        Proj4API *          _proj4API;
-        bool                _hasStagCVars;    // file has coord vars for staggered dimensions?
-
-        int _GetCartCoords(size_t ts);
     };
 
     //

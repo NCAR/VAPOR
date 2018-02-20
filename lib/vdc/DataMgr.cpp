@@ -6,10 +6,13 @@
 #include <cfloat>
 #include <vector>
 #include <map>
+#include <type_traits>
+#include <vapor/GeoUtil.h>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/DerivedVar.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
     #include <float.h>
@@ -316,6 +319,13 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
     _regionsList.clear();
 
     _varInfoCache.Clear();
+
+    _derivedDataVars.clear();
+    _derivedCoordVars.clear();
+    _doTransformHorizontal = false;
+    _doTransformHeight = false;
+    _openVarName.clear();
+    _proj4String.clear();
 }
 
 DataMgr::~DataMgr()
@@ -329,10 +339,49 @@ DataMgr::~DataMgr()
     if (_blk_mem_mgr) delete _blk_mem_mgr;
 
     _blk_mem_mgr = NULL;
+
+    for (int i = 0; i < _derivedVars.size(); i++) {
+        if (_derivedVars[i]) delete _derivedVars[i];
+    }
+    _derivedVars.clear();
+}
+
+int DataMgr::_parseOptions(vector<string> &options)
+{
+    vector<string> newOptions;
+    bool           ok = true;
+    int            i = 0;
+    while (i < options.size() && ok) {
+        if (options[i] == "-proj4") {
+            i++;
+            if (i >= options.size()) {
+                ok = false;
+            } else {
+                _proj4String = options[i];
+            }
+        }
+        if (options[i] == "-project_to_pcs") {
+            _doTransformHorizontal = true;
+        } else {
+            newOptions.push_back(options[i]);
+        }
+        i++;
+    }
+    options = newOptions;
+
+    if (!ok) {
+        SetErrMsg("Error parsing options");
+        return (-1);
+    }
+    return (0);
 }
 
 int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &options)
 {
+    vector<string> deviceOptions = options;
+    int            rc = _parseOptions(deviceOptions);
+    if (rc < 0) return (-1);
+
     Clear();
     if (_dc) delete _dc;
 
@@ -355,13 +404,27 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         return (-1);
     }
 
-    int rc = _dc->Initialize(files, options);
+    rc = _dc->Initialize(files, deviceOptions);
     if (rc < 0) {
         SetErrMsg("Failed to initialize data importer");
         return (-1);
     }
 
-    rc = _get_time_coordinates(_timeCoordinates);
+    // Use UDUnits for unit conversion
+    //
+    rc = _udunits.Initialize();
+    if (rc < 0) {
+        SetErrMsg("Failed to initialize udunits2 library : %s", _udunits.GetErrMsg().c_str());
+        return (-1);
+    }
+
+    rc = _initHorizontalCoordVars();
+    if (rc < 0) {
+        SetErrMsg("Failed to initialize horizontal coordinates");
+        return (-1);
+    }
+
+    rc = _initTimeCoord();
     if (rc < 0) {
         SetErrMsg("Failed to get time coordinates");
         return (-1);
@@ -369,9 +432,49 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
     return (0);
 }
 
+bool DataMgr::GetMesh(string meshname, DC::Mesh &m) const
+{
+    assert(_dc);
+
+    bool ok = _dc->GetMesh(meshname, m);
+    if (!ok) return (ok);
+
+    // Make sure the number of coordinate variables is greater or
+    // equal to the topological dimension. If not, add default coordinate
+    // variables
+    //
+    vector<string> coord_vars = m.GetCoordVars();
+    while (coord_vars.size() < m.GetTopologyDim()) {
+        if (!_hasCoordForAxis(coord_vars, 0)) {
+            coord_vars.insert(coord_vars.begin() + 0, _defaultCoordVar(m, 0));
+            continue;
+        } else if (!_hasCoordForAxis(coord_vars, 1)) {
+            coord_vars.insert(coord_vars.begin() + 1, _defaultCoordVar(m, 1));
+            continue;
+        } else {
+            coord_vars.insert(coord_vars.begin() + 2, _defaultCoordVar(m, 2));
+            continue;
+        }
+    }
+
+    // if requested, replace native horizontal geographic coordiate variables
+    // with derived PCS coordinate variables
+    //
+    if (_doTransformHorizontal) { _assignHorizontalCoords(coord_vars); }
+
+    // if requested, replace native vertical coordiate variables
+    // with derived coordinate variables
+    //
+    if (_doTransformHeight) { _assignVerticalCoords(coord_vars); }
+
+    m.SetCoordVars(coord_vars);
+
+    return (true);
+}
+
 vector<string> DataMgr::GetDataVarNames() const
 {
-    if (!_dc) { return (vector<string>()); }
+    assert(_dc);
 
     vector<string> validvars;
     for (int ndim = 2; ndim <= 3; ndim++) {
@@ -383,19 +486,18 @@ vector<string> DataMgr::GetDataVarNames() const
 
 vector<string> DataMgr::GetDataVarNames(int ndim) const
 {
-    if (!_dc) { return (vector<string>()); }
-    //
-    // NEED TO HANDLE DERIVED VARS
-    //
+    assert(_dc);
+
     vector<string> vars = _dc->GetDataVarNames(ndim);
+    vector<string> derived_vars = _getDataVarNamesDerived(ndim);
+    vars.insert(vars.end(), derived_vars.begin(), derived_vars.end());
+
     vector<string> validVars;
     for (int i = 0; i < vars.size(); i++) {
         // If we don't have a grid class to support this variable reject it
         //
         if (_get_grid_type(vars[i]) == UNDEFINED) continue;
 
-        // If the variable is missing coordinate variables reject it
-        //
         vector<string> coordvars;
         GetVarCoordVars(vars[i], true, coordvars);
         if (coordvars.size() < ndim) continue;
@@ -407,70 +509,115 @@ vector<string> DataMgr::GetDataVarNames(int ndim) const
 
 vector<string> DataMgr::GetCoordVarNames() const
 {
-    if (!_dc) { return (vector<string>()); }
-    //
-    // NEED TO HANDLE DERIVED VARS
-    //
-    return (_dc->GetCoordVarNames());
+    assert(_dc);
+
+    vector<string> vars = _dc->GetCoordVarNames();
+    vector<string> derived_vars = _getCoordVarNamesDerived();
+    vars.insert(vars.end(), derived_vars.begin(), derived_vars.end());
+
+    return (vars);
 }
 
 string DataMgr::GetTimeCoordVarName() const
 {
-    if (!_dc) return ("");
+    assert(_dc);
+
+    // There can be only one time coordinate variable. If a
+    // derived one exists, use it.
+    //
+    string var = _getTimeCoordVarNameDerived();
+    if (!var.empty()) return (var);
 
     vector<string> cvars = _dc->GetTimeCoordVarNames();
-    if (!cvars.size()) return ("");
+    assert(cvars.size());
 
     return (cvars[0]);
 }
 
 bool DataMgr::GetVarCoordVars(string varname, bool spatial, std::vector<string> &coord_vars) const
 {
-    if (!_dc) { return (false); }
+    assert(_dc);
 
-    //
-    // NEED TO HANDLE DERIVED VARS
-    //
-    return (_dc->GetVarCoordVars(varname, spatial, coord_vars));
+    coord_vars.clear();
+
+    DC::DataVar dvar;
+    bool        status = GetDataVarInfo(varname, dvar);
+    if (!status) return (false);
+
+    DC::Mesh m;
+    status = GetMesh(dvar.GetMeshName(), m);
+    if (!status) return (false);
+
+    coord_vars = m.GetCoordVars();
+
+    if (spatial) return (true);
+
+    if (!dvar.GetTimeCoordVar().empty()) { coord_vars.push_back(dvar.GetTimeCoordVar()); }
+
+    return (true);
 }
 
 bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const
 {
-    if (!_dc) { return (false); }
+    assert(_dc);
+
+    bool ok = _getDataVarInfoDerived(varname, var);
+    if (!ok) { ok = _dc->GetDataVarInfo(varname, var); }
+    if (!ok) return (ok);
+
+    // Replace native time coordinate variables that are not expressed
+    // in units of seconds with derived variables having units of seconds
     //
-    // NEED TO HANDLE DERIVED VARS
-    //
-    return (_dc->GetDataVarInfo(varname, var));
+    string time_coord_var = var.GetTimeCoordVar();
+
+    _assignTimeCoord(time_coord_var);
+
+    var.SetTimeCoordVar(time_coord_var);
+
+    return (true);
 }
 
 bool DataMgr::GetCoordVarInfo(string varname, VAPoR::DC::CoordVar &var) const
 {
-    if (!_dc) { return (false); }
-    return (_dc->GetCoordVarInfo(varname, var));
+    assert(_dc);
+
+    bool ok = _getCoordVarInfoDerived(varname, var);
+    if (!ok) { ok = _dc->GetCoordVarInfo(varname, var); }
+    return (ok);
 }
 
 bool DataMgr::GetBaseVarInfo(string varname, VAPoR::DC::BaseVar &var) const
 {
-    if (!_dc) { return (false); }
+    assert(_dc);
 
-    //
-    // NEED TO HANDLE DERIVED VARS
-    //
-    return (_dc->GetBaseVarInfo(varname, var));
+    bool ok = _getBaseVarInfoDerived(varname, var);
+    if (!ok) { ok = _dc->GetBaseVarInfo(varname, var); }
+    return (ok);
 }
 
 bool DataMgr::IsTimeVarying(string varname) const
 {
-    if (!_dc) { return (false); }
+    assert(_dc);
 
+    // If var is a data variable and has a time coordinate variable defined
     //
-    // NEED TO HANDLE DERIVED VARS
+    DC::DataVar dvar;
+    bool        ok = GetDataVarInfo(varname, dvar);
+    if (ok) return (!dvar.GetTimeCoordVar().empty());
+
+    // If var is a coordinate variable and it has a time dimension
     //
-    return (_dc->IsTimeVarying(varname));
+    DC::CoordVar cvar;
+    ok = GetCoordVarInfo(varname, cvar);
+    if (ok) return (!cvar.GetTimeDimName().empty());
+
+    return (false);
 }
 
 bool DataMgr::IsCompressed(string varname) const
 {
+    assert(_dc);
+
     DC::BaseVar var;
 
     // No error checking here!!!!!
@@ -483,26 +630,50 @@ bool DataMgr::IsCompressed(string varname) const
 
 int DataMgr::GetNumTimeSteps(string varname) const
 {
-    if (!_dc) { return (0); }
+    assert(_dc);
 
+    // If data variable get it's time coordinate variable if it exists
     //
-    // NEED TO HANDLE DERIVED VARS
-    //
-    return (_dc->GetNumTimeSteps(varname));
+    if (_isDataVar(varname)) {
+        DC::DataVar var;
+        bool        ok = GetDataVarInfo(varname, var);
+        if (!ok) return (0);
+
+        string time_coord_var = var.GetTimeCoordVar();
+        if (time_coord_var.empty()) return (1);
+        varname = time_coord_var;
+    }
+
+    DC::CoordVar var;
+    bool         ok = GetCoordVarInfo(varname, var);
+    if (!ok) return (0);
+
+    string time_dim_name = var.GetTimeDimName();
+    if (time_dim_name.empty()) return (1);
+
+    DC::Dimension dim;
+    ok = GetDimension(time_dim_name, dim);
+    if (!ok) return (0);
+
+    return (dim.GetLength());
 }
 
 int DataMgr::GetNumTimeSteps() const { return (_timeCoordinates.size()); }
 
 size_t DataMgr::GetNumRefLevels(string varname) const
 {
-    if (!_dc) { return (1); }
+    assert(_dc);
+
     if (varname == "") return 1;
+
+    if (IsVariableDerived(varname)) return (1);
+
     return (_dc->GetNumRefLevels(varname));
 }
 
 vector<size_t> DataMgr::GetCRatios(string varname) const
 {
-    if (!_dc) { return (vector<size_t>(1, 1)); }
+    assert(_dc);
 
     DC::BaseVar var;
     int         rc = GetBaseVarInfo(varname, var);
@@ -545,7 +716,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     // Make sure variable dimensions match extents specification
     //
     vector<string> coord_vars;
-    bool           ok = DataMgr::GetVarCoordVars(varname, true, coord_vars);
+    bool           ok = GetVarCoordVars(varname, true, coord_vars);
     assert(ok);
 
     while (min.size() > coord_vars.size()) {
@@ -569,7 +740,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
 
 Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless)
 {
-    if (!DataMgr::VariableExists(ts, varname, level, lod)) {
+    if (!VariableExists(ts, varname, level, lod)) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (NULL);
     }
@@ -592,27 +763,98 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
     return (DataMgr::_getVariable(ts, varname, level, lod, min, max, lock, dataless));
 }
 
+// Find the subset of the data dimension that are the coord dimensions
+//
+void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &data_min, const vector<size_t> &data_max, string coord_varname, vector<size_t> &coord_min,
+                                    vector<size_t> &coord_max) const
+{
+    assert(data_min.size() == data_max.size());
+    coord_min.clear();
+    coord_max.clear();
+
+    vector<string> data_dimnames;
+    bool           ok = _getVarDimNames(data_varname, data_dimnames);
+    assert(ok);
+    assert(data_dimnames.size() == data_min.size());
+
+    vector<string> coord_dimnames;
+    ok = _getVarDimNames(coord_varname, coord_dimnames);
+    assert(ok);
+
+    int i = 0;
+    for (int j = 0; j < coord_dimnames.size(); j++) {
+        while (data_dimnames[i] != coord_dimnames[j] && i < data_dimnames.size()) { i++; }
+        assert(i < data_dimnames.size());
+        coord_min.push_back(data_min[i]);
+        coord_max.push_back(data_max[i]);
+    }
+}
+
 int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims,
                              vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec,
                              vector<vector<size_t>> &bmaxvec) const
 {
     varnames.clear();
+    roi_dims.clear();
     dims_at_levelvec.clear();
     bsvec.clear();
     bs_at_levelvec.clear();
     bminvec.clear();
     bmaxvec.clear();
-    roi_dims.clear();
 
     vector<string> cvarnames;
-    bool           ok = _dc->GetVarCoordVars(varname, true, cvarnames);
+    bool           ok = GetVarCoordVars(varname, true, cvarnames);
+    assert(ok);
+
+    varnames.push_back(varname);
+    varnames.insert(varnames.end(), cvarnames.begin(), cvarnames.end());
+
+    // Compute dimenions of ROI
+    //
+    for (int i = 0; i < min.size(); i++) { roi_dims.push_back(max[i] - min[i] + 1); }
+
+    for (int i = 0; i < varnames.size(); i++) {
+        vector<size_t> dims;
+        vector<size_t> bs;
+        int            rc = DataMgr::GetDimLensAtLevel(varnames[i], -1, dims, bs);
+        assert(rc >= 0);
+
+        // Grid and block dimensions at requested refinement
+        //
+        vector<size_t> bs_at_level;
+        vector<size_t> dims_at_level;
+        rc = DataMgr::GetDimLensAtLevel(varnames[i], level, dims_at_level, bs_at_level);
+        assert(rc >= 0);
+
+        // Map data indices to coordinate indices. Coordinate indices
+        // are a subset of the data indices.
+        //
+        vector<size_t> myMin, myMax;
+        _setupCoordVecsHelper(varnames[0], min, max, varnames[i], myMin, myMax);
+
+        // Map voxel coordinates into block coordinates
+        //
+        vector<size_t> bmin, bmax;
+        map_vox_to_blk(bs_at_level, myMin, bmin);
+        map_vox_to_blk(bs_at_level, myMax, bmax);
+
+        dims_at_levelvec.push_back(dims_at_level);
+        bsvec.push_back(bs);
+        bs_at_levelvec.push_back(bs_at_level);
+        bminvec.push_back(bmin);
+        bmaxvec.push_back(bmax);
+    }
+
+#ifdef DEAD
+    vector<string> cvarnames;
+    bool           ok = GetVarCoordVars(varname, true, cvarnames);
     if (!ok) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
     }
 
     vector<string> dimnames;
-    ok = _dc->GetVarDimNames(varname, true, dimnames);
+    ok = _getVarDimNames(varname, dimnames);
     if (!ok) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
@@ -655,7 +897,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
         string name = varnames[i];
 
         vector<string> my_dimnames;
-        bool           ok = _dc->GetVarDimNames(name, true, my_dimnames);
+        bool           ok = _getVarDimNames(name, my_dimnames);
         if (!ok) {
             SetErrMsg("Invalid variable reference : %s", name.c_str());
             return (-1);
@@ -681,6 +923,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
         bmaxvec.push_back(my_bmax);
     }
 
+#endif
     return (0);
 }
 
@@ -701,7 +944,7 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, const
     string edge_node_var;
     string edge_face_var;
 
-    bool ok = _dc->GetVarConnVars(varname, face_node_var, node_face_var, face_edge_var, face_face_var, edge_node_var, edge_face_var);
+    bool ok = _getVarConnVars(varname, face_node_var, node_face_var, face_edge_var, face_face_var, edge_node_var, edge_face_var);
     if (!ok) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
@@ -825,7 +1068,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         }
 #endif
     } else {
-        rg = _make_grid(level, lod, dvar, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
+        rg = _make_grid(ts, level, lod, dvar, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
         assert(rg);
     }
 
@@ -856,7 +1099,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     // Make sure variable dimensions match extents specification
     //
     vector<string> coord_vars;
-    bool           ok = DataMgr::GetVarCoordVars(varname, true, coord_vars);
+    bool           ok = GetVarCoordVars(varname, true, coord_vars);
     assert(ok);
 
     while (min.size() > coord_vars.size()) {
@@ -966,12 +1209,12 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 
 int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
-    if (!_dc) {
-        SetErrMsg("Invalid state");
-        return (-1);
-    }
-    int rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
-    if (rc < 0) return (-1);
+    assert(_dc);
+
+    DerivedVar *dvar = _getDerivedVar(varname);
+    if (dvar) { return (dvar->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level)); }
+
+    return (_dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
 
     return (0);
 }
@@ -1072,6 +1315,41 @@ void DataMgr::RemovePipeline(string name)
 
 #endif
 
+vector<string> DataMgr::_get_var_dependencies(string varname) const
+{
+    vector<string> varnames = {varname};
+
+    // No dependencies
+    //
+    if (!_isDataVar(varname)) return (varnames);
+
+    vector<string> cvars;
+    bool           ok = GetVarCoordVars(varname, false, cvars);
+    if (ok) {
+        for (int i = 0; i < cvars.size(); i++) varnames.push_back(cvars[i]);
+    }
+
+    // Test for connectivity variables, if any
+    //
+    string face_node_var;
+    string node_face_var;
+    string face_edge_var;
+    string face_face_var;
+    string edge_node_var;
+    string edge_face_var;
+    ok = _getVarConnVars(varname, face_node_var, node_face_var, face_edge_var, face_face_var, edge_node_var, edge_face_var);
+    if (ok) {
+        if (!face_node_var.empty()) varnames.push_back(face_node_var);
+        if (!node_face_var.empty()) varnames.push_back(node_face_var);
+        if (!face_edge_var.empty()) varnames.push_back(face_edge_var);
+        if (!face_face_var.empty()) varnames.push_back(face_face_var);
+        if (!edge_node_var.empty()) varnames.push_back(edge_node_var);
+        if (!edge_face_var.empty()) varnames.push_back(edge_face_var);
+    }
+
+    return (varnames);
+}
+
 bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) const
 {
     // disable error reporting
@@ -1097,32 +1375,7 @@ bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) cons
     // If a data variable need to test for existance of all coordinate
     // variables
     //
-    vector<string> varnames;
-    varnames.push_back(varname);
-
-    vector<string> cvars;
-    bool           ok = _dc->GetVarCoordVars(varname, false, cvars);
-    if (!ok) return (false);
-
-    for (int i = 0; i < cvars.size(); i++) varnames.push_back(cvars[i]);
-
-    // Test for connectivity variables, if any
-    //
-    string face_node_var;
-    string node_face_var;
-    string face_edge_var;
-    string face_face_var;
-    string edge_node_var;
-    string edge_face_var;
-    ok = _dc->GetVarConnVars(varname, face_node_var, node_face_var, face_edge_var, face_face_var, edge_node_var, edge_face_var);
-    if (!ok) return (false);
-
-    if (!face_node_var.empty()) varnames.push_back(face_node_var);
-    if (!node_face_var.empty()) varnames.push_back(node_face_var);
-    if (!face_edge_var.empty()) varnames.push_back(face_edge_var);
-    if (!face_face_var.empty()) varnames.push_back(face_face_var);
-    if (!edge_node_var.empty()) varnames.push_back(edge_node_var);
-    if (!edge_face_var.empty()) varnames.push_back(edge_face_var);
+    vector<string> varnames = _get_var_dependencies(varname);
 
     // Separate native and derived variables. Derived variables are
     // recursively tested
@@ -1141,10 +1394,10 @@ bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) cons
     //
     vector<size_t> exists_vec;
     for (int i = 0; i < native_vars.size(); i++) {
-        if (_varInfoCache.Get(ts, varname, level, lod, key, exists_vec)) { continue; }
+        if (_varInfoCache.Get(ts, native_vars[i], level, lod, key, exists_vec)) { continue; }
         bool exists = _dc->VariableExists(ts, varname, level, lod);
         if (exists) {
-            _varInfoCache.Set(ts, varname, level, lod, key, exists_vec);
+            _varInfoCache.Set(ts, native_vars[i], level, lod, key, exists_vec);
         } else {
             return (false);
         }
@@ -1152,21 +1405,20 @@ bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) cons
 
     // Check derived variables
     //
-#ifdef DEAD
     for (int i = 0; i < derived_vars.size(); i++) {
-        PipeLine *pipeline = get_pipeline_for_var(varnames[i]);
-        if (pipeline == NULL) { return (false); }
+        DerivedVar *derivedVar = _getDerivedVar(derived_vars[i]);
+        if (!derivedVar) return (false);
 
-        vector<string> ivars = pipeline->GetInputs();
+        vector<string> ivars = derivedVar->GetInputs();
 
         //
         // Recursively test existence of all dependencies
         //
         for (int i = 0; i < ivars.size(); i++) {
-            if (!VariableExists(ts, ivars[i], level, lod)) { return (false); }
+            if (!VariableExists(ts, ivars[i], level, lod)) return (false);
         }
     }
-#endif
+
     _varInfoCache.Set(ts, varname, level, lod, key, exists_vec);
     return (true);
 }
@@ -1181,17 +1433,7 @@ bool DataMgr::IsVariableNative(string name) const
     return (false);
 }
 
-bool DataMgr::IsVariableDerived(string name) const
-{
-    if (name.size() == 0) return (false);
-
-    vector<string> svec = _get_derived_variables();
-
-    for (int i = 0; i < svec.size(); i++) {
-        if (name.compare(svec[i]) == 0) return (true);
-    }
-    return (false);
-}
+bool DataMgr::IsVariableDerived(string name) const { return (_getDerivedVar(name) != NULL); }
 
 void DataMgr::Clear()
 {
@@ -1231,14 +1473,41 @@ void DataMgr::UnlockGrid(const Grid *rg)
 
 size_t DataMgr::GetNumDimensions(string varname) const
 {
-    if (!_dc) { return (0); }
-    return (_dc->GetNumDimensions(varname));
+    assert(_dc);
+
+    DC::DataVar dvar;
+    bool        status = GetDataVarInfo(varname, dvar);
+
+    if (status) {
+        DC::Mesh m;
+        status = GetMesh(dvar.GetMeshName(), m);
+        if (!status) return (0);
+
+        return (m.GetDimNames().size());
+    }
+
+    DC::CoordVar cvar;
+    status = GetCoordVarInfo(varname, cvar);
+    if (status) return (cvar.GetDimNames().size());
+
+    return (0);
 }
 
 size_t DataMgr::GetVarTopologyDim(string varname) const
 {
-    if (!_dc) { return (0); }
-    return (_dc->GetVarTopologyDim(varname));
+    assert(_dc);
+
+    DC::DataVar var;
+    bool        status = GetDataVarInfo(varname, var);
+    if (!status) return (0);
+
+    string mname = var.GetMeshName();
+
+    DC::Mesh mesh;
+    status = GetMesh(mname, mesh);
+    if (!status) return (0);
+
+    return (mesh.GetTopologyDim());
 }
 
 template<typename T> T *DataMgr::_get_region_from_cache(size_t ts, string varname, int level, int lod, const vector<size_t> &bmin, const vector<size_t> &bmax, bool lock)
@@ -1286,17 +1555,17 @@ template<typename T> T *DataMgr::_get_region_from_fs(size_t ts, string varname, 
         }
     }
 
-    int rc = _dc->OpenVariableRead(ts, varname, level, lod);
-    if (rc < 0) return (NULL);
+    int fd = _openVariableRead(ts, varname, level, lod);
+    if (fd < 0) return (NULL);
 
-    rc = _dc->ReadRegionBlock(min, max, blks);
+    int rc = _readRegionBlock(fd, min, max, blks);
     if (rc < 0) {
         _free_region(ts, varname, level, lod, bmin, bmax);
-        _dc->CloseVariable();
+        _closeVariable(fd);
         return (NULL);
     }
 
-    rc = _dc->CloseVariable();
+    rc = _closeVariable(fd);
     if (rc < 0) return (NULL);
 
     SetDiagMsg("DataMgr::GetGrid() - data read from fs\n");
@@ -1329,7 +1598,7 @@ T *DataMgr::_get_region(size_t ts, string varname, int level, int nlevels, int l
                 decimate(bmin, bmax, bs_at_level, blks, newblks);
                 return (newblks);
             }
-        } else if (!DataMgr::IsVariableDerived(varname)) {
+        } else {
             vector<size_t> bs_at_level = decimate_dims(bs, -level - 1);
 
             blks = (T *)_get_region_from_fs<T>(ts, varname, level, lod, bs_at_level, bmin, bmax, lock);
@@ -1694,8 +1963,10 @@ vector<string> DataMgr::_get_native_variables() const
 {
     vector<string> v1 = _dc->GetDataVarNames();
     vector<string> v2 = _dc->GetCoordVarNames();
+    vector<string> v3 = _dc->GetAuxVarNames();
 
     v1.insert(v1.end(), v2.begin(), v2.end());
+    v1.insert(v1.end(), v3.begin(), v3.end());
     return (v1);
 }
 
@@ -1706,49 +1977,16 @@ vector<string> DataMgr::_get_derived_variables() const
 {
     vector<string> svec;
 
-#ifdef DEAD
-    for (int i = 0; i < _PipeLines.size(); i++) {
-        const vector<pair<string, VarType_T>> &ovars = _PipeLines[i]->GetOutputs();
-        for (int j = 0; j < ovars.size(); j++) { svec.push_back(ovars[j].first); }
-    }
-#endif
+    map<string, DerivedCoordVar *>::const_iterator itr1;
+    for (itr1 = _derivedCoordVars.begin(); itr1 != _derivedCoordVars.end(); ++itr1) { svec.push_back(itr1->first); }
+
+    map<string, DerivedDataVar *>::const_iterator itr2;
+    for (itr2 = _derivedDataVars.begin(); itr2 != _derivedDataVars.end(); ++itr2) { svec.push_back(itr2->first); }
+
     return (svec);
 }
 
 #ifdef DEAD
-
-DataMgr::VarType_T DataMgr::GetVarType(const string &varname) const
-{
-    if (!DataMgr::IsVariableDerived(varname)) {
-        vector<string> vars = GetVariables3D();
-        for (int i = 0; i < vars.size(); i++) {
-            if (vars[i].compare(varname) == 0) return (VAR3D);
-        }
-
-        vars = GetVariables2DXY();
-        for (int i = 0; i < vars.size(); i++) {
-            if (vars[i].compare(varname) == 0) return (VAR2D_XY);
-        }
-
-        vars = GetVariables2DXZ();
-        for (int i = 0; i < vars.size(); i++) {
-            if (vars[i].compare(varname) == 0) return (VAR2D_XZ);
-        }
-
-        vars = GetVariables2DYZ();
-        for (int i = 0; i < vars.size(); i++) {
-            if (vars[i].compare(varname) == 0) return (VAR2D_YZ);
-        }
-        return (VARUNKNOWN);
-    }
-    for (int i = 0; i < _PipeLines.size(); i++) {
-        const vector<pair<string, VarType_T>> &ovars = _PipeLines[i]->GetOutputs();
-        for (int j = 0; j < ovars.size(); j++) {
-            if (ovars[j].first == varname) { return ovars[j].second; }
-        }
-    }
-    return VARUNKNOWN;
-}
 
 void DataMgr::PurgeVariable(string varname)
 {
@@ -1757,6 +1995,50 @@ void DataMgr::PurgeVariable(string varname)
 }
 
 #endif
+
+bool DataMgr::_is_geographic() const
+{
+    assert(_dc);
+
+    vector<string> varnames = _dc->GetDataVarNames();
+
+    for (int i = 0; i < varnames.size(); i++) {
+        if (_is_geographic(varnames[i])) return (true);
+    }
+
+    return (false);
+}
+
+bool DataMgr::_is_geographic(string varname) const
+{
+    DC::DataVar dvarInfo;
+    bool        ok = _dc->GetDataVarInfo(varname, dvarInfo);
+    if (!ok) return (false);
+
+    string meshname = dvarInfo.GetMeshName();
+    return (_is_geographicMesh(meshname));
+}
+
+bool DataMgr::_is_geographicMesh(string meshname) const
+{
+    DC::Mesh m;
+    bool     status = _dc->GetMesh(meshname, m);
+    if (!status) return (false);
+
+    vector<string> coordVars = m.GetCoordVars();
+
+    for (int i = 0; i < coordVars.size(); i++) {
+        DC::CoordVar varInfo;
+
+        bool ok = _dc->GetCoordVarInfo(coordVars[i], varInfo);
+        assert(ok);
+
+        if (varInfo.GetAxis() == 0 && _udunits.IsLonUnit(varInfo.GetUnits())) { return (true); }
+        if (varInfo.GetAxis() == 1 && _udunits.IsLatUnit(varInfo.GetUnits())) { return (true); }
+    }
+
+    return (false);
+}
 
 string DataMgr::VarInfoCache::_make_hash(string key, size_t ts, vector<string> varnames, int level, int lod)
 {
@@ -1966,7 +2248,7 @@ int DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tcv
 
     // Get space and time coord vars
     //
-    bool ok = _dc->GetVarCoordVars(varname, false, scvars);
+    bool ok = GetVarCoordVars(varname, false, scvars);
     if (!ok) {
         SetErrMsg("Failed to get metadata for variable %s", varname.c_str());
         return (-1);
@@ -1984,26 +2266,32 @@ int DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tcv
     return (0);
 }
 
-int DataMgr::_get_time_coordinates(vector<double> &timecoords)
+int DataMgr::_initTimeCoord()
 {
-    timecoords.clear();
+    _timeCoordinates.clear();
 
-    string timeCoordVar = GetTimeCoordVarName();
+    vector<string> vars = _dc->GetTimeCoordVarNames();
+    if (vars.size() > 1) {
+        SetErrMsg("Data set contains more than one time coordinate");
+        return (-1);
+    }
 
-    // No time coordinates present
-    //
-    if (timeCoordVar.empty()) {
-        timecoords.push_back(0.0);
+    if (vars.size() == 0) {
+        // No time coordinates present
+        //
+        _timeCoordinates.push_back(0.0);
         return (0);
     }
 
-    size_t n = DataMgr::GetNumTimeSteps(timeCoordVar);
+    string timeCoordVar = vars[0];
+
+    size_t n = _dc->GetNumTimeSteps(timeCoordVar);
 
     float *buf = new float[n];
-    int    rc = _dc->GetVar(timeCoordVar, -1, -1, buf);
+    int    rc = _getVar(timeCoordVar, -1, -1, buf);
     if (rc < 0) { return (-1); }
 
-    for (int j = 0; j < n; j++) { timecoords.push_back(buf[j]); }
+    for (int j = 0; j < n; j++) { _timeCoordinates.push_back(buf[j]); }
     delete[] buf;
 
     return (0);
@@ -2094,11 +2382,15 @@ StretchedGrid *DataMgr::_make_grid_stretched(const vector<size_t> &dims, const v
     return (sg);
 }
 
-LayeredGrid *DataMgr::_make_grid_layered(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax) const
+LayeredGrid *DataMgr::_make_grid_layered(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<vector<size_t>> &bs, const vector<vector<size_t>> &bmin,
+                                         const vector<vector<size_t>> &bmax) const
 {
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    assert(bs.size() == 4);
+    assert(bs.size() == bmin.size());
+    assert(bs.size() == bmax.size());
+    assert(dims.size() == bs[0].size());
+    assert(dims.size() == bmin[0].size());
+    assert(dims.size() == bmax[0].size());
 
     // Get horizontal dimensions
     //
@@ -2109,11 +2401,13 @@ LayeredGrid *DataMgr::_make_grid_layered(const vector<size_t> &dims, const vecto
         hmaxu.push_back(coords[dims[i] - 1]);
     }
 
+    // Data blocks
+    //
     size_t nblocks = 1;
     size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
+    for (int i = 0; i < bs[0].size(); i++) {
+        nblocks *= bmax[0][i] - bmin[0][i] + 1;
+        block_size *= bs[0][i];
     }
 
     vector<float *> blkptrs, zcblkptrs;
@@ -2121,27 +2415,41 @@ LayeredGrid *DataMgr::_make_grid_layered(const vector<size_t> &dims, const vecto
     if (blkvec[0]) {
         for (int i = 0; i < nblocks; i++) { blkptrs.push_back(blkvec[0] + i * block_size); }
     }
+
+    // Z Coord blocks
+    //
+    nblocks = 1;
+    block_size = 1;
+    for (int i = 0; i < bs[3].size(); i++) {
+        nblocks *= bmax[3][i] - bmin[3][i] + 1;
+        block_size *= bs[3][i];
+    }
     for (int i = 0; i < nblocks; i++) { zcblkptrs.push_back(blkvec[3] + i * block_size); }
 
-    RegularGrid rg(dims, bs, zcblkptrs, vector<double>(3, 0.0), vector<double>(3, 1.0));
+    RegularGrid rg(dims, bs[3], zcblkptrs, vector<double>(3, 0.0), vector<double>(3, 1.0));
 
-    LayeredGrid *lg = new LayeredGrid(dims, bs, blkptrs, hminu, hmaxu, rg);
+    LayeredGrid *lg = new LayeredGrid(dims, bs[0], blkptrs, hminu, hmaxu, rg);
 
     return (lg);
 }
 
-CurvilinearGrid *DataMgr::_make_grid_curvilinear(int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs,
-                                                 const vector<size_t> &bmin, const vector<size_t> &bmax)
+CurvilinearGrid *DataMgr::_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims, const vector<float *> &blkvec,
+                                                 const vector<vector<size_t>> &bs, const vector<vector<size_t>> &bmin, const vector<vector<size_t>> &bmax)
 {
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    assert(bs.size() >= 3);
+    assert(bs.size() == bmin.size());
+    assert(bs.size() == bmax.size());
+    assert(dims.size() == bs[0].size());
+    assert(dims.size() == bmin[0].size());
+    assert(dims.size() == bmax[0].size());
 
+    // Data blocks
+    //
     size_t nblocks = 1;
     size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
+    for (int i = 0; i < bs[0].size(); i++) {
+        nblocks *= bmax[0][i] - bmin[0][i] + 1;
+        block_size *= bs[0][i];
     }
 
     // block pointers for data
@@ -2151,41 +2459,43 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(int level, int lod, const vecto
         if (blkvec[0]) blkptrs.push_back(blkvec[0] + i * block_size);
     }
 
-    vector<size_t> bs2d, dims2d;
-    vector<double> minu2d, maxu2d;
-    for (int i = 0; i < 2; i++) {
-        bs2d.push_back(bs[i]);
-        dims2d.push_back(dims[i]);
-        minu2d.push_back(0.0);
-        maxu2d.push_back(1.0);
-    }
-
-    size_t nblocks2d = 1;
-    size_t block_size2d = 1;
-    for (int i = 0; i < bs2d.size(); i++) {
-        nblocks2d *= bmax[i] - bmin[i] + 1;
-        block_size2d *= bs[i];
-    }
-
-    // Block pointers for X & Y coordinates, which are always 2D
+    // X horizontal coord blocks
     //
-    vector<float *> xcblkptrs, ycblkptrs;
-    for (int i = 0; i < nblocks2d; i++) {
-        xcblkptrs.push_back(blkvec[1] + i * block_size2d);
-        ycblkptrs.push_back(blkvec[2] + i * block_size2d);
+    nblocks = 1;
+    block_size = 1;
+    for (int i = 0; i < bs[1].size(); i++) {
+        nblocks *= bmax[1][i] - bmin[1][i] + 1;
+        block_size *= bs[1][i];
     }
+
+    vector<float *> xcblkptrs;
+    for (int i = 0; i < nblocks; i++) { xcblkptrs.push_back(blkvec[1] + i * block_size); }
+
+    // Y horizontal coord blocks
+    //
+    nblocks = 1;
+    block_size = 1;
+    for (int i = 0; i < bs[2].size(); i++) {
+        nblocks *= bmax[2][i] - bmin[2][i] + 1;
+        block_size *= bs[2][i];
+    }
+    vector<float *> ycblkptrs;
+    for (int i = 0; i < nblocks; i++) { ycblkptrs.push_back(blkvec[2] + i * block_size); }
 
     vector<double> zcoords;
     if (dims.size() == 3) {
         for (int i = 0; i < dims[2]; i++) zcoords.push_back(blkvec[3][i]);
     }
 
-    RegularGrid xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
-    RegularGrid yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
+    vector<double> minu2d = {0.0, 0.0};
+    vector<double> maxu2d = {1.0, 1.0};
+    vector<size_t> dims2d = {dims[0], dims[1]};
+    RegularGrid    xrg(dims2d, bs[1], xcblkptrs, minu2d, maxu2d);
+    RegularGrid    yrg(dims2d, bs[2], ycblkptrs, minu2d, maxu2d);
 
-    const KDTreeRG *kdtree = _getKDTree2D(level, lod, cvarsinfo, xrg, yrg);
+    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg);
 
-    CurvilinearGrid *g = new CurvilinearGrid(dims, bs, blkptrs, xrg, yrg, zcoords, kdtree);
+    CurvilinearGrid *g = new CurvilinearGrid(dims, bs[0], blkptrs, xrg, yrg, zcoords, kdtree);
 
     return (g);
 }
@@ -2199,11 +2509,12 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     edgeDims.clear();
 
     DC::Mesh m;
-    bool     status = _dc->GetMesh(var.GetMeshName(), m);
+    bool     status = GetMesh(var.GetMeshName(), m);
     assert(status);
 
-    string        dimname = m.GetNodeDimName();
     DC::Dimension dimension;
+
+    string dimname = m.GetNodeDimName();
     status = _dc->GetDimension(dimname, dimension);
     assert(status);
     vertexDims.push_back(dimension.GetLength());
@@ -2238,7 +2549,7 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     string node_face_var;
     string dummy;
 
-    bool ok = _dc->GetVarConnVars(var.GetName(), face_node_var, node_face_var, dummy, dummy, dummy, dummy);
+    bool ok = _getVarConnVars(var.GetName(), face_node_var, node_face_var, dummy, dummy, dummy, dummy);
     assert(ok);
 
     DC::AuxVar auxvar;
@@ -2251,14 +2562,14 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     faceOffset = auxvar.GetOffset();
 }
 
-UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
-                                                       const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax,
+UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
+                                                       const vector<float *> &blkvec, const vector<vector<size_t>> &bs, const vector<vector<size_t>> &bmin, const vector<vector<size_t>> &bmax,
                                                        const vector<int *> &conn_blkvec, const vector<size_t> &conn_bs, const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax)
 {
     assert(dims.size() == 1);
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    assert(dims.size() == bs[0].size());
+    assert(dims.size() == bmin[0].size());
+    assert(dims.size() == bmax[0].size());
     assert(blkvec.size() == 3);
 
     assert(conn_blkvec.size() >= 2);
@@ -2273,35 +2584,42 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(int level, int lod, const
 
     _ugrid_setup(dvarinfo, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
 
-    size_t nblocks = 1;
-    size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
     // block pointers for data
     //
+    size_t nblocks = 1;
+    size_t block_size = 1;
+    for (int i = 0; i < bs[0].size(); i++) {
+        nblocks *= bmax[0][i] - bmin[0][i] + 1;
+        block_size *= bs[0][i];
+    }
+
     vector<float *> blkptrs;
     for (int i = 0; i < nblocks; i++) {
         if (blkvec[0]) blkptrs.push_back(blkvec[0] + i * block_size);
     }
 
-    size_t         nblocks1d = 1;
-    size_t         block_size1d = 1;
-    vector<size_t> bs1d = {bs[0]};
-    for (int i = 0; i < bs1d.size(); i++) {
-        nblocks1d *= bmax[i] - bmin[i] + 1;
-        block_size1d *= bs1d[i];
+    // Block pointers for X coordinates, which are always 1D
+    //
+    nblocks = 1;
+    block_size = 1;
+    for (int i = 0; i < bs[1].size(); i++) {
+        nblocks *= bmax[1][i] - bmin[1][i] + 1;
+        block_size *= bs[1][i];
     }
 
-    // Block pointers for X & Y coordinates, which are always 2D
+    vector<float *> xcblkptrs;
+    for (int i = 0; i < nblocks; i++) { xcblkptrs.push_back(blkvec[1] + i * block_size); }
+
+    // Block pointers for X coordinates, which are always 1D
     //
-    vector<float *> xcblkptrs, ycblkptrs;
-    for (int i = 0; i < nblocks1d; i++) {
-        xcblkptrs.push_back(blkvec[1] + i * block_size1d);
-        ycblkptrs.push_back(blkvec[2] + i * block_size1d);
+    nblocks = 1;
+    block_size = 1;
+    for (int i = 0; i < bs[2].size(); i++) {
+        nblocks *= bmax[2][i] - bmin[2][i] + 1;
+        block_size *= bs[2][i];
     }
+    vector<float *> ycblkptrs;
+    for (int i = 0; i < nblocks; i++) { ycblkptrs.push_back(blkvec[2] + i * block_size); }
 
     // N.B. assumes blkvec contains contiguous blocks :-(
     //
@@ -2309,20 +2627,20 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(int level, int lod, const
     const int *faceOnVertex = conn_blkvec[1];
     const int *faceOnFace = conn_blkvec.size() == 3 ? conn_blkvec[2] : NULL;
 
-    UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs1d, xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex);
+    UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs[1], xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex);
     xug.SetNodeOffset(vertexOffset);
     xug.SetCellOffset(faceOffset);
 
-    UnstructuredGridCoordless yug(vertexDims, faceDims, edgeDims, bs1d, ycblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex);
+    UnstructuredGridCoordless yug(vertexDims, faceDims, edgeDims, bs[2], ycblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex);
     yug.SetNodeOffset(vertexOffset);
     yug.SetCellOffset(faceOffset);
 
     UnstructuredGridCoordless zug;
 
-    const KDTreeRG *kdtree = _getKDTree2D(level, lod, cvarsinfo, xug, yug);
+    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xug, yug);
 
     UnstructuredGrid2D *g =
-        new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs1d, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, zug, kdtree);
+        new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs[0], blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, zug, kdtree);
     g->SetNodeOffset(vertexOffset);
     g->SetCellOffset(faceOffset);
 
@@ -2338,9 +2656,9 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(int level, int lod, const
 //  bmaxvec: ROI offsets in blocks, full domain, data and coordinates
 //
 
-Grid *DataMgr::_make_grid(int level, int lod, const DC::DataVar &var, const vector<size_t> &roi_dims, const vector<size_t> &dims, const vector<float *> &blkvec, const vector<vector<size_t>> &bsvec,
-                          const vector<vector<size_t>> &bminvec, const vector<vector<size_t>> &bmaxvec, const vector<int *> &conn_blkvec, const vector<vector<size_t>> &conn_bsvec,
-                          const vector<vector<size_t>> &conn_bminvec, const vector<vector<size_t>> &conn_bmaxvec)
+Grid *DataMgr::_make_grid(size_t ts, int level, int lod, const DC::DataVar &var, const vector<size_t> &roi_dims, const vector<size_t> &dims, const vector<float *> &blkvec,
+                          const vector<vector<size_t>> &bsvec, const vector<vector<size_t>> &bminvec, const vector<vector<size_t>> &bmaxvec, const vector<int *> &conn_blkvec,
+                          const vector<vector<size_t>> &conn_bsvec, const vector<vector<size_t>> &conn_bminvec, const vector<vector<size_t>> &conn_bmaxvec)
 {
     vector<string> cvars;
     string         dummy;
@@ -2366,11 +2684,11 @@ Grid *DataMgr::_make_grid(int level, int lod, const DC::DataVar &var, const vect
     } else if (grid_type == STRETCHED) {
         rg = _make_grid_stretched(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
     } else if (grid_type == LAYERED) {
-        rg = _make_grid_layered(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
+        rg = _make_grid_layered(roi_dims, blkvec, bsvec, bminvec, bmaxvec);
     } else if (grid_type == CURVILINEAR) {
-        rg = _make_grid_curvilinear(level, lod, cvarsinfo, roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
+        rg = _make_grid_curvilinear(ts, level, lod, cvarsinfo, roi_dims, blkvec, bsvec, bminvec, bmaxvec);
     } else if (grid_type == UNSTRUC_2D) {
-        rg = _make_grid_unstructured2d(level, lod, var, cvarsinfo, roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0], conn_blkvec, conn_bsvec[0], conn_bminvec[0], conn_bmaxvec[0]);
+        rg = _make_grid_unstructured2d(ts, level, lod, var, cvarsinfo, roi_dims, blkvec, bsvec, bminvec, bmaxvec, conn_blkvec, conn_bsvec[0], conn_bminvec[0], conn_bmaxvec[0]);
     }
 
     vector<bool> periodic;
@@ -2390,7 +2708,7 @@ Grid *DataMgr::_make_grid(int level, int lod, const DC::DataVar &var, const vect
 DataMgr::GridType DataMgr::_get_grid_type(const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo) const
 {
     DC::Mesh m;
-    bool     status = _dc->GetMesh(var.GetMeshName(), m);
+    bool     status = GetMesh(var.GetMeshName(), m);
     assert(status);
 
     // First see if we can determine from the Mesh type
@@ -2403,7 +2721,7 @@ DataMgr::GridType DataMgr::_get_grid_type(const DC::DataVar &var, const vector<D
     vector<vector<string>> cdimnames;
     for (int i = 0; i < cvarsinfo.size(); i++) {
         vector<string> v;
-        bool           ok = _dc->GetVarDimNames(cvarsinfo[i].GetName(), true, v);
+        bool           ok = _getVarDimNames(cvarsinfo[i].GetName(), v);
         if (!ok) { return (UNDEFINED); }
 
         cdimnames.push_back(v);
@@ -2595,33 +2913,558 @@ void DataMgr::_unlock_blocks(const void *blks)
     return;
 }
 
-const KDTreeRG *DataMgr::_getKDTree2D(int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg)
+const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg)
 {
     assert(cvarsinfo.size() >= 2);
     assert(xg.GetDimensions() == yg.GetDimensions());
 
     vector<string> varnames;
-    for (int i = 0; i < 2; i++) {
-        assert(cvarsinfo[i].GetTimeDimName().empty());
-        varnames.push_back(cvarsinfo[i].GetName());
-    }
+    for (int i = 0; i < 2; i++) { varnames.push_back(cvarsinfo[i].GetName()); }
 
     const string key = "KDTree";
 
     KDTreeRG *kdtree = NULL;
 
     vector<void *> values;
-    bool           found = _varInfoCache.Get(0, varnames, level, lod, key, values);
+    bool           found = _varInfoCache.Get(ts, varnames, level, lod, key, values);
     if (found) {
         assert(values.size() == 1);
         kdtree = (KDTreeRG *)values[0];
     } else {
         kdtree = new KDTreeRG(xg, yg);
         values.push_back(kdtree);
-        _varInfoCache.Set(0, varnames, level, lod, key, values);
+        _varInfoCache.Set(ts, varnames, level, lod, key, values);
     }
 
     return (kdtree);
+}
+
+vector<string> DataMgr::_getDataVarNamesDerived(int ndim) const
+{
+    vector<string> names;
+
+    map<string, DerivedDataVar *>::const_iterator itr;
+    for (itr = _derivedDataVars.begin(); itr != _derivedDataVars.end(); ++itr) {
+        string name = itr->first;
+
+        DC::DataVar dvar;
+        bool        ok = GetDataVarInfo(name, dvar);
+        if (!ok) continue;
+
+        string mesh_name;
+        mesh_name = dvar.GetMeshName();
+
+        DC::Mesh mesh;
+        ok = GetMesh(mesh_name, mesh);
+        if (!ok) continue;
+
+        size_t d = mesh.GetTopologyDim();
+
+        if (d == ndim) { names.push_back(name); }
+    }
+
+    return (names);
+}
+
+vector<string> DataMgr::_getCoordVarNamesDerived() const
+{
+    vector<string> names;
+
+    map<string, DerivedCoordVar *>::const_iterator itr;
+    for (itr = _derivedCoordVars.begin(); itr != _derivedCoordVars.end(); ++itr) { names.push_back(itr->first); }
+
+    return (names);
+}
+
+string DataMgr::_getTimeCoordVarNameDerived() const
+{
+    vector<string> cvars = _getCoordVarNamesDerived();
+
+    for (int i = 0; i < cvars.size(); i++) {
+        DC::CoordVar varInfo;
+        bool         ok = GetCoordVarInfo(cvars[i], varInfo);
+        if (varInfo.GetAxis() == 3) return (cvars[i]);
+    }
+    return ("");
+}
+
+bool DataMgr::_getDataVarInfoDerived(string varname, VAPoR::DC::DataVar &varInfo) const
+{
+    map<string, DerivedDataVar *>::const_iterator itr = _derivedDataVars.find(varname);
+
+    if (itr == _derivedDataVars.end()) return (false);
+
+    return (itr->second->GetDataVarInfo(varname, varInfo));
+}
+
+bool DataMgr::_getCoordVarInfoDerived(string varname, VAPoR::DC::CoordVar &varInfo) const
+{
+    map<string, DerivedCoordVar *>::const_iterator itr = _derivedCoordVars.find(varname);
+
+    if (itr == _derivedCoordVars.end()) return (false);
+
+    return (itr->second->GetCoordVarInfo(varname, varInfo));
+}
+
+bool DataMgr::_getBaseVarInfoDerived(string varname, VAPoR::DC::BaseVar &varInfo) const
+{
+    map<string, DerivedCoordVar *>::const_iterator itr1;
+
+    itr1 = _derivedCoordVars.find(varname);
+
+    if (itr1 != _derivedCoordVars.end()) { return (itr1->second->GetBaseVarInfo(varname, varInfo)); }
+
+    map<string, DerivedDataVar *>::const_iterator itr2;
+    itr2 = _derivedDataVars.find(varname);
+
+    if (itr2 != _derivedDataVars.end()) { return (itr2->second->GetBaseVarInfo(varname, varInfo)); }
+
+    return (false);
+}
+
+bool DataMgr::_hasCoordForAxis(vector<string> coord_vars, int axis) const
+{
+    for (int i = 0; i < coord_vars.size(); i++) {
+        DC::CoordVar varInfo;
+
+        bool ok = GetCoordVarInfo(coord_vars[i], varInfo);
+        if (!ok) continue;
+
+        if (varInfo.GetAxis() == axis) return (true);
+    }
+    return (false);
+}
+
+string DataMgr::_defaultCoordVar(const DC::Mesh &m, int axis) const
+{
+    assert(axis >= 0 && axis <= 2);
+
+    // For a structured mesh use the coresponding dimension name
+    // as the coordinate variable name. For unstructured nothing
+    // we can do
+    //
+    if (m.GetMeshType() == DC::Mesh::STRUCTURED) {
+        assert(m.GetDimNames().size() >= axis);
+        return (m.GetDimNames()[axis]);
+    } else {
+        return ("");
+    }
+}
+
+void DataMgr::_assignHorizontalCoords(vector<string> &coord_vars) const
+{
+    for (int i = 0; i < coord_vars.size(); i++) {
+        DC::CoordVar varInfo;
+        bool         ok = GetCoordVarInfo(coord_vars[i], varInfo);
+        assert(ok);
+
+        if (_udunits.IsLonUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "X"; }
+        if (_udunits.IsLatUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "Y"; }
+    }
+}
+
+void DataMgr::_assignVerticalCoords(vector<string> &coord_vars) const
+{
+    for (int i = 0; i < coord_vars.size(); i++) {
+        DC::CoordVar varInfo;
+        bool         ok = GetCoordVarInfo(coord_vars[i], varInfo);
+        assert(ok);
+
+        if (varInfo.GetAxis() == 2 && !_udunits.IsLengthUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "Z"; }
+    }
+}
+
+void DataMgr::_assignTimeCoord(string &coord_var) const
+{
+    if (coord_var.empty()) return;
+
+    DC::CoordVar varInfo;
+    bool         ok = GetCoordVarInfo(coord_var, varInfo);
+    assert(ok);
+
+    if (varInfo.GetAxis() == 3 && !_udunits.IsTimeUnit(varInfo.GetUnits())) { coord_var = coord_var + "T"; }
+}
+
+bool DataMgr::_getVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+{
+    dimensions.clear();
+
+    if (!IsVariableDerived(varname)) { return (_dc->GetVarDimensions(varname, true, dimensions)); }
+
+    if (_getDerivedDataVar(varname)) {
+        return (_getDataVarDimensions(varname, dimensions));
+    } else if (_getDerivedCoordVar(varname)) {
+        return (_getCoordVarDimensions(varname, dimensions));
+    } else {
+        return (false);
+    }
+}
+
+bool DataMgr::_getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+{
+    dimensions.clear();
+
+    DC::DataVar var;
+    bool        status = GetDataVarInfo(varname, var);
+    if (!status) return (false);
+
+    string mname = var.GetMeshName();
+
+    DC::Mesh mesh;
+    status = GetMesh(mname, mesh);
+    if (!status) return (false);
+
+    vector<string> dimnames;
+    if (mesh.GetMeshType() == DC::Mesh::STRUCTURED) {
+        dimnames = mesh.GetDimNames();
+    } else {
+        switch (var.GetSamplingLocation()) {
+        case DC::Mesh::NODE: dimnames.push_back(mesh.GetNodeDimName()); break;
+        case DC::Mesh::EDGE: dimnames.push_back(mesh.GetEdgeDimName()); break;
+        case DC::Mesh::FACE: dimnames.push_back(mesh.GetFaceDimName()); break;
+        case DC::Mesh::VOLUME: assert(0 && "VOLUME cells not supported"); break;
+        }
+        if (mesh.GetMeshType() == DC::Mesh::UNSTRUC_LAYERED) { dimnames.push_back(mesh.GetLayersDimName()); }
+    }
+
+    for (int i = 0; i < dimnames.size(); i++) {
+        DC::Dimension dim;
+
+        status = _dc->GetDimension(dimnames[i], dim);
+        if (!status) return (false);
+
+        dimensions.push_back(dim);
+    }
+
+    return (true);
+}
+
+bool DataMgr::_getCoordVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+{
+    dimensions.clear();
+
+    DC::CoordVar var;
+    bool         status = GetCoordVarInfo(varname, var);
+    if (!status) return (false);
+
+    vector<string> dimnames = var.GetDimNames();
+
+    for (int i = 0; i < dimnames.size(); i++) {
+        DC::Dimension dim;
+        status = _dc->GetDimension(dimnames[i], dim);
+        if (!status) return (false);
+
+        dimensions.push_back(dim);
+    }
+    return (true);
+}
+
+bool DataMgr::_getVarDimNames(string varname, vector<string> &dimnames) const
+{
+    dimnames.clear();
+
+    vector<DC::Dimension> dims;
+
+    bool status = _getVarDimensions(varname, dims);
+    if (!status) return (status);
+
+    for (int i = 0; i < dims.size(); i++) { dimnames.push_back(dims[i].GetName()); }
+
+    return (true);
+}
+
+bool DataMgr::_getVarConnVars(string varname, string &face_node_var, string &node_face_var, string &face_edge_var, string &face_face_var, string &edge_node_var, string &edge_face_var) const
+{
+    face_node_var.clear();
+    node_face_var.clear();
+    face_edge_var.clear();
+    face_face_var.clear();
+    edge_node_var.clear();
+    edge_face_var.clear();
+
+    DC::DataVar dvar;
+    bool        status = GetDataVarInfo(varname, dvar);
+    if (!status) return (false);
+
+    DC::Mesh m;
+    status = GetMesh(dvar.GetMeshName(), m);
+    if (!status) return (false);
+
+    face_node_var = m.GetFaceNodeVar();
+    node_face_var = m.GetNodeFaceVar();
+    face_edge_var = m.GetFaceEdgeVar();
+    face_face_var = m.GetFaceFaceVar();
+    edge_node_var = m.GetEdgeNodeVar();
+    edge_face_var = m.GetEdgeFaceVar();
+
+    return (true);
+}
+
+DerivedVar *DataMgr::_getDerivedVar(string varname) const
+{
+    DerivedVar *dvar;
+
+    dvar = _getDerivedDataVar(varname);
+    if (dvar) return (dvar);
+
+    dvar = _getDerivedCoordVar(varname);
+    if (dvar) return (dvar);
+
+    return (NULL);
+}
+
+DerivedDataVar *DataMgr::_getDerivedDataVar(string varname) const
+{
+    map<string, DerivedDataVar *>::const_iterator itr;
+    itr = _derivedDataVars.find(varname);
+
+    if (itr != _derivedDataVars.end()) return (itr->second);
+
+    return (NULL);
+}
+
+DerivedCoordVar *DataMgr::_getDerivedCoordVar(string varname) const
+{
+    map<string, DerivedCoordVar *>::const_iterator itr;
+    itr = _derivedCoordVars.find(varname);
+
+    if (itr != _derivedCoordVars.end()) return (itr->second);
+
+    return (NULL);
+}
+
+int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
+{
+    _openVarName = varname;
+
+    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
+    if (derivedVar) { return (derivedVar->OpenVariableRead(ts, _openVarName, level, lod)); }
+
+    return (_dc->OpenVariableRead(ts, _openVarName, level, lod));
+}
+
+template<class T> int DataMgr::_readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
+{
+    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
+    if (derivedVar) {
+        assert((std::is_same<T, float>::value) == true);
+        return (derivedVar->ReadRegionBlock(fd, min, max, (float *)region));
+    }
+
+    return (_dc->ReadRegionBlock(fd, min, max, region));
+}
+
+int DataMgr::_readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
+    if (derivedVar) { return (derivedVar->ReadRegion(fd, min, max, region)); }
+
+    return (_dc->ReadRegion(fd, min, max, region));
+}
+
+int DataMgr::_closeVariable(int fd)
+{
+    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
+    if (derivedVar) { return (derivedVar->CloseVariable(fd)); }
+
+    _openVarName.clear();
+
+    return (_dc->CloseVariable(fd));
+}
+
+int DataMgr::_getVar(string varname, int level, int lod, float *data)
+{
+    vector<size_t> dims_at_level;
+    vector<size_t> dummy;
+    int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    if (rc < 0) return (-1);
+
+    // Number of per time step
+    //
+    size_t var_size = 1;
+    for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
+
+    size_t numts = _dc->GetNumTimeSteps(varname);
+
+    float *ptr = data;
+    for (size_t ts = 0; ts < numts; ts++) {
+        rc = _getVar(ts, varname, level, lod, ptr);
+        if (rc < 0) return (-1);
+
+        ptr += var_size;
+    }
+
+    return (0);
+}
+
+int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
+{
+    vector<size_t> dims_at_level;
+    vector<size_t> dummy;
+    int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    if (rc < 0) return (-1);
+    vector<size_t> min, max;
+    for (int i = 0; i < dims_at_level.size(); i++) {
+        min.push_back(0);
+        max.push_back(dims_at_level[i] - 1);
+    }
+
+    int fd = _dc->OpenVariableRead(ts, varname, level, lod);
+    if (fd < 0) return (-1);
+
+    rc = _dc->ReadRegion(fd, min, max, data);
+    if (rc < 0) return (-1);
+
+    rc = _dc->CloseVariable(fd);
+    if (rc < 0) return (-1);
+
+    return (0);
+}
+
+int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &max)
+{
+    vector<size_t> dims;
+    vector<size_t> dummy;
+    int            rc = _dc->GetDimLensAtLevel(varname, 0, dims, dummy);
+    if (rc < 0) {
+        SetErrMsg("Invalid variable reference : %s", varname.c_str());
+        return (-1);
+    }
+    assert(dims.size() >= 1 && dims.size() <= 2);
+
+    float *buf = new float[vproduct(dims)];
+
+    rc = _getVar(varname, 0, 0, buf);
+    if (rc < 0) return (-1);
+
+    //
+    // Precondition longitude coordinates so that there are no
+    // discontinuities (e.g. jumping 360 to 0, or -180 to 180)
+    //
+    if (lonflag) {
+        if (dims.size() == 2) {
+            GeoUtil::ShiftLon(buf, dims[0], dims[1], buf);
+            GeoUtil::LonExtents(buf, dims[0], dims[1], min, max);
+        } else {
+            GeoUtil::ShiftLon(buf, dims[0], buf);
+            GeoUtil::LonExtents(buf, dims[0], min, max);
+        }
+    } else {
+        if (dims.size() == 2) {
+            GeoUtil::LatExtents(buf, dims[0], dims[1], min, max);
+        } else {
+            GeoUtil::LatExtents(buf, dims[0], min, max);
+        }
+    }
+
+    delete[] buf;
+
+    return (0);
+}
+
+int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax)
+{
+    lonmin = lonmax = latmin = latmax = 0.0;
+
+    int rc = _getLatlonExtents(lon, true, lonmin, lonmax);
+    if (rc < 0) return (-1);
+
+    rc = _getLatlonExtents(lat, false, latmin, latmax);
+    if (rc < 0) return (-1);
+
+    return (0);
+}
+
+int DataMgr::_initProj4String()
+{
+    // Already initialized via Initialize() options
+    //
+    if (!_proj4String.empty()) return (0);
+
+    // If data set has a map projection use it
+    //
+    _proj4String = _dc->GetMapProjection();
+    if (!_proj4String.empty()) { return (0); }
+
+    // Generate our own proj4 string
+    //
+
+    vector<string> meshnames = _dc->GetMeshNames();
+    if (meshnames.empty()) return (0);
+
+    vector<string> coordvars;
+    for (int i = 0; i < meshnames.size() && coordvars.size() < 2; i++) {
+        if (!_is_geographicMesh(meshnames[i])) continue;
+
+        DC::Mesh m;
+        bool     ok = _dc->GetMesh(meshnames[i], m);
+        if (!ok) continue;
+
+        if (m.GetCoordVars().size() < 2) continue;
+
+        coordvars = m.GetCoordVars();
+    }
+    if (coordvars.empty()) return (0);
+
+    float lonmin, lonmax, latmin, latmax;
+    int   rc = _getCoordPairExtents(coordvars[0], coordvars[1], lonmin, lonmax, latmin, latmax);
+    if (rc < 0) return (-1);
+
+    float         lon_0 = (lonmin + lonmax) / 2.0;
+    float         lat_0 = (latmin + latmax) / 2.0;
+    ostringstream oss;
+    oss << " +lon_0=" << lon_0 << " +lat_0=" << lat_0;
+    _proj4String = "+proj=eqc +ellps=WGS84" + oss.str();
+
+    return (0);
+}
+
+int DataMgr::_initHorizontalCoordVars()
+{
+    if (!_doTransformHorizontal) return (0);
+
+    if (!_is_geographic()) return (0);
+
+    int rc = _initProj4String();
+    if (rc < 0) return (-1);
+
+    vector<string> meshnames = _dc->GetMeshNames();
+
+    vector<string> coordvars;
+    for (int i = 0; i < meshnames.size(); i++) {
+        if (!_is_geographicMesh(meshnames[i])) continue;
+
+        DC::Mesh m;
+        bool     ok = _dc->GetMesh(meshnames[i], m);
+        if (!ok) continue;
+
+        if (m.GetCoordVars().size() < 2) continue;
+
+        coordvars = m.GetCoordVars();
+        while (coordvars.size() > 2) { coordvars.pop_back(); }
+
+        vector<string> derivedCoordvars = coordvars;
+        _assignHorizontalCoords(derivedCoordvars);
+
+        // no duplicates
+        //
+        if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
+        if (_getDerivedCoordVar(derivedCoordvars[1])) continue;
+
+        DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars, _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED);
+
+        rc = derivedVar->Initialize();
+        if (rc < 0) {
+            SetErrMsg("Failed to initialize derived coord variable");
+            return (-1);
+        }
+
+        _derivedCoordVars[derivedCoordvars[0]] = derivedVar;
+        _derivedCoordVars[derivedCoordvars[1]] = derivedVar;
+        _derivedVars.push_back(derivedVar);
+    }
+
+    return (0);
 }
 
 namespace VAPoR {

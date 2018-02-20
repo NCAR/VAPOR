@@ -175,8 +175,8 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    rc = vdc.OpenVariableWrite(opt.ts, opt.varname, opt.lod);
-    if (rc < 0) exit(1);
+    int fdr = vdc.OpenVariableWrite(opt.ts, opt.varname, opt.lod);
+    if (fdr < 0) exit(1);
 
     for (size_t i = 0; i < nslice; i++) {
         nelements = nelements < ntotal ? nelements : ntotal;
@@ -185,11 +185,11 @@ int main(int argc, char **argv)
 
         ntotal -= nelements;
 
-        rc = vdc.WriteSlice(slice);
+        rc = vdc.WriteSlice(fdr, slice);
         if (rc < 0) exit(1);
     }
 
-    rc = vdc.CloseVariableWrite();
+    rc = vdc.CloseVariableWrite(fdr);
     if (rc < 0) exit(1);
 
     fclose(fp);

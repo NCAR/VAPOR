@@ -14,6 +14,7 @@
 #include <vapor/GeoUtil.h>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/DCCF.h>
+#include <vapor/DCUtils.h>
 
 using namespace VAPoR;
 using namespace std;
@@ -36,11 +37,6 @@ DCCF::DCCF()
 {
     _ncdfc = NULL;
 
-    _ovr_fd = -1;
-
-    _proj4StringOption.clear();
-    _proj4StringDefault.clear();
-    _proj4String.clear();
     _dimsMap.clear();
     _coordVarsMap.clear();
     _dataVarsMap.clear();
@@ -52,7 +48,6 @@ DCCF::DCCF()
 DCCF::~DCCF()
 {
     if (_ncdfc) delete _ncdfc;
-    if (_proj4API) delete _proj4API;
 
     for (int i = 0; i < _derivedVars.size(); i++) {
         if (_derivedVars[i]) delete _derivedVars[i];
@@ -62,11 +57,6 @@ DCCF::~DCCF()
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
-    _proj4StringOption.clear();
-    if (options.size() >= 2) {
-        if (options[0] == "-proj4") { _proj4StringOption = options[1]; }
-    }
-
     NetCDFCFCollection *ncdfc = new NetCDFCFCollection();
 
     // Initialize the NetCDFCFCollection class.
@@ -96,12 +86,6 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     }
 
     // Set up the horizontal coordinate variables
-    // These are derived variables that provide horizontal coordinates
-    // in **Cartographic coordinates**. I.e. geographic coordinate
-    // variables found in CF data are projected to cartographic
-    // coordinates using Proj4
-    //
-    // Initializes members: _coordVarMap, _proj4API,
     //
     rc = _InitHorizontalCoordinates(ncdfc);
     if (rc < 0) { return (-1); }
@@ -232,31 +216,69 @@ std::vector<string> DCCF::getCoordVarNames() const
     return (names);
 }
 
+template<class T> bool DCCF::_getAttTemplate(string varname, string attname, T &values) const
+{
+    DC::BaseVar var;
+    bool        status = getBaseVarInfo(varname, var);
+    if (!status) return (status);
+
+    DC::Attribute att;
+    status = var.GetAttribute(attname, att);
+    if (!status) return (status);
+
+    att.GetValues(values);
+
+    return (true);
+}
+
 bool DCCF::getAtt(string varname, string attname, vector<double> &values) const
 {
     values.clear();
-    return (false);
+
+    return (_getAttTemplate(varname, attname, values));
 }
 
 bool DCCF::getAtt(string varname, string attname, vector<long> &values) const
 {
     values.clear();
-    return (false);
+
+    return (_getAttTemplate(varname, attname, values));
 }
 
 bool DCCF::getAtt(string varname, string attname, string &values) const
 {
     values.clear();
-    return (false);
+
+    return (_getAttTemplate(varname, attname, values));
 }
 
 std::vector<string> DCCF::getAttNames(string varname) const
 {
+    DC::BaseVar var;
+    bool        status = getBaseVarInfo(varname, var);
+    if (!status) return (vector<string>());
+
     vector<string> names;
+
+    const std::map<string, Attribute> &         atts = var.GetAttributes();
+    std::map<string, Attribute>::const_iterator itr;
+    for (itr = atts.begin(); itr != atts.end(); ++itr) { names.push_back(itr->first); }
+
     return (names);
 }
 
-DC::XType DCCF::getAttType(string varname, string attname) const { return (DC::FLOAT); }
+DC::XType DCCF::getAttType(string varname, string attname) const
+{
+    DC::BaseVar var;
+    bool        status = getBaseVarInfo(varname, var);
+    if (!status) return (DC::INVALID);
+
+    DC::Attribute att;
+    status = var.GetAttribute(attname, att);
+    if (!status) return (DC::INVALID);
+
+    return (att.GetXType());
+}
 
 int DCCF::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
@@ -273,44 +295,42 @@ int DCCF::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_le
     return (0);
 }
 
-string DCCF::getMapProjection(string varname) const
-{
-    // See if the named variable alread has a projection string defined .
-    // If so, use it.
-    //
-    string proj4string;
-    if (_ncdfc->GetMapProjectionProj4(varname, proj4string)) { return (proj4string); }
-
-    // No projection string defined in the NetCDF file for this
-    // variable. So we use a synthesized one
-    //
-    return (_proj4String);
-}
-
-string DCCF::getMapProjection() const { return (_proj4String); }
-
 int DCCF::openVariableRead(size_t ts, string varname)
 {
-    DCCF::CloseVariable();
+    int aux = _ncdfc->OpenRead(ts, varname);
+    if (aux < 0) return (aux);
 
-    _ovr_fd = _ncdfc->OpenRead(ts, varname);
-    return (_ovr_fd);
+    FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, aux);
+    return (_fileTable.AddEntry(f));
 }
 
-int DCCF::closeVariable()
+int DCCF::closeVariable(int fd)
 {
-    if (_ovr_fd < 0) return (0);
-    int rc = _ncdfc->Close(_ovr_fd);
-    _ovr_fd = -1;
+    DC::FileTable::FileObject *w = _fileTable.GetEntry(fd);
+
+    if (!w) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+    int aux = w->GetAux();
+
+    int rc = _ncdfc->Close(aux);
+
+    _fileTable.RemoveEntry(fd);
+
     return (rc);
 }
 
-int DCCF::read(float *data) { return (_ncdfc->Read(data, _ovr_fd)); }
-
-int DCCF::readSlice(float *slice) { return (_ncdfc->ReadSlice(slice, _ovr_fd)); }
-
-template<class T> int DCCF::_readRegionTemplate(const vector<size_t> &min, const vector<size_t> &max, T *region)
+template<class T> int DCCF::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
+    FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
+
+    if (!w) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+    int aux = w->GetAux();
+
     vector<size_t> ncdf_start = min;
     reverse(ncdf_start.begin(), ncdf_start.end());
 
@@ -320,13 +340,7 @@ template<class T> int DCCF::_readRegionTemplate(const vector<size_t> &min, const
     vector<size_t> ncdf_count;
     for (int i = 0; i < ncdf_start.size(); i++) { ncdf_count.push_back(ncdf_max[i] - ncdf_start[i] + 1); }
 
-    return (_ncdfc->Read(ncdf_start, ncdf_count, region, _ovr_fd));
-}
-
-int DCCF::readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region)
-{
-    // return(DCCF::ReadRegion(min, max, region));
-    return (DCCF::Read(region));
+    return (_ncdfc->Read(ncdf_start, ncdf_count, region, aux));
 }
 
 bool DCCF::variableExists(size_t ts, string varname, int, int) const { return (_ncdfc->VariableExists(ts, varname)); }
@@ -350,91 +364,6 @@ int DCCF::_get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &
         }
     }
     return (0);
-}
-
-int DCCF::_get_latlon_extents(NetCDFCFCollection *ncdfc, string latlon, bool lonflag, float &min, float &max)
-{
-    vector<size_t> dims = ncdfc->GetSpatialDims(latlon);
-    reverse(dims.begin(), dims.end());    // DC dimension order
-    assert(dims.size() >= 1 && dims.size() <= 2);
-
-    float *buf = (float *)_buf.Alloc(vproduct(dims) * sizeof(*buf));
-
-    int fd = ncdfc->OpenRead(0, latlon);
-    if (fd < 0) {
-        SetErrMsg("Can't Read variable %s", latlon.c_str());
-        return (-1);
-    }
-
-    int rc = ncdfc->Read(buf, fd);
-    if (rc < 0) {
-        SetErrMsg("Can't Read variable %s", latlon.c_str());
-        ncdfc->Close(fd);
-        return (-1);
-    }
-    ncdfc->Close(fd);
-
-    //
-    // Precondition longitude coordinates so that there are no
-    // discontinuities (e.g. jumping 360 to 0, or -180 to 180)
-    //
-    if (lonflag) {
-        if (dims.size() == 2) {
-            GeoUtil::ShiftLon(buf, dims[0], dims[1], buf);
-            GeoUtil::LonExtents(buf, dims[0], dims[1], min, max);
-        } else {
-            GeoUtil::ShiftLon(buf, dims[0], buf);
-            GeoUtil::LonExtents(buf, dims[0], min, max);
-        }
-    } else {
-        if (dims.size() == 2) {
-            GeoUtil::LatExtents(buf, dims[0], dims[1], min, max);
-        } else {
-            GeoUtil::LatExtents(buf, dims[0], min, max);
-        }
-    }
-    return (0);
-}
-
-int DCCF::_get_coord_pair_extents(NetCDFCFCollection *ncdfc, string lon, string lat, double &lonmin, double &lonmax, double &latmin, double &latmax)
-{
-    lonmin = lonmax = latmin = latmax = 0.0;
-
-    float lonmin_f, lonmax_f;
-    int   rc = _get_latlon_extents(ncdfc, lon, true, lonmin_f, lonmax_f);
-    if (rc < 0) return (-1);
-
-    float latmin_f, latmax_f;
-    rc = _get_latlon_extents(ncdfc, lat, false, latmin_f, latmax_f);
-    if (rc < 0) return (-1);
-
-    lonmin = lonmin_f;
-    lonmax = lonmax_f;
-    latmin = latmin_f;
-    latmax = latmax_f;
-
-    return (0);
-}
-
-Proj4API *DCCF::_create_proj4api(double lonmin, double lonmax, double latmin, double latmax, string &proj4string) const
-{
-    proj4string.clear();
-
-    double        lon_0 = (lonmin + lonmax) / 2.0;
-    double        lat_0 = (latmin + latmax) / 2.0;
-    ostringstream oss;
-    oss << " +lon_0=" << lon_0 << " +lat_0=" << lat_0;
-    proj4string = "+proj=eqc +ellps=WGS84" + oss.str();
-
-    Proj4API *proj4api = new Proj4API();
-
-    int rc = proj4api->Initialize("", proj4string);
-    if (rc < 0) {
-        delete proj4api;
-        SetErrMsg("Invalid map projection : %s", proj4string.c_str());
-        return (NULL);
-    }
-    return (proj4api);
 }
 
 int DCCF::_AddCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars)
@@ -472,147 +401,16 @@ int DCCF::_AddCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars)
         //
         vector<bool> periodic(false);
         _coordVarsMap[cvars[i]] = CoordVar(cvars[i], units, DC::FLOAT, periodic, axis, false, dimnames, vector<size_t>(), time_dim_name);
-    }
 
-    return (0);
-}
-
-int DCCF::_InitHorizontalCoordinatesDerived(NetCDFCFCollection *ncdfc, const vector<pair<string, string>> &coordpairs)
-{
-    // Get min and max lat-lon extents for all lat-lon coordinate
-    // pairs
-    //
-    double lonmin = 360.0;
-    double lonmax = -360.0;
-    double latmin = 180.0;
-    double latmax = -180.0;
-    for (int i = 0; i < coordpairs.size(); i++) {
-        // Get Min and Max lat and lon for all coordinate pairs
-        //
-        double my_lonmin, my_lonmax, my_latmin, my_latmax;
-        int    rc = _get_coord_pair_extents(ncdfc, coordpairs[i].first, coordpairs[i].second, my_lonmin, my_lonmax, my_latmin, my_latmax);
+        int rc = DCUtils::CopyAtt(*ncdfc, cvars[i], _coordVarsMap[cvars[i]]);
         if (rc < 0) return (-1);
-        if (my_lonmin < lonmin) lonmin = my_lonmin;
-        if (my_lonmax > lonmax) lonmax = my_lonmax;
-        if (my_latmin < latmin) latmin = my_latmin;
-        if (my_latmax > latmax) latmax = my_latmax;
-    }
-
-    // Synthesize a proj4 string
-    // if variable does not provide its own map projection
-    //
-
-    _proj4API = _create_proj4api(lonmin, lonmax, latmin, latmax, _proj4StringDefault);
-    _proj4String = _proj4StringDefault;
-
-    if (!_proj4StringOption.empty()) {
-        delete _proj4API;
-
-        _proj4API = new Proj4API();
-
-        int rc = _proj4API->Initialize("", _proj4StringOption);
-        if (rc < 0) {
-            delete _proj4API;
-            SetErrMsg("Invalid map projection : %s", _proj4StringOption.c_str());
-        }
-        _proj4String = _proj4StringOption;
-    }
-
-    if (!_proj4API) return (-1);
-
-    // Create derived variables and find min and max lat-lon coordinate
-    // extents.
-    //
-    for (int i = 0; i < coordpairs.size(); i++) {
-        // Get dimension names for each coordinate pair.
-        //
-        vector<string> londimnames = ncdfc->GetDimNames(coordpairs[i].first);
-        vector<string> latdimnames = ncdfc->GetDimNames(coordpairs[i].second);
-
-        if (londimnames.size() > 1 && londimnames != latdimnames) {
-            SetErrMsg("Invalid coordinate variable pair : %s, %s", coordpairs[i].first.c_str(), coordpairs[i].second.c_str());
-            return (-1);
-        }
-        reverse(londimnames.begin(), londimnames.end());    // DC order
-        reverse(latdimnames.begin(), latdimnames.end());    // DC order
-
-        vector<DC::Dimension> londims;
-        for (int j = 0; j < londimnames.size(); j++) {
-            assert(_dimsMap.find(londimnames[j]) != _dimsMap.end());
-            londims.push_back(_dimsMap[londimnames[j]]);
-        }
-
-        vector<DC::Dimension> latdims;
-        for (int j = 0; j < latdimnames.size(); j++) {
-            assert(_dimsMap.find(latdimnames[j]) != _dimsMap.end());
-            latdims.push_back(_dimsMap[latdimnames[j]]);
-        }
-
-        string lon_time_dim_name;
-        if (ncdfc->IsTimeVarying(coordpairs[i].first)) {
-            lon_time_dim_name = londimnames.back();
-            londimnames.pop_back();
-        }
-
-        string lat_time_dim_name;
-        if (ncdfc->IsTimeVarying(coordpairs[i].second)) {
-            lat_time_dim_name = latdimnames.back();
-            latdimnames.pop_back();
-        }
-
-        // Create the X derived variable class object
-        //
-        string name = coordpairs[i].first + "X";
-
-        DerivedVarHorizontal *derivedX;
-        derivedX = new DerivedVarHorizontal(ncdfc, coordpairs[i].first, coordpairs[i].second, londims, _proj4API, true);
-        _derivedVars.push_back(derivedX);
-
-        // Install the derived variable on the NetCDFCFCollection class. Then
-        // all NetCDFCFCollection methods will treat the derived variable as
-        // if it existed in the CF data set.
-        //
-        ncdfc->InstallDerivedCoordVar(name, derivedX, 0);
-
-        // Finally, add the variable to _coordVarsMap. Probably don't
-        // need to do this here. Could do this when we process native CF
-        // variables later. Sigh
-        //
-        vector<bool> periodic(3, false);
-        _coordVarsMap[name] = CoordVar(name, "meters", DC::FLOAT, periodic, 0, false, londimnames, vector<size_t>(), lon_time_dim_name);
-
-        name = coordpairs[i].second + "Y";
-
-        DerivedVarHorizontal *derivedY;
-        derivedY = new DerivedVarHorizontal(ncdfc, coordpairs[i].first, coordpairs[i].second, latdims, _proj4API, false);
-        _derivedVars.push_back(derivedY);
-
-        ncdfc->InstallDerivedCoordVar(name, derivedY, 1);
-
-        _coordVarsMap[name] = CoordVar(name, "meters", DC::FLOAT, periodic, 1, false, latdimnames, vector<size_t>(), lat_time_dim_name
-
-        );
     }
 
     return (0);
 }
 
-//
-// Create derived variables expressing the horizontal coordinates
-// in Cartographic coordinates in meters.
-//
-// The derived variables are named lonX, latY, where "lat" are the names
-// of the latitude coordinate (geographic coordinates), and "lon" are the
-// names of the longitude coordinate. E.g. TLAT => TLATY, ULON => ULONX
-//
-// Initializes _proj4API, _proj4String, _coordVarKeys
-//
 int DCCF::_InitHorizontalCoordinates(NetCDFCFCollection *ncdfc)
 {
-    _proj4API = NULL;
-    _proj4String.clear();
-    _coordVarKeys.clear();
-
     //
     // Get names of data variables  in the CF data set that have 2 or 3
     // spatial dimensions
@@ -626,8 +424,7 @@ int DCCF::_InitHorizontalCoordinates(NetCDFCFCollection *ncdfc)
     // Now get all of the lat and lon coordiates pairs used for
     // for each of the 2D and 3D data variables
     //
-    vector<pair<string, string>> coordpairs;
-    vector<string>               cvars;
+    vector<string> cvars;
     for (int i = 0; i < dvars.size(); i++) {
         string loncvar, latcvar;
 
@@ -638,40 +435,19 @@ int DCCF::_InitHorizontalCoordinates(NetCDFCFCollection *ncdfc)
         if (!latcvar.empty()) cvars.push_back(latcvar);
 
         if (loncvar.empty() || latcvar.empty()) continue;
-
-        pair<string, string> p1 = make_pair(loncvar, latcvar);
-
-        coordpairs.push_back(make_pair(loncvar, latcvar));
-
-        // Map varname to coord var pair
-        //
-        string key = loncvar + ":" + latcvar;
-        _coordVarKeys[dvars[i]] = key;
     }
 
     // Remove duplicates
     //
-    sort(coordpairs.begin(), coordpairs.end());
-    vector<pair<string, string>>::iterator last1;
-    last1 = unique(coordpairs.begin(), coordpairs.end());
-    coordpairs.erase(last1, coordpairs.end());
 
     sort(cvars.begin(), cvars.end());
     vector<string>::iterator last2;
     last2 = unique(cvars.begin(), cvars.end());
     cvars.erase(last2, cvars.end());
 
-    // Create a pair of derived horizontal coordinate variables
-    // in Cartographic
-    // coordiantes for each lat-lon pair
-    //
-
-    int rc = _InitHorizontalCoordinatesDerived(ncdfc, coordpairs);
-    if (rc < 0) return (-1);
-
     // Add native coordinate variables
     //
-    rc = _AddCoordvars(ncdfc, cvars);
+    int rc = _AddCoordvars(ncdfc, cvars);
     if (rc < 0) return (-1);
 
     return (0);
@@ -694,63 +470,7 @@ int DCCF::_get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string 
     return (0);
 }
 
-int DCCF::_InitVerticalCoordinatesDerived(NetCDFCFCollection *ncdfc, const vector<string> &cvars)
-{
-    vector<bool> periodic(3, false);
-    for (int i = 0; i < cvars.size(); i++) {
-        NetCDFSimple::Variable varinfo;
-        (void)ncdfc->GetVariableInfo(cvars[i], varinfo);
-
-#ifdef DEAD
-        string standard_name;
-        varinfo.GetAtt("standard_name", standard_name);
-        if (standard_name.empty()) continue;
-
-        string formula_terms;
-        varinfo.GetAtt("formula_terms", formula_terms);
-        if (formula_terms.empty()) continue;
-#endif
-
-        string name = cvars[i] + "Z";
-        int    rc = ncdfc->InstallStandardVerticalConverter(cvars[i], name, "meters");
-        if (rc < 0) return (-1);
-
-        // Get dimension names for the *derived* variable, and
-        // then set up a Dimenions vector
-        //
-        vector<string> dimnames = ncdfc->GetDimNames(name);
-        reverse(dimnames.begin(), dimnames.end());
-
-        vector<DC::Dimension> dims;
-        for (int j = 0; j < dimnames.size(); j++) {
-            assert(_dimsMap.find(dimnames[j]) != _dimsMap.end());
-            dims.push_back(_dimsMap[dimnames[j]]);
-        }
-
-        string time_dim_name;
-        if (ncdfc->IsTimeVarying(cvars[i])) {
-            time_dim_name = dimnames.back();
-            dimnames.pop_back();
-        }
-
-        // Finally, add the variable to _coordVarsMap. Probably don't
-        // need to do this here. Could do this when we process native CF
-        // variables later. Sigh
-        //
-        _coordVarsMap[name] = CoordVar(name, "meters", DC::FLOAT, periodic, 2, false, dimnames, vector<size_t>(), time_dim_name);
-    }
-
-    return (0);
-}
-
 //
-// Create derived variables expressing the vertical coordinates
-// in meters. CF uses a Arakawa C grid (staggered
-// grid). Hence, there are separate vertical coordinates for U, V, W, and
-// all other variables.
-//
-// The derived variables are named ELEVATION, ELEVATIONU, ELEVATIONV,
-// ELEVATIONW.
 //
 int DCCF::_InitVerticalCoordinates(NetCDFCFCollection *ncdfc)
 {
@@ -767,7 +487,7 @@ int DCCF::_InitVerticalCoordinates(NetCDFCFCollection *ncdfc)
     // Now get all of the vertical coordinate variable names
     // for each of the 1D, 2D and 3D data variables
     //
-    vector<string> derived_cvars, cvars;
+    vector<string> cvars;
     for (int i = 0; i < dvars.size(); i++) {
         string vertcvar;
 
@@ -776,11 +496,7 @@ int DCCF::_InitVerticalCoordinates(NetCDFCFCollection *ncdfc)
 
         if (vertcvar.empty()) continue;
 
-        if (ncdfc->IsVertCoordVarLength(vertcvar)) {
-            cvars.push_back(vertcvar);
-        } else {
-            derived_cvars.push_back(vertcvar);
-        }
+        cvars.push_back(vertcvar);
     }
 
     // Remove duplicates
@@ -790,25 +506,9 @@ int DCCF::_InitVerticalCoordinates(NetCDFCFCollection *ncdfc)
     last = unique(cvars.begin(), cvars.end());
     cvars.erase(last, cvars.end());
 
-    sort(derived_cvars.begin(), derived_cvars.end());
-    last = unique(derived_cvars.begin(), derived_cvars.end());
-    derived_cvars.erase(last, derived_cvars.end());
-
-    // Create a new derived vertical coordinate variable for each native
-    // vertical coordinate variable using the NetCDFCFCollection class
-    // built-in standard vertical coordinate converts
+    // Add vertical coordinate vars
     //
-    int rc = _InitVerticalCoordinatesDerived(ncdfc, derived_cvars);
-    if (rc < 0) return (-1);
-
-    // Add derived vertical coordinate vars
-    //
-    rc = _AddCoordvars(ncdfc, derived_cvars);
-    if (rc < 0) return (-1);
-
-    // Add native vertical coordinate vars
-    //
-    rc = _AddCoordvars(ncdfc, cvars);
+    int rc = _AddCoordvars(ncdfc, cvars);
     if (rc < 0) return (-1);
 
     return (0);
@@ -831,45 +531,6 @@ int DCCF::_get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cva
     return (0);
 }
 
-int DCCF::_InitTimeCoordinatesDerived(NetCDFCFCollection *ncdfc, const vector<string> &cvars)
-{
-    vector<bool> periodic(1, false);
-    for (int i = 0; i < cvars.size(); i++) {
-        // Get dimension names for time variable
-        //
-        vector<string> dimnames = ncdfc->GetDimNames(cvars[i]);
-
-        if (dimnames.size() != 1) {
-            SetErrMsg("Invalid time coordinate variable : %s", cvars[i].c_str());
-            return (-1);
-        }
-
-        vector<DC::Dimension> dims;
-        for (int j = 0; j < dimnames.size(); j++) {
-            assert(_dimsMap.find(dimnames[j]) != _dimsMap.end());
-            dims.push_back(_dimsMap[dimnames[j]]);
-        }
-
-        // Create the time derived variable class object
-        //
-        string name = cvars[i] + "T";
-        int    rc = ncdfc->InstallStandardTimeConverter(cvars[i], name, "seconds");
-        if (rc < 0) return (-1);
-
-        // Finally, add the variable to _coordVarsMap. Probably don't
-        // need to do this here. Could do this when we process native CF
-        // variables later. Sigh
-        //
-        _coordVarsMap[name] = CoordVar(name, "seconds", DC::FLOAT, periodic, 3, false, vector<string>(), vector<size_t>(), dimnames[0]);
-    }
-
-    return (0);
-}
-
-// Create a derived variable for the time coordinate. Time in CF data
-// is an array of formatted time strings. The DC class requires that
-// time be expressed as seconds represented as floats.
-//
 int DCCF::_InitTimeCoordinates(NetCDFCFCollection *ncdfc)
 {
     //
@@ -903,21 +564,10 @@ int DCCF::_InitTimeCoordinates(NetCDFCFCollection *ncdfc)
     last = unique(cvars.begin(), cvars.end());
     cvars.erase(last, cvars.end());
 
-    // create time coordinate variables that map time units to seconds
-    //
-    int rc = _InitTimeCoordinatesDerived(ncdfc, cvars);
-    if (rc < 0) return (-1);
-
-// Don't add native time coordiate variable because all of the
-// time variables are aggregated into a single 'global' time
-// variable
-//
-#ifdef DEAD
     // add native time coordinate variables
     //
-    rc = _AddCoordvars(ncdfc, cvars);
+    int rc = _AddCoordvars(ncdfc, cvars);
     if (rc < 0) return (-1);
-#endif
 
     return (0);
 }
@@ -989,17 +639,13 @@ int DCCF::_GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<s
     for (int i = 0; i < scoordvars.size(); i++) {
         string xcv;
         if (ncdfc->IsLonCoordVar(scoordvars[i])) {
-            xcv = scoordvars[i] + "X";
+            xcv = scoordvars[i];
         } else if (ncdfc->IsLatCoordVar(scoordvars[i])) {
-            xcv = scoordvars[i] + "Y";
+            xcv = scoordvars[i];
         } else if (ncdfc->IsVertCoordVar(scoordvars[i])) {
-            if (ncdfc->IsVertCoordVarLength(scoordvars[i])) {
-                xcv = scoordvars[i];    // Not derived
-            } else {
-                xcv = scoordvars[i] + "Z";
-            }
+            xcv = scoordvars[i];
         } else if (ncdfc->IsTimeCoordVar(scoordvars[i])) {
-            xcv = scoordvars[i] + "T";
+            xcv = scoordvars[i];
         }
 
         // Rank of Cartographic coordinates must be less than or
@@ -1030,11 +676,11 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc)
 
     vector<bool> periodic(3, false);
     //
-    // Get names of variables  in the CF data set that have 1 2 or 3
+    // Get names of variables  in the CF data set that have 2 or 3
     // spatial dimensions
     //
     vector<string> vars;
-    for (int i = 1; i < 4; i++) {
+    for (int i = 2; i < 4; i++) {
         vector<string> v = ncdfc->GetDataVariableNames(i, true);
         vars.insert(vars.end(), v.begin(), v.end());
     }
@@ -1073,159 +719,14 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc)
         bool   has_missing = ncdfc->GetMissingValue(vars[i], mv);
 
         if (!has_missing) {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::VOLUME);
+            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::NODE);
         } else {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::VOLUME, mv);
+            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::NODE, mv);
         }
+
+        rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);
+        if (rc < 0) return (-1);
     }
 
     return (0);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Class definitions for derived coordinate variables
-//
-//////////////////////////////////////////////////////////////////////
-
-//
-// CF's native horizontal coordinate system is geographic. Need to
-// project from geographic to Cartographic using the Proj4 API
-//
-DCCF::DerivedVarHorizontal::DerivedVarHorizontal(NetCDFCFCollection *ncdfc, string lonname, string latname, const vector<DC::Dimension> &dims, Proj4API *proj4API, bool xflag) : DerivedVar(ncdfc)
-{
-    assert(dims.size() >= 1 && dims.size() <= 3);
-
-    _lonname = lonname;
-    _latname = latname;
-    _xflag = xflag;
-    _time_dim = 1;
-    _time_dim_name.clear();
-    _sdims.clear();
-    _sdimnames.clear();
-    _is_open = false;
-    _lonbuf = NULL;
-    _latbuf = NULL;
-    _proj4API = proj4API;
-    _lonfd = -1;
-    _latfd = -1;
-
-    // NetCDF dimension order
-    //
-    vector<DC::Dimension> dimsncdf = dims;
-    reverse(dimsncdf.begin(), dimsncdf.end());
-
-    if (ncdfc->IsTimeVarying(lonname) || ncdfc->IsTimeVarying(latname)) {
-        assert(ncdfc->IsTimeVarying(lonname) && ncdfc->IsTimeVarying(latname));
-        _time_dim = dimsncdf[0].GetLength();
-        _time_dim_name = dimsncdf[0].GetName();
-        dimsncdf.erase(dimsncdf.begin());
-    }
-    assert(dimsncdf.size() >= 1 && dimsncdf.size() <= 2);
-
-    _sdims.clear();
-    _sdimnames.clear();
-    for (int i = 0; i < dimsncdf.size(); i++) {
-        _sdims.push_back(dimsncdf[i].GetLength());
-        _sdimnames.push_back(dimsncdf[i].GetName());
-    }
-
-    size_t n = vproduct(_sdims);
-    _latbuf = new float[n];
-    _lonbuf = new float[n];
-
-    _is_open = false;
-}
-
-DCCF::DerivedVarHorizontal::~DerivedVarHorizontal()
-{
-    if (_lonbuf) delete[] _lonbuf;
-    if (_latbuf) delete[] _latbuf;
-}
-
-int DCCF::DerivedVarHorizontal::Open(size_t ts)
-{
-    if (_is_open) return (-1);    // Only one variable open at a time
-
-    _lonfd = -1;
-    _latfd = -1;
-
-    // if 2d open longitude  and latitude variables
-    // if 1d open only corresponding geographic coordinate varible for
-    // Cartographic axis
-
-    if (_xflag || _sdims.size() > 1) {
-        int fd = _ncdfc->OpenRead(ts, _lonname);
-        if (fd < 0) {
-            SetErrMsg("Can't read %s variable", _lonname.c_str());
-            return (-1);
-        }
-        _lonfd = fd;
-    }
-
-    if (!_xflag || _sdims.size() > 1) {
-        int fd = _ncdfc->OpenRead(ts, _latname);
-        if (fd < 0) {
-            SetErrMsg("Can't read %s variable", _latname.c_str());
-            return (-1);
-        }
-        _latfd = fd;
-    }
-    _is_open = true;
-
-    return (0);
-}
-
-int DCCF::DerivedVarHorizontal::Read(float *buf, int)
-{
-    if (!_is_open) {
-        SetErrMsg("Invalid operation");
-        return (-1);
-    }
-    size_t n = vproduct(_sdims);
-    for (int i = 0; i < n; i++) {
-        _lonbuf[i] = 0.0;
-        _latbuf[i] = 0.0;
-    }
-
-    if (_lonfd >= 0) {
-        int rc = _ncdfc->Read(_lonbuf, _lonfd);
-        if (rc < 0) {
-            SetErrMsg("Can't read %s variable", _lonname.c_str());
-            return (-1);
-        }
-    }
-
-    if (_latfd >= 0) {
-        int rc = _ncdfc->Read(_latbuf, _latfd);
-        if (rc < 0) {
-            SetErrMsg("Can't read %s variable", _latname.c_str());
-            return (-1);
-        }
-    }
-
-    int rc = _proj4API->Transform(_lonbuf, _latbuf, n);
-    if (rc < 0) return (-1);
-
-    float *ptr = _xflag ? _lonbuf : _latbuf;
-
-    for (int i = 0; i < n; i++) { buf[i] = ptr[i]; }
-
-    return (0);
-}
-
-int DCCF::DerivedVarHorizontal::ReadSlice(float *slice, int) { return (DCCF::DerivedVarHorizontal::Read(slice, 0)); }
-
-int DCCF::DerivedVarHorizontal::SeekSlice(int offset, int whence, int) { return (0); }
-
-int DCCF::DerivedVarHorizontal::Close(int)
-{
-    if (!_is_open) return (0);
-
-    int rc = 0;
-    if (_lonfd > 0 && _ncdfc->Close(_lonfd) < 0) rc = -1;
-    if (_latfd > 0 && _ncdfc->Close(_latfd) < 0) rc = -1;
-    _is_open = false;
-
-    return (rc);
 }

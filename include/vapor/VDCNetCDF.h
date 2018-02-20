@@ -131,16 +131,16 @@ public:
     //
     int OpenVariableWrite(size_t ts, string varname, int lod = -1);
 
-    int CloseVariableWrite() { return (closeVariable()); };
+    int CloseVariableWrite(int fd) { return (closeVariable(fd)); };
 
     //! \copydoc VDC::Write()
     //
-    int Write(const float *region) { return (_writeTemplate(region)); }
-    int Write(const int *region) { return (_writeTemplate(region)); }
+    int Write(int fd, const float *region) { return (_writeTemplate(fd, region)); }
+    int Write(int fd, const int *region) { return (_writeTemplate(fd, region)); }
 
-    int WriteSlice(const float *slice) { return (_writeSliceTemplate(_ofi._wasp, slice)); };
-    int WriteSlice(const int *slice) { return (_writeSliceTemplate(_ofi._wasp, slice)); };
-    int WriteSlice(const unsigned char *slice) { return (_writeSliceTemplate(_ofi._wasp, slice)); }
+    int WriteSlice(int fd, const float *slice) { return (_writeSliceTemplate(fd, slice)); };
+    int WriteSlice(int fd, const int *slice) { return (_writeSliceTemplate(fd, slice)); };
+    int WriteSlice(int fd, const unsigned char *slice) { return (_writeSliceTemplate(fd, slice)); }
 
     //! \copydoc VDC::PutVar()
     //
@@ -177,20 +177,13 @@ protected:
 
     int openVariableRead(size_t ts, string varname, int level = 0, int lod = -1);
 
-    int closeVariable();
+    int closeVariable(int fd);
 
-    int read(float *data);
+    int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+    int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, int *region);
 
-    int read(int *data);
-
-    int readSlice(float *slice);
-    int readSlice(unsigned char *slice);
-
-    int readRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
-    int readRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, int *region);
-
-    int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
-    int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region);
+    int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+    int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region);
 
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
@@ -198,35 +191,26 @@ private:
     int   _version;
     WASP *_master;    // Master NetCDF file
 
-    class open_file_info {
+    class VDCFileObject : public DC::FileTable::FileObject {
     public:
-        open_file_info()
+        VDCFileObject(size_t ts, string varname, int level, int lod, size_t file_ts, WASP *wasp_data, WASP *wasp_mask, string varname_mask, int level_mask)
+        : FileObject(ts, varname, level, lod), _file_ts(file_ts), _wasp_data(wasp_data), _wasp_mask(wasp_mask), _varname_mask(varname_mask), _level_mask(level_mask)
         {
-            _wasp = NULL;
-            _write = false;
-            _dims.clear();
-            _bs.clear();
-            _slice_num = 0;
-            _ts = 0;
-            _file_ts = 0;
-            _varname.clear();
-            _level = 0;
-        };
-        open_file_info(WASP *wasp, bool write, vector<size_t> dims, vector<size_t> bs, size_t slice_num, size_t ts, size_t file_ts, string varname, int level)
-        : _wasp(wasp), _write(write), _dims(dims), _bs(bs), _slice_num(slice_num), _ts(ts), _file_ts(file_ts), _varname(varname), _level(level){};
+        }
 
-        WASP *         _wasp;     // Currently opened data file
-        bool           _write;    // opened for writing?
-        vector<size_t> _dims;
-        vector<size_t> _bs;
-        size_t         _slice_num;    // index of current slice for WriteSlice, ReadSlice
-        size_t         _ts;           // global time step of current open variable
-        size_t         _file_ts;      // local (within file) time step of current open var
-        string         _varname;      // name of current open variable
-        int            _level;
+        size_t GetFileTS() const { return (_file_ts); }
+        WASP * GetWaspData() const { return (_wasp_data); }
+        WASP * GetWaspMask() const { return (_wasp_mask); }
+        string GetVarnameMask() const { return (_varname_mask); }
+        int    GetLevelMask() const { return (_level_mask); }
+
+    private:
+        size_t _file_ts;
+        WASP * _wasp_data;
+        WASP * _wasp_mask;
+        string _varname_mask;
+        int    _level_mask;
     };
-    open_file_info _ofi;        // currently open data or coordinate variable
-    open_file_info _ofimask;    // current opened mask variable
 
     Wasp::SmartBuf _sb_slice_buffer;
     Wasp::SmartBuf _mask_buffer;
@@ -244,9 +228,9 @@ private:
     int _WriteMasterCoordVarsDefs();
     int _WriteMasterDataVarsDefs();
 
-    template<class T> int _writeTemplate(const T *data);
+    template<class T> int _writeTemplate(int fd, const T *data);
 
-    template<class T> int _writeSliceTemplate(WASP *file, const T *slice);
+    template<class T> int _writeSliceTemplate(int fd, const T *slice);
 
     int _ReadMasterDimensions();
     int _ReadMasterAttributes(string prefix, map<string, Attribute> &atts);
@@ -269,7 +253,7 @@ private:
 
     string _get_mask_varname(string varname) const;
 
-    unsigned char *_read_mask_var(vector<size_t> start, vector<size_t> count);
+    unsigned char *_read_mask_var(WASP *wasp, string varname, string varname_mask, vector<size_t> start, vector<size_t> count);
 
     WASP *_OpenVariableRead(size_t ts, string varname, int clevel, int lod, size_t &file_ts);
 
@@ -281,7 +265,8 @@ private:
 
     int _copyVar0d(DC &dc, size_t ts, const BaseVar &varInfo);
 
-    template<class T> int _copyVarHelper(DC &dc, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer);
+    template<class T>
+    int _copyVarHelper(DC &dc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer);
 };
 };    // namespace VAPoR
 

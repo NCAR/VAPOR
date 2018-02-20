@@ -53,21 +53,7 @@ OptionParser::Option_T get_options[] = {{"bs", Wasp::CvtToSize_tVec, &opt.bs, si
 
 string ProgName;
 
-void defineMapProjection(const DCWRF &dcwrf, VDCNetCDF &vdc)
-{
-    string proj4string;
-    for (int d = 2; d < 4 && proj4string.empty(); d++) {
-        vector<string> varnames = dcwrf.DC::GetDataVarNames(d);
-
-        for (int i = 0; i < varnames.size(); i++) {
-            string proj4string = dcwrf.GetMapProjection(varnames[i]);
-            if (!proj4string.empty()) {
-                vdc.SetMapProjection(proj4string);
-                break;
-            }
-        }
-    }
-}
+void defineMapProjection(const DCWRF &dcwrf, VDCNetCDF &vdc) { vdc.SetMapProjection(dcwrf.GetMapProjection()); }
 
 int main(int argc, char **argv)
 {
@@ -163,6 +149,9 @@ int main(int argc, char **argv)
         }
 
         if (rc < 0) { exit(1); }
+
+        rc = vdc.CopyAtt(dcwrf, cvar.GetName());
+        if (rc < 0) { return (1); }
     }
 
     defineMapProjection(dcwrf, vdc);
@@ -216,25 +205,18 @@ int main(int argc, char **argv)
             rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), compress);
 
             if (rc < 0) { exit(1); }
+
+            rc = vdc.CopyAtt(dcwrf, dvar.GetName());
+            if (rc < 0) { return (1); }
         }
     }
 
     //
-    // Copy attributes
+    // Copy global attributes
     //
     {
-        vector<string> varnames = dcwrf.GetDataVarNames();
-        vector<string> coordnames = dcwrf.GetCoordVarNames();
-        string         globalvarname = "";
-        vector<string> allnames;
-        allnames.insert(allnames.end(), varnames.begin(), varnames.end());
-        allnames.insert(allnames.end(), coordnames.begin(), coordnames.end());
-        allnames.push_back(globalvarname);
-
-        for (int i = 0; i < allnames.size(); i++) {
-            vector<string> attnames = dcwrf.GetAttNames(allnames[i]);
-            for (int j = 0; j < attnames.size(); j++) { vdc.CopyAtt(dcwrf, allnames[i], attnames[j]); }
-        }
+        vector<string> attnames = dcwrf.GetAttNames("");
+        for (int j = 0; j < attnames.size(); j++) { vdc.CopyAtt(dcwrf, "", attnames[j]); }
     }
 
     rc = vdc.EndDefine();

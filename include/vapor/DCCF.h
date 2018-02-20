@@ -98,17 +98,14 @@ protected:
     //!
     virtual size_t getNumRefLevels(string varname) const { return (1); }
 
-    //! \copydoc DC::GetMapProjection(string)
-    //!
-    virtual string getMapProjection(string varname) const;
-
     //! \copydoc DC::GetMapProjection()
     //!
-    virtual string getMapProjection() const;
-
-    //! \copydoc DC::GetMapProjectionDefault()
-    //!
-    virtual string getMapProjectionDefault() const { return (_proj4StringDefault); }
+    virtual string getMapProjection() const
+    {
+        // Projections not supported yet :-(
+        //
+        return (_proj4String);
+    }
 
     //! \copydoc DC::GetAtt()
     //!
@@ -136,26 +133,17 @@ protected:
 
     //! \copydoc DC::CloseVariable()
     //!
-    virtual int closeVariable();
-
-    //! \copydoc DC::Read()
-    //!
-    int virtual read(float *data);
-    virtual int read(int *data) { return (_ncdfc->Read(data, _ovr_fd)); }
-
-    //! \copydoc DC::ReadSlice()
-    //!
-    virtual int readSlice(float *slice);
+    virtual int closeVariable(int fd);
 
     //! \copydoc DC::ReadRegion()
     //
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(min, max, region)); }
-    virtual int readRegion(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(min, max, region)); }
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::ReadRegionBlock()
     //!
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
-    virtual int readRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (DCCF::read(region)); }
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); };
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::VariableExists()
     //!
@@ -164,43 +152,28 @@ protected:
 private:
     NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
-    Wasp::SmartBuf      _buf;
 
-    int _ovr_fd;    // File descriptor for currently opened file
-
-    string                                      _proj4StringOption;
-    string                                      _proj4StringDefault;
     string                                      _proj4String;
     std::map<string, DC::Dimension>             _dimsMap;
     std::map<string, DC::CoordVar>              _coordVarsMap;
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
     std::map<string, string>                    _coordVarKeys;
-    Proj4API *                                  _proj4API;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
-
-    int _get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const;
-
-    int _get_latlon_extents(NetCDFCFCollection *ncdfc, string latlon, bool lonflag, float &min, float &max);
-
-    int _get_coord_pair_extents(NetCDFCFCollection *ncdfc, string lon, string lat, double &lonmin, double &lonmax, double &latmin, double &latmax);
-
-    Proj4API *_create_proj4api(double lonmin, double lonmax, double latmin, double latmax, string &proj4string) const;
 
     int _get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
 
     int _get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
 
+    int _get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const;
+
     int _AddCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars);
 
     int _InitHorizontalCoordinates(NetCDFCFCollection *ncdfc);
-    int _InitHorizontalCoordinatesDerived(NetCDFCFCollection *ncdfc, const vector<pair<string, string>> &coordpairs);
 
     int _InitVerticalCoordinates(NetCDFCFCollection *ncdfc);
-    int _InitVerticalCoordinatesDerived(NetCDFCFCollection *ncdfc, const vector<string> &cvars);
 
     int _InitTimeCoordinates(NetCDFCFCollection *ncdfc);
-    int _InitTimeCoordinatesDerived(NetCDFCFCollection *ncdfc, const vector<string> &cvars);
 
     int _InitDimensions(NetCDFCFCollection *ncdfc);
 
@@ -208,7 +181,9 @@ private:
 
     int _InitVars(NetCDFCFCollection *ncdfc);
 
-    template<class T> int _readRegionTemplate(const vector<size_t> &min, const vector<size_t> &max, T *region);
+    template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
+
+    template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -219,42 +194,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
 
     //
-    // Horizontal coordinate  derived variables. This class computes
-    // horizontal coordinate variables in meters by using a map projection
-    // from geographic to cartographic coordinates
-    //
-    class DerivedVarHorizontal : public NetCDFCollection::DerivedVar {
-    public:
-        DerivedVarHorizontal(NetCDFCFCollection *ncdfc, string lonname, string latname, const vector<DC::Dimension> &dims, Proj4API *proj4API, bool lonflag);
-        virtual ~DerivedVarHorizontal();
-
-        virtual int                 Open(size_t ts);
-        virtual int                 ReadSlice(float *slice, int);
-        virtual int                 Read(float *buf, int);
-        virtual int                 SeekSlice(int offset, int whence, int);
-        virtual int                 Close(int fd);
-        virtual bool                TimeVarying() const { return (!_time_dim_name.empty()); };
-        virtual std::vector<size_t> GetSpatialDims() const { return (_sdims); }
-        virtual std::vector<string> GetSpatialDimNames() const { return (_sdimnames); }
-        virtual size_t              GetTimeDim() const { return (_time_dim); }
-        virtual string              GetTimeDimName() const { return (_time_dim_name); }
-        virtual bool                GetMissingValue(double &mv) const { return (false); }
-
-    private:
-        string              _lonname;          // name of longitude variable
-        string              _latname;          // name of latitude variable
-        bool                _xflag;            // calculate X or Y Cartographic coordinates?
-        size_t              _time_dim;         // number of time steps
-        string              _time_dim_name;    // Name of time dimension
-        std::vector<size_t> _sdims;            // spatial dimensions
-        std::vector<string> _sdimnames;        // spatial dimension names
-        bool                _is_open;          // Open for reading?
-        float *             _lonbuf;           // boundary points of lat and lon
-        float *             _latbuf;           // boundary points of lat and lon
-        Proj4API *          _proj4API;
-        int                 _lonfd;
-        int                 _latfd;    // file descriptors for reading lat and lon coord vars
-    };
 };
 };    // namespace VAPoR
 
