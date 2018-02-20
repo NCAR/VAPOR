@@ -70,7 +70,16 @@ private:
     VAPoR::DataMgr *   _getCurrentDataMgr() const;
 
     void _setInitialExtents();
-    void _invokePython(const QString &, const std::vector<std::string> &, const std::vector<std::vector<float>> &, const std::vector<float> &);
+
+    // All the python stuff happens here; no python outside this method
+    void _invokePython(const QString &, const std::vector<std::string> &, const std::vector<std::vector<float>> &, const std::vector<float> &, const std::string &, const std::string &);
+
+    // Returns a string with the proper X label if all variables share the same coordinate unit.
+    //   Otherwise returns an empty string.
+    std::string _getXLabel();
+    // Returns a string with the proper Y label if all variables share the same unit.
+    //   Otherwise returns an empty string.
+    std::string _getYLabel();
 };
 
 #endif    // PLOT_H
