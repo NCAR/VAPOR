@@ -121,6 +121,34 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="leftMargin">
+            <number>20</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="xlock">
+             <property name="text">
+              <string>Lock X</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="ylock">
+             <property name="text">
+              <string>Lock Y</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="zlock">
+             <property name="text">
+              <string>Lock Z</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <widget class="QSinglePoint" name="spaceTabP1" native="true"/>
          </item>
          <item>

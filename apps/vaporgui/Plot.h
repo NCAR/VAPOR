@@ -50,6 +50,7 @@ class Plot : public QDialog, public Ui_PlotWindow {
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
     void _numberOfSamplesChanged();
+    void _axisLocksChanged(int);
 
     /// Plot when the plot button is clicked
     void _spaceTabPlotClicked();
@@ -71,7 +72,7 @@ class Plot : public QDialog, public Ui_PlotWindow {
 
     void _setInitialExtents();
 
-    // All the python stuff happens here; no python outside this method
+    /// All the python stuff happens here; no python outside this method
     void _invokePython(const QString &,
                        const std::vector<std::string> &,
                        const std::vector<std::vector<float>> &,
