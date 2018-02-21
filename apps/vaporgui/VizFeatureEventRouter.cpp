@@ -495,11 +495,6 @@ void VizFeatureEventRouter::convertPCSToLat(double &yCoord)
 
 void VizFeatureEventRouter::convertPCSToLonLat(double &xCoord, double &yCoord)
 {
-    // ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
-    // vector<string> names = paramsMgr->GetDataMgrNames();
-    // DataStatus *dataStatus = _controlExec->GetDataStatus();
-    // DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
-
     DataStatus *      dataStatus = _controlExec->GetDataStatus();
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     string            dataMgrName = vfParams->GetCurrentAxisDataMgrName();
@@ -509,7 +504,7 @@ void VizFeatureEventRouter::convertPCSToLonLat(double &xCoord, double &yCoord)
     double coordsForError[2] = {coords[0], coords[1]};
 
     int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1);
-    if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]); }
+    if (rc < 0) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]); }
 
     xCoord = coords[0];
     yCoord = coords[1];
@@ -529,10 +524,6 @@ void VizFeatureEventRouter::convertLatToPCS(double &yCoord)
 
 void VizFeatureEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
 {
-    // ParamsMgr * paramsMgr= _controlExec->GetParamsMgr();
-    // vector<string> names = paramsMgr->GetDataMgrNames();
-    // DataStatus *dataStatus = _controlExec->GetDataStatus();
-    // DataMgr* dataMgr = dataStatus->GetDataMgr(names[0]);
     DataStatus *      dataStatus = _controlExec->GetDataStatus();
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     string            dataMgrName = vfParams->GetCurrentAxisDataMgrName();
@@ -542,7 +533,7 @@ void VizFeatureEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
     double coordsForError[2] = {coords[0], coords[1]};
 
     int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1);
-    if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to PCS", coordsForError[0], coordsForError[1]); }
+    if (rc < 0) { MyBase::SetErrMsg("Could not convert point %f, %f to PCS", coordsForError[0], coordsForError[1]); }
 
     xCoord = coords[0];
     yCoord = coords[1];
