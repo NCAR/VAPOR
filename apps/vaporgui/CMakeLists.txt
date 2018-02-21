@@ -12,6 +12,7 @@ set (SRCS
 	Histo.cpp
 	ColorbarWidget.cpp
 	StartupEventRouter.cpp
+	SettingsEventRouter.cpp
 	AppSettingsEventRouter.cpp
 	VizSelectCombo.cpp
 	AnnotationsEventRouter.cpp
@@ -76,6 +77,7 @@ set (UIS
 	regionTab.ui
 	boxframe.ui
 	startupTab.ui
+	SettingsGUI.ui
 	appSettingsTab.ui
 	AnnotationsGUI.ui
 	ControlPointEditorBase.ui

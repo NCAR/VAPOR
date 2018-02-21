@@ -10,6 +10,12 @@
     <height>977</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>418</width>
@@ -18,13 +24,13 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>418</width>
+    <width>600</width>
     <height>1200</height>
    </size>
   </property>
   <property name="baseSize">
    <size>
-    <width>415</width>
+    <width>450</width>
     <height>0</height>
    </size>
   </property>
@@ -765,7 +771,7 @@
          <item>
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>Digits</string>
+            <string>Precision</string>
            </property>
           </widget>
          </item>
@@ -1044,6 +1050,9 @@
        </property>
        <item>
         <layout class="QHBoxLayout">
+         <property name="rightMargin">
+          <number>15</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
