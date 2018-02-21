@@ -81,6 +81,9 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     connect(spaceTabPlotButton, SIGNAL(clicked()), this, SLOT(_spaceTabPlotClicked()));
     connect(timeTabPlotButton, SIGNAL(clicked()), this, SLOT(_timeTabPlotClicked()));
     connect(numOfSamplesLineEdit, SIGNAL(editingFinished()), this, SLOT(_numberOfSamplesChanged()));
+    connect(xlock, SIGNAL(stateChanged(int)), this, SLOT(_axisLocksChanged(int)));
+    connect(ylock, SIGNAL(stateChanged(int)), this, SLOT(_axisLocksChanged(int)));
+    connect(zlock, SIGNAL(stateChanged(int)), this, SLOT(_axisLocksChanged(int)));
 
     // Create widgets for the plot window
     _plotDialog = new QDialog(this);
@@ -244,6 +247,17 @@ void Plot::Update()
 
     // Update number of samples
     numOfSamplesLineEdit->setText(QString::number(plotParams->GetNumOfSamples(), 10));
+
+    // Update axis locks
+    std::vector<bool> locks = plotParams->GetAxisLocks();
+    xlock->setChecked(locks[0]);
+    ylock->setChecked(locks[1]);
+    zlock->setChecked(locks[2]);
+    if (spaceTabP1->GetDimensionality() == 3)
+        zlock->setVisible(true);
+    else
+        zlock->setVisible(false);
+    _spaceModeP1Changed();    // if any axis is locked, this function syncs them
 }
 
 void Plot::_newVarChanged(int index)
@@ -283,22 +297,62 @@ void Plot::_removeVarChanged(int index)
 
 void Plot::_spaceModeP1Changed()
 {
-    std::vector<double> pt;
+    std::vector<double> pt, pt2;
     spaceTabP1->GetCurrentPoint(pt);
     assert(pt.size() == 2 || pt.size() == 3);
 
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetPoint1(pt);
+
+    spaceTabP2->GetCurrentPoint(pt2);
+    std::vector<bool> locks = plotParams->GetAxisLocks();
+    bool              lockFlag = false;
+    if (locks[0]) {
+        pt2[0] = pt[0];
+        lockFlag = true;
+    }
+    if (locks[1]) {
+        pt2[1] = pt[1];
+        lockFlag = true;
+    }
+    if (spaceTabP1->GetDimensionality() == 3 && locks[2]) {
+        pt2[2] = pt[2];
+        lockFlag = true;
+    }
+    if (lockFlag) {
+        spaceTabP2->SetValue(pt2);
+        plotParams->SetPoint2(pt2);
+    }
 }
 
 void Plot::_spaceModeP2Changed()
 {
-    std::vector<double> pt;
+    std::vector<double> pt, pt1;
     spaceTabP2->GetCurrentPoint(pt);
     assert(pt.size() == 2 || pt.size() == 3);
 
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetPoint2(pt);
+
+    spaceTabP1->GetCurrentPoint(pt1);
+    std::vector<bool> locks = plotParams->GetAxisLocks();
+    bool              lockFlag = false;
+    if (locks[0]) {
+        pt1[0] = pt[0];
+        lockFlag = true;
+    }
+    if (locks[1]) {
+        pt1[1] = pt[1];
+        lockFlag = true;
+    }
+    if (spaceTabP2->GetDimensionality() == 3 && locks[2]) {
+        pt1[2] = pt[2];
+        lockFlag = true;
+    }
+    if (lockFlag) {
+        spaceTabP1->SetValue(pt1);
+        plotParams->SetPoint1(pt1);
+    }
 }
 
 void Plot::_spaceModeTimeChanged(double val)
@@ -677,4 +731,16 @@ std::string Plot::_getYLabel()
 
         return label;
     }
+}
+
+void Plot::_axisLocksChanged(int val)
+{
+    std::vector<bool> locks(3, false);
+    locks[0] = (bool)xlock->isChecked();
+    locks[1] = (bool)ylock->isChecked();
+    locks[2] = (bool)zlock->isChecked();
+
+    PlotParams *plotParams = this->_getCurrentPlotParams();
+    plotParams->SetAxisLocks(locks);
+    _spaceModeP1Changed();
 }

@@ -29,6 +29,7 @@ const string PlotParams::_p1Tag = "Point2";
 const string PlotParams::_p2Tag = "Point1";
 const string PlotParams::_numSamplesTag = "NumberOfSamplesTag";
 const string PlotParams::_singlePtTag = "SinglePoint";
+const string PlotParams::_lockAxisTag = "LockAxis";
 
 //
 // Register class with object factory!!!
@@ -65,3 +66,20 @@ void PlotParams::SetPoint2(const std::vector<double> &point) { SetValueDoubleVec
 void PlotParams::SetNumOfSamples(long val) { SetValueLong(_numSamplesTag, "Set number of samples", (long)val); }
 
 long PlotParams::GetNumOfSamples() const { return GetValueLong(_numSamplesTag, 100); }
+
+void PlotParams::SetAxisLocks(const std::vector<bool> &locks)
+{
+    std::vector<long> locksL(3, 0);
+    for (int i = 0; i < 3; i++) locksL[i] = (long int)locks[i];
+    SetValueLongVec(_lockAxisTag, "Lock values along x, y, or z axes", locksL);
+}
+
+std::vector<bool> PlotParams::GetAxisLocks()
+{
+    std::vector<long> defaultVal(3, 0);
+    std::vector<long> locksL = GetValueLongVec(_lockAxisTag, defaultVal);
+    std::vector<bool> locks(3, false);
+    for (int i = 0; i < 3; i++) locks[i] = (bool)locksL[i];
+
+    return locks;
+}

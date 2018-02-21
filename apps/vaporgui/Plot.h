@@ -50,6 +50,7 @@ private slots:
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
     void _numberOfSamplesChanged();
+    void _axisLocksChanged(int);
 
     /// Plot when the plot button is clicked
     void _spaceTabPlotClicked();
@@ -71,7 +72,7 @@ private:
 
     void _setInitialExtents();
 
-    // All the python stuff happens here; no python outside this method
+    /// All the python stuff happens here; no python outside this method
     void _invokePython(const QString &, const std::vector<std::string> &, const std::vector<std::vector<float>> &, const std::vector<float> &, const std::string &, const std::string &);
 
     // Returns a string with the proper X label if all variables share the same coordinate unit.

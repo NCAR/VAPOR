@@ -51,6 +51,9 @@ public:
     long GetNumOfSamples() const;
     void SetNumOfSamples(long);
 
+    void              SetAxisLocks(const std::vector<bool> &locks);
+    std::vector<bool> GetAxisLocks();
+
     static string GetClassType() { return ("PlotParams"); }
 
     // virtual functions required by RenderParams
@@ -63,6 +66,7 @@ private:
     static const string _p2Tag;            // point2 in space mode
     static const string _numSamplesTag;    // number of samples in space mode
     static const string _singlePtTag;      // a single point in time mode
+    static const string _lockAxisTag;      // if we lock x, y, or z axis
 };
 
 };    // End namespace VAPoR
