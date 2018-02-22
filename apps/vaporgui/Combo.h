@@ -1,6 +1,7 @@
 #ifndef COMBO_H
 #define COMBO_H
 
+#include <QWidget>
 #include <QLineEdit>
 #include <QSlider>
 #include <QValidator>
@@ -11,8 +12,10 @@
 // across both such that a single value is represented. The value 
 // must be within a specified range.
 //
-class Combo
+class Combo : public QWidget
 {
+    Q_OBJECT
+
 public:
 
  Combo(QLineEdit* edit, QSlider* slider, bool intType = false);
