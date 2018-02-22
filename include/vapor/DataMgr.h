@@ -823,9 +823,9 @@ class VDF_API DataMgr : public Wasp::MyBase {
     VAPoR::LayeredGrid *_make_grid_layered(
         const std::vector<size_t> &dims,
         const std::vector<float *> &blkvec,
-        const std::vector<vector<size_t>> &bs,
-        const std::vector<vector<size_t>> &bmin,
-        const std::vector<vector<size_t>> &bmax) const;
+        const std::vector<size_t> &bs,
+        const std::vector<size_t> &bmin,
+        const std::vector<size_t> &bmax) const;
 
     VAPoR::CurvilinearGrid *_make_grid_curvilinear(
         size_t ts,
@@ -834,9 +834,9 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const vector<DC::CoordVar> &cvarsinfo,
         const std::vector<size_t> &dims,
         const std::vector<float *> &blkvec,
-        const std::vector<vector<size_t>> &bs,
-        const std::vector<vector<size_t>> &bmin,
-        const std::vector<vector<size_t>> &bmax);
+        const std::vector<size_t> &bs,
+        const std::vector<size_t> &bmin,
+        const std::vector<size_t> &bmax);
 
     void _ugrid_setup(
         const DC::DataVar &var,
@@ -857,9 +857,9 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const vector<DC::CoordVar> &cvarsinfo,
         const vector<size_t> &dims,
         const vector<float *> &blkvec,
-        const vector<vector<size_t>> &bs,
-        const vector<vector<size_t>> &bmin,
-        const vector<vector<size_t>> &bmax,
+        const vector<size_t> &bs,
+        const vector<size_t> &bmin,
+        const vector<size_t> &bmax,
         const vector<int *> &conn_blkvec,
         const vector<size_t> &conn_bs,
         const vector<size_t> &conn_bmin,
@@ -903,11 +903,11 @@ class VDF_API DataMgr : public Wasp::MyBase {
 
     void _setupCoordVecsHelper(
         string data_varname,
-        const vector<size_t> &data_min,
-        const vector<size_t> &data_max,
+        const vector<size_t> &data_bmin,
+        const vector<size_t> &data_bmax,
         string coord_varname,
-        vector<size_t> &coord_min,
-        vector<size_t> &coord_max) const;
+        vector<size_t> &coord_bmin,
+        vector<size_t> &coord_bmax) const;
 
     int _setupCoordVecs(
         size_t ts,

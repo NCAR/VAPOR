@@ -96,22 +96,6 @@ VDC::XType ncdf_xtype2vdc_xtype(int n_xtype) {
     return (v_xtype);
 }
 
-void ws_info(
-    const vector<size_t> &sdims, const vector<size_t> &bs,
-    size_t &slice_size, size_t &slices_per_slab, size_t &num_slices) {
-    assert(sdims.size() >= 2 && sdims.size() <= 3);
-    assert(bs.size() == sdims.size());
-
-    slice_size = sdims[0] * sdims[1];
-    if (sdims.size() > 2) {
-        slices_per_slab = bs[2];
-        num_slices = sdims[2];
-    } else {
-        slices_per_slab = 1;
-        num_slices = 1;
-    }
-}
-
 void vdc_2_ncdfcoords(
     size_t ts0, size_t ts1, bool time_varying,
     const vector<size_t> &min, const vector<size_t> &max,
@@ -222,10 +206,10 @@ int VDCNetCDF::GetHyperSliceInfo(
 
 int VDCNetCDF::Initialize(
     const vector<string> &paths, const vector<string> &options,
-    AccessMode mode, size_t chunksizehint) {
+    AccessMode mode, vector<size_t> bs, size_t chunksizehint) {
     _chunksizehint = chunksizehint;
 
-    int rc = VDC::initialize(paths, options, mode);
+    int rc = VDC::initialize(paths, options, mode, bs);
     if (rc < 0)
         return (-1);
 
@@ -371,8 +355,10 @@ int VDCNetCDF::getDimLensAtLevel(
         return (-1);
     }
 
-    vector<size_t> bs = varinfo.GetBS();
-
+    vector<size_t> bs = _bs;
+    while (bs.size() > dimlens.size()) {
+        bs.pop_back();
+    }
     assert(bs.size() == dimlens.size());
 
     if (varinfo.IsCompressed()) {
@@ -1457,13 +1443,6 @@ int VDCNetCDF::_ReadMasterBaseVarDefs(string prefix, BaseVar &var) {
         return (rc);
     var.SetPeriodic(periodic);
 
-    tag = prefix + "." + var.GetName() + ".BlockSize";
-    vector<size_t> bs;
-    rc = _master->GetAtt("", tag, bs);
-    if (rc < 0)
-        return (rc);
-    var.SetBS(bs);
-
     tag = prefix + "." + var.GetName() + ".WaveName";
     string wname;
     rc = _master->GetAtt("", tag, wname);
@@ -1675,11 +1654,6 @@ int VDCNetCDF::_WriteMasterBaseVarDefs(string prefix, const BaseVar &var) {
     if (rc < 0)
         return (rc);
 
-    tag = prefix + "." + var.GetName() + ".BlockSize";
-    rc = _master->PutAtt("", tag, var.GetBS());
-    if (rc < 0)
-        return (rc);
-
     tag = prefix + "." + var.GetName() + ".WaveName";
     rc = _master->PutAtt("", tag, var.GetWName());
     if (rc < 0)
@@ -1887,7 +1861,14 @@ int VDCNetCDF::_DefBaseVar(
     }
     reverse(dimnames.begin(), dimnames.end()); // NetCDF order
 
-    vector<size_t> bs = var.GetBS();
+    size_t nspatial = time_varying ? dimnames.size() - 1 : dimnames.size();
+
+    // Only spatial dimensions are blocked
+    //
+    vector<size_t> bs = _bs;
+    while (bs.size() > nspatial) {
+        bs.pop_back();
+    }
     reverse(bs.begin(), bs.end()); // NetCDF order
     int rc = wasp->DefVar(
         var.GetName(), vdc_xtype2ncdf_xtype(var.GetXType()),
@@ -1903,7 +1884,7 @@ int VDCNetCDF::_DefBaseVar(
     if (rc < 0)
         return (rc);
 
-    rc = wasp->PutAtt(var.GetName(), "BlockSize", var.GetBS());
+    rc = wasp->PutAtt(var.GetName(), "BlockSize", bs);
     if (rc < 0)
         return (rc);
 
