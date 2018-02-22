@@ -238,25 +238,6 @@ void VizFeatureEventRouter::_updateTab()
     axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
 
     return;
-
-    QPalette pal(regionColorEdit->palette());
-    double   clr[3];
-    vParams->GetRegionColor(clr);
-    QColor newColor = QColor((int)(clr[0] * 255), (int)(clr[1] * 255), (int)(clr[2] * 255));
-    pal.setColor(QPalette::Base, newColor);
-    regionColorEdit->setPalette(pal);
-    QPalette pal1(domainColorEdit->palette());
-    vParams->GetDomainColor(clr);
-    newColor = QColor((int)(clr[0] * 255), (int)(clr[1] * 255), (int)(clr[2] * 255));
-    pal1.setColor(QPalette::Base, newColor);
-    domainColorEdit->setPalette(pal1);
-    QPalette pal2(backgroundColorEdit->palette());
-    vParams->GetBackgroundColor(clr);
-    newColor = QColor((int)(clr[0] * 255), (int)(clr[1] * 255), (int)(clr[2] * 255));
-    pal2.setColor(QPalette::Base, newColor);
-    backgroundColorEdit->setPalette(pal2);
-
-    adjustSize();
 }
 
 void VizFeatureEventRouter::updateDataMgrCombo()
