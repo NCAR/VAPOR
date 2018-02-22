@@ -234,11 +234,9 @@ void DC::Attribute::GetValues(
 DC::BaseVar::BaseVar(
     string name,
     string units, XType type,
-    std::vector<size_t> bs,
     std::vector<bool> periodic) : _name(name),
                                   _units(units),
                                   _type(type),
-                                  _bs(bs),
                                   _periodic(periodic) {
     _wname = "";
     _cratios.push_back(1);
@@ -549,6 +547,17 @@ bool DC::_getAuxVarDimensions(
         dimensions.push_back(dim);
     }
     return (true);
+}
+
+vector<size_t> DC::_getBlockSize() const {
+    vector<size_t> bs = getBlockSize();
+    while (bs.size() > 3) {
+        bs.pop_back();
+    }
+    while (bs.size() < 3) {
+        bs.push_back(1);
+    }
+    return (bs);
 }
 
 int DC::_openVariableRead(
@@ -1159,10 +1168,6 @@ std::ostream &operator<<(std::ostream &o, const DC::BaseVar &var) {
         o << var._cratios[i] << " ";
     }
     o << endl;
-    o << "   BlockSize:";
-    for (int i = 0; i < var._bs.size(); i++) {
-        o << " " << var._bs[i];
-    }
     o << endl;
     o << "   Periodic: ";
     for (int i = 0; i < var._periodic.size(); i++) {

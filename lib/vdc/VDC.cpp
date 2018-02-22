@@ -18,7 +18,7 @@ size_t vproduct(vector<size_t> a) {
 }
 
 void _compute_bs(
-    const vector<string> &dim_names,
+    size_t ndims,
     const vector<size_t> &default_bs,
     vector<size_t> &bs) {
     bs.clear();
@@ -26,7 +26,7 @@ void _compute_bs(
     // If the default block size exists for a dimension use it.
     // Otherwise set the bs to 1
     //
-    for (int i = 0; i < dim_names.size(); i++) {
+    for (int i = 0; i < ndims; i++) {
         if (i < default_bs.size()) {
             bs.push_back(default_bs[i]);
         } else {
@@ -34,7 +34,7 @@ void _compute_bs(
         }
     }
 
-    assert(dim_names.size() == bs.size());
+    assert(ndims == bs.size());
 }
 
 void _compute_periodic(
@@ -98,7 +98,7 @@ VDC::VDC() {
 
 int VDC::initialize(
     const vector<string> &paths, const vector<string> &options,
-    AccessMode mode) {
+    AccessMode mode, vector<size_t> bs) {
     _proj4StringOption.clear();
     if (options.size() >= 2) {
         if (options[0] == "-proj4") {
@@ -118,6 +118,14 @@ int VDC::initialize(
     }
     _mode = mode;
 
+    if (mode == W) {
+        _bs = bs;
+        while (_bs.size() > 3)
+            _bs.pop_back();
+        while (_bs.size() < 3)
+            _bs.push_back(1);
+    }
+
     int rc = _udunits.Initialize();
     if (rc < 0) {
         SetErrMsg(
@@ -133,28 +141,18 @@ int VDC::initialize(
 }
 
 int VDC::SetCompressionBlock(
-    vector<size_t> bs, string wname,
-    vector<size_t> cratios) {
+    string wname, vector<size_t> cratios) {
     if (!cratios.size())
         cratios.push_back(1);
 
     sort(cratios.begin(), cratios.end());
     reverse(cratios.begin(), cratios.end());
 
-    if (!bs.size()) {
-        for (int i = 0; i < 3; i++)
-            bs.push_back(1);
-        wname.clear();
-        cratios.clear();
-        cratios.push_back(1);
-    }
-
-    if (!_ValidCompressionBlock(bs, wname, cratios)) {
+    if (!_ValidCompressionBlock(_bs, wname, cratios)) {
         SetErrMsg("Invalid compression settings");
         return (-1);
     }
 
-    _bs = bs;
     _wname = wname;
     _cratios = cratios;
 
@@ -379,10 +377,9 @@ int VDC::_DefineImplicitCoordVars(
             continue;
 
         vector<bool> periodic(1, false);
-        vector<size_t> bs(1, 1);
         _coordVars[name] = CoordVar(
             name, "", XType::FLOAT, "",
-            vector<size_t>(), periodic, dim_names, bs,
+            vector<size_t>(), periodic, dim_names,
             time_dim_name, axis, false);
 
         _coordVars[name].SetUniform(true);
@@ -418,11 +415,6 @@ int VDC::DefineCoordVar(
         return (-1);
     }
 
-    // Determine block size
-    //
-    vector<size_t> bs;
-    _compute_bs(dim_names, _bs, bs);
-
     vector<bool> periodic;
     _compute_periodic(dim_names, _periodic, periodic);
 
@@ -437,7 +429,7 @@ int VDC::DefineCoordVar(
     //
     _coordVars[varname] = CoordVar(
         varname, units, type, wname,
-        cratios, periodic, dim_names, bs, time_dim_name, axis, false);
+        cratios, periodic, dim_names, time_dim_name, axis, false);
 
     return (0);
 }
@@ -546,11 +538,6 @@ int VDC::_DefineDataVar(
         }
     }
 
-    // Determine block size
-    //
-    vector<size_t> bs;
-    _compute_bs(dim_names, _bs, bs);
-
     vector<bool> periodic;
     _compute_periodic(dim_names, _periodic, periodic);
 
@@ -566,12 +553,12 @@ int VDC::_DefineDataVar(
 
     if (!maskvar.empty()) {
         _dataVars[varname] = DataVar(
-            varname, units, type, wname, cratios, periodic, meshname, bs,
+            varname, units, type, wname, cratios, periodic, meshname,
             time_coord_var, DC::Mesh::NODE, mv, maskvar);
     } else {
         _dataVars[varname] = DataVar(
             varname, units, type, wname, cratios, periodic, meshname,
-            bs, time_coord_var, DC::Mesh::NODE);
+            time_coord_var, DC::Mesh::NODE);
     }
 
     return (0);
@@ -628,7 +615,6 @@ vector<string> VDC::getCoordVarNames() const {
 
 size_t VDC::getNumRefLevels(string varname) const {
 
-    vector<size_t> bs;
     string wname;
 
     if (_coordVars.find(varname) != _coordVars.end()) {
@@ -636,19 +622,27 @@ size_t VDC::getNumRefLevels(string varname) const {
         ;
         if (!itr->second.IsCompressed())
             return (1);
-        bs = itr->second.GetBS();
         wname = itr->second.GetWName();
     } else if (_dataVars.find(varname) != _dataVars.end()) {
         std::map<string, DC::DataVar>::const_iterator itr = _dataVars.find(varname);
         if (!itr->second.IsCompressed())
             return (1);
         ;
-        bs = itr->second.GetBS();
         wname = itr->second.GetWName();
     } else {
         // Var doesn't exist. Still return 1
         return (1);
     }
+
+    vector<DC::Dimension> mdimensions;
+    bool ok = GetVarDimensions(varname, true, mdimensions);
+    if (!ok)
+        return (1);
+
+    // Determine block size
+    //
+    vector<size_t> bs;
+    _compute_bs(mdimensions.size(), _bs, bs);
 
     size_t nlevels, maxcratio;
     CompressionInfo(bs, wname, nlevels, maxcratio);
@@ -1180,34 +1174,6 @@ bool VDC::_valid_dims(
     return (true);
 }
 
-bool VDC::_valid_blocking(
-    const vector<DC::Dimension> &dimensions,
-    const vector<size_t> &bs,
-    const vector<string> &coord_vars) const {
-    assert(dimensions.size() == coord_vars.size());
-    assert(dimensions.size() == bs.size());
-
-    // Dimensions of all coordinate variables need to
-    //
-    for (int i = 0; i < coord_vars.size(); i++) {
-
-        vector<DC::Dimension> cdimensions;
-        bool ok = GetVarDimensions(coord_vars[i], true, cdimensions);
-        assert(ok = true);
-
-        map<string, CoordVar>::const_iterator itr = _coordVars.find(coord_vars[i]);
-        assert(itr != _coordVars.end());
-
-        vector<size_t> cbs = itr->second.GetBS();
-        assert(cdimensions.size() == cbs.size());
-
-        ok = _valid_dims(cdimensions, cbs, dimensions, bs);
-        if (!ok)
-            return (false);
-    }
-    return (true);
-}
-
 bool VDC::_valid_mask_var(
     string varname, vector<DC::Dimension> dimensions,
     vector<size_t> bs, bool compressed, string maskvar) const {
@@ -1240,20 +1206,12 @@ bool VDC::_valid_mask_var(
         return (false);
     }
 
-    // Data and mask variable must have same blocking along
-    // each axis
-    //
-    if (!_valid_blocking(dimensions, bs, mitr->second.GetCoordVars())) {
-        SetErrMsg("Data and mask variables must have same blocking");
-        return (false);
-    }
-
     if (compressed) {
         size_t nlevels, dummy;
         CompressionInfo(bs, _wname, nlevels, dummy);
 
         size_t nlevels_m;
-        CompressionInfo(mvar.GetBS(), mvar.GetWName(), nlevels_m, dummy);
+        CompressionInfo(bs, mvar.GetWName(), nlevels_m, dummy);
 
         if (nlevels > nlevels_m) {
             SetErrMsg("Data variable and mask variable depth must match");
@@ -1343,16 +1301,7 @@ bool VDC::_ValidDefineDataVar(
     // Determine block size
     //
     vector<size_t> bs;
-    _compute_bs(dim_names, _bs, bs);
-
-    // Data and coordinate variables must have same blocking along
-    // each axis, and coordinate dimensions must be a subset of
-    // data variable dimensions.
-    //
-    if (!_valid_blocking(dimensions, bs, coord_vars)) {
-        SetErrMsg("Coordinate and data variables must have same blocking");
-        return (false);
-    }
+    _compute_bs(dim_names.size(), _bs, bs);
 
     // Validate mask variable if one exists
     //
