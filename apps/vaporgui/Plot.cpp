@@ -23,9 +23,6 @@
 #include <vapor/DataMgrUtils.h>
 #include "Plot.h"
 
-// #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
-// #include <numpy/ndarrayobject.h>
-
 // Constructor
 Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* parent )
 {
@@ -65,10 +62,12 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
     
     timeTabSinglePoint->SetMainLabel( QString::fromAscii("Select one data point in space:") );
     timeTabTimeRange->SetMainLabel(   QString::fromAscii("Select the minimum and maximum time steps:") );
+    timeTabTimeRange->SetIntType( true );
 
     spaceTabP1->SetMainLabel( QString::fromAscii("Select spatial location of Point 1") );
     spaceTabP2->SetMainLabel( QString::fromAscii("Select spatial location of Point 2") );
     spaceTabTimeSelector->SetLabel( QString::fromAscii("T") );
+    spaceTabTimeSelector->SetIntType( true );
 
     // set widget extents
     _setWidgetExtents();
@@ -86,8 +85,8 @@ Plot::Plot( VAPoR::DataStatus* status, VAPoR::ParamsMgr* manager, QWidget* paren
              this,                  SLOT  (  _timeModePointChanged() ) );
     connect( timeTabTimeRange,      SIGNAL(  rangeChanged() ),
              this,                  SLOT  (  _timeModeT1T2Changed() ) );
-    connect( spaceTabTimeSelector,  SIGNAL(  valueChanged( double ) ),
-             this,                  SLOT  (  _spaceModeTimeChanged( double ) ) );
+    connect( spaceTabTimeSelector,  SIGNAL(  valueChanged( int ) ),
+             this,                  SLOT  (  _spaceModeTimeChanged( int ) ) );
     connect( spaceTabP1,            SIGNAL(  pointUpdated() ),
              this,                  SLOT  (  _spaceModeP1Changed() ) );
     connect( spaceTabP2,            SIGNAL(  pointUpdated() ),
@@ -336,13 +335,10 @@ void Plot::_spaceModeP2Changed()
     plotParams->SetPoint2( pt );
 }
 
-void Plot::_spaceModeTimeChanged( double val )
+void Plot::_spaceModeTimeChanged( int val )
 {
-    assert( val == std::floor(val) );
-    int ival = (int)val;
-    
     VAPoR::PlotParams* plotParams       = this->_getCurrentPlotParams();
-    plotParams->SetCurrentTimestep( ival );
+    plotParams->SetCurrentTimestep( val );
 }
 
 void Plot::_timeModePointChanged()
@@ -425,9 +421,7 @@ void Plot::_setWidgetExtents()
     // Set temporal extents
     int numOfTimeSteps = dataMgr->GetNumTimeSteps();
     timeTabTimeRange->SetExtents(0.0, (double)(numOfTimeSteps - 1) );
-    timeTabTimeRange->SetDecimals(0);
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1) );
-    spaceTabTimeSelector->SetDecimals(0);
     spaceTabTimeSelector->SetValue(0.0);
 
     // Update parameters

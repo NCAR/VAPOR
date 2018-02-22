@@ -51,10 +51,12 @@ public:
  //
  void SetPrecision( int precision );
 
+ // switch IntType
+ void SetIntType( bool );
+
  void SetEnabled( bool );
 
 private slots:
- 
  // Slot for QLineEdit events
  //
  void setLineEdit();
@@ -65,13 +67,11 @@ private slots:
  void setSliderMini( int pos );
 
 public slots:
-
  // Public slot for changing the class's value
  //
  void SetSliderLineEdit(double);
 
 signals:
-
  // This signal is emitted whenever the value of the class changes
  //
  void valueChanged(double value);

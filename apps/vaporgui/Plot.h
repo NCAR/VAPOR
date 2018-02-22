@@ -49,7 +49,7 @@ private slots:
     void _spaceTimeModeChanged( int );
     void _spaceModeP1Changed();
     void _spaceModeP2Changed();
-    void _spaceModeTimeChanged( double );
+    void _spaceModeTimeChanged( int );
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
     //void _fidelityChanged();
