@@ -147,7 +147,8 @@ int main(int argc, char **argv)
 
     VDCNetCDF vdc(opt.nthreads);
 
-    int rc = vdc.Initialize(master, vector<string>(), VDC::A, 4 * 1024 * 1024);
+    vector<size_t> bs;
+    int            rc = vdc.Initialize(master, vector<string>(), VDC::A, bs, 4 * 1024 * 1024);
 
     vector<size_t> hslice_dims;
     size_t         nslice;

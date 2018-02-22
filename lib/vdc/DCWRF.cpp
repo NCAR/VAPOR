@@ -816,9 +816,8 @@ int DCWRF::_InitHorizontalCoordinatesHelper(NetCDFCollection *ncdfc, string name
     // need to do this here. Could do this when we process native WRF
     // variables later. Sigh
     //
-    vector<size_t> bs;    // empty => no blocking
-    vector<bool>   periodic(2, false);
-    _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, spaceDimNames, bs, timeDimName);
+    vector<bool> periodic(2, false);
+    _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, spaceDimNames, timeDimName);
 
     int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
     if (rc < 0) return (-1);
@@ -885,11 +884,10 @@ DerivedCoordVar_CF1D *DCWRF::_InitVerticalCoordinatesHelper(string varName, stri
 
     _dvm.AddCoordVar(derivedVar);
 
-    vector<size_t> bs;    // empty => no blocking
-    vector<bool>   periodic(1, false);
-    string         time_dim_name = "";
+    vector<bool> periodic(1, false);
+    string       time_dim_name = "";
 
-    _coordVarsMap[varName] = CoordVar(varName, units, DC::FLOAT, periodic, axis, false, dimNames, bs, time_dim_name);
+    _coordVarsMap[varName] = CoordVar(varName, units, DC::FLOAT, periodic, axis, false, dimNames, time_dim_name);
 
     return (derivedVar);
 }
@@ -1085,7 +1083,10 @@ int DCWRF::_InitVars(NetCDFCollection *ncdfc)
 
         // Must have a coordinate variable for each dimension!
         //
-        if (sdimnames.size() != scoordvars.size()) { continue; }
+        if (sdimnames.size() != scoordvars.size()) {
+            cout << "CRAP\n";
+            continue;
+        }
 
         if (!ok) continue;
         // if (! ok) {
@@ -1105,7 +1106,7 @@ int DCWRF::_InitVars(NetCDFCollection *ncdfc)
         if (!_udunits.ValidUnit(units)) { units = ""; }
 
         vector<bool> periodic(3, false);
-        _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::NODE);
+        _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
 
         int rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);
         if (rc < 0) return (-1);

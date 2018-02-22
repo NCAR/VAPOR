@@ -725,7 +725,7 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         dimnames = ncdfc->GetDimNames(name);
         assert(dimnames.size() == 1);
 
-        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, vector<size_t>(), time_dim_name);
+        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
 
         int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
         if (rc < 0) return (-1);
@@ -744,7 +744,7 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         dimnames = ncdfc->GetDimNames(name);
         assert(dimnames.size() == 1);
 
-        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, vector<size_t>(), time_dim_name);
+        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
 
         int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
         if (rc < 0) return (-1);
@@ -762,7 +762,7 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         dimnames = ncdfc->GetDimNames(name);
         assert(dimnames.size() == 2);
 
-        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, vector<size_t>(), time_dim_name);
+        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
         int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
         if (rc < 0) return (-1);
 
@@ -771,7 +771,7 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         dimnames = ncdfc->GetDimNames(name);
         assert(dimnames.size() == 2);
 
-        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, vector<size_t>(), time_dim_name);
+        _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
 
         rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
         if (rc < 0) return (-1);
@@ -1042,7 +1042,7 @@ int DCMPAS::_InitAuxVars(NetCDFCollection *ncdfc)
         vector<string> dimnames = _GetSpatialDimNames(ncdfc, vars[i]);
         if (!dimnames.size()) continue;
 
-        _auxVarsMap[vars[i]] = AuxVar(vars[i], "", DC::INT32, "", vector<size_t>(), vector<size_t>(), periodic, dimnames);
+        _auxVarsMap[vars[i]] = AuxVar(vars[i], "", DC::INT32, "", vector<size_t>(), periodic, dimnames);
 
         // IDs in MPAS files start from 1, not 0 :-(
         //
@@ -1116,9 +1116,9 @@ int DCMPAS::_InitDataVars(NetCDFCollection *ncdfc)
         bool   has_missing = ncdfc->GetMissingValue(vars[i], mv);
 
         if (!has_missing) {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, meshname, vector<size_t>(), time_coordvar, DC::Mesh::NODE);
+            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, meshname, time_coordvar, DC::Mesh::NODE);
         } else {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, meshname, vector<size_t>(), time_coordvar, DC::Mesh::NODE, mv);
+            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, meshname, time_coordvar, DC::Mesh::NODE, mv);
         }
 
         rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);

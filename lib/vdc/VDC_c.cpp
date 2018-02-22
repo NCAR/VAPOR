@@ -65,7 +65,6 @@ void        VDCBaseVar_GetUnits(const VDCBaseVar *p, char **units) { _stringToCS
 int         VDCBaseVar_GetXType(const VDCBaseVar *p) { return _XTypeToInt(p->GetXType()); }
 void        VDCBaseVar_GetWName(const VDCBaseVar *p, char **name) { _stringToCString(p->GetWName(), name); }
 void        VDCBaseVar_GetCRatios(const VDCBaseVar *p, size_t **ratios, int *count) { _size_tVectorToCArray(p->GetCRatios(), ratios, count); }
-void        VDCBaseVar_GetBS(const VDCBaseVar *p, size_t **bs, int *count) { _size_tVectorToCArray(p->GetBS(), bs, count); }
 void        VDCBaseVar_GetPeriodic(const VDCBaseVar *p, long **periodic, int *count) { _boolVectorToCArray(p->GetPeriodic(), periodic, count); }
 void        VDCBaseVar_GetAttributeNames(const VDCBaseVar *p, char ***names, int *count)
 {
@@ -124,8 +123,10 @@ void VDC_delete(VDC *p)
     delete p;
 }
 
-int VDC_Initialize(VDC *p, const char *path, int mode)
+int VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount)
 {
+    vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
+
     VDC_DEBUG_called();
     VDC::AccessMode am = VDC::R;
     if (mode == VDC_AccessMode_R)
@@ -136,7 +137,7 @@ int VDC_Initialize(VDC *p, const char *path, int mode)
         am = VDC::A;
 
     VAPoR::VDCNetCDF *pnc = (VAPoR::VDCNetCDF *)p;
-    int               ret = pnc->Initialize(string(path), vector<string>(), am, 0);
+    int               ret = pnc->Initialize(string(path), vector<string>(), am, bs_v, 0);
     // pnc->SetFill(0x100); // Required to disable set_fill
     return ret;
 }
@@ -358,12 +359,11 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 // #        Write         #
 // ########################
 
-int VDC_SetCompressionBlock(VDC *p, const size_t *bs, int bsCount, const char *wname, const size_t *cratios, int cratiosCount)
+int VDC_SetCompressionBlock(VDC *p, const char *wname, const size_t *cratios, int cratiosCount)
 {
-    vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
     vector<size_t> cratios_v = _size_tArrayToSize_tVector(cratios, cratiosCount);
     VDC_DEBUG_printff("(%s, \"%s\", %s)", _size_tVectorToString(bs_v).c_str(), wname, _size_tVectorToString(cratios_v).c_str());
-    int ret = p->SetCompressionBlock(bs_v, string(wname), cratios_v);
+    int ret = p->SetCompressionBlock(string(wname), cratios_v);
     return ret;
 }
 

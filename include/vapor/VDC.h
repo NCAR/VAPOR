@@ -154,15 +154,6 @@ namespace VAPoR {
 //! by a number of factors and can be obtained using the CompressionInfo()
 //! method.
 //!
-//! \param bs An ordered list of block dimensions that specifies the
-//! block decomposition of the variable. The rank of \p bs may be less
-//! than that of a variable's array dimensions, in which case only
-//! the \b n fastest varying variable dimensions will be blocked, where
-//! \b n is the rank of \p bs. The ordering of the dimensions in \p bs
-//! is from fastest to slowest. A block is the basic unit of compression
-//! in the VDC: variables are decomposed into blocks, and individual blocks
-//! are compressed independently.
-//!
 //! \param wname Name of wavelet used for transforming compressed
 //! variables between wavelet and physical space. Valid values
 //! are "bior1.1", "bior1.3", "bior1.5", "bior2.2", "bior2.4",
@@ -203,6 +194,18 @@ protected:
     //! When \p mode is \b A additional time steps may be added to
     //! an existing file.
     //!
+    //! \p bs is a three-element array, with the first element
+    //! specifying the length of the fastest varying spatial dimension (e.g. X) of
+    //! the storage block, the
+    //! second element specifies the length of the next fastest varying
+    //! dimension, etc. If a variable definition defines a variable with \b n
+    //! spatial , where \b n is less than three, only the
+    //! first \b n elements
+    //! of \p bs will be used. For example, if the rank of \b bs is greater than
+    //! two a 2D variable will be stored in
+    //! blocks having dimensions \b bs[0] x \b bs[1]. Time dimensions are
+    //! never blocked. This parameter is ignored unless \p mode is W.
+    //!
     //! \note The parameter \p mode controls the access to the master
     //! file indicated by \p path and the variable data files in a somewhat
     //! unintuitive manner.  If \p mode is \b R or \b A the master file \p path
@@ -223,8 +226,8 @@ protected:
     //!
     //! \sa EndDefine();
     //
-    virtual int initialize(const std::vector<string> &paths, const std::vector<string> &options, AccessMode mode);
-    virtual int initialize(const std::vector<string> &paths, const std::vector<string> &options) { return (initialize(paths, options, R)); }
+    virtual int initialize(const std::vector<string> &paths, const std::vector<string> &options, AccessMode mode, vector<size_t> bs);
+    virtual int initialize(const std::vector<string> &paths, const std::vector<string> &options) { return (initialize(paths, options, R, vector<size_t>())); }
 
 public:
     //! Sets various parameters for storage blocks for subsequent variable
@@ -232,16 +235,6 @@ public:
     //!
     //! This method sets the storage parameters for subsequent variable
     //! definitions for compressed variables.
-    //! \p bs is a three-element array, with the first element
-    //! specifying the length of the fastest varying dimension (e.g. X) of
-    //! the storage block, the
-    //! second element specifies the length of the next fastest varying
-    //! dimension, etc. If a variable definition defines a variable with \b n
-    //! spatial dimensions, where \b n is less than three, only the
-    //! first \b n elements
-    //! of \p bs will be used. For example, if the rank of \b bs is greater than
-    //! two a 2D variable will be stored in
-    //! blocks having dimensions \b bs[0] x \b bs[1].
     //!
     //! Variables whose spatial dimension lengths are less than the coresponding
     //! dimension of \p bs will be padded to block boundaries.
@@ -269,10 +262,6 @@ public:
     //! definitions for variables that are not compressed.
     //!
     //!
-    //! \param[in] bs A one to three-element array specifying the storage
-    //! block size. All
-    //! elements of \p must be great than or equal to one. The default value
-    //! of \p bs is (64, 64, 64).
     //! \param[in] wname A wavelet family name. The default value is "bior4.4".
     //! \param[in] cratios A vector of compression of integer compression
     //! factors.
@@ -283,7 +272,7 @@ public:
     //!
     //! \sa DefineDataVar(), DefineCoordVar(), VDC()
     //
-    int SetCompressionBlock(std::vector<size_t> bs, string wname, std::vector<size_t> cratios);
+    int SetCompressionBlock(string wname, std::vector<size_t> cratios);
 
     //! Retrieve current compression block settings.
     //!
@@ -419,6 +408,8 @@ protected:
     std::vector<string> getAttNames(string varname) const;
 
     XType getAttType(string varname, string attname) const;
+
+    virtual vector<size_t> getBlockSize() const { return (_bs); }
 
     virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const = 0;
 

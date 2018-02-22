@@ -400,7 +400,7 @@ int DCCF::_AddCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars)
         // Finally, add the variable to _coordVarsMap.
         //
         vector<bool> periodic(false);
-        _coordVarsMap[cvars[i]] = CoordVar(cvars[i], units, DC::FLOAT, periodic, axis, false, dimnames, vector<size_t>(), time_dim_name);
+        _coordVarsMap[cvars[i]] = CoordVar(cvars[i], units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
 
         int rc = DCUtils::CopyAtt(*ncdfc, cvars[i], _coordVarsMap[cvars[i]]);
         if (rc < 0) return (-1);
@@ -719,9 +719,9 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc)
         bool   has_missing = ncdfc->GetMissingValue(vars[i], mv);
 
         if (!has_missing) {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::NODE);
+            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
         } else {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), vector<size_t>(), time_coordvar, DC::Mesh::NODE, mv);
+            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE, mv);
         }
 
         rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);

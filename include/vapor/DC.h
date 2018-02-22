@@ -131,13 +131,13 @@ namespace VAPoR {
 //! method.
 //!
 //! \param bs An ordered list of block dimensions that specifies the
-//! block decomposition of the variable. The rank of \p bs may be less
+//! spatial block decomposition of the variable. The rank of \p bs may be less
 //! than that of a variable's array dimensions (or empty), in which case only
 //! the \b n fastest varying variable dimensions will be blocked, where
 //! \b n is the rank of \p bs. The ordering of the dimensions in \p bs
 //! is from fastest to slowest. A block is the basic unit of compression
 //! in the DC: variables are decomposed into blocks, and individual blocks
-//! are compressed independently.
+//! are compressed independently. Note, the time dimension is never blocked.
 //!
 //! \param wname Name of wavelet used for transforming compressed
 //! variables between wavelet and physical space. Valid values
@@ -748,7 +748,6 @@ public:
             _wname.clear();
             _cratios.clear();
             _periodic.clear();
-            _bs.clear();
             _atts.clear();
         }
 
@@ -765,15 +764,12 @@ public:
         //! compressed variable definitions. If empty, or if cratios.size()==1
         //! and cratios[0]==1, the variable is not
         //! compressed
-        //! \param[in] bs An ordered array specifying the storage
-        //! blocking
-        //! factor for the variable.
         //!
         //! \deprecated Results are undefined if the rank of
         //! of \p periodic does not match that of \p dimensions.
         //!
-        BaseVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<size_t> bs, std::vector<bool> periodic)
-        : _name(name), _units(units), _type(type), _wname(wname), _cratios(cratios), _bs(bs), _periodic(periodic)
+        BaseVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic)
+        : _name(name), _units(units), _type(type), _wname(wname), _cratios(cratios), _periodic(periodic)
         {
             if (_cratios.size() == 0) _cratios.push_back(1);
         };
@@ -796,7 +792,7 @@ public:
         //! Results are undefined if the rank of
         //! of \p periodic does not match that of \p dimensions.
         //!
-        BaseVar(string name, string units, XType type, std::vector<size_t> bs, std::vector<bool> periodic);
+        BaseVar(string name, string units, XType type, std::vector<bool> periodic);
 
         virtual ~BaseVar(){};
 
@@ -830,15 +826,6 @@ public:
             if (_cratios.size() == 0) _cratios.push_back(1);
         };
 
-        //! Get blocking dimensions
-        //!
-        //! Returns ordered list of blocking dimension for the coordinate data. The
-        //! ordering is from fastest to slowest varying dimension.
-        //!
-        //
-        std::vector<size_t> GetBS() const { return (_bs); };
-        void                SetBS(std::vector<size_t> bs) { _bs = bs; };
-
         //! \deprecated Access variable bounary periodic
         //
         std::vector<bool> GetPeriodic() const { return (_periodic); };
@@ -871,7 +858,6 @@ public:
         XType                       _type;
         string                      _wname;
         std::vector<size_t>         _cratios;
-        std::vector<size_t>         _bs;
         std::vector<bool>           _periodic;
         std::map<string, Attribute> _atts;
     };
@@ -914,9 +900,9 @@ public:
         //! \param[in] uniform A bool indicating whether the coordinate variable
         //! is uniformly sampled.
         //
-        CoordVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, std::vector<string> dim_names, std::vector<size_t> bs,
-                 string time_dim_name, int axis, bool uniform)
-        : BaseVar(name, units, type, wname, cratios, bs, periodic), _dim_names(dim_names), _time_dim_name(time_dim_name), _axis(axis), _uniform(uniform)
+        CoordVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, std::vector<string> dim_names, string time_dim_name, int axis,
+                 bool uniform)
+        : BaseVar(name, units, type, wname, cratios, periodic), _dim_names(dim_names), _time_dim_name(time_dim_name), _axis(axis), _uniform(uniform)
         {
         }
 
@@ -942,8 +928,8 @@ public:
         //! \param[in] uniform A bool indicating whether the coordinate variable
         //! is uniformly sampled.
         //
-        CoordVar(string name, string units, XType type, std::vector<bool> periodic, int axis, bool uniform, std::vector<string> dim_names, std::vector<size_t> bs, string time_dim_name)
-        : BaseVar(name, units, type, bs, periodic), _dim_names(dim_names), _time_dim_name(time_dim_name), _axis(axis), _uniform(uniform)
+        CoordVar(string name, string units, XType type, std::vector<bool> periodic, int axis, bool uniform, std::vector<string> dim_names, string time_dim_name)
+        : BaseVar(name, units, type, periodic), _dim_names(dim_names), _time_dim_name(time_dim_name), _axis(axis), _uniform(uniform)
         {
         }
 
@@ -1021,9 +1007,9 @@ public:
         //!
         //! \param[in] missing_value  Value of the missing value indicator
         //!
-        DataVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, string mesh, std::vector<size_t> bs, string time_coord_var,
-                Mesh::Location location, double missing_value)
-        : BaseVar(name, units, type, wname, cratios, bs, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(true), _missing_value(missing_value)
+        DataVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, string mesh, string time_coord_var, Mesh::Location location,
+                double missing_value)
+        : BaseVar(name, units, type, wname, cratios, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(true), _missing_value(missing_value)
         {
         }
 
@@ -1056,10 +1042,9 @@ public:
         //! \param[in] missing_value  Value used to fill masked values
         //! \param[in] maskvar  Name of variable containing mask array.
         //!
-        DataVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, string mesh, std::vector<size_t> bs, string time_coord_var,
-                Mesh::Location location, double missing_value, string maskvar)
-        : BaseVar(name, units, type, wname, cratios, bs, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(maskvar), _has_missing(true),
-          _missing_value(missing_value)
+        DataVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, string mesh, string time_coord_var, Mesh::Location location,
+                double missing_value, string maskvar)
+        : BaseVar(name, units, type, wname, cratios, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(maskvar), _has_missing(true), _missing_value(missing_value)
         {
         }
 
@@ -1086,9 +1071,8 @@ public:
         //! located at the Mesh nodes, edge centers, face centers, or
         //! volume centers.
         //!
-        DataVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, string mesh, std::vector<size_t> bs, string time_coord_var,
-                Mesh::Location location)
-        : BaseVar(name, units, type, wname, cratios, bs, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(false), _missing_value(0.0)
+        DataVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, string mesh, string time_coord_var, Mesh::Location location)
+        : BaseVar(name, units, type, wname, cratios, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(false), _missing_value(0.0)
         {
         }
 
@@ -1115,8 +1099,8 @@ public:
         //!
         //! \param[in] missing_value  Value of the missing value indicator
         //!
-        DataVar(string name, string units, XType type, std::vector<bool> periodic, string mesh, std::vector<size_t> bs, string time_coord_var, Mesh::Location location, double missing_value)
-        : BaseVar(name, units, type, bs, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(true), _missing_value(missing_value)
+        DataVar(string name, string units, XType type, std::vector<bool> periodic, string mesh, string time_coord_var, Mesh::Location location, double missing_value)
+        : BaseVar(name, units, type, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(true), _missing_value(missing_value)
         {
         }
 
@@ -1151,9 +1135,8 @@ public:
         //! \param[in] missing_value  Value used to fill masked values
         //! \param[in] maskvar  Name of variable containing mask array.
         //!
-        DataVar(string name, string units, XType type, std::vector<bool> periodic, string mesh, std::vector<size_t> bs, string time_coord_var, Mesh::Location location, double missing_value,
-                string maskvar)
-        : BaseVar(name, units, type, bs, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(maskvar), _has_missing(true), _missing_value(missing_value)
+        DataVar(string name, string units, XType type, std::vector<bool> periodic, string mesh, string time_coord_var, Mesh::Location location, double missing_value, string maskvar)
+        : BaseVar(name, units, type, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(maskvar), _has_missing(true), _missing_value(missing_value)
         {
         }
 
@@ -1172,8 +1155,8 @@ public:
         //! \p time_coord_var should be the empty string.
         //!
         //!
-        DataVar(string name, string units, XType type, std::vector<bool> periodic, string mesh, std::vector<size_t> bs, string time_coord_var, Mesh::Location location)
-        : BaseVar(name, units, type, bs, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(false), _missing_value(0.0)
+        DataVar(string name, string units, XType type, std::vector<bool> periodic, string mesh, string time_coord_var, Mesh::Location location)
+        : BaseVar(name, units, type, periodic), _mesh(mesh), _time_coord_var(time_coord_var), _location(location), _maskvar(""), _has_missing(false), _missing_value(0.0)
         {
         }
 
@@ -1253,8 +1236,8 @@ public:
         //! The number of elements in \p dim_names determines the dimensionality
         //! of the auxiliary variable.
         //!
-        AuxVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<size_t> bs, std::vector<bool> periodic, std::vector<string> dim_names)
-        : BaseVar(name, units, type, wname, cratios, bs, periodic), _dim_names(dim_names), _offset(0)
+        AuxVar(string name, string units, XType type, string wname, std::vector<size_t> cratios, std::vector<bool> periodic, std::vector<string> dim_names)
+        : BaseVar(name, units, type, wname, cratios, periodic), _dim_names(dim_names), _offset(0)
         {
         }
 
@@ -1491,6 +1474,14 @@ public:
     //!
     virtual XType GetAttType(string varname, string attname) const { return (getAttType(varname, attname)); }
 
+    //! Get blocking dimensions
+    //!
+    //! Returns a three-element list of spatial blocking dimension for stored data.
+    //! Ordering is from fastest to slowest varying dimension.
+    //!
+    //
+    std::vector<size_t> GetBlockSize() const { return (_getBlockSize()); }
+
     //! Return a variable's array dimension lengths at a specified refinement level
     //!
     //! Compressed variables may have a multi-resolution grid representation.
@@ -1501,6 +1492,11 @@ public:
     //!
     //! If the variable named by \p varname is not compressed the variable's
     //! native dimensions are returned.
+    //!
+    //! \note The number of elements in \p dims_at_level will match that of
+    //! \p bs_at_level. If \p level is -1, the highest refinement level, the return
+    //! vector \p bs_at_level should match the n values by GetBlockSize().
+    //! where n is the number of elements in \p bs_at_level
     //!
     //! \param[in] varname Data or coordinate variable name.
     //! \param[in] level Specifies a member of a multi-resolution variable's
@@ -2152,6 +2148,10 @@ protected:
     //
     virtual XType getAttType(string varname, string attname) const = 0;
 
+    //! \copydoc GetBlockSize()
+    //
+    virtual vector<size_t> getBlockSize() const { return (vector<size_t>(3, 1)); }
+
     //! \copydoc GetDimLensAtLevel()
     //
     virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const = 0;
@@ -2190,6 +2190,8 @@ private:
     virtual bool _getDataVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const;
 
     virtual bool _getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions) const;
+
+    vector<size_t> _getBlockSize() const;
 
     virtual int _openVariableRead(size_t ts, string varname, int level = 0, int lod = 0);
 

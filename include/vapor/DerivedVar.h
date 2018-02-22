@@ -23,7 +23,7 @@ class VDF_API DerivedVar : public Wasp::MyBase {
 public:
     DerivedVar(string varName) { _derivedVarNames.push_back(varName); };
 
-    DerivedVar(const vector<string> &varNames) { _derivedVarNames = varNames; };
+    DerivedVar(const std::vector<string> &varNames) { _derivedVarNames = varNames; };
 
     virtual ~DerivedVar() {}
 
@@ -35,13 +35,13 @@ public:
 
     virtual size_t GetNumRefLevels(string varname) const { return (1); }
 
-    virtual bool GetAtt(string varname, string attname, vector<double> &values) const
+    virtual bool GetAtt(string varname, string attname, std::vector<double> &values) const
     {
         values.clear();
         return (false);
     }
 
-    virtual bool GetAtt(string varname, string attname, vector<long> &values) const
+    virtual bool GetAtt(string varname, string attname, std::vector<long> &values) const
     {
         values.clear();
         return (false);
@@ -53,7 +53,7 @@ public:
         return (false);
     }
 
-    virtual std::vector<string> GetAttNames(string varname) const { return (vector<string>()); }
+    virtual std::vector<string> GetAttNames(string varname) const { return (std::vector<string>()); }
 
     virtual DC::XType GetAttType(string varname, string attname) const { return (DC::INVALID); }
 
@@ -65,15 +65,15 @@ public:
 
     virtual int CloseVariable(int fd) = 0;
 
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) = 0;
 
-    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) = 0;
 
     virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const = 0;
 
 protected:
-    vector<string> _derivedVarNames;
-    DC::FileTable  _fileTable;
+    std::vector<string> _derivedVarNames;
+    DC::FileTable       _fileTable;
 };
 
 //!
@@ -87,7 +87,7 @@ protected:
 //!
 class VDF_API DerivedCoordVar : public DerivedVar {
 public:
-    DerivedCoordVar(const vector<string> &varNames) : DerivedVar(varNames) {}
+    DerivedCoordVar(const std::vector<string> &varNames) : DerivedVar(varNames) {}
     DerivedCoordVar(string varName) : DerivedVar(varName) {}
     virtual ~DerivedCoordVar() {}
 
@@ -105,7 +105,7 @@ public:
 //!
 class VDF_API DerivedDataVar : public DerivedVar {
 public:
-    DerivedDataVar(const vector<string> &varNames) : DerivedVar(varNames) {}
+    DerivedDataVar(const std::vector<string> &varNames) : DerivedVar(varNames) {}
     DerivedDataVar(string varName) : DerivedVar(varName) {}
     virtual ~DerivedDataVar() {}
 
@@ -123,7 +123,7 @@ public:
 //!
 class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
 public:
-    DerivedCoordVar_PCSFromLatLon(const vector<string> &derivedVarNames, DC *dc, vector<string> inNames, string proj4String, bool uGridFlag);
+    DerivedCoordVar_PCSFromLatLon(const std::vector<string> &derivedVarNames, DC *dc, std::vector<string> inNames, string proj4String, bool uGridFlag);
     virtual ~DerivedCoordVar_PCSFromLatLon() {}
 
     virtual int Initialize();
@@ -140,9 +140,9 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
-    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
 
     virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const;
 
@@ -156,12 +156,13 @@ private:
     bool                _make2DFlag;
     bool                _uGridFlag;
     std::vector<size_t> _dimLens;
+    std::vector<size_t> _bs;
     Proj4API            _proj4API;
     DC::CoordVar        _xCoordVarInfo;
     DC::CoordVar        _yCoordVarInfo;
 
     int _setupVar();
-    int _getVar(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, float *region);
+    int _getVarBlock(size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 };
 
 //!
@@ -176,7 +177,7 @@ private:
 //!
 class VDF_API DerivedCoordVar_CF1D : public DerivedCoordVar {
 public:
-    DerivedCoordVar_CF1D(const vector<string> &derivedVarNames, DC *dc, string dimName, int axis, string units);
+    DerivedCoordVar_CF1D(const std::vector<string> &derivedVarNames, DC *dc, string dimName, int axis, string units);
     virtual ~DerivedCoordVar_CF1D() {}
 
     virtual int Initialize();
@@ -193,9 +194,9 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
-    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
 
     virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const;
 
@@ -235,9 +236,9 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
-    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
 
     virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const;
 
@@ -273,9 +274,9 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
-    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const;
 
@@ -288,7 +289,8 @@ private:
     DC::CoordVar _coordVarInfo;
     int          _stagDim;
 
-    void _transpose(const float *a, float *b, vector<size_t> inDims, vector<size_t> &outDims, int axis) const;
+    void _transpose(const float *a, float *b, std::vector<size_t> inDims, int axis) const;
+    void _transpose(std::vector<size_t> inDims, int axis, std::vector<size_t> &outDims) const;
 };
 
 };    // namespace VAPoR
