@@ -157,7 +157,7 @@ int DerivedCoordVar_PCSFromLatLon::GetDimLensAtLevel(
 	}
 
 	dims_at_level = _dimLens;
-	bs_at_level = _dimLens;
+	bs_at_level = _bs;
 
 	return(0);
 }
@@ -231,13 +231,13 @@ int DerivedCoordVar_PCSFromLatLon::ReadRegionBlock(
 		latBufPtr = region;
 	}
 
-	int rc = _getVar(ts, _lonName, level, lod, min, max, lonBufPtr);
+	int rc = _getVarBlock(ts, _lonName, level, lod, min, max, lonBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
 	}
 
-	rc = _getVar(ts, _latName, level, lod, min, max, latBufPtr);
+	rc = _getVarBlock(ts, _latName, level, lod, min, max, latBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
@@ -298,6 +298,9 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar() {
 		return(-1);
 	}
 
+	_bs = _dc->GetBlockSize();
+	while (_bs.size() > 2) _bs.pop_back();
+
 	vector <string> dimNames;
 	if (lonVar.GetDimNames().size() == 1 && !_uGridFlag) {
 		dimNames.push_back(lonVar.GetDimNames()[0]);
@@ -322,7 +325,6 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar() {
 		dimNames = lonVar.GetDimNames();
 		_dimLens = lonDims;
 	}
-	vector <size_t> bs = _dimLens;
 
 	if (lonVar.GetTimeDimName() != latVar.GetTimeDimName()) {
 		SetErrMsg("Incompatible time dimensions");
@@ -337,7 +339,6 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar() {
 	//
 	_xCoordVarInfo.SetName(_xCoordName);
 	_xCoordVarInfo.SetUnits("meters");
-	_xCoordVarInfo.SetBS(bs);
 	_xCoordVarInfo.SetXType(xtype);
 	_xCoordVarInfo.SetWName("");
 	_xCoordVarInfo.SetCRatios(vector <size_t> ());
@@ -352,7 +353,6 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar() {
 	//
 	_yCoordVarInfo.SetName(_yCoordName);
 	_yCoordVarInfo.SetUnits("meters");
-	_yCoordVarInfo.SetBS(bs);
 	_yCoordVarInfo.SetXType(xtype);
 	_yCoordVarInfo.SetWName("");
 	_yCoordVarInfo.SetCRatios(vector <size_t> ());
@@ -366,7 +366,7 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar() {
 	return(0);
 }
 
-int DerivedCoordVar_PCSFromLatLon::_getVar(
+int DerivedCoordVar_PCSFromLatLon::_getVarBlock(
 	size_t ts, string varname, int level, int lod,
     const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
@@ -425,8 +425,7 @@ DerivedCoordVar_CF1D::DerivedCoordVar_CF1D(
 	_coordVarInfo = DC::CoordVar(
 		_coordName, units, DC::XType::FLOAT, 
 		vector <bool> (1, false), axis, false,
-		vector <string> (1, dimName),
-		vector <size_t> (), ""
+		vector <string> (1, dimName), ""
 	);
 	
 }
@@ -464,7 +463,7 @@ int DerivedCoordVar_CF1D::GetDimLensAtLevel(
 	bs_at_level.clear();
 
 	dims_at_level.push_back(_dimLen);
-	bs_at_level.push_back(_dimLen);
+	bs_at_level.push_back(_dc->GetBlockSize()[0]);
 
 	return(0);
 }
@@ -563,8 +562,7 @@ DerivedCoordVar_WRFTime::DerivedCoordVar_WRFTime(
 	_coordVarInfo = DC::CoordVar(
 		_coordName, units, DC::XType::FLOAT, 
 		vector <bool> (), axis, false,
-		vector <string> (),
-		vector <size_t> (), dimName
+		vector <string> (), dimName
 	);
 }
 
@@ -839,18 +837,34 @@ int DerivedCoordVar_Staggered::OpenVariableRead(
 		return(-1);
 	}
 
-	return(_dc->OpenVariableRead(ts, _inName, level, lod));
+	int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
+	if (fd<0) return(fd);
+
+	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
+		ts, varname, level, lod, fd
+	);
+
+	return(_fileTable.AddEntry(f));
 }
 
 int DerivedCoordVar_Staggered::CloseVariable(int fd) {
-	return(_dc->CloseVariable(fd));
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor : %d", fd);
+		return(-1);
+	}
+	int rc = _dc->CloseVariable(f->GetAux());
+
+    _fileTable.RemoveEntry(f->GetAux());
+    delete f;
+
+	return(rc);
 }
 
 void DerivedCoordVar_Staggered::_transpose(
-	const float *a, float *b, vector <size_t> inDims, 
-	vector <size_t> &outDims, int axis
+	const float *a, float *b, vector <size_t> inDims, int axis
 ) const {
-	outDims.clear();
 
 	assert(inDims.size() < 4);
 	assert(axis >= 0 && axis < inDims.size());
@@ -860,7 +874,6 @@ void DerivedCoordVar_Staggered::_transpose(
 	// No-op if axis is 0
 	//
 	if (axis == 0) {	// 1D, 2D, and 3D case
-		outDims = inDims;
 		for (size_t i=0; i<sz; i++) {
 			b[i] = a[i];
 		}
@@ -869,24 +882,13 @@ void DerivedCoordVar_Staggered::_transpose(
 
 	if (inDims.size() == 2) {
 		assert(axis == 1);
-		outDims = inDims;
-
-		size_t tmp = outDims[0];
-		outDims[0] = outDims[1];
-		outDims[1] = tmp;
 
 		Transpose(a, b, inDims[0], inDims[1]);
 	}
 	else if (inDims.size() == 3) {
 		assert(axis == 1 || axis == 2);
 
-		outDims = inDims;
-
 		if (axis == 1) {
-
-			size_t tmp = outDims[0];
-			outDims[0] = outDims[1];
-			outDims[1] = tmp;
 
 			size_t stride = inDims[0] * inDims[1];;
 			const float *aptr = a;
@@ -898,9 +900,6 @@ void DerivedCoordVar_Staggered::_transpose(
 			}
 		}
 		else if (axis == 2) {
-			size_t tmp = outDims[0];
-			outDims[0] = outDims[2];
-			outDims[2] = tmp;
 
 			// We can treat 3D array as 2D in this case, linearizing X and Y
 			//
@@ -909,48 +908,107 @@ void DerivedCoordVar_Staggered::_transpose(
 	}
 }
 
+void DerivedCoordVar_Staggered::_transpose(
+	vector <size_t> inDims, int axis, vector <size_t> &outDims
+) const {
+	outDims = inDims;
+
+	if (axis == 1) {
+		size_t tmp = outDims[0];
+		outDims[0] = outDims[1];
+		outDims[1] = tmp;
+	}
+	else if (axis == 2) {
+		size_t tmp = outDims[0];
+		outDims[0] = outDims[2];
+		outDims[2] = tmp;
+	}
+}
+
 int DerivedCoordVar_Staggered::ReadRegion(
 	int fd,
     const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
 
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor : %d", fd);
+		return(-1);
+	}
+	string varname = f->GetVarname();
+	int level = f->GetLevel();
+
+	vector <size_t> dims, bs;
+	int rc = GetDimLensAtLevel(varname, level, dims, bs);
+	if (rc<0) return(-1);
+
 	vector <size_t> inMin = min;
 	vector <size_t> inMax = max;
-	inMax[_stagDim] -= 1;	// unstaggered axis is one less than staggered
+
+	// adjust coords for native data so that we have what we 
+	// need for interpolation or extrapolation.
+	//
+
+	// Lower bound on boundary => extrapolation
+	//
+	if (min[_stagDim] == 0) {
+		if (max[_stagDim] == 0) {
+			inMax[_stagDim] += 1;
+		}
+	}
+	else {
+		inMin[_stagDim] -= 1;
+	}
+
+	// Upper bound boundary => extrapolation
+	//
+	if (max[_stagDim] == (dims[_stagDim] - 1)) {
+		if (min[_stagDim] == (dims[_stagDim] - 2)) {
+			inMin[_stagDim] -= 1;
+		}
+		inMax[_stagDim] -= 1;
+	}
+
 
 	vector <size_t> inDims, outDims;
 	for (size_t i=0; i<min.size(); i++) {
 		inDims.push_back(inMax[i]-inMin[i]+1);
 		outDims.push_back(max[i]-min[i]+1);
-		
 	}
-	size_t sz = vproduct(outDims);
+	size_t sz = std::max(vproduct(outDims), vproduct(inDims));
 
-	float *buf = new float[sz];
+	float *buf1 = new float[sz];
+	float *buf2 = new float[sz];
 
 	// Read unstaggered data
 	//
-	int rc = _dc->ReadRegion(fd, inMin, inMax, buf);
+	rc = _dc->ReadRegion(f->GetAux(), inMin, inMax, buf1);
 	if (rc<0) return(-1);
 
 
-	// Tranpose array so that we always interpolate with unit stride
+	// Tranpose the dimensions and array so that we always interpolate 
+	// with unit stride
 	//
-	vector <size_t> xDims;	// transposed input dimensions
-	_transpose(buf, region, inDims, xDims, _stagDim);
+	vector <size_t> inDimsT;	// transposed input dimensions
+	vector <size_t> outDimsT;	// transposed output dimensions
+	_transpose(inDims, _stagDim, inDimsT);
+	_transpose(outDims, _stagDim, outDimsT);
 
-	size_t nz = xDims.size() == 3 ? xDims[2] : 1;
-	size_t ny = xDims.size() == 2 ? xDims[1] : 1;
-	size_t nx = xDims.size() == 1 ? xDims[0] : 1;
+	_transpose(buf1, buf2, inDims, _stagDim);
+
+	size_t nz = inDimsT.size() == 3 ? inDimsT[2] : 1;
+	size_t ny = inDimsT.size() == 2 ? inDimsT[1] : 1;
+	size_t nx = inDimsT.size() == 1 ? inDimsT[0] : 1;
 
 	// Interpolate interior
 	//
-	size_t nxs = nx+1;  // staggered dimension
+	size_t nxs = outDimsT[0];  // staggered dimension
 	for (size_t k=0; k<nz; k++) {
 	for (size_t j=0; j<ny; j++) {
 	for (size_t i=1; i<nxs-1; i++) {
-		buf[k*nxs*ny + j*nxs + k] = 0.5 * (
-			region[k*nx*ny + j*nx + i-1] + region[k*nx*ny + j*nx + i]
+		buf1[k*nxs*ny + j*nxs + k] = 0.5 * (
+			buf2[k*nx*ny + j*nx + i-1] + buf2[k*nx*ny + j*nx + i]
 		);
 	}
 	}
@@ -963,8 +1021,8 @@ int DerivedCoordVar_Staggered::ReadRegion(
 		
 		// left boundary
 		//
-		buf[k*nxs*ny + j*nxs] = region[k*nx*ny + j*nx + 0] +
-			(-0.5*(region[k*nx*ny + j*nx+1] - region[k*nx*ny + j*nx + 0]));
+		buf1[k*nxs*ny + j*nxs] = buf2[k*nx*ny + j*nx + 0] +
+			(-0.5*(buf2[k*nx*ny + j*nx+1] - buf2[k*nx*ny + j*nx + 0]));
 	}
 	}
 
@@ -972,18 +1030,18 @@ int DerivedCoordVar_Staggered::ReadRegion(
 	for (size_t j=0; j<ny; j++) {
 		// right boundary
 		//
-		buf[k*nxs*ny + j*nxs + nxs-1] = region[k*nx*ny + j*nx+nx-2] +
-			(0.5*(region[k*nx*ny + j*nx + nx-1]-region[k*nx*ny + j*nx +nx-2]));
+		buf1[k*nxs*ny + j*nxs + nxs-1] = buf2[k*nx*ny + j*nx+nx-2] +
+			(0.5*(buf2[k*nx*ny + j*nx + nx-1]-buf2[k*nx*ny + j*nx +nx-2]));
 
 	}
 	}
 
 	// Undo tranpose
 	//
-	xDims[0] += 1;
-	_transpose(buf, region, xDims, outDims, _stagDim);
+	_transpose(buf1, region, outDimsT, _stagDim);
 
-	delete [] buf;
+	delete [] buf1;
+	delete [] buf2;
 
 	return(0);
 }

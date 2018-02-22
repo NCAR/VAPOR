@@ -853,7 +853,7 @@ int DCMPAS::_InitCoordvars(
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
-			dimnames, vector <size_t>(), time_dim_name
+			dimnames, time_dim_name
 		);
 
         int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
@@ -876,7 +876,7 @@ int DCMPAS::_InitCoordvars(
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
-			dimnames, vector <size_t>(), time_dim_name
+			dimnames, time_dim_name
 		);
 
         int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
@@ -898,7 +898,7 @@ int DCMPAS::_InitCoordvars(
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
-			dimnames, vector <size_t>(), time_dim_name
+			dimnames, time_dim_name
 		);
         int rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
         if (rc<0) return(-1);
@@ -910,7 +910,7 @@ int DCMPAS::_InitCoordvars(
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
-			dimnames, vector <size_t>(), time_dim_name
+			dimnames, time_dim_name
 		);
 
         rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
@@ -1245,7 +1245,7 @@ int DCMPAS::_InitAuxVars(
 
 		_auxVarsMap[vars[i]] = AuxVar(
 			vars[i], "", DC::INT32, "", vector <size_t> (), 
-			vector <size_t> (), periodic, dimnames
+			periodic, dimnames
 		);
 
 		// IDs in MPAS files start from 1, not 0 :-(
@@ -1343,13 +1343,13 @@ int DCMPAS::_InitDataVars(
 		if (! has_missing) {
 			_dataVarsMap[vars[i]] = DataVar(
 				vars[i], units, DC::FLOAT, periodic, meshname,
-				vector <size_t> (), time_coordvar, DC::Mesh::NODE
+				time_coordvar, DC::Mesh::NODE
 			);
 		}
 		else {
 			_dataVarsMap[vars[i]] = DataVar(
 				vars[i], units, DC::FLOAT, periodic, meshname,
-				vector <size_t> (), time_coordvar, DC::Mesh::NODE,
+				time_coordvar, DC::Mesh::NODE,
 				mv
 			);
 		}

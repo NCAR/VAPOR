@@ -877,9 +877,9 @@ private:
  VAPoR::LayeredGrid *_make_grid_layered(
     const std::vector <size_t> &dims,
     const std::vector <float *> &blkvec,
-    const std::vector <vector <size_t> > &bs,
-    const std::vector <vector <size_t> > &bmin,
-    const std::vector <vector <size_t> > &bmax
+    const std::vector <size_t> &bs,
+    const std::vector <size_t> &bmin,
+    const std::vector <size_t> &bmax
  ) const;
 
  VAPoR::CurvilinearGrid *_make_grid_curvilinear(
@@ -889,9 +889,9 @@ private:
     const vector <DC::CoordVar> &cvarsinfo,
     const std::vector <size_t> &dims,
     const std::vector <float *> &blkvec,
-    const std::vector <vector <size_t> > &bs,
-    const std::vector <vector <size_t> > &bmin,
-    const std::vector <vector <size_t> > &bmax
+    const std::vector <size_t> &bs,
+    const std::vector <size_t> &bmin,
+    const std::vector <size_t> &bmax
  );
 
  void _ugrid_setup(
@@ -914,9 +914,9 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	const vector <DC::CoordVar> &cvarsinfo,
 	const vector <size_t> &dims,
 	const vector <float *> &blkvec,
-	const vector <vector <size_t> > &bs,
-	const vector <vector <size_t> > &bmin,
-	const vector <vector <size_t> > &bmax,
+	const vector <size_t> &bs,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax,
 	const vector <int *> &conn_blkvec,
 	const vector <size_t> &conn_bs,
 	const vector <size_t> &conn_bmin,
@@ -959,11 +959,11 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 
  void _setupCoordVecsHelper(
 	string data_varname,
-	const vector <size_t> &data_min,
-	const vector <size_t> &data_max,
+	const vector <size_t> &data_bmin,
+	const vector <size_t> &data_bmax,
 	string coord_varname,
-	vector <size_t> &coord_min,
-	vector <size_t> &coord_max
+	vector <size_t> &coord_bmin,
+	vector <size_t> &coord_bmax
  ) const;
 
  int _setupCoordVecs(
