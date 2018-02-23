@@ -42,12 +42,6 @@ public:
 
     virtual ~VizFeatureEventRouter();
 
-    //! For the VizFeatureEventRouter, we must override confirmText method on base class,
-    //! so that text changes issue Command::CaptureStart and Command::CaptureEnd,
-    //! supplying a special UndoRedo helper method
-    //!
-    virtual void confirmText();
-
     //! Connect signals and slots from tab
     virtual void hookUpTab();
 
@@ -60,6 +54,9 @@ public:
     //
     static string GetClassType() { return ("VizFeature"); }
     string        GetType() const { return GetClassType(); }
+
+    virtual void confirmText(){};
+    virtual void _confirmText(){};
 
 protected slots:
     void setAxisAnnotation(bool);
@@ -140,7 +137,6 @@ private:
     void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
     void initializeTicSizes(VAPoR::AxisAnnotation *aa);
 
-    virtual void _confirmText();
     virtual void _updateTab();
 
     void drawTimeStamp();
