@@ -2050,8 +2050,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 			_stats->Update();
 		}
 		if (_plot) {
-			//PlotParams* params;
-			//params = (PlotParams*)paramsMgr->GetParams("PlotParams");
 			_plot->Update();
 		}
 
