@@ -57,6 +57,7 @@ set (SRCS
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
+	Combo.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
