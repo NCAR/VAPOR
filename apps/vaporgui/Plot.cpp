@@ -56,8 +56,8 @@ Plot::Plot( VAPoR::DataStatus* status,
     }
 
     VAPoR::DataMgr* currentDmgr = _dataStatus->GetDataMgr( currentDatasetName );
-    PlotParams* plotParams      = dynamic_cast<PlotParams*>
-                (_paramsMgr->GetAppRenderParams(currentDatasetName, PlotParams::GetClassType()));
+    VAPoR::PlotParams* plotParams      = dynamic_cast<VAPoR::PlotParams*>
+                (_paramsMgr->GetAppRenderParams(currentDatasetName, VAPoR::PlotParams::GetClassType()));
 
     // Do some static QT stuff
     setupUi(this);
@@ -165,8 +165,8 @@ void Plot::Update()
         guiParams->SetPlotDatasetName( currentDatasetName );
     }
     VAPoR::DataMgr* currentDmgr = _dataStatus->GetDataMgr( currentDatasetName );
-    PlotParams* plotParams = dynamic_cast<PlotParams*>
-                (_paramsMgr->GetAppRenderParams(currentDatasetName, PlotParams::GetClassType()));
+    VAPoR::PlotParams* plotParams = dynamic_cast<VAPoR::PlotParams*>
+                (_paramsMgr->GetAppRenderParams(currentDatasetName, VAPoR::PlotParams::GetClassType()));
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
     // Update DataMgrCombo 
@@ -313,7 +313,7 @@ void Plot::_newVarChanged( int index )
     std::string varName = newVarCombo->itemText(index).toStdString();
 
     // Add this variable to parameter 
-    PlotParams*        plotParams = this->_getCurrentPlotParams();
+    VAPoR::PlotParams* plotParams = this->_getCurrentPlotParams();
     VAPoR::DataMgr*    dataMgr    = this->_getCurrentDataMgr();    
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
     vars.push_back( varName );
@@ -326,7 +326,7 @@ void Plot::_removeVarChanged( int index )
         return;
 
     std::string        varName    = removeVarCombo->itemText(index).toStdString();
-    PlotParams*        plotParams = this->_getCurrentPlotParams();
+    VAPoR::PlotParams* plotParams = this->_getCurrentPlotParams();
     VAPoR::DataMgr*    dataMgr    = this->_getCurrentDataMgr();    
 
     // Remove this variable from parameter 
@@ -459,8 +459,8 @@ VAPoR::PlotParams* Plot::_getCurrentPlotParams() const
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
                     (_paramsMgr->GetParams( GUIStateParams::GetClassType() ));
     std::string dsName = guiParams->GetPlotDatasetName();
-    return ( dynamic_cast<PlotParams*>
-             (_paramsMgr->GetAppRenderParams(dsName, PlotParams::GetClassType())) );
+    return ( dynamic_cast<VAPoR::PlotParams*>
+             (_paramsMgr->GetAppRenderParams(dsName, VAPoR::PlotParams::GetClassType())) );
 }
     
 VAPoR::DataMgr* Plot::_getCurrentDataMgr() const
@@ -763,14 +763,14 @@ void Plot::_numberOfSamplesChanged( )
         numOfSamplesLineEdit->setText( QString::number( val, 10 ) );
         //numOfSamplesLineEdit->blockSignals( false );
     }
-    PlotParams* plotParams = this->_getCurrentPlotParams();
+    VAPoR::PlotParams* plotParams = this->_getCurrentPlotParams();
     plotParams->SetNumOfSamples( val );
 }
    
  
 std::string Plot::_getXLabel()
 {
-    PlotParams*              plotParams  = this->_getCurrentPlotParams();
+    VAPoR::PlotParams*       plotParams  = this->_getCurrentPlotParams();
     VAPoR::DataMgr*          dataMgr     = this->_getCurrentDataMgr();    
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
     std::vector<std::string> units;
@@ -808,7 +808,7 @@ std::string Plot::_getXLabel()
 
 std::string Plot::_getYLabel()
 {
-    PlotParams*              plotParams  = this->_getCurrentPlotParams();
+    VAPoR::PlotParams*       plotParams  = this->_getCurrentPlotParams();
     VAPoR::DataMgr*          dataMgr     = this->_getCurrentDataMgr();    
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
     std::vector<std::string> units;
@@ -842,7 +842,7 @@ void Plot::_axisLocksChanged( int val )
     locks[1] = (bool)ylock->isChecked();
     locks[2] = (bool)zlock->isChecked();
 
-    PlotParams*              plotParams  = this->_getCurrentPlotParams();
+    VAPoR::PlotParams* plotParams  = this->_getCurrentPlotParams();
     plotParams->SetAxisLocks( locks );
     _spaceModeP1Changed();
 }
