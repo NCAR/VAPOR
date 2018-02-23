@@ -71,10 +71,14 @@ private slots:
 	void opacitySliderChanged(int value);
 	void setSingleColor();
 	void setUsingSingleColor(int checkState);
+	void setUseWhitespace(int state);
 
 private:
 	void collapseConstColorWidgets();
 	void showConstColorWidgets();
+	void showWhitespaceFrame();
+	void hideWhitespaceFrame();
+	string getVariableName();
 	void connectWidgets();
 	void updateSliders();
 	void updateAutoUpdateHistoCheckbox();
