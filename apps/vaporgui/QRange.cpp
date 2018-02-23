@@ -13,6 +13,10 @@ QRange::QRange(QWidget *parent) :
              this,                 SLOT(   _minChanged(  double )));
     connect( _ui->maxSliderEdit,   SIGNAL( valueChanged( double ) ),
              this,                 SLOT(   _maxChanged(  double )));
+    connect( _ui->minSliderEdit,   SIGNAL( valueChanged( int    ) ),
+             this,                 SLOT(   _minChanged(  int    )));
+    connect( _ui->maxSliderEdit,   SIGNAL( valueChanged( int    ) ),
+             this,                 SLOT(   _maxChanged(  int    )));
 }
 
 QRange::~QRange()
@@ -38,7 +42,6 @@ void QRange::_minChanged( double value )
 {
     if( value > _ui->maxSliderEdit->GetCurrentValue() )
         _ui->maxSliderEdit->SetValue( value );
-    
     emit rangeChanged();
 }
     
@@ -46,7 +49,20 @@ void QRange::_maxChanged( double value )
 {
     if( value < _ui->minSliderEdit->GetCurrentValue() )
         _ui->minSliderEdit->SetValue( value );
+    emit rangeChanged();
+}
 
+void QRange::_minChanged( int value )
+{
+    if( (double)value > _ui->maxSliderEdit->GetCurrentValue() )
+        _ui->maxSliderEdit->SetValue( (double)value );
+    emit rangeChanged();
+}
+    
+void QRange::_maxChanged( int value )
+{
+    if( (double)value < _ui->minSliderEdit->GetCurrentValue() )
+        _ui->minSliderEdit->SetValue( (double)value );
     emit rangeChanged();
 }
     
@@ -60,6 +76,11 @@ void QRange::SetDecimals( int dec )
     _ui->minSliderEdit->SetDecimals( dec );
     _ui->maxSliderEdit->SetDecimals( dec );
 }
+    
+void QRange::SetIntType( bool val )
+{
+    _ui->minSliderEdit->SetIntType( val );
+    _ui->maxSliderEdit->SetIntType( val );
 
 void QRange::SetValue( double smallVal, double bigVal )
 {
