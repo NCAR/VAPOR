@@ -1695,8 +1695,17 @@ int VDCNetCDF::_PutAtt(WASP *wasp, string varname, string tag, const Attribute &
 {
     if (tag.empty()) tag = attr.GetName();
 
+    DC::XType xtype = attr.GetXType();
+
+    // Ugh. For the special attributes missing_value and _FillValue
+    // the type must match that of the data. Since currently the only
+    // output format we support is float we must force the type of
+    // these attributes to float.
+    //
+    if (tag == "missing_value" || tag == "_FillValue") { xtype = FLOAT; }
+
     int rc;
-    switch (attr.GetXType()) {
+    switch (xtype) {
     case FLOAT:
     case DOUBLE: {
         vector<double> values;
