@@ -232,6 +232,17 @@ private:
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
  );
+
+ int _readRegionBlockHelper1D(
+	DC::FileTable::FileObject *f,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region
+ );
+ int _readRegionBlockHelper2D(
+	DC::FileTable::FileObject *f,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region
+ );
  
 };
 
