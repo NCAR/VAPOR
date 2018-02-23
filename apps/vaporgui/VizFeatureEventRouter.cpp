@@ -40,7 +40,7 @@
 #include <fstream>
 #include <sstream>
 
-
+#include "ErrorReporter.h"
 #include "VizFeatureEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
@@ -222,82 +222,6 @@ void VizFeatureEventRouter::
 setVizFeatureTextChanged(const QString& ){
 	SetTextChanged(true);
 }
-void VizFeatureEventRouter::confirmText(){
-	if (!_textChangedFlag) return;
-	VizFeatureParams* vParams = (VizFeatureParams*)GetActiveParams();
-
-#ifdef	DEAD
-	VizFeatureParams* defParams = (VizFeatureParams*)_paramsMgr->GetDefaultParams(Params::_visualizerFeaturesParamsTag);
-	assert(defParams);
-	Command* cmd = Command::CaptureStart(vParams,"vizfeature text edit",VizFeatureParams::UndoRedo, defParams);
-	
-#endif
-	_confirmText();
-	
-	SetTextChanged(false);
-
-#ifdef	DEAD
-	vParams->Validate(2);
-	
-	Command::CaptureEnd(cmd,vParams,defParams);
-#endif
-
-}
-
-void VizFeatureEventRouter::_confirmText(){
-#ifdef	DEAD
-	VizFeatureParams* vParams = (VizFeatureParams*) GetActiveParams();
-
-	vector<double> stretch;
-	//Force them to have minimum = 1:
-	double minfactor = 1.e32;
-	for (int i = 0; i<3; i++){
-		if (stretch[i] == 0.) stretch[i] = 1.;
-		if (stretch[i] < 0.) stretch[i] = -stretch[i];
-		if (stretch[i] < minfactor) minfactor = stretch[i];
-	}
-	//Make the smallest one be one.
-	if (minfactor != 1.0){
-		for (int i = 0; i<3; i++) stretch[i] /= minfactor;
-	}
-	
-	vector<double> dvals(3,0.);
-	vector<long>lvals(3,0);
-	dvals[0] = xMinTicEdit->text().toDouble();
-	dvals[1] = yMinTicEdit->text().toDouble();
-	dvals[2] = zMinTicEdit->text().toDouble();
-	vParams->SetMinTics(dvals);
-	dvals[0] = xMaxTicEdit->text().toDouble();
-	dvals[1] = yMaxTicEdit->text().toDouble();
-	dvals[2] = zMaxTicEdit->text().toDouble();
-	vParams->SetMaxTics(dvals);
-	dvals[0] = xTicSizeEdit->text().toDouble();
-	dvals[1] = yTicSizeEdit->text().toDouble();
-	dvals[2] = zTicSizeEdit->text().toDouble();
-	vParams->SetTicSize(dvals);
-	dvals[0] = axisOriginXEdit->text().toDouble();
-	dvals[1] = axisOriginYEdit->text().toDouble();
-	dvals[2] = axisOriginZEdit->text().toDouble();
-	vParams->SetAxisOrigin(dvals);
-	lvals[0] = xNumTicsEdit->text().toInt();
-	lvals[1] = yNumTicsEdit->text().toInt();
-	lvals[2] = zNumTicsEdit->text().toInt();
-	vParams->SetNumTics(lvals);
-	vParams->SetAxisTextHeight(labelHeightEdit->text().toInt());
-	vParams->SetAxisDigits(labelDigitsEdit->text().toInt());
-	vParams->SetTicWidth(ticWidthEdit->text().toDouble());
-
-	dvals[0] = arrowXEdit->text().toDouble();
-	dvals[1] = arrowYEdit->text().toDouble();
-	dvals[2] = arrowZEdit->text().toDouble();
-	vParams->SetAxisArrowCoords(dvals);
-#endif
-}
-
-void VizFeatureEventRouter::
-vizfeatureReturnPressed(void){
-	confirmText();
-}
 
 //Insert values from params into tab panel
 //
@@ -322,6 +246,10 @@ void VizFeatureEventRouter::_updateTab(){
 	axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
 
 	return;
+}
+
+void VizFeatureEventRouter::vizfeatureReturnPressed(void) {
+	confirmText();
 }
 
 void VizFeatureEventRouter::updateDataMgrCombo() {
@@ -484,7 +412,8 @@ void VizFeatureEventRouter::scaleNormalizedCoordsToWorld(
 	std::vector<double> &coords
 ) {
 	std::vector<double> extents = getDomainExtents();
-	for (int i=0; i<3; i++) {
+	int size = extents.size()/2;
+	for (int i=0; i<size; i++) {
 		double offset = coords[i]*(extents[i+3]-extents[i]);
 		double minimum = extents[i];
 		coords[i] = offset + minimum;
@@ -494,8 +423,9 @@ void VizFeatureEventRouter::scaleNormalizedCoordsToWorld(
 void VizFeatureEventRouter::scaleWorldCoordsToNormalized(
 	std::vector<double> &coords
 ) {
-   std::vector<double> extents = getDomainExtents();
-	for (int i=0; i<3; i++) {
+	std::vector<double> extents = getDomainExtents();
+	int size = extents.size()/2;
+	for (int i=0; i<size; i++) {
 		double point = coords[i]-extents[i];
 		double magnitude = extents[i+3]-extents[i];
 		coords[i] = point/magnitude;
@@ -578,8 +508,11 @@ void VizFeatureEventRouter::convertPCSToLonLat(
 
 	int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1); 
 	if (rc<0) {
-		MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat",
-			coordsForError[0], coordsForError[1]);
+		char buff[100];
+		sprintf(buff, "Could not convert point %f, %f to Lon/Lat",
+			coordsForError[0],coordsForError[1]);
+		MyBase::SetErrMsg(buff);
+		MSG_ERR(buff);
 	}   
 
 	xCoord = coords[0];
@@ -611,8 +544,11 @@ void VizFeatureEventRouter::convertLonLatToPCS(
  
 	int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1); 
 	if (rc<0) {
-		MyBase::SetErrMsg("Could not convert point %f, %f to PCS",
-			coordsForError[0], coordsForError[1]);
+		char buff[100];
+		sprintf(buff, "Could not convert point %f, %f to PCS",
+			coordsForError[0],coordsForError[1]);
+		MyBase::SetErrMsg(buff);
+		MSG_ERR(buff);
 	}   
 
 	xCoord = coords[0];
@@ -692,10 +628,10 @@ void VizFeatureEventRouter::updateAxisAnnotations() {
 	int numDigits = aa->GetAxisDigits();
 	_digitsCombo->Update(1, 12, numDigits);
 
-	GLdouble minMax[2];
-	glGetDoublev(GL_ALIASED_LINE_WIDTH_RANGE, minMax);
+	//GLdouble minMax[2];
+	//glGetDoublev(GL_ALIASED_LINE_WIDTH_RANGE, minMax);
 	double ticWidth = aa->GetTicWidth();
-	_ticWidthCombo->Update(minMax[0], minMax[1], ticWidth);
+	_ticWidthCombo->Update(0, 7, ticWidth); //minMax[0], minMax[1], ticWidth);
 }
 
 void VizFeatureEventRouter::axisAnnotationTableChanged() {
