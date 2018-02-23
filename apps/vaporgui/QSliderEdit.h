@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QDoubleValidator>
 
+#include "Combo.h"
+
 namespace Ui {
 class QSliderEdit;
 }
@@ -21,22 +23,20 @@ public:
     void   GetExtents(double &min, double &max);
     double GetCurrentValue();
     void   SetValue(double);
+    void   SetIntType(bool);    // default is false, which means double type
 
 signals:
-    // This is the only signal a QSliderEdit emits.
+    // This is the signal a QSliderEdit emits.
     void valueChanged(double);
+    void valueChanged(int);
 
 private slots:
-    void _mySlider_valueChanged(int value);
-    void _mySlider_released();
-    void _myLineEdit_valueChanged();
+    void _comboValueChanged(double);
+    void _comboValueChanged(int);
 
 private:
-    Ui::QSliderEdit * _ui;
-    QDoubleValidator *_validator;    // it does NOT handle decimals, nor min and max extents.
-    int               _decimals;
-    double            _min, _max;
-    void              _lineEditSetValue(double);
+    Ui::QSliderEdit *_ui;
+    Combo *          _combo;    // keeps the slider and lineEdit in sync
 };
 
 #endif    // QSLIDEREDIT_H

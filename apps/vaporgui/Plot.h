@@ -46,7 +46,7 @@ private slots:
     /// Clean up data points for plotting when the following events happen
     void _spaceModeP1Changed();
     void _spaceModeP2Changed();
-    void _spaceModeTimeChanged(double);
+    void _spaceModeTimeChanged(int);
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
     void _numberOfSamplesChanged();
