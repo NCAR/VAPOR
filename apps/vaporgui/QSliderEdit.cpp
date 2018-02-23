@@ -26,8 +26,6 @@ void QSliderEdit::SetLabel(const QString &text) { _ui->myLabel->setText(text); }
 
 void QSliderEdit::SetExtents(double min, double max) { _combo->Update(min, max, min); }
 
-void QSliderEdit::GetExtents(double &min, double &max) { _combo->GetExtents(min, max); }
-
 void QSliderEdit::SetDecimals(int dec) { _combo->SetPrecision(dec); }
 
 double QSliderEdit::GetCurrentValue() { return _combo->GetValue(); }

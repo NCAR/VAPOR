@@ -208,9 +208,3 @@ void Combo::SetIntType(bool val)
         _lineEdit->setValidator(_lineEditValidator);
     }
 }
-
-void Combo::GetExtents(double &min, double &max)
-{
-    min = _minValid;
-    max = _maxValid;
-}
