@@ -210,6 +210,15 @@ class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
         size_t ts, string varname, int level, int lod,
         const std::vector<size_t> &min, const std::vector<size_t> &max,
         float *region);
+
+    int _readRegionBlockHelper1D(
+        DC::FileTable::FileObject *f,
+        const std::vector<size_t> &min, const std::vector<size_t> &max,
+        float *region);
+    int _readRegionBlockHelper2D(
+        DC::FileTable::FileObject *f,
+        const std::vector<size_t> &min, const std::vector<size_t> &max,
+        float *region);
 };
 
 //!
