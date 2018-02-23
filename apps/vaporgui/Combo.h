@@ -52,8 +52,6 @@ class Combo : public QWidget {
     // switch IntType
     void SetIntType(bool);
 
-    void GetExtents(double &min, double &max);
-
     void SetEnabled(bool);
 
   private slots:
