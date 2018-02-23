@@ -1726,11 +1726,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == ParamsChangeEvent::type()) {
         ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         if (_stats) { _stats->Update(); }
-        if (_plot) {
-            // PlotParams* params;
-            // params = (PlotParams*)paramsMgr->GetParams("PlotParams");
-            _plot->Update();
-        }
+        if (_plot) { _plot->Update(); }
 
         _vizWinMgr->UpdateRouters();
 

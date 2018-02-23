@@ -23,8 +23,6 @@
 #include <vapor/DataStatus.h>
 #include "PlotParams.h"
 
-using namespace VAPoR;
-
 class Plot : public QDialog, public Ui_PlotWindow {
     Q_OBJECT
 
