@@ -1656,8 +1656,11 @@ class VDF_API DC : public Wasp::MyBase {
 
     //! Get blocking dimensions
     //!
-    //! Returns a three-element list of spatial blocking dimension for stored data.
-    //! Ordering is from fastest to slowest varying dimension.
+    //! Returns a zero (empty) or three-element list of spatial blocking
+    //! dimension for stored data.
+    //! Ordering is from fastest to slowest varying dimension. If non-empty
+    //! all data and coordinate variables in the data collection use the
+    //! specified blocking. If empty, the data are not blocked.
     //!
     //
     std::vector<size_t> GetBlockSize() const {
@@ -1678,7 +1681,10 @@ class VDF_API DC : public Wasp::MyBase {
     //! \note The number of elements in \p dims_at_level will match that of
     //! \p bs_at_level. If \p level is -1, the highest refinement level, the return
     //! vector \p bs_at_level should match the n values by GetBlockSize().
-    //! where n is the number of elements in \p bs_at_level
+    //! where n is the number of elements in \p bs_at_level, unless the
+    //! vector returned by GetBlockSize() is empty. In this case, only a single
+    //! refinement level exists, and \p bs_at_level should be equivalent
+    //! to \p dims_at_level.
     //!
     //! \param[in] varname Data or coordinate variable name.
     //! \param[in] level Specifies a member of a multi-resolution variable's
@@ -2417,7 +2423,7 @@ class VDF_API DC : public Wasp::MyBase {
     //! \copydoc GetBlockSize()
     //
     virtual vector<size_t> getBlockSize() const {
-        return (vector<size_t>(3, 1));
+        return (vector<size_t>());
     }
 
     //! \copydoc GetDimLensAtLevel()
