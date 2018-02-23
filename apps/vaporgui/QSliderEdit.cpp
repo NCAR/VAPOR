@@ -37,11 +37,6 @@ void QSliderEdit::SetExtents( double min, double max )
     _combo->Update( min, max, min );
 }
     
-void QSliderEdit::GetExtents( double& min, double& max )
-{
-    _combo->GetExtents( min, max );
-}
-    
 void QSliderEdit::SetDecimals( int dec )
 {
     _combo->SetPrecision( dec );

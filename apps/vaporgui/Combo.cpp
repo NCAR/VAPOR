@@ -229,9 +229,3 @@ void Combo::SetIntType( bool val )
     }
 
 }
- 
-void Combo::GetExtents( double& min, double& max )
-{
-    min = _minValid;
-    max = _maxValid;
-}
