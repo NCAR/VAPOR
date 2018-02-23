@@ -61,10 +61,12 @@ Plot::Plot(VAPoR::DataStatus *status,
 
     timeTabSinglePoint->SetMainLabel(QString::fromAscii("Select one data point in space:"));
     timeTabTimeRange->SetMainLabel(QString::fromAscii("Select the minimum and maximum time steps:"));
+    timeTabTimeRange->SetIntType(true);
 
     spaceTabP1->SetMainLabel(QString::fromAscii("Select spatial location of Point 1"));
     spaceTabP2->SetMainLabel(QString::fromAscii("Select spatial location of Point 2"));
     spaceTabTimeSelector->SetLabel(QString::fromAscii("T"));
+    spaceTabTimeSelector->SetIntType(true);
 
     // set widget extents
     _setInitialExtents();
@@ -82,8 +84,8 @@ Plot::Plot(VAPoR::DataStatus *status,
             this, SLOT(_timeModePointChanged()));
     connect(timeTabTimeRange, SIGNAL(rangeChanged()),
             this, SLOT(_timeModeT1T2Changed()));
-    connect(spaceTabTimeSelector, SIGNAL(valueChanged(double)),
-            this, SLOT(_spaceModeTimeChanged(double)));
+    connect(spaceTabTimeSelector, SIGNAL(valueChanged(int)),
+            this, SLOT(_spaceModeTimeChanged(int)));
     connect(spaceTabP1, SIGNAL(pointUpdated()),
             this, SLOT(_spaceModeP1Changed()));
     connect(spaceTabP2, SIGNAL(pointUpdated()),
@@ -252,7 +254,7 @@ void Plot::Update() {
     myFidelityWidget->Update(currentDmgr, _paramsMgr, plotParams);
 
     // Update time dimension
-    spaceTabTimeSelector->SetValue((int)plotParams->GetCurrentTimestep());
+    spaceTabTimeSelector->SetValue(plotParams->GetCurrentTimestep());
     std::vector<long> range = plotParams->GetMinMaxTS();
     if (range.size() > 0)
         timeTabTimeRange->SetValue((double)range[0], (double)range[1]);
@@ -373,12 +375,9 @@ void Plot::_spaceModeP2Changed() {
     }
 }
 
-void Plot::_spaceModeTimeChanged(double val) {
-    assert(val == std::floor(val));
-    int ival = (int)val;
-
+void Plot::_spaceModeTimeChanged(int val) {
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
-    plotParams->SetCurrentTimestep(ival);
+    plotParams->SetCurrentTimestep(val);
 }
 
 void Plot::_timeModePointChanged() {
@@ -457,9 +456,7 @@ void Plot::_setInitialExtents() {
     // Set temporal extents
     int numOfTimeSteps = dataMgr->GetNumTimeSteps();
     timeTabTimeRange->SetExtents(0.0, (double)(numOfTimeSteps - 1));
-    timeTabTimeRange->SetDecimals(0);
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1));
-    spaceTabTimeSelector->SetDecimals(0);
     spaceTabTimeSelector->SetValue(0.0);
 }
 
