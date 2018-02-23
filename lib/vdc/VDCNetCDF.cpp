@@ -1831,6 +1831,7 @@ int VDCNetCDF::_DefBaseVar(
     WASP *wasp,
     const VDC::BaseVar &var,
     size_t max_ts) {
+
     vector<VDC::Dimension> dims;
     bool status = GetVarDimensions(var.GetName(), false, dims);
     assert(status);
@@ -1977,8 +1978,19 @@ int VDCNetCDF::_PutAtt(
     if (tag.empty())
         tag = attr.GetName();
 
+    DC::XType xtype = attr.GetXType();
+
+    // Ugh. For the special attributes missing_value and _FillValue
+    // the type must match that of the data. Since currently the only
+    // output format we support is float we must force the type of
+    // these attributes to float.
+    //
+    if (tag == "missing_value" || tag == "_FillValue") {
+        xtype = FLOAT;
+    }
+
     int rc;
-    switch (attr.GetXType()) {
+    switch (xtype) {
     case FLOAT:
     case DOUBLE: {
         vector<double> values;
