@@ -121,6 +121,34 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="leftMargin">
+            <number>20</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="xlock">
+             <property name="text">
+              <string>Lock X</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="ylock">
+             <property name="text">
+              <string>Lock Y</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="zlock">
+             <property name="text">
+              <string>Lock Z</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <widget class="QSinglePoint" name="spaceTabP1" native="true"/>
          </item>
          <item>
@@ -132,7 +160,7 @@
             <enum>QFrame::StyledPanel</enum>
            </property>
            <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
+            <enum>QFrame::Plain</enum>
            </property>
            <property name="lineWidth">
             <number>1</number>
@@ -174,7 +202,7 @@
            <property name="frameShadow">
             <enum>QFrame::Plain</enum>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="numOfSamplesLabel">
               <property name="frameShape">
@@ -184,21 +212,14 @@
                <enum>QFrame::Plain</enum>
               </property>
               <property name="text">
-               <string>Select one time step:</string>
+               <string>Number of samples between two points:  </string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QSliderEdit" name="widget" native="true"/>
+             <widget class="QLineEdit" name="numOfSamplesLineEdit"/>
             </item>
            </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
           </widget>
          </item>
          <item>
@@ -220,19 +241,6 @@
          </item>
          <item>
           <widget class="QRange" name="timeTabTimeRange" native="true"/>
-         </item>
-         <item>
-          <widget class="Line" name="line_2">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>3</height>
-            </size>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="timeTabPlotButton">

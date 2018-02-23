@@ -35,6 +35,14 @@ void QSliderEdit::SetLabel( const QString& text )
 void QSliderEdit::SetExtents( double min, double max )
 {
     _combo->Update( min, max, min );
+    _min = min;
+    _max = max;
+}
+    
+void QSliderEdit::GetExtents( double& min, double& max )
+{
+    min = _min;
+    max = _max;
 }
     
 void QSliderEdit::SetDecimals( int dec )
@@ -51,6 +59,7 @@ void QSliderEdit::SetValue( double value )
 {
     _combo->SetSliderLineEdit( value );
 }
+
 
 void QSliderEdit::_comboValueChanged(double val )
 {

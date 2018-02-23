@@ -46,37 +46,49 @@ private slots:
     void _dataSourceChanged( int );
 
     /// Clean up data points for plotting when the following events happen
-    void _spaceTimeModeChanged( int );
     void _spaceModeP1Changed();
     void _spaceModeP2Changed();
     void _spaceModeTimeChanged( int );
     void _timeModePointChanged();
     void _timeModeT1T2Changed();
-    //void _fidelityChanged();
+    void _numberOfSamplesChanged( );
+    void _axisLocksChanged( int );
 
     /// Plot when the plot button is clicked
     void _spaceTabPlotClicked();
     void _timeTabPlotClicked();
 
+
 private:
     VAPoR::DataStatus*      _dataStatus;
     VAPoR::ParamsMgr*       _paramsMgr;
-    int                     _spaceModeNumOfSamples;
     QDialog*                _plotDialog;
     QLabel*                 _plotLabel;
     QLineEdit*              _plotPathEdit;
     QLabel*                 _plotImageLabel;
     QVBoxLayout*            _plotLayout;
+    QIntValidator*          _validator;
 
     /// Access functions to other pointers
     VAPoR::PlotParams*      _getCurrentPlotParams() const;
     VAPoR::DataMgr*         _getCurrentDataMgr() const;
 
-    void                    _setWidgetExtents();
+    void                    _setInitialExtents();
+
+    /// All the python stuff happens here; no python outside this method
     void                    _invokePython(  const QString&, 
                                             const std::vector<std::string>&,
                                             const std::vector<std::vector<float> >&, 
-                                            const std::vector<float>& );
+                                            const std::vector<float>&,
+                                            const std::string&,
+                                            const std::string& );
+
+    // Returns a string with the proper X label if all variables share the same coordinate unit.
+    //   Otherwise returns an empty string.
+    std::string             _getXLabel();
+    // Returns a string with the proper Y label if all variables share the same unit.
+    //   Otherwise returns an empty string.
+    std::string             _getYLabel();
 };
 
 #endif // PLOT_H

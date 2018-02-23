@@ -21,6 +21,7 @@ public:
     void    SetLabel( const QString& text );
     void    SetDecimals( int dec );                // how many digits after the decimal point
     void    SetExtents( double min, double max ); 
+    void    GetExtents( double& min, double& max ); 
     double  GetCurrentValue();
     void    SetValue( double );
     void    SetIntType( bool );                    // default is false, which means double type

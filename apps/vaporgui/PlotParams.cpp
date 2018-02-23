@@ -25,12 +25,11 @@
 using namespace VAPoR;
 
 const string PlotParams::_minMaxTSTag = "MinMaxTS";
-//const string PlotParams::_maxTSTag = "MaxTS";
-const string PlotParams::_spaceTimeTag = "SpaceTime";
-
 const string PlotParams::_p1Tag = "Point2";
 const string PlotParams::_p2Tag = "Point1";
+const string PlotParams::_numSamplesTag = "NumberOfSamplesTag"; 
 const string PlotParams::_singlePtTag = "SinglePoint";
+const string PlotParams::_lockAxisTag = "LockAxis";
 
 //
 // Register class with object factory!!!
@@ -57,60 +56,69 @@ PlotParams::~PlotParams()
     
 std::vector<long int> PlotParams::GetMinMaxTS( ) const
 {
-    //assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
-
-    std::vector<long int> vec(2, 0);
-    return GetValueLongVec( _minMaxTSTag, vec );
+    return GetValueLongVec( _minMaxTSTag );
 }
 
 void PlotParams::SetMinMaxTS( const std::vector<long int>&  minmax )
 {
-    //assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
     SetValueLongVec( _minMaxTSTag, "Time range in the Time mode", minmax );
 }
 
-bool PlotParams::GetSpaceTimeMode() const
-{
-    return GetValueLong(_spaceTimeTag, (long)true);
-}
-
-void PlotParams::SetSpaceTimeMode(bool val) 
-{
-    SetValueLong(_spaceTimeTag, "Set Space or Time mode", (long)val);
-}
-    
 std::vector<double> PlotParams::GetSinglePoint() const
 {
-    // assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
     return GetValueDoubleVec( _singlePtTag );
 }
     
 void PlotParams::SetSinglePoint( const std::vector<double>& point )
 {
-    //assert( !this->GetSpaceTimeMode() );     // make sure we're at "time" mode
     SetValueDoubleVec( _singlePtTag, "Single point in the time mode", point );
 }
     
 std::vector<double> PlotParams::GetPoint1() const
 {
-    //assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     return GetValueDoubleVec( _p1Tag );
 }
     
 void PlotParams::SetPoint1( const std::vector<double>& point )
 {
-    //assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     SetValueDoubleVec( _p1Tag, "Point 1 in the space mode", point );
 }
 
 std::vector<double> PlotParams::GetPoint2() const
 {
-    //assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     return GetValueDoubleVec( _p2Tag );
 }
     
 void PlotParams::SetPoint2( const std::vector<double>& point )
 {
-    //assert( this->GetSpaceTimeMode() );     // make sure we're at "space" mode
     SetValueDoubleVec( _p2Tag, "Point 2 in the space mode", point );
+}
+
+void PlotParams::SetNumOfSamples( long val ) 
+{
+    SetValueLong(_numSamplesTag, "Set number of samples", (long)val);
+}
+
+long PlotParams::GetNumOfSamples( ) const
+{
+    return GetValueLong(_numSamplesTag, 100 );
+}
+
+void PlotParams::SetAxisLocks( const std::vector<bool>& locks )
+{
+    std::vector<long> locksL( 3, 0 );
+    for( int i = 0; i < 3; i++ )
+        locksL[i] = (long int)locks[i];
+    SetValueLongVec( _lockAxisTag, "Lock values along x, y, or z axes", locksL );
+}
+
+std::vector<bool> PlotParams::GetAxisLocks( )
+{
+    std::vector<long> defaultVal(3, 0);
+    std::vector<long> locksL = GetValueLongVec( _lockAxisTag, defaultVal );
+    std::vector<bool> locks(3, false);
+    for( int i = 0; i < 3; i++ )
+        locks[i] = (bool)locksL[i];
+
+    return locks;
 }

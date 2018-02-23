@@ -32,11 +32,10 @@ void QRange::SetExtents( double min, double max )
     _ui->maxSliderEdit->SetValue( max );
 }
 
-void QRange::GetRange( std::vector<double>& range )
+void QRange::GetValue( double& min, double& max )
 {
-    range.clear();
-    range.push_back( _ui->minSliderEdit->GetCurrentValue() );
-    range.push_back( _ui->maxSliderEdit->GetCurrentValue() );
+    min = _ui->minSliderEdit->GetCurrentValue();
+    max = _ui->maxSliderEdit->GetCurrentValue();
 }
     
 void QRange::_minChanged( double value )
@@ -82,4 +81,9 @@ void QRange::SetIntType( bool val )
 {
     _ui->minSliderEdit->SetIntType( val );
     _ui->maxSliderEdit->SetIntType( val );
+
+void QRange::SetValue( double smallVal, double bigVal )
+{
+    _ui->minSliderEdit->SetValue( smallVal );
+    _ui->maxSliderEdit->SetValue( bigVal );
 }
