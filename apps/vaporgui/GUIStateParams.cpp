@@ -36,6 +36,7 @@ const string GUIStateParams::m_pythonPathTag= "PythonPathTag";
 const string GUIStateParams::m_flowPathTag= "FlowPathTag";
 const string GUIStateParams::m_tfPathTag= "TFPathTag";
 const string GUIStateParams::m_statsDatasetNameTag = "StatsDatasetNameTag";
+const string GUIStateParams::m_plotDatasetNameTag = "PlotDatasetNameTag";
 const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
@@ -328,4 +329,14 @@ std::string GUIStateParams::GetStatsDatasetName() const
 void GUIStateParams::SetStatsDatasetName(std::string& name)
 {
     SetValueString(m_statsDatasetNameTag, "Name of the active data set in Statistics", name);
+}
+
+std::string GUIStateParams::GetPlotDatasetName() const
+{
+    return GetValueString(m_plotDatasetNameTag, "");
+}
+
+void GUIStateParams::SetPlotDatasetName(std::string& name)
+{
+    SetValueString(m_plotDatasetNameTag, "Name of the active data set in Plot", name);
 }
