@@ -231,7 +231,7 @@ class PARAMS_API MapperFunction : public ParamsBase {
         ColorMap *cmap = GetColorMap();
         if (cmap)
             return cmap->GetInterpType();
-        return TFInterpolator::linear;
+        return TFInterpolator::diverging;
     }
 
     //! Specify the color interpolation type
@@ -240,6 +240,17 @@ class PARAMS_API MapperFunction : public ParamsBase {
         ColorMap *cmap = GetColorMap();
         if (cmap)
             cmap->SetInterpType(t);
+    }
+
+    void setUseWhitespace(int state) {
+        ColorMap *cmap = GetColorMap();
+        if (cmap)
+            cmap->SetUseWhitespace(state);
+    }
+
+    int getUseWhitespace() const {
+        ColorMap *cmap = GetColorMap();
+        return cmap->GetUseWhitespace();
     }
 
     //! Method to get the Color Map from the Mapper Function
