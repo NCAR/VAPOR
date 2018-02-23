@@ -32,6 +32,9 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     enum DisplayFlags {
         SCALAR = (1u << 0),
         VECTOR = (1u << 1),
+        COLOR = (1u << 2),
+        AUXILIARY = (1u << 3),
+        HEIGHT = (1u << 4),
     };
 
     FidelityWidget(QWidget *parent);
@@ -44,6 +47,9 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
         const VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams);
+
+    std::string GetCurrentLodString() const;
+    std::string GetCurrentMultiresString() const;
 
   protected slots:
     //! Connected to the image file text editor
@@ -76,15 +82,7 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     void uncheckFidelity();
 
     void setupFidelity(
-        VAPoR::RenderParams *dParams
-#ifdef DEAD
-        ,
-        bool useDefault
-#endif
-    );
-
-    //! Set the fidelity gui elements based on values in a RenderParams
-    void updateFidelity();
+        VAPoR::RenderParams *dParams);
 
     QButtonGroup *_fidelityButtons;
 
@@ -94,6 +92,8 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     std::vector<int> _fidelityMultiresIdx;
     std::vector<string> _fidelityLodStrs;
     std::vector<string> _fidelityMultiresStrs;
+    std::string _currentLodStr;
+    std::string _currentMultiresStr;
 };
 
 #endif //FIDELITYWIDGET_H
