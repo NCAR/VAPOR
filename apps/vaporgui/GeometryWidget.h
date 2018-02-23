@@ -54,6 +54,8 @@ public:
 				VAPoR::DataMgr* dataMgr,
 				VAPoR::RenderParams* rParams);
 
+    void hideSinglePointTabHeader();
+
 signals:
     void valueChanged();
 
