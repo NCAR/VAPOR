@@ -479,7 +479,6 @@ vector<size_t> DC::_getBlockSize() const
 {
     vector<size_t> bs = getBlockSize();
     while (bs.size() > 3) { bs.pop_back(); }
-    while (bs.size() < 3) { bs.push_back(1); }
     return (bs);
 }
 

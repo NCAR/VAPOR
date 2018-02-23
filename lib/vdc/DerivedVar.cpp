@@ -25,11 +25,35 @@ size_t numBlocks(const vector<size_t> &min, const vector<size_t> &max, const vec
     return (nblocks);
 }
 
+size_t numBlocks(const vector<size_t> &dims, const vector<size_t> &bs)
+{
+    assert(dims.size() == bs.size());
+
+    size_t nblocks = 1;
+    for (int i = 0; i < bs.size(); i++) {
+        assert(dims[i] != 0);
+        nblocks *= (((dims[i] - 1) / bs[i]) + 1);
+    }
+    return (nblocks);
+}
+
 size_t blockSize(const vector<size_t> &bs)
 {
     size_t sz = 1;
     for (int i = 0; i < bs.size(); i++) { sz *= bs[i]; }
     return (sz);
+}
+
+vector<size_t> increment(vector<size_t> dims, vector<size_t> coord)
+{
+    assert(dims.size() == coord.size());
+
+    for (int i = 0; i < coord.size(); i++) {
+        coord[i] += 1;
+        if (coord[i] < (dims[i])) { break; }
+        coord[i] = 0;
+    }
+    return (coord);
 }
 
 // Product of elements in a vector
@@ -40,6 +64,70 @@ size_t vproduct(vector<size_t> a)
 
     for (int i = 0; i < a.size(); i++) ntotal *= a[i];
     return (ntotal);
+}
+
+void extractBlock(const float *data, const vector<size_t> &dims, const vector<size_t> &bcoords, const vector<size_t> &bs, float *block)
+{
+    assert(dims.size() == bcoords.size());
+    assert(dims.size() == bs.size());
+
+    size_t block_size = vproduct(bs);
+
+    // Block dimensions
+    //
+    size_t bz = bs.size() > 2 ? bs[2] : 1;
+    size_t by = bs.size() > 1 ? bs[1] : 1;
+    size_t bx = bs.size() > 0 ? bs[0] : 1;
+
+    // Data dimensions
+    //
+    size_t nz = dims.size() > 2 ? dims[2] : 1;
+    size_t ny = dims.size() > 1 ? dims[1] : 1;
+    size_t nx = dims.size() > 0 ? dims[0] : 1;
+
+    // Data dimensions
+    //
+    size_t bcz = bcoords.size() > 2 ? bcoords[2] : 0;
+    size_t bcy = bcoords.size() > 1 ? bcoords[1] : 0;
+    size_t bcx = bcoords.size() > 0 ? bcoords[0] : 0;
+
+    size_t z = bcz * bz;
+    for (size_t zb = 0; zb < bz && z < nz; zb++, z++) {
+        size_t y = bcy * by;
+
+        for (size_t yb = 0; yb < by && y < ny; yb++, y++) {
+            size_t x = bcx * bx;
+
+            for (size_t xb = 0; xb < bx && x < nx; xb++, x++) { block[bx * by * zb + bx * yb + xb] = data[nx * ny * z + nx * y + x]; }
+        }
+    }
+}
+
+void blockit(const float *data, const vector<size_t> &dims, const vector<size_t> &bs, float *blocks)
+{
+    assert(dims.size() == bs.size());
+
+    size_t block_size = vproduct(bs);
+
+    vector<size_t> bdims;
+    for (int i = 0; i < bs.size(); i++) { bdims.push_back(((dims[i] - 1) / bs[i]) + 1); }
+
+    size_t nbz = bdims.size() > 2 ? bdims[2] : 1;
+    size_t nby = bdims.size() > 1 ? bdims[1] : 1;
+    size_t nbx = bdims.size() > 0 ? bdims[0] : 1;
+
+    float *        blockptr = blocks;
+    vector<size_t> bcoord(bdims.size(), 0);
+
+    for (size_t zb = 0; zb < nbz; zb++) {
+        for (size_t yb = 0; yb < nby; yb++) {
+            for (size_t xb = 0; xb < nbx; xb++) {
+                extractBlock(data, dims, bcoord, bs, blockptr);
+                blockptr += block_size;
+                bcoord = increment(bdims, bcoord);
+            }
+        }
+    }
 }
 
 // make 2D lat and lon arrays from 1D arrays by replication, in place
@@ -170,15 +258,75 @@ int DerivedCoordVar_PCSFromLatLon::CloseVariable(int fd)
     return (0);
 }
 
-int DerivedCoordVar_PCSFromLatLon::ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileObject *f, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
-    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+    size_t ts = f->GetTS();
+    string varname = f->GetVarname();
+    int    level = f->GetLevel();
+    int    lod = f->GetLOD();
+    int    sliceNum = f->GetSlice();
 
-    if (!f) {
-        SetErrMsg("Invalid file descriptor: %d", fd);
-        return (-1);
+    // Dimensions are same for X & Y coord vars
+    //
+    vector<size_t> dims, bs;
+    GetDimLensAtLevel(_xCoordName, level, dims, bs);
+
+    // Need temporary buffer space for the X or Y coordinate
+    // NOT being returned (we still need to calculate it)
+    //
+    size_t nElements = numBlocks(min, max, bs) * blockSize(bs);
+    float *buf = new float[nElements];
+
+    // Assign temporary buffer 'buf' as appropriate
+    //
+    float *lonBufPtr;
+    float *latBufPtr;
+    if (varname == _xCoordName) {
+        lonBufPtr = buf;
+        latBufPtr = region;
+    } else {
+        lonBufPtr = region;
+        latBufPtr = buf;
     }
 
+    vector<size_t> lonMin = {min[0]};
+    vector<size_t> lonMax = {max[0]};
+    int            rc = _getVarBlock(ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
+    if (rc < 0) {
+        delete[] buf;
+        return (rc);
+    }
+
+    vector<size_t> latMin = {min[1]};
+    vector<size_t> latMax = {max[1]};
+    rc = _getVarBlock(ts, _latName, level, lod, latMin, latMax, latBufPtr);
+    if (rc < 0) {
+        delete[] buf;
+        return (rc);
+    }
+
+    // Combine the 2 1D arrays into a 2D array
+    //
+    make2D(lonBufPtr, latBufPtr, dims);
+
+    rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(dims));
+
+    // Finally, block the data since the original 1D data is not blocked
+    // (and make2D doesn't add blocking)
+    //
+    if (varname == _xCoordName) {
+        blockit(lonBufPtr, dims, bs, region);
+    } else {
+        blockit(latBufPtr, dims, bs, region);
+    }
+
+    delete[] buf;
+
+    return (rc);
+}
+
+int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(DC::FileTable::FileObject *f, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
     size_t ts = f->GetTS();
     string varname = f->GetVarname();
     int    level = f->GetLevel();
@@ -220,13 +368,26 @@ int DerivedCoordVar_PCSFromLatLon::ReadRegionBlock(int fd, const vector<size_t> 
         return (rc);
     }
 
-    if (_make2DFlag) { make2D(lonBufPtr, latBufPtr, dims); }
-
     rc = _proj4API.Transform(lonBufPtr, latBufPtr, nElements);
 
     delete[] buf;
 
     return (rc);
+}
+
+int DerivedCoordVar_PCSFromLatLon::ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+    if (_make2DFlag) {
+        return (_readRegionBlockHelper1D(f, min, max, region));
+    } else {
+        return (_readRegionBlockHelper2D(f, min, max, region));
+    }
 }
 
 bool DerivedCoordVar_PCSFromLatLon::VariableExists(size_t ts, string varname, int, int) const
@@ -265,9 +426,6 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar()
         return (-1);
     }
 
-    _bs = _dc->GetBlockSize();
-    while (_bs.size() > 2) _bs.pop_back();
-
     vector<string> dimNames;
     if (lonVar.GetDimNames().size() == 1 && !_uGridFlag) {
         dimNames.push_back(lonVar.GetDimNames()[0]);
@@ -290,6 +448,12 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar()
         dimNames = lonVar.GetDimNames();
         _dimLens = lonDims;
     }
+
+    // Use blocking or no?
+    //
+    _bs = _dc->GetBlockSize();
+    if (_bs.empty()) { _bs = _dimLens; }
+    while (_bs.size() > _dimLens.size()) _bs.pop_back();
 
     if (lonVar.GetTimeDimName() != latVar.GetTimeDimName()) {
         SetErrMsg("Incompatible time dimensions");
@@ -335,27 +499,10 @@ int DerivedCoordVar_PCSFromLatLon::_getVarBlock(size_t ts, string varname, int l
 {
     assert((varname == _lonName) || (varname == _latName));
 
-    // Set up min & max for read of lat and lon variables that may be 1D
-    //
-    vector<size_t> myMin;
-    vector<size_t> myMax;
-    if (_make2DFlag && varname == _lonName) {
-        myMin.push_back(min[0]);
-        myMax.push_back(max[0]);
-    } else if (_make2DFlag && varname == _latName) {
-        myMin.push_back(min[1]);
-        myMax.push_back(max[1]);
-    } else {
-        myMin = min;
-        myMax = max;
-    }
-
     int fd = _dc->OpenVariableRead(ts, varname, level, lod);
     if (fd < 0) return (-1);
 
-    // Unblocked read!
-    //
-    int rc = _dc->ReadRegionBlock(fd, myMin, myMax, region);
+    int rc = _dc->ReadRegionBlock(fd, min, max, region);
     if (rc < 0) {
         _dc->CloseVariable(fd);
         return (-1);
@@ -411,7 +558,9 @@ int DerivedCoordVar_CF1D::GetDimLensAtLevel(string varname, int level, std::vect
     bs_at_level.clear();
 
     dims_at_level.push_back(_dimLen);
-    bs_at_level.push_back(_dc->GetBlockSize()[0]);
+    bs_at_level = _dc->GetBlockSize();
+    if (bs_at_level.empty()) { bs_at_level = dims_at_level; }
+    while (bs_at_level.size() > dims_at_level.size()) bs_at_level.pop_back();
 
     return (0);
 }
