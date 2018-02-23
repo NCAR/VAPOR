@@ -1,9 +1,10 @@
-//                                                                    *
-//         Copyright (C)  2016                                      *
-//   University Corporation for Atmospheric Research                  *
-//         All Rights Reserved                                      *
-//                                                                    *
-//************************************************************************/
+//************************************************************************
+//                                                                       *
+//         Copyright (C)  2016                                           *
+//   University Corporation for Atmospheric Research                     *
+//         All Rights Reserved                                           *
+//                                                                       *
+//************************************************************************
 //
 //  File:      Statistics.cpp
 //
@@ -18,7 +19,6 @@
 #ifdef WIN32
     #pragma warning(disable : 4100)
 #endif
-#include "vapor/glutil.h"    // Must be included first!!!
 #include "Statistics.h"
 #include "GUIStateParams.h"
 
@@ -47,6 +47,7 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
     setupUi(this);
     setWindowTitle("Statistics");
     MyGeometryWidget->Reinit(GeometryWidget::THREED, GeometryWidget::MINMAX, GeometryWidget::AUXILIARY);
+    MyFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
 
     Connect();
 }
@@ -180,50 +181,7 @@ bool Statistics::Update()
     RemoveCalcCombo->blockSignals(false);
 
     // Update LOD, Refinement
-    RefCombo->blockSignals(true);
-    LODCombo->blockSignals(true);
-    RefCombo->clear();
-    LODCombo->clear();
-    int            numRefLevels = currentDmgr->GetNumRefLevels(availVars[0]);
-    vector<size_t> availLODs = currentDmgr->GetCRatios(availVars[0]);
-    // sanity check on enabledVars.
-    for (int i = 1; i < enabledVars.size(); i++) {
-        assert(numRefLevels == currentDmgr->GetNumRefLevels(enabledVars[i]));
-        assert(availLODs.size() == currentDmgr->GetCRatios(enabledVars[i]).size());
-    }
-    std::string referenceVar;
-    if (availVars3D.size() > 0)
-        referenceVar = availVars3D[0];
-    else
-        referenceVar = availVars[0];
-
-    // add refinement levels
-    std::vector<size_t> dims, blockSizes;
-    for (int level = 0; level < numRefLevels; level++) {
-        currentDmgr->GetDimLensAtLevel(referenceVar, level, dims, blockSizes);
-        QString line = QString::number(level);
-        line += " (";
-        for (int i = 0; i < dims.size(); i++) {
-            line += QString::number(dims[i]);
-            line += "x";
-        }
-        line.remove(line.size() - 1, 1);
-        line += ")";
-        RefCombo->addItem(line);
-    }
-    RefCombo->setCurrentIndex(statsParams->GetRefinementLevel());
-
-    // add LOD levels
-    for (int lod = 0; lod < availLODs.size(); lod++) {
-        QString line = QString::number(lod);
-        line += " (";
-        line += QString::number(availLODs[lod]);
-        line += ":1)";
-        LODCombo->addItem(line);
-    }
-    LODCombo->setCurrentIndex(statsParams->GetCompressionLevel());
-    RefCombo->blockSignals(false);
-    LODCombo->blockSignals(false);
+    MyFidelityWidget->Update(currentDmgr, _controlExec->GetParamsMgr(), statsParams);
 
     // Update timesteps
     MinTimestepSpinbox->blockSignals(true);
@@ -381,8 +339,6 @@ bool Statistics::Connect()
     connect(RemoveVarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeVarChanged(int)));
     connect(NewCalcCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_newCalcChanged(int)));
     connect(RemoveCalcCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_removeCalcChanged(int)));
-    connect(RefCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_refinementChanged(int)));
-    connect(LODCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_lodChanged(int)));
     connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)));
     connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)));
     connect(UpdateButton, SIGNAL(clicked()), this, SLOT(_updateButtonClicked()));
@@ -530,50 +486,6 @@ void Statistics::_maxTSChanged(int val)
     }
 
     _validStats.currentTimeStep[1] = val;
-
-    // Auto-update if enabled
-    if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
-}
-
-void Statistics::_lodChanged(int index)
-{
-    assert(index >= 0);
-
-    // Initialize pointers
-    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string       dsName = guiParams->GetStatsDatasetName();
-    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    int               lod = index;
-
-    // Add this lod level to parameter if different
-    if (lod != statsParams->GetCompressionLevel()) {
-        statsParams->SetCompressionLevel(lod);
-        _validStats.InvalidAll();
-    }
-
-    _validStats.currentLOD = lod;
-
-    // Auto-update if enabled
-    if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
-}
-
-void Statistics::_refinementChanged(int index)
-{
-    assert(index >= 0);
-
-    // Initialize pointers
-    GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string       dsName = guiParams->GetStatsDatasetName();
-    StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-    int               refLevel = index;
-
-    // Add this refinement level to parameter if different
-    if (refLevel != statsParams->GetRefinementLevel()) {
-        statsParams->SetRefinementLevel(refLevel);
-        _validStats.InvalidAll();
-    }
-
-    _validStats.currentRefLev = refLevel;
 
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
@@ -1045,7 +957,8 @@ void Statistics::_exportTextClicked()
         VAPoR::DataMgr *         currentDmgr = _controlExec->getDataStatus()->GetDataMgr(dsName);
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
 
-        file << "#Variable Statistics" << endl;
+        file << "Data Source = " << guiParams->GetStatsDatasetName() << endl << endl;
+        file << "#Variable Statistics:" << endl;
         file << "Variable_Name, No_of_Samples";
         if (statsParams->GetMinEnabled()) file << ", Min";
         if (statsParams->GetMaxEnabled()) file << ", Max";
@@ -1072,7 +985,10 @@ void Statistics::_exportTextClicked()
             file << endl;
 
             for (int j = 0; j < availVars3D.size(); j++)
-                if (availVars3D[j] == varname) has3DVar = true;
+                if (availVars3D[j] == varname) {
+                    has3DVar = true;
+                    break;
+                }
         }
 
         file << endl;
@@ -1081,20 +997,24 @@ void Statistics::_exportTextClicked()
         statsParams->GetBox()->GetExtents(myMin, myMax);
 
         file << "#Spatial Extents:" << endl;
-        file << "X min = " << myMin[0] << ",    X max = " << myMax[0] << endl;
-        file << "Y min = " << myMin[1] << ",    Y max = " << myMax[1] << endl;
-        if (has3DVar) file << "Z min = " << myMin[2] << ",    Z max = " << myMax[2] << endl;
+        file << "X min = " << myMin[0] << endl;
+        file << "X max = " << myMax[0] << endl;
+        file << "Y min = " << myMin[1] << endl;
+        file << "Y max = " << myMax[1] << endl;
+        if (has3DVar) {
+            file << "Z min = " << myMin[2] << endl;
+            file << "Z max = " << myMax[2] << endl;
+        }
         file << endl;
 
         file << "#Temporal Extents:" << endl;
-        file << "Minimum Timestep = " << statsParams->GetCurrentMinTS() << ",    Maximum Timestep = " << statsParams->GetCurrentMaxTS() << endl;
+        file << "Minimum Timestep = " << statsParams->GetCurrentMinTS() << endl;
+        file << "Maximum Timestep = " << statsParams->GetCurrentMaxTS() << endl;
         file << endl;
 
         file << "#Compression Parameters:" << endl;
-        // file << "Level of Detail:  " << LODCombo->currentText().toStdString() << endl;
-        // file << "Refinement Level: " << RefCombo->currentText().toStdString() << endl;
-        file << "Level of Detail:  " << statsParams->GetCompressionLevel() << endl;
-        file << "Refinement Level: " << statsParams->GetRefinementLevel() << endl;
+        file << "Level of Detail  =  " << MyFidelityWidget->GetCurrentLodString() << endl;
+        file << "Refinement Level = " << MyFidelityWidget->GetCurrentMultiresString() << endl;
 
         file.close();
     }
