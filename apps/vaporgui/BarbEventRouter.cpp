@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 #include <vapor/MapperFunction.h>
-#include "VizWin.h"
+#include "VizWinMgr.h"
 #include "vapor/BarbParams.h"
 #include "VariablesWidget.h"
 #include "BarbEventRouter.h"

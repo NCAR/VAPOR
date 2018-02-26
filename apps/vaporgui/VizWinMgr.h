@@ -170,9 +170,6 @@ public:
 	//! This method includes a line for each built-in tab.
 	void createAllDefaultTabs();
     
-	//! Method that responds to user destruction of a visualizer.
-	//! Relevant params, renderers, etc. are removed.
-    void vizAboutToDisappear(string winName); 
     
 
 	//! Method to delete a visualizer under program control, e.g. if
@@ -181,9 +178,6 @@ public:
 	void removeVisualizer(string vizName);
 
     
-	//! Set a Visualizer to be the active (selected) Visualizer
-	//! \param[in] vizNum index of Visualizer to be activated.
-	void setActiveViz(string winName); 
 
 	string GetActiveVizName() const;
 
@@ -242,6 +236,18 @@ public slots:
  void UpdateRouters();
 
 ///@}
+
+private slots:
+
+ //! Set a Visualizer to be the active (selected) Visualizer
+ //! \param[in] vizNum index of Visualizer to be activated.
+ void setActiveViz(string winName); 
+
+ //! Method that responds to user destruction of a visualizer.
+ //! Relevant params, renderers, etc. are removed.
+ void vizAboutToDisappear(string winName); 
+
+
 #ifndef DOXYGEN_SKIP_THIS
 signals:
 	//Turn on/off multiple viz options:
@@ -279,6 +285,7 @@ private:
 	bool m_initialized;
 
     void attachVisualizer(string vizName);
+
 	
 
 #endif //DOXYGEN_SKIP_THIS
