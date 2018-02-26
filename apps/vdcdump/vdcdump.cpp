@@ -225,7 +225,6 @@ struct Variable {
             out->stringProperty(_name, "Units", _data->GetUnits());
             out->stringProperty(_name, "WName", _data->GetWName());
             out->vectorProperty<size_t>(_name, "CRatios", _data->GetCRatios(), false);
-            out->vectorProperty<size_t>(_name, "BS", _data->GetBS(), false);
             out->vectorProperty<bool>(_name, "Periodic", _data->GetPeriodic(), false);
         }
 
@@ -349,7 +348,7 @@ int main(int argc, char **argv)
     }
 
     VDCNetCDF vdc(1);
-    int       rc = vdc.Initialize(string(argv[1]), vector<string>(), VDC::R, 4 * 1024 * 1024);
+    int       rc = vdc.Initialize(string(argv[1]), vector<string>(), VDC::R, vector<size_t>(), 4 * 1024 * 1024);
     if (rc < 0) exit(1);
 
     //

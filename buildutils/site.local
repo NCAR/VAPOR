@@ -10,9 +10,9 @@ endif ()
 # Yellowstone and Geyser configuration
 # --------------------------------------------------------------------------------
 cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
-if (HOSTNAME MATCHES "yslogin[0-9]+" OR HOSTNAME MATCHES "geyser[0-9]+")
+if (HOSTNAME MATCHES "yslogin[0-9]+" OR HOSTNAME MATCHES "geyser[0-9]+" OR HOSTNAME MATCHES "caldera[0-9]+")
 	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2014/Linux_x86_64)
-	set (CMAKE_CXX_COMPILER /glade/apps/opt/modulefiles/ge/cmpwrappers/g++)
+	set (CMAKE_CXX_COMPILER g++)
 endif ()
 # --------------------------------------------------------------------------------
 

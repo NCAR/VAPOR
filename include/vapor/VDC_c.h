@@ -107,10 +107,10 @@ int VDC_GetVarDimNames(const VDC *p, const char *varname, int spatial, char ***n
 int VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char ***names, int *count);
 
 int VDC_OpenVariableRead(VDC *p, size_t ts, const char *varname, int level, int lod);
-int VDC_CloseVariable(VDC *p);
-int VDC_Read(VDC *p, float *region);
-int VDC_ReadSlice(VDC *p, float *slice);
-int VDC_ReadRegion(VDC *p, const size_t *min, const size_t *max, const int dims, float *region);
+int VDC_CloseVariable(VDC *p, int fd);
+int VDC_Read(VDC *p, int fd, float *region);
+int VDC_ReadSlice(VDC *p, int fd, float *slice);
+int VDC_ReadRegion(VDC *p, int fd, const size_t *min, const size_t *max, const int dims, float *region);
 int VDC_GetVar(VDC *p, const char *varname, int level, int lod, float *data);
 int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int lod, float *data);
 

@@ -1914,7 +1914,9 @@ void WASP::_dims_at_level(vector<size_t> dims, vector<size_t> bs, int level, str
 
         residual = residual >> ldelta;
 
-        dims_at_level[i] = nblocks * bs_at_level[i] + residual;
+        size_t d = nblocks * bs_at_level[i] + residual;
+        if (d < 1) d = 1;
+        dims_at_level[i] = d;
     }
 }
 

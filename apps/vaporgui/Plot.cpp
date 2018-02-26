@@ -718,26 +718,120 @@ std::string Plot::_getYLabel()
         units.push_back(dataVar.GetUnits());
     }
 
-    std::string empty;
-    if (units.size() == 0)
-        return empty;
-    else {
-        std::string label = units[0];
-        for (int i = 1; i < units.size(); i++)
-            if (units[i] != label) return empty;
+    void Plot::initConstCheckboxes()
+    {
+        for (int i = 0; i < 4; i++) {
+            QWidget *pWidget = new QWidget();
+            _spaceCheckBoxes.push_back(new QCheckBox());
+            if (i == 3) {
+                _spaceCheckBoxes[i]->setCheckState(Qt::Checked);
+                _spaceCheckBoxes[i]->setEnabled(false);
+            }
+            QHBoxLayout *pLayout = new QHBoxLayout(pWidget);
+            pLayout->addWidget(_spaceCheckBoxes[i]);
+            pLayout->setAlignment(Qt::AlignCenter);
+            pLayout->setContentsMargins(0, 0, 0, 0);
+            pWidget->setLayout(pLayout);
+            spaceTable->setCellWidget(i, 2, pWidget);
 
-        return label;
+            pWidget = new QWidget();
+            _timeCheckBoxes.push_back(new QCheckBox());
+            if (i < 3) {
+                _timeCheckBoxes[i]->setCheckState(Qt::Checked);
+                _timeCheckBoxes[i]->setEnabled(false);
+            }
+            pLayout = new QHBoxLayout(pWidget);
+            pLayout->addWidget(_timeCheckBoxes[i]);
+            pLayout->setAlignment(Qt::AlignCenter);
+            pLayout->setContentsMargins(0, 0, 0, 0);
+            pWidget->setLayout(pLayout);
+            timeTable->setCellWidget(i, 2, pWidget);
+        }
     }
-}
 
-void Plot::_axisLocksChanged(int val)
-{
-    std::vector<bool> locks(3, false);
-    locks[0] = (bool)xlock->isChecked();
-    locks[1] = (bool)ylock->isChecked();
-    locks[2] = (bool)zlock->isChecked();
+    // Called whenever list of variables changes
+    //
+    void Plot::initVariables()
+    {
+        addVarCombo->blockSignals(true);
+        _vars.clear();
+        _vars3d.clear();
+        addVarCombo->clear();    // Clear old variables
+        addVarCombo->addItem("Add Variable:");
+        vector<string> vars;
 
-    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
-    plotParams->SetAxisLocks(locks);
-    _spaceModeP1Changed();
-}
+        vars = _dm->GetDataVarNames(3);
+        for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
+            _vars.push_back(*it);
+            _vars3d.push_back(*it);
+        }
+        vars = _dm->GetDataVarNames(2);
+        for (std::vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) { _vars.push_back(*it); }
+
+        sort(_vars.begin(), _vars.end());
+
+        // Add variables to combo box
+        for (std::vector<string>::iterator it = _vars.begin(); it != _vars.end(); ++it) { addVarCombo->addItem(QString::fromStdString(*it)); }
+        addVarCombo->blockSignals(false);
+    }
+
+    void Plot::newVarAdded(int index)
+    {
+        if (index == 0) return;
+        QString varName = addVarCombo->itemText(index);
+
+        if (std::find(_uVars.begin(), _uVars.end(), varName.toStdString()) != _uVars.end()) return;
+
+        _uVars.push_back(varName.toStdString());
+        int rowCount = variablesTable->rowCount();
+        variablesTable->insertRow(rowCount);
+        variablesTable->setVerticalHeaderItem(rowCount, new QTableWidgetItem(varName));
+
+        QHeaderView *verticalHeader = variablesTable->verticalHeader();
+        verticalHeader->setResizeMode(QHeaderView::Fixed);
+        verticalHeader->setDefaultSectionSize(20);
+
+        // Add checkboxes to each variable/row
+        int colCount = variablesTable->columnCount();
+        for (int j = 0; j < colCount; j++) {
+            QWidget *  cell = new QWidget();
+            QCheckBox *checkBox = new QCheckBox();
+            checkBox->setCheckState(Qt::Checked);
+            QHBoxLayout *layout = new QHBoxLayout(cell);
+            layout->addWidget(checkBox);
+            layout->setAlignment(Qt::AlignHCenter);
+            layout->setContentsMargins(0, 0, 0, 0);
+            cell->setLayout(layout);
+            variablesTable->setCellWidget(rowCount, j, cell);
+        }
+        variablesTable->resizeRowsToContents();
+        addVarCombo->setCurrentIndex(0);
+
+        if (removeVarCombo->findText(varName) == -1) { removeVarCombo->addItem(varName); }
+
+        // If all variables are 2D, disable Z axis controllers
+        //
+        bool varsAre2D = true;
+        for (int i = 0; i < _uVars.size(); i++) {
+            size_t nDims = _dm->GetVarTopologyDim(_uVars[i]);
+            if (nDims == 3) { varsAre2D = false; }
+        }
+        varsAre2D ? enableZControllers(false) : enableZControllers(true);
+
+        // If we are adding a var through the gui, set params.
+        // Otherwise we are issuing an Update() and should not
+        // touch params.
+        if (sender()) { _params->SetVarNames(_uVars); }
+    }
+
+    void Plot::_axisLocksChanged(int val)
+    {
+        std::vector<bool> locks(3, false);
+        locks[0] = (bool)xlock->isChecked();
+        locks[1] = (bool)ylock->isChecked();
+        locks[2] = (bool)zlock->isChecked();
+
+        VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
+        plotParams->SetAxisLocks(locks);
+        _spaceModeP1Changed();
+    }

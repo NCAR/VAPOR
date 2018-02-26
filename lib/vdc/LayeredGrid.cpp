@@ -12,7 +12,7 @@ using namespace VAPoR;
 
 void LayeredGrid::_layeredGrid(const vector<double> &minu, const vector<double> &maxu, const RegularGrid &rg)
 {
-    assert(GetTopologyDim() == 3);
+    assert(GetDimensions().size() == 3);
     assert(minu.size() == maxu.size());
     assert(minu.size() == 2);
 
@@ -52,8 +52,13 @@ void LayeredGrid::GetUserExtents(vector<double> &minu, vector<double> &maxu) con
 
 void LayeredGrid::GetBoundingBox(const vector<size_t> &min, const vector<size_t> &max, vector<double> &minu, vector<double> &maxu) const
 {
-    assert(min.size() == max.size());
-    assert(min.size() >= 2);
+    vector<size_t> cMin = min;
+    ClampIndex(cMin);
+
+    vector<size_t> cMax = max;
+    ClampIndex(cMax);
+
+    assert(cMin.size() == cMax.size());
 
     minu.clear();
     maxu.clear();
@@ -61,30 +66,30 @@ void LayeredGrid::GetBoundingBox(const vector<size_t> &min, const vector<size_t>
     // Get extents of horizontal dimensions. Note: also get vertical
     // dimension, but it's bogus for layered grid.
     //
-    GetUserCoordinates(min, minu);
-    GetUserCoordinates(max, maxu);
+    GetUserCoordinates(cMin, minu);
+    GetUserCoordinates(cMax, maxu);
 
     // Initialize min and max coordinates of varying dimension with
     // coordinates of "first" and "last" grid point. Coordinates of
     // varying dimension are stored as values of a scalar function
     // sampling the coordinate space.
     //
-    float mincoord = _rg.AccessIndex(min);
-    float maxcoord = _rg.AccessIndex(max);
+    float mincoord = _rg.AccessIndex(cMin);
+    float maxcoord = _rg.AccessIndex(cMax);
 
     // Now find the extreme values of the varying dimension's coordinates
     //
-    for (int j = min[1]; j <= max[1]; j++) {
-        for (int i = min[0]; i <= max[0]; i++) {
-            float v = _rg.AccessIJK(i, j, min[2]);
+    for (int j = cMin[1]; j <= cMax[1]; j++) {
+        for (int i = cMin[0]; i <= cMax[0]; i++) {
+            float v = _rg.AccessIJK(i, j, cMin[2]);
 
             if (v < mincoord) mincoord = v;
         }
     }
 
-    for (int j = min[1]; j <= max[1]; j++) {
-        for (int i = min[0]; i <= max[0]; i++) {
-            float v = _rg.AccessIJK(i, j, max[2]);
+    for (int j = cMin[1]; j <= cMax[1]; j++) {
+        for (int i = cMin[0]; i <= cMax[0]; i++) {
+            float v = _rg.AccessIJK(i, j, cMax[2]);
 
             if (v > maxcoord) maxcoord = v;
         }
@@ -96,8 +101,14 @@ void LayeredGrid::GetBoundingBox(const vector<size_t> &min, const vector<size_t>
 
 void LayeredGrid::GetEnclosingRegion(const vector<double> &minu, const vector<double> &maxu, vector<size_t> &min, vector<size_t> &max) const
 {
-    assert(minu.size() == maxu.size());
-    assert(minu.size() == 3);
+    vector<double> cMinu = minu;
+    ClampCoord(cMinu);
+
+    vector<double> cMaxu = maxu;
+    ClampCoord(cMaxu);
+
+    assert(cMinu.size() == cMaxu.size());
+    assert(cMinu.size() == 3);
 
     min.clear();
     max.clear();
@@ -106,14 +117,14 @@ void LayeredGrid::GetEnclosingRegion(const vector<double> &minu, const vector<do
     // Get coords for non-varying dimension AND varying dimension.
     //
     for (int i = 0; i < 2; i++) {
-        assert(minu[i] <= maxu[i]);
-        double u = minu[i];
-        if (u < minu[i]) { u = minu[i]; }
+        assert(cMinu[i] <= cMaxu[i]);
+        double u = cMinu[i];
+        if (u < cMinu[i]) { u = cMinu[i]; }
         size_t index = (u - _minu[i]) / _delta[i];
         min.push_back(index);
 
-        u = maxu[i];
-        if (u > maxu[i]) { u = maxu[i]; }
+        u = cMaxu[i];
+        if (u > cMaxu[i]) { u = cMaxu[i]; }
         index = (u - _maxu[i]) / _delta[i];
         max.push_back(index);
     }
@@ -138,7 +149,7 @@ void LayeredGrid::GetEnclosingRegion(const vector<double> &minu, const vector<do
         for (int j = min[1]; j <= max[1] && done; j++) {
             for (int i = min[0]; i <= max[0] && done; i++) {
                 z = _rg.AccessIJK(i, j, k);    // get Z coordinate
-                if (z < maxu[2]) { done = false; }
+                if (z < cMaxu[2]) { done = false; }
             }
         }
     }
@@ -149,7 +160,7 @@ void LayeredGrid::GetEnclosingRegion(const vector<double> &minu, const vector<do
         for (int j = min[1]; j <= max[1] && done; j++) {
             for (int i = min[0]; i <= max[0] && done; i++) {
                 z = _rg.AccessIJK(i, j, k);    // get Z coordinate
-                if (z > minu[2]) { done = false; }
+                if (z > cMinu[2]) { done = false; }
             }
         }
     }
@@ -318,33 +329,33 @@ void LayeredGrid::SetInterpolationOrder(int order)
 
 void LayeredGrid::GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
 {
-    assert(indices.size() == 3);
+    vector<size_t> cIndices = indices;
+    ClampIndex(cIndices);
+
+    assert(cIndices.size() == 3);
     coords.clear();
 
     // First get coordinates of non-varying (horizontal) dimensions
     //
     vector<size_t> dims = GetDimensions();
-    assert(indices.size() == GetTopologyDim());
+    assert(cIndices.size() == dims.size());
 
     for (int i = 0; i < 2; i++) {
-        size_t index = indices[i];
+        size_t index = cIndices[i];
 
         if (index >= dims[i]) { index = dims[i] - 1; }
 
-        coords.push_back(indices[i] * _delta[i] + _minu[i]);
+        coords.push_back(cIndices[i] * _delta[i] + _minu[i]);
     }
 
     // Now get coordinates of varying dimension
     //
-    float v = _rg.AccessIndex(indices);
+    float v = _rg.AccessIndex(cIndices);
     coords.push_back(v);
 }
 
 void LayeredGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
 {
-    // First get ij index of non-varying dimensions
-    //
-    assert(coords.size() >= GetTopologyDim());
     indices.clear();
 
     std::vector<double> clampedCoords = coords;
@@ -408,7 +419,6 @@ void LayeredGrid::GetIndices(const std::vector<double> &coords, std::vector<size
 
 bool LayeredGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const
 {
-    assert(coords.size() >= GetTopologyDim());
     indices.clear();
 
     std::vector<double> clampedCoords = coords;
