@@ -18,6 +18,7 @@ class ControlExec;
 }
 
 class GLBarbImageWindow;
+class VizWinMgr;
 
 //!
 //! \class BarbEventRouter

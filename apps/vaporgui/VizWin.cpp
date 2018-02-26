@@ -24,16 +24,16 @@
 #include <QFocusEvent>
 #include <QMouseEvent>
 #include <QCloseEvent>
+#include <QIcon>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/Viewpoint.h>
 #include <vapor/debug.h>
 #include "TrackBall.h"
-#include "TabManager.h"
+#include "GUIStateParams.h"
 #include "MouseModeParams.h"
+#include "AnimationParams.h"
 #include "qdatetime.h"
-#include "NavigationEventRouter.h"
-#include "MainForm.h"
 #include "ErrorReporter.h"
 #include "images/vapor-icon-32.xpm"
 
@@ -44,9 +44,8 @@ using namespace VAPoR;
  *  name 'name' and widget flags set to 'f'.
  *
  */
-VizWin::VizWin(MainForm *parent, const QString &name, VizWinMgr *myMgr, QRect *location, string winName, ControlExec *ce, Trackball *trackBall) : QGLWidget(parent)
+VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QGLWidget(parent)
 {
-    _mainForm = parent;
     _trackBall = trackBall;
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -55,20 +54,17 @@ VizWin::VizWin(MainForm *parent, const QString &name, VizWinMgr *myMgr, QRect *l
     _controlExec = ce;
 
     setAutoBufferSwap(false);
-    _spinTimer = 0;
-    _vizWinMgr = myMgr;
     _mouseClicked = false;
     _buttonNum = 0;
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
 }
+
 /*
  *  Destroys the object and frees any allocated resources
  */
-VizWin::~VizWin()
-{
-    if (_spinTimer) delete _spinTimer;
-}
+VizWin::~VizWin() {}
+
 void VizWin::closeEvent(QCloseEvent *e)
 {
     // Remove the visualizer. This must be done inside of VizWin so that
@@ -76,23 +72,19 @@ void VizWin::closeEvent(QCloseEvent *e)
     // triggers OpenGL calls in the renderer destructors
     //
     makeCurrent();
-    _controlExec->RemoveVisualizer(_winName);
 
-    // Tell the winmgr that we are closing:
-    _vizWinMgr->vizAboutToDisappear(_winName);
+    emit Closing(_winName);
+
     QWidget::closeEvent(e);
 }
+
 /******************************************************
  * React when focus is on window:
  ******************************************************/
 void VizWin::focusInEvent(QFocusEvent *e)
 {
     // Test for hidden here, since a vanishing window can get this event.
-    if (e->gotFocus() && !isHidden()) {
-        GUIStateParams *p = _mainForm->GetStateParams();
-        string          winName = p->GetActiveVizName();
-        if (winName != _winName) { _vizWinMgr->setActiveViz(_winName); }
-    }
+    if (e->gotFocus() && !isHidden()) { emit HasFocus(_winName); }
 }
 
 // First project all 8 box corners to the center line of the camera
@@ -120,7 +112,7 @@ void VizWin::getNearFarDist(const double posVec[3], const double dirVec[3], doub
     DataStatus *dataStatus = _controlExec->getDataStatus();
     ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
 
-    AnimationParams *p = _mainForm->GetAnimationParams();
+    AnimationParams *p = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = p->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
@@ -216,9 +208,11 @@ void VizWin::resizeGL(int width, int height)
 {
     if (!FrameBufferReady()) { return; }
 
-    int rc1 = printOpenGLErrorMsg("GLVizWindowResizeEvent");
+    int rc = printOpenGLErrorMsg("GLVizWindowResizeEvent");
+    if (rc < 0) { MSG_ERR("OpenGL error"); }
 
-    int rc2 = _controlExec->ResizeViz(_winName, width, height);
+    rc = _controlExec->ResizeViz(_winName, width, height);
+    if (rc < 0) { MSG_ERR("OpenGL error"); }
 
     glViewport(0, 0, (GLint)width, (GLint)height);
 
@@ -262,22 +256,6 @@ void VizWin::mousePressEventNavigate(QMouseEvent *e)
     // prepare for spin
     // Create a timer to use to measure how long between mouse moves:
     //
-    if (_spinTimer) delete _spinTimer;
-
-#ifdef DEAD
-    if (_buttonNum == 1) {
-        _spinTimer = new QTime();
-        _spinTimer->start();
-        _moveCount = 0;
-        _olderMoveTime = _latestMoveTime = 0;
-    }
-#endif
-
-#ifdef DEAD
-    NavigationEventRouter *vep = VizWinMgr::getInstance()->getViewpointRouter();
-    vep->captureMouseDown(_buttonNum);
-#endif
-
     _trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
 }
 
@@ -299,7 +277,9 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     if ((_buttonNum == 1) && ((e->modifiers() & (Qt::ControlModifier | Qt::MetaModifier)))) { _buttonNum = 0; }
     if (_buttonNum == 0) return;
 
-    MouseModeParams *p = _mainForm->GetStateParams()->GetMouseModeParams();
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
     string           modeName = p->GetCurrentMouseMode();
 
     if (modeName == MouseModeParams::GetNavigateModeName()) {
@@ -405,41 +385,6 @@ void VizWin::mouseReleaseEventNavigate(QMouseEvent *e)
 {
     _trackBall->MouseOnTrackball(2, _buttonNum, e->x(), e->y(), width(), height());
 
-#ifdef DEAD
-    setMouseDown(false);
-    // If it's a right mouse being released, must update near/far distances:
-    if (e->button() == Qt::RightButton) {
-        //			_vizWinMgr->resetViews(
-        //			_controlExec->GetViewpointParams(_windowNum));
-    }
-#endif
-    // Decide whether or not to start a spin animation
-    bool doSpin = (_buttonNum == 1 && _spinTimer);
-
-    // Determine if the motion is sufficient to start a spin animation.
-    // Require that some time has elapsed since the last move event, and,
-    // to allow users to stop spin by holding mouse steady, make sure that
-    // the time from the last move event is no more than 6 times the
-    // difference between the last two move times.
-    if (doSpin) {
-        int latestTime = _spinTimer->elapsed();
-
-        if (_moveDist > 3 && _moveCount > 0 && (latestTime - _latestMoveTime) < 6 * (_latestMoveTime - _olderMoveTime)) {
-            //				_visualizer->startSpin(latestTime/_moveCount);
-        } else {
-            doSpin = false;
-        }
-#ifdef DEAD
-        if (!doSpin) {
-            // terminate current mouse motion
-            _vizWinMgr->getEventRouter(NavigationEventRouter::GetClassType())->captureMouseUp();
-        }
-
-        // Force redisplay of tab and visualizer
-        _vizWinMgr->getEventRouter(NavigationEventRouter::GetClassType())->updateTab();
-#endif
-    }
-
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->EndSaveStateGroup();
 }
@@ -452,8 +397,11 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e)
 {
     if (_buttonNum == 0) return;
 
-    MouseModeParams *p = _mainForm->GetStateParams()->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
+
+    string modeName = p->GetCurrentMouseMode();
 
     if (modeName == MouseModeParams::GetNavigateModeName()) {
         mouseReleaseEventNavigate(e);
@@ -481,43 +429,10 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e)
     }
 #endif
 
-#ifdef DEAD
-    if (_mouseClicked) {
-        // there was just a click in the window, with no mouse move
-        reallyUpdate();
-        _mouseClicked = false;
-    } else {
-        paintGL();
-    }
-#endif
     _buttonNum = 0;
 }
 
-void VizWin::mouseMoveEventNavigate(QMouseEvent *e)
-{
-#ifdef DEAD
-    if (_spinTimer) {
-        _moveCount++;
-        if (_moveCount > 0) {    // find distance from last move event...
-            _moveDist = abs(_moveCoords[0] - e->x()) + abs(_moveCoords[1] - e->y());
-        }
-        _moveCoords[0] = e->x();
-        _moveCoords[1] = e->y();
-        int latestTime = _spinTimer->elapsed();
-        _olderMoveTime = _latestMoveTime;
-        _latestMoveTime = latestTime;
-    }
-
-#endif
-
-    _trackBall->MouseOnTrackball(1, _buttonNum, e->x(), e->y(), width(), height());
-
-    // Note that the coords have changed in the trackball:
-#ifdef DEAD
-    _visualizer->SetTrackballCoordsChanged(true);
-    VizWinParams::SetVizDirty(_windowNum);
-#endif
-}
+void VizWin::mouseMoveEventNavigate(QMouseEvent *e) { _trackBall->MouseOnTrackball(1, _buttonNum, e->x(), e->y(), width(), height()); }
 
 /*
  * When the mouse is moved, it can affect navigation,
@@ -538,8 +453,11 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
 {
     if (_buttonNum == 0) return;
 
-    MouseModeParams *p = _mainForm->GetStateParams()->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
+
+    string modeName = p->GetCurrentMouseMode();
 
     if (modeName == MouseModeParams::GetNavigateModeName()) {
         mouseMoveEventNavigate(e);
@@ -575,19 +493,10 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
         }
     }
 #endif
-
-#ifdef DEAD
-    paintGL();
-#endif
     return;
 }
 
-void VizWin::setFocus()
-{
-    // qWarning("Setting Focus in win %d", _windowNum);
-    //??QMainWindow::setFocus();
-    QWidget::setFocus();
-}
+void VizWin::setFocus() { QWidget::setFocus(); }
 
 void VizWin::paintGL()
 {
@@ -629,7 +538,7 @@ void VizWin::paintGL()
         return;
     }
 
-#ifdef DEAD
+#ifdef DEBUG1
     double m[16];
     cout << "Projection matrix: " << endl;
     glGetDoublev(GL_PROJECTION_MATRIX, m);

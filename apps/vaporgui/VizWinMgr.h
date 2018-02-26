@@ -165,18 +165,10 @@ public:
     //! This method includes a line for each built-in tab.
     void createAllDefaultTabs();
 
-    //! Method that responds to user destruction of a visualizer.
-    //! Relevant params, renderers, etc. are removed.
-    void vizAboutToDisappear(string winName);
-
     //! Method to delete a visualizer under program control, e.g. if
     //! the user performs Undo after creating a visualizer
     //! \param[in] viznum Visualizer index.
     void removeVisualizer(string vizName);
-
-    //! Set a Visualizer to be the active (selected) Visualizer
-    //! \param[in] vizNum index of Visualizer to be activated.
-    void setActiveViz(string winName);
 
     string GetActiveVizName() const;
 
@@ -227,7 +219,18 @@ public slots:
     //! state of the Params for the active window.
     void UpdateRouters();
 
-///@}
+    ///@}
+
+private slots:
+
+    //! Set a Visualizer to be the active (selected) Visualizer
+    //! \param[in] vizNum index of Visualizer to be activated.
+    void setActiveViz(string winName);
+
+    //! Method that responds to user destruction of a visualizer.
+    //! Relevant params, renderers, etc. are removed.
+    void vizAboutToDisappear(string winName);
+
 #ifndef DOXYGEN_SKIP_THIS
 signals:
     // Turn on/off multiple viz options:
