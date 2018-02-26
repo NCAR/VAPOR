@@ -660,7 +660,8 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
         if (nodes.size() < 3)
             continue; // degenerate
 
-        // Compute triangle node indices
+        // Compute triangle node indices, with common vertex at
+        // nodes[0]
         //
         for (int i = 0; i < nodes.size() - 2; i++) {
             indices[index++] = LinearizeCoords(nodes[0], dims);
