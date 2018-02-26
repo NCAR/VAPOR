@@ -20,6 +20,7 @@ namespace VAPoR {
 }
 
 class GLBarbImageWindow;
+class VizWinMgr;
 
 //!
 //! \class BarbEventRouter
