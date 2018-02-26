@@ -53,7 +53,7 @@ void TwoDDataParams::_init() {
 
     // Only 2D variables supported. Override base class
     //
-    vector<string> varnames = _dataMgr->GetDataVarNames(2, true);
+    vector<string> varnames = _dataMgr->GetDataVarNames(2);
     string varname;
 
     if (!varnames.empty())

@@ -36,7 +36,7 @@ namespace VAPoR {
 //! returned by GetDimensions().
 //!
 //! \param coords A vector of floating point values with size given by
-//! GetTopologyDim() containig the coordinates of a point in user-defined
+//! GetGeometryDim() containig the coordinates of a point in user-defined
 //! coordinates.
 //!
 //
@@ -88,13 +88,16 @@ class VDF_API Grid {
         return (_dims);
     }
 
-    //! Return number of coordinates per grid point.
+    //! Get geometric dimension of cells
     //!
-    //! This method returns the number of coordinates per grid point. For
-    //! grids with 3D topological cells the number is 3. For 2D topological
-    //! cells the number is either 2 or 3
+    //! Returns the geometric dimension of the cells in the mesh. I.e.
+    //! the number of spatial spatial coordinates for each grid point.
+    //! Valid values are 0..3. The geometric dimension must be equal to
+    //! or greater than the topology dimension.
+    //!
+    //! \sa GetTopologyDim()
     //
-    virtual size_t GetNumCoordinates() const = 0;
+    virtual size_t GetGeometryDim() const = 0;
 
     virtual const std::vector<size_t> &GetNodeDimensions() const = 0;
     virtual const std::vector<size_t> &GetCellDimensions() const = 0;
@@ -459,7 +462,52 @@ class VDF_API Grid {
         const std::vector<size_t> &indices,
         std::vector<std::vector<size_t>> &cells) const = 0;
 
+    //! Clamp periodic coordinates and ensure valid coordinate vector dimension
+    //!
+    //! This method ensures that periodic coordinates are within the bounding
+    //! box of the grid and that the coordinate vector dimension does not
+    //! exceed the number of allowable coordinates as returned by
+    //! GetGeometryDim().
+    //!
+    //! \param[in,out] coords A coordinate vector
+    //! \sa GetGeometryDim()
+    //
     virtual void ClampCoord(std::vector<double> &coords) const = 0;
+
+    //! Clamp grid array indices
+    //!
+    //! This method ensures that grid indices are not out of bounds and
+    //! that the \p indices vector lengh does not exceed the number
+    //! of available dimensions as returned by GetDimensions().
+    //!
+    //! \param[in,out] indices An array index vector
+    //! \sa GetNodeDimensions()
+    //
+    virtual void ClampIndex(std::vector<size_t> &indices) const {
+        const std::vector<size_t> &dims = GetNodeDimensions();
+        while (indices.size() > dims.size()) {
+            indices.pop_back();
+        }
+        assert(indices.size() == dims.size());
+        for (int i = 0; i < indices.size(); i++) {
+            if (indices[i] >= dims[i]) {
+                indices[i] = dims[i] - 1;
+            }
+        }
+    }
+
+    virtual void ClampCellIndex(std::vector<size_t> &indices) const {
+        const std::vector<size_t> &dims = GetCellDimensions();
+        while (indices.size() > dims.size()) {
+            indices.pop_back();
+        }
+        assert(indices.size() == dims.size());
+        for (int i = 0; i < indices.size(); i++) {
+            if (indices[i] >= dims[i] - 1) {
+                indices[i] = dims[i] - 2;
+            }
+        }
+    }
 
     //! Set periodic boundaries
     //!
@@ -467,16 +515,16 @@ class VDF_API Grid {
     //! by the class constructor
     //!
     //! \param[in] periodic A boolean vector of size given by
-    //! GetTopologyDim() indicating
+    //! GetGeometryDim() indicating
     //! which coordinate axes are periodic.
     //
     virtual void SetPeriodic(const std::vector<bool> &periodic) {
         _periodic.clear();
         int i = 0;
-        for (; i < periodic.size() && i < GetNumCoordinates(); i++) {
+        for (; i < periodic.size() && i < GetGeometryDim(); i++) {
             _periodic.push_back(periodic[i]);
         }
-        for (; i < GetNumCoordinates(); i++) {
+        for (; i < GetGeometryDim(); i++) {
             _periodic.push_back(false);
         }
     }
@@ -488,11 +536,14 @@ class VDF_API Grid {
         return (_periodic);
     }
 
-    //! Return the topological dimension of the grid
+    //! Get topological dimension of the mesh
     //!
-    //! This method returns the number of topological dimensions, 2 or 3.
-    //! The topological dimension determines the number of coordinates
-    //! needed to describe the position of each node
+    //! Return the number of topological dimensions for the mesh cells. Valid
+    //! values are in the range 0..3, with, for example, 0 corresponding
+    //! to points; 1 to lines; 2 to triangles, quadrilaterals, etc.; and
+    //! 3 to hexahedron, tetrahedron, etc.
+    //!
+    //! \sa GetGeometryDim()
     //
     virtual size_t GetTopologyDim() const {
         return (_topologyDimension);
