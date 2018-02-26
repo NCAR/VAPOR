@@ -21,7 +21,6 @@
 
 #include <GL/glew.h>
 #include <QGLWidget>
-#include "VizWinMgr.h"
 #include "vapor/Visualizer.h"
 #include <QWheelEvent>
 
@@ -30,11 +29,13 @@ class QRect;
 class QMouseEvent;
 class QFocusEvent;
 
-class MainForm;
-class VizWinMgr;
 class Visualizer;
 class Viewpoint;
 class Trackball;
+
+namespace VAPoR {
+class ControlExec;
+};
 
 //! \class VizWin
 //! \ingroup Public_GUI
@@ -53,8 +54,8 @@ class VizWin : public QGLWidget {
 
   public:
     VizWin(
-        MainForm *parent, const QString &name, VizWinMgr *myMgr,
-        QRect *location, string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
+        QWidget *parent, const QString &name,
+        string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
     ~VizWin();
 
     //! Identify the visualizer index
@@ -69,19 +70,21 @@ class VizWin : public QGLWidget {
         const double upvec[3], const double centerRot[3],
         bool perspective);
 
-#ifndef DOXYGEN_SKIP_THIS
+  signals:
+    // Sent prior to closing window - after receiving Qt closeEvent()
+    //
+    void Closing(const string &winName);
+
+    // Sent when window gains focus - after receiving Qt focusInEvent()
+    //
+    void HasFocus(const string &winName);
+
   public slots:
     virtual void setFocus();
 
   private:
     VizWin() {}
 
-    MainForm *_mainForm;
-
-    virtual QSize minimumSizeHint() const { return QSize(400, 400); }
-
-    QPoint _mouseDownPosition;
-    bool _mouseDownHere;
     //Event handling
     //Virtual overrides:
     virtual void wheelEvent(QWheelEvent *e) {
@@ -102,22 +105,12 @@ class VizWin : public QGLWidget {
     virtual void resizeGL(int width, int height);
     virtual void initializeGL();
     void paintGL();
-    bool mouseIsDown() { return _mouseDownHere; }
 
     string _winName;
-    VizWinMgr *_vizWinMgr;
     VAPoR::ControlExec *_controlExec;
-    //Variables to control spin animation:
-    QTime *_spinTimer;
 
-    int _moveCount;          //number of mouse move events since mouse press
-    int _moveCoords[2];      //position at last move event during rotation navigation
-    int _moveDist;           //Distance between last two mouse move events
-    int _latestMoveTime;     //most recent time of move
-    int _olderMoveTime;      //time of move before the latest
-    bool _mouseClicked;      //Indicates mouse has been clicked but not move
-    double _strHandleMid[3]; //Stretched coordinates of middle of selected handle
-    int _buttonNum;          // currently pressed button (0=none, 1=left,2=mid, 3=right)
+    bool _mouseClicked; //Indicates mouse has been clicked but not move
+    int _buttonNum;     // currently pressed button (0=none, 1=left,2=mid, 3=right)
     Trackball *_trackBall;
 
     void getNearFarDist(
@@ -126,8 +119,6 @@ class VizWin : public QGLWidget {
 
     void setUpProjMatrix();
     void setUpModelViewMatrix();
-
-#endif //DOXYGEN_SKIP_THIS
 };
 
 #endif // VIZWIN_H
