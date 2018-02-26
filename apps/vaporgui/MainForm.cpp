@@ -187,10 +187,10 @@ MainForm::MainForm(
     myParams.push_back(StartupParams::GetClassType());
     myParams.push_back(AnimationParams::GetClassType());
     myParams.push_back(MiscParams::GetClassType());
-    myParams.push_back(PlotParams::GetClassType());
 
     vector<string> myRenParams;
     myRenParams.push_back(StatisticsParams::GetClassType());
+    myRenParams.push_back(PlotParams::GetClassType());
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
     //
@@ -1907,9 +1907,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
             _stats->Update();
         }
         if (_plot) {
-            PlotParams *params;
-            params = (PlotParams *)paramsMgr->GetParams("PlotParams");
-            _plot->Update(params);
+            _plot->Update();
         }
 
         _vizWinMgr->UpdateRouters();
@@ -2146,9 +2144,14 @@ void MainForm::launchStats() {
 }
 
 void MainForm::launchPlotUtility() {
-    if (!_plot)
-        _plot = new Plot(this);
-    _plot->Initialize(_controlExec, _vizWinMgr);
+    if (!_plot) {
+        assert(_controlExec->getDataStatus());
+        assert(_controlExec->GetParamsMgr());
+        _plot = new Plot(_controlExec->getDataStatus(), _controlExec->GetParamsMgr(), this);
+    } else {
+        _plot->show();
+        _plot->activateWindow();
+    }
 }
 
 //Begin capturing animation images.
