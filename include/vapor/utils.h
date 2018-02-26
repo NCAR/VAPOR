@@ -89,6 +89,29 @@ COMMON_API std::vector <size_t> VectorizeCoords(
 	size_t offset, const std::vector <size_t> &dims
 );
 
+//
+// blocked submatrix Transpose suitable for multithreading
+//   *a : pointer to input matrix
+//   *b : pointer to output matrix
+//    p1,p2: starting index of submatrix (row,col)
+//    m1,m2: size of submatrix (row,col)
+//    s1,s2: size of entire matrix (row,col)
+//
+void Transpose(
+	const float *a,float *b,int p1,int m1,int s1,int p2,int m2,int s2
+);
+
+//
+// blocked matrix Transpose single threaded
+//   *a : pointer to input matrix
+//   *b : pointer to output matrix
+//    s1,s2: size of entire matrix (row,col)
+//
+void Transpose(const float *a,float *b,int s1,int s2);
+
+
+
+
 };
 
 #endif

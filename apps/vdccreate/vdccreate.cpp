@@ -221,7 +221,9 @@ int	main(int argc, char **argv) {
 	}
 
 	size_t chunksize = 1024*1024*4;
-	int rc = vdc.Initialize(master, vector <string> (), VDC::W, chunksize);
+	int rc = vdc.Initialize(
+		master, vector <string> (), VDC::W, opt.bs, chunksize
+	);
 	if (rc<0) exit(1);
 
 	vector <string> dimnames;
@@ -236,29 +238,14 @@ int	main(int argc, char **argv) {
 	dimlens.push_back(opt.dim.nz);
 	dimlens.push_back(opt.numts);
 
-	vector <size_t> bs(1,1);
 	vector <size_t> cratios(1,1);
-//	bs.push_back(opt.bs[0]);
-	rc = vdc.SetCompressionBlock(bs, "", cratios);
+	rc = vdc.SetCompressionBlock("", cratios);
 	rc = vdc.DefineDimension(dimnames[0], dimlens[0], 0);
-
-	
-//	bs.clear();
-//	bs.push_back(opt.bs[1]);
-	rc = vdc.SetCompressionBlock(bs, "", cratios);
 	rc = vdc.DefineDimension(dimnames[1], dimlens[1], 1);
-
-//	bs.clear();
-//	bs.push_back(opt.bs[2]);
-	rc = vdc.SetCompressionBlock(bs, "", cratios);
 	rc = vdc.DefineDimension(dimnames[2], dimlens[2], 2);
-
-//	bs.clear();
-	rc = vdc.SetCompressionBlock(bs, "", cratios);
 	rc = vdc.DefineDimension(dimnames[3], dimlens[3], 3);
 
-	bs = opt.bs;
-	rc = vdc.SetCompressionBlock(opt.bs, opt.wname, opt.cratios);
+	rc = vdc.SetCompressionBlock(opt.wname, opt.cratios);
 	if (rc<0) exit(1);
 
 	for (int i=0; i<opt.vars3d.size(); i++) {
@@ -289,7 +276,7 @@ int	main(int argc, char **argv) {
         cratios2D[i] = c;
     }
 
-	rc = vdc.SetCompressionBlock(opt.bs, opt.wname, cratios2D);
+	rc = vdc.SetCompressionBlock(opt.wname, cratios2D);
 	if (rc<0) exit(1);
 
 	for (int i=0; i<opt.vars2dxy.size(); i++) {

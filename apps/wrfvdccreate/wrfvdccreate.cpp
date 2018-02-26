@@ -72,18 +72,7 @@ string ProgName;
 
 void defineMapProjection(const DCWRF	&dcwrf, VDCNetCDF &vdc) {
 
-	string proj4string;
-	for (int d=2; d<4 && proj4string.empty(); d++) {
-		vector <string> varnames = dcwrf.DC::GetDataVarNames(d, true);
-		
-		for (int i=0; i<varnames.size(); i++) {
-			string proj4string = dcwrf.GetMapProjection(varnames[i]);
-			if (! proj4string.empty()) {
-				vdc.SetMapProjection(proj4string);
-				break;
-			}
-		}
-	}
+	vdc.SetMapProjection(dcwrf.GetMapProjection());
 }
 
 int	main(int argc, char **argv) {
@@ -135,7 +124,9 @@ int	main(int argc, char **argv) {
 	}
 
 	size_t chunksize = 1024*1024*4;
-	int rc = vdc.Initialize(master, vector <string> (), VDC::W, chunksize);
+	int rc = vdc.Initialize(
+		master, vector <string> (), VDC::W, opt.bs, chunksize
+	);
 	if (rc<0) exit(1);
 
 	DCWRF	dcwrf;
@@ -154,64 +145,44 @@ int	main(int argc, char **argv) {
 		}
 	}
 
-	// Make the default block dimension 64 for any missing dimensions
-	//
-	vector <size_t> bs = opt.bs;
-	for (int i=bs.size(); i<3; i++) bs.push_back(64);
-
 	//
 	// Define coordinate variables
 	//
-	for (int d=0; d<4; d++) {
-		vector <string> coordnames = dcwrf.DC::GetCoordVarNames(d, true);
+	vector <string> coordnames = dcwrf.GetCoordVarNames();
+	vector <size_t> cratios(1,1);
 
-		//
-		// Time coordinate and 1D coordinates are not blocked. Not sure
-		// if this is really needed
-		//
-		vector <size_t> mybs;
-		if (d < 2) {
-			mybs.clear();
-		}
-		else {
-			mybs = opt.bs;
-		}
+	for (int i=0; i<coordnames.size(); i++) {
+		DC::CoordVar cvar;
+		dcwrf.GetCoordVarInfo(coordnames[i], cvar);
 
-		vector <size_t> cratios(1,1);
+        vector <string> sdimnames;
+        string time_dimname;
+		bool ok = dcwrf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
+		assert(ok);
 
-		rc = vdc.SetCompressionBlock(mybs, opt.wname, cratios);
+		rc = vdc.SetCompressionBlock(opt.wname, cratios);
 		if (rc<0) exit(1);
 
-		for (int i=0; i<coordnames.size(); i++) {
-			DC::CoordVar cvar;
-			dcwrf.GetCoordVarInfo(coordnames[i], cvar);
+		if (cvar.GetUniform()) {
+			rc = vdc.DefineCoordVarUniform(
+				cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(), 
+				cvar.GetAxis(), cvar.GetXType(), false
+			);
+		}
+		else {
+			rc = vdc.DefineCoordVar(
+				cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(), 
+				cvar.GetAxis(), cvar.GetXType(), false
+			);
+		}
 
-			vector <string> dimnames; 
-			bool ok = dcwrf.GetVarDimNames(coordnames[i], false, dimnames);
-			assert(ok);
+		if (rc<0) {
+			exit(1);
+		}
 
-			string time_dim_name;
-			if (dcwrf.IsTimeVarying(coordnames[i])) {
-				time_dim_name = dimnames.back();
-				dimnames.pop_back();
-			}
-	
-			if (cvar.GetUniform()) {
-				rc = vdc.DefineCoordVarUniform(
-					cvar.GetName(), dimnames, time_dim_name, cvar.GetUnits(), 
-					cvar.GetAxis(), cvar.GetXType(), false
-				);
-			}
-			else {
-				rc = vdc.DefineCoordVar(
-					cvar.GetName(), dimnames, time_dim_name, cvar.GetUnits(), 
-					cvar.GetAxis(), cvar.GetXType(), false
-				);
-			}
-
-			if (rc<0) {
-				exit(1);
-			}
+		rc = vdc.CopyAtt(dcwrf, cvar.GetName());
+		if (rc<0) {
+			return(1);
 		}
 	}
 
@@ -221,22 +192,19 @@ int	main(int argc, char **argv) {
 	// Define data variables
 	//
 	for (int d=0; d<4; d++) {
-		vector <string> datanames = dcwrf.DC::GetDataVarNames(d, true);
+		vector <string> datanames = dcwrf.DC::GetDataVarNames(d);
 
 		//
-		// Time coordinate and 1D coordinates are not blocked
+		// 1D coordinates are not blocked
 		//
 		string mywname;
-		vector <size_t> mybs;
 		bool compress;
 		if (d < 2) {
 			mywname.clear();
-			mybs.clear();
 			compress = false;
 		}
 		else {
 			mywname = opt.wname;
-			mybs = opt.bs;
 			compress = true;
 		}
 
@@ -251,7 +219,7 @@ int	main(int argc, char **argv) {
 			cratios[i] = c;
 		}
 
-		rc = vdc.SetCompressionBlock(mybs, mywname, cratios);
+		rc = vdc.SetCompressionBlock(mywname, cratios);
 		if (rc<0) exit(1);
 
 		for (int i=0; i<datanames.size(); i++) {
@@ -274,26 +242,22 @@ int	main(int argc, char **argv) {
 			if (rc<0) {
 				exit(1);
 			}
+
+			rc = vdc.CopyAtt(dcwrf, dvar.GetName());
+			if (rc<0) {
+				return(1);
+			}
+
 		}
 	}
 
 	//
-	// Copy attributes
+	// Copy global attributes
 	//
 	{
-		vector<string> varnames = dcwrf.GetDataVarNames();
-		vector<string> coordnames = dcwrf.GetCoordVarNames();
-		string globalvarname = "";
-		vector<string> allnames;
-		allnames.insert(allnames.end(), varnames.begin(), varnames.end());
-		allnames.insert(allnames.end(), coordnames.begin(), coordnames.end());
-		allnames.push_back(globalvarname);
-
-		for (int i = 0; i < allnames.size(); i++) {
-			vector<string> attnames = dcwrf.GetAttNames(allnames[i]);
-			for (int j = 0; j < attnames.size(); j++) {
-				vdc.CopyAtt(dcwrf, allnames[i], attnames[j]);
-			}
+		vector<string> attnames = dcwrf.GetAttNames("");
+		for (int j = 0; j < attnames.size(); j++) {
+			vdc.CopyAtt(dcwrf, "", attnames[j]);
 		}
 	}
 
