@@ -195,7 +195,7 @@ public slots:
     void fitSpace();
 
     //! Respond to user request to activate a window:
-    void winActivated(const QString &vizName);
+    void SetWinActive(const QString &vizName);
 
     //! Close the VizWin associated with a Visualizer index
     void killViz(string vizName);
