@@ -347,7 +347,7 @@ void VizWinMgr::killViz(string vizName) {
 /*
  * Slot that responds to user setting of VizSelectCombo
  */
-void VizWinMgr::winActivated(const QString &qS) {
+void VizWinMgr::SetWinActive(const QString &qS) {
     string vizName = qS.toStdString();
     //Truly make specified visualizer active:
 
