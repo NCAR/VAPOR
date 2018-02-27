@@ -528,16 +528,16 @@ void MainForm::hookupSignals() {
         _vizWinMgr, SLOT(cascade()));
     connect(
         _windowSelector, SIGNAL(winActivated(const QString &)),
-        _vizWinMgr, SLOT(winActivated(const QString &)));
+        _vizWinMgr, SLOT(SetWinActive(const QString &)));
     connect(
         _vizWinMgr, SIGNAL(newViz(const QString &)),
-        _windowSelector, SLOT(addWindow(const QString &)));
+        _windowSelector, SLOT(AddWindow(const QString &)));
     connect(
         _vizWinMgr, SIGNAL(removeViz(const QString &)),
-        _windowSelector, SLOT(removeWindow(const QString &)));
+        _windowSelector, SLOT(RemoveWindow(const QString &)));
     connect(
         _vizWinMgr, SIGNAL(activateViz(const QString &)),
-        _windowSelector, SLOT(setWindowActive(const QString &)));
+        _windowSelector, SLOT(SetWindowActive(const QString &)));
     connect(
         _windowSelector, SIGNAL(newWin()),
         _vizWinMgr, SLOT(LaunchVisualizer()));
