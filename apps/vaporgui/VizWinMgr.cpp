@@ -142,11 +142,12 @@ void VizWinMgr::createAllDefaultTabs()
     er = new RegionEventRouter(NavigationTab, _controlExec);
     installTab(er->GetType(), 1, er);
 
+    er = new SettingsEventRouter(SettingsTab, _controlExec);
+    installTab(er->GetType(), 2, er);
+
     er = new StartupEventRouter(SettingsTab, _controlExec);
     installTab(er->GetType(), 2, er);
 
-    er = new SettingsEventRouter(SettingsTab, _controlExec);
-    installTab(er->GetType(), 2, er);
     //	er = new AppSettingsEventRouter(SettingsTab, _controlExec);
     //	installTab(er->GetType(), 2, er);
 
