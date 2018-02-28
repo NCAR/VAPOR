@@ -1024,6 +1024,8 @@ int Visualizer:: captureImage(string filename)
 	}
 	else 
     {
+		//m_paramsMgr->GetParams(StartupParams::GetClassType())
+		//int quality = vpParams->GetJpegQuality();
 		int quality = 95;
 		int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
 		if (rc){
