@@ -33,9 +33,11 @@
 #include <sstream>
 #include <iostream>
 #include <functional>
+#include <cmath>
 #include <QDesktopWidget>
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/CFuncs.h>
@@ -147,6 +149,7 @@ MainForm::MainForm(
     _interactiveRefinementSpin = 0;
     _modeStatusWidget = 0;
     _recentPath.clear();
+    _eventsSinceLastSave = 0;
 
     // For vertical screens, reverse aspect ratio for window size
     QSize screenSize = QDesktopWidget().availableGeometry().size();
@@ -206,7 +209,14 @@ MainForm::MainForm(
     //
     StartupParams *sP = GetStartupParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
-    _controlExec->SetNumThreads(sP->GetNumExecutionThreads());
+    _controlExec->SetNumThreads(sP->GetNumThreads());
+
+    bool lockSize = sP->GetWinSizeLock();
+    if (lockSize) {
+        size_t width, height;
+        sP->GetWinSize(width, height);
+        setFixedSize(QSize(width, height));
+    }
 
     //MappingFrame::SetControlExec(_controlExec);
     BoxSliderFrame::SetControlExec(_controlExec);
@@ -897,8 +907,8 @@ void MainForm::sessionOpen(QString qfileName) {
 }
 
 void MainForm::fileSave() {
-    GUIStateParams *p = GetStateParams();
-    string path = p->GetCurrentSessionPath();
+    StartupParams *sParams = GetStartupParams();
+    string path = sParams->GetSessionDir();
 
     if (path.empty()) {
         QString fileName = QFileDialog::getSaveFileName(
@@ -914,13 +924,13 @@ void MainForm::fileSave() {
         return;
     }
 
-    p->SetCurrentSessionPath(path);
+    sParams->SetSessionDir(path);
     _stateChangeFlag = false;
 }
 
 void MainForm::fileSaveAs() {
-    GUIStateParams *p = GetStateParams();
-    string path = p->GetCurrentSessionPath();
+    StartupParams *sParams = GetStartupParams();
+    string path = sParams->GetSessionDir();
 
     QString fileName = QFileDialog::getSaveFileName(
         this, tr("Save VAPOR session file"),
@@ -938,7 +948,7 @@ void MainForm::fileSaveAs() {
 
     // Save to use a default for fileSave()
     //
-    p->SetCurrentSessionPath(path);
+    sParams->SetSessionDir(path);
     _stateChangeFlag = false;
 }
 
@@ -953,12 +963,31 @@ void MainForm::closeEvent(QCloseEvent *) {
 }
 #endif
 
+void MainForm::_performSessionAutoSave() {
+    cout << "StartupParams not instantiated yet!" << endl;
+    return;
+    StartupParams *sParams = GetStartupParams();
+    if (!sParams)
+        return;
+
+    int eventCountForAutoSave = sParams->GetChangesPerAutoSave();
+    if (_eventsSinceLastSave == eventCountForAutoSave) {
+        string autoSaveFile = sParams->GetAutoSaveSessionFile();
+        _paramsMgr->SaveToFile(autoSaveFile);
+        _eventsSinceLastSave = 0;
+    } else {
+        _eventsSinceLastSave++;
+    }
+}
+
 void MainForm::_stateChangeCB() {
 
     // Generate an application event whenever state changes
     //
     ParamsChangeEvent *event = new ParamsChangeEvent();
     QApplication::postEvent(this, event);
+
+    _performSessionAutoSave();
 }
 
 void MainForm::undoRedoHelper(bool undo) {
@@ -1113,7 +1142,9 @@ void MainForm::loadDataHelper(
             string lastData = dataSetNames[dataSetNames.size() - 1];
             defaultPath = p->GetOpenDataSetPaths(lastData)[0];
         } else {
-            defaultPath = _recentPath;
+            StartupParams *sP = GetStartupParams();
+            defaultPath = sP->GetMetadataDir();
+            //defaultPath = _recentPath;
         }
 
         myFiles = myGetOpenFileNames(
@@ -1174,6 +1205,60 @@ void MainForm::loadDataHelper(
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
 }
 
+void MainForm::performAutoStretching() {
+    GUIStateParams *p = GetStateParams();
+    DataStatus *ds = _controlExec->GetDataStatus();
+    vector<string> dataSets = p->GetOpenDataSetNames();
+    vector<string> winNames = _paramsMgr->GetVisualizerNames();
+    vector<double> minExt, maxExt;
+    vector<int> axes;
+    AnimationParams *aParams = GetAnimationParams();
+    size_t timestep = aParams->GetCurrentTimestep();
+
+    for (int i = 0; i < dataSets.size(); i++) {
+        for (int i = 0; i < winNames.size(); i++) {
+            double xRange, yRange, zRange;
+
+            DataMgr *dm = ds->GetDataMgr(dataSets[i]);
+            std::vector<string> varNames = dm->GetDataVarNames(3, true);
+
+            if (varNames.empty())
+                continue;
+
+            //			ds->GetExtents(_paramsMgr, winNames[i], dataSets[i], timestep,
+            //				minExt, maxExt
+            //			);
+
+            DataMgrUtils::GetExtents(dm, timestep, varNames, minExt, maxExt,
+                                     axes);
+
+            if (minExt.size() < 3)
+                return;
+
+            xRange = maxExt[0] - minExt[0];
+            yRange = maxExt[1] - minExt[1];
+            zRange = maxExt[2] - minExt[2];
+
+            double hypotenuse = sqrt(xRange * xRange + yRange * yRange);
+            double scale = (hypotenuse / 2.f) / zRange;
+
+            cout << dataSets[i] << " " << winNames[i] << endl;
+            cout << maxExt.size() << " " << maxExt[2] << " " << minExt[2] << endl;
+            cout << "  " << xRange << endl;
+            cout << "  " << yRange << endl;
+            cout << "  " << zRange << endl;
+            cout << "  " << hypotenuse << endl;
+            cout << "  " << scale << endl;
+
+            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+            Transform *transform = vpParams->GetTransform(dataSets[i]);
+            std::vector<double> scales = transform->GetScales();
+            scales[2] = scale;
+            transform->SetScales(scales);
+        }
+    }
+}
+
 //Load data into current session
 //If current session is at default then same as loadDefaultData
 //
@@ -1187,6 +1272,11 @@ void MainForm::loadData(string fileName) {
     loadDataHelper(
         files, "Choose the Master data File to load",
         "Vapor VDC files (*.*)", "vdc", false);
+
+    StartupParams *sP = GetStartupParams();
+    bool autoStretchingEnabled = sP->GetAutoStretch();
+    if (autoStretchingEnabled)
+        performAutoStretching();
 }
 
 void MainForm::closeData(string fileName) {
@@ -2064,8 +2154,10 @@ void MainForm::enableAnimationWidgets(bool on) {
 //
 void MainForm::captureSingleJpeg() {
     showCitationReminder();
-    GUIStateParams *p = GetStateParams();
-    string imageDir = p->GetCurrentImageSavePath();
+    StartupParams *sP = GetStartupParams();
+    string imageDir = sP->GetImageDir();
+    if (imageDir == "")
+        imageDir = sP->GetDefaultImageDir();
 
     QFileDialog fileDialog(this,
                            "Specify single image capture file name",
@@ -2093,9 +2185,11 @@ void MainForm::captureSingleJpeg() {
     string filepath = fileInfo->absoluteFilePath().toStdString();
 
     //Save the path for future captures
-    p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
+    //p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
+    sP->SetImageDir(filepath);
 
     //Turn on "image capture mode" in the current active visualizer
+    GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
     _controlExec->EnableImageCapture(filepath, vizName);
 }
@@ -2154,8 +2248,11 @@ void MainForm::launchPlotUtility() {
 //Then start file saving mode.
 void MainForm::startAnimCapture() {
     showCitationReminder();
-    GUIStateParams *p = GetStateParams();
-    string imageDir = p->GetCurrentImageSavePath();
+    StartupParams *sP = GetStartupParams();
+    string imageDir = sP->GetImageDir();
+    if (imageDir == "")
+        imageDir = sP->GetDefaultImageDir();
+
     QFileDialog fileDialog(this,
                            "Specify first file name for image capture sequence",
                            imageDir.c_str(),
@@ -2177,7 +2274,7 @@ void MainForm::startAnimCapture() {
     if (suffix != "jpg" && suffix != "jpeg")
         suffix = "jpeg";
     //Save the path for future captures
-    p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
+    sP->SetImageDir(fileInfo->absolutePath().toStdString());
 
     QString fileBaseName = fileInfo->baseName();
     //See if it ends with digits.  If not, append them
@@ -2219,6 +2316,7 @@ void MainForm::startAnimCapture() {
     filePath += suffix;
     string fpath = filePath.toStdString();
     //Turn on "image capture mode" in the current active visualizer
+    GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
     _controlExec->EnableAnimationCapture(vizName, true, fpath);
     _capturingAnimationVizName = vizName;
