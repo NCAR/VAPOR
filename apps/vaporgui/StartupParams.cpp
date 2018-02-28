@@ -64,6 +64,8 @@ const string StartupParams::_jpegQualityTag = "JpegImageQuality";
 const string StartupParams::_changesPerAutoSaveTag = "ChangesPerAutoSave";
 const string StartupParams::_autoSaveFileLocationTag = "AutoSaveFileLocation";
 const string StartupParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
+const string StartupParams::_fontFileTag = "FontFile";
+const string StartupParams::_fontSizeTag = "FontSize";
 
 //
 // Register class with object factory!!!
@@ -71,8 +73,9 @@ const string StartupParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 static ParamsRegistrar<StartupParams> registrar(StartupParams::GetClassType());
 
 namespace {
-string StartupFile = ".vapor3_startup";
-}
+//string StartupFile = ".vapor3_startup";
+string StartupFile = ".vapor3_settings";
+} // namespace
 
 StartupParams::StartupParams(
     ParamsBase::StateSave *ssave) : ParamsBase(ssave, _classType) {
@@ -80,8 +83,6 @@ StartupParams::StartupParams(
     _startupPath = QDir::homePath().toStdString();
     _startupPath += QDir::separator().toAscii();
     _startupPath += StartupFile;
-
-    cout << "StartupParams Constructor" << endl;
 
     // Try to get startup params from .startup file
     //
@@ -392,6 +393,19 @@ int StartupParams::GetNumThreads() const {
 
 void StartupParams::SetNumThreads(int val) {
     SetValueLong(_numThreadsTag, "Number of execution threads", val);
+}
+
+int StartupParams::GetFontSize() const {
+    //	return (int)GetValueDouble(_fontSizeTag,
+}
+
+void StartupParams::SetFontSize(int size) {
+}
+
+string StartupParams::GetFontFile() const {
+}
+
+void StartupParams::SetFontFile(string file) {
 }
 
 void StartupParams::SetFidelityDefault3D(long lodDef, long refDef) {
