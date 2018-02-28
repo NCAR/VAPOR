@@ -26,6 +26,7 @@
 #include <QSlider>
 #include "vapor/ControlExecutive.h"
 #include "GUIStateParams.h"
+#include "StartupParams.h"
 #include "AnimationParams.h"
 #include "MiscParams.h"
 

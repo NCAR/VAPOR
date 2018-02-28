@@ -155,6 +155,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+    void performAutoStretching();
+
 #if 0
  QWidgetAction* createTextSeparator(const QString& text);
 #endif
@@ -178,9 +180,11 @@ private:
         static QEvent::Type _customEventType;
     };
 
+    void _performSessionAutoSave();
     void _stateChangeCB();
     bool _stateChangeFlag;
     bool _sessionNewFlag;
+    int  _eventsSinceLastSave;
 
     // Set the various widgets in the main window consistent with latest
     // params settings:

@@ -39,25 +39,31 @@ const string StartupParams::_classType = "StartupParams";
 
 const string StartupParams::_shortName = "Startup";
 const string StartupParams::_cacheMBTag = "CacheMBs";
+const string StartupParams::_numThreadsTag = "NumThreads";
 const string StartupParams::_texSizeTag = "TexSize";
 const string StartupParams::_texSizeEnableTag = "TexSizeEnabled";
 const string StartupParams::_winSizeTag = "WinSize";
 const string StartupParams::_winSizeLockTag = "WinSizeLocked";
 const string StartupParams::_sessionDirTag = "SessionDir";
+const string StartupParams::_defaultSessionDirTag = "SessionDir";
 const string StartupParams::_metadataDirTag = "MetadataDir";
+const string StartupParams::_defaultMetadataDirTag = "MetadataDir";
 const string StartupParams::_imageDirTag = "ImageDir";
+const string StartupParams::_defaultImageDirTag = "ImageDir";
 const string StartupParams::_tfDirTag = "TFDir";
+const string StartupParams::_defaultTfDirTag = "TFDir";
 const string StartupParams::_flowDirTag = "FlowDir";
+const string StartupParams::_defaultFlowDirTag = "FlowDir";
 const string StartupParams::_pythonDirTag = "PythonDir";
+const string StartupParams::_defaultPythonDirTag = "PythonDir";
 const string StartupParams::_currentPrefsPathTag = "CurrentPrefsPath";
 const string StartupParams::_fidelityDefault2DTag = "Fidelity2DDefault";
 const string StartupParams::_fidelityDefault3DTag = "Fidelity3DDefault";
 const string StartupParams::_autoStretchTag = "AutoStretch";
-const string StartupParams::_numExecutionThreads = "NumExecutionThreads";
 const string StartupParams::_jpegQualityTag = "JpegImageQuality";
-const string StartupParams::_autoSaveSessionTag = "AutoSaveSession";
 const string StartupParams::_changesPerAutoSaveTag = "ChangesPerAutoSave";
-const string StartupParams::_autoSaveFileLocation = "AutoSaveFileLocation";
+const string StartupParams::_autoSaveFileLocationTag = "AutoSaveFileLocation";
+const string StartupParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 
 //
 // Register class with object factory!!!
@@ -74,6 +80,8 @@ StartupParams::StartupParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, _
     _startupPath += QDir::separator().toAscii();
     _startupPath += StartupFile;
 
+    cout << "StartupParams Constructor" << endl;
+
     // Try to get startup params from .startup file
     //
     bool ok = _loadFromStartupFile();
@@ -82,13 +90,18 @@ StartupParams::StartupParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, _
     _init();
 }
 
-StartupParams::StartupParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
+StartupParams::StartupParams(ParamsBase::StateSave *ssave, XmlNode *node) : StartupParams(ssave) {}
+
+/*StartupParams::StartupParams(
+    ParamsBase::StateSave *ssave, XmlNode *node
+) : ParamsBase(ssave, node)
 {
     // If node isn't tagged correctly we correct the tag and reinitialize
     // from scratch;
     //
     if (node->GetTag() != StartupParams::GetClassType()) {
         node->SetTag(StartupParams::GetClassType());
+
 
         // Try to get startup params from .startup file
         //
@@ -97,27 +110,11 @@ StartupParams::StartupParams(ParamsBase::StateSave *ssave, XmlNode *node) : Para
 
         _init();
     }
-}
+}*/
 
 void StartupParams::Reinit() { _init(); }
 
 StartupParams::~StartupParams() {}
-
-bool StartupParams::GetAutoStretch() const { return (0 != GetValueLong(_autoStretchTag, (long)false)); }
-
-void StartupParams::SetAutoStretch(bool val) { SetValueLong(_autoStretchTag, "Enable Auto Stretch", val); }
-
-int StartupParams::GetJpegQuality() const
-{
-    int quality = (int)GetValueDouble(_jpegQualityTag, 100.f);
-    return quality;
-}
-
-void StartupParams::SetJpegQuality(int quality)
-{
-    string description = "Specify the quality of JPEG screen captures";
-    SetValueDouble(_jpegQualityTag, description, quality);
-}
 
 long StartupParams::GetCacheMB() const
 {
@@ -153,59 +150,190 @@ void StartupParams::SetWinSizeLock(bool val) { SetValueLong(_winSizeLockTag, "to
 
 bool StartupParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSizeLockTag, (long)false)); }
 
+bool StartupParams::GetAutoStretch() const { return (0 != GetValueLong(_autoStretchTag, (long)false)); }
+
+void StartupParams::SetAutoStretch(bool val) { SetValueLong(_autoStretchTag, "Enable Auto Stretch", val); }
+
+int StartupParams::GetJpegQuality() const
+{
+    int quality = (int)GetValueDouble(_jpegQualityTag, 100.f);
+    return quality;
+}
+
+void StartupParams::SetJpegQuality(int quality)
+{
+    string description = "Specify the quality of JPEG screen captures";
+    SetValueDouble(_jpegQualityTag, description, quality);
+}
+
+bool StartupParams::GetSessionAutoSaveEnabled() const
+{
+    double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
+    if (enabled < 0)
+        return true;
+    else
+        return false;
+}
+
+void StartupParams::SetSessionAutoSaveEnabled(bool enabled)
+{
+    double val = 0.f;
+    if (enabled) val = 1.f;
+    string description = "Enable/disable auto save of session files";
+    SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
+}
+
+int StartupParams::GetChangesPerAutoSave() const
+{
+    int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
+    return changes;
+}
+
+void StartupParams::SetChangesPerAutoSave(int count)
+{
+    if (count < 0) count = 5;
+    string description = "User changes before auto saving session file";
+    SetValueDouble(_changesPerAutoSaveTag, description, count);
+}
+
+string StartupParams::GetAutoSaveSessionFile() const
+{
+    string defaultDir = string("VaporAutoSave.vss");
+    string file = GetValueString(_autoSaveFileLocationTag, defaultDir);
+    return file;
+}
+
+void StartupParams::SetAutoSaveSessionFile(string file)
+{
+    string description = "Session auto-save file location";
+    SetValueString(_autoSaveFileLocationTag, description, file);
+}
+
 string StartupParams::GetSessionDir() const
 {
-    string dir = GetValueString(_sessionDirTag, string("."));
+    string defaultDir = GetDefaultSessionDir();
+    string dir = GetValueString(_sessionDirTag, defaultDir);
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetSessionDir(string name) { SetValueString(_sessionDirTag, "set session directory", name); }
+void StartupParams::SetSessionDir(string name) { SetValueString(_sessionDirTag, "Set session directory", name); }
+
+string StartupParams::GetDefaultSessionDir() const
+{
+    string dir = GetValueString(_defaultSessionDirTag, string("."));
+    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    return (dir);
+}
+
+void StartupParams::SetDefaultSessionDir(string name)
+{
+    string description = "Set default session directory";
+    SetValueString(_defaultSessionDirTag, description, name);
+}
 
 string StartupParams::GetMetadataDir() const
 {
-    string dir = GetValueString(_metadataDirTag, string("."));
+    string defaultDir = GetDefaultMetadataDir();
+    string dir = GetValueString(_metadataDirTag, defaultDir);
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
 void StartupParams::SetMetadataDir(string dir) { SetValueString(_metadataDirTag, "set metadata directory", dir); }
 
+string StartupParams::GetDefaultMetadataDir() const
+{
+    string dir = GetValueString(_defaultMetadataDirTag, string("."));
+    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    return (dir);
+}
+
+void StartupParams::SetDefaultMetadataDir(string dir)
+{
+    string description = "set default metadata directory";
+    SetValueString(_defaultMetadataDirTag, description, dir);
+}
+
 string StartupParams::GetImageDir() const
 {
-    string dir = GetValueString(_imageDirTag, string("."));
+    string defaultDir = GetDefaultImageDir();
+    string dir = GetValueString(_imageDirTag, defaultDir);
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
 void StartupParams::SetImageDir(string dir) { SetValueString(_imageDirTag, "set image directory", dir); }
 
+string StartupParams::GetDefaultImageDir() const
+{
+    string dir = GetValueString(_defaultImageDirTag, string("."));
+    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    return (dir);
+}
+
+void StartupParams::SetDefaultImageDir(string dir) { SetValueString(_defaultImageDirTag, "Set default image directory", dir); }
+
 string StartupParams::GetTFDir() const
 {
-    string dir = GetValueString(_tfDirTag, string("."));
+    string defaultDir = GetDefaultTFDir();
+    string dir = GetValueString(_tfDirTag, defaultDir);
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
 void StartupParams::SetTFDir(string dir) { SetValueString(_tfDirTag, "set trans function directory", dir); }
 
+string StartupParams::GetDefaultTFDir() const
+{
+    string dir = GetValueString(_defaultTfDirTag, string(""));
+    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    return (dir);
+}
+
+void StartupParams::SetDefaultTFDir(string dir)
+{
+    string description = "set default trans function directory";
+    SetValueString(_defaultTfDirTag, description, dir);
+}
+
 string StartupParams::GetFlowDir() const
 {
-    string dir = GetValueString(_flowDirTag, string("."));
+    string defaultDir = GetDefaultFlowDir();
+    string dir = GetValueString(_flowDirTag, defaultDir);
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
 void StartupParams::SetFlowDir(string dir) { SetValueString(_flowDirTag, "set flow save directory", dir); }
 
+string StartupParams::GetDefaultFlowDir() const
+{
+    string dir = GetValueString(_defaultFlowDirTag, string("."));
+    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    return (dir);
+}
+
+void StartupParams::SetDefaultFlowDir(string dir) { SetValueString(_defaultFlowDirTag, "set default flow save directory", dir); }
+
 string StartupParams::GetPythonDir() const
 {
-    string dir = GetValueString(_pythonDirTag, string("."));
+    string defaultDir = GetDefaultPythonDir();
+    string dir = GetValueString(_pythonDirTag, defaultDir);
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
 void StartupParams::SetPythonDir(string dir) { SetValueString(_pythonDirTag, "set python directory", dir); }
+
+string StartupParams::GetDefaultPythonDir() const
+{
+    string dir = GetValueString(_defaultPythonDirTag, string("."));
+    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    return (dir);
+}
+
+void StartupParams::SetDefaultPythonDir(string dir) { SetValueString(_defaultPythonDirTag, "set default python directory", dir); }
 
 string StartupParams::GetCurrentPrefsPath() const
 {
@@ -215,14 +343,14 @@ string StartupParams::GetCurrentPrefsPath() const
 
 void StartupParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPrefsPathTag, "set current preference path", pth); }
 
-size_t StartupParams::GetNumExecutionThreads() const
+int StartupParams::GetNumThreads() const
 {
-    long val = GetValueLong(_numExecutionThreads, 0);
+    long val = GetValueLong(_numThreadsTag, 0);
     if (val < 0) val = 0;
-    return ((size_t)val);
+    return ((int)val);
 }
 
-void StartupParams::SetNumExecutionThreads(size_t val) { SetValueLong(_numExecutionThreads, "Number of execution threads", 0); }
+void StartupParams::SetNumThreads(int val) { SetValueLong(_numThreadsTag, "Number of execution threads", val); }
 
 void StartupParams::SetFidelityDefault3D(long lodDef, long refDef)
 {
@@ -262,6 +390,8 @@ int StartupParams::SaveStartup() const
     ofstream fileout;
     string   s;
 
+    cout << "StartupParams::SaveStartup " << _startupPath << endl;
+
     fileout.open(_startupPath.c_str());
     if (!fileout) {
         MyBase::SetErrMsg("Unable to open output startup file \"_startupPath.c_str()\" : %M");
@@ -282,32 +412,32 @@ int StartupParams::SaveStartup() const
 // Reset startup settings to initial state
 void StartupParams::_init()
 {
-    SetAutoStretch(false);
-    SetCacheMB(2000);
-    SetTextureSize(0);
-    SetTexSizeEnable(false);
-    SetWinSizeLock(false);
-    SetWinSize(1028, 1024);
+    //	SetAutoStretch(false);
+    //	SetCacheMB(2000);
+    //	SetTextureSize(0);
+    //	SetTexSizeEnable(false);
+    //	SetWinSizeLock(false);
+    //	SetWinSize(1028, 1024);
 
-    SetSessionDir(string("~"));
-    SetMetadataDir(string("~"));
-    SetImageDir(string("~"));
-    SetFlowDir(string("~"));
+    SetDefaultSessionDir(string("~"));
+    SetDefaultMetadataDir(string("~"));
+    SetDefaultImageDir(string("~"));
+    SetDefaultFlowDir(string("~"));
 
-    SetFidelityDefault3D(4., 4.);
-    SetFidelityDefault2D(2., 2.);
+    //	SetFidelityDefault3D(4.,4.);
+    //	SetFidelityDefault2D(2.,2.);
 
     vector<string> ppaths = {"palettes"};
     string         palettes = GetAppPath("VAPOR", "share", ppaths);
-    SetTFDir(string(palettes));
+    SetDefaultTFDir(string(palettes));
 
     vector<string> ipaths = {"images"};
     string         images = GetAppPath("VAPOR", "share", ipaths);
-    SetImageDir(string(images));
+    SetDefaultImageDir(string(images));
 
     vector<string> pypaths = {"python"};
     string         python = GetAppPath("VAPOR", "share", pypaths);
-    SetPythonDir(string(python));
+    SetDefaultPythonDir(string(python));
 }
 
 void StartupParams::SetWinSize(size_t width, size_t height)
