@@ -108,8 +108,11 @@ public:
  string GetDefaultPythonDir() const;
  void SetDefaultPythonDir(string dir);
 
+ int GetFontSize() const;
+ void SetFontSize(int size);
 
-
+ string GetFontFile() const;
+ void SetFontFile(string file);
 
  string GetCurrentPrefsPath() const;
  void SetCurrentPrefsPath(string pth);
@@ -156,6 +159,8 @@ private:
  static const string _changesPerAutoSaveTag;
  static const string _autoSaveFileLocationTag;
  static const string _sessionAutoSaveEnabledTag;
+ static const string _fontFileTag;
+ static const string _fontSizeTag;
 
  void _init();
  bool _loadFromStartupFile();
