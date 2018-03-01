@@ -66,7 +66,6 @@ public:
  }
  string GetType() const {return GetClassType(); }
 
-	virtual void confirmText() {};
 	virtual void _confirmText() {};
 	
 protected slots:
@@ -82,8 +81,6 @@ protected slots:
 	void setYTicOrientation(int);
 	void setZTicOrientation(int);
 	
-	void setVizFeatureTextChanged(const QString& qs);
-	void vizfeatureReturnPressed();
 	void setDomainColor();
 	void setRegionColor();
 	void setBackgroundColor();
