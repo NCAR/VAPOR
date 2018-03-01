@@ -478,14 +478,3 @@ void AnimationEventRouter::enableWidgets(bool on)
 
     _widgetsEnabled = on;
 }
-
-#ifdef DEAD
-// Set change bits when global/local change occurs, so that the animation
-// controller will change the local/global status at the end of the next rendering.
-void AnimationEventRouter::SetLocal(ParamsBase *p, bool lg)
-{
-    EventRouter::SetLocal(p, lg);
-    VizWin *viz = VizWinMgr::getInstance()->getActiveVizWin();
-    viz->updateGL();
-}
-#endif

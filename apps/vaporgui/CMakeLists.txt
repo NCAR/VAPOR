@@ -18,7 +18,6 @@ set (SRCS
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp
-	regioneventrouter.cpp
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
 	RangeController.cpp
@@ -80,7 +79,6 @@ set (SRCS
 set (UIS 
 	animationTab.ui
 	NavigationTab.ui
-	regionTab.ui
 	boxframe.ui
 	startupTab.ui
 	appSettingsTab.ui
