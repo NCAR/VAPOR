@@ -144,24 +144,6 @@ void VizFeatureEventRouter::hookUpTab() {
     connect(
         axisArrowCheckbox, SIGNAL(clicked()),
         this, SLOT(setUseAxisArrows()));
-    connect(
-        arrowXEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(
-        arrowYEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(
-        arrowZEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(setVizFeatureTextChanged(const QString &)));
-    connect(
-        arrowXEdit, SIGNAL(returnPressed()),
-        this, SLOT(vizfeatureReturnPressed()));
-    connect(
-        arrowYEdit, SIGNAL(returnPressed()),
-        this, SLOT(vizfeatureReturnPressed()));
-    connect(
-        arrowZEdit, SIGNAL(returnPressed()),
-        this, SLOT(vizfeatureReturnPressed()));
 
     connect(
         timeCombo, SIGNAL(activated(int)),
@@ -189,17 +171,6 @@ void VizFeatureEventRouter::GetWebHelp(
         "http://www.vapor.ucar.edu/docs/vapor-gui-help/vizfeature-tab#VizFeatureOverview"));
 }
 
-/*********************************************************************************
- * Slots associated with VizFeatureTab:
- *********************************************************************************/
-
-void VizFeatureEventRouter::
-    setVizFeatureTextChanged(const QString &) {
-    SetTextChanged(true);
-}
-
-//Insert values from params into tab panel
-//
 void VizFeatureEventRouter::_updateTab() {
     updateRegionColor();
     updateDomainColor();
@@ -221,10 +192,6 @@ void VizFeatureEventRouter::_updateTab() {
     axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
 
     return;
-}
-
-void VizFeatureEventRouter::vizfeatureReturnPressed(void) {
-    confirmText();
 }
 
 void VizFeatureEventRouter::updateDataMgrCombo() {
