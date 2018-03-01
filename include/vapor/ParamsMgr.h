@@ -395,6 +395,7 @@ public:
  //! \sa ParamsMgr()
  //
  ParamsBase *GetParams(string classType) {
+	cout << "_otherParams->size() " << _otherParams->Size() << endl;
 	return(_otherParams->GetParams(classType));
  }
 

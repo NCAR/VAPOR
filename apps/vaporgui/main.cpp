@@ -27,6 +27,7 @@
 #include <QFontDatabase>
 #include "BannerGUI.h"
 #include "vapor/GetAppPath.h"
+//#include "StartupParams.h"
 #ifdef WIN32
 #include "Windows.h"
 #define PYTHONVERSION "2.6"
@@ -158,6 +159,9 @@ MyBase::SetErrMsgFilePtr(stderr);
 		files.push_back(argv[i]);
 	}
 	MainForm* mw = new MainForm(files,app);
+
+
+	//StartupParams* sParams = new StartupParams(0);
 	
     vector<string> fpath;
     fpath.push_back("fonts");

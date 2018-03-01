@@ -11,9 +11,7 @@ set (SRCS
 	ErrorReporter.cpp
 	Histo.cpp
 	ColorbarWidget.cpp
-	StartupEventRouter.cpp
 	SettingsEventRouter.cpp
-	AppSettingsEventRouter.cpp
 	VizSelectCombo.cpp
 	AnnotationsEventRouter.cpp
 	AnimationEventRouter.cpp
@@ -34,10 +32,9 @@ set (SRCS
 	BarbEventRouter.cpp
 	BannerGUI.cpp
 	AnimationParams.cpp
-	AppSettingsParams.cpp
 	GUIStateParams.cpp
 	MouseModeParams.cpp
-	StartupParams.cpp
+	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
 	VizWin.cpp
