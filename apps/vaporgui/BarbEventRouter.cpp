@@ -11,7 +11,6 @@
 #include <vector>
 #include <string>
 #include <vapor/MapperFunction.h>
-#include "VizWinMgr.h"
 #include "vapor/BarbParams.h"
 #include "VariablesWidget.h"
 #include "BarbEventRouter.h"
@@ -21,7 +20,7 @@
 using namespace VAPoR;
 
 BarbEventRouter::BarbEventRouter(
-	QWidget *parent, VizWinMgr *vizMgr, ControlExec *ce
+	QWidget *parent, ControlExec *ce
 ) : QTabWidget(parent),
 	RenderEventRouter(ce, BarbParams::GetClassType())
 {

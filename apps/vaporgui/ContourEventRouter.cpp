@@ -11,7 +11,6 @@
 #include <vector>
 #include <string>
 #include <vapor/MapperFunction.h>
-#include "VizWin.h"
 #include "vapor/ContourParams.h"
 #include "VariablesWidget.h"
 #include "ContourEventRouter.h"
@@ -21,7 +20,7 @@
 using namespace VAPoR;
 
 ContourEventRouter::ContourEventRouter(
-	QWidget *parent, VizWinMgr *vizMgr, ControlExec *ce
+	QWidget *parent, ControlExec *ce
 ) : QTabWidget(parent),
 	RenderEventRouter(ce, ContourParams::GetClassType())
 {
