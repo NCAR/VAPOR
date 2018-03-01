@@ -135,9 +135,6 @@ void AnnotationsEventRouter::hookUpTab() {
         domainFrameCheckbox, SIGNAL(clicked()),
         this, SLOT(setUseDomainFrame()));
     connect(
-        regionFrameCheckbox, SIGNAL(clicked()),
-        this, SLOT(setUseRegionFrame()));
-    connect(
         regionColorButton, SIGNAL(clicked()),
         this, SLOT(setRegionColor()));
     connect(
@@ -289,7 +286,6 @@ void AnnotationsEventRouter::_updateTab() {
     AnnotationsParams *vParams = (AnnotationsParams *)GetActiveParams();
 
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
-    regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
 
     // Axis arrows:
     //
@@ -1032,11 +1028,6 @@ void AnnotationsEventRouter::setLatLonAnnot(bool val) {
 void AnnotationsEventRouter::setUseDomainFrame() {
     AnnotationsParams *vfParams = (AnnotationsParams *)GetActiveParams();
     vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
-}
-
-void AnnotationsEventRouter::setUseRegionFrame() {
-    AnnotationsParams *vfParams = (AnnotationsParams *)GetActiveParams();
-    vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
 }
 
 void AnnotationsEventRouter::setAxisAnnotation(bool toggled) {
