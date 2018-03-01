@@ -60,7 +60,6 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     }
     string GetType() const { return GetClassType(); }
 
-    virtual void confirmText(){};
     virtual void _confirmText(){};
 
   protected slots:
@@ -76,8 +75,6 @@ class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public E
     void setYTicOrientation(int);
     void setZTicOrientation(int);
 
-    void setVizFeatureTextChanged(const QString &qs);
-    void vizfeatureReturnPressed();
     void setDomainColor();
     void setRegionColor();
     void setBackgroundColor();
