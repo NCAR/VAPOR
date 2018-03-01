@@ -79,7 +79,6 @@ protected slots:
     void setDomainColor();
     void setRegionColor();
     void setBackgroundColor();
-    void setUseRegionFrame();
     void setUseDomainFrame();
     void setTimeColor();
     void setLatLonAnnot(bool);

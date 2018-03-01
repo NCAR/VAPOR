@@ -6,17 +6,18 @@
 //									*
 //************************************************************************/
 //
-//	File:		StartupParams.cpp
+//	File:		SettingsParams.cpp
 //
-//	Author:		Alan Norton
+//	Author: Scott Pearse
+//			Alan Norton
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //
 //	Date:		June 2015
 //
-//	Description:	Implements the StartupParams class.
+//	Description:	Implements the SettingsParams class.
 //		This class supports parameters associted with the
-//		initial VAPOR startup settings
+//		initial VAPOR settings settings
 //
 #ifdef WIN32
     // Annoying unreferenced formal parameter warning
@@ -30,144 +31,145 @@
 #include <vector>
 #include <vapor/GetAppPath.h>
 
-#include "StartupParams.h"
+#include "SettingsParams.h"
 
 using namespace VAPoR;
 using namespace Wasp;
 
-const string StartupParams::_classType = "StartupParams";
+// const string SettingsParams::_classType = "SettingsParams";
+const string SettingsParams::_classType = "Settings";
 
-const string StartupParams::_shortName = "Startup";
-const string StartupParams::_cacheMBTag = "CacheMBs";
-const string StartupParams::_numThreadsTag = "NumThreads";
-const string StartupParams::_texSizeTag = "TexSize";
-const string StartupParams::_texSizeEnableTag = "TexSizeEnabled";
-const string StartupParams::_winSizeTag = "WinSize";
-const string StartupParams::_winSizeLockTag = "WinSizeLocked";
-const string StartupParams::_sessionDirTag = "SessionDir";
-const string StartupParams::_defaultSessionDirTag = "SessionDir";
-const string StartupParams::_metadataDirTag = "MetadataDir";
-const string StartupParams::_defaultMetadataDirTag = "MetadataDir";
-const string StartupParams::_imageDirTag = "ImageDir";
-const string StartupParams::_defaultImageDirTag = "ImageDir";
-const string StartupParams::_tfDirTag = "TFDir";
-const string StartupParams::_defaultTfDirTag = "TFDir";
-const string StartupParams::_flowDirTag = "FlowDir";
-const string StartupParams::_defaultFlowDirTag = "FlowDir";
-const string StartupParams::_pythonDirTag = "PythonDir";
-const string StartupParams::_defaultPythonDirTag = "PythonDir";
-const string StartupParams::_currentPrefsPathTag = "CurrentPrefsPath";
-const string StartupParams::_fidelityDefault2DTag = "Fidelity2DDefault";
-const string StartupParams::_fidelityDefault3DTag = "Fidelity3DDefault";
-const string StartupParams::_autoStretchTag = "AutoStretch";
-const string StartupParams::_jpegQualityTag = "JpegImageQuality";
-const string StartupParams::_changesPerAutoSaveTag = "ChangesPerAutoSave";
-const string StartupParams::_autoSaveFileLocationTag = "AutoSaveFileLocation";
-const string StartupParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
-const string StartupParams::_fontFileTag = "FontFile";
-const string StartupParams::_fontSizeTag = "FontSize";
+const string SettingsParams::_shortName = "Settings";
+const string SettingsParams::_cacheMBTag = "CacheMBs";
+const string SettingsParams::_numThreadsTag = "NumThreads";
+const string SettingsParams::_texSizeTag = "TexSize";
+const string SettingsParams::_texSizeEnableTag = "TexSizeEnabled";
+const string SettingsParams::_winSizeTag = "WinSize";
+const string SettingsParams::_winSizeLockTag = "WinSizeLocked";
+const string SettingsParams::_sessionDirTag = "SessionDir";
+const string SettingsParams::_defaultSessionDirTag = "SessionDir";
+const string SettingsParams::_metadataDirTag = "MetadataDir";
+const string SettingsParams::_defaultMetadataDirTag = "MetadataDir";
+const string SettingsParams::_imageDirTag = "ImageDir";
+const string SettingsParams::_defaultImageDirTag = "ImageDir";
+const string SettingsParams::_tfDirTag = "TFDir";
+const string SettingsParams::_defaultTfDirTag = "TFDir";
+const string SettingsParams::_flowDirTag = "FlowDir";
+const string SettingsParams::_defaultFlowDirTag = "FlowDir";
+const string SettingsParams::_pythonDirTag = "PythonDir";
+const string SettingsParams::_defaultPythonDirTag = "PythonDir";
+const string SettingsParams::_currentPrefsPathTag = "CurrentPrefsPath";
+const string SettingsParams::_fidelityDefault2DTag = "Fidelity2DDefault";
+const string SettingsParams::_fidelityDefault3DTag = "Fidelity3DDefault";
+const string SettingsParams::_autoStretchTag = "AutoStretch";
+const string SettingsParams::_jpegQualityTag = "JpegImageQuality";
+const string SettingsParams::_changesPerAutoSaveTag = "ChangesPerAutoSave";
+const string SettingsParams::_autoSaveFileLocationTag = "AutoSaveFileLocation";
+const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
+const string SettingsParams::_fontFileTag = "FontFile";
+const string SettingsParams::_fontSizeTag = "FontSize";
 
 //
 // Register class with object factory!!!
 //
-static ParamsRegistrar<StartupParams> registrar(StartupParams::GetClassType());
+static ParamsRegistrar<SettingsParams> registrar(SettingsParams::GetClassType());
 
 namespace {
-// string StartupFile = ".vapor3_startup";
-string StartupFile = ".vapor3_settings";
+// string SettingsFile = ".vapor3_startup";
+string SettingsFile = ".vapor3_settings";
 }    // namespace
 
-StartupParams::StartupParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, _classType)
+SettingsParams::SettingsParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, _classType)
 {
-    _startupPath = QDir::homePath().toStdString();
-    _startupPath += QDir::separator().toAscii();
-    _startupPath += StartupFile;
+    _settingsPath = QDir::homePath().toStdString();
+    _settingsPath += QDir::separator().toAscii();
+    _settingsPath += SettingsFile;
 
-    // Try to get startup params from .startup file
+    // Try to get settings params from .settings file
     //
-    bool ok = _loadFromStartupFile();
+    bool ok = _loadFromSettingsFile();
     if (ok) return;
 
     _init();
 }
 
-StartupParams::StartupParams(ParamsBase::StateSave *ssave, XmlNode *node) : StartupParams(ssave) {}
+SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : SettingsParams(ssave) {}
 
-/*StartupParams::StartupParams(
+/*SettingsParams::SettingsParams(
     ParamsBase::StateSave *ssave, XmlNode *node
 ) : ParamsBase(ssave, node)
 {
     // If node isn't tagged correctly we correct the tag and reinitialize
     // from scratch;
     //
-    if (node->GetTag() != StartupParams::GetClassType()) {
-        node->SetTag(StartupParams::GetClassType());
+    if (node->GetTag() != SettingsParams::GetClassType()) {
+        node->SetTag(SettingsParams::GetClassType());
 
 
-        // Try to get startup params from .startup file
+        // Try to get settings params from .settings file
         //
-        bool ok = _loadFromStartupFile();
+        bool ok = _loadFromSettingsFile();
         if (ok) return;
 
         _init();
     }
 }*/
 
-void StartupParams::Reinit() { _init(); }
+void SettingsParams::Reinit() { _init(); }
 
-StartupParams::~StartupParams() {}
+SettingsParams::~SettingsParams() {}
 
-long StartupParams::GetCacheMB() const
+long SettingsParams::GetCacheMB() const
 {
     long val = GetValueLong(_cacheMBTag, 1000);
     if (val < 0) val = 1000;
     return (val);
 }
 
-void StartupParams::SetCacheMB(long val)
+void SettingsParams::SetCacheMB(long val)
 {
     if (val < 0) val = 1000;
     SetValueLong(_cacheMBTag, "Set cache size", val);
 }
 
-long StartupParams::GetTextureSize() const
+long SettingsParams::GetTextureSize() const
 {
     long val = GetValueLong(_texSizeTag, 0);
     if (val < 0) val = 0;
     return (val);
 }
 
-void StartupParams::SetTextureSize(long val)
+void SettingsParams::SetTextureSize(long val)
 {
     if (val < 0) val = 0;
     SetValueLong(_texSizeTag, "Set graphic tex size", val);
 }
 
-void StartupParams::SetTexSizeEnable(bool val) { SetValueLong(_texSizeEnableTag, "toggle enable texture size", (long)val); }
+void SettingsParams::SetTexSizeEnable(bool val) { SetValueLong(_texSizeEnableTag, "toggle enable texture size", (long)val); }
 
-bool StartupParams::GetTexSizeEnable() const { return (0 != GetValueLong(_texSizeEnableTag, (long)0)); }
+bool SettingsParams::GetTexSizeEnable() const { return (0 != GetValueLong(_texSizeEnableTag, (long)0)); }
 
-void StartupParams::SetWinSizeLock(bool val) { SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val); }
+void SettingsParams::SetWinSizeLock(bool val) { SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val); }
 
-bool StartupParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSizeLockTag, (long)false)); }
+bool SettingsParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSizeLockTag, (long)false)); }
 
-bool StartupParams::GetAutoStretch() const { return (0 != GetValueLong(_autoStretchTag, (long)false)); }
+bool SettingsParams::GetAutoStretch() const { return (0 != GetValueLong(_autoStretchTag, (long)false)); }
 
-void StartupParams::SetAutoStretch(bool val) { SetValueLong(_autoStretchTag, "Enable Auto Stretch", val); }
+void SettingsParams::SetAutoStretch(bool val) { SetValueLong(_autoStretchTag, "Enable Auto Stretch", val); }
 
-int StartupParams::GetJpegQuality() const
+int SettingsParams::GetJpegQuality() const
 {
     int quality = (int)GetValueDouble(_jpegQualityTag, 100.f);
     return quality;
 }
 
-void StartupParams::SetJpegQuality(int quality)
+void SettingsParams::SetJpegQuality(int quality)
 {
     string description = "Specify the quality of JPEG screen captures";
     SetValueDouble(_jpegQualityTag, description, quality);
 }
 
-bool StartupParams::GetSessionAutoSaveEnabled() const
+bool SettingsParams::GetSessionAutoSaveEnabled() const
 {
     double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
     if (enabled < 0)
@@ -176,7 +178,7 @@ bool StartupParams::GetSessionAutoSaveEnabled() const
         return false;
 }
 
-void StartupParams::SetSessionAutoSaveEnabled(bool enabled)
+void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
     double val = 0.f;
     if (enabled) val = 1.f;
@@ -184,33 +186,33 @@ void StartupParams::SetSessionAutoSaveEnabled(bool enabled)
     SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
 }
 
-int StartupParams::GetChangesPerAutoSave() const
+int SettingsParams::GetChangesPerAutoSave() const
 {
     int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
     return changes;
 }
 
-void StartupParams::SetChangesPerAutoSave(int count)
+void SettingsParams::SetChangesPerAutoSave(int count)
 {
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
     SetValueDouble(_changesPerAutoSaveTag, description, count);
 }
 
-string StartupParams::GetAutoSaveSessionFile() const
+string SettingsParams::GetAutoSaveSessionFile() const
 {
     string defaultDir = string("VaporAutoSave.vss");
     string file = GetValueString(_autoSaveFileLocationTag, defaultDir);
     return file;
 }
 
-void StartupParams::SetAutoSaveSessionFile(string file)
+void SettingsParams::SetAutoSaveSessionFile(string file)
 {
     string description = "Session auto-save file location";
     SetValueString(_autoSaveFileLocationTag, description, file);
 }
 
-string StartupParams::GetSessionDir() const
+string SettingsParams::GetSessionDir() const
 {
     string defaultDir = GetDefaultSessionDir();
     string dir = GetValueString(_sessionDirTag, defaultDir);
@@ -218,22 +220,22 @@ string StartupParams::GetSessionDir() const
     return (dir);
 }
 
-void StartupParams::SetSessionDir(string name) { SetValueString(_sessionDirTag, "Set session directory", name); }
+void SettingsParams::SetSessionDir(string name) { SetValueString(_sessionDirTag, "Set session directory", name); }
 
-string StartupParams::GetDefaultSessionDir() const
+string SettingsParams::GetDefaultSessionDir() const
 {
     string dir = GetValueString(_defaultSessionDirTag, string("."));
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetDefaultSessionDir(string name)
+void SettingsParams::SetDefaultSessionDir(string name)
 {
     string description = "Set default session directory";
     SetValueString(_defaultSessionDirTag, description, name);
 }
 
-string StartupParams::GetMetadataDir() const
+string SettingsParams::GetMetadataDir() const
 {
     string defaultDir = GetDefaultMetadataDir();
     string dir = GetValueString(_metadataDirTag, defaultDir);
@@ -241,22 +243,22 @@ string StartupParams::GetMetadataDir() const
     return (dir);
 }
 
-void StartupParams::SetMetadataDir(string dir) { SetValueString(_metadataDirTag, "set metadata directory", dir); }
+void SettingsParams::SetMetadataDir(string dir) { SetValueString(_metadataDirTag, "set metadata directory", dir); }
 
-string StartupParams::GetDefaultMetadataDir() const
+string SettingsParams::GetDefaultMetadataDir() const
 {
     string dir = GetValueString(_defaultMetadataDirTag, string("."));
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetDefaultMetadataDir(string dir)
+void SettingsParams::SetDefaultMetadataDir(string dir)
 {
     string description = "set default metadata directory";
     SetValueString(_defaultMetadataDirTag, description, dir);
 }
 
-string StartupParams::GetImageDir() const
+string SettingsParams::GetImageDir() const
 {
     string defaultDir = GetDefaultImageDir();
     string dir = GetValueString(_imageDirTag, defaultDir);
@@ -264,18 +266,18 @@ string StartupParams::GetImageDir() const
     return (dir);
 }
 
-void StartupParams::SetImageDir(string dir) { SetValueString(_imageDirTag, "set image directory", dir); }
+void SettingsParams::SetImageDir(string dir) { SetValueString(_imageDirTag, "set image directory", dir); }
 
-string StartupParams::GetDefaultImageDir() const
+string SettingsParams::GetDefaultImageDir() const
 {
     string dir = GetValueString(_defaultImageDirTag, string("."));
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetDefaultImageDir(string dir) { SetValueString(_defaultImageDirTag, "Set default image directory", dir); }
+void SettingsParams::SetDefaultImageDir(string dir) { SetValueString(_defaultImageDirTag, "Set default image directory", dir); }
 
-string StartupParams::GetTFDir() const
+string SettingsParams::GetTFDir() const
 {
     string defaultDir = GetDefaultTFDir();
     string dir = GetValueString(_tfDirTag, defaultDir);
@@ -283,22 +285,22 @@ string StartupParams::GetTFDir() const
     return (dir);
 }
 
-void StartupParams::SetTFDir(string dir) { SetValueString(_tfDirTag, "set trans function directory", dir); }
+void SettingsParams::SetTFDir(string dir) { SetValueString(_tfDirTag, "set trans function directory", dir); }
 
-string StartupParams::GetDefaultTFDir() const
+string SettingsParams::GetDefaultTFDir() const
 {
     string dir = GetValueString(_defaultTfDirTag, string(""));
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetDefaultTFDir(string dir)
+void SettingsParams::SetDefaultTFDir(string dir)
 {
     string description = "set default trans function directory";
     SetValueString(_defaultTfDirTag, description, dir);
 }
 
-string StartupParams::GetFlowDir() const
+string SettingsParams::GetFlowDir() const
 {
     string defaultDir = GetDefaultFlowDir();
     string dir = GetValueString(_flowDirTag, defaultDir);
@@ -306,18 +308,18 @@ string StartupParams::GetFlowDir() const
     return (dir);
 }
 
-void StartupParams::SetFlowDir(string dir) { SetValueString(_flowDirTag, "set flow save directory", dir); }
+void SettingsParams::SetFlowDir(string dir) { SetValueString(_flowDirTag, "set flow save directory", dir); }
 
-string StartupParams::GetDefaultFlowDir() const
+string SettingsParams::GetDefaultFlowDir() const
 {
     string dir = GetValueString(_defaultFlowDirTag, string("."));
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetDefaultFlowDir(string dir) { SetValueString(_defaultFlowDirTag, "set default flow save directory", dir); }
+void SettingsParams::SetDefaultFlowDir(string dir) { SetValueString(_defaultFlowDirTag, "set default flow save directory", dir); }
 
-string StartupParams::GetPythonDir() const
+string SettingsParams::GetPythonDir() const
 {
     string defaultDir = GetDefaultPythonDir();
     string dir = GetValueString(_pythonDirTag, defaultDir);
@@ -325,46 +327,46 @@ string StartupParams::GetPythonDir() const
     return (dir);
 }
 
-void StartupParams::SetPythonDir(string dir) { SetValueString(_pythonDirTag, "set python directory", dir); }
+void SettingsParams::SetPythonDir(string dir) { SetValueString(_pythonDirTag, "set python directory", dir); }
 
-string StartupParams::GetDefaultPythonDir() const
+string SettingsParams::GetDefaultPythonDir() const
 {
     string dir = GetValueString(_defaultPythonDirTag, string("."));
     if (dir == "~") { dir = QDir::homePath().toStdString(); }
     return (dir);
 }
 
-void StartupParams::SetDefaultPythonDir(string dir) { SetValueString(_defaultPythonDirTag, "set default python directory", dir); }
+void SettingsParams::SetDefaultPythonDir(string dir) { SetValueString(_defaultPythonDirTag, "set default python directory", dir); }
 
-string StartupParams::GetCurrentPrefsPath() const
+string SettingsParams::GetCurrentPrefsPath() const
 {
     string defaultv = "/tmp/.vapor3_prefs";
     return GetValueString(_currentPrefsPathTag, defaultv);
 }
 
-void StartupParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPrefsPathTag, "set current preference path", pth); }
+void SettingsParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPrefsPathTag, "set current preference path", pth); }
 
-int StartupParams::GetNumThreads() const
+int SettingsParams::GetNumThreads() const
 {
     long val = GetValueLong(_numThreadsTag, 0);
     if (val < 0) val = 0;
     return ((int)val);
 }
 
-void StartupParams::SetNumThreads(int val) { SetValueLong(_numThreadsTag, "Number of execution threads", val); }
+void SettingsParams::SetNumThreads(int val) { SetValueLong(_numThreadsTag, "Number of execution threads", val); }
 
-int StartupParams::GetFontSize() const
+int SettingsParams::GetFontSize() const
 {
     //	return (int)GetValueDouble(_fontSizeTag,
 }
 
-void StartupParams::SetFontSize(int size) {}
+void SettingsParams::SetFontSize(int size) {}
 
-string StartupParams::GetFontFile() const {}
+string SettingsParams::GetFontFile() const {}
 
-void StartupParams::SetFontFile(string file) {}
+void SettingsParams::SetFontFile(string file) {}
 
-void StartupParams::SetFidelityDefault3D(long lodDef, long refDef)
+void SettingsParams::SetFidelityDefault3D(long lodDef, long refDef)
 {
     vector<long> val;
     val.push_back(lodDef);
@@ -372,7 +374,7 @@ void StartupParams::SetFidelityDefault3D(long lodDef, long refDef)
     SetValueLongVec(_fidelityDefault3DTag, "Set fidelity 3D default", val);
 }
 
-void StartupParams::SetFidelityDefault2D(long lodDef, long refDef)
+void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef)
 {
     vector<long> val;
     val.push_back(lodDef);
@@ -380,7 +382,7 @@ void StartupParams::SetFidelityDefault2D(long lodDef, long refDef)
     SetValueLongVec(_fidelityDefault2DTag, "Set fidelity 2D default", val);
 }
 
-bool StartupParams::_loadFromStartupFile()
+bool SettingsParams::_loadFromSettingsFile()
 {
     XmlNode *node = GetNode();
     assert(node != NULL);
@@ -389,7 +391,7 @@ bool StartupParams::_loadFromStartupFile()
     MyBase::EnableErrMsg(false);
 
     XmlParser xmlparser;
-    int       rc = xmlparser.LoadFromFile(node, _startupPath);
+    int       rc = xmlparser.LoadFromFile(node, _settingsPath);
     bool      status = rc >= 0;
 
     MyBase::EnableErrMsg(enabled);
@@ -397,23 +399,23 @@ bool StartupParams::_loadFromStartupFile()
     return (status);
 }
 
-int StartupParams::SaveStartup() const
+int SettingsParams::SaveSettings() const
 {
     ofstream fileout;
     string   s;
 
-    cout << "StartupParams::SaveStartup " << _startupPath << endl;
+    cout << "SettingsParams::SaveSettings " << _settingsPath << endl;
 
-    fileout.open(_startupPath.c_str());
+    fileout.open(_settingsPath.c_str());
     if (!fileout) {
-        MyBase::SetErrMsg("Unable to open output startup file \"_startupPath.c_str()\" : %M");
+        MyBase::SetErrMsg("Unable to open output settings file \"_settingsPath.c_str()\" : %M");
         return (-1);
     }
 
     const XmlNode *node = GetNode();
     XmlNode::streamOut(fileout, *node);
     if (fileout.bad()) {
-        MyBase::SetErrMsg("Unable to write output startup file \"_startupPath.c_str()\" : %M");
+        MyBase::SetErrMsg("Unable to write output settings file \"_settingsPath.c_str()\" : %M");
         return (-1);
     }
 
@@ -421,8 +423,8 @@ int StartupParams::SaveStartup() const
     return (0);
 }
 
-// Reset startup settings to initial state
-void StartupParams::_init()
+// Reset settings settings to initial state
+void SettingsParams::_init()
 {
     //	SetAutoStretch(false);
     //	SetCacheMB(2000);
@@ -452,7 +454,7 @@ void StartupParams::_init()
     SetDefaultPythonDir(string(python));
 }
 
-void StartupParams::SetWinSize(size_t width, size_t height)
+void SettingsParams::SetWinSize(size_t width, size_t height)
 {
     if (width < 400) width = 400;
     if (height < 400) height = 400;
@@ -463,7 +465,7 @@ void StartupParams::SetWinSize(size_t width, size_t height)
     SetValueLongVec(_winSizeTag, "Set window size", val);
 }
 
-void StartupParams::GetWinSize(size_t &width, size_t &height) const
+void SettingsParams::GetWinSize(size_t &width, size_t &height) const
 {
     vector<long> defaultv;
     defaultv.push_back(1280);

@@ -6,7 +6,7 @@
 //         *
 //************************************************************************/
 //
-// File:  StartupParams.h
+// File:  SettingsParams.h
 //
 // Authors:
 //   Scott Pearse
@@ -16,33 +16,33 @@
 //
 // Date:  February 2018
 //
-// Description: Defines the StartupParams class.
+// Description: Defines the SettingsParams class.
 //  This class supports parameters associted with the
-//  Startup panel, describing the startup settings of the app.
+//  Settings panel, describing the settings settings of the app.
 //
-#ifndef STARTUPPARAMS_H
-#define STARTUPPARAMS_H
+#ifndef SETTINGSPARAMS_H
+#define SETTINGSPARAMS_H
 
 #include <QDir>
 #include <vector>
 #include <vapor/ParamsBase.h>
 
-//! \class StartupParams
+//! \class SettingsParams
 //! \ingroup Public_Params
-//! \brief A class for describing settings at startup.
+//! \brief A class for describing settings at settings.
 //! \authors Scott Pearse, Alan Norton
 //! \version 3.0
 //! \date    February 2018
 
-//! The StartupParams class controls various features set when the application starts.
-//! There is only a global StartupParams, that
+//! The SettingsParams class controls various features set when the application starts.
+//! There is only a global SettingsParams, that
 //! is used throughout the application
 //!
-class StartupParams : public VAPoR::ParamsBase {
+class SettingsParams : public VAPoR::ParamsBase {
 public:
-    StartupParams(VAPoR::ParamsBase::StateSave *ssave);
-    StartupParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);
-    ~StartupParams();
+    SettingsParams(VAPoR::ParamsBase::StateSave *ssave);
+    SettingsParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);
+    ~SettingsParams();
 
     int  GetNumThreads() const;
     void SetNumThreads(int num);
@@ -122,7 +122,7 @@ public:
 
     static string GetClassType() { return (_classType); }
 
-    int SaveStartup() const;
+    int SaveSettings() const;
 
 private:
     static const string _classType;
@@ -157,9 +157,9 @@ private:
     static const string _fontSizeTag;
 
     void _init();
-    bool _loadFromStartupFile();
+    bool _loadFromSettingsFile();
 
-    string _startupPath;
+    string _settingsPath;
 };
 
-#endif    // STARTUPPARAMS_H
+#endif    // SETTINGS_H
