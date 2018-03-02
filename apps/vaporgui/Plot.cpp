@@ -146,9 +146,7 @@ void Plot::Update()
     dataMgrCombo->blockSignals(false);
 
     // Update "Add a Variable"
-    std::vector<std::string> availVars = currentDmgr->GetDataVarNames(2, true);
-    std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
-    for (int i = 0; i < availVars3D.size(); i++) availVars.push_back(availVars3D[i]);
+    std::vector<std::string> availVars = currentDmgr->GetDataVarNames();
     for (int i = 0; i < enabledVars.size(); i++)
         for (int rmIdx = 0; rmIdx < availVars.size(); rmIdx++)
             if (availVars[rmIdx] == enabledVars[i]) {
@@ -421,14 +419,11 @@ void Plot::_setInitialExtents()
     VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
 
     // Set spatial extents
-    std::vector<std::string> availVars = dataMgr->GetDataVarNames(2, true);
-    std::vector<std::string> availVars3D = dataMgr->GetDataVarNames(3, true);
-    for (int i = 0; i < availVars3D.size(); i++) availVars.push_back(availVars3D[i]);
-    std::vector<double> minFullExtents, maxFullExtents;
-    std::vector<int>    axes;
-    VAPoR::DataMgrUtils::GetExtents(dataMgr, 0, availVars3D, minFullExtents, maxFullExtents, axes);
-    int dimensionality = 3;
-    if (availVars3D.size() == 0) dimensionality = 2;
+    std::vector<std::string> availVars = dataMgr->GetDataVarNames();
+    std::vector<double>      minFullExtents, maxFullExtents;
+    std::vector<int>         axes;
+    VAPoR::DataMgrUtils::GetExtents(dataMgr, 0, availVars, minFullExtents, maxFullExtents, axes);
+    int dimensionality = axes.size();
 
     spaceTabP1->SetDimensionality(dimensionality);
     spaceTabP2->SetDimensionality(dimensionality);
