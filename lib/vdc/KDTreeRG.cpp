@@ -85,6 +85,7 @@ void KDTreeRG::Nearest(
     //
     struct kdres *result = kd_nearestf(_kdtree, posXY);
     size_t *offptr = (size_t *)kd_res_item(result, NULL);
+    kd_res_free(result);
 
     // De-serialize the linear offset and put it back in vector form
     //
