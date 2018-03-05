@@ -10,7 +10,7 @@
 using namespace std;
 using namespace VAPoR;
 
-KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg) : _points(xg, yg), _kdtree(2 /* dimension */, _points, nanoflann::KDTreeSingleIndexAdaptorParams(16 /* max leaf num */))
+KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg) : _points(xg, yg), _kdtree(2 /* dimension */, _points, nanoflann::KDTreeSingleIndexAdaptorParams(20 /* max leaf num */))
 {
     _dims = xg.GetDimensions();
     _kdtree.buildIndex();
@@ -20,12 +20,13 @@ KDTreeRG::~KDTreeRG() {}
 
 void KDTreeRG::Nearest(const vector<float> &coordu, vector<size_t> &coord) const
 {
-    float                                  posXY[2] = {coordu[0], coordu[1]};
+    assert(coordu.size() == 2);    // 3D case isn't supported yet
+
     size_t                                 ret_index;
     float                                  dist_sqr;
     nanoflann::KNNResultSet<float, size_t> resultSet(1);
     resultSet.init(&ret_index, &dist_sqr);
-    bool rt = _kdtree.findNeighbors(resultSet, posXY, nanoflann::SearchParams());
+    bool rt = _kdtree.findNeighbors(resultSet, coordu.data(), nanoflann::SearchParams());
     assert(rt);
 
     // De-serialize the linear offset and put it back in vector form
