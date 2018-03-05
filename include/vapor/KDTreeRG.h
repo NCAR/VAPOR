@@ -56,11 +56,7 @@ public:
  //!
  //! \sa KDTreeRG(const Grid, const Grid)
  //
- //KDTreeRG(
- //   const Grid &xg,
- //   const Grid &yg,
- //   const Grid &zg
- //);
+ //KDTreeRG( const Grid &xg, const Grid &yg, const Grid &zg );
 
  virtual ~KDTreeRG();
 
@@ -171,7 +167,8 @@ private:
     PointCloud2D        _points;
     KDTreeType          _kdtree;
     std::vector<size_t> _dims;
-};
+};  // end of class KDTreeRG.
+
 
 //! class KDTreeRGSubset
 //! \brief This class implements a k-d tree for a structured grid over 
