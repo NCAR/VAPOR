@@ -5,8 +5,6 @@
 #include <vector>
 #include <vapor/Grid.h>
 
-#include "nanoflann.hpp"
-
 struct kdtree;
 
 namespace VAPoR {
@@ -21,6 +19,8 @@ namespace VAPoR {
 //
 class VDF_API KDTreeRG {
 public:
+    KDTreeRG();
+
     //! Construct a 2D k-d tree for a structured grid
     //!
     //! Creates a 2D k-d space partitioning tree for a structured grid
@@ -55,8 +55,7 @@ public:
     //!
     //! \sa KDTreeRG(const Grid, const Grid)
     //
-    // KDTreeRG( const Grid &xg, const Grid &yg, const Grid &zg );
-
+    KDTreeRG(const Grid &xg, const Grid &yg, const Grid &zg);
     virtual ~KDTreeRG();
 
     //! Return indecies of nearest point
@@ -78,7 +77,7 @@ public:
     {
         std::vector<float> coordu_f;
         for (int i = 0; i < coordu.size(); i++) coordu_f.push_back(coordu[i]);
-        this->Nearest(coordu_f, index);
+        Nearest(coordu_f, index);
     }
 
     //! Returns the dimesionality of the structured grids passed to the
@@ -92,67 +91,10 @@ public:
     std::vector<size_t> GetDimensions() const { return (_dims); }
 
 private:
-    class PointCloud2D {
-    public:
-        // Constructor
-        PointCloud2D(const Grid &xg, const Grid &yg)
-        {
-            assert(xg.GetDimensions() == yg.GetDimensions());
-            assert(xg.GetDimensions().size() <= 2);
-
-            // number of elements
-            std::vector<size_t> dims = xg.GetDimensions();
-            size_t              nelem = 1;
-            for (int i = 0; i < dims.size(); i++) nelem *= dims[i];
-            this->X.resize(nelem);
-            this->Y.resize(nelem);
-
-            // Store the point coordinates in the k-d tree
-            Grid::ConstIterator xitr = xg.cbegin();
-            Grid::ConstIterator yitr = yg.cbegin();
-
-            float posXY[2];
-            for (size_t i = 0; i < nelem; ++i, ++xitr, ++yitr) {
-                this->X[i] = *xitr;
-                this->Y[i] = *yitr;
-            }
-        }    // end of the Constructor
-
-        // Must return the number of data points
-        inline size_t kdtree_get_point_count() const
-        {
-            assert(X.size() == Y.size());
-            return X.size();
-        }
-
-        // Returns the dim'th component of the idx'th point in the class:
-        // Since this is inlined and the "dim" argument is typically an immediate value, the
-        //  "if/else's" are actually solved at compile time.
-        inline float kdtree_get_pt(const size_t idx, int dim) const
-        {
-            if (dim == 0)
-                return X[idx];
-            else
-                return Y[idx];
-        }
-
-        // Optional bounding-box computation: return false to default to a standard bbox computation loop.
-        //   Return true if the BBOX was already computed by the class and returned in "bb"
-        //   so it can be avoided to redo it again.
-        //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
-        template<class BBOX> bool kdtree_get_bbox(BBOX & /* bb */) const { return false; }
-
-    private:
-        std::vector<float> X, Y;
-
-    };    // end of class PointCloud2D
-
-    typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<float, PointCloud2D>, PointCloud2D, 2 /* dimension */> KDTreeType;
-
-    PointCloud2D        _points;
-    KDTreeType          _kdtree;
+    kdtree *            _kdtree;
+    size_t *            _offsets;
     std::vector<size_t> _dims;
-};    // end of class KDTreeRG.
+};
 
 //! class KDTreeRGSubset
 //! \brief This class implements a k-d tree for a structured grid over

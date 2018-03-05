@@ -10,28 +10,79 @@
 using namespace std;
 using namespace VAPoR;
 
-KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg) : _points(xg, yg), _kdtree(2 /* dimension */, _points, nanoflann::KDTreeSingleIndexAdaptorParams(20 /* max leaf num */))
+KDTreeRG::KDTreeRG()
 {
-    _dims = xg.GetDimensions();
-    _kdtree.buildIndex();
+    _kdtree = NULL;
+    _offsets = NULL;
+    _dims.clear();
 }
 
-KDTreeRG::~KDTreeRG() {}
+KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg)
+{
+    assert(xg.GetDimensions() == yg.GetDimensions());
+    assert(xg.GetDimensions().size() <= 2);
+
+    _kdtree = NULL;
+    _offsets = NULL;
+    _dims.clear();
+
+    _dims = xg.GetDimensions();
+
+    // number of elements
+    //
+    size_t nelem = 1;
+    for (int i = 0; i < _dims.size(); i++) nelem *= _dims[i];
+
+    // Need to create serialized array of offsets for each grid point.
+    // The offsets are what gets stored in the k-d tree
+    //
+    _offsets = new size_t[nelem];
+    for (size_t i = 0; i < nelem; i++) { _offsets[i] = i; }
+
+    _kdtree = kd_create(2);
+
+    // Store the point coordinates and associated offsets in the k-d tree
+    //
+    Grid::ConstIterator xitr = xg.cbegin();
+    Grid::ConstIterator yitr = yg.cbegin();
+
+    float posXY[2];
+    for (size_t i = 0; i < nelem; ++i, ++xitr, ++yitr) {
+        posXY[0] = *xitr;
+        posXY[1] = *yitr;
+
+        kd_insertf(_kdtree, posXY, &_offsets[i]);
+    }
+}
+
+KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg, const Grid &zg)
+{
+    // Not implemented yet!
+    assert(0);
+}
+
+KDTreeRG::~KDTreeRG()
+{
+    if (_offsets) delete[] _offsets;
+    if (_kdtree) kd_free(_kdtree);
+}
 
 void KDTreeRG::Nearest(const vector<float> &coordu, vector<size_t> &coord) const
 {
-    assert(coordu.size() == 2);    // 3D case isn't supported yet
+    //	assert(coordu.size() == _dims.size());
+    coord.clear();
 
-    size_t                                 ret_index;
-    float                                  dist_sqr;
-    nanoflann::KNNResultSet<float, size_t> resultSet(1);
-    resultSet.init(&ret_index, &dist_sqr);
-    bool rt = _kdtree.findNeighbors(resultSet, coordu.data(), nanoflann::SearchParams());
-    assert(rt);
+    float posXY[] = {coordu[0], coordu[1]};
+
+    // Lookup offset of nearest point
+    //
+    struct kdres *result = kd_nearestf(_kdtree, posXY);
+    size_t *      offptr = (size_t *)kd_res_item(result, NULL);
+    kd_res_free(result);
 
     // De-serialize the linear offset and put it back in vector form
-    coord.clear();
-    coord = Wasp::VectorizeCoords(ret_index, _dims);
+    //
+    coord = Wasp::VectorizeCoords(*offptr, _dims);
 }
 
 KDTreeRGSubset::KDTreeRGSubset()
