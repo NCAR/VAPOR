@@ -123,10 +123,10 @@ void VDC_delete(VDC *p)
     delete p;
 }
 
+int VDC_InitializeDefaultBS(VDC *p, const char *path, int mode) { return VDC_Initialize(p, path, mode, NULL, 0); }
+
 int VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount)
 {
-    vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
-
     VDC_DEBUG_called();
     VDC::AccessMode am = VDC::R;
     if (mode == VDC_AccessMode_R)
@@ -137,7 +137,13 @@ int VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount)
         am = VDC::A;
 
     VAPoR::VDCNetCDF *pnc = (VAPoR::VDCNetCDF *)p;
-    int               ret = pnc->Initialize(string(path), vector<string>(), am, bs_v, 0);
+    int               ret;
+    if (bs != NULL && bsCount > 0) {
+        vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
+        ret = pnc->Initialize(string(path), vector<string>(), am, bs_v, 0);
+    } else {
+        ret = pnc->Initialize(string(path), vector<string>(), am);
+    }
     // pnc->SetFill(0x100); // Required to disable set_fill
     return ret;
 }

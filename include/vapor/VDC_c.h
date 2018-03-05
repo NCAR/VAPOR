@@ -80,7 +80,8 @@ int          VDCCoordVar_GetUniform(const VDCCoordVar *p);
 
 VDC *VDC_new();
 void VDC_delete(VDC *p);
-int  VDC_Initialize(VDC *p, const char *path, int mode);
+int  VDC_InitializeDefaultBS(VDC *p, const char *path, int mode);
+int  VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount);
 
 int  VDC_GetDimension(const VDC *p, const char *dimname, VDCDimension *dimension);
 void VDC_GetDimensionNames(const VDC *p, char ***names, int *count);
@@ -116,7 +117,7 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 
 // Write
 
-int VDC_SetCompressionBlock(VDC *p, const size_t *bs, int bsCount, const char *wname, const size_t *cratios, int cratiosCount);
+int VDC_SetCompressionBlock(VDC *p, const char *wname, const size_t *cratios, int cratiosCount);
 int VDC_DefineDimension(VDC *p, const char *dimname, size_t length);
 int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char **coordvars, size_t coordvarCount, const char *units, VDC_XType xtype, int compressed);
 int VDC_DefineCoordVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);
