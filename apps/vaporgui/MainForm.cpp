@@ -1954,9 +1954,9 @@ void MainForm::launchStats()
 void MainForm::launchPlotUtility()
 {
     if (!_plot) {
-        assert(_controlExec->getDataStatus());
+        assert(_controlExec->GetDataStatus());
         assert(_controlExec->GetParamsMgr());
-        _plot = new Plot(_controlExec->getDataStatus(), _controlExec->GetParamsMgr(), this);
+        _plot = new Plot(_controlExec->GetDataStatus(), _controlExec->GetParamsMgr(), this);
     } else {
         _plot->show();
         _plot->activateWindow();
