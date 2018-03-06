@@ -13,21 +13,21 @@ namespace VAPoR {
 //! \class DC
 //! \ingroup Public_VDC
 //!
-//! \brief Defines API for reading a collection of data.
+//! \brief A Template Method design pattern for reading a collection of data.
 //!
 //! \author John Clyne
 //! \date    January, 2015
 //!
-//! The abstract Data Collection (DC) class defines an API for 
+//! The Data Collection (DC) class defines an Template Method for 
 //! reading metadata and sampled
 //! data from a data collection.  A data collection is a set of 
 //! related data, most typically the discrete outputs from a single numerical
-//! simulation. The DC class is an abstract virtual
-//! class, providing a public API, but performing no actual storage 
-//! operations. Derived implementations of the DC base class are 
-//! required to support the API.
+//! simulation. The DC class is a Template Method: if provides an
+//! abstract interface for accessing a data collection, and a set of 
+//! protected pure virtual functions that must be implemented by 
+//! derived classes providing access to a particular file format.
 //!
-//! Variables in a DC may have 1, 2, or 3 spatial dimensions, and 0 or 1
+//! Variables in a DC may have 1, 2, or 3 topological dimensions, and 0 or 1
 //! temporal dimensions.
 //!
 //! The DC is structured in the spirit of the "NetCDF Climate and Forecast
@@ -37,12 +37,9 @@ namespace VAPoR {
 //! more restrictive than the CF in a number of areas. Particular
 //! items of note include:
 //!
-//! \li The API supports variables with 1 to 4 dimensions only. 
+//! \li The API supports variables with 0 to 3 topological dimensions only. 
 //!
 //! \li Coordinate variables representing time must be 1D
-//!
-//! \li Each dimension is associated with exactly one axis: \b X (or longitude)
-//! \b Y (or latitude), \b Z (height), and \b T (time)
 //!
 //! \li All data variables have a "coordinate" attribute identifying 
 //! the coordinate (or auxiliary coordinate) variables associated with
@@ -55,6 +52,9 @@ namespace VAPoR {
 //! 'dims' is a vector of dimensions, then dims[0] is the fastest varying
 //! dimension, dim[1] is the next fastest, and so on. This ordering is the
 //! opposite of the ordering used by NetCDF.
+//!
+//! \li The API supports unstructured grids and attempts to follow
+//! the UGRID conventions.
 //!
 //! This class inherits from Wasp::MyBase. Unless otherwise documented
 //! any method that returns an integer value is returning status. A negative
@@ -131,13 +131,13 @@ namespace VAPoR {
 //! method.
 //!
 //! \param bs An ordered list of block dimensions that specifies the
-//! block decomposition of the variable. The rank of \p bs may be less
+//! spatial block decomposition of the variable. The rank of \p bs may be less
 //! than that of a variable's array dimensions (or empty), in which case only
 //! the \b n fastest varying variable dimensions will be blocked, where
 //! \b n is the rank of \p bs. The ordering of the dimensions in \p bs
 //! is from fastest to slowest. A block is the basic unit of compression
 //! in the DC: variables are decomposed into blocks, and individual blocks
-//! are compressed independently.
+//! are compressed independently. Note, the time dimension is never blocked.
 //!
 //! \param wname Name of wavelet used for transforming compressed 
 //! variables between wavelet and physical space. Valid values
@@ -159,7 +159,7 @@ public:
  //! \brief Metadata describing a named dimension length
  //!
  //! Describes an array dimension with a name and an
- //! associated length. Dimension lengths may vary over time.
+ //! associated length. Dimension lengths may vary (e.g. over time).
  //!
  class Dimension {
  public:
@@ -174,9 +174,6 @@ public:
   //! \param[in] name The name of dimension
   //! \param[in] lengths A vector of dimension lengths. 
   //!
-  //! \version 3.1
-  //! Removed axis argument, changed length from scalar to vector
-  //!
   Dimension(std::string name, std::vector <size_t> lengths) {
 	_name = name;
 	_lengths = lengths;
@@ -186,12 +183,6 @@ public:
   //!
   //! \param[in] name The name of dimension
   //! \param[in] length The dimension length. 
-  //! \deprecated \param[in] axis The dimension axis, an integer in the range 0..3 
-  //! indicating X (or longitude), Y (latitude), Z (height), and T (time), 
-  //! respectively.
-  //!
-  //! \version 3.1
-  //! Removed axis argument, changed length from scalar to vector
   //!
   Dimension(std::string name, size_t length) {
 	_name = name;
@@ -277,11 +268,7 @@ public:
  //! assumed to be zero. The dimensionality of the coordinate variable
  //! may be less than that of the dimensionality of the grid, in which
  //! case the coordinates along the unspecified dimension are assumed
- //! invariant. For time varying meshes - those with a time-vayring
- //! dimesion - a time coordinate variable may be specified. 
- //! The dimension names of a coordinate variable must be a subset
- //! of the dimension names of any data variable associated with the
- //! mesh.
+ //! invariant. 
  //!
  //! \param[in] max_nodes_per_face Specifies maximum number of nodes 
  //! (or edges) a face of the mesh may have.
@@ -378,7 +365,9 @@ public:
   //! spatial dimensions of 
   //! the mesh. The ordering is from fastest varying dimension to slowest.
   //! The number of elements in \p dim_names determines the dimensionality
-  //! of the mesh.
+  //! of the mesh, but not, in general, the topological dimension of the
+  //! mesh. The rank of \p dim_names defines
+  //! the topological dimension.
   //!
   Mesh(
 	std::string name, 
@@ -448,7 +437,8 @@ public:
   //! topological dimensionality of the mesh.
   //!
   //! For 
-  //! unstructured meshes the returned vector is empty();
+  //! unstructured meshes the returned contains the names of the
+  //! node dimensions.
   //
   std::vector <string> GetDimNames() const {return (_dim_names); };
 
@@ -459,6 +449,20 @@ public:
   //! the nodes of the mesh.
   //
   std::vector <string> GetCoordVars() const {return (_coord_vars); };
+  void SetCoordVars(std::vector <string> coord_vars) {
+	_coord_vars = coord_vars;
+  };
+
+  //! Get geometric dimension of cells
+  //!
+  //! Returns the geometric dimension of the cells in the mesh. I.e. 
+  //! the number of spatial spatial coordinates for each grid point. 
+  //! Valid values are 0..3. The geometric dimension must be equal to
+  //! or greater than the topology dimension.
+  //!
+  //! \sa GetTopologyDim()
+  //
+  size_t GetGeometryDim() const {return(_coord_vars.size()); }
 
   //! Get the maximum number of nodes per face
   //!
@@ -645,11 +649,15 @@ public:
   //
   std::string GetEdgeFaceVar() const { return(_edge_face_var); } 
 
-  //! Get topological dimension of mesh
+  //! Get topological dimension of the mesh
   //!
-  //! Return the number of dimensions for the mesh. I.e. the number
-  //! of coordinates needed to describe each node position.
+  //! Return the number of topological dimensions for the mesh cells. Valid
+  //! values are in the range 0..3, with, for example, 0 corresponding
+  //! to points; 1 to lines; 2 to triangles, quadrilaterals, etc.; and
+  //! 3 to hexahedron, tetrahedron, etc.
   //!
+  //! \sa GetGeometryDim()
+  //
   size_t GetTopologyDim() const ;
 
   friend std::ostream &operator<<(
@@ -774,33 +782,23 @@ public:
 	_wname.clear();
 	_cratios.clear();
 	_periodic.clear();
-	_bs.clear();
 	_atts.clear();
   }
 
   //! Constructor 
   //!
   //! \param[in] name The variable's name
-  //! \deprecated \param[in] dimensions An ordered vector specifying the variable's spatial 
-  //! and/or temporal dimensions
   //!
   //! \param[in] units A string recognized by Udunits-2 specifying the
   //! unit measure for the variable. An empty string indicates that the
   //! variable is unitless.
   //! \param[in] type The external storage type for variable data
-  //! \param[in] bs An ordered array specifying the storage 
-  //! blocking
-  //! factor for the variable. Results are undefined if the rank of 
-  //! of \p bs does not match that of the spatial dimensions.
-  //!
   //! \param[in] wname The wavelet family name for compressed variables
   //! \param[in] cratios Specifies a vector of compression factors for
   //! compressed variable definitions. If empty, or if cratios.size()==1 
   //! and cratios[0]==1, the variable is not 
   //! compressed
-  //! \deprecated \param[in] periodic An ordered array of booleans 
-  //! specifying the
-  //! spatial boundary periodicity.
+  //!
   //! \deprecated Results are undefined if the rank of 
   //! of \p periodic does not match that of \p dimensions.
   //!
@@ -810,7 +808,6 @@ public:
 	XType type, 
 	string wname, 
 	std::vector <size_t> cratios,
-	std::vector <size_t> bs,
 	std::vector <bool> periodic
   ) :
 	_name(name),
@@ -818,7 +815,6 @@ public:
 	_type(type),
 	_wname(wname),
 	_cratios(cratios),
-	_bs(bs),
 	_periodic(periodic)
   {
 	if (_cratios.size()==0) _cratios.push_back(1);
@@ -845,7 +841,6 @@ public:
   BaseVar(
 	string name, 
 	string units, XType type,
-	std::vector <size_t> bs,
 	std::vector <bool> periodic
   );
 
@@ -855,10 +850,6 @@ public:
   //
   string GetName() const {return (_name); };
   void SetName(string name) {_name = name; };
-
-  //! \deprecated Access variable's dimension names
-  //
-  //std::vector <DC::Dimension> GetDimensions() const;
 
   //! Access variable units
   //
@@ -886,15 +877,6 @@ public:
 	if (_cratios.size()==0) _cratios.push_back(1);
   };
 
-  //! Get blocking dimensions
-  //!
-  //! Returns ordered list of blocking dimension for the coordinate data. The
-  //! ordering is from fastest to slowest varying dimension. 
-  //!
-  //
-  std::vector <size_t> GetBS() const {return (_bs); };
-  void SetBS(std::vector <size_t> bs) {_bs = bs; };
-
 
   //! \deprecated Access variable bounary periodic 
   //
@@ -903,8 +885,19 @@ public:
 
   //! Access variable attributes
   //
-  std::map <string, Attribute> GetAttributes() const {return (_atts); };
+  const std::map <string, Attribute> &GetAttributes() const {return (_atts); };
   void SetAttributes(std::map <string, Attribute> &atts) {_atts = atts; };
+
+  bool GetAttribute(string name, Attribute &att) const {
+	std::map <string, Attribute>::const_iterator itr = _atts.find(name);
+	if (itr == _atts.end()) return(false);
+	att = itr->second;
+	return(true);
+  }
+
+  void SetAttribute(const Attribute &att) {
+	_atts[att.GetName()] = att;
+  }
 
   //! Return true if no wavelet is defined
   //
@@ -918,7 +911,6 @@ public:
   XType _type;
   string _wname;
   std::vector <size_t> _cratios;
-  std::vector <size_t> _bs;
   std::vector <bool> _periodic;
   std::map <string, Attribute> _atts;
 
@@ -968,14 +960,13 @@ public:
 	string wname, 
 	std::vector <size_t> cratios, std::vector <bool> periodic, 
 	std::vector <string> dim_names,
-	std::vector <size_t> bs,
 	string time_dim_name,
 	int axis, bool uniform
   ) :
 	BaseVar(
 		name, units, type,
 		wname, cratios,
-		bs, periodic
+		periodic
 	),
 	_dim_names(dim_names),
 	_time_dim_name(time_dim_name),
@@ -1011,10 +1002,9 @@ public:
 	std::vector <bool> periodic, 
 	int axis, bool uniform,
 	std::vector <string> dim_names,
-	std::vector <size_t> bs,
 	string time_dim_name
   ) :
-	BaseVar(name, units, type, bs, periodic),
+	BaseVar(name, units, type, periodic),
 	_dim_names(dim_names),
 	_time_dim_name(time_dim_name),
 	_axis(axis),
@@ -1083,10 +1073,6 @@ public:
   //!  std::vector <size_t> cratios,
   //!  std::vector <bool> periodic)
   //!
-  //! \deprecated \param[in] coord_vars Names of coordinate 
-  //! variables associated 
-  //! with this variables dimensions
-  //!
   //! \param[in] mesh Name of mesh upon which this variable is sampled
   //!
   //! \param[in] time_coord_var Name of time coordinate variable. If 
@@ -1107,14 +1093,13 @@ public:
 	std::vector <size_t> cratios,
 	std::vector <bool> periodic, 
 	string mesh, 
-	std::vector <size_t> bs,
 	string time_coord_var,
 	Mesh::Location location,
 	double missing_value
   ) :
 	BaseVar(
 		name, units, type, 
-		wname, cratios, bs, periodic
+		wname, cratios, periodic
 	),
 	_mesh(mesh),
 	_time_coord_var(time_coord_var),
@@ -1139,10 +1124,6 @@ public:
   //!  std::vector <size_t> cratios,
   //!  std::vector <bool> periodic)
   //!
-  //! \deprecated \param[in] coord_vars Names of coordinate variables 
-  //! associated 
-  //! with this variables dimensions
-  //!
   //! \param[in] mesh Name of mesh upon which this variable is sampled
   //!
   //! \param[in] time_coord_var Name of time coordinate variable. If 
@@ -1164,14 +1145,13 @@ public:
 	std::vector <size_t> cratios,
 	std::vector <bool> periodic, 
 	string mesh, 
-	std::vector <size_t> bs,
 	string time_coord_var,
 	Mesh::Location location,
 	double missing_value, string maskvar
   ) :
 	BaseVar(
 		name, units, type, 
-		wname, cratios, bs, periodic
+		wname, cratios, periodic
 	),
 	_mesh(mesh),
 	_time_coord_var(time_coord_var),
@@ -1211,13 +1191,12 @@ public:
 	std::vector <size_t> cratios,
 	std::vector <bool> periodic, 
 	string mesh, 
-	std::vector <size_t> bs,
 	string time_coord_var,
 	Mesh::Location location
   ) :
 	BaseVar(
 		name, units, type, 
-		wname, cratios, bs, periodic
+		wname, cratios, periodic
 	),
 	_mesh(mesh),
 	_time_coord_var(time_coord_var),
@@ -1255,13 +1234,12 @@ public:
 	string units, XType type, 
 	std::vector <bool> periodic,
 	string mesh, 
-	std::vector <size_t> bs,
 	string time_coord_var,
 	Mesh::Location location,
 	double missing_value
   ) : 
 	BaseVar(
-		name, units, type, bs, periodic
+		name, units, type, periodic
 	),
 	_mesh(mesh),
 	_time_coord_var(time_coord_var),
@@ -1307,13 +1285,12 @@ public:
 	string units, XType type, 
 	std::vector <bool> periodic,
 	string mesh, 
-	std::vector <size_t> bs,
 	string time_coord_var,
 	Mesh::Location location,
 	double missing_value, string maskvar
   ) : 
 	BaseVar(
-		name, units, type, bs, periodic
+		name, units, type, periodic
 	),
 	_mesh(mesh),
 	_time_coord_var(time_coord_var),
@@ -1343,12 +1320,11 @@ public:
 	string units, XType type, 
 	std::vector <bool> periodic,
 	string mesh, 
-	std::vector <size_t> bs,
 	string time_coord_var,
 	Mesh::Location location
   ) : 
 	BaseVar(
-		name, units, type, bs, periodic
+		name, units, type, periodic
 	),
 	_mesh(mesh),
 	_time_coord_var(time_coord_var),
@@ -1444,13 +1420,12 @@ public:
 	string units, XType type, 
 	string wname,
 	std::vector <size_t> cratios,
-	std::vector <size_t> bs,
 	std::vector <bool> periodic, 
 	std::vector <string> dim_names
   ) :
 	BaseVar(
 		name, units, type, 
-		wname, cratios, bs, periodic
+		wname, cratios, periodic
 	),
 	_dim_names(dim_names),
 	_offset(0)
@@ -1486,8 +1461,9 @@ public:
  //! Class constuctor
  //!
  //!
- DC() {};
- virtual ~DC() {}
+ DC();
+
+ virtual ~DC() {};
 
  //! Initialize the DC class
  //!
@@ -1509,7 +1485,9 @@ public:
  virtual int Initialize(
 	const std::vector <string> &paths,
 	const std::vector <string> &options = std::vector <string> ()
- ) = 0;
+ ) {
+	return(initialize(paths, options));
+ }
 
 
  //! Return a dimensions's definition
@@ -1525,21 +1503,27 @@ public:
  //!
  virtual bool GetDimension(
 	string dimname, DC::Dimension &dimension
- ) const = 0;
+ ) const {
+	return(getDimension(dimname, dimension));
+ }
 
  //! Return names of all defined dimensions
  //!
  //! This method returns the list of names of all of the dimensions
  //! defined in the DC.
  //!
- virtual std::vector <string> GetDimensionNames() const = 0;
+ virtual std::vector <string> GetDimensionNames() const {
+	return (getDimensionNames());
+ }
 
  //! Return names of all defined meshes
  //!
  //! This method returns the list of names of all of the meshes
  //! defined in the DC.
  //!
- virtual std::vector <string> GetMeshNames() const = 0;
+ virtual std::vector <string> GetMeshNames() const {
+	return(getMeshNames());
+ }
 
  //! Return a Mesh's definition
  //!
@@ -1552,7 +1536,9 @@ public:
  //!
  virtual bool GetMesh(
 	string mesh_name, DC::Mesh &mesh
- ) const = 0;
+ ) const {
+	return(getMesh(mesh_name, mesh));
+ }
 
 
  //! Return a coordinate variable's definition
@@ -1567,7 +1553,9 @@ public:
  //! \retval bool False is returned if the named coordinate variable does 
  //! not exist, and the contents of \p cvar will be undefined.
  //!
- virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const = 0;
+ virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
+	return(getCoordVarInfo(varname, cvar));
+ }
 
  //! Return a data variable's definition
  //!
@@ -1581,7 +1569,9 @@ public:
  //! \retval bool If the named data variable cannot be found false 
  //! is returned and the values of \p datavar are undefined.
  //!
- virtual bool GetDataVarInfo( string varname, DC::DataVar &datavar) const = 0;
+ virtual bool GetDataVarInfo( string varname, DC::DataVar &datavar) const {
+	return(getDataVarInfo(varname, datavar));
+ }
  
  //! Return metadata about an auxiliary variable
  //!
@@ -1594,7 +1584,9 @@ public:
  //!
  //! \sa GetDataVarInfo(), GetCoordVarInfo()
  //
- virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const = 0;
+ virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
+	return(getAuxVarInfo(varname, var));
+ }
 
  //! Return metadata about a data or coordinate variable
  //!
@@ -1607,7 +1599,9 @@ public:
  //!
  //! \sa GetDataVarInfo(), GetCoordVarInfo()
  //
- virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const = 0;
+ virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const {
+	return(getBaseVarInfo(varname, var));
+ }
 
 
 
@@ -1617,7 +1611,9 @@ public:
  //!
  //! \sa DC::DataVar
  //
- virtual std::vector <string> GetDataVarNames() const = 0;
+ virtual std::vector <string> GetDataVarNames() const {
+	return(getDataVarNames());
+ }
 
 
  //! Return a list of names for all of the defined coordinate variables.
@@ -1626,21 +1622,24 @@ public:
  //!
  //! \sa DC::CoordVar
  //
- virtual std::vector <string> GetCoordVarNames() const = 0;
+ virtual std::vector <string> GetCoordVarNames() const {
+	return(getCoordVarNames());
+ }
 
  //! Return a list of names for all of the defined Auxiliary variables.
- //! \version 3.1
  //!
  //! Returns a list of names for all Auxiliary variables defined 
  //!
  //! \sa DC::AuxVar
  //
- virtual std::vector <string> GetAuxVarNames() const = 0;
+ virtual std::vector <string> GetAuxVarNames() const {
+	return(getAuxVarNames());
+ }
 
 
  //! Return the number of refinement levels for the indicated variable
  //!
- //! Compressed variables have a multi-resolution grid representation.
+ //! Compressed variables may have a multi-resolution grid representation.
  //! This method returns the number of levels in the hiearchy. A value
  //! of one indicates that only the native resolution is available. 
  //! A value of two indicates that two levels, the native plus the
@@ -1653,7 +1652,9 @@ public:
  //! returned. Otherwise the total number of levels in the multi-resolution
  //! hierarchy are returned.
  //
- virtual size_t GetNumRefLevels(string varname) const = 0;
+ virtual size_t GetNumRefLevels(string varname) const {
+	return(getNumRefLevels(varname));
+ }
 
 
  //! Read an attribute
@@ -1677,13 +1678,22 @@ public:
  //
  virtual bool GetAtt(
 	string varname, string attname, vector <double> &values
- ) const = 0;
+ ) const {
+	return(getAtt(varname, attname, values));
+ }
+
  virtual bool GetAtt(
 	string varname, string attname, vector <long> &values
- ) const = 0;
+ ) const {
+	return(getAtt(varname, attname, values));
+ }
+
  virtual bool GetAtt(
 	string varname, string attname, string &values
- ) const = 0;
+ ) const {
+	return(getAtt(varname, attname, values));
+ }
+
 
  //! Return a list of available attribute's names
  //!
@@ -1698,7 +1708,10 @@ public:
  //!
  //! \sa GetAtt()
  //
- virtual std::vector <string> GetAttNames(string varname) const = 0;
+ virtual std::vector <string> GetAttNames(string varname) const {
+	return(getAttNames(varname));
+ }
+
 
  //! Return the external data type for an attribute
  //!
@@ -1711,18 +1724,41 @@ public:
  //! \retval If an attribute named by \p name does not exist, a
  //! negative value is returned.
  //!
- virtual XType GetAttType(string varname, string attname) const = 0;
+ virtual XType GetAttType(string varname, string attname) const {
+	return(getAttType(varname, attname));
+ }
 
- //! Return a variable's dimension lengths at a specified refinement level
+ //! Get blocking dimensions
  //!
- //! Compressed variables have a multi-resolution grid representation.
- //! This method returns the variable's ordered spatial and 
- //! temporal dimension lengths, 
+ //! Returns a zero (empty) or three-element list of spatial blocking 
+ //! dimension for stored data.
+ //! Ordering is from fastest to slowest varying dimension. If non-empty
+ //! all data and coordinate variables in the data collection use the
+ //! specified blocking. If empty, the data are not blocked.
+ //!
+ //
+ std::vector <size_t> GetBlockSize() const {
+	return(_getBlockSize());
+ }
+
+ //! Return a variable's array dimension lengths at a specified refinement level
+ //!
+ //! Compressed variables may have a multi-resolution grid representation.
+ //! This method returns the variable's ordered array 
+ //! dimension lengths, 
  //! and block dimensions
  //! at the multiresolution refinement level specified by \p level.
  //! 
  //! If the variable named by \p varname is not compressed the variable's
  //! native dimensions are returned.
+ //!
+ //! \note The number of elements in \p dims_at_level will match that of
+ //! \p bs_at_level. If \p level is -1, the highest refinement level, the return
+ //! vector \p bs_at_level should match the n values by GetBlockSize().
+ //! where n is the number of elements in \p bs_at_level, unless the
+ //! vector returned by GetBlockSize() is empty. In this case, only a single
+ //! refinement level exists, and \p bs_at_level should be equivalent
+ //! to \p dims_at_level.
  //!
  //! \param[in] varname Data or coordinate variable name.
  //! \param[in] level Specifies a member of a multi-resolution variable's
@@ -1734,46 +1770,25 @@ public:
  //!
  //! \retval status Zero is returned upon success, otherwise -1.
  //!
- //! \note This method is not well defined for unstructured grids.
+ //! \note For unstructured grids the number of dimensions may be 
+ //! less than the topological dimension returned by DC::Mesh::GetTopologyDim().
  //!
  //! \sa VAPoR::DC, DC::DataVar::GetBS(), DC::GetVarDimLens()
  //
  virtual int GetDimLensAtLevel(
 	string varname, int level, std::vector <size_t> &dims_at_level,
 	std::vector <size_t> &bs_at_level
- ) const = 0;
-
- //! Return a Proj4 map projection string.
- //!
- //! For georeference data sets that have map projections this
- //! method returns a properly formatted Proj4 projection string 
- //! for mapping from geographic to cartographic coordinates for
- //! the variable indicated by \p varname. If no
- //! such projection exists, or if \p varname is not recognized,
- //! an empty string is returned.
- //!
- //! \param[in] varname A string specifying the name of the data 
- //! variable. 
- //!
- //! \retval  projstring An empty string if a Proj4 map projection is
- //! not available for the named variable, otherwise a properly 
- //! formatted Proj4 projection
- //! string is returned.
- //!
- //
- virtual string GetMapProjection(string varname) const = 0;
+ ) const {
+	return(getDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
+ }
 
  //! Return default Proj4 map projection string.
  //!
  //! For georeference data sets that have map projections this
  //! method returns the default properly formatted Proj4 projection string 
- //! for mapping from geographic to cartographic coordinates for
- //! the variable indicated by \p varname. If no
- //! such projection exists, an empty string is returned.
- //! This projection string will be associated with any variable
- //! that has lat-lan coordinates, and does not have a 
- //! variable-specific projection string defined. 
- //! See GetMapProjection(string)
+ //! for mapping from geographic to cartographic coordinates.
+ //! If no
+ //! projection exists, an empty string is returned.
  //!
  //! \retval  projstring An empty string if a Proj4 map projection is
  //! not available for the named variable, otherwise a properly 
@@ -1781,11 +1796,9 @@ public:
  //! string is returned.
  //!
  //
- virtual string GetMapProjection() const = 0;
-
- //! Get default map projection, if any
- //!
- virtual string GetMapProjectionDefault() const = 0;
+ virtual string GetMapProjection() const {
+	return(getMapProjection());
+ }
 
 
  //! Open the named variable for reading
@@ -1816,22 +1829,29 @@ public:
  //! \param[in] lod Approximation level of the variable. A value of -1
  //! indicates the maximum approximation level defined for the DC.
  //! Ignored if the variable is not compressed.
- //! \retval status Returns a non-negative value on success
+ //!
+ //! \retval status Returns a non-negative file descriptor on success
+ //!
  //!
  //! \sa GetNumRefLevels(), DC::BaseVar::GetCRatios(), OpenVariableRead()
  //
  virtual int OpenVariableRead(
 	size_t ts, string varname, int level=0, int lod=0
- ) = 0;
+ ) {
+	return(_openVariableRead(ts, varname, level, lod));
+ }
 
 
  //! Close the currently opened variable
  //!
  //! Close the handle for variable opened with OpenVariableRead()
+ //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
  //!
  //! \sa  OpenVariableRead()
  //
- virtual int CloseVariable() = 0;
+ virtual int CloseVariable(int fd) {
+	return(_closeVariable(fd));
+ }
 
  //! Read all spatial values of the currently opened variable
  //!
@@ -1844,39 +1864,50 @@ public:
  //! It is the caller's responsibility to ensure \p data points
  //! to adequate space.
  //!
+ //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
  //! \param[out] data An array of data to be written
  //! \retval status Returns a non-negative value on success
  //!
  //! \sa OpenVariableRead()
  //
- int virtual Read(float *data) = 0;
- int virtual Read(int *data) = 0;
+ int virtual Read(int fd, float *data) {
+	return(_readTemplate(fd, data));
+ }
+
+ int virtual Read(int fd, int *data) {
+	return(_readTemplate(fd, data));
+ }
+
 
  //! Read a single slice of data from the currently opened variable
  //!
- //! Decompress, as necessary, and read a single slice (2D array) of 
+ //! Decompress, as necessary, and read a single hyperslice of 
  //! data from the variable
  //! indicated by the most recent call to OpenVariableRead().
- //! The dimensions of a slices are NX by NY,
- //! where NX is the dimension of the array along the fastest varying
- //! spatial dimension, specified
- //! in grid points, and NY is the length of the second fastest varying
- //! dimension at the currently opened grid refinement level. See
+ //! The dimensions of a slice are given by the product of the
+ //! n-1 fastest varying dimensions returned by GetDimLensAtLevel() for
+ //! for the currently opened grid refinement level. See
  //! OpenVariableRead().
  //!
  //! This method should be called exactly NZ times for each opened variable,
- //! where NZ is the dimension of third, and slowest varying dimension.
- //! In the case of a 2D variable, NZ is 1.
+ //! where NZ is the dimension of slowest varying dimension returned by
+ //! GetDimLensAtLevel(). 
  //!
  //! It is the caller's responsibility to ensure \p slice points
  //! to adequate space.
  //!
- //! \param[out] slice A 2D slice of data
+ //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
+ //! \param[out] slice A slice of data
  //! \retval status Returns a non-negative value on success
  //!
  //! \sa OpenVariableRead()
  //!
- virtual int ReadSlice(float *slice) = 0;
+ virtual int ReadSlice(int fd, float *slice) {
+	return(_readSliceTemplate(fd, slice));
+ }
+ virtual int ReadSlice(int fd, int *slice) {
+	return(_readSliceTemplate(fd, slice));
+ }
 
  //! Read in and return a subregion from the currently opened
  //! variable
@@ -1894,16 +1925,26 @@ public:
  //! returned is stored in the memory region pointed to by \p region. It
  //! is the caller's responsbility to ensure adequate space is available.
  //!
+ //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
  //! \param[in] min Minimum region extents in grid coordinates
  //! \param[in] max Maximum region extents in grid coordinates
  //! \param[out] region The requested volume subregion
  //!
  //! \retval status Returns a non-negative value on success
- //! \sa OpenVariableRead(), GetDimension(), GetDimensionNames()
+ //! \sa OpenVariableRead(), GetDimLensAtLevel(), GetDimensionNames()
  //
  virtual int ReadRegion(
+	int fd, 
     const vector <size_t> &min, const vector <size_t> &max, float *region
- ) = 0;
+ ) {
+	return(readRegion(fd, min, max, region));
+ }
+ virtual int ReadRegion(
+	int fd, 
+    const vector <size_t> &min, const vector <size_t> &max, int *region
+ ) {
+	return(readRegion(fd, min, max, region));
+ }
 
  //! Read in and return a blocked subregion from the currently opened
  //! variable.
@@ -1911,6 +1952,7 @@ public:
  //! This method is identical to ReadRegion() with the exceptions
  //! that for compressed variables:
  //!
+ //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
  //! \li The vectors \p start and \p count must be aligned
  //! with the underlying storage block of the variable. See
  //! DC::SetCompressionBlock()
@@ -1919,11 +1961,17 @@ public:
  //! storage blocking (the data will not be contiguous)
  //!
  virtual int ReadRegionBlock(
+	int fd,
     const vector <size_t> &min, const vector <size_t> &max, float *region
- ) = 0;
+ ) {
+	return(readRegionBlock(fd, min, max, region));
+ }
  virtual int ReadRegionBlock(
+	int fd,
     const vector <size_t> &min, const vector <size_t> &max, int *region
- ) = 0;
+ ) {
+	return(readRegionBlock(fd, min, max, region));
+ }
 
  //! Read an entire variable in one call
  //!
@@ -1949,8 +1997,12 @@ public:
  //! \retval status A negative int is returned on failure
  //!
  //
- virtual int GetVar(string varname, int level, int lod, float *data) = 0;
- virtual int GetVar(string varname, int level, int lod, int *data) = 0;
+ virtual int GetVar(string varname, int level, int lod, float *data) {
+	return(_getVarTemplate(varname, level, lod, data));
+ }
+ virtual int GetVar(string varname, int level, int lod, int *data) {
+	return(_getVarTemplate(varname, level, lod, data));
+ }
 
  //! Read an entire variable at a given time step in one call
  //!
@@ -1981,10 +2033,14 @@ public:
  //
  virtual int GetVar(
 	size_t ts, string varname, int level, int lod, float *data
- ) = 0;
+ ) {
+	return(_getVarTemplate(ts, varname, level, lod, data));
+ }
  virtual int GetVar(
 	size_t ts, string varname, int level, int lod, int *data
- ) = 0;
+ ) {
+	return(_getVarTemplate(ts, varname, level, lod, data));
+ }
 
 
  //! Returns true if indicated data volume is available
@@ -2005,42 +2061,39 @@ public:
     string varname,
     int reflevel = 0,
     int lod = 0
- ) const = 0;
+ ) const {
+	return(variableExists(ts, varname, reflevel, lod));
+ };
 
 
- /////////////////////////////////////////////////////////////////////
- //
- // The following are convenience methods provided by the DC base 
- // class. In general they should NOT need to be reimplimented by
- // derived classes.
- //
- /////////////////////////////////////////////////////////////////////
+ //! Get dimensions of hyperslice read by ReadSlice
+ //!
+ //! Returns the dimensions of a hyperslice when the variable
+ //! \p varname is opened at level \p level and read using ReadSlice();
+ //!
+ //! \param[in] varname A valid variable name
+ //! \param[in] reflevel Refinement level requested.
+ //! \param[out] dims An ordered vector containing the variable's 
+ //! hyperslice dimensions at the specified refinement level
+ //! \param[out] nslice Number of hyperslices
+ //!
+ //! \sa GetDimLensAtLevel(), OpenVariableRead(), ReadSlice()
+ //!
+ virtual int GetHyperSliceInfo(
+	string varname, int level, std::vector <size_t> &dims,
+	size_t &nslice
+ );
 
- //! Return a list of data variables with a given dimension rank
+ //! Return a list of data variables with a given topological dimension
  //!
  //! Returns a list of all data variables defined having a 
- //! dimension rank of \p ndim. If \p spatial is true, only the spatial
- //! dimension rank of the variable is compared against \p ndim
+ //! a topological dimension \p ndim. 
  //!
- //! \param[in] ndim Rank of dimensions for comparision
- //! \param[in] spatial If true only compare spatial dimensions against \p ndim
+ //! \param[in] ndim Topological dimension
  //!
+ //! \sa GetVarTopologyDim()
  //
- virtual std::vector <string> GetDataVarNames(int ndim, bool spatial) const;
-
-
- //
- //! Return a list of coordinate variables with a given dimension rank
- //!
- //! Returns a list of all coordinate variables defined having a 
- //! dimension rank of \p ndim. If \p spatial is true, only the spatial
- //! dimension rank of the variable is compared against \p ndim
- //!
- //! \param[in] ndim Rank of dimensions for comparision
- //! \param[in] spatial If true only compare spatial dimensions against \p ndim
- //!
- //
- virtual std::vector <string> GetCoordVarNames(int ndim, bool spatial) const;
+ virtual std::vector <string> GetDataVarNames(int ndim) const;
 
  //
  //! Return an ordered list of the variables dimensions
@@ -2157,13 +2210,26 @@ public:
 
  //! Return the topological dimension of a variable
  //!
- //! Return the number of spatial coordinate variables needed to describe
- //! the postion of each grid point (node) in a variables mesh.
+ //! Return the topological dimension of the mesh the defines
+ //! the variable data \p varname
  //!
  //! \retval dim Topological dimension or zero if variable is not known
- //! or has no coordinates.
+ //!
+ //! \sa DC::Mesh::GetTopologyDim()
  //
  virtual size_t GetVarTopologyDim(string varname) const;
+
+ //! Return the geometric dimension of a variable
+ //!
+ //! Return the geometric dimension of the mesh the defines
+ //! the variable data \p varname. I.e. return the number of spatial coordinate
+ //! variables associated with each node in the mesh.
+ //!
+ //! \retval dim Geometric dimension or zero if variable is not known
+ //!
+ //! \sa DC::Mesh::GetGeometryDim()
+ //
+ virtual size_t GetVarGeometryDim(string varname) const;
 
  //! Return a boolean indicating whether a variable is time varying
  //!
@@ -2299,17 +2365,227 @@ public:
 	string &edge_face_var
  ) const;
 
- //! Get the number of spatial dimensions for a variable
+ //! Get the rank of a variable
  //!
+ //! This method returns the number of rank of the array describing a
+ //! variable. For structured data variables the rank is equal to 
+ //! the topological dimension (See GetTopologyDim()).
  //!
  //! \param[in] varname Name of variable to query
- //! \param[out] ndim An int in the range 0..3. If the variable is
- //! a time coordinate variable \p ndim will be set to 0.
  //!
- //! \retval True is returned on success. A value of false is 
- //! returned if the variable name is unknown.
+ //! \retval Array rank. A value between 0 and 3, inclusive. If 
+ //! \p varname is unknown 0 is returned.
  //!
- virtual bool GetNumDimensions(string varname, size_t &ndim) const;
+ virtual size_t GetNumDimensions(string varname) const;
+
+ //! Return a list of all of the available time coordinate variables
+ //!
+ //! This method returns all time coordinate variables defined
+ //!
+ std::vector <string> GetTimeCoordVarNames() const;
+
+
+ class FileTable {
+ public: 
+  FileTable();
+  virtual ~FileTable();
+
+  class FileObject {
+  public:
+
+   FileObject() : 
+	_ts(0), _varname(""), _level(0), _lod(0), _slice(0), _aux(0)
+   { }
+
+   FileObject(size_t ts, string varname, int level=0, int lod=0, int aux=0) : 
+	_ts(ts), _varname(varname), _level(level), _lod(lod), _slice(0), _aux(aux)
+   { }
+
+   size_t GetTS() const {
+	return(_ts);
+   }
+   string GetVarname() const {
+	return(_varname);
+   }
+   int GetLevel() const {
+	return(_level);
+   }
+   int GetLOD() const {
+	return(_lod);
+   }
+   int GetSlice() const {
+	return(_slice);
+   }
+   void SetSlice(int slice) {
+	_slice = slice;
+   }
+   int GetAux() const {
+	return(_aux);
+   }
+  private:
+   size_t _ts;
+   string _varname;
+   int _level;
+   int _lod;
+   int _slice;
+   int _aux;
+  };
+
+  int AddEntry(FileObject *obj);
+  FileObject *GetEntry(int fd) const;
+  void RemoveEntry(int fd);
+  vector <int> GetEntries() const;
+ private:
+  std::vector <FileTable::FileObject *> _table;
+ };
+
+protected:
+ DC::FileTable _fileTable;
+
+ //! \copydoc Initialize()
+ //
+ virtual int initialize(
+	const std::vector <string> &paths,
+	const std::vector <string> &options = std::vector <string> ()
+ ) = 0;
+
+ //! \copydoc GetDimension()
+ //
+ virtual bool getDimension(
+	string dimname, DC::Dimension &dimension
+ ) const = 0;
+
+ //! \copydoc GetDimensionNames()
+ //
+ virtual std::vector <string> getDimensionNames() const = 0;
+
+ //! \copydoc GetMeshNames()
+ //
+ virtual std::vector <string> getMeshNames() const = 0;
+
+ //! \copydoc GetMesh()
+ //
+ virtual bool getMesh(
+	string mesh_name, DC::Mesh &mesh
+ ) const = 0;
+
+ //! \copydoc GetCoordVarInfo()
+ //
+ virtual bool getCoordVarInfo(string varname, DC::CoordVar &cvar) const = 0;
+
+ //! \copydoc GetDataVarInfo()
+ //
+ virtual bool getDataVarInfo( string varname, DC::DataVar &datavar) const = 0;
+
+ //! \copydoc GetAuxVarInfo()
+ //
+ virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const = 0;
+
+ //! \copydoc GetBaseVarInfo()
+ //
+ virtual bool getBaseVarInfo(string varname, DC::BaseVar &var) const = 0;
+
+ //! \copydoc GetDataVarNames()
+ //
+ virtual std::vector <string> getDataVarNames() const = 0;
+
+ //! \copydoc GetCoordVarNames()
+ //
+ virtual std::vector <string> getCoordVarNames() const = 0;
+
+ //! \copydoc GetAuxVarNames()
+ //
+ virtual std::vector <string> getAuxVarNames() const = 0;
+
+ //! \copydoc GetNumRefLevels()
+ //
+ virtual size_t getNumRefLevels(string varname) const = 0;
+
+ //! \copydoc GetAtt(string varname, string attname, vector <double> &values)
+ //
+ virtual bool getAtt(
+	string varname, string attname, vector <double> &values
+ ) const = 0;
+
+ //! \copydoc GetAtt(string varname, string attname, vector <long> &values)
+ //
+ virtual bool getAtt(
+	string varname, string attname, vector <long> &values
+ ) const = 0;
+
+ //! \copydoc GetAtt(string varname, string attname, string &values)
+ //
+ virtual bool getAtt(
+	string varname, string attname, string &values
+ ) const = 0;
+
+ //! \copydoc GetAttNames()
+ //
+ virtual std::vector <string> getAttNames(string varname) const = 0;
+
+ //! \copydoc GetAttType()
+ //
+ virtual XType getAttType(string varname, string attname) const = 0;
+
+ //! \copydoc GetBlockSize()
+ //
+ virtual vector <size_t> getBlockSize() const  {
+	return(vector <size_t> ());
+ }
+
+ //! \copydoc GetDimLensAtLevel()
+ //
+ virtual int getDimLensAtLevel(
+	string varname, int level, std::vector <size_t> &dims_at_level,
+	std::vector <size_t> &bs_at_level
+ ) const = 0;
+
+ //! \copydoc GetMapProjection()
+ //
+ virtual string getMapProjection() const = 0;
+
+ //! \copydoc OpenVariableRead()
+ //
+ virtual int openVariableRead(
+	size_t ts, string varname, int level=0, int lod=0
+ ) = 0;
+
+ //! \copydoc CloseVariable()
+ //
+ virtual int closeVariable(int fd) = 0;
+
+ //! \copydoc ReadRegion()
+ //
+ virtual int readRegion(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+ ) = 0;
+
+ virtual int readRegion(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, int *region
+ ) = 0;
+
+ //! \copydoc ReadRegionBlock()
+ //
+ virtual int readRegionBlock(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+ ) = 0;
+
+ virtual int readRegionBlock(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, int *region
+ ) = 0;
+
+ //! \copydoc VariableExists()
+ //
+ virtual bool variableExists(
+    size_t ts,
+    string varname,
+    int reflevel = 0,
+    int lod = 0
+ ) const = 0;
 
 private: 
 
@@ -2327,6 +2603,27 @@ private:
 	string varname, 
 	vector <DC::Dimension> &dimensions
  ) const;
+
+ vector <size_t> _getBlockSize() const;
+
+ virtual int _openVariableRead(
+	size_t ts, string varname, int level=0, int lod=0
+ );
+
+ virtual int _closeVariable(int fd);
+ 
+
+ template <class T>
+ int _readSliceTemplate(int fd, T *slice);
+
+ template <class T>
+ int _readTemplate(int fd, T *data);
+
+ template <class T>
+ int _getVarTemplate(string varname, int level, int lod, T *data);
+
+ template <class T>
+ int _getVarTemplate(size_t ts, string varname, int level, int lod, T *data);
 
 };
 };

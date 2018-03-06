@@ -21,19 +21,266 @@ string join(const vector<string> &v, string separator) {
 	return(s);
 }
 
+    
+// Product of elements in a vector
+//  
+size_t vproduct(vector <size_t> a) {
+	size_t ntotal = 1;
+
+	for (int i=0; i<a.size(); i++) ntotal *= a[i];
+	return(ntotal);
+}
+
 };
+
+
+DC::Attribute::Attribute(
+	string name, XType type, const vector <float> &values
+) {
+	_name = name;
+	_type = type;
+	_values.clear();
+	Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector <float> &values) 
+{
+	_values.clear();
+	vector <double> dvec;
+    for (int i=0; i<values.size(); i++) {
+		dvec.push_back((double) values[i]);
+	}
+	DC::Attribute::SetValues(dvec);
+}
+
+DC::Attribute::Attribute(
+	string name, XType type, const vector <double> &values
+) {
+	_name = name;
+	_type = type;
+	_values.clear();
+	Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector <double> &values) 
+{
+	_values.clear();
+    for (int i=0; i<values.size(); i++) {
+        podunion pod;
+        if (_type == FLOAT) {
+            pod.f = (float) values[i];
+        }
+        else if (_type == DOUBLE) {
+            pod.d = (double) values[i];
+        }
+        else if (_type == INT32) {
+            pod.i = (int) values[i];
+        }
+        else if (_type == INT64) {
+            pod.l = (int) values[i];
+        }
+        else if (_type == TEXT) {
+            pod.c = (char) values[i];
+        }
+        _values.push_back(pod);
+    }
+}
+
+DC::Attribute::Attribute(
+	string name, XType type, const vector <int> &values
+) {
+	_name = name;
+	_type = type;
+	_values.clear();
+	Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector <int> &values) 
+{
+	_values.clear();
+	vector <long> lvec;
+    for (int i=0; i<values.size(); i++) {
+		lvec.push_back((long) values[i]);
+	}
+	DC::Attribute::SetValues(lvec);
+}
+
+DC::Attribute::Attribute(
+	string name, XType type, const vector <long> &values
+) {
+	_name = name;
+	_type = type;
+	_values.clear();
+	Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const vector <long> &values) 
+{
+	_values.clear();
+
+    for (int i=0; i<values.size(); i++) {
+        podunion pod;
+        if (_type == FLOAT) {
+            pod.f = (float) values[i];
+        }
+        else if (_type == DOUBLE) {
+            pod.d = (double) values[i];
+        }
+        else if (_type == INT32) {
+            pod.i = (int) values[i];
+        }
+        else if (_type == INT64) {
+            pod.l = (long) values[i];
+        }
+        else if (_type == TEXT) {
+            pod.c = (char) values[i];
+        }
+        _values.push_back(pod);
+    }
+}
+
+DC::Attribute::Attribute(
+	string name, XType type, const string &values
+) {
+	_name = name;
+	_type = type;
+	_values.clear();
+	Attribute::SetValues(values);
+}
+
+void DC::Attribute::SetValues(const string &values) 
+{
+	_values.clear();
+    for (int i=0; i<values.size(); i++) {
+        podunion pod;
+        if (_type == FLOAT) {
+            pod.f = (float) values[i];
+        }
+        else if (_type == DOUBLE) {
+            pod.d = (double) values[i];
+        }
+        else if (_type == INT32) {
+            pod.i = (int) values[i];
+        }
+        else if (_type == INT64) {
+            pod.l = (long) values[i];
+        }
+        else if (_type == TEXT) {
+            pod.c = (char) values[i];
+        }
+        _values.push_back(pod);
+    }
+}
+
+void DC::Attribute::GetValues(
+	vector <float> &values
+) const {
+	values.clear();
+
+	vector <double> dvec;
+	DC::Attribute::GetValues(dvec);
+    for (int i=0; i<dvec.size(); i++) {
+		values.push_back((float) dvec[i]);
+	}
+}
+
+void DC::Attribute::GetValues(
+	vector <double> &values
+) const {
+	values.clear();
+
+    for (int i=0; i<_values.size(); i++) {
+        podunion pod = _values[i];
+        if (_type == FLOAT) {
+			values.push_back((double) pod.f);
+        }
+        else if (_type == DOUBLE) {
+			values.push_back((double) pod.d);
+        }
+        else if (_type == INT32) {
+			values.push_back((double) pod.i);
+        }
+        else if (_type == INT64) {
+			values.push_back((double) pod.l);
+        }
+        else if (_type == TEXT) {
+			values.push_back((double) pod.c);
+        }
+    }
+}
+
+void DC::Attribute::GetValues(
+	vector <int> &values
+) const {
+	values.clear();
+
+	vector <long> lvec;
+	DC::Attribute::GetValues(lvec);
+    for (int i=0; i<lvec.size(); i++) {
+		values.push_back((int) lvec[i]);
+	}
+}
+
+void DC::Attribute::GetValues(
+	vector <long> &values
+) const {
+	values.clear();
+
+    for (int i=0; i<_values.size(); i++) {
+        podunion pod = _values[i];
+        if (_type == FLOAT) {
+			values.push_back((long) pod.f);
+        }
+        else if (_type == DOUBLE) {
+			values.push_back((long) pod.d);
+        }
+        else if (_type == INT32) {
+			values.push_back((long) pod.i);
+        }
+        else if (_type == INT64) {
+			values.push_back((long) pod.l);
+        }
+        else if (_type == TEXT) {
+			values.push_back((long) pod.c);
+        }
+    }
+}
+
+void DC::Attribute::GetValues(
+	string &values
+) const {
+	values.clear();
+
+    for (int i=0; i<_values.size(); i++) {
+        podunion pod = _values[i];
+        if (_type == FLOAT) {
+			values += (char) pod.f;
+        }
+        else if (_type == DOUBLE) {
+			values += (char) pod.d;
+        }
+        else if (_type == INT32) {
+			values += (char) pod.i;
+        }
+        else if (_type == INT64) {
+			values += (char) pod.l;
+        }
+        else if (_type == TEXT) {
+			values += (char) pod.c;
+        }
+    }
+}
+
 
 
 DC::BaseVar::BaseVar(
 	string name, 
     string units, XType type,
-	std::vector <size_t> bs,
 	std::vector <bool> periodic
 )  :
 	_name(name),
 	_units(units),
 	_type(type),
-	_bs(bs),
 	_periodic(periodic) 
 {
 	_wname = "";
@@ -79,6 +326,8 @@ DC::Mesh::Mesh(
 	std::vector <string> dim_names,
 	std::vector <string> coord_vars
 ) {
+	assert(coord_vars.size() >= dim_names.size());
+
 	_Mesh(name, coord_vars, 4, 4, STRUCTURED);
 
 	if (_name.empty()) {
@@ -98,12 +347,17 @@ DC::Mesh::Mesh(
 	std::string face_node_var,
 	std::string node_face_var
 ) {
+	assert(coord_vars.size() >= 2);
+
 	_Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_2D);
 
 	_node_dim_name = node_dim_name;
 	_face_dim_name = face_dim_name;
 	_face_node_var = face_node_var;
 	_node_face_var = node_face_var;
+
+	_dim_names.push_back(node_dim_name);
+	
 }
 
 DC::Mesh::Mesh(
@@ -117,6 +371,8 @@ DC::Mesh::Mesh(
 	std::string face_node_var,
 	std::string node_face_var
 ) {
+	assert(coord_vars.size() == 3);
+
 	_Mesh(
 		name, coord_vars, max_nodes_per_face, max_faces_per_node, 
 		UNSTRUC_LAYERED
@@ -127,13 +383,66 @@ DC::Mesh::Mesh(
 	_layers_dim_name = layers_dim_name;
 	_face_node_var = face_node_var;
 	_node_face_var = node_face_var;
+
+	_dim_names.push_back(node_dim_name);
+	_dim_names.push_back(layers_dim_name);
 }
 
 size_t DC::Mesh::GetTopologyDim() const {
-	return(_dim_names.size());
+	switch (_mtype) {
+	case STRUCTURED:
+		return(_dim_names.size());
+	break;
+	case UNSTRUC_2D:
+		return(2);
+	break;
+	case UNSTRUC_LAYERED:
+		return(3);
+	break;
+	case UNSTRUC_3D:
+		return(3);
+	break;
+	default:
+		assert(0 && "Invalid mesh type");
+	break;
+	}
 }
 
-vector <string> DC::GetDataVarNames(int ndim, bool spatial) const {
+DC::DC() {
+}
+
+int DC::GetHyperSliceInfo(
+    string varname, int level, std::vector <size_t> &hslice_dims,
+    size_t &nslice
+) {
+	hslice_dims.clear();
+	nslice = 0;
+
+	vector <size_t> dims_at_level;
+	vector <size_t> bs_at_level;
+
+	int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+	if (rc < 0) return(-1);
+
+	if (dims_at_level.size() == 0) return(0);
+
+	hslice_dims = dims_at_level;
+
+	if (dims_at_level.size() == 1) {
+		nslice = 1;
+		return(0);
+	}
+
+	int dim = hslice_dims.size() - 1;
+
+	hslice_dims[dim] = 1;
+	nslice = dims_at_level[dim] / hslice_dims[dim];
+
+	return(0);
+}
+
+
+vector <string> DC::GetDataVarNames(int ndim) const {
 	vector <string> names, allnames;
 
 	allnames = GetDataVarNames();
@@ -151,36 +460,6 @@ vector <string> DC::GetDataVarNames(int ndim, bool spatial) const {
 		if (! ok) continue;
 
 		size_t d = mesh.GetTopologyDim();
-
-		if (! spatial && IsTimeVarying(allnames[i])) {
-			d++;
-		}
-
-		if (d == ndim) {
-			names.push_back(allnames[i]);
-		}
-	}
-	return(names);
-}
-
-vector <string> DC::GetCoordVarNames(int ndim, bool spatial) const {
-	vector <string> names, allnames;
-
-	allnames = GetCoordVarNames();
-
-	for (int i=0; i<allnames.size(); i++) {
-		CoordVar cvar;
-		bool ok = GetCoordVarInfo(allnames[i], cvar);
-		if (! ok) continue;
-
-		vector <string> dim_names = cvar.GetDimNames();
-		size_t d = dim_names.size();
-
-		// if not spatial add time dimension if it exists.
-		//
-		if (! spatial && ! cvar.GetTimeDimName().empty()) {
-			d++;
-		}
 
 		if (d == ndim) {
 			names.push_back(allnames[i]);
@@ -316,6 +595,156 @@ bool DC::_getAuxVarDimensions(
 	return(true);
 }
 
+vector <size_t> DC::_getBlockSize(
+) const {
+	vector <size_t> bs = getBlockSize();
+	while (bs.size() > 3) {
+		bs.pop_back();
+	}
+	return(bs);
+}
+
+int DC::_openVariableRead(
+	size_t ts, string varname, int level, int lod
+) {
+	return(openVariableRead(ts, varname, level, lod));
+}
+
+int DC::_closeVariable(int fd) {
+
+	return(closeVariable(fd));
+}
+
+template <class T> 
+int DC::_readSliceTemplate(int fd, T *slice) {
+	vector <size_t> dims_at_level;
+	vector <size_t> bs_at_level;
+
+	FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor: %d", fd);
+		return(-1);
+	}
+
+	string varname = f->GetVarname();
+	int level = f->GetLevel();
+	int sliceNum = f->GetSlice();
+
+	int rc = GetDimLensAtLevel(
+		varname, level,  dims_at_level, bs_at_level
+	);
+	if (rc<0) return(rc);
+
+	vector <size_t> hslice_dims;
+	size_t nslice;
+	rc = GetHyperSliceInfo(varname, level, hslice_dims, nslice);
+	if (rc<0) return(rc);
+	assert(hslice_dims.size() == dims_at_level.size());
+
+	if (sliceNum >= nslice) return(0);	// Done reading;
+
+	vector <size_t> min;
+	vector <size_t> max;
+	int dim = 0;
+	for (; dim<hslice_dims.size() - 1; dim++) {
+		min.push_back(0);
+		max.push_back(hslice_dims[dim] - 1);
+	};
+	min.push_back(sliceNum * hslice_dims[dim]);
+	max.push_back(min[dim] + hslice_dims[dim] - 1);
+
+	// Last slice is a partial read if not block-aligned
+	//
+	if (max[dim] >= dims_at_level[dim]) {
+		max[dim] = dims_at_level[dim] - 1;
+	}
+
+	rc = ReadRegion(fd, min, max, slice);
+	if (rc<0) return(rc);
+
+	sliceNum++;
+	f->SetSlice(sliceNum);
+
+	return(rc);
+}
+
+template <class T> 
+int DC::_readTemplate(int fd, T *data) {
+	vector <size_t> dims_at_level;
+	vector <size_t> bs_at_level;
+
+	FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor: %d", fd);
+		return(-1);
+	}
+	string varname = f->GetVarname();
+	int level = f->GetLevel();
+
+	int rc = GetDimLensAtLevel(
+		varname, level,  dims_at_level, bs_at_level
+	);
+	if (rc<0) return(rc);
+
+	vector <size_t> min, max;
+	for (int i=0; i<dims_at_level.size(); i++) {
+		min.push_back(0);
+		max.push_back(dims_at_level[i]-1);
+	}
+
+	return(ReadRegion(fd, min, max, data));
+}
+
+template <class T> 
+int DC::_getVarTemplate(string varname, int level, int lod, T *data) {
+
+	vector <size_t> dims_at_level;
+	vector <size_t> dummy;
+	int rc = GetDimLensAtLevel(
+		varname, level, dims_at_level, dummy
+	);
+	if (rc<0) return(-1);
+
+
+	// Number of per time step
+	//
+	size_t var_size = 1;
+	for (int i=0; i<dims_at_level.size(); i++) {
+		var_size *= dims_at_level[i];
+	}
+
+	size_t numts = GetNumTimeSteps(varname);
+
+	T *ptr = data;
+	for (size_t ts = 0; ts<numts; ts++) {
+		rc = GetVar(ts, varname, level, lod, ptr);
+		if (rc<0) return(-1);
+
+		ptr += var_size;
+	}
+
+	return(0);
+}
+
+
+template <class T>
+int DC::_getVarTemplate(
+	size_t ts, string varname, int level, int lod, T *data
+) {
+
+	int fd = OpenVariableRead(ts, varname, level, lod);
+	if (fd<0) return(-1);
+
+	int rc = Read(fd, data);
+	if (fd<0) return(-1);
+
+	rc = CloseVariable(fd);
+
+	return(rc);
+}
+
 bool DC::GetVarDimensions(
 	string varname, bool spatial,
 	vector <DC::Dimension> &dimensions
@@ -434,6 +863,20 @@ size_t DC::GetVarTopologyDim(string varname) const {
 	return(mesh.GetTopologyDim());
 }
 
+size_t DC::GetVarGeometryDim(string varname) const {
+
+	DataVar var;
+	bool status = GetDataVarInfo(varname, var);
+	if (! status) return(0);
+
+	string mname = var.GetMeshName();
+
+	Mesh mesh;
+	status = GetMesh(mname, mesh);
+	if (! status) return(0);
+
+	return(mesh.GetGeometryDim());
+}
 
 
 bool DC::IsTimeVarying(string varname) const {
@@ -449,7 +892,7 @@ bool DC::IsTimeVarying(string varname) const {
 		return(! var.GetTimeCoordVar().empty());
 	}
 		 
-	// If var is a coordinate variable and it's axis is Time
+	// If var is a coordinate variable and it has a time dimension
 	//
 	if (IsCoordVar(varname)) {
 		CoordVar var;
@@ -566,8 +1009,7 @@ bool DC::GetVarConnVars(
 	return(true);
 }
 
-bool DC::GetNumDimensions(string varname, size_t &ndim) const {
-	ndim = 0;
+size_t DC::GetNumDimensions(string varname) const {
 
 	DataVar dvar;
 	bool status = GetDataVarInfo(varname, dvar);
@@ -576,37 +1018,92 @@ bool DC::GetNumDimensions(string varname, size_t &ndim) const {
 
 		Mesh m;
 		status = GetMesh(dvar.GetMeshName(), m);
-		if (! status) return(false);
+		if (! status) return(0);
 
-		switch (m.GetMeshType()) {
-		case Mesh::UNSTRUC_2D:
-			ndim = 2;
-		break;
-		case Mesh::UNSTRUC_LAYERED:
-			ndim = 3;
-		break;
-		case Mesh::UNSTRUC_3D:
-			ndim = 3;
-		break;
-		case Mesh::STRUCTURED:
-			ndim = m.GetDimNames().size();
-		break;
-		default:
-			ndim = 0;
-		}
-		return(true);
+		return(m.GetDimNames().size());
 	}
-
 
 	CoordVar cvar;
 	status = GetCoordVarInfo(varname, cvar);
-	if (! status) return(0);
+	if (status) return (cvar.GetDimNames().size());
 
-	ndim = cvar.GetDimNames().size();
-	return(true);
+	AuxVar avar;
+	status = GetAuxVarInfo(varname, avar);
+	if (status) return (avar.GetDimNames().size());
 
+	return(0);
 }
 
+std::vector <string> DC::GetTimeCoordVarNames() const {
+
+	vector <string> cvars = GetCoordVarNames();
+
+	vector <string> timeCoordVars;
+
+	for (int i=0; i<cvars.size(); i++) {
+		CoordVar cvar;
+		bool status = GetCoordVarInfo(cvars[i], cvar);
+		assert(status);
+
+		if (cvar.GetAxis() == 3) {
+			timeCoordVars.push_back(cvars[i]);
+		}
+	}
+	return(timeCoordVars);
+}
+
+DC::FileTable::FileTable() {
+	_table.clear();
+}
+
+DC::FileTable::~FileTable() {
+	for (int i=0; i<_table.size(); i++) {
+		if (_table[i]) delete _table[i];
+		_table[i] = NULL;
+	}
+}
+
+int DC::FileTable::AddEntry(DC::FileTable::FileObject *obj) {
+
+	// Try to re-use an existing entry;
+	//
+	for (int i=0; i<_table.size(); i++) {
+		if (! _table[i]) {
+			_table[i] = obj;
+			return(i);
+		}
+	}
+
+	// Create new entry
+	//
+	_table.push_back(obj);
+	return(_table.size()-1);
+}
+
+DC::FileTable::FileObject *DC::FileTable::GetEntry(int fd) const {
+	if (fd<0) return(NULL);
+
+	if (fd < _table.size()) return(_table[fd]);
+
+	return(NULL);
+}
+
+void DC::FileTable::RemoveEntry(int fd) {
+	if (fd<0 || fd >= _table.size()) return;
+
+	_table[fd] = NULL;
+}
+
+vector <int> DC::FileTable::GetEntries() const {
+	vector <int> fds;
+
+	for (int i=0; i<_table.size(); i++) {
+		if (_table[i]) {
+			fds.push_back(i);
+		}
+	}
+	return(fds);
+}
 
 
 namespace VAPoR {
@@ -703,10 +1200,6 @@ std::ostream &operator<<(std::ostream &o, const DC::BaseVar &var) {
 		o << var._cratios[i] << " ";
 	}
 	o << endl;
-	o << "   BlockSize:";
-	for (int i=0; i<var._bs.size(); i++) {
-		o << " " << var._bs[i];
-	}
 	o << endl;
 	o << "   Periodic: ";
 	for (int i=0; i<var._periodic.size(); i++) {
