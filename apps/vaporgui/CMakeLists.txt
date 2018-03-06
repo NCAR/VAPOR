@@ -77,7 +77,7 @@ set (UIS
 	boxframe.ui
 	startupTab.ui
 	appSettingsTab.ui
-	vizFeaturesTab.ui
+	AnnotationGUI.ui
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
 	LeftPanel.ui

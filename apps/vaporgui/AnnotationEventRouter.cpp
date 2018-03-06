@@ -29,7 +29,7 @@
 #include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
 
-#include "ui_vizFeaturesTab.h"
+#include "ui_AnnotationGUI.h"
 #include "qcolordialog.h"
 
 #include <qlabel.h>
@@ -70,7 +70,7 @@ namespace {
 AnnotationEventRouter::AnnotationEventRouter(
 	QWidget *parent, ControlExec *ce
 ) : QWidget(parent),
-	Ui_vizFeaturesTab(),
+	Ui_AnnotationGUI(),
 	EventRouter(ce, AnnotationParams::GetClassType())
 {
 
