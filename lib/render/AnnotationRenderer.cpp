@@ -1,4 +1,4 @@
-//-- VizFeatureRenderer.cpp ----------------------------------------------------------
+//-- AnnotationRenderer.cpp ----------------------------------------------------------
 //
 //				   Copyright (C)  2015
 //	 University Corporation for Atmospheric Research
@@ -6,11 +6,11 @@
 //
 //----------------------------------------------------------------------------
 //
-//	  File:		   VizFeatureRenderer.cpp
+//	  File:		   AnnotationRenderer.cpp
 //
 //	  Author:		 Alan Norton
 //
-//	  Description:  Implementation of VizFeatureRenderer class
+//	  Description:  Implementation of AnnotationRenderer class
 //
 //----------------------------------------------------------------------------
 
@@ -27,7 +27,7 @@
 #endif
 
 #include <vapor/DataStatus.h>
-#include <vapor/VizFeatureRenderer.h>
+#include <vapor/AnnotationRenderer.h>
 #include <vapor/GetAppPath.h>
 
 using namespace VAPoR;
@@ -36,7 +36,7 @@ using namespace Wasp;
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-VizFeatureRenderer::VizFeatureRenderer(
+AnnotationRenderer::AnnotationRenderer(
     const ParamsMgr *pm, const DataStatus *dataStatus, string winName) {
     m_paramsMgr = pm;
     m_dataStatus = dataStatus;
@@ -56,21 +56,21 @@ VizFeatureRenderer::VizFeatureRenderer(
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-VizFeatureRenderer::~VizFeatureRenderer() {
+AnnotationRenderer::~AnnotationRenderer() {
 #ifdef DEAD
     if (_textObjectsValid)
         invalidateCache();
 #endif
 }
 
-void VizFeatureRenderer::InitializeGL(ShaderMgr *shaderMgr) {
+void AnnotationRenderer::InitializeGL(ShaderMgr *shaderMgr) {
     m_shaderMgr = shaderMgr;
 }
 
 //Issue OpenGL commands to draw a grid of lines of the full domain.
 //Grid resolution is up to 2x2x2
 //
-void VizFeatureRenderer::drawDomainFrame(size_t ts) const {
+void AnnotationRenderer::drawDomainFrame(size_t ts) const {
 
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
@@ -175,13 +175,13 @@ void VizFeatureRenderer::drawDomainFrame(size_t ts) const {
     glPopAttrib();
 }
 
-void VizFeatureRenderer::DrawText() {
+void AnnotationRenderer::DrawText() {
     DrawText(_miscAnnot);
     DrawText(_timeAnnot);
     DrawText(_axisAnnot);
 }
 
-void VizFeatureRenderer::DrawText(vector<billboard> billboards) {
+void AnnotationRenderer::DrawText(vector<billboard> billboards) {
     double txtColor[] = {1.f, 1.f, 1.f, 1.f};
     double bgColor[] = {0.f, 0.f, 0.f, 0.f};
     double coords[] = {67.5f, 31.6f, 0.f};
@@ -207,7 +207,7 @@ void VizFeatureRenderer::DrawText(vector<billboard> billboards) {
     }
 }
 
-void VizFeatureRenderer::AddText(string text,
+void AnnotationRenderer::AddText(string text,
                                  int x, int y, int size,
                                  float color[3], int type) {
     //_billboards.clear();  // Temporary hack.  We eventually need separate
@@ -234,7 +234,7 @@ void VizFeatureRenderer::AddText(string text,
     }
 }
 
-void VizFeatureRenderer::ClearText(int type) {
+void AnnotationRenderer::ClearText(int type) {
     if (type == -1) {
         _miscAnnot.clear();
         _timeAnnot.clear();
@@ -251,7 +251,7 @@ void VizFeatureRenderer::ClearText(int type) {
 
 #ifdef DEAD
 
-void VizFeatureRenderer::drawRegionBounds(size_t ts) const {
+void AnnotationRenderer::drawRegionBounds(size_t ts) const {
     RegionParams *rParams = _visualizer->getActiveRegionParams();
     double extents[6];
     rParams->GetBox()->GetLocalExtents(extents, ts);
@@ -294,7 +294,7 @@ void VizFeatureRenderer::drawRegionBounds(size_t ts) const {
 
 #endif
 
-void VizFeatureRenderer::applyTransform(Transform *t) {
+void AnnotationRenderer::applyTransform(Transform *t) {
     vector<double> scale = t->GetScales();
     vector<double> origin = t->GetOrigin();
     vector<double> translate = t->GetTranslations();
@@ -314,7 +314,7 @@ void VizFeatureRenderer::applyTransform(Transform *t) {
     glTranslatef(translate[0], translate[1], translate[2]);
 }
 
-void VizFeatureRenderer::InScenePaint(size_t ts) {
+void AnnotationRenderer::InScenePaint(size_t ts) {
 
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
@@ -374,12 +374,12 @@ void VizFeatureRenderer::InScenePaint(size_t ts) {
 
 #ifdef DEAD
 
-void VizFeatureRenderer::OverlayPaint(size_t ts) {
+void AnnotationRenderer::OverlayPaint(size_t ts) {
 }
 
 #endif
 
-void VizFeatureRenderer::scaleNormalizedCoordinatesToWorld(
+void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(
     std::vector<double> &coords,
     string dataMgrName) {
     if (dataMgrName == "")
@@ -393,7 +393,7 @@ void VizFeatureRenderer::scaleNormalizedCoordinatesToWorld(
     }
 }
 
-void VizFeatureRenderer::drawAxisTics(AxisAnnotation *aa) {
+void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa) {
 
     //vector<string> names = m_paramsMgr->GetDataMgrNames();
     //AxisAnnotation* aa = vfParams->GetAxisAnnotation(names[0]);
@@ -507,7 +507,7 @@ void VizFeatureRenderer::drawAxisTics(AxisAnnotation *aa) {
     glPopAttrib();
 }
 
-void VizFeatureRenderer::_drawAxes(
+void AnnotationRenderer::_drawAxes(
     std::vector<double> min,
     std::vector<double> max,
     std::vector<double> origin,
@@ -533,7 +533,7 @@ void VizFeatureRenderer::_drawAxes(
     glPopAttrib();
 }
 
-void VizFeatureRenderer::_drawTic(
+void AnnotationRenderer::_drawTic(
     double startPosn[],
     double endPosn[],
     double width,
@@ -550,7 +550,7 @@ void VizFeatureRenderer::_drawTic(
     glPopAttrib();
 }
 
-void VizFeatureRenderer::convertPointToLon(
+void AnnotationRenderer::convertPointToLon(
     double &xCoord, string dataMgrName) {
     if (dataMgrName == "")
         dataMgrName = getCurrentDataMgrName();
@@ -559,7 +559,7 @@ void VizFeatureRenderer::convertPointToLon(
     convertPointToLonLat(xCoord, dummy, dataMgrName);
 }
 
-void VizFeatureRenderer::convertPointToLat(
+void AnnotationRenderer::convertPointToLat(
     double &yCoord, string dataMgrName) {
     if (dataMgrName == "")
         dataMgrName = getCurrentDataMgrName();
@@ -568,7 +568,7 @@ void VizFeatureRenderer::convertPointToLat(
     convertPointToLonLat(dummy, yCoord);
 }
 
-void VizFeatureRenderer::convertPointToLonLat(
+void AnnotationRenderer::convertPointToLonLat(
     double &xCoord, double &yCoord, string dataMgrName) {
     if (dataMgrName == "")
         dataMgrName = getCurrentDataMgrName();
@@ -587,7 +587,7 @@ void VizFeatureRenderer::convertPointToLonLat(
     yCoord = coords[1];
 }
 
-Transform *VizFeatureRenderer::getTransform(string dataMgrName) {
+Transform *AnnotationRenderer::getTransform(string dataMgrName) {
     if (dataMgrName == "")
         dataMgrName = getCurrentDataMgrName();
 
@@ -597,20 +597,20 @@ Transform *VizFeatureRenderer::getTransform(string dataMgrName) {
     return t;
 }
 
-AxisAnnotation *VizFeatureRenderer::getCurrentAxisAnnotation() {
+AxisAnnotation *AnnotationRenderer::getCurrentAxisAnnotation() {
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     string currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation(currentAxisDataMgr);
     return aa;
 }
 
-string VizFeatureRenderer::getCurrentDataMgrName() const {
+string AnnotationRenderer::getCurrentDataMgrName() const {
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     string currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
     return currentAxisDataMgr;
 }
 
-std::vector<double> VizFeatureRenderer::getDomainExtents(string dmName) const {
+std::vector<double> AnnotationRenderer::getDomainExtents(string dmName) const {
     if (dmName == "")
         dmName = getCurrentDataMgrName();
     int ts = _currentTimestep;
@@ -630,7 +630,7 @@ std::vector<double> VizFeatureRenderer::getDomainExtents(string dmName) const {
     return extents;
 }
 
-void VizFeatureRenderer::renderText(
+void AnnotationRenderer::renderText(
     double text,
     double coord[],
     AxisAnnotation *aa) {
@@ -663,7 +663,7 @@ void VizFeatureRenderer::renderText(
     return;
 }
 
-void VizFeatureRenderer::drawAxisArrows(
+void AnnotationRenderer::drawAxisArrows(
     vector<double> minExts,
     vector<double> maxExts) {
     assert(minExts.size() == maxExts.size());
