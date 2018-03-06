@@ -95,14 +95,18 @@ void VariablesWidget::Reinit(
         dimensionFrame->hide();
     }
 
-    //if (!(_colorFlags & COLORVAR)) {
     if (_colorFlags ^ COLORVAR) {
         collapseColorVarSettings();
     }
 
     variableSelectionWidget->adjustSize();
 
-    _fidelityWidget->Reinit((FidelityWidget::DisplayFlags)dspFlags);
+    FidelityWidget::DisplayFlags fdf;
+    if (_dimFlags & VariablesWidget::SCALAR)
+        fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::SCALAR);
+    if (_dimFlags & VariablesWidget::VECTOR)
+        fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::VECTOR);
+    _fidelityWidget->Reinit(fdf);
 }
 
 void VariablesWidget::collapseColorVarSettings() {
@@ -282,7 +286,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
     int ndim = rParams->GetValueLong(_nDimsTag, 3);
     assert(ndim == 2 || ndim == 3);
 
-    vector<string> vars = _dataMgr->GetDataVarNames(ndim, true);
+    vector<string> vars = _dataMgr->GetDataVarNames(ndim);
 
     if (!vars.size()) {
         showHideVar(false);
@@ -328,7 +332,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
     }
 
     if (_colorFlags & COLORVAR) {
-        vector<string> vars = _dataMgr->GetDataVarNames(2, true);
+        vector<string> vars = _dataMgr->GetDataVarNames(2);
         string setVarReq = rParams->GetColorMapVariableName();
 
         string setVar = updateVarCombo(colormapVarCombo, vars, true, setVarReq);
@@ -344,7 +348,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
     }
 
     if (_dspFlags & HGT) {
-        vector<string> vars = _dataMgr->GetDataVarNames(2, true);
+        vector<string> vars = _dataMgr->GetDataVarNames(2);
         string setVarReq = rParams->GetHeightVariableName();
 
         string setVar = updateVarCombo(heightCombo, vars, true, setVarReq);

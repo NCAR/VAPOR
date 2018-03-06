@@ -82,7 +82,7 @@ void DefineMaskVars(
     //
     vector<pair<string, vector<string>>> dimpairs;
     for (int d = 1; d < 4; d++) {
-        vector<string> datanames = dccf.DC::GetDataVarNames(d, true);
+        vector<string> datanames = dccf.DC::GetDataVarNames(d);
 
         for (int i = 0; i < datanames.size(); i++) {
 
@@ -122,15 +122,12 @@ void DefineMaskVars(
         // 1D coordinates are not blocked
         //
         string mywname;
-        vector<size_t> mybs;
         bool compress;
         if (dimnames.size() < 2) {
             mywname.clear();
-            mybs.clear();
             compress = false;
         } else {
             mywname = "intbior2.2";
-            mybs = opt.bs;
             compress = true;
         }
 
@@ -139,7 +136,7 @@ void DefineMaskVars(
         //
         vector<size_t> cratios(1, 1);
 
-        int rc = vdc.SetCompressionBlock(mybs, mywname, cratios);
+        int rc = vdc.SetCompressionBlock(mywname, cratios);
         if (rc < 0)
             exit(1);
 
@@ -152,20 +149,9 @@ void DefineMaskVars(
     }
 }
 
-void defineMapProjection(const DCCF &dcwrf, VDCNetCDF &vdc) {
+void defineMapProjection(const DCCF &dc, VDCNetCDF &vdc) {
 
-    string proj4string;
-    for (int d = 2; d < 4 && proj4string.empty(); d++) {
-        vector<string> varnames = dcwrf.DC::GetDataVarNames(d, true);
-
-        for (int i = 0; i < varnames.size(); i++) {
-            string proj4string = dcwrf.GetMapProjection(varnames[i]);
-            if (!proj4string.empty()) {
-                vdc.SetMapProjection(proj4string);
-                break;
-            }
-        }
-    }
+    vdc.SetMapProjection(dc.GetMapProjection());
 }
 
 int main(int argc, char **argv) {
@@ -216,7 +202,8 @@ int main(int argc, char **argv) {
     }
 
     size_t chunksize = 1024 * 1024 * 4;
-    int rc = vdc.Initialize(master, vector<string>(), VDC::W, chunksize);
+    int rc = vdc.Initialize(
+        master, vector<string>(), VDC::W, opt.bs, chunksize);
     if (rc < 0)
         return (1);
 
@@ -236,57 +223,43 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Make the default block dimension 64 for any missing dimensions
-    //
-    vector<size_t> bs = opt.bs;
-    for (int i = bs.size(); i < 3; i++)
-        bs.push_back(64);
-
     //
     // Define coordinate variables
     //
-    for (int d = 0; d < 4; d++) {
-        vector<string> coordnames = dccf.DC::GetCoordVarNames(d, true);
+    vector<size_t> cratios(1, 1);
+    vector<string> coordnames = dccf.GetCoordVarNames();
 
-        //
-        // Time coordinate and 1D coordinates are not blocked
-        //
-        vector<size_t> mybs;
-        if (d < 2) {
-            mybs.clear();
-        } else {
-            mybs = opt.bs;
-        }
+    for (int i = 0; i < coordnames.size(); i++) {
+        DC::CoordVar cvar;
+        dccf.GetCoordVarInfo(coordnames[i], cvar);
 
-        vector<size_t> cratios(1, 1);
+        vector<string> sdimnames;
+        string time_dimname;
 
-        rc = vdc.SetCompressionBlock(mybs, opt.wname, cratios);
+        bool ok = dccf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
+        assert(ok);
+
+        rc = vdc.SetCompressionBlock(opt.wname, cratios);
         if (rc < 0)
             return (1);
 
-        for (int i = 0; i < coordnames.size(); i++) {
-            DC::CoordVar cvar;
-            dccf.GetCoordVarInfo(coordnames[i], cvar);
+        if (cvar.GetUniform()) {
+            rc = vdc.DefineCoordVarUniform(
+                cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
+                cvar.GetAxis(), cvar.GetXType(), false);
+        } else {
+            rc = vdc.DefineCoordVar(
+                cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
+                cvar.GetAxis(), cvar.GetXType(), false);
+        }
 
-            vector<string> sdimnames;
-            string time_dimname;
+        if (rc < 0) {
+            return (1);
+        }
 
-            bool ok = dccf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
-            assert(ok);
-
-            if (cvar.GetUniform()) {
-                rc = vdc.DefineCoordVarUniform(
-                    cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
-                    cvar.GetAxis(), cvar.GetXType(), false);
-            } else {
-                rc = vdc.DefineCoordVar(
-                    cvar.GetName(), sdimnames, time_dimname, cvar.GetUnits(),
-                    cvar.GetAxis(), cvar.GetXType(), false);
-            }
-
-            if (rc < 0) {
-                return (1);
-            }
+        rc = vdc.CopyAtt(dccf, cvar.GetName());
+        if (rc < 0) {
+            return (1);
         }
     }
 
@@ -298,21 +271,18 @@ int main(int argc, char **argv) {
     // Define data variables
     //
     for (int d = 0; d < 4; d++) {
-        vector<string> datanames = dccf.DC::GetDataVarNames(d, true);
+        vector<string> datanames = dccf.DC::GetDataVarNames(d);
 
         //
-        // Time coordinate and 1D coordinates are not blocked
+        // 1D coordinates are not blocked
         //
         string mywname;
-        vector<size_t> mybs;
         bool compress;
         if (d < 2) {
             mywname.clear();
-            mybs.clear();
             compress = false;
         } else {
             mywname = opt.wname;
-            mybs = opt.bs;
             compress = true;
         }
 
@@ -326,7 +296,7 @@ int main(int argc, char **argv) {
             cratios[i] = c;
         }
 
-        rc = vdc.SetCompressionBlock(mybs, mywname, cratios);
+        rc = vdc.SetCompressionBlock(mywname, cratios);
         if (rc < 0)
             return (1);
 
@@ -362,6 +332,11 @@ int main(int argc, char **argv) {
                     maskvar_name);
             }
 
+            if (rc < 0) {
+                return (1);
+            }
+
+            rc = vdc.CopyAtt(dccf, dvar.GetName());
             if (rc < 0) {
                 return (1);
             }

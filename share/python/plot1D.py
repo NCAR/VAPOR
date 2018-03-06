@@ -5,9 +5,6 @@ def plot1D( D, imagePath, X=None ):
 
   import numpy as np
   import matplotlib
-  import platform
-  #if (platform.system() == 'Darwin'):
-  #   matplotlib.use('MacOSX')
   matplotlib.use('AGG')
 	
   import matplotlib.pyplot as plt
@@ -61,8 +58,6 @@ def plot1D( D, imagePath, X=None ):
     
   plt.legend(loc='best', frameon=True, fontsize='large') 
 
-  #
-  #plt.show()
     
   plt.savefig(imagePath)
   plt.gcf().clear()
