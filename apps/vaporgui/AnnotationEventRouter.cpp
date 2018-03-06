@@ -29,7 +29,7 @@
 #include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
 
-#include "ui_AnnotationGUI.h"
+//#include "ui_AnnotationGUI.h"
 #include "qcolordialog.h"
 
 #include <qlabel.h>
