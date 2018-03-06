@@ -115,6 +115,10 @@ class PARAMS_API VizFeatureParams : public ParamsBase {
     void SetAxisArrowCoords(std::vector<double> coords);
     std::vector<double> GetAxisArrowCoords() const;
 
+    void SetXAxisArrowPosition(float pos);
+    void SetYAxisArrowPosition(float pos);
+    void SetZAxisArrowPosition(float pos);
+
     bool GetShowAxisArrows() const;
     void SetShowAxisArrows(bool val);
 

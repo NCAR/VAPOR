@@ -43,7 +43,7 @@
      <item>
       <layout class="QHBoxLayout">
        <item>
-        <widget class="QCheckBox" name="axisArrowCheckbox">
+        <widget class="QCheckBox" name="_axisArrowCheckbox">
          <property name="toolTip">
           <string>show colored X,Y,Z axes in scene</string>
          </property>
@@ -86,7 +86,7 @@
      <item>
       <layout class="QHBoxLayout">
        <item>
-        <widget class="QLineEdit" name="arrowXEdit">
+        <widget class="QLineEdit" name="_arrowXEdit">
          <property name="toolTip">
           <string>Specify x-coord of axis relative to region in [0,1]</string>
          </property>
@@ -99,7 +99,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="arrowYEdit">
+        <widget class="QLineEdit" name="_arrowYEdit">
          <property name="toolTip">
           <string>Specify y-coord of axis relative to region in [0,1]</string>
          </property>
@@ -112,7 +112,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="arrowZEdit">
+        <widget class="QLineEdit" name="_arrowZEdit">
          <property name="toolTip">
           <string>Specify z-coord of axis relative to region in [0,1]</string>
          </property>
@@ -551,7 +551,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QCheckBox" name="axisAnnotationEnabledCheckbox">
+            <widget class="QCheckBox" name="_axisAnnotationEnabledCheckbox">
              <property name="text">
               <string/>
              </property>
@@ -588,7 +588,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QCheckBox" name="latLonAnnotationCheckbox">
+            <widget class="QCheckBox" name="_latLonAnnotationCheckbox">
              <property name="text">
               <string/>
              </property>
