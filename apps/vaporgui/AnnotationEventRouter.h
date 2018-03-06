@@ -24,7 +24,7 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "ui_vizFeaturesTab.h"
+#include "ui_AnnotationGUI.h"
 #include "RangeCombos.h"
 #include "VaporTable.h"
 #include <vapor/AxisAnnotation.h>
@@ -37,7 +37,7 @@ namespace VAPoR {
 
 
 
-class AnnotationEventRouter : public QWidget, public Ui_vizFeaturesTab, public EventRouter {
+class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public EventRouter {
 
 	Q_OBJECT
 
