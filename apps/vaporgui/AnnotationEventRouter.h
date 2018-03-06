@@ -6,7 +6,7 @@
 //									*
 //************************************************************************/
 //
-//	File:		VizFeatureEventRouter.h
+//	File:		AnnotationEventRouter.h
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -14,11 +14,11 @@
 //
 //	Date:		June, 2015
 //
-//	Description:	Defines the VizFeatureEventRouter class.
+//	Description:	Defines the AnnotationEventRouter class.
 //		This class handles events for the VizFeature params
 //
-#ifndef VIZFEATUREEVENTROUTER_H
-#define VIZFEATUREEVENTROUTER_H
+#ifndef ANNOTATIONEVENTROUTER_H
+#define ANNOTATIONEVENTROUTER_H
 
 #include <qobject.h>
 #include "EventRouter.h"
@@ -34,13 +34,13 @@ namespace VAPoR {
 class ControlExec;
 }
 
-class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public EventRouter {
+class AnnotationEventRouter : public QWidget, public Ui_vizFeaturesTab, public EventRouter {
     Q_OBJECT
 
 public:
-    VizFeatureEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
+    AnnotationEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
 
-    virtual ~VizFeatureEventRouter();
+    virtual ~AnnotationEventRouter();
 
     //! Connect signals and slots from tab
     virtual void hookUpTab();
@@ -101,7 +101,7 @@ private:
 
     void connectAnnotationWidgets();
 
-    VizFeatureEventRouter() {}
+    AnnotationEventRouter() {}
 
     void setColorHelper(QWidget *w, vector<double> &rgb);
 
@@ -147,4 +147,4 @@ private:
     bool             _animConnected;
 };
 
-#endif    // VIZFEATUREEVENTROUTER_H
+#endif    // ANNOTATIONEVENTROUTER_H
