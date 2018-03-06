@@ -275,7 +275,6 @@ AxisAnnotation *AnnotationParams::GetAxisAnnotation(string dataMgr)
     if (dataMgr == "") dataMgr = GetCurrentAxisDataMgrName();
 
     vector<string> names = _axisAnnotations->GetNames();
-
     if (_axisAnnotations->GetParams(dataMgr) == NULL) {
         AxisAnnotation newAnnotation(_ssave);
         _axisAnnotations->Insert(&newAnnotation, dataMgr);
