@@ -36,8 +36,8 @@
 using namespace VAPoR;
 using namespace Wasp;
 
-// const string SettingsParams::_classType = "SettingsParams";
-const string SettingsParams::_classType = "Settings";
+const string SettingsParams::_classType = "SettingsParams";
+// const string SettingsParams::_classType = "Settings";
 
 const string SettingsParams::_shortName = "Settings";
 const string SettingsParams::_cacheMBTag = "CacheMBs";
