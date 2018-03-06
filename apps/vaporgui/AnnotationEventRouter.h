@@ -78,7 +78,6 @@ class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public Ev
     void setDomainColor();
     void setRegionColor();
     void setBackgroundColor();
-    void setRegionFrameEnabled();
     void setDomainFrameEnabled();
     void setTimeColor();
     void setLatLonAnnot(bool);
