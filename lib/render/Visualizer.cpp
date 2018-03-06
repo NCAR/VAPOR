@@ -65,7 +65,7 @@ Visualizer::Visualizer(
 	m_dataStatus = dataStatus;
 	m_winName = winName;
 	m_shaderMgr = NULL;
-	m_vizFeatures = new VizFeatureRenderer(pm, dataStatus, winName);
+	m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
 	m_viewpointDirty = true;
 
 
