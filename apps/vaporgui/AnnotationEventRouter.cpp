@@ -6,7 +6,7 @@
 //															*
 //************************************************************************/
 //
-//	File:		VizFeatureEventRouter.cpp
+//	File:		AnnotationEventRouter.cpp
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -14,7 +14,7 @@
 //
 //	Date:		May 2006
 //
-//	Description:	Implements the VizFeatureEventRouter class.
+//	Description:	Implements the AnnotationEventRouter class.
 //		This class supports routing messages from the gui to the params
 //		This is derived from the vizfeature Widget
 //
@@ -41,7 +41,7 @@
 #include <sstream>
 
 #include "ErrorReporter.h"
-#include "VizFeatureEventRouter.h"
+#include "AnnotationEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
 
@@ -67,7 +67,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 } // namespace
 
-VizFeatureEventRouter::VizFeatureEventRouter(
+AnnotationEventRouter::AnnotationEventRouter(
     QWidget *parent, ControlExec *ce) : QWidget(parent),
                                         Ui_vizFeaturesTab(),
                                         EventRouter(ce, VizFeatureParams::GetClassType()) {
@@ -90,10 +90,10 @@ VizFeatureEventRouter::VizFeatureEventRouter(
     _ap = NULL;
 }
 
-VizFeatureEventRouter::~VizFeatureEventRouter() {
+AnnotationEventRouter::~AnnotationEventRouter() {
 }
 
-void VizFeatureEventRouter::connectAnnotationWidgets() {
+void AnnotationEventRouter::connectAnnotationWidgets() {
     connect(_axisAnnotationEnabledCheckbox, SIGNAL(toggled(bool)),
             this, SLOT(setAxisAnnotation(bool)));
     connect(_latLonAnnotationCheckbox, SIGNAL(toggled(bool)),
@@ -131,7 +131,7 @@ void VizFeatureEventRouter::connectAnnotationWidgets() {
 /**********************************************************
  * Whenever a new vizfeaturetab is created it must be hooked up here
  ************************************************************/
-void VizFeatureEventRouter::hookUpTab() {
+void AnnotationEventRouter::hookUpTab() {
     connect(
         backgroundColorButton, SIGNAL(clicked()),
         this, SLOT(setBackgroundColor()));
@@ -168,7 +168,7 @@ void VizFeatureEventRouter::hookUpTab() {
         this, SLOT(setTimeColor()));
 }
 
-void VizFeatureEventRouter::GetWebHelp(
+void AnnotationEventRouter::GetWebHelp(
     vector<pair<string, string>> &help) const {
     help.clear();
 
@@ -177,7 +177,7 @@ void VizFeatureEventRouter::GetWebHelp(
         "http://www.vapor.ucar.edu/docs/vapor-gui-help/vizfeature-tab#VizFeatureOverview"));
 }
 
-void VizFeatureEventRouter::_updateTab() {
+void AnnotationEventRouter::_updateTab() {
     updateRegionColor();
     updateDomainColor();
     updateBackgroundColor();
@@ -200,7 +200,7 @@ void VizFeatureEventRouter::_updateTab() {
     return;
 }
 
-void VizFeatureEventRouter::updateDataMgrCombo() {
+void AnnotationEventRouter::updateDataMgrCombo() {
     // Save current selection
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
     string currentSelection = vParams->GetCurrentAxisDataMgrName();
@@ -225,7 +225,7 @@ void VizFeatureEventRouter::updateDataMgrCombo() {
     }
 }
 
-void VizFeatureEventRouter::copyRegionFromRenderer() {
+void AnnotationEventRouter::copyRegionFromRenderer() {
     string copyString = copyRegionCombo->currentText().toStdString();
     if (copyString == "")
         return;
@@ -269,7 +269,7 @@ void VizFeatureEventRouter::copyRegionFromRenderer() {
     paramsMgr->EndSaveStateGroup();
 }
 
-void VizFeatureEventRouter::updateCopyRegionCombo() {
+void AnnotationEventRouter::updateCopyRegionCombo() {
     copyRegionCombo->clear();
 
     VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
@@ -315,7 +315,7 @@ void VizFeatureEventRouter::updateCopyRegionCombo() {
     }
 }
 
-void VizFeatureEventRouter::updateAnnotationCheckbox() {
+void AnnotationEventRouter::updateAnnotationCheckbox() {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     bool annotationEnabled = aa->GetAxisAnnotationEnabled();
     if (annotationEnabled)
@@ -324,7 +324,7 @@ void VizFeatureEventRouter::updateAnnotationCheckbox() {
         _axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
 }
 
-void VizFeatureEventRouter::updateLatLonCheckbox() {
+void AnnotationEventRouter::updateLatLonCheckbox() {
     string dmName = dataMgrSelectorCombo->currentText().toStdString();
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     DataMgr *dataMgr = dataStatus->GetDataMgr(dmName);
@@ -345,7 +345,7 @@ void VizFeatureEventRouter::updateLatLonCheckbox() {
         _latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
 }
 
-void VizFeatureEventRouter::updateTicOrientationCombos() {
+void AnnotationEventRouter::updateTicOrientationCombos() {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     vector<double> ticDir = aa->GetTicDirs();
 
@@ -354,7 +354,7 @@ void VizFeatureEventRouter::updateTicOrientationCombos() {
     zTicOrientationCombo->setCurrentIndex(ticDir[2]);
 }
 
-void VizFeatureEventRouter::scaleNormalizedCoordsToWorld(
+void AnnotationEventRouter::scaleNormalizedCoordsToWorld(
     std::vector<double> &coords) {
     std::vector<double> extents = getDomainExtents();
     int size = extents.size() / 2;
@@ -365,7 +365,7 @@ void VizFeatureEventRouter::scaleNormalizedCoordsToWorld(
     }
 }
 
-void VizFeatureEventRouter::scaleWorldCoordsToNormalized(
+void AnnotationEventRouter::scaleWorldCoordsToNormalized(
     std::vector<double> &coords) {
     std::vector<double> extents = getDomainExtents();
     int size = extents.size() / 2;
@@ -376,7 +376,7 @@ void VizFeatureEventRouter::scaleWorldCoordsToNormalized(
     }
 }
 
-void VizFeatureEventRouter::updateAnnotationTable() {
+void AnnotationEventRouter::updateAnnotationTable() {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     bool annotationEnabled = aa->GetLatLonAxesEnabled();
 
@@ -427,19 +427,19 @@ void VizFeatureEventRouter::updateAnnotationTable() {
     _annotationVaporTable->Update(5, 3, tableValues, rowHeaders, colHeaders);
 }
 
-void VizFeatureEventRouter::convertPCSToLon(
+void AnnotationEventRouter::convertPCSToLon(
     double &xCoord) {
     double dummy = 0.;
     convertPCSToLonLat(xCoord, dummy);
 }
 
-void VizFeatureEventRouter::convertPCSToLat(
+void AnnotationEventRouter::convertPCSToLat(
     double &yCoord) {
     double dummy = 0.;
     convertPCSToLonLat(dummy, yCoord);
 }
 
-void VizFeatureEventRouter::convertPCSToLonLat(
+void AnnotationEventRouter::convertPCSToLonLat(
     double &xCoord, double &yCoord) {
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
@@ -462,19 +462,19 @@ void VizFeatureEventRouter::convertPCSToLonLat(
     yCoord = coords[1];
 }
 
-void VizFeatureEventRouter::convertLonToPCS(
+void AnnotationEventRouter::convertLonToPCS(
     double &xCoord) {
     double dummy = 0.;
     convertLonLatToPCS(xCoord, dummy);
 }
 
-void VizFeatureEventRouter::convertLatToPCS(
+void AnnotationEventRouter::convertLatToPCS(
     double &yCoord) {
     double dummy = 0.;
     convertLonLatToPCS(dummy, yCoord);
 }
 
-void VizFeatureEventRouter::convertLonLatToPCS(
+void AnnotationEventRouter::convertLonLatToPCS(
     double &xCoord, double &yCoord) {
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
@@ -497,7 +497,7 @@ void VizFeatureEventRouter::convertLonLatToPCS(
     yCoord = coords[1];
 }
 
-AxisAnnotation *VizFeatureEventRouter::_getCurrentAxisAnnotation() {
+AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     string dataMgr = vfParams->GetCurrentAxisDataMgrName();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation(dataMgr);
@@ -509,7 +509,7 @@ AxisAnnotation *VizFeatureEventRouter::_getCurrentAxisAnnotation() {
     return aa;
 }
 
-std::vector<double> VizFeatureEventRouter::getDomainExtents() const {
+std::vector<double> AnnotationEventRouter::getDomainExtents() const {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     size_t ts = GetCurrentTimeStep();
     DataStatus *dataStatus = _controlExec->GetDataStatus();
@@ -522,12 +522,12 @@ std::vector<double> VizFeatureEventRouter::getDomainExtents() const {
 }
 
 // Initialize tic length to 2.5% of the domain that they're oriented on.
-void VizFeatureEventRouter::initializeTicSizes(AxisAnnotation *aa) {
+void AnnotationEventRouter::initializeTicSizes(AxisAnnotation *aa) {
     vector<double> ticSizes(3, .025);
     aa->SetTicSize(ticSizes);
 }
 
-void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation *aa) {
+void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa) {
     vector<double> minExts(3, 0.0);
     vector<double> maxExts(3, 1.0);
 
@@ -540,7 +540,7 @@ void VizFeatureEventRouter::initializeAnnotationExtents(AxisAnnotation *aa) {
     aa->SetDataMgrName(dataMgr);
 }
 
-void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
+void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa) {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Initialize axis annotation table");
 
@@ -552,7 +552,7 @@ void VizFeatureEventRouter::initializeAnnotation(AxisAnnotation *aa) {
     aa->SetAxisAnnotationInitialized(true);
 }
 
-void VizFeatureEventRouter::updateAxisAnnotations() {
+void AnnotationEventRouter::updateAxisAnnotations() {
     updateDataMgrCombo();
     updateCopyRegionCombo();
     updateAnnotationCheckbox();
@@ -576,7 +576,7 @@ void VizFeatureEventRouter::updateAxisAnnotations() {
     _ticWidthCombo->Update(0, 7, ticWidth); //minMax[0], minMax[1], ticWidth);
 }
 
-void VizFeatureEventRouter::axisAnnotationTableChanged() {
+void AnnotationEventRouter::axisAnnotationTableChanged() {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     bool annotateLatLon = aa->GetLatLonAxesEnabled();
 
@@ -614,7 +614,7 @@ void VizFeatureEventRouter::axisAnnotationTableChanged() {
     aa->SetAxisOrigin(origins);
 }
 
-void VizFeatureEventRouter::setCurrentAxisDataMgr(int index) {
+void AnnotationEventRouter::setCurrentAxisDataMgr(int index) {
     QString qDataMgr = dataMgrSelectorCombo->itemText(index);
     string dataMgr = qDataMgr.toStdString();
 
@@ -622,7 +622,7 @@ void VizFeatureEventRouter::setCurrentAxisDataMgr(int index) {
     vfParams->SetCurrentAxisDataMgrName(dataMgr);
 }
 
-vector<double> VizFeatureEventRouter::getTableRow(int row) {
+vector<double> AnnotationEventRouter::getTableRow(int row) {
     vector<double> contents;
     for (int col = 0; col < 3; col++) {
         double val = _annotationVaporTable->GetValue(row, col);
@@ -631,7 +631,7 @@ vector<double> VizFeatureEventRouter::getTableRow(int row) {
     return contents;
 }
 
-void VizFeatureEventRouter::setColorHelper(
+void AnnotationEventRouter::setColorHelper(
     QWidget *w, vector<double> &rgb) {
     rgb.clear();
 
@@ -643,7 +643,7 @@ void VizFeatureEventRouter::setColorHelper(
     rgb.push_back(newColor.blue() / 255.0);
 }
 
-void VizFeatureEventRouter::updateColorHelper(
+void AnnotationEventRouter::updateColorHelper(
     const vector<double> &rgb, QWidget *w) {
     QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
 
@@ -652,7 +652,7 @@ void VizFeatureEventRouter::updateColorHelper(
     w->setPalette(pal);
 }
 
-void VizFeatureEventRouter::setRegionColor() {
+void AnnotationEventRouter::setRegionColor() {
 
     vector<double> rgb;
 
@@ -664,7 +664,7 @@ void VizFeatureEventRouter::setRegionColor() {
     vfParams->SetRegionColor(rgb);
 }
 
-void VizFeatureEventRouter::updateRegionColor() {
+void AnnotationEventRouter::updateRegionColor() {
 
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vector<double> rgb;
@@ -673,7 +673,7 @@ void VizFeatureEventRouter::updateRegionColor() {
     updateColorHelper(rgb, regionColorEdit);
 }
 
-void VizFeatureEventRouter::setDomainColor() {
+void AnnotationEventRouter::setDomainColor() {
     vector<double> rgb;
 
     setColorHelper(domainColorEdit, rgb);
@@ -684,7 +684,7 @@ void VizFeatureEventRouter::setDomainColor() {
     vfParams->SetDomainColor(rgb);
 }
 
-void VizFeatureEventRouter::updateDomainColor() {
+void AnnotationEventRouter::updateDomainColor() {
 
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vector<double> rgb;
@@ -693,7 +693,7 @@ void VizFeatureEventRouter::updateDomainColor() {
     updateColorHelper(rgb, domainColorEdit);
 }
 
-void VizFeatureEventRouter::setBackgroundColor() {
+void AnnotationEventRouter::setBackgroundColor() {
     vector<double> rgb;
 
     setColorHelper(backgroundColorEdit, rgb);
@@ -704,7 +704,7 @@ void VizFeatureEventRouter::setBackgroundColor() {
     vfParams->SetBackgroundColor(rgb);
 }
 
-void VizFeatureEventRouter::updateBackgroundColor() {
+void AnnotationEventRouter::updateBackgroundColor() {
 
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vector<double> rgb;
@@ -713,7 +713,7 @@ void VizFeatureEventRouter::updateBackgroundColor() {
     updateColorHelper(rgb, backgroundColorEdit);
 }
 
-void VizFeatureEventRouter::setAxisColor() {
+void AnnotationEventRouter::setAxisColor() {
     vector<double> rgb;
 
     setColorHelper(axisColorEdit, rgb);
@@ -724,7 +724,7 @@ void VizFeatureEventRouter::setAxisColor() {
     aa->SetAxisColor(rgb);
 }
 
-void VizFeatureEventRouter::setAxisBackgroundColor() {
+void AnnotationEventRouter::setAxisBackgroundColor() {
     vector<double> rgb;
 
     setColorHelper(axisBackgroundColorEdit, rgb);
@@ -735,7 +735,7 @@ void VizFeatureEventRouter::setAxisBackgroundColor() {
     aa->SetAxisBackgroundColor(rgb);
 }
 
-void VizFeatureEventRouter::updateAxisColor() {
+void AnnotationEventRouter::updateAxisColor() {
     vector<double> rgb;
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     rgb = aa->GetAxisColor();
@@ -743,7 +743,7 @@ void VizFeatureEventRouter::updateAxisColor() {
     updateColorHelper(rgb, axisColorEdit);
 }
 
-void VizFeatureEventRouter::updateAxisBackgroundColor() {
+void AnnotationEventRouter::updateAxisBackgroundColor() {
     vector<double> rgb;
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     rgb = aa->GetAxisBackgroundColor();
@@ -751,7 +751,7 @@ void VizFeatureEventRouter::updateAxisBackgroundColor() {
     updateColorHelper(rgb, axisBackgroundColorEdit);
 }
 
-void VizFeatureEventRouter::setTimeColor() {
+void AnnotationEventRouter::setTimeColor() {
     vector<double> rgb;
 
     setColorHelper(timeColorEdit, rgb);
@@ -762,7 +762,7 @@ void VizFeatureEventRouter::setTimeColor() {
     miscParams->SetTimeAnnotColor(rgb);
 }
 
-void VizFeatureEventRouter::updateTimeColor() {
+void AnnotationEventRouter::updateTimeColor() {
 
     MiscParams *miscParams = GetMiscParams();
     vector<double> rgb;
@@ -771,7 +771,7 @@ void VizFeatureEventRouter::updateTimeColor() {
     updateColorHelper(rgb, timeColorEdit);
 }
 
-void VizFeatureEventRouter::timeAnnotationChanged() {
+void AnnotationEventRouter::timeAnnotationChanged() {
     if (_animConnected == false) {
         _ap = GetAnimationParams();
         bool v = connect(_ap, SIGNAL(timestepChanged()), this, SLOT(timeAnnotationChanged()));
@@ -803,7 +803,7 @@ void VizFeatureEventRouter::timeAnnotationChanged() {
     }
 }
 
-void VizFeatureEventRouter::timeLLXChanged() {
+void AnnotationEventRouter::timeLLXChanged() {
     MiscParams *miscParams = GetMiscParams();
     float llx = timeLLXEdit->text().toFloat();
 
@@ -811,7 +811,7 @@ void VizFeatureEventRouter::timeLLXChanged() {
     drawTimeStamp();
 }
 
-void VizFeatureEventRouter::timeLLYChanged() {
+void AnnotationEventRouter::timeLLYChanged() {
     MiscParams *miscParams = GetMiscParams();
     float lly = timeLLYEdit->text().toFloat();
 
@@ -819,14 +819,14 @@ void VizFeatureEventRouter::timeLLYChanged() {
     drawTimeStamp();
 }
 
-void VizFeatureEventRouter::timeSizeChanged() {
+void AnnotationEventRouter::timeSizeChanged() {
     MiscParams *miscParams = GetMiscParams();
     float size = timeSizeEdit->text().toFloat();
     miscParams->SetTimeAnnotSize(size);
     drawTimeStamp();
 }
 
-void VizFeatureEventRouter::drawTimeStep(string myString) {
+void AnnotationEventRouter::drawTimeStep(string myString) {
     _controlExec->ClearText();
 
     if (myString == "") {
@@ -843,7 +843,7 @@ void VizFeatureEventRouter::drawTimeStep(string myString) {
     _controlExec->DrawText(myString, x, y, size, color, 1);
 }
 
-void VizFeatureEventRouter::drawTimeUser() {
+void AnnotationEventRouter::drawTimeUser() {
     MiscParams *mp = GetMiscParams();
     if (mp->GetTimeStep() == true) {
         drawTimeStep();
@@ -861,7 +861,7 @@ void VizFeatureEventRouter::drawTimeUser() {
     drawTimeStep(myString);
 }
 
-void VizFeatureEventRouter::drawTimeStamp() {
+void AnnotationEventRouter::drawTimeStamp() {
     MiscParams *mp = GetMiscParams();
     if (mp->GetTimeStep() == true) {
         drawTimeStep();
@@ -873,83 +873,83 @@ void VizFeatureEventRouter::drawTimeStamp() {
     drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
 }
 
-void VizFeatureEventRouter::setAxisDigits(int digits) {
+void AnnotationEventRouter::setAxisDigits(int digits) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetAxisDigits(digits);
 }
 
-void VizFeatureEventRouter::setAxisTicWidth(double width) {
+void AnnotationEventRouter::setAxisTicWidth(double width) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetTicWidth(width);
 }
 
-void VizFeatureEventRouter::setXTicOrientation(int) {
+void AnnotationEventRouter::setXTicOrientation(int) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     vector<double> ticDir = aa->GetTicDirs();
     ticDir[0] = xTicOrientationCombo->currentIndex() + 1; // Y(1) or Z(2)
     aa->SetTicDirs(ticDir);
 }
-void VizFeatureEventRouter::setYTicOrientation(int) {
+void AnnotationEventRouter::setYTicOrientation(int) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     vector<double> ticDir = aa->GetTicDirs();
     ticDir[1] = yTicOrientationCombo->currentIndex() * 2; // X(0) or Z(2)
     aa->SetTicDirs(ticDir);
 }
-void VizFeatureEventRouter::setZTicOrientation(int) {
+void AnnotationEventRouter::setZTicOrientation(int) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     vector<double> ticDir = aa->GetTicDirs();
     ticDir[2] = zTicOrientationCombo->currentIndex(); // X(0) or Y(1)
     aa->SetTicDirs(ticDir);
 }
 
-void VizFeatureEventRouter::setLatLonAnnot(bool val) {
+void AnnotationEventRouter::setLatLonAnnot(bool val) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetLatLonAxesEnabled(val);
 }
 
-void VizFeatureEventRouter::setDomainFrameEnabled() {
+void AnnotationEventRouter::setDomainFrameEnabled() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
 }
 
-void VizFeatureEventRouter::setRegionFrameEnabled() {
+void AnnotationEventRouter::setRegionFrameEnabled() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
 }
 
-void VizFeatureEventRouter::setAxisAnnotation(bool toggled) {
+void AnnotationEventRouter::setAxisAnnotation(bool toggled) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetAxisAnnotationEnabled(toggled);
 }
 
-void VizFeatureEventRouter::setLatLonAnnotation(bool val) {
+void AnnotationEventRouter::setLatLonAnnotation(bool val) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetLatLonAxesEnabled(val);
 }
 
-void VizFeatureEventRouter::setAxisTextSize(int size) {
+void AnnotationEventRouter::setAxisTextSize(int size) {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetAxisFontSize(size);
 }
 
-void VizFeatureEventRouter::setAxisArrowsEnabled() {
+void AnnotationEventRouter::setAxisArrowsEnabled() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetShowAxisArrows(_axisArrowCheckbox->isChecked());
 }
 
-void VizFeatureEventRouter::setXArrowPosition() {
+void AnnotationEventRouter::setXArrowPosition() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     float pos = _arrowXEdit->text().toFloat();
     vfParams->SetXAxisArrowPosition(pos);
 }
 
-void VizFeatureEventRouter::setYArrowPosition() {
+void AnnotationEventRouter::setYArrowPosition() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     float pos = _arrowYEdit->text().toFloat();
     vfParams->SetYAxisArrowPosition(pos);
 }
 
-void VizFeatureEventRouter::setZArrowPosition() {
+void AnnotationEventRouter::setZArrowPosition() {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     float pos = _arrowZEdit->text().toFloat();
     vfParams->SetZAxisArrowPosition(pos);
