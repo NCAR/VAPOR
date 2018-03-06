@@ -88,8 +88,8 @@ VizFeatureEventRouter::~VizFeatureEventRouter() {}
 
 void VizFeatureEventRouter::connectAnnotationWidgets()
 {
-    connect(axisAnnotationEnabledCheckbox, SIGNAL(toggled(bool)), this, SLOT(setAxisAnnotation(bool)));
-    connect(latLonAnnotationCheckbox, SIGNAL(toggled(bool)), this, SLOT(setLatLonAnnotation(bool)));
+    connect(_axisAnnotationEnabledCheckbox, SIGNAL(toggled(bool)), this, SLOT(setAxisAnnotation(bool)));
+    connect(_latLonAnnotationCheckbox, SIGNAL(toggled(bool)), this, SLOT(setLatLonAnnotation(bool)));
     connect(_textSizeCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisTextSize(int)));
     connect(_digitsCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisDigits(int)));
     connect(_ticWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(setAxisTicWidth(double)));
@@ -101,6 +101,9 @@ void VizFeatureEventRouter::connectAnnotationWidgets()
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
     connect(dataMgrSelectorCombo, SIGNAL(activated(int)), this, SLOT(setCurrentAxisDataMgr(int)));
     connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
+    connect(_arrowXEdit, SIGNAL(returnPressed()), this, SLOT(setXArrowPosition()));
+    connect(_arrowYEdit, SIGNAL(returnPressed()), this, SLOT(setYArrowPosition()));
+    connect(_arrowZEdit, SIGNAL(returnPressed()), this, SLOT(setZArrowPosition()));
 }
 
 /**********************************************************
@@ -110,10 +113,10 @@ void VizFeatureEventRouter::hookUpTab()
 {
     connect(backgroundColorButton, SIGNAL(clicked()), this, SLOT(setBackgroundColor()));
     connect(domainColorButton, SIGNAL(clicked()), this, SLOT(setDomainColor()));
-    connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setUseDomainFrame()));
-    connect(regionFrameCheckbox, SIGNAL(clicked()), this, SLOT(setUseRegionFrame()));
+    connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setDomainFrameEnabled()));
+    connect(regionFrameCheckbox, SIGNAL(clicked()), this, SLOT(setRegionFrameEnabled()));
     connect(regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
-    connect(axisArrowCheckbox, SIGNAL(clicked()), this, SLOT(setUseAxisArrows()));
+    connect(_axisArrowCheckbox, SIGNAL(clicked()), this, SLOT(setAxisArrowsEnabled()));
 
     connect(timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
     connect(timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
@@ -145,10 +148,10 @@ void VizFeatureEventRouter::_updateTab()
     // Axis arrows:
     //
     vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
-    arrowXEdit->setText(QString::number(axisArrowCoords[0]));
-    arrowYEdit->setText(QString::number(axisArrowCoords[1]));
-    arrowZEdit->setText(QString::number(axisArrowCoords[2]));
-    axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
+    _arrowXEdit->setText(QString::number(axisArrowCoords[0]));
+    _arrowYEdit->setText(QString::number(axisArrowCoords[1]));
+    _arrowZEdit->setText(QString::number(axisArrowCoords[2]));
+    _axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
 
     return;
 }
@@ -266,9 +269,9 @@ void VizFeatureEventRouter::updateAnnotationCheckbox()
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     bool            annotationEnabled = aa->GetAxisAnnotationEnabled();
     if (annotationEnabled)
-        axisAnnotationEnabledCheckbox->setCheckState(Qt::Checked);
+        _axisAnnotationEnabledCheckbox->setCheckState(Qt::Checked);
     else
-        axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
+        _axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
 }
 
 void VizFeatureEventRouter::updateLatLonCheckbox()
@@ -280,17 +283,17 @@ void VizFeatureEventRouter::updateLatLonCheckbox()
     string projString = dataMgr->GetMapProjection();
 
     if (projString.size() == 0) {
-        latLonAnnotationCheckbox->setEnabled(false);
+        _latLonAnnotationCheckbox->setEnabled(false);
         return;
     } else
-        latLonAnnotationCheckbox->setEnabled(true);
+        _latLonAnnotationCheckbox->setEnabled(true);
 
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     bool            annotateLatLon = aa->GetLatLonAxesEnabled();
     if (annotateLatLon)
-        latLonAnnotationCheckbox->setCheckState(Qt::Checked);
+        _latLonAnnotationCheckbox->setCheckState(Qt::Checked);
     else
-        latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
+        _latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
 }
 
 void VizFeatureEventRouter::updateTicOrientationCombos()
@@ -872,13 +875,13 @@ void VizFeatureEventRouter::setLatLonAnnot(bool val)
     aa->SetLatLonAxesEnabled(val);
 }
 
-void VizFeatureEventRouter::setUseDomainFrame()
+void VizFeatureEventRouter::setDomainFrameEnabled()
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
 }
 
-void VizFeatureEventRouter::setUseRegionFrame()
+void VizFeatureEventRouter::setRegionFrameEnabled()
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
     vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
@@ -902,8 +905,29 @@ void VizFeatureEventRouter::setAxisTextSize(int size)
     aa->SetAxisFontSize(size);
 }
 
-void VizFeatureEventRouter::setUseAxisArrows()
+void VizFeatureEventRouter::setAxisArrowsEnabled()
 {
     VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
-    vfParams->SetShowAxisArrows(axisArrowCheckbox->isChecked());
+    vfParams->SetShowAxisArrows(_axisArrowCheckbox->isChecked());
+}
+
+void VizFeatureEventRouter::setXArrowPosition()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    float             pos = _arrowXEdit->text().toFloat();
+    vfParams->SetXAxisArrowPosition(pos);
+}
+
+void VizFeatureEventRouter::setYArrowPosition()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    float             pos = _arrowYEdit->text().toFloat();
+    vfParams->SetYAxisArrowPosition(pos);
+}
+
+void VizFeatureEventRouter::setZArrowPosition()
+{
+    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    float             pos = _arrowZEdit->text().toFloat();
+    vfParams->SetZAxisArrowPosition(pos);
 }

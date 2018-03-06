@@ -293,6 +293,27 @@ void VizFeatureParams::SetAxisArrowCoords(vector<double> val)
     SetValueDoubleVec(_axisArrowCoordsTag, "Set axis arrow coords", val);
 }
 
+void VizFeatureParams::SetXAxisArrowPosition(float val)
+{
+    std::vector<double> pos = GetAxisArrowCoords();
+    pos[0] = val;
+    SetAxisArrowCoords(pos);
+}
+
+void VizFeatureParams::SetYAxisArrowPosition(float val)
+{
+    std::vector<double> pos = GetAxisArrowCoords();
+    pos[1] = val;
+    SetAxisArrowCoords(pos);
+}
+
+void VizFeatureParams::SetZAxisArrowPosition(float val)
+{
+    std::vector<double> pos = GetAxisArrowCoords();
+    pos[2] = val;
+    SetAxisArrowCoords(pos);
+}
+
 vector<double> VizFeatureParams::GetAxisArrowCoords() const
 {
     vector<double> defaultv(3, 0.0);
