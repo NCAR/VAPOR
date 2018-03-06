@@ -58,9 +58,9 @@ public:
     //! \retval RegionParams* current active RegionParams
     RegionParams *getActiveRegionParams() const;
 
-    //! Method that returns the VizFeatureParams that is active in this window.
-    //! \retval VizFeatureParams* current active VizFeatureParams
-    VizFeatureParams *getActiveVizFeatureParams() const;
+    //! Method that returns the AnnotationParams that is active in this window.
+    //! \retval AnnotationParams* current active AnnotationParams
+    AnnotationParams *getActiveAnnotationParams() const;
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
     //! \param[in] sm A pointer to a ShaderMgr

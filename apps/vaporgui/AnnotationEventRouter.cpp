@@ -27,7 +27,7 @@
 #include <qmessagebox.h>
 #include <qlineedit.h>
 #include "GL/glew.h"
-#include <vapor/VizFeatureParams.h>
+#include <vapor/AnnotationParams.h>
 
 #include "ui_vizFeaturesTab.h"
 #include "qcolordialog.h"
@@ -66,7 +66,7 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 }    // namespace
 
-AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_vizFeaturesTab(), EventRouter(ce, VizFeatureParams::GetClassType())
+AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_vizFeaturesTab(), EventRouter(ce, AnnotationParams::GetClassType())
 {
     setupUi(this);
 
@@ -140,7 +140,7 @@ void AnnotationEventRouter::_updateTab()
     updateTimeColor();
     updateAxisAnnotations();
 
-    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
     regionFrameCheckbox->setChecked(vParams->GetUseRegionFrame());
@@ -159,7 +159,7 @@ void AnnotationEventRouter::_updateTab()
 void AnnotationEventRouter::updateDataMgrCombo()
 {
     // Save current selection
-    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     string            currentSelection = vParams->GetCurrentAxisDataMgrName();
 
     // Repopulate the combo's entries
@@ -226,7 +226,7 @@ void AnnotationEventRouter::updateCopyRegionCombo()
 {
     copyRegionCombo->clear();
 
-    VizFeatureParams *vParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
 
     _visNames.clear();
@@ -395,7 +395,7 @@ void AnnotationEventRouter::convertPCSToLat(double &yCoord)
 void AnnotationEventRouter::convertPCSToLonLat(double &xCoord, double &yCoord)
 {
     DataStatus *      dataStatus = _controlExec->GetDataStatus();
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     string            dataMgrName = vfParams->GetCurrentAxisDataMgrName();
     DataMgr *         dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
@@ -429,7 +429,7 @@ void AnnotationEventRouter::convertLatToPCS(double &yCoord)
 void AnnotationEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
 {
     DataStatus *      dataStatus = _controlExec->GetDataStatus();
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     string            dataMgrName = vfParams->GetCurrentAxisDataMgrName();
     DataMgr *         dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
@@ -450,7 +450,7 @@ void AnnotationEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
 
 AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
     AxisAnnotation *  aa = vfParams->GetAxisAnnotation(dataMgr);
 
@@ -488,7 +488,7 @@ void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
     aa->SetMaxTics(maxExts);
     aa->SetAxisOrigin(minExts);
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
     aa->SetDataMgrName(dataMgr);
 }
@@ -573,7 +573,7 @@ void AnnotationEventRouter::setCurrentAxisDataMgr(int index)
     QString qDataMgr = dataMgrSelectorCombo->itemText(index);
     string  dataMgr = qDataMgr.toStdString();
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetCurrentAxisDataMgrName(dataMgr);
 }
 
@@ -615,13 +615,13 @@ void AnnotationEventRouter::setRegionColor()
     setColorHelper(regionColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetRegionColor(rgb);
 }
 
 void AnnotationEventRouter::updateRegionColor()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vector<double>    rgb;
     vfParams->GetRegionColor(rgb);
 
@@ -635,13 +635,13 @@ void AnnotationEventRouter::setDomainColor()
     setColorHelper(domainColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetDomainColor(rgb);
 }
 
 void AnnotationEventRouter::updateDomainColor()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vector<double>    rgb;
     vfParams->GetDomainColor(rgb);
 
@@ -655,13 +655,13 @@ void AnnotationEventRouter::setBackgroundColor()
     setColorHelper(backgroundColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetBackgroundColor(rgb);
 }
 
 void AnnotationEventRouter::updateBackgroundColor()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vector<double>    rgb;
     vfParams->GetBackgroundColor(rgb);
 
@@ -877,13 +877,13 @@ void AnnotationEventRouter::setLatLonAnnot(bool val)
 
 void AnnotationEventRouter::setDomainFrameEnabled()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
 }
 
 void AnnotationEventRouter::setRegionFrameEnabled()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetUseRegionFrame(regionFrameCheckbox->isChecked());
 }
 
@@ -907,27 +907,27 @@ void AnnotationEventRouter::setAxisTextSize(int size)
 
 void AnnotationEventRouter::setAxisArrowsEnabled()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     vfParams->SetShowAxisArrows(_axisArrowCheckbox->isChecked());
 }
 
 void AnnotationEventRouter::setXArrowPosition()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     float             pos = _arrowXEdit->text().toFloat();
     vfParams->SetXAxisArrowPosition(pos);
 }
 
 void AnnotationEventRouter::setYArrowPosition()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     float             pos = _arrowYEdit->text().toFloat();
     vfParams->SetYAxisArrowPosition(pos);
 }
 
 void AnnotationEventRouter::setZArrowPosition()
 {
-    VizFeatureParams *vfParams = (VizFeatureParams *)GetActiveParams();
+    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     float             pos = _arrowZEdit->text().toFloat();
     vfParams->SetZAxisArrowPosition(pos);
 }

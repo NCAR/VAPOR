@@ -31,7 +31,7 @@ namespace VAPoR {
 class DataStatus;
 
 //! \class VizFeatureRenderer
-//! \brief Class that draws various geometry as specified by VizFeatureParams
+//! \brief Class that draws various geometry as specified by AnnotationParams
 //! \author Alan Norton
 //! \version 3.0
 //! \date July 2015

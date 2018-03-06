@@ -6,20 +6,21 @@
 //									*
 //************************************************************************/
 //
-//	File:		VizFeatureParams.h
+//	File:		AnnotationParams.h
 //
-//	Author:		Alan Norton
+//	Author:	Scott Pearse
+//			Alan Norton
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //
 //	Date:		June 2015
 //
-//	Description:	Defines the VizFeatureParams class.
+//	Description:	Defines the AnnotationParams class.
 //		This class supports parameters associted with the
 //		vizfeature panel, describing the visual features in the visualizer
 //
-#ifndef VIZFEATUREPARAMS_H
-#define VIZFEATUREPARAMS_H
+#ifndef ANNOTATIONPARAMS_H
+#define ANNOTATIONPARAMS_H
 
 #include <vector>
 
@@ -33,35 +34,35 @@ namespace VAPoR {
 
 class XmlNode;
 
-//! \class VizFeatureParams
+//! \class AnnotationParams
 //! \ingroup Public_Params
 //! \brief A class for describing visual features displayed in the visualizer.
 //! \author Alan Norton
 //! \version 3.0
 //! \date    June 2015
 
-//! The VizFeatureParams class controls various features displayed in the visualizers
-//! There is a global VizFeatureParams, that
+//! The AnnotationParams class controls various features displayed in the visualizers
+//! There is a global AnnotationParams, that
 //! is shared by all windows whose vizfeature is set to "global".  There is also
-//! a local VizFeatureParams for each window, that users can select whenever there are multiple windows.
+//! a local AnnotationParams for each window, that users can select whenever there are multiple windows.
 //! When local settings are used, they only affect one currently active visualizer.
-//! The VizFeatureParams class also has several methods that are useful in setting up data requests from the DataMgr.
+//! The AnnotationParams class also has several methods that are useful in setting up data requests from the DataMgr.
 //!
-class PARAMS_API VizFeatureParams : public ParamsBase {
+class PARAMS_API AnnotationParams : public ParamsBase {
 public:
-    //! Create a VizFeatureParams object from scratch
+    //! Create a AnnotationParams object from scratch
     //
-    VizFeatureParams(ParamsBase::StateSave *ssave);
+    AnnotationParams(ParamsBase::StateSave *ssave);
 
-    //! Create a VizFeatureParams object from an existing XmlNode tree
+    //! Create a AnnotationParams object from an existing XmlNode tree
     //
-    VizFeatureParams(ParamsBase::StateSave *ssave, XmlNode *node);
+    AnnotationParams(ParamsBase::StateSave *ssave, XmlNode *node);
 
     //! Copy from already existing instance
     //
-    VizFeatureParams(const VizFeatureParams &rhs);
+    AnnotationParams(const AnnotationParams &rhs);
 
-    virtual ~VizFeatureParams(){};
+    virtual ~AnnotationParams(){};
 
     //! Obtain domain frame color
     void GetDomainColor(double color[3]) const;
@@ -110,7 +111,7 @@ public:
 
     // Get static string identifier for this params class
     //
-    static string GetClassType() { return ("VizFeatureParams"); }
+    static string GetClassType() { return ("AnnotationParams"); }
 
 private:
 #ifdef DEAD
@@ -153,4 +154,4 @@ private:
 };
 
 };        // namespace VAPoR
-#endif    // VIZFEATUREPARAMS_H
+#endif    // ANNOTATIONPARAMS_H
