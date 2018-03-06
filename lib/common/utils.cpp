@@ -91,3 +91,28 @@ vector <size_t> Wasp::VectorizeCoords(
 
 	return(Wasp::VectorizeCoords(offset, min, max));
 }
+
+
+#define BLOCKSIZE 256
+
+void Wasp::Transpose(
+	const float *a,float *b,int p1,int m1,int s1,int p2,int m2,int s2
+) {
+    int I1,I2;
+    int i1,i2;
+    int q,r;
+    const int block=BLOCKSIZE;
+    for(I2=p2;I2<p2+m2;I2+=block)
+      for(I1=p1;I1<p1+m1;I1+=block)
+	for(i2=I2;i2<min(I2+block,p2+m2);i2++)
+	  for(i1=I1;i1<min(I1+block,p1+m1);i1++)
+	    {
+	      q=i2*s1+i1;
+	      r=i1*s2+i2;
+	      b[r]=a[q];
+	    }
+}
+
+void Wasp::Transpose(const float *a,float *b,int s1,int s2) {
+	Wasp::Transpose(a,b,0,s1,s1,0,s2,s2);
+}

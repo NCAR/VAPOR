@@ -26,6 +26,7 @@ struct {
 	string savefilebase;
 	string ftype;
 	std::vector <float> extents;
+	OptionParser::Boolean_T	nogeoxform;
 	OptionParser::Boolean_T	verbose;
 	OptionParser::Boolean_T	help;
 	OptionParser::Boolean_T	quiet;
@@ -33,9 +34,9 @@ struct {
 } opt;
 
 OptionParser::OptDescRec_T	set_opts[] = {
-	{"nts",		1, 	"10","Number of timesteps to process"},
+	{"nts",		1, 	"1","Number of timesteps to process"},
 	{"ts0",		1, 	"0","First time step to process"},
-	{"loop",	1, 	"10","Number of loops to execute"},
+	{"loop",	1, 	"1","Number of loops to execute"},
 	{"memsize",	1, 	"2000","Cache size in MBs"},
 	{"level",1, "0","Multiresution refinement level. Zero implies coarsest resolution"},
 	{"lod",1, "0","Level of detail. Zero implies coarsest resolution"},
@@ -49,6 +50,7 @@ OptionParser::OptDescRec_T	set_opts[] = {
 		"specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"
 	},
 	{"verbose",	0,	"",	"Verobse output"},
+	{"nogeoxform",	0,	"",	"Do not apply geographic transform (projection to PCS"},
 	{"help",	0,	"",	"Print this message and exit"},
 	{"quiet",	0,	"",	"Operate quitely"},
 	{"debug",	0,	"",	"Debug mode"},
@@ -69,6 +71,7 @@ OptionParser::Option_T	get_options[] = {
 	{"ftype", Wasp::CvtToCPPStr, &opt.ftype, sizeof(opt.ftype)},
 	{"extents", Wasp::CvtToFloatVec, &opt.extents, sizeof(opt.extents)},
 	{"verbose", Wasp::CvtToBoolean, &opt.verbose, sizeof(opt.verbose)},
+	{"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
 	{"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
 	{"quiet", Wasp::CvtToBoolean, &opt.quiet, sizeof(opt.quiet)},
 	{"debug", Wasp::CvtToBoolean, &opt.debug, sizeof(opt.debug)},
@@ -109,7 +112,7 @@ void print_info(DataMgr &datamgr, bool verbose) {
 
 	for (int d=1; d<4; d++) {
 		cout << d << "D variables: ";
-		vars = datamgr.GetDataVarNames(d, true);
+		vars = datamgr.GetDataVarNames(d);
 		for (int i=0; i<vars.size(); i++) {
 			cout << vars[i] << endl;
 
@@ -171,8 +174,12 @@ int main(int argc, char **argv) {
 		files.push_back(argv[i]);
 	}
 		
+	vector <string> options;
+	if (! opt.nogeoxform) {
+		options.push_back("-project_to_pcs");
+	}
 	DataMgr	datamgr(opt.ftype, opt.memsize, opt.nthreads);
-	int rc = datamgr.Initialize(files, vector <string> ());
+	int rc = datamgr.Initialize(files, options);
 	if (rc<0) exit(1);
 
 	print_info(datamgr, opt.verbose);
