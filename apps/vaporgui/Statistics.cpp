@@ -1103,7 +1103,7 @@ void Statistics::_exportTextClicked()
         std::string dsName = guiParams->GetStatsDatasetName();
         StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
                 (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
-        VAPoR::DataMgr* currentDmgr = _controlExec->getDataStatus()->GetDataMgr( dsName );
+        VAPoR::DataMgr* currentDmgr = _controlExec->GetDataStatus()->GetDataMgr( dsName );
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
 
         file << "Data Source = " << guiParams->GetStatsDatasetName() << endl << endl;
