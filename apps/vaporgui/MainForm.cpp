@@ -188,10 +188,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     myParams.push_back(StartupParams::GetClassType());
     myParams.push_back(AnimationParams::GetClassType());
     myParams.push_back(MiscParams::GetClassType());
-    myParams.push_back(PlotParams::GetClassType());
 
     vector<string> myRenParams;
     myRenParams.push_back(StatisticsParams::GetClassType());
+    myRenParams.push_back(PlotParams::GetClassType());
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
     //
@@ -974,7 +974,8 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     //
     string dataSetName = makename(myFiles[0]);
 
-    bool status = openDataHelper(dataSetName, format, myFiles);
+    vector<string> options = {"-project_to_pcs"};
+    bool           status = openDataHelper(dataSetName, format, myFiles, options);
     if (!status) return;
 
     // Reinitialize all tabs
@@ -1706,7 +1707,7 @@ void MainForm::setProj4String()
 
             closeDataHelper(dataSets[i]);
 
-            vector<string> options = {"-proj4", proj4String};
+            vector<string> options = {"-proj4", proj4String, "project_to_pcs"};
 
             (void)openDataHelper(dataSets[i], format, files, options);
         }
@@ -1726,11 +1727,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == ParamsChangeEvent::type()) {
         ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         if (_stats) { _stats->Update(); }
-        if (_plot) {
-            PlotParams *params;
-            params = (PlotParams *)paramsMgr->GetParams("PlotParams");
-            _plot->Update(params);
-        }
+        if (_plot) { _plot->Update(); }
 
         _vizWinMgr->UpdateRouters();
 
@@ -1956,8 +1953,14 @@ void MainForm::launchStats()
 
 void MainForm::launchPlotUtility()
 {
-    if (!_plot) _plot = new Plot(this);
-    _plot->Initialize(_controlExec, _vizWinMgr);
+    if (!_plot) {
+        assert(_controlExec->getDataStatus());
+        assert(_controlExec->GetParamsMgr());
+        _plot = new Plot(_controlExec->getDataStatus(), _controlExec->GetParamsMgr(), this);
+    } else {
+        _plot->show();
+        _plot->activateWindow();
+    }
 }
 
 // Begin capturing animation images.

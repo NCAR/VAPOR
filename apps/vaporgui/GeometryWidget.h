@@ -51,6 +51,8 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
 
+    void hideSinglePointTabHeader();
+
 signals:
     void valueChanged();
 
@@ -66,7 +68,7 @@ private:
     void connectWidgets();
     void updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt);
     void updateCopyCombo();
-    void updateDimFlags();
+    // void updateDimFlags();
     void updateBoxCombos(std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
 
     bool getAuxiliaryExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);

@@ -158,8 +158,8 @@ public:
 
     virtual void ClampCoord(std::vector<double> &coords) const override
     {
-        assert(coords.size() >= GetNumCoordinates());
-        while (coords.size() > GetNumCoordinates()) { coords.pop_back(); }
+        assert(coords.size() >= GetGeometryDim());
+        while (coords.size() > GetGeometryDim()) { coords.pop_back(); }
     }
 
     /////////////////////////////////////////////////////////////////////////////
