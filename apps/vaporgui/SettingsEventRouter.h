@@ -56,7 +56,8 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     // Get static string identifier for this router class
     //
     static string GetClassType() {
-        return ("Settings");
+        //return("Settings");
+        return ("SettingsEventRouter");
     }
     string GetType() const { return GetClassType(); }
 
