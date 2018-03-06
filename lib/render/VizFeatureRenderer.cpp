@@ -72,7 +72,7 @@ void VizFeatureRenderer::InitializeGL(ShaderMgr *shaderMgr) {
 //
 void VizFeatureRenderer::drawDomainFrame(size_t ts) const {
 
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     vector<double> minExts, maxExts;
     m_dataStatus->GetActiveExtents(
@@ -261,7 +261,7 @@ void VizFeatureRenderer::drawRegionBounds(size_t ts) const {
     glPushAttrib(GL_CURRENT_BIT);
     glLineWidth(2.0);
     double clr[3];
-    ((VizFeatureParams *)_params)->GetRegionColor(clr);
+    ((AnnotationParams *)_params)->GetRegionColor(clr);
     glColor3dv(clr);
     glEnable(GL_LINE_SMOOTH);
     glBegin(GL_LINE_LOOP);
@@ -316,7 +316,7 @@ void VizFeatureRenderer::applyTransform(Transform *t) {
 
 void VizFeatureRenderer::InScenePaint(size_t ts) {
 
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     _currentTimestep = ts;
 
@@ -402,7 +402,7 @@ void VizFeatureRenderer::drawAxisTics(AxisAnnotation *aa) {
 
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
@@ -598,14 +598,14 @@ Transform *VizFeatureRenderer::getTransform(string dataMgrName) {
 }
 
 AxisAnnotation *VizFeatureRenderer::getCurrentAxisAnnotation() {
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     string currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation(currentAxisDataMgr);
     return aa;
 }
 
 string VizFeatureRenderer::getCurrentDataMgrName() const {
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     string currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
     return currentAxisDataMgr;
 }
@@ -678,7 +678,7 @@ void VizFeatureRenderer::drawAxisArrows(
     float origin[3];
     float maxLen = -1.f;
 
-    VizFeatureParams *vfParams = m_paramsMgr->GetVizFeatureParams(m_winName);
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     vector<double> axisArrowCoords = vfParams->GetAxisArrowCoords();
 
