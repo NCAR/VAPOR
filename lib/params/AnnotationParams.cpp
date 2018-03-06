@@ -6,17 +6,18 @@
 //									*
 //************************************************************************/
 //
-//	File:		VizFeatureParams.cpp
+//	File:		AnnotationParams.cpp
 //
-//	Author:		Alan Norton
+//	Author:	Scott Pearse	
+//			Alan Norton
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //
 //	Date:		June 2015
 //
-//	Description:	Implements the VizFeatureParams class.
+//	Description:	Implements the AnnotationParams class.
 //		This class supports parameters associted with the
-//		visualizer features in the vizfeatures panel
+//		visualizer features in the annotation panel
 //
 #ifdef WIN32
 //Annoying unreferenced formal parameter warning
@@ -27,44 +28,44 @@
 #include <string>
 #include <iostream>
 
-#include <vapor/VizFeatureParams.h>
+#include <vapor/AnnotationParams.h>
 
 
 using namespace VAPoR;
 
-const string VizFeatureParams::_domainFrameTag = "DomainFrame";
-const string VizFeatureParams::_domainColorTag = "DomainColor";
-const string VizFeatureParams::_regionFrameTag = "RegionFrame";
-const string VizFeatureParams::_regionColorTag = "RegionColor";
-const string VizFeatureParams::_backgroundColorTag = "BackgroundColor";
-const string VizFeatureParams::_axisAnnotationEnabledTag = "AxisAnnotationiEnabled";
-const string VizFeatureParams::_axisColorTag = "AxisColor";
-const string VizFeatureParams::_axisDigitsTag = "AxisDigits";
-const string VizFeatureParams::_axisTextHeightTag = "AxisTextHeight";
-const string VizFeatureParams::_axisFontSizeTag = "AxisFontSize";
-const string VizFeatureParams::_ticWidthTag = "TicWidths";
-const string VizFeatureParams::_ticDirsTag = "TicDirections";
-const string VizFeatureParams::_ticSizeTag = "TicSizes";
-const string VizFeatureParams::_minTicsTag = "TicMinPositions";
-const string VizFeatureParams::_maxTicsTag = "TicMaxPositions";
-const string VizFeatureParams::_numTicsTag = "NumberTics";
-const string VizFeatureParams::_currentAxisDataMgrTag = "AxisDataMgr";
-const string VizFeatureParams::_latLonAxesTag = "LatLonAxes";
-const string VizFeatureParams::_axisOriginTag = "AxisOrigin";
-const string VizFeatureParams::_showAxisArrowsTag = "ShowAxisArrows";
-const string VizFeatureParams::_axisArrowCoordsTag = "AxisArrowCoords";
-const string VizFeatureParams::_axisAnnotationsTag = "AxisAnnotations";
-vector<double> VizFeatureParams::_previousStretch;
+const string AnnotationParams::_domainFrameTag = "DomainFrame";
+const string AnnotationParams::_domainColorTag = "DomainColor";
+const string AnnotationParams::_regionFrameTag = "RegionFrame";
+const string AnnotationParams::_regionColorTag = "RegionColor";
+const string AnnotationParams::_backgroundColorTag = "BackgroundColor";
+const string AnnotationParams::_axisAnnotationEnabledTag = "AxisAnnotationiEnabled";
+const string AnnotationParams::_axisColorTag = "AxisColor";
+const string AnnotationParams::_axisDigitsTag = "AxisDigits";
+const string AnnotationParams::_axisTextHeightTag = "AxisTextHeight";
+const string AnnotationParams::_axisFontSizeTag = "AxisFontSize";
+const string AnnotationParams::_ticWidthTag = "TicWidths";
+const string AnnotationParams::_ticDirsTag = "TicDirections";
+const string AnnotationParams::_ticSizeTag = "TicSizes";
+const string AnnotationParams::_minTicsTag = "TicMinPositions";
+const string AnnotationParams::_maxTicsTag = "TicMaxPositions";
+const string AnnotationParams::_numTicsTag = "NumberTics";
+const string AnnotationParams::_currentAxisDataMgrTag = "AxisDataMgr";
+const string AnnotationParams::_latLonAxesTag = "LatLonAxes";
+const string AnnotationParams::_axisOriginTag = "AxisOrigin";
+const string AnnotationParams::_showAxisArrowsTag = "ShowAxisArrows";
+const string AnnotationParams::_axisArrowCoordsTag = "AxisArrowCoords";
+const string AnnotationParams::_axisAnnotationsTag = "AxisAnnotations";
+vector<double> AnnotationParams::_previousStretch;
 
 //
 // Register class with object factory!!!
 //
-static ParamsRegistrar<VizFeatureParams> registrar(VizFeatureParams::GetClassType());
+static ParamsRegistrar<AnnotationParams> registrar(AnnotationParams::GetClassType());
 
 
-VizFeatureParams::VizFeatureParams(
+AnnotationParams::AnnotationParams(
 	ParamsBase::StateSave *ssave
-) : ParamsBase(ssave, VizFeatureParams::GetClassType()) {
+) : ParamsBase(ssave, AnnotationParams::GetClassType()) {
 
 	_init();
 
@@ -73,15 +74,15 @@ VizFeatureParams::VizFeatureParams(
 }
 
 
-VizFeatureParams::VizFeatureParams(
+AnnotationParams::AnnotationParams(
 	ParamsBase::StateSave *ssave, XmlNode *node
 ) : ParamsBase(ssave, node) 
 {
 	// If node isn't tagged correctly we correct the tag and reinitialize
 	// from scratch;
 	//
-	if (node->GetTag() != VizFeatureParams::GetClassType()) {
-		node->SetTag(VizFeatureParams::GetClassType());
+	if (node->GetTag() != AnnotationParams::GetClassType()) {
+		node->SetTag(AnnotationParams::GetClassType());
 		_init();
 	}
 
@@ -98,14 +99,14 @@ VizFeatureParams::VizFeatureParams(
 	}
 }
 
-VizFeatureParams::VizFeatureParams(const VizFeatureParams &rhs
+AnnotationParams::AnnotationParams(const AnnotationParams &rhs
 ) : ParamsBase(rhs) {
 	_axisAnnotations = new ParamsContainer(*(rhs._axisAnnotations));
 }
 
 
 //Reset vizfeature settings to initial state
-void VizFeatureParams::_init() {
+void AnnotationParams::_init() {
 
 	vector<double> clr (3,1.0);
 	SetDomainColor(clr);
@@ -123,7 +124,7 @@ void VizFeatureParams::_init() {
 }
 
 
-void VizFeatureParams::m_getColor(double color[3], string tag) const {
+void AnnotationParams::m_getColor(double color[3], string tag) const {
 
 	vector <double> defaultv(3,1.0);
 	vector <double> val =  GetValueDoubleVec(tag, defaultv);
@@ -134,7 +135,7 @@ void VizFeatureParams::m_getColor(double color[3], string tag) const {
 	}
 }
 
-void VizFeatureParams::_getColor(vector <double> &color, string tag) const {
+void AnnotationParams::_getColor(vector <double> &color, string tag) const {
 	color.clear();
 
 	vector <double> defaultv(3,1.0);
@@ -145,7 +146,7 @@ void VizFeatureParams::_getColor(vector <double> &color, string tag) const {
 	}
 }
 
-void VizFeatureParams::m_setColor(vector<double> color, string tag, string msg){
+void AnnotationParams::m_setColor(vector<double> color, string tag, string msg){
 
 	assert(color.size() == 3);
 	for (int i=0; i<color.size(); i++) {
@@ -155,28 +156,28 @@ void VizFeatureParams::m_setColor(vector<double> color, string tag, string msg){
 	SetValueDoubleVec(tag, msg, color);
 }
 
-void VizFeatureParams::GetDomainColor(double color[3]) const {
+void AnnotationParams::GetDomainColor(double color[3]) const {
 	m_getColor(color, _domainColorTag);
 }
 
-void VizFeatureParams::SetDomainColor(vector<double> color) {
+void AnnotationParams::SetDomainColor(vector<double> color) {
 	m_setColor(color, _domainColorTag, "Set domain frame color");
 }
 
 
-void VizFeatureParams::GetRegionColor(double color[3]) const {
+void AnnotationParams::GetRegionColor(double color[3]) const {
 	m_getColor(color, _regionColorTag);
 }
 
-void VizFeatureParams::SetRegionColor(vector<double> color) {
+void AnnotationParams::SetRegionColor(vector<double> color) {
 	m_setColor(color, _regionColorTag, "Set region frame color");
 }
 
-void VizFeatureParams::GetBackgroundColor(double color[3]) const {
+void AnnotationParams::GetBackgroundColor(double color[3]) const {
 	m_getColor(color, _backgroundColorTag);
 }
 
-void VizFeatureParams::SetBackgroundColor(vector<double> color) {
+void AnnotationParams::SetBackgroundColor(vector<double> color) {
 	m_setColor(color, _backgroundColorTag, "Set background color");
 }
 
@@ -184,125 +185,125 @@ void VizFeatureParams::SetBackgroundColor(vector<double> color) {
 
 
 /*
-void VizFeatureParams::SetAxisAnnotationEnabled(bool val){
+void AnnotationParams::SetAxisAnnotationEnabled(bool val){
 	_currentAxisAnnotation->SetAxisAnnotationEnabled(val);
 }   
-bool VizFeatureParams::GetAxisAnnotationEnabled() const{
+bool AnnotationParams::GetAxisAnnotationEnabled() const{
 	return _currentAxisAnnotation->GetAxisAnnotationEnabled();
 }   
 
-std::vector<double> VizFeatureParams::GetAxisColor() const {
+std::vector<double> AnnotationParams::GetAxisColor() const {
 	return _currentAxisAnnotation->GetAxisColor();
 }   
-void VizFeatureParams::SetAxisColor(vector<double> color) {
+void AnnotationParams::SetAxisColor(vector<double> color) {
 	_currentAxisAnnotation->SetAxisColor(color);
 }
 
-std::vector<double> VizFeatureParams::GetAxisBackgroundColor() const {
+std::vector<double> AnnotationParams::GetAxisBackgroundColor() const {
 	return _currentAxisAnnotation->GetAxisBackgroundColor();
 }   
-void VizFeatureParams::SetAxisBackgroundColor(vector<double> color) {
+void AnnotationParams::SetAxisBackgroundColor(vector<double> color) {
 	_currentAxisAnnotation->SetAxisBackgroundColor(color);
 }
 
-void VizFeatureParams::SetNumTics(std::vector<double> numTics) {
+void AnnotationParams::SetNumTics(std::vector<double> numTics) {
 	_currentAxisAnnotation->SetNumTics(numTics);
 }
-std::vector<double> VizFeatureParams::GetNumTics() const {
+std::vector<double> AnnotationParams::GetNumTics() const {
 	return _currentAxisAnnotation->GetNumTics();
 }
 
 
-void VizFeatureParams::SetAxisOrigin(std::vector<double> orig) {
+void AnnotationParams::SetAxisOrigin(std::vector<double> orig) {
 	_currentAxisAnnotation->SetAxisOrigin(orig);
 }
-std::vector<double> VizFeatureParams::GetAxisOrigin() const {
+std::vector<double> AnnotationParams::GetAxisOrigin() const {
 	return _currentAxisAnnotation->GetAxisOrigin();
 }
 
 
-void VizFeatureParams::SetMinTics(std::vector<double> minTics) {
+void AnnotationParams::SetMinTics(std::vector<double> minTics) {
 	_currentAxisAnnotation->SetMinTics(minTics);
 }
-vector<double> VizFeatureParams::GetMinTics() const {
+vector<double> AnnotationParams::GetMinTics() const {
 	return _currentAxisAnnotation->GetMinTics();
 }
 
 
-void VizFeatureParams::SetMaxTics(vector<double> maxTics) {
+void AnnotationParams::SetMaxTics(vector<double> maxTics) {
 	_currentAxisAnnotation->SetMaxTics(maxTics);
 }
-vector<double> VizFeatureParams::GetMaxTics() const {
+vector<double> AnnotationParams::GetMaxTics() const {
 	return _currentAxisAnnotation->GetMaxTics();
 }
 
 
-void VizFeatureParams::SetTicSize(vector<double> ticSize) {
+void AnnotationParams::SetTicSize(vector<double> ticSize) {
 	_currentAxisAnnotation->SetTicSize(ticSize);
 }
-vector<double> VizFeatureParams::GetTicSize() const {
+vector<double> AnnotationParams::GetTicSize() const {
 	return _currentAxisAnnotation->GetTicSize();
 }
 
 
-void VizFeatureParams::SetTicDirs(vector<double> ticDirs) {
+void AnnotationParams::SetTicDirs(vector<double> ticDirs) {
 	_currentAxisAnnotation->SetTicDirs(ticDirs);
 }
-vector<double> VizFeatureParams::GetTicDirs() const {
+vector<double> AnnotationParams::GetTicDirs() const {
 	return _currentAxisAnnotation->GetTicDirs();
 }
 
 
-double VizFeatureParams::GetTicWidth() const{
+double AnnotationParams::GetTicWidth() const{
 	return _currentAxisAnnotation->GetTicWidth();
 }   
-void VizFeatureParams::SetTicWidth(double val){
+void AnnotationParams::SetTicWidth(double val){
 	_currentAxisAnnotation->SetTicWidth(val);
 }   
 
 
-long VizFeatureParams::GetAxisTextHeight() const{
+long AnnotationParams::GetAxisTextHeight() const{
 	return _currentAxisAnnotation->GetAxisTextHeight();
 }   
-void VizFeatureParams::SetAxisTextHeight(long val){
+void AnnotationParams::SetAxisTextHeight(long val){
 	_currentAxisAnnotation->SetAxisTextHeight(val);
 }   
 
 
-long VizFeatureParams::GetAxisDigits() const{
+long AnnotationParams::GetAxisDigits() const{
 	return _currentAxisAnnotation->GetAxisDigits();
 }
-void VizFeatureParams::SetAxisDigits(long val){
+void AnnotationParams::SetAxisDigits(long val){
 	_currentAxisAnnotation->SetAxisDigits(val);
 }
 
 
-void VizFeatureParams::SetLatLonAxesEnabled(bool val){
+void AnnotationParams::SetLatLonAxesEnabled(bool val){
 	_currentAxisAnnotation->SetLatLonAxesEnabled(val);
 }
-bool VizFeatureParams::GetLatLonAxesEnabled() const{
+bool AnnotationParams::GetLatLonAxesEnabled() const{
 	return _currentAxisAnnotation->GetLatLonAxesEnabled();
 }
 
 
-void VizFeatureParams::SetAxisFontSize(int size) {
+void AnnotationParams::SetAxisFontSize(int size) {
 	SetValueDouble(_axisFontSizeTag, "Axis annotation font size", size);
 }
-int VizFeatureParams::GetAxisFontSize() {
+int AnnotationParams::GetAxisFontSize() {
 	return (int)GetValueDouble(_axisFontSizeTag, 24);
 }
 */
 
-string VizFeatureParams::GetCurrentAxisDataMgrName() const {
+string AnnotationParams::GetCurrentAxisDataMgrName() const {
 	return GetValueString(_currentAxisDataMgrTag, "");
 }
 
-void VizFeatureParams::SetCurrentAxisDataMgrName(string dmName) {
+void AnnotationParams::SetCurrentAxisDataMgrName(string dmName) {
 	string msg = "Setting current DataMgr w.r.t. axis annotations";
 	SetValueString(_currentAxisDataMgrTag, msg, dmName);
 }
 
-AxisAnnotation* VizFeatureParams::GetAxisAnnotation(string dataMgr) {
+AxisAnnotation* AnnotationParams::GetAxisAnnotation(string dataMgr) {
 	if (dataMgr == "")
 		dataMgr = GetCurrentAxisDataMgrName();
 
@@ -316,44 +317,44 @@ AxisAnnotation* VizFeatureParams::GetAxisAnnotation(string dataMgr) {
 	return aa;
 }
 
-void VizFeatureParams::SetShowAxisArrows(bool val) {
+void AnnotationParams::SetShowAxisArrows(bool val) {
 	SetValueLong(_showAxisArrowsTag, "Toggle Axis Arrows", val);
 }
 
-bool VizFeatureParams::GetShowAxisArrows() const {
+bool AnnotationParams::GetShowAxisArrows() const {
 	return (0 != GetValueLong(_showAxisArrowsTag, (long)false));
 }
 
-void VizFeatureParams::SetAxisArrowCoords(vector<double> val){
+void AnnotationParams::SetAxisArrowCoords(vector<double> val){
 	assert(val.size() == 3);
 	SetValueDoubleVec(_axisArrowCoordsTag, "Set axis arrow coords", val);
 }
 
-void VizFeatureParams::SetXAxisArrowPosition(float val) {
+void AnnotationParams::SetXAxisArrowPosition(float val) {
 	std::vector<double> pos = GetAxisArrowCoords();
 	pos[0] = val;
 	SetAxisArrowCoords(pos);
 }
 
-void VizFeatureParams::SetYAxisArrowPosition(float val) {
+void AnnotationParams::SetYAxisArrowPosition(float val) {
 	std::vector<double> pos = GetAxisArrowCoords();
 	pos[1] = val;
 	SetAxisArrowCoords(pos);
 }
 
-void VizFeatureParams::SetZAxisArrowPosition(float val) {
+void AnnotationParams::SetZAxisArrowPosition(float val) {
 	std::vector<double> pos = GetAxisArrowCoords();
 	pos[2] = val;
 	SetAxisArrowCoords(pos);
 }
 
-vector<double> VizFeatureParams::GetAxisArrowCoords() const{
+vector<double> AnnotationParams::GetAxisArrowCoords() const{
 	vector <double> defaultv(3,0.0);
 	return GetValueDoubleVec(_axisArrowCoordsTag, defaultv);
 }
 
 #ifdef	DEAD
-void VizFeatureParams::changeStretch(vector<double> prevStretch, vector<double> newStretch){
+void AnnotationParams::changeStretch(vector<double> prevStretch, vector<double> newStretch){
 
 	_dataStatus->stretchExtents(newStretch);
 	//Determine the relative scale:
