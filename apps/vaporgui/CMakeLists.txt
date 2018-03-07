@@ -14,7 +14,7 @@ set (SRCS
 	StartupEventRouter.cpp
 	AppSettingsEventRouter.cpp
 	VizSelectCombo.cpp
-	VizFeatureEventRouter.cpp
+	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp
@@ -48,7 +48,6 @@ set (SRCS
 	ContourEventRouter.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
-	MiscParams.cpp
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
 	TransformTable.cpp
@@ -84,7 +83,7 @@ set (UIS
 	boxframe.ui
 	startupTab.ui
 	appSettingsTab.ui
-	vizFeaturesTab.ui
+	AnnotationGUI.ui
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
 	LeftPanel.ui

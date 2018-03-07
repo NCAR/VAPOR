@@ -43,7 +43,7 @@
 #include "MouseModeParams.h"
 #include "AnimationEventRouter.h"
 #include "regioneventrouter.h"
-#include "VizFeatureEventRouter.h"
+#include "AnnotationEventRouter.h"
 #include "AppSettingsEventRouter.h"
 #include "StartupEventRouter.h"
 #include "NavigationEventRouter.h"
@@ -133,7 +133,7 @@ void VizWinMgr::createAllDefaultTabs() {
 	installTab(er->GetType(), 1, er);
 
 	parent = TabManager::getInstance()->GetSubTabWidget(2);
-	er = new VizFeatureEventRouter(parent, _controlExec);
+	er = new AnnotationEventRouter(parent, _controlExec);
 	installTab(er->GetType(), 2, er);
 
 	parent = TabManager::getInstance()->GetSubTabWidget(2);
@@ -571,10 +571,9 @@ void VizWinMgr::removeVisualizer(string vizName){
 void VizWinMgr::ReinitRouters() {
 	m_initialized = false;
 
-
 	if (_controlExec->GetDataNames().size() == 0) return;
 
-	DataStatus *dataStatus = _controlExec->getDataStatus();
+	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	size_t ts = _mainForm->GetAnimationParams()->GetCurrentTimestep();
 
@@ -594,7 +593,6 @@ void VizWinMgr::ReinitRouters() {
 	UpdateRouters();
 
 	EnableRouters(true);
-
 }
 
 void VizWinMgr::UpdateRouters() {

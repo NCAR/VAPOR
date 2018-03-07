@@ -45,7 +45,7 @@
 #include "TabManager.h"
 #include "NavigationEventRouter.h"
 #include "regioneventrouter.h"
-#include "VizFeatureEventRouter.h"
+#include "AnnotationEventRouter.h"
 #include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
@@ -194,7 +194,7 @@ MainForm::MainForm(
 	myParams.push_back(AppSettingsParams::GetClassType());
 	myParams.push_back(StartupParams::GetClassType());
 	myParams.push_back(AnimationParams::GetClassType());
-	myParams.push_back(MiscParams::GetClassType());
+	myParams.push_back(AnnotationParams::GetClassType());
 	
 	vector <string> myRenParams;
 	myRenParams.push_back(StatisticsParams::GetClassType());
@@ -1268,7 +1268,7 @@ void MainForm::loadDataHelper(
 		}
 	}
 
-	DataStatus* ds = _controlExec->getDataStatus();
+	DataStatus* ds = _controlExec->GetDataStatus();
 	BoxSliderFrame::setDataStatus(ds);
 
 	_tabMgr->Update();
@@ -2001,7 +2001,7 @@ void MainForm::setProj4String() {
 
 	string proj4String = p->GetProjectionString();
 
-	DataStatus* ds = _controlExec->getDataStatus();
+	DataStatus* ds = _controlExec->GetDataStatus();
 
 	// Close and re-open any data set that doesn't have a matching
 	// proj4 string
@@ -2300,9 +2300,9 @@ void MainForm::launchStats(){
 void MainForm::launchPlotUtility(){
     if (! _plot) 
     {
-        assert( _controlExec->getDataStatus() );
+        assert( _controlExec->GetDataStatus() );
         assert( _controlExec->GetParamsMgr()  );
-        _plot = new Plot( _controlExec->getDataStatus(), _controlExec->GetParamsMgr(), this);
+        _plot = new Plot( _controlExec->GetDataStatus(), _controlExec->GetParamsMgr(), this);
     }
     else
     {
