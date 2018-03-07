@@ -1881,7 +1881,7 @@ void MainForm::captureSingleJpeg()
     GUIStateParams *p = GetStateParams();
     string          imageDir = p->GetCurrentImageSavePath();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), "Jpeg images (*.jpg *.jpeg)");
+    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), "PNG or JPEG images (*.png *.jpg *.jpeg)");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
@@ -1894,8 +1894,8 @@ void MainForm::captureSingleJpeg()
     // Extract the path, and the root name, from the returned string.
     QFileInfo *fileInfo = new QFileInfo(fn);
     QString    suffix = fileInfo->suffix();
-    if (suffix != "jpg" && suffix != "jpeg") {
-        MSG_ERR("Image capture file name must end with .jpg or .jpeg");
+    if (suffix != "jpg" && suffix != "jpeg" && suffix != "png") {
+        MSG_ERR("Image capture file name must end with .jpg or .jpeg or .png");
         return;
     }
 
