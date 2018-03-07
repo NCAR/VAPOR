@@ -972,11 +972,11 @@ int Visualizer:: captureImage(string filename)
 
 	//Turn off the single capture flag
 	_imageCaptureEnabled = false;
-	string suffix = filename.substr(filename.length()-4, 4);
+	string suffix = filename.substr(filename.length()-4, 4);  // it assumes fixed length of all suffix...   
 	
 	FILE* jpegFile = NULL;
 	TIFF* tiffFile = NULL;
-	if (suffix == ".tif" || suffix == ".tiff" )
+	if (suffix == ".tif" || suffix == "tiff" )
     {
 		tiffFile = TIFFOpen((const char*)filename.c_str(), "wb");
 		if (!tiffFile) {
@@ -984,7 +984,7 @@ int Visualizer:: captureImage(string filename)
 			return -1;
 		}
 	} 
-    else if (suffix == ".jpg" || suffix == ".jpeg" ) 
+    else if (suffix == ".jpg" || suffix == "jpeg" ) 
     {
 		jpegFile = fopen((const char*)filename.c_str(), "wb");
 		if (!jpegFile) {
@@ -1013,7 +1013,7 @@ int Visualizer:: captureImage(string filename)
 	
 	//Now call the Jpeg or tiff library to compress and write the file
 	//
-    if( suffix == ".tif" || suffix == ".tiff" ) //capture the tiff file, one scanline at a time
+    if( suffix == ".tif" || suffix == "tiff" ) //capture the tiff file, one scanline at a time
     { 
 		uint32 imagelength = (uint32) width;
 		uint32 imagewidth = (uint32) height;
@@ -1035,7 +1035,7 @@ int Visualizer:: captureImage(string filename)
 		}
 		TIFFClose(tiffFile);
 	}
-	else if( suffix == ".jpg" || suffix == ".jpeg" )
+	else if( suffix == ".jpg" || suffix == "jpeg" )
     {
 		int quality = 95;
 		int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
