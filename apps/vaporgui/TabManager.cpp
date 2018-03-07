@@ -81,6 +81,8 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce, VizWinMgr *vizWinMgr) :
     _createAllDefaultTabs();
 
     show();
+
+    _initialized = true;
 }
 
 void TabManager::ShowRenderWidget(string tag)
@@ -361,7 +363,7 @@ void TabManager::_createAllDefaultTabs()
     _installTab(er->GetType(), 1, er);
 
     parent = _getSubTabWidget(1);
-    er = new NavigationEventRouter(parent, _vizWinMgr, _controlExec);
+    er = new NavigationEventRouter(parent, _controlExec);
     _installTab(er->GetType(), 1, er);
 
     parent = _getSubTabWidget(2);

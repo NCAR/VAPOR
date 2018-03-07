@@ -76,6 +76,7 @@
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cmath>
+#include <iostream>
 #include "TrackBall.h"
 using namespace VAPoR;
 void Trackball::TrackballReset()
@@ -309,6 +310,30 @@ void Trackball::MouseOnTrackball(int eventNum, int thisButton, int xcrd, int ycr
         break;
     }
 }
+
+bool Trackball::ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const
+{
+    double m[16];
+    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+
+    double minv[16];
+
+    int rc = minvert(m, minv);
+    if (rc < 0) return (false);
+
+    vscale(minv + 8, -1.0);
+
+    for (int i = 0; i < 3; i++) {
+        position[i] = minv[12 + i];    // position vector is minv[12..14]
+        upVec[i] = minv[4 + i];        // up vector is minv[4..6]
+        viewDir[i] = minv[8 + i];      // view direction is minv[8..10]
+    }
+    vnormal(upVec);
+    vnormal(viewDir);
+
+    return (true);
+}
+
 // Set the quaternion and translation from a viewer frame
 // Also happens to construct modelview matrix, but we don't use its translation
 void Trackball::setFromFrame(const std::vector<double> &posvec, const std::vector<double> &dirvec, const std::vector<double> &upvec, const std::vector<double> &centerRot, bool persp)

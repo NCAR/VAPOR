@@ -277,6 +277,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)
  *	Slots associated with VizTab:
  ********************************************************************/
 
+#ifdef DEAD
 void VizWinMgr::SetTrackBall(const double posvec[3], const double dirvec[3], const double upvec[3], const double centerRot[3], bool perspective)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -290,6 +291,7 @@ void VizWinMgr::SetTrackBall(const double posvec[3], const double dirvec[3], con
 
     paramsMgr->EndSaveStateGroup();
 }
+#endif
 
 void VizWinMgr::Update()
 {

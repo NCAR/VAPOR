@@ -60,11 +60,6 @@ public:
     //! \retval visualizer index.
     string getWindowName() { return _winName; }
 
-    //! Force the window to update, even if nothing has changed.
-    void reallyUpdate();
-
-    void SetTrackBall(const double posvec[3], const double dirvec[3], const double upvec[3], const double centerRot[3], bool perspective);
-
 signals:
     // Sent prior to closing window - after receiving Qt closeEvent()
     //
