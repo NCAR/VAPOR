@@ -1895,7 +1895,7 @@ void MainForm::captureSingleJpeg()
     QFileInfo *fileInfo = new QFileInfo(fn);
     QString    suffix = fileInfo->suffix();
     if (suffix != "jpg" && suffix != "jpeg" && suffix != "png") {
-        MSG_ERR("Image capture file name must end with .jpg or .jpeg or .png");
+        MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
         return;
     }
 
@@ -1971,7 +1971,7 @@ void MainForm::startAnimCapture()
     showCitationReminder();
     GUIStateParams *p = GetStateParams();
     string          imageDir = p->GetCurrentImageSavePath();
-    QFileDialog     fileDialog(this, "Specify first file name for image capture sequence", imageDir.c_str(), "Jpeg images (*.jpg *.jpeg )");
+    QFileDialog     fileDialog(this, "Specify first file name for image capture sequence", imageDir.c_str(), "PNG or JPEG images (*.png *.jpg *.jpeg )");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
@@ -1984,7 +1984,10 @@ void MainForm::startAnimCapture()
     QFileInfo *fileInfo = new QFileInfo(s);
 
     QString suffix = fileInfo->suffix();
-    if (suffix != "jpg" && suffix != "jpeg") suffix = "jpeg";
+    if (suffix != "jpg" && suffix != "jpeg" && suffix != "png") {
+        MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
+        return;
+    }
     // Save the path for future captures
     p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
 
