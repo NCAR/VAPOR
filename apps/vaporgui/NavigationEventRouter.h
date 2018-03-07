@@ -30,15 +30,13 @@ class ControlExec;
 class RegionParams;
 } // namespace VAPoR
 
-class VizWinMgr;
-
 class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public EventRouter {
 
     Q_OBJECT
 
   public:
     NavigationEventRouter(
-        QWidget *parent, VizWinMgr *vizMgr, VAPoR::ControlExec *ce);
+        QWidget *parent, VAPoR::ControlExec *ce);
     virtual ~NavigationEventRouter();
     //Connect signals and slots from tab
     virtual void hookUpTab();
@@ -83,8 +81,6 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
 
     virtual void wheelEvent(QWheelEvent *) {}
 
-    VizWinMgr *_vizMgr;
-
     void updateTransforms();
     void updateProjections();
     //void appendProjTable(int row, string projString, bool usingCurrentProj);
@@ -97,6 +93,14 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
     void updateLightChanged();
 
     VAPoR::ParamsBase *GetActiveParams() const;
+
+    void _setViewpointParams(
+        const double center[3], const double posvec[3],
+        const double dirvec[3], const double upvec[3]) const;
+
+    bool _getViewpointParams(
+        double center[3], double posvec[3],
+        double dirvec[3], double upvec[3]) const;
 
   private slots:
     void setCameraChanged();

@@ -852,6 +852,9 @@ void MainForm::sessionOpenHelper(string fileName) {
     newP->SetCurrentTFPath(sP->GetTFDir());
     newP->SetCurrentPythonPath(sP->GetPythonDir());
     newP->SetCurrentFlowPath(sP->GetFlowDir());
+
+    _vizWinMgr->Restart();
+    _tabMgr->Restart();
 }
 
 // Open session file
@@ -893,9 +896,6 @@ void MainForm::sessionOpen(QString qfileName) {
     string fileName = qfileName.toStdString();
 
     sessionOpenHelper(fileName);
-
-    _vizWinMgr->Restart();
-    _tabMgr->Restart();
 
     _stateChangeFlag = false;
     _sessionNewFlag = false;
@@ -989,22 +989,6 @@ void MainForm::undoRedoHelper(bool undo) {
 
     _vizWinMgr->Restart();
     _tabMgr->Restart();
-
-    // Ugh. Trackball isn't integrated with Params database so need to
-    // handle undo/redo manually. I.e. get modelview matrix params from
-    // database and set them in the TrackBall
-    //
-    vector<string> winNames = _paramsMgr->GetVisualizerNames();
-    for (int i = 0; i < winNames.size(); i++) {
-        ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-        double pos[3], dir[3], up[3], center[3];
-        vpParams->GetCameraPos(pos);
-        vpParams->GetCameraViewDir(dir);
-        vpParams->GetCameraUpVec(up);
-        vpParams->GetRotationCenter(center);
-
-        _vizWinMgr->SetTrackBall(pos, dir, up, center, true);
-    }
 
     // Restore state saving
     //
@@ -1143,6 +1127,7 @@ void MainForm::loadDataHelper(
 
     if (_sessionNewFlag) {
         viewAll();
+        setHome();
 
         vector<string> winNames = _paramsMgr->GetVisualizerNames();
         for (int i = 0; i < winNames.size(); i++) {
@@ -1151,23 +1136,6 @@ void MainForm::loadDataHelper(
             vpParams->SetCurrentVPToHome();
         }
         _sessionNewFlag = false;
-    } else {
-
-        // Ugh. Trackball isn't integrated with Params database so need to
-        // handle undo/redo manually. I.e. get modelview matrix params from
-        // database and set them in the TrackBall
-        //
-        vector<string> winNames = _paramsMgr->GetVisualizerNames();
-        for (int i = 0; i < winNames.size(); i++) {
-            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-            double pos[3], dir[3], up[3], center[3];
-            vpParams->GetCameraPos(pos);
-            vpParams->GetCameraViewDir(dir);
-            vpParams->GetCameraUpVec(up);
-            vpParams->GetRotationCenter(center);
-
-            _vizWinMgr->SetTrackBall(pos, dir, up, center, true);
-        }
     }
 
     DataStatus *ds = _controlExec->getDataStatus();
