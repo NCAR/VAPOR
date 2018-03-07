@@ -44,8 +44,7 @@ class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public Ev
 
     virtual ~AnnotationEventRouter();
 
-    //! Connect signals and slots from tab
-    virtual void hookUpTab();
+    virtual void hookUpTab(){};
 
     virtual void GetWebHelp(
         std::vector<std::pair<string, string>> &help) const;
@@ -116,16 +115,23 @@ class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public Ev
     void updateRegionColor();
     void updateDomainColor();
     void updateBackgroundColor();
+
+    void updateAxisAnnotations();
     void updateAxisColor();
     void updateAxisBackgroundColor();
-    void updateTimeColor();
-    void updateAxisAnnotations();
-    void updateDataMgrCombo();
-    void updateCopyRegionCombo();
-    void updateAnnotationCheckbox();
+    void updateAxisTable();
+    void updateAxisEnabledCheckbox();
     void updateLatLonCheckbox();
-    void updateAnnotationTable();
+    void updateCopyRegionCombo();
     void updateTicOrientationCombos();
+
+    void updateTimePanel();
+    void updateTimeColor();
+    void updateTimeCoords();
+    void updateTimeType();
+    void updateTimeSize();
+
+    void updateDataMgrCombo();
 
     VAPoR::AxisAnnotation *_getCurrentAxisAnnotation();
 
