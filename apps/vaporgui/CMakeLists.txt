@@ -48,7 +48,6 @@ set (SRCS
 	ContourEventRouter.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
-	MiscParams.cpp
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
 	TransformTable.cpp
