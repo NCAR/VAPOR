@@ -312,6 +312,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
  ********************************************************************/
 
 
+#ifdef	DEAD
 void VizWinMgr::SetTrackBall(
 	const double posvec[3], const double dirvec[3],
 	const double upvec[3], const double centerRot[3],
@@ -328,6 +329,7 @@ void VizWinMgr::SetTrackBall(
 
 	paramsMgr->EndSaveStateGroup();
 }
+#endif
 
 void VizWinMgr::Update(){
 	map<string, VizWin*>::const_iterator it;

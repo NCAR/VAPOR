@@ -878,6 +878,7 @@ void Visualizer::removeDisabledRenderers(){
 
 
 double Visualizer::getPixelSize() const {
+#ifdef	DEAD
 	double temp[3];
 
 	//Window height is subtended by viewing angle (45 degrees),
@@ -903,6 +904,8 @@ double Visualizer::getPixelSize() const {
 	double halfHeight = tan(M_PI*0.125)* distToScene;
 	return (2.f*halfHeight/(double)height); 
 	
+#endif
+	return(0.0);
 }
 ViewpointParams* Visualizer::getActiveViewpointParams()  const {
 	return m_paramsMgr->GetViewpointParams(m_winName);
