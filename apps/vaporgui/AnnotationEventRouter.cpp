@@ -8,7 +8,8 @@
 //
 //	File:		AnnotationEventRouter.cpp
 //
-//	Author:		Alan Norton
+//	Author:	Scott Pearse
+//			Alan Norton
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //
@@ -29,9 +30,7 @@
 #include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
 
-//#include "ui_AnnotationGUI.h"
 #include "qcolordialog.h"
-
 #include <qlabel.h>
 
 #include <vector>
@@ -130,14 +129,17 @@ void AnnotationEventRouter::connectAnnotationWidgets() {
 		this, SLOT(setYArrowPosition()));
 	connect(_arrowZEdit, SIGNAL(returnPressed()),
 		this, SLOT(setZArrowPosition()));
-}
-
-/**********************************************************
- * Whenever a new vizfeaturetab is created it must be hooked up here
- ************************************************************/
-void
-AnnotationEventRouter::hookUpTab()
-{
+	connect (_timeCombo, SIGNAL(activated(int)),
+		this, SLOT(timeAnnotationChanged()));
+	connect(_timeLLXEdit, SIGNAL(returnPressed()),
+		this, SLOT(timeLLXChanged()));
+	connect(_timeLLYEdit, SIGNAL(returnPressed()),
+		this, SLOT(timeLLYChanged()));
+	connect(_timeSizeEdit, SIGNAL(returnPressed()),
+		this, SLOT(timeSizeChanged()));
+	connect(_timeColorButton, SIGNAL(clicked()),
+		this, SLOT(setTimeColor()));
+	
 	connect (
 		backgroundColorButton, SIGNAL(clicked()),
 		 this, SLOT(setBackgroundColor())
@@ -158,27 +160,6 @@ AnnotationEventRouter::hookUpTab()
 		_axisArrowCheckbox, SIGNAL(clicked()),
 		this, SLOT(setAxisArrowsEnabled())
 	);
-
-	connect (
-		timeCombo, SIGNAL(activated(int)),
-		this, SLOT(timeAnnotationChanged())
-	);
-	connect (
-		timeLLXEdit, SIGNAL(returnPressed()),
-		this, SLOT(timeLLXChanged())
-	);
-	connect (
-		timeLLYEdit, SIGNAL(returnPressed()),
-		this, SLOT(timeLLYChanged())
-	);
-	connect (
-		timeSizeEdit, SIGNAL(returnPressed()),
-		this, SLOT(timeSizeChanged())
-	);
-	connect (
-		timeColorButton, SIGNAL(clicked()),
-		this, SLOT(setTimeColor())
-	);
 }
 
 void AnnotationEventRouter::GetWebHelp(
@@ -196,7 +177,7 @@ void AnnotationEventRouter::_updateTab(){
 	updateRegionColor();
 	updateDomainColor();
 	updateBackgroundColor();
-	updateTimeColor();
+	updateTimePanel();
 	updateAxisAnnotations();
 
 	AnnotationParams* vParams = (AnnotationParams*) GetActiveParams();
@@ -330,7 +311,7 @@ void AnnotationEventRouter::updateCopyRegionCombo() {
 	}
 }
 
-void AnnotationEventRouter::updateAnnotationCheckbox() {
+void AnnotationEventRouter::updateAxisEnabledCheckbox() {
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	bool annotationEnabled = aa->GetAxisAnnotationEnabled();
 	if (annotationEnabled) 
@@ -394,7 +375,7 @@ void AnnotationEventRouter::scaleWorldCoordsToNormalized(
 	}   
 }
 
-void AnnotationEventRouter::updateAnnotationTable() {
+void AnnotationEventRouter::updateAxisTable() {
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
 	bool annotationEnabled = aa->GetLatLonAxesEnabled();
 
@@ -575,10 +556,10 @@ void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa) {
 void AnnotationEventRouter::updateAxisAnnotations() {
 	updateDataMgrCombo();
 	updateCopyRegionCombo();
-	updateAnnotationCheckbox();
+	updateAxisEnabledCheckbox();
 	updateLatLonCheckbox();
 	updateTicOrientationCombos();	
-	updateAnnotationTable();
+	updateAxisTable();
 	updateAxisColor();
 	updateAxisBackgroundColor();
 
@@ -727,12 +708,10 @@ void AnnotationEventRouter::setBackgroundColor() {
 	vfParams->SetBackgroundColor(rgb);
 }
 
-
 void AnnotationEventRouter::updateBackgroundColor() {
-
-	AnnotationParams* vfParams = (AnnotationParams*)GetActiveParams();
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
 	vector <double> rgb;
-	vfParams->GetBackgroundColor(rgb);
+	aParams->GetBackgroundColor(rgb);
 
 	updateColorHelper(rgb, backgroundColorEdit);
 }
@@ -776,81 +755,78 @@ void AnnotationEventRouter::updateAxisBackgroundColor() {
 void AnnotationEventRouter::setTimeColor() {
 	vector <double> rgb;
 
-	setColorHelper(timeColorEdit, rgb);
+	setColorHelper(_timeColorEdit, rgb);
 	if (rgb.size() != 3) return;
 
-	MiscParams* miscParams = GetMiscParams();
-	miscParams->SetTimeAnnotColor(rgb);
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	aParams->SetTimeColor(rgb);
+}
+
+void AnnotationEventRouter::updateTimePanel() {
+	updateTimeColor();
+	updateTimeCoords();
+	updateTimeType();
+	updateTimeSize();
+	timeAnnotationChanged();
 }
 
 void AnnotationEventRouter::updateTimeColor() {
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	std::vector<double> rgb = aParams->GetTimeColor();
 
-	MiscParams* miscParams = GetMiscParams();
-	vector <double> rgb;
-	miscParams->GetTimeAnnotColor(rgb);
-
-	updateColorHelper(rgb, timeColorEdit);
+	updateColorHelper(rgb, _timeColorEdit);
 }
 
+void AnnotationEventRouter::updateTimeCoords() {
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	float llx = aParams->GetTimeLLX();
+	float lly = aParams->GetTimeLLY();
+
+	_timeLLXEdit->setText(QString::number(llx));
+	_timeLLYEdit->setText(QString::number(lly));
+}
+
+void AnnotationEventRouter::updateTimeType() {
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	int type = aParams->GetTimeType();
+	_timeCombo->setCurrentIndex(type);
+}
+
+void AnnotationEventRouter::updateTimeSize() {
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	int size = aParams->GetTimeSize();
+	_timeSizeEdit->setText(QString::number(size));
+}
 
 void AnnotationEventRouter::timeAnnotationChanged() {
-	if (_animConnected==false){
-		_ap= GetAnimationParams();
-		bool v = connect (_ap, SIGNAL(timestepChanged()), this, SLOT(timeAnnotationChanged()));
-		_animConnected=true;
-	}	
+	int index = _timeCombo->currentIndex();
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	aParams->SetTimeType(index);
 
-	MiscParams* miscParams = GetMiscParams();
-
-	int index = timeCombo->currentIndex();
-	if (index == 1) {
-		miscParams->SetTimeStep(true);
-		miscParams->SetTimeStamp(false);
-		_controlExec->ClearText();
-		drawTimeStep();
+	switch(index) {
+		case 1: drawTimeStep(); break;
+		case 2: drawTimeUser(); break;
+		case 3: drawTimeStamp(); break;
 	}
-	else if (index == 2) {
-		miscParams->SetTimeStamp(true);
-		miscParams->SetTimeStep(false);
-		_controlExec->ClearText();
-		drawTimeUser();
-	}
-	else if (index == 3) {
-		miscParams->SetTimeStamp(true);
-		miscParams->SetTimeStep(false);
-		_controlExec->ClearText();
-		drawTimeStamp();
-	}
-	else {
-		miscParams->SetTimeStamp(false);
-		miscParams->SetTimeStep(false);
-		_controlExec->ClearText();
-	}
-}
+}	
 
 void AnnotationEventRouter::timeLLXChanged() {
-	MiscParams* miscParams = GetMiscParams();
-	float llx = timeLLXEdit->text().toFloat();
-
-	miscParams->SetTimeAnnotLLX(llx);
-	drawTimeStamp();
+	float llx = _timeLLXEdit->text().toFloat();
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	aParams->SetTimeLLX(llx);
 }
 
 void AnnotationEventRouter::timeLLYChanged() {
-	MiscParams* miscParams = GetMiscParams();
-	float lly = timeLLYEdit->text().toFloat();
-
-	miscParams->SetTimeAnnotLLY(lly);
-	drawTimeStamp();
+	float lly = _timeLLYEdit->text().toFloat();
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	aParams->SetTimeLLY(lly);
 }
 
 void AnnotationEventRouter::timeSizeChanged() {
-	MiscParams* miscParams = GetMiscParams();
-	float size = timeSizeEdit->text().toFloat();
-	miscParams->SetTimeAnnotSize(size);
-	drawTimeStamp();
+	float size = _timeSizeEdit->text().toFloat();
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	aParams->SetTimeSize(size);
 }
-
 
 void AnnotationEventRouter::drawTimeStep(string myString) {
 	_controlExec->ClearText();
@@ -859,23 +835,17 @@ void AnnotationEventRouter::drawTimeStep(string myString) {
 		myString = "Timestep: " + std::to_string(GetCurrentTimeStep());
 	}
 
-	MiscParams* mp = GetMiscParams();
-	int x = mp->GetTimeAnnotLLX();
-	int y = mp->GetTimeAnnotLLY();
-	int size = mp->GetTimeAnnotSize();
-	float color[3];
-	mp->GetTimeAnnotColor(color);
+	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
+	int x = aParams->GetTimeLLX();
+	int y = aParams->GetTimeLLY();
+	int size = aParams->GetTimeSize();
+	float color[] = {0., 0., 0.};
+	aParams->GetTimeColor(color);
 
 	_controlExec->DrawText(myString, x, y, size, color, 1);
 }
 
 void AnnotationEventRouter::drawTimeUser() {
-	MiscParams* mp = GetMiscParams();
-	if (mp->GetTimeStep() == true) {
-		drawTimeStep();
-		return;
-	}	
-
 	size_t ts = GetCurrentTimeStep();
 	DataStatus* ds = _controlExec->GetDataStatus();
 	vector<double> timeCoords = ds->GetTimeCoordinates();
@@ -888,12 +858,6 @@ void AnnotationEventRouter::drawTimeUser() {
 }
 
 void AnnotationEventRouter::drawTimeStamp() {
-	MiscParams* mp = GetMiscParams();
-	if (mp->GetTimeStep() == true) {
-		drawTimeStep();
-		return;
-	}	
-
 	size_t ts = GetCurrentTimeStep();
 	DataStatus* ds = _controlExec->GetDataStatus();
 	drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
