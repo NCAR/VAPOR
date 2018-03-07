@@ -187,7 +187,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
     myParams.push_back(AppSettingsParams::GetClassType());
     myParams.push_back(StartupParams::GetClassType());
     myParams.push_back(AnimationParams::GetClassType());
-    myParams.push_back(MiscParams::GetClassType());
+    myParams.push_back(AnnotationParams::GetClassType());
 
     vector<string> myRenParams;
     myRenParams.push_back(StatisticsParams::GetClassType());

@@ -32,28 +32,34 @@
 
 using namespace VAPoR;
 
-const string   AnnotationParams::_domainFrameTag = "DomainFrame";
-const string   AnnotationParams::_domainColorTag = "DomainColor";
-const string   AnnotationParams::_regionFrameTag = "RegionFrame";
-const string   AnnotationParams::_regionColorTag = "RegionColor";
-const string   AnnotationParams::_backgroundColorTag = "BackgroundColor";
-const string   AnnotationParams::_axisAnnotationEnabledTag = "AxisAnnotationiEnabled";
-const string   AnnotationParams::_axisColorTag = "AxisColor";
-const string   AnnotationParams::_axisDigitsTag = "AxisDigits";
-const string   AnnotationParams::_axisTextHeightTag = "AxisTextHeight";
-const string   AnnotationParams::_axisFontSizeTag = "AxisFontSize";
-const string   AnnotationParams::_ticWidthTag = "TicWidths";
-const string   AnnotationParams::_ticDirsTag = "TicDirections";
-const string   AnnotationParams::_ticSizeTag = "TicSizes";
-const string   AnnotationParams::_minTicsTag = "TicMinPositions";
-const string   AnnotationParams::_maxTicsTag = "TicMaxPositions";
-const string   AnnotationParams::_numTicsTag = "NumberTics";
-const string   AnnotationParams::_currentAxisDataMgrTag = "AxisDataMgr";
-const string   AnnotationParams::_latLonAxesTag = "LatLonAxes";
-const string   AnnotationParams::_axisOriginTag = "AxisOrigin";
-const string   AnnotationParams::_showAxisArrowsTag = "ShowAxisArrows";
-const string   AnnotationParams::_axisArrowCoordsTag = "AxisArrowCoords";
-const string   AnnotationParams::_axisAnnotationsTag = "AxisAnnotations";
+const string AnnotationParams::_domainFrameTag = "DomainFrame";
+const string AnnotationParams::_domainColorTag = "DomainColor";
+const string AnnotationParams::_regionFrameTag = "RegionFrame";
+const string AnnotationParams::_regionColorTag = "RegionColor";
+const string AnnotationParams::_backgroundColorTag = "BackgroundColor";
+const string AnnotationParams::_axisAnnotationEnabledTag = "AxisAnnotationiEnabled";
+const string AnnotationParams::_axisColorTag = "AxisColor";
+const string AnnotationParams::_axisDigitsTag = "AxisDigits";
+const string AnnotationParams::_axisTextHeightTag = "AxisTextHeight";
+const string AnnotationParams::_axisFontSizeTag = "AxisFontSize";
+const string AnnotationParams::_ticWidthTag = "TicWidths";
+const string AnnotationParams::_ticDirsTag = "TicDirections";
+const string AnnotationParams::_ticSizeTag = "TicSizes";
+const string AnnotationParams::_minTicsTag = "TicMinPositions";
+const string AnnotationParams::_maxTicsTag = "TicMaxPositions";
+const string AnnotationParams::_numTicsTag = "NumberTics";
+const string AnnotationParams::_currentAxisDataMgrTag = "AxisDataMgr";
+const string AnnotationParams::_latLonAxesTag = "LatLonAxes";
+const string AnnotationParams::_axisOriginTag = "AxisOrigin";
+const string AnnotationParams::_showAxisArrowsTag = "ShowAxisArrows";
+const string AnnotationParams::_axisArrowCoordsTag = "AxisArrowCoords";
+const string AnnotationParams::_axisAnnotationsTag = "AxisAnnotations";
+const string AnnotationParams::_timeLLXTag = "TimeLLX";
+const string AnnotationParams::_timeLLYTag = "TimeLLY";
+const string AnnotationParams::_timeColorTag = "TimeColor";
+const string AnnotationParams::_timeTypeTag = "TimeType";
+const string AnnotationParams::_timeSizeTag = "TimeSize";
+
 vector<double> AnnotationParams::_previousStretch;
 
 //
@@ -89,7 +95,6 @@ AnnotationParams::AnnotationParams(ParamsBase::StateSave *ssave, XmlNode *node) 
 
 AnnotationParams::AnnotationParams(const AnnotationParams &rhs) : ParamsBase(rhs) { _axisAnnotations = new ParamsContainer(*(rhs._axisAnnotations)); }
 
-// Reset vizfeature settings to initial state
 void AnnotationParams::_init()
 {
     vector<double> clr(3, 1.0);
@@ -105,17 +110,6 @@ void AnnotationParams::_init()
     vector<double> dvec(3, 0.0);
     SetAxisArrowCoords(dvec);
     SetShowAxisArrows(false);
-}
-
-void AnnotationParams::m_getColor(double color[3], string tag) const
-{
-    vector<double> defaultv(3, 1.0);
-    vector<double> val = GetValueDoubleVec(tag, defaultv);
-    for (int i = 0; i < val.size(); i++) {
-        color[i] = val[i];
-        if (color[i] < 0.0) color[i] = 0.0;
-        if (color[i] > 1.0) color[i] = 1.0;
-    }
 }
 
 void AnnotationParams::_getColor(vector<double> &color, string tag) const
@@ -151,116 +145,6 @@ void AnnotationParams::SetRegionColor(vector<double> color) { m_setColor(color, 
 void AnnotationParams::GetBackgroundColor(double color[3]) const { m_getColor(color, _backgroundColorTag); }
 
 void AnnotationParams::SetBackgroundColor(vector<double> color) { m_setColor(color, _backgroundColorTag, "Set background color"); }
-
-/*
-void AnnotationParams::SetAxisAnnotationEnabled(bool val){
-    _currentAxisAnnotation->SetAxisAnnotationEnabled(val);
-}
-bool AnnotationParams::GetAxisAnnotationEnabled() const{
-    return _currentAxisAnnotation->GetAxisAnnotationEnabled();
-}
-
-std::vector<double> AnnotationParams::GetAxisColor() const {
-    return _currentAxisAnnotation->GetAxisColor();
-}
-void AnnotationParams::SetAxisColor(vector<double> color) {
-    _currentAxisAnnotation->SetAxisColor(color);
-}
-
-std::vector<double> AnnotationParams::GetAxisBackgroundColor() const {
-    return _currentAxisAnnotation->GetAxisBackgroundColor();
-}
-void AnnotationParams::SetAxisBackgroundColor(vector<double> color) {
-    _currentAxisAnnotation->SetAxisBackgroundColor(color);
-}
-
-void AnnotationParams::SetNumTics(std::vector<double> numTics) {
-    _currentAxisAnnotation->SetNumTics(numTics);
-}
-std::vector<double> AnnotationParams::GetNumTics() const {
-    return _currentAxisAnnotation->GetNumTics();
-}
-
-
-void AnnotationParams::SetAxisOrigin(std::vector<double> orig) {
-    _currentAxisAnnotation->SetAxisOrigin(orig);
-}
-std::vector<double> AnnotationParams::GetAxisOrigin() const {
-    return _currentAxisAnnotation->GetAxisOrigin();
-}
-
-
-void AnnotationParams::SetMinTics(std::vector<double> minTics) {
-    _currentAxisAnnotation->SetMinTics(minTics);
-}
-vector<double> AnnotationParams::GetMinTics() const {
-    return _currentAxisAnnotation->GetMinTics();
-}
-
-
-void AnnotationParams::SetMaxTics(vector<double> maxTics) {
-    _currentAxisAnnotation->SetMaxTics(maxTics);
-}
-vector<double> AnnotationParams::GetMaxTics() const {
-    return _currentAxisAnnotation->GetMaxTics();
-}
-
-
-void AnnotationParams::SetTicSize(vector<double> ticSize) {
-    _currentAxisAnnotation->SetTicSize(ticSize);
-}
-vector<double> AnnotationParams::GetTicSize() const {
-    return _currentAxisAnnotation->GetTicSize();
-}
-
-
-void AnnotationParams::SetTicDirs(vector<double> ticDirs) {
-    _currentAxisAnnotation->SetTicDirs(ticDirs);
-}
-vector<double> AnnotationParams::GetTicDirs() const {
-    return _currentAxisAnnotation->GetTicDirs();
-}
-
-
-double AnnotationParams::GetTicWidth() const{
-    return _currentAxisAnnotation->GetTicWidth();
-}
-void AnnotationParams::SetTicWidth(double val){
-    _currentAxisAnnotation->SetTicWidth(val);
-}
-
-
-long AnnotationParams::GetAxisTextHeight() const{
-    return _currentAxisAnnotation->GetAxisTextHeight();
-}
-void AnnotationParams::SetAxisTextHeight(long val){
-    _currentAxisAnnotation->SetAxisTextHeight(val);
-}
-
-
-long AnnotationParams::GetAxisDigits() const{
-    return _currentAxisAnnotation->GetAxisDigits();
-}
-void AnnotationParams::SetAxisDigits(long val){
-    _currentAxisAnnotation->SetAxisDigits(val);
-}
-
-
-void AnnotationParams::SetLatLonAxesEnabled(bool val){
-    _currentAxisAnnotation->SetLatLonAxesEnabled(val);
-}
-bool AnnotationParams::GetLatLonAxesEnabled() const{
-    return _currentAxisAnnotation->GetLatLonAxesEnabled();
-}
-
-
-void AnnotationParams::SetAxisFontSize(int size) {
-    SetValueDouble(_axisFontSizeTag, "Axis annotation font size", size);
-}
-int AnnotationParams::GetAxisFontSize() {
-    return (int)GetValueDouble(_axisFontSizeTag, 24);
-}
-*/
 
 string AnnotationParams::GetCurrentAxisDataMgrName() const { return GetValueString(_currentAxisDataMgrTag, ""); }
 
@@ -320,19 +204,27 @@ vector<double> AnnotationParams::GetAxisArrowCoords() const
     return GetValueDoubleVec(_axisArrowCoordsTag, defaultv);
 }
 
-#ifdef DEAD
-void AnnotationParams::changeStretch(vector<double> prevStretch, vector<double> newStretch)
+int AnnotationParams::GetTimeLLX() const { return (int)GetValueDouble(_timeLLXTag, 10); }
+
+void AnnotationParams::SetTimeLLX(int llx) { SetValueDouble(_timeLLXTag, "Timestep llx coordinate", llx); }
+
+int AnnotationParams::GetTimeLLY() const { return (int)GetValueDouble(_timeLLYTag, 10); }
+
+void AnnotationParams::SetTimeLLY(int lly) { SetValueDouble(_timeLLYTag, "Timestep lly coordinate", lly); }
+
+std::vector<double> AnnotationParams::GetTimeColor() const
 {
-    _dataStatus->stretchExtents(newStretch);
-    // Determine the relative scale:
-    vector<double> scalefactor;
-    for (int i = 0; i < 3; i++) scalefactor.push_back(newStretch[i] / prevStretch[i]);
-    // Make all viewpoint params rescale
-    ViewpointParams *p = (ViewpointParams *)_paramsMgr->GetDefaultParams(_viewpointParamsTag);
-    p->rescale(scalefactor);
-    vector<Params *> vpparams;
-    _paramsMgr->GetAllParamsInstances(_viewpointParamsTag, vpparams);
-    for (int j = 0; j < vpparams.size(); j++) { ((ViewpointParams *)vpparams[j])->rescale(scalefactor); }
+    std::vector<double> defaultv(3, 1.0);
+    std::vector<double> val = GetValueDoubleVec(_timeColorTag, defaultv);
+    return val;
 }
 
-#endif
+void AnnotationParams::SetTimeColor(vector<double> color) { SetValueDoubleVec(_timeColorTag, "Timestep color", color); }
+
+int AnnotationParams::GetTimeType() const { return (int)GetValueDouble(_timeTypeTag, 0); }
+
+void AnnotationParams::SetTimeType(int type) { SetValueDouble(_timeTypeTag, "Timestep annotation type", type); }
+
+int AnnotationParams::GetTimeSize() const { return (int)GetValueDouble(_timeSizeTag, 24); }
+
+void AnnotationParams::SetTimeSize(int size) { SetValueDouble(_timeSizeTag, "Timestep font size", size); }

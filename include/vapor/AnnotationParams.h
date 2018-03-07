@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2015				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2015				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -39,7 +39,7 @@ class XmlNode;
 //! \brief A class for describing visual features displayed in the visualizer.
 //! \author Alan Norton
 //! \version 3.0
-//! \date    June 2015
+//! \date	June 2015
 
 //! The AnnotationParams class controls various features displayed in the visualizers
 //! There is a global AnnotationParams, that
@@ -64,11 +64,9 @@ public:
 
     virtual ~AnnotationParams(){};
 
-    //! Obtain domain frame color
     void GetDomainColor(double color[3]) const;
     void GetDomainColor(std::vector<double> &color) const { _getColor(color, _domainColorTag); }
 
-    //! Set domain frame color
     void SetDomainColor(vector<double> color);
 
     bool GetUseDomainFrame() const { return (0 != GetValueLong(_domainFrameTag, (long)false)); }
@@ -77,18 +75,14 @@ public:
     bool GetUseRegionFrame() const { return (0 != GetValueLong(_regionFrameTag, (long)false)); }
     void SetUseRegionFrame(bool onOff) { SetValueLong(_regionFrameTag, "toggle region frame", (long)onOff); }
 
-    //! Obtain region frame color
     void GetRegionColor(double color[3]) const;
     void GetRegionColor(std::vector<double> &color) const { _getColor(color, _regionColorTag); }
 
-    //! Set region frame color
     void SetRegionColor(vector<double> color);
 
-    //! Obtain background color
     void GetBackgroundColor(double color[3]) const;
     void GetBackgroundColor(std::vector<double> &color) const { _getColor(color, _backgroundColorTag); }
 
-    //! Set background color
     void SetBackgroundColor(std::vector<double> color);
 
     string GetCurrentAxisDataMgrName() const;
@@ -109,15 +103,25 @@ public:
     void SetAxisFontSize(int size);
     int  GetAxisFontSize();
 
-    // Get static string identifier for this params class
-    //
+    int  GetTimeLLX() const;
+    void SetTimeLLX(int llx);
+
+    int  GetTimeLLY() const;
+    void SetTimeLLY(int lly);
+
+    std::vector<double>       GetTimeColor() const;
+    template<typename T> void GetTimeColor(T color[]) const { m_getColor(color, _timeColorTag); };
+    void                      SetTimeColor(std::vector<double> color);
+
+    int  GetTimeType() const;
+    void SetTimeType(int type);
+
+    int  GetTimeSize() const;
+    void SetTimeSize(int size);
+
     static string GetClassType() { return ("AnnotationParams"); }
 
 private:
-#ifdef DEAD
-    static void changeStretch(vector<double> prevStretch, vector<double> newStretch);
-#endif
-
     ParamsContainer *_axisAnnotations;
 
     static const string _domainColorTag;
@@ -146,9 +150,25 @@ private:
     static const string   _currentAxisDataMgrTag;
     static vector<double> _previousStretch;
 
+    static const string _timeLLXTag;
+    static const string _timeLLYTag;
+    static const string _timeColorTag;
+    static const string _timeTypeTag;
+    static const string _timeSizeTag;
+
     void _init();
 
-    void m_getColor(double color[3], string tag) const;
+    template<typename T> void m_getColor(T color[3], string tag) const
+    {
+        vector<double> defaultv(3, 1.0);
+        vector<double> val = GetValueDoubleVec(tag, defaultv);
+        for (int i = 0; i < val.size(); i++) {
+            color[i] = val[i];
+            if (color[i] < 0.0) color[i] = 0.0;
+            if (color[i] > 1.0) color[i] = 1.0;
+        }
+    }
+    // void m_getColor(double color[3], string tag) const;
     void _getColor(vector<double> &color, string tag) const;
     void m_setColor(vector<double> color, string tag, string msg);
 };
