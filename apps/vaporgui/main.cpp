@@ -78,9 +78,6 @@ int           main(int argc, char **argv)
     FILE *errfp = NULL;
     if (getenv("VAPOR_DEBUG")) MyBase::SetDiagMsgFilePtr(stderr);
 
-    cerr << "HARD CODED ERROR OUTPUTS\n";
-    MyBase::SetErrMsgFilePtr(stderr);
-
 #ifdef Darwin
     if (!getenv("DISPLAY")) setenv("DISPLAY", ":0.0", 0);
 #endif
