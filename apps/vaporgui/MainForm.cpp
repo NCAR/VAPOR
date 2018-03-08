@@ -1052,34 +1052,12 @@ void MainForm::closeEvent(QCloseEvent* ){
 }
 #endif
 
-void MainForm::_performSessionAutoSave() {
-	if (!_paramsMgr) return;
-
-	SettingsParams* sParams = GetSettingsParams();
-	if (!sParams) return;
-
-	int eventCountForAutoSave = sParams->GetChangesPerAutoSave();
-
-	if (eventCountForAutoSave == 0) return;
-
-	if (_eventsSinceLastSave == eventCountForAutoSave) {
-		string autoSaveFile = sParams->GetAutoSaveSessionFile();
-		_paramsMgr->SaveToFile(autoSaveFile);
-		_eventsSinceLastSave = 0;
-	}
-	else {
-		_eventsSinceLastSave++;
-	}
-}
-
 void MainForm::_stateChangeCB() {
         
     // Generate an application event whenever state changes
     //      
     ParamsChangeEvent *event = new ParamsChangeEvent();
     QApplication::postEvent(this, event);
-
-	_performSessionAutoSave();
 }
 
 void MainForm::undoRedoHelper(bool undo) {
@@ -1349,13 +1327,7 @@ void MainForm::performAutoStretching() {
 			double hypotenuse = sqrt(xRange*xRange + yRange*yRange);
 			double scale = (hypotenuse/2.f) / zRange;
 
-			cout << dataSets[i] << " " << winNames[i] << endl;
-			cout << maxExt.size() << " " << maxExt[2] << " " << minExt[2] << endl;
-			cout << "  " << xRange << endl;
-			cout << "  " << yRange << endl;
-			cout << "  " << zRange << endl;
-			cout << "  " << hypotenuse << endl;
-			cout << "  " << scale << endl;
+			cout << "Auto-stretch scale: " << scale << endl;
 
 			ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
 			Transform* transform = vpParams->GetTransform(dataSets[i]);
@@ -1383,7 +1355,7 @@ void MainForm::loadData(string fileName)
 	);
 
 	SettingsParams *sP = GetSettingsParams();
-	bool autoStretchingEnabled = sP->GetAutoStretch();
+	bool autoStretchingEnabled = sP->GetAutoStretchEnabled();
 	if (autoStretchingEnabled)
 		performAutoStretching();
 }
@@ -2212,6 +2184,27 @@ void MainForm::updateMenus() {
 	_editRedoAction->setEnabled((bool) _controlExec->RedoSize());
 }
 
+void MainForm::_performSessionAutoSave() {
+	if (_paramsMgr== NULL) return;
+
+	SettingsParams* sParams = GetSettingsParams();
+	if (sParams==NULL) return;
+
+	int eventCountForAutoSave = sParams->GetChangesPerAutoSave();
+
+	if (eventCountForAutoSave == 0) return;
+	if (!sParams->GetSessionAutoSaveEnabled()) return;
+
+	if (_eventsSinceLastSave >= eventCountForAutoSave) {
+		string autoSaveFile = sParams->GetAutoSaveSessionFile();
+		_paramsMgr->SaveToFile(autoSaveFile);
+		_eventsSinceLastSave = 0;
+	}
+	else {
+		_eventsSinceLastSave++;
+	}
+}
+
 void MainForm::update() {
 
 	assert(_controlExec);
@@ -2222,6 +2215,8 @@ void MainForm::update() {
 	_timeStepEdit->setText(QString::number((int) timestep));
 
 	updateMenus();
+
+	_performSessionAutoSave();
 
 #ifdef	DEAD
 	// Get the current mode setting from MouseModeParams
