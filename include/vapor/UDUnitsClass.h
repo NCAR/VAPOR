@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <vapor/common.h>
 
 union ut_unit;
 struct ut_system;

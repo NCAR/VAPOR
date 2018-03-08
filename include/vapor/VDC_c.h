@@ -86,7 +86,8 @@ int	 VDCCoordVar_GetUniform(const VDCCoordVar *p);
 
 VDC *VDC_new();
 void VDC_delete(VDC *p);
-int  VDC_Initialize(VDC *p, const char *path, int mode);
+int  VDC_InitializeDefaultBS(VDC *p, const char *path, int mode);
+int  VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount);
 
 int  VDC_GetDimension(const VDC *p, const char *dimname, VDCDimension *dimension);
 void VDC_GetDimensionNames(const VDC *p, char ***names, int *count);
@@ -113,16 +114,16 @@ int  VDC_GetVarDimNames(const VDC*p, const char *varname, int spatial, char ***n
 int  VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char ***names, int *count);
 
 int VDC_OpenVariableRead(VDC *p, size_t ts, const char *varname, int level, int lod);
-int VDC_CloseVariable(VDC *p);
-int VDC_Read(VDC *p, float *region);
-int VDC_ReadSlice(VDC *p, float *slice);
-int VDC_ReadRegion(VDC *p, const size_t *min, const size_t *max, const int dims, float *region);
+int VDC_CloseVariable(VDC *p, int fd);
+int VDC_Read(VDC *p, int fd, float *region);
+int VDC_ReadSlice(VDC *p, int fd, float *slice);
+int VDC_ReadRegion(VDC *p, int fd, const size_t *min, const size_t *max, const int dims, float *region);
 int VDC_GetVar(VDC *p, const char *varname, int level, int lod, float *data);
 int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int lod, float *data);
 
 // Write
 
-int VDC_SetCompressionBlock(VDC *p, const size_t *bs, int bsCount, const char *wname, const size_t *cratios, int cratiosCount);
+int VDC_SetCompressionBlock(VDC *p, const char *wname, const size_t *cratios, int cratiosCount);
 int VDC_DefineDimension(VDC *p, const char *dimname, size_t length);
 int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char **coordvars, size_t coordvarCount, const char *units, VDC_XType xtype, int compressed);
 int VDC_DefineCoordVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);

@@ -61,7 +61,6 @@ void VDCBaseVar_GetUnits(const VDCBaseVar *p, char **units) { _stringToCString(p
 int  VDCBaseVar_GetXType(const VDCBaseVar *p) { return _XTypeToInt(p->GetXType()); }
 void VDCBaseVar_GetWName(const VDCBaseVar *p, char **name) { _stringToCString(p->GetWName(), name); }
 void VDCBaseVar_GetCRatios(const VDCBaseVar *p, size_t **ratios, int *count) { _size_tVectorToCArray(p->GetCRatios(), ratios, count); }
-void VDCBaseVar_GetBS(const VDCBaseVar *p, size_t **bs, int *count) { _size_tVectorToCArray(p->GetBS(), bs, count); }
 void VDCBaseVar_GetPeriodic(const VDCBaseVar *p, long **periodic, int *count) { _boolVectorToCArray(p->GetPeriodic(), periodic, count); }
 void VDCBaseVar_GetAttributeNames(const VDCBaseVar *p, char ***names, int *count)
 {
@@ -115,7 +114,10 @@ VDC *VDC_new()
 void VDC_delete(VDC *p)
 { VDC_DEBUG_called(); delete p; }
 
-int VDC_Initialize(VDC *p, const char *path, int mode)
+int VDC_InitializeDefaultBS(VDC *p, const char *path, int mode)
+{ return VDC_Initialize(p, path, mode, NULL, 0); }
+
+int VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount)
 {
 	VDC_DEBUG_called(); 
 	VDC::AccessMode am = VDC::R;
@@ -124,7 +126,13 @@ int VDC_Initialize(VDC *p, const char *path, int mode)
 	else if (mode == VDC_AccessMode_A) am = VDC::A;
 
 	VAPoR::VDCNetCDF *pnc = (VAPoR::VDCNetCDF *)p;
-	int ret = pnc->Initialize(string(path), vector <string> (), am, 0);
+	int ret;
+	if (bs != NULL && bsCount > 0) {
+		vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
+		ret = pnc->Initialize(string(path), vector <string> (), am, bs_v, 0);
+	} else {
+		ret = pnc->Initialize(string(path), vector <string> (), am);
+	}
 	// pnc->SetFill(0x100); // Required to disable set_fill
 	return ret;
 }
@@ -272,17 +280,19 @@ int  VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char **
 int VDC_OpenVariableRead(VDC *p, size_t ts, const char *varname, int level, int lod)
 { VDC_DEBUG_called(); return p->OpenVariableRead(ts, string(varname), level, lod); }
 
-int VDC_CloseVariable(VDC *p)
-{ VDC_DEBUG_called(); return p->CloseVariable(); }
+int VDC_CloseVariable(VDC *p, int fd)
+{ VDC_DEBUG_called(); return p->CloseVariable(fd); }
 
-int VDC_Read(VDC *p, float *region)
-{ VDC_DEBUG_called(); return p->Read(region); }
+int VDC_Read(VDC *p, int fd, float *region)
+{ VDC_DEBUG_called(); return p->Read(fd, region); }
 
-int VDC_ReadSlice(VDC *p, float *slice)
-{ VDC_DEBUG_called(); return p->ReadSlice(slice); }
+int VDC_ReadSlice(VDC *p, int fd, float *slice)
+{ VDC_DEBUG_called(); return p->ReadSlice(fd, slice); }
 
-int VDC_ReadRegion(VDC *p, const size_t *min, const size_t *max, const int dims, float *region)
-{
+int VDC_ReadRegion(
+	VDC *p, int fd, const size_t *min, const size_t *max, const int 
+	dims, float *region) {
+
 	VDC_DEBUG_called(); 
 	vector<size_t> min_v;
 	vector<size_t> max_v;
@@ -290,7 +300,7 @@ int VDC_ReadRegion(VDC *p, const size_t *min, const size_t *max, const int dims,
 		min_v.push_back(min[i]);
 		max_v.push_back(max[i]);
 	}
-	return p->ReadRegion(min_v, max_v, region);
+	return p->ReadRegion(fd, min_v, max_v, region);
 }
 
 int VDC_GetVar(VDC *p, const char *varname, int level, int lod, float *data)
@@ -303,12 +313,11 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 // #        Write         #
 // ########################
 
-int VDC_SetCompressionBlock(VDC *p, const size_t *bs, int bsCount, const char *wname, const size_t *cratios, int cratiosCount)
+int VDC_SetCompressionBlock(VDC *p, const char *wname, const size_t *cratios, int cratiosCount)
 {
-	vector<size_t> bs_v = _size_tArrayToSize_tVector(bs, bsCount);
 	vector<size_t> cratios_v = _size_tArrayToSize_tVector(cratios, cratiosCount);
 	VDC_DEBUG_printff("(%s, \"%s\", %s)", _size_tVectorToString(bs_v).c_str(), wname, _size_tVectorToString(cratios_v).c_str());
-	int ret = p->SetCompressionBlock(bs_v, string(wname), cratios_v);
+	int ret = p->SetCompressionBlock(string(wname), cratios_v);
 	return ret;
 }
 

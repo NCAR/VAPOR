@@ -52,7 +52,7 @@ public:
  RegularGrid() = default;
  virtual ~RegularGrid() = default;
 
- virtual size_t GetNumCoordinates() const override;
+ virtual size_t GetGeometryDim() const override;
 
 
 

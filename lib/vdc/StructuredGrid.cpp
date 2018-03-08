@@ -39,14 +39,10 @@ bool StructuredGrid::GetCellNodes(
 ) const {
 	nodes.clear();
 
-	vector <size_t> dims = GetDimensions();
-	assert (cindices.size() == dims.size());
+    vector <size_t> cCindices = cindices;
+    ClampCellIndex(cCindices);
 
-	// Check if invalid indices
-	//
-	for (int i=0; i<cindices.size(); i++) {
-		if (cindices[i] > (dims[i]-2)) return(false);
-	}
+	vector <size_t> dims = GetDimensions();
 
 	// Cells have the same ID's as their first node
 	//
@@ -55,42 +51,42 @@ bool StructuredGrid::GetCellNodes(
 	vector <size_t> indices;
 
 	if (dims.size() == 2) {
-		indices =  {cindices[0], cindices[1]};
+		indices =  {cCindices[0], cCindices[1]};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0]+1, cindices[1]};
+		indices =  {cCindices[0]+1, cCindices[1]};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0]+1, cindices[1]+1};
+		indices =  {cCindices[0]+1, cCindices[1]+1};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0], cindices[1]+1};
+		indices =  {cCindices[0], cCindices[1]+1};
 		nodes.push_back(indices);
 
 	}
 	else if (dims.size() == 3 && dims[2] > 1) {
-		indices =  {cindices[0], cindices[1], cindices[2]};
+		indices =  {cCindices[0], cCindices[1], cCindices[2]};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0]+1, cindices[1], cindices[2]};
+		indices =  {cCindices[0]+1, cCindices[1], cCindices[2]};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0]+1, cindices[1]+1, cindices[2]};
+		indices =  {cCindices[0]+1, cCindices[1]+1, cCindices[2]};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0], cindices[1]+1, cindices[2]};
+		indices =  {cCindices[0], cCindices[1]+1, cCindices[2]};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0], cindices[1], cindices[2]+1};
+		indices =  {cCindices[0], cCindices[1], cCindices[2]+1};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0]+1, cindices[1], cindices[2]+1};
+		indices =  {cCindices[0]+1, cCindices[1], cCindices[2]+1};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0]+1, cindices[1]+1, cindices[2]+1};
+		indices =  {cCindices[0]+1, cCindices[1]+1, cCindices[2]+1};
 		nodes.push_back(indices);
 
-		indices =  {cindices[0], cindices[1]+1, cindices[2]+1};
+		indices =  {cCindices[0], cCindices[1]+1, cCindices[2]+1};
 		nodes.push_back(indices);
 	}
 
@@ -103,16 +99,12 @@ bool StructuredGrid::GetCellNeighbors(
 ) const {
 	cells.clear();
 
+    vector <size_t> cCindices = cindices;
+    ClampCellIndex(cCindices);
+
 	vector <size_t> dims = GetDimensions();
-	assert (cindices.size() == dims.size());
 
 	assert((dims.size() == 2) && "3D cells not yet supported");
-
-	// Check if invalid indices
-	//
-	for (int i=0; i<cindices.size(); i++) {
-		if (cindices[i] > (dims[i]-2)) return(false);
-	}
 
 	// Cells have the same ID's as their first node
 	//
@@ -121,23 +113,23 @@ bool StructuredGrid::GetCellNeighbors(
 	if (dims.size() == 2) {
 		vector <size_t> indices;
 
-		if (cindices[1] != 0) {	// below
-			indices = {cindices[0], cindices[1]-1};
+		if (cCindices[1] != 0) {	// below
+			indices = {cCindices[0], cCindices[1]-1};
 		}
 		cells.push_back(indices);
 
-		if (cindices[0] != dims[0]-2) {	// right
-			indices = {cindices[0]+1, cindices[1]};
+		if (cCindices[0] != dims[0]-2) {	// right
+			indices = {cCindices[0]+1, cCindices[1]};
 		}
 		cells.push_back(indices);
 
-		if (cindices[1] != dims[1]-2) {	// top
-			indices = {cindices[0], cindices[1]+1};
+		if (cCindices[1] != dims[1]-2) {	// top
+			indices = {cCindices[0], cCindices[1]+1};
 		}
 		cells.push_back(indices);
 
-		if (cindices[0] != 0) {	// left
-			indices = {cindices[0]-1, cindices[1]};
+		if (cCindices[0] != 0) {	// left
+			indices = {cCindices[0]-1, cCindices[1]};
 		}
 		cells.push_back(indices);
 	}
@@ -189,9 +181,9 @@ bool StructuredGrid::GetNodeCells(
 }
 
 void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
-	assert(coords.size() >= GetTopologyDim());
+	assert(coords.size() >= GetGeometryDim());
 
-	while (coords.size() > GetTopologyDim()) {
+	while (coords.size() > GetGeometryDim()) {
 		coords.pop_back();
 	}
 
