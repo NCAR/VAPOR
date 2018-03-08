@@ -43,6 +43,9 @@ class SettingsParams : public VAPoR::ParamsBase {
   public:
     SettingsParams(VAPoR::ParamsBase::StateSave *ssave);
     SettingsParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);
+    SettingsParams(const SettingsParams &rhs);
+    SettingsParams &operator=(const SettingsParams &rhs);
+
     ~SettingsParams();
 
     int GetNumThreads() const;
@@ -61,8 +64,8 @@ class SettingsParams : public VAPoR::ParamsBase {
     void SetWinSize(size_t width, size_t height);
     void GetWinSize(size_t &width, size_t &height) const;
 
-    bool GetAutoStretch() const;
-    void SetAutoStretch(bool val);
+    bool GetAutoStretchEnabled() const;
+    void SetAutoStretchEnabled(bool val);
 
     int GetJpegQuality() const;
     void SetJpegQuality(int quality);
@@ -75,6 +78,7 @@ class SettingsParams : public VAPoR::ParamsBase {
 
     string GetAutoSaveSessionFile() const;
     void SetAutoSaveSessionFile(string file);
+    void SetDefaultAutoSaveFile(string file);
 
     string GetSessionDir() const;
     void SetSessionDir(string name);
@@ -155,6 +159,7 @@ class SettingsParams : public VAPoR::ParamsBase {
     static const string _jpegQualityTag;
     static const string _changesPerAutoSaveTag;
     static const string _autoSaveFileLocationTag;
+    static const string _defaultAutoSaveFileTag;
     static const string _sessionAutoSaveEnabledTag;
     static const string _fontFileTag;
     static const string _fontSizeTag;

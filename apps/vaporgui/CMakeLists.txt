@@ -138,7 +138,6 @@ endif ()
 
 if (APPLE)
 	target_compile_options (vapor PRIVATE "-Wno-deprecated-declarations")
-	target_compile_options (vapor PRIVATE "-fsanitize=address")
 endif ()
 
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
