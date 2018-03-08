@@ -565,7 +565,6 @@ void ParamsContainer::Remove(string name) {
 }
 
 ParamsBase *ParamsContainer::GetParams(string name) const {
-    cout << "Size " << _elements.size() << endl;
     map<string, ParamsBase *>::const_iterator itr = _elements.find(name);
     if (itr != _elements.end())
         return (itr->second);
