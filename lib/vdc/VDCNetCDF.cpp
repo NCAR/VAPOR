@@ -6,6 +6,7 @@
 #include <netcdf.h>
 #include "vapor/VDCNetCDF.h"
 #include "vapor/CFuncs.h"
+#include "vapor/Version.h"
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -1181,7 +1182,7 @@ int VDCNetCDF::_WriteMasterMeta() {
 	}
 	
 
-	rc = _master->PutAtt("", "VDC.Version", _version);
+	rc = _master->PutAtt("", "VDC.Version", Version::GetVersionString());
 	if (rc<0) return(rc);
 
 	rc = _master->PutAtt("", "VDC.BlockSize", _bs);
@@ -1234,8 +1235,17 @@ int VDCNetCDF::_ReadMasterMeta() {
     int rc = _master->Open(_master_path, 0);
 	if (rc<0) return(-1);
 
+
 	rc = _master->GetAtt("", "VDC.Version", _version);
-	if (rc<0) return(rc);
+	if (rc<0) {
+		SetErrMsg("VDC versions prior to 3.0.0 not supported");
+		return(rc);
+	}
+
+	if (Version::Compare(_version, "3.0.0") < 0) {
+		SetErrMsg("VDC versions prior to 3.0.0 not supported");
+		return(-1);
+	}
 
 	rc = _master->GetAtt("", "VDC.BlockSize", _bs);
 	if (rc<0) return(rc);
