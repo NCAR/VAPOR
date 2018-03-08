@@ -24,39 +24,38 @@
 
 class QToolBar;
 
-namespace VAPoR {
-class ControlExec;
-}
-
 class VizSelectCombo : public QComboBox {
     Q_OBJECT
 
 public:
     VizSelectCombo(QWidget *parent);
-    int     getNumWindows() { return (count() - 1); }
-    QString getWinName(int i) { return itemText(i); }
+    int     GetNumWindows() { return (count() - 1); }
+    QString GetWinName(int i) { return itemText(i); }
 
 public slots:
     // Remove a window from the combobox
     //
-    void removeWindow(const QString &winName);
+    void RemoveWindow(const QString &winName);
 
-private:
-protected slots:
+    void SetWindowActive(const QString &winName);
+
     // Add a new window to the combobox
-    // Use number to maintain order.
-    void addWindow(const QString &winName);
+    //
+    void AddWindow(const QString &winName);
 
-    void setWindowActive(const QString &winName);
+private slots:
 
     // activated window , and notify the vizWinManager
     void activeWin(const QString &winName);
 
 signals:
-    // send message that a window number was activated.
-    // This results from "activated(index)" signal of parent
 
+    // send message that a window number was activated.
+    //
     void winActivated(const QString &winName);
+
+    // send request for new window
+    //
     void newWin();
 };
 #endif    // VIZSELECTCOMBO_H

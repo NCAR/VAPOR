@@ -44,6 +44,8 @@
 #include <vapor/common.h>
 #include <vapor/ShaderMgr.h>
 
+#include "imagewriter.hpp"
+
 using namespace VAPoR;
 bool Visualizer::_regionShareFlag = true;
 
@@ -791,6 +793,7 @@ void Visualizer::removeDisabledRenderers()
 
 double Visualizer::getPixelSize() const
 {
+#ifdef DEAD
     double temp[3];
 
     // Window height is subtended by viewing angle (45 degrees),
@@ -815,6 +818,9 @@ double Visualizer::getPixelSize() const
     // tan(45 deg *0.5) is ratio between half-height and dist to scene
     double halfHeight = tan(M_PI * 0.125) * distToScene;
     return (2.f * halfHeight / (double)height);
+
+#endif
+    return (0.0);
 }
 ViewpointParams *Visualizer::getActiveViewpointParams() const { return m_paramsMgr->GetViewpointParams(m_winName); }
 
@@ -875,23 +881,30 @@ int Visualizer::captureImage(string filename)
 
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
-    string suffix = filename.substr(filename.length() - 4, 4);
+    string suffix = filename.substr(filename.length() - 4, 4);    // it assumes fixed length of all suffix...
 
     FILE *jpegFile = NULL;
     TIFF *tiffFile = NULL;
-    if (suffix == ".tif") {
+    if (suffix == ".tif" || suffix == "tiff") {
         tiffFile = TIFFOpen((const char *)filename.c_str(), "wb");
         if (!tiffFile) {
             SetErrMsg("Image Capture Error: Error opening output Tiff file: %s", (const char *)filename.c_str());
             return -1;
         }
-    } else {
-        // open the jpeg file:
+    } else if (suffix == ".jpg" || suffix == "jpeg") {
         jpegFile = fopen((const char *)filename.c_str(), "wb");
         if (!jpegFile) {
             SetErrMsg("Image Capture Error: Error opening output Jpeg file: %s", (const char *)filename.c_str());
             return -1;
         }
+    } else    // write png files
+    {
+        FILE *test = fopen((const char *)filename.c_str(), "wb");
+        if (!test) {
+            SetErrMsg("Image Capture Error: Error opening output PNG file: %s", (const char *)filename.c_str());
+            return -1;
+        }
+        fclose(test);
     }
     // Get the image buffer
     unsigned char *buf = new unsigned char[3 * width * height];
@@ -905,7 +918,7 @@ int Visualizer::captureImage(string filename)
 
     // Now call the Jpeg or tiff library to compress and write the file
     //
-    if (suffix == ".tif")    // capture the tiff file, one scanline at a time
+    if (suffix == ".tif" || suffix == "tiff")    // capture the tiff file, one scanline at a time
     {
         uint32 imagelength = (uint32)width;
         uint32 imagewidth = (uint32)height;
@@ -925,11 +938,19 @@ int Visualizer::captureImage(string filename)
             }
         }
         TIFFClose(tiffFile);
-    } else {
+    } else if (suffix == ".jpg" || suffix == "jpeg") {
         int quality = 95;
         int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
         if (rc) {
             SetErrMsg("Image Capture Error; Error writing jpeg file %s", (const char *)filename.c_str());
+            return -1;
+        }
+        fclose(jpegFile);
+    } else    // PNG
+    {
+        int rc = Write_PNG(filename.c_str(), width, height, buf);
+        if (rc) {
+            SetErrMsg("Image Capture Error; Error writing PNG file %s", (const char *)filename.c_str());
             return -1;
         }
     }
@@ -937,6 +958,7 @@ int Visualizer::captureImage(string filename)
     delete[] buf;
     return 0;
 }
+
 // Produce an array based on current contents of the (back) buffer
 bool Visualizer::getPixelData(unsigned char *data) const
 {

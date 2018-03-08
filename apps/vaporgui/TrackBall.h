@@ -83,6 +83,9 @@ public:
     {
         for (int i = 0; i < 3; i++) center[i] = _center[i];
     }
+
+    bool ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const;
+
     // Note:  button is 1,2,3 for left, middle, right
     void MouseOnTrackball(int eventType, int thisButton, int xcrd, int ycrd, unsigned width, unsigned height);
 

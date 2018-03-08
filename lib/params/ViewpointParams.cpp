@@ -156,10 +156,6 @@ void ViewpointParams::_init()
     // SetStretchFactors(vector <double>(3,1.0));
 
     SetWindowSize(100, 100);
-
-#ifdef DEAD
-    setupHomeView();
-#endif
 }
 
 Transform *ViewpointParams::GetTransform(string dataSetName)
@@ -347,50 +343,6 @@ void ViewpointParams::rescale(vector<double> scaleFac)
     return;
 }
 
-void ViewpointParams::setupHomeView()
-{
-    vector<double> minExts, maxExts;
-    m_dataStatus->GetExtents(minExts, maxExts);
-    assert(minExts.size() == maxExts.size());
-    assert(minExts.size() == 3);
-
-    vector<double> domainCenter;
-    for (int i = 0; i < 3; i++) { domainCenter.push_back((minExts[i] + maxExts[i]) / 2.0); }
-
-    vector<double> stretch = GetStretchFactors();
-    double         domainHgt = stretch[1] * fabs(maxExts[1] - minExts[1]);
-
-    double fov = GetFOV();
-    double d = stretch[2] * (maxExts[2] - minExts[2]) / 2.0;
-    double zDisplacment = d + (0.5 * domainHgt) / tan((fov / 2.0) * M_PI / 180.0);
-
-    vector<double> posVec;
-    posVec.push_back(domainCenter[0]);
-    posVec.push_back(domainCenter[1]);
-    posVec.push_back(domainCenter[2] + zDisplacment);
-
-    vector<double> dirVec;
-    dirVec.push_back(0.0);
-    dirVec.push_back(0.0);
-    dirVec.push_back(-1.0);
-
-    vector<double> upVec;
-    upVec.push_back(0.0);
-    upVec.push_back(1.0);
-    upVec.push_back(0.0);
-
-    GetPSM()->BeginSaveStateGroup("Center view on region");
-
-    setCameraPosLocal(posVec);
-
-    setViewDir(dirVec);
-
-    setRotationCenterLocal(domainCenter);
-
-    setUpVec(upVec);
-
-    GetPSM()->EndSaveStateGroup();
-}
 #endif
 
 #ifdef DEAD
