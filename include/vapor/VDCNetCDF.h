@@ -188,8 +188,8 @@ protected:
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
 private:
-    int   _version;
-    WASP *_master;    // Master NetCDF file
+    string _version;
+    WASP * _master;    // Master NetCDF file
 
     class VDCFileObject : public DC::FileTable::FileObject {
     public:

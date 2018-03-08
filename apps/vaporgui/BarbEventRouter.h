@@ -34,7 +34,7 @@ class BarbEventRouter : public QTabWidget, public RenderEventRouter {
     Q_OBJECT
 
 public:
-    BarbEventRouter(QWidget *parent, VizWinMgr *vizMgr, VAPoR::ControlExec *ce);
+    BarbEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
     ~BarbEventRouter();
 
     virtual void hookUpTab() {}

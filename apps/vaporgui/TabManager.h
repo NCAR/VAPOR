@@ -30,6 +30,8 @@ class ControlExec;
 
 class RenderHolder;
 class EventRouter;
+class RenderEventRouter;
+class VizWinMgr;
 
 //! \class TabManager
 //! \ingroup Public_GUI
@@ -65,11 +67,11 @@ public:
     //! Constructor:  Invoked by the MainForm during the set up of the
     //! main window.
     //
-    static TabManager *Create(QWidget *parent, VAPoR::ControlExec *ce)
+    static TabManager *Create(QWidget *parent, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr)
     {
         if (_tabManager) return (_tabManager);
 
-        _tabManager = new TabManager(parent, ce);
+        _tabManager = new TabManager(parent, ce, vizWinMgr);
         return (_tabManager);
     };
 
@@ -81,22 +83,6 @@ public:
         return _tabManager;
     }
 
-    //! Method invoked by the VizWinMgr at the time all the EventRouters are created
-    //! Each eventRouter and its associated tag are saved in arrays for subsequent use
-    //! \param[in] evWid indicates the QWidget that is associated with an EventRouter
-    //! \param[in] tag is the Params Tag associated with the EventRouter.
-    void AddWidget(QWidget *evWid, string Tag, int tagType);
-
-    //! Method identifies the Lower level QWidget of specified widget type.  The lower level widget is either a QTabWidget (for
-    //! widgetType 1 or 2) or (for widgetType 0) the RenderHolder instance that manages Renderer tabs.
-    //! \param[in] widType is either 0, 1 or 2, for RenderHolder, Navigation, or Settings.
-    //! \return QWidget* is either a QTabWidget* or a RenderHolder*
-    QWidget *GetSubTabWidget(int widType) { return _topWidgets[widType]; }
-
-    //! During initialization, after all the EventRouters have been created (and identified via addWidget()), the installWidgets
-    //! method must be called to set up the various widgets in each tab.
-    void InstallWidgets();
-
     //! In order to display the parameters for the selected renderer, QWidget::show() is invoked for the selected EventRouter, and
     //! QWidget::hide() is invoked for all other renderer EventRouters.  This is performed in the RenderHolder class.
     //! \param[in] tag is the tag associated with the renderer.
@@ -104,11 +90,6 @@ public:
 
     //! All the render EventRouter widgets are hidden until one is selected, using this method.
     void HideRenderWidgets();
-
-    //! This method identifies the EventRouter that is currently being displayed.  This can be invoked to determine if it is necessary
-    //! to Refresh the specified EventRouter
-    //! \return EventRouter* current displayed EventRouter
-    EventRouter *GetFrontEventRouter() { return VizWinMgr::getInstance()->GetEventRouter(_widgetTags[_currentTopTab][_currentFrontPage[_currentTopTab]]); }
 
     //! Update from current state
     //
@@ -123,6 +104,25 @@ public:
     //! \param[in] is the QWidget* to be checked
     //! \return bool true if it is in front.
     bool IsFrontTab(QWidget *wid);
+    //! Get list of Installed Tab names
+    //!
+    //! \param[in] renderOnly If true only return render event routers.
+    //! See GetRenderEventRouter()
+    //!
+    //
+    vector<string> GetInstalledTabNames(bool renderOnly) const;
+
+    EventRouter *GetEventRouter(string erType) const;
+
+    RenderEventRouter *GetRenderEventRouter(string winName, string renderType, string instName) const;
+
+    //! Enable or disable widgets associated with all event routers
+    //
+    void EnableRouters(bool onOff);
+    void Shutdown();
+    void Restart();
+    void Reinit();
+
 signals:
     void tabLeft(int, int);
 
@@ -167,23 +167,72 @@ private:
 
 private:
     static TabManager *_tabManager;
+    // map tags to eventrouters
+    std::map<string, EventRouter *> _eventRouterMap;
 
     VAPoR::ControlExec *_controlExec;
     RenderHolder *      _renderHolder;
+    VizWinMgr *         _vizWinMgr;
 
     // Data structures to store widget info
     vector<QWidget *> _widgets[3];
 
-    vector<string> _widgetTags[3];
-    QWidget *      _topWidgets[3];
-    QString        _topName[3];
-    int            _currentFrontPage[3];
-    int            _prevFrontPage[3];
-    int            _currentTopTab;
-    int            _prevTopTab;
+    vector<string>         _widgetTags[3];
+    std::vector<QWidget *> _topWidgets;
+    QString                _topName[3];
+    int                    _currentFrontPage[3];
+    int                    _prevFrontPage[3];
+    int                    _currentTopTab;
+    int                    _prevTopTab;
+
+    bool _initialized;
 
     TabManager() {}
-    TabManager(QWidget *, VAPoR::ControlExec *ce);
+    TabManager(QWidget *, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr);
+
+    QWidget *_getSubTabWidget(int widType)
+    {
+        assert(widType >= 0 && widType < _topWidgets.size());
+        return _topWidgets[widType];
+    }
+
+    GUIStateParams *_getStateParams() const
+    {
+        assert(_controlExec != NULL);
+        VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+        return ((GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    }
+
+    void _createAllDefaultTabs();
+
+    // method that creates an eventRouter, and installs it as one of the tabs.
+    // All extension EventRouter classes must call this during the
+    // InstallExtensions() method.
+    //
+    // const std::string tag : XML tag identifying the Params class.
+    //
+    void _installTab(const std::string tag, int tagType, EventRouter *eRouter);
+
+    void _registerEventRouter(const std::string tag, EventRouter *router);
+
+    // During initialization, after all the EventRouters have been created
+    // (and identified via addWidget()), the installWidgets
+    // method must be called to set up the various widgets in each tab.
+    //
+    void _installWidgets();
+
+    // Method invoked by the VizWinMgr at the time all the EventRouters
+    // are created
+    // Each eventRouter and its associated tag are saved in arrays for
+    // subsequent use
+    //
+    // \param[in] evWid indicates the QWidget that is associated with
+    // an EventRouter
+    // \param[in] tag is the Params Tag associated with the EventRouter.
+    //
+    void _addWidget(QWidget *evWid, string Tag, int tagType);
+
+    void _updateRouters();
 
 #endif    // DOXYGEN_SKIP_THIS
 };

@@ -131,9 +131,9 @@ int Version::Compare(string v1, string v2)
         else if (StrCmpNoCase(rc1, rc2) > 0)
             return (1);
     } else if (rc1.length() && !rc2.length()) {
-        return (-1);
-    } else if (!rc1.length() && rc2.length()) {
         return (1);
+    } else if (!rc1.length() && rc2.length()) {
+        return (-1);
     }
 
     return (0);
