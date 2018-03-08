@@ -11,7 +11,6 @@
 #include <vector>
 #include <string>
 #include <vapor/MapperFunction.h>
-#include "VizWin.h"
 #include "vapor/BarbParams.h"
 #include "VariablesWidget.h"
 #include "BarbEventRouter.h"
@@ -20,8 +19,8 @@
 using namespace VAPoR;
 
 BarbEventRouter::BarbEventRouter(
-    QWidget *parent, VizWinMgr *vizMgr, ControlExec *ce) : QTabWidget(parent),
-                                                           RenderEventRouter(ce, BarbParams::GetClassType()) {
+    QWidget *parent, ControlExec *ce) : QTabWidget(parent),
+                                        RenderEventRouter(ce, BarbParams::GetClassType()) {
 
     _variables = new BarbVariablesSubtab(this);
     QScrollArea *qsvar = new QScrollArea(this);
