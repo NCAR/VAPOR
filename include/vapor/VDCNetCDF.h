@@ -236,7 +236,7 @@ class VDF_API VDCNetCDF : public VAPoR::VDC {
         int lod = 0) const;
 
   private:
-    int _version;
+    string _version;
     WASP *_master; // Master NetCDF file
 
     class VDCFileObject : public DC::FileTable::FileObject {
