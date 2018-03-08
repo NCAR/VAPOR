@@ -72,7 +72,7 @@ void RenderParams::_init()
 
     vector<string> varnames;
     for (int ndim = _maxDim; ndim > 0; ndim--) {
-        varnames = _dataMgr->GetDataVarNames(ndim, true);
+        varnames = _dataMgr->GetDataVarNames(ndim);
         if (!varnames.empty()) break;
     }
 

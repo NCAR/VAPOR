@@ -197,7 +197,7 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
             varname = varnames[0];
             size_t vardim;
             for (int i = 0; i < varnames.size(); i++) {
-                assert(_dataMgr->GetNumDimensions(varnames[i], vardim));
+                vardim = _dataMgr->GetNumDimensions(varnames[i]);
                 if (vardim == 3) {
                     varname = varnames[i];
                     break;
@@ -212,7 +212,7 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
             varname = varnames[0];
             size_t vardim;
             for (int i = 0; i < varnames.size(); i++) {
-                assert(_dataMgr->GetNumDimensions(varnames[i], vardim));
+                vardim = _dataMgr->GetNumDimensions(varnames[i]);
                 if (vardim == 3) {
                     varname = varnames[i];
                     break;

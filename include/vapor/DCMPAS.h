@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vapor/MyBase.h>
 #include <vapor/NetCDFCollection.h>
-#include <vapor/Proj4API.h>
+#include <vapor/DerivedVarMgr.h>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/utils.h>
 #include <vapor/DC.h>
@@ -13,6 +13,8 @@
     #define _DCMPAS_H_
 
 namespace VAPoR {
+
+class DerivedCoordVar_WRFTime;
 
 //!
 //! \class DCMPAS
@@ -33,6 +35,7 @@ public:
     DCMPAS();
     virtual ~DCMPAS();
 
+protected:
     //! Initialize the DCMPAS class
     //!
     //! Prepare a MPAS data set for reading. This method prepares
@@ -49,156 +52,119 @@ public:
     //!
     //! \sa EndDefine();
     //
-    virtual int Initialize(const vector<string> &paths, const std::vector<string> &options);
+    virtual int initialize(const vector<string> &paths, const std::vector<string> &options);
 
     //! \copydoc DC::GetDimension()
     //!
-    virtual bool GetDimension(string dimname, DC::Dimension &dimension) const;
+    virtual bool getDimension(string dimname, DC::Dimension &dimension) const;
 
-    //! \copydoc DC::GetDimensionNames()
+    //! \copydoc DC::getDimensionNames()
     //!
-    virtual std::vector<string> GetDimensionNames() const;
+    virtual std::vector<string> getDimensionNames() const;
 
-    std::vector<string> GetMeshNames() const;
+    //! \copydoc DC::getMeshNames()
+    //!
+    std::vector<string> getMeshNames() const;
 
-    virtual bool GetMesh(string mesh_name, DC::Mesh &mesh) const;
+    //! \copydoc DC::getMesh()
+    //!
+    virtual bool getMesh(string mesh_name, DC::Mesh &mesh) const;
 
     //! \copydoc DC::GetCoordVarInfo()
     //!
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool getCoordVarInfo(string varname, DC::CoordVar &cvar) const;
 
     //! \copydoc DC::GetDataVarInfo()
     //!
-    virtual bool GetDataVarInfo(string varname, DC::DataVar &datavar) const;
+    virtual bool getDataVarInfo(string varname, DC::DataVar &datavar) const;
 
     //! \copydoc DC::GetAuxVarInfo()
     //
-    virtual bool GetAuxVarInfo(string varname, DC::AuxVar &var) const;
+    virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const;
 
     //! \copydoc DC::GetBaseVarInfo()
     //
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool getBaseVarInfo(string varname, DC::BaseVar &var) const;
 
     //! \copydoc DC::GetDataVarNames()
     //!
-    virtual std::vector<string> GetDataVarNames() const;
-
-    // override parent class!!
-    virtual std::vector<string> GetDataVarNames(int ndim, bool spatial) const;
+    virtual std::vector<string> getDataVarNames() const;
 
     //! \copydoc DC::GetCoordVarNames()
     //!
-    virtual std::vector<string> GetCoordVarNames() const;
+    virtual std::vector<string> getCoordVarNames() const;
 
-    virtual std::vector<string> GetAuxVarNames() const;
+    virtual std::vector<string> getAuxVarNames() const;
 
     //! \copydoc DC::GetCoordVarNames()
     //!
-    virtual size_t GetNumRefLevels(string varname) const { return (1); }
-
-    //! \copydoc DC::GetMapProjection(string)
-    //!
-    virtual string GetMapProjection(string varname) const { return (_proj4String); }
+    virtual size_t getNumRefLevels(string varname) const { return (1); }
 
     //! \copydoc DC::GetMapProjection()
     //!
-    virtual string GetMapProjection() const { return (_proj4String); }
-
-    //! \copydoc DC::GetMapProjectionDefault(string)
-    //!
-    virtual string GetMapProjectionDefault() const { return (_proj4StringDefault); }
+    virtual string getMapProjection() const { return ("+proj=eqc +ellps=WGS84 +lon_0=0.0 +lat_0=0.0"); }
 
     //! \copydoc DC::GetAtt()
     //!
-    virtual bool GetAtt(string varname, string attname, vector<double> &values) const;
-    virtual bool GetAtt(string varname, string attname, vector<long> &values) const;
-    virtual bool GetAtt(string varname, string attname, string &values) const;
+    virtual bool getAtt(string varname, string attname, vector<double> &values) const;
+    virtual bool getAtt(string varname, string attname, vector<long> &values) const;
+    virtual bool getAtt(string varname, string attname, string &values) const;
 
     //! \copydoc DC::GetAttNames()
     //!
-    virtual std::vector<string> GetAttNames(string varname) const;
+    virtual std::vector<string> getAttNames(string varname) const;
 
     //! \copydoc DC::GetAttType()
     //!
-    virtual XType GetAttType(string varname, string attname) const;
+    virtual XType getAttType(string varname, string attname) const;
 
     //! \copydoc DC::GetDimLensAtLevel()
     //!
-    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+    virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
 
-    //! \copydoc DC::OpenVariableRead()
-    //!
-    virtual int OpenVariableRead(size_t ts, string varname, int, int) { return (DCMPAS::OpenVariableRead(ts, varname)); }
-
-    virtual int OpenVariableRead(size_t ts, string varname);
+    virtual int openVariableRead(size_t ts, string varname, int, int);
 
     //! \copydoc DC::CloseVariable()
     //!
-    virtual int CloseVariable();
-
-    //! \copydoc DC::Read()
-    //!
-    virtual int Read(float *data);
-    virtual int Read(int *data);
-
-    //! \copydoc DC::ReadSlice()
-    //!
-    virtual int ReadSlice(float *slice);
+    virtual int closeVariable(int fd);
 
     //! \copydoc DC::ReadRegion()
     //
-    virtual int ReadRegion(const vector<size_t> &min, const vector<size_t> &max, float *region);
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::ReadRegionBlock()
     //!
-    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, float *region);
-    virtual int ReadRegionBlock(const vector<size_t> &min, const vector<size_t> &max, int *region) { return (DCMPAS::Read(region)); }
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
-    //! \copydoc DC::GetVar()
-    //!
-    virtual int GetVar(string varname, int, int, float *data) { return (DCMPAS::GetVar(varname, data)); }
-
-    virtual int GetVar(string varname, int, int, int *data)
-    {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
-    virtual int GetVar(string varname, float *data);
-
-    //! \copydoc DC::GetVar()
-    //!
-    virtual int GetVar(size_t ts, string varname, int, int, float *data) { return (DCMPAS::GetVar(ts, varname, data)); }
-
-    virtual int GetVar(size_t ts, string varname, int, int, int *data)
-    {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
-    virtual int GetVar(size_t ts, string varname, float *data);
+    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::VariableExists()
     //!
-    virtual bool VariableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
+    virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
 private:
     NetCDFCollection *_ncdfc;
     VAPoR::UDUnits    _udunits;
+    DerivedVarMgr     _dvm;
 
-    int    _ovr_fd;         // File descriptor for currently opened file
-    string _ovr_varname;    // File name for currently opened file
+    class MPASFileObject : public DC::FileTable::FileObject {
+    public:
+        MPASFileObject(size_t ts, string varname, int level, int lod, int fd, bool derivedFlag) : FileObject(ts, varname, level, lod, fd), _derivedFlag(derivedFlag) {}
 
-    string                                      _proj4StringOption;
-    string                                      _proj4StringDefault;
-    string                                      _proj4String;
-    Proj4API *                                  _proj4API;
+        bool GetDerivedFlag() const { return (_derivedFlag); }
+
+    private:
+        bool _derivedFlag;
+    };
+
     std::map<string, DC::Dimension>             _dimsMap;
     std::map<string, DC::CoordVar>              _coordVarsMap;
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
     std::map<string, DC::AuxVar>                _auxVarsMap;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
+    DerivedCoordVar_WRFTime *                   _derivedTime;
     std::vector<string>                         _cellVars;
     std::vector<string>                         _pointVars;
     std::vector<string>                         _edgeVars;
@@ -206,12 +172,8 @@ private:
     Wasp::SmartBuf                              _lonCellSmartBuf;
     Wasp::SmartBuf                              _lonVertexSmartBuf;
 
-    Proj4API *_create_proj4api(double lonmin, double lonmax, double latmin, double latmax, string &proj4string) const;
-
     int _InitDerivedVars(NetCDFCollection *ncdfc);
     int _InitCoordvars(NetCDFCollection *ncdfc);
-
-    int _InitHorizontalCoordinatesDerived(NetCDFCollection *ncdfc);
 
     int _InitVerticalCoordinatesDerived(NetCDFCollection *ncdfc);
 
@@ -229,12 +191,19 @@ private:
 
     bool _isAtmosphere(NetCDFCollection *ncdfc) const;
 
+    bool _isCoordVar(string varname) const;
+    bool _isDataVar(string varname) const;
+
     int  _read_nEdgesOnCell(size_t ts);
     void _addMissingFlag(int *data) const;
     int  _readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartBuf);
     int  _readCoordinates(size_t ts);
 
     void _splitOnBoundary(string varname, int *connData) const;
+
+    template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
+
+    template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -243,47 +212,6 @@ private:
     // found in the MPAS data.
     //
     ///////////////////////////////////////////////////////////////////////////
-
-    //
-    // Horizontal coordinate  derived variables. This class computes
-    // horizontal coordinate variables in meters by using a map projection
-    // from geographic to cartographic coordinates
-    //
-    class DerivedVarHorizontal : public NetCDFCollection::DerivedVar {
-    public:
-        DerivedVarHorizontal(NetCDFCollection *ncdfc, string lonname, string latname, Proj4API *proj4API, bool lonflag, bool uGridFlag, bool degreesFlag);
-        virtual ~DerivedVarHorizontal();
-
-        virtual int                 Open(size_t ts);
-        virtual int                 ReadSlice(float *slice, int);
-        virtual int                 Read(float *buf, int);
-        virtual int                 SeekSlice(int offset, int whence, int);
-        virtual int                 Close(int fd);
-        virtual bool                TimeVarying() const { return (!_time_dim_name.empty()); };
-        virtual std::vector<size_t> GetSpatialDims() const { return (_sdims); }
-        virtual std::vector<string> GetSpatialDimNames() const { return (_sdimnames); }
-        virtual size_t              GetTimeDim() const { return (_time_dim); }
-        virtual string              GetTimeDimName() const { return (_time_dim_name); }
-        virtual bool                GetMissingValue(double &mv) const { return (false); }
-
-    private:
-        string              _lonname;          // name of longitude variable
-        string              _latname;          // name of latitude variable
-        bool                _xflag;            // calculate X or Y Cartographic coordinates?
-        bool                _uGridFlag;        // unstructured grid?
-        bool                _degreesFlag;      // Lat and lon are in degrees?
-        bool                _oneDFlag;         // structured grid with lat and lon functions of one variable
-        size_t              _time_dim;         // number of time steps
-        string              _time_dim_name;    // Name of time dimension
-        std::vector<size_t> _sdims;            // spatial dimensions
-        std::vector<string> _sdimnames;        // spatial dimension names
-        bool                _is_open;          // Open for reading?
-        float *             _lonbuf;           // boundary points of lat and lon
-        float *             _latbuf;           // boundary points of lat and lon
-        Proj4API *          _proj4API;
-        int                 _lonfd;
-        int                 _latfd;    // file descriptors for reading lat and lon coord vars
-    };
 
     //
     // Vertical coordinate  derived variables. This class computes
@@ -316,39 +244,6 @@ private:
         bool                _is_open;             // Open for reading?
         float *             _buf;                 // boundary points of lat and lon
         int                 _fd;                  // file descriptors for reading coord vars
-    };
-
-    //
-    // Time coordinate derived variables. This class maps a WRF-style
-    // time coordinate variable (a formatted string) into a valid
-    // time coordinate.
-    //
-    class DerivedVarWRFTime : public NetCDFCollection::DerivedVar {
-    public:
-        DerivedVarWRFTime(NetCDFCollection *ncdfc, const VAPoR::UDUnits *udunits, string wrfTimeVar);
-        virtual ~DerivedVarWRFTime();
-
-        virtual int                 Open(size_t ts);
-        virtual int                 ReadSlice(float *slice, int);
-        virtual int                 Read(float *buf, int);
-        virtual int                 SeekSlice(int offset, int whence, int);
-        virtual int                 Close(int fd);
-        virtual bool                TimeVarying() const { return (true); }
-        virtual std::vector<size_t> GetSpatialDims() const { return (std::vector<size_t>()); }
-        virtual std::vector<string> GetSpatialDimNames() const { return (std::vector<string>()); }
-        virtual size_t              GetTimeDim() const { return (_time_dim); }
-        virtual string              GetTimeDimName() const { return (_time_dim_name); }
-        virtual bool                GetMissingValue(double &mv) const { return (false); }
-
-    private:
-        const VAPoR::UDUnits *_udunits;
-        string                _wrfTimeVar;
-        size_t                _time_dim;         // number of time steps
-        string                _time_dim_name;    // Name of time dimension
-        bool                  _is_open;          // Open for reading?
-        char *                _buf;              // boundary points of lat and lon
-        size_t                _buf_size;
-        int                   _fd;
     };
 };
 };    // namespace VAPoR

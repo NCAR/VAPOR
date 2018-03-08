@@ -68,7 +68,7 @@ public:
 
     float GetValueLinear(const std::vector<double> &coords) const override { return (0.0); }
 
-    virtual size_t GetNumCoordinates() const override { return (0); }
+    virtual size_t GetGeometryDim() const override { return (0); }
 
     /////////////////////////////////////////////////////////////////////////////
     //

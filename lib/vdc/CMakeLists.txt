@@ -14,11 +14,11 @@ add_library (vdc SHARED
 	UDUnitsClass.cpp
 	Proj4API.cpp
 	DC.cpp
-	VDC.cpp
-	VDCNetCDF.cpp
 	DCWRF.cpp
 	DCCF.cpp
 	DCMPAS.cpp
+	VDC.cpp
+	VDCNetCDF.cpp
 	DataMgr.cpp
 	DataMgrUtils.cpp
 	GeoUtil.cpp
@@ -26,6 +26,9 @@ add_library (vdc SHARED
 	KDTreeRG.cpp
 	kdtree.c
 	VDC_c.cpp
+	DerivedVar.cpp
+	DerivedVarMgr.cpp
+	DCUtils.cpp
 )
 
 target_link_libraries (vdc PUBLIC common wasp udunits2 proj)

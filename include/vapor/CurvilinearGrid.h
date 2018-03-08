@@ -67,7 +67,7 @@ public:
     CurvilinearGrid() = default;
     virtual ~CurvilinearGrid() = default;
 
-    virtual size_t GetNumCoordinates() const override;
+    virtual size_t GetGeometryDim() const override;
 
     // \copydoc GetGrid::GetUserExtents()
     //
