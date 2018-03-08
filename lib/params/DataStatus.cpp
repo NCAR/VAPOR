@@ -203,7 +203,7 @@ map<string, vector<string>> DataStatus::getFirstVars(
         DataMgr *dataMgr = GetDataMgr(dataSetNames[i]);
         vector<string> varnames;
         for (int dim = 3; dim > 1; dim--) {
-            varnames = dataMgr->GetDataVarNames(dim, true);
+            varnames = dataMgr->GetDataVarNames(dim);
             if (varnames.size()) {
                 vector<string> oneVar(1, varnames[0]);
                 defaultVars[dataSetNames[i]] = oneVar;

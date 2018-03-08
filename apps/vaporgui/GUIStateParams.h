@@ -124,6 +124,11 @@ class GUIStateParams : public VAPoR::ParamsBase {
     std::string GetStatsDatasetName() const;
     void SetStatsDatasetName(std::string &name);
 
+    //! method sets and gets the active data set name in Plot utility
+    //!
+    std::string GetPlotDatasetName() const;
+    void SetPlotDatasetName(std::string &name);
+
     void SetProjectionString(string proj4String) {
         SetValueString(m_proj4StringTag, "Set Proj4 projection string", proj4String);
     }
@@ -201,6 +206,7 @@ class GUIStateParams : public VAPoR::ParamsBase {
     static const string m_flowPathTag;
     static const string m_tfPathTag;
     static const string m_statsDatasetNameTag;
+    static const string m_plotDatasetNameTag;
     static const string m_proj4StringTag;
     static const string m_openDataSetsTag;
 

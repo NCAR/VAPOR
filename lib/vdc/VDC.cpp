@@ -18,7 +18,7 @@ size_t vproduct(vector<size_t> a) {
 }
 
 void _compute_bs(
-    const vector<string> &dim_names,
+    size_t ndims,
     const vector<size_t> &default_bs,
     vector<size_t> &bs) {
     bs.clear();
@@ -26,7 +26,7 @@ void _compute_bs(
     // If the default block size exists for a dimension use it.
     // Otherwise set the bs to 1
     //
-    for (int i = 0; i < dim_names.size(); i++) {
+    for (int i = 0; i < ndims; i++) {
         if (i < default_bs.size()) {
             bs.push_back(default_bs[i]);
         } else {
@@ -34,7 +34,7 @@ void _compute_bs(
         }
     }
 
-    assert(dim_names.size() == bs.size());
+    assert(ndims == bs.size());
 }
 
 void _compute_periodic(
@@ -96,9 +96,9 @@ VDC::VDC() {
     _proj4StringOption.clear();
 }
 
-int VDC::Initialize(
+int VDC::initialize(
     const vector<string> &paths, const vector<string> &options,
-    AccessMode mode) {
+    AccessMode mode, vector<size_t> bs) {
     _proj4StringOption.clear();
     if (options.size() >= 2) {
         if (options[0] == "-proj4") {
@@ -118,6 +118,14 @@ int VDC::Initialize(
     }
     _mode = mode;
 
+    if (mode == W) {
+        _bs = bs;
+        while (_bs.size() > 3)
+            _bs.pop_back();
+        while (_bs.size() < 3)
+            _bs.push_back(1);
+    }
+
     int rc = _udunits.Initialize();
     if (rc < 0) {
         SetErrMsg(
@@ -133,28 +141,18 @@ int VDC::Initialize(
 }
 
 int VDC::SetCompressionBlock(
-    vector<size_t> bs, string wname,
-    vector<size_t> cratios) {
+    string wname, vector<size_t> cratios) {
     if (!cratios.size())
         cratios.push_back(1);
 
     sort(cratios.begin(), cratios.end());
     reverse(cratios.begin(), cratios.end());
 
-    if (!bs.size()) {
-        for (int i = 0; i < 3; i++)
-            bs.push_back(1);
-        wname.clear();
-        cratios.clear();
-        cratios.push_back(1);
-    }
-
-    if (!_ValidCompressionBlock(bs, wname, cratios)) {
+    if (!_ValidCompressionBlock(_bs, wname, cratios)) {
         SetErrMsg("Invalid compression settings");
         return (-1);
     }
 
-    _bs = bs;
     _wname = wname;
     _cratios = cratios;
 
@@ -221,7 +219,7 @@ int VDC::DefineDimension(string name, size_t length, int axis) {
         name, sdimnames, time_dim_name, "", axis, XType::FLOAT, false));
 }
 
-bool VDC::GetDimension(string name, Dimension &dimension) const {
+bool VDC::getDimension(string name, Dimension &dimension) const {
 
     map<string, Dimension>::const_iterator itr = _dimsMap.find(name);
     if (itr == _dimsMap.end())
@@ -231,7 +229,7 @@ bool VDC::GetDimension(string name, Dimension &dimension) const {
     return (true);
 }
 
-vector<string> VDC::GetDimensionNames() const {
+vector<string> VDC::getDimensionNames() const {
     vector<string> dim_names;
     std::map<string, Dimension>::const_iterator itr = _dimsMap.begin();
     for (; itr != _dimsMap.end(); ++itr) {
@@ -240,7 +238,7 @@ vector<string> VDC::GetDimensionNames() const {
     return (dim_names);
 }
 
-vector<string> VDC::GetMeshNames() const {
+vector<string> VDC::getMeshNames() const {
     vector<string> mesh_names;
     std::map<string, Mesh>::const_iterator itr = _meshes.begin();
     for (; itr != _meshes.end(); ++itr) {
@@ -249,7 +247,7 @@ vector<string> VDC::GetMeshNames() const {
     return (mesh_names);
 }
 
-bool VDC::GetMesh(
+bool VDC::getMesh(
     string mesh_name, DC::Mesh &mesh) const {
 
     map<string, Mesh>::const_iterator itr = _meshes.find(mesh_name);
@@ -379,10 +377,9 @@ int VDC::_DefineImplicitCoordVars(
             continue;
 
         vector<bool> periodic(1, false);
-        vector<size_t> bs(1, 1);
         _coordVars[name] = CoordVar(
             name, "", XType::FLOAT, "",
-            vector<size_t>(), periodic, dim_names, bs,
+            vector<size_t>(), periodic, dim_names,
             time_dim_name, axis, false);
 
         _coordVars[name].SetUniform(true);
@@ -418,11 +415,6 @@ int VDC::DefineCoordVar(
         return (-1);
     }
 
-    // Determine block size
-    //
-    vector<size_t> bs;
-    _compute_bs(dim_names, _bs, bs);
-
     vector<bool> periodic;
     _compute_periodic(dim_names, _periodic, periodic);
 
@@ -437,7 +429,7 @@ int VDC::DefineCoordVar(
     //
     _coordVars[varname] = CoordVar(
         varname, units, type, wname,
-        cratios, periodic, dim_names, bs, time_dim_name, axis, false);
+        cratios, periodic, dim_names, time_dim_name, axis, false);
 
     return (0);
 }
@@ -461,35 +453,7 @@ int VDC::DefineCoordVarUniform(
     return (0);
 }
 
-bool VDC::GetCoordVarInfo(
-    string varname, vector<string> &dim_names, bool &time_varying,
-    string &units, int &axis, XType &type, bool &compressed, bool &uniform) const {
-    dim_names.clear();
-    units.erase();
-
-    map<string, CoordVar>::const_iterator itr = _coordVars.find(varname);
-
-    if (itr == _coordVars.end())
-        return (false);
-
-    time_varying = IsTimeVarying(varname);
-
-    vector<DC::Dimension> dimensions;
-    bool ok = GetVarDimensions(varname, false, dimensions);
-    assert(ok);
-
-    for (int i = 0; i < dimensions.size(); i++) {
-        dim_names.push_back(dimensions[i].GetName());
-    }
-    units = itr->second.GetUnits();
-    axis = itr->second.GetAxis();
-    type = itr->second.GetXType();
-    compressed = itr->second.IsCompressed();
-    uniform = itr->second.GetUniform();
-    return (true);
-}
-
-bool VDC::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
+bool VDC::getCoordVarInfo(string varname, DC::CoordVar &cvar) const {
 
     map<string, CoordVar>::const_iterator itr = _coordVars.find(varname);
     if (itr == _coordVars.end())
@@ -499,7 +463,7 @@ bool VDC::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const {
     return (true);
 }
 
-bool VDC::GetBaseVarInfo(string varname, DC::BaseVar &var) const {
+bool VDC::getBaseVarInfo(string varname, DC::BaseVar &var) const {
 
     map<string, CoordVar>::const_iterator itr1 = _coordVars.find(varname);
     if (itr1 != _coordVars.end()) {
@@ -556,7 +520,7 @@ int VDC::_DefineDataVar(
     vector<Dimension> dimensions;
     for (int i = 0; i < dim_names.size(); i++) {
         Dimension dimension;
-        VDC::GetDimension(dim_names[i], dimension);
+        VDC::getDimension(dim_names[i], dimension);
         assert(!dimension.GetName().empty());
         dimensions.push_back(dimension);
     }
@@ -574,11 +538,6 @@ int VDC::_DefineDataVar(
         }
     }
 
-    // Determine block size
-    //
-    vector<size_t> bs;
-    _compute_bs(dim_names, _bs, bs);
-
     vector<bool> periodic;
     _compute_periodic(dim_names, _periodic, periodic);
 
@@ -594,12 +553,12 @@ int VDC::_DefineDataVar(
 
     if (!maskvar.empty()) {
         _dataVars[varname] = DataVar(
-            varname, units, type, wname, cratios, periodic, meshname, bs,
+            varname, units, type, wname, cratios, periodic, meshname,
             time_coord_var, DC::Mesh::NODE, mv, maskvar);
     } else {
         _dataVars[varname] = DataVar(
             varname, units, type, wname, cratios, periodic, meshname,
-            bs, time_coord_var, DC::Mesh::NODE);
+            time_coord_var, DC::Mesh::NODE);
     }
 
     return (0);
@@ -623,41 +582,7 @@ int VDC::DefineDataVar(
                             units, type, true, mv, maskvar));
 }
 
-bool VDC::GetDataVarInfo(
-    string varname, vector<string> &dim_names, vector<string> &coord_vars,
-    bool &time_varying,
-    string &units, XType &type, bool &compressed,
-    string &maskvar) const {
-    dim_names.clear();
-    units.erase();
-
-    map<string, DataVar>::const_iterator ditr = _dataVars.find(varname);
-    if (ditr == _dataVars.end())
-        return (false);
-
-    map<string, Mesh>::const_iterator mitr = _meshes.find(ditr->second.GetMeshName());
-    if (mitr == _meshes.end())
-        return (false);
-
-    time_varying = IsTimeVarying(varname);
-
-    vector<DC::Dimension> dimensions;
-    bool ok = GetVarDimensions(varname, false, dimensions);
-    assert(ok);
-
-    for (int i = 0; i < dimensions.size(); i++) {
-        dim_names.push_back(dimensions[i].GetName());
-    }
-
-    coord_vars = mitr->second.GetCoordVars();
-    units = ditr->second.GetUnits();
-    type = ditr->second.GetXType();
-    compressed = ditr->second.IsCompressed();
-    maskvar = ditr->second.GetMaskvar();
-    return (true);
-}
-
-bool VDC::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
+bool VDC::getDataVarInfo(string varname, DC::DataVar &datavar) const {
 
     map<string, DataVar>::const_iterator itr = _dataVars.find(varname);
 
@@ -668,7 +593,7 @@ bool VDC::GetDataVarInfo(string varname, DC::DataVar &datavar) const {
     return (true);
 }
 
-vector<string> VDC::GetDataVarNames() const {
+vector<string> VDC::getDataVarNames() const {
     vector<string> names;
 
     map<string, DataVar>::const_iterator itr;
@@ -678,7 +603,7 @@ vector<string> VDC::GetDataVarNames() const {
     return (names);
 }
 
-vector<string> VDC::GetCoordVarNames() const {
+vector<string> VDC::getCoordVarNames() const {
     vector<string> names;
 
     map<string, CoordVar>::const_iterator itr;
@@ -688,9 +613,8 @@ vector<string> VDC::GetCoordVarNames() const {
     return (names);
 }
 
-size_t VDC::GetNumRefLevels(string varname) const {
+size_t VDC::getNumRefLevels(string varname) const {
 
-    vector<size_t> bs;
     string wname;
 
     if (_coordVars.find(varname) != _coordVars.end()) {
@@ -698,19 +622,27 @@ size_t VDC::GetNumRefLevels(string varname) const {
         ;
         if (!itr->second.IsCompressed())
             return (1);
-        bs = itr->second.GetBS();
         wname = itr->second.GetWName();
     } else if (_dataVars.find(varname) != _dataVars.end()) {
         std::map<string, DC::DataVar>::const_iterator itr = _dataVars.find(varname);
         if (!itr->second.IsCompressed())
             return (1);
         ;
-        bs = itr->second.GetBS();
         wname = itr->second.GetWName();
     } else {
         // Var doesn't exist. Still return 1
         return (1);
     }
+
+    vector<DC::Dimension> mdimensions;
+    bool ok = GetVarDimensions(varname, true, mdimensions);
+    if (!ok)
+        return (1);
+
+    // Determine block size
+    //
+    vector<size_t> bs;
+    _compute_bs(mdimensions.size(), _bs, bs);
 
     size_t nlevels, maxcratio;
     CompressionInfo(bs, wname, nlevels, maxcratio);
@@ -787,7 +719,7 @@ int VDC::PutAtt(
     return (0);
 }
 
-bool VDC::GetAtt(
+bool VDC::getAtt(
     string varname, string attname, vector<double> &values) const {
     values.clear();
 
@@ -822,7 +754,7 @@ bool VDC::GetAtt(
     return (true);
 }
 
-bool VDC::GetAtt(
+bool VDC::getAtt(
     string varname, string attname, vector<long> &values) const {
     values.clear();
 
@@ -856,7 +788,7 @@ bool VDC::GetAtt(
     return (true);
 }
 
-bool VDC::GetAtt(
+bool VDC::getAtt(
     string varname, string attname, string &values) const {
     values.clear();
 
@@ -915,7 +847,19 @@ int VDC::CopyAtt(
     return 0;
 }
 
-vector<string> VDC::GetAttNames(
+int VDC::CopyAtt(
+    const DC &src, string varname) {
+    vector<string> names = src.GetAttNames(varname);
+
+    for (int i = 0; i < names.size(); i++) {
+        int rc = CopyAtt(src, varname, names[i]);
+        if (rc < 0)
+            return (-1);
+    }
+    return (0);
+}
+
+vector<string> VDC::getAttNames(
     string varname) const {
     vector<string> attnames;
 
@@ -941,7 +885,7 @@ vector<string> VDC::GetAttNames(
     return (attnames);
 }
 
-DC::XType VDC::GetAttType(
+DC::XType VDC::getAttType(
     string varname,
     string attname) const {
 
@@ -975,7 +919,7 @@ DC::XType VDC::GetAttType(
     return (INVALID);
 }
 
-string VDC::GetMapProjection(
+string VDC::getMapProjection(
     string varname) const {
 
     // Shoot. This doens't do anything. I.e. it doesn't force data to
@@ -987,7 +931,7 @@ string VDC::GetMapProjection(
 
     string attname = "MapProjection";
 
-    vector<string> attnames = VDC::GetAttNames(varname);
+    vector<string> attnames = VDC::getAttNames(varname);
     if (find(attnames.begin(), attnames.end(), attname) == attnames.end()) {
 
         // Return default map projection.
@@ -995,18 +939,18 @@ string VDC::GetMapProjection(
         // N.B. WE SHOULD BE VERIFYING THAT THIS IS A GEOREFERENCED
         // VARIABLE!!!
         //
-        return (VDC::GetMapProjection());
+        return (VDC::getMapProjection());
     }
 
     string proj4string;
-    bool status = VDC::GetAtt(varname, attname, proj4string);
+    bool status = VDC::getAtt(varname, attname, proj4string);
     if (status)
         return (proj4string);
 
     return ("");
 }
 
-string VDC::GetMapProjection() const {
+string VDC::getMapProjection() const {
 
     if (!_proj4StringOption.empty()) {
         return (_proj4StringOption);
@@ -1014,13 +958,13 @@ string VDC::GetMapProjection() const {
 
     string attname = "MapProjection";
 
-    vector<string> attnames = VDC::GetAttNames("");
+    vector<string> attnames = VDC::getAttNames("");
     if (find(attnames.begin(), attnames.end(), attname) == attnames.end()) {
         return ("");
     }
 
     string proj4string;
-    bool status = VDC::GetAtt("", attname, proj4string);
+    bool status = VDC::getAtt("", attname, proj4string);
     if (status)
         return (proj4string);
 
@@ -1065,7 +1009,7 @@ int VDC::EndDefine() {
     for (int i = 0; i < _newUniformVars.size(); i++) {
 
         vector<DC::Dimension> dimensions;
-        bool ok = VDC::GetVarDimensions(_newUniformVars[i], false, dimensions);
+        bool ok = GetVarDimensions(_newUniformVars[i], false, dimensions);
         assert(ok);
 
         if (dimensions.size() != 1)
@@ -1086,204 +1030,6 @@ int VDC::EndDefine() {
     }
 
     return (0);
-}
-
-VDC::Attribute::Attribute(
-    string name, XType type, const vector<float> &values) {
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<float> &values) {
-    _values.clear();
-    vector<double> dvec;
-    for (int i = 0; i < values.size(); i++) {
-        dvec.push_back((double)values[i]);
-    }
-    VDC::Attribute::SetValues(dvec);
-}
-
-VDC::Attribute::Attribute(
-    string name, XType type, const vector<double> &values) {
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<double> &values) {
-    _values.clear();
-    for (int i = 0; i < values.size(); i++) {
-        podunion pod;
-        if (_type == FLOAT) {
-            pod.f = (float)values[i];
-        } else if (_type == DOUBLE) {
-            pod.d = (double)values[i];
-        } else if (_type == INT32) {
-            pod.i = (int)values[i];
-        } else if (_type == INT64) {
-            pod.l = (int)values[i];
-        } else if (_type == TEXT) {
-            pod.c = (char)values[i];
-        }
-        _values.push_back(pod);
-    }
-}
-
-VDC::Attribute::Attribute(
-    string name, XType type, const vector<int> &values) {
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<int> &values) {
-    _values.clear();
-    vector<long> lvec;
-    for (int i = 0; i < values.size(); i++) {
-        lvec.push_back((long)values[i]);
-    }
-    VDC::Attribute::SetValues(lvec);
-}
-
-VDC::Attribute::Attribute(
-    string name, XType type, const vector<long> &values) {
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const vector<long> &values) {
-    _values.clear();
-
-    for (int i = 0; i < values.size(); i++) {
-        podunion pod;
-        if (_type == FLOAT) {
-            pod.f = (float)values[i];
-        } else if (_type == DOUBLE) {
-            pod.d = (double)values[i];
-        } else if (_type == INT32) {
-            pod.i = (int)values[i];
-        } else if (_type == INT64) {
-            pod.l = (long)values[i];
-        } else if (_type == TEXT) {
-            pod.c = (char)values[i];
-        }
-        _values.push_back(pod);
-    }
-}
-
-VDC::Attribute::Attribute(
-    string name, XType type, const string &values) {
-    _name = name;
-    _type = type;
-    _values.clear();
-    Attribute::SetValues(values);
-}
-
-void VDC::Attribute::SetValues(const string &values) {
-    _values.clear();
-    for (int i = 0; i < values.size(); i++) {
-        podunion pod;
-        if (_type == FLOAT) {
-            pod.f = (float)values[i];
-        } else if (_type == DOUBLE) {
-            pod.d = (double)values[i];
-        } else if (_type == INT32) {
-            pod.i = (int)values[i];
-        } else if (_type == INT64) {
-            pod.l = (long)values[i];
-        } else if (_type == TEXT) {
-            pod.c = (char)values[i];
-        }
-        _values.push_back(pod);
-    }
-}
-
-void VDC::Attribute::GetValues(
-    vector<float> &values) const {
-    values.clear();
-
-    vector<double> dvec;
-    VDC::Attribute::GetValues(dvec);
-    for (int i = 0; i < dvec.size(); i++) {
-        values.push_back((float)dvec[i]);
-    }
-}
-
-void VDC::Attribute::GetValues(
-    vector<double> &values) const {
-    values.clear();
-
-    for (int i = 0; i < _values.size(); i++) {
-        podunion pod = _values[i];
-        if (_type == FLOAT) {
-            values.push_back((double)pod.f);
-        } else if (_type == DOUBLE) {
-            values.push_back((double)pod.d);
-        } else if (_type == INT32) {
-            values.push_back((double)pod.i);
-        } else if (_type == INT64) {
-            values.push_back((double)pod.l);
-        } else if (_type == TEXT) {
-            values.push_back((double)pod.c);
-        }
-    }
-}
-
-void VDC::Attribute::GetValues(
-    vector<int> &values) const {
-    values.clear();
-
-    vector<long> lvec;
-    VDC::Attribute::GetValues(lvec);
-    for (int i = 0; i < lvec.size(); i++) {
-        values.push_back((int)lvec[i]);
-    }
-}
-
-void VDC::Attribute::GetValues(
-    vector<long> &values) const {
-    values.clear();
-
-    for (int i = 0; i < _values.size(); i++) {
-        podunion pod = _values[i];
-        if (_type == FLOAT) {
-            values.push_back((long)pod.f);
-        } else if (_type == DOUBLE) {
-            values.push_back((long)pod.d);
-        } else if (_type == INT32) {
-            values.push_back((long)pod.i);
-        } else if (_type == INT64) {
-            values.push_back((long)pod.l);
-        } else if (_type == TEXT) {
-            values.push_back((long)pod.c);
-        }
-    }
-}
-
-void VDC::Attribute::GetValues(
-    string &values) const {
-    values.clear();
-
-    for (int i = 0; i < _values.size(); i++) {
-        podunion pod = _values[i];
-        if (_type == FLOAT) {
-            values += (char)pod.f;
-        } else if (_type == DOUBLE) {
-            values += (char)pod.d;
-        } else if (_type == INT32) {
-            values += (char)pod.i;
-        } else if (_type == INT64) {
-            values += (char)pod.l;
-        } else if (_type == TEXT) {
-            values += (char)pod.c;
-        }
-    }
 }
 
 bool VDC::_ValidDefineDimension(string name, size_t length) const {
@@ -1428,34 +1174,6 @@ bool VDC::_valid_dims(
     return (true);
 }
 
-bool VDC::_valid_blocking(
-    const vector<DC::Dimension> &dimensions,
-    const vector<size_t> &bs,
-    const vector<string> &coord_vars) const {
-    assert(dimensions.size() == coord_vars.size());
-    assert(dimensions.size() == bs.size());
-
-    // Dimensions of all coordinate variables need to
-    //
-    for (int i = 0; i < coord_vars.size(); i++) {
-
-        vector<DC::Dimension> cdimensions;
-        bool ok = GetVarDimensions(coord_vars[i], true, cdimensions);
-        assert(ok = true);
-
-        map<string, CoordVar>::const_iterator itr = _coordVars.find(coord_vars[i]);
-        assert(itr != _coordVars.end());
-
-        vector<size_t> cbs = itr->second.GetBS();
-        assert(cdimensions.size() == cbs.size());
-
-        ok = _valid_dims(cdimensions, cbs, dimensions, bs);
-        if (!ok)
-            return (false);
-    }
-    return (true);
-}
-
 bool VDC::_valid_mask_var(
     string varname, vector<DC::Dimension> dimensions,
     vector<size_t> bs, bool compressed, string maskvar) const {
@@ -1475,7 +1193,7 @@ bool VDC::_valid_mask_var(
     // variable dimensions
     //
     vector<DC::Dimension> mdimensions;
-    bool ok = VDC::GetVarDimensions(maskvar, false, mdimensions);
+    bool ok = GetVarDimensions(maskvar, false, mdimensions);
     assert(ok);
 
     while (dimensions.size() > mdimensions.size())
@@ -1488,20 +1206,12 @@ bool VDC::_valid_mask_var(
         return (false);
     }
 
-    // Data and mask variable must have same blocking along
-    // each axis
-    //
-    if (!_valid_blocking(dimensions, bs, mitr->second.GetCoordVars())) {
-        SetErrMsg("Data and mask variables must have same blocking");
-        return (false);
-    }
-
     if (compressed) {
         size_t nlevels, dummy;
         CompressionInfo(bs, _wname, nlevels, dummy);
 
         size_t nlevels_m;
-        CompressionInfo(mvar.GetBS(), mvar.GetWName(), nlevels_m, dummy);
+        CompressionInfo(bs, mvar.GetWName(), nlevels_m, dummy);
 
         if (nlevels > nlevels_m) {
             SetErrMsg("Data variable and mask variable depth must match");
@@ -1591,16 +1301,7 @@ bool VDC::_ValidDefineDataVar(
     // Determine block size
     //
     vector<size_t> bs;
-    _compute_bs(dim_names, _bs, bs);
-
-    // Data and coordinate variables must have same blocking along
-    // each axis, and coordinate dimensions must be a subset of
-    // data variable dimensions.
-    //
-    if (!_valid_blocking(dimensions, bs, coord_vars)) {
-        SetErrMsg("Coordinate and data variables must have same blocking");
-        return (false);
-    }
+    _compute_bs(dim_names.size(), _bs, bs);
 
     // Validate mask variable if one exists
     //

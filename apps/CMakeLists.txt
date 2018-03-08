@@ -14,6 +14,7 @@ if (BUILD_VDC OR BUILD_GUI)
 	add_subdirectory (vdccreate)
 	add_subdirectory (wrf2vdc)
 	add_subdirectory (wrfvdccreate)
+	add_subdirectory (vdccompare)
 endif()
 
 if (BUILD_GUI)
