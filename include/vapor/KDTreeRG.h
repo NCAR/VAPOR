@@ -5,6 +5,8 @@
 #include <vector>
 #include <vapor/Grid.h>
 
+#include "nanoflann.hpp"
+
 struct kdtree;
 
 namespace VAPoR {
@@ -19,8 +21,6 @@ namespace VAPoR {
 //
 class VDF_API KDTreeRG {
 public:
-
- KDTreeRG();
 
  //! Construct a 2D k-d tree for a structured grid
  //!
@@ -39,10 +39,7 @@ public:
  //!
  //! \sa Grid()
  //
- KDTreeRG(
-	const Grid &xg,
-	const Grid &yg
- );
+ KDTreeRG( const Grid &xg, const Grid &yg );
 
  //! Construct a 3D k-d tree for a structured grid
  //!
@@ -59,11 +56,8 @@ public:
  //!
  //! \sa KDTreeRG(const Grid, const Grid)
  //
- KDTreeRG(
-	const Grid &xg,
-	const Grid &yg,
-	const Grid &zg
- );
+ //KDTreeRG( const Grid &xg, const Grid &yg, const Grid &zg );
+
  virtual ~KDTreeRG();
 
  //! Return indecies of nearest point
@@ -79,16 +73,14 @@ public:
  //! \param[out] index The \a ijk indecies of the grid vertex nearest 
  //! \p coordu.
  //
- void Nearest(
-	const std::vector <float> &coordu, std::vector <size_t> &index
- ) const;
+ void Nearest( const std::vector <float> &coordu, std::vector <size_t> &index) const;
 
- void Nearest(
-	const std::vector <double> &coordu, std::vector <size_t> &index
- ) const {
-	std::vector <float> coordu_f;
-	for (int i=0; i<coordu.size(); i++) coordu_f.push_back(coordu[i]);
-	Nearest(coordu_f, index);
+ void Nearest( const std::vector <double> &coordu, std::vector <size_t> &index) const 
+ {
+    std::vector <float> coordu_f;
+    for (int i=0; i<coordu.size(); i++) 
+        coordu_f.push_back(coordu[i]);
+    this->Nearest(coordu_f, index);
  }
 
  //! Returns the dimesionality of the structured grids passed to the 
@@ -99,15 +91,84 @@ public:
  //! constructor. 
  //!
  //! \retval vector 
- std::vector <size_t> GetDimensions() const {
-	return (_dims);
+ std::vector <size_t> GetDimensions() const 
+ {
+    return (_dims);
  }
 
 private:
- kdtree *_kdtree;
- size_t *_offsets;
- std::vector <size_t> _dims;
-};
+
+    class  PointCloud2D
+    {
+    public:
+        // Constructor
+        PointCloud2D( const Grid& xg, const Grid& yg )
+        {
+            assert(xg.GetDimensions() == yg.GetDimensions());
+            assert(xg.GetDimensions().size() <= 2);
+
+            // number of elements
+            std::vector<size_t> dims = xg.GetDimensions();
+            size_t nelem = 1;
+            for (int i=0; i<dims.size(); i++) 
+                nelem *= dims[i];
+            this->X.resize( nelem );
+            this->Y.resize( nelem );
+
+            // Store the point coordinates in the k-d tree
+            Grid::ConstIterator xitr = xg.cbegin();
+            Grid::ConstIterator yitr = yg.cbegin();
+
+            float posXY[2];
+            for (size_t i=0; i<nelem; ++i, ++xitr, ++yitr)
+            {
+                this->X[i] = *xitr;
+                this->Y[i] = *yitr;
+            }
+        } // end of the Constructor
+
+        // Must return the number of data points
+        inline size_t kdtree_get_point_count() const 
+        { 
+            assert( X.size() == Y.size() );
+            return X.size(); 
+        }
+
+        // Returns the dim'th component of the idx'th point in the class:
+        // Since this is inlined and the "dim" argument is typically an immediate value, the
+        //  "if/else's" are actually solved at compile time.
+        inline float kdtree_get_pt(const size_t idx, int dim) const
+        {
+            if (dim == 0) 
+                return X[idx];
+            else 
+                return Y[idx];
+        }
+
+        // Optional bounding-box computation: return false to default to a standard bbox computation loop.
+        //   Return true if the BBOX was already computed by the class and returned in "bb" 
+        //   so it can be avoided to redo it again.
+        //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
+        template <class BBOX>
+        bool kdtree_get_bbox(BBOX& /* bb */) const 
+        { 
+            return false; 
+        }
+
+    private:
+        std::vector<float> X, Y;
+
+    };  // end of class PointCloud2D
+
+    typedef  nanoflann::KDTreeSingleIndexAdaptor< 
+                        nanoflann::L2_Simple_Adaptor<float, PointCloud2D>,
+                        PointCloud2D, 2/* dimension */ >   KDTreeType;
+
+    PointCloud2D        _points;
+    KDTreeType          _kdtree;
+    std::vector<size_t> _dims;
+};  // end of class KDTreeRG.
+
 
 //! class KDTreeRGSubset
 //! \brief This class implements a k-d tree for a structured grid over 
@@ -144,9 +205,9 @@ public:
  //! until this class instance is destroyed.
  //
  KDTreeRGSubset(
-	const KDTreeRG *kdtreerg,
-	const std::vector <size_t> &min,
-	const std::vector <size_t> &max
+    const KDTreeRG *kdtreerg,
+    const std::vector <size_t> &min,
+    const std::vector <size_t> &max
  );
  ~KDTreeRGSubset() {}
 
@@ -165,23 +226,23 @@ public:
  //! \p coordu.
  //
  void Nearest(
-	const std::vector <float> &coordu, std::vector <size_t> &coord
+    const std::vector <float> &coordu, std::vector <size_t> &coord
  ) const;
 
  void Nearest(
-	const std::vector <double> &coordu, std::vector <size_t> &index
+    const std::vector <double> &coordu, std::vector <size_t> &index
  ) const {
-	std::vector <float> coordu_f;
-	for (int i=0; i<coordu.size(); i++) coordu_f.push_back(coordu[i]);
-	Nearest(coordu_f, index);
+    std::vector <float> coordu_f;
+    for (int i=0; i<coordu.size(); i++) coordu_f.push_back(coordu[i]);
+    Nearest(coordu_f, index);
  }
 
  std::vector <size_t> GetDimensions() const {
-	std::vector <std::size_t> dims;
-	for (int i=0; i<_min.size(); i++) {
-		dims.push_back(_max[i]-_min[i]+1);
-	}
-	return(dims);
+    std::vector <std::size_t> dims;
+    for (int i=0; i<_min.size(); i++) {
+        dims.push_back(_max[i]-_min[i]+1);
+    }
+    return(dims);
  }
 
 private:

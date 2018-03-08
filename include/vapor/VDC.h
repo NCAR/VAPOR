@@ -154,15 +154,6 @@ namespace VAPoR {
 //! by a number of factors and can be obtained using the CompressionInfo()
 //! method.
 //!
-//! \param bs An ordered list of block dimensions that specifies the
-//! block decomposition of the variable. The rank of \p bs may be less
-//! than that of a variable's array dimensions, in which case only
-//! the \b n fastest varying variable dimensions will be blocked, where
-//! \b n is the rank of \p bs. The ordering of the dimensions in \p bs
-//! is from fastest to slowest. A block is the basic unit of compression
-//! in the VDC: variables are decomposed into blocks, and individual blocks
-//! are compressed independently.
-//!
 //! \param wname Name of wavelet used for transforming compressed 
 //! variables between wavelet and physical space. Valid values
 //! are "bior1.1", "bior1.3", "bior1.5", "bior2.2", "bior2.4",
@@ -184,6 +175,7 @@ public:
  VDC();
  virtual ~VDC() {}
 
+protected:
  //! Initialize the VDC class
  //!
  //! Prepare a VDC for reading or writing/appending. This method prepares
@@ -202,6 +194,18 @@ public:
  //! NetCDF files will be created (opened with \em nc_create(path)).
  //! When \p mode is \b A additional time steps may be added to
  //! an existing file.
+ //!
+ //! \p bs is a three-element array, with the first element
+ //! specifying the length of the fastest varying spatial dimension (e.g. X) of
+ //! the storage block, the
+ //! second element specifies the length of the next fastest varying
+ //! dimension, etc. If a variable definition defines a variable with \b n
+ //! spatial , where \b n is less than three, only the 
+ //! first \b n elements
+ //! of \p bs will be used. For example, if the rank of \b bs is greater than
+ //! two a 2D variable will be stored in
+ //! blocks having dimensions \b bs[0] x \b bs[1]. Time dimensions are
+ //! never blocked. This parameter is ignored unless \p mode is W.
  //!
  //! \note The parameter \p mode controls the access to the master
  //! file indicated by \p path and the variable data files in a somewhat
@@ -223,31 +227,23 @@ public:
  //!
  //! \sa EndDefine();
  //
- virtual int Initialize(
+ virtual int initialize(
 	const std::vector <string> &paths, const std::vector <string> &options,
-	AccessMode mode
+	AccessMode mode, vector <size_t> bs
  );
- virtual int Initialize(
+ virtual int initialize(
 	const std::vector <string> &paths, const std::vector <string> &options
  ) {
-	return(Initialize(paths, options, R));
+	return(initialize(paths, options, R, vector <size_t> ()));
  }
+
+public:
 
  //! Sets various parameters for storage blocks for subsequent variable 
  //! definitions
  //!
  //! This method sets the storage parameters for subsequent variable
  //! definitions for compressed variables. 
- //! \p bs is a three-element array, with the first element
- //! specifying the length of the fastest varying dimension (e.g. X) of
- //! the storage block, the
- //! second element specifies the length of the next fastest varying
- //! dimension, etc. If a variable definition defines a variable with \b n
- //! spatial dimensions, where \b n is less than three, only the 
- //! first \b n elements
- //! of \p bs will be used. For example, if the rank of \b bs is greater than
- //! two a 2D variable will be stored in
- //! blocks having dimensions \b bs[0] x \b bs[1].
  //!
  //! Variables whose spatial dimension lengths are less than the coresponding 
  //! dimension of \p bs will be padded to block boundaries.
@@ -275,10 +271,6 @@ public:
  //! definitions for variables that are not compressed.
  //!
  //!
- //! \param[in] bs A one to three-element array specifying the storage 
- //! block size. All
- //! elements of \p must be great than or equal to one. The default value
- //! of \p bs is (64, 64, 64).
  //! \param[in] wname A wavelet family name. The default value is "bior4.4".
  //! \param[in] cratios A vector of compression of integer compression
  //! factors.
@@ -290,7 +282,7 @@ public:
  //! \sa DefineDataVar(), DefineCoordVar(), VDC()
  //
  int SetCompressionBlock(
-	std::vector <size_t> bs, string wname, std::vector <size_t> cratios
+	string wname, std::vector <size_t> cratios
  );
  
  //! Retrieve current compression block settings.
@@ -383,38 +375,108 @@ public:
  //
  int DefineDimension(string dimname, size_t length, int axis);
 
+protected:
 
- //! Return a dimensions's definition
- //!
- //! This method returns the definition of the dimension named
- //! by \p dimname as a reference to a DC::Dimension object. If
- //! \p dimname is not defined as a dimension then the name of \p dimension
- //! will be the empty string()
- //!
- //! \param[in] dimname A string specifying the name of the dimension. 
- //! \param[out] dimension The returned Dimension object reference
- //! \retval bool If the named dimension can not be found false is returned.
- //!
- bool GetDimension(
+ //! \copydoc DC:getDimension()
+ //
+ bool getDimension(
 	string dimname, DC::Dimension &dimension
  ) const;
 
- //! Return names of all defined dimensions
- //!
- //! This method returns the list of names of all of the dimensions
- //! defined in the VDC.
- //!
- //! \sa DefineDimension()
- //!
- std::vector <string> GetDimensionNames() const;
+ //! \copydoc DC:getDimensionNames()
+ //
+ std::vector <string> getDimensionNames() const;
 
- std::vector <string> GetMeshNames() const;
+ //! \copydoc DC:getMeshNames()
+ //
+ std::vector <string> getMeshNames() const;
 
- virtual bool GetMesh(
+ virtual bool getMesh(
 	string mesh_name, DC::Mesh &mesh
  ) const;
 
+ //! \copydoc DC::GetCoordVarInfo()
+ //
+ bool getCoordVarInfo(string varname, DC::CoordVar &cvar) const;
 
+ //! \copydoc DC::GetDataVarInfo()
+ //
+ bool getDataVarInfo( string varname, DC::DataVar &datavar) const;
+
+ //! \copydoc DC::GetAuxVarInfo()
+ //
+ bool getAuxVarInfo(string varname, DC::AuxVar &var) const {
+ 	return(false);
+ }
+
+ //! \copydoc DC::GetBaseVarInfo()
+ //
+ bool getBaseVarInfo(string varname, DC::BaseVar &var) const;
+
+ virtual std::vector <string> getDataVarNames() const;
+
+ virtual std::vector <string> getAuxVarNames() const {
+	return (vector <string> ());
+ }
+
+ virtual std::vector <string> getCoordVarNames() const;
+
+ //! \copydoc DC:GetNumRefLevels()
+ //
+ size_t getNumRefLevels(string varname) const;
+
+ bool getAtt(
+	string varname, string attname, vector <double> &values
+ ) const;
+ bool getAtt(
+	string varname, string attname, vector <long> &values
+ ) const;
+ bool getAtt(
+	string varname, string attname, string &values
+ ) const;
+
+ std::vector <string> getAttNames(string varname) const;
+
+ XType getAttType(string varname, string attname) const;
+
+ virtual vector <size_t> getBlockSize() const  {
+	return(_bs);
+ }
+
+ virtual int getDimLensAtLevel(
+	string varname, int level, std::vector <size_t> &dims_at_level,
+	std::vector <size_t> &bs_at_level
+ ) const = 0;
+
+ virtual string getMapProjection(string varname) const;
+
+ virtual string getMapProjection() const;
+
+ virtual string getMapProjectionDefault() const {
+	return(getMapProjection());
+ }
+
+ virtual int openVariableRead(
+	size_t ts, string varname, int level=0, int lod=0
+ ) = 0;
+
+ virtual int closeVariable(int fd) = 0;
+
+ virtual int readRegion(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+ ) = 0;
+
+ virtual int readRegionBlock(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+ ) = 0;
+ virtual int readRegionBlock(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, int *region
+ ) = 0;
+
+public:
 
  //! Define a coordinate variable
  //!
@@ -514,46 +576,6 @@ public:
 	string units, int axis, XType type, bool compressed
  );
 
- //! Return a coordinate variable's definition
- //!
- //! This method returns the definition for the coordinate 
- //! variable named by \p varname.
- //! If \p varname is not defined as a coordinate variable
- //! \p dimnames will be set to a zero-length vector, and values of all other
- //! output parameters will be undefined.
- //!
- //! \param[in] varname A string specifying the name of the variable. 
- //! \param[out] dimnames The ordered list of dimension names for this variable
- //! \param[out] time_varying Boolean indicating whether or not the variable 
- //! is time varying. If true, the last dimension returned in \p dimnames
- //! will be the time dimension. 
- //! \param[out] units The variable's units string
- //! \param[out] axis The axis associated with the dimension. 
- //! \param[out] type The external data storage type
- //! \param[out] compressed A boolean indicating if the variable is compressed
- //! \param[out] uniform A boolean indicating if the variable has uniform
- //! sampling
- //! \retval bool If the named coordinate variable cannot be found false 
- //! is returned and the values of the output parameters will be 
- //! undefined.
- //!
- //! \sa DefineCoordVar(), DefineCoordVarUniform()
- //!
- bool GetCoordVarInfo(
-	string varname, std::vector <string> &dimnames, bool &time_varying,
-	string &units, int &axis, XType &type, bool &compressed, bool &uniform
- ) const;
-
- //! \copydoc DC::GetCoordVarInfo()
- //
- bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
-
- //! \copydoc DC::GetAuxVarInfo()
- //
- bool GetAuxVarInfo(string varname, DC::AuxVar &var) const {
- 	return(false);
- }
-
  //! Define a data variable
  //!
  //! This method defines a data variable in the VDC master file
@@ -621,72 +643,6 @@ public:
  );
 
 
- //! Return a data variable's definition
- //!
- //! This method returns the definition for the data 
- //! variable named by \p varname.
- //!
- //! \param[in] varname A string specifying the name of the dimension. 
- //! \param[out] dimnames An ordered list of dimension names for this variable
- //! \param[out] coordvars An ordered list of coordinate names for this variable
- //! \param[out] time_varying Boolean indicating whether or not the variable 
- //! is time varying. If true, the last dimension returned in \p dimnames
- //! will be the time dimension, and the last coordinate variable name 
- //! returned in \p coord_vars will be the time coordinate variable.
- //! \param[out] units The variable's units string
- //! \param[out] type The external data storage type
- //! \param[out] compressed A boolean indicating if the variable is compressed
- //! \param[out] maskvar A string, possibly empty, containing the name of 
- //! the mask variable if one exists.
- //!
- //! \retval bool If the named data variable cannot be found false 
- //! is returned and the values of the output parameters will be 
- //! undefined.
- //!
- //! \sa DefineCoordVar(), DefineCoordVarUniform()
- //!
- bool GetDataVarInfo(
-	string varname, std::vector <string> &dimnames, 
-	std::vector <string> &coordvars, bool &time_varying,
-	string &units, XType &type, bool &compressed,
-	string &maskvar
- ) const;
-
- //! \copydoc DC::GetDataVarInfo()
- //
- bool GetDataVarInfo( string varname, DC::DataVar &datavar) const;
- 
- //! \copydoc DC::GetBaseVarInfo()
- //
- bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
-
-
- //! Return a list of names for all of the defined data variables.
- //!
- //! Returns a list of names for all data variables defined 
- //!
- //! \sa DefineDataVar()
- //
- virtual std::vector <string> GetDataVarNames() const;
-
- virtual std::vector <string> GetAuxVarNames() const {
-	return (vector <string> ());
- }
-
-
- //! Return a list of names for all of the defined coordinate variables.
- //!
- //! Returns a list of names for all coordinate variables defined 
- //!
- //! \sa DefineDataVar()
- //
- virtual std::vector <string> GetCoordVarNames() const;
-
-
- //! \copydoc DC:GetNumRefLevels()
- //
- size_t GetNumRefLevels(string varname) const;
-
 
  //! Write an attribute
  //!
@@ -716,35 +672,6 @@ public:
 	string varname, string attname, XType type, const string &values
  );
 
- //! Read an attribute
- //!
- //! This method reads an attribute from the VDC. The attribute can either
- //! be "global", if \p varname is the empty string, or bound to a variable
- //! if \p varname indentifies a variable in the VDC.
- //! 
- //! \param[in] varname The name of the variable the attribute is bound to,
- //! or the empty string if the attribute is global
- //! \param[in] attname The attributes name
- //! \param[out] type The primitive data type storage format. 
- //! This is the type that will be used to store the 
- //! attribute on disk
- //! \param[out] values A vector to contain the returned floating point 
- //! attribute values
- //!
- //! \retval status False is returned if the variable name or 
- //! attribute could not be found
- //!
- //! \sa PutAtt()
- //
- bool GetAtt(
-	string varname, string attname, vector <double> &values
- ) const;
- bool GetAtt(
-	string varname, string attname, vector <long> &values
- ) const;
- bool GetAtt(
-	string varname, string attname, string &values
- ) const;
 
  //! Copy an attribute
  //!
@@ -766,55 +693,28 @@ public:
 	const DC &src, string varname, string attname 
  );
 
- //! Return a list of available attribute's names
+ //! Copy attributes
  //!
- //! Returns a vector of all attribute names for the
- //! variable, \p varname. If \p varname is the empty string the names
- //! of all of the global attributes are returned. If \p varname is 
- //! not defined an empty vector is returned.
+ //! This method copies attributes from the src DC. The attributes can either
+ //! be "global", if \p varname is the empty string, or bound to a variable
+ //! if \p varname indentifies a variable in the src DC. All attributes
+ //! associated with \p varname are copied.
+ //! 
+ //! \param[in] src The source DC from which to copy.
+ //! \param[in] varname The name of the variable the attribute is bound to,
+ //! or the empty string if the attribute is global
  //!
- //! \param[in] varname The name of the variable to query,
- //! or the empty string if the names of global attributes are desired.
- //! \retval attnames A vector of returned attribute names
+ //! \retval status A negative int is returned on failure. 0 returned on 
+ //! success.
  //!
- //! \sa PutAtt(), GetAtt()
+ //! \sa PutAtt()
  //
- std::vector <string> GetAttNames(string varname) const;
+ int CopyAtt(
+	const DC &src, string varname
+ );
 
- //! Return the external data type for an attribute
- //!
- //! Returns the external storage type of the named variable attribute.
- //!
- //! \param[in] varname The name of the variable to query,
- //! or the empty string if the names of global attributes are desired.
- //! \param[in] name Name of the attribute.
- //!
- //! \retval If an attribute named by \p name does not exist, a
- //! negative value is returned.
- //!
- XType GetAttType(string varname, string attname) const;
 
- //! \copydoc DC::GetMapProjection()
- //!
- //! This method first checks to see if a variable-specific projection
- //! string has been set with SetMapProjection(string,string). If so it,
- //! its value is returned, even if the value is the empty string. Otherwise,
- //! if the variable indicated by \p varname is georeferenced the value
- //! of the projection string set by SetMapProjection() is returned, 
- //! possibly the empty string
- //
- virtual string GetMapProjection(string varname) const;
 
- //! Return the default map projection for the data set
- //!
- //! This method returns the default Proj4 map projection for 
- //! georeferenced variables. 
- //
- virtual string GetMapProjection() const;
-
- virtual string GetMapProjectionDefault() const {
-	return(GetMapProjection());
- }
 
  //! Set a map projection string for a data variable
  //!
@@ -882,70 +782,6 @@ public:
 
  ) const = 0;
 
- //! Return a variable's dimension lengths at a specified refinement level
- //!
- //! Compressed variables have a multi-resolution grid representation.
- //! This method returns the variable's ordered spatial and 
- //! temporal dimension lengths, 
- //! and block dimensions
- //! at the multiresolution refinement level specified by \p level.
- //! 
- //! If the variable named by \p varname is not compressed the variable's
- //! native dimensions are returned.
- //!
- //! \param[in] varname Data or coordinate variable name.
- //! \param[in] level Specifies a member of a multi-resolution variable's
- //! grid hierarchy as described above.
- //! \param[out] dims_at_level An ordered vector containing the variable's 
- //! dimensions at the specified refinement level
- //! \param[out] bs_at_level An ordered vector containing the variable's 
- //! block dimensions at the specified refinement level
- //!
- //! \retval status Zero is returned upon success, otherwise -1.
- //!
- //! \sa VAPoR::VDC, DC::BaseVar::GetBS(), DC::BaseVar::GetDimensions()
- //
- virtual int GetDimLensAtLevel(
-	string varname, int level, std::vector <size_t> &dims_at_level,
-	std::vector <size_t> &bs_at_level
- ) const = 0;
-
-
- //! Open the named variable for reading
- //!
- //! This method prepares a data or coordinate variable, indicated by a
- //! variable name and time step pair, for subsequent read operations by
- //! methods of this class.  The value of the refinement levels
- //! parameter, \p level, indicates the resolution of the volume in
- //! the multiresolution hierarchy as described by GetDimLensAtLevel().
- //!
- //! The level-of-detail parameter, \p lod, selects
- //! the approximation level. Valid values for \p lod are integers in
- //! the range 0..n-1, where \e n is returned by 
- //! DC::BaseVar::GetCRatios().size(), or the value -1 may be used
- //! to select the best approximation available. 
- //!
- //! An error occurs, indicated by a negative return value, if the
- //! volume identified by the {varname, timestep, level, lod} tupple
- //! is not available. Note the availability of a volume can be tested
- //! with the VariableExists() method.
- //!
- //! \param[in] ts Time step of the variable to read. This is the integer
- //! offset into the variable's temporal dimension. If the variable
- //! does not have a temporal dimension \p ts is ignored.
- //! \param[in] varname Name of the variable to read
- //! \param[in] level Refinement level of the variable. Ignored if the
- //! variable is not compressed.
- //! \param[in] lod Approximation level of the variable. A value of -1
- //! indicates the maximum approximation level defined for the VDC.
- //! Ignored if the variable is not compressed.
- //! \retval status Returns a non-negative value on success
- //!
- //! \sa GetNumRefLevels(), DC::BaseVar::GetCRatios(), OpenVariableRead()
- //
- virtual int OpenVariableRead(
-	size_t ts, string varname, int level=0, int lod=0
- ) = 0;
 
  //! Open the named variable for writing
  //!
@@ -981,14 +817,7 @@ public:
  //
  virtual int OpenVariableWrite(size_t ts, string varname, int lod=-1) = 0;
 
- //! Close the currently opened variable
- //!
- //! Close the handle for variable opened with OpenVariableWrite(),
- //! or OpenVariableRead()
- //!
- //! \sa OpenVariableWrite(), OpenVariableRead()
- //
- virtual int CloseVariable() = 0;
+ virtual int CloseVariableWrite(int fd) = 0;
 
 
  //! Write all spatial values to the currently opened variable
@@ -1004,7 +833,8 @@ public:
  //!
  //! \sa OpenVariableWrite()
  //
- virtual int Write(const float *data) = 0;
+ virtual int Write(int fd, const float *data) = 0;
+ virtual int Write(int fd, const int *data) = 0;
 
  //! Write a single slice of data to the currently opened variable
  //!
@@ -1027,101 +857,10 @@ public:
  //!
  //! \sa OpenVariableWrite()
  //!
- virtual int WriteSlice(const float *slice) = 0;
- virtual int WriteSlice(const unsigned char *slice) = 0;
+ virtual int WriteSlice(int fd, const float *slice) = 0;
+ virtual int WriteSlice(int fd, const int *slice) = 0;
+ virtual int WriteSlice(int fd, const unsigned char *slice) = 0;
 
- //! Read all spatial values of the currently opened variable
- //!
- //! This method reads, and decompresses as necessary, 
- //!  the contents of the currently opened variable into the array 
- //! \p data. The number of values
- //! read into \p data is given by the product of the spatial 
- //! dimensions of the open variable at the refinement level specified.
- //!
- //! It is the caller's responsibility to ensure \p data points
- //! to adequate space.
- //!
- //! \param[out] data An array of data to be written
- //! \retval status Returns a non-negative value on success
- //!
- //! \sa OpenVariableRead()
- //
- int virtual Read(float *data) = 0;
- int virtual Read(int *data) = 0;
-
- //! Read a single slice of data from the currently opened variable
- //!
- //! Decompress, as necessary, and read a single slice (2D array) of 
- //! data from the variable
- //! indicated by the most recent call to OpenVariableRead().
- //! The dimensions of a slices are NX by NY,
- //! where NX is the dimension of the array along the fastest varying
- //! spatial dimension, specified
- //! in grid points, and NY is the length of the second fastest varying
- //! dimension at the currently opened grid refinement level. See
- //! OpenVariableRead().
- //!
- //! This method should be called exactly NZ times for each opened variable,
- //! where NZ is the dimension of third, and slowest varying dimension.
- //! In the case of a 2D variable, NZ is 1.
- //!
- //! It is the caller's responsibility to ensure \p slice points
- //! to adequate space.
- //!
- //! \param[out] slice A 2D slice of data
- //! \retval status Returns a non-negative value on success
- //!
- //! \sa OpenVariableRead()
- //!
- virtual int ReadSlice(float *slice) = 0;
- virtual int ReadSlice(unsigned char *slice) = 0;
-
- //! Read in and return a subregion from the currently opened
- //! variable
- //!
- //! This method reads and returns a subset of variable data.
- //! The \p min and \p max vectors, whose dimensions must match the
- //! spatial rank of the currently opened variable, identify the minimum and
- //! maximum extents, in grid coordinates, of the subregion of interest. The
- //! minimum and maximum valid values of an element of \b min or \b max 
- //! are \b 0 and
- //! \b n-1, respectively, where \b n is the length of the associated
- //! dimension at the opened refinement level. 
- //!
- //! The region
- //! returned is stored in the memory region pointed to by \p region. It
- //! is the caller's responsbility to ensure adequate space is available.
- //!
- //! \param[in] min Minimum region extents in grid coordinates
- //! \param[in] max Maximum region extents in grid coordinates
- //! \param[out] region The requested volume subregion
- //!
- //! \retval status Returns a non-negative value on success
- //! \sa OpenVariableRead(), GetDimension(), GetDimensionNames()
- //
- virtual int ReadRegion(
-    const vector <size_t> &min, const vector <size_t> &max, float *region
- ) = 0;
-
- //! Read in and return a blocked subregion from the currently opened
- //! variable.
- //!
- //! This method is identical to ReadRegion() with the exceptions
- //! that for compressed variables:
- //!
- //! \li The vectors \p start and \p count must be aligned
- //! with the underlying storage block of the variable. See
- //! DC::SetCompressionBlock()
- //!
- //! \li The hyperslab copied to \p region will preserve its underlying
- //! storage blocking (the data will not be contiguous)
- //!
- virtual int ReadRegionBlock(
-    const vector <size_t> &min, const vector <size_t> &max, float *region
- ) = 0;
- virtual int ReadRegionBlock(
-    const vector <size_t> &min, const vector <size_t> &max, int *region
- ) = 0;
 
  //! Write an entire variable in one call
  //!
@@ -1146,6 +885,7 @@ public:
  //! \sa GetVar()
  //
  virtual int PutVar(string varname, int lod, const float *data) = 0;
+ virtual int PutVar(string varname, int lod, const int *data) = 0;
  
  //! Write a variable at single time step
  //!
@@ -1172,64 +912,28 @@ public:
  //! \sa GetVar()
  //
  virtual int PutVar(size_t ts, string varname, int lod, const float *data) = 0;
+ virtual int PutVar(size_t ts, string varname, int lod, const int *data) = 0;
 
- //! Read an entire variable in one call
+ //! Copy a variable from another data collection to this data collection
  //!
- //! This method reads and entire variable (all time steps, all grid points)
- //! from a VDC.  This is the simplest interface for reading data from
- //! a VDC. If the variable is split across multiple files GetVar()
- //! ensures that the data are correctly gathered and assembled into memory
- //! Any variables currently opened with OpenVariableRead() are first closed.
- //! Thus variables need not be opened with OpenVariableRead() prior to
- //! calling GetVar();
+ //! This method copies the variable named \p varname from the data 
+ //! collection specified by \b dc to this data collection. The variable
+ //! must have previously been defined in this data collection.
  //!
- //! It is an error to call this method in \b define mode
- //!
- //! \param[in] varname Name of the variable to write
- //! \param[in] level Refinement level of the variable. 
- //! Ignored if the variable is not compressed.
- //! \param[in] lod Approximation level of the variable. A value of -1
- //! indicates the maximum approximation level defined for the VDC.
- //! Ignored if the variable is not compressed.
- //! \param[out] data Pointer to where data will be copied. It is the 
- //! caller's responsbility to ensure \p data points to sufficient memory.
+ //! \param[in] dc A reference to a source data collection 
+ //! \param[in] varname Name of variable to copy
+ //! \param[in] srclod The level-of-detail used to open \p varname
+ //! in \p dc.
+ //! \param[in] dstlod The level-of-detail used to open \p varname
+ //! in this data collection.
  //! 
- //! \retval status A negative int is returned on failure
- //!
- //! \sa PutVar()
- //
- virtual int GetVar(string varname, int level, int lod, float *data) = 0;
+ virtual int CopyVar(DC &dc, string varname, int srclod, int dstlod) = 0;
 
- //! Read an entire variable at a given time step in one call
- //!
- //! This method reads and entire variable (all grid points) at 
- //! time step \p ts
- //! from a VDC.  This is the simplest interface for reading data from
- //! a VDC. 
- //! Any variables currently opened with OpenVariableRead() are first closed.
- //! Thus variables need not be opened with OpenVariableRead() prior to
- //! calling GetVar();
- //!
- //! It is an error to call this method in \b define mode
- //!
- //! \param[in] ts Time step of the variable to write. This is the integer
- //! offset into the variable's temporal dimension. If the variable
- //! does not have a temporal dimension \p ts is ignored.
- //! \param[in] varname Name of the variable to write
- //! \param[in] level Refinement level of the variable. 
- //! Ignored if the variable is not compressed.
- //! \param[in] lod Approximation level of the variable. A value of -1
- //! indicates the maximum approximation level defined for the VDC.
- //! Ignored if the variable is not compressed.
- //! \param[out] data Pointer to where data will be copied. It is the 
- //! caller's responsbility to ensure \p data points to sufficient memory.
- //! 
- //! \retval status A negative int is returned on failure
- //!
- //! \sa PutVar()
+ //! Copy a variable from another data collection to this data collection
+ //! at a single time step
  //
- virtual int GetVar(
-	size_t ts, string varname, int level, int lod, float *data
+ virtual int CopyVar(
+	DC &dc, size_t ts, string varname, int srclod, int dstlod
  ) = 0;
 
  //! This method computes and returns the depth (number of levels) in a
@@ -1269,7 +973,7 @@ public:
  //! \param[in] lod Compression level of detail requested.
  //! refinement level contained in the VDC.
  //
- virtual bool VariableExists(
+ virtual bool variableExists(
     size_t ts,
     string varname,
     int reflevel = 0,

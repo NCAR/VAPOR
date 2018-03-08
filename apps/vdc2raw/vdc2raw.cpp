@@ -123,36 +123,43 @@ void process_volume(
 	string type
 ) {
 
+	vector <size_t> hslice_dims;
+	size_t nslice;
+	int rc = vdc.GetHyperSliceInfo(varname, opt.level, hslice_dims, nslice);
+	if (rc<0) {
+		MyBase::SetErrMsg("Invalid variable name : %s", varname.c_str());
+		exit(1);
+	}
+
 	size_t nelements = 1;
-	for (int i=0; i<dims.size() && i < 2; i++) {
-		nelements *= dims[i];
+	for (int i=0; i<hslice_dims.size(); i++) {
+		nelements *= hslice_dims[i];
 	}
 	float *buffer = new float[nelements];
 
-	if (dims.size() < 2) {
-		int rc = vdc.GetVar(ts, varname, level, lod, buffer);
+	size_t ntotal = 1;
+	for (int i=0; i<dims.size(); i++) {
+		ntotal *= dims[i];
+	}
+
+	int fd = vdc.OpenVariableRead(ts, varname, level, lod);
+	if (fd<0) exit(1);
+
+
+	for (size_t i=0; i<nslice; i++) {
+		rc = vdc.ReadSlice(fd, buffer);
 		if (rc<0) exit(1);
+
+		nelements = nelements < ntotal ? nelements : ntotal;
 
 		rc = write_data(fp, type, nelements, buffer);
 		if (rc<0) exit(1);
+
+		ntotal -= nelements;
 	}
-	else {
-		int rc = vdc.OpenVariableRead(ts, varname, level, lod);
-		if (rc<0) exit(1);
 
-		size_t nz = dims.size() > 2 ? dims[2] : 1;
-
-		for (size_t i=0; i<nz; i++) {
-			rc = vdc.ReadSlice(buffer);
-			if (rc<0) exit(1);
-
-			rc = write_data(fp, type, nelements, buffer);
-			if (rc<0) exit(1);
-		}
-
-		rc = vdc.CloseVariable();
-		if (rc<0) exit(1);
-	}
+	rc = vdc.CloseVariable(fd);
+	if (rc<0) exit(1);
 
 	delete [] buffer;
 
@@ -182,8 +189,8 @@ void process_region(
 	min_bound.push_back(xregion[0] < 0 ? 0 : xregion[0]);
 	max_bound.push_back(xregion[1] < 0 ? dims[0]-1 : xregion[1]);
 
-	int rc = vdc.OpenVariableRead(ts, varname, level, lod);
-	if (rc<0) exit(1);
+	int fd = vdc.OpenVariableRead(ts, varname, level, lod);
+	if (fd<0) exit(1);
 
 	if (dims.size() > 1) {
 		min_bound.push_back(yregion[0] < 0 ? 0 : yregion[0]);
@@ -201,7 +208,7 @@ void process_region(
 
 	float *region = new float[nelements];
 	
-	rc = vdc.ReadRegion(min_bound, max_bound, region);
+	int rc = vdc.ReadRegion(fd, min_bound, max_bound, region);
 	if (rc<0) exit(1);
 
 	rc = write_data(fp, type, nelements, region);
@@ -209,7 +216,7 @@ void process_region(
 
 	delete [] region;
 	
-	rc = vdc.CloseVariable();
+	rc = vdc.CloseVariable(fd);
 	if (rc<0) exit(1);
 }
 
@@ -260,7 +267,10 @@ int	main(int argc, char **argv) {
 
 	VDCNetCDF vdc(opt.nthreads);
 
-	int rc = vdc.Initialize(vdcmaster, vector <string> (), VDC::R, 4*1024*1024);
+	vector <size_t> bs;
+	int rc = vdc.Initialize(
+		vdcmaster, vector <string> (), VDC::R, bs, 4*1024*1024
+	);
 	if (rc<0) exit(1);
 
 	vector <size_t> dims;

@@ -128,8 +128,8 @@ bool Statistics::Update()
     UpdateCheckbox->blockSignals(false);
 
     // Update "Add a Variable"
-    std::vector<std::string> availVars   = currentDmgr->GetDataVarNames(2, true);
-    std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
+    std::vector<std::string> availVars   = currentDmgr->GetDataVarNames(2);
+    std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
     for( int i = 0; i < availVars3D.size(); i++ )
         availVars.push_back( availVars3D[i] );
     for( int i = 0; i < enabledVars.size(); i++ )
@@ -1104,7 +1104,7 @@ void Statistics::_exportTextClicked()
         StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
                 (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
         VAPoR::DataMgr* currentDmgr = _controlExec->GetDataStatus()->GetDataMgr( dsName );
-        std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3, true);
+        std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
 
         file << "Data Source = " << guiParams->GetStatsDatasetName() << endl << endl;
         file << "#Variable Statistics:" << endl;

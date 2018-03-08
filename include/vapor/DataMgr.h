@@ -11,6 +11,7 @@
 #include <vapor/CurvilinearGrid.h>
 #include <vapor/UnstructuredGrid2D.h>
 #include <vapor/KDTreeRG.h>
+#include <vapor/UDUnitsClass.h>
 
 #ifndef	DataMgvV3_0_h
 #define DataMgvV3_0_h
@@ -19,6 +20,9 @@ using namespace std;
 
 namespace VAPoR {
 class PipeLine;
+class DerivedVar;
+class DerivedDataVar;
+class DerivedCoordVar;
 
 
 //! \class DataMgr
@@ -166,15 +170,11 @@ public:
 	assert(_dc);
 	return(_dc->GetMeshNames());
  }
+ 
 
  //! \copydoc DC::GetMesh()
  //
- bool GetMesh(
-    string meshname, DC::Mesh &mesh
- ) const {
-	assert(_dc);
-	return(_dc->GetMesh(meshname, mesh));
- }
+ bool GetMesh(string meshname, DC::Mesh &mesh) const;
 
 
  //! Return a list of names for all of the defined data variables.
@@ -189,24 +189,19 @@ public:
  //! \test New in 3.0
  virtual std::vector <string> GetDataVarNames() const;
 
- //! Return a list of data variables with a given dimension rank
+ //! Return a list of data variables with a given spatial dimension rank
  //!
  //! This method returns a list of all data variables defined 
  //! in the data set with the specified dimension rank (number of dimensions).
- //! Data variables may have 0 to 3 spatial dimensions, and 0 of 1 time
- //! dimension.
+ //! Data variables may have 0 to 3 spatial dimensions
  //!
  //! \param[in] ndim Variable rank (number of dimensions)
- //! \param[in] spatial A boolean, if true, indicates that only the variable's
- //! spatial rank should be compared against \p ndim.  Otherwise the sum
- //! of the number of spatial dimensions plus the time dimension (if time
- //! varying) is compared agains \p ndim. 
  //!
  //! \retval list A vector containing a list of all the data variable names
  //! with the specified number of dimensions (rank).
  //!
  //! \test New in 3.0
- virtual std::vector <string> GetDataVarNames(int ndim, bool spatial) const;
+ virtual std::vector <string> GetDataVarNames(int ndim) const;
 
  //! Return a list of names for all of the defined coordinate variables.
  //! 
@@ -219,21 +214,6 @@ public:
  //! \sa GetDataVarNames()
  //!
  virtual std::vector <string> GetCoordVarNames() const;
-
- //! Return a list of coordinate variables with a given dimension rank
- //!
- //! This method returns a list of all coordinate variables defined 
- //! in the coordinate set with the specified dimensionality
- //!
- //! \param[in] ndim Variable rank
- //! \param[in] spatial A boolean indicating whether only the variables
- //! spatial rank should be compared against \p ndim
- //!
- //! \retval list A vector containing a list of all the coordinate 
- //! variable names
- //! with the specified number of dimensions.
- //!
- virtual std::vector <string> GetCoordVarNames(int ndim, bool spatial) const;
 
  //! Get time coordinates
  //!
@@ -499,10 +479,10 @@ std::vector <size_t> GetCRatios(string varname) const;
  void UnlockGrid(const VAPoR::Grid *rg);
 
  //! \copydoc DC::GetNumDimensions(
- //!   string varname, size_t &ndim
+ //!   string varname
  //! ) const;
  //
- bool GetNumDimensions(string varname, size_t &ndim) const;
+ size_t GetNumDimensions(string varname) const;
 
  //! \copydoc DC:GetVarTopologyDim()
  //!
@@ -542,22 +522,19 @@ std::vector <size_t> GetCRatios(string varname) const;
  virtual string GetMapProjection(
     string varname
  ) const {
-	assert(_dc != NULL);
-	return(_dc->GetMapProjection(varname));
+	return(_proj4String);
  }
 
  //! \copydoc DC::GetMapProjection() const;
  //
  virtual string GetMapProjection() const {
-	assert(_dc != NULL);
-	return(_dc->GetMapProjection());
+	return(_proj4String);
  }
 
  //! \copydoc DC::GetMapProjectionDefault() const;
  //
  virtual string GetMapProjectionDefault() const {
-	assert(_dc != NULL);
-	return(_dc->GetMapProjectionDefault());
+	return(_proj4String);
  }
 
 #ifdef	DEAD
@@ -620,6 +597,7 @@ std::vector <size_t> GetCRatios(string varname) const;
  //! \param[in] varname is the variable name
  //!
  void PurgeVariable(string varname);
+
 
  class BlkExts {
  public:
@@ -805,7 +783,7 @@ private:
 	string key, size_t ts, std::vector <string> cvars, int level, int lod
   );
 
- private:
+  private:
 
   std::map <string, std::vector <size_t> > _cacheSize_t;
   std::map <string, std::vector <double> > _cacheDouble;
@@ -819,9 +797,17 @@ private:
  size_t _mem_size;
 
  DC *_dc;
+ VAPoR::UDUnits _udunits;
+
+ std::map<string, DerivedDataVar *> _derivedDataVars;
+ std::map<string, DerivedCoordVar *> _derivedCoordVars;
+ std::vector< DerivedVar *> _derivedVars;
+ bool _doTransformHorizontal;
+ bool _doTransformHeight;
+ string _openVarName;
 
  std::vector <double> _timeCoordinates;
- string _defaultMapProjectionStr;
+ string _proj4String;
 
  typedef struct {
 	size_t ts;
@@ -846,11 +832,27 @@ private:
  mutable VarInfoCache _varInfoCache;
  std::map <string, BlkExts> _blkExtsCache;
 
+ std::vector <string> _get_var_dependencies(string varname) const;
+
+ // Return true if native data set is georeferenced
+ //
+ bool _is_geographic() const;
+
+ // Return true if the specified data variable has geographic
+ // coordinates in the native data set
+ //
+ bool _is_geographic(string varname) const;
+
+ // Return true if the specified data mesh has geographic
+ // coordinates in the native data set
+ //
+ bool _is_geographicMesh(string mesh) const;
+
  int _get_coord_vars(
 	string varname, std::vector <string> &scvars, string &tcvar
  ) const;
 
- int _get_time_coordinates(std::vector <double> &timecoords);
+ int _initTimeCoord();
 
  int _get_default_projection(string &projection);
 
@@ -881,6 +883,7 @@ private:
  ) const;
 
  VAPoR::CurvilinearGrid *_make_grid_curvilinear(
+	size_t ts,
 	int level,
 	int lod,
     const vector <DC::CoordVar> &cvarsinfo,
@@ -904,6 +907,7 @@ private:
  ) const;
 
 UnstructuredGrid2D *_make_grid_unstructured2d(
+	size_t ts,
 	int level,
 	int lod,
 	const DC::DataVar &dvarinfo,
@@ -920,6 +924,7 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
  );
 
  VAPoR::Grid *_make_grid(
+	size_t ts,
 	int level,
 	int lod,
 	const VAPoR::DC::DataVar &var,
@@ -951,6 +956,15 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
     std::vector <double> min, std::vector <double> max,
     std::vector <size_t> &min_ui, std::vector <size_t> &max_ui
  );
+
+ void _setupCoordVecsHelper(
+	string data_varname,
+	const vector <size_t> &data_bmin,
+	const vector <size_t> &data_bmax,
+	string coord_varname,
+	vector <size_t> &coord_bmin,
+	vector <size_t> &coord_bmax
+ ) const;
 
  int _setupCoordVecs(
 	size_t ts,
@@ -1002,6 +1016,8 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
     bool    lock,
     bool    dataless
  ); 
+ 
+ int _parseOptions(vector <string> &options);
 
  template <typename T> 
  T *_get_region_from_cache(
@@ -1081,6 +1097,7 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
  int _lod_correction(string varname, int &lod) const;
 
  const KDTreeRG *_getKDTree2D(
+	size_t ts,
 	int level,
 	int lod,
 	const vector <DC::CoordVar> &cvarsinfo,
@@ -1088,6 +1105,91 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	const Grid &yg
  );
 
+ vector <string> _getDataVarNamesDerived(int ndim) const;
+
+ vector <string> _getCoordVarNamesDerived() const;
+
+ string _getTimeCoordVarNameDerived() const;
+
+ bool _getDataVarInfoDerived(string varname, VAPoR::DC::DataVar &varInfo) const;
+
+ bool _getCoordVarInfoDerived(string varname, VAPoR::DC::CoordVar &varInfo) const;
+
+ bool _getBaseVarInfoDerived(string varname, VAPoR::DC::BaseVar &varInfo) const;
+
+ bool _hasCoordForAxis(vector <string> coord_vars, int axis) const;
+
+ string _defaultCoordVar(const DC::Mesh &m, int axis) const;
+
+ void _assignHorizontalCoords(vector <string> &coord_vars) const;
+
+ void _assignVerticalCoords(vector <string> &coord_vars) const;
+
+ void _assignTimeCoord(string &coord_var) const;
+
+ bool _getVarDimensions(
+	string varname, vector <DC::Dimension> &dimensions
+ ) const;
+
+ bool _getDataVarDimensions(
+	string varname, vector <DC::Dimension> &dimensions
+ ) const;
+
+ bool _getCoordVarDimensions(
+	string varname, vector <DC::Dimension> &dimensions
+ ) const;
+
+ bool _getVarDimNames(string varname, vector <string> &dimnames) const;
+
+ bool _isDataVar(string varname) const {
+	vector <string> names = GetDataVarNames();
+	return(find(names.begin(), names.end(), varname) != names.end());
+ }
+
+ bool _isCoordVar(string varname) const {
+	vector <string> names = GetCoordVarNames();
+	return(find(names.begin(), names.end(), varname) != names.end());
+ }
+
+ bool _getVarConnVars(
+	string varname, string &face_node_var, string &node_face_var,
+	string &face_edge_var, string &face_face_var, string &edge_node_var,
+	string &edge_face_var
+ ) const;
+
+ DerivedVar *_getDerivedVar(string varname) const;
+ DerivedDataVar *_getDerivedDataVar(string varname) const;
+ DerivedCoordVar *_getDerivedCoordVar(string varname) const;
+
+ int _openVariableRead(size_t ts, string varname, int level, int lod);
+
+ template <class T>
+ int _readRegionBlock(
+	int fd,
+	const vector <size_t> &min, const vector <size_t> &max, T *region
+ );
+ int _readRegion(
+	int fd,
+	const vector <size_t> &min, const vector <size_t> &max, float *region
+ );
+ int _closeVariable(int fd);
+
+ int _getVar(string varname, int level, int lod, float *data);
+
+ int _getVar(size_t ts, string varname, int level, int lod, float *data);
+
+ int _getLatlonExtents(
+	string varname, bool lonflag, float &min, float &max
+ );
+ 
+ int _getCoordPairExtents(
+	string lon, string lat,
+	float &lonmin, float &lonmax, float &latmin, float &latmax
+) ;
+
+ int _initProj4String();
+ 
+ int _initHorizontalCoordVars();
 };
 
 };
