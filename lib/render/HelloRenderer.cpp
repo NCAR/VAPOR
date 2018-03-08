@@ -180,8 +180,17 @@ int HelloRenderer::_paintGL(){
 	//To do this, take the cross product of the line direction with the viewer direction, 
 	//And then cross the result with the line direction.
 	//Find the direction vector along the line and the camera direction
-	double dirvec[3];
-	vpParams->GetCameraViewDir(dirvec);
+
+    double m[16];
+    vpParams->GetModelViewMatrix(m);
+
+	double posvec[3], upvec[3], dirvec[3];
+    bool status = vpParams->ReconstructCamera(m, posvec, upvec, dirvec);
+    if (! status) {
+        SetErrMsg("Failed to get camera parameters");
+        return(-1);
+    }
+
 	double lineDir[3], vdir[3], cross[3], normvec[3];
 	for (int i = 0; i<3; i++) {
 		lineDir[i] = point2[i]-point1[i];

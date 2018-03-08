@@ -199,44 +199,6 @@ public:
 		return(v);
 	}
 
- //! Get current camera position 
- //! \param[out] position 3-element vector with camera position in 
- //! world coordinates
- //
- void GetCameraPos(double position[3]) const {
- getCurrentViewpoint()->GetCameraPos(position);
- }
-
- //! Get current camera normalized view direction 
- //! \param[out] viewDir 3-element vector with camera position in 
- //! world coordinates
- //
- void GetCameraViewDir(double viewDir[3]) const {
- getCurrentViewpoint()->GetCameraViewDir(viewDir);
- }
-
- //! Get current camera normalized up direction 
- //! \param[out] upVec 3-element vector with camera position in 
- //! world coordinates
- //
- void GetCameraUpVec(double upVec[3]) const {
- getCurrentViewpoint()->GetCameraUpVec(upVec);
- }
-
- //! Obtain rotation center in local coordinates
- //! \param[out] center 3-element vector with center of rotation
- //
- void GetRotationCenter(double center[3]) const {
- getCurrentViewpoint()->GetRotationCenter(center);
- }
-
- //! Specify rotation center in local coordinates
- //! \param[in] vector<double>& rotation center in local coordinates
- //! \retval int 0 if successful
- void SetRotationCenter(const double center[3]) {
- getCurrentViewpoint()->SetRotationCenter(center);
- }
-
  //! Return the current 4x4 model-view matrix
  //
  void GetModelViewMatrix(double m[16]) const {
@@ -251,6 +213,14 @@ public:
  }
  void SetProjectionMatrix(const double m[16]) {
  getCurrentViewpoint()->SetProjectionMatrix(m);
+ }
+
+ bool ReconstructCamera(
+    const double m[16], double position[3], double upVec[3], double viewDir[3]
+ ) const {
+	 return(getCurrentViewpoint()->ReconstructCamera(
+		m, position, upVec, viewDir)
+	);
  }
 
  //! Access the transform for a data set
@@ -332,10 +302,6 @@ private:
 
 
  void _init();
-
-#ifdef DEAD
- void setupHomeView();
-#endif
 
 #endif //DOXYGEN_SKIP_THIS
 };

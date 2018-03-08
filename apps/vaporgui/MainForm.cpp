@@ -46,8 +46,6 @@
 #include "VizSelectCombo.h"
 #include "TabManager.h"
 #include "NavigationEventRouter.h"
-#include "regioneventrouter.h"
-#include "AnnotationsEventRouter.h"
 #include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
@@ -55,6 +53,7 @@
 #include "Statistics.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
+#include "BoxSliderFrame.h"
 #include "MainForm.h"
 
 
@@ -229,8 +228,10 @@ MainForm::MainForm(
 
 	//MappingFrame::SetControlExec(_controlExec);
 	BoxSliderFrame::SetControlExec(_controlExec);
+
+	_vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 	
-	_tabMgr = TabManager::Create(this, _controlExec);
+	_tabMgr = TabManager::Create(this, _controlExec, _vizWinMgr);
     _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
     //This is just large enough to show the whole width of flow tab, with a scrollbar
@@ -242,8 +243,6 @@ MainForm::MainForm(
 
     _tabDockWindow->setWidget(_tabMgr);
 
-	_vizWinMgr = VizWinMgr::Create(_controlExec);
-	_vizWinMgr->createAllDefaultTabs();
 	
 	
 	createToolBars();	
@@ -406,7 +405,7 @@ void MainForm::hookupSignals() {
 	// Slots on the MainForm
 	//
 	AnimationEventRouter* aRouter = (AnimationEventRouter*)
-        _vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+        _tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	connect(
 		aRouter, SIGNAL(AnimationOnOffChanged(bool)), 
@@ -591,37 +590,42 @@ void MainForm::hookupSignals() {
 	//
 	connect (
 		_tileAction, SIGNAL(triggered()),
-		_vizWinMgr, SLOT(fitSpace())
+		_vizWinMgr, SLOT(FitSpace())
 	);
 	connect (
 		_cascadeAction, SIGNAL(triggered()),
-		_vizWinMgr, SLOT(cascade())
+		_vizWinMgr, SLOT(Cascade())
 	);
 	connect (
 		_windowSelector, SIGNAL(winActivated(const QString &)),
-		_vizWinMgr, SLOT(winActivated(const QString &))
+		_vizWinMgr, SLOT(SetWinActive(const QString &))
 	);
 	connect (
 		_vizWinMgr, SIGNAL(newViz(const QString &)),
-		_windowSelector, SLOT(addWindow(const QString&))
+		_windowSelector, SLOT(AddWindow(const QString&))
 	);
 	connect (
 		_vizWinMgr, SIGNAL(removeViz(const QString &)),
-		_windowSelector, SLOT(removeWindow(const QString &))
+		_windowSelector, SLOT(RemoveWindow(const QString &))
 	);
 	connect (
 		_vizWinMgr, SIGNAL(activateViz(const QString &)),
-		_windowSelector, SLOT(setWindowActive(const QString &))
+		_windowSelector, SLOT(SetWindowActive(const QString &))
 	);
 	connect (
 		_windowSelector, SIGNAL(newWin()),
 		_vizWinMgr, SLOT(LaunchVisualizer())
 	);
 
+	connect(
+		_vizWinMgr, SIGNAL(activateViz(const QString &)),
+		_tabMgr, SLOT(SetActiveViz(const QString &))
+	);
+
 	// Slots on the NavigationEventRouter
 	//
 	NavigationEventRouter* vpRouter = (NavigationEventRouter*)
-        _vizWinMgr->GetEventRouter(NavigationEventRouter::GetClassType());
+        _tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
 
 	connect(
 		vpRouter, SIGNAL(Proj4StringChanged()), 
@@ -884,6 +888,7 @@ void MainForm::sessionOpenHelper(string fileName) {
 	enableWidgets(false);
 
 	_vizWinMgr->Shutdown();
+	_tabMgr->Shutdown();
 
 	// Close any open data sets
 	//
@@ -937,6 +942,8 @@ void MainForm::sessionOpenHelper(string fileName) {
 	newP->SetCurrentPythonPath(sP->GetPythonDir());
 	newP->SetCurrentFlowPath(sP->GetFlowDir());
 
+	_vizWinMgr->Restart();
+	_tabMgr->Restart();
 }
 
 // Open session file
@@ -983,7 +990,6 @@ void MainForm::sessionOpen(QString qfileName)
 
 	sessionOpenHelper(fileName);
 
-	_vizWinMgr->Restart();
 
     _stateChangeFlag = false;
 	_sessionNewFlag = false;
@@ -1069,6 +1075,7 @@ void MainForm::undoRedoHelper(bool undo) {
 
 	bool status;
 	_vizWinMgr->Shutdown();
+	_tabMgr->Shutdown();
 
 	if (undo) {
 		status = _controlExec->Undo();
@@ -1082,23 +1089,7 @@ void MainForm::undoRedoHelper(bool undo) {
 	}
 
 	_vizWinMgr->Restart();
-
-	// Ugh. Trackball isn't integrated with Params database so need to 
-	// handle undo/redo manually. I.e. get modelview matrix params from
-	// database and set them in the TrackBall
-	//
-	vector <string> winNames = _paramsMgr->GetVisualizerNames();
-	for (int i=0; i<winNames.size(); i++) {
-		ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-		double pos[3], dir[3], up[3], center[3];
-		vpParams->GetCameraPos(pos);
-		vpParams->GetCameraViewDir(dir);
-		vpParams->GetCameraUpVec(up);
-		vpParams->GetRotationCenter(center);
-
-		_vizWinMgr->SetTrackBall(pos, dir, up, center, true);
-	}
-
+	_tabMgr->Restart();
 
 	// Restore state saving
 	//
@@ -1249,6 +1240,7 @@ void MainForm::loadDataHelper(
 	
 	if (_sessionNewFlag) {
 		viewAll();
+		setHome();
 
 		vector <string> winNames = _paramsMgr->GetVisualizerNames();
 		for (int i=0; i<winNames.size(); i++) {
@@ -1259,30 +1251,13 @@ void MainForm::loadDataHelper(
 		}
 		_sessionNewFlag = false;
 	}
-	else {
-
-		// Ugh. Trackball isn't integrated with Params database so need to 
-		// handle undo/redo manually. I.e. get modelview matrix params from
-		// database and set them in the TrackBall
-		//
-		vector <string> winNames = _paramsMgr->GetVisualizerNames();
-		for (int i=0; i<winNames.size(); i++) {
-			ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-			double pos[3], dir[3], up[3], center[3];
-			vpParams->GetCameraPos(pos);
-			vpParams->GetCameraViewDir(dir);
-			vpParams->GetCameraUpVec(up);
-			vpParams->GetRotationCenter(center);
-
-			_vizWinMgr->SetTrackBall(pos, dir, up, center, true);
-		}
-	}
 
 	DataStatus* ds = _controlExec->GetDataStatus();
 	BoxSliderFrame::setDataStatus(ds);
 
 	_tabMgr->Update();
-	_vizWinMgr->ReinitRouters();
+	_vizWinMgr->Reinit();
+	_tabMgr->Reinit();
 
 	enableWidgets(true);
 
@@ -1376,7 +1351,7 @@ void MainForm::closeData(string fileName) {
 	}
 
 	_tabMgr->Update();
-	_vizWinMgr->ReinitRouters();
+	_vizWinMgr->Reinit();
 }
 	
 //import WRF data into current session
@@ -1550,7 +1525,7 @@ void MainForm::setInteractiveRefinementSpin(int val){
 	
 void MainForm::pauseClick(){
 	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	aRouter->AnimationPause();
 //	update();
@@ -1558,7 +1533,7 @@ void MainForm::pauseClick(){
 
 void MainForm::playForward(){
 	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	aRouter->AnimationPlayForward();
 //	update();
@@ -1566,7 +1541,7 @@ void MainForm::playForward(){
 
 void MainForm::playBackward(){
 	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	aRouter->AnimationPlayReverse();
 //	update();
@@ -1574,7 +1549,7 @@ void MainForm::playBackward(){
 
 void MainForm::stepBack(){
 	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	aRouter->AnimationStepReverse();
 //	update();
@@ -1582,7 +1557,7 @@ void MainForm::stepBack(){
 
 void MainForm::stepForward(){
 	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	aRouter->AnimationStepForward();
 //	update();
@@ -1609,7 +1584,7 @@ void MainForm::setAnimationOnOff(bool on) {
 }
 
 void MainForm::setAnimationDraw() {
-	_vizWinMgr->updateDirtyWindows();
+	_vizWinMgr->Update();
 	//update();
 }
 
@@ -1618,7 +1593,7 @@ void MainForm::setTimestep(){
 	int timestep = _timeStepEdit->text().toInt();
 
 	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
 	aRouter->SetTimeStep(timestep);
 //	update();
@@ -1653,7 +1628,7 @@ void MainForm::enableKeyframing(bool ison){
 
 void MainForm::showTab(const std::string& tag){
 	_tabMgr->MoveToFront(tag);
-	EventRouter* eRouter = _vizWinMgr->GetEventRouter(tag);
+	EventRouter* eRouter = _tabMgr->GetEventRouter(tag);
 	eRouter->updateTab();
 }
 
@@ -1993,7 +1968,7 @@ void MainForm::loadStartingPrefs(){
 
 void MainForm::setActiveEventRouter(string type) {
 
-	EventRouter *eRouter = _vizWinMgr->GetEventRouter(type);
+	EventRouter *eRouter = _tabMgr->GetEventRouter(type);
 	if (! eRouter) return;
 
 	// Set up help for active tab
@@ -2008,7 +1983,7 @@ void MainForm::setActiveEventRouter(string type) {
 
 void MainForm::goHome() {
 	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_vizWinMgr->GetEventRouter(NavigationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
 	assert(vRouter);
 
 	vRouter->UseHomeViewpoint();
@@ -2016,7 +1991,7 @@ void MainForm::goHome() {
 
 void MainForm::viewAll() {
 	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_vizWinMgr->GetEventRouter(NavigationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
 	assert(vRouter);
 
 	vRouter->ViewAll();
@@ -2024,7 +1999,7 @@ void MainForm::viewAll() {
 
 void MainForm::setHome() {
 	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_vizWinMgr->GetEventRouter(NavigationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
 	assert(vRouter);
 
 	vRouter->SetHomeViewpoint();
@@ -2035,7 +2010,7 @@ void MainForm::alignView(int axis)
     if (axis < 1) return;
 
 	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_vizWinMgr->GetEventRouter(NavigationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
 	assert(vRouter);
 
     vRouter->AlignView(axis);
@@ -2044,7 +2019,7 @@ void MainForm::alignView(int axis)
 void MainForm::viewRegion()
 {
 	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_vizWinMgr->GetEventRouter(NavigationEventRouter::GetClassType());
+		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
 	assert(vRouter);
 
     vRouter->CenterSubRegion();
@@ -2113,10 +2088,8 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 			_plot->Update();
 		}
 
-		_vizWinMgr->UpdateRouters();
-
 		_tabMgr->Update();
-		_vizWinMgr->updateDirtyWindows();
+		_vizWinMgr->Update();
 
 		update();
 
@@ -2138,7 +2111,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 	//
 	//case (QEvent::Paint):
 
-	_vizWinMgr->updateDirtyWindows();
+	_vizWinMgr->Update();
 
 	break;
 	default:
@@ -2259,13 +2232,12 @@ void MainForm::enableWidgets(bool onOff) {
 	_navigationAction->setEnabled(onOff);
 	_Edit->setEnabled(onOff);
 	_windowSelector->setEnabled(onOff);
-	_vizWinMgr->setEnabled(onOff);
 	_tabMgr->setEnabled(onOff);
 	_statsAction->setEnabled(onOff);
 	_plotAction->setEnabled(onOff);
 //	_seedMeAction->setEnabled(onOff);
 
-	_vizWinMgr->EnableRouters(onOff);
+	_tabMgr->EnableRouters(onOff);
 
 }
 
@@ -2280,9 +2252,8 @@ void MainForm::enableAnimationWidgets(bool on) {
 	}
 	else {
 		AnimationEventRouter* aRouter = (AnimationEventRouter*)
-			_vizWinMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+			_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
 
-		_vizWinMgr->setEnabled(true);
 		aRouter->setEnabled(true);
 
 		_animationToolBar->setEnabled(true);
@@ -2307,7 +2278,7 @@ void MainForm::captureSingleJpeg() {
 	QFileDialog fileDialog(this,
 		"Specify single image capture file name",
 		imageDir.c_str(),
-		"Jpeg images (*.jpg *.jpeg)");
+		"PNG or JPEG images (*.png *.jpg *.jpeg)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
@@ -2320,9 +2291,9 @@ void MainForm::captureSingleJpeg() {
 	//Extract the path, and the root name, from the returned string.
 	QFileInfo* fileInfo = new QFileInfo(fn);
 	QString suffix = fileInfo->suffix();
-	if (suffix != "jpg" && suffix != "jpeg" ) 
+	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) 
     {
-		MSG_ERR("Image capture file name must end with .jpg or .jpeg");
+		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
 		return;
 	}
 
@@ -2408,7 +2379,7 @@ void MainForm::startAnimCapture() {
 	QFileDialog fileDialog(this,
 		"Specify first file name for image capture sequence",
 		imageDir.c_str(),
-		"Jpeg images (*.jpg *.jpeg )");
+		"PNG or JPEG images (*.png *.jpg *.jpeg )");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
@@ -2421,8 +2392,11 @@ void MainForm::startAnimCapture() {
 	QFileInfo* fileInfo = new QFileInfo(s);
 
 	QString suffix = fileInfo->suffix();
-	if (suffix != "jpg" && suffix != "jpeg") 
-        suffix = "jpeg";
+	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) 
+    {
+		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
+		return;
+	}
 	//Save the path for future captures
 	sP->SetImageDir(fileInfo->absolutePath().toStdString());
 
