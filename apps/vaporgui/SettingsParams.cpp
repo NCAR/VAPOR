@@ -66,6 +66,7 @@ const string SettingsParams::_autoStretchTag = "AutoStretch";
 const string SettingsParams::_jpegQualityTag = "JpegImageQuality";
 const string SettingsParams::_changesPerAutoSaveTag = "ChangesPerAutoSave";
 const string SettingsParams::_autoSaveFileLocationTag = "AutoSaveFileLocation";
+const string SettingsParams::_defaultAutoSaveFileTag = "DefaultAutoSaveFile";
 const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 const string SettingsParams::_fontFileTag = "FontFile";
 const string SettingsParams::_fontSizeTag = "FontSize";
@@ -76,10 +77,8 @@ const string SettingsParams::_fontSizeTag = "FontSize";
 static ParamsRegistrar<SettingsParams> registrar(SettingsParams::GetClassType());
 
 namespace {
-	//string SettingsFile = ".vapor3_startup";
 	string SettingsFile = ".vapor3_settings";
 }
-
 
 SettingsParams::SettingsParams(
     ParamsBase::StateSave *ssave
@@ -97,12 +96,11 @@ SettingsParams::SettingsParams(
     _init();
 }
 
+//SettingsParams::SettingsParams(
+  //  ParamsBase::StateSave *ssave, XmlNode *node
+//) : SettingsParams(ssave) {}
 
 SettingsParams::SettingsParams(
-    ParamsBase::StateSave *ssave, XmlNode *node
-) : SettingsParams(ssave) {}
-
-/*SettingsParams::SettingsParams(
     ParamsBase::StateSave *ssave, XmlNode *node
 ) : ParamsBase(ssave, node)
 {
@@ -117,15 +115,21 @@ SettingsParams::SettingsParams(
 		//
 		bool ok = _loadFromSettingsFile();
 		if (ok) return;
-
-		_init();
+		else _init();
 	}
-}*/
+}
+
+SettingsParams::SettingsParams(
+	const SettingsParams &rhs
+) : ParamsBase(rhs) {}
+
+SettingsParams &SettingsParams::operator=( const SettingsParams& rhs ) {
+	return (*this);
+}
 
 void SettingsParams::Reinit() {
 	_init();
 }
-
 
 SettingsParams::~SettingsParams(){
 	
@@ -169,11 +173,11 @@ bool SettingsParams::GetWinSizeLock() const {
 	return (0 != GetValueLong(_winSizeLockTag, (long) false));
 }
 
-bool SettingsParams::GetAutoStretch() const {
+bool SettingsParams::GetAutoStretchEnabled() const {
 	return (0!= GetValueLong(_autoStretchTag, (long) false));
 }
 
-void SettingsParams::SetAutoStretch(bool val) {
+void SettingsParams::SetAutoStretchEnabled(bool val) {
 	SetValueLong(_autoStretchTag,"Enable Auto Stretch", val);
 }
 
@@ -189,7 +193,7 @@ void SettingsParams::SetJpegQuality(int quality) {
 
 bool SettingsParams::GetSessionAutoSaveEnabled() const {
 	double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
-	if (enabled < 0) return true;
+	if (enabled > 0) return true;
 	else return false;
 }
 
@@ -212,8 +216,10 @@ void SettingsParams::SetChangesPerAutoSave(int count) {
 }
 
 string SettingsParams::GetAutoSaveSessionFile() const {
-	string defaultDir = string("VaporAutoSave.vss");
-	string file = GetValueString(_autoSaveFileLocationTag, defaultDir);
+	string autoSaveDir = QDir::homePath().toStdString();
+	string defaultFile = autoSaveDir + "//VaporAutoSave.vss";
+
+	string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
 	return file;
 }
 
@@ -241,6 +247,13 @@ string SettingsParams::GetDefaultSessionDir() const {
 		dir = QDir::homePath().toStdString();
 	}
 	return(dir);
+}
+
+void SettingsParams::SetDefaultAutoSaveFile(string autoSaveFile) {
+	string description = "Set default auto-save session directory";
+	SetValueString(
+		_defaultAutoSaveFileTag, description, autoSaveFile
+	);
 }
 
 void SettingsParams::SetDefaultSessionDir(string name) {
@@ -396,6 +409,7 @@ void SettingsParams::SetNumThreads(int val) {
 
 int SettingsParams::GetFontSize() const {
 //	return (int)GetValueDouble(_fontSizeTag, 
+	return 24;
 }
 
 void SettingsParams::SetFontSize(int size) {
@@ -403,7 +417,7 @@ void SettingsParams::SetFontSize(int size) {
 }
 
 string SettingsParams::GetFontFile() const {
-
+	return "";
 }
 
 void SettingsParams::SetFontFile(string file) {
@@ -446,8 +460,6 @@ int SettingsParams::SaveSettings() const {
     ofstream fileout;
     string s;
 
-	cout << "SettingsParams::SaveSettings " << _settingsPath << endl;
-
     fileout.open(_settingsPath.c_str());
     if (! fileout) {
         MyBase::SetErrMsg(
@@ -472,33 +484,19 @@ int SettingsParams::SaveSettings() const {
 
 //Reset settings settings to initial state
 void SettingsParams::_init() {
-
-//	SetAutoStretch(false);
-//	SetCacheMB(2000);
-//	SetTextureSize(0);
-//	SetTexSizeEnable(false);
-//	SetWinSizeLock(false);
-//	SetWinSize(1028, 1024);
-
-	
-
 	SetDefaultSessionDir(string("~"));
 	SetDefaultMetadataDir(string("~"));
-	SetDefaultImageDir(string("~"));
 	SetDefaultFlowDir(string("~"));
 
-//	SetFidelityDefault3D(4.,4.);
-//	SetFidelityDefault2D(2.,2.);
-
-	vector <string> ppaths = {"palettes"};
+	std::vector <string> ppaths = {"palettes"};
 	string palettes = GetAppPath("VAPOR", "share", ppaths);
 	SetDefaultTFDir(string(palettes));
 
-	vector <string> ipaths = {"images"};
+	std::vector <string> ipaths = {"images"};
 	string images = GetAppPath("VAPOR", "share", ipaths);
 	SetDefaultImageDir(string(images));
 
-	vector <string> pypaths = {"python"};
+	std::vector <string> pypaths = {"python"};
 	string python = GetAppPath("VAPOR", "share", pypaths);
 	SetDefaultPythonDir(string(python));
 }
@@ -523,4 +521,3 @@ void SettingsParams::GetWinSize(size_t &width, size_t &height) const {
 	width = val[0];
 	height = val[1];
 }
-
