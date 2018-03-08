@@ -52,12 +52,8 @@ public:
 
     // Get static string identifier for this router class
     //
-    static string GetClassType()
-    {
-        // return("Settings");
-        return ("SettingsEventRouter");
-    }
-    string GetType() const { return GetClassType(); }
+    static string GetClassType() { return ("SettingsEventRouter"); }
+    string        GetType() const { return GetClassType(); }
 
 protected:
     virtual void _updateTab();
@@ -65,15 +61,19 @@ protected:
 
 private slots:
 
-    // void _configureCacheSize(bool enabled);
+    void _enableAutoStretch(bool enabled);
+    void _enableAutoSave(bool enabled);
+    void _changesPerSaveChanged();
+    void _autoSaveFileChanged();
+    void _chooseAutoSaveFile();
+
     void _numThreadsChanged();
     void _cacheSizeChanged();
     void _enableWinSize(bool enabled);
     void _windowSizeChanged();
-    void _enableAutoStretch(bool enabled);
 
     void _saveSettings();
-    void _setDirChanged();
+    void _setDirectoryPaths();
 
     void _chooseSessionPath();
     void _chooseMetadataPath();
@@ -92,8 +92,10 @@ private:
     void _warnUserAfterWidthChange();
     void _warnUserAfterHeightChange();
 
-    void   _updateGeneralSettings();
-    void   _updateDirChanged();
+    void _updateGeneralSettings();
+    void _updateStartupSettings();
+    void _updateDirectoryPaths();
+
     string _choosePathHelper(string current, string help);
 };
 

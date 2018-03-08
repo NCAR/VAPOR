@@ -69,9 +69,9 @@ SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWi
     windowHeightValidator = new QIntValidator(0, 16000, _windowHeightEdit);
     _windowHeightEdit->setValidator(windowHeightValidator);
 
-    QValidator *autosaveValidator;
-    autosaveValidator = new QIntValidator(1, 100, _autosaveIntervalEdit);
-    _autosaveIntervalEdit->setValidator(autosaveValidator);
+    QValidator *autoSaveValidator;
+    autoSaveValidator = new QIntValidator(1, 100, _autoSaveIntervalEdit);
+    _autoSaveIntervalEdit->setValidator(autoSaveValidator);
 }
 
 SettingsEventRouter::~SettingsEventRouter() {}
@@ -81,19 +81,23 @@ SettingsEventRouter::~SettingsEventRouter() {}
  ************************************************************/
 void SettingsEventRouter::hookUpTab()
 {
+    connect(_autoStretchCheckbox, SIGNAL(toggled(bool)), this, SLOT(_enableAutoStretch(bool)));
+    connect(_autoSaveCheckbox, SIGNAL(toggled(bool)), this, SLOT(_enableAutoSave(bool)));
+    connect(_autoSaveIntervalEdit, SIGNAL(returnPressed()), this, SLOT(_changesPerSaveChanged()));
+    connect(_autoSaveFileButton, SIGNAL(clicked()), this, SLOT(_chooseAutoSaveFile()));
+    connect(_autoSaveFileEdit, SIGNAL(returnPressed()), this, SLOT(_autoSaveFileChanged()));
     connect(_cacheSizeEdit, SIGNAL(returnPressed()), this, SLOT(_cacheSizeChanged()));
     connect(_windowSizeCheckbox, SIGNAL(toggled(bool)), this, SLOT(_enableWinSize(bool)));
     connect(_windowWidthEdit, SIGNAL(returnPressed()), this, SLOT(_windowSizeChanged()));
     connect(_windowHeightEdit, SIGNAL(returnPressed()), this, SLOT(_windowSizeChanged()));
-    connect(_autoStretchCheckbox, SIGNAL(toggled(bool)), this, SLOT(_enableAutoStretch(bool)));
     connect(_numThreadsEdit, SIGNAL(returnPressed()), this, SLOT(_numThreadsChanged()));
     connect(_defaultButton, SIGNAL(clicked()), this, SLOT(_restoreDefaults()));
-    connect(_sessionPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirChanged()));
-    connect(_metadataPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirChanged()));
-    connect(_imagePathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirChanged()));
-    connect(_tfPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirChanged()));
-    connect(_flowPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirChanged()));
-    connect(_pythonPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirChanged()));
+    connect(_sessionPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
+    connect(_metadataPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
+    connect(_imagePathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
+    connect(_tfPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
+    connect(_flowPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
+    connect(_pythonPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
     connect(_sessionPathButton, SIGNAL(clicked()), this, SLOT(_chooseSessionPath()));
     connect(_metadataPathButton, SIGNAL(clicked()), this, SLOT(_chooseMetadataPath()));
     connect(_imagePathButton, SIGNAL(clicked()), this, SLOT(_chooseImagePath()));
@@ -185,11 +189,46 @@ void SettingsEventRouter::_windowSizeChanged()
 void SettingsEventRouter::_enableAutoStretch(bool enabled)
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-    sParams->SetAutoStretch(enabled);
+    sParams->SetAutoStretchEnabled(enabled);
     _saveSettings();
 }
 
-void SettingsEventRouter::_setDirChanged()
+void SettingsEventRouter::_enableAutoSave(bool enabled)
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    sParams->SetSessionAutoSaveEnabled(enabled);
+    _saveSettings();
+}
+
+void SettingsEventRouter::_changesPerSaveChanged()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    size_t          changesPerSave = (size_t)_autoSaveIntervalEdit->text().toInt();
+    sParams->SetChangesPerAutoSave(changesPerSave);
+    _saveSettings();
+}
+
+void SettingsEventRouter::_chooseAutoSaveFile()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+
+    string dir = _choosePathHelper(sParams->GetMetadataDir(), "Choose the auto-save file");
+
+    if (!dir.empty()) {
+        sParams->SetAutoSaveSessionFile(dir);
+        _saveSettings();
+    }
+}
+
+void SettingsEventRouter::_autoSaveFileChanged()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    string          file = _autoSaveFileEdit->text().toStdString();
+    sParams->SetAutoSaveSessionFile(file);
+    _saveSettings();
+}
+
+void SettingsEventRouter::_setDirectoryPaths()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
@@ -208,18 +247,6 @@ void SettingsEventRouter::_setDirChanged()
     paramsMgr->EndSaveStateGroup();
 }
 
-void SettingsEventRouter::_updateDirChanged()
-{
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
-    _sessionPathEdit->setText(QString::fromStdString(sParams->GetSessionDir()));
-    _metadataPathEdit->setText(QString::fromStdString(sParams->GetMetadataDir()));
-    _imagePathEdit->setText(QString::fromStdString(sParams->GetImageDir()));
-    _tfPathEdit->setText(QString::fromStdString(sParams->GetTFDir()));
-    _flowPathEdit->setText(QString::fromStdString(sParams->GetFlowDir()));
-    _pythonPathEdit->setText(QString::fromStdString(sParams->GetPythonDir()));
-}
-
 void SettingsEventRouter::_blockSignals(bool block)
 {
     QList<QWidget *>                 widgetList = this->findChildren<QWidget *>();
@@ -234,8 +261,46 @@ void SettingsEventRouter::_blockSignals(bool block)
 
 void SettingsEventRouter::_updateGeneralSettings()
 {
-    _blockSignals(true);
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
+    bool autoStretchDomain = sParams->GetAutoStretchEnabled();
+    _autoStretchCheckbox->setChecked(autoStretchDomain);
+
+    bool autoSaveSession = sParams->GetSessionAutoSaveEnabled();
+    _autoSaveCheckbox->setChecked(autoSaveSession);
+
+    int changesPerSave = sParams->GetChangesPerAutoSave();
+    _autoSaveIntervalEdit->setText(QString::number(changesPerSave));
+
+    string autoSaveFile = sParams->GetAutoSaveSessionFile();
+    _autoSaveFileEdit->setText(QString::fromStdString(autoSaveFile));
+}
+
+void SettingsEventRouter::_updateDirectoryPaths()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+
+    string sessionPath = sParams->GetSessionDir();
+    _sessionPathEdit->setText(QString::fromStdString(sessionPath));
+
+    string metaPath = sParams->GetMetadataDir();
+    _metadataPathEdit->setText(QString::fromStdString(metaPath));
+
+    string imagePath = sParams->GetImageDir();
+    _imagePathEdit->setText(QString::fromStdString(imagePath));
+
+    string tfPath = sParams->GetTFDir();
+    _tfPathEdit->setText(QString::fromStdString(tfPath));
+
+    string flowPath = sParams->GetFlowDir();
+    _flowPathEdit->setText(QString::fromStdString(flowPath));
+
+    string pythonPath = sParams->GetPythonDir();
+    _pythonPathEdit->setText(QString::fromStdString(pythonPath));
+}
+
+void SettingsEventRouter::_updateStartupSettings()
+{
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
     QString numThreads = QString::number(sParams->GetNumThreads());
@@ -254,18 +319,19 @@ void SettingsEventRouter::_updateGeneralSettings()
     _windowWidthEdit->setEnabled(windowLockEnabled);
     _windowHeightEdit->setEnabled(windowLockEnabled);
 
-    bool autoStretchEnabled = sParams->GetAutoStretch();
+    bool autoStretchEnabled = sParams->GetAutoStretchEnabled();
     _autoStretchCheckbox->setChecked(autoStretchEnabled);
-
-    _blockSignals(false);
 }
 
 // Insert values from params into tab panel
 //
 void SettingsEventRouter::_updateTab()
 {
+    _blockSignals(true);
     _updateGeneralSettings();
-    _updateDirChanged();
+    _updateStartupSettings();
+    _updateDirectoryPaths();
+    _blockSignals(false);
 }
 
 string SettingsEventRouter::_choosePathHelper(string current, string help)
@@ -391,5 +457,4 @@ void SettingsEventRouter::_saveSettings()
 
     int rc = sParams->SaveSettings();
     if (rc < 0) { MSG_ERR("Failed to save startup file"); }
-    cout << "_saveSettings() " << rc << endl;
 }
