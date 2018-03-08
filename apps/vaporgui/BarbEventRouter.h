@@ -39,7 +39,7 @@ class BarbEventRouter : public QTabWidget,  public RenderEventRouter {
 public: 
 	
     BarbEventRouter(
-        QWidget *parent, VizWinMgr *vizMgr, VAPoR::ControlExec *ce
+        QWidget *parent, VAPoR::ControlExec *ce
     );
 	~BarbEventRouter();
 
