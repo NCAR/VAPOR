@@ -32,16 +32,15 @@
 using namespace VAPoR;
 using namespace Wasp;
 
-const string Viewpoint::_rotCenterTag = "RotationCenter";
-const string Viewpoint::m_modelViewMatrixTag = "ModelViewMatrix";
-const string Viewpoint::m_projectionMatrixTag = "ProjectionMatrix";
-double Viewpoint::m_defaultModelViewMatrix[] = {
+const string Viewpoint::_modelViewMatrixTag = "ModelViewMatrix";
+const string Viewpoint::_projectionMatrixTag = "ProjectionMatrix";
+double Viewpoint::_defaultModelViewMatrix[] = {
 	1.0, 0.0, 0.0, 0.0,
 	0.0, 1.0, 0.0, 0.0,
 	0.0, 0.0, 1.0, 0.0,
 	0.0, 0.0, 0.0, 1.0
 };
-double Viewpoint::m_defaultProjectionMatrix[] = {
+double Viewpoint::_defaultProjectionMatrix[] = {
 	1.0, 0.0, 0.0, 0.0,
 	0.0, 1.0, 0.0, 0.0,
 	0.0, 0.0, 1.0, 0.0,
@@ -98,9 +97,9 @@ void Viewpoint::_init() {
 
 void Viewpoint::GetModelViewMatrix(double m[16]) const {
 	vector <double> defaultv;
-	for (int i=0; i<16; i++) defaultv.push_back(m_defaultModelViewMatrix[i]);
+	for (int i=0; i<16; i++) defaultv.push_back(_defaultModelViewMatrix[i]);
 	
-	vector <double> val = GetValueDoubleVec(m_modelViewMatrixTag, defaultv);
+	vector <double> val = GetValueDoubleVec(_modelViewMatrixTag, defaultv);
 	assert(val.size() == 16);
 
 	for (int i=0; i<val.size(); i++) m[i] = val[i];
@@ -121,15 +120,15 @@ cout << endl;
 #endif
 
 
-	SetValueDoubleVec(m_modelViewMatrixTag, "Model view matrix", val);
+	SetValueDoubleVec(_modelViewMatrixTag, "Model view matrix", val);
 
 }
 
 void Viewpoint::GetProjectionMatrix(double m[16]) const {
 	vector <double> defaultv;
-	for (int i=0; i<16; i++) defaultv.push_back(m_defaultProjectionMatrix[i]);
+	for (int i=0; i<16; i++) defaultv.push_back(_defaultProjectionMatrix[i]);
 	
-	vector <double> val = GetValueDoubleVec(m_projectionMatrixTag, defaultv);
+	vector <double> val = GetValueDoubleVec(_projectionMatrixTag, defaultv);
 	assert(val.size() == 16);
 
 	for (int i=0; i<val.size(); i++) m[i] = val[i];
@@ -138,19 +137,19 @@ void Viewpoint::GetProjectionMatrix(double m[16]) const {
 void Viewpoint::SetProjectionMatrix(const double m[16]) {
 	vector <double> val;
 	for (int i=0; i<16; i++) val.push_back(m[i]);
-	SetValueDoubleVec(m_projectionMatrixTag, "Projection matrix", val);
+	SetValueDoubleVec(_projectionMatrixTag, "Projection matrix", val);
 }
 
 
-void Viewpoint::reconstructCamera(
-    double position[3], double upVec[3], double viewDir[3])
-const {
+bool Viewpoint::ReconstructCamera(
+	const double m[16],
+    double position[3], double upVec[3], double viewDir[3]
+) const {
 
-	double m[16], minv[16];
-	GetModelViewMatrix(m);
+	double minv[16];
 
-	int rc = minvert(m, minv);
-	assert(rc >= 0);
+	int rc = minvert((double *) m, minv);
+	if (rc<0) return(false);
 
 	vscale(minv+8, -1.0);
 
@@ -162,10 +161,5 @@ const {
 	vnormal(upVec);
 	vnormal(viewDir);
 
-#ifdef  DEAD
-	// Note: We need to convert from GL (stretched) user coord
-	// system to local coordinates for vpos here!
-	vector<double> stretch = vpParams->GetStretchFactors();
-	for( int i = 0 ;i<3; i++) position[i] = position[i]/stretch[i];
-#endif
+	return(true);
 }
