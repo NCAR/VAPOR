@@ -260,7 +260,7 @@ protected:
  ) const;
 
 private:
- int _version;
+ string _version;
  WASP *_master;	// Master NetCDF file
 
  class VDCFileObject : public DC::FileTable::FileObject {

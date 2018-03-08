@@ -324,7 +324,7 @@ void AnnotationEventRouter::updateLatLonCheckbox() {
 	string dmName = dataMgrSelectorCombo->currentText().toStdString();
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	DataMgr* dataMgr = dataStatus->GetDataMgr(dmName);
-	assert(dataMgr);
+	if (dataMgr==NULL) return;//assert(dataMgr);
 	string projString = dataMgr->GetMapProjection();
 
 	if (projString.size() == 0) {

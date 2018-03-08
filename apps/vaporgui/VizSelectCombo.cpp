@@ -29,8 +29,6 @@ namespace {
 	const std::string CreateNewStr = "Create New Visualizer";
 };
 
-using namespace VAPoR;
-
 VizSelectCombo::VizSelectCombo(
 	QWidget* parent
 ) : QComboBox(parent) {
@@ -51,12 +49,7 @@ VizSelectCombo::VizSelectCombo(
 	setToolTip("Select Active Visualizer or create new one");
 }
 
-/* 
- * Slots:  connected from VizWinMgr
- */
-/*  Called when a new viz is created:
- */
-void VizSelectCombo::addWindow(const QString& winName) {
+void VizSelectCombo::AddWindow(const QString& winName) {
 
 	//First look to find the right place; insert it in a gap if necessary.
 
@@ -76,14 +69,14 @@ void VizSelectCombo::addWindow(const QString& winName) {
 	//Insert name at the specified place:
 	//
 	insertItem(index, winName);
-	setWindowActive(winName);
+	SetWindowActive(winName);
 }
 
 // 
 // Remove specified window from the combobox
 //
 
-void VizSelectCombo::removeWindow(const QString & winName){
+void VizSelectCombo::RemoveWindow(const QString & winName){
 
 	int index = -1;
 	for (int i=0; i<count(); i++) {
@@ -99,14 +92,14 @@ void VizSelectCombo::removeWindow(const QString & winName){
 	// Make first window active
 	//
 	if (count()) {
-		setWindowActive(itemText(0));
+		SetWindowActive(itemText(0));
 	}
 }
 
 // 
 // Select a window when it's been made active
 //
-void VizSelectCombo::setWindowActive(const QString & winName){
+void VizSelectCombo::SetWindowActive(const QString & winName){
 
 	int index = -1;
 	for (int i=0; i<count()-1; i++) {
@@ -121,8 +114,8 @@ void VizSelectCombo::setWindowActive(const QString & winName){
 	//
 	if (currentIndex() != index){
 		setCurrentIndex(index);
+		emit (winActivated(winName));
 	}
-
 }
 
 
@@ -132,12 +125,14 @@ void VizSelectCombo::setWindowActive(const QString & winName){
 //
 void VizSelectCombo::activeWin(const QString &qS){
 	
-	//If they clicked the end, just create a new visualizer:
+	// If they clicked the end, just create a new visualizer:
+	//
 	if (qS.toStdString() == CreateNewStr) {
 		emit (newWin());
 		return;
 	}
-	//Activate the window that is in position index in the list:
+
+	// Otherwise notify that a new window has been selected
+	//
 	emit (winActivated(qS));
-	
 }
