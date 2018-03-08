@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     string vdc_master = "master.nc";
 
     VDCNetCDF vdc;
-    vdc.Initialize(vdc_master, VDC::W);
+    vdc.Initialize(vdc_master, vector<string>(), VDC::W);
 
     //
     // Define dimension names and implicity define 1d coord vars
@@ -31,8 +31,8 @@ int main(int argc, char **argv)
     vector<string> dimnames;
     dimnames.push_back("lon");
     dimnames.push_back("lat");
-    vdc.DefineCoordVar("geolon", dimnames, "degrees_E", 0, VDC::FLOAT, false);
-    vdc.DefineCoordVar("geolat", dimnames, "degrees_N", 1, VDC::FLOAT, false);
+    vdc.DefineCoordVar("geolon", dimnames, "", "degrees_E", 0, VDC::FLOAT, false);
+    vdc.DefineCoordVar("geolat", dimnames, "", "degrees_N", 1, VDC::FLOAT, false);
 
     vector<string> coordvars;
     coordvars.push_back("geolon");
@@ -56,17 +56,18 @@ int main(int argc, char **argv)
     int    lod = -1;
     string path;
     size_t file_ts;
+    size_t max_ts;
 
-    vdc.GetPath(varname, ts, lod, path, file_ts);
-    cout << "GetPath(" << varname << ", " << ts << ", " << lod << ") : " << path << ", " << file_ts << endl;
+    vdc.GetPath(varname, ts, path, file_ts, max_ts);
+    cout << "GetPath(" << varname << ", " << ts << ") : " << path << ", " << file_ts << ", " << max_ts << endl;
 
     ts = 99;
-    vdc.GetPath(varname, ts, lod, path, file_ts);
-    cout << "GetPath(" << varname << ", " << ts << ", " << lod << ") : " << path << ", " << file_ts << endl;
+    vdc.GetPath(varname, ts, path, file_ts, max_ts);
+    cout << "GetPath(" << varname << ", " << ts << ") : " << path << ", " << file_ts << ", " << max_ts << endl;
 
     varname = "geolon";
-    vdc.GetPath(varname, ts, lod, path, file_ts);
-    cout << "GetPath(" << varname << ", " << ts << ", " << lod << ") : " << path << ", " << file_ts << endl;
+    vdc.GetPath(varname, ts, path, file_ts, max_ts);
+    cout << "GetPath(" << varname << ", " << ts << ") : " << path << ", " << file_ts << ", " << max_ts << endl;
 
     exit(0);
 }
