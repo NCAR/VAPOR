@@ -386,7 +386,8 @@ void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(
         dataMgrName = getCurrentDataMgrName();
 
     std::vector<double> extents = getDomainExtents(dataMgrName);
-    for (int i = 0; i < 3; i++) {
+    int dims = extents.size() / 2;
+    for (int i = 0; i < dims; i++) {
         double offset = coords[i] * (extents[i + 3] - extents[i]);
         double minimum = extents[i];
         coords[i] = offset + minimum;
@@ -426,6 +427,8 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa) {
     double ticVec[3];
     double startPosn[3], endPosn[3];
     vector<double> extents = getDomainExtents(dmName);
+
+    cout << "extents " << dmName << " " << extents.size() << endl;
 
     //Now draw tic marks for x:
     pointOnAxis[1] = origin[1];
@@ -620,10 +623,10 @@ std::vector<double> AnnotationRenderer::getDomainExtents(string dmName) const {
         m_paramsMgr, m_winName, dmName, ts, minExts, maxExts);
 
     std::vector<double> extents;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < minExts.size(); i++) {
         extents.push_back(minExts[i]);
     }
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < maxExts.size(); i++) {
         extents.push_back(maxExts[i]);
     }
 
