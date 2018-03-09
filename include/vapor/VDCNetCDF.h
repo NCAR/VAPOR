@@ -124,11 +124,11 @@ public:
  //
  virtual int Initialize(
 	const vector <string> &paths, const vector <string> &options,
-	AccessMode mode, vector <size_t> bs = {3,64}, size_t chunksizehint = 0
+	AccessMode mode, vector <size_t> bs = {64,64,64}, size_t chunksizehint = 0
  );
  virtual int Initialize(
 	string path, const vector <string> &options,
-	AccessMode mode, vector <size_t> bs = {3,64}, size_t chunksizehint = 0
+	AccessMode mode, vector <size_t> bs = {64,64,64}, size_t chunksizehint = 0
  ) {
 	std::vector <string> paths;
 	paths.push_back(path);
