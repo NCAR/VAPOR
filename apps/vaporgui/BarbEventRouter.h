@@ -7,7 +7,6 @@
 #include "vapor/BarbRenderer.h"
 #include "vapor/BarbParams.h"
 #include "RenderEventRouter.h"
-#include "TabManager.h"
 #include "VariablesWidget.h"
 #include "BarbSubtabs.h"
 

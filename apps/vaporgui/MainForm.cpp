@@ -40,7 +40,7 @@
 #include <vapor/GetAppPath.h>
 #include <vapor/CFuncs.h>
 
-#include "VizWin.h"
+#include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
 #include "NavigationEventRouter.h"
@@ -213,7 +213,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
-    _tabMgr = TabManager::Create(this, _controlExec, _vizWinMgr);
+    _tabMgr = new TabManager(this, _controlExec);
     _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
     // This is just large enough to show the whole width of flow tab, with a scrollbar
