@@ -8,7 +8,6 @@
 #include "vapor/ContourRenderer.h"
 #include "vapor/ContourParams.h"
 #include "RenderEventRouter.h"
-#include "TabManager.h"
 #include "VariablesWidget.h"
 #include "ContourSubtabs.h"
 
