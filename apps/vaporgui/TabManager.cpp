@@ -28,19 +28,10 @@
 #include "AppSettingsEventRouter.h"
 #include "StartupEventRouter.h"
 #include "NavigationEventRouter.h"
-#include "HelloEventRouter.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
-
-// Extension tabs also included
-// (until we find a nicer way to separate extensions)
-//
-#include "TwoDDataEventRouter.h"
-#include "ImageEventRouter.h"
-#include "BarbEventRouter.h"
-#include "ContourEventRouter.h"
 
 #include "TabManager.h"
 
@@ -122,7 +113,7 @@ void TabManager::MoveToFront(string subTabName)
         QTabWidget *qtw = (QTabWidget *)_getTabWidget(tabName);
         qtw->setCurrentIndex(subTabIndex);
     } else {
-        _renderHolder->SetCurrentIndex(subTabIndex);
+        _renderHolder->SetCurrentWidget(subTabName);
     }
 }
 
@@ -412,29 +403,18 @@ void TabManager::_createAllDefaultTabs()
     er = new AppSettingsEventRouter(parent, _controlExec);
     _installTab(_settingsTabName, er->GetType(), er);
 
-    // Renderer tabs
+    // Create renderers from render factory
     //
-    parent = _getTabWidget(_renderersTabName);
-    er = new TwoDDataEventRouter(parent, _controlExec);
-    _installTab(_renderersTabName, er->GetType(), er);
-
-#ifndef HELLO_RENDERER
-    parent = _getTabWidget(_renderersTabName);
-    er = new HelloEventRouter(parent, _controlExec);
-    _installTab(_renderersTabName, er->GetType(), er);
-#endif
+    vector<string> renderNames = RenderEventRouterFactory::Instance()->GetFactoryNames();
 
     parent = _getTabWidget(_renderersTabName);
-    er = new BarbEventRouter(parent, _controlExec);
-    _installTab(_renderersTabName, er->GetType(), er);
+    for (int i = 0; i < renderNames.size(); i++) {
+        RenderEventRouter *er = RenderEventRouterFactory::Instance()->CreateInstance(renderNames[i], parent, _controlExec);
 
-    parent = _getTabWidget(_renderersTabName);
-    er = new ImageEventRouter(parent, _controlExec);
-    _installTab(_renderersTabName, er->GetType(), er);
+        assert(er);
 
-    parent = _getTabWidget(_renderersTabName);
-    er = new ContourEventRouter(parent, _controlExec);
-    _installTab(_renderersTabName, er->GetType(), er);
+        _installTab(_renderersTabName, er->GetType(), er);
+    }
 
     // set up widgets in tabs:
     _installWidgets();
@@ -466,8 +446,10 @@ void TabManager::_installWidgets()
     // Insert the renderer 'tabs' but don't show them yet.
     //
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
-        string tag = _subTabNames[_renderersTabName][i];
-        _renderHolder->AddWidget(_subTabWidgets[_renderersTabName][i], tag.c_str(), tag);
+        string             tag = _subTabNames[_renderersTabName][i];
+        RenderEventRouter *re = dynamic_cast<RenderEventRouter *>(_subTabWidgets[_renderersTabName][i]);
+
+        _renderHolder->AddWidget(_subTabWidgets[_renderersTabName][i], tag, re->GetDescription(), re->GetIconImagePath(), re->GetSmallIconImagePath());
         _subTabWidgets[_renderersTabName][i]->hide();
     }
 

@@ -47,8 +47,12 @@ public:
     string GetType() const { return GetClassType(); }
 
 protected:
-    virtual void _initializeTab();
-    virtual void _updateTab();
+    virtual void   _initializeTab();
+    virtual void   _updateTab();
+    virtual string _getDescription() const;
+
+    virtual string _getSmallIconImagePath() const { return ("Contours_small.png"); }
+    virtual string _getIconImagePath() const { return ("Contours.png"); }
 
 private:
     ContourEventRouter() {}

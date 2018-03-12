@@ -68,6 +68,11 @@ protected:
     //! \copydoc EventRouter::_updateTab()
     virtual void _updateTab();
 
+    virtual string _getDescription() const { return ("Hello world renderer"); };
+
+    virtual string _getSmallIconImagePath() const { return (""); }
+    virtual string _getIconImagePath() const { return (""); }
+
 private:
     HelloEventRouter() {}
 
