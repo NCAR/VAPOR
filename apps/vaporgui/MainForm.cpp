@@ -1565,12 +1565,6 @@ void MainForm::enableKeyframing(bool ison){
 	}
 #endif
 
-void MainForm::showTab(const std::string& tag){
-	_tabMgr->MoveToFront(tag);
-	EventRouter* eRouter = _tabMgr->GetEventRouter(tag);
-	eRouter->updateTab();
-}
-
 void MainForm::modeChange(int newmode){
 	string modeName = _modeCombo->itemText(newmode).toStdString();
 
@@ -1585,11 +1579,6 @@ void MainForm::modeChange(int newmode){
 	}
 	
 	_navigationAction->setChecked(false);
-	
-#ifdef	DEAD
-	showTab(MouseModeParams::getModeTag(newmode));
-#endif
-
 	
 	if(_modeStatusWidget) {
 		statusBar()->removeWidget(_modeStatusWidget);
