@@ -26,13 +26,12 @@ class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
   public:
     NewRendererDialog(QWidget *parent, VAPoR::ControlExec *ce);
 
-    std::string getSelectedRenderer() { return _selectedRenderer; }
-    QMessageBox *msgBox;
+    std::string GetSelectedRenderer() { return _selectedRenderer; }
     void mouseDoubleClickEvent(QMouseEvent *event) {
-        msgBox = new QMessageBox();
-        msgBox->setWindowTitle("Hello");
-        msgBox->setText("You Double Clicked Mouse Button");
-        msgBox->show();
+        _msgBox = new QMessageBox();
+        _msgBox->setWindowTitle("Hello");
+        _msgBox->setText("You Double Clicked Mouse Button");
+        _msgBox->show();
     };
 
   private slots:
@@ -53,6 +52,7 @@ class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
     static const std::string twoDDataDescription;
 
     std::string _selectedRenderer;
+    QMessageBox *_msgBox;
 };
 
 class CBWidget : public QWidget, public QTableWidgetItem {
@@ -87,19 +87,25 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
     //!
     void Update();
 
-    //! Specify the index of the page to be displayed of the stackedWidget.
-    //! \param[in] indx page index
-    void SetCurrentIndex(int indx) {
-        stackedWidget->setCurrentIndex(indx);
-        stackedWidget->show();
-    }
+    //! Specify the name of the page to be displayed of the stackedWidget.
+    //! \param[in] name name of widget
+    //!
+    //! \sa AddWidget()
+    //
+    void SetCurrentWidget(string name);
 
     //! Add a widget to the QStackedWidget.
     //! \param[in] QWidget* Widget to be added
     //! \param[in] name Name of the renderer to be displayed
-    //! \param[in] tag indicating type of renderer to be displayed
-    //! \return index of widget in the stackedWidget
-    int AddWidget(QWidget *, const char *name, string tag);
+    //! \param[in] description Description of the renderer to be displayed
+    //! \param[in] iconPath Full path to a raster file containing a
+    //! large icon, or an empty string if none exists
+    //! \param[in] smallIconPath Full path to a raster file containing a
+    //! small icon (thumbnail), or an empty string if none exists
+    //
+    void AddWidget(
+        QWidget *, string name, string description,
+        string iconPath, string smallIconPath);
 
 #ifndef DOXYGEN_SKIP_THIS
   private:
@@ -136,13 +142,13 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
 
     VaporTable *_vaporTable;
     int _currentRow;
+    std::vector<string> _stackedWidgetNames;
 
     void getRow(
         int row, string &renderInst, string &renderClass,
         string &dataSetName) const;
 
     void makeConnections();
-    void clearStackedWidget();
     void initializeSplitter();
     string getActiveRendererClass();
     string getActiveRendererInst();
