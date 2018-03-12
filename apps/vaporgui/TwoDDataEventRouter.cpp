@@ -18,6 +18,14 @@
 
 using namespace VAPoR;
 
+//
+// Register class with object factory!!!
+//
+static RenderEventRouterRegistrar<TwoDDataEventRouter> registrar(
+    TwoDDataEventRouter::GetClassType()
+);
+
+
 TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce) 
                     : QTabWidget(parent),
 	                    RenderEventRouter( ce, TwoDDataParams::GetClassType())
@@ -122,3 +130,12 @@ void TwoDDataEventRouter::_updateTab(){
 		GetActiveParams()
 	);
 }
+
+string TwoDDataEventRouter::_getDescription() const {
+	return(
+	"Displays "
+	"the user's 2D data variables along the plane described by the source data "
+	"file.\n\nThese 2D variables may be offset by a height variable.\n\n"
+	);
+}
+

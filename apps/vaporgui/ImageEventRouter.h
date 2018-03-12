@@ -39,6 +39,14 @@ public:
 
 protected:
  void _updateTab();
+ virtual string _getDescription() const;
+
+ virtual string _getSmallIconImagePath() const {
+	return("Image_small.png");
+ }   
+ virtual string _getIconImagePath() const {
+	return("Image.png");
+ }
 
 private:
 
