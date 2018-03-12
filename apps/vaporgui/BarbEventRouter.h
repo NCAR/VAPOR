@@ -55,6 +55,15 @@ class BarbEventRouter : public QTabWidget, public RenderEventRouter {
     virtual void _updateTab();
     virtual void _initializeTab();
 
+    virtual string _getDescription() const;
+
+    virtual string _getSmallIconImagePath() const {
+        return ("Barbs_small.png");
+    }
+    virtual string _getIconImagePath() const {
+        return ("Barbs.png");
+    }
+
   private:
     BarbEventRouter() {}
 
