@@ -35,20 +35,30 @@ class RenderEventRouter;
 //! \version 3.0
 //! \date May 2015
 
-//! The parameters in VAPOR GUI are displayed using a hierarchy of tabs.  The TabManager is a QTabWidget that
-//! handles the arrangement of these tabs.  Generally this layout is automatically set up and maintained by
-//! the MainForm and VizWinMgr classes, however users may occasionally need to query the status of a tab.
+//! The parameters in VAPOR GUI are displayed using a hierarchy of tabs.
+//! The TabManager is a QTabWidget that
+//! handles the arrangement of these tabs.  Generally this layout is
+//! automatically set up and maintained by
+//! the MainForm and VizWinMgr classes, however users may occasionally need
+//! to query the status of a tab.
 //!
-//! At the top level there are three "Top" tabs:  The \p Renderer, the \p Navigation, and the \p Settings.
+//! At the top level there are three "Top" tabs:  The \p Renderer,
+//! the \p Navigation, and the \p Settings.
 //!
-//! When the \p Renderer tab is selected, the RenderHolder is displayed.  This allows creation, deletion, enablement, and selection of
-//! the renderer that is to be edited.  The currently selected renderer has its parameters displayed in a QStackedWidget that is
-//! managed by the RenderHolder class.  There is one EventRouter instance whose contents are displayed as tabs in the QStackedWidget.
+//! When the \p Renderer tab is selected, the RenderHolder is displayed.
+//! This allows creation, deletion, enablement, and selection of
+//! the renderer that is to be edited.  The currently selected
+//! renderer has its parameters displayed in a QStackedWidget that is
+//! managed by the RenderHolder class.  There is one EventRouter
+//! instance whose contents are displayed as tabs in the QStackedWidget.
 //!
-//! When the \p Navigation tab is selected, A QTabWidget is displayed, with one tab for each of the "navigation" EventRouters: Viewpoint/Lights,
+//! When the \p Navigation tab is selected, A QTabWidget is displayed,
+//! with one tab for each of the "navigation" EventRouters: Viewpoint/Lights,
 //! Region, and Animation.
 //!
-//! When the \p Settings tab is selected, another QTabWidget is displayed, with one tab for User Preferences, and another tab for Visualizer Features.
+//! When the \p Settings tab is selected, another QTabWidget is
+//! displayed, with one tab for User Preferences, and another tab
+//! for Visualizer Features.
 //!
 
 //! @name Internal
@@ -125,9 +135,9 @@ private slots:
 
     void SetActiveViz(const QString &vizNameQ);
 
-    void setActive(string activeViz, string renderClass, string renderInst);
+    void _setActive(string activeViz, string renderClass, string renderInst);
 
-    void newRenderer(string activeViz, string renderClass, string renderInst);
+    void _newRenderer(string activeViz, string renderClass, string renderInst);
 
 private:
     virtual QSize sizeHint() const { return QSize(460, 800); }

@@ -2,15 +2,15 @@
 #define RENDERHOLDER_H
 
 #include <qobject.h>
-#include "qstackedwidget.h"
-#include "qpushbutton.h"
-#include "qtableview.h"
-#include "EventRouter.h"
+#include <qstackedwidget.h>
+#include <qpushbutton.h>
+#include <qtableview.h>
 #include <vapor/MyBase.h>
 #include <QMessageBox>
-#include "VaporTable.h"
+#include "GUIStateParams.h"
 #include "ui_LeftPanel.h"
 #include "ui_NewRendererDialog.h"
+#include "VaporTable.h"
 
 QT_USE_NAMESPACE
 
@@ -94,7 +94,7 @@ public:
         stackedWidget->show();
     }
 
-    //! Add a widget (EventRouter) to the QStackedWidget.
+    //! Add a widget to the QStackedWidget.
     //! \param[in] QWidget* Widget to be added
     //! \param[in] name Name of the renderer to be displayed
     //! \param[in] tag indicating type of renderer to be displayed
