@@ -322,8 +322,6 @@ void VizWin::initializeGL() {
 
 void VizWin::mousePressEventNavigate(QMouseEvent *e) {
 
-    cout << "mousePressEventNavigate()" << endl;
-
     // Let trackball handle mouse events for navigation
     //
     _trackBall->MouseOnTrackball(
@@ -477,8 +475,6 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
 }
 
 void VizWin::mouseReleaseEventNavigate(QMouseEvent *e) {
-
-    cout << "mouseReleaseEventNavigate() " << _buttonNum << endl;
 
     _trackBall->MouseOnTrackball(
         2, _buttonNum, e->x(), e->y(), width(), height());
@@ -668,15 +664,12 @@ void VizWin::paintGL() {
     // Only rendering if state has changed.
     //
     if (!_controlExec->GetParamsMgr()->StateChanged()) {
-        //		cout << "state not changed" << endl;
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
         glPopMatrix();
         return;
     }
-
-    //	cout << "CHANGED" << endl;
 
     // Set up projection and modelview matrices
     //
