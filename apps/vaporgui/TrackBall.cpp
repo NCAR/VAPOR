@@ -229,6 +229,8 @@ void Trackball::TrackballPan(double newx, double newy)
     /* OGLXXX glBegin: Use GL_LINES if only one line segment is desired. */
     /* Call this when the mouse glBegin(GL_LINE_STRIP); glVertex3s(i.e. PointerMotion, $2, $3).
      */
+    std::cout << "scale " << _scale[0] << " " << _scale[1] << " ";
+    std::cout << newx << " " << _lastx << " " << newy << " " << _lasty << std::endl;
     _trans[0] += (newx - _lastx) * _scale[0];
     _trans[1] += (newy - _lasty) * _scale[1];
 
