@@ -96,8 +96,7 @@ void Trackball::TrackballReset()
 Trackball::Trackball(void)
 {
     _ballsize = 0.65f;
-    // vset(_scale, 1.0, 1.0, 1.0);
-    vset(_scale, 1000000.0, 1000000.0, 1000000.0);
+    vset(_scale, 1.0, 1.0, 1.0);
     TrackballReset();
 }
 
@@ -125,8 +124,6 @@ void Trackball::TrackballSetMatrix()
     if (_perspective) {
         glTranslated(_center[0], _center[1], _center[2]);
         glTranslated(_trans[0], _trans[1], _trans[2]);
-        std::cout << _trans[0] << " " << _trans[1] << " " << _trans[2] << std::endl;
-        // qWarning("translate %f %f %f", _trans[0], _trans[1], _trans[2]);
         qmatrix(_qrot, m);
         glMultMatrixd(m);
         glTranslated(-_center[0], -_center[1], -_center[2]);
@@ -231,8 +228,6 @@ void Trackball::TrackballPan(double newx, double newy)
     /* OGLXXX glBegin: Use GL_LINES if only one line segment is desired. */
     /* Call this when the mouse glBegin(GL_LINE_STRIP); glVertex3s(i.e. PointerMotion, $2, $3).
      */
-    // std::cout << "scale " << _scale[0] << " " << _scale[1] << " ";
-    // std::cout << newx << " " << _lastx << " " << newy << " " << _lasty << std::endl;
     _trans[0] += (newx - _lastx) * _scale[0];
     _trans[1] += (newy - _lasty) * _scale[1];
 

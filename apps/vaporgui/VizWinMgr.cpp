@@ -340,4 +340,5 @@ void VizWinMgr::Reinit()
 
     double scale[3];
     scale[0] = scale[1] = scale[2] = max(maxExts[0] - minExts[0], (maxExts[1] - minExts[1]));
+    _trackBall->SetScale(scale);
 }
