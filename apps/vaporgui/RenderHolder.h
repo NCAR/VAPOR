@@ -77,8 +77,18 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
 
 public:
     //! Constructor:
+    //!
+    //! \param[in] widgets vector of Widgets to be added
+    //! \param[in] widgetNames vector of widget names
+    //! \param[in] descriptions vector of Descriptions of the renderers to
+    //! be displayed
+    //! \param[in] iconPath Full path to a raster file containing a
+    //! large icon, or an empty string if none exists
+    //! \param[in] smallIconPath Full path to a raster file containing a
+    //! small icon (thumbnail), or an empty string if none exists
     //
-    RenderHolder(QWidget *parent, VAPoR::ControlExec *ce);
+    RenderHolder(QWidget *parent, VAPoR::ControlExec *ce, const std::vector<QWidget *> &widgets, const std::vector<string> &widgetNames, const std::vector<string> &descriptions,
+                 const std::vector<string> &iconPaths, const std::vector<string> &smallIconPaths);
 
     virtual ~RenderHolder() {}
 
@@ -89,20 +99,9 @@ public:
     //! Specify the name of the page to be displayed of the stackedWidget.
     //! \param[in] name name of widget
     //!
-    //! \sa AddWidget()
+    //! \sa RenderHolder()
     //
     void SetCurrentWidget(string name);
-
-    //! Add a widget to the QStackedWidget.
-    //! \param[in] QWidget* Widget to be added
-    //! \param[in] name Name of the renderer to be displayed
-    //! \param[in] description Description of the renderer to be displayed
-    //! \param[in] iconPath Full path to a raster file containing a
-    //! large icon, or an empty string if none exists
-    //! \param[in] smallIconPath Full path to a raster file containing a
-    //! small icon (thumbnail), or an empty string if none exists
-    //
-    void AddWidget(QWidget *, string name, string description, string iconPath, string smallIconPath);
 
 #ifndef DOXYGEN_SKIP_THIS
 private:
@@ -139,7 +138,7 @@ private:
 
     VaporTable *        _vaporTable;
     int                 _currentRow;
-    std::vector<string> _stackedWidgetNames;
+    std::vector<string> _widgetNames;
 
     void getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const;
 

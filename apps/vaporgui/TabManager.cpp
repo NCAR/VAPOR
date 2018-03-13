@@ -44,7 +44,6 @@ const string TabManager::_settingsTabName = "Settings";
 TabManager::TabManager(QWidget *parent, ControlExec *ce) : QTabWidget(parent)
 {
     _controlExec = ce;
-    _renderHolder = new RenderHolder(this, _controlExec);
 
     // order of vector is order of display
     //
@@ -61,12 +60,9 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce) : QTabWidget(parent)
     _currentFrontTab = "";
     _prevFrontTab = "";
 
-    setElideMode(Qt::ElideNone);
-
     _initialized = false;
 
-    connect(_renderHolder, SIGNAL(activeChanged(string, string, string)), this, SLOT(_setActive(string, string, string)));
-    connect(_renderHolder, SIGNAL(newRendererSignal(string, string, string)), this, SLOT(_newRenderer(string, string, string)));
+    setElideMode(Qt::ElideNone);
 
     _createAllDefaultTabs();
 
@@ -442,16 +438,14 @@ void TabManager::_installWidgets()
     // Create top Tab Widgets to hold the nav and settings
     for (int i = 1; i < _tabNames.size(); i++) { _tabWidgets[_tabNames[i]] = new QTabWidget(this); }
 
-    // The renderer tabs are put into a stackedWidget, managed by RenderHolder.
-    // Insert the renderer 'tabs' but don't show them yet.
-    //
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
         string             tag = _subTabNames[_renderersTabName][i];
         RenderEventRouter *re = dynamic_cast<RenderEventRouter *>(_subTabWidgets[_renderersTabName][i]);
 
-        _renderHolder->AddWidget(_subTabWidgets[_renderersTabName][i], tag, re->GetDescription(), re->GetIconImagePath(), re->GetSmallIconImagePath());
         _subTabWidgets[_renderersTabName][i]->hide();
     }
+
+    _initRenderHolder();
 
     // Add the renderer tab to the top level TabWidget.
     //
@@ -545,4 +539,31 @@ void TabManager::_updateRouters()
 
         eRouter->updateTab();
     }
+}
+
+void TabManager::_initRenderHolder()
+{
+    vector<QWidget *> widgets;
+    vector<string>    widgetNames;
+    vector<string>    descriptions;
+    vector<string>    iconPaths;
+    vector<string>    smallIconPaths;
+
+    for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
+        string tag = _subTabNames[_renderersTabName][i];
+
+        widgets.push_back(_subTabWidgets[_renderersTabName][i]);
+        widgetNames.push_back(tag);
+
+        RenderEventRouter *re = dynamic_cast<RenderEventRouter *>(_subTabWidgets[_renderersTabName][i]);
+
+        descriptions.push_back(re->GetDescription());
+        iconPaths.push_back(re->GetIconImagePath());
+        smallIconPaths.push_back(re->GetSmallIconImagePath());
+    }
+
+    _renderHolder = new RenderHolder(this, _controlExec, widgets, widgetNames, descriptions, iconPaths, smallIconPaths);
+
+    connect(_renderHolder, SIGNAL(activeChanged(string, string, string)), this, SLOT(_setActive(string, string, string)));
+    connect(_renderHolder, SIGNAL(newRendererSignal(string, string, string)), this, SLOT(_newRenderer(string, string, string)));
 }

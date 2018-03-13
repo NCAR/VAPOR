@@ -178,14 +178,25 @@ void NewRendererDialog::uncheckAllButtons()
     twoDDataButton->blockSignals(false);
 }
 
-RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_LeftPanel()
+RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidget *> &widgets, const vector<string> &widgetNames, const vector<string> &descriptions, const vector<string> &iconPaths,
+                           const vector<string> &smallIconPaths)
+: QWidget(parent), Ui_LeftPanel()
 {
+    assert(widgets.size() == widgetNames.size());
+    assert(widgets.size() == iconPaths.size());
+    assert(widgets.size() == smallIconPaths.size());
+
     setupUi(this);
+
     _controlExec = ce;
     _newRendererDialog = new NewRendererDialog(this, ce);
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(0), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _currentRow = 0;
+
+    _widgetNames = widgetNames;
+    for (int i = 0; i < widgets.size(); i++) { stackedWidget->addWidget(widgets[i]); }
+    stackedWidget->setCurrentIndex(0);
 
     makeConnections();
     initializeSplitter();
@@ -208,21 +219,6 @@ void RenderHolder::initializeSplitter()
     proportions.append(topHeight);
     proportions.append(bottomHeight);
     mainSplitter->setSizes(proportions);
-}
-
-void RenderHolder::AddWidget(QWidget *wid, string name, string description, string iconPath, string smallIconPath)
-{
-    for (int i = 0; i < _stackedWidgetNames.size(); i++) { assert(_stackedWidgetNames[i] != name); }
-
-    // rc indicates position in the stacked widget.  It will
-    // be needed to change "active" renderer
-    //
-    int posn = stackedWidget->addWidget(wid);
-
-    assert(_stackedWidgetNames.size() == posn);
-    _stackedWidgetNames.push_back(name);
-
-    stackedWidget->setCurrentIndex(posn);
 }
 
 void RenderHolder::initializeNewRendererDialog(vector<string> datasetNames)
@@ -610,8 +606,8 @@ void RenderHolder::Update()
 void RenderHolder::SetCurrentWidget(string name)
 {
     int indx = -1;
-    for (int i = 0; i < _stackedWidgetNames.size(); i++) {
-        if (name == _stackedWidgetNames[i]) {
+    for (int i = 0; i < _widgetNames.size(); i++) {
+        if (name == _widgetNames[i]) {
             indx = i;
             break;
         }
