@@ -6,7 +6,7 @@
 //									*
 //************************************************************************/
 //
-//	File:		VizFeatureEventRouter.h
+//	File:		AnnotationsEventRouter.h
 //
 //	Author:		Alan Norton
 //			National Center for Atmospheric Research
@@ -14,7 +14,7 @@
 //
 //	Date:		June, 2015
 //
-//	Description:	Defines the VizFeatureEventRouter class.
+//	Description:	Defines the AnnotationsEventRouter class.
 //		This class handles events for the VizFeature params
 //
 #ifndef VIZFEATUREEVENTROUTER_H
@@ -24,7 +24,10 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "ui_vizFeaturesTab.h"
+#include "ui_AnnotationsGUI.h"
+#include "RangeCombos.h"
+#include "VaporTable.h"
+#include <vapor/AxisAnnotation.h>
 
 QT_USE_NAMESPACE
 
@@ -34,19 +37,19 @@ namespace VAPoR {
 
 
 
-class VizFeatureEventRouter : public QWidget, public Ui_vizFeaturesTab, public EventRouter {
+class AnnotationsEventRouter : public QWidget, public Ui_AnnotationsGUI, public EventRouter {
 
 	Q_OBJECT
 
 public: 
 
-    VizFeatureEventRouter(
+    AnnotationsEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce
     );
 
-	virtual ~VizFeatureEventRouter();
+	virtual ~AnnotationsEventRouter();
 
-	//! For the VizFeatureEventRouter, we must override confirmText method on base class,
+	//! For the AnnotationsEventRouter, we must override confirmText method on base class,
 	//! so that text changes issue Command::CaptureStart and Command::CaptureEnd,
 	//! supplying a special UndoRedo helper method
 	//!
@@ -65,36 +68,56 @@ public:
  // Get static string identifier for this router class
  //
  static string GetClassType() {
-	return("VizFeature");
+	return("Annotations");
  }
  string GetType() const {return GetClassType(); }
 
 
 	
 protected slots:
+	void setAxisAnnotation(bool);
+	void setLatLonAnnotation(bool);
+	void setAxisTextSize(int);
+	void setAxisDigits(int);
+	void setAxisTicWidth(double);
+	void setAxisColor();
+	void setAxisBackgroundColor();
+	void axisAnnotationTableChanged();
+	void setXTicOrientation(int);
+	void setYTicOrientation(int);
+	void setZTicOrientation(int);
 	
 	void setVizFeatureTextChanged(const QString& qs);
 	void vizfeatureReturnPressed();
 	void setDomainColor();
 	void setRegionColor();
 	void setBackgroundColor();
-	void setUseRegionFrame();
 	void setUseDomainFrame();
-	void setAxisAnnotation();
-	void setAxisColor();
 	void setTimeColor();
-	void setXTicOrient(int);
-	void setYTicOrient(int);
-	void setZTicOrient(int);
 	void setLatLonAnnot(bool);
 	void setUseAxisArrows();
 	void timeAnnotationChanged();
 	void timeLLXChanged();
 	void timeLLYChanged();
 	void timeSizeChanged();
+	void setCurrentAxisDataMgr(int);
+	void copyRegionFromRenderer();
 
 private:
-	VizFeatureEventRouter() {}
+
+	Combo* _textSizeCombo;
+	Combo* _digitsCombo;
+	Combo* _ticWidthCombo;
+	VaporTable* _annotationVaporTable;
+
+	std::map<std::string, std::string> _visNames;
+	std::map<std::string, std::string> _renTypeNames;
+
+	vector<double> getTableRow(int row);
+
+	void connectAnnotationWidgets();
+
+	AnnotationsEventRouter() {}
 
 	void setColorHelper(
 		QWidget *w, vector <double> &rgb
@@ -108,9 +131,31 @@ private:
 	void updateDomainColor();
 	void updateBackgroundColor();
 	void updateAxisColor();
+	void updateAxisBackgroundColor();
 	void updateTimeColor();
+	void updateAxisAnnotations();
+	void updateDataMgrCombo();
+	void updateCopyRegionCombo();
+	void updateAnnotationCheckbox();
+	void updateLatLonCheckbox();
+	void updateAnnotationTable();
+	void updateTicOrientationCombos();
 
-	void invalidateText();
+	VAPoR::AxisAnnotation* _getCurrentAxisAnnotation();
+
+	std::vector<double> getDomainExtents() const;
+	void scaleNormalizedCoordsToWorld(std::vector<double> &coords);
+	void scaleWorldCoordsToNormalized(std::vector<double> &coords);
+	void convertPCSToLon(double &xCoord);
+	void convertPCSToLat(double &yCoord);
+	void convertPCSToLonLat(double &xCoord, double &yCoord);
+	void convertLonLatToPCS(double &xCoord, double &yCoord);
+	void convertLonToPCS(double &xCoord);
+	void convertLatToPCS(double &yCoord);
+
+	void initializeAnnotation(VAPoR::AxisAnnotation* aa);
+	void initializeAnnotationExtents(VAPoR::AxisAnnotation* aa);
+	void initializeTicSizes(VAPoR::AxisAnnotation* aa);
 
 	virtual void _confirmText();
 	virtual void _updateTab();

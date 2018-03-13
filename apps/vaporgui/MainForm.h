@@ -36,8 +36,7 @@
 #include <QWidgetAction>
 #include <vapor/ControlExecutive.h>
 #include "GUIStateParams.h"
-#include "AppSettingsParams.h"
-#include "StartupParams.h"
+#include "SettingsParams.h"
 #include "AnimationParams.h"
 #include "MiscParams.h"
 
@@ -128,17 +127,10 @@ public:
 		);
 	}
 
-	AppSettingsParams *GetAppSettingsParams() const {
+	SettingsParams *GetSettingsParams() const {
 		assert(_paramsMgr != NULL);
-	    return ((AppSettingsParams *)
-			_paramsMgr->GetParams(AppSettingsParams::GetClassType())
-		);
-	}
-
-	StartupParams *GetStartupParams() const {
-		assert(_paramsMgr != NULL);
-	    return ((StartupParams *)
-			_paramsMgr->GetParams(StartupParams::GetClassType())
+	    return ((SettingsParams *)
+			_paramsMgr->GetParams(SettingsParams::GetClassType())
 		);
 	}
 
@@ -160,6 +152,8 @@ protected:
  bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+  void performAutoStretching();
+
 #if 0
  QWidgetAction* createTextSeparator(const QString& text);
 #endif
@@ -183,9 +177,12 @@ private:
   static QEvent::Type _customEventType;
  };
 
+	void _performSessionAutoSave();
     void _stateChangeCB();
     bool _stateChangeFlag;
     bool _sessionNewFlag;
+	bool _begForCitation;
+	int _eventsSinceLastSave;
 
 	// Set the various widgets in the main window consistent with latest
 	// params settings:
