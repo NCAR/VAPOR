@@ -11,10 +11,13 @@ set (SRCS
 	ErrorReporter.cpp
 	Histo.cpp
 	ColorbarWidget.cpp
-	StartupEventRouter.cpp
-	AppSettingsEventRouter.cpp
+	SettingsEventRouter.cpp
 	VizSelectCombo.cpp
+<<<<<<< HEAD
 	AnnotationEventRouter.cpp
+=======
+	AnnotationsEventRouter.cpp
+>>>>>>> master
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp
@@ -32,10 +35,9 @@ set (SRCS
 	BarbEventRouter.cpp
 	BannerGUI.cpp
 	AnimationParams.cpp
-	AppSettingsParams.cpp
 	GUIStateParams.cpp
 	MouseModeParams.cpp
-	StartupParams.cpp
+	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
 	VizWin.cpp
@@ -80,8 +82,13 @@ set (UIS
 	NavigationTab.ui
 	boxframe.ui
 	startupTab.ui
+	SettingsGUI.ui
 	appSettingsTab.ui
+<<<<<<< HEAD
 	AnnotationGUI.ui
+=======
+	AnnotationsGUI.ui
+>>>>>>> master
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
 	LeftPanel.ui
