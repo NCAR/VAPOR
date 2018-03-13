@@ -247,6 +247,8 @@ void _installWidgets();
 
  void _updateRouters();
 
+ void _initRenderHolder();
+
 };
 
 #endif //TABMANAGER_H
