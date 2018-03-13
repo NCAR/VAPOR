@@ -74,9 +74,9 @@ void ParamsMgr::_init(
 		);
 	}
 
-	if (! _otherParams->GetParams(VizFeatureParams::GetClassType())) {
+	if (! _otherParams->GetParams(AnnotationsParams::GetClassType())) {
 		_otherParams->Create(
-			VizFeatureParams::GetClassType(), VizFeatureParams::GetClassType()
+			AnnotationsParams::GetClassType(), AnnotationsParams::GetClassType()
 		);
 	}
 
@@ -88,8 +88,6 @@ void ParamsMgr::_init(
 			_otherParams->Create(appParams[i], appParams[i]);
 		}
 	}
-
-
 }
 
 ParamsMgr::ParamsMgr(
