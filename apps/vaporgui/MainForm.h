@@ -71,13 +71,11 @@ class MainForm : public QMainWindow
 	Q_OBJECT
 
 public:
-	//Note this is a singleton class.  Only the main program will create it.
-	static MainForm* getInstance(){
-		if (!_mainForm)
-			assert(0);
-		return _mainForm;
-	}
-	MainForm(vector<QString> files, QApplication* app, QWidget* parent = 0, const char* name = 0 );
+
+	MainForm(
+		vector<QString> files, QApplication* app, QWidget* parent = 0, 
+		const char* name = 0 
+	);
 	~MainForm();
 
 	void showTab(const std::string& tag);
@@ -298,12 +296,11 @@ private:
 	Plot* _plot;
 	VAPoR::SeedMe* _seedMe;
 	BannerGUI* _banner;
-	static MainForm* _mainForm;
 	QMdiArea* _mdiArea;
 	QApplication* _App;
 	VizSelectCombo* _windowSelector;
 	QLabel* _modeStatusWidget;
-	static VAPoR::ControlExec* _controlExec;
+	VAPoR::ControlExec* _controlExec;
 	VAPoR::ParamsMgr *_paramsMgr;
 	TabManager *_tabMgr;
 	VizWinMgr* _vizWinMgr;
