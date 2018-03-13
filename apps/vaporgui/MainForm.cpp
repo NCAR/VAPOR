@@ -33,9 +33,11 @@
 #include <sstream>
 #include <iostream>
 #include <functional>
+#include <cmath>
 #include <QDesktopWidget>
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
+#include <vapor/DataMgrUtils.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/CFuncs.h>
@@ -44,7 +46,6 @@
 #include "VizSelectCombo.h"
 #include "TabManager.h"
 #include "NavigationEventRouter.h"
-#include "VizFeatureEventRouter.h"
 #include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
@@ -147,6 +148,8 @@ MainForm::MainForm(
     _interactiveRefinementSpin = 0;
     _modeStatusWidget = 0;
     _recentPath.clear();
+    _eventsSinceLastSave = 0;
+    _begForCitation = true;
 
     // For vertical screens, reverse aspect ratio for window size
     QSize screenSize = QDesktopWidget().availableGeometry().size();
@@ -183,8 +186,7 @@ MainForm::MainForm(
     //
     vector<string> myParams;
     myParams.push_back(GUIStateParams::GetClassType());
-    myParams.push_back(AppSettingsParams::GetClassType());
-    myParams.push_back(StartupParams::GetClassType());
+    myParams.push_back(SettingsParams::GetClassType());
     myParams.push_back(AnimationParams::GetClassType());
     myParams.push_back(MiscParams::GetClassType());
 
@@ -204,9 +206,16 @@ MainForm::MainForm(
 
     // Set Defaults from startup file
     //
-    StartupParams *sP = GetStartupParams();
+    SettingsParams *sP = GetSettingsParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
-    _controlExec->SetNumThreads(sP->GetNumExecutionThreads());
+    _controlExec->SetNumThreads(sP->GetNumThreads());
+
+    bool lockSize = sP->GetWinSizeLock();
+    if (lockSize) {
+        size_t width, height;
+        sP->GetWinSize(width, height);
+        setFixedSize(QSize(width, height));
+    }
 
     //MappingFrame::SetControlExec(_controlExec);
     BoxSliderFrame::SetControlExec(_controlExec);
@@ -841,7 +850,7 @@ void MainForm::sessionOpenHelper(string fileName) {
 
     // ControlExec::LoadState invalidates params state
     //
-    StartupParams *sP = GetStartupParams();
+    SettingsParams *sP = GetSettingsParams();
     if (fileName.empty()) {
         newP->SetCurrentSessionPath(
             concatpath(sP->GetSessionDir(), "My_Vapor_Session.vs3"));
@@ -877,7 +886,7 @@ void MainForm::sessionOpen(QString qfileName) {
     //
     if (qfileName == "") {
 
-        StartupParams *sP = GetStartupParams();
+        SettingsParams *sP = GetSettingsParams();
         string path = sP->GetSessionDir();
 
         vector<string> files = myGetOpenFileNames(
@@ -902,8 +911,8 @@ void MainForm::sessionOpen(QString qfileName) {
 }
 
 void MainForm::fileSave() {
-    GUIStateParams *p = GetStateParams();
-    string path = p->GetCurrentSessionPath();
+    SettingsParams *sParams = GetSettingsParams();
+    string path = sParams->GetSessionDir();
 
     if (path.empty()) {
         QString fileName = QFileDialog::getSaveFileName(
@@ -919,13 +928,13 @@ void MainForm::fileSave() {
         return;
     }
 
-    p->SetCurrentSessionPath(path);
+    sParams->SetSessionDir(path);
     _stateChangeFlag = false;
 }
 
 void MainForm::fileSaveAs() {
-    GUIStateParams *p = GetStateParams();
-    string path = p->GetCurrentSessionPath();
+    SettingsParams *sParams = GetSettingsParams();
+    string path = sParams->GetSessionDir();
 
     QString fileName = QFileDialog::getSaveFileName(
         this, tr("Save VAPOR session file"),
@@ -943,7 +952,7 @@ void MainForm::fileSaveAs() {
 
     // Save to use a default for fileSave()
     //
-    p->SetCurrentSessionPath(path);
+    sParams->SetSessionDir(path);
     _stateChangeFlag = false;
 }
 
@@ -964,6 +973,8 @@ void MainForm::_stateChangeCB() {
     //
     ParamsChangeEvent *event = new ParamsChangeEvent();
     QApplication::postEvent(this, event);
+
+    _eventsSinceLastSave++;
 }
 
 void MainForm::undoRedoHelper(bool undo) {
@@ -1104,7 +1115,9 @@ void MainForm::loadDataHelper(
             string lastData = dataSetNames[dataSetNames.size() - 1];
             defaultPath = p->GetOpenDataSetPaths(lastData)[0];
         } else {
-            defaultPath = _recentPath;
+            SettingsParams *sP = GetSettingsParams();
+            defaultPath = sP->GetMetadataDir();
+            //defaultPath = _recentPath;
         }
 
         myFiles = myGetOpenFileNames(
@@ -1139,7 +1152,7 @@ void MainForm::loadDataHelper(
         _sessionNewFlag = false;
     }
 
-    DataStatus *ds = _controlExec->getDataStatus();
+    DataStatus *ds = _controlExec->GetDataStatus();
     BoxSliderFrame::setDataStatus(ds);
 
     _tabMgr->Update();
@@ -1149,6 +1162,54 @@ void MainForm::loadDataHelper(
     enableWidgets(true);
 
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
+}
+
+void MainForm::performAutoStretching() {
+    GUIStateParams *p = GetStateParams();
+    DataStatus *ds = _controlExec->GetDataStatus();
+    vector<string> dataSets = p->GetOpenDataSetNames();
+    vector<string> winNames = _paramsMgr->GetVisualizerNames();
+    vector<double> minExt, maxExt;
+    vector<int> axes;
+    AnimationParams *aParams = GetAnimationParams();
+    size_t timestep = aParams->GetCurrentTimestep();
+
+    for (int i = 0; i < dataSets.size(); i++) {
+        for (int i = 0; i < winNames.size(); i++) {
+            double xRange, yRange, zRange;
+
+            DataMgr *dm = ds->GetDataMgr(dataSets[i]);
+            std::vector<string> varNames = dm->GetDataVarNames(3);
+
+            if (varNames.empty())
+                continue;
+
+            //			ds->GetExtents(_paramsMgr, winNames[i], dataSets[i], timestep,
+            //				minExt, maxExt
+            //			);
+
+            DataMgrUtils::GetExtents(dm, timestep, varNames, minExt, maxExt,
+                                     axes);
+
+            if (minExt.size() < 3)
+                return;
+
+            xRange = maxExt[0] - minExt[0];
+            yRange = maxExt[1] - minExt[1];
+            zRange = maxExt[2] - minExt[2];
+
+            double hypotenuse = sqrt(xRange * xRange + yRange * yRange);
+            double scale = (hypotenuse / 2.f) / zRange;
+
+            cout << "Auto-stretch scale: " << scale << endl;
+
+            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
+            Transform *transform = vpParams->GetTransform(dataSets[i]);
+            std::vector<double> scales = transform->GetScales();
+            scales[2] = scale;
+            transform->SetScales(scales);
+        }
+    }
 }
 
 //Load data into current session
@@ -1164,6 +1225,11 @@ void MainForm::loadData(string fileName) {
     loadDataHelper(
         files, "Choose the Master data File to load",
         "Vapor VDC files (*.*)", "vdc", false);
+
+    SettingsParams *sP = GetSettingsParams();
+    bool autoStretchingEnabled = sP->GetAutoStretchEnabled();
+    if (autoStretchingEnabled)
+        performAutoStretching();
 }
 
 void MainForm::closeData(string fileName) {
@@ -1466,26 +1532,23 @@ void MainForm::modeChange(int newmode) {
 }
 
 void MainForm::showCitationReminder() {
-    //First check if reminder is turned off:
-    AppSettingsParams *aParams = GetAppSettingsParams();
-    if (!aParams->GetCurrentShowCitation())
+    if (!_begForCitation)
         return;
+    _begForCitation = false;
     //Provide a customized message box
     QMessageBox msgBox;
-    QString reminder("VAPOR is developed as an Open Source application by the National Center for Atmospheric Research ");
-    reminder.append("under the sponsorship of the National Science Foundation.  ");
-    reminder.append("Continued support from VAPOR is dependent on demonstrable evidence of the software's value to the scientific community.  ");
+    QString reminder("VAPOR is developed as an Open Source application by NCAR, ");
+    reminder.append("under the sponsorship of the National Science Foundation.\n\n");
+    reminder.append("We depend on evidence of the software's value to the scientific community.  ");
     reminder.append("You are free to use VAPOR as permitted under the terms and conditions of the licence.\n\n ");
-    reminder.append("We kindly request that you cite VAPOR in your publications and presentations. ");
-    reminder.append("Citation details can be found on the VAPOR website at: \n\n  http://www.vapor.ucar.edu/index.php?id=citation");
+    reminder.append("Please cite VAPOR in your publications and presentations. ");
+    reminder.append("Citation details:\n    http://www.vapor.ucar.edu/index.php?id=citation");
     msgBox.setText(reminder);
-    msgBox.setInformativeText("This reminder can be silenced from the User Preferences panel");
 
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
 
     msgBox.exec();
-    aParams->SetCurrentShowCitation(false);
 }
 void MainForm::addMouseModes() {
     MouseModeParams *p = GetStateParams()->GetMouseModeParams();
@@ -1761,7 +1824,7 @@ void MainForm::loadStartingPrefs() {
 
     //Make this path the default at startup:
     //
-    StartupParams *sP = GetStartupParams();
+    SettingsParams *sP = GetSettingsParams();
     sP->SetCurrentPrefsPath(prefPath);
 
 #ifdef DEAD
@@ -1837,7 +1900,7 @@ void MainForm::setProj4String() {
 
     string proj4String = p->GetProjectionString();
 
-    DataStatus *ds = _controlExec->getDataStatus();
+    DataStatus *ds = _controlExec->GetDataStatus();
 
     // Close and re-open any data set that doesn't have a matching
     // proj4 string
@@ -1950,6 +2013,28 @@ void MainForm::updateMenus() {
     _editRedoAction->setEnabled((bool)_controlExec->RedoSize());
 }
 
+void MainForm::_performSessionAutoSave() {
+    if (_paramsMgr == NULL)
+        return;
+
+    SettingsParams *sParams = GetSettingsParams();
+    if (sParams == NULL)
+        return;
+
+    int eventCountForAutoSave = sParams->GetChangesPerAutoSave();
+
+    if (eventCountForAutoSave == 0)
+        return;
+    if (!sParams->GetSessionAutoSaveEnabled())
+        return;
+
+    if (_eventsSinceLastSave >= eventCountForAutoSave) {
+        string autoSaveFile = sParams->GetAutoSaveSessionFile();
+        _paramsMgr->SaveToFile(autoSaveFile);
+        _eventsSinceLastSave = 0;
+    }
+}
+
 void MainForm::update() {
 
     assert(_controlExec);
@@ -1960,6 +2045,8 @@ void MainForm::update() {
     _timeStepEdit->setText(QString::number((int)timestep));
 
     updateMenus();
+
+    _performSessionAutoSave();
 
 #ifdef DEAD
     // Get the current mode setting from MouseModeParams
@@ -2036,8 +2123,10 @@ void MainForm::enableAnimationWidgets(bool on) {
 //
 void MainForm::captureSingleJpeg() {
     showCitationReminder();
-    GUIStateParams *p = GetStateParams();
-    string imageDir = p->GetCurrentImageSavePath();
+    SettingsParams *sP = GetSettingsParams();
+    string imageDir = sP->GetImageDir();
+    if (imageDir == "")
+        imageDir = sP->GetDefaultImageDir();
 
     QFileDialog fileDialog(this,
                            "Specify single image capture file name",
@@ -2065,9 +2154,11 @@ void MainForm::captureSingleJpeg() {
     string filepath = fileInfo->absoluteFilePath().toStdString();
 
     //Save the path for future captures
-    p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
+    //p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
+    sP->SetImageDir(filepath);
 
     //Turn on "image capture mode" in the current active visualizer
+    GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
     _controlExec->EnableImageCapture(filepath, vizName);
 }
@@ -2117,9 +2208,9 @@ void MainForm::launchStats() {
 
 void MainForm::launchPlotUtility() {
     if (!_plot) {
-        assert(_controlExec->getDataStatus());
+        assert(_controlExec->GetDataStatus());
         assert(_controlExec->GetParamsMgr());
-        _plot = new Plot(_controlExec->getDataStatus(), _controlExec->GetParamsMgr(), this);
+        _plot = new Plot(_controlExec->GetDataStatus(), _controlExec->GetParamsMgr(), this);
     } else {
         _plot->show();
         _plot->activateWindow();
@@ -2131,8 +2222,11 @@ void MainForm::launchPlotUtility() {
 //Then start file saving mode.
 void MainForm::startAnimCapture() {
     showCitationReminder();
-    GUIStateParams *p = GetStateParams();
-    string imageDir = p->GetCurrentImageSavePath();
+    SettingsParams *sP = GetSettingsParams();
+    string imageDir = sP->GetImageDir();
+    if (imageDir == "")
+        imageDir = sP->GetDefaultImageDir();
+
     QFileDialog fileDialog(this,
                            "Specify first file name for image capture sequence",
                            imageDir.c_str(),
@@ -2156,7 +2250,7 @@ void MainForm::startAnimCapture() {
         return;
     }
     //Save the path for future captures
-    p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
+    sP->SetImageDir(fileInfo->absolutePath().toStdString());
 
     QString fileBaseName = fileInfo->baseName();
     //See if it ends with digits.  If not, append them
@@ -2198,6 +2292,7 @@ void MainForm::startAnimCapture() {
     filePath += suffix;
     string fpath = filePath.toStdString();
     //Turn on "image capture mode" in the current active visualizer
+    GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
     _controlExec->EnableAnimationCapture(vizName, true, fpath);
     _capturingAnimationVizName = vizName;

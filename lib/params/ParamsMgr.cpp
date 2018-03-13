@@ -68,9 +68,9 @@ void ParamsMgr::_init(
             RegionParams::GetClassType(), RegionParams::GetClassType());
     }
 
-    if (!_otherParams->GetParams(VizFeatureParams::GetClassType())) {
+    if (!_otherParams->GetParams(AnnotationsParams::GetClassType())) {
         _otherParams->Create(
-            VizFeatureParams::GetClassType(), VizFeatureParams::GetClassType());
+            AnnotationsParams::GetClassType(), AnnotationsParams::GetClassType());
     }
 
     // Deal with any Params registered by the application
