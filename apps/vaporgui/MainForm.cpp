@@ -53,7 +53,6 @@
 #include "Statistics.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
-#include "BoxSliderFrame.h"
 #include "MainForm.h"
 
 // Following shortcuts are provided:
@@ -110,8 +109,6 @@
 using namespace std;
 using namespace VAPoR;
 // Initialize the singleton to 0:
-MainForm *   MainForm::_mainForm = 0;
-ControlExec *MainForm::_controlExec = NULL;
 
 QEvent::Type MainForm::ParamsChangeEvent::_customEventType = QEvent::None;
 
@@ -142,7 +139,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
 {
     QString fileName("");
     setAttribute(Qt::WA_DeleteOnClose);
-    _mainForm = this;
     _vizWinMgr = 0;
     _App = app;
     _capturingAnimationVizName = "";
@@ -216,9 +212,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent, co
         sP->GetWinSize(width, height);
         setFixedSize(QSize(width, height));
     }
-
-    // MappingFrame::SetControlExec(_controlExec);
-    BoxSliderFrame::SetControlExec(_controlExec);
 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
@@ -898,7 +891,7 @@ void MainForm::helpAbout()
                               "Version: "
                             + string(Version::GetVersionString().c_str());
 
-    _banner = new BannerGUI(banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
+    _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
 void MainForm::batchSetup()
 {
@@ -996,7 +989,6 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     }
 
     DataStatus *ds = _controlExec->GetDataStatus();
-    BoxSliderFrame::setDataStatus(ds);
 
     _tabMgr->Update();
     _vizWinMgr->Reinit();
