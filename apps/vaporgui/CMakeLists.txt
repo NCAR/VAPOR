@@ -13,11 +13,7 @@ set (SRCS
 	ColorbarWidget.cpp
 	SettingsEventRouter.cpp
 	VizSelectCombo.cpp
-<<<<<<< HEAD
 	AnnotationEventRouter.cpp
-=======
-	AnnotationsEventRouter.cpp
->>>>>>> master
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp
@@ -84,11 +80,7 @@ set (UIS
 	startupTab.ui
 	SettingsGUI.ui
 	appSettingsTab.ui
-<<<<<<< HEAD
 	AnnotationGUI.ui
-=======
-	AnnotationsGUI.ui
->>>>>>> master
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
 	LeftPanel.ui

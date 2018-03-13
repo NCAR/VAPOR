@@ -418,8 +418,6 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa)
     double         startPosn[3], endPosn[3];
     vector<double> extents = getDomainExtents(dmName);
 
-    cout << "extents " << dmName << " " << extents.size() << endl;
-
     // Now draw tic marks for x:
     pointOnAxis[1] = origin[1];
     pointOnAxis[2] = origin[2];
