@@ -236,6 +236,8 @@ class TabManager : public QTabWidget {
     void _addSubTabWidget(QWidget *evWid, string Tag, string tagType);
 
     void _updateRouters();
+
+    void _initRenderHolder();
 };
 
 #endif //TABMANAGER_H
