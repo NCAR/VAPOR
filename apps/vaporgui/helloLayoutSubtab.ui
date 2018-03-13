@@ -226,9 +226,6 @@
    </item>
   </layout>
  </widget>
- <includes>
-  <include location="local">BoxSliderFrame.h</include>
- </includes>
  <resources/>
  <connections/>
 </ui>

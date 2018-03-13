@@ -25,7 +25,6 @@
 #include "vapor/RenderParams.h"
 #include "vapor/Transform.h"
 #include "vapor/ViewpointParams.h"
-#include "MainForm.h"
 #include <typeinfo>
 
 using namespace VAPoR;
