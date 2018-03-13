@@ -84,14 +84,12 @@ void AppSettingsEventRouter::hookUpTab()
 	connect (logFilePathButton, SIGNAL(clicked()), this, SLOT(chooseLogFilePath()));
 	connect (autosavePathButton, SIGNAL(clicked()), this, SLOT(chooseAutoSaveFilename()));
 	connect (defaultButton, SIGNAL(clicked()), this, SLOT(restoreDefaults()));
-	connect (unsilenceButton, SIGNAL(clicked()), this, SLOT(unsilenceMessages()));
 	connect (autosaveCheckbox, SIGNAL(toggled(bool)),this, SLOT(setAutoSave(bool)));
 	connect (logfileCheckbox, SIGNAL(toggled(bool)), this, SLOT(enableLogfile(bool)));
 	connect (warnMissingDataCheckbox, SIGNAL(toggled(bool)),this, SLOT(warningChanged(bool)));
 	connect (lowerAccuracyCheckbox, SIGNAL(toggled(bool)),this, SLOT(lowerAccuracyChanged(bool)));
 	connect (trackMouseCheckbox, SIGNAL(toggled(bool)),this, SLOT(trackMouseChanged(bool)));
 	connect (noShowCitationCheckbox, SIGNAL(toggled(bool)),this, SLOT(setNoCitation(bool)));
-	connect (silenceCheckbox, SIGNAL(toggled(bool)),this, SLOT(silenceAllMessages(bool)));
 
 }
 
@@ -171,7 +169,6 @@ void AppSettingsEventRouter::_updateTab(){
 	lowerAccuracyCheckbox->setChecked(aParams->GetCurrentUseLessAccurate());
 	trackMouseCheckbox->setChecked(aParams->GetCurrentTrackMouse());
 	noShowCitationCheckbox->setChecked(!aParams->GetCurrentShowCitation());
-	silenceCheckbox->setChecked(aParams->GetCurrentMessageSilence());
 	logfileCheckbox->setChecked(aParams->GetCurrentLogfileEnabled());
 	adjustSize();
 

@@ -88,8 +88,6 @@ void ParamsMgr::_init(
 			_otherParams->Create(appParams[i], appParams[i]);
 		}
 	}
-
-
 }
 
 ParamsMgr::ParamsMgr(
