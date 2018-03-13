@@ -26,6 +26,7 @@
 #include "TabManager.h"
 #include "ui_NavigationTab.h"
 #include "AnimationEventRouter.h"
+#include "AnnotationEventRouter.h"
 #include "NavigationEventRouter.h"
 #include "SettingsEventRouter.h"
 #include "HelloEventRouter.h"
