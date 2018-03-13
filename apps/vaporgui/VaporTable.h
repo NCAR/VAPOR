@@ -46,6 +46,9 @@ public:
     Value       GetValue(int row, int col);
     std::string GetStringValue(int row, int col);
 
+    // template <class T>
+    // void GetRow(int row, std::vector<T> & values);
+
     // Dump all values in the table back to the user
     void GetValues(std::vector<std::string> &vec);
     void GetValues(std::vector<int> &vec);
@@ -67,11 +70,13 @@ public:
 public slots:
     void emitValueChanged();
     // void emitCellClicked();
+    void emitReturnPressed();
 
 signals:
 
     void valueChanged(int row, int col);
     void cellClicked(int row, int col);
+    void returnPressed();
 
 private:
     void emitCellClicked(QObject *object);
