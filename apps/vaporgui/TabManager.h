@@ -59,53 +59,43 @@ class VizWinMgr;
 //! @name Internal
 //! Internal methods not intended for general use
 //!
-///@{
-class TabManager : public QTabWidget{
+//
+class TabManager : public QTabWidget {
 
 Q_OBJECT
 
 public:
-	//! Constructor:  Invoked by the MainForm during the set up of the 
-	//! main window.
-	//
-	static TabManager *Create(QWidget* parent, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr) {
-		if (_tabManager) return(_tabManager);
+ //! Constructor:  Invoked by the MainForm during the set up of the 
+ //! main window.
+ //
+ TabManager(QWidget *, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr);
 
-		_tabManager = new TabManager(parent, ce, vizWinMgr);
-		return(_tabManager);
-	};
+ //! In order to display the parameters for the selected renderer, 
+ //! QWidget::show() is invoked for the selected EventRouter, and
+ //! QWidget::hide() is invoked for all other renderer EventRouters.  
+ //! This is performed in the RenderHolder class.
+ //! \param[in] tag is the tag associated with the renderer.
+ //
+ void ShowRenderWidget(string tag);
 
-	//! Obtain the (unique) TabManager instance
-	//! \retval TabManager*
-	static TabManager* getInstance() {
-		assert(_tabManager);
-		return _tabManager;
-	}
+ //! All the render EventRouter widgets are hidden until one is selected, 
+ //! using this method.
+ void HideRenderWidgets();
 
+ //! Update from current state
+ //
+ void Update();
 
+ //! Make the specified EventRouter be displayed in front.
+ //! \param[in] widgetTag is the Params tag that should be moved to front.
+ //! \return  the tab position in the associated sub tab.
+ int MoveToFront(string widgetTag);
 
+ //! Determine if a widget is currently the front tab in its subtab
+ //! \param[in] is the QWidget* to be checked
+ //! \return bool true if it is in front.
+ bool IsFrontTab(QWidget* wid);
 
-	//! In order to display the parameters for the selected renderer, QWidget::show() is invoked for the selected EventRouter, and
-	//! QWidget::hide() is invoked for all other renderer EventRouters.  This is performed in the RenderHolder class.
-	//! \param[in] tag is the tag associated with the renderer.
-	void ShowRenderWidget(string tag);
-
-	//! All the render EventRouter widgets are hidden until one is selected, using this method.
-	void HideRenderWidgets();
-
-	//! Update from current state
-	//
-	void Update();
-
-	//! Make the specified EventRouter be displayed in front.
-	//! \param[in] widgetTag is the Params tag that should be moved to front.
-	//! \return  the tab position in the associated sub tab.
-	int MoveToFront(string widgetTag);
-
-	//! Determine if a widget is currently the front tab in its subtab
-	//! \param[in] is the QWidget* to be checked
-	//! \return bool true if it is in front.
-	bool IsFrontTab(QWidget* wid);
  //! Get list of Installed Tab names
  //!
  //! \param[in] renderOnly If true only return render event routers.
@@ -126,43 +116,42 @@ public:
  void Shutdown();
  void Restart();
  void Reinit();
-
+ 
 signals:
-	void tabLeft(int,int);
+ void tabLeft(int,int);
 
-	//! Triggered when currently active event router changes
-	//!
-	//! \param[in] type Type of event router as returned by 
-	//! EventRouter::GetType()
-	//!
-	void ActiveEventRouterChanged(string type);
+ //! Triggered when currently active event router changes
+ //!
+ //! \param[in] type Type of event router as returned by 
+ //! EventRouter::GetType()
+ //!
+ void ActiveEventRouterChanged(string type);
 
-	
+
 
 protected slots:
-	//! Slot that responds to selecting a tab to be in front
-	//! \param[in] tabnum is 0,1, or 2 for the selected top tab
-	void NewTopTab(int tabnum);
+ //! Slot that responds to selecting a tab to be in front
+ //! \param[in] tabnum is 0,1, or 2 for the selected top tab
+ void NewTopTab(int tabnum);
 
-	//! Slot that responds to user selecting a 2nd level tab, i.e.
-	//! a tab that corresponds to an EventRouter.
-	//! \param[in] tabid ID of selected subtab.
-	void NewSubTab(int tabid);
+ //! Slot that responds to user selecting a 2nd level tab, i.e.
+ //! a tab that corresponds to an EventRouter.
+ //! \param[in] tabid ID of selected subtab.
+ void NewSubTab(int tabid);
 
-	void SetActiveViz(const QString &vizNameQ);
+ void SetActiveViz(const QString &vizNameQ);
 
-	void setActive(
-		string activeViz, string renderClass, string renderInst
-	); 
+ void setActive(
+	string activeViz, string renderClass, string renderInst
+ ); 
 
-	void newRenderer(
-		string activeViz, string renderClass, string renderInst
-	); 
+ void newRenderer(
+	string activeViz, string renderClass, string renderInst
+ ); 
 
 
-	
 
-///@} //End of internal methods
+
 
 #ifndef DOXYGEN_SKIP_THIS
 private:
@@ -184,7 +173,6 @@ private:
 	
 
 private:
-	static TabManager *_tabManager;
     // map tags to eventrouters
     std::map<string, EventRouter*> _eventRouterMap;
 
@@ -206,7 +194,6 @@ private:
  bool _initialized;
 
 	TabManager() {}
-	TabManager(QWidget *, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr);
 
  QWidget* _getSubTabWidget(int widType){
 	assert(widType >= 0 && widType < _topWidgets.size());
@@ -240,7 +227,7 @@ private:
  // (and identified via addWidget()), the installWidgets
  // method must be called to set up the various widgets in each tab.
  //
-void _installWidgets();
+ void _installWidgets();
 
  // Method invoked by the VizWinMgr at the time all the EventRouters 
  // are created
