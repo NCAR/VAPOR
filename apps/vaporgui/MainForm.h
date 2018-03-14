@@ -288,10 +288,16 @@ private:
     bool openDataHelper(string dataSetName, string format, const vector<string> &files, const vector<string> &options = vector<string>());
 
     void         loadDataHelper(const std::vector<string> &files, string prompt, string filter, string format, bool multi);
-    void         createActions();
+    void         _createCaptureMenu();
+    void         _createToolsMenu();
+    void         _createEditMenu();
     void         _createFileMenu();
+    void         _createHelpMenu();
     void         createMenus();
     void         hookupSignals();
+    void         _createModeToolBar();
+    void         _createAnimationToolBar();
+    void         _createVizToolBar();
     void         createToolBars();
     virtual void sessionOpenHelper(string fileName);
 
@@ -300,6 +306,8 @@ private:
     void enableWidgets(bool onOff);
 
     void enableAnimationWidgets(bool onOff);
+
+    void _fileSaveHelper(string path);
 
 private slots:
     void sessionOpen(QString qfileName = "");
@@ -339,9 +347,6 @@ private slots:
 
     void launchWebHelp(QAction *);
     void modeChange(int);
-    void languageChange();
-    void initCaptureMenu();
-    void setupEditMenu();
     void setInteractiveRefLevel(int);
     void loadStartingPrefs();
 
