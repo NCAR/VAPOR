@@ -59,7 +59,7 @@ class VizWinMgr;
 //! @name Internal
 //! Internal methods not intended for general use
 //!
-///@{
+//
 class TabManager : public QTabWidget {
     Q_OBJECT
 
@@ -67,28 +67,18 @@ public:
     //! Constructor:  Invoked by the MainForm during the set up of the
     //! main window.
     //
-    static TabManager *Create(QWidget *parent, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr)
-    {
-        if (_tabManager) return (_tabManager);
+    TabManager(QWidget *, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr);
 
-        _tabManager = new TabManager(parent, ce, vizWinMgr);
-        return (_tabManager);
-    };
-
-    //! Obtain the (unique) TabManager instance
-    //! \retval TabManager*
-    static TabManager *getInstance()
-    {
-        assert(_tabManager);
-        return _tabManager;
-    }
-
-    //! In order to display the parameters for the selected renderer, QWidget::show() is invoked for the selected EventRouter, and
-    //! QWidget::hide() is invoked for all other renderer EventRouters.  This is performed in the RenderHolder class.
+    //! In order to display the parameters for the selected renderer,
+    //! QWidget::show() is invoked for the selected EventRouter, and
+    //! QWidget::hide() is invoked for all other renderer EventRouters.
+    //! This is performed in the RenderHolder class.
     //! \param[in] tag is the tag associated with the renderer.
+    //
     void ShowRenderWidget(string tag);
 
-    //! All the render EventRouter widgets are hidden until one is selected, using this method.
+    //! All the render EventRouter widgets are hidden until one is selected,
+    //! using this method.
     void HideRenderWidgets();
 
     //! Update from current state
@@ -104,6 +94,7 @@ public:
     //! \param[in] is the QWidget* to be checked
     //! \return bool true if it is in front.
     bool IsFrontTab(QWidget *wid);
+
     //! Get list of Installed Tab names
     //!
     //! \param[in] renderOnly If true only return render event routers.
@@ -149,8 +140,6 @@ protected slots:
 
     void newRenderer(string activeViz, string renderClass, string renderInst);
 
-    ///@} //End of internal methods
-
 #ifndef DOXYGEN_SKIP_THIS
 private:
     // Find the position of the specified widget in subTab, or -1 if it isn't there.
@@ -166,7 +155,6 @@ private:
     void newFrontTab(int topType, int subPosn);
 
 private:
-    static TabManager *_tabManager;
     // map tags to eventrouters
     std::map<string, EventRouter *> _eventRouterMap;
 
@@ -188,7 +176,6 @@ private:
     bool _initialized;
 
     TabManager() {}
-    TabManager(QWidget *, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr);
 
     QWidget *_getSubTabWidget(int widType)
     {

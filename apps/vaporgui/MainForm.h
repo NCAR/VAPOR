@@ -70,8 +70,145 @@ class MainForm : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainForm(vector<QString> files, QApplication *app, QWidget *parent = 0, const char *name = 0);
+    MainForm(vector<QString> files, QApplication *app, QWidget *parent = 0);
     ~MainForm();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+
+private:
+    class ParamsChangeEvent : public QEvent {
+    public:
+        ParamsChangeEvent() : QEvent(ParamsChangeEvent::type()) {}
+
+        virtual ~ParamsChangeEvent() {}
+
+        static QEvent::Type type()
+        {
+            if (_customEventType == QEvent::None) {    // Register
+                int generatedType = QEvent::registerEventType();
+                _customEventType = static_cast<QEvent::Type>(generatedType);
+            }
+            return _customEventType;
+        }
+
+    private:
+        static QEvent::Type _customEventType;
+    };
+
+    QMdiArea *    _mdiArea;
+    QApplication *_App;
+
+    // Animation actions
+    //
+    QAction *_playForwardAction;
+    QAction *_playBackwardAction;
+    QAction *_pauseAction;
+
+    // Undo/redo actions
+    //
+    QAction *      _navigationAction;
+    QAction *      _editUndoAction;
+    QAction *      _editRedoAction;
+    QAction *      _editUndoRedoClearAction;
+    QLineEdit *    _timeStepEdit;
+    QIntValidator *_timeStepEditValidator;
+
+    QComboBox *_alignViewCombo;
+    QComboBox *_modeCombo;
+    QMenuBar * _main_Menubar;
+    QMenu *    _File;
+    QMenu *    _Edit;
+    QMenu *    _Tools;
+    QMenu *    _captureMenu;
+    QMenu *    _helpMenu;
+
+    QToolBar *_modeToolBar;
+    QToolBar *_vizToolBar;
+    QToolBar *_animationToolBar;
+
+    QMenu *_webTabHelpMenu;
+    QMenu *_webBasicHelpMenu;
+    QMenu *_webPreferencesHelpMenu;
+    QMenu *_webPythonHelpMenu;
+    QMenu *_webVisualizationHelpMenu;
+
+    // Submenus under the File menu:
+    //
+    QMenu *_dataMenu;
+    QMenu *_closeVDCMenu;
+    QMenu *_importMenu;
+    QMenu *_sessionMenu;
+
+    // File menu:
+    //
+    QAction *_fileOpenAction;
+    QAction *_fileSaveAction;
+    QAction *_fileSaveAsAction;
+    QAction *_fileExitAction;
+
+    // Help menu
+    //
+    QAction *_helpAboutAction;
+    QAction *_whatsThisAction;
+    QAction *_installCLIToolsAction;
+
+    // Data menu
+    //
+    QAction *_dataImportWRF_Action;
+    QAction *_dataImportCF_Action;
+    QAction *_dataImportMPAS_Action;
+    QAction *_dataLoad_MetafileAction;
+    QAction *_dataClose_MetafileAction;
+    QAction *_fileNew_SessionAction;
+    QAction *_plotAction;
+    QAction *_statsAction;
+
+    // Capture menu
+    //
+    QAction *_captureStartJpegCaptureAction;
+    QAction *_captureEndJpegCaptureAction;
+    QAction *_captureSingleJpegCaptureAction;
+    QAction *_seedMeAction;
+
+    // Toolbars:
+    //
+    QActionGroup *_mouseModeActions;
+    QAction *     _tileAction;
+    QAction *     _cascadeAction;
+    QAction *     _homeAction;
+    QAction *     _sethomeAction;
+    QAction *     _viewAllAction;
+    QAction *     _viewRegionAction;
+    QAction *     _stepForwardAction;
+    QAction *     _stepBackAction;
+    QSpinBox *    _interactiveRefinementSpin;
+    QDockWidget * _tabDockWindow;
+
+    Statistics *        _stats;
+    Plot *              _plot;
+    VAPoR::SeedMe *     _seedMe;
+    BannerGUI *         _banner;
+    VizSelectCombo *    _windowSelector;
+    QLabel *            _modeStatusWidget;
+    VAPoR::ControlExec *_controlExec;
+    VAPoR::ParamsMgr *  _paramsMgr;
+    TabManager *        _tabMgr;
+    VizWinMgr *         _vizWinMgr;
+    string              _capturingAnimationVizName;
+
+    bool   _stateChangeFlag;
+    bool   _sessionNewFlag;
+    bool   _begForCitation;
+    int    _eventsSinceLastSave;
+    string _recentPath;
+
+    // Zero out all member variables
+    //
+    void _initMembers();
+
+    void _performSessionAutoSave();
+    void _stateChangeCB();
 
     void      showTab(const std::string &tag);
     QMdiArea *getMDIArea() { return _mdiArea; }
@@ -82,24 +219,22 @@ public:
     void            enableKeyframing(bool onoff);
     VizSelectCombo *getWindowSelector() { return _windowSelector; }
 
-    // Following are public so accessible from animation tab:
-    QAction *  playForwardAction;
-    QAction *  playBackwardAction;
-    QAction *  pauseAction;
-    QComboBox *alignViewCombo;
     // Set the animation buttons in pause state,
     // don't trigger an event:
+    //
     void setPause()
     {
-        playForwardAction->setChecked(false);
-        playBackwardAction->setChecked(false);
-        pauseAction->setChecked(true);
+        _playForwardAction->setChecked(false);
+        _playBackwardAction->setChecked(false);
+        _pauseAction->setChecked(true);
     }
+
     int addMode(QString &text, QIcon &icon)
     {
         _modeCombo->addItem(icon, text);
         return (_modeCombo->count() - 1);
     }
+
     //! Insert all the mouse modes into the modeCombo.
     void addMouseModes();
     void setMouseMode(int newMode) { _modeCombo->setCurrentIndex(newMode); }
@@ -138,41 +273,7 @@ public:
         return ((MiscParams *)_paramsMgr->GetParams(MiscParams::GetClassType()));
     }
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *event);
-
-private:
     void performAutoStretching();
-
-#if 0
- QWidgetAction* createTextSeparator(const QString& text);
-#endif
-
-    class ParamsChangeEvent : public QEvent {
-    public:
-        ParamsChangeEvent() : QEvent(ParamsChangeEvent::type()) {}
-
-        virtual ~ParamsChangeEvent() {}
-
-        static QEvent::Type type()
-        {
-            if (_customEventType == QEvent::None) {    // Register
-                int generatedType = QEvent::registerEventType();
-                _customEventType = static_cast<QEvent::Type>(generatedType);
-            }
-            return _customEventType;
-        }
-
-    private:
-        static QEvent::Type _customEventType;
-    };
-
-    void _performSessionAutoSave();
-    void _stateChangeCB();
-    bool _stateChangeFlag;
-    bool _sessionNewFlag;
-    bool _begForCitation;
-    int  _eventsSinceLastSave;
 
     // Set the various widgets in the main window consistent with latest
     // params settings:
@@ -188,6 +289,7 @@ private:
 
     void         loadDataHelper(const std::vector<string> &files, string prompt, string filter, string format, bool multi);
     void         createActions();
+    void         _createFileMenu();
     void         createMenus();
     void         hookupSignals();
     void         createToolBars();
@@ -199,94 +301,6 @@ private:
 
     void enableAnimationWidgets(bool onOff);
 
-    string _recentPath;
-
-    // following are accessed during undo/redo
-    QAction *      _navigationAction;
-    QAction *      _editUndoAction;
-    QAction *      _editRedoAction;
-    QAction *      _editUndoRedoClearAction;
-    QLineEdit *    _timeStepEdit;
-    QIntValidator *_timeStepEditValidator;
-
-    QComboBox *_modeCombo;
-    QMenuBar * _main_Menubar;
-    QMenu *    _File;
-    QMenu *    _Edit;
-    QMenu *    _Tools;
-    QMenu *    _captureMenu;
-    QMenu *    _helpMenu;
-    QToolBar * _modeToolBar;
-    QToolBar * _vizToolBar;
-    QToolBar * _animationToolBar;
-    QMenu *    _webTabHelpMenu;
-    QMenu *    _webBasicHelpMenu;
-    QMenu *    _webPreferencesHelpMenu;
-    QMenu *    _webPythonHelpMenu;
-    QMenu *    _webVisualizationHelpMenu;
-
-    // Submenus under the File menu:
-    QMenu *_dataMenu;
-    QMenu *_closeVDCMenu;
-    QMenu *_importMenu;
-    QMenu *_sessionMenu;
-
-    // File menu:
-    QAction *_fileOpenAction;
-    QAction *_fileSaveAction;
-    QAction *_fileSaveAsAction;
-    QAction *_fileExitAction;
-
-    // Help menu
-    QAction *_helpContentsAction;
-    QAction *_helpIndexAction;
-    QAction *_helpAboutAction;
-    QAction *_whatsThisAction;
-    QAction *_installCLIToolsAction;
-
-    // Data menu
-    QAction *_dataImportWRF_Action;
-    QAction *_dataImportCF_Action;
-    QAction *_dataImportMPAS_Action;
-    QAction *_dataLoad_MetafileAction;
-    QAction *_dataClose_MetafileAction;
-    QAction *_fileNew_SessionAction;
-    QAction *_plotAction;
-    QAction *_statsAction;
-
-    // Capture menu
-    QAction *_captureStartJpegCaptureAction;
-    QAction *_captureEndJpegCaptureAction;
-    QAction *_captureSingleJpegCaptureAction;
-    QAction *_seedMeAction;
-
-    // Toolbars:
-    QActionGroup *_mouseModeActions;
-    QAction *     _tileAction;
-    QAction *     _cascadeAction;
-    QAction *     _homeAction;
-    QAction *     _sethomeAction;
-    QAction *     _viewAllAction;
-    QAction *     _viewRegionAction;
-    QAction *     _stepForwardAction;
-    QAction *     _stepBackAction;
-    QSpinBox *    _interactiveRefinementSpin;
-    QDockWidget * _tabDockWindow;
-
-    Statistics *        _stats;
-    Plot *              _plot;
-    VAPoR::SeedMe *     _seedMe;
-    BannerGUI *         _banner;
-    QMdiArea *          _mdiArea;
-    QApplication *      _App;
-    VizSelectCombo *    _windowSelector;
-    QLabel *            _modeStatusWidget;
-    VAPoR::ControlExec *_controlExec;
-    VAPoR::ParamsMgr *  _paramsMgr;
-    TabManager *        _tabMgr;
-    VizWinMgr *         _vizWinMgr;
-    string              _capturingAnimationVizName;
-
 private slots:
     void sessionOpen(QString qfileName = "");
     void fileSave();
@@ -295,8 +309,6 @@ private slots:
     void undo();
     void redo();
     void clear();
-    void helpIndex();
-    void helpContents();
     void helpAbout();
     void loadData(string fileName = "");
     void closeData(string fileName = "");
@@ -311,7 +323,6 @@ private slots:
     void installCLITools();
     void launchStats();
     void launchPlotUtility();
-    void batchSetup();
 
     // Set navigate mode
     void setNavigate(bool);
