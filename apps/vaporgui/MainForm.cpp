@@ -45,7 +45,6 @@
 #include "VizWin.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
-#include "NavigationEventRouter.h"
 #include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
@@ -256,10 +255,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     _mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setCentralWidget(_mdiArea);
 
-    createMenus();
-
-    createToolBars();
-
     // Now add a docking tabbed window on the left side.
     //
     _tabDockWindow = new QDockWidget(this);
@@ -311,6 +306,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     _tabMgr->setMinimumHeight(500);
 
     _tabDockWindow->setWidget(_tabMgr);
+
+    createMenus();
+
+    createToolBars();
 
     addMouseModes();
     (void)statusBar();
@@ -524,11 +523,11 @@ void MainForm::_createVizToolBar()
 
     _vizToolBar->addWidget(_interactiveRefinementSpin);
 
-    connect(_homeAction, SIGNAL(triggered()), this, SLOT(goHome()));
-    connect(_viewAllAction, SIGNAL(triggered()), this, SLOT(viewAll()));
-    connect(_sethomeAction, SIGNAL(triggered()), this, SLOT(setHome()));
-    connect(_alignViewCombo, SIGNAL(activated(int)), this, SLOT(alignView(int)));
-    connect(_viewRegionAction, SIGNAL(triggered()), this, SLOT(viewRegion()));
+    connect(_homeAction, SIGNAL(triggered()), _tabMgr, SLOT(UseHomeViewpoint()));
+    connect(_viewAllAction, SIGNAL(triggered()), _tabMgr, SLOT(ViewAll()));
+    connect(_sethomeAction, SIGNAL(triggered()), _tabMgr, SLOT(SetHomeViewpoint()));
+    connect(_alignViewCombo, SIGNAL(activated(int)), _tabMgr, SLOT(AlignView(int)));
+    connect(_viewRegionAction, SIGNAL(triggered()), _tabMgr, SLOT(CenterSubRegion()));
     connect(_tileAction, SIGNAL(triggered()), _vizWinMgr, SLOT(FitSpace()));
     connect(_cascadeAction, SIGNAL(triggered()), _vizWinMgr, SLOT(Cascade()));
     connect(_interactiveRefinementSpin, SIGNAL(valueChanged(int)), this, SLOT(setInteractiveRefLevel(int)));
@@ -543,13 +542,9 @@ void MainForm::createToolBars()
 
 void MainForm::hookupSignals()
 {
-    // Slots on the MainForm
-    //
-    AnimationEventRouter *aRouter = (AnimationEventRouter *)_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
+    connect(_tabMgr, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(setAnimationOnOff(bool)));
 
-    connect(aRouter, SIGNAL(AnimationOnOffChanged(bool)), this, SLOT(setAnimationOnOff(bool)));
-
-    connect(aRouter, SIGNAL(AnimationDraw()), this, SLOT(setAnimationDraw()));
+    connect(_tabMgr, SIGNAL(AnimationDrawSignal()), this, SLOT(setAnimationDraw()));
 
     connect(_tabMgr, SIGNAL(ActiveEventRouterChanged(string)), this, SLOT(setActiveEventRouter(string)));
 
@@ -563,11 +558,7 @@ void MainForm::hookupSignals()
 
     connect(_vizWinMgr, SIGNAL(activateViz(const QString &)), _tabMgr, SLOT(SetActiveViz(const QString &)));
 
-    // Slots on the NavigationEventRouter
-    //
-    NavigationEventRouter *vpRouter = (NavigationEventRouter *)_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-
-    connect(vpRouter, SIGNAL(Proj4StringChanged()), this, SLOT(setProj4String()));
+    connect(_tabMgr, SIGNAL(Proj4StringChanged(string)), this, SLOT(_setProj4String(string)));
 }
 
 void MainForm::_createFileMenu()
@@ -1076,14 +1067,9 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     //
 
     if (_sessionNewFlag) {
-        viewAll();
-        setHome();
+        _tabMgr->ViewAll();
+        _tabMgr->SetHomeViewpoint();
 
-        vector<string> winNames = _paramsMgr->GetVisualizerNames();
-        for (int i = 0; i < winNames.size(); i++) {
-            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-            vpParams->SetCurrentVPToHome();
-        }
         _sessionNewFlag = false;
     }
 
@@ -1697,57 +1683,13 @@ void MainForm::setActiveEventRouter(string type)
     eRouter->updateTab();
 }
 
-void MainForm::goHome()
-{
-    NavigationEventRouter *vRouter = (NavigationEventRouter *)_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-    assert(vRouter);
-
-    vRouter->UseHomeViewpoint();
-}
-
-void MainForm::viewAll()
-{
-    NavigationEventRouter *vRouter = (NavigationEventRouter *)_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-    assert(vRouter);
-
-    vRouter->ViewAll();
-}
-
-void MainForm::setHome()
-{
-    NavigationEventRouter *vRouter = (NavigationEventRouter *)_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-    assert(vRouter);
-
-    vRouter->SetHomeViewpoint();
-}
-
-void MainForm::alignView(int axis)
-{
-    if (axis < 1) return;
-
-    NavigationEventRouter *vRouter = (NavigationEventRouter *)_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-    assert(vRouter);
-
-    vRouter->AlignView(axis);
-}
-
-void MainForm::viewRegion()
-{
-    NavigationEventRouter *vRouter = (NavigationEventRouter *)_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-    assert(vRouter);
-
-    vRouter->CenterSubRegion();
-}
-
-void MainForm::setProj4String()
+void MainForm::_setProj4String(string proj4String)
 {
     GUIStateParams *p = GetStateParams();
 
     _App->removeEventFilter(this);
 
     vector<string> dataSets = p->GetOpenDataSetNames();
-
-    string proj4String = p->GetProjectionString();
 
     DataStatus *ds = _controlExec->GetDataStatus();
 

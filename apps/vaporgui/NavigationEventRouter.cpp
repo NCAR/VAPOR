@@ -436,12 +436,10 @@ void NavigationEventRouter::projCheckboxChanged()
     string proj = label->text().toStdString();
 
     GUIStateParams *params = GetStateParams();
-    if (checkBox->checkState() > 0) {
-        params->SetProjectionString(proj);
-    } else {
-        params->SetProjectionString("");
-    }
-    emit Proj4StringChanged();
+    if (checkBox->checkState() == 0) { proj = ""; }
+
+    params->SetProjectionString(proj);
+    emit Proj4StringChanged(proj);
 }
 
 void NavigationEventRouter::customCheckboxChanged()
@@ -454,12 +452,9 @@ void NavigationEventRouter::customCheckboxChanged()
     string proj = textEdit->toPlainText().toStdString();
 
     GUIStateParams *params = GetStateParams();
-    if (checkBox->checkState() > 0) {
-        params->SetProjectionString(proj);
-    } else {
-        params->SetProjectionString("");
-    }
-    emit Proj4StringChanged();
+    if (checkBox->checkState() == 0) { proj = ""; }
+    params->SetProjectionString(proj);
+    emit Proj4StringChanged(proj);
 }
 
 // If the custom proj string gets changed, we do not want to keep updating
@@ -472,7 +467,7 @@ void NavigationEventRouter::customProjStringChanged()
     string          currentProj = params->GetProjectionString();
     if (currentProj != "") {
         params->SetProjectionString("");
-        emit Proj4StringChanged();
+        emit Proj4StringChanged("");
     }
 }
 

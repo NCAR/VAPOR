@@ -351,12 +351,22 @@ void TabManager::_createAllDefaultTabs()
     // Install built-in tabs
     //
     parent = _getSubTabWidget(1);
-    er = new AnimationEventRouter(parent, _controlExec);
-    _installTab(er->GetType(), 1, er);
+    _animationEventRouter = new AnimationEventRouter(parent, _controlExec);
+    _installTab(er->GetType(), 1, _animationEventRouter);
+
+    connect((AnimationEventRouter *)er, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
+    connect((AnimationEventRouter *)er, SIGNAL(AnimationDrawSignal()), this, SLOT(_setAnimationDraw()));
 
     parent = _getSubTabWidget(1);
     er = new NavigationEventRouter(parent, _controlExec);
     _installTab(er->GetType(), 1, er);
+
+    connect((NavigationEventRouter *)er, SIGNAL(Proj4StringChanged(string)), this, SLOT(_setProj4String(string)));
+    connect(this, SIGNAL(HomeViewpointSignal()), (NavigationEventRouter *)er, SLOT(UseHomeViewpoint()));
+    connect(this, SIGNAL(ViewAllSignal()), (NavigationEventRouter *)er, SLOT(ViewAll()));
+    connect(this, SIGNAL(SetHomeViewpointSignal()), (NavigationEventRouter *)er, SLOT(SetHomeViewpoint()));
+    connect(this, SIGNAL(AlignViewSignal(int)), (NavigationEventRouter *)er, SLOT(AlignView(int)));
+    connect(this, SIGNAL(CenterSubRegionSignal()), (NavigationEventRouter *)er, SLOT(CenterSubRegion()));
 
     parent = _getSubTabWidget(2);
     er = new SettingsEventRouter(parent, _controlExec);
