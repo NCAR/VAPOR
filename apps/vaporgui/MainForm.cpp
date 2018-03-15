@@ -42,7 +42,7 @@
 #include <vapor/GetAppPath.h>
 #include <vapor/CFuncs.h>
 
-#include "VizWin.h"
+#include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
 #include "AnimationEventRouter.h"
@@ -298,7 +298,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
-    _tabMgr = new TabManager(this, _controlExec, _vizWinMgr);
+    _tabMgr = new TabManager(this, _controlExec);
     _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
 
@@ -1352,10 +1352,6 @@ void MainForm::modeChange(int newmode)
     }
 
     _navigationAction->setChecked(false);
-
-#ifdef DEAD
-    showTab(MouseModeParams::getModeTag(newmode));
-#endif
 
     if (_modeStatusWidget) {
         statusBar()->removeWidget(_modeStatusWidget);

@@ -18,6 +18,11 @@
 
 using namespace VAPoR;
 
+//
+// Register class with object factory!!!
+//
+static RenderEventRouterRegistrar<ContourEventRouter> registrar(ContourEventRouter::GetClassType());
+
 ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(parent), RenderEventRouter(ce, ContourParams::GetClassType())
 {
     _variables = new ContourVariablesSubtab(this);
@@ -84,4 +89,13 @@ void ContourEventRouter::_updateTab()
     _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+}
+
+string ContourEventRouter::_getDescription() const
+{
+    return ("Displays "
+            "a series of user defined contours along a two dimensional plane within the "
+            "user's domain.\n\nContours may hae constant coloration, or may be colored "
+            "according to a secondary variable.\n\nContours may be displaced by a height "
+            "variable.\n\n ");
 }

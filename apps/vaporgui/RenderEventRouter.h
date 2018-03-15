@@ -227,6 +227,16 @@ public:
     //!
     VAPoR::DataMgr *GetActiveDataMgr() const;
 
+    //! Return a brief (3 or 4 sentence description of the renderer
+    //!
+    virtual string GetDescription() const { return (_getDescription()); }
+
+    //! Return the path name of a raster file containing an icon for
+    //! the renderer
+    //!
+    virtual string GetSmallIconImagePath() const;
+    virtual string GetIconImagePath() const;
+
 protected:
     RenderEventRouter() {}
 
@@ -251,9 +261,71 @@ protected:
     //! \param[in] p Params instance associated with the current active tab.
     virtual void _confirmText(){};
 
+    virtual string _getDescription() const = 0;
+
+    virtual string _getSmallIconImagePath() const = 0;
+
+    virtual string _getIconImagePath() const = 0;
+
     Histo *_currentHistogram;
 
 private:
     string _instName;
 };
+
+//////////////////////////////////////////////////////////////////////////
+//
+// RenderEventRouterFactory Class
+//
+/////////////////////////////////////////////////////////////////////////
+
+class PARAMS_API RenderEventRouterFactory {
+public:
+    static RenderEventRouterFactory *Instance()
+    {
+        static RenderEventRouterFactory instance;
+        return &instance;
+    }
+
+    void RegisterFactoryFunction(string name, function<RenderEventRouter *(QWidget *, VAPoR::ControlExec *)> classFactoryFunction)
+    {
+        // register the class factory function
+        _factoryFunctionRegistry[name] = classFactoryFunction;
+    }
+
+    RenderEventRouter *(CreateInstance(string classType, QWidget *, VAPoR::ControlExec *));
+
+    vector<string> GetFactoryNames() const;
+
+private:
+    map<string, function<RenderEventRouter *(QWidget *, VAPoR::ControlExec *)>> _factoryFunctionRegistry;
+
+    RenderEventRouterFactory() {}
+    RenderEventRouterFactory(const RenderEventRouterFactory &) {}
+    RenderEventRouterFactory &operator=(const RenderEventRouterFactory &) { return *this; }
+};
+
+//////////////////////////////////////////////////////////////////////////
+//
+// RenderEventRouterRegistrar Class
+//
+// Register RenderEventRouter derived class with:
+//
+//	static RenderEventRouterRegistrar<RERClass> registrar("myclassname");
+//
+// where 'RERClass' is a class derived from 'RenderEventRouter', and
+// "myclassname" is the name of the class
+//
+/////////////////////////////////////////////////////////////////////////
+
+template<class T> class RenderEventRouterRegistrar {
+public:
+    RenderEventRouterRegistrar(string classType)
+    {
+        // register the class factory function
+        //
+        RenderEventRouterFactory::Instance()->RegisterFactoryFunction(classType, [](QWidget *parent, VAPoR::ControlExec *ce) -> RenderEventRouter * { return new T(parent, ce); });
+    }
+};
+
 #endif    // RENDEREREVENTROUTER_H
