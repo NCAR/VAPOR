@@ -242,7 +242,6 @@ int	main(int argc, char **argv) {
 		if (! ok) {
 			cout << "failed!" << endl;
 			success = false;
-			break;
 		}
 		if (! opt.quiet) {
 			cout << "	NLmax = " << nlmax << endl;
