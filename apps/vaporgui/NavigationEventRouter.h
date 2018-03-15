@@ -53,14 +53,7 @@ public:
 	//Methods to capture state at start and end of mouse moves:
 	//
 	
-	//Methods to handle home viewpoint
-	void SetHomeViewpoint();
-	void UseHomeViewpoint();
 
-	void ViewAll();
-	//Following are only accessible from main menu
-	void CenterSubRegion();
-	void AlignView(int axis);
 
 	//Set from probe:
 	void SetCenter(const double* centerCoords);
@@ -75,7 +68,7 @@ public:
  virtual void updateTab();
 
 signals:
- void Proj4StringChanged();
+ void Proj4StringChanged(string proj4String);
 
 protected:
 	virtual void _confirmText() {};
@@ -109,6 +102,13 @@ private:
 	double dirvec[3], double upvec[3]
  ) const;
 	
+public slots:
+	void UseHomeViewpoint();
+	void ViewAll();
+	void SetHomeViewpoint();
+	void AlignView(int axis);
+	void CenterSubRegion();
+
 private slots:
 	void setCameraChanged();
 	void setCameraLatLonChanged();

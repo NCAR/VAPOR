@@ -45,7 +45,6 @@
 #include "VizWin.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
-#include "NavigationEventRouter.h"
 #include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
@@ -271,9 +270,6 @@ MainForm::MainForm(
     _mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setCentralWidget(_mdiArea);
 
-    createMenus();
-
-	createToolBars();	
 
     // Now add a docking tabbed window on the left side.
 	//
@@ -331,6 +327,9 @@ MainForm::MainForm(
 
     _tabDockWindow->setWidget(_tabMgr);
 
+    createMenus();
+
+	createToolBars();	
 	
 	addMouseModes();
     (void)statusBar();
@@ -603,23 +602,23 @@ void MainForm::_createVizToolBar() {
 
 	connect (
 		_homeAction, SIGNAL(triggered()),
-		this, SLOT(goHome())
+		_tabMgr, SLOT(UseHomeViewpoint())
 	);
 	connect (
 		_viewAllAction, SIGNAL(triggered()),
-		this, SLOT(viewAll())
+		_tabMgr, SLOT(ViewAll())
 	);
 	connect (
 		_sethomeAction, SIGNAL(triggered()),
-		this, SLOT(setHome())
+		_tabMgr, SLOT(SetHomeViewpoint())
 	);
 	connect (
 		_alignViewCombo, SIGNAL(activated(int)),
-		this, SLOT(alignView(int))
+		_tabMgr, SLOT(AlignView(int))
 	);
 	connect (
 		_viewRegionAction, SIGNAL(triggered()),
-		this, SLOT(viewRegion())
+		_tabMgr, SLOT(CenterSubRegion())
 	);
 	connect (
 		_tileAction, SIGNAL(triggered()),
@@ -645,18 +644,13 @@ void MainForm::createToolBars(){
 
 void MainForm::hookupSignals() {
 
-	// Slots on the MainForm
-	//
-	AnimationEventRouter* aRouter = (AnimationEventRouter*)
-        _tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
 	connect(
-		aRouter, SIGNAL(AnimationOnOffChanged(bool)), 
+		_tabMgr, SIGNAL(AnimationOnOffSignal(bool)), 
 		this, SLOT( setAnimationOnOff(bool))
 	);
 
 	connect(
-		aRouter, SIGNAL(AnimationDraw()), 
+		_tabMgr, SIGNAL(AnimationDrawSignal()), 
 		this, SLOT( setAnimationDraw())
 	);
 
@@ -693,14 +687,9 @@ void MainForm::hookupSignals() {
 		_tabMgr, SLOT(SetActiveViz(const QString &))
 	);
 
-	// Slots on the NavigationEventRouter
-	//
-	NavigationEventRouter* vpRouter = (NavigationEventRouter*)
-        _tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-
 	connect(
-		vpRouter, SIGNAL(Proj4StringChanged()), 
-		this, SLOT( setProj4String())
+		_tabMgr, SIGNAL(Proj4StringChanged(string)), 
+		this, SLOT( _setProj4String(string))
 	);
 }
 
@@ -1372,16 +1361,9 @@ void MainForm::loadDataHelper(
 	//
 	
 	if (_sessionNewFlag) {
-		viewAll();
-		setHome();
+		_tabMgr->ViewAll();
+		_tabMgr->SetHomeViewpoint();
 
-		vector <string> winNames = _paramsMgr->GetVisualizerNames();
-		for (int i=0; i<winNames.size(); i++) {
-			ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(
-				winNames[i]
-			);
-			vpParams->SetCurrentVPToHome();
-		}
 		_sessionNewFlag = false;
 	}
 
@@ -2043,58 +2025,12 @@ void MainForm::setActiveEventRouter(string type) {
 	eRouter->updateTab();
 }
 
-void MainForm::goHome() {
-	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-	assert(vRouter);
-
-	vRouter->UseHomeViewpoint();
-}
-
-void MainForm::viewAll() {
-	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-	assert(vRouter);
-
-	vRouter->ViewAll();
-}
-
-void MainForm::setHome() {
-	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-	assert(vRouter);
-
-	vRouter->SetHomeViewpoint();
-}
-
-void MainForm::alignView(int axis)
-{
-    if (axis < 1) return;
-
-	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-	assert(vRouter);
-
-    vRouter->AlignView(axis);
-} 
-
-void MainForm::viewRegion()
-{
-	NavigationEventRouter* vRouter = (NavigationEventRouter*) 
-		_tabMgr->GetEventRouter(NavigationEventRouter::GetClassType());
-	assert(vRouter);
-
-    vRouter->CenterSubRegion();
-} 
-
-void MainForm::setProj4String() {
+void MainForm::_setProj4String(string proj4String) {
 	GUIStateParams *p = GetStateParams();
 
 	_App->removeEventFilter(this);
 
 	vector <string> dataSets =  p->GetOpenDataSetNames();
-
-	string proj4String = p->GetProjectionString();
 
 	DataStatus* ds = _controlExec->GetDataStatus();
 
