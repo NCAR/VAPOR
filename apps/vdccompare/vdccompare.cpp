@@ -162,16 +162,11 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    if (argc < 6) {
-        cerr << "Usage: " << ProgName << "ftype1 ftype2 ftype1files... -- ftype2files " << endl;
+    if (argc < 6 || opt.help) {
+        cerr << "Usage: " << ProgName << " ftype1 ftype2 ftype1files... -- ftype2files... " << endl;
+        cerr << "Valid file types: vdc, wrf, cf, mpas" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
-    }
-
-    if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
-        op.PrintOptionHelp(stderr, 80, false);
-        exit(0);
     }
 
     argc--;
