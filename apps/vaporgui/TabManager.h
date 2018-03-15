@@ -126,6 +126,39 @@ class TabManager : public QTabWidget {
     //!
     void ActiveEventRouterChanged(string type);
 
+    //! Proj4 string changed
+    //
+    void Proj4StringChanged(string proj4String);
+
+    void HomeViewpointSignal();
+    void ViewAllSignal();
+    void SetHomeViewpointSignal();
+    void AlignViewSignal(int axis);
+    void CenterSubRegionSignal();
+
+    void AnimationOnOffSignal(bool);
+    void AnimationDrawSignal();
+
+  public slots:
+    void UseHomeViewpoint() {
+        emit HomeViewpointSignal();
+    }
+    void ViewAll() {
+        emit ViewAllSignal();
+    }
+    void SetHomeViewpoint() {
+        emit SetHomeViewpointSignal();
+    }
+    void AlignView(int axis) {
+        emit AlignViewSignal(axis);
+    }
+    void CenterSubRegion() {
+        emit CenterSubRegionSignal();
+    }
+
+    void AnimationPlayForward() {
+    }
+
   protected slots:
     //! Slot that responds to selecting a tab to be in front
     //! \param[in] tabnum is 0,1, or 2 for the selected top tab
@@ -144,6 +177,19 @@ class TabManager : public QTabWidget {
     void newRenderer(
         string activeViz, string renderClass, string renderInst);
 
+  private slots:
+    void _setProj4String(string proj4String) {
+        emit Proj4StringChanged(proj4String);
+    }
+
+    void _setAnimationOnOff(bool onOff) {
+        emit AnimationOnOffSignal(onOff);
+    }
+
+    void _setAnimationDraw() {
+        emit AnimationDrawSignal();
+    }
+
 #ifndef DOXYGEN_SKIP_THIS
   private:
     //Find the position of the specified widget in subTab, or -1 if it isn't there.
@@ -160,7 +206,6 @@ class TabManager : public QTabWidget {
     int getTabType(string tag);
     void newFrontTab(int topType, int subPosn);
 
-  private:
     // map tags to eventrouters
     std::map<string, EventRouter *> _eventRouterMap;
 
