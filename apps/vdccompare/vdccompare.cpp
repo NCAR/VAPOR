@@ -188,6 +188,7 @@ int main(int argc, char **argv)
     }
 
     double max_nlmax = 0;
+    bool   success = true;
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dc1->GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
@@ -199,12 +200,13 @@ int main(int argc, char **argv)
         bool   ok = compare(dc1, dc2, nts, varnames[i], nlmax);
         if (!ok) {
             cout << "failed!" << endl;
-            continue;
+            success = false;
+            break;
         }
         if (!opt.quiet) { cout << "	NLmax = " << nlmax << endl; }
         if (nlmax > max_nlmax) { max_nlmax = nlmax; }
     }
     cout << "Max NLmax = " << max_nlmax << endl;
 
-    return (0);
+    return success ? 0 : 1;
 }
