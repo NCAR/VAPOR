@@ -33,12 +33,14 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QIcon>
+#include <QLineEdit>
 #include <QWidgetAction>
 #include <vapor/ControlExecutive.h>
 #include "GUIStateParams.h"
 #include "SettingsParams.h"
 #include "AnimationParams.h"
 #include "MiscParams.h"
+#include "TabManager.h"
 
 class QApplication;
 class QSpacerItem;
@@ -50,12 +52,10 @@ class QMdiArea;
 class QDockWindow;
 class QLabel;
 class QSpinBox;
-class QLineEdit;
 
 //class SeedMe;
 class VizWindow;
 class VizWinMgr;
-class TabManager;
 class VizSelectCombo;
 
 class BannerGUI;
@@ -217,7 +217,6 @@ private:
  void _performSessionAutoSave();
  void _stateChangeCB();
 
- void showTab(const std::string& tag);
  QMdiArea* getMDIArea() {return _mdiArea;}
 
  QApplication* getApp() {return _App;}
@@ -360,14 +359,10 @@ private slots:
  void setNavigate(bool);
 
  //animation toolbar:
- void playForward();
- void playBackward();
- void pauseClick();
- void stepForward();
- void stepBack();
- void setAnimationOnOff(bool);
- void setAnimationDraw();
- void setTimestep();
+ void _setTimeStep() {
+	int ts = _timeStepEdit->text().toInt();
+	_tabMgr->AnimationSetTimestep(ts);
+ }
  
  void launchWebHelp(QAction*);
  void modeChange(int);
@@ -377,6 +372,9 @@ private slots:
  void setActiveEventRouter(string type); 
 
  void _setProj4String(string proj4String);
+
+ void _setAnimationOnOff(bool onOff);
+ void _setAnimationDraw();
 
 };
 #endif // MAINFORM_H

@@ -45,7 +45,6 @@
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
-#include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
 #include "SeedMe.h"
@@ -491,27 +490,27 @@ void MainForm::_createAnimationToolBar() {
 
 	connect (
 		_playForwardAction, SIGNAL(triggered()),
-		this, SLOT(playForward())
+		_tabMgr, SLOT(AnimationPlayForward())
 	);
 	connect (
 		_playBackwardAction, SIGNAL(triggered()),
-		this, SLOT(playBackward())
+		_tabMgr, SLOT(AnimationPlayBackward())
 	);
 	connect (
 		_pauseAction, SIGNAL(triggered()),
-		this, SLOT(pauseClick())
+		_tabMgr, SLOT(AnimationPause())
 	);
 	connect (
 		_stepForwardAction, SIGNAL(triggered()),
-		this, SLOT(stepForward())
+		_tabMgr, SLOT(AnimationStepForward())
 	);
 	connect (
 		_stepBackAction, SIGNAL(triggered()),
-		this, SLOT(stepBack())
+		_tabMgr, SLOT(AnimationStepBackward())
 	);
 	connect (
 		_timeStepEdit, SIGNAL(returnPressed()),
-		this, SLOT(setTimestep())
+		this, SLOT(_setTimeStep())
 	);
 }
 
@@ -646,12 +645,12 @@ void MainForm::hookupSignals() {
 
 	connect(
 		_tabMgr, SIGNAL(AnimationOnOffSignal(bool)), 
-		this, SLOT( setAnimationOnOff(bool))
+		this, SLOT( _setAnimationOnOff(bool))
 	);
 
 	connect(
 		_tabMgr, SIGNAL(AnimationDrawSignal()), 
-		this, SLOT( setAnimationDraw())
+		this, SLOT( _setAnimationDraw())
 	);
 
 	connect (
@@ -1594,42 +1593,7 @@ void MainForm::setInteractiveRefinementSpin(int val){
 	
 }
 	
-void MainForm::pauseClick(){
-	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-	aRouter->AnimationPause();
-}
-
-void MainForm::playForward(){
-	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-	aRouter->AnimationPlayForward();
-}
-
-void MainForm::playBackward(){
-	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-	aRouter->AnimationPlayReverse();
-}
-
-void MainForm::stepBack(){
-	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-	aRouter->AnimationStepReverse();
-}	
-
-void MainForm::stepForward(){
-	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-	aRouter->AnimationStepForward();
-}	
-
-void MainForm::setAnimationOnOff(bool on) {
+void MainForm::_setAnimationOnOff(bool on) {
 
 	if (on) {
 		enableAnimationWidgets(false);
@@ -1649,30 +1613,14 @@ void MainForm::setAnimationOnOff(bool on) {
 	}
 }
 
-void MainForm::setAnimationDraw() {
+void MainForm::_setAnimationDraw() {
 	_vizWinMgr->Update();
 }
 
-//Respond to a change in the text in the animation toolbar
-void MainForm::setTimestep(){
-	int timestep = _timeStepEdit->text().toInt();
-
-	AnimationEventRouter* aRouter = (AnimationEventRouter*) 
-		_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-	aRouter->SetTimeStep(timestep);
-}
 
 void MainForm::enableKeyframing(bool ison){
 	QPalette pal(_timeStepEdit->palette());
 	_timeStepEdit->setEnabled(!ison);
-}
-
-
-void MainForm::showTab(const std::string& tag){
-	_tabMgr->MoveToFront(tag);
-	EventRouter* eRouter = _tabMgr->GetEventRouter(tag);
-	eRouter->updateTab();
 }
 
 void MainForm::modeChange(int newmode){
@@ -2007,17 +1955,12 @@ void MainForm::loadStartingPrefs(){
 
 void MainForm::setActiveEventRouter(string type) {
 
-	EventRouter *eRouter = _tabMgr->GetEventRouter(type);
-	if (! eRouter) return;
-
 	// Set up help for active tab
 	//
 	vector <pair <string, string> >help;
-	eRouter->GetWebHelp(help);
+	_tabMgr->GetWebHelp(type, help);
 
 	buildWebTabHelpMenu(help);
-
-	eRouter->updateTab();
 }
 
 void MainForm::_setProj4String(string proj4String) {
@@ -2220,11 +2163,6 @@ void MainForm::enableAnimationWidgets(bool on) {
 		_playForwardAction->setEnabled(true);
 	}
 	else {
-		AnimationEventRouter* aRouter = (AnimationEventRouter*)
-			_tabMgr->GetEventRouter(AnimationEventRouter::GetClassType());
-
-		aRouter->setEnabled(true);
-
 		_animationToolBar->setEnabled(true);
 		_playBackwardAction->setEnabled(false);
 		_stepBackAction->setEnabled(false);
