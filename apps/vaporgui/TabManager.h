@@ -25,6 +25,8 @@
 
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
+#include <AnimationEventRouter.h>
+#include <NavigationEventRouter.h>
 #include "GUIStateParams.h"
 class RenderHolder;
 class EventRouter;
@@ -105,10 +107,9 @@ class TabManager : public QTabWidget {
     //
     vector<string> GetInstalledTabNames(bool renderOnly) const;
 
-    EventRouter *GetEventRouter(string erType) const;
-
-    RenderEventRouter *GetRenderEventRouter(
-        string winName, string renderType, string instName) const;
+    virtual void GetWebHelp(
+        string tabName,
+        std::vector<std::pair<string, string>> &help) const;
 
     //! Enable or disable widgets associated with all event routers
     //
@@ -130,33 +131,43 @@ class TabManager : public QTabWidget {
     //
     void Proj4StringChanged(string proj4String);
 
-    void HomeViewpointSignal();
-    void ViewAllSignal();
-    void SetHomeViewpointSignal();
-    void AlignViewSignal(int axis);
-    void CenterSubRegionSignal();
-
     void AnimationOnOffSignal(bool);
     void AnimationDrawSignal();
 
   public slots:
     void UseHomeViewpoint() {
-        emit HomeViewpointSignal();
+        _navigationEventRouter->UseHomeViewpoint();
     }
     void ViewAll() {
-        emit ViewAllSignal();
+        _navigationEventRouter->ViewAll();
     }
     void SetHomeViewpoint() {
-        emit SetHomeViewpointSignal();
+        _navigationEventRouter->SetHomeViewpoint();
     }
     void AlignView(int axis) {
-        emit AlignViewSignal(axis);
+        _navigationEventRouter->AlignView(axis);
     }
     void CenterSubRegion() {
-        emit CenterSubRegionSignal();
+        _navigationEventRouter->CenterSubRegion();
     }
 
     void AnimationPlayForward() {
+        _animationEventRouter->AnimationPlayForward();
+    }
+    void AnimationPlayBackward() {
+        _animationEventRouter->AnimationPlayReverse();
+    }
+    void AnimationPause() {
+        _animationEventRouter->AnimationPause();
+    }
+    void AnimationStepBackward() {
+        _animationEventRouter->AnimationStepReverse();
+    }
+    void AnimationStepForward() {
+        _animationEventRouter->AnimationStepForward();
+    }
+    void AnimationSetTimestep(int ts) {
+        _animationEventRouter->SetTimeStep(ts);
     }
 
   protected slots:
@@ -193,22 +204,6 @@ class TabManager : public QTabWidget {
         string activeViz, string renderClass, string renderInst);
 
   private:
-    virtual QSize sizeHint() const { return QSize(460, 800); }
-
-    // This prevents a "beep" from occuring when you press enter on the Mac.
-    virtual void keyPressEvent(QKeyEvent *e) {
-        e->accept();
-    }
-
-    //Find the position of the specified widget in subTab, or -1 if it isn't there.
-    //
-    int _getSubTabIndex(string tabName, string subTabName) const;
-    int _getSubTabIndex(string subTabName) const;
-    int _getTabIndex(string tabName) const;
-
-    string _getTabForSubTab(string subTabName) const;
-    void _newFrontTab(int topType, int subPosn);
-
     static const string _renderersTabName;
     static const string _navigationTabName;
     static const string _settingsTabName;
@@ -241,8 +236,30 @@ class TabManager : public QTabWidget {
     std::map<string, EventRouter *> _eventRouterMap;
 
     bool _initialized;
+    AnimationEventRouter *_animationEventRouter;
+    NavigationEventRouter *_navigationEventRouter;
 
     TabManager() {}
+
+    virtual QSize sizeHint() const { return QSize(460, 800); }
+
+    // This prevents a "beep" from occuring when you press enter on the Mac.
+    virtual void keyPressEvent(QKeyEvent *e) {
+        e->accept();
+    }
+
+    EventRouter *_getEventRouter(string erType) const;
+
+    RenderEventRouter *_getRenderEventRouter(
+        string winName, string renderType, string instName) const;
+
+    //Find the position of the specified widget in subTab, or -1 if it isn't there.
+    //
+    int _getSubTabIndex(string tabName, string subTabName) const;
+    int _getSubTabIndex(string subTabName) const;
+    int _getTabIndex(string tabName) const;
+
+    string _getTabForSubTab(string subTabName) const;
 
     QWidget *_getSubTabWidget(string subTabName) const;
     QWidget *_getTabWidget(string tabName) const;
