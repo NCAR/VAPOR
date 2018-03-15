@@ -65,8 +65,8 @@ const std::string NewRendererDialog::twoDDataDescription = "Displays "
 
 CBWidget::CBWidget(QWidget *parent, QString text) : QWidget(parent), QTableWidgetItem(text){};
 
-NewRendererDialog::NewRendererDialog(QWidget *parent, ControlExec *controlExec) : QDialog(parent), Ui_NewRendererDialog()
-{
+/*NewRendererDialog::NewRendererDialog(QWidget* parent, ControlExec* controlExec) :
+    QDialog(parent), Ui_NewRendererDialog() {
     setupUi(this);
 
     rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
@@ -79,15 +79,49 @@ NewRendererDialog::NewRendererDialog(QWidget *parent, ControlExec *controlExec) 
     connect(contourButton, SIGNAL(toggled(bool)), this, SLOT(contourChecked(bool)));
     connect(imageButton, SIGNAL(toggled(bool)), this, SLOT(imageChecked(bool)));
     connect(twoDDataButton, SIGNAL(toggled(bool)), this, SLOT(twoDDataChecked(bool)));
+};*/
+
+NewRendererDialog::NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths)
+: QDialog(parent), Ui_NewRendererDialog()
+{
+    setupUi(this);
+
+    _rendererNames = rendererNames;
+    _descriptions = descriptions;
+    _iconPaths = iconPaths;
+    _smallIconPaths = smallIconPaths;
+
+    rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
+    dataMgrCombo->clear();
+
+    initializeImages();
+    initializeDataSources();    // controlExec);
+    createButtons();
+
+    connect(barbButton, SIGNAL(toggled(bool)), this, SLOT(barbChecked(bool)));
+    connect(contourButton, SIGNAL(toggled(bool)), this, SLOT(contourChecked(bool)));
+    connect(imageButton, SIGNAL(toggled(bool)), this, SLOT(imageChecked(bool)));
+    connect(twoDDataButton, SIGNAL(toggled(bool)), this, SLOT(twoDDataChecked(bool)));
 };
 
-void NewRendererDialog::initializeDataSources(ControlExec *ce)
+void NewRendererDialog::createButtons()
 {
-    ParamsMgr *    paramsMgr = ce->GetParamsMgr();
-    vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
+    for (int i = 0; i < _rendererNames.size(); i++) {
+        QString      iconPath = QString::fromStdString(_smallIconPaths[i]);
+        QIcon        icon(iconPath);
+        QString      name = QString::fromStdString(_rendererNames[i]);
+        QPushButton *button = new QPushButton(icon, name, this);
+        button->setLayoutDirection(Qt::RightToLeft);
+        button->setCheckable(true);
 
+        buttonHolderLayout->addWidget(button);
+    }
+}
+
+void NewRendererDialog::initializeDataSources()
+{
     dataMgrCombo->clear();
-    for (int i = 0; i < dataSetNames.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(dataSetNames[i])); }
+    for (int i = 0; i < _rendererNames.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(_rendererNames[i])); }
 }
 
 void NewRendererDialog::initializeImages()
@@ -110,6 +144,28 @@ void NewRendererDialog::setUpImage(std::string imageName, QLabel *label)
     imagePath.push_back(imageName);
     QPixmap thumbnail(GetAppPath("VAPOR", "share", imagePath).c_str());
     label->setPixmap(thumbnail);
+}
+
+void NewRendererDialog::buttonChecked()
+{
+    QPushButton *button = (QPushButton *)sender();
+    int          index = button->property("index").toInt();
+
+    uncheckAllButtons();
+    button->blockSignals(true);
+    button->setChecked(true);
+    button->blockSignals(false);
+
+    string icon = _iconPaths[index];
+    setUpImage(icon, bigDisplay);
+
+    QString title = "\n" + QString::fromStdString(_rendererNames[index]) + " Renderer";
+    titleLabel->setText(title);
+
+    QString description = QString::fromStdString(_descriptions[index]);
+    descriptionLabel->setText(description);
+
+    _selectedRenderer = _rendererNames[index];
 }
 
 void NewRendererDialog::barbChecked(bool state)
@@ -189,7 +245,8 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidge
     setupUi(this);
 
     _controlExec = ce;
-    _newRendererDialog = new NewRendererDialog(this, ce);
+    //_newRendererDialog = new NewRendererDialog(this, ce);
+    _newRendererDialog = new NewRendererDialog(this, widgetNames, descriptions, iconPaths, smallIconPaths);
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(0), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _currentRow = 0;

@@ -23,7 +23,7 @@ class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
     Q_OBJECT
 
 public:
-    NewRendererDialog(QWidget *parent, VAPoR::ControlExec *ce);
+    NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths);
 
     std::string GetSelectedRenderer() { return _selectedRenderer; }
     void        mouseDoubleClickEvent(QMouseEvent *event)
@@ -39,17 +39,24 @@ private slots:
     void contourChecked(bool state);
     void imageChecked(bool state);
     void twoDDataChecked(bool state);
+    void buttonChecked();
 
 private:
+    void createButtons();
     void setUpImage(std::string imageName, QLabel *label);
     void uncheckAllButtons();
     void initializeImages();
-    void initializeDataSources(VAPoR::ControlExec *ce);
+    void initializeDataSources();
 
     static const std::string barbDescription;
     static const std::string contourDescription;
     static const std::string imageDescription;
     static const std::string twoDDataDescription;
+
+    std::vector<string> _rendererNames;
+    std::vector<string> _descriptions;
+    std::vector<string> _iconPaths;
+    std::vector<string> _smallIconPaths;
 
     std::string  _selectedRenderer;
     QMessageBox *_msgBox;
