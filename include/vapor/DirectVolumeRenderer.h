@@ -32,7 +32,7 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     virtual ~DirectVolumeRenderer();
 
     static std::string GetClassType() {
-        return ("DirectVolumeRenderer");
+        return ("Direct Volume Renderer");
     }
 
   protected:
