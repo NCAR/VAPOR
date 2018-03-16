@@ -60,6 +60,8 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
 
     virtual void updateTab();
 
+    void LoadDataNotify(string dataSetName);
+
   signals:
     void Proj4StringChanged(string proj4String);
 
@@ -92,6 +94,8 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
     bool _getViewpointParams(
         double center[3], double posvec[3],
         double dirvec[3], double upvec[3]) const;
+
+    void _performAutoStretching(string dataSetName);
 
   public slots:
     void UseHomeViewpoint();
