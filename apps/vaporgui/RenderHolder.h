@@ -23,7 +23,7 @@ class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
     Q_OBJECT
 
 public:
-    NewRendererDialog(QWidget *parent, VAPoR::ControlExec *ce);
+    NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths);
 
     std::string GetSelectedRenderer() { return _selectedRenderer; }
     void        mouseDoubleClickEvent(QMouseEvent *event)
@@ -35,21 +35,19 @@ public:
     };
 
 private slots:
-    void barbChecked(bool state);
-    void contourChecked(bool state);
-    void imageChecked(bool state);
-    void twoDDataChecked(bool state);
+    void _buttonChecked();
 
 private:
-    void setUpImage(std::string imageName, QLabel *label);
-    void uncheckAllButtons();
-    void initializeImages();
-    void initializeDataSources(VAPoR::ControlExec *ce);
+    void         _createButtons();
+    void         _setUpImage(std::string imageName, QLabel *label);
+    void         _uncheckAllButtons();
+    void         _initializeDataSources();
+    QPushButton *_createButton(QIcon icon, QString name, int index);
 
-    static const std::string barbDescription;
-    static const std::string contourDescription;
-    static const std::string imageDescription;
-    static const std::string twoDDataDescription;
+    std::vector<string> _rendererNames;
+    std::vector<string> _descriptions;
+    std::vector<string> _iconPaths;
+    std::vector<string> _smallIconPaths;
 
     std::string  _selectedRenderer;
     QMessageBox *_msgBox;
@@ -107,26 +105,26 @@ public:
 private:
     RenderHolder() {}
 
-    GUIStateParams *getStateParams() const
+    GUIStateParams *_getStateParams() const
     {
         assert(_controlExec != NULL);
         return ((GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     }
 
-    void updateDupCombo();
-    void makeRendererTableHeaders(vector<string> &table);
-    void initializeNewRendererDialog(vector<string> datasetNames);
+    void _updateDupCombo();
+    void _makeRendererTableHeaders(vector<string> &table);
+    void _initializeNewRendererDialog(vector<string> datasetNames);
 
     // Convert name to a unique name (among renderer names)
     std::string uniqueName(std::string name);
 
 private slots:
-    void showNewRendererDialog();
-    void deleteRenderer();
-    void itemTextChange(QTableWidgetItem *);
-    void copyInstanceTo(int);
-    void activeRendererChanged(int row, int col);
-    void tableValueChanged(int row, int col);
+    void _showNewRendererDialog();
+    void _deleteRenderer();
+    void _itemTextChange(QTableWidgetItem *);
+    void _copyInstanceTo(int);
+    void _activeRendererChanged(int row, int col);
+    void _tableValueChanged(int row, int col);
 
 signals:
     void newRendererSignal(string vizName, string renderClass, string renderInst);
@@ -140,15 +138,15 @@ private:
     int                 _currentRow;
     std::vector<string> _widgetNames;
 
-    void getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const;
+    void _getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const;
 
-    void                 makeConnections();
-    void                 initializeSplitter();
-    string               getActiveRendererClass();
-    string               getActiveRendererInst();
-    void                 highlightActiveRow(int row);
-    void                 changeRendererName(int row, int col);
-    VAPoR::RenderParams *getRenderParamsFromCell(int row, int col);
+    void   _makeConnections();
+    void   _initializeSplitter();
+    string _getActiveRendererClass();
+    string _getActiveRendererInst();
+    // void highlightActiveRow(int row);
+    void                 _changeRendererName(int row, int col);
+    VAPoR::RenderParams *_getRenderParamsFromCell(int row, int col);
 
 #endif    // DOXYGEN_SKIP_THIS
 };
