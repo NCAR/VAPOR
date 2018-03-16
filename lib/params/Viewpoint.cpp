@@ -137,9 +137,7 @@ void Viewpoint::GetProjectionMatrix(double m[16]) const {
 void Viewpoint::SetProjectionMatrix(const double m[16]) {
 	vector <double> val;
 	for (int i=0; i<16; i++) val.push_back(m[i]);
-	
 	SetValueDoubleVec(_projectionMatrixTag, "Projection matrix", val);
-
 }
 
 
