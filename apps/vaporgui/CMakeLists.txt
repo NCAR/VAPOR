@@ -4,7 +4,6 @@ set (SRCS
 	RenderHolder.cpp
 	ImageFrame.cpp
 	ControlPointEditor.cpp
-	BoxSliderFrame.cpp
 	DomainWidget.cpp
 	GLWidget.cpp
 	OpacityWidget.cpp

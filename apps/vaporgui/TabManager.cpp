@@ -28,8 +28,6 @@
 #include "SettingsEventRouter.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
-#include "AppSettingsParams.h"
-
 #include "TabManager.h"
 
 using namespace VAPoR;
@@ -58,6 +56,8 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce)
     _prevFrontTab = "";
 
     _initialized = false;
+    _animationEventRouter = NULL;
+    _navigationEventRouter = NULL;
 
     setElideMode(Qt::ElideNone);
 
@@ -113,6 +113,18 @@ void TabManager::MoveToFront(string subTabName) {
     }
 }
 
+void TabManager::GetWebHelp(
+    string tabName,
+    std::vector<std::pair<string, string>> &help) const {
+    help.clear();
+
+    EventRouter *er = _getEventRouter(tabName);
+    if (!er)
+        return;
+
+    return (er->GetWebHelp(help));
+}
+
 //
 //  Find the index of the widget in its subTabWidget that has the specified type
 //
@@ -148,7 +160,7 @@ int TabManager::_getTabIndex(string tabName) const {
 
 void TabManager::SetActiveViz(const QString &vizNameQ) {
 
-    show();
+    this->show();
     // Make the renderHolder show either the active renderer or none.
     //
     _renderHolder->Update();
@@ -178,23 +190,6 @@ void TabManager::Update() {
     _updateRouters();
 }
 
-void TabManager::_newFrontTab(int tabIndex, int newSubPosn) {
-
-    _prevFrontTab = _currentFrontTab;
-
-    if (!_prevFrontTab.empty()) {
-        _prevFrontSubTab[_prevFrontTab] = _currentFrontSubTab[_prevFrontTab];
-    }
-
-    _currentFrontTab = _tabNames[tabIndex];
-    _currentFrontSubTab[_currentFrontTab] = _subTabNames[_currentFrontTab][newSubPosn];
-
-    EventRouter *eRouter = GetEventRouter(_subTabNames[_currentFrontTab][newSubPosn]);
-    eRouter->updateTab();
-
-    emit ActiveEventRouterChanged(eRouter->GetType());
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // SLOTS
@@ -203,10 +198,23 @@ void TabManager::_newFrontTab(int tabIndex, int newSubPosn) {
 
 void TabManager::_setSubTab(int posn) {
     int tabIndex = currentIndex();
-    if (tabIndex < 0)
+
+    if (posn < 0)
         return;
 
-    _newFrontTab(tabIndex, posn);
+    _prevFrontTab = _currentFrontTab;
+
+    if (!_prevFrontTab.empty()) {
+        _prevFrontSubTab[_prevFrontTab] = _currentFrontSubTab[_prevFrontTab];
+    }
+
+    _currentFrontTab = _tabNames[tabIndex];
+    _currentFrontSubTab[_currentFrontTab] = _subTabNames[_currentFrontTab][posn];
+
+    EventRouter *eRouter = _getEventRouter(_subTabNames[_currentFrontTab][posn]);
+    eRouter->updateTab();
+
+    emit ActiveEventRouterChanged(eRouter->GetType());
 }
 
 // Catch any change in the top tab, update the eventRouter of the sub tab.
@@ -221,13 +229,15 @@ void TabManager::_setFrontTab(int newFrontPosn) {
         _prevFrontSubTab[_prevFrontTab] = _currentFrontSubTab[_prevFrontTab];
     }
 
-    string subTab = _currentFrontSubTab[_tabNames[newFrontPosn]];
-    if (subTab.empty())
-        return;
     _prevFrontTab = _currentFrontTab;
     _currentFrontTab = _tabNames[newFrontPosn];
 
-    EventRouter *eRouter = GetEventRouter(subTab);
+    string subTab = _currentFrontSubTab[_tabNames[newFrontPosn]];
+    if (subTab.empty()) {
+        subTab = _subTabNames[_tabNames[newFrontPosn]][0];
+    }
+
+    EventRouter *eRouter = _getEventRouter(subTab);
 
     QWidget *wid = dynamic_cast<QWidget *>(eRouter);
     if (wid && wid->isVisible()) {
@@ -246,7 +256,7 @@ void TabManager::_setActive(
 
     ShowRenderWidget(renderClass);
 
-    RenderEventRouter *eRouter = GetRenderEventRouter(
+    RenderEventRouter *eRouter = _getRenderEventRouter(
         activeViz, renderClass, renderInst);
 
     eRouter->SetActive(renderInst);
@@ -258,6 +268,7 @@ void TabManager::_setActive(
 
 void TabManager::_newRenderer(
     string activeViz, string renderClass, string renderInst) {
+
     if (renderClass.empty() || renderInst.empty()) {
         HideRenderWidgets();
         return;
@@ -265,7 +276,7 @@ void TabManager::_newRenderer(
 
     ShowRenderWidget(renderClass);
 
-    RenderEventRouter *er = GetRenderEventRouter(
+    RenderEventRouter *er = _getRenderEventRouter(
         activeViz, renderClass, renderInst);
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -345,7 +356,14 @@ void TabManager::Reinit() {
     EnableRouters(true);
 }
 
-EventRouter *TabManager::GetEventRouter(string erType) const {
+void TabManager::LoadDataNotify(string dataSetName) {
+    map<string, EventRouter *>::iterator itr;
+    for (itr = _eventRouterMap.begin(); itr != _eventRouterMap.end(); ++itr) {
+        itr->second->LoadDataNotify(dataSetName);
+    }
+}
+
+EventRouter *TabManager::_getEventRouter(string erType) const {
     map<string, EventRouter *>::const_iterator itr;
     itr = _eventRouterMap.find(erType);
     if (itr == _eventRouterMap.end()) {
@@ -355,7 +373,7 @@ EventRouter *TabManager::GetEventRouter(string erType) const {
     return itr->second;
 }
 
-RenderEventRouter *TabManager::GetRenderEventRouter(
+RenderEventRouter *TabManager::_getRenderEventRouter(
     string winName, string renderType, string instName) const {
 
     map<string, EventRouter *>::const_iterator itr;
@@ -404,14 +422,29 @@ void TabManager::_createAllDefaultTabs() {
     // Install built-in tabs
     //
     parent = _getTabWidget(_navigationTabName);
-    er = new AnimationEventRouter(parent, _controlExec);
+    _animationEventRouter = new AnimationEventRouter(
+        parent, _controlExec);
+
+    connect(
+        _animationEventRouter, SIGNAL(AnimationOnOffSignal(bool)),
+        this, SLOT(_setAnimationOnOff(bool)));
+    connect(
+        _animationEventRouter, SIGNAL(AnimationDrawSignal()),
+        this, SLOT(_setAnimationDraw()));
+
+    er = _animationEventRouter;
     _installTab(_navigationTabName, er->GetType(), er);
 
     parent = _getTabWidget(_navigationTabName);
-    er = new NavigationEventRouter(parent, _controlExec);
+    _navigationEventRouter = new NavigationEventRouter(parent, _controlExec);
+    er = _navigationEventRouter;
     _installTab(_navigationTabName, er->GetType(), er);
 
-    parent = _getTabWidget(_settingsTabName);
+    connect(
+        (NavigationEventRouter *)er, SIGNAL(Proj4StringChanged(string)),
+        this, SLOT(_setProj4String(string)));
+
+    parent = _getSubTabWidget(_settingsTabName);
     er = new SettingsEventRouter(parent, _controlExec);
     _installTab(_settingsTabName, er->GetType(), er);
 
@@ -438,6 +471,9 @@ void TabManager::_installTab(
     eRouter->hookUpTab();
     QWidget *tabWidget = dynamic_cast<QWidget *>(eRouter);
     assert(tabWidget);
+    if (subTabName != SettingsParams::GetClassType()) {
+        tabWidget->setEnabled(false);
+    }
     _addSubTabWidget(tabWidget, subTabName, tabName);
 }
 
@@ -449,6 +485,12 @@ void TabManager::_registerEventRouter(
 void TabManager::_installWidgets() {
 
     clear();
+
+    _currentFrontTab = _tabNames[0];
+    for (int i = 0; i < _tabNames.size(); i++) {
+        string tabName = _tabNames[i];
+        _currentFrontSubTab[tabName] = _subTabNames[tabName][0];
+    }
 
     // Create top widgets.  Tab widgets exist but need to be
     // inserted as tabs, based on their type
@@ -501,7 +543,6 @@ void TabManager::_installWidgets() {
 
     //Start them with the renderer tab showing.
 
-    _currentFrontTab = _tabNames[0];
     setCurrentIndex(0);
 
     for (int j = 0; j < _tabNames.size(); j++) {
@@ -543,7 +584,7 @@ void TabManager::_updateRouters() {
     for (int i = 0; i < tabNames.size(); i++) {
         string tab = tabNames[i];
 
-        EventRouter *eRouter = GetEventRouter(tab);
+        EventRouter *eRouter = _getEventRouter(tab);
         RenderEventRouter *reRouter = dynamic_cast<RenderEventRouter *>(eRouter);
 
         if (reRouter)
@@ -562,7 +603,7 @@ void TabManager::_updateRouters() {
 
     if (activeViz.size() && renderClass.size() && instName.size()) {
 
-        EventRouter *eRouter = GetRenderEventRouter(
+        EventRouter *eRouter = _getRenderEventRouter(
             activeViz, renderClass, instName);
 
         eRouter->updateTab();
