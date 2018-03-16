@@ -1,4 +1,4 @@
-//-- VizFeatureRenderer.h ----------------------------------------------------------
+//-- AnnotationsRenderer.h ----------------------------------------------------------
 //
 //                   Copyright (C)  2011
 //     University Corporation for Atmospheric Research
@@ -6,42 +6,44 @@
 //
 //----------------------------------------------------------------------------
 //
-//      File:           VizFeatureRenderer.h
+//      File:           AnnotationsRenderer.h
 //
 //      Author:         Alan Norton
 //
 //
-//      Description:  Definition of VizFeatureRenderer class
+//      Description:  Definition of AnnotationsRenderer class
 //
 //
 //
 //----------------------------------------------------------------------------
 
-#ifndef VIZFEATURERENDERER_H
-#define VIZFEATURERENDERER_H
+#ifndef ANNOTATIONSRENDERER_H
+#define ANNOTATIONSRENDERER_H
 
 #include <vapor/Grid.h>
 #include <vapor/Renderer.h>
 #include <vapor/textRenderer.h>
+#include <vapor/Transform.h>
+#include <vapor/DataMgrUtils.h>
 
 namespace VAPoR {
 
 class DataStatus;
 
-//! \class VizFeatureRenderer
-//! \brief Class that draws various geometry as specified by VizFeatureParams
+//! \class AnnotationsRenderer
+//! \brief Class that draws various geometry as specified by AnnotationsParams
 //! \author Alan Norton
 //! \version 3.0
 //! \date July 2015
 
-class RENDER_API VizFeatureRenderer : public MyBase {
+class RENDER_API AnnotationsRenderer : public MyBase {
 
   private:
     struct billboard;
 
   public:
     //! Constructor, must invoke Renderer constructor
-    VizFeatureRenderer(
+    AnnotationsRenderer(
         const ParamsMgr *pm, const DataStatus *dataStatus, string winName);
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
@@ -49,7 +51,7 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     void InitializeGL(ShaderMgr *sm);
 
     //! Destructor
-    virtual ~VizFeatureRenderer();
+    virtual ~AnnotationsRenderer();
 
     //! Render the in-scene features
     void InScenePaint(size_t ts);
@@ -89,15 +91,31 @@ class RENDER_API VizFeatureRenderer : public MyBase {
     const DataStatus *m_dataStatus;
     string m_winName;
     ShaderMgr *m_shaderMgr;
+    int _currentTimestep;
     bool _textObjectsValid;
     TextObject *_textObject;
     string _fontFile;
 
+    void _drawAxes(
+        std::vector<double> min,
+        std::vector<double> max,
+        std::vector<double> origin,
+        std::vector<double> color,
+        double width);
+    void _drawTic(double startPosn[],
+                  double endPosn[],
+                  double width,
+                  std::vector<double> color);
+
     //! Render the domain fram
     void drawDomainFrame(size_t ts) const;
 
-    void getDomainExtents(
-        vector<double> &minExts, vector<double> &maxExts) const;
+    std::vector<double> getDomainExtents(string dmName = "") const;
+    AxisAnnotation *getCurrentAxisAnnotation();
+    string getCurrentDataMgrName() const;
+    void scaleNormalizedCoordinatesToWorld(
+        std::vector<double> &coords,
+        string dataMgrName);
 
 #ifdef DEAD
     //! Render the region frame
@@ -106,7 +124,13 @@ class RENDER_API VizFeatureRenderer : public MyBase {
 
     // Draw the axis lines, while building text labels.
     //
-    void drawAxisTics();
+    void drawAxisTics(AxisAnnotation *aa = NULL);
+    void applyTransform(Transform *t);
+    void renderText(double text, double coords[], AxisAnnotation *aa = NULL);
+    Transform *getTransform(string dataMgr = "");
+    void convertPointToLon(double &xCoord, string dataMgr = "");
+    void convertPointToLat(double &yCoord, string dataMgr = "");
+    void convertPointToLonLat(double &xCoord, double &yCoord, string dataMgr = "");
 
     // Draw Axis arrows
     //
@@ -137,4 +161,4 @@ class RENDER_API VizFeatureRenderer : public MyBase {
 
 }; // namespace VAPoR
 
-#endif //VIZFEATURERENDERER_H
+#endif //ANNOTATIONSRENDERER_H
