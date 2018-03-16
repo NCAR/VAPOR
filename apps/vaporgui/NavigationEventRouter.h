@@ -55,6 +55,8 @@ public:
 
     virtual void updateTab();
 
+    void LoadDataNotify(string dataSetName);
+
 signals:
     void Proj4StringChanged(string proj4String);
 
@@ -83,6 +85,8 @@ private:
     void _setViewpointParams(const double center[3], const double posvec[3], const double dirvec[3], const double upvec[3]) const;
 
     bool _getViewpointParams(double center[3], double posvec[3], double dirvec[3], double upvec[3]) const;
+
+    void _performAutoStretching(string dataSetName);
 
 public slots:
     void UseHomeViewpoint();

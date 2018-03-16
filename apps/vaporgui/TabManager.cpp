@@ -328,6 +328,12 @@ void TabManager::Restart()
 
 void TabManager::Reinit() { EnableRouters(true); }
 
+void TabManager::LoadDataNotify(string dataSetName)
+{
+    map<string, EventRouter *>::iterator itr;
+    for (itr = _eventRouterMap.begin(); itr != _eventRouterMap.end(); ++itr) { itr->second->LoadDataNotify(dataSetName); }
+}
+
 EventRouter *TabManager::_getEventRouter(string erType) const
 {
     map<string, EventRouter *>::const_iterator itr;

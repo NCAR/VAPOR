@@ -115,6 +115,10 @@ public:
     void Restart();
     void Reinit();
 
+    //! Notify TabManager that  a new data set has been loaded
+    //!
+    void LoadDataNotify(string dataSetName);
+
 signals:
 
     //! Triggered when currently active event router changes

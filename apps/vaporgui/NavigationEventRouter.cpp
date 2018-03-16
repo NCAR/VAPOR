@@ -126,6 +126,56 @@ void NavigationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
     help.push_back(make_pair("Lighting Settings", "http://www.vapor.ucar.edu/docs/vapor-gui-help/viewpoint-and-lighting#LightingControl"));
 }
 
+void NavigationEventRouter::_performAutoStretching(string dataSetName)
+{
+    GUIStateParams *p = GetStateParams();
+    DataStatus *    ds = _controlExec->GetDataStatus();
+
+    ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+
+    vector<double> minExt, maxExt;
+
+    for (int i = 0; i < winNames.size(); i++) {
+        double xRange, yRange, zRange;
+
+        DataMgr *           dm = ds->GetDataMgr(dataSetName);
+        std::vector<string> varNames = dm->GetDataVarNames(3);
+
+        if (varNames.empty()) { std::vector<string> varNames = dm->GetDataVarNames(2); }
+        if (varNames.empty()) return;
+
+        DataMgrUtils::GetExtents(dm, 0, varNames[0], minExt, maxExt);
+
+        vector<float> range;
+        float         maxRange = 0.0;
+        for (int i = 0; i < minExt.size(); i++) {
+            float r = fabs(maxExt[i] - minExt[i]);
+            if (maxRange < r) { maxRange = r; }
+            range.push_back(r);
+        }
+
+        vector<double> scale(range.size(), 1.0);
+        for (int i = 0; i < range.size(); i++) {
+            if (range[i] < (maxRange / 10.0)) { scale[i] = maxRange / (10.0 * range[i]); }
+        }
+
+        ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+        Transform *      transform = vpParams->GetTransform(dataSetName);
+        transform->SetScales(scale);
+    }
+}
+
+void NavigationEventRouter::LoadDataNotify(string dataSetName)
+{
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    SettingsParams *sP = (SettingsParams *)paramsMgr->GetParams(SettingsParams::GetClassType());
+
+    bool autoStretchingEnabled = sP->GetAutoStretchEnabled();
+    if (autoStretchingEnabled) { _performAutoStretching(dataSetName); }
+}
+
 /*********************************************************************************
  * Slots associated with ViewpointTab:
  *********************************************************************************/
