@@ -43,6 +43,7 @@ set (SRCS
 	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
+	DVREventRouter.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	MiscParams.cpp
@@ -112,6 +113,7 @@ set (UIS
 	ContourGeometryGUI.ui
 	ContourVariablesGUI.ui
 	FidelityWidgetGUI.ui
+	DVREventRouter.ui
 	QSliderEdit.ui
 	QRange.ui
 	QSinglePoint.ui

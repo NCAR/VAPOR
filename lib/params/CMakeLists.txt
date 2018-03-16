@@ -20,6 +20,7 @@ add_library (params SHARED
 	ImageParams.cpp
 	TFInterpolator.cpp
 	ContourParams.cpp
+	DVRParams.cpp
 	AxisAnnotation.cpp
 )
 
