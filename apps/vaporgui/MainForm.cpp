@@ -1087,50 +1087,6 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
 }
 
-void MainForm::performAutoStretching()
-{
-    GUIStateParams * p = GetStateParams();
-    DataStatus *     ds = _controlExec->GetDataStatus();
-    vector<string>   dataSets = p->GetOpenDataSetNames();
-    vector<string>   winNames = _paramsMgr->GetVisualizerNames();
-    vector<double>   minExt, maxExt;
-    vector<int>      axes;
-    AnimationParams *aParams = GetAnimationParams();
-    size_t           timestep = aParams->GetCurrentTimestep();
-
-    for (int i = 0; i < dataSets.size(); i++) {
-        for (int i = 0; i < winNames.size(); i++) {
-            double xRange, yRange, zRange;
-
-            DataMgr *           dm = ds->GetDataMgr(dataSets[i]);
-            std::vector<string> varNames = dm->GetDataVarNames(3);
-
-            if (varNames.empty()) continue;
-
-            //			ds->GetExtents(_paramsMgr, winNames[i], dataSets[i], timestep,
-            //				minExt, maxExt
-            //			);
-
-            DataMgrUtils::GetExtents(dm, timestep, varNames, minExt, maxExt, axes);
-
-            if (minExt.size() < 3) return;
-
-            xRange = maxExt[0] - minExt[0];
-            yRange = maxExt[1] - minExt[1];
-            zRange = maxExt[2] - minExt[2];
-
-            double hypotenuse = sqrt(xRange * xRange + yRange * yRange);
-            double scale = (hypotenuse / 2.f) / zRange;
-
-            ViewpointParams *   vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-            Transform *         transform = vpParams->GetTransform(dataSets[i]);
-            std::vector<double> scales = transform->GetScales();
-            scales[2] = scale;
-            transform->SetScales(scales);
-        }
-    }
-}
-
 // Load data into current session
 // If current session is at default then same as loadDefaultData
 //
@@ -1140,10 +1096,6 @@ void MainForm::loadData(string fileName)
     if (!fileName.empty()) { files.push_back(fileName); }
 
     loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.*)", "vdc", false);
-
-    SettingsParams *sP = GetSettingsParams();
-    bool            autoStretchingEnabled = sP->GetAutoStretchEnabled();
-    if (autoStretchingEnabled) { performAutoStretching(); }
 }
 
 void MainForm::closeData(string fileName)
