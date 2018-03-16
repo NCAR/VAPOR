@@ -504,7 +504,8 @@ void MainForm::_createVizToolBar()
     _alignViewCombo->addItem("     - X ");
     _alignViewCombo->addItem("     - Y ");
     _alignViewCombo->addItem("Default: - Z ");
-    _alignViewCombo->setToolTip("Rotate view to an axis-aligned viewpoint,\ncentered on current rotation center.");
+    _alignViewCombo->setToolTip("Rotate view to an axis-aligned viewpoint,\ncentered on current "
+                                "rotation center.");
 
     _vizToolBar->addWidget(_alignViewCombo);
 
@@ -512,7 +513,8 @@ void MainForm::_createVizToolBar()
     _interactiveRefinementSpin->setPrefix(" Interactive Refinement: ");
     _interactiveRefinementSpin->setMinimumWidth(230);
 
-    _interactiveRefinementSpin->setToolTip("Specify minimum refinement level during mouse motion,\nused in DVR and Iso rendering");
+    _interactiveRefinementSpin->setToolTip("Specify minimum refinement level during mouse motion,\nused "
+                                           "in DVR and Iso rendering");
     _interactiveRefinementSpin->setWhatsThis(QString("While the viewpoint is changing due to mouse-dragging "
                                                      "in a visualizer, the refinement level used by the DVR "
                                                      "and Iso renderers is reduced to this interactive refinement level, "
