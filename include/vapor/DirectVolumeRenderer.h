@@ -36,11 +36,10 @@ public:
 
   static std::string GetClassType()
   {
-    return ("DirectVolumeRenderer");
+    return ("Direct Volume Renderer");
   }
     
 protected:
-
   // pure virtual functions that are required to implement
   int _initializeGL();
   int _paintGL();
