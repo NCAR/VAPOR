@@ -18,6 +18,7 @@ add_library (render SHARED
 	AnnotationsRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
+	DirectVolumeRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 )
