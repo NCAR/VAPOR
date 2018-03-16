@@ -1317,6 +1317,8 @@ bool MainForm::openDataHelper(
 
 	p->InsertOpenDateSet(dataSetName, format, files);
 
+	_tabMgr->LoadDataNotify(dataSetName);
+
 	return(true);
 }
 
@@ -1419,8 +1421,6 @@ void MainForm::performAutoStretching() {
 
 			double hypotenuse = sqrt(xRange*xRange + yRange*yRange);
 			double scale = (hypotenuse/2.f) / zRange;
-
-			cout << "Auto-stretch scale: " << scale << endl;
 
 			ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
 			Transform* transform = vpParams->GetTransform(dataSets[i]);
