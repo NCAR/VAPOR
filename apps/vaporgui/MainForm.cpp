@@ -1130,12 +1130,6 @@ void MainForm::loadDataHelper(
         viewAll();
         setHome();
 
-        vector<string> winNames = _paramsMgr->GetVisualizerNames();
-        for (int i = 0; i < winNames.size(); i++) {
-            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(
-                winNames[i]);
-            vpParams->SetCurrentVPToHome();
-        }
         _sessionNewFlag = false;
     }
 
