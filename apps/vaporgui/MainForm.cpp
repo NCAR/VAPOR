@@ -974,11 +974,6 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
         viewAll();
         setHome();
 
-        vector<string> winNames = _paramsMgr->GetVisualizerNames();
-        for (int i = 0; i < winNames.size(); i++) {
-            ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winNames[i]);
-            vpParams->SetCurrentVPToHome();
-        }
         _sessionNewFlag = false;
     }
 
