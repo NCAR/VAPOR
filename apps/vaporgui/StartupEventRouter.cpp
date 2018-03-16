@@ -38,8 +38,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "TabManager.h"
-
 #include "StartupEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
