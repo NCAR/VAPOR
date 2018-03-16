@@ -63,6 +63,28 @@ DataMgr *RenderEventRouter::GetActiveDataMgr() const
     return (dataMgr);
 }
 
+string RenderEventRouter::GetSmallIconImagePath() const
+{
+    string imageName = _getSmallIconImagePath();
+    if (imageName.empty()) return (imageName);
+
+    vector<string> path;
+    path.push_back("Images");
+    path.push_back(imageName);
+    return (GetAppPath("VAPOR", "share", path));
+}
+
+string RenderEventRouter::GetIconImagePath() const
+{
+    string imageName = _getIconImagePath();
+    if (imageName.empty()) return (imageName);
+
+    vector<string> path;
+    path.push_back("Images");
+    path.push_back(imageName);
+    return (GetAppPath("VAPOR", "share", path));
+}
+
 // Calculate histogram for a planar slice of data, such as in
 // the probe or the isolines.
 //
@@ -304,4 +326,28 @@ void RenderEventRouter::updateTab()
     if (!dataMgr) return;
 
     EventRouter::updateTab();
+}
+
+RenderEventRouter *RenderEventRouterFactory::CreateInstance(string className, QWidget *parent, VAPoR::ControlExec *ce)
+{
+    RenderEventRouter *instance = NULL;
+
+    // find className in the registry and call factory method.
+    //
+    auto it = _factoryFunctionRegistry.find(className);
+    if (it != _factoryFunctionRegistry.end()) instance = it->second(parent, ce);
+
+    if (instance != NULL)
+        return instance;
+    else
+        return NULL;
+}
+
+vector<string> RenderEventRouterFactory::GetFactoryNames() const
+{
+    vector<string>                                                                              names;
+    map<string, function<RenderEventRouter *(QWidget *, VAPoR::ControlExec *)>>::const_iterator itr;
+
+    for (itr = _factoryFunctionRegistry.begin(); itr != _factoryFunctionRegistry.end(); ++itr) { names.push_back(itr->first); }
+    return (names);
 }

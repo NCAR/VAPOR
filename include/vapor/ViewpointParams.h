@@ -70,13 +70,6 @@ public:
     //! \retval float Specular exponent
     double getExponent() const { return (GetValueDouble(_specularExpTag, _defaultSpecularExp)); }
 
-    //! Set the current viewpoint to be the home viewpoint
-    void SetCurrentVPToHome()
-    {
-        Viewpoint *currentViewpoint = getCurrentViewpoint();
-        setHomeViewpoint(currentViewpoint);
-    }
-
     //! Set the number of directional light sources
     //! \param[in] int number of lights (0,1,2)
     //! \retval 0 on success
@@ -142,12 +135,6 @@ public:
     //! \sa Viewpoint
     void SetCurrentViewpoint(Viewpoint *newVP);
 
-    //! Set the home viewpoint
-    //! \param[in] Viewpoint* home viewpoint to be set
-    //! \retval int 0 if successful
-    //! \sa Viewpoint
-    void setHomeViewpoint(Viewpoint *newVP);
-
     //! Set widow width and height
     //!
     //! \param[in] width width of window in pixels
@@ -172,19 +159,9 @@ public:
     //! \param[in] factors 3-vector of stretch factors
     void SetStretchFactors(vector<double> factors);
 
-    //! Obtain the home viewpoint
-    //! \sa Viewpoint
-    //! \retval Viewpoint* current home viewpoint.
-    virtual Viewpoint *GetHomeViewpoint() const
-    {
-        Viewpoint *v = (Viewpoint *)m_VPs->GetParams(_homeViewTag);
-        assert(v != NULL);
-        return (v);
-    }
-
     //! Obtain the current viewpoint
     //! \sa Viewpoint
-    //! \retval Viewpoint* current home viewpoint.
+    //! \retval Viewpoint* current viewpoint.
     virtual Viewpoint *getCurrentViewpoint() const
     {
         Viewpoint *v = (Viewpoint *)m_VPs->GetParams(_currentViewTag);
@@ -258,7 +235,6 @@ private:
     static const string _viewPointsTag;
     static const string _transformsTag;
     static const string _currentViewTag;
-    static const string _homeViewTag;
     static const string _lightDirectionsTag;
     static const string _diffuseCoeffTag;
     static const string _specularCoeffTag;
