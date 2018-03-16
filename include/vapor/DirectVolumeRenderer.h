@@ -36,7 +36,7 @@ public:
 
   static std::string GetClassType()
   {
-    return ("Direct Volume Renderer");
+    return ("Direct_Volume_Renderer");
   }
     
 protected:
