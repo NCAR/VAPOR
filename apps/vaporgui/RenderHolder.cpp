@@ -86,7 +86,7 @@ QPushButton *NewRendererDialog::_createButton(
     QIcon icon,
     QString name,
     int index) {
-    QPushButton *button = new QPushButton(name, this);
+    QPushButton *button = new QPushButtonWithDoubleClick(name, this);
     button->setIconSize(QSize(50, 50));
     button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     button->setLayoutDirection(Qt::RightToLeft);
@@ -94,6 +94,7 @@ QPushButton *NewRendererDialog::_createButton(
     button->setProperty("index", index);
 
     connect(button, SIGNAL(toggled(bool)), this, SLOT(_buttonChecked()));
+    connect(button, SIGNAL(doubleClicked()), this, SLOT(_buttonDoubleClicked()));
     return button;
 }
 
@@ -131,6 +132,10 @@ void NewRendererDialog::_buttonChecked() {
     descriptionLabel->setText(description);
 
     _selectedRenderer = _rendererNames[index];
+}
+
+void NewRendererDialog::_buttonDoubleClicked() {
+    this->accept();
 }
 
 void NewRendererDialog::_uncheckAllButtons() {
