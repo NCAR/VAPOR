@@ -1,0 +1,37 @@
+#ifndef DVREVENTROUTER_H
+#define DVREVENTROUTER_H
+
+#include <QWidget>
+
+#include "RenderEventRouter.h"
+#include <vapor/DVRParams.h>
+#include <vapor/DirectVolumeRenderer.h>
+
+namespace Ui {
+class DVREventRouter;
+}
+
+class DVREventRouter : public QWidget, public RenderEventRouter {
+    Q_OBJECT
+
+public:
+    explicit DVREventRouter(QWidget *parent, VAPoR::ControlExec *ce);
+    ~DVREventRouter();
+
+    void               GetWebHelp(vector<pair<string, string>> &help) const;
+    static std::string GetClassType() { return (VAPoR::DirectVolumeRenderer::GetClassType()); }
+    std::string        GetType() const { return GetClassType(); }
+
+protected:
+    void        _updateTab();
+    std::string _getDescription() const { return std::string("DVR Renderer"); }
+
+    std::string _getSmallIconImagePath() const { return std::string("DVR_small.png"); }
+
+    std::string _getIconImagePath() const { return std::string("DVR.png"); }
+
+private:
+    Ui::DVREventRouter *ui;
+};
+
+#endif    // DVREVENTROUTER_H
