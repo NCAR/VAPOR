@@ -24,11 +24,9 @@ public:
 
 protected:
     void        _updateTab();
-    std::string _getDescription() const { return std::string("DVR Renderer"); }
-
-    std::string _getSmallIconImagePath() const { return std::string("DVR_small.png"); }
-
-    std::string _getIconImagePath() const { return std::string("DVR.png"); }
+    std::string _getDescription() const;
+    std::string _getSmallIconImagePath() const;
+    std::string _getIconImagePath() const;
 
 private:
     Ui::DVREventRouter *ui;

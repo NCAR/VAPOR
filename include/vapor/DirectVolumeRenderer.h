@@ -27,7 +27,7 @@ public:
 
     virtual ~DirectVolumeRenderer();
 
-    static std::string GetClassType() { return ("DirectVolumeRenderer"); }
+    static std::string GetClassType() { return ("Direct Volume Renderer"); }
 
 protected:
     // pure virtual functions that are required to implement
