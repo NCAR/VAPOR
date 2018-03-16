@@ -108,12 +108,29 @@ void TFWidget::enableTFWidget(bool state)
     colorInterpCombo->setEnabled(state);
 }
 
+void TFWidget::loadTF()
+{
+    string varname = getCurrentVarName();
+    if (varname.empty()) return;
+
+    // Ignore TF's in session, for now.
+
+    SettingsParams *sP;
+    sP = (SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType());
+    string path = sP->GetTFDir();
+
+    fileLoadTF(varname, path.c_str(), true);
+
+    Update(_dataMgr, _paramsMgr, _rParams);
+}
+
 void TFWidget::loadTF(string varname)
 {
-    GUIStateParams *p;
-    p = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    SettingsParams *sP;
+    sP = (SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType());
 
-    string path = p->GetCurrentTFPath();
+    string path = sP->GetTFDir();
+
     fileLoadTF(varname, path.c_str(), true);
 }
 
@@ -122,7 +139,13 @@ void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
     QString s = QFileDialog::getOpenFileName(0, "Choose a transfer function file to open", startPath, "Vapor 3 Transfer Functions (*.tf3)");
 
     // Null string indicates nothing selected
-    if (s.length() == 0) return;
+    if (s.length() == 0)
+        return;
+    else {
+        SettingsParams *sP;
+        sP = (SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType());
+        sP->SetTFDir(s.toStdString());
+    }
 
     // Force name to end with .tf3
     if (!s.endsWith(".tf3")) { s += ".tf3"; }
@@ -434,22 +457,6 @@ void TFWidget::setUseWhitespace(int state)
     MapperFunction *tf = getCurrentMapperFunction();
     tf->setUseWhitespace(state);
     updateHisto();
-}
-
-void TFWidget::loadTF()
-{
-    string varname = getCurrentVarName();
-    if (varname.empty()) return;
-
-    // Ignore TF's in session, for now.
-
-    GUIStateParams *p;
-    p = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    string path = p->GetCurrentTFPath();
-
-    fileLoadTF(varname, p->GetCurrentTFPath().c_str(), true);
-
-    Update(_dataMgr, _paramsMgr, _rParams);
 }
 
 bool TFWidget::autoUpdateHisto()

@@ -329,7 +329,7 @@ void VizWinMgr::Reinit()
 {
     if (_controlExec->GetDataNames().size() == 0) return;
 
-    DataStatus *dataStatus = _controlExec->getDataStatus();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
     ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
     size_t      ts = _getAnimationParams()->GetCurrentTimestep();
 

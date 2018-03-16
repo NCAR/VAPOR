@@ -23,6 +23,7 @@
 #include <qwidget.h>
 #include <QKeyEvent>
 
+#include <vapor/ControlExecutive.h>
 #include "GUIStateParams.h"
 class RenderHolder;
 class EventRouter;
