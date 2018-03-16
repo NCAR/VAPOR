@@ -20,9 +20,9 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include "vapor/ParamsMgr.h"
 #include "vapor/RenderParams.h"
 #include "vapor/DataMgrUtils.h"
-#include "MainForm.h"
 #include "GeometryWidget.h"
 
 using namespace VAPoR;
