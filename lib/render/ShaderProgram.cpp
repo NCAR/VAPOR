@@ -80,7 +80,7 @@ ShaderProgram::~ShaderProgram()
 //----------------------------------------------------------------------------
 // Load vertex shader source from a file. 
 //----------------------------------------------------------------------------
-int ShaderProgram::LoadVertexShader(string filename)
+int ShaderProgram::LoadVertexShader(const string& filename)
 {
 	return LoadShader(filename, GL_VERTEX_SHADER);
 }
@@ -89,7 +89,7 @@ int ShaderProgram::LoadVertexShader(string filename)
 //----------------------------------------------------------------------------
 // Load fragment shader source from a file. 
 //----------------------------------------------------------------------------
-int ShaderProgram::LoadFragmentShader(string filename)
+int ShaderProgram::LoadFragmentShader(const string& filename)
 {
 	return LoadShader(filename, GL_FRAGMENT_SHADER);
 }
@@ -100,7 +100,7 @@ int ShaderProgram::LoadFragmentShader(string filename)
 //
 // The shader is assumed to live in the executable directory.
 //----------------------------------------------------------------------------
-int ShaderProgram::LoadShader(string filename, GLenum shaderType)
+int ShaderProgram::LoadShader(const string& filename, GLenum shaderType)
 {
 	
 	//
@@ -164,7 +164,7 @@ int ShaderProgram::LoadShader(string filename, GLenum shaderType)
 //----------------------------------------------------------------------------
 // Load vertex shader source from a string. 
 //----------------------------------------------------------------------------
-int ShaderProgram::LoadVertexSource(const string &source, std::string fileName)
+int ShaderProgram::LoadVertexSource(const string &source, const std::string& fileName)
 {
 	return LoadSource(source, GL_VERTEX_SHADER, fileName);
 }
@@ -185,7 +185,7 @@ int ShaderProgram::LoadFragmentSource(const string &source)
 //----------------------------------------------------------------------------
 // Load fragment shader source from a file. 
 //----------------------------------------------------------------------------
-int ShaderProgram::LoadFragmentSource(const string &source, std::string fileName)
+int ShaderProgram::LoadFragmentSource(const string &source, const std::string& fileName)
 {
 	return LoadSource(source, GL_FRAGMENT_SHADER, fileName);
 }
@@ -194,7 +194,7 @@ int ShaderProgram::LoadFragmentSource(const string &source, std::string fileName
 //----------------------------------------------------------------------------
 // Create the shader from the char* source
 //----------------------------------------------------------------------------
-int ShaderProgram::LoadSource(const string &source, GLenum shaderType, std::string fileName)
+int ShaderProgram::LoadSource(const string &source, GLenum shaderType, const std::string& fileName)
 {
 	GLuint shader;
 	
@@ -460,7 +460,7 @@ void ShaderProgram::Disable()
 //----------------------------------------------------------------------------
 // Find uniform location in the shader. 
 //----------------------------------------------------------------------------
-GLint ShaderProgram::UniformLocation(string uniformName)
+GLint ShaderProgram::UniformLocation(const string& uniformName)
 {
 	GLint location;
 	if (GLEW_VERSION_2_0)
@@ -484,7 +484,7 @@ GLint ShaderProgram::UniformLocation(string uniformName)
 //----------------------------------------------------------------------------
 // Find attribute location in the shader. 
 //----------------------------------------------------------------------------
-GLint ShaderProgram::AttributeLocation(string attributeName) const
+GLint ShaderProgram::AttributeLocation(const string& attributeName) const
 {
 	GLint location;
 	if (GLEW_VERSION_2_0)
