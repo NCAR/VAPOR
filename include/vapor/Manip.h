@@ -25,8 +25,8 @@
 #include <vapor/glutil.h>
 
 // Handle diameter in pixels:
-//#define HANDLE_DIAMETER 50
-#define HANDLE_DIAMETER 3
+#define HANDLE_DIAMETER 50
+//#define HANDLE_DIAMETER 3
 namespace VAPoR {
 
 // class Visualizer;
@@ -63,7 +63,8 @@ public:
     //! \param[in] minExtents : The minimum extents that the manipulator can draw to
     //! \param[in] maxExtents : The maximum extents that the manipulator can draw to
     //! \param[in] windowSize: The current window size of the Visualizer
-    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<int> windowSize) = 0;
+    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<double> cameraPosition,
+                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize) = 0;
 
     //! Notify that manipulator that is being moved with the mouse
     //! \param[in] buttonNum - The mouse button being used to move the manipulator
@@ -106,6 +107,7 @@ protected:
 
     double _selection[6];
     double _extents[6];
+    double _cameraPosition[3];
     // std::vector<double> _selection;
     // std::vector<double> _extents;
 
@@ -139,7 +141,8 @@ public:
     virtual void render();
 
     //! @copydoc Manip::Update(std::vector<double>, std::vector<double> std::vector<double>, std::vector<double>)
-    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<int> windowSize);
+    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<double> cameraPosition,
+                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
     virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords){};
@@ -244,6 +247,11 @@ protected:
     bool             _isStretching;
     double           _handleSizeInScene;
     std::vector<int> _windowSize;
+    double           _cameraPosition[3];
+    double           _rotationCenter[3];
+    double           _modelViewMatrix[16];
+    double           _projectionMatrix[16];
+
     // screen coords where mouse is pressed:
     float _mouseDownPoint[2];
     // unit vector in direction of handle

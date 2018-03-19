@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2013				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2013				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //	File:		VizWin.cpp
@@ -78,9 +78,26 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     windowSize.push_back(width);
     windowSize.push_back(height);
 
-    cout << "winSize " << width << " " << height << endl;
-
-    _manip->Update(minExts, maxExts, minExts, maxExts, windowSize);
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
+    string           modeName = p->GetCurrentMouseMode();
+    double           rotCenter[3], cameraPos[3], dirvec[3], upvec[3];
+    p->GetRotationCenter(rotCenter);
+    p->GetCameraPos(cameraPos);
+    std::vector<double> vrotCenter;
+    vrotCenter.push_back(rotCenter[0]);
+    vrotCenter.push_back(rotCenter[1]);
+    vrotCenter.push_back(rotCenter[2]);
+    std::vector<double> vcameraPos;
+    vcameraPos.push_back(cameraPos[0]);
+    vcameraPos.push_back(cameraPos[1]);
+    vcameraPos.push_back(cameraPos[2]);
+    double mv[16];
+    vParams->GetModelViewMatrix(mv);
+    double proj[16];
+    vParams->GetProjectionMatrix(mv);
+    _manip->Update(minExts, maxExts, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
 }
 
 /*
@@ -330,11 +347,17 @@ void VizWin::mousePressEventNavigate(QMouseEvent *e)
 //
 void VizWin::mousePressEvent(QMouseEvent *e)
 {
-    double coords[2] = {(double)e->x(), (double)e->y()};
-    cout << "mousePrss " << _manip->mouseIsOverHandle(coords) << endl;
-
     _buttonNum = 0;
     _mouseClicked = true;
+
+    double screenCoords[2];
+    screenCoords[0] = (float)e->x() - 3.f;
+    screenCoords[1] = (float)(height() - e->y()) - 5.f;
+    double coords[2] = {(double)e->x(), (double)e->y()};
+    cout << "mousePrss " << _manip->mouseIsOverHandle(screenCoords) << endl;
+    cout << "mousePrss " << _manip->mouseIsOverHandle(coords) << endl;
+    cout << endl << endl << "scords " << screenCoords[0] << " " << screenCoords[1] << endl;
+    cout << "coords " << coords[0] << " " << coords[1] << endl << endl;
 
     if ((e->buttons() & Qt::LeftButton) && (e->buttons() & Qt::RightButton))
         ;    // do nothing
@@ -370,6 +393,9 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     double screenCoords[2];
     screenCoords[0] = (float)e->x() - 3.f;
     screenCoords[1] = (float)(height() - e->y()) - 5.f;
+
+    // double coords[2] = {(double)e->x(), (double)e->y()};
+    cout << "mousePrss " << _manip->mouseIsOverHandle(screenCoords) << endl;
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     AnimationParams *p = paramsMgr->GetAnimationParams(_winName);
@@ -681,16 +707,38 @@ void VizWin::paintGL()
     maxExts.push_back(4.04548e+06);
     maxExts.push_back(100000);
 
+    // double m[16];
+    // vParams->GetModelViewMatrix(m);
+    // double posvec[3], upvec[3], dirvec[3];
+    // bool status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
+
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
+    string           modeName = p->GetCurrentMouseMode();
+    double           rotCenter[3], cameraPos[3], dirvec[3], upvec[3];
+    p->GetRotationCenter(rotCenter);
+    p->GetCameraPos(cameraPos);
+    std::vector<double> vrotCenter;
+    vrotCenter.push_back(rotCenter[0]);
+    vrotCenter.push_back(rotCenter[1]);
+    vrotCenter.push_back(rotCenter[2]);
+    std::vector<double> vcameraPos;
+    vcameraPos.push_back(cameraPos[0]);
+    vcameraPos.push_back(cameraPos[1]);
+    vcameraPos.push_back(cameraPos[2]);
+
     size_t width, height;
     vParams->GetWindowSize(width, height);
     std::vector<int> windowSize;
     windowSize.push_back(width);
     windowSize.push_back(height);
 
-    cout << "winSize " << width << " " << height << endl;
+    double mv[16];
+    vParams->GetModelViewMatrix(mv);
+    double proj[16];
+    vParams->GetProjectionMatrix(proj);
 
-    _manip->Update(minExts, maxExts, minExts, maxExts, windowSize);
-
+    _manip->Update(minExts, maxExts, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
     _manip->render();
 
     swapBuffers();
