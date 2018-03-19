@@ -70,7 +70,7 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
         COLORVAR = (1u << 0),
     };
 
-    VariablesWidget(QWidget *parent);
+    VariablesWidget(QWidget *parent = 0);
 
     void Reinit(
         DisplayFlags dspFlags,
