@@ -63,12 +63,15 @@ void TranslateStretchManip::Update(
     std::vector<double> llc,
     std::vector<double> urc,
     std::vector<double> minExts,
-    std::vector<double> maxExts) {
+    std::vector<double> maxExts,
+    std::vector<int> windowSize) {
     //	_selection.insert(_selection.begin(), llc.begin(), llc.end());
     //	_selection.insert(_selection.end(), urc.begin(), urc.end());
 
     //	_extents.insert(_extents.begin(), minExts.begin(), minExts.end());
     //	_extents.insert(_extents.end(), maxExts.begin(), maxExts.end());
+
+    _windowSize = windowSize;
 
     std::copy(llc.begin(), llc.end(), _selection);
     std::copy(urc.begin(), urc.end(), _selection + 3);
@@ -532,9 +535,6 @@ void TranslateStretchManip::render() {
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
         drawHandleConnector(handleNum, handleExtents, _selection); //extents);
     }
-    cout << "draw cube faces " << endl;
-    for (int i = 0; i < 6; i++)
-        cout << _selection[i] << endl;
     //Then render the full box, unhighlighted and displaced
     drawBoxFaces();
     glPopAttrib();
@@ -550,8 +550,8 @@ double TranslateStretchManip::getPixelSize() const {
 
     size_t width, height;
     //	vpParams->GetWindowSize(width, height);
-    width = 500;
-    height = 500;
+    width = _windowSize[0];  //500;
+    height = _windowSize[1]; //500;
 
     double center[3] = {0., 0., 0.}; //, pos[3];
     double pos[3], upVec[3], viewDir[3];
@@ -643,8 +643,6 @@ void TranslateStretchManip::drawBoxFaces() {
     }
 
     //Now render the edges:
-
-    cout << "Corners " << corners[0][0] << " " << corners[0][1] << " " << corners[0][2] << endl;
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
