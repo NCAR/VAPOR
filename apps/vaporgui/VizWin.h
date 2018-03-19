@@ -22,6 +22,7 @@
 #include <GL/glew.h>
 #include <QGLWidget>
 #include "vapor/Visualizer.h"
+#include "vapor/Manip.h"
 #include <QWheelEvent>
 
 class QCloseEvent;
@@ -111,6 +112,8 @@ class VizWin : public QGLWidget {
 
     void setUpProjMatrix();
     void setUpModelViewMatrix();
+
+    VAPoR::Manip *_manip;
 };
 
 #endif // VIZWIN_H
