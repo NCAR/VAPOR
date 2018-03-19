@@ -75,7 +75,7 @@ public:
 	COLORVAR = (1u << 0),
  };
 
- VariablesWidget(QWidget* parent);
+ VariablesWidget(QWidget* parent = 0);
 
  void Reinit(
 	DisplayFlags dspFlags, 
