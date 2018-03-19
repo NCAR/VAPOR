@@ -68,10 +68,20 @@ VizWin::VizWin(
     minExts.push_back(-1.038e+06);
     minExts.push_back(2.81684e+06);
     minExts.push_back(0.f);
-    maxExts.push_back(2.78096e+06);
+    maxExts.push_back(220425);
     maxExts.push_back(4.04548e+06);
     maxExts.push_back(100000);
-    _manip->Update(minExts, maxExts, minExts, maxExts);
+
+    ViewpointParams *vParams = pm->GetViewpointParams(_winName);
+    size_t width, height;
+    vParams->GetWindowSize(width, height);
+    std::vector<int> windowSize;
+    windowSize.push_back(width);
+    windowSize.push_back(height);
+
+    cout << "winSize " << width << " " << height << endl;
+
+    _manip->Update(minExts, maxExts, minExts, maxExts, windowSize);
 }
 
 /*
@@ -351,6 +361,8 @@ void VizWin::mousePressEventNavigate(QMouseEvent *e) {
 // We record the position of the click.
 //
 void VizWin::mousePressEvent(QMouseEvent *e) {
+    double coords[2] = {(double)e->x(), (double)e->y()};
+    cout << "mousePrss " << _manip->mouseIsOverHandle(coords) << endl;
 
     _buttonNum = 0;
     _mouseClicked = true;
@@ -718,20 +730,39 @@ void VizWin::paintGL() {
     cout << endl;
 #endif
 
-    _manip->render();
-
     int rc = _controlExec->Paint(_winName, false);
     if (rc < 0) {
         MSG_ERR("Paint failed");
     }
+
+    ParamsMgr *pm = _controlExec->GetParamsMgr();
+    vector<double> minExts, maxExts;
+    //  ds->GetActiveExtents(pm, _winName, 0, minExts, maxExts);
+    minExts.push_back(-1.038e+06);
+    minExts.push_back(2.81684e+06);
+    minExts.push_back(0.f);
+    maxExts.push_back(220425);
+    maxExts.push_back(4.04548e+06);
+    maxExts.push_back(100000);
+
+    size_t width, height;
+    vParams->GetWindowSize(width, height);
+    std::vector<int> windowSize;
+    windowSize.push_back(width);
+    windowSize.push_back(height);
+
+    cout << "winSize " << width << " " << height << endl;
+
+    _manip->Update(minExts, maxExts, minExts, maxExts, windowSize);
+
+    _manip->render();
+
     swapBuffers();
 
     rc = printOpenGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) {
         MSG_ERR("OpenGL error");
     }
-
-    //_manip->render();
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
