@@ -25,8 +25,8 @@
 #include <vapor/glutil.h>
 
 //Handle diameter in pixels:
-//#define HANDLE_DIAMETER 50
-#define HANDLE_DIAMETER 3
+#define HANDLE_DIAMETER 50
+//#define HANDLE_DIAMETER 3
 namespace VAPoR {
 
 //class Visualizer;
@@ -68,6 +68,10 @@ class RENDER_API Manip {
                         std::vector<double> urc,
                         std::vector<double> minExtents,
                         std::vector<double> maxExtents,
+                        std::vector<double> cameraPosition,
+                        std::vector<double> rotationCenter,
+                        double modelViewMatrix[16],
+                        double projectionMatrix[16],
                         std::vector<int> windowSize) = 0;
 
     //! Notify that manipulator that is being moved with the mouse
@@ -111,6 +115,7 @@ class RENDER_API Manip {
 
     double _selection[6];
     double _extents[6];
+    double _cameraPosition[3];
     //std::vector<double> _selection;
     //std::vector<double> _extents;
 
@@ -148,6 +153,10 @@ class RENDER_API TranslateStretchManip : public Manip {
                         std::vector<double> urc,
                         std::vector<double> minExtents,
                         std::vector<double> maxExtents,
+                        std::vector<double> cameraPosition,
+                        std::vector<double> rotationCenter,
+                        double modelViewMatrix[16],
+                        double projectionMatrix[16],
                         std::vector<int> windowSize);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
@@ -260,6 +269,11 @@ class RENDER_API TranslateStretchManip : public Manip {
     bool _isStretching;
     double _handleSizeInScene;
     std::vector<int> _windowSize;
+    double _cameraPosition[3];
+    double _rotationCenter[3];
+    double _modelViewMatrix[16];
+    double _projectionMatrix[16];
+
     // screen coords where mouse is pressed:
     float _mouseDownPoint[2];
     // unit vector in direction of handle
