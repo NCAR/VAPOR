@@ -22,6 +22,7 @@
 #include <GL/glew.h>
 #include <QGLWidget>
 #include "vapor/Visualizer.h"
+#include "vapor/Manip.h"
 #include <QWheelEvent>
 
 class QCloseEvent;
@@ -116,6 +117,7 @@ private:
 	void setUpProjMatrix();
 	void setUpModelViewMatrix();
 
+	VAPoR::Manip* _manip;
 
 };
 
