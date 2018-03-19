@@ -17,28 +17,25 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="VariableTab">
       <attribute name="title">
-       <string>Tab 1</string>
+       <string>Variable</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="VariablesWidget" name="widget" native="true"/>
-       </item>
-       <item>
-        <widget class="FidelityWidget" name="widget_2" native="true"/>
+        <widget class="VariablesWidget" name="myVariableWidget" native="true"/>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="GeometryTab">
       <attribute name="title">
-       <string>Tab 2</string>
+       <string>Geometry</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="GeometryWidget" name="widget_3" native="true"/>
+        <widget class="GeometryWidget" name="MyGeometryWidget" native="true"/>
        </item>
       </layout>
      </widget>
@@ -51,12 +48,6 @@
    <class>VariablesWidget</class>
    <extends>QWidget</extends>
    <header>VariablesWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FidelityWidget</class>
-   <extends>QWidget</extends>
-   <header>FidelityWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
