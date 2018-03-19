@@ -62,7 +62,8 @@ public:
     //! \param[in] urc : The upper-right corner to update the manipulator with
     //! \param[in] minExtents : The minimum extents that the manipulator can draw to
     //! \param[in] maxExtents : The maximum extents that the manipulator can draw to
-    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents) = 0;
+    //! \param[in] windowSize: The current window size of the Visualizer
+    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<int> windowSize) = 0;
 
     //! Notify that manipulator that is being moved with the mouse
     //! \param[in] buttonNum - The mouse button being used to move the manipulator
@@ -138,7 +139,7 @@ public:
     virtual void render();
 
     //! @copydoc Manip::Update(std::vector<double>, std::vector<double> std::vector<double>, std::vector<double>)
-    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents);
+    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<int> windowSize);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
     virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords){};
@@ -240,8 +241,9 @@ protected:
     //! \return absolute handle index
     int makeHandleFaces(int handleNum, double handle[8][3], int octant, double *boxExtents);
 
-    bool   _isStretching;
-    double _handleSizeInScene;
+    bool             _isStretching;
+    double           _handleSizeInScene;
+    std::vector<int> _windowSize;
     // screen coords where mouse is pressed:
     float _mouseDownPoint[2];
     // unit vector in direction of handle
