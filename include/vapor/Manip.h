@@ -21,13 +21,16 @@
 
 #ifndef MANIP_H
 #define MANIP_H
+
+#include <vapor/glutil.h>
+
 // Handle diameter in pixels:
-#define HANDLE_DIAMETER 15
-#include <vapor/common.h>
+//#define HANDLE_DIAMETER 50
+#define HANDLE_DIAMETER 3
 namespace VAPoR {
 
-class Visualizer;
-class DataStatus;
+// class Visualizer;
+// class DataStatus;
 //! \class Manip
 //! \ingroup Public_Render
 //! \brief A class that supports manipulators in in a VAPOR Visualizer
@@ -47,26 +50,45 @@ class DataStatus;
 //!
 class RENDER_API Manip {
 public:
-    Manip(Visualizer *win) { _vis = win; }
+    // Manip(Visualizer* win) {_vis = win;}
+    Manip(){};
     virtual ~Manip() {}
 
     //! Pure virtual function renders the geometry of the Manip.
     virtual void render() = 0;
 
+    //! Update the box manipulator's extents
+    //! \param[in] llc : The lower-left corner to update the manipulator with
+    //! \param[in] urc : The upper-right corner to update the manipulator with
+    //! \param[in] minExtents : The minimum extents that the manipulator can draw to
+    //! \param[in] maxExtents : The maximum extents that the manipulator can draw to
+    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents) = 0;
+
+    //! Notify that manipulator that is being moved with the mouse
+    //! \param[in] buttonNum - The mouse button being used to move the manipulator
+    //! \param[in] screenCoords - The current coordinates of the mouse cursor
+    virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords) = 0;
+
+    //! Method to retrieve the manipulator's current extents
+    //! \param[out] llc - The lower-left coordinates of the manipulator
+    //! \param[out] urc - The upper-right coordinates of the manipulator
+    virtual void GetBox(std::vector<double> &llc, std::vector<double> urc) = 0;
+
     //! Obtain the Params instance currently associated with the Manip.
     //! \return Params* currently associated Params instance
-    Params *getParams() { return _params; }
+    //	Params* getParams() {return _params;}
 
     //! Specify the Params instance that is associated with the Manip
     //! \param[in] Params instance associated with Manip
-    void setParams(Params *p) { _params = p; }
+    //	void setParams(Params* p) {_params = p;}
 
     //! Pure virtual method: Determine which handle (if any) is under mouse
     //! \param[in] mouse coordinates in screen
     //! \param[in] boxExtents are extents of full box to which the handles are attached
     //! \param[out] handleMid is the coordinates of the center of the selected handle (if selected).
     //! \return handle index, or -1 if no intersection
-    virtual int mouseIsOverHandle(double screenCoords[2], double *boxExtents, double handleMid[3]) = 0;
+    //	virtual int mouseIsOverHandle(double screenCoords[2], double* boxExtents,  double handleMid[3]) = 0;
+    virtual int mouseIsOverHandle(double screenCoords[2]) = 0;
 
     //! Pure virtual function, invoked when the mouse button is released
     //! \param[in] screenCoords are coordinates of mouse at the time it is released
@@ -76,23 +98,27 @@ public:
     //! \return handle index
     virtual int draggingHandle() = 0;
 
-    static void setDataStatus(DataStatus *ds) { _dataStatus = ds; }
-
+    // static void setDataStatus(DataStatus* ds) {_dataStatus = ds;}
 protected:
     static const float _faceSelectionColor[4];
     static const float _unselectedFaceColor[4];
 
-    Params *    _params;
-    Visualizer *_vis;
+    double _selection[6];
+    double _extents[6];
+    // std::vector<double> _selection;
+    // std::vector<double> _extents;
+
+    //	Params* _params;
+    //	Visualizer* _vis;
 
     //! General utility function for drawing axis-aligned cubes.
     //! \param[in] extents : extents of box to be drawn
     //! \param[in] isSelected indicates if this box is to be drawn with the selection color or not
     void drawCubeFaces(double *extents, bool isSelected);
 
-    double             _dragDistance;
-    int                _selectedHandle;
-    static DataStatus *_dataStatus;
+    double _dragDistance;
+    int    _selectedHandle;
+    // static DataStatus* _dataStatus;
 };
 //! \class TranslateStretchManip
 //! \ingroup Public_Render
@@ -106,16 +132,27 @@ protected:
 //! When you slide a handle with the right mouse it stretches the region
 class RENDER_API TranslateStretchManip : public Manip {
 public:
-    TranslateStretchManip(Visualizer *win, Params *p);
+    //	TranslateStretchManip(Visualizer* win, Params*p);
+    TranslateStretchManip();
     virtual ~TranslateStretchManip() {}
     virtual void render();
+
+    //! @copydoc Manip::Update(std::vector<double>, std::vector<double> std::vector<double>, std::vector<double>)
+    virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents);
+
+    //! @copydoc Manip::MoveEvent(int, std::vector<double>)
+    virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords){};
+
+    //! @copydoc Manip::GetBox(std::vector<double>, std::vector<double>);
+    virtual void GetBox(std::vector<double> &llc, std::vector<double> urc){};
 
     //! Determine if the mouse is over one of the manip handles.
     //! \param[in] screenCoords x,y screen position of mouse
     //! \param[in] stretchedBoxExtents Extents of manip in stretched coordinates
     //! \param[out] handleMid coordinates of handle selected, in stretched coordinates
     //! \return index of handle, or -1 if none.
-    int mouseIsOverHandle(double screenCoords[2], double *stretchedBoxExtents, double handleMid[3]);
+    //	int mouseIsOverHandle(double screenCoords[2], double* stretchedBoxExtents,  double handleMid[3]);
+    int mouseIsOverHandle(double screenCoords[2]);
 
     //! Method to invoke when the mouse has been released after dragging a handle.
     //! \param[in] screenCoords screen coordinates where mouse was released.
@@ -145,7 +182,8 @@ public:
     //! \param[in] handle index over which the mouse is pressed
     //! \param[in] p Params that owns the Manipulator
     //! \return true if successful
-    bool startHandleSlide(Visualizer *viz, double mouseCoords[2], int handleNum, Params *p);
+    // bool startHandleSlide(Visualizer* viz, double mouseCoords[2], int handleNum, Params* p);
+    bool startHandleSlide(double mouseCoords[2], int handleNum);
 
     //! Set the status of the mouse, invoked when the mouse is pressed or released.
     //! \param downUp true is the mouse is pressed for this manipulator.
@@ -162,6 +200,10 @@ public:
 
 protected:
     virtual void drawBoxFaces();
+    virtual bool pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], double pickPt[2]);
+    virtual int  pointIsOnBox(double corners[8][3], double pkPt[2]);
+    bool         ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const;
+    double       getPixelSize() const;
 
     //! Method that draws a line connecting a handle to the box center
     //! \param[in] handleNum index of handle
@@ -209,49 +251,9 @@ protected:
     // Following only used by rotating manip subclasses:
     double _tempRotation;
     int    _tempRotAxis;
+
+    bool projectPointToWin(double cubeCoords[3], double winCoords[2]);
 };
-//! \class TranslateRotateManip
-//! \ingroup Public_Render
-//! \brief A Manip subclass for manipulators that stretch, translate, and rotate
-//! \author Alan Norton
-//! \version 3.0
-//! \date    July 2015
-
-//! Subclass of TranslateStretchManip that allows the box to be rotated, and for it to be slid outside
-//! the full domain bounds.
-class RENDER_API TranslateRotateManip : public TranslateStretchManip {
-public:
-    TranslateRotateManip(Visualizer *w, Params *p);
-    virtual ~TranslateRotateManip() {}
-    virtual void render();
-    virtual void slideHandle(int handleNum, double movedRay[3], bool constrain = true);
-    virtual void mouseRelease(float screenCoords[2]);
-
-    //! Method to support dragging the manip with the thumbwheel
-    //! While dragging the thumbwheel call this.
-    //! When drag is over, set rot to 0.f
-    void setTempRotation(double rot, int axis)
-    {
-        _tempRotation = rot;
-        _tempRotAxis = axis;
-    }
-
-private:
-    virtual void drawBoxFaces();
-    double       constrainStretch(double currentDist);
-    // utility class for handling permutations resulting from rotations of mult of 90 degrees:
-    class Permuter {
-    public:
-        Permuter(double theta, double phi, double psi);
-        int permute(int i);
-
-    private:
-        int _thetaRot;
-        int _phiRot;
-        int _psiRot;
-    };
-};
-
 };    // namespace VAPoR
 
 #endif    // MANIP_H

@@ -58,6 +58,19 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     _buttonNum = 0;
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
+
+    DataStatus *   ds = _controlExec->GetDataStatus();
+    ParamsMgr *    pm = _controlExec->GetParamsMgr();
+    vector<double> minExts, maxExts;
+    //	ds->GetActiveExtents(pm, _winName, 0, minExts, maxExts);
+    _manip = new TranslateStretchManip();    // minExts, maxExts);
+    minExts.push_back(-1.038e+06);
+    minExts.push_back(2.81684e+06);
+    minExts.push_back(0.f);
+    maxExts.push_back(2.78096e+06);
+    maxExts.push_back(4.04548e+06);
+    maxExts.push_back(100000);
+    _manip->Update(minExts, maxExts, minExts, maxExts);
 }
 
 /*
@@ -642,12 +655,16 @@ void VizWin::paintGL()
     cout << endl;
 #endif
 
+    _manip->render();
+
     int rc = _controlExec->Paint(_winName, false);
     if (rc < 0) { MSG_ERR("Paint failed"); }
     swapBuffers();
 
     rc = printOpenGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) { MSG_ERR("OpenGL error"); }
+
+    //_manip->render();
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();

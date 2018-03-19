@@ -1,8 +1,8 @@
-//************************************************************************
+/************************************************************************/
 //									*
-//		     Copyright (C)  2005				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2005				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -17,25 +17,19 @@
 //	Description:	Implements the Manip class and some of its subclasses
 // TOGO:
 
-#include <vapor/glutil.h>    // Must be included first!!!
-#include <vapor/Visualizer.h>
-#include <vapor/params.h>
-#include <vapor/ViewpointParams.h>
-#include <vapor/DataStatus.h>
+#include <iostream>
+#include <cassert>
 
-#include "Manip.h"
+#include "vapor/Manip.h"
 
 using namespace VAPoR;
-const float Manip::_faceSelectionColor[4] = {0.8f, 0.8f, 0.0f, 0.8f};
-const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.8f};
-DataStatus *Manip::_dataStatus = 0;
+using namespace std;
 
-// Methods for TranslateStretchManip:
-//
+const float Manip::_faceSelectionColor[4] = {0.8f, 0.8f, 0.0f, 0.5f};
+const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
 
-TranslateStretchManip::TranslateStretchManip(Visualizer *win, Params *p) : Manip(win)
+TranslateStretchManip::TranslateStretchManip() : Manip()
 {
-    setParams(p);
     _selectedHandle = -1;
     _isStretching = false;
     _tempRotation = 0.f;
@@ -45,46 +39,61 @@ TranslateStretchManip::TranslateStretchManip(Visualizer *win, Params *p) : Manip
     _initialSelectionRay[1] = 0.;
     _initialSelectionRay[2] = 0.;
     _mouseDownHere = false;
+
+    //_selection.reserve(6);
+    //_extents.reserve(6);
+
+    /*
+    _selection[0] = -.5;
+    _selection[1] = -.5;
+    _selection[2] = -.5;
+    _selection[3] = .5;
+    _selection[4] = .5;
+    _selection[5] = .5;
+
+    _extents[0] = -.5;
+    _extents[1] = -.5;
+    _extents[2] = -.5;
+    _extents[3] = .5;
+    _extents[4] = .5;
+    _extents[5] = .5;*/
 }
 
-// Determine if the mouse is over any of the six handles.
-// 3D Inputs are in stretched coordinates.
-// Test first the 3 handles in front, then the object, then the three in back.
-// Return the handle num if we are over one, or -1 if not.
-// The boxExtents are the extents of the box being drawn
-// Does not take into account drag distance, because the mouse is just being clicked.
-//
-int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double *boxExtents, double handleMid[3])
+void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts)
 {
-    // Determine if the mouse is over any of the six handles.
-    // Test first the 3 handles in front, then the object, then the three in back.
-    // The specified getHandle methods must return boxes with prescribed alignment
-    // (ctr clockwise around front (+Z) starting at -X, -Y, then clockwise
-    // around back (-Z) starting at -x ,-y.
+    //	_selection.insert(_selection.begin(), llc.begin(), llc.end());
+    //	_selection.insert(_selection.end(), urc.begin(), urc.end());
+
+    //	_extents.insert(_extents.begin(), minExts.begin(), minExts.end());
+    //	_extents.insert(_extents.end(), maxExts.begin(), maxExts.end());
+
+    std::copy(llc.begin(), llc.end(), _selection);
+    std::copy(urc.begin(), urc.end(), _selection + 3);
+    std::copy(minExts.begin(), minExts.end(), _extents);
+    std::copy(maxExts.begin(), maxExts.end(), _extents + 3);
+}
+
+int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2])
+{
+    double boxExtents[6];
+    std::copy(std::begin(_selection), std::end(_selection), std::begin(boxExtents));
+
+    double handleMid[3];
     double handle[8][3];
 
-    // Get the camera position in stretched coords.  This is needed to determine
-    // which handles are in front of the box.
-    ViewpointParams *myViewpointParams = _vis->getActiveViewpointParams();
-    vector<double>   camPos = myViewpointParams->getCameraPosLocal();
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
-    for (int i = 0; i < stretch.size(); i++) { camPos[i] *= stretch[i]; }
+    double camPos[3], upVec[3], viewDir[3];
+    ReconstructCamera(camPos, upVec, viewDir);
 
-    // Determine the octant based on camera relative to box center:
     int octant = 0;
-    // face identifies the faceNumber (for intersection calc) if there is
     int face, handleNum;
     for (int axis = 0; axis < 3; axis++) {
         if (camPos[axis] > 0.5f * (boxExtents[axis] + boxExtents[axis + 3])) octant |= 1 << axis;
     }
+
+    // Front handles
     for (int sortNum = 0; sortNum < 3; sortNum++) {
         handleNum = makeHandleFaces(sortNum, handle, octant, boxExtents);
-        if ((face = _vis->pointIsOnBox(handle, screenCoords)) >= 0) {
-            // Save the handle middle coordinates:
+        if ((face = pointIsOnBox(handle, screenCoords)) >= 0) {
             for (int i = 0; i < 3; i++) {
                 handleMid[i] = 0.;
                 for (int k = 0; k < 8; k++) handleMid[i] += handle[k][i];
@@ -94,11 +103,10 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double *box
         }
     }
 
-    // Then check backHandles
+    // Back handles
     for (int sortNum = 3; sortNum < 6; sortNum++) {
         handleNum = makeHandleFaces(sortNum, handle, octant, boxExtents);
-        if ((face = _vis->pointIsOnBox(handle, screenCoords)) >= 0) {
-            // Save the handle middle coordinates:
+        if ((face = pointIsOnBox(handle, screenCoords)) >= 0) {
             for (int i = 0; i < 3; i++) {
                 handleMid[i] = 0.;
                 for (int k = 0; k < 8; k++) handleMid[i] += handle[k][i];
@@ -109,6 +117,41 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double *box
     }
     return -1;
 }
+
+bool TranslateStretchManip::pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], double pickPt[2])
+{
+    double winCoord1[2];
+    double winCoord2[2];
+    double winCoord3[2];
+    double winCoord4[2];
+    if (!projectPointToWin(cor1, winCoord1)) return false;
+    if (!projectPointToWin(cor2, winCoord2)) return false;
+    if (pointOnRight(winCoord1, winCoord2, pickPt)) return false;
+    if (!projectPointToWin(cor3, winCoord3)) return false;
+    if (pointOnRight(winCoord2, winCoord3, pickPt)) return false;
+    if (!projectPointToWin(cor4, winCoord4)) return false;
+    if (pointOnRight(winCoord3, winCoord4, pickPt)) return false;
+    if (pointOnRight(winCoord4, winCoord1, pickPt)) return false;
+    return true;
+}
+
+int TranslateStretchManip::pointIsOnBox(double corners[8][3], double pickPt[2])
+{
+    // front (-Z)
+    if (pointIsOnQuad(corners[0], corners[1], corners[3], corners[2], pickPt)) return 2;
+    // back (+Z)
+    if (pointIsOnQuad(corners[4], corners[6], corners[7], corners[5], pickPt)) return 3;
+    // right (+X)
+    if (pointIsOnQuad(corners[1], corners[5], corners[7], corners[3], pickPt)) return 5;
+    // left (-X)
+    if (pointIsOnQuad(corners[0], corners[2], corners[6], corners[4], pickPt)) return 0;
+    // top (+Y)
+    if (pointIsOnQuad(corners[2], corners[3], corners[7], corners[6], pickPt)) return 4;
+    // bottom (-Y)
+    if (pointIsOnQuad(corners[0], corners[4], corners[5], corners[1], pickPt)) return 1;
+    return -1;
+}
+
 // Construct one of 6 cube-handles.  The first 3 (0,1,2) are those in front of the probe
 // the octant (between 0 and 7) is a binary representation of the viewer relative to
 // the probe center.  In binary, this value is ZYX, where Z is 1 if the viewer is above,
@@ -156,7 +199,32 @@ int TranslateStretchManip::makeHandleFaces(int sortPosition, double handle[8][3]
     }
     return newPosition;
 }
-bool TranslateStretchManip::startHandleSlide(Visualizer *viz, double mouseCoords[2], int handleNum, Params *manipParams)
+
+bool TranslateStretchManip::ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const
+{
+    double m[16];
+    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+
+    double minv[16];
+
+    int rc = minvert(m, minv);
+    if (rc < 0) return (false);
+
+    vscale(minv + 8, -1.0);
+
+    for (int i = 0; i < 3; i++) {
+        position[i] = minv[12 + i];    // position vector is minv[12..14]
+        upVec[i] = minv[4 + i];        // up vector is minv[4..6]
+        viewDir[i] = minv[8 + i];      // view direction is minv[8..10]
+    }
+    vnormal(upVec);
+    vnormal(viewDir);
+
+    return (true);
+}
+
+// bool TranslateStretchManip::startHandleSlide(Visualizer* viz, double mouseCoords[2], int handleNum, Params* manipParams){
+bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNum)
 {
     // When the mouse is first pressed over a handle,
     // need to save the
@@ -177,17 +245,17 @@ bool TranslateStretchManip::startHandleSlide(Visualizer *viz, double mouseCoords
     else
         handleNum = 2 - handleNum;
     double boxExtents[6];
-#ifdef DEAD
-    int timestep = viz->getActiveAnimationParams()->GetCurrentTimestep();
-#endif
-    manipParams->GetBox()->GetStretchedLocalExtents(boxExtents, timestep);
 
-    for (int i = 0; i < 3; i++) { boxCtr[i] = (boxExtents[i] + boxExtents[i + 3]) * 0.5f; }
+    int timestep = 0;
+
+    for (int i = 0; i < 3; i++) { boxCtr[i] = (_selection[i] + _selection[i + 3]) * 0.5f; }
     // project the boxCtr and one more point, to get a direction vector
 
-    if (!viz->projectPointToWin(boxCtr, winCoords)) return false;
+    //	if (!viz->projectPointToWin(boxCtr, winCoords)) return false;
+    if (!projectPointToWin(boxCtr, winCoords)) return false;
     boxCtr[handleNum] += 0.1f;
-    if (!viz->projectPointToWin(boxCtr, dispCoords)) return false;
+    //	if (!viz->projectPointToWin(boxCtr, dispCoords)) return false;
+    if (projectPointToWin(boxCtr, dispCoords)) return false;
     // Direction vector is difference:
     _handleProjVec[0] = dispCoords[0] - winCoords[0];
     _handleProjVec[1] = dispCoords[1] - winCoords[1];
@@ -341,8 +409,6 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     glDisable(GL_BLEND);
 }
 
-// Note: This is performed in world coordinates!
-// Determine intersection (in world coords!) of ray with handle
 bool TranslateStretchManip::rayHandleIntersect(double ray[3], const std::vector<double> &cameraPos, int handleNum, int faceNum, double intersect[3])
 {
     double val;
@@ -351,9 +417,10 @@ bool TranslateStretchManip::rayHandleIntersect(double ray[3], const std::vector<
 #ifdef DEAD
     int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
-    _params->GetBox()->GetLocalExtents(boxExtents, timestep);
+    int timestep = 0;
+    //	_params->GetBox()->GetLocalExtents(boxExtents,timestep);
 
-    makeHandleExtents(handleNum, handleExtents, 0, boxExtents);
+    makeHandleExtents(handleNum, handleExtents, 0, _selection);
     int coord;
 
     switch (faceNum) {
@@ -393,40 +460,17 @@ bool TranslateStretchManip::rayHandleIntersect(double ray[3], const std::vector<
 // If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render()
 {
-    if (!_vis || !_params) return;
-
     double extents[6];
-    // Calculate the box extents, and the viewer position, in the unit cube,
-    // Without any rotation applied:
-#ifdef DEAD
-    int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
-#endif
-    _params->GetBox()->GetStretchedLocalExtents(extents, timestep);
+    int    timestep = 0;
 
-    ViewpointParams *myViewpointParams = _vis->getActiveViewpointParams();
-    vector<double>   camPos = myViewpointParams->getCameraPosLocal();
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
-    for (int i = 0; i < stretch.size(); i++) { camPos[i] *= stretch[i]; }
-
-    // Set the handleSize, in user coords.
-    // May need to adjust for scene stretch
-    _handleSizeInScene = _vis->getPixelSize() * (float)HANDLE_DIAMETER;
-
-    // Color depends on which item selected. (reg color vs highlight color)
-    // Selected item is rendered at current offset
-    // This will issue gl calls to render 6 cubes and 3 lines through them (to the center of the
-    // specified region).  If one is selected that line (and both cubes) are given
-    // the highlight color
+    _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
     glPushAttrib(GL_CURRENT_BIT);
-    // Now generate each handle and render it.  Order is not important
     double handleExtents[6];
     for (int handleNum = 0; handleNum < 6; handleNum++) {
-        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, extents);
+        // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, extents);
+        // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _extents);
+        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _selection);
         if (_selectedHandle >= 0) {
             int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
             // displace handleExtents appropriately
@@ -446,12 +490,50 @@ void TranslateStretchManip::render()
             }
         }
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
-        drawHandleConnector(handleNum, handleExtents, extents);
+        drawHandleConnector(handleNum, handleExtents, _selection);    // extents);
     }
+    cout << "draw cube faces " << endl;
+    for (int i = 0; i < 6; i++) cout << _selection[i] << endl;
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
     glPopAttrib();
 }
+
+double TranslateStretchManip::getPixelSize() const
+{
+    double temp[3];
+
+    // Window height is subtended by viewing angle (45 degrees),
+    // at viewer distance (dist from camera to view center)
+    //	const AnnotationParams* vfParams = getActiveAnnotationParams();
+    //	const ViewpointParams* vpParams = getActiveViewpointParams();
+
+    size_t width, height;
+    //	vpParams->GetWindowSize(width, height);
+    width = 500;
+    height = 500;
+
+    double center[3] = {0., 0., 0.};    //, pos[3];
+    double pos[3], upVec[3], viewDir[3];
+    ReconstructCamera(pos, upVec, viewDir);
+
+    // vpParams->GetRotationCenter(center);
+    // vpParams->GetCameraPos(pos);
+
+    vsub(center, pos, temp);
+
+    // Apply stretch factor:
+
+    // vector<double> stretch = vpParams->GetStretchFactors();
+    // for (int i = 0; i<3; i++) temp[i] = stretch[i]*temp[i];
+    float distToScene = vlength(temp);
+    // tan(45 deg *0.5) is ratio between half-height and dist to scene
+    double halfHeight = tan(M_PI * 0.125) * distToScene;
+    return (2.f * halfHeight / (double)height);
+
+    return (0.0);
+}
+
 // Draw the main box, just rendering the lines.
 // the highlightedFace is not the same as the selectedFace!!
 //
@@ -462,19 +544,43 @@ void TranslateStretchManip::drawBoxFaces()
 #ifdef DEAD
     int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
-    _params->GetBox()->calcLocalBoxCorners(corners, 0.f, timestep);
+    int timestep = 0;
+    //	_params->GetBox()->calcLocalBoxCorners(corners, 0.f, timestep);
+    corners[0][0] = _selection[0];
+    corners[0][1] = _selection[1];
+    corners[0][2] = _selection[2];
 
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
+    corners[1][0] = _selection[0];
+    corners[1][1] = _selection[1];
+    corners[1][2] = _selection[5];
+
+    corners[2][0] = _selection[0];
+    corners[2][1] = _selection[4];
+    corners[2][2] = _selection[2];
+
+    corners[3][0] = _selection[0];
+    corners[3][1] = _selection[4];
+    corners[3][2] = _selection[5];
+
+    corners[4][0] = _selection[3];
+    corners[4][1] = _selection[1];
+    corners[4][2] = _selection[2];
+
+    corners[5][0] = _selection[3];
+    corners[5][1] = _selection[1];
+    corners[5][2] = _selection[5];
+
+    corners[6][0] = _selection[3];
+    corners[6][1] = _selection[4];
+    corners[6][2] = _selection[2];
+
+    corners[7][0] = _selection[3];
+    corners[7][1] = _selection[4];
+    corners[7][2] = _selection[5];
 
     // Now the corners need to be put into the unit cube, and displaced appropriately
     // Either displace just half the corners or do the opposite ones as well.
     for (int cor = 0; cor < 8; cor++) {
-        for (int i = 0; i < stretch.size(); i++) { corners[cor][i] *= stretch[i]; }
-
         if (_selectedHandle >= 0) {
             int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
             // The corners associated with a handle are as follows:
@@ -495,6 +601,8 @@ void TranslateStretchManip::drawBoxFaces()
     }
 
     // Now render the edges:
+
+    cout << "Corners " << corners[0][0] << " " << corners[0][1] << " " << corners[0][2] << endl;
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
@@ -549,7 +657,9 @@ void TranslateStretchManip::mouseRelease(float /*screenCoords*/[2])
         int    axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
         // Convert _dragDistance to world coords:
         float dist = _dragDistance;
-        _params->GetBox()->GetStretchedLocalExtents(boxExts, timestep);
+        int   timestep = 0;
+        //		_params->GetBox()->GetStretchedLocalExtents(boxExts,timestep);
+        std::copy(std::begin(_selection), std::end(_selection), std::begin(boxExts));
 
         // Check if we are stretching.  If so, only move coords associated with
         // handle:
@@ -563,7 +673,7 @@ void TranslateStretchManip::mouseRelease(float /*screenCoords*/[2])
             boxExts[axis] += dist;
             boxExts[axis + 3] += dist;
         }
-        _params->GetBox()->SetStretchedLocalExtents(boxExts, _params, timestep);
+        //		_params->GetBox()->SetStretchedLocalExtents(boxExts,_params,timestep);
     }
     _dragDistance = 0.f;
     _selectedHandle = -1;
@@ -575,15 +685,11 @@ void TranslateStretchManip::captureMouseDown(int handleNum, const std::vector<do
     // Grab a probe handle
     _selectedHandle = handleNum;
     _dragDistance = 0.f;
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
 
     // Calculate intersection of ray with specified plane in unstretched coords
     // The selection ray is the vector from the camera to the intersection point
-    for (int i = 0; i < 3; i++) _initialSelectionRay[i] = strHandleMid[i] / stretch[i] - camPos[i];
+    //	for (int i = 0; i<3; i++) _initialSelectionRay[i] = strHandleMid[i]/stretch[i] - camPos[i];
+    for (int i = 0; i < 3; i++) _initialSelectionRay[i] = strHandleMid[i] - camPos[i];
 
     if (buttonNum > 1)
         _isStretching = true;
@@ -616,6 +722,7 @@ void TranslateStretchManip::slideHandle(int handleNum, double movedRay[3], bool 
     normalVector[coord] = 1.f;
     // Calculate W:
     vcopy(movedRay, w);
+    //	vnormal(w);
     vnormal(w);
     double scaleFactor = 1.f / vdot(w, normalVector);
     // Calculate q:
@@ -630,14 +737,9 @@ void TranslateStretchManip::slideHandle(int handleNum, double movedRay[3], bool 
     double denom = vdot(q, q);
     _dragDistance = 0.f;
     // convert to stretched world coords.
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
     if (denom != 0.) {
         _dragDistance = -vdot(q, r) / denom;
-        _dragDistance *= stretch[coord];
+        //		_dragDistance *= stretch[coord];
     }
 
     // Make sure the displacement is OK.  Not allowed to
@@ -647,11 +749,9 @@ void TranslateStretchManip::slideHandle(int handleNum, double movedRay[3], bool 
     // Do this calculation in stretched world coords
     double        boxExtents[6];
     const double *sizes;
-#ifdef DEAD
-    sizes = _dataStatus->getFullStretchedSizes();
-    int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
-#endif
-    _params->GetBox()->GetStretchedLocalExtents(boxExtents, timestep);
+    int           timestep = 0;
+    //	_params->GetBox()->GetStretchedLocalExtents(boxExtents,timestep);
+    std::copy(std::begin(_selection), std::end(_selection), std::begin(boxExtents));
 
     if (_isStretching) {    // don't push through opposite face ..
         // Depends on whether we are pushing the "low" or "high" handle
@@ -722,459 +822,31 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
     glDisable(GL_BLEND);
 }
 
-// Subclass constructor.  Allows rotated cube to be translated and stretched
+// projectPointToWin returns true if point is in front of camera
+// resulting screen coords returned in 2nd argument.  Note that
+// OpenGL coords are 0 at bottom of window!
 //
-TranslateRotateManip::TranslateRotateManip(Visualizer *w, Params *p) : TranslateStretchManip(w, p) {}
-void TranslateRotateManip::drawBoxFaces()
+bool TranslateStretchManip::projectPointToWin(double cubeCoords[3], double winCoords[2])
 {
-    double    corners[8][3];
-    Permuter *myPermuter = 0;
-    if (_isStretching) {
-        const vector<double> angles = _params->GetBox()->GetAngles();
-        myPermuter = new Permuter(angles[0], angles[1], angles[2]);
-    }
+    double   depth;
+    GLdouble wCoords[2];
+    GLdouble cbCoords[3];
+    for (int i = 0; i < 3; i++) cbCoords[i] = (double)cubeCoords[i];
 
-    _params->GetBox()->calcLocalBoxCorners(corners, 0.f, -1, _tempRotation, _tempRotAxis);
-    // Now the corners need to be put into the unit cube, and displaced appropriately
+    //	const ViewpointParams* vpParams = getActiveViewpointParams();
+    double mvMatrix[16];
+    double pMatrix[16];
+    //	vpParams->GetModelViewMatrix(mvMatrix);
+    //	vpParams->GetProjectionMatrix(pMatrix);
+    glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, pMatrix);
 
-    // Either displace just half the corners (when stretching) or do the opposite ones as well.
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
-    for (int cor = 0; cor < 8; cor++) {
-        for (int i = 0; i < stretch.size(); i++) { corners[cor][i] *= stretch[i]; }
-        if (_selectedHandle >= 0) {
-            int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-            // The corners associated with a handle are as follows:
-            // If the handle is on the low end, i.e. _selectedHandle < 3, then
-            // for axis == 0, handles on corners  0,2,4,6 (cor&1 is 0)
-            // for axis == 1, handles on corners  0,1,4,5 (cor&2 is 0)
-            // for axis == 2, handles on corners  0,1,2,3 (cor&4 is 0)
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
 
-            if (_isStretching) {
-                // Based on the angles (phi theta psi) the user is grabbing
-                // a rotated side of the cube. These vertices slide with the mouse.
-                // rotate the selected handle by theta, phi, psi to find the side that corresponds to
-                // the corners that need to be moved
-                int newHandle;
-                if (_selectedHandle < 3)
-                    newHandle = myPermuter->permute(_selectedHandle - 3);
-                else
-                    newHandle = myPermuter->permute(_selectedHandle - 2);
-                if (newHandle < 0)
-                    newHandle += 3;
-                else
-                    newHandle += 2;
-                int axis2 = (newHandle < 3) ? (2 - newHandle) : (newHandle - 3);
-
-                if (((cor >> axis2) & 1) && newHandle < 3) continue;
-                if (!((cor >> axis2) & 1) && newHandle >= 3) continue;
-            }
-            corners[cor][axis] += _dragDistance;
-        }
-    }
-    if (myPermuter) delete myPermuter;
-    // Then the faces need to be rendered
-    // Use the same face ordering as was used for picking (mouseOver())
-
-    // determine the corners of the textured plane.
-    // the front corners are numbered 4 more than the back.
-    // Average the front and back to get the middle:
-    //
-    double midCorners[4][3];
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 3; j++) { midCorners[i][j] = 0.5f * (corners[i][j] + corners[i + 4][j]); }
-    }
-    // Now render the edges:
-
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_BLEND);
-    glLineWidth(2.0);
-    glColor3f(1.f, 0.f, 0.f);
-    glBegin(GL_LINES);
-    glVertex3dv(corners[0]);
-    glVertex3dv(corners[1]);
-    glVertex3dv(corners[0]);
-    glVertex3dv(corners[2]);
-    glVertex3dv(corners[0]);
-    glVertex3dv(corners[4]);
-
-    glVertex3dv(corners[1]);
-    glVertex3dv(corners[3]);
-    glVertex3dv(corners[1]);
-    glVertex3dv(corners[5]);
-
-    glVertex3dv(corners[2]);
-    glVertex3dv(corners[3]);
-    glVertex3dv(corners[2]);
-    glVertex3dv(corners[6]);
-
-    glVertex3dv(corners[3]);
-    glVertex3dv(corners[7]);
-
-    glVertex3dv(corners[4]);
-    glVertex3dv(corners[5]);
-    glVertex3dv(corners[4]);
-    glVertex3dv(corners[6]);
-
-    glVertex3dv(corners[5]);
-    glVertex3dv(corners[7]);
-
-    glVertex3dv(corners[6]);
-    glVertex3dv(corners[7]);
-
-    // Now do the middle:
-    glVertex3dv(midCorners[0]);
-    glVertex3dv(midCorners[1]);
-
-    glVertex3dv(midCorners[0]);
-    glVertex3dv(midCorners[2]);
-
-    glVertex3dv(midCorners[2]);
-    glVertex3dv(midCorners[3]);
-
-    glVertex3dv(midCorners[3]);
-    glVertex3dv(midCorners[1]);
-    glEnd();
-
-    glFlush();
-    // glDisable(GL_BLEND);
-    glDepthMask(GL_TRUE);
-}
-
-// Slide the handle based on mouse move from previous capture.
-// Requires new direction vector associated with current mouse position
-// The new face position requires finding the planar displacement such that
-// the ray (in the scene) associated with the new mouse position is as near
-// as possible to the line projected from the original mouse position in the
-// direction of planar motion.
-// Everything is done in WORLD coords.
-//
-
-void TranslateRotateManip::slideHandle(int handleNum, double movedRay[3], bool constrain)
-{
-    double normalVector[3] = {0.f, 0.f, 0.f};
-    double q[3], r[3], w[3];
-    assert(handleNum >= 0);
-    int coord = (handleNum < 3) ? (2 - handleNum) : (handleNum - 3);
-
-    normalVector[coord] = 1.f;
-    // qWarning(" Moved Ray %f %f %f", movedRay[0],movedRay[1],movedRay[2]);
-    // Calculate W:
-    vcopy(movedRay, w);
-    vnormal(w);
-    float scaleFactor = 1.f / vdot(w, normalVector);
-    // Calculate q:
-    vmult(w, scaleFactor, q);
-    vsub(q, normalVector, q);
-
-    // Calculate R:
-    scaleFactor *= vdot(_initialSelectionRay, normalVector);
-    vmult(w, scaleFactor, r);
-    vsub(r, _initialSelectionRay, r);
-
-    float denom = vdot(q, q);
-    _dragDistance = 0.f;
-    // Convert the drag distance to stretched world coords
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
-    if (denom != 0.f) {
-        _dragDistance = -vdot(q, r) / denom;
-        _dragDistance *= stretch[coord];
-    }
-
-    // Make sure the displacement is OK.
-    // Not allowed to
-    // slide or stretch box center out of full domain box.
-    // Do this calculation in stretched world coords
-    double boxExtents[6];
-    _params->GetBox()->GetStretchedLocalExtents(boxExtents, -1);
-
-    if (_isStretching) {    // don't push through opposite face ..
-        // We really should constrain the stretch to lie inside domain, if constrain is true!
-        _dragDistance = constrainStretch(_dragDistance);
-    } else {    // sliding, not stretching
-        // with constraint: Don't slide the center out of the full domain:
-        if (constrain) {
-            const double *sizes;
-#ifdef DEAD
-            sizes = _dataStatus->getFullStretchedSizes();
-#endif
-            float boxCenter = 0.5f * (boxExtents[coord] + boxExtents[coord + 3]);
-            if (_dragDistance + boxCenter < 0.) { _dragDistance = -boxCenter; }
-            if (_dragDistance + boxCenter > sizes[coord]) { _dragDistance = sizes[coord] - boxCenter; }
-        }
-    }
-
-    // now convert from stretched world to cube coords:
-    //_dragDistance /= _dataStatus->getMaxStretchedSize();
-}
-// Following code should be invoked during OpenGL rendering.
-// Assumes coords are already setup.
-// This renders the box and the associated handles.
-// Takes into account theta/phi rotations
-// If a handle is selected, it is highlighted, and the box is slid in the handle
-// direction according to the current translation.
-// This rendering takes place in cube coords
-// The extents argument give the full domain coordinate extents in the unit cube
-void TranslateRotateManip::render()
-{
-    if (!_vis || !_params) return;
-
-    double extents[6];
-    // Calculate the box extents, and the viewer position, in the unit cube,
-    // With any rotation applied:
-
-    _params->GetBox()->calcContainingStretchedBoxExtents(extents, true);
-
-    // Set the handleSize, in user coords.
-    // May need to adjust for scene stretch
-    _handleSizeInScene = _vis->getPixelSize() * (float)HANDLE_DIAMETER;
-
-    // Color depends on which item selected. (reg color vs highlight color)
-    // Selected item is rendered at current offset
-    // This will issue gl calls to render 6 cubes and 3 lines through them (to the center of the
-    // specified region).  If one is selected that line (and both cubes) are given
-    // the highlight color
-
-    glPushAttrib(GL_CURRENT_BIT);
-    // Now generate each handle and render it.  Order is not important
-    double handleExtents[6];
-    for (int handleNum = 0; handleNum < 6; handleNum++) {
-        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, extents);
-        if (_selectedHandle >= 0) {
-            // displace handleExtents appropriately
-            int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-            // displace handleExtents appropriately
-            if (_isStretching) {
-                // modify the extents for the one grabbed handle
-                if (_selectedHandle == handleNum) {
-                    handleExtents[axis] += _dragDistance;
-                    handleExtents[axis + 3] += _dragDistance;
-                }    // and make the handles on the non-grabbed axes move half as far:
-                else if (handleNum != (5 - _selectedHandle)) {
-                    handleExtents[axis] += 0.5f * _dragDistance;
-                    handleExtents[axis + 3] += 0.5f * _dragDistance;
-                }
-            } else {
-                handleExtents[axis] += _dragDistance;
-                handleExtents[axis + 3] += _dragDistance;
-            }
-        }
-        drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
-        drawHandleConnector(handleNum, handleExtents, extents);
-    }
-    // Then render the full box, unhighlighted and displaced
-    drawBoxFaces();
-    glPopAttrib();
-}
-void TranslateRotateManip::mouseRelease(float /*screenCoords*/[2])
-{
-    // Need to commit to latest drag position
-    Permuter *myPermuter = 0;
-    // Are we dragging?
-    if (_selectedHandle >= 0) {
-        double boxExts[6];
-        int    axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-        // Convert _dragDistance to world coords:
-        float dist = _dragDistance;
-        _params->GetBox()->GetStretchedLocalExtents(boxExts, -1);
-
-        // Check if we are stretching.  If so, need to decide what
-        // coords are associated with handle.  Only those are to be
-        // translated.
-        if (_isStretching) {
-            const vector<double> angles = _params->GetBox()->GetAngles();
-            myPermuter = new Permuter(angles[0], angles[1], angles[2]);
-            // Based on the angles (phi and theta) the user is grabbing
-            // a rotated side of the cube. These vertices slide with the mouse.
-            // rotate the selected handle by theta, phi to find the side that corresponds to
-            // the corners that need to be moved
-            int newHandle;    // This corresponds to the side that was grabbed
-            if (_selectedHandle < 3)
-                newHandle = myPermuter->permute(_selectedHandle - 3);
-            else
-                newHandle = myPermuter->permute(_selectedHandle - 2);
-            if (newHandle < 0)
-                newHandle += 3;
-            else
-                newHandle += 2;
-            // And axis2 is the axis of the grabbed side
-            int axis2 = (newHandle < 3) ? (2 - newHandle) : (newHandle - 3);
-
-            // Along axis, need to move center by half of distance.
-            // boxMin gets changed for nearHandle, boxMax for farHandle
-            // Need to also stretch box, since the rotation was about the middle:
-            // Note that if axis2 is axis then we only change the max or the min
-            boxExts[axis] += 0.5f * dist;
-            boxExts[axis + 3] += 0.5f * dist;
-            // We need to stretch the size along axis2, without changing the center;
-            // However this stretch is affected by the relative stretch factors of
-            // axis2 and axis
-#ifdef DEAD
-            vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-            vector<double> stretch(3, 1.0);
-#endif
-            float dist2 = dist * stretch[axis2] / stretch[axis];
-            if (_selectedHandle < 3) {
-                boxExts[axis2] += 0.5f * dist2;
-                boxExts[axis2 + 3] -= 0.5f * dist2;
-            } else {
-                boxExts[axis2 + 3] += 0.5f * dist2;
-                boxExts[axis2] -= 0.5f * dist2;
-            }
-
-        } else {
-            boxExts[axis] += dist;
-            boxExts[axis + 3] += dist;
-        }
-        _params->GetBox()->SetStretchedLocalExtents(boxExts, _params, -1);
-    }
-    _dragDistance = 0.f;
-    _selectedHandle = -1;
-}
-// Determine the right-mouse drag constraint based on
-// requiring that the resulting box will have all its min coords less than
-// its max coords.
-double TranslateRotateManip::constrainStretch(double currentDist)
-{
-    double dist;
-#ifdef DEAD
-    double dist = currentDist / _dataStatus->getMaxStretchedSize();
-#endif
-    double boxExts[6];
-    _params->GetBox()->GetStretchedLocalExtents(boxExts, -1);
-
-    const vector<double> angles = _params->GetBox()->GetAngles();
-    Permuter *           myPermuter = new Permuter(angles[0], angles[1], angles[2]);
-    // Based on the angles (phi and theta) the user is grabbing
-    // a rotated side of the cube. These vertices slide with the mouse.
-    // rotate the selected handle by theta, phi to find the side that corresponds to
-    // the corners that need to be moved
-    int newHandle;    // This corresponds to the side that was grabbed
-    if (_selectedHandle < 3)
-        newHandle = myPermuter->permute(_selectedHandle - 3);
-    else
-        newHandle = myPermuter->permute(_selectedHandle - 2);
-    if (newHandle < 0)
-        newHandle += 3;
-    else
-        newHandle += 2;
-    // axis2 is the axis of the grabbed side before rotation
-    int axis2 = (newHandle < 3) ? (2 - newHandle) : (newHandle - 3);
-    // axis 1 is the axis in the scene
-    int axis1 = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-    // Don't drag the z-axis if it's planar:
-    if (axis2 == 2) {
-        if (_params->GetBox()->IsPlanar()) {
-            delete myPermuter;
-            return 0.f;
-        }
-    }
-#ifdef DEAD
-    vector<double> stretch = _dataStatus->getStretchFactors();
-#else
-    vector<double> stretch(3, 1.0);
-#endif
-    float corrFactor = 0.0;
-#ifdef DEAD
-    float corrFactor = _dataStatus->getMaxStretchedSize() * stretch[axis2] / stretch[axis1];
-#endif
-
-    if (_selectedHandle < 3) {
-        if (dist * corrFactor > (boxExts[axis2 + 3] - boxExts[axis2])) dist = (boxExts[axis2 + 3] - boxExts[axis2]) / corrFactor;
-    } else {
-        if (dist * corrFactor < (boxExts[axis2] - boxExts[axis2 + 3])) dist = (boxExts[axis2] - boxExts[axis2 + 3]) / corrFactor;
-    }
-    delete myPermuter;
-
-    return (dist);
-#ifdef DEAD
-    return (dist * _dataStatus->getMaxStretchedSize());
-#endif
-}
-TranslateRotateManip::Permuter::Permuter(double theta, double phi, double psi)
-{
-    // Find the nearest multiple of 90 degrees > 0
-    theta += 44.;
-    phi += 44.;
-    psi += 44.;
-    while (theta < 0.f) theta += 360.;
-    while (phi < 0.f) phi += 360.;
-    while (psi < 0.f) psi += 360.;
-    // Then convert to right angles between 0 and 3:
-    _thetaRot = (int)(theta / 90.);
-    _thetaRot = _thetaRot % 4;
-    _phiRot = (int)(phi / 90.);
-    _phiRot = _phiRot % 4;
-    _psiRot = (int)(psi / 90.);
-    _psiRot = _psiRot % 4;
-}
-int TranslateRotateManip::Permuter::permute(int i)
-{
-    // first do the theta permutation:
-    switch (_thetaRot) {
-    case 1:    // 1->-2, -2->-1, -1 -> 2, 2 ->1
-        if (abs(i) == 1)
-            i = -2 * i;
-        else if (abs(i) == 2)
-            i = i / 2;
-        break;
-    case 2:
-        if (abs(i) < 3) i = -i;
-        break;
-    case 3:    // 1->2, 2->-1, -1 -> -2, -2 ->1
-        if (abs(i) == 1)
-            i = 2 * i;
-        else if (abs(i) == 2)
-            i = -i / 2;
-        break;
-    default: break;
-    }
-
-    // then do the phi permutation:
-    switch (_phiRot) {
-    case 1:    // 1->3, 3->-1, -1 -> -3, -3 ->1
-        if (abs(i) == 1)
-            i = 3 * i;
-        else if (abs(i) == 3)
-            i = -i / 3;
-        break;
-    case 2:
-        if (abs(i) != 2) i = -i;
-        break;
-    case 3:    // 1->3, 3->-1, -1 -> -3, -3 ->1
-        if (abs(i) == 1)
-            i = -3 * i;
-        else if (abs(i) == 3)
-            i = i / 3;
-        break;
-    default: break;
-    }
-    // finally do the psi permutation:
-    switch (_psiRot) {
-    case 1:    // 1->-2, -2->-1, -1 -> 2, 2 ->1
-        if (abs(i) == 1)
-            i = -2 * i;
-        else if (abs(i) == 2)
-            i = i / 2;
-        break;
-    case 2:
-        if (abs(i) < 3) i = -i;
-        break;
-    case 3:    // 1->2, 2->-1, -1 -> -2, -2 ->1
-        if (abs(i) == 1)
-            i = 2 * i;
-        else if (abs(i) == 2)
-            i = -i / 2;
-        break;
-    default: break;
-    }
-    return i;
+    bool success = (0 != gluProject(cbCoords[0], cbCoords[1], cbCoords[2], mvMatrix, pMatrix, viewport, wCoords, (wCoords + 1), (GLdouble *)(&depth)));
+    if (!success) return false;
+    winCoords[0] = wCoords[0];
+    winCoords[1] = wCoords[1];
+    return (depth > 0.0);
 }
