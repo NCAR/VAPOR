@@ -64,6 +64,10 @@ void TranslateStretchManip::Update(
     std::vector<double> urc,
     std::vector<double> minExts,
     std::vector<double> maxExts,
+    std::vector<double> cameraPosition,
+    std::vector<double> rotationCenter,
+    double modelViewMatrix[16],
+    double projectionMatrix[16],
     std::vector<int> windowSize) {
     //	_selection.insert(_selection.begin(), llc.begin(), llc.end());
     //	_selection.insert(_selection.end(), urc.begin(), urc.end());
@@ -71,7 +75,19 @@ void TranslateStretchManip::Update(
     //	_extents.insert(_extents.begin(), minExts.begin(), minExts.end());
     //	_extents.insert(_extents.end(), maxExts.begin(), maxExts.end());
 
+    for (int i = 0; i < 16; i++) {
+        _modelViewMatrix[i] = modelViewMatrix[i];
+        _projectionMatrix[i] = projectionMatrix[i];
+    }
+
     _windowSize = windowSize;
+    _cameraPosition[0] = cameraPosition[0];
+    _cameraPosition[1] = cameraPosition[1];
+    _cameraPosition[2] = cameraPosition[2];
+
+    _rotationCenter[0] = _rotationCenter[0];
+    _rotationCenter[1] = _rotationCenter[1];
+    _rotationCenter[2] = _rotationCenter[2];
 
     std::copy(llc.begin(), llc.end(), _selection);
     std::copy(urc.begin(), urc.end(), _selection + 3);
@@ -87,14 +103,15 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2]) {
     double handleMid[3];
     double handle[8][3];
 
-    double camPos[3], upVec[3], viewDir[3];
-    ReconstructCamera(camPos, upVec, viewDir);
+    //double pos[3], upVec[3], viewDir[3];
+    //ReconstructCamera(pos, upVec, viewDir);
 
     int octant = 0;
     int face, handleNum;
     for (int axis = 0; axis < 3; axis++) {
-        if (camPos[axis] > 0.5f * (boxExtents[axis] + boxExtents[axis + 3]))
+        if (_cameraPosition[axis] > 0.5f * (boxExtents[axis] + boxExtents[axis + 3])) {
             octant |= 1 << axis;
+        }
     }
 
     // Front handles
@@ -554,13 +571,13 @@ double TranslateStretchManip::getPixelSize() const {
     height = _windowSize[1]; //500;
 
     double center[3] = {0., 0., 0.}; //, pos[3];
-    double pos[3], upVec[3], viewDir[3];
-    ReconstructCamera(pos, upVec, viewDir);
+    //double pos[3], upVec[3], viewDir[3];
+    //ReconstructCamera(pos, upVec, viewDir);
 
     //vpParams->GetRotationCenter(center);
     //vpParams->GetCameraPos(pos);
 
-    vsub(center, pos, temp);
+    vsub(_rotationCenter, _cameraPosition, temp);
 
     //Apply stretch factor:
 
@@ -902,8 +919,8 @@ bool TranslateStretchManip::projectPointToWin(double cubeCoords[3], double winCo
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     bool success = (0 != gluProject(
-                             cbCoords[0], cbCoords[1], cbCoords[2], mvMatrix,
-                             pMatrix, viewport, wCoords,
+                             cbCoords[0], cbCoords[1], cbCoords[2], _modelViewMatrix,
+                             _projectionMatrix, viewport, wCoords,
                              (wCoords + 1), (GLdouble *)(&depth)));
     if (!success)
         return false;
