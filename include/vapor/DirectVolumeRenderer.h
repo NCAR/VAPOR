@@ -40,6 +40,13 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     int _initializeGL();
     int _paintGL();
 
+  private:
+    const std::string _effectNameStr = "DVR";
+    const std::string _effectNameAttrStr = "DVRAttr";
+    const std::string _vertexDataAttrStr = "vertexDataAttr";
+
+    GLuint _vertexDataAttr;
+
 }; // End of class DirectVolumeRenderer
 
 }; // End of namespace VAPoR
