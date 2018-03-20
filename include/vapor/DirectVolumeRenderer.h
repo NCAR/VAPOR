@@ -26,23 +26,30 @@ class RENDER_API DirectVolumeRenderer : public Renderer
 {
 public:
 
-  DirectVolumeRenderer(  const ParamsMgr*  pm, 
+    DirectVolumeRenderer(  const ParamsMgr*  pm, 
                          std::string&      winName, 
                          std::string&      dataSetName,
                          std::string&      instName, 
                          DataMgr*          dataMgr);
 
-  virtual ~DirectVolumeRenderer();
+    virtual ~DirectVolumeRenderer();
 
-  static std::string GetClassType()
-  {
-    return ("Direct_Volume_Renderer");
-  }
+    static std::string GetClassType()
+    {
+        return ("Direct_Volume_Renderer");
+    }
     
 protected:
-  // pure virtual functions that are required to implement
-  int _initializeGL();
-  int _paintGL();
+    // pure virtual functions that are required to implement
+    int _initializeGL();
+    int _paintGL();
+
+private:
+    const std::string   _effectNameStr     = "DVR";
+    const std::string   _effectNameAttrStr = "DVRAttr";
+    const std::string   _vertexDataAttrStr = "vertexDataAttr";
+
+    GLuint              _vertexDataAttr;
 
 };  // End of class DirectVolumeRenderer
 
