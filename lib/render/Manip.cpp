@@ -284,8 +284,6 @@ bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNu
         handleNum = 2 - handleNum;
     double boxExtents[6];
 
-    int timestep = 0;
-
     for (int i = 0; i < 3; i++) {
         boxCtr[i] = (_selection[i] + _selection[i + 3]) * 0.5f;
     }
@@ -498,11 +496,6 @@ bool TranslateStretchManip::
     double val;
     double handleExtents[6];
     double boxExtents[6];
-#ifdef DEAD
-    int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
-#endif
-    int timestep = 0;
-    //	_params->GetBox()->GetLocalExtents(boxExtents,timestep);
 
     makeHandleExtents(handleNum, handleExtents, 0, _selection);
     int coord;
@@ -548,7 +541,6 @@ bool TranslateStretchManip::
 //If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render() {
     double extents[6];
-    int timestep = 0;
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
@@ -625,11 +617,6 @@ double TranslateStretchManip::getPixelSize() const {
 
 void TranslateStretchManip::drawBoxFaces() {
     double corners[8][3];
-#ifdef DEAD
-    int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
-#endif
-    int timestep = 0;
-    //	_params->GetBox()->calcLocalBoxCorners(corners, 0.f, timestep);
     corners[0][0] = _selection[0];
     corners[0][1] = _selection[1];
     corners[0][2] = _selection[2];
@@ -741,8 +728,6 @@ void TranslateStretchManip::
         //Convert _dragDistance to world coords:
         float dist = _dragDistance;
 
-        int timestep = 0;
-
         //Check if we are stretching.  If so, only move coords associated with
         //handle:
         if (_isStretching) {
@@ -757,10 +742,9 @@ void TranslateStretchManip::
             _selection[axis + 3] += dist;
         }
 
-        cout << "MouseRelease " << _selectedHandle << " " << _dragDistance << endl;
-        for (int i = 0; i < 6; i++)
-            cout << _selection[i] << " ";
-        cout << endl;
+        //		cout << "MouseRelease " << _selectedHandle << " " << _dragDistance << endl;
+        //		for (int i=0; i<6; i++) cout << _selection[i] << " ";
+        //		cout << endl;
     }
     _dragDistance = 0.f;
     _selectedHandle = -1;
@@ -837,7 +821,6 @@ void TranslateStretchManip::
 
     //Do this calculation in stretched world coords
     const double *sizes;
-    int timestep = 0;
 
     if (_isStretching) { //don't push through opposite face ..
         //Depends on whether we are pushing the "low" or "high" handle
@@ -868,8 +851,6 @@ void TranslateStretchManip::
             _dragDistance = sizes[coord] - _selection[coord + 3];
         }
     }
-
-    cout << "new dragDistance " << _dragDistance << endl;
 }
 
 //Draw a line connecting the specified handle to the box center.
