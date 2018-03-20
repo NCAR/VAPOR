@@ -633,12 +633,12 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
         double projScreenCoords[2];
         //		if (_manip->projectPointToLine(mouseCoords,projMouseCoords)) {
         if (_manip->projectPointToLine(screenCoords, projScreenCoords)) {
-            cout << "dragging " << handle << endl;
             double dirVec[3];
             //_manip->pixelToVector(projMouseCoords, dirVec, _strHandleMid);
             _manip->pixelToVector(projScreenCoords, dirVec, _strHandleMid);
             _manip->slideHandle(handle, dirVec, false);
         }
+        // paintGL();
         return;
     }
 
@@ -681,6 +681,7 @@ void VizWin::setFocus() { QWidget::setFocus(); }
 
 void VizWin::paintGL()
 {
+    cout << "paintGL()" << endl;
     if (!FrameBufferReady()) { return; }
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
@@ -699,13 +700,13 @@ void VizWin::paintGL()
 
     // Only rendering if state has changed.
     //
-    if (!_controlExec->GetParamsMgr()->StateChanged()) {
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        return;
-    }
+    //	if (! _controlExec->GetParamsMgr()->StateChanged()) {
+    //		glMatrixMode(GL_PROJECTION);
+    //		glPopMatrix();
+    //		glMatrixMode(GL_MODELVIEW);
+    //		glPopMatrix();
+    //		return;
+    //	}
 
     // Set up projection and modelview matrices
     //
@@ -780,7 +781,10 @@ void VizWin::paintGL()
     double proj[16];
     vParams->GetProjectionMatrix(proj);
 
-    _manip->Update(minExts, maxExts, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
+    std::vector<double> llc, urc;
+    _manip->GetBox(llc, urc);    // get box from active RenderParams
+
+    _manip->Update(llc, urc, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
 
     _manip->render();
 
