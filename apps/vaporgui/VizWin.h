@@ -97,6 +97,7 @@ private:
 
     string              _winName;
     VAPoR::ControlExec *_controlExec;
+    double              _strHandleMid[3];
 
     bool       _mouseClicked;    // Indicates mouse has been clicked but not move
     int        _buttonNum;       // currently pressed button (0=none, 1=left,2=mid, 3=right)
@@ -107,7 +108,7 @@ private:
     void setUpProjMatrix();
     void setUpModelViewMatrix();
 
-    VAPoR::Manip *_manip;
+    VAPoR::TranslateStretchManip *_manip;
 };
 
 #endif    // VIZWIN_H

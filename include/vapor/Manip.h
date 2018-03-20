@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2004				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -36,7 +36,7 @@ namespace VAPoR {
 //! \brief A class that supports manipulators in in a VAPOR Visualizer
 //! \author Alan Norton
 //! \version 3.0
-//! \date    July 2015
+//! \date	July 2015
 //!
 //! Manip class is a pure virtual class that supports
 //! manipulators in the VAPOR Visualizer scene
@@ -90,7 +90,7 @@ public:
     //! \param[out] handleMid is the coordinates of the center of the selected handle (if selected).
     //! \return handle index, or -1 if no intersection
     //	virtual int mouseIsOverHandle(double screenCoords[2], double* boxExtents,  double handleMid[3]) = 0;
-    virtual int mouseIsOverHandle(double screenCoords[2]) = 0;
+    virtual int mouseIsOverHandle(double screenCoords[2], double handleMid[3]) = 0;
 
     //! Pure virtual function, invoked when the mouse button is released
     //! \param[in] screenCoords are coordinates of mouse at the time it is released
@@ -128,7 +128,7 @@ protected:
 //! \brief A Manip subclass for manipulators that stretch and translate
 //! \author Alan Norton
 //! \version 3.0
-//! \date    July 2015
+//! \date	July 2015
 
 //! This subclass handles translation and stretching manip.  Works
 //! with ArrowParams (rake).
@@ -156,7 +156,7 @@ public:
     //! \param[out] handleMid coordinates of handle selected, in stretched coordinates
     //! \return index of handle, or -1 if none.
     //	int mouseIsOverHandle(double screenCoords[2], double* stretchedBoxExtents,  double handleMid[3]);
-    int mouseIsOverHandle(double screenCoords[2]);
+    int mouseIsOverHandle(double screenCoords[2], double handleMid[3]);
 
     //! Method to invoke when the mouse has been released after dragging a handle.
     //! \param[in] screenCoords screen coordinates where mouse was released.
@@ -172,7 +172,8 @@ public:
     //! \param[in] dirVec is vector from camera to handle in unstretched coords
     //! \param[in] buttonNum indicates which mouse button was pressed.
     //! \param[out] strHandleMid specified 3D coordinates of handle middle in stretched coordinates.
-    virtual void captureMouseDown(int handleNum, const std::vector<double> &camPos, double *dirVec, int buttonNum, double strHandleMid[3]);
+    // virtual void captureMouseDown(int handleNum,  const std::vector<double>& camPos, double* dirVec, int buttonNum, double strHandleMid[3]);
+    virtual void captureMouseDown(int handleNum, int buttonNum, double strHandleMid[3]);
 
     //! Method to be invoked when the mouse is dragging a manip handle, from mouse move event.
     //! \param[in] handleNum index of dragging handle
@@ -201,6 +202,15 @@ public:
     //! \param[in] mouseCoords coordinates of mouse
     //! \param[out] projCoords coordinates of projected point.
     bool projectPointToLine(double mouseCoords[2], double projCoords[2]);
+
+    //! Determine a vector associated with a pixel, pointing from the
+    //! camera, through the pixel into the scene to a manip handle.  Uses OpenGL screencoords.
+    //! I.e. y = 0 at bottom.  Returns false on failure.  Used during mouse Events.
+    //! \param[in] winCoords  pixel coordinates (converted to double)
+    //! \param[out] dirVec resulting vector, from camera to handle
+    //! \param[in] strHandleMid is middle of handle in stretched coordinates.
+    //! \return true if successful
+    bool pixelToVector(double winCoords[2], double dirVec[3], double strHandleMid[3]);
 
 protected:
     virtual void drawBoxFaces();
@@ -262,6 +272,11 @@ protected:
     double _tempRotation;
     int    _tempRotAxis;
 
+    //! Project a 3D point (in user coord system) to window coords.
+    //! Return true if in front of camera.  Used by pointIsOnQuad, as well as in building Axis labels.
+    //! \param[in] userCoords[3] coordinates of point
+    //! \param[out] winCoords[2] window coordinates of projection
+    //! \return true if point is in front of camera.
     bool projectPointToWin(double cubeCoords[3], double winCoords[2]);
 };
 };    // namespace VAPoR
