@@ -99,7 +99,12 @@ VizWin::VizWin(
     vParams->GetModelViewMatrix(mv);
     double proj[16];
     vParams->GetProjectionMatrix(mv);
-    _manip->Update(minExts, maxExts, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
+
+    _manip->Update(
+        minExts, maxExts, minExts, maxExts,
+        vcameraPos, vrotCenter,
+        mv, proj,
+        windowSize);
 }
 
 /*
@@ -387,13 +392,6 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
     screenCoords[0] = (float)e->x() - 3.f;
     screenCoords[1] = (float)(height() - e->y()) - 5.f;
     double coords[2] = {(double)e->x(), (double)e->y()};
-    cout << "mousePrss " << _manip->mouseIsOverHandle(screenCoords) << endl;
-    cout << "mousePrss " << _manip->mouseIsOverHandle(coords) << endl;
-    cout << endl
-         << endl
-         << "scords " << screenCoords[0] << " " << screenCoords[1] << endl;
-    cout << "coords " << coords[0] << " " << coords[1] << endl
-         << endl;
 
     if ((e->buttons() & Qt::LeftButton) && (e->buttons() & Qt::RightButton))
         ; //do nothing
@@ -421,7 +419,29 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
     MouseModeParams *p = guiP->GetMouseModeParams();
     string modeName = p->GetCurrentMouseMode();
 
-    if (modeName == MouseModeParams::GetNavigateModeName()) {
+    int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
+    cout << "press " << handle << endl;
+    if (handle >= 0) {
+        double dirVec[3];
+        _manip->pixelToVector(screenCoords, dirVec, _strHandleMid);
+        double startCoords[3];
+        _manip->captureMouseDown(handle, _buttonNum, _strHandleMid); //screenCoords);
+        _manip->startHandleSlide(screenCoords, handle);
+        _manip->setMouseDown(true);
+
+        /*
+528             double dirVec[3];
+529             //Find the direction vector of the camera ( Local coords)
+530             _visualizer->pixelToVector(screenCoords,
+531                 vParams->getStretchedCamPosLocal(), dirVec, _strHandleMid);
+532             //Remember which handle we hit, highlight it, save the intersection point.
+533             manip->captureMouseDown(handleNum,  vParams->getCameraPosLocal(), dirVec, buttonNum, _strHandleMid);
+534             EventRouter* rep = VizWinMgr::getInstance()->getEventRouter(tag);
+535             rep->captureMouseDown(buttonNum);
+536             setMouseDown(true, manip);
+*/
+
+    } else if (modeName == MouseModeParams::GetNavigateModeName()) {
         mousePressEventNavigate(e);
         return;
     }
@@ -436,7 +456,6 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
     screenCoords[1] = (float)(height() - e->y()) - 5.f;
 
     //double coords[2] = {(double)e->x(), (double)e->y()};
-    cout << "mousePrss " << _manip->mouseIsOverHandle(screenCoords) << endl;
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     AnimationParams *p = paramsMgr->GetAnimationParams(_winName);
@@ -562,6 +581,7 @@ void VizWin::mouseReleaseEventNavigate(QMouseEvent *e) {
     p->SetCameraUpVec(upvec);
 
     paramsMgr->EndSaveStateGroup();
+    cout << "mouse release event navigate" << endl;
 }
 
 /*
@@ -575,13 +595,17 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e) {
 
     _mouseClicked = false;
 
+    float screenCoords[2];
+    screenCoords[0] = (float)e->x() - 3.f;
+    screenCoords[1] = (float)(height() - e->y()) - 5.f;
+    _manip->setMouseDown(false);
+    _manip->mouseRelease(screenCoords);
+
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(
         GUIStateParams::GetClassType());
     MouseModeParams *p = guiP->GetMouseModeParams();
-
     string modeName = p->GetCurrentMouseMode();
-
     if (modeName == MouseModeParams::GetNavigateModeName()) {
         mouseReleaseEventNavigate(e);
         _buttonNum = 0;
@@ -649,6 +673,33 @@ void VizWin::mouseMoveEvent(QMouseEvent *e) {
     if (_buttonNum == 0)
         return;
 
+    double screenCoords[2];
+    screenCoords[0] = (float)e->x() - 3.f;
+    screenCoords[1] = (float)(height() - e->y()) - 5.f;
+    double coords[2] = {(double)e->x(), (double)e->y()};
+    //int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
+    int handle = _manip->draggingHandle();
+    if (handle >= 0) {
+        //Respond based on what activity we are tracking
+        //Need to tell the appropriate params about the change,
+        //And it should refresh the panel
+        double mouseCoords[2];
+        double projMouseCoords[2];
+        mouseCoords[0] = (float)e->x();
+        mouseCoords[1] = (float)height() - e->y();
+
+        double projScreenCoords[2];
+        //		if (_manip->projectPointToLine(mouseCoords,projMouseCoords)) {
+        if (_manip->projectPointToLine(screenCoords, projScreenCoords)) {
+            cout << "dragging " << handle << endl;
+            double dirVec[3];
+            //_manip->pixelToVector(projMouseCoords, dirVec, _strHandleMid);
+            _manip->pixelToVector(projScreenCoords, dirVec, _strHandleMid);
+            _manip->slideHandle(handle, dirVec, false);
+        }
+        return;
+    }
+
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(
         GUIStateParams::GetClassType());
@@ -660,14 +711,6 @@ void VizWin::mouseMoveEvent(QMouseEvent *e) {
         mouseMoveEventNavigate(e);
         return;
     }
-
-    //Respond based on what activity we are tracking
-    //Need to tell the appropriate params about the change,
-    //And it should refresh the panel
-    double mouseCoords[2];
-    double projMouseCoords[2];
-    mouseCoords[0] = (float)e->x();
-    mouseCoords[1] = (float)height() - e->y();
 
 #ifdef DEAD
 
@@ -808,8 +851,11 @@ void VizWin::paintGL() {
     double proj[16];
     vParams->GetProjectionMatrix(proj);
 
-    _manip->Update(minExts, maxExts, minExts,
-                   maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
+    _manip->Update(minExts, maxExts, minExts, maxExts,
+                   vcameraPos, vrotCenter,
+                   mv, proj,
+                   windowSize);
+
     _manip->render();
 
     swapBuffers();
