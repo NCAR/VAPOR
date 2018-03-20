@@ -18,12 +18,12 @@ DirectVolumeRenderer::~DirectVolumeRenderer() {}
 
 int DirectVolumeRenderer::_initializeGL()
 {
-    std::cout << "    **** OpenGL Info ****" << std::endl;
+    std::cout << "    **** System Info ****" << std::endl;
     std::cout << "    OpenGL version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "    GLSL version   : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "    Vendor         : " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "    **** OpenGL Info ****" << std::endl;
+    std::cout << "    **** System Info ****" << std::endl;
 
     if (!_shaderMgr) {
         std::cerr << "Programmable shading not available" << std::endl;
@@ -39,13 +39,6 @@ int DirectVolumeRenderer::_initializeGL()
             return -1;
         }
     }
-
-    rc = (int)_shaderMgr->AttributeLocation(_effectNameAttrStr, _vertexDataAttrStr);
-    if (rc < 0) {
-        std::cerr << "AttributeLocation() failed" << std::endl;
-        return -1;
-    }
-    _vertexDataAttr = rc;
 
     return 0;
 }
