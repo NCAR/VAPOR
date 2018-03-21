@@ -378,7 +378,6 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     string           modeName = p->GetCurrentMouseMode();
 
     int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
-    cout << "press " << handle << endl;
     if (handle >= 0) {
         double dirVec[3];
         _manip->pixelToVector(screenCoords, dirVec, _strHandleMid);
@@ -527,7 +526,6 @@ void VizWin::mouseReleaseEventNavigate(QMouseEvent *e)
     p->SetCameraUpVec(upvec);
 
     paramsMgr->EndSaveStateGroup();
-    cout << "mouse release event navigate" << endl;
 }
 
 /*
@@ -638,7 +636,6 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
             _manip->pixelToVector(projScreenCoords, dirVec, _strHandleMid);
             _manip->slideHandle(handle, dirVec, false);
         }
-        // paintGL();
         return;
     }
 
@@ -681,7 +678,6 @@ void VizWin::setFocus() { QWidget::setFocus(); }
 
 void VizWin::paintGL()
 {
-    cout << "paintGL()" << endl;
     if (!FrameBufferReady()) { return; }
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
