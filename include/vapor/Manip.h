@@ -82,7 +82,7 @@ Manip() {};
 	//! Method to retrieve the manipulator's current extents
 	//! \param[out] llc - The lower-left coordinates of the manipulator
 	//! \param[out] urc - The upper-right coordinates of the manipulator
-	virtual void GetBox(std::vector<double> &llc, std::vector<double> urc) = 0;
+	virtual void GetBox(std::vector<double> &llc, std::vector<double> &urc) = 0;
 
 	//! Obtain the Params instance currently associated with the Manip.
 	//! \return Params* currently associated Params instance
@@ -164,7 +164,7 @@ public:
 	virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords) {};
 
 	//! @copydoc Manip::GetBox(std::vector<double>, std::vector<double>);
-	virtual void GetBox(std::vector<double> &llc, std::vector<double> urc) {};
+	virtual void GetBox(std::vector<double> &llc, std::vector<double> &urc);
 
 	//! Determine if the mouse is over one of the manip handles.
 	//! \param[in] screenCoords x,y screen position of mouse
