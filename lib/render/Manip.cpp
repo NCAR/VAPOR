@@ -51,12 +51,6 @@ void TranslateStretchManip::Update(
     double modelViewMatrix[16],
     double projectionMatrix[16],
     std::vector<int> windowSize) {
-    //	_selection.insert(_selection.begin(), llc.begin(), llc.end());
-    //	_selection.insert(_selection.end(), urc.begin(), urc.end());
-
-    //	_extents.insert(_extents.begin(), minExts.begin(), minExts.end());
-    //	_extents.insert(_extents.end(), maxExts.begin(), maxExts.end());
-
     for (int i = 0; i < 16; i++) {
         _modelViewMatrix[i] = modelViewMatrix[i];
         _projectionMatrix[i] = projectionMatrix[i];
@@ -75,6 +69,19 @@ void TranslateStretchManip::Update(
     std::copy(urc.begin(), urc.end(), _selection + 3);
     std::copy(minExts.begin(), minExts.end(), _extents);
     std::copy(maxExts.begin(), maxExts.end(), _extents + 3);
+}
+
+void TranslateStretchManip::GetBox(
+    std::vector<double> &llc,
+    std::vector<double> &urc) {
+    llc.resize(3);
+    urc.resize(3);
+    llc[0] = _selection[0];
+    llc[1] = _selection[1];
+    llc[2] = _selection[2];
+    urc[0] = _selection[3];
+    urc[1] = _selection[4];
+    urc[2] = _selection[5];
 }
 
 int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double handleMid[3]) {
@@ -261,7 +268,6 @@ bool TranslateStretchManip::ReconstructCamera(
     return (true);
 }
 
-//bool TranslateStretchManip::startHandleSlide(Visualizer* viz, double mouseCoords[2], int handleNum, Params* manipParams){
 bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNum) {
 
     // When the mouse is first pressed over a handle,
@@ -272,8 +278,8 @@ bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNu
 
     _mouseDownPoint[0] = mouseCoords[0];
     _mouseDownPoint[1] = mouseCoords[1];
-    //Get the cube coords of the rotation center:
 
+    //Get the cube coords of the rotation center:
     double boxCtr[3];
     double winCoords[2] = {0., 0.};
     double dispCoords[2];
@@ -289,25 +295,23 @@ bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNu
     }
     // project the boxCtr and one more point, to get a direction vector
 
-    //	if (!viz->projectPointToWin(boxCtr, winCoords)) return false;
-    if (!projectPointToWin(boxCtr, winCoords)) {
-        cout << "A" << endl;
+    if (!projectPointToWin(boxCtr, winCoords))
         return false;
-    }
+
     boxCtr[handleNum] += 0.1f;
-    //	if (!viz->projectPointToWin(boxCtr, dispCoords)) return false;
-    if (!projectPointToWin(boxCtr, dispCoords)) {
-        cout << "B" << endl;
+
+    if (!projectPointToWin(boxCtr, dispCoords))
         return false;
-    }
+
     //Direction vector is difference:
     _handleProjVec[0] = dispCoords[0] - winCoords[0];
     _handleProjVec[1] = dispCoords[1] - winCoords[1];
-    float vecNorm = sqrt(_handleProjVec[0] * _handleProjVec[0] + _handleProjVec[1] * _handleProjVec[1]);
-    if (vecNorm == 0.f) {
-        cout << "C" << endl;
+    float vecNorm = sqrt(_handleProjVec[0] * _handleProjVec[0] +
+                         _handleProjVec[1] * _handleProjVec[1]);
+
+    if (vecNorm == 0.f)
         return false;
-    }
+
     _handleProjVec[0] /= vecNorm;
     _handleProjVec[1] /= vecNorm;
     return true;
@@ -568,7 +572,6 @@ void TranslateStretchManip::render() {
                 handleExtents[axis + 3] += _dragDistance;
             }
         }
-        cout << "_selectedHandle " << _selectedHandle << endl;
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
         drawHandleConnector(handleNum, handleExtents, _selection); //extents);
     }
@@ -651,10 +654,11 @@ void TranslateStretchManip::drawBoxFaces() {
 
     //Now the corners need to be put into the unit cube, and displaced appropriately
     //Either displace just half the corners or do the opposite ones as well.
+    int axis;
     for (int cor = 0; cor < 8; cor++) {
 
         if (_selectedHandle >= 0) {
-            int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
+            axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
             //The corners associated with a handle are as follows:
             //If the handle is on the low end, i.e. _selectedHandle < 3, then
             // for axis == 0, handles on corners  1,3,5,7 (cor&1 is 1)
@@ -670,9 +674,12 @@ void TranslateStretchManip::drawBoxFaces() {
                 if (!((cor >> axis) & 1) && _selectedHandle >= 3)
                     continue;
             }
+            cout << "adjusting corner " << cor << " " << axis << " " << _selectedHandle << endl;
             corners[cor][axis] += _dragDistance;
         }
     }
+    cout << "axis " << axis << endl
+         << endl;
 
     //Now render the edges:
 
@@ -683,6 +690,7 @@ void TranslateStretchManip::drawBoxFaces() {
     glBegin(GL_LINES);
     glVertex3dv(corners[0]);
     glVertex3dv(corners[1]);
+    glColor3f(1.f, 1.f, 0.f);
     glVertex3dv(corners[0]);
     glVertex3dv(corners[2]);
     glVertex3dv(corners[0]);
@@ -741,10 +749,6 @@ void TranslateStretchManip::
             _selection[axis] += dist;
             _selection[axis + 3] += dist;
         }
-
-        //		cout << "MouseRelease " << _selectedHandle << " " << _dragDistance << endl;
-        //		for (int i=0; i<6; i++) cout << _selection[i] << " ";
-        //		cout << endl;
     }
     _dragDistance = 0.f;
     _selectedHandle = -1;
