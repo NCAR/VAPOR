@@ -50,7 +50,6 @@ using namespace Wasp;
 const string ViewpointParams::_viewPointsTag = "Viewpoints";
 const string ViewpointParams::_transformsTag = "Transforms";
 const string ViewpointParams::_currentViewTag = "CurrentViewpoint";
-const string ViewpointParams::_homeViewTag = "HomeViewpoint";
 const string ViewpointParams::_lightDirectionsTag = "LightDirections";
 const string ViewpointParams::_diffuseCoeffTag = "DiffuseCoefficients";
 const string ViewpointParams::_specularCoeffTag = "SpecularCoefficients";
@@ -79,9 +78,6 @@ ViewpointParams::ViewpointParams(
 
 	Viewpoint currentVP(ssave);
 	m_VPs->Insert(&currentVP, _currentViewTag);
-
-	Viewpoint homeVP(ssave);
-	m_VPs->Insert(&homeVP, _homeViewTag);
 
 	_transforms = new ParamsContainer(ssave, _transformsTag);
 	_transforms->SetParent(this);
@@ -288,10 +284,6 @@ void ViewpointParams::setSpecularCoeff(int lightNum, double val) {
 
 void ViewpointParams::SetCurrentViewpoint(Viewpoint* newVP) {
 	m_VPs->Insert(newVP, _currentViewTag);
-}
-
-void ViewpointParams::setHomeViewpoint(Viewpoint* newVP) {
-	m_VPs->Insert(newVP, _homeViewTag);
 }
 
 void ViewpointParams::SetWindowSize(size_t width, size_t height) {
