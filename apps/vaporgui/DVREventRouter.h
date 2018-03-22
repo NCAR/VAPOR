@@ -23,6 +23,7 @@ public:
     std::string        GetType() const { return GetClassType(); }
 
 protected:
+    // Required pure virtual functions.
     void        _updateTab();
     std::string _getDescription() const;
     std::string _getSmallIconImagePath() const;
