@@ -246,6 +246,11 @@ class EventRouter {
     //!
     virtual string GetType() const = 0;
 
+    //! Notify the event router that new data set has been loaded
+    //!
+    virtual void LoadDataNotify(string dataSetName) {
+    }
+
   protected:
     EventRouter() {}
 

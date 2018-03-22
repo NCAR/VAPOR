@@ -10,6 +10,7 @@ class BannerGUI : QMainWindow {
     Q_OBJECT
   public:
     BannerGUI(
+        QWidget *parent,
         std::string imagefile, int maxwait = 0, bool center = false,
         QString text = "", QString url = "");
 
@@ -24,6 +25,7 @@ class BannerGUI : QMainWindow {
     QPushButton *closeButton;
     QPushButton *infoButton;
     QString url;
+    QWidget *_parent;
 
   private slots:
     void on_timer_end();
