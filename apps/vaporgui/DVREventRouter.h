@@ -27,6 +27,7 @@ class DVREventRouter : public QWidget, public RenderEventRouter {
     }
 
   protected:
+    // Required pure virtual functions.
     void _updateTab();
     std::string _getDescription() const;
     std::string _getSmallIconImagePath() const;
