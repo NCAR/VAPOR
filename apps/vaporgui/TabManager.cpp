@@ -353,17 +353,11 @@ void TabManager::_createAllDefaultTabs()
 
     // Install built-in tabs
     //
-    //<<<<<<< HEAD
-    //	parent = _getSubTabWidget(2);
-    //	EventRouter *er = new StartupEventRouter(parent, _controlExec);
-    //	_installTab(er->GetType(), 2, er);
 
     parent = _getSubTabWidget(1);
     er = new AnnotationEventRouter(parent, _controlExec);
     _installTab(er->GetType(), 1, er);
 
-    //=======
-    //>>>>>>> master
     parent = _getSubTabWidget(1);
     er = new AnimationEventRouter(parent, _controlExec);
     _installTab(er->GetType(), 1, er);
@@ -373,11 +367,7 @@ void TabManager::_createAllDefaultTabs()
     _installTab(er->GetType(), 1, er);
 
     parent = _getSubTabWidget(2);
-    //<<<<<<< HEAD
-    //	er = new AppSettingsEventRouter(parent, _controlExec);
-    //=======
     er = new SettingsEventRouter(parent, _controlExec);
-    //>>>>>>> master
     _installTab(er->GetType(), 2, er);
 
     // Renderer tabs
