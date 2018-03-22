@@ -10,11 +10,11 @@ add_library (common SHARED
 	PVTime.cpp
 	GetAppPath.cpp
 	utils.cpp
-	glutil.cpp
-	MyPython.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
+	glutil.cpp
 	)
 
+target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES})
 
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
@@ -24,8 +24,6 @@ endif()
 if (NOT WIN32)
 	add_definitions (-DENABLE_THREADS)
 endif()
-
-target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES} python${PYTHONVERSION})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (common GLU)
