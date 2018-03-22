@@ -43,10 +43,14 @@ public:
     string        GetType() const { return GetClassType(); }
 
 protected:
-    void _updateTab();
+    void           _updateTab();
+    virtual string _getDescription() const;
+
+    virtual string _getSmallIconImagePath() const { return ("TwoDData_small.png"); }
+    virtual string _getIconImagePath() const { return ("TwoDData.png"); }
 
 private:
-    TwoDDataEventRouter() {}    // Sam: why a constructor in private?
+    TwoDDataEventRouter() {}
 
     //! Override default wheel behavior on the tab.  This has the effect of
     //! ignoring wheel events over the tab.  This is because wheel events will always

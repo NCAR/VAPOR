@@ -2,15 +2,15 @@
 #define RENDERHOLDER_H
 
 #include <qobject.h>
-#include "qstackedwidget.h"
-#include "qpushbutton.h"
-#include "qtableview.h"
-#include "EventRouter.h"
+#include <qstackedwidget.h>
+#include <qpushbutton.h>
+#include <qtableview.h>
 #include <vapor/MyBase.h>
 #include <QMessageBox>
-#include "VaporTable.h"
+#include "GUIStateParams.h"
 #include "ui_LeftPanel.h"
 #include "ui_NewRendererDialog.h"
+#include "VaporTable.h"
 
 QT_USE_NAMESPACE
 
@@ -19,40 +19,48 @@ class ControlExec;
 class ParamsMgr;
 }    // namespace VAPoR
 
+class QPushButtonWithDoubleClick : public QPushButton {
+    Q_OBJECT
+    using QPushButton::QPushButton;
+    void mouseDoubleClickEvent(QMouseEvent *e) { emit doubleClicked(); }
+
+signals:
+    void doubleClicked();
+};
+
 class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
     Q_OBJECT
 
 public:
-    NewRendererDialog(QWidget *parent, VAPoR::ControlExec *ce);
+    NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths);
 
-    std::string  getSelectedRenderer() { return _selectedRenderer; }
-    QMessageBox *msgBox;
-    void         mouseDoubleClickEvent(QMouseEvent *event)
+    std::string GetSelectedRenderer() { return _selectedRenderer; }
+    void        mouseDoubleClickEvent(QMouseEvent *event)
     {
-        msgBox = new QMessageBox();
-        msgBox->setWindowTitle("Hello");
-        msgBox->setText("You Double Clicked Mouse Button");
-        msgBox->show();
+        _msgBox = new QMessageBox();
+        _msgBox->setWindowTitle("Hello");
+        _msgBox->setText("You Double Clicked Mouse Button");
+        _msgBox->show();
     };
 
 private slots:
-    void barbChecked(bool state);
-    void contourChecked(bool state);
-    void imageChecked(bool state);
-    void twoDDataChecked(bool state);
+    void _buttonChecked();
+    void _buttonDoubleClicked();
 
 private:
-    void setUpImage(std::string imageName, QLabel *label);
-    void uncheckAllButtons();
-    void initializeImages();
-    void initializeDataSources(VAPoR::ControlExec *ce);
+    void         _createButtons();
+    void         _setUpImage(std::string imageName, QLabel *label);
+    void         _uncheckAllButtons();
+    void         _initializeDataSources();
+    QPushButton *_createButton(QIcon icon, QString name, int index);
 
-    static const std::string barbDescription;
-    static const std::string contourDescription;
-    static const std::string imageDescription;
-    static const std::string twoDDataDescription;
+    std::vector<string> _rendererNames;
+    std::vector<string> _descriptions;
+    std::vector<string> _iconPaths;
+    std::vector<string> _smallIconPaths;
 
-    std::string _selectedRenderer;
+    std::string  _selectedRenderer;
+    QMessageBox *_msgBox;
 };
 
 class CBWidget : public QWidget, public QTableWidgetItem {
@@ -77,8 +85,18 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
 
 public:
     //! Constructor:
+    //!
+    //! \param[in] widgets vector of Widgets to be added
+    //! \param[in] widgetNames vector of widget names
+    //! \param[in] descriptions vector of Descriptions of the renderers to
+    //! be displayed
+    //! \param[in] iconPath Full path to a raster file containing a
+    //! large icon, or an empty string if none exists
+    //! \param[in] smallIconPath Full path to a raster file containing a
+    //! small icon (thumbnail), or an empty string if none exists
     //
-    RenderHolder(QWidget *parent, VAPoR::ControlExec *ce);
+    RenderHolder(QWidget *parent, VAPoR::ControlExec *ce, const std::vector<QWidget *> &widgets, const std::vector<string> &widgetNames, const std::vector<string> &descriptions,
+                 const std::vector<string> &iconPaths, const std::vector<string> &smallIconPaths);
 
     virtual ~RenderHolder() {}
 
@@ -86,45 +104,37 @@ public:
     //!
     void Update();
 
-    //! Specify the index of the page to be displayed of the stackedWidget.
-    //! \param[in] indx page index
-    void SetCurrentIndex(int indx)
-    {
-        stackedWidget->setCurrentIndex(indx);
-        stackedWidget->show();
-    }
-
-    //! Add a widget (EventRouter) to the QStackedWidget.
-    //! \param[in] QWidget* Widget to be added
-    //! \param[in] name Name of the renderer to be displayed
-    //! \param[in] tag indicating type of renderer to be displayed
-    //! \return index of widget in the stackedWidget
-    int AddWidget(QWidget *, const char *name, string tag);
+    //! Specify the name of the page to be displayed of the stackedWidget.
+    //! \param[in] name name of widget
+    //!
+    //! \sa RenderHolder()
+    //
+    void SetCurrentWidget(string name);
 
 #ifndef DOXYGEN_SKIP_THIS
 private:
     RenderHolder() {}
 
-    GUIStateParams *getStateParams() const
+    GUIStateParams *_getStateParams() const
     {
         assert(_controlExec != NULL);
         return ((GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     }
 
-    void updateDupCombo();
-    void makeRendererTableHeaders(vector<string> &table);
-    void initializeNewRendererDialog(vector<string> datasetNames);
+    void _updateDupCombo();
+    void _makeRendererTableHeaders(vector<string> &table);
+    void _initializeNewRendererDialog(vector<string> datasetNames);
 
     // Convert name to a unique name (among renderer names)
     std::string uniqueName(std::string name);
 
 private slots:
-    void showNewRendererDialog();
-    void deleteRenderer();
-    void itemTextChange(QTableWidgetItem *);
-    void copyInstanceTo(int);
-    void activeRendererChanged(int row, int col);
-    void tableValueChanged(int row, int col);
+    void _showNewRendererDialog();
+    void _deleteRenderer();
+    void _itemTextChange(QTableWidgetItem *);
+    void _copyInstanceTo(int);
+    void _activeRendererChanged(int row, int col);
+    void _tableValueChanged(int row, int col);
 
 signals:
     void newRendererSignal(string vizName, string renderClass, string renderInst);
@@ -134,19 +144,19 @@ private:
     VAPoR::ControlExec *_controlExec;
     NewRendererDialog * _newRendererDialog;
 
-    VaporTable *_vaporTable;
-    int         _currentRow;
+    VaporTable *        _vaporTable;
+    int                 _currentRow;
+    std::vector<string> _widgetNames;
 
-    void getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const;
+    void _getRow(int row, string &renderInst, string &renderClass, string &dataSetName) const;
 
-    void                 makeConnections();
-    void                 clearStackedWidget();
-    void                 initializeSplitter();
-    string               getActiveRendererClass();
-    string               getActiveRendererInst();
-    void                 highlightActiveRow(int row);
-    void                 changeRendererName(int row, int col);
-    VAPoR::RenderParams *getRenderParamsFromCell(int row, int col);
+    void   _makeConnections();
+    void   _initializeSplitter();
+    string _getActiveRendererClass();
+    string _getActiveRendererInst();
+    // void highlightActiveRow(int row);
+    void                 _changeRendererName(int row, int col);
+    VAPoR::RenderParams *_getRenderParamsFromCell(int row, int col);
 
 #endif    // DOXYGEN_SKIP_THIS
 };

@@ -28,7 +28,11 @@ public:
     std::string        GetType() const { return GetClassType(); }
 
 protected:
-    void _updateTab();
+    void           _updateTab();
+    virtual string _getDescription() const;
+
+    virtual string _getSmallIconImagePath() const { return ("Image_small.png"); }
+    virtual string _getIconImagePath() const { return ("Image.png"); }
 
 private:
     //! Override default wheel behavior on the tab.  This has the effect of
