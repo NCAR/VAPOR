@@ -15,7 +15,7 @@ add_library (render SHARED
 	GeoImageGeoTiff.cpp
 	ImageRenderer.cpp
 	Visualizer.cpp
-	AnnotationsRenderer.cpp
+	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
 	ControlExecutive.cpp

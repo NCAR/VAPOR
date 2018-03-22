@@ -45,6 +45,9 @@
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
+//#include "NavigationEventRouter.h"
+//#include "AnnotationEventRouter.h"
+//#include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
 #include "SeedMe.h"
@@ -266,7 +269,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     myParams.push_back(GUIStateParams::GetClassType());
     myParams.push_back(SettingsParams::GetClassType());
     myParams.push_back(AnimationParams::GetClassType());
-    myParams.push_back(MiscParams::GetClassType());
+    myParams.push_back(AnnotationParams::GetClassType());
 
     vector<string> myRenParams;
     myRenParams.push_back(StatisticsParams::GetClassType());
