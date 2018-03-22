@@ -7,7 +7,6 @@
 #include "vapor/BarbRenderer.h"
 #include "vapor/BarbParams.h"
 #include "RenderEventRouter.h"
-#include "TabManager.h"
 #include "VariablesWidget.h"
 #include "BarbSubtabs.h"
 
@@ -55,6 +54,15 @@ class BarbEventRouter : public QTabWidget, public RenderEventRouter {
   protected:
     virtual void _updateTab();
     virtual void _initializeTab();
+
+    virtual string _getDescription() const;
+
+    virtual string _getSmallIconImagePath() const {
+        return ("Barbs_small.png");
+    }
+    virtual string _getIconImagePath() const {
+        return ("Barbs.png");
+    }
 
   private:
     BarbEventRouter() {}

@@ -23,7 +23,6 @@
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
 #include "ui_animationTab.h"
-#include "TabManager.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -79,13 +78,13 @@ class AnimationEventRouter : public QWidget, public Ui_AnimationTab, public Even
 
     // Emitted when animation is turned on (true) or off (false)
     //
-    void AnimationOnOffChanged(bool onOff);
+    void AnimationOnOffSignal(bool onOff);
 
     // Emitted when the client should draw a frame during animation. Only
     // Emitted if AnimationOnOffChanged() was most recently called with
     // onOff == true;
     //
-    void AnimationDraw();
+    void AnimationDrawSignal();
 
   protected:
     virtual void _confirmText(){};

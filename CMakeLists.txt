@@ -34,7 +34,7 @@ endif()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
-option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
+option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" ON)
 
