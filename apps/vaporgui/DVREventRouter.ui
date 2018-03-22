@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>597</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="VariableTab">
       <attribute name="title">
@@ -26,6 +26,42 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="VariablesWidget" name="myVariableWidget" native="true"/>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="AppearanceTab">
+      <attribute name="title">
+       <string>Appearance</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="TFWidget" name="myTFWidget" native="true"/>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -36,6 +72,19 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="GeometryWidget" name="MyGeometryWidget" native="true"/>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -54,6 +103,12 @@
    <class>GeometryWidget</class>
    <extends>QWidget</extends>
    <header location="global">GeometryWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TFWidget</class>
+   <extends>QWidget</extends>
+   <header>TFWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
