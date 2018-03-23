@@ -33,8 +33,6 @@ namespace VAPoR {
 	class ControlExec;
 }
 
-
-class StartupParams;
 class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventRouter {
 
 	Q_OBJECT
@@ -96,7 +94,7 @@ private slots:
 	void _restoreDefaults();
 
 private:
-	SettingsEventRouter() {}
+	//SettingsEventRouter() {}
 	void _blockSignals(bool block);
 	void _warnUserAfterCacheChange();
 	void _warnUserAfterThreadChange();
@@ -107,8 +105,9 @@ private:
 	void _updateStartupSettings();
 	void _updateDirectoryPaths();
 
-	string _choosePathHelper(string current, string help);
+	SettingsParams* _defaultParams;
 
+	string _choosePathHelper(string current, string help);
 };
 
 #endif //SETTINGSEVENTROUTER_H 

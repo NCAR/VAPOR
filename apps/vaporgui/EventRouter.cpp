@@ -56,8 +56,6 @@ ParamsBase *EventRouter::GetActiveParams() const {
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	assert(paramsMgr);
 
-		
-
 	return(paramsMgr->GetParams(_paramsType));
 }
 

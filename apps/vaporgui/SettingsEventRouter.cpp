@@ -1,8 +1,8 @@
 //************************************************************************
 //															*
-//		     Copyright (C)  2015										*
-//     University Corporation for Atmospheric Research					*
-//		     All Rights Reserved										*
+//			 Copyright (C)  2015										*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
 //															*
 //************************************************************************/
 //
@@ -56,8 +56,16 @@ SettingsEventRouter::SettingsEventRouter(
 	Ui_SettingsGUI(), 
 	EventRouter(ce, SettingsParams::GetClassType())
 {
-
 	setupUi(this);
+
+	SettingsParams* sp = (SettingsParams*)GetActiveParams();
+	cout << "..." << sp->GetChangesPerAutoSave() << endl;
+	cout << "Const settings " << sp << endl;
+
+	ParamsBase::StateSave *ss = new ParamsBase::StateSave;
+	_defaultParams = new SettingsParams(ss, false);
+	cout << "..." << _defaultParams->GetChangesPerAutoSave() << endl;
+	cout << "defau settings " << _defaultParams << endl;
 
 	QValidator* numThreadsValidator;
 	numThreadsValidator = new QIntValidator(0, 8, _numThreadsEdit);
@@ -269,7 +277,7 @@ void SettingsEventRouter::_autoSaveFileChanged() {
 void SettingsEventRouter::_setDirectoryPaths(){
 	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
 
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
 	paramsMgr->BeginSaveStateGroup("Settings directory");
 
@@ -305,6 +313,7 @@ void SettingsEventRouter::_updateGeneralSettings() {
 	_autoSaveCheckbox->setChecked(autoSaveSession);
 
 	int changesPerSave = sParams->GetChangesPerAutoSave();
+	cout << "Updating changesPerSave " << changesPerSave << endl;
 	_autoSaveIntervalEdit->setText(QString::number(changesPerSave));
 
 	string autoSaveFile = sParams->GetAutoSaveSessionFile();
@@ -473,26 +482,34 @@ void SettingsEventRouter::_winLockChanged(bool val){
 } 
 
 void SettingsEventRouter::_restoreDefaults() {
-	SettingsParams* sParams = (SettingsParams*) GetActiveParams();
+	//SettingsParams* sParams = (SettingsParams*) GetActiveParams();
+	//*sParams = _defaultParams;
 	
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	paramsMgr->BeginSaveStateGroup("Restoring default Settings");
+	SettingsParams* sp;
+	sp = (SettingsParams*)paramsMgr->GetParams("SettingsParams");
 
-	sParams->Reinit();
+	//if (sp) delete sp;
+	SettingsParams *setDefault = new SettingsParams(*_defaultParams);
+	sp = setDefault;
+	//sp = new SettingsParams(*_defaultParams);
+	cout << "cpas " << sp->GetChangesPerAutoSave() << endl;
+
 	_saveSettings();
 
 	paramsMgr->EndSaveStateGroup();
 }
 
 void SettingsEventRouter::GetWebHelp(
-    vector <pair <string, string> > &help
+	vector <pair <string, string> > &help
 ) const {
-    help.clear();
+	help.clear();
 
-    help.push_back(make_pair(
+	help.push_back(make_pair(
 		"Overview of the Settings tab",
 		"http://www.vapor.ucar.edu/docs/vapor-gui-help/startup-tab#SettingsOverview"
-    ));
+	));
 }
 
 void SettingsEventRouter::_saveSettings() {

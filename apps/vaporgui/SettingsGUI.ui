@@ -448,7 +448,7 @@
         <number>0</number>
        </property>
        <property name="topMargin">
-        <number>0</number>
+        <number>15</number>
        </property>
        <property name="rightMargin">
         <number>0</number>
@@ -456,6 +456,16 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Vapor must be restarted for these settings to take effect</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_12">
          <property name="topMargin">
