@@ -492,7 +492,7 @@ void SettingsEventRouter::_restoreDefaults() {
 
 	//if (sp) delete sp;
 	SettingsParams *setDefault = new SettingsParams(*_defaultParams);
-	sp = setDefault;
+	*sp = *setDefault;
 	//sp = new SettingsParams(*_defaultParams);
 	cout << "cpas " << sp->GetChangesPerAutoSave() << endl;
 
