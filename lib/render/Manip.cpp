@@ -30,6 +30,7 @@ const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
 
 TranslateStretchManip::TranslateStretchManip() : Manip()
 {
+    _buttonNum = 0;
     _selectedHandle = -1;
     _isStretching = false;
     _tempRotation = 0.f;
@@ -75,6 +76,60 @@ void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double>
     urc[1] = _selection[4];
     urc[2] = _selection[5];
 }
+
+bool TranslateStretchManip::MouseEvent(int buttonNum, std::vector<double> vscreenCoords)
+{
+    double screenCoords[2] = {vscreenCoords[0], vscreenCoords[1]};
+    double handleMidpoint[3];
+    int    handle = mouseIsOverHandle(screenCoords, handleMidpoint);
+    if (handle < 0) return false;
+
+    // Press
+    if (_buttonNum == 0) {
+        cout << "MouseEvent::press" << endl;
+        _buttonNum = buttonNum;
+        double dirVec[3];
+        pixelToVector(screenCoords, dirVec, _handleMid);
+        double startCoords[3];
+        captureMouseDown(handle, _buttonNum, _handleMid);
+        startHandleSlide(screenCoords, handle);
+        setMouseDown(true);
+    }
+
+    // Dragging
+    else if (buttonNum == _buttonNum) {
+        if (!_mouseDownHere) return false;
+        cout << "Mouse drag" << endl;
+        mouseDrag(screenCoords);
+    }
+
+    else {
+        cout << "Mouse release" << endl;
+        _buttonNum = 0;
+        setMouseDown(false);
+        mouseRelease(screenCoords);
+    }
+
+    return true;
+}
+
+void TranslateStretchManip::mouseDrag(double screenCoords[2])
+{
+    int handle = draggingHandle();
+    if (handle >= 0) {
+        double projScreenCoords[2];
+        bool   success = projectPointToLine(screenCoords, projScreenCoords);
+        if (success) {
+            double dirVec[3];
+            pixelToVector(projScreenCoords, dirVec, _handleMid);
+            slideHandle(handle, dirVec, false);
+        }
+    }
+}
+
+void TranslateStretchManip::mousePress(double screenCoords[2]) {}
+
+void TranslateStretchManip::mouseRelease(double screenCoords[2]) {}
 
 int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double handleMid[3])
 {
@@ -621,11 +676,9 @@ void TranslateStretchManip::drawBoxFaces()
                 if (((cor >> axis) & 1) && _selectedHandle < 3) continue;
                 if (!((cor >> axis) & 1) && _selectedHandle >= 3) continue;
             }
-            cout << "adjusting corner " << cor << " " << axis << " " << _selectedHandle << endl;
             corners[cor][axis] += _dragDistance;
         }
     }
-    cout << "axis " << axis << endl << endl;
 
     // Now render the edges:
 

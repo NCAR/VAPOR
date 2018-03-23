@@ -59,46 +59,9 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
 
-    DataStatus *   ds = _controlExec->GetDataStatus();
-    ParamsMgr *    pm = _controlExec->GetParamsMgr();
-    vector<double> minExts, maxExts;
-    //	ds->GetActiveExtents(pm, _winName, 0, minExts, maxExts);
-    _manip = new TranslateStretchManip();    // minExts, maxExts);
-    minExts.push_back(-1.038e+06);
-    minExts.push_back(2.81684e+06);
-    minExts.push_back(0.f);
-    maxExts.push_back(220425);
-    maxExts.push_back(4.04548e+06);
-    maxExts.push_back(100000);
-
-    ViewpointParams *vParams = pm->GetViewpointParams(_winName);
-    size_t           width, height;
-    vParams->GetWindowSize(width, height);
-    std::vector<int> windowSize;
-    windowSize.push_back(width);
-    windowSize.push_back(height);
-
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
-    double           rotCenter[3], cameraPos[3], dirvec[3], upvec[3];
-    p->GetRotationCenter(rotCenter);
-    p->GetCameraPos(cameraPos);
-    std::vector<double> vrotCenter;
-    vrotCenter.push_back(rotCenter[0]);
-    vrotCenter.push_back(rotCenter[1]);
-    vrotCenter.push_back(rotCenter[2]);
-    std::vector<double> vcameraPos;
-    vcameraPos.push_back(cameraPos[0]);
-    vcameraPos.push_back(cameraPos[1]);
-    vcameraPos.push_back(cameraPos[2]);
-    double mv[16];
-    vParams->GetModelViewMatrix(mv);
-    double proj[16];
-    vParams->GetProjectionMatrix(mv);
-
-    _manip->Update(minExts, maxExts, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
+    _manip = new TranslateStretchManip();
+    bool initialize = true;
+    updateManip(initialize);
 }
 
 /*
@@ -351,10 +314,14 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     _buttonNum = 0;
     _mouseClicked = true;
 
-    double screenCoords[2];
-    screenCoords[0] = (float)e->x() - 3.f;
-    screenCoords[1] = (float)(height() - e->y()) - 5.f;
-    double coords[2] = {(double)e->x(), (double)e->y()};
+    //	double screenCoords[2];
+    //	screenCoords[0] = (float)e->x()-3.f;
+    //	screenCoords[1] = (float)(height() - e->y()) - 5.f;
+    // double coords[2] = {(double)e->x(), (double)e->y()};
+
+    std::vector<double> screenCoords;
+    screenCoords.push_back((double)e->x() - 3.f);
+    screenCoords.push_back((double)(height() - e->y()) - 5.f);
 
     if ((e->buttons() & Qt::LeftButton) && (e->buttons() & Qt::RightButton))
         ;    // do nothing
@@ -377,16 +344,20 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     MouseModeParams *p = guiP->GetMouseModeParams();
     string           modeName = p->GetCurrentMouseMode();
 
-    int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
+    bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords);
+    if (mouseOnManip) { return; }
+
+    /*	int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
     if (handle >= 0) {
         double dirVec[3];
         _manip->pixelToVector(screenCoords, dirVec, _strHandleMid);
         double startCoords[3];
-        _manip->captureMouseDown(handle, _buttonNum, _strHandleMid);    // screenCoords);
+        _manip->captureMouseDown(handle, _buttonNum, _strHandleMid);//screenCoords);
         _manip->startHandleSlide(screenCoords, handle);
         _manip->setMouseDown(true);
+*/
 
-        /*
+    /*
 528             double dirVec[3];
 529             //Find the direction vector of the camera ( Local coords)
 530             _visualizer->pixelToVector(screenCoords,
@@ -398,7 +369,8 @@ void VizWin::mousePressEvent(QMouseEvent *e)
 536             setMouseDown(true, manip);
 */
 
-    } else if (modeName == MouseModeParams::GetNavigateModeName()) {
+    //	}
+    if (modeName == MouseModeParams::GetNavigateModeName()) {
         mousePressEventNavigate(e);
         return;
     }
@@ -538,11 +510,15 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e)
 
     _mouseClicked = false;
 
-    float screenCoords[2];
-    screenCoords[0] = (float)e->x() - 3.f;
-    screenCoords[1] = (float)(height() - e->y()) - 5.f;
-    _manip->setMouseDown(false);
-    _manip->mouseRelease(screenCoords);
+    //	float screenCoords[2];
+    //	screenCoords[0] = (float)e->x()-3.f;
+    //	screenCoords[1] = (float)(height() - e->y()) - 5.f;
+    std::vector<double> screenCoords;
+    screenCoords.push_back((double)e->x() - 3.f);
+    screenCoords.push_back((double)(height() - e->y()) - 5.f);
+    //	_manip->setMouseDown(false);
+    //	_manip->mouseRelease(screenCoords);
+    _manip->MouseEvent(_buttonNum, screenCoords);
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
@@ -613,24 +589,34 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
 {
     if (_buttonNum == 0) return;
 
-    double screenCoords[2];
-    screenCoords[0] = (float)e->x() - 3.f;
-    screenCoords[1] = (float)(height() - e->y()) - 5.f;
-    double coords[2] = {(double)e->x(), (double)e->y()};
-    // int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
-    int handle = _manip->draggingHandle();
+    //	double screenCoords[2];
+    //	screenCoords[0] = (float)e->x()-3.f;
+    //	screenCoords[1] = (float)(height() - e->y()) - 5.f;
+    //	double coords[2] = {(double)e->x(), (double)e->y()};
+
+    std::vector<double> screenCoords;
+    screenCoords.push_back((double)e->x() - 3.f);
+    screenCoords.push_back((double)(height() - e->y()) - 5.f);
+
+    bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords);
+    if (mouseOnManip) {
+        cout << "Mouse is on manip" << endl;
+        return;
+    }
+    cout << "Mouse not on manip" << endl;
+    /*	int handle = _manip->draggingHandle();
     if (handle >= 0) {
-        // Respond based on what activity we are tracking
-        // Need to tell the appropriate params about the change,
-        // And it should refresh the panel
-        double mouseCoords[2];
-        double projMouseCoords[2];
-        mouseCoords[0] = (float)e->x();
-        mouseCoords[1] = (float)height() - e->y();
+        //Respond based on what activity we are tracking
+        //Need to tell the appropriate params about the change,
+        //And it should refresh the panel
+//		double mouseCoords[2];
+//		double projMouseCoords[2];
+//		mouseCoords[0] = (float) e->x();
+//		mouseCoords[1] = (float) height()-e->y();
 
         double projScreenCoords[2];
-        //		if (_manip->projectPointToLine(mouseCoords,projMouseCoords)) {
-        if (_manip->projectPointToLine(screenCoords, projScreenCoords)) {
+//		if (_manip->projectPointToLine(mouseCoords,projMouseCoords)) {
+        if (_manip->projectPointToLine(screenCoords,projScreenCoords)) {
             double dirVec[3];
             //_manip->pixelToVector(projMouseCoords, dirVec, _strHandleMid);
             _manip->pixelToVector(projScreenCoords, dirVec, _strHandleMid);
@@ -638,6 +624,7 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
         }
         return;
     }
+*/
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
@@ -736,7 +723,37 @@ void VizWin::paintGL()
     int rc = _controlExec->Paint(_winName, false);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
-    ParamsMgr *    pm = _controlExec->GetParamsMgr();
+    updateManip();
+
+    swapBuffers();
+
+    rc = printOpenGLErrorMsg("VizWindowPaintGL");
+    if (rc < 0) { MSG_ERR("OpenGL error"); }
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+
+void VizWin::updateManip(bool initialize)
+{
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    /*
+// ParamsMgr or ControlExec can do this
+335  RenderParams *GetRenderParams(
+336     string winName, string dataSetName, string renderType,  string instName
+337  ) const;
+
+    string type, inst;
+    guiP->GetActiveRenderer(_winName, type, inst);
+    string dataSet =
+    RenderParams* rParams = _controlExec->GetRenderParams(
+        _winName, dataSet, type, inst
+    );
+*/
     vector<double> minExts, maxExts;
     //  ds->GetActiveExtents(pm, _winName, 0, minExts, maxExts);
     minExts.push_back(-1.038e+06);
@@ -751,20 +768,19 @@ void VizWin::paintGL()
     // double posvec[3], upvec[3], dirvec[3];
     // bool status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
 
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     MouseModeParams *p = guiP->GetMouseModeParams();
     string           modeName = p->GetCurrentMouseMode();
     double           rotCenter[3], cameraPos[3], dirvec[3], upvec[3];
     p->GetRotationCenter(rotCenter);
     p->GetCameraPos(cameraPos);
+
     std::vector<double> vrotCenter;
-    vrotCenter.push_back(rotCenter[0]);
-    vrotCenter.push_back(rotCenter[1]);
-    vrotCenter.push_back(rotCenter[2]);
     std::vector<double> vcameraPos;
-    vcameraPos.push_back(cameraPos[0]);
-    vcameraPos.push_back(cameraPos[1]);
-    vcameraPos.push_back(cameraPos[2]);
+    for (int i = 0; i < 3; i++) {
+        vrotCenter.push_back(rotCenter[i]);
+        vcameraPos.push_back(cameraPos[i]);
+    }
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
@@ -778,19 +794,13 @@ void VizWin::paintGL()
     vParams->GetProjectionMatrix(proj);
 
     std::vector<double> llc, urc;
-    _manip->GetBox(llc, urc);    // get box from active RenderParams
+    if (initialize) {
+        llc = minExts;
+        urc = maxExts;
+    } else
+        _manip->GetBox(llc, urc);    // get box from active RenderParams
 
     _manip->Update(llc, urc, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
 
     _manip->render();
-
-    swapBuffers();
-
-    rc = printOpenGLErrorMsg("VizWindowPaintGL");
-    if (rc < 0) { MSG_ERR("OpenGL error"); }
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
 }

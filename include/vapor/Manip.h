@@ -69,7 +69,7 @@ public:
     //! Notify that manipulator that is being moved with the mouse
     //! \param[in] buttonNum - The mouse button being used to move the manipulator
     //! \param[in] screenCoords - The current coordinates of the mouse cursor
-    virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords) = 0;
+    virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords) = 0;
 
     //! Method to retrieve the manipulator's current extents
     //! \param[out] llc - The lower-left coordinates of the manipulator
@@ -105,6 +105,7 @@ protected:
     static const float _faceSelectionColor[4];
     static const float _unselectedFaceColor[4];
 
+    int    _buttonNum;
     double _selection[6];
     double _extents[6];
     double _cameraPosition[3];
@@ -119,8 +120,13 @@ protected:
     //! \param[in] isSelected indicates if this box is to be drawn with the selection color or not
     void drawCubeFaces(double *extents, bool isSelected);
 
+    virtual void mousePress(double screenCoords[2]) = 0;
+    virtual void mouseDrag(double screenCoords[2]) = 0;
+    virtual void mouseRelease(double screenCoords[2]) = 0;
+
     double _dragDistance;
     int    _selectedHandle;
+    double _handleMid[3];
     // static DataStatus* _dataStatus;
 };
 //! \class TranslateStretchManip
@@ -145,7 +151,7 @@ public:
                         std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
-    virtual void MoveEvent(int buttonNum, std::vector<double> screenCoords){};
+    virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords);
 
     //! @copydoc Manip::GetBox(std::vector<double>, std::vector<double>);
     virtual void GetBox(std::vector<double> &llc, std::vector<double> &urc);
@@ -253,6 +259,10 @@ protected:
     //! \param[in] boxExtents are the extents of the full box.
     //! \return absolute handle index
     int makeHandleFaces(int handleNum, double handle[8][3], int octant, double *boxExtents);
+
+    void mousePress(double screenCoords[2]);
+    void mouseDrag(double screenCoords[2]);
+    void mouseRelease(double screenCoords[2]);
 
     bool             _isStretching;
     double           _handleSizeInScene;
