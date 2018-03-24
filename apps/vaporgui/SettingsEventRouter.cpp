@@ -1,8 +1,8 @@
 //************************************************************************
 //															*
-//		     Copyright (C)  2015										*
-//     University Corporation for Atmospheric Research					*
-//		     All Rights Reserved										*
+//			 Copyright (C)  2015										*
+//	 University Corporation for Atmospheric Research					*
+//			 All Rights Reserved										*
 //															*
 //************************************************************************/
 //
@@ -52,6 +52,11 @@ using namespace VAPoR;
 SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_SettingsGUI(), EventRouter(ce, SettingsParams::GetClassType())
 {
     setupUi(this);
+
+    SettingsParams *sp = (SettingsParams *)GetActiveParams();
+
+    ParamsBase::StateSave *ss = new ParamsBase::StateSave;
+    _defaultParams = new SettingsParams(ss, false);
 
     QValidator *numThreadsValidator;
     numThreadsValidator = new QIntValidator(0, 8, _numThreadsEdit);
@@ -433,12 +438,19 @@ void SettingsEventRouter::_winLockChanged(bool val)
 
 void SettingsEventRouter::_restoreDefaults()
 {
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Restoring default Settings");
 
-    sParams->Reinit();
+    SettingsParams *settingsParams;
+    settingsParams = (SettingsParams *)paramsMgr->GetParams("SettingsParams");
+
+    XmlNode *settingsNode = settingsParams->GetNode();
+    XmlNode *parent = settingsNode->GetParent();
+    XmlNode *defaultNode = _defaultParams->GetNode();
+
+    *settingsParams = *_defaultParams;
+    settingsParams->GetNode()->SetParent(parent);
+
     _saveSettings();
 
     paramsMgr->EndSaveStateGroup();

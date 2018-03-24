@@ -97,6 +97,8 @@ private:
     void _updateDirectoryPaths();
 
     string _choosePathHelper(string current, string help);
+
+    SettingsParams *_defaultParams;
 };
 
 #endif    // SETTINGSEVENTROUTER_H
