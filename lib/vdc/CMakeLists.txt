@@ -29,9 +29,10 @@ add_library (vdc SHARED
 	DerivedVar.cpp
 	DerivedVarMgr.cpp
 	DCUtils.cpp
+	glutil.cpp
 )
 
-target_link_libraries (vdc PUBLIC common wasp udunits2 proj)
+target_link_libraries (vdc PUBLIC common wasp udunits2 proj ${GLEW} ${OPENGL_LIBRARIES})
 
 add_definitions (-DVDF_EXPORTS)
 
