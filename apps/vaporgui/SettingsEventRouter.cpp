@@ -120,6 +120,13 @@ void SettingsEventRouter::_warnUserAfterThreadChange()
                                 "only take effect in future Vapor instances.");
 }
 
+void SettingsEventRouter::_undoUserWarnings()
+{
+    _numThreadsEdit->setStyleSheet("background-color: white; color: black;");
+
+    _cacheSizeEdit->setStyleSheet("background-color: white; color: black;");
+}
+
 void SettingsEventRouter::_numThreadsChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
@@ -452,6 +459,7 @@ void SettingsEventRouter::_restoreDefaults()
     settingsParams->GetNode()->SetParent(parent);
 
     _saveSettings();
+    _undoUserWarnings();
 
     paramsMgr->EndSaveStateGroup();
 }
