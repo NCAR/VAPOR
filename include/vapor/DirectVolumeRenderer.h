@@ -35,11 +35,17 @@ protected:
     int _paintGL();
 
 private:
-    const std::string _effectNameStr = "DVR";
-    const std::string _effectNameAttrStr = "DVRAttr";
-    const std::string _vertexDataAttrStr = "vertexDataAttr";
+    // C++ stuff
+    int      _colormapSize;
+    GLfloat *_colormap;
 
-    GLuint _vertexDataAttr;
+    // OpenGL stuff
+    const std::string _effectNameStr = "DVR";
+
+    GLuint _volumeTextureUnit;      // GL_TEXTURE0
+    GLuint _colormapTextureUnit;    // GL_TEXTURE1
+    // GLuint              _coordmapTextureUnit;         // GL_TEXTURE2 ??
+    GLuint _volumeCoordinateTextureUnit;    // GL_TEXTURE3
 
 };    // End of class DirectVolumeRenderer
 

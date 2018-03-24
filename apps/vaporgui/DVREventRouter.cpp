@@ -6,7 +6,11 @@
 //
 static RenderEventRouterRegistrar<DVREventRouter> registrar(DVREventRouter::GetClassType());
 
-DVREventRouter::DVREventRouter(QWidget *parent, VAPoR::ControlExec *ce) : QWidget(parent), ui(new Ui::DVREventRouter), RenderEventRouter(ce, DVREventRouter::GetClassType()) { ui->setupUi(this); }
+DVREventRouter::DVREventRouter(QWidget *parent, VAPoR::ControlExec *ce) : QWidget(parent), ui(new Ui::DVREventRouter), RenderEventRouter(ce, DVREventRouter::GetClassType())
+{
+    ui->setupUi(this);
+    ui->myTFWidget->Reinit((TFWidget::Flags)(0));    // Cause crash if no "Reinit()"
+}
 
 DVREventRouter::~DVREventRouter() { delete ui; }
 
