@@ -102,6 +102,8 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     void _updateDirectoryPaths();
 
     string _choosePathHelper(string current, string help);
+
+    SettingsParams *_defaultParams;
 };
 
 #endif //SETTINGSEVENTROUTER_H
