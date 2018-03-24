@@ -123,16 +123,20 @@ SettingsParams::SettingsParams(
 
 SettingsParams::SettingsParams(
 	const SettingsParams &rhs
-//) : SettingsParams(new ParamsBase::StateSave, false) {}
 ) : ParamsBase(new ParamsBase::StateSave, _classType) {
 	_settingsPath = QDir::homePath().toStdString();
 	_settingsPath += QDir::separator().toAscii();
 	_settingsPath += SettingsFile;
-	cout << "Copy constructor " << _settingsPath << endl;
 	_init();
 }
 
 SettingsParams &SettingsParams::operator=( const SettingsParams& rhs ) {
+	ParamsBase::operator=(rhs);
+	
+	_settingsPath = QDir::homePath().toStdString();
+	_settingsPath += QDir::separator().toAscii();
+	_settingsPath += SettingsFile;
+
 	return (*this);
 }
 
@@ -407,7 +411,7 @@ void SettingsParams::SetCurrentPrefsPath(string pth){
 }
 
 int SettingsParams::GetNumThreads() const {
-	long val = GetValueLong(_numThreadsTag, 0);
+	long val = GetValueLong(_numThreadsTag, 2);
 	if (val < 0) val = 0;
 	return((int) val);
 }
@@ -468,8 +472,6 @@ int SettingsParams::SaveSettings() const {
 
     ofstream fileout;
     string s;
-
-	cout << "!!! " << _settingsPath << endl;
 
     fileout.open(_settingsPath.c_str());
     if (! fileout) {
