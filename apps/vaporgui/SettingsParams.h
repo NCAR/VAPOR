@@ -40,7 +40,7 @@
 //!
 class SettingsParams : public VAPoR::ParamsBase {
 public:
-    SettingsParams(VAPoR::ParamsBase::StateSave *ssave);
+    SettingsParams(VAPoR::ParamsBase::StateSave *ssave, bool loadFromFile = true);
     SettingsParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);
     SettingsParams(const SettingsParams &rhs);
     SettingsParams &operator=(const SettingsParams &rhs);
