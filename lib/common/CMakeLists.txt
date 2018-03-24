@@ -11,10 +11,9 @@ add_library (common SHARED
 	GetAppPath.cpp
 	utils.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
-	glutil.cpp
 	)
 
-target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES})
+target_link_libraries (common)
 
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
