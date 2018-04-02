@@ -94,7 +94,7 @@ void PRINTARG(const long *li) { printf("(long[]){%li}", *li); }
         #else
 void PRINTARG(const int *i) { printf("*[%i]", *i); }
 void PRINTARG(const float *f) { printf("*[%f]", *f); }
-void PRINTARG(const double *d) { printf("*[%d]", *d); }
+void PRINTARG(const double *d) { printf("*[%f]", *d); }
 void PRINTARG(const size_t *li) { printf("*[%li]", *li); }
 void PRINTARG(const long *li) { printf("*[%li]", *li); }
         #endif
