@@ -306,6 +306,8 @@ private:
 
     void _fileSaveHelper(string path);
 
+    string _getDataSetName(string file);
+
 private slots:
     void sessionOpen(QString qfileName = "");
     void fileSave();

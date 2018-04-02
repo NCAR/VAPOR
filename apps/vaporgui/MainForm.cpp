@@ -1008,11 +1008,13 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
     GUIStateParams *p = GetStateParams();
     vector<string>  dataSetNames = p->GetOpenDataSetNames();
 
+#ifdef DEAD
     // If data set with this name already exists, close it
     //
     for (int i = 0; i < dataSetNames.size(); i++) {
         if (dataSetNames[i] == dataSetName) { closeDataHelper(dataSetName); }
     }
+#endif
 
     // Open the data set
     //
@@ -1060,7 +1062,8 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
 
     // Generate data set name
     //
-    string dataSetName = makename(myFiles[0]);
+    string dataSetName = _getDataSetName(myFiles[0]);
+    if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs"};
     bool           status = openDataHelper(dataSetName, format, myFiles, options);
@@ -1937,4 +1940,26 @@ void MainForm::endAnimCapture()
     _captureEndJpegCaptureAction->setEnabled(false);
     _captureStartJpegCaptureAction->setEnabled(true);
     _captureSingleJpegCaptureAction->setEnabled(true);
+}
+
+string MainForm::_getDataSetName(string file)
+{
+    vector<string> names = _controlExec->GetDataNames();
+    if (names.empty()) { return (makename(file)); }
+
+    string newSession = "New session";
+
+    QStringList items;
+    items << tr(newSession.c_str());
+    for (int i = 0; i < names.size(); i++) { items << tr(names[i].c_str()); }
+
+    bool    ok;
+    QString item = QInputDialog::getItem(this, tr("QInputDialog::getItem()"), tr("Load data into session:"), items, 0, false, &ok);
+    if (!ok || item.isEmpty()) return ("");
+
+    string dataSetName = item.toStdString();
+
+    if (dataSetName == newSession) { dataSetName = makename(file); }
+
+    return (dataSetName);
 }
