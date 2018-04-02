@@ -481,7 +481,6 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 
 void VizWin::mouseReleaseEventNavigate(QMouseEvent*e) {
 
-
 	_trackBall->MouseOnTrackball(
 		2, _buttonNum, e->x(), e->y(), width(), height()
 	);
@@ -567,7 +566,6 @@ void VizWin::mouseReleaseEvent(QMouseEvent*e){
 }
 
 void VizWin::mouseMoveEventNavigate(QMouseEvent* e) {
-
 	_trackBall->MouseOnTrackball(
 		1, _buttonNum, e->x(), e->y(), width(), height()
 	);
