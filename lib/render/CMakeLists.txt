@@ -20,9 +20,10 @@ add_library (render SHARED
 	textRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
+	MyPython.cpp
 )
 
-target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff)
+target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff python${PYTHONVERSION})
 
 if (NOT WIN32)
 	target_compile_options(render PRIVATE "-Wno-deprecated-declarations")

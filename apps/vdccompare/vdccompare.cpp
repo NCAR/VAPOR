@@ -172,7 +172,7 @@ int	main(int argc, char **argv) {
 	}
 
 	if (argc < 6 || opt.help) {
-		cerr << "Usage: " << ProgName << " ftype1 ftype2 ftype1files... -- ftype2files... " << endl;
+		cerr << "Usage: " << ProgName << " source_ftype secondary_ftype source_files... -- secondary_files... " << endl;
 		cerr << "Valid file types: vdc, wrf, cf, mpas" << endl;
 		op.PrintOptionHelp(stderr, 80, false);
 		exit(1);
