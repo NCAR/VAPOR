@@ -106,20 +106,6 @@ bool ContourRenderer::_isCacheDirty() const
     return false;
 }
 
-/*
-inline void contourVertex(const double contour, const vector<double> &ac, const vector<double> bc, const double a, const double b)
-{
-    if ((a <= contour && b <= contour) || (a > contour && b > contour))
-        return;
-
-    float t = (contour - a)/(b - a);
-    float v[2];
-    v[0] = ac[0] + t * (bc[0] - ac[0]);
-    v[1] = ac[1] + t * (bc[1] - ac[1]);
-    glVertex2f(v[0], v[1]);
-}
- */
-
 void ContourRenderer::_buildCache()
 {
     ContourParams *cParams = (ContourParams *)GetActiveParams();
@@ -131,7 +117,6 @@ void ContourRenderer::_buildCache()
         glEndList();
         return;
     }
-    PERF_TIMER_START;
     MapperFunction *tf = cParams->GetMapperFunc(cacheParams.varName);
     vector<double>  contours = cParams->GetContourValues(cacheParams.varName);
     float           contourColors[contours.size()][4];
@@ -153,49 +138,13 @@ void ContourRenderer::_buildCache()
 
         vector<double> coords[nodes.size()];
         float          values[nodes.size()];
-        // float cellMin = std::numeric_limits<float>::max();
-        // float cellMax = std::numeric_limits<float>::min();
         for (int i = 0; i < nodes.size(); i++) {
             grid->GetUserCoordinates(nodes[i], coords[i]);
             values[i] = grid->GetValue(coords[i]);
-            // cellMin = std::min(cellMin, values[i]);
-            // cellMax = std::min(cellMax, values[i]);
         }
-
-        // Draw grid
-        /*
-        if (!cParams->UseSingleColor()) {
-            glColor3f(0.15, 0.15, 0.15);
-            glBegin(GL_LINE_LOOP);
-            for (int i=0; i < nodes.size(); i++)
-                glVertex3f(coords[i][0], coords[i][1], -20);
-            glEnd();
-            // if (cacheParams.varName == "CANWAT") {
-            //     glColor3f(1, 0, 0);
-            //     glPointSize(2.5);
-            //     glEnable(GL_POINT_SMOOTH);
-            //     glBegin(GL_POINTS);
-            //     for (int i=0; i < nodes.size(); i++)
-            //         if (values[i] > contours[0])
-            //             glVertex3f(coords[i][0], coords[i][1], +20);
-            //     glEnd();
-            // }
-        }
-         */
 
         glBegin(GL_LINES);
-        // Decompose cell nodes to triangle fan with node[0] as the central vertex
-        /*
-        for (int a=0, b=1, c=2; c < nodes.size(); b++, c++) {
-            for (int ci = 0; ci != contours.size(); ci++) {
-                double contour = contours[ci];
-                glColor3fv(contourColors[ci]);
-                contourVertex(contour, coords[a], coords[b], values[a], values[b]);
-                contourVertex(contour, coords[b], coords[c], values[b], values[c]);
-                contourVertex(contour, coords[c], coords[a], values[c], values[a]);
-            }
-        }
-         */
+
         for (int ci = 0; ci != contours.size(); ci++) {
             glColor4fv(contourColors[ci]);
             for (int a = nodes.size() - 1, b = 0; b < nodes.size(); a++, b++) {
@@ -223,9 +172,6 @@ void ContourRenderer::_buildCache()
     }
 
     glEndList();
-
-    PERF_TIMER_STOP;
-    printf("Contours generated in %f sec\n", PERF_TIMER_DELTA);
 }
 
 int ContourRenderer::_paintGL()
