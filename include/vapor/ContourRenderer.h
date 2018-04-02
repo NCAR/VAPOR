@@ -57,7 +57,7 @@ public:
     virtual int _paintGL();
 
 private:
-    GLuint drawList;
+    GLuint _drawList;
 
     struct {
         string         varName;
@@ -72,7 +72,7 @@ private:
         vector<double> boxMin, boxMax;
         vector<double> contourValues;
         vector<float>  contourColors;
-    } cacheParams;
+    } _cacheParams;
 
     void _buildCache();
     bool _isCacheDirty() const;

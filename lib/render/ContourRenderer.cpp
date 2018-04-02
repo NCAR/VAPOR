@@ -43,65 +43,64 @@ using namespace VAPoR;
 static RendererRegistrar<ContourRenderer> registrar(ContourRenderer::GetClassType(), ContourParams::GetClassType());
 
 ContourRenderer::ContourRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, ContourParams::GetClassType(), ContourRenderer::GetClassType(), instName, dataMgr), drawList(0)
+: Renderer(pm, winName, dataSetName, ContourParams::GetClassType(), ContourRenderer::GetClassType(), instName, dataMgr), _drawList(0)
 {
-    FTRACE(pm, winName, dataSetName, instName, "*dataMgr");
 }
 
 ContourRenderer::~ContourRenderer()
 {
     FTRACE();
-    if (drawList) glDeleteLists(drawList, 1);
+    if (_drawList) glDeleteLists(_drawList, 1);
 }
 
 void ContourRenderer::_saveCacheParams()
 {
     ContourParams *p = (ContourParams *)GetActiveParams();
-    cacheParams.varName = p->GetVariableName();
-    cacheParams.heightVarName = p->GetHeightVariableName();
-    cacheParams.ts = p->GetCurrentTimestep();
-    cacheParams.level = p->GetRefinementLevel();
-    cacheParams.lod = p->GetCompressionLevel();
-    cacheParams.useSingleColor = p->UseSingleColor();
-    cacheParams.lineThickness = p->GetLineThickness();
-    p->GetConstantColor(cacheParams.constantColor);
-    p->GetBox()->GetExtents(cacheParams.boxMin, cacheParams.boxMax);
-    cacheParams.contourValues = p->GetContourValues(cacheParams.varName);
+    _cacheParams.varName = p->GetVariableName();
+    _cacheParams.heightVarName = p->GetHeightVariableName();
+    _cacheParams.ts = p->GetCurrentTimestep();
+    _cacheParams.level = p->GetRefinementLevel();
+    _cacheParams.lod = p->GetCompressionLevel();
+    _cacheParams.useSingleColor = p->UseSingleColor();
+    _cacheParams.lineThickness = p->GetLineThickness();
+    p->GetConstantColor(_cacheParams.constantColor);
+    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+    _cacheParams.contourValues = p->GetContourValues(_cacheParams.varName);
 
-    MapperFunction *tf = p->GetMapperFunc(cacheParams.varName);
-    cacheParams.opacity = tf->getOpacityScale();
-    cacheParams.contourColors.resize(cacheParams.contourValues.size() * 3);
-    for (int i = 0; i < cacheParams.contourValues.size(); i++) tf->rgbValue(cacheParams.contourValues[i], &cacheParams.contourColors[i * 3]);
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+    _cacheParams.opacity = tf->getOpacityScale();
+    _cacheParams.contourColors.resize(_cacheParams.contourValues.size() * 3);
+    for (int i = 0; i < _cacheParams.contourValues.size(); i++) tf->rgbValue(_cacheParams.contourValues[i], &_cacheParams.contourColors[i * 3]);
 }
 
 bool ContourRenderer::_isCacheDirty() const
 {
     ContourParams *p = (ContourParams *)GetActiveParams();
-    if (cacheParams.varName != p->GetVariableName()) return true;
-    if (cacheParams.heightVarName != p->GetHeightVariableName()) return true;
-    if (cacheParams.ts != p->GetCurrentTimestep()) return true;
-    if (cacheParams.level != p->GetRefinementLevel()) return true;
-    if (cacheParams.lod != p->GetCompressionLevel()) return true;
-    if (cacheParams.useSingleColor != p->UseSingleColor()) return true;
-    if (cacheParams.lineThickness != p->GetLineThickness()) return true;
+    if (_cacheParams.varName != p->GetVariableName()) return true;
+    if (_cacheParams.heightVarName != p->GetHeightVariableName()) return true;
+    if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
+    if (_cacheParams.level != p->GetRefinementLevel()) return true;
+    if (_cacheParams.lod != p->GetCompressionLevel()) return true;
+    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
+    if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
-    contourValues = p->GetContourValues(cacheParams.varName);
+    contourValues = p->GetContourValues(_cacheParams.varName);
 
-    if (cacheParams.boxMin != min) return true;
-    if (cacheParams.boxMax != max) return true;
-    if (cacheParams.contourValues != contourValues) return true;
+    if (_cacheParams.boxMin != min) return true;
+    if (_cacheParams.boxMax != max) return true;
+    if (_cacheParams.contourValues != contourValues) return true;
 
     float constantColor[3];
     p->GetConstantColor(constantColor);
-    if (memcmp(cacheParams.constantColor, constantColor, sizeof(constantColor))) return true;
+    if (memcmp(_cacheParams.constantColor, constantColor, sizeof(constantColor))) return true;
 
-    MapperFunction *tf = p->GetMapperFunc(cacheParams.varName);
-    vector<float>   contourColors(cacheParams.contourValues.size() * 3);
-    for (int i = 0; i < cacheParams.contourValues.size(); i++) tf->rgbValue(cacheParams.contourValues[i], &contourColors[i * 3]);
-    if (cacheParams.contourColors != contourColors) return true;
-    if (cacheParams.opacity != tf->getOpacityScale()) return true;
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+    vector<float>   contourColors(_cacheParams.contourValues.size() * 3);
+    for (int i = 0; i < _cacheParams.contourValues.size(); i++) tf->rgbValue(_cacheParams.contourValues[i], &contourColors[i * 3]);
+    if (_cacheParams.contourColors != contourColors) return true;
+    if (_cacheParams.opacity != tf->getOpacityScale()) return true;
 
     return false;
 }
@@ -111,24 +110,25 @@ void ContourRenderer::_buildCache()
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     _saveCacheParams();
 
-    glNewList(drawList, GL_COMPILE);
-    glLineWidth(cacheParams.lineThickness);
+    glNewList(_drawList, GL_COMPILE);
+    glLineWidth(_cacheParams.lineThickness);
     if (cParams->GetVariableName().empty()) {
         glEndList();
         return;
     }
-    MapperFunction *tf = cParams->GetMapperFunc(cacheParams.varName);
-    vector<double>  contours = cParams->GetContourValues(cacheParams.varName);
+    MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
+    vector<double>  contours = cParams->GetContourValues(_cacheParams.varName);
     float           contourColors[contours.size()][4];
-    if (!cacheParams.useSingleColor)
+    if (!_cacheParams.useSingleColor)
         for (int i = 0; i < contours.size(); i++) tf->rgbValue(contours[i], contourColors[i]);
     else
-        for (int i = 0; i < contours.size(); i++) memcpy(contourColors[i], cacheParams.constantColor, sizeof(cacheParams.constantColor));
-    for (int i = 0; i < contours.size(); i++) contourColors[i][3] = cacheParams.opacity;
+        for (int i = 0; i < contours.size(); i++) memcpy(contourColors[i], _cacheParams.constantColor, sizeof(_cacheParams.constantColor));
+    for (int i = 0; i < contours.size(); i++) contourColors[i][3] = _cacheParams.opacity;
 
-    Grid *grid = _dataMgr->GetVariable(cacheParams.ts, cacheParams.varName, cacheParams.level, cacheParams.lod, cacheParams.boxMin, cacheParams.boxMax);
+    Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     Grid *heightGrid = NULL;
-    if (!cacheParams.heightVarName.empty()) heightGrid = _dataMgr->GetVariable(cacheParams.ts, cacheParams.heightVarName, cacheParams.level, cacheParams.lod, cacheParams.boxMin, cacheParams.boxMax);
+    if (!_cacheParams.heightVarName.empty())
+        heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     // StructuredGrid *sGrid = dynamic_cast<StructuredGrid *>(grid);
 
     for (Grid::ConstCellIterator it = grid->ConstCellBegin(); it != grid->ConstCellEnd(); ++it) {
@@ -178,13 +178,13 @@ int ContourRenderer::_paintGL()
 {
     if (_isCacheDirty()) _buildCache();
 
-    glCallList(drawList);
+    glCallList(_drawList);
 
     return 0;
 }
 
 int ContourRenderer::_initializeGL()
 {
-    drawList = glGenLists(1);
+    _drawList = glGenLists(1);
     return 0;
 }
