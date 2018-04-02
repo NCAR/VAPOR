@@ -550,6 +550,11 @@ private:
 	string pClassName, vector <string> instNames, bool reportErrs
  );
 
+ void _removeRendererHelper(
+	string winName, string dataSetName, string renderType, string renderName,
+	bool removeFromParamsFlag
+ );
+
 
 };
 };
