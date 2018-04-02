@@ -172,7 +172,15 @@ public:
     //! Return the current 4x4 model-view matrix
     //
     void GetModelViewMatrix(double m[16]) const { getCurrentViewpoint()->GetModelViewMatrix(m); }
-    void SetModelViewMatrix(const double m[16]) { getCurrentViewpoint()->SetModelViewMatrix(m); }
+    void SetModelViewMatrix(const double matrix[16])
+    {
+        // printf( "trackball perspective Matrix is: \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f ",
+        //          matrix[0], matrix[1],matrix[2],matrix[3],
+        //        matrix[4], matrix[5],matrix[6],matrix[7],
+        //      matrix[8], matrix[9],matrix[10],matrix[11],
+        //    matrix[12], matrix[13],matrix[14],matrix[15]);
+        getCurrentViewpoint()->SetModelViewMatrix(matrix);
+    }
 
     void GetProjectionMatrix(double m[16]) const { getCurrentViewpoint()->GetProjectionMatrix(m); }
     void SetProjectionMatrix(const double m[16]) { getCurrentViewpoint()->SetProjectionMatrix(m); }
