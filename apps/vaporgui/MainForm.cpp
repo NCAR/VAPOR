@@ -45,6 +45,9 @@
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
+//#include "NavigationEventRouter.h"
+//#include "AnnotationEventRouter.h"
+//#include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
 #include "SeedMe.h"
@@ -284,7 +287,7 @@ MainForm::MainForm(
 	myParams.push_back(GUIStateParams::GetClassType());
 	myParams.push_back(SettingsParams::GetClassType());
 	myParams.push_back(AnimationParams::GetClassType());
-	myParams.push_back(MiscParams::GetClassType());
+	myParams.push_back(AnnotationParams::GetClassType());
 	
 	vector <string> myRenParams;
 	myRenParams.push_back(StatisticsParams::GetClassType());
@@ -1384,7 +1387,6 @@ void MainForm::loadDataHelper(
 	_timeStepEditValidator->setRange(0,ds->GetTimeCoordinates().size()-1);
 
 }
-
 
 //Load data into current session
 //If current session is at default then same as loadDefaultData
