@@ -45,7 +45,7 @@ namespace Wasp {
 //!
 //! Usage: MyPython::Instance()->Initialize();
 //
-class COMMON_API MyPython : public Wasp::MyBase {
+class RENDER_API MyPython : public Wasp::MyBase {
 public:
     static MyPython *Instance();
 
