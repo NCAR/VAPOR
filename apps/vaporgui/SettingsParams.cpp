@@ -80,7 +80,7 @@ string SettingsFile = ".vapor3_settings";
 }
 
 SettingsParams::SettingsParams(
-    ParamsBase::StateSave *ssave) : ParamsBase(ssave, _classType) {
+    ParamsBase::StateSave *ssave, bool loadFromFile) : ParamsBase(ssave, _classType) {
 
     _settingsPath = QDir::homePath().toStdString();
     _settingsPath += QDir::separator().toAscii();
@@ -88,19 +88,21 @@ SettingsParams::SettingsParams(
 
     // Try to get settings params from .settings file
     //
-    bool ok = _loadFromSettingsFile();
-    if (ok)
-        return;
+    if (loadFromFile) {
+        bool ok = _loadFromSettingsFile();
+        if (ok)
+            return;
+    }
 
     _init();
 }
 
-//SettingsParams::SettingsParams(
-//  ParamsBase::StateSave *ssave, XmlNode *node
-//) : SettingsParams(ssave) {}
-
 SettingsParams::SettingsParams(
     ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {
+    _settingsPath = QDir::homePath().toStdString();
+    _settingsPath += QDir::separator().toAscii();
+    _settingsPath += SettingsFile;
+
     // If node isn't tagged correctly we correct the tag and reinitialize
     // from scratch;
     //
@@ -118,9 +120,20 @@ SettingsParams::SettingsParams(
 }
 
 SettingsParams::SettingsParams(
-    const SettingsParams &rhs) : ParamsBase(rhs) {}
+    const SettingsParams &rhs) : ParamsBase(new ParamsBase::StateSave, _classType) {
+    _settingsPath = QDir::homePath().toStdString();
+    _settingsPath += QDir::separator().toAscii();
+    _settingsPath += SettingsFile;
+    _init();
+}
 
 SettingsParams &SettingsParams::operator=(const SettingsParams &rhs) {
+    ParamsBase::operator=(rhs);
+
+    _settingsPath = QDir::homePath().toStdString();
+    _settingsPath += QDir::separator().toAscii();
+    _settingsPath += SettingsFile;
+
     return (*this);
 }
 
@@ -401,7 +414,7 @@ void SettingsParams::SetCurrentPrefsPath(string pth) {
 }
 
 int SettingsParams::GetNumThreads() const {
-    long val = GetValueLong(_numThreadsTag, 0);
+    long val = GetValueLong(_numThreadsTag, 2);
     if (val < 0)
         val = 0;
     return ((int)val);
@@ -465,7 +478,7 @@ int SettingsParams::SaveSettings() const {
     fileout.open(_settingsPath.c_str());
     if (!fileout) {
         MyBase::SetErrMsg(
-            "Unable to open output settings file \"_settingsPath.c_str()\" : %M");
+            "Unable to open output settings file %s : %M", _settingsPath.c_str());
         return (-1);
     }
 
@@ -473,7 +486,7 @@ int SettingsParams::SaveSettings() const {
     XmlNode::streamOut(fileout, *node);
     if (fileout.bad()) {
         MyBase::SetErrMsg(
-            "Unable to write output settings file \"_settingsPath.c_str()\" : %M");
+            "Unable to open output settings file %s : %M", _settingsPath.c_str());
         return (-1);
     }
 
