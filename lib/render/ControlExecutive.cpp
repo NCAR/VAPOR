@@ -262,7 +262,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
     return 0;
 }
 
-void ControlExec::RemoveRenderer(string winName, string dataSetName, string renderType, string renderName)
+void ControlExec::_removeRendererHelper(string winName, string dataSetName, string renderType, string renderName, bool removeFromParamsFlag)
 {
     // No-op if tuple of winName, dataSetName, renderType, and
     // renderName is unknown
@@ -282,8 +282,10 @@ void ControlExec::RemoveRenderer(string winName, string dataSetName, string rend
 
     delete ren;
 
-    _paramsMgr->RemoveRenderParamsInstance(winName, dataSetName, paramsType, renderName);
+    if (removeFromParamsFlag) { _paramsMgr->RemoveRenderParamsInstance(winName, dataSetName, paramsType, renderName); }
 }
+
+void ControlExec::RemoveRenderer(string winName, string dataSetName, string renderType, string renderName) { _removeRendererHelper(winName, dataSetName, renderType, renderName, true); }
 
 void ControlExec::LoadState()
 {
@@ -383,6 +385,27 @@ int ControlExec::openDataHelper(bool reportErrs)
 
 int ControlExec::OpenData(const std::vector<string> &files, const std::vector<string> &options, string dataSetName, string typ)
 {
+    // If re-opening an exising data set we need to close all of the
+    // visualizers to force the renderers to be recreated with the
+    // new data manager
+    //
+    if (_dataStatus->GetDataMgr(dataSetName)) {
+        _dataStatus->Close(dataSetName);
+
+        vector<string> vizNames = _paramsMgr->GetVisualizerNames();
+        for (int k = 0; k < vizNames.size(); k++) {
+            vector<string> pClassNames = _paramsMgr->GetRenderParamsClassNames(vizNames[k], dataSetName);
+
+            for (int j = 0; j < pClassNames.size(); j++) {
+                vector<string> instNames = _paramsMgr->GetRenderParamInstances(vizNames[k], dataSetName, pClassNames[j]);
+
+                string rClassName = RendererFactory::Instance()->GetRenderClassFromParamsClass(pClassNames[j]);
+
+                for (int i = 0; i < instNames.size(); i++) { _removeRendererHelper(vizNames[k], dataSetName, rClassName, instNames[i], false); }
+            }
+        }
+    }
+
     int rc = _dataStatus->Open(files, options, dataSetName, typ);
     if (rc < 0) {
         SetErrMsg("Failure to open data set of type \"%s\"", typ.c_str());
