@@ -15,12 +15,12 @@ set (SRC
 	GeoImageGeoTiff.cpp
 	ImageRenderer.cpp
 	Visualizer.cpp
-	AnnotationsRenderer.cpp
+	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
-	ContourRenderer.cpp.bak
+	MyPython.cpp
 )
 
 set (HEAD
@@ -44,11 +44,12 @@ set (HEAD
 	../../include/vapor/textRenderer.h
 	../../include/vapor/ControlExecutive.h
 	../../include/vapor/ContourRenderer.h
+	../../include/vapor/MyPython.h
 )
 
 add_library (render SHARED ${SRC} ${HEAD})
 
-target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff)
+target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff python${PYTHONVERSION})
 
 if (NOT WIN32)
 	target_compile_options(render PRIVATE "-Wno-deprecated-declarations")
