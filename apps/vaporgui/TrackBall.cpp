@@ -86,7 +86,7 @@ void Trackball::TrackballReset()
     qzero(_qrot);
     qzero(_qinc);
     vzero(_trans);
-    vset(_scale, 1.0, 1.0, 1.0);
+    vset(_scale, 1000000.0, 1000000.0, 1000000.0);
     // Default center of rotation:
     _center[0] = 0.5f;
     _center[1] = 0.5f;
@@ -124,7 +124,6 @@ void Trackball::TrackballSetMatrix()
     if (_perspective) {
         glTranslated(_center[0], _center[1], _center[2]);
         glTranslated(_trans[0], _trans[1], _trans[2]);
-        // qWarning("translate %f %f %f", _trans[0], _trans[1], _trans[2]);
         qmatrix(_qrot, m);
         glMultMatrixd(m);
         glTranslated(-_center[0], -_center[1], -_center[2]);

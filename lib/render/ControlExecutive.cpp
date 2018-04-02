@@ -589,10 +589,7 @@ int ControlExec::DrawText(string winName, string text, int x, int y, int size, f
 int ControlExec::DrawText(string text, int x, int y, int size, float color[3], int type)
 {
     vector<string> visNames = GetVisualizerNames();
-    for (int i = 0; i < visNames.size(); i++) {
-        cout << "Calling DrawText on " << visNames[i] << endl;
-        DrawText(visNames[i], text, x, y, size, color, type);
-    }
+    for (int i = 0; i < visNames.size(); i++) { DrawText(visNames[i], text, x, y, size, color, type); }
 
     return 0;
 }
