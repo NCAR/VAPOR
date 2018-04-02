@@ -31,7 +31,6 @@ namespace VAPoR {
 class ControlExec;
 }
 
-class StartupParams;
 class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventRouter {
 
     Q_OBJECT
@@ -90,8 +89,9 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     void _restoreDefaults();
 
   private:
-    SettingsEventRouter() {}
+    //SettingsEventRouter() {}
     void _blockSignals(bool block);
+    void _undoUserWarnings();
     void _warnUserAfterCacheChange();
     void _warnUserAfterThreadChange();
     void _warnUserAfterWidthChange();
@@ -100,6 +100,8 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     void _updateGeneralSettings();
     void _updateStartupSettings();
     void _updateDirectoryPaths();
+
+    SettingsParams *_defaultParams;
 
     string _choosePathHelper(string current, string help);
 };
