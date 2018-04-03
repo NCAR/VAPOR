@@ -35,7 +35,7 @@ add_library (vdc SHARED
 target_link_libraries (vdc PUBLIC common wasp udunits2 proj ${GLEW} ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
-	target_link_libraries (common GLU)
+	target_link_libraries (vdc PUBLIC GLU)
 endif ()
 
 add_definitions (-DVDF_EXPORTS)
