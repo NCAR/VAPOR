@@ -25,7 +25,7 @@
 #include <vapor/glutil.h>
 
 // Handle diameter in pixels:
-#define HANDLE_DIAMETER 50
+#define HANDLE_DIAMETER 15
 //#define HANDLE_DIAMETER 3
 namespace VAPoR {
 
@@ -69,7 +69,7 @@ public:
     //! Notify that manipulator that is being moved with the mouse
     //! \param[in] buttonNum - The mouse button being used to move the manipulator
     //! \param[in] screenCoords - The current coordinates of the mouse cursor
-    virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords) = 0;
+    virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords, double handleMidpoint[3], bool release = false) = 0;
 
     //! Method to retrieve the manipulator's current extents
     //! \param[out] llc - The lower-left coordinates of the manipulator
@@ -91,10 +91,6 @@ public:
     //! \return handle index, or -1 if no intersection
     //	virtual int mouseIsOverHandle(double screenCoords[2], double* boxExtents,  double handleMid[3]) = 0;
     virtual int mouseIsOverHandle(double screenCoords[2], double handleMid[3]) = 0;
-
-    //! Pure virtual function, invoked when the mouse button is released
-    //! \param[in] screenCoords are coordinates of mouse at the time it is released
-    virtual void mouseRelease(float screenCoords[2]) = 0;
 
     //! Pure virtual function, indicates that the mouse has been pressed over a handle, so is currently dragging the handle
     //! \return handle index
@@ -120,9 +116,10 @@ protected:
     //! \param[in] isSelected indicates if this box is to be drawn with the selection color or not
     void drawCubeFaces(double *extents, bool isSelected);
 
-    virtual void mousePress(double screenCoords[2]) = 0;
-    virtual void mouseDrag(double screenCoords[2]) = 0;
+    virtual void mousePress(double screenCoords[2], double handleMidpoint[3], int buttonNum) = 0;
+    virtual void mouseDrag(double screenCoords[2], double handleMidpoint[3]) = 0;
     virtual void mouseRelease(double screenCoords[2]) = 0;
+    virtual void stretchCorners(double corners[8][3]) = 0;
 
     double _dragDistance;
     int    _selectedHandle;
@@ -151,7 +148,7 @@ public:
                         std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
-    virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords);
+    virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords, double handleMidpoint[3], bool release = false);
 
     //! @copydoc Manip::GetBox(std::vector<double>, std::vector<double>);
     virtual void GetBox(std::vector<double> &llc, std::vector<double> &urc);
@@ -163,10 +160,6 @@ public:
     //! \return index of handle, or -1 if none.
     //	int mouseIsOverHandle(double screenCoords[2], double* stretchedBoxExtents,  double handleMid[3]);
     int mouseIsOverHandle(double screenCoords[2], double handleMid[3]);
-
-    //! Method to invoke when the mouse has been released after dragging a handle.
-    //! \param[in] screenCoords screen coordinates where mouse was released.
-    virtual void mouseRelease(float screenCoords[2]);
 
     //! Determine the current handle index that is being dragged
     //! \return handle index
@@ -260,9 +253,17 @@ protected:
     //! \return absolute handle index
     int makeHandleFaces(int handleNum, double handle[8][3], int octant, double *boxExtents);
 
-    void mousePress(double screenCoords[2]);
-    void mouseDrag(double screenCoords[2]);
+    void mousePress(double screenCoords[2], double handleMidpoint[3], int buttonNum);
+    void mouseDrag(double screenCoords[2], double handleMidpoint[3]);
     void mouseRelease(double screenCoords[2]);
+    void stretchCorners(double corners[8][3]);
+    void translateCorners(double corners[8][3]);
+    void moveMinusXCorners(double corners[8][3]);
+    void moveMinusYCorners(double corners[8][3]);
+    void moveMinusZCorners(double corners[8][3]);
+    void movePlusXCorners(double corners[8][3]);
+    void movePlusYCorners(double corners[8][3]);
+    void movePlusZCorners(double corners[8][3]);
 
     bool             _isStretching;
     double           _handleSizeInScene;

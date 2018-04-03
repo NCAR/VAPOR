@@ -56,6 +56,7 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     setAutoBufferSwap(false);
     _mouseClicked = false;
     _buttonNum = 0;
+    _navigating = false;
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
 
@@ -295,6 +296,8 @@ void VizWin::initializeGL()
 
 void VizWin::mousePressEventNavigate(QMouseEvent *e)
 {
+    _navigating = true;
+
     // Let trackball handle mouse events for navigation
     //
     _trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
@@ -314,15 +317,6 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     _buttonNum = 0;
     _mouseClicked = true;
 
-    //	double screenCoords[2];
-    //	screenCoords[0] = (float)e->x()-3.f;
-    //	screenCoords[1] = (float)(height() - e->y()) - 5.f;
-    // double coords[2] = {(double)e->x(), (double)e->y()};
-
-    std::vector<double> screenCoords;
-    screenCoords.push_back((double)e->x() - 3.f);
-    screenCoords.push_back((double)(height() - e->y()) - 5.f);
-
     if ((e->buttons() & Qt::LeftButton) && (e->buttons() & Qt::RightButton))
         ;    // do nothing
     else if (e->button() == Qt::LeftButton)
@@ -339,133 +333,18 @@ void VizWin::mousePressEvent(QMouseEvent *e)
         return;
     }
 
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
+    string modeName = getCurrentMouseMode();
 
-    bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords);
-    if (mouseOnManip) { return; }
+    if (modeName == MouseModeParams::GetRegionModeName()) {
+        std::vector<double> screenCoords = getScreenCoords(e);
+        bool                mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
+        if (mouseOnManip) { return; }
+    }
 
-    /*	int handle = _manip->mouseIsOverHandle(screenCoords, _strHandleMid);
-    if (handle >= 0) {
-        double dirVec[3];
-        _manip->pixelToVector(screenCoords, dirVec, _strHandleMid);
-        double startCoords[3];
-        _manip->captureMouseDown(handle, _buttonNum, _strHandleMid);//screenCoords);
-        _manip->startHandleSlide(screenCoords, handle);
-        _manip->setMouseDown(true);
-*/
-
-    /*
-528             double dirVec[3];
-529             //Find the direction vector of the camera ( Local coords)
-530             _visualizer->pixelToVector(screenCoords,
-531                 vParams->getStretchedCamPosLocal(), dirVec, _strHandleMid);
-532             //Remember which handle we hit, highlight it, save the intersection point.
-533             manip->captureMouseDown(handleNum,  vParams->getCameraPosLocal(), dirVec, buttonNum, _strHandleMid);
-534             EventRouter* rep = VizWinMgr::getInstance()->getEventRouter(tag);
-535             rep->captureMouseDown(buttonNum);
-536             setMouseDown(true, manip);
-*/
-
+    //	if (modeName == MouseModeParams::GetNavigateModeName()) {
+    mousePressEventNavigate(e);
+    return;
     //	}
-    if (modeName == MouseModeParams::GetNavigateModeName()) {
-        mousePressEventNavigate(e);
-        return;
-    }
-
-#ifdef DEAD
-    // To keep orientation correct in plane, and use
-    // OpenGL convention (Y 0 at bottom of window), reverse
-    // value of y:
-    //
-    double screenCoords[2];
-    screenCoords[0] = (float)e->x() - 3.f;
-    screenCoords[1] = (float)(height() - e->y()) - 5.f;
-
-    // double coords[2] = {(double)e->x(), (double)e->y()};
-
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    AnimationParams *p = paramsMgr->GetAnimationParams(_winName);
-    int              timestep = p->GetCurrentTimestep();
-
-    double           boxExtents[6];
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-    assert(vParams);
-    string  tag = MouseModeParams::getModeTag(mode);
-    Params *rParams = paramsMgr->GetCurrentParams(_windowNum, tag);
-    if (!rParams) return;
-    int                    handleNum = -1;
-    int                    manipType;
-    TranslateStretchManip *manip = 0;
-
-    if (rParams) {
-        manip = _visualizer->getManip(tag);
-        manip->setParams(rParams);
-        manipType = MouseModeParams::getModeManipType(mode);
-        if (manipType != 3)
-            rParams->GetBox()->GetStretchedLocalExtents(boxExtents, timestep);    // non-rotated manip
-        else
-            rParams->GetBox()->calcContainingStretchedBoxExtents(boxExtents, true);    // rotated
-        handleNum = manip->mouseIsOverHandle(screenCoords, boxExtents, _strHandleMid);
-    }
-    if (handleNum >= 0 && manip->startHandleSlide(_visualizer, screenCoords, handleNum, rParams)) {
-        // With manip type 2, need to prevent right mouse slide on orthogonal handle
-        // With manip type 3, need to use orientation
-        bool OK = true;      // Flag indicates whether the manip takes the mouse
-        int  orient = -1;    // orientation of 2D boxes
-        switch (manipType) {
-        case 1:    // 3d box manip
-            break;
-        case 2:    // 2d box manip, ok if not right mouse on orthog direction
-            // Do nothing if grabbing orthog direction with right mouse:
-            orient = rParams->GetBox()->GetOrientation();
-            if (buttonNum == 2 && ((handleNum == (orient + 3)) || (handleNum == (orient - 2)))) { OK = false; }
-            break;
-        case 3:                           // Rotate-stretch:  check if it's rotated too far
-            if (buttonNum <= 1) break;    // OK if left mouse button
-            {
-                bool doStretch = true;
-                // check if the rotation angle is approx a multiple of 90 degrees:
-                int                  tolerance = 20;
-                const vector<double> angles = rParams->GetBox()->GetAngles();
-                int                  thet = (int)(fabs(angles[0]) + 0.5f);
-                int                  ph = (int)(fabs(angles[1]) + 0.5f);
-                int                  ps = (int)(fabs(angles[2]) + 0.5f);
-                // Make sure that these are within tolerance of a multiple of 90
-                if (abs(((thet + 45) / 90) * 90 - thet) > tolerance) doStretch = false;
-                if (abs(((ps + 45) / 90) * 90 - ps) > tolerance) doStretch = false;
-                if (abs(((ph + 45) / 90) * 90 - ph) > tolerance) doStretch = false;
-
-                if (!doStretch) {
-                    /*
-                        MessageReporter::warningMsg("Manipulator is not axis-aligned.\n%s %s %s",
-                            "To stretch or shrink,\n",
-                            "You must use the size\n",
-                            "(sliders or text) in the tab.");
-                            */
-                    OK = false;
-                }
-            }
-            break;
-        default: assert(0);    // Invalid manip type
-        }                      // end switch
-        if (OK) {
-            double dirVec[3];
-            // Find the direction vector of the camera ( Local coords)
-            _visualizer->pixelToVector(screenCoords, vParams->getStretchedCamPosLocal(), dirVec, _strHandleMid);
-            // Remember which handle we hit, highlight it, save the intersection point.
-            manip->captureMouseDown(handleNum, vParams->getCameraPosLocal(), dirVec, buttonNum, _strHandleMid);
-            EventRouter *rep = VizWinMgr::getInstance()->getEventRouter(tag);
-            rep->captureMouseDown(buttonNum);
-            setMouseDown(true, manip);
-            VizWinParams::SetVizDirty(_windowNum);
-
-        }    // otherwise, fall through to navigation mode
-    }
-    // Set up for spin animation
-#endif
 }
 
 void VizWin::mouseReleaseEventNavigate(QMouseEvent *e)
@@ -498,6 +377,8 @@ void VizWin::mouseReleaseEventNavigate(QMouseEvent *e)
     p->SetCameraUpVec(upvec);
 
     paramsMgr->EndSaveStateGroup();
+
+    _navigating = false;
 }
 
 /*
@@ -510,45 +391,18 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e)
 
     _mouseClicked = false;
 
-    //	float screenCoords[2];
-    //	screenCoords[0] = (float)e->x()-3.f;
-    //	screenCoords[1] = (float)(height() - e->y()) - 5.f;
-    std::vector<double> screenCoords;
-    screenCoords.push_back((double)e->x() - 3.f);
-    screenCoords.push_back((double)(height() - e->y()) - 5.f);
-    //	_manip->setMouseDown(false);
-    //	_manip->mouseRelease(screenCoords);
-    _manip->MouseEvent(_buttonNum, screenCoords);
+    string modeName = getCurrentMouseMode();
 
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
+    if (modeName == MouseModeParams::GetRegionModeName()) {
+        std::vector<double> screenCoords = getScreenCoords(e);
+        _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
+    }
+
     if (modeName == MouseModeParams::GetNavigateModeName()) {
         mouseReleaseEventNavigate(e);
         _buttonNum = 0;
         return;
     }
-
-#ifdef DEAD
-    string                 tag = MouseModeParams::getModeTag(mode);
-    TranslateStretchManip *myManip = _visualizer->getManip(tag);
-    // Check if the seed bounds were moved
-    if (myManip->draggingHandle() >= 0) {
-        float screenCoords[2];
-        screenCoords[0] = (float)e->x();
-        screenCoords[1] = (float)(height() - e->y());
-        setMouseDown(false, myManip);
-        // The manip must move the region, and then tells the params to
-        // record end of move
-        myManip->mouseRelease(screenCoords);
-        VizWinMgr::getInstance()->getEventRouter(tag)->captureMouseUp();
-        VizWinParams::SetVizDirty(_windowNum);
-
-    } else {    // otherwise fall through to navigate mode
-        doNavigate = true;
-    }
-#endif
 
     _buttonNum = 0;
 }
@@ -570,6 +424,23 @@ void VizWin::mouseMoveEventNavigate(QMouseEvent *e)
     vParams->SetModelViewMatrix(m);
 }
 
+std::vector<double> VizWin::getScreenCoords(QMouseEvent *e) const
+{
+    std::vector<double> screenCoords;
+    screenCoords.push_back((double)e->x());
+    screenCoords.push_back((double)(height() - e->y()));
+    return screenCoords;
+}
+
+string VizWin::getCurrentMouseMode() const
+{
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
+    string           modeName = p->GetCurrentMouseMode();
+    return modeName;
+}
+
 /*
  * When the mouse is moved, it can affect navigation,
  * region position, light position, or probe position, depending
@@ -589,76 +460,21 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
 {
     if (_buttonNum == 0) return;
 
-    //	double screenCoords[2];
-    //	screenCoords[0] = (float)e->x()-3.f;
-    //	screenCoords[1] = (float)(height() - e->y()) - 5.f;
-    //	double coords[2] = {(double)e->x(), (double)e->y()};
+    string modeName = getCurrentMouseMode();
 
-    std::vector<double> screenCoords;
-    screenCoords.push_back((double)e->x() - 3.f);
-    screenCoords.push_back((double)(height() - e->y()) - 5.f);
+    if (modeName == MouseModeParams::GetRegionModeName()) {
+        if (!_navigating) {
+            std::vector<double> screenCoords = getScreenCoords(e);
 
-    bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords);
-    if (mouseOnManip) {
-        cout << "Mouse is on manip" << endl;
-        return;
-    }
-    cout << "Mouse not on manip" << endl;
-    /*	int handle = _manip->draggingHandle();
-    if (handle >= 0) {
-        //Respond based on what activity we are tracking
-        //Need to tell the appropriate params about the change,
-        //And it should refresh the panel
-//		double mouseCoords[2];
-//		double projMouseCoords[2];
-//		mouseCoords[0] = (float) e->x();
-//		mouseCoords[1] = (float) height()-e->y();
-
-        double projScreenCoords[2];
-//		if (_manip->projectPointToLine(mouseCoords,projMouseCoords)) {
-        if (_manip->projectPointToLine(screenCoords,projScreenCoords)) {
-            double dirVec[3];
-            //_manip->pixelToVector(projMouseCoords, dirVec, _strHandleMid);
-            _manip->pixelToVector(projScreenCoords, dirVec, _strHandleMid);
-            _manip->slideHandle(handle, dirVec, false);
-        }
-        return;
-    }
-*/
-
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-
-    string modeName = p->GetCurrentMouseMode();
-
-    if (modeName == MouseModeParams::GetNavigateModeName()) {
-        mouseMoveEventNavigate(e);
-        return;
-    }
-
-#ifdef DEAD
-
-    string                 tag = MouseModeParams::getModeTag(mode);
-    TranslateStretchManip *manip = _visualizer->getManip(tag);
-    // bool constrain = manip->getParams()->isDomainConstrained();
-    bool             constrain = true;
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_windowNum);
-    assert(vParams);
-    int handleNum = manip->draggingHandle();
-    // check first to see if we are dragging face
-    if (handleNum >= 0) {
-        if (manip->projectPointToLine(mouseCoords, projMouseCoords)) {
-            double dirVec[3];
-            _visualizer->pixelToVector(projMouseCoords, vParams->getStretchedCamPosLocal(), dirVec, _strHandleMid);
-            // qWarning("Sliding handle %d, direction %f %f %f", handleNum, dirVec[0],dirVec[1],dirVec[2]);
-            manip->slideHandle(handleNum, dirVec, constrain);
-            VizWinParams::SetVizDirty(_windowNum);
-            doNavigate = false;
+            bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
+            if (mouseOnManip) { return; }
         }
     }
-#endif
+
+    //	if (modeName == MouseModeParams::GetNavigateModeName()) {
+    mouseMoveEventNavigate(e);
     return;
+    //	}
 }
 
 void VizWin::setFocus() { QWidget::setFocus(); }
@@ -701,29 +517,10 @@ void VizWin::paintGL()
     glPushMatrix();
     setUpModelViewMatrix();
 
-#ifdef DEBUG1
-    double m[16];
-    cout << "Projection matrix: " << endl;
-    glGetDoublev(GL_PROJECTION_MATRIX, m);
-    for (int j = 0; j < 4; j++) {
-        for (int i = 0; i < 4; i++) { cout << m[j * 4 + i] << " "; }
-        cout << endl;
-    }
-    cout << endl;
-
-    cout << "ModelView matrix: " << endl;
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
-    for (int j = 0; j < 4; j++) {
-        for (int i = 0; i < 4; i++) { cout << m[j * 4 + i] << " "; }
-        cout << endl;
-    }
-    cout << endl;
-#endif
-
     int rc = _controlExec->Paint(_winName, false);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
-    updateManip();
+    if (getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) updateManip();
 
     swapBuffers();
 
@@ -741,19 +538,7 @@ void VizWin::updateManip(bool initialize)
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    /*
-// ParamsMgr or ControlExec can do this
-335  RenderParams *GetRenderParams(
-336     string winName, string dataSetName, string renderType,  string instName
-337  ) const;
 
-    string type, inst;
-    guiP->GetActiveRenderer(_winName, type, inst);
-    string dataSet =
-    RenderParams* rParams = _controlExec->GetRenderParams(
-        _winName, dataSet, type, inst
-    );
-*/
     vector<double> minExts, maxExts;
     //  ds->GetActiveExtents(pm, _winName, 0, minExts, maxExts);
     minExts.push_back(-1.038e+06);
@@ -770,7 +555,7 @@ void VizWin::updateManip(bool initialize)
 
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
+    string           modeName = getCurrentMouseMode();
     double           rotCenter[3], cameraPos[3], dirvec[3], upvec[3];
     p->GetRotationCenter(rotCenter);
     p->GetCameraPos(cameraPos);

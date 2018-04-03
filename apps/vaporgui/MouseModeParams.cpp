@@ -87,7 +87,7 @@ void MouseModeParams::RegisterMouseMode(string name, int manipType, const char *
 void MouseModeParams::_setUpDefault()
 {
     RegisterMouseMode(GetNavigateModeName(), 0, wheel);
-    // RegisterMouseMode("Region", 1, cube);
+    RegisterMouseMode(GetRegionModeName(), 1, cube);
     // RegisterMouseMode("Barb rake", 1, arrowrake );
     // RegisterMouseMode("Contours", 3, isoline);
     // RegisterMouseMode(Params::GetClassType(),1, "Flow rake",rake );

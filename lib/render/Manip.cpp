@@ -36,10 +36,20 @@ TranslateStretchManip::TranslateStretchManip() : Manip()
     _tempRotation = 0.f;
     _tempRotAxis = -1;
     _handleSizeInScene = 1.;
-    _initialSelectionRay[0] = 0.;
-    _initialSelectionRay[1] = 0.;
-    _initialSelectionRay[2] = 0.;
+    _dragDistance = 0.f;
     _mouseDownHere = false;
+
+    for (int i = 0; i < 3; i++) {
+        _initialSelectionRay[i] = 0.;
+        _cameraPosition[i] = 0.;
+        _rotationCenter[i] = 0.;
+        _handleMid[i] = 0.f;
+
+        _selection[i] = 0.;
+        _selection[i + 3] = 0.;
+        _extents[i] = 0.;
+        _extents[i + 3] = 0.;
+    }
 }
 
 void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, std::vector<double> cameraPosition,
@@ -77,59 +87,75 @@ void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double>
     urc[2] = _selection[5];
 }
 
-bool TranslateStretchManip::MouseEvent(int buttonNum, std::vector<double> vscreenCoords)
+bool TranslateStretchManip::MouseEvent(int buttonNum, std::vector<double> vscreenCoords, double handleMidpoint[3], bool release)
 {
     double screenCoords[2] = {vscreenCoords[0], vscreenCoords[1]};
-    double handleMidpoint[3];
-    int    handle = mouseIsOverHandle(screenCoords, handleMidpoint);
-    if (handle < 0) return false;
 
-    // Press
-    if (_buttonNum == 0) {
-        cout << "MouseEvent::press" << endl;
-        _buttonNum = buttonNum;
-        double dirVec[3];
-        pixelToVector(screenCoords, dirVec, _handleMid);
-        double startCoords[3];
-        captureMouseDown(handle, _buttonNum, _handleMid);
-        startHandleSlide(screenCoords, handle);
-        setMouseDown(true);
-    }
+    if (_selectedHandle < 0) _selectedHandle = mouseIsOverHandle(screenCoords, handleMidpoint);
 
-    // Dragging
-    else if (buttonNum == _buttonNum) {
-        if (!_mouseDownHere) return false;
-        cout << "Mouse drag" << endl;
-        mouseDrag(screenCoords);
-    }
+    if (_selectedHandle < 0) return false;
 
-    else {
-        cout << "Mouse release" << endl;
-        _buttonNum = 0;
-        setMouseDown(false);
+    if (release) {    // Release
         mouseRelease(screenCoords);
+    } else if (buttonNum == _buttonNum) {    // Dragging
+        if (!_mouseDownHere) return false;
+        mouseDrag(screenCoords, handleMidpoint);
+    } else if (_buttonNum == 0) {    // Press
+        mousePress(screenCoords, handleMidpoint, buttonNum);
     }
 
     return true;
 }
 
-void TranslateStretchManip::mouseDrag(double screenCoords[2])
+void TranslateStretchManip::mouseDrag(double screenCoords[2], double handleMidpoint[3])
 {
-    int handle = draggingHandle();
-    if (handle >= 0) {
+    if (_selectedHandle >= 0) {
         double projScreenCoords[2];
         bool   success = projectPointToLine(screenCoords, projScreenCoords);
         if (success) {
             double dirVec[3];
-            pixelToVector(projScreenCoords, dirVec, _handleMid);
-            slideHandle(handle, dirVec, false);
+            pixelToVector(projScreenCoords, dirVec, handleMidpoint);
+            slideHandle(_selectedHandle, dirVec, false);
         }
     }
 }
 
-void TranslateStretchManip::mousePress(double screenCoords[2]) {}
+void TranslateStretchManip::mousePress(double screenCoords[2], double handleMidpoint[3], int buttonNum)
+{
+    double dirVec[3];
+    pixelToVector(screenCoords, dirVec, handleMidpoint);
+    captureMouseDown(_selectedHandle, buttonNum, handleMidpoint);
+    startHandleSlide(screenCoords, _selectedHandle);
+    setMouseDown(true);
+}
 
-void TranslateStretchManip::mouseRelease(double screenCoords[2]) {}
+void TranslateStretchManip::mouseRelease(double screenCoords[2])
+{
+    if (_selectedHandle >= 0) {
+        double boxExts[6];
+        int    axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
+        // Convert _dragDistance to world coords:
+        float dist = _dragDistance;
+
+        // Check if we are stretching.  If so, only move coords associated with
+        // handle:
+        if (_isStretching) {
+            // boxMin gets changed for nearHandle, boxMax for farHandle
+            if (_selectedHandle < 3) {
+                _selection[axis] += dist;
+            } else {
+                _selection[axis + 3] += dist;
+            }
+        } else {
+            _selection[axis] += dist;
+            _selection[axis + 3] += dist;
+        }
+    }
+    _dragDistance = 0.f;
+    _selectedHandle = -1;
+    _buttonNum = 0;
+    setMouseDown(false);
+}
 
 int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double handleMid[3])
 {
@@ -557,6 +583,7 @@ void TranslateStretchManip::render()
         // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, extents);
         // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _extents);
         makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _selection);
+
         if (_selectedHandle >= 0) {
             int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
             // displace handleExtents appropriately
@@ -625,59 +652,52 @@ double TranslateStretchManip::getPixelSize() const
 void TranslateStretchManip::drawBoxFaces()
 {
     double corners[8][3];
+
+    // -X -Y -Z
     corners[0][0] = _selection[0];
     corners[0][1] = _selection[1];
     corners[0][2] = _selection[2];
 
+    // -X -Y +Z
     corners[1][0] = _selection[0];
     corners[1][1] = _selection[1];
     corners[1][2] = _selection[5];
 
+    // -X +Y -Z
     corners[2][0] = _selection[0];
     corners[2][1] = _selection[4];
     corners[2][2] = _selection[2];
 
+    // -X +Y +Z
     corners[3][0] = _selection[0];
     corners[3][1] = _selection[4];
     corners[3][2] = _selection[5];
 
+    // +X -Y -Z
     corners[4][0] = _selection[3];
     corners[4][1] = _selection[1];
     corners[4][2] = _selection[2];
 
+    // +X -Y +Z
     corners[5][0] = _selection[3];
     corners[5][1] = _selection[1];
     corners[5][2] = _selection[5];
 
+    // +X +Y -Z
     corners[6][0] = _selection[3];
     corners[6][1] = _selection[4];
     corners[6][2] = _selection[2];
 
+    // +X +Y +Z
     corners[7][0] = _selection[3];
     corners[7][1] = _selection[4];
     corners[7][2] = _selection[5];
 
-    // Now the corners need to be put into the unit cube, and displaced appropriately
-    // Either displace just half the corners or do the opposite ones as well.
-    int axis;
-    for (int cor = 0; cor < 8; cor++) {
-        if (_selectedHandle >= 0) {
-            axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-            // The corners associated with a handle are as follows:
-            // If the handle is on the low end, i.e. _selectedHandle < 3, then
-            // for axis == 0, handles on corners  1,3,5,7 (cor&1 is 1)
-            // for axis == 1, handles on corners  0,1,4,5 (cor&2 is 0)
-            // for axis == 2, handles on corners  4,5,6,7 (cor&4 is 4)
-            // HMMM That's wrong.  The same expression works for x,y, and z
-            // for axis == 0, handles on corners 0,2,4,6
-            // for axis == 2, handles on corners 0,1,2,3
-            // This fixes a bug (2/7/07)
-            if (_isStretching) {
-                if (((cor >> axis) & 1) && _selectedHandle < 3) continue;
-                if (!((cor >> axis) & 1) && _selectedHandle >= 3) continue;
-            }
-            corners[cor][axis] += _dragDistance;
-        }
+    if (_selectedHandle >= 0) {
+        if (_isStretching)
+            stretchCorners(corners);
+        else if (_dragDistance != 0.)
+            translateCorners(corners);
     }
 
     // Now render the edges:
@@ -724,40 +744,102 @@ void TranslateStretchManip::drawBoxFaces()
     glDepthMask(GL_TRUE);
 }
 
-void TranslateStretchManip::mouseRelease(float /*screenCoords*/[2])
+void TranslateStretchManip::stretchCorners(double corners[8][3])
 {
-    // Need to commit to latest drag position
-    // Are we dragging?
+    int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
 
-    if (_selectedHandle >= 0) {
-        double boxExts[6];
-        int    axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-        // Convert _dragDistance to world coords:
-        float dist = _dragDistance;
-
-        // Check if we are stretching.  If so, only move coords associated with
-        // handle:
-        if (_isStretching) {
-            // boxMin gets changed for nearHandle, boxMax for farHandle
-            if (_selectedHandle < 3) {
-                _selection[axis] += dist;
-            } else {
-                _selection[axis + 3] += dist;
-            }
-        } else {
-            _selection[axis] += dist;
-            _selection[axis + 3] += dist;
-        }
+    // X axis
+    if (axis == 0) {
+        if (_selectedHandle == 2)
+            moveMinusXCorners(corners);
+        else if (_selectedHandle == 3)
+            movePlusXCorners(corners);
     }
-    _dragDistance = 0.f;
-    _selectedHandle = -1;
+    // Y axis
+    else if (axis == 1) {
+        if (_selectedHandle == 4)
+            moveMinusYCorners(corners);
+        else if (_selectedHandle == 1)
+            movePlusYCorners(corners);
+    }
+    // Z axis
+    else if (axis == 2) {
+        if (_selectedHandle == 0)
+            moveMinusZCorners(corners);
+        else if (_selectedHandle == 5)
+            movePlusZCorners(corners);
+    }
+}
+
+void TranslateStretchManip::translateCorners(double corners[8][3])
+{
+    int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
+
+    if (axis == 0) {
+        moveMinusXCorners(corners);
+        movePlusXCorners(corners);
+    } else if (axis == 1) {
+        moveMinusYCorners(corners);
+        movePlusYCorners(corners);
+    } else if (axis == 2) {
+        moveMinusZCorners(corners);
+        movePlusZCorners(corners);
+    }
+}
+
+void TranslateStretchManip::moveMinusXCorners(double corners[8][3])
+{
+    corners[2][0] += _dragDistance;
+    corners[0][0] += _dragDistance;
+    corners[1][0] += _dragDistance;
+    corners[3][0] += _dragDistance;
+}
+
+void TranslateStretchManip::movePlusXCorners(double corners[8][3])
+{
+    corners[4][0] += _dragDistance;
+    corners[5][0] += _dragDistance;
+    corners[6][0] += _dragDistance;
+    corners[7][0] += _dragDistance;
+}
+
+void TranslateStretchManip::moveMinusYCorners(double corners[8][3])
+{
+    corners[2][1] += _dragDistance;
+    corners[3][1] += _dragDistance;
+    corners[6][1] += _dragDistance;
+    corners[7][1] += _dragDistance;
+}
+
+void TranslateStretchManip::movePlusYCorners(double corners[8][3])
+{
+    corners[0][1] += _dragDistance;
+    corners[1][1] += _dragDistance;
+    corners[4][1] += _dragDistance;
+    corners[5][1] += _dragDistance;
+}
+
+void TranslateStretchManip::moveMinusZCorners(double corners[8][3])
+{
+    corners[0][2] += _dragDistance;
+    corners[2][2] += _dragDistance;
+    corners[4][2] += _dragDistance;
+    corners[6][2] += _dragDistance;
+}
+
+void TranslateStretchManip::movePlusZCorners(double corners[8][3])
+{
+    corners[1][2] += _dragDistance;
+    corners[3][2] += _dragDistance;
+    corners[5][2] += _dragDistance;
+    corners[7][2] += _dragDistance;
 }
 
 // Note: This is performed in local (unstretched) world coordinates!
-void TranslateStretchManip::captureMouseDown(int handleNum,
-                                             //	const std::vector<double>& camPos,
-                                             int buttonNum, double strHandleMid[3])
+void TranslateStretchManip::captureMouseDown(int handleNum, int buttonNum, double strHandleMid[3])
 {
+    _buttonNum = buttonNum;
+
     // Grab a probe handle
     _selectedHandle = handleNum;
     _dragDistance = 0.f;
