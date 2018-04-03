@@ -13,7 +13,7 @@ add_library (common SHARED
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 	)
 
-target_link_libraries (common)
+target_link_libraries (common pthread)
 
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
