@@ -53,7 +53,6 @@ ContourRenderer::ContourRenderer(const ParamsMgr* pm, string winName,
 
 ContourRenderer::~ContourRenderer()
 {
-    FTRACE();
     if (_drawList)
         glDeleteLists(_drawList, 1);
 }
