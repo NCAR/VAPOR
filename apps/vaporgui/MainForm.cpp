@@ -950,6 +950,7 @@ void MainForm::undoRedoHelper(bool undo)
     }
     if (!status) {
         MSG_ERR("Undo/Redo failed");
+        _controlExec->SetSaveStateEnabled(enabled);
         return;
     }
 
