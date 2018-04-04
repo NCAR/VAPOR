@@ -39,7 +39,7 @@
 #include "GUIStateParams.h"
 #include "SettingsParams.h"
 #include "AnimationParams.h"
-#include "MiscParams.h"
+//#include "MiscParams.h"
 #include "TabManager.h"
 
 class QApplication;
@@ -70,7 +70,6 @@ class MainForm : public QMainWindow {
 Q_OBJECT
 
 public:
-
  MainForm(
 	vector<QString> files, QApplication* app, QWidget* parent = 0
  );
@@ -276,12 +275,12 @@ private:
 	);
  }
 
- MiscParams *GetMiscParams() const {
+ /*MiscParams *GetMiscParams() const {
 	assert(_paramsMgr != NULL);
 	return ((MiscParams *)
 		_paramsMgr->GetParams(MiscParams::GetClassType())
 	);
- }
+ }*/
 
  
  // Set the various widgets in the main window consistent with latest
@@ -328,6 +327,8 @@ private:
  void enableAnimationWidgets(bool onOff);
 
  void _fileSaveHelper(string path);
+
+ string _getDataSetName(string file);
 
 private slots:   
  void sessionOpen(QString qfileName="");

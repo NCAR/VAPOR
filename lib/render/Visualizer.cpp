@@ -67,7 +67,7 @@ Visualizer::Visualizer(
 	m_dataStatus = dataStatus;
 	m_winName = winName;
 	m_shaderMgr = NULL;
-	m_vizFeatures = new AnnotationsRenderer(pm, dataStatus, winName);
+	m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
 	m_viewpointDirty = true;
 
 
@@ -376,7 +376,7 @@ bool Visualizer::fbSetup() {
 	
 	//Paint background
 	double clr[3];
-	getActiveAnnotationsParams()->GetBackgroundColor(clr);
+	getActiveAnnotationParams()->GetBackgroundColor(clr);
 	
 	glClearColor(clr[0],clr[1],clr[2], 1.f);
 	//Clear out the depth buffer in preparation for rendering
@@ -550,7 +550,7 @@ bool Visualizer::pixelToVector(
 	double dirVec[3], double strHandleMid[3])
 {
 
-	const AnnotationsParams* vfParams = getActiveAnnotationsParams();
+	const AnnotationParams* vfParams = getActiveAnnotationParams();
 	const ViewpointParams* vpParams = getActiveViewpointParams();
 
 	GLdouble pt[3];
@@ -885,7 +885,7 @@ double Visualizer::getPixelSize() const {
 
 	//Window height is subtended by viewing angle (45 degrees),
 	//at viewer distance (dist from camera to view center)
-	const AnnotationsParams* vfParams = getActiveAnnotationsParams();
+	const AnnotationParams* vfParams = getActiveAnnotationParams();
 	const ViewpointParams* vpParams = getActiveViewpointParams();
 
 	size_t width, height;
@@ -917,8 +917,8 @@ RegionParams* Visualizer::getActiveRegionParams()  const {
 	return m_paramsMgr->GetRegionParams(m_winName);
 }
 
-AnnotationsParams* Visualizer::getActiveAnnotationsParams()  const {
-	return m_paramsMgr->GetAnnotationsParams(m_winName);
+AnnotationParams* Visualizer::getActiveAnnotationParams()  const {
+	return m_paramsMgr->GetAnnotationParams(m_winName);
 }
 
 

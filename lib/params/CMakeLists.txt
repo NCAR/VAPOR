@@ -15,7 +15,7 @@ add_library (params SHARED
 	regionparams.cpp
 	ParamsMgr.cpp
 	DataStatus.cpp
-	AnnotationsParams.cpp
+	AnnotationParams.cpp
 	HelloParams.cpp
 	ImageParams.cpp
 	TFInterpolator.cpp

@@ -24,6 +24,7 @@
 #include <QScrollArea>
 #include <QSizePolicy>
 #include "AnimationEventRouter.h"
+#include "AnnotationEventRouter.h"
 #include "NavigationEventRouter.h"
 #include "SettingsEventRouter.h"
 #include "RenderEventRouter.h"
@@ -44,7 +45,9 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce)
 
 	// order of vector is order of display
 	//
-	_tabNames = {_renderersTabName, _navigationTabName, _settingsTabName};
+	_tabNames = {_renderersTabName, 
+		_navigationTabName, 
+		_settingsTabName};
 
 
 	//Initialize arrays of widgets and types
@@ -362,6 +365,8 @@ void TabManager::Restart() {
 	Reinit();
 
 	_initialized = true;
+
+	Update();
 }
 
 
@@ -440,6 +445,10 @@ void TabManager::_createAllDefaultTabs() {
 	// Install built-in tabs
 	//
 	parent = _getTabWidget(_navigationTabName);
+	
+	er = new AnnotationEventRouter(parent, _controlExec);
+	_installTab(_navigationTabName, er->GetType(), er);
+	
 	_animationEventRouter = new AnimationEventRouter(
 		parent, _controlExec
 	);
@@ -456,8 +465,6 @@ void TabManager::_createAllDefaultTabs() {
 	er = _animationEventRouter;
 	_installTab(_navigationTabName, er->GetType(), er);
 	
-
-	parent = _getTabWidget(_navigationTabName);
 	_navigationEventRouter = new NavigationEventRouter(parent, _controlExec);
 	er = _navigationEventRouter;
 	_installTab(_navigationTabName, er->GetType(), er);

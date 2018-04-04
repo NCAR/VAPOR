@@ -72,7 +72,7 @@ namespace VAPoR {
 				float bgColor[4],
 				ViewpointParams *vpParams= NULL,
 				TypeFlag type = LABEL,
-				OrientationFlag orientation = DEADCENTER);
+				OrientationFlag orientation = BOTTOMLEFT);
 	int Initialize(
 				string font,
 				string text,
@@ -81,7 +81,7 @@ namespace VAPoR {
 				double bgColor[4],
 				ViewpointParams *vpParams= NULL,
 				TypeFlag type = LABEL,
-				OrientationFlag orientation = DEADCENTER);
+				OrientationFlag orientation = BOTTOMLEFT);
 	int Initialize(
 				string font,
 				string text,
@@ -90,7 +90,7 @@ namespace VAPoR {
 				vector<double> bgColor,
 				ViewpointParams *vpParams= NULL,
 				TypeFlag type = LABEL,
-				OrientationFlag orientation = DEADCENTER);
+				OrientationFlag orientation = BOTTOMLEFT);
 	~TextObject();
 
 
