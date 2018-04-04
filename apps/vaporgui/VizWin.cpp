@@ -306,6 +306,7 @@ void VizWin::resizeGL(int width, int height){
 	bool enabled = _controlExec->GetSaveStateEnabled();
 	_controlExec->SetSaveStateEnabled(false);
 	vParams->SetWindowSize(width, height);
+	_controlExec->SetSaveStateEnabled(enabled);
 }
 
 void VizWin::initializeGL(){
@@ -481,7 +482,6 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 
 void VizWin::mouseReleaseEventNavigate(QMouseEvent*e) {
 
-
 	_trackBall->MouseOnTrackball(
 		2, _buttonNum, e->x(), e->y(), width(), height()
 	);
@@ -567,7 +567,6 @@ void VizWin::mouseReleaseEvent(QMouseEvent*e){
 }
 
 void VizWin::mouseMoveEventNavigate(QMouseEvent* e) {
-
 	_trackBall->MouseOnTrackball(
 		1, _buttonNum, e->x(), e->y(), width(), height()
 	);

@@ -82,7 +82,7 @@ VizWinMgr::VizWinMgr(
    
 	_vizWindow.clear();
 	_vizMdiWin.clear();
-	
+
 	_trackBall = new Trackball();
 
 	_initialized = false;
@@ -366,6 +366,8 @@ void VizWinMgr::Restart() {
 	}
 
 	_initialized = true;
+
+	Update();
 }
 
 
