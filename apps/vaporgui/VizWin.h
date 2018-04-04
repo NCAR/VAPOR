@@ -121,6 +121,8 @@ private:
 		double &boxNear,  double &boxFar
 	) const;
 
+	VAPoR::RenderParams* getRenderParams();
+
 	void setUpProjMatrix();
 	void setUpModelViewMatrix();
 
