@@ -533,25 +533,44 @@ void VizWin::paintGL()
     glPopMatrix();
 }
 
+VAPoR::RenderParams *VizWin::getRenderParams()
+{
+    ParamsMgr *     paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+
+    string inst, dataSetName, className;
+    guiP->GetActiveRenderer(_winName, className, inst);
+    _controlExec->RenderLookup(inst, _winName, dataSetName, className);
+
+    VAPoR::RenderParams *rParams = _controlExec->GetRenderParams(_winName, dataSetName, className, inst);
+
+    return rParams;
+}
+
 void VizWin::updateManip(bool initialize)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
 
+    //	VAPoR::RenderParams* rParams = getRenderParams();
+    //	if (rParams==NULL)
+    //		return;
+
+    AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
+    int              timeStep = aParams->GetCurrentTimestep();
+
     vector<double> minExts, maxExts;
-    //  ds->GetActiveExtents(pm, _winName, 0, minExts, maxExts);
+    //	DataStatus *dataStatus = _controlExec->GetDataStatus();
+    //	dataStatus->GetActiveExtents(
+    //		paramsMgr, _winName, timeStep, minExts, maxExts
+    //	);
     minExts.push_back(-1.038e+06);
     minExts.push_back(2.81684e+06);
     minExts.push_back(0.f);
     maxExts.push_back(220425);
     maxExts.push_back(4.04548e+06);
     maxExts.push_back(100000);
-
-    // double m[16];
-    // vParams->GetModelViewMatrix(m);
-    // double posvec[3], upvec[3], dirvec[3];
-    // bool status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
 
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     MouseModeParams *p = guiP->GetMouseModeParams();
@@ -583,7 +602,7 @@ void VizWin::updateManip(bool initialize)
         llc = minExts;
         urc = maxExts;
     } else
-        _manip->GetBox(llc, urc);    // get box from active RenderParams
+        _manip->GetBox(llc, urc);    // get box from active VAPoR::RenderParams
 
     _manip->Update(llc, urc, minExts, maxExts, vcameraPos, vrotCenter, mv, proj, windowSize);
 
