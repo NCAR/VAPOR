@@ -985,14 +985,6 @@ bool TranslateStretchManip::projectPointToWin(double cubeCoords[3], double winCo
     GLdouble cbCoords[3];
     for (int i = 0; i < 3; i++) cbCoords[i] = (double)cubeCoords[i];
 
-    //	const ViewpointParams* vpParams = getActiveViewpointParams();
-    //	double mvMatrix[16];
-    //	double pMatrix[16];
-    //	vpParams->GetModelViewMatrix(mvMatrix);
-    //	vpParams->GetProjectionMatrix(pMatrix);
-    //	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
-    //	glGetDoublev(GL_PROJECTION_MATRIX, pMatrix);
-
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
