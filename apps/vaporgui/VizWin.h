@@ -108,6 +108,7 @@ private:
 
     std::vector<double> getScreenCoords(QMouseEvent *e) const;
     string              getCurrentMouseMode() const;
+    void                setNewExtents();
 
     void getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar) const;
 
