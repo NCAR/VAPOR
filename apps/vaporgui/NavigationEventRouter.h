@@ -91,7 +91,7 @@ private:
 	void updateCameraChanged();
 	void updateLightChanged();
 
-  VAPoR::ParamsBase *GetActiveParams() const;
+ VAPoR::ViewpointParams *_getActiveParams() const;
 
 
  void _setViewpointParams(
