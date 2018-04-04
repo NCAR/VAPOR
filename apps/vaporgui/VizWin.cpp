@@ -236,7 +236,7 @@ void VizWin::setUpModelViewMatrix() {
 
 	// If currently navigating with mouse set matrix from trackball
 	//
-	if (_mouseClicked && modeName == MouseModeParams::GetNavigateModeName()) {
+	if (_mouseClicked && _navigating) {
 
 		// Set the modelview matrix via the trackball
 		//
@@ -325,10 +325,12 @@ void VizWin::initializeGL(){
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
 
-	bool enabled = _controlExec->GetSaveStateEnabled();
-	_controlExec->SetSaveStateEnabled(false);
-	vParams->SetWindowSize(width(), height());
-	_controlExec->SetSaveStateEnabled(enabled);
+	if (vParams != NULL) {
+		bool enabled = _controlExec->GetSaveStateEnabled();
+		_controlExec->SetSaveStateEnabled(false);
+		vParams->SetWindowSize(width(), height());
+		_controlExec->SetSaveStateEnabled(enabled);
+	}
 }
 
 void VizWin::mousePressEventNavigate(QMouseEvent* e) {
@@ -384,6 +386,7 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 			cout << "Returning" << endl;
 			return;
 		}
+		else cout << "Mouse not on manip" << endl;
 	}
 
 //	if (modeName == MouseModeParams::GetNavigateModeName()) {
@@ -394,6 +397,7 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 
 void VizWin::mouseReleaseEventNavigate(QMouseEvent*e) {
 
+	cout << "ReleaseEventNavigate" << endl;
 	_trackBall->MouseOnTrackball(
 		2, _buttonNum, e->x(), e->y(), width(), height()
 	);
@@ -444,7 +448,9 @@ void VizWin::mouseReleaseEvent(QMouseEvent*e){
 
 	if (modeName == MouseModeParams::GetRegionModeName()) {
 		std::vector<double> screenCoords = getScreenCoords(e);
-		_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
+		bool b = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
+		if (!b) mouseReleaseEventNavigate(e);
+		else setNewExtents();
 	}
 
 	if (modeName == MouseModeParams::GetNavigateModeName())
@@ -489,6 +495,16 @@ string VizWin::getCurrentMouseMode() const {
 	MouseModeParams *p = guiP->GetMouseModeParams();
 	string modeName = p->GetCurrentMouseMode();
 	return modeName;
+}
+
+void VizWin::setNewExtents() {
+	std::vector<double> llc, urc;
+	_manip->GetBox(llc,urc);
+	VAPoR::RenderParams* rParams = getRenderParams();
+	if (rParams==NULL)
+		return;
+	VAPoR::Box* box = rParams->GetBox();
+	box->SetExtents(llc, urc);
 }
 
 /* 
@@ -603,6 +619,7 @@ void VizWin::paintGL() {
 }
 
 VAPoR::RenderParams* VizWin::getRenderParams() {
+	//return NULL;
 	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
 	GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
 		GUIStateParams::GetClassType()
@@ -618,7 +635,7 @@ VAPoR::RenderParams* VizWin::getRenderParams() {
 		_winName, dataSetName, className, inst
 	);
 
-	return rParams;
+	return rParams;//NULL
 }
 
 void VizWin::updateManip(bool initialize) {
@@ -628,26 +645,24 @@ void VizWin::updateManip(bool initialize) {
 		GUIStateParams::GetClassType()
 	);
 
-//	VAPoR::RenderParams* rParams = getRenderParams();
-//	if (rParams==NULL)
-//		return;
-
 	AnimationParams* aParams = (AnimationParams*) paramsMgr->GetParams(
 		AnimationParams::GetClassType()
 	);
 	int timeStep = aParams->GetCurrentTimestep();
 	
 	vector<double> minExts, maxExts;
-//	DataStatus *dataStatus = _controlExec->GetDataStatus();
-//	dataStatus->GetActiveExtents(
-//		paramsMgr, _winName, timeStep, minExts, maxExts
-//	);
+/*	DataStatus *dataStatus = _controlExec->GetDataStatus();
+	dataStatus->GetActiveExtents(
+		paramsMgr, _winName, timeStep, minExts, maxExts
+	);
+*/
 	minExts.push_back(-1.038e+06);  
 	minExts.push_back(2.81684e+06);
 	minExts.push_back(0.f);
 	maxExts.push_back(220425);
 	maxExts.push_back(4.04548e+06);
 	maxExts.push_back(100000);
+
 
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
 	MouseModeParams *p = guiP->GetMouseModeParams();
@@ -675,12 +690,18 @@ void VizWin::updateManip(bool initialize) {
 	vParams->GetProjectionMatrix(proj);
 
 	std::vector<double> llc, urc;
+	VAPoR::RenderParams* rParams = getRenderParams();
+	cout << (rParams==NULL) << endl;
+	//if (initialize || rParams==NULL) {
 	if (initialize) {
 		llc = minExts;
 		urc = maxExts;
 	}
-	else
+	else {
 		_manip->GetBox(llc, urc); // get box from active VAPoR::RenderParams
+		//VAPoR::Box* box = rParams->GetBox();
+		//box->GetExtents(llc, urc);
+	}
 
 	_manip->Update(llc, urc, minExts, maxExts, 
 		vcameraPos, vrotCenter, 
