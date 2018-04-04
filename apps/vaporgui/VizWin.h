@@ -117,6 +117,8 @@ class VizWin : public QGLWidget {
         const double posVec[3], const double dirVec[3],
         double &boxNear, double &boxFar) const;
 
+    VAPoR::RenderParams *getRenderParams();
+
     void setUpProjMatrix();
     void setUpModelViewMatrix();
 
