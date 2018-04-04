@@ -323,6 +323,8 @@ void VizWinMgr::Restart()
     for (int i = 0; i < vizNames.size(); i++) { _attachVisualizer(vizNames[i]); }
 
     _initialized = true;
+
+    Update();
 }
 
 void VizWinMgr::Reinit()
