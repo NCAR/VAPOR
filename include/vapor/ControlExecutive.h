@@ -526,6 +526,10 @@ class RENDER_API ControlExec : public MyBase {
     int activateClassRenderers(
         string vizName, string dataSetName,
         string pClassName, vector<string> instNames, bool reportErrs);
+
+    void _removeRendererHelper(
+        string winName, string dataSetName, string renderType, string renderName,
+        bool removeFromParamsFlag);
 };
 }; // namespace VAPoR
 
