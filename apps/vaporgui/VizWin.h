@@ -109,6 +109,8 @@ private:
     std::vector<double> getScreenCoords(QMouseEvent *e) const;
     string              getCurrentMouseMode() const;
     void                setNewExtents();
+    void                getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts);
+    void                getCenterAndCamPos(std::vector<double> &rotationCenter, std::vector<double> &cameraPos);
 
     void getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar) const;
 

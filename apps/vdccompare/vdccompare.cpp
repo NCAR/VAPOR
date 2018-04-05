@@ -134,16 +134,11 @@ int main(int argc, char **argv)
 
     if (op.ParseOptions(&argc, argv, get_options) < 0) { exit(1); }
 
-    if (argc < 6) {
-        cerr << "Usage: " << ProgName << "ftype1 ftype2 ftype1files... -- ftype2files " << endl;
+    if (argc < 6 || opt.help) {
+        cerr << "Usage: " << ProgName << " source_ftype secondary_ftype source_files... -- secondary_files... " << endl;
+        cerr << "Valid file types: vdc, wrf, cf, mpas" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
-    }
-
-    if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
-        op.PrintOptionHelp(stderr, 80, false);
-        exit(0);
     }
 
     argc--;
@@ -193,6 +188,7 @@ int main(int argc, char **argv)
     }
 
     double max_nlmax = 0;
+    bool   success = true;
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dc1->GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
@@ -204,12 +200,13 @@ int main(int argc, char **argv)
         bool   ok = compare(dc1, dc2, nts, varnames[i], nlmax);
         if (!ok) {
             cout << "failed!" << endl;
-            continue;
+            success = false;
+            break;
         }
         if (!opt.quiet) { cout << "	NLmax = " << nlmax << endl; }
         if (nlmax > max_nlmax) { max_nlmax = nlmax; }
     }
     cout << "Max NLmax = " << max_nlmax << endl;
 
-    return (0);
+    return success ? 0 : 1;
 }

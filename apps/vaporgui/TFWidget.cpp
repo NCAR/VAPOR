@@ -29,7 +29,6 @@
 #include "RenderEventRouter.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
-#include "MainForm.h"
 #include "TFWidget.h"
 #include "ErrorReporter.h"
 

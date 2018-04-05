@@ -30,9 +30,8 @@
 #include "ui_NewRendererDialog.h"
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
-#include "RenderEventRouter.h"
-#include "RenderHolder.h"
 #include <vapor/GetAppPath.h>
+#include "RenderHolder.h"
 
 using namespace VAPoR;
 
@@ -40,178 +39,143 @@ namespace {
 const string DuplicateInStr = "Duplicate in:";
 };
 
-const std::string NewRendererDialog::barbDescription = "Displays an "
-                                                       "array of arrows with the users domain, with custom dimensions that are "
-                                                       "defined by the user in the X, Y, and Z axes.  The arrows represent a vector "
-                                                       "whos direction is determined by up to three user-defined variables.\n\nBarbs "
-                                                       "can have a constant color applied to them, or they may be colored according "
-                                                       "to an additional user-defined variable.\n\n [hyperlink to online doc]";
-
-const std::string NewRendererDialog::contourDescription = "Displays "
-                                                          "a series of user defined contours along a two dimensional plane within the "
-                                                          "user's domain.\n\nContours may hae constant coloration, or may be colored "
-                                                          "according to a secondary variable.\n\nContours may be displaced by a height "
-                                                          "variable.\n\n [hyperlink to online doc]";
-
-const std::string NewRendererDialog::imageDescription = "Displays a "
-                                                        "georeferenced image that is automatically reprojected and fit to the user's"
-                                                        "data, as long as the data contains georeference metadata.  The image "
-                                                        "renderer may be offset by a height variable to show bathymetry or mountainous"
-                                                        " terrain.\n\n [hyperlink to online doc]";
-
-const std::string NewRendererDialog::twoDDataDescription = "Displays "
-                                                           "the user's 2D data variables along the plane described by the source data "
-                                                           "file.\n\nThese 2D variables may be offset by a height variable.\n\n"
-                                                           "[hyperlink to online doc]";
-
 CBWidget::CBWidget(QWidget *parent, QString text) : QWidget(parent), QTableWidgetItem(text){};
 
-NewRendererDialog::NewRendererDialog(QWidget *parent, ControlExec *controlExec) : QDialog(parent), Ui_NewRendererDialog()
+NewRendererDialog::NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths)
+: QDialog(parent), Ui_NewRendererDialog()
 {
     setupUi(this);
+
+    _rendererNames = rendererNames;
+    _descriptions = descriptions;
+    _iconPaths = iconPaths;
+    _smallIconPaths = smallIconPaths;
 
     rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
     dataMgrCombo->clear();
 
-    initializeImages();
-    initializeDataSources(controlExec);
-
-    connect(barbButton, SIGNAL(toggled(bool)), this, SLOT(barbChecked(bool)));
-    connect(contourButton, SIGNAL(toggled(bool)), this, SLOT(contourChecked(bool)));
-    connect(imageButton, SIGNAL(toggled(bool)), this, SLOT(imageChecked(bool)));
-    connect(twoDDataButton, SIGNAL(toggled(bool)), this, SLOT(twoDDataChecked(bool)));
+    _initializeDataSources();
+    _createButtons();
 };
 
-void NewRendererDialog::initializeDataSources(ControlExec *ce)
+void NewRendererDialog::_createButtons()
 {
-    ParamsMgr *    paramsMgr = ce->GetParamsMgr();
-    vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
+    int size = _rendererNames.size();
+    for (int i = 0; i < size; i++) {
+        QString      iconPath = QString::fromStdString(_smallIconPaths[i]);
+        QIcon        icon(iconPath);
+        QString      name = QString::fromStdString(_rendererNames[i]);
+        QPushButton *button = _createButton(icon, name, i);
 
+        buttonHolderGridLayout->addWidget(button, i, 0);
+
+        QPixmap thumbnail(_smallIconPaths[i].c_str());
+        QLabel *label = new QLabel();
+        label->setPixmap(thumbnail);
+        label->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        buttonHolderGridLayout->addWidget(label, i, 1);
+
+        if (i == 0) button->setChecked(true);
+    }
+}
+
+QPushButton *NewRendererDialog::_createButton(QIcon icon, QString name, int index)
+{
+    QPushButton *button = new QPushButtonWithDoubleClick(name, this);
+    button->setIconSize(QSize(50, 50));
+    button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    button->setLayoutDirection(Qt::RightToLeft);
+    button->setCheckable(true);
+    button->setProperty("index", index);
+
+    connect(button, SIGNAL(toggled(bool)), this, SLOT(_buttonChecked()));
+    connect(button, SIGNAL(doubleClicked()), this, SLOT(_buttonDoubleClicked()));
+    return button;
+}
+
+void NewRendererDialog::_initializeDataSources()
+{
     dataMgrCombo->clear();
-    for (int i = 0; i < dataSetNames.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(dataSetNames[i])); }
+    for (int i = 0; i < _rendererNames.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(_rendererNames[i])); }
 }
 
-void NewRendererDialog::initializeImages()
+void NewRendererDialog::_setUpImage(std::string imageName, QLabel *label)
 {
-    setUpImage("Barbs.png", bigDisplay);
-    titleLabel->setText("\nBarb Renderer");
-    descriptionLabel->setText(QString::fromStdString(barbDescription));
-    _selectedRenderer = "Barb";
-
-    setUpImage("Barbs_small.png", barbLabel);
-    setUpImage("Contours_small.png", contourLabel);
-    setUpImage("Image_small.png", imageLabel);
-    setUpImage("TwoDData_small.png", twoDDataLabel);
-}
-
-void NewRendererDialog::setUpImage(std::string imageName, QLabel *label)
-{
-    std::vector<std::string> imagePath = std::vector<std::string>();
-    imagePath.push_back("Images");
-    imagePath.push_back(imageName);
-    QPixmap thumbnail(GetAppPath("VAPOR", "share", imagePath).c_str());
+    QPixmap thumbnail(imageName.c_str());
     label->setPixmap(thumbnail);
 }
 
-void NewRendererDialog::barbChecked(bool state)
+void NewRendererDialog::_buttonChecked()
 {
-    uncheckAllButtons();
-    barbButton->blockSignals(true);
-    barbButton->setChecked(true);
-    barbButton->blockSignals(false);
-    setUpImage("Barbs.png", bigDisplay);
-    titleLabel->setText("\nBarb Renderer");
-    descriptionLabel->setText(QString::fromStdString(barbDescription));
-    _selectedRenderer = "Barb";
+    QPushButton *button = (QPushButton *)sender();
+    int          index = button->property("index").toInt();
+
+    _uncheckAllButtons();
+    button->blockSignals(true);
+    button->setChecked(true);
+    button->blockSignals(false);
+
+    string icon = _iconPaths[index];
+    _setUpImage(icon, bigDisplay);
+
+    QString title = "\n" + QString::fromStdString(_rendererNames[index]) + " Renderer";
+    titleLabel->setText(title);
+
+    QString description = QString::fromStdString(_descriptions[index]);
+    descriptionLabel->setText(description);
+
+    _selectedRenderer = _rendererNames[index];
 }
 
-void NewRendererDialog::contourChecked(bool state)
+void NewRendererDialog::_buttonDoubleClicked() { this->accept(); }
+
+void NewRendererDialog::_uncheckAllButtons()
 {
-    uncheckAllButtons();
-    contourButton->blockSignals(true);
-    contourButton->setChecked(true);
-    contourButton->blockSignals(false);
-    setUpImage("Contours.png", bigDisplay);
-    titleLabel->setText("\nContour Renderer");
-    descriptionLabel->setText(QString::fromStdString(contourDescription));
-    _selectedRenderer = "Contour";
+    int count = buttonHolderGridLayout->count() / 2;
+    for (int i = 0; i < count; i++) {
+        QPushButton *button;
+        button = (QPushButton *)buttonHolderGridLayout->itemAt(i * 2)->widget();
+        button->blockSignals(true);
+        button->setChecked(false);
+        button->blockSignals(false);
+    }
 }
 
-void NewRendererDialog::imageChecked(bool state)
+RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidget *> &widgets, const vector<string> &widgetNames, const vector<string> &descriptions, const vector<string> &iconPaths,
+                           const vector<string> &smallIconPaths)
+: QWidget(parent), Ui_LeftPanel()
 {
-    uncheckAllButtons();
-    imageButton->blockSignals(true);
-    imageButton->setChecked(true);
-    imageButton->blockSignals(false);
-    setUpImage("Image.png", bigDisplay);
-    titleLabel->setText("\nImage Renderer");
-    descriptionLabel->setText(QString::fromStdString(imageDescription));
-    _selectedRenderer = "Image";
-}
+    assert(widgets.size() == widgetNames.size());
+    assert(widgets.size() == iconPaths.size());
+    assert(widgets.size() == smallIconPaths.size());
 
-void NewRendererDialog::twoDDataChecked(bool state)
-{
-    uncheckAllButtons();
-    twoDDataButton->blockSignals(true);
-    twoDDataButton->setChecked(true);
-    twoDDataButton->blockSignals(false);
-    setUpImage("TwoDData.png", bigDisplay);
-    titleLabel->setText("\nTwoDData Renderer");
-    descriptionLabel->setText(QString::fromStdString(twoDDataDescription));
-    _selectedRenderer = "TwoDData";
-}
-
-void NewRendererDialog::uncheckAllButtons()
-{
-    barbButton->blockSignals(true);
-    contourButton->blockSignals(true);
-    imageButton->blockSignals(true);
-    twoDDataButton->blockSignals(true);
-
-    barbButton->setChecked(false);
-    contourButton->setChecked(false);
-    imageButton->setChecked(false);
-    twoDDataButton->setChecked(false);
-
-    barbButton->blockSignals(false);
-    contourButton->blockSignals(false);
-    imageButton->blockSignals(false);
-    twoDDataButton->blockSignals(false);
-}
-
-RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_LeftPanel()
-{
     setupUi(this);
+
     _controlExec = ce;
-    _newRendererDialog = new NewRendererDialog(this, ce);
+    //_newRendererDialog = new NewRendererDialog(this, ce);
+    _newRendererDialog = new NewRendererDialog(this, widgetNames, descriptions, iconPaths, smallIconPaths);
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(0), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _currentRow = 0;
 
-    makeConnections();
-    clearStackedWidget();
-    initializeSplitter();
+    _widgetNames = widgetNames;
+    for (int i = 0; i < widgets.size(); i++) { stackedWidget->addWidget(widgets[i]); }
+    stackedWidget->setCurrentIndex(0);
+
+    _makeConnections();
+    _initializeSplitter();
 }
 
-void RenderHolder::makeConnections()
+void RenderHolder::_makeConnections()
 {
-    connect(_vaporTable, SIGNAL(cellClicked(int, int)), this, SLOT(activeRendererChanged(int, int)));
-    connect(_vaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(tableValueChanged(int, int)));
-    connect(newButton, SIGNAL(clicked()), this, SLOT(showNewRendererDialog()));
-    connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRenderer()));
-    connect(dupCombo, SIGNAL(activated(int)), this, SLOT(copyInstanceTo(int)));
+    connect(_vaporTable, SIGNAL(cellClicked(int, int)), this, SLOT(_activeRendererChanged(int, int)));
+    connect(_vaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(_tableValueChanged(int, int)));
+    connect(newButton, SIGNAL(clicked()), this, SLOT(_showNewRendererDialog()));
+    connect(deleteButton, SIGNAL(clicked()), this, SLOT(_deleteRenderer()));
+    connect(dupCombo, SIGNAL(activated(int)), this, SLOT(_copyInstanceTo(int)));
 }
 
-void RenderHolder::clearStackedWidget()
-{
-    for (int i = stackedWidget->count() - 1; i >= 0; i--) {
-        QWidget *wid = stackedWidget->widget(i);
-        stackedWidget->removeWidget(wid);
-        delete wid;
-    }
-}
-
-void RenderHolder::initializeSplitter()
+void RenderHolder::_initializeSplitter()
 {
     QList<int> proportions;
     int        topHeight = deleteButton->height() + newButton->height() + newButton->height();
@@ -221,38 +185,26 @@ void RenderHolder::initializeSplitter()
     mainSplitter->setSizes(proportions);
 }
 
-int RenderHolder::AddWidget(QWidget *wid, const char *name, string tag)
-{
-    // rc indicates position in the stacked widget.  It will
-    // be needed to change "active" renderer
-    //
-    int rc = stackedWidget->addWidget(wid);
-    stackedWidget->setCurrentIndex(rc);
-
-    return rc;
-}
-
-void RenderHolder::initializeNewRendererDialog(vector<string> datasetNames)
+void RenderHolder::_initializeNewRendererDialog(vector<string> datasetNames)
 {
     _newRendererDialog->dataMgrCombo->clear();
     for (int i = 0; i < datasetNames.size(); i++) { _newRendererDialog->dataMgrCombo->addItem(QString::fromStdString(datasetNames[i])); }
 }
 
-void RenderHolder::showNewRendererDialog()
+void RenderHolder::_showNewRendererDialog()
 {
     ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
     vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
-    vector<string> rendererTypees = _controlExec->GetAllRenderClasses();
 
-    initializeNewRendererDialog(dataSetNames);
+    _initializeNewRendererDialog(dataSetNames);
     if (_newRendererDialog->exec() != QDialog::Accepted) { return; }
 
-    string rendererType = _newRendererDialog->getSelectedRenderer();
+    string rendererType = _newRendererDialog->GetSelectedRenderer();
 
     int    selection = _newRendererDialog->dataMgrCombo->currentIndex();
     string dataSetName = dataSetNames[selection];
 
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
 
     // figure out the name
@@ -287,19 +239,19 @@ void RenderHolder::showNewRendererDialog()
     paramsMgr->EndSaveStateGroup();
 }
 
-void RenderHolder::deleteRenderer()
+void RenderHolder::_deleteRenderer()
 {
     // Check if there is anything to delete:
     //
     if (tableWidget->rowCount() == 0) { return; }
 
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
 
     // Get the currently selected renderer.
     //
     string rendererName, rendererType, dataSetName;
-    getRow(_currentRow, rendererName, rendererType, dataSetName);
+    _getRow(_currentRow, rendererName, rendererType, dataSetName);
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Delete renderer");
@@ -316,16 +268,16 @@ void RenderHolder::deleteRenderer()
 
     // Make the renderer in the first row the active renderer
     //
-    getRow(0, rendererName, rendererType, dataSetName);
+    _getRow(0, rendererName, rendererType, dataSetName);
     p->SetActiveRenderer(activeViz, rendererType, rendererName);
     emit activeChanged(activeViz, rendererType, rendererName);
 
     paramsMgr->EndSaveStateGroup();
 }
 
-void RenderHolder::activeRendererChanged(int row, int col)
+void RenderHolder::_activeRendererChanged(int row, int col)
 {
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
     string          rendererName = _vaporTable->GetValue(row, 0);
     string          rendererType = _vaporTable->GetValue(row, 1);
@@ -333,9 +285,9 @@ void RenderHolder::activeRendererChanged(int row, int col)
     emit activeChanged(activeViz, rendererType, rendererName);
 }
 
-VAPoR::RenderParams *RenderHolder::getRenderParamsFromCell(int row, int col)
+VAPoR::RenderParams *RenderHolder::_getRenderParamsFromCell(int row, int col)
 {
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
     string          activeRenderClass, activeRenderInst;
     p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
@@ -348,9 +300,9 @@ VAPoR::RenderParams *RenderHolder::getRenderParamsFromCell(int row, int col)
     return rParams;
 }
 
-void RenderHolder::changeRendererName(int row, int col)
+void RenderHolder::_changeRendererName(int row, int col)
 {
-    RenderParams *rP = getRenderParamsFromCell(row, col);
+    RenderParams *rP = _getRenderParamsFromCell(row, col);
 
     string text = _vaporTable->GetValue(row, col);
     string uniqueText = uniqueName(text);
@@ -361,14 +313,14 @@ void RenderHolder::changeRendererName(int row, int col)
     //	rP->SetRendererName(uniqueText);
 }
 
-void RenderHolder::tableValueChanged(int row, int col)
+void RenderHolder::_tableValueChanged(int row, int col)
 {
     if (col == 0) {
-        changeRendererName(row, col);
+        _changeRendererName(row, col);
         return;
     }
 
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
     string          rendererName = _vaporTable->GetValue(row, 0);
     string          rendererType = _vaporTable->GetValue(row, 1);
@@ -382,7 +334,7 @@ void RenderHolder::tableValueChanged(int row, int col)
     }
 }
 
-void RenderHolder::itemTextChange(QTableWidgetItem *item)
+void RenderHolder::_itemTextChange(QTableWidgetItem *item)
 {
 #ifdef DEAD
     int row = item->row();
@@ -404,11 +356,11 @@ void RenderHolder::itemTextChange(QTableWidgetItem *item)
 #endif
 }
 
-void RenderHolder::copyInstanceTo(int item)
+void RenderHolder::_copyInstanceTo(int item)
 {
     if (item == 0) return;    // User has selected descriptor item "Duplicate in:"
 
-    GUIStateParams *guiStateParams = getStateParams();
+    GUIStateParams *guiStateParams = _getStateParams();
 
     string vizName = dupCombo->itemText(item).toStdString();
     string activeViz = guiStateParams->GetActiveVizName();
@@ -496,9 +448,9 @@ std::string RenderHolder::uniqueName(std::string name)
     return newname;
 }
 
-string RenderHolder::getActiveRendererClass()
+string RenderHolder::_getActiveRendererClass()
 {
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
 
     string activeRenderClass, activeRenderInst;
@@ -507,9 +459,9 @@ string RenderHolder::getActiveRendererClass()
     return activeRenderClass;
 }
 
-string RenderHolder::getActiveRendererInst()
+string RenderHolder::_getActiveRendererInst()
 {
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
 
     string activeRenderClass, activeRenderInst;
@@ -518,7 +470,7 @@ string RenderHolder::getActiveRendererInst()
     return activeRenderInst;
 }
 
-void RenderHolder::updateDupCombo()
+void RenderHolder::_updateDupCombo()
 {
     ParamsMgr *    pm = _controlExec->GetParamsMgr();
     vector<string> vizNames = pm->GetVisualizerNames();
@@ -526,8 +478,8 @@ void RenderHolder::updateDupCombo()
     dupCombo->clear();
     dupCombo->addItem(QString::fromStdString(DuplicateInStr));
 
-    string activeRenderClass = getActiveRendererClass();
-    string activeRenderInst = getActiveRendererInst();
+    string activeRenderClass = _getActiveRendererClass();
+    string activeRenderInst = _getActiveRendererInst();
     if (activeRenderClass.empty() || activeRenderInst.empty()) return;
 
     for (int i = 0; i < vizNames.size(); i++) { dupCombo->addItem(QString::fromStdString(vizNames[i])); }
@@ -535,7 +487,7 @@ void RenderHolder::updateDupCombo()
     dupCombo->setCurrentIndex(0);
 }
 
-void RenderHolder::makeRendererTableHeaders(vector<string> &tableValues)
+void RenderHolder::_makeRendererTableHeaders(vector<string> &tableValues)
 {
     tableValues.push_back("Name");
     tableValues.push_back("Type");
@@ -550,7 +502,7 @@ void RenderHolder::Update()
 
     // Get active params from GUI state
     //
-    GUIStateParams *p = getStateParams();
+    GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
 
     string activeRenderClass, activeRenderInst;
@@ -568,7 +520,7 @@ void RenderHolder::Update()
     }
 
     vector<string> tableValues, rowHeader, colHeader;
-    makeRendererTableHeaders(colHeader);
+    _makeRendererTableHeaders(colHeader);
 
     map<string, vector<string>>::iterator itr;
     //	int selectedRow = -1;
@@ -598,14 +550,14 @@ void RenderHolder::Update()
 
     _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
 
-    updateDupCombo();
+    _updateDupCombo();
 
     // If there are no rows, there are no renderers, so we now set
     // the current active renderer to be "empty"
     //
     if (numRows == 0) {
         p->SetActiveRenderer(activeViz, "", "");
-        SetCurrentIndex(-1);
+        SetCurrentWidget("");
         stackedWidget->hide();
         deleteButton->setEnabled(false);
         dupCombo->setEnabled(false);
@@ -615,7 +567,22 @@ void RenderHolder::Update()
     }
 }
 
-void RenderHolder::getRow(int row, string &rendererName, string &rendererType, string &dataSetName) const
+void RenderHolder::SetCurrentWidget(string name)
+{
+    int indx = -1;
+    for (int i = 0; i < _widgetNames.size(); i++) {
+        if (name == _widgetNames[i]) {
+            indx = i;
+            break;
+        }
+    }
+    if (indx < 0) return;
+
+    stackedWidget->setCurrentIndex(indx);
+    stackedWidget->show();
+}
+
+void RenderHolder::_getRow(int row, string &rendererName, string &rendererType, string &dataSetName) const
 {
     rendererName.clear();
     rendererType.clear();

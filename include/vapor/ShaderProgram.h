@@ -24,15 +24,15 @@ public:
     ShaderProgram();
     virtual ~ShaderProgram();
 
-    int LoadVertexShader(string filename);
-    int LoadFragmentShader(string filename);
-    int LoadShader(string filename, GLenum shaderType);
+    int LoadVertexShader(const string &filename);
+    int LoadFragmentShader(const string &filename);
+    int LoadShader(const string &filename, GLenum shaderType);
     int LoadVertexSource(const string &source);
     int LoadFragmentSource(const string &source);
 
-    int LoadVertexSource(const string &source, std::string fileName);
-    int LoadFragmentSource(const string &source, std::string fileName);
-    int LoadSource(const string &source, GLenum shaderType, std::string fileName);
+    int LoadVertexSource(const string &source, const std::string &fileName);
+    int LoadFragmentSource(const string &source, const std::string &fileName);
+    int LoadSource(const string &source, GLenum shaderType, const std::string &fileName);
 
     int Create();
     int Compile();
@@ -40,8 +40,8 @@ public:
     int  Enable();
     void Disable();
 
-    GLint UniformLocation(string uniformName);
-    GLint AttributeLocation(string attributeName) const;
+    GLint UniformLocation(const string &uniformName);
+    GLint AttributeLocation(const string &attributeName) const;
 
     static bool Supported();
     GLuint      GetProgram();

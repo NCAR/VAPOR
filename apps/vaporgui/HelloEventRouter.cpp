@@ -15,6 +15,13 @@
 
 using namespace VAPoR;
 
+//
+// Register class with object factory!!!
+//
+#ifdef DEAD
+static RenderEventRouterRegistrar<HelloEventRouter> registrar(HelloEventRouter::GetClassType());
+#endif
+
 HelloEventRouter::HelloEventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(parent), RenderEventRouter(ce, HelloParams::GetClassType())
 {
     // Create all the sub tabs, put them in their own scroll areas
