@@ -277,6 +277,7 @@ void RenderHolder::_deleteRenderer()
 
 void RenderHolder::_activeRendererChanged(int row, int col)
 {
+    _currentRow = row;
     GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
     string          rendererName = _vaporTable->GetValue(row, 0);
