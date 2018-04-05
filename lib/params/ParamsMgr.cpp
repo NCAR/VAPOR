@@ -68,9 +68,9 @@ void ParamsMgr::_init(
             RegionParams::GetClassType(), RegionParams::GetClassType());
     }
 
-    if (!_otherParams->GetParams(AnnotationsParams::GetClassType())) {
+    if (!_otherParams->GetParams(AnnotationParams::GetClassType())) {
         _otherParams->Create(
-            AnnotationsParams::GetClassType(), AnnotationsParams::GetClassType());
+            AnnotationParams::GetClassType(), AnnotationParams::GetClassType());
     }
 
     // Deal with any Params registered by the application
@@ -510,7 +510,8 @@ void ParamsMgr::GetRenderParamNames(
 
     // Sanity check.  Names should always be unique!
     //
-    unique(instNames.begin(), instNames.end());
+    sort(instNames.begin(), instNames.end());
+    instNames.erase(unique(instNames.begin(), instNames.end()), instNames.end());
 }
 
 void ParamsMgr::GetRenderParamNames(
@@ -533,7 +534,8 @@ void ParamsMgr::GetRenderParamNames(
 
         instNames.insert(instNames.end(), tmp.begin(), tmp.end());
     }
-    unique(instNames.begin(), instNames.end());
+    sort(instNames.begin(), instNames.end());
+    instNames.erase(unique(instNames.begin(), instNames.end()), instNames.end());
 }
 
 void ParamsMgr::GetRenderParamNames(
@@ -554,7 +556,8 @@ void ParamsMgr::GetRenderParamNames(
         GetRenderParamNames(winName, itr->first, tmp);
         instNames.insert(instNames.end(), tmp.begin(), tmp.end());
     }
-    unique(instNames.begin(), instNames.end());
+    sort(instNames.begin(), instNames.end());
+    instNames.erase(unique(instNames.begin(), instNames.end()), instNames.end());
 }
 
 void ParamsMgr::GetRenderParamNames(
@@ -568,7 +571,8 @@ void ParamsMgr::GetRenderParamNames(
         GetRenderParamNames(itr->first, tmp);
         instNames.insert(instNames.end(), tmp.begin(), tmp.end());
     }
-    unique(instNames.begin(), instNames.end());
+    sort(instNames.begin(), instNames.end());
+    instNames.erase(unique(instNames.begin(), instNames.end()), instNames.end());
 }
 
 bool ParamsMgr::RenderParamsLookup(
@@ -735,6 +739,11 @@ vector<string> ParamsMgr::GetRenderParamsClassNames(
         rClassNames.push_back(itr->first);
     }
 
+    // remove duplicates
+    //
+    sort(rClassNames.begin(), rClassNames.end());
+    rClassNames.erase(
+        unique(rClassNames.begin(), rClassNames.end()), rClassNames.end());
     return (rClassNames);
 }
 
@@ -764,6 +773,11 @@ vector<string> ParamsMgr::GetRenderParamsClassNames(string winName) const {
         rClassNames.insert(rClassNames.end(), tmpV.begin(), tmpV.end());
     }
 
+    // remove duplicates
+    //
+    sort(rClassNames.begin(), rClassNames.end());
+    rClassNames.erase(
+        unique(rClassNames.begin(), rClassNames.end()), rClassNames.end());
     return (rClassNames);
 }
 
@@ -778,6 +792,11 @@ vector<string> ParamsMgr::GetRenderParamInstances(
         instances.insert(instances.end(), names.begin(), names.end());
     }
 
+    // Sanity check.  Names should always be unique!
+    //
+    sort(instances.begin(), instances.end());
+    instances.erase(
+        unique(instances.begin(), instances.end()), instances.end());
     return (instances);
 }
 
@@ -804,6 +823,11 @@ vector<string> ParamsMgr::GetRenderParamInstances(
         }
     }
 
+    // Sanity check.  Names should always be unique!
+    //
+    sort(instances.begin(), instances.end());
+    instances.erase(
+        unique(instances.begin(), instances.end()), instances.end());
     return (instances);
 }
 

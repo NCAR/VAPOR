@@ -4,7 +4,6 @@ set (SRCS
 	RenderHolder.cpp
 	ImageFrame.cpp
 	ControlPointEditor.cpp
-	BoxSliderFrame.cpp
 	DomainWidget.cpp
 	GLWidget.cpp
 	OpacityWidget.cpp
@@ -13,7 +12,7 @@ set (SRCS
 	ColorbarWidget.cpp
 	SettingsEventRouter.cpp
 	VizSelectCombo.cpp
-	AnnotationsEventRouter.cpp
+	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
 	MappingFrame.cpp
 	HelloEventRouter.cpp
@@ -45,7 +44,6 @@ set (SRCS
 	ContourEventRouter.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
-	MiscParams.cpp
 	ContourSubtabs.cpp
 	BarbSubtabs.cpp
 	TransformTable.cpp
@@ -81,7 +79,7 @@ set (UIS
 	startupTab.ui
 	SettingsGUI.ui
 	appSettingsTab.ui
-	AnnotationsGUI.ui
+	AnnotationGUI.ui
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
 	LeftPanel.ui
