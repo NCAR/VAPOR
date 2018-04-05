@@ -10,11 +10,10 @@ add_library (common SHARED
 	PVTime.cpp
 	GetAppPath.cpp
 	utils.cpp
-	glutil.cpp
-	MyPython.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 	)
 
+target_link_libraries (common pthread)
 
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
@@ -24,12 +23,6 @@ endif()
 if (NOT WIN32)
 	add_definitions (-DENABLE_THREADS)
 endif()
-
-target_link_libraries (common ${GLEW} ${OPENGL_LIBRARIES} python${PYTHONVERSION})
-
-if (UNIX AND NOT APPLE)
-	target_link_libraries (common GLU)
-endif ()
 
 if (NOT WIN32)
 	target_compile_options(common PRIVATE "-Wno-deprecated-declarations")
