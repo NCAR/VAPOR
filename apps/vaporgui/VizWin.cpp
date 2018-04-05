@@ -28,6 +28,7 @@
 #include <vapor/ViewpointParams.h>
 #include <vapor/Viewpoint.h>
 #include <vapor/debug.h>
+#include <vapor/ImageRenderer.h>
 #include "TrackBall.h"
 #include "GUIStateParams.h"
 #include "MouseModeParams.h"
@@ -299,6 +300,7 @@ void VizWin::initializeGL()
 
 void VizWin::mousePressEventNavigate(QMouseEvent *e)
 {
+    _navigating = true;
     // Let trackball handle mouse events for navigation
     //
     _trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
@@ -446,7 +448,6 @@ void VizWin::setNewExtents()
     std::vector<double> llc, urc;
     _manip->GetBox(llc, urc);
     VAPoR::RenderParams *rParams = getRenderParams();
-    cout << "setNewExtents " << (rParams == NULL) << endl;
     if (rParams == NULL) return;
     VAPoR::Box *box = rParams->GetBox();
     box->SetExtents(llc, urc);
@@ -511,16 +512,6 @@ void VizWin::paintGL()
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     if (!dataStatus->GetDataMgrNames().size()) return;
 
-    // Only rendering if state has changed.
-    //
-    //	if (! _controlExec->GetParamsMgr()->StateChanged()) {
-    //		glMatrixMode(GL_PROJECTION);
-    //		glPopMatrix();
-    //		glMatrixMode(GL_MODELVIEW);
-    //		glPopMatrix();
-    //		return;
-    //	}
-
     // Set up projection and modelview matrices
     //
     glMatrixMode(GL_PROJECTION);
@@ -547,6 +538,14 @@ void VizWin::paintGL()
     glPopMatrix();
 }
 
+// VAPoR::RenderParams* VizWin::getRenderParams() {
+VAPoR::RenderParams *VizWin::getRenderParams(string &classType)
+{
+    // string classType;
+    return getRenderParams(classType);
+}
+
+// VAPoR::RenderParams* VizWin::getRenderParams(string &classType) {
 VAPoR::RenderParams *VizWin::getRenderParams()
 {
     ParamsMgr *     paramsMgr = _controlExec->GetParamsMgr();
@@ -596,6 +595,18 @@ void VizWin::getCenterAndCamPos(std::vector<double> &rotationCenter, std::vector
     }
 }
 
+void VizWin::getWindowSize(std::vector<int> &windowSize)
+{
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
+
+    size_t width, height;
+    vParams->GetWindowSize(width, height);
+
+    windowSize.push_back(width);
+    windowSize.push_back(height);
+}
+
 void VizWin::updateManip(bool initialize)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -605,28 +616,21 @@ void VizWin::updateManip(bool initialize)
     std::vector<double> minExts, maxExts;
     getActiveExtents(minExts, maxExts);
 
-    /*minExts.push_back(-1.038e+06);
-    minExts.push_back(2.81684e+06);
-    minExts.push_back(0.f);
-    maxExts.push_back(220425);
-    maxExts.push_back(4.04548e+06);
-    maxExts.push_back(100000);*/
-
     std::vector<double> rotationCenter, cameraPosition;
     getCenterAndCamPos(rotationCenter, cameraPosition);
-    size_t           width, height;
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-    vParams->GetWindowSize(width, height);
-    std::vector<int> windowSize;
-    windowSize.push_back(width);
-    windowSize.push_back(height);
 
-    double mv[16];
+    std::vector<int> windowSize;
+    getWindowSize(windowSize);
+
+    double           mv[16];
+    double           proj[16];
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     vParams->GetModelViewMatrix(mv);
-    double proj[16];
     vParams->GetProjectionMatrix(proj);
 
-    std::vector<double>  llc, urc;
+    std::vector<double> llc, urc;
+    string              classType;
+    //	VAPoR::RenderParams* rParams = getRenderParams(classType);
     VAPoR::RenderParams *rParams = getRenderParams();
     if (initialize || rParams == NULL) {
         llc = minExts;
@@ -636,7 +640,13 @@ void VizWin::updateManip(bool initialize)
         box->GetExtents(llc, urc);
     }
 
-    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize);
+    bool constrain = false;    // true;
+    if (classType == ImageRenderer::GetClassType()) {
+        cout << "setting constraint to false" << endl;
+        constrain = false;
+    }
+
+    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, constrain);
 
     _manip->render();
 }

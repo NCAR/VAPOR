@@ -64,7 +64,7 @@ public:
     //! \param[in] maxExtents : The maximum extents that the manipulator can draw to
     //! \param[in] windowSize: The current window size of the Visualizer
     virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<double> cameraPosition,
-                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize) = 0;
+                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, bool constrain) = 0;
 
     //! Notify that manipulator that is being moved with the mouse
     //! \param[in] buttonNum - The mouse button being used to move the manipulator
@@ -145,7 +145,7 @@ public:
 
     //! @copydoc Manip::Update(std::vector<double>, std::vector<double> std::vector<double>, std::vector<double>)
     virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<double> cameraPosition,
-                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize);
+                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, bool constrain);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
     virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords, double handleMidpoint[3], bool release = false);
@@ -178,7 +178,8 @@ public:
     //! \param[in] handleNum index of dragging handle
     //! \param[in] movedRay is vector from camera to handle
     //! \param[in] constrain is true if the manip is constrained to stay inside full domain.
-    virtual void slideHandle(int handleNum, double movedRay[3], bool constrain = true);
+    // virtual void slideHandle(int handleNum, double movedRay[3]);
+    virtual void slideHandle(int handleNum, double movedRay[3], bool constrain);
 
     //! Method invoked when manip handle drag begins, invoked from VizWin.
     //! \param[in] viz Visualizer associated with this Manip
@@ -266,6 +267,7 @@ protected:
     void movePlusZCorners(double corners[8][3]);
 
     bool             _isStretching;
+    bool             _constrain;
     double           _handleSizeInScene;
     std::vector<int> _windowSize;
     double           _cameraPosition[3];
