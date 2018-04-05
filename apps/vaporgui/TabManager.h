@@ -22,16 +22,16 @@
 #include <qtabwidget.h>
 #include <qwidget.h>
 #include <QKeyEvent>
-#include "VizWinMgr.h"
 
-namespace VAPoR {
-	class ControlExec;
-}
-
+#include <vapor/ControlExecutive.h>
+#include <vapor/ParamsMgr.h>
+#include <AnimationEventRouter.h>
+#include <NavigationEventRouter.h>
+#include "GUIStateParams.h"
 class RenderHolder;
 class EventRouter;
 class RenderEventRouter;
-class VizWinMgr;
+
 
 //! \class TabManager
 //! \ingroup Public_GUI
@@ -40,72 +40,67 @@ class VizWinMgr;
 //! \version 3.0
 //! \date May 2015
 
-//! The parameters in VAPOR GUI are displayed using a hierarchy of tabs.  The TabManager is a QTabWidget that
-//! handles the arrangement of these tabs.  Generally this layout is automatically set up and maintained by
-//! the MainForm and VizWinMgr classes, however users may occasionally need to query the status of a tab.
+//! The parameters in VAPOR GUI are displayed using a hierarchy of tabs.  
+//! The TabManager is a QTabWidget that
+//! handles the arrangement of these tabs.  Generally this layout is 
+//! automatically set up and maintained by
+//! the MainForm and VizWinMgr classes, however users may occasionally need 
+//! to query the status of a tab.
 //!
-//! At the top level there are three "Top" tabs:  The \p Renderer, the \p Navigation, and the \p Settings.  
+//! At the top level there are three "Top" tabs:  The \p Renderer, 
+//! the \p Navigation, and the \p Settings.  
 //!
-//! When the \p Renderer tab is selected, the RenderHolder is displayed.  This allows creation, deletion, enablement, and selection of
-//! the renderer that is to be edited.  The currently selected renderer has its parameters displayed in a QStackedWidget that is 
-//! managed by the RenderHolder class.  There is one EventRouter instance whose contents are displayed as tabs in the QStackedWidget.
+//! When the \p Renderer tab is selected, the RenderHolder is displayed.  
+//! This allows creation, deletion, enablement, and selection of
+//! the renderer that is to be edited.  The currently selected 
+//! renderer has its parameters displayed in a QStackedWidget that is 
+//! managed by the RenderHolder class.  There is one EventRouter 
+//! instance whose contents are displayed as tabs in the QStackedWidget.
 //!
-//! When the \p Navigation tab is selected, A QTabWidget is displayed, with one tab for each of the "navigation" EventRouters: Viewpoint/Lights,
+//! When the \p Navigation tab is selected, A QTabWidget is displayed, 
+//! with one tab for each of the "navigation" EventRouters: Viewpoint/Lights,
 //! Region, and Animation.
 //! 
-//! When the \p Settings tab is selected, another QTabWidget is displayed, with one tab for User Preferences, and another tab for Visualizer Features.
+//! When the \p Settings tab is selected, another QTabWidget is 
+//! displayed, with one tab for User Preferences, and another tab 
+//! for Visualizer Features.
 //!
 
 //! @name Internal
 //! Internal methods not intended for general use
 //!
-///@{
-class TabManager : public QTabWidget{
+//
+class TabManager : public QTabWidget {
 
 Q_OBJECT
 
 public:
-	//! Constructor:  Invoked by the MainForm during the set up of the 
-	//! main window.
-	//
-	static TabManager *Create(QWidget* parent, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr) {
-		if (_tabManager) return(_tabManager);
 
-		_tabManager = new TabManager(parent, ce, vizWinMgr);
-		return(_tabManager);
-	};
+ TabManager(QWidget *, VAPoR::ControlExec *ce);
 
-	//! Obtain the (unique) TabManager instance
-	//! \retval TabManager*
-	static TabManager* getInstance() {
-		assert(_tabManager);
-		return _tabManager;
-	}
+ //! In order to display the parameters for the selected renderer, 
+ //! QWidget::show() is invoked for the selected EventRouter, and
+ //! QWidget::hide() is invoked for all other renderer EventRouters.  
+ //! This is performed in the RenderHolder class.
+ //! \param[in] tag is the tag associated with the renderer.
+ //
+ void ShowRenderWidget(string tag);
 
+ //! All the render EventRouter widgets are hidden until one 
+ //! is selected, using this method.
+ //
+ void HideRenderWidgets();
 
+ //! Update from current state
+ //
+ void Update();
 
+ //! Make the specified EventRouter be displayed in front.
+ //! \param[in] widgetTag is the Params tag that should be moved to front.
+ //! \return  the tab position in the associated sub tab.
+ //
+ void MoveToFront(string subTabName);
 
-	//! In order to display the parameters for the selected renderer, QWidget::show() is invoked for the selected EventRouter, and
-	//! QWidget::hide() is invoked for all other renderer EventRouters.  This is performed in the RenderHolder class.
-	//! \param[in] tag is the tag associated with the renderer.
-	void ShowRenderWidget(string tag);
-
-	//! All the render EventRouter widgets are hidden until one is selected, using this method.
-	void HideRenderWidgets();
-
-	//! Update from current state
-	//
-	void Update();
-
-	//! Make the specified EventRouter be displayed in front.
-	//! \param[in] widgetTag is the Params tag that should be moved to front.
-	//! \return  the tab position in the associated sub tab.
-	int MoveToFront(string widgetTag);
-
-	//! Determine if a widget is currently the front tab in its subtab
-	//! \param[in] is the QWidget* to be checked
-	//! \return bool true if it is in front.
-	bool IsFrontTab(QWidget* wid);
  //! Get list of Installed Tab names
  //!
  //! \param[in] renderOnly If true only return render event routers.
@@ -114,11 +109,11 @@ public:
  //
  vector <string> GetInstalledTabNames(bool renderOnly) const;
 
- EventRouter* GetEventRouter(string erType) const;
-
- RenderEventRouter* GetRenderEventRouter(
-	string winName, string renderType, string instName
+ virtual void GetWebHelp(
+	string tabName,
+    std::vector <std::pair <string, string>> &help
  ) const;
+
 
  //! Enable or disable widgets associated with all event routers
  //
@@ -127,91 +122,160 @@ public:
  void Restart();
  void Reinit();
 
+ //! Notify TabManager that  a new data set has been loaded
+ //!
+ void LoadDataNotify(string dataSetName);
+ 
 signals:
-	void tabLeft(int,int);
 
-	//! Triggered when currently active event router changes
-	//!
-	//! \param[in] type Type of event router as returned by 
-	//! EventRouter::GetType()
-	//!
-	void ActiveEventRouterChanged(string type);
+ //! Triggered when currently active event router changes
+ //!
+ //! \param[in] type Type of event router as returned by 
+ //! EventRouter::GetType()
+ //!
+ void ActiveEventRouterChanged(string type);
 
-	
+ //! Proj4 string changed
+ //
+ void Proj4StringChanged(string proj4String);
+
+ void AnimationOnOffSignal(bool);
+ void AnimationDrawSignal();
+
+public slots:
+ void UseHomeViewpoint() {
+	_navigationEventRouter->UseHomeViewpoint();
+ }
+ void ViewAll() {
+	_navigationEventRouter->ViewAll();
+ }
+ void SetHomeViewpoint() {
+	_navigationEventRouter-> SetHomeViewpoint();
+ }
+ void AlignView(int axis) {
+	_navigationEventRouter-> AlignView(axis);
+ }
+ void CenterSubRegion() {
+	_navigationEventRouter-> CenterSubRegion();
+ }
+
+ void AnimationPlayForward() {
+	_animationEventRouter->AnimationPlayForward();
+ }
+ void AnimationPlayBackward() {
+	_animationEventRouter->AnimationPlayReverse();
+ }
+ void AnimationPause() {
+	_animationEventRouter->AnimationPause();
+ }
+ void AnimationStepBackward() {
+	_animationEventRouter->AnimationStepReverse();
+ }
+ void AnimationStepForward() {
+	_animationEventRouter->AnimationStepForward();
+ }
+ void AnimationSetTimestep(int ts) {
+	_animationEventRouter->SetTimeStep(ts);
+ }
 
 protected slots:
-	//! Slot that responds to selecting a tab to be in front
-	//! \param[in] tabnum is 0,1, or 2 for the selected top tab
-	void NewTopTab(int tabnum);
 
-	//! Slot that responds to user selecting a 2nd level tab, i.e.
-	//! a tab that corresponds to an EventRouter.
-	//! \param[in] tabid ID of selected subtab.
-	void NewSubTab(int tabid);
+private slots:
+ void _setProj4String(string proj4String) {
+	emit Proj4StringChanged(proj4String);
+ }
 
-	void SetActiveViz(const QString &vizNameQ);
+ void _setAnimationOnOff(bool onOff) {
+	emit AnimationOnOffSignal(onOff);
+ }
 
-	void setActive(
-		string activeViz, string renderClass, string renderInst
-	); 
+ void _setAnimationDraw() {
+	emit AnimationDrawSignal();
+ }
 
-	void newRenderer(
-		string activeViz, string renderClass, string renderInst
-	); 
+ //! Slot that responds to user selecting a 2nd level tab, i.e.
+ //! a tab that corresponds to an EventRouter.
+ //! \param[in] tabid ID of selected subtab.
+ void _setSubTab(int tabid);
 
+ //! Slot that responds to selecting a tab to be in front
+ //! \param[in] tabnum is 0,1, or 2 for the selected top tab
+ //
+ void _setFrontTab(int tabnum);
 
-	
+ void SetActiveViz(const QString &vizNameQ);
 
-///@} //End of internal methods
+ void _setActive(
+	string activeViz, string renderClass, string renderInst
+ ); 
 
-#ifndef DOXYGEN_SKIP_THIS
-private:
-
-	//Find the position of the specified widget in subTab, or -1 if it isn't there.
-	//
-	int findWidget(string widgetTag);
-	
-	virtual QSize sizeHint() const { return QSize(460, 800);}
-
-	// This prevents a "beep" from occuring when you press enter on the Mac.
-	virtual void keyPressEvent(QKeyEvent* e){
-		e->accept();
-	}
-	
-	int getTabType(string tag);
-	void newFrontTab(int topType, int subPosn);
-
-	
+ void _newRenderer(
+	string activeViz, string renderClass, string renderInst
+ ); 
 
 private:
-	static TabManager *_tabManager;
-    // map tags to eventrouters
-    std::map<string, EventRouter*> _eventRouterMap;
 
-	VAPoR::ControlExec *_controlExec;
-	RenderHolder *_renderHolder;
-	VizWinMgr *_vizWinMgr;
 
-	//Data structures to store widget info
-	vector<QWidget*> _widgets[3];
-	
-	vector<string> _widgetTags[3];
-	std::vector <QWidget *> _topWidgets;
-	QString _topName[3];
-	int _currentFrontPage[3];
-	int _prevFrontPage[3];
-	int _currentTopTab;
-	int _prevTopTab;
+ static const string _renderersTabName;
+ static const string _navigationTabName;
+ static const string _settingsTabName;
+
+ VAPoR::ControlExec *_controlExec;
+ RenderHolder *_renderHolder;
+
+ // ordered list of all top level tabs
+ //
+ std::vector <string> _tabNames;
+
+ // Top level tabs (widgets), one for each string in _tabNames
+ //
+ std::map <string, QWidget * > _tabWidgets;
+
+ // sub tabs - a vector of widgets for each top level tab
+ //
+ std::map<string, vector<QWidget*> > _subTabWidgets;
+ std::map<string, vector<string> > _subTabNames;
+
+ // Map top level widget name to current or previous subwidget name
+ //
+ std::map <string, string> _currentFrontSubTab;
+ std::map <string, string> _prevFrontSubTab;
+
+ string _currentFrontTab;
+ string _prevFrontTab;
+
+ // map tags to eventrouters
+ std::map<string, EventRouter*> _eventRouterMap;
 
  bool _initialized;
+ AnimationEventRouter *_animationEventRouter;
+ NavigationEventRouter *_navigationEventRouter;
 
-	TabManager() {}
-	TabManager(QWidget *, VAPoR::ControlExec *ce, VizWinMgr *vizWinMgr);
+ TabManager() {}
 
- QWidget* _getSubTabWidget(int widType){
-	assert(widType >= 0 && widType < _topWidgets.size());
-	return _topWidgets[widType];
+ virtual QSize sizeHint() const { return QSize(460, 800);}
+
+ // This prevents a "beep" from occuring when you press enter on the Mac.
+ virtual void keyPressEvent(QKeyEvent* e){
+	e->accept();
  }
+
+ EventRouter* _getEventRouter(string erType) const;
+
+ RenderEventRouter* _getRenderEventRouter(
+	string winName, string renderType, string instName
+ ) const;
+	
+ //Find the position of the specified widget in subTab, or -1 if it isn't there.
+ //
+ int _getSubTabIndex(string tabName, string subTabName) const;
+ int _getSubTabIndex(string subTabName) const;
+ int _getTabIndex(string tabName) const;
+
+ string _getTabForSubTab(string subTabName) const;
+
+ QWidget* _getSubTabWidget(string subTabName) const;
+ QWidget* _getTabWidget(string tabName) const;
 
  GUIStateParams *_getStateParams() const {
 	assert(_controlExec != NULL);
@@ -228,19 +292,18 @@ private:
  // All extension EventRouter classes must call this during the
  // InstallExtensions() method.
  //
- // const std::string tag : XML tag identifying the Params class.
  //
- void _installTab(const std::string tag, int tagType, EventRouter *eRouter);
+ void _installTab(string tabName, string subTabName, EventRouter *eRouter);
 
  void _registerEventRouter(
-	const std::string tag, EventRouter* router 
+	const std::string subTabName, EventRouter* router 
  );
 
  // During initialization, after all the EventRouters have been created 
- // (and identified via addWidget()), the installWidgets
+ // (and identified via _addSubTabWidget()), the installWidgets
  // method must be called to set up the various widgets in each tab.
  //
-void _installWidgets();
+ void _installWidgets();
 
  // Method invoked by the VizWinMgr at the time all the EventRouters 
  // are created
@@ -251,15 +314,13 @@ void _installWidgets();
  // an EventRouter
  // \param[in] tag is the Params Tag associated with the EventRouter.
  //
- void _addWidget(QWidget* evWid, string Tag, int tagType);
+ void _addSubTabWidget(QWidget* evWid, string Tag, string tagType);
 
  void _updateRouters();
 
-#endif //DOXYGEN_SKIP_THIS	
+ void _initRenderHolder();
 
 };
-
-
 
 #endif //TABMANAGER_H
 

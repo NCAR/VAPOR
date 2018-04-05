@@ -28,7 +28,6 @@
 #include "GUIStateParams.h"
 #include "SettingsParams.h"
 #include "AnimationParams.h"
-#include "MiscParams.h"
 
 #ifdef WIN32
 //Annoying unreferenced formal parameter warning
@@ -230,13 +229,6 @@ public:
 	 );
  }
 
- MiscParams *GetMiscParams() const {
-	assert(_controlExec != NULL);
-	return ((MiscParams *)
-		_controlExec->GetParamsMgr()->GetParams(MiscParams::GetClassType())
-	 );
- }
-
  AnimationParams *GetAnimationParams() const {
 	assert(_controlExec != NULL);
 	return ((AnimationParams *)
@@ -259,6 +251,11 @@ public:
  //! Return a string identifier for the derived EventRouter type
  //!
  virtual string GetType() const = 0;
+
+ //! Notify the event router that new data set has been loaded
+ //!
+ virtual void LoadDataNotify(string dataSetName) {
+ }
 
 protected:
  EventRouter() {}
