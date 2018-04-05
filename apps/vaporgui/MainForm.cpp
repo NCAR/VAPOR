@@ -1928,6 +1928,7 @@ void MainForm::setActiveEventRouter(string type) {
 }
 
 void MainForm::_setProj4String(string proj4String) {
+
 	GUIStateParams *p = GetStateParams();
 
 	_App->removeEventFilter(this);
@@ -1942,7 +1943,7 @@ void MainForm::_setProj4String(string proj4String) {
 	for (int i=0; i<dataSets.size(); i++ ) {
 		string currentString = ds->GetMapProjection(dataSets[i]);
 
-		if (currentString != proj4String) { 
+		if (currentString != proj4String) {
 
 			// Save list of files and format before close so we can re-open
 			//
@@ -1951,10 +1952,10 @@ void MainForm::_setProj4String(string proj4String) {
 
 			closeDataHelper(dataSets[i]);
 
-			vector <string> options = {
-				"-proj4", 
-				proj4String,
-				"project_to_pcs"
+			vector <string> options = {"-project_to_pcs"};
+			if (! proj4String.empty()) {
+				options.push_back("-proj4");
+				options.push_back(proj4String);
 			};
 
 			(void) openDataHelper(dataSets[i], format, files, options);
