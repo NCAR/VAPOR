@@ -119,12 +119,13 @@ class VizWin : public QGLWidget {
     void getCenterAndCamPos(
         std::vector<double> &rotationCenter,
         std::vector<double> &cameraPos);
+    void getWindowSize(std::vector<int> &windowSize);
 
     void getNearFarDist(
         const double posVec[3], const double dirVec[3],
         double &boxNear, double &boxFar) const;
-
     VAPoR::RenderParams *getRenderParams();
+    VAPoR::RenderParams *getRenderParams(string &classType);
 
     void setUpProjMatrix();
     void setUpModelViewMatrix();
