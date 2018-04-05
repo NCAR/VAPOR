@@ -13,6 +13,13 @@
 
 using namespace VAPoR;
 
+//
+// Register class with object factory!!!
+//
+static RenderEventRouterRegistrar<ImageEventRouter> registrar(
+    ImageEventRouter::GetClassType()
+); 
+
 ImageEventRouter::ImageEventRouter( QWidget* parent, ControlExec* ce) 
                 : QTabWidget(parent),
 	                RenderEventRouter( ce, ImageParams::GetClassType() )
@@ -73,3 +80,15 @@ void ImageEventRouter::_updateTab()
                      GetActiveDataMgr(),
                      GetActiveParams());
 }
+
+
+string ImageEventRouter::_getDescription() const {
+	return(
+	"Displays a "
+    "georeferenced image that is automatically reprojected and fit to the user's"
+    "data, as long as the data contains georeference metadata.  The image "
+    "renderer may be offset by a height variable to show bathymetry or mountainous"
+    " terrain.\n\n "
+	);
+}
+
