@@ -691,7 +691,8 @@ void VizWin::updateManip(bool initialize) {
 		GUIStateParams::GetClassType()
 	);
 
-	std::vector<double> minExts, maxExts;
+	std::vector<double> minExts(3,0.f);
+	std::vector<double> maxExts(3,0.f);
 	getActiveExtents(minExts, maxExts);
 
 	std::vector<double> rotationCenter, cameraPosition;
