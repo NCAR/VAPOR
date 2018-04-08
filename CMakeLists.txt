@@ -31,14 +31,16 @@ elseif (WIN32)
 	add_definitions (-DWIN32)
 endif()
 
-
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
 option (BUILD_TEST_APPS "Build test applications" OFF)
-option (GENERATE_FULL_INSTALLER "Include third party library DLLs and other large resource files when building installer" ON)
+option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
 
-include_directories ("${PROJECT_SOURCE_DIR}/include")
+set (GENERATE_FULL_INSTALLER ON)
+if (BUILD_GUI)
+	set (BUILD_VDC ON)
+endif ()
 
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -53,6 +55,7 @@ set (THIRD_PARTY_INC_DIR )
 
 include (site.local OPTIONAL)
 
+include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories (${THIRD_PARTY_INC_DIR})
 include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
@@ -82,18 +85,34 @@ if (WIN32)
 	set (INSTALL_BIN_DIR .)
 	set (INSTALL_LIB_DIR .)
 	set (INSTALL_SHARE_DIR share)
+	set (INSTALL_INCLUDE_DIR include/vapor)
 elseif (APPLE)
-	set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
-	set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
-	set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
+	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	if (DIST_INSTALLER)
+		set (CMAKE_INSTALL_PREFIX /Applications)
+		set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
+		set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
+		set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
+		set (INSTALL_INCLUDE_DIR ./vapor.app/Contents/include/vapor)
+	else ()
+		set (INSTALL_BIN_DIR bin)
+		set (INSTALL_LIB_DIR lib)
+		set (INSTALL_SHARE_DIR share)
+		set (INSTALL_INCLUDE_DIR include/vapor)
+	endif ()
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
-	set (CMAKE_INSTALL_PREFIX /Applications)
 else ()
-	set (INSTALL_BIN_DIR lib)
+	if (DIST_INSTALLER)
+		set (INSTALL_BIN_DIR lib)
+	else ()
+		set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+		set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+		set (INSTALL_BIN_DIR bin)
+	endif ()
 	set (INSTALL_LIB_DIR lib)
+	set (INSTALL_INCLUDE_DIR include/vapor)
 	set (INSTALL_LAUNCHER_DIR bin)
 	set (INSTALL_SHARE_DIR share)
-	set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/install")
 endif ()
 
 add_subdirectory (apps)
@@ -129,7 +148,7 @@ if (WIN32)
 	set (PRE_UNINSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${PRE_UNINSTALL_LOCAL_PATH}")
 	configure_file ("${PRE_UNINSTALL_LOCAL_PATH}.in" "${PRE_UNINSTALL_PATH}" @ONLY)
 
-	if (${GENERATE_FULL_INSTALLER})
+	if (GENERATE_FULL_INSTALLER)
 		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
 		install (
@@ -142,7 +161,7 @@ if (WIN32)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-	endif (${GENERATE_FULL_INSTALLER})
+	endif (GENERATE_FULL_INSTALLER)
 
 	set (CPACK_NSIS_MODIFY_PATH ON)
 	set (CPACK_NSIS_URL_INFO_ABOUT "https://www.vapor.ucar.edu")
@@ -162,7 +181,7 @@ if (WIN32)
 endif (WIN32)
 
 if (APPLE)
-	if (${GENERATE_FULL_INSTALLER})
+	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH})
 		install (
@@ -175,24 +194,29 @@ if (APPLE)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-	endif (${GENERATE_FULL_INSTALLER})
+	endif ()
 	set (CPACK_BINARY_DRAGNDROP ON)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
 	set (CPACK_BINARY_STGZ ON)
 	if (BUILD_VDC)
-		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} GLU glut)
+		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} GLU glut expat)
 	endif ()
-	set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} expat quadmath)
-	add_custom_target (
-		linuxpreinstall
-		COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vapor ${EXTRA_LIBS_SEARCH} >
-		${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt
-		COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
-		)
-	if (${GENERATE_FULL_INSTALLER})
+	if (BUILD_GUI)
+		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} quadmath)
+	endif ()
+	if (DIST_INSTALLER)
+		add_custom_target (
+			linuxpreinstall
+			COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
+			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vapor ${EXTRA_LIBS_SEARCH} >
+			${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt
+			COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
+			)
+	else ()
+	endif ()
+	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
 			file (STRINGS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt INSTALL_LIBS)
 		endif ()
@@ -206,22 +230,24 @@ if (UNIX AND NOT APPLE)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-	endif (${GENERATE_FULL_INSTALLER})
+	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
 
-if (UNIX AND NOT APPLE)
-	add_custom_target (
-		installer
-		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-		COMMAND cpack .
-		DEPENDS linuxpreinstall
-		)
-else ()
-	add_custom_target (
-		installer
-		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-		COMMAND cpack .
-		)
+if (DIST_INSTALLER)
+	if (UNIX AND NOT APPLE)
+		add_custom_target (
+			installer
+			WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+			COMMAND cpack .
+			DEPENDS linuxpreinstall
+			)
+	else ()
+		add_custom_target (
+			installer
+			WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+			COMMAND cpack .
+			)
+	endif ()
 endif ()
 
 include (CPack)
