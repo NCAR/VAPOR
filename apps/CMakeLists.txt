@@ -22,6 +22,6 @@ if (BUILD_GUI)
 	add_subdirectory (tiff2geotiff)
 endif()
 
-if (UNIX AND NOT APPLE AND GENERATE_FULL_INSTALLER)
+if (UNIX AND NOT APPLE AND DIST_INSTALLER)
 	add_subdirectory (linuxlauncher)
 endif ()
