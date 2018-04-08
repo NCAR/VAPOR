@@ -1,5 +1,6 @@
 add_subdirectory (Doxygen)
-if (${GENERATE_FULL_INSTALLER})
+
+if (BUILD_VDC AND ${GENERATE_FULL_INSTALLER})
 	set (SHARE_DIRS
 		fonts
 		images
@@ -14,4 +15,4 @@ if (${GENERATE_FULL_INSTALLER})
 		DESTINATION ${INSTALL_SHARE_DIR}
 		COMPONENT Share
 	)
-endif (${GENERATE_FULL_INSTALLER})
+endif ()
