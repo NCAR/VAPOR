@@ -352,6 +352,8 @@ void TabManager::Restart() {
     Reinit();
 
     _initialized = true;
+
+    Update();
 }
 
 void TabManager::Reinit() {

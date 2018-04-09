@@ -35,7 +35,6 @@
 #include <QTextEdit>
 
 #include <qcombobox.h>
-#include <qlabel.h>
 #include <qfiledialog.h>
 #include <qmessagebox.h>
 #include "NavigationEventRouter.h"
@@ -328,7 +327,7 @@ void NavigationEventRouter::updateCameraChanged() {
 
 void NavigationEventRouter::setLightChanged() {
 
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    ViewpointParams *vpParams = _getActiveParams();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -365,7 +364,7 @@ void NavigationEventRouter::setLightChanged() {
 
 void NavigationEventRouter::updateLightChanged() {
 
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    ViewpointParams *vpParams = _getActiveParams();
 
     lightPos00->setText(QString::number(vpParams->getLightDirection(0, 0)));
     lightPos01->setText(QString::number(vpParams->getLightDirection(0, 1)));
@@ -468,46 +467,35 @@ void NavigationEventRouter::updateProjections() {
     string currentProj = params->GetProjectionString();
 
     int numDataMgrs = dataMgrs.size();
-    string customProj = getCustomProjString();
 
     datasetProjectionTable->clear();
     datasetProjectionTable->setRowCount(numDataMgrs + 1);
 
     // Set up table with dataset projection strings
     //
-    bool usingCurrentProj;
     string dataSetName, projString;
+    bool usingDSProj = false;
     for (int i = 0; i < numDataMgrs; i++) {
         dataSetName = dataMgrs[i];
         projString = dataStatus->GetMapProjectionDefault(dataSetName);
-        usingCurrentProj = projString == currentProj;
-        createProjCell(i, projString);
-        createProjCheckBox(i, usingCurrentProj);
+        createProjCell(i, projString, true);
+        createProjCheckBox(i, projString == currentProj);
+        if (projString == currentProj) {
+            usingDSProj = true;
+        }
     }
 
     // Apply the user's custom proj string if needed
     //
-    usingCurrentProj = customProj == currentProj;
-    createCustomCell(numDataMgrs, customProj);
-    createProjCheckBox(numDataMgrs, usingCurrentProj);
+    if (!usingDSProj && !currentProj.empty()) {
+        createProjCell(numDataMgrs, currentProj, false);
+        createProjCheckBox(numDataMgrs, true);
+    } else {
+        createProjCell(numDataMgrs, "Custom", false);
+        createProjCheckBox(numDataMgrs, false);
+    }
 
     resizeProjTable();
-}
-
-string NavigationEventRouter::getCustomProjString() {
-    int row = datasetProjectionTable->rowCount();
-    QTableWidgetItem *item = datasetProjectionTable->item(row - 1, 0);
-
-    string customProj;
-    if (item == NULL)
-        customProj = "";
-    else
-        customProj = item->text().toStdString();
-
-    if (customProj == "")
-        customProj = "Custom";
-
-    return customProj;
 }
 
 void NavigationEventRouter::resizeProjTable() {
@@ -538,61 +526,24 @@ void NavigationEventRouter::createProjCheckBox(int row, bool usingCurrentProj) {
     checkBox->setCheckState(cs);
     checkBox->blockSignals(false);
 
-    if (row == datasetProjectionTable->rowCount() - 1) {
-        connect(checkBox, SIGNAL(stateChanged(int)), this,
-                SLOT(customCheckboxChanged()));
-    } else {
-        connect(checkBox, SIGNAL(stateChanged(int)), this,
-                SLOT(projCheckboxChanged()));
-    }
+    connect(checkBox, SIGNAL(stateChanged(int)), this,
+            SLOT(projCheckboxChanged()));
 }
 
-void NavigationEventRouter::createProjCell(int row, string projString) {
-    QLabel *label = new QLabel(datasetProjectionTable);
-    label->setText(QString::fromStdString(projString));
-    label->setAlignment(Qt::AlignCenter);
-    label->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    label->setWordWrap(true);
-
-    // If this is the last row, the item should be editable for custom
-    // proj strings from the user
-    //
-    datasetProjectionTable->setCellWidget(row, 0, label);
-}
-
-void NavigationEventRouter::createCustomCell(int row, string projString) {
+void NavigationEventRouter::createProjCell(int row, string projString, bool ro) {
     QTextEdit *textEdit = new QTextEdit(datasetProjectionTable);
     textEdit->setText(QString::fromStdString(projString));
     textEdit->setAlignment(Qt::AlignCenter);
+    textEdit->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textEdit->setReadOnly(ro);
 
     // If this is the last row, the item should be editable for custom
     // proj strings from the user
     //
-    //if (row != datasetProjectionTable->rowCount()) textEdit->setReadOnly(true);
     datasetProjectionTable->setCellWidget(row, 0, textEdit);
-
-    connect(textEdit, SIGNAL(textChanged()), this,
-            SLOT(customProjStringChanged()));
 }
 
 void NavigationEventRouter::projCheckboxChanged() {
-    QCheckBox *checkBox = (QCheckBox *)sender();
-    int row = checkBox->parentWidget()->property("row").toInt();
-
-    QLabel *label;
-    label = qobject_cast<QLabel *>(datasetProjectionTable->cellWidget(row, 0));
-    string proj = label->text().toStdString();
-
-    GUIStateParams *params = GetStateParams();
-    if (checkBox->checkState() == 0) {
-        proj = "";
-    }
-
-    params->SetProjectionString(proj);
-    emit Proj4StringChanged(proj);
-}
-
-void NavigationEventRouter::customCheckboxChanged() {
     QCheckBox *checkBox = (QCheckBox *)sender();
     int row = checkBox->parentWidget()->property("row").toInt();
 
@@ -601,29 +552,20 @@ void NavigationEventRouter::customCheckboxChanged() {
     string proj = textEdit->toPlainText().toStdString();
 
     GUIStateParams *params = GetStateParams();
-    if (checkBox->checkState() == 0) {
+    if (checkBox->checkState() == 0 || proj == "Custom") {
         proj = "";
     }
+
     params->SetProjectionString(proj);
     emit Proj4StringChanged(proj);
-}
-
-// If the custom proj string gets changed, we do not want to keep updating
-// it as the user types in their new string.  Just disable the global
-// projection, and let the user re-enable their selection when they're
-// done entering text
-void NavigationEventRouter::customProjStringChanged() {
-    GUIStateParams *params = GetStateParams();
-    string currentProj = params->GetProjectionString();
-    if (currentProj != "") {
-        params->SetProjectionString("");
-        emit Proj4StringChanged("");
-    }
 }
 
 //Insert values from params into tab panel
 //
 void NavigationEventRouter::_updateTab() {
+
+    if (!_getActiveParams())
+        return;
 
     updateCameraChanged();
     updateLightChanged();
@@ -637,7 +579,9 @@ void NavigationEventRouter::CenterSubRegion() {
 
 #ifdef DEAD
 
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    ViewpointParams *vpParams = _getActiveParams();
+    if (!vpParams)
+        return;
 
     //Find the largest of the dimensions of the current region, projected orthogonal to view
     //direction:
@@ -704,7 +648,9 @@ void NavigationEventRouter::AlignView(int axis) {
     double dirvec[3] = {0.0, 0.0, 0.0};
     double upvec[3] = {0.0, 0.0, 0.0};
     upvec[1] = 1.;
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    ViewpointParams *vpParams = _getActiveParams();
+    if (!vpParams)
+        return;
 
     double curPosVec[3], curViewDir[3], curUpVec[3], curCenter[3];
     bool status = _getViewpointParams(
@@ -802,7 +748,9 @@ void NavigationEventRouter::
 #ifdef DEAD
     double vdir[3];
     vector<double> nvdir;
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    ViewpointParams *vpParams = _getActiveParams();
+    if (!vpParams)
+        return;
     vector<double> stretch = _dataStatus->getStretchFactors();
 
     //Determine the new viewDir in stretched world coords
@@ -889,10 +837,12 @@ void NavigationEventRouter::ViewAll() {
     _setViewpointParams(center, posvec, dirvec, upvec);
 }
 
-VAPoR::ParamsBase *NavigationEventRouter::GetActiveParams() const {
+VAPoR::ViewpointParams *NavigationEventRouter::_getActiveParams() const {
 
     GUIStateParams *p = GetStateParams();
     string vizName = p->GetActiveVizName();
+    if (vizName.empty())
+        return (NULL);
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -924,7 +874,7 @@ bool NavigationEventRouter::_getViewpointParams(
 
     // Get camera parameters from ViewpointParams
     //
-    ViewpointParams *vpParams = (ViewpointParams *)GetActiveParams();
+    ViewpointParams *vpParams = _getActiveParams();
     double m[16];
     vpParams->GetModelViewMatrix(m);
 

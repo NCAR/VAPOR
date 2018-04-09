@@ -300,6 +300,7 @@ void VizWin::resizeGL(int width, int height) {
     bool enabled = _controlExec->GetSaveStateEnabled();
     _controlExec->SetSaveStateEnabled(false);
     vParams->SetWindowSize(width, height);
+    _controlExec->SetSaveStateEnabled(enabled);
 }
 
 void VizWin::initializeGL() {
