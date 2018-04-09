@@ -211,7 +211,10 @@ string ParamsBase::GetValueString(const string tag, string defaultVal) const
 {
     if (!_node->HasElementString(tag)) return (defaultVal);
 
-    return (_node->GetElementString(tag));
+    string v = _node->GetElementString(tag);
+    if (v == "NULL") { v = ""; }
+
+    return (v);
 }
 
 void ParamsBase::SetValueLong(const string &tag, string description, long value)

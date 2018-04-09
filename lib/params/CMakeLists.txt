@@ -1,4 +1,4 @@
-add_library (params SHARED
+set (SRC
 	XmlNode.cpp
 	ParamsBase.cpp
 	ColorMap.cpp
@@ -24,6 +24,31 @@ add_library (params SHARED
 	AxisAnnotation.cpp
 )
 
+set (HEADERS
+	${PROJECT_SOURCE_DIR}/include/vapor/XmlNode.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ParamsBase.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ColorMap.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OpacityMap.h
+	${PROJECT_SOURCE_DIR}/include/vapor/MapperFunction.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Box.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ColorbarPbase.h
+	${PROJECT_SOURCE_DIR}/include/vapor/RenderParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/BarbParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ViewpointParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/regionparams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ParamsMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DataStatus.h
+	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/HelloParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ImageParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TFInterpolator.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ContourParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/AxisAnnotation.h
+)
+
+add_library (params SHARED ${SRC} ${HEADERS})
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	find_library (AGL AGL)
 	target_link_libraries (params PUBLIC ${AGL})
@@ -36,5 +61,11 @@ add_definitions (-DPARAMS_EXPORTS)
 install (
 	TARGETS params
 	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)
+
+install (
+	FILES ${HEADERS}
+	DESTINATION ${INSTALL_INCLUDE_DIR}
 	COMPONENT Libraries
 	)

@@ -72,15 +72,13 @@ private:
     void updateTransforms();
     void updateProjections();
     // void appendProjTable(int row, string projString, bool usingCurrentProj);
-    void   createProjCell(int row, string projString);
-    void   createCustomCell(int row, string projString);
-    void   createProjCheckBox(int row, bool usingCurrentProj);
-    void   resizeProjTable();
-    string getCustomProjString();
-    void   updateCameraChanged();
-    void   updateLightChanged();
+    void createProjCell(int row, string projString, bool ro);
+    void createProjCheckBox(int row, bool usingCurrentProj);
+    void resizeProjTable();
+    void updateCameraChanged();
+    void updateLightChanged();
 
-    VAPoR::ParamsBase *GetActiveParams() const;
+    VAPoR::ViewpointParams *_getActiveParams() const;
 
     void _setViewpointParams(const double center[3], const double posvec[3], const double dirvec[3], const double upvec[3]) const;
 
@@ -100,9 +98,7 @@ private slots:
     void setCameraLatLonChanged();
     void setLightChanged();
     void notImplemented();
-    void customProjStringChanged();
     void projCheckboxChanged();
-    void customCheckboxChanged();
 };
 
 #endif    // VIEWPOINTEVENTROUTER_H
