@@ -1,4 +1,4 @@
-add_library (vdc SHARED
+set (SRC
 	BlkMemMgr.cpp
 	Grid.cpp
 	StructuredGrid.cpp
@@ -29,14 +29,60 @@ add_library (vdc SHARED
 	DerivedVar.cpp
 	DerivedVarMgr.cpp
 	DCUtils.cpp
+	glutil.cpp
 )
 
-target_link_libraries (vdc PUBLIC common wasp udunits2 proj)
+set (HEADERS
+	${PROJECT_SOURCE_DIR}/include/vapor/BlkMemMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Grid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/StructuredGrid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/RegularGrid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/StretchedGrid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/LayeredGrid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/CurvilinearGrid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGrid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGrid2D.h
+	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFSimple.h
+	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFCollection.h
+	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFCFCollection.h
+	${PROJECT_SOURCE_DIR}/include/vapor/UDUnitsClass.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Proj4API.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DC.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DCWRF.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DCCF.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DCMPAS.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VDC.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VDCNetCDF.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DataMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DataMgrUtils.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoUtil.h
+	${PROJECT_SOURCE_DIR}/include/vapor/vizutil.h
+	${PROJECT_SOURCE_DIR}/include/vapor/KDTreeRG.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VDC_c.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVar.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVarMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DCUtils.h
+	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
+)
+
+add_library (vdc SHARED ${SRC} ${HEADERS})
+
+target_link_libraries (vdc PUBLIC common wasp udunits2 proj ${GLEW} ${OPENGL_LIBRARIES})
+
+if (UNIX AND NOT APPLE)
+	target_link_libraries (vdc PUBLIC GLU)
+endif ()
 
 add_definitions (-DVDF_EXPORTS)
 
 install (
 	TARGETS vdc
 	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)
+
+install (
+	FILES ${HEADERS}
+	DESTINATION ${INSTALL_INCLUDE_DIR}
 	COMPONENT Libraries
 	)

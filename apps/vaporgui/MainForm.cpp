@@ -1183,6 +1183,8 @@ void MainForm::_fileSaveHelper(string path)
     _stateChangeFlag = false;
 }
 
+
+
 void MainForm::fileSave()
 {
 	SettingsParams* sParams = GetSettingsParams();
@@ -1203,7 +1205,7 @@ void MainForm::fileExit()
 }
 
 void MainForm::_stateChangeCB() {
-        
+
     // Generate an application event whenever state changes
     //      
     ParamsChangeEvent *event = new ParamsChangeEvent();
@@ -1231,6 +1233,7 @@ void MainForm::undoRedoHelper(bool undo) {
 	}
 	if (! status) {
 		MSG_ERR("Undo/Redo failed");
+		_controlExec->SetSaveStateEnabled(enabled);
 		return;
 	}
 
@@ -1300,6 +1303,7 @@ bool MainForm::openDataHelper(
 	GUIStateParams *p = GetStateParams();
 	vector <string> dataSetNames =  p->GetOpenDataSetNames();
 
+#ifdef	DEAD
 	// If data set with this name already exists, close it
 	//
 	for (int i=0; i<dataSetNames.size(); i++) {
@@ -1307,6 +1311,7 @@ bool MainForm::openDataHelper(
 			closeDataHelper(dataSetName);
 		}
 	}
+#endif
 
 	// Open the data set
 	//
@@ -1360,7 +1365,9 @@ void MainForm::loadDataHelper(
 
 	// Generate data set name 
 	//
-	string dataSetName = makename(myFiles[0]);
+	string dataSetName = _getDataSetName(myFiles[0]);
+	if (dataSetName.empty()) return;
+	
 
 	vector <string> options = {"-project_to_pcs"};
 	bool status = openDataHelper(dataSetName, format, myFiles, options);
@@ -1921,6 +1928,7 @@ void MainForm::setActiveEventRouter(string type) {
 }
 
 void MainForm::_setProj4String(string proj4String) {
+
 	GUIStateParams *p = GetStateParams();
 
 	_App->removeEventFilter(this);
@@ -1935,7 +1943,7 @@ void MainForm::_setProj4String(string proj4String) {
 	for (int i=0; i<dataSets.size(); i++ ) {
 		string currentString = ds->GetMapProjection(dataSets[i]);
 
-		if (currentString != proj4String) { 
+		if (currentString != proj4String) {
 
 			// Save list of files and format before close so we can re-open
 			//
@@ -1944,10 +1952,10 @@ void MainForm::_setProj4String(string proj4String) {
 
 			closeDataHelper(dataSets[i]);
 
-			vector <string> options = {
-				"-proj4", 
-				proj4String,
-				"project_to_pcs"
+			vector <string> options = {"-project_to_pcs"};
+			if (! proj4String.empty()) {
+				options.push_back("-proj4");
+				options.push_back(proj4String);
 			};
 
 			(void) openDataHelper(dataSets[i], format, files, options);
@@ -2131,7 +2139,6 @@ void MainForm::enableAnimationWidgets(bool on) {
 
 //Capture just one image
 //Launch a file save dialog to specify the names
-//Then put jpeg in it.
 //
 void MainForm::captureSingleJpeg() {
 	showCitationReminder();
@@ -2164,13 +2171,14 @@ void MainForm::captureSingleJpeg() {
 	string filepath = fileInfo->absoluteFilePath().toStdString();
 
 	//Save the path for future captures
-	//p->SetCurrentImageSavePath(fileInfo->absolutePath().toStdString());
 	sP->SetImageDir(filepath);
 
 	//Turn on "image capture mode" in the current active visualizer
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
 	_controlExec->EnableImageCapture(filepath, vizName);
+
+    delete fileInfo;
 }
 
 void MainForm::launchSeedMe(){
@@ -2234,54 +2242,61 @@ void MainForm::launchPlotUtility(){
 //Begin capturing animation images.
 //Launch a file save dialog to specify the names
 //Then start file saving mode.
-void MainForm::startAnimCapture() {
-
+void MainForm::startAnimCapture() 
+{
 	showCitationReminder();
 	SettingsParams *sP = GetSettingsParams();
 	string imageDir = sP->GetImageDir();
-	if (imageDir=="") imageDir = sP->GetDefaultImageDir();
+	if (imageDir=="") 
+        imageDir = sP->GetDefaultImageDir();
 
 	QFileDialog fileDialog(this,
-		"Specify first file name for image capture sequence",
+		"Specify the base file name for image capture sequence",
 		imageDir.c_str(),
 		"PNG or JPEG images (*.png *.jpg *.jpeg )");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
-	if (fileDialog.exec() != QDialog::Accepted) return;
+	if (fileDialog.exec() != QDialog::Accepted) 
+        return;
 	
 	//Extract the path, and the root name, from the returned string.
 	QStringList qsl = fileDialog.selectedFiles();
-	if (qsl.isEmpty()) return;
-	QString s = qsl[0];
-	QFileInfo* fileInfo = new QFileInfo(s);
+	if (qsl.isEmpty()) 
+        return;
+	QFileInfo* fileInfo = new QFileInfo( qsl[0] );
 
 	QString suffix = fileInfo->suffix();
-	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) 
+	if ( suffix != "png" && suffix != "jpg" && suffix != "jpeg" ) 
     {
 		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
 		return;
 	}
 	//Save the path for future captures
 	sP->SetImageDir(fileInfo->absolutePath().toStdString());
-
 	QString fileBaseName = fileInfo->baseName();
-	//See if it ends with digits.  If not, append them
+
 	int posn;
-	for (posn = fileBaseName.length()-1; posn >=0; posn--){
-		if (!fileBaseName.at(posn).isDigit()) break;
+	for (posn = fileBaseName.length()-1; posn >=0; posn--)
+    {
+		if (!fileBaseName.at(posn).isDigit()) 
+            break;
 	}
 	int startFileNum = 0;
+
 	unsigned int lastDigitPos = posn+1;
 	if (lastDigitPos < fileBaseName.length()) {
 		startFileNum = fileBaseName.right(fileBaseName.length()-lastDigitPos).toInt();
 		fileBaseName.truncate(lastDigitPos);
 	}
+
 	QString filePath = fileInfo->absolutePath() + "/" + fileBaseName;
 	//Insert up to 4 zeros
 	QString zeroes;
-	if (startFileNum == 0) zeroes = "000";
-	else {
+	if (startFileNum == 0) 
+        zeroes = "000";
+	else 
+    {
 		switch((int)log10((float)startFileNum)) {
 		case (0):
 			zeroes = "000";
@@ -2302,16 +2317,37 @@ void MainForm::startAnimCapture() {
 	filePath += ".";
 	filePath += suffix;
 	string fpath = filePath.toStdString();
+
+    // Check if the numbered file exists.
+    QFileInfo check_file( filePath );
+    if ( check_file.exists() )
+    {
+		QMessageBox msgBox; 
+		msgBox.setWindowTitle("Are you sure?");
+        QString msg = "The following numbered file exists.\n ";
+        msg += filePath;
+        msg += "\n"; 
+        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
+		msgBox.setText( msg );
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if(msgBox.exec() == QMessageBox::No)
+        {
+			return;
+		}
+    }
+
 	//Turn on "image capture mode" in the current active visualizer
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
 	_controlExec->EnableAnimationCapture(vizName, true, fpath);
 	_capturingAnimationVizName = vizName;
-	delete fileInfo;
 
 	_captureEndJpegCaptureAction->setEnabled(true);
 	_captureStartJpegCaptureAction->setEnabled(false);
 	_captureSingleJpegCaptureAction->setEnabled(false);
+
+	delete fileInfo;
 }
 
 void MainForm::endAnimCapture(){
@@ -2331,4 +2367,35 @@ void MainForm::endAnimCapture(){
 	_captureEndJpegCaptureAction->setEnabled(false);
 	_captureStartJpegCaptureAction->setEnabled(true);
 	_captureSingleJpegCaptureAction->setEnabled(true);
+}
+
+string MainForm::_getDataSetName(string file) {
+
+	vector <string> names = _controlExec->GetDataNames();
+	if (names.empty()) {
+		return(makename(file));
+	}
+
+	string newSession = "New session";
+
+    QStringList items;
+	items << tr(newSession.c_str());
+	for (int i=0; i<names.size(); i++) {
+		items << tr(names[i].c_str());
+	}
+
+    bool ok;
+    QString item = QInputDialog::getItem(
+		this, tr("QInputDialog::getItem()"), 
+		tr("Load data into session:"), items, 0, false, &ok
+	);
+	if (! ok || item.isEmpty()) return("");
+
+	string dataSetName = item.toStdString();
+
+	if (dataSetName == newSession) {
+		dataSetName = makename(file);
+	}
+
+	return(dataSetName);
 }
