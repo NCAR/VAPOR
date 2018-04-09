@@ -187,7 +187,6 @@ public:
 	//! \param[in] stretchedBoxExtents Extents of manip in stretched coordinates
 	//! \param[out] handleMid coordinates of handle selected, in stretched coordinates
 	//! \return index of handle, or -1 if none.
-//	int mouseIsOverHandle(double screenCoords[2], double* stretchedBoxExtents,  double handleMid[3]);
 	int mouseIsOverHandle(double screenCoords[2], double handleMid[3]);
 
 	//! Determine the current handle index that is being dragged
@@ -217,7 +216,7 @@ public:
 	//! \param[in] p Params that owns the Manipulator
 	//! \return true if successful
 	//bool startHandleSlide(Visualizer* viz, double mouseCoords[2], int handleNum, Params* p);
-bool startHandleSlide(double mouseCoords[2], int handleNum);
+	bool startHandleSlide(double mouseCoords[2], int handleNum);
 
 	//! Set the status of the mouse, invoked when the mouse is pressed or released.
 	//! \param downUp true is the mouse is pressed for this manipulator.
@@ -309,6 +308,7 @@ protected:
 	void movePlusXCorners(double corners[8][3]);
 	void movePlusYCorners(double corners[8][3]);
 	void movePlusZCorners(double corners[8][3]);
+	void constrainExtents();
 
 	bool _isStretching;
 	bool _constrain;
