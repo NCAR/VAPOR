@@ -186,7 +186,6 @@ class RENDER_API TranslateStretchManip : public Manip {
     //! \param[in] stretchedBoxExtents Extents of manip in stretched coordinates
     //! \param[out] handleMid coordinates of handle selected, in stretched coordinates
     //! \return index of handle, or -1 if none.
-    //	int mouseIsOverHandle(double screenCoords[2], double* stretchedBoxExtents,  double handleMid[3]);
     int mouseIsOverHandle(double screenCoords[2], double handleMid[3]);
 
     //! Determine the current handle index that is being dragged
@@ -305,6 +304,7 @@ class RENDER_API TranslateStretchManip : public Manip {
     void movePlusXCorners(double corners[8][3]);
     void movePlusYCorners(double corners[8][3]);
     void movePlusZCorners(double corners[8][3]);
+    void constrainExtents();
 
     bool _isStretching;
     bool _constrain;

@@ -134,6 +134,7 @@ void TranslateStretchManip::mouseDrag(
             double dirVec[3];
             pixelToVector(projScreenCoords, dirVec, handleMidpoint);
             slideHandle(_selectedHandle, dirVec, false);
+            //slideHandle(_selectedHandle, dirVec);
         }
     }
 }
@@ -170,6 +171,10 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
             _selection[axis + 3] += dist;
         }
     }
+
+    if (_constrain)
+        constrainExtents();
+
     _dragDistance = 0.f;
     _selectedHandle = -1;
     _buttonNum = 0;
@@ -224,6 +229,22 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double hand
         }
     }
     return -1;
+}
+
+void TranslateStretchManip::constrainExtents() {
+    for (int i = 0; i < 3; i++) {
+        // correct selection minimum
+        if (_selection[i] < _extents[i])
+            _selection[i] = _extents[i];
+        if (_selection[i] > _extents[i + 3])
+            _selection[i] = _extents[i + 3];
+
+        // correct selection maximum
+        if (_selection[i + 3] < _extents[i])
+            _selection[i + 3] = _extents[i];
+        if (_selection[i + 3] > _extents[i + 3])
+            _selection[i + 3] = _extents[i + 3];
+    }
 }
 
 bool TranslateStretchManip::pointIsOnQuad(
@@ -466,8 +487,11 @@ bool TranslateStretchManip::pixelToVector(
 //If this is on the same axis as the selected handle it is displaced by _dragDistance
 //
 
-void TranslateStretchManip::
-    makeHandleExtents(int sortPosition, double handleExtents[6], int octant, double boxExtents[6]) {
+void TranslateStretchManip::makeHandleExtents(
+    int sortPosition,
+    double handleExtents[6],
+    int octant,
+    double boxExtents[6]) {
     //Identify the axis this handle is on:
     int axis = (sortPosition < 3) ? (2 - sortPosition) : (sortPosition - 3);
     int newPosition = sortPosition;
@@ -762,7 +786,6 @@ void TranslateStretchManip::drawBoxFaces() {
     }
 
     //Now render the edges:
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glLineWidth(2.0);
@@ -960,7 +983,11 @@ void TranslateStretchManip::
     //If stretching, not allowed to push face through opposite face.
 
     //Do this calculation in stretched world coords
-    const double *sizes;
+    double sizes[3];
+    int ndims = 3; //_extents.size()/2;
+    for (int i = 0; i < ndims; i++) {
+        sizes[i] = _extents[i + ndims] - _extents[i];
+    }
 
     if (_isStretching) { //don't push through opposite face ..
         //Depends on whether we are pushing the "low" or "high" handle
@@ -970,25 +997,10 @@ void TranslateStretchManip::
             if (_dragDistance + _selection[coord] > _selection[coord + 3]) {
                 _dragDistance = _selection[coord + 3] - _selection[coord];
             }
-            if (constrain && (_dragDistance + _selection[coord] < 0.)) {
-                _dragDistance = -_selection[coord];
-            }
         } else { //Moving "high" handle:
             if (_dragDistance + _selection[coord + 3] < _selection[coord]) {
                 _dragDistance = _selection[coord] - _selection[coord + 3];
             }
-            if (constrain && (_dragDistance + _selection[coord + 3] > sizes[coord])) {
-                _dragDistance = sizes[coord] - _selection[coord + 3];
-            }
-        }
-    } else if (constrain) { //sliding, not stretching
-        //Don't push the box out of the full region extents:
-
-        if (_dragDistance + _selection[coord] < 0.) {
-            _dragDistance = -_selection[coord];
-        }
-        if (_dragDistance + _selection[coord + 3] > sizes[coord]) {
-            _dragDistance = sizes[coord] - _selection[coord + 3];
         }
     }
 }
