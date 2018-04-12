@@ -40,6 +40,7 @@ static RendererRegistrar<BarbRenderer> registrar(BarbRenderer::GetClassType(), B
 BarbRenderer::BarbRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, BarbParams::GetClassType(), BarbRenderer::GetClassType(), instName, dataMgr)
 {
+    _drawList = 0;
     _fieldVariables.clear();
     _vectorScaleFactor = 1.0;
 }
@@ -54,15 +55,101 @@ BarbRenderer::~BarbRenderer() {}
 int BarbRenderer::_initializeGL()
 {
     //_initialized = true;
+    _drawList = glGenLists(1);
     return (0);
+}
+
+void BarbRenderer::_saveCacheParams()
+{
+    BarbParams *p = (BarbParams *)GetActiveParams();
+    _cacheParams.fieldVarNames = p->GetFieldVariableNames();
+    _cacheParams.heightVarName = p->GetHeightVariableName();
+    _cacheParams.colorVarName = p->GetColorMapVariableName();
+    _cacheParams.ts = p->GetCurrentTimestep();
+    _cacheParams.level = p->GetRefinementLevel();
+    _cacheParams.lod = p->GetCompressionLevel();
+    _cacheParams.useSingleColor = p->UseSingleColor();
+    _cacheParams.lineThickness = p->GetLineThickness();
+    _cacheParams.lengthScale = p->GetLengthScale();
+    _cacheParams.grid = p->GetGrid();
+    p->GetConstantColor(_cacheParams.constantColor);
+    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
+    if (_cacheParams.useSingleColor) return;
+
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.colorVarName);
+    _cacheParams.opacity = tf->getOpacityScale();
+    _cacheParams.minMapValue = tf->getMinMapValue();
+    _cacheParams.maxMapValue = tf->getMaxMapValue();
+    for (int i = 0; i < 10; i++) {
+        float point = _cacheParams.minMapValue + i / 10.f * (_cacheParams.maxMapValue - _cacheParams.minMapValue);
+        tf->rgbValue(point, _cacheParams.colorSamples[i]);
+        _cacheParams.alphaSamples[i] = tf->getOpacityValueData(point);
+    }
+}
+
+bool BarbRenderer::_isCacheDirty() const
+{
+    BarbParams *p = (BarbParams *)GetActiveParams();
+    if (_cacheParams.fieldVarNames != p->GetFieldVariableNames()) return true;
+    if (_cacheParams.heightVarName != p->GetHeightVariableName()) return true;
+    if (_cacheParams.colorVarName != p->GetColorMapVariableName()) return true;
+    if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
+    if (_cacheParams.level != p->GetRefinementLevel()) return true;
+    if (_cacheParams.lod != p->GetCompressionLevel()) return true;
+    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
+    if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
+    if (_cacheParams.lengthScale != p->GetLengthScale()) return true;
+    if (_cacheParams.grid != p->GetGrid()) return true;
+
+    vector<double> min, max, contourValues;
+    p->GetBox()->GetExtents(min, max);
+
+    if (_cacheParams.boxMin != min) return true;
+    if (_cacheParams.boxMax != max) return true;
+
+    float constantColor[3];
+    p->GetConstantColor(constantColor);
+    if (memcmp(_cacheParams.constantColor, constantColor, sizeof(constantColor))) return true;
+
+    if (_cacheParams.useSingleColor) return false;
+
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.colorVarName);
+    if (_cacheParams.opacity != tf->getOpacityScale()) return true;
+    if (_cacheParams.minMapValue != tf->getMinMapValue()) return true;
+    if (_cacheParams.maxMapValue != tf->getMaxMapValue()) return true;
+
+    for (int i = 0; i < 10; i++) {
+        float point = _cacheParams.minMapValue + i / 10.f * (_cacheParams.maxMapValue - _cacheParams.minMapValue);
+        float color[3];
+        tf->rgbValue(point, color);
+        if (_cacheParams.colorSamples[i][0] != color[0]) return true;
+        if (_cacheParams.colorSamples[i][1] != color[1]) return true;
+        if (_cacheParams.colorSamples[i][2] != color[2]) return true;
+        if (_cacheParams.alphaSamples[i] != tf->getOpacityValueData(point)) return true;
+    }
+
+    return false;
 }
 
 int BarbRenderer::_paintGL()
 {
+    static int i = 0;
+    if (!_isCacheDirty()) {
+        glCallList(_drawList);
+        return 0;
+    }
+    printf("dirty %i\n", ++i);
+    _saveCacheParams();
+    glNewList(_drawList, GL_COMPILE_AND_EXECUTE);
+
     // Set up the variable data required, while determining data
     // extents to use in rendering
     //
     vector<Grid *> varData;
+    float          vectorLengthScale;
+    string         hname;
+    string         colorVar;
 
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     size_t      ts = bParams->GetCurrentTimestep();
@@ -84,13 +171,13 @@ int BarbRenderer::_paintGL()
     //
     int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
 
-    if (rc < 0) return (rc);
+    if (rc < 0) goto RETURN;
     varData.push_back(NULL);
     varData.push_back(NULL);
 
     // Get grids for our height variable
     //
-    string hname = bParams->GetHeightVariableName();
+    hname = bParams->GetHeightVariableName();
     if (!hname.empty()) {
         Grid *sg = NULL;
         int   rc = DataMgrUtils::GetGrids(_dataMgr, ts, hname, minExts, maxExts, true, &refLevel, &lod, &sg);
@@ -98,14 +185,14 @@ int BarbRenderer::_paintGL()
             for (int i = 0; i < varData.size(); i++) {
                 if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
             }
-            return (rc);
+            goto RETURN;
         }
         varData[3] = sg;
     }
 
     // Get grids for our auxillary variables
     //
-    string colorVar = bParams->GetColorMapVariableName();
+    colorVar = bParams->GetColorMapVariableName();
     if (!bParams->UseSingleColor() && !colorVar.empty()) {
         Grid *sg;
         int   rc = DataMgrUtils::GetGrids(_dataMgr, ts, colorVar, minExts, maxExts, true, &refLevel, &lod, &sg);
@@ -113,12 +200,12 @@ int BarbRenderer::_paintGL()
             for (int i = 0; i < varData.size(); i++) {
                 if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
             }
-            return (rc);
+            goto RETURN;
         }
         varData[4] = sg;
     }
 
-    float vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
+    vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
 
     //
     // Perform OpenGL rendering of barbs
@@ -129,6 +216,9 @@ int BarbRenderer::_paintGL()
     for (int i = 0; i < varData.size(); i++) {
         if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
     }
+
+RETURN:
+    glEndList();
     return (rc);
 }
 
