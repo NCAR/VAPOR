@@ -119,8 +119,9 @@ namespace VAPoR {
 //! \p level that are less than the negation of GetNumRefLevels() are
 //! treated as if they were equal to the negation of the GetNumRefLevels()
 //! return value.
-//!
+//! \endparblock
 //! \param lod
+//! \parblock
 //! The level-of-detail parameter, \p lod, selects
 //! the approximation level for a compressed variable.
 //! The \p lod parameter is similar to the \p level parameter in that it
@@ -143,7 +144,7 @@ namespace VAPoR {
 //! Using negative values the first element of \p cratios - the greatest
 //! compression rate - is indexed by negating the size of the
 //! \p cratios vector.
-//!
+//! \endparblock
 //! \param cratios A monotonically decreasing vector of
 //! compression ratios. Compressed variables in the VDC are stored
 //! with a fixed, finite number of compression factors. The \p cratios
@@ -160,7 +161,6 @@ namespace VAPoR {
 //! "bior2.6", "bior2.8", "bior3.1", "bior3.3", "bior3.5", "bior3.7",
 //! "bior3.9", "bior4.4"
 //!
-//! \endparblock
 //!
 class VDF_API VDC : public VAPoR::DC {
 public:
