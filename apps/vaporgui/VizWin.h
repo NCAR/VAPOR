@@ -21,6 +21,7 @@
 
 #include <GL/glew.h>
 #include <QGLWidget>
+#include "vapor/Transform.h"
 #include "vapor/Visualizer.h"
 #include "vapor/Manip.h"
 #include <QWheelEvent>
@@ -123,6 +124,8 @@ private:
 		std::vector<double> &rotationCenter,
 		std::vector<double> &cameraPos);
 	void getWindowSize(std::vector<int> &windowSize);
+	string getCurrentDataMgrName() const;
+	VAPoR::Transform* getTransform() const;
 
 	void getNearFarDist(
 		const double  posVec[3], const double dirVec[3],
