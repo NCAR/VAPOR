@@ -23,6 +23,7 @@
 #define MANIP_H
 
 #include <vapor/glutil.h>
+#include "vapor/Transform.h"
 
 //Handle diameter in pixels:
 #define HANDLE_DIAMETER 15
@@ -73,6 +74,7 @@ class RENDER_API Manip {
                         double modelViewMatrix[16],
                         double projectionMatrix[16],
                         std::vector<int> windowSize,
+                        VAPoR::Transform *transform,
                         bool constrain) = 0;
 
     //! Notify that manipulator that is being moved with the mouse
@@ -115,6 +117,7 @@ class RENDER_API Manip {
 
     int _buttonNum;
     double _selection[6];
+    double _transformedSelection[6];
     double _extents[6];
     double _cameraPosition[3];
     //std::vector<double> _selection;
@@ -169,6 +172,7 @@ class RENDER_API TranslateStretchManip : public Manip {
                         double modelViewMatrix[16],
                         double projectionMatrix[16],
                         std::vector<int> windowSize,
+                        VAPoR::Transform *transform,
                         bool constrain);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
@@ -314,6 +318,7 @@ class RENDER_API TranslateStretchManip : public Manip {
     double _rotationCenter[3];
     double _modelViewMatrix[16];
     double _projectionMatrix[16];
+    VAPoR::Transform *_transform;
 
     // screen coords where mouse is pressed:
     float _mouseDownPoint[2];
