@@ -519,33 +519,33 @@ const char *VDC_GetErrMsg()
 
 void VDC_FreeStringArray(char ***str, int *count)
 {
-    for (int i = 0; i < *count; i++) delete (*str)[i];
-    delete *str;
+    for (int i = 0; i < *count; i++) delete[](*str)[i];
+    delete[] * str;
     *str = 0;
     *count = 0;
 }
 
 void VDC_FreeString(char **str)
 {
-    delete *str;
+    delete[] * str;
     *str = 0;
 }
 
 void VDC_FreeLongArray(long **data)
 {
-    delete *data;
+    delete[] * data;
     *data = 0;
 }
 
 void VDC_FreeDoubleArray(double **data)
 {
-    delete *data;
+    delete[] * data;
     *data = 0;
 }
 
 void VDC_FreeSize_tArray(size_t **data)
 {
-    delete *data;
+    delete[] * data;
     *data = 0;
 }
 
