@@ -79,7 +79,7 @@ Histo::~Histo()
 }
 void Histo::reset(int newNumBins)
 {
-    if (newNumBins != -1) {
+    if (newNumBins != _numBins && newNumBins != -1) {
         _numBins = newNumBins;
         if (_binArray) delete[] _binArray;
         _binArray = new int[_numBins];
