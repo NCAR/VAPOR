@@ -564,6 +564,23 @@ VAPoR::RenderParams *VizWin::getRenderParams(string &className)
     return rParams;
 }
 
+string VizWin::getCurrentDataMgrName() const
+{
+    ParamsMgr *     paramsMgr = _controlExec->GetParamsMgr();
+    GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+
+    string inst, winName, className, dataSetName;
+    guiP->GetActiveRenderer(_winName, className, inst);
+
+    bool exists = paramsMgr->RenderParamsLookup(inst, winName, dataSetName, className);
+
+    if (!exists) return "";
+
+    VAPoR::RenderParams *rParams = paramsMgr->GetRenderParams(_winName, dataSetName, className, inst);
+
+    return dataSetName;
+}
+
 void VizWin::getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts)
 {
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
@@ -605,6 +622,17 @@ void VizWin::getWindowSize(std::vector<int> &windowSize)
     windowSize.push_back(height);
 }
 
+VAPoR::Transform *VizWin::getTransform() const
+{
+    string dataMgrName = getCurrentDataMgrName();
+
+    ParamsMgr *       paramsMgr = _controlExec->GetParamsMgr();
+    ViewpointParams * vpParams = paramsMgr->GetViewpointParams(_winName);
+    vector<string>    names = paramsMgr->GetDataMgrNames();
+    VAPoR::Transform *t = vpParams->GetTransform(dataMgrName);
+    return t;
+}
+
 void VizWin::updateManip(bool initialize)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -641,7 +669,11 @@ void VizWin::updateManip(bool initialize)
     bool constrain = true;
     if (classType == ImageParams::GetClassType()) constrain = false;
 
-    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, constrain);
+    VAPoR::Transform *  transform = getTransform();
+    std::vector<double> scales = transform->GetScales();
+    cout << "Tx Vscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
+
+    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, transform, constrain);
 
     _manip->render();
 }

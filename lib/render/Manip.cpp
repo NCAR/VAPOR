@@ -53,7 +53,8 @@ TranslateStretchManip::TranslateStretchManip() : Manip()
 }
 
 void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, std::vector<double> cameraPosition,
-                                   std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, bool constrain)
+                                   std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *transform,
+                                   bool constrain)
 {
     for (int i = 0; i < 16; i++) {
         _modelViewMatrix[i] = modelViewMatrix[i];
@@ -73,6 +74,8 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
     std::copy(urc.begin(), urc.end(), _selection + 3);
     std::copy(minExts.begin(), minExts.end(), _extents);
     std::copy(maxExts.begin(), maxExts.end(), _extents + 3);
+
+    _transform = transform;
 
     _constrain = constrain;
 }
@@ -596,14 +599,32 @@ void TranslateStretchManip::render()
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
+    std::vector<double> scales = _transform->GetScales();
+    std::vector<double> selectionSize, selectionMid;
+    int                 ndims = 3;    //_selection.size()/2;
+    cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
+    for (int i = 0; i < ndims; i++) {
+        selectionSize.push_back(_selection[i + ndims] - _selection[i]);
+        selectionSize[i] *= scales[i];
+
+        selectionMid.push_back((_selection[i] + _selection[i + ndims]) / 2.f);
+
+        _transformedSelection[i] = selectionMid[i] - selectionSize[i] / 2.f;
+        _transformedSelection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
+    }
+    cout << "_selection " << _selection[0] << " " << _selection[3] << endl;
+    cout << "scaledSele " << _transformedSelection[0] << " " << _transformedSelection[3] << endl;
+
     glPushAttrib(GL_CURRENT_BIT);
     double handleExtents[6];
     for (int handleNum = 0; handleNum < 6; handleNum++) {
         // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, extents);
         // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _extents);
-        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _selection);
+        // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _selection);
+        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _transformedSelection);
 
         if (_selectedHandle >= 0) {
+            // int axis = (_selectedHandle < 3) ? (2-_selectedHandle) : (_selectedHandle -3);
             int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
             // displace handleExtents appropriately
             if (_isStretching) {
@@ -623,6 +644,7 @@ void TranslateStretchManip::render()
         }
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
         drawHandleConnector(handleNum, handleExtents, _selection);    // extents);
+                                                                      // drawHandleConnector(handleNum, handleExtents, transformedSelection);//extents);
     }
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
@@ -912,11 +934,7 @@ void TranslateStretchManip::
 
     double denom = vdot(q, q);
     _dragDistance = 0.f;
-    // convert to stretched world coords.
-    if (denom != 0.) {
-        _dragDistance = -vdot(q, r) / denom;
-        //		_dragDistance *= stretch[coord];
-    }
+    if (denom != 0.) { _dragDistance = -vdot(q, r) / denom; }
 
     // Make sure the displacement is OK.  Not allowed to
     // slide box out of full domain box.
