@@ -62,13 +62,13 @@ private:
     struct {
         string         varName;
         string         heightVarName;
-        int            ts;
+        size_t         ts;
         int            level;
         int            lod;
         bool           useSingleColor;
         float          constantColor[3];
-        float          lineThickness;
-        float          opacity;
+        double         lineThickness;
+        double         opacity;
         vector<double> boxMin, boxMax;
         vector<double> contourValues;
         vector<float>  contourColors;
