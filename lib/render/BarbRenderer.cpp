@@ -139,7 +139,6 @@ int BarbRenderer::_paintGL()
         glCallList(_drawList);
         return 0;
     }
-    printf("dirty %i\n", ++i);
     _saveCacheParams();
     glNewList(_drawList, GL_COMPILE_AND_EXECUTE);
 
