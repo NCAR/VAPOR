@@ -293,6 +293,15 @@ int VDC_GetCRatiosCount(const VDC *p, const char *varname)
     return v.GetCRatios().size();
 }
 
+int VDC_GetVarDimLens(const VDC *p, const char *varname, int spatial, size_t **lens, int *count)
+{
+    VDC_DEBUG_called();
+    vector<size_t> lens_v;
+    bool           ret = p->GetVarDimLens(string(varname), spatial, lens_v);
+    if (ret) _size_tVectorToCArray(lens_v, lens, count);
+    return ret;
+}
+
 int VDC_GetVarDimNames(const VDC *p, const char *varname, int spatial, char ***names, int *count)
 {
     VDC_DEBUG_called();
