@@ -180,8 +180,11 @@ void AnnotationParams::SetCurrentAxisDataMgrName(string dmName) {
 }
 
 AxisAnnotation* AnnotationParams::GetAxisAnnotation(string dataMgr) {
-	if (dataMgr == "")
+	if (dataMgr == "") {
 		dataMgr = GetCurrentAxisDataMgrName();
+	}
+
+//	if (dataMgr == "") return(NULL);
 
 	vector<string> names = _axisAnnotations->GetNames();
 	if (_axisAnnotations->GetParams(dataMgr) == NULL) {
