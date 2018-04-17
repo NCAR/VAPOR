@@ -52,6 +52,7 @@ set (SRCS
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
+	QIntValidatorWithFixup.cpp
 	Combo.cpp
 
 	# Need to include all files that request .ui files
