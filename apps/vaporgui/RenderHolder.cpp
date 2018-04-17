@@ -563,6 +563,7 @@ void RenderHolder::Update() {
 	//
 	GUIStateParams *p = _getStateParams();
 	string activeViz = p->GetActiveVizName();
+	if (activeViz.empty()) return;
 
 	string activeRenderClass, activeRenderInst;
  	p->GetActiveRenderer(
