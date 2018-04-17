@@ -125,6 +125,18 @@ void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 
 void AnnotationEventRouter::_updateTab()
 {
+    ParamsMgr *    pMgr = _controlExec->GetParamsMgr();
+    vector<string> names = pMgr->GetDataMgrNames();
+
+    // If no data managers we can't update
+    //
+    if (names.empty()) {
+        this->setEnabled(false);
+        return;
+    } else {
+        this->setEnabled(true);
+    }
+
     updateRegionColor();
     updateDomainColor();
     updateBackgroundColor();
@@ -442,7 +454,9 @@ AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation()
 {
     AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
     string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
-    AxisAnnotation *  aa = vfParams->GetAxisAnnotation(dataMgr);
+    if (dataMgr.empty()) return (NULL);
+
+    AxisAnnotation *aa = vfParams->GetAxisAnnotation(dataMgr);
 
     bool initialized = aa->GetAxisAnnotationInitialized();
     if (!initialized) initializeAnnotation(aa);
