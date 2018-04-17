@@ -182,7 +182,10 @@ int VAPoR::write_JPEG_file(FILE *outfile, int image_width, int image_height, uns
          * We need to clean up the JPEG object, close the input file, and return.
          */
         jpeg_destroy_compress(&cinfo);
-        fclose(outfile);
+        /*
+         * !!WRONG!! You should NOT close a file that does not belong to you!!
+         */
+        // fclose(outfile);
         return 1;
     }
     /* Now we can initialize the JPEG compression object. */
@@ -248,7 +251,10 @@ int VAPoR::write_JPEG_file(FILE *outfile, int image_width, int image_height, uns
 
     jpeg_finish_compress(&cinfo);
     /* After finish_compress, we can close the output file. */
-    fclose(outfile);
+    /*
+     * !!WRONG!! You should NOT close a file that does not belong to you!!
+     */
+    // fclose(outfile);
 
     /* Step 7: release JPEG compression object */
 
