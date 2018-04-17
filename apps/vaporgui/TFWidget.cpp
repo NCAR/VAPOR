@@ -299,6 +299,14 @@ void TFWidget::Update(DataMgr *dataMgr,
 	_dataMgr = dataMgr;
 	_rParams = rParams;
 
+	if (getCurrentVarName() == "") {
+		setEnabled(false);
+		return;
+	}
+	else {
+		setEnabled(true);
+	}
+
 	updateAutoUpdateHistoCheckbox();
 	updateMappingFrame();
 	updateColorInterpolation();
