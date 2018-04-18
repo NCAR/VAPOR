@@ -61,28 +61,28 @@ SettingsEventRouter::SettingsEventRouter(
 
 	SettingsParams* sp = (SettingsParams*)GetActiveParams();
 
-	ParamsBase::StateSave *ss = new ParamsBase::StateSave;
-	_defaultParams = new SettingsParams(ss, false);
+    ParamsBase::StateSave *ss = new ParamsBase::StateSave;
+    _defaultParams = new SettingsParams(ss, false);
 
-	QIntValidatorWithFixup*  numThreadsValidator = 
+    QIntValidatorWithFixup*  numThreadsValidator = 
         new QIntValidatorWithFixup(0, INT_MAX, _numThreadsEdit);
-	_numThreadsEdit->setValidator(numThreadsValidator);
+    _numThreadsEdit->setValidator(numThreadsValidator);
 
-	QIntValidatorWithFixup* cacheSizeValidator = 
+    QIntValidatorWithFixup* cacheSizeValidator = 
         new QIntValidatorWithFixup(1000, INT_MAX, _cacheSizeEdit);
-	_cacheSizeEdit->setValidator(cacheSizeValidator);
+    _cacheSizeEdit->setValidator(cacheSizeValidator);
 
-	QIntValidatorWithFixup* windowWidthValidator = 
+    QIntValidatorWithFixup* windowWidthValidator = 
         new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
-	_windowWidthEdit->setValidator(windowWidthValidator);
+    _windowWidthEdit->setValidator(windowWidthValidator);
 
-	QIntValidatorWithFixup* windowHeightValidator = 
+    QIntValidatorWithFixup* windowHeightValidator = 
         new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
-	_windowHeightEdit->setValidator(windowHeightValidator);
+    _windowHeightEdit->setValidator(windowHeightValidator);
 
-	QIntValidatorWithFixup* autoSaveValidator = 
+    QIntValidatorWithFixup* autoSaveValidator = 
         new QIntValidatorWithFixup(1, 1000, _autoSaveIntervalEdit);
-	_autoSaveIntervalEdit->setValidator(autoSaveValidator);
+    _autoSaveIntervalEdit->setValidator(autoSaveValidator);
 }
 
 
