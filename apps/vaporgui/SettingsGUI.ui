@@ -238,7 +238,7 @@
               <string>The file specified for auto save is overwritten every time there is an automatic session save</string>
              </property>
              <property name="text">
-              <string>Auto-save session location</string>
+              <string>Auto-save session file</string>
              </property>
              <property name="wordWrap">
               <bool>false</bool>
