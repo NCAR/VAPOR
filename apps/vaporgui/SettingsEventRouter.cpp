@@ -47,6 +47,7 @@
 #include "SettingsParams.h"
 #include "ErrorReporter.h"
 
+#include "QIntValidatorWithFixup.h"
 
 using namespace VAPoR;
 
@@ -71,12 +72,12 @@ SettingsEventRouter::SettingsEventRouter(
 	cacheSizeValidator = new QIntValidator(0, 100000, _cacheSizeEdit);
 	_cacheSizeEdit->setValidator(cacheSizeValidator);
 
-	QValidator* windowWidthValidator;
-	windowWidthValidator = new QIntValidator(0, 16000, _windowWidthEdit);
+	QIntValidatorWithFixup* windowWidthValidator = 
+        new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
 	_windowWidthEdit->setValidator(windowWidthValidator);
 
-	QValidator* windowHeightValidator;
-	windowHeightValidator = new QIntValidator(0, 16000, _windowHeightEdit);
+	QIntValidatorWithFixup* windowHeightValidator = 
+        new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
 	_windowHeightEdit->setValidator(windowHeightValidator);
 
 	QValidator* autoSaveValidator;
