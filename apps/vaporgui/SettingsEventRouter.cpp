@@ -111,38 +111,12 @@ void SettingsEventRouter::hookUpTab()
     connect(_pythonPathButton, SIGNAL(clicked()), this, SLOT(_choosePythonPath()));
 }
 
-void SettingsEventRouter::_warnUserAfterThreadChange()
-{
-    _numThreadsEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _numThreadsEdit->setToolTip("Vapor's thread count is initialized when the\n"
-                                "application launches.  These settings will\n"
-                                "only take effect in future Vapor instances.");
-}
-
-void SettingsEventRouter::_undoUserWarnings()
-{
-    _numThreadsEdit->setStyleSheet("background-color: white; color: black;");
-
-    _cacheSizeEdit->setStyleSheet("background-color: white; color: black;");
-}
-
 void SettingsEventRouter::_numThreadsChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
     size_t          numThreads = (size_t)_numThreadsEdit->text().toInt();
-    if (numThreads != sParams->GetNumThreads()) _warnUserAfterThreadChange();
     sParams->SetNumThreads(numThreads);
     _saveSettings();
-}
-
-void SettingsEventRouter::_warnUserAfterCacheChange()
-{
-    _cacheSizeEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _cacheSizeEdit->setToolTip("Vapor's cache size is initialized when the\n"
-                               "application launches.  These settings will\n"
-                               "only take effect in future Vapor instances.");
 }
 
 void SettingsEventRouter::_cacheSizeChanged()
@@ -150,28 +124,8 @@ void SettingsEventRouter::_cacheSizeChanged()
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
     int             cacheSize = _cacheSizeEdit->text().toInt();
 
-    if (cacheSize != sParams->GetCacheMB()) _warnUserAfterCacheChange();
-
     sParams->SetCacheMB(cacheSize);
     _saveSettings();
-}
-
-void SettingsEventRouter::_warnUserAfterWidthChange()
-{
-    _windowWidthEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _windowWidthEdit->setToolTip("Vapor's window size is initialized when the\n"
-                                 "application launches.  These settings will\n"
-                                 "only take effect in future Vapor instances.");
-}
-
-void SettingsEventRouter::_warnUserAfterHeightChange()
-{
-    _windowHeightEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _windowHeightEdit->setToolTip("Vapor's window size is initialized when the\n"
-                                  "application launches.  These settings will\n"
-                                  "only take effect in future Vapor instances.");
 }
 
 void SettingsEventRouter::_enableWinSize(bool enabled)
@@ -190,10 +144,6 @@ void SettingsEventRouter::_windowSizeChanged()
     int             height = _windowHeightEdit->text().toInt();
     size_t          oldWidth, oldHeight;
     sParams->GetWinSize(oldWidth, oldHeight);
-    if (width != oldWidth || height != oldHeight) {
-        _warnUserAfterHeightChange();
-        _warnUserAfterWidthChange();
-    }
     sParams->SetWinSize(width, height);
     _saveSettings();
 }
@@ -459,7 +409,6 @@ void SettingsEventRouter::_restoreDefaults()
     settingsParams->GetNode()->SetParent(parent);
 
     _saveSettings();
-    _undoUserWarnings();
 
     paramsMgr->EndSaveStateGroup();
 }
