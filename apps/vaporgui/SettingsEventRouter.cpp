@@ -60,12 +60,10 @@ SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWi
     ParamsBase::StateSave *ss = new ParamsBase::StateSave;
     _defaultParams = new SettingsParams(ss, false);
 
-    QValidator *numThreadsValidator;
-    numThreadsValidator = new QIntValidator(0, 8, _numThreadsEdit);
+    QIntValidatorWithFixup *numThreadsValidator = new QIntValidatorWithFixup(0, INT_MAX, _numThreadsEdit);
     _numThreadsEdit->setValidator(numThreadsValidator);
 
-    QValidator *cacheSizeValidator;
-    cacheSizeValidator = new QIntValidator(0, 100000, _cacheSizeEdit);
+    QIntValidatorWithFixup *cacheSizeValidator = new QIntValidatorWithFixup(1000, INT_MAX, _cacheSizeEdit);
     _cacheSizeEdit->setValidator(cacheSizeValidator);
 
     QIntValidatorWithFixup *windowWidthValidator = new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
@@ -74,8 +72,7 @@ SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWi
     QIntValidatorWithFixup *windowHeightValidator = new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
     _windowHeightEdit->setValidator(windowHeightValidator);
 
-    QValidator *autoSaveValidator;
-    autoSaveValidator = new QIntValidator(1, 100, _autoSaveIntervalEdit);
+    QIntValidatorWithFixup *autoSaveValidator = new QIntValidatorWithFixup(1, 1000, _autoSaveIntervalEdit);
     _autoSaveIntervalEdit->setValidator(autoSaveValidator);
 }
 
