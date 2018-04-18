@@ -474,7 +474,7 @@
          <item>
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Number of concurrent threads</string>
+            <string>Number of threads (0 for num. of CPU cores)</string>
            </property>
           </widget>
          </item>
