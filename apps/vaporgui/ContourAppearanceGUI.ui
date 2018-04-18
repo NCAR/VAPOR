@@ -379,7 +379,12 @@
       </size>
      </property>
      <property name="toolTip">
-      <string>Often times a set of contour parameters (Spacing, Conunt, or Minimum) will be set so that some contours fall outside a variable's range, resulting in that contours absence.  Users can select one of these parameters to be soft, so that it will accomodate the values of the other two settings.</string>
+      <string>Often times a set of contour parameters (Spacing, 
+Conunt, or Minimum) will be set so that some 
+contours fall outside a variable's range, resulting 
+in that contours absence.  Users can select one 
+of these parameters to be soft, so that it will 
+accomodate the values of the other two settings.</string>
      </property>
     </widget>
    </item>
