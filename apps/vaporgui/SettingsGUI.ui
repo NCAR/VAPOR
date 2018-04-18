@@ -303,9 +303,6 @@
              <property name="whatsThis">
               <string>The file specified for auto save is overwritten every time there is an automatic session save</string>
              </property>
-             <property name="text">
-              <string>/tmp</string>
-             </property>
             </widget>
            </item>
           </layout>
