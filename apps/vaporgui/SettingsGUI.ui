@@ -238,7 +238,7 @@
               <string>The file specified for auto save is overwritten every time there is an automatic session save</string>
              </property>
              <property name="text">
-              <string>Autosave file location</string>
+              <string>Auto-save session location</string>
              </property>
              <property name="wordWrap">
               <bool>false</bool>
@@ -779,7 +779,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Session file</string>
+            <string>Session file path</string>
            </property>
           </widget>
          </item>
@@ -823,7 +823,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Data set</string>
+            <string>Data set path</string>
            </property>
           </widget>
          </item>
@@ -870,7 +870,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Images</string>
+            <string>Image path</string>
            </property>
           </widget>
          </item>
@@ -923,7 +923,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Transfer function</string>
+            <string>Transfer function path</string>
            </property>
           </widget>
          </item>
@@ -976,7 +976,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Flow</string>
+            <string>Flow path</string>
            </property>
           </widget>
          </item>
@@ -1029,7 +1029,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Python scripts</string>
+            <string>Python script path</string>
            </property>
           </widget>
          </item>
