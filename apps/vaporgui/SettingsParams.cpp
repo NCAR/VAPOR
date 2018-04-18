@@ -223,7 +223,7 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 string SettingsParams::GetAutoSaveSessionFile() const
 {
     string autoSaveDir = QDir::homePath().toStdString();
-    string defaultFile = autoSaveDir + "//VaporAutoSave.vss";
+    string defaultFile = autoSaveDir + "/VaporAutoSave.vs3";
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
     return file;
