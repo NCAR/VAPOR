@@ -411,8 +411,7 @@ void SettingsParams::SetCurrentPrefsPath(string pth){
 }
 
 int SettingsParams::GetNumThreads() const {
-	long val = GetValueLong(_numThreadsTag, 2);
-	if (val < 0) val = 0;
+	long val = GetValueLong(_numThreadsTag, 0);
 	return((int) val);
 }
 
@@ -421,7 +420,6 @@ void SettingsParams::SetNumThreads(int val) {
 }
 
 int SettingsParams::GetFontSize() const {
-//	return (int)GetValueDouble(_fontSizeTag, 
 	return 24;
 }
 
