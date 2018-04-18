@@ -171,10 +171,11 @@ void SettingsEventRouter::_chooseAutoSaveFile()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
-    string dir = _choosePathHelper(sParams->GetMetadataDir(), "Choose the auto-save file");
+    QString fileName =
+        QFileDialog::getSaveFileName(_autoSaveFileButton, tr("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()), tr("Vapor 3 Session Files (*.vs3)"));
 
-    if (!dir.empty()) {
-        sParams->SetAutoSaveSessionFile(dir);
+    if (!fileName.isEmpty()) {
+        sParams->SetAutoSaveSessionFile(fileName.toStdString());
         _saveSettings();
     }
 }
