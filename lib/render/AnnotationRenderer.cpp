@@ -593,7 +593,10 @@ std::vector<double> AnnotationRenderer::getDomainExtents(string dmName) const
     int            ts = _currentTimestep;
     vector<double> minExts, maxExts;
 
-    m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, dmName, ts, minExts, maxExts);
+    m_dataStatus->GetActiveExtents(m_paramsMgr, dmName, ts, minExts, maxExts);
+    // m_dataStatus->GetActiveExtents(
+    //	m_paramsMgr, m_winName, dmName, ts, minExts, maxExts
+    //);
 
     std::vector<double> extents;
     for (int i = 0; i < minExts.size(); i++) { extents.push_back(minExts[i]); }
