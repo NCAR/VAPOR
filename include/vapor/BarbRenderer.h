@@ -50,6 +50,8 @@ private:
     vector<double> _currentBoxMinExtsTex;    // new, do we need this?
     vector<double> _currentBoxMaxExtsTex;    // new, do we need this?
 
+    GLuint _drawList;
+
     // Copied from TwoDRenderer.h
     //
     // ...TBD...
@@ -84,6 +86,29 @@ private:
     //! \param[in] const float endPoint[3] ending position of barb
     //! \param[in] float radius Radius of barb in voxels
     void drawBarb(const float startPoint[3], const float endPoint[3], float radius);
+
+    struct {
+        vector<string> fieldVarNames;
+        string         heightVarName;
+        string         colorVarName;
+        size_t         ts;
+        int            level;
+        int            lod;
+        bool           useSingleColor;
+        float          constantColor[3];
+        double         lineThickness;
+        double         opacity;
+        double         lengthScale;
+        vector<long>   grid;
+        vector<double> boxMin, boxMax;
+        float          minMapValue;
+        float          maxMapValue;
+        float          colorSamples[10][3];
+        float          alphaSamples[10];
+    } _cacheParams;
+
+    bool _isCacheDirty() const;
+    void _saveCacheParams();
 };
 };    // namespace VAPoR
 

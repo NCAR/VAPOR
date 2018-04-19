@@ -269,8 +269,10 @@ void RenderHolder::_deleteRenderer()
     // Make the renderer in the first row the active renderer
     //
     _getRow(0, rendererName, rendererType, dataSetName);
-    p->SetActiveRenderer(activeViz, rendererType, rendererName);
-    emit activeChanged(activeViz, rendererType, rendererName);
+    if (rendererName != "" || rendererType != "" || dataSetName != "") {
+        _activeRendererChanged(0, 0);
+        emit activeChanged(activeViz, rendererType, rendererName);
+    }
 
     paramsMgr->EndSaveStateGroup();
 }

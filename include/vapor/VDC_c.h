@@ -104,6 +104,7 @@ int  VDC_CoordVarExists(const VDC *p, const char *varname);
 int VDC_GetCRatios(const VDC *p, const char *varname, size_t **ratios, int *count);
 int VDC_GetCRatiosCount(const VDC *p, const char *varname);
 
+int VDC_GetVarDimLens(const VDC *p, const char *varname, int spatial, size_t **lens, int *count);
 int VDC_GetVarDimNames(const VDC *p, const char *varname, int spatial, char ***names, int *count);
 int VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char ***names, int *count);
 
