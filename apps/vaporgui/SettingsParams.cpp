@@ -378,6 +378,7 @@ void SettingsParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPr
 int SettingsParams::GetNumThreads() const
 {
     long val = GetValueLong(_numThreadsTag, 0);
+    val = val >= 0 ? val : 0;
     return ((int)val);
 }
 
