@@ -46,9 +46,9 @@
 #include "EventRouter.h"
 #include "SettingsParams.h"
 #include "ErrorReporter.h"
+#include "FileOperationChecker.h"
 
 #include "QIntValidatorWithFixup.h"
-#include "FileOperationChecker.h"
 
 using namespace VAPoR;
 
@@ -62,28 +62,28 @@ SettingsEventRouter::SettingsEventRouter(
 
 	SettingsParams* sp = (SettingsParams*)GetActiveParams();
 
-    ParamsBase::StateSave *ss = new ParamsBase::StateSave;
-    _defaultParams = new SettingsParams(ss, false);
+	ParamsBase::StateSave *ss = new ParamsBase::StateSave;
+	_defaultParams = new SettingsParams(ss, false);
 
-    QIntValidatorWithFixup*  numThreadsValidator = 
-        new QIntValidatorWithFixup(0, INT_MAX, _numThreadsEdit);
-    _numThreadsEdit->setValidator(numThreadsValidator);
+	QIntValidatorWithFixup*  numThreadsValidator = 
+		new QIntValidatorWithFixup(0, INT_MAX, _numThreadsEdit);
+	_numThreadsEdit->setValidator(numThreadsValidator);
 
-    QIntValidatorWithFixup* cacheSizeValidator = 
-        new QIntValidatorWithFixup(1000, INT_MAX, _cacheSizeEdit);
-    _cacheSizeEdit->setValidator(cacheSizeValidator);
+	QIntValidatorWithFixup* cacheSizeValidator = 
+		new QIntValidatorWithFixup(1000, INT_MAX, _cacheSizeEdit);
+	_cacheSizeEdit->setValidator(cacheSizeValidator);
 
-    QIntValidatorWithFixup* windowWidthValidator = 
-        new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
-    _windowWidthEdit->setValidator(windowWidthValidator);
+	QIntValidatorWithFixup* windowWidthValidator = 
+		new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
+	_windowWidthEdit->setValidator(windowWidthValidator);
 
-    QIntValidatorWithFixup* windowHeightValidator = 
-        new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
-    _windowHeightEdit->setValidator(windowHeightValidator);
+	QIntValidatorWithFixup* windowHeightValidator = 
+		new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
+	_windowHeightEdit->setValidator(windowHeightValidator);
 
-    QIntValidatorWithFixup* autoSaveValidator = 
-        new QIntValidatorWithFixup(1, 1000, _autoSaveIntervalEdit);
-    _autoSaveIntervalEdit->setValidator(autoSaveValidator);
+	QIntValidatorWithFixup* autoSaveValidator = 
+		new QIntValidatorWithFixup(1, 1000, _autoSaveIntervalEdit);
+	_autoSaveIntervalEdit->setValidator(autoSaveValidator);
 }
 
 
@@ -118,17 +118,17 @@ void SettingsEventRouter::hookUpTab() {
 	connect(_defaultButton, SIGNAL(clicked()),
 		this, SLOT(_restoreDefaults()));
 	connect(_sessionPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setSessionPath()));
 	connect(_metadataPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setMetadataPath()));
 	connect(_imagePathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setImagePath()));
 	connect(_tfPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setTFPath()));
 	connect(_flowPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setFlowPath()));
 	connect(_pythonPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setPythonPath()));
 	connect(_sessionPathButton, SIGNAL(clicked()),
 		this, SLOT(_chooseSessionPath()));
 	connect(_metadataPathButton, SIGNAL(clicked()),
@@ -198,15 +198,15 @@ void SettingsEventRouter::_changesPerSaveChanged() {
 void SettingsEventRouter::_chooseAutoSaveFile() {
 	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
 
-    QString fileName = QFileDialog::getSaveFileName(
-        _autoSaveFileButton, 
-        tr("Select auso-save VAPOR session file"),
+	QString fileName = QFileDialog::getSaveFileName(
+		_autoSaveFileButton, 
+		tr("Select auso-save VAPOR session file"),
 		QString::fromStdString( sParams->GetAutoSaveSessionFile() ),
-        tr("Vapor 3 Session Files (*.vs3)")
-    );
+		tr("Vapor 3 Session Files (*.vs3)")
+	);
 
-	if (! fileName.isEmpty()) 
-    {
+	if (! fileName.isEmpty() && 
+		FileOperationChecker::FileGoodToWrite(fileName)) {
 		sParams->SetAutoSaveSessionFile(fileName.toStdString());
 		_saveSettings();
 	}
@@ -214,9 +214,88 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
 
 void SettingsEventRouter::_autoSaveFileChanged() {
 	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
-	string file = _autoSaveFileEdit->text().toStdString();
-	sParams->SetAutoSaveSessionFile(file);
+	string oldFile = sParams->GetAutoSaveSessionFile();
+	QString qfile = _autoSaveFileEdit->text();
+	string file = qfile.toStdString();
+
+	if (FileOperationChecker::FileGoodToWrite(qfile))
+		sParams->SetAutoSaveSessionFile(file);
+	else {
+		_autoSaveFileEdit->setText(qfile);
+	}
 	_saveSettings();
+}
+
+void SettingsEventRouter::_setSessionPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetSessionDir,
+		&SettingsParams::GetSessionDir,
+		*sParams, _sessionPathEdit
+	);
+}
+
+void SettingsEventRouter::_setMetadataPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetMetadataDir,
+		&SettingsParams::GetMetadataDir,
+		*sParams, _metadataPathEdit
+	);
+}
+
+void SettingsEventRouter::_setImagePath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetImageDir,
+		&SettingsParams::GetImageDir,
+		*sParams, _imagePathEdit
+	);
+}
+
+void SettingsEventRouter::_setFlowPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetFlowDir,
+		&SettingsParams::GetFlowDir,
+		*sParams, _flowPathEdit
+	);
+}
+
+void SettingsEventRouter::_setPythonPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetPythonDir,
+		&SettingsParams::GetPythonDir,
+		*sParams, _pythonPathEdit
+	);
+}
+
+void SettingsEventRouter::_setTFPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetTFDir,
+		&SettingsParams::GetTFDir,
+		*sParams, _tfPathEdit
+	);
+}
+
+void SettingsEventRouter::_setFilePath(
+	void (SettingsParams::*setFunc)(string),
+	string (SettingsParams::*getFunc)() const,
+	SettingsParams &sParams,
+	QLineEdit* lineEdit
+) {
+	string path = lineEdit->text().toStdString();
+	QString qpath= QString::fromStdString(path);
+	if (FileOperationChecker::DirectoryGoodToRead(qpath)) {
+		(sParams.*setFunc)(path);
+	}
+	else {
+		string oldPath = (sParams.*getFunc)();
+		QString qoldPath = QString::fromStdString(oldPath);
+		lineEdit->setText(qoldPath);
+	}
 }
 
 void SettingsEventRouter::_setDirectoryPaths(){
@@ -225,14 +304,13 @@ void SettingsEventRouter::_setDirectoryPaths(){
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
 	paramsMgr->BeginSaveStateGroup("Settings directory");
-        
 
-	sParams->SetSessionDir(_sessionPathEdit->text().toStdString());
-	sParams->SetMetadataDir(_metadataPathEdit->text().toStdString());
-	sParams->SetImageDir(_imagePathEdit->text().toStdString());
-	sParams->SetFlowDir(_flowPathEdit->text().toStdString());
-	sParams->SetPythonDir(_pythonPathEdit->text().toStdString());
-	sParams->SetTFDir(_tfPathEdit->text().toStdString());
+//	sParams->SetSessionDir(_sessionPathEdit->text().toStdString());
+//	sParams->SetMetadataDir(_metadataPathEdit->text().toStdString());
+//	sParams->SetImageDir(_imagePathEdit->text().toStdString());
+//	sParams->SetFlowDir(_flowPathEdit->text().toStdString());
+//	sParams->SetPythonDir(_pythonPathEdit->text().toStdString());
+//	sParams->SetTFDir(_tfPathEdit->text().toStdString());
 	_saveSettings();
 
 	paramsMgr->EndSaveStateGroup();
