@@ -2,16 +2,7 @@
 #include <QMessageBox>
 
 #include "FileOperationChecker.h"
-
-void
-FileOperationChecker::PopWarning( const QString& errorMessage )
-{
-    QMessageBox msgBox; 
-    msgBox.setWindowTitle("File Error!");
-    msgBox.setText( errorMessage );
-    msgBox.setStandardButtons( QMessageBox::Close );
-    msgBox.exec();
-}
+#include "ErrorReporter.h"
 
 bool 
 FileOperationChecker::DirectoryGoodToRead( const QString& filename )
@@ -23,7 +14,7 @@ FileOperationChecker::DirectoryGoodToRead( const QString& filename )
     {
         QString msg(" The following input does not exist! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -32,7 +23,7 @@ FileOperationChecker::DirectoryGoodToRead( const QString& filename )
     {
         QString msg(" The following input is NOT a directory! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -41,7 +32,7 @@ FileOperationChecker::DirectoryGoodToRead( const QString& filename )
     {
         QString msg(" The following input is NOT readable! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -50,7 +41,7 @@ FileOperationChecker::DirectoryGoodToRead( const QString& filename )
     {
         QString msg(" The following input is NOT executable! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -67,7 +58,7 @@ FileOperationChecker::FileGoodToRead( const QString& filename )
     {
         QString msg(" The following input does not exist! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -76,7 +67,7 @@ FileOperationChecker::FileGoodToRead( const QString& filename )
     {
         QString msg(" The following input is NOT a file! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -85,7 +76,7 @@ FileOperationChecker::FileGoodToRead( const QString& filename )
     {
         QString msg(" The following input is NOT readable! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -109,9 +100,10 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
         }
         else
         {
+            std::fclose( f );
             QString msg(" The following input file cannot be created! \n" );
             msg += filename;
-            PopWarning( msg );
+            MSG_WARN( msg.toStdString() );
             return false;
         }
     }
@@ -123,7 +115,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     {
         QString msg(" The following input is NOT a file! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -132,7 +124,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     {
         QString msg(" The following input is NOT readable! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
@@ -141,7 +133,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     {
         QString msg(" The following input is NOT writable! \n" );
         msg += filename;
-        PopWarning( msg );
+        MSG_WARN( msg.toStdString() );
         return false;
     }
 
