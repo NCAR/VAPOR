@@ -48,6 +48,7 @@
 #include "ErrorReporter.h"
 
 #include "QIntValidatorWithFixup.h"
+#include "FileOperationChecker.h"
 
 using namespace VAPoR;
 
@@ -224,6 +225,7 @@ void SettingsEventRouter::_setDirectoryPaths(){
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
 	paramsMgr->BeginSaveStateGroup("Settings directory");
+        
 
 	sParams->SetSessionDir(_sessionPathEdit->text().toStdString());
 	sParams->SetMetadataDir(_metadataPathEdit->text().toStdString());
