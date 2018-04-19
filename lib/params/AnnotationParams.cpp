@@ -59,6 +59,7 @@ const string AnnotationParams::_timeLLYTag = "TimeLLY";
 const string AnnotationParams::_timeColorTag = "TimeColor";
 const string AnnotationParams::_timeTypeTag = "TimeType";
 const string AnnotationParams::_timeSizeTag = "TimeSize";
+const string AnnotationParams::_projStringTag = "ProjString";
 
 vector<double> AnnotationParams::_previousStretch;
 
@@ -166,27 +167,34 @@ void AnnotationParams::SetBackgroundColor(vector<double> color) {
 }
 
 string AnnotationParams::GetCurrentAxisDataMgrName() const {
-    return GetValueString(_currentAxisDataMgrTag, "");
+    return GetValueString(_currentAxisDataMgrTag, "default");
 }
 
 void AnnotationParams::SetCurrentAxisDataMgrName(string dmName) {
     string msg = "Setting current DataMgr w.r.t. axis annotations";
+    cout << "setting current axis DM " << dmName << endl;
     SetValueString(_currentAxisDataMgrTag, msg, dmName);
 }
 
-AxisAnnotation *AnnotationParams::GetAxisAnnotation(string dataMgr) {
-    if (dataMgr == "") {
-        dataMgr = GetCurrentAxisDataMgrName();
-    }
+string AnnotationParams::GetProjString() const {
+    return GetValueString(_projStringTag, "");
+}
 
-    //	if (dataMgr == "") return(NULL);
+void AnnotationParams::SetProjString(string projString) {
+    string msg = "Set proj string used by axis annotations";
+    SetValueString(_projStringTag, msg, projString);
+}
+
+AxisAnnotation *AnnotationParams::GetAxisAnnotation(string dataMgr) {
+    dataMgr = "default";
 
     vector<string> names = _axisAnnotations->GetNames();
     if (_axisAnnotations->GetParams(dataMgr) == NULL) {
         AxisAnnotation newAnnotation(_ssave);
         _axisAnnotations->Insert(&newAnnotation, dataMgr);
     }
-    AxisAnnotation *aa = (AxisAnnotation *)_axisAnnotations->GetParams(dataMgr);
+    AxisAnnotation *aa;
+    aa = (AxisAnnotation *)_axisAnnotations->GetParams(dataMgr);
     return aa;
 }
 
