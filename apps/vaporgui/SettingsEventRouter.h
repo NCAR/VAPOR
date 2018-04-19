@@ -91,11 +91,6 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
   private:
     //SettingsEventRouter() {}
     void _blockSignals(bool block);
-    void _undoUserWarnings();
-    void _warnUserAfterCacheChange();
-    void _warnUserAfterThreadChange();
-    void _warnUserAfterWidthChange();
-    void _warnUserAfterHeightChange();
 
     void _updateGeneralSettings();
     void _updateStartupSettings();
