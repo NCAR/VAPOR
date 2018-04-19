@@ -109,9 +109,9 @@ public:
 	void SetBackgroundColor(std::vector<double> color);
 
 	string GetCurrentAxisDataMgrName() const;
-	void SetCurrentAxisDataMgrName(string dataMgr);
+	void SetCurrentAxisDataMgrName(string dataMgr="default");
 
-	AxisAnnotation* GetAxisAnnotation(string dataMgr = "");
+	AxisAnnotation* GetAxisAnnotation(string dataMgr="default");
 
 	void SetAxisArrowCoords(std::vector<double> coords);
 	std::vector<double> GetAxisArrowCoords() const;
@@ -144,6 +144,9 @@ public:
 
 	int GetTimeSize() const;
 	void SetTimeSize(int size);
+
+	string GetProjString() const;
+	void SetProjString(string projString);
 
 	static string GetClassType() {
 		return("AnnotationParams");
@@ -185,6 +188,8 @@ private:
 	static const string _timeColorTag;
 	static const string _timeTypeTag;
 	static const string _timeSizeTag;
+
+	static const string _projStringTag;
 
 	void _init();
 

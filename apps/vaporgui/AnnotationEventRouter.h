@@ -94,7 +94,6 @@ protected slots:
 	void timeLLXChanged();
 	void timeLLYChanged();
 	void timeSizeChanged();
-	void setCurrentAxisDataMgr(int);
 	void copyRegionFromRenderer();
 
 private:
@@ -141,6 +140,8 @@ private:
 	void updateTimeSize();
 
 	void updateDataMgrCombo();
+	void updateProjString();
+	string getProjString();
 
 	VAPoR::AxisAnnotation* _getCurrentAxisAnnotation();
 

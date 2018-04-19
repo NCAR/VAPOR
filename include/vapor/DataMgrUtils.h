@@ -83,6 +83,12 @@ namespace DataMgrUtils {
 	double coords[], int npoints = 1 
  );
 
+ int ConvertPCSToLonLat(
+	string projString,
+	double coords[], int npoints = 1
+ );
+
+
  //! Convert lon/lat coordinates to Projected Coordinate System coordinates,
  //!  in-place. 
  //!
@@ -99,6 +105,11 @@ namespace DataMgrUtils {
  //!
  int ConvertLonLatToPCS(
 	const DataMgr *dataMgr,
+	double coords[], int npoints = 1
+ );
+
+ int ConvertLonLatToPCS(
+	string projString,
 	double coords[], int npoints = 1
  );
 
