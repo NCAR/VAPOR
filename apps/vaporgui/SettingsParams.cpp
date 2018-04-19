@@ -411,8 +411,9 @@ void SettingsParams::SetCurrentPrefsPath(string pth){
 }
 
 int SettingsParams::GetNumThreads() const {
-	long val = GetValueLong(_numThreadsTag, 0);
-	return((int) val);
+    long val = GetValueLong(_numThreadsTag, 0);
+    val = val >= 0 ? val : 0; 
+    return((int) val);
 }
 
 void SettingsParams::SetNumThreads(int val) {
