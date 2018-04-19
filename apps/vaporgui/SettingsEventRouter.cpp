@@ -48,6 +48,7 @@
 #include "ErrorReporter.h"
 
 #include "QIntValidatorWithFixup.h"
+#include "FileOperationChecker.h"
 
 using namespace VAPoR;
 
