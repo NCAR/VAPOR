@@ -3,7 +3,7 @@
  * is good to read/write.
  *
  * The rational is recorded in this post:
- * https://github.com/NCAR/VAPOR/wiki/Robust-File-Operations-with-Qt
+ * https://github.com/NCAR/VAPOR/wiki/Robust-File-Operations-with-VAPOR-and-Qt
  *
  */
 
