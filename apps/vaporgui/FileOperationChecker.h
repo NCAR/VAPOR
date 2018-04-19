@@ -10,7 +10,4 @@ public:
     static bool DirectoryGoodToRead(const QString &filename);
     static bool FileGoodToRead(const QString &filename);
     static bool FileGoodToWrite(const QString &filename);
-
-private:
-    static void PopWarning(const QString &filename);
 };
