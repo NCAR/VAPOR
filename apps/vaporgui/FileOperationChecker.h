@@ -18,6 +18,8 @@ public:
     static bool DirectoryGoodToRead( const QString& filename );
     static bool FileGoodToRead( const QString& filename );
     static bool FileGoodToWrite( const QString& filename );
+    static bool FileHasCorrectSuffix( const QString& filename, 
+                                      const QString& expectedSuffix );
 };
 
 #endif

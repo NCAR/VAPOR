@@ -139,3 +139,14 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
 
     return true;
 }
+    
+bool 
+FileOperationChecker::FileHasCorrectSuffix( const QString& filename, 
+                                            const QString& expectedSuffix )
+{
+    QFileInfo fileInfo( filename );
+    if( fileInfo.suffix().compare( expectedSuffix ) == 0 )
+        return true;
+    else
+        return false;    
+}
