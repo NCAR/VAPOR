@@ -900,11 +900,12 @@ int Visualizer::captureImage(string filename)
     } else    // write png files
     {
         FILE *test = fopen((const char *)filename.c_str(), "wb");
-        fclose(test);
         if (!test) {
+            fclose(test);
             SetErrMsg("Image Capture Error: Error opening output PNG file: %s", (const char *)filename.c_str());
             return -1;
         }
+        fclose(test);
     }
     // Get the image buffer
     unsigned char *buf = new unsigned char[3 * width * height];

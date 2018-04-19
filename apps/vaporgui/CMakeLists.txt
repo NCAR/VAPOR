@@ -53,6 +53,7 @@ set (SRCS
 	QRange.cpp
 	QSinglePoint.cpp
 	QIntValidatorWithFixup.cpp
+    FileOperationChecker.cpp
 	Combo.cpp
 
 	# Need to include all files that request .ui files
