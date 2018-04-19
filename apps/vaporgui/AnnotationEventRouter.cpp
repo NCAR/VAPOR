@@ -77,8 +77,6 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
 
     connectAnnotationWidgets();
 
-    setCurrentAxisDataMgr(0);
-
     _animConnected = false;
     _ap = NULL;
 }
@@ -98,7 +96,6 @@ void AnnotationEventRouter::connectAnnotationWidgets()
     connect(xTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrientation(int)));
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
-    connect(dataMgrSelectorCombo, SIGNAL(activated(int)), this, SLOT(setCurrentAxisDataMgr(int)));
     connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
     connect(_arrowXEdit, SIGNAL(returnPressed()), this, SLOT(setXArrowPosition()));
     connect(_arrowYEdit, SIGNAL(returnPressed()), this, SLOT(setYArrowPosition()));
@@ -142,6 +139,7 @@ void AnnotationEventRouter::_updateTab()
     updateBackgroundColor();
     updateTimePanel();
     updateAxisAnnotations();
+    updateProjString();
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
@@ -156,32 +154,6 @@ void AnnotationEventRouter::_updateTab()
     _axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
 
     return;
-}
-
-void AnnotationEventRouter::updateDataMgrCombo()
-{
-    // Save current selection
-    AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
-    string            currentSelection = vParams->GetCurrentAxisDataMgrName();
-
-    // Repopulate the combo's entries
-    ParamsMgr *    pMgr = _controlExec->GetParamsMgr();
-    vector<string> names = pMgr->GetDataMgrNames();
-    dataMgrSelectorCombo->clear();
-    for (int i = 0; i < names.size(); i++) {
-        QString name = QString::fromStdString(names[i]);
-        dataMgrSelectorCombo->addItem(name);
-    }
-
-    // Reset the saved selection
-    QString qCurrentSelection = QString::fromStdString(currentSelection);
-    int     index = dataMgrSelectorCombo->findText(qCurrentSelection);
-    if (index > 0)
-        dataMgrSelectorCombo->setCurrentIndex(index);
-    else {
-        dataMgrSelectorCombo->setCurrentIndex(0);
-        setCurrentAxisDataMgr(0);
-    }
 }
 
 void AnnotationEventRouter::copyRegionFromRenderer()
@@ -278,12 +250,7 @@ void AnnotationEventRouter::updateAxisEnabledCheckbox()
 
 void AnnotationEventRouter::updateLatLonCheckbox()
 {
-    string      dmName = dataMgrSelectorCombo->currentText().toStdString();
-    DataStatus *dataStatus = _controlExec->GetDataStatus();
-    DataMgr *   dataMgr = dataStatus->GetDataMgr(dmName);
-    if (dataMgr == NULL) return;    // assert(dataMgr);
-    string projString = dataMgr->GetMapProjection();
-
+    string projString = getProjString();
     if (projString.size() == 0) {
         _latLonAnnotationCheckbox->setEnabled(false);
         return;
@@ -382,6 +349,21 @@ void AnnotationEventRouter::updateAxisTable()
     _annotationVaporTable->Update(5, 3, tableValues, rowHeaders, colHeaders);
 }
 
+string AnnotationEventRouter::getProjString()
+{
+    GUIStateParams *params = GetStateParams();
+    string          projString = params->GetProjectionString();
+    return projString;
+}
+
+void AnnotationEventRouter::updateProjString()
+{
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    GUIStateParams *  params = GetStateParams();
+    string            projString = params->GetProjectionString();
+    aParams->SetProjString(projString);
+}
+
 void AnnotationEventRouter::convertPCSToLon(double &xCoord)
 {
     double dummy = 0.;
@@ -396,15 +378,11 @@ void AnnotationEventRouter::convertPCSToLat(double &yCoord)
 
 void AnnotationEventRouter::convertPCSToLonLat(double &xCoord, double &yCoord)
 {
-    DataStatus *      dataStatus = _controlExec->GetDataStatus();
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    string            dataMgrName = vfParams->GetCurrentAxisDataMgrName();
-    DataMgr *         dataMgr = dataStatus->GetDataMgr(dataMgrName);
-
+    string projString = getProjString();
     double coords[2] = {xCoord, yCoord};
     double coordsForError[2] = {coords[0], coords[1]};
 
-    int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1);
+    int rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
     if (rc < 0) {
         char buff[100];
         sprintf(buff, "Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]);
@@ -430,15 +408,11 @@ void AnnotationEventRouter::convertLatToPCS(double &yCoord)
 
 void AnnotationEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
 {
-    DataStatus *      dataStatus = _controlExec->GetDataStatus();
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    string            dataMgrName = vfParams->GetCurrentAxisDataMgrName();
-    DataMgr *         dataMgr = dataStatus->GetDataMgr(dataMgrName);
-
+    string projString = getProjString();
     double coords[2] = {xCoord, yCoord};
     double coordsForError[2] = {coords[0], coords[1]};
 
-    int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1);
+    int rc = DataMgrUtils::ConvertLonLatToPCS(projString, coords, 1);
     if (rc < 0) {
         char buff[100];
         sprintf(buff, "Could not convert point %f, %f to PCS", coordsForError[0], coordsForError[1]);
@@ -452,11 +426,12 @@ void AnnotationEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
 
 AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
-    if (dataMgr.empty()) return (NULL);
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    // string dataMgr = aParams->GetCurrentAxisDataMgrName();
+    // if (dataMgr.empty()) return(NULL);
 
-    AxisAnnotation *aa = vfParams->GetAxisAnnotation(dataMgr);
+    // AxisAnnotation* aa = aParams->GetAxisAnnotation(dataMgr);
+    AxisAnnotation *aa = aParams->GetAxisAnnotation();
 
     bool initialized = aa->GetAxisAnnotationInitialized();
     if (!initialized) initializeAnnotation(aa);
@@ -492,9 +467,9 @@ void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
     aa->SetMaxTics(maxExts);
     aa->SetAxisOrigin(minExts);
 
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    string            dataMgr = vfParams->GetCurrentAxisDataMgrName();
-    aa->SetDataMgrName(dataMgr);
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    // string dataMgr = aParams->GetCurrentAxisDataMgrName();
+    aa->SetDataMgrName("default");    // dataMgr);
 }
 
 void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa)
@@ -512,7 +487,6 @@ void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa)
 
 void AnnotationEventRouter::updateAxisAnnotations()
 {
-    updateDataMgrCombo();
     updateCopyRegionCombo();
     updateAxisEnabledCheckbox();
     updateLatLonCheckbox();
@@ -572,15 +546,6 @@ void AnnotationEventRouter::axisAnnotationTableChanged()
     aa->SetAxisOrigin(origins);
 }
 
-void AnnotationEventRouter::setCurrentAxisDataMgr(int index)
-{
-    QString qDataMgr = dataMgrSelectorCombo->itemText(index);
-    string  dataMgr = qDataMgr.toStdString();
-
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    vfParams->SetCurrentAxisDataMgrName(dataMgr);
-}
-
 vector<double> AnnotationEventRouter::getTableRow(int row)
 {
     vector<double> contents;
@@ -619,15 +584,15 @@ void AnnotationEventRouter::setRegionColor()
     setColorHelper(regionColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    vfParams->SetRegionColor(rgb);
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    aParams->SetRegionColor(rgb);
 }
 
 void AnnotationEventRouter::updateRegionColor()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     vector<double>    rgb;
-    vfParams->GetRegionColor(rgb);
+    aParams->GetRegionColor(rgb);
 
     updateColorHelper(rgb, regionColorEdit);
 }
@@ -639,15 +604,15 @@ void AnnotationEventRouter::setDomainColor()
     setColorHelper(domainColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    vfParams->SetDomainColor(rgb);
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    aParams->SetDomainColor(rgb);
 }
 
 void AnnotationEventRouter::updateDomainColor()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     vector<double>    rgb;
-    vfParams->GetDomainColor(rgb);
+    aParams->GetDomainColor(rgb);
 
     updateColorHelper(rgb, domainColorEdit);
 }
@@ -659,8 +624,8 @@ void AnnotationEventRouter::setBackgroundColor()
     setColorHelper(backgroundColorEdit, rgb);
     if (rgb.size() != 3) return;
 
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    vfParams->SetBackgroundColor(rgb);
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    aParams->SetBackgroundColor(rgb);
 }
 
 void AnnotationEventRouter::updateBackgroundColor()
@@ -876,8 +841,8 @@ void AnnotationEventRouter::setLatLonAnnot(bool val)
 
 void AnnotationEventRouter::setDomainFrameEnabled()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    vfParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    aParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
 }
 
 void AnnotationEventRouter::setAxisAnnotation(bool toggled)
@@ -900,27 +865,27 @@ void AnnotationEventRouter::setAxisTextSize(int size)
 
 void AnnotationEventRouter::setAxisArrowsEnabled()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
-    vfParams->SetShowAxisArrows(_axisArrowCheckbox->isChecked());
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    aParams->SetShowAxisArrows(_axisArrowCheckbox->isChecked());
 }
 
 void AnnotationEventRouter::setXArrowPosition()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     float             pos = _arrowXEdit->text().toFloat();
-    vfParams->SetXAxisArrowPosition(pos);
+    aParams->SetXAxisArrowPosition(pos);
 }
 
 void AnnotationEventRouter::setYArrowPosition()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     float             pos = _arrowYEdit->text().toFloat();
-    vfParams->SetYAxisArrowPosition(pos);
+    aParams->SetYAxisArrowPosition(pos);
 }
 
 void AnnotationEventRouter::setZArrowPosition()
 {
-    AnnotationParams *vfParams = (AnnotationParams *)GetActiveParams();
+    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     float             pos = _arrowZEdit->text().toFloat();
-    vfParams->SetZAxisArrowPosition(pos);
+    aParams->SetZAxisArrowPosition(pos);
 }

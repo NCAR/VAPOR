@@ -99,7 +99,7 @@ private:
     //! Render the domain fram
     void drawDomainFrame(size_t ts) const;
 
-    std::vector<double> getDomainExtents(string dmName = "") const;
+    std::vector<double> getDomainExtents() const;
     AxisAnnotation *    getCurrentAxisAnnotation();
     string              getCurrentDataMgrName() const;
     void                scaleNormalizedCoordinatesToWorld(std::vector<double> &coords, string dataMgrName);
@@ -115,9 +115,9 @@ private:
     void       applyTransform(Transform *t);
     void       renderText(double text, double coords[], AxisAnnotation *aa = NULL);
     Transform *getTransform(string dataMgr = "");
-    void       convertPointToLon(double &xCoord, string dataMgr = "");
-    void       convertPointToLat(double &yCoord, string dataMgr = "");
-    void       convertPointToLonLat(double &xCoord, double &yCoord, string dataMgr = "");
+    void       convertPointToLon(double &xCoord);
+    void       convertPointToLat(double &yCoord);
+    void       convertPointToLonLat(double &xCoord, double &yCoord);
 
     // Draw Axis arrows
     //
