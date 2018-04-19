@@ -1,7 +1,14 @@
 /*
  * This class provides a set of functions that check if a file/directory
  * is good to read/write.
+ *
+ * The rational is recorded in this post:
+ * https://github.com/NCAR/VAPOR/wiki/Robust-File-Operations-with-Qt
+ *
  */
+
+#ifndef FILEOPERATIONCHECKER_H
+#define FILEOPERATIONCHECKER_H
 
 #include <QString>
 
@@ -11,3 +18,5 @@ public:
     static bool FileGoodToRead(const QString &filename);
     static bool FileGoodToWrite(const QString &filename);
 };
+
+#endif
