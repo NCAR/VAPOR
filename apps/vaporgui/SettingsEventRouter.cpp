@@ -403,7 +403,7 @@ void SettingsEventRouter::_restoreDefaults()
     XmlNode *parent = settingsNode->GetParent();
     XmlNode *defaultNode = _defaultParams->GetNode();
 
-    *settingsParams = *_defaultParams;
+    *settingsParams = SettingsParams(*_defaultParams);
     settingsParams->GetNode()->SetParent(parent);
 
     _saveSettings();
