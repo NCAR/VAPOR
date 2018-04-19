@@ -79,6 +79,10 @@ int ConvertPCSToLonLat(
     const DataMgr *dataMgr,
     double coords[], int npoints = 1);
 
+int ConvertPCSToLonLat(
+    string projString,
+    double coords[], int npoints = 1);
+
 //! Convert lon/lat coordinates to Projected Coordinate System coordinates,
 //!  in-place.
 //!
@@ -95,6 +99,10 @@ int ConvertPCSToLonLat(
 //!
 int ConvertLonLatToPCS(
     const DataMgr *dataMgr,
+    double coords[], int npoints = 1);
+
+int ConvertLonLatToPCS(
+    string projString,
     double coords[], int npoints = 1);
 
 //! Method that obtains one or more regular grids at specified timestep,
