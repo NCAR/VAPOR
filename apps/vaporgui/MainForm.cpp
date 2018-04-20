@@ -1323,6 +1323,9 @@ bool MainForm::openDataHelper(
 		return (false);;
 	}
 
+	DataStatus* ds = _controlExec->GetDataStatus();
+	p->SetProjectionString(ds->GetMapProjection());
+
 	p->InsertOpenDateSet(dataSetName, format, files);
 
 	_tabMgr->LoadDataNotify(dataSetName);
@@ -1931,35 +1934,43 @@ void MainForm::_setProj4String(string proj4String) {
 
 	GUIStateParams *p = GetStateParams();
 
+	DataStatus* ds = _controlExec->GetDataStatus();
+	string currentString = ds->GetMapProjection();
+
+	if (proj4String == currentString) return;
+
 	_App->removeEventFilter(this);
 
 	vector <string> dataSets =  p->GetOpenDataSetNames();
 
-	DataStatus* ds = _controlExec->GetDataStatus();
 
-	// Close and re-open any data set that doesn't have a matching
+	// Close and re-open all data with new
 	// proj4 string
 	//
+	map <int, vector <string> > filesMap;
+	map <int, string> formatsMap;
 	for (int i=0; i<dataSets.size(); i++ ) {
-		string currentString = ds->GetMapProjection(dataSets[i]);
 
-		if (currentString != proj4String) {
+		// Save list of files and format before close so we can re-open
+		//
+		filesMap[i] = p->GetOpenDataSetPaths(dataSets[i]);
+		formatsMap[i] = p->GetOpenDataSetFormat(dataSets[i]);
 
-			// Save list of files and format before close so we can re-open
-			//
-			vector <string> files = p->GetOpenDataSetPaths(dataSets[i]);
-			string format = p->GetOpenDataSetFormat(dataSets[i]);
+		closeDataHelper(dataSets[i]);
+	}
 
-			closeDataHelper(dataSets[i]);
+	vector <string> options = {"-project_to_pcs"};
+	if (! proj4String.empty()) {
+		options.push_back("-proj4");
+		options.push_back(proj4String);
+	};
 
-			vector <string> options = {"-project_to_pcs"};
-			if (! proj4String.empty()) {
-				options.push_back("-proj4");
-				options.push_back(proj4String);
-			};
+	for (int i=0; i<dataSets.size(); i++ ) {
 
-			(void) openDataHelper(dataSets[i], format, files, options);
-		}
+		(void) openDataHelper(
+			dataSets[i], formatsMap[i], filesMap[i], options
+		);
+
 	}
 
 	_App->installEventFilter(this);
