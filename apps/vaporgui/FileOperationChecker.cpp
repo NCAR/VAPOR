@@ -1,8 +1,5 @@
 #include <QFileInfo>
-#include <QMessageBox>
-
 #include "FileOperationChecker.h"
-#include "ErrorReporter.h"
 
 bool FileOperationChecker::DirectoryGoodToRead(const QString &filename)
 {
@@ -12,7 +9,7 @@ bool FileOperationChecker::DirectoryGoodToRead(const QString &filename)
     if (!fileInfo.exists()) {
         QString msg(" The following input does not exist! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -20,7 +17,7 @@ bool FileOperationChecker::DirectoryGoodToRead(const QString &filename)
     if (!fileInfo.isDir()) {
         QString msg(" The following input is NOT a directory! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -28,7 +25,7 @@ bool FileOperationChecker::DirectoryGoodToRead(const QString &filename)
     if (!fileInfo.isReadable()) {
         QString msg(" The following input is NOT readable! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -36,7 +33,7 @@ bool FileOperationChecker::DirectoryGoodToRead(const QString &filename)
     if (!fileInfo.isExecutable()) {
         QString msg(" The following input is NOT executable! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -51,7 +48,7 @@ bool FileOperationChecker::FileGoodToRead(const QString &filename)
     if (!fileInfo.exists()) {
         QString msg(" The following input does not exist! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -59,7 +56,7 @@ bool FileOperationChecker::FileGoodToRead(const QString &filename)
     if (!fileInfo.isFile()) {
         QString msg(" The following input is NOT a file! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -67,7 +64,7 @@ bool FileOperationChecker::FileGoodToRead(const QString &filename)
     if (!fileInfo.isReadable()) {
         QString msg(" The following input is NOT readable! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -89,7 +86,7 @@ bool FileOperationChecker::FileGoodToWrite(const QString &filename)
             std::fclose(f);
             QString msg(" The following input file cannot be created! \n");
             msg += filename;
-            MSG_WARN(msg.toStdString());
+            _message = msg;
             return false;
         }
     }
@@ -100,7 +97,7 @@ bool FileOperationChecker::FileGoodToWrite(const QString &filename)
     if (!fileInfo.isFile()) {
         QString msg(" The following input is NOT a file! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -108,7 +105,7 @@ bool FileOperationChecker::FileGoodToWrite(const QString &filename)
     if (!fileInfo.isReadable()) {
         QString msg(" The following input is NOT readable! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -116,7 +113,7 @@ bool FileOperationChecker::FileGoodToWrite(const QString &filename)
     if (!fileInfo.isWritable()) {
         QString msg(" The following input is NOT writable! \n");
         msg += filename;
-        MSG_WARN(msg.toStdString());
+        _message = msg;
         return false;
     }
 
@@ -128,6 +125,15 @@ bool FileOperationChecker::FileHasCorrectSuffix(const QString &filename, const Q
     QFileInfo fileInfo(filename);
     if (fileInfo.suffix().compare(expectedSuffix) == 0)
         return true;
-    else
+    else {
+        QString msg(" The following input does NOT have the expected suffix: ");
+        msg += expectedSuffix;
+        msg += "\n";
+        msg += filename;
+        _message = msg;
+
         return false;
+    }
 }
+
+QString FileOperationChecker::GetLastErrorMessage() { return _message; }

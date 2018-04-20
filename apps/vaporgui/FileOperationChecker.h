@@ -14,10 +14,14 @@
 
 class FileOperationChecker {
 public:
-    static bool DirectoryGoodToRead(const QString &filename);
-    static bool FileGoodToRead(const QString &filename);
-    static bool FileGoodToWrite(const QString &filename);
-    static bool FileHasCorrectSuffix(const QString &filename, const QString &expectedSuffix);
+    static bool    DirectoryGoodToRead(const QString &filename);
+    static bool    FileGoodToRead(const QString &filename);
+    static bool    FileGoodToWrite(const QString &filename);
+    static bool    FileHasCorrectSuffix(const QString &filename, const QString &expectedSuffix);
+    static QString GetLastErrorMessage();
+
+private:
+    static QString _message;
 };
 
 #endif
