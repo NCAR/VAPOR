@@ -448,11 +448,10 @@ void AnnotationEventRouter::convertPCSToLonLat(
 
     int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1);
     if (rc < 0) {
-        char buff[100];
-        sprintf(buff, "Could not convert point %f, %f to Lon/Lat",
-                coordsForError[0], coordsForError[1]);
-        MyBase::SetErrMsg(buff);
-        MSG_ERR(buff);
+        MyBase::SetErrMsg(
+            "Could not convert point %f, %f to Lon/Lat",
+            coordsForError[0], coordsForError[1]);
+        MSG_ERR("Error converting PCS to Lat-Lon coordinates");
     }
 
     xCoord = coords[0];
@@ -483,11 +482,10 @@ void AnnotationEventRouter::convertLonLatToPCS(
 
     int rc = DataMgrUtils::ConvertLonLatToPCS(dataMgr, coords, 1);
     if (rc < 0) {
-        char buff[100];
-        sprintf(buff, "Could not convert point %f, %f to PCS",
-                coordsForError[0], coordsForError[1]);
-        MyBase::SetErrMsg(buff);
-        MSG_ERR(buff);
+        MyBase::SetErrMsg(
+            "Could not convert point %f, %f to PCS",
+            coordsForError[0], coordsForError[1]);
+        MSG_ERR("Error converting from Lat-Lon to PCS coordinates");
     }
 
     xCoord = coords[0];
