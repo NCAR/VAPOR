@@ -67,6 +67,9 @@ public:
     int      ColumnCount() { return _table->columnCount(); }
     QWidget *CellWidget(int row, int col) { return _table->cellWidget(row, col); }
 
+    void SetActiveRow(int row);
+    void SetActiveCol(int col);
+
 public slots:
     void emitValueChanged();
     // void emitCellClicked();
