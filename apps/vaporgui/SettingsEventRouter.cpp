@@ -426,8 +426,6 @@ void SettingsEventRouter::_restoreDefaults() {
     *settingsParams = *newParams;
     settingsParams->GetNode()->SetParent(parent);
 
-    cout << settingsParams->GetCacheMB() << endl;
-
     delete newParams;
 
     _saveSettings();
