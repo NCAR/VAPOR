@@ -160,23 +160,12 @@ void AnnotationEventRouter::GetWebHelp(
 
 void AnnotationEventRouter::_updateTab() {
     ParamsMgr *pMgr = _controlExec->GetParamsMgr();
-    vector<string> names = pMgr->GetDataMgrNames();
-
-    // If no data managers we can't update
-    //
-    if (names.empty()) {
-        this->setEnabled(false);
-        return;
-    } else {
-        this->setEnabled(true);
-    }
 
     updateRegionColor();
     updateDomainColor();
     updateBackgroundColor();
     updateTimePanel();
     updateAxisAnnotations();
-    updateProjString();
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
@@ -391,16 +380,9 @@ void AnnotationEventRouter::updateAxisTable() {
 }
 
 string AnnotationEventRouter::getProjString() {
-    GUIStateParams *params = GetStateParams();
-    string projString = params->GetProjectionString();
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    string projString = dataStatus->GetMapProjection();
     return projString;
-}
-
-void AnnotationEventRouter::updateProjString() {
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    GUIStateParams *params = GetStateParams();
-    string projString = params->GetProjectionString();
-    aParams->SetProjString(projString);
 }
 
 void AnnotationEventRouter::convertPCSToLon(
@@ -426,7 +408,6 @@ void AnnotationEventRouter::convertPCSToLonLat(
         char buff[100];
         sprintf(buff, "Could not convert point %f, %f to Lon/Lat",
                 coordsForError[0], coordsForError[1]);
-        MyBase::SetErrMsg(buff);
         MSG_ERR(buff);
     }
 
@@ -457,7 +438,6 @@ void AnnotationEventRouter::convertLonLatToPCS(
         char buff[100];
         sprintf(buff, "Could not convert point %f, %f to PCS",
                 coordsForError[0], coordsForError[1]);
-        MyBase::SetErrMsg(buff);
         MSG_ERR(buff);
     }
 
@@ -467,10 +447,6 @@ void AnnotationEventRouter::convertLonLatToPCS(
 
 AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation() {
     AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    //string dataMgr = aParams->GetCurrentAxisDataMgrName();
-    //if (dataMgr.empty()) return(NULL);
-
-    //AxisAnnotation* aa = aParams->GetAxisAnnotation(dataMgr);
     AxisAnnotation *aa = aParams->GetAxisAnnotation();
 
     bool initialized = aa->GetAxisAnnotationInitialized();
@@ -507,8 +483,6 @@ void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa) {
     aa->SetAxisOrigin(minExts);
 
     AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    //string dataMgr = aParams->GetCurrentAxisDataMgrName();
-    aa->SetDataMgrName("default"); //dataMgr);
 }
 
 void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa) {
