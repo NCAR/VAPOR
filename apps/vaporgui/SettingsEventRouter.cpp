@@ -403,8 +403,13 @@ void SettingsEventRouter::_restoreDefaults()
     XmlNode *parent = settingsNode->GetParent();
     XmlNode *defaultNode = _defaultParams->GetNode();
 
-    *settingsParams = SettingsParams(*_defaultParams);
+    SettingsParams *newParams = new SettingsParams(*_defaultParams);
+    *settingsParams = *newParams;
     settingsParams->GetNode()->SetParent(parent);
+
+    cout << settingsParams->GetCacheMB() << endl;
+
+    delete newParams;
 
     _saveSettings();
 
