@@ -105,7 +105,7 @@ class PARAMS_API AnnotationParams : public ParamsBase {
     string GetCurrentAxisDataMgrName() const;
     void SetCurrentAxisDataMgrName(string dataMgr = "default");
 
-    AxisAnnotation *GetAxisAnnotation(string dataMgr = "default");
+    AxisAnnotation *GetAxisAnnotation();
 
     void SetAxisArrowCoords(std::vector<double> coords);
     std::vector<double> GetAxisArrowCoords() const;
@@ -138,9 +138,6 @@ class PARAMS_API AnnotationParams : public ParamsBase {
 
     int GetTimeSize() const;
     void SetTimeSize(int size);
-
-    string GetProjString() const;
-    void SetProjString(string projString);
 
     static string GetClassType() {
         return ("AnnotationParams");
