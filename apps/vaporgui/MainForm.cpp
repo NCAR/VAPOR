@@ -1286,7 +1286,7 @@ void MainForm::showCitationReminder()
     reminder.append("We depend on evidence of the software's value to the scientific community.  ");
     reminder.append("You are free to use VAPOR as permitted under the terms and conditions of the licence.\n\n ");
     reminder.append("Please cite VAPOR in your publications and presentations. ");
-    reminder.append("Citation details:\n    http://www.vapor.ucar.edu/index.php?id=citation");
+    reminder.append("Citation details:\n    http://www.vapor.ucar.edu/citation");
     msgBox.setText(reminder);
 
     msgBox.setStandardButtons(QMessageBox::Ok);
