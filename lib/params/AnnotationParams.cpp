@@ -69,6 +69,9 @@ vector<double> AnnotationParams::_previousStretch;
 //
 static ParamsRegistrar<AnnotationParams> registrar(AnnotationParams::GetClassType());
 
+namespace {
+	string defaultAnnotation = "default";
+}
 
 AnnotationParams::AnnotationParams(
 	ParamsBase::StateSave *ssave
@@ -171,34 +174,22 @@ void AnnotationParams::SetBackgroundColor(vector<double> color) {
 }
 
 string AnnotationParams::GetCurrentAxisDataMgrName() const {
-	return GetValueString(_currentAxisDataMgrTag, "default");
+	return GetValueString(_currentAxisDataMgrTag, defaultAnnotation);
 }
 
 void AnnotationParams::SetCurrentAxisDataMgrName(string dmName) {
 	string msg = "Setting current DataMgr w.r.t. axis annotations";
-	cout << "setting current axis DM " << dmName << endl;
 	SetValueString(_currentAxisDataMgrTag, msg, dmName);
 }
 
-string AnnotationParams::GetProjString() const {
-	return GetValueString(_projStringTag, "");
-}
-
-void AnnotationParams::SetProjString(string projString) {
-	string msg = "Set proj string used by axis annotations";
-	SetValueString(_projStringTag, msg, projString);
-}
-
-AxisAnnotation* AnnotationParams::GetAxisAnnotation(string dataMgr) {
-	dataMgr = "default";
-
+AxisAnnotation* AnnotationParams::GetAxisAnnotation() {
 	vector<string> names = _axisAnnotations->GetNames();
-	if (_axisAnnotations->GetParams(dataMgr) == NULL) {
+	if (_axisAnnotations->GetParams(defaultAnnotation) == NULL) {
 		AxisAnnotation newAnnotation(_ssave);
-		_axisAnnotations->Insert(&newAnnotation, dataMgr);
+		_axisAnnotations->Insert(&newAnnotation, defaultAnnotation);
 	}
 	AxisAnnotation* aa;
-	aa = (AxisAnnotation*)_axisAnnotations->GetParams(dataMgr);
+	aa = (AxisAnnotation*)_axisAnnotations->GetParams(defaultAnnotation);
 	return aa;
 }
 
