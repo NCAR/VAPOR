@@ -19,6 +19,10 @@ class FileOperationChecker {
     static bool FileGoodToWrite(const QString &filename);
     static bool FileHasCorrectSuffix(const QString &filename,
                                      const QString &expectedSuffix);
+    static QString GetLastErrorMessage();
+
+  private:
+    static QString _message;
 };
 
 #endif
