@@ -201,11 +201,14 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
         QString::fromStdString(sParams->GetAutoSaveSessionFile()),
         tr("Vapor 3 Session Files (*.vs3)"));
 
-    if (!fileName.isEmpty() &&
-        FileOperationChecker::FileGoodToWrite(fileName)) {
+    bool goodToWrite = FileOperationChecker::FileGoodToWrite(fileName);
+    if (!fileName.isEmpty() && goodToWrite) {
         sParams->SetAutoSaveSessionFile(fileName.toStdString());
         _saveSettings();
     }
+
+    if (!goodToWrite)
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
 }
 
 void SettingsEventRouter::_autoSaveFileChanged() {
@@ -217,7 +220,8 @@ void SettingsEventRouter::_autoSaveFileChanged() {
     if (FileOperationChecker::FileGoodToWrite(qfile))
         sParams->SetAutoSaveSessionFile(file);
     else {
-        _autoSaveFileEdit->setText(qfile);
+        _autoSaveFileEdit->setText(QString::fromStdString(oldFile));
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
     }
     _saveSettings();
 }
@@ -283,6 +287,7 @@ void SettingsEventRouter::_setFilePath(
         string oldPath = (sParams.*getFunc)();
         QString qoldPath = QString::fromStdString(oldPath);
         lineEdit->setText(qoldPath);
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
     }
 }
 

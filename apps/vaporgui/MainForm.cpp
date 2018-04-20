@@ -1043,7 +1043,9 @@ void MainForm::sessionOpen(QString qfileName) {
     if (!qfileName.endsWith(".vs3")) {
         return;
     }
-    FileOperationChecker::FileGoodToRead(qfileName);
+
+    if (!FileOperationChecker::FileGoodToRead(qfileName))
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
 
     string fileName = qfileName.toStdString();
     sessionOpenHelper(fileName);
@@ -1068,7 +1070,8 @@ void MainForm::_fileSaveHelper(string path) {
         return;
     }
 
-    FileOperationChecker::FileGoodToWrite(fileName);
+    if (!FileOperationChecker::FileGoodToWrite(fileName))
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
 
     SettingsParams *sParams = GetSettingsParams();
     sParams->SetSessionDir(path);
