@@ -68,6 +68,10 @@ vector<double> AnnotationParams::_previousStretch;
 //
 static ParamsRegistrar<AnnotationParams> registrar(AnnotationParams::GetClassType());
 
+namespace {
+string defaultAnnotation = "default";
+}
+
 AnnotationParams::AnnotationParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, AnnotationParams::GetClassType())
 {
     _init();
@@ -147,34 +151,23 @@ void AnnotationParams::GetBackgroundColor(double color[3]) const { m_getColor(co
 
 void AnnotationParams::SetBackgroundColor(vector<double> color) { m_setColor(color, _backgroundColorTag, "Set background color"); }
 
-string AnnotationParams::GetCurrentAxisDataMgrName() const { return GetValueString(_currentAxisDataMgrTag, "default"); }
+string AnnotationParams::GetCurrentAxisDataMgrName() const { return GetValueString(_currentAxisDataMgrTag, defaultAnnotation); }
 
 void AnnotationParams::SetCurrentAxisDataMgrName(string dmName)
 {
     string msg = "Setting current DataMgr w.r.t. axis annotations";
-    cout << "setting current axis DM " << dmName << endl;
     SetValueString(_currentAxisDataMgrTag, msg, dmName);
 }
 
-string AnnotationParams::GetProjString() const { return GetValueString(_projStringTag, ""); }
-
-void AnnotationParams::SetProjString(string projString)
+AxisAnnotation *AnnotationParams::GetAxisAnnotation()
 {
-    string msg = "Set proj string used by axis annotations";
-    SetValueString(_projStringTag, msg, projString);
-}
-
-AxisAnnotation *AnnotationParams::GetAxisAnnotation(string dataMgr)
-{
-    dataMgr = "default";
-
     vector<string> names = _axisAnnotations->GetNames();
-    if (_axisAnnotations->GetParams(dataMgr) == NULL) {
+    if (_axisAnnotations->GetParams(defaultAnnotation) == NULL) {
         AxisAnnotation newAnnotation(_ssave);
-        _axisAnnotations->Insert(&newAnnotation, dataMgr);
+        _axisAnnotations->Insert(&newAnnotation, defaultAnnotation);
     }
     AxisAnnotation *aa;
-    aa = (AxisAnnotation *)_axisAnnotations->GetParams(dataMgr);
+    aa = (AxisAnnotation *)_axisAnnotations->GetParams(defaultAnnotation);
     return aa;
 }
 

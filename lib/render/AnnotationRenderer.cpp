@@ -350,10 +350,8 @@ void AnnotationRenderer::InScenePaint(size_t ts)
         drawAxisArrows(minExts, maxExts);
     }
 
-    for (int i = 0; i < names.size(); i++) {
-        AxisAnnotation *aa = vfParams->GetAxisAnnotation(names[i]);
-        if (aa->GetAxisAnnotationEnabled()) { drawAxisTics(aa); }
-    }
+    AxisAnnotation *aa = vfParams->GetAxisAnnotation();
+    if (aa->GetAxisAnnotationEnabled()) drawAxisTics(aa);
 
     glPopAttrib();
     glMatrixMode(GL_MODELVIEW);
@@ -377,7 +375,7 @@ void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(std::vector<double> &
     std::vector<double> extents = getDomainExtents();
     int                 dims = extents.size() / 2;
     for (int i = 0; i < dims; i++) {
-        double offset = coords[i] * (extents[i + 3] - extents[i]);
+        double offset = coords[i] * (extents[i + dims] - extents[i]);
         double minimum = extents[i];
         coords[i] = offset + minimum;
     }
@@ -545,7 +543,7 @@ void AnnotationRenderer::convertPointToLonLat(double &xCoord, double &yCoord)
     double coordsForError[2] = {coords[0], coords[1]};
 
     AnnotationParams *aParams = m_paramsMgr->GetAnnotationParams(m_winName);
-    string            projString = aParams->GetProjString();
+    string            projString = m_dataStatus->GetMapProjection();
     int               rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
     if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]); }
 
@@ -567,7 +565,7 @@ AxisAnnotation *AnnotationRenderer::getCurrentAxisAnnotation()
 {
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     string            currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
-    AxisAnnotation *  aa = vfParams->GetAxisAnnotation(currentAxisDataMgr);
+    AxisAnnotation *  aa = vfParams->GetAxisAnnotation();
     return aa;
 }
 

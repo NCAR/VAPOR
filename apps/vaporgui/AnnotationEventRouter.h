@@ -116,6 +116,7 @@ private:
     void updateLatLonCheckbox();
     void updateCopyRegionCombo();
     void updateTicOrientationCombos();
+    void addRendererToCombo(string, string, string, string);
 
     void updateTimePanel();
     void updateTimeColor();

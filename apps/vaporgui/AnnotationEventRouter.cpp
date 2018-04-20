@@ -156,7 +156,8 @@ void AnnotationEventRouter::copyRegionFromRenderer()
     string                   renType = _renTypeNames[elems[2]];
     string                   renderer = elems[3];
 
-    ParamsMgr *   paramsMgr = _controlExec->GetParamsMgr();
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    cout << visualizer << " " << dataSetName << " " << renType << " " << renderer << endl;
     RenderParams *copyParams = paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
     assert(copyParams);
 
@@ -185,6 +186,29 @@ void AnnotationEventRouter::copyRegionFromRenderer()
     paramsMgr->EndSaveStateGroup();
 }
 
+void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, string visAbb, string dataSetName)
+{
+    // Abbreviate Params names by removing 'Params" from them.
+    // Then store them in a map for later reference.
+    //
+    string typeAbb = typeName;
+    int    pos = typeAbb.find("Params");
+    typeAbb.erase(pos, 6);
+    _renTypeNames[typeAbb] = typeName;
+
+    std::vector<string> renNames;
+    ParamsMgr *         paramsMgr = _controlExec->GetParamsMgr();
+    renNames = paramsMgr->GetRenderParamInstances(visName, typeName);
+
+    cout << renNames.size() << " " << visName << " " << typeAbb << endl;
+
+    for (int k = 0; k < renNames.size(); k++) {
+        string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
+        QString qDisplayName = QString::fromStdString(displayName);
+        copyRegionCombo->addItem(qDisplayName);
+    }
+}
+
 void AnnotationEventRouter::updateCopyRegionCombo()
 {
     copyRegionCombo->clear();
@@ -197,31 +221,25 @@ void AnnotationEventRouter::updateCopyRegionCombo()
     ParamsMgr *              paramsMgr = _controlExec->GetParamsMgr();
     std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
     for (int i = 0; i < visNames.size(); i++) {
+        string visName = visNames[i];
+
         // Create a mapping of abreviated visualizer names to their
         // actual string values.
         //
         string visAbb = "Vis" + std::to_string(i);
-        _visNames[visAbb] = visNames[i];
+        _visNames[visAbb] = visName;
 
         std::vector<string> typeNames;
-        typeNames = paramsMgr->GetRenderParamsClassNames(visNames[i]);
+        typeNames = paramsMgr->GetRenderParamsClassNames(visName);
 
         for (int j = 0; j < typeNames.size(); j++) {
-            // Abbreviate Params names by removing 'Params" from them.
-            // Then store them in a map for later reference.
-            //
-            string typeAbb = typeNames[j];
-            int    pos = typeAbb.find("Params");
-            typeAbb.erase(pos, 6);
-            _renTypeNames[typeAbb] = typeNames[j];
+            string typeName = typeNames[j];
 
-            std::vector<string> renNames;
-            renNames = paramsMgr->GetRenderParamInstances(visNames[i], typeNames[j]);
-
-            for (int k = 0; k < renNames.size(); k++) {
-                string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
-                QString qDisplayName = QString::fromStdString(displayName);
-                copyRegionCombo->addItem(qDisplayName);
+            std::vector<string> dmNames = paramsMgr->GetDataMgrNames();
+            for (int k = 0; k < dmNames.size(); k++) {
+                string dataSetName = dmNames[k];
+                cout << visName << " " << typeName << " " << visAbb << " " << dataSetName << endl;
+                addRendererToCombo(visName, typeName, visAbb, dataSetName);
             }
         }
     }
@@ -365,9 +383,8 @@ void AnnotationEventRouter::convertPCSToLonLat(double &xCoord, double &yCoord)
 
     int rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
     if (rc < 0) {
-        char buff[100];
-        sprintf(buff, "Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]);
-        MSG_ERR(buff);
+        MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]);
+        MSG_ERR("Error converting PCS to Lat-Lon coordinates");
     }
 
     xCoord = coords[0];
@@ -394,9 +411,8 @@ void AnnotationEventRouter::convertLonLatToPCS(double &xCoord, double &yCoord)
 
     int rc = DataMgrUtils::ConvertLonLatToPCS(projString, coords, 1);
     if (rc < 0) {
-        char buff[100];
-        sprintf(buff, "Could not convert point %f, %f to PCS", coordsForError[0], coordsForError[1]);
-        MSG_ERR(buff);
+        MyBase::SetErrMsg("Could not convert point %f, %f to PCS", coordsForError[0], coordsForError[1]);
+        MSG_ERR("Error converting from Lat-Lon to PCS coordinates");
     }
 
     xCoord = coords[0];
