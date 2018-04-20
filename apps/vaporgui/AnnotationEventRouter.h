@@ -124,7 +124,6 @@ private:
     void updateTimeSize();
 
     void   updateDataMgrCombo();
-    void   updateProjString();
     string getProjString();
 
     VAPoR::AxisAnnotation *_getCurrentAxisAnnotation();
