@@ -1,6 +1,9 @@
 #include <QFileInfo>
 #include "FileOperationChecker.h"
 
+
+QString FileOperationChecker::_message("");
+
 bool 
 FileOperationChecker::DirectoryGoodToRead( const QString& filename )
 {
