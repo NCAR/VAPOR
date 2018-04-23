@@ -222,6 +222,7 @@ void SettingsEventRouter::_autoSaveFileChanged() {
     else {
         _autoSaveFileEdit->setText(QString::fromStdString(oldFile));
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return;
     }
     _saveSettings();
 }
@@ -288,25 +289,8 @@ void SettingsEventRouter::_setFilePath(
         QString qoldPath = QString::fromStdString(oldPath);
         lineEdit->setText(qoldPath);
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return;
     }
-}
-
-void SettingsEventRouter::_setDirectoryPaths() {
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-
-    paramsMgr->BeginSaveStateGroup("Settings directory");
-
-    //	sParams->SetSessionDir(_sessionPathEdit->text().toStdString());
-    //	sParams->SetMetadataDir(_metadataPathEdit->text().toStdString());
-    //	sParams->SetImageDir(_imagePathEdit->text().toStdString());
-    //	sParams->SetFlowDir(_flowPathEdit->text().toStdString());
-    //	sParams->SetPythonDir(_pythonPathEdit->text().toStdString());
-    //	sParams->SetTFDir(_tfPathEdit->text().toStdString());
-    _saveSettings();
-
-    paramsMgr->EndSaveStateGroup();
 }
 
 void SettingsEventRouter::_blockSignals(bool block) {
