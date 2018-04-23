@@ -179,12 +179,10 @@ void SettingsEventRouter::_chooseAutoSaveFile()
     if (goodToWrite) {
         sParams->SetAutoSaveSessionFile(fileName.toStdString());
         _saveSettings();
-    } else
-        (!goodToWrite)
-        {
-            MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
-            _updateTab();
-        }
+    } else {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
 }
 
 void SettingsEventRouter::_autoSaveFileChanged()
