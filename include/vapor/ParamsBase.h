@@ -102,7 +102,7 @@ public:
 
     //! Equivalence operator
     //
-    bool operator==(const ParamsBase &rhs) const { return (_ssave == rhs._ssave && _node == rhs._node); }
+    bool operator==(const ParamsBase &rhs) const { return (_ssave == rhs._ssave && *_node == *(rhs._node)); }
 
     bool operator!=(const ParamsBase &rhs) const { return (!(*this == rhs)); };
 
@@ -211,6 +211,8 @@ public:
     ParamsSeparator(StateSave *ssave, XmlNode *node);
 
     ParamsSeparator(ParamsSeparator *parent, const string &name);
+
+    virtual ~ParamsSeparator() {}
 
     bool HasChild(const string &name) { return (GetNode()->HasChild(name)); }
 };
@@ -321,7 +323,7 @@ public:
     //! with this object. If this object's node is a root node (i.e. has
     //! no parent) the node is freed. Otherwise it is not
     //!
-    ~ParamsContainer();
+    virtual ~ParamsContainer();
 
     //! Set parent
     //!
