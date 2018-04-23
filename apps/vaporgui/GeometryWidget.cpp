@@ -280,7 +280,7 @@ void GeometryWidget::updateCopyCombo() {
 
                 std::vector<string> renNames;
                 renNames = _paramsMgr->GetRenderParamInstances(visNames[i],
-                                                               typeNames[j]);
+                                                               _dataSetNames[ii], typeNames[j]);
 
                 for (int k = 0; k < renNames.size(); k++) {
                     string displayName = visAbb + ":" +

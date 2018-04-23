@@ -298,13 +298,18 @@ void RenderHolder::_deleteRenderer() {
     // Make the renderer in the first row the active renderer
     //
     _getRow(0, rendererName, rendererType, dataSetName);
-    p->SetActiveRenderer(activeViz, rendererType, rendererName);
-    emit activeChanged(activeViz, rendererType, rendererName);
+    if (rendererName != "" || rendererType != "" || dataSetName != "") {
+        _activeRendererChanged(0, 0);
+        emit activeChanged(activeViz, rendererType, rendererName);
+    }
+
+    _vaporTable->SetActiveRow(0);
 
     paramsMgr->EndSaveStateGroup();
 }
 
 void RenderHolder::_activeRendererChanged(int row, int col) {
+    _currentRow = row;
     GUIStateParams *p = _getStateParams();
     string activeViz = p->GetActiveVizName();
     string rendererName = _vaporTable->GetValue(row, 0);
@@ -544,6 +549,8 @@ void RenderHolder::Update() {
     //
     GUIStateParams *p = _getStateParams();
     string activeViz = p->GetActiveVizName();
+    if (activeViz.empty())
+        return;
 
     string activeRenderClass, activeRenderInst;
     p->GetActiveRenderer(
@@ -565,8 +572,6 @@ void RenderHolder::Update() {
     _makeRendererTableHeaders(colHeader);
 
     map<string, vector<string>>::iterator itr;
-    //	int selectedRow = -1;
-    int row = 0;
     for (itr = rendererNamesMap.begin(); itr != rendererNamesMap.end(); ++itr) {
         vector<string> rendererNames = itr->second;
 
