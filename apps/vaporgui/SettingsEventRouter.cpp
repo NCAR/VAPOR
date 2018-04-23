@@ -206,12 +206,11 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
 	);
 
 	bool goodToWrite = FileOperationChecker::FileGoodToWrite(fileName); 
-	if (! fileName.isEmpty() && goodToWrite) {
+	if (goodToWrite) {
 		sParams->SetAutoSaveSessionFile(fileName.toStdString());
 		_saveSettings();
 	}
-
-	if (!goodToWrite) {
+	else (!goodToWrite) {
 		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
 		_updateTab();
 	}
