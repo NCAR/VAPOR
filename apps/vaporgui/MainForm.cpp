@@ -55,6 +55,7 @@
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
+#include "FileOperationChecker.h"
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -884,8 +885,13 @@ void MainForm::sessionOpen(QString qfileName)
 
     // Make sure the name ends with .vs3
     if (!qfileName.endsWith(".vs3")) { return; }
-    string fileName = qfileName.toStdString();
 
+    if (!FileOperationChecker::FileGoodToRead(qfileName)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return;
+    }
+
+    string fileName = qfileName.toStdString();
     sessionOpenHelper(fileName);
 
     _stateChangeFlag = false;
@@ -894,11 +900,17 @@ void MainForm::sessionOpen(QString qfileName)
 
 void MainForm::_fileSaveHelper(string path)
 {
+    QString fileName;
     if (path.empty()) {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save VAPOR session file"), tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)"));
+        fileName = QFileDialog::getSaveFileName(this, tr("Save VAPOR session file"), tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)"));
         path = fileName.toStdString();
     }
     if (path.empty()) return;
+
+    if (!FileOperationChecker::FileGoodToWrite(fileName)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return;
+    }
 
     if (_controlExec->SaveSession(path) < 0) {
         MSG_ERR("Saving session file failed");
