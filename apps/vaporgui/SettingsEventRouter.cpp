@@ -210,7 +210,7 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
 		sParams->SetAutoSaveSessionFile(fileName.toStdString());
 		_saveSettings();
 	}
-	else (!goodToWrite) {
+	else {
 		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
 		_updateTab();
 	}
