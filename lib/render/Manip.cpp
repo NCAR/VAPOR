@@ -83,6 +83,8 @@ void TranslateStretchManip::Update(
     std::copy(minExts.begin(), minExts.end(), _extents);
     std::copy(maxExts.begin(), maxExts.end(), _extents + 3);
 
+    cout << minExts[1] << "!!!" << endl;
+
     _transform = transform;
 
     _constrain = constrain;
@@ -235,10 +237,15 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double hand
 }
 
 void TranslateStretchManip::constrainExtents() {
+    cout << "Constraining" << endl
+         << endl;
+    cout << _selection[1] << " " << _extents[1] << endl;
     for (int i = 0; i < 3; i++) {
         // correct selection minimum
-        if (_selection[i] < _extents[i])
+        if (_selection[i] < _extents[i]) {
+            cout << "sel " << i << " " << _selection[i] << " " << _extents[i] << endl;
             _selection[i] = _extents[i];
+        }
         if (_selection[i] > _extents[i + 3])
             _selection[i] = _extents[i + 3];
 
@@ -670,7 +677,7 @@ void TranslateStretchManip::render() {
     std::vector<double> scales = _transform->GetScales();
     std::vector<double> selectionSize, selectionMid;
     int ndims = 3; //_selection.size()/2;
-    cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
+    //cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
     for (int i = 0; i < ndims; i++) {
         selectionSize.push_back(_selection[i + ndims] - _selection[i]);
         selectionSize[i] *= scales[i];
@@ -680,8 +687,8 @@ void TranslateStretchManip::render() {
         _transformedSelection[i] = selectionMid[i] - selectionSize[i] / 2.f;
         _transformedSelection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
     }
-    cout << "_selection " << _selection[0] << " " << _selection[3] << endl;
-    cout << "scaledSele " << _transformedSelection[0] << " " << _transformedSelection[3] << endl;
+    //cout << "_selection " << _selection[0]<< " " << _selection[3] << endl;
+    //cout << "scaledSele " << _transformedSelection[0]<< " " << _transformedSelection[3] << endl;
 
     glPushAttrib(GL_CURRENT_BIT);
     double handleExtents[6];
