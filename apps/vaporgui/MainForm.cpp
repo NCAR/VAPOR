@@ -1447,6 +1447,7 @@ void MainForm::_setAnimationOnOff(bool on) {
 }
 
 void MainForm::_setAnimationDraw() {
+    _tabMgr->Update();
     _vizWinMgr->Update();
 }
 
