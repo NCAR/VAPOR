@@ -181,21 +181,23 @@ void SettingsEventRouter::_chooseAutoSaveFile()
         _saveSettings();
     }
 
-    if (!goodToWrite) MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+    if (!goodToWrite) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
 }
 
 void SettingsEventRouter::_autoSaveFileChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-    string          oldFile = sParams->GetAutoSaveSessionFile();
     QString         qfile = _autoSaveFileEdit->text();
     string          file = qfile.toStdString();
 
     if (FileOperationChecker::FileGoodToWrite(qfile))
         sParams->SetAutoSaveSessionFile(file);
     else {
-        _autoSaveFileEdit->setText(QString::fromStdString(oldFile));
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
         return;
     }
     _saveSettings();
@@ -250,10 +252,8 @@ void SettingsEventRouter::_setFilePath(void (SettingsParams::*setFunc)(string), 
     if (FileOperationChecker::DirectoryGoodToRead(qpath)) {
         (sParams.*setFunc)(path);
     } else {
-        string  oldPath = (sParams.*getFunc)();
-        QString qoldPath = QString::fromStdString(oldPath);
-        lineEdit->setText(qoldPath);
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
         return;
     }
 }
