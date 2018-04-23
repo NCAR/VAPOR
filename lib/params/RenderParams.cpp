@@ -692,6 +692,7 @@ RenParamsContainer::~RenParamsContainer() {
 
 RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name) {
 	assert(pb != NULL);
+	assert(! name.empty());
 
 	map <string, RenderParams *>::iterator itr = _elements.find(name);
 	if (itr != _elements.end()) {
@@ -720,6 +721,8 @@ RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name) {
 }
 
 RenderParams *RenParamsContainer::Create(string className, string name) {
+	assert(! className.empty());
+	assert(! name.empty());
 
     map <string, RenderParams *>::iterator itr = _elements.find(name);
     if (itr != _elements.end()) {

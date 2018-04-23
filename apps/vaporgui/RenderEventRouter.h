@@ -22,7 +22,6 @@
 #define RENDEREREVENTROUTER_H
 
 #include "EventRouter.h"
-#include "Histo.h"
 class MappingFrame;
 
 namespace VAPoR {
@@ -38,7 +37,6 @@ namespace VAPoR {
 #pragma warning( disable : 4100)
 #endif
 
-class Histo;
 class ColorbarWidget;
 
 //!
@@ -118,13 +116,11 @@ public:
 	VAPoR::ControlExec *ce, string paramsType
  ) : EventRouter(ce, paramsType) {
 
-	_currentHistogram = NULL;
 	_instName = "";
 	
 }
 
  virtual ~RenderEventRouter(){
-	if (_currentHistogram) delete _currentHistogram;
  }
 
  void SetActive(string instName) {
@@ -180,32 +176,10 @@ public:
 #endif
 
  
- //! Obtain the current valid histogram.  Optionally will construct a new 
- //! one if needed.
- //!
- //! \param[in] mustGet : Boolean argument indicating that a new histogram 
- //! is required.
- //! \param[in] isIsoWin : Boolean argument indicating this is associated 
- //! with an IsoSelection panel
- //! \retval Histo* is resulting Histo instance.
- //
- //virtual Histo* GetHistogram(
-//	bool mustGet, bool isIsoWin = false
-// );
- 
- 
  //! Virtual method to fit the color map editor interval to the current map 
  //! bounds.
  //! By default does nothing
  virtual void fitToView() {}
- 
- 
- //! Helper method, calculate a histogram of a slice of 3d variables, 
- //! such as Probe or IsoLines
- //!
- //! \param[in] ts time step for the histogram
- //! \param[out] histo resulting Histo instance.
- void CalcSliceHistogram(int ts, Histo* histo);
  
  //! Virtual method identifies the MappingFrame associated with an EventRouter.
  //! Must be implemented in every EventRouter with a MappingFrame
@@ -288,10 +262,6 @@ protected:
 
  virtual string _getIconImagePath() const = 0;
 
- 
-
- Histo* _currentHistogram;
- 
 private:
  string _instName;
 
