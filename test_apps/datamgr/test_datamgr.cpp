@@ -24,7 +24,8 @@ struct {
     string                  varname;
     string                  savefilebase;
     string                  ftype;
-    std::vector<float>      extents;
+    std::vector<double>     minu;
+    std::vector<double>     maxu;
     OptionParser::Boolean_T nogeoxform;
     OptionParser::Boolean_T verbose;
     OptionParser::Boolean_T help;
@@ -44,9 +45,12 @@ OptionParser::OptDescRec_T set_opts[] = {{"nts", 1, "1", "Number of timesteps to
                                          {"varname", 1, "", "Name of variable"},
                                          {"savefilebase", 1, "", "Base path name to output file"},
                                          {"ftype", 1, "vdc", "data set type (vdc|wrf|cf|mpas)"},
-                                         {"extents", 1, "",
-                                          "Colon delimited 6-element vector "
-                                          "specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"},
+                                         {"minu", 1, "",
+                                          "Colon delimited 3-element vector "
+                                          "specifying domain min extents in user coordinates (X0:Y0:Z0)"},
+                                         {"maxu", 1, "",
+                                          "Colon delimited 3-element vector "
+                                          "specifying domain max extents in user coordinates (X1:Y1:Z1)"},
                                          {"verbose", 0, "", "Verobse output"},
                                          {"nogeoxform", 0, "", "Do not apply geographic transform (projection to PCS"},
                                          {"help", 0, "", "Print this message and exit"},
@@ -64,7 +68,8 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
                                         {"varname", Wasp::CvtToCPPStr, &opt.varname, sizeof(opt.varname)},
                                         {"savefilebase", Wasp::CvtToCPPStr, &opt.savefilebase, sizeof(opt.savefilebase)},
                                         {"ftype", Wasp::CvtToCPPStr, &opt.ftype, sizeof(opt.ftype)},
-                                        {"extents", Wasp::CvtToFloatVec, &opt.extents, sizeof(opt.extents)},
+                                        {"minu", Wasp::CvtToDoubleVec, &opt.minu, sizeof(opt.minu)},
+                                        {"maxu", Wasp::CvtToDoubleVec, &opt.maxu, sizeof(opt.maxu)},
                                         {"verbose", Wasp::CvtToBoolean, &opt.verbose, sizeof(opt.verbose)},
                                         {"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
                                         {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
@@ -117,6 +122,23 @@ void print_info(DataMgr &datamgr, bool verbose)
     cout << endl << endl;
 }
 
+void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
+{
+    cout << "Node Iterator Test ----->" << endl;
+
+    double t0 = Wasp::GetTime();
+
+    Grid::ConstNodeIterator itr;
+    Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
+
+    itr = g->ConstNodeBegin(minu, maxu);
+
+    size_t count = 0;
+    for (; itr != enditr; ++itr) { count++; }
+    cout << "count: " << count << endl;
+    cout << endl;
+}
+
 int main(int argc, char **argv)
 {
     OptionParser op;
@@ -137,7 +159,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    if (opt.extents.size() && opt.extents.size() != 6) {
+    if (opt.minu.size() && opt.minu.size() != opt.maxu.size()) {
         cerr << "Usage: " << ProgName << " master.nc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
@@ -203,20 +225,18 @@ int main(int argc, char **argv)
                 break;
             }
 
-            vector<double> min, max;
-            if (opt.extents.size()) {
-                assert(opt.extents.size() == 6);
-                for (int i = 0; i < 3; i++) {
-                    min.push_back(opt.extents[i]);
-                    max.push_back(opt.extents[i + 3]);
-                }
+            vector<double> minu, maxu;
+            if (opt.minu.size()) {
+                assert(opt.minu.size() == opt.maxu.size());
+                minu = opt.minu;
+                maxu = opt.maxu;
             } else {
-                int rc = datamgr.GetVariableExtents(ts, vname, opt.level, min, max);
+                int rc = datamgr.GetVariableExtents(ts, vname, opt.level, minu, maxu);
                 if (rc < 0) exit(1);
             }
 
             Grid *g;
-            g = datamgr.GetVariable(ts, vname, opt.level, opt.lod, min, max, false);
+            g = datamgr.GetVariable(ts, vname, opt.level, opt.lod, minu, maxu, false);
 
             if (!g) { exit(1); }
 
@@ -230,6 +250,8 @@ int main(int argc, char **argv)
                 }
                 fclose(fp);
             }
+
+            test_node_iterator(g, minu, maxu);
 
             //			float r[2];
             //			g->GetRange(r);
@@ -245,7 +267,6 @@ int main(int argc, char **argv)
             for (int i = 0; i < dims.size(); i++) { cout << dims[i] << " "; }
             cout << "]" << endl;
 
-            vector<double> minu, maxu;
             g->GetUserExtents(minu, maxu);
             cout << "Min user extents: [";
             for (int i = 0; i < minu.size(); i++) cout << minu[i] << " ";

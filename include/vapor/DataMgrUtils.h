@@ -75,6 +75,8 @@ bool MaxLODPresent(const DataMgr *dataMgr, size_t timestep, string varname, size
 //!
 int ConvertPCSToLonLat(const DataMgr *dataMgr, double coords[], int npoints = 1);
 
+int ConvertPCSToLonLat(string projString, double coords[], int npoints = 1);
+
 //! Convert lon/lat coordinates to Projected Coordinate System coordinates,
 //!  in-place.
 //!
@@ -90,6 +92,8 @@ int ConvertPCSToLonLat(const DataMgr *dataMgr, double coords[], int npoints = 1)
 //! \return true if successful
 //!
 int ConvertLonLatToPCS(const DataMgr *dataMgr, double coords[], int npoints = 1);
+
+int ConvertLonLatToPCS(string projString, double coords[], int npoints = 1);
 
 //! Method that obtains one or more regular grids at specified timestep,
 //! extents, refinement, and lod.

@@ -358,6 +358,8 @@ std::string VaporTable::GetStringValue(int row, int col)
     int         nRows = _table->rowCount();
     int         nCols = _table->columnCount();
 
+    if (row >= nRows || col >= nCols) return "";
+
     QWidget *widget = _table->cellWidget(row, col);
 
     if ((col == nCols - 1 && _lastColIsCheckboxes) || (row == nRows - 1 && _lastRowIsCheckboxes)) {
@@ -474,3 +476,7 @@ void VaporTable::highlightActiveCol(int col)
         }
     }
 }
+
+void VaporTable::SetActiveRow(int row) { _activeRow = row; }
+
+void VaporTable::SetActiveCol(int col) { _activeCol = col; }

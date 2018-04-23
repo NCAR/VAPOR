@@ -47,6 +47,8 @@
 #include "SettingsParams.h"
 #include "ErrorReporter.h"
 
+#include "QIntValidatorWithFixup.h"
+
 using namespace VAPoR;
 
 SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_SettingsGUI(), EventRouter(ce, SettingsParams::GetClassType())
@@ -58,24 +60,19 @@ SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWi
     ParamsBase::StateSave *ss = new ParamsBase::StateSave;
     _defaultParams = new SettingsParams(ss, false);
 
-    QValidator *numThreadsValidator;
-    numThreadsValidator = new QIntValidator(0, 8, _numThreadsEdit);
+    QIntValidatorWithFixup *numThreadsValidator = new QIntValidatorWithFixup(0, INT_MAX, _numThreadsEdit);
     _numThreadsEdit->setValidator(numThreadsValidator);
 
-    QValidator *cacheSizeValidator;
-    cacheSizeValidator = new QIntValidator(0, 100000, _cacheSizeEdit);
+    QIntValidatorWithFixup *cacheSizeValidator = new QIntValidatorWithFixup(1000, INT_MAX, _cacheSizeEdit);
     _cacheSizeEdit->setValidator(cacheSizeValidator);
 
-    QValidator *windowWidthValidator;
-    windowWidthValidator = new QIntValidator(0, 16000, _windowWidthEdit);
+    QIntValidatorWithFixup *windowWidthValidator = new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
     _windowWidthEdit->setValidator(windowWidthValidator);
 
-    QValidator *windowHeightValidator;
-    windowHeightValidator = new QIntValidator(0, 16000, _windowHeightEdit);
+    QIntValidatorWithFixup *windowHeightValidator = new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
     _windowHeightEdit->setValidator(windowHeightValidator);
 
-    QValidator *autoSaveValidator;
-    autoSaveValidator = new QIntValidator(1, 100, _autoSaveIntervalEdit);
+    QIntValidatorWithFixup *autoSaveValidator = new QIntValidatorWithFixup(1, 1000, _autoSaveIntervalEdit);
     _autoSaveIntervalEdit->setValidator(autoSaveValidator);
 }
 
@@ -111,38 +108,12 @@ void SettingsEventRouter::hookUpTab()
     connect(_pythonPathButton, SIGNAL(clicked()), this, SLOT(_choosePythonPath()));
 }
 
-void SettingsEventRouter::_warnUserAfterThreadChange()
-{
-    _numThreadsEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _numThreadsEdit->setToolTip("Vapor's thread count is initialized when the\n"
-                                "application launches.  These settings will\n"
-                                "only take effect in future Vapor instances.");
-}
-
-void SettingsEventRouter::_undoUserWarnings()
-{
-    _numThreadsEdit->setStyleSheet("background-color: white; color: black;");
-
-    _cacheSizeEdit->setStyleSheet("background-color: white; color: black;");
-}
-
 void SettingsEventRouter::_numThreadsChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
     size_t          numThreads = (size_t)_numThreadsEdit->text().toInt();
-    if (numThreads != sParams->GetNumThreads()) _warnUserAfterThreadChange();
     sParams->SetNumThreads(numThreads);
     _saveSettings();
-}
-
-void SettingsEventRouter::_warnUserAfterCacheChange()
-{
-    _cacheSizeEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _cacheSizeEdit->setToolTip("Vapor's cache size is initialized when the\n"
-                               "application launches.  These settings will\n"
-                               "only take effect in future Vapor instances.");
 }
 
 void SettingsEventRouter::_cacheSizeChanged()
@@ -150,28 +121,8 @@ void SettingsEventRouter::_cacheSizeChanged()
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
     int             cacheSize = _cacheSizeEdit->text().toInt();
 
-    if (cacheSize != sParams->GetCacheMB()) _warnUserAfterCacheChange();
-
     sParams->SetCacheMB(cacheSize);
     _saveSettings();
-}
-
-void SettingsEventRouter::_warnUserAfterWidthChange()
-{
-    _windowWidthEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _windowWidthEdit->setToolTip("Vapor's window size is initialized when the\n"
-                                 "application launches.  These settings will\n"
-                                 "only take effect in future Vapor instances.");
-}
-
-void SettingsEventRouter::_warnUserAfterHeightChange()
-{
-    _windowHeightEdit->setStyleSheet("background-color: yellow; color: black;");
-
-    _windowHeightEdit->setToolTip("Vapor's window size is initialized when the\n"
-                                  "application launches.  These settings will\n"
-                                  "only take effect in future Vapor instances.");
 }
 
 void SettingsEventRouter::_enableWinSize(bool enabled)
@@ -190,10 +141,6 @@ void SettingsEventRouter::_windowSizeChanged()
     int             height = _windowHeightEdit->text().toInt();
     size_t          oldWidth, oldHeight;
     sParams->GetWinSize(oldWidth, oldHeight);
-    if (width != oldWidth || height != oldHeight) {
-        _warnUserAfterHeightChange();
-        _warnUserAfterWidthChange();
-    }
     sParams->SetWinSize(width, height);
     _saveSettings();
 }
@@ -224,10 +171,11 @@ void SettingsEventRouter::_chooseAutoSaveFile()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
-    string dir = _choosePathHelper(sParams->GetMetadataDir(), "Choose the auto-save file");
+    QString fileName =
+        QFileDialog::getSaveFileName(_autoSaveFileButton, tr("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()), tr("Vapor 3 Session Files (*.vs3)"));
 
-    if (!dir.empty()) {
-        sParams->SetAutoSaveSessionFile(dir);
+    if (!fileName.isEmpty()) {
+        sParams->SetAutoSaveSessionFile(fileName.toStdString());
         _saveSettings();
     }
 }
@@ -455,11 +403,13 @@ void SettingsEventRouter::_restoreDefaults()
     XmlNode *parent = settingsNode->GetParent();
     XmlNode *defaultNode = _defaultParams->GetNode();
 
-    *settingsParams = *_defaultParams;
+    SettingsParams *newParams = new SettingsParams(*_defaultParams);
+    *settingsParams = *newParams;
     settingsParams->GetNode()->SetParent(parent);
 
+    delete newParams;
+
     _saveSettings();
-    _undoUserWarnings();
 
     paramsMgr->EndSaveStateGroup();
 }

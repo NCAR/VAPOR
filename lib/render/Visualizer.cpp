@@ -900,11 +900,11 @@ int Visualizer::captureImage(string filename)
     } else    // write png files
     {
         FILE *test = fopen((const char *)filename.c_str(), "wb");
+        fclose(test);
         if (!test) {
             SetErrMsg("Image Capture Error: Error opening output PNG file: %s", (const char *)filename.c_str());
             return -1;
         }
-        fclose(test);
     }
     // Get the image buffer
     unsigned char *buf = new unsigned char[3 * width * height];
@@ -943,11 +943,11 @@ int Visualizer::captureImage(string filename)
         // int quality = vpParams->GetJpegQuality();
         int quality = 95;
         int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
+        fclose(jpegFile);
         if (rc) {
             SetErrMsg("Image Capture Error; Error writing jpeg file %s", (const char *)filename.c_str());
             return -1;
         }
-        fclose(jpegFile);
     } else    // PNG
     {
         int rc = Write_PNG(filename.c_str(), width, height, buf);

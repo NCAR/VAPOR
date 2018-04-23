@@ -223,7 +223,7 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 string SettingsParams::GetAutoSaveSessionFile() const
 {
     string autoSaveDir = QDir::homePath().toStdString();
-    string defaultFile = autoSaveDir + "//VaporAutoSave.vss";
+    string defaultFile = autoSaveDir + "/VaporAutoSave.vs3";
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
     return file;
@@ -377,18 +377,14 @@ void SettingsParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPr
 
 int SettingsParams::GetNumThreads() const
 {
-    long val = GetValueLong(_numThreadsTag, 2);
-    if (val < 0) val = 0;
+    long val = GetValueLong(_numThreadsTag, 0);
+    val = val >= 0 ? val : 0;
     return ((int)val);
 }
 
 void SettingsParams::SetNumThreads(int val) { SetValueLong(_numThreadsTag, "Number of execution threads", val); }
 
-int SettingsParams::GetFontSize() const
-{
-    //	return (int)GetValueDouble(_fontSizeTag,
-    return 24;
-}
+int SettingsParams::GetFontSize() const { return 24; }
 
 void SettingsParams::SetFontSize(int size) {}
 
