@@ -152,7 +152,9 @@ void ContourRenderer::_buildCache() {
                                            _cacheParams.boxMin, _cacheParams.boxMax);
     //StructuredGrid *sGrid = dynamic_cast<StructuredGrid *>(grid);
 
-    for (Grid::ConstCellIterator it = grid->ConstCellBegin(); it != grid->ConstCellEnd(); ++it) {
+    Grid::ConstCellIterator it = grid->ConstCellBegin();
+    Grid::ConstCellIterator end = grid->ConstCellEnd();
+    for (; it != end; ++it) {
         vector<size_t> cell = *it;
         vector<vector<size_t>> nodes;
         grid->GetCellNodes(cell, nodes);

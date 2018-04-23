@@ -24,31 +24,31 @@ set (SRC
 	MyPython.cpp
 )
 
-set (HEAD
-	../../include/vapor/BarbRenderer.h
-	../../include/vapor/ControlExecutive.h
-	../../include/vapor/HelloRenderer.h
-	../../include/vapor/Renderer.h
-	../../include/vapor/ShaderMgr.h
-	../../include/vapor/ShaderProgram.h
-	../../include/vapor/TwoDDataRenderer.h
-	../../include/vapor/TwoDRenderer.h
-	../../include/vapor/GeoTile.h
-	../../include/vapor/GeoTileMercator.h
-	../../include/vapor/GeoTileEquirectangular.h
-	../../include/vapor/GeoImage.h
-	../../include/vapor/GeoImageTMS.h
-	../../include/vapor/GeoImageGeoTiff.h
-	../../include/vapor/ImageRenderer.h
-	../../include/vapor/Visualizer.h
-	../../include/vapor/AnnotationsRenderer.h
-	../../include/vapor/textRenderer.h
-	../../include/vapor/ControlExecutive.h
-	../../include/vapor/ContourRenderer.h
-	../../include/vapor/MyPython.h
+set (HEADERS
+	${PROJECT_SOURCE_DIR}/include/vapor/BarbRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
+	${PROJECT_SOURCE_DIR}/include/vapor/HelloRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ShaderMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TwoDRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoTile.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoTileMercator.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoTileEquirectangular.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoImage.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoImageTMS.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoImageGeoTiff.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ImageRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Visualizer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationsRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/textRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
 )
 
-add_library (render SHARED ${SRC} ${HEAD})
+add_library (render SHARED ${SRC} ${HEADERS})
 
 target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff python${PYTHONVERSION})
 
@@ -61,5 +61,11 @@ add_definitions (-DRENDER_EXPORTS)
 install (
 	TARGETS render
 	DESTINATION ${INSTALL_LIB_DIR}
+	COMPONENT Libraries
+	)
+
+install (
+	FILES ${HEADERS}
+	DESTINATION ${INSTALL_INCLUDE_DIR}
 	COMPONENT Libraries
 	)
