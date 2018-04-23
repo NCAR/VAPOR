@@ -116,6 +116,11 @@ private:
 	void setUpProjMatrix();
 	void setUpModelViewMatrix();
 
+	void _setMatrixFromModeParams();
+
+	double _center[3], _posvec[3], _dirvec[3], _upvec[3];
+
+
 
 };
 
