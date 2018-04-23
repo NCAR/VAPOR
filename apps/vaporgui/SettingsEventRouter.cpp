@@ -442,6 +442,7 @@ void SettingsEventRouter::_restoreDefaults() {
 	delete newParams;
 	
 	_saveSettings();
+	_updateTab();
 
 	paramsMgr->EndSaveStateGroup();
 }
