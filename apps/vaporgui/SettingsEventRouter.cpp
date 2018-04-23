@@ -458,6 +458,7 @@ void SettingsEventRouter::_restoreDefaults()
     settingsParams->GetNode()->SetParent(parent);
 
     _saveSettings();
+    _updateTab();
 
     paramsMgr->EndSaveStateGroup();
 }
