@@ -1252,7 +1252,11 @@ void MainForm::_setAnimationOnOff(bool on)
     }
 }
 
-void MainForm::_setAnimationDraw() { _vizWinMgr->Update(); }
+void MainForm::_setAnimationDraw()
+{
+    _tabMgr->Update();
+    _vizWinMgr->Update();
+}
 
 void MainForm::enableKeyframing(bool ison)
 {
