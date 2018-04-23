@@ -202,15 +202,14 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
         tr("Vapor 3 Session Files (*.vs3)"));
 
     bool goodToWrite = FileOperationChecker::FileGoodToWrite(fileName);
-    if (!fileName.isEmpty() && goodToWrite) {
+    if (goodToWrite) {
         sParams->SetAutoSaveSessionFile(fileName.toStdString());
         _saveSettings();
-    }
-
-    if (!goodToWrite) {
-        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
-        _updateTab();
-    }
+    } else
+        (!goodToWrite) {
+            MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+            _updateTab();
+        }
 }
 
 void SettingsEventRouter::_autoSaveFileChanged() {
