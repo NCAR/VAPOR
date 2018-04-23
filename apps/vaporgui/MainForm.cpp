@@ -907,13 +907,13 @@ void MainForm::_fileSaveHelper(string path)
     }
     if (path.empty()) return;
 
-    if (_controlExec->SaveSession(path) < 0) {
-        MSG_ERR("Saving session file failed");
+    if (!FileOperationChecker::FileGoodToWrite(fileName)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
         return;
     }
 
-    if (!FileOperationChecker::FileGoodToWrite(fileName)) {
-        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+    if (_controlExec->SaveSession(path) < 0) {
+        MSG_ERR("Saving session file failed");
         return;
     }
 

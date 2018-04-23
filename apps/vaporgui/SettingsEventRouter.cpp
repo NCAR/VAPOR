@@ -176,15 +176,15 @@ void SettingsEventRouter::_chooseAutoSaveFile()
         QFileDialog::getSaveFileName(_autoSaveFileButton, tr("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()), tr("Vapor 3 Session Files (*.vs3)"));
 
     bool goodToWrite = FileOperationChecker::FileGoodToWrite(fileName);
-    if (!fileName.isEmpty() && goodToWrite) {
+    if (goodToWrite) {
         sParams->SetAutoSaveSessionFile(fileName.toStdString());
         _saveSettings();
-    }
-
-    if (!goodToWrite) {
-        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
-        _updateTab();
-    }
+    } else
+        (!goodToWrite)
+        {
+            MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+            _updateTab();
+        }
 }
 
 void SettingsEventRouter::_autoSaveFileChanged()
