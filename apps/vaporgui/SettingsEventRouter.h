@@ -77,7 +77,6 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     void _windowSizeChanged();
 
     void _saveSettings();
-    void _setDirectoryPaths();
     void _setSessionPath();
     void _setMetadataPath();
     void _setImagePath();
