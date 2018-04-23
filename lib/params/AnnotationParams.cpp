@@ -60,6 +60,7 @@ const string AnnotationParams::_timeLLYTag = "TimeLLY";
 const string AnnotationParams::_timeColorTag = "TimeColor";
 const string AnnotationParams::_timeTypeTag = "TimeType";
 const string AnnotationParams::_timeSizeTag = "TimeSize";
+const string AnnotationParams::_projStringTag = "ProjString";
 
 vector<double> AnnotationParams::_previousStretch;
 
@@ -68,6 +69,9 @@ vector<double> AnnotationParams::_previousStretch;
 //
 static ParamsRegistrar<AnnotationParams> registrar(AnnotationParams::GetClassType());
 
+namespace {
+	string defaultAnnotation = "default";
+}
 
 AnnotationParams::AnnotationParams(
 	ParamsBase::StateSave *ssave
@@ -153,7 +157,6 @@ void AnnotationParams::SetDomainColor(vector<double> color) {
 	m_setColor(color, _domainColorTag, "Set domain frame color");
 }
 
-
 void AnnotationParams::GetRegionColor(double color[3]) const {
 	m_getColor(color, _regionColorTag);
 }
@@ -171,7 +174,7 @@ void AnnotationParams::SetBackgroundColor(vector<double> color) {
 }
 
 string AnnotationParams::GetCurrentAxisDataMgrName() const {
-	return GetValueString(_currentAxisDataMgrTag, "");
+	return GetValueString(_currentAxisDataMgrTag, defaultAnnotation);
 }
 
 void AnnotationParams::SetCurrentAxisDataMgrName(string dmName) {
@@ -179,16 +182,14 @@ void AnnotationParams::SetCurrentAxisDataMgrName(string dmName) {
 	SetValueString(_currentAxisDataMgrTag, msg, dmName);
 }
 
-AxisAnnotation* AnnotationParams::GetAxisAnnotation(string dataMgr) {
-	if (dataMgr == "")
-		dataMgr = GetCurrentAxisDataMgrName();
-
+AxisAnnotation* AnnotationParams::GetAxisAnnotation() {
 	vector<string> names = _axisAnnotations->GetNames();
-	if (_axisAnnotations->GetParams(dataMgr) == NULL) {
+	if (_axisAnnotations->GetParams(defaultAnnotation) == NULL) {
 		AxisAnnotation newAnnotation(_ssave);
-		_axisAnnotations->Insert(&newAnnotation, dataMgr);
+		_axisAnnotations->Insert(&newAnnotation, defaultAnnotation);
 	}
-	AxisAnnotation* aa = (AxisAnnotation*)_axisAnnotations->GetParams(dataMgr);
+	AxisAnnotation* aa;
+	aa = (AxisAnnotation*)_axisAnnotations->GetParams(defaultAnnotation);
 	return aa;
 }
 

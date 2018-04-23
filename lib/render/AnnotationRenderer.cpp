@@ -368,12 +368,9 @@ void AnnotationRenderer::InScenePaint(size_t ts){
 		drawAxisArrows(minExts, maxExts);
 	}
 
-	for (int i=0; i<names.size(); i++) {
-		AxisAnnotation* aa = vfParams->GetAxisAnnotation(names[i]);
-		if (aa->GetAxisAnnotationEnabled()) {
-			drawAxisTics(aa);
-		}
-	}
+	AxisAnnotation* aa = vfParams->GetAxisAnnotation();
+	if (aa->GetAxisAnnotationEnabled()) 
+		drawAxisTics(aa);
 
 	glPopAttrib();
 	glMatrixMode(GL_MODELVIEW);
@@ -397,13 +394,10 @@ void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(
 	std::vector<double> &coords,
 	string dataMgrName
 ) {
-	if (dataMgrName=="")
-		dataMgrName = getCurrentDataMgrName();
-
-	std::vector<double> extents = getDomainExtents(dataMgrName);
+	std::vector<double> extents = getDomainExtents();
 	int dims = extents.size()/2;
 	for (int i=0; i<dims; i++) {
-		double offset = coords[i]*(extents[i+3]-extents[i]);
+		double offset = coords[i]*(extents[i+dims]-extents[i]);
 		double minimum = extents[i];
 		coords[i] = offset + minimum;
 	}
@@ -411,8 +405,6 @@ void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(
 
 void AnnotationRenderer::drawAxisTics(AxisAnnotation* aa) {
 	
-	//vector<string> names = m_paramsMgr->GetDataMgrNames();
-	//AxisAnnotation* aa = vfParams->GetAxisAnnotation(names[0]);
 	if (aa==NULL)
 		aa = getCurrentAxisAnnotation();
 
@@ -441,7 +433,7 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation* aa) {
 	double pointOnAxis[3]; 
 	double ticVec[3];
 	double startPosn[3], endPosn[3];
-	vector<double> extents = getDomainExtents(dmName);
+	vector<double> extents = getDomainExtents();
 
 	//Now draw tic marks for x:
 	pointOnAxis[1] = origin[1];
@@ -468,7 +460,7 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation* aa) {
 		
 		double text = pointOnAxis[0];
 		if (latLon)
-			convertPointToLon(text, dmName);
+			convertPointToLon(text);
 		renderText(text, startPosn, aa);
 	}
 	
@@ -493,7 +485,7 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation* aa) {
 
 		double text = pointOnAxis[1];
 		if (latLon)
-			convertPointToLat(text, dmName);
+			convertPointToLat(text);
 		renderText(text, startPosn, aa);
 	}
 
@@ -564,35 +556,25 @@ void AnnotationRenderer::_drawTic(
 	glPopAttrib();
 }
 
-void AnnotationRenderer::convertPointToLon(
-	double &xCoord, string dataMgrName) {
-	if (dataMgrName=="")
-		dataMgrName = getCurrentDataMgrName();
-
+void AnnotationRenderer::convertPointToLon(double &xCoord) {
 	double dummy = 0.;
-	convertPointToLonLat(xCoord, dummy, dataMgrName); 
+	convertPointToLonLat(xCoord, dummy); 
 }
 
-void AnnotationRenderer::convertPointToLat(
-	double &yCoord, string dataMgrName) {
-	if (dataMgrName=="")
-		dataMgrName = getCurrentDataMgrName();
-
+void AnnotationRenderer::convertPointToLat(double &yCoord) {
 	double dummy = 0.;
 	convertPointToLonLat(dummy, yCoord); 
 }
 
 void AnnotationRenderer::convertPointToLonLat(
-    double &xCoord, double &yCoord, string dataMgrName
+    double &xCoord, double &yCoord
 ) {
-	if (dataMgrName=="")
-		dataMgrName = getCurrentDataMgrName();
-
-	DataMgr* dataMgr = m_dataStatus->GetDataMgr(dataMgrName);
 	double coords[2] = {xCoord, yCoord};
 	double coordsForError[2] = {coords[0], coords[1]};
- 
-	int rc = DataMgrUtils::ConvertPCSToLonLat(dataMgr, coords, 1);
+
+	AnnotationParams *aParams = m_paramsMgr->GetAnnotationParams(m_winName); 
+	string projString = m_dataStatus->GetMapProjection();
+	int rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
 	if (!rc) {
 		MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat",
 			coordsForError[0], coordsForError[1]);
@@ -615,7 +597,7 @@ Transform* AnnotationRenderer::getTransform(string dataMgrName) {
 AxisAnnotation* AnnotationRenderer::getCurrentAxisAnnotation() {
 	AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 	string currentAxisDataMgr = vfParams->GetCurrentAxisDataMgrName();
-	AxisAnnotation* aa = vfParams->GetAxisAnnotation(currentAxisDataMgr);
+	AxisAnnotation* aa = vfParams->GetAxisAnnotation();
 	return aa;
 }
 
@@ -625,14 +607,12 @@ string AnnotationRenderer::getCurrentDataMgrName() const {
 	return currentAxisDataMgr;
 }
 
-std::vector<double> AnnotationRenderer::getDomainExtents(string dmName) const {
-	if (dmName == "")
-		dmName = getCurrentDataMgrName();
+std::vector<double> AnnotationRenderer::getDomainExtents() const {
 	int ts = _currentTimestep;
 	vector <double> minExts, maxExts;
 
 	m_dataStatus->GetActiveExtents(
-		m_paramsMgr, m_winName, dmName, ts, minExts, maxExts
+		m_paramsMgr, ts, minExts, maxExts
 	);
 
 	std::vector<double> extents;

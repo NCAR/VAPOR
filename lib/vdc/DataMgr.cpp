@@ -390,6 +390,7 @@ DataMgr::DataMgr(
 	_doTransformHeight = false;
 	_openVarName.clear();
 	_proj4String.clear();
+	_proj4StringDefault.clear();
 }
 
 
@@ -4008,16 +4009,13 @@ int DataMgr::_getCoordPairExtents(
 }
 
 
-int DataMgr::_initProj4String() {
+int DataMgr::_initProj4StringDefault() {
 
-	// Already initialized via Initialize() options
-	//
-	if (! _proj4String.empty()) return(0);
 
 	// If data set has a map projection use it
 	//
-	_proj4String = _dc->GetMapProjection();
-	if (! _proj4String.empty()) {
+	_proj4StringDefault = _dc->GetMapProjection();
+	if (! _proj4StringDefault.empty()) {
 		return(0);
 	}
 
@@ -4052,7 +4050,8 @@ int DataMgr::_initProj4String() {
 	float lat_0 = (latmin + latmax) / 2.0;
 	ostringstream oss;
 	oss << " +lon_0=" << lon_0 << " +lat_0=" << lat_0;
-	_proj4String = "+proj=eqc +ellps=WGS84" + oss.str();
+	_proj4StringDefault = "+proj=eqc +ellps=WGS84" + oss.str();
+
 
 	return(0);
 }
@@ -4064,8 +4063,14 @@ int DataMgr::_initHorizontalCoordVars() {
 	if (! _is_geographic()) return(0);
 
 
-	int rc = _initProj4String();
+	int rc = _initProj4StringDefault();
 	if (rc<0) return(-1);
+
+	// Already initialized via Initialize() options
+	//
+	if (_proj4String.empty()) {
+		_proj4String = _proj4StringDefault;
+	}
 	
 
 	vector <string> meshnames = _dc->GetMeshNames();
