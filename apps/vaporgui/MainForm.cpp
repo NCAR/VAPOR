@@ -1153,9 +1153,10 @@ void MainForm::sessionOpen(QString qfileName)
 		return;
 	}
 
-	if (!FileOperationChecker::FileGoodToRead(qfileName))
+	if (!FileOperationChecker::FileGoodToRead(qfileName)) {
 		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
-
+		return;
+	}
 
 	string fileName = qfileName.toStdString();
 	sessionOpenHelper(fileName);
@@ -1183,8 +1184,10 @@ void MainForm::_fileSaveHelper(string path)
 		return;
 	}
 
-	if (!FileOperationChecker::FileGoodToWrite(fileName))
+	if (!FileOperationChecker::FileGoodToWrite(fileName)) {
 		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+		return;
+	}
 
 	SettingsParams* sParams = GetSettingsParams();
 	sParams->SetSessionDir(path);

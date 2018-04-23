@@ -82,7 +82,6 @@ private slots:
 	void _windowSizeChanged();
 	
 	void _saveSettings();
-	void _setDirectoryPaths();
 	void _setSessionPath();
 	void _setMetadataPath();
 	void _setImagePath();
