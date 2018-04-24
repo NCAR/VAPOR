@@ -752,6 +752,8 @@ int VDCNetCDF::_writeSliceTemplate(int fd, const T *slice) {
     return (rc);
 }
 
+template int VDCNetCDF::_writeSliceTemplate<float>(int fd, const float *slice);
+
 int VDCNetCDF::readRegion(
     int fd,
     const vector<size_t> &min, const vector<size_t> &max, float *region) {
