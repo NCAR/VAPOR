@@ -13,7 +13,7 @@ set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 0)
 set (VERSION_MICRO 0)
-set (VERSION_RC beta)
+set (VERSION_RC )
 get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
 execute_process (
 	COMMAND git rev-parse --short ${VERSION_COMMIT}
