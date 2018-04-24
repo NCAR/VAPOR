@@ -119,6 +119,7 @@ add_subdirectory (apps)
 add_subdirectory (lib)
 add_subdirectory (include)
 add_subdirectory (share)
+add_subdirectory (scripts)
 add_subdirectory (test_apps)
 
 ###############################################################################
