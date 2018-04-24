@@ -219,6 +219,9 @@ protected:
     virtual int  pointIsOnBox(double corners[8][3], double pkPt[2]);
     bool         ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const;
     double       getPixelSize() const;
+    void         applyTransformToSelection();
+    void         applyTransformToDrag(float &dist, int axis);
+    void         removeTransform();
 
     //! Method that draws a line connecting a handle to the box center
     //! \param[in] handleNum index of handle

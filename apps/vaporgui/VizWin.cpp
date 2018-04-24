@@ -643,7 +643,7 @@ void VizWin::updateManip(bool initialize)
     std::vector<double> minExts(3, 0.f);
     std::vector<double> maxExts(3, 0.f);
     getActiveExtents(minExts, maxExts);
-    cout << minExts[0] << " " << minExts[1] << " " << minExts[2] << " ";
+    cout << "EXTS " << minExts[0] << " " << minExts[1] << " " << minExts[2] << " ";
     cout << maxExts[0] << " " << maxExts[1] << " " << maxExts[2] << endl;
 
     std::vector<double> rotationCenter, cameraPosition;
