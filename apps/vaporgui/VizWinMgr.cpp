@@ -277,22 +277,6 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)
  *	Slots associated with VizTab:
  ********************************************************************/
 
-#ifdef DEAD
-void VizWinMgr::SetTrackBall(const double posvec[3], const double dirvec[3], const double upvec[3], const double centerRot[3], bool perspective)
-{
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    paramsMgr->BeginSaveStateGroup("Navigate scene");
-
-    std::map<string, VizWin *>::iterator itr;
-    for (itr = _vizWindow.begin(); itr != _vizWindow.end(); itr++) {
-        VizWin *vw = itr->second;
-        vw->SetTrackBall(posvec, dirvec, upvec, centerRot, true);
-    }
-
-    paramsMgr->EndSaveStateGroup();
-}
-#endif
-
 void VizWinMgr::Update()
 {
     map<string, VizWin *>::const_iterator it;

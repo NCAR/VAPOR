@@ -58,6 +58,13 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     _buttonNum = 0;
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
+
+    for (int i = 0; i < 3; i++) {
+        _center[i] = 0.0;
+        _posvec[i] = 0.0;
+        _dirvec[i] = 0.0;
+        _upvec[i] = 0.0;
+    }
 }
 
 /*
@@ -194,34 +201,32 @@ void VizWin::setUpProjMatrix()
     glMatrixMode(GL_MODELVIEW);
 }
 
-void VizWin::setUpModelViewMatrix()
+void VizWin::_setMatrixFromModeParams()
 {
-    makeCurrent();    // necessary?
+    // This is a hack to see if camera parameters have been changed
+    // via MouseModeParams. Because the only way to convert camera
+    // parameter such as position vector, etc. into a ModelView matrix
+    // is via the TrackBall we have to do the conversion in a window
+    // with an OpenGL context :-(
+    //
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
     MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
 
-    // If currently navigating with mouse set matrix from trackball
-    //
-    if (_mouseClicked && modeName == MouseModeParams::GetNavigateModeName()) {
-        // Set the modelview matrix via the trackball
-        //
-        glLoadIdentity();
-        _trackBall->TrackballSetMatrix();
-    } else {
-        // Else we set trackball from params
-        //
-        double center[3], posvec[3], dirvec[3], upvec[3];
-        p->GetRotationCenter(center);
-        p->GetCameraPos(posvec);
-        p->GetCameraViewDir(dirvec);
-        p->GetCameraUpVec(upvec);
-
-        _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-        _trackBall->TrackballSetMatrix();
+    double center[3], posvec[3], dirvec[3], upvec[3];
+    p->GetRotationCenter(center);
+    p->GetCameraPos(posvec);
+    p->GetCameraViewDir(dirvec);
+    p->GetCameraUpVec(upvec);
+    bool updateFromMouseMode = false;
+    for (int i = 0; i < 3; i++) {
+        if (center[i] != _center[i] || posvec[i] != _posvec[i] || dirvec[i] != _dirvec[i] || upvec[i] != _upvec[i]) { updateFromMouseMode = true; }
     }
+    if (!updateFromMouseMode) return;
+
+    _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
+    _trackBall->TrackballSetMatrix();
 
     double m[16];
     glGetDoublev(GL_MODELVIEW_MATRIX, m);
@@ -236,6 +241,27 @@ void VizWin::setUpModelViewMatrix()
     vParams->SetModelViewMatrix(m);
 
     _controlExec->SetSaveStateEnabled(enabled);
+
+    for (int i = 0; i < 3; i++) {
+        _center[i] = center[i];
+        _posvec[i] = posvec[i];
+        _dirvec[i] = dirvec[i];
+        _upvec[i] = upvec[i];
+    }
+}
+
+void VizWin::setUpModelViewMatrix()
+{
+    makeCurrent();    // necessary?
+
+    _setMatrixFromModeParams();
+
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
+
+    double m[16];
+    vParams->GetModelViewMatrix(m);
+    glLoadMatrixd(m);
 }
 
 // React to a user-change in window size/position (or possibly max/min)
@@ -292,6 +318,27 @@ void VizWin::initializeGL()
 
 void VizWin::mousePressEventNavigate(QMouseEvent *e)
 {
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    MouseModeParams *p = guiP->GetMouseModeParams();
+
+    double           m[16];
+    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
+    vParams->GetModelViewMatrix(m);
+
+    double center[3];
+    p->GetRotationCenter(center);
+
+    double posvec[3], upvec[3], dirvec[3];
+    bool   status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
+    assert(status);
+
+    // Set trackball from current ViewpointParams matrix;
+    //
+    _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
+    _trackBall->TrackballSetMatrix();
+
     // Let trackball handle mouse events for navigation
     //
     _trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
@@ -299,7 +346,6 @@ void VizWin::mousePressEventNavigate(QMouseEvent *e)
     // Create a state saving group.
     // Only save camera parameters after user release mouse
     //
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Navigate scene");
 }
 

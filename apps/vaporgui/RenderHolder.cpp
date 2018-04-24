@@ -274,6 +274,8 @@ void RenderHolder::_deleteRenderer()
         emit activeChanged(activeViz, rendererType, rendererName);
     }
 
+    _vaporTable->SetActiveRow(0);
+
     paramsMgr->EndSaveStateGroup();
 }
 
@@ -527,8 +529,6 @@ void RenderHolder::Update()
     _makeRendererTableHeaders(colHeader);
 
     map<string, vector<string>>::iterator itr;
-    //	int selectedRow = -1;
-    int row = 0;
     for (itr = rendererNamesMap.begin(); itr != rendererNamesMap.end(); ++itr) {
         vector<string> rendererNames = itr->second;
 
