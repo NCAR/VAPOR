@@ -83,8 +83,6 @@ void TranslateStretchManip::Update(
     std::copy(minExts.begin(), minExts.end(), _extents);
     std::copy(maxExts.begin(), maxExts.end(), _extents + 3);
 
-    cout << minExts[1] << "!!!" << endl;
-
     _transform = transform;
 
     _constrain = constrain;
@@ -155,12 +153,23 @@ void TranslateStretchManip::mousePress(
     setMouseDown(true);
 }
 
+void TranslateStretchManip::applyTransformToDrag(float &dist, int axis) {
+    std::vector<double> scales(3, 1.f);
+    if (_transform != NULL)
+        scales = _transform->GetScales();
+
+    cout << "dist before " << dist << endl;
+    dist *= scales[axis];
+    cout << "dist after  " << dist << endl;
+}
+
 void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
     if (_selectedHandle >= 0) {
         double boxExts[6];
         int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
         //Convert _dragDistance to world coords:
         float dist = _dragDistance;
+        applyTransformToDrag(dist, axis);
 
         //Check if we are stretching.  If so, only move coords associated with
         //handle:
@@ -168,12 +177,16 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
             //boxMin gets changed for nearHandle, boxMax for farHandle
             if (_selectedHandle < 3) {
                 _selection[axis] += dist;
+                _selection[axis] += dist;
             } else {
-                _selection[axis + 3] += dist;
+                _transformedSelection[axis + 3] += dist;
+                _transformedSelection[axis + 3] += dist;
             }
         } else {
-            _selection[axis] += dist;
-            _selection[axis + 3] += dist;
+            //	_selection[axis] += dist;
+            //	_selection[axis+3] += dist;
+            _transformedSelection[axis] += dist;
+            _transformedSelection[axis + 3] += dist;
         }
     }
 
@@ -237,13 +250,9 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double hand
 }
 
 void TranslateStretchManip::constrainExtents() {
-    cout << "Constraining" << endl
-         << endl;
-    cout << _selection[1] << " " << _extents[1] << endl;
     for (int i = 0; i < 3; i++) {
         // correct selection minimum
         if (_selection[i] < _extents[i]) {
-            cout << "sel " << i << " " << _selection[i] << " " << _extents[i] << endl;
             _selection[i] = _extents[i];
         }
         if (_selection[i] > _extents[i + 3])
@@ -667,16 +676,13 @@ bool TranslateStretchManip::
     return true;
 }
 
-//Renders handles and box
-//If it is stretching, it only moves the one handle that is doing the stretching
-void TranslateStretchManip::render() {
-    double extents[6];
-
-    _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
-
+void TranslateStretchManip::applyTransformToSelection() {
     std::vector<double> scales(3, 1.f);
-    if (_transform != NULL)
+    std::vector<double> origin(3, 0.f);
+    if (_transform != NULL) {
         scales = _transform->GetScales();
+        origin = _transform->GetOrigin();
+    }
 
     std::vector<double> selectionSize, selectionMid;
     int ndims = 3; //_selection.size()/2;
@@ -686,19 +692,65 @@ void TranslateStretchManip::render() {
         selectionSize[i] *= scales[i];
 
         selectionMid.push_back((_selection[i] + _selection[i + ndims]) / 2.f);
+        //selectionMid.push_back(_selection[i]+selectionSize[i]/2.f);
 
-        _transformedSelection[i] = selectionMid[i] - selectionSize[i] / 2.f;
-        _transformedSelection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
+        //_transformedSelection[i] = selectionMid[i]-selectionSize[i]/2.f;
+        //_transformedSelection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
+
+        //_selection[i] = selectionMid[i]-selectionSize[i]/2.f;
+        //_selection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
+
+        _selection[i] = origin[i] - selectionSize[i] / 2.f;
+        _selection[i + ndims] = origin[i] + selectionSize[i] / 2.f;
     }
-    //cout << "_selection " << _selection[0]<< " " << _selection[3] << endl;
-    //cout << "scaledSele " << _transformedSelection[0]<< " " << _transformedSelection[3] << endl;
+    cout << "_selection " << _selection[0] << " " << _selection[3] << " " << selectionMid[0] << endl;
+}
+
+void TranslateStretchManip::removeTransform() {
+    std::vector<double> scales(3, 1.f);
+    std::vector<double> origin(3, 0.f);
+    if (_transform != NULL) {
+        scales = _transform->GetScales();
+        origin = _transform->GetOrigin();
+    }
+
+    std::vector<double> selectionSize, selectionMid;
+    int ndims = 3; //_selection.size()/2;
+    //cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
+    for (int i = 0; i < ndims; i++) {
+        selectionSize.push_back(_selection[i + ndims] - _selection[i]);
+        selectionSize[i] /= scales[i];
+
+        selectionMid.push_back((_selection[i] + _selection[i + ndims]) / 2.f);
+        //selectionMid.push_back(_selection[i]+selectionSize[i]/2.f);
+
+        //_transformedSelection[i] = selectionMid[i]-selectionSize[i]/2.f;
+        //_transformedSelection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
+
+        //_selection[i] = selectionMid[i]-selectionSize[i]/2.f;
+        //_selection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
+
+        _selection[i] = origin[i] - selectionSize[i] / 2.f;
+        _selection[i + ndims] = origin[i] + selectionSize[i] / 2.f;
+    }
+    cout << "_selection " << _selection[0] << " " << _selection[3] << " " << selectionMid[0] << endl;
+}
+
+//Renders handles and box
+//If it is stretching, it only moves the one handle that is doing the stretching
+void TranslateStretchManip::render() {
+    double extents[6];
+
+    _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
+
+    applyTransformToSelection();
 
     glPushAttrib(GL_CURRENT_BIT);
     double handleExtents[6];
     for (int handleNum = 0; handleNum < 6; handleNum++) {
         //makeHandleExtents(handleNum, handleExtents, 0/*octant*/, extents);
         //makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _extents);
-        //makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _selection);
+        //		makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _selection);
         makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _transformedSelection);
 
         if (_selectedHandle >= 0) {
@@ -721,12 +773,14 @@ void TranslateStretchManip::render() {
             }
         }
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
-        drawHandleConnector(handleNum, handleExtents, _selection); //extents);
-                                                                   //drawHandleConnector(handleNum, handleExtents, transformedSelection);//extents);
+        //drawHandleConnector(handleNum, handleExtents, _selection);//extents);
+        drawHandleConnector(handleNum, handleExtents, _transformedSelection); //extents);
     }
     //Then render the full box, unhighlighted and displaced
     drawBoxFaces();
     glPopAttrib();
+
+    //	removeTransform();
 }
 
 double TranslateStretchManip::getPixelSize() const {
