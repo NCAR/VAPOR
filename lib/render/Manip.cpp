@@ -606,7 +606,9 @@ void TranslateStretchManip::render()
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
-    std::vector<double> scales = _transform->GetScales();
+    std::vector<double> scales(3, 1.f);
+    if (_transform != NULL) scales = _transform->GetScales();
+
     std::vector<double> selectionSize, selectionMid;
     int                 ndims = 3;    //_selection.size()/2;
     // cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;

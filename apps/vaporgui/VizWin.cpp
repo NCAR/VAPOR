@@ -625,6 +625,7 @@ void VizWin::getWindowSize(std::vector<int> &windowSize)
 VAPoR::Transform *VizWin::getTransform() const
 {
     string dataMgrName = getCurrentDataMgrName();
+    if (dataMgrName.empty()) return NULL;
 
     ParamsMgr *       paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams * vpParams = paramsMgr->GetViewpointParams(_winName);
@@ -672,7 +673,8 @@ void VizWin::updateManip(bool initialize)
     if (classType == ImageParams::GetClassType()) constrain = false;
 
     VAPoR::Transform *  transform = getTransform();
-    std::vector<double> scales = transform->GetScales();
+    std::vector<double> scales(3, 1.f);
+    if (transform != NULL) scales = transform->GetScales();
     cout << "Tx Vscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
 
     cout << llc[1] << "!!!" << endl;
