@@ -193,7 +193,7 @@ public:
 		_cacheSize = sizeMB;
 	}
 
-	string GetMapProjection(string dataSetName) const;
+	string GetMapProjection() const;
 	string GetMapProjectionDefault(string dataSetName) const;
 	
 
