@@ -77,7 +77,12 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     void _windowSizeChanged();
 
     void _saveSettings();
-    void _setDirectoryPaths();
+    void _setSessionPath();
+    void _setMetadataPath();
+    void _setImagePath();
+    void _setTFPath();
+    void _setFlowPath();
+    void _setPythonPath();
 
     void _chooseSessionPath();
     void _chooseMetadataPath();
@@ -89,7 +94,10 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     void _restoreDefaults();
 
   private:
-    //SettingsEventRouter() {}
+    void _setFilePath(void (SettingsParams::*setFunc)(string),
+                      string (SettingsParams::*getFunc)() const,
+                      SettingsParams &sParams,
+                      QLineEdit *lineEdit);
     void _blockSignals(bool block);
 
     void _updateGeneralSettings();

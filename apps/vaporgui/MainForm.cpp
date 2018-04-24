@@ -55,6 +55,7 @@
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
+#include "FileOperationChecker.h"
 
 //Following shortcuts are provided:
 // CTRL_N: new session
@@ -1042,8 +1043,13 @@ void MainForm::sessionOpen(QString qfileName) {
     if (!qfileName.endsWith(".vs3")) {
         return;
     }
-    string fileName = qfileName.toStdString();
 
+    if (!FileOperationChecker::FileGoodToRead(qfileName)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return;
+    }
+
+    string fileName = qfileName.toStdString();
     sessionOpenHelper(fileName);
 
     _stateChangeFlag = false;
@@ -1051,14 +1057,20 @@ void MainForm::sessionOpen(QString qfileName) {
 }
 
 void MainForm::_fileSaveHelper(string path) {
+    QString fileName;
     if (path.empty()) {
-        QString fileName = QFileDialog::getSaveFileName(
+        fileName = QFileDialog::getSaveFileName(
             this, tr("Save VAPOR session file"),
             tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)"));
         path = fileName.toStdString();
     }
     if (path.empty())
         return;
+
+    if (!FileOperationChecker::FileGoodToWrite(fileName)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return;
+    }
 
     if (_controlExec->SaveSession(path) < 0) {
         MSG_ERR("Saving session file failed");
@@ -1202,6 +1214,9 @@ bool MainForm::openDataHelper(
         return (false);
         ;
     }
+
+    DataStatus *ds = _controlExec->GetDataStatus();
+    p->SetProjectionString(ds->GetMapProjection());
 
     p->InsertOpenDateSet(dataSetName, format, files);
 
@@ -1432,6 +1447,7 @@ void MainForm::_setAnimationOnOff(bool on) {
 }
 
 void MainForm::_setAnimationDraw() {
+    _tabMgr->Update();
     _vizWinMgr->Update();
 }
 
@@ -1478,7 +1494,7 @@ void MainForm::showCitationReminder() {
     reminder.append("We depend on evidence of the software's value to the scientific community.  ");
     reminder.append("You are free to use VAPOR as permitted under the terms and conditions of the licence.\n\n ");
     reminder.append("Please cite VAPOR in your publications and presentations. ");
-    reminder.append("Citation details:\n    http://www.vapor.ucar.edu/index.php?id=citation");
+    reminder.append("Citation details:\n    http://www.vapor.ucar.edu/citation");
     msgBox.setText(reminder);
 
     msgBox.setStandardButtons(QMessageBox::Ok);
@@ -1782,35 +1798,41 @@ void MainForm::_setProj4String(string proj4String) {
 
     GUIStateParams *p = GetStateParams();
 
+    DataStatus *ds = _controlExec->GetDataStatus();
+    string currentString = ds->GetMapProjection();
+
+    if (proj4String == currentString)
+        return;
+
     _App->removeEventFilter(this);
 
     vector<string> dataSets = p->GetOpenDataSetNames();
 
-    DataStatus *ds = _controlExec->GetDataStatus();
-
-    // Close and re-open any data set that doesn't have a matching
+    // Close and re-open all data with new
     // proj4 string
     //
+    map<int, vector<string>> filesMap;
+    map<int, string> formatsMap;
     for (int i = 0; i < dataSets.size(); i++) {
-        string currentString = ds->GetMapProjection(dataSets[i]);
 
-        if (currentString != proj4String) {
+        // Save list of files and format before close so we can re-open
+        //
+        filesMap[i] = p->GetOpenDataSetPaths(dataSets[i]);
+        formatsMap[i] = p->GetOpenDataSetFormat(dataSets[i]);
 
-            // Save list of files and format before close so we can re-open
-            //
-            vector<string> files = p->GetOpenDataSetPaths(dataSets[i]);
-            string format = p->GetOpenDataSetFormat(dataSets[i]);
+        closeDataHelper(dataSets[i]);
+    }
 
-            closeDataHelper(dataSets[i]);
+    vector<string> options = {"-project_to_pcs"};
+    if (!proj4String.empty()) {
+        options.push_back("-proj4");
+        options.push_back(proj4String);
+    };
 
-            vector<string> options = {"-project_to_pcs"};
-            if (!proj4String.empty()) {
-                options.push_back("-proj4");
-                options.push_back(proj4String);
-            };
+    for (int i = 0; i < dataSets.size(); i++) {
 
-            (void)openDataHelper(dataSets[i], format, files, options);
-        }
+        (void)openDataHelper(
+            dataSets[i], formatsMap[i], filesMap[i], options);
     }
 
     _App->installEventFilter(this);
