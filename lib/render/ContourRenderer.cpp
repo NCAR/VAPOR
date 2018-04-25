@@ -117,7 +117,7 @@ void ContourRenderer::_buildCache()
     }
     MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
     vector<double>  contours = cParams->GetContourValues(_cacheParams.varName);
-    float           contourColors[contours.size()][4];
+    float(*contourColors)[4] = new float[contours.size()][4];
     if (!_cacheParams.useSingleColor)
         for (int i = 0; i < contours.size(); i++) tf->rgbValue(contours[i], contourColors[i]);
     else
@@ -137,8 +137,8 @@ void ContourRenderer::_buildCache()
         vector<vector<size_t>> nodes;
         grid->GetCellNodes(cell, nodes);
 
-        vector<double> coords[nodes.size()];
-        float          values[nodes.size()];
+        vector<double> *coords = new vector<double>[nodes.size()];
+        float *         values = new float[nodes.size()];
         for (int i = 0; i < nodes.size(); i++) {
             grid->GetUserCoordinates(nodes[i], coords[i]);
             values[i] = grid->GetValue(coords[i]);
@@ -170,9 +170,12 @@ void ContourRenderer::_buildCache()
             }
         }
         glEnd();
+        delete[] coords;
+        delete[] values;
     }
 
     glEndList();
+    delete[] contourColors;
 }
 
 int ContourRenderer::_paintGL()
