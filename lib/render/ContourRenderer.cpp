@@ -145,7 +145,7 @@ void ContourRenderer::_buildCache()
                                            _cacheParams.boxMin, _cacheParams.boxMax);
     //StructuredGrid *sGrid = dynamic_cast<StructuredGrid *>(grid);
 
-    Grid::ConstCellIterator it = grid->ConstCellBegin();
+    Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
 	Grid::ConstCellIterator end = grid->ConstCellEnd();
 	for (; it != end; ++it)
     {
