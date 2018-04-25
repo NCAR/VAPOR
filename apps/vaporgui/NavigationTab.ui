@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>1004</height>
+    <height>1136</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,9 +42,12 @@ scene.</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
      <property name="spacing">
       <number>10</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
      </property>
      <item>
       <widget class="TransformTable" name="transformTable" native="true">
@@ -57,7 +60,7 @@ scene.</string>
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>100</height>
+         <height>50</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -107,10 +110,16 @@ scene.</string>
          </property>
          <item>
           <widget class="QTableWidget" name="datasetProjectionTable">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>115</height>
+             <height>16777215</height>
             </size>
            </property>
            <column>
@@ -2408,6 +2417,19 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
