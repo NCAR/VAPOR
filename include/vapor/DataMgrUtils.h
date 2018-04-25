@@ -43,7 +43,7 @@ namespace DataMgrUtils {
 //! \return status Return true on success. Return false if the no
 //! transform levels exist e.g. the variable does not exist.
 //
-bool MaxXFormPresent(
+VDF_API bool MaxXFormPresent(
     const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxXForm);
 
 //! Return the maximum available LOD level for a variable.
@@ -60,7 +60,7 @@ bool MaxXFormPresent(
 //! \return status Return true on success. Return false if the no
 //! LOD levels exist e.g. the variable does not exist.
 //
-bool MaxLODPresent(
+VDF_API bool MaxLODPresent(
     const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxLOD);
 
 //! Convert Projected Coordinate System coordinates to lon/lat in-place.
@@ -75,11 +75,11 @@ bool MaxLODPresent(
 //! \param[in] npoints Number of points to convert.
 //! \return true if successful
 //!
-int ConvertPCSToLonLat(
+VDF_API int ConvertPCSToLonLat(
     const DataMgr *dataMgr,
     double coords[], int npoints = 1);
 
-int ConvertPCSToLonLat(
+VDF_API int ConvertPCSToLonLat(
     string projString,
     double coords[], int npoints = 1);
 
@@ -97,11 +97,11 @@ int ConvertPCSToLonLat(
 //! \param[in] npoints Number of points to convert.
 //! \return true if successful
 //!
-int ConvertLonLatToPCS(
+VDF_API int ConvertLonLatToPCS(
     const DataMgr *dataMgr,
     double coords[], int npoints = 1);
 
-int ConvertLonLatToPCS(
+VDF_API int ConvertLonLatToPCS(
     string projString,
     double coords[], int npoints = 1);
 
