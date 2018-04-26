@@ -97,7 +97,6 @@ void ContourParams::SetContourValues(string varName, vector<double> vals)
         MakeNewContours(varName);
         c = (Contours *)_contours->GetParams(varName);
     }
-    int s = vals.size();
     c->SetContourValues(vals);
 }
 
