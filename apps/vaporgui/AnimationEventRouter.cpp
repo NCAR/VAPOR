@@ -352,12 +352,7 @@ void AnimationEventRouter::AnimationStepReverse()
     setCurrentTimestep(currentFrame);
 }
 
-void AnimationEventRouter::SetTimeStep(int ts)
-{
-    AnimationParams *aParams = (AnimationParams *)GetActiveParams();
-
-    setCurrentTimestep((size_t)ts);
-}
+void AnimationEventRouter::SetTimeStep(int ts) { setCurrentTimestep((size_t)ts); }
 
 void AnimationEventRouter::SetFrameStep(int step)
 {
