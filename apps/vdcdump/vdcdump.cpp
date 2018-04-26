@@ -156,6 +156,8 @@ class OutFormat {
             return "text";
         case XType::INVALID:
             return "INVALID";
+        default:
+            return "INVALID";
         };
     }
 };
