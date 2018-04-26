@@ -166,7 +166,6 @@ if (getenv("VAPOR_DEBUG"))
     fontFile = fontFile + "//arimo.ttf";
 
 	QFontDatabase fdb; 
-	int result = fdb.addApplicationFont(QString::fromStdString(fontFile));
 	QStringList fonts = fdb.families();
 	QFont f = fdb.font("Arimo", "normal", 12);  
 	
@@ -178,7 +177,6 @@ if (getenv("VAPOR_DEBUG"))
     mw->setWindowTitle( "VAPOR User Interface" );
     mw->show();
     std::string banner_file_name = "vapor_banner.png";
-    BannerGUI* banner = new BannerGUI(mw, banner_file_name, 3000);
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
 	int estatus = a.exec();
 
