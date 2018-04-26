@@ -137,9 +137,6 @@ void GetIndices(
   virtual const void *address() const {return this; };
 
   virtual bool equal(const void* rhs) const {
-	const ConstCoordItrUCoordless *itrptr = 
-		static_cast<const ConstCoordItrUCoordless *> (rhs);
-
 	return(true);
   }
 
