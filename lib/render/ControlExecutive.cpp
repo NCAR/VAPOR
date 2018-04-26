@@ -483,6 +483,19 @@ int ControlExec::EnableAnimationCapture(string winName, bool onOff, string filen
     return 0;
 }
 
+string ControlExec::MakeStringConformant(string s)
+{
+    if (s.empty()) s += "_";
+
+    if (!(std::isalpha(s[0]) || s[0] == '_')) { s = "_" + s; }
+
+    for (string::iterator itr = s.begin(); itr != s.end(); ++itr) {
+        if (!(std::isalnum(*itr) || std::isdigit(*itr) || *itr == '-' || *itr == '_' || *itr == '.')) { *itr = '_'; }
+        if (isspace(*itr)) { *itr = '_'; }
+    }
+    return (s);
+}
+
 void ControlExec::undoRedoHelper()
 {
     bool enabled = GetSaveStateEnabled();
