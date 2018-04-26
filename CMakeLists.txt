@@ -35,6 +35,13 @@ elseif (WIN32)
 	add_definitions (-DWIN32)
 endif()
 
+# compiler warning flags
+if (NOT WIN32)
+  SET( COMPILE_FLAGS "-Wall -Wno-sign-compare")
+  SET( CMAKE_CXX_FLAGS  "${COMPILE_FLAGS}" )
+  SET( CMAKE_C_FLAGS  "${COMPILE_FLAGS}" )
+endif()
+
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
