@@ -48,9 +48,6 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
         }
     }
 
-    VAPoR::DataMgr *   currentDmgr = _dataStatus->GetDataMgr(currentDatasetName);
-    VAPoR::PlotParams *plotParams = dynamic_cast<VAPoR::PlotParams *>(_paramsMgr->GetAppRenderParams(currentDatasetName, VAPoR::PlotParams::GetClassType()));
-
     // Do some static QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
@@ -268,7 +265,6 @@ void Plot::_newVarChanged(int index)
 
     // Add this variable to parameter
     VAPoR::PlotParams *      plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr *         dataMgr = this->_getCurrentDataMgr();
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
     vars.push_back(varName);
     plotParams->SetAuxVariableNames(vars);
@@ -280,7 +276,6 @@ void Plot::_removeVarChanged(int index)
 
     std::string        varName = removeVarCombo->itemText(index).toStdString();
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
 
     // Remove this variable from parameter
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
@@ -415,8 +410,7 @@ VAPoR::DataMgr *Plot::_getCurrentDataMgr() const
 
 void Plot::_setInitialExtents()
 {
-    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
+    VAPoR::DataMgr *dataMgr = this->_getCurrentDataMgr();
 
     // Set spatial extents
     std::vector<std::string> availVars = dataMgr->GetDataVarNames();
@@ -533,7 +527,6 @@ void Plot::_timeTabPlotClicked()
         std::vector<float> seq;
         for (int t = minMaxTS[0]; t <= minMaxTS[1]; t++) {
             VAPoR::Grid *grid = dataMgr->GetVariable(t, enabledVars[v], refinementLevel, compressLevel);
-            float        missingVal = grid->GetMissingValue();
             float        fieldVal = grid->GetValue(singlePt);
             if (fieldVal != grid->GetMissingValue())
                 seq.push_back(fieldVal);
