@@ -391,6 +391,7 @@ int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype
 	}
 }
 
+#ifdef VAPOR3_0_0_ALPHA
 static string valueCArrayToString(const void *a, int l, VDC_XType type) {
 	string s("[");
 	char buffer[128];
@@ -407,6 +408,7 @@ static string valueCArrayToString(const void *a, int l, VDC_XType type) {
 	}
 	return s + string("]");
 }
+#endif 
 
 int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count)
 {

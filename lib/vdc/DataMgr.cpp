@@ -307,7 +307,7 @@ void grid_params(
 	}
 }
 
-
+#ifdef VAPOR3_0_0_ALPHA
 void coord_setup_helper(
 	const vector <string> &dimnames, 
 	const vector <size_t> &dims, 
@@ -353,6 +353,7 @@ void coord_setup_helper(
 		}
 	}
 }
+#endif
 
 };
 
