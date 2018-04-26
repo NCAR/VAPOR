@@ -186,7 +186,7 @@ float Grid::GetValue(const std::vector<double> &coords) const
     //
     ClampCoord(clampedCoords);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // At this point xyz should be within the grid bounds
     //
     if (!InsideGrid(clampedCoords)) return (_missingValue);

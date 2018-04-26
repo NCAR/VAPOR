@@ -64,7 +64,7 @@ size_t gcd(size_t n1, size_t n2)
 
 size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 // Copy a variable mask with 2 or 3 spatial dimensions
 //
 int CopyVar2d3dMask(DC &dc, VDC &vdc, size_t ts, string varname, int lod)

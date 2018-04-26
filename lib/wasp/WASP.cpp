@@ -2729,7 +2729,7 @@ int WASP::_CopyVar(string varname, NetCDFCpp &src_ncdf, NetCDFCpp &dst_ncdf) con
     // hyperslab at a time.
     //
     int nk = 1;
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //
     // Need to fix this so that count is block-aligned
     //

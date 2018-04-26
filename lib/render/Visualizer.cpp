@@ -73,7 +73,7 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     _renderOrder.clear();
     _renderer.clear();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Create Manips for every mode except 0
     _manipHolder.push_back(0);
     for (int i = 1; i < MouseModeParams::getNumMouseModes(); i++) {
@@ -100,13 +100,13 @@ Visualizer::~Visualizer()
 {
     for (int i = 0; i < _renderer.size(); i++) {
         delete _renderer[i];
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         TextObject::clearTextObjects(_renderer[i]);
 #endif
     }
     _renderOrder.clear();
     _renderer.clear();
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     _manipHolder.clear();
 #endif
 }
@@ -184,7 +184,7 @@ void Visualizer::applyTransforms(int i)
     //	Box* box = rParams->GetBox();
     //	box->GetExtents(minExts, maxExts);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     vector<double> minExts, maxExts;
     DataMgr *      dMgr = m_dataStatus->GetDataMgr(datasetName);
     dMgr->GetVariableExtents(0, "U", 3, minExts, maxExts);
@@ -197,7 +197,7 @@ void Visualizer::applyTransforms(int i)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     glTranslatef(xCenter, yCenter, zCenter);
     glRotatef(rotations[0], 1, 0, 0);
     glRotatef(rotations[1], 0, 1, 0);
@@ -213,7 +213,7 @@ void Visualizer::applyTransforms(int i)
 
     glTranslatef(translations[0], translations[1], translations[2]);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     glTranslatef(-xCenter, -yCenter, -zCenter);
 #endif
 }
@@ -255,11 +255,11 @@ int Visualizer::paintEvent()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Render the current active manip, if there is one
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     renderManip();
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Render all of the current text objects
     TextObject::renderAllText(timeStep, this);
 #endif
@@ -273,7 +273,7 @@ int Visualizer::paintEvent()
     for (int i = 0; i < _renderer.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         if (_renderer[i]->isInitialized() && !(_renderer[i]->doAlwaysBypass(timeStep)))
 #endif
         {
@@ -295,7 +295,7 @@ int Visualizer::paintEvent()
                 glPopMatrix();
                 if (myrc < 0) rc = -1;
             }
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
             if (rc) { _renderer[i]->setBypass(timeStep); }
 #endif
             glPopAttrib();
@@ -316,7 +316,7 @@ int Visualizer::paintEvent()
 
     if (m_vizFeatures) m_vizFeatures->DrawText();
     renderColorbars(timeStep);
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     if (m_vizFeatures) m_vizFeatures->OverlayPaint(timeStep);
 #endif
 
@@ -336,14 +336,14 @@ int Visualizer::paintEvent()
 
 bool Visualizer::fbSetup()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Following is needed in case undo/redo leaves a
     // disabled renderer in the renderer list, so it can be deleted.
     //
     removeDisabledRenderers();
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Get the ModelView matrix from the viewpoint params, if it has changed.  If
     // it is not changed, it will come from the Trackball
     if (vpParams->VPHasChanged(_winNum))
@@ -387,7 +387,7 @@ int Visualizer::paintSetup(int timeStep)
     // Lights are positioned relative to the view direction, do this before the modelView matrix is set
     if (placeLights()) { return -1; }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     double center[3];
     m_trackBall->GetCenter(center);
     vector<double> stretch = vpParams->GetStretchFactors();
@@ -397,7 +397,7 @@ int Visualizer::paintSetup(int timeStep)
     glTranslated(-center[0], -center[1], -center[2]);
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Save the GL matrix in the viewpoint params, for when the mouse is moving.
     // Don't put this event in the command queue.
     if (_tBallChanged) {
@@ -409,7 +409,7 @@ int Visualizer::paintSetup(int timeStep)
     _tBallChanged = false;
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     vpParams->VPSetChanged(false);
 #endif
     return 0;
@@ -457,7 +457,7 @@ int Visualizer::initializeGL(ShaderMgr *shaderMgr)
     //
     if (printOpenGLError()) return -1;
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     if (setUpViewport(_width, _height) < 0) return -1;
 #endif
     return 0;
@@ -629,7 +629,7 @@ void Visualizer::removeAllRenderers()
 {
     // Prevent new rendering while we do this?
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     for (int i = _renderer.size() - 1; i >= 0; i--) { delete _renderer[i]; }
 #endif
 
@@ -647,7 +647,7 @@ bool Visualizer::RemoveRenderer(Renderer *ren)
     bool found = false;
     for (i = 0; i < _renderer.size(); i++) {
         if (_renderer[i] != ren) continue;
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         delete _renderer[i];
 #endif
 
@@ -793,7 +793,7 @@ void Visualizer::removeDisabledRenderers()
 
 double Visualizer::getPixelSize() const
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     double temp[3];
 
     // Window height is subtended by viewing angle (45 degrees),
@@ -828,7 +828,7 @@ RegionParams *Visualizer::getActiveRegionParams() const { return m_paramsMgr->Ge
 
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return m_paramsMgr->GetAnnotationParams(m_winName); }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void Visualizer::resetTrackball()
 {
     if (m_trackBall) delete m_trackBall;
@@ -836,7 +836,7 @@ void Visualizer::resetTrackball()
 }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void Visualizer::renderManip()
 {
     // render the region manipulator, if in region mode, and active visualizer, or region shared
@@ -1011,7 +1011,7 @@ void Visualizer::renderColorbars(int timeStep)
     for (int i = 0; i < _renderer.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         if (_renderer[i]->isInitialized() && !(_renderer[i]->doAlwaysBypass(timeStep))) {
 #endif
             _renderer[i]->renderColorbar();

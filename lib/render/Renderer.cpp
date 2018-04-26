@@ -208,7 +208,7 @@ void Renderer::DisableClippingPlanes()
     glDisable(GL_CLIP_PLANE5);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void Renderer::buildLocal2DTransform(int dataOrientation, float a[2], float b[2], float *constVal, int mappedDims[3])
 {
     mappedDims[2] = dataOrientation;

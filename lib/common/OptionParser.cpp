@@ -736,7 +736,7 @@ void OptionParser::PrintOptionHelp(FILE *fp, int linelimit, bool docopyright)
         fprintf(fp, "\n");
     }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     for (i = 0; i < (int)_optTbl.size(); i++) {
         _OptRec_T *o = _optTbl[i];
 

@@ -415,7 +415,7 @@ void DataStatus::reset_time()
 
 DataStatus::~DataStatus() {}
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 // Map corners of box to voxels.
 void DataStatus::mapBoxToVox(Box *box, string varname, int refLevel, int lod, int timestep, size_t voxExts[6])
 {

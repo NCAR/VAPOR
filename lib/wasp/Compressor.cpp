@@ -512,7 +512,7 @@ int Compressor::Reconstruct(const long *src_arr, long *dst_arr, vector<Significa
     return reconstruct_template(this, src_arr, dst_arr, (long *)_C, _CLen, _L, _nlevels, l, sigmaps, _dims);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 bool Compressor::IsCompressible(vector<size_t> dims, const string &wavename, const string &mode)
 {
     if (dims.size() < 1 || dims.size() > 3) { return (false); }

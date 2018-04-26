@@ -230,7 +230,7 @@ void test_iterator(const StructuredGrid *sg)
     cout << endl;
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void test_cell_iterator(const StructuredGrid *sg)
 {
     cout << "Cell Iterator Test ----->" << endl;

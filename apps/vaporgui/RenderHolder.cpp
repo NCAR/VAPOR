@@ -341,7 +341,7 @@ void RenderHolder::_tableValueChanged(int row, int col)
 
 void RenderHolder::_itemTextChange(QTableWidgetItem *item)
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     int row = item->row();
     int col = item->column();
     if (col != 0) return;
