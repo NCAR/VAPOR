@@ -335,15 +335,9 @@ VAPoR::RenderParams *RenderHolder::_getRenderParamsFromCell(int row, int col) {
 }
 
 void RenderHolder::_changeRendererName(int row, int col) {
-    RenderParams *rP = _getRenderParamsFromCell(row, col);
 
     string text = _vaporTable->GetValue(row, col);
     string uniqueText = uniqueName(text);
-    //if (text == rP->GetRendererName()) return;
-
-    //if (uniqueText != text) item->setText(QString(uniqueText.c_str()));
-
-    //	rP->SetRendererName(uniqueText);
 }
 
 void RenderHolder::_tableValueChanged(int row, int col) {
@@ -542,7 +536,6 @@ void RenderHolder::_makeRendererTableHeaders(vector<string> &tableValues) {
 }
 
 void RenderHolder::Update() {
-    int rows, cols;
     std::vector<std::string> values;
 
     // Get active params from GUI state

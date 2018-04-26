@@ -395,7 +395,6 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa) {
 
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
-    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
@@ -558,7 +557,6 @@ void AnnotationRenderer::convertPointToLonLat(
     double coords[2] = {xCoord, yCoord};
     double coordsForError[2] = {coords[0], coords[1]};
 
-    AnnotationParams *aParams = m_paramsMgr->GetAnnotationParams(m_winName);
     string projString = m_dataStatus->GetMapProjection();
     int rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
     if (!rc) {
