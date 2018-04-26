@@ -34,11 +34,6 @@ add_library (wasp SHARED ${SRC} ${HEADERS})
 
 target_link_libraries (wasp common netcdf)
 
-if (NOT WIN32)
-	target_compile_options(wasp PRIVATE "-Wno-deprecated-register")
-	target_compile_options(wasp PRIVATE "-Wno-absolute-value")
-endif ()
-
 add_definitions (-DWASP_EXPORTS)
 
 install (
