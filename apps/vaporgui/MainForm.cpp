@@ -209,7 +209,7 @@ void MainForm::_initMembers()
 
     _stats = NULL;
     _plot = NULL;
-    SeedMe *_seedMe = NULL;
+    _seedMe = NULL;
     _banner = NULL;
     _windowSelector = NULL;
     _modeStatusWidget = NULL;
@@ -1648,7 +1648,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     // Only update the GUI if the Params state has changed
     //
     if (event->type() == ParamsChangeEvent::type()) {
-        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
 
