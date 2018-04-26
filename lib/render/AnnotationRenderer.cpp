@@ -632,12 +632,11 @@ void AnnotationRenderer::renderText(
 	AxisAnnotation* aa)
 {
 	if (aa == NULL)
-		AxisAnnotation *aa = getCurrentAxisAnnotation();
+		aa = getCurrentAxisAnnotation();
 
 	std::vector<double> axisColor = aa->GetAxisColor();
 	std:: vector<double> txtBackground = aa->GetAxisBackgroundColor();
 	int fontSize = aa->GetAxisFontSize();
-	bool latLon = aa->GetLatLonAxesEnabled();
 	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
 	int precision = (int)aa->GetAxisDigits();
