@@ -22,7 +22,9 @@ using namespace VAPoR;
 using namespace std;
 
 namespace {
+#ifdef VAPOR3_0_0_ALPHA
 bool mycompare(const pair<int, float> &a, const pair<int, float> &b) { return (a.second < b.second); }
+#endif
 };    // namespace
 
 DCWRF::DCWRF()

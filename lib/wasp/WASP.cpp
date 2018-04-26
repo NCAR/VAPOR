@@ -406,6 +406,7 @@ size_t vproduct(vector<size_t> a)
     return (ntotal);
 }
 
+#ifdef VAPOR3_0_0_ALPHA
 // Elementwise difference between vector a and b (return (a-b));
 //
 vector<size_t> vdiff(vector<size_t> a, vector<size_t> b)
@@ -417,12 +418,15 @@ vector<size_t> vdiff(vector<size_t> a, vector<size_t> b)
     for (int i = 0; i < a.size(); i++) c[i] = a[i] - b[i];
     return (c);
 }
+#endif
 
 // Determine POD type
 //
+#ifdef VAPOR3_0_0_ALPHA
 int NetCDFType(float dummy) { return NC_FLOAT; }
-int NetCDFType(double dummy) { return NC_DOUBLE; }
 int NetCDFType(char dummy) { return NC_BYTE; }
+#endif
+int NetCDFType(double dummy) { return NC_DOUBLE; }
 int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
 int NetCDFType(int16_t dummy) { return NC_SHORT; }
 int NetCDFType(int dummy) { return NC_INT; }
