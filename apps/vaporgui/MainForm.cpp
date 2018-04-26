@@ -117,7 +117,7 @@ string makename(string file)
 {
     QFileInfo qFileInfo(QString(file.c_str()));
 
-    return (qFileInfo.fileName().toStdString());
+    return (ControlExec::MakeStringConformant(qFileInfo.fileName().toStdString()));
 }
 
 string concatpath(string s1, string s2)
@@ -275,6 +275,12 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     vector<string> myRenParams;
     myRenParams.push_back(StatisticsParams::GetClassType());
     myRenParams.push_back(PlotParams::GetClassType());
+
+    // Force creation of the static error reporter, which registers
+    // callback's with the MyBase error logger used by the vapor render
+    // library.
+    //
+    ErrorReporter::GetInstance();
 
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
