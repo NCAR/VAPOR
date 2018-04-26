@@ -161,7 +161,7 @@ int ControlExec::Paint(string winName, bool force){
 		return -1;
 	}
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	if (!force) {
 		if (!VizWinParams::VizIsDirty(viz)) return 0;  //Do nothing
 	}
