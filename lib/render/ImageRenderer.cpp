@@ -183,7 +183,6 @@ int ImageRenderer::GetMesh( DataMgr *dataMgr,
 	_gridStateClear();
 
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
-  size_t ts = myParams->GetCurrentTimestep();
 
   // Find box extents for ROI
   //
@@ -201,8 +200,6 @@ int ImageRenderer::GetMesh( DataMgr *dataMgr,
 		// Get the width and height of the image texture. These
 		// will be used to set the width and height of the mesh.
 		//
-		unsigned char *texture = (unsigned char *) _getTexture(dataMgr);
-
 		_vertsWidth = _texWidth;
 		_vertsHeight = _texHeight;
 		rc = _getMeshDisplaced(
@@ -777,7 +774,6 @@ int ImageRenderer::_getMeshPlane( const vector <double> &minBox,
 vector <double> ImageRenderer::_getPCSExtentsData() const 
 {
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
-  size_t ts = myParams->GetCurrentTimestep();
 
   // Find box extents for ROI
   //
