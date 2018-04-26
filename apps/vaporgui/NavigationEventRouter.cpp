@@ -631,7 +631,7 @@ void NavigationEventRouter::CenterSubRegion(){
 
 cout << "NavigationEventRouter::CenterSubRegion not implemented" << endl;
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	ViewpointParams* vpParams = _getActiveParams();
 	if (! vpParams) return;
@@ -774,7 +774,7 @@ void NavigationEventRouter::AlignView(int axis) {
 //Reset the center of view.  Leave the camera where it is
 void NavigationEventRouter::
 SetCenter(const double* coords){
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	double vdir[3];
 	vector<double> nvdir;
 	ViewpointParams* vpParams = _getActiveParams();
@@ -793,7 +793,7 @@ SetCenter(const double* coords){
 	
 	vnormal(vdir);
 	vector<double>vvdir;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	Command* cmd = Command::CaptureStart(vpParams,"re-center view");
 #endif
 	for (int i = 0; i<3; i++) vvdir.push_back(vdir[i]);
@@ -803,7 +803,7 @@ SetCenter(const double* coords){
 		rotCtr.push_back(coords[i]);
 	}
 	vpParams->setRotationCenterLocal(rotCtr);
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	Command::CaptureEnd(cmd,vpParams);
 #endif
 	updateTab();

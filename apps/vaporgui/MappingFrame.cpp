@@ -289,7 +289,7 @@ void MappingFrame::updateMapperFunction(MapperFunction *mapper)
     {
 		
       OpacityWidget *widget = createOpacityWidget(_mapper->GetOpacityMap(i));
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
       _mapper->GetOpacityMap(i)->setMapper(_mapper);
 #endif
 
@@ -2537,7 +2537,7 @@ void MappingFrame::setIsoSlider()
 //----------------------------------------------------------------------------
 void MappingFrame::setIsolineSlider(int index)
 {
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
   if (!_mapper) return;
   IsoSlider* iSlider = _isolineSliders[index];
   float min = xWorldToData(iSlider->minValue());

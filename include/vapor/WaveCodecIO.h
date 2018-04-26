@@ -56,7 +56,7 @@ public:
  //
  WaveCodecIO(const string &metafile, int nthreads = 0);
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
  WaveCodecIO(
 	const size_t dim[3], const size_t bs[3], int numTransforms, 
 	const vector <size_t> cratios,

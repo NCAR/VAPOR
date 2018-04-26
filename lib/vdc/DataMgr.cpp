@@ -1189,7 +1189,7 @@ Grid *DataMgr::_getVariable(
 		// Derived variable that is not in cache, so we need to 
 		// create it
 		//
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 		rg = execute_pipeline(
 			ts, varname, level, lod, min, max, lock,
 			xcblks, ycblks, zcblks
@@ -1391,7 +1391,7 @@ int DataMgr::GetDimLensAtLevel(
 	return(0);
 } 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 int	DataMgr::NewPipeline(PipeLine *pipeline) {
 
@@ -2062,7 +2062,7 @@ bool	DataMgr::_free_lru(
 }
 	
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 PipeLine *DataMgr::get_pipeline_for_var(string varname) const {
 
 	for (int i=0; i<_PipeLines.size(); i++) {
@@ -2326,7 +2326,7 @@ vector <string> DataMgr::_get_derived_variables() const {
     return(svec);
 }
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 void DataMgr::PurgeVariable(string varname){
 	_free_var(varname);

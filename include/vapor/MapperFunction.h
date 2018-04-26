@@ -351,7 +351,7 @@ private:
 
 };
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 //! \class MFContainer
 //! \brief A simple container class for managing a collection
