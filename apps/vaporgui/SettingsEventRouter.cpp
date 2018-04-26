@@ -509,4 +509,6 @@ void SettingsEventRouter::_saveSettings() {
     if (rc < 0) {
         MSG_ERR("Failed to save startup file");
     }
+
+    _updateTab();
 }
