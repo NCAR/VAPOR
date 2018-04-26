@@ -201,7 +201,6 @@ class MainForm : public QMainWindow {
     bool _sessionNewFlag;
     bool _begForCitation;
     int _eventsSinceLastSave;
-    string _recentPath;
 
     // Zero out all member variables
     //
