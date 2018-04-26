@@ -248,7 +248,7 @@ private:
 //
 /////////////////////////////////////////////////////////////////////////
 
-class PARAMS_API RenderEventRouterFactory {
+class RenderEventRouterFactory {
 public:
     static RenderEventRouterFactory *Instance()
     {

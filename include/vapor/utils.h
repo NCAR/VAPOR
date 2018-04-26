@@ -98,7 +98,7 @@ COMMON_API std::vector<size_t> VectorizeCoords(size_t offset, const std::vector<
 //    m1,m2: size of submatrix (row,col)
 //    s1,s2: size of entire matrix (row,col)
 //
-void Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, int m2, int s2);
+COMMON_API void Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, int m2, int s2);
 
 //
 // blocked matrix Transpose single threaded
@@ -106,7 +106,7 @@ void Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, int m2,
 //   *b : pointer to output matrix
 //    s1,s2: size of entire matrix (row,col)
 //
-void Transpose(const float *a, float *b, int s1, int s2);
+COMMON_API void Transpose(const float *a, float *b, int s1, int s2);
 
 };    // namespace Wasp
 
