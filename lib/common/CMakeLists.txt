@@ -39,10 +39,6 @@ if (NOT WIN32)
 	add_definitions (-DENABLE_THREADS)
 endif()
 
-if (NOT WIN32)
-	target_compile_options(common PRIVATE "-Wno-deprecated-declarations")
-endif ()
-
 add_definitions (-DCOMMON_EXPORTS)
 
 install (
