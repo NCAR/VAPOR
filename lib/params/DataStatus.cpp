@@ -318,7 +318,6 @@ void DataStatus::GetActiveExtents(
             }
         }
     }
-    int s = minExts.size();
 }
 
 size_t DataStatus::MapGlobalToLocalTimeStep(
