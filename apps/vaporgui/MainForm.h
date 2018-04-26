@@ -197,11 +197,10 @@ private:
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 
-    bool   _stateChangeFlag;
-    bool   _sessionNewFlag;
-    bool   _begForCitation;
-    int    _eventsSinceLastSave;
-    string _recentPath;
+    bool _stateChangeFlag;
+    bool _sessionNewFlag;
+    bool _begForCitation;
+    int  _eventsSinceLastSave;
 
     // Zero out all member variables
     //

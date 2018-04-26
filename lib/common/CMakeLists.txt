@@ -28,14 +28,13 @@ set (HEADERS
 
 add_library (common SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (common pthread)
-
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
 	target_link_libraries (common ${COREFOUNDATION})
 endif()
 
 if (NOT WIN32)
+	target_link_libraries (common pthread)
 	add_definitions (-DENABLE_THREADS)
 endif()
 

@@ -139,13 +139,9 @@ void GUIStateParams::GetActiveRenderer(string vizWin, string &renderType, string
 //
 void GUIStateParams::SetActiveRenderer(string vizWin, string renderType, string renderInst) { m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst); }
 
-//! method identifies the current session file
-//! \retval session file path
-string GUIStateParams::GetCurrentSessionPath() const { return (GetValueString(m_sessionFileTag, "bogus.vs3")); }
+string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }
 
-//! method sets the current session path
-//! \param[in] path string
-void GUIStateParams::SetCurrentSessionPath(string path) { SetValueString(m_sessionFileTag, "Set current session path", path); }
+void GUIStateParams::SetCurrentSessionFile(string path) { SetValueString(m_sessionFileTag, "Set current session file path", path); }
 
 //! method identifies the current session file
 //! \retval session file path

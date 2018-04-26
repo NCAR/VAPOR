@@ -117,7 +117,7 @@ void ContourRenderer::_buildCache()
     }
     MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
     vector<double>  contours = cParams->GetContourValues(_cacheParams.varName);
-    float           contourColors[contours.size()][4];
+    float(*contourColors)[4] = new float[contours.size()][4];
     if (!_cacheParams.useSingleColor)
         for (int i = 0; i < contours.size(); i++) tf->rgbValue(contours[i], contourColors[i]);
     else
@@ -130,15 +130,15 @@ void ContourRenderer::_buildCache()
         heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     // StructuredGrid *sGrid = dynamic_cast<StructuredGrid *>(grid);
 
-    Grid::ConstCellIterator it = grid->ConstCellBegin();
+    Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it) {
         vector<size_t>         cell = *it;
         vector<vector<size_t>> nodes;
         grid->GetCellNodes(cell, nodes);
 
-        vector<double> coords[nodes.size()];
-        float          values[nodes.size()];
+        vector<double> *coords = new vector<double>[nodes.size()];
+        float *         values = new float[nodes.size()];
         for (int i = 0; i < nodes.size(); i++) {
             grid->GetUserCoordinates(nodes[i], coords[i]);
             values[i] = grid->GetValue(coords[i]);
@@ -170,9 +170,12 @@ void ContourRenderer::_buildCache()
             }
         }
         glEnd();
+        delete[] coords;
+        delete[] values;
     }
 
     glEndList();
+    delete[] contourColors;
 }
 
 int ContourRenderer::_paintGL()

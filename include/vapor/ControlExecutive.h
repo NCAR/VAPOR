@@ -465,6 +465,27 @@ public:
     //!
     int EnableAnimationCapture(string winName, bool doEnable, string filename = "");
 
+    //! Make string conformant for library
+    //!
+    //! Many of the methods provided by the API accept string arguments
+    //! defining names of objects. These user-defined names must conform
+    //! to Xml element name requirements:
+    //!
+    //! \li Element names are case-sensitive
+    //! \li Element names must start with a letter or underscore
+    //! \li Element names cannot start with the letters xml (or XML, or Xml, etc)
+    //! \li Element names can contain letters, digits, hyphens,
+    //! underscores, and periods
+    //! \li Element names cannot contain spaces
+    //!
+    //! This method ensures \p s is conformant, returning a possibly
+    //! modified string meeting the above requirements
+    //!
+    //! \param[in] s a string
+    //! \retval Returns \p s, possibly modified to be XML element conformant
+    //
+    static string MakeStringConformant(string s);
+
 private:
     ParamsMgr *                    _paramsMgr;
     DataStatus *                   _dataStatus;
