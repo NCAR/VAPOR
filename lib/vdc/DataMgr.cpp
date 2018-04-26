@@ -3537,7 +3537,6 @@ string DataMgr::_getTimeCoordVarNameDerived() const {
 
 	for(int i=0; i<cvars.size(); i++) {
 		DC::CoordVar varInfo;
-		bool ok = GetCoordVarInfo(cvars[i], varInfo);
 		if (varInfo.GetAxis() == 3) return(cvars[i]);
 	}
 	return("");
