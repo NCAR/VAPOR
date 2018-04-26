@@ -532,8 +532,6 @@ bool Visualizer::projectPointToWin(double cubeCoords[3], double winCoords[2]) {
 bool Visualizer::pixelToVector(
     double winCoords[2], const vector<double> camPosStr,
     double dirVec[3], double strHandleMid[3]) {
-
-    const AnnotationParams *vfParams = getActiveAnnotationParams();
     const ViewpointParams *vpParams = getActiveViewpointParams();
 
     GLdouble pt[3];
