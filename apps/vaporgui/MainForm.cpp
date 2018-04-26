@@ -219,7 +219,6 @@ void MainForm::_initMembers()
     _vizWinMgr = NULL;
 
     _capturingAnimationVizName.clear();
-    _recentPath.clear();
 
     _stateChangeFlag = false;
     _sessionNewFlag = false;
@@ -836,27 +835,8 @@ void MainForm::sessionOpenHelper(string fileName)
     //
     GUIStateParams *newP = GetStateParams();
     dataSetNames = newP->GetOpenDataSetNames();
-    if (dataSetNames.size()) {
-        vector<string> p = newP->GetOpenDataSetPaths(dataSetNames[dataSetNames.size() - 1]);
-        _recentPath = p[p.size() - 1];
-    } else {
-        _recentPath = ".";
-    }
 
     for (int i = 0; i < dataSetNames.size(); i++) { newP->RemoveOpenDateSet(dataSetNames[i]); }
-
-    // ControlExec::LoadState invalidates params state
-    //
-    SettingsParams *sP = GetSettingsParams();
-    if (fileName.empty()) {
-        newP->SetCurrentSessionPath(concatpath(sP->GetSessionDir(), "My_Vapor_Session.vs3"));
-    } else {
-        newP->SetCurrentSessionPath(fileName);
-    }
-    newP->SetCurrentImagePath(sP->GetImageDir());
-    newP->SetCurrentTFPath(sP->GetTFDir());
-    newP->SetCurrentPythonPath(sP->GetPythonDir());
-    newP->SetCurrentFlowPath(sP->GetFlowDir());
 
     _vizWinMgr->Restart();
     _tabMgr->Restart();
@@ -881,9 +861,9 @@ void MainForm::sessionOpen(QString qfileName)
     //
     if (qfileName == "") {
         SettingsParams *sP = GetSettingsParams();
-        string          path = sP->GetSessionDir();
+        string          dir = sP->GetSessionDir();
 
-        vector<string> files = myGetOpenFileNames("Choose a VAPOR session file to restore a session", path, "Vapor 3 Session Save Files (*.vs3)", false);
+        vector<string> files = myGetOpenFileNames("Choose a VAPOR session file to restore a session", dir, "Vapor 3 Session Save Files (*.vs3)", false);
         if (files.empty()) return;
 
         qfileName = files[0].c_str();
@@ -900,20 +880,26 @@ void MainForm::sessionOpen(QString qfileName)
     string fileName = qfileName.toStdString();
     sessionOpenHelper(fileName);
 
+    GUIStateParams *p = GetStateParams();
+    p->SetCurrentSessionFile(fileName);
+
     _stateChangeFlag = false;
     _sessionNewFlag = false;
 }
 
 void MainForm::_fileSaveHelper(string path)
 {
-    QString fileName;
     if (path.empty()) {
-        fileName = QFileDialog::getSaveFileName(this, tr("Save VAPOR session file"), tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)"));
+        SettingsParams *sP = GetSettingsParams();
+        string          dir = sP->GetSessionDir();
+
+        QString fileName;
+        fileName = QFileDialog::getSaveFileName(this, tr("Save VAPOR session file"), tr(dir.c_str()), "Vapor 3 Session Save Files (*.vs3)");
         path = fileName.toStdString();
     }
     if (path.empty()) return;
 
-    if (!FileOperationChecker::FileGoodToWrite(fileName)) {
+    if (!FileOperationChecker::FileGoodToWrite(path)) {
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
         return;
     }
@@ -923,15 +909,16 @@ void MainForm::_fileSaveHelper(string path)
         return;
     }
 
-    SettingsParams *sParams = GetSettingsParams();
-    sParams->SetSessionDir(path);
+    GUIStateParams *p = GetStateParams();
+    p->SetCurrentSessionFile(path);
+
     _stateChangeFlag = false;
 }
 
 void MainForm::fileSave()
 {
-    SettingsParams *sParams = GetSettingsParams();
-    string          path = sParams->GetSessionDir();
+    GUIStateParams *p = GetStateParams();
+    string          path = p->GetCurrentSessionFile();
 
     _fileSaveHelper(path);
 }
@@ -1077,7 +1064,6 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
         } else {
             SettingsParams *sP = GetSettingsParams();
             defaultPath = sP->GetMetadataDir();
-            // defaultPath = _recentPath;
         }
 
         myFiles = myGetOpenFileNames(prompt, defaultPath, filter, multi);

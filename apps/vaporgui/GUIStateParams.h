@@ -47,11 +47,11 @@ public:
 
     //! method identifies the current session file
     //! \retval session file path
-    string GetCurrentSessionPath() const;
+    string GetCurrentSessionFile() const;
 
-    //! method sets the current session path
+    //! method sets the current session file path
     //! \param[in] path string
-    void SetCurrentSessionPath(string path);
+    void SetCurrentSessionFile(string path);
 
     //! Get names of currently opened data sets
     //!
