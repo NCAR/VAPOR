@@ -426,7 +426,7 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
         return;
     }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // To keep orientation correct in plane, and use
     // OpenGL convention (Y 0 at bottom of window), reverse
     // value of y:
@@ -585,7 +585,7 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e) {
         return;
     }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     string tag = MouseModeParams::getModeTag(mode);
     TranslateStretchManip *myManip = _visualizer->getManip(tag);
     //Check if the seed bounds were moved
@@ -665,7 +665,7 @@ void VizWin::mouseMoveEvent(QMouseEvent *e) {
     mouseCoords[0] = (float)e->x();
     mouseCoords[1] = (float)height() - e->y();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
     string tag = MouseModeParams::getModeTag(mode);
     TranslateStretchManip *manip = _visualizer->getManip(tag);

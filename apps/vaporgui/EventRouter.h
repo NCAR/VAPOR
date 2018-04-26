@@ -177,7 +177,7 @@ class EventRouter {
     //! \param[in] bool on : true indicates the flag is set.
     //!
     void SetTextChanged(bool on) {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         if (!_updatingTab)
             _textChangedFlag = on;
 #endif
