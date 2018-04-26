@@ -1,0 +1,894 @@
+Scanning dependencies of target vapor_automoc
+[  1%] Automatic moc, uic and rcc for target vapor
+Scanning dependencies of target common
+[  1%] Building CXX object lib/common/CMakeFiles/common.dir/common.cpp.o
+[  2%] Building CXX object lib/common/CMakeFiles/common.dir/MyBase.cpp.o
+[  2%] Building CXX object lib/common/CMakeFiles/common.dir/OptionParser.cpp.o
+Scanning dependencies of target tiff2geotiff
+[  3%] Building CXX object apps/tiff2geotiff/CMakeFiles/tiff2geotiff.dir/tiff2geotiff.cpp.o
+[  3%] Building CXX object apps/tiff2geotiff/CMakeFiles/tiff2geotiff.dir/geotiff_proj4.cpp.o
+[  4%] Building CXX object apps/tiff2geotiff/CMakeFiles/tiff2geotiff.dir/getopt.cpp.o
+[  4%] Linking CXX executable ../../bin/tiff2geotiff
+[  4%] Built target tiff2geotiff
+[  5%] Building CXX object lib/common/CMakeFiles/common.dir/EasyThreads.cpp.o
+[  5%] Building CXX object lib/common/CMakeFiles/common.dir/CFuncs.cpp.o
+[  6%] Building CXX object lib/common/CMakeFiles/common.dir/Version.cpp.o
+[  6%] Building CXX object lib/common/CMakeFiles/common.dir/PVTime.cpp.o
+[  7%] Building CXX object lib/common/CMakeFiles/common.dir/GetAppPath.cpp.o
+[  7%] Building CXX object lib/common/CMakeFiles/common.dir/utils.cpp.o
+[  8%] Building CXX object lib/common/CMakeFiles/common.dir/CMakeConfig.cpp.o
+[  8%] Linking CXX shared library ../libcommon.so
+[  8%] Built target common
+Scanning dependencies of target vaporversion
+[  8%] Building CXX object apps/vaporversion/CMakeFiles/vaporversion.dir/vaporversion.cpp.o
+Scanning dependencies of target wasp
+[  9%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/Compressor.cpp.o
+[  9%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/MatWaveBase.cpp.o
+[ 10%] Linking CXX executable ../../bin/vaporversion
+[ 11%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/MatWaveDwt.cpp.o
+[ 11%] Built target vaporversion
+[ 11%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/MatWaveWavedec.cpp.o
+Generating moc source moc_AnimationEventRouter.cpp
+Generating moc source moc_AnimationParams.cpp
+Generating moc source moc_AnnotationEventRouter.cpp
+Generating moc source moc_BannerGUI.cpp
+Generating moc source moc_BarbEventRouter.cpp
+Generating moc source moc_BarbSubtabs.cpp
+Generating moc source moc_ColorbarWidget.cpp
+Generating moc source moc_Combo.cpp
+Generating moc source moc_ContourEventRouter.cpp
+Generating moc source moc_ContourSubtabs.cpp
+Generating moc source moc_ControlPointEditor.cpp
+Generating moc source moc_DomainWidget.cpp
+Generating moc source moc_FidelityWidget.cpp
+Generating moc source moc_GLColorbarWidget.cpp
+Generating moc source moc_GLWidget.cpp
+Generating moc source moc_GeometryWidget.cpp
+Generating moc source moc_HelloEventRouter.cpp
+Generating moc source moc_ImageEventRouter.cpp
+Generating moc source moc_ImageFrame.cpp
+Generating moc source moc_ImageSubtabs.cpp
+Generating moc source moc_MainForm.cpp
+Generating moc source moc_MappingFrame.cpp
+Generating moc source moc_NavigationEventRouter.cpp
+Generating moc source moc_OpacityWidget.cpp
+Generating moc source moc_OrientationAngles.cpp
+Generating moc source moc_Plot.cpp
+Generating moc source moc_QRange.cpp
+Generating moc source moc_QSinglePoint.cpp
+Generating moc source moc_QSliderEdit.cpp
+Generating moc source moc_RangeCombos.cpp
+Generating moc source moc_RangeController.cpp
+Generating moc source moc_RenderHolder.cpp
+Generating moc source moc_SeedMe.cpp
+Generating moc source moc_SettingsEventRouter.cpp
+Generating moc source moc_Statistics.cpp
+Generating moc source moc_TFWidget.cpp
+Generating moc source moc_TabManager.cpp
+Generating moc source moc_TransformTable.cpp
+Generating moc source moc_TwoDDataEventRouter.cpp
+Generating moc source moc_TwoDSubtabs.cpp
+Generating moc source moc_VaporTable.cpp
+Generating moc source moc_VariablesWidget.cpp
+Generating moc source moc_VizSelectCombo.cpp
+Generating moc source moc_VizWin.cpp
+Generating moc source moc_VizWinMgr.cpp
+Generating moc source moc_helloSubtabs.cpp
+Generating moc compilation vapor_automoc.cpp
+Generating ui header ui_animationTab.h
+Generating ui header ui_AnnotationGUI.h
+Generating ui header ui_BarbAppearanceGUI.h
+Generating ui header ui_BarbGeometryGUI.h
+Generating ui header ui_BarbVariablesGUI.h
+Generating ui header ui_ColorbarWidgetGUI.h
+Generating ui header ui_ContourAppearanceGUI.h
+/home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ContourAppearanceGUI.ui: Warning: Z-order assignment: 'horizontalSpacer_3' is not a valid widget.
+Generating ui header ui_ContourGeometryGUI.h
+Generating ui header ui_ContourVariablesGUI.h
+Generating ui header ui_ControlPointEditorBase.h
+Generating ui header ui_FidelityWidgetGUI.h
+Generating ui header ui_GeometryWidgetGUI.h
+Generating ui header ui_helloAppearanceSubtab.h
+Generating ui header ui_helloLayoutSubtab.h
+Generating ui header ui_ImageAppearanceGUI.h
+Generating ui header ui_ImageGeometryGUI.h
+Generating ui header ui_ImageVariablesGUI.h
+Generating ui header ui_NavigationTab.h
+/home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/NavigationTab.ui: Warning: The name 'gridLayout' (QGridLayout) is already in use, defaulting to 'gridLayout1'.
+Generating ui header ui_NavigationTab.h
+/home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/NavigationTab.ui: Warning: The name 'gridLayout' (QGridLayout) is already in use, defaulting to 'gridLayout1'.
+Generating ui header ui_OrientationAnglesGUI.h
+Generating ui header ui_plotWindow.h
+Generating ui header ui_QRange.h
+Generating ui header ui_QSinglePoint.h
+Generating ui header ui_QSliderEdit.h
+Generating ui header ui_NewRendererDialog.h
+Generating ui header ui_LeftPanel.h
+Generating ui header ui_NewRendererDialog.h
+Generating ui header ui_SeedMeGUI.h
+Generating ui header ui_SeedMeGUI.h
+Generating ui header ui_errMsg.h
+Generating ui header ui_firstTimeUser.h
+Generating ui header ui_SettingsGUI.h
+Generating ui header ui_errMsg.h
+Generating ui header ui_statsWindow.h
+Generating ui header ui_TFWidgetGUI.h
+Generating ui header ui_TransformTableGUI.h
+Generating ui header ui_TwoDAppearanceGUI.h
+Generating ui header ui_TwoDGeometryGUI.h
+Generating ui header ui_TwoDVariablesGUI.h
+Generating ui header ui_VariablesWidgetGUI.h
+Generating ui header ui_HelloVariablesGUI.h
+[ 11%] Built target vapor_automoc
+[ 12%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/NetCDFCpp.cpp.o
+[ 12%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/SignificanceMap.cpp.o
+[ 13%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WASP.cpp.o
+[ 13%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WaveFiltBase.cpp.o
+[ 14%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WaveFiltBior.cpp.o
+[ 14%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WaveFiltCoif.cpp.o
+[ 15%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WaveFiltDaub.cpp.o
+[ 15%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WaveFiltHaar.cpp.o
+[ 16%] Building CXX object lib/wasp/CMakeFiles/wasp.dir/WaveFiltInt.cpp.o
+[ 16%] Linking CXX shared library ../libwasp.so
+[ 16%] Built target wasp
+Scanning dependencies of target wasp2raw
+Scanning dependencies of target raw2wasp
+Scanning dependencies of target waspcreate
+Scanning dependencies of target ncdf2wasp
+[ 17%] Building CXX object apps/wasp2raw/CMakeFiles/wasp2raw.dir/wasp2raw.cpp.o
+[ 18%] Building CXX object apps/raw2wasp/CMakeFiles/raw2wasp.dir/raw2wasp.cpp.o
+[ 19%] Building CXX object apps/waspcreate/CMakeFiles/waspcreate.dir/waspcreate.cpp.o
+[ 20%] Building CXX object apps/ncdf2wasp/CMakeFiles/ncdf2wasp.dir/ncdf2wasp.cpp.o
+[ 20%] Linking CXX executable ../../bin/raw2wasp
+[ 20%] Linking CXX executable ../../bin/wasp2raw
+[ 20%] Built target wasp2raw
+Scanning dependencies of target wasp2ncdf
+[ 20%] Linking CXX executable ../../bin/waspcreate
+[ 20%] Built target raw2wasp
+[ 20%] Linking CXX executable ../../bin/ncdf2wasp
+[ 21%] Building CXX object apps/wasp2ncdf/CMakeFiles/wasp2ncdf.dir/wasp2ncdf.cpp.o
+Scanning dependencies of target vdc
+[ 21%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/BlkMemMgr.cpp.o
+[ 21%] Built target waspcreate
+[ 21%] Built target ncdf2wasp
+[ 22%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/Grid.cpp.o
+[ 22%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/StructuredGrid.cpp.o
+[ 23%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/RegularGrid.cpp.o
+[ 23%] Linking CXX executable ../../bin/wasp2ncdf
+[ 23%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/StretchedGrid.cpp.o
+[ 23%] Built target wasp2ncdf
+[ 24%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/LayeredGrid.cpp.o
+[ 24%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/CurvilinearGrid.cpp.o
+[ 25%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/UnstructuredGrid.cpp.o
+[ 25%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/UnstructuredGrid2D.cpp.o
+[ 26%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/NetCDFSimple.cpp.o
+[ 26%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/NetCDFCollection.cpp.o
+[ 27%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/NetCDFCFCollection.cpp.o
+[ 27%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/UDUnitsClass.cpp.o
+[ 28%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/Proj4API.cpp.o
+[ 28%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DC.cpp.o
+[ 29%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DCWRF.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DC.cpp:3:0:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DCUtils.h:28:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DCWRF.cpp:16:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 29%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DCCF.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DCCF.h:10:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DCCF.cpp:16:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 30%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DCMPAS.cpp.o
+[ 30%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/VDC.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DCUtils.h:28:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DCMPAS.cpp:16:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/VDC.cpp:4:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 31%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/VDCNetCDF.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/VDCNetCDF.cpp:7:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 31%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DataMgr.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DataMgr.cpp:11:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 32%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DataMgrUtils.cpp.o
+[ 32%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/GeoUtil.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DataMgrUtils.cpp:29:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 33%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/vizutil.cpp.o
+[ 34%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/KDTreeRG.cpp.o
+[ 34%] Building C object lib/vdc/CMakeFiles/vdc.dir/kdtree.c.o
+[ 35%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/VDC_c.cpp.o
+[ 35%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DerivedVar.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/VDC_c.cpp:4:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 36%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DerivedVarMgr.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DerivedVar.h:2:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DerivedVar.cpp:7:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DerivedVarMgr.h:3:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DerivedVarMgr.cpp:3:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 36%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/DCUtils.cpp.o
+[ 37%] Building CXX object lib/vdc/CMakeFiles/vdc.dir/glutil.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DCUtils.h:28:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/vdc/DCUtils.cpp:29:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 37%] Linking CXX shared library ../libvdc.so
+[ 37%] Built target vdc
+Scanning dependencies of target cf2vdc
+Scanning dependencies of target raw2vdc
+Scanning dependencies of target vdcdump
+Scanning dependencies of target cfvdccreate
+[ 37%] Building CXX object apps/cf2vdc/CMakeFiles/cf2vdc.dir/cf2vdc.cpp.o
+[ 38%] Building CXX object apps/raw2vdc/CMakeFiles/raw2vdc.dir/raw2vdc.cpp.o
+[ 39%] Building CXX object apps/vdcdump/CMakeFiles/vdcdump.dir/vdcdump.cpp.o
+[ 39%] Building CXX object apps/cfvdccreate/CMakeFiles/cfvdccreate.dir/cfvdccreate.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/cf2vdc/cf2vdc.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/raw2vdc/raw2vdc.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/cfvdccreate/cfvdccreate.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vdcdump/vdcdump.cpp:10:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 39%] Linking CXX executable ../../bin/raw2vdc
+[ 39%] Built target raw2vdc
+Scanning dependencies of target vdc2raw
+[ 40%] Building CXX object apps/vdc2raw/CMakeFiles/vdc2raw.dir/vdc2raw.cpp.o
+[ 41%] Linking CXX executable ../../bin/cf2vdc
+[ 41%] Built target cf2vdc
+Scanning dependencies of target vdccreate
+[ 42%] Building CXX object apps/vdccreate/CMakeFiles/vdccreate.dir/vdccreate.cpp.o
+[ 43%] Linking CXX executable ../../bin/cfvdccreate
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vdc2raw/vdc2raw.cpp:11:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 43%] Linking CXX executable ../../bin/vdcdump
+[ 43%] Built target cfvdccreate
+Scanning dependencies of target wrf2vdc
+[ 44%] Building CXX object apps/wrf2vdc/CMakeFiles/wrf2vdc.dir/wrf2vdc.cpp.o
+[ 44%] Built target vdcdump
+Scanning dependencies of target wrfvdccreate
+[ 45%] Building CXX object apps/wrfvdccreate/CMakeFiles/wrfvdccreate.dir/wrfvdccreate.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vdccreate/vdccreate.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 45%] Linking CXX executable ../../bin/vdc2raw
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/wrf2vdc/wrf2vdc.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 45%] Built target vdc2raw
+Scanning dependencies of target vdccompare
+[ 46%] Building CXX object apps/vdccompare/CMakeFiles/vdccompare.dir/vdccompare.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/wrfvdccreate/wrfvdccreate.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 46%] Linking CXX executable ../../bin/vdccreate
+[ 46%] Built target vdccreate
+Scanning dependencies of target params
+[ 47%] Building CXX object lib/params/CMakeFiles/params.dir/XmlNode.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDC.h:4:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/VDCNetCDF.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vdccompare/vdccompare.cpp:9:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 47%] Linking CXX executable ../../bin/wrf2vdc
+[ 47%] Built target wrf2vdc
+[ 47%] Building CXX object lib/params/CMakeFiles/params.dir/ParamsBase.cpp.o
+[ 48%] Linking CXX executable ../../bin/wrfvdccreate
+[ 48%] Built target wrfvdccreate
+[ 49%] Building CXX object lib/params/CMakeFiles/params.dir/ColorMap.cpp.o
+[ 49%] Linking CXX executable ../../bin/vdccompare
+[ 49%] Built target vdccompare
+[ 49%] Building CXX object lib/params/CMakeFiles/params.dir/OpacityMap.cpp.o
+[ 50%] Building CXX object lib/params/CMakeFiles/params.dir/MapperFunction.cpp.o
+[ 50%] Building CXX object lib/params/CMakeFiles/params.dir/Box.cpp.o
+[ 51%] Building CXX object lib/params/CMakeFiles/params.dir/ColorbarPbase.cpp.o
+[ 51%] Building CXX object lib/params/CMakeFiles/params.dir/RenderParams.cpp.o
+[ 52%] Building CXX object lib/params/CMakeFiles/params.dir/TwoDDataParams.cpp.o
+[ 52%] Building CXX object lib/params/CMakeFiles/params.dir/BarbParams.cpp.o
+[ 53%] Building CXX object lib/params/CMakeFiles/params.dir/Viewpoint.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/RenderParams.cpp:27:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/TwoDDataParams.cpp:3:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/BarbParams.cpp:3:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 53%] Building CXX object lib/params/CMakeFiles/params.dir/Transform.cpp.o
+[ 54%] Building CXX object lib/params/CMakeFiles/params.dir/ViewpointParams.cpp.o
+[ 54%] Building CXX object lib/params/CMakeFiles/params.dir/regionparams.cpp.o
+[ 55%] Building CXX object lib/params/CMakeFiles/params.dir/ParamsMgr.cpp.o
+[ 55%] Building CXX object lib/params/CMakeFiles/params.dir/DataStatus.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/ParamsMgr.cpp:26:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 56%] Building CXX object lib/params/CMakeFiles/params.dir/AnnotationParams.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataStatus.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/DataStatus.cpp:29:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 56%] Building CXX object lib/params/CMakeFiles/params.dir/HelloParams.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/HelloParams.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/HelloParams.cpp:3:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 57%] Building CXX object lib/params/CMakeFiles/params.dir/ImageParams.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ImageParams.h:4,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/ImageParams.cpp:1:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 57%] Building CXX object lib/params/CMakeFiles/params.dir/TFInterpolator.cpp.o
+[ 58%] Building CXX object lib/params/CMakeFiles/params.dir/ContourParams.cpp.o
+[ 59%] Building CXX object lib/params/CMakeFiles/params.dir/AxisAnnotation.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/params/ContourParams.cpp:3:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 59%] Linking CXX shared library ../libparams.so
+[ 59%] Built target params
+Scanning dependencies of target render
+[ 60%] Building CXX object lib/render/CMakeFiles/render.dir/BarbRenderer.cpp.o
+[ 60%] Building CXX object lib/render/CMakeFiles/render.dir/ControlExecutive.cpp.o
+[ 61%] Building CXX object lib/render/CMakeFiles/render.dir/HelloRenderer.cpp.o
+[ 61%] Building CXX object lib/render/CMakeFiles/render.dir/Renderer.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/ControlExecutive.cpp:12:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgrUtils.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/BarbRenderer.cpp:24:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/HelloRenderer.cpp:28:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/Renderer.h:26,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/Renderer.cpp:28:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 62%] Building CXX object lib/render/CMakeFiles/render.dir/ShaderMgr.cpp.o
+[ 62%] Building CXX object lib/render/CMakeFiles/render.dir/ShaderProgram.cpp.o
+[ 63%] Building CXX object lib/render/CMakeFiles/render.dir/TwoDDataRenderer.cpp.o
+[ 63%] Building CXX object lib/render/CMakeFiles/render.dir/TwoDRenderer.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgrUtils.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/TwoDDataRenderer.cpp:30:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 64%] Building CXX object lib/render/CMakeFiles/render.dir/GeoTile.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/TwoDRenderer.h:20,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/TwoDRenderer.cpp:16:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 64%] Building CXX object lib/render/CMakeFiles/render.dir/GeoTileMercator.cpp.o
+[ 65%] Building CXX object lib/render/CMakeFiles/render.dir/GeoTileEquirectangular.cpp.o
+[ 65%] Building CXX object lib/render/CMakeFiles/render.dir/GeoImage.cpp.o
+[ 66%] Building CXX object lib/render/CMakeFiles/render.dir/GeoImageTMS.cpp.o
+[ 66%] Building CXX object lib/render/CMakeFiles/render.dir/GeoImageGeoTiff.cpp.o
+[ 67%] Building CXX object lib/render/CMakeFiles/render.dir/ImageRenderer.cpp.o
+[ 67%] Building CXX object lib/render/CMakeFiles/render.dir/Visualizer.cpp.o
+[ 68%] Building CXX object lib/render/CMakeFiles/render.dir/AnnotationRenderer.cpp.o
+In file included from /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/Python.h:8:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/MyPython.h:19,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/imagewriter.hpp:1,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/Visualizer.cpp:49:
+/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/pyconfig.h:1190:0: warning: "_POSIX_C_SOURCE" redefined [enabled by default]
+ #define _POSIX_C_SOURCE 200112L
+ ^
+In file included from /usr/include/stdint.h:25:0,
+                 from /usr/lib/gcc/x86_64-redhat-linux/4.8.5/include/stdint.h:9,
+                 from /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/GL/glew.h:229,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/glutil.h:46,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/Visualizer.cpp:20:
+/usr/include/features.h:168:0: note: this is the location of the previous definition
+ # define _POSIX_C_SOURCE 200809L
+ ^
+In file included from /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/Python.h:8:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/MyPython.h:19,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/imagewriter.hpp:1,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/Visualizer.cpp:49:
+/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/pyconfig.h:1212:0: warning: "_XOPEN_SOURCE" redefined [enabled by default]
+ #define _XOPEN_SOURCE 600
+ ^
+In file included from /usr/include/stdint.h:25:0,
+                 from /usr/lib/gcc/x86_64-redhat-linux/4.8.5/include/stdint.h:9,
+                 from /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/GL/glew.h:229,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/glutil.h:46,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/Visualizer.cpp:20:
+/usr/include/features.h:170:0: note: this is the location of the previous definition
+ # define _XOPEN_SOURCE 700
+ ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/TwoDRenderer.h:20,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ImageRenderer.h:14,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/ImageRenderer.cpp:24:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 68%] Building CXX object lib/render/CMakeFiles/render.dir/jfilewrite.cpp.o
+[ 69%] Building CXX object lib/render/CMakeFiles/render.dir/textRenderer.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/Visualizer.cpp:37:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataStatus.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/AnnotationRenderer.cpp:31:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/textRenderer.h:26,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/textRenderer.cpp:36:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 69%] Building CXX object lib/render/CMakeFiles/render.dir/ContourRenderer.cpp.o
+[ 70%] Building CXX object lib/render/CMakeFiles/render.dir/MyPython.cpp.o
+In file included from /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/Python.h:8:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/MyPython.h:19,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/MyPython.cpp:20:
+/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/pyconfig.h:1190:0: warning: "_POSIX_C_SOURCE" redefined [enabled by default]
+ #define _POSIX_C_SOURCE 200112L
+ ^
+In file included from /usr/include/c++/4.8.2/x86_64-redhat-linux/bits/os_defines.h:39:0,
+                 from /usr/include/c++/4.8.2/x86_64-redhat-linux/bits/c++config.h:2097,
+                 from /usr/include/c++/4.8.2/cstdlib:41,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/MyPython.cpp:18:
+/usr/include/features.h:168:0: note: this is the location of the previous definition
+ # define _POSIX_C_SOURCE 200809L
+ ^
+In file included from /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/Python.h:8:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/MyPython.h:19,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/MyPython.cpp:20:
+/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/python2.7/pyconfig.h:1212:0: warning: "_XOPEN_SOURCE" redefined [enabled by default]
+ #define _XOPEN_SOURCE 600
+ ^
+In file included from /usr/include/c++/4.8.2/x86_64-redhat-linux/bits/os_defines.h:39:0,
+                 from /usr/include/c++/4.8.2/x86_64-redhat-linux/bits/c++config.h:2097,
+                 from /usr/include/c++/4.8.2/cstdlib:41,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/MyPython.cpp:18:
+/usr/include/features.h:170:0: note: this is the location of the previous definition
+ # define _XOPEN_SOURCE 700
+ ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/Renderer.h:26,
+                 from /home/shaomeng/Git/VAPOR-git-src/lib/render/ContourRenderer.cpp:27:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 70%] Linking CXX shared library ../librender.so
+[ 70%] Built target render
+Scanning dependencies of target vapor
+[ 71%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/EventRouter.cpp.o
+[ 71%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/RenderEventRouter.cpp.o
+[ 72%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/RenderHolder.cpp.o
+[ 72%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ImageFrame.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgrUtils.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/RenderEventRouter.cpp:27:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/EventRouter.cpp:37:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ImageFrame.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ImageFrame.cpp:21:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/RenderHolder.cpp:27:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 73%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ControlPointEditor.cpp.o
+[ 73%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/DomainWidget.cpp.o
+[ 74%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/GLWidget.cpp.o
+[ 75%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/OpacityWidget.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataStatus.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/Visualizer.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MappingFrame.h:34,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/DomainWidget.cpp:11:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 75%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ErrorReporter.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataStatus.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/Visualizer.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MappingFrame.h:34,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ControlPointEditor.cpp:15:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataStatus.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/Visualizer.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MappingFrame.h:34,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/OpacityWidget.cpp:11:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 76%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/Histo.cpp.o
+[ 76%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ColorbarWidget.cpp.o
+[ 77%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/SettingsEventRouter.cpp.o
+[ 77%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/VizSelectCombo.cpp.o
+[ 78%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/AnnotationEventRouter.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ColorbarWidget.cpp:22:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TabManager.h:26,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/SettingsEventRouter.cpp:42:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 78%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/AnimationEventRouter.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/EventRouter.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/AnnotationEventRouter.h:25,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/AnnotationEventRouter.cpp:43:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/EventRouter.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/AnimationEventRouter.h:24,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/AnimationEventRouter.cpp:34:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 79%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/MappingFrame.cpp.o
+[ 79%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/HelloEventRouter.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MappingFrame.cpp:30:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 80%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/NavigationEventRouter.cpp.o
+[ 80%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/TwoDDataEventRouter.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/HelloParams.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/HelloEventRouter.cpp:10:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/TwoDDataParams.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TwoDDataEventRouter.cpp:13:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/EventRouter.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/NavigationEventRouter.h:24,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/NavigationEventRouter.cpp:40:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 81%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/RangeController.cpp.o
+[ 81%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/Statistics.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/Statistics.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/Statistics.cpp:22:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 82%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/Plot.cpp.o
+[ 82%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/SeedMe.cpp.o
+[ 83%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/helloSubtabs.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/Plot.cpp:18:0:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/HelloParams.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/helloSubtabs.cpp:1:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 83%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/TFWidget.cpp.o
+[ 84%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/VariablesWidget.cpp.o
+[ 84%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/GeometryWidget.cpp.o
+[ 85%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/RangeCombos.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/VariablesWidget.cpp:27:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/GeometryWidget.cpp:23:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ColorbarWidget.h:25,
+                 from /home/shaomeng/Builds/vapor-cmake/apps/vaporgui/ui_TwoDAppearanceGUI.h:21,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TwoDSubtabs.h:4,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TFWidget.cpp:28:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 85%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/BarbEventRouter.cpp.o
+[ 86%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/BannerGUI.cpp.o
+[ 86%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/AnimationParams.cpp.o
+[ 87%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/GUIStateParams.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/BarbParams.h:5,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/BarbEventRouter.cpp:14:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 87%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/MouseModeParams.cpp.o
+[ 88%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/SettingsParams.cpp.o
+[ 88%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/main.cpp.o
+[ 89%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/MainForm.cpp.o
+[ 89%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/VizWin.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MainForm.h:38,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/main.cpp:24:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 90%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/VizWinMgr.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MainForm.cpp:39:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/VizWin.cpp:27:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/VizWinMgr.cpp:36:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 90%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/TabManager.cpp.o
+[ 91%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/TrackBall.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/EventRouter.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/AnimationEventRouter.h:24,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TabManager.cpp:26:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 91%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/GLColorbarWidget.cpp.o
+[ 92%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ImageEventRouter.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ImageParams.h:4,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ImageEventRouter.cpp:6:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataStatus.h:28,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/Visualizer.h:27,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/MappingFrame.h:34,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/GLColorbarWidget.cpp:12:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 92%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ContourEventRouter.cpp.o
+[ 93%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/PlotParams.cpp.o
+[ 93%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/StatisticsParams.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ContourParams.h:6,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ContourEventRouter.cpp:14:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 94%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/ContourSubtabs.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/PlotParams.h:23,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/PlotParams.cpp:23:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/StatisticsParams.h:23,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/StatisticsParams.cpp:25:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ContourParams.h:6,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ContourSubtabs.h:4,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ContourSubtabs.cpp:1:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 95%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/BarbSubtabs.cpp.o
+[ 95%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/TransformTable.cpp.o
+[ 96%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/VaporTable.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TransformTable.h:7,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/TransformTable.cpp:24:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/ColorbarWidget.h:25,
+                 from /home/shaomeng/Builds/vapor-cmake/apps/vaporgui/ui_BarbAppearanceGUI.h:25,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/BarbSubtabs.h:4,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/BarbSubtabs.cpp:2:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 96%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/FidelityWidget.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/RenderParams.h:32,
+                 from /home/shaomeng/Git/VAPOR-git-src/apps/vaporgui/FidelityWidget.cpp:26:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[ 97%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/QSliderEdit.cpp.o
+[ 97%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/QRange.cpp.o
+[ 98%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/QSinglePoint.cpp.o
+[ 98%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/QIntValidatorWithFixup.cpp.o
+[ 99%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/FileOperationChecker.cpp.o
+[ 99%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/Combo.cpp.o
+[100%] Building CXX object apps/vaporgui/CMakeFiles/vapor.dir/vapor_automoc.cpp.o
+In file included from /home/shaomeng/Git/VAPOR-git-src/include/vapor/DataMgr.h:6:0,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ParamsMgr.h:30,
+                 from /home/shaomeng/Git/VAPOR-git-src/include/vapor/ControlExecutive.h:9,
+                 from /home/shaomeng/Builds/vapor-cmake/apps/vaporgui/../../../../Git/VAPOR-git-src/apps/vaporgui/EventRouter.h:27,
+                 from /home/shaomeng/Builds/vapor-cmake/apps/vaporgui/../../../../Git/VAPOR-git-src/apps/vaporgui/AnimationEventRouter.h:24,
+                 from /home/shaomeng/Builds/vapor-cmake/apps/vaporgui/moc_AnimationEventRouter.cpp:9,
+                 from /home/shaomeng/Builds/vapor-cmake/apps/vaporgui/vapor_automoc.cpp:2:
+/home/shaomeng/Git/VAPOR-git-src/include/vapor/DC.h:669:3: warning: ‘std::ostream& VAPoR::operator<<(std::ostream&, const VAPoR::DC::Mesh&)’ is already a friend of class ‘VAPoR::DC::Mesh’ [enabled by default]
+   );
+   ^
+[100%] Linking CXX executable ../../bin/vapor
+[100%] Built target vapor
