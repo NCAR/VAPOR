@@ -687,20 +687,21 @@ private:
     template<class T> int _CopyHyperSlice(string varname, NetCDFCpp &src_ncdf, NetCDFCpp &dst_ncdf, vector<size_t> start, vector<size_t> count, T *buf) const;
 
     int _CopyVar(string varname, NetCDFCpp &src_ncdf, NetCDFCpp &dst_ncdf) const;
+
+    // Determine POD type
+    //
+    int _NetCDFType(float dummy) { return NC_FLOAT; }
+    int _NetCDFType(char dummy) { return NC_BYTE; }
+    int _NetCDFType(double dummy) { return NC_DOUBLE; }
+    int _NetCDFType(unsigned char dummy) { return NC_UBYTE; }
+    int _NetCDFType(int16_t dummy) { return NC_SHORT; }
+    int _NetCDFType(int dummy) { return NC_INT; }
+    int _NetCDFType(long dummy) { return NC_INT64; }
 };
 
 }    // namespace VAPoR
 
 namespace Wasp {
-// Determine POD type
-//
-int NetCDFType(float dummy) { return NC_FLOAT; }
-int NetCDFType(char dummy) { return NC_BYTE; }
-int NetCDFType(double dummy) { return NC_DOUBLE; }
-int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
-int NetCDFType(int16_t dummy) { return NC_SHORT; }
-int NetCDFType(int dummy) { return NC_INT; }
-int NetCDFType(long dummy) { return NC_INT64; }
-}    // namespace Wasp
+}
 
 #endif    //	_WASP_H_
