@@ -207,7 +207,6 @@ void NavigationEventRouter::GetWebHelp(
 }
 
 void NavigationEventRouter::_performAutoStretching(string dataSetName) {
-    GUIStateParams *p = GetStateParams();
     DataStatus *ds = _controlExec->GetDataStatus();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -216,8 +215,6 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
     vector<double> minExt, maxExt;
 
     for (int i = 0; i < winNames.size(); i++) {
-        double xRange, yRange, zRange;
-
         DataMgr *dm = ds->GetDataMgr(dataSetName);
         std::vector<string> varNames = dm->GetDataVarNames(3);
 
