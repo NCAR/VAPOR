@@ -120,6 +120,7 @@ string makename(string file)
     return (ControlExec::MakeStringConformant(qFileInfo.fileName().toStdString()));
 }
 
+#ifdef UNUSED_FUNCTION
 string concatpath(string s1, string s2)
 {
     string s;
@@ -130,6 +131,8 @@ string concatpath(string s1, string s2)
     }
     return (QDir::toNativeSeparators(s.c_str()).toStdString());
 }
+#endif
+
 };    // namespace
 
 void MainForm::_initMembers()
