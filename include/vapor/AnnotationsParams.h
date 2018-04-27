@@ -137,7 +137,7 @@ public:
 
 private:
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	static void changeStretch(vector<double> prevStretch, vector<double> newStretch);
 #endif
 
