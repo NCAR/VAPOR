@@ -166,6 +166,7 @@ if (getenv("VAPOR_DEBUG"))
     fontFile = fontFile + "//arimo.ttf";
 
 	QFontDatabase fdb; 
+	fdb.addApplicationFont(QString::fromStdString(fontFile));
 	QStringList fonts = fdb.families();
 	QFont f = fdb.font("Arimo", "normal", 12);  
 	
