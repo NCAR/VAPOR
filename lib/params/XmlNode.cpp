@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <cctype>
 #include <algorithm>
 #include <expat.h>
 #include <vapor/XmlNode.h>
@@ -50,11 +51,33 @@ namespace {
 	const string StringType = "String";
 };
 
+namespace {
+	bool isValidXMLElement(string s) {
+		if (s.empty()) return(false);
+		if (! (std::isalpha(s[0]) || s[0] == '_')) return(false);
+		for (string::const_iterator itr = s.begin(); itr != s.end(); ++itr) {
+			if (! 
+				(std::isalnum(*itr) || 
+				std::isdigit(*itr) || 
+				*itr == '-' ||
+				*itr == '_' ||
+				*itr == '.')) {
+
+				return(false);
+			}
+			if (isspace(*itr)) return(false);
+		}
+
+		return(true);
+	}
+};
 
 XmlNode::XmlNode(
 	const string &tag, const map <string, string> &attrs, 
 	size_t numChildrenHint
 ) {
+	assert(isValidXMLElement(tag));
+
 	_longmap.clear();
 	_doublemap.clear();
 	_stringmap.clear();
@@ -79,6 +102,8 @@ XmlNode::XmlNode(
 	const string &tag,
 	size_t numChildrenHint
 ) {
+	assert(isValidXMLElement(tag));
+
 	_longmap.clear();
 	_doublemap.clear();
 	_stringmap.clear();
