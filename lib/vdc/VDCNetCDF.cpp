@@ -48,6 +48,7 @@ int vdc_xtype2ncdf_xtype(VDC::XType v_xtype)
     return (n_xtype);
 }
 
+#ifdef UNUSED_FUNCTION
 VDC::XType ncdf_xtype2vdc_xtype(int n_xtype)
 {
     VDC::XType v_xtype;
@@ -64,6 +65,7 @@ VDC::XType ncdf_xtype2vdc_xtype(int n_xtype)
     }
     return (v_xtype);
 }
+#endif
 
 void vdc_2_ncdfcoords(size_t ts0, size_t ts1, bool time_varying, const vector<size_t> &min, const vector<size_t> &max, vector<size_t> &start, vector<size_t> &count)
 {

@@ -25,6 +25,7 @@ size_t numBlocks(const vector<size_t> &min, const vector<size_t> &max, const vec
     return (nblocks);
 }
 
+#ifdef UNUSED_FUNCTION
 size_t numBlocks(const vector<size_t> &dims, const vector<size_t> &bs)
 {
     assert(dims.size() == bs.size());
@@ -36,6 +37,7 @@ size_t numBlocks(const vector<size_t> &dims, const vector<size_t> &bs)
     }
     return (nblocks);
 }
+#endif
 
 size_t blockSize(const vector<size_t> &bs)
 {
@@ -70,8 +72,6 @@ void extractBlock(const float *data, const vector<size_t> &dims, const vector<si
 {
     assert(dims.size() == bcoords.size());
     assert(dims.size() == bs.size());
-
-    size_t block_size = vproduct(bs);
 
     // Block dimensions
     //
@@ -264,7 +264,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
     string varname = f->GetVarname();
     int    level = f->GetLevel();
     int    lod = f->GetLOD();
-    int    sliceNum = f->GetSlice();
 
     // Dimensions are same for X & Y coord vars
     //
@@ -331,7 +330,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(DC::FileTable::FileO
     string varname = f->GetVarname();
     int    level = f->GetLevel();
     int    lod = f->GetLOD();
-    int    sliceNum = f->GetSlice();
 
     // Dimensions are same for X & Y coord vars
     //

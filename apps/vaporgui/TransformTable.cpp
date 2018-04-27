@@ -59,7 +59,6 @@ void TransformTable::Update(const std::map<string, Transform *> &transforms)
     _transforms = transforms;
 
     _verticalHeaders.clear();
-    int                                     numDatasets = transforms.size();
     map<std::string, Transform *>::iterator it;
     for (it = _transforms.begin(); it != _transforms.end(); ++it) {
         string datasetName = it->first;

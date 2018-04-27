@@ -598,15 +598,7 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
         return;
     }
 
-    // Respond based on what activity we are tracking
-    // Need to tell the appropriate params about the change,
-    // And it should refresh the panel
-    double mouseCoords[2];
-    double projMouseCoords[2];
-    mouseCoords[0] = (float)e->x();
-    mouseCoords[1] = (float)height() - e->y();
-
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
     string                 tag = MouseModeParams::getModeTag(mode);
     TranslateStretchManip *manip = _visualizer->getManip(tag);

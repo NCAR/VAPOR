@@ -30,7 +30,10 @@
 #include "GL/glew.h"
 #include "qcolordialog.h"
 
-#include "images/fileopen.xpm"
+#ifdef VAPOR3_0_0_ALPHA
+    #include "images/fileopen.xpm"
+#endif
+
 #include <qlabel.h>
 #include <QFileDialog>
 #include <vector>
@@ -55,8 +58,6 @@ using namespace VAPoR;
 SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_SettingsGUI(), EventRouter(ce, SettingsParams::GetClassType())
 {
     setupUi(this);
-
-    SettingsParams *sp = (SettingsParams *)GetActiveParams();
 
     ParamsBase::StateSave *ss = new ParamsBase::StateSave;
     _defaultParams = new SettingsParams(ss, false);
@@ -346,8 +347,7 @@ void SettingsEventRouter::_updateTab()
 string SettingsEventRouter::_choosePathHelper(string current, string help)
 {
     // Launch a file-chooser dialog, just choosing the directory
-    QString         dir;
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    QString dir;
 
     if (current == ".") {
         dir = QDir::currentPath();
@@ -450,7 +450,6 @@ void SettingsEventRouter::_restoreDefaults()
 
     XmlNode *settingsNode = settingsParams->GetNode();
     XmlNode *parent = settingsNode->GetParent();
-    XmlNode *defaultNode = _defaultParams->GetNode();
 
     SettingsParams *newParams = new SettingsParams(*_defaultParams);
     *settingsParams = *newParams;

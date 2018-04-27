@@ -205,11 +205,9 @@ bool Statistics::Update()
 void Statistics::_updateStatsTable()
 {
     // Initialize pointers
-    VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
-    GUIStateParams *   guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string        currentDatasetName = guiParams->GetStatsDatasetName();
+    GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string     currentDatasetName = guiParams->GetStatsDatasetName();
     assert(currentDatasetName != "");
-    VAPoR::DataMgr *  currentDmgr = dataStatus->GetDataMgr(currentDatasetName);
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
 
     // Update Statistics Table: header

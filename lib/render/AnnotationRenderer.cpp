@@ -387,7 +387,6 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa)
 
     // Preserve the current GL color state
     glPushAttrib(GL_CURRENT_BIT);
-    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
@@ -542,9 +541,8 @@ void AnnotationRenderer::convertPointToLonLat(double &xCoord, double &yCoord)
     double coords[2] = {xCoord, yCoord};
     double coordsForError[2] = {coords[0], coords[1]};
 
-    AnnotationParams *aParams = m_paramsMgr->GetAnnotationParams(m_winName);
-    string            projString = m_dataStatus->GetMapProjection();
-    int               rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
+    string projString = m_dataStatus->GetMapProjection();
+    int    rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
     if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]); }
 
     xCoord = coords[0];
@@ -592,12 +590,11 @@ std::vector<double> AnnotationRenderer::getDomainExtents() const
 
 void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation *aa)
 {
-    if (aa == NULL) AxisAnnotation *aa = getCurrentAxisAnnotation();
+    if (aa == NULL) aa = getCurrentAxisAnnotation();
 
     std::vector<double> axisColor = aa->GetAxisColor();
     std::vector<double> txtBackground = aa->GetAxisBackgroundColor();
     int                 fontSize = aa->GetAxisFontSize();
-    bool                latLon = aa->GetLatLonAxesEnabled();
     ViewpointParams *   vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
     int               precision = (int)aa->GetAxisDigits();

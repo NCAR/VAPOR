@@ -406,6 +406,7 @@ size_t vproduct(vector<size_t> a)
     return (ntotal);
 }
 
+#ifdef UNUSED_FUNCTION
 // Elementwise difference between vector a and b (return (a-b));
 //
 vector<size_t> vdiff(vector<size_t> a, vector<size_t> b)
@@ -417,16 +418,7 @@ vector<size_t> vdiff(vector<size_t> a, vector<size_t> b)
     for (int i = 0; i < a.size(); i++) c[i] = a[i] - b[i];
     return (c);
 }
-
-// Determine POD type
-//
-int NetCDFType(float dummy) { return NC_FLOAT; }
-int NetCDFType(double dummy) { return NC_DOUBLE; }
-int NetCDFType(char dummy) { return NC_BYTE; }
-int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
-int NetCDFType(int16_t dummy) { return NC_SHORT; }
-int NetCDFType(int dummy) { return NC_INT; }
-int NetCDFType(long dummy) { return NC_INT64; }
+#endif
 
 // Extract a single block of data from an array. Perform padding as
 // needed based on mode value if this is a boundary block
@@ -2300,8 +2292,8 @@ template<class T, class U> int WASP::_PutVara(vector<size_t> start, vector<size_
     // Ugh. Can't preserve type in thread_state, which has to be passed
     // as a void * to thread library
     //
-    int data_type = NetCDFType(*data);
-    int block_type = NetCDFType(*block);
+    int data_type = _NetCDFType(*data);
+    int block_type = _NetCDFType(*block);
 
     //
     // Set up thread state for parallel (threaded) execution
@@ -2519,8 +2511,8 @@ template<class T, class U> int WASP::_GetVara(vector<size_t> start, vector<size_
     // Ugh. Can't preserve type in thread_state, which has to be passed
     // as a void * to thread library
     //
-    int data_type = NetCDFType(*data);
-    int block_type = NetCDFType(*block);
+    int data_type = _NetCDFType(*data);
+    int block_type = _NetCDFType(*block);
 
     //
     // Set up thread state for parallel (threaded) execution
