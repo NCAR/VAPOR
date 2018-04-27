@@ -98,7 +98,6 @@ class RENDER_API RendererBase : public MyBase {
     //! It will be called from an OpenGL rendering context.
     virtual int _initializeGL() = 0;
 
-  protected:
     RendererBase() {}
 
   private:
@@ -274,6 +273,14 @@ class RENDER_API Renderer : public RendererBase {
     //! returning from _paintGL()
     //
     void DisableClippingPlanes();
+
+    //! return true if all of the specified variables exist in the DataMgr
+    //! at the specified timestep, refinement level, and lod. If \p zeroOK
+    //! is true variables named "0" or "" evaluate to true.
+    //
+    virtual bool VariableExists(
+        size_t ts, std::vector<string> &varnames,
+        int level, int lod, bool zeroOK) const;
 
     static const int _imgHgt;
     static const int _imgWid;
