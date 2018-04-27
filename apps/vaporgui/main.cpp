@@ -164,6 +164,7 @@ int main(int argc, char **argv) {
     fontFile = fontFile + "//arimo.ttf";
 
     QFontDatabase fdb;
+    fdb.addApplicationFont(QString::fromStdString(fontFile));
     QStringList fonts = fdb.families();
     QFont f = fdb.font("Arimo", "normal", 12);
 
