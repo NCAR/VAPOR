@@ -66,15 +66,11 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 	_zRangeCombo = new RangeCombo(_minZCombo, _maxZCombo);
 
 	connectWidgets();
-
-	QFont myFont = font();
-	xTab->setFont(myFont);
-    
 }
 
 void GeometryWidget::adjustLayoutTo2D() {
-	zTab->hide();
-	zTab->resize(0,0);
+	zFrame->hide();
+	zFrame->resize(0,0);
 
 	adjustSize();
 }
@@ -90,7 +86,7 @@ void GeometryWidget::Reinit(
 		adjustLayoutTo2D();
 	}
 	else if(_dimFlags & THREED ) {
-		zTab->show();
+		zFrame->show();
 	}
 }
 
@@ -154,13 +150,13 @@ void GeometryWidget::updateRangeLabels(
 		QString::number(minExt[0], 'g', 3) + 
 		QString("	Max: ") + 
 		QString::number(maxExt[0], 'g', 3);
-	xTab->setTabText(0,xTitle);
+	xLabel->setText(xTitle);
 
 	QString yTitle = QString("Y  Min: ") + 
 		QString::number(minExt[1], 'g', 3) +
 		QString("	Max: ") + 
 		QString::number(maxExt[1], 'g', 3);
-	yTab->setTabText(0,yTitle);
+	yLabel->setText(yTitle);
 
 	if (minExt.size() < 3) 
 	{
@@ -168,7 +164,7 @@ void GeometryWidget::updateRangeLabels(
 			GeometryWidget::TWOD,
 			_varFlags);
 		QString text = QString("Z Coordinates aren't available for 2D variables!");
-		zTab->setTabText(0, text);
+		zLabel->setText(text);
 	} 
 	else 
 	{
@@ -179,7 +175,7 @@ void GeometryWidget::updateRangeLabels(
 			QString::number(minExt[2], 'g', 3) +
 			QString("	Max: ") + 
 			QString::number(maxExt[2], 'g', 3);
-		zTab->setTabText(0,zTitle);
+		zLabel->setText(zTitle);
 	}
 }
 
