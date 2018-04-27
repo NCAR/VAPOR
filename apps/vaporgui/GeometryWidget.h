@@ -28,16 +28,10 @@ public:
 		AUXILIARY = (1u << 2),
 	};
 
-	enum DisplayFlags {
-		SINGLEPOINT = (1u << 0),
-		MINMAX = (1u << 1),
-	};
-
 	GeometryWidget(QWidget *parent=0);
 
 	void Reinit(
 		DimFlags dimFlags, 
-		DisplayFlags displayFlags,
 		VariableFlags varFlags);
 
 	~GeometryWidget();
@@ -54,7 +48,6 @@ public:
 				VAPoR::DataMgr* dataMgr,
 				VAPoR::RenderParams* rParams);
 
-    void hideSinglePointTabHeader();
 
 signals:
     void valueChanged();
@@ -65,8 +58,6 @@ private slots:
 	void copyRegion();
 
 private:
-	void adjustLayoutToMinMax();
-	void adjustLayoutToSinglePoint();
 	void adjustLayoutTo2D();
 	void connectWidgets();
 	void updateRangeLabels(
@@ -116,7 +107,6 @@ private:
 
 	DimFlags _dimFlags;
 	VariableFlags _varFlags;
-	DisplayFlags _displayFlags;
 
     bool  _useAuxVariables;     // for Statistics utility
 

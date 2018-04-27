@@ -68,82 +68,30 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 	connectWidgets();
 
 	QFont myFont = font();
-	xMinMaxGroupBox->setFont(myFont);
+	xTab->setFont(myFont);
     
 }
 
-void GeometryWidget::hideSinglePointTabHeader()
-{
-    singlePointTab->setStyleSheet("QTabBar::tab { height: 0px }");
-}
-	
-void GeometryWidget::adjustLayoutToSinglePoint() {
-	QSizePolicy::Policy minimum = QSizePolicy::Minimum;
-	QSizePolicy::Policy ignored = QSizePolicy::Ignored;
-
-	singlePointPage->setSizePolicy(minimum, minimum);
-	singlePointTab->setSizePolicy(minimum, minimum);
-
-	minMaxPage->setSizePolicy(ignored, ignored);
-	minMaxTab->setSizePolicy(ignored, ignored);
-
-	centerSizePage->setSizePolicy(ignored, ignored);
-	centerSizeTab->setSizePolicy(ignored, ignored);
-
-	stackedSliderWidget->adjustSize();
-	adjustSize();
-}
-
-void GeometryWidget::adjustLayoutToMinMax() {
-	QSizePolicy::Policy minimum = QSizePolicy::Minimum;
-	QSizePolicy::Policy ignored = QSizePolicy::Ignored;
-
-	singlePointPage->setSizePolicy(ignored, ignored);
-	singlePointTab->setSizePolicy(ignored, ignored);
-
-	minMaxPage->setSizePolicy(minimum, minimum);
-	minMaxTab->setSizePolicy(minimum, minimum);
-
-	centerSizePage->setSizePolicy(ignored, ignored);
-	centerSizeTab->setSizePolicy(ignored, ignored);
-
-	stackedSliderWidget->adjustSize();
-	adjustSize();
-}
-
 void GeometryWidget::adjustLayoutTo2D() {
-	zMinMaxGroupBox->hide();
-	zMinMaxGroupBox->resize(0,0);
-	minMaxContainerWidget->adjustSize();
-	minMaxTab->adjustSize();
+	zTab->hide();
+	zTab->resize(0,0);
 
-	stackedSliderWidget->adjustSize();
 	adjustSize();
 }
 
 void GeometryWidget::Reinit(
 	DimFlags dimFlags,
-	DisplayFlags displayFlags,
 	VariableFlags varFlags) {
 
 	_dimFlags = dimFlags;
-	_displayFlags = displayFlags;
 	_varFlags = varFlags;
 
 	if (_dimFlags & TWOD) {
 		adjustLayoutTo2D();
 	}
 	else if(_dimFlags & THREED ) {
-		zMinMaxGroupBox->show();
+		zTab->show();
 	}
-
-	if (_displayFlags & MINMAX) {
-		adjustLayoutToMinMax();
-		stackedSliderWidget->setCurrentIndex(0);
-	}
-
-	stackedSliderWidget->adjustSize();
-	minMaxTab->adjustSize();
 }
 
 GeometryWidget::~GeometryWidget() {
@@ -202,37 +150,36 @@ GeometryWidget::~GeometryWidget() {
 void GeometryWidget::updateRangeLabels(
 							std::vector<double> minExt,
 							std::vector<double> maxExt) {
-	QString xTitle = QString("X Coordinates	Min: ") + 
+	QString xTitle = QString("X  Min: ") + 
 		QString::number(minExt[0], 'g', 3) + 
 		QString("	Max: ") + 
 		QString::number(maxExt[0], 'g', 3);
-	xMinMaxGroupBox->setTitle(xTitle);
+	xTab->setTabText(0,xTitle);
 
-	QString yTitle = QString("Y Coordinates	Min: ") + 
+	QString yTitle = QString("Y  Min: ") + 
 		QString::number(minExt[1], 'g', 3) +
 		QString("	Max: ") + 
 		QString::number(maxExt[1], 'g', 3);
-	yMinMaxGroupBox->setTitle(yTitle);
+	yTab->setTabText(0,yTitle);
 
 	if (minExt.size() < 3) 
 	{
 		Reinit(
 			GeometryWidget::TWOD,
-			_displayFlags,
 			_varFlags);
-		zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
+		QString text = QString("Z Coordinates aren't available for 2D variables!");
+		zTab->setTabText(0, text);
 	} 
 	else 
 	{
 		Reinit(
 			GeometryWidget::THREED,
-			_displayFlags,
 			_varFlags);
-		QString zTitle = QString("Z Coordinates	Min: ") + 
+		QString zTitle = QString("Z Min: ") + 
 			QString::number(minExt[2], 'g', 3) +
 			QString("	Max: ") + 
 			QString::number(maxExt[2], 'g', 3);
-		zMinMaxGroupBox->setTitle(zTitle);
+		zTab->setTabText(0,zTitle);
 	}
 }
 
@@ -413,14 +360,6 @@ void GeometryWidget::updateBoxCombos(
 	if (!box->IsPlanar()) {
 		_zRangeCombo->Update(minFullExt[2], maxFullExt[2],
 							 minExt[2], maxExt[2]);
-	}
-
-	// Update single-point combos
-	//
-	_spXCombo->Update(minFullExt[0], maxFullExt[0], minExt[0]);
-	_spYCombo->Update(minFullExt[1], maxFullExt[1], minExt[1]);
-	if (!box->IsPlanar()) {
-		_spZCombo->Update(minFullExt[2], maxFullExt[2], minExt[2]);
 	}
 }
 
