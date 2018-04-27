@@ -50,7 +50,7 @@ public:
     //! \retval string name
     const std::string getShortName() { return _shortName; }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Copy the current settings to the saved settings
     //! Needed whenever user wants to make current settings default
     //! All of the settings in this Params have an additional "current" state

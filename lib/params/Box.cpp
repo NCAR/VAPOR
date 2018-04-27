@@ -101,7 +101,7 @@ void Box::GetExtents(vector<double> &minExt, vector<double> &maxExt) const
 
 void Box::SetPlanar(bool value) { SetValueLong(Box::m_planarTag, "Set box planar value", (long)value); }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 int Box::GetStretchedLocalExtents(double extents[6], int timestep)
 {
     double exts[6];
@@ -113,7 +113,7 @@ int Box::GetStretchedLocalExtents(double extents[6], int timestep)
 }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 int Box::SetStretchedLocalExtents(const double extents[6], int timestep)
 {
     vector<double> exts;
@@ -123,7 +123,7 @@ int Box::SetStretchedLocalExtents(const double extents[6], int timestep)
 }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void Box::buildLocalCoordTransform(double transformMatrix[12], double extraThickness, int timestep, double rotation, int axis) const
 {
     double theta, phi, psi;

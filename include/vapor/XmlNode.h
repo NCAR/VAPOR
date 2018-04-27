@@ -357,7 +357,7 @@ public:
     //
     virtual void DeleteAll();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Replace the indicated child node with specified new child node
     //!
     //! If indicated child does not exist, return -1, otherwise

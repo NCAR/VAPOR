@@ -27,7 +27,7 @@ class Histo {
 public:
     Histo(int numberBins, float mnData, float mxData, string var, int ts);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Special constructor for unsigned char data:
     //
     Histo(const VAPoR::StructuredGrid *rg, const double exts[6], const float range[2]);

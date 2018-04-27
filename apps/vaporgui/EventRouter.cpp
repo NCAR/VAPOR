@@ -105,7 +105,7 @@ void EventRouter::confirmText()
     ParamsBase *myParams = GetActiveParams();
     if (!myParams) return;
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Capture all the changes in one Undo/Redo queue event:
     Command *cmd = Command::CaptureStart(myParams, "tab text edit");
 #endif
@@ -116,7 +116,7 @@ void EventRouter::confirmText()
     // Turn off the textChanged flag; we have processed all the text changes.
     SetTextChanged(false);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Call Validate(2) to force all the values in the Params to legitimate values.
     myParams->Validate(2);
 

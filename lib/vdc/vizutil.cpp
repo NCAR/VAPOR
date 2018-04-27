@@ -74,7 +74,7 @@ void VAPoR::QuadToTris(const int quad[4], int tris[2 * 3])
     tris[i++] = quad[2];
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 void VAPoR::BaryTet(const Point3d &p, const Point3d &a, const Point3d &b, const Point3d &c, const Point3d &d Point3d &ans)
 {

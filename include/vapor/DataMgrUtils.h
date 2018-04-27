@@ -188,7 +188,7 @@ VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vecto
 //
 VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 //! Determine the size of a voxel in user coordinates, along a specific dimension,
 //! or its maximum or minimum dimension

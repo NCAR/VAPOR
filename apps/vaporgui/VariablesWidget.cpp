@@ -52,7 +52,7 @@ VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_Variable
     //
     distribVariableFrame->hide();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     if (!(dspFlags & COLOR)) { colorVarCombo->hide(); }
 #endif
 }
@@ -140,21 +140,21 @@ void VariablesWidget::setZVarName(const QString &name)
 void VariablesWidget::setXDistVarName(const QString &name)
 {
     assert(_rParams);
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
 }
 
 void VariablesWidget::setYDistVarName(const QString &name)
 {
     assert(_rParams);
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
 }
 
 void VariablesWidget::setZDistVarName(const QString &name)
 {
     assert(_rParams);
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
 }
 
