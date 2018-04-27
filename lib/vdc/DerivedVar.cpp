@@ -27,7 +27,7 @@ size_t numBlocks(
 	return(nblocks);
 }
 
-#ifdef VAPOR3_0_0_ALPHA
+#ifdef UNUSED_FUNCTION
 size_t numBlocks(
 	const vector <size_t> &dims, const vector <size_t> &bs
 ) {
