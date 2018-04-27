@@ -48,7 +48,7 @@ int vdc_xtype2ncdf_xtype(VDC::XType v_xtype)
     return (n_xtype);
 }
 
-#ifdef VAPOR3_0_0_ALPHA
+#ifdef UNUSED_FUNCTION
 VDC::XType ncdf_xtype2vdc_xtype(int n_xtype)
 {
     VDC::XType v_xtype;

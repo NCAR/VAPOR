@@ -20,7 +20,7 @@ string join(const vector<string> &v, string separator)
     return (s);
 }
 
-#ifdef VAPOR3_0_0_ALPHA
+#ifdef UNUSED_FUNCTION
 // Product of elements in a vector
 //
 size_t vproduct(vector<size_t> a)

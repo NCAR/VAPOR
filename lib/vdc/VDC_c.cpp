@@ -451,7 +451,7 @@ int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype
     }
 }
 
-#ifdef VAPOR3_0_0_ALPHA
+#ifdef UNUSED_FUNCTION
 static string valueCArrayToString(const void *a, int l, VDC_XType type)
 {
     string s("[");

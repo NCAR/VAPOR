@@ -406,7 +406,7 @@ size_t vproduct(vector<size_t> a)
     return (ntotal);
 }
 
-#ifdef VAPOR3_0_0_ALPHA
+#ifdef UNUSED_FUNCTION
 // Elementwise difference between vector a and b (return (a-b));
 //
 vector<size_t> vdiff(vector<size_t> a, vector<size_t> b)
@@ -422,15 +422,16 @@ vector<size_t> vdiff(vector<size_t> a, vector<size_t> b)
 
 // Determine POD type
 //
-#ifdef VAPOR3_0_0_ALPHA
-int NetCDFType(float dummy) { return NC_FLOAT; }
-int NetCDFType(char dummy) { return NC_BYTE; }
-#endif
-int NetCDFType(double dummy) { return NC_DOUBLE; }
-int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
-int NetCDFType(int16_t dummy) { return NC_SHORT; }
-int NetCDFType(int dummy) { return NC_INT; }
-int NetCDFType(long dummy) { return NC_INT64; }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+int                    NetCDFType(float dummy) { return NC_FLOAT; }
+int                    NetCDFType(char dummy) { return NC_BYTE; }
+int                    NetCDFType(double dummy) { return NC_DOUBLE; }
+int                    NetCDFType(unsigned char dummy) { return NC_UBYTE; }
+int                    NetCDFType(int16_t dummy) { return NC_SHORT; }
+int                    NetCDFType(int dummy) { return NC_INT; }
+int                    NetCDFType(long dummy) { return NC_INT64; }
+#pragma GCC diagnostic pop
 
 // Extract a single block of data from an array. Perform padding as
 // needed based on mode value if this is a boundary block
