@@ -1191,7 +1191,7 @@ bool MainForm::openDataHelper(
     GUIStateParams *p = GetStateParams();
     vector<string> dataSetNames = p->GetOpenDataSetNames();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // If data set with this name already exists, close it
     //
     for (int i = 0; i < dataSetNames.size(); i++) {
@@ -1399,7 +1399,7 @@ void MainForm::sessionNew() {
 // navigate mode.  Don't change tab menu
 //
 void MainForm::setNavigate(bool on) {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //Only do something if this is an actual change of mode
     if (MouseModeParams::GetCurrentMouseMode() == MouseModeParams::navigateMode)
         return;
@@ -1774,7 +1774,7 @@ void MainForm::loadStartingPrefs() {
     SettingsParams *sP = GetSettingsParams();
     sP->SetCurrentPrefsPath(prefPath);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     _controlExec->RestorePreferences(prefPath);
 #endif
 }

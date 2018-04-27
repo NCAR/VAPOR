@@ -68,7 +68,7 @@ class RENDER_API AnnotationsRenderer : public MyBase {
 
     void ClearText(int type = -1);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Clear all the text objects
     void invalidateCache();
 #endif
@@ -117,7 +117,7 @@ class RENDER_API AnnotationsRenderer : public MyBase {
         std::vector<double> &coords,
         string dataMgrName);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Render the region frame
     void drawRegionBounds(size_t ts) const;
 #endif
@@ -137,7 +137,7 @@ class RENDER_API AnnotationsRenderer : public MyBase {
     void drawAxisArrows(
         std::vector<double> minExts, std::vector<double> maxExts);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Static method to convert axis coordinates between user and lat-lon
     //! It is OK for outputs to equal corresponding inputs.
     //! \param[in] toLatLon indicates whether conversion is to LatLon (true) or to user (false)
