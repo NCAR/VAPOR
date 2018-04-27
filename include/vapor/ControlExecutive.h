@@ -238,7 +238,7 @@ class RENDER_API ControlExec : public MyBase {
     //
     int SaveSession(string file);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Save user preferences to a file
     //!
     //! This method saves all preference information

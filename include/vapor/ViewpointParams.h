@@ -220,7 +220,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
         return (_transforms->GetNames());
     }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Determine the current diameter of the visible scene.
     //! Calculated as 2*Dist*tan(theta*.5) where theta is the camera angle,
     //! Dist is the distance from the camera to the rotation center.

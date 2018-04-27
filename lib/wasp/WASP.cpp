@@ -3153,7 +3153,7 @@ int WASP::_CopyVar(
     // hyperslab at a time.
     //
     int nk = 1;
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //
     // Need to fix this so that count is block-aligned
     //
