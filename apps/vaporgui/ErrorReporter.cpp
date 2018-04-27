@@ -202,6 +202,7 @@ string ErrorReporter::GetSystemInformation()
 		while (!feof(pipe)) {
 			if (fgets(buffer, 128, pipe) != 0)
 				ret += string(buffer);
+            pclose( pipe );
 		}
 	} else {
 		fprintf(stderr, "popen failed\n");
