@@ -157,6 +157,7 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
         // Get the width and height of the image texture. These
         // will be used to set the width and height of the mesh.
         //
+        _getTexture(dataMgr);    // Ugh, this function is more than a get method...
         _vertsWidth = _texWidth;
         _vertsHeight = _texHeight;
         rc = _getMeshDisplaced(dataMgr, _vertsWidth, _vertsHeight, minBoxReq, maxBoxReq);
