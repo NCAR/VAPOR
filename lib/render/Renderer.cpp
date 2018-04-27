@@ -208,6 +208,16 @@ void Renderer::DisableClippingPlanes()
     glDisable(GL_CLIP_PLANE5);
 }
 
+bool Renderer::VariableExists(size_t ts, std::vector<string> &varnames, int level, int lod, bool zeroOK) const
+{
+    for (int i = 0; i < varnames.size(); i++) {
+        if (zeroOK && (varnames[i] == "0" || varnames[i] == "")) { continue; }
+
+        if (!_dataMgr->VariableExists(ts, varnames[i], level, lod)) { return (false); }
+    }
+    return (true);
+}
+
 #ifdef DEAD
 void Renderer::buildLocal2DTransform(int dataOrientation, float a[2], float b[2], float *constVal, int mappedDims[3])
 {

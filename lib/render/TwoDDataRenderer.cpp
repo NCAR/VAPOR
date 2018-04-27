@@ -733,13 +733,12 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 
     Grid *g = NULL;
     int   rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &g);
+    if (rc < 0) return (NULL);
 
     if (g->GetTopologyDim() != 2) {
         SetErrMsg("Invalid variable: %s ", varname.c_str());
         return (NULL);
     }
-
-    if (rc < 0) return (NULL);
 
     // For structured grid variable data are stored in a 2D array.
     // For structured grid variable data are stored in a 1D array.
