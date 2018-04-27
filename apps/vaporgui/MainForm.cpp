@@ -125,6 +125,7 @@ string makename(string file) {
 	);
 }
 
+#ifdef UNUSED_FUNCTION
 string concatpath(string s1, string s2) {
 	string s;
 	if (! s1.empty()) {
@@ -135,6 +136,8 @@ string concatpath(string s1, string s2) {
 	}
 	return(QDir::toNativeSeparators(s.c_str()).toStdString());
 }
+#endif
+
 };
 
 
