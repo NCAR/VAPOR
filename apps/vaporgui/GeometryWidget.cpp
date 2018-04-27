@@ -53,10 +53,6 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 	_dataMgr = NULL;
 	_rParams = NULL;
 
-	_spXCombo = new Combo(xEdit, xSlider);
-	_spYCombo = new Combo(yEdit, ySlider);
-	_spZCombo = new Combo(zEdit, zSlider);
-
 	_minXCombo = new Combo(minXEdit, minXSlider);
 	_maxXCombo = new Combo(maxXEdit, maxXSlider);
 	_xRangeCombo = new RangeCombo(_minXCombo, _maxXCombo);
@@ -121,11 +117,6 @@ void GeometryWidget::adjustLayoutTo2D() {
 	minMaxContainerWidget->adjustSize();
 	minMaxTab->adjustSize();
 
-	zSinglePointGroupBox->hide();
-	zSinglePointGroupBox->resize(0,0);
-	singlePointContainerWidget->adjustSize();
-	singlePointTab->adjustSize();
-
 	stackedSliderWidget->adjustSize();
 	adjustSize();
 }
@@ -142,19 +133,13 @@ void GeometryWidget::Reinit(
 	if (_dimFlags & TWOD) {
 		adjustLayoutTo2D();
 	}
-	else if(_dimFlags & THREED )
-	{
+	else if(_dimFlags & THREED ) {
 		zMinMaxGroupBox->show();
-		zSinglePointGroupBox->show();
 	}
 
 	if (_displayFlags & MINMAX) {
 		adjustLayoutToMinMax();
 		stackedSliderWidget->setCurrentIndex(0);
-	}
-	else if (_displayFlags & SINGLEPOINT) {
-		adjustLayoutToSinglePoint();
-		stackedSliderWidget->setCurrentIndex(1);
 	}
 
 	stackedSliderWidget->adjustSize();
@@ -222,15 +207,12 @@ void GeometryWidget::updateRangeLabels(
 		QString("	Max: ") + 
 		QString::number(maxExt[0], 'g', 3);
 	xMinMaxGroupBox->setTitle(xTitle);
-	xSinglePointGroupBox->setTitle(xTitle);
-	
 
 	QString yTitle = QString("Y Coordinates	Min: ") + 
 		QString::number(minExt[1], 'g', 3) +
 		QString("	Max: ") + 
 		QString::number(maxExt[1], 'g', 3);
 	yMinMaxGroupBox->setTitle(yTitle);
-	ySinglePointGroupBox->setTitle(yTitle);
 
 	if (minExt.size() < 3) 
 	{
@@ -239,7 +221,6 @@ void GeometryWidget::updateRangeLabels(
 			_displayFlags,
 			_varFlags);
 		zMinMaxGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
-		zSinglePointGroupBox->setTitle(QString("Z Coordinates aren't available for 2D variables!"));
 	} 
 	else 
 	{
@@ -252,7 +233,6 @@ void GeometryWidget::updateRangeLabels(
 			QString("	Max: ") + 
 			QString::number(maxExt[2], 'g', 3);
 		zMinMaxGroupBox->setTitle(zTitle);
-		zSinglePointGroupBox->setTitle(xTitle);
 	}
 }
 
@@ -477,12 +457,6 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 }
 
 void GeometryWidget::connectWidgets() {
-	connect(_spXCombo, SIGNAL(valueChanged(double)), this,
-		SLOT(setPoint(double)));
-	connect(_spYCombo, SIGNAL(valueChanged(double)), this,
-		SLOT(setPoint(double)));
-	connect(_spZCombo, SIGNAL(valueChanged(double)), this,
-		SLOT(setPoint(double)));
 	connect(_xRangeCombo, SIGNAL(valueChanged(double,double)), 
 		this, SLOT(setRange(double, double)));
 	connect(_yRangeCombo, SIGNAL(valueChanged(double,double)), 
