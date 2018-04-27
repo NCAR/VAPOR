@@ -830,4 +830,17 @@ private:
 
 }
 
+namespace Wasp
+{
+    // Determine POD type 
+    //
+    int NetCDFType(float dummy)         { return NC_FLOAT; }
+    int NetCDFType(char dummy)          { return NC_BYTE; }
+    int NetCDFType(double dummy)        { return NC_DOUBLE; }
+    int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
+    int NetCDFType(int16_t dummy)       { return NC_SHORT; }
+    int NetCDFType(int dummy)           { return NC_INT; }
+    int NetCDFType(long dummy)          { return NC_INT64; }
+}
+
 #endif //	_WASP_H_
