@@ -331,7 +331,7 @@ MainForm::MainForm(
     _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
 
-    _tabMgr->setMinimumWidth(460);
+    _tabMgr->setMinimumWidth(500);
     _tabMgr->setMinimumHeight(500);
 
     _tabDockWindow->setWidget(_tabMgr);

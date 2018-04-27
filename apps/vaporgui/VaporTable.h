@@ -87,6 +87,9 @@ public:
  void SetActiveRow(int row);
  void SetActiveCol(int col);
 
+ void SetAutoResizeHeight(bool val);
+ bool GetAutoResizeHeight() const;
+
 public slots:
  void emitValueChanged();
  //void emitCellClicked();
@@ -126,10 +129,13 @@ private:
  
  void highlightActiveCol(int col);
 
+ void resizeTableHeight();
+
  int _activeRow;
  int _activeCol;
  bool _lastRowIsCheckboxes;
  bool _lastColIsCheckboxes;
+ bool _autoResizeHeight;
  QTableWidget *_table;
 
  MutabilityFlags _mutabilityFlags;
