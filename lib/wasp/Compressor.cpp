@@ -715,7 +715,7 @@ int Compressor::Reconstruct(
 
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 bool Compressor::IsCompressible(
 	vector <size_t> dims, const string &wavename, const string &mode
 ) {

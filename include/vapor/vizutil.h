@@ -81,7 +81,7 @@ void QuadToTris(
 	int tris[2*3]
 );
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 void BaryTet(
     const Point3d &p, const Point3d &a,
     const Point3d &b, const Point3d &c, const Point3d &d

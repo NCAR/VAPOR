@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
 
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 	for (int i=0; i<3; i++) vdim[i] = vdim[i] * 2;
 
