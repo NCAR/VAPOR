@@ -345,7 +345,7 @@ private:
 //
 // Register RendererBase derived class with:
 //
-//	static RendererRegistrar<RendererClass> \
+//	static RendererRegistrar<RendererClass> 
 //		registrar("myclassname", "myparamsclassname");
 //
 // where 'RendererClass' is a class derived from 'Renderer', and 
