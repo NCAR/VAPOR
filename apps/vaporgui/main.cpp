@@ -155,8 +155,9 @@ int           main(int argc, char **argv)
     fontFile = fontFile + "//arimo.ttf";
 
     QFontDatabase fdb;
-    QStringList   fonts = fdb.families();
-    QFont         f = fdb.font("Arimo", "normal", 12);
+    fdb.addApplicationFont(QString::fromStdString(fontFile));
+    QStringList fonts = fdb.families();
+    QFont       f = fdb.font("Arimo", "normal", 12);
 
     const char *useFont = std::getenv("USE_SYSTEM_FONT");
     if (!useFont) { mw->setFont(f); }
