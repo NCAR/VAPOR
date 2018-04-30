@@ -135,11 +135,11 @@ inline bool my_compare_d(const void *x1, const void *x2) {
 }
 
 inline bool my_compare_i(const void *x1, const void *x2) {
-    return (fabsf(*(int *)x1) > fabsf(*(int *)x2));
+    return (abs(*(int *)x1) > abs(*(int *)x2));
 }
 
 inline bool my_compare_l(const void *x1, const void *x2) {
-    return (abs(*(long *)x1) > abs(*(long *)x2));
+    return (labs(*(long *)x1) > labs(*(long *)x2));
 }
 
 namespace {
