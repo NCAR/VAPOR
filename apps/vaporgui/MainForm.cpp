@@ -56,6 +56,7 @@
 #include "ErrorReporter.h"
 #include "MainForm.h"
 #include "FileOperationChecker.h"
+#include "windowsUtils.h"
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -1870,8 +1871,38 @@ void MainForm::installCLITools()
 #endif
 
 #ifdef WIN32
-    box.setText("Windows");
-    box.setIcon(QMessageBox::Critical);
+    HKEY key;
+    long error, errorClose;
+    bool pathWasModified = false;
+
+    error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
+    if (error != WINDOWS_SUCCESS) {
+        string path;
+        error = Windows_GetRegistryString(key, "PATH", path, "");
+        if (error != WINDOWS_SUCCESS && path.find(home) == std::string::npos) {
+            if (path.length() > 0) path += ";";
+            path += home;
+            error = Windows_SetRegistryString(key, "PATH", path);
+            if (error != WINDOWS_SUCCESS) pathWasModified = true;
+        }
+
+        errorClose = Windows_CloseRegistry(key);
+    }
+
+    if (error | errorClose == WINDOWS_SUCCESS) {
+        box.setIcon(QMessageBox::Information);
+        if (pathWasModified)
+            box.setText("Vapor conversion utilities were added to your path");
+        else
+            box.setText("Your path is properly configured");
+    } else {
+        box.setIcon(QMessageBox::Critical);
+        box.setText("Unable to set environmental variables");
+        string errString;
+        if (error != WINDOWS_SUCCESS) errString += Windows_GetErrorString(error) + "\n";
+        if (errorClose != WINDOWS_SUCCESS) errString += Windows_GetErrorString(errorClose);
+        box.setInformativeText(QString::fromStdString(errString));
+    }
 #endif
 
     box.exec();
