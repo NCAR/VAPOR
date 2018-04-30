@@ -2273,6 +2273,7 @@ void MainForm::startAnimCapture()
 		"Specify the base file name for image capture sequence",
 		imageDir.c_str(),
 		"PNG or JPEG images (*.png *.jpg *.jpeg )");
+	fileDialog.setDefaultSuffix( QString("png") );
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
