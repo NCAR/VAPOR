@@ -297,6 +297,11 @@ void VizWinMgr::Update() {
     }
 }
 
+int VizWinMgr::EnableImageCapture(string filename, string winName) {
+    _vizWindow[winName]->makeCurrent();
+    return _controlExec->EnableImageCapture(filename, winName);
+}
+
 void VizWinMgr::Shutdown() {
 
     vector<string> vizNames = _getVisualizerNames();
