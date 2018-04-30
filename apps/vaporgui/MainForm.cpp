@@ -1007,8 +1007,14 @@ void MainForm::_createHelpMenu() {
 	buildWebHelpMenus();
 	_webTabHelpMenu = new QMenu("Web Help: About the current tab",this);
 	_helpMenu->addMenu(_webTabHelpMenu);
+#ifdef WIN32
+#define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
 #ifdef Darwin
-	_helpMenu->addAction(_installCLIToolsAction);
+#define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
+#ifdef ADD_INSTALL_CLI_TOOLS_ACTION
+    _helpMenu->addAction(_installCLIToolsAction);
 #endif
 
     connect( 
@@ -2208,28 +2214,36 @@ void MainForm::launchSeedMe(){
 void MainForm::installCLITools(){
 	vector<string> pths;
 	string home = GetAppPath("VAPOR","home", pths, true);
-	string path = home + "/MacOS";
+    
+    QMessageBox box;
+    box.addButton(QMessageBox::Ok);
+    
+#ifdef Darwin
+    string path = home + "/MacOS";
+    home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
+    
+    string profilePath = string(getenv("HOME")) + "/.profile";
+    FILE *prof = fopen(profilePath.c_str(), "a");
+    if (prof) {
+        fprintf(prof, "\n");
+        fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
+        fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
+        fclose(prof);
+        
+        box.setText("Environmental variables set in ~/.profile");
+        box.setInformativeText("Please log out and log back in for changes to take effect.");
+        box.setIcon(QMessageBox::Information);
+    } else {
+        box.setText("Unable to set environmental variables");
+        box.setIcon(QMessageBox::Critical);
+    }
+#endif
+    
+#ifdef WIN32
+    box.setText("Windows");
+    box.setIcon(QMessageBox::Critical);
+#endif
 
-	home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
-
-	QMessageBox box;
-	box.addButton(QMessageBox::Ok);
-
-	string profilePath = string(getenv("HOME")) + "/.profile";
-	FILE *prof = fopen(profilePath.c_str(), "a");
-	if (prof) {
-		fprintf(prof, "\n");
-		fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
-		fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
-		fclose(prof);
-
-		box.setText("Environmental variables set in ~/.profile");
-		box.setInformativeText("Please log out and log back in for changes to take effect.");
-		box.setIcon(QMessageBox::Information);
-	} else {
-		box.setText("Unable to set environmental variables");
-		box.setIcon(QMessageBox::Critical);
-	}
 	box.exec();
 }
 
