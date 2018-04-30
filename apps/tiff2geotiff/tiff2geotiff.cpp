@@ -990,8 +990,8 @@ bad:
 DECLAREcpFunc(cpContig2SeparateByRow) {
     unsigned char *inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
     unsigned char *outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-    register unsigned char *inp, *outp;
-    register uint32 n;
+    unsigned char *inp, *outp;
+    uint32 n;
     uint32 row;
     tsample_t s;
 
@@ -1030,8 +1030,8 @@ bad:
 DECLAREcpFunc(cpSeparate2ContigByRow) {
     unsigned char *inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
     unsigned char *outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-    register unsigned char *inp, *outp;
-    register uint32 n;
+    unsigned char *inp, *outp;
+    uint32 n;
     uint32 row;
     tsample_t s;
 
