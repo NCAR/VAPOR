@@ -402,7 +402,7 @@ int VDCNetCDF::openVariableRead(size_t ts, string varname, int level, int lod)
     //
 
     WASP *wasp_mask = NULL;
-    int   clevel_mask;
+    int   clevel_mask = 0;
     if (!maskvar.empty()) {
         //
         // the level specification can be tricky because the data variable
