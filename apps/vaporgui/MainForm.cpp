@@ -1053,16 +1053,22 @@ void MainForm::_fileSaveHelper(string path) {
         SettingsParams *sP = GetSettingsParams();
         string dir = sP->GetSessionDir();
 
-        QString fileName;
-        fileName = QFileDialog::getSaveFileName(
-            this, tr("Save VAPOR session file"),
-            tr(dir.c_str()), "Vapor 3 Session Save Files (*.vs3)");
-        path = fileName.toStdString();
-    }
-    if (path.empty())
-        return;
+        QFileDialog fileDialog(this, "Save VAPOR session file",
+                               QString::fromStdString(dir),
+                               QString::fromAscii("Vapor 3 Session Save file (*.vs3)"));
+        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        fileDialog.setDefaultSuffix(QString::fromAscii("vs3"));
+        if (fileDialog.exec() != QDialog::Accepted)
+            return;
 
-    if (!FileOperationChecker::FileGoodToWrite(path)) {
+        QStringList files = fileDialog.selectedFiles();
+        if (files.isEmpty() || files.size() > 1)
+            return;
+
+        path = files[0].toStdString();
+    }
+
+    if (!FileOperationChecker::FileGoodToWrite(QString::fromStdString(path))) {
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
         return;
     }
@@ -2009,6 +2015,7 @@ void MainForm::captureSingleJpeg() {
                            "Specify single image capture file name",
                            imageDir.c_str(),
                            "PNG or JPEG images (*.png *.jpg *.jpeg)");
+    fileDialog.setDefaultSuffix(QString::fromAscii("png"));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
@@ -2109,6 +2116,7 @@ void MainForm::startAnimCapture() {
                            "Specify the base file name for image capture sequence",
                            imageDir.c_str(),
                            "PNG or JPEG images (*.png *.jpg *.jpeg )");
+    fileDialog.setDefaultSuffix(QString::fromAscii("png"));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
