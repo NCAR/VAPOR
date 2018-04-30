@@ -723,21 +723,24 @@ bool Statistics::_calc3M( std::string varname )
         VAPoR::Grid* grid = currentDmgr->GetVariable( ts, varname, 
                 statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
                 minExtent, maxExtent );
-        Grid::ConstIterator endItr  = grid->cend(); 
-        float missingVal            = grid->GetMissingValue();
-
-        for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        if( grid )
         {
-            if( *it != missingVal )
+            Grid::ConstIterator endItr  = grid->cend(); 
+            float missingVal            = grid->GetMissingValue();
+
+            for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
             {
-                double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
-                min = min < val ? min : val;
-                max = max > val ? max : val;
-                double y = val - c;
-                double t = sum + y;
-                       c = t - sum - y;
-                     sum = t; 
-                count++;
+                if( *it != missingVal )
+                {
+                    double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
+                    min = min < val ? min : val;
+                    max = max > val ? max : val;
+                    double y = val - c;
+                    double t = sum + y;
+                           c = t - sum - y;
+                         sum = t; 
+                    count++;
+                }
             }
         }
     }
@@ -780,13 +783,16 @@ bool Statistics::_calcMedian( std::string varname )
         VAPoR::Grid* grid = currentDmgr->GetVariable( ts, varname, 
                 statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
                 minExtent, maxExtent );
-        Grid::ConstIterator endItr  = grid->cend(); 
-        float missingVal            = grid->GetMissingValue();
-
-        for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        if( grid )
         {
-            if( *it != missingVal )
-                buffer.push_back( std::abs(*it) < 1e-38 ? 0.0 : *it );
+            Grid::ConstIterator endItr  = grid->cend(); 
+            float missingVal            = grid->GetMissingValue();
+
+            for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+            {
+                if( *it != missingVal )
+                    buffer.push_back( std::abs(*it) < 1e-38 ? 0.0 : *it );
+            }
         }
     }
     
@@ -839,19 +845,21 @@ bool Statistics::_calcStddev( std::string varname )
         VAPoR::Grid* grid = currentDmgr->GetVariable( ts, varname, 
                 statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
                 minExtent, maxExtent );
-        Grid::ConstIterator endItr  = grid->cend(); 
-        float missingVal            = grid->GetMissingValue();
-
-        for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        if( grid )
         {
-            if( *it != missingVal )
+            Grid::ConstIterator endItr  = grid->cend(); 
+            float missingVal            = grid->GetMissingValue();
+            for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
             {
-                double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
-                double y = (val - m3[2]) * (val - m3[2]) - c;
-                double t = sum + y;
-                       c = t - sum - y;
-                     sum = t; 
-                count++;
+                if( *it != missingVal )
+                {
+                    double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
+                    double y = (val - m3[2]) * (val - m3[2]) - c;
+                    double t = sum + y;
+                           c = t - sum - y;
+                         sum = t; 
+                    count++;
+                }
             }
         }
     }
