@@ -22,10 +22,8 @@
 #include "GUIStateParams.h"
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgrUtils.h>
+#include "ErrorReporter.h"
 #include "Plot.h"
-
-// #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
-// #include <numpy/ndarrayobject.h>
 
 // Constructor
 Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent) : QDialog(parent), Ui_PlotWindow()
@@ -262,16 +260,29 @@ void Plot::Update()
 
 void Plot::_newVarChanged(int index)
 {
-    if (index == 0) return;
+    if (index == 0)    // not selecting any variable
+        return;
 
     std::string varName = newVarCombo->itemText(index).toStdString();
 
-    // Add this variable to parameter
-    VAPoR::PlotParams *      plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr *         dataMgr = this->_getCurrentDataMgr();
-    std::vector<std::string> vars = plotParams->GetAuxVariableNames();
-    vars.push_back(varName);
-    plotParams->SetAuxVariableNames(vars);
+    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
+    VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
+    int                refinementLevel = plotParams->GetRefinementLevel();
+    int                compressLevel = plotParams->GetCompressionLevel();
+    int                currentTS = (int)plotParams->GetCurrentTimestep();
+
+    // Test if the selected variable available at the specific time step,
+    //   compression level, etc.
+    if (!dataMgr->VariableExists(currentTS, varName, refinementLevel, compressLevel)) {
+        MSG_WARN("Selected variable not available at this settings!");
+        newVarCombo->setCurrentIndex(0);
+        return;
+    } else    // Add this variable to parameter
+    {
+        std::vector<std::string> vars = plotParams->GetAuxVariableNames();
+        vars.push_back(varName);
+        plotParams->SetAuxVariableNames(vars);
+    }
 }
 
 void Plot::_removeVarChanged(int index)
@@ -659,9 +670,7 @@ void Plot::_numberOfSamplesChanged()
     long minSamples = 50;
     if (val < minSamples) {
         val = minSamples;
-        // numOfSamplesLineEdit->blockSignals( true );
         numOfSamplesLineEdit->setText(QString::number(val, 10));
-        // numOfSamplesLineEdit->blockSignals( false );
     }
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetNumOfSamples(val);
