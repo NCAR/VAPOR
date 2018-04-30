@@ -917,12 +917,12 @@ bad:
  */
 DECLAREcpFunc(cpContig2SeparateByRow)
 {
-    unsigned char *         inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
-    unsigned char *         outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-    register unsigned char *inp, *outp;
-    register uint32         n;
-    uint32                  row;
-    tsample_t               s;
+    unsigned char *inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
+    unsigned char *outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
+    unsigned char *inp, *outp;
+    uint32         n;
+    uint32         row;
+    tsample_t      s;
 
     /* unpack channels */
     for (s = 0; s < spp; s++) {
@@ -952,12 +952,12 @@ bad:
  */
 DECLAREcpFunc(cpSeparate2ContigByRow)
 {
-    unsigned char *         inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
-    unsigned char *         outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-    register unsigned char *inp, *outp;
-    register uint32         n;
-    uint32                  row;
-    tsample_t               s;
+    unsigned char *inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
+    unsigned char *outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
+    unsigned char *inp, *outp;
+    uint32         n;
+    uint32         row;
+    tsample_t      s;
 
     for (row = 0; row < imagelength; row++) {
         /* merge channels */
