@@ -273,6 +273,12 @@ void VizWinMgr::Update()
     for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) { (it->second)->updateGL(); }
 }
 
+int VizWinMgr::EnableImageCapture(string filename, string winName)
+{
+    _vizWindow[winName]->makeCurrent();
+    return _controlExec->EnableImageCapture(filename, winName);
+}
+
 void VizWinMgr::Shutdown()
 {
     vector<string> vizNames = _getVisualizerNames();

@@ -70,6 +70,9 @@ public:
     //! Invoke updateGL on all the visualizers that have dirty bit set.
     void Update();
 
+    //! \copydoc VAPoR::ControlExec::EnableImageCapture()
+    int EnableImageCapture(string filename, string winName);
+
 public slots:
 
     //! Method launches a new visualizer, sets up appropriate
