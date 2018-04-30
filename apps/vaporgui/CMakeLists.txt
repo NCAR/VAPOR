@@ -72,6 +72,9 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
+
+	MainForm.h
+	VizWinMgr.h
 )
 
 set (UIS 
