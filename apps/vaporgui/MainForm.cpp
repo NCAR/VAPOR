@@ -782,7 +782,13 @@ void MainForm::_createHelpMenu()
     buildWebHelpMenus();
     _webTabHelpMenu = new QMenu("Web Help: About the current tab", this);
     _helpMenu->addMenu(_webTabHelpMenu);
+#ifdef WIN32
+    #define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
 #ifdef Darwin
+    #define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
+#ifdef ADD_INSTALL_CLI_TOOLS_ACTION
     _helpMenu->addAction(_installCLIToolsAction);
 #endif
 
@@ -1838,12 +1844,13 @@ void MainForm::installCLITools()
 {
     vector<string> pths;
     string         home = GetAppPath("VAPOR", "home", pths, true);
-    string         path = home + "/MacOS";
-
-    home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
 
     QMessageBox box;
     box.addButton(QMessageBox::Ok);
+
+#ifdef Darwin
+    string path = home + "/MacOS";
+    home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
 
     string profilePath = string(getenv("HOME")) + "/.profile";
     FILE * prof = fopen(profilePath.c_str(), "a");
@@ -1860,6 +1867,13 @@ void MainForm::installCLITools()
         box.setText("Unable to set environmental variables");
         box.setIcon(QMessageBox::Critical);
     }
+#endif
+
+#ifdef WIN32
+    box.setText("Windows");
+    box.setIcon(QMessageBox::Critical);
+#endif
+
     box.exec();
 }
 
