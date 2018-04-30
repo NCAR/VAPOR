@@ -1878,11 +1878,11 @@ void MainForm::installCLITools()
     error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
     if (error != WINDOWS_SUCCESS) {
         string path;
-        error = Windows_GetRegistryString(key, "PATH", path, "");
+        error = Windows_GetRegistryString(key, "Path", path, "");
         if (error != WINDOWS_SUCCESS && path.find(home) == std::string::npos) {
             if (path.length() > 0) path += ";";
             path += home;
-            error = Windows_SetRegistryString(key, "PATH", path);
+            error = Windows_SetRegistryString(key, "Path", path);
             if (error != WINDOWS_SUCCESS) pathWasModified = true;
         }
 
