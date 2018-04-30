@@ -2168,6 +2168,7 @@ void MainForm::captureSingleJpeg() {
 		"Specify single image capture file name",
 		imageDir.c_str(),
 		"PNG or JPEG images (*.png *.jpg *.jpeg)");
+	fileDialog.setDefaultSuffix( QString::fromAscii("png") );
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
