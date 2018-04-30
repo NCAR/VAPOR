@@ -21,6 +21,7 @@
 #endif
 #include "Statistics.h"
 #include "GUIStateParams.h"
+#include "ErrorReporter.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -548,24 +549,33 @@ void Statistics::_removeCalcChanged(int index)
 
 void Statistics::_newVarChanged(int index)
 {
-    assert(index > 0);
+    if (index <= 0) return;
 
     // Initialize pointers
     GUIStateParams *  guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    VAPoR::DataMgr *  currentDmgr = _controlExec->GetDataStatus()->GetDataMgr(dsName);
     std::string       varName = NewVarCombo->itemText(index).toStdString();
 
-    // Add this variable to parameter
-    std::vector<std::string> vars = statsParams->GetAuxVariableNames();
-    vars.push_back(varName);
-    statsParams->SetAuxVariableNames(vars);
+    // Test if the selected variable available at the specific time step,
+    //   compression level, etc.
+    if (!currentDmgr->VariableExists(statsParams->GetCurrentMinTS(), varName, statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel())) {
+        MSG_WARN("Selected variable not available at this settings!");
+        NewVarCombo->setCurrentIndex(0);
+        return;
+    } else {
+        // Add this variable to parameter
+        std::vector<std::string> vars = statsParams->GetAuxVariableNames();
+        vars.push_back(varName);
+        statsParams->SetAuxVariableNames(vars);
 
-    // Add this variable to _validStats
-    _validStats.AddVariable(varName);
+        // Add this variable to _validStats
+        _validStats.AddVariable(varName);
 
-    // Auto-update if enabled
-    if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
+        // Auto-update if enabled
+        if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
+    }
 }
 
 void Statistics::_removeVarChanged(int index)
