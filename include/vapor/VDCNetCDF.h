@@ -193,8 +193,9 @@ private:
 
     class VDCFileObject : public DC::FileTable::FileObject {
     public:
-        VDCFileObject(size_t ts, string varname, int level, int lod, size_t file_ts, WASP *wasp_data, WASP *wasp_mask, string varname_mask, int level_mask)
-        : FileObject(ts, varname, level, lod), _file_ts(file_ts), _wasp_data(wasp_data), _wasp_mask(wasp_mask), _varname_mask(varname_mask), _level_mask(level_mask)
+        VDCFileObject(size_t ts, string varname, int level, int lod, size_t file_ts, WASP *wasp_data, WASP *wasp_mask, string varname_mask, int level_mask, size_t file_ts_mask, double mv)
+        : FileObject(ts, varname, level, lod), _file_ts(file_ts), _wasp_data(wasp_data), _wasp_mask(wasp_mask), _varname_mask(varname_mask), _level_mask(level_mask), _file_ts_mask(file_ts_mask),
+          _mv(mv)
         {
         }
 
@@ -203,6 +204,8 @@ private:
         WASP * GetWaspMask() const { return (_wasp_mask); }
         string GetVarnameMask() const { return (_varname_mask); }
         int    GetLevelMask() const { return (_level_mask); }
+        size_t GetFileTSMask() const { return (_file_ts_mask); }
+        double GetMissingValue() const { return (_mv); }
 
     private:
         size_t _file_ts;
@@ -210,6 +213,8 @@ private:
         WASP * _wasp_mask;
         string _varname_mask;
         int    _level_mask;
+        size_t _file_ts_mask;
+        double _mv;
     };
 
     Wasp::SmartBuf _sb_slice_buffer;
@@ -251,7 +256,7 @@ private:
 
     bool _var_in_master(const VDC::BaseVar &var) const;
 
-    string _get_mask_varname(string varname) const;
+    string _get_mask_varname(string varname, double &mv) const;
 
     unsigned char *_read_mask_var(WASP *wasp, string varname, string varname_mask, vector<size_t> start, vector<size_t> count);
 
@@ -267,6 +272,10 @@ private:
 
     template<class T>
     int _copyVarHelper(DC &dc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer);
+
+    template<class T> int _readRegionBlockTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
+
+    template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 };
 };    // namespace VAPoR
 
