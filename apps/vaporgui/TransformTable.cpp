@@ -74,6 +74,7 @@ void TransformTable::Update(const std::map<string, Transform *> &transforms)
     UpdateTranslations();
     UpdateRotations();
     UpdateOrigins();
+    adjustSize();
 }
 
 void TransformTable::UpdateScales()
