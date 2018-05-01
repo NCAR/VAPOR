@@ -113,7 +113,7 @@ void VariablesWidget::Reinit(
 
 	variableSelectionWidget->adjustSize();
 
-	FidelityWidget::DisplayFlags fdf;
+	FidelityWidget::DisplayFlags fdf = (FidelityWidget::DisplayFlags)0;
 	if (_dimFlags & VariablesWidget::SCALAR) 
 		fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::SCALAR);
 	if (_dimFlags & VariablesWidget::VECTOR)

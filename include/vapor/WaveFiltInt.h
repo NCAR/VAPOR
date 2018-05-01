@@ -37,6 +37,8 @@ public:
  //! integer values.
  //!
  virtual bool isint() const { return(true); };
+
+ virtual bool IsNormalized() const { return(false); };
 	
  void Analysis(
 	const long *sigIn, size_t sigInLen,
