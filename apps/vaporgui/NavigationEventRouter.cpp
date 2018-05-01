@@ -207,7 +207,6 @@ void NavigationEventRouter::GetWebHelp(
 }
 
 void NavigationEventRouter::_performAutoStretching(string dataSetName) {
-    GUIStateParams *p = GetStateParams();
     DataStatus *ds = _controlExec->GetDataStatus();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -216,8 +215,6 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
     vector<double> minExt, maxExt;
 
     for (int i = 0; i < winNames.size(); i++) {
-        double xRange, yRange, zRange;
-
         DataMgr *dm = ds->GetDataMgr(dataSetName);
         std::vector<string> varNames = dm->GetDataVarNames(3);
 
@@ -577,7 +574,7 @@ void NavigationEventRouter::CenterSubRegion() {
 
     cout << "NavigationEventRouter::CenterSubRegion not implemented" << endl;
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
     ViewpointParams *vpParams = _getActiveParams();
     if (!vpParams)
@@ -745,7 +742,7 @@ void NavigationEventRouter::AlignView(int axis) {
 //Reset the center of view.  Leave the camera where it is
 void NavigationEventRouter::
     SetCenter(const double *coords) {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     double vdir[3];
     vector<double> nvdir;
     ViewpointParams *vpParams = _getActiveParams();
@@ -765,7 +762,7 @@ void NavigationEventRouter::
 
     vnormal(vdir);
     vector<double> vvdir;
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     Command *cmd = Command::CaptureStart(vpParams, "re-center view");
 #endif
     for (int i = 0; i < 3; i++)
@@ -776,7 +773,7 @@ void NavigationEventRouter::
         rotCtr.push_back(coords[i]);
     }
     vpParams->setRotationCenterLocal(rotCtr);
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     Command::CaptureEnd(cmd, vpParams);
 #endif
     updateTab();

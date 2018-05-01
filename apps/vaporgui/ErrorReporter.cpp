@@ -138,7 +138,7 @@ void ErrorReporter::Report(string msg, Type severity, string details) {
         break;
     }
 
-    int ret = box.exec();
+    box.exec();
     QAbstractButton *clicked = box.clickedButton();
     QMessageBox::ButtonRole role = box.buttonRole(clicked);
 
@@ -185,11 +185,12 @@ string ErrorReporter::GetSystemInformation() {
     ret += "OS: " + string(info.sysname) + " " + string(info.release) + " " + string(info.version) + "\n";
     ret += "Distro:\n";
     char buffer[128];
-    FILE *pipe = popen("lsb_release", "r"), pclose;
+    FILE *pipe = popen("lsb_release", "r");
     if (pipe) {
         while (!feof(pipe)) {
             if (fgets(buffer, 128, pipe) != 0)
                 ret += string(buffer);
+            pclose(pipe);
         }
     } else {
         fprintf(stderr, "popen failed\n");
