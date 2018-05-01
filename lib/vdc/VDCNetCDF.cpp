@@ -118,7 +118,7 @@ VDCNetCDF::VDCNetCDF(int nthreads, size_t master_threshold, size_t variable_thre
     _master_threshold = master_threshold;
     _variable_threshold = variable_threshold;
     _chunksizehint = 0;
-    _master = new WASP();
+    _master = new WASP(nthreads);
     _version = 1;
 }
 
@@ -637,13 +637,21 @@ template<class T> int VDCNetCDF::_writeSliceTemplate(int fd, const T *slice)
     size_t         file_ts = o->GetFileTS();
     vdc_2_ncdfcoords(file_ts, file_ts, IsTimeVarying(varname), min, max, start, count);
 
-    rc = wasp->PutVara(start, count, slice);
+    string maskvar = _get_mask_varname(varname);
+    if (maskvar.empty()) {
+        rc = wasp->PutVara(start, count, slice);
+    } else {
+        unsigned char *mask = _read_mask_var(o->GetWaspMask(), varname, maskvar, start, count);
+        if (!mask) return (-1);
+
+        rc = wasp->PutVara(start, count, slice, mask);
+    }
     if (rc < 0) return (rc);
 
     slice_num++;
     o->SetSlice(slice_num);
 
-    return (rc);
+    return (0);
 }
 
 template int VDCNetCDF::_writeSliceTemplate<float>(int fd, const float *slice);
