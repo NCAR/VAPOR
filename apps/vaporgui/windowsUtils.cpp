@@ -6,10 +6,6 @@
     #include <codecvt>
     #include "windowsUtils.h"
 
-    #include <stdio.h>
-FILE *f = NULL;
-void  Windows_setLog(FILE *f_) { f = f_; }
-
 LONG Windows_OpenRegistry(HKEY root, std::string keyName, HKEY &key) { return RegOpenKeyEx(root, TEXT(keyName.c_str()), 0, KEY_ALL_ACCESS, &key); }
 
 LONG Windows_CloseRegistry(HKEY key) { return RegCloseKey(key); }
@@ -28,18 +24,8 @@ LONG Windows_GetRegistryString(HKEY hKey, const std::string &strValueName, std::
 LONG Windows_SetRegistryString(HKEY hKey, const std::string &strValueName, const std::string &strValue)
 {
     LONG error;
-    std::fprintf(f, "utils::write...");
-    std::fflush(f);
     error = RegSetValueEx(hKey, strValueName.c_str(), 0, REG_SZ, (LPBYTE)strValue.c_str(), strValue.length());
-    std::fprintf(f, "done...\n");
-    std::fflush(f);
-    if (error == ERROR_SUCCESS) {
-        std::fprintf(f, "utils::broadcast...");
-        std::fflush(f);
-        BroadcastSystemMessage(0, 0, WM_SETTINGCHANGE, 0, (LPARAM)TEXT("Environment"));
-        std::fprintf(f, "done...\n");
-        std::fflush(f);
-    }
+    if (error == ERROR_SUCCESS) { BroadcastSystemMessage(0, 0, WM_SETTINGCHANGE, 0, (LPARAM)TEXT("Environment")); }
     return error;
 }
 

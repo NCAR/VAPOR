@@ -1841,13 +1841,6 @@ void MainForm::launchSeedMe()
     _seedMe->Initialize();
 }
 
-#include <stdio.h>
-#define LOG(...)                      \
-    {                                 \
-        std::fprintf(f, __VA_ARGS__); \
-        std::fflush(f);               \
-    }
-
 void MainForm::installCLITools()
 {
     vector<string> pths;
@@ -1877,55 +1870,42 @@ void MainForm::installCLITools()
 #endif
 
 #ifdef WIN32
-    HKEY       key;
-    long       error;
-    long       errorClose;
-    bool       pathWasModified = false;
-    string     errorFunc;
-    std::FILE *f = std::fopen("log.txt", "w");
-    Windows_setLog(f);
-    LOG("%i Log Start\n", __LINE__);
+    HKEY   key;
+    long   error;
+    long   errorClose;
+    bool   pathWasModified = false;
     string home = GetAppPath("VAPOR", "", pths, true);
-    LOG("home = \"%s\"\n", home.c_str());
 
-    LOG("%i Opening registry...", __LINE__);
-    errorFunc = "OpenRegistry";
     error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
-    LOG("done...");
     if (error == WINDOWS_SUCCESS) {
-        LOG("success\n");
         string path;
-        LOG("%i Reading Path...", __LINE__);
-        errorFunc = "GetRegistryString";
-        error = Windows_GetRegistryString(key, "TMP", path, "");
-        LOG("done...");
+        error = Windows_GetRegistryString(key, "Path", path, "");
+        if (error == WINDOWS_ERROR_FILE_NOT_FOUND) {
+            error = WINDOWS_SUCCESS;
+            path = "";
+        }
         if (error == WINDOWS_SUCCESS) {
-            LOG("success\n");
-            LOG("\"%s\".find(\"%s\") = %i (%s)\n", path.c_str(), home.c_str(), path.find(home), path.find(home) == std::string::npos ? "true" : "false");
-            if (path.find(home) == std::string::npos) {
-                LOG("%i Adding home to path\n", __LINE__);
+            bool   alreadyExists = false;
+            size_t index;
+            if (path.find(";" + home + ";") != std::string::npos)
+                alreadyExists = true;
+            else if ((index = path.find(";" + home)) != std::string::npos && index + home.length() + 1 == path.length())
+                alreadyExists = true;
+            else if ((index = path.find(home + ";")) != std::string::npos && index == 0)
+                alreadyExists = true;
+            else if (path == home)
+                alreadyExists = true;
+
+            if (!alreadyExists) {
                 if (path.length() > 0) path += ";";
                 path += home;
-                errorFunc = "SetRegistryString";
-                LOG("%i Writing Registry...", __LINE__);
                 error = Windows_SetRegistryString(key, "Path", path);
-                LOG("done...");
-                if (error == WINDOWS_SUCCESS) {
-                    LOG("%i Path Modified\n", __LINE__);
-                    pathWasModified = true;
-                } else {
-                    LOG("failure\n");
-                }
+                if (error == WINDOWS_SUCCESS) pathWasModified = true;
             }
-        } else {
-            LOG("failure[%li]: ", error);
-            LOG("%s\n", Windows_GetErrorString(error).c_str());
         }
-
         errorClose = Windows_CloseRegistry(key);
     }
 
-    std::fclose(f);
     if (error == WINDOWS_SUCCESS && errorClose == WINDOWS_SUCCESS) {
         box.setIcon(QMessageBox::Information);
         if (pathWasModified)
@@ -1936,7 +1916,7 @@ void MainForm::installCLITools()
         box.setIcon(QMessageBox::Critical);
         box.setText("Unable to set environmental variables");
         string errString = "";
-        if (error != WINDOWS_SUCCESS) errString += errorFunc + ": " + Windows_GetErrorString(error) + "\n";
+        if (error != WINDOWS_SUCCESS) errString += Windows_GetErrorString(error) + "\n";
         if (errorClose != WINDOWS_SUCCESS) errString += "CloseRegistry: " + Windows_GetErrorString(errorClose);
         box.setInformativeText(QString::fromStdString(errString));
     }
