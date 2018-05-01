@@ -112,7 +112,7 @@ private:
 
 	static string _nDimsTag;
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 	void makeItRed(QLineEdit* edit);
 	void makeItYellow(QLineEdit* edit);
 	void makeItGreen(QLineEdit* edit);

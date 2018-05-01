@@ -47,7 +47,7 @@ void ImageFrame::attachRenderWindow(QGLWidget* wid, EventRouter* evr){
 		QString strng("Unable to obtain adequate OpenGL rendering format.\n");
 		strng += "Ensure your graphics card is properly configured, and/or \n";
 		strng += "Be sure to use 'vglrun' if you are in a VirtualGL session.";
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 		Params::BailOut((const char*)strng.toAscii(),__FILE__,__LINE__);
 #endif
 	}
@@ -60,7 +60,7 @@ ImageFrame::~ImageFrame() {
 }
 	
 void ImageFrame::mousePressEvent( QMouseEvent * e){
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	RenderParams* pm = getParams();
 	if (!pm) return;
@@ -73,7 +73,7 @@ void ImageFrame::mousePressEvent( QMouseEvent * e){
 	
 }
 void ImageFrame::mouseMoveEvent( QMouseEvent * e){
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	RenderParams* pm = getParams();
 	if (!pm) return;
@@ -85,7 +85,7 @@ void ImageFrame::mouseMoveEvent( QMouseEvent * e){
 	
 }
 void ImageFrame::mouseReleaseEvent( QMouseEvent *e ){
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	RenderParams* pm = getParams();
 	if (!pm) return;

@@ -72,6 +72,9 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
+
+	MainForm.h
+	VizWinMgr.h
 )
 
 set (UIS 
@@ -142,10 +145,6 @@ target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geo
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
-endif ()
-
-if (APPLE)
-	target_compile_options (vapor PRIVATE "-Wno-deprecated-declarations")
 endif ()
 
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
