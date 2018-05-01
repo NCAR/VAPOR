@@ -437,7 +437,7 @@ XmlNode	*XmlNode::AddChild( const XmlNode &child)
 	return(mychild);
 }
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 int XmlNode::ReplaceChild(XmlNode* prevChildNode, XmlNode* newChildNode){
 	for (int index = 0; index < _children.size(); index++){
 		XmlNode *node = _children[index];

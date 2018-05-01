@@ -111,7 +111,7 @@ void AppSettingsParams::restoreDefaults() {
 	_init();
 }
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 void AppSettingsParams::saveCurrentSettings(){
 	//This copying should not be saved as a command;
 	//It cannot be undone.  Copy all the current settings to the permanent settings. 

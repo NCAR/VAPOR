@@ -27,6 +27,7 @@ size_t numBlocks(
 	return(nblocks);
 }
 
+#ifdef UNUSED_FUNCTION
 size_t numBlocks(
 	const vector <size_t> &dims, const vector <size_t> &bs
 ) {
@@ -39,6 +40,7 @@ size_t numBlocks(
 	}
 	return(nblocks);
 }
+#endif
 
 size_t blockSize(const vector <size_t> &bs) {
 	size_t sz = 1;
@@ -77,8 +79,6 @@ void extractBlock(
 ) {
 	assert(dims.size() == bcoords.size());
 	assert(dims.size() == bs.size());
-
-	size_t block_size = vproduct(bs);
 
 	// Block dimensions
 	//
@@ -299,7 +299,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 	string varname = f->GetVarname();
 	int level = f->GetLevel();
 	int lod = f->GetLOD();
-    int sliceNum = f->GetSlice();
 
 	// Dimensions are same for X & Y coord vars
 	//
@@ -371,7 +370,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(
 	string varname = f->GetVarname();
 	int level = f->GetLevel();
 	int lod = f->GetLOD();
-    int sliceNum = f->GetSlice();
 
 	// Dimensions are same for X & Y coord vars
 	//

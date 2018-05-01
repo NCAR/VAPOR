@@ -103,6 +103,8 @@ class OutFormat {
 				case XType::DOUBLE:  return "double";
 				case XType::TEXT:    return "text";
 				case XType::INVALID: return "INVALID";
+                default:        
+                    return "INVALID";
 			};
 		}
 };
