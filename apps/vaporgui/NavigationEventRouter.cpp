@@ -33,6 +33,7 @@
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <QTextEdit>
+#include <QScrollArea>
 
 #include <qcombobox.h>
 #include <qfiledialog.h>
@@ -502,6 +503,10 @@ void NavigationEventRouter::resizeProjTable() {
         QHeaderView::Stretch);
     datasetProjectionTable->verticalHeader()->hide();
     datasetProjectionTable->resizeRowsToContents();
+
+    int height = datasetProjectionTable->horizontalHeader()->height();
+    int rows = datasetProjectionTable->rowCount();
+    datasetProjectionTable->setMaximumHeight(height * rows * 3);
 }
 
 void NavigationEventRouter::createProjCheckBox(int row, bool usingCurrentProj) {

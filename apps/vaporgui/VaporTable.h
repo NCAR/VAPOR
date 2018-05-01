@@ -85,6 +85,9 @@ class VaporTable : public QWidget {
     void SetActiveRow(int row);
     void SetActiveCol(int col);
 
+    void SetAutoResizeHeight(bool val);
+    bool GetAutoResizeHeight() const;
+
   public slots:
     void emitValueChanged();
     //void emitCellClicked();
@@ -124,10 +127,13 @@ class VaporTable : public QWidget {
 
     void highlightActiveCol(int col);
 
+    void resizeTableHeight();
+
     int _activeRow;
     int _activeCol;
     bool _lastRowIsCheckboxes;
     bool _lastColIsCheckboxes;
+    bool _autoResizeHeight;
     QTableWidget *_table;
 
     MutabilityFlags _mutabilityFlags;
