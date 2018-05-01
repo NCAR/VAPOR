@@ -1093,7 +1093,9 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	int lod,
 	const vector <DC::CoordVar> &cvarsinfo,
 	const Grid &xg,
-	const Grid &yg
+	const Grid &yg,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax
  );
 
  vector <string> _getDataVarNamesDerived(int ndim) const;
