@@ -56,6 +56,7 @@
 #include "ErrorReporter.h"
 #include "MainForm.h"
 #include "FileOperationChecker.h"
+#include "windowsUtils.h"
 
 //Following shortcuts are provided:
 // CTRL_N: new session
@@ -993,8 +994,14 @@ void MainForm::_createHelpMenu() {
 	buildWebHelpMenus();
 	_webTabHelpMenu = new QMenu("Web Help: About the current tab",this);
 	_helpMenu->addMenu(_webTabHelpMenu);
+#ifdef WIN32
+#define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
 #ifdef Darwin
-	_helpMenu->addAction(_installCLIToolsAction);
+#define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
+#ifdef ADD_INSTALL_CLI_TOOLS_ACTION
+    _helpMenu->addAction(_installCLIToolsAction);
 #endif
 
     connect( 
@@ -2187,29 +2194,82 @@ void MainForm::captureSingleJpeg() {
 
 void MainForm::installCLITools(){
 	vector<string> pths;
-	string home = GetAppPath("VAPOR","home", pths, true);
-	string path = home + "/MacOS";
+    QMessageBox box;
+    box.addButton(QMessageBox::Ok);
+    
+#ifdef Darwin
+	string home = GetAppPath("VAPOR", "home", pths, true);
+    string path = home + "/MacOS";
+    home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
+    
+    string profilePath = string(getenv("HOME")) + "/.profile";
+    FILE *prof = fopen(profilePath.c_str(), "a");
+    if (prof) {
+        fprintf(prof, "\n");
+        fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
+        fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
+        fclose(prof);
+        
+        box.setText("Environmental variables set in ~/.profile");
+        box.setInformativeText("Please log out and log back in for changes to take effect.");
+        box.setIcon(QMessageBox::Information);
+    } else {
+        box.setText("Unable to set environmental variables");
+        box.setIcon(QMessageBox::Critical);
+    }
+#endif
+    
+#ifdef WIN32
+	HKEY key;
+	long error;
+	long errorClose;
+	bool pathWasModified = false;
+	string home = GetAppPath("VAPOR", "", pths, true);
 
-	home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
+	error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
+	if (error == WINDOWS_SUCCESS) {
+		string path;
+		error = Windows_GetRegistryString(key, "Path", path, "");
+		if (error == WINDOWS_ERROR_FILE_NOT_FOUND) {
+			error = WINDOWS_SUCCESS;
+			path = "";
+		}
+		if (error == WINDOWS_SUCCESS) {
+			bool alreadyExists = false;
+			size_t index;
+			if      (path.find(";" + home + ";") != std::string::npos) alreadyExists = true;
+			else if ((index = path.find(";" + home)) != std::string::npos && index + home.length() + 1 == path.length()) alreadyExists = true;
+			else if ((index = path.find(home + ";")) != std::string::npos && index == 0) alreadyExists = true;
+			else if (path == home) alreadyExists = true;
 
-	QMessageBox box;
-	box.addButton(QMessageBox::Ok);
-
-	string profilePath = string(getenv("HOME")) + "/.profile";
-	FILE *prof = fopen(profilePath.c_str(), "a");
-	if (prof) {
-		fprintf(prof, "\n");
-		fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
-		fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
-		fclose(prof);
-
-		box.setText("Environmental variables set in ~/.profile");
-		box.setInformativeText("Please log out and log back in for changes to take effect.");
-		box.setIcon(QMessageBox::Information);
-	} else {
-		box.setText("Unable to set environmental variables");
-		box.setIcon(QMessageBox::Critical);
+			if (!alreadyExists) {
+				if (path.length() > 0)
+					path += ";";
+				path += home;
+				error = Windows_SetRegistryString(key, "Path", path);
+				if (error == WINDOWS_SUCCESS)
+					pathWasModified = true;
+			}
+		}
+		errorClose = Windows_CloseRegistry(key);
 	}
+	
+	if (error == WINDOWS_SUCCESS && errorClose == WINDOWS_SUCCESS) {
+		box.setIcon(QMessageBox::Information);
+		if (pathWasModified)
+			box.setText("Vapor conversion utilities were added to your path");
+		else
+			box.setText("Your path is properly configured");
+	} else {
+		box.setIcon(QMessageBox::Critical);
+		box.setText("Unable to set environmental variables");
+		string errString = "";
+		if (error      != WINDOWS_SUCCESS) errString += Windows_GetErrorString(error) + "\n";
+		if (errorClose != WINDOWS_SUCCESS) errString += "CloseRegistry: " + Windows_GetErrorString(errorClose);
+		box.setInformativeText(QString::fromStdString(errString));
+	}
+#endif
+
 	box.exec();
 }
 
