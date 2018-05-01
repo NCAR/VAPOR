@@ -22,9 +22,11 @@ using namespace VAPoR;
 using namespace std;
 
 namespace {
+#ifdef UNUSED_FUNCTION
 bool mycompare(const pair<int, float> &a, const pair<int, float> &b) {
     return (a.second < b.second);
 }
+#endif
 }; // namespace
 
 DCWRF::DCWRF() {

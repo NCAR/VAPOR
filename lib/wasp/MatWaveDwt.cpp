@@ -742,7 +742,7 @@ int idwt_template(
             //
             cDTempLen = cATempLen;
         }
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
     } else {
         cATempLen = L[0];

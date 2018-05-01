@@ -179,7 +179,7 @@ void ColorbarWidget::setBackgroundColor() {
     _cbPbase->SetBackgroundColor(rgbd);
 }
 void ColorbarWidget::applyToAll() {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     _paramsMgr->CopyColorBarSettings((RenderParams *)_params);
 #endif
 }
