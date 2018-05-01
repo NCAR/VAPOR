@@ -2890,7 +2890,8 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(
     RegularGrid xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
     RegularGrid yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg);
+    const KDTreeRG *kdtree = _getKDTree2D(
+        ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax);
 
     CurvilinearGrid *g = new CurvilinearGrid(
         dims, bs, blkptrs, xrg, yrg,
@@ -3069,7 +3070,7 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
     UnstructuredGridCoordless zug;
 
     const KDTreeRG *kdtree = _getKDTree2D(
-        ts, level, lod, cvarsinfo, xug, yug);
+        ts, level, lod, cvarsinfo, xug, yug, bmin, bmax);
 
     UnstructuredGrid2D *g = new UnstructuredGrid2D(
         vertexDims, faceDims, edgeDims, bs, blkptrs,
@@ -3412,7 +3413,9 @@ const KDTreeRG *DataMgr::_getKDTree2D(
     int lod,
     const vector<DC::CoordVar> &cvarsinfo,
     const Grid &xg,
-    const Grid &yg) {
+    const Grid &yg,
+    const vector<size_t> &bmin,
+    const vector<size_t> &bmax) {
     assert(cvarsinfo.size() >= 2);
     assert(xg.GetDimensions() == yg.GetDimensions());
 
@@ -3421,7 +3424,11 @@ const KDTreeRG *DataMgr::_getKDTree2D(
         varnames.push_back(cvarsinfo[i].GetName());
     }
 
-    const string key = "KDTree";
+    string key = "KDTree";
+    key += ":";
+    key += vector_to_string(bmin);
+    key += ":";
+    key += vector_to_string(bmax);
 
     KDTreeRG *kdtree = NULL;
 

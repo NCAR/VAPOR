@@ -37,6 +37,8 @@ class WASP_API WaveFiltInt : public WaveFiltBase {
     //!
     virtual bool isint() const { return (true); };
 
+    virtual bool IsNormalized() const { return (false); };
+
     void Analysis(
         const long *sigIn, size_t sigInLen,
         long *cA, long *cD, bool oddlow, bool oddhigh) const;
