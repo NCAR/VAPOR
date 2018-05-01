@@ -16,7 +16,7 @@ namespace VAPoR {
 //! wavelet families that can be implemented as FIR filters. A wavelet
 //! family class contains scaling and
 //! wavelet coefficients that define a particular wavelet. All
-//! filters are normalized.
+//! filters are normalized unless IsNormalized returns false.
 //!
 class WASP_API WaveFiltBase {
 public:
@@ -55,6 +55,10 @@ public:
     //! Returns true if the wavelet is an integer transform
     //!
     virtual bool isint() const { return (false); };
+
+    //! Returns true wavelet transform is normalized
+    //!
+    virtual bool IsNormalized() const { return (true); };
 
 protected:
     static const int MAX_FILTER_SIZE = 32;    // space allocated to filters

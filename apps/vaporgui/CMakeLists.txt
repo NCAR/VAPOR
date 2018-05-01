@@ -21,7 +21,6 @@ set (SRCS
 	RangeController.cpp
 	Statistics.cpp
 	Plot.cpp
-	SeedMe.cpp
 	helloSubtabs.cpp
 	TFWidget.cpp
 	VariablesWidget.cpp
@@ -59,7 +58,6 @@ set (SRCS
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
 	Statistics.h
-	SeedMe.h
 	Plot.h
 	BarbSubtabs.h
 	ColorbarWidget.h
@@ -101,7 +99,6 @@ set (UIS
 	statsWindow.ui
 	errMsg.ui
 	plotWindow.ui
-	SeedMeGUI.ui
 	firstTimeUser.ui
 	TFWidgetGUI.ui
 	StretchFactorTableGUI.ui

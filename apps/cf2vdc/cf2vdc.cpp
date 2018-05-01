@@ -64,88 +64,6 @@ size_t gcd(size_t n1, size_t n2)
 
 size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
 
-#ifdef VAPOR3_0_0_ALPHA
-// Copy a variable mask with 2 or 3 spatial dimensions
-//
-int CopyVar2d3dMask(DC &dc, VDC &vdc, size_t ts, string varname, int lod)
-{
-    vector<size_t> dimlens;
-    bool           ok = dc.GetVarDimLens(varname, true, dimlens);
-    assert(ok == true);
-
-    if (dimlens.size() < 2) return (0);
-
-    string maskvar;
-
-    // Only data variables can have masks
-    //
-    if (!vdc.IsDataVar(varname)) return (0);
-
-    DC::DataVar dvar;
-    vdc.GetDataVarInfo(varname, dvar);
-    maskvar = dvar.GetMaskvar();
-
-    // Do nothing if mask variable already exists on disk
-    //
-    if (maskvar.empty() || vdc.VariableExists(ts, maskvar, 0, lod)) return (0);
-
-    int fdr = dc.OpenVariableRead(ts, varname, -1, -1);
-    if (fdr < 0) {
-        MyBase::SetErrMsg("Failed to open variable %s for reading\n", varname.c_str());
-        return (-1);
-    }
-
-    int fdw = vdc.OpenVariableWrite(ts, maskvar, lod);
-    if (fdw < 0) {
-        MyBase::SetErrMsg("Failed to open variable %s for writing\n", maskvar.c_str());
-        return (-1);
-    }
-
-    size_t nz = dimlens.size() > 2 ? dimlens[dimlens.size() - 1] : 1;
-
-    size_t         sz = dimlens[0] * dimlens[1];
-    float *        buf = (float *)dataBuffer.Alloc(sz * sizeof(*buf));
-    unsigned char *mask_buf = (unsigned char *)maskBuffer.Alloc(sz * sizeof(*mask_buf));
-
-    dc.GetDataVarInfo(varname, dvar);
-    double mv = dvar.GetMissingValue();
-
-    // Generate a mask variable by comparing the data variable values
-    // against the missing value
-    //
-    for (size_t i = 0; i < nz; i++) {
-        int rc = dc.ReadSlice(fdr, buf);
-        if (rc < 0) {
-            MyBase::SetErrMsg("Failed to read variable %s\n", varname.c_str());
-            return (-1);
-        }
-
-        for (int j = 0; j < sz; j++) {
-            if (buf[j] == mv)
-                mask_buf[j] = 0;    // invalid data
-            else
-                mask_buf[j] = 1;    // valid data
-        }
-
-        rc = vdc.WriteSlice(fdw, mask_buf);
-        if (rc < 0) {
-            MyBase::SetErrMsg("Failed to write variable %s\n", maskvar.c_str());
-            return (-1);
-        }
-    }
-
-    (void)dc.CloseVariable(fdr);
-    int rc = vdc.CloseVariable(fdw);
-    if (rc < 0) {
-        MyBase::SetErrMsg("Failed to write variable %s\n", maskvar.c_str());
-        return (-1);
-    }
-
-    return (0);
-}
-
-#endif
-
 int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, double mv,
                   float *buffer)
 {
@@ -160,7 +78,8 @@ int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dim
         float *bufptr = buffer;
         int    n = buffer_dims[dim] / src_hslice_dims[dim];
 
-        for (int i = 0; i < n && src_slice_count < src_nslice; i++) {
+        int rCount;
+        for (rCount = 0; rCount < n && src_slice_count < src_nslice; rCount++) {
             int rc = dc.ReadSlice(fdr, bufptr);
             if (rc < 0) return (-1);
             bufptr += vproduct(src_hslice_dims);
@@ -170,13 +89,14 @@ int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dim
 
         // In place replacmenet of missing value with 1-byte flag
         //
-        size_t         sz = n * vproduct(src_hslice_dims);
+        size_t         sz = rCount * vproduct(src_hslice_dims);
         unsigned char *cptr = (unsigned char *)buffer;
         for (int j = 0; j < sz; j++) {
-            if (buffer[j] == mv)
+            if (buffer[j] == mv) {
                 cptr[j] = 0;    // invalid data
-            else
+            } else {
                 cptr[j] = 1;    // valid data
+            }
         }
 
         cptr = (unsigned char *)buffer;

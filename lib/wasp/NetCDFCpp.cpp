@@ -950,11 +950,15 @@ bool NetCDFCpp::InqDimDefined(string dimname)
 bool NetCDFCpp::InqAttDefined(string varname, string attname)
 {
     int varid = -1;
-    int rc = nc_inq_varid(_ncid, varname.c_str(), &varid);
-    if (rc != NC_NOERR) return (false);
+    if (varname.empty()) {
+        varid = NC_GLOBAL;
+    } else {
+        int rc = nc_inq_varid(_ncid, varname.c_str(), &varid);
+        if (rc != NC_NOERR) return (false);
+    }
 
     int dummy;
-    rc = nc_inq_attid(_ncid, varid, attname.c_str(), &dummy);
+    int rc = nc_inq_attid(_ncid, varid, attname.c_str(), &dummy);
 
     if (rc == NC_NOERR) return (true);
 
