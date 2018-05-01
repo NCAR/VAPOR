@@ -14,6 +14,7 @@ using namespace VAPoR;
 struct opt_t {
     vector<string>          dimnames;
     vector<int>             dimlens;
+    std::vector<size_t>     cratios;
     string                  wname;
     string                  ofile;
     OptionParser::Boolean_T help;
@@ -26,12 +27,17 @@ OptionParser::OptDescRec_T set_opts[] = {{"dimnames", 1, "", "Colon delimited li
                                           "Valid values are bior1.1, bior1.3, "
                                           "bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, "
                                           "bior3.5, bior3.7, bior3.9, bior4.4 intbior2.2"},
+                                         {"cratios", 1, "500:100:10:1",
+                                          "Colon delimited list compression ratios. "
+                                          "The default is 500:100:10:1. The maximum compression ratio "
+                                          "is wavelet and block size dependent."},
                                          {"ofile", 1, "test.nc", "Output file"},
                                          {"help", 0, "", "Print this message and exit"},
                                          {NULL}};
 
 OptionParser::Option_T get_options[] = {{"dimnames", Wasp::CvtToStrVec, &opt.dimnames, sizeof(opt.dimnames)},
                                         {"dimlens", Wasp::CvtToIntVec, &opt.dimlens, sizeof(opt.dimlens)},
+                                        {"cratios", Wasp::CvtToSize_tVec, &opt.cratios, sizeof(opt.cratios)},
                                         {"wname", Wasp::CvtToCPPStr, &opt.wname, sizeof(opt.wname)},
                                         {"ofile", Wasp::CvtToCPPStr, &opt.ofile, sizeof(opt.ofile)},
                                         {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
@@ -100,23 +106,17 @@ int main(int argc, char **argv)
     bs.push_back(64);
     size_t chunksize = 1024 * 1024 * 4;
 
-    vector<size_t> cratios3D;
-    cratios3D.push_back(1);
-    cratios3D.push_back(10);
-    cratios3D.push_back(100);
-    cratios3D.push_back(500);
+    vector<size_t> cratios3D = opt.cratios;
 
-    vector<size_t> cratios2D;
-    cratios2D.push_back(1);
-    cratios2D.push_back(5);
-    cratios2D.push_back(25);
-    cratios2D.push_back(100);
+    vector<size_t> cratios2D = cratios3D;
+    vector<size_t> cratios1D = cratios3D;
+    for (int i = 0; i < cratios2D.size(); i++) {
+        size_t c = (size_t)pow((double)cratios2D[i], (double)(2.0 / 3.0));
+        cratios2D[i] = c;
 
-    vector<size_t> cratios1D;
-    cratios1D.push_back(1);
-    cratios1D.push_back(2);
-    cratios1D.push_back(4);
-    cratios1D.push_back(8);
+        c = (size_t)pow((double)cratios2D[i], (double)(1.0 / 3.0));
+        cratios2D[i] = c;
+    }
 
     int rc = wasp.Create(opt.ofile, NC_64BIT_OFFSET, 0, chunksize, cratios3D.size());
     if (rc < 0) exit(1);
