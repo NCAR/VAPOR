@@ -209,14 +209,14 @@ GeometryWidget::~GeometryWidget() {
 void GeometryWidget::updateRangeLabels(
 							std::vector<double> minExt,
 							std::vector<double> maxExt) {
-	QString xTitle = QString("X Coordinates	Min: ") + 
+	QString xTitle = QString("X Min: ") + 
 		QString::number(minExt[0], 'g', 3) + 
 		QString("	Max: ") + 
 		QString::number(maxExt[0], 'g', 3);
 	xMinMaxLabel->setText(xTitle);
 	
 
-	QString yTitle = QString("Y Coordinates	Min: ") + 
+	QString yTitle = QString("Y Min: ") + 
 		QString::number(minExt[1], 'g', 3) +
 		QString("	Max: ") + 
 		QString::number(maxExt[1], 'g', 3);
@@ -236,7 +236,7 @@ void GeometryWidget::updateRangeLabels(
 			GeometryWidget::THREED,
 			_displayFlags,
 			_varFlags);
-		QString zTitle = QString("Z Coordinates	Min: ") + 
+		QString zTitle = QString("Z Min: ") + 
 			QString::number(minExt[2], 'g', 3) +
 			QString("	Max: ") + 
 			QString::number(maxExt[2], 'g', 3);
