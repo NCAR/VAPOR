@@ -298,7 +298,6 @@ int main(int argc, char **argv) {
 			datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
 			cout << "Data Range : [" << rvec[0] << ", " << rvec[1] << "]" << endl;
 
-
 			vector <size_t> dims = g->GetDimensions();
 			cout << "Grid dimensions: [ " ;
 			for (int i=0; i<dims.size(); i++) {

@@ -9,7 +9,7 @@ extern const char VERSION_RC[];
 extern const char VERSION_DATE[];
 extern const char VERSION_COMMIT[];
 extern const char VERSION_STRING[];
-extern const char VERSION_FULL[];
+extern const char VERSION_STRING_FULL[];
 
 extern const char SOURCE_DIR[];
 

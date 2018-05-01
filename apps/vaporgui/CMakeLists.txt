@@ -21,7 +21,6 @@ set (SRCS
 	RangeController.cpp
 	Statistics.cpp
 	Plot.cpp
-	SeedMe.cpp
 	helloSubtabs.cpp
 	TFWidget.cpp
 	VariablesWidget.cpp
@@ -53,13 +52,13 @@ set (SRCS
 	QRange.cpp
 	QSinglePoint.cpp
 	QIntValidatorWithFixup.cpp
-    FileOperationChecker.cpp
+	FileOperationChecker.cpp
 	Combo.cpp
+	windowsUtils.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
 	Statistics.h
-	SeedMe.h
 	Plot.h
 	BarbSubtabs.h
 	ColorbarWidget.h
@@ -75,6 +74,7 @@ set (SRCS
 
 	MainForm.h
 	VizWinMgr.h
+	windowsUtils.h
 )
 
 set (UIS 
@@ -101,7 +101,6 @@ set (UIS
 	statsWindow.ui
 	errMsg.ui
 	plotWindow.ui
-	SeedMeGUI.ui
 	firstTimeUser.ui
 	TFWidgetGUI.ui
 	StretchFactorTableGUI.ui
