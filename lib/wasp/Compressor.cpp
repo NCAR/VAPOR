@@ -340,22 +340,24 @@ int decompress_template(
 
 		C[idx] = src_arr[i];
 	}
+
+	bool normalize = cmp->wavelet()->IsNormalized();
 	
 	int rc = 0;
 	size_t dst_dim[] = {1,1,1};
 	if (dims.size() == 3) {
 		//rc = cmp->waverec3(C, L, nlevels, dst_arr);
-		rc = cmp->appcoef3(C, L, nlevels, nlevels, true, dst_arr);
+		rc = cmp->appcoef3(C, L, nlevels, nlevels, normalize, dst_arr);
 		cmp->approxlength3(L, nlevels, nlevels, &dst_dim[0],&dst_dim[1],&dst_dim[2]);
 	}
 	else if (dims.size() == 2) {
 		//rc = cmp->waverec2(C, L, nlevels, dst_arr);
-		rc = cmp->appcoef2(C, L, nlevels, nlevels, true, dst_arr);
+		rc = cmp->appcoef2(C, L, nlevels, nlevels, normalize, dst_arr);
 		cmp->approxlength2(L, nlevels, nlevels, &dst_dim[0],&dst_dim[1]);
 	}
 	else if (dims.size() == 1) {
 		//cmp->waverec(C, L, nlevels, dst_arr);
-		rc = cmp->appcoef(C, L, nlevels, nlevels, true, dst_arr);
+		rc = cmp->appcoef(C, L, nlevels, nlevels, normalize, dst_arr);
 		cmp->approxlength(L, nlevels, nlevels, &dst_dim[0]);
 	}
 	if (rc<0) return(rc);
@@ -591,22 +593,23 @@ int reconstruct_template(
 		}
 	}
 
+	bool normalize = cmp->wavelet()->IsNormalized();
 
 	int rc = 0;
 	size_t dst_dim[] = {1,1,1};
 	if (dims.size() == 3) {
 		//cmp->waverec3(C, L, nlevels, dst_arr);
-		rc = cmp->appcoef3(C, L, nlevels, l, true, dst_arr);
+		rc = cmp->appcoef3(C, L, nlevels, l, normalize, dst_arr);
 		cmp->approxlength3(L, nlevels, l, &dst_dim[0],&dst_dim[1],&dst_dim[2]);
 	}
 	else if (dims.size() == 2) {
 		//cmp->waverec2(C, L, nlevels, dst_arr);
-		rc = cmp->appcoef2(C, L, nlevels, l, true, dst_arr);
+		rc = cmp->appcoef2(C, L, nlevels, l, normalize, dst_arr);
 		cmp->approxlength2(L, nlevels, l, &dst_dim[0],&dst_dim[1]);
 	}
 	else if (dims.size() == 1) {
 		//cmp->waverec(C, L, nlevels, dst_arr);
-		rc = cmp->appcoef(C, L, nlevels, l, true, dst_arr);
+		rc = cmp->appcoef(C, L, nlevels, l, normalize, dst_arr);
 		cmp->approxlength(L, nlevels, l, &dst_dim[0]);
 	}
 	if (rc < 0) return(-1);
