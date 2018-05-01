@@ -17,5 +17,7 @@ LONG        Windows_GetRegistryString(HKEY hKey, const std::string &strValueName
 LONG        Windows_SetRegistryString(HKEY hKey, const std::string &strValueName, const std::string &strValue);
 std::string Windows_GetErrorString(LONG errorCode);
 
+void Windows_setLog(FILE *f);
+
 #endif
 #endif

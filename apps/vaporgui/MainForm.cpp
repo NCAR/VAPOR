@@ -1841,15 +1841,21 @@ void MainForm::launchSeedMe()
     _seedMe->Initialize();
 }
 
+#include <stdio.h>
+#define LOG(...)                      \
+    {                                 \
+        std::fprintf(f, __VA_ARGS__); \
+        std::fflush(f);               \
+    }
+
 void MainForm::installCLITools()
 {
     vector<string> pths;
-    string         home = GetAppPath("VAPOR", "home", pths, true);
-
-    QMessageBox box;
+    QMessageBox    box;
     box.addButton(QMessageBox::Ok);
 
 #ifdef Darwin
+    string home = GetAppPath("VAPOR", "home", pths, true);
     string path = home + "/MacOS";
     home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
 
@@ -1871,25 +1877,56 @@ void MainForm::installCLITools()
 #endif
 
 #ifdef WIN32
-    HKEY key;
-    long error, errorClose;
-    bool pathWasModified = false;
+    HKEY       key;
+    long       error;
+    long       errorClose;
+    bool       pathWasModified = false;
+    string     errorFunc;
+    std::FILE *f = std::fopen("log.txt", "w");
+    Windows_setLog(f);
+    LOG("%i Log Start\n", __LINE__);
+    string home = GetAppPath("VAPOR", "", pths, true);
+    LOG("home = \"%s\"\n", home.c_str());
 
+    LOG("%i Opening registry...", __LINE__);
+    errorFunc = "OpenRegistry";
     error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
-    if (error != WINDOWS_SUCCESS) {
+    LOG("done...");
+    if (error == WINDOWS_SUCCESS) {
+        LOG("success\n");
         string path;
-        error = Windows_GetRegistryString(key, "Path", path, "");
-        if (error != WINDOWS_SUCCESS && path.find(home) == std::string::npos) {
-            if (path.length() > 0) path += ";";
-            path += home;
-            error = Windows_SetRegistryString(key, "Path", path);
-            if (error != WINDOWS_SUCCESS) pathWasModified = true;
+        LOG("%i Reading Path...", __LINE__);
+        errorFunc = "GetRegistryString";
+        error = Windows_GetRegistryString(key, "TMP", path, "");
+        LOG("done...");
+        if (error == WINDOWS_SUCCESS) {
+            LOG("success\n");
+            LOG("\"%s\".find(\"%s\") = %i (%s)\n", path.c_str(), home.c_str(), path.find(home), path.find(home) == std::string::npos ? "true" : "false");
+            if (path.find(home) == std::string::npos) {
+                LOG("%i Adding home to path\n", __LINE__);
+                if (path.length() > 0) path += ";";
+                path += home;
+                errorFunc = "SetRegistryString";
+                LOG("%i Writing Registry...", __LINE__);
+                error = Windows_SetRegistryString(key, "Path", path);
+                LOG("done...");
+                if (error == WINDOWS_SUCCESS) {
+                    LOG("%i Path Modified\n", __LINE__);
+                    pathWasModified = true;
+                } else {
+                    LOG("failure\n");
+                }
+            }
+        } else {
+            LOG("failure[%li]: ", error);
+            LOG("%s\n", Windows_GetErrorString(error).c_str());
         }
 
         errorClose = Windows_CloseRegistry(key);
     }
 
-    if (error | errorClose == WINDOWS_SUCCESS) {
+    std::fclose(f);
+    if (error == WINDOWS_SUCCESS && errorClose == WINDOWS_SUCCESS) {
         box.setIcon(QMessageBox::Information);
         if (pathWasModified)
             box.setText("Vapor conversion utilities were added to your path");
@@ -1898,9 +1935,9 @@ void MainForm::installCLITools()
     } else {
         box.setIcon(QMessageBox::Critical);
         box.setText("Unable to set environmental variables");
-        string errString;
-        if (error != WINDOWS_SUCCESS) errString += Windows_GetErrorString(error) + "\n";
-        if (errorClose != WINDOWS_SUCCESS) errString += Windows_GetErrorString(errorClose);
+        string errString = "";
+        if (error != WINDOWS_SUCCESS) errString += errorFunc + ": " + Windows_GetErrorString(error) + "\n";
+        if (errorClose != WINDOWS_SUCCESS) errString += "CloseRegistry: " + Windows_GetErrorString(errorClose);
         box.setInformativeText(QString::fromStdString(errString));
     }
 #endif
