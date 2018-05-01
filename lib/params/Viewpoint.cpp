@@ -78,7 +78,7 @@ void Viewpoint::SetModelViewMatrix(const double m[16])
     vector<double> val;
     for (int i = 0; i < 16; i++) val.push_back(m[i]);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) { cout << m[j * 4 + i] << " "; }
         cout << endl;

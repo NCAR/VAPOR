@@ -51,7 +51,7 @@ void make_params(DataMgrV3_0 *dataMgr, string parent_name, string outfile)
     vector<string> varnames = dataMgr->GetDataVarNames();
     for (int i = 0; i < varnames.size(); i++) { dataParams.GetTransferFunc(varnames[i]); }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     ParamsContainer tfs(&psm, "TransferFunctions");
     tfs.GetNode()->SetParent(&parent);
 

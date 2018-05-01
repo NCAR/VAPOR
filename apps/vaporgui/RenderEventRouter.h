@@ -149,7 +149,7 @@ public:
     //
     virtual void setEditorDirty();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Method used to indicate that the mapping bounds have changed,
     //! in the transfer function editor, requiring update of the display.
     //! Must be reimplemented in every EventRouter which has a transfer function.
@@ -179,7 +179,7 @@ public:
     //! Default does nothing
     virtual void variableChanged() {}
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Determine the value of the current variable at specified point.
     //! Return _OUT_OF_BOUNDS if not in current extents but in full domain
     //!

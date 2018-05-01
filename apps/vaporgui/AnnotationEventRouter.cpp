@@ -122,8 +122,6 @@ void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 
 void AnnotationEventRouter::_updateTab()
 {
-    ParamsMgr *pMgr = _controlExec->GetParamsMgr();
-
     updateRegionColor();
     updateDomainColor();
     updateBackgroundColor();
@@ -453,8 +451,6 @@ void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
     aa->SetMinTics(minExts);
     aa->SetMaxTics(maxExts);
     aa->SetAxisOrigin(minExts);
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
 }
 
 void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa)

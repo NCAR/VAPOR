@@ -62,7 +62,7 @@ public:
     //! \param[out] double[6] extents
     //! \param[in] int timestep indicates the current timestep, used only with time-varying extents.
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     void getLocalRegionExtents(double exts[6], int timestep) const
     {
         GetBox()->GetLocalExtents(exts, timestep);
@@ -80,7 +80,7 @@ public:
     }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Provide a vector of the times, useful for time-varying extents
     //! \retval const vector<long> vector of times.
     const vector<long> GetTimes() const { return GetBox()->GetTimes(); }
@@ -100,14 +100,14 @@ public:
     bool removeTime(int timestep);
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Provide a vector of all the extents for all times
     //! returns 6 doubles for each time step.
     //! \retval const vector<double> vector of extents.
     vector<double> GetAllExtents() const { return GetBox()->GetLocalExtents(); }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Provide the domain-defining variables
     //! returns a vector of variable names.
     //! Note that this is an attribute of the global Region params

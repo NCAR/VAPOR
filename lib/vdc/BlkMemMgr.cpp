@@ -27,7 +27,7 @@ size_t BlkMemMgr::_blk_size = 0;
 vector<size_t>                               BlkMemMgr::_mem_region_sizes;
 vector<unsigned char *>                      BlkMemMgr::_blks;
 vector<vector<BlkMemMgr::_mem_allocation_t>> BlkMemMgr::_mem_regions;
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
 
 int BlkMemMgr::_ref_count = 0;

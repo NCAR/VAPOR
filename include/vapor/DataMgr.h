@@ -485,7 +485,7 @@ public:
     //
     virtual string GetMapProjectionDefault() const { return (_proj4StringDefault); }
 
-    #ifdef DEAD
+    #ifdef VAPOR3_0_0_ALPHA
 
     //!
     //! Add a pipeline stage to produce derived variables

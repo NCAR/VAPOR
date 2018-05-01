@@ -33,7 +33,7 @@ Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
     _timestepOfUpdate = ts;
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2])
 {
     _binArray = new int[256];

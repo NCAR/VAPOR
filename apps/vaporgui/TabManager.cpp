@@ -261,7 +261,6 @@ void TabManager::_newRenderer(string activeViz, string renderClass, string rende
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     string     winName, dataSetName, paramsType;
-    bool       status = paramsMgr->RenderParamsLookup(renderInst, winName, dataSetName, paramsType);
 
     AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = aParams->GetCurrentTimestep();
@@ -462,9 +461,7 @@ void TabManager::_installWidgets()
     for (int i = 1; i < _tabNames.size(); i++) { _tabWidgets[_tabNames[i]] = new QTabWidget(this); }
 
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
-        string             tag = _subTabNames[_renderersTabName][i];
-        RenderEventRouter *re = dynamic_cast<RenderEventRouter *>(_subTabWidgets[_renderersTabName][i]);
-
+        string tag = _subTabNames[_renderersTabName][i];
         _subTabWidgets[_renderersTabName][i]->hide();
     }
 
@@ -504,12 +501,6 @@ void TabManager::_installWidgets()
     // Start them with the renderer tab showing.
 
     setCurrentIndex(0);
-
-    for (int j = 0; j < _tabNames.size(); j++) {
-        string tab = _tabNames[j];
-
-        for (int subidx = 0; subidx < _subTabWidgets[tab].size(); subidx++) { EventRouter *ev = dynamic_cast<EventRouter *>(_subTabWidgets[tab][subidx]); }
-    }
 
     // Hook up signals
     for (int i = 1; i < _tabNames.size(); i++) {

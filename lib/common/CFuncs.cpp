@@ -130,7 +130,7 @@ bool Wasp::IsAbsPath(string path)
 
 double Wasp::GetTime()
 {
-    double t;
+    double t = -1.0;
 #ifdef WIN32    // Windows does not have a nanosecond time function...
     SYSTEMTIME sTime;
     FILETIME   fTime;
