@@ -567,7 +567,11 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
                          const std::string &xLabel, const std::string &yLabel)
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
-    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+    PyObject *pName = NULL;
+    PyObject *pModule = NULL;
+    PyObject *pFunc = NULL;
+    PyObject *pArgs = NULL;
+    PyObject *pValue = NULL;
     Wasp::MyPython::Instance()->Initialize();
     assert(Py_IsInitialized());
 

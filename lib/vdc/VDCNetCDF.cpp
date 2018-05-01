@@ -411,6 +411,7 @@ int VDCNetCDF::openVariableRead(size_t ts, string varname, int level, int lod)
     WASP * wasp_mask = NULL;
     int    clevel_mask = -1;
     size_t file_ts_mask = 0;
+
     if (!maskvar.empty()) {
         //
         // the level specification can be tricky because the data variable
