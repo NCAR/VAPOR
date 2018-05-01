@@ -37,9 +37,8 @@ endif()
 
 # compiler warning flags
 if (NOT WIN32)
-  SET( COMPILE_FLAGS "-Wall -Wno-sign-compare -Wno-overloaded-virtual")
-  SET( CMAKE_CXX_FLAGS  "${COMPILE_FLAGS}" )
-  SET( CMAKE_C_FLAGS  "${COMPILE_FLAGS}" )
+  SET( CMAKE_CXX_FLAGS "-Wall -Wno-sign-compare -Wno-overloaded-virtual")
+  SET( CMAKE_C_FLAGS   "-Wall -Wno-sign-compare")
 endif()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
