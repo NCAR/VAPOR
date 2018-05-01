@@ -52,8 +52,9 @@ set (SRCS
 	QRange.cpp
 	QSinglePoint.cpp
 	QIntValidatorWithFixup.cpp
-    FileOperationChecker.cpp
+	FileOperationChecker.cpp
 	Combo.cpp
+	windowsUtils.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -73,6 +74,7 @@ set (SRCS
 
 	MainForm.h
 	VizWinMgr.h
+	windowsUtils.h
 )
 
 set (UIS 
