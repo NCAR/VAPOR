@@ -487,10 +487,10 @@ string ControlExec::MakeStringConformant(string s)
 {
     if (s.empty()) s += "_";
 
-    if (!(std::isalpha(s[0]) || s[0] == '_')) { s = "_" + s; }
+    if (!(isalpha(s[0]) || s[0] == '_')) { s = "_" + s; }
 
     for (string::iterator itr = s.begin(); itr != s.end(); ++itr) {
-        if (!(std::isalnum(*itr) || std::isdigit(*itr) || *itr == '-' || *itr == '_' || *itr == '.')) { *itr = '_'; }
+        if (!(isalnum(*itr) || isdigit(*itr) || *itr == '-' || *itr == '_' || *itr == '.')) { *itr = '_'; }
         if (isspace(*itr)) { *itr = '_'; }
     }
     return (s);
