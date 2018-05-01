@@ -815,11 +815,21 @@ int ReconstructBlock(
     if (reconstruct_map) {
         sigmaps[ncoeffs.size() - 1].Clear();
 
-        for (int i = 0; i < ncoeffs.size() - 1; i++) {
-            sigmaps[ncoeffs.size() - 1].Append(sigmaps[i]);
+        // Edge case for when sigmap isn't stored at all
+        //
+        if (ncoeffs.size() == 1 && encoded_dims[0] - BLK_HDR_SZ == ncoeffs[0]) {
+            sigmaps[0].Reshape(ncoeffs[0]);
+            for (int i = 0; i < ncoeffs[0]; i++) {
+                sigmaps[0].Set(i);
+            }
+        } else {
+
+            for (int i = 0; i < ncoeffs.size() - 1; i++) {
+                sigmaps[ncoeffs.size() - 1].Append(sigmaps[i]);
+            }
+            sigmaps[ncoeffs.size() - 1].Sort();
+            sigmaps[ncoeffs.size() - 1].Invert();
         }
-        sigmaps[ncoeffs.size() - 1].Sort();
-        sigmaps[ncoeffs.size() - 1].Invert();
     }
 
     int rc = cmp->Reconstruct(coeffs, block, sigmaps, level);
@@ -876,6 +886,7 @@ int StoreBlockCompressed(
     const T *coeffs, const T *datarange, unsigned char *maps, int xtype
 
 ) {
+
     unsigned long LSBTest = 1;
     bool do_swapbytes = false;
     if (!(*(char *)&LSBTest)) {
@@ -1522,6 +1533,17 @@ void *RunReadThreadCompressed(void *arg) {
             return (RunReadThreadCompressedTemplate(s, dummy1, dummy2));
         }
     }
+    case NC_BYTE:
+    case NC_UBYTE: {
+        int8_t dummy1 = 0;
+        if (s._block_type == NC_INT64) {
+            long dummy2 = 0;
+            return (RunReadThreadCompressedTemplate(s, dummy1, dummy2));
+        } else {
+            double dummy2 = 0;
+            return (RunReadThreadCompressedTemplate(s, dummy1, dummy2));
+        }
+    }
     default:
         assert(0);
         return (NULL);
@@ -1827,6 +1849,9 @@ int WASP::DefVar(
         dims.push_back(dimlen);
     }
 
+    while (bs.size() > dims.size()) {
+        bs.pop_back();
+    }
     while (bs.size() < dims.size()) {
         bs.insert(bs.begin(), 1);
     }
