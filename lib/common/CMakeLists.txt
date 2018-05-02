@@ -37,8 +37,7 @@ endif()
 if (NOT WIN32)
 	target_link_libraries (common pthread)
 	add_definitions (-DENABLE_THREADS)
-	target_compile_options(common PRIVATE "-Wno-deprecated-declarations")
-endif ()
+endif()
 
 add_definitions (-DCOMMON_EXPORTS)
 
