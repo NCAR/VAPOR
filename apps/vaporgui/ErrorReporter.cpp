@@ -40,6 +40,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QPushButton>
+#include <QApplication>
 
 #include "vapor/MyBase.h"
 #include "vapor/Version.h"
@@ -49,6 +50,10 @@
 
 using std::string;
 using std::vector;
+
+QWidget *ErrorReporter::_parent = NULL;
+QMessageBox *ErrorReporter::_box = NULL;
+ErrorReporter *ErrorReporter::_instance = NULL;
 
 void _segFaultHandler(int sig)
 {
@@ -96,15 +101,6 @@ void _myBaseDiagCallback(const char *msg)
 	}
 }
 
-ErrorReporter *ErrorReporter::_instance;
-ErrorReporter *ErrorReporter::GetInstance()
-{
-	if (!_instance)
-	{
-		_instance = new ErrorReporter();
-	}
-	return _instance;
-}
 
 void ErrorReporter::ShowErrors()
 {
@@ -119,13 +115,10 @@ void ErrorReporter::Report(string msg, Type severity, string details)
 		fprintf(e->_logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str());
 	}
 
-	QMessageBox box;
-	box.setText("An error has occured");
-	box.setInformativeText(msg.c_str());
-	//box.addButton(QMessageBox::Ok);
-	//box.addButton(QMessageBox::Save);
-	box.addButton("Ok", QMessageBox::AcceptRole);
-	box.addButton("Save Log", QMessageBox::ApplyRole);
+	_box->setText("An error has occured");
+	_box->setInformativeText(msg.c_str());
+	//_box->addButton(QMessageBox::Ok);
+	//_box->addButton(QMessageBox::Save);
 
 	if (details == "")
 	{
@@ -137,28 +130,29 @@ void ErrorReporter::Report(string msg, Type severity, string details)
 			e->_log.pop_back();
 		}
 	}
-	box.setDetailedText(details.c_str());
+	_box->setDetailedText(details.c_str());
 
 
 	switch (severity)
 	{
 		case Diagnostic:
-		case       Info: box.setIcon(QMessageBox::Information); break;
-		case    Warning: box.setIcon(QMessageBox::Warning);     break;
-		case	  Error: box.setIcon(QMessageBox::Critical);    break;
+		case       Info: _box->setIcon(QMessageBox::Information); break;
+		case    Warning: _box->setIcon(QMessageBox::Warning);     break;
+		case	  Error: _box->setIcon(QMessageBox::Critical);    break;
 	}
 
-	int ret = box.exec();
-	QAbstractButton *clicked = box.clickedButton();
-	QMessageBox::ButtonRole role = box.buttonRole(clicked);
+	_box->show();
+	QAbstractButton *clicked = _box->clickedButton();
+	QMessageBox::ButtonRole role = _box->buttonRole(clicked);
 
 	switch (role)
 	{
 		case QMessageBox::ApplyRole:
 			{
 				QString fileName = QFileDialog::getSaveFileName(NULL, "Save Error Log", QString(), "Text (*.txt);;All Files (*)");
-				if (fileName.isEmpty())
+				if (fileName.isEmpty()) {
 					return;
+				}
 				else {
 					QFile file(fileName);
 					if (!file.open(QIODevice::WriteOnly))
@@ -243,8 +237,17 @@ int ErrorReporter::OpenLogFile(std::string path)
 	return 0;
 }
 
-ErrorReporter::ErrorReporter()
+ErrorReporter::ErrorReporter(QWidget *parent)
 {
+	assert(parent != NULL);
+
+	if (_instance) return;
+            
+	_parent = parent;
+	_instance = this;
+	_box = new QMessageBox(_parent);
+	_box->addButton("Ok", QMessageBox::AcceptRole);
+	_box->addButton("Save Log", QMessageBox::ApplyRole);
 	signal(SIGSEGV, _segFaultHandler);
 	Wasp::MyBase::SetErrMsgCB(_myBaseErrorCallback);
 	Wasp::MyBase::SetDiagMsgCB(_myBaseDiagCallback);
