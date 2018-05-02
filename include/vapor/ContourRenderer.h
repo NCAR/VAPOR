@@ -81,7 +81,7 @@ class RENDER_API ContourRenderer : public Renderer {
         vector<float> contourColors;
     } _cacheParams;
 
-    void _buildCache();
+    int _buildCache();
     bool _isCacheDirty() const;
     void _saveCacheParams();
 };
