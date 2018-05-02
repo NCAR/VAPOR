@@ -827,6 +827,9 @@ template<class T> int VDCNetCDF::_putVarTemplate(string varname, int lod, const 
     return (0);
 }
 
+template int VDCNetCDF::_putVarTemplate<float>(string varname, int lod, const float *data);
+template int VDCNetCDF::_putVarTemplate<int>(string varname, int lod, const int *data);
+
 template<class T> int VDCNetCDF::_putVarTemplate(size_t ts, string varname, int lod, const T *data)
 {
     int fd = VDCNetCDF::OpenVariableWrite(ts, varname, lod);
@@ -840,6 +843,9 @@ template<class T> int VDCNetCDF::_putVarTemplate(size_t ts, string varname, int 
 
     return (0);
 }
+
+template int VDCNetCDF::_putVarTemplate<float>(size_t ts, string varname, int lod, const float *data);
+template int VDCNetCDF::_putVarTemplate<int>(size_t ts, string varname, int lod, const int *data);
 
 int VDCNetCDF::_copyVar0d(DC &dc, size_t ts, const BaseVar &varInfo)
 {
