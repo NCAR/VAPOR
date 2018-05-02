@@ -24,6 +24,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/GetAppPath.h
 	${PROJECT_SOURCE_DIR}/include/vapor/utils.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CMakeConfig.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/debug.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})
