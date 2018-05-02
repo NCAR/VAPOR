@@ -33,6 +33,7 @@
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <QTextEdit>
+#include <QScrollArea>
 
 #include <qcombobox.h>
 #include <qfiledialog.h>
@@ -62,7 +63,6 @@ NavigationEventRouter::NavigationEventRouter(
 	stereoCombo->setEnabled(false);
 	latLonCheckbox->setEnabled(false);
 	stereoSeparationEdit->setEnabled(false);
-
 }
 
 NavigationEventRouter::~NavigationEventRouter(){
@@ -257,7 +257,6 @@ void NavigationEventRouter::GetWebHelp(
 
 
 void NavigationEventRouter::_performAutoStretching(string dataSetName) {
-	GUIStateParams *p = GetStateParams();
 	DataStatus* ds = _controlExec->GetDataStatus();
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -266,8 +265,6 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
 	vector<double> minExt, maxExt;
 	
 	for (int i=0; i<winNames.size(); i++) {
-		double xRange, yRange, zRange;
-
 		DataMgr* dm = ds->GetDataMgr(dataSetName);
 		std::vector<string> varNames = dm->GetDataVarNames(3);
 
@@ -305,14 +302,14 @@ void NavigationEventRouter::LoadDataNotify(string dataSetName) {
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
-    SettingsParams *sP = (SettingsParams *) paramsMgr->GetParams(
+	SettingsParams *sP = (SettingsParams *) paramsMgr->GetParams(
 		SettingsParams::GetClassType()
 	);
 
-    bool autoStretchingEnabled = sP->GetAutoStretchEnabled();
-    if (autoStretchingEnabled) {
-        _performAutoStretching(dataSetName);
-    }
+	bool autoStretchingEnabled = sP->GetAutoStretchEnabled();
+	if (autoStretchingEnabled) {
+		_performAutoStretching(dataSetName);
+	}
 }
 
 /*********************************************************************************
@@ -558,6 +555,10 @@ void NavigationEventRouter::resizeProjTable() {
 	);
 	datasetProjectionTable->verticalHeader()->hide();
 	datasetProjectionTable->resizeRowsToContents();
+
+    int height = datasetProjectionTable->horizontalHeader()->height();
+    int rows = datasetProjectionTable->rowCount();
+    datasetProjectionTable->setMaximumHeight(height*rows*3);
 }
 
 void NavigationEventRouter::createProjCheckBox(int row, bool usingCurrentProj) {
@@ -631,7 +632,7 @@ void NavigationEventRouter::CenterSubRegion(){
 
 cout << "NavigationEventRouter::CenterSubRegion not implemented" << endl;
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	ViewpointParams* vpParams = _getActiveParams();
 	if (! vpParams) return;
@@ -774,7 +775,7 @@ void NavigationEventRouter::AlignView(int axis) {
 //Reset the center of view.  Leave the camera where it is
 void NavigationEventRouter::
 SetCenter(const double* coords){
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	double vdir[3];
 	vector<double> nvdir;
 	ViewpointParams* vpParams = _getActiveParams();
@@ -793,7 +794,7 @@ SetCenter(const double* coords){
 	
 	vnormal(vdir);
 	vector<double>vvdir;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	Command* cmd = Command::CaptureStart(vpParams,"re-center view");
 #endif
 	for (int i = 0; i<3; i++) vvdir.push_back(vdir[i]);
@@ -803,7 +804,7 @@ SetCenter(const double* coords){
 		rotCtr.push_back(coords[i]);
 	}
 	vpParams->setRotationCenterLocal(rotCtr);
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	Command::CaptureEnd(cmd,vpParams);
 #endif
 	updateTab();
@@ -812,20 +813,20 @@ SetCenter(const double* coords){
 }
 
 void NavigationEventRouter::SetHomeViewpoint() {
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
-        GUIStateParams::GetClassType()
-    );
-    MouseModeParams *p = guiP->GetMouseModeParams();
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
+		GUIStateParams::GetClassType()
+	);
+	MouseModeParams *p = guiP->GetMouseModeParams();
 	p->SetHomeToCamera();
 }
 
 void NavigationEventRouter::UseHomeViewpoint() {
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
-        GUIStateParams::GetClassType()
-    );
-    MouseModeParams *p = guiP->GetMouseModeParams();
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
+		GUIStateParams::GetClassType()
+	);
+	MouseModeParams *p = guiP->GetMouseModeParams();
 
 	p->SetCameraToHome();
 }
@@ -884,11 +885,11 @@ void NavigationEventRouter::_setViewpointParams(
 	const double dirvec[3], const double upvec[3]
 ) const {
 
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
-        GUIStateParams::GetClassType()
-    );
-    MouseModeParams *p = guiP->GetMouseModeParams();
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
+		GUIStateParams::GetClassType()
+	);
+	MouseModeParams *p = guiP->GetMouseModeParams();
 
 	paramsMgr->BeginSaveStateGroup("Move camera");
 
@@ -920,11 +921,11 @@ bool NavigationEventRouter::_getViewpointParams(
 
 	// Get center of rotation from MouseModeParams
 	//
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
-        GUIStateParams::GetClassType()
-    );
-    MouseModeParams *p = guiP->GetMouseModeParams();
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	GUIStateParams *guiP = (GUIStateParams *) paramsMgr->GetParams(
+		GUIStateParams::GetClassType()
+	);
+	MouseModeParams *p = guiP->GetMouseModeParams();
 	p->GetRotationCenter(center);
 
 	return(true);

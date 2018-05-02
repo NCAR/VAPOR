@@ -304,8 +304,6 @@ const GLvoid *TwoDDataRenderer::GetTexture(  DataMgr *dataMgr,
 	texelSize = _texelSize;
 	gridAligned = GridAligned;
 
-	TwoDDataParams *rParams = (TwoDDataParams *) GetActiveParams();
-
 	GLvoid *texture = (GLvoid *) _getTexture(dataMgr);
 	if (! texture) return(NULL);
 
@@ -542,8 +540,6 @@ int TwoDDataRenderer::_getMeshUnStructured(
 	const Grid *g,
 	double defaultZ
 ) {
-	TwoDDataParams *rParams = (TwoDDataParams *) GetActiveParams();
-
 	assert(g->GetTopologyDim() == 2);
 	vector <size_t> dims = g->GetDimensions();
 

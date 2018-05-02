@@ -307,7 +307,7 @@ void grid_params(
 	}
 }
 
-
+#ifdef UNUSED_FUNCTION
 void coord_setup_helper(
 	const vector <string> &dimnames, 
 	const vector <size_t> &dims, 
@@ -353,6 +353,7 @@ void coord_setup_helper(
 		}
 	}
 }
+#endif
 
 };
 
@@ -1189,7 +1190,7 @@ Grid *DataMgr::_getVariable(
 		// Derived variable that is not in cache, so we need to 
 		// create it
 		//
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 		rg = execute_pipeline(
 			ts, varname, level, lod, min, max, lock,
 			xcblks, ycblks, zcblks
@@ -1391,7 +1392,7 @@ int DataMgr::GetDimLensAtLevel(
 	return(0);
 } 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 int	DataMgr::NewPipeline(PipeLine *pipeline) {
 
@@ -2062,7 +2063,7 @@ bool	DataMgr::_free_lru(
 }
 	
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 PipeLine *DataMgr::get_pipeline_for_var(string varname) const {
 
 	for (int i=0; i<_PipeLines.size(); i++) {
@@ -2326,7 +2327,7 @@ vector <string> DataMgr::_get_derived_variables() const {
     return(svec);
 }
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 void DataMgr::PurgeVariable(string varname){
 	_free_var(varname);
@@ -2909,7 +2910,9 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(
 	RegularGrid xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
 	RegularGrid yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-	const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg);
+	const KDTreeRG *kdtree = _getKDTree2D(
+		ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax
+	);
 
 	CurvilinearGrid *g = new CurvilinearGrid(
 		dims, bs, blkptrs, xrg, yrg, 
@@ -3096,7 +3099,7 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(
 	UnstructuredGridCoordless zug;
 
 	const KDTreeRG *kdtree = _getKDTree2D(
-		ts, level, lod, cvarsinfo, xug, yug
+		ts, level, lod, cvarsinfo, xug, yug, bmin, bmax
 	);
 
 	UnstructuredGrid2D *g = new UnstructuredGrid2D(
@@ -3463,7 +3466,9 @@ const KDTreeRG *DataMgr::_getKDTree2D(
 	int lod,
     const vector <DC::CoordVar> &cvarsinfo, 
 	const Grid &xg,
-	const Grid &yg
+	const Grid &yg,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax
 ) {
 	assert(cvarsinfo.size() >= 2);
 	assert(xg.GetDimensions() == yg.GetDimensions());
@@ -3473,7 +3478,11 @@ const KDTreeRG *DataMgr::_getKDTree2D(
 		varnames.push_back(cvarsinfo[i].GetName());
 	}
 
-	const string key = "KDTree";
+	string key = "KDTree";
+	key += ":";
+	key += vector_to_string(bmin);
+	key += ":";
+	key += vector_to_string(bmax);
 	
 	KDTreeRG *kdtree = NULL;
 
@@ -3537,7 +3546,6 @@ string DataMgr::_getTimeCoordVarNameDerived() const {
 
 	for(int i=0; i<cvars.size(); i++) {
 		DC::CoordVar varInfo;
-		bool ok = GetCoordVarInfo(cvars[i], varInfo);
 		if (varInfo.GetAxis() == 3) return(cvars[i]);
 	}
 	return("");
