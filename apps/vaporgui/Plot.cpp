@@ -540,23 +540,14 @@ void Plot::_timeTabPlotClicked()
     for (int v = 0; v < enabledVars.size(); v++) {
         std::vector<float> seq;
         for (int t = minMaxTS[0]; t <= minMaxTS[1]; t++) {
-            VAPoR::Grid *grid = dataMgr->GetVariable(t, enabledVars[v], refinementLevel, compressLevel); 
-<<<<<<< HEAD
+            VAPoR::Grid *grid = dataMgr->GetVariable(t, enabledVars[v], refinementLevel, compressLevel);
             if (grid) {
-                float missingVal = grid->GetMissingValue();
                 float fieldVal = grid->GetValue(singlePt);
                 if (fieldVal != grid->GetMissingValue())
                     seq.push_back(fieldVal);
                 else
                     seq.push_back(std::nanf("1"));
             }
-=======
-            float fieldVal = grid->GetValue(singlePt);
-            if (fieldVal != grid->GetMissingValue())
-                seq.push_back(fieldVal);
-            else
-                seq.push_back(std::nanf("1"));
->>>>>>> master
         }
         sequences.push_back(seq);
     }
