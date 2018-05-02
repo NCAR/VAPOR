@@ -107,6 +107,9 @@ void RenderParams::_initBox() {
     if (varname.empty())
         return;
 
+    if (!_dataMgr->VariableExists(0, varname, 0, 0))
+        return;
+
     vector<double> minExt, maxExt;
     int rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
@@ -332,11 +335,14 @@ MapperFunction *RenderParams::GetMapperFunc(string varname) {
 
     MapperFunction tf(_ssave);
 
-    vector<string> varnames = _dataMgr->GetDataVarNames();
-    if (find(varnames.begin(), varnames.end(), varname) != varnames.end()) {
+    size_t ts = 0;
+    int level = 0;
+    int lod = 0;
+    if (_dataMgr->VariableExists(ts, varname, level, lod)) {
 
         vector<double> range;
-        (void)_dataMgr->GetDataRange(0, varname, 0, 0, range);
+        int rc = _dataMgr->GetDataRange(ts, varname, level, lod, range);
+        assert(rc >= 0);
         tf.setMinMaxMapValue(range[0], range[1]);
     }
 
