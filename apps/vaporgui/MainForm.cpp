@@ -34,7 +34,21 @@
 #include <iostream>
 #include <functional>
 #include <cmath>
+
 #include <QDesktopWidget>
+#include <QDockWidget>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QComboBox>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QUrl>
+#include <QDesktopServices>
+#include <QInputDialog>
+#include <QMdiArea>
+#include <QWhatsThis>
+#include <QStatusBar>
+
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
@@ -50,7 +64,6 @@
 //#include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
-#include "SeedMe.h"
 #include "Statistics.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
