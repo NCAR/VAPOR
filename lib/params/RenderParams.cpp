@@ -105,6 +105,8 @@ void RenderParams::_initBox()
     string varname = GetVariableName();
     if (varname.empty()) return;
 
+    if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
+
     vector<double> minExt, maxExt;
     int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 

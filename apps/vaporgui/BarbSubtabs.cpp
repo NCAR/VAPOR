@@ -86,6 +86,8 @@ double BarbAppearanceSubtab::CalculateDomainLength(int ts)
         string varName = fieldVars[i];
         if ((varName) == "") { continue; }
 
+        if (!_dataMgr->VariableExists(ts, varName, level, 0)) continue;
+
         vector<double> minExt, maxExt;
         _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
 
