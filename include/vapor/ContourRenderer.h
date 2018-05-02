@@ -74,7 +74,7 @@ private:
         vector<float>  contourColors;
     } _cacheParams;
 
-    void _buildCache();
+    int  _buildCache();
     bool _isCacheDirty() const;
     void _saveCacheParams();
 };
