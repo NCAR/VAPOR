@@ -46,9 +46,6 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
         }
     }
 
-    VAPoR::DataMgr *   currentDmgr = _dataStatus->GetDataMgr(currentDatasetName);
-    VAPoR::PlotParams *plotParams = dynamic_cast<VAPoR::PlotParams *>(_paramsMgr->GetAppRenderParams(currentDatasetName, VAPoR::PlotParams::GetClassType()));
-
     // Do some static QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
@@ -291,7 +288,6 @@ void Plot::_removeVarChanged(int index)
 
     std::string        varName = removeVarCombo->itemText(index).toStdString();
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
 
     // Remove this variable from parameter
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
@@ -426,8 +422,7 @@ VAPoR::DataMgr *Plot::_getCurrentDataMgr() const
 
 void Plot::_setInitialExtents()
 {
-    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
+    VAPoR::DataMgr *dataMgr = this->_getCurrentDataMgr();
 
     // Set spatial extents
     std::vector<std::string> availVars = dataMgr->GetDataVarNames();
@@ -545,7 +540,8 @@ void Plot::_timeTabPlotClicked()
     for (int v = 0; v < enabledVars.size(); v++) {
         std::vector<float> seq;
         for (int t = minMaxTS[0]; t <= minMaxTS[1]; t++) {
-            VAPoR::Grid *grid = dataMgr->GetVariable(t, enabledVars[v], refinementLevel, compressLevel);
+            VAPoR::Grid *grid = dataMgr->GetVariable(t, enabledVars[v], refinementLevel, compressLevel); 
+<<<<<<< HEAD
             if (grid) {
                 float missingVal = grid->GetMissingValue();
                 float fieldVal = grid->GetValue(singlePt);
@@ -554,6 +550,13 @@ void Plot::_timeTabPlotClicked()
                 else
                     seq.push_back(std::nanf("1"));
             }
+=======
+            float fieldVal = grid->GetValue(singlePt);
+            if (fieldVal != grid->GetMissingValue())
+                seq.push_back(fieldVal);
+            else
+                seq.push_back(std::nanf("1"));
+>>>>>>> master
         }
         sequences.push_back(seq);
     }
@@ -589,7 +592,11 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
                          const std::string &xLabel, const std::string &yLabel)
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
-    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+    PyObject *pName = NULL;
+    PyObject *pModule = NULL;
+    PyObject *pFunc = NULL;
+    PyObject *pArgs = NULL;
+    PyObject *pValue = NULL;
     Wasp::MyPython::Instance()->Initialize();
     assert(Py_IsInitialized());
 

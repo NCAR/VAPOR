@@ -113,7 +113,6 @@ void ContourAppearanceSubtab::EndTFChange()
 
 void ContourAppearanceSubtab::GetContourBounds(double &min, double &max)
 {
-    double lower, upper, spacing;
     string varname = _cParams->GetVariableName();
 
     size_t         ts = _cParams->GetCurrentTimestep();
@@ -130,7 +129,6 @@ void ContourAppearanceSubtab::SetContourCount(int count)
 {
     double spacing = _cParams->GetContourSpacing();
     double contourMin = _cParams->GetContourMin();
-    double minBound, maxBound;
 
     SetContourValues(count, contourMin, spacing);
 }

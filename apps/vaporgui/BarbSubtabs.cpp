@@ -73,14 +73,11 @@ void BarbAppearanceSubtab::hideZDimWidgets()
 
 double BarbAppearanceSubtab::CalculateDomainLength(int ts)
 {
-    VAPoR::StructuredGrid *grid;
-
     double domainLength = 0;
 
     // Is this a legitimite way to acquire animation params?
     //
     int            level = _bParams->GetRefinementLevel();
-    int            lod = _bParams->GetCompressionLevel();
     vector<string> fieldVars = _bParams->GetFieldVariableNames();
     for (int i = 0; i < 3; i++) {
         string varName = fieldVars[i];

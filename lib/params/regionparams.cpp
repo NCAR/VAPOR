@@ -89,7 +89,7 @@ RegionParams::~RegionParams()
 // Reset region settings to initial state
 void RegionParams::_init()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     const double * extents = m_dataStatus->getLocalExtents();
     vector<double> exts(3, 0.0);
 
@@ -104,7 +104,7 @@ void RegionParams::_init()
 
 void RegionParams::_reconcile()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     vector<long> times = GetBox()->GetTimes();
     double       regionExtents[6];
     for (int timenum = 0; timenum < times.size(); timenum++) {
@@ -126,7 +126,7 @@ void RegionParams::_reconcile()
 #endif
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 bool RegionParams::insertTime(int timestep) { return true; }
 
 bool RegionParams::removeTime(int timestep) { return true; }

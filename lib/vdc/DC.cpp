@@ -20,6 +20,7 @@ string join(const vector<string> &v, string separator)
     return (s);
 }
 
+#ifdef UNUSED_FUNCTION
 // Product of elements in a vector
 //
 size_t vproduct(vector<size_t> a)
@@ -29,6 +30,7 @@ size_t vproduct(vector<size_t> a)
     for (int i = 0; i < a.size(); i++) ntotal *= a[i];
     return (ntotal);
 }
+#endif
 
 };    // namespace
 

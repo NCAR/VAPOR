@@ -38,7 +38,7 @@ class ImageFrame : public QFrame {
     Q_OBJECT
 public:
     ImageFrame(QWidget *parent = 0, Qt::WFlags f = 0);
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     virtual ~ImageFrame();
 
     void       setGLImageWindow(QGLWidget *wid) { _glImageWindow = wid; }

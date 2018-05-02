@@ -485,7 +485,7 @@ public:
     //
     virtual string GetMapProjectionDefault() const { return (_proj4StringDefault); }
 
-    #ifdef DEAD
+    #ifdef VAPOR3_0_0_ALPHA
 
     //!
     //! Add a pipeline stage to produce derived variables
@@ -817,7 +817,7 @@ private:
     int _level_correction(string varname, int &level) const;
     int _lod_correction(string varname, int &lod) const;
 
-    const KDTreeRG *_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg);
+    const KDTreeRG *_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax);
 
     vector<string> _getDataVarNamesDerived(int ndim) const;
 

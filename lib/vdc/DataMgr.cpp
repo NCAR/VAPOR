@@ -264,6 +264,7 @@ void grid_params(const DC::DataVar &var, const vector<size_t> &roi_dims, const v
     }
 }
 
+#ifdef UNUSED_FUNCTION
 void coord_setup_helper(const vector<string> &dimnames, const vector<size_t> &dims, const vector<size_t> &dims_at_level, const vector<size_t> &bs, const vector<size_t> &bs_at_level,
                         const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<string> &my_dimnames, vector<size_t> &my_dims, vector<size_t> &my_dims_at_level, vector<size_t> &my_bs,
                         vector<size_t> &my_bs_at_level, vector<size_t> &my_bmin, vector<size_t> &my_bmax)
@@ -297,6 +298,7 @@ void coord_setup_helper(const vector<string> &dimnames, const vector<size_t> &di
         }
     }
 }
+#endif
 
 };    // namespace
 
@@ -997,7 +999,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         // Derived variable that is not in cache, so we need to
         // create it
         //
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         rg = execute_pipeline(ts, varname, level, lod, min, max, lock, xcblks, ycblks, zcblks);
 
         if (!rg) {
@@ -1159,7 +1161,7 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     return (0);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 int DataMgr::NewPipeline(PipeLine *pipeline)
 {
@@ -1702,7 +1704,7 @@ bool DataMgr::_free_lru()
     return (false);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 PipeLine *DataMgr::get_pipeline_for_var(string varname) const
 {
     for (int i = 0; i < _PipeLines.size(); i++) {
@@ -1926,7 +1928,7 @@ vector<string> DataMgr::_get_derived_variables() const
     return (svec);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 void DataMgr::PurgeVariable(string varname)
 {
@@ -2431,7 +2433,7 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(size_t ts, int level, int lod, 
     RegularGrid    xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
     RegularGrid    yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg);
+    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax);
 
     CurvilinearGrid *g = new CurvilinearGrid(dims, bs, blkptrs, xrg, yrg, zcoords, kdtree);
 
@@ -2575,7 +2577,7 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(size_t ts, int level, int
 
     UnstructuredGridCoordless zug;
 
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xug, yug);
+    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xug, yug, bmin, bmax);
 
     UnstructuredGrid2D *g =
         new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, zug, kdtree);
@@ -2851,7 +2853,7 @@ void DataMgr::_unlock_blocks(const void *blks)
     return;
 }
 
-const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg)
+const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax)
 {
     assert(cvarsinfo.size() >= 2);
     assert(xg.GetDimensions() == yg.GetDimensions());
@@ -2859,7 +2861,11 @@ const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vecto
     vector<string> varnames;
     for (int i = 0; i < 2; i++) { varnames.push_back(cvarsinfo[i].GetName()); }
 
-    const string key = "KDTree";
+    string key = "KDTree";
+    key += ":";
+    key += vector_to_string(bmin);
+    key += ":";
+    key += vector_to_string(bmax);
 
     KDTreeRG *kdtree = NULL;
 
@@ -2920,7 +2926,6 @@ string DataMgr::_getTimeCoordVarNameDerived() const
 
     for (int i = 0; i < cvars.size(); i++) {
         DC::CoordVar varInfo;
-        bool         ok = GetCoordVarInfo(cvars[i], varInfo);
         if (varInfo.GetAxis() == 3) return (cvars[i]);
     }
     return ("");
