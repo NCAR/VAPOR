@@ -134,6 +134,7 @@ bool BarbRenderer::_isCacheDirty() const
 
 int BarbRenderer::_paintGL()
 {
+    int rc = 0;
     if (!_isCacheDirty()) {
         glCallList(_drawList);
         return 0;
@@ -157,9 +158,15 @@ int BarbRenderer::_paintGL()
     vector<double> minExts, maxExts;
     bParams->GetBox()->GetExtents(minExts, maxExts);
 
+    vector<string> varnames = bParams->GetFieldVariableNames();
+    if (!VariableExists(ts, varnames, refLevel, lod, true)) {
+        SetErrMsg("One or more selected field variables does not exist");
+        rc = -1;
+        goto RETURN;
+    }
+
     // Find box extents for ROI
     //
-    vector<string> varnames = bParams->GetFieldVariableNames();
     if (varnames != _fieldVariables) {
         _vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
         _fieldVariables = varnames;
@@ -167,7 +174,7 @@ int BarbRenderer::_paintGL()
 
     // Get grids for our vector variables
     //
-    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
+    rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
 
     if (rc < 0) goto RETURN;
     varData.push_back(NULL);

@@ -60,6 +60,7 @@ class VizSelectCombo;
 class BannerGUI;
 class Statistics;
 class Plot;
+class ErrorReporter;
 
 class MainForm : public QMainWindow {
     Q_OBJECT
@@ -194,6 +195,8 @@ private:
     bool _sessionNewFlag;
     bool _begForCitation;
     int  _eventsSinceLastSave;
+
+    ErrorReporter *_errRep;
 
     // Zero out all member variables
     //

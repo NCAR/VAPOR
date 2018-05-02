@@ -22,10 +22,8 @@
 #include "GUIStateParams.h"
 #include <vapor/GetAppPath.h>
 #include <vapor/DataMgrUtils.h>
+#include "ErrorReporter.h"
 #include "Plot.h"
-
-// #define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
-// #include <numpy/ndarrayobject.h>
 
 // Constructor
 Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent) : QDialog(parent), Ui_PlotWindow()
@@ -259,15 +257,29 @@ void Plot::Update()
 
 void Plot::_newVarChanged(int index)
 {
-    if (index == 0) return;
+    if (index == 0)    // not selecting any variable
+        return;
 
     std::string varName = newVarCombo->itemText(index).toStdString();
 
-    // Add this variable to parameter
-    VAPoR::PlotParams *      plotParams = this->_getCurrentPlotParams();
-    std::vector<std::string> vars = plotParams->GetAuxVariableNames();
-    vars.push_back(varName);
-    plotParams->SetAuxVariableNames(vars);
+    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
+    VAPoR::DataMgr *   dataMgr = this->_getCurrentDataMgr();
+    int                refinementLevel = plotParams->GetRefinementLevel();
+    int                compressLevel = plotParams->GetCompressionLevel();
+    int                currentTS = (int)plotParams->GetCurrentTimestep();
+
+    // Test if the selected variable available at the specific time step,
+    //   compression level, etc.
+    if (!dataMgr->VariableExists(currentTS, varName, refinementLevel, compressLevel)) {
+        MSG_WARN("Selected variable not available at this settings!");
+        newVarCombo->setCurrentIndex(0);
+        return;
+    } else    // Add this variable to parameter
+    {
+        std::vector<std::string> vars = plotParams->GetAuxVariableNames();
+        vars.push_back(varName);
+        plotParams->SetAuxVariableNames(vars);
+    }
 }
 
 void Plot::_removeVarChanged(int index)
@@ -456,23 +468,25 @@ void Plot::_spaceTabPlotClicked()
     for (int v = 0; v < enabledVars.size(); v++) {
         std::vector<float> seq(numOfSamples, 0.0);
         VAPoR::Grid *      grid = dataMgr->GetVariable(currentTS, enabledVars[v], refinementLevel, compressLevel);
-        float              missingVal = grid->GetMissingValue();
-        for (int i = 0; i < numOfSamples; i++) {
-            std::vector<double> sample;
-            if (i == 0)
-                sample = point1;
-            else if (i == numOfSamples - 1)
-                sample = point2;
-            else {
-                for (int j = 0; j < point1.size(); j++) sample.push_back((double)i / (double)(numOfSamples - 1) * p1p2span[j] + point1[j]);
+        if (grid) {
+            float missingVal = grid->GetMissingValue();
+            for (int i = 0; i < numOfSamples; i++) {
+                std::vector<double> sample;
+                if (i == 0)
+                    sample = point1;
+                else if (i == numOfSamples - 1)
+                    sample = point2;
+                else {
+                    for (int j = 0; j < point1.size(); j++) sample.push_back((double)i / (double)(numOfSamples - 1) * p1p2span[j] + point1[j]);
+                }
+                float fieldVal = grid->GetValue(sample);
+                if (fieldVal == missingVal)
+                    seq[i] = std::nanf("1");
+                else
+                    seq[i] = fieldVal;
             }
-            float fieldVal = grid->GetValue(sample);
-            if (fieldVal == missingVal)
-                seq[i] = std::nanf("1");
-            else
-                seq[i] = fieldVal;
+            sequences.push_back(seq);
         }
-        sequences.push_back(seq);
     }
 
     // Decide X label and values
@@ -527,11 +541,13 @@ void Plot::_timeTabPlotClicked()
         std::vector<float> seq;
         for (int t = minMaxTS[0]; t <= minMaxTS[1]; t++) {
             VAPoR::Grid *grid = dataMgr->GetVariable(t, enabledVars[v], refinementLevel, compressLevel);
-            float        fieldVal = grid->GetValue(singlePt);
-            if (fieldVal != grid->GetMissingValue())
-                seq.push_back(fieldVal);
-            else
-                seq.push_back(std::nanf("1"));
+            if (grid) {
+                float fieldVal = grid->GetValue(singlePt);
+                if (fieldVal != grid->GetMissingValue())
+                    seq.push_back(fieldVal);
+                else
+                    seq.push_back(std::nanf("1"));
+            }
         }
         sequences.push_back(seq);
     }
@@ -656,9 +672,7 @@ void Plot::_numberOfSamplesChanged()
     long minSamples = 50;
     if (val < minSamples) {
         val = minSamples;
-        // numOfSamplesLineEdit->blockSignals( true );
         numOfSamplesLineEdit->setText(QString::number(val, 10));
-        // numOfSamplesLineEdit->blockSignals( false );
     }
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetNumOfSamples(val);
