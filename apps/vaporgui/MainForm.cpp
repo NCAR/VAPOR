@@ -294,7 +294,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     // callback's with the MyBase error logger used by the vapor render
     // library.
     //
-    _errRep = new ErrorReporter::ErrorReporter(this);
+    _errRep = new ErrorReporter(this);
 
     // Create the Control executive before the VizWinMgr. Disable
     // state saving until completely initalized
