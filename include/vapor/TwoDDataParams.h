@@ -23,7 +23,7 @@ public:
  virtual ~TwoDDataParams();
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
  //! \copydoc Params::Validate()
  virtual void Validate(int type);
 #endif
@@ -45,7 +45,7 @@ public:
 private:
 
  void _init();
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
  void _validateTF(int type, DataMgr* dataMgr);
 #endif
 

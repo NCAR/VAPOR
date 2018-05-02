@@ -53,10 +53,6 @@ Plot::Plot( VAPoR::DataStatus* status,
         }
     }
 
-    VAPoR::DataMgr* currentDmgr = _dataStatus->GetDataMgr( currentDatasetName );
-    VAPoR::PlotParams* plotParams      = dynamic_cast<VAPoR::PlotParams*>
-                (_paramsMgr->GetAppRenderParams(currentDatasetName, VAPoR::PlotParams::GetClassType()));
-
     // Do some static QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
@@ -336,7 +332,6 @@ void Plot::_removeVarChanged( int index )
 
     std::string        varName    = removeVarCombo->itemText(index).toStdString();
     VAPoR::PlotParams* plotParams = this->_getCurrentPlotParams();
-    VAPoR::DataMgr*    dataMgr    = this->_getCurrentDataMgr();    
 
     // Remove this variable from parameter 
     std::vector<std::string> vars = plotParams->GetAuxVariableNames();
@@ -484,7 +479,6 @@ VAPoR::DataMgr* Plot::_getCurrentDataMgr() const
     
 void Plot::_setInitialExtents()
 {
-    VAPoR::PlotParams* plotParams        = this->_getCurrentPlotParams();
     VAPoR::DataMgr*    dataMgr           = this->_getCurrentDataMgr();    
 
     // Set spatial extents
@@ -622,6 +616,7 @@ void Plot::_timeTabPlotClicked()
         {
             VAPoR::Grid* grid = dataMgr->GetVariable( t, enabledVars[v], 
                                 refinementLevel, compressLevel ); 
+<<<<<<< HEAD
             if( grid )
             {
                 float missingVal  = grid->GetMissingValue();
@@ -631,6 +626,13 @@ void Plot::_timeTabPlotClicked()
                 else
                     seq.push_back( std::nanf("1") );
             }
+=======
+            float fieldVal    = grid->GetValue( singlePt );
+            if( fieldVal     != grid->GetMissingValue() )
+                seq.push_back( fieldVal );
+            else
+                seq.push_back( std::nanf("1") );
+>>>>>>> master
         }
         sequences.push_back( seq );
     }
@@ -674,7 +676,11 @@ void Plot::_invokePython( const QString&                              outFile,
                           const std::string&                          yLabel )
 {
     /* Adopted from documentation: https://docs.python.org/2/extending/embedding.html */
-    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+    PyObject* pName   = NULL;
+    PyObject* pModule = NULL;
+    PyObject* pFunc   = NULL;
+    PyObject* pArgs   = NULL;
+    PyObject* pValue  = NULL;
     Wasp::MyPython::Instance()->Initialize();
     assert( Py_IsInitialized() );
 

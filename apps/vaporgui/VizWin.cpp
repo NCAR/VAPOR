@@ -436,7 +436,7 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 		return;
 	}
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	// To keep orientation correct in plane, and use
 	// OpenGL convention (Y 0 at bottom of window), reverse
 	// value of y:
@@ -596,7 +596,7 @@ void VizWin::mouseReleaseEvent(QMouseEvent*e){
 	}
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	string tag = MouseModeParams::getModeTag(mode);
 	TranslateStretchManip* myManip = _visualizer->getManip(tag);
 	//Check if the seed bounds were moved
@@ -668,16 +668,8 @@ void VizWin::mouseMoveEvent(QMouseEvent* e){
 		mouseMoveEventNavigate(e);
 		return;
 	}
-	
-	//Respond based on what activity we are tracking
-	//Need to tell the appropriate params about the change,
-	//And it should refresh the panel
-	double mouseCoords[2];
-	double projMouseCoords[2];
-	mouseCoords[0] = (float) e->x();
-	mouseCoords[1] = (float) height()-e->y();
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	string tag = MouseModeParams::getModeTag(mode);
 	TranslateStretchManip* manip = _visualizer->getManip(tag);

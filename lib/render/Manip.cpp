@@ -69,7 +69,7 @@ mouseIsOverHandle(double screenCoords[2], double* boxExtents, double handleMid[3
 	//which handles are in front of the box.
 	ViewpointParams* myViewpointParams = _vis->getActiveViewpointParams();
 	vector<double> camPos = myViewpointParams->getCameraPosLocal();
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -182,7 +182,7 @@ bool TranslateStretchManip::startHandleSlide(Visualizer* viz, double mouseCoords
 	if (handleNum > 2) handleNum = handleNum-3;
 	else handleNum = 2 - handleNum;
 	double boxExtents[6];
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	int timestep = viz->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	manipParams->GetBox()->GetStretchedLocalExtents(boxExtents, timestep);
@@ -346,7 +346,7 @@ rayHandleIntersect(double ray[3], const std::vector<double>& cameraPos, int hand
 	double val;
 	double handleExtents[6];
 	double boxExtents[6];
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	_params->GetBox()->GetLocalExtents(boxExtents,timestep);
@@ -399,14 +399,14 @@ void TranslateStretchManip::render(){
 	double extents[6];
 	//Calculate the box extents, and the viewer position, in the unit cube,
 	//Without any rotation applied:
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	_params->GetBox()->GetStretchedLocalExtents(extents, timestep);
 	
 	ViewpointParams* myViewpointParams = _vis->getActiveViewpointParams();
 	vector<double> camPos = myViewpointParams->getCameraPosLocal();
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -462,12 +462,12 @@ void TranslateStretchManip::render(){
 
 void TranslateStretchManip::drawBoxFaces(){
 	double corners[8][3];
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	_params->GetBox()->calcLocalBoxCorners(corners, 0.f, timestep);
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -552,7 +552,7 @@ void TranslateStretchManip::
 mouseRelease(float /*screenCoords*/[2]){
 	//Need to commit to latest drag position
 	//Are we dragging?
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
 	if (_selectedHandle >= 0){
@@ -587,7 +587,7 @@ captureMouseDown(int handleNum, const std::vector<double>& camPos, double* dirVe
 	//Grab a probe handle
 	_selectedHandle = handleNum;
 	_dragDistance = 0.f;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -640,7 +640,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	double denom = vdot(q,q);
 	_dragDistance = 0.f;
 	//convert to stretched world coords.
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -657,7 +657,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	//Do this calculation in stretched world coords
 	double boxExtents[6];
 	const double* sizes;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	sizes = _dataStatus->getFullStretchedSizes();
 	int timestep = _vis->getActiveAnimationParams()->GetCurrentTimestep();
 #endif
@@ -763,7 +763,7 @@ void TranslateRotateManip::drawBoxFaces(){
 	//Now the corners need to be put into the unit cube, and displaced appropriately
 	
 	//Either displace just half the corners (when stretching) or do the opposite ones as well.
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -911,7 +911,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	float denom = vdot(q,q);
 	_dragDistance = 0.f;
 	//Convert the drag distance to stretched world coords
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 	vector<double> stretch(3,1.0);
@@ -936,7 +936,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 		//with constraint: Don't slide the center out of the full domain:
 		if (constrain) {
 			const double* sizes;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 			sizes = _dataStatus->getFullStretchedSizes();
 #endif
 			float boxCenter = 0.5f*(boxExtents[coord]+boxExtents[coord+3]);
@@ -1053,7 +1053,7 @@ mouseRelease(float /*screenCoords*/[2]){
 			//We need to stretch the size along axis2, without changing the center;
 			//However this stretch is affected by the relative stretch factors of 
 			//axis2 and axis
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 			vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 			vector<double> stretch(3,1.0);
@@ -1083,7 +1083,7 @@ mouseRelease(float /*screenCoords*/[2]){
 //its max coords.
 double TranslateRotateManip::constrainStretch(double currentDist){
 	double dist;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	double dist = currentDist/_dataStatus->getMaxStretchedSize();
 #endif
 	double boxExts[6];
@@ -1111,13 +1111,13 @@ double TranslateRotateManip::constrainStretch(double currentDist){
 			return 0.f;
 		}
 	}
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 			vector<double> stretch = _dataStatus->getStretchFactors();
 #else
 			vector<double> stretch(3,1.0);
 #endif
 	float corrFactor = 0.0;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	float corrFactor = _dataStatus->getMaxStretchedSize()*stretch[axis2]/stretch[axis1]; 
 #endif
 	
@@ -1132,7 +1132,7 @@ double TranslateRotateManip::constrainStretch(double currentDist){
 	delete myPermuter;
 	
 	return (dist);
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	return (dist*_dataStatus->getMaxStretchedSize());
 #endif
 }
