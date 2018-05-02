@@ -509,7 +509,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
         return (_proj4StringDefault);
     }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
     //!
     //! Add a pipeline stage to produce derived variables
@@ -1027,7 +1027,9 @@ class VDF_API DataMgr : public Wasp::MyBase {
         int lod,
         const vector<DC::CoordVar> &cvarsinfo,
         const Grid &xg,
-        const Grid &yg);
+        const Grid &yg,
+        const vector<size_t> &bmin,
+        const vector<size_t> &bmax);
 
     vector<string> _getDataVarNamesDerived(int ndim) const;
 

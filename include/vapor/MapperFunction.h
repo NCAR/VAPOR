@@ -338,7 +338,7 @@ class PARAMS_API MapperFunction : public ParamsBase {
     string _make_omap_name(int index) const;
 };
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 //! \class MFContainer
 //! \brief A simple container class for managing a collection

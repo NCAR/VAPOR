@@ -139,10 +139,10 @@ class RENDER_API Renderer : public RendererBase {
     //! \retval int zero if successful.
     virtual int paintGL();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Call setBypass to indicate that the renderer will not work until the state of the params is changed
     //! This will result in the renderer not being invoked for the specified timestep
     //! \param[in] int timestep The timestep when the renderer fails
@@ -189,7 +189,7 @@ class RENDER_API Renderer : public RendererBase {
     virtual void setAllDataDirty() { return; }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Set the current ControlExec
     //! \param[in] ds Current DataStatus instance
     static void SetControlExec(ControlExec *ce) { _controlExec = ce; }
@@ -214,7 +214,7 @@ class RENDER_API Renderer : public RendererBase {
 
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Construct transform of form (x,y)-> (a[0]x+b[0],a[1]y+b[1],const)
     //! Mapping [-1,1]X[-1,1] into local 3D volume coordinates.
     //! This is used to map plane coordinates (for various 2D renderers) into User coordinates
@@ -226,7 +226,7 @@ class RENDER_API Renderer : public RendererBase {
     void buildLocal2DTransform(int dataOrientation, float a[2], float b[2], float *constVal, int mappedDims[3]);
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
     //! Obtain the extents of a region that contains a rotated (3D) box associated with a renderer.
     //! \param[out] regMin Minimum coordinates of containing region.
@@ -291,7 +291,7 @@ class RENDER_API Renderer : public RendererBase {
   private:
     size_t _timestep;
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     static ControlExec *_controlExec;
 #endif
 };
@@ -337,7 +337,7 @@ class RENDER_API RendererFactory {
 //
 // Register RendererBase derived class with:
 //
-//	static RendererRegistrar<RendererClass> \
+//	static RendererRegistrar<RendererClass>
 //		registrar("myclassname", "myparamsclassname");
 //
 // where 'RendererClass' is a class derived from 'Renderer', and
