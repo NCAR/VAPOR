@@ -29,6 +29,8 @@
 
 #include <string>
 #include <vector>
+#include <cassert>
+#include <QMessageBox>
 
 #define ERRORREPORTER_DEFAULT_MESSAGE "The action failed"
 
@@ -55,6 +57,8 @@
 class ErrorReporter {
 
 	public:
+
+		ErrorReporter(QWidget *parent);
 		enum Type { Diagnostic=0, Info=1, Warning=2, Error=3 };
 
 		struct Message {
@@ -68,7 +72,9 @@ class ErrorReporter {
 
 		//! Returns the singleton instance of this class with lazy initialization
 		//! \retval ErrorReporter instance
-		static ErrorReporter *GetInstance();
+		static ErrorReporter *GetInstance() {
+			return(_instance);
+		};
 
 		//! Displays the current log of errors with the default message ERRORREPORTER_DEFAULT_MESSAGE
 		static void ShowErrors();
@@ -88,15 +94,17 @@ class ErrorReporter {
 		static int OpenLogFile(std::string path);
 
 	protected:
-		ErrorReporter();
 		~ErrorReporter();
 
 	private:
+		ErrorReporter();
 		static ErrorReporter *_instance;
 		std::vector<Message> _log;
 		std::vector<Message> _fullLog;
 		std::string _logFilePath;
 		FILE *_logFile;
+		static QWidget *_parent;
+		static QMessageBox *_box;
 
 		friend void _myBaseErrorCallback(const char *msg, int err_code);
 		friend void _myBaseDiagCallback(const char *msg);
