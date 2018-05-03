@@ -151,6 +151,11 @@ int ContourRenderer::_buildCache()
         return -1;
     }
     
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    
     Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it)
