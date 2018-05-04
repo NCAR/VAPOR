@@ -195,7 +195,10 @@ void SettingsEventRouter::_chooseAutoSaveFile()
         msgBox.setText(msg);
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
-        if (msgBox.exec() == QMessageBox::No) { return; }
+        if (msgBox.exec() == QMessageBox::No) {
+            _updateTab();
+            return;
+        }
     }
 
     bool goodToWrite = FileOperationChecker::FileGoodToWrite(qfilename);
@@ -211,17 +214,38 @@ void SettingsEventRouter::_chooseAutoSaveFile()
 void SettingsEventRouter::_autoSaveFileChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-    QString         qfile = _autoSaveFileEdit->text();
-    string          file = qfile.toStdString();
+    QString         qfilename = _autoSaveFileEdit->text();
+    if (!qfilename.endsWith(".vs3")) {
+        qfilename.append(".vs3");
+        _autoSaveFileEdit->setText(qfilename);
+    }
 
-    if (FileOperationChecker::FileGoodToWrite(qfile))
+    QFileInfo check_file(qfilename);
+    if (check_file.exists()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        QString msg = "The following file exists.\n ";
+        msg += qfilename;
+        msg += "\n";
+        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
+        msgBox.setText(msg);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No) {
+            _updateTab();
+            return;
+        }
+    }
+    std::string file = qfilename.toStdString();
+
+    if (FileOperationChecker::FileGoodToWrite(qfilename)) {
         sParams->SetAutoSaveSessionFile(file);
-    else {
+        _saveSettings();
+    } else {
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
         _updateTab();
         return;
     }
-    _saveSettings();
 }
 
 void SettingsEventRouter::_setSessionPath()
