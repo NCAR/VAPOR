@@ -402,7 +402,10 @@ void Statistics::_autoUpdateClicked( int state )
     if( state == 0 )        // unchecked
         statsParams->SetAutoUpdateEnabled( false );
     else if( state == 2 )   // checked
+    {
         statsParams->SetAutoUpdateEnabled( true );
+        updateButtonClicked();
+    }
     else
     {
         std::cerr << "Dont know what this state is!!!" << std::endl;
