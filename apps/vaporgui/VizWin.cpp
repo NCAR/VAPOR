@@ -449,7 +449,11 @@ void VizWin::setNewExtents()
     _manip->GetBox(llc, urc);
     VAPoR::RenderParams *rParams = getRenderParams();
     if (rParams == NULL) return;
-    VAPoR::Box *box = rParams->GetBox();
+    VAPoR::Box *        box = rParams->GetBox();
+    std::vector<double> pllc, purc;
+    box->GetExtents(pllc, purc);
+    cout << "rDist " << pllc[0] - llc[0] << endl;
+
     box->SetExtents(llc, urc);
 }
 
@@ -643,8 +647,6 @@ void VizWin::updateManip(bool initialize)
     std::vector<double> minExts(3, 0.f);
     std::vector<double> maxExts(3, 0.f);
     getActiveExtents(minExts, maxExts);
-    cout << "EXTS " << minExts[0] << " " << minExts[1] << " " << minExts[2] << " ";
-    cout << maxExts[0] << " " << maxExts[1] << " " << maxExts[2] << endl;
 
     std::vector<double> rotationCenter, cameraPosition;
     getCenterAndCamPos(rotationCenter, cameraPosition);
@@ -675,10 +677,6 @@ void VizWin::updateManip(bool initialize)
     VAPoR::Transform *  transform = getTransform();
     std::vector<double> scales(3, 1.f);
     if (transform != NULL) scales = transform->GetScales();
-    cout << "Tx Vscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
-
-    cout << llc[1] << "!!!" << endl;
-    cout << minExts[1] << "!!!" << endl;
 
     _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, transform, constrain);
 

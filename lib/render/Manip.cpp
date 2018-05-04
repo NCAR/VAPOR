@@ -140,9 +140,7 @@ void TranslateStretchManip::applyTransformToDrag(float &dist, int axis)
     std::vector<double> scales(3, 1.f);
     if (_transform != NULL) scales = _transform->GetScales();
 
-    cout << "dist before " << dist << endl;
     dist *= scales[axis];
-    cout << "dist after  " << dist << endl;
 }
 
 void TranslateStretchManip::mouseRelease(double screenCoords[2])
@@ -160,16 +158,16 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2])
             // boxMin gets changed for nearHandle, boxMax for farHandle
             if (_selectedHandle < 3) {
                 _selection[axis] += dist;
-                _selection[axis] += dist;
             } else {
-                _transformedSelection[axis + 3] += dist;
-                _transformedSelection[axis + 3] += dist;
+                _selection[axis + 3] += dist;
+                //				_transformedSelection[axis+3] += dist;
+                //				_transformedSelection[axis+3] += dist;
             }
         } else {
-            //	_selection[axis] += dist;
-            //	_selection[axis+3] += dist;
-            _transformedSelection[axis] += dist;
-            _transformedSelection[axis + 3] += dist;
+            _selection[axis] += dist;
+            _selection[axis + 3] += dist;
+            //			_transformedSelection[axis] += dist;
+            //			_transformedSelection[axis+3] += dist;
         }
     }
 
@@ -183,47 +181,45 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2])
 
 int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double handleMid[3])
 {
-    double boxExtents[6];
-    std::copy(std::begin(_selection), std::end(_selection), std::begin(boxExtents));
-
-    // double handleMid[3];
     double handle[8][3];
 
-    // double pos[3], upVec[3], viewDir[3];
-    // ReconstructCamera(pos, upVec, viewDir);
+    applyTransformToSelection();
 
     int octant = 0;
     int face, handleNum;
     for (int axis = 0; axis < 3; axis++) {
-        double axisBoundary = 0.5f * (boxExtents[axis] + boxExtents[axis + 3]);
+        double axisBoundary = 0.5f * (_selection[axis] + _selection[axis + 3]);
         if (_cameraPosition[axis] > axisBoundary) { octant |= 1 << axis; }
     }
 
     // Front handles
     for (int sortNum = 0; sortNum < 3; sortNum++) {
-        handleNum = makeHandleFaces(sortNum, handle, octant, boxExtents);
+        handleNum = makeHandleFaces(sortNum, handle, octant, _selection);
         if ((face = pointIsOnBox(handle, screenCoords)) >= 0) {
             for (int i = 0; i < 3; i++) {
                 handleMid[i] = 0.;
                 for (int k = 0; k < 8; k++) handleMid[i] += handle[k][i];
                 handleMid[i] /= 8.;
             }
+            removeTransform();
             return handleNum;
         }
     }
 
     // Back handles
     for (int sortNum = 3; sortNum < 6; sortNum++) {
-        handleNum = makeHandleFaces(sortNum, handle, octant, boxExtents);
+        handleNum = makeHandleFaces(sortNum, handle, octant, _selection);
         if ((face = pointIsOnBox(handle, screenCoords)) >= 0) {
             for (int i = 0; i < 3; i++) {
                 handleMid[i] = 0.;
                 for (int k = 0; k < 8; k++) handleMid[i] += handle[k][i];
                 handleMid[i] /= 8.;
             }
+            removeTransform();
             return handleNum;
         }
     }
+    removeTransform();
     return -1;
 }
 
@@ -617,24 +613,18 @@ void TranslateStretchManip::applyTransformToSelection()
 
     std::vector<double> selectionSize, selectionMid;
     int                 ndims = 3;    //_selection.size()/2;
-    // cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
     for (int i = 0; i < ndims; i++) {
         selectionSize.push_back(_selection[i + ndims] - _selection[i]);
         selectionSize[i] *= scales[i];
 
-        selectionMid.push_back((_selection[i] + _selection[i + ndims]) / 2.f);
-        // selectionMid.push_back(_selection[i]+selectionSize[i]/2.f);
+        float unscaledMidpoint = (_selection[i] + _selection[i + ndims]) / 2.f;
+        float offset = (origin[i] - unscaledMidpoint) * scales[i];
+        selectionMid.push_back(unscaledMidpoint + offset);
+        // selectionMid.push_back((_selection[i]+_selection[i+ndims])/2.f);
 
-        //_transformedSelection[i] = selectionMid[i]-selectionSize[i]/2.f;
-        //_transformedSelection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
-
-        //_selection[i] = selectionMid[i]-selectionSize[i]/2.f;
-        //_selection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
-
-        _selection[i] = origin[i] - selectionSize[i] / 2.f;
-        _selection[i + ndims] = origin[i] + selectionSize[i] / 2.f;
+        _selection[i] = selectionMid[i] - selectionSize[i] / 2.f;
+        _selection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
     }
-    cout << "_selection " << _selection[0] << " " << _selection[3] << " " << selectionMid[0] << endl;
 }
 
 void TranslateStretchManip::removeTransform()
@@ -648,24 +638,19 @@ void TranslateStretchManip::removeTransform()
 
     std::vector<double> selectionSize, selectionMid;
     int                 ndims = 3;    //_selection.size()/2;
-    // cout << "Tx Mscales " << scales[0] << " " << scales[1] << " " << scales[2] << endl;
     for (int i = 0; i < ndims; i++) {
         selectionSize.push_back(_selection[i + ndims] - _selection[i]);
         selectionSize[i] /= scales[i];
 
-        selectionMid.push_back((_selection[i] + _selection[i + ndims]) / 2.f);
-        // selectionMid.push_back(_selection[i]+selectionSize[i]/2.f);
+        float unscaledMidpoint = (_selection[i] + _selection[i + ndims]) / 2.f;
+        float offset = (origin[i] - unscaledMidpoint) * scales[i];
+        selectionMid.push_back(unscaledMidpoint - offset);
+        // selectionMid.push_back((_selection[i]+_selection[i+ndims])/2.f);
+        // selectionMid[i] -= (selectionMid[i] - origin[i])/scales[i];
 
-        //_transformedSelection[i] = selectionMid[i]-selectionSize[i]/2.f;
-        //_transformedSelection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
-
-        //_selection[i] = selectionMid[i]-selectionSize[i]/2.f;
-        //_selection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
-
-        _selection[i] = origin[i] - selectionSize[i] / 2.f;
-        _selection[i + ndims] = origin[i] + selectionSize[i] / 2.f;
+        _selection[i] = selectionMid[i] - selectionSize[i] / 2.f;
+        _selection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
     }
-    cout << "_selection " << _selection[0] << " " << _selection[3] << " " << selectionMid[0] << endl;
 }
 
 // Renders handles and box
@@ -683,8 +668,8 @@ void TranslateStretchManip::render()
     for (int handleNum = 0; handleNum < 6; handleNum++) {
         // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, extents);
         // makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _extents);
-        //		makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _selection);
-        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _transformedSelection);
+        makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _selection);
+        //		makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _transformedSelection);
 
         if (_selectedHandle >= 0) {
             // int axis = (_selectedHandle < 3) ? (2-_selectedHandle) : (_selectedHandle -3);
@@ -706,14 +691,14 @@ void TranslateStretchManip::render()
             }
         }
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
-        // drawHandleConnector(handleNum, handleExtents, _selection);//extents);
-        drawHandleConnector(handleNum, handleExtents, _transformedSelection);    // extents);
+        drawHandleConnector(handleNum, handleExtents, _selection);    // extents);
+                                                                      //		drawHandleConnector(handleNum, handleExtents, _transformedSelection);//extents);
     }
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
     glPopAttrib();
 
-    //	removeTransform();
+    removeTransform();
 }
 
 double TranslateStretchManip::getPixelSize() const
