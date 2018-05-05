@@ -404,7 +404,7 @@ void Statistics::_autoUpdateClicked( int state )
     else if( state == 2 )   // checked
     {
         statsParams->SetAutoUpdateEnabled( true );
-        updateButtonClicked();
+        _updateButtonClicked();
     }
     else
     {
@@ -508,6 +508,8 @@ void Statistics::_minTSChanged( int val )
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
+    _validStats.currentTimeStep[0] = val;
+
     // Add this minTS to parameter if different
     if( val != statsParams->GetCurrentMinTS() )
     {
@@ -516,14 +518,11 @@ void Statistics::_minTSChanged( int val )
 
         if( val > statsParams->GetCurrentMaxTS() )
         {
+            _validStats.currentTimeStep[1] = val;
             statsParams->SetCurrentMaxTS( val );
-            MaxTimestepSpinbox->blockSignals( true );
             MaxTimestepSpinbox->setValue( val );
-            MaxTimestepSpinbox->blockSignals( false );
         }
     }
-
-    _validStats.currentTimeStep[0] = val;
 
     // Auto-update if enabled
     if( statsParams->GetAutoUpdateEnabled() )
@@ -541,6 +540,8 @@ void Statistics::_maxTSChanged( int val )
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
+    _validStats.currentTimeStep[1] = val;
+
     // Add this maxTS to parameter if different
     if( val != statsParams->GetCurrentMaxTS() )
     {
@@ -549,14 +550,11 @@ void Statistics::_maxTSChanged( int val )
 
         if( val < statsParams->GetCurrentMinTS() )
         {
+            _validStats.currentTimeStep[0] = val;
             statsParams->SetCurrentMinTS( val );
-            MinTimestepSpinbox->blockSignals( true );
             MinTimestepSpinbox->setValue( val );
-            MinTimestepSpinbox->blockSignals( false );
         }
     }
-
-    _validStats.currentTimeStep[1] = val;
 
     // Auto-update if enabled
     if( statsParams->GetAutoUpdateEnabled() )
