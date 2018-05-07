@@ -616,10 +616,11 @@ void Plot::_timeTabPlotClicked()
         {
             VAPoR::Grid* grid = dataMgr->GetVariable( t, enabledVars[v], 
                                 refinementLevel, compressLevel ); 
+            float missingVal  = grid->GetMissingValue();
             if( grid )
             {
                 float fieldVal    = grid->GetValue( singlePt );
-                if( fieldVal     != grid->GetMissingValue() )
+                if( fieldVal     != missingVal )
                     seq.push_back( fieldVal );
                 else
                     seq.push_back( std::nanf("1") );
