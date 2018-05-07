@@ -445,10 +445,9 @@ void VaporTable::highlightActiveRow(int row)
 {
     if (row < 0) return;
 
-    QString selectionColor = "{ background: rgb(0, 255, 255);"
-                             " selection-background-color: rgb(233, 99, 0); }";
-    QString normalColor = "{ background: rgb(255,255,255);"
-                          " selection-background-color: rgb(233, 99, 0); }";
+    QString selectionColor = "{ background-color: yellow; }";
+    " selection-background-color: red; }";
+    QString normalColor = "{ background: rgb(255,255,255); }";
 
     for (int i = 0; i < _table->rowCount(); i++) {
         for (int j = 0; j < _table->columnCount(); j++) {
