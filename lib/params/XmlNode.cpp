@@ -198,7 +198,7 @@ XmlNode::~XmlNode()
 
 void XmlNode::SetElementLong(const string &tag, const vector<long> &values)
 {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     _longmap[tag] = values;
 }
 
@@ -215,7 +215,7 @@ void XmlNode::SetElementLong(const vector<string> &tags, const vector<long> &val
     }
 
     string tag = tags[tags.size() - 1];
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     currNode->_longmap[tag] = values;
 }
 
@@ -232,7 +232,7 @@ void XmlNode::SetElementDouble(const vector<string> &tags, const vector<double> 
     }
 
     string tag = tags[tags.size() - 1];
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     currNode->_doublemap[tag] = values;
 }
 
@@ -255,7 +255,7 @@ bool XmlNode::HasElementLong(const string &tag) const
 
 void XmlNode::SetElementDouble(const string &tag, const vector<double> &values)
 {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     _doublemap[tag] = values;
 }
 
@@ -279,14 +279,14 @@ bool XmlNode::HasElementDouble(const string &tag) const
 
 void XmlNode::SetElementString(const string &tag, const string &str)
 {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
 
     _stringmap[tag] = str;
 }
 
 void XmlNode::SetElementStringVec(const string &tag, const vector<string> &strvec)
 {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
@@ -309,7 +309,7 @@ void XmlNode::SetElementStringVec(const vector<string> &tags, const vector<strin
         currNode = child;
     }
     string tag = tags[tags.size() - 1];
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
