@@ -1011,8 +1011,6 @@ int DataMgr::_setupConnVecs(
     string varname,
     int level,
     int lod,
-    const vector<size_t> &min,
-    const vector<size_t> &max,
     vector<string> &varnames,
     vector<vector<size_t>> &dims_at_levelvec,
     vector<vector<size_t>> &bsvec,
@@ -1078,16 +1076,10 @@ int DataMgr::_setupConnVecs(
             return (-1);
         }
 
-        vector<size_t> conn_min = min;
-        vector<size_t> conn_max = max;
-
-        // Ugh. Connection variables have an additional dimension
-        // providing ID's for each entry in the connection variable array.
-        // This hack deals with that.
-        //
-        if (conn_min.size() < dims.size()) {
-            conn_min.insert(conn_min.begin(), 0);
-            conn_max.insert(conn_max.begin(), dims[0] - 1);
+        vector<size_t> conn_min = vector<size_t>(dims_at_level.size(), 0);
+        vector<size_t> conn_max = dims_at_level;
+        for (int i = 0; i < conn_max.size(); i++) {
+            conn_max[i]--;
         }
 
         // Map voxel coordinates into block coordinates
@@ -1158,7 +1150,7 @@ Grid *DataMgr::_getVariable(
     vector<vector<size_t>> conn_bminvec;
     vector<vector<size_t>> conn_bmaxvec;
     rc = _setupConnVecs(
-        ts, varname, level, lod, min, max, conn_varnames,
+        ts, varname, level, lod, conn_varnames,
         conn_dims_at_levelvec, conn_bsvec, conn_bs_at_levelvec,
         conn_bminvec, conn_bmaxvec);
     if (rc < 0)
