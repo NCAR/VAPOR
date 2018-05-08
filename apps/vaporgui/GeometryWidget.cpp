@@ -212,7 +212,7 @@ void GeometryWidget::updateRangeLabels(
 	assert(minExt.size() == maxExt.size());
 
 	if (minExt.size() < 1) return;
-	QString xTitle = QString("X Coordinates	Min: ") + 
+	QString xTitle = QString("X Min: ") + 
 		QString::number(minExt[0], 'g', 3) + 
 		QString("	Max: ") + 
 		QString::number(maxExt[0], 'g', 3);
@@ -220,7 +220,7 @@ void GeometryWidget::updateRangeLabels(
 	
 
 	if (minExt.size() < 2) return;
-	QString yTitle = QString("Y Coordinates	Min: ") + 
+	QString yTitle = QString("Y Min: ") + 
 		QString::number(minExt[1], 'g', 3) +
 		QString("	Max: ") + 
 		QString::number(maxExt[1], 'g', 3);
@@ -244,7 +244,7 @@ void GeometryWidget::updateRangeLabels(
 			QString::number(minExt[2], 'g', 3) +
 			QString("	Max: ") + 
 			QString::number(maxExt[2], 'g', 3);
-		zMinMaxLabel->setText(xTitle);
+		zMinMaxLabel->setText(zTitle);
 	}
 }
 
