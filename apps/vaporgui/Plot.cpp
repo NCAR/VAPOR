@@ -129,6 +129,7 @@ void Plot::Update() {
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
     if (dmNames.empty()) {
         this->close();
+        return;
     }
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     std::string currentDatasetName = guiParams->GetPlotDatasetName();
