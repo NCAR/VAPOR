@@ -358,8 +358,10 @@ void Statistics::_autoUpdateClicked(int state)
     if (state == 0)    // unchecked
         statsParams->SetAutoUpdateEnabled(false);
     else if (state == 2)    // checked
+    {
         statsParams->SetAutoUpdateEnabled(true);
-    else {
+        _updateButtonClicked();
+    } else {
         std::cerr << "Dont know what this state is!!!" << std::endl;
         // REPORT ERROR!!!
     }
@@ -443,20 +445,19 @@ void Statistics::_minTSChanged(int val)
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
+    _validStats.currentTimeStep[0] = val;
+
     // Add this minTS to parameter if different
     if (val != statsParams->GetCurrentMinTS()) {
         statsParams->SetCurrentMinTS(val);
         _validStats.InvalidAll();
 
         if (val > statsParams->GetCurrentMaxTS()) {
+            _validStats.currentTimeStep[1] = val;
             statsParams->SetCurrentMaxTS(val);
-            MaxTimestepSpinbox->blockSignals(true);
             MaxTimestepSpinbox->setValue(val);
-            MaxTimestepSpinbox->blockSignals(false);
         }
     }
-
-    _validStats.currentTimeStep[0] = val;
 
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
@@ -471,20 +472,19 @@ void Statistics::_maxTSChanged(int val)
     std::string       dsName = guiParams->GetStatsDatasetName();
     StatisticsParams *statsParams = dynamic_cast<StatisticsParams *>(_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
+    _validStats.currentTimeStep[1] = val;
+
     // Add this maxTS to parameter if different
     if (val != statsParams->GetCurrentMaxTS()) {
         statsParams->SetCurrentMaxTS(val);
         _validStats.InvalidAll();
 
         if (val < statsParams->GetCurrentMinTS()) {
+            _validStats.currentTimeStep[0] = val;
             statsParams->SetCurrentMinTS(val);
-            MinTimestepSpinbox->blockSignals(true);
             MinTimestepSpinbox->setValue(val);
-            MinTimestepSpinbox->blockSignals(false);
         }
     }
-
-    _validStats.currentTimeStep[1] = val;
 
     // Auto-update if enabled
     if (statsParams->GetAutoUpdateEnabled()) _updateButtonClicked();
