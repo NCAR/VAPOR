@@ -201,26 +201,34 @@ void Plot::Update()
         timeTabSinglePoint->SetExtents(min, max);
 
         std::vector<double> pt = plotParams->GetPoint1();
-        if (pt.size() == axes.size())
-            spaceTabP1->SetValue(pt);
-        else {
-            spaceTabP1->SetValue(min);
-            plotParams->SetPoint1(min);
-        }
+        if (pt.size() == 0)    // 1st time
+            pt = min;
+        else if (pt.size() == 2 && axes.size() == 3)
+            pt.push_back(min.at(2));
+        else if (pt.size() == 3 && axes.size() == 2)
+            pt.pop_back();
+        spaceTabP1->SetValue(pt);
+        plotParams->SetPoint1(pt);
+
         pt = plotParams->GetPoint2();
-        if (pt.size() == axes.size())
-            spaceTabP2->SetValue(pt);
-        else {
-            spaceTabP2->SetValue(max);
-            plotParams->SetPoint2(max);
-        }
+        if (pt.size() == 0)
+            pt = max;
+        else if (pt.size() == 2 && axes.size() == 3)
+            pt.push_back(max.at(2));
+        else if (pt.size() == 3 && axes.size() == 2)
+            pt.pop_back();
+        spaceTabP2->SetValue(pt);
+        plotParams->SetPoint2(pt);
+
         pt = plotParams->GetSinglePoint();
-        if (pt.size() == axes.size())
-            timeTabSinglePoint->SetValue(pt);
-        else {
-            timeTabSinglePoint->SetValue(min);
-            plotParams->SetSinglePoint(min);
-        }
+        if (pt.size() == 0) {
+            for (size_t i = 0; i < min.size(); i++) pt.push_back(min.at(i) + 0.5 * (max.at(i) - min.at(i)));
+        } else if (pt.size() == 2 && axes.size() == 3)
+            pt.push_back(min.at(2) + 0.5 * (max.at(2) - min.at(2)));
+        else if (pt.size() == 3 && axes.size() == 2)
+            pt.pop_back();
+        timeTabSinglePoint->SetValue(pt);
+        plotParams->SetSinglePoint(pt);
     }
 
     // Update LOD, Refinement
