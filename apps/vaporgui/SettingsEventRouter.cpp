@@ -197,14 +197,33 @@ void SettingsEventRouter::_changesPerSaveChanged() {
 }
 
     
-bool SettingsEventRouter::_fileExistanceWarning( QString& filename )
+bool SettingsEventRouter::_confirmFileExist( QString& qfilename )
 {
-
+    QFileInfo check_file( qfilename );
+    if ( check_file.exists() )
+    {
+        QMessageBox msgBox; 
+        msgBox.setWindowTitle("Are you sure?");
+        QString msg = "The following file exists.\n ";
+        msg += qfilename;
+        msg += "\n"; 
+        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
+        msgBox.setText( msg );
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if(msgBox.exec() == QMessageBox::No)
+            //_updateTab();
+            return false;
+        else
+            return true;
+    }
+    else
+        return true;
 }
 
-void SettingsEventRouter::_chooseAutoSaveFile() {
+void SettingsEventRouter::_chooseAutoSaveFile() 
+{
 	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
-
     QFileDialog fileDialog( _autoSaveFileButton, 
                             QString::fromAscii("Select auso-save VAPOR session file"),
                             QString::fromStdString( sParams->GetAutoSaveSessionFile() ),
@@ -221,27 +240,13 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
     if( !qfilename.endsWith( ".vs3" ) )
         qfilename.append(".vs3");
 
-    QFileInfo check_file( qfilename );
-    if ( check_file.exists() )
+    if( !_confirmFileExist( qfilename ) )
     {
-        QMessageBox msgBox; 
-        msgBox.setWindowTitle("Are you sure?");
-        QString msg = "The following file exists.\n ";
-        msg += qfilename;
-        msg += "\n"; 
-        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
-        msgBox.setText( msg );
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        if(msgBox.exec() == QMessageBox::No)
-        {
-            _updateTab();
-            return;
-        }
+        _updateTab();
+        return;
     }
 
-	bool goodToWrite = FileOperationChecker::FileGoodToWrite( qfilename ); 
-	if (goodToWrite) 
+	if( FileOperationChecker::FileGoodToWrite( qfilename ) )
     {
 		sParams->SetAutoSaveSessionFile( qfilename.toStdString() );
 		_saveSettings();
@@ -253,7 +258,8 @@ void SettingsEventRouter::_chooseAutoSaveFile() {
 	}
 }
 
-void SettingsEventRouter::_autoSaveFileChanged() {
+void SettingsEventRouter::_autoSaveFileChanged() 
+{
 	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
 	QString qfilename = _autoSaveFileEdit->text();
     if( !qfilename.endsWith( ".vs3" ) )
@@ -262,36 +268,21 @@ void SettingsEventRouter::_autoSaveFileChanged() {
         _autoSaveFileEdit->setText( qfilename );
     }
 
-    QFileInfo check_file( qfilename );
-    if ( check_file.exists() )
+    if( !_confirmFileExist( qfilename ) )
     {
-        QMessageBox msgBox; 
-        msgBox.setWindowTitle("Are you sure?");
-        QString msg = "The following file exists.\n ";
-        msg += qfilename;
-        msg += "\n"; 
-        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
-        msgBox.setText( msg );
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        if(msgBox.exec() == QMessageBox::No)
-        {
-            _updateTab();
-            return;
-        }
+        _updateTab();
+        return;
     }
-	std::string file = qfilename.toStdString();
 
 	if (FileOperationChecker::FileGoodToWrite(qfilename))
     {
-        sParams->SetAutoSaveSessionFile(file);
+        sParams->SetAutoSaveSessionFile(qfilename.toStdString());
         _saveSettings();
     }
 	else 
     {
 		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
 		_updateTab();
-		return;
 	}
 }
 
