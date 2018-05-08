@@ -253,6 +253,7 @@ void AnnotationEventRouter::addRendererToCombo(
 	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
 	renNames = paramsMgr->GetRenderParamInstances(
 		visName,
+		dataSetName,
 		typeName
 	);
 
