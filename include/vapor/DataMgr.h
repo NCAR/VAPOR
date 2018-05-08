@@ -978,8 +978,6 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	string varname,
 	int level,
 	int lod,
-	const vector <size_t> &min,
-	const vector <size_t> &max,
 	vector <string> &varnames,
 	vector < vector <size_t > > &dims_at_levelvec,
 	vector < vector <size_t > > &bsvec,
