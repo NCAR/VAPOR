@@ -331,6 +331,12 @@ void RenderParams::SetColorbarPbase(ColorbarPbase* pb){
 
 
 MapperFunction* RenderParams::GetMapperFunc(string varname) {
+
+	// This way we always return a valid MapperFunction
+	//
+	if (varname.empty()) {
+		varname = "NULL";
+	}
 	MapperFunction *tfptr = (MapperFunction *) _TFs->GetParams(varname);
 
 	if (tfptr) return(tfptr);
@@ -697,7 +703,10 @@ RenParamsContainer::~RenParamsContainer() {
 
 RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name) {
 	assert(pb != NULL);
-	assert(! name.empty());
+
+    if (name.empty()) {
+        name = "NULL";
+    }
 
 	map <string, RenderParams *>::iterator itr = _elements.find(name);
 	if (itr != _elements.end()) {
@@ -769,6 +778,11 @@ void RenParamsContainer::Remove(string name) {
 }
 
 RenderParams *RenParamsContainer::GetParams(string name) const {
+
+    if (name.empty()) {
+        name = "NULL";
+    }
+
 	map <string, RenderParams *>::const_iterator itr = _elements.find(name);
 	if (itr != _elements.end())  return(itr->second);
 
