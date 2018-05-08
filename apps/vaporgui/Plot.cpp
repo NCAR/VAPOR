@@ -439,6 +439,8 @@ void Plot::_setInitialExtents()
     VAPoR::DataMgrUtils::GetExtents(dataMgr, 0, availVars, minFullExtents, maxFullExtents, axes);
     int dimensionality = axes.size();
 
+    if (dimensionality < 2) return;
+
     spaceTabP1->SetDimensionality(dimensionality);
     spaceTabP2->SetDimensionality(dimensionality);
     timeTabSinglePoint->SetDimensionality(dimensionality);
