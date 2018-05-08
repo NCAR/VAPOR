@@ -195,7 +195,7 @@ void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, 
 
     std::vector<string> renNames;
     ParamsMgr *         paramsMgr = _controlExec->GetParamsMgr();
-    renNames = paramsMgr->GetRenderParamInstances(visName, typeName);
+    renNames = paramsMgr->GetRenderParamInstances(visName, dataSetName, typeName);
 
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
