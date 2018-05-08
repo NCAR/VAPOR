@@ -289,7 +289,7 @@ void RenderHolder::_deleteRenderer() {
 	// Get the currently selected renderer.
 	//
 	string rendererName, rendererType, dataSetName;
-	_getRow(_currentRow, rendererName, rendererType, dataSetName);
+	_getRowInfo(_currentRow, rendererName, rendererType, dataSetName);
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	paramsMgr->BeginSaveStateGroup("Delete renderer");
@@ -310,7 +310,7 @@ void RenderHolder::_deleteRenderer() {
 
 	// Make the renderer in the first row the active renderer
 	//
-	_getRow(0, rendererName, rendererType, dataSetName);
+	_getRowInfo(0, rendererName, rendererType, dataSetName);
 	if (rendererName!="" || rendererType!="" || dataSetName!="") {
 		_activeRendererChanged(0, 0);
 		emit activeChanged(activeViz, rendererType, rendererName);
@@ -328,6 +328,8 @@ void RenderHolder::_activeRendererChanged(int row, int col) {
 	string rendererName = _vaporTable->GetValue(row, 0);
 	string rendererType = _vaporTable->GetValue(row, 1);
 	p->SetActiveRenderer(activeViz, rendererType, rendererName);
+	if (col != 3)
+		_vaporTable->SetActiveRow(row);
 	emit activeChanged(activeViz, rendererType, rendererName);
 }
 
@@ -372,9 +374,11 @@ void RenderHolder::_tableValueChanged(int row, int col) {
 		activeViz, dataSetName, rendererType, rendererName, state
 	);
 	if (rc<0) {
-		MSG_ERR("Can't create renderer");
+		MSG_ERR("Can't activate renderer");
 		return;
 	}
+
+	_activeRendererChanged(row, col);
 }
 
 void RenderHolder::_itemTextChange(QTableWidgetItem* item) {
@@ -614,6 +618,9 @@ void RenderHolder::Update() {
 	} 
 
 	_vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
+	int row = _getRow(activeRenderInst);
+	if (row >= 0)
+		_vaporTable->SetActiveRow(row);
 
 	_updateDupCombo();
 
@@ -649,7 +656,21 @@ void RenderHolder::SetCurrentWidget(string name) {
     stackedWidget->show();
 }
 
-void RenderHolder::_getRow(
+int RenderHolder::_getRow(string renderInst) const {
+	int row = -1;
+	int rowCount = _vaporTable->RowCount();
+	for (int i=0; i<rowCount; i++) {
+		string tableValue = _vaporTable->GetStringValue(i,0);
+		if (renderInst != tableValue)
+			continue;
+
+		row = i;
+	}
+
+	return row;
+}
+
+void RenderHolder::_getRowInfo(
 	int row, string &rendererName, string &rendererType, 
 	string &dataSetName
 ) const {

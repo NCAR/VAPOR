@@ -253,6 +253,7 @@ void AnnotationEventRouter::addRendererToCombo(
 	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
 	renNames = paramsMgr->GetRenderParamInstances(
 		visName,
+		dataSetName,
 		typeName
 	);
 
@@ -773,6 +774,7 @@ void AnnotationEventRouter::timeAnnotationChanged() {
 	aParams->SetTimeType(index);
 
 	switch(index) {
+		case 0: _controlExec->ClearText(); break;
 		case 1: drawTimeStep(); break;
 		case 2: drawTimeUser(); break;
 		case 3: drawTimeStamp(); break;
