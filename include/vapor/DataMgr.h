@@ -781,8 +781,8 @@ private:
                         vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec,
                         vector<vector<size_t>> &bmaxvec) const;
 
-    int _setupConnVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<vector<size_t>> &dims_at_levelvec,
-                       vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const;
+    int _setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec,
+                       vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const;
 
     VAPoR::Grid *_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless);
 
