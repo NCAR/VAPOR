@@ -109,7 +109,7 @@ class SettingsEventRouter : public QWidget, public Ui_SettingsGUI, public EventR
     //                 2) the user says YES to overwrite.
     // Returns false if the users says NO to overwrite.
     //
-    bool _fileExistanceWarning(QString &filename);
+    bool _confirmFileExist(QString &filename);
 
     SettingsParams *_defaultParams;
 
