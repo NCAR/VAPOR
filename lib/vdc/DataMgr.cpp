@@ -1529,6 +1529,8 @@ vector<string> DataMgr::_get_var_dependencies(string varname) const {
 
 bool DataMgr::VariableExists(
     size_t ts, string varname, int level, int lod) const {
+    if (varname.empty())
+        return (false);
 
     // disable error reporting
     //
