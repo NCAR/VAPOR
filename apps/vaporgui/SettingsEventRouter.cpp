@@ -193,6 +193,9 @@ void SettingsEventRouter::_changesPerSaveChanged() {
     _saveSettings();
 }
 
+bool SettingsEventRouter::_fileExistanceWarning(QString &filename) {
+}
+
 void SettingsEventRouter::_chooseAutoSaveFile() {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
