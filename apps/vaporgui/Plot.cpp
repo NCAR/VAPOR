@@ -140,6 +140,7 @@ void Plot::Update()
     if( dmNames.empty() )
     {
         this->close();
+        return;
     }
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
                     (_paramsMgr->GetParams( GUIStateParams::GetClassType() ));
