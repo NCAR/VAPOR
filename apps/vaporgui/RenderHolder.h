@@ -160,7 +160,9 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
     int _currentRow;
     std::vector<string> _widgetNames;
 
-    void _getRow(
+    int _getRow(string renderInst) const;
+
+    void _getRowInfo(
         int row, string &renderInst, string &renderClass,
         string &dataSetName) const;
 
