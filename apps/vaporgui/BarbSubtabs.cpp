@@ -86,7 +86,8 @@ double BarbAppearanceSubtab::CalculateDomainLength(int ts)
         if (!_dataMgr->VariableExists(ts, varName, level, 0)) continue;
 
         vector<double> minExt, maxExt;
-        _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
+        int            rc = _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
+        assert(rc >= 0);
 
         // If we're dealing with 2D vars, skip the Z element
         //
