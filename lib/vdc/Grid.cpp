@@ -389,18 +389,43 @@ void Grid::ConstCellIteratorSG::next(const long &offset)
     _index = Wasp::VectorizeCoords(newIndexL, _dims);
 }
 
+bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(const std::vector<size_t> &cindices) const
+{
+    vector<std::vector<size_t>> nodes;
+    bool                        status = _g->GetCellNodes(cindices, nodes);
+    if (!status) return (false);
+
+    for (int i = 0; i < nodes.size(); i++) {
+        vector<double> coords;
+        _g->GetUserCoordinates(nodes[i], coords);
+        if (!_pred(coords)) return (false);
+    }
+
+    return (true);
+}
+
 Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const Grid *g, const std::vector<double> &minu, const std::vector<double> &maxu) : ConstCellIteratorSG(g, true), _pred(minu, maxu)
 {
+#ifdef VAPOR3_0_0
+    // Advance to first node inside box
+    //
     _coordItr = g->ConstCoordBegin();
+
+    if (!_pred(*_coordItr)) { next(); }
+#else
+    _g = g;
 
     // Advance to first node inside box
     //
-    if (!_pred(*_coordItr)) { next(); }
+    if (!_cellInsideBox(_index)) { next(); }
+#endif
 }
 
 Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs) : ConstCellIteratorSG()
 {
+#ifdef VAPOR3_0_0
     _coordItr = rhs._coordItr;
+#endif
     _pred = rhs._pred;
 }
 
@@ -408,20 +433,35 @@ Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG() : ConstCellIteratorSG() {
 
 void Grid::ConstCellIteratorBoxSG::next()
 {
+#ifdef VAPOR3_0_0
     do {
         ConstCellIteratorSG::next();
         ++_coordItr;
     } while (!_pred(*_coordItr) && _index != _lastIndex);
+#else
+    do {
+        ConstCellIteratorSG::next();
+    } while (!_cellInsideBox(_index) && _index != _lastIndex);
+#endif
 }
 
 void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 {
+#ifdef VAPOR3_0_0
     _coordItr += offset;
-
     while (!_pred(*_coordItr) && _index != _lastIndex) {
         ConstCellIteratorSG::next();
         ++_coordItr;
     }
+
+#else
+
+    long count = offset;
+    while (!_cellInsideBox(_index) && _index != _lastIndex && count > 0) {
+        ConstCellIteratorSG::next();
+        count--;
+    }
+#endif
 }
 
 //
