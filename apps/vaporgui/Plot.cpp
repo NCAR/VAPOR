@@ -191,21 +191,19 @@ void Plot::Update()
 
     // If there are variables selected, update the extents based on the selected variables.
     if (enabledVars.size() > 0) {
+        // First update the space tab
         std::vector<double> min, max;
         std::vector<int>    axes;
         VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetCurrentTimestep(), enabledVars, min, max, axes);
         assert(axes.size() == 2 || axes.size() == 3);
 
-        timeTabSinglePoint->SetDimensionality(axes.size());
         spaceTabP1->SetDimensionality(axes.size());
         spaceTabP2->SetDimensionality(axes.size());
-
         spaceTabP1->SetExtents(min, max);
         spaceTabP2->SetExtents(min, max);
-        timeTabSinglePoint->SetExtents(min, max);
 
         std::vector<double> pt = plotParams->GetPoint1();
-        if (pt.size() == 0)    // 1st time
+        if (pt.size() == 0)    // 1st time open Plot
             pt = min;
         else if (pt.size() == 2 && axes.size() == 3)
             pt.push_back(min.at(2));
@@ -231,6 +229,12 @@ void Plot::Update()
         }
         spaceTabP2->SetValue(pt);
         plotParams->SetPoint2(pt);
+
+        // Second update the time tab
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetMinMaxTS().at(0), enabledVars, min, max, axes);
+        assert(axes.size() == 2 || axes.size() == 3);
+        timeTabSinglePoint->SetDimensionality(axes.size());
+        timeTabSinglePoint->SetExtents(min, max);
 
         pt = plotParams->GetSinglePoint();
         if (pt.size() == 0) {
