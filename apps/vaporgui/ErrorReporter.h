@@ -32,6 +32,31 @@
 #include <cassert>
 #include <QMessageBox>
 
+
+//! \class ErrorReporterPopup
+//! \ingroup Public_GUI
+//! \brief A helper class for ErrorReporter that is neccessary because the Qt gui is in a separate thread
+//! \author Stas Jaroszynski
+//! \version 1.0
+//! \date May 2018
+
+class ErrorReporterPopup : public QMessageBox {
+    Q_OBJECT;
+    
+public:
+    ErrorReporterPopup(QWidget * parent, int id);
+    void setLogText(std::string text);
+    bool isDead() const { return dead; };
+    
+    private slots:
+    void doAction(QAbstractButton *button);
+    
+private:
+    bool dead;
+    std::string _logText;
+};
+
+
 #define ERRORREPORTER_DEFAULT_MESSAGE "The action failed"
 
 //! \class ErrorReporter
@@ -53,61 +78,59 @@
 #define MSG_DIAG(M) \
 	(ErrorReporter::GetInstance()->Report(M, ErrorReporter::Diagnostic))
 
-
 class ErrorReporter {
+public:
 
-	public:
+	ErrorReporter(QWidget *parent);
+	enum Type { Diagnostic=0, Info=1, Warning=2, Error=3 };
 
-		ErrorReporter(QWidget *parent);
-		enum Type { Diagnostic=0, Info=1, Warning=2, Error=3 };
+	struct Message {
+		Type type;
+		std::string value;
+		int err_code;
 
-		struct Message {
-			Type type;
-			std::string value;
-			int err_code;
+		Message(Type type_, std::string value_, int err_code_ = 0)
+			: type(type_), value(value_), err_code(err_code_) {}
+	};
 
-			Message(Type type_, std::string value_, int err_code_ = 0)
-				: type(type_), value(value_), err_code(err_code_) {}
-		};
+	//! Returns the singleton instance of this class with lazy initialization
+	//! \retval ErrorReporter instance
+	static ErrorReporter *GetInstance() {
+		return(_instance);
+	};
 
-		//! Returns the singleton instance of this class with lazy initialization
-		//! \retval ErrorReporter instance
-		static ErrorReporter *GetInstance() {
-			return(_instance);
-		};
+	//! Displays the current log of errors with the default message ERRORREPORTER_DEFAULT_MESSAGE
+	static void ShowErrors();
 
-		//! Displays the current log of errors with the default message ERRORREPORTER_DEFAULT_MESSAGE
-		static void ShowErrors();
+	//! Displays an error message with the log of errors and outputs the message to the log file
+	//! \param string msg to display explaining error cause/implications
+	//! \param Type severity of message
+	//! \param string details of error. Default to current erros in log
+	static void Report(std::string msg, Type severity = Diagnostic, std::string details = "");
 
-		//! Displays an error message with the log of errors and outputs the message to the log file
-		//! \param string msg to display explaining error cause/implications
-		//! \param Type severity of message
-		//! \param string details of error. Default to current erros in log
-		static void Report(std::string msg, Type severity = Diagnostic, std::string details = "");
+	//! Returns basic system OS information
+	//! \retval string containing OS information
+	static std::string GetSystemInformation();
 
-		//! Returns basic system OS information
-		//! \retval string containing OS information
-		static std::string GetSystemInformation();
+	//! Opens log file and begins logging error and diagnostic messages
+	//! \retval int returns -1 on failure
+	static int OpenLogFile(std::string path);
 
-		//! Opens log file and begins logging error and diagnostic messages
-		//! \retval int returns -1 on failure
-		static int OpenLogFile(std::string path);
+protected:
+    ~ErrorReporter();
 
-	protected:
-		~ErrorReporter();
+private:
+	ErrorReporter();
+	static ErrorReporter *_instance;
+	std::vector<Message> _log;
+	std::vector<Message> _fullLog;
+	std::string _logFilePath;
+	FILE *_logFile;
+	QWidget *_parent;
+    std::vector<ErrorReporterPopup *> _boxes;
 
-	private:
-		ErrorReporter();
-		static ErrorReporter *_instance;
-		std::vector<Message> _log;
-		std::vector<Message> _fullLog;
-		std::string _logFilePath;
-		FILE *_logFile;
-		static QWidget *_parent;
-		static QMessageBox *_box;
-
-		friend void _myBaseErrorCallback(const char *msg, int err_code);
-		friend void _myBaseDiagCallback(const char *msg);
+	friend void _myBaseErrorCallback(const char *msg, int err_code);
+	friend void _myBaseDiagCallback(const char *msg);
 };
 
 #endif
