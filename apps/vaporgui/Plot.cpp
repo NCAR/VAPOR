@@ -144,7 +144,7 @@ void Plot::Update()
     dataMgrCombo->blockSignals(false);
 
     // Update "Add a Variable"
-    std::vector<std::string> availVars = currentDmgr->GetDataVarNames();
+    std::vector<std::string> availVars = currentDmgr->GetDataVarNames(2);
     for (int i = 0; i < enabledVars.size(); i++)
         for (int rmIdx = 0; rmIdx < availVars.size(); rmIdx++)
             if (availVars[rmIdx] == enabledVars[i]) {
@@ -154,19 +154,19 @@ void Plot::Update()
     std::sort(availVars.begin(), availVars.end());
     newVarCombo->blockSignals(true);
     newVarCombo->clear();
+    newVarCombo->blockSignals(false);
     newVarCombo->addItem(QString::fromAscii("Add a Variable"));
     for (std::vector<std::string>::iterator it = availVars.begin(); it != availVars.end(); ++it) newVarCombo->addItem(QString::fromStdString(*it));
     newVarCombo->setCurrentIndex(0);
-    newVarCombo->blockSignals(false);
 
     // Update "Remove a Variable"
     std::sort(enabledVars.begin(), enabledVars.end());
     removeVarCombo->blockSignals(true);
     removeVarCombo->clear();
+    removeVarCombo->blockSignals(false);
     removeVarCombo->addItem(QString::fromAscii("Remove a Variable"));
     for (int i = 0; i < enabledVars.size(); i++) removeVarCombo->addItem(QString::fromStdString(enabledVars[i]));
     removeVarCombo->setCurrentIndex(0);
-    removeVarCombo->blockSignals(false);
 
     // Update "Variable Table"
     variablesTable->clear();    // This also deletes the items properly.
