@@ -80,9 +80,11 @@ class Plot : public QDialog, public Ui_PlotWindow {
 
     // Returns a string with the proper X label if all variables share the same coordinate unit.
     //   Otherwise returns an empty string.
+    //
     std::string _getXLabel();
     // Returns a string with the proper Y label if all variables share the same unit.
     //   Otherwise returns an empty string.
+    //
     std::string _getYLabel();
 };
 
