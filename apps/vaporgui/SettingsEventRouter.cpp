@@ -246,22 +246,22 @@ void SettingsEventRouter::_chooseAutoSaveFile()
         return;
     }
 
-	if( FileOperationChecker::FileGoodToWrite( qfilename ) )
+    if( FileOperationChecker::FileGoodToWrite( qfilename ) )
     {
-		sParams->SetAutoSaveSessionFile( qfilename.toStdString() );
-		_saveSettings();
-	}
-	else 
+        sParams->SetAutoSaveSessionFile( qfilename.toStdString() );
+        _saveSettings();
+    }
+    else 
     {
-		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
-		_updateTab();
-	}
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
 }
 
 void SettingsEventRouter::_autoSaveFileChanged() 
 {
-	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
-	QString qfilename = _autoSaveFileEdit->text();
+    SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+    QString qfilename = _autoSaveFileEdit->text();
     if( !qfilename.endsWith( ".vs3" ) )
     {
         qfilename.append(".vs3");
@@ -274,16 +274,16 @@ void SettingsEventRouter::_autoSaveFileChanged()
         return;
     }
 
-	if (FileOperationChecker::FileGoodToWrite(qfilename))
+    if (FileOperationChecker::FileGoodToWrite(qfilename))
     {
         sParams->SetAutoSaveSessionFile(qfilename.toStdString());
         _saveSettings();
     }
-	else 
+    else 
     {
-		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
-		_updateTab();
-	}
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
 }
 
 void SettingsEventRouter::_setSessionPath() {
