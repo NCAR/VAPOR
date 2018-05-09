@@ -130,9 +130,6 @@ bool Statistics::Update()
 
     // Update "Add a Variable"
     std::vector<std::string> availVars   = currentDmgr->GetDataVarNames(2);
-    std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
-    for( int i = 0; i < availVars3D.size(); i++ )
-        availVars.push_back( availVars3D[i] );
     for( int i = 0; i < enabledVars.size(); i++ )
         for( int rmIdx = 0; rmIdx < availVars.size(); rmIdx++ )
             if( availVars[ rmIdx ] == enabledVars[i] )
@@ -143,13 +140,13 @@ bool Statistics::Update()
     std::sort( availVars.begin(), availVars.end() );
     NewVarCombo->blockSignals( true );
     NewVarCombo->clear();
+    NewVarCombo->blockSignals( false );
     NewVarCombo->addItem( QString::fromAscii("Add a Variable") );
     for(std::vector<std::string>::iterator it = availVars.begin(); it != availVars.end(); ++it)
     {
         NewVarCombo->addItem( QString::fromStdString(*it));
     }
     NewVarCombo->setCurrentIndex( 0 );
-    NewVarCombo->blockSignals( false );
 
     // Update "Remove a Variable"
     assert( enabledVars.size() == _validStats.GetVariableCount() );
@@ -1129,6 +1126,8 @@ void Statistics::_exportTextClicked()
                 (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
         VAPoR::DataMgr* currentDmgr = _controlExec->GetDataStatus()->GetDataMgr( dsName );
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
+        availVars3D.clear();    // This is a temporary change to hide all 3D variables. 
+                                //   Removing this line could expose 3D variables again.
 
         file << "Data Source = " << guiParams->GetStatsDatasetName() << endl << endl;
         file << "#Variable Statistics:" << endl;
