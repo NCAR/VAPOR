@@ -193,8 +193,9 @@ void Plot::Update()
     if (enabledVars.size() > 0) {
         std::vector<double> min, max;
         std::vector<int>    axes;
-        VAPoR::DataMgrUtils::GetExtents(currentDmgr, 0, enabledVars, min, max, axes);
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetCurrentTimestep(), enabledVars, min, max, axes);
         assert(axes.size() == 2 || axes.size() == 3);
+
         timeTabSinglePoint->SetDimensionality(axes.size());
         spaceTabP1->SetDimensionality(axes.size());
         spaceTabP2->SetDimensionality(axes.size());
@@ -210,6 +211,10 @@ void Plot::Update()
             pt.push_back(min.at(2));
         else if (pt.size() == 3 && axes.size() == 2)
             pt.pop_back();
+        for (size_t i = 0; i < pt.size(); i++) {
+            pt[i] = pt[i] > min[i] ? pt[i] : min[i];
+            pt[i] = pt[i] < max[i] ? pt[i] : max[i];
+        }
         spaceTabP1->SetValue(pt);
         plotParams->SetPoint1(pt);
 
@@ -220,6 +225,10 @@ void Plot::Update()
             pt.push_back(max.at(2));
         else if (pt.size() == 3 && axes.size() == 2)
             pt.pop_back();
+        for (size_t i = 0; i < pt.size(); i++) {
+            pt[i] = pt[i] > min[i] ? pt[i] : min[i];
+            pt[i] = pt[i] < max[i] ? pt[i] : max[i];
+        }
         spaceTabP2->SetValue(pt);
         plotParams->SetPoint2(pt);
 
@@ -230,6 +239,10 @@ void Plot::Update()
             pt.push_back(min.at(2) + 0.5 * (max.at(2) - min.at(2)));
         else if (pt.size() == 3 && axes.size() == 2)
             pt.pop_back();
+        for (size_t i = 0; i < pt.size(); i++) {
+            pt[i] = pt[i] > min[i] ? pt[i] : min[i];
+            pt[i] = pt[i] < max[i] ? pt[i] : max[i];
+        }
         timeTabSinglePoint->SetValue(pt);
         plotParams->SetSinglePoint(pt);
     }
