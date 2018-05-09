@@ -32,6 +32,29 @@
 #include <cassert>
 #include <QMessageBox>
 
+//! \class ErrorReporterPopup
+//! \ingroup Public_GUI
+//! \brief A helper class for ErrorReporter that is neccessary because the Qt gui is in a separate thread
+//! \author Stas Jaroszynski
+//! \version 1.0
+//! \date May 2018
+
+class ErrorReporterPopup : public QMessageBox {
+    Q_OBJECT;
+
+public:
+    ErrorReporterPopup(QWidget *parent, int id);
+    void setLogText(std::string text);
+    bool isDead() const { return dead; };
+
+private slots:
+    void doAction(QAbstractButton *button);
+
+private:
+    bool        dead;
+    std::string _logText;
+};
+
 #define ERRORREPORTER_DEFAULT_MESSAGE "The action failed"
 
 //! \class ErrorReporter
@@ -89,13 +112,13 @@ protected:
 
 private:
     ErrorReporter();
-    static ErrorReporter *_instance;
-    std::vector<Message>  _log;
-    std::vector<Message>  _fullLog;
-    std::string           _logFilePath;
-    FILE *                _logFile;
-    static QWidget *      _parent;
-    static QMessageBox *  _box;
+    static ErrorReporter *            _instance;
+    std::vector<Message>              _log;
+    std::vector<Message>              _fullLog;
+    std::string                       _logFilePath;
+    FILE *                            _logFile;
+    QWidget *                         _parent;
+    std::vector<ErrorReporterPopup *> _boxes;
 
     friend void _myBaseErrorCallback(const char *msg, int err_code);
     friend void _myBaseDiagCallback(const char *msg);
