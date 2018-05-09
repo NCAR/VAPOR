@@ -183,7 +183,6 @@ bool SettingsEventRouter::_confirmFileExist(QString &qfilename)
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         if (msgBox.exec() == QMessageBox::No)
-            //_updateTab();
             return false;
         else
             return true;
