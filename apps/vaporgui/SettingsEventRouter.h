@@ -96,6 +96,13 @@ private:
     void _updateStartupSettings();
     void _updateDirectoryPaths();
 
+    // Checks if a file exists on the disk, and warns the user if it does.
+    // Returns true if 1) there is no such file on disk; and
+    //                 2) the user says YES to overwrite.
+    // Returns false if the users says NO to overwrite.
+    //
+    bool _confirmFileExist(QString &filename);
+
     SettingsParams *_defaultParams;
 
     string _choosePathHelper(string current, string help);

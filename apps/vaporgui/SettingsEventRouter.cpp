@@ -169,16 +169,48 @@ void SettingsEventRouter::_changesPerSaveChanged()
     _saveSettings();
 }
 
+bool SettingsEventRouter::_confirmFileExist(QString &qfilename)
+{
+    QFileInfo check_file(qfilename);
+    if (check_file.exists()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        QString msg = "The following file exists.\n ";
+        msg += qfilename;
+        msg += "\n";
+        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
+        msgBox.setText(msg);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No)
+            return false;
+        else
+            return true;
+    } else
+        return true;
+}
+
 void SettingsEventRouter::_chooseAutoSaveFile()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    QFileDialog     fileDialog(_autoSaveFileButton, QString::fromAscii("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()),
+                           QString::fromAscii("Vapor 3 Session Files (*.vs3)"));
+    fileDialog.setDefaultSuffix(QString::fromAscii("vs3"));
+    fileDialog.setOption(QFileDialog::DontConfirmOverwrite);
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec() != QDialog::Accepted) return;
+    QStringList files = fileDialog.selectedFiles();
+    if (files.isEmpty() || files.size() > 1) return;
+    QString qfilename = files.first();
+    if (!qfilename.endsWith(".vs3")) qfilename.append(".vs3");
 
-    QString fileName =
-        QFileDialog::getSaveFileName(_autoSaveFileButton, tr("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()), tr("Vapor 3 Session Files (*.vs3)"));
+    if (!_confirmFileExist(qfilename)) {
+        _updateTab();
+        return;
+    }
 
-    bool goodToWrite = FileOperationChecker::FileGoodToWrite(fileName);
-    if (goodToWrite) {
-        sParams->SetAutoSaveSessionFile(fileName.toStdString());
+    if (FileOperationChecker::FileGoodToWrite(qfilename)) {
+        sParams->SetAutoSaveSessionFile(qfilename.toStdString());
         _saveSettings();
     } else {
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
@@ -189,17 +221,24 @@ void SettingsEventRouter::_chooseAutoSaveFile()
 void SettingsEventRouter::_autoSaveFileChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-    QString         qfile = _autoSaveFileEdit->text();
-    string          file = qfile.toStdString();
+    QString         qfilename = _autoSaveFileEdit->text();
+    if (!qfilename.endsWith(".vs3")) {
+        qfilename.append(".vs3");
+        _autoSaveFileEdit->setText(qfilename);
+    }
 
-    if (FileOperationChecker::FileGoodToWrite(qfile))
-        sParams->SetAutoSaveSessionFile(file);
-    else {
-        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+    if (!_confirmFileExist(qfilename)) {
         _updateTab();
         return;
     }
-    _saveSettings();
+
+    if (FileOperationChecker::FileGoodToWrite(qfilename)) {
+        sParams->SetAutoSaveSessionFile(qfilename.toStdString());
+        _saveSettings();
+    } else {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
 }
 
 void SettingsEventRouter::_setSessionPath()
