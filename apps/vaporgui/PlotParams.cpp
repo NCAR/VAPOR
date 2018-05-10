@@ -20,7 +20,7 @@
 #include <sstream>
 #include <string>
 #include <cassert>
-#include <PlotParams.h>
+#include "PlotParams.h"
 
 using namespace VAPoR;
 
@@ -30,6 +30,8 @@ const string PlotParams::_p2Tag = "Point1";
 const string PlotParams::_numSamplesTag = "NumberOfSamplesTag";
 const string PlotParams::_singlePtTag = "SinglePoint";
 const string PlotParams::_lockAxisTag = "LockAxis";
+const string PlotParams::_minExtentTag = "MinExtentTag";
+const string PlotParams::_maxExtentTag = "MaxExtentTag";
 
 //
 // Register class with object factory!!!
@@ -83,3 +85,11 @@ std::vector<bool> PlotParams::GetAxisLocks()
 
     return locks;
 }
+
+std::vector<double> PlotParams::GetMinExtents() const { return GetValueDoubleVec(_minExtentTag); }
+
+void PlotParams::SetMinExtents(const std::vector<double> &point) { SetValueDoubleVec(_minExtentTag, "Minimal extent", point); }
+
+std::vector<double> PlotParams::GetMaxExtents() const { return GetValueDoubleVec(_maxExtentTag); }
+
+void PlotParams::SetMaxExtents(const std::vector<double> &point) { SetValueDoubleVec(_maxExtentTag, "Maximal Extent", point); }
