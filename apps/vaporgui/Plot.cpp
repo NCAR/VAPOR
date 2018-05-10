@@ -34,9 +34,9 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     // Get the active dataset name
     std::string              currentDatasetName;
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
-    if (dmNames.empty()) {
-        std::cerr << "No data set chosen yet. Plot shouldn't run into this condition." << std::endl;
-    } else {
+    if (dmNames.empty())
+        MSG_ERR("No data set chosen yet. Plot shouldn't run into this condition.");
+    else {
         GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
         currentDatasetName = guiParams->GetPlotDatasetName();
         if (currentDatasetName == "" || currentDatasetName == "NULL")    // not initialized yet
@@ -543,7 +543,7 @@ void Plot::_spaceTabPlotClicked()
 
         file.close();
     } else
-        std::cerr << "QT temporary file not able to open" << std::endl;
+        MSG_ERR("QT temporary file not able to open");
 }
 
 void Plot::_timeTabPlotClicked()
@@ -597,7 +597,7 @@ void Plot::_timeTabPlotClicked()
 
         file.close();
     } else
-        std::cerr << "QT temporary file not able to open" << std::endl;
+        MSG_ERR("QT temporary file not able to open");
 }
 
 void Plot::_invokePython(const QString &outFile, const std::vector<std::string> &enabledVars, const std::vector<std::vector<float>> &sequences, const std::vector<float> &xValues,
@@ -616,7 +616,7 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
     pModule = PyImport_Import(pName);
 
     if (pModule == NULL) {
-        std::cerr << "pModule NULL!!" << std::endl;
+        MSG_ERR("pModule NULL!!");
         PyErr_Print();
         return;
     }
@@ -672,11 +672,11 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
 
         pValue = PyObject_CallObject(pFunc, pArgs);
         if (pValue == NULL) {
-            std::cerr << "pFunc failed to execute" << std::endl;
+            MSG_ERR("pFunc failed to execute");
             PyErr_Print();
         }
     } else {
-        std::cerr << "pFunc NULL" << std::endl;
+        MSG_ERR("pFunc NULL");
         PyErr_Print();
     }
 
