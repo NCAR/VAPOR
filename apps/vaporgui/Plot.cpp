@@ -36,9 +36,9 @@ Plot::Plot(VAPoR::DataStatus *status,
     // Get the active dataset name
     std::string currentDatasetName;
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
-    if (dmNames.empty()) {
-        std::cerr << "No data set chosen yet. Plot shouldn't run into this condition." << std::endl;
-    } else {
+    if (dmNames.empty())
+        MSG_ERR("No data set chosen yet. Plot shouldn't run into this condition.");
+    else {
         GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
         currentDatasetName = guiParams->GetPlotDatasetName();
         if (currentDatasetName == "" || currentDatasetName == "NULL") // not initialized yet
@@ -210,22 +210,31 @@ void Plot::Update() {
     if (enabledVars.size() > 0) {
         std::vector<double> min, max;
         std::vector<int> axes;
-        VAPoR::DataMgrUtils::GetExtents(currentDmgr, 0, enabledVars, min, max, axes);
-        assert(axes.size() == 2 || axes.size() == 3);
-        timeTabSinglePoint->SetDimensionality(axes.size());
-        spaceTabP1->SetDimensionality(axes.size());
-        spaceTabP2->SetDimensionality(axes.size());
+        // Retrieve the dimensionality
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr,
+                                        plotParams->GetCurrentTimestep(),
+                                        enabledVars,
+                                        min,
+                                        max,
+                                        axes);
+        size_t dimensionality = axes.size();
+        assert(dimensionality == 2 || dimensionality == 3);
 
+        // First update the space tab
+        min = plotParams->GetMinExtents();
+        max = plotParams->GetMaxExtents();
+
+        spaceTabP1->SetDimensionality(dimensionality);
+        spaceTabP2->SetDimensionality(dimensionality);
         spaceTabP1->SetExtents(min, max);
         spaceTabP2->SetExtents(min, max);
-        timeTabSinglePoint->SetExtents(min, max);
 
         std::vector<double> pt = plotParams->GetPoint1();
-        if (pt.size() == 0) // 1st time
+        if (pt.size() == 0) // 1st time open Plot
             pt = min;
-        else if (pt.size() == 2 && axes.size() == 3)
+        else if (pt.size() == 2 && dimensionality == 3)
             pt.push_back(min.at(2));
-        else if (pt.size() == 3 && axes.size() == 2)
+        else if (pt.size() == 3 && dimensionality == 2)
             pt.pop_back();
         spaceTabP1->SetValue(pt);
         plotParams->SetPoint1(pt);
@@ -233,20 +242,24 @@ void Plot::Update() {
         pt = plotParams->GetPoint2();
         if (pt.size() == 0)
             pt = max;
-        else if (pt.size() == 2 && axes.size() == 3)
+        else if (pt.size() == 2 && dimensionality == 3)
             pt.push_back(max.at(2));
-        else if (pt.size() == 3 && axes.size() == 2)
+        else if (pt.size() == 3 && dimensionality == 2)
             pt.pop_back();
         spaceTabP2->SetValue(pt);
         plotParams->SetPoint2(pt);
+
+        // Second update the time tab
+        timeTabSinglePoint->SetDimensionality(dimensionality);
+        timeTabSinglePoint->SetExtents(min, max);
 
         pt = plotParams->GetSinglePoint();
         if (pt.size() == 0) {
             for (size_t i = 0; i < min.size(); i++)
                 pt.push_back(min.at(i) + 0.5 * (max.at(i) - min.at(i)));
-        } else if (pt.size() == 2 && axes.size() == 3)
+        } else if (pt.size() == 2 && dimensionality == 3)
             pt.push_back(min.at(2) + 0.5 * (max.at(2) - min.at(2)));
-        else if (pt.size() == 3 && axes.size() == 2)
+        else if (pt.size() == 3 && dimensionality == 2)
             pt.pop_back();
         timeTabSinglePoint->SetValue(pt);
         plotParams->SetSinglePoint(pt);
@@ -258,16 +271,8 @@ void Plot::Update() {
     // Update time dimension
     spaceTabTimeSelector->SetValue(plotParams->GetCurrentTimestep());
     std::vector<long> range = plotParams->GetMinMaxTS();
-    if (range.size() > 0)
-        timeTabTimeRange->SetValue((double)range[0], (double)range[1]);
-    else {
-        int numOfTimeSteps = currentDmgr->GetNumTimeSteps();
-        timeTabTimeRange->SetValue((double)0, (double)(numOfTimeSteps - 1));
-        std::vector<long int> rangeInt;
-        rangeInt.push_back((long int)0);
-        rangeInt.push_back((long int)(numOfTimeSteps - 1));
-        plotParams->SetMinMaxTS(rangeInt);
-    }
+    assert(range.size() > 0);
+    timeTabTimeRange->SetValue((double)range[0], (double)range[1]);
 
     // Update number of samples
     numOfSamplesLineEdit->setText(QString::number(plotParams->GetNumOfSamples(), 10));
@@ -307,6 +312,7 @@ void Plot::_newVarChanged(int index) {
         std::vector<std::string> vars = plotParams->GetAuxVariableNames();
         vars.push_back(varName);
         plotParams->SetAuxVariableNames(vars);
+        _fixActiveExtents(varName);
     }
 }
 
@@ -391,6 +397,8 @@ void Plot::_spaceModeP2Changed() {
 void Plot::_spaceModeTimeChanged(int val) {
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetCurrentTimestep(val);
+    std::string emptyStr;
+    _fixActiveExtents(emptyStr);
 }
 
 void Plot::_timeModePointChanged() {
@@ -413,6 +421,8 @@ void Plot::_timeModeT1T2Changed() {
     rangeInt.push_back((long int)bigVal);
 
     plotParams->SetMinMaxTS(rangeInt);
+    std::string emptyStr;
+    _fixActiveExtents(emptyStr);
 }
 
 void Plot::_dataSourceChanged(int index) {
@@ -441,33 +451,39 @@ VAPoR::DataMgr *Plot::_getCurrentDataMgr() const {
 }
 
 void Plot::_setInitialExtents() {
-    VAPoR::DataMgr *dataMgr = this->_getCurrentDataMgr();
-
     // Set spatial extents
-    std::vector<std::string> availVars = dataMgr->GetDataVarNames();
-    std::vector<double> minFullExtents, maxFullExtents;
-    std::vector<int> axes;
-    VAPoR::DataMgrUtils::GetExtents(dataMgr, 0, availVars, minFullExtents, maxFullExtents, axes);
-    int dimensionality = axes.size();
-
+    std::vector<double> minActiveExtents, maxActiveExtents;
+    _dataStatus->GetActiveExtents(_paramsMgr,
+                                  0,
+                                  minActiveExtents,
+                                  maxActiveExtents);
+    int dimensionality = minActiveExtents.size();
     if (dimensionality < 2)
         return;
+    _getCurrentPlotParams()->SetMinExtents(minActiveExtents);
+    _getCurrentPlotParams()->SetMaxExtents(maxActiveExtents);
 
+    int numOfTimeSteps = this->_getCurrentDataMgr()->GetNumTimeSteps();
+    std::vector<long int> rangeInt;
+    rangeInt.push_back((long int)0);
+    rangeInt.push_back((long int)(numOfTimeSteps - 1));
+    _getCurrentPlotParams()->SetMinMaxTS(rangeInt);
+
+    // Set space tab extents
     spaceTabP1->SetDimensionality(dimensionality);
     spaceTabP2->SetDimensionality(dimensionality);
-    timeTabSinglePoint->SetDimensionality(dimensionality);
-    spaceTabP1->SetExtents(minFullExtents, maxFullExtents);
-    spaceTabP2->SetExtents(minFullExtents, maxFullExtents);
-    spaceTabP1->SetValue(minFullExtents);
-    spaceTabP2->SetValue(maxFullExtents);
-    timeTabSinglePoint->SetExtents(minFullExtents, maxFullExtents);
-    timeTabSinglePoint->SetValue(minFullExtents);
-
-    // Set temporal extents
-    int numOfTimeSteps = dataMgr->GetNumTimeSteps();
-    timeTabTimeRange->SetExtents(0.0, (double)(numOfTimeSteps - 1));
+    spaceTabP1->SetExtents(minActiveExtents, maxActiveExtents);
+    spaceTabP2->SetExtents(minActiveExtents, maxActiveExtents);
+    spaceTabP1->SetValue(minActiveExtents);
+    spaceTabP2->SetValue(maxActiveExtents);
     spaceTabTimeSelector->SetExtents(0.0, (double)(numOfTimeSteps - 1));
     spaceTabTimeSelector->SetValue(0.0);
+
+    // Set time tab extents
+    timeTabSinglePoint->SetDimensionality(dimensionality);
+    timeTabSinglePoint->SetExtents(minActiveExtents, maxActiveExtents);
+    timeTabSinglePoint->SetValue(minActiveExtents);
+    timeTabTimeRange->SetExtents(0.0, (double)(numOfTimeSteps - 1));
 }
 
 void Plot::_spaceTabPlotClicked() {
@@ -551,7 +567,7 @@ void Plot::_spaceTabPlotClicked() {
 
         file.close();
     } else
-        std::cerr << "QT temporary file not able to open" << std::endl;
+        MSG_ERR("QT temporary file not able to open");
 }
 
 void Plot::_timeTabPlotClicked() {
@@ -606,7 +622,7 @@ void Plot::_timeTabPlotClicked() {
 
         file.close();
     } else
-        std::cerr << "QT temporary file not able to open" << std::endl;
+        MSG_ERR("QT temporary file not able to open");
 }
 
 void Plot::_invokePython(const QString &outFile,
@@ -628,7 +644,7 @@ void Plot::_invokePython(const QString &outFile,
     pModule = PyImport_Import(pName);
 
     if (pModule == NULL) {
-        std::cerr << "pModule NULL!!" << std::endl;
+        MSG_ERR("pModule NULL!!");
         PyErr_Print();
         return;
     }
@@ -684,11 +700,11 @@ void Plot::_invokePython(const QString &outFile,
 
         pValue = PyObject_CallObject(pFunc, pArgs);
         if (pValue == NULL) {
-            std::cerr << "pFunc failed to execute" << std::endl;
+            MSG_ERR("pFunc failed to execute");
             PyErr_Print();
         }
     } else {
-        std::cerr << "pFunc NULL" << std::endl;
+        MSG_ERR("pFunc NULL");
         PyErr_Print();
     }
 
@@ -777,4 +793,52 @@ void Plot::_axisLocksChanged(int val) {
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetAxisLocks(locks);
     _spaceModeP1Changed();
+}
+
+void Plot::_fixActiveExtents(const std::string varname) {
+    VAPoR::DataMgr *currentDmgr = this->_getCurrentDataMgr();
+    VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
+    std::vector<std::string> enabledVars;
+    if (!varname.empty())
+        enabledVars.push_back(varname);
+    else
+        enabledVars = plotParams->GetAuxVariableNames();
+
+    std::vector<double> minActive, maxActive, minActiveT, maxActiveT;
+    std::vector<int> axes;
+    VAPoR::DataMgrUtils::GetExtents(currentDmgr,
+                                    plotParams->GetCurrentTimestep(),
+                                    enabledVars,
+                                    minActive,
+                                    maxActive,
+                                    axes);
+    VAPoR::DataMgrUtils::GetExtents(currentDmgr,
+                                    plotParams->GetMinMaxTS().at(0),
+                                    enabledVars,
+                                    minActiveT,
+                                    maxActiveT,
+                                    axes);
+
+    // ActiveExtents from Params;
+    std::vector<double> minParams = plotParams->GetMinExtents();
+    if (minParams.size() == 0) // 1st time invoking
+        minParams = minActive;
+    else {
+        for (size_t i = 0; i < minParams.size() && i < minActive.size(); i++) {
+            minParams[i] = minParams[i] < minActive[i] ? minParams[i] : minActive[i];
+            minParams[i] = minParams[i] < minActiveT[i] ? minParams[i] : minActiveT[i];
+        }
+    }
+    plotParams->SetMinExtents(minParams);
+
+    std::vector<double> maxParams = plotParams->GetMaxExtents();
+    if (maxParams.size() == 0)
+        maxParams = maxActive;
+    else {
+        for (size_t i = 0; i < maxParams.size() && i < maxActive.size(); i++) {
+            maxParams[i] = maxParams[i] > maxActive[i] ? maxParams[i] : maxActive[i];
+            maxParams[i] = maxParams[i] > maxActiveT[i] ? maxParams[i] : maxActiveT[i];
+        }
+    }
+    plotParams->SetMaxExtents(maxParams);
 }

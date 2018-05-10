@@ -256,6 +256,12 @@ void DataStatus::GetActiveExtents(
                 varnames.push_back(fvarnames[k]);
             }
         }
+
+        vector<string> auxVarNames = rParams[j]->GetAuxVariableNames();
+        for (int k = 0; k < auxVarNames.size(); k++) {
+            if (!auxVarNames[k].empty())
+                varnames.push_back(auxVarNames[k]);
+        }
     }
     if (varnames.size()) {
         foundOne = true;
