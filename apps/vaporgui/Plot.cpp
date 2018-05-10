@@ -38,9 +38,7 @@ Plot::Plot( VAPoR::DataStatus* status,
     std::string currentDatasetName;
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
     if( dmNames.empty() )
-    {
-        std::cerr << "No data set chosen yet. Plot shouldn't run into this condition." << std::endl;
-    }
+        MSG_ERR( "No data set chosen yet. Plot shouldn't run into this condition." );
     else
     {
         GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -621,7 +619,7 @@ void Plot::_spaceTabPlotClicked()
         file.close();
     } 
     else
-        std::cerr << "QT temporary file not able to open" << std::endl;
+        MSG_ERR( "QT temporary file not able to open" );
 }
 
 void Plot::_timeTabPlotClicked()
@@ -682,7 +680,7 @@ void Plot::_timeTabPlotClicked()
         file.close();
     } 
     else
-        std::cerr << "QT temporary file not able to open" << std::endl;
+        MSG_ERR( "QT temporary file not able to open" );
 }
 
     
@@ -707,7 +705,7 @@ void Plot::_invokePython( const QString&                              outFile,
 
     if( pModule == NULL )
     {
-        std::cerr << "pModule NULL!!" << std::endl;
+        MSG_ERR( "pModule NULL!!" );
         PyErr_Print();
         return;
     }
@@ -768,13 +766,13 @@ void Plot::_invokePython( const QString&                              outFile,
         pValue  = PyObject_CallObject( pFunc, pArgs );
         if( pValue == NULL )
         {
-            std::cerr << "pFunc failed to execute" << std::endl;
+            MSG_ERR( "pFunc failed to execute" );
             PyErr_Print();
         }
     }
     else
     {
-        std::cerr << "pFunc NULL" << std::endl;
+        MSG_ERR( "pFunc NULL" );
         PyErr_Print();
     }
 
