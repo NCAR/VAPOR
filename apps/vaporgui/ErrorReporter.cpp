@@ -27,7 +27,7 @@
     #include <unistd.h>
 #endif
 
-#if defined(DARWIN)
+#if defined(Darwin)
     #include <CoreServices/CoreServices.h>
 #elif defined(linux)
     #include <sys/utsname.h>
@@ -50,8 +50,6 @@
 using std::string;
 using std::vector;
 
-QWidget *      ErrorReporter::_parent = NULL;
-QMessageBox *  ErrorReporter::_box = NULL;
 ErrorReporter *ErrorReporter::_instance = NULL;
 
 void _segFaultHandler(int sig)
@@ -92,40 +90,21 @@ void _myBaseDiagCallback(const char *msg)
     if (e->_logFile) { fprintf(e->_logFile, "Diagnostic: %s\n", msg); }
 }
 
-void ErrorReporter::ShowErrors() { Report(ERRORREPORTER_DEFAULT_MESSAGE); }
+#define ErrorReporterPopup_OK_BUTTON_TEXT   "Ok"
+#define ErrorReporterPopup_SAVE_BUTTON_TEXT "Save Log"
 
-void ErrorReporter::Report(string msg, Type severity, string details)
+ErrorReporterPopup::ErrorReporterPopup(QWidget *parent, int id) : QMessageBox(parent), dead(false)
 {
-    ErrorReporter *e = GetInstance();
-    if (e->_logFile) { fprintf(e->_logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str()); }
+    addButton(ErrorReporterPopup_OK_BUTTON_TEXT, QMessageBox::AcceptRole);
+    addButton(ErrorReporterPopup_SAVE_BUTTON_TEXT, QMessageBox::ApplyRole);
+    setText("An error has occured");
+    connect(this, SIGNAL(buttonClicked(QAbstractButton *)), this, SLOT(doAction(QAbstractButton *)));
+}
 
-    _box->setText("An error has occured");
-    _box->setInformativeText(msg.c_str());
-    //_box->addButton(QMessageBox::Ok);
-    //_box->addButton(QMessageBox::Save);
-
-    if (details == "") {
-        while (e->_log.size()) {
-            details += e->_log.back().value + "\n";
-            if (e->_log.back().type > severity) severity = e->_log.back().type;
-            e->_log.pop_back();
-        }
-    }
-    _box->setDetailedText(details.c_str());
-
-    switch (severity) {
-    case Diagnostic:
-    case Info: _box->setIcon(QMessageBox::Information); break;
-    case Warning: _box->setIcon(QMessageBox::Warning); break;
-    case Error: _box->setIcon(QMessageBox::Critical); break;
-    }
-
-    _box->show();
-    QAbstractButton *       clicked = _box->clickedButton();
-    QMessageBox::ButtonRole role = _box->buttonRole(clicked);
-
-    switch (role) {
-    case QMessageBox::ApplyRole: {
+void ErrorReporterPopup::doAction(QAbstractButton *button)
+{
+    dead = true;
+    if (ErrorReporterPopup_SAVE_BUTTON_TEXT == button->text().toStdString()) {
         QString fileName = QFileDialog::getSaveFileName(NULL, "Save Error Log", QString(), "Text (*.txt);;All Files (*)");
         if (fileName.isEmpty()) {
             return;
@@ -136,17 +115,61 @@ void ErrorReporter::Report(string msg, Type severity, string details)
                 return;
             }
             QTextStream out(&file);
-            out << QString((GetSystemInformation() + "\n").c_str());
-            out << QString("-------------------\n");
-            out << QString((msg + "\n").c_str());
-            out << QString("-------------------\n");
-            out << QString(details.c_str());
+            out << QString(_logText.c_str());
         }
-        break;
+    } else if (ErrorReporterPopup_OK_BUTTON_TEXT == button->text().toStdString()) {
+    } else {
+        printf("Unknown ErrorReporterPopup button pressed: [%s]\n", button->text().toStdString().c_str());
     }
-    case QMessageBox::AcceptRole: break;
-    default: printf("Uknown Messagebox role %i\n", role);
+}
+
+void ErrorReporterPopup::setLogText(std::string text) { _logText = text; }
+
+void ErrorReporter::ShowErrors() { Report(ERRORREPORTER_DEFAULT_MESSAGE); }
+
+void ErrorReporter::Report(string msg, Type severity, string details)
+{
+    ErrorReporter *e = GetInstance();
+    if (e->_logFile) { fprintf(e->_logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str()); }
+
+    for (int i = 0; i < e->_boxes.size(); i++) {
+        if (e->_boxes[i]->isDead()) {
+            delete e->_boxes[i];
+            e->_boxes.erase(e->_boxes.begin() + i);
+            i--;
+        }
     }
+
+    static int          i = 0;
+    ErrorReporterPopup *box = new ErrorReporterPopup(e->_parent, i++);
+    e->_boxes.push_back(box);
+    box->setInformativeText(msg.c_str());
+
+    if (details == "") {
+        while (e->_log.size()) {
+            details += e->_log.back().value + "\n";
+            if (e->_log.back().type > severity) severity = e->_log.back().type;
+            e->_log.pop_back();
+        }
+    }
+    box->setDetailedText(details.c_str());
+
+    switch (severity) {
+    case Diagnostic:
+    case Info: box->setIcon(QMessageBox::Information); break;
+    case Warning: box->setIcon(QMessageBox::Warning); break;
+    case Error: box->setIcon(QMessageBox::Critical); break;
+    }
+
+    string logText;
+    logText = GetSystemInformation() + "\n";
+    logText += "-------------------\n";
+    logText += msg + "\n";
+    logText += "-------------------\n";
+    logText += details;
+    box->setLogText(logText);
+
+    box->show();    // This will immediately return
 }
 
 #pragma GCC diagnostic push
@@ -154,7 +177,7 @@ void ErrorReporter::Report(string msg, Type severity, string details)
 string                 ErrorReporter::GetSystemInformation()
 {
     string ret = "Vapor " + Wasp::Version::GetFullVersionString() + "\n";
-#if defined(DARWIN)
+#if defined(Darwin)
     SInt32 major, minor, rev;
     Gestalt(gestaltSystemVersionMajor, &major);
     Gestalt(gestaltSystemVersionMinor, &minor);
@@ -217,9 +240,6 @@ ErrorReporter::ErrorReporter(QWidget *parent)
 
     _parent = parent;
     _instance = this;
-    _box = new QMessageBox(_parent);
-    _box->addButton("Ok", QMessageBox::AcceptRole);
-    _box->addButton("Save Log", QMessageBox::ApplyRole);
     signal(SIGSEGV, _segFaultHandler);
     Wasp::MyBase::SetErrMsgCB(_myBaseErrorCallback);
     Wasp::MyBase::SetDiagMsgCB(_myBaseDiagCallback);
@@ -230,5 +250,7 @@ ErrorReporter::ErrorReporter(QWidget *parent)
 
 ErrorReporter::~ErrorReporter()
 {
-    if (_logFile) { fclose(_logFile); }
+    if (_logFile) fclose(_logFile);
+
+    for (int i = 0; i < _boxes.size(); i++) delete _boxes[i];
 }
