@@ -48,6 +48,12 @@ public:
     void                SetPoint1(const std::vector<double> &point);
     void                SetPoint2(const std::vector<double> &point);
 
+    /// These 4 methods get/set the up-to-date extents.
+    std::vector<double> GetMinExtents() const;
+    std::vector<double> GetMaxExtents() const;
+    void                SetMinExtents(const std::vector<double> &point);
+    void                SetMaxExtents(const std::vector<double> &point);
+
     long GetNumOfSamples() const;
     void SetNumOfSamples(long);
 
@@ -67,6 +73,8 @@ private:
     static const string _numSamplesTag;    // number of samples in space mode
     static const string _singlePtTag;      // a single point in time mode
     static const string _lockAxisTag;      // if we lock x, y, or z axis
+    static const string _minExtentTag;     // minimal extent we've seen so far
+    static const string _maxExtentTag;     // maximal extent we've seen so far
 };
 
 };    // End namespace VAPoR
