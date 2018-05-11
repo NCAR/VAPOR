@@ -2219,16 +2219,39 @@ int DataMgr::_initTimeCoord()
         return (0);
     }
 
-    string timeCoordVar = vars[0];
+    string nativeTimeCoordName = vars[0];
 
-    size_t n = _dc->GetNumTimeSteps(timeCoordVar);
+    size_t numTS = _dc->GetNumTimeSteps(nativeTimeCoordName);
 
-    float *buf = new float[n];
-    int    rc = _getVar(timeCoordVar, -1, -1, buf);
-    if (rc < 0) { return (-1); }
+    // If we have a time unit try to convert to seconds from EPOCH
+    //
+    VAPoR::DC::CoordVar cvar;
+    _dc->GetCoordVarInfo(nativeTimeCoordName, cvar);
+    if (_udunits.IsTimeUnit(cvar.GetUnits())) {
+        string derivedTimeCoordName = nativeTimeCoordName;
 
-    for (int j = 0; j < n; j++) { _timeCoordinates.push_back(buf[j]); }
-    delete[] buf;
+        _assignTimeCoord(derivedTimeCoordName);
+
+        DerivedCoordVar_TimeInSeconds *derivedVar = new DerivedCoordVar_TimeInSeconds(derivedTimeCoordName, _dc, nativeTimeCoordName, cvar.GetTimeDimName());
+
+        int rc = derivedVar->Initialize();
+        if (rc < 0) {
+            SetErrMsg("Failed to initialize derived coord variable");
+            return (-1);
+        }
+
+        _derivedCoordVars[derivedTimeCoordName] = derivedVar;
+        _derivedVars.push_back(derivedVar);
+
+        _timeCoordinates = derivedVar->GetTimes();
+    } else {
+        float *buf = new float[numTS];
+        int    rc = _getVar(nativeTimeCoordName, -1, -1, buf);
+        if (rc < 0) { return (-1); }
+
+        for (int j = 0; j < numTS; j++) { _timeCoordinates.push_back(buf[j]); }
+        delete[] buf;
+    }
 
     return (0);
 }
