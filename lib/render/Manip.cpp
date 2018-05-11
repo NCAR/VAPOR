@@ -618,10 +618,11 @@ void TranslateStretchManip::applyTransformToSelection()
         selectionSize[i] *= scales[i];
 
         float unscaledMidpoint = (_selection[i] + _selection[i + ndims]) / 2.f;
-        float offset = (origin[i] - unscaledMidpoint) * scales[i];
-        selectionMid.push_back(unscaledMidpoint + offset);
+        float offsetFromOrigin = (origin[i] - unscaledMidpoint);    //*scales[i];
+        selectionMid.push_back((unscaledMidpoint + offsetFromOrigin) * scales[i]);
         // selectionMid.push_back((_selection[i]+_selection[i+ndims])/2.f);
 
+        if (i == 0) cout << "applyT " << selectionMid[i] << " " << unscaledMidpoint << " " << offsetFromOrigin << endl;
         _selection[i] = selectionMid[i] - selectionSize[i] / 2.f;
         _selection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
     }
@@ -642,12 +643,13 @@ void TranslateStretchManip::removeTransform()
         selectionSize.push_back(_selection[i + ndims] - _selection[i]);
         selectionSize[i] /= scales[i];
 
-        float unscaledMidpoint = (_selection[i] + _selection[i + ndims]) / 2.f;
-        float offset = (origin[i] - unscaledMidpoint) * scales[i];
-        selectionMid.push_back(unscaledMidpoint - offset);
+        float scaledMidpoint = (_selection[i] + _selection[i + ndims]) / 2.f;
+        float offsetFromOrigin = (origin[i] - scaledMidpoint);    // scales[i];
+        selectionMid.push_back((scaledMidpoint - offsetFromOrigin) / scales[i]);
         // selectionMid.push_back((_selection[i]+_selection[i+ndims])/2.f);
         // selectionMid[i] -= (selectionMid[i] - origin[i])/scales[i];
 
+        if (i == 0) cout << "removT " << selectionMid[i] << " " << scaledMidpoint << " " << offsetFromOrigin << endl;
         _selection[i] = selectionMid[i] - selectionSize[i] / 2.f;
         _selection[i + ndims] = selectionMid[i] + selectionSize[i] / 2.f;
     }
