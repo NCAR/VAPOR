@@ -15,6 +15,7 @@ set (TARGETS
 	vdc2raw
 	wasp2ncdf
 	wrf2vdc
+	vdccompare
 	)
 
 append (LAUNCHER_TARGETS _launcher ${TARGETS})
