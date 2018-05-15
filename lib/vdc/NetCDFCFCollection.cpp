@@ -188,7 +188,11 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
         }
     }
 
-    _GetMissingValueMap(_missingValueMap);
+    string mvattname;
+    _GetMissingValueMap(_missingValueMap, mvattname);
+
+    if (!mvattname.empty()) { NetCDFCFCollection::SetMissingValueAttName(mvattname); }
+
     return (0);
 }
 
@@ -505,13 +509,8 @@ bool NetCDFCFCollection::GetMissingValue(string varname, double &mv) const
 
 int NetCDFCFCollection::OpenRead(size_t ts, string varname)
 {
-    double mv;
-    string mvattname;
-
-    if (_GetMissingValue(varname, mvattname, mv)) { NetCDFCFCollection::SetMissingValueAttName(mvattname); }
     int fd = NetCDFCollection::OpenRead(ts, varname);
 
-    NetCDFCFCollection::SetMissingValueAttName("");
     return (fd);
 }
 
@@ -993,7 +992,7 @@ bool NetCDFCFCollection::_IsTimeCoordVar(const NetCDFSimple::Variable &varinfo) 
     return (_udunit->IsTimeUnit(unit));
 }
 
-bool NetCDFCFCollection::_GetMissingValue(string varname, string &attname, double &mv) const
+bool NetCDFCFCollection::_GetMissingValue(string varname, string attname, double &mv) const
 {
     attname.clear();
     mv = 0.0;
@@ -1005,29 +1004,53 @@ bool NetCDFCFCollection::_GetMissingValue(string varname, string &attname, doubl
 
     vector<double> dvec;
 
-    attname = "_FillValue";
     varinfo.GetAtt(attname, dvec);
     if (dvec.size()) {
         mv = dvec[0];
         return (true);
-    } else {
-        //
-        // Use of "missing_value" is deprecated, but still
-        // supported
-        //
-        attname = "missing_value";
-        varinfo.GetAtt(attname, dvec);
-        if (dvec.size()) {
-            mv = dvec[0];
-            return (true);
-        }
     }
+
     return (false);
 }
 
-void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMap) const
+void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMap, string &mv_attname) const
 {
     missingValueMap.clear();
+    mv_attname.clear();
+
+    // First see if data set use "missing_value" attribute to identify
+    // missing data values
+    //
+    for (int d = 1; d < 5 && mv_attname.empty(); d++) {
+        string         attname = "missing_value";
+        vector<string> vars = NetCDFCFCollection::GetDataVariableNames(d, false);
+        for (int i = 0; i < vars.size(); i++) {
+            double mv;
+            if (_GetMissingValue(vars[i], attname, mv)) {
+                mv_attname = attname;
+                break;
+            }
+        }
+    }
+
+    // Second if "missing_value" not used see if data set use
+    // "_FillValue" attribute to identify
+    // missing data values. Some (e.g. CAM) data sets have both attributes.
+    // If so, assuming "missing_value" is true missing data marker
+    //
+    for (int d = 1; d < 5 && mv_attname.empty(); d++) {
+        string         attname = "_FillValue";
+        vector<string> vars = NetCDFCFCollection::GetDataVariableNames(d, false);
+        for (int i = 0; i < vars.size(); i++) {
+            double mv;
+            if (_GetMissingValue(vars[i], attname, mv)) {
+                mv_attname = attname;
+                break;
+            }
+        }
+    }
+
+    if (mv_attname.empty()) return;
 
     //
     // Generate a map from all data variables with missing value
@@ -1037,9 +1060,8 @@ void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMa
         vector<string> vars = NetCDFCFCollection::GetDataVariableNames(d, false);
 
         for (int i = 0; i < vars.size(); i++) {
-            string attname;
             double mv;
-            if (_GetMissingValue(vars[i], attname, mv)) { missingValueMap[vars[i]] = mv; }
+            if (_GetMissingValue(vars[i], mv_attname, mv)) { missingValueMap[vars[i]] = mv; }
         }
     }
 }
