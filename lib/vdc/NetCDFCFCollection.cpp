@@ -1127,7 +1127,6 @@ bool NetCDFCFCollection::_GetMissingValue(
     string varname,
     string attname,
     double &mv) const {
-    attname.clear();
     mv = 0.0;
 
     if (NetCDFCollection::IsDerivedVar(varname)) {
