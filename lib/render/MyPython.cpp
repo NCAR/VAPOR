@@ -82,15 +82,26 @@ void MyPython::Initialize()
     char        env2[256];
     strcpy(env2, env);    // All this trouble is to eliminate a compiler warning
     putenv(env2);
+
+    std::vector<std::string> dummy;
+    std::string              libpath = Wasp::GetAppPath("VAPOR", "lib", dummy);
+    std::string              pythonpath = libpath.substr(0, libpath.length() - 4);
+    char                     pyprogramname[256];
+    strcpy(pyprogramname, pythonpath.c_str());
+
+    Py_SetProgramName(pyprogramname);
+    Py_SetPythonHome(pyprogramname);
+
     Py_Initialize();
 
     PyRun_SimpleString("import sys\n");
     PyRun_SimpleString("import os\n");
 
-    std::vector<std::string> dummy;
-    std::string              path = Wasp::GetAppPath("VAPOR", "share", dummy);
-    path = "sys.path.append('" + path + "/python')\n";
-    PyRun_SimpleString(path.c_str());
+    // Tell Python to find modules in our share directory too.
+    //
+    std::string sharepath = Wasp::GetAppPath("VAPOR", "share", dummy);
+    sharepath = "sys.path.append('" + sharepath + "/python')\n";
+    PyRun_SimpleString(sharepath.c_str());
 
     m_isInitialized = true;
 }
