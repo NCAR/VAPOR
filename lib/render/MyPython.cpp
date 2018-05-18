@@ -43,9 +43,7 @@ MyPython *MyPython::Instance() {
 int MyPython::Initialize() {
 	if (m_isInitialized) return (0);
 
-	/*
 	m_pyHome.clear();
-
 	char *s = getenv("VAPOR_PYTHONHOME");
 	if (s) m_pyHome = s;
 
@@ -82,7 +80,6 @@ int MyPython::Initialize() {
 			);
 		}
 	}
-	*/
 
     // Prevent python from attempting to write a .pyc file on disk.
     // 
