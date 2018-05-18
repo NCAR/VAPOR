@@ -5,7 +5,11 @@ RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char 
 {
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
 
-    Wasp::MyPython::Instance()->Initialize();
+    int rc = Wasp::MyPython::Instance()->Initialize();
+    if (rc < 0) {
+        MyBase::SetErrMsg("Failed to initialize python : %s", MyPython::Instance()->PyErr().c_str());
+        return (-1);
+    }
 
     pName = PyString_FromString("imagewriter");
     pModule = PyImport_Import(pName);
