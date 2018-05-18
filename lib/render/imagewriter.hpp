@@ -30,6 +30,10 @@ RENDER_API int Write_PNG(const char *file,
                          int width,
                          int height,
                          unsigned char *buffer) {
+    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+
+    Wasp::MyPython::Instance()->Initialize();
+
     std::string stdErr =
         "import sys\n"
         "class CatchErr:\n"
@@ -40,9 +44,35 @@ RENDER_API int Write_PNG(const char *file,
         "catchErr = CatchErr()\n"
         "sys.stderr = catchErr\n";
 
-    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+    // Catch stderr from Python to a string.
+    //
+    if (PyRun_SimpleString(stdErr.c_str()) < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        return (1);
+    }
 
-    Wasp::MyPython::Instance()->Initialize();
+    cout << "System search path: ";
+    std::string printSysPath =
+        "import sys\n"
+        "print sys.path\n";
+
+    int rc = PyRun_SimpleString(printSysPath.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        return (1);
+    }
+
+    cout << endl;
+    cout << "Location of site module: ";
+    std::string printSiteModulePath =
+        "import site\n"
+        "print os.path.dirname(site.__file__)\n";
+
+    rc = PyRun_SimpleString(printSiteModulePath.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        return (1);
+    }
 
     pName = PyString_FromString("imagewriter");
     pModule = PyImport_Import(pName);
@@ -81,12 +111,6 @@ RENDER_API int Write_PNG(const char *file,
 
         // Call the python routine
         pValue = PyObject_CallObject(pFunc, pArgs);
-        // Catch stderr from Python to a string.
-        //
-        if (PyRun_SimpleString(stdErr.c_str()) < 0) {
-            MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
-            return (1);
-        }
         if (pValue == NULL) {
             MyBase::SetErrMsg("pFunc (drawpng) failed to execute!!");
             std::cerr << "pFunc (drawpng) failed to execute!!" << std::endl;
