@@ -42,46 +42,43 @@ int MyPython::Initialize() {
     if (m_isInitialized)
         return (0);
 
-    /*
-	m_pyHome.clear();
+    m_pyHome.clear();
+    char *s = getenv("VAPOR_PYTHONHOME");
+    if (s)
+        m_pyHome = s;
 
-	char *s = getenv("VAPOR_PYTHONHOME");
-	if (s) m_pyHome = s;
+    if (m_pyHome.empty()) {
 
-	if (m_pyHome.empty()) {
+        // Set pythonhome to the vapor installation (based on VAPOR_HOME)
+        //
+        vector<string> pths;
 
-		// Set pythonhome to the vapor installation (based on VAPOR_HOME)
-		//
-		vector<string> pths;
-
-		// On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works 
-		// on Linux and Mac
-		//
+        // On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works
+        // on Linux and Mac
+        //
 #ifdef _WINDOWS
-		pths.push_back("python27");
-		m_pyHome = GetAppPath("VAPOR","", pths, true);
+        pths.push_back("python27");
+        m_pyHome = GetAppPath("VAPOR", "", pths, true);
 #else
-		m_pyHome = GetAppPath("VAPOR","home", pths, true);
+        m_pyHome = GetAppPath("VAPOR", "home", pths, true);
 #endif
-	}
+    }
 
-	if (! m_pyHome.empty()) {
-		struct STAT64 statbuf;
-		if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
-			// N.B. the string passed to Py_SetPythonHome() must be
-			// maintained in static storage :-(. However, the python
-			// documentation promisses that it's value will not be changed
-			//
-			// It's also important to use forward slashes even on Windows.
-			//
-			Py_SetPythonHome((char *) m_pyHome.c_str());
+    if (!m_pyHome.empty()) {
+        struct STAT64 statbuf;
+        if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
+            // N.B. the string passed to Py_SetPythonHome() must be
+            // maintained in static storage :-(. However, the python
+            // documentation promisses that it's value will not be changed
+            //
+            // It's also important to use forward slashes even on Windows.
+            //
+            Py_SetPythonHome((char *)m_pyHome.c_str());
 
-			MyBase::SetDiagMsg(
-				"Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str()
-			);
-		}
-	}
-	*/
+            MyBase::SetDiagMsg(
+                "Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
+        }
+    }
 
     // Prevent python from attempting to write a .pyc file on disk.
     //
