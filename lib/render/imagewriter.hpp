@@ -2,31 +2,6 @@
 
 namespace VAPoR
 {
-    // Fetch an error message genereated by Python API.
-    //
-    string pyErr() {
-
-        PyObject *pMain = PyImport_AddModule("__main__");
-
-        PyObject *catcher = NULL;
-        if (pMain && PyObject_HasAttrString(pMain,"catchErr")) {
-            catcher = PyObject_GetAttrString(pMain,"catchErr");
-        }
-
-        // If catcher is NULL the Python message will be written
-        // to stderr. Otherwise it is writter to the catchErr object.
-        //
-        PyErr_Print();
-
-        if (! catcher) {
-            cerr << "CATCHER NULL" << endl;
-            return("No Python error catcher");
-        }
-
-        PyObject *output = PyObject_GetAttrString(catcher,"value");
-        return(PyString_AsString(output));
-    }
-
     RENDER_API int Write_PNG( const char*   file, 
                               int           width, 
                               int           height, 
@@ -48,10 +23,10 @@ namespace VAPoR
 
         if( pModule == NULL )
         {
-            MyBase::SetErrMsg(   "pModule (drawpng) NULL!!" );
-            std::cerr << "pModule (drawpng) NULL!!" << std::endl;
             PyErr_Print();
-            return 1;
+            MyBase::SetErrMsg( "pModule (drawpng) NULL : %s",
+                               MyPython::Instance()->PyErr().c_str()  );
+            return -1;
         }
         pFunc   = PyObject_GetAttrString( pModule, "drawpng" );
         if( pFunc && PyCallable_Check( pFunc ) )
@@ -85,17 +60,18 @@ namespace VAPoR
             pValue  = PyObject_CallObject( pFunc, pArgs );
             if( pValue == NULL )
             {
-                MyBase::SetErrMsg(   "pFunc (drawpng) failed to execute!!" );
-                std::cerr << "pFunc (drawpng) failed to execute!!" << std::endl;
                 PyErr_Print();
+                MyBase::SetErrMsg( "pFunc (drawpng) failed to execute : %s",
+                                   MyPython::Instance()->PyErr().c_str() );
+                return -1;
             }
         }
         else
         {
-            MyBase::SetErrMsg(   "pFunc (drawpng) NULL!!" );
-            std::cerr << "pFunc (drawpng) NULL!!" << std::endl;
             PyErr_Print();
-            return 1;
+            MyBase::SetErrMsg( "pFunc (drawpng) NULL : %s",
+                               MyPython::Instance()->PyErr().c_str() );
+            return -1;
         }
 
         Py_XDECREF( pName );
