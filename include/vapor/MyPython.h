@@ -89,9 +89,9 @@ public:
     static PyObject *CreatePyFunc(string moduleName, string funcName, string script);
 
 private:
-    static MyPython *m_instance;
-    static bool      m_isInitialized;
-    // static string m_pyHome;
+    static MyPython *  m_instance;
+    static bool        m_isInitialized;
+    static std::string m_pyHome;
 
     MyPython() {}                        // Don't implement
     MyPython(MyPython const &);          // Don't Implement

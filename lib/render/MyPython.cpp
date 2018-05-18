@@ -51,9 +51,9 @@ void init_signals(void)
 }    // namespace
 #endif
 
-MyPython *MyPython::m_instance = NULL;
-bool      MyPython::m_isInitialized = false;
-// string MyPython::m_pyHome;
+MyPython *  MyPython::m_instance = NULL;
+bool        MyPython::m_isInitialized = false;
+std::string MyPython::m_pyHome = "";
 
 MyPython *MyPython::Instance()
 {
