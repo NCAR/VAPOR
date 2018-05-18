@@ -51,7 +51,7 @@ void init_signals(void) {
 
 MyPython *MyPython::m_instance = NULL;
 bool MyPython::m_isInitialized = false;
-//string MyPython::m_pyHome;
+std::string MyPython::m_pyHome = "";
 
 MyPython *MyPython::Instance() {
     if (!m_instance) {
