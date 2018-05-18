@@ -27,6 +27,30 @@
 
 using namespace Wasp;
 
+#ifdef VAPOR3_0_0
+namespace {
+
+bool        pyIntFailed = false;
+static void signal_handler(int sig)
+{
+    if (sig == SIGINT) {
+        cerr << "Caught SIGINT\n";
+        pyIntFailed = true;
+    }
+}
+
+void init_signals(void)
+{
+    struct sigaction sigact;
+
+    sigact.sa_handler = signal_handler;
+    sigemptyset(&sigact.sa_mask);
+    sigact.sa_flags = 0;
+    sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
+}
+}    // namespace
+#endif
+
 MyPython *MyPython::m_instance = NULL;
 bool      MyPython::m_isInitialized = false;
 // string MyPython::m_pyHome;
@@ -83,7 +107,18 @@ int MyPython::Initialize()
     strcpy(env2, env);    // All this trouble is to eliminate a compiler warning
     putenv(env2);
 
+#ifdef VAPOR3_0_0
+    init_signals();
+#endif
+
     Py_Initialize();
+
+#ifdef VAPOR3_0_0
+    if (pyIntFailed) {
+        SetErrMsg("Failed to initialize python : Py_Initialize() Failed");
+        return (-1);
+    }
+#endif
 
     // Ugh. Have to define a python object to enable capturing of
     // stderr to a string. Python API doesn't support a version of
