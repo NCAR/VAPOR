@@ -34,43 +34,6 @@ RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char 
         return (-1);
     }
 
-    std::string stdErr = "import sys\n"
-                         "class CatchErr:\n"
-                         "   def __init__(self):\n"
-                         "       self.value = 'Plot: '\n"
-                         "   def write(self, txt):\n"
-                         "       self.value += txt\n"
-                         "catchErr = CatchErr()\n"
-                         "sys.stderr = catchErr\n";
-
-    // Catch stderr from Python to a string.
-    //
-    if (PyRun_SimpleString(stdErr.c_str()) < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
-        return (1);
-    }
-
-    cout << "System search path: ";
-    std::string printSysPath = "import sys\n"
-                               "print sys.path\n";
-
-    int rc = PyRun_SimpleString(printSysPath.c_str());
-    if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
-        return (1);
-    }
-
-    cout << endl;
-    cout << "Location of site module: ";
-    std::string printSiteModulePath = "import site\n"
-                                      "print os.path.dirname(site.__file__)\n";
-
-    rc = PyRun_SimpleString(printSiteModulePath.c_str());
-    if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
-        return (1);
-    }
-
     pName = PyString_FromString("imagewriter");
     pModule = PyImport_Import(pName);
 
