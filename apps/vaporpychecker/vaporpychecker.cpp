@@ -99,11 +99,21 @@ int main(int argc, char **argv)
 
     cout << endl;
     cout << "Location of site module: ";
-    std::string printSiteModulePath = "import sys\n"
-                                      "import site\n"
+    std::string printSiteModulePath = "import site\n"
                                       "print os.path.dirname(site.__file__)\n";
 
     rc = PyRun_SimpleString(printSiteModulePath.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        return (1);
+    }
+
+    cout << endl;
+    cout << "Location of matplotlib module: ";
+    std::string printMatplotlibModulePath = "import matplotlib\n"
+                                            "print os.path.dirname(matplotlib.__file__)\n";
+
+    rc = PyRun_SimpleString(printMatplotlibModulePath.c_str());
     if (rc < 0) {
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
         return (1);
