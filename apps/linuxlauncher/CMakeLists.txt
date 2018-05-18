@@ -16,6 +16,7 @@ set (TARGETS
 	wasp2ncdf
 	wrf2vdc
 	vdccompare
+	vaporpychecker
 	)
 
 append (LAUNCHER_TARGETS _launcher ${TARGETS})
