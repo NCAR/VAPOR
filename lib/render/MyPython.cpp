@@ -15,7 +15,13 @@
 //
 //	Description:
 //
+#include <iostream>
 #include <cstdlib>
+#include <csignal>
+#include <cstdlib>
+#include <csetjmp>
+#include <csignal>
+#include <unistd.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/MyPython.h>
 
@@ -31,9 +37,9 @@ MyPython *MyPython::Instance()
     return (m_instance);
 }
 
-void MyPython::Initialize()
+int MyPython::Initialize()
 {
-    if (m_isInitialized) return;
+    if (m_isInitialized) return (0);
 
     /*
     m_pyHome.clear();
@@ -84,15 +90,79 @@ void MyPython::Initialize()
     putenv(env2);
     Py_Initialize();
 
-    PyRun_SimpleString("import sys\n");
-    PyRun_SimpleString("import os\n");
+    // Ugh. Have to define a python object to enable capturing of
+    // stderr to a string. Python API doesn't support a version of
+    // PyErr_Print() that fetches the error to a C++ string. Give me
+    // a break!
+    //
+    std::string stdErr = "try:\n"
+                         "	import sys, os\n"
+                         "except: \n"
+                         "	print >> sys.stderr, \'Failed to import sys\'\n"
+                         "	raise\n"
+                         "class CatchErr:\n"
+                         "	def __init__(self):\n"
+                         "		self.value = 'VAPOR_PY: '\n"
+                         "	def write(self, txt):\n"
+                         "		self.value += txt\n"
+                         "catchErr = CatchErr()\n"
+                         "sys.stderr = catchErr\n";
 
+    // Catch stderr from Python to a string.
+    //
+    int rc = PyRun_SimpleString(stdErr.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
+
+    // Import matplotlib
+    //
+    std::string importMPL = "try:\n"
+                            "	import matplotlib\n"
+                            "except: \n"
+                            "	print >> sys.stderr, \'Failed to import matplotlib\'\n"
+                            "	raise\n";
+    rc = PyRun_SimpleString(importMPL.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
+
+    // Add vapor modules to search path
+    //
     std::vector<std::string> dummy;
     std::string              path = Wasp::GetAppPath("VAPOR", "share", dummy);
     path = "sys.path.append('" + path + "/python')\n";
-    PyRun_SimpleString(path.c_str());
+    rc = PyRun_SimpleString(path.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
 
     m_isInitialized = true;
+
+    return (0);
+}
+
+// Fetch an error message genereated by Python API.
+//
+string MyPython::PyErr()
+{
+    PyObject *pMain = PyImport_AddModule("__main__");
+
+    PyObject *catcher = NULL;
+    if (pMain && PyObject_HasAttrString(pMain, "catchErr")) { catcher = PyObject_GetAttrString(pMain, "catchErr"); }
+
+    // If catcher is NULL the Python message will be written
+    // to stderr. Otherwise it is writter to the catchErr object.
+    //
+    PyErr_Print();
+
+    if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
+
+    PyObject *output = PyObject_GetAttrString(catcher, "value");
+    return (PyString_AsString(output));
 }
 
 PyObject *MyPython::CreatePyFunc(string moduleName, string funcName, string script)

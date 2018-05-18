@@ -60,62 +60,56 @@ int main(int argc, char **argv)
         return (1);
     }
 
-    // Ugh. Have to define a python object to enable capturing of
-    // stderr to a string. Python API doesn't support a version of
-    // PyErr_Print() that fetches the error to a C++ string. Give me
-    // a break!
-    //
-    std::string stdErr = "import sys\n"
-                         "class CatchErr:\n"
-                         "   def __init__(self):\n"
-                         "       self.value = 'Plot: '\n"
-                         "   def write(self, txt):\n"
-                         "       self.value += txt\n"
-                         "catchErr = CatchErr()\n"
-                         "sys.stderr = catchErr\n";
-
     // Use MyPython singleton class to initialize Python interpeter to
     // ensure it only gets initialized once.
     //
-    MyPython::Instance()->Initialize();
-
-    // Catch stderr from Python to a string.
-    //
-    int rc = PyRun_SimpleString(stdErr.c_str());
+    int rc = MyPython::Instance()->Initialize();
     if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        MyBase::SetErrMsg("Failed to initialize python : %s", pyErr().c_str());
         return (1);
     }
 
     cout << "System search path: ";
-    std::string printSysPath = "import sys\n"
+    std::string printSysPath = "try:\n"
+                               "	import sys\n"
+                               "except: \n"
+                               "	print >> sys.stderr, \'Failed to import sys\'\n"
+                               "	raise\n"
                                "print sys.path\n";
 
     rc = PyRun_SimpleString(printSysPath.c_str());
     if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", MyPython::Instance()->PyErr().c_str());
         return (1);
     }
-
     cout << endl;
+
     cout << "Location of site module: ";
-    std::string printSiteModulePath = "import site\n"
+    std::string printSiteModulePath = "try:\n"
+                                      "	import site\n"
+                                      "except: \n"
+                                      "	print >> sys.stderr, \'Failed to import site\'\n"
+                                      "	raise\n"
                                       "print os.path.dirname(site.__file__)\n";
 
     rc = PyRun_SimpleString(printSiteModulePath.c_str());
     if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", MyPython::Instance()->PyErr().c_str());
         return (1);
     }
 
     cout << endl;
     cout << "Location of matplotlib module: ";
-    std::string printMatplotlibModulePath = "import matplotlib\n"
+    std::string printMatplotlibModulePath = "try:\n"
+                                            "	import matplotlib\n"
+                                            "except: \n"
+                                            "	print >> sys.stderr, \'Failed to import matplotlib\'\n"
+                                            "	raise\n"
                                             "print os.path.dirname(matplotlib.__file__)\n";
 
     rc = PyRun_SimpleString(printMatplotlibModulePath.c_str());
     if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", pyErr().c_str());
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", MyPython::Instance()->PyErr().c_str());
         return (1);
     }
 
