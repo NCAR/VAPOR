@@ -88,6 +88,7 @@ int MyPython::Initialize()
     char        env2[256];
     strcpy(env2, env);    // All this trouble is to eliminate a compiler warning
     putenv(env2);
+
     Py_Initialize();
 
     // Ugh. Have to define a python object to enable capturing of
