@@ -2,6 +2,7 @@
 # width     : image width
 # height    : image height
 # rgbbuffer : buffer of R, G, B values
+
 def drawpng( outfile, width, height, rgbbuffer ):
     import matplotlib
     matplotlib.use('AGG')
