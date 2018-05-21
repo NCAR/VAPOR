@@ -21,7 +21,11 @@
 #include <cstdlib>
 #include <csetjmp>
 #include <csignal>
-#include <unistd.h>
+
+#ifndef _WINDOWS
+    #include <unistd.h>
+#endif
+
 #include <vapor/GetAppPath.h>
 #include <vapor/MyPython.h>
 
@@ -86,6 +90,10 @@ int MyPython::Initialize()
     }
 
     if (!m_pyHome.empty()) {
+#ifdef _WINDOWS
+        Py_SetPythonHome((char *)m_pyHome.c_str());
+        MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
+#else
         struct STAT64 statbuf;
         if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
             // N.B. the string passed to Py_SetPythonHome() must be
@@ -93,11 +101,14 @@ int MyPython::Initialize()
             // documentation promisses that it's value will not be changed
             //
             // It's also important to use forward slashes even on Windows.
+            // The above comment might no longer be relevant
             //
+
             Py_SetPythonHome((char *)m_pyHome.c_str());
 
             MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
         }
+#endif
     }
 
     // Prevent python from attempting to write a .pyc file on disk.
