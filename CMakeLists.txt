@@ -7,7 +7,7 @@ include (buildutils/GetGitRevisionDescription.cmake)
 set (CMAKE_CXX_STANDARD 11)
 
 # set(CMAKE_VERBOSE_MAKEFILE on)
-set (CMAKE_BUILD_TYPE Release)
+set (CMAKE_BUILD_TYPE Debug)
 set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 
 set (VERSION_MAJOR 3)
@@ -45,7 +45,7 @@ option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_DOC "Build Vapor Doxygen documentation" OFF)
 option (BUILD_TEST_APPS "Build test applications" OFF)
-option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" ON)
+option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
 
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
