@@ -66,6 +66,7 @@ int main(int argc, char **argv)
     int rc = MyPython::Instance()->Initialize();
     if (rc < 0) {
         MyBase::SetErrMsg("Failed to initialize python : %s", pyErr().c_str());
+        printf("Failed to initialize python : %s\n", pyErr().c_str());
         return (1);
     }
 
