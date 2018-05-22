@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     }
 
     if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << "wrffiles... master.nc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(0);
     }
@@ -93,6 +93,10 @@ int main(int argc, char **argv)
         MyBase::SetErrMsg("Data directory exists and -force option not used. "
                           "Remove directory %s or use -force",
                           vdc.GetDataDir(master).c_str());
+        exit(1);
+    }
+    if (FileExists(master) && !opt.force) {
+        MyBase::SetErrMsg("\"%s\" already exists and -force option not used.", master.c_str());
         exit(1);
     }
 
