@@ -95,6 +95,10 @@ int main(int argc, char **argv)
                           vdc.GetDataDir(master).c_str());
         exit(1);
     }
+    if (FileExists(master) && !opt.force) {
+        MyBase::SetErrMsg("\"%s\" already exists and -force option not used.", master.c_str());
+        exit(1);
+    }
 
     size_t chunksize = 1024 * 1024 * 4;
     int    rc = vdc.Initialize(master, vector<string>(), VDC::W, opt.bs, chunksize);

@@ -15,6 +15,8 @@
 #endif
 
 #include <iostream>
+#include <fstream>
+
 #ifdef WIN32
     #include "windows.h"
     #include "Winbase.h"
@@ -201,3 +203,5 @@ int Wasp::MkDirHier(const string &dir)
     }
     return (0);
 }
+
+bool Wasp::FileExists(const string path) { return (bool)std::ifstream(path.c_str()); }
