@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     }
 
     if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << "wrffiles... master.nc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(0);
     }
