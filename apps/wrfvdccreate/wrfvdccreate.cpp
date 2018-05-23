@@ -95,7 +95,7 @@ int	main(int argc, char **argv) {
 	}
 
 	if (argc < 3) {
-		cerr << "Usage: " << ProgName << "wrffiles... master.nc" << endl;
+		cerr << "Usage: " << ProgName << " wrf_file1 wrf_file2 ... master.nc" << endl;
 		op.PrintOptionHelp(stderr, 80, false);
 		exit(1);
 	}
