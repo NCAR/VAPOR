@@ -285,7 +285,7 @@ void MappingFrame::updateMapperFunction(MapperFunction *mapper) {
         for (int i = 0; i < _mapper->getNumOpacityMaps(); i++) {
 
             OpacityWidget *widget = createOpacityWidget(_mapper->GetOpacityMap(i));
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
             _mapper->GetOpacityMap(i)->setMapper(_mapper);
 #endif
 
@@ -1056,6 +1056,8 @@ int MappingFrame::drawHistogram() {
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, _texid);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     if (_updateTexture) {
         updateTexture();
@@ -2317,7 +2319,7 @@ void MappingFrame::setIsoSlider() {
 // Deal with isoline slider movement
 //----------------------------------------------------------------------------
 void MappingFrame::setIsolineSlider(int index) {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     if (!_mapper)
         return;
     IsoSlider *iSlider = _isolineSliders[index];

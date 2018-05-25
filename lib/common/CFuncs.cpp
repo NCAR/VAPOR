@@ -15,6 +15,8 @@
 #endif
 
 #include <iostream>
+#include <fstream>
+
 #ifdef WIN32
 #include "windows.h"
 #include "Winbase.h"
@@ -133,7 +135,7 @@ bool Wasp::IsAbsPath(string path) {
 }
 
 double Wasp::GetTime() {
-    double t;
+    double t = -1.0;
 #ifdef WIN32 //Windows does not have a nanosecond time function...
     SYSTEMTIME sTime;
     FILETIME fTime;
@@ -204,4 +206,8 @@ int Wasp::MkDirHier(const string &dir) {
 #endif
     }
     return (0);
+}
+
+bool Wasp::FileExists(const string path) {
+    return (bool)std::ifstream(path.c_str());
 }

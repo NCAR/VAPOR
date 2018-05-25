@@ -15,6 +15,7 @@ if (BUILD_VDC OR BUILD_GUI)
 	add_subdirectory (wrf2vdc)
 	add_subdirectory (wrfvdccreate)
 	add_subdirectory (vdccompare)
+	add_subdirectory (vaporpychecker)
 endif()
 
 if (BUILD_GUI)

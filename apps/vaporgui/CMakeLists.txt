@@ -21,7 +21,6 @@ set (SRCS
 	RangeController.cpp
 	Statistics.cpp
 	Plot.cpp
-	SeedMe.cpp
 	helloSubtabs.cpp
 	TFWidget.cpp
 	VariablesWidget.cpp
@@ -53,12 +52,14 @@ set (SRCS
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
+	QIntValidatorWithFixup.cpp
+	FileOperationChecker.cpp
 	Combo.cpp
+	windowsUtils.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
 	Statistics.h
-	SeedMe.h
 	Plot.h
 	BarbSubtabs.h
 	ColorbarWidget.h
@@ -71,6 +72,14 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
+
+	MainForm.h
+	VizWinMgr.h
+	windowsUtils.h
+	ErrorReporter.h
+	Histo.h
+	EventRouter.h
+	GLWidget.h
 )
 
 set (UIS 
@@ -97,7 +106,6 @@ set (UIS
 	statsWindow.ui
 	errMsg.ui
 	plotWindow.ui
-	SeedMeGUI.ui
 	firstTimeUser.ui
 	TFWidgetGUI.ui
 	StretchFactorTableGUI.ui
@@ -132,7 +140,7 @@ if (APPLE)
 elseif (WIN32)
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
 	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
-	add_executable (vapor ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
+	add_executable (vapor WIN32 ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 else ()
 	add_executable (vapor ${SRCS} ${UIS})
 endif()
@@ -140,12 +148,10 @@ endif()
 # target_link_libraries (vapor common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
 
-if (UNIX AND NOT APPLE)
-	target_link_libraries (vapor quadmath)
-endif ()
-
 if (APPLE)
-	target_compile_options (vapor PRIVATE "-Wno-deprecated-declarations")
+	target_link_libraries (vapor "-framework CoreServices")
+elseif (UNIX AND NOT APPLE)
+	target_link_libraries (vapor quadmath)
 endif ()
 
 add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
