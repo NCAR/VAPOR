@@ -21,6 +21,11 @@
 #include <stdlib.h>
 #include "VaporTable.h"
 
+namespace {
+    QString selectionColor = "{color: white; background-color: blue}";
+    QString normalColor = "{ color: black; background: white; }";
+}
+
 VaporTable::VaporTable(
 	QTableWidget* table,
 	bool lastRowIsCheckboxes,
@@ -30,6 +35,7 @@ VaporTable::VaporTable(
 	_lastColIsCheckboxes = lastColIsCheckboxes;
 	_activeRow = -1;
 	_activeCol = -1;
+	_autoResizeHeight = false;
 }
 
 // Clear current table, then generate table of rows x columns
@@ -42,6 +48,8 @@ void VaporTable::Update(int rows, int cols,
 
 	std::vector<std::string> sValues = convertToString(values);
 	Update(rows, cols, sValues, rowHeaders, colHeaders);
+	
+	resizeTableHeight();
 }
 
 void VaporTable::Update(int rows, int cols,
@@ -51,6 +59,8 @@ void VaporTable::Update(int rows, int cols,
 
 	std::vector<std::string> sValues = convertToString(values);
 	Update(rows, cols, sValues, rowHeaders, colHeaders);
+
+	resizeTableHeight();
 }
 
 void VaporTable::Update(int rows, int cols,
@@ -68,9 +78,27 @@ void VaporTable::Update(int rows, int cols,
 
 	addCheckboxes(values);
 
-
 	if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
 	if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
+
+	resizeTableHeight();
+}
+
+void VaporTable::SetAutoResizeHeight(bool val) {
+	_autoResizeHeight = val;
+}
+
+bool VaporTable::GetAutoResizeHeight() const {
+	return _autoResizeHeight;
+}
+
+void VaporTable::resizeTableHeight() {
+	if (!_autoResizeHeight)
+		return;
+
+    int height = _table->horizontalHeader()->height();
+    int rows = _table->rowCount();
+    _table->setMaximumHeight(height*rows*3);
 }
 
 void VaporTable::Reinit(VaporTable::ValidatorFlags vFlags,
@@ -382,6 +410,8 @@ std::string VaporTable::GetStringValue(int row, int col) {
 	int nRows = _table->rowCount();
 	int nCols = _table->columnCount();
 
+	if (row >= nRows || col >= nCols) return "";
+
 	QWidget *widget = _table->cellWidget(row, col);
 
 	if ((col==nCols-1 && _lastColIsCheckboxes) ||
@@ -444,11 +474,6 @@ void VaporTable::GetValues(std::vector<double> &vec) {
 void VaporTable::highlightActiveRow(int row) {
 	if (row < 0) return;
 
-    QString selectionColor = "{ background: rgb(0, 255, 255);"
-        " selection-background-color: rgb(233, 99, 0); }";
-    QString normalColor = "{ background: rgb(255,255,255);"
-        " selection-background-color: rgb(233, 99, 0); }";
-
     for (int i=0; i<_table->rowCount(); i++) {
         for (int j=0; j<_table->columnCount(); j++) {
             QWidget* cell = _table->cellWidget(i,j);
@@ -472,11 +497,6 @@ void VaporTable::highlightActiveRow(int row) {
 void VaporTable::highlightActiveCol(int col) {
 	if (col < 0) return;
 
-    QString selectionColor = "{ background: rgb(0, 255, 255);"
-        " selection-background-color: rgb(233, 99, 0); }";
-    QString normalColor = "{ background: rgb(255,255,255);"
-        " selection-background-color: rgb(233, 99, 0); }";
-
     for (int i=0; i<_table->rowCount(); i++) {
         for (int j=0; j<_table->columnCount(); j++) {
             QWidget* cell = _table->cellWidget(i,j);
@@ -495,4 +515,12 @@ void VaporTable::highlightActiveCol(int col) {
             }   
         }   
     }
+}
+
+void VaporTable::SetActiveRow(int row) {
+	_activeRow = row;
+}
+
+void VaporTable::SetActiveCol(int col) {
+	_activeCol = col;
 }

@@ -238,7 +238,7 @@
               <string>The file specified for auto save is overwritten every time there is an automatic session save</string>
              </property>
              <property name="text">
-              <string>Autosave file location</string>
+              <string>Auto-save session file</string>
              </property>
              <property name="wordWrap">
               <bool>false</bool>
@@ -302,9 +302,6 @@
              </property>
              <property name="whatsThis">
               <string>The file specified for auto save is overwritten every time there is an automatic session save</string>
-             </property>
-             <property name="text">
-              <string>/tmp</string>
              </property>
             </widget>
            </item>
@@ -474,7 +471,7 @@
          <item>
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Number of concurrent threads</string>
+            <string>Number of threads (0 for available num. of CPU cores)</string>
            </property>
           </widget>
          </item>
@@ -673,9 +670,6 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This setting only takes place after the preferences are saved to disk and vaporgui is restarted.  When the checkbox is checked, the specified window width and height will be used the next time vaporgui is launched.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
-             <property name="text">
-              <string>1280</string>
-             </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
@@ -736,9 +730,6 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This setting only takes place after the preferences are saved to disk and vaporgui is restarted.  When the checkbox is checked, the specified window width and height will be used the next time vaporgui is launched.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
-             <property name="text">
-              <string>1024</string>
-             </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
@@ -785,7 +776,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Session file</string>
+            <string>Session file path</string>
            </property>
           </widget>
          </item>
@@ -829,7 +820,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Data set</string>
+            <string>Data set path</string>
            </property>
           </widget>
          </item>
@@ -876,7 +867,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Images</string>
+            <string>Image path</string>
            </property>
           </widget>
          </item>
@@ -929,7 +920,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Transfer function</string>
+            <string>Transfer function path</string>
            </property>
           </widget>
          </item>
@@ -982,7 +973,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Flow</string>
+            <string>Flow path</string>
            </property>
           </widget>
          </item>
@@ -1035,7 +1026,7 @@ p, li { white-space: pre-wrap; }
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Python scripts</string>
+            <string>Python script path</string>
            </property>
           </widget>
          </item>

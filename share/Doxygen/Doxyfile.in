@@ -408,7 +408,6 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/mainpage.dox \
 		@PROJECT_SOURCE_DIR@/apps/vaporgui/EventRouter.h \
 		@PROJECT_SOURCE_DIR@/apps/vaporgui/BarbEventRouter.h \
 		@PROJECT_SOURCE_DIR@/apps/vaporgui/HelloEventRouter.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/BoxSliderFrame.h \
 		@PROJECT_SOURCE_DIR@/apps/vaporgui/MappingFrame.h \
 		@PROJECT_SOURCE_DIR@/apps/vaporgui/VariablesWidget.h \
 		@PROJECT_SOURCE_DIR@/apps/vaporgui/RenderHolder.h \

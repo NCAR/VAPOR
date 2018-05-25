@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
 	//Create and set up a visualizer (no. 0)
 	
 	bool useSession = false;
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	CE->CreateDefaultParams(0);
 	CE->SetActiveVizIndex(0);
 
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
 	if (rc < 0) return(1);
 	
 	//Disable command queue (not used here)
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	Command::blockCapture();
 #endif
 	
@@ -239,9 +239,9 @@ int main(int argc, char **argv) {
 	//Make the Window display itself:
 	vizwin.show();
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	if (useSession){
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 		int rc = CE->ActivateEnabledRenderers(0);
 		if (rc) exit (rc);
 #endif
@@ -256,12 +256,12 @@ int main(int argc, char **argv) {
 #endif
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	//Set up animation and capture
 	//If there is a session file, use its timestep initially, otherwise get 
 	//the first time step from the command argument.
 	
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	AnimationParams* animParams = CE->GetParamsMgr()->GetAnimationParams(0);
 	if (!useSession) animParams->setCurrentTimestep(opt.ts0);
 	int frameStep = animParams->getFrameStepSize();

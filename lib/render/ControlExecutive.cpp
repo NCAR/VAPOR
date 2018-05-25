@@ -161,7 +161,7 @@ int ControlExec::Paint(string winName, bool force){
 		return -1;
 	}
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	if (!force) {
 		if (!VizWinParams::VizIsDirty(viz)) return 0;  //Do nothing
 	}
@@ -599,6 +599,31 @@ int ControlExec::EnableAnimationCapture(
 	if(v->setAnimationCaptureEnabled(onOff, filename)) return -1;
 	return 0;
 }
+
+string ControlExec::MakeStringConformant(string s) {
+	if (s.empty()) s += "_";
+
+	if (! (isalpha(s[0]) || s[0] == '_')) {
+		s = "_" + s;
+	}
+
+	for (string::iterator itr = s.begin(); itr != s.end(); ++itr) {
+		if (!
+			(isalnum(*itr) ||
+			 isdigit(*itr) ||
+			 *itr == '-'   ||
+			 *itr == '_'   ||
+			 *itr == '.')) {
+
+			*itr = '_';
+		}
+		if (isspace(*itr)) {
+			*itr = '_';
+		}
+	}
+	return(s);
+}
+
 
 void ControlExec::undoRedoHelper() {
 

@@ -13,7 +13,7 @@ set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 0)
 set (VERSION_MICRO 0)
-set (VERSION_RC beta)
+set (VERSION_RC )
 get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
 execute_process (
 	COMMAND git rev-parse --short ${VERSION_COMMIT}
@@ -22,13 +22,23 @@ execute_process (
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 string (TIMESTAMP VERSION_DATE UTC)
-set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
+if (VERSION_RC)
+	set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
+else ()
+	set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
+endif ()
 set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT})
 
 if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
 	add_definitions (-DWIN32)
+endif()
+
+# compiler warning flags
+if (NOT WIN32)
+  SET( CMAKE_CXX_FLAGS "-Wall -Wno-sign-compare -Wno-overloaded-virtual")
+  SET( CMAKE_C_FLAGS   "-Wall -Wno-sign-compare")
 endif()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
@@ -119,6 +129,7 @@ add_subdirectory (apps)
 add_subdirectory (lib)
 add_subdirectory (include)
 add_subdirectory (share)
+add_subdirectory (scripts)
 add_subdirectory (test_apps)
 
 ###############################################################################
@@ -163,7 +174,7 @@ if (WIN32)
 			)
 	endif (GENERATE_FULL_INSTALLER)
 
-	set (CPACK_NSIS_MODIFY_PATH ON)
+	set (CPACK_NSIS_MODIFY_PATH OFF)
 	set (CPACK_NSIS_URL_INFO_ABOUT "https://www.vapor.ucar.edu")
 	set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".") # Manually fixed in template file
 	set (CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")

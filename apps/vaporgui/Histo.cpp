@@ -39,7 +39,7 @@ Histo::Histo(
 	_timestepOfUpdate = ts;
 }
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2]) {
 	_binArray = new int[256];
 	_minData = range[0];
@@ -80,7 +80,7 @@ Histo::~Histo(){
 	if (_binArray) delete [] _binArray;
 }
 void Histo::reset(int newNumBins) {
-	if (newNumBins != -1) {
+	if ( newNumBins != _numBins && newNumBins != -1 ) {
 		_numBins = newNumBins;
 		if (_binArray) delete [] _binArray;
 		_binArray = new int[_numBins];

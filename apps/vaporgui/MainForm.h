@@ -53,7 +53,6 @@ class QDockWindow;
 class QLabel;
 class QSpinBox;
 
-//class SeedMe;
 class VizWindow;
 class VizWinMgr;
 class VizSelectCombo;
@@ -61,10 +60,7 @@ class VizSelectCombo;
 class BannerGUI;
 class Statistics;
 class Plot;
-
-namespace VAPoR {
-	class SeedMe;
-}
+class ErrorReporter;
 
 class MainForm : public QMainWindow {
 Q_OBJECT
@@ -174,7 +170,6 @@ private:
  QAction* _captureStartJpegCaptureAction;
  QAction* _captureEndJpegCaptureAction;
  QAction* _captureSingleJpegCaptureAction;
- QAction* _seedMeAction;
 
  // Toolbars:
  //
@@ -192,7 +187,6 @@ private:
 
  Statistics *_stats;
  Plot *_plot;
- VAPoR::SeedMe *_seedMe;
  BannerGUI* _banner;
  VizSelectCombo* _windowSelector;
  QLabel* _modeStatusWidget;
@@ -206,7 +200,8 @@ private:
  bool _sessionNewFlag;
  bool _begForCitation;
  int _eventsSinceLastSave;
- string _recentPath;
+
+ ErrorReporter *_errRep;
 
 
  // Zero out all member variables
@@ -348,7 +343,6 @@ private slots:
  void startAnimCapture();
  void endAnimCapture();
  void captureSingleJpeg();
- void launchSeedMe();
  void installCLITools();
  void launchStats();
  void launchPlotUtility();

@@ -21,6 +21,7 @@
 #endif
 #include "Statistics.h"
 #include "GUIStateParams.h"
+#include "ErrorReporter.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -129,9 +130,6 @@ bool Statistics::Update()
 
     // Update "Add a Variable"
     std::vector<std::string> availVars   = currentDmgr->GetDataVarNames(2);
-    std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
-    for( int i = 0; i < availVars3D.size(); i++ )
-        availVars.push_back( availVars3D[i] );
     for( int i = 0; i < enabledVars.size(); i++ )
         for( int rmIdx = 0; rmIdx < availVars.size(); rmIdx++ )
             if( availVars[ rmIdx ] == enabledVars[i] )
@@ -142,13 +140,13 @@ bool Statistics::Update()
     std::sort( availVars.begin(), availVars.end() );
     NewVarCombo->blockSignals( true );
     NewVarCombo->clear();
+    NewVarCombo->blockSignals( false );
     NewVarCombo->addItem( QString::fromAscii("Add a Variable") );
     for(std::vector<std::string>::iterator it = availVars.begin(); it != availVars.end(); ++it)
     {
         NewVarCombo->addItem( QString::fromStdString(*it));
     }
     NewVarCombo->setCurrentIndex( 0 );
-    NewVarCombo->blockSignals( false );
 
     // Update "Remove a Variable"
     assert( enabledVars.size() == _validStats.GetVariableCount() );
@@ -223,12 +221,10 @@ bool Statistics::Update()
 void Statistics::_updateStatsTable()
 {
     // Initialize pointers
-    VAPoR::DataStatus* dataStatus = _controlExec->GetDataStatus();
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
                     (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
     std::string currentDatasetName = guiParams->GetStatsDatasetName();
     assert( currentDatasetName != "" );
-    VAPoR::DataMgr* currentDmgr = dataStatus->GetDataMgr( currentDatasetName );
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>(_controlExec->GetParamsMgr()->
                       GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
 
@@ -403,7 +399,10 @@ void Statistics::_autoUpdateClicked( int state )
     if( state == 0 )        // unchecked
         statsParams->SetAutoUpdateEnabled( false );
     else if( state == 2 )   // checked
+    {
         statsParams->SetAutoUpdateEnabled( true );
+        _updateButtonClicked();
+    }
     else
     {
         std::cerr << "Dont know what this state is!!!" << std::endl;
@@ -506,6 +505,8 @@ void Statistics::_minTSChanged( int val )
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
+    _validStats.currentTimeStep[0] = val;
+
     // Add this minTS to parameter if different
     if( val != statsParams->GetCurrentMinTS() )
     {
@@ -514,14 +515,11 @@ void Statistics::_minTSChanged( int val )
 
         if( val > statsParams->GetCurrentMaxTS() )
         {
+            _validStats.currentTimeStep[1] = val;
             statsParams->SetCurrentMaxTS( val );
-            MaxTimestepSpinbox->blockSignals( true );
             MaxTimestepSpinbox->setValue( val );
-            MaxTimestepSpinbox->blockSignals( false );
         }
     }
-
-    _validStats.currentTimeStep[0] = val;
 
     // Auto-update if enabled
     if( statsParams->GetAutoUpdateEnabled() )
@@ -539,6 +537,8 @@ void Statistics::_maxTSChanged( int val )
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
 
+    _validStats.currentTimeStep[1] = val;
+
     // Add this maxTS to parameter if different
     if( val != statsParams->GetCurrentMaxTS() )
     {
@@ -547,14 +547,11 @@ void Statistics::_maxTSChanged( int val )
 
         if( val < statsParams->GetCurrentMinTS() )
         {
+            _validStats.currentTimeStep[0] = val;
             statsParams->SetCurrentMinTS( val );
-            MinTimestepSpinbox->blockSignals( true );
             MinTimestepSpinbox->setValue( val );
-            MinTimestepSpinbox->blockSignals( false );
         }
     }
-
-    _validStats.currentTimeStep[1] = val;
 
     // Auto-update if enabled
     if( statsParams->GetAutoUpdateEnabled() )
@@ -626,7 +623,8 @@ void Statistics::_removeCalcChanged( int index )
 
 void Statistics::_newVarChanged( int index )
 {
-    assert( index > 0 );
+    if( index <= 0 )
+        return;
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -634,19 +632,34 @@ void Statistics::_newVarChanged( int index )
     std::string dsName = guiParams->GetStatsDatasetName();
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>
             (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
+    VAPoR::DataMgr* currentDmgr = _controlExec->GetDataStatus()->GetDataMgr( dsName );
     std::string varName = NewVarCombo->itemText(index).toStdString();
 
-    // Add this variable to parameter 
-    std::vector<std::string> vars = statsParams->GetAuxVariableNames();
-    vars.push_back( varName );
-    statsParams->SetAuxVariableNames( vars );
+    // Test if the selected variable available at the specific time step,
+    //   compression level, etc.
+    if( !currentDmgr->VariableExists( statsParams->GetCurrentMinTS(), 
+                                      varName,
+                                      statsParams->GetRefinementLevel(),
+                                      statsParams->GetCompressionLevel() ) )
+    {
+        MSG_WARN("Selected variable not available at this settings!");
+        NewVarCombo->setCurrentIndex( 0 );
+        return;
+    }
+    else
+    {
+        // Add this variable to parameter 
+        std::vector<std::string> vars = statsParams->GetAuxVariableNames();
+        vars.push_back( varName );
+        statsParams->SetAuxVariableNames( vars );
 
-    // Add this variable to _validStats
-    _validStats.AddVariable( varName );
+        // Add this variable to _validStats
+        _validStats.AddVariable( varName );
 
-    // Auto-update if enabled
-    if( statsParams->GetAutoUpdateEnabled() )
-        _updateButtonClicked();
+        // Auto-update if enabled
+        if( statsParams->GetAutoUpdateEnabled() )
+            _updateButtonClicked();
+    }
 }
 
 void Statistics::_removeVarChanged( int index )
@@ -706,21 +719,24 @@ bool Statistics::_calc3M( std::string varname )
         VAPoR::Grid* grid = currentDmgr->GetVariable( ts, varname, 
                 statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
                 minExtent, maxExtent );
-        Grid::ConstIterator endItr  = grid->cend(); 
-        float missingVal            = grid->GetMissingValue();
-
-        for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        if( grid )
         {
-            if( *it != missingVal )
+            Grid::ConstIterator endItr  = grid->cend(); 
+            float missingVal            = grid->GetMissingValue();
+
+            for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
             {
-                double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
-                min = min < val ? min : val;
-                max = max > val ? max : val;
-                double y = val - c;
-                double t = sum + y;
-                       c = t - sum - y;
-                     sum = t; 
-                count++;
+                if( *it != missingVal )
+                {
+                    double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
+                    min = min < val ? min : val;
+                    max = max > val ? max : val;
+                    double y = val - c;
+                    double t = sum + y;
+                           c = t - sum - y;
+                         sum = t; 
+                    count++;
+                }
             }
         }
     }
@@ -763,13 +779,16 @@ bool Statistics::_calcMedian( std::string varname )
         VAPoR::Grid* grid = currentDmgr->GetVariable( ts, varname, 
                 statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
                 minExtent, maxExtent );
-        Grid::ConstIterator endItr  = grid->cend(); 
-        float missingVal            = grid->GetMissingValue();
-
-        for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        if( grid )
         {
-            if( *it != missingVal )
-                buffer.push_back( std::abs(*it) < 1e-38 ? 0.0 : *it );
+            Grid::ConstIterator endItr  = grid->cend(); 
+            float missingVal            = grid->GetMissingValue();
+
+            for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+            {
+                if( *it != missingVal )
+                    buffer.push_back( std::abs(*it) < 1e-38 ? 0.0 : *it );
+            }
         }
     }
     
@@ -822,19 +841,21 @@ bool Statistics::_calcStddev( std::string varname )
         VAPoR::Grid* grid = currentDmgr->GetVariable( ts, varname, 
                 statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(),
                 minExtent, maxExtent );
-        Grid::ConstIterator endItr  = grid->cend(); 
-        float missingVal            = grid->GetMissingValue();
-
-        for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
+        if( grid )
         {
-            if( *it != missingVal )
+            Grid::ConstIterator endItr  = grid->cend(); 
+            float missingVal            = grid->GetMissingValue();
+            for( Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it )
             {
-                double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
-                double y = (val - m3[2]) * (val - m3[2]) - c;
-                double t = sum + y;
-                       c = t - sum - y;
-                     sum = t; 
-                count++;
+                if( *it != missingVal )
+                {
+                    double val = std::abs(*it) < 1e-38 ? 0.0 : *it; 
+                    double y = (val - m3[2]) * (val - m3[2]) - c;
+                    double t = sum + y;
+                           c = t - sum - y;
+                         sum = t; 
+                    count++;
+                }
             }
         }
     }
@@ -1105,6 +1126,8 @@ void Statistics::_exportTextClicked()
                 (_controlExec->GetParamsMgr()->GetAppRenderParams(dsName, StatisticsParams::GetClassType()));
         VAPoR::DataMgr* currentDmgr = _controlExec->GetDataStatus()->GetDataMgr( dsName );
         std::vector<std::string> availVars3D = currentDmgr->GetDataVarNames(3);
+        availVars3D.clear();    // This is a temporary change to hide all 3D variables. 
+                                //   Removing this line could expose 3D variables again.
 
         file << "Data Source = " << guiParams->GetStatsDatasetName() << endl << endl;
         file << "#Variable Statistics:" << endl;

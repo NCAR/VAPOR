@@ -48,12 +48,11 @@ COMMON_API void Splitpath(
 
 COMMON_API bool IsAbsPath(string path);
 
-
 COMMON_API double GetTime();
 
 COMMON_API int    MkDirHier(const string &dir);
 
-
+COMMON_API bool FileExists(const string path);
 
 };
 

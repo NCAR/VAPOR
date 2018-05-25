@@ -890,7 +890,7 @@ ViewpointParams* ParamsMgr::GetViewpointParams(string winName) const {
 
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 void ParamsMgr::InsertRenderParamsInstance(
 	RenderParams *rp, string winName, string instName
 ) {
@@ -1110,7 +1110,7 @@ ViewpointParams *ParamsMgr::make_vp_params(
 
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 //----------------------------------------------------------------------------
 // Create a transfer function by parsing a file.
 //----------------------------------------------------------------------------

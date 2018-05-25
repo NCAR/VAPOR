@@ -44,7 +44,7 @@ namespace DataMgrUtils {
  //! \return status Return true on success. Return false if the no
  //! transform levels exist e.g. the variable does not exist.
  //
- bool MaxXFormPresent(
+ VDF_API bool MaxXFormPresent(
 	 const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxXForm
  );
 
@@ -62,7 +62,7 @@ namespace DataMgrUtils {
  //! \return status Return true on success. Return false if the no
  //! LOD levels exist e.g. the variable does not exist.
  //
- bool MaxLODPresent( 
+ VDF_API bool MaxLODPresent( 
      const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxLOD
  );
 
@@ -78,10 +78,16 @@ namespace DataMgrUtils {
  //! \param[in] npoints Number of points to convert.
  //! \return true if successful
  //!
- int ConvertPCSToLonLat(
+ VDF_API int ConvertPCSToLonLat(
 	const DataMgr *dataMgr,
 	double coords[], int npoints = 1 
  );
+
+ VDF_API int ConvertPCSToLonLat(
+	string projString,
+	double coords[], int npoints = 1
+ );
+
 
  //! Convert lon/lat coordinates to Projected Coordinate System coordinates,
  //!  in-place. 
@@ -97,8 +103,13 @@ namespace DataMgrUtils {
  //! \param[in] npoints Number of points to convert.
  //! \return true if successful
  //!
- int ConvertLonLatToPCS(
+ VDF_API int ConvertLonLatToPCS(
 	const DataMgr *dataMgr,
+	double coords[], int npoints = 1
+ );
+
+ VDF_API int ConvertLonLatToPCS(
+	string projString,
 	double coords[], int npoints = 1
  );
 
@@ -226,7 +237,7 @@ namespace DataMgrUtils {
 	vector <int> &axes
  );
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 
 
 
