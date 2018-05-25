@@ -48,6 +48,7 @@ int vdc_xtype2ncdf_xtype(VDC::XType v_xtype)
     return (n_xtype);
 }
 
+#ifdef UNUSED_FUNCTION
 VDC::XType ncdf_xtype2vdc_xtype(int n_xtype)
 {
     VDC::XType v_xtype;
@@ -64,6 +65,7 @@ VDC::XType ncdf_xtype2vdc_xtype(int n_xtype)
     }
     return (v_xtype);
 }
+#endif
 
 void vdc_2_ncdfcoords(size_t ts0, size_t ts1, bool time_varying, const vector<size_t> &min, const vector<size_t> &max, vector<size_t> &start, vector<size_t> &count)
 {
@@ -118,7 +120,7 @@ VDCNetCDF::VDCNetCDF(int nthreads, size_t master_threshold, size_t variable_thre
     _master_threshold = master_threshold;
     _variable_threshold = variable_threshold;
     _chunksizehint = 0;
-    _master = new WASP();
+    _master = new WASP(nthreads);
     _version = 1;
 }
 
@@ -374,12 +376,18 @@ WASP *VDCNetCDF::_OpenVariableRead(size_t ts, string varname, int clevel, int lo
     return (wasp);
 }
 
-string VDCNetCDF::_get_mask_varname(string varname) const
+string VDCNetCDF::_get_mask_varname(string varname, double &mv) const
 {
     VDC::DataVar dvar;
+    mv = 0.0;
 
-    if (VDC::getDataVarInfo(varname, dvar)) { return (dvar.GetMaskvar()); }
-    return ("");
+    string mask_varname;
+
+    if (VDC::getDataVarInfo(varname, dvar)) {
+        mask_varname = dvar.GetMaskvar();
+        if (!mask_varname.empty()) { mv = dvar.GetMissingValue(); }
+    }
+    return (mask_varname);
 }
 
 int VDCNetCDF::openVariableRead(size_t ts, string varname, int level, int lod)
@@ -393,14 +401,17 @@ int VDCNetCDF::openVariableRead(size_t ts, string varname, int level, int lod)
     WASP * wasp = _OpenVariableRead(ts, varname, clevel, lod, file_ts);
     if (!wasp) return (-1);
 
-    string maskvar = _get_mask_varname(varname);
+    double mv;
+    string maskvar = _get_mask_varname(varname, mv);
 
     //
     // If there is a mask variable we need to open it.
     //
 
-    WASP *wasp_mask = NULL;
-    int   clevel_mask;
+    WASP * wasp_mask = NULL;
+    int    clevel_mask = -1;
+    size_t file_ts_mask = 0;
+
     if (!maskvar.empty()) {
         //
         // the level specification can be tricky because the data variable
@@ -413,11 +424,11 @@ int VDCNetCDF::openVariableRead(size_t ts, string varname, int level, int lod)
 
         levels(flevel, nlevels, clevel_mask, flevel);
 
-        wasp_mask = _OpenVariableRead(ts, maskvar, clevel_mask, lod, file_ts);
+        wasp_mask = _OpenVariableRead(ts, maskvar, clevel_mask, lod, file_ts_mask);
         if (!wasp_mask) return (-1);
     }
 
-    VDCFileObject *o = new VDCFileObject(ts, varname, clevel, lod, file_ts, wasp, wasp_mask, maskvar, clevel_mask);
+    VDCFileObject *o = new VDCFileObject(ts, varname, clevel, lod, file_ts, wasp, wasp_mask, maskvar, clevel_mask, file_ts_mask, mv);
 
     return (_fileTable.AddEntry(o));
 }
@@ -488,16 +499,18 @@ int VDCNetCDF::OpenVariableWrite(size_t ts, string varname, int lod)
     // If there is a mask variable we need to open it for **reading**
     //
 
-    string maskvar = _get_mask_varname(varname);
+    double mv;
+    string maskvar = _get_mask_varname(varname, mv);
     WASP * wasp_mask = NULL;
+    size_t file_ts_mask = 0;
     if (!maskvar.empty()) {
         nlevels = VDC::GetNumRefLevels(maskvar);
 
-        wasp_mask = _OpenVariableRead(ts, maskvar, nlevels - 1, lod, file_ts);
+        wasp_mask = _OpenVariableRead(ts, maskvar, nlevels - 1, lod, file_ts_mask);
         if (!wasp_mask) return (-1);
     }
 
-    VDCFileObject *o = new VDCFileObject(ts, varname, nlevels - 1, lod, file_ts, wasp, wasp_mask, maskvar, nlevels - 1);
+    VDCFileObject *o = new VDCFileObject(ts, varname, nlevels - 1, lod, file_ts, wasp, wasp_mask, maskvar, nlevels - 1, file_ts_mask, mv);
 
     return (_fileTable.AddEntry(o));
 }
@@ -579,7 +592,8 @@ template<class T> int VDCNetCDF::_writeTemplate(int fd, const T *data)
     size_t file_ts = o->GetFileTS();
     vdc_2_ncdfcoords(file_ts, file_ts, time_varying, mins, maxs, start, count);
 
-    string maskvar = _get_mask_varname(varname);
+    double mv;
+    string maskvar = _get_mask_varname(varname, mv);
     if (maskvar.empty()) { return (wasp->PutVara(start, count, data)); }
 
     unsigned char *mask = _read_mask_var(o->GetWaspMask(), varname, maskvar, start, count);
@@ -637,16 +651,27 @@ template<class T> int VDCNetCDF::_writeSliceTemplate(int fd, const T *slice)
     size_t         file_ts = o->GetFileTS();
     vdc_2_ncdfcoords(file_ts, file_ts, IsTimeVarying(varname), min, max, start, count);
 
-    rc = wasp->PutVara(start, count, slice);
+    double mv;
+    string maskvar = _get_mask_varname(varname, mv);
+    if (maskvar.empty()) {
+        rc = wasp->PutVara(start, count, slice);
+    } else {
+        unsigned char *mask = _read_mask_var(o->GetWaspMask(), varname, maskvar, start, count);
+        if (!mask) return (-1);
+
+        rc = wasp->PutVara(start, count, slice, mask);
+    }
     if (rc < 0) return (rc);
 
     slice_num++;
     o->SetSlice(slice_num);
 
-    return (rc);
+    return (0);
 }
 
-int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+template int VDCNetCDF::_writeSliceTemplate<float>(int fd, const float *slice);
+
+template<class T> int VDCNetCDF::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
     VDCFileObject *o = (VDCFileObject *)_fileTable.GetEntry(fd);
     if (!o) {
@@ -657,6 +682,7 @@ int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t
     WASP * wasp = o->GetWaspData();
     string varname = o->GetVarname();
     size_t file_ts = o->GetFileTS();
+    WASP * wasp_mask = o->GetWaspMask();
 
     bool time_varying = VDC::IsTimeVarying(varname);
 
@@ -664,10 +690,39 @@ int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t
     vector<size_t> count;
     vdc_2_ncdfcoords(file_ts, file_ts, time_varying, min, max, start, count);
 
-    return (wasp->GetVara(start, count, region));
+    int rc = wasp->GetVara(start, count, region);
+    if (rc < 0) return (rc);
+
+    // if no mask we're done
+    //
+    if (!wasp_mask) return (0);
+
+    size_t file_ts_mask = o->GetFileTSMask();
+    double mv = o->GetMissingValue();
+
+    // If there is a mask associated with this variable we need to
+    // restore the missing value
+    //
+    string mask_varname = o->GetVarnameMask();
+    time_varying = VDC::IsTimeVarying(mask_varname);
+    vdc_2_ncdfcoords(file_ts_mask, file_ts_mask, time_varying, min, max, start, count);
+
+    size_t         size = vproduct(count);
+    unsigned char *mask = (unsigned char *)_mask_buffer.Alloc(size);
+    rc = wasp_mask->GetVara(start, count, mask);
+    if (rc < 0) return (rc);
+
+    for (size_t i = 0; i < size; i++) {
+        if (!mask[i]) { region[i] = mv; }
+    }
+    return (0);
 }
 
-int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region)
+int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
+
+int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
+
+template<class T> int VDCNetCDF::_readRegionBlockTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
     VDCFileObject *o = (VDCFileObject *)_fileTable.GetEntry(fd);
     if (!o) {
@@ -678,6 +733,7 @@ int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t
     WASP * wasp = o->GetWaspData();
     string varname = o->GetVarname();
     size_t file_ts = o->GetFileTS();
+    WASP * wasp_mask = o->GetWaspMask();
 
     bool time_varying = VDC::IsTimeVarying(varname);
 
@@ -685,50 +741,37 @@ int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t
     vector<size_t> count;
     vdc_2_ncdfcoords(file_ts, file_ts, time_varying, min, max, start, count);
 
-    return (wasp->GetVara(start, count, region));
-}
+    int rc = wasp->GetVaraBlock(start, count, region);
+    if (rc < 0) return (rc);
 
-int VDCNetCDF::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
-{
-    VDCFileObject *o = (VDCFileObject *)_fileTable.GetEntry(fd);
-    if (!o) {
-        SetErrMsg("Invalid file descriptor : %d", fd);
-        return (-1);
+    // if no mask we're done
+    //
+    if (!wasp_mask) return (0);
+
+    size_t file_ts_mask = o->GetFileTSMask();
+    double mv = o->GetMissingValue();
+
+    // If there is a mask associated with this variable we need to
+    // restore the missing value
+    //
+    string mask_varname = o->GetVarnameMask();
+    time_varying = VDC::IsTimeVarying(mask_varname);
+    vdc_2_ncdfcoords(file_ts_mask, file_ts_mask, time_varying, min, max, start, count);
+
+    size_t         size = vproduct(count);
+    unsigned char *mask = (unsigned char *)_mask_buffer.Alloc(size);
+    rc = wasp_mask->GetVaraBlock(start, count, mask);
+    if (rc < 0) return (rc);
+
+    for (size_t i = 0; i < size; i++) {
+        if (!mask[i]) { region[i] = mv; }
     }
-
-    WASP * wasp = o->GetWaspData();
-    string varname = o->GetVarname();
-    size_t file_ts = o->GetFileTS();
-
-    bool time_varying = VDC::IsTimeVarying(varname);
-
-    vector<size_t> start;
-    vector<size_t> count;
-    vdc_2_ncdfcoords(file_ts, file_ts, time_varying, min, max, start, count);
-
-    return (wasp->GetVaraBlock(start, count, region));
+    return (0);
 }
 
-int VDCNetCDF::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region)
-{
-    VDCFileObject *o = (VDCFileObject *)_fileTable.GetEntry(fd);
-    if (!o) {
-        SetErrMsg("Invalid file descriptor : %d", fd);
-        return (-1);
-    }
+int VDCNetCDF::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionBlockTemplate(fd, min, max, region)); }
 
-    WASP * wasp = o->GetWaspData();
-    string varname = o->GetVarname();
-    size_t file_ts = o->GetFileTS();
-
-    bool time_varying = VDC::IsTimeVarying(varname);
-
-    vector<size_t> start;
-    vector<size_t> count;
-    vdc_2_ncdfcoords(file_ts, file_ts, time_varying, min, max, start, count);
-
-    return (wasp->GetVaraBlock(start, count, region));
-}
+int VDCNetCDF::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionBlockTemplate(fd, min, max, region)); }
 
 template<class T> int VDCNetCDF::_putVarTemplate(string varname, int lod, const T *data)
 {
@@ -784,6 +827,9 @@ template<class T> int VDCNetCDF::_putVarTemplate(string varname, int lod, const 
     return (0);
 }
 
+template int VDCNetCDF::_putVarTemplate<float>(string varname, int lod, const float *data);
+template int VDCNetCDF::_putVarTemplate<int>(string varname, int lod, const int *data);
+
 template<class T> int VDCNetCDF::_putVarTemplate(size_t ts, string varname, int lod, const T *data)
 {
     int fd = VDCNetCDF::OpenVariableWrite(ts, varname, lod);
@@ -797,6 +843,9 @@ template<class T> int VDCNetCDF::_putVarTemplate(size_t ts, string varname, int 
 
     return (0);
 }
+
+template int VDCNetCDF::_putVarTemplate<float>(size_t ts, string varname, int lod, const float *data);
+template int VDCNetCDF::_putVarTemplate<int>(size_t ts, string varname, int lod, const int *data);
 
 int VDCNetCDF::_copyVar0d(DC &dc, size_t ts, const BaseVar &varInfo)
 {

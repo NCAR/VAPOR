@@ -208,7 +208,17 @@ void Renderer::DisableClippingPlanes()
     glDisable(GL_CLIP_PLANE5);
 }
 
-#ifdef DEAD
+bool Renderer::VariableExists(size_t ts, std::vector<string> &varnames, int level, int lod, bool zeroOK) const
+{
+    for (int i = 0; i < varnames.size(); i++) {
+        if (zeroOK && (varnames[i] == "0" || varnames[i] == "")) { continue; }
+
+        if (!_dataMgr->VariableExists(ts, varnames[i], level, lod)) { return (false); }
+    }
+    return (true);
+}
+
+#ifdef VAPOR3_0_0_ALPHA
 void Renderer::buildLocal2DTransform(int dataOrientation, float a[2], float b[2], float *constVal, int mappedDims[3])
 {
     mappedDims[2] = dataOrientation;
@@ -451,8 +461,6 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
     double txtColor[] = {fgr, fgg, fgb, 1.};
     double bgColor[] = {(double)bgc[0], (double)bgc[1], (double)bgc[2], 0.};
     int    precision = (int)cbpb->GetNumDigits();
-    double dummy[] = {0., 0., 0.};    // Dummy coordinates.  We won't know the correct
-                                      // coords until we know image size.
 
     // Corners in texture coordinates, to be derived later
     //
@@ -481,7 +489,6 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
         _textObject->Initialize(_fontFile, textString, fontSize, txtColor, bgColor);
         _textObject->SetOrientation(TextObject::CENTERLEFT);
         double texWidth = _textObject->getWidth();
-        double texHeight = _textObject->getHeight();
 
         // llx and lly are in visualizer coordinates between -1 and 1
         // TextRenderer takes pixel coordinates. Trx and Tuy are the

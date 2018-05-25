@@ -36,6 +36,8 @@ public:
     //!
     virtual bool isint() const { return (true); };
 
+    virtual bool IsNormalized() const { return (false); };
+
     void Analysis(const long *sigIn, size_t sigInLen, long *cA, long *cD, bool oddlow, bool oddhigh) const;
 
     void Synthesis(const long *cA, const long *cD, size_t sigInLen, long *sigOut) const;

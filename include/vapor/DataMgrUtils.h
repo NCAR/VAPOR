@@ -43,7 +43,7 @@ namespace DataMgrUtils {
 //! \return status Return true on success. Return false if the no
 //! transform levels exist e.g. the variable does not exist.
 //
-bool MaxXFormPresent(const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxXForm);
+VDF_API bool MaxXFormPresent(const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxXForm);
 
 //! Return the maximum available LOD level for a variable.
 //!
@@ -59,7 +59,7 @@ bool MaxXFormPresent(const DataMgr *dataMgr, size_t timestep, string varname, si
 //! \return status Return true on success. Return false if the no
 //! LOD levels exist e.g. the variable does not exist.
 //
-bool MaxLODPresent(const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxLOD);
+VDF_API bool MaxLODPresent(const DataMgr *dataMgr, size_t timestep, string varname, size_t &maxLOD);
 
 //! Convert Projected Coordinate System coordinates to lon/lat in-place.
 //!
@@ -73,7 +73,9 @@ bool MaxLODPresent(const DataMgr *dataMgr, size_t timestep, string varname, size
 //! \param[in] npoints Number of points to convert.
 //! \return true if successful
 //!
-int ConvertPCSToLonLat(const DataMgr *dataMgr, double coords[], int npoints = 1);
+VDF_API int ConvertPCSToLonLat(const DataMgr *dataMgr, double coords[], int npoints = 1);
+
+VDF_API int ConvertPCSToLonLat(string projString, double coords[], int npoints = 1);
 
 //! Convert lon/lat coordinates to Projected Coordinate System coordinates,
 //!  in-place.
@@ -89,7 +91,9 @@ int ConvertPCSToLonLat(const DataMgr *dataMgr, double coords[], int npoints = 1)
 //! \param[in] npoints Number of points to convert.
 //! \return true if successful
 //!
-int ConvertLonLatToPCS(const DataMgr *dataMgr, double coords[], int npoints = 1);
+VDF_API int ConvertLonLatToPCS(const DataMgr *dataMgr, double coords[], int npoints = 1);
+
+VDF_API int ConvertLonLatToPCS(string projString, double coords[], int npoints = 1);
 
 //! Method that obtains one or more regular grids at specified timestep,
 //! extents, refinement, and lod.
@@ -184,7 +188,7 @@ VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vecto
 //
 VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 //! Determine the size of a voxel in user coordinates, along a specific dimension,
 //! or its maximum or minimum dimension

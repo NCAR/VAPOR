@@ -258,6 +258,50 @@ private:
     DC::CoordVar       _coordVarInfo;
 };
 
+//!
+//! \class DerivedCoordVar_TimeInSeconds
+//!
+//! \brief Derived time coordinate variable
+//!
+//! \author John Clyne
+//! \date   Februrary, 2018
+//!
+//!
+class VDF_API DerivedCoordVar_TimeInSeconds : public DerivedCoordVar {
+public:
+    DerivedCoordVar_TimeInSeconds(string derivedVarName, DC *dc, string nativeTimeVar, string dimName);
+    virtual ~DerivedCoordVar_TimeInSeconds() {}
+
+    virtual int Initialize();
+
+    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+
+    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+
+    virtual std::vector<string> GetInputs() const { return (std::vector<string>()); }
+
+    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+    virtual int OpenVariableRead(size_t ts, string varname, int level = 0, int lod = 0);
+
+    virtual int CloseVariable(int fd);
+
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegionBlock(fd, min, max, region)); }
+
+    virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const;
+
+    const vector<double> &GetTimes() const { return (_times); }
+
+private:
+    DC *                _dc;
+    std::vector<double> _times;
+    string              _coordName;
+    string              _nativeTimeVar;
+    DC::CoordVar        _coordVarInfo;
+};
+
 class VDF_API DerivedCoordVar_Staggered : public DerivedCoordVar {
 public:
     DerivedCoordVar_Staggered(string derivedVarName, string stagDimName, DC *dc, string inName, string dimName);

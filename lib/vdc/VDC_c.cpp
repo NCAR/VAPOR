@@ -293,6 +293,15 @@ int VDC_GetCRatiosCount(const VDC *p, const char *varname)
     return v.GetCRatios().size();
 }
 
+int VDC_GetVarDimLens(const VDC *p, const char *varname, int spatial, size_t **lens, int *count)
+{
+    VDC_DEBUG_called();
+    vector<size_t> lens_v;
+    bool           ret = p->GetVarDimLens(string(varname), spatial, lens_v);
+    if (ret) _size_tVectorToCArray(lens_v, lens, count);
+    return ret;
+}
+
 int VDC_GetVarDimNames(const VDC *p, const char *varname, int spatial, char ***names, int *count)
 {
     VDC_DEBUG_called();
@@ -442,6 +451,7 @@ int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype
     }
 }
 
+#ifdef UNUSED_FUNCTION
 static string valueCArrayToString(const void *a, int l, VDC_XType type)
 {
     string s("[");
@@ -458,6 +468,7 @@ static string valueCArrayToString(const void *a, int l, VDC_XType type)
     }
     return s + string("]");
 }
+#endif
 
 int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count)
 {
@@ -519,33 +530,33 @@ const char *VDC_GetErrMsg()
 
 void VDC_FreeStringArray(char ***str, int *count)
 {
-    for (int i = 0; i < *count; i++) delete (*str)[i];
-    delete *str;
+    for (int i = 0; i < *count; i++) delete[](*str)[i];
+    delete[] * str;
     *str = 0;
     *count = 0;
 }
 
 void VDC_FreeString(char **str)
 {
-    delete *str;
+    delete[] * str;
     *str = 0;
 }
 
 void VDC_FreeLongArray(long **data)
 {
-    delete *data;
+    delete[] * data;
     *data = 0;
 }
 
 void VDC_FreeDoubleArray(double **data)
 {
-    delete *data;
+    delete[] * data;
     *data = 0;
 }
 
 void VDC_FreeSize_tArray(size_t **data)
 {
-    delete *data;
+    delete[] * data;
     *data = 0;
 }
 

@@ -70,13 +70,13 @@ int main(int argc, char **argv)
     if (op.ParseOptions(&argc, argv, get_options) < 0) { exit(1); }
 
     if (argc < 3) {
-        cerr << "Usage: " << ProgName << "wrffiles... master.nc" << endl;
+        cerr << "Usage: " << ProgName << " wrf_file1 wrf_file2 ... master.nc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
     }
 
     if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << "wrffiles... master.nc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(0);
     }
@@ -93,6 +93,10 @@ int main(int argc, char **argv)
         MyBase::SetErrMsg("Data directory exists and -force option not used. "
                           "Remove directory %s or use -force",
                           vdc.GetDataDir(master).c_str());
+        exit(1);
+    }
+    if (FileExists(master) && !opt.force) {
+        MyBase::SetErrMsg("\"%s\" already exists and -force option not used.", master.c_str());
         exit(1);
     }
 

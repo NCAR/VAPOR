@@ -18,7 +18,7 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 static RenderEventRouterRegistrar<HelloEventRouter> registrar(HelloEventRouter::GetClassType());
 #endif
 

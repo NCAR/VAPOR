@@ -157,6 +157,9 @@ int main(int argc, char **argv)
     } else if (opt.type == "int16") {
         int16_t dummy = 0;
         CopyVar(ncdffile, datafile, dummy);
+    } else if (opt.type == "uint8") {
+        unsigned char dummy = 0;
+        CopyVar(ncdffile, datafile, dummy);
     } else {
         cerr << "Invalid type " << opt.type << endl;
     }

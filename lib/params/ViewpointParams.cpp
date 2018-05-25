@@ -291,7 +291,7 @@ vector<double> ViewpointParams::GetStretchFactors() const
     return (val);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void ViewpointParams::SetStretchFactors(vector<double> val)
 {
     vector<double> defaultv(3, 1.);
@@ -304,7 +304,7 @@ void ViewpointParams::SetStretchFactors(vector<double> val)
 }
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 // Rescale viewing parameters when the scene is rescaled by factor
 void ViewpointParams::rescale(vector<double> scaleFac)
 {
@@ -339,7 +339,7 @@ void ViewpointParams::rescale(vector<double> scaleFac)
 
 #endif
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 double ViewpointParams::GetCurrentViewDiameter(vector<double> stretchFactors) const
 {
     double campos[3], rotctr[3];

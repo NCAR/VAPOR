@@ -352,19 +352,6 @@
     </widget>
    </item>
    <item>
-    <spacer name="horizontalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>400</width>
-       <height>0</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
     <widget class="TFWidget" name="_TFWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -379,7 +366,12 @@
       </size>
      </property>
      <property name="toolTip">
-      <string>Often times a set of contour parameters (Spacing, Conunt, or Minimum) will be set so that some contours fall outside a variable's range, resulting in that contours absence.  Users can select one of these parameters to be soft, so that it will accomodate the values of the other two settings.</string>
+      <string>Often times a set of contour parameters (Spacing, 
+Conunt, or Minimum) will be set so that some 
+contours fall outside a variable's range, resulting 
+in that contours absence.  Users can select one 
+of these parameters to be soft, so that it will 
+accomodate the values of the other two settings.</string>
      </property>
     </widget>
    </item>
@@ -431,7 +423,6 @@
   <zorder>line_2</zorder>
   <zorder>_ColorbarWidget</zorder>
   <zorder>_TFWidget</zorder>
-  <zorder>horizontalSpacer_3</zorder>
   <zorder>line_3</zorder>
   <zorder>tabWidget</zorder>
  </widget>

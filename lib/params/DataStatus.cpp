@@ -69,13 +69,29 @@ DataStatus::DataStatus(size_t cacheSize, int nThreads)
 
 int DataStatus::Open(const std::vector<string> &files, const std::vector<string> &options, string name, string format)
 {
-    if (name.empty()) name = "DataSet1";
+    assert(!name.empty());
+    vector<string> myOptions = options;
 
     Close(name);
 
     DataMgr *dataMgr = new DataMgr(format, _cacheSize, _nThreads);
 
-    int rc = dataMgr->Initialize(files, options);
+    // Ensure all data managers use the same proj4 string. Note, it's
+    // possible that 'options' will already have a -proj4 string argument.
+    // The one we add here will take precedence because it is last in
+    // the list. This is a bit of a hack. To ensure that a -proj argument
+    // already present in the 'options' parameter is honored the dataMgr
+    // map should be empty. I.e. the first open data mgr.
+    //
+    if (_dataMgrs.size()) {
+        map<string, DataMgr *>::iterator itr = _dataMgrs.begin();
+        DataMgr *                        dm0 = itr->second;
+
+        myOptions.push_back("-proj4");
+        myOptions.push_back(dm0->GetMapProjection());
+    }
+
+    int rc = dataMgr->Initialize(files, myOptions);
     if (rc < 0) {
         delete dataMgr;
         return (-1);
@@ -213,6 +229,11 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, st
         for (int k = 0; k < fvarnames.size(); k++) {
             if (!fvarnames[k].empty()) { varnames.push_back(fvarnames[k]); }
         }
+
+        vector<string> auxVarNames = rParams[j]->GetAuxVariableNames();
+        for (int k = 0; k < auxVarNames.size(); k++) {
+            if (!auxVarNames[k].empty()) varnames.push_back(auxVarNames[k]);
+        }
     }
     if (varnames.size()) { foundOne = true; }
     varMap[datasetName] = varnames;
@@ -259,7 +280,6 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<
             if (maxWExts[j] > maxExts[j]) { maxExts[j] = maxWExts[j]; }
         }
     }
-    int s = minExts.size();
 }
 
 size_t DataStatus::MapGlobalToLocalTimeStep(string dataSetName, size_t ts) const
@@ -295,12 +315,14 @@ void DataStatus::MapLocalToGlobalTimeRange(string dataSetName, size_t local_ts, 
     max_ts = ref.rend() - itr2 - 1;
 }
 
-string DataStatus::GetMapProjection(string dataSetName) const
+string DataStatus::GetMapProjection() const
 {
-    DataMgr *dataMgr = GetDataMgr(dataSetName);
-    if (!dataMgr) return ("");
+    if (_dataMgrs.empty()) return ("");
 
-    return (dataMgr->GetMapProjection());
+    map<string, DataMgr *>::const_iterator itr = _dataMgrs.begin();
+    DataMgr *                              dm0 = itr->second;
+
+    return (dm0->GetMapProjection());
 }
 
 string DataStatus::GetMapProjectionDefault(string dataSetName) const
@@ -397,7 +419,7 @@ void DataStatus::reset_time()
 
 DataStatus::~DataStatus() {}
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 // Map corners of box to voxels.
 void DataStatus::mapBoxToVox(Box *box, string varname, int refLevel, int lod, int timestep, size_t voxExts[6])
 {

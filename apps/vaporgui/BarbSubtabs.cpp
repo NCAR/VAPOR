@@ -21,7 +21,7 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr 
     int    ndim = bParams->GetValueLong(nDimsTag, 3);
     assert(ndim == 2 || ndim == 3);
 
-    vector<string> varNames = dataMgr->GetDataVarNames(3);
+    vector<string> varNames = dataMgr->GetDataVarNames(ndim);
     vector<string> defaultVars;
 
     if (varNames.size() < 2) return;
@@ -73,21 +73,21 @@ void BarbAppearanceSubtab::hideZDimWidgets()
 
 double BarbAppearanceSubtab::CalculateDomainLength(int ts)
 {
-    VAPoR::StructuredGrid *grid;
-
     double domainLength = 0;
 
     // Is this a legitimite way to acquire animation params?
     //
     int            level = _bParams->GetRefinementLevel();
-    int            lod = _bParams->GetCompressionLevel();
     vector<string> fieldVars = _bParams->GetFieldVariableNames();
     for (int i = 0; i < 3; i++) {
         string varName = fieldVars[i];
         if ((varName) == "") { continue; }
 
+        if (!_dataMgr->VariableExists(ts, varName, level, 0)) continue;
+
         vector<double> minExt, maxExt;
-        _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
+        int            rc = _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
+        assert(rc >= 0);
 
         // If we're dealing with 2D vars, skip the Z element
         //

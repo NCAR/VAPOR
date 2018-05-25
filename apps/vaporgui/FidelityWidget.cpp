@@ -86,7 +86,7 @@ void FidelityWidget::setFidelity(int buttonID)
 
 void FidelityWidget::SetFidelityDefault()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Check current values of LOD and refinement and their combos.
     _renderEV->confirmText();
     _dataStatus->setFidelityDefault(rParams);

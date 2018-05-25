@@ -25,6 +25,7 @@ size_t numBlocks(const vector<size_t> &min, const vector<size_t> &max, const vec
     return (nblocks);
 }
 
+#ifdef UNUSED_FUNCTION
 size_t numBlocks(const vector<size_t> &dims, const vector<size_t> &bs)
 {
     assert(dims.size() == bs.size());
@@ -36,6 +37,7 @@ size_t numBlocks(const vector<size_t> &dims, const vector<size_t> &bs)
     }
     return (nblocks);
 }
+#endif
 
 size_t blockSize(const vector<size_t> &bs)
 {
@@ -70,8 +72,6 @@ void extractBlock(const float *data, const vector<size_t> &dims, const vector<si
 {
     assert(dims.size() == bcoords.size());
     assert(dims.size() == bs.size());
-
-    size_t block_size = vproduct(bs);
 
     // Block dimensions
     //
@@ -264,7 +264,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
     string varname = f->GetVarname();
     int    level = f->GetLevel();
     int    lod = f->GetLOD();
-    int    sliceNum = f->GetSlice();
 
     // Dimensions are same for X & Y coord vars
     //
@@ -331,7 +330,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(DC::FileTable::FileO
     string varname = f->GetVarname();
     int    level = f->GetLevel();
     int    lod = f->GetLOD();
-    int    sliceNum = f->GetSlice();
 
     // Dimensions are same for X & Y coord vars
     //
@@ -784,6 +782,147 @@ int DerivedCoordVar_WRFTime::ReadRegionBlock(int fd, const vector<size_t> &min, 
 }
 
 bool DerivedCoordVar_WRFTime::VariableExists(size_t ts, string varname, int reflevel, int lod) const
+{
+    if (varname != _coordName) return (false);
+
+    return (ts < _times.size());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	DerivedCoordVar_TimeInSeconds
+//
+//////////////////////////////////////////////////////////////////////////////
+
+DerivedCoordVar_TimeInSeconds::DerivedCoordVar_TimeInSeconds(string derivedVarName, DC *dc, string nativeTimeVar, string dimName) : DerivedCoordVar(derivedVarName)
+{
+    _dc = dc;
+    _times.clear();
+    _coordName = _derivedVarNames[0];
+    _nativeTimeVar = nativeTimeVar;
+
+    string units = "seconds";
+    int    axis = 3;
+    _coordVarInfo = DC::CoordVar(_coordName, units, DC::XType::FLOAT, vector<bool>(), axis, false, vector<string>(), dimName);
+}
+
+int DerivedCoordVar_TimeInSeconds::Initialize()
+{
+    // Use UDUnits for unit conversion
+    //
+    UDUnits udunits;
+    int     rc = udunits.Initialize();
+    if (rc < 0) {
+        SetErrMsg("Failed to initialize udunits2 library : %s", udunits.GetErrMsg().c_str());
+        return (-1);
+    }
+
+    DC::CoordVar cvar;
+    bool         status = _dc->GetCoordVarInfo(_nativeTimeVar, cvar);
+    if (!status) {
+        SetErrMsg("Invalid coordinate variable %s", _nativeTimeVar.c_str());
+        return (-1);
+    }
+
+    if (!udunits.IsTimeUnit(cvar.GetUnits())) {
+        SetErrMsg("Invalid coordinate variable %s", _nativeTimeVar.c_str());
+        return (-1);
+    }
+
+    size_t numTS = _dc->GetNumTimeSteps(_nativeTimeVar);
+
+    float *buf = new float[2 * numTS];
+    float *bufptr1 = buf;
+    float *bufptr2 = buf + numTS;
+
+    rc = _dc->GetVar(_nativeTimeVar, -1, -1, bufptr1);
+    if (rc < 0) {
+        SetErrMsg("Can't read time variable");
+        return (-1);
+    }
+
+    status = udunits.Convert(cvar.GetUnits(), "seconds", bufptr1, bufptr2, numTS);
+    if (!status) {
+        SetErrMsg("Invalid coordinate variable %s", _nativeTimeVar.c_str());
+        return (-1);
+    }
+
+    _times.clear();
+    for (int i = 0; i < numTS; i++) { _times.push_back(bufptr2[i]); }
+    delete[] buf;
+
+    return (0);
+}
+
+bool DerivedCoordVar_TimeInSeconds::GetBaseVarInfo(string varname, DC::BaseVar &var) const
+{
+    var = _coordVarInfo;
+    return (true);
+}
+
+bool DerivedCoordVar_TimeInSeconds::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const
+{
+    cvar = _coordVarInfo;
+    return (true);
+}
+
+int DerivedCoordVar_TimeInSeconds::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{
+    dims_at_level.clear();
+    bs_at_level.clear();
+
+    return (0);
+}
+
+int DerivedCoordVar_TimeInSeconds::OpenVariableRead(size_t ts, string varname, int level, int lod)
+{
+    if (varname != _coordName) {
+        SetErrMsg("Invalid variable name: %s", varname.c_str());
+        return (-1);
+    }
+
+    ts = ts < _times.size() ? ts : _times.size() - 1;
+
+    DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, varname, level, lod);
+
+    return (_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVar_TimeInSeconds::CloseVariable(int fd)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return (0);
+}
+
+int DerivedCoordVar_TimeInSeconds::ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    assert(min.size() == 0);
+    assert(max.size() == 0);
+
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+
+    size_t ts = f->GetTS();
+
+    *region = _times[ts];
+
+    return (0);
+}
+
+bool DerivedCoordVar_TimeInSeconds::VariableExists(size_t ts, string varname, int reflevel, int lod) const
 {
     if (varname != _coordName) return (false);
 

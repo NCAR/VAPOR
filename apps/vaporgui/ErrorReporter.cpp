@@ -27,7 +27,7 @@
     #include <unistd.h>
 #endif
 
-#if defined(DARWIN)
+#if defined(Darwin)
     #include <CoreServices/CoreServices.h>
 #elif defined(linux)
     #include <sys/utsname.h>
@@ -40,6 +40,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QPushButton>
+#include <QApplication>
 
 #include "vapor/MyBase.h"
 #include "vapor/Version.h"
@@ -48,6 +49,8 @@
 
 using std::string;
 using std::vector;
+
+ErrorReporter *ErrorReporter::_instance = NULL;
 
 void _segFaultHandler(int sig)
 {
@@ -87,12 +90,40 @@ void _myBaseDiagCallback(const char *msg)
     if (e->_logFile) { fprintf(e->_logFile, "Diagnostic: %s\n", msg); }
 }
 
-ErrorReporter *ErrorReporter::_instance;
-ErrorReporter *ErrorReporter::GetInstance()
+#define ErrorReporterPopup_OK_BUTTON_TEXT   "Ok"
+#define ErrorReporterPopup_SAVE_BUTTON_TEXT "Save Log"
+
+ErrorReporterPopup::ErrorReporterPopup(QWidget *parent, int id) : QMessageBox(parent), dead(false)
 {
-    if (!_instance) { _instance = new ErrorReporter(); }
-    return _instance;
+    addButton(ErrorReporterPopup_OK_BUTTON_TEXT, QMessageBox::AcceptRole);
+    addButton(ErrorReporterPopup_SAVE_BUTTON_TEXT, QMessageBox::ApplyRole);
+    setText("An error has occured");
+    connect(this, SIGNAL(buttonClicked(QAbstractButton *)), this, SLOT(doAction(QAbstractButton *)));
 }
+
+void ErrorReporterPopup::doAction(QAbstractButton *button)
+{
+    dead = true;
+    if (ErrorReporterPopup_SAVE_BUTTON_TEXT == button->text().toStdString()) {
+        QString fileName = QFileDialog::getSaveFileName(NULL, "Save Error Log", QString(), "Text (*.txt);;All Files (*)");
+        if (fileName.isEmpty()) {
+            return;
+        } else {
+            QFile file(fileName);
+            if (!file.open(QIODevice::WriteOnly)) {
+                QMessageBox::information(NULL, "Unable to open file", file.errorString());
+                return;
+            }
+            QTextStream out(&file);
+            out << QString(_logText.c_str());
+        }
+    } else if (ErrorReporterPopup_OK_BUTTON_TEXT == button->text().toStdString()) {
+    } else {
+        printf("Unknown ErrorReporterPopup button pressed: [%s]\n", button->text().toStdString().c_str());
+    }
+}
+
+void ErrorReporterPopup::setLogText(std::string text) { _logText = text; }
 
 void ErrorReporter::ShowErrors() { Report(ERRORREPORTER_DEFAULT_MESSAGE); }
 
@@ -101,13 +132,18 @@ void ErrorReporter::Report(string msg, Type severity, string details)
     ErrorReporter *e = GetInstance();
     if (e->_logFile) { fprintf(e->_logFile, "Report[%i]: %s\n%s\n", (int)severity, msg.c_str(), details.c_str()); }
 
-    QMessageBox box;
-    box.setText("An error has occured");
-    box.setInformativeText(msg.c_str());
-    // box.addButton(QMessageBox::Ok);
-    // box.addButton(QMessageBox::Save);
-    box.addButton("Ok", QMessageBox::AcceptRole);
-    box.addButton("Save Log", QMessageBox::ApplyRole);
+    for (int i = 0; i < e->_boxes.size(); i++) {
+        if (e->_boxes[i]->isDead()) {
+            delete e->_boxes[i];
+            e->_boxes.erase(e->_boxes.begin() + i);
+            i--;
+        }
+    }
+
+    static int          i = 0;
+    ErrorReporterPopup *box = new ErrorReporterPopup(e->_parent, i++);
+    e->_boxes.push_back(box);
+    box->setInformativeText(msg.c_str());
 
     if (details == "") {
         while (e->_log.size()) {
@@ -116,42 +152,24 @@ void ErrorReporter::Report(string msg, Type severity, string details)
             e->_log.pop_back();
         }
     }
-    box.setDetailedText(details.c_str());
+    box->setDetailedText(details.c_str());
 
     switch (severity) {
     case Diagnostic:
-    case Info: box.setIcon(QMessageBox::Information); break;
-    case Warning: box.setIcon(QMessageBox::Warning); break;
-    case Error: box.setIcon(QMessageBox::Critical); break;
+    case Info: box->setIcon(QMessageBox::Information); break;
+    case Warning: box->setIcon(QMessageBox::Warning); break;
+    case Error: box->setIcon(QMessageBox::Critical); break;
     }
 
-    int                     ret = box.exec();
-    QAbstractButton *       clicked = box.clickedButton();
-    QMessageBox::ButtonRole role = box.buttonRole(clicked);
+    string logText;
+    logText = GetSystemInformation() + "\n";
+    logText += "-------------------\n";
+    logText += msg + "\n";
+    logText += "-------------------\n";
+    logText += details;
+    box->setLogText(logText);
 
-    switch (role) {
-    case QMessageBox::ApplyRole: {
-        QString fileName = QFileDialog::getSaveFileName(NULL, "Save Error Log", QString(), "Text (*.txt);;All Files (*)");
-        if (fileName.isEmpty())
-            return;
-        else {
-            QFile file(fileName);
-            if (!file.open(QIODevice::WriteOnly)) {
-                QMessageBox::information(NULL, "Unable to open file", file.errorString());
-                return;
-            }
-            QTextStream out(&file);
-            out << QString((GetSystemInformation() + "\n").c_str());
-            out << QString("-------------------\n");
-            out << QString((msg + "\n").c_str());
-            out << QString("-------------------\n");
-            out << QString(details.c_str());
-        }
-        break;
-    }
-    case QMessageBox::AcceptRole: break;
-    default: printf("Uknown Messagebox role %i\n", role);
-    }
+    box->show();    // This will immediately return
 }
 
 #pragma GCC diagnostic push
@@ -159,7 +177,7 @@ void ErrorReporter::Report(string msg, Type severity, string details)
 string                 ErrorReporter::GetSystemInformation()
 {
     string ret = "Vapor " + Wasp::Version::GetFullVersionString() + "\n";
-#if defined(DARWIN)
+#if defined(Darwin)
     SInt32 major, minor, rev;
     Gestalt(gestaltSystemVersionMajor, &major);
     Gestalt(gestaltSystemVersionMinor, &minor);
@@ -171,10 +189,11 @@ string                 ErrorReporter::GetSystemInformation()
     ret += "OS: " + string(info.sysname) + " " + string(info.release) + " " + string(info.version) + "\n";
     ret += "Distro:\n";
     char  buffer[128];
-    FILE *pipe = popen("lsb_release", "r"), pclose;
+    FILE *pipe = popen("lsb_release", "r");
     if (pipe) {
         while (!feof(pipe)) {
             if (fgets(buffer, 128, pipe) != 0) ret += string(buffer);
+            pclose(pipe);
         }
     } else {
         fprintf(stderr, "popen failed\n");
@@ -213,8 +232,14 @@ int ErrorReporter::OpenLogFile(std::string path)
     return 0;
 }
 
-ErrorReporter::ErrorReporter()
+ErrorReporter::ErrorReporter(QWidget *parent)
 {
+    assert(parent != NULL);
+
+    if (_instance) return;
+
+    _parent = parent;
+    _instance = this;
     signal(SIGSEGV, _segFaultHandler);
     Wasp::MyBase::SetErrMsgCB(_myBaseErrorCallback);
     Wasp::MyBase::SetDiagMsgCB(_myBaseDiagCallback);
@@ -225,5 +250,7 @@ ErrorReporter::ErrorReporter()
 
 ErrorReporter::~ErrorReporter()
 {
-    if (_logFile) { fclose(_logFile); }
+    if (_logFile) fclose(_logFile);
+
+    for (int i = 0; i < _boxes.size(); i++) delete _boxes[i];
 }

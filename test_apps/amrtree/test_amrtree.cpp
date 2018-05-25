@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         cerr << "child " << i << " " << nidx << endl;
     }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     AMRTree::cid_t c0, c0save;
 
     c0 = tree->RefineCell(cellid + 0);
