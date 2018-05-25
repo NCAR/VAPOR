@@ -81,9 +81,16 @@ std::string Wasp::GetAppPath(
 	const vector <string> &paths,
 	bool forwardSeparator
 ) {
+	string myResource = resource;
+
+#ifndef Darwin
+	if (myResource == "home") {
+		myResource.clear();
+	}
+#endif
 	ostringstream oss;
 
-	oss << "GetAppPath(" << app << ", " << resource;
+	oss << "GetAppPath(" << app << ", " << myResource;
 	for (int i=0; i<paths.size(); i++) {
 		oss << ", " << paths[i];
 	}
@@ -115,18 +122,19 @@ std::string Wasp::GetAppPath(
 	env.append("_HOME");
 
 	if ( ! (
-		(resource.compare("lib") == 0) || 
-		(resource.compare("bin") == 0) ||
-		(resource.compare("share") == 0) ||
-		(resource.compare("plugins") == 0) ||
-		(resource.compare("home") == 0) ||
-		(resource.compare("") == 0)
+		(myResource.compare("lib") == 0) || 
+		(myResource.compare("bin") == 0) ||
+		(myResource.compare("share") == 0) ||
+		(myResource.compare("plugins") == 0) ||
+		(myResource.compare("home") == 0) ||
+		(myResource.compare("") == 0)
 	)) {
 		MyBase::SetDiagMsg("GetAppPath() return : empty (unknown resources)");
 		return("");	// empty path, invalid resource
 	}
 
 	char *homestr = getenv(env.c_str());
+
 #ifdef	Darwin
 	if (homestr) {
 		string s = homestr;
@@ -140,9 +148,9 @@ std::string Wasp::GetAppPath(
 
     if (homestr) {
 		path.assign(homestr);
-		if (! resource.empty()) {
+		if (! myResource.empty()) {
 			path.append(separator);
-			path.append(resource);
+			path.append(myResource);
 		}
 	}
 #ifdef	Darwin
@@ -153,17 +161,17 @@ std::string Wasp::GetAppPath(
 		if (! path.empty()) {
 			path.append("Contents/");
 			if (
-				(resource.compare("bin")==0) || 
-				(resource.compare("")==0)) {
+				(myResource.compare("bin")==0) || 
+				(myResource.compare("")==0)) {
 				path.append("MacOS");
 			}
-			else if (resource.compare("share") == 0) {
+			else if (myResource.compare("share") == 0) {
 				path.append("share");
 			}
-			else if (resource.compare("lib") == 0) {
+			else if (myResource.compare("lib") == 0) {
 				path.append("lib");
 			}
-			else if (resource.compare("home") == 0) {
+			else if (myResource.compare("home") == 0) {
 				path.erase(path.size() - 1, 1);
 			}
 			else {	// must be plugins
@@ -177,7 +185,7 @@ std::string Wasp::GetAppPath(
         path = "";
 
 	if (path.empty()) {
-		if (resource.compare("share") == 0) {
+		if (myResource.compare("share") == 0) {
 			path.append(SOURCE_DIR);
 			path.append(separator);
 			path.append("share");

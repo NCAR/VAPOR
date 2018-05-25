@@ -69,7 +69,7 @@ public:
 
 	void ClearText(int type=-1);
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
  //! Clear all the text objects
 	void invalidateCache();
 #endif
@@ -114,7 +114,7 @@ private:
 	void drawDomainFrame(size_t ts) const;
 
 
- std::vector<double> getDomainExtents(string dmName = "") const;
+ std::vector<double> getDomainExtents() const;
  AxisAnnotation* getCurrentAxisAnnotation();
  string getCurrentDataMgrName() const;
  void scaleNormalizedCoordinatesToWorld(
@@ -122,7 +122,7 @@ private:
 	string dataMgrName);
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 //! Render the region frame
 	void drawRegionBounds(size_t ts) const;
 #endif
@@ -133,9 +133,9 @@ private:
  void applyTransform(Transform *t);
  void renderText(double text, double coords[], AxisAnnotation *aa = NULL);
  Transform* getTransform(string dataMgr="");
- void convertPointToLon(double &xCoord, string dataMgr="");
- void convertPointToLat(double &yCoord, string dataMgr="");
- void convertPointToLonLat(double &xCoord, double &yCoord, string dataMgr="");
+ void convertPointToLon(double &xCoord);
+ void convertPointToLat(double &yCoord);
+ void convertPointToLonLat(double &xCoord, double &yCoord);
 
  // Draw Axis arrows
  //
@@ -143,7 +143,7 @@ private:
 	std::vector <double> minExts, std::vector <double> maxExts
  );
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 //! Static method to convert axis coordinates between user and lat-lon
 //! It is OK for outputs to equal corresponding inputs.
 //! \param[in] toLatLon indicates whether conversion is to LatLon (true) or to user (false)

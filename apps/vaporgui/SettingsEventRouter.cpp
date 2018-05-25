@@ -30,7 +30,10 @@
 #include "GL/glew.h"
 #include "qcolordialog.h"
 
+#ifdef VAPOR3_0_0_ALPHA
 #include "images/fileopen.xpm"
+#endif 
+
 #include <qlabel.h>
 #include <QFileDialog>
 #include <vector>
@@ -46,7 +49,9 @@
 #include "EventRouter.h"
 #include "SettingsParams.h"
 #include "ErrorReporter.h"
+#include "FileOperationChecker.h"
 
+#include "QIntValidatorWithFixup.h"
 
 using namespace VAPoR;
 
@@ -58,29 +63,27 @@ SettingsEventRouter::SettingsEventRouter(
 {
 	setupUi(this);
 
-	SettingsParams* sp = (SettingsParams*)GetActiveParams();
-
 	ParamsBase::StateSave *ss = new ParamsBase::StateSave;
 	_defaultParams = new SettingsParams(ss, false);
 
-	QValidator* numThreadsValidator;
-	numThreadsValidator = new QIntValidator(0, 8, _numThreadsEdit);
+	QIntValidatorWithFixup*  numThreadsValidator = 
+		new QIntValidatorWithFixup(0, INT_MAX, _numThreadsEdit);
 	_numThreadsEdit->setValidator(numThreadsValidator);
 
-	QValidator* cacheSizeValidator;
-	cacheSizeValidator = new QIntValidator(0, 100000, _cacheSizeEdit);
+	QIntValidatorWithFixup* cacheSizeValidator = 
+		new QIntValidatorWithFixup(1000, INT_MAX, _cacheSizeEdit);
 	_cacheSizeEdit->setValidator(cacheSizeValidator);
 
-	QValidator* windowWidthValidator;
-	windowWidthValidator = new QIntValidator(0, 16000, _windowWidthEdit);
+	QIntValidatorWithFixup* windowWidthValidator = 
+		new QIntValidatorWithFixup(800, 16000, _windowWidthEdit);
 	_windowWidthEdit->setValidator(windowWidthValidator);
 
-	QValidator* windowHeightValidator;
-	windowHeightValidator = new QIntValidator(0, 16000, _windowHeightEdit);
+	QIntValidatorWithFixup* windowHeightValidator = 
+		new QIntValidatorWithFixup(600, 16000, _windowHeightEdit);
 	_windowHeightEdit->setValidator(windowHeightValidator);
 
-	QValidator* autoSaveValidator;
-	autoSaveValidator = new QIntValidator(1, 100, _autoSaveIntervalEdit);
+	QIntValidatorWithFixup* autoSaveValidator = 
+		new QIntValidatorWithFixup(1, 1000, _autoSaveIntervalEdit);
 	_autoSaveIntervalEdit->setValidator(autoSaveValidator);
 }
 
@@ -116,17 +119,17 @@ void SettingsEventRouter::hookUpTab() {
 	connect(_defaultButton, SIGNAL(clicked()),
 		this, SLOT(_restoreDefaults()));
 	connect(_sessionPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setSessionPath()));
 	connect(_metadataPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setMetadataPath()));
 	connect(_imagePathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setImagePath()));
 	connect(_tfPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setTFPath()));
 	connect(_flowPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setFlowPath()));
 	connect(_pythonPathEdit, SIGNAL( returnPressed()),
-		this, SLOT(_setDirectoryPaths()));
+		this, SLOT(_setPythonPath()));
 	connect(_sessionPathButton, SIGNAL(clicked()),
 		this, SLOT(_chooseSessionPath()));
 	connect(_metadataPathButton, SIGNAL(clicked()),
@@ -141,82 +144,19 @@ void SettingsEventRouter::hookUpTab() {
 		this, SLOT(_choosePythonPath()));
 }
 
-void SettingsEventRouter::_warnUserAfterThreadChange() {
-	_numThreadsEdit->setStyleSheet(
-		"background-color: yellow; color: black;"
-	);
-
-	_numThreadsEdit->setToolTip(
-		"Vapor's thread count is initialized when the\n"
-		"application launches.  These settings will\n"
-		"only take effect in future Vapor instances."
-	);
-}
-
-void SettingsEventRouter::_undoUserWarnings() {
-	_numThreadsEdit->setStyleSheet(
-		"background-color: white; color: black;"
-	);
-	
-	_cacheSizeEdit->setStyleSheet(
-		"background-color: white; color: black;"
-	);
-}
-
 void SettingsEventRouter::_numThreadsChanged() {
 	SettingsParams* sParams = (SettingsParams*)GetActiveParams();
 	size_t numThreads = (size_t)_numThreadsEdit->text().toInt();
-	if (numThreads != sParams->GetNumThreads())
-		_warnUserAfterThreadChange();
 	sParams->SetNumThreads(numThreads);
 	_saveSettings();
-}
-
-void SettingsEventRouter::_warnUserAfterCacheChange() {
-	_cacheSizeEdit->setStyleSheet(
-		"background-color: yellow; color: black;"
-	);
-
-	_cacheSizeEdit->setToolTip(
-		"Vapor's cache size is initialized when the\n"
-		"application launches.  These settings will\n"
-		"only take effect in future Vapor instances."
-	);
 }
 
 void SettingsEventRouter::_cacheSizeChanged() {
 	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
 	int cacheSize = _cacheSizeEdit->text().toInt();
 
-	if (cacheSize != sParams->GetCacheMB())
-		_warnUserAfterCacheChange();
-
 	sParams->SetCacheMB(cacheSize);
 	_saveSettings();
-}
-
-void SettingsEventRouter::_warnUserAfterWidthChange() {
-	_windowWidthEdit->setStyleSheet(
-		"background-color: yellow; color: black;"
-	);
-
-	_windowWidthEdit->setToolTip(
-		"Vapor's window size is initialized when the\n"
-		"application launches.  These settings will\n"
-		"only take effect in future Vapor instances."
-	);
-}
-
-void SettingsEventRouter::_warnUserAfterHeightChange() {
-	_windowHeightEdit->setStyleSheet(
-		"background-color: yellow; color: black;"
-	);
-
-	_windowHeightEdit->setToolTip(
-		"Vapor's window size is initialized when the\n"
-		"application launches.  These settings will\n"
-		"only take effect in future Vapor instances."
-	);
 }
 
 void SettingsEventRouter::_enableWinSize(bool enabled) {
@@ -233,10 +173,6 @@ void SettingsEventRouter::_windowSizeChanged() {
 	int height = _windowHeightEdit->text().toInt();
 	size_t oldWidth, oldHeight;
 	sParams->GetWinSize(oldWidth, oldHeight);
-	if (width != oldWidth || height != oldHeight) {
-		_warnUserAfterHeightChange();
-		_warnUserAfterWidthChange();
-	}
 	sParams->SetWinSize(width, height);
 	_saveSettings();
 }
@@ -260,42 +196,165 @@ void SettingsEventRouter::_changesPerSaveChanged() {
 	_saveSettings();
 }
 
-void SettingsEventRouter::_chooseAutoSaveFile() {
-	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+    
+bool SettingsEventRouter::_confirmFileExist( QString& qfilename )
+{
+    QFileInfo check_file( qfilename );
+    if ( check_file.exists() )
+    {
+        QMessageBox msgBox; 
+        msgBox.setWindowTitle("Are you sure?");
+        QString msg = "The following file exists.\n ";
+        msg += qfilename;
+        msg += "\n"; 
+        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
+        msgBox.setText( msg );
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if(msgBox.exec() == QMessageBox::No)
+            return false;
+        else
+            return true;
+    }
+    else
+        return true;
+}
 
-	string dir = _choosePathHelper(
-		sParams->GetMetadataDir(), "Choose the auto-save file"
+void SettingsEventRouter::_chooseAutoSaveFile() 
+{
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+    QFileDialog fileDialog( _autoSaveFileButton, 
+                            QString::fromAscii("Select auso-save VAPOR session file"),
+                            QString::fromStdString( sParams->GetAutoSaveSessionFile() ),
+                            QString::fromAscii("Vapor 3 Session Files (*.vs3)") );
+    fileDialog.setDefaultSuffix( QString::fromAscii("vs3") );
+    fileDialog.setOption( QFileDialog::DontConfirmOverwrite );
+    fileDialog.setAcceptMode( QFileDialog::AcceptSave );
+    if( fileDialog.exec() != QDialog::Accepted )
+        return;
+    QStringList files = fileDialog.selectedFiles();
+    if (files.isEmpty() || files.size() > 1)
+        return;
+    QString qfilename = files.first();
+    if( !qfilename.endsWith( ".vs3" ) )
+        qfilename.append(".vs3");
+
+    if( !_confirmFileExist( qfilename ) )
+    {
+        _updateTab();
+        return;
+    }
+
+    if( FileOperationChecker::FileGoodToWrite( qfilename ) )
+    {
+        sParams->SetAutoSaveSessionFile( qfilename.toStdString() );
+        _saveSettings();
+    }
+    else 
+    {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
+}
+
+void SettingsEventRouter::_autoSaveFileChanged() 
+{
+    SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+    QString qfilename = _autoSaveFileEdit->text();
+    if( !qfilename.endsWith( ".vs3" ) )
+    {
+        qfilename.append(".vs3");
+        _autoSaveFileEdit->setText( qfilename );
+    }
+
+    if( !_confirmFileExist( qfilename ) )
+    {
+        _updateTab();
+        return;
+    }
+
+    if (FileOperationChecker::FileGoodToWrite(qfilename))
+    {
+        sParams->SetAutoSaveSessionFile(qfilename.toStdString());
+        _saveSettings();
+    }
+    else 
+    {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
+}
+
+void SettingsEventRouter::_setSessionPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetSessionDir,
+		&SettingsParams::GetSessionDir,
+		*sParams, _sessionPathEdit
 	);
+}
 
-	if (! dir.empty()) {
-		sParams->SetAutoSaveSessionFile(dir);
-		_saveSettings();
+void SettingsEventRouter::_setMetadataPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetMetadataDir,
+		&SettingsParams::GetMetadataDir,
+		*sParams, _metadataPathEdit
+	);
+}
+
+void SettingsEventRouter::_setImagePath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetImageDir,
+		&SettingsParams::GetImageDir,
+		*sParams, _imagePathEdit
+	);
+}
+
+void SettingsEventRouter::_setFlowPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetFlowDir,
+		&SettingsParams::GetFlowDir,
+		*sParams, _flowPathEdit
+	);
+}
+
+void SettingsEventRouter::_setPythonPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetPythonDir,
+		&SettingsParams::GetPythonDir,
+		*sParams, _pythonPathEdit
+	);
+}
+
+void SettingsEventRouter::_setTFPath() {
+	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
+	
+	_setFilePath(&SettingsParams::SetTFDir,
+		&SettingsParams::GetTFDir,
+		*sParams, _tfPathEdit
+	);
+}
+
+void SettingsEventRouter::_setFilePath(
+	void (SettingsParams::*setFunc)(string),
+	string (SettingsParams::*getFunc)() const,
+	SettingsParams &sParams,
+	QLineEdit* lineEdit
+) {
+	string path = lineEdit->text().toStdString();
+	QString qpath= QString::fromStdString(path);
+	if (FileOperationChecker::DirectoryGoodToRead(qpath)) {
+		(sParams.*setFunc)(path);
 	}
-}
-
-void SettingsEventRouter::_autoSaveFileChanged() {
-	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
-	string file = _autoSaveFileEdit->text().toStdString();
-	sParams->SetAutoSaveSessionFile(file);
-	_saveSettings();
-}
-
-void SettingsEventRouter::_setDirectoryPaths(){
-	SettingsParams* sParams = (SettingsParams *) GetActiveParams();
-
-	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-
-	paramsMgr->BeginSaveStateGroup("Settings directory");
-
-	sParams->SetSessionDir(_sessionPathEdit->text().toStdString());
-	sParams->SetMetadataDir(_metadataPathEdit->text().toStdString());
-	sParams->SetImageDir(_imagePathEdit->text().toStdString());
-	sParams->SetFlowDir(_flowPathEdit->text().toStdString());
-	sParams->SetPythonDir(_pythonPathEdit->text().toStdString());
-	sParams->SetTFDir(_tfPathEdit->text().toStdString());
-	_saveSettings();
-
-	paramsMgr->EndSaveStateGroup();
+	else {
+		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+		_updateTab();
+		return;
+	}
 }
 
 void SettingsEventRouter::_blockSignals(bool block) {
@@ -384,7 +443,6 @@ string SettingsEventRouter::_choosePathHelper(string current, string help) {
 
 	//Launch a file-chooser dialog, just choosing the directory
 	QString dir;
-	SettingsParams* sParams = (SettingsParams*)GetActiveParams();
 
 	if (current == ".") {
 		dir = QDir::currentPath();
@@ -495,13 +553,15 @@ void SettingsEventRouter::_restoreDefaults() {
 
 	XmlNode* settingsNode = settingsParams->GetNode();
 	XmlNode* parent = settingsNode->GetParent();
-	XmlNode* defaultNode = _defaultParams->GetNode();
 
-	*settingsParams = *_defaultParams;
+	SettingsParams* newParams = new SettingsParams(*_defaultParams);
+	*settingsParams = *newParams;
 	settingsParams->GetNode()->SetParent(parent);
+
+	delete newParams;
 	
 	_saveSettings();
-	_undoUserWarnings();
+	_updateTab();
 
 	paramsMgr->EndSaveStateGroup();
 }
@@ -525,5 +585,7 @@ void SettingsEventRouter::_saveSettings() {
 	if (rc<0) {
 		MSG_ERR("Failed to save startup file");
 	}
+
+	_updateTab();
 }
 
