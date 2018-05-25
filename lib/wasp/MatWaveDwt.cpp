@@ -431,7 +431,7 @@ void transpose(const T *a, U *b, size_t p1, size_t p2, size_t m1, size_t m2, siz
     size_t I1, I2;
     size_t i1, i2;
     size_t q, r;
-    register double c0;
+    double c0;
     const size_t block = BlockSize;
     for (I2 = p2; I2 < p2 + m2; I2 += block)
         for (I1 = p1; I1 < p1 + m1; I1 += block)
@@ -742,7 +742,7 @@ int idwt_template(
             //
             cDTempLen = cATempLen;
         }
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
     } else {
         cATempLen = L[0];

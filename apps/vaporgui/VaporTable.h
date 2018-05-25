@@ -78,9 +78,15 @@ class VaporTable : public QWidget {
     // I think we may need something like this.  TBD...
     void SetCellMutability(int row, int col);
 
-    int RowCount() { return _table->rowCount(); }
-    int ColumnCount() { return _table->columnCount(); }
+    int RowCount() const { return _table->rowCount(); }
+    int ColumnCount() const { return _table->columnCount(); }
     QWidget *CellWidget(int row, int col) { return _table->cellWidget(row, col); }
+
+    void SetActiveRow(int row);
+    void SetActiveCol(int col);
+
+    void SetAutoResizeHeight(bool val);
+    bool GetAutoResizeHeight() const;
 
   public slots:
     void emitValueChanged();
@@ -121,10 +127,13 @@ class VaporTable : public QWidget {
 
     void highlightActiveCol(int col);
 
+    void resizeTableHeight();
+
     int _activeRow;
     int _activeCol;
     bool _lastRowIsCheckboxes;
     bool _lastColIsCheckboxes;
+    bool _autoResizeHeight;
     QTableWidget *_table;
 
     MutabilityFlags _mutabilityFlags;
