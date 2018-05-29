@@ -86,6 +86,9 @@ void TranslateStretchManip::Update(
 	std::copy(maxExts.begin(), maxExts.end(), _extents+3);
 
 	_transform = transform;
+	
+	applyTransform(_selection);
+	applyTransform(_extents);
 
 	_constrain = constrain;
 }
@@ -94,6 +97,8 @@ void TranslateStretchManip::GetBox(
 	std::vector<double> &llc, 
 	std::vector<double> &urc) 
 {
+	removeTransform(_selection);
+
 	llc.resize(3);
 	urc.resize(3);
 	llc[0] = _selection[0];
@@ -160,23 +165,12 @@ void TranslateStretchManip::mousePress(
 	setMouseDown(true);
 }
 
-
-void TranslateStretchManip::applyTransformToDrag(float &dist, int axis) {
-	std::vector<double> scales(3, 1.f);
-	if (_transform != NULL)
-		scales = _transform->GetScales();
-
-	dist *= scales[axis];
-}
-	
-
 void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
 	if (_selectedHandle >= 0){
 		double boxExts[6];
 		int axis = (_selectedHandle <3) ? (2-_selectedHandle): (_selectedHandle-3);
 		//Convert _dragDistance to world coords:
 		float dist = _dragDistance;
-		applyTransformToDrag(dist, axis);
 
 		//Check if we are stretching.  If so, only move coords associated with
 		//handle:
@@ -187,14 +181,11 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
 			}
 			else { 
 				_selection[axis+3] += dist;
-//				_transformedSelection[axis+3] += dist;
-//				_transformedSelection[axis+3] += dist;
 			}
 		} else {
+			//boxMin gets changed for nearHandle, boxMax for farHandle
 			_selection[axis] += dist;
 			_selection[axis+3] += dist;
-//			_transformedSelection[axis] += dist;
-//			_transformedSelection[axis+3] += dist;
 		}
 	}
 	
@@ -211,8 +202,6 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double hand
 	
 	double handle[8][3];
 
-	applyTransformToSelection();
-	
 	int octant = 0;
 	int face, handleNum;
 	for (int axis = 0; axis < 3; axis++){
@@ -232,7 +221,6 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double hand
 					handleMid[i] += handle[k][i];
 				handleMid[i] /= 8.;
 			}	
-			removeTransform();
 			return handleNum;
 		}
 	}
@@ -247,11 +235,9 @@ int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double hand
 					handleMid[i] += handle[k][i];
 				handleMid[i] /= 8.;
 			}
-			removeTransform();
 			return handleNum;
 		}
 	}
-	removeTransform();
 	return -1;
 }
 
@@ -658,60 +644,65 @@ rayHandleIntersect(double ray[3],
 	return true;
 }
 
-void TranslateStretchManip::applyTransformToSelection() {
-	std::vector<double> scales(3, 1.f);
-	std::vector<double> origin(3, 0.f);
-	if (_transform != NULL) {
-		scales = _transform->GetScales();
-		origin = _transform->GetOrigin();
-	}
+void TranslateStretchManip::applyTransform(double extents[6]) {
+	if (_transform==NULL) return;
+    vector <double> translations = _transform->GetTranslations();
+    vector <double> rotations    = _transform->GetRotations();
+    vector <double> scales       = _transform->GetScales();
+    vector <double> origins      = _transform->GetOrigin();
+    assert(translations.size() == 3); 
+    assert(rotations.size()    == 3); 
+    assert(scales.size()       == 3); 
+    assert(origins.size()      == 3); 
 
-	std::vector<double> selectionSize, selectionMid;
-	int ndims = 3;//_selection.size()/2;
-	for (int i=0; i<ndims; i++) {
-		selectionSize.push_back(_selection[i+ndims]-_selection[i]);
-		selectionSize[i]*=scales[i];
+	double origin, scale, translation;
+	for (int i=0; i<3; i++) {
+		origin = origins[i];
+		scale = scales[i];
+		translation = translations[i];
 
-		float unscaledMidpoint = (_selection[i]+_selection[i+ndims])/2.f;
-		float offsetFromOrigin = (origin[i]-unscaledMidpoint);//*scales[i];
-		selectionMid.push_back((unscaledMidpoint + offsetFromOrigin)*scales[i]);
-		//selectionMid.push_back((_selection[i]+_selection[i+ndims])/2.f);
-	
-		if (i==0)	
-		cout << "applyT " << selectionMid[i] << " " << unscaledMidpoint << " " << offsetFromOrigin << endl;	
-		_selection[i] = selectionMid[i]-selectionSize[i]/2.f;
-		_selection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
+		extents[i] -= origin;
+		extents[i] *= scale;
+		extents[i] += origin;
+		extents[i] += translation;
+			
+		extents[i+3] -= origin;
+		extents[i+3] *= scale;
+		extents[i+3] += origin;
+		extents[i+3] += translation;
 	}
 }
 
-void TranslateStretchManip::removeTransform() {
-	std::vector<double> scales(3, 1.f);
-	std::vector<double> origin(3, 0.f);
-	if (_transform != NULL) {
-		scales = _transform->GetScales();
-		origin = _transform->GetOrigin();
+
+void TranslateStretchManip::removeTransform(double extents[6]) {
+	if (_transform==NULL) return;
+    vector <double> translations = _transform->GetTranslations();
+    vector <double> rotations    = _transform->GetRotations();
+    vector <double> scales       = _transform->GetScales();
+    vector <double> origins      = _transform->GetOrigin();
+    assert(translations.size() == 3); 
+    assert(rotations.size()    == 3); 
+    assert(scales.size()       == 3); 
+    assert(origins.size()      == 3); 
+
+	double origin, scale, translation;
+	for (int i=0; i<3; i++) {
+		origin = origins[i];
+		scale = scales[i];
+		translation = translations[i];
+
+		extents[i] -= origin;
+		extents[i] /= scale;
+		extents[i] += origin;
+		extents[i] -= translation;
+			
+		extents[i+3] -= origin;
+		extents[i+3] /= scale;
+		extents[i+3] += origin;
+		extents[i+3] -= translation;
 	}
-
-	std::vector<double> selectionSize, selectionMid;
-	int ndims = 3;//_selection.size()/2;
-	for (int i=0; i<ndims; i++) {
-		selectionSize.push_back(_selection[i+ndims]-_selection[i]);
-		selectionSize[i]/=scales[i];
-
-		float scaledMidpoint = (_selection[i]+_selection[i+ndims])/2.f;
-		float offsetFromOrigin = (origin[i]-scaledMidpoint);//scales[i];
-		selectionMid.push_back((scaledMidpoint - offsetFromOrigin)/scales[i]);
-		//selectionMid.push_back((_selection[i]+_selection[i+ndims])/2.f);
-		//selectionMid[i] -= (selectionMid[i] - origin[i])/scales[i];
-	
-		if (i==0)	
-		cout << "removT " << selectionMid[i] << " " << scaledMidpoint << " " << offsetFromOrigin << endl;	
-		_selection[i] = selectionMid[i]-selectionSize[i]/2.f;
-		_selection[i+ndims] = selectionMid[i]+selectionSize[i]/2.f;
-	}
-
 }
-	
+
 //Renders handles and box
 //If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render(){
@@ -719,18 +710,12 @@ void TranslateStretchManip::render(){
 
 	_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
 
-	applyTransformToSelection();
-
 	glPushAttrib(GL_CURRENT_BIT);
 	double handleExtents[6];
 	for (int handleNum = 0; handleNum < 6; handleNum++){
-		//makeHandleExtents(handleNum, handleExtents, 0/*octant*/, extents);
-		//makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _extents);
 		makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _selection);
-//		makeHandleExtents(handleNum, handleExtents, 0/*octant*/, _transformedSelection);
 
 		if (_selectedHandle >= 0){
-			//int axis = (_selectedHandle < 3) ? (2-_selectedHandle) : (_selectedHandle -3);
 			int axis = (_selectedHandle < 3) ? (2-_selectedHandle) : (_selectedHandle -3);
 			//displace handleExtents appropriately
 			if (_isStretching){
@@ -750,13 +735,12 @@ void TranslateStretchManip::render(){
 		}
 		drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
 		drawHandleConnector(handleNum, handleExtents, _selection);//extents);
-//		drawHandleConnector(handleNum, handleExtents, _transformedSelection);//extents);
 	}
 	//Then render the full box, unhighlighted and displaced
 	drawBoxFaces();
 	glPopAttrib();
 
-	removeTransform();
+//	removeTransform(_selection);
 }
 
 double TranslateStretchManip::getPixelSize() const {
@@ -1000,6 +984,7 @@ captureMouseDown(int handleNum,
 	_tempRotAxis = -1;
 }
 
+
 //Slide the handle based on mouse move from previous capture.  
 //Requires new direction vector associated with current mouse position
 //The new face position requires finding the planar displacement such that 
@@ -1025,6 +1010,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	vcopy(movedRay, w);
 	vnormal(w);
 	double scaleFactor = 1.f/vdot(w,normalVector);
+	
 	//Calculate q:
 	vmult(w, scaleFactor, q);
 	vsub(q, normalVector, q);
@@ -1043,7 +1029,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 	//Make sure the displacement is OK.  Not allowed to
 	//slide box out of full domain box.
 	//If stretching, not allowed to push face through opposite face.
-	
+
 	//Do this calculation in stretched world coords
 	double sizes[3];
 	int ndims = 3;//_extents.size()/2;
@@ -1066,6 +1052,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 		}
 	} 
 }
+
 
 //Draw a line connecting the specified handle to the box center.
 //Highlight both ends of the line to the selected handle
