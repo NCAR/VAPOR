@@ -452,7 +452,6 @@ void VizWin::setNewExtents()
     VAPoR::Box *        box = rParams->GetBox();
     std::vector<double> pllc, purc;
     box->GetExtents(pllc, purc);
-    cout << "rDist " << pllc[0] - llc[0] << endl;
 
     box->SetExtents(llc, urc);
 }
@@ -674,9 +673,7 @@ void VizWin::updateManip(bool initialize)
     bool constrain = true;
     if (classType == ImageParams::GetClassType()) constrain = false;
 
-    VAPoR::Transform *  transform = getTransform();
-    std::vector<double> scales(3, 1.f);
-    if (transform != NULL) scales = transform->GetScales();
+    VAPoR::Transform *transform = getTransform();
 
     _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, transform, constrain);
 
