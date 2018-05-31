@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <cmath>
 
 #include "vapor/Manip.h"
 
@@ -27,6 +28,10 @@ using namespace std;
 
 const float Manip::_faceSelectionColor[4] = {0.8f, 0.8f, 0.0f, 0.5f};
 const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
+
+#ifndef M_PI
+    #define M_PI (3.14159265358979323846)
+#endif
 
 TranslateStretchManip::TranslateStretchManip() : Manip()
 {
@@ -50,6 +55,37 @@ TranslateStretchManip::TranslateStretchManip() : Manip()
         _extents[i] = 0.;
         _extents[i + 3] = 0.;
     }
+}
+
+void TranslateStretchManip::transformMatrix()
+{
+    glMatrixMode(GL_MODELVIEW);
+
+    glLoadMatrixd(_modelViewMatrix);
+
+    glPushMatrix();
+
+    if (_transform == NULL) return;
+
+    vector<double> translations = _transform->GetTranslations();
+    vector<double> rotations = _transform->GetRotations();
+    vector<double> scales = _transform->GetScales();
+    vector<double> origins = _transform->GetOrigin();
+    assert(translations.size() == 3);
+    assert(rotations.size() == 3);
+    assert(scales.size() == 3);
+    assert(origins.size() == 3);
+
+    glTranslatef(origins[0], origins[1], origins[2]);
+    glScalef(scales[0], scales[1], scales[2]);
+    glRotatef(rotations[0], 1, 0, 0);
+    glRotatef(rotations[1], 0, 1, 0);
+    glRotatef(rotations[2], 0, 0, 1);
+    glTranslatef(-origins[0], -origins[1], -origins[2]);
+
+    glTranslatef(translations[0], translations[1], translations[2]);
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, _modelViewMatrix);
 }
 
 void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, std::vector<double> cameraPosition,
@@ -77,15 +113,17 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
 
     _transform = transform;
 
-    applyTransform(_selection);
-    applyTransform(_extents);
-
     _constrain = constrain;
+
+    transformMatrix();
+    // transformCoordinates(_selection);
+    // transformCoordinates(_extents);
 }
 
 void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double> &urc)
 {
-    removeTransform(_selection);
+    // reverseTransformCoordinates(_selection);
+    // reverseTransformCoordinates(_extents);
 
     llc.resize(3);
     urc.resize(3);
@@ -95,6 +133,9 @@ void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double>
     urc[0] = _selection[3];
     urc[1] = _selection[4];
     urc[2] = _selection[5];
+
+    // transformCoordinates(_selection);
+    // transformCoordinates(_extents);
 }
 
 bool TranslateStretchManip::MouseEvent(int buttonNum, std::vector<double> vscreenCoords, double handleMidpoint[3], bool release)
@@ -138,6 +179,14 @@ void TranslateStretchManip::mousePress(double screenCoords[2], double handleMidp
     captureMouseDown(_selectedHandle, buttonNum, handleMidpoint);
     startHandleSlide(screenCoords, _selectedHandle);
     setMouseDown(true);
+}
+
+void TranslateStretchManip::scaleDrag(int axis, float &dist)
+{
+    if (_transform == NULL) return;
+    vector<double> rotations = _transform->GetRotations();
+    double         theta = 2 * M_PI * rotations[0] / 360.f;
+    dist = dist / cos(theta);
 }
 
 void TranslateStretchManip::mouseRelease(double screenCoords[2])
@@ -215,7 +264,7 @@ void TranslateStretchManip::constrainExtents()
 {
     for (int i = 0; i < 3; i++) {
         // correct selection minimum
-        if (_selection[i] < _extents[i]) { _selection[i] = _extents[i]; }
+        if (_selection[i] < _extents[i]) _selection[i] = _extents[i];
         if (_selection[i] > _extents[i + 3]) _selection[i] = _extents[i + 3];
 
         // correct selection maximum
@@ -590,7 +639,60 @@ bool TranslateStretchManip::rayHandleIntersect(double ray[3], const std::vector<
     return true;
 }
 
-void TranslateStretchManip::applyTransform(double extents[6])
+void TranslateStretchManip::removeRotation(vector<double> rotations, vector<double> origins, double extents[6])
+{
+    std::vector<double> reverseRotations;
+    reverseRotations.push_back(rotations[0] * -1);
+    reverseRotations.push_back(rotations[1] * -1);
+    reverseRotations.push_back(rotations[2] * -1);
+    applyRotation(reverseRotations, origins, extents);
+}
+
+// All rotations are applied assuming that extents[6] is centered
+// at the origin of the scene
+void TranslateStretchManip::applyRotation(vector<double> rotations, vector<double> origins, double extents[6])
+{
+    double radianRotation = 2 * M_PI * rotations[0] / 360.f;
+    double minHypotenuse = extents[1];
+    double maxHypotenuse = extents[4];
+    extents[1] = minHypotenuse * cos(radianRotation);
+    extents[4] = maxHypotenuse * cos(radianRotation);
+    extents[2] = minHypotenuse * sin(radianRotation);
+    extents[5] = maxHypotenuse * sin(radianRotation);
+    // extents[2] = maxHypotenuse * sin(radianRotation);
+
+    // minHypotenuse << " " << radianRotation << endl;
+
+    // double b = hypotenuse * sin(rotations[0]);
+
+    // cout << "X " << hypotenuse << " " << a << " " << b << " " << rotations[0] << endl;
+    // cout << "X " << a << " " << extents[4] << " " << cos(rotations[0]) << " " << rotations[0] << " " << origins[1] << endl;
+
+    // extents[2] -= b;
+    // extents[5] += b;
+    // break;
+    /*case (1): // Y axis modifies X and Z extents
+            break;
+            cout << "Y" << endl;
+            extents[0] += hypotenuse-a;
+            extents[3] -= hypotenuse-a;
+            extents[2] -= b;
+            extents[5] += b;
+            break;
+        case (2): // Z axis modifies X and Y extents
+            break;
+            cout << "Z" << endl;
+            extents[0] += hypotenuse-a;
+            extents[3] -= hypotenuse-a;
+            extents[1] -= b;
+            extents[4] += b;
+            break;
+        default:
+            return;
+    }*/
+}
+
+void TranslateStretchManip::transformCoordinates(double extents[6])
 {
     if (_transform == NULL) return;
     vector<double> translations = _transform->GetTranslations();
@@ -602,25 +704,36 @@ void TranslateStretchManip::applyTransform(double extents[6])
     assert(scales.size() == 3);
     assert(origins.size() == 3);
 
-    double origin, scale, translation;
+    // Move to (0,0,0),
+    // Scale,
+    // Rotate,
+    // Move back to origin,
+    // Translate
+
     for (int i = 0; i < 3; i++) {
-        origin = origins[i];
-        scale = scales[i];
-        translation = translations[i];
+        extents[i] -= origins[i];
+        extents[i + 3] -= origins[i];
+    }
 
-        extents[i] -= origin;
-        extents[i] *= scale;
-        extents[i] += origin;
-        extents[i] += translation;
+    for (int i = 0; i < 3; i++) {
+        extents[i] *= scales[i];
+        extents[i + 3] *= scales[i];
+    }
 
-        extents[i + 3] -= origin;
-        extents[i + 3] *= scale;
-        extents[i + 3] += origin;
-        extents[i + 3] += translation;
+    applyRotation(rotations, origins, extents);
+
+    for (int i = 0; i < 3; i++) {
+        extents[i] += origins[i];
+        extents[i + 3] += origins[i];
+    }
+
+    for (int i = 0; i < 3; i++) {
+        extents[i] += translations[i];
+        extents[i + 3] += translations[i];
     }
 }
 
-void TranslateStretchManip::removeTransform(double extents[6])
+void TranslateStretchManip::reverseTransformCoordinates(double extents[6])
 {
     if (_transform == NULL) return;
     vector<double> translations = _transform->GetTranslations();
@@ -632,29 +745,36 @@ void TranslateStretchManip::removeTransform(double extents[6])
     assert(scales.size() == 3);
     assert(origins.size() == 3);
 
-    double origin, scale, translation;
     for (int i = 0; i < 3; i++) {
-        origin = origins[i];
-        scale = scales[i];
-        translation = translations[i];
-
-        extents[i] -= origin;
-        extents[i] /= scale;
-        extents[i] += origin;
-        extents[i] -= translation;
-
-        extents[i + 3] -= origin;
-        extents[i + 3] /= scale;
-        extents[i + 3] += origin;
-        extents[i + 3] -= translation;
+        extents[i] -= origins[i];
+        extents[i + 3] -= origins[i];
     }
+
+    for (int i = 0; i < 3; i++) {
+        extents[i] /= scales[i];
+        extents[i + 3] /= scales[i];
+    }
+
+    cout << "removing ";
+    removeRotation(rotations, origins, extents);
+
+    for (int i = 0; i < 3; i++) {
+        extents[i] += origins[i];
+        extents[i + 3] += origins[i];
+    }
+
+    for (int i = 0; i < 3; i++) {
+        extents[i] -= translations[i];
+        extents[i + 3] -= translations[i];
+    }
+    cout << "rotationRemoved " << extents[0] << " " << extents[1] << " " << extents[2] << endl;
 }
 
 // Renders handles and box
 // If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render()
 {
-    double extents[6];
+    // transformMatrix();
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
@@ -682,13 +802,13 @@ void TranslateStretchManip::render()
             }
         }
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
-        drawHandleConnector(handleNum, handleExtents, _selection);    // extents);
+        drawHandleConnector(handleNum, handleExtents, _selection);
     }
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
     glPopAttrib();
 
-    //	removeTransform(_selection);
+    glPopMatrix();
 }
 
 double TranslateStretchManip::getPixelSize() const
@@ -1047,6 +1167,16 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
     glEnd();
     glDisable(GL_BLEND);
 }
+
+/*bool TranslateStretchManip::transformModelViewMatrix() {
+    GLdouble* m[16];
+    for (int i=0; i<16; i++)
+        m[i] = _modelViewMatrix[i];
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixd(m);
+
+}*/
 
 // projectPointToWin returns true if point is in front of camera
 // resulting screen coords returned in 2nd argument.  Note that
