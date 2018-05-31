@@ -111,10 +111,11 @@ private:
     string              getCurrentMouseMode() const;
     void                setNewExtents();
     void                getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts);
+    void                getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, std::vector<double> &minExts, std::vector<double> &maxExts);
     void                getCenterAndCamPos(std::vector<double> &rotationCenter, std::vector<double> &cameraPos);
     void                getWindowSize(std::vector<int> &windowSize);
     string              getCurrentDataMgrName() const;
-    VAPoR::Transform *  getTransform() const;
+    VAPoR::Transform *  getDataMgrTransform() const;
 
     void                 getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar) const;
     VAPoR::RenderParams *getRenderParams();

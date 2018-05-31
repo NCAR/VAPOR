@@ -584,13 +584,54 @@ string VizWin::getCurrentDataMgrName() const
     return dataSetName;
 }
 
+void VizWin::getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, std::vector<double> &minExts, std::vector<double> &maxExts)
+{
+    vector<string> fieldVars = rParams->GetFieldVariableNames();
+    for (int i = 0; i < 3; i++) {
+        std::vector<double> tmpMin, tmpMax;
+        string              varName = fieldVars[i];
+        if (varName == "") continue;
+
+        dataMgr->GetVariableExtents(timeStep, varName, refLevel, tmpMin, tmpMax);
+
+        if (minExts.size() == 0) {
+            for (int j = 0; j < 3; j++) {
+                minExts = tmpMin;
+                maxExts = tmpMax;
+            }
+        } else {
+            for (int j = 0; j < 3; j++) {
+                if (tmpMin[j] < minExts[j]) minExts[j] = tmpMin[j];
+                if (tmpMax[j] > maxExts[j]) maxExts[j] = tmpMax[j];
+            }
+        }
+    }
+}
+
 void VizWin::getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts)
 {
+    VAPoR::RenderParams *rParams = getRenderParams();
+    if (rParams == NULL) return;
+
+    int            refLevel = rParams->GetRefinementLevel();
+    int            cmpLevel = rParams->GetCompressionLevel();
+    string         varName = rParams->GetVariableName();
+    vector<string> fieldVars = rParams->GetFieldVariableNames();
+
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     int              timeStep = aParams->GetCurrentTimestep();
-    DataStatus *     dataStatus = _controlExec->GetDataStatus();
-    dataStatus->GetActiveExtents(paramsMgr, timeStep, minExts, maxExts);
+
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    string      dataMgrName = getCurrentDataMgrName();
+    DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
+
+    if (fieldVars[0] == "" && fieldVars[1] == "" && fieldVars[2] == "") {
+        dataMgr->GetVariableExtents(timeStep, varName, refLevel, minExts, maxExts);
+    } else {
+        getUnionOfFieldVarExtents(rParams, dataMgr, timeStep, refLevel, minExts, maxExts);
+    }
+    cout << "Got extents " << minExts.size() << " " << maxExts.size() << endl;
 }
 
 void VizWin::getCenterAndCamPos(std::vector<double> &rotationCenter, std::vector<double> &cameraPosition)
@@ -625,7 +666,7 @@ void VizWin::getWindowSize(std::vector<int> &windowSize)
     windowSize.push_back(height);
 }
 
-VAPoR::Transform *VizWin::getTransform() const
+VAPoR::Transform *VizWin::getDataMgrTransform() const
 {
     string dataMgrName = getCurrentDataMgrName();
     if (dataMgrName.empty()) return NULL;
@@ -641,10 +682,10 @@ void VizWin::updateManip(bool initialize)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
-    GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-
     std::vector<double> minExts(3, 0.f);
     std::vector<double> maxExts(3, 0.f);
+    // std::vector<double> minExts;	// This dumps core...
+    // std::vector<double> maxExts;	// This dumps core...
     getActiveExtents(minExts, maxExts);
 
     std::vector<double> rotationCenter, cameraPosition;
@@ -673,9 +714,11 @@ void VizWin::updateManip(bool initialize)
     bool constrain = true;
     if (classType == ImageParams::GetClassType()) constrain = false;
 
-    VAPoR::Transform *transform = getTransform();
+    VAPoR::Transform *dmTransform = getDataMgrTransform();
+    VAPoR::Transform *rpTransform = NULL;
+    if (rParams != NULL) rpTransform = rParams->GetTransform();
 
-    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, transform, constrain);
+    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, rotationCenter, mv, proj, windowSize, rpTransform, dmTransform, constrain);
 
     _manip->render();
 }

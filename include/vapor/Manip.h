@@ -63,9 +63,15 @@ public:
     //! \param[in] urc : The upper-right corner to update the manipulator with
     //! \param[in] minExtents : The minimum extents that the manipulator can draw to
     //! \param[in] maxExtents : The maximum extents that the manipulator can draw to
+    //! \param[in] projectionMatrix: The current ProjectionMatrix in the Params database
+    //! \param[in] modelViewMatrix: The current ModelView matrix in the Params database
     //! \param[in] windowSize: The current window size of the Visualizer
+    //! \param[in] rpTransform: The current scene transform used by the current RenderParams
+    //! \param[in] dmTransform: The current scene transform used by the current DataMgr
+    //! \param[in] constrain: Indicates whether the manipulator box is bound by domain extents
     virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<double> cameraPosition,
-                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *transform, bool constrain) = 0;
+                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *rpTransform,
+                        VAPoR::Transform *dmTransform, bool constrain) = 0;
 
     //! Notify that manipulator that is being moved with the mouse
     //! \param[in] buttonNum - The mouse button being used to move the manipulator
@@ -77,41 +83,25 @@ public:
     //! \param[out] urc - The upper-right coordinates of the manipulator
     virtual void GetBox(std::vector<double> &llc, std::vector<double> &urc) = 0;
 
-    //! Obtain the Params instance currently associated with the Manip.
-    //! \return Params* currently associated Params instance
-    //	Params* getParams() {return _params;}
-
-    //! Specify the Params instance that is associated with the Manip
-    //! \param[in] Params instance associated with Manip
-    //	void setParams(Params* p) {_params = p;}
-
     //! Pure virtual method: Determine which handle (if any) is under mouse
     //! \param[in] mouse coordinates in screen
     //! \param[in] boxExtents are extents of full box to which the handles are attached
     //! \param[out] handleMid is the coordinates of the center of the selected handle (if selected).
     //! \return handle index, or -1 if no intersection
-    //	virtual int mouseIsOverHandle(double screenCoords[2], double* boxExtents,  double handleMid[3]) = 0;
     virtual int mouseIsOverHandle(double screenCoords[2], double handleMid[3]) = 0;
 
     //! Pure virtual function, indicates that the mouse has been pressed over a handle, so is currently dragging the handle
     //! \return handle index
     virtual int draggingHandle() = 0;
 
-    // static void setDataStatus(DataStatus* ds) {_dataStatus = ds;}
 protected:
     static const float _faceSelectionColor[4];
     static const float _unselectedFaceColor[4];
 
     int    _buttonNum;
     double _selection[6];
-    double _transformedSelection[6];
     double _extents[6];
     double _cameraPosition[3];
-    // std::vector<double> _selection;
-    // std::vector<double> _extents;
-
-    //	Params* _params;
-    //	Visualizer* _vis;
 
     //! General utility function for drawing axis-aligned cubes.
     //! \param[in] extents : extents of box to be drawn
@@ -126,7 +116,6 @@ protected:
     double _dragDistance;
     int    _selectedHandle;
     double _handleMid[3];
-    // static DataStatus* _dataStatus;
 };
 //! \class TranslateStretchManip
 //! \ingroup Public_Render
@@ -147,7 +136,8 @@ public:
 
     //! @copydoc Manip::Update(std::vector<double>, std::vector<double> std::vector<double>, std::vector<double>)
     virtual void Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExtents, std::vector<double> maxExtents, std::vector<double> cameraPosition,
-                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *transform, bool constrain);
+                        std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *rpTransform,
+                        VAPoR::Transform *dmTransform, bool constrain);
 
     //! @copydoc Manip::MoveEvent(int, std::vector<double>)
     virtual bool MouseEvent(int buttonNum, std::vector<double> screenCoords, double handleMidpoint[3], bool release = false);
@@ -219,11 +209,7 @@ protected:
     virtual int  pointIsOnBox(double corners[8][3], double pkPt[2]);
     bool         ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const;
     double       getPixelSize() const;
-    void         applyRotation(vector<double> rotation, vector<double> origins, double extents[3]);
-    void         removeRotation(vector<double> rotation, vector<double> origins, double extents[3]);
-    void         transformCoordinates(double extents[6]);
-    void         reverseTransformCoordinates(double extents[6]);
-    void         transformMatrix();
+    void         transformMatrix(VAPoR::Transform *transform);
     void         scaleDrag(int axis, float &dist);
 
     //! Method that draws a line connecting a handle to the box center
@@ -282,7 +268,8 @@ protected:
     double            _rotationCenter[3];
     double            _modelViewMatrix[16];
     double            _projectionMatrix[16];
-    VAPoR::Transform *_transform;
+    VAPoR::Transform *_rpTransform;
+    VAPoR::Transform *_dmTransform;
 
     // screen coords where mouse is pressed:
     float _mouseDownPoint[2];
