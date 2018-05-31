@@ -26,7 +26,9 @@ Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
     _numBins = numberBins;
     _minData = mnData;
     _maxData = mxData;
-    _binArray = new int[_numBins];
+    if (_maxData < _minData) _maxData = _minData;
+    _range = _maxData - _minData;
+    _binArray = new long[_numBins];
     reset(numberBins);
 
     _varnameOfUpdate = var;
@@ -47,7 +49,6 @@ Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2
     vector<double>                point;
     StructuredGrid::ConstIterator itr;
     StructuredGrid::ConstIterator enditr = rg->end();
-    //	for (itr = rg->begin(); itr!=rg->end(); ++itr) {
     for (itr = rg->begin(); itr != enditr; ++itr) {
         v = *itr;
         if (v == rg->GetMissingValue()) continue;
@@ -82,32 +83,44 @@ void Histo::reset(int newNumBins)
     if (newNumBins != _numBins && newNumBins != -1) {
         _numBins = newNumBins;
         if (_binArray) delete[] _binArray;
-        _binArray = new int[_numBins];
+        _binArray = new long[_numBins];
     }
     for (int i = 0; i < _numBins; i++) _binArray[i] = 0;
     _numBelow = 0;
     _numAbove = 0;
     _maxBinSize = 0;
-    _largestBin = -1;
 }
+
+void Histo::reset(int newNumBins, float mnData, float mxData)
+{
+    reset(newNumBins);
+    _minData = mnData;
+    _maxData = mxData;
+    if (_maxData < _minData) _maxData = _minData;
+    _range = _maxData - _minData;
+}
+
 void Histo::addToBin(float val)
 {
-    int intVal;
     if (val < _minData)
         _numBelow++;
     else if (val > _maxData)
         _numAbove++;
     else {
-        if (_maxData == _minData)
+        int intVal = 0;
+        if (_range == 0.f)
             intVal = 0;
         else
-            intVal = (int)(((double)val - (double)_minData) * (double)_numBins / ((double)_maxData - (double)_minData));
-        if (intVal >= _numBins) intVal = _numBins - 1;
-        if (intVal <= 0) intVal = 0;
+            intVal = (int)((val - _minData) / _range * (float)_numBins);
+        intVal = intVal < _numBins ? intVal : _numBins - 1;
         _binArray[intVal]++;
-        if (_binArray[intVal] > _maxBinSize) {
-            _maxBinSize = _binArray[intVal];
-            _largestBin = intVal;
-        }
     }
+}
+
+int Histo::getMaxBinSize()
+{
+    int maxBinSize = 0;
+    for (int i = 0; i < _numBins; i++) { maxBinSize = maxBinSize > _binArray[i] ? maxBinSize : _binArray[i]; }
+
+    return maxBinSize;
 }
