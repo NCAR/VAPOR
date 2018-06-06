@@ -34,11 +34,6 @@ const float Manip::_unselectedFaceColor[4] = {0.8f,0.2f,0.0f,0.5f};
 #define M_PI (3.14159265358979323846)
 #endif
 
-double winCoord1[2];
-double winCoord2[2];
-double winCoord3[2];
-double winCoord4[2];
-
 TranslateStretchManip::TranslateStretchManip() : Manip() {
 
 	_buttonNum = 0;	
@@ -394,7 +389,7 @@ makeHandleFaces(int sortPosition, double handle[8][3], int octant, double boxReg
 			handle[vertex][coord] = fltCoord;
 		}
 	}
-	deScaleExtents(handle);
+	//deScaleExtents(handle);
 	return newPosition;
 }
 
@@ -560,7 +555,7 @@ void TranslateStretchManip::makeHandleExtents(
 			}
 		}
 	}
-	deScaleExtents(handleExtents);
+	//deScaleExtents(handleExtents);
 	return;
 }
 
