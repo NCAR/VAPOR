@@ -170,8 +170,6 @@ void AnnotationEventRouter::GetWebHelp(
 }
 
 void AnnotationEventRouter::_updateTab(){
-	ParamsMgr* pMgr = _controlExec->GetParamsMgr();
-
 	updateRegionColor();
 	updateDomainColor();
 	updateBackgroundColor();
@@ -255,6 +253,7 @@ void AnnotationEventRouter::addRendererToCombo(
 	ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
 	renNames = paramsMgr->GetRenderParamInstances(
 		visName,
+		dataSetName,
 		typeName
 	);
 
@@ -518,8 +517,6 @@ void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation* aa) {
 	aa->SetMinTics(minExts);
 	aa->SetMaxTics(maxExts);	
 	aa->SetAxisOrigin(minExts);
-
-	AnnotationParams* aParams = (AnnotationParams*)GetActiveParams();
 }
 
 void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa) {
@@ -777,6 +774,7 @@ void AnnotationEventRouter::timeAnnotationChanged() {
 	aParams->SetTimeType(index);
 
 	switch(index) {
+		case 0: _controlExec->ClearText(); break;
 		case 1: drawTimeStep(); break;
 		case 2: drawTimeUser(); break;
 		case 3: drawTimeStamp(); break;

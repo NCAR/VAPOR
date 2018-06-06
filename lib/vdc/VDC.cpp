@@ -1111,7 +1111,7 @@ bool VDC::_ValidDefineCoordVar(
 		return(false);
 	}
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	if (compressed && type != FLOAT) {
 		SetErrMsg("Only FLOAT data supported with compressed variables");
 		return(false);
@@ -1289,7 +1289,7 @@ bool VDC::_ValidDefineDataVar(
 		return(false);
 	}
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	if (compressed && type != FLOAT) {
 		SetErrMsg("Only FLOAT data supported with compressed variables");
 		return(false);

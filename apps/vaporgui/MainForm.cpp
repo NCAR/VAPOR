@@ -34,7 +34,21 @@
 #include <iostream>
 #include <functional>
 #include <cmath>
+
 #include <QDesktopWidget>
+#include <QDockWidget>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QComboBox>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QUrl>
+#include <QDesktopServices>
+#include <QInputDialog>
+#include <QMdiArea>
+#include <QWhatsThis>
+#include <QStatusBar>
+
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
@@ -50,12 +64,12 @@
 //#include "AnimationEventRouter.h"
 #include "MappingFrame.h"
 #include "BannerGUI.h"
-#include "SeedMe.h"
 #include "Statistics.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
-
+#include "FileOperationChecker.h"
+#include "windowsUtils.h"
 
 //Following shortcuts are provided:
 // CTRL_N: new session
@@ -120,9 +134,12 @@ namespace {
 string makename(string file) {
 	QFileInfo qFileInfo (QString(file.c_str()));
 
-	return( qFileInfo.fileName().toStdString());
+	return(
+		ControlExec::MakeStringConformant(qFileInfo.fileName().toStdString())
+	);
 }
 
+#ifdef UNUSED_FUNCTION
 string concatpath(string s1, string s2) {
 	string s;
 	if (! s1.empty()) {
@@ -133,6 +150,8 @@ string concatpath(string s1, string s2) {
 	}
 	return(QDir::toNativeSeparators(s.c_str()).toStdString());
 }
+#endif
+
 };
 
 
@@ -197,7 +216,6 @@ void MainForm::_initMembers() {
 	_captureStartJpegCaptureAction = NULL;
 	_captureEndJpegCaptureAction = NULL;
 	_captureSingleJpegCaptureAction = NULL;
-	_seedMeAction = NULL;
 
 	_mouseModeActions = NULL;
 	_tileAction = NULL;
@@ -213,7 +231,6 @@ void MainForm::_initMembers() {
 
 	_stats = NULL;
 	_plot = NULL;
-	SeedMe *_seedMe = NULL;
 	_banner = NULL;
 	_windowSelector = NULL;
 	_modeStatusWidget = NULL;
@@ -223,7 +240,6 @@ void MainForm::_initMembers() {
 	_vizWinMgr = NULL;
 
 	_capturingAnimationVizName.clear();
-	_recentPath.clear();
 
 	_stateChangeFlag = false;
 	_sessionNewFlag = false;
@@ -292,6 +308,12 @@ MainForm::MainForm(
 	vector <string> myRenParams;
 	myRenParams.push_back(StatisticsParams::GetClassType());
 	myRenParams.push_back(PlotParams::GetClassType());
+
+	// Force creation of the static error reporter, which registers
+	// callback's with the MyBase error logger used by the vapor render
+	// library.
+	//
+	_errRep = new ErrorReporter(this);
 
 	// Create the Control executive before the VizWinMgr. Disable
 	// state saving until completely initalized
@@ -925,13 +947,6 @@ void MainForm::_createCaptureMenu() {
 	);
 	_captureEndJpegCaptureAction->setEnabled(false);
 
-	_seedMeAction = new QAction(this);
-	_seedMeAction->setText("SeedMe Video Encoder");
-	_seedMeAction->setToolTip(
-		"Launch the SeedMe application to create videos of your still-frames"
-	);
-	_seedMeAction->setEnabled(false);
- 
 
 	// Note that the ordering of the following 4 is significant, so that image
 	// capture actions correctly activate each other.
@@ -940,7 +955,6 @@ void MainForm::_createCaptureMenu() {
 	_captureMenu->addAction(_captureSingleJpegCaptureAction);
 	_captureMenu->addAction(_captureStartJpegCaptureAction);
 	_captureMenu->addAction(_captureEndJpegCaptureAction);
-	_captureMenu->addAction(_seedMeAction);
 
 	connect (
 		_captureSingleJpegCaptureAction, SIGNAL(triggered()),
@@ -953,10 +967,6 @@ void MainForm::_createCaptureMenu() {
 	connect( 
 		_captureEndJpegCaptureAction, SIGNAL( triggered() ),
 		this, SLOT( endAnimCapture() ) 
-	);
-	connect(
-		_seedMeAction, SIGNAL(triggered()),
-		this, SLOT(launchSeedMe())
 	);
 }
 
@@ -997,8 +1007,14 @@ void MainForm::_createHelpMenu() {
 	buildWebHelpMenus();
 	_webTabHelpMenu = new QMenu("Web Help: About the current tab",this);
 	_helpMenu->addMenu(_webTabHelpMenu);
+#ifdef WIN32
+#define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
 #ifdef Darwin
-	_helpMenu->addAction(_installCLIToolsAction);
+#define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
+#ifdef ADD_INSTALL_CLI_TOOLS_ACTION
+    _helpMenu->addAction(_installCLIToolsAction);
 #endif
 
     connect( 
@@ -1079,34 +1095,10 @@ void MainForm::sessionOpenHelper(string fileName) {
 	//
 	GUIStateParams *newP = GetStateParams();
 	dataSetNames = newP->GetOpenDataSetNames();
-	if (dataSetNames.size()) {
-		vector <string> p = newP->GetOpenDataSetPaths(dataSetNames[dataSetNames.size()-1]);
-		_recentPath = p[p.size()-1];
-	}
-	else {
-		_recentPath = ".";
-	}
 
 	for (int i=0; i<dataSetNames.size(); i++) {
 		newP->RemoveOpenDateSet(dataSetNames[i]);
 	}
-
-
-	// ControlExec::LoadState invalidates params state
-	//
-	SettingsParams *sP = GetSettingsParams();
-	if (fileName.empty()) {
-		newP->SetCurrentSessionPath(
-			concatpath(sP->GetSessionDir(), "My_Vapor_Session.vs3")
-		);
-	}
-	else {
-		newP->SetCurrentSessionPath(fileName);
-	}
-	newP->SetCurrentImagePath(sP->GetImageDir());
-	newP->SetCurrentTFPath(sP->GetTFDir());
-	newP->SetCurrentPythonPath(sP->GetPythonDir());
-	newP->SetCurrentFlowPath(sP->GetFlowDir());
 
 	_vizWinMgr->Restart();
 	_tabMgr->Restart();
@@ -1136,11 +1128,11 @@ void MainForm::sessionOpen(QString qfileName)
 	if (qfileName==""){	
 
 		SettingsParams *sP = GetSettingsParams();
-		string path = sP->GetSessionDir();
+		string dir = sP->GetSessionDir();
 
 		vector <string> files = myGetOpenFileNames(
 			"Choose a VAPOR session file to restore a session", 
-			path, "Vapor 3 Session Save Files (*.vs3)", false
+			dir, "Vapor 3 Session Save Files (*.vs3)", false
 		);
 		if (files.empty()) 
             return;
@@ -1152,10 +1144,17 @@ void MainForm::sessionOpen(QString qfileName)
 	if (! qfileName.endsWith(".vs3")){
 		return;
 	}
-	string fileName = qfileName.toStdString();
 
+	if (!FileOperationChecker::FileGoodToRead(qfileName)) {
+		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+		return;
+	}
+
+	string fileName = qfileName.toStdString();
 	sessionOpenHelper(fileName);
 
+	GUIStateParams *p = GetStateParams();
+	p->SetCurrentSessionFile(fileName);
 
     _stateChangeFlag = false;
 	_sessionNewFlag = false;
@@ -1164,13 +1163,27 @@ void MainForm::sessionOpen(QString qfileName)
 void MainForm::_fileSaveHelper(string path)
 {
     if( path.empty()) {
-		QString fileName = QFileDialog::getSaveFileName(
-			this, tr("Save VAPOR session file"),
-			tr(path.c_str()), tr("Vapor 3 Session Save Files (*.vs3)")
-		);
-		path = fileName.toStdString();
+		SettingsParams *sP = GetSettingsParams();
+		string dir = sP->GetSessionDir();
+
+        QFileDialog fileDialog(this, "Save VAPOR session file",
+                    QString::fromStdString( dir ),
+                    QString::fromAscii("Vapor 3 Session Save file (*.vs3)" ));
+        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        fileDialog.setDefaultSuffix( QString::fromAscii("vs3") );
+        if (fileDialog.exec() != QDialog::Accepted) return;
+
+        QStringList files = fileDialog.selectedFiles();
+        if (files.isEmpty() || files.size() > 1)
+            return;
+
+		path = files[0].toStdString();
 	}
-    if( path.empty()) return;
+
+	if (!FileOperationChecker::FileGoodToWrite( QString::fromStdString( path ))) {
+		MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+		return;
+	}
 
 	if( _controlExec->SaveSession(path) < 0 )
     {
@@ -1178,8 +1191,9 @@ void MainForm::_fileSaveHelper(string path)
 		return;
 	}
 
-	SettingsParams* sParams = GetSettingsParams();
-	sParams->SetSessionDir(path);
+	GUIStateParams *p = GetStateParams();
+	p->SetCurrentSessionFile(path);
+
     _stateChangeFlag = false;
 }
 
@@ -1187,8 +1201,8 @@ void MainForm::_fileSaveHelper(string path)
 
 void MainForm::fileSave()
 {
-	SettingsParams* sParams = GetSettingsParams();
-	string path = sParams->GetSessionDir();
+	GUIStateParams *p = GetStateParams();
+	string path = p->GetCurrentSessionFile();
 
 	_fileSaveHelper(path);
 }
@@ -1303,7 +1317,7 @@ bool MainForm::openDataHelper(
 	GUIStateParams *p = GetStateParams();
 	vector <string> dataSetNames =  p->GetOpenDataSetNames();
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	// If data set with this name already exists, close it
 	//
 	for (int i=0; i<dataSetNames.size(); i++) {
@@ -1356,7 +1370,6 @@ void MainForm::loadDataHelper(
 		else {
 			SettingsParams *sP = GetSettingsParams();
 			defaultPath = sP->GetMetadataDir();
-			//defaultPath = _recentPath;
 		}
 
 		myFiles = myGetOpenFileNames(
@@ -1536,7 +1549,7 @@ void MainForm::sessionNew()
 //
 void MainForm::setNavigate(bool on)
 {
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	//Only do something if this is an actual change of mode
 	if (MouseModeParams::GetCurrentMouseMode() == MouseModeParams::navigateMode) return;
 	if (on){
@@ -1581,6 +1594,7 @@ void MainForm::_setAnimationOnOff(bool on) {
 }
 
 void MainForm::_setAnimationDraw() {
+	_tabMgr->Update();
 	_vizWinMgr->Update();
 }
 
@@ -1914,7 +1928,7 @@ void MainForm::loadStartingPrefs(){
 	SettingsParams *sP = GetSettingsParams();
 	sP->SetCurrentPrefsPath(prefPath);
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	_controlExec->RestorePreferences(prefPath);
 #endif
 		
@@ -1991,7 +2005,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 	//
 	if (event->type() == ParamsChangeEvent::type()) 
     {
-		ParamsMgr* paramsMgr = _controlExec->GetParamsMgr();
 		if (_stats) 
         {
 			_stats->Update();
@@ -2123,7 +2136,6 @@ void MainForm::enableWidgets(bool onOff) {
 	_tabMgr->setEnabled(onOff);
 	_statsAction->setEnabled(onOff);
 	_plotAction->setEnabled(onOff);
-//	_seedMeAction->setEnabled(onOff);
 
 	_tabMgr->EnableRouters(onOff);
 
@@ -2161,6 +2173,7 @@ void MainForm::captureSingleJpeg() {
 		"Specify single image capture file name",
 		imageDir.c_str(),
 		"PNG or JPEG images (*.png *.jpg *.jpeg)");
+	fileDialog.setDefaultSuffix( QString::fromAscii("png") );
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
@@ -2187,41 +2200,89 @@ void MainForm::captureSingleJpeg() {
 	//Turn on "image capture mode" in the current active visualizer
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
-	_controlExec->EnableImageCapture(filepath, vizName);
+	_vizWinMgr->EnableImageCapture(filepath, vizName);
 
     delete fileInfo;
 }
 
-void MainForm::launchSeedMe(){
-    if (_seedMe==NULL) _seedMe = new VAPoR::SeedMe;
-    _seedMe->Initialize();
-}
-
 void MainForm::installCLITools(){
 	vector<string> pths;
-	string home = GetAppPath("VAPOR","home", pths, true);
-	string path = home + "/MacOS";
+    QMessageBox box;
+    box.addButton(QMessageBox::Ok);
+    
+#ifdef Darwin
+	string home = GetAppPath("VAPOR", "home", pths, true);
+    string path = home + "/MacOS";
+    home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
+    
+    string profilePath = string(getenv("HOME")) + "/.profile";
+    FILE *prof = fopen(profilePath.c_str(), "a");
+    if (prof) {
+        fprintf(prof, "\n");
+        fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
+        fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
+        fclose(prof);
+        
+        box.setText("Environmental variables set in ~/.profile");
+        box.setInformativeText("Please log out and log back in for changes to take effect.");
+        box.setIcon(QMessageBox::Information);
+    } else {
+        box.setText("Unable to set environmental variables");
+        box.setIcon(QMessageBox::Critical);
+    }
+#endif
+    
+#ifdef WIN32
+	HKEY key;
+	long error;
+	long errorClose;
+	bool pathWasModified = false;
+	string home = GetAppPath("VAPOR", "", pths, true);
 
-	home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
+	error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
+	if (error == WINDOWS_SUCCESS) {
+		string path;
+		error = Windows_GetRegistryString(key, "Path", path, "");
+		if (error == WINDOWS_ERROR_FILE_NOT_FOUND) {
+			error = WINDOWS_SUCCESS;
+			path = "";
+		}
+		if (error == WINDOWS_SUCCESS) {
+			bool alreadyExists = false;
+			size_t index;
+			if      (path.find(";" + home + ";") != std::string::npos) alreadyExists = true;
+			else if ((index = path.find(";" + home)) != std::string::npos && index + home.length() + 1 == path.length()) alreadyExists = true;
+			else if ((index = path.find(home + ";")) != std::string::npos && index == 0) alreadyExists = true;
+			else if (path == home) alreadyExists = true;
 
-	QMessageBox box;
-	box.addButton(QMessageBox::Ok);
-
-	string profilePath = string(getenv("HOME")) + "/.profile";
-	FILE *prof = fopen(profilePath.c_str(), "a");
-	if (prof) {
-		fprintf(prof, "\n");
-		fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
-		fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
-		fclose(prof);
-
-		box.setText("Environmental variables set in ~/.profile");
-		box.setInformativeText("Please log out and log back in for changes to take effect.");
-		box.setIcon(QMessageBox::Information);
-	} else {
-		box.setText("Unable to set environmental variables");
-		box.setIcon(QMessageBox::Critical);
+			if (!alreadyExists) {
+				if (path.length() > 0)
+					path += ";";
+				path += home;
+				error = Windows_SetRegistryString(key, "Path", path);
+				if (error == WINDOWS_SUCCESS)
+					pathWasModified = true;
+			}
+		}
+		errorClose = Windows_CloseRegistry(key);
 	}
+	
+	if (error == WINDOWS_SUCCESS && errorClose == WINDOWS_SUCCESS) {
+		box.setIcon(QMessageBox::Information);
+		if (pathWasModified)
+			box.setText("Vapor conversion utilities were added to your path");
+		else
+			box.setText("Your path is properly configured");
+	} else {
+		box.setIcon(QMessageBox::Critical);
+		box.setText("Unable to set environmental variables");
+		string errString = "";
+		if (error      != WINDOWS_SUCCESS) errString += Windows_GetErrorString(error) + "\n";
+		if (errorClose != WINDOWS_SUCCESS) errString += "CloseRegistry: " + Windows_GetErrorString(errorClose);
+		box.setInformativeText(QString::fromStdString(errString));
+	}
+#endif
+
 	box.exec();
 }
 
@@ -2265,6 +2326,7 @@ void MainForm::startAnimCapture()
 		"Specify the base file name for image capture sequence",
 		imageDir.c_str(),
 		"PNG or JPEG images (*.png *.jpg *.jpeg )");
+	fileDialog.setDefaultSuffix( QString::fromAscii("png") );
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);

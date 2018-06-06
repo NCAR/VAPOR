@@ -120,7 +120,7 @@ void Box::SetPlanar(bool value) {
 }
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 int Box::GetStretchedLocalExtents(double extents[6], int timestep){
 	double exts[6];
 	int rc = GetLocalExtents(exts, timestep);
@@ -132,7 +132,7 @@ int Box::GetStretchedLocalExtents(double extents[6], int timestep){
 #endif
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 int Box::SetStretchedLocalExtents(const double extents[6], int timestep){
 	vector<double> exts;
 	vector<double> stretch = _dataStatus->getStretchFactors();
@@ -143,7 +143,7 @@ int Box::SetStretchedLocalExtents(const double extents[6], int timestep){
 
 
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 void Box::
 buildLocalCoordTransform(
 	double transformMatrix[12], double extraThickness, int timestep, 
