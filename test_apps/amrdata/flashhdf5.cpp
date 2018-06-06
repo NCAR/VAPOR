@@ -363,7 +363,7 @@ FlashHDFFile::GetGlobalIds(int idx,int gids[])
 		      H5P_DEFAULT, gids);
     
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
     for(i=0;i<count_2d[1];i++)
     {
 	if(gids[i] >= 1)

@@ -326,7 +326,7 @@ void AnimationEventRouter::_updateTab() {
 	maxFrameLabel->setText(QString::number(numTS-1));
 	replayButton->setChecked(aParams->GetRepeating());
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	
 	int playDirection = aParams->GetPlayBackwards();
 
@@ -434,10 +434,7 @@ void AnimationEventRouter::AnimationStepReverse(){
 
 
 void AnimationEventRouter::SetTimeStep(int ts) {
-	AnimationParams* aParams =  (AnimationParams*)GetActiveParams();
-
 	setCurrentTimestep((size_t) ts);
-
 }
 
 void AnimationEventRouter::SetFrameStep(int step) {

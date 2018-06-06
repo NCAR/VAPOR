@@ -99,7 +99,7 @@ int GeoImage::TiffOpen(string path) {
 
 	//Check compression.  Some compressions, e.g. jpeg, cause crash on Linux
 	//
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	short compr = 1;
 	ok = TIFFGetField(_tif, TIFFTAG_COMPRESSION, &compr);
 	if (ok){
@@ -285,7 +285,7 @@ int GeoImage::CornerExtents(
 	int rc = proj4API.Initialize(proj4src,"");
 	if (rc<0) return(-1);
 
-#ifdef	DEAD
+#ifdef	VAPOR3_0_0_ALPHA
 	double corners[8] = {
 		srccoords[0],	// llx
 		srccoords[1],	// lly
