@@ -210,7 +210,11 @@ protected:
     bool         ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const;
     double       getPixelSize() const;
     void         transformMatrix(VAPoR::Transform *transform);
+    void         getScales(std::vector<double> &dmScales, std::vector<double> &rpScales);
+    void         deScaleExtents(double *extents);
+    void         deScaleExtents(double extents[8][3]);
     void         scaleDrag(int axis, float &dist);
+    void         drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord3[2], double winCoord4[2]);
 
     //! Method that draws a line connecting a handle to the box center
     //! \param[in] handleNum index of handle
