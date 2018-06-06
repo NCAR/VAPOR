@@ -305,6 +305,15 @@ int VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char ***
     return ret;
 }
 
+int VDC_GetVarDimLensAtLevel(const VDC *p, const char *varname, int level, size_t **lens, int *count) {
+    VDC_DEBUG_called();
+    vector<size_t> lens_v, bs_v;
+    bool ret = p->GetDimLensAtLevel(string(varname), level, lens_v, bs_v);
+    if (ret == 0)
+        _size_tVectorToCArray(lens_v, lens, count);
+    return ret;
+}
+
 int VDC_OpenVariableRead(VDC *p, size_t ts, const char *varname, int level, int lod) {
     VDC_DEBUG_called();
     return p->OpenVariableRead(ts, string(varname), level, lod);
@@ -426,6 +435,7 @@ int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype
     }
 }
 
+#ifdef UNUSED_FUNCTION
 static string valueCArrayToString(const void *a, int l, VDC_XType type) {
     string s("[");
     char buffer[128];
@@ -450,6 +460,7 @@ static string valueCArrayToString(const void *a, int l, VDC_XType type) {
     }
     return s + string("]");
 }
+#endif
 
 int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count) {
     VDC_DEBUG_printff("(%s, \"%s\", \"%s\", %s, %s, %li)\n", p ? "*p" : "NULL", varname, attname, _XTypeToString(_IntToXType(xtype)), valueCArrayToString(values, count, xtype).c_str(), count);
@@ -532,6 +543,14 @@ void VDC_FreeDoubleArray(double **data) {
 void VDC_FreeSize_tArray(size_t **data) {
     delete[] * data;
     *data = 0;
+}
+
+void VDC_ReverseSize_tArray(size_t *data, int count) {
+    for (int i = 0; i < count / 2; i++) {
+        size_t temp = data[i];
+        data[i] = data[count - i - 1];
+        data[count - i - 1] = temp;
+    }
 }
 
 // ########################

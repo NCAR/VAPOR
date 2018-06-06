@@ -42,12 +42,6 @@ class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
                       std::vector<string> smallIconPaths);
 
     std::string GetSelectedRenderer() { return _selectedRenderer; }
-    void mouseDoubleClickEvent(QMouseEvent *event) {
-        _msgBox = new QMessageBox();
-        _msgBox->setWindowTitle("Hello");
-        _msgBox->setText("You Double Clicked Mouse Button");
-        _msgBox->show();
-    };
 
   private slots:
     void _buttonChecked();
@@ -160,7 +154,9 @@ class RenderHolder : public QWidget, public Ui_LeftPanel {
     int _currentRow;
     std::vector<string> _widgetNames;
 
-    void _getRow(
+    int _getRow(string renderInst) const;
+
+    void _getRowInfo(
         int row, string &renderInst, string &renderClass,
         string &dataSetName) const;
 

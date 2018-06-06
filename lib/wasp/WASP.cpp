@@ -428,6 +428,7 @@ size_t vproduct(vector<size_t> a) {
     return (ntotal);
 }
 
+#ifdef UNUSED_FUNCTION
 // Elementwise difference between vector a and b (return (a-b));
 //
 vector<size_t> vdiff(vector<size_t> a, vector<size_t> b) {
@@ -439,16 +440,7 @@ vector<size_t> vdiff(vector<size_t> a, vector<size_t> b) {
         c[i] = a[i] - b[i];
     return (c);
 }
-
-// Determine POD type
-//
-int NetCDFType(float dummy) { return NC_FLOAT; }
-int NetCDFType(double dummy) { return NC_DOUBLE; }
-int NetCDFType(char dummy) { return NC_BYTE; }
-int NetCDFType(unsigned char dummy) { return NC_UBYTE; }
-int NetCDFType(int16_t dummy) { return NC_SHORT; }
-int NetCDFType(int dummy) { return NC_INT; }
-int NetCDFType(long dummy) { return NC_INT64; }
+#endif
 
 // Extract a single block of data from an array. Perform padding as
 // needed based on mode value if this is a boundary block
@@ -823,11 +815,21 @@ int ReconstructBlock(
     if (reconstruct_map) {
         sigmaps[ncoeffs.size() - 1].Clear();
 
-        for (int i = 0; i < ncoeffs.size() - 1; i++) {
-            sigmaps[ncoeffs.size() - 1].Append(sigmaps[i]);
+        // Edge case for when sigmap isn't stored at all
+        //
+        if (ncoeffs.size() == 1 && encoded_dims[0] - BLK_HDR_SZ == ncoeffs[0]) {
+            sigmaps[0].Reshape(ncoeffs[0]);
+            for (int i = 0; i < ncoeffs[0]; i++) {
+                sigmaps[0].Set(i);
+            }
+        } else {
+
+            for (int i = 0; i < ncoeffs.size() - 1; i++) {
+                sigmaps[ncoeffs.size() - 1].Append(sigmaps[i]);
+            }
+            sigmaps[ncoeffs.size() - 1].Sort();
+            sigmaps[ncoeffs.size() - 1].Invert();
         }
-        sigmaps[ncoeffs.size() - 1].Sort();
-        sigmaps[ncoeffs.size() - 1].Invert();
     }
 
     int rc = cmp->Reconstruct(coeffs, block, sigmaps, level);
@@ -884,6 +886,7 @@ int StoreBlockCompressed(
     const T *coeffs, const T *datarange, unsigned char *maps, int xtype
 
 ) {
+
     unsigned long LSBTest = 1;
     bool do_swapbytes = false;
     if (!(*(char *)&LSBTest)) {
@@ -1530,6 +1533,17 @@ void *RunReadThreadCompressed(void *arg) {
             return (RunReadThreadCompressedTemplate(s, dummy1, dummy2));
         }
     }
+    case NC_BYTE:
+    case NC_UBYTE: {
+        int8_t dummy1 = 0;
+        if (s._block_type == NC_INT64) {
+            long dummy2 = 0;
+            return (RunReadThreadCompressedTemplate(s, dummy1, dummy2));
+        } else {
+            double dummy2 = 0;
+            return (RunReadThreadCompressedTemplate(s, dummy1, dummy2));
+        }
+    }
     default:
         assert(0);
         return (NULL);
@@ -1835,6 +1849,9 @@ int WASP::DefVar(
         dims.push_back(dimlen);
     }
 
+    while (bs.size() > dims.size()) {
+        bs.pop_back();
+    }
     while (bs.size() < dims.size()) {
         bs.insert(bs.begin(), 1);
     }
@@ -2591,8 +2608,8 @@ int WASP::_PutVara(
     // Ugh. Can't preserve type in thread_state, which has to be passed
     // as a void * to thread library
     //
-    int data_type = NetCDFType(*data);
-    int block_type = NetCDFType(*block);
+    int data_type = _NetCDFType(*data);
+    int block_type = _NetCDFType(*block);
 
     //
     // Set up thread state for parallel (threaded) execution
@@ -2883,8 +2900,8 @@ int WASP::_GetVara(
     // Ugh. Can't preserve type in thread_state, which has to be passed
     // as a void * to thread library
     //
-    int data_type = NetCDFType(*data);
-    int block_type = NetCDFType(*block);
+    int data_type = _NetCDFType(*data);
+    int block_type = _NetCDFType(*block);
 
     //
     // Set up thread state for parallel (threaded) execution
@@ -3161,7 +3178,7 @@ int WASP::_CopyVar(
     // hyperslab at a time.
     //
     int nk = 1;
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //
     // Need to fix this so that count is block-aligned
     //
