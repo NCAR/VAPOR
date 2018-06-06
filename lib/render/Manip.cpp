@@ -126,8 +126,9 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
 
     _constrain = constrain;
 
-    transformMatrix(_dmTransform);
-    if (_rpTransform != NULL) transformMatrix(_rpTransform);
+    //	transformMatrix(_dmTransform);
+    //	if (_rpTransform != NULL)
+    //		transformMatrix(_rpTransform);
 }
 
 void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double> &urc)
@@ -475,7 +476,7 @@ bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3],
 
 void TranslateStretchManip::makeHandleExtents(int sortPosition, double handleExtents[6], int octant, double boxExtents[6])
 {
-    _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
+    //_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
     // Identify the axis this handle is on:
     int axis = (sortPosition < 3) ? (2 - sortPosition) : (sortPosition - 3);
     int newPosition = sortPosition;
@@ -746,6 +747,11 @@ bool TranslateStretchManip::rayHandleIntersect(double ray[3], const std::vector<
 // If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render()
 {
+    transformMatrix(_dmTransform);
+    if (_rpTransform != NULL) transformMatrix(_rpTransform);
+
+    _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
+
     glPushAttrib(GL_CURRENT_BIT);
     double handleExtents[6];
     for (int handleNum = 0; handleNum < 6; handleNum++) {
@@ -1155,10 +1161,10 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
 //		glPushMatrix();
 //		setUpModelViewMatrix();			// End setup sequence
 //
-//      std::vector<double> screenCoords = getScreenCoords(e);
-//        bool mouseOnManip = _manip->MouseEvent(
-//            _buttonNum, screenCoords, _strHandleMid
-//        );
+//	  std::vector<double> screenCoords = getScreenCoords(e);
+//		bool mouseOnManip = _manip->MouseEvent(
+//			_buttonNum, screenCoords, _strHandleMid
+//		);
 //
 //		swapBuffers();					// Begin cleanup sequence
 //		glMatrixMode(GL_PROJECTION);
