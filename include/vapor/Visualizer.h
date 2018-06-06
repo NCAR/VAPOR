@@ -130,7 +130,7 @@ public:
     //! \return associated RenderParams instance
     Renderer *getRenderer(string type, string instance) const;
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Identify the AnnotationRenderer associated with this Visualizer
     //! \return associated RenderParams instance
     AnnotationRenderer *getAnnotationRenderer() { return _vizFeatures; }
@@ -157,7 +157,7 @@ public:
     //! Remove all disabled renderers from the queue
     void removeDisabledRenderers();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Obtain the manip that is associated with a specified Params type
     //! \param[in] tag associated with the Params that owns the manip
     //! \return pointer to the Manip
@@ -232,7 +232,7 @@ private:
     //! \return zero if successful
     int captureImage(string filename);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     //! Render the current active manip, if we are not in navigation mode
     void renderManip();
 #endif
@@ -312,7 +312,7 @@ private:
     bool                m_viewpointDirty;
 
     //! There's a separate manipholder for each window
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     vector<TranslateStretchManip *> _manipHolder;
 #endif
     bool   _imageCaptureEnabled;

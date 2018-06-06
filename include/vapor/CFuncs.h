@@ -47,6 +47,8 @@ COMMON_API double GetTime();
 
 COMMON_API int MkDirHier(const string &dir);
 
+COMMON_API bool FileExists(const string path);
+
 };    // namespace Wasp
 
 #endif    // _CFuncs_h_

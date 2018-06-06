@@ -167,7 +167,7 @@ void ColorbarWidget::setBackgroundColor()
 }
 void ColorbarWidget::applyToAll()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     _paramsMgr->CopyColorBarSettings((RenderParams *)_params);
 #endif
 }

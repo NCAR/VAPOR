@@ -264,6 +264,7 @@ void grid_params(const DC::DataVar &var, const vector<size_t> &roi_dims, const v
     }
 }
 
+#ifdef UNUSED_FUNCTION
 void coord_setup_helper(const vector<string> &dimnames, const vector<size_t> &dims, const vector<size_t> &dims_at_level, const vector<size_t> &bs, const vector<size_t> &bs_at_level,
                         const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<string> &my_dimnames, vector<size_t> &my_dims, vector<size_t> &my_dims_at_level, vector<size_t> &my_bs,
                         vector<size_t> &my_bs_at_level, vector<size_t> &my_bmin, vector<size_t> &my_bmax)
@@ -297,6 +298,7 @@ void coord_setup_helper(const vector<string> &dimnames, const vector<size_t> &di
         }
     }
 }
+#endif
 
 };    // namespace
 
@@ -867,8 +869,8 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     return (0);
 }
 
-int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<vector<size_t>> &dims_at_levelvec,
-                            vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const
+int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec,
+                            vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const
 {
     varnames.clear();
     dims_at_levelvec.clear();
@@ -919,17 +921,9 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, const
             return (-1);
         }
 
-        vector<size_t> conn_min = min;
-        vector<size_t> conn_max = max;
-
-        // Ugh. Connection variables have an additional dimension
-        // providing ID's for each entry in the connection variable array.
-        // This hack deals with that.
-        //
-        if (conn_min.size() < dims.size()) {
-            conn_min.insert(conn_min.begin(), 0);
-            conn_max.insert(conn_max.begin(), dims[0] - 1);
-        }
+        vector<size_t> conn_min = vector<size_t>(dims_at_level.size(), 0);
+        vector<size_t> conn_max = dims_at_level;
+        for (int i = 0; i < conn_max.size(); i++) { conn_max[i]--; }
 
         // Map voxel coordinates into block coordinates
         //
@@ -985,7 +979,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     vector<vector<size_t>> conn_bs_at_levelvec;
     vector<vector<size_t>> conn_bminvec;
     vector<vector<size_t>> conn_bmaxvec;
-    rc = _setupConnVecs(ts, varname, level, lod, min, max, conn_varnames, conn_dims_at_levelvec, conn_bsvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
+    rc = _setupConnVecs(ts, varname, level, lod, conn_varnames, conn_dims_at_levelvec, conn_bsvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
     if (rc < 0) return (NULL);
 
     vector<int *> conn_blkvec;
@@ -997,7 +991,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         // Derived variable that is not in cache, so we need to
         // create it
         //
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
         rg = execute_pipeline(ts, varname, level, lod, min, max, lock, xcblks, ycblks, zcblks);
 
         if (!rg) {
@@ -1159,7 +1153,7 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     return (0);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 int DataMgr::NewPipeline(PipeLine *pipeline)
 {
@@ -1292,6 +1286,8 @@ vector<string> DataMgr::_get_var_dependencies(string varname) const
 
 bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) const
 {
+    if (varname.empty()) return (false);
+
     // disable error reporting
     //
     bool enabled = EnableErrMsg(false);
@@ -1702,7 +1698,7 @@ bool DataMgr::_free_lru()
     return (false);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 PipeLine *DataMgr::get_pipeline_for_var(string varname) const
 {
     for (int i = 0; i < _PipeLines.size(); i++) {
@@ -1926,7 +1922,7 @@ vector<string> DataMgr::_get_derived_variables() const
     return (svec);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 
 void DataMgr::PurgeVariable(string varname)
 {
@@ -2223,16 +2219,39 @@ int DataMgr::_initTimeCoord()
         return (0);
     }
 
-    string timeCoordVar = vars[0];
+    string nativeTimeCoordName = vars[0];
 
-    size_t n = _dc->GetNumTimeSteps(timeCoordVar);
+    size_t numTS = _dc->GetNumTimeSteps(nativeTimeCoordName);
 
-    float *buf = new float[n];
-    int    rc = _getVar(timeCoordVar, -1, -1, buf);
-    if (rc < 0) { return (-1); }
+    // If we have a time unit try to convert to seconds from EPOCH
+    //
+    VAPoR::DC::CoordVar cvar;
+    _dc->GetCoordVarInfo(nativeTimeCoordName, cvar);
+    if (_udunits.IsTimeUnit(cvar.GetUnits())) {
+        string derivedTimeCoordName = nativeTimeCoordName;
 
-    for (int j = 0; j < n; j++) { _timeCoordinates.push_back(buf[j]); }
-    delete[] buf;
+        _assignTimeCoord(derivedTimeCoordName);
+
+        DerivedCoordVar_TimeInSeconds *derivedVar = new DerivedCoordVar_TimeInSeconds(derivedTimeCoordName, _dc, nativeTimeCoordName, cvar.GetTimeDimName());
+
+        int rc = derivedVar->Initialize();
+        if (rc < 0) {
+            SetErrMsg("Failed to initialize derived coord variable");
+            return (-1);
+        }
+
+        _derivedCoordVars[derivedTimeCoordName] = derivedVar;
+        _derivedVars.push_back(derivedVar);
+
+        _timeCoordinates = derivedVar->GetTimes();
+    } else {
+        float *buf = new float[numTS];
+        int    rc = _getVar(nativeTimeCoordName, -1, -1, buf);
+        if (rc < 0) { return (-1); }
+
+        for (int j = 0; j < numTS; j++) { _timeCoordinates.push_back(buf[j]); }
+        delete[] buf;
+    }
 
     return (0);
 }
@@ -2431,7 +2450,7 @@ CurvilinearGrid *DataMgr::_make_grid_curvilinear(size_t ts, int level, int lod, 
     RegularGrid    xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
     RegularGrid    yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg);
+    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax);
 
     CurvilinearGrid *g = new CurvilinearGrid(dims, bs, blkptrs, xrg, yrg, zcoords, kdtree);
 
@@ -2575,7 +2594,7 @@ UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(size_t ts, int level, int
 
     UnstructuredGridCoordless zug;
 
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xug, yug);
+    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xug, yug, bmin, bmax);
 
     UnstructuredGrid2D *g =
         new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, zug, kdtree);
@@ -2851,7 +2870,7 @@ void DataMgr::_unlock_blocks(const void *blks)
     return;
 }
 
-const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg)
+const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax)
 {
     assert(cvarsinfo.size() >= 2);
     assert(xg.GetDimensions() == yg.GetDimensions());
@@ -2859,7 +2878,11 @@ const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vecto
     vector<string> varnames;
     for (int i = 0; i < 2; i++) { varnames.push_back(cvarsinfo[i].GetName()); }
 
-    const string key = "KDTree";
+    string key = "KDTree";
+    key += ":";
+    key += vector_to_string(bmin);
+    key += ":";
+    key += vector_to_string(bmax);
 
     KDTreeRG *kdtree = NULL;
 
@@ -2920,7 +2943,6 @@ string DataMgr::_getTimeCoordVarNameDerived() const
 
     for (int i = 0; i < cvars.size(); i++) {
         DC::CoordVar varInfo;
-        bool         ok = GetCoordVarInfo(cvars[i], varInfo);
         if (varInfo.GetAxis() == 3) return (cvars[i]);
     }
     return ("");

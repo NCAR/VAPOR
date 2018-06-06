@@ -75,7 +75,7 @@ void HexahedronToTets(const int hexahedron[8], int tets[5 * 4]);
 //
 void QuadToTris(const int quad[4], int tris[2 * 3]);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 void BaryTet(const Point3d &p, const Point3d &a, const Point3d &b, const Point3d &c, const Point3d &d Point3d &ans);
 
 void BaryTri(const Point3d &p, const Point3d &a, const Point3d &b, const Point3d &c Point3d &ans);

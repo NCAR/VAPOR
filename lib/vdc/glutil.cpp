@@ -1736,8 +1736,8 @@ void doubleToString(const double d, string &s, int digits)
     string ss(buf);
     s = ss;
 }
-#define DEAD
-#ifdef DEAD
+#define VAPOR3_0_0_ALPHA
+#ifdef VAPOR3_0_0_ALPHA
 
     // Macros
     #define LINEAR_INDEX(dim, x, y, z) ((x) + (dim[0]) * ((y) + (z) * (dim[1])))

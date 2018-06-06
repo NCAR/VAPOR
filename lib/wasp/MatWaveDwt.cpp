@@ -352,11 +352,11 @@ void inverse_xform(const double *cA, const double *cD, size_t sigOutLen, const d
 
 template<class T, class U> void transpose(const T *a, U *b, size_t p1, size_t p2, size_t m1, size_t m2, size_t s1, size_t s2)
 {
-    size_t          I1, I2;
-    size_t          i1, i2;
-    size_t          q, r;
-    register double c0;
-    const size_t    block = BlockSize;
+    size_t       I1, I2;
+    size_t       i1, i2;
+    size_t       q, r;
+    double       c0;
+    const size_t block = BlockSize;
     for (I2 = p2; I2 < p2 + m2; I2 += block)
         for (I1 = p1; I1 < p1 + m1; I1 += block)
             for (i2 = I2; i2 < Minimum(I2 + block, p2 + m2); i2++)
@@ -615,7 +615,7 @@ int idwt_template(MatWaveDwt *dwt, const T *cA, const T *cD, const size_t L[3], 
             //
             cDTempLen = cATempLen;
         }
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 #endif
     } else {
         cATempLen = L[0];

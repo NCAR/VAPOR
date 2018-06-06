@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 #include <vapor/utils.h>
 
 using namespace std;

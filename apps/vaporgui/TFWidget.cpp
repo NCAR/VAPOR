@@ -196,6 +196,8 @@ void TFWidget::getRange(float range[2], float values[2])
     int    ref = _rParams->GetRefinementLevel();
     int    cmp = _rParams->GetCompressionLevel();
 
+    if (!_dataMgr->VariableExists(ts, varName, ref, cmp)) return;
+
     vector<double> minExt, maxExt;
     Box *          myBox = _rParams->GetBox();
     myBox->GetExtents(minExt, maxExt);

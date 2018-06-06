@@ -723,8 +723,8 @@ private:
     //!
     bool _IsTimeCoordVar(const NetCDFSimple::Variable &varinfo) const;
 
-    bool _GetMissingValue(string varname, string &attname, double &mv) const;
-    void _GetMissingValueMap(map<string, double> &missingValueMap) const;
+    bool _GetMissingValue(string varname, string attname, double &mv) const;
+    void _GetMissingValueMap(map<string, double> &missingValueMap, string &attname) const;
 
     int _parse_formula(string formula_terms, map<string, string> &parsed_terms) const;
 

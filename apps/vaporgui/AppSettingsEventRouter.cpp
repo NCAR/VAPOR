@@ -104,7 +104,7 @@ void AppSettingsEventRouter::confirmText()
 
     SetTextChanged(false);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     vParams->Validate(2);
 
 #endif
@@ -113,7 +113,7 @@ void AppSettingsEventRouter::_confirmText()
 {
     AppSettingsParams *aParams = (AppSettingsParams *)GetActiveParams();
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     if (logFilePathEdit->text().toStdString() != aParams->GetCurrentLogFileName()) {
         aParams->SetCurrentLogFileName(logFilePathEdit->text().toStdString());
         int rc = m_controlExec->OpenLogfile(aParams->GetCurrentLogFileName());
@@ -194,7 +194,7 @@ void AppSettingsEventRouter::setAutoSave(bool val)
 }
 void AppSettingsEventRouter::save()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     AppSettingsParams *aParams = (AppSettingsParams *)GetActiveParams();
     // Copy the current App Settings to the Params for saving
     aParams->saveCurrentSettings();
@@ -208,7 +208,7 @@ void AppSettingsEventRouter::save()
 
 void AppSettingsEventRouter::restoreDefaults()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     AppSettingsParams *aParams = (AppSettingsParams *)GetActiveParams();
     Command *          cmd = Command::CaptureStart(aParams, "restore defaults");
     aParams->restart();
@@ -231,7 +231,7 @@ void AppSettingsEventRouter::chooseAutoSaveFilename()
 }
 void AppSettingsEventRouter::chooseLogFilePath()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Launch a file-chooser dialog
     AppSettingsParams *sParams = (AppSettingsParams *)GetActiveParams();
     QString            s = QFileDialog::getSaveFileName(this, "Choose a filename for log messages", sParams->GetLogFileName().c_str(), "Text (*.txt)");
@@ -250,7 +250,7 @@ void AppSettingsEventRouter::chooseLogFilePath()
 }
 void AppSettingsEventRouter::unsilenceMessages()
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     AppSettingsParams *sParams = (AppSettingsParams *)GetActiveParams();
     sParams->SetCurrentMessageSilence(false);
     if (silenceCheckbox->isChecked()) silenceCheckbox->setChecked(false);
@@ -267,7 +267,7 @@ void AppSettingsEventRouter::silenceAllMessages(bool val)
 }
 void AppSettingsEventRouter::enableLogfile(bool val)
 {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     AppSettingsParams *aParams = (AppSettingsParams *)GetActiveParams();
     aParams->SetCurrentLogfileEnabled(val);
     if (val) {

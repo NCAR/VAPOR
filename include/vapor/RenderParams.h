@@ -445,21 +445,21 @@ public:
 // the derived class; and 'ele name x' is the unique name of the element
 // contained in the container.
 //
-//
-//            |----------------|
-//            | Container Name |
-//            |----------------|
-//                    |
-//                   \|/
-//            |----------------|
-//            |   Class Name   |
-//            |----------------|
-//                    |         \
-//                   \|/         \
-//            |----------------|  \ |----------------|
-//            |   ele name 1   |....|   ele name n   |
-//            |----------------|    |----------------|
-//
+/*
+            |----------------|
+            | Container Name |
+            |----------------|
+                    |
+                   \|/
+            |----------------|
+            |   Class Name   |
+            |----------------|
+                    |         \
+                   \|/         \
+            |----------------|  \ |----------------|
+            |   ele name 1   |....|   ele name n   |
+            |----------------|    |----------------|
+*/
 class PARAMS_API RenParamsContainer : public Wasp::MyBase {
 public:
     RenParamsContainer(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &myname);

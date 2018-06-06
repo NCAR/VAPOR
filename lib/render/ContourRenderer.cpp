@@ -104,7 +104,7 @@ bool ContourRenderer::_isCacheDirty() const
     return false;
 }
 
-void ContourRenderer::_buildCache()
+int ContourRenderer::_buildCache()
 {
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     _saveCacheParams();
@@ -113,11 +113,11 @@ void ContourRenderer::_buildCache()
     glLineWidth(_cacheParams.lineThickness);
     if (cParams->GetVariableName().empty()) {
         glEndList();
-        return;
+        return 0;
     }
     MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
     vector<double>  contours = cParams->GetContourValues(_cacheParams.varName);
-    float           contourColors[contours.size()][4];
+    float(*contourColors)[4] = new float[contours.size()][4];
     if (!_cacheParams.useSingleColor)
         for (int i = 0; i < contours.size(); i++) tf->rgbValue(contours[i], contourColors[i]);
     else
@@ -126,23 +126,35 @@ void ContourRenderer::_buildCache()
 
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     Grid *heightGrid = NULL;
-    if (!_cacheParams.heightVarName.empty())
+    if (!_cacheParams.heightVarName.empty()) {
         heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
+    }
     // StructuredGrid *sGrid = dynamic_cast<StructuredGrid *>(grid);
 
-    Grid::ConstCellIterator it = grid->ConstCellBegin();
+    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
+        glEndList();
+        return -1;
+    }
+
+    double mv = grid->GetMissingValue();
+
+    Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
+
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it) {
         vector<size_t>         cell = *it;
         vector<vector<size_t>> nodes;
         grid->GetCellNodes(cell, nodes);
 
-        vector<double> coords[nodes.size()];
-        float          values[nodes.size()];
+        vector<double> *coords = new vector<double>[nodes.size()];
+        float *         values = new float[nodes.size()];
+        bool            hasMissing = false;
         for (int i = 0; i < nodes.size(); i++) {
             grid->GetUserCoordinates(nodes[i], coords[i]);
             values[i] = grid->GetValue(coords[i]);
+            if (values[i] == mv) { hasMissing = true; }
         }
+        if (hasMissing) continue;
 
         glBegin(GL_LINES);
 
@@ -170,18 +182,23 @@ void ContourRenderer::_buildCache()
             }
         }
         glEnd();
+        delete[] coords;
+        delete[] values;
     }
 
     glEndList();
+    delete[] contourColors;
+    return 0;
 }
 
 int ContourRenderer::_paintGL()
 {
-    if (_isCacheDirty()) _buildCache();
+    int rc = 0;
+    if (_isCacheDirty()) rc = _buildCache();
 
     glCallList(_drawList);
 
-    return 0;
+    return rc;
 }
 
 int ContourRenderer::_initializeGL()

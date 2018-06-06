@@ -637,6 +637,7 @@ public:
     //! by the location of the sampled data within the grid (node, face,
     //! cell, etc)
     //!
+    //! N.B. Current only works with node coordinates
     //!
     //
     typedef const std::vector<double>              ConstCoordType;
@@ -778,8 +779,13 @@ public:
         virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const { return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorBoxSG(*this)); };
 
     private:
-        InsideBox     _pred;
+        InsideBox _pred;
+#ifdef VAPOR3_0_0
         ConstCoordItr _coordItr;
+#else
+        const Grid *_g;
+        bool        _cellInsideBox(const std::vector<size_t> &cindices) const;
+#endif
     };
 
     //! Return constant grid cell coordinate iterator

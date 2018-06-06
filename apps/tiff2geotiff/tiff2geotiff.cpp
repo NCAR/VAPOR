@@ -694,7 +694,8 @@ static copyFunc pickCopyFunc(TIFF *, TIFF *, uint16, uint16);
 
 static int tiffcp(TIFF *in, TIFF *out)
 {
-    uint16   bitspersample, samplesperpixel, shortv;
+    uint16   samplesperpixel, shortv;
+    uint16   bitspersample = 0;
     copyFunc cf;
     uint32   w, l;
 
@@ -917,12 +918,12 @@ bad:
  */
 DECLAREcpFunc(cpContig2SeparateByRow)
 {
-    unsigned char *         inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
-    unsigned char *         outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-    register unsigned char *inp, *outp;
-    register uint32         n;
-    uint32                  row;
-    tsample_t               s;
+    unsigned char *inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
+    unsigned char *outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
+    unsigned char *inp, *outp;
+    uint32         n;
+    uint32         row;
+    tsample_t      s;
 
     /* unpack channels */
     for (s = 0; s < spp; s++) {
@@ -952,12 +953,12 @@ bad:
  */
 DECLAREcpFunc(cpSeparate2ContigByRow)
 {
-    unsigned char *         inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
-    unsigned char *         outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-    register unsigned char *inp, *outp;
-    register uint32         n;
-    uint32                  row;
-    tsample_t               s;
+    unsigned char *inbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(in));
+    unsigned char *outbuf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
+    unsigned char *inp, *outp;
+    uint32         n;
+    uint32         row;
+    tsample_t      s;
 
     for (row = 0; row < imagelength; row++) {
         /* merge channels */

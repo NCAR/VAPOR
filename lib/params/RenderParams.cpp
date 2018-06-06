@@ -105,6 +105,8 @@ void RenderParams::_initBox()
     string varname = GetVariableName();
     if (varname.empty()) return;
 
+    if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
+
     vector<double> minExt, maxExt;
     int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
@@ -293,6 +295,9 @@ void RenderParams::SetColorbarPbase(ColorbarPbase *pb)
 
 MapperFunction *RenderParams::GetMapperFunc(string varname)
 {
+    // This way we always return a valid MapperFunction
+    //
+    if (varname.empty()) { varname = "NULL"; }
     MapperFunction *tfptr = (MapperFunction *)_TFs->GetParams(varname);
 
     if (tfptr) return (tfptr);
@@ -304,10 +309,13 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
 
     MapperFunction tf(_ssave);
 
-    vector<string> varnames = _dataMgr->GetDataVarNames();
-    if (find(varnames.begin(), varnames.end(), varname) != varnames.end()) {
+    size_t ts = 0;
+    int    level = 0;
+    int    lod = 0;
+    if (_dataMgr->VariableExists(ts, varname, level, lod)) {
         vector<double> range;
-        (void)_dataMgr->GetDataRange(0, varname, 0, 0, range);
+        int            rc = _dataMgr->GetDataRange(ts, varname, level, lod, range);
+        assert(rc >= 0);
         tf.setMinMaxMapValue(range[0], range[1]);
     }
 
@@ -623,7 +631,8 @@ RenParamsContainer::~RenParamsContainer()
 RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name)
 {
     assert(pb != NULL);
-    assert(!name.empty());
+
+    if (name.empty()) { name = "NULL"; }
 
     map<string, RenderParams *>::iterator itr = _elements.find(name);
     if (itr != _elements.end()) { delete itr->second; }
@@ -688,6 +697,8 @@ void RenParamsContainer::Remove(string name)
 
 RenderParams *RenParamsContainer::GetParams(string name) const
 {
+    if (name.empty()) { name = "NULL"; }
+
     map<string, RenderParams *>::const_iterator itr = _elements.find(name);
     if (itr != _elements.end()) return (itr->second);
 

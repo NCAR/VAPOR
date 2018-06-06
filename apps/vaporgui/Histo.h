@@ -27,22 +27,17 @@ class Histo {
 public:
     Histo(int numberBins, float mnData, float mxData, string var, int ts);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     // Special constructor for unsigned char data:
     //
     Histo(const VAPoR::StructuredGrid *rg, const double exts[6], const float range[2]);
 #endif
     ~Histo();
-    void reset(int newNumBins = -1);
-    void reset(int newNumBins, float mnData, float mxData)
-    {
-        reset(newNumBins);
-        _minData = mnData;
-        _maxData = mxData;
-    }
+    void  reset(int newNumBins = -1);
+    void  reset(int newNumBins, float mnData, float mxData);
     void  addToBin(float val);
+    int   getMaxBinSize();
     int   getBinSize(int posn) { return _binArray[posn]; }
-    int   getMaxBinSize() { return _maxBinSize; }
     float getMinData() { return _minData; }
     float getMaxData() { return _maxData; }
 
@@ -51,12 +46,11 @@ public:
 
 private:
     Histo() {}
-    int * _binArray;
-    int   _numBelow, _numAbove;
+    long *_binArray;
+    long  _numBelow, _numAbove;
     int   _numBins;
-    float _minData, _maxData;
-    int   _maxBinSize;
-    int   _largestBin;
+    float _minData, _maxData, _range;
+    long  _maxBinSize;
 
     int    _timestepOfUpdate;
     string _varnameOfUpdate;

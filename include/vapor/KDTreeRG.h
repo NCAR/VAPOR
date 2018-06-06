@@ -111,7 +111,6 @@ private:
             Grid::ConstIterator xitr = xg.cbegin();
             Grid::ConstIterator yitr = yg.cbegin();
 
-            float posXY[2];
             for (size_t i = 0; i < nelem; ++i, ++xitr, ++yitr) {
                 this->X[i] = *xitr;
                 this->Y[i] = *yitr;

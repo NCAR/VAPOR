@@ -30,7 +30,10 @@
 #include "GL/glew.h"
 #include "qcolordialog.h"
 
-#include "images/fileopen.xpm"
+#ifdef VAPOR3_0_0_ALPHA
+    #include "images/fileopen.xpm"
+#endif
+
 #include <qlabel.h>
 #include <QFileDialog>
 #include <vector>
@@ -46,6 +49,7 @@
 #include "EventRouter.h"
 #include "SettingsParams.h"
 #include "ErrorReporter.h"
+#include "FileOperationChecker.h"
 
 #include "QIntValidatorWithFixup.h"
 
@@ -54,8 +58,6 @@ using namespace VAPoR;
 SettingsEventRouter::SettingsEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_SettingsGUI(), EventRouter(ce, SettingsParams::GetClassType())
 {
     setupUi(this);
-
-    SettingsParams *sp = (SettingsParams *)GetActiveParams();
 
     ParamsBase::StateSave *ss = new ParamsBase::StateSave;
     _defaultParams = new SettingsParams(ss, false);
@@ -94,12 +96,12 @@ void SettingsEventRouter::hookUpTab()
     connect(_windowHeightEdit, SIGNAL(returnPressed()), this, SLOT(_windowSizeChanged()));
     connect(_numThreadsEdit, SIGNAL(returnPressed()), this, SLOT(_numThreadsChanged()));
     connect(_defaultButton, SIGNAL(clicked()), this, SLOT(_restoreDefaults()));
-    connect(_sessionPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
-    connect(_metadataPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
-    connect(_imagePathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
-    connect(_tfPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
-    connect(_flowPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
-    connect(_pythonPathEdit, SIGNAL(returnPressed()), this, SLOT(_setDirectoryPaths()));
+    connect(_sessionPathEdit, SIGNAL(returnPressed()), this, SLOT(_setSessionPath()));
+    connect(_metadataPathEdit, SIGNAL(returnPressed()), this, SLOT(_setMetadataPath()));
+    connect(_imagePathEdit, SIGNAL(returnPressed()), this, SLOT(_setImagePath()));
+    connect(_tfPathEdit, SIGNAL(returnPressed()), this, SLOT(_setTFPath()));
+    connect(_flowPathEdit, SIGNAL(returnPressed()), this, SLOT(_setFlowPath()));
+    connect(_pythonPathEdit, SIGNAL(returnPressed()), this, SLOT(_setPythonPath()));
     connect(_sessionPathButton, SIGNAL(clicked()), this, SLOT(_chooseSessionPath()));
     connect(_metadataPathButton, SIGNAL(clicked()), this, SLOT(_chooseMetadataPath()));
     connect(_imagePathButton, SIGNAL(clicked()), this, SLOT(_chooseImagePath()));
@@ -167,44 +169,131 @@ void SettingsEventRouter::_changesPerSaveChanged()
     _saveSettings();
 }
 
+bool SettingsEventRouter::_confirmFileExist(QString &qfilename)
+{
+    QFileInfo check_file(qfilename);
+    if (check_file.exists()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Are you sure?");
+        QString msg = "The following file exists.\n ";
+        msg += qfilename;
+        msg += "\n";
+        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
+        msgBox.setText(msg);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        if (msgBox.exec() == QMessageBox::No)
+            return false;
+        else
+            return true;
+    } else
+        return true;
+}
+
 void SettingsEventRouter::_chooseAutoSaveFile()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    QFileDialog     fileDialog(_autoSaveFileButton, QString::fromAscii("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()),
+                           QString::fromAscii("Vapor 3 Session Files (*.vs3)"));
+    fileDialog.setDefaultSuffix(QString::fromAscii("vs3"));
+    fileDialog.setOption(QFileDialog::DontConfirmOverwrite);
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec() != QDialog::Accepted) return;
+    QStringList files = fileDialog.selectedFiles();
+    if (files.isEmpty() || files.size() > 1) return;
+    QString qfilename = files.first();
+    if (!qfilename.endsWith(".vs3")) qfilename.append(".vs3");
 
-    QString fileName =
-        QFileDialog::getSaveFileName(_autoSaveFileButton, tr("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()), tr("Vapor 3 Session Files (*.vs3)"));
+    if (!_confirmFileExist(qfilename)) {
+        _updateTab();
+        return;
+    }
 
-    if (!fileName.isEmpty()) {
-        sParams->SetAutoSaveSessionFile(fileName.toStdString());
+    if (FileOperationChecker::FileGoodToWrite(qfilename)) {
+        sParams->SetAutoSaveSessionFile(qfilename.toStdString());
         _saveSettings();
+    } else {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
     }
 }
 
 void SettingsEventRouter::_autoSaveFileChanged()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-    string          file = _autoSaveFileEdit->text().toStdString();
-    sParams->SetAutoSaveSessionFile(file);
-    _saveSettings();
+    QString         qfilename = _autoSaveFileEdit->text();
+    if (!qfilename.endsWith(".vs3")) {
+        qfilename.append(".vs3");
+        _autoSaveFileEdit->setText(qfilename);
+    }
+
+    if (!_confirmFileExist(qfilename)) {
+        _updateTab();
+        return;
+    }
+
+    if (FileOperationChecker::FileGoodToWrite(qfilename)) {
+        sParams->SetAutoSaveSessionFile(qfilename.toStdString());
+        _saveSettings();
+    } else {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+    }
 }
 
-void SettingsEventRouter::_setDirectoryPaths()
+void SettingsEventRouter::_setSessionPath()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    _setFilePath(&SettingsParams::SetSessionDir, &SettingsParams::GetSessionDir, *sParams, _sessionPathEdit);
+}
 
-    paramsMgr->BeginSaveStateGroup("Settings directory");
+void SettingsEventRouter::_setMetadataPath()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
-    sParams->SetSessionDir(_sessionPathEdit->text().toStdString());
-    sParams->SetMetadataDir(_metadataPathEdit->text().toStdString());
-    sParams->SetImageDir(_imagePathEdit->text().toStdString());
-    sParams->SetFlowDir(_flowPathEdit->text().toStdString());
-    sParams->SetPythonDir(_pythonPathEdit->text().toStdString());
-    sParams->SetTFDir(_tfPathEdit->text().toStdString());
-    _saveSettings();
+    _setFilePath(&SettingsParams::SetMetadataDir, &SettingsParams::GetMetadataDir, *sParams, _metadataPathEdit);
+}
 
-    paramsMgr->EndSaveStateGroup();
+void SettingsEventRouter::_setImagePath()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+
+    _setFilePath(&SettingsParams::SetImageDir, &SettingsParams::GetImageDir, *sParams, _imagePathEdit);
+}
+
+void SettingsEventRouter::_setFlowPath()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+
+    _setFilePath(&SettingsParams::SetFlowDir, &SettingsParams::GetFlowDir, *sParams, _flowPathEdit);
+}
+
+void SettingsEventRouter::_setPythonPath()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+
+    _setFilePath(&SettingsParams::SetPythonDir, &SettingsParams::GetPythonDir, *sParams, _pythonPathEdit);
+}
+
+void SettingsEventRouter::_setTFPath()
+{
+    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+
+    _setFilePath(&SettingsParams::SetTFDir, &SettingsParams::GetTFDir, *sParams, _tfPathEdit);
+}
+
+void SettingsEventRouter::_setFilePath(void (SettingsParams::*setFunc)(string), string (SettingsParams::*getFunc)() const, SettingsParams &sParams, QLineEdit *lineEdit)
+{
+    string  path = lineEdit->text().toStdString();
+    QString qpath = QString::fromStdString(path);
+    if (FileOperationChecker::DirectoryGoodToRead(qpath)) {
+        (sParams.*setFunc)(path);
+    } else {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        _updateTab();
+        return;
+    }
 }
 
 void SettingsEventRouter::_blockSignals(bool block)
@@ -297,8 +386,7 @@ void SettingsEventRouter::_updateTab()
 string SettingsEventRouter::_choosePathHelper(string current, string help)
 {
     // Launch a file-chooser dialog, just choosing the directory
-    QString         dir;
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
+    QString dir;
 
     if (current == ".") {
         dir = QDir::currentPath();
@@ -401,7 +489,6 @@ void SettingsEventRouter::_restoreDefaults()
 
     XmlNode *settingsNode = settingsParams->GetNode();
     XmlNode *parent = settingsNode->GetParent();
-    XmlNode *defaultNode = _defaultParams->GetNode();
 
     SettingsParams *newParams = new SettingsParams(*_defaultParams);
     *settingsParams = *newParams;
@@ -410,6 +497,7 @@ void SettingsEventRouter::_restoreDefaults()
     delete newParams;
 
     _saveSettings();
+    _updateTab();
 
     paramsMgr->EndSaveStateGroup();
 }
@@ -427,4 +515,6 @@ void SettingsEventRouter::_saveSettings()
 
     int rc = sParams->SaveSettings();
     if (rc < 0) { MSG_ERR("Failed to save startup file"); }
+
+    _updateTab();
 }

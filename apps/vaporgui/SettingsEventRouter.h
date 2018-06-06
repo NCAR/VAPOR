@@ -72,7 +72,12 @@ private slots:
     void _windowSizeChanged();
 
     void _saveSettings();
-    void _setDirectoryPaths();
+    void _setSessionPath();
+    void _setMetadataPath();
+    void _setImagePath();
+    void _setTFPath();
+    void _setFlowPath();
+    void _setPythonPath();
 
     void _chooseSessionPath();
     void _chooseMetadataPath();
@@ -84,12 +89,19 @@ private slots:
     void _restoreDefaults();
 
 private:
-    // SettingsEventRouter() {}
+    void _setFilePath(void (SettingsParams::*setFunc)(string), string (SettingsParams::*getFunc)() const, SettingsParams &sParams, QLineEdit *lineEdit);
     void _blockSignals(bool block);
 
     void _updateGeneralSettings();
     void _updateStartupSettings();
     void _updateDirectoryPaths();
+
+    // Checks if a file exists on the disk, and warns the user if it does.
+    // Returns true if 1) there is no such file on disk; and
+    //                 2) the user says YES to overwrite.
+    // Returns false if the users says NO to overwrite.
+    //
+    bool _confirmFileExist(QString &filename);
 
     SettingsParams *_defaultParams;
 

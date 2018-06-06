@@ -107,6 +107,7 @@ int VDC_GetCRatiosCount(const VDC *p, const char *varname);
 int VDC_GetVarDimLens(const VDC *p, const char *varname, int spatial, size_t **lens, int *count);
 int VDC_GetVarDimNames(const VDC *p, const char *varname, int spatial, char ***names, int *count);
 int VDC_GetVarCoordVars(const VDC *p, const char *varname, int spatial, char ***names, int *count);
+int VDC_GetVarDimLensAtLevel(const VDC *p, const char *varname, int level, size_t **lens, int *count);
 
 int VDC_OpenVariableRead(VDC *p, size_t ts, const char *varname, int level, int lod);
 int VDC_CloseVariable(VDC *p, int fd);
@@ -138,6 +139,7 @@ void        VDC_FreeString(char **str);
 void        VDC_FreeLongArray(long **data);
 void        VDC_FreeDoubleArray(double **data);
 void        VDC_FreeSize_tArray(size_t **data);
+void        VDC_ReverseSize_tArray(size_t *data, int count);
 
 #ifdef __cplusplus
 }    // extern "C" }

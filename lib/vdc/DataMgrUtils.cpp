@@ -324,7 +324,7 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
     return (true);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 // Map corners of box to voxels.
 void DataMgrUtils::mapBoxToVox(Box *box, string varname, int refLevel, int lod, int timestep, size_t voxExts[6])
 {

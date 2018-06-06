@@ -229,6 +229,11 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, st
         for (int k = 0; k < fvarnames.size(); k++) {
             if (!fvarnames[k].empty()) { varnames.push_back(fvarnames[k]); }
         }
+
+        vector<string> auxVarNames = rParams[j]->GetAuxVariableNames();
+        for (int k = 0; k < auxVarNames.size(); k++) {
+            if (!auxVarNames[k].empty()) varnames.push_back(auxVarNames[k]);
+        }
     }
     if (varnames.size()) { foundOne = true; }
     varMap[datasetName] = varnames;
@@ -275,7 +280,6 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<
             if (maxWExts[j] > maxExts[j]) { maxExts[j] = maxWExts[j]; }
         }
     }
-    int s = minExts.size();
 }
 
 size_t DataStatus::MapGlobalToLocalTimeStep(string dataSetName, size_t ts) const
@@ -415,7 +419,7 @@ void DataStatus::reset_time()
 
 DataStatus::~DataStatus() {}
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 // Map corners of box to voxels.
 void DataStatus::mapBoxToVox(Box *box, string varname, int refLevel, int lod, int timestep, size_t voxExts[6])
 {

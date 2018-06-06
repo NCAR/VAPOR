@@ -15,15 +15,49 @@
 //
 //	Description:
 //
+#include <iostream>
 #include <cstdlib>
+#include <csignal>
+#include <cstdlib>
+#include <csetjmp>
+#include <csignal>
+
+#ifndef _WINDOWS
+    #include <unistd.h>
+#endif
+
 #include <vapor/GetAppPath.h>
 #include <vapor/MyPython.h>
 
 using namespace Wasp;
 
-MyPython *MyPython::m_instance = NULL;
-bool      MyPython::m_isInitialized = false;
-// string MyPython::m_pyHome;
+#ifdef VAPOR3_0_0
+namespace {
+
+bool        pyIntFailed = false;
+static void signal_handler(int sig)
+{
+    if (sig == SIGINT) {
+        cerr << "Caught SIGINT\n";
+        pyIntFailed = true;
+    }
+}
+
+void init_signals(void)
+{
+    struct sigaction sigact;
+
+    sigact.sa_handler = signal_handler;
+    sigemptyset(&sigact.sa_mask);
+    sigact.sa_flags = 0;
+    sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
+}
+}    // namespace
+#endif
+
+MyPython *  MyPython::m_instance = NULL;
+bool        MyPython::m_isInitialized = false;
+std::string MyPython::m_pyHome = "";
 
 MyPython *MyPython::Instance()
 {
@@ -31,18 +65,15 @@ MyPython *MyPython::Instance()
     return (m_instance);
 }
 
-void MyPython::Initialize()
+int MyPython::Initialize()
 {
-    if (m_isInitialized) return;
+    if (m_isInitialized) return (0);
 
-    /*
     m_pyHome.clear();
-
     char *s = getenv("VAPOR_PYTHONHOME");
     if (s) m_pyHome = s;
 
     if (m_pyHome.empty()) {
-
         // Set pythonhome to the vapor installation (based on VAPOR_HOME)
         //
         vector<string> pths;
@@ -52,13 +83,17 @@ void MyPython::Initialize()
         //
 #ifdef _WINDOWS
         pths.push_back("python27");
-        m_pyHome = GetAppPath("VAPOR","", pths, true);
+        m_pyHome = GetAppPath("VAPOR", "", pths, true);
 #else
-        m_pyHome = GetAppPath("VAPOR","home", pths, true);
+        m_pyHome = GetAppPath("VAPOR", "home", pths, true);
 #endif
     }
 
-    if (! m_pyHome.empty()) {
+    if (!m_pyHome.empty()) {
+#ifdef _WINDOWS
+        Py_SetPythonHome((char *)m_pyHome.c_str());
+        MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
+#else
         struct STAT64 statbuf;
         if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
             // N.B. the string passed to Py_SetPythonHome() must be
@@ -66,15 +101,15 @@ void MyPython::Initialize()
             // documentation promisses that it's value will not be changed
             //
             // It's also important to use forward slashes even on Windows.
+            // The above comment might no longer be relevant
             //
-            Py_SetPythonHome((char *) m_pyHome.c_str());
 
-            MyBase::SetDiagMsg(
-                "Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str()
-            );
+            Py_SetPythonHome((char *)m_pyHome.c_str());
+
+            MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
         }
+#endif
     }
-    */
 
     // Prevent python from attempting to write a .pyc file on disk.
     //
@@ -82,17 +117,93 @@ void MyPython::Initialize()
     char        env2[256];
     strcpy(env2, env);    // All this trouble is to eliminate a compiler warning
     putenv(env2);
+
+#ifdef VAPOR3_0_0
+    init_signals();
+#endif
+
     Py_Initialize();
 
-    PyRun_SimpleString("import sys\n");
-    PyRun_SimpleString("import os\n");
+#ifdef VAPOR3_0_0
+    if (pyIntFailed) {
+        SetErrMsg("Failed to initialize python : Py_Initialize() Failed");
+        return (-1);
+    }
+#endif
 
+    // Ugh. Have to define a python object to enable capturing of
+    // stderr to a string. Python API doesn't support a version of
+    // PyErr_Print() that fetches the error to a C++ string. Give me
+    // a break!
+    //
+    std::string stdErr = "try:\n"
+                         "	import sys, os\n"
+                         "except: \n"
+                         "	print >> sys.stderr, \'Failed to import sys\'\n"
+                         "	raise\n"
+                         "class CatchErr:\n"
+                         "	def __init__(self):\n"
+                         "		self.value = 'VAPOR_PY: '\n"
+                         "	def write(self, txt):\n"
+                         "		self.value += txt\n"
+                         "catchErr = CatchErr()\n"
+                         "sys.stderr = catchErr\n";
+
+    // Catch stderr from Python to a string.
+    //
+    int rc = PyRun_SimpleString(stdErr.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
+
+    // Import matplotlib
+    //
+    std::string importMPL = "try:\n"
+                            "	import matplotlib\n"
+                            "except: \n"
+                            "	print >> sys.stderr, \'Failed to import matplotlib\'\n"
+                            "	raise\n";
+    rc = PyRun_SimpleString(importMPL.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
+
+    // Add vapor modules to search path
+    //
     std::vector<std::string> dummy;
     std::string              path = Wasp::GetAppPath("VAPOR", "share", dummy);
     path = "sys.path.append('" + path + "/python')\n";
-    PyRun_SimpleString(path.c_str());
+    rc = PyRun_SimpleString(path.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
 
     m_isInitialized = true;
+
+    return (0);
+}
+
+// Fetch an error message genereated by Python API.
+//
+string MyPython::PyErr()
+{
+    PyObject *pMain = PyImport_AddModule("__main__");
+
+    PyObject *catcher = NULL;
+    if (pMain && PyObject_HasAttrString(pMain, "catchErr")) { catcher = PyObject_GetAttrString(pMain, "catchErr"); }
+
+    // If catcher is NULL the Python message will be written
+    // to stderr. Otherwise it is writter to the catchErr object.
+    //
+    PyErr_Print();
+
+    if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
+
+    PyObject *output = PyObject_GetAttrString(catcher, "value");
+    return (PyString_AsString(output));
 }
 
 PyObject *MyPython::CreatePyFunc(string moduleName, string funcName, string script)

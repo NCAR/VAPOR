@@ -5,15 +5,19 @@ RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char 
 {
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
 
-    Wasp::MyPython::Instance()->Initialize();
+    int rc = Wasp::MyPython::Instance()->Initialize();
+    if (rc < 0) {
+        MyBase::SetErrMsg("Failed to initialize python : %s", MyPython::Instance()->PyErr().c_str());
+        return (-1);
+    }
 
     pName = PyString_FromString("imagewriter");
     pModule = PyImport_Import(pName);
 
     if (pModule == NULL) {
-        std::cerr << "pModule (drawpng) NULL!!" << std::endl;
         PyErr_Print();
-        return 1;
+        MyBase::SetErrMsg("pModule (drawpng) NULL : %s", MyPython::Instance()->PyErr().c_str());
+        return -1;
     }
     pFunc = PyObject_GetAttrString(pModule, "drawpng");
     if (pFunc && PyCallable_Check(pFunc)) {
@@ -44,13 +48,14 @@ RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char 
         // Call the python routine
         pValue = PyObject_CallObject(pFunc, pArgs);
         if (pValue == NULL) {
-            std::cerr << "pFunc failed to execute!!" << std::endl;
             PyErr_Print();
+            MyBase::SetErrMsg("pFunc (drawpng) failed to execute : %s", MyPython::Instance()->PyErr().c_str());
+            return -1;
         }
     } else {
-        std::cerr << "pFunc NULL" << std::endl;
         PyErr_Print();
-        return 1;
+        MyBase::SetErrMsg("pFunc (drawpng) NULL : %s", MyPython::Instance()->PyErr().c_str());
+        return -1;
     }
 
     Py_XDECREF(pName);

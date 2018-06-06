@@ -16,6 +16,7 @@ struct opt_t {
     std::vector<size_t>         bs;
     std::vector<size_t>         cratios;
     string                      wname;
+    string                      xtype;
     int                         numts;
     int                         nthreads;
     std::vector<string>         vars3d;
@@ -44,6 +45,9 @@ OptionParser::OptDescRec_T set_opts[] = {{"dimension", 1, "512x512x512",
                                           "Valid values are bior1.1, bior1.3, "
                                           "bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, "
                                           "bior3.5, bior3.7, bior3.9, bior4.4"},
+                                         {"xtype", 1, "float",
+                                          "External data type representation. "
+                                          "Valid values are uint8 int8 int16 int32 int64 float double"},
                                          {"numts", 1, "1", "Number of timesteps in the data set"},
                                          {"nthreads", 1, "0",
                                           "Specify number of execution threads "
@@ -94,6 +98,7 @@ OptionParser::Option_T get_options[] = {{"dimension", Wasp::CvtToDimension3D, &o
                                         {"bs", Wasp::CvtToSize_tVec, &opt.bs, sizeof(opt.bs)},
                                         {"cratios", Wasp::CvtToSize_tVec, &opt.cratios, sizeof(opt.cratios)},
                                         {"wname", Wasp::CvtToCPPStr, &opt.wname, sizeof(opt.wname)},
+                                        {"xtype", Wasp::CvtToCPPStr, &opt.xtype, sizeof(opt.xtype)},
                                         {"numts", Wasp::CvtToInt, &opt.numts, sizeof(opt.numts)},
                                         {"nthreads", Wasp::CvtToInt, &opt.nthreads, sizeof(opt.nthreads)},
                                         {"vars3d", Wasp::CvtToStrVec, &opt.vars3d, sizeof(opt.vars3d)},
@@ -139,6 +144,21 @@ void set_coords(VDCNetCDF &vdc, const vector<float> &extents, const vector<strin
     set_coord(vdc, dimnames[2], dimlens[2], extents[2], extents[5]);
 }
 
+DC::XType parseXType(string xTypeStr)
+{
+    if (xTypeStr == "uint8") return (DC::XType::UINT8);
+    if (xTypeStr == "int8") return (DC::XType::INT8);
+    //	if (xTypeStr == "int16") return (DC::XType::INT16);
+    if (xTypeStr == "int32") return (DC::XType::INT32);
+    if (xTypeStr == "int64") return (DC::XType::INT64);
+    if (xTypeStr == "float") return (DC::XType::FLOAT);
+    if (xTypeStr == "float32") return (DC::XType::FLOAT);
+    if (xTypeStr == "float64") return (DC::XType::DOUBLE);
+    if (xTypeStr == "double") return (DC::XType::DOUBLE);
+
+    return (DC::XType::INVALID);
+}
+
 int main(int argc, char **argv)
 {
     OptionParser op;
@@ -163,6 +183,7 @@ int main(int argc, char **argv)
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
     }
+
     string master = argv[1];
 
     if (opt.help) {
@@ -171,12 +192,22 @@ int main(int argc, char **argv)
         exit(0);
     }
 
+    DC::XType xType = parseXType(opt.xtype);
+    if (xType == DC::XType::INVALID) {
+        MyBase::SetErrMsg("Invalid external data type specifier : %s", opt.xtype.c_str());
+        exit(1);
+    }
+
     VDCNetCDF vdc(opt.nthreads);
 
     if (vdc.DataDirExists(master) && !opt.force) {
         MyBase::SetErrMsg("Data directory exists and -force option not used. "
                           "Remove directory %s or use -force",
                           vdc.GetDataDir(master).c_str());
+        exit(1);
+    }
+    if (FileExists(master) && !opt.force) {
+        MyBase::SetErrMsg("\"%s\" already exists and -force option not used.", master.c_str());
         exit(1);
     }
 
@@ -206,8 +237,8 @@ int main(int argc, char **argv)
     rc = vdc.SetCompressionBlock(opt.wname, opt.cratios);
     if (rc < 0) exit(1);
 
-    for (int i = 0; i < opt.vars3d.size(); i++) { rc = vdc.DefineDataVar(opt.vars3d[i], dimnames, dimnames, "", VDC::FLOAT, true); }
-    for (int i = 0; i < opt.ncvars3d.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars3d[i], dimnames, dimnames, "", VDC::FLOAT, false); }
+    for (int i = 0; i < opt.vars3d.size(); i++) { rc = vdc.DefineDataVar(opt.vars3d[i], dimnames, dimnames, "", xType, true); }
+    for (int i = 0; i < opt.ncvars3d.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars3d[i], dimnames, dimnames, "", xType, false); }
 
     vector<string> dimnames2dxy;
     dimnames2dxy.push_back(dimnames[0]);
@@ -227,22 +258,22 @@ int main(int argc, char **argv)
     rc = vdc.SetCompressionBlock(opt.wname, cratios2D);
     if (rc < 0) exit(1);
 
-    for (int i = 0; i < opt.vars2dxy.size(); i++) { rc = vdc.DefineDataVar(opt.vars2dxy[i], dimnames2dxy, dimnames2dxy, "", VDC::FLOAT, true); }
-    for (int i = 0; i < opt.ncvars2dxy.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars2dxy[i], dimnames2dxy, dimnames2dxy, "", VDC::FLOAT, false); }
+    for (int i = 0; i < opt.vars2dxy.size(); i++) { rc = vdc.DefineDataVar(opt.vars2dxy[i], dimnames2dxy, dimnames2dxy, "", xType, true); }
+    for (int i = 0; i < opt.ncvars2dxy.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars2dxy[i], dimnames2dxy, dimnames2dxy, "", xType, false); }
 
     vector<string> dimnames2dxz;
     dimnames2dxz.push_back(dimnames[0]);
     dimnames2dxz.push_back(dimnames[2]);
     dimnames2dxz.push_back(dimnames[3]);
-    for (int i = 0; i < opt.vars2dxz.size(); i++) { rc = vdc.DefineDataVar(opt.vars2dxz[i], dimnames2dxz, dimnames2dxz, "", VDC::FLOAT, true); }
-    for (int i = 0; i < opt.ncvars2dxz.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars2dxz[i], dimnames2dxz, dimnames2dxz, "", VDC::FLOAT, false); }
+    for (int i = 0; i < opt.vars2dxz.size(); i++) { rc = vdc.DefineDataVar(opt.vars2dxz[i], dimnames2dxz, dimnames2dxz, "", xType, true); }
+    for (int i = 0; i < opt.ncvars2dxz.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars2dxz[i], dimnames2dxz, dimnames2dxz, "", xType, false); }
 
     vector<string> dimnames2dyz;
     dimnames2dyz.push_back(dimnames[1]);
     dimnames2dyz.push_back(dimnames[2]);
     dimnames2dyz.push_back(dimnames[3]);
-    for (int i = 0; i < opt.vars2dyz.size(); i++) { rc = vdc.DefineDataVar(opt.vars2dyz[i], dimnames2dyz, dimnames2dyz, "", VDC::FLOAT, true); }
-    for (int i = 0; i < opt.ncvars2dyz.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars2dyz[i], dimnames2dyz, dimnames2dyz, "", VDC::FLOAT, false); }
+    for (int i = 0; i < opt.vars2dyz.size(); i++) { rc = vdc.DefineDataVar(opt.vars2dyz[i], dimnames2dyz, dimnames2dyz, "", xType, true); }
+    for (int i = 0; i < opt.ncvars2dyz.size(); i++) { rc = vdc.DefineDataVar(opt.ncvars2dyz[i], dimnames2dyz, dimnames2dyz, "", xType, false); }
 
     vdc.EndDefine();
 
