@@ -528,7 +528,6 @@ void TranslateStretchManip::makeHandleExtents(
 	int octant, 
 	double boxExtents[6]
 ) {
-	//_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
 	//Identify the axis this handle is on:
 	int axis = (sortPosition<3) ? (2-sortPosition) : (sortPosition-3);
 	int newPosition = sortPosition;
@@ -856,19 +855,14 @@ double TranslateStretchManip::getPixelSize() const {
 	std::vector<double> vorigin(3,0.f);
 	if (_dmTransform != NULL) 
 		vorigin = _dmTransform->GetOrigin();
-	if (_rpTransform != NULL) {
-		std::vector<double> rpOrigin = _rpTransform->GetOrigin();
-		vorigin[0] += rpOrigin[0];
-		vorigin[1] += rpOrigin[1];
-		vorigin[2] += rpOrigin[2];
-	}
-		
 
 	double rotCenterLocal[3];
 	double camPosLocal[3];
 	for (int i=0; i<3; i++) {
 		origin[i] = vorigin[i];
 	}
+
+	cout << origin[0] << " " << origin[1] << " " << origin[2] << endl;
 
 	vsub(origin, _cameraPosition, temp);
 
