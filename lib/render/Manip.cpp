@@ -548,13 +548,9 @@ void TranslateStretchManip::deScaleExtents(double extents[8][3])
 
     vector<double> dmScales = _dmTransform->GetScales();
     vector<double> rpScales = _rpTransform->GetScales();
-    vector<double> dmOrigins = _dmTransform->GetOrigin();
-    vector<double> rpOrigins = _rpTransform->GetOrigin();
 
     assert(rpScales.size() == 3);
     assert(dmScales.size() == 3);
-    assert(rpOrigins.size() == 3);
-    assert(dmOrigins.size() == 3);
 
     double size, midpoint, min, max;
 
@@ -563,6 +559,7 @@ void TranslateStretchManip::deScaleExtents(double extents[8][3])
         // Vertex 7 contains the XYZ maximum coordinates
         size = extents[7][i] - extents[0][i];
         size /= dmScales[i];
+        size /= rpScales[i];
         midpoint = (extents[7][i] + extents[0][i]) / 2.f;
 
         min = midpoint - size / 2.f;
@@ -596,19 +593,16 @@ void TranslateStretchManip::deScaleExtents(double *extents)
 
     vector<double> dmScales = _dmTransform->GetScales();
     vector<double> rpScales = _rpTransform->GetScales();
-    vector<double> dmOrigins = _dmTransform->GetOrigin();
-    vector<double> rpOrigins = _rpTransform->GetOrigin();
 
     assert(rpScales.size() == 3);
     assert(dmScales.size() == 3);
-    assert(rpOrigins.size() == 3);
-    assert(dmOrigins.size() == 3);
 
     double size, midpoint;
     for (int i = 0; i < 3; i++) {
         size = extents[i + 3] - extents[i];
         midpoint = (extents[i + 3] + extents[i]) / 2.f;
         size /= dmScales[i];
+        size /= rpScales[i];
         extents[i] = midpoint - size / 2.f;
         extents[i + 3] = midpoint + size / 2.f;
     }

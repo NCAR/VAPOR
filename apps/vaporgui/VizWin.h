@@ -125,6 +125,10 @@ private:
     void setUpModelViewMatrix();
 
     VAPoR::TranslateStretchManip *_manip;
+
+    void _setMatrixFromModeParams();
+
+    double _center[3], _posvec[3], _dirvec[3], _upvec[3];
 };
 
 #endif    // VIZWIN_H
