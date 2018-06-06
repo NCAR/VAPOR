@@ -188,8 +188,7 @@ void TranslateStretchManip::mousePress(double screenCoords[2], double handleMidp
 void TranslateStretchManip::mouseRelease(double screenCoords[2])
 {
     if (_selectedHandle >= 0) {
-        double boxExts[6];
-        int    axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
+        int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
         // Convert _dragDistance to world coords:
         float dist = _dragDistance;
 
@@ -399,7 +398,6 @@ bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNu
         handleNum = handleNum - 3;
     else
         handleNum = 2 - handleNum;
-    double boxExtents[6];
 
     for (int i = 0; i < 3; i++) { boxCtr[i] = (_selection[i] + _selection[i + 3]) * 0.5f; }
     // project the boxCtr and one more point, to get a direction vector
@@ -698,7 +696,6 @@ bool TranslateStretchManip::rayHandleIntersect(double ray[3], const std::vector<
 {
     double val;
     double handleExtents[6];
-    double boxExtents[6];
 
     makeHandleExtents(handleNum, handleExtents, 0, _selection);
     int coord;
@@ -793,16 +790,11 @@ double TranslateStretchManip::getPixelSize() const
     std::vector<double> vorigin(3, 0.f);
     if (_dmTransform != NULL) vorigin = _dmTransform->GetOrigin();
 
-    double rotCenterLocal[3];
-    double camPosLocal[3];
     for (int i = 0; i < 3; i++) { origin[i] = vorigin[i]; }
-
-    cout << origin[0] << " " << origin[1] << " " << origin[2] << endl;
 
     vsub(origin, _cameraPosition, temp);
 
     float distToScene = vlength(temp);
-    cout << distToScene << endl;
     // tan(45 deg *0.5) is ratio between half-height and dist to scene
     double halfHeight = tan(M_PI * 0.125) * distToScene;
     return (2.f * halfHeight / (double)height);
@@ -871,7 +863,6 @@ void TranslateStretchManip::drawBoxFaces()
     glBegin(GL_LINES);
     glVertex3dv(corners[0]);
     glVertex3dv(corners[1]);
-    glColor3f(1.f, 1.f, 0.f);
     glVertex3dv(corners[0]);
     glVertex3dv(corners[2]);
     glVertex3dv(corners[0]);

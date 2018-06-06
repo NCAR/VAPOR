@@ -646,8 +646,6 @@ string VizWin::getCurrentDataMgrName() const
 
     if (!exists) return "";
 
-    VAPoR::RenderParams *rParams = paramsMgr->GetRenderParams(_winName, dataSetName, className, inst);
-
     return dataSetName;
 }
 
@@ -681,7 +679,6 @@ void VizWin::getActiveExtents(std::vector<double> &minExts, std::vector<double> 
     if (rParams == NULL) return;
 
     int            refLevel = rParams->GetRefinementLevel();
-    int            cmpLevel = rParams->GetCompressionLevel();
     string         varName = rParams->GetVariableName();
     vector<string> fieldVars = rParams->GetFieldVariableNames();
 
@@ -705,10 +702,9 @@ void VizWin::getCenterAndCamPos(std::vector<double> &rotationCenter, std::vector
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
     GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     MouseModeParams *p = guiP->GetMouseModeParams();
     string           modeName = getCurrentMouseMode();
-    double           rotCenter[3], cameraPos[3], dirvec[3], upvec[3];
+    double           rotCenter[3], cameraPos[3];
     p->GetRotationCenter(rotCenter);
     p->GetCameraPos(cameraPos);
 
@@ -748,8 +744,8 @@ void VizWin::updateManip(bool initialize)
 {
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
-    std::vector<double> minExts(3, 0.f);
-    std::vector<double> maxExts(3, 0.f);
+    std::vector<double> minExts(3, numeric_limits<double>::max());
+    std::vector<double> maxExts(3, numeric_limits<double>::lowest());
     // std::vector<double> minExts;	// This dumps core...
     // std::vector<double> maxExts;	// This dumps core...
     getActiveExtents(minExts, maxExts);
