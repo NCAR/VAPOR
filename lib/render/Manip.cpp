@@ -8,15 +8,16 @@
 //
 //	File:		Manip.cpp
 //
-//	Author:		Alan Norton
+//	Author:		Alan Norton, Scott Pearse
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 //
-//	Date:		November 2005
+//	Date:		June, 2018
 //
 //	Description:	Implements the Manip class and some of its subclasses
 //TOGO:
 
+#include <iomanip>
 #include <iostream>
 #include <cassert>
 #include <cmath>
@@ -32,6 +33,11 @@ const float Manip::_unselectedFaceColor[4] = {0.8f,0.2f,0.0f,0.5f};
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
 #endif
+
+double winCoord1[2];
+double winCoord2[2];
+double winCoord3[2];
+double winCoord4[2];
 
 TranslateStretchManip::TranslateStretchManip() : Manip() {
 
@@ -58,34 +64,34 @@ TranslateStretchManip::TranslateStretchManip() : Manip() {
 }
 
 void TranslateStretchManip::transformMatrix(VAPoR::Transform* transform) {
-    glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_MODELVIEW);
 
 	// Use the ModelViewMatrix passed in upon Update(),
 	// not what is currently held in the gl state
 	glLoadMatrixd(_modelViewMatrix);
 
-    glPushMatrix();
+	glPushMatrix();
 
 	if (transform==NULL) return;
 
-    vector <double> translations = transform->GetTranslations();
-    vector <double> rotations    = transform->GetRotations();
-    vector <double> scales       = transform->GetScales();
-    vector <double> origins      = transform->GetOrigin();
-    assert(translations.size() == 3); 
-    assert(rotations.size()    == 3); 
-    assert(scales.size()  == 3); 
-    assert(origins.size()    == 3); 
+	vector <double> translations = transform->GetTranslations();
+	vector <double> rotations	= transform->GetRotations();
+	vector <double> scales	   = transform->GetScales();
+	vector <double> origins	  = transform->GetOrigin();
+	assert(translations.size() == 3); 
+	assert(rotations.size()	== 3); 
+	assert(scales.size()  == 3); 
+	assert(origins.size()	== 3); 
 
 
-    glTranslatef(origins[0], origins[1], origins[2]);
-    glScalef(scales[0], scales[1], scales[2]);
-    glRotatef(rotations[0], 1, 0, 0); 
-    glRotatef(rotations[1], 0, 1, 0); 
-    glRotatef(rotations[2], 0, 0, 1); 
-    glTranslatef(-origins[0], -origins[1], -origins[2]);
+	glTranslatef(origins[0], origins[1], origins[2]);
+	glScalef(scales[0], scales[1], scales[2]);
+	glRotatef(rotations[0], 1, 0, 0); 
+	glRotatef(rotations[1], 0, 1, 0); 
+	glRotatef(rotations[2], 0, 0, 1); 
+	glTranslatef(-origins[0], -origins[1], -origins[2]);
 
-    glTranslatef(translations[0], translations[1], translations[2]);
+	glTranslatef(translations[0], translations[1], translations[2]);
 
 	// Retrieve the transformed matrix and stick it back into
 	// our _modelViewMatrix array
@@ -311,15 +317,17 @@ bool TranslateStretchManip::pointIsOnQuad(
 	double winCoord2[2];
 	double winCoord3[2];
 	double winCoord4[2];
-	if(!projectPointToWin(cor1, winCoord1)) return false;
-	if (!projectPointToWin(cor2, winCoord2)) return false;
-	if (pointOnRight(winCoord1, winCoord2, pickPt)) return false;
-	if (!projectPointToWin(cor3, winCoord3)) return false;
-	if (pointOnRight(winCoord2, winCoord3, pickPt)) return false;
-	if (!projectPointToWin(cor4, winCoord4)) return false;
-	if (pointOnRight(winCoord3, winCoord4, pickPt)) return false;
-	if (pointOnRight(winCoord4, winCoord1, pickPt)) return false;
-	return true;
+	bool returnValue = true;
+	if(!projectPointToWin(cor1, winCoord1)) returnValue = false;
+	if (!projectPointToWin(cor2, winCoord2)) returnValue = false;
+	if (pointOnRight(winCoord1, winCoord2, pickPt)) returnValue = false;
+	if (!projectPointToWin(cor3, winCoord3)) returnValue = false;
+	if (pointOnRight(winCoord2, winCoord3, pickPt)) returnValue = false;
+	if (!projectPointToWin(cor4, winCoord4)) returnValue = false;
+	if (pointOnRight(winCoord3, winCoord4, pickPt)) returnValue = false;
+	if (pointOnRight(winCoord4, winCoord1, pickPt)) returnValue = false;
+
+	return returnValue;
 }
 
 int TranslateStretchManip::
@@ -386,6 +394,7 @@ makeHandleFaces(int sortPosition, double handle[8][3], int octant, double boxReg
 			handle[vertex][coord] = fltCoord;
 		}
 	}
+	deScaleExtents(handle);
 	return newPosition;
 }
 
@@ -524,15 +533,17 @@ void TranslateStretchManip::makeHandleExtents(
 	int octant, 
 	double boxExtents[6]
 ) {
+	_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
 	//Identify the axis this handle is on:
 	int axis = (sortPosition<3) ? (2-sortPosition) : (sortPosition-3);
 	int newPosition = sortPosition;
 	if ((octant>>axis)&1) newPosition = 5 - sortPosition;
-	
+
 	//Now create the cube associated with newPosition.  It's just the handle translated
 	//up or down in the direction associated with newPosition
 	float worldHandleDiameter = _handleSizeInScene;
 	for (int coord = 0; coord<3; coord++){
+
 		//Start at the box center position
 		handleExtents[coord] = .5f*(-worldHandleDiameter +(boxExtents[coord+3] + boxExtents[coord]));
 		handleExtents[coord+3] = .5f*(worldHandleDiameter +(boxExtents[coord+3] + boxExtents[coord]));
@@ -549,7 +560,122 @@ void TranslateStretchManip::makeHandleExtents(
 			}
 		}
 	}
+	deScaleExtents(handleExtents);
 	return;
+}
+
+void TranslateStretchManip::getScales(
+	std::vector<double> &dmScales, 
+	std::vector<double> &rpScales) 
+{
+	if (_dmTransform==NULL) {
+		dmScales.push_back(1.f);
+		dmScales.push_back(1.f);
+		dmScales.push_back(1.f);
+	}
+	else {
+		dmScales = _dmTransform->GetScales();
+		assert(dmScales.size()  == 3);
+	}
+	if (_rpTransform==NULL) {
+		rpScales.push_back(1.f);
+		rpScales.push_back(1.f);
+		rpScales.push_back(1.f);
+	}
+	else {
+		rpScales = _rpTransform->GetScales();
+		assert(rpScales.size()  == 3);
+	}
+}
+
+// If we are deScaling a cube of the form extents[8][3], then that
+// cube will apparently contain its corner coordinates in the following form:
+//		  j = 0   1   2   (XYZ)
+//	  i			   
+//	  0	   min min min
+//	  1	   max min min
+//	  2	   min max min
+//	  3	   max max min
+//	  4	   min min max
+//	  5	   max min max
+//	  6	   min max max
+//	  7	   max max max
+//
+//  This lookup table is how the extents are being rescaled in the for
+//  loop below.
+//
+void TranslateStretchManip::deScaleExtents(double extents[8][3]) {
+	if (_dmTransform==NULL) return;
+	if (_rpTransform==NULL) return;
+
+	vector <double> dmScales	   = _dmTransform->GetScales();
+	vector <double> rpScales	   = _rpTransform->GetScales();
+	vector <double> dmOrigins	  = _dmTransform->GetOrigin();
+	vector <double> rpOrigins	  = _rpTransform->GetOrigin();
+
+	assert(rpScales.size()  == 3);
+	assert(dmScales.size()  == 3);
+	assert(rpOrigins.size()	== 3);
+	assert(dmOrigins.size()	== 3);
+
+	double size, midpoint, min, max;
+
+
+	for (int i=0; i<3; i++) {
+		// Vertex 0 contains the XYZ minimum coordinates
+		// Vertex 7 contains the XYZ maximum coordinates
+		size = extents[7][i] - extents[0][i];
+		size /= dmScales[i];
+		midpoint = (extents[7][i] + extents[0][i])/2.f;
+
+		min = midpoint - size/2.f;
+		max = midpoint + size/2.f;
+
+		for (int j=0; j<8; j++) {
+			if (i==0) {		 // X axis
+				if (j%2)
+					extents[j][i] = min;
+				else
+					extents[j][i] = max;
+			}
+			else if (i==1) {	// Y axis
+				if (j/2%2)
+					extents[j][i] = min;
+				else
+					extents[j][i] = max;
+			}
+			else if (i==2) {	// Z axis
+				if (j<4)
+					extents[j][i] = min;
+				else
+					extents[j][i] = max;
+			}
+		}
+	}
+}
+
+void TranslateStretchManip::deScaleExtents(double* extents) {
+	if (_dmTransform==NULL) return;
+	if (_rpTransform==NULL) return;
+
+	vector <double> dmScales	   = _dmTransform->GetScales();
+	vector <double> rpScales	   = _rpTransform->GetScales();
+	vector <double> dmOrigins	  = _dmTransform->GetOrigin();
+	vector <double> rpOrigins	  = _rpTransform->GetOrigin();
+
+	assert(rpScales.size()  == 3);
+	assert(dmScales.size()  == 3);
+	assert(rpOrigins.size()	== 3);
+	assert(dmOrigins.size()	== 3);
+
+	double size, midpoint;
+	for (int i=0; i<3; i++) {
+		size = extents[i+3] - extents[i];
+		midpoint = (extents[i+3] + extents[i])/2.f;
+		size /= dmScales[i];
+		extents[i] = midpoint - size/2.f;
+		extents[i+3] = midpoint + size/2.f;
+	}
 }
 
 //Draw all the faces of a cube with specified extents.
@@ -682,8 +808,6 @@ rayHandleIntersect(double ray[3],
 //Renders handles and box
 //If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render(){
-
-	_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
 
 	glPushAttrib(GL_CURRENT_BIT);
 	double handleExtents[6];
@@ -1079,6 +1203,83 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double* handleExt
 	glDisable(GL_BLEND);
 }
 
+// This is a utility to draw the hitbox over the handle.  It can be
+// called from TranslateStretchManip::pointIsOnQuad(), but with a caveat.
+// Hitboxes are calculated during mouse events, at which time we are not
+// in a good state to perform rendering.
+//
+// VizWin has an openGL setup and cleanup sequence which must be applied
+// during VizWin::mousePressEvent().  When done as shown below, the hitboxes
+// will be colored green during mouse press events.  Hold the mouse to 
+// illuminate the boxes.
+//
+// VizWin setup sequence:
+//
+// void VizWin:;mousePressEvent(QMouseEvent* e) {
+// 		...
+// 		...
+// 		glMatrixMode(GL_PROJECTION);	// Begin setup sequence
+//		glPushMatrix();
+//		setUpProjMatrix();
+//		glMatrixMode(GL_MODELVIEW);
+//		glPushMatrix();
+//		setUpModelViewMatrix();			// End setup sequence
+//
+//      std::vector<double> screenCoords = getScreenCoords(e);
+//        bool mouseOnManip = _manip->MouseEvent(
+//            _buttonNum, screenCoords, _strHandleMid
+//        ); 
+//
+//		swapBuffers();					// Begin cleanup sequence
+//		glMatrixMode(GL_PROJECTION);
+//		glPopMatrix();
+//		glMatrixMode(GL_MODELVIEW);
+//		glPopMatrix();					// End cleanup sequence
+//		...
+//		...
+//
+void TranslateStretchManip::drawHitBox(
+		double winCoord1[2],
+		double winCoord2[2],
+		double winCoord4[2],
+		double winCoord3[2]
+) { 
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	GLint dims[4] = {0};
+	glGetIntegerv(GL_VIEWPORT, dims);
+	GLint width = dims[2];
+	GLint height = dims[3];
+
+	gluOrtho2D(0, width, 0, height);
+	
+	glEnable (GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
+ 	glBegin(GL_QUADS);			  // Each set of 4 vertices form a quad
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex2f(winCoord1[0], winCoord1[1]);
+	glVertex2f(winCoord2[0], winCoord2[1]);
+	glVertex2f(winCoord3[0], winCoord3[1]);
+	glVertex2f(winCoord4[0], winCoord4[1]);
+
+   	glEnd();
+   	glFlush();
+	glPopAttrib();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	glDisable(GL_BLEND);
+}
+
 //projectPointToWin returns true if point is in front of camera
 //resulting screen coords returned in 2nd argument.  Note that
 //OpenGL coords are 0 at bottom of window!
@@ -1098,6 +1299,7 @@ bool TranslateStretchManip::projectPointToWin(double cubeCoords[3], double winCo
 		_projectionMatrix, viewport, wCoords, 
 		(wCoords+1),(GLdouble*)(&depth))
 	);   
+
 	if (!success) return false;
 	winCoords[0] = wCoords[0];
 	winCoords[1] = wCoords[1];
