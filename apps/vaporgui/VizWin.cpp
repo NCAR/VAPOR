@@ -377,6 +377,7 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
         std::vector<double> screenCoords = getScreenCoords(e);
         bool mouseOnManip = _manip->MouseEvent(
             _buttonNum, screenCoords, _strHandleMid);
+
         if (mouseOnManip) {
             return;
         }
@@ -702,7 +703,6 @@ void VizWin::getActiveExtents(
         getUnionOfFieldVarExtents(rParams, dataMgr, timeStep,
                                   refLevel, minExts, maxExts);
     }
-    cout << "Got extents " << minExts.size() << " " << maxExts.size() << endl;
 }
 
 void VizWin::getCenterAndCamPos(
