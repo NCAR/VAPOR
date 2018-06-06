@@ -136,9 +136,9 @@ void TranslateStretchManip::Update(
 
 	_constrain = constrain;
 	
-	transformMatrix(_dmTransform);
-	if (_rpTransform != NULL)
-		transformMatrix(_rpTransform);
+//	transformMatrix(_dmTransform);
+//	if (_rpTransform != NULL)
+//		transformMatrix(_rpTransform);
 }
 
 void TranslateStretchManip::GetBox(
@@ -528,7 +528,7 @@ void TranslateStretchManip::makeHandleExtents(
 	int octant, 
 	double boxExtents[6]
 ) {
-	_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
+	//_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
 	//Identify the axis this handle is on:
 	int axis = (sortPosition<3) ? (2-sortPosition) : (sortPosition-3);
 	int newPosition = sortPosition;
@@ -803,6 +803,11 @@ rayHandleIntersect(double ray[3],
 //Renders handles and box
 //If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::render(){
+	transformMatrix(_dmTransform);
+	if (_rpTransform != NULL)
+		transformMatrix(_rpTransform);
+
+	_handleSizeInScene = getPixelSize()*(float)HANDLE_DIAMETER;
 
 	glPushAttrib(GL_CURRENT_BIT);
 	double handleExtents[6];
@@ -1228,10 +1233,10 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double* handleExt
 //		glPushMatrix();
 //		setUpModelViewMatrix();			// End setup sequence
 //
-//      std::vector<double> screenCoords = getScreenCoords(e);
-//        bool mouseOnManip = _manip->MouseEvent(
-//            _buttonNum, screenCoords, _strHandleMid
-//        ); 
+//	  std::vector<double> screenCoords = getScreenCoords(e);
+//		bool mouseOnManip = _manip->MouseEvent(
+//			_buttonNum, screenCoords, _strHandleMid
+//		); 
 //
 //		swapBuffers();					// Begin cleanup sequence
 //		glMatrixMode(GL_PROJECTION);
