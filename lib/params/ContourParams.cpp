@@ -103,7 +103,6 @@ void ContourParams::SetContourValues(string varName, vector<double> vals) {
         MakeNewContours(varName);
         c = (Contours *)_contours->GetParams(varName);
     }
-    int s = vals.size();
     c->SetContourValues(vals);
 }
 
@@ -150,6 +149,12 @@ void ContourParams::_init() {
     // Initialize 2D box
     //
     if (varname.empty())
+        return;
+
+    if (!_dataMgr->VariableExists(0, varname, 0, 0))
+        return;
+
+    if (!_dataMgr->VariableExists(0, varname, 0, 0))
         return;
 
     vector<double> minExt, maxExt;

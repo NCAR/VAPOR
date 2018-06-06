@@ -278,7 +278,7 @@ void RenderHolder::_deleteRenderer() {
     // Get the currently selected renderer.
     //
     string rendererName, rendererType, dataSetName;
-    _getRow(_currentRow, rendererName, rendererType, dataSetName);
+    _getRowInfo(_currentRow, rendererName, rendererType, dataSetName);
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Delete renderer");
@@ -297,7 +297,7 @@ void RenderHolder::_deleteRenderer() {
 
     // Make the renderer in the first row the active renderer
     //
-    _getRow(0, rendererName, rendererType, dataSetName);
+    _getRowInfo(0, rendererName, rendererType, dataSetName);
     if (rendererName != "" || rendererType != "" || dataSetName != "") {
         _activeRendererChanged(0, 0);
         emit activeChanged(activeViz, rendererType, rendererName);
@@ -315,6 +315,8 @@ void RenderHolder::_activeRendererChanged(int row, int col) {
     string rendererName = _vaporTable->GetValue(row, 0);
     string rendererType = _vaporTable->GetValue(row, 1);
     p->SetActiveRenderer(activeViz, rendererType, rendererName);
+    if (col != 3)
+        _vaporTable->SetActiveRow(row);
     emit activeChanged(activeViz, rendererType, rendererName);
 }
 
@@ -335,15 +337,9 @@ VAPoR::RenderParams *RenderHolder::_getRenderParamsFromCell(int row, int col) {
 }
 
 void RenderHolder::_changeRendererName(int row, int col) {
-    RenderParams *rP = _getRenderParamsFromCell(row, col);
 
     string text = _vaporTable->GetValue(row, col);
     string uniqueText = uniqueName(text);
-    //if (text == rP->GetRendererName()) return;
-
-    //if (uniqueText != text) item->setText(QString(uniqueText.c_str()));
-
-    //	rP->SetRendererName(uniqueText);
 }
 
 void RenderHolder::_tableValueChanged(int row, int col) {
@@ -362,13 +358,15 @@ void RenderHolder::_tableValueChanged(int row, int col) {
     int rc = _controlExec->ActivateRender(
         activeViz, dataSetName, rendererType, rendererName, state);
     if (rc < 0) {
-        MSG_ERR("Can't create renderer");
+        MSG_ERR("Can't activate renderer");
         return;
     }
+
+    _activeRendererChanged(row, col);
 }
 
 void RenderHolder::_itemTextChange(QTableWidgetItem *item) {
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     int row = item->row();
     int col = item->column();
     if (col != 0)
@@ -542,7 +540,6 @@ void RenderHolder::_makeRendererTableHeaders(vector<string> &tableValues) {
 }
 
 void RenderHolder::Update() {
-    int rows, cols;
     std::vector<std::string> values;
 
     // Get active params from GUI state
@@ -599,6 +596,9 @@ void RenderHolder::Update() {
     }
 
     _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
+    int row = _getRow(activeRenderInst);
+    if (row >= 0)
+        _vaporTable->SetActiveRow(row);
 
     _updateDupCombo();
 
@@ -633,7 +633,21 @@ void RenderHolder::SetCurrentWidget(string name) {
     stackedWidget->show();
 }
 
-void RenderHolder::_getRow(
+int RenderHolder::_getRow(string renderInst) const {
+    int row = -1;
+    int rowCount = _vaporTable->RowCount();
+    for (int i = 0; i < rowCount; i++) {
+        string tableValue = _vaporTable->GetStringValue(i, 0);
+        if (renderInst != tableValue)
+            continue;
+
+        row = i;
+    }
+
+    return row;
+}
+
+void RenderHolder::_getRowInfo(
     int row, string &rendererName, string &rendererType,
     string &dataSetName) const {
     rendererName.clear();

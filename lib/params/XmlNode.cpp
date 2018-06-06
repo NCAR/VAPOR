@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <cctype>
 #include <algorithm>
 #include <expat.h>
 #include <vapor/XmlNode.h>
@@ -50,9 +51,34 @@ const string DoubleType = "Double";
 const string StringType = "String";
 }; // namespace
 
+namespace {
+bool isValidXMLElement(string s) {
+    if (s.empty())
+        return (false);
+    if (!(std::isalpha(s[0]) || s[0] == '_'))
+        return (false);
+    for (string::const_iterator itr = s.begin(); itr != s.end(); ++itr) {
+        if (!(std::isalnum(*itr) ||
+              std::isdigit(*itr) ||
+              *itr == '-' ||
+              *itr == '_' ||
+              *itr == '.')) {
+
+            return (false);
+        }
+        if (isspace(*itr))
+            return (false);
+    }
+
+    return (true);
+}
+}; // namespace
+
 XmlNode::XmlNode(
     const string &tag, const map<string, string> &attrs,
     size_t numChildrenHint) {
+    assert(isValidXMLElement(tag));
+
     _longmap.clear();
     _doublemap.clear();
     _stringmap.clear();
@@ -76,6 +102,8 @@ XmlNode::XmlNode(
 XmlNode::XmlNode(
     const string &tag,
     size_t numChildrenHint) {
+    assert(isValidXMLElement(tag));
+
     _longmap.clear();
     _doublemap.clear();
     _stringmap.clear();
@@ -197,7 +225,7 @@ XmlNode::~XmlNode() {
 
 void XmlNode::SetElementLong(
     const string &tag, const vector<long> &values) {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     _longmap[tag] = values;
 }
 
@@ -216,7 +244,7 @@ void XmlNode::SetElementLong(
     }
 
     string tag = tags[tags.size() - 1];
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     currNode->_longmap[tag] = values;
 }
 
@@ -235,7 +263,7 @@ void XmlNode::SetElementDouble(
     }
 
     string tag = tags[tags.size() - 1];
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     currNode->_doublemap[tag] = values;
 }
 
@@ -259,7 +287,7 @@ bool XmlNode::HasElementLong(const string &tag) const {
 
 void XmlNode::SetElementDouble(
     const string &tag, const vector<double> &values) {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
     _doublemap[tag] = values;
 }
 
@@ -285,14 +313,14 @@ bool XmlNode::HasElementDouble(const string &tag) const {
 
 void XmlNode::SetElementString(
     const string &tag, const string &str) {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
 
     _stringmap[tag] = str;
 }
 
 void XmlNode::SetElementStringVec(
     const string &tag, const vector<string> &strvec) {
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
@@ -318,7 +346,7 @@ void XmlNode::SetElementStringVec(
         currNode = child;
     }
     string tag = tags[tags.size() - 1];
-    assert(!tag.empty());
+    assert(isValidXMLElement(tag));
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
@@ -391,7 +419,7 @@ XmlNode *XmlNode::AddChild(const XmlNode &child) {
     return (mychild);
 }
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
 int XmlNode::ReplaceChild(XmlNode *prevChildNode, XmlNode *newChildNode) {
     for (int index = 0; index < _children.size(); index++) {
         XmlNode *node = _children[index];

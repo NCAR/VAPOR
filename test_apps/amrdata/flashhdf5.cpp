@@ -334,7 +334,7 @@ int FlashHDFFile::GetGlobalIds(int idx, int gids[]) {
     status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
                      H5P_DEFAULT, gids);
 
-#ifdef DEAD
+#ifdef VAPOR3_0_0_ALPHA
     for (i = 0; i < count_2d[1]; i++) {
         if (gids[i] >= 1)
             gids[i] = gids[i] - 1;

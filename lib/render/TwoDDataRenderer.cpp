@@ -297,8 +297,6 @@ const GLvoid *TwoDDataRenderer::GetTexture(DataMgr *dataMgr,
     texelSize = _texelSize;
     gridAligned = GridAligned;
 
-    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
-
     GLvoid *texture = (GLvoid *)_getTexture(dataMgr);
     if (!texture)
         return (NULL);
@@ -525,8 +523,6 @@ int TwoDDataRenderer::_getMeshUnStructured(
     DataMgr *dataMgr,
     const Grid *g,
     double defaultZ) {
-    TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
-
     assert(g->GetTopologyDim() == 2);
     vector<size_t> dims = g->GetDimensions();
 
@@ -838,14 +834,13 @@ const GLvoid *TwoDDataRenderer::_getTexture(
     Grid *g = NULL;
     int rc = DataMgrUtils::GetGrids(
         dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &g);
+    if (rc < 0)
+        return (NULL);
 
     if (g->GetTopologyDim() != 2) {
         SetErrMsg("Invalid variable: %s ", varname.c_str());
         return (NULL);
     }
-
-    if (rc < 0)
-        return (NULL);
 
     // For structured grid variable data are stored in a 2D array.
     // For structured grid variable data are stored in a 1D array.
