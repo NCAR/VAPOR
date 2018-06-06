@@ -798,6 +798,12 @@ double TranslateStretchManip::getPixelSize() const
     double              origin[3];
     std::vector<double> vorigin(3, 0.f);
     if (_dmTransform != NULL) vorigin = _dmTransform->GetOrigin();
+    if (_rpTransform != NULL) {
+        std::vector<double> rpOrigin = _rpTransform->GetOrigin();
+        vorigin[0] += rpOrigin[0];
+        vorigin[1] += rpOrigin[1];
+        vorigin[2] += rpOrigin[2];
+    }
 
     double rotCenterLocal[3];
     double camPosLocal[3];
