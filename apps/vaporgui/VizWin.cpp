@@ -383,6 +383,7 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 		bool mouseOnManip = _manip->MouseEvent(
 			_buttonNum, screenCoords, _strHandleMid
 		);
+
 		if (mouseOnManip) {
 			return;
 		}
@@ -722,7 +723,6 @@ void VizWin::getActiveExtents(
 			refLevel, minExts, maxExts
 		);
 	}
-	cout << "Got extents " << minExts.size() << " " << maxExts.size() << endl;
 }
 
 void VizWin::getCenterAndCamPos(
