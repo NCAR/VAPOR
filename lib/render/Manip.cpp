@@ -389,7 +389,7 @@ makeHandleFaces(int sortPosition, double handle[8][3], int octant, double boxReg
 			handle[vertex][coord] = fltCoord;
 		}
 	}
-	//deScaleExtents(handle);
+	deScaleExtents(handle);
 	return newPosition;
 }
 
@@ -555,7 +555,7 @@ void TranslateStretchManip::makeHandleExtents(
 			}
 		}
 	}
-	//deScaleExtents(handleExtents);
+	deScaleExtents(handleExtents);
 	return;
 }
 
@@ -868,6 +868,7 @@ double TranslateStretchManip::getPixelSize() const {
 	vsub(origin, _cameraPosition, temp);
 
 	float distToScene = vlength(temp);
+	cout << distToScene << endl;
 	//tan(45 deg *0.5) is ratio between half-height and dist to scene
 	double halfHeight = tan(M_PI*0.125)* distToScene;
 	return (2.f*halfHeight/(double)height);
