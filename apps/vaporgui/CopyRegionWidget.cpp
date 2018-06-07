@@ -20,6 +20,7 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include "vapor/Renderer.h"
 #include "vapor/ParamsMgr.h"
 #include "vapor/RenderParams.h"
 #include "vapor/DataMgrUtils.h"
@@ -82,9 +83,9 @@ void CopyRegionWidget::updateCopyCombo()
                 // Abbreviate Params names by removing 'Params" from them.
                 // Then store them in a map for later reference.
                 //
-                string typeAbb = typeNames[j];
-                int    pos = typeAbb.find("Params");
-                typeAbb.erase(pos, 6);
+                string typeAbb;
+                typeAbb = RendererFactory::Instance()->GetRenderClassFromParamsClass(typeNames[j]);
+
                 _renTypeNames[typeAbb] = typeNames[j];
 
                 std::vector<string> renNames;
