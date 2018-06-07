@@ -84,12 +84,19 @@ private:
     void                   updateMappingFrame();
     void                   enableTFWidget(bool state);
     void                   updateConstColorWidgets();
+    void                   checkForExternalChangesToHisto();
     bool                   autoUpdateHisto();
     string                 getCurrentVarName();
     VAPoR::MapperFunction *getCurrentMapperFunction();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
+
+    std::vector<double> _minExt;
+    std::vector<double> _maxExt;
+    int                 _cLevel;
+    int                 _refLevel;
+    int                 _timeStep;
 
     bool  _autoUpdateHisto = false;
     bool  _discreteColormap = false;
