@@ -64,6 +64,7 @@ private slots:
 	void setRange();
 	void setRange(double min, double max);
 	void updateHisto();
+	void refreshHistogram();
 	void autoUpdateHistoChecked(int state);
 	void colorInterpChanged(int index);
 	void loadTF();
@@ -99,6 +100,7 @@ private:
 	int _cLevel;
 	int _refLevel;
 	int _timeStep;
+	string _varName;
 
 	bool _autoUpdateHisto = false;
 	bool _discreteColormap = false;
