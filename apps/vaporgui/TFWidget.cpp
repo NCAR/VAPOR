@@ -324,10 +324,18 @@ void TFWidget::Update(DataMgr *dataMgr,
 	updateColorInterpolation();
 	updateSliders();
 	updateConstColorWidgets();
+	
+	string newName = getCurrentVarName();
+	if (_varName != newName) {
+		_varName = newName;
+		refreshHistogram();
+	}
 }
 
 void TFWidget::checkForExternalChangesToHisto() {
 	bool somethingChanged = false;
+
+
 	int newCLevel = _rParams->GetCompressionLevel();
 	if (_cLevel != newCLevel) {
 		_cLevel = _rParams->GetCompressionLevel();
@@ -370,8 +378,12 @@ void TFWidget::checkForExternalChangesToHisto() {
 		somethingChanged = true;
 	}
 
-	if (somethingChanged && autoUpdateHisto())
-		updateHisto();
+	if (somethingChanged) {
+		if (autoUpdateHisto())
+			refreshHistogram();
+		else
+			updateHistoButton->setEnabled(true);
+	}
 }
 
 void TFWidget::updateConstColorWidgets() {
@@ -464,18 +476,22 @@ void TFWidget::setRange(double min, double max) {
 	emit emitChange();
 }
 
+void TFWidget::refreshHistogram() {
+	MapperFunction *mf = getCurrentMapperFunction();
+	mappingFrame->updateMapperFunction(mf);
+	bool force = true;
+	mappingFrame->RefreshHistogram(force);
+	updateMappingFrame();
+	updateHistoButton->setEnabled(false);
+}
+
 void TFWidget::updateHisto() {
 	bool buttonRequest = sender() == updateHistoButton ? true : false;
 	if (autoUpdateHisto() || buttonRequest) {
-		MapperFunction *mf = getCurrentMapperFunction();
-		mappingFrame->updateMapperFunction(mf);
-		bool force = true;
-		mappingFrame->RefreshHistogram(force);
-		updateMappingFrame();
+		refreshHistogram();
 	}
 	else {
 		mappingFrame->fitToView();
-		updateHistoButton->setEnabled(true);
 	}
 }
 
@@ -486,11 +502,6 @@ void TFWidget::autoUpdateHistoChecked(int state) {
 	
 	MapperFunction *tf = getCurrentMapperFunction();
 	tf->SetAutoUpdateHisto(bstate);
-
-	if (bstate == true)	
-		updateHistoButton->setEnabled(false);
-	else
-		updateHistoButton->setEnabled(true);
 
 	updateHisto();
 }
