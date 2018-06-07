@@ -25,6 +25,7 @@ set (SRCS
 	TFWidget.cpp
 	VariablesWidget.cpp
 	GeometryWidget.cpp
+	CopyRegionWidget.cpp
 	RangeCombos.cpp
 	BarbEventRouter.cpp
 	BannerGUI.cpp
@@ -110,6 +111,7 @@ set (UIS
 	StretchFactorTableGUI.ui
 	OrientationAnglesGUI.ui
 	GeometryWidgetGUI.ui
+	CopyRegionWidgetGUI.ui
 	ColorbarWidgetGUI.ui
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui

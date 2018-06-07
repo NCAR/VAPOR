@@ -49,6 +49,16 @@
     </widget>
    </item>
    <item>
+    <widget class="CopyRegionWidget" name="_copyRegionWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="TransformTable" name="_transformTable" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -80,6 +90,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>CopyRegionWidget</class>
+   <extends>QWidget</extends>
+   <header>CopyRegionWidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>TransformTable</class>
    <extends>QWidget</extends>
