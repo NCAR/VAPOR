@@ -222,96 +222,6 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
     }
 }
 
-void GeometryWidget::updateCopyCombo()
-{
-    copyCombo->clear();
-
-    std::vector<string> visNames = _paramsMgr->GetVisualizerNames();
-    _visNames.clear();
-
-    _dataSetNames = _paramsMgr->GetDataMgrNames();
-
-    for (int i = 0; i < visNames.size(); i++) {
-        for (int ii = 0; ii < _dataSetNames.size(); ii++) {
-            // Create a mapping of abreviated visualizer names to their
-            // actual string values.
-            //
-            string visAbb = "Vis" + std::to_string(i);
-            _visNames[visAbb] = visNames[i];
-
-            string dataSetName = _dataSetNames[ii];
-
-            std::vector<string> typeNames;
-            typeNames = _paramsMgr->GetRenderParamsClassNames(visNames[i]);
-
-            for (int j = 0; j < typeNames.size(); j++) {
-                // Abbreviate Params names by removing 'Params" from them.
-                // Then store them in a map for later reference.
-                //
-                string typeAbb = typeNames[j];
-                int    pos = typeAbb.find("Params");
-                typeAbb.erase(pos, 6);
-                _renTypeNames[typeAbb] = typeNames[j];
-
-                std::vector<string> renNames;
-                renNames = _paramsMgr->GetRenderParamInstances(visNames[i], _dataSetNames[ii], typeNames[j]);
-
-                for (int k = 0; k < renNames.size(); k++) {
-                    string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
-                    QString qDisplayName = QString::fromStdString(displayName);
-                    copyCombo->addItem(qDisplayName);
-                }
-            }
-        }
-    }
-}
-
-void GeometryWidget::copyRegion()
-{
-    string copyString = copyCombo->currentText().toStdString();
-    if (copyString != "") {
-        std::vector<std::string> elems = split(copyString, ':');
-        string                   visualizer = _visNames[elems[0]];
-        string                   dataSetName = elems[1];
-        string                   renType = _renTypeNames[elems[2]];
-        string                   renderer = elems[3];
-
-        RenderParams *copyParams = _paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
-        assert(copyParams);
-
-        Box *               copyBox = copyParams->GetBox();
-        std::vector<double> minExtents, maxExtents;
-        copyBox->GetExtents(minExtents, maxExtents);
-
-        Box *               myBox = _rParams->GetBox();
-        std::vector<double> myMin, myMax;
-        myBox->GetExtents(myMin, myMax);
-        assert(minExtents.size() == maxExtents.size());
-        for (int i = 0; i < minExtents.size(); i++) {
-            myMin[i] = minExtents[i];
-            myMax[i] = maxExtents[i];
-        }
-        myBox->SetExtents(myMin, myMax);
-
-        emit valueChanged();
-    }
-}
-
-/*
-void GeometryWidget::updateDimFlags() {
-    int ndim = _rParams->GetValueLong(_nDimsTag,3);
-    assert(ndim==2 || ndim==3);
-    if (ndim==2) {
-        _dimFlags = (DimFlags)(_dimFlags | TWOD);
-        _dimFlags = (DimFlags)(_dimFlags & ~(THREED));
-    }
-    else {
-        _dimFlags = (DimFlags)(_dimFlags | THREED);
-        _dimFlags = (DimFlags)(_dimFlags & ~(TWOD));
-    }
-}
-*/
-
 bool GeometryWidget::getAuxiliaryExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts)
 {
     size_t                   ts = _rParams->GetCurrentTimestep();
@@ -409,7 +319,6 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     }
 
     updateRangeLabels(minFullExt, maxFullExt);
-    updateCopyCombo();
     updateBoxCombos(minFullExt, maxFullExt);
     adjustSize();
 }
@@ -422,7 +331,6 @@ void GeometryWidget::connectWidgets()
     connect(_xRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_yRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_zRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
-    connect(copyButton, SIGNAL(released()), this, SLOT(copyRegion()));
 }
 
 void GeometryWidget::setPoint(double point)
