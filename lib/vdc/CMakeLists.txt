@@ -20,6 +20,7 @@ set (SRC
 	VDC.cpp
 	VDCNetCDF.cpp
 	DataMgr.cpp
+	GridHelper.cpp
 	DataMgrUtils.cpp
 	GeoUtil.cpp
 	vizutil.cpp
