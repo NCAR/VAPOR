@@ -197,6 +197,7 @@ bool Statistics::Update()
 
     // Update geometry extents
     MyGeometryWidget->Update(_controlExec->GetParamsMgr(), currentDmgr, statsParams);
+    MyCopyRegionWidget->Update(_controlExec->GetParamsMgr(), statsParams);
 
     return true;
 }
