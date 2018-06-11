@@ -215,10 +215,8 @@ void MappingFrame::RefreshHistogram(bool force) {
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
-    if (!force) {
-        if (skipRefreshHistogram())
-            return;
-    }
+    if (!force && skipRefreshHistogram())
+        return;
 
     string var;
     var = _rParams->GetColorMapVariableName();
@@ -230,9 +228,7 @@ void MappingFrame::RefreshHistogram(bool force) {
 
     if (_histogram)
         delete _histogram;
-    _histogram = NULL;
-    _histogram = new Histo(256, minRange,
-                           maxRange, var, ts);
+    _histogram = new Histo(256, minRange, maxRange, var, ts);
 
     populateHistogram();
 
