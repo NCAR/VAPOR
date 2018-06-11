@@ -16,9 +16,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>1</number>
-     </property>
      <widget class="QWidget" name="VariableTab">
       <attribute name="title">
        <string>Variable</string>
@@ -71,7 +68,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="GeometryWidget" name="MyGeometryWidget" native="true"/>
+        <widget class="GeometryWidget" name="myGeometryWidget" native="true"/>
        </item>
        <item>
         <spacer name="verticalSpacer_2">
