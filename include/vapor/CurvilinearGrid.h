@@ -73,6 +73,11 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     CurvilinearGrid() = default;
     virtual ~CurvilinearGrid() = default;
 
+    static std::string GetClassType() {
+        return ("Curvilinear");
+    }
+    std::string GetType() const override { return (GetClassType()); }
+
     virtual size_t GetGeometryDim() const override;
 
     // \copydoc GetGrid::GetUserExtents()

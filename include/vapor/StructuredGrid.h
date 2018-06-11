@@ -70,6 +70,11 @@ class VDF_API StructuredGrid : public Grid {
     StructuredGrid() = default;
     virtual ~StructuredGrid() = default;
 
+    static std::string GetClassType() {
+        return ("Structured");
+    }
+    std::string GetType() const override { return (GetClassType()); }
+
     const std::vector<size_t> &GetNodeDimensions() const override {
         return (GetDimensions());
     }

@@ -65,6 +65,11 @@ class VDF_API StretchedGrid : public StructuredGrid {
 
     virtual size_t GetGeometryDim() const override;
 
+    static std::string GetClassType() {
+        return ("Stretched");
+    }
+    std::string GetType() const override { return (GetClassType()); }
+
     // \copydoc GetGrid::GetUserExtents()
     //
     virtual void GetUserExtents(

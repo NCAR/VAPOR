@@ -52,6 +52,11 @@ class VDF_API RegularGrid : public StructuredGrid {
 
     virtual size_t GetGeometryDim() const override;
 
+    static std::string GetClassType() {
+        return ("Regular");
+    }
+    std::string GetType() const override { return (GetClassType()); }
+
     //! \copydoc Grid::GetUserExtents()
     //
     virtual void GetUserExtents(
