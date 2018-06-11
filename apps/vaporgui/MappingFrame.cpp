@@ -515,7 +515,8 @@ int MappingFrame::histoValue(const QPoint &p)
   QPoint pos = mapFromParent(p);
  
   float x = xWorldToData(xViewToWorld(pos.x()));
-	if (_histogram->getMaxData() <= _histogram->getMinData()) return 0;
+  if (_histogram->getMaxData() <= _histogram->getMinData()) 
+    return 0;
   float ind = (x - _histogram->getMinData())
     / (_histogram->getMaxData() - _histogram->getMinData());
 
