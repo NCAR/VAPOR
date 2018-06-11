@@ -241,29 +241,6 @@ void map_blk_to_vox(vector<size_t> bs, const vector<size_t> &bmin, const vector<
     }
 }
 
-// Extract various grid related metadata from a BaseVar class object
-//
-void grid_params(const DC::DataVar &var, const vector<size_t> &roi_dims, const vector<size_t> &dims, vector<bool> &periodic, bool &has_missing, float &missing)
-{
-    assert(roi_dims.size() == dims.size());
-    periodic.clear();
-    has_missing = false;
-
-    vector<bool> has_periodic = var.GetPeriodic();
-    for (int i = 0; i < dims.size(); i++) {
-        if (has_periodic[i] && roi_dims[i] == dims[i]) {
-            periodic.push_back(true);
-        } else {
-            periodic.push_back(false);
-        }
-    }
-
-    if (var.GetHasMissing()) {
-        has_missing = true;
-        missing = var.GetMissingValue();
-    }
-}
-
 #ifdef UNUSED_FUNCTION
 void coord_setup_helper(const vector<string> &dimnames, const vector<size_t> &dims, const vector<size_t> &dims_at_level, const vector<size_t> &bs, const vector<size_t> &bs_at_level,
                         const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<string> &my_dimnames, vector<size_t> &my_dims, vector<size_t> &my_dims_at_level, vector<size_t> &my_bs,
@@ -499,7 +476,7 @@ vector<string> DataMgr::GetDataVarNames(int ndim) const
     for (int i = 0; i < vars.size(); i++) {
         // If we don't have a grid class to support this variable reject it
         //
-        if (_get_grid_type(vars[i]) == UNDEFINED) continue;
+        if (_get_grid_type(vars[i]).empty()) continue;
 
         vector<string> coordvars;
         GetVarCoordVars(vars[i], true, coordvars);
@@ -736,7 +713,11 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     rc = _find_bounding_grid(ts, varname, level, lod, min, max, min_ui, max_ui);
     if (rc < 0) return (NULL);
 
-    if (!min_ui.size()) { return (_make_grid_empty(varname)); }
+    if (!min_ui.size()) {
+        // Why not return NULL?
+        //
+        return (new RegularGrid());
+    }
 
     return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui));
 }
@@ -906,7 +887,7 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
         vector<size_t> bs;
         int            rc = DataMgr::GetDimLensAtLevel(name, -1, dims, bs);
         if (rc < 0) {
-            SetErrMsg("Invalid variable reference : %s", varname.c_str());
+            SetErrMsg("Invalid variable reference : %s", name.c_str());
             return (-1);
         }
 
@@ -917,7 +898,7 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
         rc = DataMgr::GetDimLensAtLevel(name, level, dims_at_level, bs_at_level);
 
         if (rc < 0) {
-            SetErrMsg("Invalid variable reference : %s", varname.c_str());
+            SetErrMsg("Invalid variable reference : %s", name.c_str());
             return (-1);
         }
 
@@ -945,8 +926,19 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
 {
     Grid *rg = NULL;
 
+    string gridType = _get_grid_type(varname);
+    if (gridType.empty()) {
+        SetErrMsg("Unrecognized grid type for variable %s", varname.c_str());
+        return (NULL);
+    }
+
     DC::DataVar dvar;
     bool        status = DataMgr::GetDataVarInfo(varname, dvar);
+    assert(status);
+
+    vector<DC::CoordVar> cvarsinfo;
+    DC::CoordVar         dummy;
+    status = _get_coord_vars(varname, cvarsinfo, dummy);
     assert(status);
 
     vector<string>         varnames;
@@ -979,12 +971,15 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     vector<vector<size_t>> conn_bs_at_levelvec;
     vector<vector<size_t>> conn_bminvec;
     vector<vector<size_t>> conn_bmaxvec;
-    rc = _setupConnVecs(ts, varname, level, lod, conn_varnames, conn_dims_at_levelvec, conn_bsvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
-    if (rc < 0) return (NULL);
 
     vector<int *> conn_blkvec;
-    rc = DataMgr::_get_regions<int>(ts, conn_varnames, level, lod, true, conn_bsvec, conn_bminvec, conn_bmaxvec, conn_blkvec);
-    if (rc < 0) return (NULL);
+    if (_gridHelper.IsUnstructured(gridType)) {
+        rc = _setupConnVecs(ts, varname, level, lod, conn_varnames, conn_dims_at_levelvec, conn_bsvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
+        if (rc < 0) return (NULL);
+
+        rc = DataMgr::_get_regions<int>(ts, conn_varnames, level, lod, true, conn_bsvec, conn_bminvec, conn_bmaxvec, conn_blkvec);
+        if (rc < 0) return (NULL);
+    }
 
     if (DataMgr::IsVariableDerived(varname) && !blkvec[0]) {
         //
@@ -1002,7 +997,23 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         }
 #endif
     } else {
-        rg = _make_grid(ts, level, lod, dvar, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
+        if (_gridHelper.IsUnstructured(gridType)) {
+            vector<size_t>             vertexDims;
+            vector<size_t>             faceDims;
+            vector<size_t>             edgeDims;
+            UnstructuredGrid::Location location;
+            size_t                     maxVertexPerFace;
+            size_t                     maxFacePerVertex;
+            long                       vertexOffset;
+            long                       faceOffset;
+
+            _ugrid_setup(dvar, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
+
+            rg = _gridHelper.MakeGridUnstructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec,
+                                                  conn_bminvec, conn_bmaxvec, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
+        } else {
+            rg = _gridHelper.MakeGridStructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec);
+        }
         assert(rg);
     }
 
@@ -1012,6 +1023,9 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     if (!lock) {
         for (int i = 0; i < blkvec.size(); i++) {
             if (blkvec[i]) _unlock_blocks(blkvec[i]);
+        }
+        for (int i = 0; i < conn_blkvec.size(); i++) {
+            if (conn_blkvec[i]) _unlock_blocks(conn_blkvec[i]);
         }
     }
 
@@ -1060,8 +1074,8 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, vector<dou
 
     vector<string> cvars;
     string         dummy;
-    rc = _get_coord_vars(varname, cvars, dummy);
-    if (rc < 0) return (-1);
+    bool           ok = _get_coord_vars(varname, cvars, dummy);
+    if (!ok) return (-1);
 
     string         key = "VariableExtents";
     vector<double> values;
@@ -2177,7 +2191,7 @@ int DataMgr::_lod_correction(string varname, int &lod) const
 // a list of spatial coordinate variables, and a single (if it exists)
 // time coordinate variable
 //
-int DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tcvar) const
+bool DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tcvar) const
 {
     scvars.clear();
     tcvar.clear();
@@ -2185,10 +2199,7 @@ int DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tcv
     // Get space and time coord vars
     //
     bool ok = GetVarCoordVars(varname, false, scvars);
-    if (!ok) {
-        SetErrMsg("Failed to get metadata for variable %s", varname.c_str());
-        return (-1);
-    }
+    if (!ok) return (ok);
 
     // Split out time and space coord vars
     //
@@ -2199,7 +2210,33 @@ int DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tcv
         scvars.pop_back();
     }
 
-    return (0);
+    return (true);
+}
+
+bool DataMgr::_get_coord_vars(string varname, vector<DC::CoordVar> &scvarsinfo, DC::CoordVar &tcvarinfo) const
+{
+    scvarsinfo.clear();
+
+    vector<string> scvarnames;
+    string         tcvarname;
+    bool           ok = _get_coord_vars(varname, scvarnames, tcvarname);
+    if (!ok) return (ok);
+
+    for (int i = 0; i < scvarnames.size(); i++) {
+        DC::CoordVar cvarinfo;
+
+        bool ok = GetCoordVarInfo(scvarnames[i], cvarinfo);
+        if (!ok) return (ok);
+
+        scvarsinfo.push_back(cvarinfo);
+    }
+
+    if (!tcvarname.empty()) {
+        bool ok = GetCoordVarInfo(tcvarname, tcvarinfo);
+        if (!ok) return (ok);
+    }
+
+    return (true);
 }
 
 int DataMgr::_initTimeCoord()
@@ -2254,207 +2291,6 @@ int DataMgr::_initTimeCoord()
     }
 
     return (0);
-}
-
-RegularGrid *DataMgr::_make_grid_empty(string varname) const
-{
-    vector<size_t>  dims;
-    vector<size_t>  bs;
-    vector<double>  minu, maxu;
-    vector<float *> blkptrs;
-
-    size_t ndim = GetNumDimensions(varname);
-    for (int i = 0; i < ndim; i++) {
-        dims.push_back(1);
-        bs.push_back(1);
-        minu.push_back(0.0);
-        maxu.push_back(0.0);
-    }
-    return (new RegularGrid(dims, bs, blkptrs, minu, maxu));
-}
-
-RegularGrid *DataMgr::_make_grid_regular(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax
-
-) const
-{
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-
-    vector<double> minu, maxu;
-    for (int i = 0; i < dims.size(); i++) {
-        float *coords = blkvec[i + 1];
-        minu.push_back(coords[0]);
-        maxu.push_back(coords[dims[i] - 1]);
-    }
-
-    size_t nblocks = 1;
-    size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
-    vector<float *> blkptrs;
-    if (blkvec[0]) {
-        for (int i = 0; i < nblocks; i++) { blkptrs.push_back(blkvec[0] + i * block_size); }
-    }
-
-    RegularGrid *rg = new RegularGrid(dims, bs, blkptrs, minu, maxu);
-
-    return (rg);
-}
-
-StretchedGrid *DataMgr::_make_grid_stretched(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax
-
-) const
-{
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-
-    size_t nblocks = 1;
-    size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
-    vector<float *> blkptrs;
-    if (blkvec[0]) {
-        for (int i = 0; i < nblocks; i++) { blkptrs.push_back(blkvec[0] + i * block_size); }
-    }
-
-    vector<double> xcoords;
-    for (int i = 0; i < dims[0]; i++) xcoords.push_back(blkvec[1][i]);
-
-    vector<double> ycoords;
-    for (int i = 0; i < dims[1]; i++) ycoords.push_back(blkvec[2][i]);
-
-    vector<double> zcoords;
-    if (dims.size() == 3) {
-        for (int i = 0; i < dims[2]; i++) zcoords.push_back(blkvec[3][i]);
-    }
-
-    StretchedGrid *sg = new StretchedGrid(dims, bs, blkptrs, xcoords, ycoords, zcoords);
-
-    return (sg);
-}
-
-LayeredGrid *DataMgr::_make_grid_layered(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax) const
-{
-    assert(bs.size() == bmin.size());
-    assert(bs.size() == bmax.size());
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-
-    // Get horizontal dimensions
-    //
-    vector<double> hminu, hmaxu;
-    for (int i = 0; i < 2; i++) {
-        float *coords = blkvec[i + 1];
-        hminu.push_back(coords[0]);
-        hmaxu.push_back(coords[dims[i] - 1]);
-    }
-
-    // Data blocks
-    //
-    size_t nblocks = 1;
-    size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
-    vector<float *> blkptrs, zcblkptrs;
-
-    if (blkvec[0]) {
-        for (int i = 0; i < nblocks; i++) { blkptrs.push_back(blkvec[0] + i * block_size); }
-    }
-
-    // Z Coord blocks
-    //
-    nblocks = 1;
-    block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-    for (int i = 0; i < nblocks; i++) { zcblkptrs.push_back(blkvec[3] + i * block_size); }
-
-    RegularGrid rg(dims, bs, zcblkptrs, vector<double>(3, 0.0), vector<double>(3, 1.0));
-
-    LayeredGrid *lg = new LayeredGrid(dims, bs, blkptrs, hminu, hmaxu, rg);
-
-    return (lg);
-}
-
-CurvilinearGrid *DataMgr::_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims, const vector<float *> &blkvec,
-                                                 const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax)
-{
-    assert(bs.size() == bmin.size());
-    assert(bs.size() == bmax.size());
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-
-    // Data blocks
-    //
-    size_t nblocks = 1;
-    size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
-    // block pointers for data
-    //
-    vector<float *> blkptrs;
-    for (int i = 0; i < nblocks; i++) {
-        if (blkvec[0]) blkptrs.push_back(blkvec[0] + i * block_size);
-    }
-
-    // X horizontal coord blocks
-    //
-    vector<size_t> bs2d = {bs[0], bs[1]};
-    nblocks = 1;
-    block_size = 1;
-    for (int i = 0; i < bs2d.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs2d[i];
-    }
-
-    vector<float *> xcblkptrs;
-    for (int i = 0; i < nblocks; i++) { xcblkptrs.push_back(blkvec[1] + i * block_size); }
-
-    // Y horizontal coord blocks
-    //
-    nblocks = 1;
-    block_size = 1;
-    for (int i = 0; i < bs2d.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs2d[i];
-    }
-    vector<float *> ycblkptrs;
-    for (int i = 0; i < nblocks; i++) { ycblkptrs.push_back(blkvec[2] + i * block_size); }
-
-    vector<double> zcoords;
-    if (dims.size() == 3) {
-        for (int i = 0; i < dims[2]; i++) zcoords.push_back(blkvec[3][i]);
-    }
-
-    vector<double> minu2d = {0.0, 0.0};
-    vector<double> maxu2d = {1.0, 1.0};
-    vector<size_t> dims2d = {dims[0], dims[1]};
-    RegularGrid    xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
-    RegularGrid    yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
-
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax);
-
-    CurvilinearGrid *g = new CurvilinearGrid(dims, bs, blkptrs, xrg, yrg, zcoords, kdtree);
-
-    return (g);
 }
 
 void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
@@ -2519,220 +2355,31 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     faceOffset = auxvar.GetOffset();
 }
 
-UnstructuredGrid2D *DataMgr::_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
-                                                       const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax,
-                                                       const vector<int *> &conn_blkvec, const vector<size_t> &conn_bs, const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax)
+string DataMgr::_get_grid_type(string varname) const
 {
-    assert(dims.size() == 1);
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-    assert(blkvec.size() == 3);
-
-    assert(conn_blkvec.size() >= 2);
-
-    vector<size_t>             vertexDims;
-    vector<size_t>             faceDims;
-    vector<size_t>             edgeDims;
-    UnstructuredGrid::Location location;
-    size_t                     maxVertexPerFace;
-    size_t                     maxFacePerVertex;
-    long                       vertexOffset, faceOffset;
-
-    _ugrid_setup(dvarinfo, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
-
-    // block pointers for data
-    //
-    size_t nblocks = 1;
-    size_t block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
-    vector<float *> blkptrs;
-    for (int i = 0; i < nblocks; i++) {
-        if (blkvec[0]) blkptrs.push_back(blkvec[0] + i * block_size);
-    }
-
-    // Block pointers for X coordinates, which are always 1D
-    //
-    nblocks = 1;
-    block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-
-    vector<float *> xcblkptrs;
-    for (int i = 0; i < nblocks; i++) { xcblkptrs.push_back(blkvec[1] + i * block_size); }
-
-    // Block pointers for X coordinates, which are always 1D
-    //
-    nblocks = 1;
-    block_size = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        nblocks *= bmax[i] - bmin[i] + 1;
-        block_size *= bs[i];
-    }
-    vector<float *> ycblkptrs;
-    for (int i = 0; i < nblocks; i++) { ycblkptrs.push_back(blkvec[2] + i * block_size); }
-
-    // N.B. assumes blkvec contains contiguous blocks :-(
-    //
-    const int *vertexOnFace = conn_blkvec[0];
-    const int *faceOnVertex = conn_blkvec[1];
-    const int *faceOnFace = conn_blkvec.size() == 3 ? conn_blkvec[2] : NULL;
-
-    UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs, xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex);
-    xug.SetNodeOffset(vertexOffset);
-    xug.SetCellOffset(faceOffset);
-
-    UnstructuredGridCoordless yug(vertexDims, faceDims, edgeDims, bs, ycblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex);
-    yug.SetNodeOffset(vertexOffset);
-    yug.SetCellOffset(faceOffset);
-
-    UnstructuredGridCoordless zug;
-
-    const KDTreeRG *kdtree = _getKDTree2D(ts, level, lod, cvarsinfo, xug, yug, bmin, bmax);
-
-    UnstructuredGrid2D *g =
-        new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, zug, kdtree);
-    g->SetNodeOffset(vertexOffset);
-    g->SetCellOffset(faceOffset);
-
-    return (g);
-}
-
-//	var: variable info
-//  roi_dims: spatial dimensions of ROI
-//	dims: spatial dimensions of full variable domain in voxels
-//	blkvec: data blocks, and coordinate blocks
-//	bsvec: data block dimensions, and coordinate block dimensions
-//  bminvec: ROI offsets in blocks, full domain, data and coordinates
-//  bmaxvec: ROI offsets in blocks, full domain, data and coordinates
-//
-
-Grid *DataMgr::_make_grid(size_t ts, int level, int lod, const DC::DataVar &var, const vector<size_t> &roi_dims, const vector<size_t> &dims, const vector<float *> &blkvec,
-                          const vector<vector<size_t>> &bsvec, const vector<vector<size_t>> &bminvec, const vector<vector<size_t>> &bmaxvec, const vector<int *> &conn_blkvec,
-                          const vector<vector<size_t>> &conn_bsvec, const vector<vector<size_t>> &conn_bminvec, const vector<vector<size_t>> &conn_bmaxvec)
-{
-    vector<string> cvars;
-    string         dummy;
-    int            rc = _get_coord_vars(var.GetName(), cvars, dummy);
-    assert(rc == 0);
-
     vector<DC::CoordVar> cvarsinfo;
-    for (int i = 0; i < cvars.size(); i++) {
-        DC::CoordVar cvarinfo;
+    DC::CoordVar         dummy;
+    bool                 ok = _get_coord_vars(varname, cvarsinfo, dummy);
+    if (!ok) return ("");
 
-        bool ok = GetCoordVarInfo(cvars[i], cvarinfo);
-        assert(ok);
-
-        cvarsinfo.push_back(cvarinfo);
-    }
-
-    DataMgr::GridType grid_type = _get_grid_type(var, cvarsinfo);
-    assert(grid_type != UNDEFINED);
-
-    Grid *rg = NULL;
-    if (grid_type == REGULAR) {
-        rg = _make_grid_regular(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    } else if (grid_type == STRETCHED) {
-        rg = _make_grid_stretched(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    } else if (grid_type == LAYERED) {
-        rg = _make_grid_layered(roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    } else if (grid_type == CURVILINEAR) {
-        rg = _make_grid_curvilinear(ts, level, lod, cvarsinfo, roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    } else if (grid_type == UNSTRUC_2D) {
-        rg = _make_grid_unstructured2d(ts, level, lod, var, cvarsinfo, roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0], conn_blkvec, conn_bsvec[0], conn_bminvec[0], conn_bmaxvec[0]);
-    }
-
-    vector<bool> periodic;
-    bool         has_missing;
-    float        mv;
-    grid_params(var, roi_dims, dims, periodic, has_missing, mv);
-
-    rg->SetPeriodic(periodic);
-    if (has_missing) {
-        rg->SetHasMissingValues(true);
-        rg->SetMissingValue(mv);
-    }
-
-    return (rg);
-}
-
-DataMgr::GridType DataMgr::_get_grid_type(const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo) const
-{
-    DC::Mesh m;
-    bool     status = GetMesh(var.GetMeshName(), m);
-    assert(status);
-
-    // First see if we can determine from the Mesh type
-    //
-    DC::Mesh::Type mtype = m.GetMeshType();
-    if (mtype == DC::Mesh::UNSTRUC_2D) { return (UNSTRUC_2D); }
-    if (mtype == DC::Mesh::UNSTRUC_LAYERED) { return (UNSTRUC_LAYERED); }
-
-    assert(mtype == DC::Mesh::STRUCTURED);
     vector<vector<string>> cdimnames;
     for (int i = 0; i < cvarsinfo.size(); i++) {
         vector<string> v;
         bool           ok = _getVarDimNames(cvarsinfo[i].GetName(), v);
-        if (!ok) { return (UNDEFINED); }
+        if (!ok) return ("");
 
         cdimnames.push_back(v);
     }
 
-    GridType grid_type = UNDEFINED;
-
-    //
-    // First check for RegularGrid
-    //
-    grid_type = REGULAR;
-    for (int i = 0; i < cdimnames.size(); i++) {
-        if (cdimnames[i].size() != 1 || !cvarsinfo[i].GetUniform()) { grid_type = UNDEFINED; }
-    }
-    if (!grid_type) {
-        grid_type = STRETCHED;
-        for (int i = 0; i < cdimnames.size(); i++) {
-            if (cdimnames[i].size() != 1) {
-                grid_type = UNDEFINED;
-                break;
-            }
-        }
-    }
-    if (!grid_type) {
-        if (cdimnames.size() == 3 && cvarsinfo[0].GetUniform() && cvarsinfo[1].GetUniform() && cdimnames[2].size() == 3) { grid_type = LAYERED; }
-    }
-    if (!grid_type) {
-        if ((cdimnames.size() == 2 || (cdimnames.size() == 3 && cdimnames[2].size() == 1)) && cdimnames[0].size() == 2 && cdimnames[1].size() == 2) { grid_type = CURVILINEAR; }
-    }
-    return (grid_type);
-}
-
-DataMgr::GridType DataMgr::_get_grid_type(string varname) const
-{
-    vector<string> cvars;
-    string         dummy;
-    int            rc = _get_coord_vars(varname, cvars, dummy);
-    assert(rc == 0);
-
-    vector<DC::CoordVar> cvarsinfo;
-    for (int i = 0; i < cvars.size(); i++) {
-        DC::CoordVar cvarinfo;
-
-        bool ok = GetCoordVarInfo(cvars[i], cvarinfo);
-        if (!ok) return (UNDEFINED);
-
-        cvarsinfo.push_back(cvarinfo);
-    }
-
     DC::DataVar dvar;
-    bool        status = DataMgr::GetDataVarInfo(varname, dvar);
-    assert(status);
+    ok = GetDataVarInfo(varname, dvar);
+    assert(ok);
 
-    return (_get_grid_type(dvar, cvarsinfo));
+    DC::Mesh m;
+    ok = GetMesh(dvar.GetMeshName(), m);
+    assert(ok);
+
+    return (_gridHelper.GetGridType(m, cvarsinfo, cdimnames));
 }
 
 // Find the grid coordinates, in voxels, for the region containing
@@ -2746,8 +2393,8 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     vector<string> scvars;
     string         tcvar;
 
-    int rc = _get_coord_vars(varname, scvars, tcvar);
-    if (rc < 0) return (-1);
+    bool ok = _get_coord_vars(varname, scvars, tcvar);
+    if (!ok) return (-1);
 
     size_t hash_ts = 0;
     for (int i = 0; i < scvars.size(); i++) {
@@ -2756,7 +2403,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
     vector<size_t> dims_at_level;
     vector<size_t> bs_at_level;
-    rc = DataMgr::GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    int            rc = DataMgr::GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
@@ -2841,7 +2488,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     // Find block coordinates of region that contains the bounding volume
     //
     vector<size_t> bmin, bmax;
-    bool           ok = blkexts.Intersect(min, max, bmin, bmax);
+    ok = blkexts.Intersect(min, max, bmin, bmax);
     if (!ok) {
         return (0);    // No intersection
     }
@@ -2868,36 +2515,6 @@ void DataMgr::_unlock_blocks(const void *blks)
         }
     }
     return;
-}
-
-const KDTreeRG *DataMgr::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax)
-{
-    assert(cvarsinfo.size() >= 2);
-    assert(xg.GetDimensions() == yg.GetDimensions());
-
-    vector<string> varnames;
-    for (int i = 0; i < 2; i++) { varnames.push_back(cvarsinfo[i].GetName()); }
-
-    string key = "KDTree";
-    key += ":";
-    key += vector_to_string(bmin);
-    key += ":";
-    key += vector_to_string(bmax);
-
-    KDTreeRG *kdtree = NULL;
-
-    vector<void *> values;
-    bool           found = _varInfoCache.Get(ts, varnames, level, lod, key, values);
-    if (found) {
-        assert(values.size() == 1);
-        kdtree = (KDTreeRG *)values[0];
-    } else {
-        kdtree = new KDTreeRG(xg, yg);
-        values.push_back(kdtree);
-        _varInfoCache.Set(ts, varnames, level, lod, key, values);
-    }
-
-    return (kdtree);
 }
 
 vector<string> DataMgr::_getDataVarNamesDerived(int ndim) const

@@ -288,6 +288,7 @@ int main(int argc, char **argv)
                 }
                 cout << "Num missing values : " << count << endl;
             }
+            cout << "Grid type: " << g->GetType() << endl;
 
             cout << setprecision(16) << "User time: " << timecoords[ts] << endl;
             cout << endl;

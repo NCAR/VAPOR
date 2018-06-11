@@ -35,6 +35,9 @@ public:
     UnstructuredGridCoordless() = default;
     virtual ~UnstructuredGridCoordless() = default;
 
+    static std::string GetClassType() { return ("UnstructuredCoordless"); }
+    std::string        GetType() const override { return (GetClassType()); }
+
     virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override
     {
         minu.clear();
