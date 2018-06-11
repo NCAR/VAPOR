@@ -74,6 +74,7 @@ public:
 		VAPoR::RenderParams *rParams
 	) {
 		_geometryWidget->Update(paramsMgr, dataMgr, rParams);
+		_copyRegionWidget->Update(paramsMgr, rParams);
 		_transformTable->Update(rParams->GetTransform());
 	}
 
