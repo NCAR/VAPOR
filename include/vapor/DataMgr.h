@@ -12,6 +12,7 @@
 #include <vapor/UnstructuredGrid2D.h>
 #include <vapor/KDTreeRG.h>
 #include <vapor/UDUnitsClass.h>
+#include <vapor/GridHelper.h>
 
 #ifndef DataMgvV3_0_h
 #define DataMgvV3_0_h
@@ -740,6 +741,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
 
     DC *_dc;
     VAPoR::UDUnits _udunits;
+    VAPoR::GridHelper _gridHelper;
 
     std::map<string, DerivedDataVar *> _derivedDataVars;
     std::map<string, DerivedCoordVar *> _derivedCoordVars;
@@ -789,14 +791,15 @@ class VDF_API DataMgr : public Wasp::MyBase {
     //
     bool _is_geographicMesh(string mesh) const;
 
-    int _get_coord_vars(
+    bool _get_coord_vars(
         string varname, std::vector<string> &scvars, string &tcvar) const;
+
+    bool _get_coord_vars(
+        string varname, vector<DC::CoordVar> &scvarsinfo, DC::CoordVar &tcvarinfo) const;
 
     int _initTimeCoord();
 
     int _get_default_projection(string &projection);
-
-    VAPoR::RegularGrid *_make_grid_empty(string varname) const;
 
     VAPoR::RegularGrid *_make_grid_regular(
         const std::vector<size_t> &dims,
@@ -873,20 +876,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const vector<vector<size_t>> &conn_bminvec,
         const vector<vector<size_t>> &conn_bmaxvec);
 
-    enum GridType {
-        UNDEFINED = 0,
-        REGULAR,
-        STRETCHED,
-        LAYERED,
-        CURVILINEAR,
-        UNSTRUC_2D,
-        UNSTRUC_LAYERED
-    };
-    GridType _get_grid_type(
-        const DC::DataVar &var,
-        const vector<DC::CoordVar> &cvarsinfo) const;
-
-    GridType _get_grid_type(string varname) const;
+    string _get_grid_type(string varname) const;
 
     int _find_bounding_grid(
         size_t ts, string varname, int level, int lod,
@@ -1018,16 +1008,6 @@ class VDF_API DataMgr : public Wasp::MyBase {
 
     int _level_correction(string varname, int &level) const;
     int _lod_correction(string varname, int &lod) const;
-
-    const KDTreeRG *_getKDTree2D(
-        size_t ts,
-        int level,
-        int lod,
-        const vector<DC::CoordVar> &cvarsinfo,
-        const Grid &xg,
-        const Grid &yg,
-        const vector<size_t> &bmin,
-        const vector<size_t> &bmax);
 
     vector<string> _getDataVarNamesDerived(int ndim) const;
 
