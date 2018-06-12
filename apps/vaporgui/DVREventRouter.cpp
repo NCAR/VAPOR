@@ -58,45 +58,35 @@ DVREventRouter::~DVREventRouter() {
         delete _appearance;
 }
 
-void DVREventRouter::GetWebHelp(
-    vector<pair<string, string>> &help) const {
+void DVREventRouter::GetWebHelp(vector<pair<string, string>> &help) const {
     help.clear();
 
-    help.push_back(make_pair(
-        "DVR Overview",
-        "https://www.vapor.ucar.edu/docs/vapor-gui-general-guide/volume-rendering-dvr"));
+    help.push_back(make_pair("DVR Overview",
+                             "https://www.vapor.ucar.edu/docs/vapor-gui-general-guide/volume-rendering-dvr"));
 
-    help.push_back(make_pair(
-        "Renderer control",
-        "http://www.vapor.ucar.edu/docs/vapor-how-guide/renderer-instances"));
+    help.push_back(make_pair("Renderer control",
+                             "http://www.vapor.ucar.edu/docs/vapor-how-guide/renderer-instances"));
 
-    help.push_back(make_pair(
-        "Data accuracy control",
-        "http://www.vapor.ucar.edu/docs/vapor-how-guide/refinement-and-lod-control"));
+    help.push_back(make_pair("Data accuracy control",
+                             "http://www.vapor.ucar.edu/docs/vapor-how-guide/refinement-and-lod-control"));
 }
 
 void DVREventRouter::_updateTab() {
+    _variables->Update(GetActiveDataMgr(),
+                       _controlExec->GetParamsMgr(),
+                       GetActiveParams());
 
-    // The variable tab updates itself:
-    //
-    _variables->Update(
-        GetActiveDataMgr(),
-        _controlExec->GetParamsMgr(),
-        GetActiveParams());
+    _appearance->Update(GetActiveDataMgr(),
+                        _controlExec->GetParamsMgr(),
+                        GetActiveParams());
 
-    _appearance->Update(
-        GetActiveDataMgr(),
-        _controlExec->GetParamsMgr(),
-        GetActiveParams());
-    _geometry->Update(
-        _controlExec->GetParamsMgr(),
-        GetActiveDataMgr(),
-        GetActiveParams());
+    _geometry->Update(_controlExec->GetParamsMgr(),
+                      GetActiveDataMgr(),
+                      GetActiveParams());
 }
 
 string DVREventRouter::_getDescription() const {
-    return (
-        "Displays "
-        "the user's 2D data variables along the plane described by the source data "
-        "file.\n\nThese 2D variables may be offset by a height variable.\n\n");
+    return ("Displays "
+            "the user's 2D data variables along the plane described by the source data "
+            "file.\n\nThese 2D variables may be offset by a height variable.\n\n");
 }

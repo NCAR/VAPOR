@@ -13,7 +13,6 @@ class DataMgr;
 } // namespace VAPoR
 
 class DVRVariablesSubtab : public QWidget, public Ui_DVRVariablesGUI {
-
     Q_OBJECT
 
   public:
@@ -24,16 +23,14 @@ class DVRVariablesSubtab : public QWidget, public Ui_DVRVariablesGUI {
                                  (VariablesWidget::ColorFlags)(0));
     }
 
-    void Update(
-        VAPoR::DataMgr *dataMgr,
-        VAPoR::ParamsMgr *paramsMgr,
-        VAPoR::RenderParams *rParams) {
+    void Update(VAPoR::DataMgr *dataMgr,
+                VAPoR::ParamsMgr *paramsMgr,
+                VAPoR::RenderParams *rParams) {
         _variablesWidget->Update(dataMgr, paramsMgr, rParams);
     }
 };
 
 class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
-
     Q_OBJECT
 
   public:
@@ -42,38 +39,32 @@ class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
         _TFWidget->Reinit((TFWidget::Flags)(0));
     }
 
-    void Update(
-        VAPoR::DataMgr *dataMgr,
-        VAPoR::ParamsMgr *paramsMgr,
-        VAPoR::RenderParams *rParams) {
+    void Update(VAPoR::DataMgr *dataMgr,
+                VAPoR::ParamsMgr *paramsMgr,
+                VAPoR::RenderParams *rParams) {
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
         _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
     }
 };
 
 class DVRGeometrySubtab : public QWidget, public Ui_DVRGeometryGUI {
-
     Q_OBJECT
 
   public:
     DVRGeometrySubtab(QWidget *parent) {
         setupUi(this);
-        _geometryWidget->Reinit(
-            GeometryWidget::THREED,
-            GeometryWidget::MINMAX,
-            GeometryWidget::SCALAR);
+        _geometryWidget->Reinit(GeometryWidget::THREED,
+                                GeometryWidget::MINMAX,
+                                GeometryWidget::SCALAR);
     }
 
-    void Update(
-        VAPoR::ParamsMgr *paramsMgr,
-        VAPoR::DataMgr *dataMgr,
-        VAPoR::RenderParams *rParams) {
+    void Update(VAPoR::ParamsMgr *paramsMgr,
+                VAPoR::DataMgr *dataMgr,
+                VAPoR::RenderParams *rParams) {
         _geometryWidget->Update(paramsMgr, dataMgr, rParams);
         _copyRegionWidget->Update(paramsMgr, rParams);
         _transformTable->Update(rParams->GetTransform());
     }
-
-  private:
 };
 
 #endif //DVRSUBTABS_H
