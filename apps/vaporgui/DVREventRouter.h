@@ -26,7 +26,7 @@ class GLDVRImageWindow;
 //! \version 3.0
 //! \date  April 2016
 
-//!	The DVREventRouter class manages the DVR gui.  There are three sub-tabs,
+//! The DVREventRouter class manages the DVR gui.  There are three sub-tabs,
 //! for variables, geometry, and appearance.
 
 class DVREventRouter : public QTabWidget, public RenderEventRouter {
@@ -41,7 +41,6 @@ class DVREventRouter : public QTabWidget, public RenderEventRouter {
     void GetWebHelp(
         vector<pair<string, string>> &help) const;
 
-    //
     static string GetClassType() {
         return (VAPoR::DirectVolumeRenderer::GetClassType());
     }
