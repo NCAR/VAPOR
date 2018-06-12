@@ -60,6 +60,7 @@ set (SRCS
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
+	DVRSubtabs.h
 	Statistics.h
 	Plot.h
 	BarbSubtabs.h
