@@ -67,11 +67,10 @@ void DVREventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 
 void DVREventRouter::_updateTab()
 {
-    // The variable tab updates itself:
-    //
     _variables->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
     _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
+
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 }
 

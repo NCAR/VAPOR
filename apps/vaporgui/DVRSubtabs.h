@@ -58,8 +58,6 @@ public:
         _copyRegionWidget->Update(paramsMgr, rParams);
         _transformTable->Update(rParams->GetTransform());
     }
-
-private:
 };
 
 #endif    // DVRSUBTABS_H
