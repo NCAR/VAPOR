@@ -14,7 +14,7 @@
 QT_USE_NAMESPACE
 
 namespace VAPoR {
-	class ControlExec;
+    class ControlExec;
 }
 
 class GLDVRImageWindow;
@@ -27,7 +27,7 @@ class GLDVRImageWindow;
 //! \version 3.0
 //! \date  April 2016
 
-//!	The DVREventRouter class manages the DVR gui.  There are three sub-tabs,
+//! The DVREventRouter class manages the DVR gui.  There are three sub-tabs,
 //! for variables, geometry, and appearance. 
 
 class DVREventRouter : public QTabWidget,  public RenderEventRouter {
@@ -37,17 +37,16 @@ Q_OBJECT
 public: 
 
  DVREventRouter(
-	QWidget *parent, VAPoR::ControlExec *ce
+    QWidget *parent, VAPoR::ControlExec *ce
  );
  ~DVREventRouter();
 
  void GetWebHelp(
-	vector <pair <string, string> > &help
+    vector <pair <string, string> > &help
  ) const;
 
- //
  static string GetClassType() {
-	 return(VAPoR::DirectVolumeRenderer::GetClassType());
+     return(VAPoR::DirectVolumeRenderer::GetClassType());
  }
  string GetType() const {return GetClassType(); }
 
@@ -57,10 +56,10 @@ protected:
  virtual string _getDescription() const;
                       
  virtual string _getSmallIconImagePath() const {
-	return("DVR_small.png");
+    return("DVR_small.png");
  }   
  virtual string _getIconImagePath() const {
-	return("DVR.png");
+    return("DVR.png");
  }
 
 private:
@@ -81,7 +80,7 @@ private:
  DVRAppearanceSubtab * _appearance;
 
 #ifdef VAPOR3_0_0_ALPHA
- 	DVRImageGUI *_image;
+    DVRImageGUI *_image;
 #endif
 
 };
