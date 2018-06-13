@@ -139,7 +139,8 @@ MappingFrame::MappingFrame(QWidget* parent)
     _bottomGap(10),
 	_dataMgr(NULL),
 	_rParams(NULL),
-	_mousePressFlag(false)
+	_mousePressFlag(false),
+	_initialized(false)
 {
   initWidgets();
   initConnections();
@@ -419,7 +420,11 @@ void MappingFrame::Update(DataMgr *dataMgr,
 
 	deselectWidgets();
 
-	RefreshHistogram();
+	if (_initialized == false) {
+		_initialized = true;
+		RefreshHistogram();
+	}
+
 	_minValue = getMinEditBound();
 	_maxValue = getMaxEditBound();
 
