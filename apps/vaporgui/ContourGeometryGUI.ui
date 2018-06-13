@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,0,2">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,1,0,2">
    <property name="spacing">
     <number>-1</number>
    </property>
@@ -56,6 +56,16 @@
       <size>
        <width>16777215</width>
        <height>16777215</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="CopyRegionWidget" name="_copyRegionWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>60</height>
       </size>
      </property>
     </widget>
@@ -120,6 +130,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>CopyRegionWidget</class>
+   <extends>QWidget</extends>
+   <header>CopyRegionWidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>TransformTable</class>
    <extends>QWidget</extends>

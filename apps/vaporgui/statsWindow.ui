@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>893</width>
+    <width>981</width>
     <height>478</height>
    </rect>
   </property>
@@ -283,7 +283,7 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,1,0,0">
         <property name="spacing">
          <number>12</number>
         </property>
@@ -299,6 +299,16 @@
            <size>
             <width>0</width>
             <height>50</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="CopyRegionWidget" name="MyCopyRegionWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>20</height>
            </size>
           </property>
          </widget>
@@ -559,6 +569,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>CopyRegionWidget</class>
+   <extends>QWidget</extends>
+   <header>CopyRegionWidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>GeometryWidget</class>
    <extends>QWidget</extends>
