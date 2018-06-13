@@ -27,9 +27,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/ContourRenderer.h>
 #include <vapor/Visualizer.h>
-//#include <vapor/params.h>
 #include <vapor/ContourParams.h>
-//#include <vapor/AnimationParams.h>
 #include <vapor/regionparams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/DataStatus.h>
@@ -151,7 +149,6 @@ int ContourRenderer::_buildCache() {
                                            _cacheParams.level, _cacheParams.lod,
                                            _cacheParams.boxMin, _cacheParams.boxMax);
     }
-    //StructuredGrid *sGrid = dynamic_cast<StructuredGrid *>(grid);
 
     if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
         glEndList();
