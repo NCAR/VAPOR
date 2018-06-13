@@ -27,10 +27,10 @@ class RENDER_API DirectVolumeRenderer : public Renderer
 public:
 
     DirectVolumeRenderer(  const ParamsMgr*  pm, 
-                         std::string&      winName, 
-                         std::string&      dataSetName,
-                         std::string&      instName, 
-                         DataMgr*          dataMgr);
+                           std::string&      winName, 
+                           std::string&      dataSetName,
+                           std::string&      instName, 
+                           DataMgr*          dataMgr);
 
     virtual ~DirectVolumeRenderer();
 
@@ -46,8 +46,17 @@ protected:
 
 private:
     // C++ stuff
-    int         _colormapSize;
-    GLfloat*    _colormap;
+    struct {
+        std::string varName;
+        size_t ts;
+        int level;
+        int lod;
+        std::vector<double>     boxMin, boxMax;
+        std::vector<GLfloat>    colormap;
+    } _cacheParams;
+    void _saveCacheParams();
+    bool _isCacheDirty() const;
+
 
     // OpenGL stuff
     const std::string   _effectNameStr     = "DVR";
