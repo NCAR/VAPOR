@@ -48,7 +48,6 @@ TranslateStretchManip::TranslateStretchManip() : Manip()
     for (int i = 0; i < 3; i++) {
         _initialSelectionRay[i] = 0.;
         _cameraPosition[i] = 0.;
-        _rotationCenter[i] = 0.;
         _handleMid[i] = 0.f;
 
         _selection[i] = 0.;
@@ -94,8 +93,7 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform)
 }
 
 void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, std::vector<double> cameraPosition,
-                                   std::vector<double> rotationCenter, double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *rpTransform,
-                                   VAPoR::Transform *dmTransform, bool constrain)
+                                   double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *rpTransform, VAPoR::Transform *dmTransform, bool constrain)
 {
     for (int i = 0; i < 16; i++) {
         _modelViewMatrix[i] = modelViewMatrix[i];
@@ -106,10 +104,6 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
     _cameraPosition[0] = cameraPosition[0];
     _cameraPosition[1] = cameraPosition[1];
     _cameraPosition[2] = cameraPosition[2];
-
-    _rotationCenter[0] = _rotationCenter[0];
-    _rotationCenter[1] = _rotationCenter[1];
-    _rotationCenter[2] = _rotationCenter[2];
 
     if (llc.size() == 2) llc.push_back(0);
     if (urc.size() == 2) urc.push_back(0);
@@ -125,13 +119,9 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
     _dmTransform = dmTransform;
 
     _constrain = constrain;
-
-    //	transformMatrix(_dmTransform);
-    //	if (_rpTransform != NULL)
-    //		transformMatrix(_rpTransform);
 }
 
-void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double> &urc)
+void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double> &urc) const
 {
     llc.resize(3);
     urc.resize(3);
@@ -216,7 +206,7 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2])
     setMouseDown(false);
 }
 
-int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double handleMid[3])
+int TranslateStretchManip::mouseIsOverHandle(double screenCoords[2], double handleMid[3]) const
 {
     double handle[8][3];
 
@@ -268,26 +258,26 @@ void TranslateStretchManip::constrainExtents()
     }
 }
 
-bool TranslateStretchManip::pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], double pickPt[2])
+bool TranslateStretchManip::pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], double pickPt[2]) const
 {
     double winCoord1[2];
     double winCoord2[2];
     double winCoord3[2];
     double winCoord4[2];
     bool   returnValue = true;
-    if (!projectPointToWin(cor1, winCoord1)) returnValue = false;
-    if (!projectPointToWin(cor2, winCoord2)) returnValue = false;
+    if (!_projectPointToWin(cor1, winCoord1)) returnValue = false;
+    if (!_projectPointToWin(cor2, winCoord2)) returnValue = false;
     if (pointOnRight(winCoord1, winCoord2, pickPt)) returnValue = false;
-    if (!projectPointToWin(cor3, winCoord3)) returnValue = false;
+    if (!_projectPointToWin(cor3, winCoord3)) returnValue = false;
     if (pointOnRight(winCoord2, winCoord3, pickPt)) returnValue = false;
-    if (!projectPointToWin(cor4, winCoord4)) returnValue = false;
+    if (!_projectPointToWin(cor4, winCoord4)) returnValue = false;
     if (pointOnRight(winCoord3, winCoord4, pickPt)) returnValue = false;
     if (pointOnRight(winCoord4, winCoord1, pickPt)) returnValue = false;
 
     return returnValue;
 }
 
-int TranslateStretchManip::pointIsOnBox(double corners[8][3], double pickPt[2])
+int TranslateStretchManip::pointIsOnBox(double corners[8][3], double pickPt[2]) const
 {
     // front (-Z)
     if (pointIsOnQuad(corners[0], corners[1], corners[3], corners[2], pickPt)) return 2;
@@ -322,7 +312,7 @@ int TranslateStretchManip::pointIsOnBox(double corners[8][3], double pickPt[2])
 // This requires that we have boxCenter and boxWidth in cube coords.
 // HANDLE_DIAMETER is measured in pixels
 // These can be calculated from the boxRegion
-int TranslateStretchManip::makeHandleFaces(int sortPosition, double handle[8][3], int octant, double boxRegion[6])
+int TranslateStretchManip::makeHandleFaces(int sortPosition, double handle[8][3], int octant, const double boxRegion[6]) const
 {
     // Identify the axis this handle is on:
     int axis = (sortPosition < 3) ? (2 - sortPosition) : (sortPosition - 3);
@@ -402,11 +392,11 @@ bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNu
     for (int i = 0; i < 3; i++) { boxCtr[i] = (_selection[i] + _selection[i + 3]) * 0.5f; }
     // project the boxCtr and one more point, to get a direction vector
 
-    if (!projectPointToWin(boxCtr, winCoords)) return false;
+    if (!_projectPointToWin(boxCtr, winCoords)) return false;
 
     boxCtr[handleNum] += 0.1f;
 
-    if (!projectPointToWin(boxCtr, dispCoords)) return false;
+    if (!_projectPointToWin(boxCtr, dispCoords)) return false;
 
     // Direction vector is difference:
     _handleProjVec[0] = dispCoords[0] - winCoords[0];
@@ -539,7 +529,7 @@ void TranslateStretchManip::getScales(std::vector<double> &dmScales, std::vector
 //  This lookup table is how the extents are being rescaled in the for
 //  loop below.
 //
-void TranslateStretchManip::deScaleExtents(double extents[8][3])
+void TranslateStretchManip::deScaleExtents(double extents[8][3]) const
 {
     if (_dmTransform == NULL) return;
     if (_rpTransform == NULL) return;
@@ -584,7 +574,7 @@ void TranslateStretchManip::deScaleExtents(double extents[8][3])
     }
 }
 
-void TranslateStretchManip::deScaleExtents(double *extents)
+void TranslateStretchManip::deScaleExtents(double *extents) const
 {
     if (_dmTransform == NULL) return;
     if (_rpTransform == NULL) return;
@@ -1192,11 +1182,11 @@ void TranslateStretchManip::drawHitBox(double winCoord1[2], double winCoord2[2],
     glDisable(GL_BLEND);
 }
 
-// projectPointToWin returns true if point is in front of camera
+//_projectPointToWin returns true if point is in front of camera
 // resulting screen coords returned in 2nd argument.  Note that
 // OpenGL coords are 0 at bottom of window!
 //
-bool TranslateStretchManip::projectPointToWin(double cubeCoords[3], double winCoords[2])
+bool TranslateStretchManip::_projectPointToWin(double cubeCoords[3], double winCoords[2]) const
 {
     double   depth;
     GLdouble wCoords[2];
