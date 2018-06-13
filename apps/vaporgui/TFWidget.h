@@ -63,6 +63,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void setRange();
     void setRange(double min, double max);
     void updateHisto();
+    void refreshHistogram();
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
@@ -85,12 +86,20 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateMappingFrame();
     void enableTFWidget(bool state);
     void updateConstColorWidgets();
+    void checkForExternalChangesToHisto();
     bool autoUpdateHisto();
     string getCurrentVarName();
     VAPoR::MapperFunction *getCurrentMapperFunction();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
+
+    std::vector<double> _minExt;
+    std::vector<double> _maxExt;
+    int _cLevel;
+    int _refLevel;
+    int _timeStep;
+    string _varName;
 
     bool _autoUpdateHisto = false;
     bool _discreteColormap = false;

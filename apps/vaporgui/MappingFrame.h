@@ -383,6 +383,7 @@ class MappingFrame : public QGLWidget {
     VAPoR::DataMgr *_dataMgr;
     VAPoR::RenderParams *_rParams;
     bool _mousePressFlag;
+    bool _initialized;
     VAPoR::ParamsMgr *_paramsMgr;
 
     QStringList _axisTexts;
