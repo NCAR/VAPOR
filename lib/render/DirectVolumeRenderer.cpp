@@ -15,18 +15,6 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _volumeTextureUnit = 0;
     _colormapTextureUnit = 0;
     _volumeCoordinateTextureUnit = 0;
-
-    // Build a color map
-    DVRParams *     params = dynamic_cast<DVRParams *>(GetActiveParams());
-    MapperFunction *mapper = params->GetMapperFunc(params->GetVariableName());
-    _colormapSize = mapper->getNumEntries();
-    _colormap = new GLfloat[_colormapSize * 4];
-    for (int i = 0; i < _colormapSize; i++) {
-        _colormap[i * 4] = (GLfloat)i / (GLfloat)(_colormapSize - 1);
-        _colormap[i * 4 + 1] = _colormap[i * 4];
-        _colormap[i * 4 + 2] = _colormap[i * 4];
-        _colormap[i * 4 + 3] = 1.0f;
-    }
 }
 
 // Destructor
@@ -41,8 +29,6 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_volumeTextureUnit) glDeleteTextures(1, &_volumeTextureUnit);
     if (_colormapTextureUnit) glDeleteTextures(1, &_colormapTextureUnit);
     if (_volumeCoordinateTextureUnit) glDeleteTextures(1, &_volumeCoordinateTextureUnit);
-
-    if (_colormap) delete[] _colormap;
 }
 
 int DirectVolumeRenderer::_initializeGL()
@@ -68,6 +54,7 @@ int DirectVolumeRenderer::_initializeGL()
         rc = _shaderMgr->DefineEffect(_effectNameStr, "", _effectNameStr);
         if (rc < 0) {
             std::cerr << "DefineEffect() failed" << std::endl;
+            SetErrMsg("DefineEffect() failed");
             return -1;
         }
     }
@@ -79,7 +66,7 @@ int DirectVolumeRenderer::_initializeGL()
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, _colormapTextureUnit);
-    glTexImage1D(GL_TEXTURE_1D, 0, 4, _colormapSize, 0, GL_RGBA, GL_FLOAT, _colormap);
+    // glTexImage1D(    GL_TEXTURE_1D, 0, 4, _colormapSize, 0, GL_RGBA, GL_FLOAT, _colormap );
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -91,16 +78,47 @@ int DirectVolumeRenderer::_paintGL()
 {
     std::cout << "_paintGL() called" << std::endl;
 
-    /*
-    float s=10000;
-    glColor3f(1,1,1);
+    float s = 10000;
+    glColor3f(1, 1, 1);
     glBegin(GL_QUADS);
     glVertex2f(0, 0);
     glVertex2f(s, 0);
     glVertex2f(s, s);
     glVertex2f(0, s);
     glEnd();
-    */
 
     return 0;
+}
+
+void DirectVolumeRenderer::_saveCacheParams()
+{
+    DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
+    _cacheParams.varName = params->GetVariableName();
+    _cacheParams.ts = params->GetCurrentTimestep();
+    _cacheParams.level = params->GetRefinementLevel();
+    _cacheParams.lod = params->GetCompressionLevel();
+    params->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
+    MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
+    _cacheParams.colormap.resize(mapper->getNumEntries() * 4, 0.0f);
+    // colormap values aren't filled yet!
+}
+
+bool DirectVolumeRenderer::_isCacheDirty() const
+{
+    DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
+    if (_cacheParams.varName != params->GetVariableName()) return true;
+    if (_cacheParams.ts != params->GetCurrentTimestep()) return true;
+    if (_cacheParams.level != params->GetRefinementLevel()) return true;
+    if (_cacheParams.lod != params->GetCompressionLevel()) return true;
+
+    vector<double> min, max;
+    params->GetBox()->GetExtents(min, max);
+    if (_cacheParams.boxMin != min) return true;
+    if (_cacheParams.boxMax != max) return true;
+
+    MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
+    // colormap values aren't compared yet!!
+
+    return false;
 }

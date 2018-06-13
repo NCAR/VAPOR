@@ -36,8 +36,16 @@ protected:
 
 private:
     // C++ stuff
-    int      _colormapSize;
-    GLfloat *_colormap;
+    struct {
+        std::string          varName;
+        size_t               ts;
+        int                  level;
+        int                  lod;
+        std::vector<double>  boxMin, boxMax;
+        std::vector<GLfloat> colormap;
+    } _cacheParams;
+    void _saveCacheParams();
+    bool _isCacheDirty() const;
 
     // OpenGL stuff
     const std::string _effectNameStr = "DVR";
