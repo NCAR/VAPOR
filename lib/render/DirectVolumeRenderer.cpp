@@ -28,6 +28,42 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm,
     _volumeCoordinateTextureUnit = 0;
 }
 
+DirectVolumeRenderer::UserCoordinates::UserCoordinates() {
+    frontFace = NULL;
+    backFace = NULL;
+    rightFace = NULL;
+    leftFace = NULL;
+    topFace = NULL;
+    bottomFace = NULL;
+}
+
+DirectVolumeRenderer::UserCoordinates::~UserCoordinates() {
+    if (frontFace) {
+        delete[] frontFace;
+        frontFace = NULL;
+    }
+    if (backFace) {
+        delete[] backFace;
+        backFace = NULL;
+    }
+    if (rightFace) {
+        delete[] rightFace;
+        rightFace = NULL;
+    }
+    if (leftFace) {
+        delete[] leftFace;
+        leftFace = NULL;
+    }
+    if (topFace) {
+        delete[] topFace;
+        topFace = NULL;
+    }
+    if (bottomFace) {
+        delete[] bottomFace;
+        bottomFace = NULL;
+    }
+}
+
 // Destructor
 DirectVolumeRenderer::~DirectVolumeRenderer() {
     /* A few useful files from VAPOR2:
@@ -151,7 +187,8 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
                                             const float *leftFace,
                                             const float *topFace,
                                             const float *bottomFace,
-                                            const BBox &volumeBox,
+                                            const float *volumeMin,
+                                            const float *volumeMax,
                                             int bx,
                                             int by,
                                             int bz,
@@ -161,8 +198,9 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
     float deltaX = 1.0f / (bx - 1);
     float deltaY = 1.0f / (by - 1);
     float deltaZ = 1.0f / (bz - 1);
-    float volumeMin[3] = {volumeBox.minZ().x, volumeBox.minZ().y, volumeBox.minZ().z};
-    float volumeSpanInverse[3] = {1.0f / volumeBox.span().x, 1.0f / volumeBox.span().y, 1.0f / volumeBox.span().z};
+    float volumeSpanInverse[3] = {1.0f / (volumeMax[0] - volumeMin[0]),
+                                  1.0f / (volumeMax[1] - volumeMin[1]),
+                                  1.0f / (volumeMax[2] - volumeMin[2])};
     const float *ptr = NULL;
 
     // Render front face:
@@ -172,26 +210,28 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = frontFace + ((y + 1) * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[0] = x * deltaX;
-                gridCoord[1] = (y + 1) * deltaY;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[0] =   x      * deltaX;
+        gridCoord[1] =  (y + 1) * deltaY;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
 
             ptr = frontFace + (y * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[1] = y * deltaY;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[1] =  y * deltaY;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
         }
         glEnd();
@@ -203,26 +243,28 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = backFace + (y * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[0] = x * deltaX;
-                gridCoord[1] = y * deltaY;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[0] =  x * deltaX;
+        gridCoord[1] =  y * deltaY;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
 
             ptr = backFace + ((y + 1) * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[1] = (y + 1) * deltaY;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[1] =  (y + 1) * deltaY;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
         }
         glEnd();
@@ -234,26 +276,28 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
         glBegin(GL_TRIANGLE_STRIP);
         for (int y = 0; y < by; y++) {
             ptr = rightFace + ((z + 1) * by + y) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[1] = y * deltaY;
-                gridCoord[2] = (z + 1) * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[1] =   y      * deltaY;
+        gridCoord[2] =  (z + 1) * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
 
             ptr = rightFace + (z * by + y) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[2] = z * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[2] =  z * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
         }
         glEnd();
@@ -265,26 +309,28 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
         glBegin(GL_TRIANGLE_STRIP);
         for (int y = 0; y < by; y++) {
             ptr = leftFace + (z * by + y) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[1] = y * deltaY;
-                gridCoord[2] = z * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[1] =  y * deltaY;
+        gridCoord[2] =  z * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
 
             ptr = leftFace + ((z + 1) * by + y) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[2] = (z + 1) * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[2] =  (z + 1) * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
         }
         glEnd();
@@ -296,26 +342,28 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = topFace + (z * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[0] = x * deltaX;
-                gridCoord[2] = z * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[0] =  x * deltaX;
+        gridCoord[2] =  z * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
 
             ptr = topFace + ((z + 1) * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[2] = (z + 1) * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[2] =  (z + 1) * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
         }
         glEnd();
@@ -327,26 +375,28 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace,
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = bottomFace + ((z + 1) * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[0] = x * deltaX;
-                gridCoord[2] = (z + 1) * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[0]  =   x * deltaX;
+        gridCoord[2]  =  (z + 1) * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
 
             ptr = bottomFace + (z * bx + x) * 3;
-            realWorldCoord[0] = (*ptr - volumeMin[0]) * volumeSpanInverse[0];
-            realWorldCoord[1] = (*(ptr + 1) - volumeMin[1]) * volumeSpanInverse[1];
-            realWorldCoord[2] = (*(ptr + 2) - volumeMin[2]) * volumeSpanInverse[2];
-            glColor3fv(realWorldCoord);
-            if (frontFacing) {
-                gridCoord[2] = z * deltaZ;
-                glTexCoord3fv(gridCoord);
-            }
+            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
+      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
+      glColor3fv(       realWorldCoord );
+      if( frontFacing )
+      {
+        gridCoord[2]  =  z * deltaZ;
+        glTexCoord3fv(  gridCoord );
+      }*/
             glVertex3fv(ptr);
         }
         glEnd();
