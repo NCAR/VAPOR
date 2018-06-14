@@ -46,7 +46,9 @@ protected:
 
 private:
     // C++ stuff
-    struct {
+    const std::string   _effectNameStr     = "DVR";
+    struct 
+    {
         std::string varName;
         size_t ts;
         int level;
@@ -57,10 +59,22 @@ private:
     void _saveCacheParams();
     bool _isCacheDirty() const;
 
+    struct UserCoordinates
+    {
+        float *frontFace, *backFace;     // user coordinates, size == bx * by * 3
+        float *rightFace, *leftFace;     // user coordinates, size == by * bz * 3
+        float *topFace,   *bottomFace;   // user coordinates, size == bx * bz * 3
+        int    dimX, dimY, dimZ;         // num. of samples along each axis
+        float  volumeMin[3], volumeMax[3];
+
+        UserCoordinates();    // constructor
+        ~UserCoordinates();   // destructor
+    }; 
+
+    UserCoordinates _userCoordinates;
+
 
     // OpenGL stuff
-    const std::string   _effectNameStr     = "DVR";
-
     GLuint              _volumeTextureUnit;             // GL_TEXTURE0
     GLuint              _colormapTextureUnit;           // GL_TEXTURE1
     //GLuint              _coordmapTextureUnit;         // GL_TEXTURE2 ??
@@ -70,14 +84,15 @@ private:
     // Draw faces using triangle strips
     // Used in the 1st pass volume rendering
     //
-    virtual void _drawVolumeFaces( const float* frontFace,
+    virtual void _drawVolumeFaces( const float* frontFace, 
                                    const float* backFace,
                                    const float* rightFace,
                                    const float* leftFace,
-                                   const float* topFace,
+                                   const float* topFace, 
                                    const float* bottomFace,
-                                   const BBox    &volumeBox,
-                                         int     bx,
+                                   const float* volumeMin,  // array of 3 values
+                                   const float* volumeMax,
+                                         int     bx,      
                                          int     by,
                                          int     bz,
                                          bool    frontFacing );
