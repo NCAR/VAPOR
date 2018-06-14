@@ -154,25 +154,25 @@ bool TranslateStretchManip::MouseEvent(
 	double screenCoords[2] = {vscreenCoords[0], vscreenCoords[1]};
 
 	if (_selectedHandle < 0)
-		_selectedHandle = mouseIsOverHandle(screenCoords, handleMidpoint);
+		_selectedHandle = _mouseIsOverHandle(screenCoords, handleMidpoint);
 
 	if (_selectedHandle < 0) return false;
 
 	if (release) { // Release
-		mouseRelease(screenCoords);
+		_mouseRelease(screenCoords);
 	}
 	else if (buttonNum == _buttonNum) { // Dragging
 		if (!_mouseDownHere) return false;
-		mouseDrag(screenCoords, handleMidpoint);
+		_mouseDrag(screenCoords, handleMidpoint);
 	}
 	else if (_buttonNum == 0) { // Press
-		mousePress(screenCoords, handleMidpoint, buttonNum);
+		_mousePress(screenCoords, handleMidpoint, buttonNum);
 	}
 
 	return true;
 }
 
-void TranslateStretchManip::mouseDrag(
+void TranslateStretchManip::_mouseDrag(
 	double screenCoords[2], 
 	double handleMidpoint[3]
 ) {
@@ -187,7 +187,7 @@ void TranslateStretchManip::mouseDrag(
 	}
 }
 
-void TranslateStretchManip::mousePress(
+void TranslateStretchManip::_mousePress(
 	double screenCoords[2], 
 	double handleMidpoint[3],
 	int buttonNum
@@ -199,7 +199,7 @@ void TranslateStretchManip::mousePress(
 	setMouseDown(true);
 }
 
-void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
+void TranslateStretchManip::_mouseRelease(double screenCoords[2]) {
 	if (_selectedHandle >= 0){
 		int axis = (_selectedHandle <3) ? (2-_selectedHandle): (_selectedHandle-3);
 		//Convert _dragDistance to world coords:
@@ -231,8 +231,8 @@ void TranslateStretchManip::mouseRelease(double screenCoords[2]) {
 	setMouseDown(false);
 }
 
-int TranslateStretchManip::mouseIsOverHandle(
-	double screenCoords[2], 
+int TranslateStretchManip::_mouseIsOverHandle(
+	const double screenCoords[2], 
 	double handleMid[3]
 ) const {
 	
@@ -298,7 +298,7 @@ bool TranslateStretchManip::pointIsOnQuad(
 	double cor2[3], 
 	double cor3[3], 
 	double cor4[3], 
-	double pickPt[2])
+	const double pickPt[2])
 const {
 	double winCoord1[2];
 	double winCoord2[2];
@@ -318,7 +318,10 @@ const {
 }
 
 int TranslateStretchManip::
-pointIsOnBox(double corners[8][3], double pickPt[2]) const {
+pointIsOnBox(
+	double corners[8][3], 
+	const double pickPt[2]) const 
+{
 	//front (-Z)
 	if (pointIsOnQuad(corners[0],corners[1],corners[3],corners[2],pickPt)) return 2;
 	//back (+Z)
@@ -390,33 +393,10 @@ makeHandleFaces(
 	return newPosition;
 }
 
-bool TranslateStretchManip::ReconstructCamera( 
-	double position[3], double upVec[3], double viewDir[3]
-) const {
-
-	double m[16];
-	glGetDoublev(GL_MODELVIEW_MATRIX, m); 
-
-	double minv[16];
-
-	int rc = minvert(m, minv);
-	if (rc<0) return(false);
-
-	vscale(minv+8, -1.0);
-
-	for (int i = 0; i<3; i++) {
-		position[i] = minv[12+i]; //position vector is minv[12..14]
-		upVec[i] = minv[4+i]; //up vector is minv[4..6]
-		viewDir[i] = minv[8+i]; //view direction is minv[8..10]
-	}   
-	vnormal(upVec);
-	vnormal(viewDir);
-
-	return(true);
-}
-
-bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNum){
-
+bool TranslateStretchManip::startHandleSlide(
+	const double mouseCoords[2], 
+	int handleNum
+){
 	// When the mouse is first pressed over a handle, 
 	// need to save the
 	// windows coordinates of the click, as well as
@@ -464,7 +444,10 @@ bool TranslateStretchManip::startHandleSlide(double mouseCoords[2], int handleNu
 // The line starts at the mouseDownPosition, and points in the
 // direction resulting from projecting to the screen the axis 
 // associated with the dragHandle.  Returns false on error.
-bool TranslateStretchManip::projectPointToLine(double mouseCoords[2], double projCoords[2]){
+bool TranslateStretchManip::projectPointToLine(
+	const double mouseCoords[2], 
+	double projCoords[2]
+) {
 	//  State saved at a mouse press is:
 	//	mouseDownPoint[2] = P
 	//  _handleProjVec[2] unit vector (U)
@@ -488,8 +471,9 @@ bool TranslateStretchManip::projectPointToLine(double mouseCoords[2], double pro
 //
 bool TranslateStretchManip::pixelToVector(
 	double winCoords[2], 
-	double dirVec[3], double strHandleMid[3])
-{
+	double dirVec[3], 
+	const double strHandleMid[3]
+) {
 
 	GLdouble pt[3];
 	//Project handleMid to find its z screen coordinate:
@@ -503,8 +487,13 @@ bool TranslateStretchManip::pixelToVector(
 		_projectionMatrix, viewport,&screenx,&screeny, &screenz
 	);   
 	//Obtain the coords of a point in view:
-	bool success = (0 != gluUnProject((GLdouble)winCoords[0],(GLdouble)winCoords[1],screenz, _modelViewMatrix,
-		_projectionMatrix, viewport,pt, pt+1, pt+2));
+	bool success = (0 != gluUnProject(
+		(GLdouble)winCoords[0],
+		(GLdouble)winCoords[1],
+		screenz, _modelViewMatrix,
+		_projectionMatrix, viewport,
+		pt, pt+1, pt+2)
+	);
 	if (success){
 		//Subtract camera coords to get a direction vector:
 		vsub(pt, _cameraPosition, dirVec);
@@ -552,30 +541,6 @@ void TranslateStretchManip::makeHandleExtents(
 	}
 	deScaleExtents(handleExtents);
 	return;
-}
-
-void TranslateStretchManip::getScales(
-	std::vector<double> &dmScales, 
-	std::vector<double> &rpScales) 
-{
-	if (_dmTransform==NULL) {
-		dmScales.push_back(1.f);
-		dmScales.push_back(1.f);
-		dmScales.push_back(1.f);
-	}
-	else {
-		dmScales = _dmTransform->GetScales();
-		assert(dmScales.size()  == 3);
-	}
-	if (_rpTransform==NULL) {
-		rpScales.push_back(1.f);
-		rpScales.push_back(1.f);
-		rpScales.push_back(1.f);
-	}
-	else {
-		rpScales = _rpTransform->GetScales();
-		assert(rpScales.size()  == 3);
-	}
 }
 
 // If we are deScaling a cube of the form extents[8][3], then that
@@ -790,7 +755,7 @@ rayHandleIntersect(double ray[3],
 
 //Renders handles and box
 //If it is stretching, it only moves the one handle that is doing the stretching
-void TranslateStretchManip::render(){
+void TranslateStretchManip::Render(){
 	transformMatrix(_dmTransform);
 	if (_rpTransform != NULL)
 		transformMatrix(_rpTransform);
@@ -861,7 +826,7 @@ double TranslateStretchManip::getPixelSize() const {
 //the highlightedFace is not the same as the selectedFace!!
 //
 
-void TranslateStretchManip::drawBoxFaces(){
+void TranslateStretchManip::drawBoxFaces() const {
 	double corners[8][3];
 
 	// -X -Y -Z
@@ -907,7 +872,7 @@ void TranslateStretchManip::drawBoxFaces(){
 
 	if (_selectedHandle >= 0) {
 		if (_isStretching) 
-			stretchCorners(corners);
+			_stretchCorners(corners);
 		else if (_dragDistance != 0.)
 			translateCorners(corners);
 	}
@@ -954,7 +919,7 @@ void TranslateStretchManip::drawBoxFaces(){
 	glDepthMask(GL_TRUE);
 }
 
-void TranslateStretchManip::stretchCorners(double corners[8][3]) {
+void TranslateStretchManip::_stretchCorners(double corners[8][3]) const {
 	int axis = (_selectedHandle < 3) ? (2-_selectedHandle):(_selectedHandle-3);
 
 	// X axis
@@ -980,7 +945,7 @@ void TranslateStretchManip::stretchCorners(double corners[8][3]) {
 	}
 }
 
-void TranslateStretchManip::translateCorners(double corners[8][3]) {
+void TranslateStretchManip::translateCorners(double corners[8][3]) const {
 	int axis = (_selectedHandle < 3) ? (2-_selectedHandle):(_selectedHandle-3);
 	
 	if (axis==0) {
@@ -997,42 +962,42 @@ void TranslateStretchManip::translateCorners(double corners[8][3]) {
 	}
 }
 
-void TranslateStretchManip::moveMinusXCorners(double corners[8][3]) {
+void TranslateStretchManip::moveMinusXCorners(double corners[8][3]) const {
 	corners[2][0] += _dragDistance;
 	corners[0][0] += _dragDistance;
 	corners[1][0] += _dragDistance;
 	corners[3][0] += _dragDistance;
 }
 
-void TranslateStretchManip::movePlusXCorners(double corners[8][3]) {
+void TranslateStretchManip::movePlusXCorners(double corners[8][3]) const {
 	corners[4][0] += _dragDistance;
 	corners[5][0] += _dragDistance;
 	corners[6][0] += _dragDistance;
 	corners[7][0] += _dragDistance;
 }
 
-void TranslateStretchManip::moveMinusYCorners(double corners[8][3]) {
+void TranslateStretchManip::moveMinusYCorners(double corners[8][3]) const {
 	corners[2][1] += _dragDistance;
 	corners[3][1] += _dragDistance;
 	corners[6][1] += _dragDistance;
 	corners[7][1] += _dragDistance;
 }
 
-void TranslateStretchManip::movePlusYCorners(double corners[8][3]) {
+void TranslateStretchManip::movePlusYCorners(double corners[8][3]) const {
 	corners[0][1] += _dragDistance;
 	corners[1][1] += _dragDistance;
 	corners[4][1] += _dragDistance;
 	corners[5][1] += _dragDistance;
 }
 
-void TranslateStretchManip::moveMinusZCorners(double corners[8][3]) {
+void TranslateStretchManip::moveMinusZCorners(double corners[8][3]) const {
 	corners[0][2] += _dragDistance;
 	corners[2][2] += _dragDistance;
 	corners[4][2] += _dragDistance;
 	corners[6][2] += _dragDistance;
 }
 
-void TranslateStretchManip::movePlusZCorners(double corners[8][3]) {
+void TranslateStretchManip::movePlusZCorners(double corners[8][3]) const {
 	corners[1][2] += _dragDistance;
 	corners[3][2] += _dragDistance;
 	corners[5][2] += _dragDistance;
@@ -1043,7 +1008,7 @@ void TranslateStretchManip::movePlusZCorners(double corners[8][3]) {
 void TranslateStretchManip::
 captureMouseDown(int handleNum, 
 	int buttonNum, 
-	double strHandleMid[3])
+	const double strHandleMid[3])
 {
 	_buttonNum = buttonNum;
 
@@ -1077,7 +1042,7 @@ captureMouseDown(int handleNum,
 //
 
 void TranslateStretchManip::
-slideHandle(int handleNum, double movedRay[3], bool constrain){
+slideHandle(int handleNum, const double movedRay[3], bool constrain){
 	double normalVector[3] = {0.f,0.f,0.f};
 	double q[3], r[3], w[3];
 	assert(handleNum >= 0);
@@ -1110,7 +1075,7 @@ slideHandle(int handleNum, double movedRay[3], bool constrain){
 
 	//Do this calculation in stretched world coords
 	double sizes[3];
-	int ndims = 3;//_extents.size()/2;
+	int ndims = 3;
 	for (int i=0; i<ndims; i++) {
 		sizes[i] = _extents[i+ndims] - _extents[i];
 	}
@@ -1194,13 +1159,13 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double* handleExt
 // in a good state to perform rendering.
 //
 // VizWin has an openGL setup and cleanup sequence which must be applied
-// during VizWin::mousePressEvent().  When done as shown below, the hitboxes
+// during VizWin::_mousePressEvent().  When done as shown below, the hitboxes
 // will be colored green during mouse press events.  Hold the mouse to 
 // illuminate the boxes.
 //
 // VizWin setup sequence:
 //
-// void VizWin:;mousePressEvent(QMouseEvent* e) {
+// void VizWin:;_mousePressEvent(QMouseEvent* e) {
 // 		...
 // 		...
 // 		glMatrixMode(GL_PROJECTION);	// Begin setup sequence
@@ -1269,7 +1234,10 @@ void TranslateStretchManip::drawHitBox(
 //resulting screen coords returned in 2nd argument.  Note that
 //OpenGL coords are 0 at bottom of window!
 //
-bool TranslateStretchManip::_projectPointToWin(double cubeCoords[3], double winCoords[2])const{
+bool TranslateStretchManip::_projectPointToWin(
+	const double cubeCoords[3], 
+	double winCoords[2]) const
+{
 	double depth;
 	GLdouble wCoords[2];
 	GLdouble cbCoords[3];
