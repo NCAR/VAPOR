@@ -55,6 +55,13 @@ private:
     // GLuint              _coordmapTextureUnit;         // GL_TEXTURE2 ??
     GLuint _volumeCoordinateTextureUnit;    // GL_TEXTURE3
 
+    //
+    // Draw faces using triangle strips
+    // Used in the 1st pass volume rendering
+    //
+    virtual void _drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace, const BBox &volumeBox,
+                                  int bx, int by, int bz, bool frontFacing);
+
 };    // End of class DirectVolumeRenderer
 
 };    // End of namespace VAPoR
