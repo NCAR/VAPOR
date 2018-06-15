@@ -25,6 +25,9 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
     leftFace = NULL;
     topFace = NULL;
     bottomFace = NULL;
+    dims[0] = 0;
+    dims[1] = 0;
+    dims[2] = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
@@ -53,6 +56,87 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
         delete[] bottomFace;
         bottomFace = NULL;
     }
+}
+
+void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *grid)
+{
+    std::vector<size_t> gridDims = grid->GetDimensions();
+    dims[0] = gridDims[0];
+    dims[1] = gridDims[1];
+    dims[2] = gridDims[2];
+    double buf[3];
+
+    // Save front face user coordinates ( z == dims[2] - 1 )
+    if (frontFace) delete[] frontFace;
+    frontFace = new float[dims[0] * dims[1] * 3];
+    size_t idx = 0;
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, y, dims[2] - 1, buf[0], buf[1], buf[2]);
+            frontFace[idx++] = (float)buf[0];
+            frontFace[idx++] = (float)buf[1];
+            frontFace[idx++] = (float)buf[2];
+        }
+
+    // Save back face user coordinates ( z == 0 )
+    if (backFace) delete[] backFace;
+    backFace = new float[dims[0] * dims[1] * 3];
+    idx = 0;
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, y, 0, buf[0], buf[1], buf[2]);
+            backFace[idx++] = (float)buf[0];
+            backFace[idx++] = (float)buf[1];
+            backFace[idx++] = (float)buf[2];
+        }
+
+    // Save right face user coordinates ( x == dims[0] - 1 )
+    if (rightFace) delete[] rightFace;
+    rightFace = new float[dims[1] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t y = 0; y < dims[1]; y++) {
+            grid->GetUserCoordinates(dims[0] - 1, y, z, buf[0], buf[1], buf[2]);
+            rightFace[idx++] = (float)buf[0];
+            rightFace[idx++] = (float)buf[1];
+            rightFace[idx++] = (float)buf[2];
+        }
+
+    // Save left face user coordinates ( x == 0 )
+    if (leftFace) delete[] leftFace;
+    leftFace = new float[dims[1] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t y = 0; y < dims[1]; y++) {
+            grid->GetUserCoordinates(0, y, z, buf[0], buf[1], buf[2]);
+            leftFace[idx++] = (float)buf[0];
+            leftFace[idx++] = (float)buf[1];
+            leftFace[idx++] = (float)buf[2];
+        }
+
+    // Save top face user coordinates ( y == dims[1] - 1 )
+    if (topFace) delete[] topFace;
+    topFace = new float[dims[0] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, dims[1] - 1, z, buf[0], buf[1], buf[2]);
+            topFace[idx++] = (float)buf[0];
+            topFace[idx++] = (float)buf[1];
+            topFace[idx++] = (float)buf[2];
+        }
+
+    // Save bottom face user coordinates ( y == 0 )
+    if (bottomFace) delete[] bottomFace;
+    bottomFace = new float[dims[0] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, 0, z, buf[0], buf[1], buf[2]);
+            bottomFace[idx++] = (float)buf[0];
+            bottomFace[idx++] = (float)buf[1];
+            bottomFace[idx++] = (float)buf[2];
+        }
 }
 
 // Destructor
@@ -115,7 +199,7 @@ int DirectVolumeRenderer::_paintGL()
 {
     std::cout << "_paintGL() called" << std::endl;
 
-    if (_isCacheDirty()) _saveCacheParams();
+    if (_isCacheDirty(true)) _saveCacheParams(true);
 
     int rc = _shaderMgr->EnableEffect(_effectNameStr);
     if (rc < 0) {
@@ -134,7 +218,7 @@ int DirectVolumeRenderer::_paintGL()
     return 0;
 }
 
-void DirectVolumeRenderer::_saveCacheParams()
+void DirectVolumeRenderer::_saveCacheParams(bool considerUserCoordinates)
 {
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
     _cacheParams.varName = params->GetVariableName();
@@ -146,9 +230,21 @@ void DirectVolumeRenderer::_saveCacheParams()
     MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
     _cacheParams.colormap.resize(mapper->getNumEntries() * 4, 0.0f);
     // colormap values aren't filled yet!
+
+    if (considerUserCoordinates) {
+        VAPoR::StructuredGrid *grid =
+            dynamic_cast<VAPoR::StructuredGrid *>(_dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax));
+        if (grid != NULL) {
+            _cacheParams.userCoords.Fill(grid);
+        } else {
+            std::cerr << "_saveCacheParams() grid isn't StructuredGrid" << std::endl;
+        }
+
+        delete grid;
+    }
 }
 
-bool DirectVolumeRenderer::_isCacheDirty() const
+bool DirectVolumeRenderer::_isCacheDirty(bool considerUserCoordinates) const
 {
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
     if (_cacheParams.varName != params->GetVariableName()) return true;
@@ -377,3 +473,5 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         glEnd();
     }
 }
+
+void DirectVolumeRenderer::_fillUserCoordinates() {}
