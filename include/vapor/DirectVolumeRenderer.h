@@ -73,7 +73,8 @@ private:
 
     CacheParams _cacheParams;
     void _saveCacheParams( bool considerUserCoord );    // True: consider user coordinates too
-    bool _isCacheDirty( bool considerUserCoord ) const; // False: not consider user coordinates
+                                                        // False: not consider user coordinates
+    bool _isCacheDirty( ) const; 
 
 
     // OpenGL stuff
@@ -92,13 +93,10 @@ private:
                                    const float* leftFace,
                                    const float* topFace, 
                                    const float* bottomFace,
-                                   const float* volumeMin,  // array of 3 values
-                                   const float* volumeMax,
-                                         int     bx,      
-                                         int     by,
-                                         int     bz,
+                                   const double* volumeMin,  // array of 3 values
+                                   const double* volumeMax,
+                                   const size_t* dims,       // num. of grid points
                                          bool    frontFacing );
-    void _fillUserCoordinates();
 
 };  // End of class DirectVolumeRenderer
 
