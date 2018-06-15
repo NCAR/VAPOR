@@ -37,31 +37,20 @@ namespace VAPoR {
 //! \class Manip
 //! \ingroup Public_Render
 //! \brief A class that supports manipulators in in a VAPOR Visualizer
-//! \author Alan Norton
+//! \author Alan Norton, Scott Pearse
 //! \version 3.0
-//! \date	July 2015
+//! \date	July 2015, June 2018
 //!
 //! Manip class is a pure virtual class that supports
 //! manipulators in the VAPOR Visualizer scene
-//! Currently two subclasses, TranslateStretchManip and TranslateRotateManip are
-//! supported.
-//! TranslateStretchManip is used for axis-aligned manipulators.
-//! TranslateRotateManip supports manipulators that can be rotated to arbitrary
-//! orientation.  To use a Manip, programmers must invoke
-//! MouseModeParams::RegisterMouseMode() for the Params class associated with the
-//! Manip.
-//! This is called in either MouseModeParams::RegisterMouseModes()
-//! [for built-in Manips] or VAPoR::InstallExtensionMouseModes() [for Manips on
-//! extension Params classes]
 //!
 class RENDER_API Manip {
 public:
-    // Manip(Visualizer* win) {_vis = win;}
     Manip(){};
     virtual ~Manip() {}
 
     //! Pure virtual function renders the geometry of the Manip.
-    virtual void render() = 0;
+    virtual void Render() = 0;
 
     //! Update the box manipulator's extents
     //! \param[in] llc : The lower-left corner to update the manipulator with
@@ -97,12 +86,9 @@ public:
     //! \param[out] urc - The upper-right coordinates of the manipulator
     virtual void GetBox(std::vector<double> &llc, std::vector<double> &urc) const = 0;
 
-private:
+protected:
     //! Pure virtual method: Determine which handle (if any) is under mouse
     //! \param[in] mouse coordinates in screen
-    /*! \param[in] boxExtents are extents of full box to which the handles are
-     * attached
-     */
     /*! \param[out] handleMid is the coordinates of the center of the selected
      * handle (if selected).
      */
@@ -116,12 +102,29 @@ private:
      */
     void _drawCubeFaces(double *extents, bool isSelected);
 
+    //! Handles logic for a mouse-press event on one of the manip handles
+    //! \param[in] screenCoords is a pixel location on the visualizer window
+    /*! \param[in] handleMidpoint is the center of a handle to test that gets
+     *	tested against the screenCoords array.
+     */
+    /*! param[in] buttonNum is the button of the mouse that is clicked, which
+     *  determines whether we are moving or stretching the manipulator.
+     */
     virtual void _mousePress(double screenCoords[2], double handleMidpoint[3], int buttonNum) = 0;
 
+    //! Handles logic for moving a handle while a mouse button is held down.
+    //! param[in] screenCoords is the current position of the mouse cursor
+    //! param[in] handleMidpoint is the center of the handle being moved
     virtual void _mouseDrag(double screenCoords[2], double handleMidpoint[3]) = 0;
 
+    /*! Handles logic to set the current extents of the manipulator, held in
+     *  the _selection array
+     */
+    //! param[in] screenCoords - coordinates of the cursor upon mose release
     virtual void _mouseRelease(double screenCoords[2]) = 0;
 
+    //! Adjust the corners of the manipulator extents according to _dragDistance
+    //! param[in] corners describes the bounding box of the manipulator
     virtual void _stretchCorners(double corners[8][3]) const = 0;
 
     int                _buttonNum;
@@ -164,24 +167,17 @@ public:
 private:
     //! Determine if the mouse is over one of the manip handles.
     //! \param[in] screenCoords x,y screen position of mouse
-    //! \param[in] stretchedBoxExtents Extents of manip in stretched coordinates
     //! \param[out] handleMid coordinates of handle selected
     //! \return index of handle, or -1 if none.
-    int mouseIsOverHandle(const double screenCoords[2], double handleMid[3]) const;
-
-    //! Determine the current handle index that is being dragged
-    //! \return handle index
-    virtual int draggingHandle() const { return _selectedHandle; }
+    int _mouseIsOverHandle(const double screenCoords[2], double handleMid[3]) const;
 
     //! Method to be invoked when the mouse if first pressed over a handle.
     //! \param[in] handleNum is handle index 0..5
-    //! \param[in] camPos is camera coordinates in world (unstretched) coords
-    //! \param[in] dirVec is vector from camera to handle in unstretched coords
     //! \param[in] buttonNum indicates which mouse button was pressed.
     /*! \param[out] strHandleMid specified 3D coordinates of handle middle in
      * stretched coordinates.
      */
-    virtual void captureMouseDown(int handleNum, int buttonNum, const double strHandleMid[3]);
+    virtual void _captureMouseDown(int handleNum, int buttonNum, const double strHandleMid[3]);
 
     /*! Method to be invoked when the mouse is dragging a manip handle, from
      * mouse move event.
@@ -191,14 +187,11 @@ private:
     /*! \param[in] constrain is true if the manip is constrained to stay inside
      * full domain.
      */
-    // virtual void slideHandle(int handleNum, double movedRay[3]);
     virtual void slideHandle(int handleNum, const double movedRay[3], bool constrain);
 
     //! Method invoked when manip handle drag begins, invoked from VizWin.
-    //! \param[in] viz Visualizer associated with this Manip
     //! \param[in] mouseCoords coordinates where mouse is pressed.
-    //! \param[in] handle index over which the mouse is pressed
-    //! \param[in] p Params that owns the Manipulator
+    //! \param[in] handleNum index over which the mouse is pressed
     //! \return true if successful
     bool startHandleSlide(const double mouseCoords[2], int handleNum);
 
@@ -228,14 +221,46 @@ private:
     //! \return true if successful
     bool pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3]);
 
+    //! Method to render the faces of the manipulator handlebars
     virtual void drawBoxFaces() const;
+
+    //! Method to indicate whether a screencoordinate that is projected
+    //! into the scene intersects the coordinates of a cube face
+    //! \param[in] cor1 first corner
+    //! \param[in] cor2 second corner
+    //! \param[in] cor3 third corner
+    //! \param[in] cor4 fourth corner
+    //! \param[in] pickPt the screen coordinate being projected into the scene
+    //! \return true if the projected point intesects the quad
     virtual bool pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], const double pickPt[2]) const;
-    virtual int  pointIsOnBox(double corners[8][3], const double pkPt[2]) const;
-    double       getPixelSize() const;
-    void         transformMatrix(VAPoR::Transform *transform);
-    void         deScaleExtents(double *extents) const;
-    void         deScaleExtents(double extents[8][3]) const;
-    void         drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord3[2], double winCoord4[2]);
+
+    //! Method to indicate whether a screencoordinate that is projected
+    //! into the scene intersects the coordinates of a 3D cube
+    //! \param[in] corners The corners constraining the extents of a handlebar
+    //! \param[in] pickPt the screen coordinate being projected into the scene
+    virtual int pointIsOnBox(double corners[8][3], const double pkPt[2]) const;
+
+    double getPixelSize() const;
+
+    //! Method to scale, translate, or rotate the coordinates of the manipulator
+    //! param[in] - the current dataset or renderer transform to operate upon
+    void transformMatrix(VAPoR::Transform *transform);
+
+    //! Method to remove the scaling of the manipulator extents
+    //! param[in] extents are the current region of the manipulator
+    void deScaleExtents(double *extents) const;
+
+    //! Method to remove the scaling of the manipulator extents
+    //! param[in] extents are the current region of the manipulator
+    void deScaleExtents(double extents[8][3]) const;
+
+    //! Debug tool to draw the hitbox of a manipulator handle.  This should
+    //! align with the window-coordinates of the actual handle.
+    //! param[in] winCoord1 - first corner of a 2D quad on the screen
+    //! param[in] winCoord2 - secdond corner of a 2D quad on the screen
+    //! param[in] winCoord3 - third corner of a 2D quad on the screen
+    //! param[in] winCoord4 - fourth corner of a 2D quad on the screen
+    void drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord3[2], double winCoord4[2]);
 
     //! Method that draws a line connecting a handle to the box center
     //! \param[in] handleNum index of handle
@@ -283,18 +308,18 @@ private:
     //! \return true if point is in front of camera.
     bool _projectPointToWin(const double cubeCoords[3], double winCoords[2]) const;
 
-    void mousePress(double screenCoords[2], double handleMidpoint[3], int buttonNum);
-    void mouseDrag(double screenCoords[2], double handleMidpoint[3]);
-    void mouseRelease(double screenCoords[2]);
-    void stretchCorners(double corners[8][3]) const;
-    void translateCorners(double corners[8][3]) const;
-    void moveMinusXCorners(double corners[8][3]) const;
-    void moveMinusYCorners(double corners[8][3]) const;
-    void moveMinusZCorners(double corners[8][3]) const;
-    void movePlusXCorners(double corners[8][3]) const;
-    void movePlusYCorners(double corners[8][3]) const;
-    void movePlusZCorners(double corners[8][3]) const;
-    void constrainExtents();
+    void _mousePress(double screenCoords[2], double handleMidpoint[3], int buttonNum);
+    void _mouseDrag(double screenCoords[2], double handleMidpoint[3]);
+    void _mouseRelease(double screenCoords[2]);
+    void _stretchCorners(double corners[8][3]) const;
+    void _translateCorners(double corners[8][3]) const;
+    void _moveMinusXCorners(double corners[8][3]) const;
+    void _moveMinusYCorners(double corners[8][3]) const;
+    void _moveMinusZCorners(double corners[8][3]) const;
+    void _movePlusXCorners(double corners[8][3]) const;
+    void _movePlusYCorners(double corners[8][3]) const;
+    void _movePlusZCorners(double corners[8][3]) const;
+    void _constrainExtents();
 
     bool              _isStretching;
     bool              _constrain;

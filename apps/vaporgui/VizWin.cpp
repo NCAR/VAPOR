@@ -784,5 +784,5 @@ void VizWin::updateManip(bool initialize)
 
     _manip->Update(llc, urc, minExts, maxExts, cameraPosition, mv, proj, windowSize, rpTransform, dmTransform, constrain);
 
-    _manip->render();
+    _manip->Render();
 }
