@@ -892,5 +892,5 @@ void VizWin::updateManip(bool initialize) {
 		constrain
 	);
 
-	_manip->render();
+	_manip->Render();
 }
