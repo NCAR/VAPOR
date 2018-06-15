@@ -88,6 +88,17 @@ public:
         hsvToRgb(hsv, rgb);
     }
 
+    //! Determine the color (in RGB)  and opacity at a data point
+    //! \param[in] point Data value
+    //! \param[out] rgb r,g,b, afloats
+    void rgbaValue(float point, float rgba[3]) const
+    {
+        float hsv[3];
+        hsvValue(point, hsv, hsv + 1, hsv + 2);
+        hsvToRgb(hsv, rgba);
+        rgba[3] = getOpacityValueData(point);
+    }
+
     //! Make the opacity map completely opaque (opacity 1)
     void setOpaque();
 
