@@ -869,5 +869,5 @@ void VizWin::updateManip(bool initialize) {
         rpTransform, dmTransform,
         constrain);
 
-    _manip->render();
+    _manip->Render();
 }

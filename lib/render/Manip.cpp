@@ -193,7 +193,7 @@ void TranslateStretchManip::_mousePress(
     int buttonNum) {
     double dirVec[3];
     pixelToVector(screenCoords, dirVec, handleMidpoint);
-    captureMouseDown(_selectedHandle, buttonNum, handleMidpoint);
+    _captureMouseDown(_selectedHandle, buttonNum, handleMidpoint);
     startHandleSlide(screenCoords, _selectedHandle);
     setMouseDown(true);
 }
@@ -221,7 +221,7 @@ void TranslateStretchManip::_mouseRelease(double screenCoords[2]) {
     }
 
     if (_constrain)
-        constrainExtents();
+        _constrainExtents();
 
     _dragDistance = 0.f;
     _selectedHandle = -1;
@@ -274,7 +274,7 @@ int TranslateStretchManip::_mouseIsOverHandle(
     return -1;
 }
 
-void TranslateStretchManip::constrainExtents() {
+void TranslateStretchManip::_constrainExtents() {
     for (int i = 0; i < 3; i++) {
         // correct selection minimum
         if (_selection[i] < _extents[i])
@@ -892,7 +892,7 @@ void TranslateStretchManip::drawBoxFaces() const {
         if (_isStretching)
             _stretchCorners(corners);
         else if (_dragDistance != 0.)
-            translateCorners(corners);
+            _translateCorners(corners);
     }
 
     //Now render the edges:
@@ -943,77 +943,77 @@ void TranslateStretchManip::_stretchCorners(double corners[8][3]) const {
     // X axis
     if (axis == 0) {
         if (_selectedHandle == 2)
-            moveMinusXCorners(corners);
+            _moveMinusXCorners(corners);
         else if (_selectedHandle == 3)
-            movePlusXCorners(corners);
+            _movePlusXCorners(corners);
     }
     // Y axis
     else if (axis == 1) {
         if (_selectedHandle == 4)
-            moveMinusYCorners(corners);
+            _moveMinusYCorners(corners);
         else if (_selectedHandle == 1)
-            movePlusYCorners(corners);
+            _movePlusYCorners(corners);
     }
     // Z axis
     else if (axis == 2) {
         if (_selectedHandle == 0)
-            moveMinusZCorners(corners);
+            _moveMinusZCorners(corners);
         else if (_selectedHandle == 5)
-            movePlusZCorners(corners);
+            _movePlusZCorners(corners);
     }
 }
 
-void TranslateStretchManip::translateCorners(double corners[8][3]) const {
+void TranslateStretchManip::_translateCorners(double corners[8][3]) const {
     int axis = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
 
     if (axis == 0) {
-        moveMinusXCorners(corners);
-        movePlusXCorners(corners);
+        _moveMinusXCorners(corners);
+        _movePlusXCorners(corners);
     } else if (axis == 1) {
-        moveMinusYCorners(corners);
-        movePlusYCorners(corners);
+        _moveMinusYCorners(corners);
+        _movePlusYCorners(corners);
     } else if (axis == 2) {
-        moveMinusZCorners(corners);
-        movePlusZCorners(corners);
+        _moveMinusZCorners(corners);
+        _movePlusZCorners(corners);
     }
 }
 
-void TranslateStretchManip::moveMinusXCorners(double corners[8][3]) const {
+void TranslateStretchManip::_moveMinusXCorners(double corners[8][3]) const {
     corners[2][0] += _dragDistance;
     corners[0][0] += _dragDistance;
     corners[1][0] += _dragDistance;
     corners[3][0] += _dragDistance;
 }
 
-void TranslateStretchManip::movePlusXCorners(double corners[8][3]) const {
+void TranslateStretchManip::_movePlusXCorners(double corners[8][3]) const {
     corners[4][0] += _dragDistance;
     corners[5][0] += _dragDistance;
     corners[6][0] += _dragDistance;
     corners[7][0] += _dragDistance;
 }
 
-void TranslateStretchManip::moveMinusYCorners(double corners[8][3]) const {
+void TranslateStretchManip::_moveMinusYCorners(double corners[8][3]) const {
     corners[2][1] += _dragDistance;
     corners[3][1] += _dragDistance;
     corners[6][1] += _dragDistance;
     corners[7][1] += _dragDistance;
 }
 
-void TranslateStretchManip::movePlusYCorners(double corners[8][3]) const {
+void TranslateStretchManip::_movePlusYCorners(double corners[8][3]) const {
     corners[0][1] += _dragDistance;
     corners[1][1] += _dragDistance;
     corners[4][1] += _dragDistance;
     corners[5][1] += _dragDistance;
 }
 
-void TranslateStretchManip::moveMinusZCorners(double corners[8][3]) const {
+void TranslateStretchManip::_moveMinusZCorners(double corners[8][3]) const {
     corners[0][2] += _dragDistance;
     corners[2][2] += _dragDistance;
     corners[4][2] += _dragDistance;
     corners[6][2] += _dragDistance;
 }
 
-void TranslateStretchManip::movePlusZCorners(double corners[8][3]) const {
+void TranslateStretchManip::_movePlusZCorners(double corners[8][3]) const {
     corners[1][2] += _dragDistance;
     corners[3][2] += _dragDistance;
     corners[5][2] += _dragDistance;
@@ -1021,10 +1021,10 @@ void TranslateStretchManip::movePlusZCorners(double corners[8][3]) const {
 }
 
 //Note: This is performed in local (unstretched) world coordinates!
-void TranslateStretchManip::
-    captureMouseDown(int handleNum,
-                     int buttonNum,
-                     const double strHandleMid[3]) {
+void TranslateStretchManip::_captureMouseDown(
+    int handleNum,
+    int buttonNum,
+    const double strHandleMid[3]) {
     _buttonNum = buttonNum;
 
     //Grab a probe handle
@@ -1057,8 +1057,10 @@ void TranslateStretchManip::
 //If constrain is true, the slide will not go out of the full extents of the data.
 //
 
-void TranslateStretchManip::
-    slideHandle(int handleNum, const double movedRay[3], bool constrain) {
+void TranslateStretchManip::slideHandle(
+    int handleNum,
+    const double movedRay[3],
+    bool constrain) {
     double normalVector[3] = {0.f, 0.f, 0.f};
     double q[3], r[3], w[3];
     assert(handleNum >= 0);
