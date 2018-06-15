@@ -149,6 +149,17 @@ public:
 	std::vector <std::vector <size_t> > &cells
  ) const override;
 
+ size_t GetMaxVertexPerFace() const override {
+	return(_maxVertexPerFace);
+ };
+ 
+ size_t GetMaxVertexPerCell() const override {
+    return(
+		(GetTopologyDim() == 3) ? 
+		2 * GetMaxVertexPerFace() : GetMaxVertexPerFace()
+	);
+ };
+
 
  //! Return the grid node dimmensions 
  //!
@@ -179,6 +190,7 @@ public:
  void SetMissingID(size_t v) {
 	_missingID = v;
  }
+
 
  //! Get boundary element ID
  //!
