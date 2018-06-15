@@ -33,7 +33,7 @@ public:
     WireFrameAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
-        _TFWidget->Reinit((TFWidget::Flags)(0));
+        _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTANT));
         //_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
     }
 
