@@ -60,8 +60,9 @@ private:
     };
 
     CacheParams _cacheParams;
-    void        _saveCacheParams(bool considerUserCoord);       // True: consider user coordinates too
-    bool        _isCacheDirty(bool considerUserCoord) const;    // False: not consider user coordinates
+    void        _saveCacheParams(bool considerUserCoord);    // True: consider user coordinates too
+                                                             // False: not consider user coordinates
+    bool _isCacheDirty() const;
 
     // OpenGL stuff
     GLuint _volumeTextureUnit;      // GL_TEXTURE0
@@ -74,9 +75,10 @@ private:
     // Used in the 1st pass volume rendering
     //
     virtual void _drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                                  const float *volumeMin,    // array of 3 values
-                                  const float *volumeMax, int bx, int by, int bz, bool frontFacing);
-    void         _fillUserCoordinates();
+                                  const double *volumeMin,    // array of 3 values
+                                  const double *volumeMax,
+                                  const size_t *dims,    // num. of grid points
+                                  bool          frontFacing);
 
 };    // End of class DirectVolumeRenderer
 
