@@ -462,6 +462,14 @@ class VDF_API Grid {
         const std::vector<size_t> &indices,
         std::vector<std::vector<size_t>> &cells) const = 0;
 
+    //! Return the maximum number of vertices per cell face
+    //!
+    virtual size_t GetMaxVertexPerFace() const = 0;
+
+    //! Return the maximum number of vertices per cell
+    //!
+    virtual size_t GetMaxVertexPerCell() const = 0;
+
     //! Clamp periodic coordinates and ensure valid coordinate vector dimension
     //!
     //! This method ensures that periodic coordinates are within the bounding
