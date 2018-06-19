@@ -484,6 +484,14 @@ public:
 	std::vector <std::vector <size_t> > &cells
  ) const = 0;
 
+ //! Return the maximum number of vertices per cell face
+ //!
+ virtual size_t GetMaxVertexPerFace() const = 0;
+
+ //! Return the maximum number of vertices per cell
+ //!
+ virtual size_t GetMaxVertexPerCell() const = 0;
+
  //! Clamp periodic coordinates and ensure valid coordinate vector dimension
  //!
  //! This method ensures that periodic coordinates are within the bounding
@@ -525,8 +533,8 @@ public:
 	}
 	assert(indices.size() == dims.size());
 	for (int i=0; i<indices.size(); i++) {
-		if (indices[i] >= dims[i]-1) {
-			indices[i] = dims[i] - 2;
+		if (indices[i] >= dims[i]) {
+			indices[i] = dims[i] - 1;
 		}
 	}
  }
@@ -590,6 +598,8 @@ public:
  void SetCellOffset(long offset) {
 	_cellIDOffset = offset;
  }
+
+
  
  VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 

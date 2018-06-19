@@ -35,12 +35,10 @@ public:
 #endif
 	~Histo();
 	void reset(int newNumBins = -1);
-	void reset(int newNumBins, float mnData, float mxData){
-		reset(newNumBins); _minData = mnData; _maxData = mxData;
-	}
+	void reset(int newNumBins, float mnData, float mxData);
 	void addToBin(float val);	
+	int getMaxBinSize(); 
 	int getBinSize(int posn) {return _binArray[posn];}
-	int getMaxBinSize() {return _maxBinSize;}
 	float getMinData(){return _minData;}
 	float getMaxData(){return _maxData;}
 	
@@ -50,12 +48,11 @@ public:
 private:
 	
 	Histo() {}
-	int* _binArray;
-	int _numBelow, _numAbove;
-	int _numBins;
-	float _minData, _maxData;
-	int _maxBinSize;
-	int _largestBin;
+	long* _binArray;
+	long _numBelow, _numAbove;
+	int  _numBins;
+	float _minData, _maxData, _range;
+	long _maxBinSize;
 
 	int _timestepOfUpdate;
 	string _varnameOfUpdate;
