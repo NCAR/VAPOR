@@ -18,6 +18,7 @@ set (SRCS
 	HelloEventRouter.cpp
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
+	WireFrameEventRouter.cpp
 	RangeController.cpp
 	Statistics.cpp
 	Plot.cpp
@@ -59,6 +60,7 @@ set (SRCS
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
+	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
 	BarbSubtabs.h
@@ -96,11 +98,14 @@ set (UIS
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	TwoDAppearanceGUI.ui
+	WireFrameAppearanceGUI.ui
 	BarbAppearanceGUI.ui
 	BarbVariablesGUI.ui
 	BarbGeometryGUI.ui
 	TwoDVariablesGUI.ui
+	WireFrameVariablesGUI.ui
 	TwoDGeometryGUI.ui
+	WireFrameGeometryGUI.ui
 	VariablesWidgetGUI.ui
 	HelloVariablesGUI.ui
 	statsWindow.ui

@@ -21,6 +21,7 @@ set (SRC
 	TFInterpolator.cpp
 	ContourParams.cpp
 	AxisAnnotation.cpp
+	WireFrameParams.cpp
 )
 
 set (HEADERS
@@ -44,6 +45,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/TFInterpolator.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/AxisAnnotation.h
+	${PROJECT_SOURCE_DIR}/include/vapor/WireFrameParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})
