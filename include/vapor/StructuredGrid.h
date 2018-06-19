@@ -83,6 +83,10 @@ public:
     //!
     virtual bool GetNodeCells(const std::vector<size_t> &indices, std::vector<std::vector<size_t>> &cells) const override;
 
+    size_t GetMaxVertexPerFace() const override { return (4); };
+
+    size_t GetMaxVertexPerCell() const override { return ((GetTopologyDim() == 3) ? 8 : 4); };
+
     virtual void ClampCoord(std::vector<double> &coords) const override;
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg);

@@ -278,6 +278,14 @@ public:
     //
     void GetConstantColor(float rgb[3]) const;
 
+    vector<float> GetConstantColor() const
+    {
+        float rgb[3];
+        GetConstantColor(rgb);
+        vector<float> v = {rgb[0], rgb[1], rgb[2]};
+        return (v);
+    }
+
     //! Specify a constant opacity.  Color is n the between 0 and 1.
     //!
     //! \param[in] const float rgb[3]

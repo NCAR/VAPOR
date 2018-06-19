@@ -66,7 +66,14 @@ int NetCDFCpp::SetFill(int fillmode, int &old_modep)
 int NetCDFCpp::EndDef() const
 {
     int rc = nc_enddef(_ncid);
-    MY_NC_ERR(rc, _path, "nc_enddif()");
+    MY_NC_ERR(rc, _path, "nc_enddef()");
+    return (NC_NOERR);
+}
+
+int NetCDFCpp::ReDef() const
+{
+    int rc = nc_redef(_ncid);
+    MY_NC_ERR(rc, _path, "nc_redef()");
     return (NC_NOERR);
 }
 
