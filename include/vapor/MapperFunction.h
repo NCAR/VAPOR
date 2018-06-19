@@ -91,7 +91,7 @@ public:
     //! Determine the color (in RGB)  and opacity at a data point
     //! \param[in] point Data value
     //! \param[out] rgb r,g,b, afloats
-    void rgbaValue(float point, float rgba[3]) const
+    void rgbaValue(float point, float rgba[4]) const
     {
         float hsv[3];
         hsvValue(point, hsv, hsv + 1, hsv + 2);
@@ -111,6 +111,20 @@ public:
     //! Each entry isa 4-tuple: r,g,b,opacity.
     //! \param[out] clut lookup table of size _numEntries*4
     void makeLut(float *clut) const;
+
+    void makeLut(std::vector<float> &clut) const
+    {
+        clut.clear();
+        float *cluta = new float[4 * getNumEntries()];
+        makeLut(cluta);
+        for (int i = 0; i < getNumEntries(); i++) {
+            clut.push_back(cluta[4 * i + 0]);
+            clut.push_back(cluta[4 * i + 1]);
+            clut.push_back(cluta[4 * i + 2]);
+            clut.push_back(cluta[4 * i + 3]);
+        }
+        delete[] cluta;
+    }
 
     //! Obtain minimum mapping (histo) value
     //! \return Minimum mapping value
