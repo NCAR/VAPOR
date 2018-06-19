@@ -68,7 +68,10 @@ class RENDER_API WireFrameRenderer : public Renderer {
         bool useSingleColor;
         std::vector<float> constantColor;
         float constantOpacity;
+        std::vector<float> tf_lut;
+        std::vector<double> tf_minmax;
         std::vector<double> boxMin, boxMax;
+
     } _cacheParams;
 
     int _buildCache();

@@ -511,8 +511,8 @@ class VDF_API Grid {
         }
         assert(indices.size() == dims.size());
         for (int i = 0; i < indices.size(); i++) {
-            if (indices[i] >= dims[i] - 1) {
-                indices[i] = dims[i] - 2;
+            if (indices[i] >= dims[i]) {
+                indices[i] = dims[i] - 1;
             }
         }
     }
