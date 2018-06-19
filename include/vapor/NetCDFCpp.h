@@ -270,6 +270,9 @@ public:
  //! End the metadata definition section 
  virtual int EndDef() const;
 
+ //! Put open netcdf dataset into define mode
+ virtual int ReDef() const;
+
  //! Close the currently opened file
  virtual int Close();
 
