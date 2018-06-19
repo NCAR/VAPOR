@@ -152,6 +152,15 @@ class VDF_API UnstructuredGrid : public Grid {
         const std::vector<size_t> &indices,
         std::vector<std::vector<size_t>> &cells) const override;
 
+    size_t GetMaxVertexPerFace() const override {
+        return (_maxVertexPerFace);
+    };
+
+    size_t GetMaxVertexPerCell() const override {
+        return (
+            (GetTopologyDim() == 3) ? 2 * GetMaxVertexPerFace() : GetMaxVertexPerFace());
+    };
+
     //! Return the grid node dimmensions
     //!
     const std::vector<size_t> &GetNodeDimensions() const override {
