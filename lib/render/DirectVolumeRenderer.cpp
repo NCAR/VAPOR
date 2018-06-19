@@ -182,15 +182,15 @@ int DirectVolumeRenderer::_initializeGL()
 
     /* good texture tutorial:
        https://open.gl/textures */
-    glGenTextures(1, &_colormapTextureUnit);
-    std::cout << "_colormapTextureUnit = " << _colormapTextureUnit << std::endl;
+    // glGenTextures(1, &_colormapTextureUnit );
+    // std::cout << "_colormapTextureUnit = " << _colormapTextureUnit << std::endl;
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_1D, _colormapTextureUnit);
-    // glTexImage1D(    GL_TEXTURE_1D, 0, 4, _colormapSize, 0, GL_RGBA, GL_FLOAT, _colormap );
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glActiveTexture( GL_TEXTURE1 );
+    // glBindTexture(   GL_TEXTURE_1D, _colormapTextureUnit );
+    ////glTexImage1D(    GL_TEXTURE_1D, 0, 4, _colormapSize, 0, GL_RGBA, GL_FLOAT, _colormap );
+    // glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     return 0;
 }
