@@ -18,11 +18,18 @@ namespace VAPoR {
 //! by functions:
 //!
 //! \code
-//! x = X(i,j,k)
-//! y = Y(i,j,k)
+//! x = X(i,j)
+//! y = Y(i,j)
 //! z = Z(i,j,k)
 //! \endcode
 //!
+//! or
+//!
+//! \code
+//! x = X(i,j)
+//! y = Y(i,j)
+//! z = Z(k)
+//! \endcode
 //!
 //
 class VDF_API CurvilinearGrid : public StructuredGrid {
@@ -30,7 +37,7 @@ public:
 
  //! \copydoc StructuredGrid::StructuredGrid()
  //!
- //! Construct a regular grid sampling a 3D or 2D scalar function.
+ //! Construct a layered, horizontally curvlinear 3D grid 
  //!
  //! This constructor instantiates a curvilinear grid  where the x,y,z
  //! user coordinates are expressed as follows:
@@ -42,7 +49,7 @@ public:
  //! \endcode
  //!
  //! The X and Y user coordinates are specified with \p xrg and \p yrg,
- //! respectively, and the Z coordinates (if 3D) are specified by the
+ //! respectively, and the Z coordinates  are specified by the
  //! vector \p zcoords.
  //!
  //! Adds new parameters:
@@ -73,6 +80,92 @@ public:
 	const KDTreeRG *kdtree
  );
 
+ //! \copydoc StructuredGrid::StructuredGrid()
+ //!
+ //! Construct a layered, horizontally curvlinear 3D grid 
+ //!
+ //! This constructor instantiates a curvilinear grid  where the x,y,z
+ //! user coordinates are expressed as follows:
+ //!
+ //! \code
+ //! x = X(i,j)
+ //! y = Y(i,j)
+ //! z = Z(i,j,k)
+ //! \endcode
+ //!
+ //! The X and Y user coordinates are specified with \p xrg and \p yrg,
+ //! respectively, and the Z coordinates  are specified by the
+ //! \p zrg
+ //!
+ //! Adds new parameters:
+ //!
+ //! \param[in] xrg A 2D RegularGrid instance whose
+ //! I and J dimensionality matches that of this class instance, and whose
+ //! values specify the X user coordinates.
+ //! \param[in] yrg A 2D RegularGrid instance whose
+ //! I and J dimensionality matches that of this class instance, and whose
+ //! values specify the Y user coordinates.
+ //! \param[in] zrg A 3D RegularGrid instance whose
+ //! I, J, K dimensionality matches that of this class instance, and whose
+ //! values specify the Z user coordinates.
+ //! \param[in] kdtree A KDTreeRG instance that contains a KD tree
+ //! that may be used to find the nearest grid vertex to a given point
+ //! expressed in user coordintes. The offsets returned by \p kdtree will
+ //! be used as indeces into \p xrg and \p yrg.
+ //!
+ //!
+ //! \sa RegularGrid()
+ //
+ CurvilinearGrid(
+	const std::vector <size_t> &dims,
+	const std::vector <size_t> &bs,
+	const std::vector <float *> &blks,
+	const RegularGrid &xrg,
+	const RegularGrid &yrg,
+	const RegularGrid &zrg,
+	const KDTreeRG *kdtree
+ );
+
+ //! \copydoc StructuredGrid::StructuredGrid()
+ //!
+ //! Construct a curvlinear 2D grid 
+ //!
+ //! This constructor instantiates a curvilinear grid  where the x,y
+ //! user coordinates are expressed as follows:
+ //!
+ //! \code
+ //! x = X(i,j)
+ //! y = Y(i,j)
+ //! \endcode
+ //!
+ //! The X and Y user coordinates are specified with \p xrg and \p yrg,
+ //! respectively.
+ //!
+ //! Adds new parameters:
+ //!
+ //! \param[in] xrg A 2D RegularGrid instance whose
+ //! I and J dimensionality matches that of this class instance, and whose
+ //! values specify the X user coordinates.
+ //! \param[in] yrg A 2D RegularGrid instance whose
+ //! I and J dimensionality matches that of this class instance, and whose
+ //! values specify the Y user coordinates.
+ //! \param[in] kdtree A KDTreeRG instance that contains a KD tree
+ //! that may be used to find the nearest grid vertex to a given point
+ //! expressed in user coordintes. The offsets returned by \p kdtree will
+ //! be used as indeces into \p xrg and \p yrg.
+ //!
+ //!
+ //! \sa RegularGrid()
+ //
+ CurvilinearGrid(
+	const std::vector <size_t> &dims,
+	const std::vector <size_t> &bs,
+	const std::vector <float *> &blks,
+	const RegularGrid &xrg,
+	const RegularGrid &yrg,
+	const KDTreeRG *kdtree
+ );
+
  CurvilinearGrid() = default;
  virtual ~CurvilinearGrid() = default;
 
@@ -81,7 +174,9 @@ public:
  }
  std::string GetType() const override {return (GetClassType()); }
 
- virtual size_t GetGeometryDim() const override;
+ virtual size_t GetGeometryDim() const override {
+	return(GetTopologyDim());
+ };
 
 
  // \copydoc GetGrid::GetUserExtents()
@@ -195,6 +290,8 @@ public:
 	std::vector <double> _coords;
 	ConstIterator _xCoordItr;
 	ConstIterator _yCoordItr;
+	ConstIterator _zCoordItr;
+	bool _terrainFollowing;
  };
 
  virtual ConstCoordItr ConstCoordBegin() const override {
@@ -225,10 +322,13 @@ private:
  const KDTreeRG *_kdtree;
  RegularGrid _xrg;
  RegularGrid _yrg;
+ RegularGrid _zrg;
+ bool _terrainFollowing;
 
  void _curvilinearGrid(
 	const RegularGrid &xrg,
 	const RegularGrid &yrg,
+	const RegularGrid &zrg,
 	const std::vector <double> &zcoords,
 	const KDTreeRG *kdtree
  );
@@ -247,7 +347,26 @@ private:
 	double lambda[4], double zwgt[2]
  ) const;
 
- virtual void _getMinCellExtents(std::vector <double> &minCellExtents) const; 
+ void    _getEnclosingRegionHelper(
+	const std::vector <double> &minu, const std::vector <double> &maxu,
+	std::vector <size_t> &min, std::vector <size_t> &max
+ ) const;
+
+ void _getIndicesHelper(
+	const std::vector <double> &coords,
+	std::vector <size_t> &indices
+ ) const;
+
+ bool _insideGridHelperStretched(
+	double z, size_t &k, double zwgt[2]
+ ) const;
+
+ bool _insideGridHelperTerrain(
+	double x, double y, double z,
+	const size_t &i, const size_t &j, size_t &k,
+	double zwgt[2]
+ ) const;
+
 
 };
 };
