@@ -66,6 +66,11 @@ void WireFrameRenderer::_saveCacheParams()
     _cacheParams.lod = p->GetCompressionLevel();
     _cacheParams.useSingleColor = p->UseSingleColor();
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+	tf->makeLut(_cacheParams.tf_lut);
+
+	_cacheParams.tf_minmax = tf->getMinMaxMapValue();
     
 	_cacheParams.constantColor = p->GetConstantColor();
 	_cacheParams.constantOpacity = p->GetConstantOpacity();
@@ -80,14 +85,20 @@ bool WireFrameRenderer::_isCacheDirty() const
     if (_cacheParams.level   != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod     != p->GetCompressionLevel()) return true;
     if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
+    if (_cacheParams.constantColor != p->GetConstantColor()) return true;
+    if (_cacheParams.constantOpacity != p->GetConstantOpacity()) return true;
+
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+	vector <float> tf_lut;
+	tf->makeLut(tf_lut);
+	if (_cacheParams.tf_lut != tf_lut) return(true);
+	if (_cacheParams.tf_minmax != tf->getMinMaxMapValue()) return(true);
     
     vector<double> min, max;
     p->GetBox()->GetExtents(min, max);
     
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
-    if (_cacheParams.constantColor != p->GetConstantColor()) return true;
-    if (_cacheParams.constantOpacity != p->GetConstantOpacity()) return true;
     
     return false;
 }
@@ -147,8 +158,6 @@ int WireFrameRenderer::_buildCache()
         return 0;
     }
 
-    MapperFunction *tf = rParams->GetMapperFunc(_cacheParams.varName);
-
     Grid *grid = _dataMgr->GetVariable(
 		_cacheParams.ts, _cacheParams.varName,
 		_cacheParams.level, _cacheParams.lod,
@@ -173,9 +182,20 @@ int WireFrameRenderer::_buildCache()
     
 	double mv = grid->GetMissingValue();
 
+#if 0	// VAPOR_3_1_0
+
+	// Performance of the bounding box version of the Cell iterator 
+	// is too slow. So we render the entire grid and use clipping planes
+	// to restrict the displayed region
+	//
     Grid::ConstCellIterator it = grid->ConstCellBegin(
 		_cacheParams.boxMin, _cacheParams.boxMax
 	);
+#else
+    Grid::ConstCellIterator it = grid->ConstCellBegin();
+	EnableClipToBox();
+#endif
+
 
 	size_t nverts = grid->GetMaxVertexPerCell();
 	bool layered = grid->GetTopologyDim() == 3;
@@ -183,6 +203,7 @@ int WireFrameRenderer::_buildCache()
 	float *coordsArray = new float[nverts*3];
 	float *colorsArray = new float[nverts*4];
     Grid::ConstCellIterator end = grid->ConstCellEnd();
+
     for (; it != end; ++it)
     {
         vector <vector<size_t> > nodes;
@@ -220,7 +241,21 @@ int WireFrameRenderer::_buildCache()
 				colorsArray[4*i+3] = _cacheParams.constantOpacity;
 			}
 			else {
-				tf->rgbaValue(dataValue, &colorsArray[4*i]);
+				size_t n = _cacheParams.tf_lut.size() >> 2;
+				int index = (dataValue - _cacheParams.tf_minmax[0]) / 
+					(_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) *
+					(n - 1);
+				if (index < 0) {
+					index = 0;
+				}
+				if (index >= n) {
+					index = n-1;
+				}
+				colorsArray[4*i+0] = _cacheParams.tf_lut[4*index+0];
+				colorsArray[4*i+1] = _cacheParams.tf_lut[4*index+1];
+				colorsArray[4*i+2] = _cacheParams.tf_lut[4*index+2];
+				colorsArray[4*i+3] = _cacheParams.tf_lut[4*index+3];
+
 			}
         }
 
@@ -230,7 +265,12 @@ int WireFrameRenderer::_buildCache()
 	delete [] colorsArray;
 	if (grid) delete grid;
 	if (heightGrid) delete heightGrid;
-    
+
+#if 0	// VAPOR_3_1_0
+#else
+	DisableClippingPlanes();
+#endif
+
     glEndList();
     return 0;
 }
