@@ -7,6 +7,7 @@ set (SRC
 	ShaderProgram.cpp
 	TwoDDataRenderer.cpp
 	TwoDRenderer.cpp
+	WireFrameRenderer.cpp
 	GeoTile.cpp
 	GeoTileMercator.cpp
 	GeoTileEquirectangular.cpp
@@ -32,6 +33,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/WireFrameRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTile.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTileMercator.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTileEquirectangular.h
