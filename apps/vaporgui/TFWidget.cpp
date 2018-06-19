@@ -46,6 +46,14 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _maxCombo = new Combo(maxRangeEdit, maxRangeSlider);
     _rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 
+    _cLevel = 0;
+    _refLevel = 0;
+    _timeStep = 0;
+    for (int i = 0; i < 3; i++) {
+        _minExt.push_back(0.f);
+        _maxExt.push_back(0.f);
+    }
+
     connectWidgets();
 }
 
@@ -297,11 +305,71 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
         setEnabled(true);
     }
 
+    checkForExternalChangesToHisto();
+
     updateAutoUpdateHistoCheckbox();
     updateMappingFrame();
     updateColorInterpolation();
     updateSliders();
     updateConstColorWidgets();
+
+    string newName = getCurrentVarName();
+    if (_varName != newName) {
+        _varName = newName;
+        refreshHistogram();
+    }
+}
+
+void TFWidget::checkForExternalChangesToHisto()
+{
+    bool somethingChanged = false;
+
+    int newCLevel = _rParams->GetCompressionLevel();
+    if (_cLevel != newCLevel) {
+        _cLevel = _rParams->GetCompressionLevel();
+        somethingChanged = true;
+    }
+
+    int newRefLevel = _rParams->GetRefinementLevel();
+    if (_refLevel != newRefLevel) {
+        _refLevel = newRefLevel;
+        somethingChanged = true;
+    }
+
+    std::vector<double> minExt, maxExt;
+    VAPoR::Box *        box = _rParams->GetBox();
+    box->GetExtents(minExt, maxExt);
+    for (int i = 0; i < minExt.size(); i++) {
+        if (minExt[i] != _minExt[i]) {
+            somethingChanged = true;
+            _minExt[i] = minExt[i];
+        }
+        if (maxExt[i] != _maxExt[i]) {
+            somethingChanged = true;
+            _maxExt[i] = maxExt[i];
+        }
+    }
+
+    double          min = _minCombo->GetValue();
+    double          max = _maxCombo->GetValue();
+    MapperFunction *tf = getCurrentMapperFunction();
+    double          newMin = tf->getMinMapValue();
+    double          newMax = tf->getMaxMapValue();
+    if (min != newMin) somethingChanged = true;
+    if (max != newMax) somethingChanged = true;
+
+    int newTimestep = _rParams->GetCurrentTimestep();
+    if (_timeStep != newTimestep) {
+        _timeStep = newTimestep;
+        somethingChanged = true;
+    }
+
+    if (somethingChanged) {
+        if (autoUpdateHisto())
+            refreshHistogram();
+        else
+            updateHistoButton->setEnabled(true);
+    }
 }
 
 void TFWidget::updateConstColorWidgets()
@@ -386,19 +454,23 @@ void TFWidget::setRange(double min, double max)
     emit emitChange();
 }
 
+void TFWidget::refreshHistogram()
+{
+    MapperFunction *mf = getCurrentMapperFunction();
+    mappingFrame->updateMapperFunction(mf);
+    bool force = true;
+    mappingFrame->RefreshHistogram(force);
+    updateMappingFrame();
+    updateHistoButton->setEnabled(false);
+}
+
 void TFWidget::updateHisto()
 {
     bool buttonRequest = sender() == updateHistoButton ? true : false;
     if (autoUpdateHisto() || buttonRequest) {
-        MapperFunction *mf = getCurrentMapperFunction();
-        mappingFrame->updateMapperFunction(mf);
-        bool force = true;
-        mappingFrame->RefreshHistogram(force);
-        updateMappingFrame();
-        updateHistoButton->setEnabled(false);
+        refreshHistogram();
     } else {
         mappingFrame->fitToView();
-        updateHistoButton->setEnabled(true);
     }
 }
 
@@ -411,7 +483,6 @@ void TFWidget::autoUpdateHistoChecked(int state)
         bstate = true;
 
     MapperFunction *tf = getCurrentMapperFunction();
-
     tf->SetAutoUpdateHisto(bstate);
 
     updateHisto();
@@ -457,14 +528,12 @@ void TFWidget::colorInterpChanged(int index)
     } else if (index == 2) {
         tf->setColorInterpType(TFInterpolator::linear);
     }
-    updateHisto();
 }
 
 void TFWidget::setUseWhitespace(int state)
 {
     MapperFunction *tf = getCurrentMapperFunction();
     tf->setUseWhitespace(state);
-    updateHisto();
 }
 
 bool TFWidget::autoUpdateHisto()

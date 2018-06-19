@@ -1,9 +1,9 @@
-#ifndef TWODSUBTABS_H
-#define TWODSUBTABS_H
+#ifndef WIREFRAMESUBTABS_H
+#define WIREFRAMESUBTABS_H
 
-#include "ui_TwoDAppearanceGUI.h"
-#include "ui_TwoDVariablesGUI.h"
-#include "ui_TwoDGeometryGUI.h"
+#include "ui_WireFrameAppearanceGUI.h"
+#include "ui_WireFrameVariablesGUI.h"
+#include "ui_WireFrameGeometryGUI.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -12,27 +12,28 @@ class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
 
-class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
+class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI {
     Q_OBJECT
 
 public:
-    TwoDVariablesSubtab(QWidget *parent)
+    WireFrameVariablesSubtab(QWidget *parent)
     {
         setupUi(this);
-        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT), (VariablesWidget::DimFlags)(VariablesWidget::TWOD), (VariablesWidget::ColorFlags)(0));
+        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT), (VariablesWidget::DimFlags)(VariablesWidget::THREED | VariablesWidget::TWOD),
+                                 (VariablesWidget::ColorFlags)(0));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
 };
 
-class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
+class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceGUI {
     Q_OBJECT
 
 public:
-    TwoDAppearanceSubtab(QWidget *parent)
+    WireFrameAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
-        _TFWidget->Reinit((TFWidget::Flags)(0));
+        _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTANT));
         //_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
     }
 
@@ -43,14 +44,14 @@ public:
     }
 };
 
-class TwoDGeometrySubtab : public QWidget, public Ui_TwoDGeometryGUI {
+class WireFrameGeometrySubtab : public QWidget, public Ui_WireFrameGeometryGUI {
     Q_OBJECT
 
 public:
-    TwoDGeometrySubtab(QWidget *parent)
+    WireFrameGeometrySubtab(QWidget *parent)
     {
         setupUi(this);
-        _geometryWidget->Reinit(GeometryWidget::TWOD, GeometryWidget::MINMAX, GeometryWidget::SCALAR);
+        _geometryWidget->Reinit(GeometryWidget::THREED, GeometryWidget::MINMAX, GeometryWidget::SCALAR);
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
@@ -63,4 +64,4 @@ public:
 private:
 };
 
-#endif    // TWODSUBTABS_H
+#endif    // WIREFRAMESUBTABS_H

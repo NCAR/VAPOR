@@ -64,6 +64,23 @@
         #define PERF_TIMER_DELTA ((PERF_TIMER_T2.tv_usec - PERF_TIMER_T1.tv_usec) / 1000000.0 + (double)(PERF_TIMER_T2.tv_sec - PERF_TIMER_T1.tv_sec))
     #endif
 
+    #ifdef WIN32
+        #define PRINT_BACKTRACE()
+    #else
+        #include <execinfo.h>
+        #define PRINT_BACKTRACE(...)                                  \
+            {                                                         \
+                printf("------------------ %s", __func__);            \
+                printf(__VA_ARGS__);                                  \
+                printf(" ------------------\n");                      \
+                void **buffer = (void **)malloc(sizeof(void *) * 32); \
+                int    depth = backtrace(buffer, 32);                 \
+                fflush(stdout);                                       \
+                backtrace_symbols_fd(buffer, depth, fileno(stdout));  \
+                free(buffer);                                         \
+            }
+    #endif
+
 using std::string;
 using std::vector;
 
@@ -76,42 +93,42 @@ using std::vector;
         #define ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
         #define RSEQ_N()                                          9, 8, 7, 6, 5, 4, 3, 2, 1, 0
 
-void PRINTARG() {}
-void PRINTARG(int x) { printf("%i", x); }
-void PRINTARG(long x) { printf("%li", x); }
-void PRINTARG(size_t x) { printf("%li", x); }
-void PRINTARG(float x) { printf("%g", x); }
-void PRINTARG(double x) { printf("%g", x); }
-void PRINTARG(bool x) { printf("%s", x ? "true" : "false"); }
-void PRINTARG(const std::string x) { printf("\"%s\"", x.c_str()); }
-void PRINTARG(const char *x) { printf("\"%s\"", x); }
+inline void PRINTARG() {}
+inline void PRINTARG(int x) { printf("%i", x); }
+inline void PRINTARG(long x) { printf("%li", x); }
+inline void PRINTARG(size_t x) { printf("%li", x); }
+inline void PRINTARG(float x) { printf("%g", x); }
+inline void PRINTARG(double x) { printf("%g", x); }
+inline void PRINTARG(bool x) { printf("%s", x ? "true" : "false"); }
+inline void PRINTARG(const std::string x) { printf("\"%s\"", x.c_str()); }
+inline void PRINTARG(const char *x) { printf("\"%s\"", x); }
         #ifdef VDC_LIBTRACE_RUNNABLE
-void PRINTARG(const int *i) { printf("(int[]){%i}", *i); }
-void PRINTARG(const float *f) { printf("(float[]){%f}", *f); }
-void PRINTARG(const double *d) { printf("(double[]){%d}", *d); }
-void PRINTARG(const size_t *li) { printf("(size_t[]){%li}", *li); }
-void PRINTARG(const long *li) { printf("(long[]){%li}", *li); }
+inline void PRINTARG(const int *i) { printf("(int[]){%i}", *i); }
+inline void PRINTARG(const float *f) { printf("(float[]){%f}", *f); }
+inline void PRINTARG(const double *d) { printf("(double[]){%d}", *d); }
+inline void PRINTARG(const size_t *li) { printf("(size_t[]){%li}", *li); }
+inline void PRINTARG(const long *li) { printf("(long[]){%li}", *li); }
         #else
-void PRINTARG(const int *i) { printf("*[%i]", *i); }
-void PRINTARG(const float *f) { printf("*[%f]", *f); }
-void PRINTARG(const double *d) { printf("*[%f]", *d); }
-void PRINTARG(const size_t *li) { printf("*[%li]", *li); }
-void PRINTARG(const long *li) { printf("*[%li]", *li); }
+inline void PRINTARG(const int *i) { printf("*[%i]", *i); }
+inline void PRINTARG(const float *f) { printf("*[%f]", *f); }
+inline void PRINTARG(const double *d) { printf("*[%f]", *d); }
+inline void PRINTARG(const size_t *li) { printf("*[%li]", *li); }
+inline void PRINTARG(const long *li) { printf("*[%li]", *li); }
         #endif
-void PRINTARG(const void *x) { printf("%s", x ? "<ptr>" : "NULL"); }
+inline void PRINTARG(const void *x) { printf("%s", x ? "<ptr>" : "NULL"); }
 // void PRINTARG(const VAPoR::VDC::AccessMode x) { printf("VDC::AccessMode::%s", x==VAPoR::VDC::AccessMode::R?"R":x==VAPoR::VDC::AccessMode::W?"W":"A"); }
 // void PRINTARG(const VAPoR::DC::XType x)
 // {
-// 	switch (x) {
-// 		case VAPoR::DC::XType::INVALID: printf("DC::INVALID"); break;
-// 		case VAPoR::DC::XType::FLOAT:   printf("DC::FLOAT"); break;
-// 		case VAPoR::DC::XType::DOUBLE:  printf("DC::DOUBLE"); break;
-// 		case VAPoR::DC::XType::UINT8:   printf("DC::UINT8"); break;
-// 		case VAPoR::DC::XType::INT8:    printf("DC::INT8"); break;
-// 		case VAPoR::DC::XType::INT32:   printf("DC::INT32"); break;
-// 		case VAPoR::DC::XType::INT64:   printf("DC::INT64"); break;
-// 		case VAPoR::DC::XType::TEXT:    printf("DC::TEXT"); break;
-// 	}
+//     switch (x) {
+//         case VAPoR::DC::XType::INVALID: printf("DC::INVALID"); break;
+//         case VAPoR::DC::XType::FLOAT:   printf("DC::FLOAT"); break;
+//         case VAPoR::DC::XType::DOUBLE:  printf("DC::DOUBLE"); break;
+//         case VAPoR::DC::XType::UINT8:   printf("DC::UINT8"); break;
+//         case VAPoR::DC::XType::INT8:    printf("DC::INT8"); break;
+//         case VAPoR::DC::XType::INT32:   printf("DC::INT32"); break;
+//         case VAPoR::DC::XType::INT64:   printf("DC::INT64"); break;
+//         case VAPoR::DC::XType::TEXT:    printf("DC::TEXT"); break;
+//     }
 // }
 template<class T> void PRINTARG(const std::vector<T> v)
 {

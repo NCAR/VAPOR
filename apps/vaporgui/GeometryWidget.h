@@ -59,7 +59,6 @@ signals:
 private slots:
     void setPoint(double point);
     void setRange(double min, double max, int dim = -1);
-    void copyRegion();
 
 private:
     void adjustLayoutToMinMax();
@@ -67,8 +66,6 @@ private:
     void adjustLayoutTo2D();
     void connectWidgets();
     void updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt);
-    void updateCopyCombo();
-    // void updateDimFlags();
     void updateBoxCombos(std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
 
     bool getAuxiliaryExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
