@@ -121,6 +121,7 @@ int VDC_GetVarAtTimeStep(VDC *p, size_t ts, const char *varname, int level, int 
 
 int VDC_SetCompressionBlock(VDC *p, const char *wname, const size_t *cratios, int cratiosCount);
 int VDC_DefineDimension(VDC *p, const char *dimname, size_t length);
+int VDC_DefineDimensionWithAxis(VDC *p, const char *dimname, size_t length, int axis);
 int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char **coordvars, size_t coordvarCount, const char *units, VDC_XType xtype, int compressed);
 int VDC_DefineCoordVar(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);
 int VDC_DefineCoordVarUniform(VDC *p, const char *varname, const char **dimnames, size_t dimnamesCount, const char *time_dim_name, const char *units, int axis, VDC_XType xtype, int compressed);
