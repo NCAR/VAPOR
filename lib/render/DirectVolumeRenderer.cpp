@@ -2,6 +2,14 @@
 #include <vapor/DirectVolumeRenderer.h>
 #include <iostream>
 
+//
+// OpenGL debug output
+//
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+{
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+}
+
 using namespace VAPoR;
 
 //
@@ -15,6 +23,8 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _volumeTextureUnit = 0;
     _colormapTextureUnit = 0;
     _volumeCoordinateTextureUnit = 0;
+    _frameBufferId = 0;
+    _baskFaceTextureId = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
@@ -155,6 +165,10 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
 
 int DirectVolumeRenderer::_initializeGL()
 {
+    // Enable debug output
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
+
     int maxTextureUnits;
     glGetIntegerv(GL_MAX_TEXTURE_UNITS, &maxTextureUnits);
     std::cout << "    **** System Info ****" << std::endl;
@@ -162,8 +176,10 @@ int DirectVolumeRenderer::_initializeGL()
     std::cout << "    GLSL version   : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "    Vendor         : " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "    Max number of texture units: " << maxTextureUnits << std::endl;
+    std::cout << "    Number of texture units: " << maxTextureUnits << std::endl;
     std::cout << "    **** System Info ****" << std::endl;
+
+    _initializeTextures();
 
     if (!_shaderMgr) {
         std::cerr << "Programmable shading not available" << std::endl;
@@ -266,6 +282,39 @@ bool DirectVolumeRenderer::_isCacheDirty() const
     return false;
 }
 
+void DirectVolumeRenderer::_twoPassDVR()
+{
+    /* Now try Render to Texture                                                            */
+    /* http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/ */
+}
+
+void DirectVolumeRenderer::_initializeTextures()
+{
+    /* Create an Frame Buffer Object for the back side of the volume.                       */
+    glGenFramebuffers(1, &_frameBufferId);
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
+
+    /* Get viewport dimensions */
+    /*GLint viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport ); */
+
+    /* Generate backfacing texture */
+    /*glGenTextures(1, &_baskFaceTextureId);
+    glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId); */
+    // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // from vapor2
+    /*glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3],
+                 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _baskFaceTextureId, 0);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cerr << "_openGLInitialization(): Framebuffer failed!!" << std::endl;
+    }*/
+}
+
 void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
                                             const double *volumeMin, const double *volumeMax, const size_t *dims, bool frontFacing)
 {
@@ -281,13 +330,16 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     const float *ptr = NULL;
 
     // Render front face:
-    gridCoord[2] = 1.0;
-    for (int y = 0; y < by - 1; y++)    // strip by strip
+    /*
+  gridCoord[2] = 1.0;
+  for( int y = 0; y < by - 1; y++ )   // strip by strip
+  {
+    glBegin( GL_TRIANGLE_STRIP );
+    for( int x = 0; x < bx; x++ )
     {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int x = 0; x < bx; x++) {
-            ptr = frontFace + ((y + 1) * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+      ptr = frontFace + ((y + 1) * bx + x) * 3;
+      */
+    /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
       realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
       realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
       glColor3fv(       realWorldCoord );
@@ -297,10 +349,10 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         gridCoord[1] =  (y + 1) * deltaY;
         glTexCoord3fv(  gridCoord );
       }*/
-            glVertex3fv(ptr);
+    // glVertex3fv(      ptr );
 
-            ptr = frontFace + (y * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+    // ptr = frontFace + (y * bx + x) * 3;
+    /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
       realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
       realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
       glColor3fv(       realWorldCoord );
@@ -309,10 +361,12 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         gridCoord[1] =  y * deltaY;
         glTexCoord3fv(  gridCoord );
       }*/
-            glVertex3fv(ptr);
-        }
-        glEnd();
+    /*
+      glVertex3fv(      ptr );
     }
+    glEnd();
+  }
+    */
 
     // Render back face:
     gridCoord[2] = 0.0;
@@ -348,12 +402,16 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     }
 
     // Render right face:
-    gridCoord[0] = 1.0;
-    for (int z = 0; z < bz - 1; z++) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int y = 0; y < by; y++) {
-            ptr = rightFace + ((z + 1) * by + y) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+    /*
+  gridCoord[0] = 1.0;
+  for( int z = 0; z < bz - 1; z++ )
+  {
+    glBegin( GL_TRIANGLE_STRIP );
+    for( int y = 0; y < by; y++ )
+    {
+      ptr = rightFace + ((z + 1) * by + y) * 3;
+*/
+    /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
       realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
       realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
       glColor3fv(       realWorldCoord );
@@ -363,10 +421,10 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         gridCoord[2] =  (z + 1) * deltaZ;
         glTexCoord3fv(  gridCoord );
       }*/
-            glVertex3fv(ptr);
+    //     glVertex3fv(      ptr );
 
-            ptr = rightFace + (z * by + y) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
+    //    ptr = rightFace + (z * by + y) * 3;
+    /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
       realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
       realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
       glColor3fv(       realWorldCoord );
@@ -375,10 +433,12 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         gridCoord[2] =  z * deltaZ;
         glTexCoord3fv(  gridCoord );
       }*/
-            glVertex3fv(ptr);
-        }
-        glEnd();
+    /*
+      glVertex3fv(      ptr );
     }
+    glEnd();
+  }
+*/
 
     // Render left face:
     gridCoord[0] = 0.0;
