@@ -75,6 +75,8 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     GLuint _colormapTextureUnit; // GL_TEXTURE1
     //GLuint              _coordmapTextureUnit;         // GL_TEXTURE2 ??
     GLuint _volumeCoordinateTextureUnit; // GL_TEXTURE3
+    GLuint _frameBufferId;
+    GLuint _baskFaceTextureId;
 
     //
     // Draw faces using triangle strips
@@ -90,6 +92,16 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
                                   const double *volumeMax,
                                   const size_t *dims, // num. of grid points
                                   bool frontFacing);
+
+    //
+    // Implement two pass ray caster algorithm here.
+    //
+    void _twoPassDVR();
+
+    //
+    // Texture initializations
+    //
+    void _initializeTextures();
 
 }; // End of class DirectVolumeRenderer
 
