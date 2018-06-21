@@ -326,7 +326,8 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     float        deltaX = 1.0f / (bx - 1);
     float        deltaY = 1.0f / (by - 1);
     float        deltaZ = 1.0f / (bz - 1);
-    float        volumeSpanInverse[3] = {1.0f / (volumeMax[0] - volumeMin[0]), 1.0f / (volumeMax[1] - volumeMin[1]), 1.0f / (volumeMax[2] - volumeMin[2])};
+    float        volumeSpanInverse[3] = {1.0f / static_cast<float>(volumeMax[0] - volumeMin[0]), 1.0f / static_cast<float>(volumeMax[1] - volumeMin[1]),
+                                  1.0f / static_cast<float>(volumeMax[2] - volumeMin[2])};
     const float *ptr = NULL;
 
     // Render front face:
