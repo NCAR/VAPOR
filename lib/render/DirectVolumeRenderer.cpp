@@ -46,6 +46,7 @@ DirectVolumeRenderer::DirectVolumeRenderer( const ParamsMgr*    pm,
     _volumeCoordinateTextureUnit = 0;
     _frameBufferId               = 0;
     _baskFaceTextureId           = 0;
+    _depthBufferId               = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
@@ -209,8 +210,8 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
 int DirectVolumeRenderer::_initializeGL()
 {
     // Enable debug output
-    glEnable              ( GL_DEBUG_OUTPUT );
-    glDebugMessageCallback( MessageCallback, 0 );
+    //glEnable              ( GL_DEBUG_OUTPUT );
+    //glDebugMessageCallback( MessageCallback, 0 );
 
     int maxTextureUnits;
     glGetIntegerv(GL_MAX_TEXTURE_UNITS, &maxTextureUnits);
@@ -221,8 +222,6 @@ int DirectVolumeRenderer::_initializeGL()
     std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "    Number of texture units: " << maxTextureUnits << std::endl;
     std::cout << "    **** System Info ****" << std::endl;
-
-    _initializeTextures();
 
     if( !_shaderMgr )
     {
@@ -242,7 +241,6 @@ int DirectVolumeRenderer::_initializeGL()
         }
     }
 
-
     /* good texture tutorial: 
        https://open.gl/textures */
     //glGenTextures(1, &_colormapTextureUnit );
@@ -255,14 +253,14 @@ int DirectVolumeRenderer::_initializeGL()
     //glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
+    _initializeTextures();
+
 
     return 0;
 }
 
 int DirectVolumeRenderer::_paintGL() 
 {
-    std::cout << "_paintGL() called" << std::endl;
-
     if( _isCacheDirty() )
         _saveCacheParams( true );
 
@@ -359,24 +357,37 @@ void DirectVolumeRenderer::_initializeTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 
     /* Get viewport dimensions */
-    /*GLint viewport[4];
-    glGetIntegerv( GL_VIEWPORT, viewport ); */
+    GLint viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport );
     
     /* Generate backfacing texture */
-    /*glGenTextures(1, &_baskFaceTextureId);
-    glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId); */
+    glGenTextures(1, &_baskFaceTextureId);
+    glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId); 
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // from vapor2
-    /*glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3], 
-                 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _baskFaceTextureId, 0);
+
+    /* Depth buffer */
+    glGenRenderbuffers( 1, &_depthBufferId );
+    glBindRenderbuffer( GL_RENDERBUFFER, _depthBufferId );
+    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3] );
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _baskFaceTextureId, 0);
+
+    /* Check if framebuffer is complete */
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
         std::cerr << "_openGLInitialization(): Framebuffer failed!!" << std::endl;
-    }*/
+    }
+
+    /* Bind the default frame buffer */
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
