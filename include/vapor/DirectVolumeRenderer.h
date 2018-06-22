@@ -71,6 +71,7 @@ private:
     GLuint _volumeCoordinateTextureUnit;    // GL_TEXTURE3
     GLuint _frameBufferId;
     GLuint _baskFaceTextureId;
+    GLuint _depthBufferId;
 
     //
     // Draw faces using triangle strips
