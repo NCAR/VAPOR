@@ -23,7 +23,7 @@
 #include <QGLWidget>
 #include "vapor/Transform.h"
 #include "vapor/Visualizer.h"
-#include "vapor/Manip.h"
+#include "Manip.h"
 #include <QWheelEvent>
 
 class QCloseEvent;
