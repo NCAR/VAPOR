@@ -20,7 +20,6 @@ set (SRC
 	textRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
-	Manip.cpp
 	MyPython.cpp
 )
 
