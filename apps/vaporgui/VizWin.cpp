@@ -436,9 +436,23 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 
 	if (modeName == MouseModeParams::GetRegionModeName()) {
 		std::vector<double> screenCoords = _getScreenCoords(e);
+
+glMatrixMode(GL_PROJECTION);    // Begin setup sequence
+glPushMatrix();
+_setUpProjMatrix();
+glMatrixMode(GL_MODELVIEW);
+glPushMatrix();
+_setUpModelViewMatrix();         // End setup sequence
+
 		bool mouseOnManip = _manip->MouseEvent(
 			_buttonNum, screenCoords, _strHandleMid
 		);
+
+swapBuffers();                  // Begin cleanup sequence
+glMatrixMode(GL_PROJECTION);
+glPopMatrix();
+glMatrixMode(GL_MODELVIEW);
+glPopMatrix();                  // End cleanup sequence
 
 		if (mouseOnManip) {
 			return;
