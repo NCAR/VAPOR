@@ -15,8 +15,8 @@
 //	Date:		June, 2018
 //
 //	Description:	Implements the Manip class and some of its subclasses
-// TOGO:
 
+#include <iterator>
 #include <iomanip>
 #include <iostream>
 #include <cassert>
@@ -25,7 +25,6 @@
 #include "Manip.h"
 
 using namespace VAPoR;
-using namespace std;
 
 const float Manip::_faceSelectionColor[4] = {0.8f, 0.8f, 0.0f, 0.5f};
 const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
@@ -33,6 +32,20 @@ const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
 #ifndef M_PI
     #define M_PI (3.14159265358979323846)
 #endif
+
+// X, Y, and Z axes are indexed 0, 1, and 2
+#define X 0
+#define Y 1
+#define Z 2
+
+// 6 element arrays that describe 3D extents have the ordering
+//   MINX, MINY, MINZ, MAXX, MAXY, MAXZ
+#define MINX 0
+#define MINY 1
+#define MINZ 2
+#define MAXX 3
+#define MAXY 4
+#define MAXZ 5
 
 TranslateStretchManip::TranslateStretchManip() : Manip()
 {
@@ -78,14 +91,14 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform)
     assert(scales.size() == 3);
     assert(origins.size() == 3);
 
-    glTranslatef(origins[0], origins[1], origins[2]);
-    glScalef(scales[0], scales[1], scales[2]);
-    glRotatef(rotations[0], 1, 0, 0);
-    glRotatef(rotations[1], 0, 1, 0);
-    glRotatef(rotations[2], 0, 0, 1);
-    glTranslatef(-origins[0], -origins[1], -origins[2]);
+    glTranslatef(origins[X], origins[Y], origins[Z]);
+    glScalef(scales[X], scales[Y], scales[Z]);
+    glRotatef(rotations[X], 1, 0, 0);
+    glRotatef(rotations[Y], 0, 1, 0);
+    glRotatef(rotations[Z], 0, 0, 1);
+    glTranslatef(-origins[X], -origins[Y], -origins[Z]);
 
-    glTranslatef(translations[0], translations[1], translations[2]);
+    glTranslatef(translations[X], translations[Y], translations[Z]);
 
     // Retrieve the transformed matrix and stick it back into
     // our _modelViewMatrix array
@@ -101,9 +114,9 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
     }
 
     _windowSize = windowSize;
-    _cameraPosition[0] = cameraPosition[0];
-    _cameraPosition[1] = cameraPosition[1];
-    _cameraPosition[2] = cameraPosition[2];
+    _cameraPosition[X] = cameraPosition[X];
+    _cameraPosition[Y] = cameraPosition[Y];
+    _cameraPosition[Z] = cameraPosition[Z];
 
     if (llc.size() == 2) llc.push_back(0);
     if (urc.size() == 2) urc.push_back(0);
@@ -125,12 +138,12 @@ void TranslateStretchManip::GetBox(std::vector<double> &llc, std::vector<double>
 {
     llc.resize(3);
     urc.resize(3);
-    llc[0] = _selection[0];
-    llc[1] = _selection[1];
-    llc[2] = _selection[2];
-    urc[0] = _selection[3];
-    urc[1] = _selection[4];
-    urc[2] = _selection[5];
+    llc[X] = _selection[MINX];
+    llc[Y] = _selection[MINY];
+    llc[Z] = _selection[MINZ];
+    urc[X] = _selection[MAXX];
+    urc[Y] = _selection[MAXY];
+    urc[Z] = _selection[MAXZ];
 }
 
 bool TranslateStretchManip::MouseEvent(int buttonNum, std::vector<double> vscreenCoords, double handleMidpoint[3], bool release)
@@ -274,6 +287,10 @@ bool TranslateStretchManip::pointIsOnQuad(double cor1[3], double cor2[3], double
     if (pointOnRight(winCoord3, winCoord4, pickPt)) returnValue = false;
     if (pointOnRight(winCoord4, winCoord1, pickPt)) returnValue = false;
 
+#ifdef DEBUG
+    drawHitBox(winCoord1, winCoord2, winCoord3, winCoord4);
+#endif
+
     return returnValue;
 }
 
@@ -326,17 +343,22 @@ int TranslateStretchManip::makeHandleFaces(int sortPosition, double handle[8][3]
     float translateSign = (newPosition > 2) ? 1.f : -1.f;
     for (int vertex = 0; vertex < 8; vertex++) {
         for (int coord = 0; coord < 3; coord++) {
+            float worldHandleDiameter = _handleSizeInScene;
+
             // Obtain the coordinate of unit cube corner.  It's either +0.5 or -0.5
             // multiplied by the handle diameter, then translated along the
             // specific axis corresponding to
-            double fltCoord = (((double)((vertex >> coord) & 1) - 0.5f) * _handleSizeInScene);
+            double fltCoord = (((double)((vertex >> coord) & 1) - 0.5f) * worldHandleDiameter);    //_handleSizeInScene);
             // First offset it from the probeCenter:
             fltCoord += 0.5f * (boxRegion[coord + 3] + boxRegion[coord]);
+
+            deScaleScalarOnAxis(worldHandleDiameter, coord);
+
             // Displace all the c - coords of this handle if this handle is on the c-axis
             if (coord == axis) {
                 double boxWidth = (boxRegion[coord + 3] - boxRegion[coord]);
                 // Note we are putting the handle 2 diameters from the box edge
-                fltCoord += translateSign * (boxWidth * 0.5f + 2.f * _handleSizeInScene);
+                fltCoord += translateSign * (boxWidth * 0.5f + 2.f * worldHandleDiameter);    //_handleSizeInScene);
             }
             handle[vertex][coord] = fltCoord;
         }
@@ -448,11 +470,13 @@ void TranslateStretchManip::makeHandleExtents(int sortPosition, double handleExt
 
     // Now create the cube associated with newPosition.  It's just the handle translated
     // up or down in the direction associated with newPosition
-    float worldHandleDiameter = _handleSizeInScene;
     for (int coord = 0; coord < 3; coord++) {
+        float worldHandleDiameter = _handleSizeInScene;
         // Start at the box center position
         handleExtents[coord] = .5f * (-worldHandleDiameter + (boxExtents[coord + 3] + boxExtents[coord]));
         handleExtents[coord + 3] = .5f * (worldHandleDiameter + (boxExtents[coord + 3] + boxExtents[coord]));
+
+        deScaleScalarOnAxis(worldHandleDiameter, coord);
 
         if (coord == axis) {    // Translate up or down along this axis
             // The translation is 2 handles + .5 box thickness
@@ -470,9 +494,21 @@ void TranslateStretchManip::makeHandleExtents(int sortPosition, double handleExt
     return;
 }
 
+void TranslateStretchManip::deScaleScalarOnAxis(float &whd, int axis) const
+{
+    if (_dmTransform == NULL) return;
+    if (_rpTransform == NULL) return;
+
+    vector<double> dmScales = _dmTransform->GetScales();
+    vector<double> rpScales = _rpTransform->GetScales();
+
+    whd /= dmScales[axis];
+    whd /= rpScales[axis];
+}
+
 // If we are deScaling a cube of the form extents[8][3], then that
-// cube will apparently contain its corner coordinates in the following form:
-//		  j = 0   1   2   (XYZ)
+// cube will (apparently) contain its corner coordinates in the following form:
+//		j = 0   1   2   (XYZ)
 //	  i
 //	  0	   min min min
 //	  1	   max min min
@@ -568,10 +604,10 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
 
     // Do left (x=0)
     glBegin(GL_QUADS);
-    glVertex3f(extents[0], extents[1], extents[2]);
-    glVertex3f(extents[0], extents[1], extents[5]);
-    glVertex3f(extents[0], extents[4], extents[5]);
-    glVertex3f(extents[0], extents[4], extents[2]);
+    glVertex3f(extents[MINX], extents[MINY], extents[MINZ]);
+    glVertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
+    glVertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
+    glVertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
     glEnd();
 
     // do right
@@ -580,10 +616,10 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     else
         glColor4fv(_unselectedFaceColor);
     glBegin(GL_QUADS);
-    glVertex3f(extents[3], extents[1], extents[2]);
-    glVertex3f(extents[3], extents[1], extents[5]);
-    glVertex3f(extents[3], extents[4], extents[5]);
-    glVertex3f(extents[3], extents[4], extents[2]);
+    glVertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
+    glVertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
+    glVertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
+    glVertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
     glEnd();
 
     // top
@@ -592,10 +628,10 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     else
         glColor4fv(_unselectedFaceColor);
     glBegin(GL_QUADS);
-    glVertex3f(extents[0], extents[4], extents[2]);
-    glVertex3f(extents[3], extents[4], extents[2]);
-    glVertex3f(extents[3], extents[4], extents[5]);
-    glVertex3f(extents[0], extents[4], extents[5]);
+    glVertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
+    glVertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
+    glVertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
+    glVertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
     glEnd();
 
     // bottom
@@ -604,10 +640,10 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     else
         glColor4fv(_unselectedFaceColor);
     glBegin(GL_QUADS);
-    glVertex3f(extents[0], extents[1], extents[2]);
-    glVertex3f(extents[0], extents[1], extents[5]);
-    glVertex3f(extents[3], extents[1], extents[5]);
-    glVertex3f(extents[3], extents[1], extents[2]);
+    glVertex3f(extents[MINX], extents[MINY], extents[MINZ]);
+    glVertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
+    glVertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
+    glVertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
     glEnd();
 
     // back
@@ -616,10 +652,10 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     else
         glColor4fv(_unselectedFaceColor);
     glBegin(GL_QUADS);
-    glVertex3f(extents[0], extents[1], extents[2]);
-    glVertex3f(extents[3], extents[1], extents[2]);
-    glVertex3f(extents[3], extents[4], extents[2]);
-    glVertex3f(extents[0], extents[4], extents[2]);
+    glVertex3f(extents[MINX], extents[MINY], extents[MINZ]);
+    glVertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
+    glVertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
+    glVertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
     glEnd();
 
     // do the front:
@@ -629,10 +665,10 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     else
         glColor4fv(_unselectedFaceColor);
     glBegin(GL_QUADS);
-    glVertex3f(extents[0], extents[1], extents[5]);
-    glVertex3f(extents[3], extents[1], extents[5]);
-    glVertex3f(extents[3], extents[4], extents[5]);
-    glVertex3f(extents[0], extents[4], extents[5]);
+    glVertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
+    glVertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
+    glVertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
+    glVertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
     glEnd();
 
     glColor4f(1, 1, 1, 1);
@@ -676,6 +712,7 @@ void TranslateStretchManip::Render()
     }
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
+
     glPopAttrib();
 
     glPopMatrix();               // Pop the matrix applied for the DataMgr's transform
@@ -715,44 +752,44 @@ void TranslateStretchManip::drawBoxFaces() const
     double corners[8][3];
 
     // -X -Y -Z
-    corners[0][0] = _selection[0];
-    corners[0][1] = _selection[1];
-    corners[0][2] = _selection[2];
+    corners[0][X] = _selection[MINX];
+    corners[0][Y] = _selection[MINY];
+    corners[0][Z] = _selection[MINZ];
 
     // -X -Y +Z
-    corners[1][0] = _selection[0];
-    corners[1][1] = _selection[1];
-    corners[1][2] = _selection[5];
+    corners[1][X] = _selection[MINX];
+    corners[1][Y] = _selection[MINY];
+    corners[1][Z] = _selection[MAXZ];
 
     // -X +Y -Z
-    corners[2][0] = _selection[0];
-    corners[2][1] = _selection[4];
-    corners[2][2] = _selection[2];
+    corners[2][X] = _selection[MINX];
+    corners[2][Y] = _selection[MAXY];
+    corners[2][Z] = _selection[MINZ];
 
     // -X +Y +Z
-    corners[3][0] = _selection[0];
-    corners[3][1] = _selection[4];
-    corners[3][2] = _selection[5];
+    corners[3][X] = _selection[MINX];
+    corners[3][Y] = _selection[MAXY];
+    corners[3][Z] = _selection[MAXZ];
 
     // +X -Y -Z
-    corners[4][0] = _selection[3];
-    corners[4][1] = _selection[1];
-    corners[4][2] = _selection[2];
+    corners[4][X] = _selection[MAXX];
+    corners[4][Y] = _selection[MINY];
+    corners[4][Z] = _selection[MINZ];
 
     // +X -Y +Z
-    corners[5][0] = _selection[3];
-    corners[5][1] = _selection[1];
-    corners[5][2] = _selection[5];
+    corners[5][X] = _selection[MAXX];
+    corners[5][Y] = _selection[MINY];
+    corners[5][Z] = _selection[MAXZ];
 
     // +X +Y -Z
-    corners[6][0] = _selection[3];
-    corners[6][1] = _selection[4];
-    corners[6][2] = _selection[2];
+    corners[6][X] = _selection[MAXX];
+    corners[6][Y] = _selection[MAXY];
+    corners[6][Z] = _selection[MINZ];
 
     // +X +Y +Z
-    corners[7][0] = _selection[3];
-    corners[7][1] = _selection[4];
-    corners[7][2] = _selection[5];
+    corners[7][X] = _selection[MAXX];
+    corners[7][Y] = _selection[MAXY];
+    corners[7][Z] = _selection[MAXZ];
 
     if (_selectedHandle >= 0) {
         if (_isStretching)
@@ -848,50 +885,50 @@ void TranslateStretchManip::_translateCorners(double corners[8][3]) const
 
 void TranslateStretchManip::_moveMinusXCorners(double corners[8][3]) const
 {
-    corners[2][0] += _dragDistance;
-    corners[0][0] += _dragDistance;
-    corners[1][0] += _dragDistance;
-    corners[3][0] += _dragDistance;
+    corners[2][X] += _dragDistance;
+    corners[0][X] += _dragDistance;
+    corners[1][X] += _dragDistance;
+    corners[3][X] += _dragDistance;
 }
 
 void TranslateStretchManip::_movePlusXCorners(double corners[8][3]) const
 {
-    corners[4][0] += _dragDistance;
-    corners[5][0] += _dragDistance;
-    corners[6][0] += _dragDistance;
-    corners[7][0] += _dragDistance;
+    corners[4][X] += _dragDistance;
+    corners[5][X] += _dragDistance;
+    corners[6][X] += _dragDistance;
+    corners[7][X] += _dragDistance;
 }
 
 void TranslateStretchManip::_moveMinusYCorners(double corners[8][3]) const
 {
-    corners[2][1] += _dragDistance;
-    corners[3][1] += _dragDistance;
-    corners[6][1] += _dragDistance;
-    corners[7][1] += _dragDistance;
+    corners[2][Y] += _dragDistance;
+    corners[3][Y] += _dragDistance;
+    corners[6][Y] += _dragDistance;
+    corners[7][Y] += _dragDistance;
 }
 
 void TranslateStretchManip::_movePlusYCorners(double corners[8][3]) const
 {
-    corners[0][1] += _dragDistance;
-    corners[1][1] += _dragDistance;
-    corners[4][1] += _dragDistance;
-    corners[5][1] += _dragDistance;
+    corners[0][Y] += _dragDistance;
+    corners[1][Y] += _dragDistance;
+    corners[4][Y] += _dragDistance;
+    corners[5][Y] += _dragDistance;
 }
 
 void TranslateStretchManip::_moveMinusZCorners(double corners[8][3]) const
 {
-    corners[0][2] += _dragDistance;
-    corners[2][2] += _dragDistance;
-    corners[4][2] += _dragDistance;
-    corners[6][2] += _dragDistance;
+    corners[0][Z] += _dragDistance;
+    corners[2][Z] += _dragDistance;
+    corners[4][Z] += _dragDistance;
+    corners[6][Z] += _dragDistance;
 }
 
 void TranslateStretchManip::_movePlusZCorners(double corners[8][3]) const
 {
-    corners[1][2] += _dragDistance;
-    corners[3][2] += _dragDistance;
-    corners[5][2] += _dragDistance;
-    corners[7][2] += _dragDistance;
+    corners[1][Z] += _dragDistance;
+    corners[3][Z] += _dragDistance;
+    corners[5][Z] += _dragDistance;
+    corners[7][Z] += _dragDistance;
 }
 
 // Note: This is performed in local (unstretched) world coordinates!
@@ -963,6 +1000,10 @@ void TranslateStretchManip::slideHandle(int handleNum, const double movedRay[3],
     int    ndims = 3;
     for (int i = 0; i < ndims; i++) { sizes[i] = _extents[i + ndims] - _extents[i]; }
 
+    float temp = _dragDistance;
+    deScaleScalarOnAxis(temp, coord);
+    _dragDistance = temp;
+
     if (_isStretching) {    // don't push through opposite face ..
         // Depends on whether we are pushing the "low" or "high" handle
         // E.g., The low handle is limited by the low end of the extents, and the
@@ -1018,9 +1059,9 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
     else
         glColor4fv(_unselectedFaceColor);
     glBegin(GL_LINES);
-    glVertex3f(0.5f * (handleExtents[3] + handleExtents[0]) + handleDisp[0], 0.5f * (handleExtents[4] + handleExtents[1]) + handleDisp[1],
-               0.5f * (handleExtents[5] + handleExtents[2]) + handleDisp[2]);
-    glVertex3f(0.5f * (boxExtents[3] + boxExtents[0]) + boxDisp[0], 0.5f * (boxExtents[4] + boxExtents[1]) + boxDisp[1], 0.5f * (boxExtents[5] + boxExtents[2]) + boxDisp[2]);
+    glVertex3f(0.5f * (handleExtents[MAXX] + handleExtents[MINX]) + handleDisp[X], 0.5f * (handleExtents[MAXY] + handleExtents[MINY]) + handleDisp[Y],
+               0.5f * (handleExtents[MAXZ] + handleExtents[MINZ]) + handleDisp[Z]);
+    glVertex3f(0.5f * (boxExtents[MAXX] + boxExtents[MINX]) + boxDisp[X], 0.5f * (boxExtents[MAXY] + boxExtents[MINY]) + boxDisp[Y], 0.5f * (boxExtents[MAXZ] + boxExtents[MINZ]) + boxDisp[Z]);
     glEnd();
     glDisable(GL_BLEND);
 }
@@ -1042,12 +1083,12 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
 // 		...
 // 		glMatrixMode(GL_PROJECTION);	// Begin setup sequence
 //		glPushMatrix();
-//		setUpProjMatrix();
+//		_setUpProjMatrix();
 //		glMatrixMode(GL_MODELVIEW);
 //		glPushMatrix();
-//		setUpModelViewMatrix();			// End setup sequence
+//		_setUpModelViewMatrix();			// End setup sequence
 //
-//	  std::vector<double> screenCoords = getScreenCoords(e);
+//	    std::vector<double> screenCoords = getScreenCoords(e);
 //		bool mouseOnManip = _manip->MouseEvent(
 //			_buttonNum, screenCoords, _strHandleMid
 //		);
@@ -1062,7 +1103,7 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
 //
 
 #ifdef DEBUG
-void TranslateStretchManip::drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord4[2], double winCoord3[2])
+void TranslateStretchManip::drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord4[2], double winCoord3[2]) const
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();

@@ -254,13 +254,19 @@ private:
     //! param[in] extents are the current region of the manipulator
     void deScaleExtents(double extents[8][3]) const;
 
+    //! Method to apply the inverse-scaling factor to the worldHandleDiameter
+    //! used in makeHandleExtents()
+    //! param[in] worldHandleDiameter - the size of the manipulator handle
+    //! param[in] axis - The axis to descale the manipulator handle size upon
+    void deScaleScalarOnAxis(float &scalar, int axis) const;
+
     //! Debug tool to draw the hitbox of a manipulator handle.  This should
     //! align with the window-coordinates of the actual handle.
     //! param[in] winCoord1 - first corner of a 2D quad on the screen
     //! param[in] winCoord2 - secdond corner of a 2D quad on the screen
     //! param[in] winCoord3 - third corner of a 2D quad on the screen
     //! param[in] winCoord4 - fourth corner of a 2D quad on the screen
-    void drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord3[2], double winCoord4[2]);
+    void drawHitBox(double winCoord1[2], double winCoord2[2], double winCoord3[2], double winCoord4[2]) const;
 
     //! Method that draws a line connecting a handle to the box center
     //! \param[in] handleNum index of handle
