@@ -114,6 +114,12 @@ private:
     //
     void _initializeTextures();
 
+    // 
+    // Simple shader compilation
+    //
+    GLuint LoadShaders(const char* vertex_file_path,
+                       const char* fragment_file_path );
+
 
 };  // End of class DirectVolumeRenderer
 
