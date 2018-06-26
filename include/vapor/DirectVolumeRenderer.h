@@ -38,6 +38,9 @@ private:
     // C++ stuff
     const std::string _effectNameStr = "DVR";
 
+    bool _enablePrintGLInfo;
+    void _printGLInfo() const;
+
     struct UserCoordinates {
         float *frontFace, *backFace;    // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;    // user coordinates, size == by * bz * 3
