@@ -96,9 +96,6 @@ void RenderParams::_init() {
 	SetConstantColor(rgb);
 	SetConstantOpacity(1.0);
 	SetUseSingleColor(false);
-	
-	SetStretchFactors(vector<double>(3,1.0));
-		
 }
 
 void RenderParams::_initBox() {
@@ -524,9 +521,6 @@ float RenderParams::GetConstantOpacity()  const {
 	return(o);
 }
 
-
-	
-
 //////////////////////////////////////////////////////////////////////////
 //
 // RenParamsFactory Class
@@ -799,4 +793,3 @@ vector <string> RenParamsContainer::GetNames() const {
 
 	return(names);
 }
-
