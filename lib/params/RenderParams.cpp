@@ -98,8 +98,6 @@ void RenderParams::_init() {
     SetConstantColor(rgb);
     SetConstantOpacity(1.0);
     SetUseSingleColor(false);
-
-    SetStretchFactors(vector<double>(3, 1.0));
 }
 
 void RenderParams::_initBox() {
