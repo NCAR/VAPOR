@@ -387,10 +387,17 @@ int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, floa
 
     string           winName = GetVisualizer();
     ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winName);
+
     // Barb thickness is .001*LineThickness*viewDiameter.
-    float thickness = bParams->GetLineThickness();
+    // float thickness = bParams->GetLineThickness();
+
+    size_t         ts = bParams->GetCurrentTimestep();
+    vector<string> varnames = bParams->GetFieldVariableNames();
+    float          thickness = .2 * _calcDefaultScale(ts, varnames, bParams);
+
     // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
-    float rad = (float)(1000 * thickness);
+    // float rad = (float) (1000*thickness);
+    float rad = (float)(thickness);
     // Set up lighting and color
     int   nLights = vpParams->getNumLights();
     float fcolor[3];
