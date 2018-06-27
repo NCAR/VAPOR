@@ -191,7 +191,7 @@ int DirectVolumeRenderer::_initializeGL()
 
     const char vertex_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.vgl";
     const char fragment_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.fgl";
-    _loadShaders(vertex_shader, fragment_shader);
+    //_loadShaders( vertex_shader, fragment_shader );
 
     /* good texture tutorial:
        https://open.gl/textures */
@@ -221,7 +221,7 @@ int DirectVolumeRenderer::_paintGL()
     glEnd();*/
 
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
-                     _cacheParams.userCoords.bottomFace, _cacheParams.boxMin.data(), _cacheParams.boxMax.data(), _cacheParams.userCoords.dims, true);
+                     _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
 
     //_shaderMgr->DisableEffect();
 
@@ -335,217 +335,87 @@ void DirectVolumeRenderer::_printGLInfo() const
 }
 
 void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                                            const double *volumeMin, const double *volumeMax, const size_t *dims, bool frontFacing)
+                                            const size_t *dims, bool frontFacing)
 {
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);    // don't draw front-facing facets
-
-    float        gridCoord[3];         // normalized grid coordinates, for drawing front-facing facets
-    float        realWorldCoord[3];    // normalized real world coordinates
     size_t       bx = dims[0];
     size_t       by = dims[1];
     size_t       bz = dims[2];
-    float        deltaX = 1.0f / (bx - 1);
-    float        deltaY = 1.0f / (by - 1);
-    float        deltaZ = 1.0f / (bz - 1);
-    float        volumeSpanInverse[3] = {1.0f / static_cast<float>(volumeMax[0] - volumeMin[0]), 1.0f / static_cast<float>(volumeMax[1] - volumeMin[1]),
-                                  1.0f / static_cast<float>(volumeMax[2] - volumeMin[2])};
     const float *ptr = NULL;
 
     // Render front face:
-    gridCoord[2] = 1.0;
     for (int y = 0; y < by - 1; y++)    // strip by strip
     {
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = frontFace + ((y + 1) * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[0] =   x      * deltaX;
-        gridCoord[1] =  (y + 1) * deltaY;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
 
             ptr = frontFace + (y * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[1] =  y * deltaY;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
         }
         glEnd();
     }
 
     // Render back face:
-    gridCoord[2] = 0.0;
     for (int y = 0; y < by - 1; y++) {
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = backFace + (y * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[0] =  x * deltaX;
-        gridCoord[1] =  y * deltaY;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
 
             ptr = backFace + ((y + 1) * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[1] =  (y + 1) * deltaY;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
         }
         glEnd();
     }
 
     // Render right face:
-    gridCoord[0] = 1.0;
     for (int z = 0; z < bz - 1; z++) {
         glBegin(GL_TRIANGLE_STRIP);
         for (int y = 0; y < by; y++) {
             ptr = rightFace + ((z + 1) * by + y) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[1] =   y      * deltaY;
-        gridCoord[2] =  (z + 1) * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
 
             ptr = rightFace + (z * by + y) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[2] =  z * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
         }
         glEnd();
     }
 
     // Render left face:
-    gridCoord[0] = 0.0;
     for (int z = 0; z < bz - 1; z++) {
         glBegin(GL_TRIANGLE_STRIP);
         for (int y = 0; y < by; y++) {
             ptr = leftFace + (z * by + y) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[1] =  y * deltaY;
-        gridCoord[2] =  z * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
 
             ptr = leftFace + ((z + 1) * by + y) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[2] =  (z + 1) * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
         }
         glEnd();
     }
 
     // Render top face:
-    gridCoord[1] = 1.0;
     for (int z = 0; z < bz - 1; z++) {
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = topFace + (z * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[0] =  x * deltaX;
-        gridCoord[2] =  z * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
 
             ptr = topFace + ((z + 1) * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[2] =  (z + 1) * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
         }
         glEnd();
     }
 
     // Render bottom face:
-    gridCoord[1] = 0.0;
     for (int z = 0; z < bz - 1; z++) {
         glBegin(GL_TRIANGLE_STRIP);
         for (int x = 0; x < bx; x++) {
             ptr = bottomFace + ((z + 1) * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[0]  =   x * deltaX;
-        gridCoord[2]  =  (z + 1) * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
 
             ptr = bottomFace + (z * bx + x) * 3;
-            /*realWorldCoord[0] = (*ptr        - volumeMin[0]) * volumeSpanInverse[0];
-      realWorldCoord[1] = (*(ptr + 1)  - volumeMin[1]) * volumeSpanInverse[1];
-      realWorldCoord[2] = (*(ptr + 2)  - volumeMin[2]) * volumeSpanInverse[2];
-      glColor3fv(       realWorldCoord );
-      if( frontFacing )
-      {
-        gridCoord[2]  =  z * deltaZ;
-        glTexCoord3fv(  gridCoord );
-      }*/
             glVertex3fv(ptr);
         }
         glEnd();

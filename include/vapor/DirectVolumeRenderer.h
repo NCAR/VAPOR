@@ -81,9 +81,7 @@ private:
     // Used in the 1st pass volume rendering
     //
     virtual void _drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                                  const double *volumeMin,    // array of 3 values
-                                  const double *volumeMax,
-                                  const size_t *dims,    // num. of grid points
+                                  const size_t *dims,    // num. of grid points in X, Y, Z
                                   bool          frontFacing);
 
     //
