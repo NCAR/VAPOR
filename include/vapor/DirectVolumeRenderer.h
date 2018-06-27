@@ -42,6 +42,12 @@ private:
     void _printGLInfo() const;
 
     struct UserCoordinates {
+        //              Y
+        //              |   Z (coming out the screen)
+        //              |  /
+        //              | /
+        //              |/
+        //            0 --------X
         float *frontFace, *backFace;    // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;    // user coordinates, size == by * bz * 3
         float *topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
