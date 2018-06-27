@@ -56,6 +56,14 @@ private:
     //
     // ...TBD...
 
+    double _getMaxAtBarbLocations(VAPoR::Grid *grid) const;
+
+    std::vector<double> _getMaxVarValues(size_t ts, const std::vector<string> &varnames) const;
+
+    double _getDomainHypotenuse(size_t ts, const std::vector<string> varnames) const;
+
+    double _getMaxDomainLength(size_t ts, const std::vector<string> varnames) const;
+
     double _calcDefaultScale(size_t ts, const std::vector<string> &varnames, const BarbParams *bParams);
 
     //! \copydoc Renderer::_initializeGL()
