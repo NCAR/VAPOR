@@ -179,10 +179,11 @@ int BarbRenderer::_paintGL(){
 
 	// Find box extents for ROI
 	//
-	if (varnames != _fieldVariables) {
+//	if (varnames != _fieldVariables) {
+		cout << "......Calculating _vectorScaleFactor....." << endl;
 		_vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
 		_fieldVariables = varnames;
-	}
+//	}
 	
 	// Get grids for our vector variables
 	//
