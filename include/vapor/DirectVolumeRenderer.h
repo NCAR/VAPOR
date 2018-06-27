@@ -92,9 +92,7 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
                                   const float *leftFace,
                                   const float *topFace,
                                   const float *bottomFace,
-                                  const double *volumeMin, // array of 3 values
-                                  const double *volumeMax,
-                                  const size_t *dims, // num. of grid points
+                                  const size_t *dims, // num. of grid points in X, Y, Z
                                   bool frontFacing);
 
     //
