@@ -99,7 +99,7 @@ private:
     //
     // Simple shader compilation
     //
-    GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path);
+    GLuint _loadShaders(const char *vertex_file_path, const char *fragment_file_path);
 
 };    // End of class DirectVolumeRenderer
 

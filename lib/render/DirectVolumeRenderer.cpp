@@ -172,32 +172,29 @@ int DirectVolumeRenderer::_initializeGL()
     // glEnable              ( GL_DEBUG_OUTPUT );
     // glDebugMessageCallback( MessageCallback, 0 );
 
-    if (!_shaderMgr) {
+    /* if( !_shaderMgr )
+    {
         std::cerr << "Programmable shading not available" << std::endl;
         SetErrMsg("Programmable shading not available");
-        return (-1);
+        return(-1);
     }
-
-    if (!_shaderMgr->EffectExists(_effectNameStr)) {
-        int rc = _shaderMgr->DefineEffect(_effectNameStr, "", _effectNameStr);
-        if (rc < 0) {
+    if( !_shaderMgr->EffectExists(_effectNameStr) )
+    {
+        int rc = _shaderMgr->DefineEffect( _effectNameStr, "", _effectNameStr );
+        if( rc < 0 )
+        {
             std::cerr << "DefineEffect() failed" << std::endl;
             SetErrMsg("DefineEffect() failed");
             return -1;
         }
-    }
+    } */
+
+    const char vertex_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.vgl";
+    const char fragment_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.fgl";
+    _loadShaders(vertex_shader, fragment_shader);
 
     /* good texture tutorial:
        https://open.gl/textures */
-    // glGenTextures(1, &_colormapTextureUnit );
-    // std::cout << "_colormapTextureUnit = " << _colormapTextureUnit << std::endl;
-
-    // glActiveTexture( GL_TEXTURE1 );
-    // glBindTexture(   GL_TEXTURE_1D, _colormapTextureUnit );
-    ////glTexImage1D(    GL_TEXTURE_1D, 0, 4, _colormapSize, 0, GL_RGBA, GL_FLOAT, _colormap );
-    // glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     _initializeTextures();
 
@@ -210,11 +207,12 @@ int DirectVolumeRenderer::_paintGL()
 {
     if (_isCacheDirty()) _saveCacheParams(true);
 
-    int rc = _shaderMgr->EnableEffect(_effectNameStr);
-    if (rc < 0) {
+    /*int rc = _shaderMgr->EnableEffect( _effectNameStr );
+    if (rc<0)
+    {
         std::cerr << "EnableEffect() failed!" << std::endl;
-        return (-1);
-    }
+        return(-1);
+    }*/
 
     /*glColor3f(1.0f,1.0f,1.0f);
     glBegin(GL_LINES);
@@ -225,7 +223,7 @@ int DirectVolumeRenderer::_paintGL()
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.boxMin.data(), _cacheParams.boxMax.data(), _cacheParams.userCoords.dims, true);
 
-    _shaderMgr->DisableEffect();
+    //_shaderMgr->DisableEffect();
 
     if (_enablePrintGLInfo) {
         _printGLInfo();
@@ -554,7 +552,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     }
 }
 
-GLuint DirectVolumeRenderer::LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
+GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
