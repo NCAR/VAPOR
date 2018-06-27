@@ -88,6 +88,8 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     GLuint _baskFaceTextureId;
     GLuint _depthBufferId;
 
+    GLuint _vertexArrayId;
+
     //
     // Draw faces using triangle strips
     // Used in the 1st pass volume rendering

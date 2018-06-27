@@ -47,6 +47,8 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm,
     _baskFaceTextureId = 0;
     _depthBufferId = 0;
     _enablePrintGLInfo = false;
+
+    _vertexArrayId = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates() {
@@ -188,6 +190,9 @@ DirectVolumeRenderer::~DirectVolumeRenderer() {
         glDeleteTextures(1, &_colormapTextureUnit);
     if (_volumeCoordinateTextureUnit)
         glDeleteTextures(1, &_volumeCoordinateTextureUnit);
+
+    if (_vertexArrayId)
+        glDeleteVertexArrays(1, &_vertexArrayId);
 }
 
 int DirectVolumeRenderer::_initializeGL() {
@@ -218,6 +223,10 @@ int DirectVolumeRenderer::_initializeGL() {
 
     /* good texture tutorial: 
        https://open.gl/textures */
+
+    // Create Vertex Array Object (VAO)
+    glGenVertexArrays(1, &_vertexArrayId);
+    glBindVertexArray(_vertexArrayId);
 
     _initializeTextures();
 
