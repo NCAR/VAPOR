@@ -470,7 +470,7 @@ void BarbRenderer::_getDirection(float direction[3], vector<Grid *> variableData
     }
 }
 
-bool BarbRenderer::_doColorMapping(float clut[1024]) const
+bool BarbRenderer::_makeCLUT(float clut[1024]) const
 {
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     string      colorVar = bParams->GetColorMapVariableName();
@@ -558,6 +558,7 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                         missing = GetColorMapping(tf, val, clut);
                     }
                 }
+
                 if (!missing) {
                     vector<double> scales = _getScales();    // t->GetScales();
 
