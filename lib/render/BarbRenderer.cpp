@@ -457,11 +457,51 @@ float BarbRenderer::getHeightOffset(Grid *heightVar, float xCoord, float yCoord,
     return offset;
 }
 
+void BarbRenderer::_getDirection(float direction[3], vector<Grid *> variableData, float xCoord, float yCoord, float zCoord, bool &missing) const
+{
+    for (int dim = 0; dim < 3; dim++) {
+        direction[dim] = 0.f;
+        if (variableData[dim]) {
+            direction[dim] = variableData[dim]->GetValue(xCoord, yCoord, zCoord);
+
+            float missingVal = variableData[dim]->GetMissingValue();
+            if (direction[dim] == missingVal) { missing = true; }
+        }
+    }
+}
+
+bool BarbRenderer::_doColorMapping(float clut[1024]) const
+{
+    BarbParams *bParams = (BarbParams *)GetActiveParams();
+    string      colorVar = bParams->GetColorMapVariableName();
+    // float clut[256*4];
+    bool            doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
+    MapperFunction *tf = 0;
+    if (doColorMapping) {
+        tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
+        assert(tf);
+        tf->makeLut(clut);
+    }
+    return doColorMapping;
+}
+
+vector<double> BarbRenderer::_getScales()
+{
+    string                  myVisName = GetVisualizer();    // Not const :(
+    VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
+    string                  datasetName = GetMyDatasetName();
+    Transform *             t = vpp->GetTransform(datasetName);
+
+    vector<double> scales{3, 1.0};
+    if (t != NULL) scales = t->GetScales();
+    ;
+
+    return scales;
+}
+
 void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, BarbParams *bParams)
 {
     assert(variableData.size() == 5);
-
-    vector<double> scales(3, 1.0);
 
     Grid *heightVar = variableData[3];
 
@@ -470,15 +510,8 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
     float yStride = (rakeExts[4] - rakeExts[1]) / ((float)rakeGrid[1] + 1);
     float zStride = (rakeExts[5] - rakeExts[2]) / ((float)rakeGrid[2] + 1);
 
-    string          colorVar = bParams->GetColorMapVariableName();
-    float           clut[256 * 4];
-    bool            doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
-    MapperFunction *tf = 0;
-    if (doColorMapping) {
-        tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
-        assert(tf);
-        tf->makeLut(clut);
-    }
+    float clut[1024];
+    bool  doColorMapping = _doColorMapping(clut);
 
     float xCoord, yCoord, zCoordGrid, zCoord;
     for (int k = 1; k <= rakeGrid[2]; k++) {
@@ -496,20 +529,12 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                 if (heightVar) { zCoord += getHeightOffset(heightVar, xCoord, yCoord, missing); }
 
                 float direction[3] = {0.f, 0.f, 0.f};
-                for (int dim = 0; dim < 3; dim++) {
-                    direction[dim] = 0.f;
-                    if (variableData[dim]) {
-                        direction[dim] = variableData[dim]->GetValue(xCoord, yCoord, zCoord);
-
-                        float missingVal = variableData[dim]->GetMissingValue();
-                        if (direction[dim] == missingVal) { missing = true; }
-                    }
-                }
+                _getDirection(direction, variableData, xCoord, yCoord, zCoord, missing);
 
                 float point[3] = {xCoord, yCoord, zCoord};
-                end[0] = point[0] + scales[0] * direction[0] * length;
-                end[1] = point[1] + scales[1] * direction[1] * length;
-                end[2] = point[2] + scales[2] * direction[2] * length;
+                end[0] = point[0] + direction[0] * length;
+                end[1] = point[1] + direction[1] * length;
+                end[2] = point[2] + direction[2] * length;
 
                 if (j == 3) {
                     float xDist = point[0] - end[0];
@@ -524,17 +549,17 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                     if (val == variableData[4]->GetMissingValue())
                         missing = true;
                     else {
+                        // missing = missingColorVar(colorVar,va
+                        MapperFunction *tf = 0;
+                        BarbParams *    bParams = (BarbParams *)GetActiveParams();
+                        string          colorVar = bParams->GetColorMapVariableName();
+                        tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
+                        assert(tf);
                         missing = GetColorMapping(tf, val, clut);
                     }
                 }
                 if (!missing) {
-                    string                  datasetName = GetMyDatasetName();
-                    string                  myVisName = GetVisualizer();
-                    VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
-
-                    Transform *t = vpp->GetTransform(datasetName);
-                    assert(t);
-                    vector<double> scales = t->GetScales();
+                    vector<double> scales = _getScales();    // t->GetScales();
 
                     glMatrixMode(GL_MODELVIEW);
                     glPushMatrix();

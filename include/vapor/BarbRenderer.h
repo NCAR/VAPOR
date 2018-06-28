@@ -89,6 +89,12 @@ private:
 
     float getHeightOffset(Grid *heightVar, float xCoord, float yCoord, bool &missing);
 
+    bool _doColorMapping(float clut[1024]) const;
+
+    void _getDirection(float direction[3], vector<Grid *> varData, float xCoord, float yCoord, float zCoord, bool &missing) const;
+
+    vector<double> _getScales();
+
     void renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float vectorLengthScale, float rad, BarbParams *params);
 
     bool GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4]);
