@@ -69,15 +69,11 @@ namespace VAPoR {
 
 	double _getMaxAtBarbLocations(VAPoR::Grid* grid) const;
 
-	std::vector<double> _getMaxVarValues(
+	std::vector<double> _getMaximumValues(
 		size_t ts,
 		const std::vector<string> &varnames) const;
 
 	double _getDomainHypotenuse(
-		size_t ts,
-		const std::vector<string> varnames) const;
-
-	double _getMaxDomainLength(
 		size_t ts,
 		const std::vector<string> varnames) const;
 
@@ -92,6 +88,12 @@ namespace VAPoR {
 //! \copydoc Renderer::_paintGL()
     virtual int _paintGL();
 
+
+void _setUpLightingAndColor();
+
+void _reFormatExtents(double rakeExts[6]) const;
+
+void _makeRakeGrid(int rakeGrid[3]) const;
 
 //! Protected method that performs rendering of all barbs.
 //! \param[in] DataMgr* current DataMgr
