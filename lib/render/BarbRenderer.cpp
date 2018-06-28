@@ -521,7 +521,7 @@ void BarbRenderer::_getDirection(
     }
 }
 
-bool BarbRenderer::_doColorMapping(float clut[1024]) const {
+bool BarbRenderer::_makeCLUT(float clut[1024]) const {
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     string colorVar = bParams->GetColorMapVariableName();
     //float clut[256*4];
@@ -619,6 +619,7 @@ void BarbRenderer::renderGrid(
                         missing = GetColorMapping(tf, val, clut);
                     }
                 }
+
                 if (!missing) {
                     vector<double> scales = _getScales(); //t->GetScales();
 
