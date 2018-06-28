@@ -394,6 +394,8 @@ void BarbRenderer::drawBarb(const float startPoint[3],
 // Is the following true?
 //		- - - - >
 //	   ^       ^ ^
+// start    next end
+
 	//Calculate nextPoint and vertexPoint, for barbhead
 	for (int i = 0; i< 3; i++){
 		nextPoint[i] = (1. - BARB_LENGTH_FACTOR)*startPoint[i]+ BARB_LENGTH_FACTOR*endPoint[i];
@@ -507,11 +509,11 @@ int BarbRenderer::performRendering(
 //float thickness = bParams->GetLineThickness();
 	//vector <string> varnames = bParams->GetFieldVariableNames();
 	//float thickness = 2*_calcDefaultScale(ts, varnames, bParams);
-	float thickness = vectorLengthScale;
+	//float thickness = vectorLengthScale;
 	
 	//float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
 	//float rad = (float) (1000*thickness);
-	float rad = (float) (thickness);
+	//float rad = (float) (thickness);
 
 	_setUpLightingAndColor();
 		
@@ -520,7 +522,7 @@ int BarbRenderer::performRendering(
 	
 	size_t timestep = bParams->GetCurrentTimestep();
 	renderGrid(rakeGrid, rakeExts, variableData, timestep, 
-		vectorLengthScale, rad, bParams);
+		vectorLengthScale, vectorLengthScale, bParams);
 	
 	return 0;
 }
