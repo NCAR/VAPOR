@@ -30,6 +30,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _enablePrintGLInfo = false;
 
     _vertexArrayId = 0;
+    _shaderProgramId = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
@@ -168,6 +169,7 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_volumeCoordinateTextureUnit) glDeleteTextures(1, &_volumeCoordinateTextureUnit);
 
     if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
+    if (_shaderProgramId) glDeleteProgram(_shaderProgramId);
 }
 
 int DirectVolumeRenderer::_initializeGL()
@@ -195,7 +197,7 @@ int DirectVolumeRenderer::_initializeGL()
 
     const char vertex_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.vgl";
     const char fragment_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.fgl";
-    //_loadShaders( vertex_shader, fragment_shader );
+    _shaderProgramId = _loadShaders(vertex_shader, fragment_shader);
 
     /* good texture tutorial:
        https://open.gl/textures */
@@ -204,7 +206,7 @@ int DirectVolumeRenderer::_initializeGL()
     glGenVertexArrays(1, &_vertexArrayId);
     glBindVertexArray(_vertexArrayId);
 
-    _initializeTextures();
+    //_initializeTextures();
 
     _enablePrintGLInfo = true;
 
@@ -214,6 +216,11 @@ int DirectVolumeRenderer::_initializeGL()
 int DirectVolumeRenderer::_paintGL()
 {
     if (_isCacheDirty()) _saveCacheParams(true);
+
+    if (_enablePrintGLInfo) {
+        _printGLInfo();
+        _enablePrintGLInfo = false;
+    }
 
     /*int rc = _shaderMgr->EnableEffect( _effectNameStr );
     if (rc<0)
@@ -228,15 +235,19 @@ int DirectVolumeRenderer::_paintGL()
         glVertex3dv( _cacheParams.boxMax.data() );
     glEnd();*/
 
+    glUseProgram(_shaderProgramId);
+
+    GLfloat MVP[16];
+    _getMVPMatrix(MVP);
+    GLuint MVPId = glGetUniformLocation(_shaderProgramId, "MVP");
+    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
+
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
 
-    //_shaderMgr->DisableEffect();
+    glUseProgram(0);
 
-    if (_enablePrintGLInfo) {
-        _printGLInfo();
-        _enablePrintGLInfo = false;
-    }
+    //_shaderMgr->DisableEffect();
 
     return 0;
 }
@@ -350,84 +361,112 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     size_t       bz = dims[2];
     const float *ptr = NULL;
 
+    size_t idx;
+    size_t numOfVertices;
+
+    glEnableVertexAttribArray(0);
+    GLuint vertexBufferId = 0;
+    glGenBuffers(1, &vertexBufferId);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+
     // Render front face:
+    numOfVertices = bx * 2;
+    GLfloat *frontVertexBuffer = new GLfloat[numOfVertices * 3];
     for (int y = 0; y < by - 1; y++)    // strip by strip
     {
-        glBegin(GL_TRIANGLE_STRIP);
+        idx = 0;
         for (int x = 0; x < bx; x++) {
             ptr = frontFace + ((y + 1) * bx + x) * 3;
-            glVertex3fv(ptr);
-
+            std::memcpy(frontVertexBuffer + idx, ptr, 12);
+            idx += 3;
             ptr = frontFace + (y * bx + x) * 3;
-            glVertex3fv(ptr);
+            std::memcpy(frontVertexBuffer + idx, ptr, 12);
+            idx += 3;
         }
-        glEnd();
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, frontVertexBuffer, GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
+                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
     }
+    delete[] frontVertexBuffer;
 
     // Render back face:
-    for (int y = 0; y < by - 1; y++) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int x = 0; x < bx; x++) {
-            ptr = backFace + (y * bx + x) * 3;
-            glVertex3fv(ptr);
+    /*for( int y = 0; y < by - 1; y++ )
+    {
+        glBegin( GL_TRIANGLE_STRIP );
+        for( int x = 0; x < bx; x++ )
+        {
+            ptr = backFace  + (y * bx + x) * 3;
+            glVertex3fv(      ptr );
 
-            ptr = backFace + ((y + 1) * bx + x) * 3;
-            glVertex3fv(ptr);
+            ptr = backFace  + ((y + 1) * bx + x) * 3;
+            glVertex3fv(      ptr );
         }
         glEnd();
-    }
+    }*/
 
     // Render right face:
-    for (int z = 0; z < bz - 1; z++) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int y = 0; y < by; y++) {
+    /*for( int z = 0; z < bz - 1; z++ )
+    {
+        glBegin( GL_TRIANGLE_STRIP );
+        for( int y = 0; y < by; y++ )
+        {
             ptr = rightFace + ((z + 1) * by + y) * 3;
-            glVertex3fv(ptr);
+            glVertex3fv(      ptr );
 
             ptr = rightFace + (z * by + y) * 3;
-            glVertex3fv(ptr);
+            glVertex3fv(      ptr );
         }
         glEnd();
-    }
+    }*/
 
     // Render left face:
-    for (int z = 0; z < bz - 1; z++) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int y = 0; y < by; y++) {
-            ptr = leftFace + (z * by + y) * 3;
-            glVertex3fv(ptr);
+    /*for( int z = 0; z < bz - 1; z++ )
+    {
+        glBegin( GL_TRIANGLE_STRIP );
+        for( int y = 0; y < by; y++ )
+        {
+            ptr = leftFace  + (z * by + y) * 3;
+            glVertex3fv(      ptr );
 
-            ptr = leftFace + ((z + 1) * by + y) * 3;
-            glVertex3fv(ptr);
+            ptr = leftFace  + ((z + 1) * by + y) * 3;
+            glVertex3fv(      ptr );
         }
         glEnd();
-    }
+    }*/
 
     // Render top face:
-    for (int z = 0; z < bz - 1; z++) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int x = 0; x < bx; x++) {
-            ptr = topFace + (z * bx + x) * 3;
-            glVertex3fv(ptr);
+    /*for( int z = 0; z < bz - 1; z++ )
+    {
+        glBegin( GL_TRIANGLE_STRIP );
+        for( int x = 0; x < bx; x++ )
+        {
+            ptr = topFace   + (z * bx + x) * 3;
+            glVertex3fv(      ptr );
 
-            ptr = topFace + ((z + 1) * bx + x) * 3;
-            glVertex3fv(ptr);
+            ptr = topFace   + ((z + 1) * bx + x) * 3;
+            glVertex3fv(      ptr );
         }
         glEnd();
-    }
+    }*/
 
     // Render bottom face:
-    for (int z = 0; z < bz - 1; z++) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int x = 0; x < bx; x++) {
+    /*for( int z = 0; z < bz - 1; z++ )
+    {
+        glBegin( GL_TRIANGLE_STRIP );
+        for( int x = 0; x < bx; x++ )
+        {
             ptr = bottomFace + ((z + 1) * bx + x) * 3;
-            glVertex3fv(ptr);
+            glVertex3fv(      ptr );
 
             ptr = bottomFace + (z * bx + x) * 3;
-            glVertex3fv(ptr);
+            glVertex3fv(      ptr );
         }
         glEnd();
-    }
+    }*/
+
+    glDisableVertexAttribArray(0);
+    glDeleteBuffers(1, &vertexBufferId);
 }
 
 GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
@@ -516,4 +555,32 @@ GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const ch
     glDeleteShader(FragmentShaderID);
 
     return ProgramID;
+}
+
+void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
+{
+    GLfloat ModelView[16];
+    GLfloat Projection[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
+    glGetFloatv(GL_PROJECTION_MATRIX, Projection);
+
+    // MVP = Projection * ModelView
+    GLfloat tmp;
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++) {
+            tmp = 0.0f;
+            for (int idx = 0; idx < 4; idx++)
+                // tmp += Projection[i * 4 + idx] * ModelView[idx * 4 + j];
+                tmp += ModelView[i * 4 + idx] * Projection[idx * 4 + j];
+            // Because all matrices are colume-major, this is the correct order.
+            MVP[i * 4 + j] = tmp;
+        }
+
+    /*for( int i = 0; i < 16; i++ )
+    {
+        std::cout << MVP[i] << ",\t";
+        if( (i+1) % 4 == 0 )
+            std::cout << std::endl;
+    }
+    std::cout << std::endl; */
 }
