@@ -95,9 +95,21 @@ private:
 
     vector<double> _getScales();
 
+    float _calculateLength(float start[3], float end[3]) const;
+
+    void _makeStartAndEndPoint(float start[3], float end[3], float direction[3], float length);
+
     void renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float vectorLengthScale, float rad, BarbParams *params);
 
-    bool GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4]);
+    bool _getColorMapping(float val, float clut[256 * 4]);
+
+    float _calculateDirVec(const float start[3], const float end[3], float dirVec[3]);
+
+    void _drawBackOfBarb(const float dirVec[3], const float startVertex[3]) const;
+
+    void _drawCylinderSides(const float nextNormal[3], const float nextVertex[3], const float startNormal[3], const float startVertex[3]) const;
+
+    void _drawBarbHead(const float dirVec[3], const float vertexPoint[3], const float startNormal[3], const float startVertex[3]) const;
 
     //! Protected method to draw one barb (a hexagonal tube with a cone barbhead)
     //! \param[in] const float startPoint[3] beginning position of barb

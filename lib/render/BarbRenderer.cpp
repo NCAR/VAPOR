@@ -232,11 +232,70 @@ RETURN:
     return (rc);
 }
 
+float BarbRenderer::_calculateDirVec(const float start[3], const float end[3], float dirVec[3])
+{
+    vsub(end, start, dirVec);
+    float len = vlength(dirVec);
+    if (len != 0.f) vscale(dirVec, 1. / len);
+    return len;
+}
+
+void BarbRenderer::_drawBackOfBarb(const float dirVec[3], const float startVertex[3]) const
+{
+    glBegin(GL_POLYGON);
+    glNormal3fv(dirVec);
+    for (int k = 0; k < 6; k++) { glVertex3fv(startVertex + 3 * k); }
+    glEnd();
+}
+
+void BarbRenderer::_drawCylinderSides(const float nextNormal[3], const float nextVertex[3], const float startNormal[3], const float startVertex[3]) const
+{
+    glBegin(GL_TRIANGLE_STRIP);
+
+    for (int i = 0; i < 6; i++) {
+        glNormal3fv(nextNormal + 3 * i);
+        glVertex3fv(nextVertex + 3 * i);
+
+        glNormal3fv(startNormal + 3 * i);
+        glVertex3fv(startVertex + 3 * i);
+    }
+    // repeat first two vertices to close cylinder:
+
+    glNormal3fv(nextNormal);
+    glVertex3fv(nextVertex);
+
+    glNormal3fv(startNormal);
+    glVertex3fv(startVertex);
+
+    glEnd();
+}
+
+void BarbRenderer::_drawBarbHead(const float dirVec[3], const float vertexPoint[3], const float startNormal[3], const float startVertex[3]) const
+{
+    // Create a triangle fan from these 6 vertices.
+    glBegin(GL_TRIANGLE_FAN);
+    glNormal3fv(dirVec);
+    glVertex3fv(vertexPoint);
+    for (int i = 0; i < 6; i++) {
+        glNormal3fv(startNormal + 3 * i);
+        glVertex3fv(startVertex + 3 * i);
+    }
+    // Repeat first point to close fan:
+    glNormal3fv(startNormal);
+    glVertex3fv(startVertex);
+    glEnd();
+}
+
 // Issue OpenGL calls to draw a cylinder with orthogonal ends from
 // one point to another.  Then put an barb head on the end
 //
 void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], float radius)
 {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    vector<double> scales = _getScales();    // t->GetScales();
+    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
+
     // Constants are needed for cosines and sines, at
     // 60 degree intervals. The barb is really a hexagonal tube,
     // but the shading makes it look round.
@@ -253,15 +312,15 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     float testVec[3];
     float testVec2[3];
 
-    // Calculate an orthonormal frame, dirVec, uVec, bVec.
-    // dirVec is the barb direction
-    float dirVec[3], bVec[3], uVec[3];
-    vsub(endPoint, startPoint, dirVec);
-    float len = vlength(dirVec);
-    if (len == 0.f) return;
-    vscale(dirVec, 1. / len);
+    // Calculate an orthonormal frame
 
-    // Calculate uVec, orthogonal to dirVec:
+    // dirVec is the barb direction
+    float dirVec[3];
+    float len = _calculateDirVec(startPoint, endPoint, dirVec);
+
+    // Calculate uVec, orthogonal to dirVec
+    // Not sure what bVec is
+    float uVec[3], bVec[3];
     vset(testVec, 1., 0., 0.);
     vcross(dirVec, testVec, uVec);
     len = vdot(uVec, uVec);
@@ -273,18 +332,8 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     vscale(uVec, 1.f / sqrt(len));
     vcross(uVec, dirVec, bVec);
 
-    int i;
-    // Calculate nextPoint and vertexPoint, for barbhead
-
-    for (i = 0; i < 3; i++) {
-        nextPoint[i] = (1. - BARB_LENGTH_FACTOR) * startPoint[i] + BARB_LENGTH_FACTOR * endPoint[i];
-        // Assume a vertex angle of 45 degrees:
-        vertexPoint[i] = nextPoint[i] + dirVec[i] * radius;
-        headCenter[i] = nextPoint[i] - dirVec[i] * (BARB_HEAD_FACTOR * radius - radius);
-    }
-
     // calculate 6 points in plane orthog to dirVec, in plane of point
-    for (i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         // testVec and testVec2 are components of point in plane
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
@@ -297,13 +346,21 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
         vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
     }
 
-    glBegin(GL_POLYGON);
-    glNormal3fv(dirVec);
-    for (int k = 0; k < 6; k++) { glVertex3fv(startVertex + 3 * k); }
-    glEnd();
+    _drawBackOfBarb(dirVec, startVertex);
+
+    // Is the following true?
+    //		- - - - >
+    //	   ^       ^ ^
+    // Calculate nextPoint and vertexPoint, for barbhead
+    for (int i = 0; i < 3; i++) {
+        nextPoint[i] = (1. - BARB_LENGTH_FACTOR) * startPoint[i] + BARB_LENGTH_FACTOR * endPoint[i];
+        // Assume a vertex angle of 45 degrees:
+        vertexPoint[i] = nextPoint[i] + dirVec[i] * radius;
+        headCenter[i] = nextPoint[i] - dirVec[i] * (BARB_HEAD_FACTOR * radius - radius);
+    }
 
     // calc for endpoints:
-    for (i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         // testVec and testVec2 are components of point in plane
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
@@ -316,29 +373,12 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
         vadd(nextVertex + 3 * i, nextPoint, nextVertex + 3 * i);
     }
 
-    // Now make a triangle strip for cylinder sides:
-    glBegin(GL_TRIANGLE_STRIP);
+    _drawCylinderSides(nextNormal, nextVertex, startNormal, startVertex);
 
-    for (i = 0; i < 6; i++) {
-        glNormal3fv(nextNormal + 3 * i);
-        glVertex3fv(nextVertex + 3 * i);
-
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
-    }
-    // repeat first two vertices to close cylinder:
-
-    glNormal3fv(nextNormal);
-    glVertex3fv(nextVertex);
-
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
-
-    glEnd();
     // Now draw the barb head.  First calc 6 vertices at back of barbhead
     // Reuse startNormal and startVertex vectors
     // calc for endpoints:
-    for (i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         // testVec and testVec2 are components of point in plane
         // Can reuse them from previous (cylinder end) calculation
         vmult(uVec, coses[i], testVec);
@@ -353,18 +393,10 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
         // Now tilt normals in direction of barb:
         for (int k = 0; k < 3; k++) { startNormal[3 * i + k] = 0.5 * startNormal[3 * i + k] + 0.5 * dirVec[k]; }
     }
-    // Create a triangle fan from these 6 vertices.
-    glBegin(GL_TRIANGLE_FAN);
-    glNormal3fv(dirVec);
-    glVertex3fv(vertexPoint);
-    for (i = 0; i < 6; i++) {
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
-    }
-    // Repeat first point to close fan:
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
-    glEnd();
+
+    _drawBarbHead(dirVec, vertexPoint, startNormal, startVertex);
+
+    glPopMatrix();
 }
 
 void BarbRenderer::_setUpLightingAndColor()
@@ -499,31 +531,43 @@ vector<double> BarbRenderer::_getScales()
     return scales;
 }
 
+float BarbRenderer::_calculateLength(float start[3], float end[3]) const
+{
+    float xDist = start[0] - end[0];
+    float yDist = start[1] - end[1];
+    float zDist = start[2] - end[2];
+    float barbLength = sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
+    return barbLength;
+}
+
+void BarbRenderer::_makeStartAndEndPoint(float start[3], float end[3], float direction[3], float length)
+{
+    vector<double> scales = _getScales();    // t->GetScales();
+    end[0] = start[0] + scales[0] * direction[0] * length;
+    end[1] = start[1] + scales[1] * direction[1] * length;
+    end[2] = start[2] + scales[2] * direction[2] * length;
+}
+
 void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, BarbParams *bParams)
 {
     assert(variableData.size() == 5);
 
     Grid *heightVar = variableData[3];
 
-    float end[3];
     float xStride = (rakeExts[3] - rakeExts[0]) / ((float)rakeGrid[0] + 1);
     float yStride = (rakeExts[4] - rakeExts[1]) / ((float)rakeGrid[1] + 1);
     float zStride = (rakeExts[5] - rakeExts[2]) / ((float)rakeGrid[2] + 1);
 
     float clut[1024];
-    bool  doColorMapping = _doColorMapping(clut);
+    bool  doColorMapping = _makeCLUT(clut);
 
-    float xCoord, yCoord, zCoordGrid, zCoord;
-    for (int k = 1; k <= rakeGrid[2]; k++) {
-        zCoordGrid = zStride * k + rakeExts[2];    //+ zStride/2.0;
-
-        cout << "..foo.." << endl;
-
+    float xCoord, yCoord, zCoord;
+    for (int i = 1; i <= rakeGrid[0]; i++) {
+        xCoord = xStride * i + rakeExts[0];    // + xStride/2.0;
         for (int j = 1; j <= rakeGrid[1]; j++) {
             yCoord = yStride * j + rakeExts[1];    // + yStride/2.0;
-            for (int i = 1; i <= rakeGrid[0]; i++) {
-                xCoord = xStride * i + rakeExts[0];    // + xStride/2.0;
-                zCoord = zCoordGrid;
+            for (int k = 1; k <= rakeGrid[2]; k++) {
+                zCoord = zStride * k + rakeExts[2];    //+ zStride/2.0;
 
                 bool missing = false;
                 if (heightVar) { zCoord += getHeightOffset(heightVar, xCoord, yCoord, missing); }
@@ -531,52 +575,38 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                 float direction[3] = {0.f, 0.f, 0.f};
                 _getDirection(direction, variableData, xCoord, yCoord, zCoord, missing);
 
-                float point[3] = {xCoord, yCoord, zCoord};
-                end[0] = point[0] + direction[0] * length;
-                end[1] = point[1] + direction[1] * length;
-                end[2] = point[2] + direction[2] * length;
+                float end[3];
+                float start[3] = {xCoord, yCoord, zCoord};
+                _makeStartAndEndPoint(start, end, direction, length);
 
-                if (j == 3) {
-                    float xDist = point[0] - end[0];
-                    float yDist = point[1] - end[1];
-                    float zDist = point[2] - end[2];
-                    float barbLength = sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
-                    cout << "Barb length: " << barbLength << endl;
-                }
+                if (j == 3) cout << "Barb Length: " << _calculateLength(start, end) << endl;
 
                 if (doColorMapping) {
-                    float val = variableData[4]->GetValue(point[0], point[1], point[2]);
+                    float val = variableData[4]->GetValue(start[0], start[1], start[2]);
+
                     if (val == variableData[4]->GetMissingValue())
                         missing = true;
                     else {
-                        // missing = missingColorVar(colorVar,va
-                        MapperFunction *tf = 0;
-                        BarbParams *    bParams = (BarbParams *)GetActiveParams();
-                        string          colorVar = bParams->GetColorMapVariableName();
-                        tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
-                        assert(tf);
-                        missing = GetColorMapping(tf, val, clut);
+                        missing = _getColorMapping(val, clut);
                     }
                 }
 
-                if (!missing) {
-                    vector<double> scales = _getScales();    // t->GetScales();
-
-                    glMatrixMode(GL_MODELVIEW);
-                    glPushMatrix();
-                    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
-                    drawBarb(point, end, rad);
-                    glPopMatrix();
-                }
+                if (!missing) { drawBarb(start, end, rad); }
             }
         }
     }
     return;
 }
 
-bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4])
+bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
 {
     bool missing = false;
+
+    MapperFunction *tf = 0;
+    BarbParams *    bParams = (BarbParams *)GetActiveParams();
+    string          colorVar = bParams->GetColorMapVariableName();
+    tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
+    assert(tf);
 
     //	float clut[256*4];
     //	tf->makeLut(clut);
