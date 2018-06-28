@@ -216,7 +216,6 @@ int BarbRenderer::_paintGL()
     }
 
     vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
-    cout << "vectorLengthScale (rendering) " << vectorLengthScale << endl;
 
     //
     // Perform OpenGL rendering of barbs
@@ -283,6 +282,7 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
         vertexPoint[i] = nextPoint[i] + dirVec[i] * radius;
         headCenter[i] = nextPoint[i] - dirVec[i] * (BARB_HEAD_FACTOR * radius - radius);
     }
+
     // calculate 6 points in plane orthog to dirVec, in plane of point
     for (i = 0; i < 6; i++) {
         // testVec and testVec2 are components of point in plane
@@ -367,41 +367,16 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     glEnd();
 }
 
-int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
+void BarbRenderer::_setUpLightingAndColor()
 {
-    assert(variableData.size() == 5);
-
-    size_t timestep = bParams->GetCurrentTimestep();
-
-    vector<double> rMinExtents, rMaxExtents;
-    bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
-
-    double rakeExts[6];    // rake extents in user coordinates
-
-    rakeExts[0] = rMinExtents[0];
-    rakeExts[1] = rMinExtents[1];
-    rakeExts[2] = rMinExtents[2];
-    rakeExts[3] = rMaxExtents[0];
-    rakeExts[4] = rMaxExtents[1];
-    rakeExts[5] = rMaxExtents[2];
-
-    string           winName = GetVisualizer();
+    string           winName = GetVisualizer();    // GetVisualizer is not const :(
     ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winName);
+    int              nLights = vpParams->getNumLights();
 
-    // Barb thickness is .001*LineThickness*viewDiameter.
-    // float thickness = bParams->GetLineThickness();
-
-    size_t         ts = bParams->GetCurrentTimestep();
-    vector<string> varnames = bParams->GetFieldVariableNames();
-    float          thickness = 2 * _calcDefaultScale(ts, varnames, bParams);
-
-    // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
-    // float rad = (float) (1000*thickness);
-    float rad = (float)(thickness);
-    // Set up lighting and color
-    int   nLights = vpParams->getNumLights();
-    float fcolor[3];
+    float       fcolor[3];
+    BarbParams *bParams = (BarbParams *)GetActiveParams();
     bParams->GetConstantColor(fcolor);
+
     if (nLights == 0) {
         glDisable(GL_LIGHTING);
     } else {
@@ -417,13 +392,54 @@ int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, floa
         glEnable(GL_COLOR_MATERIAL);
     }
     glColor3fv(fcolor);
+}
 
+void BarbRenderer::_reFormatExtents(double rakeExts[6]) const
+{
+    BarbParams *   bParams = (BarbParams *)GetActiveParams();
+    vector<double> rMinExtents, rMaxExtents;
+    bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
+
+    rakeExts[0] = rMinExtents[0];
+    rakeExts[1] = rMinExtents[1];
+    rakeExts[2] = rMinExtents[2];
+    rakeExts[3] = rMaxExtents[0];
+    rakeExts[4] = rMaxExtents[1];
+    rakeExts[5] = rMaxExtents[2];
+}
+
+void BarbRenderer::_makeRakeGrid(int rakeGrid[3]) const
+{
+    BarbParams * bParams = (BarbParams *)GetActiveParams();
     vector<long> longGrid = bParams->GetGrid();
-    int          rakeGrid[3];
     rakeGrid[0] = (int)longGrid[0];
     rakeGrid[1] = (int)longGrid[1];
     rakeGrid[2] = (int)longGrid[2];
+}
 
+int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
+{
+    assert(variableData.size() == 5);
+
+    double rakeExts[6];    // rake extents in user coordinates
+    _reFormatExtents(rakeExts);
+
+    // Barb thickness is .001*LineThickness*viewDiameter.
+    // float thickness = bParams->GetLineThickness();
+    // vector <string> varnames = bParams->GetFieldVariableNames();
+    // float thickness = 2*_calcDefaultScale(ts, varnames, bParams);
+    float thickness = vectorLengthScale;
+
+    // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
+    // float rad = (float) (1000*thickness);
+    float rad = (float)(thickness);
+
+    _setUpLightingAndColor();
+
+    int rakeGrid[3];
+    _makeRakeGrid(rakeGrid);
+
+    size_t timestep = bParams->GetCurrentTimestep();
     renderGrid(rakeGrid, rakeExts, variableData, timestep, vectorLengthScale, rad, bParams);
 
     return 0;
@@ -445,7 +461,6 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
 {
     assert(variableData.size() == 5);
 
-    string         winName = GetVisualizer();
     vector<double> scales(3, 1.0);
 
     Grid *heightVar = variableData[3];
@@ -466,15 +481,15 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
     }
 
     float xCoord, yCoord, zCoordGrid, zCoord;
-    for (int k = 0; k <= rakeGrid[2]; k++) {
-        zCoordGrid = zStride * k + rakeExts[2] + zStride / 2.0;
+    for (int k = 1; k <= rakeGrid[2]; k++) {
+        zCoordGrid = zStride * k + rakeExts[2];    //+ zStride/2.0;
 
         cout << "..foo.." << endl;
 
-        for (int j = 0; j <= rakeGrid[1]; j++) {
-            yCoord = yStride * j + rakeExts[1] + yStride / 2.0;
-            for (int i = 0; i <= rakeGrid[0]; i++) {
-                xCoord = xStride * i + rakeExts[0] + xStride / 2.0;
+        for (int j = 1; j <= rakeGrid[1]; j++) {
+            yCoord = yStride * j + rakeExts[1];    // + yStride/2.0;
+            for (int i = 1; i <= rakeGrid[0]; i++) {
+                xCoord = xStride * i + rakeExts[0];    // + xStride/2.0;
                 zCoord = zCoordGrid;
 
                 bool missing = false;
@@ -582,8 +597,7 @@ double BarbRenderer::_getMaxAtBarbLocations(VAPoR::Grid *grid) const
     return maxValue;
 }
 
-// std::vector<double> BarbRenderer::_getMaxVarValues(
-vector<double> BarbRenderer::_getMaxVarValues(size_t ts, const std::vector<string> &varNames) const
+vector<double> BarbRenderer::_getMaximumValues(size_t ts, const std::vector<string> &varNames) const
 {
     std::vector<double> maxVarVals(3, 0.0);
     for (int i = 0; i < varNames.size(); i++) {
@@ -608,8 +622,6 @@ vector<double> BarbRenderer::_getMaxVarValues(size_t ts, const std::vector<strin
         }
     }
 
-    cout << "maxes " << maxVarVals[0] << " " << maxVarVals[1] << " " << maxVarVals[2] << endl;
-
     return maxVarVals;
 }
 
@@ -627,22 +639,6 @@ double BarbRenderer::_getDomainHypotenuse(size_t ts, const std::vector<string> v
     return diag;
 }
 
-double BarbRenderer::_getMaxDomainLength(size_t ts, const std::vector<string> varnames) const
-{
-    vector<int>    axes;
-    vector<double> minExts, maxExts;
-    bool           status = DataMgrUtils::GetExtents(_dataMgr, ts, varnames, minExts, maxExts, axes);
-    assert(status);
-
-    double maxVecLength = 0.0;
-    for (int i = 0; i < minExts.size(); i++) { maxVecLength = Max(maxVecLength, (maxExts[i] - minExts[i])); }
-    maxVecLength *= 0.1;
-
-    cout << "maxVecLength " << maxVecLength << endl;
-
-    return maxVecLength;
-}
-
 double BarbRenderer::_calcDefaultScale(size_t ts, const vector<string> &varnames, const BarbParams *bParams)
 {
     assert(varnames.size() <= 3);
@@ -651,21 +647,24 @@ double BarbRenderer::_calcDefaultScale(size_t ts, const vector<string> &varnames
     Transform *    t = bParams->GetTransform();
     vector<double> scales = t->GetScales();
 
-    vector<double> maxVarVals = _getMaxVarValues(ts, varnames);
-    for (int i = 0; i < maxVarVals.size(); i++) maxVarVals[i] *= scales[i];
-    double maxVarVal = Max(maxVarVals[0], maxVarVals[1]);
-    maxVarVal = Max(maxVarVal, maxVarVals[2]);
+    vector<double> maxVals = _getMaximumValues(ts, varnames);
+    for (int i = 0; i < maxVals.size(); i++) maxVals[i] *= scales[i];
+    double maxVal = Max(maxVals[0], maxVals[1]);
+    maxVal = Max(maxVal, maxVals[2]);
 
     double maxVecLength = _getDomainHypotenuse(ts, varnames);
+    double hypotenuse = maxVecLength;
 
-    _getMaxVarValues(ts, varnames);
+    _getMaximumValues(ts, varnames);
     double maxVecVal = 0.0;
-    for (int i = 0; i < maxVarVals.size(); i++) { maxVecVal = Max(maxVecLength, maxVarVals[i]); }
+    for (int i = 0; i < maxVals.size(); i++) { maxVecVal = Max(maxVecLength, maxVals[i]); }
 
-    cout << ". " << maxVecLength << " " << maxVarVal << endl;
+    cout << "HvM " << hypotenuse << " " << maxVecLength << endl;
+    //	cout << ". " << maxVecLength << " " << maxVarVal << endl;
 
-    double returnValue = maxVecLength * .05;
-    returnValue *= 1.0 / maxVarVal;
+    // double returnValue = maxVecLength * .05;
+    double returnValue = hypotenuse * .05;
+    returnValue *= 1.0 / maxVal;
 
     //	if (maxVecVal == 0.) returnValue = maxVecLength;
     //	else returnValue = maxVecLength/maxVecVal;
