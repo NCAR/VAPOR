@@ -393,7 +393,7 @@ int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, floa
 
     size_t         ts = bParams->GetCurrentTimestep();
     vector<string> varnames = bParams->GetFieldVariableNames();
-    float          thickness = .2 * _calcDefaultScale(ts, varnames, bParams);
+    float          thickness = 2 * _calcDefaultScale(ts, varnames, bParams);
 
     // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
     // float rad = (float) (1000*thickness);
@@ -468,6 +468,9 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
     float xCoord, yCoord, zCoordGrid, zCoord;
     for (int k = 0; k <= rakeGrid[2]; k++) {
         zCoordGrid = zStride * k + rakeExts[2] + zStride / 2.0;
+
+        cout << "..foo.." << endl;
+
         for (int j = 0; j <= rakeGrid[1]; j++) {
             yCoord = yStride * j + rakeExts[1] + yStride / 2.0;
             for (int i = 0; i <= rakeGrid[0]; i++) {
@@ -493,6 +496,14 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                 end[1] = point[1] + scales[1] * direction[1] * length;
                 end[2] = point[2] + scales[2] * direction[2] * length;
 
+                if (j == 3) {
+                    float xDist = point[0] - end[0];
+                    float yDist = point[1] - end[1];
+                    float zDist = point[2] - end[2];
+                    float barbLength = sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
+                    cout << "Barb length: " << barbLength << endl;
+                }
+
                 if (doColorMapping) {
                     float val = variableData[4]->GetValue(point[0], point[1], point[2]);
                     if (val == variableData[4]->GetMissingValue())
@@ -513,7 +524,7 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                     glMatrixMode(GL_MODELVIEW);
                     glPushMatrix();
                     glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
-                    drawBarb(point, end, rad * 10);
+                    drawBarb(point, end, rad);
                     glPopMatrix();
                 }
             }
