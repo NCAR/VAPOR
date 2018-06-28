@@ -89,11 +89,11 @@ namespace VAPoR {
     virtual int _paintGL();
 
 
-void _setUpLightingAndColor();
+	void _setUpLightingAndColor();
 
-void _reFormatExtents(double rakeExts[6]) const;
+	void _reFormatExtents(double rakeExts[6]) const;
 
-void _makeRakeGrid(int rakeGrid[3]) const;
+	void _makeRakeGrid(int rakeGrid[3]) const;
 
 //! Protected method that performs rendering of all barbs.
 //! \param[in] DataMgr* current DataMgr
@@ -111,6 +111,19 @@ void _makeRakeGrid(int rakeGrid[3]) const;
 
 	float getHeightOffset(Grid* heightVar, float xCoord,
 		float yCoord, bool& missing);	
+
+	bool _doColorMapping(float clut[1024]) const;
+
+	void _getDirection(
+		float direction[3], 
+		vector<Grid*> varData,
+		float xCoord,
+		float yCoord,
+		float zCoord,
+		bool &missing
+	) const;
+
+	vector<double> _getScales();
 
 	void renderGrid(int rakeGrid[3],double rakeExts[6],
 		vector <Grid *> variableData, int timestep,
