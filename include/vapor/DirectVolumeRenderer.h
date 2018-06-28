@@ -53,12 +53,12 @@ private:
 
     struct UserCoordinates
     {
-          //              Y
-          //              |   Z (coming out the screen)
-          //              |  /
-          //              | /
-          //              |/
-          //            0 --------X
+        //              Y
+        //              |   Z (coming out the screen)
+        //              |  /
+        //              | /
+        //              |/
+        //            0 --------X
         float *frontFace, *backFace;     // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;     // user coordinates, size == by * bz * 3
         float *topFace,   *bottomFace;   // user coordinates, size == bx * bz * 3
@@ -96,6 +96,7 @@ private:
     GLuint              _depthBufferId;
 
     GLuint              _vertexArrayId;
+    GLuint              _shaderProgramId;
 
     //
     // Draw faces using triangle strips
@@ -125,6 +126,12 @@ private:
     //
     GLuint _loadShaders(const char* vertex_file_path,
                         const char* fragment_file_path );
+
+    //
+    // Get current Model View Projection matrix that can be passed to shaders
+    //   Note: MVP should be a memory space of 16 GLfloats that is already allocated.
+    //         The MVP matrix is stored in a colume-major fashion.
+    void _getMVPMatrix( GLfloat* MVP ) const;
 
 
 };  // End of class DirectVolumeRenderer
