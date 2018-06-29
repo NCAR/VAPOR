@@ -24,7 +24,7 @@
     #include <unistd.h>
 #endif
 
-//#include <vapor/Renderer.h>
+#include <vapor/DataStatus.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/BarbRenderer.h>
 #include <vapor/BarbParams.h>
