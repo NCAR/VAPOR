@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 
 #ifndef WIN32
     #include <unistd.h>
@@ -177,11 +178,12 @@ int BarbRenderer::_paintGL()
 
     // Find box extents for ROI
     //
-    //	if (varnames != _fieldVariables) {
-    cout << "......Calculating _vectorScaleFactor....." << endl;
-    _vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
-    _fieldVariables = varnames;
-    //	}
+    if (varnames != _fieldVariables) {
+        cout << "......Calculating _vectorScaleFactor....." << endl;
+        //_vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
+        _setDefaultLengthAndThicknessScales(ts, varnames, bParams);
+        _fieldVariables = varnames;
+    }
 
     // Get grids for our vector variables
     //
@@ -339,8 +341,7 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3])
     vcross(uVec, dirVec, bVec);
 
     BarbParams *bParams = (BarbParams *)GetActiveParams();
-    // float radius = bParams->GetLengthScale() * _vectorScaleFactor;
-    float radius = bParams->GetLineThickness() * BARB_THICKNESS_FACTOR * _maxThickness;
+    float       radius = bParams->GetLineThickness() * BARB_THICKNESS_FACTOR * _maxThickness;
 
     // calculate 6 points in plane orthog to dirVec, in plane of point
     for (int i = 0; i < 6; i++) {
@@ -359,7 +360,7 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3])
         vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
     }
 
-#ifdef DEBUG
+#ifdef DEBUG2
     float pointA[3] = {startVertex[0], startVertex[1], startVertex[2]};
     float pointB[3] = {startVertex[3], startVertex[4], startVertex[5]};
     float pointC[3] = {startVertex[6], startVertex[7], startVertex[8]};
@@ -403,8 +404,6 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3])
         // add to current point
         vadd(nextVertex + 3 * i, nextPoint, nextVertex + 3 * i);
     }
-
-    cout << "radius " << radius << endl;
 
     _drawCylinderSides(nextNormal, nextVertex, startNormal, startVertex);
 
@@ -582,7 +581,7 @@ void BarbRenderer::_makeStartAndEndPoint(float start[3], float end[3], float dir
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     float       length = bParams->GetLengthScale() * _vectorScaleFactor;
 
-    vector<double> scales = _getScales();    // t->GetScales();
+    vector<double> scales = _getScales();
 
     end[0] = start[0] + scales[0] * direction[0] * length;
     end[1] = start[1] + scales[1] * direction[1] * length;
@@ -618,9 +617,10 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
 
                 float end[3];
                 float start[3] = {xCoord, yCoord, zCoord};
-                _makeStartAndEndPoint(start, end, direction);    //, length);
+                _makeStartAndEndPoint(start, end, direction);
 
-                if (j == 3) cout << "Barb Length: " << _calculateLength(start, end) << endl;
+                // if (j==3)
+                cout << "Barb Length: " << _calculateLength(start, end) << endl;
 
                 if (doColorMapping) {
                     float val = variableData[4]->GetValue(start[0], start[1], start[2]);
@@ -685,9 +685,7 @@ double BarbRenderer::_getMaxAtBarbLocations(VAPoR::Grid *grid) const
                 xCoord = stride[X] * i + minExts[X] + stride[X] / 2.0;
 
                 double value = grid->GetValue(xCoord, yCoord, zCoord);
-                if (value > maxValue) maxValue = value;
-
-                // cout << i << " " << j << " " << k << " " << xCoord << " " << yCoord << " " << zCoord << endl;
+                if (value > maxValue && value < std::numeric_limits<double>::max() && value > std::numeric_limits<double>::lowest()) maxValue = value;
             }
         }
     }
@@ -730,37 +728,33 @@ double BarbRenderer::_getDomainHypotenuse(size_t ts, const std::vector<string> v
     assert(status);
 
     double xLen = maxExts[0] - minExts[0];
+
     double yLen = maxExts[1] - minExts[1];
-    double zLen = maxExts[2] - minExts[2];
+
+    double zLen = 0.0;
+    if (minExts.size() > 2) zLen = maxExts[2] - minExts[2];
+
     double diag = sqrt(xLen * xLen + yLen * yLen + zLen * zLen);
     return diag;
 }
 
-double BarbRenderer::_calcDefaultScale(size_t ts, const vector<string> &varnames, const BarbParams *bParams)
+void BarbRenderer::_setDefaultLengthAndThicknessScales(size_t ts, const vector<string> &varnames, const BarbParams *bParams)
 {
     assert(varnames.size() <= 3);
-    if (varnames[0] == "" && varnames[1] == "" && varnames[2] == "") return 1.f;
+    if (varnames[0] == "" && varnames[1] == "" && varnames[2] == "") return;
+
+    vector<double> maxVals = _getMaximumValues(ts, varnames);
 
     Transform *    t = bParams->GetTransform();
     vector<double> scales = t->GetScales();
-
-    vector<double> maxVals = _getMaximumValues(ts, varnames);
     for (int i = 0; i < maxVals.size(); i++) maxVals[i] *= scales[i];
+
     double maxVal = Max(maxVals[0], maxVals[1]);
     maxVal = Max(maxVal, maxVals[2]);
 
     double hypotenuse = _getDomainHypotenuse(ts, varnames);
+
     _maxThickness = hypotenuse;
-
-    _getMaximumValues(ts, varnames);
-    double maxVecVal = 0.0;
-    for (int i = 0; i < maxVals.size(); i++) { maxVecVal = Max(hypotenuse, maxVals[i]); }
-
-    double returnValue = hypotenuse * .05;
-    returnValue *= 1.0 / maxVal;
-
-    //	else returnValue = maxVecLength/maxVecVal;
-
-    return returnValue;
-    // return 1000.0;
+    _vectorScaleFactor = hypotenuse * .05;
+    _vectorScaleFactor *= 1.0 / maxVal;
 }
