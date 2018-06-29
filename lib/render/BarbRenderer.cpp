@@ -11,6 +11,9 @@
 // Specify how long the barb tube is, in front of where the barbhead is attached:
 #define BARB_LENGTH_FACTOR 0.9
 
+// Specify the default thickness in proportion to the hypotenuse of the domain
+#define BARB_THICKNESS_FACTOR .005
+
 #include <vapor/glutil.h> // Must be included first!!!
 #include <cstdlib>
 #include <cstdio>
@@ -36,6 +39,8 @@
 #define Y 1
 #define Z 2
 
+#define DEBUG
+
 using namespace VAPoR;
 using namespace Wasp;
 
@@ -50,6 +55,7 @@ BarbRenderer::BarbRenderer(
     _drawList = 0;
     _fieldVariables.clear();
     _vectorScaleFactor = 1.0;
+    _maxThickness = 1.0;
 }
 
 //----------------------------------------------------------------------------
@@ -252,7 +258,7 @@ int BarbRenderer::_paintGL() {
     //Perform OpenGL rendering of barbs
     //
     rc = performRendering(
-        bParams, refLevel, vectorLengthScale, varData);
+        bParams, refLevel, varData);
 
     //Release the locks on the data:
     for (int i = 0; i < varData.size(); i++) {
@@ -338,8 +344,8 @@ void BarbRenderer::_drawBarbHead(
 //one point to another.  Then put an barb head on the end
 //
 void BarbRenderer::drawBarb(const float startPoint[3],
-                            const float endPoint[3],
-                            float radius) {
+                            const float endPoint[3]) {
+
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     vector<double> scales = _getScales(); //t->GetScales();
@@ -370,7 +376,7 @@ void BarbRenderer::drawBarb(const float startPoint[3],
     float len = _calculateDirVec(startPoint, endPoint, dirVec);
 
     //Calculate uVec, orthogonal to dirVec
-    //Not sure what bVec is
+    //Not sure what bVec is.  Up direction?
     float uVec[3], bVec[3];
     vset(testVec, 1., 0., 0.);
     vcross(dirVec, testVec, uVec);
@@ -383,19 +389,41 @@ void BarbRenderer::drawBarb(const float startPoint[3],
     vscale(uVec, 1.f / sqrt(len));
     vcross(uVec, dirVec, bVec);
 
+    BarbParams *bParams = (BarbParams *)GetActiveParams();
+    //float radius = bParams->GetLengthScale() * _vectorScaleFactor;
+    float radius = bParams->GetLineThickness() *
+                   BARB_THICKNESS_FACTOR *
+                   _maxThickness;
+
     //calculate 6 points in plane orthog to dirVec, in plane of point
     for (int i = 0; i < 6; i++) {
         //testVec and testVec2 are components of point in plane
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
+
         //Calc outward normal as a sideEffect..
         //It is the vector sum of x,y components (norm 1)
         vadd(testVec, testVec2, startNormal + 3 * i);
+
         //stretch by radius to get current displacement
         vmult(startNormal + 3 * i, radius, startVertex + 3 * i);
+
         //add to current point
         vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
     }
+
+#ifdef DEBUG
+    float pointA[3] = {startVertex[0], startVertex[1], startVertex[2]};
+    float pointB[3] = {startVertex[3], startVertex[4], startVertex[5]};
+    float pointC[3] = {startVertex[6], startVertex[7], startVertex[8]};
+    float pointD[3] = {startVertex[9], startVertex[10], startVertex[11]};
+    float pointE[3] = {startVertex[12], startVertex[13], startVertex[14]};
+    float pointF[3] = {startVertex[15], startVertex[16], startVertex[17]};
+    //cout << "   " << pointA[0] << "\t\t" << pointB[0] << "\t\t\t" << pointC[0] << "\t\t" << pointD[0] << "\t\t" << pointE[0] << "\t\t" << pointF[0] << endl;
+    //cout << "   " << pointA[1] << "\t\t" << pointB[1] << "\t\t" << pointC[1] << "\t" << pointD[1] << "\t" << pointE[1] << "\t\t" << pointF[1] << endl;
+    //cout << "   " << pointA[2] << "\t\t" << pointB[2] << "\t\t" << pointC[2] << "\t\t" << pointD[2] << "\t\t" << pointE[2] << "\t\t" << pointF[2] << endl;
+    cout << "Back Diameter " << _calculateLength(pointA, pointD) << endl;
+#endif
 
     _drawBackOfBarb(dirVec, startVertex);
 
@@ -417,14 +445,19 @@ void BarbRenderer::drawBarb(const float startPoint[3],
         //testVec and testVec2 are components of point in plane
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
+
         //Calc outward normal as a sideEffect..
         //It is the vector sum of x,y components (norm 1)
         vadd(testVec, testVec2, nextNormal + 3 * i);
+
         //stretch by radius to get current displacement
         vmult(nextNormal + 3 * i, radius, nextVertex + 3 * i);
+
         //add to current point
         vadd(nextVertex + 3 * i, nextPoint, nextVertex + 3 * i);
     }
+
+    cout << "radius " << radius << endl;
 
     _drawCylinderSides(nextNormal, nextVertex, startNormal, startVertex);
 
@@ -436,13 +469,17 @@ void BarbRenderer::drawBarb(const float startPoint[3],
         //Can reuse them from previous (cylinder end) calculation
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
+
         //Calc outward normal as a sideEffect..
         //It is the vector sum of x,y components (norm 1)
         vadd(testVec, testVec2, startNormal + 3 * i);
+
         //stretch by radius to get current displacement
         vmult(startNormal + 3 * i, BARB_HEAD_FACTOR * radius, startVertex + 3 * i);
+
         //add to current point
         vadd(startVertex + 3 * i, headCenter, startVertex + 3 * i);
+
         //Now tilt normals in direction of barb:
         for (int k = 0; k < 3; k++) {
             startNormal[3 * i + k] = 0.5 * startNormal[3 * i + k] + 0.5 * dirVec[k];
@@ -504,7 +541,6 @@ void BarbRenderer::_makeRakeGrid(int rakeGrid[3]) const {
 int BarbRenderer::performRendering(
     BarbParams *bParams,
     int actualRefLevel,
-    float vectorLengthScale,
     vector<Grid *> variableData) {
     assert(variableData.size() == 5);
 
@@ -527,8 +563,7 @@ int BarbRenderer::performRendering(
     _makeRakeGrid(rakeGrid);
 
     size_t timestep = bParams->GetCurrentTimestep();
-    renderGrid(rakeGrid, rakeExts, variableData, timestep,
-               vectorLengthScale, vectorLengthScale, bParams);
+    renderGrid(rakeGrid, rakeExts, variableData, timestep, bParams);
 
     return 0;
 }
@@ -598,16 +633,19 @@ float BarbRenderer::_calculateLength(float start[3], float end[3]) const {
     float xDist = start[0] - end[0];
     float yDist = start[1] - end[1];
     float zDist = start[2] - end[2];
-    float barbLength = sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
-    return barbLength;
+    float length = sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
+    return length;
 }
 
 void BarbRenderer::_makeStartAndEndPoint(
     float start[3],
     float end[3],
-    float direction[3],
-    float length) {
+    float direction[3]) {
+    BarbParams *bParams = (BarbParams *)GetActiveParams();
+    float length = bParams->GetLengthScale() * _vectorScaleFactor;
+
     vector<double> scales = _getScales(); //t->GetScales();
+
     end[0] = start[0] + scales[0] * direction[0] * length;
     end[1] = start[1] + scales[1] * direction[1] * length;
     end[2] = start[2] + scales[2] * direction[2] * length;
@@ -618,8 +656,6 @@ void BarbRenderer::renderGrid(
     double rakeExts[6],
     vector<Grid *> variableData,
     int timestep,
-    float length,
-    float rad,
     BarbParams *bParams) {
     assert(variableData.size() == 5);
 
@@ -652,7 +688,7 @@ void BarbRenderer::renderGrid(
 
                 float end[3];
                 float start[3] = {xCoord, yCoord, zCoord};
-                _makeStartAndEndPoint(start, end, direction, length);
+                _makeStartAndEndPoint(start, end, direction); //, length);
 
                 if (j == 3)
                     cout << "Barb Length: " << _calculateLength(start, end) << endl;
@@ -669,7 +705,7 @@ void BarbRenderer::renderGrid(
                 }
 
                 if (!missing) {
-                    drawBarb(start, end, rad);
+                    drawBarb(start, end);
                 }
             }
         }
@@ -780,7 +816,9 @@ double BarbRenderer::_getDomainHypotenuse(
 }
 
 double BarbRenderer::_calcDefaultScale(
-    size_t ts, const vector<string> &varnames, const BarbParams *bParams) {
+    size_t ts,
+    const vector<string> &varnames,
+    const BarbParams *bParams) {
     assert(varnames.size() <= 3);
     if (varnames[0] == "" &&
         varnames[1] == "" &&
@@ -796,23 +834,18 @@ double BarbRenderer::_calcDefaultScale(
     double maxVal = Max(maxVals[0], maxVals[1]);
     maxVal = Max(maxVal, maxVals[2]);
 
-    double maxVecLength = _getDomainHypotenuse(ts, varnames);
-    double hypotenuse = maxVecLength;
+    double hypotenuse = _getDomainHypotenuse(ts, varnames);
+    _maxThickness = hypotenuse;
 
     _getMaximumValues(ts, varnames);
     double maxVecVal = 0.0;
     for (int i = 0; i < maxVals.size(); i++) {
-        maxVecVal = Max(maxVecLength, maxVals[i]);
+        maxVecVal = Max(hypotenuse, maxVals[i]);
     }
 
-    cout << "HvM " << hypotenuse << " " << maxVecLength << endl;
-    //	cout << ". " << maxVecLength << " " << maxVarVal << endl;
-
-    //double returnValue = maxVecLength * .05;
     double returnValue = hypotenuse * .05;
     returnValue *= 1.0 / maxVal;
 
-    //	if (maxVecVal == 0.) returnValue = maxVecLength;
     //	else returnValue = maxVecLength/maxVecVal;
 
     return returnValue;
