@@ -78,7 +78,7 @@ namespace VAPoR {
 		size_t ts,
 		const std::vector<string> varnames) const;
 
-	double _calcDefaultScale(
+	void _setDefaultLengthAndThicknessScales(
 		size_t ts, const std::vector<string> &varnames,
 		const BarbParams* bParams
 	);
