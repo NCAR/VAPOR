@@ -1088,10 +1088,7 @@ int DCWRF::_InitVars(NetCDFCollection *ncdfc)
 
         // Must have a coordinate variable for each dimension!
         //
-        if (sdimnames.size() != scoordvars.size()) {
-            cout << "CRAP\n";
-            continue;
-        }
+        if (sdimnames.size() != scoordvars.size()) { continue; }
 
         if (!ok) continue;
         // if (! ok) {
@@ -1111,10 +1108,19 @@ int DCWRF::_InitVars(NetCDFCollection *ncdfc)
         if (!_udunits.ValidUnit(units)) { units = ""; }
 
         vector<bool> periodic(3, false);
-        _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
+        DC::DataVar  dvar = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
 
-        int rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);
+        int rc = DCUtils::CopyAtt(*ncdfc, vars[i], dvar);
         if (rc < 0) return (-1);
+
+        if (scoordvars.size() == 3) {
+            dvar.SetAttribute(Attribute("standard_name", DC::XType::TEXT, "wrf_terrain"));
+
+            string formula_terms = "PH: PH PHB: PHB";
+            dvar.SetAttribute(Attribute("formula_terms", DC::XType::TEXT, formula_terms));
+        }
+
+        _dataVarsMap[vars[i]] = dvar;
     }
 
     return (0);

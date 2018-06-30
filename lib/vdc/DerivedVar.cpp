@@ -39,6 +39,15 @@ size_t numBlocks(const vector<size_t> &dims, const vector<size_t> &bs)
 }
 #endif
 
+size_t numElements(const vector<size_t> &min, const vector<size_t> &max)
+{
+    assert(min.size() == max.size());
+
+    size_t nElements = 1;
+    for (int i = 0; i < min.size(); i++) { nElements *= (max[i] - min[i] + 1); }
+    return (nElements);
+}
+
 size_t blockSize(const vector<size_t> &bs)
 {
     size_t sz = 1;
@@ -153,7 +162,56 @@ void make2D(float *lonBuf, float *latBuf, vector<size_t> dims)
     }
 }
 
+bool parse_formula(string formula_terms, map<string, string> &parsed_terms)
+{
+    parsed_terms.clear();
+
+    // Remove ":" to ease parsing. It's superflous
+    //
+    replace(formula_terms.begin(), formula_terms.end(), ':', ' ');
+
+    string       buf;                  // Have a buffer string
+    stringstream ss(formula_terms);    // Insert the string into a stream
+
+    vector<string> tokens;    // Create vector to hold our words
+
+    while (ss >> buf) { tokens.push_back(buf); }
+
+    if (tokens.size() % 2) return (false);
+
+    for (int i = 0; i < tokens.size(); i += 2) { parsed_terms[tokens[i]] = tokens[i + 1]; }
+    return (true);
+}
+
 };    // namespace
+
+int DerivedVar::_getVar(DC *dc, size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, float *region) const
+{
+    int fd = dc->OpenVariableRead(ts, varname, level, lod);
+    if (fd < 0) return (-1);
+
+    int rc = dc->ReadRegion(fd, min, max, region);
+    if (rc < 0) {
+        dc->CloseVariable(fd);
+        return (-1);
+    }
+
+    return (dc->CloseVariable(fd));
+}
+
+int DerivedVar::_getVarBlock(DC *dc, size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, float *region) const
+{
+    int fd = dc->OpenVariableRead(ts, varname, level, lod);
+    if (fd < 0) return (-1);
+
+    int rc = dc->ReadRegionBlock(fd, min, max, region);
+    if (rc < 0) {
+        dc->CloseVariable(fd);
+        return (-1);
+    }
+
+    return (dc->CloseVariable(fd));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -290,7 +348,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
 
     vector<size_t> lonMin = {min[0]};
     vector<size_t> lonMax = {max[0]};
-    int            rc = _getVarBlock(ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
+    int            rc = _getVarBlock(_dc, ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -298,7 +356,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
 
     vector<size_t> latMin = {min[1]};
     vector<size_t> latMax = {max[1]};
-    rc = _getVarBlock(ts, _latName, level, lod, latMin, latMax, latBufPtr);
+    rc = _getVarBlock(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -354,13 +412,13 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(DC::FileTable::FileO
         latBufPtr = region;
     }
 
-    int rc = _getVarBlock(ts, _lonName, level, lod, min, max, lonBufPtr);
+    int rc = _getVarBlock(_dc, ts, _lonName, level, lod, min, max, lonBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
     }
 
-    rc = _getVarBlock(ts, _latName, level, lod, min, max, latBufPtr);
+    rc = _getVarBlock(_dc, ts, _latName, level, lod, min, max, latBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -491,22 +549,6 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar()
     _yCoordVarInfo.SetAxis(1);
 
     return (0);
-}
-
-int DerivedCoordVar_PCSFromLatLon::_getVarBlock(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, float *region)
-{
-    assert((varname == _lonName) || (varname == _latName));
-
-    int fd = _dc->OpenVariableRead(ts, varname, level, lod);
-    if (fd < 0) return (-1);
-
-    int rc = _dc->ReadRegionBlock(fd, min, max, region);
-    if (rc < 0) {
-        _dc->CloseVariable(fd);
-        return (-1);
-    }
-
-    return (_dc->CloseVariable(fd));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1203,4 +1245,206 @@ bool DerivedCoordVar_Staggered::VariableExists(size_t ts, string varname, int re
     if (varname != _derivedVarName) return (false);
 
     return (_dc->VariableExists(ts, _inName, reflevel, lod));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	DerivedCoordVarStandardWRF_Terrain
+//
+//////////////////////////////////////////////////////////////////////////////
+
+DerivedCoordVarStandardWRF_Terrain::DerivedCoordVarStandardWRF_Terrain(string derivedVarName, DC *dc, string formula) : DerivedCoordVar(derivedVarName)
+{
+    _derivedVarName = derivedVarName;
+    _dc = dc;
+    _formula = formula;
+    _PHVar.clear();
+    _PHBVar.clear();
+    _grav = 9.80665;
+}
+
+int DerivedCoordVarStandardWRF_Terrain::Initialize()
+{
+    map<string, string> formulaMap;
+    if (!parse_formula(_formula, formulaMap)) {
+        SetErrMsg("Invalid conversion formula \"%s\"", _formula.c_str());
+        return (-1);
+    }
+
+    map<string, string>::const_iterator itr;
+    itr = formulaMap.find("PH");
+    if (itr != formulaMap.end()) { _PHVar = itr->second; }
+
+    itr = formulaMap.find("PHB");
+    if (itr != formulaMap.end()) { _PHBVar = itr->second; }
+
+    if (_PHVar.empty() || _PHBVar.empty()) {
+        SetErrMsg("Invalid conversion formula \"%s\"", _formula.c_str());
+        return (-1);
+    }
+
+    DC::DataVar dvarInfo;
+    bool        status = _dc->GetDataVarInfo(_PHVar, dvarInfo);
+    if (!status) {
+        SetErrMsg("Invalid variable \"%s\"", _PHVar.c_str());
+        return (-1);
+    }
+
+    DC::Mesh m;
+    status = _dc->GetMesh(dvarInfo.GetMeshName(), m);
+    if (!status) {
+        SetErrMsg("Invalid variable \"%s\"", _PHVar.c_str());
+        return (-1);
+    }
+
+    string timeCoordVar = dvarInfo.GetTimeCoordVar();
+    string timeDimName;
+    if (!timeCoordVar.empty()) {
+        DC::CoordVar cvarInfo;
+        bool         status = _dc->GetCoordVarInfo(timeCoordVar, cvarInfo);
+        if (!status) {
+            SetErrMsg("Invalid variable \"%s\"", timeCoordVar.c_str());
+            return (-1);
+        }
+        timeDimName = cvarInfo.GetTimeDimName();
+    }
+
+    _coordVarInfo = DC::CoordVar(_derivedVarName, "m", DC::XType::FLOAT, vector<bool>(3, false), 2, false, m.GetDimNames(), timeDimName);
+
+    return (0);
+}
+
+bool DerivedCoordVarStandardWRF_Terrain::GetBaseVarInfo(string varname, DC::BaseVar &var) const
+{
+    if (varname == _derivedVarName) {
+        var = _coordVarInfo;
+        return (true);
+    }
+    return (false);
+}
+
+bool DerivedCoordVarStandardWRF_Terrain::GetCoordVarInfo(string varname, DC::CoordVar &cvar) const
+{
+    if (varname == _derivedVarName) {
+        cvar = _coordVarInfo;
+        return (true);
+    }
+    return (false);
+}
+
+int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{
+    dims_at_level.clear();
+    bs_at_level.clear();
+
+    int rc = _dc->GetDimLensAtLevel(_PHVar, level, dims_at_level, bs_at_level);
+    if (rc < 0) return (-1);
+
+    return (0);
+}
+
+int DerivedCoordVarStandardWRF_Terrain::OpenVariableRead(size_t ts, string varname, int level, int lod)
+{
+    if (varname != _derivedVarName) {
+        SetErrMsg("Invalid variable name: %s", varname.c_str());
+        return (-1);
+    }
+
+    DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, varname, level, lod);
+
+    return (_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVarStandardWRF_Terrain::CloseVariable(int fd)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return (0);
+}
+
+int DerivedCoordVarStandardWRF_Terrain::ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    // Need temporary buffer space for the PH and PHB  variables
+    //
+    size_t nElements = numElements(min, max);
+
+    float *phBuf = new float[nElements];
+    int    rc = _getVar(_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(), min, max, phBuf);
+    if (rc < 0) {
+        delete[] phBuf;
+        return (rc);
+    }
+
+    float *phbBuf = new float[nElements];
+    rc = _getVar(_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(), min, max, phbBuf);
+    if (rc < 0) {
+        delete[] phBuf;
+        delete[] phbBuf;
+        return (rc);
+    }
+
+    for (size_t i = 0; i < nElements; i++) { region[i] = (phBuf[i] + phbBuf[i]) / _grav; }
+
+    delete[] phBuf;
+    delete[] phbBuf;
+
+    return (0);
+}
+
+int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    assert(min.size() == 3);
+    assert(min.size() == max.size());
+
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    // Dimensions are same for PH & PHB vars
+    //
+    vector<size_t> dims, bs;
+    GetDimLensAtLevel(f->GetVarname(), f->GetLevel(), dims, bs);
+
+    // Need temporary buffer space for the PH and PHB  variables
+    //
+    size_t nElements = numBlocks(min, max, bs) * blockSize(bs);
+
+    float *phBuf = new float[nElements];
+    int    rc = _getVarBlock(_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(), min, max, phBuf);
+    if (rc < 0) {
+        delete[] phBuf;
+        return (rc);
+    }
+
+    float *phbBuf = new float[nElements];
+    rc = _getVarBlock(_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(), min, max, phbBuf);
+    if (rc < 0) {
+        delete[] phBuf;
+        delete[] phbBuf;
+        return (rc);
+    }
+
+    // Ignore block padding. No chance of floating point errors
+    //
+    for (size_t i = 0; i < nElements; i++) { region[i] = (phBuf[i] + phbBuf[i]) / _grav; }
+
+    delete[] phBuf;
+    delete[] phbBuf;
+
+    return (0);
+}
+
+bool DerivedCoordVarStandardWRF_Terrain::VariableExists(size_t ts, string varname, int reflevel, int lod) const
+{
+    if (varname != _derivedVarName) return (false);
+
+    return (_dc->VariableExists(ts, _PHVar, reflevel, lod) && _dc->VariableExists(ts, _PHBVar, reflevel, lod));
 }

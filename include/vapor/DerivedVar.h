@@ -74,6 +74,10 @@ public:
 protected:
     std::vector<string> _derivedVarNames;
     DC::FileTable       _fileTable;
+
+    int _getVar(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) const;
+
+    int _getVarBlock(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) const;
 };
 
 //!
@@ -162,7 +166,6 @@ private:
     DC::CoordVar        _yCoordVarInfo;
 
     int _setupVar();
-    int _getVarBlock(size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     int _readRegionBlockHelper1D(DC::FileTable::FileObject *f, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
     int _readRegionBlockHelper2D(DC::FileTable::FileObject *f, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
@@ -338,6 +341,41 @@ private:
 
     void _transpose(const float *a, float *b, std::vector<size_t> inDims, int axis) const;
     void _transpose(std::vector<size_t> inDims, int axis, std::vector<size_t> &outDims) const;
+};
+
+class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCoordVar {
+public:
+    DerivedCoordVarStandardWRF_Terrain(string derivedVarName, DC *dc, string formula);
+    virtual ~DerivedCoordVarStandardWRF_Terrain() {}
+
+    virtual int Initialize();
+
+    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+
+    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+
+    virtual std::vector<string> GetInputs() const { return (std::vector<string>()); }
+
+    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+    virtual int OpenVariableRead(size_t ts, string varname, int level = 0, int lod = 0);
+
+    virtual int CloseVariable(int fd);
+
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual bool VariableExists(size_t ts, string varname, int reflevel, int lod) const;
+
+private:
+    string       _derivedVarName;
+    DC *         _dc;
+    string       _formula;
+    string       _PHVar;
+    string       _PHBVar;
+    float        _grav;
+    DC::CoordVar _coordVarInfo;
 };
 
 };    // namespace VAPoR

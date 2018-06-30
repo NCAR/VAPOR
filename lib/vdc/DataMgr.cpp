@@ -302,7 +302,7 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
     _derivedDataVars.clear();
     _derivedCoordVars.clear();
     _doTransformHorizontal = false;
-    _doTransformHeight = false;
+    _doTransformVertical = false;
     _openVarName.clear();
     _proj4String.clear();
     _proj4StringDefault.clear();
@@ -340,8 +340,9 @@ int DataMgr::_parseOptions(vector<string> &options)
                 _proj4String = options[i];
             }
         }
-        if (options[i] == "-project_to_pcs") {
-            _doTransformHorizontal = true;
+        if (options[i] == "-project_to_pcs") { _doTransformHorizontal = true; }
+        if (options[i] == "-vertical_xform") {
+            _doTransformVertical = true;
         } else {
             newOptions.push_back(options[i]);
         }
@@ -404,6 +405,12 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         return (-1);
     }
 
+    rc = _initVerticalCoordVars();
+    if (rc < 0) {
+        SetErrMsg("Failed to initialize horizontal coordinates");
+        return (-1);
+    }
+
     rc = _initTimeCoord();
     if (rc < 0) {
         SetErrMsg("Failed to get time coordinates");
@@ -445,7 +452,7 @@ bool DataMgr::GetMesh(string meshname, DC::Mesh &m) const
     // if requested, replace native vertical coordiate variables
     // with derived coordinate variables
     //
-    if (_doTransformHeight) { _assignVerticalCoords(coord_vars); }
+    if (_doTransformVertical) { _assignVerticalCoords(coord_vars); }
 
     m.SetCoordVars(coord_vars);
 
@@ -1990,6 +1997,68 @@ bool DataMgr::_is_geographicMesh(string meshname) const
     return (false);
 }
 
+bool DataMgr::_hasVerticalConversion() const
+{
+    assert(_dc);
+
+    // Only 3D variables can have vertical coordinates?
+    //
+    vector<string> varnames = _dc->GetDataVarNames(3);
+
+    for (int i = 0; i < varnames.size(); i++) {
+        string dummy;
+        if (_hasVerticalConversion(varnames[i], dummy, dummy)) return (true);
+    }
+
+    return (false);
+}
+
+bool DataMgr::_hasVerticalConversion(string varname, string &standard_name, string &formula_terms) const
+{
+    standard_name.clear();
+    formula_terms.clear();
+
+    DC::DataVar dvarInfo;
+    bool        ok = _dc->GetDataVarInfo(varname, dvarInfo);
+    if (!ok) return (false);
+
+    DC::Mesh m;
+    ok = _dc->GetMesh(dvarInfo.GetMeshName(), m);
+    if (!ok) return (false);
+
+    vector<string> coordVars = m.GetCoordVars();
+
+    bool hasVertCoord = false;
+    for (int i = 0; i < coordVars.size(); i++) {
+        DC::CoordVar cvarInfo;
+
+        bool ok = _dc->GetCoordVarInfo(coordVars[i], cvarInfo);
+        assert(ok);
+
+        if (cvarInfo.GetAxis() == 2) {
+            hasVertCoord = true;
+            break;
+        }
+    }
+    if (!hasVertCoord) return (false);
+
+    DC::Attribute attr_name;
+    if (!dvarInfo.GetAttribute("standard_name", attr_name)) return (false);
+
+    attr_name.GetValues(standard_name);
+
+    if (standard_name.empty()) return (false);
+
+    DC::Attribute attr_formula;
+    if (!dvarInfo.GetAttribute("formula_terms", attr_formula)) return (false);
+
+    attr_formula.GetValues(formula_terms);
+
+    if (formula_terms.empty()) return (false);
+
+    return (true);
+}
+
 string DataMgr::VarInfoCache::_make_hash(string key, size_t ts, vector<string> varnames, int level, int lod)
 {
     ostringstream oss;
@@ -3038,6 +3107,60 @@ int DataMgr::_initHorizontalCoordVars()
 
         _derivedCoordVars[derivedCoordvars[0]] = derivedVar;
         _derivedCoordVars[derivedCoordvars[1]] = derivedVar;
+        _derivedVars.push_back(derivedVar);
+    }
+
+    return (0);
+}
+
+int DataMgr::_initVerticalCoordVars()
+{
+    if (!_doTransformVertical) return (0);
+
+    if (!_hasVerticalConversion()) return (0);
+
+    // Only 3D variables can have vertical coordinates?
+    //
+    vector<string> varnames = _dc->GetDataVarNames(3);
+
+    for (int i = 0; i < varnames.size(); i++) {
+        vector<string> coordvars;
+
+        string standard_name, formula_terms;
+        if (!_hasVerticalConversion(varnames[i], standard_name, formula_terms)) { continue; }
+
+        DC::DataVar dvarInfo;
+        bool        ok = _dc->GetDataVarInfo(varnames[i], dvarInfo);
+        if (!ok) continue;
+
+        DC::Mesh m;
+        ok = _dc->GetMesh(dvarInfo.GetMeshName(), m);
+        if (!ok) continue;
+
+        if (m.GetCoordVars().size() < 3) continue;
+
+        DC::CoordVar varInfo;
+        ok = GetCoordVarInfo(m.GetCoordVars()[2], varInfo);
+        assert(ok);
+
+        coordvars.push_back(m.GetCoordVars()[2]);
+
+        vector<string> derivedCoordvars = coordvars;
+        _assignVerticalCoords(derivedCoordvars);
+
+        // no duplicates
+        //
+        if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
+
+        DerivedCoordVarStandardWRF_Terrain *derivedVar = new DerivedCoordVarStandardWRF_Terrain(derivedCoordvars[0], _dc, formula_terms);
+
+        int rc = derivedVar->Initialize();
+        if (rc < 0) {
+            SetErrMsg("Failed to initialize derived coord variable");
+            return (-1);
+        }
+
+        _derivedCoordVars[derivedCoordvars[0]] = derivedVar;
         _derivedVars.push_back(derivedVar);
     }
 
