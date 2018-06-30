@@ -747,7 +747,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
     std::map<string, DerivedCoordVar *> _derivedCoordVars;
     std::vector<DerivedVar *> _derivedVars;
     bool _doTransformHorizontal;
-    bool _doTransformHeight;
+    bool _doTransformVertical;
     string _openVarName;
 
     std::vector<double> _timeCoordinates;
@@ -1086,6 +1086,13 @@ class VDF_API DataMgr : public Wasp::MyBase {
     int _initProj4StringDefault();
 
     int _initHorizontalCoordVars();
+
+    int _initVerticalCoordVars();
+
+    bool _hasVerticalConversion() const;
+
+    bool _hasVerticalConversion(
+        string varname, string &standard_name, string &formula_terms) const;
 };
 
 }; // namespace VAPoR

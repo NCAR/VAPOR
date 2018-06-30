@@ -1271,7 +1271,7 @@ void MainForm::loadDataHelper(
     if (dataSetName.empty())
         return;
 
-    vector<string> options = {"-project_to_pcs"};
+    vector<string> options = {"-project_to_pcs", "-vertical_xform"};
     bool status = openDataHelper(dataSetName, format, myFiles, options);
     if (!status)
         return;
