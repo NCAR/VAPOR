@@ -225,6 +225,11 @@ int DirectVolumeRenderer::_paintGL()
 
     glUseProgram(_shaderProgramId);
 
+    GLfloat MVP[16];
+    _getMVPMatrix(MVP);
+    GLuint MVPId = glGetUniformLocation(_shaderProgramId, "MVP");
+    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
+
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
 
@@ -541,26 +546,16 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
 {
     GLfloat ModelView[16];
     GLfloat Projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
-    glGetFloatv(GL_PROJECTION_MATRIX, Projection);
+    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);      // This is from OpenGL 2...
+    glGetFloatv(GL_PROJECTION_MATRIX, Projection);    // This is from OpenGL 2...
 
     // MVP = Projection * ModelView
     GLfloat tmp;
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++) {
             tmp = 0.0f;
-            for (int idx = 0; idx < 4; idx++)
-                // tmp += Projection[i * 4 + idx] * ModelView[idx * 4 + j];
-                tmp += ModelView[i * 4 + idx] * Projection[idx * 4 + j];
+            for (int idx = 0; idx < 4; idx++) tmp += ModelView[i * 4 + idx] * Projection[idx * 4 + j];
             // Because all matrices are colume-major, this is the correct order.
             MVP[i * 4 + j] = tmp;
         }
-
-    /*for( int i = 0; i < 16; i++ )
-    {
-        std::cout << MVP[i] << ",\t";
-        if( (i+1) % 4 == 0 )
-            std::cout << std::endl;
-    }
-    std::cout << std::endl; */
 }
