@@ -27,7 +27,6 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _frameBufferId = 0;
     _baskFaceTextureId = 0;
     _depthBufferId = 0;
-    _enablePrintGLInfo = false;
 
     _vertexArrayId = 0;
     _shaderProgramId = 0;
@@ -208,7 +207,7 @@ int DirectVolumeRenderer::_initializeGL()
 
     //_initializeTextures();
 
-    _enablePrintGLInfo = true;
+    _printGLInfo();
 
     return 0;
 }
@@ -217,11 +216,6 @@ int DirectVolumeRenderer::_paintGL()
 {
     if (_isCacheDirty()) _saveCacheParams(true);
 
-    if (_enablePrintGLInfo) {
-        _printGLInfo();
-        _enablePrintGLInfo = false;
-    }
-
     /*int rc = _shaderMgr->EnableEffect( _effectNameStr );
     if (rc<0)
     {
@@ -229,18 +223,7 @@ int DirectVolumeRenderer::_paintGL()
         return(-1);
     }*/
 
-    /*glColor3f(1.0f,1.0f,1.0f);
-    glBegin(GL_LINES);
-        glVertex3dv( _cacheParams.boxMin.data() );
-        glVertex3dv( _cacheParams.boxMax.data() );
-    glEnd();*/
-
     glUseProgram(_shaderProgramId);
-
-    GLfloat MVP[16];
-    _getMVPMatrix(MVP);
-    GLuint MVPId = glGetUniformLocation(_shaderProgramId, "MVP");
-    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
 
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
@@ -342,14 +325,11 @@ void DirectVolumeRenderer::_initializeTextures()
 
 void DirectVolumeRenderer::_printGLInfo() const
 {
-    int maxTextureUnits;
-    glGetIntegerv(GL_MAX_TEXTURE_UNITS, &maxTextureUnits);
     std::cout << "    **** System Info ****" << std::endl;
     std::cout << "    OpenGL version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "    GLSL version   : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "    Vendor         : " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "    Number of texture units: " << maxTextureUnits << std::endl;
     std::cout << "    **** System Info ****" << std::endl;
 }
 

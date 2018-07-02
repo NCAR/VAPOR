@@ -1,11 +1,10 @@
-#version 330 core
+#version 330 compatibility
 
 // Input vertex data
 layout(location = 0) in vec3 vertexPosition;
 
-uniform mat4 MVP;
-
 void main(void)
 {
-    gl_Position = MVP * vec4( vertexPosition, 1 );
+    // Caution:   gl_ModelViewProjectionMatrix is NOT available in core profile. 
+    gl_Position = gl_ModelViewProjectionMatrix * vec4( vertexPosition, 1 );
 }
