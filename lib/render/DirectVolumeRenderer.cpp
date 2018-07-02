@@ -55,12 +55,12 @@ DirectVolumeRenderer::DirectVolumeRenderer( const ParamsMgr*    pm,
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
 {
-    frontFace  = NULL;
-    backFace   = NULL;
-    rightFace  = NULL;
-    leftFace   = NULL;
-    topFace    = NULL;
-    bottomFace = NULL;
+    frontFace  = nullptr;
+    backFace   = nullptr;
+    rightFace  = nullptr;
+    leftFace   = nullptr;
+    topFace    = nullptr;
+    bottomFace = nullptr;
     dims[0]    = 0; 
     dims[1]    = 0; 
     dims[2]    = 0; 
@@ -71,32 +71,32 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
     if( frontFace )
     {
         delete[] frontFace;
-        frontFace = NULL;
+        frontFace = nullptr;
     }
     if( backFace )
     {
         delete[] backFace;
-        backFace  = NULL;
+        backFace  = nullptr;
     }
     if( rightFace )
     {
         delete[] rightFace;
-        rightFace = NULL;
+        rightFace = nullptr;
     }
     if( leftFace )
     {
         delete[] leftFace;
-        leftFace  = NULL;
+        leftFace  = nullptr;
     }
     if( topFace )
     {
         delete[] topFace;
-        topFace = NULL;
+        topFace = nullptr;
     }
     if( bottomFace )
     {
         delete[] bottomFace;
-        bottomFace = NULL;
+        bottomFace = nullptr;
     }
 }
         
@@ -310,7 +310,7 @@ void DirectVolumeRenderer::_saveCacheParams( bool considerUserCoordinates )
             _dataMgr->GetVariable( _cacheParams.ts,     _cacheParams.varName,
                                    _cacheParams.level,  _cacheParams.lod,
                                    _cacheParams.boxMin, _cacheParams.boxMax ) );
-        if( grid != NULL )
+        if( grid != nullptr )
         {
             _cacheParams.userCoords.Fill( grid );
         }
@@ -410,7 +410,7 @@ void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
     size_t bx = dims[0];
     size_t by = dims[1];
     size_t bz = dims[2];
-    const float* ptr = NULL;
+    const float* ptr = nullptr;
 
     size_t idx;
     size_t numOfVertices;
@@ -422,103 +422,142 @@ void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
 
     // Render front face: 
     numOfVertices = bx * 2;
-    GLfloat* frontVertexBuffer = new GLfloat[ numOfVertices * 3 ];
+    GLfloat* vertexPositionBuffer = new GLfloat[ numOfVertices * 3 ];
     for( int y = 0; y < by - 1; y++ )   // strip by strip
     {
         idx = 0;
         for( int x = 0; x < bx; x++ )
         {
             ptr = frontFace + ((y + 1) * bx + x) * 3;
-            std::memcpy( frontVertexBuffer + idx, ptr, 12 ); 
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 ); 
             idx += 3;
             ptr = frontFace + (y * bx + x) * 3;
-            std::memcpy( frontVertexBuffer + idx, ptr, 12 );
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
             idx += 3;
         }
         glBufferData( GL_ARRAY_BUFFER, 
                       numOfVertices * 3 * 4, 
-                      frontVertexBuffer, 
+                      vertexPositionBuffer, 
                       GL_DYNAMIC_DRAW );
         glVertexAttribPointer( 0, // need to match attribute 0 in the shader
                                3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
         glDrawArrays( GL_TRIANGLE_STRIP, 0, numOfVertices );
     }
-    delete[] frontVertexBuffer;
 
     // Render back face: 
-    /*for( int y = 0; y < by - 1; y++ )
+    for( int y = 0; y < by - 1; y++ )
     {
-        glBegin( GL_TRIANGLE_STRIP );
+        idx = 0;
         for( int x = 0; x < bx; x++ )
         {
             ptr = backFace  + (y * bx + x) * 3;
-            glVertex3fv(      ptr );
-
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
             ptr = backFace  + ((y + 1) * bx + x) * 3;
-            glVertex3fv(      ptr );
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
         }    
-        glEnd();
-    }*/
-
-    // Render right face: 
-    /*for( int z = 0; z < bz - 1; z++ )   
-    {
-        glBegin( GL_TRIANGLE_STRIP );
-        for( int y = 0; y < by; y++ )
-        {
-            ptr = rightFace + ((z + 1) * by + y) * 3;
-            glVertex3fv(      ptr );
-
-            ptr = rightFace + (z * by + y) * 3;
-            glVertex3fv(      ptr );
-        }
-        glEnd();
-    }*/
-
-    // Render left face: 
-    /*for( int z = 0; z < bz - 1; z++ )   
-    {
-        glBegin( GL_TRIANGLE_STRIP );
-        for( int y = 0; y < by; y++ )
-        {
-            ptr = leftFace  + (z * by + y) * 3;
-            glVertex3fv(      ptr );
-
-            ptr = leftFace  + ((z + 1) * by + y) * 3;
-            glVertex3fv(      ptr );
-        }
-        glEnd();
-    }*/
+        glBufferData( GL_ARRAY_BUFFER, 
+                      numOfVertices * 3 * 4, 
+                      vertexPositionBuffer, 
+                      GL_DYNAMIC_DRAW );
+        glVertexAttribPointer( 0, // need to match attribute 0 in the shader
+                               3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+        glDrawArrays( GL_TRIANGLE_STRIP, 0, numOfVertices );
+    
+    }
 
     // Render top face: 
-    /*for( int z = 0; z < bz - 1; z++ )   
+    for( int z = 0; z < bz - 1; z++ )   
     {
-        glBegin( GL_TRIANGLE_STRIP );
+        idx = 0;
         for( int x = 0; x < bx; x++ )
         {
             ptr = topFace   + (z * bx + x) * 3;
-            glVertex3fv(      ptr );
-
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
             ptr = topFace   + ((z + 1) * bx + x) * 3;
-            glVertex3fv(      ptr );
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
         }
-        glEnd();
-    }*/
+        glBufferData( GL_ARRAY_BUFFER, 
+                      numOfVertices * 3 * 4, 
+                      vertexPositionBuffer, 
+                      GL_DYNAMIC_DRAW );
+        glVertexAttribPointer( 0, // need to match attribute 0 in the shader
+                               3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+        glDrawArrays( GL_TRIANGLE_STRIP, 0, numOfVertices );
+    }
 
     // Render bottom face: 
-    /*for( int z = 0; z < bz - 1; z++ )   
+    for( int z = 0; z < bz - 1; z++ )   
     {
-        glBegin( GL_TRIANGLE_STRIP );
+        idx = 0;
         for( int x = 0; x < bx; x++ )
         {
             ptr = bottomFace + ((z + 1) * bx + x) * 3;
-            glVertex3fv(      ptr );
-
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
             ptr = bottomFace + (z * bx + x) * 3;
-            glVertex3fv(      ptr );
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
         }
-        glEnd();
-    }*/
+        glBufferData( GL_ARRAY_BUFFER, 
+                      numOfVertices * 3 * 4, 
+                      vertexPositionBuffer, 
+                      GL_DYNAMIC_DRAW );
+        glVertexAttribPointer( 0, // need to match attribute 0 in the shader
+                               3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+        glDrawArrays( GL_TRIANGLE_STRIP, 0, numOfVertices );
+    }
+    delete[] vertexPositionBuffer;
+
+    // Render right face: 
+    numOfVertices = by * 2;
+    vertexPositionBuffer = new GLfloat[ numOfVertices * 3 ];
+    for( int z = 0; z < bz - 1; z++ )   
+    {
+        idx = 0;
+        for( int y = 0; y < by; y++ )
+        {
+            ptr = rightFace + ((z + 1) * by + y) * 3;
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
+            ptr = rightFace + (z * by + y) * 3;
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
+        }
+        glBufferData( GL_ARRAY_BUFFER, 
+                      numOfVertices * 3 * 4, 
+                      vertexPositionBuffer, 
+                      GL_DYNAMIC_DRAW );
+        glVertexAttribPointer( 0, // need to match attribute 0 in the shader
+                               3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+        glDrawArrays( GL_TRIANGLE_STRIP, 0, numOfVertices );
+    }
+
+    // Render left face: 
+    for( int z = 0; z < bz - 1; z++ )   
+    {
+        idx = 0;
+        for( int y = 0; y < by; y++ )
+        {
+            ptr = leftFace  + (z * by + y) * 3;
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
+            ptr = leftFace  + ((z + 1) * by + y) * 3;
+            std::memcpy( vertexPositionBuffer + idx, ptr, 12 );
+            idx += 3;
+        }
+        glBufferData( GL_ARRAY_BUFFER, 
+                      numOfVertices * 3 * 4, 
+                      vertexPositionBuffer, 
+                      GL_DYNAMIC_DRAW );
+        glVertexAttribPointer( 0, // need to match attribute 0 in the shader
+                               3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+        glDrawArrays( GL_TRIANGLE_STRIP, 0, numOfVertices );
+    }
+    delete[] vertexPositionBuffer;
     
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &vertexBufferId );
