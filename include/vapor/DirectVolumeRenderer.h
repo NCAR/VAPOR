@@ -58,8 +58,6 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
         float *topFace, *bottomFace; // user coordinates, size == bx * bz * 3
         size_t dims[3];              // num. of samples along each axis
 
-        float boxMin[3], boxMax[3];
-
         UserCoordinates();  // constructor
         ~UserCoordinates(); // destructor
         void Fill(const VAPoR::StructuredGrid *grid);
