@@ -29,7 +29,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _depthBufferId = 0;
 
     _vertexArrayId = 0;
-    _shaderProgramId = 0;
+    _1stPassShaderId = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
@@ -168,7 +168,7 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_volumeCoordinateTextureUnit) glDeleteTextures(1, &_volumeCoordinateTextureUnit);
 
     if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
-    if (_shaderProgramId) glDeleteProgram(_shaderProgramId);
+    if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
 }
 
 int DirectVolumeRenderer::_initializeGL()
@@ -177,26 +177,9 @@ int DirectVolumeRenderer::_initializeGL()
     // glEnable              ( GL_DEBUG_OUTPUT );
     // glDebugMessageCallback( MessageCallback, 0 );
 
-    /* if( !_shaderMgr )
-    {
-        std::cerr << "Programmable shading not available" << std::endl;
-        SetErrMsg("Programmable shading not available");
-        return(-1);
-    }
-    if( !_shaderMgr->EffectExists(_effectNameStr) )
-    {
-        int rc = _shaderMgr->DefineEffect( _effectNameStr, "", _effectNameStr );
-        if( rc < 0 )
-        {
-            std::cerr << "DefineEffect() failed" << std::endl;
-            SetErrMsg("DefineEffect() failed");
-            return -1;
-        }
-    } */
-
-    const char vertex_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.vgl";
-    const char fragment_shader[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR.fgl";
-    _shaderProgramId = _loadShaders(vertex_shader, fragment_shader);
+    const char vgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.vgl";
+    const char fgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.fgl";
+    _1stPassShaderId = _loadShaders(vgl1, fgl1);
 
     /* good texture tutorial:
        https://open.gl/textures */
@@ -205,7 +188,7 @@ int DirectVolumeRenderer::_initializeGL()
     glGenVertexArrays(1, &_vertexArrayId);
     glBindVertexArray(_vertexArrayId);
 
-    //_initializeTextures();
+    _initializeTextures();
 
     _printGLInfo();
 
@@ -216,26 +199,21 @@ int DirectVolumeRenderer::_paintGL()
 {
     if (_isCacheDirty()) _saveCacheParams(true);
 
-    /*int rc = _shaderMgr->EnableEffect( _effectNameStr );
-    if (rc<0)
-    {
-        std::cerr << "EnableEffect() failed!" << std::endl;
-        return(-1);
-    }*/
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
 
-    glUseProgram(_shaderProgramId);
-
-    GLfloat MVP[16];
-    _getMVPMatrix(MVP);
-    GLuint MVPId = glGetUniformLocation(_shaderProgramId, "MVP");
-    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
+    // 1st pass, render to a framebuffer
+    // glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
+    // glViewport( 0, 0, viewport[2], viewport[3] );
 
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
 
-    glUseProgram(0);
+    // put the framebuffer texture to a quad
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, viewport[2], viewport[3]);
 
-    //_shaderMgr->DisableEffect();
+    //_drawQuad();
 
     return 0;
 }
@@ -304,12 +282,13 @@ void DirectVolumeRenderer::_initializeTextures()
     /* Generate backfacing texture */
     glGenTextures(1, &_baskFaceTextureId);
     glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId);
-    // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // from vapor2
+    // glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewport[2], viewport[3], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _baskFaceTextureId, 0);
 
     /* Depth buffer */
     glGenRenderbuffers(1, &_depthBufferId);
@@ -317,8 +296,10 @@ void DirectVolumeRenderer::_initializeTextures()
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3]);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _baskFaceTextureId, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _baskFaceTextureId, 0);
+
+    GLenum drawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, drawBuffers);
 
     /* Check if framebuffer is complete */
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) { std::cerr << "_openGLInitialization(): Framebuffer failed!!" << std::endl; }
@@ -349,6 +330,23 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     size_t idx;
     size_t numOfVertices;
 
+    glUseProgram(_1stPassShaderId);
+
+    GLfloat MVP[16];
+    _getMVPMatrix(MVP);
+    GLuint MVPId = glGetUniformLocation(_1stPassShaderId, "MVP");
+    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    if (frontFacing) {
+        glCullFace(GL_BACK);
+        glDepthFunc(GL_LESS);    // Accept fragment if it is closer to the camera than the former one
+    } else {
+        glCullFace(GL_FRONT);
+        glDepthFunc(GL_GREATER);    // Accept fragment if it is farther to the camera than the former one
+    }
+
     glEnableVertexAttribArray(0);
     GLuint vertexBufferId = 0;
     glGenBuffers(1, &vertexBufferId);
@@ -368,7 +366,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
             std::memcpy(vertexPositionBuffer + idx, ptr, 12);
             idx += 3;
         }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
         glVertexAttribPointer(0,    // need to match attribute 0 in the shader
                               3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
@@ -385,7 +383,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
             std::memcpy(vertexPositionBuffer + idx, ptr, 12);
             idx += 3;
         }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
         glVertexAttribPointer(0,    // need to match attribute 0 in the shader
                               3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
@@ -402,7 +400,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
             std::memcpy(vertexPositionBuffer + idx, ptr, 12);
             idx += 3;
         }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
         glVertexAttribPointer(0,    // need to match attribute 0 in the shader
                               3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
@@ -419,7 +417,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
             std::memcpy(vertexPositionBuffer + idx, ptr, 12);
             idx += 3;
         }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
         glVertexAttribPointer(0,    // need to match attribute 0 in the shader
                               3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
@@ -439,7 +437,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
             std::memcpy(vertexPositionBuffer + idx, ptr, 12);
             idx += 3;
         }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
         glVertexAttribPointer(0,    // need to match attribute 0 in the shader
                               3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
@@ -456,7 +454,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
             std::memcpy(vertexPositionBuffer + idx, ptr, 12);
             idx += 3;
         }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
         glVertexAttribPointer(0,    // need to match attribute 0 in the shader
                               3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
@@ -465,6 +463,11 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
 
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &vertexBufferId);
+
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+
+    glUseProgram(0);
 }
 
 GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
@@ -503,7 +506,7 @@ GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const ch
     // Compile Vertex Shader
     printf("Compiling shader : %s\n", vertex_file_path);
     char const *VertexSourcePointer = VertexShaderCode.c_str();
-    glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
+    glShaderSource(VertexShaderID, 1, &VertexSourcePointer, nullptr);
     glCompileShader(VertexShaderID);
 
     // Check Vertex Shader
@@ -511,14 +514,14 @@ GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const ch
     glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     if (InfoLogLength > 0) {
         std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-        glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
+        glGetShaderInfoLog(VertexShaderID, InfoLogLength, nullptr, &VertexShaderErrorMessage[0]);
         printf("%s\n", &VertexShaderErrorMessage[0]);
     }
 
     // Compile Fragment Shader
     printf("Compiling shader : %s\n", fragment_file_path);
     char const *FragmentSourcePointer = FragmentShaderCode.c_str();
-    glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
+    glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, nullptr);
     glCompileShader(FragmentShaderID);
 
     // Check Fragment Shader
@@ -526,7 +529,7 @@ GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const ch
     glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     if (InfoLogLength > 0) {
         std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-        glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
+        glGetShaderInfoLog(FragmentShaderID, InfoLogLength, nullptr, &FragmentShaderErrorMessage[0]);
         printf("%s\n", &FragmentShaderErrorMessage[0]);
     }
 
@@ -542,7 +545,7 @@ GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path, const ch
     glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     if (InfoLogLength > 0) {
         std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-        glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+        glGetProgramInfoLog(ProgramID, InfoLogLength, nullptr, &ProgramErrorMessage[0]);
         printf("%s\n", &ProgramErrorMessage[0]);
     }
 
@@ -571,4 +574,53 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
             // Because all matrices are colume-major, this is the correct order.
             MVP[i * 4 + j] = tmp;
         }
+}
+
+void DirectVolumeRenderer::_drawQuad()
+{
+    float boxmin[3], boxmax[3];
+    assert(_cacheParams.boxMin.size() == 3);
+    for (size_t i = 0; i < 3; i++) {
+        boxmin[i] = (float)_cacheParams.boxMin[i];
+        boxmax[i] = (float)_cacheParams.boxMax[i];
+    }
+    const GLfloat quadVertices[] = {boxmin[0], boxmax[1], boxmin[2], boxmin[0], boxmin[1], boxmin[2], boxmax[0], boxmax[1], boxmin[2], boxmax[0], boxmin[1], boxmin[2]};
+
+    const char vgl[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.vgl";
+    const char fgl[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.fgl";
+    GLuint     quadShaderId = _loadShaders(vgl, fgl);
+
+    glUseProgram(quadShaderId);
+
+    GLfloat MVP[16];
+    _getMVPMatrix(MVP);
+
+    GLuint MVPId = glGetUniformLocation(quadShaderId, "MVP");
+    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
+
+    GLuint boxminId = glGetUniformLocation(quadShaderId, "boxmin");
+    glUniform3fv(boxminId, 3, boxmin);
+
+    GLuint boxmaxId = glGetUniformLocation(quadShaderId, "boxmax");
+    glUniform3fv(boxmaxId, 3, boxmax);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId);
+    GLuint texId = glGetUniformLocation(quadShaderId, "backFaceTexture");
+    glUniform1i(texId, 0);
+
+    glEnableVertexAttribArray(0);
+    GLuint vertexBufferId = 0;
+    glGenBuffers(1, &vertexBufferId);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+
+    glBufferData(GL_ARRAY_BUFFER, 4 * 3 * 4, quadVertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0,    // need to match attribute 0 in the shader
+                          3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDeleteBuffers(1, &vertexBufferId);
+    glDisableVertexAttribArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glUseProgram(0);
 }
