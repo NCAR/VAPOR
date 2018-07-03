@@ -52,6 +52,8 @@ private:
         float *topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
         size_t dims[3];                 // num. of samples along each axis
 
+        float boxMin[3], boxMax[3];
+
         UserCoordinates();     // constructor
         ~UserCoordinates();    // destructor
         void Fill(const VAPoR::StructuredGrid *grid);
@@ -83,6 +85,7 @@ private:
 
     GLuint _vertexArrayId;
     GLuint _1stPassShaderId;
+    GLuint _quadShaderId;
 
     //
     // Draw faces using triangle strips

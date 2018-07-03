@@ -2,13 +2,16 @@
 #include <vapor/DirectVolumeRenderer.h>
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 //
 // OpenGL debug output
 //
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
-    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+        fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 }
 
 using namespace VAPoR;
@@ -30,6 +33,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
 
     _vertexArrayId = 0;
     _1stPassShaderId = 0;
+    _quadShaderId = 0;
 }
 
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
@@ -40,9 +44,11 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
     leftFace = nullptr;
     topFace = nullptr;
     bottomFace = nullptr;
-    dims[0] = 0;
-    dims[1] = 0;
-    dims[2] = 0;
+    for (int i = 0; i < 3; i++) {
+        dims[i] = 0;
+        boxMin[i] = std::numeric_limits<float>::max();
+        boxMax[i] = -boxMin[i];
+    }
 }
 
 DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
@@ -79,7 +85,12 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     dims[0] = gridDims[0];
     dims[1] = gridDims[1];
     dims[2] = gridDims[2];
-    double buf[3];
+    for (int i = 0; i < 3; i++) {
+        boxMin[i] = std::numeric_limits<float>::max();
+        boxMax[i] = -boxMin[i];
+    }
+    double dbuf[3];
+    float  fbuf[3];
 
     // Save front face user coordinates ( z == dims[2] - 1 )
     if (frontFace) delete[] frontFace;
@@ -87,10 +98,18 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     size_t idx = 0;
     for (size_t y = 0; y < dims[1]; y++)
         for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, y, dims[2] - 1, buf[0], buf[1], buf[2]);
-            frontFace[idx++] = (float)buf[0];
-            frontFace[idx++] = (float)buf[1];
-            frontFace[idx++] = (float)buf[2];
+            grid->GetUserCoordinates(x, y, dims[2] - 1, dbuf[0], dbuf[1], dbuf[2]);
+            fbuf[0] = (float)dbuf[0];
+            fbuf[1] = (float)dbuf[1];
+            fbuf[2] = (float)dbuf[2];
+            std::memcpy(frontFace + idx, fbuf, 3 * sizeof(float));
+            idx += 3;
+            boxMin[0] = boxMin[0] < fbuf[0] ? boxMin[0] : fbuf[0];
+            boxMin[1] = boxMin[1] < fbuf[1] ? boxMin[1] : fbuf[1];
+            boxMin[2] = boxMin[2] < fbuf[2] ? boxMin[2] : fbuf[2];
+            boxMax[0] = boxMax[0] > fbuf[0] ? boxMax[0] : fbuf[0];
+            boxMax[1] = boxMax[1] > fbuf[1] ? boxMax[1] : fbuf[1];
+            boxMax[2] = boxMax[2] > fbuf[2] ? boxMax[2] : fbuf[2];
         }
 
     // Save back face user coordinates ( z == 0 )
@@ -99,10 +118,18 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     idx = 0;
     for (size_t y = 0; y < dims[1]; y++)
         for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, y, 0, buf[0], buf[1], buf[2]);
-            backFace[idx++] = (float)buf[0];
-            backFace[idx++] = (float)buf[1];
-            backFace[idx++] = (float)buf[2];
+            grid->GetUserCoordinates(x, y, 0, dbuf[0], dbuf[1], dbuf[2]);
+            fbuf[0] = (float)dbuf[0];
+            fbuf[1] = (float)dbuf[1];
+            fbuf[2] = (float)dbuf[2];
+            std::memcpy(backFace + idx, fbuf, 3 * sizeof(float));
+            idx += 3;
+            boxMin[0] = boxMin[0] < fbuf[0] ? boxMin[0] : fbuf[0];
+            boxMin[1] = boxMin[1] < fbuf[1] ? boxMin[1] : fbuf[1];
+            boxMin[2] = boxMin[2] < fbuf[2] ? boxMin[2] : fbuf[2];
+            boxMax[0] = boxMax[0] > fbuf[0] ? boxMax[0] : fbuf[0];
+            boxMax[1] = boxMax[1] > fbuf[1] ? boxMax[1] : fbuf[1];
+            boxMax[2] = boxMax[2] > fbuf[2] ? boxMax[2] : fbuf[2];
         }
 
     // Save right face user coordinates ( x == dims[0] - 1 )
@@ -111,10 +138,18 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     idx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t y = 0; y < dims[1]; y++) {
-            grid->GetUserCoordinates(dims[0] - 1, y, z, buf[0], buf[1], buf[2]);
-            rightFace[idx++] = (float)buf[0];
-            rightFace[idx++] = (float)buf[1];
-            rightFace[idx++] = (float)buf[2];
+            grid->GetUserCoordinates(dims[0] - 1, y, z, dbuf[0], dbuf[1], dbuf[2]);
+            fbuf[0] = (float)dbuf[0];
+            fbuf[1] = (float)dbuf[1];
+            fbuf[2] = (float)dbuf[2];
+            std::memcpy(rightFace + idx, fbuf, 3 * sizeof(float));
+            idx += 3;
+            boxMin[0] = boxMin[0] < fbuf[0] ? boxMin[0] : fbuf[0];
+            boxMin[1] = boxMin[1] < fbuf[1] ? boxMin[1] : fbuf[1];
+            boxMin[2] = boxMin[2] < fbuf[2] ? boxMin[2] : fbuf[2];
+            boxMax[0] = boxMax[0] > fbuf[0] ? boxMax[0] : fbuf[0];
+            boxMax[1] = boxMax[1] > fbuf[1] ? boxMax[1] : fbuf[1];
+            boxMax[2] = boxMax[2] > fbuf[2] ? boxMax[2] : fbuf[2];
         }
 
     // Save left face user coordinates ( x == 0 )
@@ -123,10 +158,18 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     idx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t y = 0; y < dims[1]; y++) {
-            grid->GetUserCoordinates(0, y, z, buf[0], buf[1], buf[2]);
-            leftFace[idx++] = (float)buf[0];
-            leftFace[idx++] = (float)buf[1];
-            leftFace[idx++] = (float)buf[2];
+            grid->GetUserCoordinates(0, y, z, dbuf[0], dbuf[1], dbuf[2]);
+            fbuf[0] = (float)dbuf[0];
+            fbuf[1] = (float)dbuf[1];
+            fbuf[2] = (float)dbuf[2];
+            std::memcpy(leftFace + idx, fbuf, 3 * sizeof(float));
+            idx += 3;
+            boxMin[0] = boxMin[0] < fbuf[0] ? boxMin[0] : fbuf[0];
+            boxMin[1] = boxMin[1] < fbuf[1] ? boxMin[1] : fbuf[1];
+            boxMin[2] = boxMin[2] < fbuf[2] ? boxMin[2] : fbuf[2];
+            boxMax[0] = boxMax[0] > fbuf[0] ? boxMax[0] : fbuf[0];
+            boxMax[1] = boxMax[1] > fbuf[1] ? boxMax[1] : fbuf[1];
+            boxMax[2] = boxMax[2] > fbuf[2] ? boxMax[2] : fbuf[2];
         }
 
     // Save top face user coordinates ( y == dims[1] - 1 )
@@ -135,10 +178,18 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     idx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, dims[1] - 1, z, buf[0], buf[1], buf[2]);
-            topFace[idx++] = (float)buf[0];
-            topFace[idx++] = (float)buf[1];
-            topFace[idx++] = (float)buf[2];
+            grid->GetUserCoordinates(x, dims[1] - 1, z, dbuf[0], dbuf[1], dbuf[2]);
+            fbuf[0] = (float)dbuf[0];
+            fbuf[1] = (float)dbuf[1];
+            fbuf[2] = (float)dbuf[2];
+            std::memcpy(topFace + idx, fbuf, 3 * sizeof(float));
+            idx += 3;
+            boxMin[0] = boxMin[0] < fbuf[0] ? boxMin[0] : fbuf[0];
+            boxMin[1] = boxMin[1] < fbuf[1] ? boxMin[1] : fbuf[1];
+            boxMin[2] = boxMin[2] < fbuf[2] ? boxMin[2] : fbuf[2];
+            boxMax[0] = boxMax[0] > fbuf[0] ? boxMax[0] : fbuf[0];
+            boxMax[1] = boxMax[1] > fbuf[1] ? boxMax[1] : fbuf[1];
+            boxMax[2] = boxMax[2] > fbuf[2] ? boxMax[2] : fbuf[2];
         }
 
     // Save bottom face user coordinates ( y == 0 )
@@ -147,10 +198,18 @@ void DirectVolumeRenderer::UserCoordinates::Fill(const VAPoR::StructuredGrid *gr
     idx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, 0, z, buf[0], buf[1], buf[2]);
-            bottomFace[idx++] = (float)buf[0];
-            bottomFace[idx++] = (float)buf[1];
-            bottomFace[idx++] = (float)buf[2];
+            grid->GetUserCoordinates(x, 0, z, dbuf[0], dbuf[1], dbuf[2]);
+            fbuf[0] = (float)dbuf[0];
+            fbuf[1] = (float)dbuf[1];
+            fbuf[2] = (float)dbuf[2];
+            std::memcpy(bottomFace + idx, fbuf, 3 * sizeof(float));
+            idx += 3;
+            boxMin[0] = boxMin[0] < fbuf[0] ? boxMin[0] : fbuf[0];
+            boxMin[1] = boxMin[1] < fbuf[1] ? boxMin[1] : fbuf[1];
+            boxMin[2] = boxMin[2] < fbuf[2] ? boxMin[2] : fbuf[2];
+            boxMax[0] = boxMax[0] > fbuf[0] ? boxMax[0] : fbuf[0];
+            boxMax[1] = boxMax[1] > fbuf[1] ? boxMax[1] : fbuf[1];
+            boxMax[2] = boxMax[2] > fbuf[2] ? boxMax[2] : fbuf[2];
         }
 }
 
@@ -169,17 +228,22 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
 
     if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
     if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
+    if (_quadShaderId) glDeleteProgram(_quadShaderId);
 }
 
 int DirectVolumeRenderer::_initializeGL()
 {
     // Enable debug output
-    // glEnable              ( GL_DEBUG_OUTPUT );
-    // glDebugMessageCallback( MessageCallback, 0 );
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
 
     const char vgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.vgl";
     const char fgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.fgl";
     _1stPassShaderId = _loadShaders(vgl1, fgl1);
+
+    const char vglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.vgl";
+    const char fglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.fgl";
+    _quadShaderId = _loadShaders(vglQuad, fglQuad);
 
     /* good texture tutorial:
        https://open.gl/textures */
@@ -203,8 +267,8 @@ int DirectVolumeRenderer::_paintGL()
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     // 1st pass, render to a framebuffer
-    // glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
-    // glViewport( 0, 0, viewport[2], viewport[3] );
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
+    glViewport(0, 0, viewport[2], viewport[3]);
 
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
@@ -213,7 +277,7 @@ int DirectVolumeRenderer::_paintGL()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
-    //_drawQuad();
+    _drawQuad();
 
     return 0;
 }
@@ -282,22 +346,22 @@ void DirectVolumeRenderer::_initializeTextures()
     /* Generate backfacing texture */
     glGenTextures(1, &_baskFaceTextureId);
     glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId);
-    // glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewport[2], viewport[3], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
+    /* Configure the texture: _backFaceTextureId */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
     /* Depth buffer */
-    glGenRenderbuffers(1, &_depthBufferId);
-    glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3]);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
+    // glGenRenderbuffers( 1, &_depthBufferId );
+    // glBindRenderbuffer( GL_RENDERBUFFER, _depthBufferId );
+    // glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3] );
+    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
+    /* Set "_baskFaceTextureId" as our colour attachement #0 */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _baskFaceTextureId, 0);
-
     GLenum drawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, drawBuffers);
 
@@ -586,27 +650,23 @@ void DirectVolumeRenderer::_drawQuad()
     }
     const GLfloat quadVertices[] = {boxmin[0], boxmax[1], boxmin[2], boxmin[0], boxmin[1], boxmin[2], boxmax[0], boxmax[1], boxmin[2], boxmax[0], boxmin[1], boxmin[2]};
 
-    const char vgl[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.vgl";
-    const char fgl[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.fgl";
-    GLuint     quadShaderId = _loadShaders(vgl, fgl);
-
-    glUseProgram(quadShaderId);
+    glUseProgram(_quadShaderId);
 
     GLfloat MVP[16];
     _getMVPMatrix(MVP);
 
-    GLuint MVPId = glGetUniformLocation(quadShaderId, "MVP");
+    GLuint MVPId = glGetUniformLocation(_quadShaderId, "MVP");
     glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
 
-    GLuint boxminId = glGetUniformLocation(quadShaderId, "boxmin");
-    glUniform3fv(boxminId, 3, boxmin);
+    GLuint boxminId = glGetUniformLocation(_quadShaderId, "boxmin");
+    glUniform3fv(boxminId, 1, boxmin);
 
-    GLuint boxmaxId = glGetUniformLocation(quadShaderId, "boxmax");
-    glUniform3fv(boxmaxId, 3, boxmax);
+    GLuint boxmaxId = glGetUniformLocation(_quadShaderId, "boxmax");
+    glUniform3fv(boxmaxId, 1, boxmax);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId);
-    GLuint texId = glGetUniformLocation(quadShaderId, "backFaceTexture");
+    GLuint texId = glGetUniformLocation(_quadShaderId, "backFaceTexture");
     glUniform1i(texId, 0);
 
     glEnableVertexAttribArray(0);
