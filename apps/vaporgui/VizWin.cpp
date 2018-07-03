@@ -642,16 +642,6 @@ void VizWin::paintGL()
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     if (!dataStatus->GetDataMgrNames().size()) return;
 
-    // Only rendering if state has changed.
-    //
-    if (!_controlExec->GetParamsMgr()->StateChanged()) {
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        return;
-    }
-
     // Set up projection and modelview matrices
     //
     glMatrixMode(GL_PROJECTION);
