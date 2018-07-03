@@ -235,15 +235,21 @@ void DirectVolumeRenderer::_saveCacheParams(bool considerUserCoordinates)
     _cacheParams.ts = params->GetCurrentTimestep();
     _cacheParams.level = params->GetRefinementLevel();
     _cacheParams.lod = params->GetCompressionLevel();
-    params->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+    std::vector<double> extMin, extMax;
+    params->GetBox()->GetExtents(extMin, extMax);
+    assert(extMin.size() == 3);
+    assert(extMax.size() == 3);
+    for (int i = 0; i < 3; i++) {
+        _cacheParams.boxMin[i] = (float)extMin[i];
+        _cacheParams.boxMax[i] = (float)extMax[i];
+    }
 
     MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
     _cacheParams.colormap.resize(mapper->getNumEntries() * 4, 0.0f);
     // colormap values aren't filled yet!
 
     if (considerUserCoordinates) {
-        VAPoR::StructuredGrid *grid =
-            dynamic_cast<VAPoR::StructuredGrid *>(_dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax));
+        VAPoR::StructuredGrid *grid = dynamic_cast<VAPoR::StructuredGrid *>(_dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, extMin, extMax));
         if (grid != nullptr) {
             _cacheParams.userCoords.Fill(grid);
         } else {
@@ -262,10 +268,14 @@ bool DirectVolumeRenderer::_isCacheDirty() const
     if (_cacheParams.level != params->GetRefinementLevel()) return true;
     if (_cacheParams.lod != params->GetCompressionLevel()) return true;
 
-    vector<double> min, max;
-    params->GetBox()->GetExtents(min, max);
-    if (_cacheParams.boxMin != min) return true;
-    if (_cacheParams.boxMax != max) return true;
+    vector<double> extMin, extMax;
+    params->GetBox()->GetExtents(extMin, extMax);
+    assert(extMin.size() == 3);
+    assert(extMax.size() == 3);
+    for (int i = 0; i < 3; i++) {
+        if (_cacheParams.boxMin[i] != (float)extMin[i]) return true;
+        if (_cacheParams.boxMax[i] != (float)extMax[i]) return true;
+    }
 
     MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
     // colormap values aren't compared yet!!
@@ -588,13 +598,8 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
 
 void DirectVolumeRenderer::_drawQuad()
 {
-    float boxmin[3], boxmax[3];
-    assert(_cacheParams.boxMin.size() == 3);
-    for (size_t i = 0; i < 3; i++) {
-        boxmin[i] = (float)_cacheParams.boxMin[i];
-        boxmax[i] = (float)_cacheParams.boxMax[i];
-    }
-    const GLfloat quadVertices[] = {boxmin[0], boxmax[1], boxmin[2], boxmin[0], boxmin[1], boxmin[2], boxmax[0], boxmax[1], boxmin[2], boxmax[0], boxmin[1], boxmin[2]};
+    const GLfloat quadVertices[] = {_cacheParams.boxMin[0], _cacheParams.boxMax[1], _cacheParams.boxMin[2], _cacheParams.boxMin[0], _cacheParams.boxMin[1], _cacheParams.boxMin[2],
+                                    _cacheParams.boxMax[0], _cacheParams.boxMax[1], _cacheParams.boxMin[2], _cacheParams.boxMax[0], _cacheParams.boxMin[1], _cacheParams.boxMin[2]};
 
     glUseProgram(_quadShaderId);
 
@@ -605,10 +610,10 @@ void DirectVolumeRenderer::_drawQuad()
     glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
 
     GLuint boxminId = glGetUniformLocation(_quadShaderId, "boxmin");
-    glUniform3fv(boxminId, 1, boxmin);
+    glUniform3fv(boxminId, 1, _cacheParams.boxMin);
 
     GLuint boxmaxId = glGetUniformLocation(_quadShaderId, "boxmax");
-    glUniform3fv(boxmaxId, 1, boxmax);
+    glUniform3fv(boxmaxId, 1, _cacheParams.boxMax);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _baskFaceTextureId);
