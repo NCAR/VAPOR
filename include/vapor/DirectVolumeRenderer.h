@@ -68,14 +68,13 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
         size_t ts;
         int level;
         int lod;
-        std::vector<double> boxMin, boxMax;
+        float boxMin[3], boxMax[3];
         std::vector<GLfloat> colormap;
         UserCoordinates userCoords;
     };
 
     CacheParams _cacheParams;
     void _saveCacheParams(bool considerUserCoord); // True: consider user coordinates too
-                                                   // False: not consider user coordinates
     bool _isCacheDirty() const;
 
     // OpenGL stuff
