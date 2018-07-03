@@ -1,0 +1,17 @@
+#version 330 core
+
+// Input vertex data
+layout(location = 0) in vec3 vertexPosition;
+
+uniform mat4 MVP;
+uniform vec3 boxmin;
+uniform vec3 boxmax;
+
+out vec2 UV;
+
+void main(void)
+{
+    UV          = vec2( (vertexPosition.x - boxmin.x) / (boxmax.x - boxmin.x),
+                        (vertexPosition.y - boxmin.y) / (boxmax.y - boxmin.y) );
+    gl_Position = MVP * vec4( vertexPosition, 1 );
+}
