@@ -83,11 +83,13 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     //GLuint              _coordmapTextureUnit;         // GL_TEXTURE2 ??
     GLuint _volumeCoordinateTextureUnit; // GL_TEXTURE3
     GLuint _frameBufferId;
-    GLuint _baskFaceTextureId;
+    GLuint _backFaceTextureId;
+    GLuint _frontFaceTextureId;
     GLuint _depthBufferId;
 
     GLuint _vertexArrayId;
     GLuint _1stPassShaderId;
+    GLuint _2ndPassShaderId;
     GLuint _quadShaderId;
 
     //
@@ -103,7 +105,7 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
                           const float *boxmin, // Three elements: minimal X, Y, Z of this volume.
                           const float *boxmax, // Three elements: maximal X, Y, Z of this volume.
                           const size_t *dims,  // num. of grid points in X, Y, Z for 6 faces.
-                          bool frontFacing);
+                          int whichPass);      // 1st, 2nd, or 3rd pass?
 
     //
     // Draw a quad that helps examine the texture.

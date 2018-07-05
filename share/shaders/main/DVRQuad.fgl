@@ -7,6 +7,5 @@ uniform sampler2D backFaceTexture;
 
 void main(void)
 {
-    //color = vec4(1.0, 0.5, 0.5, 0.9);
-    color = texture( backFaceTexture, UV );
+    color = texture(backFaceTexture, UV);
 }
