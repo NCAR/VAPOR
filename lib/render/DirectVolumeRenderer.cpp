@@ -213,17 +213,17 @@ int DirectVolumeRenderer::_paintGL()
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     // 1st pass, render to a framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
-    glViewport(0, 0, viewport[2], viewport[3]);
+    // glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
+    // glViewport( 0, 0, viewport[2], viewport[3] );
 
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
-                     _cacheParams.userCoords.bottomFace, _cacheParams.userCoords.dims, true);
+                     _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims, true);
 
     // put the framebuffer texture to a quad
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
-    _drawQuad();
+    //_drawQuad();
 
     return 0;
 }
@@ -340,7 +340,7 @@ void DirectVolumeRenderer::_printGLInfo() const
 }
 
 void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                                            const size_t *dims, bool frontFacing)
+                                            const float *boxMin, const float *boxMax, const size_t *dims, bool frontFacing)
 {
     size_t       bx = dims[0];
     size_t       by = dims[1];
@@ -356,6 +356,10 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     _getMVPMatrix(MVP);
     GLuint MVPId = glGetUniformLocation(_1stPassShaderId, "MVP");
     glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
+    GLuint boxMinId = glGetUniformLocation(_1stPassShaderId, "boxMin");
+    glUniform3fv(boxMinId, 1, boxMin);
+    GLuint boxMaxId = glGetUniformLocation(_1stPassShaderId, "boxMax");
+    glUniform3fv(boxMaxId, 1, boxMax);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

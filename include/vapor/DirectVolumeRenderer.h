@@ -89,7 +89,9 @@ private:
     // Used in the 1st pass volume rendering
     //
     void _drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                          const size_t *dims,    // num. of grid points in X, Y, Z
+                          const float * boxmin,    // Three elements: minimal X, Y, Z of this volume.
+                          const float * boxmax,    // Three elements: maximal X, Y, Z of this volume.
+                          const size_t *dims,      // num. of grid points in X, Y, Z for 6 faces.
                           bool          frontFacing);
 
     //
