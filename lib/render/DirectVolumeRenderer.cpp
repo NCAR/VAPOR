@@ -258,8 +258,8 @@ int DirectVolumeRenderer::_paintGL()
     glGetIntegerv( GL_VIEWPORT, viewport );
 
     // 1st pass, render to a framebuffer
-    glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
-    glViewport( 0, 0, viewport[2], viewport[3] );
+    //glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
+    //glViewport( 0, 0, viewport[2], viewport[3] );
 
     _drawVolumeFaces( _cacheParams.userCoords.frontFace,
                       _cacheParams.userCoords.backFace,
@@ -267,6 +267,8 @@ int DirectVolumeRenderer::_paintGL()
                       _cacheParams.userCoords.leftFace,
                       _cacheParams.userCoords.topFace,
                       _cacheParams.userCoords.bottomFace,
+                      _cacheParams.boxMin,
+                      _cacheParams.boxMax,
                       _cacheParams.userCoords.dims,
                       true );
 
@@ -274,7 +276,7 @@ int DirectVolumeRenderer::_paintGL()
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, viewport[2], viewport[3] );
 
-    _drawQuad();
+    //_drawQuad();
 
 
     return 0;
@@ -413,6 +415,8 @@ void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
                                              const float* leftFace,
                                              const float* topFace,
                                              const float* bottomFace,
+                                             const float* boxMin, 
+                                             const float* boxMax, 
                                              const size_t* dims,
                                                    bool    frontFacing )
 {
@@ -430,6 +434,10 @@ void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
     _getMVPMatrix( MVP );
     GLuint MVPId = glGetUniformLocation( _1stPassShaderId, "MVP" );
     glUniformMatrix4fv( MVPId, 1, GL_FALSE, MVP );
+    GLuint boxMinId = glGetUniformLocation( _1stPassShaderId, "boxMin" );
+    glUniform3fv( boxMinId, 1, boxMin );
+    GLuint boxMaxId = glGetUniformLocation( _1stPassShaderId, "boxMax" );
+    glUniform3fv( boxMaxId, 1, boxMax );
 
     glEnable( GL_CULL_FACE );
     glEnable(GL_DEPTH_TEST);
