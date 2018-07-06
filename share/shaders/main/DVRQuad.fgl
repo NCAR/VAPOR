@@ -3,9 +3,9 @@
 in  vec2 UV;
 out vec4 color;
 
-uniform sampler2D backFaceTexture;
+uniform sampler2D previousTexture;
 
 void main(void)
 {
-    color = texture(backFaceTexture, UV);
+    color = texture(previousTexture, UV);
 }
