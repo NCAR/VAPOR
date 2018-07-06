@@ -112,19 +112,7 @@ public:
     //! \param[out] clut lookup table of size _numEntries*4
     void makeLut(float *clut) const;
 
-    void makeLut(std::vector<float> &clut) const
-    {
-        clut.clear();
-        float *cluta = new float[4 * getNumEntries()];
-        makeLut(cluta);
-        for (int i = 0; i < getNumEntries(); i++) {
-            clut.push_back(cluta[4 * i + 0]);
-            clut.push_back(cluta[4 * i + 1]);
-            clut.push_back(cluta[4 * i + 2]);
-            clut.push_back(cluta[4 * i + 3]);
-        }
-        delete[] cluta;
-    }
+    void makeLut(std::vector<float> &clut) const;
 
     //! Obtain minimum mapping (histo) value
     //! \return Minimum mapping value

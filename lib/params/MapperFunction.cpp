@@ -280,6 +280,17 @@ void MapperFunction::makeLut(float *clut) const
     }
 }
 
+//----------------------------------------------------------------------------
+// Populate at a RGBA lookup table with std::vector input
+//----------------------------------------------------------------------------
+void MapperFunction::makeLut(std::vector<float> &clut) const
+{
+    float *cluta = new float[4 * getNumEntries()];
+    makeLut(cluta);
+    clut.assign(cluta, cluta + 4 * getNumEntries());
+    delete[] cluta;
+}
+
 //! Set both minimum and maximum mapping (histo) values
 //! \param[in] val1 minimum value
 //! \param[in] val2 maximum value
