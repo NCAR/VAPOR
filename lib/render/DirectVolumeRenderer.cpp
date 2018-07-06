@@ -335,7 +335,6 @@ int DirectVolumeRenderer::_paintGL()
     /* 1st pass, render back facing polygons to texture0 of the framebuffer */
     glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
     glViewport( 0, 0, viewport[2], viewport[3] );
-    glClear( GL_COLOR_BUFFER_BIT ); 
     _drawVolumeFaces( _userCoordinates.frontFace,
                       _userCoordinates.backFace,
                       _userCoordinates.rightFace,
@@ -396,7 +395,7 @@ void DirectVolumeRenderer::_initializeTextures()
     /* Generate back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId); 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, viewport[2], viewport[3], 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
     /* Configure the back-facing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -407,7 +406,7 @@ void DirectVolumeRenderer::_initializeTextures()
     /* Generate front-facing texture */
     glGenTextures(1, &_frontFaceTextureId);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId); 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, viewport[2], viewport[3], 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
     /* Configure the front-faceing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -487,8 +486,10 @@ void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
         glCullFace( GL_FRONT );
         glEnable(GL_DEPTH_TEST);
         glClearDepth( 0.0 );  
-        glClear(GL_DEPTH_BUFFER_BIT); 
+        glClear(GL_DEPTH_BUFFER_BIT);
         glDepthFunc(GL_GEQUAL);
+        const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
+        glClearBufferfv( GL_COLOR, 0, black );  // clear GL_COLOR_ATTACHMENT0 
     }
     else if( whichPass == 2 )   // render front-facing polygons 
     {
@@ -504,8 +505,10 @@ void DirectVolumeRenderer::_drawVolumeFaces( const float* frontFace,
         glCullFace( GL_BACK );
         glEnable(GL_DEPTH_TEST);
         glClearDepth( 1.0 );   
-        glClear(GL_DEPTH_BUFFER_BIT); 
+        glClear( GL_DEPTH_BUFFER_BIT ); 
         glDepthFunc(GL_LEQUAL); 
+        const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
+        glClearBufferfv( GL_COLOR, 1, black );  // clear GL_COLOR_ATTACHMENT1
     }
     else                        // perform ray-casting
     { 
