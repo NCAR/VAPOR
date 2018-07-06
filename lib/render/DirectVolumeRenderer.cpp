@@ -34,6 +34,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _vertexArrayId = 0;
     _1stPassShaderId = 0;
     _2ndPassShaderId = 0;
+    _3rdPassShaderId = 0;
     _quadShaderId = 0;
 }
 
@@ -175,6 +176,7 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
     if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
     if (_2ndPassShaderId) glDeleteProgram(_2ndPassShaderId);
+    if (_3rdPassShaderId) glDeleteProgram(_3rdPassShaderId);
     if (_quadShaderId) glDeleteProgram(_quadShaderId);
 
     // Need to look up what resources to destroy in OpenGL.
@@ -193,6 +195,10 @@ int DirectVolumeRenderer::_initializeGL()
     const char vgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.vgl";
     const char fgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.fgl";
     _2ndPassShaderId = _loadShaders(vgl2, fgl2);
+
+    const char vgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.vgl";
+    const char fgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.fgl";
+    _3rdPassShaderId = _loadShaders(vgl3, fgl3);
 
     const char vglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.vgl";
     const char fglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.fgl";
@@ -222,22 +228,29 @@ int DirectVolumeRenderer::_paintGL()
     /* 1st pass, render back facing polygons to texture0 of the framebuffer */
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims,
                      1);    // The 1st pass!!!
 
     /* 2nd pass, render front facing polygons to texture1 of the framebuffer */
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    // Clear the framebuffer
     _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
                      _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims,
                      2);    // The 2nd pass!!!
 
-    // put the framebuffer texture to a quad
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
+    /* 3rd pass, perform ray casting */
+    _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
+                     _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims,
+                     3);    // The 3rd pass!!!
+
+#if 0
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    glViewport( 0, 0, viewport[2], viewport[3] );
     _drawQuad();
+#endif
 
     return 0;
 }
@@ -297,12 +310,6 @@ bool DirectVolumeRenderer::_isCacheDirty() const
     return false;
 }
 
-void DirectVolumeRenderer::_twoPassDVR()
-{
-    /* Now try Render to Texture                                                            */
-    /* http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/ */
-}
-
 void DirectVolumeRenderer::_initializeTextures()
 {
     /* Create an Frame Buffer Object for the back side of the volume.                       */
@@ -318,7 +325,7 @@ void DirectVolumeRenderer::_initializeTextures()
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, viewport[2], viewport[3], 0, GL_RGB, GL_FLOAT, nullptr);
 
-    /* Configure the texture: _backFaceTextureId */
+    /* Configure the back-facing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -329,7 +336,7 @@ void DirectVolumeRenderer::_initializeTextures()
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, viewport[2], viewport[3], 0, GL_RGB, GL_FLOAT, nullptr);
 
-    /* Configure the texture: _frontFaceTextureId */
+    /* Configure the front-faceing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -378,18 +385,19 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     size_t idx;
     size_t numOfVertices;
 
+    GLfloat MVP[16];
+    _getMVPMatrix(MVP);
+
     /* Set up shader uniforms, OpenGL states, etc. */
     if (whichPass == 1)    // render back-facing polygons
     {
         glUseProgram(_1stPassShaderId);
-        GLfloat MVP[16];
-        _getMVPMatrix(MVP);
-        GLuint MVPId = glGetUniformLocation(_1stPassShaderId, "MVP");
-        glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
-        GLuint boxMinId = glGetUniformLocation(_1stPassShaderId, "boxMin");
-        glUniform3fv(boxMinId, 1, boxMin);
-        GLuint boxMaxId = glGetUniformLocation(_1stPassShaderId, "boxMax");
-        glUniform3fv(boxMaxId, 1, boxMax);
+        GLuint MVPLoc = glGetUniformLocation(_1stPassShaderId, "MVP");
+        glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
+        GLuint boxMinLoc = glGetUniformLocation(_1stPassShaderId, "boxMin");
+        glUniform3fv(boxMinLoc, 1, boxMin);
+        GLuint boxMaxLoc = glGetUniformLocation(_1stPassShaderId, "boxMax");
+        glUniform3fv(boxMaxLoc, 1, boxMax);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -400,14 +408,12 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     } else if (whichPass == 2)    // render front-facing polygons
     {
         glUseProgram(_2ndPassShaderId);
-        GLfloat MVP[16];
-        _getMVPMatrix(MVP);
-        GLuint MVPId = glGetUniformLocation(_2ndPassShaderId, "MVP");
-        glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
-        GLuint boxMinId = glGetUniformLocation(_2ndPassShaderId, "boxMin");
-        glUniform3fv(boxMinId, 1, boxMin);
-        GLuint boxMaxId = glGetUniformLocation(_2ndPassShaderId, "boxMax");
-        glUniform3fv(boxMaxId, 1, boxMax);
+        GLuint MVPLoc = glGetUniformLocation(_2ndPassShaderId, "MVP");
+        glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
+        GLuint boxMinLoc = glGetUniformLocation(_2ndPassShaderId, "boxMin");
+        glUniform3fv(boxMinLoc, 1, boxMin);
+        GLuint boxMaxLoc = glGetUniformLocation(_2ndPassShaderId, "boxMax");
+        glUniform3fv(boxMaxLoc, 1, boxMax);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -417,6 +423,25 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         glDepthFunc(GL_LEQUAL);
     } else    // perform ray-casting
     {
+        glUseProgram(_3rdPassShaderId);
+        GLuint MVPLoc = glGetUniformLocation(_2ndPassShaderId, "MVP");
+        glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+
+        // Pass in textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
+        GLuint backFaceTextureLoc = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
+        glUniform1i(backFaceTextureLoc, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
+        GLuint frontFaceTextureLoc = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
+        glUniform1i(frontFaceTextureLoc, 1);
     }
 
     glEnableVertexAttribArray(0);
@@ -537,8 +562,9 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     glDeleteBuffers(1, &vertexBufferId);
 
     glDisable(GL_CULL_FACE);
-    glClearDepth(1.0);
     glDisable(GL_DEPTH_TEST);
+    glClearDepth(1.0);
+    glDepthMask(GL_TRUE);
 
     glUseProgram(0);
 }
@@ -669,8 +695,8 @@ void DirectVolumeRenderer::_drawQuad()
     glUniform3fv(boxmaxId, 1, _cacheParams.boxMax);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-    GLuint texId = glGetUniformLocation(_quadShaderId, "backFaceTexture");
+    glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
+    GLuint texId = glGetUniformLocation(_quadShaderId, "previousTexture");
     glUniform1i(texId, 0);
 
     glEnableVertexAttribArray(0);
