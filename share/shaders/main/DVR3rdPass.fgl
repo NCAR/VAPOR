@@ -1,0 +1,26 @@
+#version 330 core
+
+in vec4 positionHomo;   // vertex position in the homogeneous coordinate
+
+// textures from the 1st and 2nd pass.
+uniform sampler2D backFaceTexture;
+uniform sampler2D frontFaceTexture;
+
+layout(location = 0) out vec4 color;
+
+void main(void)
+{
+    // Get normalized window coordinates of this frament by dividing w
+    if( positionHomo.w == 0.0f )
+        discard;
+    vec2 positionWindow = ((positionHomo.xy / positionHomo.w) + 1.0f) / 2.0f;
+
+    vec4 stopTexture    = vec4(texture( backFaceTexture,  positionWindow ).xyz, 1.0f);
+    vec4 startTexture   = vec4(texture( frontFaceTexture, positionWindow ).xyz, 1.0f);
+    vec4 rayDirTexture  = stopTexture - startTexture;
+    if( length( rayDirTexture ) == 0.0f )
+        discard;
+
+    color = vec4( length(rayDirTexture)/1.732f );
+    color.a = clamp( color.a * 2.0f, 0.0f, 1.0f );
+}
