@@ -2,9 +2,6 @@
 
 using namespace VAPoR;
 
-//const std::string   DVRParams::_fileNameTag           = "DVRParams filename tag";
-//const std::string   DVRParams::_isGeoRefTag          = "DVRParams isgeotiff tag";
-
 //
 // Register class with object factory
 //
@@ -19,6 +16,7 @@ DVRParams::DVRParams(DataMgr *dataManager,
     SetDiagMsg("DVRParams::DVRParams() this=%p", this);
 }
 
+// Constructor
 DVRParams::DVRParams(DataMgr *dataManager,
                      ParamsBase::StateSave *stateSave,
                      XmlNode *node)
@@ -32,6 +30,11 @@ DVRParams::DVRParams(DataMgr *dataManager,
     }
 }
 
+// Destructor
 DVRParams::~DVRParams() {
     SetDiagMsg("DVRParams::~DVRParams() this=%p", this);
+}
+
+MapperFunction *DVRParams::GetMapperFunc() {
+    return RenderParams::GetMapperFunc(GetVariableName());
 }
