@@ -293,9 +293,14 @@ int DirectVolumeRenderer::_initializeGL() {
 }
 
 int DirectVolumeRenderer::_paintGL() {
+    DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
+
+    /* Gather user coordinates */
     if (!_userCoordinates.isFilled())
-        _userCoordinates.Fill(dynamic_cast<DVRParams *>(GetActiveParams()),
-                              _dataMgr);
+        _userCoordinates.Fill(params, _dataMgr);
+
+    /* Gather the color map */
+    params->GetMapperFunc()->makeLut(_colorMap);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
