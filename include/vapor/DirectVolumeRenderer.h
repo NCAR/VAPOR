@@ -68,7 +68,7 @@ private:
         void Fill( const VAPoR::StructuredGrid* grid );
     }; 
 
-    struct CacheParams
+    struct Cache
     {
         std::string varName;
         size_t ts;
@@ -79,7 +79,7 @@ private:
         UserCoordinates         userCoords;
     }; 
 
-    CacheParams _cacheParams;
+    Cache _cache;
     void _saveCacheParams( bool considerUserCoord );    // True: consider user coordinates too
     bool _isCacheDirty( ) const; 
 
