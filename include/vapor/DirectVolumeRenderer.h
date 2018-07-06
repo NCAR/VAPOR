@@ -51,30 +51,18 @@ private:
         float *rightFace, *leftFace;    // user coordinates, size == by * bz * 3
         float *topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
         size_t dims[3];                 // num. of samples along each axis
+        float  boxMin[3], boxMax[3];    // bounding box of this volume
 
-        UserCoordinates();     // constructor
-        ~UserCoordinates();    // destructor
-        void Fill(const VAPoR::StructuredGrid *grid);
+        UserCoordinates();
+        ~UserCoordinates();
+        bool isFilled();    // is memory properly allocated?
+        bool Fill(const DVRParams *params, DataMgr *dataMgr);
     };
-
-    struct Cache {
-        std::string          varName;
-        size_t               ts;
-        int                  level;
-        int                  lod;
-        float                boxMin[3], boxMax[3];
-        std::vector<GLfloat> colormap;
-        UserCoordinates      userCoords;
-    };
-
-    Cache _cache;
-    void  _saveCacheParams(bool considerUserCoord);    // True: consider user coordinates too
-    bool  _isCacheDirty() const;
+    UserCoordinates _userCoordinates;
 
     // OpenGL stuff
-    GLuint _volumeTextureUnit;      // GL_TEXTURE0
-    GLuint _colormapTextureUnit;    // GL_TEXTURE1
-    // GLuint              _coordmapTextureUnit;         // GL_TEXTURE2 ??
+    GLuint _volumeTextureUnit;              // GL_TEXTURE0
+    GLuint _colormapTextureUnit;            // GL_TEXTURE1
     GLuint _volumeCoordinateTextureUnit;    // GL_TEXTURE3
     GLuint _frameBufferId;
     GLuint _backFaceTextureId;
