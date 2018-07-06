@@ -38,6 +38,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _quadShaderId = 0;
 }
 
+// Constructor
 DirectVolumeRenderer::UserCoordinates::UserCoordinates()
 {
     frontFace = nullptr;
@@ -46,6 +47,7 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
     leftFace = nullptr;
     topFace = nullptr;
     bottomFace = nullptr;
+    field = nullptr;
     for (int i = 0; i < 3; i++) {
         dims[i] = 0;
         boxMin[i] = 0;
@@ -53,6 +55,7 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
     }
 }
 
+// Destructor
 DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
 {
     if (frontFace) {
@@ -79,11 +82,15 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
         delete[] bottomFace;
         bottomFace = nullptr;
     }
+    if (field) {
+        delete[] field;
+        field = nullptr;
+    }
 }
 
 bool DirectVolumeRenderer::UserCoordinates::isFilled()
 {
-    if (frontFace == nullptr || backFace == nullptr || rightFace == nullptr || leftFace == nullptr || topFace == nullptr || bottomFace == nullptr)
+    if (frontFace == nullptr || backFace == nullptr || rightFace == nullptr || leftFace == nullptr || topFace == nullptr || bottomFace == nullptr || field == nullptr)
         return false;
     else
         return true;
@@ -183,6 +190,10 @@ bool DirectVolumeRenderer::UserCoordinates::Fill(const DVRParams *params, DataMg
                 bottomFace[idx++] = (float)buf[1];
                 bottomFace[idx++] = (float)buf[2];
             }
+
+        // Save the field values
+        // if( field )
+        //    delete[] field;
     }
 
     delete grid;
