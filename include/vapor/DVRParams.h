@@ -38,6 +38,10 @@ public:
     return false;   // since this class is for an image, not rendering a variable.
   }
 
+  //
+  //! Obtain current MapperFunction for the primary variable.
+  //
+  virtual MapperFunction* GetMapperFunc();
 
 private:
 
