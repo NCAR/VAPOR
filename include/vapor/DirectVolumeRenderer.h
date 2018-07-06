@@ -56,10 +56,11 @@ private:
 
         UserCoordinates();
         ~UserCoordinates();
-        bool isFilled();    // is memory properly allocated?
+        bool isFilled();    // are values properly filled?
         bool Fill(const DVRParams *params, DataMgr *dataMgr);
     };
-    UserCoordinates _userCoordinates;
+    UserCoordinates    _userCoordinates;
+    std::vector<float> _colorMap;
 
     // OpenGL stuff
     GLuint _volumeTextureUnit;              // GL_TEXTURE0
