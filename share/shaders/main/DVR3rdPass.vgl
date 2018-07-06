@@ -5,11 +5,11 @@ layout(location = 0) in vec3 vertexPosition;
 
 uniform mat4 MVP;
 
-out vec4 positionHomo;   // vertex position in the homogeneous coordinate
+out vec4 positionClip;   // vertex position in the homogeneous coordinate
 
 void main(void)
 {
     gl_Position     = MVP * vec4( vertexPosition, 1.0f );
 
-    positionHomo    = gl_Position;
+    positionClip    = gl_Position;
 }
