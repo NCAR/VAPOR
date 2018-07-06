@@ -60,7 +60,8 @@ private:
         //            0 --------X
         float *frontFace, *backFace;     // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;     // user coordinates, size == by * bz * 3
-        float *topFace,   *bottomFace;   // user coordinates, size == bx * bz * 3
+        float *topFace,   *bottomFace;   // user coordinates, size == bx * bz * 3   
+        float *field;                    // data field of this volume
         size_t dims[3];                  // num. of samples along each axis
         float  boxMin[3], boxMax[3];     // bounding box of this volume
 
