@@ -97,6 +97,7 @@ private:
     GLuint              _vertexArrayId;
     GLuint              _1stPassShaderId;
     GLuint              _2ndPassShaderId;
+    GLuint              _3rdPassShaderId;
     GLuint              _quadShaderId;
 
     //
@@ -118,11 +119,6 @@ private:
     // Draw a quad that helps examine the texture.
     //
     void _drawQuad();
-
-    //
-    // Implement two pass ray caster algorithm here.
-    //
-    void _twoPassDVR(); 
 
     // 
     // Texture initializations 
