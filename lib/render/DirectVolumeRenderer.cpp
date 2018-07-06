@@ -229,21 +229,21 @@ int DirectVolumeRenderer::_paintGL()
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
     glClear(GL_COLOR_BUFFER_BIT);
-    _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
-                     _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims,
+    _drawVolumeFaces(_cache.userCoords.frontFace, _cache.userCoords.backFace, _cache.userCoords.rightFace, _cache.userCoords.leftFace, _cache.userCoords.topFace, _cache.userCoords.bottomFace,
+                     _cache.boxMin, _cache.boxMax, _cache.userCoords.dims,
                      1);    // The 1st pass!!!
 
     /* 2nd pass, render front facing polygons to texture1 of the framebuffer */
-    _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
-                     _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims,
+    _drawVolumeFaces(_cache.userCoords.frontFace, _cache.userCoords.backFace, _cache.userCoords.rightFace, _cache.userCoords.leftFace, _cache.userCoords.topFace, _cache.userCoords.bottomFace,
+                     _cache.boxMin, _cache.boxMax, _cache.userCoords.dims,
                      2);    // The 2nd pass!!!
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
     /* 3rd pass, perform ray casting */
-    _drawVolumeFaces(_cacheParams.userCoords.frontFace, _cacheParams.userCoords.backFace, _cacheParams.userCoords.rightFace, _cacheParams.userCoords.leftFace, _cacheParams.userCoords.topFace,
-                     _cacheParams.userCoords.bottomFace, _cacheParams.boxMin, _cacheParams.boxMax, _cacheParams.userCoords.dims,
+    _drawVolumeFaces(_cache.userCoords.frontFace, _cache.userCoords.backFace, _cache.userCoords.rightFace, _cache.userCoords.leftFace, _cache.userCoords.topFace, _cache.userCoords.bottomFace,
+                     _cache.boxMin, _cache.boxMax, _cache.userCoords.dims,
                      3);    // The 3rd pass!!!
 
 #if 0
@@ -258,27 +258,27 @@ int DirectVolumeRenderer::_paintGL()
 void DirectVolumeRenderer::_saveCacheParams(bool considerUserCoordinates)
 {
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
-    _cacheParams.varName = params->GetVariableName();
-    _cacheParams.ts = params->GetCurrentTimestep();
-    _cacheParams.level = params->GetRefinementLevel();
-    _cacheParams.lod = params->GetCompressionLevel();
+    _cache.varName = params->GetVariableName();
+    _cache.ts = params->GetCurrentTimestep();
+    _cache.level = params->GetRefinementLevel();
+    _cache.lod = params->GetCompressionLevel();
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
     assert(extMin.size() == 3);
     assert(extMax.size() == 3);
     for (int i = 0; i < 3; i++) {
-        _cacheParams.boxMin[i] = (float)extMin[i];
-        _cacheParams.boxMax[i] = (float)extMax[i];
+        _cache.boxMin[i] = (float)extMin[i];
+        _cache.boxMax[i] = (float)extMax[i];
     }
 
-    MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
-    _cacheParams.colormap.resize(mapper->getNumEntries() * 4, 0.0f);
+    MapperFunction *mapper = params->GetMapperFunc(_cache.varName);
+    _cache.colormap.resize(mapper->getNumEntries() * 4, 0.0f);
     // colormap values aren't filled yet!
 
     if (considerUserCoordinates) {
-        VAPoR::StructuredGrid *grid = dynamic_cast<VAPoR::StructuredGrid *>(_dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, extMin, extMax));
+        VAPoR::StructuredGrid *grid = dynamic_cast<VAPoR::StructuredGrid *>(_dataMgr->GetVariable(_cache.ts, _cache.varName, _cache.level, _cache.lod, extMin, extMax));
         if (grid != nullptr) {
-            _cacheParams.userCoords.Fill(grid);
+            _cache.userCoords.Fill(grid);
         } else {
             std::cerr << "_saveCacheParams() grid isn't StructuredGrid" << std::endl;
         }
@@ -290,21 +290,21 @@ void DirectVolumeRenderer::_saveCacheParams(bool considerUserCoordinates)
 bool DirectVolumeRenderer::_isCacheDirty() const
 {
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
-    if (_cacheParams.varName != params->GetVariableName()) return true;
-    if (_cacheParams.ts != params->GetCurrentTimestep()) return true;
-    if (_cacheParams.level != params->GetRefinementLevel()) return true;
-    if (_cacheParams.lod != params->GetCompressionLevel()) return true;
+    if (_cache.varName != params->GetVariableName()) return true;
+    if (_cache.ts != params->GetCurrentTimestep()) return true;
+    if (_cache.level != params->GetRefinementLevel()) return true;
+    if (_cache.lod != params->GetCompressionLevel()) return true;
 
     vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
     assert(extMin.size() == 3);
     assert(extMax.size() == 3);
     for (int i = 0; i < 3; i++) {
-        if (_cacheParams.boxMin[i] != (float)extMin[i]) return true;
-        if (_cacheParams.boxMax[i] != (float)extMax[i]) return true;
+        if (_cache.boxMin[i] != (float)extMin[i]) return true;
+        if (_cache.boxMax[i] != (float)extMax[i]) return true;
     }
 
-    MapperFunction *mapper = params->GetMapperFunc(_cacheParams.varName);
+    MapperFunction *mapper = params->GetMapperFunc(_cache.varName);
     // colormap values aren't compared yet!!
 
     return false;
@@ -375,7 +375,7 @@ void DirectVolumeRenderer::_printGLInfo() const
 void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
                                             const float *boxMin, const float *boxMax, const size_t *dims, int whichPass)
 {
-    assert(whichPass == 3 || whichPass == 2 || whichPass == 1);
+    assert(whichPass == 1 || whichPass == 2 || whichPass == 3);
 
     size_t       bx = dims[0];
     size_t       by = dims[1];
@@ -677,8 +677,8 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
 
 void DirectVolumeRenderer::_drawQuad()
 {
-    const GLfloat quadVertices[] = {_cacheParams.boxMin[0], _cacheParams.boxMax[1], _cacheParams.boxMin[2], _cacheParams.boxMin[0], _cacheParams.boxMin[1], _cacheParams.boxMin[2],
-                                    _cacheParams.boxMax[0], _cacheParams.boxMax[1], _cacheParams.boxMin[2], _cacheParams.boxMax[0], _cacheParams.boxMin[1], _cacheParams.boxMin[2]};
+    const GLfloat quadVertices[] = {_cache.boxMin[0], _cache.boxMax[1], _cache.boxMin[2], _cache.boxMin[0], _cache.boxMin[1], _cache.boxMin[2],
+                                    _cache.boxMax[0], _cache.boxMax[1], _cache.boxMin[2], _cache.boxMax[0], _cache.boxMin[1], _cache.boxMin[2]};
 
     glUseProgram(_quadShaderId);
 
@@ -689,10 +689,10 @@ void DirectVolumeRenderer::_drawQuad()
     glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
 
     GLuint boxminId = glGetUniformLocation(_quadShaderId, "boxmin");
-    glUniform3fv(boxminId, 1, _cacheParams.boxMin);
+    glUniform3fv(boxminId, 1, _cache.boxMin);
 
     GLuint boxmaxId = glGetUniformLocation(_quadShaderId, "boxmax");
-    glUniform3fv(boxmaxId, 1, _cacheParams.boxMax);
+    glUniform3fv(boxmaxId, 1, _cache.boxMax);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
