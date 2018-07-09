@@ -629,7 +629,7 @@ bool Statistics::_calc3M(std::string varname)
 
             for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
                 if (*it != missingVal) {
-                    float val = std::abs(*it);
+                    float val = *it;
                     min = min < val ? min : val;
                     max = max > val ? max : val;
                     float y = val - c;
