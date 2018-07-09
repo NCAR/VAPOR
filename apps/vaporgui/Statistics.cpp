@@ -729,7 +729,7 @@ bool Statistics::_calc3M( std::string varname )
             {
                 if( *it != missingVal )
                 {
-                    float val = std::abs(*it); 
+                    float val = *it; 
                     min = min < val ? min : val;
                     max = max > val ? max : val;
                     float y = val - c;
