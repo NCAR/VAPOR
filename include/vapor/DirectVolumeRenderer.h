@@ -50,10 +50,13 @@ private:
         float *frontFace, *backFace;    // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;    // user coordinates, size == by * bz * 3
         float *topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
-        float *field;                   // data field of this volume
+        // data field of this volume: each data point has 4 components:
+        //   the X, Y, Z user coordinates, and the actual field value.
+        float *field;
         size_t dims[3];                 // num. of samples along each axis
         float  boxMin[3], boxMax[3];    // bounding box of this volume
 
+        /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
         bool isFilled();    // are values properly filled?
@@ -70,12 +73,12 @@ private:
     GLuint _backFaceTextureId;
     GLuint _frontFaceTextureId;
     GLuint _depthBufferId;
-
     GLuint _vertexArrayId;
     GLuint _1stPassShaderId;
     GLuint _2ndPassShaderId;
     GLuint _3rdPassShaderId;
     GLuint _quadShaderId;
+    GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
 
     //
     // Draw faces using triangle strips
@@ -93,9 +96,9 @@ private:
     void _drawQuad();
 
     //
-    // Texture initializations
+    // Framebuffer initializations
     //
-    void _initializeTextures();
+    void _initializeFramebuffer();
 
     //
     // Simple shader compilation

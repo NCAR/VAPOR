@@ -36,6 +36,9 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _2ndPassShaderId = 0;
     _3rdPassShaderId = 0;
     _quadShaderId = 0;
+
+    _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
+    _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
 }
 
 // Constructor
@@ -251,7 +254,7 @@ int DirectVolumeRenderer::_initializeGL()
     glGenVertexArrays(1, &_vertexArrayId);
     glBindVertexArray(_vertexArrayId);
 
-    _initializeTextures();
+    _initializeFramebuffer();
 
     _printGLInfo();
 
@@ -300,7 +303,7 @@ int DirectVolumeRenderer::_paintGL()
     return 0;
 }
 
-void DirectVolumeRenderer::_initializeTextures()
+void DirectVolumeRenderer::_initializeFramebuffer()
 {
     /* Create an Frame Buffer Object for the back side of the volume.                       */
     glGenFramebuffers(1, &_frameBufferId);
@@ -341,8 +344,7 @@ void DirectVolumeRenderer::_initializeTextures()
     /* Set "_backFaceTextureId" as colour attachement #0, and "_frontFaceTextureId" as attachement #1 */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
-    GLenum drawBuffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    glDrawBuffers(2, drawBuffers);
+    glDrawBuffers(2, _drawBuffers);
 
     /* Check if framebuffer is complete */
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) { std::cerr << "_openGLInitialization(): Framebuffer failed!!" << std::endl; }
