@@ -240,6 +240,10 @@ public:
 	return("Navigate");
  }
 
+ static string GetRegionModeName() {
+	return("Region");
+ }
+
 private:
 
  static const string _currentMouseModeTag;
