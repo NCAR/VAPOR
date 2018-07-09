@@ -58,6 +58,7 @@ set (SRCS
 	FileOperationChecker.cpp
 	Combo.cpp
 	windowsUtils.cpp
+	Manip.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
