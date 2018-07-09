@@ -73,22 +73,6 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     _renderOrder.clear();
     _renderer.clear();
 
-#ifdef VAPOR3_0_0_ALPHA
-    // Create Manips for every mode except 0
-    _manipHolder.push_back(0);
-    for (int i = 1; i < MouseModeParams::getNumMouseModes(); i++) {
-        int manipType = MouseModeParams::getModeManipType(i);
-        if (manipType == 1 || manipType == 2) {
-            TranslateStretchManip *manip = new TranslateStretchManip(this, 0);
-            _manipHolder.push_back(manip);
-        } else if (manipType == 3) {
-            TranslateRotateManip *manip = new TranslateRotateManip(this, 0);
-            _manipHolder.push_back(manip);
-        } else
-            assert(0);
-    }
-#endif
-
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
 
@@ -255,9 +239,6 @@ int Visualizer::paintEvent()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Render the current active manip, if there is one
-#ifdef VAPOR3_0_0_ALPHA
-    renderManip();
-#endif
 
 #ifdef VAPOR3_0_0_ALPHA
     // Render all of the current text objects
@@ -832,42 +813,6 @@ void Visualizer::resetTrackball()
 {
     if (m_trackBall) delete m_trackBall;
     m_trackBall = new Trackball();
-}
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-void Visualizer::renderManip()
-{
-    // render the region manipulator, if in region mode, and active visualizer, or region shared
-    // with active visualizer.
-    if (MouseModeParams::GetCurrentMouseMode() == MouseModeParams::regionMode) {
-        if ((windowIsActive() || (!getActiveRegionParams()->IsLocal() && activeWinSharesRegion()))) {
-            TranslateStretchManip *regionManip = getManip(Params::_regionParamsTag);
-            regionManip->setParams(getActiveRegionParams());
-            regionManip->render();
-        }
-    }
-    // Render other manips, if we are in appropriate mode:
-    // Note: Other manips don't have shared and local to deal with:
-    else if ((MouseModeParams::GetCurrentMouseMode() != MouseModeParams::navigateMode) && windowIsActive()) {
-        int mode = MouseModeParams::GetCurrentMouseMode();
-
-        string                 tag = MouseModeParams::getModeTag(mode);
-        TranslateStretchManip *manip = _manipHolder[mode];
-
-        RenderParams *p = (RenderParams *)_paramsMgr->GetCurrentParams(_winNum, tag);
-        if (!p) return;
-        manip->setParams(p);
-        manip->render();
-        int manipType = MouseModeParams::getModeManipType(mode);
-        // For various manips with window, render 3D cursor too
-        //(Not implemented yet)
-        if (manipType > 1) {
-            //		const double *localPoint = p->getSelectedPointLocal();
-
-            //		draw3DCursor(localPoint);
-        }
-    }
 }
 #endif
 

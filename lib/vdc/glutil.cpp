@@ -247,7 +247,7 @@ void vtransform3t(const float *v, float *mat, float *vt)
 }
 // Test whether a planar point is right (or left) of the oriented line from
 // pt1 to pt2
-bool pointOnRight(double *pt1, double *pt2, double *testPt)
+bool pointOnRight(double *pt1, double *pt2, const double *testPt)
 {
     float rhs = pt1[0] * (pt1[1] - pt2[1]) + pt1[1] * (pt2[0] - pt1[0]);
     float test = (pt2[0] - pt1[0]) * testPt[1] + (pt1[1] - pt2[1]) * testPt[0] - rhs;
