@@ -231,8 +231,8 @@ void Statistics::_updateStatsTable()
     VariablesTable->setRowCount(enabledVars.size());
     int numberOfDigits = 3;
     for (int row = 0; row < enabledVars.size(); row++) {
-        double m3[3], median, stddev;
-        long   count;
+        float m3[3], median, stddev;
+        long  count;
         _validStats.GetCount(enabledVars[row], &count);
         _validStats.Get3MStats(enabledVars[row], m3);
         _validStats.GetMedian(enabledVars[row], &median);
@@ -416,7 +416,7 @@ void Statistics::_updateButtonClicked()
             _calc3M(varname);
             _updateStatsTable();
         }
-        double m3[3], median, stddev;
+        float m3[3], median, stddev;
         _validStats.Get3MStats(varname, m3);
         _validStats.GetMedian(varname, &median);
         _validStats.GetStddev(varname, &stddev);
@@ -615,11 +615,11 @@ bool Statistics::_calc3M(std::string varname)
     std::vector<double> minExtent, maxExtent;
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
-    double c = 0.0;
-    double sum = 0.0;
-    double min = std::numeric_limits<double>::max();
-    double max = -min;
-    long   count = 0;
+    float c = 0.0;
+    float sum = 0.0;
+    float min = std::numeric_limits<float>::max();
+    float max = -min;
+    long  count = 0;
 
     for (int ts = minTS; ts <= maxTS; ts++) {
         VAPoR::Grid *grid = currentDmgr->GetVariable(ts, varname, statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(), minExtent, maxExtent);
@@ -629,11 +629,11 @@ bool Statistics::_calc3M(std::string varname)
 
             for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
                 if (*it != missingVal) {
-                    double val = std::abs(*it) < 1e-38 ? 0.0 : *it;
+                    float val = std::abs(*it);
                     min = min < val ? min : val;
                     max = max > val ? max : val;
-                    double y = val - c;
-                    double t = sum + y;
+                    float y = val - c;
+                    float t = sum + y;
                     c = t - sum - y;
                     sum = t;
                     count++;
@@ -643,7 +643,7 @@ bool Statistics::_calc3M(std::string varname)
     }
 
     if (count > 0) {
-        double m3[3] = {min, max, sum / (double)count};
+        float m3[3] = {min, max, sum / (float)count};
         _validStats.Add3MStats(varname, m3);
     } else    // count == 0
     {
@@ -677,14 +677,14 @@ bool Statistics::_calcMedian(std::string varname)
             float               missingVal = grid->GetMissingValue();
 
             for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
-                if (*it != missingVal) buffer.push_back(std::abs(*it) < 1e-38 ? 0.0 : *it);
+                if (*it != missingVal) buffer.push_back(*it);
             }
         }
     }
 
     if (buffer.size() > 0) {
         std::sort(buffer.begin(), buffer.end());
-        double median = buffer.at(buffer.size() / 2);
+        float median = buffer.at(buffer.size() / 2);
         _validStats.AddMedian(varname, median);
     } else {
         // std::cerr << "Error: Zero value got selected!!" << std::endl;
@@ -709,10 +709,10 @@ bool Statistics::_calcStddev(std::string varname)
     std::vector<double> minExtent, maxExtent;
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
-    double c = 0.0;
-    double sum = 0.0;
-    long   count = 0;
-    double m3[3];
+    float c = 0.0;
+    float sum = 0.0;
+    long  count = 0;
+    float m3[3];
     _validStats.Get3MStats(varname, m3);
     if (std::isnan(m3[2])) {
         this->_calc3M(varname);
@@ -726,9 +726,9 @@ bool Statistics::_calcStddev(std::string varname)
             float               missingVal = grid->GetMissingValue();
             for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
                 if (*it != missingVal) {
-                    double val = std::abs(*it) < 1e-38 ? 0.0 : *it;
-                    double y = (val - m3[2]) * (val - m3[2]) - c;
-                    double t = sum + y;
+                    float val = *it;
+                    float y = (val - m3[2]) * (val - m3[2]) - c;
+                    float t = sum + y;
                     c = t - sum - y;
                     sum = t;
                     count++;
@@ -738,7 +738,7 @@ bool Statistics::_calcStddev(std::string varname)
     }
 
     if (count > 0) {
-        _validStats.AddStddev(varname, std::sqrt(sum / (double)count));
+        _validStats.AddStddev(varname, std::sqrt(sum / (float)count));
     } else {
         // std::cerr << "Error: Zero value got selected!!" << std::endl;
     }
@@ -795,7 +795,7 @@ bool Statistics::ValidStats::RemoveVariable(std::string &varname)
     return true;
 }
 
-bool Statistics::ValidStats::Add3MStats(std::string &varName, const double *input3M)
+bool Statistics::ValidStats::Add3MStats(std::string &varName, const float *input3M)
 {
     int idx = _getVarIdx(varName);
     if (idx == -1)    // This variable doesn't exist
@@ -805,7 +805,7 @@ bool Statistics::ValidStats::Add3MStats(std::string &varName, const double *inpu
     return true;
 }
 
-bool Statistics::ValidStats::AddMedian(std::string &varName, double inputMedian)
+bool Statistics::ValidStats::AddMedian(std::string &varName, float inputMedian)
 {
     int idx = _getVarIdx(varName);
     if (idx == -1)    // This variable doesn't exist
@@ -815,7 +815,7 @@ bool Statistics::ValidStats::AddMedian(std::string &varName, double inputMedian)
     return true;
 }
 
-bool Statistics::ValidStats::AddStddev(std::string &varName, double inputStddev)
+bool Statistics::ValidStats::AddStddev(std::string &varName, float inputStddev)
 {
     int idx = _getVarIdx(varName);
     if (idx == -1)    // This variable doesn't exist
@@ -835,7 +835,7 @@ bool Statistics::ValidStats::AddCount(std::string &varName, long inputCount)
     return true;
 }
 
-bool Statistics::ValidStats::Get3MStats(std::string &varName, double *output3M)
+bool Statistics::ValidStats::Get3MStats(std::string &varName, float *output3M)
 {
     int idx = _getVarIdx(varName);
     if (idx == -1)    // This variable doesn't exist
@@ -845,7 +845,7 @@ bool Statistics::ValidStats::Get3MStats(std::string &varName, double *output3M)
     return true;
 }
 
-bool Statistics::ValidStats::GetMedian(std::string &varName, double *outputMedian)
+bool Statistics::ValidStats::GetMedian(std::string &varName, float *outputMedian)
 {
     int idx = _getVarIdx(varName);
     if (idx == -1)    // This variable doesn't exist
@@ -855,7 +855,7 @@ bool Statistics::ValidStats::GetMedian(std::string &varName, double *outputMedia
     return true;
 }
 
-bool Statistics::ValidStats::GetStddev(std::string &varName, double *outputStddev)
+bool Statistics::ValidStats::GetStddev(std::string &varName, float *outputStddev)
 {
     int idx = _getVarIdx(varName);
     if (idx == -1)    // This variable doesn't exist
@@ -929,7 +929,7 @@ bool Statistics::ValidStats::UpdateMyParams(const VAPoR::StatisticsParams *rhs)
     return true;
 }
 
-bool Statistics::ValidStats::SetCurrentExtents(std::vector<double> &min, std::vector<double> &max)
+bool Statistics::ValidStats::SetCurrentExtents(const std::vector<float> &min, const std::vector<float> &max)
 {
     currentExtentMin.clear();
     currentExtentMax.clear();
@@ -938,11 +938,21 @@ bool Statistics::ValidStats::SetCurrentExtents(std::vector<double> &min, std::ve
         return false;
     }
     for (int i = 0; i < min.size(); i++) {
-        currentExtentMin.push_back((float)min[i]);
-        currentExtentMax.push_back((float)max[i]);
+        currentExtentMin.push_back(min[i]);
+        currentExtentMax.push_back(max[i]);
     }
 
     return true;
+}
+
+bool Statistics::ValidStats::SetCurrentExtents(const std::vector<double> &min, const std::vector<double> &max)
+{
+    std::vector<float> minf, maxf;
+    for (int i = 0; i < min.size(); i++) {
+        minf.push_back((float)min[i]);
+        maxf.push_back((float)max[i]);
+    }
+    return (this->SetCurrentExtents(minf, maxf));
 }
 
 void Statistics::_exportTextClicked()
@@ -984,7 +994,7 @@ void Statistics::_exportTextClicked()
         bool has3DVar = false;
         for (int i = 0; i < _validStats.GetVariableCount(); i++) {
             std::string varname = _validStats.GetVariableName(i);
-            double      m3[3], median, stddev;
+            float       m3[3], median, stddev;
             long        count;
             _validStats.Get3MStats(varname, m3);
             _validStats.GetMedian(varname, &median);
