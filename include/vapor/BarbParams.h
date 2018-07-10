@@ -23,7 +23,7 @@ public:
     //! Get the length scaling factor
     //! \retval double scale factor
     //
-    double GetLengthScale() const { return GetValueDouble(_lengthScaleTag, .2); }
+    double GetLengthScale() const { return GetValueDouble(_lengthScaleTag, .1); }
 
     void SetLengthScale(double val) { SetValueDouble(_lengthScaleTag, "Barb length", val); }
 
@@ -39,7 +39,7 @@ public:
     //! \retval vector<long> grid
     const vector<long> GetGrid() const
     {
-        const vector<long> defaultGrid(3, 1);
+        const vector<long> defaultGrid(3, 10);
         return (GetValueLongVec(_gridTag, defaultGrid));
     }
 
