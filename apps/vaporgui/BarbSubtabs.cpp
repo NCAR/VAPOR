@@ -2,6 +2,13 @@
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
 
+#define LENGTH_MIN    0
+#define LENGTH_MAX    1
+#define THICKNESS_MIN 0
+#define THICKNESS_MAX 1
+#define COUNT_MIN     1
+#define COUNT_MAX     50
+
 void BarbVariablesSubtab::pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter)
 {
     bool foundDefaultU = false;
@@ -71,37 +78,6 @@ void BarbAppearanceSubtab::hideZDimWidgets()
     adjustSize();
 }
 
-double BarbAppearanceSubtab::CalculateDomainLength(int ts)
-{
-    double domainLength = 0;
-
-    // Is this a legitimite way to acquire animation params?
-    //
-    int            level = _bParams->GetRefinementLevel();
-    vector<string> fieldVars = _bParams->GetFieldVariableNames();
-    for (int i = 0; i < 3; i++) {
-        string varName = fieldVars[i];
-        if ((varName) == "") { continue; }
-
-        if (!_dataMgr->VariableExists(ts, varName, level, 0)) continue;
-
-        vector<double> minExt, maxExt;
-        int            rc = _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
-        assert(rc >= 0);
-
-        // If we're dealing with 2D vars, skip the Z element
-        //
-        if (i == 3 && minExt.size() < 2)
-            continue;
-        else {
-            double length = maxExt[i] - minExt[i];
-            domainLength += length * length;
-        }
-    }
-    domainLength = sqrt(domainLength);
-    return domainLength;
-}
-
 void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *bParams)
 {
     _dataMgr = dataMgr;
@@ -111,21 +87,16 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
     _ColorbarWidget->Update(dataMgr, paramsMgr, bParams);
 
     vector<long> grid = _bParams->GetGrid();
-    _xDimCombo->Update(1, 50, grid[0]);
-    _yDimCombo->Update(1, 50, grid[1]);
-    _zDimCombo->Update(1, 50, grid[2]);
+    _xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[0]);
+    _yDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[1]);
+    _zDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[2]);
 
     vector<double> minExt, maxExt;
     double         length = _bParams->GetLengthScale();
-    //_lengthCombo->Update(.1, 4000000, length);
-    AnimationParams *ap = (AnimationParams *)paramsMgr->GetParams("AnimationParams");
-    int              ts = ap->GetCurrentTimestep();
-    float            domainLength = CalculateDomainLength(ts);
-    _lengthCombo->Update(0, domainLength / 50.f, length);
+    _lengthCombo->Update(LENGTH_MIN, LENGTH_MAX, length);
 
     double thickness = _bParams->GetLineThickness();
-    //_thicknessCombo->Update(.1, 1.5, thickness);
-    _thicknessCombo->Update(.1, domainLength / 250000.f, thickness);
+    _thicknessCombo->Update(THICKNESS_MIN, THICKNESS_MAX, thickness);
 }
 
 void BarbAppearanceSubtab::xDimChanged(int i)

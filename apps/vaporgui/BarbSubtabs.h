@@ -40,12 +40,11 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 private slots:
-    void   xDimChanged(int i);
-    void   yDimChanged(int i);
-    void   zDimChanged(int i);
-    void   lengthChanged(double d);
-    void   thicknessChanged(double d);
-    double CalculateDomainLength(int ts);
+    void xDimChanged(int i);
+    void yDimChanged(int i);
+    void zDimChanged(int i);
+    void lengthChanged(double d);
+    void thicknessChanged(double d);
 
 private:
     void hideZDimWidgets();
