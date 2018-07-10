@@ -47,8 +47,6 @@
 #define Y 1
 #define Z 2
 
-#define DEBUG
-
 using namespace VAPoR;
 using namespace Wasp;
 
@@ -164,9 +162,8 @@ int BarbRenderer::_paintGL()
     // extents to use in rendering
     //
     vector<Grid *> varData;
-    //    float vectorLengthScale;
-    string hname;
-    string colorVar;
+    string         hname;
+    string         colorVar;
 
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     size_t      ts = bParams->GetCurrentTimestep();
@@ -185,12 +182,10 @@ int BarbRenderer::_paintGL()
 
     // Find box extents for ROI
     //
-    // if (varnames != _fieldVariables) {
-    cout << "......Calculating _vectorScaleFactor....." << endl;
-    //_vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
-    _setDefaultLengthAndThicknessScales(ts, varnames, bParams);
-    _fieldVariables = varnames;
-    //}
+    if (varnames != _fieldVariables) {
+        _setDefaultLengthAndThicknessScales(ts, varnames, bParams);
+        _fieldVariables = varnames;
+    }
 
     // Get grids for our vector variables
     //
@@ -229,8 +224,6 @@ int BarbRenderer::_paintGL()
         }
         varData[4] = sg;
     }
-
-    //	vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
 
     //
     // Perform OpenGL rendering of barbs
@@ -301,6 +294,27 @@ void BarbRenderer::_drawBarbHead(const float dirVec[3], const float vertexPoint[
     glEnd();
 }
 
+#ifdef DEBUG
+void BarbRenderer::_printBackDiameter(const float startVertex[18]) const
+{
+    float pointA[3] = {startVertex[0], startVertex[1], startVertex[2]};
+    float pointB[3] = {startVertex[3], startVertex[4], startVertex[5]};
+    float pointC[3] = {startVertex[6], startVertex[7], startVertex[8]};
+    float pointD[3] = {startVertex[9], startVertex[10], startVertex[11]};
+    float pointE[3] = {startVertex[12], startVertex[13], startVertex[14]};
+    float pointF[3] = {startVertex[15], startVertex[16], startVertex[17]};
+    cout << "   " << pointA[0] << "\t\t" << pointB[0] << "\t\t\t" << pointC[0];
+    cout << "\t\t" << pointD[0] << "\t\t" << pointE[0] << "\t\t" << pointF[0] << endl;
+
+    cout << "   " << pointA[1] << "\t\t" << pointB[1] << "\t\t" << pointC[1];
+    cout << "\t" << pointD[1] << "\t" << pointE[1] << "\t\t" << pointF[1] << endl;
+
+    cout << "   " << pointA[2] << "\t\t" << pointB[2] << "\t\t" << pointC[2];
+    cout << "\t\t" << pointD[2] << "\t\t" << pointE[2] << "\t\t" << pointF[2] << endl;
+    cout << "Back Diameter " << _calculateLength(pointA, pointD) << endl;
+}
+#endif
+
 // Issue OpenGL calls to draw a cylinder with orthogonal ends from
 // one point to another.  Then put an barb head on the end
 //
@@ -369,22 +383,13 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3])
         vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
     }
 
-#ifdef DEBUG2
-    float pointA[3] = {startVertex[0], startVertex[1], startVertex[2]};
-    float pointB[3] = {startVertex[3], startVertex[4], startVertex[5]};
-    float pointC[3] = {startVertex[6], startVertex[7], startVertex[8]};
-    float pointD[3] = {startVertex[9], startVertex[10], startVertex[11]};
-    float pointE[3] = {startVertex[12], startVertex[13], startVertex[14]};
-    float pointF[3] = {startVertex[15], startVertex[16], startVertex[17]};
-    // cout << "   " << pointA[0] << "\t\t" << pointB[0] << "\t\t\t" << pointC[0] << "\t\t" << pointD[0] << "\t\t" << pointE[0] << "\t\t" << pointF[0] << endl;
-    // cout << "   " << pointA[1] << "\t\t" << pointB[1] << "\t\t" << pointC[1] << "\t" << pointD[1] << "\t" << pointE[1] << "\t\t" << pointF[1] << endl;
-    // cout << "   " << pointA[2] << "\t\t" << pointB[2] << "\t\t" << pointC[2] << "\t\t" << pointD[2] << "\t\t" << pointE[2] << "\t\t" << pointF[2] << endl;
-    cout << "Back Diameter " << _calculateLength(pointA, pointD) << endl;
+#ifdef DEBUG
+    _printBackDiameter(startVertex);
 #endif
 
     _drawBackOfBarb(dirVec, startVertex);
 
-    // Is the following true?
+    // The variables are located as follows:
     //		- - - - >
     //	   ^       ^ ^
     // start    next end
@@ -501,16 +506,6 @@ int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, vect
     double rakeExts[6];    // rake extents in user coordinates
     _reFormatExtents(rakeExts);
 
-    // Barb thickness is .001*LineThickness*viewDiameter.
-    // float thickness = bParams->GetLineThickness();
-    // vector <string> varnames = bParams->GetFieldVariableNames();
-    // float thickness = 2*_calcDefaultScale(ts, varnames, bParams);
-    // float thickness = vectorLengthScale;
-
-    // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
-    // float rad = (float) (1000*thickness);
-    // float rad = (float) (thickness);
-
     _setUpLightingAndColor();
 
     int rakeGrid[3];
@@ -536,7 +531,6 @@ float BarbRenderer::getHeightOffset(Grid *heightVar, float xCoord, float yCoord,
 
 void BarbRenderer::_getDirection(float direction[3], vector<Grid *> variableData, float xCoord, float yCoord, float zCoord, bool &missing) const
 {
-    cout << "_getDirection " << xCoord << " " << yCoord << " " << zCoord << endl;
     for (int dim = 0; dim < 3; dim++) {
         direction[dim] = 0.f;
         if (variableData[dim]) {
@@ -552,10 +546,10 @@ bool BarbRenderer::_makeCLUT(float clut[1024]) const
 {
     BarbParams *bParams = (BarbParams *)GetActiveParams();
     string      colorVar = bParams->GetColorMapVariableName();
-    // float clut[256*4];
-    bool            doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
-    MapperFunction *tf = 0;
+    bool        doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
+
     if (doColorMapping) {
+        MapperFunction *tf = 0;
         tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
         assert(tf);
         tf->makeLut(clut);
@@ -593,9 +587,6 @@ void BarbRenderer::_makeStartAndEndPoint(float start[3], float end[3], float dir
 
     vector<double> scales = _getScales();
 
-    cout << _vectorScaleFactor << " " << scales[0] << " " << scales[1] << " " << scales[2] << " ";
-    cout << direction[0] << " " << direction[1] << " " << direction[2] << endl;
-
     end[0] = start[0] + scales[0] * direction[0] * length;
     end[1] = start[1] + scales[1] * direction[1] * length;
     end[2] = start[2] + scales[2] * direction[2] * length;
@@ -632,9 +623,6 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
                 float start[3] = {xCoord, yCoord, zCoord};
                 _makeStartAndEndPoint(start, end, direction);
 
-                // if (j==3)
-                // cout << "Barb Length: " << _calculateLength(start, end) << endl;
-
                 if (doColorMapping) {
                     float val = variableData[4]->GetValue(start[0], start[1], start[2]);
 
@@ -662,9 +650,6 @@ bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
     tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
     assert(tf);
 
-    //	float clut[256*4];
-    //	tf->makeLut(clut);
-
     float mappedColor[4] = {0., 0., 0., 0.};
     // Use the transfer function to map the data:
     int lutIndex = tf->mapFloatToIndex(val);
@@ -681,10 +666,6 @@ double BarbRenderer::_getMaxAtBarbLocations(VAPoR::Grid *grid) const
 
     vector<long> rakeGrid = p->GetGrid();
 
-    // float xStride = (rakeExts[3]-rakeExts[0]) / (rakeGrid[0]+1);
-    // float yStride = (rakeExts[4]-rakeExts[1]) / (rakeGrid[1]+1);
-    // float zStride = (rakeExts[5]-rakeExts[2]) / (rakeGrid[2]+1);
-
     float stride[3] = {0.f, 0.f, 0.f};
     for (int i = 0; i < 3; i++) { stride[i] = (maxExts[i] - minExts[i]) / (rakeGrid[i] + 1); }
 
@@ -698,8 +679,6 @@ double BarbRenderer::_getMaxAtBarbLocations(VAPoR::Grid *grid) const
                 xCoord = stride[X] * i + minExts[X];    // + stride[X]/2.0;
 
                 double value = grid->GetValue(xCoord, yCoord, zCoord);
-
-                cout << "_getMaxAtBarbLocations " << xCoord << " " << yCoord << " " << zCoord << endl;
 
                 value = abs(value);
                 if (value > maxValue && value < std::numeric_limits<double>::max() && value > std::numeric_limits<double>::lowest() && !isnan(value)) maxValue = value;
@@ -726,10 +705,6 @@ vector<double> BarbRenderer::_getMaximumValues(size_t ts, const std::vector<stri
             grid = _dataMgr->GetVariable(ts, varName, refLevel, compLevel);
 
             maxVarVals[i] = _getMaxAtBarbLocations(grid);
-
-            //			vector <double> minmax;
-            //			_dataMgr->GetDataRange(0,varnames[i], 0, 0, minmax);
-            //			maxvarvals.push_back(Max(abs(minmax[0]),abs(minmax[1])));
         }
     }
 

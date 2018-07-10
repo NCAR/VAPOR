@@ -117,6 +117,10 @@ private:
     //! \param[in] const float endPoint[3] ending position of barb
     void drawBarb(const float startPoint[3], const float endPoint[3]);
 
+#ifdef DEBUG
+    _printBackDiameter(const float startVertex[18]) const;
+#endif
+
     struct {
         vector<string> fieldVarNames;
         string         heightVarName;
