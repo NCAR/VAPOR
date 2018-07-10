@@ -24,7 +24,7 @@ class PARAMS_API BarbParams : public RenderParams {
     //! \retval double scale factor
     //
     double GetLengthScale() const {
-        return GetValueDouble(_lengthScaleTag, .2);
+        return GetValueDouble(_lengthScaleTag, .1);
     }
 
     void SetLengthScale(double val) {
@@ -42,7 +42,7 @@ class PARAMS_API BarbParams : public RenderParams {
     //! E.g. the grid on which barbs are placed.
     //! \retval vector<long> grid
     const vector<long> GetGrid() const {
-        const vector<long> defaultGrid(3, 1);
+        const vector<long> defaultGrid(3, 10);
         return (GetValueLongVec(_gridTag, defaultGrid));
     }
 
