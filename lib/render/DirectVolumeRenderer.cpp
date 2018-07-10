@@ -75,6 +75,7 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
     topFace = nullptr;
     bottomFace = nullptr;
     field = nullptr;
+    missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
         dims[i] = 0;
         boxMin[i] = 0;
@@ -112,6 +113,10 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
     if (field) {
         delete[] field;
         field = nullptr;
+    }
+    if (missingValueMask) {
+        delete[] missingValueMask;
+        missingValueMask = nullptr;
     }
 }
 
@@ -217,26 +222,49 @@ bool DirectVolumeRenderer::UserCoordinates::Fill(const DVRParams *params, DataMg
                 bottomFace[idx++] = (float)buf[2];
             }
 
-        // Save the field values
+        // Save the field value and missing value
         if (field) delete[] field;
-        size_t fieldLen = dims[0] * dims[1] * dims[2] * 4;
-        field = new float[fieldLen];
-        idx = 0;
-        // Iterator for field value
-        StructuredGrid::ConstIterator valItr = grid->cbegin();
-        float                         missingVal = grid->GetMissingValue();
-        float                         valueRange[2];
+        size_t numOfVertices = dims[0] * dims[1] * dims[2];
+        field = new float[numOfVertices * 4];
+
+        if (missingValueMask) delete[] missingValueMask;
+        missingValueMask = new unsigned char[numOfVertices];
+
+        StructuredGrid::ConstIterator valItr = grid->cbegin();               // Iterator for field values
+        StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();    // Iterator for coordinates
+
+        float valueRange[2];
         grid->GetRange(valueRange);
-        // Iterator for data point coordinates
-        StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
-        float                         boxExtents[] = {1.0f / (boxMax[0] - boxMin[0]), 1.0f / (boxMax[1] - boxMin[1]), 1.0f / (boxMax[2] - boxMin[2])};
-        /*while( idx < fieldLen )
-        {
-            field[ idx++ ] = ((float)((*coordItr)[0]) - boxMin[0]) * boxExtents[0]; // normalized X
-            field[ idx++ ] = ((float)((*coordItr)[1]) - boxMin[1]) * boxExtents[1]; // normalized Y
-            field[ idx++ ] = ((float)((*coordItr)[2]) - boxMin[2]) * boxExtents[2]; // normalized Z
-            field[ idx++ ] = j
-        }*/
+        float valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
+        float boxExtent1o[] = {1.0f / (boxMax[0] - boxMin[0]), 1.0f / (boxMax[1] - boxMin[1]), 1.0f / (boxMax[2] - boxMin[2])};
+
+        if (grid->HasMissingData()) {
+            float missingValue = grid->GetMissingValue();
+            float value;
+            for (size_t i = 0; i < numOfVertices; i++) {
+                field[i * 4] = ((float)((*coordItr).at(0)) - boxMin[0]) * boxExtent1o[0];        // normalized X
+                field[i * 4 + 1] = ((float)((*coordItr).at(1)) - boxMin[1]) * boxExtent1o[1];    // normalized Y
+                field[i * 4 + 2] = ((float)((*coordItr).at(2)) - boxMin[2]) * boxExtent1o[2];    // normalized Z
+                value = (float)(*valItr);
+                if (value == missingValue) {
+                    field[i * 4 + 3] = 0.0;
+                    missingValueMask[i] = 0;
+                } else {
+                    field[i * 4 + 3] = (value - valueRange[0]) * valueRange1o;
+                    missingValueMask[i] = 255;
+                }
+                ++coordItr;
+                ++valItr;
+            }
+        } else {
+            for (size_t i = 0; i < numOfVertices; i++) {
+                field[i * 4] = ((float)((*coordItr).at(0)) - boxMin[0]) * boxExtent1o[0];        // normalized X
+                field[i * 4 + 1] = ((float)((*coordItr).at(1)) - boxMin[1]) * boxExtent1o[1];    // normalized Y
+                field[i * 4 + 2] = ((float)((*coordItr).at(2)) - boxMin[2]) * boxExtent1o[2];    // normalized Z
+                field[i * 4 + 3] = ((float)(*valItr) - valueRange[0]) * valueRange1o;
+                missingValueMask[i] = 255;
+            }
+        }
     }
 
     delete grid;
