@@ -106,10 +106,9 @@ void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 void Grid::GetRange(float range[2]) const
 {
     float               missingValue = GetMissingValue();
-    Grid::ConstIterator itr;
     Grid::ConstIterator enditr = this->cend();
-    range[0] = range[1] = *itr;
-    for (itr = this->cbegin(); itr != enditr; ++itr) {
+    range[0] = range[1] = *enditr;
+    for (Grid::ConstIterator itr = this->cbegin(); itr != enditr; ++itr) {
         if (*itr < range[0] && *itr != missingValue)
             range[0] = *itr;
         else if (*itr > range[1] && *itr != missingValue)
