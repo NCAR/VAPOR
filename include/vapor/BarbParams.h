@@ -25,7 +25,7 @@ public:
  //! \retval double scale factor
  //  
  double GetLengthScale() const {
- 	return GetValueDouble(_lengthScaleTag, 1.0);
+ 	return GetValueDouble(_lengthScaleTag, .2);
  }
 
  void SetLengthScale(double val) {
@@ -75,7 +75,7 @@ public:
  //! Determine line thickness in voxels
  //! \retval double line thickness
  double GetLineThickness() const {
- 	return (GetValueDouble(_thicknessScaleTag,1.0));
+ 	return (GetValueDouble(_thicknessScaleTag, .2));
  }
 
  void SetLineThickness(double val) {
