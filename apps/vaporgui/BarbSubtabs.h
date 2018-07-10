@@ -57,7 +57,6 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
     void zDimChanged(int i);
     void lengthChanged(double d);
     void thicknessChanged(double d);
-    double CalculateDomainLength(int ts);
 
   private:
     void hideZDimWidgets();
