@@ -66,12 +66,12 @@ private:
     std::vector<float> _colorMap;
 
     // OpenGL stuff
-    GLuint _volumeTextureUnit;              // GL_TEXTURE0
-    GLuint _colormapTextureUnit;            // GL_TEXTURE1
-    GLuint _volumeCoordinateTextureUnit;    // GL_TEXTURE3
+    GLuint _backFaceTextureId;        // GL_TEXTURE0
+    GLuint _frontFaceTextureId;       // GL_TEXTURE1
+    GLuint _volumeTextureId;          // GL_TEXTURE2
+    GLuint _missingValueTextureId;    // GL_TEXTURE3
+    GLuint _colormapTextureId;        // GL_TEXTURE4
     GLuint _frameBufferId;
-    GLuint _backFaceTextureId;
-    GLuint _frontFaceTextureId;
     GLuint _depthBufferId;
     GLuint _vertexArrayId;
     GLuint _1stPassShaderId;

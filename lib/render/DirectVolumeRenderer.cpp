@@ -23,12 +23,12 @@ static RendererRegistrar<DirectVolumeRenderer> registrar(DirectVolumeRenderer::G
 DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, DVRParams::GetClassType(), DirectVolumeRenderer::GetClassType(), instName, dataMgr)
 {
-    _volumeTextureUnit = 0;
-    _colormapTextureUnit = 0;
-    _volumeCoordinateTextureUnit = 0;
-    _frameBufferId = 0;
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
+    _volumeTextureId = 0;
+    _missingValueTextureId = 0;
+    _colormapTextureId = 0;
+    _frameBufferId = 0;
     _depthBufferId = 0;
 
     _vertexArrayId = 0;
@@ -39,6 +39,30 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
 
     _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
     _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
+}
+
+// Destructor
+DirectVolumeRenderer::~DirectVolumeRenderer()
+{
+    /* A few useful files from VAPOR2:
+         DVRRayCaster.h/cpp
+         DVRTexture3d.h/cpp
+         TextureBrick.h/cpp
+         DVRShader.h/cpp
+    */
+    if (_backFaceTextureId) glDeleteTextures(1, &_backFaceTextureId);
+    if (_frontFaceTextureId) glDeleteTextures(1, &_frontFaceTextureId);
+    if (_volumeTextureId) glDeleteTextures(1, &_volumeTextureId);
+    if (_missingValueTextureId) glDeleteTextures(1, &_missingValueTextureId);
+    if (_colormapTextureId) glDeleteTextures(1, &_colormapTextureId);
+
+    if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
+    if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
+    if (_2ndPassShaderId) glDeleteProgram(_2ndPassShaderId);
+    if (_3rdPassShaderId) glDeleteProgram(_3rdPassShaderId);
+    if (_quadShaderId) glDeleteProgram(_quadShaderId);
+
+    // Need to look up what resources to destroy in OpenGL.
 }
 
 // Constructor
@@ -103,19 +127,18 @@ bool DirectVolumeRenderer::UserCoordinates::Fill(const DVRParams *params, DataMg
 {
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
-    assert(extMin.size() == 3);
-    assert(extMax.size() == 3);
-    for (int i = 0; i < 3; i++) {
-        boxMin[i] = (float)extMin[i];
-        boxMax[i] = (float)extMax[i];
-    }
-
-    VAPoR::StructuredGrid *grid = dynamic_cast<VAPoR::StructuredGrid *>(
-        dataMgr->GetVariable(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), extMin, extMax));
+    StructuredGrid *grid =
+        dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), extMin, extMax));
     if (grid == nullptr) {
         std::cerr << "UserCoordinates::Fill() isn't on a StructuredGrid" << std::endl;
         return false;
     } else {
+        grid->GetUserExtents(extMin, extMax);
+        for (int i = 0; i < 3; i++) {
+            boxMin[i] = (float)extMin[i];
+            boxMax[i] = (float)extMax[i];
+        }
+
         std::vector<size_t> gridDims = grid->GetDimensions();
         dims[0] = gridDims[0];
         dims[1] = gridDims[1];
@@ -195,34 +218,29 @@ bool DirectVolumeRenderer::UserCoordinates::Fill(const DVRParams *params, DataMg
             }
 
         // Save the field values
-        // if( field )
-        //    delete[] field;
+        if (field) delete[] field;
+        size_t fieldLen = dims[0] * dims[1] * dims[2] * 4;
+        field = new float[fieldLen];
+        idx = 0;
+        // Iterator for field value
+        StructuredGrid::ConstIterator valItr = grid->cbegin();
+        float                         missingVal = grid->GetMissingValue();
+        float                         valueRange[2];
+        grid->GetRange(valueRange);
+        // Iterator for data point coordinates
+        StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
+        float                         boxExtents[] = {1.0f / (boxMax[0] - boxMin[0]), 1.0f / (boxMax[1] - boxMin[1]), 1.0f / (boxMax[2] - boxMin[2])};
+        /*while( idx < fieldLen )
+        {
+            field[ idx++ ] = ((float)((*coordItr)[0]) - boxMin[0]) * boxExtents[0]; // normalized X
+            field[ idx++ ] = ((float)((*coordItr)[1]) - boxMin[1]) * boxExtents[1]; // normalized Y
+            field[ idx++ ] = ((float)((*coordItr)[2]) - boxMin[2]) * boxExtents[2]; // normalized Z
+            field[ idx++ ] = j
+        }*/
     }
 
     delete grid;
     return true;
-}
-
-// Destructor
-DirectVolumeRenderer::~DirectVolumeRenderer()
-{
-    /* A few useful files from VAPOR2:
-         DVRRayCaster.h/cpp
-         DVRTexture3d.h/cpp
-         TextureBrick.h/cpp
-         DVRShader.h/cpp
-    */
-    if (_volumeTextureUnit) glDeleteTextures(1, &_volumeTextureUnit);
-    if (_colormapTextureUnit) glDeleteTextures(1, &_colormapTextureUnit);
-    if (_volumeCoordinateTextureUnit) glDeleteTextures(1, &_volumeCoordinateTextureUnit);
-
-    if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
-    if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
-    if (_2ndPassShaderId) glDeleteProgram(_2ndPassShaderId);
-    if (_3rdPassShaderId) glDeleteProgram(_3rdPassShaderId);
-    if (_quadShaderId) glDeleteProgram(_quadShaderId);
-
-    // Need to look up what resources to destroy in OpenGL.
 }
 
 int DirectVolumeRenderer::_initializeGL()
