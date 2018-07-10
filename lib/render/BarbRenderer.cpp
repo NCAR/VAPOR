@@ -750,11 +750,13 @@ double BarbRenderer::_getMaxAtBarbLocations(VAPoR::Grid *grid) const {
                 xCoord = stride[X] * i + minExts[X]; // + stride[X]/2.0;
 
                 double value = grid->GetValue(xCoord, yCoord, zCoord);
+                double missingValue = grid->GetMissingValue();
 
                 value = abs(value);
                 if (value > maxValue &&
                     value < std::numeric_limits<double>::max() &&
                     value > std::numeric_limits<double>::lowest() &&
+                    value != missingValue &&
                     !isnan(value))
                     maxValue = value;
             }
