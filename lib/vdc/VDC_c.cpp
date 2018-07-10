@@ -84,6 +84,7 @@ string _strArrayToString(const char **a, size_t count);
 vector<size_t> _size_tArrayToSize_tVector(const size_t *a, size_t count);
 string _size_tVectorToString(const vector<size_t> v);
 string _size_tArrayToString(const size_t *a, size_t count);
+static string valueCArrayToString(const void *a, int l, VDC_XType type) __attribute__((unused));
 
 // ########################
 // #    VDC::Dimension    #
@@ -478,6 +479,7 @@ int VDC_PutAtt(VDC *p, const char *varname, const char *attname, VDC_XType xtype
 	}
 }
 
+#ifdef VDC_DEBUG
 static string valueCArrayToString(const void *a, int l, VDC_XType type) {
 	string s;
 	switch (type) {
@@ -508,6 +510,7 @@ static string valueCArrayToString(const void *a, int l, VDC_XType type) {
 	}
 	return s + string("}");
 }
+#endif
 
 int VDC_PutAtt_double(VDC *p, const char *varname, const char *attname, VDC_XType xtype, const double *values, size_t count)
 {
