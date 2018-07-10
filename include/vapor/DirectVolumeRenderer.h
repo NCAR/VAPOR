@@ -59,8 +59,9 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
         // data field of this volume: each data point has 4 components:
         //   the X, Y, Z user coordinates, and the actual field value.
         float *field;
-        size_t dims[3];             // num. of samples along each axis
-        float boxMin[3], boxMax[3]; // bounding box of this volume
+        unsigned char *missingValueMask; // 0 == is missing value; 255 == not missing value
+        size_t dims[3];                  // num. of samples along each axis
+        float boxMin[3], boxMax[3];      // bounding box of this volume
 
         /* Member functions */
         UserCoordinates();
