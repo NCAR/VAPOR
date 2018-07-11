@@ -109,9 +109,14 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     void _drawQuad();
 
     //
-    // Framebuffer initializations
+    // Initialization for 1) framebuffer and 2) textures
     //
-    void _initializeFramebuffer();
+    void _initializeFramebufferTextures();
+
+    //
+    // Upload texture data to GPU
+    //
+    void _uploadTextures();
 
     //
     // Simple shader compilation
