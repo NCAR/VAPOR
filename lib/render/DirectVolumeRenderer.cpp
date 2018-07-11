@@ -159,6 +159,7 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
         dims[1] = gridDims[1];
         dims[2] = gridDims[2];
         double buf[3];
+        grid->GetRange(valueRange);
 
         // Save front face user coordinates ( z == dims[2] - 1 )
         if (frontFace) delete[] frontFace;
@@ -243,8 +244,7 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
         StructuredGrid::ConstIterator valItr = grid->cbegin();               // Iterator for field values
         StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();    // Iterator for coordinates
 
-        float valueRange[2];
-        grid->GetRange(valueRange);
+        // float valueRange[2];
         float valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
         float boxExtent1o[] = {1.0f / (boxMax[0] - boxMin[0]), 1.0f / (boxMax[1] - boxMin[1]), 1.0f / (boxMax[2] - boxMin[2])};
 
@@ -524,8 +524,13 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
     } else                                      // perform ray-casting
     {
         glUseProgram(_3rdPassShaderId);
-        GLuint MVPLoc = glGetUniformLocation(_2ndPassShaderId, "MVP");
+        GLuint MVPLoc = glGetUniformLocation(_3rdPassShaderId, "MVP");
         glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
+
+        GLfloat ModelView[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
+        GLuint ModelViewLoc = glGetUniformLocation(_3rdPassShaderId, "ModelView");
+        glUniformMatrix4fv(ModelViewLoc, 1, GL_FALSE, ModelView);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
