@@ -89,13 +89,8 @@ private:
 
     //
     // Draw faces using triangle strips
-    // Used in the 1st pass volume rendering
     //
-    void _drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                          const float * boxmin,    // Three elements: minimal X, Y, Z of this volume.
-                          const float * boxmax,    // Three elements: maximal X, Y, Z of this volume.
-                          const size_t *dims,      // num. of grid points in X, Y, Z for 6 faces.
-                          int           whichPass);          // 1st, 2nd, or 3rd pass?
+    void _drawVolumeFaces(int whichPass);
 
     //
     // Draw a quad that helps examine the texture.

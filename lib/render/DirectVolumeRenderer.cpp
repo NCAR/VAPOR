@@ -148,18 +148,19 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
         std::cerr << "UserCoordinates::updateCoordinates() isn't on a StructuredGrid" << std::endl;
         return false;
     } else {
+        /* update member variables */
         grid->GetUserExtents(extMin, extMax);
         for (int i = 0; i < 3; i++) {
             boxMin[i] = (float)extMin[i];
             boxMax[i] = (float)extMax[i];
         }
-
         std::vector<size_t> gridDims = grid->GetDimensions();
         dims[0] = gridDims[0];
         dims[1] = gridDims[1];
         dims[2] = gridDims[2];
-        double buf[3];
         grid->GetRange(valueRange);
+
+        double buf[3];
 
         // Save front face user coordinates ( z == dims[2] - 1 )
         if (frontFace) delete[] frontFace;
@@ -244,7 +245,6 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
         StructuredGrid::ConstIterator valItr = grid->cbegin();               // Iterator for field values
         StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();    // Iterator for coordinates
 
-        // float valueRange[2];
         float valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
         float boxExtent1o[] = {1.0f / (boxMax[0] - boxMin[0]), 1.0f / (boxMax[1] - boxMin[1]), 1.0f / (boxMax[2] - boxMin[2])};
 
@@ -344,22 +344,15 @@ int DirectVolumeRenderer::_paintGL()
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     glBindTexture(GL_TEXTURE_1D, 0);
 
-    /* 1st pass, render back facing polygons to texture0 of the framebuffer */
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
-    _drawVolumeFaces(_userCoordinates.frontFace, _userCoordinates.backFace, _userCoordinates.rightFace, _userCoordinates.leftFace, _userCoordinates.topFace, _userCoordinates.bottomFace,
-                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims, 1);    // The 1st pass!!!
-
-    /* 2nd pass, render front facing polygons to texture1 of the framebuffer */
-    _drawVolumeFaces(_userCoordinates.frontFace, _userCoordinates.backFace, _userCoordinates.rightFace, _userCoordinates.leftFace, _userCoordinates.topFace, _userCoordinates.bottomFace,
-                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims, 2);    // The 2nd pass!!!
+    _drawVolumeFaces(1);    // 1st pass, render back facing polygons to texture0 of the framebuffer
+    _drawVolumeFaces(2);    // 2nd pass, render front facing polygons to texture1 of the framebuffer
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
-    /* 3rd pass, perform ray casting */
-    _drawVolumeFaces(_userCoordinates.frontFace, _userCoordinates.backFace, _userCoordinates.rightFace, _userCoordinates.leftFace, _userCoordinates.topFace, _userCoordinates.bottomFace,
-                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims, 3);    // The 3rd pass!!!
+    _drawVolumeFaces(3);    // 3rd pass, perform ray casting
 
 #if 0
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
@@ -468,14 +461,20 @@ void DirectVolumeRenderer::_printGLInfo() const
     std::cout << "    **** System Info ****" << std::endl;
 }
 
-void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float *backFace, const float *rightFace, const float *leftFace, const float *topFace, const float *bottomFace,
-                                            const float *boxMin, const float *boxMax, const size_t *dims, int whichPass)
+void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
 {
     assert(whichPass == 1 || whichPass == 2 || whichPass == 3);
 
-    size_t       bx = dims[0];
-    size_t       by = dims[1];
-    size_t       bz = dims[2];
+    const float *frontFace = _userCoordinates.frontFace;
+    const float *backFace = _userCoordinates.backFace;
+    const float *rightFace = _userCoordinates.rightFace;
+    const float *leftFace = _userCoordinates.leftFace;
+    const float *topFace = _userCoordinates.topFace;
+    const float *bottomFace = _userCoordinates.bottomFace;
+
+    size_t       bx = _userCoordinates.dims[0];
+    size_t       by = _userCoordinates.dims[1];
+    size_t       bz = _userCoordinates.dims[2];
     const float *ptr = nullptr;
 
     size_t idx;
@@ -491,9 +490,9 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         GLuint MVPLoc = glGetUniformLocation(_1stPassShaderId, "MVP");
         glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
         GLuint boxMinLoc = glGetUniformLocation(_1stPassShaderId, "boxMin");
-        glUniform3fv(boxMinLoc, 1, boxMin);
+        glUniform3fv(boxMinLoc, 1, _userCoordinates.boxMin);
         GLuint boxMaxLoc = glGetUniformLocation(_1stPassShaderId, "boxMax");
-        glUniform3fv(boxMaxLoc, 1, boxMax);
+        glUniform3fv(boxMaxLoc, 1, _userCoordinates.boxMax);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -509,9 +508,9 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         GLuint MVPLoc = glGetUniformLocation(_2ndPassShaderId, "MVP");
         glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
         GLuint boxMinLoc = glGetUniformLocation(_2ndPassShaderId, "boxMin");
-        glUniform3fv(boxMinLoc, 1, boxMin);
+        glUniform3fv(boxMinLoc, 1, _userCoordinates.boxMin);
         GLuint boxMaxLoc = glGetUniformLocation(_2ndPassShaderId, "boxMax");
-        glUniform3fv(boxMaxLoc, 1, boxMax);
+        glUniform3fv(boxMaxLoc, 1, _userCoordinates.boxMax);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
