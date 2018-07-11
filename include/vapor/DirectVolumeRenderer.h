@@ -78,6 +78,7 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     };
     UserCoordinates _userCoordinates;
     std::vector<float> _colorMap;
+    float _colorMapRange[2];
 
     // OpenGL stuff
     GLuint _backFaceTextureId;     // GL_TEXTURE0
