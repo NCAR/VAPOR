@@ -4,6 +4,8 @@ in vec4 positionClip;   // vertex position in the clip space
 
 uniform sampler2D backFaceTexture;
 uniform sampler2D frontFaceTexture;
+uniform sampler3D volumeTexture;
+uniform sampler3D missingValueMaskTexture;
 
 layout(location = 0) out vec4 color;
 
@@ -20,6 +22,8 @@ void main(void)
     if( length( rayDirTexture ) == 0.0f )
         discard;
 
-    color   = vec4( length(rayDirTexture)/1.732f );
-    color.a = clamp( color.a * 2.0f, 0.0f, 1.0f );
+    //color   = vec4( length(rayDirTexture)/1.732f );
+    //color.a = clamp( color.a * 2.0f, 0.0f, 1.0f );
+
+    color     = texture( missingValueMaskTexture, vec3(positionUV, 0.5) );
 }
