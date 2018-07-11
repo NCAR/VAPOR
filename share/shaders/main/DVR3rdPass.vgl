@@ -1,15 +1,18 @@
-#version 330 core
+#version 410 core
 
 // Input vertex positions, model coordinate
 layout(location = 0) in vec3 vertexPosition;
 
 uniform mat4 MVP;
+uniform mat4 ModelView;
 
 out vec4 positionClip;   // vertex position in the clip space
+out vec4 positionEye;    // vertex position in the eye space
 
 void main(void)
 {
-    gl_Position     = MVP * vec4( vertexPosition, 1.0f );
+    positionClip    = MVP * vec4( vertexPosition, 1.0f );
+    positionEye     = ModelView * vec4( vertexPosition, 1.0f );
 
-    positionClip    = gl_Position;
+    gl_Position     = positionClip;
 }
