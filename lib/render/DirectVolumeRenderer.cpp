@@ -27,7 +27,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
     _missingValueTextureId = 0;
-    _colormapTextureId = 0;
+    _colorMapTextureId = 0;
     _frameBufferId = 0;
     _depthBufferId = 0;
 
@@ -54,7 +54,7 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_frontFaceTextureId) glDeleteTextures(1, &_frontFaceTextureId);
     if (_volumeTextureId) glDeleteTextures(1, &_volumeTextureId);
     if (_missingValueTextureId) glDeleteTextures(1, &_missingValueTextureId);
-    if (_colormapTextureId) glDeleteTextures(1, &_colormapTextureId);
+    if (_colorMapTextureId) glDeleteTextures(1, &_colorMapTextureId);
 
     if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
     if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
@@ -81,6 +81,11 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
         boxMin[i] = 0;
         boxMax[i] = 0;
     }
+
+    myCurrentTimeStep = 0;
+    myVariableName = "";
+    myRefinementLevel = -1;
+    myCompressionLevel = -1;
 }
 
 // Destructor
@@ -120,22 +125,27 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
     }
 }
 
-bool DirectVolumeRenderer::UserCoordinates::isFilled()
+bool DirectVolumeRenderer::UserCoordinates::isUpToDate(const DVRParams *params)
 {
-    if (frontFace == nullptr || backFace == nullptr || rightFace == nullptr || leftFace == nullptr || topFace == nullptr || bottomFace == nullptr || field == nullptr || missingValueMask == nullptr)
+    if (myCurrentTimeStep != params->GetCurrentTimestep() || myVariableName != params->GetVariableName() || myRefinementLevel != params->GetRefinementLevel()
+        || myCompressionLevel != params->GetCompressionLevel()) {
         return false;
-    else
+    } else
         return true;
 }
 
-bool DirectVolumeRenderer::UserCoordinates::Fill(const DVRParams *params, DataMgr *dataMgr)
+bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *params, DataMgr *dataMgr)
 {
+    myCurrentTimeStep = params->GetCurrentTimestep();
+    myVariableName = params->GetVariableName();
+    myRefinementLevel = params->GetRefinementLevel();
+    myCompressionLevel = params->GetCompressionLevel();
+
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
-    StructuredGrid *grid =
-        dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), extMin, extMax));
+    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
     if (grid == nullptr) {
-        std::cerr << "UserCoordinates::Fill() isn't on a StructuredGrid" << std::endl;
+        std::cerr << "UserCoordinates::updateCoordinates() isn't on a StructuredGrid" << std::endl;
         return false;
     } else {
         grid->GetUserExtents(extMin, extMax);
@@ -317,8 +327,8 @@ int DirectVolumeRenderer::_paintGL()
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
 
     /* Gather user coordinates */
-    if (!_userCoordinates.isFilled()) {
-        _userCoordinates.Fill(params, _dataMgr);
+    if (!_userCoordinates.isUpToDate(params)) {
+        _userCoordinates.updateCoordinates(params, _dataMgr);
 
         /* Also attach the new data to 3D textures: _volumeTextureId, _missingValueTextureId */
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
@@ -330,6 +340,9 @@ int DirectVolumeRenderer::_paintGL()
 
     /* Gather the color map */
     params->GetMapperFunc()->makeLut(_colorMap);
+    glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
+    glBindTexture(GL_TEXTURE_1D, 0);
 
     /* 1st pass, render back facing polygons to texture0 of the framebuffer */
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
@@ -375,8 +388,8 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure the back-facing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Generate front-facing texture */
     glGenTextures(1, &_frontFaceTextureId);
@@ -386,8 +399,8 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure the front-faceing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Depth buffer */
     glGenRenderbuffers(1, &_depthBufferId);
@@ -413,9 +426,9 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure _volumeTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 3D texture: _missingValueTextureId */
     glGenTextures(1, &_missingValueTextureId);
@@ -424,11 +437,21 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure _missingValueTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    /* Generate and configure 1D texture: _colorMapTextureId */
+    glGenTextures(1, &_colorMapTextureId);
+    glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
+
+    /* Configure _colorMapTextureId */
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /* Bind the default textures */
+    glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_3D, 0);
 }
@@ -529,6 +552,11 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
         GLuint missingValueTextureLoc = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
         glUniform1i(missingValueTextureLoc, 3);
+
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
+        GLuint colorMapTextureLoc = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
+        glUniform1i(colorMapTextureLoc, 4);
     }
 
     glEnableVertexAttribArray(0);

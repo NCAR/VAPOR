@@ -50,18 +50,23 @@ private:
         float *frontFace, *backFace;    // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;    // user coordinates, size == by * bz * 3
         float *topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
-        // data field of this volume: each data point has 4 components:
-        //   the X, Y, Z user coordinates, and the actual field value.
+        /* data field of this volume: each data point has 4 components:
+           the X, Y, Z user coordinates, and the actual field value.   */
         float *        field;
         unsigned char *missingValueMask;        // 0 == is missing value; 255 == not missing value
         size_t         dims[3];                 // num. of samples along each axis
         float          boxMin[3], boxMax[3];    // bounding box of this volume
 
+        /* Also keep the current meta data */
+        size_t      myCurrentTimeStep;
+        std::string myVariableName;
+        int         myRefinementLevel, myCompressionLevel;
+
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        bool isFilled();    // are values properly filled?
-        bool Fill(const DVRParams *params, DataMgr *dataMgr);
+        bool isUpToDate(const DVRParams *params);
+        bool updateCoordinates(const DVRParams *params, DataMgr *dataMgr);
     };
     UserCoordinates    _userCoordinates;
     std::vector<float> _colorMap;
@@ -71,7 +76,7 @@ private:
     GLuint _frontFaceTextureId;       // GL_TEXTURE1
     GLuint _volumeTextureId;          // GL_TEXTURE2
     GLuint _missingValueTextureId;    // GL_TEXTURE3
-    GLuint _colormapTextureId;        // GL_TEXTURE4
+    GLuint _colorMapTextureId;        // GL_TEXTURE4
     GLuint _frameBufferId;
     GLuint _depthBufferId;
     GLuint _vertexArrayId;
