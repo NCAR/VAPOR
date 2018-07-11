@@ -423,10 +423,13 @@ int DirectVolumeRenderer::_paintGL()
 
     /* Gather the color map */
     params->GetMapperFunc()->makeLut( _colorMap );
+    _colorMapRange[0] = params->GetMapperFunc()->getMinMapValue();
+    _colorMapRange[1] = params->GetMapperFunc()->getMaxMapValue();
     glBindTexture( GL_TEXTURE_1D, _colorMapTextureId );
     glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
     glBindTexture( GL_TEXTURE_1D, 0 );
+
 
     glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
     glViewport( 0, 0, viewport[2], viewport[3] );
@@ -565,8 +568,8 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
     size_t bx = _userCoordinates.dims[0];
     size_t by = _userCoordinates.dims[1];
     size_t bz = _userCoordinates.dims[2];
-    const float* ptr = nullptr;
 
+    const float* ptr = nullptr;
     size_t idx;
     size_t numOfVertices;
 
@@ -612,8 +615,9 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv( GL_COLOR, 1, black );  // clear GL_COLOR_ATTACHMENT1
     }
-    else                        // perform ray-casting
+    else
     { 
+        // Pass in uniforms
         glUseProgram( _3rdPassShaderId );
         GLuint MVPLoc = glGetUniformLocation( _3rdPassShaderId, "MVP" );
         glUniformMatrix4fv( MVPLoc, 1, GL_FALSE, MVP );
@@ -623,10 +627,11 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
         GLuint ModelViewLoc = glGetUniformLocation( _3rdPassShaderId, "ModelView" );
         glUniformMatrix4fv( ModelViewLoc, 1, GL_FALSE, ModelView );
 
-        glEnable( GL_CULL_FACE );
-        glCullFace( GL_BACK );
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask( GL_FALSE );
+        GLuint valueRangeLoc = glGetUniformLocation( _3rdPassShaderId, "valueRange" );
+        glUniform2fv( valueRangeLoc, 1, _userCoordinates.valueRange );
+
+        GLuint colorMapRangeLoc = glGetUniformLocation( _3rdPassShaderId, "colorMapRange" );
+        glUniform2fv( colorMapRangeLoc, 1, _colorMapRange );
 
         // Pass in textures
         glActiveTexture( GL_TEXTURE0 );
@@ -653,6 +658,11 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
         glBindTexture( GL_TEXTURE_1D, _colorMapTextureId );
         GLuint colorMapTextureLoc = glGetUniformLocation( _3rdPassShaderId, "colorMapTexture" );
         glUniform1i( colorMapTextureLoc, 4 );
+
+        glEnable( GL_CULL_FACE );
+        glCullFace( GL_BACK );
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask( GL_FALSE );
     }
 
     glEnableVertexAttribArray( 0 );     
