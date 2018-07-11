@@ -122,7 +122,7 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
 
 bool DirectVolumeRenderer::UserCoordinates::isFilled()
 {
-    if (frontFace == nullptr || backFace == nullptr || rightFace == nullptr || leftFace == nullptr || topFace == nullptr || bottomFace == nullptr || field == nullptr)
+    if (frontFace == nullptr || backFace == nullptr || rightFace == nullptr || leftFace == nullptr || topFace == nullptr || bottomFace == nullptr || field == nullptr || missingValueMask == nullptr)
         return false;
     else
         return true;
@@ -256,14 +256,17 @@ bool DirectVolumeRenderer::UserCoordinates::Fill(const DVRParams *params, DataMg
                 ++coordItr;
                 ++valItr;
             }
-        } else {
+        } else    // No missing value!
+        {
             for (size_t i = 0; i < numOfVertices; i++) {
                 field[i * 4] = ((float)((*coordItr).at(0)) - boxMin[0]) * boxExtent1o[0];        // normalized X
                 field[i * 4 + 1] = ((float)((*coordItr).at(1)) - boxMin[1]) * boxExtent1o[1];    // normalized Y
                 field[i * 4 + 2] = ((float)((*coordItr).at(2)) - boxMin[2]) * boxExtent1o[2];    // normalized Z
                 field[i * 4 + 3] = ((float)(*valItr) - valueRange[0]) * valueRange1o;
-                missingValueMask[i] = 255;
+                ++coordItr;
+                ++valItr;
             }
+            std::memset(missingValueMask, 255, numOfVertices);
         }
     }
 
@@ -300,45 +303,50 @@ int DirectVolumeRenderer::_initializeGL()
     glGenVertexArrays(1, &_vertexArrayId);
     glBindVertexArray(_vertexArrayId);
 
-    _initializeFramebuffer();
-
     _printGLInfo();
+
+    _initializeFramebufferTextures();
 
     return 0;
 }
 
 int DirectVolumeRenderer::_paintGL()
 {
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
 
     /* Gather user coordinates */
-    if (!_userCoordinates.isFilled()) _userCoordinates.Fill(params, _dataMgr);
+    if (!_userCoordinates.isFilled()) {
+        _userCoordinates.Fill(params, _dataMgr);
+
+        /* Also attach the new data to 3D textures: _volumeTextureId, _missingValueTextureId */
+        glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGBA, GL_FLOAT, _userCoordinates.field);
+        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+        glBindTexture(GL_TEXTURE_3D, 0);
+    }
 
     /* Gather the color map */
     params->GetMapperFunc()->makeLut(_colorMap);
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
 
     /* 1st pass, render back facing polygons to texture0 of the framebuffer */
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
     _drawVolumeFaces(_userCoordinates.frontFace, _userCoordinates.backFace, _userCoordinates.rightFace, _userCoordinates.leftFace, _userCoordinates.topFace, _userCoordinates.bottomFace,
-                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims,
-                     1);    // The 1st pass!!!
+                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims, 1);    // The 1st pass!!!
 
     /* 2nd pass, render front facing polygons to texture1 of the framebuffer */
     _drawVolumeFaces(_userCoordinates.frontFace, _userCoordinates.backFace, _userCoordinates.rightFace, _userCoordinates.leftFace, _userCoordinates.topFace, _userCoordinates.bottomFace,
-                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims,
-                     2);    // The 2nd pass!!!
+                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims, 2);    // The 2nd pass!!!
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
     /* 3rd pass, perform ray casting */
     _drawVolumeFaces(_userCoordinates.frontFace, _userCoordinates.backFace, _userCoordinates.rightFace, _userCoordinates.leftFace, _userCoordinates.topFace, _userCoordinates.bottomFace,
-                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims,
-                     3);    // The 3rd pass!!!
+                     _userCoordinates.boxMin, _userCoordinates.boxMax, _userCoordinates.dims, 3);    // The 3rd pass!!!
 
 #if 0
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
@@ -349,7 +357,7 @@ int DirectVolumeRenderer::_paintGL()
     return 0;
 }
 
-void DirectVolumeRenderer::_initializeFramebuffer()
+void DirectVolumeRenderer::_initializeFramebufferTextures()
 {
     /* Create an Frame Buffer Object for the back side of the volume.                       */
     glGenFramebuffers(1, &_frameBufferId);
@@ -397,8 +405,35 @@ void DirectVolumeRenderer::_initializeFramebuffer()
 
     /* Bind the default frame buffer */
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    /* Generate and configure 3D texture: _volumeTextureId */
+    glGenTextures(1, &_volumeTextureId);
+    glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+
+    /* Configure _volumeTextureId */
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+    /* Generate and configure 3D texture: _missingValueTextureId */
+    glGenTextures(1, &_missingValueTextureId);
+    glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+
+    /* Configure _missingValueTextureId */
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+    /* Bind the default textures */
     glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_3D, 0);
 }
+
+void DirectVolumeRenderer::_uploadTextures() {}
 
 void DirectVolumeRenderer::_printGLInfo() const
 {
@@ -484,6 +519,16 @@ void DirectVolumeRenderer::_drawVolumeFaces(const float *frontFace, const float 
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         GLuint frontFaceTextureLoc = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
         glUniform1i(frontFaceTextureLoc, 1);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+        GLuint volumeTextureLoc = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
+        glUniform1i(volumeTextureLoc, 2);
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        GLuint missingValueTextureLoc = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
+        glUniform1i(missingValueTextureLoc, 3);
     }
 
     glEnableVertexAttribArray(0);
