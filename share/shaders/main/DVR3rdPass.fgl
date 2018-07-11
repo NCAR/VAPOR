@@ -9,6 +9,9 @@ uniform sampler3D volumeTexture;
 uniform sampler3D missingValueMaskTexture;
 uniform sampler1D colorMapTexture;
 
+uniform vec2 valueRange;     // min and max values of the variable
+uniform vec2 colorMapRange;  // min and max values on the color map
+
 layout(location = 0) out vec4 color;
 
 void main(void)
