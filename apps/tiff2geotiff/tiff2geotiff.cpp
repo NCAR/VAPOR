@@ -1,6 +1,5 @@
 /* tiff2geotiff.c -- based on Sam Leffler's "tiffcp" and "geotifcp" codes */
 
-
 /*
  *  Original code had this copyright notice: 
  *
@@ -13,11 +12,11 @@
  * separate directories in the output geotiff file.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <ctype.h>
-
+#include <cassert>
 
 /* GeoTIFF overrides */
 
@@ -43,8 +42,6 @@
 #include <float.h>
 #pragma warning( disable : 4996 )
 #endif
-
-
 
 #define TIFFOpen XTIFFOpen
 #define TIFFClose XTIFFClose
@@ -256,12 +253,19 @@ static void ApplyWorldFile(const char *worldfilename, TIFF *out)
         return;
     }
 
-    fscanf( tfw, "%lf", pixsize + 0 );
-    fscanf( tfw, "%lf", &y_rot );
-    fscanf( tfw, "%lf", &x_rot );
-    fscanf( tfw, "%lf", pixsize + 1 );
-    fscanf( tfw, "%lf", &xoff );
-    fscanf( tfw, "%lf", &yoff );
+    int rt;
+    rt = std::fscanf( tfw, "%lf", pixsize + 0 );
+    assert( rt > 0 && rt != EOF );
+    rt = std::fscanf( tfw, "%lf", &y_rot );
+    assert( rt > 0 && rt != EOF );
+    rt = std::fscanf( tfw, "%lf", &x_rot );
+    assert( rt > 0 && rt != EOF );
+    rt = std::fscanf( tfw, "%lf", pixsize + 1 );
+    assert( rt > 0 && rt != EOF );
+    rt = std::fscanf( tfw, "%lf", &xoff );
+    assert( rt > 0 && rt != EOF );
+    rt = std::fscanf( tfw, "%lf", &yoff );
+    assert( rt > 0 && rt != EOF );
 
     fclose( tfw );
 
