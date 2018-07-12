@@ -299,8 +299,6 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
 
     _varInfoCache.Clear();
 
-    _derivedDataVars.clear();
-    _derivedCoordVars.clear();
     _doTransformHorizontal = false;
     _doTransformVertical = false;
     _openVarName.clear();
@@ -320,10 +318,15 @@ DataMgr::~DataMgr()
 
     _blk_mem_mgr = NULL;
 
-    for (int i = 0; i < _derivedVars.size(); i++) {
-        if (_derivedVars[i]) delete _derivedVars[i];
+    vector<string> names = _dvm.GetDataVarNames();
+    for (int i = 0; i < names.size(); i++) {
+        if (_dvm.GetVar(names[i])) delete _dvm.GetVar(names[i]);
     }
-    _derivedVars.clear();
+
+    names = _dvm.GetCoordVarNames();
+    for (int i = 0; i < names.size(); i++) {
+        if (_dvm.GetVar(names[i])) delete _dvm.GetVar(names[i]);
+    }
 }
 
 int DataMgr::_parseOptions(vector<string> &options)
@@ -499,7 +502,7 @@ vector<string> DataMgr::GetCoordVarNames() const
     assert(_dc);
 
     vector<string> vars = _dc->GetCoordVarNames();
-    vector<string> derived_vars = _getCoordVarNamesDerived();
+    vector<string> derived_vars = _dvm.GetCoordVarNames();
     vars.insert(vars.end(), derived_vars.begin(), derived_vars.end());
 
     return (vars);
@@ -512,10 +515,10 @@ string DataMgr::GetTimeCoordVarName() const
     // There can be only one time coordinate variable. If a
     // derived one exists, use it.
     //
-    string var = _getTimeCoordVarNameDerived();
-    if (!var.empty()) return (var);
+    vector<string> cvars = _dvm.GetTimeCoordVarNames();
+    if (!cvars.empty()) return (cvars[0]);
 
-    vector<string> cvars = _dc->GetTimeCoordVarNames();
+    cvars = _dc->GetTimeCoordVarNames();
     assert(cvars.size());
 
     return (cvars[0]);
@@ -548,7 +551,7 @@ bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const
 {
     assert(_dc);
 
-    bool ok = _getDataVarInfoDerived(varname, var);
+    bool ok = _dvm.GetDataVarInfo(varname, var);
     if (!ok) { ok = _dc->GetDataVarInfo(varname, var); }
     if (!ok) return (ok);
 
@@ -568,7 +571,7 @@ bool DataMgr::GetCoordVarInfo(string varname, VAPoR::DC::CoordVar &var) const
 {
     assert(_dc);
 
-    bool ok = _getCoordVarInfoDerived(varname, var);
+    bool ok = _dvm.GetCoordVarInfo(varname, var);
     if (!ok) { ok = _dc->GetCoordVarInfo(varname, var); }
     return (ok);
 }
@@ -577,7 +580,7 @@ bool DataMgr::GetBaseVarInfo(string varname, VAPoR::DC::BaseVar &var) const
 {
     assert(_dc);
 
-    bool ok = _getBaseVarInfoDerived(varname, var);
+    bool ok = _dvm.GetBaseVarInfo(varname, var);
     if (!ok) { ok = _dc->GetBaseVarInfo(varname, var); }
     return (ok);
 }
@@ -1167,7 +1170,7 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     assert(_dc);
 
     DerivedVar *dvar = _getDerivedVar(varname);
-    if (dvar) { return (dvar->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level)); }
+    if (dvar) { return (dvar->GetDimLensAtLevel(level, dims_at_level, bs_at_level)); }
 
     return (_dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
 
@@ -1927,22 +1930,6 @@ vector<string> DataMgr::_get_native_variables() const
     return (v1);
 }
 
-//
-// return complete list of derived variables
-//
-vector<string> DataMgr::_get_derived_variables() const
-{
-    vector<string> svec;
-
-    map<string, DerivedCoordVar *>::const_iterator itr1;
-    for (itr1 = _derivedCoordVars.begin(); itr1 != _derivedCoordVars.end(); ++itr1) { svec.push_back(itr1->first); }
-
-    map<string, DerivedDataVar *>::const_iterator itr2;
-    for (itr2 = _derivedDataVars.begin(); itr2 != _derivedDataVars.end(); ++itr2) { svec.push_back(itr2->first); }
-
-    return (svec);
-}
-
 #ifdef VAPOR3_0_0_ALPHA
 
 void DataMgr::PurgeVariable(string varname)
@@ -1953,30 +1940,20 @@ void DataMgr::PurgeVariable(string varname)
 
 #endif
 
-bool DataMgr::_is_geographic() const
+bool DataMgr::_hasHorizontalXForm() const
 {
     assert(_dc);
 
-    vector<string> varnames = _dc->GetDataVarNames();
+    vector<string> meshnames = _dc->GetMeshNames();
 
-    for (int i = 0; i < varnames.size(); i++) {
-        if (_is_geographic(varnames[i])) return (true);
+    for (int i = 0; i < meshnames.size(); i++) {
+        if (_hasHorizontalXForm(meshnames[i])) return (true);
     }
 
     return (false);
 }
 
-bool DataMgr::_is_geographic(string varname) const
-{
-    DC::DataVar dvarInfo;
-    bool        ok = _dc->GetDataVarInfo(varname, dvarInfo);
-    if (!ok) return (false);
-
-    string meshname = dvarInfo.GetMeshName();
-    return (_is_geographicMesh(meshname));
-}
-
-bool DataMgr::_is_geographicMesh(string meshname) const
+bool DataMgr::_hasHorizontalXForm(string meshname) const
 {
     DC::Mesh m;
     bool     status = _dc->GetMesh(meshname, m);
@@ -1997,41 +1974,35 @@ bool DataMgr::_is_geographicMesh(string meshname) const
     return (false);
 }
 
-bool DataMgr::_hasVerticalConversion() const
+bool DataMgr::_hasVerticalXForm() const
 {
     assert(_dc);
 
     // Only 3D variables can have vertical coordinates?
     //
-    vector<string> varnames = _dc->GetDataVarNames(3);
+    vector<string> meshnames = _dc->GetMeshNames();
 
-    for (int i = 0; i < varnames.size(); i++) {
-        string dummy;
-        if (_hasVerticalConversion(varnames[i], dummy, dummy)) return (true);
+    for (int i = 0; i < meshnames.size(); i++) {
+        if (_hasVerticalXForm(meshnames[i])) return (true);
     }
 
     return (false);
 }
 
-bool DataMgr::_hasVerticalConversion(string varname, string &standard_name, string &formula_terms) const
+bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &formula_terms) const
 {
     standard_name.clear();
     formula_terms.clear();
 
-    DC::DataVar dvarInfo;
-    bool        ok = _dc->GetDataVarInfo(varname, dvarInfo);
-    if (!ok) return (false);
-
     DC::Mesh m;
-    ok = _dc->GetMesh(dvarInfo.GetMeshName(), m);
+    bool     ok = _dc->GetMesh(meshname, m);
     if (!ok) return (false);
 
     vector<string> coordVars = m.GetCoordVars();
 
-    bool hasVertCoord = false;
+    bool         hasVertCoord = false;
+    DC::CoordVar cvarInfo;
     for (int i = 0; i < coordVars.size(); i++) {
-        DC::CoordVar cvarInfo;
-
         bool ok = _dc->GetCoordVarInfo(coordVars[i], cvarInfo);
         assert(ok);
 
@@ -2043,14 +2014,14 @@ bool DataMgr::_hasVerticalConversion(string varname, string &standard_name, stri
     if (!hasVertCoord) return (false);
 
     DC::Attribute attr_name;
-    if (!dvarInfo.GetAttribute("standard_name", attr_name)) return (false);
+    if (!cvarInfo.GetAttribute("standard_name", attr_name)) return (false);
 
     attr_name.GetValues(standard_name);
 
     if (standard_name.empty()) return (false);
 
     DC::Attribute attr_formula;
-    if (!dvarInfo.GetAttribute("formula_terms", attr_formula)) return (false);
+    if (!cvarInfo.GetAttribute("formula_terms", attr_formula)) return (false);
 
     attr_formula.GetValues(formula_terms);
 
@@ -2346,8 +2317,7 @@ int DataMgr::_initTimeCoord()
             return (-1);
         }
 
-        _derivedCoordVars[derivedTimeCoordName] = derivedVar;
-        _derivedVars.push_back(derivedVar);
+        _dvm.AddCoordVar(derivedVar);
 
         _timeCoordinates = derivedVar->GetTimes();
     } else {
@@ -2590,9 +2560,10 @@ vector<string> DataMgr::_getDataVarNamesDerived(int ndim) const
 {
     vector<string> names;
 
-    map<string, DerivedDataVar *>::const_iterator itr;
-    for (itr = _derivedDataVars.begin(); itr != _derivedDataVars.end(); ++itr) {
-        string name = itr->first;
+    vector<string> allnames = _dvm.GetDataVarNames();
+    ;
+    for (int i = 0; i < allnames.size(); i++) {
+        string name = allnames[i];
 
         DC::DataVar dvar;
         bool        ok = GetDataVarInfo(name, dvar);
@@ -2611,61 +2582,6 @@ vector<string> DataMgr::_getDataVarNamesDerived(int ndim) const
     }
 
     return (names);
-}
-
-vector<string> DataMgr::_getCoordVarNamesDerived() const
-{
-    vector<string> names;
-
-    map<string, DerivedCoordVar *>::const_iterator itr;
-    for (itr = _derivedCoordVars.begin(); itr != _derivedCoordVars.end(); ++itr) { names.push_back(itr->first); }
-
-    return (names);
-}
-
-string DataMgr::_getTimeCoordVarNameDerived() const
-{
-    vector<string> cvars = _getCoordVarNamesDerived();
-
-    for (int i = 0; i < cvars.size(); i++) {
-        DC::CoordVar varInfo;
-        if (varInfo.GetAxis() == 3) return (cvars[i]);
-    }
-    return ("");
-}
-
-bool DataMgr::_getDataVarInfoDerived(string varname, VAPoR::DC::DataVar &varInfo) const
-{
-    map<string, DerivedDataVar *>::const_iterator itr = _derivedDataVars.find(varname);
-
-    if (itr == _derivedDataVars.end()) return (false);
-
-    return (itr->second->GetDataVarInfo(varname, varInfo));
-}
-
-bool DataMgr::_getCoordVarInfoDerived(string varname, VAPoR::DC::CoordVar &varInfo) const
-{
-    map<string, DerivedCoordVar *>::const_iterator itr = _derivedCoordVars.find(varname);
-
-    if (itr == _derivedCoordVars.end()) return (false);
-
-    return (itr->second->GetCoordVarInfo(varname, varInfo));
-}
-
-bool DataMgr::_getBaseVarInfoDerived(string varname, VAPoR::DC::BaseVar &varInfo) const
-{
-    map<string, DerivedCoordVar *>::const_iterator itr1;
-
-    itr1 = _derivedCoordVars.find(varname);
-
-    if (itr1 != _derivedCoordVars.end()) { return (itr1->second->GetBaseVarInfo(varname, varInfo)); }
-
-    map<string, DerivedDataVar *>::const_iterator itr2;
-    itr2 = _derivedDataVars.find(varname);
-
-    if (itr2 != _derivedDataVars.end()) { return (itr2->second->GetBaseVarInfo(varname, varInfo)); }
-
-    return (false);
 }
 
 bool DataMgr::_hasCoordForAxis(vector<string> coord_vars, int axis) const
@@ -2861,20 +2777,16 @@ DerivedVar *DataMgr::_getDerivedVar(string varname) const
 
 DerivedDataVar *DataMgr::_getDerivedDataVar(string varname) const
 {
-    map<string, DerivedDataVar *>::const_iterator itr;
-    itr = _derivedDataVars.find(varname);
-
-    if (itr != _derivedDataVars.end()) return (itr->second);
+    vector<string> varnames = _dvm.GetDataVarNames();
+    if (find(varnames.begin(), varnames.end(), varname) != varnames.end()) { return (dynamic_cast<DerivedDataVar *>(_dvm.GetVar(varname))); }
 
     return (NULL);
 }
 
 DerivedCoordVar *DataMgr::_getDerivedCoordVar(string varname) const
 {
-    map<string, DerivedCoordVar *>::const_iterator itr;
-    itr = _derivedCoordVars.find(varname);
-
-    if (itr != _derivedCoordVars.end()) return (itr->second);
+    vector<string> varnames = _dvm.GetCoordVarNames();
+    if (find(varnames.begin(), varnames.end(), varname) != varnames.end()) { return (dynamic_cast<DerivedCoordVar *>(_dvm.GetVar(varname))); }
 
     return (NULL);
 }
@@ -2884,7 +2796,7 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
     _openVarName = varname;
 
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
-    if (derivedVar) { return (derivedVar->OpenVariableRead(ts, _openVarName, level, lod)); }
+    if (derivedVar) { return (derivedVar->OpenVariableRead(ts, level, lod)); }
 
     return (_dc->OpenVariableRead(ts, _openVarName, level, lod));
 }
@@ -3036,7 +2948,7 @@ int DataMgr::_initProj4StringDefault()
 
     vector<string> coordvars;
     for (int i = 0; i < meshnames.size() && coordvars.size() < 2; i++) {
-        if (!_is_geographicMesh(meshnames[i])) continue;
+        if (!_hasHorizontalXForm(meshnames[i])) continue;
 
         DC::Mesh m;
         bool     ok = _dc->GetMesh(meshnames[i], m);
@@ -3065,7 +2977,7 @@ int DataMgr::_initHorizontalCoordVars()
 {
     if (!_doTransformHorizontal) return (0);
 
-    if (!_is_geographic()) return (0);
+    if (!_hasHorizontalXForm()) return (0);
 
     int rc = _initProj4StringDefault();
     if (rc < 0) return (-1);
@@ -3078,7 +2990,7 @@ int DataMgr::_initHorizontalCoordVars()
 
     vector<string> coordvars;
     for (int i = 0; i < meshnames.size(); i++) {
-        if (!_is_geographicMesh(meshnames[i])) continue;
+        if (!_hasHorizontalXForm(meshnames[i])) continue;
 
         DC::Mesh m;
         bool     ok = _dc->GetMesh(meshnames[i], m);
@@ -3097,7 +3009,16 @@ int DataMgr::_initHorizontalCoordVars()
         if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
         if (_getDerivedCoordVar(derivedCoordvars[1])) continue;
 
-        DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars, _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED);
+        DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
+
+        rc = derivedVar->Initialize();
+        if (rc < 0) {
+            SetErrMsg("Failed to initialize derived coord variable");
+            return (-1);
+        }
+        _dvm.AddCoordVar(derivedVar);
+
+        derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
 
         rc = derivedVar->Initialize();
         if (rc < 0) {
@@ -3105,9 +3026,7 @@ int DataMgr::_initHorizontalCoordVars()
             return (-1);
         }
 
-        _derivedCoordVars[derivedCoordvars[0]] = derivedVar;
-        _derivedCoordVars[derivedCoordvars[1]] = derivedVar;
-        _derivedVars.push_back(derivedVar);
+        _dvm.AddCoordVar(derivedVar);
     }
 
     return (0);
@@ -3117,31 +3036,24 @@ int DataMgr::_initVerticalCoordVars()
 {
     if (!_doTransformVertical) return (0);
 
-    if (!_hasVerticalConversion()) return (0);
+    if (!_hasVerticalXForm()) return (0);
 
-    // Only 3D variables can have vertical coordinates?
-    //
-    vector<string> varnames = _dc->GetDataVarNames(3);
+    vector<string> meshnames = _dc->GetMeshNames();
 
-    for (int i = 0; i < varnames.size(); i++) {
-        vector<string> coordvars;
+    vector<string> coordvars;
+    for (int i = 0; i < meshnames.size(); i++) {
+        if (!_hasHorizontalXForm(meshnames[i])) continue;
 
         string standard_name, formula_terms;
-        if (!_hasVerticalConversion(varnames[i], standard_name, formula_terms)) { continue; }
-
-        DC::DataVar dvarInfo;
-        bool        ok = _dc->GetDataVarInfo(varnames[i], dvarInfo);
-        if (!ok) continue;
+        if (!_hasVerticalXForm(meshnames[i], standard_name, formula_terms)) { continue; }
 
         DC::Mesh m;
-        ok = _dc->GetMesh(dvarInfo.GetMeshName(), m);
+        bool     ok = _dc->GetMesh(meshnames[i], m);
         if (!ok) continue;
 
-        if (m.GetCoordVars().size() < 3) continue;
+        assert(m.GetCoordVars().size() > 2);
 
-        DC::CoordVar varInfo;
-        ok = GetCoordVarInfo(m.GetCoordVars()[2], varInfo);
-        assert(ok);
+        cout << "meshname, coord var name " << meshnames[i] << " " << m.GetCoordVars()[2] << endl;
 
         coordvars.push_back(m.GetCoordVars()[2]);
 
@@ -3152,7 +3064,7 @@ int DataMgr::_initVerticalCoordVars()
         //
         if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
 
-        DerivedCoordVarStandardWRF_Terrain *derivedVar = new DerivedCoordVarStandardWRF_Terrain(derivedCoordvars[0], _dc, formula_terms);
+        DerivedCoordVarStandardWRF_Terrain *derivedVar = new DerivedCoordVarStandardWRF_Terrain(_dc, meshnames[i], formula_terms);
 
         int rc = derivedVar->Initialize();
         if (rc < 0) {
@@ -3160,8 +3072,7 @@ int DataMgr::_initVerticalCoordVars()
             return (-1);
         }
 
-        _derivedCoordVars[derivedCoordvars[0]] = derivedVar;
-        _derivedVars.push_back(derivedVar);
+        _dvm.AddCoordVar(derivedVar);
     }
 
     return (0);
@@ -3186,4 +3097,5 @@ std::ostream &operator<<(std::ostream &o, const DataMgr::BlkExts &b)
 
     return (o);
 }
+
 };    // namespace VAPoR
