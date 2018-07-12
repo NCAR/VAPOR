@@ -791,9 +791,7 @@ private:
  VAPoR::UDUnits _udunits;
  VAPoR::GridHelper _gridHelper;
 
- std::map<string, DerivedDataVar *> _derivedDataVars;
- std::map<string, DerivedCoordVar *> _derivedCoordVars;
- std::vector< DerivedVar *> _derivedVars;
+ DerivedVarMgr _dvm;
  bool _doTransformHorizontal;
  bool _doTransformVertical;
  string _openVarName;
@@ -827,19 +825,13 @@ private:
 
  std::vector <string> _get_var_dependencies(string varname) const;
 
- // Return true if native data set is georeferenced
+ // Return true if native data has a transformable horizontal coordinate
  //
- bool _is_geographic() const;
+ bool _hasHorizontalXForm() const;
 
- // Return true if the specified data variable has geographic
- // coordinates in the native data set
+ // Return true if native mesh has a transformable horizontal coordinate
  //
- bool _is_geographic(string varname) const;
-
- // Return true if the specified data mesh has geographic
- // coordinates in the native data set
- //
- bool _is_geographicMesh(string mesh) const;
+ bool _hasHorizontalXForm(string meshname) const;
 
  bool _get_coord_vars(
 	string varname, std::vector <string> &scvars, string &tcvar
@@ -1050,7 +1042,6 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
  void _unlock_blocks(const void *blks);
 
  std::vector <string> _get_native_variables() const;
- std::vector <string> _get_derived_variables() const;
 
  void   *_alloc_region(
 	size_t ts,
@@ -1081,16 +1072,6 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
  int _lod_correction(string varname, int &lod) const;
 
  vector <string> _getDataVarNamesDerived(int ndim) const;
-
- vector <string> _getCoordVarNamesDerived() const;
-
- string _getTimeCoordVarNameDerived() const;
-
- bool _getDataVarInfoDerived(string varname, VAPoR::DC::DataVar &varInfo) const;
-
- bool _getCoordVarInfoDerived(string varname, VAPoR::DC::CoordVar &varInfo) const;
-
- bool _getBaseVarInfoDerived(string varname, VAPoR::DC::BaseVar &varInfo) const;
 
  bool _hasCoordForAxis(vector <string> coord_vars, int axis) const;
 
@@ -1168,11 +1149,16 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 
  int _initVerticalCoordVars();
 
- bool _hasVerticalConversion() const;
+ bool _hasVerticalXForm() const;
 
- bool _hasVerticalConversion(
-	string varname, string &standard_name, string &formula_terms
+ bool _hasVerticalXForm(
+	string meshname, string &standard_name, string &formula_terms
  ) const;
+
+ bool _hasVerticalXForm(string meshname) const {
+	string dummy;
+	return(_hasVerticalXForm(meshname, dummy, dummy));
+ }
 
 
 };
