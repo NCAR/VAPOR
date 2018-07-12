@@ -31,6 +31,8 @@ class VDF_API DerivedVarMgr : public VAPoR::DC {
 
     void RemoveVar(const DerivedVar *var);
 
+    DerivedVar *GetVar(string name) const;
+
   protected:
     //! \copydoc Initialize()
     //

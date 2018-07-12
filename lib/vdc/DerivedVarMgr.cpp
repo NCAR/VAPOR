@@ -15,21 +15,15 @@ int DerivedVarMgr::initialize(
 }
 
 void DerivedVarMgr::AddCoordVar(DerivedCoordVar *cvar) {
-    vector<string> names = cvar->GetNames();
 
-    for (int i = 0; i < names.size(); i++) {
-        _coordVars[names[i]] = cvar;
-        _vars[names[i]] = cvar;
-    }
+    _coordVars[cvar->GetName()] = cvar;
+    _vars[cvar->GetName()] = cvar;
 }
 
 void DerivedVarMgr::AddDataVar(DerivedDataVar *dvar) {
-    vector<string> names = dvar->GetNames();
 
-    for (int i = 0; i < names.size(); i++) {
-        _dataVars[names[i]] = dvar;
-        _vars[names[i]] = dvar;
-    }
+    _dataVars[dvar->GetName()] = dvar;
+    _vars[dvar->GetName()] = dvar;
 }
 
 void DerivedVarMgr::RemoveVar(const DerivedVar *var) {
@@ -74,6 +68,19 @@ void DerivedVarMgr::RemoveVar(const DerivedVar *var) {
     }
 }
 
+DerivedVar *DerivedVarMgr::GetVar(string varname) const {
+
+    DerivedVar *var = _getDataVar(varname);
+    if (var)
+        return (var);
+
+    var = _getCoordVar(varname);
+    if (var)
+        return (var);
+
+    return (NULL);
+}
+
 bool DerivedVarMgr::getCoordVarInfo(
     string varname, DC::CoordVar &cvarInfo) const {
 
@@ -81,7 +88,7 @@ bool DerivedVarMgr::getCoordVarInfo(
     if (!dvar)
         return (false);
 
-    return (dvar->GetCoordVarInfo(varname, cvarInfo));
+    return (dvar->GetCoordVarInfo(cvarInfo));
 }
 
 bool DerivedVarMgr::getDataVarInfo(
@@ -91,7 +98,7 @@ bool DerivedVarMgr::getDataVarInfo(
     if (!dvar)
         return (false);
 
-    return (dvar->GetDataVarInfo(varname, dvarInfo));
+    return (dvar->GetDataVarInfo(dvarInfo));
 }
 
 bool DerivedVarMgr::getBaseVarInfo(string varname, DC::BaseVar &varInfo) const {
@@ -100,7 +107,7 @@ bool DerivedVarMgr::getBaseVarInfo(string varname, DC::BaseVar &varInfo) const {
     if (!var)
         return (false);
 
-    return (var->GetBaseVarInfo(varname, varInfo));
+    return (var->GetBaseVarInfo(varInfo));
 }
 
 std::vector<string> DerivedVarMgr::getDataVarNames() const {
@@ -130,7 +137,7 @@ size_t DerivedVarMgr::getNumRefLevels(string varname) const {
     if (!var)
         return (0);
 
-    return (var->GetNumRefLevels(varname));
+    return (var->GetNumRefLevels());
 }
 
 bool DerivedVarMgr::getAtt(
@@ -139,7 +146,7 @@ bool DerivedVarMgr::getAtt(
     if (!var)
         return (false);
 
-    return (var->GetAtt(varname, attname, values));
+    return (var->GetAtt(attname, values));
 }
 
 bool DerivedVarMgr::getAtt(
@@ -148,7 +155,7 @@ bool DerivedVarMgr::getAtt(
     if (!var)
         return (false);
 
-    return (var->GetAtt(varname, attname, values));
+    return (var->GetAtt(attname, values));
 }
 
 bool DerivedVarMgr::getAtt(
@@ -157,7 +164,7 @@ bool DerivedVarMgr::getAtt(
     if (!var)
         return (false);
 
-    return (var->GetAtt(varname, attname, values));
+    return (var->GetAtt(attname, values));
 }
 
 std::vector<string> DerivedVarMgr::getAttNames(string varname) const {
@@ -166,7 +173,7 @@ std::vector<string> DerivedVarMgr::getAttNames(string varname) const {
     if (!var)
         return (vector<string>());
 
-    return (var->GetAttNames(varname));
+    return (var->GetAttNames());
 }
 
 DC::XType DerivedVarMgr::getAttType(string varname, string attname) const {
@@ -175,7 +182,7 @@ DC::XType DerivedVarMgr::getAttType(string varname, string attname) const {
     if (!var)
         return (DC::INVALID);
 
-    return (var->GetAttType(varname, attname));
+    return (var->GetAttType(attname));
 }
 
 int DerivedVarMgr::getDimLensAtLevel(
@@ -186,7 +193,7 @@ int DerivedVarMgr::getDimLensAtLevel(
     if (!var)
         return (-1);
 
-    return (var->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
+    return (var->GetDimLensAtLevel(level, dims_at_level, bs_at_level));
 }
 
 int DerivedVarMgr::openVariableRead(
@@ -199,7 +206,7 @@ int DerivedVarMgr::openVariableRead(
         return (-1);
     }
 
-    return (var->OpenVariableRead(ts, varname, level, lod));
+    return (var->OpenVariableRead(ts, level, lod));
 }
 
 int DerivedVarMgr::closeVariable(int fd) {
@@ -247,7 +254,7 @@ bool DerivedVarMgr::variableExists(
     if (!var)
         return (false);
 
-    return (var->VariableExists(ts, varname, reflevel, lod));
+    return (var->VariableExists(ts, reflevel, lod));
 }
 
 DerivedVar *DerivedVarMgr::_getVar(string name) const {

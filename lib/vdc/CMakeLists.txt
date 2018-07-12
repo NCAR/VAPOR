@@ -19,6 +19,8 @@ set (SRC
 	DCMPAS.cpp
 	VDC.cpp
 	VDCNetCDF.cpp
+	DerivedVar.cpp
+	DerivedVarMgr.cpp
 	DataMgr.cpp
 	GridHelper.cpp
 	DataMgrUtils.cpp
@@ -27,8 +29,6 @@ set (SRC
 	KDTreeRG.cpp
 	kdtree.c
 	VDC_c.cpp
-	DerivedVar.cpp
-	DerivedVarMgr.cpp
 	DCUtils.cpp
 	glutil.cpp
 )

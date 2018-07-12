@@ -22,61 +22,57 @@ class NetCDFCollection;
 class VDF_API DerivedVar : public Wasp::MyBase {
   public:
     DerivedVar(string varName) {
-        _derivedVarNames.push_back(varName);
-    };
-
-    DerivedVar(const std::vector<string> &varNames) {
-        _derivedVarNames = varNames;
+        _derivedVarName = varName;
     };
 
     virtual ~DerivedVar() {}
 
     virtual int Initialize() = 0;
 
-    std::vector<string> GetNames() const {
-        return (_derivedVarNames);
+    string GetName() const {
+        return (_derivedVarName);
     }
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const = 0;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const = 0;
 
-    virtual size_t GetNumRefLevels(string varname) const {
+    virtual size_t GetNumRefLevels() const {
         return (1);
     }
 
     virtual bool GetAtt(
-        string varname, string attname, std::vector<double> &values) const {
+        string attname, std::vector<double> &values) const {
         values.clear();
         return (false);
     }
 
     virtual bool GetAtt(
-        string varname, string attname, std::vector<long> &values) const {
+        string attname, std::vector<long> &values) const {
         values.clear();
         return (false);
     }
 
     virtual bool GetAtt(
-        string varname, string attname, string &values) const {
+        string attname, string &values) const {
         values.clear();
         return (false);
     }
 
-    virtual std::vector<string> GetAttNames(string varname) const {
+    virtual std::vector<string> GetAttNames() const {
         return (std::vector<string>());
     }
 
-    virtual DC::XType GetAttType(string varname, string attname) const {
+    virtual DC::XType GetAttType(string attname) const {
         return (DC::INVALID);
     }
 
     virtual std::vector<string> GetInputs() const = 0;
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const = 0;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0) = 0;
+        size_t ts, int level = 0, int lod = 0) = 0;
 
     virtual int CloseVariable(int fd) = 0;
 
@@ -92,12 +88,11 @@ class VDF_API DerivedVar : public Wasp::MyBase {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const = 0;
 
   protected:
-    std::vector<string> _derivedVarNames;
+    string _derivedVarName;
     DC::FileTable _fileTable;
 
     int _getVar(
@@ -122,11 +117,34 @@ class VDF_API DerivedVar : public Wasp::MyBase {
 //!
 class VDF_API DerivedCoordVar : public DerivedVar {
   public:
-    DerivedCoordVar(const std::vector<string> &varNames) : DerivedVar(varNames) {}
     DerivedCoordVar(string varName) : DerivedVar(varName) {}
     virtual ~DerivedCoordVar() {}
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const = 0;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const = 0;
+};
+
+//!
+//! \class DerivedCFVertCoordVar
+//!
+//! \brief Derived coordinate variable abstract class
+//!
+//! \author John Clyne
+//! \date   July, 2018
+//!
+//!
+class VDF_API DerivedCFVertCoordVar : public DerivedCoordVar {
+  public:
+    DerivedCFVertCoordVar(
+        string varName, DC *dc, string mesh, string formula) : DerivedCoordVar(varName), _dc(dc), _mesh(mesh), _formula(formula) {}
+
+    virtual ~DerivedCFVertCoordVar() {}
+
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const = 0;
+
+  protected:
+    DC *_dc;
+    string _mesh;
+    string _formula;
 };
 
 //!
@@ -140,11 +158,10 @@ class VDF_API DerivedCoordVar : public DerivedVar {
 //!
 class VDF_API DerivedDataVar : public DerivedVar {
   public:
-    DerivedDataVar(const std::vector<string> &varNames) : DerivedVar(varNames) {}
     DerivedDataVar(string varName) : DerivedVar(varName) {}
     virtual ~DerivedDataVar() {}
 
-    virtual bool GetDataVarInfo(string varname, DC::DataVar &cvar) const = 0;
+    virtual bool GetDataVarInfo(DC::DataVar &cvar) const = 0;
 };
 
 //!
@@ -159,26 +176,27 @@ class VDF_API DerivedDataVar : public DerivedVar {
 class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
   public:
     DerivedCoordVar_PCSFromLatLon(
-        const std::vector<string> &derivedVarNames, DC *dc,
-        std::vector<string> inNames, string proj4String, bool uGridFlag);
+        string derivedVarName, DC *dc,
+        std::vector<string> inNames, string proj4String, bool uGridFlag,
+        bool lonFlag);
     virtual ~DerivedCoordVar_PCSFromLatLon() {}
 
     virtual int Initialize();
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
         return (std::vector<string>{_lonName, _latName});
     }
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0);
+        size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
 
@@ -196,7 +214,6 @@ class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const;
 
@@ -209,11 +226,11 @@ class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
     string _yCoordName;
     bool _make2DFlag;
     bool _uGridFlag;
+    bool _lonFlag;
     std::vector<size_t> _dimLens;
     std::vector<size_t> _bs;
     Proj4API _proj4API;
-    DC::CoordVar _xCoordVarInfo;
-    DC::CoordVar _yCoordVarInfo;
+    DC::CoordVar _coordVarInfo;
 
     int _setupVar();
 
@@ -240,26 +257,26 @@ class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
 class VDF_API DerivedCoordVar_CF1D : public DerivedCoordVar {
   public:
     DerivedCoordVar_CF1D(
-        const std::vector<string> &derivedVarNames, DC *dc,
+        string derivedVarName, DC *dc,
         string dimName, int axis, string units);
     virtual ~DerivedCoordVar_CF1D() {}
 
     virtual int Initialize();
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
         return (std::vector<string>());
     }
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0);
+        size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
 
@@ -277,14 +294,12 @@ class VDF_API DerivedCoordVar_CF1D : public DerivedCoordVar {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const;
 
   private:
     DC *_dc;
     string _dimName;
-    string _coordName;
     size_t _dimLen;
     DC::CoordVar _coordVarInfo;
 };
@@ -307,20 +322,20 @@ class VDF_API DerivedCoordVar_WRFTime : public DerivedCoordVar {
 
     virtual int Initialize();
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
         return (std::vector<string>());
     }
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0);
+        size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
 
@@ -338,7 +353,6 @@ class VDF_API DerivedCoordVar_WRFTime : public DerivedCoordVar {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const;
 
@@ -350,7 +364,6 @@ class VDF_API DerivedCoordVar_WRFTime : public DerivedCoordVar {
     NetCDFCollection *_ncdfc;
     std::vector<float> _times;
     std::vector<int> _timePerm;
-    string _coordName;
     string _wrfTimeVar;
     float _p2si;
     size_t _ovr_ts;
@@ -375,20 +388,20 @@ class VDF_API DerivedCoordVar_TimeInSeconds : public DerivedCoordVar {
 
     virtual int Initialize();
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
         return (std::vector<string>());
     }
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0);
+        size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
 
@@ -406,7 +419,6 @@ class VDF_API DerivedCoordVar_TimeInSeconds : public DerivedCoordVar {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const;
 
@@ -417,7 +429,6 @@ class VDF_API DerivedCoordVar_TimeInSeconds : public DerivedCoordVar {
   private:
     DC *_dc;
     std::vector<double> _times;
-    string _coordName;
     string _nativeTimeVar;
     DC::CoordVar _coordVarInfo;
 };
@@ -431,20 +442,20 @@ class VDF_API DerivedCoordVar_Staggered : public DerivedCoordVar {
 
     virtual int Initialize();
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
         return (std::vector<string>());
     }
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0);
+        size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
 
@@ -462,48 +473,40 @@ class VDF_API DerivedCoordVar_Staggered : public DerivedCoordVar {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const;
 
   private:
-    string _derivedVarName;
     string _inName;
     string _stagDimName;
     string _dimName;
     DC *_dc;
     DC::CoordVar _coordVarInfo;
     int _stagDim;
-
-    void _transpose(
-        const float *a, float *b, std::vector<size_t> inDims,
-        int axis) const;
-    void _transpose(
-        std::vector<size_t> inDims, int axis, std::vector<size_t> &outDims) const;
 };
 
-class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCoordVar {
+class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCFVertCoordVar {
   public:
     DerivedCoordVarStandardWRF_Terrain(
-        string derivedVarName, DC *dc, string formula);
+        DC *dc, string mesh, string formula);
     virtual ~DerivedCoordVarStandardWRF_Terrain() {}
 
     virtual int Initialize();
 
-    virtual bool GetBaseVarInfo(string varname, DC::BaseVar &var) const;
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
 
-    virtual bool GetCoordVarInfo(string varname, DC::CoordVar &cvar) const;
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
         return (std::vector<string>());
     }
 
     virtual int GetDimLensAtLevel(
-        string varname, int level, std::vector<size_t> &dims_at_level,
+        int level, std::vector<size_t> &dims_at_level,
         std::vector<size_t> &bs_at_level) const;
 
     virtual int OpenVariableRead(
-        size_t ts, string varname, int level = 0, int lod = 0);
+        size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
 
@@ -519,14 +522,10 @@ class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCoordVar {
 
     virtual bool VariableExists(
         size_t ts,
-        string varname,
         int reflevel,
         int lod) const;
 
   private:
-    string _derivedVarName;
-    DC *_dc;
-    string _formula;
     string _PHVar;
     string _PHBVar;
     float _grav;
