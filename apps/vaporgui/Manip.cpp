@@ -995,11 +995,6 @@ void TranslateStretchManip::slideHandle(int handleNum, const double movedRay[3],
     // slide box out of full domain box.
     // If stretching, not allowed to push face through opposite face.
 
-    // Do this calculation in stretched world coords
-    double sizes[3];
-    int    ndims = 3;
-    for (int i = 0; i < ndims; i++) { sizes[i] = _extents[i + ndims] - _extents[i]; }
-
     float temp = _dragDistance;
     deScaleScalarOnAxis(temp, coord);
     _dragDistance = temp;
