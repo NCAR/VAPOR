@@ -27,6 +27,7 @@
 #include <string>
 
 #include "../../apps/vaporgui/images/wheel.xpm"
+#include "../../apps/vaporgui/images/cube.xpm"
 #ifdef VAPOR3_0_0_ALPHA
     #include "../../apps/vaporgui/images/twoDData.xpm"
     #include "../../apps/vaporgui/images/twoDImage.xpm"
@@ -89,7 +90,7 @@ void MouseModeParams::RegisterMouseMode(string name, int manipType, const char *
 void MouseModeParams::_setUpDefault()
 {
     RegisterMouseMode(GetNavigateModeName(), 0, wheel);
-    // RegisterMouseMode("Region", 1, cube);
+    RegisterMouseMode(GetRegionModeName(), 1, cube);
     // RegisterMouseMode("Barb rake", 1, arrowrake );
     // RegisterMouseMode("Contours", 3, isoline);
     // RegisterMouseMode(Params::GetClassType(),1, "Flow rake",rake );

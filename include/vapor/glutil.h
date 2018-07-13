@@ -109,7 +109,7 @@ VDF_API void vtransform4(const float *v, GLfloat *mat, float *vt);
 VDF_API void vtransform3(const float *v, float *mat, float *vt);
 VDF_API void vtransform3(const double *v, double *mat, double *vt);
 VDF_API void vtransform3t(const float *v, float *mat, float *vt);
-VDF_API bool pointOnRight(double *pt1, double *pt2, double *testPt);
+VDF_API bool pointOnRight(double *pt1, double *pt2, const double *testPt);
 VDF_API void mcopy(GLfloat *m1, GLfloat *m2);
 VDF_API void mcopy(double *m1, double *m2);
 VDF_API void mmult(GLfloat *m1, GLfloat *m2, GLfloat *prod);
