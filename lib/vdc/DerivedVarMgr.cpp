@@ -62,6 +62,8 @@ void DerivedVarMgr::RemoveVar(const DerivedVar *var)
     }
 }
 
+void DerivedVarMgr::AddMesh(const Mesh &m) { _meshes[m.GetName()] = m; }
+
 DerivedVar *DerivedVarMgr::GetVar(string varname) const
 {
     DerivedVar *var = _getDataVar(varname);
@@ -71,6 +73,24 @@ DerivedVar *DerivedVarMgr::GetVar(string varname) const
     if (var) return (var);
 
     return (NULL);
+}
+
+std::vector<string> DerivedVarMgr::getMeshNames() const
+{
+    std::map<string, Mesh>::const_iterator itr;
+    vector<string>                         names;
+    for (itr = _meshes.begin(); itr != _meshes.end(); ++itr) { names.push_back(itr->first); }
+    return (names);
+}
+
+bool DerivedVarMgr::getMesh(string mesh_name, DC::Mesh &mesh) const
+{
+    std::map<string, Mesh>::const_iterator itr;
+    itr = _meshes.find(mesh_name);
+    if (itr == _meshes.end()) return (false);
+
+    mesh = itr->second;
+    return (true);
 }
 
 bool DerivedVarMgr::getCoordVarInfo(string varname, DC::CoordVar &cvarInfo) const

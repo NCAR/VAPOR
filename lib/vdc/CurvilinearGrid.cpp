@@ -29,7 +29,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
                                  const KDTreeRG *kdtree)
 : StructuredGrid(dims, bs, blks)
 {
-    assert(dims.size() == 3);
+    assert(dims.size() == 2 || dims.size() == 3);
     assert(bs.size() == dims.size());
 
     // Only support 2D X & Y coordinates currently. I.e. only support
@@ -38,7 +38,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     assert(xrg.GetDimensions().size() == 2);
     assert(yrg.GetDimensions().size() == 2);
     assert(kdtree->GetDimensions().size() == 2);
-    assert(zcoords.size() == dims[2]);
+    assert(zcoords.size() == 0 || zcoords.size() == dims[2]);
 
     _curvilinearGrid(xrg, yrg, RegularGrid(), zcoords, kdtree);
 }

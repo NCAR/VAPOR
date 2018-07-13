@@ -13,6 +13,7 @@
 #include <vapor/KDTreeRG.h>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/GridHelper.h>
+#include <vapor/DerivedVarMgr.h>
 
 #ifndef DataMgvV3_0_h
     #define DataMgvV3_0_h

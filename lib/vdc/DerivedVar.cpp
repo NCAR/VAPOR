@@ -319,22 +319,32 @@ void resampleToStaggered(float *src, const vector<size_t> &inMin, const vector<s
 
     // Next extrapolate boundary points if needed
     //
+    // left boundary
+    //
     if (outMin[stagDim] <= inMin[stagDim]) {
-        for (size_t k = 0; k < nz; k++) {
-            for (size_t j = 0; j < ny; j++) {
-                // left boundary
-                //
-                src[k * nxs * ny + j * nxs] = buf[k * nx * ny + j * nx + 0] + (-0.5 * (buf[k * nx * ny + j * nx + 1] - buf[k * nx * ny + j * nx + 0]));
+        if (inMin[stagDim] < inMax[stagDim]) {
+            for (size_t k = 0; k < nz; k++) {
+                for (size_t j = 0; j < ny; j++) { src[k * nxs * ny + j * nxs] = buf[k * nx * ny + j * nx + 0] + (-0.5 * (buf[k * nx * ny + j * nx + 1] - buf[k * nx * ny + j * nx + 0])); }
+            }
+        } else {
+            for (size_t k = 0; k < nz; k++) {
+                for (size_t j = 0; j < ny; j++) { src[k * nxs * ny + j * nxs] = buf[k * nx * ny + j * nx + 0]; }
             }
         }
     }
 
+    // right boundary
+    //
     if (outMax[stagDim] > inMax[stagDim]) {
-        for (size_t k = 0; k < nz; k++) {
-            for (size_t j = 0; j < ny; j++) {
-                // right boundary
-                //
-                src[k * nxs * ny + j * nxs + nxs - 1] = buf[k * nx * ny + j * nx + nx - 1] + (0.5 * (buf[k * nx * ny + j * nx + nx - 1] - buf[k * nx * ny + j * nx + nx - 2]));
+        if (inMin[stagDim] < inMax[stagDim]) {
+            for (size_t k = 0; k < nz; k++) {
+                for (size_t j = 0; j < ny; j++) {
+                    src[k * nxs * ny + j * nxs + nxs - 1] = buf[k * nx * ny + j * nx + nx - 1] + (0.5 * (buf[k * nx * ny + j * nx + nx - 1] - buf[k * nx * ny + j * nx + nx - 2]));
+                }
+            }
+        } else {
+            for (size_t k = 0; k < nz; k++) {
+                for (size_t j = 0; j < ny; j++) { src[k * nxs * ny + j * nxs + nxs - 1] = buf[k * nx * ny + j * nx + nx - 1]; }
             }
         }
     }
@@ -1293,11 +1303,18 @@ int DerivedCoordVar_Staggered::ReadRegion(int fd, const vector<size_t> &min, con
     //	  O X O X O
     //	  0 1 1 2 2
 
-    // Lower bound on boundary => extrapolation
+    // Adjust input min so we can interpolate interior.
     //
     if (min[_stagDim] > 0) { inMin[_stagDim] -= 1; }
 
+    // input dimensions are one less then output
+    //
     if (max[_stagDim] >= (dims[_stagDim] - 1)) { inMax[_stagDim] -= 1; }
+
+    // Adjust min and max for edge cases
+    //
+    if (max[_stagDim] == 0 && (dims[_stagDim] - 1) > 1) { inMax[_stagDim] += 1; }
+    if (min[_stagDim] == dims[_stagDim] - 1 && min[_stagDim] > 0) { inMin[_stagDim] -= 1; }
 
     vector<size_t> inDims, outDims;
     for (size_t i = 0; i < min.size(); i++) {
