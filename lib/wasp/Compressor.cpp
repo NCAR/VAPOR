@@ -806,13 +806,13 @@ bool Compressor::CompressionInfo(
 			mww.computeL(dims[0], nlevels, L);
 			mincoeff = L[0];
 		}
-		if (dims.size() == 2) {
+		else if (dims.size() == 2) {
 			nlevels = min(mww.wmaxlev(dims[0]), mww.wmaxlev(dims[1]));
 			L = new size_t[(6*nlevels)+4];
 			mww.computeL2(dims[0], dims[1], nlevels, L);
 			mincoeff = L[0]*L[1];
 		}
-		if (dims.size() == 3) {
+		else { // dims.size() == 3
 			nlevels = min(
 					min( mww.wmaxlev(dims[0]), mww.wmaxlev(dims[1])), 
 					mww.wmaxlev(dims[2])
