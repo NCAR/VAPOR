@@ -204,6 +204,7 @@ int WireFrameRenderer::_buildCache()
 	float *colorsArray = new float[nverts*4];
     Grid::ConstCellIterator end = grid->ConstCellEnd();
 
+	float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
     for (; it != end; ++it)
     {
         vector <vector<size_t> > nodes;
@@ -224,7 +225,7 @@ int WireFrameRenderer::_buildCache()
 				coordsArray[3*i+2] = heightGrid->AccessIndex(nodes[i]);
 			}
 			else {
-				coordsArray[3*i+2] = _getDefaultZ(_dataMgr, _cacheParams.ts);
+				coordsArray[3*i+2] = defaultZ;
 			}
 
             float dataValue = grid->AccessIndex(nodes[i]);
