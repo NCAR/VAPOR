@@ -14,8 +14,20 @@ uniform vec2 colorMapRange;  // min and max values on the color map
 
 layout(location = 0) out vec4 color;
 
+//
+// Input:  normalized value w.r.t. valueRange.
+// Output: normalized value w.r.t. colorMapRange.
+//
+float TranslateValue( in float value )
+{
+    float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
+    return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+}
+
 void main(void)
 {
+    int nSteps = 1000;
+
     // Get UV coordinates of this frament
     if( positionClip.w == 0.0f )
         discard;
@@ -27,8 +39,37 @@ void main(void)
     if( length( rayDirTexture ) == 0.0f )
         discard;
 
-    color   = vec4( length(rayDirTexture)/1.732f );
-    color.a = clamp( color.a * 2.0f, 0.0f, 1.0f );
+    //color   = vec4( length(rayDirTexture)/1.732f );
+    //color.a = clamp( color.a * 2.0f, 0.0f, 1.0f );
 
-    //color     = texture( missingValueMaskTexture, vec3(positionUV, 0.5) );
+    vec4  stepSize      = rayDirTexture / float(nSteps);
+    vec4  step1Texture  = startTexture;
+    if( texture(missingValueMaskTexture, step1Texture.xyz).x > 0 )    // missing value
+        color           = vec4( 0.0f );
+    else
+    {
+        float step1Value = texture( volumeTexture, step1Texture.xyz ).w;
+              color      = texture( colorMapTexture, TranslateValue(step1Value) );
+    }
+
+    // let's do a ray casting! 
+    for( int i = 0; i < nSteps; i++ )
+    {
+        vec4 step2Texture = startTexture + stepSize * float(i + 1);
+        if( texture(missingValueMaskTexture, step2Texture.xyz).x > 0 )    // missing value
+            continue;
+        else
+        {
+            float step2Value  = texture( volumeTexture, step2Texture.xyz ).w;
+            vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
+            color.rgb        += (1.0f - color.a) * backColor.a * backColor.rgb;
+            color.a          += (1.0f - color.a) * backColor.a;
+        }
+
+        if( color.a > 0.99 )
+            break;
+
+        step1Texture      = step2Texture;
+    }
 }
+
