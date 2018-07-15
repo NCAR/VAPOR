@@ -9,8 +9,9 @@ uniform sampler3D volumeTexture;
 uniform sampler3D missingValueMaskTexture;
 uniform sampler1D colorMapTexture;
 
-uniform vec2 valueRange;     // min and max values of the variable
-uniform vec2 colorMapRange;  // min and max values on the color map
+uniform vec2 valueRange;        // min and max values of the variable
+uniform vec2 colorMapRange;     // min and max values on the color map
+uniform vec3 volumeDimensions;  // Number of vertices of the volumeTexture
 
 layout(location = 0) out vec4 color;
 
@@ -23,6 +24,53 @@ float TranslateValue( in float value )
     float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
     return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
 }
+
+//
+// Input:  Location to be evaluated in texture coordinates
+// Output: Gradient at that location
+//
+vec3 CalculateGradient(in vec3 tc)
+{
+    vec3 h0 = vec3(-0.5 ) / volumeDimensions;
+    vec3 h1 = vec3( 0.5 ) / volumeDimensions;
+    vec3 h  = vec3( 1.0 );
+
+    if ((tc.x + h0.x) < 0.0) {
+        h0.x = 0.0;
+        h.x = 0.5;
+    }
+    if ((tc.x + h1.x) > 1.0) {
+        h1.x = 0.0;
+        h.x = 0.5;
+    }
+    if ((tc.y + h0.y) < 0.0) {
+        h0.y = 0.0;
+        h.y = 0.5;
+    }
+    if ((tc.y + h1.y) > 1.0) {
+        h1.y = 0.0;
+        h.y = 0.5;
+    }
+    if ((tc.z + h0.z) < 0.0) {
+        h0.z = 0.0;
+        h.z = 0.5;
+    }
+    if ((tc.z + h1.z) > 1.0) {
+        h1.z = 0.0;
+        h.z = 0.5;
+    }
+
+    vec3 a0, a1;
+    a0.x = texture(volumeTexture, tc + vec3(h0.x,0.0,0.0)).x;
+    a1.x = texture(volumeTexture, tc + vec3(h1.x,0.0,0.0)).x;
+    a0.y = texture(volumeTexture, tc + vec3(0.0,h0.y,0.0)).x;
+    a1.y = texture(volumeTexture, tc + vec3(0.0,h1.y,0.0)).x;
+    a0.z = texture(volumeTexture, tc + vec3(0.0,0.0,h0.z)).x;
+    a1.z = texture(volumeTexture, tc + vec3(0.0,0.0,h1.z)).x;
+
+    return (a1-a0 / h);
+}
+
 
 void main(void)
 {

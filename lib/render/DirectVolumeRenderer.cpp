@@ -483,6 +483,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
     const float *ptr = nullptr;
     size_t       idx;
     size_t       numOfVertices;
+    GLuint       uniformLocation;
 
     GLfloat MVP[16];
     _getMVPMatrix(MVP);
@@ -491,12 +492,12 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
     if (whichPass == 1)    // render back-facing polygons
     {
         glUseProgram(_1stPassShaderId);
-        GLuint MVPLoc = glGetUniformLocation(_1stPassShaderId, "MVP");
-        glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
-        GLuint boxMinLoc = glGetUniformLocation(_1stPassShaderId, "boxMin");
-        glUniform3fv(boxMinLoc, 1, _userCoordinates.boxMin);
-        GLuint boxMaxLoc = glGetUniformLocation(_1stPassShaderId, "boxMax");
-        glUniform3fv(boxMaxLoc, 1, _userCoordinates.boxMax);
+        uniformLocation = glGetUniformLocation(_1stPassShaderId, "MVP");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
+        uniformLocation = glGetUniformLocation(_1stPassShaderId, "boxMin");
+        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
+        uniformLocation = glGetUniformLocation(_1stPassShaderId, "boxMax");
+        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -509,12 +510,12 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
     } else if (whichPass == 2)                  // render front-facing polygons
     {
         glUseProgram(_2ndPassShaderId);
-        GLuint MVPLoc = glGetUniformLocation(_2ndPassShaderId, "MVP");
-        glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
-        GLuint boxMinLoc = glGetUniformLocation(_2ndPassShaderId, "boxMin");
-        glUniform3fv(boxMinLoc, 1, _userCoordinates.boxMin);
-        GLuint boxMaxLoc = glGetUniformLocation(_2ndPassShaderId, "boxMax");
-        glUniform3fv(boxMaxLoc, 1, _userCoordinates.boxMax);
+        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "MVP");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
+        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "boxMin");
+        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
+        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "boxMax");
+        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -524,48 +525,53 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         glDepthFunc(GL_LEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
-    } else {
+    } else                                      // the ray-casting pass
+    {
         // Pass in uniforms
         glUseProgram(_3rdPassShaderId);
-        GLuint MVPLoc = glGetUniformLocation(_3rdPassShaderId, "MVP");
-        glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, MVP);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MVP");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
 
         GLfloat ModelView[16];
         glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
-        GLuint ModelViewLoc = glGetUniformLocation(_3rdPassShaderId, "ModelView");
-        glUniformMatrix4fv(ModelViewLoc, 1, GL_FALSE, ModelView);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "ModelView");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, ModelView);
 
-        GLuint valueRangeLoc = glGetUniformLocation(_3rdPassShaderId, "valueRange");
-        glUniform2fv(valueRangeLoc, 1, _userCoordinates.valueRange);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "valueRange");
+        glUniform2fv(uniformLocation, 1, _userCoordinates.valueRange);
 
-        GLuint colorMapRangeLoc = glGetUniformLocation(_3rdPassShaderId, "colorMapRange");
-        glUniform2fv(colorMapRangeLoc, 1, _colorMapRange);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapRange");
+        glUniform2fv(uniformLocation, 1, _colorMapRange);
+
+        float volumeDimensions[3] = {(float)_userCoordinates.dims[0], (float)_userCoordinates.dims[1], (float)_userCoordinates.dims[2]};
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
+        glUniform2fv(uniformLocation, 1, volumeDimensions);
 
         // Pass in textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-        GLuint backFaceTextureLoc = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-        glUniform1i(backFaceTextureLoc, 0);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
+        glUniform1i(uniformLocation, 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-        GLuint frontFaceTextureLoc = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-        glUniform1i(frontFaceTextureLoc, 1);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
+        glUniform1i(uniformLocation, 1);
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-        GLuint volumeTextureLoc = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-        glUniform1i(volumeTextureLoc, 2);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
+        glUniform1i(uniformLocation, 2);
 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-        GLuint missingValueTextureLoc = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-        glUniform1i(missingValueTextureLoc, 3);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
+        glUniform1i(uniformLocation, 3);
 
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-        GLuint colorMapTextureLoc = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-        glUniform1i(colorMapTextureLoc, 4);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
+        glUniform1i(uniformLocation, 4);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
