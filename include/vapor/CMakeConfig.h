@@ -11,6 +11,7 @@ extern const char VERSION_COMMIT[];
 extern const char VERSION_STRING[];
 extern const char VERSION_STRING_FULL[];
 
+extern const char BUILD_TYPE[];
 extern const char SOURCE_DIR[];
 
 #endif
