@@ -74,7 +74,7 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
-    int nSteps = 1000;
+    float stepSize1D = 0.001f; // This is like ~1000 steps.
 
     // Get UV coordinates of this frament
     if( positionClip.w == 0.0f )
@@ -87,10 +87,9 @@ void main(void)
     if( length( rayDirTexture ) == 0.0f )
         discard;
 
-    //color   = vec4( length(rayDirTexture)/1.732f );
-    //color.a = clamp( color.a * 2.0f, 0.0f, 1.0f );
+    float nStepsf       = length( rayDirTexture ) / stepSize1D;
+    vec4  stepSize3D    = rayDirTexture / nStepsf;
 
-    vec4  stepSize      = rayDirTexture / float(nSteps);
     vec4  step1Texture  = startTexture;
     if( texture(missingValueMaskTexture, step1Texture.xyz).x > 0 )    // missing value
         color           = vec4( 0.0f );
@@ -98,12 +97,13 @@ void main(void)
     {
         float step1Value = texture( volumeTexture, step1Texture.xyz ).w;
               color      = texture( colorMapTexture, TranslateValue(step1Value) );
+              color.rgb *= color.a;
     }
 
     // let's do a ray casting! 
-    for( int i = 0; i < nSteps; i++ )
+    for( int i = 0; i < int(nStepsf); i++ )
     {
-        vec4 step2Texture = startTexture + stepSize * float(i + 1);
+        vec4 step2Texture = startTexture + stepSize3D * float(i + 1);
         if( texture(missingValueMaskTexture, step2Texture.xyz).x > 0 )    // missing value
             continue;
         else

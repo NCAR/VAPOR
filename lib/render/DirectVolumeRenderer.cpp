@@ -432,7 +432,6 @@ int DirectVolumeRenderer::_paintGL()
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
     glBindTexture( GL_TEXTURE_1D, 0 );
 
-
     glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
     glViewport( 0, 0, viewport[2], viewport[3] );
     _drawVolumeFaces( 1 ); // 1st pass, render back facing polygons to texture0 of the framebuffer
