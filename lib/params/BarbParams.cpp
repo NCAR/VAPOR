@@ -13,6 +13,7 @@ using namespace VAPoR;
 //
 static RenParamsRegistrar<BarbParams> registrar(BarbParams::GetClassType());
 
+const string BarbParams::_needToRecalculateScalesTag = "NeedToRecalc";
 const string BarbParams::_thicknessScaleTag = "LineThickness";
 const string BarbParams::_lengthScaleTag = "VectorScale";
 const string BarbParams::_gridTag = "GridDimensions";
@@ -47,6 +48,13 @@ BarbParams::BarbParams(
 BarbParams::~BarbParams() {
 	SetDiagMsg("BarbParams::~BarbParams() this=%p", this);
 
+}
+
+void BarbParams::SetNeedToRecalculateScales(bool val) {
+	double dval = val ? 1.0 : 0.0;
+	SetValueDouble(_needToRecalculateScalesTag,
+	"Whether or not scales need to be recalculated",
+	dval);
 }
 
 bool BarbParams::IsOpaque() const {
