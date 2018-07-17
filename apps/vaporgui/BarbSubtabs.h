@@ -23,10 +23,10 @@ public:
 		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
 			(VariablesWidget::VECTOR | VariablesWidget::HGT |
 			VariablesWidget::COLOR),
-			(VariablesWidget::DimFlags)(VariablesWidget::TWOD),
-			(VariablesWidget::ColorFlags)
-			(VariablesWidget::COLORVAR));
-			//(VariablesWidget::DimFlags)(VariablesWidget::THREED));
+			(VariablesWidget::DimFlags)
+			(VariablesWidget::TWOD),
+			//(VariablesWidget::TWOD | VariablesWidget::THREED),
+			(VariablesWidget::ColorFlags)(VariablesWidget::COLORVAR));
 	}
 
 	void Initialize(VAPoR::BarbParams* bParams, VAPoR::DataMgr* dataMgr);
@@ -59,8 +59,9 @@ private slots:
 	void xDimChanged(int i);
 	void yDimChanged(int i);
 	void zDimChanged(int i);
-	void lengthChanged(double d);
-	void thicknessChanged(double d);
+	void lengthChanged(int d);
+	void thicknessChanged(int d);
+	void recalculateScales();
 
 private:
 	void hideZDimWidgets();
