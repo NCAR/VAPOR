@@ -624,10 +624,17 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "MVP" );
         glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, MVP );
 
-        GLfloat ModelView[16];
+        GLfloat ModelView[16], InversedMV[16], TransposedInverseMV[16];
         glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "ModelView" );
         glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, ModelView );
+
+        bool success = _mesa_invert_matrix_general( InversedMV, ModelView );
+        assert( success );
+        _mesa_transposef( TransposedInverseMV, InversedMV );
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "transposedInverseMV" );
+        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, TransposedInverseMV );
+        //_printMatrix( TransposedInverseMV );
 
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "valueRange" );
         glUniform2fv( uniformLocation, 1, _userCoordinates.valueRange );
@@ -639,7 +646,7 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
                                       (float)_userCoordinates.dims[1],  
                                       (float)_userCoordinates.dims[2] };
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "volumeDimensions" );
-        glUniform2fv( uniformLocation, 1, volumeDimensions );
+        glUniform3fv( uniformLocation, 1, volumeDimensions );
 
         // Pass in textures
         glActiveTexture( GL_TEXTURE0 );
@@ -1159,3 +1166,8 @@ void DirectVolumeRenderer::_mesa_transposef( GLfloat to[16], const GLfloat from[
     to[15] = from[15];
 }
 
+void DirectVolumeRenderer::_printMatrix( const GLfloat m[16] )
+{
+   for (int i=0;i<4;i++)
+      printf("\t%f %f %f %f\n", m[i], m[4+i], m[8+i], m[12+i] );
+}
