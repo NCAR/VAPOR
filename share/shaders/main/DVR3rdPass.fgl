@@ -13,6 +13,9 @@ uniform vec2 valueRange;        // min and max values of the variable
 uniform vec2 colorMapRange;     // min and max values on the color map
 uniform vec3 volumeDimensions;  // Number of vertices of the volumeTexture
 
+uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
+uniform mat4 ModelView;
+
 layout(location = 0) out vec4 color;
 
 //
@@ -61,12 +64,12 @@ vec3 CalculateGradient(in vec3 tc)
     }
 
     vec3 a0, a1;
-    a0.x = texture(volumeTexture, tc + vec3(h0.x,0.0,0.0)).x;
-    a1.x = texture(volumeTexture, tc + vec3(h1.x,0.0,0.0)).x;
-    a0.y = texture(volumeTexture, tc + vec3(0.0,h0.y,0.0)).x;
-    a1.y = texture(volumeTexture, tc + vec3(0.0,h1.y,0.0)).x;
-    a0.z = texture(volumeTexture, tc + vec3(0.0,0.0,h0.z)).x;
-    a1.z = texture(volumeTexture, tc + vec3(0.0,0.0,h1.z)).x;
+    a0.x = texture(volumeTexture, tc + vec3(h0.x,0.0,0.0)).w;
+    a1.x = texture(volumeTexture, tc + vec3(h1.x,0.0,0.0)).w;
+    a0.y = texture(volumeTexture, tc + vec3(0.0,h0.y,0.0)).w;
+    a1.y = texture(volumeTexture, tc + vec3(0.0,h1.y,0.0)).w;
+    a0.z = texture(volumeTexture, tc + vec3(0.0,0.0,h0.z)).w;
+    a1.z = texture(volumeTexture, tc + vec3(0.0,0.0,h1.z)).w;
 
     return (a1-a0 / h);
 }
@@ -75,6 +78,9 @@ vec3 CalculateGradient(in vec3 tc)
 void main(void)
 {
     float stepSize1D = 0.001f; // This is like ~1000 steps.
+    vec4  lightDirEye = vec4( 0.0f, 0.0f, 1.0f, 0.0f );
+    float ambientCoeff = 0.5;
+    float diffuseCoeff = 0.5;
 
     // Get UV coordinates of this frament
     if( positionClip.w == 0.0f )
@@ -103,21 +109,33 @@ void main(void)
     // let's do a ray casting! 
     for( int i = 0; i < int(nStepsf); i++ )
     {
+        if( color.a > 0.99f )
+            break;
+
         vec4 step2Texture = startTexture + stepSize3D * float(i + 1);
         if( texture(missingValueMaskTexture, step2Texture.xyz).x > 0 )    // missing value
             continue;
-        else
+
+        float step2Value  = texture( volumeTexture, step2Texture.xyz ).w;
+        vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
+        if( backColor.a < 0.01f )    // only process this fragment if it's opaque enough
+            continue;
+        
+        vec4 gradientModel = vec4( CalculateGradient( step2Texture.xyz ), 0.0f );
+        if( length( gradientModel ) > 0.01f )
         {
-            float step2Value  = texture( volumeTexture, step2Texture.xyz ).w;
-            vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
-            color.rgb        += (1.0f - color.a) * backColor.a * backColor.rgb;
-            color.a          += (1.0f - color.a) * backColor.a;
+            //vec4 gradientEye = normalize( transpose(inverse(ModelView)) * gradientModel );
+            vec4 gradientEye = normalize( transposedInverseMV * gradientModel );
+            float diffuse    = abs( dot(gradientEye, lightDirEye) );
+            backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff);
         }
 
-        if( color.a > 0.99 )
-            break;
+        // Color compositing
+        color.rgb        += (1.0f - color.a) * backColor.a * backColor.rgb;
+        color.a          += (1.0f - color.a) * backColor.a;
 
         step1Texture      = step2Texture;
     }
+
 }
 
