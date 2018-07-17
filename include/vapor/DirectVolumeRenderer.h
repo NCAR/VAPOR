@@ -119,6 +119,12 @@ private:
     //         The MVP matrix is stored in a colume-major fashion.
     void _getMVPMatrix(GLfloat *MVP) const;
 
+    //
+    // Helper matrix manipulation functions
+    //
+    bool _mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16]);
+    void _mesa_transposef(GLfloat to[16], const GLfloat from[16]);
+
 };    // End of class DirectVolumeRenderer
 
 };    // End of namespace VAPoR
