@@ -177,6 +177,7 @@ class RENDER_API BarbRenderer : public Renderer {
         float maxMapValue;
         float colorSamples[10][3];
         float alphaSamples[10];
+        bool needToRecalc;
     } _cacheParams;
 
     bool _isCacheDirty() const;
