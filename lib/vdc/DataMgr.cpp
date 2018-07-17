@@ -352,8 +352,6 @@ int DataMgr::_parseOptions(vector<string> &options)
         i++;
     }
 
-    _doTransformVertical = false;
-    cout << "DO VERTICAL HARDODED TO " << _doTransformVertical << endl;
     options = newOptions;
 
     if (!ok) {
@@ -456,13 +454,6 @@ bool DataMgr::GetMesh(string meshname, DC::Mesh &m) const
     // with derived PCS coordinate variables
     //
     if (_doTransformHorizontal) { _assignHorizontalCoords(coord_vars); }
-
-#ifdef DEAD
-    // if requested, replace native vertical coordiate variables
-    // with derived coordinate variables
-    //
-    if (_doTransformVertical) { _assignVerticalCoords(coord_vars); }
-#endif
 
     m.SetCoordVars(coord_vars);
 
@@ -2632,19 +2623,6 @@ void DataMgr::_assignHorizontalCoords(vector<string> &coord_vars) const
     }
 }
 
-#ifdef DEAD
-void DataMgr::_assignVerticalCoords(vector<string> &coord_vars) const
-{
-    for (int i = 0; i < coord_vars.size(); i++) {
-        DC::CoordVar varInfo;
-        bool         ok = GetCoordVarInfo(coord_vars[i], varInfo);
-        assert(ok);
-
-        if (varInfo.GetAxis() == 2 && !_udunits.IsLengthUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "Z"; }
-    }
-}
-#endif
-
 void DataMgr::_assignTimeCoord(string &coord_var) const
 {
     if (coord_var.empty()) return;
@@ -3060,19 +3038,6 @@ int DataMgr::_initVerticalCoordVars()
 
         assert(m.GetCoordVars().size() > 2);
 
-        cout << "meshname, coord var name " << meshnames[i] << " " << m.GetCoordVars()[2] << endl;
-
-#ifdef DEAD
-        coordvars.push_back(m.GetCoordVars()[2]);
-
-        vector<string> derivedCoordvars = coordvars;
-        _assignVerticalCoords(derivedCoordvars);
-
-        // no duplicates
-        //
-        if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
-
-#endif
         DerivedCoordVarStandardWRF_Terrain *derivedVar = new DerivedCoordVarStandardWRF_Terrain(_dc, meshnames[i], formula_terms);
 
         int rc = derivedVar->Initialize();

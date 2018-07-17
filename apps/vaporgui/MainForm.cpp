@@ -1639,7 +1639,7 @@ void MainForm::_setProj4String(string proj4String)
         closeDataHelper(dataSets[i]);
     }
 
-    vector<string> options = {"-project_to_pcs"};
+    vector<string> options = {"-project_to_pcs", "-vertical_xform"};
     if (!proj4String.empty()) {
         options.push_back("-proj4");
         options.push_back(proj4String);

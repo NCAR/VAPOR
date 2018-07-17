@@ -11,17 +11,20 @@ using namespace Wasp;
 
 namespace {
 
+size_t numBlocks(size_t min, size_t max, size_t bs)
+{
+    size_t b0 = min / bs;
+    size_t b1 = max / bs;
+    return (b1 - b0 + 1);
+}
+
 size_t numBlocks(const vector<size_t> &min, const vector<size_t> &max, const vector<size_t> &bs)
 {
     assert(min.size() == max.size());
     assert(min.size() == bs.size());
 
     size_t nblocks = 1;
-    for (int i = 0; i < bs.size(); i++) {
-        int b0 = min[i] / bs[i];
-        int b1 = max[i] / bs[i];
-        nblocks *= (b1 - b0 + 1);
-    }
+    for (int i = 0; i < bs.size(); i++) { nblocks *= numBlocks(min[i], max[i], bs[i]); }
     return (nblocks);
 }
 
@@ -570,14 +573,17 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
 
     // Dimensions are same for X & Y coord vars
     //
-    vector<size_t> dims, bs;
-    GetDimLensAtLevel(level, dims, bs);
+    vector<size_t> dummy, bs;
+    GetDimLensAtLevel(level, dummy, bs);
 
     // Need temporary buffer space for the X or Y coordinate
     // NOT being returned (we still need to calculate it)
     //
     size_t nElements = numBlocks(min, max, bs) * blockSize(bs);
     float *buf = new float[nElements];
+
+    vector<size_t> roidims;
+    for (int i = 0; i < min.size(); i++) { roidims.push_back(max[i] - min[i] + 1); }
 
     // Assign temporary buffer 'buf' as appropriate
     //
@@ -591,9 +597,11 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
         latBufPtr = buf;
     }
 
+    // Reading 1D data so no blocking
+    //
     vector<size_t> lonMin = {min[0]};
     vector<size_t> lonMax = {max[0]};
-    int            rc = _getVarBlock(_dc, ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
+    int            rc = _getVar(_dc, ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -601,7 +609,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
 
     vector<size_t> latMin = {min[1]};
     vector<size_t> latMax = {max[1]};
-    rc = _getVarBlock(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
+    rc = _getVar(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -609,17 +617,17 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(DC::FileTable::FileO
 
     // Combine the 2 1D arrays into a 2D array
     //
-    make2D(lonBufPtr, latBufPtr, dims);
+    make2D(lonBufPtr, latBufPtr, roidims);
 
-    rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(dims));
+    rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(roidims));
 
     // Finally, block the data since the original 1D data is not blocked
     // (and make2D doesn't add blocking)
     //
     if (_lonFlag) {
-        blockit(lonBufPtr, dims, bs, region);
+        blockit(lonBufPtr, roidims, bs, region);
     } else {
-        blockit(latBufPtr, dims, bs, region);
+        blockit(latBufPtr, roidims, bs, region);
     }
 
     delete[] buf;
@@ -636,8 +644,8 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(DC::FileTable::FileO
 
     // Dimensions are same for X & Y coord vars
     //
-    vector<size_t> dims, bs;
-    GetDimLensAtLevel(level, dims, bs);
+    vector<size_t> dummy, bs;
+    GetDimLensAtLevel(level, dummy, bs);
 
     // Need temporary buffer space for the X or Y coordinate
     // NOT being returned (we still need to calculate it)
@@ -1440,28 +1448,27 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(int level, std::vector
     int rc = _dc->GetDimLensAtLevel(_PHVar, level, dims_at_level, bs_at_level);
     if (rc < 0) return (-1);
 
+    bool blocked = dims_at_level != bs_at_level;
+
     if (_derivedVarName == "Elevation") {
         dims_at_level[2]--;
-        bs_at_level[2]--;
-        return (0);
     } else if (_derivedVarName == "ElevationU") {
         dims_at_level[0]++;
-        bs_at_level[0]++;
         dims_at_level[2]--;
-        bs_at_level[2]--;
-        return (0);
     } else if (_derivedVarName == "ElevationV") {
         dims_at_level[1]++;
-        bs_at_level[1]++;
         dims_at_level[2]--;
-        bs_at_level[2]--;
-        return (0);
     } else if (_derivedVarName == "ElevationW") {
-        return (0);
+    } else {
+        SetErrMsg("Invalid variable name: %s", _derivedVarName.c_str());
+        return (-1);
     }
 
-    SetErrMsg("Invalid variable name: %s", _derivedVarName.c_str());
-    return (-1);
+    // Ugh. The blocking is invariant for data that are truly blocked (i.e.
+    // block size is not the dimension size)
+    //
+    if (!blocked) { bs_at_level = dims_at_level; }
+    return (0);
 }
 
 int DerivedCoordVarStandardWRF_Terrain::OpenVariableRead(size_t ts, int level, int lod)
@@ -1488,10 +1495,100 @@ int DerivedCoordVarStandardWRF_Terrain::CloseVariable(int fd)
 
 int DerivedCoordVarStandardWRF_Terrain::ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
-    assert(0);
+    assert(min.size() == 3);
+    assert(min.size() == max.size());
 
-    return (0);
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+    int                        level = f->GetLevel();
+
+    vector<size_t> dims, bs;
+    GetDimLensAtLevel(level, dims, bs);
+
+    bool blockFlag = dims != bs;
+
+    // We're going to use an unblocked read to fetch the data, so need to
+    // ensure ROI does not include block padding
+    //
+    vector<size_t> myMax = max;
+    for (int i = 0; i < myMax.size(); i++) {
+        if (myMax[i] >= dims[i]) { myMax[i] = dims[i] - 1; }
+    }
+
+    vector<size_t> roidims;    // region of interest dims
+    for (int i = 0; i < min.size(); i++) { roidims.push_back(myMax[i] - min[i] + 1); }
+
+    if (!blockFlag) {
+        // Data actually aren't blocked. Do a normal read
+        //
+        assert(roidims == dims);
+        return (ReadRegion(fd, min, myMax, region));
+    } else {
+        // Do an unblocked read of the data and then block the results. Too
+        // damn hard to do the resampling to a staggered grid with blocked
+        // reads
+        //
+        size_t nElements = numElements(min, myMax);
+
+        float *buf = new float[nElements];
+
+        int rc = ReadRegion(fd, min, myMax, buf);
+        if (rc < 0) {
+            delete[] buf;
+            return (-1);
+        }
+
+        blockit(buf, roidims, bs, region);
+
+        delete[] buf;
+
+        return (0);
+    }
 }
+
+#ifdef DEAD
+// Voxel coordinates aligned to block boundaries
+//
+vector<size_t> bmin = min;
+vector<size_t> bmax;
+for (int i = 0; i < bmin.size(); i++) { bmax.push_back(min[i] + bs[i] - 1); }
+
+size_t block_size = blockSize(bs);
+float *ptr = region;
+
+// Currently don't have resampling code for staggered grids
+// that works with blocked data, so we simply read one block
+// at a time using non-bricked version of ReadRegion()
+//
+for (size_t k = 0; k < numBlocks(min[2], max[2], bs[2]); k++) {
+    if (bmax[2] >= dims[2]) bmax[2] = dims[2] - 1;
+
+    for (size_t j = 0; j < numBlocks(min[1], max[1], bs[1]); j++) {
+        if (bmax[1] >= dims[1]) bmax[1] = dims[1] - 1;
+
+        for (size_t i = 0; i < numBlocks(min[0], max[0], bs[0]); i++) {
+            if (bmax[0] >= dims[0]) bmax[0] = dims[0] - 1;
+
+            int rc = ReadRegion(fd, bmin, bmax, ptr);
+            if (rc < 0) return (-1);
+
+            ptr += block_size;
+            bmin[0] += bs[0];
+            bmax[0] += bs[0];
+        }
+        bmin[0] = min[0];
+        bmax[0] = min[0] + bs[0] - 1;
+        bmin[1] += bs[1];
+        bmax[1] += bs[1];
+    }
+    bmin[1] = min[1];
+    bmax[1] = min[1] + bs[1] - 1;
+    bmin[2] += bs[2];
+    bmax[2] += bs[2];
+}
+
+return (0);
+}
+#endif
 
 int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
