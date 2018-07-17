@@ -14,12 +14,21 @@
 #define BARB_LENGTH_FACTOR 0.9
 
 // Specify the maximum cylinder radius in proportion to the
-// hypotenuse of the domain
-#define BARB_RADIUS_TO_HYPOTENUSE .025
+// hypotenuse of the domain, divided by 100 (the maximum barb thicness param)
+// I.E. if the user sets the thickness to 100 (the maximum), then the
+// barbs will have radius = 100 * BARB_RADIUS_TO_HYPOTENUSE * hypotenuse
+//#define BARB_RADIUS_TO_HYPOTENUSE .05
+//#define BARB_RADIUS_TO_HYPOTENUSE .00016667
+//#define BARB_RADIUS_TO_HYPOTENUSE .00025
+#define BARB_RADIUS_TO_HYPOTENUSE .000125
 
 // Specify the maximum barb length in proportion to the
-// hypotenuse of the domain
-#define BARB_LENGTH_TO_HYPOTENUSE .5
+// hypotenuse of the domain, divided by 100 (the maximum barb length param)
+// I.E. if the user sets the length to 100 (the maximum), then the longest
+// barb will have length = 100 * BARB_LENGTH_TO_HYPOTENUSE * hypotenuse
+//#define BARB_LENGTH_TO_HYPOTENUSE .5
+#define BARB_LENGTH_TO_HYPOTENUSE .00125
+//#define BARB_LENGTH_TO_HYPOTENUSE .0025
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cstdlib>
@@ -88,6 +97,7 @@ void BarbRenderer::_saveCacheParams()
     _cacheParams.lineThickness = p->GetLineThickness();
     _cacheParams.lengthScale = p->GetLengthScale();
     _cacheParams.grid = p->GetGrid();
+    _cacheParams.needToRecalc = p->GetNeedToRecalculateScales();
     p->GetConstantColor(_cacheParams.constantColor);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
@@ -117,6 +127,7 @@ bool BarbRenderer::_isCacheDirty() const
     if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
     if (_cacheParams.lengthScale != p->GetLengthScale()) return true;
     if (_cacheParams.grid != p->GetGrid()) return true;
+    if (_cacheParams.needToRecalc != p->GetNeedToRecalculateScales()) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
@@ -177,21 +188,27 @@ int BarbRenderer::_paintGL()
     if (!VariableExists(ts, varnames, refLevel, lod, true)) {
         SetErrMsg("One or more selected field variables does not exist");
         rc = -1;
-        goto RETURN;
+        glEndList();
+        return (rc);
     }
 
     // Find box extents for ROI
     //
-    if (varnames != _fieldVariables) {
+    bool recalculateScales = bParams->GetNeedToRecalculateScales();
+    if (varnames != _fieldVariables || recalculateScales) {
         _setDefaultLengthAndThicknessScales(ts, varnames, bParams);
         _fieldVariables = varnames;
+        bParams->SetNeedToRecalculateScales(false);
     }
 
     // Get grids for our vector variables
     //
     rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
 
-    if (rc < 0) goto RETURN;
+    if (rc < 0) {
+        glEndList();
+        return (rc);
+    }
     varData.push_back(NULL);
     varData.push_back(NULL);
 
@@ -205,7 +222,8 @@ int BarbRenderer::_paintGL()
             for (int i = 0; i < varData.size(); i++) {
                 if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
             }
-            goto RETURN;
+            glEndList();
+            return (rc);
         }
         varData[3] = sg;
     }
@@ -220,7 +238,8 @@ int BarbRenderer::_paintGL()
             for (int i = 0; i < varData.size(); i++) {
                 if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
             }
-            goto RETURN;
+            glEndList();
+            return (rc);
         }
         varData[4] = sg;
     }
@@ -235,7 +254,6 @@ int BarbRenderer::_paintGL()
         if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
     }
 
-RETURN:
     glEndList();
     return (rc);
 }
@@ -362,9 +380,7 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3])
     vcross(uVec, dirVec, bVec);
 
     BarbParams *bParams = (BarbParams *)GetActiveParams();
-    float       radius = bParams->GetLineThickness() *
-
-                   _maxThickness;
+    float       radius = bParams->GetLineThickness() * _maxThickness;
 
     // calculate 6 points in plane orthog to dirVec, in plane of point
     for (int i = 0; i < 6; i++) {
@@ -704,8 +720,11 @@ vector<double> BarbRenderer::_getMaximumValues(size_t ts, const std::vector<stri
 
             VAPoR::Grid *grid;
             grid = _dataMgr->GetVariable(ts, varName, refLevel, compLevel);
-
-            maxVarVals[i] = _getMaxAtBarbLocations(grid);
+            if (!grid) {
+                MyBase::SetErrMsg("Failed to retrieve %s at timestep %i", varName.c_str(), ts);
+            } else {
+                maxVarVals[i] = _getMaxAtBarbLocations(grid);
+            }
         }
     }
 

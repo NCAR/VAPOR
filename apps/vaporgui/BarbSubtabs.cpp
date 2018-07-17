@@ -2,12 +2,17 @@
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
 
-#define LENGTH_MIN    .01
-#define LENGTH_MAX    1
-#define THICKNESS_MIN .01
-#define THICKNESS_MAX 1
-#define COUNT_MIN     1
-#define COUNT_MAX     50
+//#define LENGTH_MIN .01
+//#define LENGTH_MAX 1
+//#define THICKNESS_MIN .01
+//#define THICKNESS_MAX 1
+#define COUNT_MIN 1
+#define COUNT_MAX 50
+
+#define LENGTH_MIN    1
+#define LENGTH_MAX    100
+#define THICKNESS_MIN 1
+#define THICKNESS_MAX 100
 
 void BarbVariablesSubtab::pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter)
 {
@@ -55,14 +60,15 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
     _zDimCombo = new Combo(zDimEdit, zDimSlider, true);
-    _lengthCombo = new Combo(lengthScaleEdit, lengthScaleSlider);
-    _thicknessCombo = new Combo(thicknessEdit, thicknessSlider);
+    _lengthCombo = new Combo(lengthScaleEdit, lengthScaleSlider, true);
+    _thicknessCombo = new Combo(thicknessEdit, thicknessSlider, true);
 
     connect(_xDimCombo, SIGNAL(valueChanged(int)), this, SLOT(xDimChanged(int)));
     connect(_yDimCombo, SIGNAL(valueChanged(int)), this, SLOT(yDimChanged(int)));
     connect(_zDimCombo, SIGNAL(valueChanged(int)), this, SLOT(zDimChanged(int)));
-    connect(_lengthCombo, SIGNAL(valueChanged(double)), this, SLOT(lengthChanged(double)));
-    connect(_thicknessCombo, SIGNAL(valueChanged(double)), this, SLOT(thicknessChanged(double)));
+    connect(_lengthCombo, SIGNAL(valueChanged(int)), this, SLOT(lengthChanged(int)));
+    connect(_thicknessCombo, SIGNAL(valueChanged(int)), this, SLOT(thicknessChanged(int)));
+    connect(_recalcScalesButton, SIGNAL(pressed()), this, SLOT(recalculateScales()));
 }
 
 void BarbAppearanceSubtab::hideZDimWidgets()
@@ -92,10 +98,10 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
     _zDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[2]);
 
     vector<double> minExt, maxExt;
-    double         length = _bParams->GetLengthScale();
+    int            length = _bParams->GetLengthScale();
     _lengthCombo->Update(LENGTH_MIN, LENGTH_MAX, length);
 
-    double thickness = _bParams->GetLineThickness();
+    int thickness = _bParams->GetLineThickness();
     _thicknessCombo->Update(THICKNESS_MIN, THICKNESS_MAX, thickness);
 }
 
@@ -132,6 +138,8 @@ void BarbAppearanceSubtab::zDimChanged(int i)
     _bParams->SetGrid(dims);
 }
 
-void BarbAppearanceSubtab::lengthChanged(double d) { _bParams->SetLengthScale(d); }
+void BarbAppearanceSubtab::lengthChanged(int d) { _bParams->SetLengthScale(d); }
 
-void BarbAppearanceSubtab::thicknessChanged(double d) { _bParams->SetLineThickness(d); }
+void BarbAppearanceSubtab::thicknessChanged(int d) { _bParams->SetLineThickness(d); }
+
+void BarbAppearanceSubtab::recalculateScales() { _bParams->SetNeedToRecalculateScales(true); }
