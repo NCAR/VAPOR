@@ -132,6 +132,7 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     //
     bool _mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16]);
     void _mesa_transposef(GLfloat to[16], const GLfloat from[16]);
+    void _printMatrix(const GLfloat m[16]);
 
 }; // End of class DirectVolumeRenderer
 
