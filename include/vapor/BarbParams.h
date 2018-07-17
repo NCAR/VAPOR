@@ -20,15 +20,21 @@ class PARAMS_API BarbParams : public RenderParams {
 
     virtual ~BarbParams();
 
+    bool GetNeedToRecalculateScales() const {
+        return (bool)GetValueDouble(_needToRecalculateScalesTag, 0.0);
+    }
+
+    void SetNeedToRecalculateScales(bool val);
+
     //! Get the length scaling factor
     //! \retval double scale factor
     //
-    double GetLengthScale() const {
-        return GetValueDouble(_lengthScaleTag, .1);
+    int GetLengthScale() const {
+        return (int)GetValueDouble(_lengthScaleTag, 50);
     }
 
-    void SetLengthScale(double val) {
-        SetValueDouble(_lengthScaleTag, "Barb length", val);
+    void SetLengthScale(int val) {
+        SetValueDouble(_lengthScaleTag, "Barb length", (double)val);
     }
 
     //! \copydoc RenderParams::IsOpaque()
@@ -73,12 +79,12 @@ class PARAMS_API BarbParams : public RenderParams {
 
     //! Determine line thickness in voxels
     //! \retval double line thickness
-    double GetLineThickness() const {
-        return (GetValueDouble(_thicknessScaleTag, .2));
+    int GetLineThickness() const {
+        return (int)GetValueDouble(_thicknessScaleTag, 50);
     }
 
-    void SetLineThickness(double val) {
-        SetValueDouble(_thicknessScaleTag, "Barb thickness", val);
+    void SetLineThickness(int val) {
+        SetValueDouble(_thicknessScaleTag, "Barb thickness", (double)val);
     }
 
     // Get static string identifier for this params class
@@ -89,6 +95,7 @@ class PARAMS_API BarbParams : public RenderParams {
 
   private:
     void _init();
+    static const string _needToRecalculateScalesTag;
     static const string _lengthScaleTag;
     static const string _thicknessScaleTag;
     static const string _gridTag;
