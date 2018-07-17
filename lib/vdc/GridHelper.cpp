@@ -114,11 +114,16 @@ bool isCurvilinear(
 	const vector <DC::CoordVar> &cvarsinfo,
 	const vector <vector <string>> &cdimnames
 ) {
+
 	assert(cvarsinfo.size() == cdimnames.size());
 
 	if (! (cdimnames.size() == 2 || cdimnames.size() == 3)) return(false);
 
-	if (cdimnames.size() == 3 && cdimnames[2].size() != 1) return(false);
+	if (cdimnames.size() == 3 && ! 
+		((cdimnames[2].size() == 1) || (cdimnames[2].size() == 3))) {
+
+		return(false);
+	}
 
 	if (! (cdimnames[0].size() == 2 && cdimnames[1].size() == 2)) return(false);
 
@@ -368,34 +373,29 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(
 	// X horizontal coord blocks
 	//
 	vector <size_t> bs2d = {bs[0], bs[1]};
-	nblocks = 1;
-	block_size = 1;
+	size_t nblocks2d = 1;
+	size_t block_size2d = 1;
     for (int i=0; i<bs2d.size(); i++) {
-        nblocks *= bmax[i]-bmin[i]+1;
-        block_size *= bs2d[i];
+        nblocks2d *= bmax[i]-bmin[i]+1;
+        block_size2d *= bs2d[i];
     }
 
 	vector <float *> xcblkptrs;
-    for (int i=0; i<nblocks; i++) {
-        xcblkptrs.push_back(blkvec[1] + i*block_size);
+    for (int i=0; i<nblocks2d; i++) {
+        xcblkptrs.push_back(blkvec[1] + i*block_size2d);
 	}
 
 	// Y horizontal coord blocks
 	//
-	nblocks = 1;
-	block_size = 1;
+	nblocks2d = 1;
+	block_size2d = 1;
     for (int i=0; i<bs2d.size(); i++) {
-        nblocks *= bmax[i]-bmin[i]+1;
-        block_size *= bs2d[i];
+        nblocks2d *= bmax[i]-bmin[i]+1;
+        block_size2d *= bs2d[i];
     }
 	vector <float *> ycblkptrs;
-    for (int i=0; i<nblocks; i++) {
-        ycblkptrs.push_back(blkvec[2] + i*block_size);
-	}
-
-	vector <double> zcoords;
-	if (dims.size()==3) {
-		for (int i=0; i<dims[2]; i++) zcoords.push_back(blkvec[3][i]);
+    for (int i=0; i<nblocks2d; i++) {
+        ycblkptrs.push_back(blkvec[2] + i*block_size2d);
 	}
 
 	vector <double> minu2d = {0.0, 0.0};
@@ -408,12 +408,45 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(
 		ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax
 	);
 
-	CurvilinearGrid *g = new CurvilinearGrid(
-		dims, bs, blkptrs, xrg, yrg, 
-		zcoords, kdtree
-	);
+	if (dims.size() == 3 && cvarsinfo[2].GetDimNames().size() == 3) {
 
-	return(g);
+		// Terrain following vertical
+		//
+		vector <double> minu = {0.0, 0.0, 0.0};
+		vector <double> maxu = {1.0, 1.0, 1.0};
+
+		vector <float *> zcblkptrs;
+		for (int i=0; i<nblocks; i++) {
+			zcblkptrs.push_back(blkvec[3] + i*block_size);
+		}
+
+		RegularGrid zrg(dims, bs, zcblkptrs, minu, maxu);
+
+		return (new CurvilinearGrid(
+			dims, bs, blkptrs, xrg, yrg, zrg, kdtree
+		));
+
+	}
+	else if (dims.size() == 3 && cvarsinfo[2].GetDimNames().size() == 1) {
+
+		// stretched vertical
+		//
+		vector <double> zcoords;
+		for (int i=0; i<dims[2]; i++) zcoords.push_back(blkvec[3][i]);
+
+		return (new CurvilinearGrid(
+			dims, bs, blkptrs, xrg, yrg, zcoords, kdtree
+		));
+	}
+	else {
+
+		// 2D
+		//
+		return (new CurvilinearGrid(
+			dims, bs, blkptrs, xrg, yrg, vector <double> (), kdtree
+		));
+
+	}
 }
 
 

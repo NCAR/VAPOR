@@ -1080,8 +1080,6 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 
  void _assignHorizontalCoords(vector <string> &coord_vars) const;
 
- void _assignVerticalCoords(vector <string> &coord_vars) const;
-
  void _assignTimeCoord(string &coord_var) const;
 
  bool _getVarDimensions(
