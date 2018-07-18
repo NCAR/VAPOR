@@ -64,12 +64,12 @@ vec3 CalculateGradient(in vec3 tc)
     }
 
     vec3 a0, a1;
-    a0.x = texture(volumeTexture, tc + vec3(h0.x,0.0,0.0)).w;
-    a1.x = texture(volumeTexture, tc + vec3(h1.x,0.0,0.0)).w;
-    a0.y = texture(volumeTexture, tc + vec3(0.0,h0.y,0.0)).w;
-    a1.y = texture(volumeTexture, tc + vec3(0.0,h1.y,0.0)).w;
-    a0.z = texture(volumeTexture, tc + vec3(0.0,0.0,h0.z)).w;
-    a1.z = texture(volumeTexture, tc + vec3(0.0,0.0,h1.z)).w;
+    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0,0.0) ).w;
+    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0,0.0) ).w;
+    a0.y = texture( volumeTexture, tc + vec3(0.0,h0.y,0.0) ).w;
+    a1.y = texture( volumeTexture, tc + vec3(0.0,h1.y,0.0) ).w;
+    a0.z = texture( volumeTexture, tc + vec3(0.0,0.0,h0.z) ).w;
+    a1.z = texture( volumeTexture, tc + vec3(0.0,0.0,h1.z) ).w;
 
     return (a1-a0 / h);
 }
@@ -78,30 +78,31 @@ vec3 CalculateGradient(in vec3 tc)
 void main(void)
 {
     float stepSize1D = 0.001f; // This is like ~1000 steps.
-    vec4  lightDirEye = vec4( 0.0f, 0.0f, 1.0f, 0.0f );
-    float ambientCoeff = 0.5;
-    float diffuseCoeff = 0.5;
+    vec3  lightDirEye = normalize( vec3(0.0f, 0.0f, 1.0f)); // vec3 makes normalization easier
+    float ambientCoeff = 0.3f;
+    float diffuseCoeff = 1.0f;
+    float specularExp  = 32f;
 
     // Get UV coordinates of this frament
     if( positionClip.w == 0.0f )
         discard;
     vec2 positionUV = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
 
-    vec4 stopTexture    = vec4(texture( backFaceTexture,  positionUV ).xyz, 1.0f);
-    vec4 startTexture   = vec4(texture( frontFaceTexture, positionUV ).xyz, 1.0f);
-    vec4 rayDirTexture  = stopTexture - startTexture;
+    vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
+    vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
+    vec3 rayDirTexture  = stopTexture - startTexture;
     if( length( rayDirTexture ) == 0.0f )
         discard;
 
     float nStepsf       = length( rayDirTexture ) / stepSize1D;
-    vec4  stepSize3D    = rayDirTexture / nStepsf;
+    vec3  stepSize3D    = rayDirTexture / nStepsf;
 
-    vec4  step1Texture  = startTexture;
-    if( texture(missingValueMaskTexture, step1Texture.xyz).x > 0 )    // missing value
+    vec3  step1Texture  = startTexture;
+    if( texture(missingValueMaskTexture, step1Texture).x > 0 )    // missing value
         color           = vec4( 0.0f );
     else
     {
-        float step1Value = texture( volumeTexture, step1Texture.xyz ).w;
+        float step1Value = texture( volumeTexture, step1Texture ).w;
               color      = texture( colorMapTexture, TranslateValue(step1Value) );
               color.rgb *= color.a;
     }
@@ -112,22 +113,28 @@ void main(void)
         if( color.a > 0.99f )
             break;
 
-        vec4 step2Texture = startTexture + stepSize3D * float(i + 1);
-        if( texture(missingValueMaskTexture, step2Texture.xyz).x > 0 )    // missing value
+        vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
+        if( texture(missingValueMaskTexture, step2Texture).x > 0 )    // missing value
             continue;
 
-        float step2Value  = texture( volumeTexture, step2Texture.xyz ).w;
+        float step2Value  = texture( volumeTexture, step2Texture ).w;
         vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
         if( backColor.a < 0.01f )    // only process this fragment if it's opaque enough
             continue;
         
-        vec4 gradientModel = vec4( CalculateGradient( step2Texture.xyz ), 0.0f );
-        if( length( gradientModel ) > 0.01f )
+        // Apply lighting if big enough gradient
+        vec3 gradientModel = CalculateGradient( step2Texture );
+        if( length( gradientModel ) > 0.001f )
         {
-            //vec4 gradientEye = normalize( transpose(inverse(ModelView)) * gradientModel );
-            vec4 gradientEye = normalize( transposedInverseMV * gradientModel );
-            float diffuse    = abs( dot(gradientEye, lightDirEye) );
-            backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff);
+            vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
+            gradientEye      = normalize( gradientEye );
+            float diffuse    = abs( dot(lightDirEye, gradientEye) );
+            //backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff);
+
+            // Calculate eye space coordinates of "step2Texture"
+
+            vec3 halfvEye    = reflect( -lightDirEye, gradientEye );
+            float specular   = pow( abs(dot( halfvEye, 
         }
 
         // Color compositing
