@@ -214,15 +214,17 @@ int WireFrameRenderer::_buildCache()
 
         _drawCell(coordsArray, colorsArray, nodes.size(), layered);
     }
-    delete[] coordsArray;
-    delete[] colorsArray;
-    if (grid) delete grid;
-    if (heightGrid) delete heightGrid;
 
 #if 0    // VAPOR_3_1_0
 #else
     DisableClippingPlanes();
 #endif
+
+    delete[] coordsArray;
+    delete[] colorsArray;
+
+    if (grid) delete grid;
+    if (heightGrid) delete heightGrid;
 
     glEndList();
     return 0;
