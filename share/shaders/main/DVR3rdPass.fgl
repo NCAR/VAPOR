@@ -9,9 +9,11 @@ uniform sampler3D volumeTexture;
 uniform sampler3D missingValueMaskTexture;
 uniform sampler1D colorMapTexture;
 
-uniform vec2 valueRange;        // min and max values of the variable
-uniform vec2 colorMapRange;     // min and max values on the color map
-uniform vec3 volumeDimensions;  // Number of vertices of the volumeTexture
+uniform vec2 valueRange;        // min and max values of this variable
+uniform vec2 colorMapRange;     // min and max values on this color map
+uniform vec3 volumeDimensions;  // number of vertices of this volumeTexture
+uniform vec3 boxMin;            // min coordinates of the bounding box of this volume
+uniform vec3 boxMax;            // max coordinates of the bounding box of this volume
 
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
@@ -77,11 +79,12 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
-    float stepSize1D = 0.001f; // This is like ~1000 steps.
-    vec3  lightDirEye = normalize( vec3(0.0f, 0.0f, 1.0f)); // vec3 makes normalization easier
-    float ambientCoeff = 0.3f;
-    float diffuseCoeff = 1.0f;
-    float specularExp  = 32f;
+    float stepSize1D    = 0.001f; // This is like ~1000 steps.
+    vec3  lightDirEye   = normalize( vec3(0.0f, 0.0f, 1.0f)); // vec3 makes normalization easier
+    float ambientCoeff  = 0.3f;
+    float diffuseCoeff  = 1.0f;
+    float specularCoeff = 0.3f;
+    float specularExp   = 12.0f;
 
     // Get UV coordinates of this frament
     if( positionClip.w == 0.0f )
@@ -129,12 +132,16 @@ void main(void)
             vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
             gradientEye      = normalize( gradientEye );
             float diffuse    = abs( dot(lightDirEye, gradientEye) );
-            //backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff);
 
             // Calculate eye space coordinates of "step2Texture"
+            vec3 step2Model  = boxMin + step2Texture * (boxMax - boxMin);
+            vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
+            vec3 viewDirEye  = normalize( -step2Eye );
 
-            vec3 halfvEye    = reflect( -lightDirEye, gradientEye );
-            float specular   = pow( abs(dot( halfvEye, 
+            vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
+            float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), specularExp ); 
+            backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
+                               specular * specularCoeff;
         }
 
         // Color compositing
