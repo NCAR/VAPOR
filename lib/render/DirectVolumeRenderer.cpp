@@ -542,13 +542,18 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         _mesa_transposef(TransposedInverseMV, InversedMV);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "transposedInverseMV");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, TransposedInverseMV);
-        //_printMatrix( TransposedInverseMV );
 
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "valueRange");
         glUniform2fv(uniformLocation, 1, _userCoordinates.valueRange);
 
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapRange");
         glUniform2fv(uniformLocation, 1, _colorMapRange);
+
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMin");
+        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
+
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMax");
+        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
 
         float volumeDimensions[3] = {(float)_userCoordinates.dims[0], (float)_userCoordinates.dims[1], (float)_userCoordinates.dims[2]};
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
