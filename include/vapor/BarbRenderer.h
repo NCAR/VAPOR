@@ -53,17 +53,29 @@ private:
 
     GLuint _drawList;
 
+    double _maxValue;
+
     // Copied from TwoDRenderer.h
     //
     // ...TBD...
 
     double _getMaxAtBarbLocations(VAPoR::Grid *grid) const;
 
+    void _getMagnitudeAtPoint(std::vector<VAPoR::Grid *> variables, float point[3]);
+
+    void _recalculateScales(
+        //		std::vector<string> varnames,
+        std::vector<VAPoR::Grid *> &varData, int ts);
+
     std::vector<double> _getMaximumValues(size_t ts, const std::vector<string> &varnames) const;
 
-    double _getDomainHypotenuse(size_t ts, const std::vector<string> varnames) const;
+    double _getDomainHypotenuse(size_t ts) const;
 
-    void _setDefaultLengthAndThicknessScales(size_t ts, const std::vector<string> &varnames, const BarbParams *bParams);
+    void _setDefaultLengthAndThicknessScales(
+        // size_t ts, const std::vector<string> &varnames,
+        size_t ts, const std::vector<VAPoR::Grid *> &varData, const BarbParams *bParams);
+
+    void _getGridRequirements(int &ts, int &refLevel, int &lod, std::vector<double> &minExts, std::vector<double> &maxExts) const;
 
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
@@ -71,11 +83,15 @@ private:
     //! \copydoc Renderer::_paintGL()
     virtual int _paintGL();
 
+    int _getVectorVarGrids(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
+
+    int _getHeightVarGrid(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
+
     void _setUpLightingAndColor();
 
-    void _reFormatExtents(double rakeExts[6]) const;
+    void _reFormatExtents(vector<float> &rakeExts) const;
 
-    void _makeRakeGrid(int rakeGrid[3]) const;
+    void _makeRakeGrid(vector<int> &rakeGrid) const;
 
     //! Protected method that performs rendering of all barbs.
     //! \param[in] DataMgr* current DataMgr
@@ -86,13 +102,16 @@ private:
     //! \param[in] Grid Grid used in rendering.
     //! The first three are the vector field, Grid[3] is the Height variable, Grid[4] is the color variable.
     //! \retval int zero if successful
-    int performRendering(BarbParams *rParams, int actualRefLevel, vector<Grid *> variableData);
+    //	int performRendering(BarbParams* rParams,
+    //		int actualRefLevel,
+    //		vector <Grid *> variableData
+    //	);
 
-    float getHeightOffset(Grid *heightVar, float xCoord, float yCoord, bool &missing);
+    float _getHeightOffset(Grid *heightVar, float xCoord, float yCoord, bool &missing) const;
 
     bool _makeCLUT(float clut[1024]) const;
 
-    void _getDirection(float direction[3], vector<Grid *> varData, float xCoord, float yCoord, float zCoord, bool &missing) const;
+    void _getDirection(float direction[3], std::vector<Grid *> varData, float xCoord, float yCoord, float zCoord, bool &missing) const;
 
     vector<double> _getScales();
 
@@ -100,7 +119,11 @@ private:
 
     void _makeStartAndEndPoint(float start[3], float end[3], float direction[3]);
 
-    void renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, BarbParams *params);
+    void _getStrides(vector<float> &strides, vector<int> &rakeGrid, vector<float> &rakeExts) const;
+
+    bool _defineBarb(std::vector<Grid *>, float start[3], float end[3], bool doColorMapping, float clut[1024]);
+
+    void _operateOnGrid(vector<Grid *> variableData, bool drawBarb = true);
 
     bool _getColorMapping(float val, float clut[256 * 4]);
 
@@ -115,7 +138,8 @@ private:
     //! Protected method to draw one barb (a hexagonal tube with a cone barbhead)
     //! \param[in] const float startPoint[3] beginning position of barb
     //! \param[in] const float endPoint[3] ending position of barb
-    void drawBarb(const float startPoint[3], const float endPoint[3]);
+    // void drawBarb(const float startPoint[3], const float endPoint[3]);
+    void _drawBarb(const std::vector<Grid *> variableData, float startPoint[3], bool doColorMapping, float clut[1024]);
 
 #ifdef DEBUG
     _printBackDiameter(const float startVertex[18]) const;
