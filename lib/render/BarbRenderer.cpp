@@ -212,15 +212,13 @@ void BarbRenderer::_getGridRequirements(int &ts, int &refLevel, int &lod, std::v
     bParams->GetBox()->GetExtents(minExts, maxExts);
 }
 
-int BarbRenderer::_getHeightVarGrid(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData)
+int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData)
 {
-    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
-    assert(bParams);
-    string hname = bParams->GetHeightVariableName();
+    Grid *sg = NULL;
+    varData.push_back(sg);
 
-    if (!hname.empty()) {
-        Grid *sg = NULL;
-        int   rc = DataMgrUtils::GetGrids(_dataMgr, ts, hname, minExts, maxExts, true, &refLevel, &lod, &sg);
+    if (!varName.empty()) {
+        int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varName, minExts, maxExts, true, &refLevel, &lod, &sg);
         if (rc < 0) {
             for (int i = 0; i < varData.size(); i++) {
                 if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
@@ -228,7 +226,7 @@ int BarbRenderer::_getHeightVarGrid(int ts, int refLevel, int lod, std::vector<d
             glEndList();
             return (rc);
         }
-        varData[3] = sg;
+        varData[varData.size() - 1] = sg;
     }
 
     return 0;
@@ -252,68 +250,35 @@ int BarbRenderer::_paintGL()
     int            ts, refLevel, lod;
     vector<double> minExts, maxExts;
     _getGridRequirements(ts, refLevel, lod, minExts, maxExts);
-    _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
 
+    // Get vector variables
+    _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
     if (rc < 0) {
         glEndList();
         return (rc);
     }
 
-    //_recalculateScales(varnames, ts);
-    _recalculateScales(varData, ts);
-
-    varData.push_back(NULL);
-    varData.push_back(NULL);
-
-    // Get grids for our height variable
-    //
-    _getHeightVarGrid(ts, refLevel, lod, minExts, maxExts, varData);
-    if (rc < 0) return rc;
-
-    /*    string hname = bParams->GetHeightVariableName();
-    if (! hname.empty()) {
-        Grid *sg = NULL;
-        int rc = DataMgrUtils::GetGrids(
-                _dataMgr, ts, hname, minExts, maxExts,
-                true, &refLevel, &lod, &sg
-        );
-        if(rc<0) {
-            for (int i = 0; i<varData.size(); i++){
-                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
-            }
-            glEndList();
-            return(rc);
-        }
-        varData[3] = sg;
-    }
-*/
-
-    // Get grids for our color variable
-    //
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     assert(bParams);
+
+    // Get height variable
+    string heightVar = bParams->GetHeightVariableName();
+    _getVarGrid(ts, refLevel, lod, heightVar, minExts, maxExts, varData);
+    if (rc < 0) return rc;
+
+    // Get color variable
     string colorVar = bParams->GetColorMapVariableName();
-    if (!bParams->UseSingleColor() && !colorVar.empty()) {
-        Grid *sg;
-        int   rc = DataMgrUtils::GetGrids(_dataMgr, ts, colorVar, minExts, maxExts, true, &refLevel, &lod, &sg);
-        if (rc < 0) {
-            for (int i = 0; i < varData.size(); i++) {
-                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
-            }
-            glEndList();
-            return (rc);
-        }
-        varData[4] = sg;
-    }
+    _getVarGrid(ts, refLevel, lod, colorVar, minExts, maxExts, varData);
+    if (rc < 0) return rc;
+
+    _recalculateScales(varData, ts);
 
     _setUpLightingAndColor();
 
-    //
-    // Perform OpenGL rendering of barbs
-    //
+    // Render the barbs
     _operateOnGrid(varData);
 
-    // Release the locks on the data:
+    // Release the locks on the data
     for (int i = 0; i < varData.size(); i++) {
         if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
     }
@@ -867,7 +832,7 @@ double BarbRenderer::_getDomainHypotenuse(size_t ts) const
 
 void BarbRenderer::_setDefaultLengthAndThicknessScales(size_t ts, const std::vector<VAPoR::Grid *> &varData, const BarbParams *bParams)
 {
-    assert(varData.size() <= 3);
+    assert(varData.size() >= 3);
 
     _maxValue = 0;
 
