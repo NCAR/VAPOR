@@ -24,8 +24,8 @@ public:
 			(VariablesWidget::VECTOR | VariablesWidget::HGT |
 			VariablesWidget::COLOR),
 			(VariablesWidget::DimFlags)
-			(VariablesWidget::TWOD),
-			//(VariablesWidget::TWOD | VariablesWidget::THREED),
+			//(VariablesWidget::TWOD),
+			(VariablesWidget::TWOD | VariablesWidget::THREED),
 			(VariablesWidget::ColorFlags)(VariablesWidget::COLORVAR));
 	}
 
