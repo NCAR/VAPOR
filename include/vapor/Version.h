@@ -57,6 +57,8 @@ public:
     //
     static string GetRC() { return (VERSION_RC); }
 
+    static string GetBuildType() { return (BUILD_TYPE); }
+
     //! Return the canonical version number as a formatted string
     //!
     //! Return the canonical version number as a formatted string of
