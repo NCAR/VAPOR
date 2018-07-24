@@ -599,16 +599,13 @@ StructuredGrid *GridHelper::MakeGridStructured(
     if (gridType == RegularGrid::GetClassType()) {
         rg = _make_grid_regular(
             roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    }
-    if (gridType == StretchedGrid::GetClassType()) {
+    } else if (gridType == StretchedGrid::GetClassType()) {
         rg = _make_grid_stretched(
             roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    }
-    if (gridType == LayeredGrid::GetClassType()) {
+    } else if (gridType == LayeredGrid::GetClassType()) {
         rg = _make_grid_layered(
             roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
-    }
-    if (gridType == CurvilinearGrid::GetClassType()) {
+    } else if (gridType == CurvilinearGrid::GetClassType()) {
         rg = _make_grid_curvilinear(
             ts, level, lod, cvarsinfo, roi_dims,
             blkvec, bsvec[0], bminvec[0], bmaxvec[0]);
