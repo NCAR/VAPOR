@@ -12,6 +12,8 @@
 #include <vapor/UnstructuredGrid2D.h>
 #include <vapor/KDTreeRG.h>
 #include <vapor/UDUnitsClass.h>
+#include <vapor/GridHelper.h>
+#include <vapor/DerivedVarMgr.h>
 
 #ifndef DataMgvV3_0_h
     #define DataMgvV3_0_h
@@ -684,15 +686,14 @@ private:
     int    _nthreads;
     size_t _mem_size;
 
-    DC *           _dc;
-    VAPoR::UDUnits _udunits;
+    DC *              _dc;
+    VAPoR::UDUnits    _udunits;
+    VAPoR::GridHelper _gridHelper;
 
-    std::map<string, DerivedDataVar *>  _derivedDataVars;
-    std::map<string, DerivedCoordVar *> _derivedCoordVars;
-    std::vector<DerivedVar *>           _derivedVars;
-    bool                                _doTransformHorizontal;
-    bool                                _doTransformHeight;
-    string                              _openVarName;
+    DerivedVarMgr _dvm;
+    bool          _doTransformHorizontal;
+    bool          _doTransformVertical;
+    string        _openVarName;
 
     std::vector<double> _timeCoordinates;
     string              _proj4String;
@@ -721,27 +722,21 @@ private:
 
     std::vector<string> _get_var_dependencies(string varname) const;
 
-    // Return true if native data set is georeferenced
+    // Return true if native data has a transformable horizontal coordinate
     //
-    bool _is_geographic() const;
+    bool _hasHorizontalXForm() const;
 
-    // Return true if the specified data variable has geographic
-    // coordinates in the native data set
+    // Return true if native mesh has a transformable horizontal coordinate
     //
-    bool _is_geographic(string varname) const;
+    bool _hasHorizontalXForm(string meshname) const;
 
-    // Return true if the specified data mesh has geographic
-    // coordinates in the native data set
-    //
-    bool _is_geographicMesh(string mesh) const;
+    bool _get_coord_vars(string varname, std::vector<string> &scvars, string &tcvar) const;
 
-    int _get_coord_vars(string varname, std::vector<string> &scvars, string &tcvar) const;
+    bool _get_coord_vars(string varname, vector<DC::CoordVar> &scvarsinfo, DC::CoordVar &tcvarinfo) const;
 
     int _initTimeCoord();
 
     int _get_default_projection(string &projection);
-
-    VAPoR::RegularGrid *_make_grid_empty(string varname) const;
 
     VAPoR::RegularGrid *_make_grid_regular(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
                                            const std::vector<size_t> &bmax) const;
@@ -767,10 +762,7 @@ private:
                             const std::vector<std::vector<size_t>> &bsvec, const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec,
                             const vector<int *> &conn_blkvec, const vector<vector<size_t>> &conn_bsvec, const vector<vector<size_t>> &conn_bminvec, const vector<vector<size_t>> &conn_bmaxvec);
 
-    enum GridType { UNDEFINED = 0, REGULAR, STRETCHED, LAYERED, CURVILINEAR, UNSTRUC_2D, UNSTRUC_LAYERED };
-    GridType _get_grid_type(const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo) const;
-
-    GridType _get_grid_type(string varname) const;
+    string _get_grid_type(string varname) const;
 
     int _find_bounding_grid(size_t ts, string varname, int level, int lod, std::vector<double> min, std::vector<double> max, std::vector<size_t> &min_ui, std::vector<size_t> &max_ui);
 
@@ -805,7 +797,6 @@ private:
     void _unlock_blocks(const void *blks);
 
     std::vector<string> _get_native_variables() const;
-    std::vector<string> _get_derived_variables() const;
 
     void *_alloc_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, std::vector<size_t> bs, int element_sz, bool lock, bool fill);
 
@@ -817,27 +808,13 @@ private:
     int _level_correction(string varname, int &level) const;
     int _lod_correction(string varname, int &lod) const;
 
-    const KDTreeRG *_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax);
-
     vector<string> _getDataVarNamesDerived(int ndim) const;
-
-    vector<string> _getCoordVarNamesDerived() const;
-
-    string _getTimeCoordVarNameDerived() const;
-
-    bool _getDataVarInfoDerived(string varname, VAPoR::DC::DataVar &varInfo) const;
-
-    bool _getCoordVarInfoDerived(string varname, VAPoR::DC::CoordVar &varInfo) const;
-
-    bool _getBaseVarInfoDerived(string varname, VAPoR::DC::BaseVar &varInfo) const;
 
     bool _hasCoordForAxis(vector<string> coord_vars, int axis) const;
 
     string _defaultCoordVar(const DC::Mesh &m, int axis) const;
 
     void _assignHorizontalCoords(vector<string> &coord_vars) const;
-
-    void _assignVerticalCoords(vector<string> &coord_vars) const;
 
     void _assignTimeCoord(string &coord_var) const;
 
@@ -884,6 +861,18 @@ private:
     int _initProj4StringDefault();
 
     int _initHorizontalCoordVars();
+
+    int _initVerticalCoordVars();
+
+    bool _hasVerticalXForm() const;
+
+    bool _hasVerticalXForm(string meshname, string &standard_name, string &formula_terms) const;
+
+    bool _hasVerticalXForm(string meshname) const
+    {
+        string dummy;
+        return (_hasVerticalXForm(meshname, dummy, dummy));
+    }
 };
 
 };    // namespace VAPoR

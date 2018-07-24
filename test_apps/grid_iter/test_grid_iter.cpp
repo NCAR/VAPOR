@@ -193,6 +193,59 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid()
     return (cg);
 }
 
+VAPoR::CurvilinearGrid *make_curvilinear_terrain_grid()
+{
+    assert(opt.bs.size() == 3);
+    assert(opt.bs.size() == opt.minu.size());
+    assert(opt.bs.size() == opt.maxu.size());
+    assert(opt.bs.size() == opt.dims.size());
+    assert(opt.bs.size() == opt.periodic.size());
+
+    vector<size_t> bs2d = {opt.bs[0], opt.bs[1]};
+    vector<size_t> dims2d = {opt.dims[0], opt.dims[1]};
+    vector<size_t> bs = {opt.bs[0], opt.bs[1], opt.bs[2]};
+    vector<size_t> dims = {opt.dims[0], opt.dims[1], opt.dims[2]};
+
+    vector<float *> xblks = alloc_blocks(bs2d, dims2d);
+
+    RegularGrid *xrg = new RegularGrid(dims2d, bs2d, xblks, vector<double>(2, 0.0), vector<double>(2, 1.0));
+
+    vector<float *> yblks = alloc_blocks(bs2d, dims2d);
+
+    RegularGrid *yrg = new RegularGrid(dims2d, bs2d, yblks, vector<double>(2, 0.0), vector<double>(2, 1.0));
+
+    for (size_t j = 0; j < dims2d[1]; j++) {
+        for (size_t i = 0; i < dims2d[0]; i++) {
+            double x = (opt.maxu[0] - opt.minu[0]) / (dims2d[0] - 1) * i + opt.minu[0];
+            double y = (opt.maxu[1] - opt.minu[1]) / (dims2d[1] - 1) * j + opt.minu[1];
+            xrg->SetValueIJK(i, j, 0, x);
+            yrg->SetValueIJK(i, j, 0, y);
+        }
+    }
+
+    KDTreeRG *kdtree = new KDTreeRG(*xrg, *yrg);
+
+    vector<float *> zblks = alloc_blocks(bs, dims);
+
+    RegularGrid *zrg = new RegularGrid(dims, bs, zblks, vector<double>(3, 0.0), vector<double>(3, 1.0));
+
+    for (size_t k = 0; k < dims[2]; k++) {
+        double z = (opt.maxu[2] - opt.minu[2]) / (dims[2] - 1) * k + opt.minu[2];
+
+        for (size_t j = 0; j < dims[1]; j++) {
+            for (size_t i = 0; i < dims[0]; i++) { zrg->SetValueIJK(i, j, k, z); }
+        }
+    }
+
+    vector<float *> blks = alloc_blocks(opt.bs, opt.dims);
+
+    vector<double>   minu2d = {opt.minu[0], opt.minu[1]};
+    vector<double>   maxu2d = {opt.maxu[0], opt.maxu[1]};
+    CurvilinearGrid *cg = new CurvilinearGrid(opt.dims, opt.bs, blks, *xrg, *yrg, *zrg, kdtree);
+
+    return (cg);
+}
+
 void init_grid(StructuredGrid *sg)
 {
     // Initialize data to linear ramp
@@ -349,6 +402,9 @@ int main(int argc, char **argv)
     } else if (opt.type == "curvilinear") {
         cout << "Curvilinear grid" << endl;
         sg = make_curvilinear_grid();
+    } else if (opt.type == "curvilinear_terrain") {
+        cout << "Curvilinear terrain grid" << endl;
+        sg = make_curvilinear_terrain_grid();
     } else {
         cout << "Regular grid" << endl;
         sg = make_regular_grid();
@@ -360,6 +416,10 @@ int main(int argc, char **argv)
 
     cout << "Creation time : " << Wasp::GetTime() - t0 << endl;
     cout << *sg;
+    vector<double> minu, maxu;
+    sg->GetUserExtents(minu, maxu);
+    cout << "Grid Extents: " << endl;
+    for (int i = 0; i < minu.size(); i++) { cout << "\t" << minu[i] << " " << maxu[i] << endl; }
     cout << endl;
 
     test_iterator(sg);

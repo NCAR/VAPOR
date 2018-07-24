@@ -67,6 +67,9 @@ public:
     StructuredGrid() = default;
     virtual ~StructuredGrid() = default;
 
+    static std::string GetClassType() { return ("Structured"); }
+    std::string        GetType() const override { return (GetClassType()); }
+
     const std::vector<size_t> &GetNodeDimensions() const override { return (GetDimensions()); }
 
     const std::vector<size_t> &GetCellDimensions() const override { return (_cellDims); };
