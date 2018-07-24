@@ -1050,6 +1050,27 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     return (rg);
 }
 
+int DataMgr::GetVariableExtents(size_t ts, std::vector<std::string> varnames, int level, std::vector<double> &min, std::vector<double> &max)
+{
+    int                 rc;
+    std::vector<double> tmpMin, tmpMax;
+    for (int i = 0; i < varnames.size(); i++) {
+        rc = GetVariableExtents(ts, varnames[i], level, tmpMin, tmpMax);
+        if (rc < 0) return (-1);
+
+        if (i == 0) {
+            min = tmpMin;
+            max = tmpMax;
+        } else {
+            for (int j = 0; j < tmpMin.size(); j++) {
+                if (tmpMin[j] < min[j]) min[j] = tmpMin[j];
+                if (tmpMax[j] < max[j]) max[j] = tmpMax[j];
+            }
+        }
+    }
+    return rc;
+}
+
 int DataMgr::GetVariableExtents(size_t ts, string varname, int level, vector<double> &min, vector<double> &max)
 {
     min.clear();

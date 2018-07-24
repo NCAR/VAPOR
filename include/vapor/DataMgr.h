@@ -413,9 +413,10 @@ public:
     //! specified in user
     //! coordinates, of the smallest axis-aligned bounding box that is
     //! guaranteed to contain
-    //! the variable indicated by \p varname, and the given refinement level,
+    //! the variable(s) indicated by \p varname, and the given refinement level,
     //! \p level
     //!
+    int GetVariableExtents(size_t ts, std::vector<string> varname, int level, std::vector<double> &min, std::vector<double> &max);
     int GetVariableExtents(size_t ts, string varname, int level, std::vector<double> &min, std::vector<double> &max);
 
     int GetDataRange(size_t ts, string varname, int level, int lod, std::vector<double> &range);

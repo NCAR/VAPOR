@@ -678,6 +678,7 @@ void BarbRenderer::_operateOnGrid(vector<Grid *> variableData, bool drawBarb)
 {
     vector<int> rakeGrid;
     _makeRakeGrid(rakeGrid);
+
     vector<float> rakeExts;
     _reFormatExtents(rakeExts);
 
@@ -688,12 +689,12 @@ void BarbRenderer::_operateOnGrid(vector<Grid *> variableData, bool drawBarb)
     bool  doColorMapping = _makeCLUT(clut);
 
     float start[3];    //, end[3];
-    for (int i = 1; i <= rakeGrid[0]; i++) {
-        start[X] = strides[X] * i + rakeExts[0];    // + xStride/2.0;
-        for (int j = 1; j <= rakeGrid[1]; j++) {
-            start[Y] = strides[Y] * j + rakeExts[1];    // + yStride/2.0;
-            for (int k = 1; k <= rakeGrid[2]; k++) {
-                start[Z] = strides[Z] * k + rakeExts[2];    //+ zStride/2.0;
+    for (int i = 1; i <= rakeGrid[X]; i++) {
+        start[X] = strides[X] * i + rakeExts[X];    // + xStride/2.0;
+        for (int j = 1; j <= rakeGrid[Y]; j++) {
+            start[Y] = strides[Y] * j + rakeExts[Y];    // + yStride/2.0;
+            for (int k = 1; k <= rakeGrid[Z]; k++) {
+                start[Z] = strides[Z] * k + rakeExts[Z];    //+ zStride/2.0;
 
                 if (drawBarb) {
                     _drawBarb(variableData, start, doColorMapping, clut);

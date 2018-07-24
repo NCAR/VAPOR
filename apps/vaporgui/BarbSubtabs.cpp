@@ -55,8 +55,6 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     setupUi(this);
     _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::CONSTANT));
 
-    hideZDimWidgets();
-
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
     _zDimCombo = new Combo(zDimEdit, zDimSlider, true);
@@ -71,7 +69,7 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     connect(_recalcScalesButton, SIGNAL(pressed()), this, SLOT(recalculateScales()));
 }
 
-void BarbAppearanceSubtab::hideZDimWidgets()
+void BarbAppearanceSubtab::_hideZDimWidgets()
 {
     zDimLabel->hide();
     zDimSlider->hide();
@@ -82,6 +80,28 @@ void BarbAppearanceSubtab::hideZDimWidgets()
     tab->adjustSize();
     BarbLayoutTab->adjustSize();
     adjustSize();
+}
+
+bool BarbAppearanceSubtab::_isVariable2D() const
+{
+    VAPoR::Grid *       grid;
+    int                 ts, level, lod;
+    std::vector<string> varNames = _bParams->GetFieldVariableNames();
+
+    for (int i = 0; i < 3; i++) {
+        string varName = varNames[i];
+        if (varName == "") { continue; }
+
+        ts = _bParams->GetCurrentTimestep();
+        level = _bParams->GetRefinementLevel();
+        lod = _bParams->GetCompressionLevel();
+        grid = _dataMgr->GetVariable(ts, varName, level, lod);
+
+        int dimSize = grid->GetDimensions().size();
+        if (dimSize == 2) return true;
+    }
+
+    return false;
 }
 
 void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *bParams)
@@ -103,6 +123,8 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
 
     int thickness = _bParams->GetLineThickness();
     _thicknessCombo->Update(THICKNESS_MIN, THICKNESS_MAX, thickness);
+
+    if (_isVariable2D()) _hideZDimWidgets();
 }
 
 void BarbAppearanceSubtab::xDimChanged(int i)

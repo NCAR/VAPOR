@@ -50,7 +50,8 @@ private slots:
     void recalculateScales();
 
 private:
-    void hideZDimWidgets();
+    void _hideZDimWidgets();
+    bool _isVariable2D() const;
 
     VAPoR::BarbParams *_bParams;
     VAPoR::DataMgr *   _dataMgr;
