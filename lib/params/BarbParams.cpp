@@ -73,36 +73,46 @@ bool BarbParams::usingVariable(const std::string& varname) {
 //Set everything to default values
 void BarbParams::_init() {
 	SetDiagMsg("BarbParams::_init()");
+	
+	int defaultTS = GetCurrentTimestep();
+	int defaultLOD = GetRefinementLevel();
+	int defaultCRatio = GetCompressionLevel();
+	int defaultDimension = 3;
 
-	// Only 2D variables supported. Override base class
-	//
-    vector <string> varnames = _dataMgr->GetDataVarNames(2);
+    vector <string> varnames = _dataMgr->GetDataVarNames(defaultDimension);
+	if (varnames.empty()) 
+		varnames = _dataMgr->GetDataVarNames(defaultDimension-1);
+
 	string varname;
+	if (!varnames.empty()) varname = varnames[0];
+	else return;
 
-	if (! varnames.empty()) varname = varnames[0];
-    SetVariableName(varname);
+	SetVariableName(varname);
 	SetColorMapVariableName(varname);
 
-	// Initialize 2D box
-	//
-	if (varname.empty()) return;
-
-    if (! _dataMgr->VariableExists(0,varname, 0, 0)) return;
+    bool variableExists = _dataMgr->VariableExists(
+		defaultTS,
+		varname, 
+		defaultCRatio, 
+		defaultLOD
+	);
+	if (!variableExists) return;
 
     vector <double> minExt, maxExt;
-    int rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
+    int rc = _dataMgr->GetVariableExtents(
+		defaultTS, 
+		varname, 
+		defaultLOD, 
+		minExt, 
+		maxExt
+	);
+	assert (rc >=0);
+	assert(minExt.size()==maxExt.size() && minExt.size()>=2);
 
+	GetBox()->SetExtents(minExt, maxExt);
+	
 	SetUseSingleColor(true);
 	float rgb[] = {1.f,1.f,1.f};
 	SetConstantColor(rgb);
 
-	// Crap. No error handling from constructor. Need Initialization()
-	// method.
-	//
-	assert (rc >=0);
-	assert(minExt.size()==maxExt.size() && minExt.size()==2);
-
-	GetBox()->SetExtents(minExt, maxExt);
-	//GetBox()->SetPlanar(true);	
-	//GetBox()->SetOrientation(2);	
 }
