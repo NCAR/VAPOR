@@ -252,14 +252,26 @@ bool GeometryWidget::getAuxiliaryExtents(
 	std::vector<double> &minFullExts,
 	std::vector<double> &maxFullExts) {
 
-	size_t ts = _rParams->GetCurrentTimestep();
 	std::vector<std::string> auxVarNames = _rParams->GetAuxVariableNames();
 	if( auxVarNames.empty() )
 		return false;
 	else
 	{
-		vector<int> axes;
-		DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExts, maxFullExts, axes);
+//		vector<int> axes;
+//		DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExts, maxFullExts, axes);
+		int ts    = _rParams->GetCurrentTimestep();
+		int level = _rParams->GetRefinementLevel();
+		int rc    = _dataMgr->GetVariableExtents(
+			ts, 
+			auxVarNames, 
+			level, 
+			minFullExts, 
+			maxFullExts
+		);
+		if (rc<0) {
+			MyBase::SetErrMsg("Error: DataMgr could "
+				"not return valid values from GetVariableExtents()");
+		}
 	}
 	return true;
 }
@@ -268,7 +280,6 @@ bool GeometryWidget::getVectorExtents(
 	std::vector<double> &minFullExts,
 	std::vector<double> &maxFullExts) {
 	
-	size_t ts = _rParams->GetCurrentTimestep();
 	std::vector<string> varNames = _rParams->GetFieldVariableNames();
 	if (varNames.empty()) return false;
 
@@ -276,8 +287,21 @@ bool GeometryWidget::getVectorExtents(
 		(varNames[1] == "") &&
 		(varNames[2] == "")) return false;
 
-	vector<int> axes;
-	DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExts, maxFullExts, axes);
+//	vector<int> axes;
+//	DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExts, maxFullExts, axes);
+	int ts    = _rParams->GetCurrentTimestep();
+	int level = _rParams->GetRefinementLevel();
+	int rc    = _dataMgr->GetVariableExtents(
+		ts, 
+		varNames,
+		level, 
+		minFullExts, 
+		maxFullExts
+	);
+	if (rc<0) {
+		MyBase::SetErrMsg("Error: DataMgr could "
+			"not return valid values from GetVariableExtents()");
+	}
 	return true;
 }
 

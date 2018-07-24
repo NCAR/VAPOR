@@ -49,8 +49,9 @@ public:
  //! E.g. the grid on which barbs are placed.
  //! \retval vector<long> grid
  const vector<long> GetGrid() const {
-	  const vector<long> defaultGrid(3, 10);
-	 return (GetValueLongVec(_gridTag,defaultGrid));
+	vector<long> defaultGrid(2, 10);
+	defaultGrid.push_back(1.0);
+	return (GetValueLongVec(_gridTag,defaultGrid));
  }
 
  void SetGrid(const int grid[3]){
