@@ -202,6 +202,7 @@ int WireFrameRenderer::_buildCache() {
     float *colorsArray = new float[nverts * 4];
     Grid::ConstCellIterator end = grid->ConstCellEnd();
 
+    float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
     for (; it != end; ++it) {
         vector<vector<size_t>> nodes;
         grid->GetCellNodes(*it, nodes);
@@ -218,7 +219,7 @@ int WireFrameRenderer::_buildCache() {
             } else if (heightGrid) {
                 coordsArray[3 * i + 2] = heightGrid->AccessIndex(nodes[i]);
             } else {
-                coordsArray[3 * i + 2] = _getDefaultZ(_dataMgr, _cacheParams.ts);
+                coordsArray[3 * i + 2] = defaultZ;
             }
 
             float dataValue = grid->AccessIndex(nodes[i]);
@@ -252,17 +253,19 @@ int WireFrameRenderer::_buildCache() {
 
         _drawCell(coordsArray, colorsArray, nodes.size(), layered);
     }
-    delete[] coordsArray;
-    delete[] colorsArray;
-    if (grid)
-        delete grid;
-    if (heightGrid)
-        delete heightGrid;
 
 #if 0 // VAPOR_3_1_0
 #else
     DisableClippingPlanes();
 #endif
+
+    delete[] coordsArray;
+    delete[] colorsArray;
+
+    if (grid)
+        delete grid;
+    if (heightGrid)
+        delete heightGrid;
 
     glEndList();
     return 0;
