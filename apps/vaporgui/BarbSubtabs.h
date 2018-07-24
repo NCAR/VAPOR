@@ -61,7 +61,8 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
     void recalculateScales();
 
   private:
-    void hideZDimWidgets();
+    void _hideZDimWidgets();
+    bool _isVariable2D() const;
 
     VAPoR::BarbParams *_bParams;
     VAPoR::DataMgr *_dataMgr;
