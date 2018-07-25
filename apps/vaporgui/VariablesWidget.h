@@ -119,8 +119,6 @@ private:
 
     void setVectorVarName(const QString &name, int component);
     void configureDefaultColoring();
-    // void configureColorMappingToVariable(string var);
-    // void configureConstantColor(string var);
     void configureColorWidgets(string selection);
     void collapseColorVarSettings();
 
@@ -128,9 +126,15 @@ private:
 
     string updateVarCombo(QComboBox *varCombo, const vector<string> &varnames, bool doZero, string currentVar);
 
-    void updateVariableCombos(VAPoR::RenderParams *params);
+    void updateCombos();
+    void updateScalarCombo();
+    void updateVectorCombo();
+    void updateColorCombo();
+    void updateHeightCombo();
 
-    void updateDims(VAPoR::RenderParams *rParams);
+    void updateDims();
+
+    int _activeDim;
 
     DisplayFlags _dspFlags;
     DimFlags     _dimFlags;
