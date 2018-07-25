@@ -71,16 +71,12 @@ public:
 	THREED = (1u << 1),
  };
 
- enum ColorFlags {
-	COLORVAR = (1u << 0),
- };
-
  VariablesWidget(QWidget* parent);
 
  void Reinit(
 	DisplayFlags dspFlags, 
-	DimFlags dimFlags,
-	ColorFlags colorFlags);
+	DimFlags dimFlags
+ );
 
  virtual ~VariablesWidget(){}
 
@@ -132,6 +128,11 @@ private:
  VAPoR::ParamsMgr *_paramsMgr;
  VAPoR::RenderParams *_rParams;
  
+ void pushVarStartingWithLetter(
+	std::vector<string> searchVars,
+	std::vector<string> &returnVars,
+	char letter
+ );
 	
  void setVectorVarName(const QString& name, int component);
  void configureDefaultColoring();
@@ -154,7 +155,6 @@ private:
 
  DisplayFlags _dspFlags;
  DimFlags _dimFlags;
- ColorFlags _colorFlags;
 
  static string _nDimsTag;
 };
