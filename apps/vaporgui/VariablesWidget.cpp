@@ -31,6 +31,9 @@
 
 #define TWODIMS 2
 #define THREEDIMS 3
+#define X 0
+#define Y 1
+#define Z 2
 
 using namespace VAPoR;
 
@@ -141,7 +144,6 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component) {
 
     if (!(_dspFlags & VECTOR))
         return;
-    //if ((! (_dimFlags & THREED)) && component == 2) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -153,17 +155,17 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component) {
 
 void VariablesWidget::setXVarName(const QString &name) {
     assert(_rParams);
-    setVectorVarName(name, 0);
+    setVectorVarName(name, X);
 }
 
 void VariablesWidget::setYVarName(const QString &name) {
     assert(_rParams);
-    setVectorVarName(name, 1);
+    setVectorVarName(name, Y);
 }
 
 void VariablesWidget::setZVarName(const QString &name) {
     assert(_rParams);
-    setVectorVarName(name, 2);
+    setVectorVarName(name, Z);
 }
 
 void VariablesWidget::setXDistVarName(const QString &name) {
@@ -208,16 +210,17 @@ void VariablesWidget::setVariableDims(int index) {
 
     _activeDim = index == 0 ? TWODIMS : THREEDIMS;
 
-    _paramsMgr->BeginSaveStateGroup(
-        "Set variable dimensions");
+    /*	_paramsMgr->BeginSaveStateGroup(
+		"Set variable dimensions"
+	);
 
-    _rParams->SetValueLong(_nDimsTag, "Set variable dimensions", _activeDim);
-
+	_rParams->SetValueLong(_nDimsTag, "Set variable dimensions", _activeDim);
+*/
     // Need to refresh variable list if dimension changes
     //
     updateCombos();
 
-    _paramsMgr->EndSaveStateGroup();
+    //	_paramsMgr->EndSaveStateGroup();
 }
 
 void VariablesWidget::showHideVar(bool on) {
@@ -365,44 +368,45 @@ void VariablesWidget::updateCombos() {
 
 void VariablesWidget::updateDims() {
 
+    // If we only support one dimension
     if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+        dimensionFrame->hide();
 
         // Need to set default variable dimension even if only support
         // single dimension option.
         //
-        int defaultDim = 2;
+        //		int defaultDim = THREEDIMS;
+        _activeDim = THREEDIMS;
         if (_dimFlags & TWOD) {
-            defaultDim = 2;
-        }
-        if (_dimFlags & THREED) {
-            defaultDim = 3;
+            //			defaultDim = TWODIMS;
+            _activeDim = TWODIMS;
         }
 
-        bool enabled = _paramsMgr->GetSaveStateEnabled();
+        /*		bool enabled = _paramsMgr->GetSaveStateEnabled();
+		
+		_paramsMgr->SetSaveStateEnabled(false);
+		_rParams->SetValueLong(_nDimsTag, "", defaultDim);
+		_paramsMgr->SetSaveStateEnabled(enabled);
+*/
+    } else {
+        dimensionFrame->show();
 
-        _paramsMgr->SetSaveStateEnabled(false);
-        _rParams->SetValueLong(_nDimsTag, "", defaultDim);
-        _paramsMgr->SetSaveStateEnabled(enabled);
+        //	int ndim = _rParams->GetValueLong(_nDimsTag, 3);
 
-        dimensionFrame->hide();
-        return;
+        //	if (ndim < 2 || ndim > 3) {
+        //		ndim = 2;
+        //		_rParams->SetValueLong(_nDimsTag, "Set variable dimensions", ndim);
+        //	}
+
+        //	int index = ndim == 2 ? 0 : 1;
+
+        int index = _activeDim - 1;
+        dimensionCombo->setCurrentIndex(index);
+
+        // Nono!  Do not do this!  We want to
+        // keep our old Box after var dimension change!
+        //_rParams->_initBox();
     }
-
-    dimensionFrame->show();
-
-    int ndim = _rParams->GetValueLong(_nDimsTag, 3);
-
-    if (ndim < 2 || ndim > 3) {
-        ndim = 2;
-        _rParams->SetValueLong(_nDimsTag, "Set variable dimensions", ndim);
-    }
-
-    int index = ndim == 2 ? 0 : 1;
-    dimensionCombo->setCurrentIndex(index);
-
-    // Nono!  Do not do this!  We want to
-    // keep our old Box after var dimension change!
-    //_rParams->_initBox();
 }
 
 void VariablesWidget::Update(
