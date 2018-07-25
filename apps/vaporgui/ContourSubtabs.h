@@ -82,7 +82,6 @@ public:
 	ContourGeometrySubtab(QWidget* parent) {
 		setupUi(this);
 		_geometryWidget->Reinit(
-			GeometryWidget::TWOD,
 			GeometryWidget::MINMAX,
 			GeometryWidget::SCALAR);
 
