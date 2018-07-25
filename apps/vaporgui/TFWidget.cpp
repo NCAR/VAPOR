@@ -206,13 +206,13 @@ void TFWidget::getRange(float range[2], float values[2])
 
     if (!_dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
-    vector<double> minExt, maxExt;
-    Box *          myBox = _rParams->GetBox();
-    myBox->GetExtents(minExt, maxExt);
+    vector<double> rangev;
+    int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, rangev);
+    assert(rc >= 0);
+    assert(rangev.size() == 2);
 
-    Grid *myVar;
-    myVar = _dataMgr->GetVariable(ts, varName, ref, cmp, minExt, maxExt);
-    myVar->GetRange(range);
+    range[0] = rangev[0];
+    range[1] = rangev[1];
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     values[0] = tf->getMinMapValue();
