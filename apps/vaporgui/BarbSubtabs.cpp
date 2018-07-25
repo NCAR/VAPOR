@@ -75,8 +75,6 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);
 	_geometryWidget->Reinit(
-		(GeometryWidget::DimFlags)((GeometryWidget::VECTOR) 
-			| (GeometryWidget::TWOD)),
 		GeometryWidget::MINMAX,
 		GeometryWidget::VECTOR);
 }

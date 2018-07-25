@@ -15,13 +15,6 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 	Q_OBJECT
 
 public:
-	//! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to be supported
-	//
-	enum DimFlags {
-		TWOD = (1u << 0), 
-		THREED = (1u << 1), 
-	};
-
 	enum VariableFlags {
 		SCALAR = (1u << 0),
 		VECTOR = (1u << 1),
@@ -36,7 +29,6 @@ public:
 	GeometryWidget(QWidget *parent=0);
 
 	void Reinit(
-		DimFlags dimFlags, 
 		DisplayFlags displayFlags,
 		VariableFlags varFlags);
 
@@ -111,13 +103,10 @@ private:
 	std::map<std::string, std::string> _visNames;
 	std::map<std::string, std::string> _renTypeNames;
 
-	DimFlags _dimFlags;
 	VariableFlags _varFlags;
 	DisplayFlags _displayFlags;
 
     bool  _useAuxVariables;     // for Statistics utility
-
-	static const std::string _nDimsTag;
 };
 
 #endif //GEOMETRYWIDGET_H
