@@ -14,6 +14,19 @@
 #define THICKNESS_MIN 1
 #define THICKNESS_MAX 100
 
+BarbVariablesSubtab::BarbVariablesSubtab(QWidget *parent) {
+    setupUi(this);
+
+    VariablesWidget::DisplayFlags displayFlags;
+    displayFlags = (VariablesWidget::DisplayFlags)(VariablesWidget::VECTOR | VariablesWidget::HGT |
+                                                   VariablesWidget::COLOR);
+
+    VariablesWidget::DimFlags dimFlags;
+    dimFlags = (VariablesWidget::DimFlags)(VariablesWidget::TWOD | VariablesWidget::THREED);
+
+    _variablesWidget->Reinit(displayFlags, dimFlags);
+}
+
 void BarbVariablesSubtab::pushVarStartingWithLetter(
     vector<string> searchVars,
     vector<string> &returnVars,
@@ -29,6 +42,13 @@ void BarbVariablesSubtab::pushVarStartingWithLetter(
     }
     if (!foundDefaultU)
         returnVars.push_back(searchVars[0]);
+}
+
+void BarbVariablesSubtab::Update(
+    VAPoR::DataMgr *dataMgr,
+    VAPoR::ParamsMgr *paramsMgr,
+    VAPoR::RenderParams *rParams) {
+    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
 void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams,
@@ -56,6 +76,16 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent) {
         (GeometryWidget::DimFlags)((GeometryWidget::VECTOR) | (GeometryWidget::TWOD)),
         GeometryWidget::MINMAX,
         GeometryWidget::VECTOR);
+}
+
+void BarbGeometrySubtab::Update(
+    VAPoR::ParamsMgr *paramsMgr,
+    VAPoR::DataMgr *dataMgr,
+    VAPoR::RenderParams *rParams) {
+    _bParams = (VAPoR::BarbParams *)rParams;
+    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+    _copyRegionWidget->Update(paramsMgr, rParams);
+    _transformTable->Update(rParams->GetTransform());
 }
 
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {

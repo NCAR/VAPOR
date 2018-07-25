@@ -20,8 +20,7 @@ class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI
     WireFrameVariablesSubtab(QWidget *parent) {
         setupUi(this);
         _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
-                                 (VariablesWidget::DimFlags)(VariablesWidget::THREED | VariablesWidget::TWOD),
-                                 (VariablesWidget::ColorFlags)(0));
+                                 (VariablesWidget::DimFlags)(VariablesWidget::THREED | VariablesWidget::TWOD));
     }
 
     void Update(
