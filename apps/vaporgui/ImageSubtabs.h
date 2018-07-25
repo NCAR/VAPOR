@@ -26,8 +26,7 @@ class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit(
             VariablesWidget::HGT,
-            VariablesWidget::TWOD,
-            (VariablesWidget::ColorFlags)(0));
+            VariablesWidget::TWOD);
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
