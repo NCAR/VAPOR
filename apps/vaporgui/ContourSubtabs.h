@@ -79,7 +79,6 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
     ContourGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            GeometryWidget::TWOD,
             GeometryWidget::MINMAX,
             GeometryWidget::SCALAR);
 

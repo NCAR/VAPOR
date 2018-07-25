@@ -27,8 +27,6 @@
 
 using namespace VAPoR;
 
-const string GeometryWidget::_nDimsTag = "ActiveDimension";
-
 template <typename Out>
 void split(const std::string &s, char delim, Out result) {
     std::stringstream ss;
@@ -122,19 +120,13 @@ void GeometryWidget::adjustLayoutTo2D() {
 }
 
 void GeometryWidget::Reinit(
-    DimFlags dimFlags,
     DisplayFlags displayFlags,
     VariableFlags varFlags) {
 
-    _dimFlags = dimFlags;
+    cout << "GeometryWidget::Reinit" << endl;
+
     _displayFlags = displayFlags;
     _varFlags = varFlags;
-
-    if (_dimFlags & TWOD) {
-        adjustLayoutTo2D();
-    } else if (_dimFlags & THREED) {
-        zMinMaxFrame->show();
-    }
 
     if (_displayFlags & MINMAX) {
         adjustLayoutToMinMax();
@@ -223,16 +215,10 @@ void GeometryWidget::updateRangeLabels(
     yMinMaxLabel->setText(yTitle);
 
     if (minExt.size() < 3) {
-        Reinit(
-            GeometryWidget::TWOD,
-            _displayFlags,
-            _varFlags);
+        adjustLayoutTo2D();
         zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
-        Reinit(
-            GeometryWidget::THREED,
-            _displayFlags,
-            _varFlags);
+        zMinMaxFrame->show();
         QString zTitle = QString("Z Min: ") +
                          QString::number(minExt[2], 'g', 3) +
                          QString("	Max: ") +
