@@ -76,7 +76,7 @@ const vector<string> requiredHorizCoordVarNames = {
 
 // Vertical coordinate variables
 //
-const string zGridVarName = "zgrid";
+const string zGridP1VarName = "zgrid";
 
 // Time coordinate variables
 //
@@ -107,10 +107,10 @@ const vector<string> requiredAuxVarNames = {
 //
 const string mesh2DTriName = "mesh2DTri";
 const string mesh3DTriName = "mesh3DTri";
-const string mesh3DP1TriName = "mesh3DTri";
+const string mesh3DP1TriName = "mesh3DTriP1";
 const string mesh2DCellName = "mesh2DCell";
 const string mesh3DCellName = "mesh3DCell";
-const string mesh3DP1CellName = "mesh3DCell";
+const string mesh3DP1CellName = "mesh3DCellP1";
 
 // Attributes
 //
@@ -120,9 +120,9 @@ const string onASphereAttr = "on_a_sphere";
 // Derived variable names. These don't appear in the MPAS output.
 // They are derived at run-time by the DCMPAS class
 //
-const string zGridM1VarName = "zgridM1";
-const string zGridVertVarName = "zgridVert";
-const string zGridVertM1VarName = "zgridVertM1";
+const string zGridVertP1VarName = "zgridVert";
+const string zGridVarName = "zgridM1";
+const string zGridVertVarName = "zgridVertM1";
 
 const vector<string> requiredAttrNames = {
     //		coreNameAttr,
@@ -867,11 +867,14 @@ int DCMPAS::_InitCoordvars(
     vector<string> dimnames;
 
     if (_isAtmosphere(ncdfc)) {
-        // Vertical coordinate variables, native and derived
+
+        // Vertical coordinate variables
+        // MPAS-A only outputs a single vertical coordinate variable, zgrid,
+        // which is the elevation of the staggered grid, primary (cell) mesh.
         //
         string units = "meters";
         int axis = 2;
-        string name = zGridVarName;
+        string name = zGridP1VarName;
         dimnames = ncdfc->GetDimNames(name);
         assert(dimnames.size() == 2);
 
@@ -882,18 +885,20 @@ int DCMPAS::_InitCoordvars(
         if (rc < 0)
             return (-1);
 
-        units = "meters";
-        name = zGridM1VarName;
-        dimnames = ncdfc->GetDimNames(name);
-        assert(dimnames.size() == 2);
+        // Need derived vertical coord vars for dual mesh and unstaggered grid
+        //
+        DC::CoordVar cvarInfo;
+        bool ok = _dvm.GetCoordVarInfo(zGridVertP1VarName, cvarInfo);
+        assert(ok);
+        _coordVarsMap[zGridVertP1VarName] = cvarInfo;
 
-        _coordVarsMap[name] = CoordVar(
-            name, units, DC::FLOAT, periodic, axis, false,
-            dimnames, time_dim_name);
+        ok = _dvm.GetCoordVarInfo(zGridVarName, cvarInfo);
+        assert(ok);
+        _coordVarsMap[zGridVarName] = cvarInfo;
 
-        rc = DCUtils::CopyAtt(*ncdfc, name, _coordVarsMap[name]);
-        if (rc < 0)
-            return (-1);
+        ok = _dvm.GetCoordVarInfo(zGridVertVarName, cvarInfo);
+        assert(ok);
+        _coordVarsMap[zGridVertVarName] = cvarInfo;
     }
 
     // Time coordinate is a derived variable
@@ -932,16 +937,33 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
     if (!_isAtmosphere(ncdfc))
         return (0);
 
-    DerivedCoordVar_UnStaggered *derivedVar = NULL;
+    DerivedCoordVar *derivedVar = NULL;
 
     derivedVar = new DerivedCoordVar_UnStaggered(
-        zGridM1VarName, nVertLevelsDimName,
-        this, zGridVarName, nVertLevelsP1DimName);
+        zGridVarName, nVertLevelsDimName,
+        this, zGridP1VarName, nVertLevelsP1DimName);
 
     int rc = derivedVar->Initialize();
     if (rc < 0)
         return (-1);
+    _dvm.AddCoordVar(derivedVar);
 
+    derivedVar = new DerivedCoordVertFromCell(
+        zGridVertP1VarName, nVertLevelsP1DimName, this, zGridP1VarName,
+        cellsOnVertexVarName);
+
+    rc = derivedVar->Initialize();
+    if (rc < 0)
+        return (-1);
+    _dvm.AddCoordVar(derivedVar);
+
+    derivedVar = new DerivedCoordVertFromCell(
+        zGridVertVarName, nVertLevelsDimName, this, zGridVarName,
+        cellsOnVertexVarName);
+
+    rc = derivedVar->Initialize();
+    if (rc < 0)
+        return (-1);
     _dvm.AddCoordVar(derivedVar);
 
     return (0);
@@ -1033,10 +1055,7 @@ int DCMPAS::_InitDimensions(
 }
 
 // Given a data variable name return the variable's dimensions and
-// associated coordinate variables. The coordinate variable names
-// returned is for the derived coordinate variables expressed in
-// Cartographic coordinates, not the native geographic coordinates
-// found in the MPAS file.
+// associated coordinate variables.
 //
 // The order of the returned vectors
 // is significant.
@@ -1065,27 +1084,43 @@ int DCMPAS::_GetVarCoordinates(
         sdimnames.push_back(nCellsDimName);
         scoordvars.push_back(lonCellVarName);
         scoordvars.push_back(latCellVarName);
+
+        if (dimnames.size() > 1) {
+            sdimnames.push_back(dimnames[1]);
+            if (dimnames[1] == nVertLevelsDimName) {
+                scoordvars.push_back(zGridVarName);
+            } else {
+                scoordvars.push_back(zGridP1VarName);
+            }
+        }
     } else if (find(_pointVars.begin(), _pointVars.end(), varname) != _pointVars.end()) {
         sdimnames.push_back(nVerticesDimName);
         scoordvars.push_back(lonVertexVarName);
         scoordvars.push_back(latVertexVarName);
+
+        if (dimnames.size() > 1) {
+            sdimnames.push_back(dimnames[1]);
+            if (dimnames[1] == nVertLevelsDimName) {
+                scoordvars.push_back(zGridVertVarName);
+            } else {
+                scoordvars.push_back(zGridVertP1VarName);
+            }
+        }
     } else if (find(_edgeVars.begin(), _edgeVars.end(), varname) != _edgeVars.end()) {
         sdimnames.push_back(nEdgesDimName);
         scoordvars.push_back(lonEdgeVarName);
         scoordvars.push_back(latEdgeVarName);
+
+        if (dimnames.size() > 1) {
+            sdimnames.push_back(dimnames[1]);
+            if (dimnames[1] == nVertLevelsDimName) {
+                scoordvars.push_back(zGridVarName);
+            } else {
+                scoordvars.push_back(zGridP1VarName);
+            }
+        }
     } else {
         assert(0);
-    }
-
-    // 3D variable?
-    //
-    if (dimnames.size() > 1) {
-        sdimnames.push_back(dimnames[1]);
-        if (dimnames[1] == nVertLevelsDimName) {
-            scoordvars.push_back(zGridM1VarName);
-        } else {
-            scoordvars.push_back(zGridVarName);
-        }
     }
 
     return (0);
@@ -1114,15 +1149,15 @@ int DCMPAS::_InitMeshes(
         nCellsDimName, nVerticesDimName, coordvars,
         cellsOnVertexVarName, verticesOnCellVarName);
 
-    coordvars = {lonCellVarName, latCellVarName, zGridM1VarName};
-    _meshMap[mesh3DTriName] = Mesh(
-        mesh3DTriName, 3, dimension.GetLength(),
-        nCellsDimName, nVerticesDimName, nVertLevelsDimName, coordvars,
-        cellsOnVertexVarName, verticesOnCellVarName);
-
     if (_isAtmosphere(ncdfc)) {
+        coordvars = {lonCellVarName, latCellVarName, zGridVarName};
+        _meshMap[mesh3DTriName] = Mesh(
+            mesh3DTriName, 3, dimension.GetLength(),
+            nCellsDimName, nVerticesDimName, nVertLevelsDimName, coordvars,
+            cellsOnVertexVarName, verticesOnCellVarName);
+
         coordvars = {
-            lonCellVarName, latCellVarName, zGridVarName};
+            lonCellVarName, latCellVarName, zGridP1VarName};
 
         _meshMap[mesh3DP1TriName] = Mesh(
             mesh3DP1TriName, 3, dimension.GetLength(),
@@ -1141,15 +1176,16 @@ int DCMPAS::_InitMeshes(
         mesh2DCellName, dimension.GetLength(), 3, nVerticesDimName,
         nCellsDimName, coordvars, verticesOnCellVarName, cellsOnVertexVarName);
 
-    coordvars = {lonVertexVarName, latVertexVarName, zGridM1VarName};
-    _meshMap[mesh3DCellName] = Mesh(
-        mesh3DCellName, dimension.GetLength(), 3, nVerticesDimName,
-        nCellsDimName, nVertLevelsDimName, coordvars, verticesOnCellVarName,
-        cellsOnVertexVarName);
-
     if (_isAtmosphere(ncdfc)) {
+
+        coordvars = {lonVertexVarName, latVertexVarName, zGridVertVarName};
+        _meshMap[mesh3DCellName] = Mesh(
+            mesh3DCellName, dimension.GetLength(), 3, nVerticesDimName,
+            nCellsDimName, nVertLevelsDimName, coordvars, verticesOnCellVarName,
+            cellsOnVertexVarName);
+
         coordvars = {
-            lonVertexVarName, latVertexVarName, zGridVarName};
+            lonVertexVarName, latVertexVarName, zGridVertP1VarName};
 
         _meshMap[mesh3DP1CellName] = Mesh(
             mesh3DP1CellName, dimension.GetLength(), 3, nVerticesDimName,

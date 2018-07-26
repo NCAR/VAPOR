@@ -262,6 +262,10 @@ class VDF_API DCMPAS : public VAPoR::DC {
         bool GetCoordVarInfo(
             DC::CoordVar &cvar) const;
 
+        virtual std::vector<string> GetInputs() const {
+            return (std::vector<string>{_inName});
+        }
+
         int GetDimLensAtLevel(
             int, std::vector<size_t> &dims_at_level,
             std::vector<size_t> &bs_at_level) const;
