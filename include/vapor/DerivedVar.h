@@ -355,6 +355,40 @@ private:
     int          _stagDim;
 };
 
+class VDF_API DerivedCoordVar_UnStaggered : public DerivedCoordVar {
+public:
+    DerivedCoordVar_UnStaggered(string derivedVarName, string unstagDimName, DC *dc, string inName, string dimName);
+    virtual ~DerivedCoordVar_UnStaggered() {}
+
+    virtual int Initialize();
+
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+    virtual std::vector<string> GetInputs() const { return (std::vector<string>()); }
+
+    virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+    virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
+
+    virtual int CloseVariable(int fd);
+
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
+
+private:
+    string       _inName;
+    string       _unstagDimName;
+    string       _dimName;
+    DC *         _dc;
+    DC::CoordVar _coordVarInfo;
+    int          _stagDim;
+};
+
 class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCFVertCoordVar {
 public:
     DerivedCoordVarStandardWRF_Terrain(DC *dc, string mesh, string formula);
