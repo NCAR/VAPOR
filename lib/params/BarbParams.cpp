@@ -2,11 +2,14 @@
 #include <string>
 #include <vapor/RenderParams.h>
 #include <vapor/BarbParams.h>
-
+#include <vapor/DataMgrUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
 
+#define X 0
+#define Y 1 
+#define Z 2
 
 //
 // Register class with object factory!!!
@@ -74,35 +77,32 @@ bool BarbParams::usingVariable(const std::string& varname) {
 void BarbParams::_init() {
 	SetDiagMsg("BarbParams::_init()");
 	
+	SetUseSingleColor(true);
+	float rgb[] = {1.f,1.f,1.f};
+	SetConstantColor(rgb);
+
 	int defaultTS = GetCurrentTimestep();
 	int defaultLOD = GetRefinementLevel();
-	int defaultCRatio = GetCompressionLevel();
-	int defaultDimension = 3;
+	
+	std::vector<string> varnames = GetFieldVariableNames();
+	if (varnames.empty()) {
+		cout << "foo" << endl;
+		return;
+	}
+	if (varnames[X]=="" &&
+		varnames[Y]=="" &&
+		varnames[Z]==""
+	) {
+		cout << "bar" << endl;
+		return;
+	}
 
-    vector <string> varnames = _dataMgr->GetDataVarNames(defaultDimension);
-	if (varnames.empty()) 
-		varnames = _dataMgr->GetDataVarNames(defaultDimension-1);
-
-	string varname;
-	if (!varnames.empty()) varname = varnames[0];
-	else return;
-
-	SetVariableName(varname);
-	SetColorMapVariableName(varname);
-
-    bool variableExists = _dataMgr->VariableExists(
-		defaultTS,
-		varname, 
-		defaultCRatio, 
-		defaultLOD
-	);
-	if (!variableExists) return;
-
-    vector <double> minExt, maxExt;
-    int rc = _dataMgr->GetVariableExtents(
+	vector <double> minExt, maxExt;
+	int rc = DataMgrUtils::GetExtents(
+		_dataMgr,
 		defaultTS, 
-		varname, 
 		defaultLOD, 
+		varnames,
 		minExt, 
 		maxExt
 	);
@@ -110,9 +110,4 @@ void BarbParams::_init() {
 	assert(minExt.size()==maxExt.size() && minExt.size()>=2);
 
 	GetBox()->SetExtents(minExt, maxExt);
-	
-	SetUseSingleColor(true);
-	float rgb[] = {1.f,1.f,1.f};
-	SetConstantColor(rgb);
-
 }

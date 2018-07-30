@@ -438,10 +438,6 @@ std::vector <size_t> GetCRatios(string varname) const;
  //! \p level
  //! 
  int GetVariableExtents(
-	size_t ts, std::vector<string> varname, int level,
-	std::vector <double> &min , std::vector <double> &max
- );
- int GetVariableExtents(
 	size_t ts, string varname, int level,
 	std::vector <double> &min , std::vector <double> &max
  );
