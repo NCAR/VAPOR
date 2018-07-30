@@ -186,15 +186,7 @@ void VariablesWidget::setVariableDims(int index)
     updateCombos();
 }
 
-void VariablesWidget::setDefaultVariables()
-{
-    _rParams->SetDefaultVariables(_activeDim);
-    //	std::vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
-
-    //	setDefaultScalarVar(vars);
-    //	setDefaultVectorVar(vars);
-    //	setDefaultColorVar(vars);
-}
+void VariablesWidget::setDefaultVariables() { _rParams->SetDefaultVariables(_activeDim); }
 
 // Default scalar variable will just be the first variable
 // of the active dimension (2D or 3D)
