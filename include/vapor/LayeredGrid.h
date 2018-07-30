@@ -59,6 +59,11 @@ class VDF_API LayeredGrid : public StructuredGrid {
         return (3);
     }
 
+    static std::string GetClassType() {
+        return ("Layered");
+    }
+    std::string GetType() const override { return (GetClassType()); }
+
     //! \copydoc RegularGrid::GetValue()
     //!
     float GetValue(const std::vector<double> &coords) const override;
