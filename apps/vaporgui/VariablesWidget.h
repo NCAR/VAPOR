@@ -83,8 +83,6 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams);
 
-    string getNDimsTag() { return _nDimsTag; }
-
   protected slots:
     //! Respond to selecting the single (primary) variable of field
     void setVarName(const QString &);
@@ -127,8 +125,6 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
         char letter);
 
     void setVectorVarName(const QString &name, int component);
-    void configureDefaultColoring();
-    void configureColorWidgets(string selection);
     void collapseColorVarSettings();
 
     void showHideVar(bool on);
@@ -142,8 +138,16 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
     void updateVectorCombo();
     void updateColorCombo();
     void updateHeightCombo();
+    void updateDimCombo();
 
-    void updateDims();
+    void setDefaultVariables();
+    void setDefaultScalarVar(std::vector<string> vars);
+    void setDefaultVectorVar(std::vector<string> vars);
+    void setDefaultColorVar(std::vector<string> vars);
+
+    string findVarStartingWithLetter(
+        std::vector<string> searchVars,
+        char letter);
 
     int _activeDim;
 
