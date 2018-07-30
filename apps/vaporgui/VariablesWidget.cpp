@@ -215,11 +215,6 @@ void VariablesWidget::setVariableDims(int index) {
 
 void VariablesWidget::setDefaultVariables() {
     _rParams->SetDefaultVariables(_activeDim);
-    //	std::vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
-
-    //	setDefaultScalarVar(vars);
-    //	setDefaultVectorVar(vars);
-    //	setDefaultColorVar(vars);
 }
 
 // Default scalar variable will just be the first variable
