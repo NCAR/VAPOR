@@ -323,12 +323,17 @@ public:
     //!
     virtual bool usingVariable(const std::string &varname) = 0;
 
+    //! Set reasonable default variables
+    //! \param[in] The dimension of the variables being set
+    void SetDefaultVariables(int dim);
+
     void _initBox();
 
 protected:
     DataMgr *_dataMgr;
 
 private:
+    void             _init();
     int              _maxDim;
     ParamsContainer *_TFs;
     Box *            _Box;
@@ -356,8 +361,7 @@ private:
     static const string _stretchFactorsTag;
     static const string _currentTimestepTag;
 
-    void _init();
-    // void _initBox();
+    string _findVarStartingWithLetter(std::vector<string> searchVars, char letter);
 };
 
 //////////////////////////////////////////////////////////////////////////

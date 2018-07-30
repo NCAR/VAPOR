@@ -27,26 +27,13 @@ BarbVariablesSubtab::BarbVariablesSubtab(QWidget *parent)
     _variablesWidget->Reinit(displayFlags, dimFlags);
 }
 
-void BarbVariablesSubtab::pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter)
-{
-    bool foundDefaultU = false;
-    for (auto &element : searchVars) {
-        if (element[0] == letter || element[0] == toupper(letter)) {
-            returnVars.push_back(element);
-            foundDefaultU = true;
-            break;
-        }
-    }
-    if (!foundDefaultU) returnVars.push_back(searchVars[0]);
-}
-
 void BarbVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
 
 void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr)
 {
-    string nDimsTag = _variablesWidget->getNDimsTag();
-    int    ndim = bParams->GetValueLong(nDimsTag, 3);
-    assert(ndim == 2 || ndim == 3);
+    /*	string nDimsTag = _variablesWidget->getNDimsTag();
+    int ndim = bParams->GetValueLong(nDimsTag, 3);
+    assert(ndim==2 || ndim==3);
 
     vector<string> varNames = dataMgr->GetDataVarNames(ndim);
     vector<string> defaultVars;
@@ -57,6 +44,7 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr 
     pushVarStartingWithLetter(varNames, defaultVars, 'v');
 
     bParams->SetFieldVariableNames(defaultVars);
+*/
 }
 
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent)

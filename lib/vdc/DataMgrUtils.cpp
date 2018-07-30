@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2017				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2017				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -235,6 +235,35 @@ bool DataMgrUtils::GetAxes(const DataMgr *dataMgr, string varname, vector<int> &
         axes.push_back(cvar.GetAxis());
     }
     return (true);
+}
+
+bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t ts, int level, const std::vector<string> &varnames, std::vector<double> &min, std::vector<double> &max)
+{
+    min.clear();
+    max.clear();
+
+    int rc;
+
+    std::vector<double> tmpMin(3, 0);
+    std::vector<double> tmpMax(3, 0);
+    for (int i = 0; i < varnames.size(); i++) {
+        if (varnames[i] == "") { continue; }
+
+        rc = dataMgr->GetVariableExtents(ts, varnames[i], level, tmpMin, tmpMax);
+        if (rc < 0) return (false);
+
+        if (i == 0) {
+            min = tmpMin;
+            max = tmpMax;
+        } else {
+            for (int j = 0; j < min.size(); j++) {
+                if (tmpMin[j] < min[j]) min[j] = tmpMin[j];
+                if (tmpMax[j] < max[j]) max[j] = tmpMax[j];
+            }
+        }
+    }
+    if (rc < 0) return false;
+    return true;
 }
 
 bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double> &minExts, vector<double> &maxExts)

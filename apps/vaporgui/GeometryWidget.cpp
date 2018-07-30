@@ -122,8 +122,6 @@ void GeometryWidget::adjustLayoutTo2D()
 
 void GeometryWidget::Reinit(DisplayFlags displayFlags, VariableFlags varFlags)
 {
-    cout << "GeometryWidget::Reinit" << endl;
-
     _displayFlags = displayFlags;
     _varFlags = varFlags;
 
@@ -221,11 +219,11 @@ bool GeometryWidget::getAuxiliaryExtents(std::vector<double> &minFullExts, std::
     if (auxVarNames.empty())
         return false;
     else {
-        //		vector<int> axes;
-        //		DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExts, maxFullExts, axes);
-        int ts = _rParams->GetCurrentTimestep();
-        int level = _rParams->GetRefinementLevel();
-        int rc = _dataMgr->GetVariableExtents(ts, auxVarNames, level, minFullExts, maxFullExts);
+        vector<int> axes;
+        int         ts = _rParams->GetCurrentTimestep();
+        int         level = _rParams->GetRefinementLevel();
+        int         rc = DataMgrUtils::GetExtents(_dataMgr, ts, level, auxVarNames, minFullExts, maxFullExts);
+
         if (rc < 0) {
             MyBase::SetErrMsg("Error: DataMgr could "
                               "not return valid values from GetVariableExtents()");
@@ -241,11 +239,10 @@ bool GeometryWidget::getVectorExtents(std::vector<double> &minFullExts, std::vec
 
     if ((varNames[0] == "") && (varNames[1] == "") && (varNames[2] == "")) return false;
 
-    //	vector<int> axes;
-    //	DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExts, maxFullExts, axes);
     int ts = _rParams->GetCurrentTimestep();
     int level = _rParams->GetRefinementLevel();
-    int rc = _dataMgr->GetVariableExtents(ts, varNames, level, minFullExts, maxFullExts);
+    int rc = DataMgrUtils::GetExtents(_dataMgr, ts, level, varNames, minFullExts, maxFullExts);
+
     if (rc < 0) {
         MyBase::SetErrMsg("Error: DataMgr could "
                           "not return valid values from GetVariableExtents()");

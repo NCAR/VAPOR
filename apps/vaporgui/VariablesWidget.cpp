@@ -41,7 +41,7 @@ string VariablesWidget::_nDimsTag = "ActiveDimension";
 
 VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_VariablesWidgetGUI()
 {
-    _activeDim = 3;
+    _activeDim = THREEDIMS;
 
     setupUi(this);
 
@@ -75,8 +75,6 @@ void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags)
         else
             _activeDim = THREEDIMS;
     }
-
-    if (_dspFlags ^ COLOR) { collapseColorVarSettings(); }
 
     variableSelectionWidget->adjustSize();
 
@@ -181,17 +179,60 @@ void VariablesWidget::setVariableDims(int index)
 
     _activeDim = index == 0 ? TWODIMS : THREEDIMS;
 
-    /*	_paramsMgr->BeginSaveStateGroup(
-        "Set variable dimensions"
-    );
+    setDefaultVariables();
 
-    _rParams->SetValueLong(_nDimsTag, "Set variable dimensions", _activeDim);
-*/
     // Need to refresh variable list if dimension changes
     //
     updateCombos();
+}
 
-    //	_paramsMgr->EndSaveStateGroup();
+void VariablesWidget::setDefaultVariables()
+{
+    _rParams->SetDefaultVariables(_activeDim);
+    //	std::vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
+
+    //	setDefaultScalarVar(vars);
+    //	setDefaultVectorVar(vars);
+    //	setDefaultColorVar(vars);
+}
+
+// Default scalar variable will just be the first variable
+// of the active dimension (2D or 3D)
+void VariablesWidget::setDefaultScalarVar(std::vector<string> vars)
+{
+    if (_dspFlags & SCALAR) {
+        string defaultVar = vars[0];
+        _rParams->SetVariableName(defaultVar);
+        if (_dspFlags ^ COLOR) _rParams->SetColorMapVariableName(defaultVar);
+    }
+}
+
+// Default vector variables only apply to X and Y components.
+// We try to find variables that correspond to U and V
+void VariablesWidget::setDefaultVectorVar(std::vector<string> vars)
+{
+    if (_dspFlags & VECTOR) {
+        std::vector<string> defaultVars;
+
+        string defaultVar = findVarStartingWithLetter(vars, 'u');
+        defaultVars.push_back(defaultVar);
+        defaultVar = findVarStartingWithLetter(vars, 'v');
+        defaultVars.push_back(defaultVar);
+        defaultVars.push_back("");
+        _rParams->SetFieldVariableNames(defaultVars);
+    }
+}
+
+// A common color-mapped-variable is temperature, so we will try
+// finding a variable starting with 't'
+void VariablesWidget::setDefaultColorVar(std::vector<string> vars)
+{
+    string defaultVar;
+
+    if (_dspFlags & COLOR) {
+        string defaultVar = findVarStartingWithLetter(vars, 't');
+        _rParams->SetColorMapVariableName(defaultVar);
+    }
 }
 
 void VariablesWidget::showHideVar(bool on)
@@ -223,7 +264,9 @@ void VariablesWidget::showHideVar(bool on)
 string VariablesWidget::updateVarCombo(QComboBox *varCombo, const vector<string> &varnames, bool doZero, string currentVar)
 {
     vector<string> my_varnames = varnames;
-    my_varnames.insert(my_varnames.begin(), "0");
+
+    if (doZero) my_varnames.insert(my_varnames.begin(), "0");
+
     if (currentVar == "") { currentVar = "0"; }
 
     varCombo->clear();
@@ -263,10 +306,18 @@ void VariablesWidget::updateVectorCombo()
 {
     if (_dspFlags & VECTOR) {
         vector<string> setVarsReq = _rParams->GetFieldVariableNames();
+
         assert(setVarsReq.size() == 3);
 
         vector<string> setVars;
         vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
+
+        // If our vector variables are empty, choose some defaults
+        if (setVarsReq[0] == "" && setVarsReq[1] == "" && setVarsReq[2] == "") {
+            setDefaultVectorVar(vars);
+            setVarsReq = _rParams->GetFieldVariableNames();
+        }
+
         setVars.push_back(updateVarCombo(varCombo1, vars, true, setVarsReq[0]));
         setVars.push_back(updateVarCombo(varCombo2, vars, true, setVarsReq[1]));
         setVars.push_back(updateVarCombo(varCombo3, vars, true, setVarsReq[2]));
@@ -295,6 +346,8 @@ void VariablesWidget::updateColorCombo()
             _rParams->SetColorMapVariableName(setVar);
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
+    } else {
+        collapseColorVarSettings();
     }
 }
 
@@ -332,48 +385,15 @@ void VariablesWidget::updateCombos()
     updateVectorCombo();
     updateColorCombo();
     updateHeightCombo();
+    updateDimCombo();
 }
 
-void VariablesWidget::updateDims()
+void VariablesWidget::updateDimCombo()
 {
-    // If we only support one dimension
-    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) {
-        dimensionFrame->hide();
-
-        // Need to set default variable dimension even if only support
-        // single dimension option.
-        //
-        //		int defaultDim = THREEDIMS;
-        _activeDim = THREEDIMS;
-        if (_dimFlags & TWOD) {
-            //			defaultDim = TWODIMS;
-            _activeDim = TWODIMS;
-        }
-
-        /*		bool enabled = _paramsMgr->GetSaveStateEnabled();
-
-        _paramsMgr->SetSaveStateEnabled(false);
-        _rParams->SetValueLong(_nDimsTag, "", defaultDim);
-        _paramsMgr->SetSaveStateEnabled(enabled);
-*/
-    } else {
-        dimensionFrame->show();
-
-        //	int ndim = _rParams->GetValueLong(_nDimsTag, 3);
-
-        //	if (ndim < 2 || ndim > 3) {
-        //		ndim = 2;
-        //		_rParams->SetValueLong(_nDimsTag, "Set variable dimensions", ndim);
-        //	}
-
-        //	int index = ndim == 2 ? 0 : 1;
-
-        int index = _activeDim - 1;
+    // Only update if we support multiple dimensions
+    if (((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+        int index = _activeDim - 2;
         dimensionCombo->setCurrentIndex(index);
-
-        // Nono!  Do not do this!  We want to
-        // keep our old Box after var dimension change!
-        //_rParams->_initBox();
     }
 }
 
@@ -387,8 +407,15 @@ void VariablesWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
     _paramsMgr = paramsMgr;
     _rParams = rParams;
 
-    updateDims();
     updateCombos();
 
     _fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
+}
+
+string VariablesWidget::findVarStartingWithLetter(vector<string> searchVars, char letter)
+{
+    for (auto &element : searchVars) {
+        if (element[0] == letter || element[0] == toupper(letter)) { return element; }
+    }
+    return "";
 }
