@@ -60,6 +60,9 @@ public:
 
     virtual size_t GetGeometryDim() const override;
 
+    static std::string GetClassType() { return ("Stretched"); }
+    std::string        GetType() const override { return (GetClassType()); }
+
     // \copydoc GetGrid::GetUserExtents()
     //
     virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override

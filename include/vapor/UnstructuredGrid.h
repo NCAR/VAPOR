@@ -118,6 +118,9 @@ public:
     UnstructuredGrid() = default;
     virtual ~UnstructuredGrid() = default;
 
+    static std::string GetClassType() { return ("Unstructured"); }
+    std::string        GetType() const override { return (GetClassType()); }
+
     //! \copydoc Grid::GetCellNodes()
     //!
     virtual bool GetCellNodes(const std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &nodes) const override;
