@@ -32,6 +32,10 @@ public:
 
  void RemoveVar(const DerivedVar *var);
 
+ DerivedVar *GetVar(string name) const;
+
+ void AddMesh(const Mesh &m);
+
 protected:
 
  //! \copydoc Initialize()
@@ -57,17 +61,13 @@ protected:
 
  //! \copydoc GetMeshNames()
  //
- virtual std::vector <string> getMeshNames() const {
-	return(std::vector <string> ());
- }
+ virtual std::vector <string> getMeshNames() const;
 
  //! \copydoc GetMesh()
  //
  virtual bool getMesh(
 	string mesh_name, DC::Mesh &mesh
- ) const {
-	return(false);
- }
+ ) const;
 
  //! \copydoc GetCoordVarInfo()
  //
@@ -196,6 +196,7 @@ private:
  std::map<string, DerivedVar *> _vars;
  std::map<string, DerivedDataVar *> _dataVars;
  std::map<string, DerivedCoordVar *> _coordVars;
+ std::map<string, Mesh > _meshes;
 
  DerivedVar *_getVar(string name) const;
  DerivedDataVar *_getDataVar(string name) const;
