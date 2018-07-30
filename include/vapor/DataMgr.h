@@ -426,9 +426,6 @@ class VDF_API DataMgr : public Wasp::MyBase {
     //! \p level
     //!
     int GetVariableExtents(
-        size_t ts, std::vector<string> varname, int level,
-        std::vector<double> &min, std::vector<double> &max);
-    int GetVariableExtents(
         size_t ts, string varname, int level,
         std::vector<double> &min, std::vector<double> &max);
 
