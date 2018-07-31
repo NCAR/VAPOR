@@ -1359,7 +1359,6 @@ int DataMgr::GetDataRange(
     float mv = sg->GetMissingValue();
     Grid::ConstIterator itr;
     Grid::ConstIterator enditr = sg->cend();
-    //	for (itr = sg->cbegin(); itr!=sg->cend(); ++itr) {
     for (itr = sg->cbegin(); itr != enditr; ++itr) {
         float v = *itr;
         if (v != mv) {
