@@ -539,6 +539,12 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
         glUniform3fv(uniformLocation, 1, volumeDimensions);
 
+        float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
+        maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
+        float stepSize1D = 0.5f / maxVolumeDim;    // 2 samples per cell
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
+        glUniform1f(uniformLocation, stepSize1D);
+
         // Pass in textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
