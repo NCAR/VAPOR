@@ -5,10 +5,10 @@
 
 //
 // OpenGL debug output
+// https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
 //
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
         fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 }
@@ -19,6 +19,7 @@ using namespace VAPoR;
 // Register class with object factory!!!
 //
 static RendererRegistrar<DirectVolumeRenderer> registrar(DirectVolumeRenderer::GetClassType(), DVRParams::GetClassType());
+
 // Constructor
 DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, DVRParams::GetClassType(), DirectVolumeRenderer::GetClassType(), instName, dataMgr)
@@ -44,12 +45,6 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
 // Destructor
 DirectVolumeRenderer::~DirectVolumeRenderer()
 {
-    /* A few useful files from VAPOR2:
-         DVRRayCaster.h/cpp
-         DVRTexture3d.h/cpp
-         TextureBrick.h/cpp
-         DVRShader.h/cpp
-    */
     if (_backFaceTextureId) glDeleteTextures(1, &_backFaceTextureId);
     if (_frontFaceTextureId) glDeleteTextures(1, &_frontFaceTextureId);
     if (_volumeTextureId) glDeleteTextures(1, &_volumeTextureId);
@@ -74,7 +69,7 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates()
     leftFace = nullptr;
     topFace = nullptr;
     bottomFace = nullptr;
-    field = nullptr;
+    dataField = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
         dims[i] = 0;
@@ -115,9 +110,9 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
         delete[] bottomFace;
         bottomFace = nullptr;
     }
-    if (field) {
-        delete[] field;
-        field = nullptr;
+    if (dataField) {
+        delete[] dataField;
+        dataField = nullptr;
     }
     if (missingValueMask) {
         delete[] missingValueMask;
@@ -236,46 +231,36 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
                 bottomFace[idx++] = (float)buf[2];
             }
 
-        // Save the field value and missing value
-        if (field) delete[] field;
+        // Save the data field values and missing values
+        if (dataField) delete[] dataField;
         size_t numOfVertices = dims[0] * dims[1] * dims[2];
-        field = new float[numOfVertices * 4];
+        dataField = new float[numOfVertices];
+        if (!dataField) return false;
 
         if (missingValueMask) delete[] missingValueMask;
         missingValueMask = new unsigned char[numOfVertices];
 
-        StructuredGrid::ConstIterator valItr = grid->cbegin();               // Iterator for field values
-        StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();    // Iterator for coordinates
-
-        float valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
-        float boxExtent1o[] = {1.0f / (boxMax[0] - boxMin[0]), 1.0f / (boxMax[1] - boxMin[1]), 1.0f / (boxMax[2] - boxMin[2])};
+        StructuredGrid::ConstIterator valItr = grid->cbegin();    // Iterator for data field values
+        float                         valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
 
         if (grid->HasMissingData()) {
             float missingValue = grid->GetMissingValue();
-            float value;
+            float dataValue;
             for (size_t i = 0; i < numOfVertices; i++) {
-                field[i * 4] = ((float)((*coordItr).at(0)) - boxMin[0]) * boxExtent1o[0];        // normalized X
-                field[i * 4 + 1] = ((float)((*coordItr).at(1)) - boxMin[1]) * boxExtent1o[1];    // normalized Y
-                field[i * 4 + 2] = ((float)((*coordItr).at(2)) - boxMin[2]) * boxExtent1o[2];    // normalized Z
-                value = (float)(*valItr);
-                if (value == missingValue) {
-                    field[i * 4 + 3] = 0.0;
+                dataValue = float(*valItr);
+                if (dataValue == missingValue) {
+                    dataField[i] = 0.0f;
                     missingValueMask[i] = 255;
                 } else {
-                    field[i * 4 + 3] = (value - valueRange[0]) * valueRange1o;
+                    dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
                     missingValueMask[i] = 0;
                 }
-                ++coordItr;
                 ++valItr;
             }
         } else    // No missing value!
         {
             for (size_t i = 0; i < numOfVertices; i++) {
-                field[i * 4] = ((float)((*coordItr).at(0)) - boxMin[0]) * boxExtent1o[0];        // normalized X
-                field[i * 4 + 1] = ((float)((*coordItr).at(1)) - boxMin[1]) * boxExtent1o[1];    // normalized Y
-                field[i * 4 + 2] = ((float)((*coordItr).at(2)) - boxMin[2]) * boxExtent1o[2];    // normalized Z
-                field[i * 4 + 3] = ((float)(*valItr) - valueRange[0]) * valueRange1o;
-                ++coordItr;
+                dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
                 ++valItr;
             }
             std::memset(missingValueMask, 0, numOfVertices);
@@ -308,9 +293,6 @@ int DirectVolumeRenderer::_initializeGL()
     const char fglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.fgl";
     _quadShaderId = _loadShaders(vglQuad, fglQuad);
 
-    /* good texture tutorial:
-       https://open.gl/textures */
-
     // Create Vertex Array Object (VAO)
     glGenVertexArrays(1, &_vertexArrayId);
     glBindVertexArray(_vertexArrayId);
@@ -334,7 +316,7 @@ int DirectVolumeRenderer::_paintGL()
 
         /* Also attach the new data to 3D textures: _volumeTextureId, _missingValueTextureId */
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGBA, GL_FLOAT, _userCoordinates.field);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
         glBindTexture(GL_TEXTURE_3D, 0);
@@ -369,7 +351,7 @@ int DirectVolumeRenderer::_paintGL()
 
 void DirectVolumeRenderer::_initializeFramebufferTextures()
 {
-    /* Create an Frame Buffer Object for the back side of the volume.                       */
+    /* Create an Frame Buffer Object for the back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 
@@ -452,8 +434,6 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_3D, 0);
 }
-
-void DirectVolumeRenderer::_uploadTextures() {}
 
 void DirectVolumeRenderer::_printGLInfo() const
 {
