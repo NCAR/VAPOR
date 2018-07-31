@@ -12,6 +12,14 @@ using namespace Wasp;
 namespace {
 
 size_t numBlocks(
+	size_t min, size_t max, size_t bs
+) {
+	size_t b0 = min / bs;
+	size_t b1 = max / bs;
+	return(b1-b0+1);
+}
+
+size_t numBlocks(
 	const vector <size_t> &min, const vector <size_t> &max, 
 	const vector <size_t> &bs
 ) {
@@ -20,12 +28,11 @@ size_t numBlocks(
 
 	size_t nblocks = 1;
 	for (int i=0; i<bs.size(); i++) {
-		int b0 = min[i] / bs[i];
-		int b1 = max[i] / bs[i];
-		nblocks *= (b1-b0+1);
+		nblocks *= numBlocks(min[i], max[i], bs[i]);
 	}
 	return(nblocks);
 }
+
 
 #ifdef UNUSED_FUNCTION
 size_t numBlocks(
@@ -41,6 +48,18 @@ size_t numBlocks(
 	return(nblocks);
 }
 #endif
+
+size_t numElements(
+	const vector <size_t> &min, const vector <size_t> &max
+) {
+	assert(min.size() == max.size());
+
+	size_t nElements = 1;
+	for (int i=0; i<min.size(); i++) {
+		nElements *= (max[i] - min[i] + 1);
+	}
+	return(nElements);
+}
 
 size_t blockSize(const vector <size_t> &bs) {
 	size_t sz = 1;
@@ -175,7 +194,397 @@ void make2D(
 	}
 }
 
+
+bool parse_formula(
+	string formula_terms, map <string, string> &parsed_terms
+) {
+	parsed_terms.clear();
+
+	// Remove ":" to ease parsing. It's superflous
+	//
+	replace(formula_terms.begin(), formula_terms.end(), ':', ' ');
+
+	string buf; // Have a buffer string
+	stringstream ss(formula_terms); // Insert the string into a stream
+
+	vector<string> tokens; // Create vector to hold our words
+
+	while (ss >> buf) {
+		tokens.push_back(buf);
+	}
+
+	if (tokens.size() % 2) return(false);
+
+	for (int i=0; i<tokens.size(); i+=2) {
+		parsed_terms[tokens[i]] = tokens[i+1];
+	}
+	return(true);
+}
+
+
+#define BLOCKSIZE 256
+
+void Transpose(
+    const float *a,float *b,int p1,int m1,int s1,int p2,int m2,int s2
+) {
+    int I1,I2;
+    int i1,i2;
+    int q,r;
+    const int block=BLOCKSIZE;
+    for(I2=p2;I2<p2+m2;I2+=block)
+      for(I1=p1;I1<p1+m1;I1+=block)
+    for(i2=I2;i2<min(I2+block,p2+m2);i2++)
+      for(i1=I1;i1<min(I1+block,p1+m1);i1++)
+        {
+          q=i2*s1+i1;
+          r=i1*s2+i2;
+          b[r]=a[q];
+        }
+}
+
+void Transpose(const float *a,float *b,int s1,int s2) {
+    Transpose(a,b,0,s1,s1,0,s2,s2);
+}
+
+// Transpose a 1D, 2D, or 3D array. For 1D 'a' is simply copied
+// to 'b'. Otherwise 'b' contains a permuted version of 'a' as follows:
+//
+//    axis        1D        2D        3D
+//    ----        --        --        --
+//    0	          (0)       (0,1)     (0,1,2)
+//    1	          N/A       (1,0)     (1,0,2)
+//    2	          N/A       N/A       (2,0,1)
+//
+// where the numbers in parenthesis indicate the permutation of the
+// axes.
+//
+// NOTE: The contents of 'a' are overwritten
+//
+void transpose(
+	float *a, float *b, vector <size_t> inDims, int axis
+) {
+
+	assert(inDims.size() < 4);
+	assert(axis >= 0 && axis < inDims.size());
+
+	size_t sz = vproduct(inDims);
+
+	// No-op if axis is 0
+	//
+	if (axis == 0) {	// 1D, 2D, and 3D case
+		for (size_t i=0; i<sz; i++) {
+			b[i] = a[i];
+		}
+		return;
+	}
+
+	if (inDims.size() == 2) {
+		assert(axis == 1);
+
+		Transpose(a, b, inDims[0], inDims[1]);
+	}
+	else if (inDims.size() == 3) {
+		assert(axis == 1 || axis == 2);
+
+
+		size_t stride = inDims[0] * inDims[1];;
+		const float *aptr = a;
+		float *bptr = b;
+		for (size_t i=0; i<inDims[2]; i++) {
+			Transpose(aptr, bptr, inDims[0], inDims[1]);
+			aptr += stride;
+			bptr += stride;
+		}
+
+		// For (2,1,0) permutation we do (0,1,2) -> (1,0,2) -> (2,1,0)
+		//
+		if (axis == 2) {
+
+			// We can treat 3D array as 2D in this case, linearizing X and Y
+			//
+			Transpose(b, a, inDims[0]*inDims[1], inDims[2]);
+
+			// Ugh need to copy data from a back to b
+			//
+			for (size_t i=0; i<vproduct(inDims); i++) {
+				b[i] = a[i];
+			}
+		}
+	}
+}
+
+void transpose(
+	vector <size_t> inDims, int axis, vector <size_t> &outDims
+) {
+	outDims = inDims;
+
+	if (axis == 1) {
+		size_t tmp = outDims[0];
+		outDims[0] = outDims[1];
+		outDims[1] = tmp;
+	}
+	else if (axis == 2) {
+		size_t tmp = outDims[0];
+		outDims[0] = outDims[2];
+		outDims[2] = tmp;
+	}
+}
+
+void resampleToStaggered(
+	float *src,
+	const vector <size_t> &inMin,
+	const vector <size_t> &inMax,
+	float *dst,
+	const vector <size_t> &outMin,
+	const vector <size_t> &outMax,
+	int stagDim
+) {
+	assert(inMin.size() == inMax.size());
+	assert(inMin.size() == outMax.size());
+	assert(inMin.size() == outMax.size());
+
+	vector <size_t> inDims, outDims;
+	for (size_t i=0; i<outMin.size(); i++) {
+		inDims.push_back(inMax[i]-inMin[i]+1);
+		outDims.push_back(outMax[i]-outMin[i]+1);
+	}
+	size_t sz = std::max(vproduct(outDims), vproduct(inDims));
+
+	float *buf = new float[sz];
+
+	// Tranpose the dimensions and array so that we always interpolate 
+	// with unit stride
+	//
+	vector <size_t> inDimsT;	// transposed input dimensions
+	vector <size_t> outDimsT;	// transposed output dimensions
+	transpose(inDims, stagDim, inDimsT);
+	transpose(outDims, stagDim, outDimsT);
+
+	transpose(src, buf, inDims, stagDim);
+
+	size_t nz = inDimsT.size() >= 3 ? inDimsT[2] : 1;
+	size_t ny = inDimsT.size() >= 2 ? inDimsT[1] : 1;
+	size_t nx = inDimsT.size() >= 1 ? inDimsT[0] : 1;
+
+	// Interpolate interior
+	//
+	size_t nxs = outDimsT[0];  // staggered dimension
+	size_t i0 = outMin[stagDim] > inMin[stagDim] ? 0 : 1;
+
+	for (size_t k=0; k<nz; k++) {
+	for (size_t j=0; j<ny; j++) {
+	for (size_t i=0, ii=i0; i<nx-1; i++, ii++) {
+		src[k*nxs*ny + j*nxs + ii] = 0.5 * (
+			buf[k*nx*ny + j*nx + i] + buf[k*nx*ny + j*nx + i+1]
+		);
+	}
+	}
+	}
+
+	// Next extrapolate boundary points if needed
+	//
+	// left boundary
+	//
+	if (outMin[stagDim] <= inMin[stagDim]) {
+		if (inMin[stagDim] < inMax[stagDim]) {
+			for (size_t k=0; k<nz; k++) {
+			for (size_t j=0; j<ny; j++) {
+		
+				src[k*nxs*ny + j*nxs] = buf[k*nx*ny + j*nx + 0] +
+					(-0.5*(buf[k*nx*ny + j*nx+1] - buf[k*nx*ny + j*nx + 0]));
+			}
+			}
+		}
+		else {
+			for (size_t k=0; k<nz; k++) {
+			for (size_t j=0; j<ny; j++) {
+				src[k*nxs*ny + j*nxs] = buf[k*nx*ny + j*nx + 0];
+			}
+			}
+		}
+	}
+
+	// right boundary
+	//
+	if (outMax[stagDim] > inMax[stagDim]) {
+		if (inMin[stagDim] < inMax[stagDim]) {
+			for (size_t k=0; k<nz; k++) {
+			for (size_t j=0; j<ny; j++) {
+
+				src[k*nxs*ny + j*nxs + nxs-1] = buf[k*nx*ny + j*nx+nx-1] +
+					(0.5*(buf[k*nx*ny + j*nx + nx-1]-buf[k*nx*ny + j*nx +nx-2]));
+
+			}
+			}
+		}
+		else {
+			for (size_t k=0; k<nz; k++) {
+			for (size_t j=0; j<ny; j++) {
+				src[k*nxs*ny + j*nxs + nxs-1] = buf[k*nx*ny + j*nx+nx-1];
+			}
+			}
+
+		}
+	}
+
+	// Undo tranpose
+	//
+	transpose(src, dst, outDimsT, stagDim);
+
+	delete [] buf;
+}
+
+void resampleToUnStaggered(
+	float *src,
+	const vector <size_t> &inMin,
+	const vector <size_t> &inMax,
+	float *dst,
+	const vector <size_t> &outMin,
+	const vector <size_t> &outMax,
+	int stagDim
+) {
+	assert(inMin.size() == inMax.size());
+	assert(inMin.size() == outMax.size());
+	assert(inMin.size() == outMax.size());
+
+	vector <size_t> myOutMax = outMax;
+	vector <size_t> myOutMin = outMin;
+
+	myOutMin[stagDim] += 1;
+	myOutMax[stagDim] += 1;
+
+	resampleToStaggered(
+		src, inMin, inMax, dst, myOutMin, myOutMax, stagDim
+	);
+}
+
+#ifdef	UNIT_TEST
+
+void print_matrix(const float *a, const vector <size_t> &dims) {
+
+	size_t nz = dims.size() >= 3 ? dims[2] : 1;
+	size_t ny = dims.size() >= 2 ? dims[1] : 1;
+	size_t nx = dims.size() >= 1 ? dims[0] : 1;
+
+	for (int k=0; k<nz; k++) {
+	for (int j=0; j<ny; j++) {
+		for (int i=0; i<nx; i++) {
+			cout << a[k*nx*ny + j*nx + i] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	}
+}
+
+void test_resample(int stagDim) {
+
+	vector <size_t> inMin = {0,0,0};
+	vector <size_t> inMax = {1,2,3};
+
+	vector <size_t> outMin = inMin;
+	vector <size_t> outMax = inMax;
+
+	outMax[stagDim] += 1;
+
+	vector <size_t> inDims, outDims;
+	for (int i=0; i<inMax.size(); i++) {
+		inDims.push_back(inMax[i]-inMin[i] + 1);
+		outDims.push_back(outMax[i]-outMin[i] + 1);
+	}
+
+
+    size_t nz = inDims.size() >= 3 ? inDims[2] : 1;
+    size_t ny = inDims.size() >= 2 ? inDims[1] : 1;
+    size_t nx = inDims.size() >= 1 ? inDims[0] : 1;
+
+    size_t nzs = outDims.size() >= 3 ? outDims[2] : 1;
+    size_t nys = outDims.size() >= 2 ? outDims[1] : 1;
+    size_t nxs = outDims.size() >= 1 ? outDims[0] : 1;
+
+
+	size_t sz = std::max(vproduct(outDims), vproduct(inDims));
+	float *src = new float[sz];
+	float *dst = new float[sz];
+
+	for (int k=0; k<nz; k++) {
+	for (int j=0; j<ny; j++) {
+	for (int i=0; i<nx; i++) {
+		src[k*nx*ny + j*nx + i] = k*nx*ny + j*nx + i;
+	}
+	}
+	}
+
+	for (int k=0; k<nzs; k++) {
+	for (int j=0; j<nys; j++) {
+	for (int i=0; i<nxs; i++) {
+		dst[k*nxs*nys + j*nxs + i] = 99;
+	}
+	}
+	}
+
+	cout << "original array" << endl;
+	print_matrix(src, inDims);
+
+
+	resampleToStaggered(src, inMin, inMax, dst, outMin, outMax, stagDim);
+
+	cout << endl << endl;
+
+	cout << "staggered array" << endl;
+	print_matrix(dst, outDims);
+
+	resampleToUnStaggered(dst, outMin, outMax, src, inMin, inMax, stagDim);
+
+	cout << "reconstructed unstaggered array" << endl;
+	print_matrix(src, inDims);
+}
+
+int main(int argc, char **argv) {
+	assert(argc == 2);
+	int stagDim = atoi(argv[1]);
+	test_resample(stagDim);
+}
+
+#endif
+
 };
+
+int DerivedVar::_getVar(
+	DC *dc, size_t ts, string varname, int level, int lod,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+) const {
+
+	int fd = dc->OpenVariableRead(ts, varname, level, lod);
+	if (fd<0) return(-1);
+
+	int rc = dc->ReadRegion(fd, min, max, region);
+	if (rc<0) {
+		dc->CloseVariable(fd);
+		return(-1);
+	}
+
+	return(dc->CloseVariable(fd));
+}
+
+int DerivedVar::_getVarBlock(
+	DC *dc, size_t ts, string varname, int level, int lod,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+) const {
+
+	int fd = dc->OpenVariableRead(ts, varname, level, lod);
+	if (fd<0) return(-1);
+
+	int rc = dc->ReadRegionBlock(fd, min, max, region);
+	if (rc<0) {
+		dc->CloseVariable(fd);
+		return(-1);
+	}
+
+	return(dc->CloseVariable(fd));
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////// 
 //
@@ -184,21 +593,20 @@ void make2D(
 ////////////////////////////////////////////////////////////////////////////// 
 
 DerivedCoordVar_PCSFromLatLon::DerivedCoordVar_PCSFromLatLon(
-	const vector <string> &derivedVarNames, 
-	DC *dc, vector <string> inNames, string proj4String, bool uGridFlag
-) : DerivedCoordVar(derivedVarNames) {
+	string derivedVarName, 
+	DC *dc, vector <string> inNames, string proj4String, bool uGridFlag,
+	bool lonFlag
+) : DerivedCoordVar(derivedVarName) {
 
 	assert(inNames.size() == 2);
-	assert(derivedVarNames.size() == 2);
 
 	_dc = dc;
 	_proj4String = proj4String;
 	_lonName = inNames[0];
 	_latName = inNames[1];
-	_xCoordName = _derivedVarNames[0];
-	_yCoordName = _derivedVarNames[1];
 	_make2DFlag = false;
 	_uGridFlag = uGridFlag;
+	_lonFlag = lonFlag;
 	_dimLens.clear();
 }
 
@@ -218,42 +626,25 @@ int DerivedCoordVar_PCSFromLatLon::Initialize() {
 }
 
 bool DerivedCoordVar_PCSFromLatLon::GetBaseVarInfo(
-	string varname, DC::BaseVar &var
+	DC::BaseVar &var
 ) const {
-	if (varname == _xCoordName) {
-		var = _xCoordVarInfo;
-		return(true);
-	} else if (varname == _yCoordName) {
-		var = _yCoordVarInfo;
-		return(true);
-	}
-	return(false);
+	var = _coordVarInfo;
+	return(true);
 }
 
 bool DerivedCoordVar_PCSFromLatLon::GetCoordVarInfo(
-	string varname, DC::CoordVar &cvar
+	DC::CoordVar &cvar
 ) const {
-	if (varname == _xCoordName) {
-		cvar = _xCoordVarInfo;
-		return(true);
-	} else if (varname == _yCoordName) {
-		cvar = _yCoordVarInfo;
-		return(true);
-	}
-	return(false);
+	cvar = _coordVarInfo;
+	return(true);
 }
 
 int DerivedCoordVar_PCSFromLatLon::GetDimLensAtLevel(
-    string varname, int , std::vector <size_t> &dims_at_level,
+    int , std::vector <size_t> &dims_at_level,
     std::vector <size_t> &bs_at_level
 ) const {
 	dims_at_level.clear();
 	bs_at_level.clear();
-
-	if (! ((varname == _xCoordName) || (varname == _yCoordName))) {
-		SetErrMsg("Invalid variable name: %s", varname.c_str());
-		return(-1);
-	}
 
 	dims_at_level = _dimLens;
 	bs_at_level = _bs;
@@ -262,15 +653,11 @@ int DerivedCoordVar_PCSFromLatLon::GetDimLensAtLevel(
 }
 
 int DerivedCoordVar_PCSFromLatLon::OpenVariableRead(
-    size_t ts, string varname, int , int 
+    size_t ts, int , int 
 ) {
-	if (! ((varname == _xCoordName) || (varname == _yCoordName))) {
-		SetErrMsg("Invalid variable name: %s", varname.c_str());
-		return(-1);
-	}
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
-		ts, varname, -1, -1
+		ts, _derivedVarName, -1, -1
 	);
 
 	return(_fileTable.AddEntry(f));
@@ -302,8 +689,8 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 
 	// Dimensions are same for X & Y coord vars
 	//
-	vector <size_t> dims, bs;
-	GetDimLensAtLevel(_xCoordName, level, dims, bs);
+	vector <size_t> dummy, bs;
+	GetDimLensAtLevel(level, dummy, bs);
 
 	// Need temporary buffer space for the X or Y coordinate
 	// NOT being returned (we still need to calculate it)
@@ -311,11 +698,16 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 	size_t nElements = numBlocks(min, max, bs) * blockSize(bs);
 	float *buf = new float[nElements];
 
+	vector <size_t> roidims;
+	for (int i=0; i<min.size(); i++) {
+		roidims.push_back(max[i] - min[i] + 1);
+	}
+
 	// Assign temporary buffer 'buf' as appropriate
 	//
 	float *lonBufPtr;
 	float *latBufPtr;
-	if (varname == _xCoordName) {
+	if (_lonFlag) {
 		lonBufPtr = buf;
 		latBufPtr = region;
 	}
@@ -324,9 +716,11 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 		latBufPtr = buf;
 	}
 
+	// Reading 1D data so no blocking
+	//
 	vector <size_t> lonMin = {min[0]};
 	vector <size_t> lonMax = {max[0]};
-	int rc = _getVarBlock(ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
+	int rc = _getVar(_dc,ts,_lonName,level,lod, lonMin, lonMax, lonBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
@@ -334,7 +728,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 
 	vector <size_t> latMin = {min[1]};
 	vector <size_t> latMax = {max[1]};
-	rc = _getVarBlock(ts, _latName, level, lod, latMin, latMax, latBufPtr);
+	rc = _getVar(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
@@ -342,18 +736,18 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 
 	// Combine the 2 1D arrays into a 2D array
 	//
-	make2D(lonBufPtr, latBufPtr, dims);
+	make2D(lonBufPtr, latBufPtr, roidims);
 
-	rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(dims));
+	rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(roidims));
 
 	// Finally, block the data since the original 1D data is not blocked 
 	// (and make2D doesn't add blocking)
 	//
-	if (varname == _xCoordName) {
-		blockit(lonBufPtr, dims, bs, region);
+	if (_lonFlag) {
+		blockit(lonBufPtr, roidims, bs, region);
 	}
 	else {
-		blockit(latBufPtr, dims, bs, region);
+		blockit(latBufPtr, roidims, bs, region);
 	}
 
 	delete [] buf;
@@ -373,8 +767,8 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(
 
 	// Dimensions are same for X & Y coord vars
 	//
-	vector <size_t> dims, bs;
-	GetDimLensAtLevel(_xCoordName, level, dims, bs);
+	vector <size_t> dummy, bs;
+	GetDimLensAtLevel(level, dummy, bs);
 
 	// Need temporary buffer space for the X or Y coordinate
 	// NOT being returned (we still need to calculate it)
@@ -386,7 +780,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(
 	//
 	float *lonBufPtr;
 	float *latBufPtr;
-	if (varname == _xCoordName) {
+	if (_lonFlag) {
 		lonBufPtr = region;
 		latBufPtr = buf;
 	}
@@ -395,13 +789,13 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper2D(
 		latBufPtr = region;
 	}
 
-	int rc = _getVarBlock(ts, _lonName, level, lod, min, max, lonBufPtr);
+	int rc = _getVarBlock(_dc, ts, _lonName, level, lod, min, max, lonBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
 	}
 
-	rc = _getVarBlock(ts, _latName, level, lod, min, max, latBufPtr);
+	rc = _getVarBlock(_dc, ts, _latName, level, lod, min, max, latBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
@@ -435,11 +829,9 @@ int DerivedCoordVar_PCSFromLatLon::ReadRegionBlock(
 
 bool DerivedCoordVar_PCSFromLatLon::VariableExists(
 	size_t ts,
-	string varname,
 	int ,
 	int 
 ) const {
-	if (! (varname == _xCoordName || varname == _yCoordName)) return(false);
 
 	return(
 		_dc->VariableExists(ts, _lonName, -1, -1) &&
@@ -520,54 +912,22 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar() {
 	DC::XType xtype = lonVar.GetXType();
 	vector <bool> periodic = lonVar.GetPeriodic();
 
-	// X coordinate variable
-	//
-	_xCoordVarInfo.SetName(_xCoordName);
-	_xCoordVarInfo.SetUnits("meters");
-	_xCoordVarInfo.SetXType(xtype);
-	_xCoordVarInfo.SetWName("");
-	_xCoordVarInfo.SetCRatios(vector <size_t> ());
-	_xCoordVarInfo.SetPeriodic(periodic);
-	_xCoordVarInfo.SetUniform(false);
+	_coordVarInfo.SetName(_derivedVarName);
+	_coordVarInfo.SetUnits("meters");
+	_coordVarInfo.SetXType(xtype);
+	_coordVarInfo.SetWName("");
+	_coordVarInfo.SetCRatios(vector <size_t> ());
+	_coordVarInfo.SetPeriodic(periodic);
+	_coordVarInfo.SetUniform(false);
 
-	_xCoordVarInfo.SetDimNames(dimNames);
-	_xCoordVarInfo.SetTimeDimName(timeDimName);
-	_xCoordVarInfo.SetAxis(0);
+	_coordVarInfo.SetDimNames(dimNames);
+	_coordVarInfo.SetTimeDimName(timeDimName);
 
-	// Y coordinate variable
-	//
-	_yCoordVarInfo.SetName(_yCoordName);
-	_yCoordVarInfo.SetUnits("meters");
-	_yCoordVarInfo.SetXType(xtype);
-	_yCoordVarInfo.SetWName("");
-	_yCoordVarInfo.SetCRatios(vector <size_t> ());
-	//_yCoordVarInfo.SetPeriodic(periodic);
-	_yCoordVarInfo.SetUniform(false);
-
-	_yCoordVarInfo.SetDimNames(dimNames);
-	_yCoordVarInfo.SetTimeDimName(timeDimName);
-	_yCoordVarInfo.SetAxis(1);
+	_coordVarInfo.SetAxis(_lonFlag ? 0 : 1);
 
 	return(0);
 }
 
-int DerivedCoordVar_PCSFromLatLon::_getVarBlock(
-	size_t ts, string varname, int level, int lod,
-    const vector <size_t> &min, const vector <size_t> &max, float *region
-) {
-	assert((varname == _lonName) || (varname == _latName));
-
-	int fd = _dc->OpenVariableRead(ts, varname, level, lod);
-	if (fd<0) return(-1);
-
-	int rc = _dc->ReadRegionBlock(fd, min, max, region);
-	if (rc<0) {
-		_dc->CloseVariable(fd);
-		return(-1);
-	}
-
-	return(_dc->CloseVariable(fd));
-}
 
 
 ////////////////////////////////////////////////////////////////////////////// 
@@ -577,19 +937,16 @@ int DerivedCoordVar_PCSFromLatLon::_getVarBlock(
 ////////////////////////////////////////////////////////////////////////////// 
 
 DerivedCoordVar_CF1D::DerivedCoordVar_CF1D(
-	const vector <string> &derivedVarNames, DC *dc,
+	string derivedVarName, DC *dc,
 	string dimName, int axis, string units
-) : DerivedCoordVar(derivedVarNames) {
-
-	assert(derivedVarNames.size() == 1);
+) : DerivedCoordVar(derivedVarName) {
 
 	_dc = dc;
 	_dimName = dimName;
-	_coordName = _derivedVarNames[0];
 	_dimLen = 0;
 
 	_coordVarInfo = DC::CoordVar(
-		_coordName, units, DC::XType::FLOAT, 
+		_derivedVarName, units, DC::XType::FLOAT, 
 		vector <bool> (1, false), axis, false,
 		vector <string> (1, dimName), ""
 	);
@@ -608,21 +965,21 @@ int DerivedCoordVar_CF1D::Initialize() {
 }
 
 bool DerivedCoordVar_CF1D::GetBaseVarInfo(
-	string varname, DC::BaseVar &var
+	DC::BaseVar &var
 ) const {
 	var = _coordVarInfo;
 	return(true);
 }
 
 bool DerivedCoordVar_CF1D::GetCoordVarInfo(
-	string varname, DC::CoordVar &cvar
+	DC::CoordVar &cvar
 ) const {
 	cvar = _coordVarInfo;
 	return(true);
 }
 
 int DerivedCoordVar_CF1D::GetDimLensAtLevel(
-    string varname, int level, std::vector <size_t> &dims_at_level,
+    int level, std::vector <size_t> &dims_at_level,
     std::vector <size_t> &bs_at_level
 ) const {
 	dims_at_level.clear();
@@ -640,13 +997,8 @@ int DerivedCoordVar_CF1D::GetDimLensAtLevel(
 }
 
 int DerivedCoordVar_CF1D::OpenVariableRead(
-    size_t ts, string varname, int level, int lod
+    size_t ts, int level, int lod
 ) {
-	if (varname != _coordName) {
-		SetErrMsg("Invalid variable name: %s", varname.c_str());
-		return(-1);
-	}
-
 	if (level != 0) {
 		SetErrMsg("Invalid parameter");
 		return(-1);
@@ -658,7 +1010,7 @@ int DerivedCoordVar_CF1D::OpenVariableRead(
 	}
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
-		ts, varname, level, lod
+		ts, _derivedVarName, level, lod
 	);
 
 	return(_fileTable.AddEntry(f));
@@ -698,11 +1050,9 @@ int DerivedCoordVar_CF1D::ReadRegionBlock(
 
 bool DerivedCoordVar_CF1D::VariableExists(
 	size_t ts,
-	string varname,
 	int reflevel,
 	int lod
 ) const {
-	if (varname != _coordName) return(false);
 	if (reflevel != 0) return(false);
 	if (lod != 0) return(false);
 
@@ -723,7 +1073,6 @@ DerivedCoordVar_WRFTime::DerivedCoordVar_WRFTime(
 	_ncdfc = ncdfc;
 	_times.clear();
 	_timePerm.clear();
-	_coordName = _derivedVarNames[0];
 	_wrfTimeVar = wrfTimeVar;
 	_p2si = p2si;
 	_ovr_ts = 0;
@@ -731,7 +1080,7 @@ DerivedCoordVar_WRFTime::DerivedCoordVar_WRFTime(
 	string units = "seconds";
 	int axis = 3;
 	_coordVarInfo = DC::CoordVar(
-		_coordName, units, DC::XType::FLOAT, 
+		_derivedVarName, units, DC::XType::FLOAT, 
 		vector <bool> (), axis, false,
 		vector <string> (), dimName
 	);
@@ -824,21 +1173,21 @@ int DerivedCoordVar_WRFTime::Initialize() {
 }
 
 bool DerivedCoordVar_WRFTime::GetBaseVarInfo(
-	string varname, DC::BaseVar &var
+	DC::BaseVar &var
 ) const {
 	var = _coordVarInfo;
 	return(true);
 }
 
 bool DerivedCoordVar_WRFTime::GetCoordVarInfo(
-	string varname, DC::CoordVar &cvar
+	DC::CoordVar &cvar
 ) const {
 	cvar = _coordVarInfo;
 	return(true);
 }
 
 int DerivedCoordVar_WRFTime::GetDimLensAtLevel(
-    string varname, int level, std::vector <size_t> &dims_at_level,
+    int level, std::vector <size_t> &dims_at_level,
     std::vector <size_t> &bs_at_level
 ) const {
 	dims_at_level.clear();
@@ -848,17 +1197,12 @@ int DerivedCoordVar_WRFTime::GetDimLensAtLevel(
 }
 
 int DerivedCoordVar_WRFTime::OpenVariableRead(
-    size_t ts, string varname, int level, int lod
+    size_t ts, int level, int lod
 ) {
-	if (varname != _coordName) {
-		SetErrMsg("Invalid variable name: %s", varname.c_str());
-		return(-1);
-	}
-
 	ts  = ts < _times.size() ? ts : _times.size() - 1;
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
-		ts, varname, level, lod
+		ts, _derivedVarName, level, lod
 	);
 
 	return(_fileTable.AddEntry(f));
@@ -901,11 +1245,9 @@ int DerivedCoordVar_WRFTime::ReadRegionBlock(
 
 bool DerivedCoordVar_WRFTime::VariableExists(
 	size_t ts,
-	string varname,
 	int reflevel,
 	int lod
 ) const {
-	if (varname != _coordName) return(false);
 
 	return(ts < _times.size());
 }
@@ -924,13 +1266,12 @@ DerivedCoordVar_TimeInSeconds::DerivedCoordVar_TimeInSeconds(
 
 	_dc = dc;
 	_times.clear();
-	_coordName = _derivedVarNames[0];
 	_nativeTimeVar = nativeTimeVar;
 
 	string units = "seconds";
 	int axis = 3;
 	_coordVarInfo = DC::CoordVar(
-		_coordName, units, DC::XType::FLOAT, 
+		_derivedVarName, units, DC::XType::FLOAT, 
 		vector <bool> (), axis, false,
 		vector <string> (), dimName
 	);
@@ -991,21 +1332,21 @@ int DerivedCoordVar_TimeInSeconds::Initialize() {
 }
 
 bool DerivedCoordVar_TimeInSeconds::GetBaseVarInfo(
-	string varname, DC::BaseVar &var
+	DC::BaseVar &var
 ) const {
 	var = _coordVarInfo;
 	return(true);
 }
 
 bool DerivedCoordVar_TimeInSeconds::GetCoordVarInfo(
-	string varname, DC::CoordVar &cvar
+	DC::CoordVar &cvar
 ) const {
 	cvar = _coordVarInfo;
 	return(true);
 }
 
 int DerivedCoordVar_TimeInSeconds::GetDimLensAtLevel(
-    string varname, int level, std::vector <size_t> &dims_at_level,
+    int level, std::vector <size_t> &dims_at_level,
     std::vector <size_t> &bs_at_level
 ) const {
 	dims_at_level.clear();
@@ -1015,17 +1356,12 @@ int DerivedCoordVar_TimeInSeconds::GetDimLensAtLevel(
 }
 
 int DerivedCoordVar_TimeInSeconds::OpenVariableRead(
-    size_t ts, string varname, int level, int lod
+    size_t ts, int level, int lod
 ) {
-	if (varname != _coordName) {
-		SetErrMsg("Invalid variable name: %s", varname.c_str());
-		return(-1);
-	}
-
 	ts  = ts < _times.size() ? ts : _times.size() - 1;
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
-		ts, varname, level, lod
+		ts, _derivedVarName, level, lod
 	);
 
 	return(_fileTable.AddEntry(f));
@@ -1068,11 +1404,9 @@ int DerivedCoordVar_TimeInSeconds::ReadRegionBlock(
 
 bool DerivedCoordVar_TimeInSeconds::VariableExists(
 	size_t ts,
-	string varname,
 	int reflevel,
 	int lod
 ) const {
-	if (varname != _coordName) return(false);
 
 	return(ts < _times.size());
 }
@@ -1089,7 +1423,6 @@ DerivedCoordVar_Staggered::DerivedCoordVar_Staggered(
 	DC *dc, string inName, string dimName
 ) : DerivedCoordVar(derivedVarName) {
 
-	_derivedVarName = derivedVarName;
 	_stagDimName = stagDimName;
 	_inName = inName;
 	_dimName = dimName;
@@ -1133,27 +1466,21 @@ int DerivedCoordVar_Staggered::Initialize() {
 }
 
 bool DerivedCoordVar_Staggered::GetBaseVarInfo(
-	string varname, DC::BaseVar &var
+	DC::BaseVar &var
 ) const {
-	if (varname == _derivedVarName) {
-		var = _coordVarInfo;
-		return(true);
-	}
-	return(false);
+	var = _coordVarInfo;
+	return(true);
 }
 
 bool DerivedCoordVar_Staggered::GetCoordVarInfo(
-	string varname, DC::CoordVar &cvar
+	DC::CoordVar &cvar
 ) const {
-	if (varname == _derivedVarName) {
-		cvar = _coordVarInfo;
-		return(true);
-	}
-	return(false);
+	cvar = _coordVarInfo;
+	return(true);
 }
 
 int DerivedCoordVar_Staggered::GetDimLensAtLevel(
-    string varname, int level, std::vector <size_t> &dims_at_level,
+    int level, std::vector <size_t> &dims_at_level,
     std::vector <size_t> &bs_at_level
 ) const {
 	dims_at_level.clear();
@@ -1168,18 +1495,14 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(
 }
 
 int DerivedCoordVar_Staggered::OpenVariableRead(
-    size_t ts, string varname, int level, int lod
+    size_t ts, int level, int lod
 ) {
-	if (varname != _derivedVarName) {
-		SetErrMsg("Invalid variable name: %s", varname.c_str());
-		return(-1);
-	}
 
 	int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
 	if (fd<0) return(fd);
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
-		ts, varname, level, lod, fd
+		ts, _derivedVarName, level, lod, fd
 	);
 
 	return(_fileTable.AddEntry(f));
@@ -1200,68 +1523,6 @@ int DerivedCoordVar_Staggered::CloseVariable(int fd) {
 	return(rc);
 }
 
-void DerivedCoordVar_Staggered::_transpose(
-	const float *a, float *b, vector <size_t> inDims, int axis
-) const {
-
-	assert(inDims.size() < 4);
-	assert(axis >= 0 && axis < inDims.size());
-
-	size_t sz = vproduct(inDims);
-
-	// No-op if axis is 0
-	//
-	if (axis == 0) {	// 1D, 2D, and 3D case
-		for (size_t i=0; i<sz; i++) {
-			b[i] = a[i];
-		}
-		return;
-	}
-
-	if (inDims.size() == 2) {
-		assert(axis == 1);
-
-		Transpose(a, b, inDims[0], inDims[1]);
-	}
-	else if (inDims.size() == 3) {
-		assert(axis == 1 || axis == 2);
-
-		if (axis == 1) {
-
-			size_t stride = inDims[0] * inDims[1];;
-			const float *aptr = a;
-			float *bptr = b;
-			for (size_t i=0; i<inDims[2]; i++) {
-				Transpose(aptr, bptr, inDims[0], inDims[1]);
-				aptr += stride;
-				bptr += stride;
-			}
-		}
-		else if (axis == 2) {
-
-			// We can treat 3D array as 2D in this case, linearizing X and Y
-			//
-			Transpose(a, b, inDims[0]*inDims[1], inDims[2]);
-		}
-	}
-}
-
-void DerivedCoordVar_Staggered::_transpose(
-	vector <size_t> inDims, int axis, vector <size_t> &outDims
-) const {
-	outDims = inDims;
-
-	if (axis == 1) {
-		size_t tmp = outDims[0];
-		outDims[0] = outDims[1];
-		outDims[1] = tmp;
-	}
-	else if (axis == 2) {
-		size_t tmp = outDims[0];
-		outDims[0] = outDims[2];
-		outDims[2] = tmp;
-	}
-}
 
 int DerivedCoordVar_Staggered::ReadRegion(
 	int fd,
@@ -1274,11 +1535,10 @@ int DerivedCoordVar_Staggered::ReadRegion(
 		SetErrMsg("Invalid file descriptor : %d", fd);
 		return(-1);
 	}
-	string varname = f->GetVarname();
 	int level = f->GetLevel();
 
 	vector <size_t> dims, bs;
-	int rc = GetDimLensAtLevel(varname, level, dims, bs);
+	int rc = GetDimLensAtLevel(level, dims, bs);
 	if (rc<0) return(-1);
 
 	vector <size_t> inMin = min;
@@ -1288,26 +1548,44 @@ int DerivedCoordVar_Staggered::ReadRegion(
 	// need for interpolation or extrapolation.
 	//
 
-	// Lower bound on boundary => extrapolation
+
+	// Adjust min max boundaries to handle 4 case (below) where X's
+	// are samples on the destination grid (staggered) and O's are samples
+	// on the source grid (unstaggered) and the numbers represent 
+	// the address of the samples in their respective arrays
 	//
-	if (min[_stagDim] == 0) {
-		if (max[_stagDim] == 0) {
-			inMax[_stagDim] += 1;
-		}
-	}
-	else {
+	//	X O X O X O X
+	//	0 0 1 1 2 2 3
+	//
+	//	  O X O X O X
+	//	  0 1 1 2 2 3
+	//
+	//	X O X O X O 
+	//	0 0 1 1 2 2 
+	//
+	//	  O X O X O 
+	//	  0 1 1 2 2 
+
+	// Adjust input min so we can interpolate interior.
+	//
+	if (min[_stagDim] > 0) {
 		inMin[_stagDim] -= 1;
 	}
 
-	// Upper bound boundary => extrapolation
+	// input dimensions are one less then output
 	//
-	if (max[_stagDim] == (dims[_stagDim] - 1)) {
-		if (min[_stagDim] == (dims[_stagDim] - 2)) {
-			inMin[_stagDim] -= 1;
-		}
+	if (max[_stagDim] >= (dims[_stagDim]-1)) {
 		inMax[_stagDim] -= 1;
 	}
 
+	// Adjust min and max for edge cases
+	//
+	if (max[_stagDim] == 0 && (dims[_stagDim]-1) > 1) {
+		inMax[_stagDim] += 1;
+	}
+	if (min[_stagDim] == dims[_stagDim]-1 && min[_stagDim] > 0) {
+		inMin[_stagDim] -= 1;
+	}
 
 	vector <size_t> inDims, outDims;
 	for (size_t i=0; i<min.size(); i++) {
@@ -1316,67 +1594,467 @@ int DerivedCoordVar_Staggered::ReadRegion(
 	}
 	size_t sz = std::max(vproduct(outDims), vproduct(inDims));
 
-	float *buf1 = new float[sz];
-	float *buf2 = new float[sz];
+	float *buf = new float[sz];
 
 	// Read unstaggered data
 	//
-	rc = _dc->ReadRegion(f->GetAux(), inMin, inMax, buf1);
+	rc = _dc->ReadRegion(f->GetAux(), inMin, inMax, buf);
 	if (rc<0) return(-1);
 
+	resampleToStaggered(buf, inMin, inMax, region, min, max, _stagDim);
 
-	// Tranpose the dimensions and array so that we always interpolate 
-	// with unit stride
+	delete [] buf;
+
+	return(0);
+}
+
+bool DerivedCoordVar_Staggered::VariableExists(
+	size_t ts,
+	int reflevel,
+	int lod
+) const {
+
+	return(_dc->VariableExists(ts, _inName, reflevel, lod)); 
+}
+
+
+////////////////////////////////////////////////////////////////////////////// 
+//
+//	DerivedCoordVarStandardWRF_Terrain
+//
+////////////////////////////////////////////////////////////////////////////// 
+
+DerivedCoordVarStandardWRF_Terrain::DerivedCoordVarStandardWRF_Terrain(
+	DC *dc, string mesh, string formula
+) : DerivedCFVertCoordVar(
+	"", dc, mesh, formula
+) {
+
+	_PHVar.clear();
+	_PHBVar.clear();
+	_grav = 9.80665;
+}
+
+int DerivedCoordVarStandardWRF_Terrain::Initialize() {
+
+	map <string, string> formulaMap;
+	if (! parse_formula(_formula, formulaMap)) {
+		SetErrMsg("Invalid conversion formula \"%s\"", _formula.c_str());
+		return(-1);
+	}
+
+	map <string, string>::const_iterator itr;
+	itr = formulaMap.find("PH");
+	if (itr != formulaMap.end()) {
+		_PHVar = itr->second;
+	}
+
+	itr = formulaMap.find("PHB");
+	if (itr != formulaMap.end()) {
+		_PHBVar = itr->second;
+	}
+
+	if (_PHVar.empty() || _PHBVar.empty()) {
+		SetErrMsg("Invalid conversion formula \"%s\"", _formula.c_str());
+		return(-1);
+	}
+
+
+	DC::DataVar dvarInfo;
+	bool status = _dc->GetDataVarInfo(_PHVar, dvarInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _PHVar.c_str());
+		return(-1);
+	}
+
+	string timeCoordVar = dvarInfo.GetTimeCoordVar();
+	string timeDimName;
+	if (! timeCoordVar.empty()) {
+		DC::CoordVar cvarInfo;
+		bool status = _dc->GetCoordVarInfo(timeCoordVar, cvarInfo);
+		if (! status) {
+			SetErrMsg("Invalid variable \"%s\"", timeCoordVar.c_str());
+			return(-1);
+		}
+		timeDimName = cvarInfo.GetTimeDimName();
+	}
+
+	DC::Mesh m;
+	status = _dc->GetMesh(_mesh, m);
+	if (! status) {
+		SetErrMsg("Invalid mesh \"%s\"", _mesh.c_str());
+		return(-1);
+	}
+
+
+	// Elevation variable
 	//
-	vector <size_t> inDimsT;	// transposed input dimensions
-	vector <size_t> outDimsT;	// transposed output dimensions
-	_transpose(inDims, _stagDim, inDimsT);
-	_transpose(outDims, _stagDim, outDimsT);
+	vector <string> dimnames = m.GetDimNames();
+	assert(dimnames.size() == 3);
+	if (
+		dimnames[0] == "west_east" && 
+		dimnames[1] == "south_north" &&
+		dimnames[2] == "bottom_top"
+	) {
+		_derivedVarName = "Elevation";
+	}
+	else if (
+		dimnames[0] == "west_east_stag" && 
+		dimnames[1] == "south_north" &&
+		dimnames[2] == "bottom_top"
+	) {
+		_derivedVarName = "ElevationU";
+	}
+	else if (
+		dimnames[0] == "west_east" && 
+		dimnames[1] == "south_north_stag" &&
+		dimnames[2] == "bottom_top"
+	) {
+		_derivedVarName = "ElevationV";
+	}
+	else if (
+		dimnames[0] == "west_east" && 
+		dimnames[1] == "south_north" &&
+		dimnames[2] == "bottom_top_stag"
+	) {
+		_derivedVarName = "ElevationW";
+	}
+	else {
+		SetErrMsg("Invalid mesh \"%s\"", _mesh.c_str());
+		return(-1);
+	}
+		
+    _coordVarInfo = DC::CoordVar(
+        _derivedVarName, "m", DC::XType::FLOAT,
+        vector <bool> (3, false), 2, false,
+        dimnames, timeDimName
+	);
 
-	_transpose(buf1, buf2, inDims, _stagDim);
+    return(0);
+}
 
-	size_t nz = inDimsT.size() == 3 ? inDimsT[2] : 1;
-	size_t ny = inDimsT.size() == 2 ? inDimsT[1] : 1;
-	size_t nx = inDimsT.size() == 1 ? inDimsT[0] : 1;
+bool DerivedCoordVarStandardWRF_Terrain::GetBaseVarInfo(
+	DC::BaseVar &var
+) const {
+	var = _coordVarInfo;
+	return(true);
+}
 
-	// Interpolate interior
+bool DerivedCoordVarStandardWRF_Terrain::GetCoordVarInfo(
+	DC::CoordVar &cvar
+) const {
+	cvar = _coordVarInfo;
+	return(true);
+}
+
+int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
+    int level, std::vector <size_t> &dims_at_level,
+    std::vector <size_t> &bs_at_level
+) const {
+	dims_at_level.clear();
+	bs_at_level.clear();
+
+	int rc = _dc->GetDimLensAtLevel(_PHVar, level, dims_at_level, bs_at_level);
+	if (rc<0) return(-1);
+
+	bool blocked = dims_at_level != bs_at_level;
+
+	if (_derivedVarName == "Elevation") {
+		dims_at_level[2]--;
+	}
+	else if (_derivedVarName == "ElevationU") {
+		dims_at_level[0]++;
+		dims_at_level[2]--;
+	}
+	else if (_derivedVarName == "ElevationV") {
+		dims_at_level[1]++;
+		dims_at_level[2]--;
+	}
+	else if (_derivedVarName == "ElevationW") {
+	}
+	else {
+		SetErrMsg("Invalid variable name: %s", _derivedVarName.c_str());
+		return(-1);
+	}
+
+	// Ugh. The blocking is invariant for data that are truly blocked (i.e.
+	// block size is not the dimension size)
 	//
-	size_t nxs = outDimsT[0];  // staggered dimension
-	for (size_t k=0; k<nz; k++) {
-	for (size_t j=0; j<ny; j++) {
-	for (size_t i=1; i<nxs-1; i++) {
-		buf1[k*nxs*ny + j*nxs + k] = 0.5 * (
-			buf2[k*nx*ny + j*nx + i-1] + buf2[k*nx*ny + j*nx + i]
+	if (! blocked) {
+		bs_at_level = dims_at_level;
+	}
+	return(0);
+}
+
+int DerivedCoordVarStandardWRF_Terrain::OpenVariableRead(
+    size_t ts, int level, int lod
+) {
+
+	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
+		ts, _derivedVarName, level, lod
+	);
+
+	return(_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVarStandardWRF_Terrain::CloseVariable(int fd) {
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor : %d", fd);
+		return(-1);
+	}
+
+	_fileTable.RemoveEntry(fd);
+	delete f;
+
+	return(0);
+}
+
+
+
+int DerivedCoordVarStandardWRF_Terrain::ReadRegionBlock(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+) {
+	assert(min.size() == 3);
+	assert(min.size() == max.size());
+
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+	int level = f->GetLevel();
+
+	vector <size_t> dims, bs;
+	GetDimLensAtLevel(level, dims, bs);
+
+	bool blockFlag = dims != bs;
+
+	// We're going to use an unblocked read to fetch the data, so need to
+	// ensure ROI does not include block padding
+	//
+	vector <size_t> myMax = max;
+	for (int i=0; i<myMax.size(); i++) {
+		if (myMax[i] >= dims[i]) {
+			myMax[i] = dims[i] - 1;
+		}
+	}
+	
+	vector <size_t> roidims;	// region of interest dims
+	for (int i=0; i<min.size(); i++) {
+		roidims.push_back(myMax[i] - min[i] + 1);
+	}
+
+	if (! blockFlag) {
+
+		// Data actually aren't blocked. Do a normal read
+		//
+		assert(roidims == dims);
+		return (ReadRegion(fd, min, myMax, region));
+	}
+	else {
+		// Do an unblocked read of the data and then block the results. Too
+		// damn hard to do the resampling to a staggered grid with blocked
+		// reads
+		//
+		size_t nElements = numElements(min, myMax);
+
+		float *buf = new float[nElements];
+
+		int rc = ReadRegion(fd, min, myMax, buf);
+		if (rc<0) {
+			delete [] buf;
+			return(-1);
+		}
+
+		blockit(buf, roidims, bs, region);
+
+		delete [] buf;
+
+		return(0);
+	}
+
+}
+
+	
+
+#ifdef	DEAD
+	// Voxel coordinates aligned to block boundaries
+	//
+	vector <size_t> bmin = min;
+	vector <size_t> bmax;
+	for (int i=0; i<bmin.size(); i++) {
+		bmax.push_back(min[i] + bs[i] - 1);
+	}
+
+	size_t block_size = blockSize(bs);
+	float *ptr = region;
+
+
+	// Currently don't have resampling code for staggered grids
+	// that works with blocked data, so we simply read one block
+	// at a time using non-bricked version of ReadRegion()
+	//
+	for (size_t k=0; k<numBlocks(min[2], max[2], bs[2]); k++) {
+
+		if (bmax[2] >= dims[2]) bmax[2] = dims[2] - 1;
+
+		for (size_t j=0; j<numBlocks(min[1], max[1], bs[1]); j++) {
+
+			if (bmax[1] >= dims[1]) bmax[1] = dims[1] - 1;
+
+			for (size_t i=0; i<numBlocks(min[0], max[0], bs[0]); i++) {
+
+				if (bmax[0] >= dims[0]) bmax[0] = dims[0] - 1;
+
+				int rc = ReadRegion(fd, bmin, bmax, ptr);
+				if (rc<0) return(-1);
+
+				ptr += block_size;
+				bmin[0] += bs[0];
+				bmax[0] += bs[0];
+
+			}
+			bmin[0] = min[0];
+			bmax[0] = min[0] + bs[0] - 1;
+			bmin[1] += bs[1];
+			bmax[1] += bs[1];
+		}
+		bmin[1] = min[1];
+		bmax[1] = min[1] + bs[1] - 1;
+		bmin[2] += bs[2];
+		bmax[2] += bs[2];
+	}
+
+
+	return(0);
+}
+#endif
+
+int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+) {
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	string varname = f->GetVarname();
+
+	// Dimensions of "W" grid: PH and PHB variables are sampled on the
+	// same grid as the W component of velocity
+	//
+	vector <size_t> wDims, wBS;
+	int rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, wBS);
+	if (rc<0) return(-1);
+
+	// coordinates of "W" grid.
+	//
+	vector <size_t> wMin = min;
+	vector <size_t> wMax = max;	
+
+
+	// coordinates of base (Elevation) grid.
+	//
+	if (varname == "Elevation") {
+		wMax[2] += 1;
+	}
+	else if (varname == "ElevationU") {
+		wMax[2] += 1;
+
+		if (min[0] > 0) {
+			wMin[0] -= 1;
+		}
+		if (max[0] >= (wDims[0]-1)) {
+			wMax[0] -= 1;
+		}
+	}
+	else if (varname == "ElevationV") {
+		wMax[2] += 1;
+
+		if (min[1] > 0) {
+			wMin[1] -= 1;
+		}
+		if (max[1] >= (wDims[1]-1)) {
+			wMax[1] -= 1;
+		}
+	}
+	
+	// Base grid dimensions
+	//
+	vector <size_t> bMin = wMin;
+	vector <size_t> bMax = wMax;
+	bMax[2] -= 1;
+
+	size_t nElements = std::max(numElements(wMin, wMax), numElements(min, max));
+
+
+	float *buf1 = new float[nElements];
+	rc = _getVar(
+		_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(),
+		wMin, wMax, buf1
+	);
+	if (rc<0) {
+		delete [] buf1;
+		return(rc);
+	}
+
+	float *buf2 = new float[nElements];
+	rc = _getVar(
+		_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(),
+		wMin, wMax, buf2
+	);
+	if (rc<0) {
+		delete [] buf1;
+		delete [] buf2;
+		return(rc);
+	}
+
+	float *dst = region;
+	if (varname != "ElevationW") {
+		dst = buf1;
+	}
+	
+	// Compute elevation on the W grid
+	//
+    for (size_t i=0; i<nElements; i++) {
+        dst[i] = (buf1[i] + buf2[i]) / _grav;
+    }
+
+	// Elevation is correct for W grid. If we want Elevation, ElevationU, or 
+	// Elevation V grid we need to interpolate
+	//
+
+	if (varname == "Elevation") {
+		
+		// Resample stagged W grid to base grid
+		//
+		resampleToUnStaggered(
+			buf1, wMin, wMax, region, min, max, 2
 		);
 	}
-	}
-	}
+	else if (varname == "ElevationU") {
 
-	// Next extrapolate boundary points 
-	//
-	for (size_t k=0; k<nz; k++) {
-	for (size_t j=0; j<ny; j++) {
-		
-		// left boundary
+		// Resample stagged W grid to base grid
 		//
-		buf1[k*nxs*ny + j*nxs] = buf2[k*nx*ny + j*nx + 0] +
-			(-0.5*(buf2[k*nx*ny + j*nx+1] - buf2[k*nx*ny + j*nx + 0]));
-	}
-	}
+		resampleToUnStaggered(
+			buf1, wMin, wMax, buf2, bMin, bMax, 2
+		);
 
-	for (size_t k=0; k<nz; k++) {
-	for (size_t j=0; j<ny; j++) {
-		// right boundary
+		resampleToStaggered(
+			buf2, bMin, bMax, region, min, max, 0
+		);
+	}
+	else if (varname == "ElevationV") {
+
+		// Resample stagged W grid to base grid
 		//
-		buf1[k*nxs*ny + j*nxs + nxs-1] = buf2[k*nx*ny + j*nx+nx-2] +
-			(0.5*(buf2[k*nx*ny + j*nx + nx-1]-buf2[k*nx*ny + j*nx +nx-2]));
+		resampleToUnStaggered(
+			buf1, wMin, wMax, buf2, bMin, bMax, 2
+		);
 
+		resampleToStaggered(
+			buf2, bMin, bMax, region, min, max, 1
+		);
 	}
-	}
-
-	// Undo tranpose
-	//
-	_transpose(buf1, region, outDimsT, _stagDim);
 
 	delete [] buf1;
 	delete [] buf2;
@@ -1384,13 +2062,14 @@ int DerivedCoordVar_Staggered::ReadRegion(
 	return(0);
 }
 
-bool DerivedCoordVar_Staggered::VariableExists(
+bool DerivedCoordVarStandardWRF_Terrain::VariableExists(
 	size_t ts,
-	string varname,
 	int reflevel,
 	int lod
 ) const {
-	if (varname != _derivedVarName) return(false);
 
-	return(_dc->VariableExists(ts, _inName, reflevel, lod)); 
+	return(
+		_dc->VariableExists(ts, _PHVar, reflevel, lod) &&
+		_dc->VariableExists(ts, _PHBVar, reflevel, lod) 
+	);
 }

@@ -54,7 +54,10 @@ public:
 
  virtual size_t GetGeometryDim() const override;
 
-
+ static std::string GetClassType() {
+	return("Regular");
+ }  
+ std::string GetType() const override {return (GetClassType()); }
 
  //! \copydoc Grid::GetUserExtents()
  //

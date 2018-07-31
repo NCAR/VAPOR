@@ -51,6 +51,10 @@ public:
 
  virtual size_t GetGeometryDim() const override;
 
+ static std::string GetClassType() {
+	return("Unstructured2D");
+ }  
+ std::string GetType() const override {return (GetClassType()); }
 
  virtual void GetUserExtents(
 	std::vector <double> &minu, std::vector <double> &maxu
