@@ -1,7 +1,6 @@
 #version 410 core
 
 in vec4 positionClip;   // vertex position in the clip space
-in vec4 positionEye;    // vertex position in the eye space
 
 uniform sampler2D backFaceTexture;
 uniform sampler2D frontFaceTexture;
@@ -66,12 +65,12 @@ vec3 CalculateGradient(in vec3 tc)
     }
 
     vec3 a0, a1;
-    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0,0.0) ).w;
-    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0,0.0) ).w;
-    a0.y = texture( volumeTexture, tc + vec3(0.0,h0.y,0.0) ).w;
-    a1.y = texture( volumeTexture, tc + vec3(0.0,h1.y,0.0) ).w;
-    a0.z = texture( volumeTexture, tc + vec3(0.0,0.0,h0.z) ).w;
-    a1.z = texture( volumeTexture, tc + vec3(0.0,0.0,h1.z) ).w;
+    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0,0.0) ).r;
+    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0,0.0) ).r;
+    a0.y = texture( volumeTexture, tc + vec3(0.0,h0.y,0.0) ).r;
+    a1.y = texture( volumeTexture, tc + vec3(0.0,h1.y,0.0) ).r;
+    a0.z = texture( volumeTexture, tc + vec3(0.0,0.0,h0.z) ).r;
+    a1.z = texture( volumeTexture, tc + vec3(0.0,0.0,h1.z) ).r;
 
     return (a1-a0 / h);
 }
@@ -105,7 +104,7 @@ void main(void)
         color           = vec4( 0.0f );
     else
     {
-        float step1Value = texture( volumeTexture, step1Texture ).w;
+        float step1Value = texture( volumeTexture, step1Texture ).r;
               color      = texture( colorMapTexture, TranslateValue(step1Value) );
               color.rgb *= color.a;
     }
@@ -120,7 +119,7 @@ void main(void)
         if( texture(missingValueMaskTexture, step2Texture).x > 0 )    // missing value
             continue;
 
-        float step2Value  = texture( volumeTexture, step2Texture ).w;
+        float step2Value  = texture( volumeTexture, step2Texture ).r;
         vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
         if( backColor.a < 0.01f )    // only process this fragment if it's opaque enough
             continue;
