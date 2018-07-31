@@ -195,6 +195,7 @@ class MainForm : public QMainWindow {
     bool _sessionNewFlag;
     bool _begForCitation;
     int _eventsSinceLastSave;
+    bool _buttonPressed;
 
     ErrorReporter *_errRep;
 

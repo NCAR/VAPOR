@@ -129,6 +129,11 @@ class VDF_API UnstructuredGrid : public Grid {
     UnstructuredGrid() = default;
     virtual ~UnstructuredGrid() = default;
 
+    static std::string GetClassType() {
+        return ("Unstructured");
+    }
+    std::string GetType() const override { return (GetClassType()); }
+
     //! \copydoc Grid::GetCellNodes()
     //!
     virtual bool GetCellNodes(
