@@ -100,7 +100,7 @@ void main(void)
     vec3  stepSize3D    = rayDirTexture / nStepsf;
 
     vec3  step1Texture  = startTexture;
-    if( texture(missingValueMaskTexture, step1Texture).x > 0 )    // missing value
+    if( texture(missingValueMaskTexture, step1Texture).x > 1e-6f )    // missing value
         color           = vec4( 0.0f );
     else
     {
@@ -116,7 +116,7 @@ void main(void)
             break;
 
         vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
-        if( texture(missingValueMaskTexture, step2Texture).x > 0 )    // missing value
+        if( texture(missingValueMaskTexture, step2Texture).x > 1e-6f )    // missing value
             continue;
 
         float step2Value  = texture( volumeTexture, step2Texture ).r;
