@@ -61,9 +61,7 @@ private:
         float *frontFace, *backFace;     // user coordinates, size == bx * by * 3
         float *rightFace, *leftFace;     // user coordinates, size == by * bz * 3
         float *topFace,   *bottomFace;   // user coordinates, size == bx * bz * 3   
-        /* data field of this volume: each data point has 4 components:
-           the X, Y, Z user coordinates, and the actual field value.   */
-        float*         field;
+        float *dataField;                // data field of this volume
         unsigned char* missingValueMask; // 0 == is missing value; 255 == not missing value
         size_t dims[3];                  // num. of samples along each axis
         float  boxMin[3], boxMax[3];     // bounding box of this volume
@@ -80,7 +78,8 @@ private:
         bool isUpToDate(        const DVRParams* params );
         bool updateCoordinates( const DVRParams* params,
                                       DataMgr*   dataMgr );
-    }; 
+    };  // end of struct UserCoordinates 
+
     UserCoordinates     _userCoordinates;
     std::vector<float>  _colorMap;
     float               _colorMapRange[2];
@@ -98,7 +97,7 @@ private:
     GLuint              _2ndPassShaderId;
     GLuint              _3rdPassShaderId;
     GLuint              _quadShaderId;
-    GLenum              _drawBuffers[2];                // Draw buffers for the 1st and 2nd pass
+    GLenum              _drawBuffers[2];            // Draw buffers for the 1st and 2nd pass
 
     //
     // Draw faces using triangle strips
@@ -111,14 +110,9 @@ private:
     void _drawQuad();
 
     // 
-    // Initialization for 1) framebuffer and 2) textures 
+    // Initialization for 1) framebuffers and 2) textures 
     //
     void _initializeFramebufferTextures();
-
-    // 
-    // Upload texture data to GPU
-    //
-    void _uploadTextures();
 
     // 
     // Simple shader compilation
