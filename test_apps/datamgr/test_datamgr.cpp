@@ -27,6 +27,7 @@ struct {
     std::vector<double>     minu;
     std::vector<double>     maxu;
     OptionParser::Boolean_T nogeoxform;
+    OptionParser::Boolean_T novertxform;
     OptionParser::Boolean_T verbose;
     OptionParser::Boolean_T help;
     OptionParser::Boolean_T quiet;
@@ -53,6 +54,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"nts", 1, "1", "Number of timesteps to
                                           "specifying domain max extents in user coordinates (X1:Y1:Z1)"},
                                          {"verbose", 0, "", "Verobse output"},
                                          {"nogeoxform", 0, "", "Do not apply geographic transform (projection to PCS"},
+                                         {"novertxform", 0, "", "Do not apply to convert pressure, etc. to meters"},
                                          {"help", 0, "", "Print this message and exit"},
                                          {"quiet", 0, "", "Operate quitely"},
                                          {"debug", 0, "", "Debug mode"},
@@ -72,6 +74,7 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
                                         {"maxu", Wasp::CvtToDoubleVec, &opt.maxu, sizeof(opt.maxu)},
                                         {"verbose", Wasp::CvtToBoolean, &opt.verbose, sizeof(opt.verbose)},
                                         {"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
+                                        {"novertxform", Wasp::CvtToBoolean, &opt.novertxform, sizeof(opt.novertxform)},
                                         {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
                                         {"quiet", Wasp::CvtToBoolean, &opt.quiet, sizeof(opt.quiet)},
                                         {"debug", Wasp::CvtToBoolean, &opt.debug, sizeof(opt.debug)},
@@ -126,8 +129,6 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
 {
     cout << "Node Iterator Test ----->" << endl;
 
-    double t0 = Wasp::GetTime();
-
     Grid::ConstNodeIterator itr;
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
@@ -136,6 +137,98 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
     size_t count = 0;
     for (; itr != enditr; ++itr) { count++; }
     cout << "count: " << count << endl;
+    cout << endl;
+}
+
+void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
+{
+    vector<double> timecoords;
+    datamgr.GetTimeCoordinates(timecoords);
+
+    if (!opt.savefilebase.empty()) {
+        char   buf[4 + 1];
+        string path(opt.savefilebase);
+        path.append(".");
+        sprintf(buf, "%4.4d", loop);
+        path.append(buf);
+        path.append(".");
+        sprintf(buf, "%4.4d", ts);
+        path.append(buf);
+
+        fp = fopen(path.c_str(), "w");
+        if (!fp) { cerr << "Can't open output file " << path << endl; }
+    }
+    if (!datamgr.VariableExists(ts, vname, opt.level, opt.lod)) {
+        cerr << "Variable " << vname << " does not exist" << endl;
+        return;
+    }
+
+    vector<double> minu, maxu;
+    if (opt.minu.size()) {
+        assert(opt.minu.size() == opt.maxu.size());
+        minu = opt.minu;
+        maxu = opt.maxu;
+    } else {
+        int rc = datamgr.GetVariableExtents(ts, vname, opt.level, minu, maxu);
+        if (rc < 0) exit(1);
+    }
+
+    Grid *g;
+    g = datamgr.GetVariable(ts, vname, opt.level, opt.lod, minu, maxu, false);
+
+    if (!g) { exit(1); }
+
+    if (fp) {
+        Grid::Iterator itr;
+        Grid::Iterator enditr = g->end();
+        float          v;
+        for (itr = g->begin(); itr != enditr; ++itr) {
+            v = *itr;
+            fwrite(&v, sizeof(v), 1, fp);
+        }
+        fclose(fp);
+    }
+
+    test_node_iterator(g, minu, maxu);
+
+    //			float r[2];
+    //			g->GetRange(r);
+
+    //			cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
+
+    vector<double> rvec;
+    datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
+    cout << "Data Range : [" << rvec[0] << ", " << rvec[1] << "]" << endl;
+
+    vector<size_t> dims = g->GetDimensions();
+    cout << "Grid dimensions: [ ";
+    for (int i = 0; i < dims.size(); i++) { cout << dims[i] << " "; }
+    cout << "]" << endl;
+
+    g->GetUserExtents(minu, maxu);
+    cout << "Min user extents: [";
+    for (int i = 0; i < minu.size(); i++) cout << minu[i] << " ";
+    cout << "]" << endl;
+
+    cout << "Max user extents: [";
+    for (int i = 0; i < maxu.size(); i++) cout << maxu[i] << " ";
+    cout << "]" << endl;
+
+    cout << "Has missing data : " << g->HasMissingData() << endl;
+    if (g->HasMissingData()) {
+        cout << "Missing data value : " << g->GetMissingValue() << endl;
+        Grid::Iterator itr;
+        Grid::Iterator enditr = g->end();
+        float          mv = g->GetMissingValue();
+        int            count = 0;
+        for (itr = g->begin(); itr != enditr; ++itr) {
+            if (*itr == mv) count++;
+        }
+        cout << "Num missing values : " << count << endl;
+    }
+    cout << "Grid type: " << g->GetType() << endl;
+
+    cout << setprecision(16) << "User time: " << timecoords[ts] << endl;
     cout << endl;
 }
 
@@ -184,6 +277,7 @@ int main(int argc, char **argv)
 
     vector<string> options;
     if (!opt.nogeoxform) { options.push_back("-project_to_pcs"); }
+    if (!opt.novertxform) { options.push_back("-vertical_xform"); }
     DataMgr datamgr(opt.ftype, opt.memsize, opt.nthreads);
     int     rc = datamgr.Initialize(files, options);
     if (rc < 0) exit(1);
@@ -197,9 +291,7 @@ int main(int argc, char **argv)
 
     cout << "Variable name : " << vname << endl;
 
-    int            nts = datamgr.GetNumTimeSteps(vname);
-    vector<double> timecoords;
-    datamgr.GetTimeCoordinates(timecoords);
+    int nts = datamgr.GetNumTimeSteps(vname);
 
     for (int l = 0; l < opt.loop; l++) {
         cout << "Processing loop " << l << endl;
@@ -207,90 +299,7 @@ int main(int argc, char **argv)
         for (int ts = opt.ts0; ts < opt.ts0 + opt.nts && ts < nts; ts++) {
             cout << "Processing time step " << ts << endl;
 
-            if (!opt.savefilebase.empty()) {
-                char   buf[4 + 1];
-                string path(opt.savefilebase);
-                path.append(".");
-                sprintf(buf, "%4.4d", l);
-                path.append(buf);
-                path.append(".");
-                sprintf(buf, "%4.4d", ts);
-                path.append(buf);
-
-                fp = fopen(path.c_str(), "w");
-                if (!fp) { cerr << "Can't open output file " << path << endl; }
-            }
-            if (!datamgr.VariableExists(ts, vname, opt.level, opt.lod)) {
-                cerr << "Variable " << vname << " does not exist" << endl;
-                break;
-            }
-
-            vector<double> minu, maxu;
-            if (opt.minu.size()) {
-                assert(opt.minu.size() == opt.maxu.size());
-                minu = opt.minu;
-                maxu = opt.maxu;
-            } else {
-                int rc = datamgr.GetVariableExtents(ts, vname, opt.level, minu, maxu);
-                if (rc < 0) exit(1);
-            }
-
-            Grid *g;
-            g = datamgr.GetVariable(ts, vname, opt.level, opt.lod, minu, maxu, false);
-
-            if (!g) { exit(1); }
-
-            if (fp) {
-                Grid::Iterator itr;
-                Grid::Iterator enditr = g->end();
-                float          v;
-                for (itr = g->begin(); itr != enditr; ++itr) {
-                    v = *itr;
-                    fwrite(&v, sizeof(v), 1, fp);
-                }
-                fclose(fp);
-            }
-
-            test_node_iterator(g, minu, maxu);
-
-            //			float r[2];
-            //			g->GetRange(r);
-
-            //			cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
-
-            vector<double> rvec;
-            datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
-            cout << "Data Range : [" << rvec[0] << ", " << rvec[1] << "]" << endl;
-
-            vector<size_t> dims = g->GetDimensions();
-            cout << "Grid dimensions: [ ";
-            for (int i = 0; i < dims.size(); i++) { cout << dims[i] << " "; }
-            cout << "]" << endl;
-
-            g->GetUserExtents(minu, maxu);
-            cout << "Min user extents: [";
-            for (int i = 0; i < minu.size(); i++) cout << minu[i] << " ";
-            cout << "]" << endl;
-
-            cout << "Max user extents: [";
-            for (int i = 0; i < maxu.size(); i++) cout << maxu[i] << " ";
-            cout << "]" << endl;
-
-            cout << "Has missing data : " << g->HasMissingData() << endl;
-            if (g->HasMissingData()) {
-                cout << "Missing data value : " << g->GetMissingValue() << endl;
-                Grid::Iterator itr;
-                Grid::Iterator enditr = g->end();
-                float          mv = g->GetMissingValue();
-                int            count = 0;
-                for (itr = g->begin(); itr != enditr; ++itr) {
-                    if (*itr == mv) count++;
-                }
-                cout << "Num missing values : " << count << endl;
-            }
-
-            cout << setprecision(16) << "User time: " << timecoords[ts] << endl;
-            cout << endl;
+            process(fp, datamgr, vname, l, ts);
         }
     }
 

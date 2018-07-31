@@ -75,12 +75,6 @@ void HexahedronToTets(const int hexahedron[8], int tets[5 * 4]);
 //
 void QuadToTris(const int quad[4], int tris[2 * 3]);
 
-#ifdef VAPOR3_0_0_ALPHA
-void BaryTet(const Point3d &p, const Point3d &a, const Point3d &b, const Point3d &c, const Point3d &d Point3d &ans);
-
-void BaryTri(const Point3d &p, const Point3d &a, const Point3d &b, const Point3d &c Point3d &ans);
-#endif
-
 //! Return the signed, double-area of a 2D triangle
 //!
 //! This function uses determinants to calculate double the signed area of a
@@ -95,6 +89,19 @@ void BaryTri(const Point3d &p, const Point3d &a, const Point3d &b, const Point3d
 //! \param[in] c 2D coordinates of third vertex
 //!
 double SignedTriArea2D(const double a[2], const double b[2], const double c[2]);
+
+//! Compute the Barycentric coordinates for a point inside a 2D triangle
+//!
+//! \param[in] verts an 6-element array of 2D triagle Cartesian coordinates,
+//! ordered x1, y1, x2, y2, x3, y3.
+//! \param[in] pt the 2D Cartesian coordinates
+//! \param[out] Barycentric coordinates for point \pt.
+//!
+//! \retval inside a flag indicating whether the point \p pt
+//! is inside (or on the edge) of the triangle. I.e. all of the
+//! Barycentric coordinates
+//! are positive.
+bool BarycentricCoordsTri(const double verts[], const double pt[], double lambda[]);
 
 //! Compute the Wachspress coordinates for a point inside an irregular,
 //! convex, n-sided, planar polygon.
@@ -122,8 +129,22 @@ double SignedTriArea2D(const double a[2], const double b[2], const double c[2]);
 //! \retval inside a flag indicating whether the point \p pt
 //! is inside (or on the edge) of Q. I.e. all of the Wachspress coordinates
 //! are positive.
-
+//
 bool WachspressCoords2D(const double verts[], const double pt[], int n, double lambda[]);
+
+//! Test whether a point is inside (or on edge) of a convex polygon
+//!
+//! This function returns true of the point \p pt is on an edge or in the
+//! interior of the 2D polygon defined by the ordered list of vertices
+//! \p verts. It is the callers responsibility to ensure that the
+//! polygon is convex, otherwise results are undefined
+//
+//! \param[in] verts an array of 2D polygon Cartesian coordinates
+//! describing a convex polygon.
+//! \param[in] pt the 2D Cartesian coordinates
+//! \param[in] n The number of vertices in \p verts. I.e. degree of polygon
+//
+bool InsideConvexPolygon(const double verts[], const double pt[], int n);
 
 };    // namespace VAPoR
 

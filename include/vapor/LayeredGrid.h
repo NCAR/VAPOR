@@ -52,6 +52,9 @@ public:
 
     virtual size_t GetGeometryDim() const override { return (3); }
 
+    static std::string GetClassType() { return ("Layered"); }
+    std::string        GetType() const override { return (GetClassType()); }
+
     //! \copydoc RegularGrid::GetValue()
     //!
     float GetValue(const std::vector<double> &coords) const override;

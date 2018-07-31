@@ -2,6 +2,12 @@
 #include <cassert>
 #include <vapor/vizutil.h>
 
+namespace {
+
+double dot2d(const double a[], const double b[]) { return ((a[0] * b[0]) + (a[1] * b[1])); }
+
+};    // namespace
+
 void VAPoR::HexahedronToTets(const int hexahedron[8], int tets[5 * 4])
 {
     int i = 0;
@@ -161,6 +167,27 @@ double VAPoR::SignedTriArea2D(const double a[2], const double b[2], const double
     return (a[0] * (b[1] * 1.0 - 1.0 * c[1]) - b[0] * (a[1] * 1.0 - 1.0 * c[1]) + c[0] * (a[1] * 1.0 - 1.0 * b[1]));
 }
 
+bool VAPoR::BarycentricCoordsTri(const double verts[], const double pt[], double lambda[])
+{
+    // Vector v0 = b - a, v1 = c - a, v2 = p - a;
+    //
+    double v0[] = {verts[2] - verts[0], verts[3] - verts[1]};
+    double v1[] = {verts[4] - verts[0], verts[5] - verts[1]};
+    double v2[] = {pt[0] - verts[0], pt[1] - verts[1]};
+
+    double d00 = dot2d(v0, v0);
+    double d01 = dot2d(v0, v1);
+    double d11 = dot2d(v1, v1);
+    double d20 = dot2d(v2, v0);
+    double d21 = dot2d(v2, v1);
+    double denom = d00 * d11 - d01 * d01;
+    lambda[1] = (d11 * d20 - d01 * d21) / denom;
+    lambda[2] = (d00 * d21 - d01 * d20) / denom;
+    lambda[0] = 1.0f - lambda[1] - lambda[2];
+
+    return (lambda[0] >= 0.0 && lambda[1] >= 0.0 && lambda[2] >= 0.0);
+}
+
 bool VAPoR::WachspressCoords2D(const double verts[], const double pt[], int n, double lambda[])
 {
     if (n == 0) return (false);
@@ -234,4 +261,26 @@ bool VAPoR::WachspressCoords2D(const double verts[], const double pt[], int n, d
     }
 
     return (inside);
+}
+
+bool VAPoR::InsideConvexPolygon(const double verts[], const double pt[], int n)
+{
+    assert(n >= 3);
+
+    // Partition the convex polygon into a triangle fan, testing each triangle
+    // to see if it contains the point
+    //
+    double triverts[6];
+    triverts[0] = verts[0];
+    triverts[1] = verts[1];
+    double dummy[3];
+    for (int i = 2; i < n; i++) {
+        triverts[2] = verts[2 * (i - 1)];
+        triverts[3] = verts[2 * (i - 1) + 1];
+        triverts[4] = verts[2 * (i)];
+        triverts[5] = verts[2 * (i) + 1];
+        if (BarycentricCoordsTri(triverts, pt, dummy)) return (true);
+    }
+
+    return (false);
 }

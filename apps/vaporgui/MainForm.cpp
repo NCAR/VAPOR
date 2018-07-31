@@ -239,6 +239,7 @@ void MainForm::_initMembers()
     _sessionNewFlag = false;
     _begForCitation = false;
     _eventsSinceLastSave = 0;
+    _buttonPressed = false;
 }
 
 // Only the main program should call the constructor:
@@ -1095,7 +1096,7 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     string dataSetName = _getDataSetName(myFiles[0]);
     if (dataSetName.empty()) return;
 
-    vector<string> options = {"-project_to_pcs"};
+    vector<string> options = {"-project_to_pcs", "-vertical_xform"};
     bool           status = openDataHelper(dataSetName, format, myFiles, options);
     if (!status) return;
 
@@ -1639,7 +1640,7 @@ void MainForm::_setProj4String(string proj4String)
         closeDataHelper(dataSets[i]);
     }
 
-    vector<string> options = {"-project_to_pcs"};
+    vector<string> options = {"-project_to_pcs", "-vertical_xform"};
     if (!proj4String.empty()) {
         options.push_back("-proj4");
         options.push_back(proj4String);
@@ -1663,6 +1664,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_plot) { _plot->Update(); }
 
         _tabMgr->Update();
+
+        // force visualizer redraw
+        //
         _vizWinMgr->Update();
 
         update();
@@ -1670,22 +1674,18 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         return (false);
     }
 
-    // Most other events result in a redraw. Not sure if this
-    // is necessary
+    //
+    // Force a redraw if mouse button is pressed and moving
     //
     switch (event->type()) {
-    case (QEvent::MouseButtonPress):
-    case (QEvent::MouseButtonRelease):
+    case (QEvent::MouseButtonPress): _buttonPressed = true; break;
+
+    case (QEvent::MouseButtonRelease): _buttonPressed = false; break;
+
     case (QEvent::MouseMove):
-        //	case (QEvent::KeyRelease):
-
-        // Not sure why Paint is needed. Who generates it?
-        //
-        // case (QEvent::Paint):
-
-        _vizWinMgr->Update();
-
+        if (_buttonPressed) { _vizWinMgr->Update(); }
         break;
+
     default: break;
     }
 
