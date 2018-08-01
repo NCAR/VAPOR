@@ -62,6 +62,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm,
 
 // Destructor
 DirectVolumeRenderer::~DirectVolumeRenderer() {
+    // delete textures
     if (_backFaceTextureId)
         glDeleteTextures(1, &_backFaceTextureId);
     if (_frontFaceTextureId)
@@ -73,8 +74,17 @@ DirectVolumeRenderer::~DirectVolumeRenderer() {
     if (_colorMapTextureId)
         glDeleteTextures(1, &_colorMapTextureId);
 
+    // delete buffers
+    if (_frameBufferId)
+        glDeleteBuffers(1, &_frameBufferId);
+    if (_depthBufferId)
+        glDeleteBuffers(1, &_depthBufferId);
+
+    // delete vertex arrays
     if (_vertexArrayId)
         glDeleteVertexArrays(1, &_vertexArrayId);
+
+    // delete shader programs
     if (_1stPassShaderId)
         glDeleteProgram(_1stPassShaderId);
     if (_2ndPassShaderId)
