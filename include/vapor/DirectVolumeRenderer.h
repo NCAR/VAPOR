@@ -80,19 +80,26 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     float _colorMapRange[2];
 
     // OpenGL stuff
+    // textures
     GLuint _backFaceTextureId;     // GL_TEXTURE0
     GLuint _frontFaceTextureId;    // GL_TEXTURE1
     GLuint _volumeTextureId;       // GL_TEXTURE2
     GLuint _missingValueTextureId; // GL_TEXTURE3
     GLuint _colorMapTextureId;     // GL_TEXTURE4
+
+    // buffers
     GLuint _frameBufferId;
     GLuint _depthBufferId;
+    GLenum _drawBuffers[2]; // Draw buffers for the 1st and 2nd pass
+
+    // vertex arrays
     GLuint _vertexArrayId;
+
+    // shaders
     GLuint _1stPassShaderId;
     GLuint _2ndPassShaderId;
     GLuint _3rdPassShaderId;
     GLuint _quadShaderId;
-    GLenum _drawBuffers[2]; // Draw buffers for the 1st and 2nd pass
 
     //
     // Draw faces using triangle strips
