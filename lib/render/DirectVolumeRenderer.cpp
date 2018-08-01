@@ -45,23 +45,56 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
 DirectVolumeRenderer::~DirectVolumeRenderer()
 {
     // delete textures
-    if (_backFaceTextureId) glDeleteTextures(1, &_backFaceTextureId);
-    if (_frontFaceTextureId) glDeleteTextures(1, &_frontFaceTextureId);
-    if (_volumeTextureId) glDeleteTextures(1, &_volumeTextureId);
-    if (_missingValueTextureId) glDeleteTextures(1, &_missingValueTextureId);
-    if (_colorMapTextureId) glDeleteTextures(1, &_colorMapTextureId);
+    if (_backFaceTextureId) {
+        glDeleteTextures(1, &_backFaceTextureId);
+        _backFaceTextureId = 0;
+    }
+    if (_frontFaceTextureId) {
+        glDeleteTextures(1, &_frontFaceTextureId);
+        _frontFaceTextureId = 0;
+    }
+    if (_volumeTextureId) {
+        glDeleteTextures(1, &_volumeTextureId);
+        _volumeTextureId = 0;
+    }
+    if (_missingValueTextureId) {
+        glDeleteTextures(1, &_missingValueTextureId);
+        _missingValueTextureId = 0;
+    }
+    if (_colorMapTextureId) {
+        glDeleteTextures(1, &_colorMapTextureId);
+        _colorMapTextureId = 0;
+    }
 
     // delete buffers
-    if (_frameBufferId) glDeleteBuffers(1, &_frameBufferId);
-    if (_depthBufferId) glDeleteBuffers(1, &_depthBufferId);
+    if (_frameBufferId) {
+        glDeleteBuffers(1, &_frameBufferId);
+        _frameBufferId = 0;
+    }
+    if (_depthBufferId) {
+        glDeleteBuffers(1, &_depthBufferId);
+        _depthBufferId = 0;
+    }
 
     // delete vertex arrays
-    if (_vertexArrayId) glDeleteVertexArrays(1, &_vertexArrayId);
+    if (_vertexArrayId) {
+        glDeleteVertexArrays(1, &_vertexArrayId);
+        _vertexArrayId = 0;
+    }
 
     // delete shader programs
-    if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
-    if (_2ndPassShaderId) glDeleteProgram(_2ndPassShaderId);
-    if (_3rdPassShaderId) glDeleteProgram(_3rdPassShaderId);
+    if (_1stPassShaderId) {
+        glDeleteProgram(_1stPassShaderId);
+        _1stPassShaderId = 0;
+    }
+    if (_2ndPassShaderId) {
+        glDeleteProgram(_2ndPassShaderId);
+        _2ndPassShaderId = 0;
+    }
+    if (_3rdPassShaderId) {
+        glDeleteProgram(_3rdPassShaderId);
+        _3rdPassShaderId = 0;
+    }
 }
 
 // Constructor
