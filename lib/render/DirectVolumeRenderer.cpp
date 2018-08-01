@@ -36,7 +36,6 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _1stPassShaderId = 0;
     _2ndPassShaderId = 0;
     _3rdPassShaderId = 0;
-    _quadShaderId = 0;
 
     _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
     _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
@@ -63,9 +62,6 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_1stPassShaderId) glDeleteProgram(_1stPassShaderId);
     if (_2ndPassShaderId) glDeleteProgram(_2ndPassShaderId);
     if (_3rdPassShaderId) glDeleteProgram(_3rdPassShaderId);
-    if (_quadShaderId) glDeleteProgram(_quadShaderId);
-
-    // Need to look up what resources to destroy in OpenGL.
 }
 
 // Constructor
@@ -151,8 +147,6 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
         std::cerr << "UserCoordinates::updateCoordinates() isn't on a StructuredGrid" << std::endl;
         return false;
     } else {
-        std::cerr << "EXPENSIVE operation in progress!" << std::endl;
-
         /* update member variables */
         grid->GetUserExtents(extMin, extMax);
         for (int i = 0; i < 3; i++) {
@@ -239,8 +233,6 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
                 bottomFace[idx++] = (float)buf[2];
             }
 
-        std::cerr << "  EXPENSIVE operation: finish retrieving faces !" << std::endl;
-
         // Save the data field values and missing values
         if (dataField) delete[] dataField;
         size_t numOfVertices = dims[0] * dims[1] * dims[2];
@@ -275,8 +267,6 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
             }
             std::memset(missingValueMask, 0, numOfVertices);
         }
-
-        std::cerr << "  EXPENSIVE operation: finish retrieving data field !" << std::endl;
     }
 
     delete grid;
@@ -300,10 +290,6 @@ int DirectVolumeRenderer::_initializeGL()
     const char vgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.vgl";
     const char fgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.fgl";
     _3rdPassShaderId = _loadShaders(vgl3, fgl3);
-
-    const char vglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.vgl";
-    const char fglQuad[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVRQuad.fgl";
-    _quadShaderId = _loadShaders(vglQuad, fglQuad);
 
     // Create Vertex Array Object (VAO)
     glGenVertexArrays(1, &_vertexArrayId);
@@ -351,12 +337,6 @@ int DirectVolumeRenderer::_paintGL()
     glViewport(0, 0, viewport[2], viewport[3]);
 
     _drawVolumeFaces(3);    // 3rd pass, perform ray casting
-
-#if 0
-    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-    glViewport( 0, 0, viewport[2], viewport[3] );
-    _drawQuad();
-#endif
 
     return 0;
 }
@@ -439,9 +419,7 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure _colorMapTextureId */
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    float borderColor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, borderColor);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -555,7 +533,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
 
         float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
         maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
-        float stepSize1D = 0.5f / maxVolumeDim;    // 2 samples per cell
+        float stepSize1D = 0.5f / maxVolumeDim;    // approximately 2 samples per cell
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
         glUniform1f(uniformLocation, stepSize1D);
 
@@ -820,47 +798,6 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
             // Because all matrices are colume-major, this is the correct order.
             MVP[i * 4 + j] = tmp;
         }
-}
-
-void DirectVolumeRenderer::_drawQuad()
-{
-    const GLfloat quadVertices[] = {_userCoordinates.boxMin[0], _userCoordinates.boxMax[1], _userCoordinates.boxMin[2], _userCoordinates.boxMin[0],
-                                    _userCoordinates.boxMin[1], _userCoordinates.boxMin[2], _userCoordinates.boxMax[0], _userCoordinates.boxMax[1],
-                                    _userCoordinates.boxMin[2], _userCoordinates.boxMax[0], _userCoordinates.boxMin[1], _userCoordinates.boxMin[2]};
-
-    glUseProgram(_quadShaderId);
-
-    GLfloat MVP[16];
-    _getMVPMatrix(MVP);
-
-    GLuint MVPId = glGetUniformLocation(_quadShaderId, "MVP");
-    glUniformMatrix4fv(MVPId, 1, GL_FALSE, MVP);
-
-    GLuint boxminId = glGetUniformLocation(_quadShaderId, "boxmin");
-    glUniform3fv(boxminId, 1, _userCoordinates.boxMin);
-
-    GLuint boxmaxId = glGetUniformLocation(_quadShaderId, "boxmax");
-    glUniform3fv(boxmaxId, 1, _userCoordinates.boxMax);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-    GLuint texId = glGetUniformLocation(_quadShaderId, "previousTexture");
-    glUniform1i(texId, 0);
-
-    glEnableVertexAttribArray(0);
-    GLuint vertexBufferId = 0;
-    glGenBuffers(1, &vertexBufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-
-    glBufferData(GL_ARRAY_BUFFER, 4 * 3 * 4, quadVertices, GL_STREAM_DRAW);
-    glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                          3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    glDeleteBuffers(1, &vertexBufferId);
-    glDisableVertexAttribArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUseProgram(0);
 }
 
 //===================================================================

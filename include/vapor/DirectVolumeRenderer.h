@@ -92,17 +92,11 @@ private:
     GLuint _1stPassShaderId;
     GLuint _2ndPassShaderId;
     GLuint _3rdPassShaderId;
-    GLuint _quadShaderId;
 
     //
     // Draw faces using triangle strips
     //
     void _drawVolumeFaces(int whichPass);
-
-    //
-    // Draw a quad that helps examine the texture.
-    //
-    void _drawQuad();
 
     //
     // Initialization for 1) framebuffers and 2) textures
