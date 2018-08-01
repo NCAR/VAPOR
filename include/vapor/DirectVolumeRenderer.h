@@ -58,9 +58,10 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
         float *topFace, *bottomFace;     // user coordinates, size == bx * bz * 3
         float *dataField;                // data field of this volume
         unsigned char *missingValueMask; // 0 == is missing value; 255 == not missing value
-        size_t dims[3];                  // num. of samples along each axis
-        float boxMin[3], boxMax[3];      // bounding box of this volume
         float valueRange[2];             // min and max values of the volume
+        size_t dims[3];                  // num. of samples along each axis
+        float boxMin[3], boxMax[3];      // bounding box of the current volume
+                                         // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
 
         /* Also keep the current meta data */
         size_t myCurrentTimeStep;
@@ -70,7 +71,8 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        bool isUpToDate(const DVRParams *params);
+        bool isUpToDate(const DVRParams *params,
+                        DataMgr *dataMgr);
         bool updateCoordinates(const DVRParams *params,
                                DataMgr *dataMgr);
     }; // end of struct UserCoordinates
