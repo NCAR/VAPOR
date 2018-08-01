@@ -157,13 +157,27 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
     }
 }
 
-bool DirectVolumeRenderer::UserCoordinates::isUpToDate(const DVRParams *params)
+bool DirectVolumeRenderer::UserCoordinates::isUpToDate(const DVRParams *params, DataMgr *dataMgr)
 {
-    if (myCurrentTimeStep != params->GetCurrentTimestep() || myVariableName != params->GetVariableName() || myRefinementLevel != params->GetRefinementLevel()
-        || myCompressionLevel != params->GetCompressionLevel()) {
+    if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
+        || (myCompressionLevel != params->GetCompressionLevel())) {
         return false;
-    } else
-        return true;
+    }
+
+    // compare grid boundaries and dimensions
+    std::vector<double> extMin, extMax;
+    params->GetBox()->GetExtents(extMin, extMax);
+    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
+    if (grid == nullptr) std::cerr << "UserCoordinates::isUpToDate() isn't on a StructuredGrid" << std::endl;
+
+    grid->GetUserExtents(extMin, extMax);
+    std::vector<size_t> gridDims = grid->GetDimensions();
+    for (int i = 0; i < 3; i++) {
+        if ((boxMin[i] != (float)extMin[i]) || (boxMax[i] != (float)extMax[i]) || (dims[i] != gridDims[i])) return false;
+    }
+
+    // now we know it's up to date!
+    return true;
 }
 
 bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *params, DataMgr *dataMgr)
@@ -342,7 +356,7 @@ int DirectVolumeRenderer::_paintGL()
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
 
     /* Gather user coordinates */
-    if (!_userCoordinates.isUpToDate(params)) {
+    if (!_userCoordinates.isUpToDate(params, _dataMgr)) {
         _userCoordinates.updateCoordinates(params, _dataMgr);
 
         /* Also attach the new data to 3D textures: _volumeTextureId, _missingValueTextureId */
