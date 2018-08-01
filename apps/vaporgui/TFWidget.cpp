@@ -208,7 +208,10 @@ void TFWidget::getRange(float range[2], float values[2])
 
     vector<double> rangev;
     int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, rangev);
-    assert(rc >= 0);
+    if (rc < 0) {
+        MSG_ERR("Error loading variable");
+        return;
+    }
     assert(rangev.size() == 2);
 
     range[0] = rangev[0];
