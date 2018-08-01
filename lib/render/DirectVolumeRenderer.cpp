@@ -143,7 +143,7 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
         std::cerr << "UserCoordinates::updateCoordinates() isn't on a StructuredGrid" << std::endl;
         return false;
     } else {
-        std::cout << "EXPENSIVE operation in progress!" << std::endl;
+        std::cerr << "EXPENSIVE operation in progress!" << std::endl;
 
         /* update member variables */
         grid->GetUserExtents(extMin, extMax);
@@ -231,6 +231,8 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
                 bottomFace[idx++] = (float)buf[2];
             }
 
+        std::cerr << "  EXPENSIVE operation: finish retrieving faces !" << std::endl;
+
         // Save the data field values and missing values
         if (dataField) delete[] dataField;
         size_t numOfVertices = dims[0] * dims[1] * dims[2];
@@ -265,6 +267,8 @@ bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *p
             }
             std::memset(missingValueMask, 0, numOfVertices);
         }
+
+        std::cerr << "  EXPENSIVE operation: finish retrieving data field !" << std::endl;
     }
 
     delete grid;
@@ -427,7 +431,9 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure _colorMapTextureId */
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    float borderColor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -439,7 +445,7 @@ void DirectVolumeRenderer::_printGLInfo() const
 {
     std::cout << "    **** System Info ****" << std::endl;
     std::cout << "    OpenGL version : " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "    GLSL version   : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "    GLSL   version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "    Vendor         : " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "    **** System Info ****" << std::endl;
