@@ -84,9 +84,10 @@ void ControlPointEditor::initWidgets()
     ColorMap::Color color = _cmap->controlPointColor(_controlPoint);
    
 
-    _tempColor.setHsv((int)(359*color.hue()), 
-                  (int)(255*color.sat()), 
-                  (int)(255*color.val()));
+    _tempColor.setHsvF(color.hue(), 
+                  color.sat(), 
+                  color.val());
+	
 	
 	QPalette pal;
 	pal.setColor(QPalette::Base,_tempColor);
@@ -174,7 +175,9 @@ void ControlPointEditor::indexValueChanged()
 void ControlPointEditor::pickColor()
 {
 	QPalette pal(_colorEdit->palette());
+	QColor from = pal.color(QPalette::Base);
 	QColor newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
+	QColor to = newColor;
 	if (!newColor.isValid()) return; 
 	pal.setColor(QPalette::Base, newColor);
 	_colorEdit->setPalette(pal);
@@ -199,11 +202,11 @@ void ControlPointEditor::okHandler()
   {
     float value = _dataValueField->text().toFloat();
 
-    int h,s,v;
+    double h,s,v;
 	
-	_tempColor.getHsv(&h,&s,&v);
+	_tempColor.getHsvF(&h,&s,&v);
 
-    ColorMap::Color color(h/359.0, s/255.0, v/255.0);
+    ColorMap::Color color(h, s, v);
 
     _cmap->controlPointValue(_controlPoint, value);
     _cmap->controlPointColor(_controlPoint, color);
