@@ -138,9 +138,7 @@ void ControlPointEditor::indexValueChanged()
 void ControlPointEditor::pickColor()
 {
     QPalette pal(_colorEdit->palette());
-    QColor   from = pal.color(QPalette::Base);
     QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-    QColor   to = newColor;
     if (!newColor.isValid()) return;
     pal.setColor(QPalette::Base, newColor);
     _colorEdit->setPalette(pal);
