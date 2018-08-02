@@ -39,6 +39,20 @@ using namespace VAPoR;
 
 static RendererRegistrar<WireFrameRenderer> registrar(WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType());
 
+namespace {
+
+// Product of elements in a vector
+//
+size_t vproduct(vector<size_t> a)
+{
+    size_t ntotal = 1;
+
+    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
+    return (ntotal);
+}
+
+};    // namespace
+
 WireFrameRenderer::WireFrameRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, WireFrameParams::GetClassType(), WireFrameRenderer::GetClassType(), instName, dataMgr), _drawList(0)
 {
@@ -96,33 +110,35 @@ bool WireFrameRenderer::_isCacheDirty() const
     return false;
 }
 
-void WireFrameRenderer::_drawCell(const float *verts, const float *colors, int n, bool layered)
+void WireFrameRenderer::_drawCell(const vector<vector<size_t>> &nodes, const vector<size_t> &dims, bool layered) const
 {
-    glVertexPointer(3, GL_FLOAT, 0, verts);
-    glColorPointer(4, GL_FLOAT, 0, colors);
+    GLuint *indices1 = new GLuint[nodes.size()];
+    for (int i = 0; i < nodes.size(); i++) { indices1[i] = Wasp::LinearizeCoords(nodes[i], dims); }
 
-    GLuint *indices = new GLuint[n];
+    int count = layered ? nodes.size() / 2 : nodes.size();
+    glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices1);
 
-    int count = layered ? n / 2 : n;
-    for (int i = 0; i < count; i++) { indices[i] = i; }
-    glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices);
-
-    if (!layered) return;
+    if (!layered) {
+        delete[] indices1;
+        return;
+    }
 
     // if layered the coordinates are ordered bottom face first, then top face
     //
-    for (int i = 0; i < count; i++) { indices[i] = i + count; }
-    glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices);
+
+    glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices1 + count);
 
     // Now draw edges between top and bottom face
     //
+    GLuint *indices2 = new GLuint[nodes.size()];
     for (int i = 0; i < count; i++) {
-        indices[2 * i + 0] = i;
-        indices[2 * i + 1] = i + count;
+        indices2[2 * i + 0] = indices1[i];
+        indices2[2 * i + 1] = indices1[i + count];
     }
-    glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, indices);
+    glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, indices2);
 
-    delete[] indices;
+    delete[] indices1;
+    delete[] indices2;
 }
 
 int WireFrameRenderer::_buildCache()
@@ -146,79 +162,85 @@ int WireFrameRenderer::_buildCache()
 
     glNewList(_drawList, GL_COMPILE);
 
+    // Set up coordinate and color buffers
+    //
     double mv = grid->GetMissingValue();
 
-#if 0    // VAPOR_3_1_0
+    size_t nVertsTotal = vproduct(grid->GetDimensions());
 
-	// Performance of the bounding box version of the Cell iterator 
-	// is too slow. So we render the entire grid and use clipping planes
-	// to restrict the displayed region
-	//
-    Grid::ConstCellIterator it = grid->ConstCellBegin(
-		_cacheParams.boxMin, _cacheParams.boxMax
-	);
-#else
-    Grid::ConstCellIterator it = grid->ConstCellBegin();
-    EnableClipToBox();
-#endif
+    float *coordsArray = new float[nVertsTotal * 3];
+    float *colorsArray = new float[nVertsTotal * 4];
 
-    size_t nverts = grid->GetMaxVertexPerCell();
-    bool   layered = grid->GetTopologyDim() == 3;
+    Grid::ConstIterator itr = grid->cbegin();
+    Grid::ConstIterator end_itr = grid->cend();
 
-    float *                 coordsArray = new float[nverts * 3];
-    float *                 colorsArray = new float[nverts * 4];
-    Grid::ConstCellIterator end = grid->ConstCellEnd();
+    Grid::ConstCoordItr coord_itr = grid->ConstCoordBegin();
+    Grid::ConstCoordItr end_coord_itr = grid->ConstCoordEnd();
 
-    float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
-    for (; it != end; ++it) {
-        vector<vector<size_t>> nodes;
-        grid->GetCellNodes(*it, nodes);
+    float  defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    size_t index = 0;
+    for (; itr != end_itr && coord_itr != end_coord_itr; ++itr, ++coord_itr, ++index) {
+        const vector<double> &coord = *coord_itr;
 
-        for (int i = 0; i < nodes.size(); i++) {
-            vector<double> coord;
-            grid->GetUserCoordinates(nodes[i], coord);
+        coordsArray[3 * index + 0] = coord[0];
+        coordsArray[3 * index + 1] = coord[1];
 
-            coordsArray[3 * i + 0] = coord[0];
-            coordsArray[3 * i + 1] = coord[1];
-
-            if (coord.size() == 3) {
-                coordsArray[3 * i + 2] = coord[2];
-            } else if (heightGrid) {
-                coordsArray[3 * i + 2] = heightGrid->AccessIndex(nodes[i]);
-            } else {
-                coordsArray[3 * i + 2] = defaultZ;
-            }
-
-            float dataValue = grid->AccessIndex(nodes[i]);
-            if (dataValue == mv) {
-                colorsArray[4 * i + 0] = 0.0;
-                colorsArray[4 * i + 1] = 0.0;
-                colorsArray[4 * i + 2] = 0.0;
-                colorsArray[4 * i + 3] = 0.0;
-            } else if (_cacheParams.useSingleColor) {
-                colorsArray[4 * i + 0] = _cacheParams.constantColor[0];
-                colorsArray[4 * i + 1] = _cacheParams.constantColor[1];
-                colorsArray[4 * i + 2] = _cacheParams.constantColor[2];
-                colorsArray[4 * i + 3] = _cacheParams.constantOpacity;
-            } else {
-                size_t n = _cacheParams.tf_lut.size() >> 2;
-                int    index = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
-                if (index < 0) { index = 0; }
-                if (index >= n) { index = n - 1; }
-                colorsArray[4 * i + 0] = _cacheParams.tf_lut[4 * index + 0];
-                colorsArray[4 * i + 1] = _cacheParams.tf_lut[4 * index + 1];
-                colorsArray[4 * i + 2] = _cacheParams.tf_lut[4 * index + 2];
-                colorsArray[4 * i + 3] = _cacheParams.tf_lut[4 * index + 3];
-            }
+        if (coord.size() == 3) {
+            coordsArray[3 * index + 2] = coord[2];
+        } else if (heightGrid) {
+            coordsArray[3 * index + 2] = heightGrid->GetValue(*coord_itr);
+        } else {
+            coordsArray[3 * index + 2] = defaultZ;
         }
 
-        _drawCell(coordsArray, colorsArray, nodes.size(), layered);
+        float dataValue = *itr;
+        if (dataValue == mv) {
+            colorsArray[4 * index + 0] = 0.0;
+            colorsArray[4 * index + 1] = 0.0;
+            colorsArray[4 * index + 2] = 0.0;
+            colorsArray[4 * index + 3] = 0.0;
+        } else if (_cacheParams.useSingleColor) {
+            colorsArray[4 * index + 0] = _cacheParams.constantColor[0];
+            colorsArray[4 * index + 1] = _cacheParams.constantColor[1];
+            colorsArray[4 * index + 2] = _cacheParams.constantColor[2];
+            colorsArray[4 * index + 3] = _cacheParams.constantOpacity;
+        } else {
+            size_t n = _cacheParams.tf_lut.size() >> 2;
+            int    lut = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
+            if (lut < 0) { lut = 0; }
+            if (lut >= n) { lut = n - 1; }
+            colorsArray[4 * index + 0] = _cacheParams.tf_lut[4 * lut + 0];
+            colorsArray[4 * index + 1] = _cacheParams.tf_lut[4 * lut + 1];
+            colorsArray[4 * index + 2] = _cacheParams.tf_lut[4 * lut + 2];
+            colorsArray[4 * index + 3] = _cacheParams.tf_lut[4 * lut + 3];
+        }
     }
 
-#if 0    // VAPOR_3_1_0
-#else
+    if (grid->GetTopologyDim() == 3) {
+        EnableClipToBox();
+    } else {
+        EnableClipToBox2DXY();
+    }
+
+    glVertexPointer(3, GL_FLOAT, 0, coordsArray);
+    glColorPointer(4, GL_FLOAT, 0, colorsArray);
+
+    // Now draw the individual cells. Note: each shared cell edge
+    // gets drawn twice. Oops
+    //
+    bool layered = grid->GetTopologyDim() == 3;
+
+    Grid::ConstCellIterator cell_itr = grid->ConstCellBegin();
+    Grid::ConstCellIterator end_cell_itr = grid->ConstCellEnd();
+
+    for (; cell_itr != end_cell_itr; ++cell_itr) {
+        vector<vector<size_t>> nodes;
+        grid->GetCellNodes(*cell_itr, nodes);
+
+        _drawCell(nodes, grid->GetDimensions(), layered);
+    }
+
     DisableClippingPlanes();
-#endif
 
     delete[] coordsArray;
     delete[] colorsArray;

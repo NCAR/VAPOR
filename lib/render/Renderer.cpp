@@ -237,6 +237,34 @@ void Renderer::GetClippingPlanes(float planes[24]) const
     std::memcpy(planes + 20, z1Plane, planeSize);
 }
 
+void Renderer::EnableClipToBox2DXY() const
+{
+    GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
+    GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
+    GLdouble y0Plane[] = {0.0, 1.0, 0.0, 0.0};
+    GLdouble y1Plane[] = {0.0, -1.0, 0.0, 0.0};
+
+    const RenderParams *rParams = GetActiveParams();
+    vector<double>      minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+    assert(minExts.size() == maxExts.size());
+    assert(minExts.size() > 0 && minExts.size() < 4);
+
+    x0Plane[3] = -minExts[0];
+    x1Plane[3] = maxExts[0];
+    glEnable(GL_CLIP_PLANE0);
+    glClipPlane(GL_CLIP_PLANE0, x0Plane);
+    glEnable(GL_CLIP_PLANE1);
+    glClipPlane(GL_CLIP_PLANE1, x1Plane);
+
+    y0Plane[3] = -minExts[1];
+    y1Plane[3] = maxExts[1];
+    glEnable(GL_CLIP_PLANE2);
+    glClipPlane(GL_CLIP_PLANE2, y0Plane);
+    glEnable(GL_CLIP_PLANE3);
+    glClipPlane(GL_CLIP_PLANE3, y1Plane);
+}
+
 void Renderer::DisableClippingPlanes()
 {
     glDisable(GL_CLIP_PLANE0);

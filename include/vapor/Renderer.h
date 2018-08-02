@@ -260,6 +260,8 @@ protected:
     //! It is the caller's responsibility to allocate memory for 24 floats.
     void GetClippingPlanes(float planes[24]) const;
 
+    void EnableClipToBox2DXY() const;
+
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to
     //! returning from _paintGL()
