@@ -173,8 +173,6 @@ void main(void)
         // Color compositing
         color.rgb        += (1.0f - color.a) * backColor.a * backColor.rgb;
         color.a          += (1.0f - color.a) * backColor.a;
-
-        step1Texture      = step2Texture;
     }
 
 }
