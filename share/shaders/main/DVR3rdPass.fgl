@@ -79,6 +79,7 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
+    float EPSILON       = 1e-6f;
     vec3  lightDirEye   = normalize( vec3(0.0f, 0.0f, 1.0f)); // vec3 makes normalization easier
     float ambientCoeff  = 0.3f;
     float diffuseCoeff  = 1.0f;
@@ -100,7 +101,7 @@ void main(void)
     vec3  stepSize3D    = rayDirTexture / nStepsf;
 
     vec3  step1Texture  = startTexture;
-    if( texture(missingValueMaskTexture, step1Texture).x > 1e-6f )    // missing value
+    if( texture(missingValueMaskTexture, step1Texture).x > EPSILON )    // missing value
         color           = vec4( 0.0f );
     else
     {
@@ -116,7 +117,7 @@ void main(void)
             break;
 
         vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
-        if( texture(missingValueMaskTexture, step2Texture).x > 1e-6f )    // missing value
+        if( texture(missingValueMaskTexture, step2Texture).x > EPSILON )    // missing value
             continue;
 
         float step2Value  = texture( volumeTexture, step2Texture ).r;
@@ -126,10 +127,10 @@ void main(void)
         
         // Apply lighting if big enough gradient
         vec3 gradientModel = CalculateGradient( step2Texture );
-        if( length( gradientModel ) > 0.001f )  // 0.001f seems to be a good threshold
+        if( length( gradientModel ) > EPSILON )
         {
             vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
-            gradientEye      = normalize( gradientEye );
+                 gradientEye = normalize( gradientEye );
             float diffuse    = abs( dot(lightDirEye, gradientEye) );
 
             // Calculate eye space coordinates of "step2Texture"
