@@ -663,6 +663,7 @@ void BarbRenderer::_getDirection(
 
 			float missingVal = variableData[dim]->GetMissingValue();
 			if (direction[dim] == missingVal) {
+				cout << "Missing value at " << xCoord << " " << yCoord << " " << zCoord << endl;
 				missing = true;
 			}
 		}
