@@ -77,11 +77,11 @@ class RENDER_API WireFrameRenderer : public Renderer {
     int _buildCache();
     bool _isCacheDirty() const;
     void _saveCacheParams();
+
     void _drawCell(
-        const float *verts,
-        const float *colors,
-        int n,
-        bool layered);
+        const vector<vector<size_t>> &nodes,
+        const vector<size_t> &dims,
+        bool layered) const;
 };
 }; // namespace VAPoR
 

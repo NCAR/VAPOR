@@ -268,6 +268,8 @@ class RENDER_API Renderer : public RendererBase {
     //! \sa DisableClippingPlanes
     void EnableClipToBox() const;
 
+    void EnableClipToBox2DXY() const;
+
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to
     //! returning from _paintGL()
