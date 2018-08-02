@@ -88,14 +88,17 @@ void VariablesWidget::Reinit(
     _dspFlags = dspFlags;
     _dimFlags = dimFlags;
 
-    showHideVar(true);
+    showHideVarCombos(true);
 
-    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+    // If the renderer is not 2D and 3D, hide
+    // the dimension selector and set the _activeDim
+    if (!((_dimFlags & TWOD) &&
+          (_dimFlags & THREED))) {
         dimensionFrame->hide();
-        if (dimFlags & TWOD)
-            _activeDim = TWODIMS;
-        else
+        if (dimFlags & THREED)
             _activeDim = THREEDIMS;
+        else
+            _activeDim = TWODIMS;
     }
 
     variableSelectionWidget->adjustSize();
@@ -257,7 +260,7 @@ void VariablesWidget::setDefaultColorVar(
     }
 }
 
-void VariablesWidget::showHideVar(bool on) {
+void VariablesWidget::showHideVarCombos(bool on) {
 
     if ((_dspFlags & SCALAR) && on) {
         singleVariableFrame->show();
@@ -266,8 +269,10 @@ void VariablesWidget::showHideVar(bool on) {
     }
 
     if ((_dspFlags & VECTOR) && on) {
+        cout << "showing fieldVarFrame" << endl;
         fieldVariableFrame->show();
     } else {
+        cout << "hiding fieldVarFrame" << endl;
         fieldVariableFrame->hide();
     }
 
@@ -398,16 +403,19 @@ void VariablesWidget::updateHeightCombo() {
 
 void VariablesWidget::updateCombos() {
 
-    int ndim = _rParams->GetValueLong(_nDimsTag, THREEDIMS);
-    assert(ndim == TWODIMS || ndim == THREEDIMS);
+    //int ndim = _rParams->GetValueLong(_nDimsTag, THREEDIMS);
+    //assert(ndim == TWODIMS || ndim == THREEDIMS);
+    assert(_activeDim == TWODIMS || _activeDim == THREEDIMS);
 
-    vector<string> vars = _dataMgr->GetDataVarNames(ndim);
+    vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
+    cout << "updateCombos " << vars.size() << " " << _activeDim << endl;
 
-    if (!vars.size()) {
-        showHideVar(false);
-        return;
-    }
-    showHideVar(true);
+    /*	if (! vars.size()) {
+		showHideVarCombos(false);
+		return;
+	}
+	showHideVarCombos(true);
+*/
 
     updateScalarCombo();
     updateVectorCombo();
