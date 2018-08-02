@@ -835,8 +835,7 @@ void BarbRenderer::_getMagnitudeAtPoint(
 			double missingValue = grid->GetMissingValue();
 
 			if (value == missingValue){
-				cout.precision(18);
-				cout << counter << "value is missing " << fixed << value << " " << point[X] << " " << point[Y] << " " << point[Z] << endl;
+				cout << "missing value of " << value << " found at " << point[X] << " " << point[Y] << " " << point[Z] << endl;
 				counter++;
 				continue;
 			}
