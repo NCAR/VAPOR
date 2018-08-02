@@ -442,6 +442,7 @@ int DirectVolumeRenderer::_paintGL()
     GLint viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
+    assert( params );
 
     /* Gather user coordinates */
     if( !_userCoordinates.isUpToDate( params, _dataMgr ) )
@@ -687,6 +688,12 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "stepSize1D" );
         glUniform1f( uniformLocation, stepSize1D );
 
+        float planes[ 24 ];                      // 6 planes, each with 4 elements
+        GetClippingPlanes( planes );
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "clipPlanes" );
+        glUniform4fv( uniformLocation, 6, planes );
+
+
         // Pass in textures
         glActiveTexture( GL_TEXTURE0 );
         glBindTexture( GL_TEXTURE_2D, _backFaceTextureId );
@@ -713,11 +720,17 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapTexture" );
         glUniform1i( uniformLocation, 4 );
 
-        glEnable( GL_CULL_FACE );
+        glEnable(   GL_CULL_FACE );
         glCullFace( GL_BACK );
-        glEnable(GL_DEPTH_TEST);
+        glEnable(   GL_DEPTH_TEST );
         glDepthMask( GL_FALSE );
 
+        glEnable( GL_CLIP_DISTANCE0 );
+        glEnable( GL_CLIP_DISTANCE1 );
+        glEnable( GL_CLIP_DISTANCE2 );
+        glEnable( GL_CLIP_DISTANCE3 );
+        glEnable( GL_CLIP_DISTANCE4 );
+        glEnable( GL_CLIP_DISTANCE5 );
     }
 
     glEnableVertexAttribArray( 0 );     
@@ -867,8 +880,15 @@ void DirectVolumeRenderer::_drawVolumeFaces( int whichPass )
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &vertexBufferId );
 
+    glDisable( GL_CLIP_DISTANCE0 );
+    glDisable( GL_CLIP_DISTANCE1 );
+    glDisable( GL_CLIP_DISTANCE2 );
+    glDisable( GL_CLIP_DISTANCE3 );
+    glDisable( GL_CLIP_DISTANCE4 );
+    glDisable( GL_CLIP_DISTANCE5 );
+
     glDisable( GL_CULL_FACE );
-    glDisable(GL_DEPTH_TEST);
+    glDisable( GL_DEPTH_TEST );
     glClearDepth( 1.0 );  
     glDepthMask( GL_TRUE );
 
