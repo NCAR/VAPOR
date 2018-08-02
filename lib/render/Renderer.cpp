@@ -217,7 +217,7 @@ void Renderer::GetClippingPlanes(float planes[24]) const
 
     if (minExts.size() == 3 || orientation != 0) {
         x0Plane[3] = float(-minExts[0]);
-        x1Plane[3] = float(maxExts[1]);
+        x1Plane[3] = float(maxExts[0]);
     }
     if (minExts.size() == 3 || orientation != 1) {
         y0Plane[3] = float(-minExts[1]);
