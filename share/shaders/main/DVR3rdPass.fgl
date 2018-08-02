@@ -10,10 +10,10 @@ uniform sampler1D colorMapTexture;
 
 uniform vec2 valueRange;        // min and max values of this variable
 uniform vec2 colorMapRange;     // min and max values on this color map
-uniform vec3 volumeDimensions;  // number of vertices of this volumeTexture
-uniform float stepSize1D;       // ray casting step size
 uniform vec3 boxMin;            // min coordinates of the bounding box of this volume
 uniform vec3 boxMax;            // max coordinates of the bounding box of this volume
+uniform vec3 volumeDimensions;  // number of vertices of this volumeTexture
+uniform float stepSize1D;       // ray casting step size
 
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
