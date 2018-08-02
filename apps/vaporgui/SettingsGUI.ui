@@ -88,6 +88,9 @@
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
           <widget class="QLabel" name="label_7">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upon loading data, if the shortest dimension is less than 10% of the longest dimension, Vapor will stretch it to 50% of the longest dimension.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Automatically stretch domain</string>
            </property>
@@ -109,7 +112,7 @@
          <item>
           <widget class="QCheckBox" name="_autoStretchCheckbox">
            <property name="toolTip">
-            <string>When loading data, the shortest dimension is shorter than 1/10 of the longest then stretch it to 1/2 the longest</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upon loading data, if the shortest dimension is less than 10% of the longest dimension, Vapor will stretch it to 50% of the longest dimension.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string/>
