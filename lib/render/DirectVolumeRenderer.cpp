@@ -619,13 +619,6 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
-
-        glEnable(GL_CLIP_DISTANCE0);
-        glEnable(GL_CLIP_DISTANCE1);
-        glEnable(GL_CLIP_DISTANCE2);
-        glEnable(GL_CLIP_DISTANCE3);
-        glEnable(GL_CLIP_DISTANCE4);
-        glEnable(GL_CLIP_DISTANCE5);
     }
 
     glEnableVertexAttribArray(0);
@@ -744,13 +737,6 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
 
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &vertexBufferId);
-
-    glDisable(GL_CLIP_DISTANCE0);
-    glDisable(GL_CLIP_DISTANCE1);
-    glDisable(GL_CLIP_DISTANCE2);
-    glDisable(GL_CLIP_DISTANCE3);
-    glDisable(GL_CLIP_DISTANCE4);
-    glDisable(GL_CLIP_DISTANCE5);
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
