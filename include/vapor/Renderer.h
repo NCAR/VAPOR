@@ -255,6 +255,11 @@ protected:
     //! \sa DisableClippingPlanes
     void EnableClipToBox() const;
 
+    //! Get clipping planes in the model/user coordinates.
+    //! There are six planes in total that get stored in "planes"
+    //! It is the caller's responsibility to allocate memory for 24 floats.
+    void GetClippingPlanes(float planes[24]) const;
+
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to
     //! returning from _paintGL()
