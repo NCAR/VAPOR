@@ -268,6 +268,8 @@ string VariablesWidget::updateVarCombo(QComboBox *varCombo, const vector<string>
     varCombo->clear();
     varCombo->setMaxCount(my_varnames.size());
 
+    if (my_varnames.size() == 0) return "";
+
     int currentIndex = -1;
     for (int i = 0; i < my_varnames.size(); i++) {
         const string s = my_varnames[i];
