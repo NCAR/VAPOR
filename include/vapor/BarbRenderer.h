@@ -55,25 +55,13 @@ private:
 
     double _maxValue;
 
-    // Copied from TwoDRenderer.h
-    //
-    // ...TBD...
-
-    double _getMaxAtBarbLocations(VAPoR::Grid *grid) const;
-
     void _getMagnitudeAtPoint(std::vector<VAPoR::Grid *> variables, float point[3]);
 
-    void _recalculateScales(
-        //		std::vector<string> varnames,
-        std::vector<VAPoR::Grid *> &varData, int ts);
-
-    std::vector<double> _getMaximumValues(size_t ts, const std::vector<string> &varnames) const;
+    void _recalculateScales(std::vector<VAPoR::Grid *> &varData, int ts);
 
     double _getDomainHypotenuse(size_t ts) const;
 
-    void _setDefaultLengthAndThicknessScales(
-        // size_t ts, const std::vector<string> &varnames,
-        size_t ts, const std::vector<VAPoR::Grid *> &varData, const BarbParams *bParams);
+    void _setDefaultLengthAndThicknessScales(size_t ts, const std::vector<VAPoR::Grid *> &varData, const BarbParams *bParams);
 
     void _getGridRequirements(int &ts, int &refLevel, int &lod, std::vector<double> &minExts, std::vector<double> &maxExts) const;
 

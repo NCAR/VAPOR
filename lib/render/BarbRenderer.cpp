@@ -57,6 +57,8 @@
 #define YMAX 4
 #define ZMAX 5
 
+int counter = 0;
+
 using namespace VAPoR;
 using namespace Wasp;
 
@@ -579,10 +581,7 @@ void BarbRenderer::_getDirection(float direction[3], vector<Grid *> variableData
             direction[dim] = variableData[dim]->GetValue(xCoord, yCoord, zCoord);
 
             float missingVal = variableData[dim]->GetMissingValue();
-            if (direction[dim] == missingVal) {
-                cout << "Missing value at " << xCoord << " " << yCoord << " " << zCoord << endl;
-                missing = true;
-            }
+            if (direction[dim] == missingVal) { missing = true; }
         }
     }
 }
@@ -722,12 +721,21 @@ void BarbRenderer::_getMagnitudeAtPoint(std::vector<VAPoR::Grid *> variables, fl
             double value = grid->GetValue(point[X], point[Y], point[Z]);
             double missingValue = grid->GetMissingValue();
 
+            if (value == missingValue) {
+                cout.precision(18);
+                cout << counter << "value is missing " << fixed << value << " " << point[X] << " " << point[Y] << " " << point[Z] << endl;
+                counter++;
+                continue;
+            }
             value = abs(value);
 
-            if (value > maxValue && value < std::numeric_limits<double>::max() && value > std::numeric_limits<double>::lowest() && value != missingValue && !isnan(value)) maxValue = value;
+            if (value > maxValue && value < std::numeric_limits<double>::max() && value > std::numeric_limits<double>::lowest() && !isnan(value)) maxValue = value;
         }
     }
-    if (maxValue > _maxValue) _maxValue = maxValue;
+    if (maxValue > _maxValue) {
+        cout << "Setting new maxValue" << endl;
+        _maxValue = maxValue;
+    }
 }
 
 bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
@@ -747,65 +755,6 @@ bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
     for (int i = 0; i < 4; i++) mappedColor[i] = clut[4 * lutIndex + i];
     glColor4fv(mappedColor);
     return missing;
-}
-
-double BarbRenderer::_getMaxAtBarbLocations(VAPoR::Grid *grid) const
-{
-    vector<double> minExts, maxExts;
-    BarbParams *   p = dynamic_cast<BarbParams *>(GetActiveParams());
-    assert(p);
-    p->GetBox()->GetExtents(minExts, maxExts);
-
-    vector<long> rakeGrid = p->GetGrid();
-
-    float stride[3] = {0.f, 0.f, 0.f};
-    for (int i = 0; i < 3; i++) { stride[i] = (maxExts[i] - minExts[i]) / (rakeGrid[i] + 1); }
-
-    double maxValue = 0.0;
-    double xCoord, yCoord, zCoord;
-    for (int k = 1; k <= rakeGrid[Z]; k++) {
-        zCoord = stride[Z] * k + minExts[Z];    // + stride[Z]/2.0;
-        for (int j = 1; j <= rakeGrid[Y]; j++) {
-            yCoord = stride[Y] * j + minExts[Y];    // + stride[Y]/2.0;
-            for (int i = 1; i <= rakeGrid[X]; i++) {
-                xCoord = stride[X] * i + minExts[X];    // + stride[X]/2.0;
-
-                double value = grid->GetValue(xCoord, yCoord, zCoord);
-                double missingValue = grid->GetMissingValue();
-
-                value = abs(value);
-                if (value > maxValue && value < std::numeric_limits<double>::max() && value > std::numeric_limits<double>::lowest() && value != missingValue && !isnan(value)) maxValue = value;
-            }
-        }
-    }
-    return maxValue;
-}
-
-vector<double> BarbRenderer::_getMaximumValues(size_t ts, const std::vector<string> &varNames) const
-{
-    std::vector<double> maxVarVals(3, 0.0);
-    for (int i = 0; i < varNames.size(); i++) {
-        if (varNames[i] == "") {
-            continue;
-        } else {
-            string varName = varNames[i];
-
-            BarbParams *p = dynamic_cast<BarbParams *>(GetActiveParams());
-            assert(p);
-            int refLevel = p->GetRefinementLevel();
-            int compLevel = p->GetCompressionLevel();
-
-            VAPoR::Grid *grid;
-            grid = _dataMgr->GetVariable(ts, varName, refLevel, compLevel);
-            if (!grid) {
-                MyBase::SetErrMsg("Failed to retrieve %s at timestep %i", varName.c_str(), ts);
-            } else {
-                maxVarVals[i] = _getMaxAtBarbLocations(grid);
-            }
-        }
-    }
-
-    return maxVarVals;
 }
 
 double BarbRenderer::_getDomainHypotenuse(size_t ts) const
@@ -849,4 +798,5 @@ void BarbRenderer::_setDefaultLengthAndThicknessScales(size_t ts, const std::vec
     _maxThickness = hypotenuse * BARB_RADIUS_TO_HYPOTENUSE;
     _vectorScaleFactor = hypotenuse * BARB_LENGTH_TO_HYPOTENUSE;
     _vectorScaleFactor *= 1.0 / _maxValue;
+    cout << "VSF " << _vectorScaleFactor << " " << _maxValue << " " << hypotenuse << endl;
 }

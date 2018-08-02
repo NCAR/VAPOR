@@ -37,8 +37,6 @@
 
 using namespace VAPoR;
 
-string VariablesWidget::_nDimsTag = "ActiveDimension";
-
 VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_VariablesWidgetGUI()
 {
     _activeDim = THREEDIMS;
@@ -238,10 +236,8 @@ void VariablesWidget::showHideVarCombos(bool on)
     }
 
     if ((_dspFlags & VECTOR) && on) {
-        cout << "showing fieldVarFrame" << endl;
         fieldVariableFrame->show();
     } else {
-        cout << "hiding fieldVarFrame" << endl;
         fieldVariableFrame->hide();
     }
 
@@ -368,19 +364,9 @@ void VariablesWidget::updateHeightCombo()
 
 void VariablesWidget::updateCombos()
 {
-    // int ndim = _rParams->GetValueLong(_nDimsTag, THREEDIMS);
-    // assert(ndim == TWODIMS || ndim == THREEDIMS);
     assert(_activeDim == TWODIMS || _activeDim == THREEDIMS);
 
     vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
-    cout << "updateCombos " << vars.size() << " " << _activeDim << endl;
-
-    /*	if (! vars.size()) {
-        showHideVarCombos(false);
-        return;
-    }
-    showHideVarCombos(true);
-*/
 
     updateScalarCombo();
     updateVectorCombo();

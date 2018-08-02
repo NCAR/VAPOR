@@ -135,8 +135,6 @@ int WireFrameRenderer::_buildCache()
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     if (!grid) return (-1);
 
-    cout << "GetValue2 " << grid->GetValue(0.f, 0.f, 10000.f) << endl;
-
     Grid *heightGrid = NULL;
     if (!_cacheParams.heightVarName.empty()) {
         heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
@@ -163,8 +161,6 @@ int WireFrameRenderer::_buildCache()
     Grid::ConstCellIterator it = grid->ConstCellBegin();
     EnableClipToBox();
 #endif
-
-    cout << "GetValue " << grid->GetValue(0.f, 0.f, 10000.f) << endl;
 
     size_t nverts = grid->GetMaxVertexPerCell();
     bool   layered = grid->GetTopologyDim() == 3;
