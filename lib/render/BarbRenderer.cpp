@@ -579,7 +579,10 @@ void BarbRenderer::_getDirection(float direction[3], vector<Grid *> variableData
             direction[dim] = variableData[dim]->GetValue(xCoord, yCoord, zCoord);
 
             float missingVal = variableData[dim]->GetMissingValue();
-            if (direction[dim] == missingVal) { missing = true; }
+            if (direction[dim] == missingVal) {
+                cout << "Missing value at " << xCoord << " " << yCoord << " " << zCoord << endl;
+                missing = true;
+            }
         }
     }
 }

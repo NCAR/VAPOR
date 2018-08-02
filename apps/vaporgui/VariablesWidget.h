@@ -118,7 +118,7 @@ private:
     void setVectorVarName(const QString &name, int component);
     void collapseColorVarSettings();
 
-    void showHideVar(bool on);
+    void showHideVarCombos(bool on);
 
     string updateVarCombo(QComboBox *varCombo, const vector<string> &varnames, bool doZero, string currentVar);
 
