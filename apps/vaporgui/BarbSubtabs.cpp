@@ -103,9 +103,18 @@ void BarbAppearanceSubtab::_hideZDimWidgets() {
 	zDimLabel->hide();
 	zDimSlider->hide();
 	zDimEdit->hide();
-	zDimLabel->resize(0,0);
-	zDimSlider->resize(0,0);
-	zDimEdit->resize(0,0);
+	//zDimLabel->resize(0,0);
+	//zDimSlider->resize(0,0);
+	//zDimEdit->resize(0,0);
+	tab->adjustSize();
+	BarbLayoutTab->adjustSize();
+	adjustSize();
+}
+
+void BarbAppearanceSubtab::_showZDimWidgets() {
+	zDimLabel->show();
+	zDimSlider->show();
+	zDimEdit->show();
 	tab->adjustSize();
 	BarbLayoutTab->adjustSize();
 	adjustSize();
@@ -158,6 +167,8 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr* dataMgr,
 	
 	if (_isVariable2D())
 		_hideZDimWidgets();
+	else
+		_showZDimWidgets();
 }
 
 void BarbAppearanceSubtab::xDimChanged(int i) {

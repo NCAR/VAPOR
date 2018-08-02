@@ -165,6 +165,8 @@ int WireFrameRenderer::_buildCache()
 	);
 	if (! grid) return(-1);
 
+	cout << "GetValue2 " << grid->GetValue(0.f, 0.f, 10000.f) << endl;
+
     Grid *heightGrid = NULL;
     if (!_cacheParams.heightVarName.empty()) {
         heightGrid = _dataMgr->GetVariable(
@@ -196,6 +198,7 @@ int WireFrameRenderer::_buildCache()
 	EnableClipToBox();
 #endif
 
+	cout << "GetValue " << grid->GetValue(0.f, 0.f, 10000.f) << endl;
 
 	size_t nverts = grid->GetMaxVertexPerCell();
 	bool layered = grid->GetTopologyDim() == 3;
