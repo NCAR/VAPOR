@@ -1267,7 +1267,7 @@ int DerivedCoordVar_Staggered::CloseVariable(int fd)
     }
     int rc = _dc->CloseVariable(f->GetAux());
 
-    _fileTable.RemoveEntry(f->GetAux());
+    _fileTable.RemoveEntry(fd);
     delete f;
 
     return (rc);
@@ -1346,6 +1346,151 @@ int DerivedCoordVar_Staggered::ReadRegion(int fd, const vector<size_t> &min, con
 }
 
 bool DerivedCoordVar_Staggered::VariableExists(size_t ts, int reflevel, int lod) const { return (_dc->VariableExists(ts, _inName, reflevel, lod)); }
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	DerivedCoordVar_UnStaggered
+//
+//////////////////////////////////////////////////////////////////////////////
+
+DerivedCoordVar_UnStaggered::DerivedCoordVar_UnStaggered(string derivedVarName, string unstagDimName, DC *dc, string inName, string dimName) : DerivedCoordVar(derivedVarName)
+{
+    _unstagDimName = unstagDimName;
+    _inName = inName;
+    _dimName = dimName;
+    _dc = dc;
+}
+
+int DerivedCoordVar_UnStaggered::Initialize()
+{
+    bool ok = _dc->GetCoordVarInfo(_inName, _coordVarInfo);
+    if (!ok) return (-1);
+
+    vector<size_t> dims, bs;
+    int            rc = _dc->GetDimLensAtLevel(_inName, 0, dims, bs);
+    if (rc < 0) return (-1);
+
+    if (dims != bs) {
+        SetErrMsg("Blocked data not supported");
+        return (-1);
+    }
+
+    vector<string> dimNames = _coordVarInfo.GetDimNames();
+    _stagDim = -1;
+    for (int i = 0; i < dimNames.size(); i++) {
+        if (dimNames[i] == _dimName) {
+            _stagDim = i;
+            dimNames[i] = _unstagDimName;
+            break;
+        }
+    }
+    if (_stagDim < 0) {
+        SetErrMsg("Dimension %s not found", _dimName.c_str());
+        return (-1);
+    }
+
+    // Change the name of the staggered dimension
+    //
+    _coordVarInfo.SetDimNames(dimNames);
+
+    return (0);
+}
+
+bool DerivedCoordVar_UnStaggered::GetBaseVarInfo(DC::BaseVar &var) const
+{
+    var = _coordVarInfo;
+    return (true);
+}
+
+bool DerivedCoordVar_UnStaggered::GetCoordVarInfo(DC::CoordVar &cvar) const
+{
+    cvar = _coordVarInfo;
+    return (true);
+}
+
+int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{
+    dims_at_level.clear();
+    bs_at_level.clear();
+
+    int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, bs_at_level);
+    if (rc < 0) return (-1);
+
+    dims_at_level[_stagDim] -= 1;
+
+    return (0);
+}
+
+int DerivedCoordVar_UnStaggered::OpenVariableRead(size_t ts, int level, int lod)
+{
+    int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
+    if (fd < 0) return (fd);
+
+    DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod, fd);
+
+    return (_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVar_UnStaggered::CloseVariable(int fd)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+    int rc = _dc->CloseVariable(f->GetAux());
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return (rc);
+}
+
+int DerivedCoordVar_UnStaggered::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+    int level = f->GetLevel();
+
+    vector<size_t> dims, bs;
+    int            rc = GetDimLensAtLevel(level, dims, bs);
+    if (rc < 0) return (-1);
+
+    vector<size_t> inMin = min;
+    vector<size_t> inMax = max;
+
+    // adjust coords for native data so that we have what we
+    // need for interpolation .
+    //
+    inMax[_stagDim] += 1;
+
+    vector<size_t> inDims, outDims;
+    for (size_t i = 0; i < min.size(); i++) {
+        inDims.push_back(inMax[i] - inMin[i] + 1);
+        outDims.push_back(max[i] - min[i] + 1);
+    }
+    size_t sz = std::max(vproduct(outDims), vproduct(inDims));
+
+    float *buf = new float[sz];
+
+    // Read staggered data
+    //
+    rc = _dc->ReadRegion(f->GetAux(), inMin, inMax, buf);
+    if (rc < 0) return (-1);
+
+    resampleToUnStaggered(buf, inMin, inMax, region, min, max, _stagDim);
+
+    delete[] buf;
+
+    return (0);
+}
+
+bool DerivedCoordVar_UnStaggered::VariableExists(size_t ts, int reflevel, int lod) const { return (_dc->VariableExists(ts, _inName, reflevel, lod)); }
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -1685,4 +1830,18 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> 
 bool DerivedCoordVarStandardWRF_Terrain::VariableExists(size_t ts, int reflevel, int lod) const
 {
     return (_dc->VariableExists(ts, _PHVar, reflevel, lod) && _dc->VariableExists(ts, _PHBVar, reflevel, lod));
+}
+
+bool DerivedCoordVarStandardWRF_Terrain::ValidFormula(string formula)
+{
+    map<string, string> formulaMap;
+    if (!parse_formula(formula, formulaMap)) { return (false); }
+    map<string, string>::const_iterator itr;
+    itr = formulaMap.find("PH");
+    if (itr == formulaMap.end()) return (false);
+
+    itr = formulaMap.find("PHB");
+    if (itr == formulaMap.end()) return (false);
+
+    return (true);
 }

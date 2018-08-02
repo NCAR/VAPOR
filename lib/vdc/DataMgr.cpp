@@ -2025,6 +2025,10 @@ bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &
 
     if (formula_terms.empty()) return (false);
 
+    // Currently only support one vertical transform!!!
+    //
+    if (!DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) { return (false); }
+
     return (true);
 }
 
