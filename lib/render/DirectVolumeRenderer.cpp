@@ -575,7 +575,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMax");
         glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
 
-        float volumeDimensions[3] = {(float)_userCoordinates.dims[0], (float)_userCoordinates.dims[1], (float)_userCoordinates.dims[2]};
+        float volumeDimensions[3] = {float(_userCoordinates.dims[0]), float(_userCoordinates.dims[1]), float(_userCoordinates.dims[2])};
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
         glUniform3fv(uniformLocation, 1, volumeDimensions);
 
