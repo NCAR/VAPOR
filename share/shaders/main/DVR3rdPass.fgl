@@ -13,9 +13,10 @@ uniform vec2 colorMapRange;     // min and max values on this color map
 uniform vec3 boxMin;            // min coordinates of the bounding box of this volume
 uniform vec3 boxMax;            // max coordinates of the bounding box of this volume
 uniform vec3 volumeDimensions;  // number of vertices of this volumeTexture
-uniform float stepSize1D;       // ray casting step size
-
 uniform vec4 clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+
+uniform float stepSize1D;       // ray casting step size
+uniform bool  lighting;         // apply lighting or not
 
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
@@ -148,31 +149,32 @@ void main(void)
 
         float step2Value  = texture( volumeTexture, step2Texture ).r;
         vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
-        if( backColor.a < 0.01f )    // only process this fragment if it's opaque enough
-            continue;
         
         // Apply lighting if big enough gradient
-        vec3 gradientModel = CalculateGradient( step2Texture );
-        if( length( gradientModel ) > EPSILON )
+        if( lighting )
         {
-            vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
-                 gradientEye = normalize( gradientEye );
-            float diffuse    = abs( dot(lightDirEye, gradientEye) );
+            vec3 gradientModel = CalculateGradient( step2Texture );
+            if( length( gradientModel ) > EPSILON )
+            {
+                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
+                     gradientEye = normalize( gradientEye );
+                float diffuse    = abs( dot(lightDirEye, gradientEye) );
 
-            // Calculate eye space coordinates of "step2Texture"
-            vec3 step2Model  = boxMin + step2Texture * (boxMax - boxMin);
-            vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
-            vec3 viewDirEye  = normalize( -step2Eye );
+                // Calculate eye space coordinates of "step2Texture"
+                vec3 step2Model  = boxMin + step2Texture * (boxMax - boxMin);
+                vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
+                vec3 viewDirEye  = normalize( -step2Eye );
 
-            vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
-            float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), specularExp ); 
-            backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
-                               specular * specularCoeff;
-        }
+                vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
+                float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), specularExp ); 
+                backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
+                                   specular * specularCoeff;
+            }
+        }   // End lighting
 
         // Color compositing
-        color.rgb        += (1.0f - color.a) * backColor.a * backColor.rgb;
-        color.a          += (1.0f - color.a) * backColor.a;
+        color.rgb += (1.0f - color.a) * backColor.a * backColor.rgb;
+        color.a   += (1.0f - color.a) * backColor.a;
     }
 
 }
