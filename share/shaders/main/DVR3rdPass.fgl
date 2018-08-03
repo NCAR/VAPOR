@@ -105,9 +105,9 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
-    vec3  lightDirEye   = normalize( vec3(0.0f, 0.0f, 1.0f)); // vec3 makes normalization easier
-    float ambientCoeff  = 0.3f;
-    float diffuseCoeff  = 1.0f;
+    vec3  lightDirEye   = vec3(0.0f, 0.0f, 1.0f); 
+    float ambientCoeff  = 0.5f;
+    float diffuseCoeff  = 0.3f;
     float specularCoeff = 0.2f;
     float specularExp   = 12.0f;
 
