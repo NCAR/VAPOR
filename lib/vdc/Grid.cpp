@@ -818,7 +818,6 @@ template class Grid::ForwardIterator<Grid>;
 template class Grid::ForwardIterator<const Grid>;
 
 
-
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const Grid &g) {
 	o << "Grid" << endl;
