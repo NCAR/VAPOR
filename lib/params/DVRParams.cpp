@@ -2,7 +2,8 @@
 
 using namespace VAPoR;
 
-const std::string DVRParams::_lightingTag = "LightingTag";
+const std::string DVRParams::_lightingTag       = "LightingTag";
+const std::string DVRParams::_lightingCoeffsTag = "LightingCoeffTag";
 
 //
 // Register class with object factory
@@ -58,4 +59,14 @@ bool DVRParams::GetLighting() const
     long l = GetValueLong( _lightingTag, 1 );
 
     return (bool)l;
+}
+    
+std::vector<double> DVRParams::GetLightingCoeffs() const
+{
+    return GetValueDoubleVec( _lightingCoeffsTag );
+}
+    
+void DVRParams::SetLightingCoeffs( const std::vector<double>& coeffs )
+{
+    SetValueDoubleVec( _lightingCoeffsTag, "Coefficients for lighting effects", coeffs );
 }
