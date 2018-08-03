@@ -654,6 +654,8 @@ public:
 	int lod
  ) const;
 
+ static bool ValidFormula(string formula);
+
 private:
  string _PHVar;
  string _PHBVar;
