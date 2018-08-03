@@ -178,12 +178,6 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
 
     if (!g) { exit(1); }
 
-    vector<double> c;
-    vector<double> myminu, mymaxu;
-    g->GetUserExtents(myminu, mymaxu);
-    for (int i = 0; i < myminu.size(); i++) { c.push_back((mymaxu[i] - myminu[i]) / 2.0 + myminu[i]); }
-    cout << "Value " << g->GetValue(c[0], c[1], c[2]) << endl;
-
     if (fp) {
         Grid::Iterator itr;
         Grid::Iterator enditr = g->end();
