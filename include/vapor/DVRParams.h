@@ -36,8 +36,13 @@ class PARAMS_API DVRParams : public RenderParams {
     //
     virtual MapperFunction *GetMapperFunc();
 
+    bool GetLighting() const;
+    void SetLighting(bool);
+
   private:
+    static const std::string _lightingTag;
 };
+
 } // namespace VAPoR
 
 #endif
