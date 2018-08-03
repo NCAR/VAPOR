@@ -36,6 +36,14 @@ bool DVRParams::GetLighting() const
     return (bool)l;
 }
 
-std::vector<double> DVRParams::GetLightingCoeffs() const { return GetValueDoubleVec(_lightingCoeffsTag); }
+std::vector<double> DVRParams::GetLightingCoeffs() const
+{
+    std::vector<double> defaultVec(4);
+    defaultVec[0] = 0.5;
+    defaultVec[1] = 0.3;
+    defaultVec[2] = 0.2;
+    defaultVec[3] = 12.0;
+    return GetValueDoubleVec(_lightingCoeffsTag, defaultVec);
+}
 
 void DVRParams::SetLightingCoeffs(const std::vector<double> &coeffs) { SetValueDoubleVec(_lightingCoeffsTag, "Coefficients for lighting effects", coeffs); }

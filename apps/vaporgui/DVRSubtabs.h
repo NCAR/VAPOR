@@ -38,7 +38,7 @@ public:
 
         _dvrParams = nullptr;
 
-        /* note: slider ranges are set using QTCreator */
+        /* Note: slider ranges are set using QTCreator, and should be modified there ! */
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)

@@ -593,6 +593,11 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
         glUniform1i(uniformLocation, int(params->GetLighting()));
 
+        std::vector<double> coeffsD = params->GetLightingCoeffs();
+        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
+        glUniform1fv(uniformLocation, 4, coeffsF);
+
         // Pass in textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
