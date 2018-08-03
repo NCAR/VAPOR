@@ -83,12 +83,12 @@ private:
  int  _buildCache();
  bool _isCacheDirty() const;
  void _saveCacheParams();
+
  void _drawCell(
-	const float *verts,
-	const float *colors,
-	int n,
+	const vector <vector<size_t> > &nodes,
+	const vector <size_t> &dims,
 	bool layered
- );
+ ) const;
 
 
 };

@@ -2243,3 +2243,19 @@ bool DerivedCoordVarStandardWRF_Terrain::VariableExists(
 		_dc->VariableExists(ts, _PHBVar, reflevel, lod) 
 	);
 }
+
+bool DerivedCoordVarStandardWRF_Terrain::ValidFormula(string formula) {
+
+	map <string, string> formulaMap;
+	if (! parse_formula(formula, formulaMap)) {
+		return(false);
+	}
+	map <string, string>::const_iterator itr;
+	itr = formulaMap.find("PH");
+	if (itr == formulaMap.end()) return(false);
+
+	itr = formulaMap.find("PHB");
+	if (itr == formulaMap.end()) return(false);
+
+	return(true);
+}
