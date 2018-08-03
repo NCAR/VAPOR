@@ -127,20 +127,31 @@ void UnstructuredGrid2D::GetIndices(const std::vector<double> &coords, std::vect
     _kdtree->Nearest(cCoords, indices);
 }
 
-bool UnstructuredGrid2D::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const
+bool UnstructuredGrid2D::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &nodes, std::vector<double> &lambdav) const
 {
-    indices.clear();
+    cindices.clear();
+    nodes.clear();
+    lambdav.clear();
 
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
     double *lambda = new double[_maxVertexPerFace];
     int     nlambda;
-    double  zwgt[2];
 
     // See if point is inside any cells (faces)
     //
-    bool status = _insideGridNodeCentered(cCoords, indices, lambda, nlambda, zwgt);
+    size_t              my_index;
+    std::vector<size_t> my_nodes;
+    bool                status = _insideGridNodeCentered(cCoords, my_index, my_nodes, lambda, nlambda);
+
+    if (status) {
+        cindices.push_back(my_index);
+        for (int i = 0; i < nlambda; i++) {
+            lambdav.push_back(lambda[i]);
+            nodes.push_back(vector<size_t>(nodes[i]));
+        }
+    }
 
     delete[] lambda;
 
@@ -154,12 +165,12 @@ bool UnstructuredGrid2D::InsideGrid(const std::vector<double> &coords) const
 
     double *       lambda = new double[_maxVertexPerFace];
     int            nlambda;
-    double         zwgt[2];
-    vector<size_t> indices;
+    size_t         face;
+    vector<size_t> nodes;
 
     // See if point is inside any cells (faces)
     //
-    bool status = _insideGridNodeCentered(cCoords, indices, lambda, nlambda, zwgt);
+    bool status = _insideGridNodeCentered(cCoords, face, nodes, lambda, nlambda);
 
     delete[] lambda;
 
@@ -191,21 +202,20 @@ float UnstructuredGrid2D::GetValueLinear(const std::vector<double> &coords) cons
 
     double *       lambda = new double[_maxVertexPerFace];
     int            nlambda;
-    double         zwgt[2];
-    vector<size_t> face_indices;
+    size_t         face;
+    vector<size_t> nodes;
 
     // See if point is inside any cells (faces)
     //
-    bool inside = _insideGrid(cCoords, face_indices, lambda, nlambda, zwgt);
+    bool inside = _insideGrid(cCoords, face, nodes, lambda, nlambda);
 
     if (!inside) {
         delete[] lambda;
         return (GetMissingValue());
     }
-    assert(face_indices.size() == 1);
-    assert(face_indices[0] < GetCellDimensions()[0]);
+    assert(face < GetCellDimensions()[0]);
 
-    const int *ptr = _vertexOnFace + (face_indices[0] * _maxVertexPerFace);
+    const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
 
     double value = 0;
     long   offset = GetNodeOffset();
@@ -291,28 +301,28 @@ std::ostream &operator<<(std::ostream &o, const UnstructuredGrid2D &ug)
 // Search for a point inside the grid. If the point is inside return true,
 // and provide the Wachspress weights/coordinates for the point within
 // the face containing the point in XY, and the linear
-// interpolation weights/coordinates along Z. If the grid is 2D then
-// zwgt[0] == 1.0, and zwgt[1] == 0.0. If the point is outside of the
-// grid the values of 'lambda', and 'zwgt' are not defined
+// interpolation weights/coordinates along Z.
 //
-bool UnstructuredGrid2D::_insideGrid(const vector<double> &coords, vector<size_t> &face_indices, double *lambda, int &nlambda, double zwgt[2]) const
+bool UnstructuredGrid2D::_insideGrid(const vector<double> &coords, size_t &face, vector<size_t> &nodes, double *lambda, int &nlambda) const
 {
+    nodes.clear();
+
     if (_location == NODE) {
-        return (_insideGridNodeCentered(coords, face_indices, lambda, nlambda, zwgt));
+        return (_insideGridNodeCentered(coords, face, nodes, lambda, nlambda));
     } else {
-        return (_insideGridFaceCentered(coords, face_indices, lambda, nlambda, zwgt));
+        return (_insideGridFaceCentered(coords, face, nodes, lambda, nlambda));
     }
 }
 
-bool UnstructuredGrid2D::_insideGridFaceCentered(const vector<double> &coords, vector<size_t> &indices, double *lambda, int &nlambda, double zwgt[2]) const
+bool UnstructuredGrid2D::_insideGridFaceCentered(const vector<double> &coords, size_t &face, vector<size_t> &nodes, double *lambda, int &nlambda) const
 {
     assert(0 && "Not supported");
     return false;
 }
 
-bool UnstructuredGrid2D::_insideGridNodeCentered(const vector<double> &coords, vector<size_t> &face_indices, double *lambda, int &nlambda, double zwgt[2]) const
+bool UnstructuredGrid2D::_insideGridNodeCentered(const vector<double> &coords, size_t &face_index, vector<size_t> &nodes, double *lambda, int &nlambda) const
 {
-    face_indices.clear();
+    nodes.clear();
 
     assert(coords.size() == 2);
 
@@ -331,12 +341,14 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(const vector<double> &coords, v
     long       offset = GetCellOffset();
 
     for (int i = 0; i < _maxFacePerVertex; i++) {
-        long face = *ptr + offset;
-        if (face == GetMissingID() || face < 0) break;
-        if (face == GetBoundaryID()) continue;
+        if (*ptr == GetMissingID()) break;
+        if (*ptr == GetBoundaryID()) continue;
 
-        if (_insideFace(face, pt, lambda, nlambda, zwgt)) {
-            face_indices.push_back(face);
+        long face = *ptr + offset;
+        if (face < 0) break;
+
+        if (_insideFace(face, pt, nodes, lambda, nlambda)) {
+            face_index = face;
             return (true);
         }
         ptr++;
@@ -345,8 +357,9 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(const vector<double> &coords, v
     return (false);
 }
 
-bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], double *lambda, int &nlambda, double zwgt[2]) const
+bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &node_indices, double *lambda, int &nlambda) const
 {
+    node_indices.clear();
     nlambda = 0;
 
     double *verts = new double[_maxVertexPerFace * 2];
@@ -355,10 +368,14 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], double *lambda, 
     long       offset = GetNodeOffset();
 
     for (int i = 0; i < _maxVertexPerFace; i++) {
+        if (*ptr == GetMissingID()) break;
+
         long vertex = *ptr + offset;
-        if (vertex == GetMissingID() || vertex < 0) break;
+        if (vertex < 0) break;
+
         verts[i * 2 + 0] = _xug.AccessIJK(vertex, 0, 0);
         verts[i * 2 + 1] = _yug.AccessIJK(vertex, 0, 0);
+        node_indices.push_back(*ptr);
         ptr++;
         nlambda++;
     }
