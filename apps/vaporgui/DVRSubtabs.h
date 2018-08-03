@@ -50,14 +50,7 @@ public:
     }
 
 private slots:
-    void on__lightingCheckBox_toggled(bool checked)
-    {
-        if (checked)
-            std::cerr << "lighting on" << std::endl;
-        else
-            std::cerr << "lighting off" << std::endl;
-        _dvrParams->SetLighting(checked);
-    }
+    void on__lightingCheckBox_toggled(bool checked) { _dvrParams->SetLighting(checked); }
 
 private:
     VAPoR::DVRParams *_dvrParams;

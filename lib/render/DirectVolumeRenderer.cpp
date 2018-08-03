@@ -589,6 +589,10 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
         glUniform4fv(uniformLocation, 6, planes);
 
+        DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
+        glUniform1i(uniformLocation, int(params->GetLighting()));
+
         // Pass in textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
