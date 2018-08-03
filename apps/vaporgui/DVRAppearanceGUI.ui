@@ -54,13 +54,29 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
      <property name="spacing">
       <number>0</number>
      </property>
      <property name="sizeConstraint">
       <enum>QLayout::SetMaximumSize</enum>
      </property>
+     <item alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="_lightingCheckBox">
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Lighting On</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <property name="tristate">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="TFWidget" name="_TFWidget" native="true">
        <property name="sizePolicy">

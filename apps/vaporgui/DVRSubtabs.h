@@ -5,6 +5,8 @@
 #include "ui_DVRVariablesGUI.h"
 #include "ui_DVRGeometryGUI.h"
 
+#include <vapor/DVRParams.h>
+
 namespace VAPoR {
 class ControlExec;
 class RenderParams;
@@ -37,6 +39,8 @@ class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
     DVRAppearanceSubtab(QWidget *parent) {
         setupUi(this);
         _TFWidget->Reinit((TFWidget::Flags)(0));
+
+        _dvrParams = nullptr;
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
@@ -44,7 +48,23 @@ class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
                 VAPoR::RenderParams *rParams) {
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
         _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
+
+        _dvrParams = dynamic_cast<VAPoR::DVRParams *>(rParams);
+        assert(_dvrParams);
+        _lightingCheckBox->setChecked(_dvrParams->GetLighting());
     }
+
+  private slots:
+    void on__lightingCheckBox_toggled(bool checked) {
+        if (checked)
+            std::cerr << "lighting on" << std::endl;
+        else
+            std::cerr << "lighting off" << std::endl;
+        _dvrParams->SetLighting(checked);
+    }
+
+  private:
+    VAPoR::DVRParams *_dvrParams;
 };
 
 class DVRGeometrySubtab : public QWidget, public Ui_DVRGeometryGUI {
