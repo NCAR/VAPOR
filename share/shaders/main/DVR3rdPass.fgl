@@ -17,7 +17,7 @@ uniform vec4 clipPlanes[6];     // clipping planes in **un-normalized** model co
 
 uniform float stepSize1D;       // ray casting step size
 uniform bool  lighting;         // apply lighting or not
-uniform float lightCoeffs[4];   // lighting factors
+uniform float lightingCoeffs[4]; // lighting factors
 
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
@@ -25,10 +25,10 @@ uniform mat4 ModelView;
 layout(location = 0) out vec4 color;
 
 const float EPSILON = 1e-6f;
-float ambientCoeff  = lightCoeffs[0];
-float diffuseCoeff  = lightCoeffs[1];
-float specularCoeff = lightCoeffs[2];
-float specularExp   = lightCoeffs[3];
+float ambientCoeff  = lightingCoeffs[0];
+float diffuseCoeff  = lightingCoeffs[1];
+float specularCoeff = lightingCoeffs[2];
+float specularExp   = lightingCoeffs[3];
 
 //
 // Input:  normalized value w.r.t. valueRange.
