@@ -577,6 +577,8 @@ class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCFVertCoordVar 
         int reflevel,
         int lod) const;
 
+    static bool ValidFormula(string formula);
+
   private:
     string _PHVar;
     string _PHBVar;
