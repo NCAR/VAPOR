@@ -30,11 +30,14 @@ public:
     //
     virtual MapperFunction *GetMapperFunc();
 
-    bool GetLighting() const;
-    void SetLighting(bool);
+    bool                GetLighting() const;
+    void                SetLighting(bool);
+    std::vector<double> GetLightingCoeffs() const;
+    void                SetLightingCoeffs(const std::vector<double> &coeffs);
 
 private:
     static const std::string _lightingTag;
+    static const std::string _lightingCoeffsTag;
 };
 
 }    // namespace VAPoR
