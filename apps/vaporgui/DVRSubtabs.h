@@ -42,7 +42,7 @@ class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
 
         _dvrParams = nullptr;
 
-        /* note: slider ranges are set using QTCreator */
+        /* Note: slider ranges are set using QTCreator, and should be modified there ! */
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
