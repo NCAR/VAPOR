@@ -222,6 +222,8 @@ bool VAPoR::WachspressCoords2D(const double verts[], const double pt[], int n, d
     // interpolate between the adjacent points
     //
     if (onEdge) {
+        for (int i = 0; i < n; i++) lambda[i] = 0.0;
+
         int i0, i1;
 
         // Which edge is point on? beteen points prev and curr, or curr
