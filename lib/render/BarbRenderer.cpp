@@ -254,10 +254,10 @@ int BarbRenderer::_paintGL()
     _getGridRequirements(ts, refLevel, lod, minExts, maxExts);
 
     // Get vector variables
-    _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
+    rc = _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
     if (rc < 0) {
         glEndList();
-        return (rc);
+        SetErrMsg("One or more selected field variables does not exist");
     }
 
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
@@ -265,13 +265,13 @@ int BarbRenderer::_paintGL()
 
     // Get height variable
     string heightVar = bParams->GetHeightVariableName();
-    _getVarGrid(ts, refLevel, lod, heightVar, minExts, maxExts, varData);
-    if (rc < 0) return rc;
+    rc = _getVarGrid(ts, refLevel, lod, heightVar, minExts, maxExts, varData);
+    if (rc < 0) SetErrMsg("Height variable does not exist");
 
     // Get color variable
     string colorVar = bParams->GetColorMapVariableName();
-    _getVarGrid(ts, refLevel, lod, colorVar, minExts, maxExts, varData);
-    if (rc < 0) return rc;
+    rc = _getVarGrid(ts, refLevel, lod, colorVar, minExts, maxExts, varData);
+    if (rc < 0) SetErrMsg("Color variable does not exist");
 
     _recalculateScales(varData, ts);
 
