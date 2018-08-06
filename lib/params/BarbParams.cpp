@@ -86,14 +86,12 @@ void BarbParams::_init() {
 	
 	std::vector<string> varnames = GetFieldVariableNames();
 	if (varnames.empty()) {
-		cout << "foo" << endl;
 		return;
 	}
 	if (varnames[X]=="" &&
 		varnames[Y]=="" &&
 		varnames[Z]==""
 	) {
-		cout << "bar" << endl;
 		return;
 	}
 
