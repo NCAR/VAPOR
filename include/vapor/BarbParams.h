@@ -27,9 +27,9 @@ public:
     //! Get the length scaling factor
     //! \retval double scale factor
     //
-    int GetLengthScale() const { return (int)GetValueDouble(_lengthScaleTag, 50); }
+    double GetLengthScale() const { return GetValueDouble(_lengthScaleTag, 1.f); }
 
-    void SetLengthScale(int val) { SetValueDouble(_lengthScaleTag, "Barb length", (double)val); }
+    void SetLengthScale(double val) { SetValueDouble(_lengthScaleTag, "Barb length", val); }
 
     //! \copydoc RenderParams::IsOpaque()
     virtual bool IsOpaque() const;
@@ -55,28 +55,11 @@ public:
         SetValueLongVec(_gridTag, "Set grid", griddims);
     }
 
-    /*
- //! Set the variable type being used by the barbs
- //!
- void SetVariables3D(bool val) {
-    if (val)
-        SetValueString(_varsAre3dTag, "Set variable dimensionality", "true");
-    else
-        SetValueString(_varsAre3dTag, "Set variable dimensionality", "false");
- }
-
- //! Find out whether the barbs are using 2D or 3D variables
- //!
- bool VariablesAre3D() {
-    GetValueString(_varsAre3dTag, "true");
- }
-*/
-
     //! Determine line thickness in voxels
     //! \retval double line thickness
-    int GetLineThickness() const { return (int)GetValueDouble(_thicknessScaleTag, 50); }
+    double GetLineThickness() const { return GetValueDouble(_thicknessScaleTag, 1.f); }
 
-    void SetLineThickness(int val) { SetValueDouble(_thicknessScaleTag, "Barb thickness", (double)val); }
+    void SetLineThickness(double val) { SetValueDouble(_thicknessScaleTag, "Barb thickness", val); }
 
     // Get static string identifier for this params class
     //

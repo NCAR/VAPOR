@@ -74,14 +74,8 @@ void BarbParams::_init()
     int defaultLOD = GetRefinementLevel();
 
     std::vector<string> varnames = GetFieldVariableNames();
-    if (varnames.empty()) {
-        cout << "foo" << endl;
-        return;
-    }
-    if (varnames[X] == "" && varnames[Y] == "" && varnames[Z] == "") {
-        cout << "bar" << endl;
-        return;
-    }
+    if (varnames.empty()) { return; }
+    if (varnames[X] == "" && varnames[Y] == "" && varnames[Z] == "") { return; }
 
     vector<double> minExt, maxExt;
     int            rc = DataMgrUtils::GetExtents(_dataMgr, defaultTS, defaultLOD, varnames, minExt, maxExt);
