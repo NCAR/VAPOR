@@ -44,8 +44,8 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
     void xDimChanged(int i);
     void yDimChanged(int i);
     void zDimChanged(int i);
-    void lengthChanged(int d);
-    void thicknessChanged(int d);
+    void lengthChanged(double d);
+    void thicknessChanged(double d);
     void recalculateScales();
 
   private:
