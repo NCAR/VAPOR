@@ -71,17 +71,17 @@ void TFWidget::collapseConstColorWidgets() {
 void TFWidget::showConstColorWidgets() {
 	useConstColorFrame->show();
 	constColorFrame->show();
-	adjsutSize();
+	adjustSize();
 }
 
 void TFWidget::hideWhitespaceFrame() {
 	whitespaceFrame->hide();
-	adjsutSize();
+	adjustSize();
 }
 
 void TFWidget::showWhitespaceFrame() {
 	whitespaceFrame->show();
-	adjsutSize();
+	adjustSize();
 }
 
 void TFWidget::Reinit(Flags flags) {
@@ -90,7 +90,7 @@ void TFWidget::Reinit(Flags flags) {
 		showConstColorWidgets();
 	else
 		collapseConstColorWidgets();
-	adjsutSize();
+	adjustSize();
 }
 
 TFWidget::~TFWidget() {
