@@ -69,21 +69,19 @@ void TFWidget::collapseConstColorWidgets() {
 }
 
 void TFWidget::showConstColorWidgets() {
-	//useConstColorLabel->show();
-	//useConstColorCheckbox->show();
-	//constColorLabel->show();	
-	//colorDisplay->show();
-	//colorSelectButton->show();
 	useConstColorFrame->show();
 	constColorFrame->show();
+	adjsutSize();
 }
 
 void TFWidget::hideWhitespaceFrame() {
 	whitespaceFrame->hide();
+	adjsutSize();
 }
 
 void TFWidget::showWhitespaceFrame() {
 	whitespaceFrame->show();
+	adjsutSize();
 }
 
 void TFWidget::Reinit(Flags flags) {
@@ -92,6 +90,7 @@ void TFWidget::Reinit(Flags flags) {
 		showConstColorWidgets();
 	else
 		collapseConstColorWidgets();
+	adjsutSize();
 }
 
 TFWidget::~TFWidget() {
@@ -116,7 +115,6 @@ void TFWidget::enableTFWidget(bool state) {
 	minRangeEdit->setEnabled(state);
 	maxRangeEdit->setEnabled(state);
 	opacitySlider->setEnabled(state);
-	//updateHistoButton->setEnabled(state);
 	autoUpdateHistoCheckbox->setEnabled(state);
 	colorInterpCombo->setEnabled(state);
 }
