@@ -421,13 +421,13 @@ void TFWidget::connectWidgets()
     connect(loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
-    connect(mappingFrame, SIGNAL(endChange()), this, SLOT(forwardTFChange()));
+    connect(mappingFrame, SIGNAL(endChange()), this, SLOT(emitTFChange()));
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
     connect(colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(useConstColorCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUsingSingleColor(int)));
 }
 
-void TFWidget::forwardTFChange() { emit emitChange(); }
+void TFWidget::emitTFChange() { emit emitChange(); }
 
 void TFWidget::opacitySliderChanged(int value)
 {
@@ -514,7 +514,6 @@ void TFWidget::setUsingSingleColor(int state)
 {
     if (state > 0) {
         _rParams->SetUseSingleColor(true);
-
     } else {
         _rParams->SetUseSingleColor(false);
     }
