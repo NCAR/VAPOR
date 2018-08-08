@@ -21,14 +21,8 @@ public:
 	WireFrameVariablesSubtab(QWidget* parent) {
 		setupUi(this);
 		_variablesWidget->Reinit(
-			(DisplayFlags)(
-				SCALAR | 
-				HEIGHT
-			),
-			(DimFlags)(
-				THREED | 
-				TWOD
-			)
+			(VariableFlags)(SCALAR | HEIGHT),
+			(DimFlags)(THREED | TWOD)
 		);
 	}
 
@@ -48,8 +42,7 @@ class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceG
 public:
 	WireFrameAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
-		_TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTANT));
-		//_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
+		_TFWidget->Reinit((TFFlags)(CONSTANT));
 	}
 
 	void Update(
@@ -70,9 +63,10 @@ public:
 	WireFrameGeometrySubtab(QWidget* parent) {
 		setupUi(this);
 		_geometryWidget->Reinit(
-			GeometryWidget::THREED,
-			GeometryWidget::MINMAX,
-			GeometryWidget::SCALAR);
+			THREED,
+			MINMAX,
+			SCALAR
+		);
 	}
 	
 	void Update(
