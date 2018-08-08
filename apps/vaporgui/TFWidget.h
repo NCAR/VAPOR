@@ -10,21 +10,44 @@ class ControlExec;
 class MapperFunction;
 }    // namespace VAPoR
 
+//    V - Composition
+//    # - Association
+//
+//     |----------------|              |--------------|
+//     |    QWidget::   |     Update() | DataMgr      |
+//  |--|    TFWidget    |--------------#              |
+//  |  |----------------|   |          |--------------|
+//  |         |             |
+//  |         | 1           |
+//  |  |------V---------|   |          |--------------|
+//  |  |  QGLWidget::   |   | Update() | ParamsMgr    |
+//  |  |  MappingFrame  |---|----------#              |
+//  |  |----------------|   |          |--------------|
+//  |         |             |
+//  |         | 1           |
+//  |  |------V---------|   |          |--------------|
+//  |--# ParamsBase::   |   | Update() | RenderParams |
+//     | MapperFunction |   |----------#              |
+//     |------^---------|              |--------------|
+//            |                              |
+//            |------------------------------|
+//
+
 class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     Q_OBJECT
 
 public:
     //! Bit masks to indicate what type of variables are to be supported by
-    //! a particular VariablesWidget instance. These flags correspond
+    //! a particular TFWidget instance. These flags correspond
     //! to variable names returned by methods:
     //!
     //! SCALAR : RenderParams::GetVariableName()
     //! VECTOR : RenderParams::GetFieldVariableNames()
-    //! HGT : RenderParams::GetHeightVariableName()
-    //! COLOR : RenderParams::GetColorMapVariableNames()
+    //! HGT    : RenderParams::GetHeightVariableName()
+    //! COLOR  : RenderParams::GetColorMapVariableNames()
     //!
     enum Flags {
-        // We can map our renderer's colors to a secondary color variable
+        // We can map our renderer's color to a secondary color variable
         COLORVAR = (1u << 0),
 
         // We can map the color of our renderer to a constant value
@@ -66,7 +89,7 @@ private slots:
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void forwardTFChange();
+    void emitTFChange();
     void opacitySliderChanged(int value);
     void setSingleColor();
     void setUsingSingleColor(int checkState);
