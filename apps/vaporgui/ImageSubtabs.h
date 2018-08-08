@@ -127,9 +127,9 @@ class ImageGeometrySubtab : public QWidget, public Ui_ImageGeometryGUI {
     ImageGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            TWOD,
-            MINMAX,
-            SCALAR);
+            (DimFlags)TWOD,
+            (GeometryFlags)MINMAX,
+            (VariableFlags)SCALAR);
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr,
