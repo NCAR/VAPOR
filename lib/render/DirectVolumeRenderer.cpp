@@ -670,76 +670,52 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
     if (insideACell)    // All triangles are facing the inside of the volume
     {
         // Render front face ( vertex 4, 5, 6, 7, see the diagram in the header)
-        GLsizei numOfVertices = 4;
-        GLfloat vertexPositions[numOfVertices * 3];
-        size_t  idx = 0;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[4], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[7], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[5], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[6], 12);
+        unsigned int numOfVertices = 4;
+        float        vertexPositions[numOfVertices * 3];
+        std::memcpy(vertexPositions + 0, _userCoordinates.cellCoords[4], 12);
+        std::memcpy(vertexPositions + 3, _userCoordinates.cellCoords[7], 12);
+        std::memcpy(vertexPositions + 6, _userCoordinates.cellCoords[5], 12);
+        std::memcpy(vertexPositions + 9, _userCoordinates.cellCoords[6], 12);
         glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
 
         // Render back face ( vertex 0, 1, 2, 3 )
-        idx = 0;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[3], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[0], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[2], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[1], 12);
+        std::memcpy(vertexPositions + 0, _userCoordinates.cellCoords[3], 12);
+        std::memcpy(vertexPositions + 3, _userCoordinates.cellCoords[0], 12);
+        std::memcpy(vertexPositions + 6, _userCoordinates.cellCoords[2], 12);
+        std::memcpy(vertexPositions + 9, _userCoordinates.cellCoords[1], 12);
         glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
 
         // Render top face ( vertex 2, 3, 6, 7 )
-        idx = 0;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[7], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[3], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[6], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[2], 12);
+        std::memcpy(vertexPositions + 0, _userCoordinates.cellCoords[7], 12);
+        std::memcpy(vertexPositions + 3, _userCoordinates.cellCoords[3], 12);
+        std::memcpy(vertexPositions + 6, _userCoordinates.cellCoords[6], 12);
+        std::memcpy(vertexPositions + 9, _userCoordinates.cellCoords[2], 12);
         glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
 
         // Render bottom face ( vertex 0, 1, 5, 4 )
-        idx = 0;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[0], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[4], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[1], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[5], 12);
+        std::memcpy(vertexPositions + 0, _userCoordinates.cellCoords[0], 12);
+        std::memcpy(vertexPositions + 3, _userCoordinates.cellCoords[4], 12);
+        std::memcpy(vertexPositions + 6, _userCoordinates.cellCoords[1], 12);
+        std::memcpy(vertexPositions + 9, _userCoordinates.cellCoords[5], 12);
         glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
 
         // Render right face ( vertex 1, 2, 5, 6 )
-        idx = 0;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[2], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[1], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[6], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[5], 12);
+        std::memcpy(vertexPositions + 0, _userCoordinates.cellCoords[2], 12);
+        std::memcpy(vertexPositions + 3, _userCoordinates.cellCoords[1], 12);
+        std::memcpy(vertexPositions + 6, _userCoordinates.cellCoords[6], 12);
+        std::memcpy(vertexPositions + 9, _userCoordinates.cellCoords[5], 12);
         glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
 
         // Render left face ( vertex 0, 4, 7, 3 )
-        idx = 0;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[0], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[3], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[4], 12);
-        idx += 3;
-        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[7], 12);
+        std::memcpy(vertexPositions + 0, _userCoordinates.cellCoords[0], 12);
+        std::memcpy(vertexPositions + 3, _userCoordinates.cellCoords[3], 12);
+        std::memcpy(vertexPositions + 6, _userCoordinates.cellCoords[4], 12);
+        std::memcpy(vertexPositions + 9, _userCoordinates.cellCoords[7], 12);
         glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
     } else    // All triangles are facing the outside of the volume
