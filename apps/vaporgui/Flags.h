@@ -11,7 +11,7 @@
 //! COLOR : RenderParams::GetColorMapVariableNames()
 //!
 
-enum DisplayFlags {
+enum VariableFlags {
     SCALAR = (1u << 0),
     VECTOR = (1u << 1),
     COLOR = (1u << 2),
@@ -25,6 +25,20 @@ enum DisplayFlags {
 enum DimFlags {
     TWOD = (1u << 0),
     THREED = (1u << 1),
+};
+
+//! Bit mask to indicate whether the GeometryWidget should control a
+//! single point, or 3D extents with Min/Max controllers
+enum GeometryFlags {
+    SINGLEPOINT = (1u << 0),
+    MINMAX = (1u << 1),
+};
+
+//! Bit masks to indicate whether the TFWidget maps constant color
+//! to a variable, or maps a secondary color variable
+enum TFFlags {
+    SECONDARY = (1u << 0),
+    CONSTANT = (1u << 1),
 };
 
 #endif
