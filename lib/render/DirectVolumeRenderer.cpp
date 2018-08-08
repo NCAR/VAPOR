@@ -338,6 +338,7 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
     float valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
 
     if (grid->HasMissingData()) {
+        std::cout << "missing value! " << std::endl;
         float missingValue = grid->GetMissingValue();
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
@@ -353,6 +354,7 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
         }
     } else // No missing value!
     {
+        std::cout << "no missing value! " << std::endl;
         for (size_t i = 0; i < numOfVertices; i++) {
             dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
             ++valItr;
@@ -407,10 +409,12 @@ int DirectVolumeRenderer::_paintGL() {
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0],
                      _userCoordinates.dims[1], _userCoordinates.dims[2],
                      0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
+
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, _userCoordinates.dims[0],
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0],
                      _userCoordinates.dims[1], _userCoordinates.dims[2],
-                     0, GL_RED, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+                     0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+
         glBindTexture(GL_TEXTURE_3D, 0);
     }
 
@@ -440,7 +444,7 @@ int DirectVolumeRenderer::_paintGL() {
     bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
-        //std::cout << "inside a cell: " << std::endl;
+        std::cout << "inside a cell: " << std::endl;
         printf(" %f, %f, %f\n", cameraUser[0], cameraUser[1], cameraUser[2]);
         printf(" %ld, %ld, %ld\n", cameraCellIndices[0], cameraCellIndices[1], cameraCellIndices[2]);
 
@@ -459,7 +463,7 @@ int DirectVolumeRenderer::_paintGL() {
 
         _drawVolumeFaces(2, true);
     } else {
-        //std::cout << "not inside a cell" << std::endl;
+        std::cout << "not inside a cell" << std::endl;
         _drawVolumeFaces(2, false);
     }
 
@@ -542,8 +546,8 @@ void DirectVolumeRenderer::_initializeFramebufferTextures() {
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
 
     /* Configure _missingValueTextureId */
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
