@@ -4,6 +4,7 @@
 #include "ui_WireFrameAppearanceGUI.h"
 #include "ui_WireFrameVariablesGUI.h"
 #include "ui_WireFrameGeometryGUI.h"
+#include "Flags.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -20,15 +21,13 @@ public:
 	WireFrameVariablesSubtab(QWidget* parent) {
 		setupUi(this);
 		_variablesWidget->Reinit(
-			(VariablesWidget::DisplayFlags)
-			(
-				VariablesWidget::SCALAR | 
-				VariablesWidget::HGT
+			(DisplayFlags)(
+				SCALAR | 
+				HEIGHT
 			),
-			(VariablesWidget::DimFlags)
-			(
-				VariablesWidget::THREED | 
-				VariablesWidget::TWOD
+			(DimFlags)(
+				THREED | 
+				TWOD
 			)
 		);
 	}

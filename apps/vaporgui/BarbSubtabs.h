@@ -21,18 +21,9 @@ public:
 	BarbVariablesSubtab(QWidget* parent) {
 		setupUi(this);
 		_variablesWidget->Reinit(
-			(VariablesWidget::DisplayFlags)
-			(
-				VariablesWidget::VECTOR | 
-				VariablesWidget::HGT |
-				VariablesWidget::COLOR
-			),
-			(VariablesWidget::DimFlags)
-			(
-				VariablesWidget::TWOD
-			)
+			(DisplayFlags)(VECTOR | HEIGHT | COLOR),
+			(DimFlags)(TWOD)
 		);
-			//(VariablesWidget::DimFlags)(VariablesWidget::THREED));
 	}
 
 	void Initialize(VAPoR::BarbParams* bParams, VAPoR::DataMgr* dataMgr);
