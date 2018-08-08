@@ -398,13 +398,9 @@ int DirectVolumeRenderer::_paintGL()
     bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
-        std::cout << "inside a cell: " << std::endl;
+        // std::cout << "inside a cell: " << std::endl;
         printf(" %f, %f, %f\n", cameraUser[0], cameraUser[1], cameraUser[2]);
         printf(" %ld, %ld, %ld\n", cameraCellIndices[0], cameraCellIndices[1], cameraCellIndices[2]);
-
-        // cameraCellIndices[0]++;
-        // cameraCellIndices[1]--;
-        // cameraCellIndices[2]--;
 
         // Get coordinates of nodes that surrounding that cell
         std::vector<std::vector<size_t>> cellNodes;
@@ -421,7 +417,7 @@ int DirectVolumeRenderer::_paintGL()
 
         _drawVolumeFaces(2, true);
     } else {
-        std::cout << "not inside a cell" << std::endl;
+        // std::cout << "not inside a cell" << std::endl;
         _drawVolumeFaces(2, false);
     }
 
