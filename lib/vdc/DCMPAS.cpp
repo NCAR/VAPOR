@@ -203,6 +203,23 @@ void rad2degrees(float *buf, size_t n) {
         buf[i] = buf[i] * 180.0 / M_PI;
     }
 }
+
+// MPAS orders 3D data with vertical axis varying fastest. VAPOR
+// wants horizontal dimensions varying fastest. Return true if this is
+// a 3D variable with transposed horizontal and vertical dimensions
+//
+bool isTransposed(NetCDFCollection *ncdfc, string varname) {
+
+    vector<string> v = ncdfc->GetSpatialDimNames(varname);
+    if (v.size() != 2)
+        return (false);
+
+    if ((v[1] == nVertLevelsDimName || v[1] == nVertLevelsP1DimName)) {
+        return (true);
+    }
+
+    return (false);
+}
 }; // namespace
 
 DCMPAS::DCMPAS() {
@@ -745,6 +762,33 @@ int DCMPAS::closeVariable(int fd) {
     return (rc);
 }
 
+int DCMPAS::_readRegionTransposed(
+    MPASFileObject *w,
+    const vector<size_t> &min, const vector<size_t> &max, float *region) {
+    assert(min.size() == 2);
+    assert(min.size() == max.size());
+
+    int aux = w->GetAux();
+
+    vector<size_t> ncdf_start = min;
+    vector<size_t> ncdf_max = max;
+
+    vector<size_t> ncdf_count;
+    for (int i = 0; i < ncdf_start.size(); i++) {
+        ncdf_count.push_back(ncdf_max[i] - ncdf_start[i] + 1);
+    }
+
+    float *buf = new float[vproduct(ncdf_count)];
+
+    int rc = _ncdfc->Read(ncdf_start, ncdf_count, buf, aux);
+    if (rc < 0)
+        return (-1);
+
+    Wasp::Transpose(buf, region, ncdf_count[0], ncdf_count[1]);
+
+    return (0);
+}
+
 template <class T>
 int DCMPAS::_readRegionTemplate(
     int fd,
@@ -762,14 +806,21 @@ int DCMPAS::_readRegionTemplate(
         return (_dvm.ReadRegion(aux, min, max, region));
     }
 
+    if (isTransposed(_ncdfc, varname)) {
+
+        assert((std::is_same<float *, T *>::value) == true);
+        return (_readRegionTransposed(w, min, max, (float *)region));
+    }
+
     // Need to reverse coordinate ordering for NetCDFCollection API, which
     // orders coordinates from slowest to fastest. DC class expects order
-    // from fastest to slowest
+    // from fastest to slowest. Unless the variable is tranposed, then
+    // we need to "untranspose" it.
     //
     vector<size_t> ncdf_start = min;
-    reverse(ncdf_start.begin(), ncdf_start.end());
-
     vector<size_t> ncdf_max = max;
+
+    reverse(ncdf_start.begin(), ncdf_start.end());
     reverse(ncdf_max.begin(), ncdf_max.end());
 
     vector<size_t> ncdf_count;
@@ -943,7 +994,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
     _coordVarsMap[zGridVarName] = cvarInfo;
 
     derivedVar = new DerivedCoordVertFromCell(
-        zGridVertP1VarName, nVertLevelsP1DimName, this, zGridP1VarName,
+        zGridVertP1VarName, nVerticesDimName, this, zGridP1VarName,
         cellsOnVertexVarName);
 
     rc = derivedVar->Initialize();
@@ -956,7 +1007,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
     _coordVarsMap[zGridVertP1VarName] = cvarInfo;
 
     derivedVar = new DerivedCoordVertFromCell(
-        zGridVertVarName, nVertLevelsDimName, this, zGridVarName,
+        zGridVertVarName, nVerticesDimName, this, zGridVarName,
         cellsOnVertexVarName);
 
     rc = derivedVar->Initialize();
@@ -1257,8 +1308,7 @@ int DCMPAS::_InitDataVars(
     // spatial dimensions
     //
     vector<string> vars;
-    //	for (int i=1; i<3; i++) {
-    for (int i = 1; i < 2; i++) { // ONLY 2D VARIABLES SUPPORTED!!!
+    for (int i = 1; i < 3; i++) {
         vector<string> v = ncdfc->GetVariableNames(i, true);
         vars.insert(vars.end(), v.begin(), v.end());
     }
@@ -1266,6 +1316,10 @@ int DCMPAS::_InitDataVars(
     // For each variable add a member to _dataVarsMap
     //
     for (int i = 0; i < vars.size(); i++) {
+
+        if (vars[i] == "qv") {
+            cout << "INDEX OF QV " << i << endl;
+        }
 
         // variable type must be float
         //
@@ -1342,7 +1396,13 @@ int DCMPAS::_InitDataVars(
 vector<string> DCMPAS::_GetSpatialDimNames(
     NetCDFCollection *ncdfc, string varname) const {
     vector<string> v = ncdfc->GetSpatialDimNames(varname);
-    reverse(v.begin(), v.end());
+    if (v.size() == 0)
+        return (v);
+
+    if (!isTransposed(ncdfc, varname)) {
+        reverse(v.begin(), v.end());
+    }
+
     return (v);
 }
 
