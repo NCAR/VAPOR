@@ -42,34 +42,9 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
     Q_OBJECT
 
 public:
-    //! Bit masks to indicate what type of variables are to be supported by
-    //! a particular VariablesWidget instance. These flags correspond
-    //! to variable names returned by methods:
-    //!
-    //! SCALAR : RenderParams::GetVariableName()
-    //! VECTOR : RenderParams::GetFieldVariableNames()
-    //! HGT : RenderParams::GetHeightVariableName()
-    //! COLOR : RenderParams::GetColorMapVariableNames()
-    //!
-    /*enum DisplayFlags {
-    SCALAR = (1u << 0),
-    VECTOR = (1u << 1),
-    HGT = (1u << 2),
-    COLOR = (1u << 3),
- };*/
-
-    //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to
-    //! be supported
-    //
-    /* enum DimFlags {
-    TWOD = (1u << 0),
-    THREED = (1u << 1),
- };
-*/
-
     VariablesWidget(QWidget *parent);
 
-    void Reinit(DisplayFlags dspFlags, DimFlags dimFlags);
+    void Reinit(VariableFlags variableFlags, DimFlags dimFlags);
 
     virtual ~VariablesWidget() {}
 
@@ -132,8 +107,8 @@ private:
 
     void updateDims(VAPoR::RenderParams *rParams);
 
-    DisplayFlags _dspFlags;
-    DimFlags     _dimFlags;
+    VariableFlags _variableFlags;
+    DimFlags      _dimFlags;
 
     static string _nDimsTag;
 };

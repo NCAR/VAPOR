@@ -4,6 +4,7 @@
 #include "ui_TFWidgetGUI.h"
 #include "EventRouter.h"
 #include "RangeCombos.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -14,26 +15,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     Q_OBJECT
 
 public:
-    //! Bit masks to indicate what type of variables are to be supported by
-    //! a particular VariablesWidget instance. These flags correspond
-    //! to variable names returned by methods:
-    //!
-    //! SCALAR : RenderParams::GetVariableName()
-    //! VECTOR : RenderParams::GetFieldVariableNames()
-    //! HGT : RenderParams::GetHeightVariableName()
-    //! COLOR : RenderParams::GetColorMapVariableNames()
-    //!
-    enum Flags {
-        // We can map our renderer's colors to a secondary color variable
-        COLORVAR = (1u << 0),
-
-        // We can map the color of our renderer to a constant value
-        CONSTANT = (1u << 1),
-    };
-
     TFWidget(QWidget *parent = 0);
 
-    void Reinit(Flags flags);
+    void Reinit(TFFlags flags);
 
     ~TFWidget();
 
@@ -115,7 +99,7 @@ private:
     Combo *     _maxCombo = NULL;
     RangeCombo *_rangeCombo = NULL;
 
-    Flags _flags;
+    TFFlags _flags;
 
     static string _nDimsTag;
 

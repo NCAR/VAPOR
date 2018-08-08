@@ -20,7 +20,7 @@ public:
     WireFrameVariablesSubtab(QWidget *parent)
     {
         setupUi(this);
-        _variablesWidget->Reinit((DisplayFlags)(SCALAR | HEIGHT), (DimFlags)(THREED | TWOD));
+        _variablesWidget->Reinit((VariableFlags)(SCALAR | HEIGHT), (DimFlags)(THREED | TWOD));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
@@ -33,8 +33,7 @@ public:
     WireFrameAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
-        _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTANT));
-        //_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
+        _TFWidget->Reinit((TFFlags)(CONSTANT));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -51,7 +50,7 @@ public:
     WireFrameGeometrySubtab(QWidget *parent)
     {
         setupUi(this);
-        _geometryWidget->Reinit(GeometryWidget::THREED, GeometryWidget::MINMAX, GeometryWidget::SCALAR);
+        _geometryWidget->Reinit(THREED, MINMAX, SCALAR);
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)

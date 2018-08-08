@@ -3,6 +3,7 @@
 
 #include "ui_GeometryWidgetGUI.h"
 #include "RangeCombos.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class RenderParams;
@@ -16,7 +17,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 public:
     //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to be supported
     //
-    enum DimFlags {
+    /*	enum DimFlags {
         TWOD = (1u << 0),
         THREED = (1u << 1),
     };
@@ -27,14 +28,16 @@ public:
         AUXILIARY = (1u << 2),
     };
 
-    enum DisplayFlags {
+*/
+    /*	enum DisplayFlags {
         SINGLEPOINT = (1u << 0),
         MINMAX = (1u << 1),
     };
+*/
 
     GeometryWidget(QWidget *parent = 0);
 
-    void Reinit(DimFlags dimFlags, DisplayFlags displayFlags, VariableFlags varFlags);
+    void Reinit(DimFlags dimFlags, GeometryFlags geometryFlags, VariableFlags varFlags);
 
     ~GeometryWidget();
 
@@ -100,7 +103,7 @@ private:
 
     DimFlags      _dimFlags;
     VariableFlags _varFlags;
-    DisplayFlags  _displayFlags;
+    GeometryFlags _geometryFlags;
 
     bool _useAuxVariables;    // for Statistics utility
 

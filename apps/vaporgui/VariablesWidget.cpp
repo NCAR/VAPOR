@@ -53,26 +53,26 @@ VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_Variable
     distribVariableFrame->hide();
 
 #ifdef VAPOR3_0_0_ALPHA
-    if (!(dspFlags & COLOR)) { colorVarCombo->hide(); }
+    if (!(variableFlags & COLOR)) { colorVarCombo->hide(); }
 #endif
 }
 
-void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags)
+void VariablesWidget::Reinit(VariableFlags variableFlags, DimFlags dimFlags)
 {
-    _dspFlags = dspFlags;
+    _variableFlags = variableFlags;
     _dimFlags = dimFlags;
 
     showHideVar(true);
 
     if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) { dimensionFrame->hide(); }
 
-    if (_dspFlags ^ COLOR) { collapseColorVarSettings(); }
+    if (_variableFlags ^ COLOR) { collapseColorVarSettings(); }
 
     variableSelectionWidget->adjustSize();
 
-    DisplayFlags fdf = (DisplayFlags)0;
-    if (_dimFlags & SCALAR) fdf = (DisplayFlags)(fdf | SCALAR);
-    if (_dimFlags & VECTOR) fdf = (DisplayFlags)(fdf | VECTOR);
+    VariableFlags fdf = (VariableFlags)0;
+    if (_dimFlags & SCALAR) fdf = (VariableFlags)(fdf | SCALAR);
+    if (_dimFlags & VECTOR) fdf = (VariableFlags)(fdf | VECTOR);
     _fidelityWidget->Reinit(fdf);
 }
 
@@ -85,13 +85,13 @@ void VariablesWidget::setVarName(const QString &qname)
     _paramsMgr->BeginSaveStateGroup("Set variable and possible color "
                                     "variable name");
 
-    if (!(_dspFlags & SCALAR)) return;
+    if (!(_variableFlags & SCALAR)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
     _rParams->SetVariableName(name);
 
-    if (!(_dspFlags & COLOR)) _rParams->SetColorMapVariableName(name);
+    if (!(_variableFlags & COLOR)) _rParams->SetColorMapVariableName(name);
 
     _paramsMgr->EndSaveStateGroup();
 }
@@ -101,7 +101,7 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component)
     assert(_rParams);
     assert(component >= 0 && component <= 2);
 
-    if (!(_dspFlags & VECTOR)) return;
+    if (!(_variableFlags & VECTOR)) return;
     // if ((! (_dimFlags & THREED)) && component == 2) return;
 
     string name = qname.toStdString();
@@ -155,7 +155,7 @@ void VariablesWidget::setHeightVarName(const QString &qname)
 {
     assert(_rParams);
 
-    if (!(_dspFlags & HEIGHT)) return;
+    if (!(_variableFlags & HEIGHT)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -166,7 +166,7 @@ void VariablesWidget::setColorMappedVariable(const QString &qname)
 {
     assert(_rParams);
 
-    if (!(_dspFlags & COLOR)) return;
+    if (!(_variableFlags & COLOR)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -194,25 +194,25 @@ void VariablesWidget::setVariableDims(int index)
 
 void VariablesWidget::showHideVar(bool on)
 {
-    if ((_dspFlags & SCALAR) && on) {
+    if ((_variableFlags & SCALAR) && on) {
         singleVariableFrame->show();
     } else {
         singleVariableFrame->hide();
     }
 
-    if ((_dspFlags & VECTOR) && on) {
+    if ((_variableFlags & VECTOR) && on) {
         fieldVariableFrame->show();
     } else {
         fieldVariableFrame->hide();
     }
 
-    if ((_dspFlags & HEIGHT) && on) {
+    if ((_variableFlags & HEIGHT) && on) {
         heightVariableFrame->show();
     } else {
         heightVariableFrame->hide();
     }
 
-    if ((_dspFlags & COLOR) && on) {
+    if ((_variableFlags & COLOR) && on) {
         colorVariableFrame->show();
     } else {
         colorVariableFrame->hide();
@@ -263,7 +263,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
     }
     showHideVar(true);
 
-    if (_dspFlags & SCALAR) {
+    if (_variableFlags & SCALAR) {
         string setVarReq = rParams->GetVariableName();
         string setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
         if (setVar != setVarReq) {
@@ -276,7 +276,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
         }
     }
 
-    if (_dspFlags & VECTOR) {
+    if (_variableFlags & VECTOR) {
         vector<string> setVarsReq = rParams->GetFieldVariableNames();
         assert(setVarsReq.size() == 3);
 
@@ -295,7 +295,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
         _paramsMgr->SetSaveStateEnabled(enabled);
     }
 
-    if (_dspFlags & COLOR) {
+    if (_variableFlags & COLOR) {
         vector<string> vars = _dataMgr->GetDataVarNames(2);
         string         setVarReq = rParams->GetColorMapVariableName();
 
@@ -309,7 +309,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
         }
     }
 
-    if (_dspFlags & HEIGHT) {
+    if (_variableFlags & HEIGHT) {
         vector<string> vars = _dataMgr->GetDataVarNames(2);
         string         setVarReq = rParams->GetHeightVariableName();
         string         setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
