@@ -46,7 +46,7 @@ public:
  FidelityWidget(QWidget* parent);
 
 
- void Reinit(DisplayFlags dspFlags) {
+ void Reinit(VariableFlags dspFlags) {
 	_dspFlags = dspFlags;
  }
 
@@ -74,7 +74,7 @@ protected slots:
  void SetFidelityDefault();
 
 private:
-     DisplayFlags _dspFlags;
+     VariableFlags _dspFlags;
      const VAPoR::DataMgr *_dataMgr;
      VAPoR::ParamsMgr *_paramsMgr;
      VAPoR::RenderParams *_rParams;

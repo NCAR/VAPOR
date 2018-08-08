@@ -20,7 +20,8 @@ class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
 public:
 	TwoDVariablesSubtab(QWidget* parent) {
 		setupUi(this);
-		_variablesWidget->Reinit((DisplayFlags)(SCALAR | HEIGHT),
+		_variablesWidget->Reinit(
+			(VariableFlags)(SCALAR | HEIGHT),
 			(DimFlags)(TWOD)
 		);
 	}
@@ -41,8 +42,7 @@ class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
 public:
 	TwoDAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
-		_TFWidget->Reinit((TFWidget::Flags)(0));
-		//_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
+		_TFWidget->Reinit((TFFlags)(0));
 	}
 
 	void Update(
@@ -63,9 +63,9 @@ public:
 	TwoDGeometrySubtab(QWidget* parent) {
 		setupUi(this);
 		_geometryWidget->Reinit(
-			GeometryWidget::TWOD,
-			GeometryWidget::MINMAX,
-			GeometryWidget::SCALAR);
+			TWOD,
+			MINMAX,
+			SCALAR);
 	}
 	
 	void Update(

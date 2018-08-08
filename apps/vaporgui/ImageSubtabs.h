@@ -27,7 +27,7 @@ public:
   { 
     setupUi(this);
 		_variablesWidget->Reinit( 
-			(DisplayFlags)(HEIGHT), 
+			(VariableFlags)(HEIGHT), 
 			(DimFlags)(TWOD)
 		);
 	}
@@ -141,9 +141,10 @@ public:
   {
 		setupUi(this);
 		_geometryWidget->Reinit( 
-			GeometryWidget::TWOD,
-			GeometryWidget::MINMAX,
-			GeometryWidget::SCALAR);
+			TWOD,
+			MINMAX,
+			SCALAR
+		);
 	}
 	
 	void Update(  VAPoR::ParamsMgr *paramsMgr,
