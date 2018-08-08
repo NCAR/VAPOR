@@ -149,7 +149,7 @@ bool UnstructuredGrid2D::GetIndicesCell(const std::vector<double> &coords, std::
         cindices.push_back(my_index);
         for (int i = 0; i < nlambda; i++) {
             lambdav.push_back(lambda[i]);
-            nodes.push_back(vector<size_t>(nodes[i]));
+            nodes.push_back(vector<size_t>(my_nodes[i]));
         }
     }
 
