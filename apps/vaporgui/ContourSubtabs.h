@@ -25,7 +25,7 @@ class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
     ContourVariablesSubtab(QWidget *parent) {
         setupUi(this);
         _variablesWidget->Reinit(
-            (DisplayFlags)(SCALAR | HEIGHT),
+            (VariableFlags)(SCALAR | HEIGHT),
             (DimFlags)(TWOD));
     }
 
@@ -81,9 +81,9 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
     ContourGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            GeometryWidget::TWOD,
-            GeometryWidget::MINMAX,
-            GeometryWidget::SCALAR);
+            TWOD,
+            MINMAX,
+            SCALAR);
 
         _orientationAngles->hide();
     }
