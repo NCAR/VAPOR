@@ -57,17 +57,16 @@ VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_Variable
 #endif
 }
 
-void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags, ColorFlags colorFlags)
+void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags)
 {
     _dspFlags = dspFlags;
     _dimFlags = dimFlags;
-    _colorFlags = colorFlags;
 
     showHideVar(true);
 
     if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) { dimensionFrame->hide(); }
 
-    if (_colorFlags ^ COLORVAR) { collapseColorVarSettings(); }
+    if (_dspFlags ^ COLOR) { collapseColorVarSettings(); }
 
     variableSelectionWidget->adjustSize();
 
@@ -77,13 +76,7 @@ void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags, ColorFlag
     _fidelityWidget->Reinit(fdf);
 }
 
-void VariablesWidget::collapseColorVarSettings()
-{
-    colormapVarCombo->hide();
-    colormapVarCombo->resize(0, 0);
-    colorVarLabel->hide();
-    colorVarLabel->resize(0, 0);
-}
+void VariablesWidget::collapseColorVarSettings() { colorVariableFrame->hide(); }
 
 void VariablesWidget::setVarName(const QString &qname)
 {
@@ -98,7 +91,7 @@ void VariablesWidget::setVarName(const QString &qname)
     name = name == "0" ? "" : name;
     _rParams->SetVariableName(name);
 
-    if (!(_colorFlags & COLORVAR)) _rParams->SetColorMapVariableName(name);
+    if (!(_dspFlags & COLOR)) _rParams->SetColorMapVariableName(name);
 
     _paramsMgr->EndSaveStateGroup();
 }
@@ -173,7 +166,7 @@ void VariablesWidget::setColorMappedVariable(const QString &qname)
 {
     assert(_rParams);
 
-    if (!(_colorFlags & COLORVAR)) return;
+    if (!(_dspFlags & COLOR)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -218,6 +211,14 @@ void VariablesWidget::showHideVar(bool on)
     } else {
         heightVariableFrame->hide();
     }
+
+    if ((_dspFlags & COLOR) && on) {
+        colorVariableFrame->show();
+    } else {
+        colorVariableFrame->hide();
+    }
+
+    adjustSize();
 }
 
 // Populate the specified combo box with a list of variables and set
@@ -291,11 +292,10 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
         for (int i = 0; i < setVars.size(); i++) {
             if (setVars[i] != setVarsReq[i]) { rParams->SetFieldVariableNames(setVars); }
         }
-
         _paramsMgr->SetSaveStateEnabled(enabled);
     }
 
-    if (_colorFlags & COLORVAR) {
+    if (_dspFlags & COLOR) {
         vector<string> vars = _dataMgr->GetDataVarNames(2);
         string         setVarReq = rParams->GetColorMapVariableName();
 
@@ -304,9 +304,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
         if (setVar != setVarReq) {
             bool enabled = _paramsMgr->GetSaveStateEnabled();
             _paramsMgr->SetSaveStateEnabled(false);
-
             rParams->SetColorMapVariableName(setVar);
-
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
     }
@@ -314,15 +312,12 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams)
     if (_dspFlags & HGT) {
         vector<string> vars = _dataMgr->GetDataVarNames(2);
         string         setVarReq = rParams->GetHeightVariableName();
-
-        string setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
+        string         setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
 
         if (setVar != setVarReq) {
             bool enabled = _paramsMgr->GetSaveStateEnabled();
             _paramsMgr->SetSaveStateEnabled(false);
-
             rParams->SetHeightVariableName(setVar);
-
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
     }
