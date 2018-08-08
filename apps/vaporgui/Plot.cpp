@@ -55,7 +55,7 @@ Plot::Plot( VAPoR::DataStatus* status,
     // Do some static QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
-    myFidelityWidget->Reinit(AUXILIARY);
+    myFidelityWidget->Reinit((VariableFlags)AUXILIARY);
     spaceTimeTab->setCurrentIndex(0);       // default to load space tab
     
     timeTabSinglePoint->SetMainLabel( QString::fromAscii("Select one data point in space:") );
