@@ -188,6 +188,7 @@ bool DirectVolumeRenderer::UserCoordinates::IsUpToDate(const DVRParams *params, 
     }
 
     // now we know it's up to date!
+    delete grid;
     return true;
 }
 
@@ -290,7 +291,10 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
     if (dataField) delete[] dataField;
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     dataField = new float[numOfVertices];
-    if (!dataField) return false;
+    if (!dataField) {
+        delete grid;
+        return false;
+    }
 
     if (missingValueMask) delete[] missingValueMask;
     missingValueMask = new unsigned char[numOfVertices];
