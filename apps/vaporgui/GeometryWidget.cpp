@@ -224,13 +224,13 @@ void GeometryWidget::updateRangeLabels(
 
     if (minExt.size() < 3) {
         Reinit(
-            TWOD,
+            (DimFlags)TWOD,
             _geometryFlags,
             _varFlags);
         zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
         Reinit(
-            THREED,
+            (DimFlags)THREED,
             _geometryFlags,
             _varFlags);
         QString zTitle = QString("Z Min: ") +

@@ -30,19 +30,10 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     Q_OBJECT
 
   public:
-    /* enum DisplayFlags {
-	SCALAR = (1u << 0), 
-	VECTOR = (1u << 1), 
-	COLOR = (1u << 2),
- 	AUXILIARY = (1u << 3),
-	HEIGHT = (1u << 4),
-	};
-*/
-
     FidelityWidget(QWidget *parent);
 
-    void Reinit(VariableFlags dspFlags) {
-        _dspFlags = dspFlags;
+    void Reinit(VariableFlags variableFlags) {
+        _variableFlags = variableFlags;
     }
 
     virtual void Update(
@@ -68,7 +59,7 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     void SetFidelityDefault();
 
   private:
-    VariableFlags _dspFlags;
+    VariableFlags _variableFlags;
     const VAPoR::DataMgr *_dataMgr;
     VAPoR::ParamsMgr *_paramsMgr;
     VAPoR::RenderParams *_rParams;
