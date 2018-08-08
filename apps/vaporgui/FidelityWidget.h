@@ -4,6 +4,7 @@
 #include <QObject>
 #include "vapor/MyBase.h"
 #include "ui_FidelityWidgetGUI.h"
+#include "Flags.h"
 
 QT_USE_NAMESPACE
 
@@ -28,13 +29,14 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
     Q_OBJECT
 
 public:
-    enum DisplayFlags {
-        SCALAR = (1u << 0),
-        VECTOR = (1u << 1),
-        COLOR = (1u << 2),
-        AUXILIARY = (1u << 3),
-        HEIGHT = (1u << 4),
+    /* enum DisplayFlags {
+    SCALAR = (1u << 0),
+    VECTOR = (1u << 1),
+    COLOR = (1u << 2),
+    AUXILIARY = (1u << 3),
+    HEIGHT = (1u << 4),
     };
+*/
 
     FidelityWidget(QWidget *parent);
 
