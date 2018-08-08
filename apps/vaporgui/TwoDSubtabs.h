@@ -4,6 +4,7 @@
 #include "ui_TwoDAppearanceGUI.h"
 #include "ui_TwoDVariablesGUI.h"
 #include "ui_TwoDGeometryGUI.h"
+#include "Flags.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -19,9 +20,9 @@ class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
 public:
 	TwoDVariablesSubtab(QWidget* parent) {
 		setupUi(this);
-		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
-			(VariablesWidget::SCALAR | VariablesWidget::HGT),
-			(VariablesWidget::DimFlags)(VariablesWidget::TWOD));
+		_variablesWidget->Reinit((DisplayFlags)(SCALAR | HEIGHT),
+			(DimFlags)(TWOD)
+		);
 	}
 
 	void Update(

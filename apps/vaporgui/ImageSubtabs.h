@@ -8,6 +8,7 @@
 #include "vapor/ImageParams.h"
 #include "vapor/GetAppPath.h"
 #include <QFileDialog>
+#include "Flags.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -26,8 +27,8 @@ public:
   { 
     setupUi(this);
 		_variablesWidget->Reinit( 
-			VariablesWidget::HGT, 
-			VariablesWidget::TWOD
+			(DisplayFlags)(HEIGHT), 
+			(DimFlags)(TWOD)
 		);
 	}
 
