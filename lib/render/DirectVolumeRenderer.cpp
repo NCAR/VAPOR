@@ -378,7 +378,7 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates( const DVRParams* 
 
     if( grid->HasMissingData() )
     {
-std::cout << "missing value! " << std::endl;
+//std::cout << "missing value! " << std::endl;
         float missingValue    = grid->GetMissingValue();
         float dataValue;
         for( size_t i = 0; i < numOfVertices; i++ )
@@ -399,7 +399,7 @@ std::cout << "missing value! " << std::endl;
     }
     else    // No missing value!
     {
-std::cout << "no missing value! " << std::endl;
+//std::cout << "no missing value! " << std::endl;
         for( size_t i = 0; i < numOfVertices; i++ )
         {
             dataField[ i ] = (float(*valItr) - valueRange[0]) * valueRange1o;
@@ -494,7 +494,7 @@ int DirectVolumeRenderer::_paintGL()
 
     if( insideACell )
     {
-        std::cout << "inside a cell: " << std::endl; 
+//std::cout << "inside a cell: " << std::endl; 
         printf(" %f, %f, %f\n", cameraUser[0], cameraUser[1], cameraUser[2] );
         printf(" %ld, %ld, %ld\n", cameraCellIndices[0], cameraCellIndices[1], cameraCellIndices[2]);
 
@@ -516,7 +516,7 @@ int DirectVolumeRenderer::_paintGL()
     }
     else
     {
-        std::cout << "not inside a cell" << std::endl;
+//std::cout << "not inside a cell" << std::endl;
         _drawVolumeFaces( 2, false );
     }
 
