@@ -267,6 +267,11 @@ private:
 
  void _splitOnBoundary(string varname, int *connData) const;
 
+ int _readRegionTransposed(
+	MPASFileObject *w,
+	const vector <size_t> &min, const vector <size_t> &max, float *region
+ );
+
  template <class T>
  int _readRegionTemplate(
 	int fd,
@@ -278,6 +283,8 @@ private:
 	string varname, string attname, T &values
  ) const;
 
+ // Derive vertical coordinate variable for dual mesh from primary mesh
+ //
  class DerivedCoordVertFromCell : public DerivedCoordVar {
  public: 
   DerivedCoordVertFromCell(
