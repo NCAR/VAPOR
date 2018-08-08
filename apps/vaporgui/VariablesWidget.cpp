@@ -99,11 +99,11 @@ void VariablesWidget::Reinit(
 
     variableSelectionWidget->adjustSize();
 
-    FidelityWidget::DisplayFlags fdf = (FidelityWidget::DisplayFlags)0;
-    if (_dimFlags & VariablesWidget::SCALAR)
-        fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::SCALAR);
-    if (_dimFlags & VariablesWidget::VECTOR)
-        fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::VECTOR);
+    DisplayFlags fdf = (DisplayFlags)0;
+    if (_dimFlags & SCALAR)
+        fdf = (DisplayFlags)(fdf | SCALAR);
+    if (_dimFlags & VECTOR)
+        fdf = (DisplayFlags)(fdf | VECTOR);
     _fidelityWidget->Reinit(fdf);
 }
 
@@ -182,7 +182,7 @@ void VariablesWidget::setZDistVarName(const QString &name) {
 void VariablesWidget::setHeightVarName(const QString &qname) {
     assert(_rParams);
 
-    if (!(_dspFlags & HGT))
+    if (!(_dspFlags & HEIGHT))
         return;
 
     string name = qname.toStdString();
@@ -235,7 +235,7 @@ void VariablesWidget::showHideVar(bool on) {
         fieldVariableFrame->hide();
     }
 
-    if ((_dspFlags & HGT) && on) {
+    if ((_dspFlags & HEIGHT) && on) {
         heightVariableFrame->show();
     } else {
         heightVariableFrame->hide();
@@ -346,7 +346,7 @@ void VariablesWidget::updateVariableCombos(RenderParams *rParams) {
         }
     }
 
-    if (_dspFlags & HGT) {
+    if (_dspFlags & HEIGHT) {
         vector<string> vars = _dataMgr->GetDataVarNames(2);
         string setVarReq = rParams->GetHeightVariableName();
         string setVar = updateVarCombo(heightCombo, vars, true, setVarReq);

@@ -24,6 +24,7 @@
 #include <vapor/DataMgrUtils.h>
 #include "ErrorReporter.h"
 #include "Plot.h"
+#include "Flags.h"
 
 // Constructor
 Plot::Plot(VAPoR::DataStatus *status,
@@ -51,7 +52,7 @@ Plot::Plot(VAPoR::DataStatus *status,
     // Do some static QT stuff
     setupUi(this);
     setWindowTitle("Plot Utility");
-    myFidelityWidget->Reinit(FidelityWidget::AUXILIARY);
+    myFidelityWidget->Reinit(AUXILIARY);
     spaceTimeTab->setCurrentIndex(0); // default to load space tab
 
     timeTabSinglePoint->SetMainLabel(QString::fromAscii("Select one data point in space:"));
