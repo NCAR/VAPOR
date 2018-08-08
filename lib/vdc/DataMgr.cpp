@@ -2419,6 +2419,12 @@ bool DataMgr::_hasVerticalXForm(
     if (formula_terms.empty())
         return (false);
 
+    // Currently only support one vertical transform!!!
+    //
+    if (!DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) {
+        return (false);
+    }
+
     return (true);
 }
 
