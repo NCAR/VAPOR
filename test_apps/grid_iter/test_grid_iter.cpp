@@ -412,6 +412,39 @@ void test_coord_accessor(const StructuredGrid *sg)
     cout << endl;
 }
 
+void test_getvalue(StructuredGrid *sg)
+{
+    cout << "GetValue Test ----->" << endl;
+
+    float rangev[2];
+    sg->GetRange(rangev);
+
+    sg->SetInterpolationOrder(1);
+
+    float range = rangev[1] - rangev[0];
+    if (range == 0.0) return;
+
+    double t0 = Wasp::GetTime();
+
+    Grid::ConstIterator itr;
+    Grid::ConstIterator enditr = sg->cend();
+    Grid::ConstCoordItr coord_itr = sg->ConstCoordBegin();
+    Grid::ConstCoordItr coord_enditr = sg->ConstCoordEnd();
+    float               maxErr = 0.0;
+    for (itr = sg->cbegin(); itr != enditr; ++itr, ++coord_itr) {
+        float                 v1 = *itr;
+        const vector<double> &coord = *coord_itr;
+
+        float v2 = sg->GetValue(coord);
+
+        float err = abs(v1 - v2) / range;
+        if (err > maxErr) { maxErr = err; }
+    }
+    cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+    cout << "Lmax error : " << maxErr << endl;
+    cout << endl;
+}
+
 int main(int argc, char **argv)
 {
     OptionParser op;
@@ -479,6 +512,8 @@ int main(int argc, char **argv)
     test_coord_iterator(sg);
 
     test_coord_accessor(sg);
+
+    test_getvalue(sg);
 
     delete sg;
 
