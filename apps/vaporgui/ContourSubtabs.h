@@ -69,7 +69,7 @@ public:
     ContourGeometrySubtab(QWidget *parent)
     {
         setupUi(this);
-        _geometryWidget->Reinit(TWOD, MINMAX, SCALAR);
+        _geometryWidget->Reinit((DimFlags)TWOD, (GeometryFlags)MINMAX, (VariableFlags)SCALAR);
 
         _orientationAngles->hide();
     }

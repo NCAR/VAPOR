@@ -213,10 +213,10 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
     yMinMaxLabel->setText(yTitle);
 
     if (minExt.size() < 3) {
-        Reinit(TWOD, _geometryFlags, _varFlags);
+        Reinit((DimFlags)TWOD, _geometryFlags, _varFlags);
         zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
-        Reinit(THREED, _geometryFlags, _varFlags);
+        Reinit((DimFlags)THREED, _geometryFlags, _varFlags);
         QString zTitle = QString("Z Min: ") + QString::number(minExt[2], 'g', 3) + QString("	Max: ") + QString::number(maxExt[2], 'g', 3);
         zMinMaxLabel->setText(zTitle);
     }

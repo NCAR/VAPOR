@@ -189,9 +189,9 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
     _rParams = rParams;
 
     string varname;
-    if (_dspFlags & SCALAR) {
+    if (_variableFlags & SCALAR) {
         varname = _rParams->GetVariableName();
-    } else if (_dspFlags & VECTOR) {
+    } else if (_variableFlags & VECTOR) {
         vector<string> varnames = _rParams->GetFieldVariableNames();
         if (varnames.size() > 0) {
             varname = varnames[0];
@@ -204,9 +204,9 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
                 }
             }
         }
-    } else if (_dspFlags & HEIGHT) {
+    } else if (_variableFlags & HEIGHT) {
         varname = _rParams->GetHeightVariableName();
-    } else if (_dspFlags & AUXILIARY) {
+    } else if (_variableFlags & AUXILIARY) {
         vector<string> varnames = _rParams->GetAuxVariableNames();
         if (varnames.size() > 0) {
             varname = varnames[0];
@@ -219,7 +219,7 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
                 }
             }
         }
-    } else if (_dspFlags & COLOR) {
+    } else if (_variableFlags & COLOR) {
         varname = _rParams->GetColorMapVariableName();
     }
 
