@@ -71,16 +71,12 @@ public:
 	THREED = (1u << 1),
  };
 
- enum ColorFlags {
-	COLORVAR = (1u << 0),
- };
-
  VariablesWidget(QWidget* parent);
 
  void Reinit(
 	DisplayFlags dspFlags, 
-	DimFlags dimFlags,
-	ColorFlags colorFlags);
+	DimFlags dimFlags
+ );
 
  virtual ~VariablesWidget(){}
 
@@ -154,7 +150,6 @@ private:
 
  DisplayFlags _dspFlags;
  DimFlags _dimFlags;
- ColorFlags _colorFlags;
 
  static string _nDimsTag;
 };

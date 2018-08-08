@@ -27,8 +27,7 @@ public:
     setupUi(this);
 		_variablesWidget->Reinit( 
 			VariablesWidget::HGT, 
-			VariablesWidget::TWOD,
-			(VariablesWidget::ColorFlags)(0)
+			VariablesWidget::TWOD
 		);
 	}
 
