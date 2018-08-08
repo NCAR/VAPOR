@@ -154,7 +154,7 @@
          <height>16777215</height>
         </size>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,1,1">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="2,0,2,1">
         <property name="spacing">
          <number>-1</number>
         </property>
@@ -252,7 +252,7 @@
              <x>0</x>
              <y>0</y>
              <width>291</width>
-             <height>151</height>
+             <height>181</height>
             </rect>
            </property>
            <property name="sizePolicy">
