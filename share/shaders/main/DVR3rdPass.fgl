@@ -115,15 +115,16 @@ void main(void)
     // Get UV coordinates of this frament
     if( positionClip.w == 0.0f )
         discard;
-    vec2 positionUV = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
+    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
 
     vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
     vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
     vec3 rayDirTexture  = stopTexture - startTexture;
-    if( length( rayDirTexture ) == 0.0f )
+    float rayDirLength  = length( rayDirTexture );
+    if( rayDirLength < EPSILON )
         discard;
 
-    float nStepsf       = length( rayDirTexture ) / stepSize1D;
+    float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirTexture / nStepsf;
 
     vec3  step1Texture  = startTexture;
