@@ -744,120 +744,102 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
     } else    // All triangles are facing the outside of the volume
     {
-        const float *frontFace = _userCoordinates.frontFace;
-        const float *backFace = _userCoordinates.backFace;
-        const float *rightFace = _userCoordinates.rightFace;
-        const float *leftFace = _userCoordinates.leftFace;
-        const float *topFace = _userCoordinates.topFace;
-        const float *bottomFace = _userCoordinates.bottomFace;
+        unsigned int bx = (unsigned int)_userCoordinates.dims[0];
+        unsigned int by = (unsigned int)_userCoordinates.dims[1];
+        unsigned int bz = (unsigned int)_userCoordinates.dims[2];
 
-        size_t bx = _userCoordinates.dims[0];
-        size_t by = _userCoordinates.dims[1];
-        size_t bz = _userCoordinates.dims[2];
+        unsigned int idx;
 
-        const float *ptr = nullptr;
-        size_t       idx;
-        GLsizei      numOfVertices;
+        // Use an index buffer
+        GLuint indexBufferId = 0;
+        glGenBuffers(1, &indexBufferId);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
 
-        // Use an index buffer:
-        //   http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-9-vbo-indexing/#filling-the-index-buffer
+        // Each strip will have the same numOfVertices for the first 4 faces
+        size_t        numOfVertices = bx * 2;
+        unsigned int *indexBuffer = new unsigned int[numOfVertices];
 
         // Render front face:
-        numOfVertices = bx * 2;
-        GLfloat *vertexPositionBuffer = new GLfloat[numOfVertices * 3];
-        for (int y = 0; y < by - 1; y++)    // strip by strip
+        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFace, GL_STATIC_DRAW);
+        for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
         {
             idx = 0;
-            for (int x = 0; x < bx; x++) {
-                ptr = frontFace + ((y + 1) * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
-                ptr = frontFace + (y * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
+            for (unsigned int x = 0; x < bx; x++) {
+                indexBuffer[idx++] = (y + 1) * bx + x;
+                indexBuffer[idx++] = y * bx + x;
             }
-            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
         }
 
         // Render back face:
-        for (int y = 0; y < by - 1; y++) {
+        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFace, GL_STATIC_DRAW);
+        for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
+        {
             idx = 0;
-            for (int x = 0; x < bx; x++) {
-                ptr = backFace + (y * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
-                ptr = backFace + ((y + 1) * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
+            for (unsigned int x = 0; x < bx; x++) {
+                indexBuffer[idx++] = y * bx + x;
+                indexBuffer[idx++] = (y + 1) * bx + x;
             }
-            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
         }
 
         // Render top face:
-        for (int z = 0; z < bz - 1; z++) {
+        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFace, GL_STATIC_DRAW);
+        for (unsigned int z = 0; z < bz - 1; z++) {
             idx = 0;
-            for (int x = 0; x < bx; x++) {
-                ptr = topFace + (z * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
-                ptr = topFace + ((z + 1) * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
+            for (unsigned int x = 0; x < bx; x++) {
+                indexBuffer[idx++] = z * bx + x;
+                indexBuffer[idx++] = (z + 1) * bx + x;
             }
-            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
         }
 
         // Render bottom face:
-        for (int z = 0; z < bz - 1; z++) {
+        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace, GL_STATIC_DRAW);
+        for (unsigned int z = 0; z < bz - 1; z++) {
             idx = 0;
-            for (int x = 0; x < bx; x++) {
-                ptr = bottomFace + ((z + 1) * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
-                ptr = bottomFace + (z * bx + x) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
+            for (unsigned int x = 0; x < bx; x++) {
+                indexBuffer[idx++] = (z + 1) * bx + x;
+                indexBuffer[idx++] = z * bx + x;
             }
-            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
         }
-        delete[] vertexPositionBuffer;
+
+        // Each strip will have the same numOfVertices for the rest 2 faces.
+        numOfVertices = by * 2;
+        delete[] indexBuffer;
+        indexBuffer = new unsigned int[numOfVertices];
 
         // Render right face:
-        numOfVertices = by * 2;
-        vertexPositionBuffer = new GLfloat[numOfVertices * 3];
-        for (int z = 0; z < bz - 1; z++) {
+        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFace, GL_STATIC_DRAW);
+        for (unsigned int z = 0; z < bz - 1; z++) {
             idx = 0;
-            for (int y = 0; y < by; y++) {
-                ptr = rightFace + ((z + 1) * by + y) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
-                ptr = rightFace + (z * by + y) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
+            for (unsigned int y = 0; y < by; y++) {
+                indexBuffer[idx++] = (z + 1) * by + y;
+                indexBuffer[idx++] = z * by + y;
             }
-            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
         }
 
-        // Render left face:
-        for (int z = 0; z < bz - 1; z++) {
+        // Render left face
+        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_DRAW);
+        for (unsigned int z = 0; z < bz - 1; z++) {
             idx = 0;
-            for (int y = 0; y < by; y++) {
-                ptr = leftFace + (z * by + y) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
-                ptr = leftFace + ((z + 1) * by + y) * 3;
-                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-                idx += 3;
+            for (unsigned int y = 0; y < by; y++) {
+                indexBuffer[idx++] = z * by + y;
+                indexBuffer[idx++] = (z + 1) * by + y;
             }
-            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
         }
-        delete[] vertexPositionBuffer;
+
+        delete[] indexBuffer;
+        glDeleteBuffers(1, &indexBufferId);
     }
 
     glDisableVertexAttribArray(0);
