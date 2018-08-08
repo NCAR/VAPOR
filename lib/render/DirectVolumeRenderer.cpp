@@ -157,7 +157,17 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates()
     }
 }
 
-bool DirectVolumeRenderer::UserCoordinates::isUpToDate(const DVRParams *params, DataMgr *dataMgr)
+StructuredGrid *DirectVolumeRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *params, DataMgr *dataMgr) const
+{
+    std::vector<double> extMin, extMax;
+    params->GetBox()->GetExtents(extMin, extMax);
+    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
+    if (grid == nullptr) std::cerr << "UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid" << std::endl;
+
+    return grid;
+}
+
+bool DirectVolumeRenderer::UserCoordinates::IsUpToDate(const DVRParams *params, DataMgr *dataMgr) const
 {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
         || (myCompressionLevel != params->GetCompressionLevel())) {
@@ -165,155 +175,150 @@ bool DirectVolumeRenderer::UserCoordinates::isUpToDate(const DVRParams *params, 
     }
 
     // compare grid boundaries and dimensions
+    StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
+    assert(grid);
     std::vector<double> extMin, extMax;
-    params->GetBox()->GetExtents(extMin, extMax);
-    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
-    if (grid == nullptr) std::cerr << "UserCoordinates::isUpToDate() isn't on a StructuredGrid" << std::endl;
-
     grid->GetUserExtents(extMin, extMax);
     std::vector<size_t> gridDims = grid->GetDimensions();
     for (int i = 0; i < 3; i++) {
-        if ((boxMin[i] != (float)extMin[i]) || (boxMax[i] != (float)extMax[i]) || (dims[i] != gridDims[i])) return false;
+        if ((boxMin[i] != (float)extMin[i]) || (boxMax[i] != (float)extMax[i]) || (dims[i] != gridDims[i])) {
+            delete grid;
+            return false;
+        }
     }
 
     // now we know it's up to date!
     return true;
 }
 
-bool DirectVolumeRenderer::UserCoordinates::updateCoordinates(const DVRParams *params, DataMgr *dataMgr)
+bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *params, DataMgr *dataMgr)
 {
     myCurrentTimeStep = params->GetCurrentTimestep();
     myVariableName = params->GetVariableName();
     myRefinementLevel = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
 
+    /* update member variables */
+    StructuredGrid *    grid = this->GetCurrentGrid(params, dataMgr);
     std::vector<double> extMin, extMax;
-    params->GetBox()->GetExtents(extMin, extMax);
-    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
-    if (grid == nullptr) {
-        std::cerr << "UserCoordinates::updateCoordinates() isn't on a StructuredGrid" << std::endl;
-        return false;
-    } else {
-        /* update member variables */
-        grid->GetUserExtents(extMin, extMax);
-        for (int i = 0; i < 3; i++) {
-            boxMin[i] = (float)extMin[i];
-            boxMax[i] = (float)extMax[i];
+    grid->GetUserExtents(extMin, extMax);
+    for (int i = 0; i < 3; i++) {
+        boxMin[i] = (float)extMin[i];
+        boxMax[i] = (float)extMax[i];
+    }
+    std::vector<size_t> gridDims = grid->GetDimensions();
+    dims[0] = gridDims[0];
+    dims[1] = gridDims[1];
+    dims[2] = gridDims[2];
+    grid->GetRange(valueRange);
+
+    double buf[3];
+
+    // Save front face user coordinates ( z == dims[2] - 1 )
+    if (frontFace) delete[] frontFace;
+    frontFace = new float[dims[0] * dims[1] * 3];
+    size_t idx = 0;
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, y, dims[2] - 1, buf[0], buf[1], buf[2]);
+            frontFace[idx++] = (float)buf[0];
+            frontFace[idx++] = (float)buf[1];
+            frontFace[idx++] = (float)buf[2];
         }
-        std::vector<size_t> gridDims = grid->GetDimensions();
-        dims[0] = gridDims[0];
-        dims[1] = gridDims[1];
-        dims[2] = gridDims[2];
-        grid->GetRange(valueRange);
 
-        double buf[3];
-
-        // Save front face user coordinates ( z == dims[2] - 1 )
-        if (frontFace) delete[] frontFace;
-        frontFace = new float[dims[0] * dims[1] * 3];
-        size_t idx = 0;
-        for (size_t y = 0; y < dims[1]; y++)
-            for (size_t x = 0; x < dims[0]; x++) {
-                grid->GetUserCoordinates(x, y, dims[2] - 1, buf[0], buf[1], buf[2]);
-                frontFace[idx++] = (float)buf[0];
-                frontFace[idx++] = (float)buf[1];
-                frontFace[idx++] = (float)buf[2];
-            }
-
-        // Save back face user coordinates ( z == 0 )
-        if (backFace) delete[] backFace;
-        backFace = new float[dims[0] * dims[1] * 3];
-        idx = 0;
-        for (size_t y = 0; y < dims[1]; y++)
-            for (size_t x = 0; x < dims[0]; x++) {
-                grid->GetUserCoordinates(x, y, 0, buf[0], buf[1], buf[2]);
-                backFace[idx++] = (float)buf[0];
-                backFace[idx++] = (float)buf[1];
-                backFace[idx++] = (float)buf[2];
-            }
-
-        // Save right face user coordinates ( x == dims[0] - 1 )
-        if (rightFace) delete[] rightFace;
-        rightFace = new float[dims[1] * dims[2] * 3];
-        idx = 0;
-        for (size_t z = 0; z < dims[2]; z++)
-            for (size_t y = 0; y < dims[1]; y++) {
-                grid->GetUserCoordinates(dims[0] - 1, y, z, buf[0], buf[1], buf[2]);
-                rightFace[idx++] = (float)buf[0];
-                rightFace[idx++] = (float)buf[1];
-                rightFace[idx++] = (float)buf[2];
-            }
-
-        // Save left face user coordinates ( x == 0 )
-        if (leftFace) delete[] leftFace;
-        leftFace = new float[dims[1] * dims[2] * 3];
-        idx = 0;
-        for (size_t z = 0; z < dims[2]; z++)
-            for (size_t y = 0; y < dims[1]; y++) {
-                grid->GetUserCoordinates(0, y, z, buf[0], buf[1], buf[2]);
-                leftFace[idx++] = (float)buf[0];
-                leftFace[idx++] = (float)buf[1];
-                leftFace[idx++] = (float)buf[2];
-            }
-
-        // Save top face user coordinates ( y == dims[1] - 1 )
-        if (topFace) delete[] topFace;
-        topFace = new float[dims[0] * dims[2] * 3];
-        idx = 0;
-        for (size_t z = 0; z < dims[2]; z++)
-            for (size_t x = 0; x < dims[0]; x++) {
-                grid->GetUserCoordinates(x, dims[1] - 1, z, buf[0], buf[1], buf[2]);
-                topFace[idx++] = (float)buf[0];
-                topFace[idx++] = (float)buf[1];
-                topFace[idx++] = (float)buf[2];
-            }
-
-        // Save bottom face user coordinates ( y == 0 )
-        if (bottomFace) delete[] bottomFace;
-        bottomFace = new float[dims[0] * dims[2] * 3];
-        idx = 0;
-        for (size_t z = 0; z < dims[2]; z++)
-            for (size_t x = 0; x < dims[0]; x++) {
-                grid->GetUserCoordinates(x, 0, z, buf[0], buf[1], buf[2]);
-                bottomFace[idx++] = (float)buf[0];
-                bottomFace[idx++] = (float)buf[1];
-                bottomFace[idx++] = (float)buf[2];
-            }
-
-        // Save the data field values and missing values
-        if (dataField) delete[] dataField;
-        size_t numOfVertices = dims[0] * dims[1] * dims[2];
-        dataField = new float[numOfVertices];
-        if (!dataField) return false;
-
-        if (missingValueMask) delete[] missingValueMask;
-        missingValueMask = new unsigned char[numOfVertices];
-
-        StructuredGrid::ConstIterator valItr = grid->cbegin();    // Iterator for data field values
-        float                         valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
-
-        if (grid->HasMissingData()) {
-            float missingValue = grid->GetMissingValue();
-            float dataValue;
-            for (size_t i = 0; i < numOfVertices; i++) {
-                dataValue = float(*valItr);
-                if (dataValue == missingValue) {
-                    dataField[i] = 0.0f;
-                    missingValueMask[i] = 255;
-                } else {
-                    dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
-                    missingValueMask[i] = 0;
-                }
-                ++valItr;
-            }
-        } else    // No missing value!
-        {
-            for (size_t i = 0; i < numOfVertices; i++) {
-                dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
-                ++valItr;
-            }
-            std::memset(missingValueMask, 0, numOfVertices);
+    // Save back face user coordinates ( z == 0 )
+    if (backFace) delete[] backFace;
+    backFace = new float[dims[0] * dims[1] * 3];
+    idx = 0;
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, y, 0, buf[0], buf[1], buf[2]);
+            backFace[idx++] = (float)buf[0];
+            backFace[idx++] = (float)buf[1];
+            backFace[idx++] = (float)buf[2];
         }
+
+    // Save right face user coordinates ( x == dims[0] - 1 )
+    if (rightFace) delete[] rightFace;
+    rightFace = new float[dims[1] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t y = 0; y < dims[1]; y++) {
+            grid->GetUserCoordinates(dims[0] - 1, y, z, buf[0], buf[1], buf[2]);
+            rightFace[idx++] = (float)buf[0];
+            rightFace[idx++] = (float)buf[1];
+            rightFace[idx++] = (float)buf[2];
+        }
+
+    // Save left face user coordinates ( x == 0 )
+    if (leftFace) delete[] leftFace;
+    leftFace = new float[dims[1] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t y = 0; y < dims[1]; y++) {
+            grid->GetUserCoordinates(0, y, z, buf[0], buf[1], buf[2]);
+            leftFace[idx++] = (float)buf[0];
+            leftFace[idx++] = (float)buf[1];
+            leftFace[idx++] = (float)buf[2];
+        }
+
+    // Save top face user coordinates ( y == dims[1] - 1 )
+    if (topFace) delete[] topFace;
+    topFace = new float[dims[0] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, dims[1] - 1, z, buf[0], buf[1], buf[2]);
+            topFace[idx++] = (float)buf[0];
+            topFace[idx++] = (float)buf[1];
+            topFace[idx++] = (float)buf[2];
+        }
+
+    // Save bottom face user coordinates ( y == 0 )
+    if (bottomFace) delete[] bottomFace;
+    bottomFace = new float[dims[0] * dims[2] * 3];
+    idx = 0;
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, 0, z, buf[0], buf[1], buf[2]);
+            bottomFace[idx++] = (float)buf[0];
+            bottomFace[idx++] = (float)buf[1];
+            bottomFace[idx++] = (float)buf[2];
+        }
+
+    // Save the data field values and missing values
+    if (dataField) delete[] dataField;
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    dataField = new float[numOfVertices];
+    if (!dataField) return false;
+
+    if (missingValueMask) delete[] missingValueMask;
+    missingValueMask = new unsigned char[numOfVertices];
+
+    StructuredGrid::ConstIterator valItr = grid->cbegin();    // Iterator for data field values
+    float                         valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
+
+    if (grid->HasMissingData()) {
+        float missingValue = grid->GetMissingValue();
+        float dataValue;
+        for (size_t i = 0; i < numOfVertices; i++) {
+            dataValue = float(*valItr);
+            if (dataValue == missingValue) {
+                dataField[i] = 0.0f;
+                missingValueMask[i] = 255;
+            } else {
+                dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
+                missingValueMask[i] = 0;
+            }
+            ++valItr;
+        }
+    } else    // No missing value!
+    {
+        for (size_t i = 0; i < numOfVertices; i++) {
+            dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
+            ++valItr;
+        }
+        std::memset(missingValueMask, 0, numOfVertices);
     }
 
     delete grid;
@@ -357,8 +362,8 @@ int DirectVolumeRenderer::_paintGL()
     assert(params);
 
     /* Gather user coordinates */
-    if (!_userCoordinates.isUpToDate(params, _dataMgr)) {
-        _userCoordinates.updateCoordinates(params, _dataMgr);
+    if (!_userCoordinates.IsUpToDate(params, _dataMgr)) {
+        _userCoordinates.UpdateCoordinates(params, _dataMgr);
 
         /* Also attach the new data to 3D textures: _volumeTextureId, _missingValueTextureId */
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
@@ -379,12 +384,56 @@ int DirectVolumeRenderer::_paintGL()
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
     _drawVolumeFaces(1);    // 1st pass, render back facing polygons to texture0 of the framebuffer
-    _drawVolumeFaces(2);    // 2nd pass, render front facing polygons to texture1 of the framebuffer
+
+    GLfloat ModelView[16], InversedMV[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
+    bool success = _mesa_invert_matrix_general(InversedMV, ModelView);
+    assert(success);
+    std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
+    cameraUser[0] = InversedMV[12];
+    cameraUser[1] = InversedMV[13];
+    cameraUser[2] = InversedMV[14];
+    std::vector<size_t> cameraCellIndices;    // camera position in which cell?
+    StructuredGrid *    grid = _userCoordinates.GetCurrentGrid(params, _dataMgr);
+    bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
+
+    if (insideACell) {
+        std::cout << "inside a cell: " << std::endl;
+        printf(" %f, %f, %f\n", cameraUser[0], cameraUser[1], cameraUser[2]);
+        printf(" %ld, %ld, %ld\n", cameraCellIndices[0], cameraCellIndices[1], cameraCellIndices[2]);
+
+        // cameraCellIndices[0]++;
+        // cameraCellIndices[1]--;
+        // cameraCellIndices[2]--;
+
+        // Get coordinates of nodes that surrounding that cell
+        std::vector<std::vector<size_t>> cellNodes;
+        grid->GetCellNodes(cameraCellIndices, cellNodes);
+        std::vector<double> coords;
+        for (int i = 0; i < 8; i++) {
+            grid->GetUserCoordinates(cellNodes.at(i), coords);
+            _userCoordinates.cellCoords[i][0] = (float)coords.at(0);
+            _userCoordinates.cellCoords[i][1] = (float)coords.at(1);
+            _userCoordinates.cellCoords[i][2] = (float)coords.at(2);
+            // printf("  %f, %f, %f:    ", coords.at(0), coords.at(1), coords.at(2) );
+            // printf("  %ld, %ld, %ld\n", cellNodes[i][0], cellNodes[i][1], cellNodes[i][2] );
+        }
+
+        _drawVolumeFaces(2, true);
+    } else {
+        std::cout << "not inside a cell" << std::endl;
+        _drawVolumeFaces(2, false);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
-    _drawVolumeFaces(3);    // 3rd pass, perform ray casting
+    if (insideACell)
+        _drawVolumeFaces(3, true, ModelView, InversedMV);    // 3rd pass, perform ray casting
+    else
+        _drawVolumeFaces(3, false, ModelView, InversedMV);    // 3rd pass, perform ray casting
+
+    delete grid;
 
     return 0;
 }
@@ -485,26 +534,11 @@ void DirectVolumeRenderer::_printGLInfo() const
     std::cout << "    **** System Info ****" << std::endl;
 }
 
-void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
+void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV)
 {
     assert(whichPass == 1 || whichPass == 2 || whichPass == 3);
 
-    const float *frontFace = _userCoordinates.frontFace;
-    const float *backFace = _userCoordinates.backFace;
-    const float *rightFace = _userCoordinates.rightFace;
-    const float *leftFace = _userCoordinates.leftFace;
-    const float *topFace = _userCoordinates.topFace;
-    const float *bottomFace = _userCoordinates.bottomFace;
-
-    size_t bx = _userCoordinates.dims[0];
-    size_t by = _userCoordinates.dims[1];
-    size_t bz = _userCoordinates.dims[2];
-
-    const float *ptr = nullptr;
-    size_t       idx;
-    size_t       numOfVertices;
-    GLuint       uniformLocation;
-
+    GLuint  uniformLocation;
     GLfloat MVP[16];
     _getMVPMatrix(MVP);
 
@@ -552,13 +586,9 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MVP");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
 
-        GLfloat ModelView[16], InversedMV[16];
-        glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "ModelView");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, ModelView);
 
-        bool success = _mesa_invert_matrix_general(InversedMV, ModelView);
-        assert(success);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "transposedInverseMV");
         glUniformMatrix4fv(uniformLocation, 1, GL_TRUE, InversedMV);
 
@@ -634,115 +664,201 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass)
     GLuint vertexBufferId = 0;
     glGenBuffers(1, &vertexBufferId);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+    glVertexAttribPointer(0,    // attribute 0
+                          3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    // Render front face:
-    numOfVertices = bx * 2;
-    GLfloat *vertexPositionBuffer = new GLfloat[numOfVertices * 3];
-    for (int y = 0; y < by - 1; y++)    // strip by strip
+    if (insideACell)    // All triangles are facing the inside of the volume
     {
-        idx = 0;
-        for (int x = 0; x < bx; x++) {
-            ptr = frontFace + ((y + 1) * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-            ptr = frontFace + (y * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-        }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        // Render front face ( vertex 4, 5, 6, 7, see the diagram in the header)
+        GLsizei numOfVertices = 4;
+        GLfloat vertexPositions[numOfVertices * 3];
+        size_t  idx = 0;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[4], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[7], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[5], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[6], 12);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
-    }
 
-    // Render back face:
-    for (int y = 0; y < by - 1; y++) {
+        // Render back face ( vertex 0, 1, 2, 3 )
         idx = 0;
-        for (int x = 0; x < bx; x++) {
-            ptr = backFace + (y * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-            ptr = backFace + ((y + 1) * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-        }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[3], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[0], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[2], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[1], 12);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
-    }
 
-    // Render top face:
-    for (int z = 0; z < bz - 1; z++) {
+        // Render top face ( vertex 2, 3, 6, 7 )
         idx = 0;
-        for (int x = 0; x < bx; x++) {
-            ptr = topFace + (z * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-            ptr = topFace + ((z + 1) * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-        }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[7], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[3], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[6], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[2], 12);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
-    }
 
-    // Render bottom face:
-    for (int z = 0; z < bz - 1; z++) {
+        // Render bottom face ( vertex 0, 1, 5, 4 )
         idx = 0;
-        for (int x = 0; x < bx; x++) {
-            ptr = bottomFace + ((z + 1) * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-            ptr = bottomFace + (z * bx + x) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-        }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[0], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[4], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[1], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[5], 12);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
-    }
-    delete[] vertexPositionBuffer;
 
-    // Render right face:
-    numOfVertices = by * 2;
-    vertexPositionBuffer = new GLfloat[numOfVertices * 3];
-    for (int z = 0; z < bz - 1; z++) {
+        // Render right face ( vertex 1, 2, 5, 6 )
         idx = 0;
-        for (int y = 0; y < by; y++) {
-            ptr = rightFace + ((z + 1) * by + y) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-            ptr = rightFace + (z * by + y) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-        }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[2], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[1], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[6], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[5], 12);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
-    }
 
-    // Render left face:
-    for (int z = 0; z < bz - 1; z++) {
+        // Render left face ( vertex 0, 4, 7, 3 )
         idx = 0;
-        for (int y = 0; y < by; y++) {
-            ptr = leftFace + (z * by + y) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-            ptr = leftFace + ((z + 1) * by + y) * 3;
-            std::memcpy(vertexPositionBuffer + idx, ptr, 12);
-            idx += 3;
-        }
-        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
-        glVertexAttribPointer(0,    // need to match attribute 0 in the shader
-                              3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[0], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[3], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[4], 12);
+        idx += 3;
+        std::memcpy(vertexPositions + idx, _userCoordinates.cellCoords[7], 12);
+        glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositions, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+    } else    // All triangles are facing the outside of the volume
+    {
+        const float *frontFace = _userCoordinates.frontFace;
+        const float *backFace = _userCoordinates.backFace;
+        const float *rightFace = _userCoordinates.rightFace;
+        const float *leftFace = _userCoordinates.leftFace;
+        const float *topFace = _userCoordinates.topFace;
+        const float *bottomFace = _userCoordinates.bottomFace;
+
+        size_t bx = _userCoordinates.dims[0];
+        size_t by = _userCoordinates.dims[1];
+        size_t bz = _userCoordinates.dims[2];
+
+        const float *ptr = nullptr;
+        size_t       idx;
+        GLsizei      numOfVertices;
+
+        // Use an index buffer:
+        //   http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-9-vbo-indexing/#filling-the-index-buffer
+
+        // Render front face:
+        numOfVertices = bx * 2;
+        GLfloat *vertexPositionBuffer = new GLfloat[numOfVertices * 3];
+        for (int y = 0; y < by - 1; y++)    // strip by strip
+        {
+            idx = 0;
+            for (int x = 0; x < bx; x++) {
+                ptr = frontFace + ((y + 1) * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+                ptr = frontFace + (y * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+            }
+            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+        }
+
+        // Render back face:
+        for (int y = 0; y < by - 1; y++) {
+            idx = 0;
+            for (int x = 0; x < bx; x++) {
+                ptr = backFace + (y * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+                ptr = backFace + ((y + 1) * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+            }
+            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+        }
+
+        // Render top face:
+        for (int z = 0; z < bz - 1; z++) {
+            idx = 0;
+            for (int x = 0; x < bx; x++) {
+                ptr = topFace + (z * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+                ptr = topFace + ((z + 1) * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+            }
+            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+        }
+
+        // Render bottom face:
+        for (int z = 0; z < bz - 1; z++) {
+            idx = 0;
+            for (int x = 0; x < bx; x++) {
+                ptr = bottomFace + ((z + 1) * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+                ptr = bottomFace + (z * bx + x) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+            }
+            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+        }
+        delete[] vertexPositionBuffer;
+
+        // Render right face:
+        numOfVertices = by * 2;
+        vertexPositionBuffer = new GLfloat[numOfVertices * 3];
+        for (int z = 0; z < bz - 1; z++) {
+            idx = 0;
+            for (int y = 0; y < by; y++) {
+                ptr = rightFace + ((z + 1) * by + y) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+                ptr = rightFace + (z * by + y) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+            }
+            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+        }
+
+        // Render left face:
+        for (int z = 0; z < bz - 1; z++) {
+            idx = 0;
+            for (int y = 0; y < by; y++) {
+                ptr = leftFace + (z * by + y) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+                ptr = leftFace + ((z + 1) * by + y) * 3;
+                std::memcpy(vertexPositionBuffer + idx, ptr, 12);
+                idx += 3;
+            }
+            glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * 4, vertexPositionBuffer, GL_STREAM_DRAW);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, numOfVertices);
+        }
+        delete[] vertexPositionBuffer;
     }
-    delete[] vertexPositionBuffer;
 
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &vertexBufferId);

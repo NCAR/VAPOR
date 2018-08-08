@@ -57,6 +57,21 @@ private:
         float          boxMin[3], boxMax[3];    // bounding box of the current volume
                                                 // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
 
+        //
+        //                 7____________6
+        //                /|            |
+        //               / |            |
+        //             3/  |         2  |
+        //              |  |            |
+        //              |  |____________|5
+        //              |  /4           /
+        //              | /            /
+        //              |/____________/
+        //               0             1
+        //
+        // Also keep the coordinates of the 8 vertices containing the camera
+        float cellCoords[8][3];
+
         /* Also keep the current meta data */
         size_t      myCurrentTimeStep;
         std::string myVariableName;
@@ -65,8 +80,9 @@ private:
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        bool isUpToDate(const DVRParams *params, DataMgr *dataMgr);
-        bool updateCoordinates(const DVRParams *params, DataMgr *dataMgr);
+        StructuredGrid *GetCurrentGrid(const DVRParams *params, DataMgr *dataMgr) const;
+        bool            IsUpToDate(const DVRParams *params, DataMgr *dataMgr) const;
+        bool            UpdateCoordinates(const DVRParams *params, DataMgr *dataMgr);
     };    // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;
@@ -97,7 +113,7 @@ private:
     //
     // Draw faces using triangle strips
     //
-    void _drawVolumeFaces(int whichPass);
+    void _drawVolumeFaces(int whichPass, bool insideACell = false, const GLfloat *ModelView = nullptr, const GLfloat *InversedMV = nullptr);
 
     //
     // Initialization for 1) framebuffers and 2) textures
