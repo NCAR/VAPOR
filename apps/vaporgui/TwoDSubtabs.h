@@ -20,8 +20,7 @@ class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
     TwoDVariablesSubtab(QWidget *parent) {
         setupUi(this);
         _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
-                                 (VariablesWidget::DimFlags)(VariablesWidget::TWOD),
-                                 (VariablesWidget::ColorFlags)(0));
+                                 (VariablesWidget::DimFlags)(VariablesWidget::TWOD));
     }
 
     void Update(
