@@ -2,11 +2,11 @@
 
 in vec4 positionClip;   // vertex position in the clip space
 
-uniform sampler2D backFaceTexture;
-uniform sampler2D frontFaceTexture;
-uniform sampler3D volumeTexture;
-uniform sampler3D missingValueMaskTexture;
-uniform sampler1D colorMapTexture;
+uniform sampler2D  backFaceTexture;
+uniform sampler2D  frontFaceTexture;
+uniform sampler3D  volumeTexture;
+uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
+uniform sampler1D  colorMapTexture;
 
 uniform vec2 valueRange;        // min and max values of this variable
 uniform vec2 colorMapRange;     // min and max values on this color map
@@ -24,7 +24,7 @@ uniform mat4 ModelView;
 
 layout(location = 0) out vec4 color;
 
-const float EPSILON = 1e-6f;
+const float EPSILON = 5e-6f;
 float ambientCoeff  = lightingCoeffs[0];
 float diffuseCoeff  = lightingCoeffs[1];
 float specularCoeff = lightingCoeffs[2];
@@ -48,13 +48,13 @@ float TranslateValue( in float value )
 //
 bool ShouldSkip( in vec3 tc )
 {
-    if( texture(missingValueMaskTexture, tc).x > EPSILON )    // missing value
+    if( texture(missingValueMaskTexture, tc).r > 0 )
         return true;
 
     vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
     for( int i = 0; i < 6; i++ )
     {
-        if( dot(positionModel, clipPlanes[i]) < 0.0f )
+        if( dot(positionModel, clipPlanes[i]) < -EPSILON )
             return true;
     }
 
