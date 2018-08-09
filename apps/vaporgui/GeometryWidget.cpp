@@ -122,10 +122,10 @@ void GeometryWidget::adjustLayoutTo2D()
     adjustSize();
 }
 
-void GeometryWidget::Reinit(DimFlags dimFlags, DisplayFlags displayFlags, VariableFlags varFlags)
+void GeometryWidget::Reinit(DimFlags dimFlags, GeometryFlags geometryFlags, VariableFlags varFlags)
 {
     _dimFlags = dimFlags;
-    _displayFlags = displayFlags;
+    _geometryFlags = geometryFlags;
     _varFlags = varFlags;
 
     if (_dimFlags & TWOD) {
@@ -134,10 +134,10 @@ void GeometryWidget::Reinit(DimFlags dimFlags, DisplayFlags displayFlags, Variab
         zMinMaxFrame->show();
     }
 
-    if (_displayFlags & MINMAX) {
+    if (_geometryFlags & MINMAX) {
         adjustLayoutToMinMax();
         stackedSliderWidget->setCurrentIndex(0);
-    } else if (_displayFlags & SINGLEPOINT) {
+    } else if (_geometryFlags & SINGLEPOINT) {
         adjustLayoutToSinglePoint();
         stackedSliderWidget->setCurrentIndex(1);
     }
@@ -213,10 +213,10 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
     yMinMaxLabel->setText(yTitle);
 
     if (minExt.size() < 3) {
-        Reinit(GeometryWidget::TWOD, _displayFlags, _varFlags);
+        Reinit((DimFlags)TWOD, _geometryFlags, _varFlags);
         zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
-        Reinit(GeometryWidget::THREED, _displayFlags, _varFlags);
+        Reinit((DimFlags)THREED, _geometryFlags, _varFlags);
         QString zTitle = QString("Z Min: ") + QString::number(minExt[2], 'g', 3) + QString("	Max: ") + QString::number(maxExt[2], 'g', 3);
         zMinMaxLabel->setText(zTitle);
     }

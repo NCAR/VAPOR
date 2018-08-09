@@ -2,6 +2,14 @@
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
 
+BarbVariablesSubtab::BarbVariablesSubtab(QWidget *parent)
+{
+    setupUi(this);
+    _variablesWidget->Reinit((VariableFlags)(VECTOR | HEIGHT | COLOR), (DimFlags)(TWOD));
+}
+
+void BarbVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
+
 void BarbVariablesSubtab::pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter)
 {
     bool foundDefaultU = false;
@@ -35,13 +43,13 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr 
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent)
 {
     setupUi(this);
-    _geometryWidget->Reinit((GeometryWidget::DimFlags)((GeometryWidget::VECTOR) | (GeometryWidget::TWOD)), GeometryWidget::MINMAX, GeometryWidget::VECTOR);
+    _geometryWidget->Reinit((DimFlags)(VECTOR | TWOD), (GeometryFlags)(MINMAX), (VariableFlags)(VECTOR));
 }
 
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::CONSTANT));
+    _TFWidget->Reinit((TFFlags)(SECONDARY | CONSTANT));
 
     hideZDimWidgets();
 
@@ -164,3 +172,11 @@ void BarbAppearanceSubtab::zDimChanged(int i)
 void BarbAppearanceSubtab::lengthChanged(double d) { _bParams->SetLengthScale(d); }
 
 void BarbAppearanceSubtab::thicknessChanged(double d) { _bParams->SetLineThickness(d); }
+
+void BarbGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
+{
+    _bParams = (VAPoR::BarbParams *)rParams;
+    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+    _copyRegionWidget->Update(paramsMgr, rParams);
+    _transformTable->Update(rParams->GetTransform());
+}
