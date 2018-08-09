@@ -84,7 +84,7 @@ void TFWidget::showWhitespaceFrame() {
 	adjustSize();
 }
 
-void TFWidget::Reinit(Flags flags) {
+void TFWidget::Reinit(TFFlags flags) {
 	_flags = flags;
 	if ((_flags & CONSTANT))
 		showConstColorWidgets();
@@ -406,7 +406,7 @@ void TFWidget::updateConstColorWidgets() {
 	useConstColorCheckbox->blockSignals(false);
 
 	string varName;
-	if (_flags & COLORVAR) {
+	if (_flags & SECONDARY) {
 		varName = _rParams->GetColorMapVariableName();
 		// If we are using a single color instead of a
 		// color mapped variable, disable the transfer function
@@ -567,7 +567,7 @@ bool TFWidget::autoUpdateHisto() {
 
 string TFWidget::getCurrentVarName() {
 	string varname = "";
-	if (_flags & COLORVAR) {
+	if (_flags & SECONDARY) {
 		varname = _rParams->GetColorMapVariableName();
 	}	
 	else {
