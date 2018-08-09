@@ -345,7 +345,7 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
             dataValue = float(*valItr);
             if (dataValue == missingValue) {
                 dataField[i] = 0.0f;
-                missingValueMask[i] = 255;
+                missingValueMask[i] = 127;
             } else {
                 dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
                 missingValueMask[i] = 0;
@@ -359,7 +359,7 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
             dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
             ++valItr;
         }
-        std::memset(missingValueMask, 0, numOfVertices);
+        std::memset(missingValueMask, 0, sizeof(unsigned char) * numOfVertices);
     }
 
     delete grid;
@@ -411,9 +411,28 @@ int DirectVolumeRenderer::_paintGL() {
                      0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
 
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8I,            _userCoordinates.dims[0], 
+                       _userCoordinates.dims[1],             _userCoordinates.dims[2], 
+                       0, GL_RED_INTEGER, GL_BYTE,  _userCoordinates.missingValueMask );*/
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0],
                      _userCoordinates.dims[1], _userCoordinates.dims[2],
                      0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32UI,            _userCoordinates.dims[0], 
+                       _userCoordinates.dims[1],             _userCoordinates.dims[2], 
+                       0, GL_RED_INTEGER, GL_UNSIGNED_INT,  _userCoordinates.missingValueMask );*/
+        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16,            _userCoordinates.dims[0], 
+                       _userCoordinates.dims[1],             _userCoordinates.dims[2], 
+                       0, GL_RED, GL_UNSIGNED_SHORT,  _userCoordinates.missingValueMask );*/
+        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8,            _userCoordinates.dims[0], 
+                       _userCoordinates.dims[1],             _userCoordinates.dims[2], 
+                       0, GL_RED, GL_UNSIGNED_BYTE,  _userCoordinates.missingValueMask ); */
+
+        for (size_t i = 0; i < _userCoordinates.dims[0] * _userCoordinates.dims[1] *
+                                   _userCoordinates.dims[2];
+             i++) {
+            if (_userCoordinates.missingValueMask[i] != 0)
+                printf("%u\n", _userCoordinates.missingValueMask[i]);
+        }
 
         glBindTexture(GL_TEXTURE_3D, 0);
     }
