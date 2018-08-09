@@ -4,6 +4,7 @@
 #include "ui_TwoDAppearanceGUI.h"
 #include "ui_TwoDVariablesGUI.h"
 #include "ui_TwoDGeometryGUI.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -19,9 +20,9 @@ class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
   public:
     TwoDVariablesSubtab(QWidget *parent) {
         setupUi(this);
-        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
-                                 (VariablesWidget::DimFlags)(VariablesWidget::TWOD),
-                                 (VariablesWidget::ColorFlags)(0));
+        _variablesWidget->Reinit(
+            (VariableFlags)(SCALAR | HEIGHT),
+            (DimFlags)(TWOD));
     }
 
     void Update(
@@ -39,8 +40,7 @@ class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
   public:
     TwoDAppearanceSubtab(QWidget *parent) {
         setupUi(this);
-        _TFWidget->Reinit((TFWidget::Flags)(0));
-        //_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
+        _TFWidget->Reinit((TFFlags)(0));
     }
 
     void Update(
@@ -60,9 +60,9 @@ class TwoDGeometrySubtab : public QWidget, public Ui_TwoDGeometryGUI {
     TwoDGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            GeometryWidget::TWOD,
-            GeometryWidget::MINMAX,
-            GeometryWidget::SCALAR);
+            (DimFlags)TWOD,
+            (GeometryFlags)MINMAX,
+            (VariableFlags)SCALAR);
     }
 
     void Update(
