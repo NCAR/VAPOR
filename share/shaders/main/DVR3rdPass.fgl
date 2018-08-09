@@ -43,7 +43,7 @@ float TranslateValue( in float value )
 //
 // Input:  Location to be evaluated in texture coordinates.
 // Output: If this location should be skipped.
-// Note:   It is ignored in two cases: 1) it represents a missing value
+// Note:   It is skipped in two cases: 1) it represents a missing value
 //                                     2) it is outside of clipping planes
 //
 bool ShouldSkip( in vec3 tc )
