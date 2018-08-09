@@ -48,7 +48,7 @@ float TranslateValue( in float value )
 //
 bool ShouldSkip( in vec3 tc )
 {
-    if( texture(missingValueMaskTexture, tc).r > 0 )
+    if( texture(missingValueMaskTexture, tc).r != 0u )
         return true;
 
     vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
