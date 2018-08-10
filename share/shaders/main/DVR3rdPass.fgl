@@ -1,6 +1,7 @@
 #version 410 core
 
 in vec4 positionClip;   // vertex position in the clip space
+layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
 uniform sampler2D  frontFaceTexture;
@@ -17,12 +18,11 @@ uniform vec4 clipPlanes[6];     // clipping planes in **un-normalized** model co
 
 uniform float stepSize1D;       // ray casting step size
 uniform bool  lighting;         // apply lighting or not
-uniform float lightingCoeffs[4]; // lighting factors
+uniform bool  hasMissingValue;  // has missing values or not
+uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
-
-layout(location = 0) out vec4 color;
 
 const float EPSILON = 5e-6f;
 float ambientCoeff  = lightingCoeffs[0];
@@ -48,7 +48,7 @@ float TranslateValue( in float value )
 //
 bool ShouldSkip( in vec3 tc )
 {
-    if( texture(missingValueMaskTexture, tc).r != 0u )
+    if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
     vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
@@ -177,7 +177,7 @@ void main(void)
         // Color compositing
         color.rgb += (1.0f - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0f - color.a) * backColor.a;
-    }
+    }   // End ray casting
 
-}
+}       // End main()
 
