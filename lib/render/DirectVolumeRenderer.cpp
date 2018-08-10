@@ -359,30 +359,36 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates( const DVRParams* 
         }
 
     // Save the data field values and missing values
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
     if( dataField )
         delete[] dataField;
-    size_t numOfVertices = dims[0] * dims[1] * dims[2];
     dataField = new float[ numOfVertices ];
     if( !dataField )
     {
         delete grid;
         return false;
     }
-
     if( missingValueMask )
+    {
         delete[] missingValueMask;
-    missingValueMask = new unsigned char[ numOfVertices ];
-
+        missingValueMask = nullptr;
+    }
     StructuredGrid::ConstIterator valItr = grid->cbegin();          // Iterator for data field values
-    float valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
+    float valueRange1o                   = 1.0f / (valueRange[1] - valueRange[0]);
 
     if( grid->HasMissingData() )
     {
-        float missingValue    = grid->GetMissingValue();
+        float missingValue = grid->GetMissingValue();
+        missingValueMask   = new unsigned char[ numOfVertices ];
+        if( !missingValueMask )
+        {
+            delete grid;
+            return false;
+        }
         float dataValue;
         for( size_t i = 0; i < numOfVertices; i++ )
         {
-            dataValue         = float(*valItr);
+            dataValue       = float(*valItr);
             if( dataValue == missingValue )
             {
                 dataField[ i ]        = 0.0f;
@@ -403,7 +409,6 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates( const DVRParams* 
             dataField[ i ] = (float(*valItr) - valueRange[0]) * valueRange1o;
             ++valItr;
         }
-        std::memset( missingValueMask, 0, numOfVertices );
     }
 
     delete grid;
@@ -451,18 +456,25 @@ int DirectVolumeRenderer::_paintGL()
     {
         _userCoordinates.UpdateCoordinates( params, _dataMgr );
 
-        /* Also attach the new data to 3D textures: _volumeTextureId, _missingValueTextureId */
+        /* Also attach the new data to 3D textures */
         glBindTexture( GL_TEXTURE_3D, _volumeTextureId );
         glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F,    _userCoordinates.dims[0], 
                        _userCoordinates.dims[1],     _userCoordinates.dims[2], 
                        0, GL_RED, GL_FLOAT,          _userCoordinates.dataField );
 
-        glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );    // Necessary to work with GL_R8UI. STUPID!
-        glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
-        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI,            _userCoordinates.dims[0], 
-                       _userCoordinates.dims[1],             _userCoordinates.dims[2], 
-                       0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,  _userCoordinates.missingValueMask );
-        glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment. STUPID!
+        // If there is missing value, upload the mask to texture
+        // Otherwise, leave it empty.
+        if( _userCoordinates.missingValueMask )     // Has missing value!
+        {
+            // Adjust alignment for GL_R8UI format. Stupit OpenGL parameter.
+            glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+            glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
+            glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI,   _userCoordinates.dims[0],
+                           _userCoordinates.dims[1],    _userCoordinates.dims[2],
+                           0,                           GL_RED_INTEGER,
+                           GL_UNSIGNED_BYTE,            _userCoordinates.missingValueMask );
+            glPixelStorei( GL_UNPACK_ALIGNMENT, 4 ); // Restore default alignment.
+        }
 
         glBindTexture( GL_TEXTURE_3D, 0 );
     }
@@ -482,13 +494,13 @@ int DirectVolumeRenderer::_paintGL()
 
     GLfloat ModelView[16],      InversedMV[16];
     glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
-    bool success = _mesa_invert_matrix_general( InversedMV, ModelView );
+    bool success          = _mesa_invert_matrix_general( InversedMV, ModelView );
     assert( success );
     std::vector<double> cameraUser( 4, 1.0 );   // camera position in user coordinates
-    cameraUser[0] = InversedMV[ 12 ];
-    cameraUser[1] = InversedMV[ 13 ];
-    cameraUser[2] = InversedMV[ 14 ];
-    std::vector<size_t> cameraCellIndices; // camera position in which cell?
+    cameraUser[0]         = InversedMV[ 12 ];
+    cameraUser[1]         = InversedMV[ 13 ];
+    cameraUser[2]         = InversedMV[ 14 ];
+    std::vector<size_t> cameraCellIndices;      // camera position in which cell?
     StructuredGrid*  grid = _userCoordinates.GetCurrentGrid( params, _dataMgr );
     bool insideACell      =  grid->GetIndicesCell( cameraUser, cameraCellIndices ); 
 
@@ -757,15 +769,23 @@ void DirectVolumeRenderer::_drawVolumeFaces( int            whichPass,
         
         textureUnit = 3;
         glActiveTexture( GL_TEXTURE0 + textureUnit );
-        glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
-        glUniform1i( uniformLocation, textureUnit );
-
-        textureUnit = 4;
-        glActiveTexture( GL_TEXTURE0 + textureUnit );
         glBindTexture( GL_TEXTURE_1D, _colorMapTextureId );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapTexture" );
         glUniform1i( uniformLocation, textureUnit );
+
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "hasMissingValue" );
+        glUniform1i( uniformLocation, 0 );          // Set to false
+        // If there is missing value, pass in missingValueMaskTexture as well.
+        // Otherwise, leave it empty.
+        if( _userCoordinates.missingValueMask )
+        {
+            glUniform1i( uniformLocation, 1 );      // Set to true
+            textureUnit = 4;
+            glActiveTexture( GL_TEXTURE0 + textureUnit );
+            glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
+            uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
+            glUniform1i( uniformLocation, textureUnit );
+        }
 
         glEnable(   GL_CULL_FACE );
         glCullFace( GL_BACK );
