@@ -303,7 +303,6 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
     float                         valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
 
     if (grid->HasMissingData()) {
-        // std::cout << "missing value! " << std::endl;
         float missingValue = grid->GetMissingValue();
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
@@ -319,12 +318,11 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
         }
     } else    // No missing value!
     {
-        // std::cout << "no missing value! " << std::endl;
         for (size_t i = 0; i < numOfVertices; i++) {
             dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
             ++valItr;
         }
-        std::memset(missingValueMask, 0, sizeof(unsigned char) * numOfVertices);
+        std::memset(missingValueMask, 0, numOfVertices);
     }
 
     delete grid;
@@ -375,24 +373,10 @@ int DirectVolumeRenderer::_paintGL()
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Necessary to work with GL_R8UI. STUPID!
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8I,            _userCoordinates.dims[0],
-                       _userCoordinates.dims[1],             _userCoordinates.dims[2],
-                       0, GL_RED_INTEGER, GL_BYTE,  _userCoordinates.missingValueMask );*/
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
-        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32UI,            _userCoordinates.dims[0],
-                       _userCoordinates.dims[1],             _userCoordinates.dims[2],
-                       0, GL_RED_INTEGER, GL_UNSIGNED_INT,  _userCoordinates.missingValueMask );*/
-        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16,            _userCoordinates.dims[0],
-                       _userCoordinates.dims[1],             _userCoordinates.dims[2],
-                       0, GL_RED, GL_UNSIGNED_SHORT,  _userCoordinates.missingValueMask );*/
-        /*glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8,            _userCoordinates.dims[0],
-                       _userCoordinates.dims[1],             _userCoordinates.dims[2],
-                       0, GL_RED, GL_UNSIGNED_BYTE,  _userCoordinates.missingValueMask ); */
-
-        for (size_t i = 0; i < _userCoordinates.dims[0] * _userCoordinates.dims[1] * _userCoordinates.dims[2]; i++) {
-            if (_userCoordinates.missingValueMask[i] != 0) printf("%u\n", _userCoordinates.missingValueMask[i]);
-        }
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment. STUPID!
 
         glBindTexture(GL_TEXTURE_3D, 0);
     }
@@ -507,17 +491,6 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Bind the default frame buffer */
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    /* Generate and configure 3D texture: _volumeTextureId */
-    glGenTextures(1, &_volumeTextureId);
-    glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-
-    /* Configure _volumeTextureId */
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
     /* Generate and configure 3D texture: _missingValueTextureId */
     glGenTextures(1, &_missingValueTextureId);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
@@ -525,6 +498,17 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Configure _missingValueTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    /* Generate and configure 3D texture: _volumeTextureId */
+    glGenTextures(1, &_volumeTextureId);
+    glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+
+    /* Configure _volumeTextureId */
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -649,30 +633,35 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
         glUniform1fv(uniformLocation, 4, coeffsF);
 
         // Pass in textures
-        glActiveTexture(GL_TEXTURE0);
+        GLuint textureUnit = 0;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-        glUniform1i(uniformLocation, 0);
+        glUniform1i(uniformLocation, textureUnit);
 
-        glActiveTexture(GL_TEXTURE1);
+        textureUnit = 1;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-        glUniform1i(uniformLocation, 1);
+        glUniform1i(uniformLocation, textureUnit);
 
-        glActiveTexture(GL_TEXTURE2);
+        textureUnit = 2;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-        glUniform1i(uniformLocation, 2);
+        glUniform1i(uniformLocation, textureUnit);
 
-        glActiveTexture(GL_TEXTURE3);
+        textureUnit = 3;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-        glUniform1i(uniformLocation, 3);
+        glUniform1i(uniformLocation, textureUnit);
 
-        glActiveTexture(GL_TEXTURE4);
+        textureUnit = 4;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-        glUniform1i(uniformLocation, 4);
+        glUniform1i(uniformLocation, textureUnit);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -835,11 +824,13 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
         }
 
         delete[] indexBuffer;
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glDeleteBuffers(1, &indexBufferId);
     }
 
-    glDisableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &vertexBufferId);
+    glDisableVertexAttribArray(0);
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
