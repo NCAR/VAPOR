@@ -33,6 +33,8 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm, std::string &win
     _depthBufferId = 0;
 
     _vertexArrayId = 0;
+    _vertexBufferId = 0;
+
     _1stPassShaderId = 0;
     _2ndPassShaderId = 0;
     _3rdPassShaderId = 0;
@@ -80,6 +82,10 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     if (_vertexArrayId) {
         glDeleteVertexArrays(1, &_vertexArrayId);
         _vertexArrayId = 0;
+    }
+    if (_vertexBufferId) {
+        glDeleteBuffers(1, &_vertexBufferId);
+        _vertexBufferId = 0;
     }
 
     // delete shader programs
@@ -353,6 +359,7 @@ int DirectVolumeRenderer::_initializeGL()
 
     // Create Vertex Array Object (VAO)
     glGenVertexArrays(1, &_vertexArrayId);
+    glGenBuffers(1, &_vertexBufferId);
 
     _printGLInfo();
 
@@ -369,6 +376,7 @@ int DirectVolumeRenderer::_paintGL()
     assert(params);
 
     glBindVertexArray(_vertexArrayId);    // Use our VAO
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
 
     /* Gather user coordinates */
     if (!_userCoordinates.IsUpToDate(params, _dataMgr)) {
@@ -451,6 +459,7 @@ int DirectVolumeRenderer::_paintGL()
     delete grid;
 
     glBindVertexArray(0);    // Restore default vertex array!
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     return 0;
 }
@@ -690,9 +699,6 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
     }
 
     glEnableVertexAttribArray(0);
-    GLuint vertexBufferId = 0;
-    glGenBuffers(1, &vertexBufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
     glVertexAttribPointer(0,    // attribute 0
                           3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
@@ -848,9 +854,7 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
         glDeleteBuffers(1, &indexBufferId);
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(0);
-    glDeleteBuffers(1, &vertexBufferId);
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
