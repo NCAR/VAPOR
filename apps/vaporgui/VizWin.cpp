@@ -39,6 +39,7 @@
 #include "ErrorReporter.h"
 #include "images/vapor-icon-32.xpm"
 #include "VizWin.h"
+#include "vapor/GLState.h"
 
 using namespace VAPoR;
 
@@ -68,6 +69,9 @@ VizWin::VizWin(
     bool initialize = true;
     updateManip(initialize);
 
+    GLState::CreateState(_winName);
+    GLState::SelectState(_winName);
+
     for (int i = 0; i < 3; i++) {
         _center[i] = 0.0;
         _posvec[i] = 0.0;
@@ -80,6 +84,13 @@ VizWin::VizWin(
  *  Destroys the object and frees any allocated resources
  */
 VizWin::~VizWin() {
+    GLState::DeleteState(_winName);
+}
+
+void VizWin::makeCurrent() {
+    QGLWidget::makeCurrent();
+    GLState::SelectState(_winName);
+    //printf("%s\n", __func__);
 }
 
 void VizWin::closeEvent(QCloseEvent *e) {
@@ -209,12 +220,15 @@ void VizWin::_setUpProjMatrix() {
     vParams->GetWindowSize(width, height);
 
     glMatrixMode(GL_PROJECTION);
+    GLState::MatrixModeProjection();
     glLoadIdentity();
+    GLState::LoadIdentity();
 
     GLfloat w = (float)width / (float)height;
 
     double fov = vParams->GetFOV();
     gluPerspective(fov, w, nearDist, farDist);
+    GLState::Perspective(fov, w, nearDist, farDist);
 
     double pMatrix[16];
     glGetDoublev(GL_PROJECTION_MATRIX, pMatrix);
@@ -227,6 +241,7 @@ void VizWin::_setUpProjMatrix() {
     _controlExec->SetSaveStateEnabled(enabled);
 
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
 }
 
 void VizWin::_setMatrixFromModeParams() {
@@ -298,6 +313,7 @@ void VizWin::_setUpModelViewMatrix() {
     double m[16];
     vParams->GetModelViewMatrix(m);
     glLoadMatrixd(m);
+    GLState::LoadMatrixd(m);
 }
 
 // React to a user-change in window size/position (or possibly max/min)
@@ -431,11 +447,16 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
     if (modeName == MouseModeParams::GetRegionModeName()) {
         std::vector<double> screenCoords = _getScreenCoords(e);
 
-        glMatrixMode(GL_PROJECTION); // Begin setup sequence
+        glMatrixMode(GL_PROJECTION);
+        GLState::MatrixModeProjection(); // Begin setup sequence
+
         glPushMatrix();
+        GLState::PushMatrix();
         _setUpProjMatrix();
         glMatrixMode(GL_MODELVIEW);
+        GLState::MatrixModeModelView();
         glPushMatrix();
+        GLState::PushMatrix();
         _setUpModelViewMatrix(); // End setup sequence
 
         bool mouseOnManip = _manip->MouseEvent(
@@ -443,9 +464,13 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
 
         swapBuffers(); // Begin cleanup sequence
         glMatrixMode(GL_PROJECTION);
+        GLState::MatrixModeProjection();
         glPopMatrix();
+        GLState::PopMatrix();
         glMatrixMode(GL_MODELVIEW);
-        glPopMatrix(); // End cleanup sequence
+        GLState::MatrixModeModelView();
+        glPopMatrix();
+        GLState::PopMatrix(); // End cleanup sequence
 
         if (mouseOnManip) {
             return;
@@ -465,7 +490,7 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent *e) {
     _trackBall->TrackballSetMatrix();
 
     double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+    glGetDoublev(GL_MODELVIEW_MATRIX, m); // TODO GLState
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -550,7 +575,7 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e) {
     _trackBall->TrackballSetMatrix();
 
     double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+    glGetDoublev(GL_MODELVIEW_MATRIX, m); // TODO GLState
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -655,11 +680,15 @@ void VizWin::paintGL() {
     // Set up projection and modelview matrices
     //
     glMatrixMode(GL_PROJECTION);
+    GLState::MatrixModeProjection();
     glPushMatrix();
+    GLState::PushMatrix();
     _setUpProjMatrix();
 
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPushMatrix();
+    GLState::PushMatrix();
     _setUpModelViewMatrix();
 
     int rc = _controlExec->Paint(_winName, false);
@@ -678,9 +707,13 @@ void VizWin::paintGL() {
     }
 
     glMatrixMode(GL_PROJECTION);
+    GLState::MatrixModeProjection();
     glPopMatrix();
+    GLState::PopMatrix();
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPopMatrix();
+    GLState::PopMatrix();
 }
 
 VAPoR::RenderParams *VizWin::_getRenderParams() {

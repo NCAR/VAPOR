@@ -43,6 +43,7 @@
 #include <vapor/jpegapi.h>
 #include <vapor/common.h>
 #include <vapor/ShaderMgr.h>
+#include <vapor/GLState.h>
 
 #include "imagewriter.hpp"
 
@@ -181,27 +182,25 @@ void Visualizer::applyTransforms(int i) {
 #endif
 
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPushMatrix();
-
-#ifdef VAPOR3_0_0_ALPHA
-    glTranslatef(xCenter, yCenter, zCenter);
-    glRotatef(rotations[0], 1, 0, 0);
-    glRotatef(rotations[1], 0, 1, 0);
-    glRotatef(rotations[2], 0, 0, 1);
-#endif
+    GLState::PushMatrix();
 
     glTranslatef(origin[0], origin[1], origin[2]);
+    GLState::Translate(origin[0], origin[1], origin[2]);
     glScalef(scales[0], scales[1], scales[2]);
+    GLState::Scale(scales[0], scales[1], scales[2]);
     glRotatef(rotations[0], 1, 0, 0);
+    GLState::Rotate(rotations[0], 1, 0, 0);
     glRotatef(rotations[1], 0, 1, 0);
+    GLState::Rotate(rotations[1], 0, 1, 0);
     glRotatef(rotations[2], 0, 0, 1);
+    GLState::Rotate(rotations[2], 0, 0, 1);
     glTranslatef(-origin[0], -origin[1], -origin[2]);
+    GLState::Translate(-origin[0], -origin[1], -origin[2]);
 
     glTranslatef(translations[0], translations[1], translations[2]);
-
-#ifdef VAPOR3_0_0_ALPHA
-    glTranslatef(-xCenter, -yCenter, -zCenter);
-#endif
+    GLState::Translate(translations[0], translations[1], translations[2]);
 }
 
 int Visualizer::paintEvent() {
@@ -265,10 +264,12 @@ int Visualizer::paintEvent() {
 #endif
         {
             // Push or reset state
-            glMatrixMode(GL_TEXTURE);
+            glMatrixMode(GL_TEXTURE); // TODO GLState
             glPushMatrix();
             glMatrixMode(GL_MODELVIEW);
+            GLState::MatrixModeModelView();
             glPushMatrix();
+            GLState::PushMatrix();
             glPushAttrib(GL_ALL_ATTRIB_BITS);
 
             if (!_renderer[i]->IsGLInitialized()) {
@@ -279,8 +280,11 @@ int Visualizer::paintEvent() {
 
             if (_renderer[i]->IsGLInitialized()) {
                 applyTransforms(i);
+                GLState::Test();
+                GLState::TestUpload();
                 int myrc = _renderer[i]->paintGL();
                 glPopMatrix();
+                GLState::PopMatrix();
                 if (myrc < 0)
                     rc = -1;
             }
@@ -291,8 +295,10 @@ int Visualizer::paintEvent() {
 #endif
             glPopAttrib();
             glMatrixMode(GL_MODELVIEW);
+            GLState::MatrixModeModelView();
             glPopMatrix();
-            glMatrixMode(GL_TEXTURE);
+            GLState::PopMatrix();
+            glMatrixMode(GL_TEXTURE); // TODO GLState
             glPopMatrix();
             int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
             if (myrc < 0)
@@ -303,6 +309,7 @@ int Visualizer::paintEvent() {
     //Go back to MODELVIEW for any other matrix stuff
     //By default the matrix is expected to be MODELVIEW
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
 
     //Draw any features that are overlaid on scene
 
@@ -367,11 +374,15 @@ int Visualizer::paintSetup(int timeStep) {
     double m[16];
     vpParams->GetProjectionMatrix(m);
     glMatrixMode(GL_PROJECTION);
+    GLState::MatrixModeProjection();
     glLoadMatrixd(m);
+    GLState::LoadMatrixd(m);
 
     vpParams->GetModelViewMatrix(m);
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glLoadMatrixd(m);
+    GLState::LoadMatrixd(m);
 
     //Improve polygon antialiasing
     glEnable(GL_MULTISAMPLE);
@@ -384,31 +395,6 @@ int Visualizer::paintSetup(int timeStep) {
         return -1;
     }
 
-#ifdef VAPOR3_0_0_ALPHA
-    double center[3];
-    m_trackBall->GetCenter(center);
-    vector<double> stretch = vpParams->GetStretchFactors();
-
-    glTranslated(center[0], center[1], center[2]);
-    glScaled(stretch[0], stretch[1], stretch[2]);
-    glTranslated(-center[0], -center[1], -center[2]);
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-    //Save the GL matrix in the viewpoint params, for when the mouse is moving.
-    //Don't put this event in the command queue.
-    if (_tBallChanged) {
-        vpParams->SetSaveState(false);
-        saveGLMatrix(timeStep, vpParams);
-        vpParams->SetSaveState(true);
-    }
-    //Reset the flags
-    _tBallChanged = false;
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-    vpParams->VPSetChanged(false);
-#endif
     return 0;
 }
 //
@@ -495,6 +481,7 @@ bool Visualizer::projectPointToWin(double cubeCoords[3], double winCoords[2]) {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
+    // TODO GL
     bool success = (0 != gluProject(
                              cbCoords[0], cbCoords[1], cbCoords[2], mvMatrix,
                              pMatrix, viewport, wCoords,
@@ -526,6 +513,7 @@ bool Visualizer::pixelToVector(
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
+    // TODO GL
     gluProject(
         strHandleMid[0], strHandleMid[1], strHandleMid[2], mvMatrix,
         pMatrix, viewport, &screenx, &screeny, &screenz);
@@ -1037,11 +1025,17 @@ bool Visualizer::getPixelData(unsigned char *data) const {
 
 void Visualizer::renderColorbars(int timeStep) {
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPushMatrix();
+    GLState::PushMatrix();
     glLoadIdentity();
+    GLState::LoadIdentity();
     glMatrixMode(GL_PROJECTION);
+    GLState::MatrixModeProjection();
     glPushMatrix();
+    GLState::PushMatrix();
     glLoadIdentity();
+    GLState::LoadIdentity();
     for (int i = 0; i < _renderer.size(); i++) {
         //If a renderer is not initialized, or if its bypass flag is set, then don't render.
         //Otherwise push and pop the GL matrix stack, and all attribs
@@ -1051,9 +1045,13 @@ void Visualizer::renderColorbars(int timeStep) {
             _renderer[i]->renderColorbar();
         }
         glMatrixMode(GL_PROJECTION);
+        GLState::MatrixModeProjection();
         glPopMatrix();
+        GLState::PopMatrix();
         glMatrixMode(GL_MODELVIEW);
+        GLState::MatrixModeModelView();
         glPopMatrix();
+        GLState::PopMatrix();
     }
 
     void Visualizer::incrementPath(string & s) {
