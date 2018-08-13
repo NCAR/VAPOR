@@ -72,6 +72,8 @@ public:
  //! \retval visualizer index.
  string getWindowName() {return _winName;}
 
+ void makeCurrent();
+
 signals:
  // Sent prior to closing window - after receiving Qt closeEvent()
  //
