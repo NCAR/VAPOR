@@ -142,7 +142,7 @@ void main(void)
     // let's do a ray casting! 
     for( int i = 0; i < int(nStepsf); i++ )
     {
-        if( color.a > 0.99f )
+        if( color.a > 0.999f )  // You can still see through with 0.99...
             break;
 
         vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
