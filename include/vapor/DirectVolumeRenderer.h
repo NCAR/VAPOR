@@ -118,6 +118,7 @@ private:
 
     // vertex arrays
     GLuint              _vertexArrayId;
+    GLuint              _vertexBufferId; 
 
     // shaders
     GLuint              _1stPassShaderId;
