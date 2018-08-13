@@ -653,7 +653,8 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
 
         float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
         maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
-        float stepSize1D = 0.5f / maxVolumeDim;    // approximately 2 samples per cell
+        maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
+        float stepSize1D = 0.5f / maxVolumeDim;                    // Approximately 2 samples per cell
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
         glUniform1f(uniformLocation, stepSize1D);
 
