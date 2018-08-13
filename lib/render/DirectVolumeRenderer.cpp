@@ -105,11 +105,6 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
         glDeleteBuffers( 1, &_depthBufferId );
         _depthBufferId = 0;
     }
-    if( _indexBufferId )
-    {
-        glDeleteBuffers( 1, &_indexBufferId );
-        _indexBufferId = 0;
-    }
 
     // delete vertex arrays
     if( _vertexArrayId )
@@ -121,6 +116,11 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     {
         glDeleteBuffers( 1, &_vertexBufferId );
         _vertexBufferId = 0;
+    }
+    if( _indexBufferId )
+    {
+        glDeleteBuffers( 1, &_indexBufferId );
+        _indexBufferId = 0;
     }
 
     // delete shader programs
