@@ -28,6 +28,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/GetAppPath.h>
+#include <vapor/GLState.h>
 
 #include <vapor/ViewpointParams.h>
 
@@ -127,20 +128,30 @@ int Renderer::paintGL()
     assert(origin.size() == 3);
 
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPushMatrix();
+    GLState::PushMatrix();
 
     glTranslatef(origin[0], origin[1], origin[2]);
+    GLState::Translate(origin[0], origin[1], origin[2]);
     glScalef(scale[0], scale[1], scale[2]);
+    GLState::Scale(scale[0], scale[1], scale[2]);
     glRotatef(rotate[0], 1, 0, 0);
+    GLState::Rotate(rotate[0], 1, 0, 0);
     glRotatef(rotate[1], 0, 1, 0);
+    GLState::Rotate(rotate[1], 0, 1, 0);
     glRotatef(rotate[2], 0, 0, 1);
+    GLState::Rotate(rotate[2], 0, 0, 1);
     glTranslatef(-origin[0], -origin[1], -origin[2]);
+    GLState::Translate(-origin[0], -origin[1], -origin[2]);
 
     glTranslatef(translate[0], translate[1], translate[2]);
+    GLState::Translate(translate[0], translate[1], translate[2]);
 
     int rc = _paintGL();
 
     glPopMatrix();
+    GLState::PopMatrix();
 
     if (rc < 0) { return (-1); }
 

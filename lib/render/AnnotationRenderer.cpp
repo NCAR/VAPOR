@@ -29,6 +29,7 @@
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
 #include <vapor/GetAppPath.h>
+#include <vapor/GLState.h>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -305,13 +306,20 @@ void AnnotationRenderer::applyTransform(Transform *t)
     assert(origin.size() == 3);
 
     glTranslatef(origin[0], origin[1], origin[2]);
+    GLState::Translate(origin[0], origin[1], origin[2]);
     glScalef(scale[0], scale[1], scale[2]);
+    GLState::Scale(scale[0], scale[1], scale[2]);
     glRotatef(rotate[0], 1, 0, 0);
+    GLState::Rotate(rotate[0], 1, 0, 0);
     glRotatef(rotate[1], 0, 1, 0);
+    GLState::Rotate(rotate[1], 0, 1, 0);
     glRotatef(rotate[2], 0, 0, 1);
+    GLState::Rotate(rotate[2], 0, 0, 1);
     glTranslatef(-origin[0], -origin[1], -origin[2]);
+    GLState::Translate(-origin[0], -origin[1], -origin[2]);
 
     glTranslatef(translate[0], translate[1], translate[2]);
+    GLState::Translate(translate[0], translate[1], translate[2]);
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts)
@@ -324,7 +332,9 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPushMatrix();
+    GLState::PushMatrix();
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     vector<string>   winNames = m_paramsMgr->GetVisualizerNames();
@@ -355,7 +365,9 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     glPopAttrib();
     glMatrixMode(GL_MODELVIEW);
+    GLState::MatrixModeModelView();
     glPopMatrix();
+    GLState::PopMatrix();
     glMatrixMode(GL_TEXTURE);
     glPopMatrix();
 
