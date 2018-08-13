@@ -404,8 +404,6 @@ int DirectVolumeRenderer::_paintGL()
                          _userCoordinates.missingValueMask);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
         }
-
-        glBindTexture(GL_TEXTURE_3D, 0);
     }
 
     /* Gather the color map */
@@ -414,7 +412,6 @@ int DirectVolumeRenderer::_paintGL()
     _colorMapRange[1] = params->GetMapperFunc()->getMaxMapValue();
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
-    glBindTexture(GL_TEXTURE_1D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
@@ -470,6 +467,11 @@ int DirectVolumeRenderer::_paintGL()
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // Bind default textures
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_3D, 0);
 
     return 0;
 }
