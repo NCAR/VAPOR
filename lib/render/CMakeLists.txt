@@ -22,6 +22,8 @@ set (SRC
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 	MyPython.cpp
+	GLState.cpp
+	# Shader.cpp
 )
 
 set (HEADERS
@@ -42,11 +44,13 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoImageGeoTiff.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ImageRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Visualizer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationsRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/textRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GLState.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/Shader.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
