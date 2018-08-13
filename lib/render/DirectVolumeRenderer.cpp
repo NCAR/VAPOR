@@ -54,6 +54,7 @@ DirectVolumeRenderer::DirectVolumeRenderer( const ParamsMgr*    pm,
 
     _vertexArrayId               = 0;
     _vertexBufferId              = 0;
+    _indexBufferId               = 0;
 
     _1stPassShaderId             = 0;
     _2ndPassShaderId             = 0;
@@ -103,6 +104,11 @@ DirectVolumeRenderer::~DirectVolumeRenderer()
     {
         glDeleteBuffers( 1, &_depthBufferId );
         _depthBufferId = 0;
+    }
+    if( _indexBufferId )
+    {
+        glDeleteBuffers( 1, &_indexBufferId );
+        _indexBufferId = 0;
     }
 
     // delete vertex arrays
@@ -443,6 +449,7 @@ int DirectVolumeRenderer::_initializeGL()
     // Create Vertex Array Object (VAO)
     glGenVertexArrays( 1, &_vertexArrayId );
     glGenBuffers(      1, &_vertexBufferId );
+    glGenBuffers(      1, &_indexBufferId );
     
     _printGLInfo();
 
@@ -458,8 +465,10 @@ int DirectVolumeRenderer::_paintGL()
     DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
     assert( params );
 
-    glBindVertexArray( _vertexArrayId );    // Use our VAO
+    // Use our VAO
+    glBindVertexArray( _vertexArrayId );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _indexBufferId );
 
     /* Gather user coordinates */
     if( !_userCoordinates.IsUpToDate( params, _dataMgr ) )
@@ -551,8 +560,10 @@ int DirectVolumeRenderer::_paintGL()
         
     delete grid;
 
-    glBindVertexArray( 0 ); // Restore default vertex array! 
+    // Restore default VAO settings! 
+    glBindVertexArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
     return 0;
 }
@@ -870,11 +881,6 @@ void DirectVolumeRenderer::_drawVolumeFaces( int            whichPass,
 
         unsigned int idx;
 
-        // Use an index buffer
-        GLuint            indexBufferId = 0;
-        glGenBuffers( 1, &indexBufferId );
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferId );
-
         // Each strip will have the same numOfVertices for the first 4 faces
         size_t numOfVertices = bx * 2;
         unsigned int* indexBuffer = new unsigned int[ numOfVertices ];
@@ -987,8 +993,6 @@ void DirectVolumeRenderer::_drawVolumeFaces( int            whichPass,
         }
 
         delete[] indexBuffer;
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-        glDeleteBuffers( 1, &indexBufferId );
     }
     
     glDisableVertexAttribArray(0);
