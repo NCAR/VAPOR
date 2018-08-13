@@ -482,7 +482,9 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     /* Generate back-facing texture */
+    GLuint textureUnit = 0;
     glGenTextures(1, &_backFaceTextureId);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -493,7 +495,9 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Generate front-facing texture */
+    textureUnit = 1;
     glGenTextures(1, &_frontFaceTextureId);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -520,19 +524,10 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     /* Bind the default frame buffer */
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    /* Generate and configure 3D texture: _missingValueTextureId */
-    glGenTextures(1, &_missingValueTextureId);
-    glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-
-    /* Configure _missingValueTextureId */
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
     /* Generate and configure 3D texture: _volumeTextureId */
+    textureUnit = 2;
     glGenTextures(1, &_volumeTextureId);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
 
     /* Configure _volumeTextureId */
@@ -543,13 +538,28 @@ void DirectVolumeRenderer::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 1D texture: _colorMapTextureId */
+    textureUnit = 3;
     glGenTextures(1, &_colorMapTextureId);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
 
     /* Configure _colorMapTextureId */
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+    /* Generate and configure 3D texture: _missingValueTextureId */
+    textureUnit = 4;
+    glGenTextures(1, &_missingValueTextureId);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+
+    /* Configure _missingValueTextureId */
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
