@@ -439,35 +439,22 @@ int DirectVolumeRenderer::_paintGL()
         _getMVPMatrix(MVP);
         _mesa_invert_matrix_general(InversedMVP, MVP);
 
-        float topLeftClip[4] = {-1.0f, 1.0f, -0.99f, 1.0f};
-        float bottomLeftClip[4] = {-1.0f, -1.0f, -0.99f, 1.0f};
-        float topRightClip[4] = {1.0f, 1.0f, -0.99f, 1.0f};
-        float bottomRightClip[4] = {1.0f, -1.0f, -0.99f, 1.0f};
+        float topLeftNDC[4] = {-1.0f, 1.0f, -0.999f, 1.0f};
+        float bottomLeftNDC[4] = {-1.0f, -1.0f, -0.999f, 1.0f};
+        float topRightNDC[4] = {1.0f, 1.0f, -0.999f, 1.0f};
+        float bottomRightNDC[4] = {1.0f, -1.0f, -0.999f, 1.0f};
         float near[16];
-        _matMultiVec(InversedMVP, topLeftClip, near);
-        _matMultiVec(InversedMVP, bottomLeftClip, near + 4);
-        _matMultiVec(InversedMVP, topRightClip, near + 8);
-        _matMultiVec(InversedMVP, bottomRightClip, near + 12);
+        _matMultiVec(InversedMVP, topLeftNDC, near);
+        _matMultiVec(InversedMVP, bottomLeftNDC, near + 4);
+        _matMultiVec(InversedMVP, topRightNDC, near + 8);
+        _matMultiVec(InversedMVP, bottomRightNDC, near + 12);
         for (int i = 0; i < 4; i++) {
-            _userCoordinates.nearCoords[i * 3] = near[i * 4];
-            _userCoordinates.nearCoords[i * 3 + 1] = near[i * 4 + 1];
-            _userCoordinates.nearCoords[i * 3 + 2] = near[i * 4 + 2];
+            _userCoordinates.nearCoords[i * 3] = near[i * 4] / near[i * 4 + 3];
+            _userCoordinates.nearCoords[i * 3 + 1] = near[i * 4 + 1] / near[i * 4 + 3];
+            _userCoordinates.nearCoords[i * 3 + 2] = near[i * 4 + 2] / near[i * 4 + 3];
         }
 
-        // start debug
-        std::cout << "near plane:" << std::endl;
-        const float *p = _userCoordinates.nearCoords;
-        GLfloat      plane[4] = {MVP[3] + MVP[2], MVP[7] + MVP[6], MVP[11] + MVP[10], MVP[15] + MVP[14]};
-        float        mag = std::sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
-        for (int i = 0; i < 4; i++) plane[i] /= mag;
-        for (int i = 0; i < 4; i++) {
-            printf("  point %d: (%f, %f, %f)\n", i, p[i * 3 + 0], p[i * 3 + 1], p[i * 3 + 2]);
-            printf("  dist: %f\n", p[i * 3] * plane[0] + p[i * 3 + 1] * plane[1] + p[i * 3 + 2] * plane[2] + plane[3]);
-        }
-
-        // finish debug
-
-        _drawVolumeFaces(2, true);
+        _drawVolumeFaces(2, true);    // 2nd pass, render front facing polygons
     } else
         _drawVolumeFaces(2, false);
 
@@ -477,7 +464,7 @@ int DirectVolumeRenderer::_paintGL()
     if (insideACell)
         _drawVolumeFaces(3, true, ModelView, InversedMV);    // 3rd pass, perform ray casting
     else
-        _drawVolumeFaces(3, false, ModelView, InversedMV);    // 3rd pass, perform ray casting
+        _drawVolumeFaces(3, false, ModelView, InversedMV);
 
     delete grid;
 
@@ -734,16 +721,14 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
         glDepthMask(GL_FALSE);
     }
 
+    // Let's use our VAO here
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,    // attribute 0
-                          3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    if (insideACell)    // All triangles are facing the inside of the volume
-    {
+    if (insideACell) {
         glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    } else    // All triangles are facing the outside of the volume
-    {
+    } else {
         unsigned int bx = (unsigned int)_userCoordinates.dims[0];
         unsigned int by = (unsigned int)_userCoordinates.dims[1];
         unsigned int bz = (unsigned int)_userCoordinates.dims[2];
