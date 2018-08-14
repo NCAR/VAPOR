@@ -73,6 +73,7 @@ const string xTimeVarName = "xtime";
 const string cellsOnVertexVarName = "cellsOnVertex";
 const string verticesOnCellVarName = "verticesOnCell";
 const string verticesOnEdge = "verticesOnEdge";
+const string edgesOnVertexVarName = "edgesOnVertex";
 const string edgesOnCellVarName = "edgesOnCell";
 const string nEdgesOnCellVarName = "nEdgesOnCell";
 
@@ -176,6 +177,15 @@ bool isTransposed(NetCDFCollection *ncdfc, string varname)
     if (v.size() != 2) return (false);
 
     if ((v[1] == nVertLevelsDimName || v[1] == nVertLevelsP1DimName)) { return (true); }
+
+    return (false);
+}
+
+bool isEdgeVariable(NetCDFCollection *ncdfc, string varname)
+{
+    vector<string> v = ncdfc->GetSpatialDimNames(varname);
+
+    if (v[0] == nEdgesDimName) { return (true); }
 
     return (false);
 }
@@ -472,6 +482,17 @@ int DCMPAS::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_
     return (0);
 }
 
+template<class T> int DCMPAS::_getVar(size_t ts, string varname, T *buf)
+{
+    int fd = _ncdfc->OpenRead(ts, varname);
+    if (fd < 0) return (fd);
+
+    int rc = _ncdfc->Read(buf, fd);
+    if (rc < 0) return (fd);
+
+    return (_ncdfc->Close(fd));
+}
+
 // Read the MPAS nEdgesOnCell auxiliary variable and store it for
 // use later
 //
@@ -689,7 +710,60 @@ int DCMPAS::_readRegionTransposed(MPASFileObject *w, const vector<size_t> &min, 
     int rc = _ncdfc->Read(ncdf_start, ncdf_count, buf, aux);
     if (rc < 0) return (-1);
 
-    Wasp::Transpose(buf, region, ncdf_count[0], ncdf_count[1]);
+    Wasp::Transpose(buf, region, ncdf_count[1], ncdf_count[0]);
+
+    return (0);
+}
+
+int DCMPAS::_readRegionEdgeVariable(MPASFileObject *w, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    assert(min.size() == 2);
+    assert(min.size() == max.size());
+
+    vector<size_t> dims = _ncdfc->GetDims(edgesOnVertexVarName);
+    int *          edgesOnVertex = new int[vproduct(dims)];
+    int            rc = _getVar(w->GetTS(), edgesOnVertexVarName, edgesOnVertex);
+    if (rc < 0) {
+        delete[] edgesOnVertex;
+        return (-1);
+    }
+
+    size_t vertexDegree = dims[1];
+    assert(vertexDegree == 3);
+
+    string varname = w->GetVarname();
+
+    // Don't need to reverse dims because we have to do a tranpose anyway
+    //
+    dims = _ncdfc->GetSpatialDims(varname);
+    float *edgeVariable = new float[vproduct(dims)];
+
+    vector<size_t> minAll, maxAll;
+    for (int i = 0; i < dims.size(); i++) {
+        minAll.push_back(0);
+        maxAll.push_back(dims[i] - 1);
+    }
+
+    rc = _readRegionTransposed(w, minAll, maxAll, edgeVariable);
+    if (rc < 0) {
+        delete[] edgesOnVertex;
+        delete[] edgeVariable;
+        return (-1);
+    }
+
+    float wgt = 1.0 / (float)vertexDegree;
+    for (size_t j = min[1]; j <= max[1]; j++) {
+        for (size_t i = min[0], ii = 0; i <= max[0]; i++, ii++) {
+            size_t vidx0 = edgesOnVertex[i * vertexDegree + 0] - 1;
+            size_t vidx1 = edgesOnVertex[i * vertexDegree + 1] - 1;
+            size_t vidx2 = edgesOnVertex[i * vertexDegree + 2] - 1;
+
+            region[ii] = edgeVariable[j * dims[0] + vidx0] * wgt + edgeVariable[j * dims[0] + vidx1] * wgt + edgeVariable[j * dims[0] + vidx2] * wgt;
+        }
+    }
+
+    delete[] edgesOnVertex;
+    delete[] edgeVariable;
 
     return (0);
 }
@@ -707,7 +781,11 @@ template<class T> int DCMPAS::_readRegionTemplate(int fd, const vector<size_t> &
 
     if (w->GetDerivedFlag()) { return (_dvm.ReadRegion(aux, min, max, region)); }
 
-    if (isTransposed(_ncdfc, varname)) {
+    if (isEdgeVariable(_ncdfc, varname)) {
+        assert((std::is_same<float *, T *>::value) == true);
+        return (_readRegionEdgeVariable(w, min, max, (float *)region));
+
+    } else if (isTransposed(_ncdfc, varname)) {
         assert((std::is_same<float *, T *>::value) == true);
         return (_readRegionTransposed(w, min, max, (float *)region));
     }
@@ -1140,8 +1218,6 @@ int DCMPAS::_InitDataVars(NetCDFCollection *ncdfc)
     // For each variable add a member to _dataVarsMap
     //
     for (int i = 0; i < vars.size(); i++) {
-        if (vars[i] == "qv") { cout << "INDEX OF QV " << i << endl; }
-
         // variable type must be float
         //
         int type = ncdfc->GetXType(vars[i]);
@@ -1162,10 +1238,12 @@ int DCMPAS::_InitDataVars(NetCDFCollection *ncdfc)
         } else if (dimnames[0] == nVerticesDimName) {
             _pointVars.push_back(vars[i]);
         } else if (dimnames[0] == nEdgesDimName) {
-            // not supported yet
+            // No grid support for edge variables in VAPOR, so we turn
+            // them into node-centered data
             //
             //_edgeVars.push_back(vars[i]);
-            continue;
+            dimnames[0] = nVerticesDimName;
+            _pointVars.push_back(vars[i]);
         } else {
             continue;
         }
