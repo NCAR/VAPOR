@@ -69,6 +69,7 @@ void BarbParams::_init()
     SetUseSingleColor(true);
     float rgb[] = {1.f, 1.f, 1.f};
     SetConstantColor(rgb);
+    return;
 
     int defaultTS = GetCurrentTimestep();
     int defaultLOD = GetRefinementLevel();
