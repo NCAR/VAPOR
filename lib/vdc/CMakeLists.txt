@@ -8,6 +8,7 @@ set (SRC
 	CurvilinearGrid.cpp
 	UnstructuredGrid.cpp
 	UnstructuredGrid2D.cpp
+	UnstructuredGridLayered.cpp
 	NetCDFSimple.cpp
 	NetCDFCollection.cpp
 	NetCDFCFCollection.cpp
