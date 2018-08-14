@@ -50,7 +50,6 @@ private:
     VAPoR::ParamsMgr * _paramsMgr;
     Combo *            _xDimCombo;
     Combo *            _yDimCombo;
-    Combo *            _zDimCombo;
     Combo *            _lengthCombo;
     Combo *            _thicknessCombo;
 };
