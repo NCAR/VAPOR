@@ -6,6 +6,7 @@
 #include "ui_ContourVariablesGUI.h"
 #include "ui_ContourGeometryGUI.h"
 #include "RangeCombos.h"
+#include "Flags.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -23,9 +24,10 @@ class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
 public:
 	ContourVariablesSubtab(QWidget* parent) {
 		setupUi(this);
-		_variablesWidget->Reinit((VariablesWidget::DisplayFlags)
-			(VariablesWidget::SCALAR | VariablesWidget::HGT),
-			(VariablesWidget::DimFlags)(VariablesWidget::TWOD));
+		_variablesWidget->Reinit(
+			(VariableFlags)(SCALAR | HEIGHT),
+			(DimFlags)(TWOD)
+		);
 	}
 
 	void Update(
@@ -82,8 +84,10 @@ public:
 	ContourGeometrySubtab(QWidget* parent) {
 		setupUi(this);
 		_geometryWidget->Reinit(
-			GeometryWidget::MINMAX,
-			GeometryWidget::SCALAR);
+			(DimFlags)TWOD,
+			(GeometryFlags)MINMAX,
+			(VariableFlags)SCALAR
+		);
 
 		_orientationAngles->hide();
 	}
