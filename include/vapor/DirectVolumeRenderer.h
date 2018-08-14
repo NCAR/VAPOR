@@ -2,6 +2,7 @@
 #define DIRECTVOLUMERENDERER_H
 
 #include <GL/glew.h>
+#include <sys/time.h>
 
 #ifdef Darwin
 #include <OpenGL/gl.h>
@@ -143,6 +144,8 @@ class RENDER_API DirectVolumeRenderer : public Renderer {
     // Multiply a 4-value vector by a 4x4 matrix.
     //
     void _matMultiVec(const GLfloat *matrix, const GLfloat *vecIn, GLfloat *vecOut) const;
+
+    double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
 
     //
     // Helper matrix manipulation functions
