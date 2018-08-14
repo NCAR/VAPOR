@@ -222,7 +222,7 @@ bool GeometryWidget::getAuxiliaryExtents(std::vector<double> &minFullExts, std::
         vector<int> axes;
         int         ts = _rParams->GetCurrentTimestep();
         int         level = _rParams->GetRefinementLevel();
-        int         rc = DataMgrUtils::GetExtents(_dataMgr, ts, level, auxVarNames, minFullExts, maxFullExts);
+        int         rc = DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExts, maxFullExts, axes, level);
 
         if (rc < 0) {
             MyBase::SetErrMsg("Error: DataMgr could "
@@ -239,9 +239,10 @@ bool GeometryWidget::getVectorExtents(std::vector<double> &minFullExts, std::vec
 
     if ((varNames[0] == "") && (varNames[1] == "") && (varNames[2] == "")) return false;
 
-    int ts = _rParams->GetCurrentTimestep();
-    int level = _rParams->GetRefinementLevel();
-    int rc = DataMgrUtils::GetExtents(_dataMgr, ts, level, varNames, minFullExts, maxFullExts);
+    std::vector<int> axes;
+    int              ts = _rParams->GetCurrentTimestep();
+    int              level = _rParams->GetRefinementLevel();
+    int              rc = DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExts, maxFullExts, axes, level);
 
     if (rc < 0) {
         MyBase::SetErrMsg("Error: DataMgr could "

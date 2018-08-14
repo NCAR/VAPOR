@@ -161,7 +161,7 @@ bool GetAxes(const DataMgr *dataMgr, string varname, vector<int> &axes);
 //!
 //! \sa GetAxes()
 //
-VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double> &minExts, vector<double> &maxExts);
+VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vector<double> &minExts, vector<double> &maxExts, int refLevel = -1);
 
 //! Get coordinate extents for one or more variables.
 //!
@@ -186,30 +186,7 @@ VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, vecto
 //!
 //! \sa GetAxes()
 //
-VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes);
-
-//! Get coordinate extents for one or more variables.
-//!
-//! Get the minimum and maximum coordinate extents of a list of variables
-//! at a given time step. This function handles variables with mixed
-//! dimensionality, and 2D variables that are defined on different planes.
-//! The extents are returned in \p minExts and
-//! \p maxExts.
-//!
-//! \param[in] DataMgr object to be queried
-//! \param[in] timestep Time step of variable. Ignored for variables that
-//! are not time-varying.
-//! \param[in] Level of detail to retrieve extents at
-//! \param[in] Vector of variable names
-//! \param[out] minExts A vector whose size matches the dimensionality
-//! of the variable, and containing the minimum ordered coordinate
-//! extents of \p varname at time step \p timestep.
-//! \param[out] maxExts A vector whose size matches the dimensionality
-//! of the variable, and containing the maximum ordered coordinate
-//! extents of \p varname at time step \p timestep.
-//!
-//
-VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, int level, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts);
+VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes, int refLevel = -1);
 
 #ifdef VAPOR3_0_0_ALPHA
 

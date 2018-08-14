@@ -77,8 +77,9 @@ void BarbParams::_init()
     if (varnames.empty()) { return; }
     if (varnames[X] == "" && varnames[Y] == "" && varnames[Z] == "") { return; }
 
+    vector<int>    axes;
     vector<double> minExt, maxExt;
-    int            rc = DataMgrUtils::GetExtents(_dataMgr, defaultTS, defaultLOD, varnames, minExt, maxExt);
+    int            rc = DataMgrUtils::GetExtents(_dataMgr, defaultTS, varnames, minExt, maxExt, axes, defaultLOD);
     assert(rc >= 0);
     assert(minExt.size() == maxExt.size() && minExt.size() >= 2);
 
