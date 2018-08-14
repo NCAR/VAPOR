@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -41,11 +41,20 @@
    <property name="sizeConstraint">
     <enum>QLayout::SetMaximumSize</enum>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,1">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0">
      <property name="spacing">
       <number>10</number>
      </property>
@@ -92,148 +101,68 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <property name="spacing">
-        <number>10</number>
+      <widget class="QSliderEdit" name="_ambientWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="leftMargin">
-        <number>10</number>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>10</height>
+        </size>
        </property>
-       <property name="rightMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QSlider" name="_ambientSlider">
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="tracking">
-          <bool>false</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="_ambientLabel">
-         <property name="text">
-          <string>Ambient   </string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <property name="spacing">
-        <number>10</number>
+      <widget class="QSliderEdit" name="_diffuseWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="leftMargin">
-        <number>10</number>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>10</height>
+        </size>
        </property>
-       <property name="rightMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QSlider" name="_diffuseSlider">
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="tracking">
-          <bool>false</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="_diffuseLabel">
-         <property name="text">
-          <string>Diffuse     </string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <property name="spacing">
-        <number>10</number>
+      <widget class="QSliderEdit" name="_specularWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="leftMargin">
-        <number>10</number>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>10</height>
+        </size>
        </property>
-       <property name="rightMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QSlider" name="_specularSlider">
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="tracking">
-          <bool>false</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="_specularLabel">
-         <property name="text">
-          <string>Specular  </string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <property name="spacing">
-        <number>10</number>
+      <widget class="QSliderEdit" name="_shininessWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="leftMargin">
-        <number>10</number>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>10</height>
+        </size>
        </property>
-       <property name="rightMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QSlider" name="_shininessSlider">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="tracking">
-          <bool>false</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="_shininessLabel">
-         <property name="text">
-          <string>Shininess </string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      </widget>
      </item>
      <item>
       <widget class="Line" name="line">
@@ -304,6 +233,12 @@
    <class>TFWidget</class>
    <extends>QWidget</extends>
    <header>TFWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QSliderEdit</class>
+   <extends>QWidget</extends>
+   <header>QSliderEdit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
