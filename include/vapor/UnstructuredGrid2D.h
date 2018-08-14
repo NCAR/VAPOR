@@ -49,7 +49,20 @@ public:
 
     void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
 
-    bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
+    bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override
+    {
+        std::vector<double>              lambda;
+        std::vector<std::vector<size_t>> nodes;
+        return (GetIndicesCell(coords, indices, nodes, lambda));
+    }
+
+    //! \copydoc Grid::GetIndicesCell()
+    //!
+    //! \param[out] nodes Indices of vertices of the cell identified by \p indices
+    //! \param[out] lambda Interpolation weights that may be applied to values
+    //! at nodes identified by \p nodes
+    //!
+    bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices, std::vector<std::vector<size_t>> &nodes, std::vector<double> &lambda) const;
 
     bool InsideGrid(const std::vector<double> &coords) const override;
 
@@ -104,13 +117,13 @@ private:
     UnstructuredGridCoordless _zug;
     const KDTreeRG *          _kdtree;
 
-    bool _insideGrid(const std::vector<double> &coords, std::vector<size_t> &face_indices, double *lambda, int &nlambda, double zwgt[2]) const;
+    bool _insideGrid(const std::vector<double> &coords, size_t &face, std::vector<size_t> &nodes, double *lambda, int &nlambda) const;
 
-    bool _insideGridNodeCentered(const std::vector<double> &coords, std::vector<size_t> &face_indices, double *lambda, int &nlambda, double zwgt[2]) const;
+    bool _insideGridNodeCentered(const std::vector<double> &coords, size_t &face, std::vector<size_t> &nodes, double *lambda, int &nlambda) const;
 
-    bool _insideGridFaceCentered(const std::vector<double> &coords, std::vector<size_t> &face_indices, double *lambda, int &nlambda, double zwgt[2]) const;
+    bool _insideGridFaceCentered(const std::vector<double> &coords, size_t &face, std::vector<size_t> &nodes, double *lambda, int &nlambda) const;
 
-    bool _insideFace(size_t face, double pt[2], double *lambda, int &nlambda, double zwgt[2]) const;
+    bool _insideFace(size_t face, double pt[2], std::vector<size_t> &node_indices, double *lambda, int &nlambda) const;
 };
 };    // namespace VAPoR
 

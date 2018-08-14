@@ -2348,21 +2348,33 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
 
     DC::Dimension dimension;
 
+    size_t layers_dimlen = 0;
+    if (m.GetMeshType() == DC::Mesh::UNSTRUC_LAYERED) {
+        string dimname = m.GetLayersDimName();
+        assert(!dimname.empty());
+        status = _dc->GetDimension(dimname, dimension);
+        assert(status);
+        layers_dimlen = dimension.GetLength();
+    }
+
     string dimname = m.GetNodeDimName();
     status = _dc->GetDimension(dimname, dimension);
     assert(status);
     vertexDims.push_back(dimension.GetLength());
+    if (layers_dimlen) { vertexDims.push_back(layers_dimlen); }
 
     dimname = m.GetFaceDimName();
     status = _dc->GetDimension(dimname, dimension);
     assert(status);
     faceDims.push_back(dimension.GetLength());
+    if (layers_dimlen) { faceDims.push_back(layers_dimlen - 1); }
 
     dimname = m.GetEdgeDimName();
     if (dimname.size()) {
         status = _dc->GetDimension(dimname, dimension);
         assert(status);
         edgeDims.push_back(dimension.GetLength());
+        if (layers_dimlen) { edgeDims.push_back(layers_dimlen - 1); }
     }
 
     DC::Mesh::Location l = var.GetSamplingLocation();
