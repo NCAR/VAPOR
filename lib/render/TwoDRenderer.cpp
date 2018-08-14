@@ -133,8 +133,8 @@ void TwoDRenderer::_openGLInit()
         //		glColor3fv(elevGridColor);
     }
 
-    // glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    //	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glEnable(GL_COLOR_MATERIAL);
     glColor4f(1.0, 1.0, 1.0, opacity);
 
