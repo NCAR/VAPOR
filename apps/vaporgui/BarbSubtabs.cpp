@@ -53,7 +53,9 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
     _lengthCombo = new Combo(lengthScaleEdit, lengthScaleSlider, false);
+    _lengthCombo->SetPrecision(2);
     _thicknessCombo = new Combo(thicknessEdit, thicknessSlider, false);
+    _thicknessCombo->SetPrecision(2);
 
     _zDimSelector->SetLabel(QString::fromAscii("Z Dimension"));
     _zDimSelector->SetIntType(true);

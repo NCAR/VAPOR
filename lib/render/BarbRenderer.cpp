@@ -14,20 +14,17 @@
 #define BARB_LENGTH_FACTOR 0.9
 
 // Specify the maximum cylinder radius in proportion to the
-// hypotenuse of the domain, divided by 100 (the maximum barb thicness param)
-// I.E. if the user sets the thickness to 100 (the maximum), then the
-// barbs will have radius = 100 * BARB_RADIUS_TO_HYPOTENUSE * hypotenuse
-//#define BARB_RADIUS_TO_HYPOTENUSE .000125
-#define BARB_RADIUS_TO_HYPOTENUSE .00625
-//#define BARB_RADIUS_TO_HYPOTENUSE .003125
+// hypotenuse of the domain, divided by 4 (the maximum barb thicness param)
+// I.E. if the user sets the thickness to 4 (the maximum), then the
+// barbs will have max radius = 4 * BARB_RADIUS_TO_HYPOTENUSE * hypotenuse
+//#define BARB_RADIUS_TO_HYPOTENUSE .00625
+#define BARB_RADIUS_TO_HYPOTENUSE .001875
 
 // Specify the maximum barb length in proportion to the
-// hypotenuse of the domain, divided by 100 (the maximum barb length param)
-// I.E. if the user sets the length to 100 (the maximum), then the longest
-// barb will have length = 100 * BARB_LENGTH_TO_HYPOTENUSE * hypotenuse
-//#define BARB_LENGTH_TO_HYPOTENUSE .00125
+// hypotenuse of the domain, divided by 4 (the maximum barb length param)
+// I.E. if the user sets the length to 4 (the maximum), then the longest
+// barb will have max length = 4 * BARB_LENGTH_TO_HYPOTENUSE * hypotenuse
 #define BARB_LENGTH_TO_HYPOTENUSE .0625
-//#define BARB_LENGTH_TO_HYPOTENUSE .03125
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cstdlib>
@@ -262,6 +259,7 @@ int BarbRenderer::_paintGL()
     if (rc < 0) {
         glEndList();
         SetErrMsg("One or more selected field variables does not exist");
+        return -1;
     }
 
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
@@ -270,12 +268,18 @@ int BarbRenderer::_paintGL()
     // Get height variable
     string heightVar = bParams->GetHeightVariableName();
     rc = _getVarGrid(ts, refLevel, lod, heightVar, minExts, maxExts, varData);
-    if (rc < 0) SetErrMsg("Height variable does not exist");
+    if (rc < 0) {
+        SetErrMsg("Height variable does not exist");
+        return -1;
+    }
 
     // Get color variable
     string colorVar = bParams->GetColorMapVariableName();
     rc = _getVarGrid(ts, refLevel, lod, colorVar, minExts, maxExts, varData);
-    if (rc < 0) SetErrMsg("Color variable does not exist");
+    if (rc < 0) {
+        SetErrMsg("Color variable does not exist");
+        return -1;
+    }
 
     _recalculateScales(varData, ts);
 
