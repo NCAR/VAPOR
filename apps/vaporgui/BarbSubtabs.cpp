@@ -16,15 +16,9 @@
 
 BarbVariablesSubtab::BarbVariablesSubtab(QWidget *parent) {
     setupUi(this);
-
-    VariablesWidget::DisplayFlags displayFlags;
-    displayFlags = (VariablesWidget::DisplayFlags)(VariablesWidget::VECTOR | VariablesWidget::HGT |
-                                                   VariablesWidget::COLOR);
-
-    VariablesWidget::DimFlags dimFlags;
-    dimFlags = (VariablesWidget::DimFlags)(VariablesWidget::TWOD | VariablesWidget::THREED);
-
-    _variablesWidget->Reinit(displayFlags, dimFlags);
+    _variablesWidget->Reinit(
+        (VariableFlags)(VECTOR | HEIGHT | COLOR),
+        (DimFlags)(TWOD));
 }
 
 void BarbVariablesSubtab::Update(
@@ -34,6 +28,23 @@ void BarbVariablesSubtab::Update(
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
+void BarbVariablesSubtab::pushVarStartingWithLetter(
+    vector<string> searchVars,
+    vector<string> &returnVars,
+    char letter) {
+
+    bool foundDefaultU = false;
+    for (auto &element : searchVars) {
+        if (element[0] == letter || element[0] == toupper(letter)) {
+            returnVars.push_back(element);
+            foundDefaultU = true;
+            break;
+        }
+    }
+    if (!foundDefaultU)
+        returnVars.push_back(searchVars[0]);
+}
+
 void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams,
                                      VAPoR::DataMgr *dataMgr) {
 }
@@ -41,23 +52,15 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams,
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent) {
     setupUi(this);
     _geometryWidget->Reinit(
-        GeometryWidget::MINMAX,
-        GeometryWidget::VECTOR);
-}
-
-void BarbGeometrySubtab::Update(
-    VAPoR::ParamsMgr *paramsMgr,
-    VAPoR::DataMgr *dataMgr,
-    VAPoR::RenderParams *rParams) {
-    _bParams = (VAPoR::BarbParams *)rParams;
-    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
-    _copyRegionWidget->Update(paramsMgr, rParams);
-    _transformTable->Update(rParams->GetTransform());
+        (DimFlags)(VECTOR | TWOD),
+        (GeometryFlags)(MINMAX),
+        (VariableFlags)(VECTOR));
 }
 
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {
     setupUi(this);
-    _TFWidget->Reinit((TFWidget::Flags)(TFWidget::COLORVAR | TFWidget::CONSTANT));
+    _TFWidget->Reinit(
+        (TFFlags)(SECONDARY | CONSTANT));
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
@@ -186,6 +189,16 @@ void BarbAppearanceSubtab::lengthChanged(double d) {
 
 void BarbAppearanceSubtab::thicknessChanged(double d) {
     _bParams->SetLineThickness(d);
+}
+
+void BarbGeometrySubtab::Update(
+    VAPoR::ParamsMgr *paramsMgr,
+    VAPoR::DataMgr *dataMgr,
+    VAPoR::RenderParams *rParams) {
+    _bParams = (VAPoR::BarbParams *)rParams;
+    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+    _copyRegionWidget->Update(paramsMgr, rParams);
+    _transformTable->Update(rParams->GetTransform());
 }
 
 void BarbAppearanceSubtab::recalculateScales() {

@@ -4,6 +4,7 @@
 #include "ui_WireFrameAppearanceGUI.h"
 #include "ui_WireFrameVariablesGUI.h"
 #include "ui_WireFrameGeometryGUI.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -19,8 +20,9 @@ class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI
   public:
     WireFrameVariablesSubtab(QWidget *parent) {
         setupUi(this);
-        _variablesWidget->Reinit((VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
-                                 (VariablesWidget::DimFlags)(VariablesWidget::THREED | VariablesWidget::TWOD));
+        _variablesWidget->Reinit(
+            (VariableFlags)(SCALAR | HEIGHT),
+            (DimFlags)(THREED | TWOD));
     }
 
     void Update(
@@ -38,8 +40,7 @@ class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceG
   public:
     WireFrameAppearanceSubtab(QWidget *parent) {
         setupUi(this);
-        _TFWidget->Reinit((TFWidget::Flags)(TFWidget::CONSTANT));
-        //_TFWidget->setEventRouter(dynamic_cast<RenderEventRouter*>(parent));
+        _TFWidget->Reinit((TFFlags)(CONSTANT));
     }
 
     void Update(
@@ -59,8 +60,9 @@ class WireFrameGeometrySubtab : public QWidget, public Ui_WireFrameGeometryGUI {
     WireFrameGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            GeometryWidget::MINMAX,
-            GeometryWidget::SCALAR);
+            (DimFlags)THREED,
+            (GeometryFlags)MINMAX,
+            (VariableFlags)SCALAR);
     }
 
     void Update(
