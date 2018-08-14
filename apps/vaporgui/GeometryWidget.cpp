@@ -245,10 +245,11 @@ bool GeometryWidget::getAuxiliaryExtents(
 		int rc = DataMgrUtils::GetExtents(
 			_dataMgr, 
 			ts, 
-			level,
 			auxVarNames, 
 			minFullExts, 
-			maxFullExts
+			maxFullExts,
+			axes,
+			level
 		);
 
 		if (rc<0) {
@@ -270,15 +271,17 @@ bool GeometryWidget::getVectorExtents(
 		(varNames[1] == "") &&
 		(varNames[2] == "")) return false;
 
+	std::vector<int> axes;
 	int ts    = _rParams->GetCurrentTimestep();
 	int level = _rParams->GetRefinementLevel();
 	int rc = DataMgrUtils::GetExtents(
 		_dataMgr, 
 		ts, 
-		level, 
 		varNames, 
 		minFullExts, 
-		maxFullExts
+		maxFullExts,
+		axes,
+		level
 	);
 	
 	if (rc<0) {

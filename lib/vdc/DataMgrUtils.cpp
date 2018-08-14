@@ -291,55 +291,12 @@ bool DataMgrUtils::GetAxes(
 }
 
 bool DataMgrUtils::GetExtents(
-	DataMgr* dataMgr,
-	size_t ts, 
-	int level,
-	const std::vector<string> &varnames, 
-	std::vector<double> &min, 
-	std::vector<double> &max
-) {
-	min.clear();
-	max.clear();
-	
-	int rc;
-
-	std::vector<double> tmpMin(3,0);
-	std::vector<double> tmpMax(3,0);
-	for (int i=0; i<varnames.size(); i++) {
-		if (varnames[i] == "") {
-			continue;
-		}
-
-		rc = dataMgr->GetVariableExtents(
-			ts, 
-			varnames[i], 
-			level, 
-			tmpMin, 
-			tmpMax
-		);
-		if (rc<0) return(false);
-
-		if (i==0) {
-			min = tmpMin;
-			max = tmpMax;
-		}
-		else {
-			for (int j=0; j<min.size(); j++) {
-				if (tmpMin[j] < min[j])
-					min[j] = tmpMin[j];
-				if (tmpMax[j] < max[j])
-					max[j] = tmpMax[j];
-			}
-		}
-	}
-	if (rc<0) return false;
-	return true;
-}
-
-bool DataMgrUtils::GetExtents(
 	DataMgr *dataMgr,
-	size_t timestep, string varname, 
-	vector <double>& minExts, vector <double>& maxExts
+	size_t timestep, 
+	string varname, 
+	vector <double>& minExts, 
+	vector <double>& maxExts,
+	int refLevel
 ) {
 	minExts.clear();
 	maxExts.clear();
@@ -357,15 +314,18 @@ bool DataMgrUtils::GetExtents(
 	}
 	if (varname.empty()) return (false);
 
-	size_t maxXForm;
-	bool status = DataMgrUtils::MaxXFormPresent(
-		dataMgr, timestep, varname, maxXForm
-	);
-	if (! status) return (status);
+	if (refLevel == -1) {
+		size_t maxXForm;
+		bool status = DataMgrUtils::MaxXFormPresent(
+			dataMgr, timestep, varname, maxXForm
+		);
+		if (! status) return (status);
+		refLevel = (int)maxXForm;
+	}
 
 	bool errEnabled = MyBase::EnableErrMsg(false);
 	int rc = dataMgr->GetVariableExtents(
-		timestep, varname, (int) maxXForm, minExts, maxExts
+		timestep, varname, refLevel, minExts, maxExts
 	);
 	MyBase::EnableErrMsg(errEnabled);
 
@@ -376,9 +336,12 @@ bool DataMgrUtils::GetExtents(
 
 bool DataMgrUtils::GetExtents(
 	DataMgr *dataMgr,
-	size_t timestep, const vector <string> &varnames, 
-	vector <double>& minExts, vector <double>& maxExts,
-	vector <int> &axes
+	size_t timestep, 
+	const vector <string> &varnames, 
+	vector <double>& minExts, 
+	vector <double>& maxExts,
+	vector <int> &axes,
+	int refLevel
 ) {
 	minExts.clear();
 	maxExts.clear();
@@ -406,7 +369,7 @@ bool DataMgrUtils::GetExtents(
 		vector <int> varAxes;
 
 		bool status = DataMgrUtils::GetExtents(
-			dataMgr, timestep, varnames[i], varMinExts, varMaxExts
+			dataMgr, timestep, varnames[i], varMinExts, varMaxExts, refLevel
 		);
 		if (! status) continue;
 

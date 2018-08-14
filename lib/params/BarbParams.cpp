@@ -95,14 +95,16 @@ void BarbParams::_init() {
 		return;
 	}
 
+	vector <int> axes;
 	vector <double> minExt, maxExt;
 	int rc = DataMgrUtils::GetExtents(
 		_dataMgr,
 		defaultTS, 
-		defaultLOD, 
 		varnames,
 		minExt, 
-		maxExt
+		maxExt,
+		axes,
+		defaultLOD
 	);
 	assert (rc >=0);
 	assert(minExt.size()==maxExt.size() && minExt.size()>=2);
