@@ -38,7 +38,24 @@ public:
 
         _dvrParams = nullptr;
 
-        /* Note: slider ranges are set using QTCreator, and should be modified there ! */
+        _ambientWidget->SetLabel(QString::fromAscii("Ambient"));
+        _ambientWidget->SetDecimals(2);
+        _ambientWidget->SetExtents(0.0, 1.0);
+        _ambientWidget->SetIntType(false);
+
+        _diffuseWidget->SetLabel(QString::fromAscii("Diffuse"));
+        _diffuseWidget->SetDecimals(2);
+        _diffuseWidget->SetExtents(0.0, 1.0);
+        _diffuseWidget->SetIntType(false);
+
+        _specularWidget->SetLabel(QString::fromAscii("Specular"));
+        _specularWidget->SetDecimals(2);
+        _specularWidget->SetExtents(0.0, 1.0);
+        _specularWidget->SetIntType(false);
+
+        _shininessWidget->SetLabel(QString::fromAscii("Shininess"));
+        _shininessWidget->SetExtents(1.0, 100.0);
+        _shininessWidget->SetIntType(true);
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -51,37 +68,37 @@ public:
         _lightingCheckBox->setChecked(_dvrParams->GetLighting());
 
         std::vector<double> coeffs = _dvrParams->GetLightingCoeffs();
-        _ambientSlider->setValue(int(coeffs[0] * 100.0));
-        _diffuseSlider->setValue(int(coeffs[1] * 100.0));
-        _specularSlider->setValue(int(coeffs[2] * 100.0));
-        _shininessSlider->setValue(int(coeffs[3]));
+        _ambientWidget->SetValue(coeffs[0]);
+        _diffuseWidget->SetValue(coeffs[1]);
+        _specularWidget->SetValue(coeffs[2]);
+        _shininessWidget->SetValue(coeffs[3]);
     }
 
 private slots:
     void on__lightingCheckBox_toggled(bool checked) { _dvrParams->SetLighting(checked); }
 
-    void on__ambientSlider_valueChanged(int value)
+    void on__ambientWidget_valueChanged(double value)
     {
         std::vector<double> coeffs = _dvrParams->GetLightingCoeffs();
-        coeffs[0] = double(value) / 100.0;
+        coeffs[0] = value;
         _dvrParams->SetLightingCoeffs(coeffs);
     }
 
-    void on__diffuseSlider_valueChanged(int value)
+    void on__diffuseWidget_valueChanged(double value)
     {
         std::vector<double> coeffs = _dvrParams->GetLightingCoeffs();
-        coeffs[1] = double(value) / 100.0;
+        coeffs[1] = value;
         _dvrParams->SetLightingCoeffs(coeffs);
     }
 
-    void on__specularSlider_valueChanged(int value)
+    void on__specularWidget_valueChanged(double value)
     {
         std::vector<double> coeffs = _dvrParams->GetLightingCoeffs();
-        coeffs[2] = double(value) / 100.0;
+        coeffs[2] = value;
         _dvrParams->SetLightingCoeffs(coeffs);
     }
 
-    void on__shininessSlider_valueChanged(int value)
+    void on__shininessWidget_valueChanged(int value)
     {
         std::vector<double> coeffs = _dvrParams->GetLightingCoeffs();
         coeffs[3] = double(value);
@@ -100,7 +117,8 @@ private slots:
 
 private:
     VAPoR::DVRParams *_dvrParams;
-};
+
+};    // End class DVRAppearanceSubtab
 
 class DVRGeometrySubtab : public QWidget, public Ui_DVRGeometryGUI {
     Q_OBJECT
