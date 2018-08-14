@@ -61,7 +61,6 @@ bool BarbParams::usingVariable(const std::string &varname)
     return (varname.compare(GetVariableName()) == 0);
 }
 
-// Set everything to default values
 void BarbParams::_init()
 {
     SetDiagMsg("BarbParams::_init()");
@@ -69,20 +68,4 @@ void BarbParams::_init()
     SetUseSingleColor(true);
     float rgb[] = {1.f, 1.f, 1.f};
     SetConstantColor(rgb);
-    return;
-
-    int defaultTS = GetCurrentTimestep();
-    int defaultLOD = GetRefinementLevel();
-
-    std::vector<string> varnames = GetFieldVariableNames();
-    if (varnames.empty()) { return; }
-    if (varnames[X] == "" && varnames[Y] == "" && varnames[Z] == "") { return; }
-
-    vector<int>    axes;
-    vector<double> minExt, maxExt;
-    int            rc = DataMgrUtils::GetExtents(_dataMgr, defaultTS, varnames, minExt, maxExt, axes, defaultLOD);
-    assert(rc >= 0);
-    assert(minExt.size() == maxExt.size() && minExt.size() >= 2);
-
-    GetBox()->SetExtents(minExt, maxExt);
 }
