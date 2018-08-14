@@ -946,6 +946,8 @@ void DirectVolumeRenderer::_matMultiVec(const GLfloat *mat, const GLfloat *in, G
 #undef MAT
 }
 
+double DirectVolumeRenderer::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
+
 //===================================================================
 // The following invert and transpose functions are from mesa 17.3.9:
 // https://mesa.freedesktop.org/archive/mesa-17.3.9.tar.xz
