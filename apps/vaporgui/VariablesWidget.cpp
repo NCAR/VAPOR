@@ -29,18 +29,12 @@
 #include "vapor/DataMgr.h"
 #include "VariablesWidget.h"
 
-#define TWODIMS   2
-#define THREEDIMS 3
-#define X         0
-#define Y         1
-#define Z         2
-
 using namespace VAPoR;
+
+string VariablesWidget::_nDimsTag = "ActiveDimension";
 
 VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_VariablesWidgetGUI()
 {
-    _activeDim = THREEDIMS;
-
     setupUi(this);
 
     connect(varnameCombo, SIGNAL(activated(const QString &)), this, SLOT(setVarName(const QString &)));
@@ -57,40 +51,32 @@ VariablesWidget::VariablesWidget(QWidget *parent) : QWidget(parent), Ui_Variable
     // Legacy crap. Should remove
     //
     distribVariableFrame->hide();
+
+#ifdef VAPOR3_0_0_ALPHA
+    if (!(variableFlags & COLOR)) { colorVarCombo->hide(); }
+#endif
 }
 
-void VariablesWidget::Reinit(DisplayFlags dspFlags, DimFlags dimFlags)
+void VariablesWidget::Reinit(VariableFlags variableFlags, DimFlags dimFlags)
 {
-    _dspFlags = dspFlags;
+    _variableFlags = variableFlags;
     _dimFlags = dimFlags;
 
-    showHideVarCombos(true);
+    showHideVar(true);
 
-    // If the renderer is not 2D and 3D, hide
-    // the dimension selector and set the _activeDim
-    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) {
-        dimensionFrame->hide();
-        if (dimFlags & THREED)
-            _activeDim = THREEDIMS;
-        else
-            _activeDim = TWODIMS;
-    }
+    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) { dimensionFrame->hide(); }
+
+    if (_variableFlags ^ COLOR) { collapseColorVarSettings(); }
 
     variableSelectionWidget->adjustSize();
 
-    FidelityWidget::DisplayFlags fdf = (FidelityWidget::DisplayFlags)0;
-    if (_dimFlags & VariablesWidget::SCALAR) fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::SCALAR);
-    if (_dimFlags & VariablesWidget::VECTOR) fdf = (FidelityWidget::DisplayFlags)(fdf | FidelityWidget::VECTOR);
+    VariableFlags fdf = (VariableFlags)0;
+    if (_dimFlags & SCALAR) fdf = (VariableFlags)(fdf | SCALAR);
+    if (_dimFlags & VECTOR) fdf = (VariableFlags)(fdf | VECTOR);
     _fidelityWidget->Reinit(fdf);
 }
 
-void VariablesWidget::collapseColorVarSettings()
-{
-    colormapVarCombo->hide();
-    colormapVarCombo->resize(0, 0);
-    colorVarLabel->hide();
-    colorVarLabel->resize(0, 0);
-}
+void VariablesWidget::collapseColorVarSettings() { colorVariableFrame->hide(); }
 
 void VariablesWidget::setVarName(const QString &qname)
 {
@@ -99,13 +85,13 @@ void VariablesWidget::setVarName(const QString &qname)
     _paramsMgr->BeginSaveStateGroup("Set variable and possible color "
                                     "variable name");
 
-    if (!(_dspFlags & SCALAR)) return;
+    if (!(_variableFlags & SCALAR)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
     _rParams->SetVariableName(name);
 
-    if (!(_dspFlags & COLOR)) _rParams->SetColorMapVariableName(name);
+    if (!(_variableFlags & COLOR)) _rParams->SetColorMapVariableName(name);
 
     _paramsMgr->EndSaveStateGroup();
 }
@@ -115,7 +101,8 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component)
     assert(_rParams);
     assert(component >= 0 && component <= 2);
 
-    if (!(_dspFlags & VECTOR)) return;
+    if (!(_variableFlags & VECTOR)) return;
+    // if ((! (_dimFlags & THREED)) && component == 2) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -128,32 +115,47 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component)
 void VariablesWidget::setXVarName(const QString &name)
 {
     assert(_rParams);
-    setVectorVarName(name, X);
+    setVectorVarName(name, 0);
 }
 
 void VariablesWidget::setYVarName(const QString &name)
 {
     assert(_rParams);
-    setVectorVarName(name, Y);
+    setVectorVarName(name, 1);
 }
 
 void VariablesWidget::setZVarName(const QString &name)
 {
     assert(_rParams);
-    setVectorVarName(name, Z);
+    setVectorVarName(name, 2);
 }
 
-void VariablesWidget::setXDistVarName(const QString &name) { assert(_rParams); }
+void VariablesWidget::setXDistVarName(const QString &name)
+{
+    assert(_rParams);
+#ifdef VAPOR3_0_0_ALPHA
+#endif
+}
 
-void VariablesWidget::setYDistVarName(const QString &name) { assert(_rParams); }
+void VariablesWidget::setYDistVarName(const QString &name)
+{
+    assert(_rParams);
+#ifdef VAPOR3_0_0_ALPHA
+#endif
+}
 
-void VariablesWidget::setZDistVarName(const QString &name) { assert(_rParams); }
+void VariablesWidget::setZDistVarName(const QString &name)
+{
+    assert(_rParams);
+#ifdef VAPOR3_0_0_ALPHA
+#endif
+}
 
 void VariablesWidget::setHeightVarName(const QString &qname)
 {
     assert(_rParams);
 
-    if (!(_dspFlags & HGT)) return;
+    if (!(_variableFlags & HEIGHT)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -164,7 +166,7 @@ void VariablesWidget::setColorMappedVariable(const QString &qname)
 {
     assert(_rParams);
 
-    if (!(_dspFlags & COLOR)) return;
+    if (!(_variableFlags & COLOR)) return;
 
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
@@ -177,75 +179,46 @@ void VariablesWidget::setVariableDims(int index)
     if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) return;
     assert(index >= 0 && index <= 1);
 
-    _activeDim = index == 0 ? TWODIMS : THREEDIMS;
+    int ndim = index == 0 ? 2 : 3;
 
-    setDefaultVariables();
+    _paramsMgr->BeginSaveStateGroup("Set variable dimensions");
+
+    _rParams->SetValueLong(_nDimsTag, "Set variable dimensions", ndim);
 
     // Need to refresh variable list if dimension changes
     //
-    updateCombos();
+    updateVariableCombos(_rParams);
+
+    _paramsMgr->EndSaveStateGroup();
 }
 
-void VariablesWidget::setDefaultVariables() { _rParams->SetDefaultVariables(_activeDim); }
-
-// Default scalar variable will just be the first variable
-// of the active dimension (2D or 3D)
-void VariablesWidget::setDefaultScalarVar(std::vector<string> vars)
+void VariablesWidget::showHideVar(bool on)
 {
-    if (_dspFlags & SCALAR) {
-        string defaultVar = vars[0];
-        _rParams->SetVariableName(defaultVar);
-        if (_dspFlags ^ COLOR) _rParams->SetColorMapVariableName(defaultVar);
-    }
-}
-
-// Default vector variables only apply to X and Y components.
-// We try to find variables that correspond to U and V
-void VariablesWidget::setDefaultVectorVar(std::vector<string> vars)
-{
-    if (_dspFlags & VECTOR) {
-        std::vector<string> defaultVars;
-
-        string defaultVar = findVarStartingWithLetter(vars, 'u');
-        defaultVars.push_back(defaultVar);
-        defaultVar = findVarStartingWithLetter(vars, 'v');
-        defaultVars.push_back(defaultVar);
-        defaultVars.push_back("");
-        _rParams->SetFieldVariableNames(defaultVars);
-    }
-}
-
-// A common color-mapped-variable is temperature, so we will try
-// finding a variable starting with 't'
-void VariablesWidget::setDefaultColorVar(std::vector<string> vars)
-{
-    string defaultVar;
-
-    if (_dspFlags & COLOR) {
-        string defaultVar = findVarStartingWithLetter(vars, 't');
-        _rParams->SetColorMapVariableName(defaultVar);
-    }
-}
-
-void VariablesWidget::showHideVarCombos(bool on)
-{
-    if ((_dspFlags & SCALAR) && on) {
+    if ((_variableFlags & SCALAR) && on) {
         singleVariableFrame->show();
     } else {
         singleVariableFrame->hide();
     }
 
-    if ((_dspFlags & VECTOR) && on) {
+    if ((_variableFlags & VECTOR) && on) {
         fieldVariableFrame->show();
     } else {
         fieldVariableFrame->hide();
     }
 
-    if ((_dspFlags & HGT) && on) {
+    if ((_variableFlags & HEIGHT) && on) {
         heightVariableFrame->show();
     } else {
         heightVariableFrame->hide();
     }
+
+    if ((_variableFlags & COLOR) && on) {
+        colorVariableFrame->show();
+    } else {
+        colorVariableFrame->hide();
+    }
+
+    adjustSize();
 }
 
 // Populate the specified combo box with a list of variables and set
@@ -256,15 +229,11 @@ void VariablesWidget::showHideVarCombos(bool on)
 string VariablesWidget::updateVarCombo(QComboBox *varCombo, const vector<string> &varnames, bool doZero, string currentVar)
 {
     vector<string> my_varnames = varnames;
-
-    if (doZero) my_varnames.insert(my_varnames.begin(), "0");
-
+    my_varnames.insert(my_varnames.begin(), "0");
     if (currentVar == "") { currentVar = "0"; }
 
     varCombo->clear();
     varCombo->setMaxCount(my_varnames.size());
-
-    if (my_varnames.size() == 0) return "";
 
     int currentIndex = -1;
     for (int i = 0; i < my_varnames.size(); i++) {
@@ -281,36 +250,37 @@ string VariablesWidget::updateVarCombo(QComboBox *varCombo, const vector<string>
     }
 }
 
-void VariablesWidget::updateScalarCombo()
+void VariablesWidget::updateVariableCombos(RenderParams *rParams)
 {
-    if (_dspFlags & SCALAR) {
-        string         setVarReq = _rParams->GetVariableName();
-        vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
-        string         setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
+    int ndim = rParams->GetValueLong(_nDimsTag, 3);
+    assert(ndim == 2 || ndim == 3);
+
+    vector<string> vars = _dataMgr->GetDataVarNames(ndim);
+
+    if (!vars.size()) {
+        showHideVar(false);
+        return;
+    }
+    showHideVar(true);
+
+    if (_variableFlags & SCALAR) {
+        string setVarReq = rParams->GetVariableName();
+        string setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
         if (setVar != setVarReq) {
             bool enabled = _paramsMgr->GetSaveStateEnabled();
             _paramsMgr->SetSaveStateEnabled(false);
-            _rParams->SetVariableName(setVar);
+
+            rParams->SetVariableName(setVar);
+
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
     }
-}
 
-void VariablesWidget::updateVectorCombo()
-{
-    if (_dspFlags & VECTOR) {
-        vector<string> setVarsReq = _rParams->GetFieldVariableNames();
-
+    if (_variableFlags & VECTOR) {
+        vector<string> setVarsReq = rParams->GetFieldVariableNames();
         assert(setVarsReq.size() == 3);
 
         vector<string> setVars;
-        vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
-
-        // If our vector variables are empty, choose some defaults
-        if (setVarsReq[0] == "" && setVarsReq[1] == "" && setVarsReq[2] == "") {
-            setDefaultVectorVar(vars);
-            setVarsReq = _rParams->GetFieldVariableNames();
-        }
 
         setVars.push_back(updateVarCombo(varCombo1, vars, true, setVarsReq[0]));
         setVars.push_back(updateVarCombo(varCombo2, vars, true, setVarsReq[1]));
@@ -320,68 +290,75 @@ void VariablesWidget::updateVectorCombo()
         _paramsMgr->SetSaveStateEnabled(false);
 
         for (int i = 0; i < setVars.size(); i++) {
-            if (setVars[i] != setVarsReq[i]) { _rParams->SetFieldVariableNames(setVars); }
+            if (setVars[i] != setVarsReq[i]) { rParams->SetFieldVariableNames(setVars); }
         }
         _paramsMgr->SetSaveStateEnabled(enabled);
     }
-}
 
-void VariablesWidget::updateColorCombo()
-{
-    if (_dspFlags & COLOR) {
-        vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
-        string         setVarReq = _rParams->GetColorMapVariableName();
+    if (_variableFlags & COLOR) {
+        vector<string> vars = _dataMgr->GetDataVarNames(2);
+        string         setVarReq = rParams->GetColorMapVariableName();
 
         string setVar = updateVarCombo(colormapVarCombo, vars, true, setVarReq);
 
         if (setVar != setVarReq) {
             bool enabled = _paramsMgr->GetSaveStateEnabled();
             _paramsMgr->SetSaveStateEnabled(false);
-            _rParams->SetColorMapVariableName(setVar);
+            rParams->SetColorMapVariableName(setVar);
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
-    } else {
-        collapseColorVarSettings();
     }
-}
 
-void VariablesWidget::updateHeightCombo()
-{
-    if (_dspFlags & HGT) {
-        vector<string> vars = _dataMgr->GetDataVarNames(TWODIMS);
-        string         setVarReq = _rParams->GetHeightVariableName();
-
-        string setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
+    if (_variableFlags & HEIGHT) {
+        vector<string> vars = _dataMgr->GetDataVarNames(2);
+        string         setVarReq = rParams->GetHeightVariableName();
+        string         setVar = updateVarCombo(heightCombo, vars, true, setVarReq);
 
         if (setVar != setVarReq) {
             bool enabled = _paramsMgr->GetSaveStateEnabled();
             _paramsMgr->SetSaveStateEnabled(false);
-            _rParams->SetHeightVariableName(setVar);
+            rParams->SetHeightVariableName(setVar);
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
     }
 }
 
-void VariablesWidget::updateCombos()
+void VariablesWidget::updateDims(RenderParams *rParams)
 {
-    assert(_activeDim == TWODIMS || _activeDim == THREEDIMS);
+    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+        // Need to set default variable dimension even if only support
+        // single dimension option.
+        //
+        int defaultDim = 2;
+        if (_dimFlags & TWOD) { defaultDim = 2; }
+        if (_dimFlags & THREED) { defaultDim = 3; }
 
-    vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
+        bool enabled = _paramsMgr->GetSaveStateEnabled();
+        _paramsMgr->SetSaveStateEnabled(false);
 
-    updateScalarCombo();
-    updateVectorCombo();
-    updateColorCombo();
-    updateHeightCombo();
-    updateDimCombo();
-}
+        rParams->SetValueLong(_nDimsTag, "", defaultDim);
 
-void VariablesWidget::updateDimCombo()
-{
-    // Only update if we support multiple dimensions
-    if (((_dimFlags & TWOD) && (_dimFlags & THREED))) {
-        int index = _activeDim - 2;
-        dimensionCombo->setCurrentIndex(index);
+        _paramsMgr->SetSaveStateEnabled(enabled);
+
+        dimensionFrame->hide();
+        return;
     }
+
+    dimensionFrame->show();
+
+    int ndim = rParams->GetValueLong(_nDimsTag, 3);
+
+    if (ndim < 2 || ndim > 3) {
+        ndim = 2;
+        rParams->SetValueLong(_nDimsTag, "Set variable dimensions", ndim);
+    }
+
+    int index = ndim == 2 ? 0 : 1;
+    dimensionCombo->setCurrentIndex(index);
+
+    // Nono!  Do not do this!  We want to
+    // keep our old Box after var dimension change!
+    //_rParams->_initBox();
 }
 
 void VariablesWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
@@ -394,15 +371,9 @@ void VariablesWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
     _paramsMgr = paramsMgr;
     _rParams = rParams;
 
-    updateCombos();
+    updateDims(rParams);
+
+    updateVariableCombos(rParams);
 
     _fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
-}
-
-string VariablesWidget::findVarStartingWithLetter(vector<string> searchVars, char letter)
-{
-    for (auto &element : searchVars) {
-        if (element[0] == letter || element[0] == toupper(letter)) { return element; }
-    }
-    return "";
 }
