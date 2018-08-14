@@ -2,6 +2,10 @@
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
 
+#define X 0
+#define Y 1
+#define Z 2
+
 #define COUNT_MIN 1
 #define COUNT_MAX 50
 
@@ -57,15 +61,18 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
-    _zDimCombo = new Combo(zDimEdit, zDimSlider, true);
     _lengthCombo = new Combo(lengthScaleEdit, lengthScaleSlider, false);
     _thicknessCombo = new Combo(thicknessEdit, thicknessSlider, false);
+
+    _zDimSelector->SetLabel(QString::fromAscii("Z Dimension"));
+    _zDimSelector->SetIntType(true);
+    _zDimSelector->SetExtents(COUNT_MIN, COUNT_MAX);
 
     connect(_xDimCombo, SIGNAL(valueChanged(int)), this,
             SLOT(xDimChanged(int)));
     connect(_yDimCombo, SIGNAL(valueChanged(int)), this,
             SLOT(yDimChanged(int)));
-    connect(_zDimCombo, SIGNAL(valueChanged(int)), this,
+    connect(_zDimSelector, SIGNAL(valueChanged(int)), this,
             SLOT(zDimChanged(int)));
     connect(_lengthCombo, SIGNAL(valueChanged(double)), this,
             SLOT(lengthChanged(double)));
@@ -76,21 +83,14 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {
 }
 
 void BarbAppearanceSubtab::_hideZDimWidgets() {
-    zDimLabel->hide();
-    zDimSlider->hide();
-    zDimEdit->hide();
-    //zDimLabel->resize(0,0);
-    //zDimSlider->resize(0,0);
-    //zDimEdit->resize(0,0);
+    _zDimSelector->hide();
     tab->adjustSize();
     BarbLayoutTab->adjustSize();
     adjustSize();
 }
 
 void BarbAppearanceSubtab::_showZDimWidgets() {
-    zDimLabel->show();
-    zDimSlider->show();
-    zDimEdit->show();
+    _zDimSelector->show();
     tab->adjustSize();
     BarbLayoutTab->adjustSize();
     adjustSize();
@@ -130,9 +130,10 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr,
     _ColorbarWidget->Update(dataMgr, paramsMgr, bParams);
 
     vector<long> grid = _bParams->GetGrid();
-    _xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[0]);
-    _yDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[1]);
-    _zDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[2]);
+    _xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[X]);
+    _yDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[Y]);
+
+    _zDimSelector->SetValue(grid[Z]);
 
     vector<double> minExt, maxExt;
     double length = _bParams->GetLengthScale();
@@ -151,9 +152,9 @@ void BarbAppearanceSubtab::xDimChanged(int i) {
     vector<long> longDims = _bParams->GetGrid();
     int dims[3];
 
-    dims[0] = i;
-    dims[1] = (int)longDims[1];
-    dims[2] = (int)longDims[2];
+    dims[X] = i;
+    dims[Y] = (int)longDims[Y];
+    dims[Z] = (int)longDims[Z];
     _bParams->SetGrid(dims);
 }
 
@@ -161,9 +162,9 @@ void BarbAppearanceSubtab::yDimChanged(int i) {
     vector<long> longDims = _bParams->GetGrid();
     int dims[3];
 
-    dims[0] = (int)longDims[0];
-    dims[1] = i;
-    dims[2] = (int)longDims[2];
+    dims[X] = (int)longDims[X];
+    dims[Y] = i;
+    dims[Z] = (int)longDims[Z];
     _bParams->SetGrid(dims);
 }
 
@@ -171,9 +172,9 @@ void BarbAppearanceSubtab::zDimChanged(int i) {
     vector<long> longDims = _bParams->GetGrid();
     int dims[3];
 
-    dims[0] = (int)longDims[0];
-    dims[1] = (int)longDims[1];
-    dims[2] = i;
+    dims[X] = (int)longDims[X];
+    dims[Y] = (int)longDims[Y];
+    dims[Z] = i;
     _bParams->SetGrid(dims);
 }
 

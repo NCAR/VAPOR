@@ -58,7 +58,6 @@ class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
     VAPoR::ParamsMgr *_paramsMgr;
     Combo *_xDimCombo;
     Combo *_yDimCombo;
-    Combo *_zDimCombo;
     Combo *_lengthCombo;
     Combo *_thicknessCombo;
 };
