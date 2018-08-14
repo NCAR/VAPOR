@@ -57,20 +57,13 @@ private:
         float          boxMin[3], boxMax[3];    // bounding box of the current volume
                                                 // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
 
-        //
-        //                 7____________6
-        //                /|            |
-        //               / |            |
-        //             3/  |         2  |
-        //              |  |            |
-        //              |  |____________|5
-        //              |  /4           /
-        //              | /            /
-        //              |/____________/
-        //               0             1
-        //
-        // Also keep the coordinates of the 8 vertices containing the camera
-        float cellCoords[8][3];
+        //             0---------2
+        //              |       |
+        //              |       |
+        //              |       |
+        //             1|_______|3
+        // Also keep the coordinates of 4 vertices of the the near clipping plane.
+        float nearCoords[12];
 
         /* Also keep the current meta data */
         size_t      myCurrentTimeStep;
@@ -132,6 +125,11 @@ private:
     //   Note: MVP should be a memory space of 16 GLfloats that is already allocated.
     //         The MVP matrix is stored in a colume-major fashion.
     void _getMVPMatrix(GLfloat *MVP) const;
+
+    //
+    // Multiply a 4-value vector by a 4x4 matrix.
+    //
+    void _matMultiVec(const GLfloat *matrix, const GLfloat *vecIn, GLfloat *vecOut) const;
 
     //
     // Helper matrix manipulation functions

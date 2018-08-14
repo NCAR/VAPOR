@@ -418,8 +418,10 @@ int DirectVolumeRenderer::_paintGL()
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, viewport[2], viewport[3]);
+
     _drawVolumeFaces(1);    // 1st pass, render back facing polygons to texture0 of the framebuffer
 
+    /* Detect if we're inside the volume */
     GLfloat ModelView[16], InversedMV[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
     bool success = _mesa_invert_matrix_general(InversedMV, ModelView);
@@ -433,21 +435,37 @@ int DirectVolumeRenderer::_paintGL()
     bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
-        printf(" %f, %f, %f\n", cameraUser[0], cameraUser[1], cameraUser[2]);
-        printf(" %ld, %ld, %ld\n", cameraCellIndices[0], cameraCellIndices[1], cameraCellIndices[2]);
+        GLfloat MVP[16], InversedMVP[16];
+        _getMVPMatrix(MVP);
+        _mesa_invert_matrix_general(InversedMVP, MVP);
 
-        // Get coordinates of nodes that surrounding that cell
-        std::vector<std::vector<size_t>> cellNodes;
-        grid->GetCellNodes(cameraCellIndices, cellNodes);
-        std::vector<double> coords;
-        for (int i = 0; i < 8; i++) {
-            grid->GetUserCoordinates(cellNodes.at(i), coords);
-            _userCoordinates.cellCoords[i][0] = (float)coords.at(0);
-            _userCoordinates.cellCoords[i][1] = (float)coords.at(1);
-            _userCoordinates.cellCoords[i][2] = (float)coords.at(2);
-            // printf("  %f, %f, %f:    ", coords.at(0), coords.at(1), coords.at(2) );
-            // printf("  %ld, %ld, %ld\n", cellNodes[i][0], cellNodes[i][1], cellNodes[i][2] );
+        float topLeftClip[4] = {-1.0f, 1.0f, -0.99f, 1.0f};
+        float bottomLeftClip[4] = {-1.0f, -1.0f, -0.99f, 1.0f};
+        float topRightClip[4] = {1.0f, 1.0f, -0.99f, 1.0f};
+        float bottomRightClip[4] = {1.0f, -1.0f, -0.99f, 1.0f};
+        float near[16];
+        _matMultiVec(InversedMVP, topLeftClip, near);
+        _matMultiVec(InversedMVP, bottomLeftClip, near + 4);
+        _matMultiVec(InversedMVP, topRightClip, near + 8);
+        _matMultiVec(InversedMVP, bottomRightClip, near + 12);
+        for (int i = 0; i < 4; i++) {
+            _userCoordinates.nearCoords[i * 3] = near[i * 4];
+            _userCoordinates.nearCoords[i * 3 + 1] = near[i * 4 + 1];
+            _userCoordinates.nearCoords[i * 3 + 2] = near[i * 4 + 2];
         }
+
+        // start debug
+        std::cout << "near plane:" << std::endl;
+        const float *p = _userCoordinates.nearCoords;
+        GLfloat      plane[4] = {MVP[3] + MVP[2], MVP[7] + MVP[6], MVP[11] + MVP[10], MVP[15] + MVP[14]};
+        float        mag = std::sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
+        for (int i = 0; i < 4; i++) plane[i] /= mag;
+        for (int i = 0; i < 4; i++) {
+            printf("  point %d: (%f, %f, %f)\n", i, p[i * 3 + 0], p[i * 3 + 1], p[i * 3 + 2]);
+            printf("  dist: %f\n", p[i * 3] * plane[0] + p[i * 3 + 1] * plane[1] + p[i * 3 + 2] * plane[2] + plane[3]);
+        }
+
+        // finish debug
 
         _drawVolumeFaces(2, true);
     } else
@@ -722,63 +740,13 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass, bool insideACell, con
 
     if (insideACell)    // All triangles are facing the inside of the volume
     {
-        unsigned int numOfVertices = 4;
-        unsigned int indexBuffer[numOfVertices];
-        glBufferData(GL_ARRAY_BUFFER, 8 * 3 * sizeof(float), _userCoordinates.cellCoords, GL_STATIC_DRAW);
-
-        // Render front face ( vertex 4, 5, 6, 7, see the diagram in the header)
-        indexBuffer[0] = 4;
-        indexBuffer[1] = 7;
-        indexBuffer[2] = 5;
-        indexBuffer[3] = 6;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-
-        // Render back face ( vertex 0, 1, 2, 3 )
-        indexBuffer[0] = 3;
-        indexBuffer[1] = 0;
-        indexBuffer[2] = 2;
-        indexBuffer[3] = 1;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-
-        // Render top face ( vertex 2, 3, 6, 7 )
-        indexBuffer[0] = 7;
-        indexBuffer[1] = 3;
-        indexBuffer[2] = 6;
-        indexBuffer[3] = 2;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-
-        // Render bottom face ( vertex 0, 1, 5, 4 )
-        indexBuffer[0] = 0;
-        indexBuffer[1] = 4;
-        indexBuffer[2] = 1;
-        indexBuffer[3] = 5;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-
-        // Render right face ( vertex 1, 2, 5, 6 )
-        indexBuffer[0] = 2;
-        indexBuffer[1] = 1;
-        indexBuffer[2] = 6;
-        indexBuffer[3] = 5;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-
-        // Render left face ( vertex 0, 4, 7, 3 )
-        indexBuffer[0] = 0;
-        indexBuffer[1] = 3;
-        indexBuffer[2] = 4;
-        indexBuffer[3] = 7;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     } else    // All triangles are facing the outside of the volume
     {
         unsigned int bx = (unsigned int)_userCoordinates.dims[0];
         unsigned int by = (unsigned int)_userCoordinates.dims[1];
         unsigned int bz = (unsigned int)_userCoordinates.dims[2];
-
         unsigned int idx;
 
         // Each strip will have the same numOfVertices for the first 4 faces
@@ -981,6 +949,16 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const
             // Because all matrices are colume-major, this is the correct order.
             MVP[i * 4 + j] = tmp;
         }
+}
+
+void DirectVolumeRenderer::_matMultiVec(const GLfloat *mat, const GLfloat *in, GLfloat *out) const
+{
+#define MAT(m, r, c) (m)[(c)*4 + (r)]
+    out[0] = MAT(mat, 0, 0) * in[0] + MAT(mat, 0, 1) * in[1] + MAT(mat, 0, 2) * in[2] + MAT(mat, 0, 3) * in[3];
+    out[1] = MAT(mat, 1, 0) * in[0] + MAT(mat, 1, 1) * in[1] + MAT(mat, 1, 2) * in[2] + MAT(mat, 1, 3) * in[3];
+    out[2] = MAT(mat, 2, 0) * in[0] + MAT(mat, 2, 1) * in[1] + MAT(mat, 2, 2) * in[2] + MAT(mat, 2, 3) * in[3];
+    out[3] = MAT(mat, 3, 0) * in[0] + MAT(mat, 3, 1) * in[1] + MAT(mat, 3, 2) * in[2] + MAT(mat, 3, 3) * in[3];
+#undef MAT
 }
 
 //===================================================================
