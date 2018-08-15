@@ -410,8 +410,10 @@ int DirectVolumeRenderer::_paintGL()
 
     /* Gather the color map */
     params->GetMapperFunc()->makeLut(_colorMap);
-    _colorMapRange[0] = params->GetMapperFunc()->getMinMapValue();
-    _colorMapRange[1] = params->GetMapperFunc()->getMaxMapValue();
+    std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+    _colorMapRange[0] = float(range[0]);
+    _colorMapRange[1] = float(range[1]);
+
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     glBindTexture(GL_TEXTURE_1D, 0);
