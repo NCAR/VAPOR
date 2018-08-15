@@ -21,10 +21,6 @@ class BarbVariablesSubtab : public QWidget, public Ui_BarbVariablesGUI {
     BarbVariablesSubtab(QWidget *parent);
 
     void Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr);
-    void pushVarStartingWithLetter(
-        vector<string> searchVars,
-        vector<string> &returnVars,
-        char letter);
 
     void Update(
         VAPoR::DataMgr *dataMgr,
