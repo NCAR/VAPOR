@@ -269,12 +269,11 @@ void MapperFunction::hsvValue(float value, float *h, float *s, float *v) const
 //----------------------------------------------------------------------------
 void MapperFunction::makeLut(float *clut) const
 {
-    float step = (getMaxMapValue() - getMinMapValue()) / (_numEntries - 1);
+    float     step = (getMaxMapValue() - getMinMapValue()) / float(_numEntries - 1);
+    ColorMap *cmap = GetColorMap();
 
     for (int i = 0; i < _numEntries; i++) {
         float v = getMinMapValue() + i * step;
-
-        ColorMap *cmap = GetColorMap();
         cmap->color(v).toRGB(&clut[4 * i]);
         clut[4 * i + 3] = getOpacityValueData(v);
     }
