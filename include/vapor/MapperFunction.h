@@ -268,7 +268,6 @@ private:
     //
     // XML tags
     //
-
     static const string _dataBoundsTag;
     static const string _opacityCompositionTag;
     static const string _opacityScaleTag;
