@@ -99,8 +99,6 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     GeometryFlags _geometryFlags;
 
     bool _useAuxVariables; // for Statistics utility
-
-    static const std::string _nDimsTag;
 };
 
 #endif //GEOMETRYWIDGET_H
