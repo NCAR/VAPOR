@@ -298,9 +298,9 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
     // This way we always return a valid MapperFunction
     //
     if (varname.empty()) { varname = "NULL"; }
-    MapperFunction *tfptr = (MapperFunction *)_TFs->GetParams(varname);
+    MapperFunction *tfptr = dynamic_cast<MapperFunction *>(_TFs->GetParams(varname));
 
-    if (tfptr) return (tfptr);
+    if (tfptr) { return (tfptr); }
 
     // Disable state saving for Get function
     //
