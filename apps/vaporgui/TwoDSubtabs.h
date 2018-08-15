@@ -65,8 +65,7 @@ public:
 		_geometryWidget->Reinit(
 			(DimFlags)TWOD,
 			(GeometryFlags)MINMAX,
-			(VariableFlags)SCALAR
-		);
+			(VariableFlags)SCALAR);
 	}
 	
 	void Update(
