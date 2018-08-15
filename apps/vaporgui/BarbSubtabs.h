@@ -21,11 +21,6 @@ public:
 	BarbVariablesSubtab(QWidget* parent);
 
 	void Initialize(VAPoR::BarbParams* bParams, VAPoR::DataMgr* dataMgr);
-	void pushVarStartingWithLetter(
-		vector<string> searchVars, 
-		vector<string> &returnVars, 
-		char letter
-	);
 
 	void Update(
 		VAPoR::DataMgr *dataMgr,
@@ -76,11 +71,11 @@ class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
 public:
 	BarbGeometrySubtab(QWidget* parent);
 	
-void Update(
-	VAPoR::ParamsMgr *paramsMgr,
-	VAPoR::DataMgr *dataMgr,
-	VAPoR::RenderParams *rParams
-);
+	void Update(
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::RenderParams *rParams
+	);
 
 private:
 	VAPoR::BarbParams* _bParams;
