@@ -1417,6 +1417,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(int level, std::vector<size_t
     if (rc < 0) return (-1);
 
     dims_at_level[_stagDim] -= 1;
+    bs_at_level[_stagDim] -= 1;
 
     return (0);
 }
