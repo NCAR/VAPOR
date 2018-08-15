@@ -320,12 +320,10 @@ public:
  }
 
 private:
-
 	
  //
  // XML tags
  //
- 
  static const string _dataBoundsTag;
  static const string _opacityCompositionTag;
  static const string _opacityScaleTag;
@@ -341,6 +339,8 @@ private:
 
  ParamsContainer *m_opacityMaps;
  ColorMap *m_colorMap;
+
+
 
  //!
  //! Map a point to the specified range, and quantize it.
