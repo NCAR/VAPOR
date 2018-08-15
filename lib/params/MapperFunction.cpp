@@ -147,7 +147,6 @@ MapperFunction::~MapperFunction()
     MyBase::SetDiagMsg("MapperFunction::~MapperFunction()");
 
     if (m_colorMap) delete m_colorMap;
-
     if (m_opacityMaps) delete m_opacityMaps;
 }
 
@@ -269,12 +268,11 @@ void MapperFunction::hsvValue(float value, float *h, float *s, float *v) const
 //----------------------------------------------------------------------------
 void MapperFunction::makeLut(float *clut) const
 {
-    float     step = (getMaxMapValue() - getMinMapValue()) / float(_numEntries - 1);
-    ColorMap *cmap = GetColorMap();
+    float step = (getMaxMapValue() - getMinMapValue()) / float(_numEntries - 1);
 
     for (int i = 0; i < _numEntries; i++) {
         float v = getMinMapValue() + i * step;
-        cmap->color(v).toRGB(&clut[4 * i]);
+        m_colorMap->color(v).toRGB(&clut[4 * i]);
         clut[4 * i + 3] = getOpacityValueData(v);
     }
 }
@@ -313,7 +311,6 @@ void MapperFunction::setMinMaxMapValue(float val1, float val2)
 vector<double> MapperFunction::getMinMaxMapValue() const
 {
     vector<double> defaultv(2, 0.0);
-
     vector<double> bounds = GetValueDoubleVec(_dataBoundsTag, defaultv);
     if (bounds.size() != 2) bounds = defaultv;
     return (bounds);
