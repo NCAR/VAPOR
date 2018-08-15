@@ -5,7 +5,6 @@
 using namespace VAPoR;
 
 DerivedVarMgr::DerivedVarMgr() {
-    _ovrName = "";
 }
 
 int DerivedVarMgr::initialize(
@@ -224,51 +223,87 @@ int DerivedVarMgr::getDimLensAtLevel(
 
 int DerivedVarMgr::openVariableRead(
     size_t ts, string varname, int level, int lod) {
-    _ovrName = varname;
-    _ovrLevel = level;
     DerivedVar *var = _getVar(varname);
     if (!var) {
         SetErrMsg("Invalid variable : %s", varname.c_str());
         return (-1);
     }
 
-    return (var->OpenVariableRead(ts, level, lod));
+    int fd = var->OpenVariableRead(ts, level, lod);
+    if (fd < 0)
+        return (fd);
+
+    DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
+        ts, varname, level, lod, fd);
+
+    return (_fileTable.AddEntry(f));
 }
 
 int DerivedVarMgr::closeVariable(int fd) {
-    DerivedVar *var = _getVar(_ovrName);
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
-    if (!var) {
-        SetErrMsg("Invalid variable : %s", _ovrName.c_str());
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    _ovrName.clear();
 
-    return (var->CloseVariable(fd));
+    string varname = f->GetVarname();
+    DerivedVar *var = _getVar(varname);
+    if (!var) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    int derivedFD = f->GetAux();
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return (var->CloseVariable(derivedFD));
 }
 
 int DerivedVarMgr::readRegion(
     int fd,
     const vector<size_t> &min, const vector<size_t> &max, float *region) {
-    DerivedVar *var = _getVar(_ovrName);
-    if (!var) {
-        SetErrMsg("Invalid variable : %s", _ovrName.c_str());
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
 
-    return (var->ReadRegion(fd, min, max, region));
+    string varname = f->GetVarname();
+    DerivedVar *var = _getVar(varname);
+    if (!var) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    int derivedFD = f->GetAux();
+
+    return (var->ReadRegion(derivedFD, min, max, region));
 }
 
 int DerivedVarMgr::readRegionBlock(
     int fd,
     const vector<size_t> &min, const vector<size_t> &max, float *region) {
-    DerivedVar *var = _getVar(_ovrName);
-    if (!var) {
-        SetErrMsg("Invalid variable : %s", _ovrName.c_str());
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
 
-    return (var->ReadRegionBlock(fd, min, max, region));
+    string varname = f->GetVarname();
+    DerivedVar *var = _getVar(varname);
+    if (!var) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    int derivedFD = f->GetAux();
+
+    return (var->ReadRegionBlock(derivedFD, min, max, region));
 }
 
 bool DerivedVarMgr::variableExists(
