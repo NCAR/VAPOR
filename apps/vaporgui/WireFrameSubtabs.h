@@ -4,6 +4,7 @@
 #include "ui_WireFrameAppearanceGUI.h"
 #include "ui_WireFrameVariablesGUI.h"
 #include "ui_WireFrameGeometryGUI.h"
+#include "ui_WireFrameAnnotationGUI.h"
 #include "Flags.h"
 
 namespace VAPoR {
@@ -36,11 +37,7 @@ public:
         _TFWidget->Reinit((TFFlags)(CONSTANT));
     }
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
-    {
-        _TFWidget->Update(dataMgr, paramsMgr, rParams);
-        _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
-    }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _TFWidget->Update(dataMgr, paramsMgr, rParams); }
 };
 
 class WireFrameGeometrySubtab : public QWidget, public Ui_WireFrameGeometryGUI {
@@ -59,8 +56,14 @@ public:
         _copyRegionWidget->Update(paramsMgr, rParams);
         _transformTable->Update(rParams->GetTransform());
     }
-
-private:
 };
 
+class WireFrameAnnotationSubtab : public QWidget, public Ui_WireFrameAnnotationGUI {
+    Q_OBJECT
+
+public:
+    WireFrameAnnotationSubtab(QWidget *parent) { setupUi(this); }
+
+    void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams) { _colorbarWidget->Update(dataMgr, paramsMgr, rParams); }
+};
 #endif    // WIREFRAMESUBTABS_H
