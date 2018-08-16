@@ -49,6 +49,13 @@ BarbEventRouter::BarbEventRouter(
     qsgeo->setWidget(_geometry);
     qsgeo->setWidgetResizable(true);
     addTab(qsgeo, "Geometry");
+
+    _annotation = new BarbAnnotationSubtab(this);
+    QScrollArea *qsAnnotation = new QScrollArea(this);
+    qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    qsAnnotation->setWidget(_annotation);
+    qsAnnotation->setWidgetResizable(true);
+    addTab(qsAnnotation, "Annotation");
 }
 
 //Destructor does nothing
@@ -107,6 +114,11 @@ void BarbEventRouter::_updateTab() {
         GetActiveParams());
 
     _geometry->Update(
+        _controlExec->GetParamsMgr(),
+        GetActiveDataMgr(),
+        GetActiveParams());
+
+    _annotation->Update(
         _controlExec->GetParamsMgr(),
         GetActiveDataMgr(),
         GetActiveParams());

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>880</height>
+    <height>491</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -54,7 +54,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -78,22 +78,6 @@
       </widget>
      </item>
      <item>
-      <widget class="ColorbarWidget" name="_ColorbarWidget" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>350</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -111,11 +95,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ColorbarWidget</class>
-   <extends>QWidget</extends>
-   <header>ColorbarWidget.h</header>
-  </customwidget>
   <customwidget>
    <class>TFWidget</class>
    <extends>QWidget</extends>
