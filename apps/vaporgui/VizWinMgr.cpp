@@ -197,7 +197,7 @@ void VizWinMgr::_setActiveViz(string vizName) {
         if (p->GetCurrentMouseMode() != MouseModeParams::GetNavigateModeName()) {
             map<string, VizWin *>::iterator it;
             for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) {
-                (it->second)->updateGL();
+                (it->second)->Render(false);
             }
         }
     }
@@ -289,11 +289,11 @@ void VizWinMgr::_vizAboutToDisappear(string vizName) {
  *	Slots associated with VizTab:
  ********************************************************************/
 
-void VizWinMgr::Update() {
+void VizWinMgr::Update(bool fast) {
 
     map<string, VizWin *>::const_iterator it;
     for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) {
-        (it->second)->updateGL();
+        (it->second)->Render(fast);
     }
 }
 
@@ -332,7 +332,7 @@ void VizWinMgr::Restart() {
 
     _initialized = true;
 
-    Update();
+    Update(false);
 }
 
 void VizWinMgr::Reinit() {
