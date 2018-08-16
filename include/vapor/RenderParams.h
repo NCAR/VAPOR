@@ -301,14 +301,6 @@ public:
     //
     float GetConstantOpacity() const;
 
-    //! Method to get stretch factors
-    //! return 3-vector of scene stretch factors
-    vector<double> GetStretchFactors() const
-    {
-        vector<double> defaultvec(3, 1.);
-        return GetValueDoubleVec(_stretchFactorsTag, defaultvec);
-    }
-
     //! Get the current data timestep
     //! \retval ts current time step
     //
@@ -323,17 +315,6 @@ public:
     //
     virtual Transform *GetTransform() const { return _transform; }
 
-    //! method to set stretch factors
-    //! Always sets them in the global instance.
-    //! Also saves previous values
-    //! \param[in] factors 3-vector of stretch factors
-    void SetStretchFactors(vector<double> factors)
-    {
-        vector<double> defaultvec(3, 1.);
-        if (factors.size() != defaultvec.size()) factors = defaultvec;
-        SetValueDoubleVec(_stretchFactorsTag, "Scene stretch factors", factors);
-    }
-
     void initializeBypassFlags();
 
     //! Pure virtual method indicates if a particular variable name
@@ -342,12 +323,17 @@ public:
     //!
     virtual bool usingVariable(const std::string &varname) = 0;
 
+    //! Set reasonable default variables
+    //! \param[in] The dimension of the variables being set
+    void SetDefaultVariables(int dim);
+
     void _initBox();
 
 protected:
     DataMgr *_dataMgr;
 
 private:
+    void             _init();
     int              _maxDim;
     ParamsContainer *_TFs;
     Box *            _Box;
@@ -375,8 +361,7 @@ private:
     static const string _stretchFactorsTag;
     static const string _currentTimestepTag;
 
-    void _init();
-    // void _initBox();
+    string _findVarStartingWithLetter(std::vector<string> searchVars, char letter);
 };
 
 //////////////////////////////////////////////////////////////////////////

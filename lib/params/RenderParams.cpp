@@ -66,27 +66,30 @@ string string_replace(string s, string olds, string news)
 
 };    // namespace
 
+void RenderParams::SetDefaultVariables(int dim = 3)
+{
+    vector<string> varnames;
+    varnames = _dataMgr->GetDataVarNames(dim);
+    if (varnames.empty()) { varnames = _dataMgr->GetDataVarNames(dim - 1); }
+
+    string varname = "";
+    if (varnames.size()) { varname = varnames[0]; }
+    SetVariableName(varname);
+
+    vector<string> fieldVarNames(3, "");
+    fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
+    fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
+    SetFieldVariableNames(fieldVarNames);
+
+    string colorVar = _findVarStartingWithLetter(varnames, 't');
+    SetColorMapVariableName(colorVar);
+}
+
 void RenderParams::_init()
 {
     SetEnabled(true);
 
-    vector<string> varnames;
-    for (int ndim = _maxDim; ndim > 0; ndim--) {
-        varnames = _dataMgr->GetDataVarNames(ndim);
-        if (!varnames.empty()) break;
-    }
-
-    string         varname = "";
-    vector<string> fieldVarNames(3, "");
-    if (varnames.size()) {
-        varname = varnames[0];
-        for (int i = 0; i < varnames.size() && i < fieldVarNames.size(); i++) { fieldVarNames[i] = varnames[i]; }
-    }
-
-    SetVariableName(varname);
-    SetFieldVariableNames(fieldVarNames);
-    SetHeightVariableName("");
-    SetColorMapVariableName(varname);
+    SetDefaultVariables();
 
     SetRefinementLevel(0);
     SetCompressionLevel(0);
@@ -96,19 +99,18 @@ void RenderParams::_init()
     SetConstantColor(rgb);
     SetConstantOpacity(1.0);
     SetUseSingleColor(false);
-
-    SetStretchFactors(vector<double>(3, 1.0));
 }
 
 void RenderParams::_initBox()
 {
-    string varname = GetVariableName();
+    int            rc;
+    vector<double> minExt, maxExt;
+    string         varname = GetVariableName();
     if (varname.empty()) return;
 
     if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
 
-    vector<double> minExt, maxExt;
-    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
+    rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
     // Crap. No error handling from constructor. Need Initialization()
     // method.
@@ -357,7 +359,6 @@ vector<string> RenderParams::GetFieldVariableNames() const
     vector<string> varnames;
 
     varnames = GetValueStringVec(_fieldVariableNamesTag, defaultv);
-
     varnames = string_replace(varnames, "NULL", "");
     for (int i = varnames.size(); i < 3; i++) varnames.push_back("");
 
@@ -481,6 +482,13 @@ float RenderParams::GetConstantOpacity() const
     return (o);
 }
 
+string RenderParams::_findVarStartingWithLetter(vector<string> searchVars, char letter)
+{
+    for (auto &element : searchVars) {
+        if (element[0] == letter || element[0] == toupper(letter)) { return element; }
+    }
+    return "";
+}
 //////////////////////////////////////////////////////////////////////////
 //
 // RenParamsFactory Class
