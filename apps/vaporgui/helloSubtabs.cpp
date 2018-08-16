@@ -11,6 +11,7 @@ HelloVariablesSubtab::HelloVariablesSubtab(QWidget* parent)
 	setupUi(this);
 
 	_variablesWidget->Reinit(
-	(VariableFlags)(SCALAR | HEIGHT),
-	(DimFlags)(THREED));
+		(VariableFlags)(SCALAR | HEIGHT),
+		(DimFlags)(THREED)
+	);
 }
