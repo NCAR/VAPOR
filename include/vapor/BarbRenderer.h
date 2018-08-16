@@ -87,7 +87,7 @@ class RENDER_API BarbRenderer : public Renderer {
     virtual int _initializeGL();
 
     //! \copydoc Renderer::_paintGL()
-    virtual int _paintGL();
+    virtual int _paintGL(bool fast);
 
     int _getVectorVarGrids(
         int ts,
