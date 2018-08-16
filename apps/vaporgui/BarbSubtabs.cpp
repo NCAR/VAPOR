@@ -2,43 +2,27 @@
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
 
+#define X 0
+#define Y 1
+#define Z 2
+
+#define COUNT_MIN 1
+#define COUNT_MAX 50
+
+#define LENGTH_MIN    .01
+#define LENGTH_MAX    4
+#define THICKNESS_MIN .01
+#define THICKNESS_MAX 4
+
 BarbVariablesSubtab::BarbVariablesSubtab(QWidget *parent)
 {
     setupUi(this);
-    _variablesWidget->Reinit((VariableFlags)(VECTOR | HEIGHT | COLOR), (DimFlags)(TWOD));
+    _variablesWidget->Reinit((VariableFlags)(VECTOR | HEIGHT | COLOR), (DimFlags)(TWOD | THREED));
 }
 
 void BarbVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
 
-void BarbVariablesSubtab::pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter)
-{
-    bool foundDefaultU = false;
-    for (auto &element : searchVars) {
-        if (element[0] == letter || element[0] == toupper(letter)) {
-            returnVars.push_back(element);
-            foundDefaultU = true;
-            break;
-        }
-    }
-    if (!foundDefaultU) returnVars.push_back(searchVars[0]);
-}
-
-void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr)
-{
-    string nDimsTag = _variablesWidget->getNDimsTag();
-    int    ndim = bParams->GetValueLong(nDimsTag, 3);
-    assert(ndim == 2 || ndim == 3);
-
-    vector<string> varNames = dataMgr->GetDataVarNames(ndim);
-    vector<string> defaultVars;
-
-    if (varNames.size() < 2) return;
-
-    pushVarStartingWithLetter(varNames, defaultVars, 'u');
-    pushVarStartingWithLetter(varNames, defaultVars, 'v');
-
-    bParams->SetFieldVariableNames(defaultVars);
-}
+void BarbVariablesSubtab::Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr) {}
 
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent)
 {
@@ -46,68 +30,74 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent)
     _geometryWidget->Reinit((DimFlags)(VECTOR | TWOD), (GeometryFlags)(MINMAX), (VariableFlags)(VECTOR));
 }
 
+void BarbGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
+{
+    _bParams = (VAPoR::BarbParams *)rParams;
+    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+    _copyRegionWidget->Update(paramsMgr, rParams);
+    _transformTable->Update(rParams->GetTransform());
+}
+
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
     _TFWidget->Reinit((TFFlags)(SECONDARY | CONSTANT));
 
-    hideZDimWidgets();
-
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
-    _zDimCombo = new Combo(zDimEdit, zDimSlider, true);
-    _lengthCombo = new Combo(lengthScaleEdit, lengthScaleSlider);
-    _thicknessCombo = new Combo(thicknessEdit, thicknessSlider);
+    _lengthCombo = new Combo(lengthScaleEdit, lengthScaleSlider, false);
+    _lengthCombo->SetPrecision(2);
+    _thicknessCombo = new Combo(thicknessEdit, thicknessSlider, false);
+    _thicknessCombo->SetPrecision(2);
+
+    _zDimSelector->SetLabel(QString::fromAscii("Z Dimension"));
+    _zDimSelector->SetIntType(true);
+    _zDimSelector->SetExtents(COUNT_MIN, COUNT_MAX);
 
     connect(_xDimCombo, SIGNAL(valueChanged(int)), this, SLOT(xDimChanged(int)));
     connect(_yDimCombo, SIGNAL(valueChanged(int)), this, SLOT(yDimChanged(int)));
-    connect(_zDimCombo, SIGNAL(valueChanged(int)), this, SLOT(zDimChanged(int)));
+    connect(_zDimSelector, SIGNAL(valueChanged(int)), this, SLOT(zDimChanged(int)));
     connect(_lengthCombo, SIGNAL(valueChanged(double)), this, SLOT(lengthChanged(double)));
     connect(_thicknessCombo, SIGNAL(valueChanged(double)), this, SLOT(thicknessChanged(double)));
+    connect(_recalcScalesButton, SIGNAL(pressed()), this, SLOT(recalculateScales()));
 }
 
-void BarbAppearanceSubtab::hideZDimWidgets()
+void BarbAppearanceSubtab::_hideZDimWidgets()
 {
-    zDimLabel->hide();
-    zDimSlider->hide();
-    zDimEdit->hide();
-    zDimLabel->resize(0, 0);
-    zDimSlider->resize(0, 0);
-    zDimEdit->resize(0, 0);
+    _zDimSelector->hide();
     tab->adjustSize();
     BarbLayoutTab->adjustSize();
     adjustSize();
 }
 
-double BarbAppearanceSubtab::CalculateDomainLength(int ts)
+void BarbAppearanceSubtab::_showZDimWidgets()
 {
-    double domainLength = 0;
+    _zDimSelector->show();
+    tab->adjustSize();
+    BarbLayoutTab->adjustSize();
+    adjustSize();
+}
 
-    // Is this a legitimite way to acquire animation params?
-    //
-    int            level = _bParams->GetRefinementLevel();
-    vector<string> fieldVars = _bParams->GetFieldVariableNames();
+bool BarbAppearanceSubtab::_isVariable2D() const
+{
+    VAPoR::Grid *       grid;
+    int                 ts, level, lod;
+    std::vector<string> varNames = _bParams->GetFieldVariableNames();
+
     for (int i = 0; i < 3; i++) {
-        string varName = fieldVars[i];
-        if ((varName) == "") { continue; }
+        string varName = varNames[i];
+        if (varName == "") { continue; }
 
-        if (!_dataMgr->VariableExists(ts, varName, level, 0)) continue;
+        ts = _bParams->GetCurrentTimestep();
+        level = _bParams->GetRefinementLevel();
+        lod = _bParams->GetCompressionLevel();
+        grid = _dataMgr->GetVariable(ts, varName, level, lod);
 
-        vector<double> minExt, maxExt;
-        int            rc = _dataMgr->GetVariableExtents(ts, varName, level, minExt, maxExt);
-        assert(rc >= 0);
-
-        // If we're dealing with 2D vars, skip the Z element
-        //
-        if (i == 3 && minExt.size() < 2)
-            continue;
-        else {
-            double length = maxExt[i] - minExt[i];
-            domainLength += length * length;
-        }
+        int dimSize = grid->GetDimensions().size();
+        if (dimSize == 2) return true;
     }
-    domainLength = sqrt(domainLength);
-    return domainLength;
+
+    return false;
 }
 
 void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *bParams)
@@ -118,21 +108,22 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
     _TFWidget->Update(dataMgr, paramsMgr, bParams);
 
     vector<long> grid = _bParams->GetGrid();
-    _xDimCombo->Update(1, 50, grid[0]);
-    _yDimCombo->Update(1, 50, grid[1]);
-    _zDimCombo->Update(1, 50, grid[2]);
+    _xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[X]);
+    _yDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[Y]);
+
+    _zDimSelector->SetValue(grid[Z]);
 
     vector<double> minExt, maxExt;
     double         length = _bParams->GetLengthScale();
-    //_lengthCombo->Update(.1, 4000000, length);
-    AnimationParams *ap = (AnimationParams *)paramsMgr->GetParams("AnimationParams");
-    int              ts = ap->GetCurrentTimestep();
-    float            domainLength = CalculateDomainLength(ts);
-    _lengthCombo->Update(0, domainLength / 50.f, length);
+    _lengthCombo->Update(LENGTH_MIN, LENGTH_MAX, length);
 
     double thickness = _bParams->GetLineThickness();
-    //_thicknessCombo->Update(.1, 1.5, thickness);
-    _thicknessCombo->Update(.1, domainLength / 250000.f, thickness);
+    _thicknessCombo->Update(THICKNESS_MIN, THICKNESS_MAX, thickness);
+
+    if (_isVariable2D())
+        _hideZDimWidgets();
+    else
+        _showZDimWidgets();
 }
 
 void BarbAppearanceSubtab::xDimChanged(int i)
@@ -140,9 +131,9 @@ void BarbAppearanceSubtab::xDimChanged(int i)
     vector<long> longDims = _bParams->GetGrid();
     int          dims[3];
 
-    dims[0] = i;
-    dims[1] = (int)longDims[1];
-    dims[2] = (int)longDims[2];
+    dims[X] = i;
+    dims[Y] = (int)longDims[Y];
+    dims[Z] = (int)longDims[Z];
     _bParams->SetGrid(dims);
 }
 
@@ -151,9 +142,9 @@ void BarbAppearanceSubtab::yDimChanged(int i)
     vector<long> longDims = _bParams->GetGrid();
     int          dims[3];
 
-    dims[0] = (int)longDims[0];
-    dims[1] = i;
-    dims[2] = (int)longDims[2];
+    dims[X] = (int)longDims[X];
+    dims[Y] = i;
+    dims[Z] = (int)longDims[Z];
     _bParams->SetGrid(dims);
 }
 
@@ -162,9 +153,9 @@ void BarbAppearanceSubtab::zDimChanged(int i)
     vector<long> longDims = _bParams->GetGrid();
     int          dims[3];
 
-    dims[0] = (int)longDims[0];
-    dims[1] = (int)longDims[1];
-    dims[2] = i;
+    dims[X] = (int)longDims[X];
+    dims[Y] = (int)longDims[Y];
+    dims[Z] = i;
     _bParams->SetGrid(dims);
 }
 
@@ -172,13 +163,7 @@ void BarbAppearanceSubtab::lengthChanged(double d) { _bParams->SetLengthScale(d)
 
 void BarbAppearanceSubtab::thicknessChanged(double d) { _bParams->SetLineThickness(d); }
 
-void BarbGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
-{
-    _bParams = (VAPoR::BarbParams *)rParams;
-    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
-    _copyRegionWidget->Update(paramsMgr, rParams);
-    _transformTable->Update(rParams->GetTransform());
-}
+void BarbAppearanceSubtab::recalculateScales() { _bParams->SetNeedToRecalculateScales(true); }
 
 BarbAnnotationSubtab::BarbAnnotationSubtab(QWidget *parent) { setupUi(this); }
 

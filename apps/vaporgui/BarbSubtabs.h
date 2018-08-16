@@ -21,7 +21,6 @@ public:
     BarbVariablesSubtab(QWidget *parent);
 
     void Initialize(VAPoR::BarbParams *bParams, VAPoR::DataMgr *dataMgr);
-    void pushVarStartingWithLetter(vector<string> searchVars, vector<string> &returnVars, char letter);
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 };
@@ -35,22 +34,23 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 private slots:
-    void   xDimChanged(int i);
-    void   yDimChanged(int i);
-    void   zDimChanged(int i);
-    void   lengthChanged(double d);
-    void   thicknessChanged(double d);
-    double CalculateDomainLength(int ts);
+    void xDimChanged(int i);
+    void yDimChanged(int i);
+    void zDimChanged(int i);
+    void lengthChanged(double d);
+    void thicknessChanged(double d);
+    void recalculateScales();
 
 private:
-    void hideZDimWidgets();
+    void _hideZDimWidgets();
+    void _showZDimWidgets();
+    bool _isVariable2D() const;
 
     VAPoR::BarbParams *_bParams;
     VAPoR::DataMgr *   _dataMgr;
     VAPoR::ParamsMgr * _paramsMgr;
     Combo *            _xDimCombo;
     Combo *            _yDimCombo;
-    Combo *            _zDimCombo;
     Combo *            _lengthCombo;
     Combo *            _thicknessCombo;
 };

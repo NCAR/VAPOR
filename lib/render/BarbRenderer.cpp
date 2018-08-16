@@ -8,19 +8,35 @@
 
 // Specify the barbhead width compared with barb diameter:
 #define BARB_HEAD_FACTOR 3.0
-// Specify how long the barb tube is, in front of where the barbhead is attached:
+
+// Specify how long the barb tube is, in front of where the
+// barbhead is attached:
 #define BARB_LENGTH_FACTOR 0.9
+
+// Specify the maximum cylinder radius in proportion to the
+// hypotenuse of the domain, divided by 4 (the maximum barb thicness param)
+// I.E. if the user sets the thickness to 4 (the maximum), then the
+// barbs will have max radius = 4 * BARB_RADIUS_TO_HYPOTENUSE * hypotenuse
+//#define BARB_RADIUS_TO_HYPOTENUSE .00625
+#define BARB_RADIUS_TO_HYPOTENUSE .001875
+
+// Specify the maximum barb length in proportion to the
+// hypotenuse of the domain, divided by 4 (the maximum barb length param)
+// I.E. if the user sets the length to 4 (the maximum), then the longest
+// barb will have max length = 4 * BARB_LENGTH_TO_HYPOTENUSE * hypotenuse
+#define BARB_LENGTH_TO_HYPOTENUSE .0625
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 
 #ifndef WIN32
     #include <unistd.h>
 #endif
 
-//#include <vapor/Renderer.h>
+#include <vapor/DataStatus.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/BarbRenderer.h>
 #include <vapor/BarbParams.h>
@@ -32,6 +48,18 @@
 #include <vapor/errorcodes.h>
 #include <vapor/DataMgr.h>
 
+#define X    0
+#define Y    1
+#define Z    2
+#define XMIN 0
+#define YMIN 1
+#define ZMIN 2
+#define XMAX 3
+#define YMAX 4
+#define ZMAX 5
+
+int counter = 0;
+
 using namespace VAPoR;
 using namespace Wasp;
 
@@ -42,7 +70,9 @@ BarbRenderer::BarbRenderer(const ParamsMgr *pm, string winName, string dataSetNa
 {
     _drawList = 0;
     _fieldVariables.clear();
-    _vectorScaleFactor = 1.0;
+    _vectorScaleFactor = .2;
+    _maxThickness = .2;
+    _maxValue = 0.f;
 }
 
 //----------------------------------------------------------------------------
@@ -61,7 +91,8 @@ int BarbRenderer::_initializeGL()
 
 void BarbRenderer::_saveCacheParams()
 {
-    BarbParams *p = (BarbParams *)GetActiveParams();
+    BarbParams *p = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(p);
     _cacheParams.fieldVarNames = p->GetFieldVariableNames();
     _cacheParams.heightVarName = p->GetHeightVariableName();
     _cacheParams.colorVarName = p->GetColorMapVariableName();
@@ -72,6 +103,7 @@ void BarbRenderer::_saveCacheParams()
     _cacheParams.lineThickness = p->GetLineThickness();
     _cacheParams.lengthScale = p->GetLengthScale();
     _cacheParams.grid = p->GetGrid();
+    _cacheParams.needToRecalc = p->GetNeedToRecalculateScales();
     p->GetConstantColor(_cacheParams.constantColor);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
@@ -90,7 +122,8 @@ void BarbRenderer::_saveCacheParams()
 
 bool BarbRenderer::_isCacheDirty() const
 {
-    BarbParams *p = (BarbParams *)GetActiveParams();
+    BarbParams *p = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(p);
     if (_cacheParams.fieldVarNames != p->GetFieldVariableNames()) return true;
     if (_cacheParams.heightVarName != p->GetHeightVariableName()) return true;
     if (_cacheParams.colorVarName != p->GetColorMapVariableName()) return true;
@@ -101,6 +134,7 @@ bool BarbRenderer::_isCacheDirty() const
     if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
     if (_cacheParams.lengthScale != p->GetLengthScale()) return true;
     if (_cacheParams.grid != p->GetGrid()) return true;
+    if (_cacheParams.needToRecalc != p->GetNeedToRecalculateScales()) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
@@ -132,6 +166,75 @@ bool BarbRenderer::_isCacheDirty() const
     return false;
 }
 
+void BarbRenderer::_recalculateScales(
+    // std::vector<string> varnames,
+    std::vector<VAPoR::Grid *> &varData, int ts)
+{
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+
+    vector<string> varnames = bParams->GetFieldVariableNames();
+    bool           recalculateScales = bParams->GetNeedToRecalculateScales();
+
+    if (varnames != _fieldVariables || recalculateScales) {
+        //_setDefaultLengthAndThicknessScales(ts, varnames, bParams);
+        _setDefaultLengthAndThicknessScales(ts, varData, bParams);
+        _fieldVariables = varnames;
+        bParams->SetNeedToRecalculateScales(false);
+    }
+}
+
+int BarbRenderer::_getVectorVarGrids(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData)
+{
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+
+    vector<string> varnames = bParams->GetFieldVariableNames();
+    if (!VariableExists(ts, varnames, refLevel, lod, true)) {
+        SetErrMsg("One or more selected field variables does not exist");
+        return -1;
+        // glEndList();
+    }
+
+    // Get grids for our vector variables
+    //
+    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
+
+    return rc;
+}
+
+void BarbRenderer::_getGridRequirements(int &ts, int &refLevel, int &lod, std::vector<double> &minExts, std::vector<double> &maxExts) const
+{
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+
+    ts = bParams->GetCurrentTimestep();
+
+    refLevel = bParams->GetRefinementLevel();
+    lod = bParams->GetCompressionLevel();
+    bParams->GetBox()->GetExtents(minExts, maxExts);
+}
+
+int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData)
+{
+    Grid *sg = NULL;
+    varData.push_back(sg);
+
+    if (!varName.empty()) {
+        int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varName, minExts, maxExts, true, &refLevel, &lod, &sg);
+        if (rc < 0) {
+            for (int i = 0; i < varData.size(); i++) {
+                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
+            }
+            glEndList();
+            return (rc);
+        }
+        varData[varData.size() - 1] = sg;
+    }
+
+    return 0;
+}
+
 int BarbRenderer::_paintGL()
 {
     int rc = 0;
@@ -146,92 +249,146 @@ int BarbRenderer::_paintGL()
     // extents to use in rendering
     //
     vector<Grid *> varData;
-    float          vectorLengthScale;
-    string         hname;
-    string         colorVar;
 
-    BarbParams *bParams = (BarbParams *)GetActiveParams();
-    size_t      ts = bParams->GetCurrentTimestep();
-
-    int            refLevel = bParams->GetRefinementLevel();
-    int            lod = bParams->GetCompressionLevel();
+    int            ts, refLevel, lod;
     vector<double> minExts, maxExts;
-    bParams->GetBox()->GetExtents(minExts, maxExts);
+    _getGridRequirements(ts, refLevel, lod, minExts, maxExts);
 
-    vector<string> varnames = bParams->GetFieldVariableNames();
-    if (!VariableExists(ts, varnames, refLevel, lod, true)) {
+    // Get vector variables
+    rc = _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
+    if (rc < 0) {
+        glEndList();
         SetErrMsg("One or more selected field variables does not exist");
-        rc = -1;
-        goto RETURN;
+        return -1;
     }
 
-    // Find box extents for ROI
-    //
-    if (varnames != _fieldVariables) {
-        _vectorScaleFactor = _calcDefaultScale(ts, varnames, bParams);
-        _fieldVariables = varnames;
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+
+    // Get height variable
+    string heightVar = bParams->GetHeightVariableName();
+    rc = _getVarGrid(ts, refLevel, lod, heightVar, minExts, maxExts, varData);
+    if (rc < 0) {
+        SetErrMsg("Height variable does not exist");
+        return -1;
     }
 
-    // Get grids for our vector variables
-    //
-    rc = DataMgrUtils::GetGrids(_dataMgr, ts, varnames, minExts, maxExts, true, &refLevel, &lod, varData);
-
-    if (rc < 0) goto RETURN;
-    varData.push_back(NULL);
-    varData.push_back(NULL);
-
-    // Get grids for our height variable
-    //
-    hname = bParams->GetHeightVariableName();
-    if (!hname.empty()) {
-        Grid *sg = NULL;
-        int   rc = DataMgrUtils::GetGrids(_dataMgr, ts, hname, minExts, maxExts, true, &refLevel, &lod, &sg);
-        if (rc < 0) {
-            for (int i = 0; i < varData.size(); i++) {
-                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
-            }
-            goto RETURN;
-        }
-        varData[3] = sg;
+    // Get color variable
+    string colorVar = bParams->GetColorMapVariableName();
+    rc = _getVarGrid(ts, refLevel, lod, colorVar, minExts, maxExts, varData);
+    if (rc < 0) {
+        SetErrMsg("Color variable does not exist");
+        return -1;
     }
 
-    // Get grids for our auxillary variables
-    //
-    colorVar = bParams->GetColorMapVariableName();
-    if (!bParams->UseSingleColor() && !colorVar.empty()) {
-        Grid *sg;
-        int   rc = DataMgrUtils::GetGrids(_dataMgr, ts, colorVar, minExts, maxExts, true, &refLevel, &lod, &sg);
-        if (rc < 0) {
-            for (int i = 0; i < varData.size(); i++) {
-                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
-            }
-            goto RETURN;
-        }
-        varData[4] = sg;
-    }
+    _recalculateScales(varData, ts);
 
-    vectorLengthScale = bParams->GetLengthScale() * _vectorScaleFactor;
+    _setUpLightingAndColor();
 
-    //
-    // Perform OpenGL rendering of barbs
-    //
-    rc = performRendering(bParams, refLevel, vectorLengthScale, varData);
+    // Render the barbs
+    _operateOnGrid(varData);
 
-    // Release the locks on the data:
+    // Release the locks on the data
     for (int i = 0; i < varData.size(); i++) {
         if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
     }
 
-RETURN:
     glEndList();
     return (rc);
 }
 
+float BarbRenderer::_calculateDirVec(const float start[3], const float end[3], float dirVec[3])
+{
+    vsub(end, start, dirVec);
+    float len = vlength(dirVec);
+    if (len != 0.f) vscale(dirVec, 1. / len);
+    return len;
+}
+
+void BarbRenderer::_drawBackOfBarb(const float dirVec[3], const float startVertex[3]) const
+{
+    glBegin(GL_POLYGON);
+    glNormal3fv(dirVec);
+    for (int k = 0; k < 6; k++) { glVertex3fv(startVertex + 3 * k); }
+    glEnd();
+}
+
+void BarbRenderer::_drawCylinderSides(const float nextNormal[3], const float nextVertex[3], const float startNormal[3], const float startVertex[3]) const
+{
+    glBegin(GL_TRIANGLE_STRIP);
+
+    for (int i = 0; i < 6; i++) {
+        glNormal3fv(nextNormal + 3 * i);
+        glVertex3fv(nextVertex + 3 * i);
+
+        glNormal3fv(startNormal + 3 * i);
+        glVertex3fv(startVertex + 3 * i);
+    }
+    // repeat first two vertices to close cylinder:
+
+    glNormal3fv(nextNormal);
+    glVertex3fv(nextVertex);
+
+    glNormal3fv(startNormal);
+    glVertex3fv(startVertex);
+
+    glEnd();
+}
+
+void BarbRenderer::_drawBarbHead(const float dirVec[3], const float vertexPoint[3], const float startNormal[3], const float startVertex[3]) const
+{
+    // Create a triangle fan from these 6 vertices.
+    glBegin(GL_TRIANGLE_FAN);
+    glNormal3fv(dirVec);
+    glVertex3fv(vertexPoint);
+    for (int i = 0; i < 6; i++) {
+        glNormal3fv(startNormal + 3 * i);
+        glVertex3fv(startVertex + 3 * i);
+    }
+    // Repeat first point to close fan:
+    glNormal3fv(startNormal);
+    glVertex3fv(startVertex);
+    glEnd();
+}
+
+#ifdef DEBUG
+void BarbRenderer::_printBackDiameter(const float startVertex[18]) const
+{
+    float pointA[3] = {startVertex[0], startVertex[1], startVertex[2]};
+    float pointB[3] = {startVertex[3], startVertex[4], startVertex[5]};
+    float pointC[3] = {startVertex[6], startVertex[7], startVertex[8]};
+    float pointD[3] = {startVertex[9], startVertex[10], startVertex[11]};
+    float pointE[3] = {startVertex[12], startVertex[13], startVertex[14]};
+    float pointF[3] = {startVertex[15], startVertex[16], startVertex[17]};
+    cout << "   " << pointA[0] << "\t\t" << pointB[0] << "\t\t\t" << pointC[0];
+    cout << "\t\t" << pointD[0] << "\t\t" << pointE[0] << "\t\t" << pointF[0] << endl;
+
+    cout << "   " << pointA[1] << "\t\t" << pointB[1] << "\t\t" << pointC[1];
+    cout << "\t" << pointD[1] << "\t" << pointE[1] << "\t\t" << pointF[1] << endl;
+
+    cout << "   " << pointA[2] << "\t\t" << pointB[2] << "\t\t" << pointC[2];
+    cout << "\t\t" << pointD[2] << "\t\t" << pointE[2] << "\t\t" << pointF[2] << endl;
+    cout << "Back Diameter " << _calculateLength(pointA, pointD) << endl;
+}
+#endif
+
 // Issue OpenGL calls to draw a cylinder with orthogonal ends from
 // one point to another.  Then put an barb head on the end
 //
-void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], float radius)
+void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, float startPoint[3], bool doColorMapping, float clut[1024])
 {
+    assert(variableData.size() == 5);
+
+    float endPoint[3];
+    bool  missing = _defineBarb(variableData, startPoint, endPoint, doColorMapping, clut);
+
+    if (missing) return;
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    vector<double> scales = _getScales();
+    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
+
     // Constants are needed for cosines and sines, at
     // 60 degree intervals. The barb is really a hexagonal tube,
     // but the shading makes it look round.
@@ -248,15 +405,15 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     float testVec[3];
     float testVec2[3];
 
-    // Calculate an orthonormal frame, dirVec, uVec, bVec.
-    // dirVec is the barb direction
-    float dirVec[3], bVec[3], uVec[3];
-    vsub(endPoint, startPoint, dirVec);
-    float len = vlength(dirVec);
-    if (len == 0.f) return;
-    vscale(dirVec, 1. / len);
+    // Calculate an orthonormal frame
 
-    // Calculate uVec, orthogonal to dirVec:
+    // dirVec is the barb direction
+    float dirVec[3];
+    float len = _calculateDirVec(startPoint, endPoint, dirVec);
+
+    // Calculate uVec, orthogonal to dirVec
+    // Not sure what bVec is.  Up direction?
+    float uVec[3], bVec[3];
     vset(testVec, 1., 0., 0.);
     vcross(dirVec, testVec, uVec);
     len = vdot(uVec, uVec);
@@ -268,127 +425,105 @@ void BarbRenderer::drawBarb(const float startPoint[3], const float endPoint[3], 
     vscale(uVec, 1.f / sqrt(len));
     vcross(uVec, dirVec, bVec);
 
-    int i;
-    // Calculate nextPoint and vertexPoint, for barbhead
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
 
-    for (i = 0; i < 3; i++) {
+    float radius = bParams->GetLineThickness() * _maxThickness;
+
+    // calculate 6 points in plane orthog to dirVec, in plane of point
+    for (int i = 0; i < 6; i++) {
+        // testVec and testVec2 are components of point in plane
+        vmult(uVec, coses[i], testVec);
+        vmult(bVec, sines[i], testVec2);
+
+        // Calc outward normal as a sideEffect..
+        // It is the vector sum of x,y components (norm 1)
+        vadd(testVec, testVec2, startNormal + 3 * i);
+
+        // stretch by radius to get current displacement
+        vmult(startNormal + 3 * i, radius, startVertex + 3 * i);
+
+        // add to current point
+        vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
+    }
+
+#ifdef DEBUG
+    _printBackDiameter(startVertex);
+#endif
+
+    _drawBackOfBarb(dirVec, startVertex);
+
+    // The variables are located as follows:
+    //		- - - - >
+    //	   ^       ^ ^
+    // start    next end
+
+    // Calculate nextPoint and vertexPoint, for barbhead
+    for (int i = 0; i < 3; i++) {
         nextPoint[i] = (1. - BARB_LENGTH_FACTOR) * startPoint[i] + BARB_LENGTH_FACTOR * endPoint[i];
         // Assume a vertex angle of 45 degrees:
         vertexPoint[i] = nextPoint[i] + dirVec[i] * radius;
         headCenter[i] = nextPoint[i] - dirVec[i] * (BARB_HEAD_FACTOR * radius - radius);
     }
-    // calculate 6 points in plane orthog to dirVec, in plane of point
-    for (i = 0; i < 6; i++) {
-        // testVec and testVec2 are components of point in plane
-        vmult(uVec, coses[i], testVec);
-        vmult(bVec, sines[i], testVec2);
-        // Calc outward normal as a sideEffect..
-        // It is the vector sum of x,y components (norm 1)
-        vadd(testVec, testVec2, startNormal + 3 * i);
-        // stretch by radius to get current displacement
-        vmult(startNormal + 3 * i, radius, startVertex + 3 * i);
-        // add to current point
-        vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
-    }
-
-    glBegin(GL_POLYGON);
-    glNormal3fv(dirVec);
-    for (int k = 0; k < 6; k++) { glVertex3fv(startVertex + 3 * k); }
-    glEnd();
 
     // calc for endpoints:
-    for (i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         // testVec and testVec2 are components of point in plane
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
+
         // Calc outward normal as a sideEffect..
         // It is the vector sum of x,y components (norm 1)
         vadd(testVec, testVec2, nextNormal + 3 * i);
+
         // stretch by radius to get current displacement
         vmult(nextNormal + 3 * i, radius, nextVertex + 3 * i);
+
         // add to current point
         vadd(nextVertex + 3 * i, nextPoint, nextVertex + 3 * i);
     }
 
-    // Now make a triangle strip for cylinder sides:
-    glBegin(GL_TRIANGLE_STRIP);
+    _drawCylinderSides(nextNormal, nextVertex, startNormal, startVertex);
 
-    for (i = 0; i < 6; i++) {
-        glNormal3fv(nextNormal + 3 * i);
-        glVertex3fv(nextVertex + 3 * i);
-
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
-    }
-    // repeat first two vertices to close cylinder:
-
-    glNormal3fv(nextNormal);
-    glVertex3fv(nextVertex);
-
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
-
-    glEnd();
     // Now draw the barb head.  First calc 6 vertices at back of barbhead
     // Reuse startNormal and startVertex vectors
     // calc for endpoints:
-    for (i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         // testVec and testVec2 are components of point in plane
         // Can reuse them from previous (cylinder end) calculation
         vmult(uVec, coses[i], testVec);
         vmult(bVec, sines[i], testVec2);
+
         // Calc outward normal as a sideEffect..
         // It is the vector sum of x,y components (norm 1)
         vadd(testVec, testVec2, startNormal + 3 * i);
+
         // stretch by radius to get current displacement
         vmult(startNormal + 3 * i, BARB_HEAD_FACTOR * radius, startVertex + 3 * i);
+
         // add to current point
         vadd(startVertex + 3 * i, headCenter, startVertex + 3 * i);
+
         // Now tilt normals in direction of barb:
         for (int k = 0; k < 3; k++) { startNormal[3 * i + k] = 0.5 * startNormal[3 * i + k] + 0.5 * dirVec[k]; }
     }
-    // Create a triangle fan from these 6 vertices.
-    glBegin(GL_TRIANGLE_FAN);
-    glNormal3fv(dirVec);
-    glVertex3fv(vertexPoint);
-    for (i = 0; i < 6; i++) {
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
-    }
-    // Repeat first point to close fan:
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
-    glEnd();
+
+    _drawBarbHead(dirVec, vertexPoint, startNormal, startVertex);
+
+    glPopMatrix();
 }
 
-int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, float vectorLengthScale, vector<Grid *> variableData)
+void BarbRenderer::_setUpLightingAndColor()
 {
-    assert(variableData.size() == 5);
-
-    size_t timestep = bParams->GetCurrentTimestep();
-
-    vector<double> rMinExtents, rMaxExtents;
-    bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
-
-    double rakeExts[6];    // rake extents in user coordinates
-
-    rakeExts[0] = rMinExtents[0];
-    rakeExts[1] = rMinExtents[1];
-    rakeExts[2] = rMinExtents[2];
-    rakeExts[3] = rMaxExtents[0];
-    rakeExts[4] = rMaxExtents[1];
-    rakeExts[5] = rMaxExtents[2];
-
-    string           winName = GetVisualizer();
+    string           winName = GetVisualizer();    // GetVisualizer is not const :(
     ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winName);
-    // Barb thickness is .001*LineThickness*viewDiameter.
-    float thickness = bParams->GetLineThickness();
-    // float rad =(float)( 0.001*vpParams->GetCurrentViewDiameter()*thickness);
-    float rad = (float)(1000 * thickness);
-    // Set up lighting and color
-    int   nLights = vpParams->getNumLights();
-    float fcolor[3];
+    int              nLights = vpParams->getNumLights();
+
+    float       fcolor[3];
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
     bParams->GetConstantColor(fcolor);
+
     if (nLights == 0) {
         glDisable(GL_LIGHTING);
     } else {
@@ -404,19 +539,37 @@ int BarbRenderer::performRendering(BarbParams *bParams, int actualRefLevel, floa
         glEnable(GL_COLOR_MATERIAL);
     }
     glColor3fv(fcolor);
-
-    vector<long> longGrid = bParams->GetGrid();
-    int          rakeGrid[3];
-    rakeGrid[0] = (int)longGrid[0];
-    rakeGrid[1] = (int)longGrid[1];
-    rakeGrid[2] = (int)longGrid[2];
-
-    renderGrid(rakeGrid, rakeExts, variableData, timestep, vectorLengthScale, rad, bParams);
-
-    return 0;
 }
 
-float BarbRenderer::getHeightOffset(Grid *heightVar, float xCoord, float yCoord, bool &missing)
+void BarbRenderer::_reFormatExtents(vector<float> &rakeExts) const
+{
+    rakeExts.clear();
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+    vector<double> rMinExtents, rMaxExtents;
+    bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
+
+    rakeExts.push_back(rMinExtents[X]);
+    rakeExts.push_back(rMinExtents[Y]);
+    rakeExts.push_back(rMinExtents[Z]);
+    rakeExts.push_back(rMaxExtents[X]);
+    rakeExts.push_back(rMaxExtents[Y]);
+    rakeExts.push_back(rMaxExtents[Z]);
+}
+
+void BarbRenderer::_makeRakeGrid(vector<int> &rakeGrid) const
+{
+    rakeGrid.clear();
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+    vector<long> longGrid = bParams->GetGrid();
+
+    rakeGrid.push_back((int)longGrid[X]);
+    rakeGrid.push_back((int)longGrid[Y]);
+    rakeGrid.push_back((int)longGrid[Z]);
+}
+
+float BarbRenderer::_getHeightOffset(Grid *heightVar, float xCoord, float yCoord, bool &missing) const
 {
     assert(heightVar);
     float missingVal = heightVar->GetMissingValue();
@@ -428,80 +581,135 @@ float BarbRenderer::getHeightOffset(Grid *heightVar, float xCoord, float yCoord,
     return offset;
 }
 
-void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *> variableData, int timestep, float length, float rad, BarbParams *bParams)
+void BarbRenderer::_getDirection(float direction[3], vector<Grid *> variableData, float xCoord, float yCoord, float zCoord, bool &missing) const
 {
-    assert(variableData.size() == 5);
+    for (int dim = 0; dim < 3; dim++) {
+        direction[dim] = 0.f;
+        if (variableData[dim]) {
+            direction[dim] = variableData[dim]->GetValue(xCoord, yCoord, zCoord);
 
-    string         winName = GetVisualizer();
-    vector<double> scales(3, 1.0);
+            float missingVal = variableData[dim]->GetMissingValue();
+            if (direction[dim] == missingVal) { missing = true; }
+        }
+    }
+}
 
-    Grid *heightVar = variableData[3];
+bool BarbRenderer::_makeCLUT(float clut[1024]) const
+{
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+    string colorVar = bParams->GetColorMapVariableName();
+    bool   doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
 
-    float end[3];
-    float xStride = (rakeExts[3] - rakeExts[0]) / ((float)rakeGrid[0] + 1);
-    float yStride = (rakeExts[4] - rakeExts[1]) / ((float)rakeGrid[1] + 1);
-    float zStride = (rakeExts[5] - rakeExts[2]) / ((float)rakeGrid[2] + 1);
-
-    string          colorVar = bParams->GetColorMapVariableName();
-    float           clut[256 * 4];
-    bool            doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
-    MapperFunction *tf = 0;
     if (doColorMapping) {
+        MapperFunction *tf = 0;
         tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
         assert(tf);
         tf->makeLut(clut);
     }
+    return doColorMapping;
+}
 
-    float xCoord, yCoord, zCoordGrid, zCoord;
-    for (int k = 1; k <= rakeGrid[2]; k++) {
-        zCoordGrid = zStride * k + rakeExts[2];
-        for (int j = 1; j <= rakeGrid[1]; j++) {
-            yCoord = yStride * j + rakeExts[1];
-            for (int i = 1; i <= rakeGrid[0]; i++) {
-                xCoord = xStride * i + rakeExts[0];
-                zCoord = zCoordGrid;
+vector<double> BarbRenderer::_getScales()
+{
+    string                  myVisName = GetVisualizer();    // Not const :(
+    VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
+    string                  datasetName = GetMyDatasetName();
+    Transform *             t = vpp->GetTransform(datasetName);
 
-                bool missing = false;
-                if (heightVar) { zCoord += getHeightOffset(heightVar, xCoord, yCoord, missing); }
+    vector<double> scales{3, 1.0};
+    if (t != NULL) scales = t->GetScales();
+    ;
 
-                float direction[3] = {0.f, 0.f, 0.f};
-                for (int dim = 0; dim < 3; dim++) {
-                    direction[dim] = 0.f;
-                    if (variableData[dim]) {
-                        direction[dim] = variableData[dim]->GetValue(xCoord, yCoord, zCoord);
+    return scales;
+}
 
-                        float missingVal = variableData[dim]->GetMissingValue();
-                        if (direction[dim] == missingVal) { missing = true; }
-                    }
-                }
+float BarbRenderer::_calculateLength(float start[3], float end[3]) const
+{
+    float xDist = start[X] - end[X];
+    float yDist = start[Y] - end[Y];
+    float zDist = start[Z] - end[Z];
+    float length = sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
+    return length;
+}
 
-                float point[3] = {xCoord, yCoord, zCoord};
-                end[0] = point[0] + scales[0] * direction[0] * length;
-                end[1] = point[1] + scales[1] * direction[1] * length;
-                end[2] = point[2] + scales[2] * direction[2] * length;
+void BarbRenderer::_makeStartAndEndPoint(float start[3], float end[3], float direction[3])
+{
+    BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+    float length = bParams->GetLengthScale() * _vectorScaleFactor;
 
-                if (doColorMapping) {
-                    float val = variableData[4]->GetValue(point[0], point[1], point[2]);
-                    if (val == variableData[4]->GetMissingValue())
-                        missing = true;
-                    else {
-                        missing = GetColorMapping(tf, val, clut);
-                    }
-                }
-                if (!missing) {
-                    string                  datasetName = GetMyDatasetName();
-                    string                  myVisName = GetVisualizer();
-                    VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
+    vector<double> scales = _getScales();
 
-                    Transform *t = vpp->GetTransform(datasetName);
-                    assert(t);
-                    vector<double> scales = t->GetScales();
+    end[X] = start[X] + scales[X] * direction[X] * length;
+    end[Y] = start[Y] + scales[Y] * direction[Y] * length;
+    end[Z] = start[Z] + scales[Z] * direction[Z] * length;
+}
 
-                    glMatrixMode(GL_MODELVIEW);
-                    glPushMatrix();
-                    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
-                    drawBarb(point, end, rad * 10);
-                    glPopMatrix();
+void BarbRenderer::_getStrides(vector<float> &strides, vector<int> &rakeGrid, vector<float> &rakeExts) const
+{
+    strides.clear();
+
+    float xStride = (rakeExts[XMAX] - rakeExts[XMIN]) / ((float)rakeGrid[X] + 1);
+    strides.push_back(xStride);
+
+    float yStride = (rakeExts[YMAX] - rakeExts[YMIN]) / ((float)rakeGrid[Y] + 1);
+    strides.push_back(yStride);
+
+    float zStride = (rakeExts[ZMAX] - rakeExts[ZMIN]) / ((float)rakeGrid[Z] + 1);
+    strides.push_back(zStride);
+}
+
+bool BarbRenderer::_defineBarb(std::vector<Grid *> variableData, float start[3], float end[3], bool doColorMapping, float clut[1024])
+{
+    bool missing = false;
+
+    Grid *heightVar = variableData[3];
+    if (heightVar) { start[Z] += _getHeightOffset(heightVar, start[X], start[Y], missing); }
+
+    float direction[3] = {0.f, 0.f, 0.f};
+    _getDirection(direction, variableData, start[X], start[Y], start[Z], missing);
+
+    _makeStartAndEndPoint(start, end, direction);
+
+    if (doColorMapping) {
+        float val = variableData[4]->GetValue(start[X], start[Y], start[Z]);
+
+        if (val == variableData[4]->GetMissingValue())
+            missing = true;
+        else {
+            missing = _getColorMapping(val, clut);
+        }
+    }
+    return missing;
+}
+
+void BarbRenderer::_operateOnGrid(vector<Grid *> variableData, bool drawBarb)
+{
+    vector<int> rakeGrid;
+    _makeRakeGrid(rakeGrid);
+
+    vector<float> rakeExts;
+    _reFormatExtents(rakeExts);
+
+    vector<float> strides;
+    _getStrides(strides, rakeGrid, rakeExts);
+
+    float clut[1024];
+    bool  doColorMapping = _makeCLUT(clut);
+
+    float start[3];    //, end[3];
+    for (int i = 1; i <= rakeGrid[X]; i++) {
+        start[X] = strides[X] * i + rakeExts[X];    // + xStride/2.0;
+        for (int j = 1; j <= rakeGrid[Y]; j++) {
+            start[Y] = strides[Y] * j + rakeExts[Y];    // + yStride/2.0;
+            for (int k = 1; k <= rakeGrid[Z]; k++) {
+                start[Z] = strides[Z] * k + rakeExts[Z];    //+ zStride/2.0;
+
+                if (drawBarb) {
+                    _drawBarb(variableData, start, doColorMapping, clut);
+                } else {
+                    _getMagnitudeAtPoint(variableData, start);
                 }
             }
         }
@@ -509,12 +717,37 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6], vector<Grid *
     return;
 }
 
-bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val, float clut[256 * 4])
+void BarbRenderer::_getMagnitudeAtPoint(std::vector<VAPoR::Grid *> variables, float point[3])
+{
+    VAPoR::Grid *grid;
+    double       maxValue = 0.f;
+    for (int i = 0; i < 3; i++) {
+        grid = variables[i];
+        if (grid == NULL)
+            continue;
+        else {
+            double value = grid->GetValue(point[X], point[Y], point[Z]);
+            double missingValue = grid->GetMissingValue();
+
+            if (value == missingValue) { continue; }
+            value = abs(value);
+
+            if (value > maxValue && value < std::numeric_limits<double>::max() && value > std::numeric_limits<double>::lowest() && !isnan(value)) maxValue = value;
+        }
+    }
+    if (maxValue > _maxValue) { _maxValue = maxValue; }
+}
+
+bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
 {
     bool missing = false;
 
-    //	float clut[256*4];
-    //	tf->makeLut(clut);
+    MapperFunction *tf = 0;
+    BarbParams *    bParams = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(bParams);
+    string colorVar = bParams->GetColorMapVariableName();
+    tf = (MapperFunction *)bParams->GetMapperFunc(colorVar);
+    assert(tf);
 
     float mappedColor[4] = {0., 0., 0., 0.};
     // Use the transfer function to map the data:
@@ -524,41 +757,45 @@ bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val, float clut[256
     return missing;
 }
 
-double BarbRenderer::_calcDefaultScale(size_t ts, const vector<string> &varnames, const BarbParams *bParams)
+double BarbRenderer::_getDomainHypotenuse(size_t ts) const
 {
-    assert(varnames.size() <= 3);
-    vector<double> maxvarvals;
+    std::vector<int>    axes;
+    std::vector<double> minExts, maxExts;
+    std::vector<string> varNames;
 
-    vector<double> stretch = bParams->GetStretchFactors();
-    for (int i = 0; i < varnames.size(); i++) {
-        if (varnames[i] == "") {
-            maxvarvals.push_back(0.);
-        } else {
-            // Obtain the default
-            //
+    BarbParams *p = dynamic_cast<BarbParams *>(GetActiveParams());
+    assert(p);
+    varNames = p->GetFieldVariableNames();
 
-            vector<double> minmax;
-            _dataMgr->GetDataRange(0, varnames[i], 0, 0, minmax);
-            maxvarvals.push_back(Max(abs(minmax[0]), abs(minmax[1])));
-        }
-    }
-
-    for (int i = 0; i < maxvarvals.size(); i++) maxvarvals[i] *= stretch[i];
-
-    vector<int>    axes;
-    vector<double> minExts, maxExts;
-    bool           status = DataMgrUtils::GetExtents(_dataMgr, ts, varnames, minExts, maxExts, axes);
+    bool status = DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minExts, maxExts, axes);
     assert(status);
 
-    double maxVecLength = 0.0;
-    for (int i = 0; i < minExts.size(); i++) { maxVecLength = Max(maxVecLength, (maxExts[i] - minExts[i])); }
-    maxVecLength *= 0.1;
+    if (varNames[0] == "" && varNames[1] == "" && varNames[2] == "") return 0.0;
 
-    double maxVecVal = 0.0;
-    for (int i = 0; i < maxvarvals.size(); i++) { maxVecVal = Max(maxVecLength, maxvarvals[i]); }
+    double xLen = maxExts[0] - minExts[0];
 
-    if (maxVecVal == 0.)
-        return (maxVecLength);
-    else
-        return (maxVecLength / maxVecVal);
+    double yLen = maxExts[1] - minExts[1];
+
+    double zLen = 0.0;
+    if (minExts.size() > 2) zLen = maxExts[2] - minExts[2];
+
+    double diag = sqrt(xLen * xLen + yLen * yLen + zLen * zLen);
+    return diag;
+}
+
+void BarbRenderer::_setDefaultLengthAndThicknessScales(size_t ts, const std::vector<VAPoR::Grid *> &varData, const BarbParams *bParams)
+{
+    assert(varData.size() >= 3);
+
+    _maxValue = 0;
+
+    _operateOnGrid(varData, false);
+
+    double hypotenuse = _getDomainHypotenuse(ts);
+
+    if (hypotenuse == 0.f) return;
+
+    _maxThickness = hypotenuse * BARB_RADIUS_TO_HYPOTENUSE;
+    _vectorScaleFactor = hypotenuse * BARB_LENGTH_TO_HYPOTENUSE;
+    _vectorScaleFactor *= 1.0 / _maxValue;
 }
