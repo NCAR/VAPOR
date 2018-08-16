@@ -53,7 +53,6 @@ void ContourAppearanceSubtab::Update(
 	_spacingCombo->Update(0, maxSpacing, spacing);
 
 	_TFWidget->Update(dataMgr, paramsMgr, _cParams);
-	_ColorbarWidget->Update(dataMgr, paramsMgr, _cParams);
 }
 
 void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams* cParams) {
@@ -161,4 +160,15 @@ void ContourAppearanceSubtab::SetContourSpacing(double spacing) {
 	double min = _cParams->GetContourMin();
 
 	SetContourValues(count, min, spacing);
+}
+
+ContourGeometrySubtab::ContourGeometrySubtab(QWidget* parent) {
+	setupUi(this);
+	_geometryWidget->Reinit(
+		(DimFlags)TWOD,
+		(GeometryFlags)MINMAX,
+		(VariableFlags)SCALAR
+	);
+
+	_orientationAngles->hide();
 }

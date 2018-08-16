@@ -5,6 +5,7 @@
 #include "ui_ContourAppearanceGUI.h"
 #include "ui_ContourVariablesGUI.h"
 #include "ui_ContourGeometryGUI.h"
+#include "ui_ContourAnnotationGUI.h"
 #include "RangeCombos.h"
 #include "Flags.h"
 
@@ -81,15 +82,7 @@ class ContourGeometrySubtab : public QWidget, public Ui_ContourGeometryGUI {
 	Q_OBJECT
 
 public:
-	ContourGeometrySubtab(QWidget* parent) {
-		setupUi(this);
-		_geometryWidget->Reinit(
-			(DimFlags)TWOD,
-			(GeometryFlags)MINMAX,
-			(VariableFlags)SCALAR);
-
-		_orientationAngles->hide();
-	}
+	ContourGeometrySubtab(QWidget* parent);
 	
 	void Update(
 		VAPoR::ParamsMgr *paramsMgr,
@@ -100,9 +93,24 @@ public:
 		_copyRegionWidget->Update(paramsMgr, rParams);
 		_transformTable->Update(rParams->GetTransform());
 	}
+};
 
+class ContourAnnotationSubtab : public QWidget, public Ui_ContourAnnotationGUI {
 
-private:
+	Q_OBJECT
+
+public:
+	ContourAnnotationSubtab(QWidget* parent) {
+		setupUi(this);
+	}
+	
+	void Update(
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::RenderParams *rParams
+	) {
+		_colorbarWidget->Update(dataMgr, paramsMgr, rParams);
+	}
 };
 
 #endif //CONTOURSUBTABS_H
