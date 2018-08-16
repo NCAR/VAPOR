@@ -54,7 +54,7 @@ int TwoDRenderer::_initializeGL()
     return (0);
 }
 
-int TwoDRenderer::_paintGL()
+int TwoDRenderer::_paintGL(bool)
 {
     // Get the 2D texture
     //

@@ -70,7 +70,7 @@ public:
     //! all the OpenGL rendering is performed in the paintEvent method.  It must be invoked from
     //! a current OpenGL context.
     //! \return zero if successful.
-    int paintEvent();
+    int paintEvent(bool fast);
 
     //! Apply user defined transforms to the current renderer being drawn
     //! \param[in] renIndex The index of the current renderer being drawn,

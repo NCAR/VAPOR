@@ -67,6 +67,12 @@ public:
     //! \retval visualizer index.
     string getWindowName() { return _winName; }
 
+    // Render the scene
+    //
+    // If \p fast is true try to render the scene quickly
+    //
+    void Render(bool fast);
+
 signals:
     // Sent prior to closing window - after receiving Qt closeEvent()
     //
@@ -103,7 +109,6 @@ private:
     // QGLWidget reimplementations
     virtual void resizeGL(int width, int height);
     virtual void initializeGL();
-    void         paintGL();
 
     string              _winName;
     VAPoR::ControlExec *_controlExec;
