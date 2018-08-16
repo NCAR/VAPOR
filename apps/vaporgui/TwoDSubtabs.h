@@ -4,6 +4,7 @@
 #include "ui_TwoDAppearanceGUI.h"
 #include "ui_TwoDVariablesGUI.h"
 #include "ui_TwoDGeometryGUI.h"
+#include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
 
 namespace VAPoR {
@@ -48,7 +49,6 @@ class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams) {
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
-        _ColorbarWidget->Update(dataMgr, paramsMgr, rParams);
     }
 };
 
@@ -73,8 +73,22 @@ class TwoDGeometrySubtab : public QWidget, public Ui_TwoDGeometryGUI {
         _copyRegionWidget->Update(paramsMgr, rParams);
         _transformTable->Update(rParams->GetTransform());
     }
-
-  private:
 };
 
+class TwoDAnnotationSubtab : public QWidget, public Ui_TwoDAnnotationGUI {
+
+    Q_OBJECT
+
+  public:
+    TwoDAnnotationSubtab(QWidget *parent) {
+        setupUi(this);
+    }
+
+    void Update(
+        VAPoR::ParamsMgr *paramsMgr,
+        VAPoR::DataMgr *dataMgr,
+        VAPoR::RenderParams *rParams) {
+        _colorbarWidget->Update(dataMgr, paramsMgr, rParams);
+    }
+};
 #endif //TWODSUBTABS_H

@@ -75,6 +75,7 @@ class ContourEventRouter : public QTabWidget, public RenderEventRouter {
     ContourVariablesSubtab *_variables;
     ContourGeometrySubtab *_geometry;
     ContourAppearanceSubtab *_appearance;
+    ContourAnnotationSubtab *_annotation;
 };
 
 #endif //CONTOUREVENTROUTER_H
