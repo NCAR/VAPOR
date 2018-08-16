@@ -51,27 +51,48 @@ namespace VAPoR {
   private:
 
 	vector <string> _fieldVariables;	// old, used instead of _currentVarname
-	double _vectorScaleFactor;			// old
+	double _vectorScaleFactor;
+	double _maxThickness;
 	
-	vector<double> _currentBoxMinExts;	// new!
-	vector<double> _currentBoxMaxExts;	// new!
+	vector<double> _currentBoxMinExts;
+	vector<double> _currentBoxMaxExts;	
 
-	string _currentHgtVar;				// new!
-	vector<double> _currentBoxMinExtsTex;	// new, do we need this?
-	vector<double> _currentBoxMaxExtsTex;	// new, do we need this?
+	string _currentHgtVar;			
+	vector<double> _currentBoxMinExtsTex;
+	vector<double> _currentBoxMaxExtsTex;
       
     GLuint _drawList;
-	
-	// Copied from TwoDRenderer.h
-	//
-	// ...TBD...
-	
 
+	double _maxValue;
+	
+	void _getMagnitudeAtPoint(
+		std::vector<VAPoR::Grid*> variables,
+		float point[3]
+	);
 
-	double _calcDefaultScale(
-		size_t ts, const std::vector<string> &varnames,
+	void _recalculateScales(
+		std::vector<VAPoR::Grid*> &varData, 
+		int ts
+	);
+
+	double _getDomainHypotenuse(
+		size_t ts
+	) const;
+
+	void _setDefaultLengthAndThicknessScales(
+		size_t ts, 
+		const std::vector<VAPoR::Grid*> &varData,
 		const BarbParams* bParams
 	);
+
+	void _getGridRequirements(
+		int &ts, 
+		int &refLevel, 
+		int& lod,
+		std::vector<double> &minExts,
+		std::vector<double> &maxExts
+	) const;
+	
 
 //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
@@ -79,6 +100,30 @@ namespace VAPoR {
 //! \copydoc Renderer::_paintGL()
     virtual int _paintGL();
 
+	int _getVectorVarGrids(
+		int ts,
+		int refLevel,
+		int lod,
+		std::vector<double> minExts,
+		std::vector<double> maxExts,
+		std::vector<VAPoR::Grid*> &varData
+	);
+
+	int _getVarGrid(
+		int ts,
+		int refLevel,
+		int lod,
+		string varName,
+		std::vector<double> minExts,
+		std::vector<double> maxExts,
+		std::vector<VAPoR::Grid*> &varData
+	);
+
+	void _setUpLightingAndColor();
+
+	void _reFormatExtents(vector<float> &rakeExts) const;
+
+	void _makeRakeGrid(vector<int> &rakeGrid) const;
 
 //! Protected method that performs rendering of all barbs.
 //! \param[in] DataMgr* current DataMgr
@@ -89,27 +134,95 @@ namespace VAPoR {
 //! \param[in] Grid Grid used in rendering.
 //! The first three are the vector field, Grid[3] is the Height variable, Grid[4] is the color variable.
 //! \retval int zero if successful
-	int performRendering(BarbParams* rParams,
-		int actualRefLevel,float vectorScale, 
-		vector <Grid *> variableData
+//	int performRendering(BarbParams* rParams,
+//		int actualRefLevel, 
+//		vector <Grid *> variableData
+//	);
+
+	float _getHeightOffset(Grid* heightVar, float xCoord,
+		float yCoord, bool& missing) const;	
+
+	bool _makeCLUT(float clut[1024]) const;
+
+	void _getDirection(
+		float direction[3], 
+		std::vector<Grid*> varData,
+		float xCoord,
+		float yCoord,
+		float zCoord,
+		bool &missing
+	) const;
+
+	vector<double> _getScales();
+
+	float _calculateLength(float start[3], float end[3]) const; 
+
+	void _makeStartAndEndPoint(
+		float start[3],
+		float end[3],
+		float direction[3]
 	);
 
-	float getHeightOffset(Grid* heightVar, float xCoord,
-		float yCoord, bool& missing);	
+	void _getStrides(
+		vector<float> &strides, 
+		vector<int> &rakeGrid, 
+		vector<float> &rakeExts
+	) const;
 
-	void renderGrid(int rakeGrid[3],double rakeExts[6],
-		vector <Grid *> variableData, int timestep,
-		float vectorLengthScale, float rad, BarbParams* params);
+	bool _defineBarb(
+		std::vector<Grid*>, 
+		float start[3], 
+		float end[3],
+		bool doColorMapping,
+		float clut[1024]);
 
-	bool GetColorMapping(MapperFunction* tf, float val, float clut[256*4]);
+	void _operateOnGrid(
+		vector <Grid *> variableData,
+		bool drawBarb=true);
+
+	bool _getColorMapping(float val, float clut[256*4]);
+
+	float _calculateDirVec(
+		const float start[3], 
+		const float end[3],
+		float dirVec[3]
+	);
+
+	void _drawBackOfBarb(
+		const float dirVec[3], 
+		const float startVertex[3]
+	) const;
+
+	void _drawCylinderSides(
+		const float nextNormal[3],
+		const float nextVertex[3],
+		const float startNormal[3],
+		const float startVertex[3]
+	) const;
+
+	void _drawBarbHead(
+	    const float dirVec[3], 
+	    const float vertexPoint[3], 
+	    const float startNormal[3], 
+	    const float startVertex[3]
+	) const; 
 
 //! Protected method to draw one barb (a hexagonal tube with a cone barbhead)
 //! \param[in] const float startPoint[3] beginning position of barb
 //! \param[in] const float endPoint[3] ending position of barb
-//! \param[in] float radius Radius of barb in voxels
-	void drawBarb(const float startPoint[3], const float endPoint[3], float radius);
-  
-      
+	//void drawBarb(const float startPoint[3], const float endPoint[3]);
+	void _drawBarb(
+		const std::vector<Grid*> variableData,
+		float startPoint[3],
+		bool doColorMapping,
+		float clut[1024]
+	);
+		
+     
+#ifdef DEBUG
+	_printBackDiameter(const float startVertex[18]) const;
+#endif
+ 
       struct {
           vector<string> fieldVarNames;
           string heightVarName;
@@ -128,6 +241,7 @@ namespace VAPoR {
           float maxMapValue;
           float colorSamples[10][3];
           float alphaSamples[10];
+		  bool needToRecalc;
       } _cacheParams;
       
       bool _isCacheDirty() const;
