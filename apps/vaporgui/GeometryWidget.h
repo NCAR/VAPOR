@@ -21,7 +21,8 @@ public:
 	void Reinit(
 		DimFlags dimFlags, 
 		GeometryFlags geometryFlags,
-		VariableFlags varFlags);
+		VariableFlags varFlags
+	);
 
 	~GeometryWidget();
 
@@ -99,8 +100,6 @@ private:
 	GeometryFlags _geometryFlags;
 
     bool  _useAuxVariables;     // for Statistics utility
-
-	static const std::string _nDimsTag;
 };
 
 #endif //GEOMETRYWIDGET_H
