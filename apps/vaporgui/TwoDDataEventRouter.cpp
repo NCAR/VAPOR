@@ -52,6 +52,13 @@ TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce)
 	qsgeo->setWidgetResizable(true);
 	addTab(qsgeo, "Geometry");
 
+	_annotation = new TwoDAnnotationSubtab(this);
+	QScrollArea *qsAnnotation = new QScrollArea(this);
+	qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	qsAnnotation->setWidget(_annotation);
+	qsAnnotation->setWidgetResizable(true);
+	addTab(qsAnnotation, "Annotations");
+
 #if 0	
 	QScrollArea *qsimg = new QScrollArea(this);
 	qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -72,9 +79,10 @@ TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce)
 }
 
 TwoDDataEventRouter::~TwoDDataEventRouter(){
-	if (_variables) delete _variables;
-	if (_geometry) delete _geometry;
+	if (_variables)  delete _variables;
+	if (_geometry)   delete _geometry;
 	if (_appearance) delete _appearance;
+	if (_annotation) delete _annotation;
 }
 
 void TwoDDataEventRouter::GetWebHelp(
@@ -125,6 +133,11 @@ void TwoDDataEventRouter::_updateTab(){
 		GetActiveParams()
 	);
 	_geometry->Update(
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr(),
+		GetActiveParams()
+	);
+	_annotation->Update(
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr(),
 		GetActiveParams()
