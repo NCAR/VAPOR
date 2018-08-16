@@ -60,7 +60,7 @@ WireFrameRenderer::WireFrameRenderer(const ParamsMgr *pm, string winName, string
 
 WireFrameRenderer::~WireFrameRenderer()
 {
-    if (_drawList) glDeleteLists(_drawList, 1);
+    if (_drawList) glDeleteLists(_drawList, 3);
 }
 
 void WireFrameRenderer::_saveCacheParams()
@@ -135,7 +135,7 @@ void WireFrameRenderer::_drawCell(const vector<vector<size_t>> &nodes, const vec
         indices2[2 * i + 0] = indices1[i];
         indices2[2 * i + 1] = indices1[i + count];
     }
-    glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, indices2);
+    glDrawElements(GL_LINES, 2 * count, GL_UNSIGNED_INT, indices2);
 
     delete[] indices1;
     delete[] indices2;
@@ -225,10 +225,19 @@ int WireFrameRenderer::_buildCache()
     glVertexPointer(3, GL_FLOAT, 0, coordsArray);
     glColorPointer(4, GL_FLOAT, 0, colorsArray);
 
+    glEndList();
+
     // Now draw the individual cells. Note: each shared cell edge
     // gets drawn twice. Oops
     //
     bool layered = grid->GetTopologyDim() == 3;
+
+    // Create slow and fast draw lists with connectivity information
+    //
+
+    // Slow drawing display list
+    //
+    glNewList(_drawList + 1, GL_COMPILE);
 
     Grid::ConstCellIterator cell_itr = grid->ConstCellBegin();
     Grid::ConstCellIterator end_cell_itr = grid->ConstCellEnd();
@@ -239,8 +248,28 @@ int WireFrameRenderer::_buildCache()
 
         _drawCell(nodes, grid->GetDimensions(), layered);
     }
-
     DisableClippingPlanes();
+
+    glEndList();
+
+    // Fast drawing display list
+    //
+    glNewList(_drawList + 2, GL_COMPILE);
+
+    cell_itr = grid->ConstCellBegin();
+    end_cell_itr = grid->ConstCellEnd();
+
+    size_t count = 0;
+    for (; cell_itr != end_cell_itr; ++cell_itr) {
+        vector<vector<size_t>> nodes;
+        grid->GetCellNodes(*cell_itr, nodes);
+
+        if (count % 99 == 0) { _drawCell(nodes, grid->GetDimensions(), layered); }
+        count++;
+    }
+    DisableClippingPlanes();
+
+    glEndList();
 
     delete[] coordsArray;
     delete[] colorsArray;
@@ -248,11 +277,10 @@ int WireFrameRenderer::_buildCache()
     if (grid) delete grid;
     if (heightGrid) delete heightGrid;
 
-    glEndList();
     return 0;
 }
 
-int WireFrameRenderer::_paintGL()
+int WireFrameRenderer::_paintGL(bool fast)
 {
     int rc = 0;
     if (_isCacheDirty()) {
@@ -267,11 +295,25 @@ int WireFrameRenderer::_paintGL()
 
     glCallList(_drawList);
 
+    if (!fast) {
+        glCallList(_drawList + 1);
+    } else {
+        // Fast draw display list
+        //
+        glCallList(_drawList + 2);
+    }
+
     return rc;
 }
 
 int WireFrameRenderer::_initializeGL()
 {
-    _drawList = glGenLists(1);
+    // Three drawing list: one for vertex coordinates, one for vertex
+    // connectivity during "slow" drawing, and one for vertex connectivity
+    // during fast drawing
+    //
+    _drawList = glGenLists(3);
+    assert(_drawList != 0);
+
     return 0;
 }

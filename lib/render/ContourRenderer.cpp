@@ -191,7 +191,7 @@ int ContourRenderer::_buildCache()
     return 0;
 }
 
-int ContourRenderer::_paintGL()
+int ContourRenderer::_paintGL(bool)
 {
     int rc = 0;
     if (_isCacheDirty()) rc = _buildCache();
