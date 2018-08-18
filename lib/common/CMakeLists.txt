@@ -41,6 +41,13 @@ endif()
 
 add_definitions (-DCOMMON_EXPORTS)
 
+# This is necessary because we include external header files in our headers
+target_include_directories (common
+	PUBLIC "${PROJECT_SOURCE_DIR}/include"
+	PUBLIC "${THIRD_PARTY_INC_DIR}"
+	PUBLIC "${THIRD_PARTY_INC_DIR}/freetype2"
+	)
+
 install (
 	TARGETS common
 	DESTINATION ${INSTALL_LIB_DIR}
