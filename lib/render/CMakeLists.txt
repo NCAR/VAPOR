@@ -23,7 +23,6 @@ set (SRC
 	ContourRenderer.cpp
 	MyPython.cpp
 	GLState.cpp
-	# Shader.cpp
 )
 
 set (HEADERS
@@ -50,12 +49,11 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GLState.h
-	# ${PROJECT_SOURCE_DIR}/include/vapor/Shader.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff python${PYTHONVERSION})
+target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION})
 
 add_definitions (-DRENDER_EXPORTS)
 
