@@ -86,6 +86,7 @@ set (SRCS
 )
 
 set (UIS 
+	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
 	boxframe.ui
@@ -95,18 +96,27 @@ set (UIS
 	AnnotationGUI.ui
 	ControlPointEditorBase.ui
 	NewRendererDialog.ui
-	LeftPanel.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
-	TwoDAppearanceGUI.ui
-	WireFrameAppearanceGUI.ui
 	BarbAppearanceGUI.ui
 	BarbVariablesGUI.ui
 	BarbGeometryGUI.ui
+	BarbAnnotationGUI.ui
+	ImageAppearanceGUI.ui
+	ImageGeometryGUI.ui
+	ImageVariablesGUI.ui
 	TwoDVariablesGUI.ui
-	WireFrameVariablesGUI.ui
+	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui
+	TwoDAnnotationGUI.ui
+	ContourVariablesGUI.ui
+	ContourAppearanceGUI.ui
+	ContourGeometryGUI.ui
+	ContourAnnotationGUI.ui
+	WireFrameVariablesGUI.ui
+	WireFrameAppearanceGUI.ui
 	WireFrameGeometryGUI.ui
+	WireFrameAnnotationGUI.ui
 	VariablesWidgetGUI.ui
 	HelloVariablesGUI.ui
 	statsWindow.ui
@@ -119,12 +129,6 @@ set (UIS
 	GeometryWidgetGUI.ui
 	CopyRegionWidgetGUI.ui
 	ColorbarWidgetGUI.ui
-	ImageAppearanceGUI.ui
-	ImageGeometryGUI.ui
-	ImageVariablesGUI.ui
-	ContourAppearanceGUI.ui
-	ContourGeometryGUI.ui
-	ContourVariablesGUI.ui
 	FidelityWidgetGUI.ui
 	QSliderEdit.ui
 	QRange.ui

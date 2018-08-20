@@ -78,7 +78,8 @@ private:
  TwoDVariablesSubtab *_variables;
  TwoDGeometrySubtab* _geometry;
  GLTwoDDataImageWindow* _glTwoDDataImageWindow;
- TwoDAppearanceSubtab * _appearance;
+ TwoDAppearanceSubtab* _appearance;
+ TwoDAnnotationSubtab* _annotation;
 
 #ifdef VAPOR3_0_0_ALPHA
  	TwoDDataImageGUI *_image;
