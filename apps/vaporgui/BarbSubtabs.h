@@ -4,6 +4,7 @@
 #include "ui_BarbAppearanceGUI.h"
 #include "ui_BarbVariablesGUI.h"
 #include "ui_BarbGeometryGUI.h"
+#include "ui_BarbAnnotationGUI.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -76,6 +77,19 @@ class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
 
   private:
     VAPoR::BarbParams *_bParams;
+};
+
+class BarbAnnotationSubtab : public QWidget, public Ui_BarbAnnotationGUI {
+
+    Q_OBJECT
+
+  public:
+    BarbAnnotationSubtab(QWidget *parent);
+
+    void Update(
+        VAPoR::ParamsMgr *paramsMgr,
+        VAPoR::DataMgr *dataMgr,
+        VAPoR::RenderParams *rParams);
 };
 
 #endif //BARBSUBTABS_H
