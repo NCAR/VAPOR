@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ContourVariablesGUI</class>
- <widget class="QWidget" name="ContourVariablesGUI">
+ <class>ContourAnnotationGUI</class>
+ <widget class="QWidget" name="ContourAnnotationGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -9,6 +9,12 @@
     <width>400</width>
     <height>302</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -21,7 +27,7 @@
     <number>0</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="rightMargin">
     <number>0</number>
@@ -30,16 +36,22 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="VariablesWidget" name="_variablesWidget" native="true"/>
+    <widget class="ColorbarWidget" name="_colorbarWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>VariablesWidget</class>
+   <class>ColorbarWidget</class>
    <extends>QWidget</extends>
-   <header>VariablesWidget.h</header>
-   <container>1</container>
+   <header>ColorbarWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
