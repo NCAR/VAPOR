@@ -45,6 +45,13 @@ DVREventRouter::DVREventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(pa
     qsgeo->setWidget(_geometry);
     qsgeo->setWidgetResizable(true);
     addTab(qsgeo, "Geometry");
+
+    _annotation = new DVRAnnotationSubtab(this);
+    QScrollArea *qsannotation = new QScrollArea(this);
+    qsannotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    qsannotation->setWidget(_geometry);
+    qsannotation->setWidgetResizable(true);
+    addTab(qsannotation, "Annotation");
 }
 
 DVREventRouter::~DVREventRouter()
@@ -52,6 +59,7 @@ DVREventRouter::~DVREventRouter()
     if (_variables) delete _variables;
     if (_geometry) delete _geometry;
     if (_appearance) delete _appearance;
+    if (_annotation) delete _annotation;
 }
 
 void DVREventRouter::GetWebHelp(vector<pair<string, string>> &help) const
@@ -72,6 +80,8 @@ void DVREventRouter::_updateTab()
     _appearance->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
 
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+
+    _annotation->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
 }
 
 string DVREventRouter::_getDescription() const
