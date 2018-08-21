@@ -37,7 +37,7 @@ public:
 
     static std::string GetClassType()
     {
-        return ("DVRenderer");
+        return ("Volume");
     }
     
 protected:
