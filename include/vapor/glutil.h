@@ -114,8 +114,8 @@ VDF_API void mcopy(GLfloat *m1, GLfloat *m2);
 VDF_API void mcopy(double *m1, double *m2);
 VDF_API void mmult(GLfloat *m1, GLfloat *m2, GLfloat *prod);
 VDF_API void mmult(GLdouble *m1, GLdouble *m2, GLdouble *prod);
-VDF_API int  minvert(GLfloat *mat, GLfloat *result);
-VDF_API int  minvert(GLdouble *mat, GLdouble *result);
+VDF_API int  minvert(const GLfloat *mat, GLfloat *result);
+VDF_API int  minvert(const GLdouble *mat, GLdouble *result);
 
 // Some routines to handle 3x3 rotation matrices, represented as 9 floats,
 // where the column index increments faster (like in 4x4 case

@@ -113,6 +113,8 @@ public:
         _scale[2] = scale[2];
     }
 
+    const double *GetModelViewMatrix() { return (_modelViewMatrix); }
+
 private:
     void setCenter(const std::vector<double> &newCenter)
     {
@@ -121,15 +123,15 @@ private:
         _center[2] = newCenter[2];
     }
 
-    double _qrot[4];
-    double _qinc[4];
-    double _trans[3];
-    double _scale[3];
-    double _center[3];
-    double _ballsize;
-    double _lastx, _lasty;
-
-    bool _perspective;
+    double   _qrot[4];
+    double   _qinc[4];
+    double   _trans[3];
+    double   _scale[3];
+    double   _center[3];
+    double   _ballsize;
+    double   _lastx, _lasty;
+    bool     _perspective;
+    GLdouble _modelViewMatrix[16];
 };
 
 #endif    // TRACKBALL_H
