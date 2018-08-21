@@ -77,6 +77,7 @@ void DVREventRouter::_updateTab()
 string DVREventRouter::_getDescription() const
 {
     return ("Displays "
-            "the user's 2D data variables along the plane described by the source data "
-            "file.\n\nThese 2D variables may be offset by a height variable.\n\n");
+            "the user's 3D data variables within a volume described by the source data "
+            "file, according to color and opacity settings defined by the user.\n\n"
+            "These 3D variables may be offset by a height variable.\n\n");
 }
