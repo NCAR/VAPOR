@@ -92,6 +92,7 @@ VDF_API void makeModelviewMatrixD(const std::vector<double> &vpos, const std::ve
 VDF_API void makeTransMatrix(float *transVec, float *matrix);
 VDF_API void makeTransMatrix(double *transVec, double *matrix);
 VDF_API void makeTransMatrix(const std::vector<double> &transVec, double *matrix);
+VDF_API void makeScaleMatrix(const double *scaleVec, double *matrix);
 VDF_API void vscale(float *v, float s);
 VDF_API void vscale(double *v, double s);
 VDF_API void vscale(std::vector<double> v, double s);

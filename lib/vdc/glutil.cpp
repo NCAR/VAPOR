@@ -845,6 +845,16 @@ void makeTransMatrix(const std::vector<double> &trans, double *mtrx)
     mtrx[15] = 1.;
     for (int i = 0; i < 3; i++) mtrx[i + 12] = trans[i];
 }
+
+void makeScaleMatrix(const double *scale, double *mtrx)
+{
+    for (int i = 0; i < 16; i++) mtrx[i] = 0.;
+    mtrx[0] = scale[0];
+    mtrx[5] = scale[1];
+    mtrx[10] = scale[2];
+    mtrx[15] = 1.;
+}
+
 /*
  * make a modelview matrix from viewer position, direction, and up vector
  * Vectors must be nonzero
