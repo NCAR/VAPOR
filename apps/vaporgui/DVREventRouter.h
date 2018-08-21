@@ -60,6 +60,7 @@ private:
     DVRVariablesSubtab *_variables;
     DVRGeometrySubtab* _geometry;
     DVRAppearanceSubtab * _appearance;
+	DVRAnnotationSubtab* _annotation;
 
 };
 
