@@ -5,7 +5,7 @@
 #include <qobject.h>
 #include <vapor/MyBase.h>
 #include "GL/glew.h"
-#include "vapor/DirectVolumeRenderer.h"
+#include "vapor/DVRenderer.h"
 #include "vapor/DVRParams.h"
 #include "RenderEventRouter.h"
 #include "VariablesWidget.h"
@@ -29,7 +29,7 @@ public:
 
     static string GetClassType() 
     { 
-       return(VAPoR::DirectVolumeRenderer::GetClassType()); 
+       return(VAPoR::DVRenderer::GetClassType()); 
     }
     string GetType() const 
     {
