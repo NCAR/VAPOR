@@ -82,6 +82,11 @@ class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
   private slots:
     void on__lightingCheckBox_toggled(bool checked) {
         _dvrParams->SetLighting(checked);
+
+        _ambientWidget->setEnabled(checked);
+        _diffuseWidget->setEnabled(checked);
+        _specularWidget->setEnabled(checked);
+        _shininessWidget->setEnabled(checked);
     }
 
     void on__ambientWidget_valueChanged(double value) {
