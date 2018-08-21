@@ -1,5 +1,5 @@
 #include <vapor/glutil.h> // Must be included first!!!
-#include <vapor/DirectVolumeRenderer.h>
+#include <vapor/DVRenderer.h>
 #include <iostream>
 #include <sstream>
 
@@ -25,21 +25,21 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<DirectVolumeRenderer>
-    registrar(DirectVolumeRenderer::GetClassType(),
+static RendererRegistrar<DVRenderer>
+    registrar(DVRenderer::GetClassType(),
               DVRParams::GetClassType());
 
 // Constructor
-DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm,
-                                           std::string &winName,
-                                           std::string &dataSetName,
-                                           std::string &instName,
-                                           DataMgr *dataMgr)
+DVRenderer::DVRenderer(const ParamsMgr *pm,
+                       std::string &winName,
+                       std::string &dataSetName,
+                       std::string &instName,
+                       DataMgr *dataMgr)
     : Renderer(pm,
                winName,
                dataSetName,
                DVRParams::GetClassType(),
-               DirectVolumeRenderer::GetClassType(),
+               DVRenderer::GetClassType(),
                instName,
                dataMgr) {
     _backFaceTextureId = 0;
@@ -63,7 +63,7 @@ DirectVolumeRenderer::DirectVolumeRenderer(const ParamsMgr *pm,
 }
 
 // Destructor
-DirectVolumeRenderer::~DirectVolumeRenderer() {
+DVRenderer::~DVRenderer() {
     // delete textures
     if (_backFaceTextureId) {
         glDeleteTextures(1, &_backFaceTextureId);
@@ -126,7 +126,7 @@ DirectVolumeRenderer::~DirectVolumeRenderer() {
 }
 
 // Constructor
-DirectVolumeRenderer::UserCoordinates::UserCoordinates() {
+DVRenderer::UserCoordinates::UserCoordinates() {
     frontFace = nullptr;
     backFace = nullptr;
     rightFace = nullptr;
@@ -148,7 +148,7 @@ DirectVolumeRenderer::UserCoordinates::UserCoordinates() {
 }
 
 // Destructor
-DirectVolumeRenderer::UserCoordinates::~UserCoordinates() {
+DVRenderer::UserCoordinates::~UserCoordinates() {
     if (frontFace) {
         delete[] frontFace;
         frontFace = nullptr;
@@ -184,8 +184,8 @@ DirectVolumeRenderer::UserCoordinates::~UserCoordinates() {
 }
 
 StructuredGrid *
-DirectVolumeRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *params,
-                                                      DataMgr *dataMgr) const {
+DVRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *params,
+                                            DataMgr *dataMgr) const {
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
     StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(
@@ -201,8 +201,8 @@ DirectVolumeRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *params,
     return grid;
 }
 
-bool DirectVolumeRenderer::UserCoordinates::IsUpToDate(const DVRParams *params,
-                                                       DataMgr *dataMgr) const {
+bool DVRenderer::UserCoordinates::IsUpToDate(const DVRParams *params,
+                                             DataMgr *dataMgr) const {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) ||
         (myVariableName != params->GetVariableName()) ||
         (myRefinementLevel != params->GetRefinementLevel()) ||
@@ -230,8 +230,8 @@ bool DirectVolumeRenderer::UserCoordinates::IsUpToDate(const DVRParams *params,
     return true;
 }
 
-bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *params,
-                                                              DataMgr *dataMgr) {
+bool DVRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *params,
+                                                    DataMgr *dataMgr) {
     myCurrentTimeStep = params->GetCurrentTimestep();
     myVariableName = params->GetVariableName();
     myRefinementLevel = params->GetRefinementLevel();
@@ -378,7 +378,7 @@ bool DirectVolumeRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *p
     return true;
 }
 
-int DirectVolumeRenderer::_initializeGL() {
+int DVRenderer::_initializeGL() {
     // Enable debug output
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
@@ -407,7 +407,7 @@ int DirectVolumeRenderer::_initializeGL() {
     return 0;
 }
 
-int DirectVolumeRenderer::_paintGL() {
+int DVRenderer::_paintGL() {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
@@ -515,7 +515,7 @@ int DirectVolumeRenderer::_paintGL() {
     return 0;
 }
 
-void DirectVolumeRenderer::_initializeFramebufferTextures() {
+void DVRenderer::_initializeFramebufferTextures() {
     /* Create an Frame Buffer Object for the back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
@@ -612,7 +612,7 @@ void DirectVolumeRenderer::_initializeFramebufferTextures() {
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void DirectVolumeRenderer::_printGLInfo() const {
+void DVRenderer::_printGLInfo() const {
     std::cout << "    **** System Info ****" << std::endl;
     std::cout << "    OpenGL version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "    GLSL   version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
@@ -621,10 +621,10 @@ void DirectVolumeRenderer::_printGLInfo() const {
     std::cout << "    **** System Info ****" << std::endl;
 }
 
-void DirectVolumeRenderer::_drawVolumeFaces(int whichPass,
-                                            bool insideACell,
-                                            const GLfloat *ModelView,
-                                            const GLfloat *InversedMV) {
+void DVRenderer::_drawVolumeFaces(int whichPass,
+                                  bool insideACell,
+                                  const GLfloat *ModelView,
+                                  const GLfloat *InversedMV) {
     assert(whichPass == 1 || whichPass == 2 || whichPass == 3);
 
     GLuint uniformLocation;
@@ -893,8 +893,8 @@ void DirectVolumeRenderer::_drawVolumeFaces(int whichPass,
     glUseProgram(0);
 }
 
-GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path,
-                                          const char *fragment_file_path) {
+GLuint DVRenderer::_loadShaders(const char *vertex_file_path,
+                                const char *fragment_file_path) {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -981,7 +981,7 @@ GLuint DirectVolumeRenderer::_loadShaders(const char *vertex_file_path,
     return ProgramID;
 }
 
-void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const {
+void DVRenderer::_getMVPMatrix(GLfloat *MVP) const {
     GLfloat ModelView[16];
     GLfloat Projection[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);   // This is from OpenGL 2...
@@ -999,8 +999,8 @@ void DirectVolumeRenderer::_getMVPMatrix(GLfloat *MVP) const {
         }
 }
 
-void DirectVolumeRenderer::_matMultiVec(const GLfloat *mat, const GLfloat *in,
-                                        GLfloat *out) const {
+void DVRenderer::_matMultiVec(const GLfloat *mat, const GLfloat *in,
+                              GLfloat *out) const {
 #define MAT(m, r, c) (m)[(c)*4 + (r)]
     out[0] = MAT(mat, 0, 0) * in[0] + MAT(mat, 0, 1) * in[1] + MAT(mat, 0, 2) * in[2] + MAT(mat, 0, 3) * in[3];
     out[1] = MAT(mat, 1, 0) * in[0] + MAT(mat, 1, 1) * in[1] + MAT(mat, 1, 2) * in[2] + MAT(mat, 1, 3) * in[3];
@@ -1009,8 +1009,8 @@ void DirectVolumeRenderer::_matMultiVec(const GLfloat *mat, const GLfloat *in,
 #undef MAT
 }
 
-double DirectVolumeRenderer::_getElapsedSeconds(const struct timeval *begin,
-                                                const struct timeval *end) const {
+double DVRenderer::_getElapsedSeconds(const struct timeval *begin,
+                                      const struct timeval *end) const {
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
 }
 
@@ -1033,7 +1033,7 @@ double DirectVolumeRenderer::_getElapsedSeconds(const struct timeval *begin,
  * with partial pivoting followed by back/substitution with the loops manually
  * unrolled.
  */
-bool DirectVolumeRenderer::_mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16]) {
+bool DVRenderer::_mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16]) {
 /**
      * References an element of 4x4 matrix.
      * Calculate the linear storage index of the element and references it. 
@@ -1234,7 +1234,7 @@ bool DirectVolumeRenderer::_mesa_invert_matrix_general(GLfloat out[16], const GL
  * \param to destination array.
  * \param from source array.
  */
-void DirectVolumeRenderer::_mesa_transposef(GLfloat to[16], const GLfloat from[16]) {
+void DVRenderer::_mesa_transposef(GLfloat to[16], const GLfloat from[16]) {
     to[0] = from[0];
     to[1] = from[4];
     to[2] = from[8];
@@ -1253,7 +1253,7 @@ void DirectVolumeRenderer::_mesa_transposef(GLfloat to[16], const GLfloat from[1
     to[15] = from[15];
 }
 
-void DirectVolumeRenderer::_printMatrix(const GLfloat m[16]) {
+void DVRenderer::_printMatrix(const GLfloat m[16]) {
     for (int i = 0; i < 4; i++)
         printf("\t%f %f %f %f\n", m[i], m[4 + i], m[8 + i], m[12 + i]);
 }
