@@ -123,7 +123,11 @@ void Trackball::TrackballSetMatrix()
 	Currently assuming identity??
 	*/
 	//sendGLHomeViewpoint();
-
+	
+	// Ugh. Use OpenGL to do matrix manipulation, then retrieve and store
+	// results in member variable
+	//
+	glPushMatrix();
 	glLoadIdentity();
 
     if (_perspective) {
@@ -163,6 +167,13 @@ void Trackball::TrackballSetMatrix()
 			matrix[8], matrix[9],matrix[10],matrix[11],
 			matrix[12], matrix[13],matrix[14],matrix[15]);*/
     }
+
+	// Fetch results of matrix calculation, and then restore previous
+	// OpenGL state
+	//
+	glGetDoublev(GL_MODELVIEW_MATRIX, _modelViewMatrix);
+	glPopMatrix();
+	
 }
 
 #ifndef	M_SQRT1_2
@@ -336,12 +347,9 @@ bool Trackball::ReconstructCamera(
 	double position[3], double upVec[3], double viewDir[3]
 ) const {
 
-    double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
-
     double minv[16];
 
-    int rc = minvert(m, minv);
+    int rc = minvert(_modelViewMatrix, minv);
     if (rc<0) return(false);
 
     vscale(minv+8, -1.0);
