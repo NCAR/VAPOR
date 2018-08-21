@@ -1,5 +1,5 @@
-#ifndef DIRECTVOLUMERENDERER_H
-#define DIRECTVOLUMERENDERER_H
+#ifndef DVRENDERER_H
+#define DVRENDERER_H
 
 #include <GL/glew.h>
 #include <sys/time.h>
@@ -22,13 +22,13 @@
 
 namespace VAPoR {
 
-class RENDER_API DirectVolumeRenderer : public Renderer {
+class RENDER_API DVRenderer : public Renderer {
 public:
-    DirectVolumeRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
+    DVRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
 
-    virtual ~DirectVolumeRenderer();
+    virtual ~DVRenderer();
 
-    static std::string GetClassType() { return ("DirectVolumeRenderer"); }
+    static std::string GetClassType() { return ("DVRenderer"); }
 
 protected:
     // pure virtual functions that are required to implement
@@ -141,7 +141,7 @@ private:
     void _mesa_transposef(GLfloat to[16], const GLfloat from[16]);
     void _printMatrix(const GLfloat m[16]);
 
-};    // End of class DirectVolumeRenderer
+};    // End of class DVRenderer
 
 };    // End of namespace VAPoR
 
