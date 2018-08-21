@@ -46,12 +46,6 @@
 #ifndef	TRACKBALL_H
 #define	TRACKBALL_H
 
-#ifdef Darwin
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
 #include <vector>
 #include <vapor/common.h>
 
@@ -136,7 +130,7 @@ private:
     double	_ballsize;
     double	_lastx, _lasty;
 	bool _perspective;
-	GLdouble    _modelViewMatrix[16];
+	double    _modelViewMatrix[16];
 } ;
 
 
