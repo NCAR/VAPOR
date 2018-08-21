@@ -264,8 +264,7 @@ void VizWin::_setMatrixFromModeParams() {
     _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
     _trackBall->TrackballSetMatrix();
 
-    double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+    const double *m = _trackBall->GetModelViewMatrix();
 
     // Disable state saving for modelview matrix. It's handled elsewhere and
     // don't want to double up
@@ -464,8 +463,7 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent *e) {
         2, _buttonNum, e->x(), e->y(), width(), height());
     _trackBall->TrackballSetMatrix();
 
-    double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+    const double *m = _trackBall->GetModelViewMatrix();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -549,8 +547,7 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e) {
 
     _trackBall->TrackballSetMatrix();
 
-    double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
+    const double *m = _trackBall->GetModelViewMatrix();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
