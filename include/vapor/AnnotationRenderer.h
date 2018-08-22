@@ -25,6 +25,7 @@
 #include <vapor/textRenderer.h>
 #include <vapor/Transform.h>
 #include <vapor/DataMgrUtils.h>
+#include "vapor/GLManager.h"
 
 namespace VAPoR {
 
@@ -48,7 +49,7 @@ class RENDER_API AnnotationRenderer : public MyBase {
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
     //! \param[in] sm A pointer to a ShaderMgr
-    void InitializeGL(ShaderMgr *sm);
+    void InitializeGL(ShaderMgr *sm, GLManager *glManager);
 
     //! Destructor
     virtual ~AnnotationRenderer();
@@ -91,6 +92,7 @@ class RENDER_API AnnotationRenderer : public MyBase {
     const DataStatus *m_dataStatus;
     string m_winName;
     ShaderMgr *m_shaderMgr;
+    GLManager *_glManager;
     int _currentTimestep;
     bool _textObjectsValid;
     TextObject *_textObject;
