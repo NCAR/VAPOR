@@ -33,6 +33,7 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/ContourParams.h>
+#include <vapor/ShaderProgram2.h>
 
 namespace VAPoR {
 
@@ -57,8 +58,10 @@ public:
     virtual int _paintGL();
 
 private:
-    GLuint _drawList;
+    GLuint       _VAO, _VBO;
+    unsigned int _nVertices;
 
+    struct VertexData;
     struct {
         string         varName;
         string         heightVarName;
