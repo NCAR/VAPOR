@@ -373,6 +373,7 @@ MainForm::MainForm(
         //
         if (files[0].endsWith(".nc")) {
             loadData(files[0].toStdString());
+            _stateChangeCB();
         }
     }
     app->installEventFilter(this);
@@ -1458,7 +1459,7 @@ void MainForm::_setAnimationOnOff(bool on) {
 
 void MainForm::_setAnimationDraw() {
     _tabMgr->Update();
-    _vizWinMgr->Update();
+    _vizWinMgr->Update(false);
 }
 
 void MainForm::enableKeyframing(bool ison) {
@@ -1871,7 +1872,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
         // force visualizer redraw
         //
-        _vizWinMgr->Update();
+        _vizWinMgr->Update(false);
 
         update();
 
@@ -1892,7 +1893,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
     case (QEvent::MouseMove):
         if (_buttonPressed) {
-            _vizWinMgr->Update();
+            _vizWinMgr->Update(true);
         }
         break;
 

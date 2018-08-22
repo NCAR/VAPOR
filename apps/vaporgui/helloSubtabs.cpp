@@ -1,5 +1,6 @@
 #include <vapor/HelloParams.h>
 #include "helloSubtabs.h"
+#include "Flags.h"
 
 using namespace VAPoR;
 
@@ -9,7 +10,6 @@ HelloVariablesSubtab::HelloVariablesSubtab(QWidget *parent)
     setupUi(this);
 
     _variablesWidget->Reinit(
-        (VariablesWidget::DisplayFlags)(VariablesWidget::SCALAR | VariablesWidget::HGT),
-        (VariablesWidget::THREED),
-        (VariablesWidget::ColorFlags)(0));
+        (VariableFlags)(SCALAR | HEIGHT),
+        (DimFlags)(THREED));
 }

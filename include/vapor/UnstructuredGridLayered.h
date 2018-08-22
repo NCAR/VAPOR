@@ -1,12 +1,11 @@
-#ifndef _UnstructuredGrid2D_
-#define _UnstructuredGrid2D_
+#ifndef _UnstructuredGridLayered_
+#define _UnstructuredGridLayered_
 
 #include <ostream>
 #include <vector>
 #include <memory>
 #include <vapor/common.h>
-#include <vapor/UnstructuredGrid.h>
-#include <vapor/UnstructuredGridCoordless.h>
+#include <vapor/UnstructuredGrid2D.h>
 #include <vapor/KDTreeRG.h>
 
 #ifdef WIN32
@@ -15,17 +14,17 @@
 
 namespace VAPoR {
 
-//! \class UnstructuredGrid2D
-//! \brief class for a 2D unstructured grid.
+//! \class UnstructuredGridLayered
+//! \brief class for a Layered unstructured grid.
 //! \author John Clyne
 //!
 //
-class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
+class VDF_API UnstructuredGridLayered : public UnstructuredGrid {
   public:
-    //! Construct a unstructured grid sampling 2D scalar function
+    //! Construct a unstructured grid sampling Layered scalar function
     //!
     //
-    UnstructuredGrid2D(
+    UnstructuredGridLayered(
         const std::vector<size_t> &vertexDims,
         const std::vector<size_t> &faceDims,
         const std::vector<size_t> &edgeDims,
@@ -42,13 +41,13 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
         const UnstructuredGridCoordless &zug,
         const KDTreeRG *kdtree);
 
-    UnstructuredGrid2D() = default;
-    virtual ~UnstructuredGrid2D() = default;
+    UnstructuredGridLayered() = default;
+    virtual ~UnstructuredGridLayered() = default;
 
     virtual size_t GetGeometryDim() const override;
 
     static std::string GetClassType() {
-        return ("Unstructured2D");
+        return ("UnstructuredLayered");
     }
     std::string GetType() const override { return (GetClassType()); }
 
@@ -73,24 +72,7 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
 
     bool GetIndicesCell(
         const std::vector<double> &coords,
-        std::vector<size_t> &indices) const override {
-
-        std::vector<double> lambda;
-        std::vector<std::vector<size_t>> nodes;
-        return (GetIndicesCell(coords, indices, nodes, lambda));
-    }
-
-    //! \copydoc Grid::GetIndicesCell()
-    //!
-    //! \param[out] nodes Indices of vertices of the cell identified by \p indices
-    //! \param[out] lambda Interpolation weights that may be applied to values
-    //! at nodes identified by \p nodes
-    //!
-    bool GetIndicesCell(
-        const std::vector<double> &coords,
-        std::vector<size_t> &indices,
-        std::vector<std::vector<size_t>> &nodes,
-        std::vector<double> &lambda) const;
+        std::vector<size_t> &indices) const override;
 
     bool InsideGrid(const std::vector<double> &coords) const override;
 
@@ -106,13 +88,13 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
     //
     /////////////////////////////////////////////////////////////////////////////
 
-    class ConstCoordItrU2D : public Grid::ConstCoordItrAbstract {
+    class ConstCoordItrULayered : public Grid::ConstCoordItrAbstract {
       public:
-        ConstCoordItrU2D(const UnstructuredGrid2D *ug, bool begin);
-        ConstCoordItrU2D(const ConstCoordItrU2D &rhs);
+        ConstCoordItrULayered(const UnstructuredGridLayered *ug, bool begin);
+        ConstCoordItrULayered(const ConstCoordItrULayered &rhs);
 
-        ConstCoordItrU2D();
-        virtual ~ConstCoordItrU2D() {}
+        ConstCoordItrULayered();
+        virtual ~ConstCoordItrULayered() {}
 
         virtual void next();
         virtual void next(const long &offset);
@@ -122,63 +104,48 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
         virtual const void *address() const { return this; };
 
         virtual bool equal(const void *rhs) const {
-            const ConstCoordItrU2D *itrptr =
-                static_cast<const ConstCoordItrU2D *>(rhs);
+            const ConstCoordItrULayered *itrptr =
+                static_cast<const ConstCoordItrULayered *>(rhs);
 
             return (
-                _xCoordItr == itrptr->_xCoordItr &&
-                _yCoordItr == itrptr->_yCoordItr &&
+                _itr2D == itrptr->_itr2D &&
                 _zCoordItr == itrptr->_zCoordItr);
         }
 
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const {
-            return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU2D(*this));
+            return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrULayered(*this));
         };
 
       private:
-        int _ncoords;
-        ConstIterator _xCoordItr;
-        ConstIterator _yCoordItr;
+        const UnstructuredGridLayered *_ug;
+        UnstructuredGrid2D::ConstCoordItr _itr2D;
         ConstIterator _zCoordItr;
         std::vector<double> _coords;
+        size_t _nElements2D;
+        size_t _index2D;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override {
         return ConstCoordItr(
-            std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU2D(this, true)));
+            std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrULayered(this, true)));
     }
     virtual ConstCoordItr ConstCoordEnd() const override {
         return ConstCoordItr(
-            std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU2D(this, false)));
+            std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrULayered(this, false)));
     }
 
-    VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGrid2D &sg);
+    VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGridLayered &sg);
 
   private:
-    UnstructuredGridCoordless _xug;
-    UnstructuredGridCoordless _yug;
+    UnstructuredGrid2D _ug2d;
     UnstructuredGridCoordless _zug;
-    const KDTreeRG *_kdtree;
 
     bool _insideGrid(
         const std::vector<double> &coords,
-        size_t &face, std::vector<size_t> &nodes,
-        double *lambda, int &nlambda) const;
-
-    bool _insideGridNodeCentered(
-        const std::vector<double> &coords,
-        size_t &face, std::vector<size_t> &nodes,
-        double *lambda, int &nlambda) const;
-
-    bool _insideGridFaceCentered(
-        const std::vector<double> &coords,
-        size_t &face, std::vector<size_t> &nodes,
-        double *lambda, int &nlambda) const;
-
-    bool _insideFace(
-        size_t face, double pt[2],
-        std::vector<size_t> &node_indices,
-        double *lambda, int &nlambda) const;
+        std::vector<size_t> &cindices,
+        std::vector<size_t> &nodes2D,
+        std::vector<double> &lambda,
+        float zwgt[2]) const;
 };
 }; // namespace VAPoR
 

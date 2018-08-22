@@ -58,7 +58,7 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
   protected:
     int _initializeGL();
 
-    int _paintGL();
+    int _paintGL(bool fast);
 
     int GetMesh(DataMgr *dataMgr,
                 GLfloat **verts,
