@@ -127,7 +127,8 @@ private:
     void _drawVolumeFaces( int            whichPass, 
                            bool           insideACell = false,
                            const GLfloat* ModelView   = nullptr,
-                           const GLfloat* InversedMV  = nullptr );
+                           const GLfloat* InversedMV  = nullptr,
+                           bool           fast        = false );
 
     // 
     // Initialization for 1) framebuffers and 2) textures 
