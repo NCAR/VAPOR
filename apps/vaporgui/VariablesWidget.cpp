@@ -182,7 +182,12 @@ void VariablesWidget::setVariableDims(int index)
     updateCombos();
 }
 
-void VariablesWidget::setDefaultVariables() { _rParams->SetDefaultVariables(_activeDim); }
+void VariablesWidget::setDefaultVariables()
+{
+    bool secondaryColormapVariable = false;
+    if (_variableFlags & COLOR) secondaryColormapVariable = true;
+    _rParams->SetDefaultVariables(_activeDim, secondaryColormapVariable);
+}
 
 // Default scalar variable will just be the first variable
 // of the active dimension (2D or 3D)
