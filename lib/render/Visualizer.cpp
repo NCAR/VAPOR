@@ -43,7 +43,6 @@
 #include <vapor/jpegapi.h>
 #include <vapor/common.h>
 #include <vapor/ShaderMgr.h>
-#include <vapor/GLState.h>
 
 #include "imagewriter.hpp"
 
@@ -181,25 +180,25 @@ void Visualizer::applyTransforms(int i)
 #endif
 
     glMatrixMode(GL_MODELVIEW);
-    GLState::MatrixModeModelView();
+    _glManager->matrixManager->MatrixModeModelView();
     glPushMatrix();
-    GLState::PushMatrix();
+    _glManager->matrixManager->PushMatrix();
 
     glTranslatef(origin[0], origin[1], origin[2]);
-    GLState::Translate(origin[0], origin[1], origin[2]);
+    _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
     glScalef(scales[0], scales[1], scales[2]);
-    GLState::Scale(scales[0], scales[1], scales[2]);
+    _glManager->matrixManager->Scale(scales[0], scales[1], scales[2]);
     glRotatef(rotations[0], 1, 0, 0);
-    GLState::Rotate(rotations[0], 1, 0, 0);
+    _glManager->matrixManager->Rotate(rotations[0], 1, 0, 0);
     glRotatef(rotations[1], 0, 1, 0);
-    GLState::Rotate(rotations[1], 0, 1, 0);
+    _glManager->matrixManager->Rotate(rotations[1], 0, 1, 0);
     glRotatef(rotations[2], 0, 0, 1);
-    GLState::Rotate(rotations[2], 0, 0, 1);
+    _glManager->matrixManager->Rotate(rotations[2], 0, 0, 1);
     glTranslatef(-origin[0], -origin[1], -origin[2]);
-    GLState::Translate(-origin[0], -origin[1], -origin[2]);
+    _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 
     glTranslatef(translations[0], translations[1], translations[2]);
-    GLState::Translate(translations[0], translations[1], translations[2]);
+    _glManager->matrixManager->Translate(translations[0], translations[1], translations[2]);
 }
 
 int Visualizer::paintEvent()
@@ -262,9 +261,9 @@ int Visualizer::paintEvent()
             glMatrixMode(GL_TEXTURE);    // TODO GLState
             glPushMatrix();              // GL_TEXTURE
             glMatrixMode(GL_MODELVIEW);
-            GLState::MatrixModeModelView();
+            _glManager->matrixManager->MatrixModeModelView();
             glPushMatrix();
-            GLState::PushMatrix();
+            _glManager->matrixManager->PushMatrix();
             glPushAttrib(GL_ALL_ATTRIB_BITS);
 
             if (!_renderer[i]->IsGLInitialized()) {
@@ -274,11 +273,11 @@ int Visualizer::paintEvent()
 
             if (_renderer[i]->IsGLInitialized()) {
                 applyTransforms(i);
-                GLState::Test();
-                GLState::TestUpload();
+                _glManager->matrixManager->Test();
+                _glManager->matrixManager->TestUpload();
                 int myrc = _renderer[i]->paintGL();
                 glPopMatrix();
-                GLState::PopMatrix();
+                _glManager->matrixManager->PopMatrix();
                 if (myrc < 0) rc = -1;
             }
 #ifdef VAPOR3_0_0_ALPHA
@@ -286,9 +285,9 @@ int Visualizer::paintEvent()
 #endif
             glPopAttrib();
             glMatrixMode(GL_MODELVIEW);
-            GLState::MatrixModeModelView();
+            _glManager->matrixManager->MatrixModeModelView();
             glPopMatrix();
-            GLState::PopMatrix();
+            _glManager->matrixManager->PopMatrix();
             glMatrixMode(GL_TEXTURE);    // TODO GLState
             glPopMatrix();               // GL_TEXTURE
             int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
@@ -299,7 +298,7 @@ int Visualizer::paintEvent()
     // Go back to MODELVIEW for any other matrix stuff
     // By default the matrix is expected to be MODELVIEW
     glMatrixMode(GL_MODELVIEW);
-    GLState::MatrixModeModelView();
+    _glManager->matrixManager->MatrixModeModelView();
 
     // Draw any features that are overlaid on scene
 
@@ -361,15 +360,15 @@ int Visualizer::paintSetup(int timeStep)
     double m[16];
     vpParams->GetProjectionMatrix(m);
     glMatrixMode(GL_PROJECTION);
-    GLState::MatrixModeProjection();
+    _glManager->matrixManager->MatrixModeProjection();
     glLoadMatrixd(m);
-    GLState::LoadMatrixd(m);
+    _glManager->matrixManager->LoadMatrixd(m);
 
     vpParams->GetModelViewMatrix(m);
     glMatrixMode(GL_MODELVIEW);
-    GLState::MatrixModeModelView();
+    _glManager->matrixManager->MatrixModeModelView();
     glLoadMatrixd(m);
-    GLState::LoadMatrixd(m);
+    _glManager->matrixManager->LoadMatrixd(m);
 
     // Improve polygon antialiasing
     glEnable(GL_MULTISAMPLE);
@@ -390,7 +389,7 @@ int Visualizer::initializeGL(ShaderMgr *shaderMgr, GLManager *glManager)
 {
     _glManager = glManager;
     m_shaderMgr = shaderMgr;
-    m_vizFeatures->InitializeGL(shaderMgr);
+    m_vizFeatures->InitializeGL(shaderMgr, glManager);
 
     GLenum err = glewInit();
     if (GLEW_OK != err) {
@@ -937,17 +936,17 @@ bool Visualizer::getPixelData(unsigned char *data) const
 void Visualizer::renderColorbars(int timeStep)
 {
     glMatrixMode(GL_MODELVIEW);
-    GLState::MatrixModeModelView();
+    _glManager->matrixManager->MatrixModeModelView();
     glPushMatrix();
-    GLState::PushMatrix();
+    _glManager->matrixManager->PushMatrix();
     glLoadIdentity();
-    GLState::LoadIdentity();
+    _glManager->matrixManager->LoadIdentity();
     glMatrixMode(GL_PROJECTION);
-    GLState::MatrixModeProjection();
+    _glManager->matrixManager->MatrixModeProjection();
     glPushMatrix();
-    GLState::PushMatrix();
+    _glManager->matrixManager->PushMatrix();
     glLoadIdentity();
-    GLState::LoadIdentity();
+    _glManager->matrixManager->LoadIdentity();
     for (int i = 0; i < _renderer.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
@@ -957,13 +956,13 @@ void Visualizer::renderColorbars(int timeStep)
             _renderer[i]->renderColorbar();
         }
         glMatrixMode(GL_PROJECTION);
-        GLState::MatrixModeProjection();
+        _glManager->matrixManager->MatrixModeProjection();
         glPopMatrix();
-        GLState::PopMatrix();
+        _glManager->matrixManager->PopMatrix();
         glMatrixMode(GL_MODELVIEW);
-        GLState::MatrixModeModelView();
+        _glManager->matrixManager->MatrixModeModelView();
         glPopMatrix();
-        GLState::PopMatrix();
+        _glManager->matrixManager->PopMatrix();
     }
 
     void Visualizer::incrementPath(string & s)

@@ -29,7 +29,6 @@
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
 #include <vapor/GetAppPath.h>
-#include <vapor/GLState.h>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -43,6 +42,7 @@ AnnotationRenderer::AnnotationRenderer(const ParamsMgr *pm, const DataStatus *da
     m_dataStatus = dataStatus;
     m_winName = winName;
     m_shaderMgr = NULL;
+    _glManager = nullptr;
 
     _textObjectsValid = false;
     _textObject = NULL;
@@ -64,7 +64,11 @@ AnnotationRenderer::~AnnotationRenderer()
 #endif
 }
 
-void AnnotationRenderer::InitializeGL(ShaderMgr *shaderMgr) { m_shaderMgr = shaderMgr; }
+void AnnotationRenderer::InitializeGL(ShaderMgr *shaderMgr, GLManager *glManager)
+{
+    m_shaderMgr = shaderMgr;
+    _glManager = glManager;
+}
 
 // Issue OpenGL commands to draw a grid of lines of the full domain.
 // Grid resolution is up to 2x2x2
@@ -306,20 +310,20 @@ void AnnotationRenderer::applyTransform(Transform *t)
     assert(origin.size() == 3);
 
     glTranslatef(origin[0], origin[1], origin[2]);
-    GLState::Translate(origin[0], origin[1], origin[2]);
+    _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
     glScalef(scale[0], scale[1], scale[2]);
-    GLState::Scale(scale[0], scale[1], scale[2]);
+    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
     glRotatef(rotate[0], 1, 0, 0);
-    GLState::Rotate(rotate[0], 1, 0, 0);
+    _glManager->matrixManager->Rotate(rotate[0], 1, 0, 0);
     glRotatef(rotate[1], 0, 1, 0);
-    GLState::Rotate(rotate[1], 0, 1, 0);
+    _glManager->matrixManager->Rotate(rotate[1], 0, 1, 0);
     glRotatef(rotate[2], 0, 0, 1);
-    GLState::Rotate(rotate[2], 0, 0, 1);
+    _glManager->matrixManager->Rotate(rotate[2], 0, 0, 1);
     glTranslatef(-origin[0], -origin[1], -origin[2]);
-    GLState::Translate(-origin[0], -origin[1], -origin[2]);
+    _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 
     glTranslatef(translate[0], translate[1], translate[2]);
-    GLState::Translate(translate[0], translate[1], translate[2]);
+    _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts)
@@ -332,9 +336,9 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
     glMatrixMode(GL_MODELVIEW);
-    GLState::MatrixModeModelView();
+    _glManager->matrixManager->MatrixModeModelView();
     glPushMatrix();
-    GLState::PushMatrix();
+    _glManager->matrixManager->PushMatrix();
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     vector<string>   winNames = m_paramsMgr->GetVisualizerNames();
@@ -365,9 +369,9 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     glPopAttrib();
     glMatrixMode(GL_MODELVIEW);
-    GLState::MatrixModeModelView();
+    _glManager->matrixManager->MatrixModeModelView();
     glPopMatrix();
-    GLState::PopMatrix();
+    _glManager->matrixManager->PopMatrix();
     glMatrixMode(GL_TEXTURE);
     glPopMatrix();
 

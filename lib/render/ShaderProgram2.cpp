@@ -20,7 +20,6 @@ bool ShaderProgram2::Link()
     _id = glCreateProgram();
     for (auto it = _shaders.begin(); it != _shaders.end(); it++) {
         assert((*it)->WasCompilationSuccessful());
-        printf("GL Adding shader %i\n", (*it)->GetID());
         glAttachShader(_id, (*it)->GetID());
     }
     glLinkProgram(_id);
@@ -116,3 +115,15 @@ void ShaderProgram2::SetUniform(int location, const glm::vec2 value) const { glU
 void ShaderProgram2::SetUniform(int location, const glm::vec3 value) const { glUniform3fv(location, 1, glm::value_ptr(value)); }
 void ShaderProgram2::SetUniform(int location, const glm::vec4 value) const { glUniform4fv(location, 1, glm::value_ptr(value)); }
 void ShaderProgram2::SetUniform(int location, const glm::mat4 value) const { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)); }
+
+SmartShaderProgram::SmartShaderProgram(ShaderProgram2 *program) : _program(program)
+{
+    printf("Auto Bind\n");
+    _program->Bind();
+}
+
+SmartShaderProgram::~SmartShaderProgram()
+{
+    printf("Auto Unbind\n");
+    _program->UnBind();
+}

@@ -42,4 +42,15 @@ public:
     void                      SetUniform(int location, const glm::vec4 value) const;
     void                      SetUniform(int location, const glm::mat4 value) const;
 };
+
+class SmartShaderProgram {
+    ShaderProgram2 *_program;
+
+    SmartShaderProgram(ShaderProgram2 *program);
+
+public:
+    ~SmartShaderProgram();
+    ShaderProgram2 *operator->() { return _program; }
+    friend class ShaderManager;
+};
 }    // namespace VAPoR
