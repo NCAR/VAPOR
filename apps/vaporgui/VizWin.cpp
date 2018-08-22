@@ -261,7 +261,7 @@ void VizWin::_setUpModelViewMatrix()
 {
     makeCurrent();    // necessary?
 
-    _setMatrixFromModeParams();
+    //_setMatrixFromModeParams();
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
@@ -331,15 +331,12 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-
     double           m[16];
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     vParams->GetModelViewMatrix(m);
 
     double center[3];
-    p->GetRotationCenter(center);
+    vParams->GetRotationCenter(center);
 
     double posvec[3], upvec[3], dirvec[3];
     bool   status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
@@ -348,7 +345,7 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
     // Set trackball from current ViewpointParams matrix;
     //
     _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-    _trackBall->TrackballSetMatrix();
+    _trackBall->TrackballSetMatrix();    // needed?
 
     // Let trackball handle mouse events for navigation
     //
@@ -358,6 +355,8 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
     // Only save camera parameters after user release mouse
     //
     paramsMgr->BeginSaveStateGroup("Navigate scene");
+
+    emit StartNavigation(_winName);
 }
 
 // If the user presses the mouse on the active viz window,
@@ -428,20 +427,9 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent *e)
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     vParams->SetModelViewMatrix(m);
 
-    // Also need to set camera parameters in MouseModeParams
-    //
-    double posvec[3], upvec[3], dirvec[3];
-    bool   status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
-    assert(status);
-
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-
-    p->SetCameraPos(posvec);
-    p->SetCameraViewDir(dirvec);
-    p->SetCameraUpVec(upvec);
-
     paramsMgr->EndSaveStateGroup();
+
+    emit EndNavigation(_winName);
 }
 
 /*

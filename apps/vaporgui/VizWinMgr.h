@@ -26,6 +26,7 @@ class QWidget;
 #include <qobject.h>
 #include <vapor/common.h>
 #include <vapor/ParamsMgr.h>
+#include <vapor/ViewpointParams.h>
 #include "AnimationParams.h"
 #include "GUIStateParams.h"
 
@@ -102,6 +103,10 @@ private slots:
     //! Relevant params, renderers, etc. are removed.
     void _vizAboutToDisappear(string winName);
 
+    // Method that responds to completion of window navigation
+    //
+    void _syncViewpoints(string winName);
+
 signals:
     // Turn on/off multiple viz options:
     //
@@ -144,6 +149,13 @@ private:
         assert(_controlExec != NULL);
         VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         return ((AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType()));
+    }
+
+    VAPoR::ViewpointParams *_getViewpointParams(string winName) const
+    {
+        assert(_controlExec != NULL);
+        VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+        return (paramsMgr->GetViewpointParams(winName));
     }
 
     vector<string> _getVisualizerNames() const;
