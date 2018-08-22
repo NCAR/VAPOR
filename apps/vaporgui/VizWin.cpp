@@ -66,13 +66,6 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     _manip = new TranslateStretchManip();
     bool initialize = true;
     updateManip(initialize);
-
-    for (int i = 0; i < 3; i++) {
-        _center[i] = 0.0;
-        _posvec[i] = 0.0;
-        _dirvec[i] = 0.0;
-        _upvec[i] = 0.0;
-    }
 }
 
 /*
@@ -209,59 +202,9 @@ void VizWin::_setUpProjMatrix()
     glMatrixMode(GL_MODELVIEW);
 }
 
-void VizWin::_setMatrixFromModeParams()
-{
-    // This is a hack to see if camera parameters have been changed
-    // via MouseModeParams. Because the only way to convert camera
-    // parameter such as position vector, etc. into a ModelView matrix
-    // is via the TrackBall we have to do the conversion in a window
-    // with an OpenGL context :-(
-    //
-
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-
-    double center[3], posvec[3], dirvec[3], upvec[3];
-    p->GetRotationCenter(center);
-    p->GetCameraPos(posvec);
-    p->GetCameraViewDir(dirvec);
-    p->GetCameraUpVec(upvec);
-    bool updateFromMouseMode = false;
-    for (int i = 0; i < 3; i++) {
-        if (center[i] != _center[i] || posvec[i] != _posvec[i] || dirvec[i] != _dirvec[i] || upvec[i] != _upvec[i]) { updateFromMouseMode = true; }
-    }
-    if (!updateFromMouseMode) return;
-
-    _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-    _trackBall->TrackballSetMatrix();
-
-    const double *m = _trackBall->GetModelViewMatrix();
-
-    // Disable state saving for modelview matrix. It's handled elsewhere and
-    // don't want to double up
-    //
-    bool enabled = _controlExec->GetSaveStateEnabled();
-    _controlExec->SetSaveStateEnabled(false);
-
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-    vParams->SetModelViewMatrix(m);
-
-    _controlExec->SetSaveStateEnabled(enabled);
-
-    for (int i = 0; i < 3; i++) {
-        _center[i] = center[i];
-        _posvec[i] = posvec[i];
-        _dirvec[i] = dirvec[i];
-        _upvec[i] = upvec[i];
-    }
-}
-
 void VizWin::_setUpModelViewMatrix()
 {
     makeCurrent();    // necessary?
-
-    //_setMatrixFromModeParams();
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
@@ -456,26 +399,6 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e)
     if (modeName == MouseModeParams::GetNavigateModeName()) _mouseReleaseEventNavigate(e);
 
     _navigating = false;
-
-#ifdef VAPOR3_0_0_ALPHA
-    string                 tag = MouseModeParams::getModeTag(mode);
-    TranslateStretchManip *myManip = _visualizer->getManip(tag);
-    // Check if the seed bounds were moved
-    if (myManip->draggingHandle() >= 0) {
-        float screenCoords[2];
-        screenCoords[0] = (float)e->x();
-        screenCoords[1] = (float)(height() - e->y());
-        setMouseDown(false, myManip);
-        // The manip must move the region, and then tells the params to
-        // record end of move
-        myManip->mouseRelease(screenCoords);
-        VizWinMgr::getInstance()->getEventRouter(tag)->captureMouseUp();
-        VizWinParams::SetVizDirty(_windowNum);
-
-    } else {    // otherwise fall through to navigate mode
-        doNavigate = true;
-    }
-#endif
 
     _buttonNum = 0;
 }
@@ -702,37 +625,6 @@ void VizWin::_getActiveExtents(std::vector<double> &minExts, std::vector<double>
     }
 }
 
-void VizWin::_getCenterAndCamPos(std::vector<double> &rotationCenter, std::vector<double> &cameraPosition)
-{
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = _getCurrentMouseMode();
-    double           rotCenter[3], cameraPos[3];
-    p->GetRotationCenter(rotCenter);
-    p->GetCameraPos(cameraPos);
-
-    rotationCenter.clear();
-    cameraPosition.clear();
-    for (int i = 0; i < 3; i++) {
-        rotationCenter.push_back(rotCenter[i]);
-        cameraPosition.push_back(cameraPos[i]);
-    }
-}
-
-void VizWin::_getWindowSize(std::vector<int> &windowSize)
-{
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-
-    size_t width, height;
-    vParams->GetWindowSize(width, height);
-
-    windowSize.push_back(width);
-    windowSize.push_back(height);
-}
-
 VAPoR::Transform *VizWin::_getDataMgrTransform() const
 {
     string dataMgrName = _getCurrentDataMgrName();
@@ -751,21 +643,8 @@ void VizWin::updateManip(bool initialize)
 
     std::vector<double> minExts(3, numeric_limits<double>::max());
     std::vector<double> maxExts(3, numeric_limits<double>::lowest());
-    // std::vector<double> minExts;	// This dumps core...
-    // std::vector<double> maxExts;	// This dumps core...
+
     _getActiveExtents(minExts, maxExts);
-
-    std::vector<double> rotationCenter, cameraPosition;
-    _getCenterAndCamPos(rotationCenter, cameraPosition);
-
-    std::vector<int> windowSize;
-    _getWindowSize(windowSize);
-
-    double           mv[16];
-    double           proj[16];
-    ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-    vParams->GetModelViewMatrix(mv);
-    vParams->GetProjectionMatrix(proj);
 
     std::vector<double>  llc, urc;
     string               classType;
@@ -785,7 +664,7 @@ void VizWin::updateManip(bool initialize)
     VAPoR::Transform *rpTransform = NULL;
     if (rParams != NULL) rpTransform = rParams->GetTransform();
 
-    _manip->Update(llc, urc, minExts, maxExts, cameraPosition, mv, proj, windowSize, rpTransform, dmTransform, constrain);
+    _manip->Update(llc, urc, minExts, maxExts, rpTransform, dmTransform, constrain);
 
     _manip->Render();
 }
