@@ -148,10 +148,6 @@ private:
 		int refLevel,
 		std::vector<double> &minExts,
 		std::vector<double> &maxExts);
-	void _getCenterAndCamPos(
-		std::vector<double> &rotationCenter,
-		std::vector<double> &cameraPos);
-	void _getWindowSize(std::vector<int> &windowSize);
 	string _getCurrentDataMgrName() const;
 	VAPoR::Transform* _getDataMgrTransform() const;
 
@@ -167,9 +163,6 @@ private:
 
 	VAPoR::TranslateStretchManip* _manip;
 	
-	void _setMatrixFromModeParams();
-
-	double _center[3], _posvec[3], _dirvec[3], _upvec[3];
 };
 
 #endif // VIZWIN_H

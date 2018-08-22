@@ -58,13 +58,6 @@ public:
 	//! \param[in] urc : The upper-right corner to update the manipulator with
 	//! \param[in] minExtents : The minimum extents that the manipulator can draw to
 	//! \param[in] maxExtents : The maximum extents that the manipulator can draw to
-	/*! \param[in] projectionMatrix: The current ProjectionMatrix in the Params 
-	 *	database
-	 */
-	/*! \param[in] modelViewMatrix: The current ModelView matrix in the Params 
-	 *  database
-	 */
-	//! \param[in] windowSize: The current window size of the Visualizer
 	/*! \param[in] rpTransform: The current scene transform used by the current 
 	 *  RenderParams
 	 */
@@ -79,10 +72,6 @@ public:
 		std::vector<double> urc,
 		std::vector<double> minExtents,
 		std::vector<double> maxExtents,
-		std::vector<double> cameraPosition,
-		double modelViewMatrix[16],
-		double projectionMatrix[16],
-		std::vector<int> windowSize,
 		VAPoR::Transform* rpTransform,
 		VAPoR::Transform* dmTransform,
 		bool constrain
@@ -190,10 +179,6 @@ public:
 		std::vector<double> urc,
 		std::vector<double> minExtents,
 		std::vector<double> maxExtents,
-		std::vector<double> cameraPosition,
-		double modelViewMatrix[16],
-		double projectionMatrix[16],
-		std::vector<int> windowSize,
 		VAPoR::Transform* rpTransform,
 		VAPoR::Transform* dmTransform,
 		bool constrain);
@@ -427,7 +412,7 @@ private:
 	double _cameraPosition[3];
 	double _modelViewMatrix[16];
 	double _projectionMatrix[16];
-	std::vector<int> _windowSize;
+	int _windowSize[2];
 	VAPoR::Transform* _rpTransform;
 	VAPoR::Transform* _dmTransform;
 
