@@ -66,8 +66,8 @@ DVREventRouter::~DVREventRouter()
         delete _geometry;
     if (_appearance) 
         delete _appearance;
-	if (_annotation)
-		delete _annotation;
+    if (_annotation)
+        delete _annotation;
 }
 
 void DVREventRouter::GetWebHelp( vector <pair <string, string> > &help) const 
@@ -98,9 +98,9 @@ void DVREventRouter::_updateTab()
                         GetActiveDataMgr(),
                         GetActiveParams());
 
-	_annotation->Update( _controlExec->GetParamsMgr(),
-						GetActiveDataMgr(),
-						GetActiveParams());
+    _annotation->Update( _controlExec->GetParamsMgr(),
+                        GetActiveDataMgr(),
+                        GetActiveParams());
 }
 
 string DVREventRouter::_getDescription() const 
@@ -108,6 +108,6 @@ string DVREventRouter::_getDescription() const
     return( "Displays "
             "the user's 3D data variables within a volume described by the source data "
             "file, according to color and opacity settings defined by the user.\n\n"
-			"These 3D variables may be offset by a height variable.\n\n");
+            "These 3D variables may be offset by a height variable.\n\n");
 }
 
