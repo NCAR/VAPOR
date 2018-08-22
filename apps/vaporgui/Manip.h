@@ -58,13 +58,6 @@ class RENDER_API Manip {
     //! \param[in] urc : The upper-right corner to update the manipulator with
     //! \param[in] minExtents : The minimum extents that the manipulator can draw to
     //! \param[in] maxExtents : The maximum extents that the manipulator can draw to
-    /*! \param[in] projectionMatrix: The current ProjectionMatrix in the Params 
-	 *	database
-	 */
-    /*! \param[in] modelViewMatrix: The current ModelView matrix in the Params 
-	 *  database
-	 */
-    //! \param[in] windowSize: The current window size of the Visualizer
     /*! \param[in] rpTransform: The current scene transform used by the current 
 	 *  RenderParams
 	 */
@@ -79,10 +72,6 @@ class RENDER_API Manip {
         std::vector<double> urc,
         std::vector<double> minExtents,
         std::vector<double> maxExtents,
-        std::vector<double> cameraPosition,
-        double modelViewMatrix[16],
-        double projectionMatrix[16],
-        std::vector<int> windowSize,
         VAPoR::Transform *rpTransform,
         VAPoR::Transform *dmTransform,
         bool constrain) = 0;
@@ -183,10 +172,6 @@ class RENDER_API TranslateStretchManip : public Manip {
                         std::vector<double> urc,
                         std::vector<double> minExtents,
                         std::vector<double> maxExtents,
-                        std::vector<double> cameraPosition,
-                        double modelViewMatrix[16],
-                        double projectionMatrix[16],
-                        std::vector<int> windowSize,
                         VAPoR::Transform *rpTransform,
                         VAPoR::Transform *dmTransform,
                         bool constrain);
@@ -404,7 +389,7 @@ class RENDER_API TranslateStretchManip : public Manip {
     double _cameraPosition[3];
     double _modelViewMatrix[16];
     double _projectionMatrix[16];
-    std::vector<int> _windowSize;
+    int _windowSize[2];
     VAPoR::Transform *_rpTransform;
     VAPoR::Transform *_dmTransform;
 
