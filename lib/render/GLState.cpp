@@ -16,6 +16,7 @@ struct GLState::StateData {
     stack<glm::mat4>  modelviewStack;
     stack<glm::mat4>  projectionStack;
     stack<glm::mat4> *currentStack;
+    Mode              mode;
 
     StateData();
     glm::mat4 &      top();
@@ -30,6 +31,7 @@ void GLState::CreateState(string name)
 {
     assert(_stateMap.count(name) == 0);
     _stateMap.insert(pair<string, StateData *>(name, new StateData));
+    if (!_currentState) SelectState(name);
 }
 
 void GLState::DeleteState(string name)
@@ -46,38 +48,110 @@ void GLState::SelectState(string name)
     _currentState = it->second;
 }
 
-void GLState::MatrixModeModelView() { _currentState->currentStack = &_currentState->modelviewStack; }
+mat4 GLState::GetProjectionMatrix()
+{
+    assert(_currentState);
+    return _currentState->projectionStack.top();
+}
 
-void GLState::MatrixModeProjection() { _currentState->currentStack = &_currentState->projectionStack; }
+mat4 GLState::GetModelViewMatrix()
+{
+    assert(_currentState);
+    return _currentState->modelviewStack.top();
+}
+
+mat4 GLState::GetModelViewProjectionMatrix()
+{
+    assert(_currentState);
+    return GLState::GetProjectionMatrix() * GLState::GetModelViewMatrix();
+}
+
+void GLState::MatrixModeModelView()
+{
+    assert(_currentState);
+    _currentState->currentStack = &_currentState->modelviewStack;
+    _currentState->mode = Mode::ModelView;
+}
+
+void GLState::MatrixModeProjection()
+{
+    assert(_currentState);
+    _currentState->currentStack = &_currentState->projectionStack;
+    _currentState->mode = Mode::Projection;
+}
 
 void GLState::PushMatrix()
 {
+    assert(_currentState);
     assert(_currentState->currentStack->size() < 128);    // Catch unmatched push/pop
     _currentState->currentStack->push(_currentState->top());
+    printf("%s Push mode=%s depth=%li glMode=%s glDepth=%i\n", _currentStateName.c_str(), GetMatrixModeStr(), _currentState->currentStack->size(), GetGLMatrixModeStr(), GetGLCurrentStackDepth());
+    assert(GetGLCurrentStackDepth() == _currentState->currentStack->size());
 }
 
 void GLState::PopMatrix()
 {
+    assert(_currentState);
     assert(_currentState->currentStack->size() > 1);
     _currentState->currentStack->pop();
+    printf("%s Push mode=%s depth=%li glMode=%s glDepth=%i\n", _currentStateName.c_str(), GetMatrixModeStr(), _currentState->currentStack->size(), GetGLMatrixModeStr(), GetGLCurrentStackDepth());
+    assert(GetGLCurrentStackDepth() == _currentState->currentStack->size());
 }
 
-void GLState::LoadMatrixd(const double *m) { _currentState->top() = glm::make_mat4(m); }
+void GLState::LoadMatrixd(const double *m)
+{
+    assert(_currentState);
+    _currentState->top() = glm::make_mat4(m);
+}
 
-void GLState::LoadIdentity() { _currentState->top() = glm::mat4(1.0); }
+void GLState::LoadIdentity()
+{
+    assert(_currentState);
+    _currentState->top() = glm::mat4(1.0);
+}
 
-void GLState::Translate(float x, float y, float z) { _currentState->top() = glm::translate(_currentState->top(), vec3(x, y, z)); }
+void GLState::Translate(float x, float y, float z)
+{
+    assert(_currentState);
+    _currentState->top() = glm::translate(_currentState->top(), vec3(x, y, z));
+}
 
-void GLState::Scale(float x, float y, float z) { _currentState->top() = glm::scale(_currentState->top(), vec3(x, y, z)); }
+void GLState::Scale(float x, float y, float z)
+{
+    assert(_currentState);
+    _currentState->top() = glm::scale(_currentState->top(), vec3(x, y, z));
+}
 
-void GLState::Rotate(float angle, float x, float y, float z) { _currentState->top() = glm::rotate(_currentState->top(), angle, vec3(x, y, z)); }
+void GLState::Rotate(float angle, float x, float y, float z)
+{
+    assert(_currentState);
+    _currentState->top() = glm::rotate(_currentState->top(), angle, vec3(x, y, z));
+}
 
-void GLState::Perspective(float fovy, float aspect, float zNear, float zFar) { _currentState->top() = glm::perspective(fovy, aspect, zNear, zFar); }
+void GLState::Perspective(float fovy, float aspect, float zNear, float zFar)
+{
+    assert(_currentState);
+    _currentState->top() = glm::perspective(fovy, aspect, zNear, zFar);
+}
 
-#define GLM_ENABLE_EXPERIMENTAL 1
-#include <glm/gtx/string_cast.hpp>
+void GLState::Ortho(float left, float right, float bottom, float top)
+{
+    assert(_currentState);
+    _currentState->top() = glm::ortho(left, right, bottom, top);
+}
+
+void GLState::Ortho(float left, float right, float bottom, float top, float zNear, float zFar)
+{
+    assert(_currentState);
+    _currentState->top() = glm::ortho(left, right, bottom, top, zNear, zFar);
+}
+
+#ifndef GLDEMO
+    #define GLM_ENABLE_EXPERIMENTAL 1
+    #include <glm/gtx/string_cast.hpp>
 void GLState::Test()
 {
+    assert(_currentState);
     float gl_modelview_matrix[16], gl_projection_matrix[16];
     int   gl_modelview_stack_depth, gl_projection_stack_depth;
 
@@ -108,6 +182,7 @@ void GLState::Test()
 
 void GLState::TestUpload()
 {
+    assert(_currentState);
     glPushAttrib(GL_TRANSFORM_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(glm::value_ptr(_currentState->modelviewStack.top()));
@@ -116,11 +191,60 @@ void GLState::TestUpload()
     glPopAttrib();
 }
 
+int GLState::GetGLMatrixMode()
+{
+    int mode;
+    glGetIntegerv(GL_MATRIX_MODE, &mode);
+    return mode;
+}
+
+const char *GLState::GetGLMatrixModeStr()
+{
+    int mode = GetGLMatrixMode();
+    switch (mode) {
+    case GL_MODELVIEW: return "GL_MODELVIEW";
+    case GL_PROJECTION: return "GL_PROJECTION";
+    case GL_TEXTURE: return "GL_TEXTURE";
+    case GL_COLOR: return "GL_COLOR";
+    default: return "UNKNOWN_MODE";
+    }
+}
+
+int GLState::GetGLModelViewStackDepth()
+{
+    int depth;
+    glGetIntegerv(GL_MODELVIEW_STACK_DEPTH, &depth);
+    return depth;
+}
+
+int GLState::GetGLProjectionStackDepth()
+{
+    int depth;
+    glGetIntegerv(GL_PROJECTION_STACK_DEPTH, &depth);
+    return depth;
+}
+
+int GLState::GetGLCurrentStackDepth()
+{
+    if (GetGLMatrixMode() == GL_MODELVIEW) return GetGLModelViewStackDepth();
+    if (GetGLMatrixMode() == GL_PROJECTION) return GetGLProjectionStackDepth();
+    return -1;
+}
+
+const char *GLState::GetMatrixModeStr()
+{
+    if (_currentState->mode == Mode::ModelView) return "ModelView";
+    return "Projection";
+}
+
+#endif
+
 GLState::StateData::StateData()
 {
     modelviewStack.push(glm::mat4(1.0));
     projectionStack.push(glm::mat4(1.0));
     currentStack = &modelviewStack;
+    mode = Mode::ModelView;
 }
 
 glm::mat4 &GLState::StateData::top() { return currentStack->top(); }

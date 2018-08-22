@@ -70,6 +70,7 @@ RendererBase::RendererBase(const ParamsMgr *pm, string winName, string dataSetNa
     _instName = instName;
     _dataMgr = dataMgr;
 
+    _glManager = nullptr;
     _shaderMgr = NULL;
     _glInitialized = false;
 }
@@ -81,8 +82,9 @@ Renderer::~Renderer()
     if (_colorbarTexture) delete _colorbarTexture;
 }
 
-int RendererBase::initializeGL(ShaderMgr *sm)
+int RendererBase::initializeGL(ShaderMgr *sm, GLManager *glManager)
 {
+    _glManager = glManager;
     _shaderMgr = sm;
     int rc = _initializeGL();
     if (rc < 0) { return (rc); }
