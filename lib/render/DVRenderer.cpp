@@ -680,6 +680,7 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         else {
             DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
             glUniform1i(uniformLocation, int(params->GetLighting()));
+
             std::vector<double> coeffsD = params->GetLightingCoeffs();
             float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
             uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
