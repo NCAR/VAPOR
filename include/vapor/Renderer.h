@@ -26,6 +26,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
 #include <vapor/textRenderer.h>
+#include "vapor/GLManager.h"
 
 namespace VAPoR {
 
@@ -54,7 +55,7 @@ class RENDER_API RendererBase : public MyBase {
     //! Any OpenGL initialization is performed in initializeGL
     //! It will be called from an OpenGL rendering context.
     //! Sets _initialized to true if successful.
-    virtual int initializeGL(ShaderMgr *sm);
+    virtual int initializeGL(ShaderMgr *sm, GLManager *glManager);
 
     //! Obtain the Visualizer associated with this Renderer
     string GetVisualizer() { return _winName; }
@@ -91,6 +92,7 @@ class RENDER_API RendererBase : public MyBase {
     string _instName;
     DataMgr *_dataMgr;
 
+    GLManager *_glManager;
     ShaderMgr *_shaderMgr;
 
     //! Pure virtual method

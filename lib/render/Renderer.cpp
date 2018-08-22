@@ -71,6 +71,7 @@ RendererBase::RendererBase(
     _instName = instName;
     _dataMgr = dataMgr;
 
+    _glManager = nullptr;
     _shaderMgr = NULL;
     _glInitialized = false;
 }
@@ -83,7 +84,8 @@ Renderer::~Renderer() {
         delete _colorbarTexture;
 }
 
-int RendererBase::initializeGL(ShaderMgr *sm) {
+int RendererBase::initializeGL(ShaderMgr *sm, GLManager *glManager) {
+    _glManager = glManager;
     _shaderMgr = sm;
     int rc = _initializeGL();
     if (rc < 0) {

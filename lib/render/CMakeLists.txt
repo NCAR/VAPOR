@@ -5,6 +5,7 @@ set (SRC
 	Renderer.cpp
 	ShaderMgr.cpp
 	ShaderProgram.cpp
+	ShaderProgram2.cpp
 	TwoDDataRenderer.cpp
 	TwoDRenderer.cpp
 	WireFrameRenderer.cpp
@@ -23,6 +24,10 @@ set (SRC
 	ContourRenderer.cpp
 	MyPython.cpp
 	GLState.cpp
+	Shader.cpp
+	LegacyGL.cpp
+	ShaderManager.cpp
+	GLManager.cpp
 )
 
 set (HEADERS
@@ -32,6 +37,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram2.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/WireFrameRenderer.h
@@ -49,6 +55,10 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GLState.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Shader.h
+	${PROJECT_SOURCE_DIR}/include/vapor/LegacyGL.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ShaderManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GLManager.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
