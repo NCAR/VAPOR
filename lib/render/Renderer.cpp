@@ -75,6 +75,7 @@ RendererBase::RendererBase(
 	_instName = instName;
 	_dataMgr = dataMgr;
 
+    _glManager = nullptr;
 	_shaderMgr = NULL;
 	_glInitialized = false;
 
@@ -92,7 +93,8 @@ Renderer::~Renderer()
 }
 
 
-int RendererBase::initializeGL(ShaderMgr *sm) {
+int RendererBase::initializeGL(ShaderMgr *sm, GLManager *glManager) {
+    _glManager = glManager;
 	_shaderMgr = sm;
 	int rc = _initializeGL();
 	if (rc<0) {
@@ -141,7 +143,7 @@ int Renderer::paintGL() {
 	assert(origin.size()	== 3);
 
 	glMatrixMode(GL_MODELVIEW); GLState::MatrixModeModelView();
-	glPushMatrix(); GLState::PushMatrix();
+    glPushMatrix(); GLState::PushMatrix();
 
 	glTranslatef(origin[0], origin[1], origin[2]); GLState::Translate(origin[0], origin[1], origin[2]);
 	glScalef(scale[0], scale[1], scale[2]); GLState::Scale(scale[0], scale[1], scale[2]);

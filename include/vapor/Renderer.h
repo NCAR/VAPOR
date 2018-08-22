@@ -26,6 +26,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
 #include <vapor/textRenderer.h>
+#include "vapor/GLManager.h"
 
 namespace VAPoR {
 
@@ -56,7 +57,7 @@ public:
 	//! Any OpenGL initialization is performed in initializeGL
 	//! It will be called from an OpenGL rendering context.
 	//! Sets _initialized to true if successful.
-    virtual int	initializeGL(ShaderMgr *sm);
+    virtual int	initializeGL(ShaderMgr *sm, GLManager *glManager);
 
 
 	//! Obtain the Visualizer associated with this Renderer
@@ -88,15 +89,16 @@ public:
 	
 protected:
 
- const ParamsMgr *_paramsMgr;
- string _winName;
- string _dataSetName;
- string _paramsType;
- string _classType;
- string _instName;
- DataMgr* _dataMgr;
+	const ParamsMgr *_paramsMgr;
+	string _winName;
+	string _dataSetName;
+	string _paramsType;
+	string _classType;
+    string _instName;
+    DataMgr* _dataMgr;
 
- ShaderMgr *_shaderMgr;
+    GLManager *_glManager;
+	ShaderMgr *_shaderMgr;
 
 	//! Pure virtual method
 	//! Any OpenGL initialization is performed in initializeGL
