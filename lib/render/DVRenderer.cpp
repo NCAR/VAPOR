@@ -464,9 +464,9 @@ int DVRenderer::_paintGL(bool fast)
     glViewport(0, 0, viewport[2], viewport[3]);
 
     if (insideACell)
-        _drawVolumeFaces(3, true, ModelView, InversedMV);    // 3rd pass, perform ray casting
+        _drawVolumeFaces(3, true, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
     else
-        _drawVolumeFaces(3, false, ModelView, InversedMV);
+        _drawVolumeFaces(3, false, ModelView, InversedMV, fast);
 
     delete grid;
 
@@ -584,7 +584,7 @@ void DVRenderer::_printGLInfo() const
     std::cout << "    **** System Info ****" << std::endl;
 }
 
-void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV)
+void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast)
 {
     assert(whichPass == 1 || whichPass == 2 || whichPass == 3);
 
@@ -658,10 +658,14 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
         glUniform3fv(uniformLocation, 1, volumeDimensions);
 
-        float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
-        maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
-        maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
-        float stepSize1D = 0.5f / maxVolumeDim;                    // Approximately 2 samples per cell
+        float stepSize1D = 0.005f;    // This is like ~200 samples
+        if (!fast)                    // Calculate a better step size if in fast rendering mode
+        {
+            float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
+            maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
+            maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
+            stepSize1D = 0.5f / maxVolumeDim;                          // Approximately 2 samples per cell
+        }
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
         glUniform1f(uniformLocation, stepSize1D);
 
@@ -670,14 +674,17 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
         glUniform4fv(uniformLocation, 6, planes);
 
-        DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-        glUniform1i(uniformLocation, int(params->GetLighting()));
-
-        std::vector<double> coeffsD = params->GetLightingCoeffs();
-        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
-        glUniform1fv(uniformLocation, 4, coeffsF);
+        if (fast)    // Disable lighting during "fast" rendering
+            glUniform1i(uniformLocation, int(0));
+        else {
+            DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
+            glUniform1i(uniformLocation, int(params->GetLighting()));
+            std::vector<double> coeffsD = params->GetLightingCoeffs();
+            float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
+            uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
+            glUniform1fv(uniformLocation, 4, coeffsF);
+        }
 
         // Pass in textures
         GLuint textureUnit = 0;

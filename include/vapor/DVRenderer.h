@@ -109,7 +109,7 @@ private:
     //
     // Draw faces using triangle strips
     //
-    void _drawVolumeFaces(int whichPass, bool insideACell = false, const GLfloat *ModelView = nullptr, const GLfloat *InversedMV = nullptr);
+    void _drawVolumeFaces(int whichPass, bool insideACell = false, const GLfloat *ModelView = nullptr, const GLfloat *InversedMV = nullptr, bool fast = false);
 
     //
     // Initialization for 1) framebuffers and 2) textures
