@@ -65,7 +65,8 @@ class RENDER_API Visualizer : public MyBase {
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
     //! \param[in] sm A pointer to a ShaderMgr
-    int initializeGL(ShaderMgr *sm);
+    //! \param[in] glManager A pointer to a GLManager
+    int initializeGL(ShaderMgr *sm, GLManager *glManager);
 
     //! Set/clear a flag indicating that the trackball has changed the viewpoint.
     //! all the OpenGL rendering is performed in the paintEvent method.  It must be invoked from
@@ -316,6 +317,7 @@ class RENDER_API Visualizer : public MyBase {
     const ParamsMgr *m_paramsMgr;
     const DataStatus *m_dataStatus;
     string m_winName;
+    GLManager *_glManager;
     ShaderMgr *m_shaderMgr;
     AnnotationRenderer *m_vizFeatures;
     bool m_viewpointDirty;
