@@ -43,7 +43,7 @@ public:
 protected:
     // pure virtual functions that are required to implement
     int _initializeGL();
-    int _paintGL();
+    int _paintGL( bool fast );
 
 private:
     // C++ stuff
