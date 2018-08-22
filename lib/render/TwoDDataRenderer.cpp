@@ -214,7 +214,7 @@ int TwoDDataRenderer::_initializeGL() {
 	return(TwoDRenderer::_initializeGL());
 }
 
-int TwoDDataRenderer::_paintGL() {
+int TwoDDataRenderer::_paintGL(bool fast) {
 	if (printOpenGLError() != 0) return(-1);
 
 
@@ -270,7 +270,7 @@ int TwoDDataRenderer::_paintGL() {
 	);
 
 	glActiveTexture(GL_TEXTURE0);
-	rc = TwoDRenderer::_paintGL();
+	rc = TwoDRenderer::_paintGL(fast);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_1D, 0);

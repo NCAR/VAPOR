@@ -21,11 +21,17 @@ public:
 
  virtual ~BarbParams();
 
+ bool GetNeedToRecalculateScales() const {
+	return (bool)GetValueDouble(_needToRecalculateScalesTag, 0.0);
+ }
+
+ void SetNeedToRecalculateScales(bool val);
+
  //! Get the length scaling factor
  //! \retval double scale factor
  //  
  double GetLengthScale() const {
- 	return GetValueDouble(_lengthScaleTag, 1.0);
+ 	return GetValueDouble(_lengthScaleTag, 1.f);
  }
 
  void SetLengthScale(double val) {
@@ -43,8 +49,9 @@ public:
  //! E.g. the grid on which barbs are placed.
  //! \retval vector<long> grid
  const vector<long> GetGrid() const {
-	  const vector<long> defaultGrid(3,1);
-	 return (GetValueLongVec(_gridTag,defaultGrid));
+	vector<long> defaultGrid(2, 10);
+	defaultGrid.push_back(1.0);
+	return (GetValueLongVec(_gridTag,defaultGrid));
  }
 
  void SetGrid(const int grid[3]){
@@ -55,27 +62,10 @@ public:
  	SetValueLongVec(_gridTag,"Set grid", griddims);
  }
 
-/*
- //! Set the variable type being used by the barbs
- //!
- void SetVariables3D(bool val) {
-	if (val)
-		SetValueString(_varsAre3dTag, "Set variable dimensionality", "true");
-	else
-		SetValueString(_varsAre3dTag, "Set variable dimensionality", "false");
- }
-
- //! Find out whether the barbs are using 2D or 3D variables
- //!
- bool VariablesAre3D() {
-	GetValueString(_varsAre3dTag, "true");
- }
-*/
-
  //! Determine line thickness in voxels
  //! \retval double line thickness
  double GetLineThickness() const {
- 	return (GetValueDouble(_thicknessScaleTag,1.0));
+ 	return GetValueDouble(_thicknessScaleTag, 1.f);
  }
 
  void SetLineThickness(double val) {
@@ -93,6 +83,7 @@ public:
 private:
 
  void _init();
+ static const string _needToRecalculateScalesTag;
  static const string _lengthScaleTag;
  static const string _thicknessScaleTag;
  static const string _gridTag;

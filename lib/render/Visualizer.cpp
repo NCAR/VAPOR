@@ -217,7 +217,7 @@ void Visualizer::applyTransforms(int i) {
 #endif
 }
 
-int Visualizer::paintEvent()
+int Visualizer::paintEvent(bool fast)
 {
 	MyBase::SetDiagMsg("Visualizer::paintGL()");
 
@@ -290,7 +290,7 @@ int Visualizer::paintEvent()
 
 			if (_renderer[i]->IsGLInitialized()) {
 				applyTransforms(i);
-				int myrc = _renderer[i]->paintGL();
+				int myrc = _renderer[i]->paintGL(fast);
 				glPopMatrix();
 				if (myrc < 0) rc = -1;
 			}
