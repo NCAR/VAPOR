@@ -374,7 +374,7 @@ int DVRenderer::_initializeGL()
     return 0;
 }
 
-int DVRenderer::_paintGL()
+int DVRenderer::_paintGL(bool fast)
 {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
