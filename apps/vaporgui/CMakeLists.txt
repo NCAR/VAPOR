@@ -97,6 +97,7 @@ set (UIS
 	appSettingsTab.ui
 	NewRendererDialog.ui
 	LeftPanel.ui
+	errMsg.ui
 	
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
@@ -123,7 +124,6 @@ set (UIS
 	
 	VariablesWidgetGUI.ui
 	statsWindow.ui
-	errMsg.ui
 	plotWindow.ui
 	firstTimeUser.ui
 	TFWidgetGUI.ui
@@ -134,7 +134,6 @@ set (UIS
 	StretchFactorTableGUI.ui
 	OrientationAnglesGUI.ui
 	CopyRegionWidgetGUI.ui
-	#DVREventRouter.ui
 	
 	QSliderEdit.ui
 	QRange.ui
