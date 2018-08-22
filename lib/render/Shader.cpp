@@ -12,15 +12,12 @@ Shader::Shader(unsigned int type)
 
 Shader::~Shader() {
     if (_id)
-        printf("GL Freeing shader %i\n", _id);
-    if (_id)
         glDeleteShader(_id);
 }
 
 bool Shader::CompileFromSource(const char *source) {
     assert(!_compiled);
     _id = glCreateShader(_type);
-    printf("GL Create Shader %i\n", _id);
     glShaderSource(_id, 1, &source, NULL);
     glCompileShader(_id);
     glGetShaderiv(_id, GL_COMPILE_STATUS, &_successStatus);
