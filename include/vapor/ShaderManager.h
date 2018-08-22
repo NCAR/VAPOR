@@ -12,6 +12,7 @@ class ShaderManager {
     
 public:
     ShaderProgram2 *GetShader(const std::string name);
+    SmartShaderProgram GetSmartShader(const std::string name);
     bool HasShader(const std::string name);
     bool HasShader(const ShaderProgram2 *shader);
     bool SetShaderDirectory(const std::string path);

@@ -20,6 +20,11 @@ ShaderProgram2* ShaderManager::GetShader(const std::string name)
     return it->second;
 }
 
+SmartShaderProgram ShaderManager::GetSmartShader(const std::string name)
+{
+    return SmartShaderProgram(GetShader(name));
+}
+
 bool ShaderManager::HasShader(const std::string name)
 {
     return _shaderMap.find(name) != _shaderMap.end();

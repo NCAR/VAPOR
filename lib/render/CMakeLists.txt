@@ -23,7 +23,7 @@ set (SRC
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 	MyPython.cpp
-	GLState.cpp
+	MatrixManager.cpp
 	Shader.cpp
 	LegacyGL.cpp
 	ShaderManager.cpp
@@ -54,7 +54,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GLState.h
+	${PROJECT_SOURCE_DIR}/include/vapor/MatrixManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Shader.h
 	${PROJECT_SOURCE_DIR}/include/vapor/LegacyGL.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderManager.h
