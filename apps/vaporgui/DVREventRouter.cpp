@@ -49,7 +49,7 @@ DVREventRouter::DVREventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(pa
     _annotation = new DVRAnnotationSubtab(this);
     QScrollArea *qsannotation = new QScrollArea(this);
     qsannotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    qsannotation->setWidget(_geometry);
+    qsannotation->setWidget(_annotation);
     qsannotation->setWidgetResizable(true);
     addTab(qsannotation, "Annotation");
 }

@@ -4,6 +4,7 @@
 #include "ui_DVRAppearanceGUI.h"
 #include "ui_DVRVariablesGUI.h"
 #include "ui_DVRGeometryGUI.h"
+#include "ui_DVRAnnotationGUI.h"
 
 #include <vapor/DVRParams.h>
 
@@ -144,6 +145,13 @@ public:
         _copyRegionWidget->Update(paramsMgr, rParams);
         _transformTable->Update(rParams->GetTransform());
     }
+};
+
+class DVRAnnotationSubtab : public QWidget, public Ui_DVRAnnotationGUI {
+public:
+    DVRAnnotationSubtab(QWidget *parent) { setupUi(this); }
+
+    void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams) { _colorbarWidget->Update(dataMgr, paramsMgr, rParams); }
 };
 
 #endif    // DVRSUBTABS_H
