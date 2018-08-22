@@ -68,7 +68,7 @@ public:
     void SetTrackBall(const double posvec[3], const double dirvec[3], const double upvec[3], const double centerRot[3], bool perspective);
 
     //! Invoke updateGL on all the visualizers that have dirty bit set.
-    void Update();
+    void Update(bool fast);
 
     //! \copydoc VAPoR::ControlExec::EnableImageCapture()
     int EnableImageCapture(string filename, string winName);

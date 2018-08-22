@@ -130,7 +130,7 @@ public:
     //! This invokes _paintGL on the renderer subclass
     //! \param[in] dataMgr Current (valid) dataMgr
     //! \retval int zero if successful.
-    virtual int paintGL();
+    virtual int paintGL(bool fast);
 
 #ifdef VAPOR3_0_0_ALPHA
 #endif
@@ -245,7 +245,7 @@ protected:
     int makeColorbarTexture();
 
     //! All OpenGL rendering is performed in the pure virtual paintGL method.
-    virtual int _paintGL() = 0;
+    virtual int _paintGL(bool fast) = 0;
 
     //! Enable specified clipping planes during the GL rendering. This
     //! method clips the scene to the bounding box. See

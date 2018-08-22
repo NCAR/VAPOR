@@ -259,8 +259,6 @@ private:
 
     void _GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    int _binarySearchRange(const std::vector<double> &sorted, double x, size_t &i) const;
-
     bool _insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double lambda[4], double zwgt[2]) const;
 
     void _getEnclosingRegionHelper(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const;

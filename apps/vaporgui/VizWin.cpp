@@ -580,8 +580,12 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
 
 void VizWin::setFocus() { QWidget::setFocus(); }
 
-void VizWin::paintGL()
+void VizWin::Render(bool fast)
 {
+    // Need to call since we're not overriding QGLWidget::paintGL()
+    //
+    makeCurrent();
+
     if (!FrameBufferReady()) { return; }
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
@@ -608,7 +612,7 @@ void VizWin::paintGL()
     glPushMatrix();
     _setUpModelViewMatrix();
 
-    int rc = _controlExec->Paint(_winName, false);
+    int rc = _controlExec->Paint(_winName, fast);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) updateManip();
