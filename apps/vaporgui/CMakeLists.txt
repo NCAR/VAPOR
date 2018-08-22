@@ -92,43 +92,50 @@ set (UIS
 	NavigationTab.ui
 	boxframe.ui
 	startupTab.ui
+	AnnotationGUI.ui
 	SettingsGUI.ui
 	appSettingsTab.ui
-	AnnotationGUI.ui
-	ControlPointEditorBase.ui
 	NewRendererDialog.ui
 	LeftPanel.ui
+	
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
+	HelloVariablesGUI.ui
 	TwoDAppearanceGUI.ui
-	WireFrameAppearanceGUI.ui
+	TwoDVariablesGUI.ui
+	TwoDGeometryGUI.ui
 	BarbAppearanceGUI.ui
 	BarbVariablesGUI.ui
 	BarbGeometryGUI.ui
-	TwoDVariablesGUI.ui
-	WireFrameVariablesGUI.ui
-	TwoDGeometryGUI.ui
-	WireFrameGeometryGUI.ui
-	VariablesWidgetGUI.ui
-	HelloVariablesGUI.ui
-	statsWindow.ui
-	errMsg.ui
-	plotWindow.ui
-	firstTimeUser.ui
-	TFWidgetGUI.ui
-	StretchFactorTableGUI.ui
-	OrientationAnglesGUI.ui
-	GeometryWidgetGUI.ui
-	CopyRegionWidgetGUI.ui
-	ColorbarWidgetGUI.ui
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	ImageVariablesGUI.ui
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
 	ContourVariablesGUI.ui
+	WireFrameVariablesGUI.ui
+	WireFrameAppearanceGUI.ui
+	WireFrameGeometryGUI.ui
+	DVRVariablesGUI.ui
+	DVRAppearanceGUI.ui
+	DVRGeometryGUI.ui
+	DVRAnnotationGUI.ui
+	
+	VariablesWidgetGUI.ui
+	statsWindow.ui
+	errMsg.ui
+	plotWindow.ui
+	firstTimeUser.ui
+	TFWidgetGUI.ui
+	GeometryWidgetGUI.ui
+	ColorbarWidgetGUI.ui
 	FidelityWidgetGUI.ui
-	DVREventRouter.ui
+	ControlPointEditorBase.ui
+	StretchFactorTableGUI.ui
+	OrientationAnglesGUI.ui
+	CopyRegionWidgetGUI.ui
+	#DVREventRouter.ui
+	
 	QSliderEdit.ui
 	QRange.ui
 	QSinglePoint.ui
