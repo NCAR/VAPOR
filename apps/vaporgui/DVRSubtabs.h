@@ -93,10 +93,10 @@ private slots:
     {
         _dvrParams->SetLighting( checked );
 
-		_ambientWidget->setEnabled(checked);
-		_diffuseWidget->setEnabled(checked);
-		_specularWidget->setEnabled(checked);
-		_shininessWidget->setEnabled(checked);
+        _ambientWidget->setEnabled(checked);
+        _diffuseWidget->setEnabled(checked);
+        _specularWidget->setEnabled(checked);
+        _shininessWidget->setEnabled(checked);
     }
 
     void on__ambientWidget_valueChanged( double value )
@@ -169,10 +169,10 @@ public:
 class DVRAnnotationSubtab : public QWidget, public Ui_DVRAnnotationGUI
 {
 public:
-	DVRAnnotationSubtab(QWidget* parent)
-	{
-		setupUi(this);
-	}
+    DVRAnnotationSubtab(QWidget* parent)
+    {
+        setupUi(this);
+    }
 
     void Update( VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::DataMgr *dataMgr,
