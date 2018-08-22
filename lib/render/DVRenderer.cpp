@@ -776,18 +776,19 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "stepSize1D" );
         glUniform1f( uniformLocation, stepSize1D );
 
-        float planes[ 24 ];                      // 6 planes, each with 4 elements
+        float planes[ 24 ];             // 6 planes, each with 4 elements
         GetClippingPlanes( planes );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "clipPlanes" );
         glUniform4fv( uniformLocation, 6, planes );
 
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lighting" );
-        if( fast )  // Disable lighting during "fast" rendering
+        if( fast )                      // Disable lighting during "fast" rendering
             glUniform1i( uniformLocation, int(0) );
         else
         {
             DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
             glUniform1i( uniformLocation, int(params->GetLighting()) );
+
             std::vector<double> coeffsD = params->GetLightingCoeffs();
             float coeffsF[4] = { (float)coeffsD[0], (float)coeffsD[1], 
                                  (float)coeffsD[2], (float)coeffsD[3] };
