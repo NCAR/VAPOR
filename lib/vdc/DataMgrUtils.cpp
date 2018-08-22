@@ -1,8 +1,8 @@
 //************************************************************************
 //									*
-//		     Copyright (C)  2017				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
+//			 Copyright (C)  2017				*
+//	 University Corporation for Atmospheric Research			*
+//			 All Rights Reserved				*
 //									*
 //************************************************************************/
 //
@@ -283,8 +283,11 @@ bool DataMgrUtils::GetAxes(
 
 bool DataMgrUtils::GetExtents(
     DataMgr *dataMgr,
-    size_t timestep, string varname,
-    vector<double> &minExts, vector<double> &maxExts) {
+    size_t timestep,
+    string varname,
+    vector<double> &minExts,
+    vector<double> &maxExts,
+    int refLevel) {
     minExts.clear();
     maxExts.clear();
 
@@ -303,15 +306,18 @@ bool DataMgrUtils::GetExtents(
     if (varname.empty())
         return (false);
 
-    size_t maxXForm;
-    bool status = DataMgrUtils::MaxXFormPresent(
-        dataMgr, timestep, varname, maxXForm);
-    if (!status)
-        return (status);
+    if (refLevel == -1) {
+        size_t maxXForm;
+        bool status = DataMgrUtils::MaxXFormPresent(
+            dataMgr, timestep, varname, maxXForm);
+        if (!status)
+            return (status);
+        refLevel = (int)maxXForm;
+    }
 
     bool errEnabled = MyBase::EnableErrMsg(false);
     int rc = dataMgr->GetVariableExtents(
-        timestep, varname, (int)maxXForm, minExts, maxExts);
+        timestep, varname, refLevel, minExts, maxExts);
     MyBase::EnableErrMsg(errEnabled);
 
     if (rc < 0)
@@ -322,9 +328,12 @@ bool DataMgrUtils::GetExtents(
 
 bool DataMgrUtils::GetExtents(
     DataMgr *dataMgr,
-    size_t timestep, const vector<string> &varnames,
-    vector<double> &minExts, vector<double> &maxExts,
-    vector<int> &axes) {
+    size_t timestep,
+    const vector<string> &varnames,
+    vector<double> &minExts,
+    vector<double> &maxExts,
+    vector<int> &axes,
+    int refLevel) {
     minExts.clear();
     maxExts.clear();
     axes.clear();
@@ -351,7 +360,7 @@ bool DataMgrUtils::GetExtents(
         vector<int> varAxes;
 
         bool status = DataMgrUtils::GetExtents(
-            dataMgr, timestep, varnames[i], varMinExts, varMaxExts);
+            dataMgr, timestep, varnames[i], varMinExts, varMaxExts, refLevel);
         if (!status)
             continue;
 

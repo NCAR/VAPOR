@@ -88,6 +88,7 @@ set (SRCS
 )
 
 set (UIS 
+	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
 	boxframe.ui
@@ -96,32 +97,32 @@ set (UIS
 	SettingsGUI.ui
 	appSettingsTab.ui
 	NewRendererDialog.ui
-	LeftPanel.ui
 	errMsg.ui
-	
-	helloLayoutSubtab.ui
-	helloAppearanceSubtab.ui
-	HelloVariablesGUI.ui
-	TwoDAppearanceGUI.ui
-	TwoDVariablesGUI.ui
-	TwoDGeometryGUI.ui
-	BarbAppearanceGUI.ui
-	BarbVariablesGUI.ui
-	BarbGeometryGUI.ui
-	ImageAppearanceGUI.ui
-	ImageGeometryGUI.ui
-	ImageVariablesGUI.ui
-	ContourAppearanceGUI.ui
-	ContourGeometryGUI.ui
-	ContourVariablesGUI.ui
-	WireFrameVariablesGUI.ui
-	WireFrameAppearanceGUI.ui
-	WireFrameGeometryGUI.ui
 	DVRVariablesGUI.ui
 	DVRAppearanceGUI.ui
 	DVRGeometryGUI.ui
 	DVRAnnotationGUI.ui
-	
+	helloLayoutSubtab.ui
+	helloAppearanceSubtab.ui
+	BarbAppearanceGUI.ui
+	BarbVariablesGUI.ui
+	BarbGeometryGUI.ui
+	BarbAnnotationGUI.ui
+	ImageAppearanceGUI.ui
+	ImageGeometryGUI.ui
+	ImageVariablesGUI.ui
+	TwoDVariablesGUI.ui
+	TwoDAppearanceGUI.ui
+	TwoDGeometryGUI.ui
+	TwoDAnnotationGUI.ui
+	ContourVariablesGUI.ui
+	ContourAppearanceGUI.ui
+	ContourGeometryGUI.ui
+	ContourAnnotationGUI.ui
+	WireFrameVariablesGUI.ui
+	WireFrameAppearanceGUI.ui
+	WireFrameGeometryGUI.ui
+	WireFrameAnnotationGUI.ui
 	VariablesWidgetGUI.ui
 	statsWindow.ui
 	plotWindow.ui

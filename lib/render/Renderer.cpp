@@ -113,7 +113,7 @@ double Renderer::_getDefaultZ(
     return (minExts.size() == 3 ? minExts[2] : 0.0);
 }
 
-int Renderer::paintGL() {
+int Renderer::paintGL(bool fast) {
     const RenderParams *rParams = GetActiveParams();
 
     if (!rParams->IsEnabled())
@@ -142,7 +142,7 @@ int Renderer::paintGL() {
 
     glTranslatef(translate[0], translate[1], translate[2]);
 
-    int rc = _paintGL();
+    int rc = _paintGL(fast);
 
     glPopMatrix();
 
