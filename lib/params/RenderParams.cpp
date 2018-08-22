@@ -66,7 +66,9 @@ string string_replace(string s, string olds, string news) {
 
 }; // namespace
 
-void RenderParams::SetDefaultVariables(int dim = 3) {
+void RenderParams::SetDefaultVariables(
+    int dim = 3,
+    bool secondaryColormapVariable = false) {
     vector<string> varnames;
     varnames = _dataMgr->GetDataVarNames(dim);
     if (varnames.empty()) {
@@ -84,7 +86,10 @@ void RenderParams::SetDefaultVariables(int dim = 3) {
     fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
     SetFieldVariableNames(fieldVarNames);
 
-    string colorVar = _findVarStartingWithLetter(varnames, 't');
+    string colorVar = varname;
+    if (secondaryColormapVariable)
+        colorVar = _findVarStartingWithLetter(varnames, 't');
+
     SetColorMapVariableName(colorVar);
 }
 
