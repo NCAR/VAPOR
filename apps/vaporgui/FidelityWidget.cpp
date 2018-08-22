@@ -259,6 +259,8 @@ void FidelityWidget::Update( const DataMgr *dataMgr,
         varname = _rParams->GetColorMapVariableName();
     }
 
+	cout << "FidelityWidget " << varname << endl;
+
     if (varname.empty()) {
         fidelityTab->setEnabled(false);
         return;
