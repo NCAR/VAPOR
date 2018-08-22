@@ -83,6 +83,7 @@ set (SRCS
 	Histo.h
 	EventRouter.h
 	GLWidget.h
+	VizWin.h
 )
 
 set (UIS 
