@@ -223,7 +223,10 @@ void VariablesWidget::setVariableDims(int index){
 }
 
 void VariablesWidget::setDefaultVariables() {
-	_rParams->SetDefaultVariables(_activeDim);
+	bool secondaryColormapVariable = false;
+	if (_variableFlags & COLOR)
+		secondaryColormapVariable = true;
+	_rParams->SetDefaultVariables(_activeDim, secondaryColormapVariable);
 }
 
 // Default scalar variable will just be the first variable
