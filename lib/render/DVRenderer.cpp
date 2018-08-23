@@ -30,16 +30,15 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<DVRenderer> 
-            registrar( DVRenderer::GetClassType(), 
-                        DVRParams::GetClassType() );
+static RendererRegistrar<DVRenderer> registrar( DVRenderer::GetClassType(), 
+                                                DVRParams::GetClassType() );
 
 // Constructor
 DVRenderer::DVRenderer( const ParamsMgr*    pm,
-                                            std::string&        winName,
-                                            std::string&        dataSetName,
-                                            std::string&        instName,
-                                            DataMgr*            dataMgr )
+                        std::string&        winName,
+                        std::string&        dataSetName,
+                        std::string&        instName,
+                        DataMgr*            dataMgr )
                     : Renderer( pm,
                                 winName,
                                 dataSetName,
@@ -236,7 +235,7 @@ DVRenderer::UserCoordinates::GetCurrentGrid( const DVRParams* params,
 }
 
 bool DVRenderer::UserCoordinates::IsUpToDate( const DVRParams* params,  
-                                                              DataMgr*   dataMgr ) const
+                                                    DataMgr*   dataMgr ) const
 {
     if( ( myCurrentTimeStep  != params->GetCurrentTimestep()  )  ||
         ( myVariableName     != params->GetVariableName()     )  ||
@@ -1001,7 +1000,7 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
 }
     
 GLuint DVRenderer::_loadShaders(const char* vertex_file_path, 
-                                          const char* fragment_file_path)
+                                const char* fragment_file_path)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -1110,7 +1109,7 @@ void DVRenderer::_getMVPMatrix( GLfloat* MVP ) const
 }
 
 void DVRenderer::_matMultiVec( const GLfloat* mat,  const GLfloat* in,
-                                               GLfloat* out ) const
+                                     GLfloat* out ) const
 {
     #define MAT(m,r,c) (m)[(c)*4+(r)]
     out[0] = MAT(mat,0,0)*in[0] + MAT(mat,0,1)*in[1] + MAT(mat,0,2)*in[2] + MAT(mat,0,3)*in[3];
@@ -1121,7 +1120,7 @@ void DVRenderer::_matMultiVec( const GLfloat* mat,  const GLfloat* in,
 }
 
 double DVRenderer::_getElapsedSeconds( const struct timeval* begin, 
-                                                 const struct timeval* end ) const
+                                       const struct timeval* end ) const
 {
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec)/1000000.0);
 }
