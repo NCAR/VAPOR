@@ -688,6 +688,9 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
 
         float planes[24];    // 6 planes, each with 4 elements
         GetClippingPlanes(planes);
+        for (int i = 0; i < 24; i++) std::cout << planes[i] << "  ";
+        std::cout << endl;
+
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
         glUniform4fv(uniformLocation, 6, planes);
 
