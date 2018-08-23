@@ -462,8 +462,6 @@ int DVRenderer::_initializeGL()
     glGenVertexArrays( 1, &_vertexArrayId );
     glGenBuffers(      1, &_vertexBufferId );
     glGenBuffers(      1, &_indexBufferId );
-    
-    _printGLInfo();
 
     _initializeFramebufferTextures();
 
@@ -690,16 +688,6 @@ void DVRenderer::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void DVRenderer::_printGLInfo() const
-{
-    std::cout << "    **** System Info ****" << std::endl;
-    std::cout << "    OpenGL version : " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "    GLSL   version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    std::cout << "    Vendor         : " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "    **** System Info ****" << std::endl;
-}
-
 void DVRenderer::_drawVolumeFaces( int            whichPass, 
                                    bool           insideACell,
                                    const GLfloat* ModelView, 
@@ -795,10 +783,6 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
 
         float planes[ 24 ];             // 6 planes, each with 4 elements
         GetClippingPlanes( planes );
-for( int i = 0; i < 24; i++ )
-    std::cout << planes[i] << "  ";
-std::cout << endl;
-            
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "clipPlanes" );
         glUniform4fv( uniformLocation, 6, planes );
 
