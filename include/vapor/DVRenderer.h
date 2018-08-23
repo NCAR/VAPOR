@@ -39,8 +39,6 @@ private:
     // C++ stuff
     const std::string _effectNameStr = "DVR";
 
-    void _printGLInfo() const;
-
     struct UserCoordinates {
         //              Y
         //              |   Z (coming out the screen)
