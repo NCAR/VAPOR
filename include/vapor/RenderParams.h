@@ -349,7 +349,10 @@ class PARAMS_API RenderParams : public ParamsBase {
 
     //! Set reasonable default variables
     //! \param[in] The dimension of the variables being set
-    void SetDefaultVariables(int dim);
+    //! \param[in] Indicates whether we're using color mapped variables
+    void SetDefaultVariables(
+        int dim,
+        bool secondaryColormapVariable);
 
     void _initBox();
 
