@@ -59,7 +59,9 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     setAutoBufferSwap(false);
     _mouseClicked = false;
     _buttonNum = 0;
-    _navigating = false;
+    _navigateFlag = false;
+    _manipFlag = false;
+    _openGLInitFlag = false;
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
 
@@ -219,7 +221,7 @@ void VizWin::_setUpModelViewMatrix()
 //
 void VizWin::resizeGL(int width, int height)
 {
-    if (!FrameBufferReady()) { return; }
+    if (!_openGLInitFlag || !FrameBufferReady()) { return; }
 
     int rc = printOpenGLErrorMsg("GLVizWindowResizeEvent");
     if (rc < 0) { MSG_ERR("OpenGL error"); }
@@ -266,11 +268,20 @@ void VizWin::initializeGL()
         vParams->SetWindowSize(width(), height());
         _controlExec->SetSaveStateEnabled(enabled);
     }
+
+    _openGLInitFlag = true;
+}
+
+void VizWin::_mousePressEventManip(QMouseEvent *e)
+{
+    std::vector<double> screenCoords = _getScreenCoords(e);
+
+    _manipFlag = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
 }
 
 void VizWin::_mousePressEventNavigate(QMouseEvent *e)
 {
-    _navigating = true;
+    _navigateFlag = true;
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -329,34 +340,32 @@ void VizWin::mousePressEvent(QMouseEvent *e)
     string modeName = _getCurrentMouseMode();
 
     if (modeName == MouseModeParams::GetRegionModeName()) {
-        std::vector<double> screenCoords = _getScreenCoords(e);
+        _mousePressEventManip(e);
 
-        glMatrixMode(GL_PROJECTION);    // Begin setup sequence
-        glPushMatrix();
-        _setUpProjMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        _setUpModelViewMatrix();    // End setup sequence
-
-        bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
-
-        swapBuffers();    // Begin cleanup sequence
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();    // End cleanup sequence
-
-        if (mouseOnManip) { return; }
+        // Only manipulating if user managed to grab manipulator handle.
+        // Otherwise we navigate
+        //
+        if (_manipFlag) { return; }
     }
 
-    //	if (modeName == MouseModeParams::GetNavigateModeName()) {
     _mousePressEventNavigate(e);
-    return;
-    //	}
+}
+
+void VizWin::_mouseReleaseEventManip(QMouseEvent *e)
+{
+    if (!_manipFlag) return;
+
+    std::vector<double> screenCoords = _getScreenCoords(e);
+    (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
+    _setNewExtents();
+
+    _manipFlag = false;
 }
 
 void VizWin::_mouseReleaseEventNavigate(QMouseEvent *e)
 {
+    if (!_navigateFlag) return;
+
     _trackBall->MouseOnTrackball(2, _buttonNum, e->x(), e->y(), width(), height());
     _trackBall->TrackballSetMatrix();
 
@@ -373,6 +382,8 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent *e)
     paramsMgr->EndSaveStateGroup();
 
     emit EndNavigation(_winName);
+
+    _navigateFlag = false;
 }
 
 /*
@@ -385,26 +396,28 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e)
 
     _mouseClicked = false;
 
-    string modeName = _getCurrentMouseMode();
-
-    if (modeName == MouseModeParams::GetRegionModeName()) {
-        std::vector<double> screenCoords = _getScreenCoords(e);
-        bool                b = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
-        if (!b)
-            _mouseReleaseEventNavigate(e);
-        else
-            _setNewExtents();
+    if (_manipFlag) {
+        _mouseReleaseEventManip(e);
+    } else if (_navigateFlag) {
+        _mouseReleaseEventNavigate(e);
     }
-
-    if (modeName == MouseModeParams::GetNavigateModeName()) _mouseReleaseEventNavigate(e);
-
-    _navigating = false;
 
     _buttonNum = 0;
 }
 
+void VizWin::_mouseMoveEventManip(QMouseEvent *e)
+{
+    if (!_manipFlag) return;
+
+    std::vector<double> screenCoords = _getScreenCoords(e);
+
+    (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
+}
+
 void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
 {
+    if (!_navigateFlag) return;
+
     _trackBall->MouseOnTrackball(1, _buttonNum, e->x(), e->y(), width(), height());
 
     _trackBall->TrackballSetMatrix();
@@ -468,21 +481,11 @@ void VizWin::mouseMoveEvent(QMouseEvent *e)
 {
     if (_buttonNum == 0) return;
 
-    string modeName = _getCurrentMouseMode();
-
-    if (modeName == MouseModeParams::GetRegionModeName()) {
-        if (!_navigating) {
-            std::vector<double> screenCoords = _getScreenCoords(e);
-
-            bool mouseOnManip = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
-            if (mouseOnManip)
-                return;
-            else
-                _navigating = true;
-        }
+    if (_manipFlag) {
+        _mouseMoveEventManip(e);
+    } else if (_navigateFlag) {
+        _mouseMoveEventNavigate(e);
     }
-
-    _mouseMoveEventNavigate(e);
     return;
 }
 
@@ -494,7 +497,7 @@ void VizWin::Render(bool fast)
     //
     makeCurrent();
 
-    if (!FrameBufferReady()) { return; }
+    if (!_openGLInitFlag || !FrameBufferReady()) { return; }
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
@@ -523,7 +526,7 @@ void VizWin::Render(bool fast)
     int rc = _controlExec->Paint(_winName, fast);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
-    if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) updateManip();
+    if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) { updateManip(); }
 
     swapBuffers();
 
@@ -639,8 +642,6 @@ VAPoR::Transform *VizWin::_getDataMgrTransform() const
 
 void VizWin::updateManip(bool initialize)
 {
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-
     std::vector<double> minExts(3, numeric_limits<double>::max());
     std::vector<double> maxExts(3, numeric_limits<double>::lowest());
 
