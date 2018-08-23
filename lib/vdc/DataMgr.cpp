@@ -764,19 +764,19 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
     coord_bmin.clear();
     coord_bmax.clear();
 
-    vector<string> data_dimnames;
-    bool           ok = _getVarDimNames(data_varname, data_dimnames);
+    vector<DC::Dimension> data_dims;
+    bool                  ok = _getVarDimensions(data_varname, data_dims);
     assert(ok);
-    assert(data_dimnames.size() == data_bmin.size());
+    assert(data_dims.size() == data_bmin.size());
 
-    vector<string> coord_dimnames;
-    ok = _getVarDimNames(coord_varname, coord_dimnames);
+    vector<DC::Dimension> coord_dims;
+    ok = _getVarDimensions(coord_varname, coord_dims);
     assert(ok);
 
     int i = 0;
-    for (int j = 0; j < coord_dimnames.size(); j++) {
-        while (data_dimnames[i] != coord_dimnames[j] && i < data_dimnames.size()) { i++; }
-        assert(i < data_dimnames.size());
+    for (int j = 0; j < coord_dims.size(); j++) {
+        while (data_dims[i].GetLength() != coord_dims[j].GetLength() && i < data_dims.size()) { i++; }
+        assert(i < data_dims.size());
         coord_bmin.push_back(data_bmin[i]);
         coord_bmax.push_back(data_bmax[i]);
     }
