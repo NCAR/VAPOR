@@ -252,10 +252,17 @@ protected:
     //!! RenderParams::GetBox()
     //! May be invoked during _paintGL() by classes derived from this class.
     //! Clipping planes are specified in User coordinates.
+    //!
+    //! \param[in] haloFrac Fraction of bounding box that should be used to
+    //! extend the min and max clippig planes. For example, if a min extent
+    //! is zero, and a max extent is 1.0, and haloFrac is 0.1 then the
+    //! min clipping plane will be set to -0.1 and the max to 1.1
+    //!
     //! \sa DisableClippingPlanes
-    void EnableClipToBox() const;
+    //
+    void EnableClipToBox(float haloFrac = 0.0) const;
 
-    void EnableClipToBox2DXY() const;
+    void EnableClipToBox2DXY(float haloFrac = 0.0) const;
 
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to

@@ -153,7 +153,7 @@ int Renderer::paintGL(bool fast)
     return (0);
 }
 
-void Renderer::EnableClipToBox() const
+void Renderer::EnableClipToBox(float haloFrac) const
 {
     GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
     GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
@@ -169,6 +169,12 @@ void Renderer::EnableClipToBox() const
     assert(minExts.size() > 0 && minExts.size() < 4);
 
     int orientation = rParams->GetBox()->GetOrientation();
+
+    for (int i = 0; i < minExts.size(); i++) {
+        float halo = (maxExts[i] - minExts[i]) * haloFrac;
+        minExts[i] -= halo;
+        maxExts[i] += halo;
+    }
 
     if (minExts.size() == 3 || orientation != 0) {
         x0Plane[3] = -minExts[0];
@@ -198,7 +204,7 @@ void Renderer::EnableClipToBox() const
     }
 }
 
-void Renderer::EnableClipToBox2DXY() const
+void Renderer::EnableClipToBox2DXY(float haloFrac) const
 {
     GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
     GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
@@ -210,6 +216,12 @@ void Renderer::EnableClipToBox2DXY() const
     rParams->GetBox()->GetExtents(minExts, maxExts);
     assert(minExts.size() == maxExts.size());
     assert(minExts.size() > 0 && minExts.size() < 4);
+
+    for (int i = 0; i < minExts.size(); i++) {
+        float halo = (maxExts[i] - minExts[i]) * haloFrac;
+        minExts[i] -= halo;
+        maxExts[i] += halo;
+    }
 
     x0Plane[3] = -minExts[0];
     x1Plane[3] = maxExts[0];
