@@ -38,14 +38,6 @@
 #include "MouseModeParams.h"
 
 const std::string MouseModeParams::_currentMouseModeTag = "CurrentMouseModeTag";
-const string      MouseModeParams::_rotCenterTag = "RotationCenter";
-const string      MouseModeParams::_positionVectorTag = "PositionVector";
-const string      MouseModeParams::_upVectorTag = "UpVector";
-const string      MouseModeParams::_directionVectorTag = "DirectionVector";
-const string      MouseModeParams::_rotCenterHomeTag = "RotationCenterHome";
-const string      MouseModeParams::_positionVectorHomeTag = "PositionVectorHome";
-const string      MouseModeParams::_upVectorHomeTag = "UpVectorHome";
-const string      MouseModeParams::_directionVectorHomeTag = "DirectionVectorHome";
 
 using namespace VAPoR;
 
@@ -106,46 +98,4 @@ void MouseModeParams::SetCurrentMouseMode(string t)
     if (_typeMap.find(t) == _typeMap.end()) t = GetNavigateModeName();
 
     SetValueString(_currentMouseModeTag, "Set mouse mode", t);
-}
-
-void MouseModeParams::SetCameraToHome()
-{
-    double position[3], viewdir[3], upvec[3], center[3];
-
-    _ssave->BeginGroup("Set camera to home");
-
-    GetCameraPosHome(position);
-    SetCameraPos(position);
-
-    GetCameraViewDirHome(viewdir);
-    SetCameraViewDir(viewdir);
-
-    GetCameraUpVecHome(upvec);
-    SetCameraUpVec(upvec);
-
-    GetRotationCenterHome(center);
-    SetRotationCenter(center);
-
-    _ssave->EndGroup();
-}
-
-void MouseModeParams::SetHomeToCamera()
-{
-    double position[3], viewdir[3], upvec[3], center[3];
-
-    _ssave->BeginGroup("Set new camera home");
-
-    GetCameraPos(position);
-    SetCameraPosHome(position);
-
-    GetCameraViewDir(viewdir);
-    SetCameraViewDirHome(viewdir);
-
-    GetCameraUpVec(upvec);
-    SetCameraUpVecHome(upvec);
-
-    GetRotationCenter(center);
-    SetRotationCenterHome(center);
-
-    _ssave->EndGroup();
 }

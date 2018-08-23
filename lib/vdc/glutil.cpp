@@ -308,7 +308,7 @@ void mmult(GLdouble *m1, GLdouble *m2, GLdouble *prod)
 
 // 4x4 matrix inversion.  Fixed (AN 4/07) so that it doesn't try to divide by very small
 // pivot elements.  Returns 0 if not invertible
-int minvert(GLfloat *mat, GLfloat *result)
+int minvert(const GLfloat *mat, GLfloat *result)
 {
     // Invert a 4x4 matrix
 
@@ -362,7 +362,7 @@ int minvert(GLfloat *mat, GLfloat *result)
         for (j = 0; j < 4; j++) result[i + 4 * j] = m[i + 4][j];
     return 0;
 }
-int minvert(GLdouble *mat, GLdouble *result)
+int minvert(const GLdouble *mat, GLdouble *result)
 {
     // Invert a 4x4 matrix
 
@@ -845,6 +845,16 @@ void makeTransMatrix(const std::vector<double> &trans, double *mtrx)
     mtrx[15] = 1.;
     for (int i = 0; i < 3; i++) mtrx[i + 12] = trans[i];
 }
+
+void makeScaleMatrix(const double *scale, double *mtrx)
+{
+    for (int i = 0; i < 16; i++) mtrx[i] = 0.;
+    mtrx[0] = scale[0];
+    mtrx[5] = scale[1];
+    mtrx[10] = scale[2];
+    mtrx[15] = 1.;
+}
+
 /*
  * make a modelview matrix from viewer position, direction, and up vector
  * Vectors must be nonzero

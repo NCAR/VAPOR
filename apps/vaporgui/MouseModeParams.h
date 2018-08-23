@@ -97,109 +97,6 @@ public:
         return (v);
     }
 
-    //! Get current camera position
-    //! \param[out] position 3-element vector with camera position in
-    //! world coordinates
-    //
-    void GetCameraPos(double position[3]) const
-    {
-        double def[3] = {0.0, 0.0, 5.0};
-        _get3(_positionVectorTag, def, position);
-    }
-
-    void SetCameraPos(const double position[3]) { _set3(_positionVectorTag, "Set camera position", position); }
-
-    //! Get current camera normalized view direction
-    //! \param[out] viewDir 3-element vector with camera position in
-    //! world coordinates
-    //
-    void GetCameraViewDir(double viewDir[3]) const
-    {
-        double def[3] = {0.0, 0.0, -1.0};
-        _get3(_directionVectorTag, def, viewDir);
-    }
-
-    void SetCameraViewDir(const double viewDir[3]) { _set3(_directionVectorTag, "Set camera view direction", viewDir); }
-
-    //! Get current camera normalized up direction
-    //! \param[out] upVec 3-element vector with camera position in
-    //! world coordinates
-    //
-    void GetCameraUpVec(double upVec[3]) const
-    {
-        double def[3] = {0.0, 1.0, 0.0};
-        _get3(_upVectorTag, def, upVec);
-    }
-
-    void SetCameraUpVec(const double upVec[3]) { _set3(_upVectorTag, "Set camera up vector", upVec); }
-
-    //! Obtain rotation center in local coordinates
-    //! \param[out] center 3-element vector with center of rotation
-    //
-    void GetRotationCenter(double center[3]) const
-    {
-        double def[3] = {0.0, 0.0, 0.0};
-        _get3(_rotCenterTag, def, center);
-    }
-
-    //! Specify rotation center in local coordinates
-    //! \param[in] vector<double>& rotation center in local coordinates
-    //! \retval int 0 if successful
-    void SetRotationCenter(const double center[3]) { _set3(_rotCenterTag, "Set rotation center", center); }
-
-    //! Get home camera position
-    //! \param[out] position 3-element vector with camera position in
-    //! world coordinates
-    //
-    void GetCameraPosHome(double position[3]) const
-    {
-        double def[3] = {0.0, 0.0, 5.0};
-        _get3(_positionVectorHomeTag, def, position);
-    }
-
-    void SetCameraPosHome(const double position[3]) { _set3(_positionVectorHomeTag, "Set camera position home", position); }
-
-    //! Get home camera normalized view direction
-    //! \param[out] viewDir 3-element vector with camera position in
-    //! world coordinates
-    //
-    void GetCameraViewDirHome(double viewDir[3]) const
-    {
-        double def[3] = {0.0, 0.0, -1.0};
-        _get3(_directionVectorHomeTag, def, viewDir);
-    }
-
-    void SetCameraViewDirHome(const double viewDir[3]) { _set3(_directionVectorHomeTag, "Set camera view direction home", viewDir); }
-
-    //! Get home camera normalized up direction
-    //! \param[out] upVec 3-element vector with camera position in
-    //! world coordinates
-    //
-    void GetCameraUpVecHome(double upVec[3]) const
-    {
-        double def[3] = {0.0, 1.0, 0.0};
-        _get3(_upVectorHomeTag, def, upVec);
-    }
-
-    void SetCameraUpVecHome(const double upVec[3]) { _set3(_upVectorHomeTag, "Set camera up vector home", upVec); }
-
-    //! Obtain home rotation center in local coordinates
-    //! \param[out] center 3-element vector with center of rotation
-    //
-    void GetRotationCenterHome(double center[3]) const
-    {
-        double def[3] = {0.0, 0.0, 0.0};
-        _get3(_rotCenterHomeTag, def, center);
-    }
-
-    //! Specify home rotation center in local coordinates
-    //! \param[in] vector<double>& rotation center in local coordinates
-    //! \retval int 0 if successful
-    void SetRotationCenterHome(const double center[3]) { _set3(_rotCenterHomeTag, "Set rotation center home", center); }
-
-    void SetCameraToHome();
-    void SetHomeToCamera();
-
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("MouseModeParamsTag"); }
@@ -210,39 +107,12 @@ public:
 
 private:
     static const string _currentMouseModeTag;
-    static const string _rotCenterTag;
-    static const string _positionVectorTag;
-    static const string _upVectorTag;
-    static const string _directionVectorTag;
-    static const string _rotCenterHomeTag;
-    static const string _positionVectorHomeTag;
-    static const string _upVectorHomeTag;
-    static const string _directionVectorHomeTag;
 
     map<string, int>                 _typeMap;
     map<string, const char *const *> _iconMap;
 
     void _init();
     void _setUpDefault();
-
-    void _get3(string tag, const double def[3], double v[3]) const
-    {
-        vector<double> defaultv = {def[0], def[1], def[2]};
-        vector<double> vec = GetValueDoubleVec(tag, defaultv);
-        assert(vec.size() == 3);
-        v[0] = vec[0];
-        v[1] = vec[1];
-        v[2] = vec[2];
-    }
-
-    void _set3(string tag, string msg, const double v[3])
-    {
-        vector<double> vec;
-        vec.push_back(v[0]);
-        vec.push_back(v[1]);
-        vec.push_back(v[2]);
-        SetValueDoubleVec(tag, msg, vec);
-    }
 };
 
 #endif    // MOUSEMODEPARAMS_H
