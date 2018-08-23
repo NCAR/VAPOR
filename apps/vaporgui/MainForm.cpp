@@ -1677,21 +1677,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         return (false);
     }
 
-    //
-    // Force a redraw if mouse button is pressed and moving
-    //
-    switch (event->type()) {
-    case (QEvent::MouseButtonPress): _buttonPressed = true; break;
-
-    case (QEvent::MouseButtonRelease): _buttonPressed = false; break;
-
-    case (QEvent::MouseMove):
-        if (_buttonPressed) { _vizWinMgr->Update(true); }
-        break;
-
-    default: break;
-    }
-
     // Pass event on to target
     return (false);
 }
