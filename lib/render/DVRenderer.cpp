@@ -15,9 +15,12 @@ MessageCallback(GLenum source,
                 GLsizei length,
                 const GLchar *message,
                 const void *userParam) {
-    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-        fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+        char buffer[2048];
+        sprintf(buffer, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
                 (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+        MyBase::SetErrMsg(buffer);
+    }
 }
 
 using namespace VAPoR;
@@ -195,9 +198,10 @@ DVRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *params,
         myCompressionLevel,
         extMin,
         extMax));
-    if (grid == nullptr)
-        std::cerr << "UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid" << std::endl;
-
+    if (grid == nullptr) {
+        MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid;
+                           the behavior is undefined in this case.");
+    }
     return grid;
 }
 
@@ -563,7 +567,8 @@ void DVRenderer::_initializeFramebufferTextures() {
 
     /* Check if framebuffer is complete */
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cerr << "_openGLInitialization(): Framebuffer failed!!" << std::endl;
+        MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed;
+                           the behavior is then undefined." ); 
     }
 
     /* Bind the default frame buffer */
