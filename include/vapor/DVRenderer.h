@@ -122,8 +122,11 @@ private:
     GLuint              _3rdPassShaderId;
 
     //
-    // Draw faces using triangle strips
+    // Render the volume surface using triangle strips
+    //   This is a subroutine used by _drawVolumeFaces().
     //
+    void _renderTriangleStrips() const;
+
     void _drawVolumeFaces( int            whichPass, 
                            bool           insideACell = false,
                            const GLfloat* ModelView   = nullptr,
@@ -147,11 +150,6 @@ private:
     //         The MVP matrix is stored in a colume-major fashion.
     void _getMVPMatrix( GLfloat* MVP ) const;
 
-    //
-    // Multiply a 4-value vector by a 4x4 matrix.
-    //
-    void _matMultiVec( const GLfloat* matrix, const GLfloat* vecIn, GLfloat* vecOut ) const;
-
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
 
     //
@@ -160,6 +158,11 @@ private:
     bool _mesa_invert_matrix_general( GLfloat out[16], const GLfloat in[16] );
     void _mesa_transposef( GLfloat to[16], const GLfloat from[16] );
     void _printMatrix( const GLfloat m[16] );
+
+    //
+    // Multiply a 4-value vector by a 4x4 matrix.
+    //
+    void _matMultiVec( const GLfloat* matrix, const GLfloat* vecIn, GLfloat* vecOut ) const;
 
 };  // End of class DVRenderer
 
