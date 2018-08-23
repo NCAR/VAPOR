@@ -354,6 +354,9 @@ bool DVRenderer::UserCoordinates::UpdateCoordinates(const DVRParams *params, Dat
 
 int DVRenderer::_initializeGL()
 {
+#ifdef Darwin
+    return 0;
+#endif
     // Enable debug output
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
@@ -384,6 +387,9 @@ int DVRenderer::_initializeGL()
 
 int DVRenderer::_paintGL(bool fast)
 {
+#ifdef Darwin
+    return 0;
+#endif
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
