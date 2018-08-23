@@ -9,8 +9,11 @@
 //
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
-    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-        fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+        char buffer[2048];
+        sprintf(buffer, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+        MyBase::SetErrMsg(buffer);
+    }
 }
 
 using namespace VAPoR;
@@ -173,8 +176,10 @@ StructuredGrid *DVRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *par
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
     StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
-    if (grid == nullptr) std::cerr << "UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid" << std::endl;
-
+    if (grid == nullptr) {
+        MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid;
+                           the behavior is undefined in this case.");
+    }
     return grid;
 }
 
@@ -526,7 +531,10 @@ void DVRenderer::_initializeFramebufferTextures()
     glDrawBuffers(2, _drawBuffers);
 
     /* Check if framebuffer is complete */
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) { std::cerr << "_openGLInitialization(): Framebuffer failed!!" << std::endl; }
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed;
+                           the behavior is then undefined." ); 
+    }
 
     /* Bind the default frame buffer */
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
