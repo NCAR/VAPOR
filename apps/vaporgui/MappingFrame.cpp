@@ -639,8 +639,8 @@ void MappingFrame::fitToView()
   _minValue = getMinDomainBound();
   _maxValue = getMaxDomainBound();
   
- // setMinEditBound(_minValue);
- // setMaxEditBound(_maxValue);
+  setMinEditBound(_minValue);
+  setMaxEditBound(_maxValue);
  
   _domainSlider->setDomain(xDataToWorld(_minValue), xDataToWorld(_maxValue));
   if(_colorbarWidget) _colorbarWidget->setDirty();

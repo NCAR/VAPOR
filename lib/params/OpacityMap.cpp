@@ -315,7 +315,7 @@ void OpacityMap::controlPointValue(int index, float value)
 //----------------------------------------------------------------------------
 void OpacityMap::SetMean(double mean) {
   SetValueDouble(_meanTag, "Set opacity mean", mean);
-cout << "OpacityMap::SetMean()" << endl;
+cout << "    OpacityMap::SetMean()" << endl;
   _dirtyBit = true;
 }
 

@@ -349,10 +349,10 @@ void MapperFunction::makeLut(float* clut)
   	  m_colorMap->color(v).toRGB(&clut[4*i]);
   	  clut[4*i+3] = getOpacityValueData(v);
   	}
-	_clut = clut;
+	memcpy(_clut, clut, _numEntries);
   }
   else {
-	clut = _clut;
+	memcpy(clut, _clut, _numEntries);
   }
 
   _dirtyBit = false;
