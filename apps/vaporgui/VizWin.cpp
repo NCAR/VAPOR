@@ -430,6 +430,8 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
     //
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     vParams->SetModelViewMatrix(m);
+
+    Render(true);
 }
 
 std::vector<double> VizWin::_getScreenCoords(QMouseEvent *e) const
