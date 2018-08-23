@@ -477,10 +477,7 @@ int DVRenderer::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
 
-    if (insideACell)
-        _drawVolumeFaces(3, true, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
-    else
-        _drawVolumeFaces(3, false, ModelView, InversedMV, fast);
+    _drawVolumeFaces(3, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
 
     delete grid;
 
@@ -730,7 +727,7 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "hasMissingValue");
         glUniform1i(uniformLocation, 0);    // Set to false
         // If there is missing value, pass in missingValueMaskTexture as well.
-        // Otherwise, leave it empty.
+        //   Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask) {
             glUniform1i(uniformLocation, 1);    // Set to true
             textureUnit = 4;
@@ -754,95 +751,7 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     } else {
-        unsigned int bx = (unsigned int)_userCoordinates.dims[0];
-        unsigned int by = (unsigned int)_userCoordinates.dims[1];
-        unsigned int bz = (unsigned int)_userCoordinates.dims[2];
-        unsigned int idx;
-
-        // Each strip will have the same numOfVertices for the first 4 faces
-        size_t        numOfVertices = bx * 2;
-        unsigned int *indexBuffer = new unsigned int[numOfVertices];
-
-        // Render front face:
-        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFace, GL_STATIC_DRAW);
-        for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
-        {
-            idx = 0;
-            for (unsigned int x = 0; x < bx; x++) {
-                indexBuffer[idx++] = (y + 1) * bx + x;
-                indexBuffer[idx++] = y * bx + x;
-            }
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-        }
-
-        // Render back face:
-        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFace, GL_STATIC_DRAW);
-        for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
-        {
-            idx = 0;
-            for (unsigned int x = 0; x < bx; x++) {
-                indexBuffer[idx++] = y * bx + x;
-                indexBuffer[idx++] = (y + 1) * bx + x;
-            }
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-        }
-
-        // Render top face:
-        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFace, GL_STATIC_DRAW);
-        for (unsigned int z = 0; z < bz - 1; z++) {
-            idx = 0;
-            for (unsigned int x = 0; x < bx; x++) {
-                indexBuffer[idx++] = z * bx + x;
-                indexBuffer[idx++] = (z + 1) * bx + x;
-            }
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-        }
-
-        // Render bottom face:
-        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace, GL_STATIC_DRAW);
-        for (unsigned int z = 0; z < bz - 1; z++) {
-            idx = 0;
-            for (unsigned int x = 0; x < bx; x++) {
-                indexBuffer[idx++] = (z + 1) * bx + x;
-                indexBuffer[idx++] = z * bx + x;
-            }
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-        }
-
-        // Each strip will have the same numOfVertices for the rest 2 faces.
-        numOfVertices = by * 2;
-        delete[] indexBuffer;
-        indexBuffer = new unsigned int[numOfVertices];
-
-        // Render right face:
-        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFace, GL_STATIC_DRAW);
-        for (unsigned int z = 0; z < bz - 1; z++) {
-            idx = 0;
-            for (unsigned int y = 0; y < by; y++) {
-                indexBuffer[idx++] = (z + 1) * by + y;
-                indexBuffer[idx++] = z * by + y;
-            }
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-        }
-
-        // Render left face
-        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_DRAW);
-        for (unsigned int z = 0; z < bz - 1; z++) {
-            idx = 0;
-            for (unsigned int y = 0; y < by; y++) {
-                indexBuffer[idx++] = z * by + y;
-                indexBuffer[idx++] = (z + 1) * by + y;
-            }
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
-        }
-
-        delete[] indexBuffer;
+        _renderTriangleStrips();
     }
 
     glDisableVertexAttribArray(0);
@@ -853,6 +762,99 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
     glDepthMask(GL_TRUE);
 
     glUseProgram(0);
+}
+
+void DVRenderer::_renderTriangleStrips() const
+{
+    unsigned int bx = (unsigned int)_userCoordinates.dims[0];
+    unsigned int by = (unsigned int)_userCoordinates.dims[1];
+    unsigned int bz = (unsigned int)_userCoordinates.dims[2];
+    unsigned int idx;
+
+    // Each strip will have the same numOfVertices for the first 4 faces
+    size_t        numOfVertices = bx * 2;
+    unsigned int *indexBuffer = new unsigned int[numOfVertices];
+
+    // Render front face:
+    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFace, GL_STATIC_DRAW);
+    for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
+    {
+        idx = 0;
+        for (unsigned int x = 0; x < bx; x++) {
+            indexBuffer[idx++] = (y + 1) * bx + x;
+            indexBuffer[idx++] = y * bx + x;
+        }
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+    }
+
+    // Render back face:
+    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFace, GL_STATIC_DRAW);
+    for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
+    {
+        idx = 0;
+        for (unsigned int x = 0; x < bx; x++) {
+            indexBuffer[idx++] = y * bx + x;
+            indexBuffer[idx++] = (y + 1) * bx + x;
+        }
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+    }
+
+    // Render top face:
+    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFace, GL_STATIC_DRAW);
+    for (unsigned int z = 0; z < bz - 1; z++) {
+        idx = 0;
+        for (unsigned int x = 0; x < bx; x++) {
+            indexBuffer[idx++] = z * bx + x;
+            indexBuffer[idx++] = (z + 1) * bx + x;
+        }
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+    }
+
+    // Render bottom face:
+    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace, GL_STATIC_DRAW);
+    for (unsigned int z = 0; z < bz - 1; z++) {
+        idx = 0;
+        for (unsigned int x = 0; x < bx; x++) {
+            indexBuffer[idx++] = (z + 1) * bx + x;
+            indexBuffer[idx++] = z * bx + x;
+        }
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+    }
+
+    // Each strip will have the same numOfVertices for the rest 2 faces.
+    numOfVertices = by * 2;
+    delete[] indexBuffer;
+    indexBuffer = new unsigned int[numOfVertices];
+
+    // Render right face:
+    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFace, GL_STATIC_DRAW);
+    for (unsigned int z = 0; z < bz - 1; z++) {
+        idx = 0;
+        for (unsigned int y = 0; y < by; y++) {
+            indexBuffer[idx++] = (z + 1) * by + y;
+            indexBuffer[idx++] = z * by + y;
+        }
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+    }
+
+    // Render left face
+    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_DRAW);
+    for (unsigned int z = 0; z < bz - 1; z++) {
+        idx = 0;
+        for (unsigned int y = 0; y < by; y++) {
+            indexBuffer[idx++] = z * by + y;
+            indexBuffer[idx++] = (z + 1) * by + y;
+        }
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+    }
+
+    delete[] indexBuffer;
 }
 
 GLuint DVRenderer::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
