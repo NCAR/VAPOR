@@ -248,7 +248,11 @@ bool DVRenderer::UserCoordinates::IsUpToDate( const DVRParams* params,
 
     // compare grid boundaries and dimensions
     StructuredGrid* grid = this->GetCurrentGrid( params, dataMgr );
-    assert( grid );
+    if( !grid )
+    {
+        MyBase::SetErrMsg("Retrieving grid unsuccessful;
+                           the behavior is then undefined!" );
+    }
     std::vector<double>   extMin, extMax;
     grid->GetUserExtents( extMin, extMax );
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -269,7 +273,7 @@ bool DVRenderer::UserCoordinates::IsUpToDate( const DVRParams* params,
 }
         
 bool DVRenderer::UserCoordinates::UpdateCoordinates( const DVRParams* params,
-                                                                     DataMgr*   dataMgr )
+                                                           DataMgr*   dataMgr )
 {
     myCurrentTimeStep  = params->GetCurrentTimestep();
     myVariableName     = params->GetVariableName();
@@ -469,7 +473,11 @@ int DVRenderer::_paintGL( bool fast )
     GLint viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
-    assert( params );
+    if( !params )
+    {
+        MyBase::SetErrMsg("Not receiving DVR parameters;
+                           the behavior becomes undefined!" );
+    }
 
     // Use our VAO
     glBindVertexArray( _vertexArrayId );
@@ -524,7 +532,11 @@ int DVRenderer::_paintGL( bool fast )
     GLfloat ModelView[16],      InversedMV[16];
     glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
     bool success          = _mesa_invert_matrix_general( InversedMV, ModelView );
-    assert( success );
+    if( !success )
+    {
+        MyBase::SetErrMsg("ModelView matrix is a singular matrix;
+                           the behavior becomes undefined!" );
+    }
     std::vector<double> cameraUser( 4, 1.0 );   // camera position in user coordinates
     cameraUser[0]         = InversedMV[ 12 ];
     cameraUser[1]         = InversedMV[ 13 ];
@@ -694,8 +706,6 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
                                    const GLfloat* InversedMV,
                                    bool           fast )
 {
-    assert( whichPass == 1 || whichPass == 2 || whichPass == 3 );
-
     GLuint uniformLocation;
     GLfloat MVP[16];
     _getMVPMatrix( MVP );
