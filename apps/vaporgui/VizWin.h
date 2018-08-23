@@ -115,6 +115,10 @@ class VizWin : public QGLWidget {
     virtual void _mouseReleaseEventNavigate(QMouseEvent *);
     virtual void _mouseMoveEventNavigate(QMouseEvent *);
 
+    virtual void _mousePressEventManip(QMouseEvent *);
+    virtual void _mouseReleaseEventManip(QMouseEvent *);
+    virtual void _mouseMoveEventManip(QMouseEvent *);
+
     virtual void focusInEvent(QFocusEvent *e);
     virtual void closeEvent(QCloseEvent *);
 
@@ -128,7 +132,8 @@ class VizWin : public QGLWidget {
 
     bool _mouseClicked; //Indicates mouse has been clicked but not move
     int _buttonNum;     // currently pressed button (0=none, 1=left,2=mid, 3=right)
-    bool _navigating;
+    bool _navigateFlag;
+    bool _manipFlag;
     Trackball *_trackBall;
 
     std::vector<double> _getScreenCoords(QMouseEvent *e) const;
@@ -156,6 +161,8 @@ class VizWin : public QGLWidget {
     void _setUpModelViewMatrix();
 
     VAPoR::TranslateStretchManip *_manip;
+
+    bool _openGLInitFlag;
 };
 
 #endif // VIZWIN_H
