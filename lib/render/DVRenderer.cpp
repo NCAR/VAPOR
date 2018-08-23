@@ -469,10 +469,9 @@ int DVRenderer::_paintGL(bool fast)
             _userCoordinates.nearCoords[i * 3 + 1] = near[i * 4 + 1] / near[i * 4 + 3];
             _userCoordinates.nearCoords[i * 3 + 2] = near[i * 4 + 2] / near[i * 4 + 3];
         }
+    }
 
-        _drawVolumeFaces(2, true);    // 2nd pass, render front facing polygons
-    } else
-        _drawVolumeFaces(2, false);
+    _drawVolumeFaces(2, insideACell);    // 2nd pass, render front facing polygons
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, viewport[2], viewport[3]);
