@@ -110,6 +110,8 @@ public:
   vector<double> GetControlPoints() const;
   void SetControlPoints(const vector<double> &opacityControlPoints);
 
+  bool GetDirtyBit() const;
+  void ResetDirtyBit();
 
   // Get static string identifier for this params class
   //
@@ -136,6 +138,8 @@ private:
   const double _maxFreq;
   const double _minPhase;
   const double _maxPhase;
+
+  bool _dirtyBit;
 
   static const string _relMinTag;
   static const string _relMaxTag;

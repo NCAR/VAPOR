@@ -116,13 +116,17 @@ public:
  //! \return true if opaque.
  bool isOpaque() const;
 
+ //! Check for changes to our OpacityMaps and set our dirty
+ //! bit if there have been
+ void checkForOpacityChanges();
+
  //! Build a color/opacity lookup table.
  //! Caller must supply an array to be filled in.
  //! Each entry isa 4-tuple: r,g,b,opacity.
  //! \param[out] clut lookup table of size _numEntries*4
- void makeLut(float* clut) const;
+ void makeLut(float* clut);
 
- void makeLut(std::vector <float> &clut) const;
+ void makeLut(std::vector <float> &clut);
 
  //! Obtain minimum mapping (histo) value
  //! \return Minimum mapping value
@@ -336,6 +340,10 @@ private:
  // Size of lookup table.  Always 1<<8 currently!
  //
  const int _numEntries;
+
+ bool _dirtyBit;
+
+ float* _clut;
 
  ParamsContainer *m_opacityMaps;
  ColorMap *m_colorMap;

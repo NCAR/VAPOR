@@ -2,6 +2,7 @@
 #include <vapor/DVRenderer.h>
 #include <iostream>
 #include <sstream>
+#include <ctime>
 
 //
 // OpenGL debug output
@@ -460,6 +461,11 @@ int DVRenderer::_initializeGL()
 
 int DVRenderer::_paintGL( bool fast ) 
 {
+
+	std::clock_t start;
+	double duration;
+	start = std::clock();
+
     GLint viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
@@ -568,6 +574,9 @@ int DVRenderer::_paintGL( bool fast )
     glBindVertexArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+
+	duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
+	std::cout << "_paintGL(): " << duration << endl << endl;
 
     return 0;
 }
