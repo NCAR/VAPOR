@@ -177,8 +177,8 @@ StructuredGrid *DVRenderer::UserCoordinates::GetCurrentGrid(const DVRParams *par
     params->GetBox()->GetExtents(extMin, extMax);
     StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
     if (grid == nullptr) {
-        MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid;
-                           the behavior is undefined in this case.");
+        MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid; "
+                          "the behavior is undefined in this case.");
     }
     return grid;
 }
@@ -193,8 +193,8 @@ bool DVRenderer::UserCoordinates::IsUpToDate(const DVRParams *params, DataMgr *d
     // compare grid boundaries and dimensions
     StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
     if (!grid) {
-        MyBase::SetErrMsg("Retrieving grid unsuccessful;
-                           the behavior is then undefined!" );
+        MyBase::SetErrMsg("Retrieving grid unsuccessful; "
+                          "the behavior is then undefined!");
     }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
@@ -388,8 +388,8 @@ int DVRenderer::_paintGL(bool fast)
     glGetIntegerv(GL_VIEWPORT, viewport);
     DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
     if (!params) {
-        MyBase::SetErrMsg("Not receiving DVR parameters;
-                           the behavior becomes undefined!" );
+        MyBase::SetErrMsg("Not receiving DVR parameters; "
+                          "the behavior becomes undefined!");
     }
 
     // Use our VAO
@@ -439,8 +439,8 @@ int DVRenderer::_paintGL(bool fast)
     glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
     bool success = _mesa_invert_matrix_general(InversedMV, ModelView);
     if (!success) {
-        MyBase::SetErrMsg("ModelView matrix is a singular matrix;
-                           the behavior becomes undefined!" );
+        MyBase::SetErrMsg("ModelView matrix is a singular matrix; "
+                          "the behavior becomes undefined!");
     }
     std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
     cameraUser[0] = InversedMV[12];
@@ -541,8 +541,8 @@ void DVRenderer::_initializeFramebufferTextures()
 
     /* Check if framebuffer is complete */
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed;
-                           the behavior is then undefined." ); 
+        MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed; "
+                          "the behavior is then undefined.");
     }
 
     /* Bind the default frame buffer */
