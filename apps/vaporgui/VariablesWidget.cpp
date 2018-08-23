@@ -79,9 +79,9 @@ void VariablesWidget::Reinit(VariableFlags variableFlags, DimFlags dimFlags)
     variableSelectionWidget->adjustSize();
 
     VariableFlags fdf = (VariableFlags)0;
-    if (_dimFlags & SCALAR) fdf = (VariableFlags)(fdf | SCALAR);
+    if (_variableFlags & SCALAR) fdf = (VariableFlags)(fdf | SCALAR);
 
-    if (_dimFlags & VECTOR) fdf = (VariableFlags)(fdf | VECTOR);
+    if (_variableFlags & VECTOR) fdf = (VariableFlags)(fdf | VECTOR);
 
     _fidelityWidget->Reinit(fdf);
 }
@@ -182,7 +182,12 @@ void VariablesWidget::setVariableDims(int index)
     updateCombos();
 }
 
-void VariablesWidget::setDefaultVariables() { _rParams->SetDefaultVariables(_activeDim); }
+void VariablesWidget::setDefaultVariables()
+{
+    bool secondaryColormapVariable = false;
+    if (_variableFlags & COLOR) secondaryColormapVariable = true;
+    _rParams->SetDefaultVariables(_activeDim, secondaryColormapVariable);
+}
 
 // Default scalar variable will just be the first variable
 // of the active dimension (2D or 3D)
