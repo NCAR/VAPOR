@@ -20,6 +20,7 @@ set (SRC
 	ImageParams.cpp
 	TFInterpolator.cpp
 	ContourParams.cpp
+	DVRParams.cpp
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
 )

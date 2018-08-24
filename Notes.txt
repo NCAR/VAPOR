@@ -40,3 +40,8 @@ made an event router, or possible migrate VizWinMgr "view" functions
 to viewpointeventrouter
 
 + paint events get generated every time mouse moves anywhere in GUI
+
+
+
+Good GLSL resources:
++ https://www.tomdalling.com/blog/modern-opengl/03-matrices-depth-buffering-animation/

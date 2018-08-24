@@ -1,0 +1,183 @@
+#version 410 core
+
+in vec4 positionClip;   // vertex position in the clip space
+layout(location = 0) out vec4 color;
+
+uniform sampler2D  backFaceTexture;
+uniform sampler2D  frontFaceTexture;
+uniform sampler3D  volumeTexture;
+uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
+uniform sampler1D  colorMapTexture;
+
+uniform vec2 valueRange;        // min and max values of this variable
+uniform vec2 colorMapRange;     // min and max values on this color map
+uniform vec3 boxMin;            // min coordinates of the bounding box of this volume
+uniform vec3 boxMax;            // max coordinates of the bounding box of this volume
+uniform vec3 volumeDimensions;  // number of vertices of this volumeTexture
+uniform vec4 clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+
+uniform float stepSize1D;       // ray casting step size
+uniform bool  lighting;         // apply lighting or not
+uniform bool  hasMissingValue;  // has missing values or not
+uniform float lightingCoeffs[4]; // lighting parameters
+
+uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
+uniform mat4 ModelView;
+
+const float EPSILON = 5e-6f;
+float ambientCoeff  = lightingCoeffs[0];
+float diffuseCoeff  = lightingCoeffs[1];
+float specularCoeff = lightingCoeffs[2];
+float specularExp   = lightingCoeffs[3];
+
+//
+// Input:  normalized value w.r.t. valueRange.
+// Output: normalized value w.r.t. colorMapRange.
+//
+float TranslateValue( in float value )
+{
+    float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
+    return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+}
+
+//
+// Input:  Location to be evaluated in texture coordinates.
+// Output: If this location should be skipped.
+// Note:   It is skipped in two cases: 1) it represents a missing value
+//                                     2) it is outside of clipping planes
+//
+bool ShouldSkip( in vec3 tc )
+{
+    if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
+        return true;
+
+    vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
+    for( int i = 0; i < 6; i++ )
+    {
+        if( dot(positionModel, clipPlanes[i]) < -EPSILON )
+            return true;
+    }
+
+    return false;
+}
+
+//
+// Input:  Location to be evaluated in texture coordinates
+// Output: Gradient at that location
+//
+vec3 CalculateGradient(in vec3 tc)
+{
+    vec3 h0 = vec3(-0.5f ) / volumeDimensions;
+    vec3 h1 = vec3( 0.5f ) / volumeDimensions;
+    vec3 h  = vec3( 1.0f );
+
+    if ((tc.x + h0.x) < 0.0f) {
+        h0.x = 0.0f;
+        h.x = 0.5f;
+    }
+    if ((tc.x + h1.x) > 1.0f) {
+        h1.x = 0.0f;
+        h.x = 0.5f;
+    }
+    if ((tc.y + h0.y) < 0.0f) {
+        h0.y = 0.0f;
+        h.y = 0.5f;
+    }
+    if ((tc.y + h1.y) > 1.0f) {
+        h1.y = 0.0f;
+        h.y = 0.5f;
+    }
+    if ((tc.z + h0.z) < 0.0f) {
+        h0.z = 0.0f;
+        h.z = 0.5f;
+    }
+    if ((tc.z + h1.z) > 1.0f) {
+        h1.z = 0.0f;
+        h.z = 0.5f;
+    }
+
+    vec3 a0, a1;
+    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0f,0.0f) ).r;
+    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0f,0.0f) ).r;
+    a0.y = texture( volumeTexture, tc + vec3(0.0f,h0.y,0.0f) ).r;
+    a1.y = texture( volumeTexture, tc + vec3(0.0f,h1.y,0.0f) ).r;
+    a0.z = texture( volumeTexture, tc + vec3(0.0f,0.0f,h0.z) ).r;
+    a1.z = texture( volumeTexture, tc + vec3(0.0f,0.0f,h1.z) ).r;
+
+    return (a1-a0 / h);
+}
+
+
+void main(void)
+{
+    vec3  lightDirEye   = vec3(0.0f, 0.0f, 1.0f); 
+
+    // Get UV coordinates of this frament
+    if( positionClip.w == 0.0f )
+        discard;
+    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
+
+    vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
+    vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
+    vec3 rayDirTexture  = stopTexture - startTexture;
+    float rayDirLength  = length( rayDirTexture );
+    if( rayDirLength < EPSILON )
+        discard;
+
+    float nStepsf       = rayDirLength  / stepSize1D;
+    vec3  stepSize3D    = rayDirTexture / nStepsf;
+
+    vec3  step1Texture  = startTexture;
+    if( ShouldSkip( step1Texture ) )
+    {
+        color = vec4( 0.0f );
+    }
+    else
+    {
+        float step1Value = texture( volumeTexture, step1Texture ).r;
+              color      = texture( colorMapTexture, TranslateValue(step1Value) );
+              color.rgb *= color.a;
+    }
+
+    // let's do a ray casting! 
+    for( int i = 0; i < int(nStepsf); i++ )
+    {
+        if( color.a > 0.999f )  // You can still see through with 0.99...
+            break;
+
+        vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
+        if( ShouldSkip( step2Texture ) )
+            continue;
+
+        float step2Value  = texture( volumeTexture, step2Texture ).r;
+        vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
+        
+        // Apply lighting if big enough gradient
+        if( lighting )
+        {
+            vec3 gradientModel = CalculateGradient( step2Texture );
+            if( length( gradientModel ) > EPSILON )
+            {
+                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
+                     gradientEye = normalize( gradientEye );
+                float diffuse    = abs( dot(lightDirEye, gradientEye) );
+
+                // Calculate eye space coordinates of "step2Texture"
+                vec3 step2Model  = boxMin + step2Texture * (boxMax - boxMin);
+                vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
+                vec3 viewDirEye  = normalize( -step2Eye );
+
+                vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
+                float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), specularExp ); 
+                backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
+                                   specular * specularCoeff;
+            }
+        }   // End lighting
+
+        // Color compositing
+        color.rgb += (1.0f - color.a) * backColor.a * backColor.rgb;
+        color.a   += (1.0f - color.a) * backColor.a;
+    }   // End ray casting
+
+}       // End main()
+
