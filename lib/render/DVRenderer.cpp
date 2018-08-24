@@ -31,16 +31,15 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<DVRenderer> 
-            registrar( DVRenderer::GetClassType(), 
-                        DVRParams::GetClassType() );
+static RendererRegistrar<DVRenderer> registrar( DVRenderer::GetClassType(), 
+                                                DVRParams::GetClassType() );
 
 // Constructor
 DVRenderer::DVRenderer( const ParamsMgr*    pm,
-                                            std::string&        winName,
-                                            std::string&        dataSetName,
-                                            std::string&        instName,
-                                            DataMgr*            dataMgr )
+                        std::string&        winName,
+                        std::string&        dataSetName,
+                        std::string&        instName,
+                        DataMgr*            dataMgr )
                     : Renderer( pm,
                                 winName,
                                 dataSetName,
@@ -237,7 +236,7 @@ DVRenderer::UserCoordinates::GetCurrentGrid( const DVRParams* params,
 }
 
 bool DVRenderer::UserCoordinates::IsUpToDate( const DVRParams* params,  
-                                                              DataMgr*   dataMgr ) const
+                                                    DataMgr*   dataMgr ) const
 {
     if( ( myCurrentTimeStep  != params->GetCurrentTimestep()  )  ||
         ( myVariableName     != params->GetVariableName()     )  ||
@@ -441,6 +440,9 @@ bool DVRenderer::UserCoordinates::UpdateCoordinates( const DVRParams* params,
 
 int DVRenderer::_initializeGL()
 {
+#ifdef Darwin
+    return 0;
+#endif
     // Enable debug output
     glEnable              ( GL_DEBUG_OUTPUT );
     glDebugMessageCallback( MessageCallback, 0 );
@@ -461,8 +463,6 @@ int DVRenderer::_initializeGL()
     glGenVertexArrays( 1, &_vertexArrayId );
     glGenBuffers(      1, &_vertexBufferId );
     glGenBuffers(      1, &_indexBufferId );
-    
-    _printGLInfo();
 
     _initializeFramebufferTextures();
 
@@ -471,12 +471,15 @@ int DVRenderer::_initializeGL()
 
 int DVRenderer::_paintGL( bool fast ) 
 {
-
 	std::clock_t start;
 	double duration;
 	start = std::clock();
 
-    GLint viewport[4];
+#ifdef Darwin
+    return 0;
+#endif
+    
+	GLint viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
     if( !params )
@@ -572,19 +575,14 @@ int DVRenderer::_paintGL( bool fast )
             _userCoordinates.nearCoords[ i*3+1 ] = near[ i*4+1 ] / near[ i*4+3 ];
             _userCoordinates.nearCoords[ i*3+2 ] = near[ i*4+2 ] / near[ i*4+3 ];
         }
-
-        _drawVolumeFaces( 2, true );    // 2nd pass, render front facing polygons
     }
-    else
-        _drawVolumeFaces( 2, false );
+
+    _drawVolumeFaces( 2, insideACell );    // 2nd pass, render front facing polygons
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, viewport[2], viewport[3] );
 
-    if( insideACell )
-        _drawVolumeFaces( 3, true, ModelView, InversedMV, fast );  // 3rd pass, perform ray casting
-    else
-        _drawVolumeFaces( 3, false, ModelView, InversedMV, fast );
+    _drawVolumeFaces( 3, insideACell, ModelView, InversedMV, fast );  // 3rd pass, perform ray casting
         
     delete grid;
 
@@ -699,28 +697,17 @@ void DVRenderer::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void DVRenderer::_printGLInfo() const
-{
-    std::cout << "    **** System Info ****" << std::endl;
-    std::cout << "    OpenGL version : " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "    GLSL   version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    std::cout << "    Vendor         : " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "    Renderer       : " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "    **** System Info ****" << std::endl;
-}
-
 void DVRenderer::_drawVolumeFaces( int            whichPass, 
                                    bool           insideACell,
                                    const GLfloat* ModelView, 
                                    const GLfloat* InversedMV,
                                    bool           fast )
 {
-    GLuint uniformLocation;
+    GLuint  uniformLocation;
     GLfloat MVP[16];
     _getMVPMatrix( MVP );
 
-    /* Set up shader uniforms, OpenGL states, etc. */
-    if( whichPass == 1 )        // render back-facing polygons
+    if( whichPass == 1 )
     {
         glUseProgram( _1stPassShaderId );
         uniformLocation = glGetUniformLocation( _1stPassShaderId, "MVP" );
@@ -739,7 +726,7 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv( GL_COLOR, 0, black );  // clear GL_COLOR_ATTACHMENT0 
     }
-    else if( whichPass == 2 )   // render front-facing polygons 
+    else if( whichPass == 2 )
     {
         glUseProgram( _2ndPassShaderId );
         uniformLocation = glGetUniformLocation( _2ndPassShaderId, "MVP" );
@@ -758,113 +745,13 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv( GL_COLOR, 1, black );  // clear GL_COLOR_ATTACHMENT1
     }
-    else    // the ray-casting pass
+    else
     { 
-        // Pass in uniforms
-        glUseProgram( _3rdPassShaderId );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "MVP" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, MVP );
+        _load3rdPassUniforms( MVP, ModelView, InversedMV, fast );
 
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "ModelView" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, ModelView );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "transposedInverseMV" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_TRUE, InversedMV );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "valueRange" );
-        glUniform2fv( uniformLocation, 1, _userCoordinates.valueRange );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapRange" );
-        glUniform2fv( uniformLocation, 1, _colorMapRange );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "boxMin" );
-        glUniform3fv( uniformLocation, 1, _userCoordinates.boxMin );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "boxMax" );
-        glUniform3fv( uniformLocation, 1, _userCoordinates.boxMax );
-
-        float volumeDimensions[3] = { float(_userCoordinates.dims[0]),
-                                      float(_userCoordinates.dims[1]),  
-                                      float(_userCoordinates.dims[2]) };
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "volumeDimensions" );
-        glUniform3fv( uniformLocation, 1, volumeDimensions );
-
-        float stepSize1D   = 0.005f;    // This is like ~200 samples 
-        if( !fast )                     // Calculate a better step size if in fast rendering mode
-        {
-            float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ?
-                                 volumeDimensions[0] : volumeDimensions[1] ;
-            maxVolumeDim       = maxVolumeDim        > volumeDimensions[2] ?
-                                 maxVolumeDim        : volumeDimensions[2];
-            maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200; // Make sure at least 400 smaples
-            stepSize1D = 0.5f / maxVolumeDim;                       // Approximately 2 samples per cell
-        }
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "stepSize1D" );
-        glUniform1f( uniformLocation, stepSize1D );
-
-        float planes[ 24 ];             // 6 planes, each with 4 elements
-        GetClippingPlanes( planes );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "clipPlanes" );
-        glUniform4fv( uniformLocation, 6, planes );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lighting" );
-        if( fast )                      // Disable lighting during "fast" rendering
-            glUniform1i( uniformLocation, int(0) );
-        else
-        {
-            DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
-            glUniform1i( uniformLocation, int(params->GetLighting()) );
-
-            std::vector<double> coeffsD = params->GetLightingCoeffs();
-            float coeffsF[4] = { (float)coeffsD[0], (float)coeffsD[1], 
-                                 (float)coeffsD[2], (float)coeffsD[3] };
-            uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lightingCoeffs" );
-            glUniform1fv( uniformLocation, 4, coeffsF );
-        }
-
-
-        // Pass in textures
-        GLuint textureUnit = 0;
-        glActiveTexture( GL_TEXTURE0 + textureUnit );
-        glBindTexture( GL_TEXTURE_2D, _backFaceTextureId );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "backFaceTexture" );
-        glUniform1i( uniformLocation, textureUnit );
-
-        textureUnit = 1;
-        glActiveTexture( GL_TEXTURE0 + textureUnit );
-        glBindTexture( GL_TEXTURE_2D, _frontFaceTextureId );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "frontFaceTexture" );
-        glUniform1i( uniformLocation, textureUnit );
-        
-        textureUnit = 2;
-        glActiveTexture( GL_TEXTURE0 + textureUnit );
-        glBindTexture( GL_TEXTURE_3D, _volumeTextureId );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "volumeTexture" );
-        glUniform1i( uniformLocation, textureUnit );
-        
-        textureUnit = 3;
-        glActiveTexture( GL_TEXTURE0 + textureUnit );
-        glBindTexture( GL_TEXTURE_1D, _colorMapTextureId );
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapTexture" );
-        glUniform1i( uniformLocation, textureUnit );
-
-        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "hasMissingValue" );
-        glUniform1i( uniformLocation, 0 );          // Set to false
-        // If there is missing value, pass in missingValueMaskTexture as well.
-        // Otherwise, leave it empty.
-        if( _userCoordinates.missingValueMask )
-        {
-            glUniform1i( uniformLocation, 1 );      // Set to true
-            textureUnit = 4;
-            glActiveTexture( GL_TEXTURE0 + textureUnit );
-            glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
-            uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
-            glUniform1i( uniformLocation, textureUnit );
-        }
-
-        glEnable(   GL_CULL_FACE );
-        glCullFace( GL_BACK );
-        glEnable(   GL_DEPTH_TEST );
+        glEnable(    GL_CULL_FACE );
+        glCullFace(  GL_BACK );
+        glEnable(    GL_DEPTH_TEST );
         glDepthMask( GL_FALSE );
     }
 
@@ -880,123 +767,7 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
     }
     else
     {
-        unsigned int bx = (unsigned int)_userCoordinates.dims[0];
-        unsigned int by = (unsigned int)_userCoordinates.dims[1];
-        unsigned int bz = (unsigned int)_userCoordinates.dims[2];
-        unsigned int idx;
-
-        // Each strip will have the same numOfVertices for the first 4 faces
-        size_t numOfVertices = bx * 2;
-        unsigned int* indexBuffer = new unsigned int[ numOfVertices ];
-
-        // Render front face: 
-        glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
-                      _userCoordinates.frontFace,   GL_STATIC_DRAW );
-        for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
-        {
-            idx = 0;
-            for( unsigned int x = 0; x < bx; x++ )
-            {
-                indexBuffer[ idx++ ] = (y + 1) * bx + x;
-                indexBuffer[ idx++ ] = y * bx + x;
-            }
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
-                          indexBuffer,              GL_STREAM_DRAW );
-            glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
-                            GL_UNSIGNED_INT,        (void*)0 );
-        }
-
-        // Render back face: 
-        glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
-                      _userCoordinates.backFace,    GL_STATIC_DRAW );
-        for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
-        {
-            idx = 0;
-            for( unsigned int x = 0; x < bx; x++ )
-            {
-                indexBuffer[ idx++ ] = y * bx + x;
-                indexBuffer[ idx++ ] = (y + 1) * bx + x;
-            }
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                          indexBuffer,              GL_STREAM_DRAW );
-            glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
-                            GL_UNSIGNED_INT,        (void*)0 );
-        }
-
-        // Render top face: 
-        glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
-                      _userCoordinates.topFace,     GL_STATIC_DRAW );
-        for( unsigned int z = 0; z < bz - 1; z++ )   
-        {
-            idx = 0;
-            for( unsigned int x = 0; x < bx; x++ )
-            {
-                indexBuffer[ idx++ ] = z * bx + x;
-                indexBuffer[ idx++ ] = (z + 1) * bx + x;
-            }
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                          indexBuffer,              GL_STREAM_DRAW );
-            glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
-                            GL_UNSIGNED_INT,        (void*)0 );
-        }
-
-        // Render bottom face: 
-        glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
-                      _userCoordinates.bottomFace,  GL_STATIC_DRAW );
-        for( unsigned int z = 0; z < bz - 1; z++ )   
-        {
-            idx = 0;
-            for( unsigned int x = 0; x < bx; x++ )
-            {
-                indexBuffer[ idx++ ] = (z + 1) * bx + x; 
-                indexBuffer[ idx++ ] = z * bx + x;
-            }
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                          indexBuffer,              GL_STREAM_DRAW );
-            glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
-                            GL_UNSIGNED_INT,        (void*)0 );
-        }
-
-        // Each strip will have the same numOfVertices for the rest 2 faces.
-        numOfVertices = by * 2;
-        delete[] indexBuffer;
-        indexBuffer = new unsigned int[ numOfVertices ];
-
-        // Render right face: 
-        glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
-                      _userCoordinates.rightFace,   GL_STATIC_DRAW );
-        for( unsigned int z = 0; z < bz - 1; z++ )   
-        {
-            idx = 0;
-            for( unsigned int y = 0; y < by; y++ )
-            {
-                indexBuffer[ idx++ ] = (z + 1) * by + y; 
-                indexBuffer[ idx++ ] = z * by + y;
-            }
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                          indexBuffer,              GL_STREAM_DRAW );
-            glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
-                            GL_UNSIGNED_INT,        (void*)0 );
-        }
-
-        // Render left face
-        glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
-                      _userCoordinates.leftFace,    GL_STATIC_DRAW );
-        for( unsigned int z = 0; z < bz - 1; z++ )   
-        {
-            idx = 0;
-            for( unsigned int y = 0; y < by; y++ )
-            {
-                indexBuffer[ idx++ ] = z * by + y;
-                indexBuffer[ idx++ ] = (z + 1) * by + y;
-            }
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                          indexBuffer,              GL_STREAM_DRAW );
-            glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
-                            GL_UNSIGNED_INT,        (void*)0 );
-        }
-
-        delete[] indexBuffer;
+        _renderTriangleStrips();
     }
     
     glDisableVertexAttribArray(0);
@@ -1008,9 +779,237 @@ void DVRenderer::_drawVolumeFaces( int            whichPass,
 
     glUseProgram( 0 );
 }
+
+void DVRenderer::_load3rdPassUniforms( const GLfloat*   MVP,
+                                       const GLfloat*   ModelView,
+                                       const GLfloat*   InversedMV,
+                                       bool             fast ) const
+{
+    glUseProgram( _3rdPassShaderId );
+    GLuint uniformLocation = glGetUniformLocation( _3rdPassShaderId, "MVP" );
+    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, MVP );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "ModelView" );
+    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, ModelView );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "transposedInverseMV" );
+    glUniformMatrix4fv( uniformLocation, 1, GL_TRUE, InversedMV );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "valueRange" );
+    glUniform2fv( uniformLocation, 1, _userCoordinates.valueRange );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapRange" );
+    glUniform2fv( uniformLocation, 1, _colorMapRange );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "boxMin" );
+    glUniform3fv( uniformLocation, 1, _userCoordinates.boxMin );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "boxMax" );
+    glUniform3fv( uniformLocation, 1, _userCoordinates.boxMax );
+
+    float volumeDimensions[3] = { float(_userCoordinates.dims[0]),
+                                  float(_userCoordinates.dims[1]),  
+                                  float(_userCoordinates.dims[2]) };
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "volumeDimensions" );
+    glUniform3fv( uniformLocation, 1, volumeDimensions );
+
+    float stepSize1D   = 0.005f;    // This is like ~200 samples 
+    if( !fast )                     // Calculate a better step size if in fast rendering mode
+    {
+        float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ?
+                             volumeDimensions[0] : volumeDimensions[1] ;
+        maxVolumeDim       = maxVolumeDim        > volumeDimensions[2] ?
+                             maxVolumeDim        : volumeDimensions[2];
+        maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200; // Make sure at least 400 smaples
+        stepSize1D = 0.5f / maxVolumeDim;                       // Approximately 2 samples per cell
+    }
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "stepSize1D" );
+    glUniform1f( uniformLocation, stepSize1D );
+
+    float planes[ 24 ];             // 6 planes, each with 4 elements
+    Renderer::GetClippingPlanes( planes );
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "clipPlanes" );
+    glUniform4fv( uniformLocation, 6, planes );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lighting" );
+    if( fast )                      // Disable lighting during "fast" rendering
+        glUniform1i( uniformLocation, int(0) );
+    else
+    {
+        DVRParams* params = dynamic_cast<DVRParams*>( GetActiveParams() );
+        glUniform1i( uniformLocation, int(params->GetLighting()) );
+
+        std::vector<double> coeffsD = params->GetLightingCoeffs();
+        float coeffsF[4] = { (float)coeffsD[0], (float)coeffsD[1], 
+            (float)coeffsD[2], (float)coeffsD[3] };
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lightingCoeffs" );
+        glUniform1fv( uniformLocation, 4, coeffsF );
+    }
+
+    // Pass in textures
+    GLuint textureUnit = 0;
+    glActiveTexture( GL_TEXTURE0 + textureUnit );
+    glBindTexture( GL_TEXTURE_2D, _backFaceTextureId );
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "backFaceTexture" );
+    glUniform1i( uniformLocation, textureUnit );
+
+    textureUnit = 1;
+    glActiveTexture( GL_TEXTURE0 + textureUnit );
+    glBindTexture( GL_TEXTURE_2D, _frontFaceTextureId );
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "frontFaceTexture" );
+    glUniform1i( uniformLocation, textureUnit );
+
+    textureUnit = 2;
+    glActiveTexture( GL_TEXTURE0 + textureUnit );
+    glBindTexture( GL_TEXTURE_3D, _volumeTextureId );
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "volumeTexture" );
+    glUniform1i( uniformLocation, textureUnit );
+
+    textureUnit = 3;
+    glActiveTexture( GL_TEXTURE0 + textureUnit );
+    glBindTexture( GL_TEXTURE_1D, _colorMapTextureId );
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapTexture" );
+    glUniform1i( uniformLocation, textureUnit );
+
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "hasMissingValue" );
+    // If there is missing value, pass in missingValueMaskTexture as well.
+    //   Otherwise, leave it empty.
+    if( _userCoordinates.missingValueMask == nullptr )
+        glUniform1i( uniformLocation, 0 );      // Set to false
+    else
+    {
+        glUniform1i( uniformLocation, 1 );      // Set to true
+        textureUnit = 4;
+        glActiveTexture( GL_TEXTURE0 + textureUnit );
+        glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
+        glUniform1i( uniformLocation, textureUnit );
+    }
+}
     
+void DVRenderer::_renderTriangleStrips() const
+{
+    unsigned int bx = (unsigned int)_userCoordinates.dims[0];
+    unsigned int by = (unsigned int)_userCoordinates.dims[1];
+    unsigned int bz = (unsigned int)_userCoordinates.dims[2];
+    unsigned int idx;
+
+    // Each strip will have the same numOfVertices for the first 4 faces
+    size_t      numOfVertices = bx * 2;
+    unsigned int* indexBuffer = new unsigned int[ numOfVertices ];
+
+    // Render front face: 
+    glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
+                  _userCoordinates.frontFace,   GL_STATIC_DRAW );
+    for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
+    {
+        idx = 0;
+        for( unsigned int x = 0; x < bx; x++ )
+        {
+            indexBuffer[ idx++ ] = (y + 1) * bx + x;
+            indexBuffer[ idx++ ] = y * bx + x;
+        }
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
+                      indexBuffer,              GL_STREAM_DRAW );
+        glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
+                        GL_UNSIGNED_INT,        (void*)0 );
+    }
+
+    // Render back face: 
+    glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
+                  _userCoordinates.backFace,    GL_STATIC_DRAW );
+    for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
+    {
+        idx = 0;
+        for( unsigned int x = 0; x < bx; x++ )
+        {
+            indexBuffer[ idx++ ] = y * bx + x;
+            indexBuffer[ idx++ ] = (y + 1) * bx + x;
+        }
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+                      indexBuffer,              GL_STREAM_DRAW );
+        glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
+                        GL_UNSIGNED_INT,        (void*)0 );
+    }
+
+    // Render top face: 
+    glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
+                  _userCoordinates.topFace,     GL_STATIC_DRAW );
+    for( unsigned int z = 0; z < bz - 1; z++ )   
+    {
+        idx = 0;
+        for( unsigned int x = 0; x < bx; x++ )
+        {
+            indexBuffer[ idx++ ] = z * bx + x;
+            indexBuffer[ idx++ ] = (z + 1) * bx + x;
+        }
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+                      indexBuffer,              GL_STREAM_DRAW );
+        glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
+                        GL_UNSIGNED_INT,        (void*)0 );
+    }
+
+    // Render bottom face: 
+    glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
+                  _userCoordinates.bottomFace,  GL_STATIC_DRAW );
+    for( unsigned int z = 0; z < bz - 1; z++ )   
+    {
+        idx = 0;
+        for( unsigned int x = 0; x < bx; x++ )
+        {
+            indexBuffer[ idx++ ] = (z + 1) * bx + x; 
+            indexBuffer[ idx++ ] = z * bx + x;
+        }
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+                      indexBuffer,              GL_STREAM_DRAW );
+        glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
+                        GL_UNSIGNED_INT,        (void*)0 );
+    }
+
+    // Each strip will have the same numOfVertices for the rest 2 faces.
+    numOfVertices = by * 2;
+    delete[] indexBuffer;
+    indexBuffer = new unsigned int[ numOfVertices ];
+
+    // Render right face: 
+    glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
+                  _userCoordinates.rightFace,   GL_STATIC_DRAW );
+    for( unsigned int z = 0; z < bz - 1; z++ )   
+    {
+        idx = 0;
+        for( unsigned int y = 0; y < by; y++ )
+        {
+            indexBuffer[ idx++ ] = (z + 1) * by + y; 
+            indexBuffer[ idx++ ] = z * by + y;
+        }
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+                      indexBuffer,              GL_STREAM_DRAW );
+        glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
+                        GL_UNSIGNED_INT,        (void*)0 );
+    }
+
+    // Render left face
+    glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
+                  _userCoordinates.leftFace,    GL_STATIC_DRAW );
+    for( unsigned int z = 0; z < bz - 1; z++ )   
+    {
+        idx = 0;
+        for( unsigned int y = 0; y < by; y++ )
+        {
+            indexBuffer[ idx++ ] = z * by + y;
+            indexBuffer[ idx++ ] = (z + 1) * by + y;
+        }
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+                      indexBuffer,              GL_STREAM_DRAW );
+        glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
+                        GL_UNSIGNED_INT,        (void*)0 );
+    }
+
+    delete[] indexBuffer;
+}
+
 GLuint DVRenderer::_loadShaders(const char* vertex_file_path, 
-                                          const char* fragment_file_path)
+                                const char* fragment_file_path)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -1119,7 +1118,7 @@ void DVRenderer::_getMVPMatrix( GLfloat* MVP ) const
 }
 
 void DVRenderer::_matMultiVec( const GLfloat* mat,  const GLfloat* in,
-                                               GLfloat* out ) const
+                                     GLfloat* out ) const
 {
     #define MAT(m,r,c) (m)[(c)*4+(r)]
     out[0] = MAT(mat,0,0)*in[0] + MAT(mat,0,1)*in[1] + MAT(mat,0,2)*in[2] + MAT(mat,0,3)*in[3];
@@ -1130,7 +1129,7 @@ void DVRenderer::_matMultiVec( const GLfloat* mat,  const GLfloat* in,
 }
 
 double DVRenderer::_getElapsedSeconds( const struct timeval* begin, 
-                                                 const struct timeval* end ) const
+                                       const struct timeval* end ) const
 {
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec)/1000000.0);
 }

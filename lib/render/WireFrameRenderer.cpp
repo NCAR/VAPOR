@@ -264,10 +264,10 @@ int WireFrameRenderer::_buildCache()
 	}
 
 	if (grid->GetTopologyDim() == 3) {
-		EnableClipToBox();
+		EnableClipToBox(0.001);
 	}
 	else {
-		EnableClipToBox2DXY();
+		EnableClipToBox2DXY(0.001);
 	}
 
 	glVertexPointer(3, GL_FLOAT, 0, coordsArray);
