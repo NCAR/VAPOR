@@ -1,0 +1,18 @@
+#version 410 core
+
+// Input vertex positions, model coordinate
+layout(location = 0) in vec3 vertexPosition;
+
+uniform mat4 MVP;
+uniform vec3 boxMin;
+uniform vec3 boxMax;
+
+// Output model coordinate vertex positions, normalized
+out vec3 vPosNormalized;
+
+void main(void)
+{
+    gl_Position = MVP * vec4( vertexPosition, 1.0f );
+
+    vPosNormalized = (vertexPosition - boxMin) / (boxMax - boxMin);
+}

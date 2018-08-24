@@ -47,7 +47,6 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
 	Q_OBJECT
 
 public: 
-
  VariablesWidget(QWidget* parent);
 
  void Reinit(
