@@ -349,10 +349,12 @@ void MapperFunction::makeLut(float* clut)
   	  m_colorMap->color(v).toRGB(&clut[4*i]);
   	  clut[4*i+3] = getOpacityValueData(v);
   	}
-	memcpy(_clut, clut, _numEntries);
+	cout << "A " << _numEntries << endl;
+	memcpy(_clut, clut, _numEntries*4);
   }
   else {
-	memcpy(clut, _clut, _numEntries);
+	cout << "B " << _numEntries << endl;
+	memcpy(clut, _clut, _numEntries*4);
   }
 
   _dirtyBit = false;
