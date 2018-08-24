@@ -19,6 +19,7 @@ set (SRC
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
+	DVRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 	MyPython.cpp
