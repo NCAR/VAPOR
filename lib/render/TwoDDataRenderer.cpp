@@ -145,7 +145,6 @@ TwoDDataRenderer::~TwoDDataRenderer()
 
 int TwoDDataRenderer::_initializeGL()
 {
-//#define	NOSHADER
 #ifndef NOSHADER
     if (!_shaderMgr) {
         SetErrMsg("Programmable shading not available");
@@ -168,14 +167,9 @@ int TwoDDataRenderer::_initializeGL()
         if (rc < 0) return (-1);
     }
 
-    //	rc = _shaderMgr->EnableEffect(EffectNameAttr);
-    //	if (rc<0) return(-1);
-
     rc = (int)_shaderMgr->AttributeLocation(EffectNameAttr, VertexDataAttr);
     if (rc < 0) return (-1);
     _vertexDataAttr = rc;
-
-    //	_shaderMgr->DisableEffect();
 
 #endif
 

@@ -662,6 +662,45 @@ vector<string> RendererFactory::GetFactoryNames() const
     return (names);
 }
 
+void Renderer::GetClippingPlanes(float planes[24]) const
+{
+    float x0Plane[4] = {1.0, 0.0, 0.0, 0.0};
+    float x1Plane[4] = {-1.0, 0.0, 0.0, 0.0};
+    float y0Plane[4] = {0.0, 1.0, 0.0, 0.0};
+    float y1Plane[4] = {0.0, -1.0, 0.0, 0.0};
+    float z0Plane[4] = {0.0, 0.0, 1.0, 0.0};
+    float z1Plane[4] = {0.0, 0.0, -1.0, 0.0};
+
+    const RenderParams *rParams = GetActiveParams();
+    std::vector<double> minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+    assert(minExts.size() == maxExts.size());
+    assert(minExts.size() > 0 && minExts.size() < 4);
+
+    int orientation = rParams->GetBox()->GetOrientation();
+
+    if (minExts.size() == 3 || orientation != 0) {
+        x0Plane[3] = float(-minExts[0]);
+        x1Plane[3] = float(maxExts[0]);
+    }
+    if (minExts.size() == 3 || orientation != 1) {
+        y0Plane[3] = float(-minExts[1]);
+        y1Plane[3] = float(maxExts[1]);
+    }
+    if (minExts.size() == 3 || orientation != 2) {
+        z0Plane[3] = float(-minExts[2]);
+        z1Plane[3] = float(maxExts[2]);
+    }
+
+    size_t planeSize = sizeof(x0Plane);
+    std::memcpy(planes, x0Plane, planeSize);
+    std::memcpy(planes + 4, x1Plane, planeSize);
+    std::memcpy(planes + 8, y0Plane, planeSize);
+    std::memcpy(planes + 12, y1Plane, planeSize);
+    std::memcpy(planes + 16, z0Plane, planeSize);
+    std::memcpy(planes + 20, z1Plane, planeSize);
+}
+
 RendererFactory::RendererFactory() {}
 RendererFactory::RendererFactory(const RendererFactory &) {}
 RendererFactory &RendererFactory::operator=(const RendererFactory &) { return *this; }

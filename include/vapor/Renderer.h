@@ -270,6 +270,11 @@ protected:
     //
     void DisableClippingPlanes();
 
+    //! Get clipping planes in the model/user coordinates.
+    //! There are six planes in total that get stored in "planes"
+    //! It is the caller's responsibility to allocate memory for 24 floats.
+    void GetClippingPlanes(float planes[24]) const;
+
     //! return true if all of the specified variables exist in the DataMgr
     //! at the specified timestep, refinement level, and lod. If \p zeroOK
     //! is true variables named "0" or "" evaluate to true.

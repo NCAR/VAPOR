@@ -67,15 +67,15 @@ protected:
         size_t      GetVariableCount();
         std::string GetVariableName(int i);
 
-        bool Add3MStats(std::string &, const double *);    // Min, Max, Mean
-        bool AddMedian(std::string &, double);
-        bool AddStddev(std::string &, double);
+        bool Add3MStats(std::string &, const float *);    // Min, Max, Mean
+        bool AddMedian(std::string &, float);
+        bool AddStddev(std::string &, float);
         bool AddCount(std::string &, long);
 
         // invalid values are represented as nan.
-        bool Get3MStats(std::string &, double *);
-        bool GetMedian(std::string &, double *);
-        bool GetStddev(std::string &, double *);
+        bool Get3MStats(std::string &, float *);
+        bool GetMedian(std::string &, float *);
+        bool GetStddev(std::string &, float *);
         bool GetCount(std::string &, long *);
 
         bool InvalidAll();    // keep existing variables, but set values to nan
@@ -88,11 +88,12 @@ protected:
 
         bool HaveSameParams(const VAPoR::StatisticsParams *rhs) const;
         bool UpdateMyParams(const VAPoR::StatisticsParams *rhs);
-        bool SetCurrentExtents(std::vector<double> &min, std::vector<double> &max);
+        bool SetCurrentExtents(const std::vector<float> &min, const std::vector<float> &max);
+        bool SetCurrentExtents(const std::vector<double> &min, const std::vector<double> &max);
 
     private:
         std::vector<std::string> _variables;
-        std::vector<double>      _values[5];    // 0: min
+        std::vector<float>       _values[5];    // 0: min
                                                 // 1: max
                                                 // 2: mean
                                                 // 3: median
