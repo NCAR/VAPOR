@@ -597,9 +597,7 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
     GLfloat MVP[16];
     _getMVPMatrix(MVP);
 
-    /* Set up shader uniforms, OpenGL states, etc. */
-    if (whichPass == 1)    // render back-facing polygons
-    {
+    if (whichPass == 1) {
         glUseProgram(_1stPassShaderId);
         uniformLocation = glGetUniformLocation(_1stPassShaderId, "MVP");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
@@ -616,8 +614,7 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         glDepthFunc(GL_GEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
-    } else if (whichPass == 2)                  // render front-facing polygons
-    {
+    } else if (whichPass == 2) {
         glUseProgram(_2ndPassShaderId);
         uniformLocation = glGetUniformLocation(_2ndPassShaderId, "MVP");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
@@ -634,101 +631,8 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
         glDepthFunc(GL_LEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
-    } else                                      // the ray-casting pass
-    {
-        // Pass in uniforms
-        glUseProgram(_3rdPassShaderId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MVP");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "ModelView");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, ModelView);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "transposedInverseMV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_TRUE, InversedMV);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "valueRange");
-        glUniform2fv(uniformLocation, 1, _userCoordinates.valueRange);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapRange");
-        glUniform2fv(uniformLocation, 1, _colorMapRange);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMin");
-        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMax");
-        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
-
-        float volumeDimensions[3] = {float(_userCoordinates.dims[0]), float(_userCoordinates.dims[1]), float(_userCoordinates.dims[2])};
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
-        glUniform3fv(uniformLocation, 1, volumeDimensions);
-
-        float stepSize1D = 0.005f;    // This is like ~200 samples
-        if (!fast)                    // Calculate a better step size if in fast rendering mode
-        {
-            float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
-            maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
-            maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
-            stepSize1D = 0.5f / maxVolumeDim;                          // Approximately 2 samples per cell
-        }
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
-        glUniform1f(uniformLocation, stepSize1D);
-
-        float planes[24];    // 6 planes, each with 4 elements
-        GetClippingPlanes(planes);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
-        glUniform4fv(uniformLocation, 6, planes);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-        if (fast)    // Disable lighting during "fast" rendering
-            glUniform1i(uniformLocation, int(0));
-        else {
-            DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
-            glUniform1i(uniformLocation, int(params->GetLighting()));
-
-            std::vector<double> coeffsD = params->GetLightingCoeffs();
-            float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
-            uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
-            glUniform1fv(uniformLocation, 4, coeffsF);
-        }
-
-        // Pass in textures
-        GLuint textureUnit = 0;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-        glUniform1i(uniformLocation, textureUnit);
-
-        textureUnit = 1;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-        glUniform1i(uniformLocation, textureUnit);
-
-        textureUnit = 2;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-        glUniform1i(uniformLocation, textureUnit);
-
-        textureUnit = 3;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-        glUniform1i(uniformLocation, textureUnit);
-
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "hasMissingValue");
-        glUniform1i(uniformLocation, 0);    // Set to false
-        // If there is missing value, pass in missingValueMaskTexture as well.
-        //   Otherwise, leave it empty.
-        if (_userCoordinates.missingValueMask) {
-            glUniform1i(uniformLocation, 1);    // Set to true
-            textureUnit = 4;
-            glActiveTexture(GL_TEXTURE0 + textureUnit);
-            glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-            uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-            glUniform1i(uniformLocation, textureUnit);
-        }
+    } else {
+        _load3rdPassUniforms(MVP, ModelView, InversedMV, fast);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -755,6 +659,103 @@ void DVRenderer::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat
     glDepthMask(GL_TRUE);
 
     glUseProgram(0);
+}
+
+void DVRenderer::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast) const
+{
+    glUseProgram(_3rdPassShaderId);
+    GLuint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MVP");
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "ModelView");
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, ModelView);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "transposedInverseMV");
+    glUniformMatrix4fv(uniformLocation, 1, GL_TRUE, InversedMV);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "valueRange");
+    glUniform2fv(uniformLocation, 1, _userCoordinates.valueRange);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapRange");
+    glUniform2fv(uniformLocation, 1, _colorMapRange);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMin");
+    glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMax");
+    glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
+
+    float volumeDimensions[3] = {float(_userCoordinates.dims[0]), float(_userCoordinates.dims[1]), float(_userCoordinates.dims[2])};
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
+    glUniform3fv(uniformLocation, 1, volumeDimensions);
+
+    float stepSize1D = 0.005f;    // This is like ~200 samples
+    if (!fast)                    // Calculate a better step size if in fast rendering mode
+    {
+        float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
+        maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
+        maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
+        stepSize1D = 0.5f / maxVolumeDim;                          // Approximately 2 samples per cell
+    }
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
+    glUniform1f(uniformLocation, stepSize1D);
+
+    float planes[24];    // 6 planes, each with 4 elements
+    Renderer::GetClippingPlanes(planes);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
+    glUniform4fv(uniformLocation, 6, planes);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
+    if (fast)    // Disable lighting during "fast" rendering
+        glUniform1i(uniformLocation, int(0));
+    else {
+        DVRParams *params = dynamic_cast<DVRParams *>(GetActiveParams());
+        glUniform1i(uniformLocation, int(params->GetLighting()));
+
+        std::vector<double> coeffsD = params->GetLightingCoeffs();
+        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
+        glUniform1fv(uniformLocation, 4, coeffsF);
+    }
+
+    // Pass in textures
+    GLuint textureUnit = 0;
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
+    glUniform1i(uniformLocation, textureUnit);
+
+    textureUnit = 1;
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
+    glUniform1i(uniformLocation, textureUnit);
+
+    textureUnit = 2;
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
+    glUniform1i(uniformLocation, textureUnit);
+
+    textureUnit = 3;
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
+    glUniform1i(uniformLocation, textureUnit);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "hasMissingValue");
+    // If there is missing value, pass in missingValueMaskTexture as well.
+    //   Otherwise, leave it empty.
+    if (_userCoordinates.missingValueMask == nullptr)
+        glUniform1i(uniformLocation, 0);    // Set to false
+    else {
+        glUniform1i(uniformLocation, 1);    // Set to true
+        textureUnit = 4;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
+        glUniform1i(uniformLocation, textureUnit);
+    }
 }
 
 void DVRenderer::_renderTriangleStrips() const
