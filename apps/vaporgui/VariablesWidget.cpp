@@ -107,6 +107,9 @@ void VariablesWidget::Reinit(
     if (_variableFlags & VECTOR)
         fdf = (VariableFlags)(fdf | VECTOR);
 
+    if (_variableFlags & HEIGHT)
+        fdf = (VariableFlags)(fdf | HEIGHT);
+
     _fidelityWidget->Reinit(fdf);
 }
 
@@ -381,6 +384,8 @@ void VariablesWidget::updateColorCombo() {
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
     } else {
+        string colorVar = _rParams->GetVariableName();
+        _rParams->SetColorMapVariableName(colorVar);
         collapseColorVarSettings();
     }
 }
