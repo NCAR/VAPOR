@@ -22,6 +22,7 @@ set (SRC
 	ContourParams.cpp
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
+    SliceParams.cpp
 )
 
 set (HEADERS
