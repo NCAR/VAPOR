@@ -30,6 +30,7 @@ void LegacyGL::Initialize()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, r));
     glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     _initialized = true;
@@ -49,6 +50,7 @@ void LegacyGL::End()
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData) * _vertices.size(), _vertices.data(), GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _shader.Bind();
     _shader.SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
