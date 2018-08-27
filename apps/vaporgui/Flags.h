@@ -23,8 +23,10 @@ enum VariableFlags {
 //! be supported
 //
 enum DimFlags {
-    TWOD = (1u << 0),
-    THREED = (1u << 1),
+    TWODXY = (1u << 0),
+    TWODXZ = (1u << 1),
+    TWODYZ = (1u << 2),
+    THREED = (1u << 3),
 };
 
 //! Bit mask to indicate whether the GeometryWidget should control a
