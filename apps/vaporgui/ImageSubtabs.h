@@ -27,7 +27,7 @@ class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit(
             (VariableFlags)(HEIGHT),
-            (DimFlags)(TWOD));
+            (DimFlags)(TWODXY));
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
@@ -127,7 +127,7 @@ class ImageGeometrySubtab : public QWidget, public Ui_ImageGeometryGUI {
     ImageGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            (DimFlags)TWOD,
+            (DimFlags)TWODXY,
             (GeometryFlags)MINMAX,
             (VariableFlags)SCALAR);
     }
