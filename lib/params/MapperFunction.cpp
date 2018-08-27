@@ -84,8 +84,6 @@ MapperFunction::MapperFunction(
 
 	setMinMaxMapValue(1., -1.);
 
-	_clut = new float[_numEntries*4];
-cout << "	MapperFunction::MapperFunction() 1" << endl;
 	_dirtyBit = true;
 }
 
@@ -124,8 +122,6 @@ MapperFunction::MapperFunction(
 		m_opacityMaps->Insert(&opacityMap, _make_omap_name(0));
 	}
 
-cout << "	MapperFunction::MapperFunction() 2" << endl;
-	_clut = new float[_numEntries*4];
 	_dirtyBit = true;
 }
 
@@ -143,8 +139,6 @@ MapperFunction::MapperFunction(
 	m_opacityMaps = new ParamsContainer(*(rhs.m_opacityMaps));
 	m_opacityMaps->SetParent(this);
 
-cout << "	MapperFunction::MapperFunction() 3" << endl;
-	_clut = new float[_numEntries*4];
 	_dirtyBit = true;
 }
 
@@ -167,8 +161,6 @@ MapperFunction &MapperFunction::operator=( const MapperFunction& rhs ) {
 	);
 	m_opacityMaps->SetParent(this);
 
-cout << "	MapperFunction::MapperFunction() =" << endl;
-	_clut = new float[_numEntries*4];
 	_dirtyBit = true;
 
 	return(*this);
@@ -184,7 +176,6 @@ MapperFunction::~MapperFunction()
 
 	if (m_colorMap)    delete m_colorMap;
 	if (m_opacityMaps) delete m_opacityMaps;
-	if (_clut) delete[] _clut;
 }
 
 
@@ -221,7 +212,6 @@ int MapperFunction::LoadFromFile(string path, vector<double> defaultDataBounds)
 	//
 	delete newTF;
 
-cout << "	MapperFunction::LoadFromFile()" << endl;
 	_dirtyBit = true;
 
 	return(0);
@@ -335,10 +325,6 @@ void MapperFunction::checkForOpacityChanges() {
 //----------------------------------------------------------------------------
 void MapperFunction::makeLut(float* clut) 
 {
-	std::clock_t start;
-	double duration;
-	start = std::clock();
-
   checkForOpacityChanges();
 
   if (_dirtyBit) {
@@ -349,18 +335,13 @@ void MapperFunction::makeLut(float* clut)
   	  m_colorMap->color(v).toRGB(&clut[4*i]);
   	  clut[4*i+3] = getOpacityValueData(v);
   	}
-	cout << "A " << _numEntries << endl;
-	memcpy(_clut, clut, _numEntries*4);
+	memcpy(_clut, clut, sizeof(float)*_numEntries*4);
   }
   else {
-	cout << "B " << _numEntries << endl;
-	memcpy(clut, _clut, _numEntries*4);
+	memcpy(clut, _clut, sizeof(float)*_numEntries*4);
   }
 
   _dirtyBit = false;
-
-	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-	std::cout << "makeLut(): " << duration << endl;
 }
 
 //----------------------------------------------------------------------------
@@ -394,7 +375,6 @@ void MapperFunction::setMinMaxMapValue(float val1,float val2) {
 		GetOpacityMap(i)->SetDataBounds(bnds);
 	}
 
-cout << "	MapperFunction::setMinMaxMapValue()" << endl;
 	_dirtyBit = true;
 }
 
@@ -420,7 +400,6 @@ OpacityMap* MapperFunction::createOpacityMap(OpacityMap::Type type)
 
 	m_opacityMaps->Insert(&opacityMap, _make_omap_name(index));
 
-cout << "	MapperFunction::createOpacityMap()" << endl;
 	_dirtyBit = true;
 
 	return((OpacityMap *) m_opacityMaps->GetParams(_make_omap_name(index)));

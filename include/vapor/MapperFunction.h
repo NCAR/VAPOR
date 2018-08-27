@@ -343,7 +343,7 @@ private:
 
  bool _dirtyBit;
 
- float* _clut;
+ float _clut[1024];
 
  ParamsContainer *m_opacityMaps;
  ColorMap *m_colorMap;

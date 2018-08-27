@@ -315,7 +315,6 @@ void OpacityMap::controlPointValue(int index, float value)
 //----------------------------------------------------------------------------
 void OpacityMap::SetMean(double mean) {
   SetValueDouble(_meanTag, "Set opacity mean", mean);
-cout << "    OpacityMap::SetMean()" << endl;
   _dirtyBit = true;
 }
 
@@ -326,7 +325,6 @@ cout << "    OpacityMap::SetMean()" << endl;
 void OpacityMap::SetSSQ(double ssq)
 {
 	SetValueDouble(_ssqTag,"Set Opac SSQ", ssq);
-cout << "OpacityMap::SetSSQ()" << endl;
     _dirtyBit = true;
 }
 
@@ -336,7 +334,6 @@ cout << "OpacityMap::SetSSQ()" << endl;
 void OpacityMap::SetFreq(double freq) 
 { 
 	SetValueDouble(_freqTag,"Set Opac Freq", freq);
-cout << "OpacityMap::SetFreq()" << endl;
     _dirtyBit = true;
 }
 
@@ -346,7 +343,6 @@ cout << "OpacityMap::SetFreq()" << endl;
 void OpacityMap::SetPhase(double p)
 {
 	SetValueDouble(_phaseTag, "Set Opac Phase", denormSinePhase(p));
-cout << "OpacityMap::SetPhase()" << endl;
     _dirtyBit = true;
 } 
 
@@ -430,7 +426,6 @@ void OpacityMap::SetDataBounds(const vector <double> &bounds) {
 	assert(bounds.size() == 2);
 
 	SetValueDoubleVec(_dataBoundsTag, "Set min max map value", bounds);
-cout << "OpacityMap::SetDataBounds()" << endl;
     _dirtyBit = true;
 }
 
@@ -549,7 +544,6 @@ bool OpacityMap::isOpaque() const
 
 void OpacityMap::SetEnabled(bool val) {
 	SetValueLong(_enabledTag, "Change opacity map enabled", (long)val);
-cout << "OpacityMap::SetEnabled()" << endl;
 	_dirtyBit = true;
 }
 
@@ -571,19 +565,16 @@ void OpacityMap::SetControlPoints(const vector<double> &controlPoints) {
 		_controlPointsTag, "Set opacity control points", mycp
 	);
 
-cout << "OpacityMap::SetControlPoints()" << endl;
 	_dirtyBit = true;
 }
 
 void OpacityMap::SetInterpType(TFInterpolator::type t){
 	SetValueLong(_interpTypeTag, "Set Opacity Interpolation", (long)t);
-cout << "OpacityMap::SetInterpType()" << endl;
 	_dirtyBit = true;
 }
 
 void OpacityMap::SetType(OpacityMap::Type t) {
 	SetValueLong(_typeTag, "Set Opacity Map Type", (long) t);
-cout << "OpacityMap::SetType()" << endl;
 	_dirtyBit = true;
 }
 
@@ -606,7 +597,6 @@ void OpacityMap::setMinValue(double val)
 	else val = 0.;
 
 	SetValueDouble(_relMinTag, "Set Opacity min", val);
-cout << "OpacityMap::setMinValue()" << endl;
 	_dirtyBit = true;
 }
 //----------------------------------------------------------------------------
@@ -628,7 +618,6 @@ void OpacityMap::setMaxValue(double val)
 	else val = 1.;
 
 	SetValueDouble(_relMaxTag, "Set Opacity max", val);
-cout << "OpacityMap::setMaxValue()" << endl;
 	_dirtyBit = true;
 }
 
