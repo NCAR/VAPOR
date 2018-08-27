@@ -470,10 +470,6 @@ int DVRenderer::_initializeGL()
 
 int DVRenderer::_paintGL( bool fast ) 
 {
-	std::clock_t start;
-	double duration;
-	start = std::clock();
-
 #ifdef Darwin
     return 0;
 #endif
@@ -589,9 +585,6 @@ int DVRenderer::_paintGL( bool fast )
     glBindVertexArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-
-	duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
-	std::cout << "_paintGL(): " << duration << endl << endl;
 
     return 0;
 }
