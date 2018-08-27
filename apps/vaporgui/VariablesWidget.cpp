@@ -89,7 +89,7 @@ void VariablesWidget::Reinit(
 
     // If the renderer is not 2D and 3D, hide
     // the dimension selector and set the _activeDim
-    if (!((_dimFlags & TWOD) &&
+    if (!((_dimFlags & TWODXY) &&
           (_dimFlags & THREED))) {
         dimensionFrame->hide();
         if (dimFlags & THREED)
@@ -199,7 +199,7 @@ void VariablesWidget::setColorMappedVariable(const QString &qname) {
 
 void VariablesWidget::setVariableDims(int index) {
     assert(_rParams);
-    if (!((_dimFlags & TWOD) && (_dimFlags & THREED)))
+    if (!((_dimFlags & TWODXY) && (_dimFlags & THREED)))
         return;
     assert(index >= 0 && index <= 1);
 
@@ -415,7 +415,7 @@ void VariablesWidget::updateCombos() {
 
 void VariablesWidget::updateDimCombo() {
     // Only update if we support multiple dimensions
-    if (((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+    if (((_dimFlags & TWODXY) && (_dimFlags & THREED))) {
         int index = _activeDim - 2;
         dimensionCombo->setCurrentIndex(index);
     }

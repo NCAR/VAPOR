@@ -27,7 +27,7 @@ class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit(
             (VariableFlags)(SCALAR | HEIGHT),
-            (DimFlags)(TWOD));
+            (DimFlags)(TWODXY));
     }
 
     void Update(
