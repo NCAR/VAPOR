@@ -43,9 +43,11 @@ set (SRCS
 	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
+    SliceEventRouter.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
+    SliceSubtabs.cpp
 	BarbSubtabs.cpp
 	TransformTable.cpp
 	VaporTable.cpp
@@ -70,6 +72,7 @@ set (SRCS
 	TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
+    SliceSubtabs.h
 	VaporTable.h
 	FidelityWidget.h
 	QSliderEdit.h
@@ -117,6 +120,10 @@ set (UIS
 	WireFrameAppearanceGUI.ui
 	WireFrameGeometryGUI.ui
 	WireFrameAnnotationGUI.ui
+    SliceVariablesGUI.ui
+    SliceAppearanceGUI.ui
+    SliceGeometryGUI.ui
+    SliceAnnotationGUI.ui
 	VariablesWidgetGUI.ui
 	HelloVariablesGUI.ui
 	statsWindow.ui
