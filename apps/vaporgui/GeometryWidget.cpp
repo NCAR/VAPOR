@@ -130,7 +130,7 @@ void GeometryWidget::Reinit(
 	_geometryFlags = geometryFlags;
 	_varFlags = varFlags;
 
-	if (_dimFlags & TWOD) {
+	if (_dimFlags & TWODXY) {
 		adjustLayoutTo2D();
 	}
 	else if(_dimFlags & THREED ) {
@@ -226,7 +226,7 @@ void GeometryWidget::updateRangeLabels(
 	if (minExt.size() < 3) 
 	{
 		Reinit(
-			(DimFlags)TWOD,
+			(DimFlags)TWODXY,
 			_geometryFlags,
 			_varFlags);
 		zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
