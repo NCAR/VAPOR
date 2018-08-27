@@ -2,7 +2,6 @@
 #include <vapor/DVRenderer.h>
 #include <iostream>
 #include <sstream>
-#include <ctime>
 
 //
 // OpenGL debug output

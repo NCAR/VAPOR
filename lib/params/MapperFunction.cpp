@@ -27,7 +27,6 @@
 #include <fstream>
 #include <cassert>
 #include <algorithm>
-#include <ctime>
 #include <vapor/MapperFunction.h>
 #include <vapor/ColorMap.h>
 #include <vapor/XmlNode.h>
