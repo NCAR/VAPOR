@@ -83,7 +83,7 @@ MapperFunction::MapperFunction(
 
 	setMinMaxMapValue(1., -1.);
 
-	_dirtyBit = true;
+	_clutDirtyBit = true;
 }
 
 MapperFunction::MapperFunction(
@@ -121,7 +121,7 @@ MapperFunction::MapperFunction(
 		m_opacityMaps->Insert(&opacityMap, _make_omap_name(0));
 	}
 
-	_dirtyBit = true;
+	_clutDirtyBit = true;
 }
 
 MapperFunction::MapperFunction(
@@ -138,7 +138,8 @@ MapperFunction::MapperFunction(
 	m_opacityMaps = new ParamsContainer(*(rhs.m_opacityMaps));
 	m_opacityMaps->SetParent(this);
 
-	_dirtyBit = true;
+	memcpy(_clut, rhs._clut, sizeof(float)*_numEntries*4);
+	_clutDirtyBit = rhs._clutDirtyBit;
 }
 
 MapperFunction &MapperFunction::operator=( const MapperFunction& rhs ) {
@@ -160,7 +161,8 @@ MapperFunction &MapperFunction::operator=( const MapperFunction& rhs ) {
 	);
 	m_opacityMaps->SetParent(this);
 
-	_dirtyBit = true;
+	memcpy(_clut, rhs._clut, sizeof(float)*_numEntries*4);
+	_clutDirtyBit = rhs._clutDirtyBit;
 
 	return(*this);
 }
@@ -211,7 +213,7 @@ int MapperFunction::LoadFromFile(string path, vector<double> defaultDataBounds)
 	//
 	delete newTF;
 
-	_dirtyBit = true;
+	_clutDirtyBit = true;
 
 	return(0);
 }
@@ -314,7 +316,7 @@ void MapperFunction::checkForOpacityChanges() {
 	for (int i=0; i<getNumOpacityMaps(); i++) {
 		OpacityMap* om = GetOpacityMap(i);
 		if (om->GetDirtyBit())
-			_dirtyBit = true;
+			_clutDirtyBit = true;
 		om->ResetDirtyBit();
 	}
 }
@@ -326,7 +328,7 @@ void MapperFunction::makeLut(float* clut)
 {
   checkForOpacityChanges();
 
-  if (_dirtyBit) {
+  if (_clutDirtyBit) {
   	float step = (getMaxMapValue() - getMinMapValue())/float(_numEntries-1);
   	for (int i = 0; i< _numEntries; i++)
   	{
@@ -335,12 +337,11 @@ void MapperFunction::makeLut(float* clut)
   	  clut[4*i+3] = getOpacityValueData(v);
   	}
 	memcpy(_clut, clut, sizeof(float)*_numEntries*4);
+    _clutDirtyBit = false;
   }
   else {
 	memcpy(clut, _clut, sizeof(float)*_numEntries*4);
   }
-
-  _dirtyBit = false;
 }
 
 //----------------------------------------------------------------------------
@@ -374,7 +375,7 @@ void MapperFunction::setMinMaxMapValue(float val1,float val2) {
 		GetOpacityMap(i)->SetDataBounds(bnds);
 	}
 
-	_dirtyBit = true;
+	_clutDirtyBit = true;
 }
 
 vector<double> MapperFunction::getMinMaxMapValue() const {
@@ -399,7 +400,7 @@ OpacityMap* MapperFunction::createOpacityMap(OpacityMap::Type type)
 
 	m_opacityMaps->Insert(&opacityMap, _make_omap_name(index));
 
-	_dirtyBit = true;
+	_clutDirtyBit = true;
 
 	return((OpacityMap *) m_opacityMaps->GetParams(_make_omap_name(index)));
 }

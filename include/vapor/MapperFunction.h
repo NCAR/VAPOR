@@ -341,7 +341,7 @@ private:
  //
  const int _numEntries;
 
- bool _dirtyBit;
+ bool _clutDirtyBit;
 
  float _clut[1024];
 
