@@ -3009,27 +3009,29 @@ int DataMgr::_initHorizontalCoordVars()
 
         // no duplicates
         //
-        if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
-        if (_getDerivedCoordVar(derivedCoordvars[1])) continue;
+        if (!_getDerivedCoordVar(derivedCoordvars[0])) {
+            DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
 
-        DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                SetErrMsg("Failed to initialize derived coord variable");
+                return (-1);
+            }
 
-        rc = derivedVar->Initialize();
-        if (rc < 0) {
-            SetErrMsg("Failed to initialize derived coord variable");
-            return (-1);
-        }
-        _dvm.AddCoordVar(derivedVar);
-
-        derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
-
-        rc = derivedVar->Initialize();
-        if (rc < 0) {
-            SetErrMsg("Failed to initialize derived coord variable");
-            return (-1);
+            _dvm.AddCoordVar(derivedVar);
         }
 
-        _dvm.AddCoordVar(derivedVar);
+        if (!_getDerivedCoordVar(derivedCoordvars[1])) {
+            DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
+
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                SetErrMsg("Failed to initialize derived coord variable");
+                return (-1);
+            }
+
+            _dvm.AddCoordVar(derivedVar);
+        }
     }
 
     return (0);
