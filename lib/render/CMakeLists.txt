@@ -21,6 +21,7 @@ set (SRC
 	textRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
+    SliceRenderer.cpp
 	MyPython.cpp
 )
 

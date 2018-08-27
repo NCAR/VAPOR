@@ -74,6 +74,10 @@ VariablesWidget::VariablesWidget(QWidget *parent)
         colormapVarCombo, SIGNAL(activated(const QString &)),
         this, SLOT(setColorMappedVariable(const QString &)));
 
+    connect(
+        orientationCombo, SIGNAL(activated(const QString &)),
+        this, SLOT(set2DOrientation(const QString &)));
+
     // Legacy crap. Should remove
     //
     distribVariableFrame->hide();
@@ -87,7 +91,7 @@ void VariablesWidget::Reinit(
 
     showHideVarCombos(true);
 
-    // If the renderer is not 2D and 3D, hide
+    // If the renderer is not both 2D and 3D, hide
     // the dimension selector and set the _activeDim
     if (!((_dimFlags & TWOD) &&
           (_dimFlags & THREED))) {
@@ -96,6 +100,13 @@ void VariablesWidget::Reinit(
             _activeDim = THREEDIMS;
         else
             _activeDim = TWODIMS;
+    }
+
+    // If the renderer is only 3D, hide the 2D orientation selector
+    if (!(_dimFlags & TWODXY) &&
+        !(_dimFlags & TWODXZ) &&
+        !(_dimFlags & TWODYZ)) {
+        orientationFrame->hide();
     }
 
     variableSelectionWidget->adjustSize();
@@ -195,6 +206,10 @@ void VariablesWidget::setColorMappedVariable(const QString &qname) {
     string name = qname.toStdString();
     name = name == "0" ? "" : name;
     _rParams->SetColorMapVariableName(name);
+}
+
+void VariablesWidget::set2DOrientation(const QString &orientation) {
+    cout << "2D orientation is currently a no-op" << endl;
 }
 
 void VariablesWidget::setVariableDims(int index) {
