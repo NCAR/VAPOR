@@ -2,9 +2,10 @@
 
 #include <vector>
 #include "vapor/ShaderProgram2.h"
-#include "vapor/GLManager.h"
 
 namespace VAPoR {
+
+struct GLManager;
 
 class LegacyGL {
 #pragma pack(push, 4)
