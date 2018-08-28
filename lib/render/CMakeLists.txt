@@ -28,6 +28,8 @@ set (SRC
 	LegacyGL.cpp
 	ShaderManager.cpp
 	GLManager.cpp
+	FontManager.cpp
+	Font.cpp
 )
 
 set (HEADERS
@@ -59,6 +61,9 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/LegacyGL.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GLManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/FontManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Font.h
+	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
