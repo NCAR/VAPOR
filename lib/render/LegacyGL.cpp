@@ -21,9 +21,7 @@ _VBO(0),
 _r(1), _g(1), _b(1), _a(1),
 _initialized(false),
 _insideBeginEndBlock(false)
-{
-    Initialize();
-}
+{}
 
 void LegacyGL::Initialize()
 {
