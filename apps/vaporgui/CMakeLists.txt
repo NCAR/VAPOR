@@ -132,6 +132,8 @@ set (UIS
 	QSinglePoint.ui
 )
 
+source_group (UIs FILES ${UIS})
+
 find_package(Qt4 REQUIRED)
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
