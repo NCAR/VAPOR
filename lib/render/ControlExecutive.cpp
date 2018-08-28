@@ -74,13 +74,6 @@ int ControlExec::NewVisualizer(string winName) {
 
 void ControlExec::RemoveVisualizer(string winName) {
     {
-        auto itr = _glManagers.find(winName);
-        if (itr != _glManagers.end()) {
-            delete itr->second;
-            _glManagers.erase(itr);
-        }
-    }
-    {
         auto itr = _shaderMgrs.find(winName);
         if (itr != _shaderMgrs.end()) {
             delete itr->second;
@@ -95,7 +88,7 @@ void ControlExec::RemoveVisualizer(string winName) {
     }
 }
 
-int ControlExec::InitializeViz(string winName) {
+int ControlExec::InitializeViz(string winName, GLManager *glManager) {
     Visualizer *v = getVisualizer(winName);
     if (!v) {
         SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
@@ -109,11 +102,10 @@ int ControlExec::InitializeViz(string winName) {
     vector<string> paths;
     paths.push_back("shaders");
 
-    GLManager *glManager = new GLManager;
     ShaderMgr *shaderMgr = new ShaderMgr();
 
     string shaderPath = GetAppPath("VAPOR", "share", paths);
-    glManager->shaderManager->SetResourceDirectory(shaderPath);
+    // glManager->shaderManager->SetResourceDirectory(shaderPath);
     shaderMgr->SetShaderSourceDir(shaderPath);
     int rc = shaderMgr->LoadShaders();
     if (rc < 0) {
@@ -125,7 +117,6 @@ int ControlExec::InitializeViz(string winName) {
         return (-1);
     }
     _shaderMgrs[winName] = shaderMgr;
-    _glManagers[winName] = glManager;
 
     if (v->initializeGL(shaderMgr, glManager) < 0) {
         SetErrMsg("InitializeGL failure");
