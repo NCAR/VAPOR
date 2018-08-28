@@ -25,6 +25,7 @@
 #include "vapor/Visualizer.h"
 #include "Manip.h"
 #include <QWheelEvent>
+#include "vapor/GLManager.h"
 
 class QCloseEvent;
 class QRect;
@@ -109,6 +110,7 @@ private:
 
     string              _winName;
     VAPoR::ControlExec *_controlExec;
+    VAPoR::GLManager *  _glManager;
     double              _strHandleMid[3];
 
     bool       _mouseClicked;    // Indicates mouse has been clicked but not move
