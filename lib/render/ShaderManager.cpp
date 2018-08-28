@@ -16,7 +16,7 @@ SmartShaderProgram ShaderManager::GetSmartShader(const std::string name) {
 }
 
 #ifdef _WINDOWS
-#define PATH_SEPARATOR "\"
+#define PATH_SEPARATOR "\\"
 #else
 #define PATH_SEPARATOR "/"
 #endif
