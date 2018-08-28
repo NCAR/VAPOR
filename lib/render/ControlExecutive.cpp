@@ -106,7 +106,7 @@ int ControlExec::InitializeViz(string winName)
     ShaderMgr *shaderMgr = new ShaderMgr();
 
     string shaderPath = GetAppPath("VAPOR", "share", paths);
-    glManager->shaderManager->SetShaderDirectory(shaderPath);
+    glManager->shaderManager->SetResourceDirectory(shaderPath);
     shaderMgr->SetShaderSourceDir(shaderPath);
     int rc = shaderMgr->LoadShaders();
     if (rc < 0) {
