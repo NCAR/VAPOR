@@ -21,7 +21,7 @@ FontManager::~FontManager()
 }
 
 #ifdef _WINDOWS
-    #define PATH_SEPARATOR "\"
+    #define PATH_SEPARATOR "\\"
 #else
     #define PATH_SEPARATOR "/"
 #endif

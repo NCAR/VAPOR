@@ -12,7 +12,7 @@ ShaderProgram2 *ShaderManager::GetShader(const std::string name) { return GetRes
 SmartShaderProgram ShaderManager::GetSmartShader(const std::string name) { return SmartShaderProgram(GetResource(name)); }
 
 #ifdef _WINDOWS
-    #define PATH_SEPARATOR "\"
+    #define PATH_SEPARATOR "\\"
 #else
     #define PATH_SEPARATOR "/"
 #endif
