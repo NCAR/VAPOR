@@ -367,6 +367,7 @@ void VizWin::initializeGL() {
     if (rc < 0) {
         MSG_ERR("Failure to initialize Visualizer");
     }
+    _glManager->legacy->Initialize();
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
