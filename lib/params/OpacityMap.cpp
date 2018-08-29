@@ -68,7 +68,8 @@ OpacityMap::OpacityMap(
 	_minFreq(1.0),
 	_maxFreq(30.0),
 	_minPhase(0.0),
-	_maxPhase(2*M_PI) 
+	_maxPhase(2*M_PI),
+	_dirtyBit(false)
 {
 
 
@@ -94,7 +95,6 @@ OpacityMap::OpacityMap(
 //	  cps.push_back((double)i/3.);
 	}
 	SetControlPoints(cps);
-
 }
 
 OpacityMap::OpacityMap(
@@ -105,7 +105,8 @@ OpacityMap::OpacityMap(
 	_minFreq(1.0),
 	_maxFreq(30.0),
 	_minPhase(0.0),
-	_maxPhase(2*M_PI) 
+	_maxPhase(2*M_PI),
+	_dirtyBit(false)
 {
 }
 
@@ -136,7 +137,7 @@ void OpacityMap::addNormControlPoint(float normVal, float opacity)
 	int index = leftControlIndex(normVal)*2 +2;
 	cps.insert(cps.begin()+index++, opacity);
 	cps.insert(cps.begin()+index,normVal);
-    SetControlPoints(cps);                
+    SetControlPoints(cps);
 }
 
 //----------------------------------------------------------------------------
@@ -313,8 +314,8 @@ void OpacityMap::controlPointValue(int index, float value)
 // Set the mean value (normalized coordinates) for the gaussian function
 //----------------------------------------------------------------------------
 void OpacityMap::SetMean(double mean) {
-
   SetValueDouble(_meanTag, "Set opacity mean", mean);
+  _dirtyBit = true;
 }
 
 //----------------------------------------------------------------------------
@@ -324,6 +325,7 @@ void OpacityMap::SetMean(double mean) {
 void OpacityMap::SetSSQ(double ssq)
 {
 	SetValueDouble(_ssqTag,"Set Opac SSQ", ssq);
+    _dirtyBit = true;
 }
 
 //----------------------------------------------------------------------------
@@ -332,6 +334,7 @@ void OpacityMap::SetSSQ(double ssq)
 void OpacityMap::SetFreq(double freq) 
 { 
 	SetValueDouble(_freqTag,"Set Opac Freq", freq);
+    _dirtyBit = true;
 }
 
 //----------------------------------------------------------------------------
@@ -340,6 +343,7 @@ void OpacityMap::SetFreq(double freq)
 void OpacityMap::SetPhase(double p)
 {
 	SetValueDouble(_phaseTag, "Set Opac Phase", denormSinePhase(p));
+    _dirtyBit = true;
 } 
 
 
@@ -422,6 +426,7 @@ void OpacityMap::SetDataBounds(const vector <double> &bounds) {
 	assert(bounds.size() == 2);
 
 	SetValueDoubleVec(_dataBoundsTag, "Set min max map value", bounds);
+    _dirtyBit = true;
 }
 
 vector <double> OpacityMap::GetDataBounds() const {
@@ -539,6 +544,7 @@ bool OpacityMap::isOpaque() const
 
 void OpacityMap::SetEnabled(bool val) {
 	SetValueLong(_enabledTag, "Change opacity map enabled", (long)val);
+	_dirtyBit = true;
 }
 
 vector<double> OpacityMap::GetControlPoints() const {
@@ -558,14 +564,18 @@ void OpacityMap::SetControlPoints(const vector<double> &controlPoints) {
 	SetValueDoubleVec(
 		_controlPointsTag, "Set opacity control points", mycp
 	);
+
+	_dirtyBit = true;
 }
 
 void OpacityMap::SetInterpType(TFInterpolator::type t){
 	SetValueLong(_interpTypeTag, "Set Opacity Interpolation", (long)t);
+	_dirtyBit = true;
 }
 
 void OpacityMap::SetType(OpacityMap::Type t) {
 	SetValueLong(_typeTag, "Set Opacity Map Type", (long) t);
+	_dirtyBit = true;
 }
 
 //----------------------------------------------------------------------------
@@ -587,6 +597,7 @@ void OpacityMap::setMinValue(double val)
 	else val = 0.;
 
 	SetValueDouble(_relMinTag, "Set Opacity min", val);
+	_dirtyBit = true;
 }
 //----------------------------------------------------------------------------
 // Set the minimum value of the opacity map (in data coordinates).
@@ -607,6 +618,7 @@ void OpacityMap::setMaxValue(double val)
 	else val = 1.;
 
 	SetValueDouble(_relMaxTag, "Set Opacity max", val);
+	_dirtyBit = true;
 }
 
 double OpacityMap::minValue() const {
@@ -619,4 +631,12 @@ double OpacityMap::maxValue() const {
 	vector<double> minmaxmap =  GetDataBounds();
 	double relmax = GetValueDouble(_relMaxTag, 1.0);
 	return (minmaxmap[0] + relmax*(minmaxmap[1]-minmaxmap[0]));
+}
+
+bool OpacityMap::GetDirtyBit() const {
+	return _dirtyBit;
+}
+
+void OpacityMap::ResetDirtyBit() {
+	_dirtyBit = false;
 }

@@ -82,6 +82,8 @@ MapperFunction::MapperFunction(
 	m_opacityMaps->Insert(&opacityMap, _make_omap_name(0));
 
 	setMinMaxMapValue(1., -1.);
+
+	_clutDirtyBit = true;
 }
 
 MapperFunction::MapperFunction(
@@ -118,6 +120,8 @@ MapperFunction::MapperFunction(
 
 		m_opacityMaps->Insert(&opacityMap, _make_omap_name(0));
 	}
+
+	_clutDirtyBit = true;
 }
 
 MapperFunction::MapperFunction(
@@ -133,6 +137,9 @@ MapperFunction::MapperFunction(
 
 	m_opacityMaps = new ParamsContainer(*(rhs.m_opacityMaps));
 	m_opacityMaps->SetParent(this);
+
+	memcpy(_clut, rhs._clut, sizeof(float)*_numEntries*4);
+	_clutDirtyBit = rhs._clutDirtyBit;
 }
 
 MapperFunction &MapperFunction::operator=( const MapperFunction& rhs ) {
@@ -153,6 +160,9 @@ MapperFunction &MapperFunction::operator=( const MapperFunction& rhs ) {
 		rhs._ssave, rhs.m_opacityMaps->GetNode()
 	);
 	m_opacityMaps->SetParent(this);
+
+	memcpy(_clut, rhs._clut, sizeof(float)*_numEntries*4);
+	_clutDirtyBit = rhs._clutDirtyBit;
 
 	return(*this);
 }
@@ -202,6 +212,8 @@ int MapperFunction::LoadFromFile(string path, vector<double> defaultDataBounds)
 	// Delete the new tree
 	//
 	delete newTF;
+
+	_clutDirtyBit = true;
 
 	return(0);
 }
@@ -300,25 +312,42 @@ void MapperFunction::hsvValue(float value, float *h, float *s, float *v) const
   }
 }
 
+void MapperFunction::checkForOpacityChanges() {
+	for (int i=0; i<getNumOpacityMaps(); i++) {
+		OpacityMap* om = GetOpacityMap(i);
+		if (om->GetDirtyBit())
+			_clutDirtyBit = true;
+		om->ResetDirtyBit();
+	}
+}
+
 //----------------------------------------------------------------------------
 // Populate at a RGBA lookup table 
 //----------------------------------------------------------------------------
-void MapperFunction::makeLut(float* clut) const
+void MapperFunction::makeLut(float* clut) 
 {
-  float step = (getMaxMapValue() - getMinMapValue())/float(_numEntries-1);
+  checkForOpacityChanges();
 
-  for (int i = 0; i< _numEntries; i++)
-  {
-    float v = getMinMapValue() + i*step;
-    m_colorMap->color(v).toRGB(&clut[4*i]);
-    clut[4*i+3] = getOpacityValueData(v);
+  if (_clutDirtyBit) {
+  	float step = (getMaxMapValue() - getMinMapValue())/float(_numEntries-1);
+  	for (int i = 0; i< _numEntries; i++)
+  	{
+  	  float v = getMinMapValue() + i*step;
+  	  m_colorMap->color(v).toRGB(&clut[4*i]);
+  	  clut[4*i+3] = getOpacityValueData(v);
+  	}
+	memcpy(_clut, clut, sizeof(float)*_numEntries*4);
+    _clutDirtyBit = false;
+  }
+  else {
+	memcpy(clut, _clut, sizeof(float)*_numEntries*4);
   }
 }
 
 //----------------------------------------------------------------------------
 // Populate at a RGBA lookup table with std::vector input
 //----------------------------------------------------------------------------
-void MapperFunction::makeLut(std::vector <float> &clut) const 
+void MapperFunction::makeLut(std::vector <float> &clut) 
 {
     float cluta[ 4 * _numEntries ];
     makeLut(cluta);
@@ -345,6 +374,8 @@ void MapperFunction::setMinMaxMapValue(float val1,float val2) {
 	for (int i=0; i<getNumOpacityMaps(); i++) {
 		GetOpacityMap(i)->SetDataBounds(bnds);
 	}
+
+	_clutDirtyBit = true;
 }
 
 vector<double> MapperFunction::getMinMaxMapValue() const {
@@ -369,8 +400,9 @@ OpacityMap* MapperFunction::createOpacityMap(OpacityMap::Type type)
 
 	m_opacityMaps->Insert(&opacityMap, _make_omap_name(index));
 
-	return((OpacityMap *) m_opacityMaps->GetParams(_make_omap_name(index)));
+	_clutDirtyBit = true;
 
+	return((OpacityMap *) m_opacityMaps->GetParams(_make_omap_name(index)));
 }
 
 //----------------------------------------------------------------------------
@@ -388,7 +420,7 @@ void MapperFunction::DeleteOpacityMap(const OpacityMap *omap) {
 OpacityMap* MapperFunction::GetOpacityMap(int index) const
 {
 	if (index >= m_opacityMaps->Size()) return(NULL);
-	
+
 	return((OpacityMap *) m_opacityMaps->GetParams(_make_omap_name(index)));
 }
 
@@ -512,6 +544,7 @@ void MapperFunction::setOpaque()
    GetOpacityMap(i)->setOpaque();
   }
 }
+
 bool MapperFunction::isOpaque() const
 {
 

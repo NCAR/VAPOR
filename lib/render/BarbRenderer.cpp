@@ -870,8 +870,9 @@ bool BarbRenderer::_getColorMapping(float val, float clut[256*4]) {
 	float mappedColor[4] = {0.,0.,0.,0.};
 	//Use the transfer function to map the data:
 	int lutIndex = tf->mapFloatToIndex(val);
-	for (int i = 0; i<4; i++)
+	for (int i = 0; i<4; i++){
 		mappedColor[i] = clut[4*lutIndex+i];
+    }
 	glColor4fv(mappedColor);
 	return missing;
 }

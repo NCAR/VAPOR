@@ -634,14 +634,10 @@ void MappingFrame::setEditMode(bool flag)
 void MappingFrame::fitToView()
 {
   //Make sure it's current active params:
-
   emit startChange("Mapping window fit-to-view");
   
   _minValue = getMinDomainBound();
   _maxValue = getMaxDomainBound();
-  
-  setMinEditBound(_minValue);
-  setMaxEditBound(_maxValue);
  
   _domainSlider->setDomain(xDataToWorld(_minValue), xDataToWorld(_maxValue));
   if(_colorbarWidget) _colorbarWidget->setDirty();
