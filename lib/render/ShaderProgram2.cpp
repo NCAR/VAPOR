@@ -18,6 +18,7 @@ bool ShaderProgram2::Link()
 {
     assert(!_linked);
     _id = glCreateProgram();
+    assert(_id);
     for (auto it = _shaders.begin(); it != _shaders.end(); it++) {
         assert((*it)->WasCompilationSuccessful());
         glAttachShader(_id, (*it)->GetID());
@@ -38,14 +39,16 @@ void ShaderProgram2::Bind()
     glUseProgram(_id);
 }
 
-bool ShaderProgram2::IsBound() const
+bool ShaderProgram2::IsBound() const { return _id == GetBoundProgramID(); }
+
+void ShaderProgram2::UnBind() { glUseProgram(0); }
+
+int ShaderProgram2::GetBoundProgramID()
 {
     int currentlyBoundProgramId;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentlyBoundProgramId);
-    return _id == currentlyBoundProgramId;
+    return currentlyBoundProgramId;
 }
-
-void ShaderProgram2::UnBind() { glUseProgram(0); }
 
 void ShaderProgram2::AddShader(Shader *s) { _shaders.push_back(s); }
 

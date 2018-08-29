@@ -22,6 +22,7 @@ public:
     void        Bind();
     bool        IsBound() const;
     static void UnBind();
+    static int  GetBoundProgramID();
 
     void AddShader(Shader *s);
     bool AddShaderFromSource(unsigned int type, const char *source);
