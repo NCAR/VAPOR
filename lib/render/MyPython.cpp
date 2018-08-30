@@ -157,6 +157,27 @@ int MyPython::Initialize()
         return (-1);
     }
 
+    std::string stdOut = "try:\n"
+                         "	import sys, os\n"
+                         "except: \n"
+                         "	print >> sys.stderr, \'Failed to import sys\'\n"
+                         "	raise\n"
+                         "class CatchOut:\n"
+                         "	def __init__(self):\n"
+                         "		self.value = ''\n"
+                         "	def write(self, txt):\n"
+                         "		self.value += txt\n"
+                         "catchOut = CatchOut()\n"
+                         "sys.stdout = catchOut\n";
+
+    // Catch stdout from Python to a string.
+    //
+    rc = PyRun_SimpleString(stdOut.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
+
     // Import matplotlib
     //
     std::string importMPL = "try:\n"
@@ -201,6 +222,21 @@ string MyPython::PyErr()
     PyErr_Print();
 
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
+
+    PyObject *output = PyObject_GetAttrString(catcher, "value");
+    return (PyString_AsString(output));
+}
+
+// Fetch an error message genereated by Python API.
+//
+string MyPython::PyOut()
+{
+    PyObject *pMain = PyImport_AddModule("__main__");
+
+    PyObject *catcher = NULL;
+    if (pMain && PyObject_HasAttrString(pMain, "catchOut")) { catcher = PyObject_GetAttrString(pMain, "catchOut"); }
+
+    if (!catcher) { return (""); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
     return (PyString_AsString(output));

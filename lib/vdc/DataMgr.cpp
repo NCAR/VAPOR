@@ -989,41 +989,24 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         if (rc < 0) return (NULL);
     }
 
-    if (DataMgr::IsVariableDerived(varname) && !blkvec[0]) {
-        //
-        // Derived variable that is not in cache, so we need to
-        // create it
-        //
-#ifdef VAPOR3_0_0_ALPHA
-        rg = execute_pipeline(ts, varname, level, lod, min, max, lock, xcblks, ycblks, zcblks);
+    if (_gridHelper.IsUnstructured(gridType)) {
+        vector<size_t>             vertexDims;
+        vector<size_t>             faceDims;
+        vector<size_t>             edgeDims;
+        UnstructuredGrid::Location location;
+        size_t                     maxVertexPerFace;
+        size_t                     maxFacePerVertex;
+        long                       vertexOffset;
+        long                       faceOffset;
 
-        if (!rg) {
-            for (int i = 0; i < blkvec.size(); i++) {
-                if (blkvec[i]) _unlock_blocks(blkvec[i]);
-            }
-            return (NULL);
-        }
-#endif
+        _ugrid_setup(dvar, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
+
+        rg = _gridHelper.MakeGridUnstructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec,
+                                              conn_bminvec, conn_bmaxvec, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
     } else {
-        if (_gridHelper.IsUnstructured(gridType)) {
-            vector<size_t>             vertexDims;
-            vector<size_t>             faceDims;
-            vector<size_t>             edgeDims;
-            UnstructuredGrid::Location location;
-            size_t                     maxVertexPerFace;
-            size_t                     maxFacePerVertex;
-            long                       vertexOffset;
-            long                       faceOffset;
-
-            _ugrid_setup(dvar, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
-
-            rg = _gridHelper.MakeGridUnstructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec,
-                                                  conn_bminvec, conn_bmaxvec, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
-        } else {
-            rg = _gridHelper.MakeGridStructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec);
-        }
-        assert(rg);
+        rg = _gridHelper.MakeGridStructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec);
     }
+    assert(rg);
 
     //
     // Safe to remove locks now that were not explicitly requested
@@ -1174,102 +1157,6 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     return (0);
 }
 
-#ifdef VAPOR3_0_0_ALPHA
-
-int DataMgr::NewPipeline(PipeLine *pipeline)
-{
-    //
-    // Delete any pipeline stage with the same name as the new one. This
-    // is a no-op if the stage doesn't exist.
-    //
-    RemovePipeline(pipeline->GetName());
-
-    //
-    // Make sure outputs don't collide with existing outputs
-    //
-    const vector<pair<string, VarType_T>> &my_outputs = pipeline->GetOutputs();
-
-    for (int i = 0; i < _PipeLines.size(); i++) {
-        const vector<pair<string, VarType_T>> &outputs = _PipeLines[i]->GetOutputs();
-        for (int j = 0; j < my_outputs.size(); j++) {
-            for (int k = 0; k < outputs.size(); k++) {
-                if (my_outputs[j].first.compare(outputs[k].first) == 0) {
-                    SetErrMsg("Pipeline output %s already in use", my_outputs[j].first.c_str());
-                    return (-1);
-                }
-            }
-        }
-    }
-
-    //
-    // Now make sure outputs don't match any native variables
-    //
-    vector<string> native_vars = _get_native_variables();
-
-    for (int i = 0; i < native_vars.size(); i++) {
-        for (int j = 0; j < my_outputs.size(); j++) {
-            if (native_vars[i].compare(my_outputs[j].first) == 0) {
-                SetErrMsg("Pipeline output %s matches native variable name", my_outputs[i].first.c_str());
-                return (-1);
-            }
-        }
-    }
-
-    //
-    // Add the new stage to a temporary pipeline. Generate a hash
-    // table with all the dependencies of the temporary pipeline. And
-    // then check for cycles in the graph (e.g. a -> b -> c -> a).
-    //
-    map<string, vector<string>> graph;
-    vector<PipeLine *>          tmp_pipe = _PipeLines;
-    tmp_pipe.push_back(pipeline);
-
-    for (int i = 0; i < tmp_pipe.size(); i++) {
-        vector<string> depends;
-        for (int j = 0; j < tmp_pipe.size(); j++) {
-            //
-            // See if inputs to tmp_pipe[i] match outputs
-            // of tmp_pipe[j]
-            //
-            if (depends_on(tmp_pipe[i], tmp_pipe[j])) { depends.push_back(tmp_pipe[j]->GetName()); }
-        }
-        graph[tmp_pipe[i]->GetName()] = depends;
-    }
-
-    //
-    // Finally check for cycles in the graph
-    //
-    if (cycle_check(graph, pipeline->GetName(), graph[pipeline->GetName()])) {
-        SetErrMsg("Invalid pipeline : circular dependency detected");
-        return (-1);
-    }
-
-    _PipeLines.push_back(pipeline);
-    return (0);
-}
-
-void DataMgr::RemovePipeline(string name)
-{
-    vector<PipeLine *>::iterator itr;
-    for (itr = _PipeLines.begin(); itr != _PipeLines.end(); itr++) {
-        if (name.compare((*itr)->GetName()) == 0) {
-            _PipeLines.erase(itr);
-
-            const vector<pair<string, VarType_T>> &output_vars = (*itr)->GetOutputs();
-            //
-            // Remove any cached instances of variable
-            //
-            for (int i = 0; i < output_vars.size(); i++) {
-                string var = output_vars[i].first;
-                DataMgr::PurgeVariable(var);
-            }
-            break;
-        }
-    }
-}
-
-#endif
-
 vector<string> DataMgr::_get_var_dependencies(string varname) const
 {
     vector<string> varnames = {varname};
@@ -1391,6 +1278,26 @@ bool DataMgr::IsVariableNative(string name) const
 }
 
 bool DataMgr::IsVariableDerived(string name) const { return (_getDerivedVar(name) != NULL); }
+
+int DataMgr::AddDerivedVar(DerivedDataVar *derivedVar)
+{
+    string varname = derivedVar->GetName();
+
+    if (_dvm.HasVar(varname)) {
+        SetErrMsg("Variable named %s already defined", varname.c_str());
+        return (-1);
+    }
+    _dvm.AddDataVar(derivedVar);
+
+    return (0);
+}
+
+void DataMgr::RemoveDerivedVar(string varname)
+{
+    if (!_dvm.HasVar(varname)) return;
+
+    _dvm.RemoveVar(_dvm.GetVar(varname));
+}
 
 void DataMgr::Clear()
 {
@@ -1719,200 +1626,6 @@ bool DataMgr::_free_lru()
     return (false);
 }
 
-#ifdef VAPOR3_0_0_ALPHA
-PipeLine *DataMgr::get_pipeline_for_var(string varname) const
-{
-    for (int i = 0; i < _PipeLines.size(); i++) {
-        const vector<pair<string, VarType_T>> &output_vars = _PipeLines[i]->GetOutputs();
-
-        for (int j = 0; j < output_vars.size(); j++) {
-            if (output_vars[j].first.compare(varname) == 0) { return (_PipeLines[i]); }
-        }
-    }
-    return (NULL);
-}
-
-Grid *DataMgr::execute_pipeline(size_t ts, string varname, int level, int lod, const size_t min[3], const size_t max[3], bool lock, float *xcblks, float *ycblks, float *zcblks)
-{
-    if (level < 0) level = GetNumTransforms();
-    if (lod < 0) lod = GetCRatios().size() - 1;
-
-    _VarInfoCache.PurgeRange(ts, varname, level, lod);
-    _VarInfoCache.PurgeRegion(ts, varname, level);
-    _VarInfoCache.PurgeExist(ts, varname, level, lod);
-
-    PipeLine *pipeline = get_pipeline_for_var(varname);
-
-    assert(pipeline != NULL);
-
-    const vector<string> &                 input_varnames = pipeline->GetInputs();
-    const vector<pair<string, VarType_T>> &output_vars = pipeline->GetOutputs();
-
-    VarType_T vtype = DataMgr::GetVarType(varname);
-
-    //
-    // Ptrs to space for input and output variables
-    //
-    vector<const Grid *> in_grids;
-    vector<Grid *>       out_grids;
-
-    //
-    // Get input variables, and lock them into memory
-    //
-    for (int i = 0; i < input_varnames.size(); i++) {
-        size_t    min_in[] = {min[0], min[1], min[2]};
-        size_t    max_in[] = {max[0], max[1], max[2]};
-        VarType_T vtype_in = DataMgr::GetVarType(input_varnames[i]);
-
-        //
-        // If the requested output variable is 2D and an input variable
-        // is 3D we need to make sure that the 3rd dimension of the
-        // 3D input variable covers the full domain
-        //
-        if (vtype != VAR3D && vtype_in == VAR3D) {
-            size_t dims[3];
-            DataMgr::GetDim(dims, level);
-
-            switch (vtype) {
-            case VAR2D_XY:
-                min_in[2] = 0;
-                max_in[2] = dims[2] - 1;
-                break;
-            case VAR2D_XZ:
-                min_in[1] = 0;
-                max_in[1] = dims[1] - 1;
-                break;
-            case VAR2D_YZ:
-                min_in[0] = 0;
-                max_in[0] = dims[0] - 1;
-                break;
-            default: break;
-            }
-        }
-
-        Grid *rg = GetGrid(ts, input_varnames[i], level, lod, min_in, max_in, true);
-        if (!rg) {
-            // Unlock any locked variables and abort
-            //
-            for (int j = 0; j < in_grids.size(); j++) UnlockGrid(in_grids[j]);
-            return (NULL);
-        }
-        in_grids.push_back(rg);
-    }
-
-    //
-    // Get space for all output variables generated by the pipeline,
-    // including the single variable that we will return.
-    //
-    int output_index = -1;
-    for (int i = 0; i < output_vars.size(); i++) {
-        string    v = output_vars[i].first;
-        VarType_T vtype_out = output_vars[i].second;
-
-        //
-        // if output variable i is the one we are interested in record
-        // the index and use the lock value passed in to this method
-        //
-        if (v.compare(varname) == 0) { output_index = i; }
-
-        float *blks = _alloc_region(ts, v.c_str(), vtype_out, level, lod, min, max, true, true);
-        if (!blks) {
-            // Unlock any locked variables and abort
-            //
-            for (int j = 0; j < in_grids.size(); j++) UnlockGrid(in_grids[j]);
-            for (int j = 0; j < out_grids.size(); j++) UnlockGrid(out_grids[j]);
-            return (NULL);
-        }
-        Grid *rg = _make_grid(ts, v, level, lod, min, max, blks, xcblks, ycblks, zcblks);
-        if (!rg) {
-            for (int j = 0; j < in_grids.size(); j++) UnlockGrid(in_grids[j]);
-            for (int j = 0; j < out_grids.size(); j++) UnlockGrid(out_grids[j]);
-            return (NULL);
-        }
-        out_grids.push_back(rg);
-    }
-    assert(output_index >= 0);
-
-    int rc = pipeline->Calculate(in_grids, out_grids, ts, level, lod);
-
-    //
-    // Unlock input variables and output variables that are not
-    // being returned.
-    //
-    // N.B. unlocking a variable doesn't necessarily free it, but
-    // makes the space available if needed later
-    //
-
-    //
-    // Always unlock/free all input variables
-    //
-    for (int i = 0; i < in_grids.size(); i++) {
-        UnlockGrid(in_grids[i]);
-        delete in_grids[i];
-    }
-
-    //
-    // Unlock/free all outputs on error
-    //
-    if (rc < 0) {
-        for (int i = 0; i < out_grids.size(); i++) {
-            UnlockGrid(out_grids[i]);
-            delete out_grids[i];
-        }
-        return (NULL);
-    }
-
-    //
-    // Unlock/free outputs not being returned
-    //
-    for (int i = 0; i < out_grids.size(); i++) {
-        if (i != output_index) {
-            UnlockGrid(out_grids[i]);
-            delete out_grids[i];
-        } else if (!lock)
-            UnlockGrid(out_grids[i]);
-    }
-
-    return (out_grids[output_index]);
-}
-
-bool DataMgr::cycle_check(const map<string, vector<string>> &graph, const string &node, const vector<string> &depends) const
-{
-    if (depends.size() == 0) return (false);
-
-    for (int i = 0; i < depends.size(); i++) {
-        if (node.compare(depends[i]) == 0) return (true);
-    }
-
-    for (int i = 0; i < depends.size(); i++) {
-        const map<string, vector<string>>::const_iterator itr = graph.find(depends[i]);
-        assert(itr != graph.end());
-
-        if (cycle_check(graph, node, itr->second)) return (true);
-    }
-
-    return (false);
-}
-
-//
-// return true iff 'a' depends on 'b' - true if a has inputs that
-// match b's outputs.
-//
-bool DataMgr::depends_on(const PipeLine *a, const PipeLine *b) const
-{
-    const vector<string> &                 input_varnames = a->GetInputs();
-    const vector<pair<string, VarType_T>> &output_vars = b->GetOutputs();
-
-    for (int i = 0; i < input_varnames.size(); i++) {
-        for (int j = 0; j < output_vars.size(); j++) {
-            if (input_varnames[i].compare(output_vars[j].first) == 0) { return (true); }
-        }
-    }
-    return (false);
-}
-
-#endif
-
 //
 // return complete list of native variables
 //
@@ -1926,16 +1639,6 @@ vector<string> DataMgr::_get_native_variables() const
     v1.insert(v1.end(), v3.begin(), v3.end());
     return (v1);
 }
-
-#ifdef VAPOR3_0_0_ALPHA
-
-void DataMgr::PurgeVariable(string varname)
-{
-    _free_var(varname);
-    _VarInfoCache.PurgeVariable(varname);
-}
-
-#endif
 
 bool DataMgr::_hasHorizontalXForm() const
 {
