@@ -24,7 +24,7 @@ namespace VAPoR {
 
 class RENDER_API RayCaster : public Renderer {
 public:
-    RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &paramsType, std::string &classType, std::string &instName, DataMgr *dataMgr);
+    RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr);
 
     virtual ~RayCaster();
 
@@ -67,9 +67,9 @@ protected:
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        StructuredGrid *GetCurrentGrid(const RayCasterRParams *params, DataMgr *dataMgr) const;
-        bool            IsUpToDate(const RayCasterRParams *params, DataMgr *dataMgr) const;
-        bool            UpdateCoordinates(const RayCasterRParams *params, DataMgr *dataMgr);
+        StructuredGrid *GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr) const;
+        bool            IsUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
+        bool            UpdateCoordinates(const RayCasterParams *params, DataMgr *dataMgr);
     };    // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;

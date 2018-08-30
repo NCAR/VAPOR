@@ -1,7 +1,9 @@
 #ifndef DVRPARAMS_H
 #define DVRPARAMS_H
 
-using namespace VAPoR;
+#include "vapor/RayCasterParams.h"
+
+namespace VAPoR {
 
 class PARAMS_API DVRParams : public RayCasterParams {
 public:
@@ -10,5 +12,7 @@ public:
 
     static std::string GetClassType() { return ("DVRParams"); }
 };
+
+};    // namespace VAPoR
 
 #endif

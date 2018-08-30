@@ -5,13 +5,7 @@ using namespace VAPoR;
 const std::string RayCasterParams::_lightingTag = "LightingTag";
 const std::string RayCasterParams::_lightingCoeffsTag = "LightingCoeffTag";
 
-RayCasterParams::RayCasterParams( DataMgr*                dataManager, 
-                                  ParamsBase::StateSave*  stateSave )
-                                  std::string&            classType )
-               : RenderParams(    dataManager, 
-                                  stateSave, 
-                                  classType,
-                                  3 /* max dim */ )
+RayCasterParams::RayCasterParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, std::string classType) : RenderParams(dataManager, stateSave, classType, 3 /* max dim */)
 {
     SetDiagMsg("RayCasterParams::RayCasterParams() this=%p", this);
 }
