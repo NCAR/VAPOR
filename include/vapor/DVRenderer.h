@@ -4,7 +4,8 @@
 #include "vapor/RayCaster.h"
 #include "vapor/DVRParams.h"
 
-using namespace VAPoR;
+namespace VAPoR
+{
 
 class RENDER_API DVRenderer : public RayCaster
 {
@@ -17,8 +18,10 @@ public:
 
     static std::string GetClassType()
     {
-        return ("DVR");
+        return ("VolumeRenderer");
     }
+
+};
 
 };
 

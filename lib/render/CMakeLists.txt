@@ -19,6 +19,7 @@ set (SRC
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	textRenderer.cpp
+	RayCaster.cpp
 	DVRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp

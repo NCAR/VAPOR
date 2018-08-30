@@ -14,7 +14,7 @@ public:
 
     RayCasterParams( DataMgr*                 dataManager, 
                      ParamsBase::StateSave*   stateSave,
-                     std::string&             classType );
+                     std::string              classType );
     RayCasterParams( DataMgr*                 dataManager, 
                      ParamsBase::StateSave*   stateSave, 
                      XmlNode*                 xmlNode );

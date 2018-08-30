@@ -7,8 +7,8 @@ const std::string RayCasterParams::_lightingCoeffsTag = "LightingCoeffTag";
 
 
 RayCasterParams::RayCasterParams( DataMgr*                dataManager, 
-                                  ParamsBase::StateSave*  stateSave )
-                                  std::string&            classType )
+                                  ParamsBase::StateSave*  stateSave,
+                                  std::string             classType )
                : RenderParams(    dataManager, 
                                   stateSave, 
                                   classType,
