@@ -1,5 +1,7 @@
 #include "vapor/DVRParams.h"
 
+using namespace VAPoR;
+
 //
 // Register class with object factory
 //
@@ -13,12 +15,11 @@ DVRParams::DVRParams(DataMgr *dataManager,
 
 DVRParams::DVRParams(DataMgr *dataManager,
                      ParamsBase::StateSave *stateSave,
-                     XmlNode *xmlNode);
-         : RayCasterParams(                    dataManager,
-                                               stateSave, 
-                                               xmlNode )
-{
-             if (xmlNode->GetTag() != DVRParams::GetClassType()) {
-                 xmlNode->SetTag(DVRParams::GetClassType());
-             }
-         }
+                     XmlNode *xmlNode)
+    : RayCasterParams(dataManager,
+                      stateSave,
+                      xmlNode) {
+    if (xmlNode->GetTag() != DVRParams::GetClassType()) {
+        xmlNode->SetTag(DVRParams::GetClassType());
+    }
+}

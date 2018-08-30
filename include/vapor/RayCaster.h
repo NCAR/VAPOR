@@ -27,8 +27,8 @@ class RENDER_API RayCaster : public Renderer {
     RayCaster(const ParamsMgr *pm,
               std::string &winName,
               std::string &dataSetName,
-              std::string &paramsType,
-              std::string &classType,
+              std::string paramsType,
+              std::string classType,
               std::string &instName,
               DataMgr *dataMgr);
 
@@ -73,11 +73,11 @@ class RENDER_API RayCaster : public Renderer {
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        StructuredGrid *GetCurrentGrid(const RayCasterRParams *params,
+        StructuredGrid *GetCurrentGrid(const RayCasterParams *params,
                                        DataMgr *dataMgr) const;
-        bool IsUpToDate(const RayCasterRParams *params,
+        bool IsUpToDate(const RayCasterParams *params,
                         DataMgr *dataMgr) const;
-        bool UpdateCoordinates(const RayCasterRParams *params,
+        bool UpdateCoordinates(const RayCasterParams *params,
                                DataMgr *dataMgr);
     }; // end of struct UserCoordinates
 
