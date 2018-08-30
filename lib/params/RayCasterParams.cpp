@@ -1,67 +1,59 @@
-#include <vapor/DVRParams.h>
+#include "vapor/RayCasterParams.h"
 
 using namespace VAPoR;
 
-const std::string DVRParams::_lightingTag       = "LightingTag";
-const std::string DVRParams::_lightingCoeffsTag = "LightingCoeffTag";
-
-//
-// Register class with object factory
-//
-static RenParamsRegistrar<DVRParams> registrar( DVRParams::GetClassType() );
+const std::string RayCasterParams::_lightingTag       = "LightingTag";
+const std::string RayCasterParams::_lightingCoeffsTag = "LightingCoeffTag";
 
 
-DVRParams::DVRParams( DataMgr*                dataManager, 
-                      ParamsBase::StateSave*  stateSave )
-         : RenderParams( dataManager, 
-                         stateSave, 
-                         DVRParams::GetClassType(), 
-                         3 /* max dim */ )
+RayCasterParams::RayCasterParams( DataMgr*                dataManager, 
+                                  ParamsBase::StateSave*  stateSave )
+                                  std::string&            classType )
+               : RenderParams(    dataManager, 
+                                  stateSave, 
+                                  classType,
+                                  3 /* max dim */ )
 {
-    SetDiagMsg("DVRParams::DVRParams() this=%p", this);
+    SetDiagMsg("RayCasterParams::RayCasterParams() this=%p", this);
 }
 
 // Constructor
-DVRParams::DVRParams( DataMgr*                dataManager, 
-                      ParamsBase::StateSave*  stateSave,
-                      XmlNode*                node )
-         : RenderParams( dataManager, 
-                         stateSave, 
-                         node,
-                         3 /* max dim */ )
+RayCasterParams::RayCasterParams( DataMgr*                dataManager, 
+                                  ParamsBase::StateSave*  stateSave,
+                                  XmlNode*                node )
+               : RenderParams(    dataManager, 
+                                  stateSave, 
+                                  node,
+                                  3 /* max dim */ )
 {
-    SetDiagMsg("DVRParams::DVRParams() this=%p", this);
-    if( node->GetTag() != DVRParams::GetClassType() )
-    {
-        node->SetTag( DVRParams::GetClassType() );
-    }
+    SetDiagMsg("RayCasterParams::RayCasterParams() this=%p", this);
 }
 
 // Destructor
-DVRParams::~DVRParams()
+RayCasterParams::~RayCasterParams()
 {
-    SetDiagMsg( "DVRParams::~DVRParams() this=%p", this );
+    SetDiagMsg( "RayCasterParams::~RayCasterParams() this=%p", this );
 }
   
-MapperFunction* DVRParams::GetMapperFunc()
+MapperFunction* RayCasterParams::GetMapperFunc()
 {
     return RenderParams::GetMapperFunc( GetVariableName() ); 
 }
 
 
-void DVRParams::SetLighting( bool lightingOn )
+void RayCasterParams::SetLighting( bool lightingOn )
 {
     SetValueLong( _lightingTag, "Apply lighting or not", (long int)lightingOn );
 }
 
-bool DVRParams::GetLighting() const
+bool RayCasterParams::GetLighting() const
 {
     long l = GetValueLong( _lightingTag, 1 );
 
     return (bool)l;
 }
     
-std::vector<double> DVRParams::GetLightingCoeffs() const
+std::vector<double> RayCasterParams::GetLightingCoeffs() const
 {
     std::vector<double> defaultVec( 4 );
     defaultVec[0] = 0.5;
@@ -71,7 +63,7 @@ std::vector<double> DVRParams::GetLightingCoeffs() const
     return GetValueDoubleVec( _lightingCoeffsTag, defaultVec );
 }
     
-void DVRParams::SetLightingCoeffs( const std::vector<double>& coeffs )
+void RayCasterParams::SetLightingCoeffs( const std::vector<double>& coeffs )
 {
     SetValueDoubleVec( _lightingCoeffsTag, "Coefficients for lighting effects", coeffs );
 }
