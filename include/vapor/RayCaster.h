@@ -1,5 +1,5 @@
-#ifndef DVRENDERER_H
-#define DVRENDERER_H
+#ifndef RAYCASTER_H
+#define RAYCASTER_H
 
 #include <GL/glew.h>
 #include <sys/time.h>
@@ -13,7 +13,7 @@
 #endif
 
 #include <vapor/Visualizer.h>
-#include <vapor/DVRParams.h>
+#include <vapor/RayCasterParams.h>
 #include <vapor/ShaderMgr.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
@@ -22,23 +22,18 @@
 
 namespace VAPoR {
 
-class RENDER_API DVRenderer : public Renderer {
+class RENDER_API RayCaster : public Renderer {
 public:
-    DVRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
+    RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &paramsType, std::string &classType, std::string &instName, DataMgr *dataMgr);
 
-    virtual ~DVRenderer();
-
-    static std::string GetClassType() { return ("Volume"); }
+    virtual ~RayCaster();
 
 protected:
-    // pure virtual functions that are required to implement
+    // pure virtual functions from Renderer
     int _initializeGL();
     int _paintGL(bool fast);
 
-private:
     // C++ stuff
-    const std::string _effectNameStr = "DVR";
-
     struct UserCoordinates {
         //              Y
         //              |   Z (coming out the screen)
@@ -72,9 +67,9 @@ private:
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        StructuredGrid *GetCurrentGrid(const DVRParams *params, DataMgr *dataMgr) const;
-        bool            IsUpToDate(const DVRParams *params, DataMgr *dataMgr) const;
-        bool            UpdateCoordinates(const DVRParams *params, DataMgr *dataMgr);
+        StructuredGrid *GetCurrentGrid(const RayCasterRParams *params, DataMgr *dataMgr) const;
+        bool            IsUpToDate(const RayCasterRParams *params, DataMgr *dataMgr) const;
+        bool            UpdateCoordinates(const RayCasterRParams *params, DataMgr *dataMgr);
     };    // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;
@@ -145,7 +140,7 @@ private:
     //
     void _matMultiVec(const GLfloat *matrix, const GLfloat *vecIn, GLfloat *vecOut) const;
 
-};    // End of class DVRenderer
+};    // End of class RayCaster
 
 };    // End of namespace VAPoR
 

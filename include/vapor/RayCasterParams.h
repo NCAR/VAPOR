@@ -1,5 +1,5 @@
-#ifndef DVRPARAMS_H
-#define DVRPARAMS_H
+#ifndef RAYCASTERPARAMS_H
+#define RAYCASTERPARAMS_H
 
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
@@ -7,14 +7,12 @@
 
 namespace VAPoR {
 
-class PARAMS_API DVRParams : public RenderParams {
+class PARAMS_API RayCasterParams : public RenderParams {
 public:
-    DVRParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave);
-    DVRParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, XmlNode *xmlNode);
+    RayCasterParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, std::string &classType);
+    RayCasterParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, XmlNode *xmlNode);
 
-    virtual ~DVRParams();
-
-    static std::string GetClassType() { return ("DVRParams"); }
+    virtual ~RayCasterParams();
 
     //
     // (Pure virtual methods from RenderParams)
@@ -28,14 +26,14 @@ public:
     //
     //! Obtain current MapperFunction for the primary variable.
     //
-    virtual MapperFunction *GetMapperFunc();
+    MapperFunction *GetMapperFunc();
 
     bool                GetLighting() const;
     void                SetLighting(bool);
     std::vector<double> GetLightingCoeffs() const;
     void                SetLightingCoeffs(const std::vector<double> &coeffs);
 
-private:
+protected:
     static const std::string _lightingTag;
     static const std::string _lightingCoeffsTag;
 };
