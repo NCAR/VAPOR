@@ -19,6 +19,7 @@
 #include <vapor/DataMgrUtils.h>
 #include <vapor/Grid.h>
 #include <vapor/utils.h>
+#include <vapor/GetAppPath.h>
 
 namespace VAPoR {
 
@@ -29,11 +30,15 @@ public:
     virtual ~RayCaster();
 
 protected:
+    // C++ stuff
     // pure virtual functions from Renderer
     int _initializeGL();
     int _paintGL(bool fast);
 
-    // C++ stuff
+    // Makes RayCaster an abstract class that cannot be instantiated,
+    //   and it's up to the subclasses to decide which shader to load.
+    virtual void _loadShaders() = 0;
+
     struct UserCoordinates {
         //              Y
         //              |   Z (coming out the screen)
@@ -118,7 +123,7 @@ protected:
     //
     // Simple shader compilation
     //
-    GLuint _loadShaders(const char *vertex_file_path, const char *fragment_file_path);
+    GLuint _compileShaders(const char *vertex_file_path, const char *fragment_file_path);
 
     //
     // Get current Model View Projection matrix that can be passed to shaders

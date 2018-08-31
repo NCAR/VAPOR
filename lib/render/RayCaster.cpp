@@ -356,17 +356,7 @@ int RayCaster::_initializeGL()
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
 
-    const char vgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.vgl";
-    const char fgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.fgl";
-    _1stPassShaderId = _loadShaders(vgl1, fgl1);
-
-    const char vgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.vgl";
-    const char fgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.fgl";
-    _2ndPassShaderId = _loadShaders(vgl2, fgl2);
-
-    const char vgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.vgl";
-    const char fgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.fgl";
-    _3rdPassShaderId = _loadShaders(vgl3, fgl3);
+    _loadShaders();
 
     // Create Vertex Array Object (VAO)
     glGenVertexArrays(1, &_vertexArrayId);
@@ -846,7 +836,7 @@ void RayCaster::_renderTriangleStrips() const
     delete[] indexBuffer;
 }
 
-GLuint RayCaster::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
+GLuint RayCaster::_compileShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
