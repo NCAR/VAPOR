@@ -8,11 +8,11 @@ namespace VAPoR {
 
 class RENDER_API IsoSurfaceRenderer : public RayCaster {
   public:
-    IsoSurfaceRnderer(const ParamsMgr *pm,
-                      std::string &winName,
-                      std::string &dataSetName,
-                      std::string &instName,
-                      DataMgr *dataMgr);
+    IsoSurfaceRenderer(const ParamsMgr *pm,
+                       std::string &winName,
+                       std::string &dataSetName,
+                       std::string &instName,
+                       DataMgr *dataMgr);
 
     static std::string GetClassType() {
         return ("IsoSurface");
