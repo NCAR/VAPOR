@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>700</height>
+    <height>849</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -81,7 +81,7 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
-          <number>2</number>
+          <number>5</number>
          </property>
          <property name="leftMargin">
           <number>0</number>
@@ -120,10 +120,10 @@
              <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>12</number>
+             <number>10</number>
             </property>
             <property name="bottomMargin">
-             <number>0</number>
+             <number>5</number>
             </property>
             <item>
              <widget class="QLabel" name="label">
@@ -247,7 +247,10 @@
              <number>0</number>
             </property>
             <property name="topMargin">
-             <number>0</number>
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>10</number>
             </property>
             <property name="bottomMargin">
              <number>0</number>
@@ -323,6 +326,9 @@
              <property name="spacing">
               <number>5</number>
              </property>
+             <property name="rightMargin">
+              <number>10</number>
+             </property>
              <property name="bottomMargin">
               <number>0</number>
              </property>
@@ -342,6 +348,9 @@
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <property name="spacing">
               <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>12</number>
              </property>
              <property name="bottomMargin">
               <number>0</number>
@@ -363,6 +372,9 @@
              <property name="spacing">
               <number>5</number>
              </property>
+             <property name="rightMargin">
+              <number>12</number>
+             </property>
              <property name="bottomMargin">
               <number>0</number>
              </property>
@@ -382,6 +394,9 @@
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <property name="spacing">
               <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>12</number>
              </property>
              <property name="bottomMargin">
               <number>0</number>
