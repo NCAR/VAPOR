@@ -6,10 +6,10 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<IsoSurfaceRenderer> registrar(IsoSurfaceRenderer::GetClassType(), IsoSurfaceRParams::GetClassType());
+static RendererRegistrar<IsoSurfaceRenderer> registrar(IsoSurfaceRenderer::GetClassType(), IsoSurfaceParams::GetClassType());
 
 IsoSurfaceRenderer::IsoSurfaceRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr)
-: RayCaster(pm, winName, dataSetName, IsoSurfaceRParams::GetClassType(), IsoSurfaceRenderer::GetClassType(), instName, dataMgr)
+: RayCaster(pm, winName, dataSetName, IsoSurfaceParams::GetClassType(), IsoSurfaceRenderer::GetClassType(), instName, dataMgr)
 {
 }
 
