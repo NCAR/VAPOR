@@ -6,9 +6,8 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<IsoSurfaceRenderer> 
-        registrar( IsoSurfaceRenderer::GetClassType(), 
-                   IsoSurfaceRParams::GetClassType() );
+static RendererRegistrar<IsoSurfaceRenderer> registrar( IsoSurfaceRenderer::GetClassType(), 
+                                                        IsoSurfaceParams::GetClassType() );
 
 
 IsoSurfaceRenderer::IsoSurfaceRenderer( const ParamsMgr*    pm,
@@ -19,7 +18,7 @@ IsoSurfaceRenderer::IsoSurfaceRenderer( const ParamsMgr*    pm,
                   : RayCaster(  pm,
                                 winName,
                                 dataSetName,
-                                IsoSurfaceRParams::GetClassType(),
+                                IsoSurfaceParams::GetClassType(),
                                 IsoSurfaceRenderer::GetClassType(),
                                 instName,
                                 dataMgr )
