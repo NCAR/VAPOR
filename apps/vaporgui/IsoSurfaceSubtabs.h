@@ -39,6 +39,7 @@ public:
 
         _params = nullptr;
 
+        // Set up lighting parameter widgets
         _ambientWidget->SetLabel(QString::fromAscii("Ambient   "));
         _ambientWidget->SetDecimals(2);
         _ambientWidget->SetExtents(0.0, 1.0);
@@ -57,6 +58,27 @@ public:
         _shininessWidget->SetLabel(QString::fromAscii("Shininess "));
         _shininessWidget->SetExtents(1.0, 100.0);
         _shininessWidget->SetIntType(true);
+
+        // Set up iso value widgets
+        _isoWidget1->SetLabel(QString::fromAscii("Value 1"));
+        _isoWidget1->SetDecimals(2);
+        _isoWidget1->SetIntType(false);
+        _isoWidget1->setEnabled(true);
+
+        _isoWidget2->SetLabel(QString::fromAscii("Value 2"));
+        _isoWidget2->SetDecimals(2);
+        _isoWidget2->SetIntType(false);
+        _isoWidget2->setEnabled(false);
+
+        _isoWidget3->SetLabel(QString::fromAscii("Value 3"));
+        _isoWidget3->SetDecimals(2);
+        _isoWidget3->SetIntType(false);
+        _isoWidget3->setEnabled(false);
+
+        _isoWidget4->SetLabel(QString::fromAscii("Value 4"));
+        _isoWidget4->SetDecimals(2);
+        _isoWidget4->SetIntType(false);
+        _isoWidget4->setEnabled(false);
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
