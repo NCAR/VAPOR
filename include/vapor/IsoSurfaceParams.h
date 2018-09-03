@@ -21,12 +21,15 @@ public:
         return ("IsoSurfaceParams");
     }
 
-    std::vector<double> GetIsoValues() const;
-    void SetIsoValues( const std::vector<double>& );
+    std::vector<double>     GetIsoValues() const;
+    void                    SetIsoValues(  std::vector<double> );
+    std::vector<bool>       GetEnabledIsoValues() const;
+    void                    SetEnabledIsoValues(  const std::vector<bool>& );
 
 protected:
     
-    static const std::string _IsoValuesTag;
+    static const std::string    _isoValuesTag;
+    static const std::string    _enabledIsoValuesTag;
 };
 
 };
