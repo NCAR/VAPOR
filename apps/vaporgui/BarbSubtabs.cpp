@@ -36,7 +36,6 @@ BarbGeometrySubtab::BarbGeometrySubtab(QWidget *parent) {
     setupUi(this);
     _geometryWidget->Reinit(
         (DimFlags)(VECTOR | TWOD),
-        (GeometryFlags)(MINMAX),
         (VariableFlags)(VECTOR));
 }
 

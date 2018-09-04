@@ -33,9 +33,7 @@ enum DimFlags {
 //! Bit mask to indicate whether the GeometryWidget should control a
 //! single point, or 3D extents with Min/Max controllers
 enum GeometryFlags {
-    SINGLEPOINT = (1u << 0),
-    MINMAX = (1u << 1),
-    PLANAR = (1u << 2),
+    PLANAR = (1u << 0),
 };
 
 //! Bit masks to indicate whether the TFWidget maps constant color

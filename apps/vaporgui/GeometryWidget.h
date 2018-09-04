@@ -20,8 +20,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 
     void Reinit(
         DimFlags dimFlags,
-        GeometryFlags geometryFlags,
-        VariableFlags varFlags);
+        VariableFlags varFlags,
+        GeometryFlags geometryFlags = (GeometryFlags)(0));
 
     ~GeometryWidget();
 
@@ -37,19 +37,18 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
                 VAPoR::DataMgr *dataMgr,
                 VAPoR::RenderParams *rParams);
 
-    void hideSinglePointTabHeader();
-
   signals:
     void valueChanged();
 
   private slots:
-    void setPoint(double point);
     void setRange(double min, double max, int dim = -1);
+    void adjustLayoutToPlanar(int plane);
 
   private:
-    void adjustLayoutToMinMax();
-    void adjustLayoutToSinglePoint();
     void adjustLayoutTo2D();
+    void adjustLayoutToPlanarXY();
+    void adjustLayoutToPlanarXZ();
+    void adjustLayoutToPlanarYZ();
     void connectWidgets();
     void updateRangeLabels(
         std::vector<double> minExt,
@@ -73,10 +72,6 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     VAPoR::ParamsMgr *_paramsMgr;
     VAPoR::DataMgr *_dataMgr;
     VAPoR::RenderParams *_rParams;
-
-    Combo *_spXCombo;
-    Combo *_spYCombo;
-    Combo *_spZCombo;
 
     Combo *_minXCombo;
     Combo *_maxXCombo;
