@@ -38,11 +38,11 @@ protected:
     virtual string _getDescription() const;
     virtual string _getSmallIconImagePath() const 
     {
-       return("DVR_small.png");
+       return("IsoSurface_small.png");
     }   
     virtual string _getIconImagePath() const 
     {
-       return("DVR.png");
+       return("IsoSurface.png");
     }
 
 private:
