@@ -27,8 +27,8 @@ public:
 protected:
     void           _updateTab();
     virtual string _getDescription() const;
-    virtual string _getSmallIconImagePath() const { return ("DVR_small.png"); }
-    virtual string _getIconImagePath() const { return ("DVR.png"); }
+    virtual string _getSmallIconImagePath() const { return ("IsoSurface_small.png"); }
+    virtual string _getIconImagePath() const { return ("IsoSurface.png"); }
 
 private:
     //! Override default wheel behavior on the tab.  This has the effect of
