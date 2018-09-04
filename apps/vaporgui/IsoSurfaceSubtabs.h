@@ -40,14 +40,20 @@ private slots:
     void on__lightingCheckBox_toggled(bool checked);
 
     void on__ambientWidget_valueChanged(double value);
-
     void on__diffuseWidget_valueChanged(double value);
-
     void on__specularWidget_valueChanged(double value);
-
     void on__shininessWidget_valueChanged(int value);
-
     void on__defaultLightingButton_clicked(bool checked);
+
+    void on__isoValueCheckbox0_toggled(bool);
+    void on__isoValueCheckbox1_toggled(bool);
+    void on__isoValueCheckbox2_toggled(bool);
+    void on__isoValueCheckbox3_toggled(bool);
+
+    void on__isoWidget0_valueChanged(double);
+    void on__isoWidget1_valueChanged(double);
+    void on__isoWidget2_valueChanged(double);
+    void on__isoWidget3_valueChanged(double);
 
 private:
     VAPoR::IsoSurfaceParams *_params;
