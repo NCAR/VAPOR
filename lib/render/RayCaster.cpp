@@ -726,6 +726,8 @@ void RayCaster::_drawVolumeFaces( int            whichPass,
     { 
         _load3rdPassUniforms( MVP, ModelView, InversedMV, fast );
 
+        _3rdPassSpecialHandling();
+
         glEnable(    GL_CULL_FACE );
         glCullFace(  GL_BACK );
         glEnable(    GL_DEPTH_TEST );
@@ -818,9 +820,9 @@ void RayCaster::_load3rdPassUniforms( const GLfloat*   MVP,
 
         std::vector<double> coeffsD = params->GetLightingCoeffs();
         float coeffsF[4] = { (float)coeffsD[0], (float)coeffsD[1], 
-            (float)coeffsD[2], (float)coeffsD[3] };
+                             (float)coeffsD[2], (float)coeffsD[3] };
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lightingCoeffs" );
-        glUniform1fv( uniformLocation, 4, coeffsF );
+        glUniform1fv( uniformLocation, (GLsizei)4, coeffsF );
     }
 
     // Pass in textures
@@ -862,6 +864,12 @@ void RayCaster::_load3rdPassUniforms( const GLfloat*   MVP,
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
         glUniform1i( uniformLocation, textureUnit );
     }
+}
+    
+void RayCaster::_3rdPassSpecialHandling()
+{
+    // Left empty intentially.
+    // Derived classes feel free to put stuff here.
 }
     
 void RayCaster::_renderTriangleStrips() const
