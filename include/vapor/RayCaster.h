@@ -125,11 +125,12 @@ class RENDER_API RayCaster : public Renderer {
                           const GLfloat *InversedMV = nullptr,
                           bool fast = false);
 
-    // Spun-off function...
     void _load3rdPassUniforms(const GLfloat *MVP,
                               const GLfloat *ModelView,
                               const GLfloat *InversedMV,
                               bool fast) const;
+
+    virtual void _3rdPassSpecialHandling();
 
     //
     // Initialization for 1) framebuffers and 2) textures
