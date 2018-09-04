@@ -39,7 +39,7 @@ void IsoSurfaceParams::SetIsoValues(std::vector<double> vals) {
     SetValueDoubleVec(_isoValuesTag, "Iso Surface Iso Values", vals);
 }
 
-std::vector<bool> IsoSurfaceParams::GetEnabledIsoValues() const {
+std::vector<bool> IsoSurfaceParams::GetEnabledIsoValueFlags() const {
     std::vector<long> defaultVal(4, 0);
     defaultVal[0] = 1;
     std::vector<long> enabled = GetValueLongVec(_enabledIsoValuesTag, defaultVal);
@@ -49,7 +49,7 @@ std::vector<bool> IsoSurfaceParams::GetEnabledIsoValues() const {
     return retVal;
 }
 
-void IsoSurfaceParams::SetEnabledIsoValues(const std::vector<bool> &enabled) {
+void IsoSurfaceParams::SetEnabledIsoValueFlags(const std::vector<bool> &enabled) {
     std::vector<long> in;
     for (int i = 0; i < enabled.size(); i++)
         in.push_back((long)enabled[i]);
