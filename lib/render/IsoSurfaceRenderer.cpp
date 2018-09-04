@@ -30,3 +30,20 @@ void IsoSurfaceRenderer::_loadShaders()
     _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
     _3rdPassShaderId = _compileShaders(VShader3rdPass.data(), FShader3rdPass.data());
 }
+
+void IsoSurfaceRenderer::_3rdPassSpecialHandling()
+{
+    IsoSurfaceParams *  params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
+    std::vector<double> isoValues = params->GetIsoValues();
+    std::vector<bool>   flags = params->GetEnabledIsoValueFlags();
+    std::vector<float>  validValues;
+    for (int i = 0; i < flags.size(); i++)
+        if (flags[i]) validValues.push_back((float)isoValues[i]);
+    int numOfIsoValues = (int)validValues.size();
+
+    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "numOfIsoValues");
+    glUniform1i(uniformLocation, numOfIsoValues);
+
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "isoValues");
+    glUniform1fv(uniformLocation, (GLsizei)numOfIsoValues, validValues.data());
+}

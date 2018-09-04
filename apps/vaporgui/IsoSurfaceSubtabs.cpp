@@ -150,7 +150,6 @@ void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox0_toggled(bool checked)
     std::vector<bool> enabled = _params->GetEnabledIsoValueFlags();
     enabled[0] = checked;
     _params->SetEnabledIsoValueFlags(enabled);
-    std::cout << "toggled" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox1_toggled(bool checked)
@@ -158,7 +157,6 @@ void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox1_toggled(bool checked)
     std::vector<bool> enabled = _params->GetEnabledIsoValueFlags();
     enabled[1] = checked;
     _params->SetEnabledIsoValueFlags(enabled);
-    std::cout << "toggled" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox2_toggled(bool checked)
@@ -166,7 +164,6 @@ void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox2_toggled(bool checked)
     std::vector<bool> enabled = _params->GetEnabledIsoValueFlags();
     enabled[2] = checked;
     _params->SetEnabledIsoValueFlags(enabled);
-    std::cout << "toggled" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox3_toggled(bool checked)
@@ -174,7 +171,6 @@ void IsoSurfaceAppearanceSubtab::on__isoValueCheckbox3_toggled(bool checked)
     std::vector<bool> enabled = _params->GetEnabledIsoValueFlags();
     enabled[3] = checked;
     _params->SetEnabledIsoValueFlags(enabled);
-    std::cout << "toggled" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoWidget0_valueChanged(double val)
@@ -182,7 +178,6 @@ void IsoSurfaceAppearanceSubtab::on__isoWidget0_valueChanged(double val)
     std::vector<double> vals = _params->GetIsoValues();
     vals[0] = val;
     _params->SetIsoValues(vals);
-    std::cout << "changed" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoWidget1_valueChanged(double val)
@@ -190,7 +185,6 @@ void IsoSurfaceAppearanceSubtab::on__isoWidget1_valueChanged(double val)
     std::vector<double> vals = _params->GetIsoValues();
     vals[1] = val;
     _params->SetIsoValues(vals);
-    std::cout << "changed" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoWidget2_valueChanged(double val)
@@ -198,7 +192,6 @@ void IsoSurfaceAppearanceSubtab::on__isoWidget2_valueChanged(double val)
     std::vector<double> vals = _params->GetIsoValues();
     vals[2] = val;
     _params->SetIsoValues(vals);
-    std::cout << "changed" << std::endl;
 }
 
 void IsoSurfaceAppearanceSubtab::on__isoWidget3_valueChanged(double val)
@@ -206,5 +199,4 @@ void IsoSurfaceAppearanceSubtab::on__isoWidget3_valueChanged(double val)
     std::vector<double> vals = _params->GetIsoValues();
     vals[3] = val;
     _params->SetIsoValues(vals);
-    std::cout << "changed" << std::endl;
 }
