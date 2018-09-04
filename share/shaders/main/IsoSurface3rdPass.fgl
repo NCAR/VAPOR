@@ -21,6 +21,9 @@ uniform bool  lighting;         // apply lighting or not
 uniform bool  hasMissingValue;  // has missing values or not
 uniform float lightingCoeffs[4]; // lighting parameters
 
+uniform int   numOfIsoValues;   // how many iso values are valid in isoValues array?
+uniform float isoValues[4];     // currently say there are at most 4 iso values.
+
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
 
@@ -128,56 +131,57 @@ void main(void)
     vec3  stepSize3D    = rayDirTexture / nStepsf;
 
     vec3  step1Texture  = startTexture;
-    if( ShouldSkip( step1Texture ) )
-    {
-        color = vec4( 0.0f );
-    }
-    else
-    {
-        float step1Value = texture( volumeTexture, step1Texture ).r;
-              color      = texture( colorMapTexture, TranslateValue(step1Value) );
-              color.rgb *= color.a;
-    }
+    float step1Value    = texture( volumeTexture, step1Texture ).r;
+    color               = vec4( 0.0f );
 
     // let's do a ray casting! 
     for( int i = 0; i < int(nStepsf); i++ )
     {
-        if( color.a > 0.999f )  // You can still see through with 0.99...
-            break;
+        if( color.a > 0.999f )  // You can still see through with 0.99,
+            break;              //   so let's use 0.999.
 
         vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
         if( ShouldSkip( step2Texture ) )
             continue;
 
         float step2Value  = texture( volumeTexture, step2Texture ).r;
-        vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
-        
-        // Apply lighting if big enough gradient
-        if( lighting )
-        {
-            vec3 gradientModel = CalculateGradient( step2Texture );
-            if( length( gradientModel ) > EPSILON )
+
+        for( int i = 0; i < numOfIsoValues; i++ )
+            if( (isoValues[i] - step1Value) * (isoValues[i] - step2Value) <= 0.0f )
             {
-                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
-                     gradientEye = normalize( gradientEye );
-                float diffuse    = abs( dot(lightDirEye, gradientEye) );
+                vec4 backColor      = texture( colorMapTexture, TranslateValue(isoValues[i]) );
+                float weight        = (isoValues[i] - step1Value) / (step2Value - step1Value);
+                vec3 isoTexture     = step1Texture + (weight * stepSize3D);
 
-                // Calculate eye space coordinates of "step2Texture"
-                vec3 step2Model  = boxMin + step2Texture * (boxMax - boxMin);
-                vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
-                vec3 viewDirEye  = normalize( -step2Eye );
+                if( lighting )
+                {
+                    vec3 gradientModel = CalculateGradient( isoTexture );
+                    if( length( gradientModel ) > EPSILON ) // Only apply if big enough gradient
+                    {
+                        vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
+                             gradientEye = normalize( gradientEye );
+                        float diffuse    = abs( dot(lightDirEye, gradientEye) );
 
-                vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
-                float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), specularExp ); 
-                backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
-                                   specular * specularCoeff;
-            }
-        }   // End lighting
+                        // Calculate eye space coordinates of "isoTexture"
+                        vec3 step2Model  = boxMin + isoTexture * (boxMax - boxMin);
+                        vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
+                        vec3 viewDirEye  = normalize( -step2Eye );
 
-        // Color compositing
-        color.rgb += (1.0f - color.a) * backColor.a * backColor.rgb;
-        color.a   += (1.0f - color.a) * backColor.a;
-    }   // End ray casting
+                        vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
+                        float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), 
+                                                specularExp ); 
+                        backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse*diffuseCoeff) + 
+                                           specular * specularCoeff;
+                    }
+                }   // End lighting
 
-}       // End main()
+                color.rgb += (1.0f - color.a) * backColor.a * backColor.rgb;
+                color.a   += (1.0f - color.a) * backColor.a;
+            }   // Finish processing the current iso-value
+
+        step1Texture = step2Texture;
+        step1Value   = step2Value;
+    }   // Finish ray casting
+
+}   // End main()
 

@@ -30,3 +30,24 @@ void DVRenderer::_loadShaders()
     _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
     _3rdPassShaderId = _compileShaders(VShader3rdPass.data(), FShader3rdPass.data());
 }
+
+void DVRenderer::_3rdPassSpecialHandling(bool fast)
+{
+    // Special handling for DVR:
+    //   turn off lighting during fast rendering.
+    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
+    if (fast)    // Disable lighting during "fast" DVR rendering
+        glUniform1i(uniformLocation, int(0));
+    else {
+        RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
+        bool             lighting = params->GetLighting();
+        glUniform1i(uniformLocation, int(lighting));
+
+        if (lighting) {
+            std::vector<double> coeffsD = params->GetLightingCoeffs();
+            float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
+            uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
+            glUniform1fv(uniformLocation, (GLsizei)4, coeffsF);
+        }
+    }
+}

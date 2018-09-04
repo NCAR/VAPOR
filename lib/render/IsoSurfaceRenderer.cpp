@@ -31,19 +31,30 @@ void IsoSurfaceRenderer::_loadShaders()
     _3rdPassShaderId = _compileShaders(VShader3rdPass.data(), FShader3rdPass.data());
 }
 
-void IsoSurfaceRenderer::_3rdPassSpecialHandling()
+void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast)
 {
     IsoSurfaceParams *  params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
+    bool                lighting = params->GetLighting();
     std::vector<double> isoValues = params->GetIsoValues();
-    std::vector<bool>   flags = params->GetEnabledIsoValueFlags();
-    std::vector<float>  validValues;
-    for (int i = 0; i < flags.size(); i++)
-        if (flags[i]) validValues.push_back((float)isoValues[i]);
+    std::vector<bool>   isoFlags = params->GetEnabledIsoValueFlags();
+
+    // Special handling for IsoSurface #1:
+    //   honor GUI lighting selection even in fast rendering mode.
+    glUniform1i(glGetUniformLocation(_3rdPassShaderId, "lighting"), int(lighting));
+    if (lighting) {
+        std::vector<double> coeffsD = params->GetLightingCoeffs();
+        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
+        glUniform1fv(glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs"), (GLsizei)4, coeffsF);
+    }
+
+    // Special handling for IsoSurface #2:
+    //   pass in iso values.
+    std::vector<float> validValues;
+    for (int i = 0; i < isoFlags.size(); i++)
+        if (isoFlags[i]) validValues.push_back((float)isoValues[i]);
     int numOfIsoValues = (int)validValues.size();
 
-    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "numOfIsoValues");
-    glUniform1i(uniformLocation, numOfIsoValues);
+    glUniform1i(glGetUniformLocation(_3rdPassShaderId, "numOfIsoValues"), numOfIsoValues);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "isoValues");
-    glUniform1fv(uniformLocation, (GLsizei)numOfIsoValues, validValues.data());
+    glUniform1fv(glGetUniformLocation(_3rdPassShaderId, "isoValues"), (GLsizei)numOfIsoValues, validValues.data());
 }
