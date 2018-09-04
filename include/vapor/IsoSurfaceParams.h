@@ -14,8 +14,8 @@ public:
 
     std::vector<double> GetIsoValues() const;
     void                SetIsoValues(std::vector<double>);
-    std::vector<bool>   GetEnabledIsoValues() const;
-    void                SetEnabledIsoValues(const std::vector<bool> &);
+    std::vector<bool>   GetEnabledIsoValueFlags() const;
+    void                SetEnabledIsoValueFlags(const std::vector<bool> &);
 
 protected:
     static const std::string _isoValuesTag;

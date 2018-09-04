@@ -6,7 +6,7 @@
 #include "ui_IsoSurfaceGeometryGUI.h"
 #include "ui_IsoSurfaceAnnotationGUI.h"
 
-#include <vapor/IsoSurfaceParams.h>
+#include "vapor/IsoSurfaceParams.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -32,118 +32,22 @@ class IsoSurfaceAppearanceSubtab : public QWidget, public Ui_IsoSurfaceAppearanc
     Q_OBJECT
 
 public:
-    IsoSurfaceAppearanceSubtab(QWidget *parent)
-    {
-        setupUi(this);
-        _TFWidget->Reinit((TFFlags)(0));
+    IsoSurfaceAppearanceSubtab(QWidget *parent);
 
-        _params = nullptr;
-
-        // Set up lighting parameter widgets
-        _ambientWidget->SetLabel(QString::fromAscii("Ambient   "));
-        _ambientWidget->SetDecimals(2);
-        _ambientWidget->SetExtents(0.0, 1.0);
-        _ambientWidget->SetIntType(false);
-
-        _diffuseWidget->SetLabel(QString::fromAscii("Diffuse     "));
-        _diffuseWidget->SetDecimals(2);
-        _diffuseWidget->SetExtents(0.0, 1.0);
-        _diffuseWidget->SetIntType(false);
-
-        _specularWidget->SetLabel(QString::fromAscii("Specular  "));
-        _specularWidget->SetDecimals(2);
-        _specularWidget->SetExtents(0.0, 1.0);
-        _specularWidget->SetIntType(false);
-
-        _shininessWidget->SetLabel(QString::fromAscii("Shininess "));
-        _shininessWidget->SetExtents(1.0, 100.0);
-        _shininessWidget->SetIntType(true);
-
-        // Set up iso value widgets
-        _isoWidget1->SetLabel(QString::fromAscii("Value 1"));
-        _isoWidget1->SetDecimals(2);
-        _isoWidget1->SetIntType(false);
-        _isoWidget1->setEnabled(true);
-
-        _isoWidget2->SetLabel(QString::fromAscii("Value 2"));
-        _isoWidget2->SetDecimals(2);
-        _isoWidget2->SetIntType(false);
-        _isoWidget2->setEnabled(false);
-
-        _isoWidget3->SetLabel(QString::fromAscii("Value 3"));
-        _isoWidget3->SetDecimals(2);
-        _isoWidget3->SetIntType(false);
-        _isoWidget3->setEnabled(false);
-
-        _isoWidget4->SetLabel(QString::fromAscii("Value 4"));
-        _isoWidget4->SetDecimals(2);
-        _isoWidget4->SetIntType(false);
-        _isoWidget4->setEnabled(false);
-    }
-
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
-    {
-        _TFWidget->Update(dataMgr, paramsMgr, rParams);
-
-        _params = dynamic_cast<VAPoR::IsoSurfaceParams *>(rParams);
-        assert(_params);
-        _lightingCheckBox->setChecked(_params->GetLighting());
-
-        std::vector<double> coeffs = _params->GetLightingCoeffs();
-        _ambientWidget->SetValue(coeffs[0]);
-        _diffuseWidget->SetValue(coeffs[1]);
-        _specularWidget->SetValue(coeffs[2]);
-        _shininessWidget->SetValue(coeffs[3]);
-    }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *params);
 
 private slots:
-    void on__lightingCheckBox_toggled(bool checked)
-    {
-        _params->SetLighting(checked);
+    void on__lightingCheckBox_toggled(bool checked);
 
-        _ambientWidget->setEnabled(checked);
-        _diffuseWidget->setEnabled(checked);
-        _specularWidget->setEnabled(checked);
-        _shininessWidget->setEnabled(checked);
-    }
+    void on__ambientWidget_valueChanged(double value);
 
-    void on__ambientWidget_valueChanged(double value)
-    {
-        std::vector<double> coeffs = _params->GetLightingCoeffs();
-        coeffs[0] = value;
-        _params->SetLightingCoeffs(coeffs);
-    }
+    void on__diffuseWidget_valueChanged(double value);
 
-    void on__diffuseWidget_valueChanged(double value)
-    {
-        std::vector<double> coeffs = _params->GetLightingCoeffs();
-        coeffs[1] = value;
-        _params->SetLightingCoeffs(coeffs);
-    }
+    void on__specularWidget_valueChanged(double value);
 
-    void on__specularWidget_valueChanged(double value)
-    {
-        std::vector<double> coeffs = _params->GetLightingCoeffs();
-        coeffs[2] = value;
-        _params->SetLightingCoeffs(coeffs);
-    }
+    void on__shininessWidget_valueChanged(int value);
 
-    void on__shininessWidget_valueChanged(int value)
-    {
-        std::vector<double> coeffs = _params->GetLightingCoeffs();
-        coeffs[3] = double(value);
-        _params->SetLightingCoeffs(coeffs);
-    }
-
-    void on__defaultLightingButton_clicked(bool checked)
-    {
-        std::vector<double> defaultLightingCoeffs(4);
-        defaultLightingCoeffs[0] = 0.5;
-        defaultLightingCoeffs[1] = 0.3;
-        defaultLightingCoeffs[2] = 0.2;
-        defaultLightingCoeffs[3] = 12.0;
-        _params->SetLightingCoeffs(defaultLightingCoeffs);
-    }
+    void on__defaultLightingButton_clicked(bool checked);
 
 private:
     VAPoR::IsoSurfaceParams *_params;

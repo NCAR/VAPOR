@@ -397,7 +397,7 @@ int RayCaster::_paintGL(bool fast)
         // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask)    // Has missing value!
         {
-            // Adjust alignment for GL_R8UI format. Stupit OpenGL parameter.
+            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
