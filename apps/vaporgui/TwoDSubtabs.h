@@ -61,7 +61,6 @@ class TwoDGeometrySubtab : public QWidget, public Ui_TwoDGeometryGUI {
         setupUi(this);
         _geometryWidget->Reinit(
             (DimFlags)TWOD,
-            (GeometryFlags)MINMAX,
             (VariableFlags)SCALAR);
     }
 

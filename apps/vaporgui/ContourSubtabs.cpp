@@ -162,7 +162,6 @@ ContourGeometrySubtab::ContourGeometrySubtab(QWidget *parent) {
     setupUi(this);
     _geometryWidget->Reinit(
         (DimFlags)TWOD,
-        (GeometryFlags)MINMAX,
         (VariableFlags)SCALAR);
 
     _orientationAngles->hide();

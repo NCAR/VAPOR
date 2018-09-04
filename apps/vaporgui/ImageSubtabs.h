@@ -128,7 +128,6 @@ class ImageGeometrySubtab : public QWidget, public Ui_ImageGeometryGUI {
         setupUi(this);
         _geometryWidget->Reinit(
             (DimFlags)TWOD,
-            (GeometryFlags)MINMAX,
             (VariableFlags)SCALAR);
     }
 
