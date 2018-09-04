@@ -404,10 +404,6 @@ int RayCaster::_paintGL(bool fast) {
 #ifdef Darwin
     return 0;
 #endif
-    std::cerr << "enter paintGL()... ";
-    fast = false;
-    struct timeval startT, endT;
-    gettimeofday(&startT, NULL);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -514,9 +510,6 @@ int RayCaster::_paintGL(bool fast) {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    gettimeofday(&endT, NULL);
-    std::cerr << "leaving, using " << _getElapsedSeconds(&startT, &endT) << std::endl;
 
     return 0;
 }
