@@ -17,7 +17,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
 public:
     GeometryWidget(QWidget *parent = 0);
 
-    void Reinit(DimFlags dimFlags, GeometryFlags geometryFlags, VariableFlags varFlags);
+    void Reinit(DimFlags dimFlags, VariableFlags varFlags, GeometryFlags geometryFlags = (GeometryFlags)(0));
 
     ~GeometryWidget();
 
@@ -34,19 +34,18 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams);
 
-    void hideSinglePointTabHeader();
-
 signals:
     void valueChanged();
 
 private slots:
-    void setPoint(double point);
     void setRange(double min, double max, int dim = -1);
+    void adjustLayoutToPlanar(int plane);
 
 private:
-    void adjustLayoutToMinMax();
-    void adjustLayoutToSinglePoint();
     void adjustLayoutTo2D();
+    void adjustLayoutToPlanarXY();
+    void adjustLayoutToPlanarXZ();
+    void adjustLayoutToPlanarYZ();
     void connectWidgets();
     void updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt);
     void updateBoxCombos(std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
@@ -60,10 +59,6 @@ private:
     VAPoR::ParamsMgr *   _paramsMgr;
     VAPoR::DataMgr *     _dataMgr;
     VAPoR::RenderParams *_rParams;
-
-    Combo *_spXCombo;
-    Combo *_spYCombo;
-    Combo *_spZCombo;
 
     Combo *     _minXCombo;
     Combo *     _maxXCombo;
