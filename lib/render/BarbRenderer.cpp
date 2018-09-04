@@ -836,7 +836,7 @@ void BarbRenderer::_getMagnitudeAtPoint(
             if (value > maxValue &&
                 value < std::numeric_limits<double>::max() &&
                 value > std::numeric_limits<double>::lowest() &&
-                !isnan(value))
+                !std::isnan(value))
                 maxValue = value;
         }
     }
