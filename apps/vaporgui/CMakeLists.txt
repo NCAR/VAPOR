@@ -45,6 +45,7 @@ set (SRCS
 	ContourEventRouter.cpp
 	DVREventRouter.cpp
 	IsoSurfaceEventRouter.cpp
+	IsoSurfaceSubtabs.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
