@@ -336,7 +336,7 @@
               <widget class="QSliderEdit" name="_isoWidget0" native="true"/>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox">
+              <widget class="QCheckBox" name="_isoValueCheckbox0">
                <property name="text">
                 <string/>
                </property>
@@ -362,7 +362,7 @@
               <widget class="QSliderEdit" name="_isoWidget1" native="true"/>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox_2">
+              <widget class="QCheckBox" name="_isoValueCheckbox1">
                <property name="text">
                 <string/>
                </property>
@@ -385,7 +385,7 @@
               <widget class="QSliderEdit" name="_isoWidget2" native="true"/>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox_3">
+              <widget class="QCheckBox" name="_isoValueCheckbox2">
                <property name="text">
                 <string/>
                </property>
@@ -408,7 +408,7 @@
               <widget class="QSliderEdit" name="_isoWidget3" native="true"/>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox_4">
+              <widget class="QCheckBox" name="_isoValueCheckbox3">
                <property name="text">
                 <string/>
                </property>
