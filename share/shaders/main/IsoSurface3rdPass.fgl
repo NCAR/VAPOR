@@ -149,9 +149,9 @@ void main(void)
         for( int i = 0; i < numOfIsoValues; i++ )
             if( (isoValues[i] - step1Value) * (isoValues[i] - step2Value) <= 0.0f )
             {
-                vec4 backColor      = texture( colorMapTexture, TranslateValue(isoValues[i]) );
-                float weight        = (isoValues[i] - step1Value) / (step2Value - step1Value);
-                vec3 isoTexture     = step1Texture + (weight * stepSize3D);
+                vec4 backColor   = texture( colorMapTexture, TranslateValue(isoValues[i]) );
+                float weight     = (isoValues[i] - step1Value) / (step2Value - step1Value);
+                vec3 isoTexture  = step1Texture + (weight * stepSize3D);
 
                 if( lighting )
                 {
@@ -163,9 +163,9 @@ void main(void)
                         float diffuse    = abs( dot(lightDirEye, gradientEye) );
 
                         // Calculate eye space coordinates of "isoTexture"
-                        vec3 step2Model  = boxMin + isoTexture * (boxMax - boxMin);
-                        vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
-                        vec3 viewDirEye  = normalize( -step2Eye );
+                        vec3 stepIsoModel= boxMin + isoTexture * (boxMax - boxMin);
+                        vec3 stepIsoEye  = (ModelView * vec4(stepIsoModel, 1.0f)).xyz;
+                        vec3 viewDirEye  = normalize( -stepIsoEye );
 
                         vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                         float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), 
