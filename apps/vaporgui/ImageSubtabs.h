@@ -142,7 +142,6 @@ public:
 		setupUi(this);
 		_geometryWidget->Reinit( 
 			(DimFlags)TWOD,
-			(GeometryFlags)MINMAX,
 			(VariableFlags)SCALAR
 		);
 	}
