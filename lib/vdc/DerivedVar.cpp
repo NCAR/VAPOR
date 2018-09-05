@@ -720,7 +720,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 	//
 	vector <size_t> lonMin = {min[0]};
 	vector <size_t> lonMax = {max[0]};
-	int rc = _getVar(_dc,ts,_lonName,level,lod, lonMin, lonMax, lonBufPtr);
+	int rc = _getVarBlock(_dc,ts,_lonName,level,lod, lonMin, lonMax, lonBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);
@@ -728,7 +728,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionBlockHelper1D(
 
 	vector <size_t> latMin = {min[1]};
 	vector <size_t> latMax = {max[1]};
-	rc = _getVar(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
+	rc = _getVarBlock(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
 	if (rc<0) {
 		delete [] buf;
 		return(rc);

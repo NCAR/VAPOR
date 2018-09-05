@@ -41,6 +41,17 @@ public:
 	const double m[16], double position[3], double upVec[3], double viewDir[3]
  ) const;
 
+ void SetRotationCenter(const std::vector <double> &v) {
+	assert(v.size() == 3);
+	SetValueDoubleVec(_rotationCenterTag, "Camera rotation center",v);
+ }
+
+ std::vector <double> GetRotationCenter() const {
+    vector <double> defaultv (3, 0.0);
+    return(GetValueDoubleVec(_rotationCenterTag, defaultv));
+ }
+
+
  static string GetClassType() {
 	return("Viewpoint");
  }
@@ -52,6 +63,7 @@ private:
 	
  static const string _modelViewMatrixTag;
  static const string _projectionMatrixTag;
+ static const string _rotationCenterTag;
 
  static double _defaultModelViewMatrix[16];
  static double _defaultProjectionMatrix[16];
