@@ -21,6 +21,7 @@ set (SRC
 	textRenderer.cpp
 	RayCaster.cpp
 	DVRenderer.cpp
+	IsoSurfaceRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 	MyPython.cpp

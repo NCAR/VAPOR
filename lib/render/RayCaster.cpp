@@ -356,17 +356,7 @@ int RayCaster::_initializeGL()
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
 
-    const char vgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.vgl";
-    const char fgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.fgl";
-    _1stPassShaderId = _loadShaders(vgl1, fgl1);
-
-    const char vgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.vgl";
-    const char fgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.fgl";
-    _2ndPassShaderId = _loadShaders(vgl2, fgl2);
-
-    const char vgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.vgl";
-    const char fgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.fgl";
-    _3rdPassShaderId = _loadShaders(vgl3, fgl3);
+    _loadShaders();
 
     // Create Vertex Array Object (VAO)
     glGenVertexArrays(1, &_vertexArrayId);
@@ -383,6 +373,7 @@ int RayCaster::_paintGL(bool fast)
 #ifdef Darwin
     return 0;
 #endif
+
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
@@ -407,7 +398,7 @@ int RayCaster::_paintGL(bool fast)
         // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask)    // Has missing value!
         {
-            // Adjust alignment for GL_R8UI format. Stupit OpenGL parameter.
+            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
@@ -629,6 +620,8 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
     } else {
         _load3rdPassUniforms(MVP, ModelView, InversedMV, fast);
 
+        _3rdPassSpecialHandling(fast);
+
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
@@ -700,19 +693,6 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
     glUniform4fv(uniformLocation, 6, planes);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-    if (fast)    // Disable lighting during "fast" rendering
-        glUniform1i(uniformLocation, int(0));
-    else {
-        RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
-        glUniform1i(uniformLocation, int(params->GetLighting()));
-
-        std::vector<double> coeffsD = params->GetLightingCoeffs();
-        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
-        glUniform1fv(uniformLocation, 4, coeffsF);
-    }
-
     // Pass in textures
     GLuint textureUnit = 0;
     glActiveTexture(GL_TEXTURE0 + textureUnit);
@@ -751,6 +731,12 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
         glUniform1i(uniformLocation, textureUnit);
     }
+}
+
+void RayCaster::_3rdPassSpecialHandling(bool fast)
+{
+    // Left empty intentially.
+    // Derived classes feel free to put stuff here.
 }
 
 void RayCaster::_renderTriangleStrips() const
@@ -846,7 +832,7 @@ void RayCaster::_renderTriangleStrips() const
     delete[] indexBuffer;
 }
 
-GLuint RayCaster::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
+GLuint RayCaster::_compileShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
