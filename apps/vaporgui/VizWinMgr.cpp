@@ -107,10 +107,15 @@ void VizWinMgr::_attachVisualizer(string vizName)
     connect(_vizWindow[vizName], SIGNAL(Closing(const string &)), this, SLOT(_vizAboutToDisappear(const string &)));
     connect(_vizWindow[vizName], SIGNAL(HasFocus(const string &)), this, SLOT(_setActiveViz(const string &)));
 
+    connect(_vizWindow[vizName], SIGNAL(EndNavigation(const string &)), this, SLOT(_syncViewpoints(const string &)));
+
     QMdiSubWindow *qsbw = _mdiArea->addSubWindow(_vizWindow[vizName]);
     _vizMdiWin[vizName] = qsbw;
     _vizWindow[vizName]->setFocusPolicy(Qt::ClickFocus);
     _vizWindow[vizName]->setWindowTitle(qvizname);
+
+    GUIStateParams *p = _getStateParams();
+    string          prevActiveVizName = p->GetActiveVizName();
 
     _setActiveViz(vizName);
 
@@ -130,7 +135,10 @@ void VizWinMgr::_attachVisualizer(string vizName)
     // When we go from 1 to 2 windows, need to enable multiple
     // viz panels and signals.
     //
-    if (numWins > 1) { emit enableMultiViz(true); }
+    if (numWins > 1) {
+        emit enableMultiViz(true);
+        _syncViewpoints(prevActiveVizName);
+    }
 }
 
 void VizWinMgr::LaunchVisualizer()
@@ -181,6 +189,29 @@ void VizWinMgr::_setActiveViz(string vizName)
             for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) { (it->second)->Render(false); }
         }
     }
+}
+
+void VizWinMgr::_syncViewpoints(string vizName)
+{
+    if (vizName.empty()) return;
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+
+    bool enabled = paramsMgr->GetSaveStateEnabled();
+    paramsMgr->SetSaveStateEnabled(false);
+
+    ViewpointParams *currentVP = _getViewpointParams(vizName);
+
+    vector<string> winNames = _getVisualizerNames();
+    for (int i = 0; i < winNames.size(); i++) {
+        if (winNames[i] != vizName) {
+            ViewpointParams *vpParams = _getViewpointParams(winNames[i]);
+            vpParams->SetModelViewMatrix(currentVP->GetModelViewMatrix());
+            vpParams->SetRotationCenter(currentVP->GetRotationCenter());
+        }
+    }
+
+    paramsMgr->SetSaveStateEnabled(enabled);
 }
 
 vector<string> VizWinMgr::_getVisualizerNames() const

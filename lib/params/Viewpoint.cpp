@@ -32,8 +32,10 @@ using namespace Wasp;
 
 const string Viewpoint::_modelViewMatrixTag = "ModelViewMatrix";
 const string Viewpoint::_projectionMatrixTag = "ProjectionMatrix";
-double       Viewpoint::_defaultModelViewMatrix[] = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
-double       Viewpoint::_defaultProjectionMatrix[] = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+const string Viewpoint::_rotationCenterTag = "RotationCenter";
+
+double Viewpoint::_defaultModelViewMatrix[] = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+double Viewpoint::_defaultProjectionMatrix[] = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
 
 //
 // Register class with object factory!!!

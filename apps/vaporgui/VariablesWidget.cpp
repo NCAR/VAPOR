@@ -70,7 +70,7 @@ void VariablesWidget::Reinit(VariableFlags variableFlags, DimFlags dimFlags)
 
     // If the renderer is not both 2D and 3D, hide
     // the dimension selector and set the _activeDim
-    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+    if (!((_dimFlags & TWODXY) && (_dimFlags & THREED))) {
         dimensionFrame->hide();
         if (dimFlags & THREED)
             _activeDim = THREEDIMS;
@@ -84,9 +84,11 @@ void VariablesWidget::Reinit(VariableFlags variableFlags, DimFlags dimFlags)
     variableSelectionWidget->adjustSize();
 
     VariableFlags fdf = (VariableFlags)0;
-    if (_dimFlags & SCALAR) fdf = (VariableFlags)(fdf | SCALAR);
+    if (_variableFlags & SCALAR) fdf = (VariableFlags)(fdf | SCALAR);
 
-    if (_dimFlags & VECTOR) fdf = (VariableFlags)(fdf | VECTOR);
+    if (_variableFlags & VECTOR) fdf = (VariableFlags)(fdf | VECTOR);
+
+    if (_variableFlags & HEIGHT) fdf = (VariableFlags)(fdf | HEIGHT);
 
     _fidelityWidget->Reinit(fdf);
 }
@@ -177,7 +179,7 @@ void VariablesWidget::set2DOrientation(const QString &orientation) { cout << "2D
 void VariablesWidget::setVariableDims(int index)
 {
     assert(_rParams);
-    if (!((_dimFlags & TWOD) && (_dimFlags & THREED))) return;
+    if (!((_dimFlags & TWODXY) && (_dimFlags & THREED))) return;
     assert(index >= 0 && index <= 1);
 
     _activeDim = index == 0 ? TWODIMS : THREEDIMS;
@@ -189,7 +191,12 @@ void VariablesWidget::setVariableDims(int index)
     updateCombos();
 }
 
-void VariablesWidget::setDefaultVariables() { _rParams->SetDefaultVariables(_activeDim); }
+void VariablesWidget::setDefaultVariables()
+{
+    bool secondaryColormapVariable = false;
+    if (_variableFlags & COLOR) secondaryColormapVariable = true;
+    _rParams->SetDefaultVariables(_activeDim, secondaryColormapVariable);
+}
 
 // Default scalar variable will just be the first variable
 // of the active dimension (2D or 3D)
@@ -344,6 +351,8 @@ void VariablesWidget::updateColorCombo()
             _paramsMgr->SetSaveStateEnabled(enabled);
         }
     } else {
+        string colorVar = _rParams->GetVariableName();
+        _rParams->SetColorMapVariableName(colorVar);
         collapseColorVarSettings();
     }
 }
@@ -381,7 +390,7 @@ void VariablesWidget::updateCombos()
 void VariablesWidget::updateDimCombo()
 {
     // Only update if we support multiple dimensions
-    if (((_dimFlags & TWOD) && (_dimFlags & THREED))) {
+    if (((_dimFlags & TWODXY) && (_dimFlags & THREED))) {
         int index = _activeDim - 2;
         dimensionCombo->setCurrentIndex(index);
     }

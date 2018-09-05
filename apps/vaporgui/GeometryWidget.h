@@ -38,22 +38,24 @@ signals:
     void valueChanged();
 
 private slots:
+    void setPoint(double point);
     void setRange(double min, double max, int dim = -1);
-    void adjustLayoutToPlanar(int plane);
+    void adjustPlanarOrientation(int plane);
 
 private:
     void adjustLayoutTo2D();
     void adjustLayoutToPlanarXY();
     void adjustLayoutToPlanarXZ();
     void adjustLayoutToPlanarYZ();
+    void showOrientationOptions();
+    void hideOrientationOptions();
     void connectWidgets();
+
+    void getFullExtents(std::vector<double> &minFullExtents, std::vector<double> &maxFullExtents);
     void updateRangeLabels(std::vector<double> minExt, std::vector<double> maxExt);
     void updateBoxCombos(std::vector<double> &minFullExt, std::vector<double> &maxFullExt);
-
     bool getAuxiliaryExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
-
     bool getVectorExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
-
     bool getVariableExtents(std::vector<double> &minFullExts, std::vector<double> &maxFullExts);
 
     VAPoR::ParamsMgr *   _paramsMgr;

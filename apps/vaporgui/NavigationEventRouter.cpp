@@ -38,13 +38,19 @@
 #include <qcombobox.h>
 #include <qfiledialog.h>
 #include <qmessagebox.h>
-#include "NavigationEventRouter.h"
 #include "vapor/ViewpointParams.h"
 #include "vapor/ControlExecutive.h"
 #include "ui_NavigationTab.h"
 #include "ErrorReporter.h"
+#include "TrackBall.h"
+#include "NavigationEventRouter.h"
 
 using namespace VAPoR;
+
+namespace {
+string HomeModelViewMatrixTag = "HomeModelViewMatrix";
+string HomeRotationCenterTag = "HomeRotationCenter";
+}    // namespace
 
 NavigationEventRouter::NavigationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_NavigationTab(), EventRouter(ce, ViewpointParams::GetClassType())
 {
@@ -662,18 +668,36 @@ void NavigationEventRouter::SetCenter(const double *coords)
 void NavigationEventRouter::SetHomeViewpoint()
 {
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    p->SetHomeToCamera();
+    ViewpointParams *vpParams = _getActiveParams();
+    GUIStateParams * guiParams = GetStateParams();
+
+    // Get the current model view matrix and it home
+    //
+    vector<double> m = vpParams->GetModelViewMatrix();
+    vector<double> c = vpParams->GetRotationCenter();
+
+    paramsMgr->BeginSaveStateGroup("Set home viewpoint");
+
+    guiParams->SetValueDoubleVec(HomeModelViewMatrixTag, "Modelview matrix", m);
+    guiParams->SetValueDoubleVec(HomeRotationCenterTag, "Camera rotation center", c);
+    paramsMgr->EndSaveStateGroup();
 }
 
 void NavigationEventRouter::UseHomeViewpoint()
 {
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
+    GUIStateParams *guiParams = GetStateParams();
 
-    p->SetCameraToHome();
+    // Get the home matrix and make it the current model view matrix
+    //
+    vector<double> defaultV(16, 0.0);
+    defaultV[0] = defaultV[5] = defaultV[10] = defaultV[15] = 1.0;
+
+    vector<double> m = guiParams->GetValueDoubleVec(HomeModelViewMatrixTag, defaultV);
+
+    vector<double> defaultC(3, 0.0);
+    vector<double> c = guiParams->GetValueDoubleVec(HomeRotationCenterTag, defaultC);
+
+    _setViewpointParams(m, c);
 }
 
 void NavigationEventRouter::ViewAll()
@@ -720,20 +744,45 @@ VAPoR::ViewpointParams *NavigationEventRouter::_getActiveParams() const
     return (paramsMgr->GetViewpointParams(vizName));
 }
 
-void NavigationEventRouter::_setViewpointParams(const double center[3], const double posvec[3], const double dirvec[3], const double upvec[3]) const
+void NavigationEventRouter::_setViewpointParams(const vector<double> &modelview, const vector<double> &center) const
 {
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
+    assert(modelview.size() == 16);
+    assert(center.size() == 3);
+
+    // Set modelview and rotation center for *all* visualizers
+    //
+    ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+
+    vector<double> minExt, maxExt;
 
     paramsMgr->BeginSaveStateGroup("Move camera");
 
-    p->SetRotationCenter(center);
-    p->SetCameraPos(posvec);
-    p->SetCameraViewDir(dirvec);
-    p->SetCameraUpVec(upvec);
+    for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+
+        vpParams->SetModelViewMatrix(modelview);
+        vpParams->SetRotationCenter(center);
+    }
 
     paramsMgr->EndSaveStateGroup();
+}
+
+void NavigationEventRouter::_setViewpointParams(const double center[3], const double posvec[3], const double dirvec[3], const double upvec[3]) const
+{
+    // Ugh. Use trackball to convert viewing vectors into a model view
+    // matrix
+    //
+    Trackball trackball;
+    trackball.setFromFrame(posvec, dirvec, upvec, center, true);
+    trackball.TrackballSetMatrix();
+
+    const double *m = trackball.GetModelViewMatrix();
+
+    vector<double> modelview(m, m + 16);
+    vector<double> centerv(center, center + 3);
+
+    _setViewpointParams(modelview, centerv);
 }
 
 bool NavigationEventRouter::_getViewpointParams(double center[3], double posvec[3], double dirvec[3], double upvec[3]) const
@@ -750,12 +799,7 @@ bool NavigationEventRouter::_getViewpointParams(double center[3], double posvec[
         return (false);
     }
 
-    // Get center of rotation from MouseModeParams
-    //
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    p->GetRotationCenter(center);
+    vpParams->GetRotationCenter(center);
 
     return (true);
 }

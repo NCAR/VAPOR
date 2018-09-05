@@ -201,7 +201,7 @@ int ShaderMgr::DefineEffect(std::string baseName, std::string defines, std::stri
     }
 
     // iterate through fragment shader code
-    for (int i = 0; i < _baseEffects[baseName][1].size(); i++) {
+    for (int i = 0; i < _baseEffects[baseName].at(1).size(); i++) {
         // add definition tokens to all source code
         //
         std::string defined = OGLdefines + _baseEffects[baseName][1][i];
@@ -210,6 +210,7 @@ int ShaderMgr::DefineEffect(std::string baseName, std::string defines, std::stri
 
     int rc = _effects[instanceName]->Compile();
     if (rc < 0) {
+        fprintf(stderr, "Effect \"%s::%s\" failed to compile\n", baseName.c_str(), instanceName.c_str());
         SetErrMsg("Effect \"%s::%s\" failed to compile", baseName.c_str(), instanceName.c_str());
         return -1;
     }

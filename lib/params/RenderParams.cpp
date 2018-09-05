@@ -66,7 +66,7 @@ string string_replace(string s, string olds, string news)
 
 };    // namespace
 
-void RenderParams::SetDefaultVariables(int dim = 3)
+void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariable = false)
 {
     vector<string> varnames;
     varnames = _dataMgr->GetDataVarNames(dim);
@@ -81,7 +81,9 @@ void RenderParams::SetDefaultVariables(int dim = 3)
     fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
     SetFieldVariableNames(fieldVarNames);
 
-    string colorVar = _findVarStartingWithLetter(varnames, 't');
+    string colorVar = varname;
+    if (secondaryColormapVariable) colorVar = _findVarStartingWithLetter(varnames, 't');
+
     SetColorMapVariableName(colorVar);
 }
 
@@ -300,9 +302,9 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
     // This way we always return a valid MapperFunction
     //
     if (varname.empty()) { varname = "NULL"; }
-    MapperFunction *tfptr = (MapperFunction *)_TFs->GetParams(varname);
+    MapperFunction *tfptr = dynamic_cast<MapperFunction *>(_TFs->GetParams(varname));
 
-    if (tfptr) return (tfptr);
+    if (tfptr) { return (tfptr); }
 
     // Disable state saving for Get function
     //

@@ -764,19 +764,19 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
     coord_bmin.clear();
     coord_bmax.clear();
 
-    vector<string> data_dimnames;
-    bool           ok = _getVarDimNames(data_varname, data_dimnames);
+    vector<DC::Dimension> data_dims;
+    bool                  ok = _getVarDimensions(data_varname, data_dims);
     assert(ok);
-    assert(data_dimnames.size() == data_bmin.size());
+    assert(data_dims.size() == data_bmin.size());
 
-    vector<string> coord_dimnames;
-    ok = _getVarDimNames(coord_varname, coord_dimnames);
+    vector<DC::Dimension> coord_dims;
+    ok = _getVarDimensions(coord_varname, coord_dims);
     assert(ok);
 
     int i = 0;
-    for (int j = 0; j < coord_dimnames.size(); j++) {
-        while (data_dimnames[i] != coord_dimnames[j] && i < data_dimnames.size()) { i++; }
-        assert(i < data_dimnames.size());
+    for (int j = 0; j < coord_dims.size(); j++) {
+        while (data_dims[i].GetLength() != coord_dims[j].GetLength() && i < data_dims.size()) { i++; }
+        assert(i < data_dims.size());
         coord_bmin.push_back(data_bmin[i]);
         coord_bmax.push_back(data_bmax[i]);
     }
@@ -1144,7 +1144,6 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     float               mv = sg->GetMissingValue();
     Grid::ConstIterator itr;
     Grid::ConstIterator enditr = sg->cend();
-    //	for (itr = sg->cbegin(); itr!=sg->cend(); ++itr) {
     for (itr = sg->cbegin(); itr != enditr; ++itr) {
         float v = *itr;
         if (v != mv) {
@@ -3009,27 +3008,29 @@ int DataMgr::_initHorizontalCoordVars()
 
         // no duplicates
         //
-        if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
-        if (_getDerivedCoordVar(derivedCoordvars[1])) continue;
+        if (!_getDerivedCoordVar(derivedCoordvars[0])) {
+            DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
 
-        DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                SetErrMsg("Failed to initialize derived coord variable");
+                return (-1);
+            }
 
-        rc = derivedVar->Initialize();
-        if (rc < 0) {
-            SetErrMsg("Failed to initialize derived coord variable");
-            return (-1);
-        }
-        _dvm.AddCoordVar(derivedVar);
-
-        derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
-
-        rc = derivedVar->Initialize();
-        if (rc < 0) {
-            SetErrMsg("Failed to initialize derived coord variable");
-            return (-1);
+            _dvm.AddCoordVar(derivedVar);
         }
 
-        _dvm.AddCoordVar(derivedVar);
+        if (!_getDerivedCoordVar(derivedCoordvars[1])) {
+            DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
+
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                SetErrMsg("Failed to initialize derived coord variable");
+                return (-1);
+            }
+
+            _dvm.AddCoordVar(derivedVar);
+        }
     }
 
     return (0);
