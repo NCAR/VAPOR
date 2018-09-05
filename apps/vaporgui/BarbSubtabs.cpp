@@ -18,7 +18,7 @@ BarbVariablesSubtab::BarbVariablesSubtab(QWidget *parent) {
     setupUi(this);
     _variablesWidget->Reinit(
         (VariableFlags)(VECTOR | HEIGHT | COLOR),
-        (DimFlags)(TWOD | THREED));
+        (DimFlags)(TWODXY | THREED));
 }
 
 void BarbVariablesSubtab::Update(

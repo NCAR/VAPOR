@@ -321,8 +321,8 @@ int ShaderProgram::Compile() {
 
     if (!compileSuccess) {
         //print out errrors and exit
-        SetErrMsg(
-            "Shader InfoLog:\n%s", (GLchar *)shaderErrors.c_str());
+        fprintf(stderr, "Shader InfoLog: %s\n", (GLchar *)shaderErrors.c_str());
+        SetErrMsg("Shader InfoLog:\n%s", (GLchar *)shaderErrors.c_str());
         return -1;
     }
 

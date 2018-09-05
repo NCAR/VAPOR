@@ -46,12 +46,6 @@
 #ifndef TRACKBALL_H
 #define TRACKBALL_H
 
-#ifdef Darwin
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
 #include <vector>
 #include <vapor/common.h>
 
@@ -118,6 +112,10 @@ class Trackball {
         _scale[2] = scale[2];
     }
 
+    const double *GetModelViewMatrix() {
+        return (_modelViewMatrix);
+    }
+
   private:
     void setCenter(const std::vector<double> &newCenter) {
         _center[0] = newCenter[0];
@@ -132,8 +130,8 @@ class Trackball {
     double _center[3];
     double _ballsize;
     double _lastx, _lasty;
-
     bool _perspective;
+    double _modelViewMatrix[16];
 };
 
 #endif // TRACKBALL_H

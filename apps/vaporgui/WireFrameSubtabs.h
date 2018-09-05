@@ -23,7 +23,7 @@ class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI
         setupUi(this);
         _variablesWidget->Reinit(
             (VariableFlags)(SCALAR | HEIGHT),
-            (DimFlags)(THREED | TWOD));
+            (DimFlags)(THREED | TWODXY));
     }
 
     void Update(
