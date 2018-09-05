@@ -91,6 +91,9 @@ private:
 
  VAPoR::ViewpointParams *_getActiveParams() const;
 
+ void _setViewpointParams(
+	const vector <double> &modelview, const vector <double> &center
+ ) const; 
 
  void _setViewpointParams(
 	const double center[3], const double posvec[3],

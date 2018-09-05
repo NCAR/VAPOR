@@ -214,30 +214,29 @@ string MappingFrame::getActiveRendererName() const {
 	return activeRenderInst;
 }
 
-void MappingFrame::RefreshHistogram(bool force) {
-	string rendererName = getActiveRendererName();
-	_histogram = _histogramMap[rendererName];
+void MappingFrame::RefreshHistogram(bool force) 
+{
+    string rendererName = getActiveRendererName();
+    _histogram = _histogramMap[rendererName];
 
-	if (!force) {	
-		if (skipRefreshHistogram()) return;
-	}
+    if (!force && skipRefreshHistogram()) 
+            return;
 
-	string var;
-	var = _rParams->GetColorMapVariableName();
-	MapperFunction* mf = _rParams->GetMapperFunc(var);
+    string var;
+    var = _rParams->GetColorMapVariableName();
+    MapperFunction* mf = _rParams->GetMapperFunc(var);
 
-	float minRange = mf->getMinMapValue();
-	float maxRange = mf->getMaxMapValue();
-	size_t ts = _rParams->GetCurrentTimestep();	
+    float minRange = mf->getMinMapValue();
+    float maxRange = mf->getMaxMapValue();
+    size_t ts = _rParams->GetCurrentTimestep(); 
 
-	if (_histogram) delete _histogram;
-	_histogram = NULL;
-	_histogram = new Histo(256, minRange,
-	maxRange, var, ts);
+    if (_histogram) 
+        delete _histogram;
+    _histogram = new Histo(256, minRange, maxRange, var, ts);
 
-	populateHistogram();
-	
-	_histogramMap[rendererName] = _histogram;
+    populateHistogram();
+    
+    _histogramMap[rendererName] = _histogram;
 }
 
 void MappingFrame::populateHistogram() {
@@ -515,7 +514,8 @@ int MappingFrame::histoValue(const QPoint &p)
   QPoint pos = mapFromParent(p);
  
   float x = xWorldToData(xViewToWorld(pos.x()));
-	if (_histogram->getMaxData() <= _histogram->getMinData()) return 0;
+  if (_histogram->getMaxData() <= _histogram->getMinData()) 
+    return 0;
   float ind = (x - _histogram->getMinData())
     / (_histogram->getMaxData() - _histogram->getMinData());
 

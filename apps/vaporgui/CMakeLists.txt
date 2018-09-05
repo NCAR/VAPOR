@@ -44,6 +44,7 @@ set (SRCS
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
     SliceEventRouter.cpp
+	DVREventRouter.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
@@ -63,6 +64,7 @@ set (SRCS
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
+	DVRSubtabs.h
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
@@ -94,11 +96,15 @@ set (UIS
 	NavigationTab.ui
 	boxframe.ui
 	startupTab.ui
+	AnnotationGUI.ui
 	SettingsGUI.ui
 	appSettingsTab.ui
-	AnnotationGUI.ui
-	ControlPointEditorBase.ui
 	NewRendererDialog.ui
+	errMsg.ui
+	DVRVariablesGUI.ui
+	DVRAppearanceGUI.ui
+	DVRGeometryGUI.ui
+	DVRAnnotationGUI.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	BarbAppearanceGUI.ui
@@ -125,18 +131,18 @@ set (UIS
     SliceGeometryGUI.ui
     SliceAnnotationGUI.ui
 	VariablesWidgetGUI.ui
-	HelloVariablesGUI.ui
 	statsWindow.ui
-	errMsg.ui
 	plotWindow.ui
 	firstTimeUser.ui
 	TFWidgetGUI.ui
-	StretchFactorTableGUI.ui
-	OrientationAnglesGUI.ui
 	GeometryWidgetGUI.ui
-	CopyRegionWidgetGUI.ui
 	ColorbarWidgetGUI.ui
 	FidelityWidgetGUI.ui
+	ControlPointEditorBase.ui
+	StretchFactorTableGUI.ui
+	OrientationAnglesGUI.ui
+	CopyRegionWidgetGUI.ui
+	
 	QSliderEdit.ui
 	QRange.ui
 	QSinglePoint.ui

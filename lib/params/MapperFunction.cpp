@@ -118,7 +118,6 @@ MapperFunction::MapperFunction(
 
 		m_opacityMaps->Insert(&opacityMap, _make_omap_name(0));
 	}
-
 }
 
 MapperFunction::MapperFunction(
@@ -166,8 +165,7 @@ MapperFunction::~MapperFunction()
 {
 	MyBase::SetDiagMsg("MapperFunction::~MapperFunction()");
 
-	if (m_colorMap) delete m_colorMap;
-
+	if (m_colorMap)    delete m_colorMap;
 	if (m_opacityMaps) delete m_opacityMaps;
 }
 
@@ -280,7 +278,8 @@ float MapperFunction::getOpacityValueData(float value) const
     }
   }
 
-  if (count) return opacity*opacScale;
+  if (count) 
+    return opacity*opacScale;
 
   return 0.0;
 }
@@ -306,16 +305,24 @@ void MapperFunction::hsvValue(float value, float *h, float *s, float *v) const
 //----------------------------------------------------------------------------
 void MapperFunction::makeLut(float* clut) const
 {
-  float step = (getMaxMapValue() - getMinMapValue())/(_numEntries-1);
+  float step = (getMaxMapValue() - getMinMapValue())/float(_numEntries-1);
 
   for (int i = 0; i< _numEntries; i++)
   {
     float v = getMinMapValue() + i*step;
-   
-	ColorMap* cmap = GetColorMap();
-    cmap->color(v).toRGB(&clut[4*i]);
+    m_colorMap->color(v).toRGB(&clut[4*i]);
     clut[4*i+3] = getOpacityValueData(v);
   }
+}
+
+//----------------------------------------------------------------------------
+// Populate at a RGBA lookup table with std::vector input
+//----------------------------------------------------------------------------
+void MapperFunction::makeLut(std::vector <float> &clut) const 
+{
+    float cluta[ 4 * _numEntries ];
+    makeLut(cluta);
+    clut.assign( cluta, cluta + 4 * _numEntries );
 }
 
  //! Set both minimum and maximum mapping (histo) values
@@ -342,9 +349,9 @@ void MapperFunction::setMinMaxMapValue(float val1,float val2) {
 
 vector<double> MapperFunction::getMinMaxMapValue() const {
 	vector <double> defaultv(2,0.0);
-
 	vector <double> bounds = GetValueDoubleVec(_dataBoundsTag, defaultv);
-	if (bounds.size() != 2) bounds = defaultv;
+	if (bounds.size() != 2) 
+        bounds = defaultv;
 	return(bounds);
 }
 
