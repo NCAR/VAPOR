@@ -83,9 +83,21 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
     connectWidgets();
 }
 
-void GeometryWidget::showOrientationOptions() { _orientationTab->show(); }
+void GeometryWidget::showOrientationOptions()
+{
+    _orientationTab->show();
+    _xPointFrame->show();
+    _yPointFrame->show();
+    _zPointFrame->show();
+}
 
-void GeometryWidget::hideOrientationOptions() { _orientationTab->hide(); }
+void GeometryWidget::hideOrientationOptions()
+{
+    _orientationTab->hide();
+    _xPointFrame->hide();
+    _yPointFrame->hide();
+    _zPointFrame->hide();
+}
 
 void GeometryWidget::adjustPlanarOrientation(int plane)
 {
@@ -170,11 +182,9 @@ void GeometryWidget::adjustLayoutToPlanarYZ()
 
 void GeometryWidget::adjustLayoutTo2D()
 {
-    cout << "adjustLayoutTo2D" << endl;
     _zFrame->hide();
-    //_zFrame->resize(0,0);
-    _minMaxContainerWidget->adjustSize();
-    _minMaxTab->adjustSize();
+    //_minMaxContainerWidget->adjustSize();
+    //_minMaxTab->adjustSize();
 
     adjustSize();
 }
@@ -185,7 +195,8 @@ void GeometryWidget::Reinit(DimFlags dimFlags, VariableFlags varFlags, GeometryF
     _geometryFlags = geometryFlags;
     _varFlags = varFlags;
 
-    if (_dimFlags & TWODXY) {
+    if (_dimFlags & TWOD) {
+        cout << "how did i get here?" << endl;
         adjustLayoutTo2D();
     } else if (_dimFlags & THREED) {
         cout << "Showing zFrame" << endl;
@@ -258,16 +269,13 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
 
     if (minExt.size() < 3) {
         if (_dimFlags & THREED) {
+            cout << "Correcting dimensionality" << endl;
             Reinit((DimFlags)TWOD, _varFlags, _geometryFlags);
             QString text = "Z Coordinates aren't available for 2D variables!";
             _zMinMaxLabel->setText(QString(text));
         }
     } else {
-        //		Reinit(
-        //			(DimFlags)THREED,
-        //			_varFlags,
-        //			_geometryFlags
-        //		);
+        Reinit((DimFlags)THREED, _varFlags, _geometryFlags);
 
         QString zTitle = QString("Z Min: ") + QString::number(minExt[2], 'g', 3) + QString("	Max: ") + QString::number(maxExt[2], 'g', 3);
         _zMinMaxLabel->setText(zTitle);
