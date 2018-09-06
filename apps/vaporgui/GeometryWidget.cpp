@@ -90,11 +90,16 @@ GeometryWidget::GeometryWidget(QWidget* parent) :
 
 void GeometryWidget::showOrientationOptions() {
     _orientationTab->show();
-        
+    _xPointFrame->show();
+    _yPointFrame->show();
+    _zPointFrame->show();
 }
 
 void GeometryWidget::hideOrientationOptions() {
     _orientationTab->hide();
+    _xPointFrame->hide();
+    _yPointFrame->hide();
+    _zPointFrame->hide();
 }
 
 void GeometryWidget::adjustPlanarOrientation(int plane) {
@@ -175,11 +180,9 @@ void GeometryWidget::adjustLayoutToPlanarYZ() {
 }
 
 void GeometryWidget::adjustLayoutTo2D() {
-    cout << "adjustLayoutTo2D" << endl;
 	_zFrame->hide();
-	//_zFrame->resize(0,0);
-	_minMaxContainerWidget->adjustSize();
-	_minMaxTab->adjustSize();
+	//_minMaxContainerWidget->adjustSize();
+	//_minMaxTab->adjustSize();
 
 	adjustSize();
 }
@@ -193,7 +196,8 @@ void GeometryWidget::Reinit(
 	_geometryFlags = geometryFlags;
 	_varFlags = varFlags;
 
-	if (_dimFlags & TWODXY) {
+	if (_dimFlags & TWOD) {
+        cout << "how did i get here?" << endl;
 		adjustLayoutTo2D();
 	}
 	else if(_dimFlags & THREED ) {
@@ -276,6 +280,7 @@ void GeometryWidget::updateRangeLabels(
 	if (minExt.size() < 3) 
 	{
 		if (_dimFlags & THREED) {
+            cout << "Correcting dimensionality" << endl;
             Reinit(
 		    	(DimFlags)TWOD,
 		    	_varFlags,
@@ -287,11 +292,11 @@ void GeometryWidget::updateRangeLabels(
 	} 
 	else 
 	{
-//		Reinit(
-//			(DimFlags)THREED,
-//			_varFlags,
-//			_geometryFlags
-//		);
+		Reinit(
+			(DimFlags)THREED,
+			_varFlags,
+			_geometryFlags
+		);
 
 		QString zTitle = QString("Z Min: ") + 
 			QString::number(minExt[2], 'g', 3) +
