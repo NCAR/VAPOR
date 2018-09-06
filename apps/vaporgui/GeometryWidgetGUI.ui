@@ -60,11 +60,14 @@
        <property name="spacing">
         <number>0</number>
        </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
        <property name="topMargin">
         <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>15</number>
+        <number>10</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -162,7 +165,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_36">
        <property name="spacing">
-        <number>20</number>
+        <number>-1</number>
        </property>
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
