@@ -40,6 +40,11 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
 
     _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
     _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
+
+    /* Get viewport dimensions */
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 }
 
 // Destructor
@@ -374,8 +379,27 @@ int RayCaster::_paintGL(bool fast)
     return 0;
 #endif
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    // Visualizer dimensions would change if window is resized
+    GLint newViewport[4];
+    glGetIntegerv(GL_VIEWPORT, newViewport);
+    if (std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) {
+        std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
+
+        // Re-size 2D textures
+        GLuint textureUnit = 0;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        textureUnit = 1;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
+    }
+
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Not receiving RayCaster parameters; "
@@ -420,7 +444,7 @@ int RayCaster::_paintGL(bool fast)
     glBindTexture(GL_TEXTURE_1D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
-    glViewport(0, 0, viewport[2], viewport[3]);
+    glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     _drawVolumeFaces(1);    // 1st pass, render back facing polygons to texture0 of the framebuffer
 
@@ -464,7 +488,7 @@ int RayCaster::_paintGL(bool fast)
     _drawVolumeFaces(2, insideACell);    // 2nd pass, render front facing polygons
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, viewport[2], viewport[3]);
+    glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     _drawVolumeFaces(3, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
 
@@ -484,16 +508,12 @@ void RayCaster::_initializeFramebufferTextures()
     glGenFramebuffers(1, &_frameBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 
-    /* Get viewport dimensions */
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
     /* Generate back-facing texture */
     GLuint textureUnit = 0;
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
     /* Configure the back-facing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -506,7 +526,7 @@ void RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
     /* Configure the front-faceing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -517,7 +537,7 @@ void RayCaster::_initializeFramebufferTextures()
     /* Depth buffer */
     glGenRenderbuffers(1, &_depthBufferId);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
     /* Set "_backFaceTextureId" as colour attachement #0, and "_frontFaceTextureId" as attachement #1 */
