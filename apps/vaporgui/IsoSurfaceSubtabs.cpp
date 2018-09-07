@@ -29,23 +29,23 @@ IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent)
 
     // Set up iso value widgets
     _isoWidget0->SetLabel(QString::fromAscii("Value 1"));
-    _isoWidget0->SetDecimals(4);
     _isoWidget0->SetIntType(false);
+    _isoWidget0->SetDecimals(4);
     _isoWidget0->setEnabled(true);
 
     _isoWidget1->SetLabel(QString::fromAscii("Value 2"));
-    _isoWidget1->SetDecimals(4);
     _isoWidget1->SetIntType(false);
+    _isoWidget1->SetDecimals(4);
     _isoWidget1->setEnabled(false);
 
     _isoWidget2->SetLabel(QString::fromAscii("Value 3"));
-    _isoWidget2->SetDecimals(4);
     _isoWidget2->SetIntType(false);
+    _isoWidget2->SetDecimals(4);
     _isoWidget2->setEnabled(false);
 
     _isoWidget3->SetLabel(QString::fromAscii("Value 4"));
-    _isoWidget3->SetDecimals(4);
     _isoWidget3->SetIntType(false);
+    _isoWidget3->SetDecimals(4);
     _isoWidget3->setEnabled(false);
 }
 
