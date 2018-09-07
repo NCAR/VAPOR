@@ -113,6 +113,9 @@ class RENDER_API RayCaster : public Renderer {
     GLuint _2ndPassShaderId;
     GLuint _3rdPassShaderId;
 
+    // current viewport in use
+    GLint _currentViewport[4];
+
     //
     // Render the volume surface using triangle strips
     //   This is a subroutine used by _drawVolumeFaces().
