@@ -141,10 +141,13 @@ void main(void)
             break;              //   so let's use 0.999.
 
         vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
-        if( ShouldSkip( step2Texture ) )
-            continue;
-
         float step2Value  = texture( volumeTexture, step2Texture ).r;
+        if( ShouldSkip( step2Texture ) )
+        {
+            step1Texture = step2Texture;
+            step1Value   = step2Value;
+            continue;
+        }
 
         for( int i = 0; i < numOfIsoValues; i++ )
             if( (isoValues[i] - step1Value) * (isoValues[i] - step2Value) <= 0.0f )
