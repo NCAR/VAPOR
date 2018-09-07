@@ -434,10 +434,20 @@ int RayCaster::_paintGL(bool fast)
     }
 
     /* Gather the color map */
-    params->GetMapperFunc()->makeLut(_colorMap);
-    std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
-    _colorMapRange[0] = float(range[0]);
-    _colorMapRange[1] = float(range[1]);
+    if (params->UseSingleColor()) {
+        float singleColor[4];
+        params->GetConstantColor(singleColor);
+        singleColor[3] = 1.0f;    // 1.0 in alpha channel
+        _colorMap.resize(8);      // _colorMap will have 2 RGBA values
+        for (int i = 0; i < 8; i++) _colorMap[i] = singleColor[i % 4];
+        _colorMapRange[0] = 0.0f;
+        _colorMapRange[1] = 0.0f;
+    } else {
+        params->GetMapperFunc()->makeLut(_colorMap);
+        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+        _colorMapRange[0] = float(range[0]);
+        _colorMapRange[1] = float(range[1]);
+    }
 
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());

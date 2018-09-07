@@ -3,7 +3,7 @@
 IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(0));
+    _TFWidget->Reinit((TFFlags)(CONSTANT));
 
     _params = nullptr;
 
