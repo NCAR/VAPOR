@@ -39,8 +39,13 @@ float specularExp   = lightingCoeffs[3];
 //
 float TranslateValue( in float value )
 {
-    float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
-    return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+    if( colorMapRange.x != colorMapRange.y )
+    {
+        float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
+        return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+    }
+    else
+        return value;
 }
 
 //
