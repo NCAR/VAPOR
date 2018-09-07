@@ -24,7 +24,7 @@ public:
     IsoSurfaceVariablesSubtab(QWidget* parent) 
     {
         setupUi(this);
-        _variablesWidget->Reinit( (VariableFlags)(SCALAR),
+        _variablesWidget->Reinit( (VariableFlags)(SCALAR | COLOR),
                                   (DimFlags)(THREED) );
     }
 
