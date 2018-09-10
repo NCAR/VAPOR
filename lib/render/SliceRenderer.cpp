@@ -5,9 +5,12 @@
 #include <vapor/SliceParams.h>
 #include <vapor/ControlExecutive.h>
 
-#define X 0
-#define Y 1
-#define Z 2
+#define X  0
+#define Y  1
+#define Z  2
+#define XY 0
+#define XZ 1
+#define YZ 2
 
 using namespace VAPoR;
 
@@ -60,25 +63,6 @@ void SliceRenderer::_initTexture()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    unsigned char *foo = new unsigned char[_textureWidth * _textureHeight * 4];
-    for (int i = 0; i < _textureWidth; i++) {
-        for (int j = 0; j < _textureHeight; j++) {
-            int index = (j * _textureWidth + i) * 4;
-            // foo[index]   = (unsigned char*)0;
-            // foo[index+1] = (unsigned char*)0;
-            // foo[index+2] = (unsigned char*)255;
-            // foo[index+3] = (unsigned char*)255;
-            foo[index] = 0;
-            foo[index + 1] = 0;
-            foo[index + 2] = 255;
-            foo[index + 3] = (float)i / (float)_textureWidth * 255;
-        }
-    }
-
-    // glTexImage2D(
-    //    GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight,
-    //   0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)foo
-    //);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *)_textureData);
 
     // Do write to the z buffer
@@ -94,6 +78,10 @@ void SliceRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.refinementLevel = p->GetRefinementLevel();
     _cacheParams.compressionLevel = p->GetCompressionLevel();
+    _cacheParams.textureSampleRates = p->GetSampleRates();
+
+    _textureWidth = _cacheParams.textureSampleRates[X];
+    _textureHeight = _cacheParams.textureSampleRates[Y];
 
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
@@ -117,9 +105,7 @@ int SliceRenderer::_saveTextureData()
     if (rc < 0) return (-1);
     assert(grid);
 
-    // int _textureWidth = 25;
-    // int _textureHeight = 25;
-    // int zFrequency = 1;
+    int orientation = _getOrientation();
 
     double dx = (_cacheParams.boxMax[X] - _cacheParams.boxMin[X]) / _textureWidth;
     double dy = (_cacheParams.boxMax[Y] - _cacheParams.boxMin[Y]) / _textureHeight;
@@ -155,12 +141,14 @@ int SliceRenderer::_saveTextureData()
             green = _cacheParams.tf_lut[bin + 1] * 255;
             blue = _cacheParams.tf_lut[bin + 2] * 255;
             alpha = _cacheParams.tf_lut[bin + 3] * 255;
-            _textureData[index + 0] = red;      //   * 255;
-            _textureData[index + 1] = green;    // * 255;
-            _textureData[index + 2] = blue;     //  * 255;
-            _textureData[index + 3] = alpha;    // * 255;
+            _textureData[index + 0] = red;
+            _textureData[index + 1] = green;
+            _textureData[index + 2] = blue;
+            _textureData[index + 3] = alpha;
         }
     }
+
+    return 0;
 }
 
 bool SliceRenderer::_isCacheDirty() const
@@ -172,6 +160,8 @@ bool SliceRenderer::_isCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.refinementLevel != p->GetRefinementLevel()) return true;
     if (_cacheParams.compressionLevel != p->GetCompressionLevel()) return true;
+
+    if (_cacheParams.textureSampleRates != p->GetSampleRates()) return true;
 
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     vector<float>   tf_lut;
@@ -199,32 +189,104 @@ int SliceRenderer::_paintGL(bool fast)
     std::vector<double> min = _cacheParams.boxMin;
     std::vector<double> max = _cacheParams.boxMax;
 
-    //    glColor3f(0.f, 1.f, 0.f);
+    cout << "XY " << (min[Z] == max[Z]) << endl;
+    cout << "XZ " << (min[Y] == max[Y]) << endl;
+    cout << "YZ " << (min[X] == max[X]) << endl << endl;
+
+    int orientation = _getOrientation();
+    if (orientation == XY)
+        _renderXY(min, max);
+    else if (orientation == XZ)
+        _renderXZ(min, max);
+    else if (orientation == YZ)
+        _renderYZ(min, max);
+
+    return 0;
+}
+
+int SliceRenderer::_getOrientation() const
+{
+    std::vector<double> min = _cacheParams.boxMin;
+    std::vector<double> max = _cacheParams.boxMax;
+
+    if (min[Z] == max[Z])    // XY Plane
+        return XY;
+    else if (min[Y] == max[Y])    // XZ Plane
+        return XZ;
+    else if (min[X] == max[X])    // YZ Plane
+        return YZ;
+}
+
+void SliceRenderer::_renderXY(std::vector<double> min, std::vector<double> max) const
+{
+    double zCoord = min[Z];
 
     glBegin(GL_TRIANGLES);
     glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(min[X], min[Y], min[Z]);
+    glVertex3f(min[X], min[Y], zCoord);
     glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(max[X], min[Y], min[Z]);
+    glVertex3f(max[X], min[Y], zCoord);
     glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(max[X], max[Y], min[Z]);
+    glVertex3f(max[X], max[Y], zCoord);
 
     glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(min[X], min[Y], min[Z]);
+    glVertex3f(min[X], min[Y], zCoord);
     glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(max[X], max[Y], min[Z]);
+    glVertex3f(max[X], max[Y], zCoord);
     glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(min[X], max[Y], min[Z]);
+    glVertex3f(min[X], max[Y], zCoord);
 
-    /*    glVertex3f(min[X], min[Y], min[Z]);
-    glVertex3f(max[X], min[Y], min[Z]);
-    glVertex3f(max[X], max[Y], min[Z]);
-
-    glVertex3f(min[X], min[Y], min[Z]);
-    glVertex3f(max[X], max[Y], min[Z]);
-    glVertex3f(min[X], max[Y], min[Z]);
-*/
     glEnd();
+}
 
-    return 0;
+void SliceRenderer::_renderXZ(std::vector<double> min, std::vector<double> max) const
+{
+    double yCoord = min[Y];
+
+    glBegin(GL_TRIANGLES);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(min[X], yCoord, min[Z]);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(max[X], yCoord, min[Z]);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(max[X], yCoord, max[Z]);
+
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(min[X], yCoord, min[Z]);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(max[X], yCoord, max[Z]);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(min[X], yCoord, max[Z]);
+
+    /*glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(max[X], yCoord, min[Z]);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], yCoord, max[Z]);
+
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], yCoord, max[Z]);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(min[X], yCoord, max[Z]);*/
+
+    glEnd();
+}
+
+void SliceRenderer::_renderYZ(std::vector<double> min, std::vector<double> max) const
+{
+    double xCoord = min[X];
+
+    glBegin(GL_TRIANGLES);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(xCoord, min[Y], min[Z]);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(xCoord, max[Y], min[Z]);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(xCoord, max[Y], max[Z]);
+
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(xCoord, min[Y], min[Z]);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(xCoord, max[Y], max[Z]);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(xCoord, min[Y], max[Z]);
+
+    glEnd();
 }

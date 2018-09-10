@@ -7,6 +7,8 @@
 #include "ui_SliceAnnotationGUI.h"
 #include "Flags.h"
 
+#include <vapor/SliceParams.h>
+
 namespace VAPoR {
 class ControlExec;
 class RenderParams;
@@ -30,6 +32,14 @@ public:
     SliceAppearanceSubtab(QWidget *parent);
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+
+private slots:
+    void _xSampleRateChanged(int rate);
+    void _ySampleRateChanged(int rate);
+    void _zSampleRateChanged(int rate);
+
+private:
+    VAPoR::SliceParams *_params;
 };
 
 class SliceGeometrySubtab : public QWidget, public Ui_SliceGeometryGUI {

@@ -1,6 +1,6 @@
 #include "SliceSubtabs.h"
 
-#define MIN_SAMPLES 25
+#define MIN_SAMPLES 1
 #define MAX_SAMPLES 8000
 
 #define X 0
@@ -32,31 +32,54 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
     _zSampleRate->SetIntType(true);
     _zSampleRate->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
 
-    connect(_xSamplingRate, SIGNAL(valueChanged(int)), this, SLOT(xSamplingRateChanged(int)));
-    connect(_ySamplingRate, SIGNAL(valueChanged(int)), this, SLOT(ySamplingRateChanged(int)));
-    connect(_zSamplingRate, SIGNAL(valueChanged(int)), this, SLOT(zSamplingRateChanged(int)));
+    connect(_xSampleRate, SIGNAL(valueChanged(int)), this, SLOT(_xSampleRateChanged(int)));
+    connect(_ySampleRate, SIGNAL(valueChanged(int)), this, SLOT(_ySampleRateChanged(int)));
+    connect(_zSampleRate, SIGNAL(valueChanged(int)), this, SLOT(_zSampleRateChanged(int)));
+}
+
+void SliceAppearanceSubtab::_xSampleRateChanged(int rate)
+{
+    std::vector<int> rates = _params->GetSampleRates();
+    rates[X] = rate;
+    _params->SetSampleRates(rates);
+}
+
+void SliceAppearanceSubtab::_ySampleRateChanged(int rate)
+{
+    std::vector<int> rates = _params->GetSampleRates();
+    rates[Y] = rate;
+    _params->SetSampleRates(rates);
+}
+
+void SliceAppearanceSubtab::_zSampleRateChanged(int rate)
+{
+    std::vector<int> rates = _params->GetSampleRates();
+    rates[Z] = rate;
+    _params->SetSampleRates(rates);
 }
 
 void SliceAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
+    _params = dynamic_cast<VAPoR::SliceParams *>(rParams);
+    assert(_params);
+
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
 
-    Box *               box = rParams->GetBox();
     std::vector<double> minExt, maxExt;
-    box->GetExtents(minExt, maxExt);
+    rParams->GetBox()->GetExtents(minExt, maxExt);
 
     if (minExt[X] == maxExt[X])
-        _xSamplingRate->setEnabled(false);
+        _xSampleRate->setEnabled(false);
     else
-        _xSamplingRage->setEnabled(true);
+        _xSampleRate->setEnabled(true);
     if (minExt[Y] == maxExt[Y])
-        _ySamplingRate->setEnabled(false);
+        _ySampleRate->setEnabled(false);
     else
-        _ySamplingRage->setEnabled(true);
+        _ySampleRate->setEnabled(true);
     if (minExt[Z] == maxExt[Z])
-        _zSamplingRate->setEnabled(false);
+        _zSampleRate->setEnabled(false);
     else
-        _zSamplingRage->setEnabled(true);
+        _zSampleRate->setEnabled(true);
 }
 
 SliceGeometrySubtab::SliceGeometrySubtab(QWidget *paremt)

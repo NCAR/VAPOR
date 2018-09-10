@@ -41,17 +41,6 @@ void SliceParams::_init() { SetDiagMsg("SliceParams::_init()"); }
 
 bool SliceParams::IsOpaque() const { return true; }
 
-std::vector<int> SliceParams::GetSamplingRates() const
-{
-    std::vector<double> defaultVec(3, 1);
-    std::vector<double> tmpVec = GetValueDoubleVec(_samplingRateTag, defaultVec);
-
-    std::vector<int> returnVec;
-    for (int i = 0; i < tmpVec.size(); i++) returnVec[i] = (int)tmpVec[i];
-
-    return returnVec;
-}
-
 bool SliceParams::usingVariable(const std::string &varname)
 {
     if ((varname.compare(GetHeightVariableName()) == 0)) { return (true); }
@@ -59,7 +48,18 @@ bool SliceParams::usingVariable(const std::string &varname)
     return (varname.compare(GetVariableName()) == 0);
 }
 
-void SliceParams::SetSamplingRates(std::vector<int> rates)
+std::vector<int> SliceParams::GetSampleRates() const
+{
+    std::vector<double> defaultVec(3, 1);
+    std::vector<double> tmpVec = GetValueDoubleVec(_samplingRateTag, defaultVec);
+
+    std::vector<int> returnVec;
+    for (int i = 0; i < tmpVec.size(); i++) returnVec.push_back((int)tmpVec[i]);
+
+    return returnVec;
+}
+
+void SliceParams::SetSampleRates(std::vector<int> rates)
 {
     std::vector<double> doubleVec;
     for (int i = 0; i < rates.size(); i++) { doubleVec.push_back((double)rates[i]); }
