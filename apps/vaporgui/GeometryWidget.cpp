@@ -292,11 +292,13 @@ void GeometryWidget::updateRangeLabels(
 	} 
 	else 
 	{
-		Reinit(
-			(DimFlags)THREED,
-			_varFlags,
-			_geometryFlags
-		);
+        if (!(_dimFlags & THREED)) {
+    		Reinit(
+    			(DimFlags)THREED,
+    			_varFlags,
+    			_geometryFlags
+    		);
+        }
 
 		QString zTitle = QString("Z Min: ") + 
 			QString::number(minExt[2], 'g', 3) +
