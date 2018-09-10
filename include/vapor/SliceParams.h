@@ -25,9 +25,9 @@ class PARAMS_API SliceParams : public RenderParams {
         return ("SliceParams");
     }
 
-    std::vector<int> GetSamplingRates() const;
+    std::vector<int> GetSampleRates() const;
 
-    void SetSamplingRates(std::vector<int> rates);
+    void SetSampleRates(std::vector<int> rates);
 
     bool IsOpaque() const;
 
