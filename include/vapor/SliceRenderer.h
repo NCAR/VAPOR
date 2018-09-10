@@ -44,6 +44,7 @@ class RENDER_API SliceRenderer : public Renderer {
         std::vector<float> tf_lut;
         std::vector<double> tf_minMax;
         std::vector<double> boxMin, boxMax;
+        std::vector<int> textureSampleRates;
     } _cacheParams;
 
     int _buildCache();
@@ -51,6 +52,10 @@ class RENDER_API SliceRenderer : public Renderer {
     void _saveCacheParams();
     void _initTexture();
     int _saveTextureData();
+    int _getOrientation() const;
+    void _renderXY(std::vector<double> min, std::vector<double> max) const;
+    void _renderXZ(std::vector<double> min, std::vector<double> max) const;
+    void _renderYZ(std::vector<double> min, std::vector<double> max) const;
 
     GLuint _texture;
     int _textureWidth;
