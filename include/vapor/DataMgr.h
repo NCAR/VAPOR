@@ -529,12 +529,46 @@ std::vector <size_t> GetCRatios(string varname) const;
 	return(_proj4StringDefault);
  }
 
+#ifdef	VAPOR3_0_0_ALPHA
+
+ //!
+ //! Add a pipeline stage to produce derived variables
+ //!
+ //! Add a new pipline stage for derived variable calculation. If a 
+ //! pipeline already exists with the same
+ //! name it is replaced. The output variable names are added to
+ //! the list of variables available for this data 
+ //! set (see GetVariables3D, etc.).
+ //!
+ //! An error occurs if:
+ //!
+ //! \li The output variable names match any of the native variable 
+ //! names - variable names returned via _GetVariables3D(), etc. 
+ //! \li The output variable names match the output variable names
+ //! of pipeline stage previously added with NewPipeline()
+ //! \li A circular dependency is introduced by adding \p pipeline
+ //!
+ //! \retval status A negative int is returned on failure.
+ //!
+ int NewPipeline(PipeLine *pipeline);
+
+ //!
+ //! Remove the named pipline if it exists. Otherwise this method is a
+ //! no-op
+ //!
+ //! \param[in] name The name of the pipeline as returned by 
+ //! PipeLine::GetName()
+ //!
+ void RemovePipeline(string name);
+#endif
+
  //! Return true if the named variable is the output of a pipeline
  //!
  //! This method returns true if \p varname matches a variable name
  //! in the output list (PipeLine::GetOutputs()) of any pipeline added
  //! with NewPipeline()
  //!
+ //! \sa NewPipeline()
  //
  bool IsVariableDerived(string varname) const;
 
@@ -549,21 +583,16 @@ std::vector <size_t> GetCRatios(string varname) const;
  //
  bool IsVariableNative(string varname) const;
 
+ int AddDerivedVar(DerivedDataVar *derivedVar);
+
+ void RemoveDerivedVar(string varname);
+
 	
  //! Purge the cache of a variable
  //!
  //! \param[in] varname is the variable name
  //!
  void PurgeVariable(string varname);
-
- //! Add a new derived variable to the data set
- //!
- //! 
- int AddDerivedVar(DerivedDataVar *derivedVar);
-
- //! Remove a new derived variable from the data set
- //
- void RemoveDerivedVar(string varname);
 
 
  class BlkExts {
@@ -775,6 +804,7 @@ private:
  std::vector <double> _timeCoordinates;
  string _proj4String;
  string _proj4StringDefault;
+ std::vector <size_t> _bs;
 
  typedef struct {
 	size_t ts;
@@ -929,9 +959,8 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	const vector <size_t> &max,
 	vector <string> &varnames,
 	vector <size_t> &roi_dims,
-	vector < vector <size_t > > &dims_at_levelvec,
+	vector <size_t> &dims,
 	vector < vector <size_t > > &bsvec,
-	vector < vector <size_t > > &bs_at_levelvec,
 	vector < vector <size_t > > &bminvec,
 	vector < vector <size_t > > &bmaxvec
  ) const;
@@ -942,9 +971,7 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	int level,
 	int lod,
 	vector <string> &varnames,
-	vector < vector <size_t > > &dims_at_levelvec,
 	vector < vector <size_t > > &bsvec,
-	vector < vector <size_t > > &bs_at_levelvec,
 	vector < vector <size_t > > &bminvec,
 	vector < vector <size_t > > &bmaxvec
  ) const;
@@ -982,11 +1009,25 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	bool    lock
  );
 
+ template <typename T>
+ int _get_region_from_fs_helper(
+	size_t ts, string varname, int level, int lod,
+	const vector <size_t> &file_bmin,
+	const vector <size_t> &file_bmax,
+	const vector <size_t> &file_bs,
+	const vector <size_t> &downsample_bs,
+	const vector <size_t> &grid_bs,
+	const vector <size_t> &grid_min,
+	const vector <size_t> &grid_max,
+	T *blks
+ );
+
  template <typename T> 
  T *_get_region_from_fs(
 	size_t ts, string varname, int level, int lod,
-	const std::vector <size_t> &bs, const std::vector <size_t> &bmin,
-	const std::vector <size_t> &bmax, bool lock
+	const std::vector <size_t> &grid_bs, 
+	const std::vector <size_t> &grid_bmin,
+	const std::vector <size_t> &grid_bmax, bool lock
  );
 
  template <typename T> 
@@ -1098,9 +1139,10 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	int fd,
 	const vector <size_t> &min, const vector <size_t> &max, T *region
  );
+ template <class T>
  int _readRegion(
 	int fd,
-	const vector <size_t> &min, const vector <size_t> &max, float *region
+	const vector <size_t> &min, const vector <size_t> &max, T *region
  );
  int _closeVariable(int fd);
 
