@@ -771,11 +771,11 @@ private:
 
     int _find_bounding_grid(size_t ts, string varname, int level, int lod, std::vector<double> min, std::vector<double> max, std::vector<size_t> &min_ui, std::vector<size_t> &max_ui);
 
-    void _setupCoordVecsHelper(string data_varname, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, vector<size_t> &coord_bmin,
-                               vector<size_t> &coord_bmax) const;
+    void _setupCoordVecsHelper(string data_varname, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order, vector<size_t> &coord_bmin,
+                               vector<size_t> &coord_bmax, bool structured) const;
 
     int _setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims, vector<size_t> &dims,
-                        vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const;
+                        vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec, bool structured) const;
 
     int _setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const;
 
