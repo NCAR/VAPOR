@@ -23,7 +23,6 @@ set (SRC
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 	MyPython.cpp
-	PyEngine.cpp
 )
 
 set (HEADERS
@@ -49,7 +48,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
-	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
