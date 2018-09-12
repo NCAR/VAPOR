@@ -1474,17 +1474,6 @@ public:
     //!
     virtual XType GetAttType(string varname, string attname) const { return (getAttType(varname, attname)); }
 
-    //! Get blocking dimensions
-    //!
-    //! Returns a zero (empty) or three-element list of spatial blocking
-    //! dimension for stored data.
-    //! Ordering is from fastest to slowest varying dimension. If non-empty
-    //! all data and coordinate variables in the data collection use the
-    //! specified blocking. If empty, the data are not blocked.
-    //!
-    //
-    std::vector<size_t> GetBlockSize() const { return (_getBlockSize()); }
-
     //! Return a variable's array dimension lengths at a specified refinement level
     //!
     //! Compressed variables may have a multi-resolution grid representation.
@@ -1497,12 +1486,8 @@ public:
     //! native dimensions are returned.
     //!
     //! \note The number of elements in \p dims_at_level will match that of
-    //! \p bs_at_level. If \p level is -1, the highest refinement level, the return
-    //! vector \p bs_at_level should match the n values by GetBlockSize().
-    //! where n is the number of elements in \p bs_at_level, unless the
-    //! vector returned by GetBlockSize() is empty. In this case, only a single
-    //! refinement level exists, and \p bs_at_level should be equivalent
-    //! to \p dims_at_level.
+    //! \p bs_at_level.  If the data are not blocked the value of each
+    //! element of \p bs_at_level will be 1.
     //!
     //! \param[in] varname Data or coordinate variable name.
     //! \param[in] level Specifies a member of a multi-resolution variable's
@@ -1518,6 +1503,7 @@ public:
     //! less than the topological dimension returned by DC::Mesh::GetTopologyDim().
     //!
     //! \sa VAPoR::DC, DC::DataVar::GetBS(), DC::GetVarDimLens()
+    //! \sa ReadRegionBlock()
     //
     virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
     {
@@ -1622,10 +1608,8 @@ public:
     //! Decompress, as necessary, and read a single hyperslice of
     //! data from the variable
     //! indicated by the most recent call to OpenVariableRead().
-    //! The dimensions of a slice are given by the product of the
-    //! n-1 fastest varying dimensions returned by GetDimLensAtLevel() for
-    //! for the currently opened grid refinement level. See
-    //! OpenVariableRead().
+    //! The dimensions and number of slices are given by
+    //! GetHyperSliceInfo().
     //!
     //! This method should be called exactly NZ times for each opened variable,
     //! where NZ is the dimension of slowest varying dimension returned by
@@ -1638,7 +1622,7 @@ public:
     //! \param[out] slice A slice of data
     //! \retval status Returns a non-negative value on success
     //!
-    //! \sa OpenVariableRead()
+    //! \sa OpenVariableRead(), GetHyperSliceInfo()
     //!
     virtual int ReadSlice(int fd, float *slice) { return (_readSliceTemplate(fd, slice)); }
     virtual int ReadSlice(int fd, int *slice) { return (_readSliceTemplate(fd, slice)); }
@@ -1674,15 +1658,19 @@ public:
     //! variable.
     //!
     //! This method is identical to ReadRegion() with the exceptions
-    //! that for compressed variables:
+    //! that:
     //!
-    //! \param[in] fd A valid file descriptor returned by OpenVariableRead()
     //! \li The vectors \p start and \p count must be aligned
     //! with the underlying storage block of the variable. See
-    //! DC::SetCompressionBlock()
+    //! DC::GetDimLensAtLevel()
+    //!
+    //! For data that are not blocked (i.e. the elements of the
+    //! \p bs_at_level parameter returned by GetDimsAtLevel() are all 1)
+    //! this method is identical to ReadRegion()
     //!
     //! \li The hyperslab copied to \p region will preserve its underlying
-    //! storage blocking (the data will not be contiguous)
+    //! storage blocking (the data will not be contiguous, unless the
+    //! data are not blocked)
     //!
     virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegionBlock(fd, min, max, region)); }
     virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegionBlock(fd, min, max, region)); }

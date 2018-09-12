@@ -34,15 +34,7 @@ template<class T> string vector_to_string(vector<T> v)
     return (oss.str());
 }
 
-// Product of elements in a vector
-//
-size_t vproduct(vector<size_t> a)
-{
-    size_t ntotal = 1;
-
-    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
-    return (ntotal);
-}
+#ifdef UNUSED_FUNCTION
 
 size_t decimate_length(size_t l)
 {
@@ -188,8 +180,8 @@ template<typename T> void decimate(const vector<size_t> &bmin, const vector<size
     vector<size_t> dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs.push_back(decimate_length(src_bs[i])); }
 
-    size_t src_block_size = vproduct(src_bs);
-    size_t dst_block_size = vproduct(dst_bs);
+    size_t src_block_size = VProduct(src_bs);
+    size_t dst_block_size = VProduct(dst_bs);
 
     if (src_bs.size() == 1) {
         for (int i = bmin[0]; i <= bmax[0]; i++) {
@@ -218,6 +210,129 @@ template<typename T> void decimate(const vector<size_t> &bmin, const vector<size
     }
 }
 
+#endif
+
+void downsample_compute_weights(size_t nIn, size_t nOut, vector<float> &wgts)
+{
+    assert(nOut <= nIn);
+    wgts.resize(nOut, 0.0);
+
+    float deltax = (float)nIn / (float)nOut;
+    float shift = ((nIn - 1) - (deltax * (nOut - 1))) / 2.0;
+    for (int i = 0; i < nOut; i++) { wgts[i] = (i * deltax) + shift; }
+}
+
+template<typename T> void downsample1d(const T *signalIn, size_t nIn, size_t strideIn, T *signalOut, size_t nOut, size_t strideOut, const vector<float> &wgts)
+{
+    assert(nOut <= nIn);
+    assert(nOut == wgts.size());
+
+    for (size_t i = 0; i < nOut; i++) {
+        size_t i0 = wgts[i];
+        float  w = wgts[i] - i0;
+        signalOut[i * strideOut] = (signalIn[i0 * strideIn] * (1.0 - w)) + (signalIn[(i0 + 1) * strideIn] * w);
+    }
+}
+
+template<typename T> void downsample2d(const T *signalIn, vector<size_t> inDims, T *signalOut, vector<size_t> outDims)
+{
+    assert(inDims.size() == 2);
+    assert(inDims.size() == outDims.size());
+
+    // Sample along first dimension
+    //
+    vector<float> wgts;
+    downsample_compute_weights(inDims[0], outDims[0], wgts);
+
+    T *buf = new T[inDims[1] * outDims[0]];
+
+    size_t nIn = inDims[0];
+    size_t nOut = outDims[0];
+    size_t strideIn = 1;
+    size_t strideOut = 1;
+    size_t n = inDims[1];
+    for (int i = 0; i < n; i++) {
+        const T *inPtr = signalIn + (i * nIn);
+        T *      outPtr = buf + (i * nOut);
+        downsample1d(inPtr, nIn, strideIn, outPtr, nOut, strideOut, wgts);
+    }
+
+    // Sample along second dimension
+    //
+    downsample_compute_weights(inDims[1], outDims[1], wgts);
+
+    nIn = inDims[1];
+    nOut = outDims[1];
+    strideIn = outDims[0];
+    strideOut = outDims[0];
+    n = outDims[0];
+    for (int i = 0; i < n; i++) {
+        const T *inPtr = buf + i;
+        T *      outPtr = signalOut + i;
+        downsample1d(inPtr, nIn, strideIn, outPtr, nOut, strideOut, wgts);
+    }
+
+    delete[] buf;
+}
+
+template<typename T> void downsample3d(const T *signalIn, vector<size_t> inDims, T *signalOut, vector<size_t> outDims)
+{
+    assert(inDims.size() == 3);
+    assert(inDims.size() == outDims.size());
+
+    // Sample along XY planes first
+    //
+
+    T *buf = new T[inDims[2] * outDims[1] * outDims[0]];
+
+    vector<size_t> inDims2d = {inDims[0], inDims[1]};
+    vector<size_t> outDims2d = {outDims[0], outDims[1]};
+
+    size_t nIn = inDims[0] * inDims[1];
+    size_t nOut = outDims[0] * outDims[1];
+    size_t n = inDims[2];
+    for (int i = 0; i < n; i++) {
+        const T *inPtr = signalIn + (i * nIn);
+        T *      outPtr = buf + (i * nOut);
+        downsample2d(inPtr, inDims2d, outPtr, outDims2d);
+    }
+
+    // Sample along Z dimension
+    //
+    vector<float> wgts;
+    downsample_compute_weights(inDims[2], outDims[2], wgts);
+
+    nIn = inDims[2];
+    nOut = outDims[2];
+    size_t strideIn = outDims[0] * outDims[1];
+    size_t strideOut = outDims[0] * outDims[2];
+    n = outDims[0] * outDims[1];
+    for (int i = 0; i < n; i++) {
+        const T *inPtr = buf + i;
+        T *      outPtr = signalOut + i;
+        downsample1d(inPtr, nIn, strideIn, outPtr, nOut, strideOut, wgts);
+    }
+
+    delete[] buf;
+}
+
+template<typename T> void downsample(const T *signalIn, vector<size_t> inDims, T *signalOut, vector<size_t> outDims)
+{
+    assert(inDims.size() >= 1 && inDims.size() <= 3);
+    assert(inDims.size() == outDims.size());
+
+    if (inDims.size() == 1) {
+        vector<float> wgts;
+        downsample_compute_weights(inDims[0], outDims[0], wgts);
+
+        downsample1d(signalIn, inDims[0], 1, signalOut, outDims[0], 1, wgts);
+    } else if (inDims.size() == 2) {
+        downsample2d(signalIn, inDims, signalOut, outDims);
+    } else if (inDims.size() == 3) {
+        downsample3d(signalIn, inDims, signalOut, outDims);
+    }
+}
+
 // Map voxel to block coordinates
 //
 void map_vox_to_blk(vector<size_t> bs, const vector<size_t> &vcoord, vector<size_t> &bcoord)
@@ -241,41 +356,141 @@ void map_blk_to_vox(vector<size_t> bs, const vector<size_t> &bmin, const vector<
     }
 }
 
-#ifdef UNUSED_FUNCTION
-void coord_setup_helper(const vector<string> &dimnames, const vector<size_t> &dims, const vector<size_t> &dims_at_level, const vector<size_t> &bs, const vector<size_t> &bs_at_level,
-                        const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<string> &my_dimnames, vector<size_t> &my_dims, vector<size_t> &my_dims_at_level, vector<size_t> &my_bs,
-                        vector<size_t> &my_bs_at_level, vector<size_t> &my_bmin, vector<size_t> &my_bmax)
+// Map block to vox coordinates, and clamp to dimension boundaries
+//
+void map_blk_to_vox(const vector<size_t> &bs, const vector<size_t> &dims, const vector<size_t> &bmin, const vector<size_t> &bmax, vector<size_t> &vmin, vector<size_t> &vmax)
 {
-    assert(dimnames.size() == dims.size());
-    assert(dimnames.size() == dims_at_level.size());
-    assert(dimnames.size() >= bs.size());
-    assert(dimnames.size() >= bs_at_level.size());
-    assert(dimnames.size() >= bmin.size());
-    assert(dimnames.size() >= bmax.size());
+    assert(bs.size() == bmin.size());
+    assert(bs.size() == bmax.size());
+    assert(bs.size() == dims.size());
+    vmin.clear();
+    vmax.clear();
 
-    my_dims.clear();
-    my_dims_at_level.clear();
-    my_bs.clear();
-    my_bs_at_level.clear();
-    my_bmin.clear();
-    my_bmax.clear();
-
-    // Assumes mydimnames is an ordered subset of dimnames
-    //
-    for (int i = 0; i < dimnames.size(); i++) {
-        for (int j = 0; j < my_dimnames.size(); j++) {
-            if (dimnames[i] == my_dimnames[j]) {
-                my_dims.push_back(dims[i]);
-                my_dims_at_level.push_back(dims_at_level[i]);
-                my_bs.push_back(bs[i]);
-                my_bs_at_level.push_back(bs_at_level[i]);
-                my_bmin.push_back(bmin[i]);
-                my_bmax.push_back(bmax[i]);
-            }
-        }
+    for (int i = 0; i < bs.size(); i++) {
+        vmin.push_back(bmin[i] * bs[i]);
+        vmax.push_back(bmax[i] * bs[i] + bs[i] - 1);
+        if (vmin[i] >= dims[i]) vmin[i] = dims[i] - 1;
+        if (vmax[i] >= dims[i]) vmax[i] = dims[i] - 1;
     }
 }
-#endif
+
+template<class T>
+void copy_block(const T *src, const vector<size_t> &src_min, const vector<size_t> &src_max, T *dst, const vector<size_t> &dst_bs, const vector<size_t> &dst_min, const vector<size_t> &dst_max)
+{
+    assert(src_min.size() <= 3);
+    assert(src_min.size() == src_max.size());
+    assert(src_min.size() == dst_bs.size());
+    assert(src_min.size() == dst_min.size());
+    assert(src_min.size() == dst_max.size());
+
+    vector<size_t> dst_bmin, dst_bmax;
+    map_vox_to_blk(dst_bs, dst_min, dst_bmin);
+
+    // Min and max bounds of block to be copied relative to origin of
+    // source block along Z axis
+    //
+    size_t src_min_k = 0, src_max_k = 0;
+
+    // Min and max bounds of destination subregion relative to origin
+    // of destination region along Z axis
+    //
+    size_t dst_min_k = 0, dst_max_k = 0;
+
+    // Destination block size along Z axis
+    //
+    size_t dst_bs_k = 1;
+
+    // Number of destination blocks along Z axis;
+    size_t dst_nb_k = 1;
+    size_t src_bs_k = 1;
+    if (src_min.size() > 2) {
+        src_max_k = src_max[2] - src_min[2];
+        dst_max_k = dst_max[2] - dst_min[2];
+        if (src_min[2] < dst_min[2]) { src_min_k += dst_min[2] - src_min[2]; }
+        if (src_max[2] > dst_max[2]) { src_max_k -= src_max[2] - dst_max[2]; }
+        if (src_min[2] > dst_min[2]) { dst_min_k = src_min[2] - dst_min[2]; }
+        if (src_max[2] < dst_max[2]) { dst_max_k = src_max[2] - dst_min[2]; }
+        dst_bs_k = dst_bs[2];
+
+        dst_nb_k = (dst_max[2] / dst_bs[2]) - (dst_min[2] / dst_bs[2]) + 1;
+        src_bs_k = src_max[2] - src_min[2] + 1;
+    }
+    assert((dst_max_k - dst_min_k) == (src_max_k - src_min_k));
+
+    size_t src_min_j = 0, src_max_j = 0;
+    size_t dst_min_j = 0, dst_max_j = 0;
+    size_t dst_bs_j = 1;
+    size_t dst_nb_j = 1;
+    size_t src_bs_j = 1;
+    if (src_min.size() > 1) {
+        src_max_j = src_max[1] - src_min[1];
+        dst_max_j = dst_max[1] - dst_min[1];
+        if (src_min[1] < dst_min[1]) { src_min_j += dst_min[1] - src_min[1]; }
+        if (src_max[1] > dst_max[1]) { src_max_j -= src_max[1] - dst_max[1]; }
+        if (src_min[1] > dst_min[1]) { dst_min_j = src_min[1] - dst_min[1]; }
+        if (src_max[1] < dst_max[1]) { dst_max_j = src_max[1] - dst_min[1]; }
+        dst_bs_j = dst_bs[1];
+
+        dst_nb_j = (dst_max[1] / dst_bs[1]) - (dst_min[1] / dst_bs[1]) + 1;
+        src_bs_j = src_max[1] - src_min[1] + 1;
+    }
+    assert((dst_max_j - dst_min_j) == (src_max_j - src_min_j));
+
+    size_t src_min_i = 0, src_max_i = 0;
+    size_t dst_min_i = 0, dst_max_i = 0;
+    size_t dst_bs_i = 1;
+    size_t dst_nb_i = 1;
+    size_t src_bs_i = 1;
+    if (src_min.size() > 0) {
+        src_max_i = src_max[0] - src_min[0];
+        dst_max_i = dst_max[0] - dst_min[0];
+        if (src_min[0] < dst_min[0]) { src_min_i += dst_min[0] - src_min[0]; }
+        if (src_max[0] > dst_max[0]) { src_max_i -= src_max[0] - dst_max[0]; }
+        if (src_min[0] > dst_min[0]) { dst_min_i = src_min[0] - dst_min[0]; }
+        if (src_max[0] < dst_max[0]) { dst_max_i = src_max[0] - dst_min[0]; }
+        dst_bs_i = dst_bs[0];
+
+        dst_nb_i = (dst_max[0] / dst_bs[0]) - (dst_min[0] / dst_bs[0]) + 1;
+        src_bs_i = src_max[0] - src_min[0] + 1;
+    }
+    assert((dst_max_i - dst_min_i) == (src_max_i - src_min_i));
+
+    size_t block_size = VProduct(dst_bs);
+
+    T *dstptr = dst;
+
+    // dst_xx coordinates are relative to current destination block origin
+    //
+    size_t dst_kk = dst_min_k % dst_bs_k;
+    for (size_t src_k = src_min_k, dst_k = dst_min_k; src_k <= src_max_k; src_k++, dst_k++) {
+        if (dst_k % dst_bs_k == 0) {
+            dst_kk = 0;
+            dstptr = dst + block_size * ((dst_k / dst_bs_k) * dst_nb_k * dst_nb_i);
+        }
+
+        size_t dst_jj = dst_min_j % dst_bs_j;
+        for (size_t src_j = src_min_j, dst_j = dst_min_j; src_j <= src_max_j; src_j++, dst_j++) {
+            if (dst_j % dst_bs_j == 0) {
+                dst_jj = 0;
+                dstptr = dst + block_size * ((dst_k / dst_bs_k) * dst_nb_j * dst_nb_i + (dst_j / dst_bs_j) * dst_nb_i);
+            }
+
+            size_t dst_ii = dst_min_i % dst_bs_i;
+            for (size_t src_i = src_min_i, dst_i = dst_min_i; src_i <= src_max_i; src_i++, dst_i++) {
+                if (dst_i % dst_bs_i == 0) {
+                    dst_ii = 0;
+                    dstptr = dst + block_size * ((dst_k / dst_bs_k) * dst_nb_j * dst_nb_i + (dst_j / dst_bs_j) * dst_nb_i + (dst_i / dst_bs_i));
+                }
+
+                dstptr[dst_kk * dst_bs_i * dst_bs_j + dst_jj * dst_bs_i + dst_ii] = src[src_k * src_bs_i * src_bs_j + src_j * src_bs_i + src_i];
+
+                dst_ii++;
+            }
+            dst_jj++;
+        }
+        dst_kk++;
+    }
+}
 
 };    // namespace
 
@@ -304,6 +519,8 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
     _openVarName.clear();
     _proj4String.clear();
     _proj4StringDefault.clear();
+    _bs = {64, 64, 64};
+    cout << "HARD CODE BS\n";
 }
 
 DataMgr::~DataMgr()
@@ -654,7 +871,8 @@ size_t DataMgr::GetNumRefLevels(string varname) const
 
     if (varname == "") return 1;
 
-    if (IsVariableDerived(varname)) return (1);
+    DerivedVar *dvar = _getDerivedVar(varname);
+    if (dvar) { return (dvar->GetNumRefLevels()); }
 
     return (_dc->GetNumRefLevels(varname));
 }
@@ -783,14 +1001,12 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
 }
 
 int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims,
-                             vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec,
-                             vector<vector<size_t>> &bmaxvec) const
+                             vector<size_t> &dims, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const
 {
     varnames.clear();
     roi_dims.clear();
-    dims_at_levelvec.clear();
+    dims.clear();
     bsvec.clear();
-    bs_at_levelvec.clear();
     bminvec.clear();
     bmaxvec.clear();
 
@@ -798,26 +1014,21 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     //
     for (int i = 0; i < min.size(); i++) { roi_dims.push_back(max[i] - min[i] + 1); }
 
-    vector<size_t> dims;
-    vector<size_t> bs;
-    int            rc = DataMgr::GetDimLensAtLevel(varname, -1, dims, bs);
-    assert(rc >= 0);
-    bsvec.push_back(bs);
-
     // Grid and block dimensions at requested refinement
     //
-    vector<size_t> bs_at_level;
+    vector<size_t> dummy;
     vector<size_t> dims_at_level;
-    rc = DataMgr::GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    int            rc = DataMgr::GetDimLensAtLevel(varname, level, dims, dummy);
     assert(rc >= 0);
-    dims_at_levelvec.push_back(dims_at_level);
-    bs_at_levelvec.push_back(bs_at_level);
+
+    vector<size_t> bs(_bs.begin(), _bs.begin() + dims.size());
+    bsvec.push_back(bs);
 
     // Map voxel coordinates into block coordinates
     //
     vector<size_t> bmin, bmax;
-    map_vox_to_blk(bs_at_level, min, bmin);
-    map_vox_to_blk(bs_at_level, max, bmax);
+    map_vox_to_blk(bs, min, bmin);
+    map_vox_to_blk(bs, max, bmax);
     bminvec.push_back(bmin);
     bmaxvec.push_back(bmax);
 
@@ -826,28 +1037,15 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     assert(ok);
 
     for (int i = 0; i < cvarnames.size(); i++) {
-        vector<size_t> dims;
-        vector<size_t> bs;
-        int            rc = DataMgr::GetDimLensAtLevel(cvarnames[i], -1, dims, bs);
-        assert(rc >= 0);
-
-        // Grid and block dimensions at requested refinement
-        //
-        vector<size_t> bs_at_level;
-        vector<size_t> dims_at_level;
-        rc = DataMgr::GetDimLensAtLevel(cvarnames[i], level, dims_at_level, bs_at_level);
-        assert(rc >= 0);
-
         // Map data indices to coordinate indices. Coordinate indices
         // are a subset of the data indices.
         //
         vector<size_t> coord_bmin, coord_bmax;
-        vector<size_t> coord_dims_at_level, coord_bs_at_level, coord_bs;
         _setupCoordVecsHelper(varname, bmin, bmax, cvarnames[i], coord_bmin, coord_bmax);
 
-        dims_at_levelvec.push_back(dims_at_level);
+        vector<size_t> bs(_bs.begin(), _bs.begin() + coord_bmin.size());
+
         bsvec.push_back(bs);
-        bs_at_levelvec.push_back(bs_at_level);
         bminvec.push_back(coord_bmin);
         bmaxvec.push_back(coord_bmax);
     }
@@ -858,13 +1056,11 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     return (0);
 }
 
-int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec,
-                            vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec) const
+int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec,
+                            vector<vector<size_t>> &bmaxvec) const
 {
     varnames.clear();
-    dims_at_levelvec.clear();
     bsvec.clear();
-    bs_at_levelvec.clear();
     bminvec.clear();
     bmaxvec.clear();
 
@@ -891,38 +1087,30 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
     for (int i = 0; i < varnames.size(); i++) {
         string name = varnames[i];
 
-        vector<size_t> dims;
-        vector<size_t> bs;
-        int            rc = DataMgr::GetDimLensAtLevel(name, -1, dims, bs);
+        vector<size_t> dims, dummy;
+        int            rc = DataMgr::GetDimLensAtLevel(name, level, dims, dummy);
         if (rc < 0) {
             SetErrMsg("Invalid variable reference : %s", name.c_str());
             return (-1);
         }
 
-        // Grid and block dimensions at requested refinement
+        cerr << "BS set to 64^3, but connection vectors are flat\n";
+
+        vector<size_t> bs(_bs.begin(), _bs.begin() + dims.size());
+
+        // Always read the entire connection variable
         //
-        vector<size_t> bs_at_level;
-        vector<size_t> dims_at_level;
-        rc = DataMgr::GetDimLensAtLevel(name, level, dims_at_level, bs_at_level);
-
-        if (rc < 0) {
-            SetErrMsg("Invalid variable reference : %s", name.c_str());
-            return (-1);
-        }
-
-        vector<size_t> conn_min = vector<size_t>(dims_at_level.size(), 0);
-        vector<size_t> conn_max = dims_at_level;
+        vector<size_t> conn_min = vector<size_t>(dims.size(), 0);
+        vector<size_t> conn_max = dims;
         for (int i = 0; i < conn_max.size(); i++) { conn_max[i]--; }
 
         // Map voxel coordinates into block coordinates
         //
         vector<size_t> bmin, bmax;
-        map_vox_to_blk(bs_at_level, conn_min, bmin);
-        map_vox_to_blk(bs_at_level, conn_max, bmax);
+        map_vox_to_blk(bs, conn_min, bmin);
+        map_vox_to_blk(bs, conn_max, bmax);
 
         bsvec.push_back(bs);
-        dims_at_levelvec.push_back(dims_at_level);
-        bs_at_levelvec.push_back(bs_at_level);
         bminvec.push_back(bmin);
         bmaxvec.push_back(bmax);
     }
@@ -951,15 +1139,14 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
 
     vector<string>         varnames;
     vector<size_t>         roi_dims;
-    vector<vector<size_t>> dims_at_levelvec;
+    vector<size_t>         dims;
     vector<vector<size_t>> bsvec;
-    vector<vector<size_t>> bs_at_levelvec;
     vector<vector<size_t>> bminvec;
     vector<vector<size_t>> bmaxvec;
 
     // Get dimensions for coordinate variables
     //
-    int rc = _setupCoordVecs(ts, varname, level, lod, min, max, varnames, roi_dims, dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec);
+    int rc = _setupCoordVecs(ts, varname, level, lod, min, max, varnames, roi_dims, dims, bsvec, bminvec, bmaxvec);
     if (rc < 0) return (NULL);
 
     //
@@ -974,15 +1161,13 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     // Get dimensions for connectivity variables (if any)
     //
     vector<string>         conn_varnames;
-    vector<vector<size_t>> conn_dims_at_levelvec;
     vector<vector<size_t>> conn_bsvec;
-    vector<vector<size_t>> conn_bs_at_levelvec;
     vector<vector<size_t>> conn_bminvec;
     vector<vector<size_t>> conn_bmaxvec;
 
     vector<int *> conn_blkvec;
     if (_gridHelper.IsUnstructured(gridType)) {
-        rc = _setupConnVecs(ts, varname, level, lod, conn_varnames, conn_dims_at_levelvec, conn_bsvec, conn_bs_at_levelvec, conn_bminvec, conn_bmaxvec);
+        rc = _setupConnVecs(ts, varname, level, lod, conn_varnames, conn_bsvec, conn_bminvec, conn_bmaxvec);
         if (rc < 0) return (NULL);
 
         rc = DataMgr::_get_regions<int>(ts, conn_varnames, level, lod, true, conn_bsvec, conn_bminvec, conn_bmaxvec, conn_blkvec);
@@ -1001,10 +1186,10 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
 
         _ugrid_setup(dvar, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
 
-        rg = _gridHelper.MakeGridUnstructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec, conn_blkvec, conn_bs_at_levelvec,
-                                              conn_bminvec, conn_bmaxvec, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
+        rg = _gridHelper.MakeGridUnstructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims, blkvec, bsvec, bminvec, bmaxvec, conn_blkvec, conn_bsvec, conn_bminvec, conn_bmaxvec,
+                                              vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
     } else {
-        rg = _gridHelper.MakeGridStructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims_at_levelvec[0], blkvec, bs_at_levelvec, bminvec, bmaxvec);
+        rg = _gridHelper.MakeGridStructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dims, blkvec, bsvec, bminvec, bmaxvec);
     }
     assert(rg);
 
@@ -1148,11 +1333,27 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
     assert(_dc);
+    dims_at_level.clear();
+    bs_at_level.clear();
 
+    int         rc = 0;
     DerivedVar *dvar = _getDerivedVar(varname);
-    if (dvar) { return (dvar->GetDimLensAtLevel(level, dims_at_level, bs_at_level)); }
+    if (dvar) {
+        rc = dvar->GetDimLensAtLevel(level, dims_at_level, bs_at_level);
+    } else {
+        rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    }
+    if (rc < 0) return (-1);
 
-    return (_dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
+#ifdef DEAD
+    // If data are not blocked (i.e. if all elements of bs_at_level
+    // are 1) set the block size to the dimension size. This forces
+    // non-blocked data to be read as a single block, avoiding the
+    // need to block the data into some arbitrary size, but at the same
+    // time prevening non-blocked data from being subset :-(
+    //
+    if (std::all_of(bs_at_level.cbegin(), bs_at_level.cend(), [](size_t i) { return i == 1; })) { bs_at_level = dims_at_level; }
+#endif
 
     return (0);
 }
@@ -1397,40 +1598,101 @@ template<typename T> T *DataMgr::_get_region_from_cache(size_t ts, string varnam
     return (NULL);
 }
 
-template<typename T> T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax, bool lock)
+template<typename T>
+int DataMgr::_get_region_from_fs_helper(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bmin, const vector<size_t> &file_bmax, const vector<size_t> &file_bs,
+                                        const vector<size_t> &downsample_bs, const vector<size_t> &grid_bs, const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks
+
+)
 {
-    T *blks = (T *)_alloc_region(ts, varname, level, lod, bmin, bmax, bs, sizeof(T), lock, false);
-    if (!blks) return (NULL);
+    int fd = _openVariableRead(ts, varname, level, lod);
+    if (fd < 0) return (fd);
 
-    vector<size_t> min, max;
-    map_blk_to_vox(bs, bmin, bmax, min, max);
+    T *file_block = NULL;
+    T *downsample_block = NULL;
 
-    // Ugh. This stupid hack is needed because 1D variables aren't blocked
-    // in the VDC. However, we try to fake it by setting the block
-    // size to match that of the data variable. But the fake bs results
-    // in missaligned coords when we go to read 1D variables.
+    // if data on disk aren't blocked we simply read the entire region
+    // at once
     //
-    if (bs.size() == 1) {
-        vector<size_t> dims_at_level;
-        vector<size_t> bs_at_level;
-        (void)DataMgr::GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
-        if (bs_at_level[0] == 1) {
-            if (max[0] >= dims_at_level[0]) max[0] = dims_at_level[0] - 1;
+    if (std::all_of(file_bs.cbegin(), file_bs.cend(), [](size_t i) { return i == 1; })) {
+        vector<size_t> min = grid_min;
+        vector<size_t> max = grid_max;
+
+        file_block = new T[VProduct(Dims(file_bmin, file_bmax))];
+
+        int rc = _readRegion(fd, min, max, file_block);
+        if (rc < 0) {
+            delete[] file_block;
+            return (-1);
+        }
+
+        copy_block(file_block, min, max, blks, grid_bs, grid_min, grid_max);
+    } else {
+        file_block = new T[VProduct(file_bs)];
+
+        if (file_bs != downsample_bs) { downsample_block = new T[VProduct(downsample_bs)]; }
+
+        std::vector<size_t> bcoord = file_bmin;
+        for (size_t i = 0; i < VProduct(Dims(file_bmin, file_bmax)); i++) {
+            vector<size_t> min, max;
+
+            map_blk_to_vox(file_bs, bcoord, bcoord, min, max);
+
+            int rc = _readRegion(fd, min, max, file_block);
+            if (rc < 0) {
+                delete[] file_block;
+                return (-1);
+            }
+
+            if (file_bs != downsample_bs) {
+                downsample(file_block, file_bs, downsample_block, downsample_bs);
+
+                map_blk_to_vox(downsample_bs, file_bmin, file_bmax, min, max);
+
+                copy_block(downsample_block, min, max, blks, grid_bs, grid_min, grid_max);
+            } else {
+                copy_block(file_block, min, max, blks, grid_bs, grid_min, grid_max);
+            }
+            bcoord = IncrementCoords(file_bmin, file_bmax, bcoord);
         }
     }
 
-    int fd = _openVariableRead(ts, varname, level, lod);
-    if (fd < 0) return (NULL);
+    (void)_closeVariable(fd);
 
-    int rc = _readRegionBlock(fd, min, max, blks);
+    if (file_block) delete[] file_block;
+    if (downsample_block) delete[] downsample_block;
+
+    return (0);
+}
+
+template<typename T>
+T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &grid_bs, const vector<size_t> &grid_bmin, const vector<size_t> &grid_bmax, bool lock)
+{
+    T *blks = (T *)_alloc_region(ts, varname, level, lod, grid_bmin, grid_bmax, grid_bs, sizeof(T), lock, false);
+    if (!blks) return (NULL);
+
+    vector<size_t> dims, file_bs, downsample_bs;
+    int            rc = DataMgr::GetDimLensAtLevel(varname, level, dims, file_bs);
+    assert(rc >= 0);
+    downsample_bs = file_bs;
+
+    // Get voxel coordinates of requested region, clamped to grid
+    // boundaries.
+    //
+    vector<size_t> grid_min, grid_max;
+    map_blk_to_vox(grid_bs, dims, grid_bmin, grid_bmax, grid_min, grid_max);
+
+    // Map requested region voxel coordinates to disk block coordinates
+    //
+    vector<size_t> file_bmin, file_bmax;
+    map_vox_to_blk(downsample_bs, grid_min, file_bmin);
+    map_vox_to_blk(downsample_bs, grid_max, file_bmax);
+
+    rc = _get_region_from_fs_helper(ts, varname, level, lod, file_bmin, file_bmax, file_bs, downsample_bs, grid_bs, grid_min, grid_max, blks);
+
     if (rc < 0) {
-        _free_region(ts, varname, level, lod, bmin, bmax);
-        _closeVariable(fd);
+        _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
         return (NULL);
     }
-
-    rc = _closeVariable(fd);
-    if (rc < 0) return (NULL);
 
     SetDiagMsg("DataMgr::GetGrid() - data read from fs\n");
     return (blks);
@@ -1445,32 +1707,10 @@ T *DataMgr::_get_region(size_t ts, string varname, int level, int nlevels, int l
     // file system.
     //
     T *blks = _get_region_from_cache<T>(ts, varname, level, lod, bmin, bmax, lock);
+    if (!blks) { blks = (T *)_get_region_from_fs<T>(ts, varname, level, lod, bs, bmin, bmax, lock); }
     if (!blks) {
-        // If level not available we recursively decimate
-        //
-        if (level < -nlevels) {
-            level++;
-
-            blks = _get_region<T>(ts, varname, level, nlevels, lod, nlods, bs, bmin, bmax, false);
-            if (blks) {
-                vector<size_t> bs_at_level = decimate_dims(bs, -level - 1);
-                vector<size_t> bs_at_level_m1 = decimate_dims(bs, -level);
-
-                T *newblks = (T *)_alloc_region(ts, varname, level - 1, lod, bmin, bmax, bs_at_level_m1, sizeof(T), false, false);
-                if (!newblks) return (NULL);
-
-                decimate(bmin, bmax, bs_at_level, blks, newblks);
-                return (newblks);
-            }
-        } else {
-            vector<size_t> bs_at_level = decimate_dims(bs, -level - 1);
-
-            blks = (T *)_get_region_from_fs<T>(ts, varname, level, lod, bs_at_level, bmin, bmax, lock);
-        }
-        if (!blks) {
-            SetErrMsg("Failed to read region from variable/timestep/level/lod (%s, %d, %d, %d)", varname.c_str(), ts, level, lod);
-            return (NULL);
-        }
+        SetErrMsg("Failed to read region from variable/timestep/level/lod (%s, %d, %d, %d)", varname.c_str(), ts, level, lod);
+        return (NULL);
     }
     return (blks);
 }
@@ -2157,12 +2397,15 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     }
 
     vector<size_t> dims_at_level;
-    vector<size_t> bs_at_level;
-    int            rc = DataMgr::GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    vector<size_t> dummy;
+    int            rc = DataMgr::GetDimLensAtLevel(varname, level, dims_at_level, dummy);
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
     }
+
+    vector<size_t> bs;
+    for (int i = 0; i < dims_at_level.size(); i++) { bs.push_back(_bs[i]); }
 
     // hash tag for block coordinate cache
     //
@@ -2191,8 +2434,8 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
             vmin.push_back(0);
             vmax.push_back(dims_at_level[i] - 1);
         }
-        map_vox_to_blk(bs_at_level, vmin, bmin);
-        map_vox_to_blk(bs_at_level, vmax, bmax);
+        map_vox_to_blk(bs, vmin, bmin);
+        map_vox_to_blk(bs, vmax, bmax);
 
         BlkExts blkexts(bmin, bmax);
 
@@ -2210,10 +2453,10 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
             vector<size_t> bcoord = Wasp::VectorizeCoords(offset, bmin, bmax);
 
             for (int i = 0; i < bcoord.size(); i++) {
-                my_vmin[i] = bcoord[i] * bs_at_level[i];
+                my_vmin[i] = bcoord[i] * bs[i];
                 if (my_vmin[i] > 0) my_vmin[i] -= 1;    // not boundary face
 
-                my_vmax[i] = bcoord[i] * bs_at_level[i] + bs_at_level[i] - 1;
+                my_vmax[i] = bcoord[i] * bs[i] + bs[i] - 1;
                 if (my_vmax[i] > vmax[i]) my_vmax[i] = vmax[i];
                 if (my_vmax[i] < vmax[i]) my_vmax[i] += 1;
             }
@@ -2250,7 +2493,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
     // Finally, map from block to voxel coordinates
     //
-    map_blk_to_vox(bs_at_level, bmin, bmax, min_ui, max_ui);
+    map_blk_to_vox(bs, bmin, bmax, min_ui, max_ui);
     for (int i = 0; i < max_ui.size(); i++) {
         if (max_ui[i] >= dims_at_level[i]) { max_ui[i] = dims_at_level[i] - 1; }
     }
@@ -2517,10 +2760,13 @@ template<class T> int DataMgr::_readRegionBlock(int fd, const vector<size_t> &mi
     return (_dc->ReadRegionBlock(fd, min, max, region));
 }
 
-int DataMgr::_readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+template<class T> int DataMgr::_readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
-    if (derivedVar) { return (derivedVar->ReadRegion(fd, min, max, region)); }
+    if (derivedVar) {
+        assert((std::is_same<T, float>::value) == true);
+        return (derivedVar->ReadRegion(fd, min, max, (float *)region));
+    }
 
     return (_dc->ReadRegion(fd, min, max, region));
 }
@@ -2595,7 +2841,7 @@ int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &
     }
     assert(dims.size() >= 1 && dims.size() <= 2);
 
-    float *buf = new float[vproduct(dims)];
+    float *buf = new float[VProduct(dims)];
 
     rc = _getVar(varname, 0, 0, buf);
     if (rc < 0) return (-1);
