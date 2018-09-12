@@ -946,8 +946,10 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	const vector <size_t> &data_bmin,
 	const vector <size_t> &data_bmax,
 	string coord_varname,
+	int order,
 	vector <size_t> &coord_bmin,
-	vector <size_t> &coord_bmax
+	vector <size_t> &coord_bmax,
+	bool structured
  ) const;
 
  int _setupCoordVecs(
@@ -962,7 +964,8 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 	vector <size_t> &dims,
 	vector < vector <size_t > > &bsvec,
 	vector < vector <size_t > > &bminvec,
-	vector < vector <size_t > > &bmaxvec
+	vector < vector <size_t > > &bmaxvec,
+	bool structured
  ) const;
 
  int _setupConnVecs(
