@@ -49,8 +49,8 @@ void SliceRenderer::_initTexture()
     glDeleteTextures(1, &_texture);
     glGenTextures(1, &_texture);
 
-    glMatrixMode(GL_TEXTURE);
-    glLoadIdentity();
+    // glMatrixMode(GL_TEXTURE);
+    // glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glBindTexture(GL_TEXTURE_2D, _texture);
@@ -58,15 +58,17 @@ void SliceRenderer::_initTexture()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // Need to set the clamp parameter for OpenGL 3.0 here
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *)_textureData);
 
     // Do write to the z buffer
-    glDepthMask(GL_TRUE);
+    // glDepthMask(GL_TRUE);
 }
 
 void SliceRenderer::_saveCacheParams()
@@ -79,6 +81,7 @@ void SliceRenderer::_saveCacheParams()
     _cacheParams.refinementLevel = p->GetRefinementLevel();
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.textureSampleRates = p->GetSampleRates();
+    _cacheParams.orientation = p->GetBox()->GetOrientation();
 
     _textureWidth = _cacheParams.textureSampleRates[X];
     _textureHeight = _cacheParams.textureSampleRates[Y];
@@ -105,18 +108,22 @@ int SliceRenderer::_saveTextureData()
     if (rc < 0) return (-1);
     assert(grid);
 
-    int orientation = _getOrientation();
+    std::vector<double> textureMin, textureMax;
+    _getTextureCoordinates(textureMin, textureMax);
 
-    double dx = (_cacheParams.boxMax[X] - _cacheParams.boxMin[X]) / _textureWidth;
-    double dy = (_cacheParams.boxMax[Y] - _cacheParams.boxMin[Y]) / _textureHeight;
-    // double dz = (_cacheParams.boxMax[Z]-_cacheParams.boxMin[Z])/zFrequency;
+    // double dx = (textureMax[X]-textureMin[X])/_textureWidth;
+    // double dy = (textureMax[Y]-textureMin[Y])/_textureHeight;
+    std::vector<int> sampleRates = _cacheParams.textureSampleRates;
+    double           dx = (_cacheParams.boxMax[X] - _cacheParams.boxMin[X]) / (1 + sampleRates[X]);
+    double           dy = (_cacheParams.boxMax[Y] - _cacheParams.boxMin[Y]) / (1 + sampleRates[Y]);
+    double           dz = (_cacheParams.boxMax[Z] - _cacheParams.boxMin[Z]) / (1 + sampleRates[Z]);
 
     float               varValue, minValue, maxValue, missingValue;
     std::vector<double> coords(3, 0.0);
     for (int j = 0; j < _textureHeight; j++) {
         for (int i = 0; i < _textureWidth; i++) {
-            coords[X] = _cacheParams.boxMin[X] + dx * i;
-            coords[Y] = _cacheParams.boxMin[Y] + dy * j;
+            coords[X] = _cacheParams.boxMin[X] + dx * i + dx / 2.f;
+            coords[Y] = _cacheParams.boxMin[Y] + dy * j + dy / 2.f;
             coords[Z] = _cacheParams.boxMin[Z];    // + dx*i;
 
             int index = (j * _textureWidth + i) * 4;
@@ -141,6 +148,10 @@ int SliceRenderer::_saveTextureData()
             green = _cacheParams.tf_lut[bin + 1] * 255;
             blue = _cacheParams.tf_lut[bin + 2] * 255;
             alpha = _cacheParams.tf_lut[bin + 3] * 255;
+
+            // cout << "color " << (int)red << " " << (int)green << " " << (int)blue << " " << (int)alpha << endl;
+            // cout << "Coord " << coords[X] << " " << coords[Y] << " " << coords[Z] << endl;
+
             _textureData[index + 0] = red;
             _textureData[index + 1] = green;
             _textureData[index + 2] = blue;
@@ -149,6 +160,35 @@ int SliceRenderer::_saveTextureData()
     }
 
     return 0;
+}
+
+void SliceRenderer::_getTextureCoordinates(std::vector<double> &textureMin, std::vector<double> &textureMax)
+{
+    textureMin.clear();
+    textureMax.clear();
+
+    std::vector<double> boxMin = _cacheParams.boxMin;
+    std::vector<double> boxMax = _cacheParams.boxMax;
+
+    int orientation = _cacheParams.orientation;    //_getOrientation();
+    if (orientation == XY) {
+        textureMin.push_back(boxMin[X]);
+        textureMin.push_back(boxMin[Y]);
+        textureMax.push_back(boxMax[X]);
+        textureMax.push_back(boxMax[Y]);
+    }
+    if (orientation == XZ) {
+        textureMin.push_back(boxMin[X]);
+        textureMin.push_back(boxMin[Z]);
+        textureMax.push_back(boxMax[X]);
+        textureMax.push_back(boxMax[Z]);
+    }
+    if (orientation == YZ) {
+        textureMin.push_back(boxMin[Y]);
+        textureMin.push_back(boxMin[Z]);
+        textureMax.push_back(boxMax[Y]);
+        textureMax.push_back(boxMax[Z]);
+    }
 }
 
 bool SliceRenderer::_isCacheDirty() const
@@ -166,12 +206,15 @@ bool SliceRenderer::_isCacheDirty() const
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     vector<float>   tf_lut;
     tf->makeLut(tf_lut);
-    if (_cacheParams.tf_lut != tf_lut) return (true);
-    if (_cacheParams.tf_minMax != tf->getMinMaxMapValue()) return (true);
+    if (_cacheParams.tf_lut != tf_lut) return true;
+    if (_cacheParams.tf_minMax != tf->getMinMaxMapValue()) return true;
 
     vector<double> min, max;
-    p->GetBox()->GetExtents(min, max);
+    Box *          box = p->GetBox();
+    box->GetExtents(min, max);
+    int orientation = box->GetOrientation();
 
+    if (_cacheParams.orientation != orientation) return true;
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
 
@@ -189,11 +232,13 @@ int SliceRenderer::_paintGL(bool fast)
     std::vector<double> min = _cacheParams.boxMin;
     std::vector<double> max = _cacheParams.boxMax;
 
-    cout << "XY " << (min[Z] == max[Z]) << endl;
-    cout << "XZ " << (min[Y] == max[Y]) << endl;
-    cout << "YZ " << (min[X] == max[X]) << endl << endl;
+    // cout << "XY " << min[Z] << " " << max[Z] << endl;
+    // cout << "XZ " << min[Y] << " " << max[Y] << endl;
+    // cout << "YZ " << min[X] << " " << max[X] << endl << endl;
 
-    int orientation = _getOrientation();
+    glDisable(GL_DEPTH_TEST);
+
+    int orientation = _cacheParams.orientation;    //_getOrientation();
     if (orientation == XY)
         _renderXY(min, max);
     else if (orientation == XZ)
@@ -204,18 +249,17 @@ int SliceRenderer::_paintGL(bool fast)
     return 0;
 }
 
-int SliceRenderer::_getOrientation() const
-{
+/*int SliceRenderer::_getOrientation() const {
     std::vector<double> min = _cacheParams.boxMin;
     std::vector<double> max = _cacheParams.boxMax;
 
-    if (min[Z] == max[Z])    // XY Plane
-        return XY;
-    else if (min[Y] == max[Y])    // XZ Plane
-        return XZ;
-    else if (min[X] == max[X])    // YZ Plane
+    if (min[X] == max[X])       // YZ Plane
         return YZ;
-}
+    else if (min[Y] == max[Y])  // XZ Plane
+        return XZ;
+    else                        // XY Plane
+        return XY;
+}*/
 
 void SliceRenderer::_renderXY(std::vector<double> min, std::vector<double> max) const
 {

@@ -38,6 +38,7 @@ private:
         std::vector<double> tf_minMax;
         std::vector<double> boxMin, boxMax;
         std::vector<int>    textureSampleRates;
+        int                 orientation;
     } _cacheParams;
 
     int  _buildCache();
@@ -45,7 +46,8 @@ private:
     void _saveCacheParams();
     void _initTexture();
     int  _saveTextureData();
-    int  _getOrientation() const;
+    //        int  _getOrientation() const;
+    void _getTextureCoordinates(std::vector<double> &textureMin, std::vector<double> &textureMax);
     void _renderXY(std::vector<double> min, std::vector<double> max) const;
     void _renderXZ(std::vector<double> min, std::vector<double> max) const;
     void _renderYZ(std::vector<double> min, std::vector<double> max) const;

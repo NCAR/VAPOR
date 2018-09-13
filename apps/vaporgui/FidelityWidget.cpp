@@ -81,6 +81,10 @@ void FidelityWidget::setFidelity(int buttonID)
     refinementCombo->setCurrentIndex(ref);
 }
 
+QButtonGroup *FidelityWidget::GetFidelityButtons() { return _fidelityButtons; }
+
+std::vector<int> FidelityWidget::GetFidelityLodIdx() const { return _fidelityLodIdx; }
+
 // User clicks on SetDefault button, need to make current
 // fidelity settings the default.
 

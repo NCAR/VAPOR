@@ -23,6 +23,10 @@
 
 #include <vapor/ParamsBase.h>
 
+#define XY 0
+#define XZ 1
+#define YZ 2
+
 namespace VAPoR {
 
 //! \class Box
@@ -97,15 +101,15 @@ public:
 
     //! Indicate the orientation of a (2D) box
     //! This is 0,1, or 2 based on the axis orthogonal to the box.
-    //! A 0 indiciates the X axis, 1 indicates the Y axis, and 2 the Z
+    //! A 0 indiciates the XY plane, 1 indicates the XZ plane, and 2 YZ plane
     //! axis.
     //!
-    //! \retval int The axis to which the box is orthogonal, if planar. Otherwise
+    //! \retval int The plane that the box resides in, if planar. Otherwise
     //! the return value is meaningless.
     //!
     //! \sa IsPlanar()
     //
-    int GetOrientation() const { return GetValueLong(Box::m_orientationTag, 2); }
+    int GetOrientation() const { return GetValueLong(Box::m_orientationTag, XY); }
 
     //! Set the value of the orientation state, indicating the axis
     //! orthogonal to a 2D box
