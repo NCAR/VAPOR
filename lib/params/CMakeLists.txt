@@ -22,6 +22,7 @@ set (SRC
 	ContourParams.cpp
 	RayCasterParams.cpp
 	DVRParams.cpp
+	IsoSurfaceParams.cpp
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
     SliceParams.cpp
