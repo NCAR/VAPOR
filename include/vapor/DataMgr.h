@@ -881,8 +881,10 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const vector<size_t> &data_bmin,
         const vector<size_t> &data_bmax,
         string coord_varname,
+        int order,
         vector<size_t> &coord_bmin,
-        vector<size_t> &coord_bmax) const;
+        vector<size_t> &coord_bmax,
+        bool structured) const;
 
     int _setupCoordVecs(
         size_t ts,
@@ -897,7 +899,8 @@ class VDF_API DataMgr : public Wasp::MyBase {
         vector<vector<size_t>> &bsvec,
         vector<vector<size_t>> &bs_at_levelvec,
         vector<vector<size_t>> &bminvec,
-        vector<vector<size_t>> &bmaxvec) const;
+        vector<vector<size_t>> &bmaxvec,
+        bool structured) const;
 
     int _setupConnVecs(
         size_t ts,

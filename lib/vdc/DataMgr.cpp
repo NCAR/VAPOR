@@ -872,8 +872,10 @@ void DataMgr::_setupCoordVecsHelper(
     const vector<size_t> &data_bmin,
     const vector<size_t> &data_bmax,
     string coord_varname,
+    int order,
     vector<size_t> &coord_bmin,
-    vector<size_t> &coord_bmax) const {
+    vector<size_t> &coord_bmax,
+    bool structured) const {
     assert(data_bmin.size() == data_bmax.size());
     coord_bmin.clear();
     coord_bmax.clear();
@@ -887,17 +889,90 @@ void DataMgr::_setupCoordVecsHelper(
     ok = _getVarDimensions(coord_varname, coord_dims);
     assert(ok);
 
-    int i = 0;
-    for (int j = 0; j < coord_dims.size(); j++) {
-        while (
-            data_dims[i].GetLength() != coord_dims[j].GetLength() &&
-            i < data_dims.size()) {
+    if (structured) {
+        // For structured data
+        // Here we try to match dimensions of coordinate variables
+        // with dimensions of data variables. Ideally, this would be done
+        // by matching the dimension names. However, some CF data sets (e.g. MOM)
+        // have data and coordinate variables that use different dimension
+        // names (but have the same length)
+        //
+        assert(data_dims.size() >= 1 && data_dims.size() <= 3);
+        if (data_dims.size() == 1) {
+            assert(coord_dims.size() == 1);
+            assert(order == 0);
+            assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
 
-            i++;
+            coord_bmin.push_back(data_bmin[0]);
+            coord_bmax.push_back(data_bmax[0]);
+        } else if (data_dims.size() == 2) {
+            assert(coord_dims.size() >= 1 && coord_dims.size() <= 2);
+            assert(order >= 0 && order <= 1);
+
+            if (coord_dims.size() == 1) {
+                assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
+
+                coord_bmin.push_back(data_bmin[order]);
+                coord_bmax.push_back(data_bmax[order]);
+            } else {
+                assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
+                assert(data_dims[1].GetLength() == coord_dims[1].GetLength());
+
+                coord_bmin.push_back(data_bmin[0]);
+                coord_bmax.push_back(data_bmax[0]);
+                coord_bmin.push_back(data_bmin[1]);
+                coord_bmax.push_back(data_bmax[1]);
+            }
+        } else if (data_dims.size() == 3) {
+
+            assert(coord_dims.size() >= 1 && coord_dims.size() <= 3);
+            assert(order >= 0 && order <= 2);
+
+            if (coord_dims.size() == 1) {
+                assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
+
+                coord_bmin.push_back(data_bmin[order]);
+                coord_bmax.push_back(data_bmax[order]);
+            } else if (coord_dims.size() == 2) {
+
+                // We assume 2D coordinates are horizontal (in XY plane).
+                // No way currently to distinguish XZ and YZ plane 2D coordinates
+                // for 3D data :-(
+                //
+                assert(order >= 0 && order <= 1);
+                coord_bmin.push_back(data_bmin[0]);
+                coord_bmax.push_back(data_bmax[0]);
+                coord_bmin.push_back(data_bmin[1]);
+                coord_bmax.push_back(data_bmax[1]);
+
+            } else if (coord_dims.size() == 3) {
+                coord_bmin.push_back(data_bmin[0]);
+                coord_bmax.push_back(data_bmax[0]);
+                coord_bmin.push_back(data_bmin[1]);
+                coord_bmax.push_back(data_bmax[1]);
+                coord_bmin.push_back(data_bmin[2]);
+                coord_bmax.push_back(data_bmax[2]);
+            }
+        } else {
+            assert(0 && "Only 1, 2, or 3D data supported");
         }
-        assert(i < data_dims.size());
-        coord_bmin.push_back(data_bmin[i]);
-        coord_bmax.push_back(data_bmax[i]);
+
+    } else {
+        // For unstructured data we can just match data dimension names
+        // with coord dimension names. Yay!
+        //
+        int i = 0;
+        for (int j = 0; j < coord_dims.size(); j++) {
+            while (
+                data_dims[i].GetLength() != coord_dims[j].GetLength() &&
+                i < data_dims.size()) {
+
+                i++;
+            }
+            assert(i < data_dims.size());
+            coord_bmin.push_back(data_bmin[i]);
+            coord_bmax.push_back(data_bmax[i]);
+        }
     }
 }
 
@@ -914,7 +989,8 @@ int DataMgr::_setupCoordVecs(
     vector<vector<size_t>> &bsvec,
     vector<vector<size_t>> &bs_at_levelvec,
     vector<vector<size_t>> &bminvec,
-    vector<vector<size_t>> &bmaxvec) const {
+    vector<vector<size_t>> &bmaxvec,
+    bool structured) const {
     varnames.clear();
     roi_dims.clear();
     dims_at_levelvec.clear();
@@ -979,7 +1055,7 @@ int DataMgr::_setupCoordVecs(
         vector<size_t> coord_dims_at_level, coord_bs_at_level, coord_bs;
         _setupCoordVecsHelper(
             varname, bmin, bmax,
-            cvarnames[i], coord_bmin, coord_bmax);
+            cvarnames[i], i, coord_bmin, coord_bmax, structured);
 
         dims_at_levelvec.push_back(dims_at_level);
         bsvec.push_back(bs);
@@ -1124,7 +1200,8 @@ Grid *DataMgr::_getVariable(
     //
     int rc = _setupCoordVecs(
         ts, varname, level, lod, min, max, varnames, roi_dims,
-        dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec);
+        dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec,
+        !_gridHelper.IsUnstructured(gridType));
     if (rc < 0)
         return (NULL);
 
