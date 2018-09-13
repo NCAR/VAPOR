@@ -35,6 +35,8 @@ public:
 
  bool IsOpaque() const;
 
+ int  GetDefaultSampleRate() const;
+
 private:
 
  void _init();
