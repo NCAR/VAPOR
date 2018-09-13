@@ -17,6 +17,10 @@ class RENDER_API DVRenderer : public RayCaster {
     static std::string GetClassType() {
         return ("VolumeRenderer");
     }
+
+  protected:
+    void _loadShaders();
+    void _3rdPassSpecialHandling(bool);
 };
 
 }; // namespace VAPoR
