@@ -45,6 +45,8 @@ set (SRCS
 	ContourEventRouter.cpp
     SliceEventRouter.cpp
 	DVREventRouter.cpp
+	IsoSurfaceEventRouter.cpp
+	IsoSurfaceSubtabs.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
@@ -65,6 +67,7 @@ set (SRCS
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
 	DVRSubtabs.h
+	IsoSurfaceSubtabs.h
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
@@ -105,6 +108,10 @@ set (UIS
 	DVRAppearanceGUI.ui
 	DVRGeometryGUI.ui
 	DVRAnnotationGUI.ui
+	IsoSurfaceVariablesGUI.ui
+	IsoSurfaceAppearanceGUI.ui
+	IsoSurfaceGeometryGUI.ui
+	IsoSurfaceAnnotationGUI.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	BarbAppearanceGUI.ui
