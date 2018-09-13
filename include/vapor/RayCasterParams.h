@@ -3,7 +3,6 @@
 
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
-#include <vapor/GetAppPath.h>
 
 namespace VAPoR {
 

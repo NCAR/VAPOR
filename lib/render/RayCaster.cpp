@@ -40,6 +40,11 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
 
     _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
     _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
+
+    /* Get viewport dimensions */
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 }
 
 // Destructor
@@ -356,17 +361,7 @@ int RayCaster::_initializeGL()
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
 
-    const char vgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.vgl";
-    const char fgl1[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR1stPass.fgl";
-    _1stPassShaderId = _loadShaders(vgl1, fgl1);
-
-    const char vgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.vgl";
-    const char fgl2[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR2ndPass.fgl";
-    _2ndPassShaderId = _loadShaders(vgl2, fgl2);
-
-    const char vgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.vgl";
-    const char fgl3[] = "/home/shaomeng/Git/VAPOR-new-DVR-src/share/shaders/main/DVR3rdPass.fgl";
-    _3rdPassShaderId = _loadShaders(vgl3, fgl3);
+    _loadShaders();
 
     // Create Vertex Array Object (VAO)
     glGenVertexArrays(1, &_vertexArrayId);
@@ -383,8 +378,28 @@ int RayCaster::_paintGL(bool fast)
 #ifdef Darwin
     return 0;
 #endif
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Visualizer dimensions would change if window is resized
+    GLint newViewport[4];
+    glGetIntegerv(GL_VIEWPORT, newViewport);
+    if (std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) {
+        std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
+
+        // Re-size 2D textures
+        GLuint textureUnit = 0;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        textureUnit = 1;
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
+    }
+
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Not receiving RayCaster parameters; "
@@ -407,7 +422,7 @@ int RayCaster::_paintGL(bool fast)
         // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask)    // Has missing value!
         {
-            // Adjust alignment for GL_R8UI format. Stupit OpenGL parameter.
+            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
@@ -419,17 +434,27 @@ int RayCaster::_paintGL(bool fast)
     }
 
     /* Gather the color map */
-    params->GetMapperFunc()->makeLut(_colorMap);
-    std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
-    _colorMapRange[0] = float(range[0]);
-    _colorMapRange[1] = float(range[1]);
+    if (params->UseSingleColor()) {
+        float singleColor[4];
+        params->GetConstantColor(singleColor);
+        singleColor[3] = 1.0f;    // 1.0 in alpha channel
+        _colorMap.resize(8);      // _colorMap will have 2 RGBA values
+        for (int i = 0; i < 8; i++) _colorMap[i] = singleColor[i % 4];
+        _colorMapRange[0] = 0.0f;
+        _colorMapRange[1] = 0.0f;
+    } else {
+        params->GetMapperFunc()->makeLut(_colorMap);
+        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+        _colorMapRange[0] = float(range[0]);
+        _colorMapRange[1] = float(range[1]);
+    }
 
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     glBindTexture(GL_TEXTURE_1D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
-    glViewport(0, 0, viewport[2], viewport[3]);
+    glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     _drawVolumeFaces(1);    // 1st pass, render back facing polygons to texture0 of the framebuffer
 
@@ -473,7 +498,7 @@ int RayCaster::_paintGL(bool fast)
     _drawVolumeFaces(2, insideACell);    // 2nd pass, render front facing polygons
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, viewport[2], viewport[3]);
+    glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     _drawVolumeFaces(3, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
 
@@ -493,16 +518,12 @@ void RayCaster::_initializeFramebufferTextures()
     glGenFramebuffers(1, &_frameBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 
-    /* Get viewport dimensions */
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
     /* Generate back-facing texture */
     GLuint textureUnit = 0;
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
     /* Configure the back-facing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -515,7 +536,7 @@ void RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
     /* Configure the front-faceing texture */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -526,7 +547,7 @@ void RayCaster::_initializeFramebufferTextures()
     /* Depth buffer */
     glGenRenderbuffers(1, &_depthBufferId);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
     /* Set "_backFaceTextureId" as colour attachement #0, and "_frontFaceTextureId" as attachement #1 */
@@ -629,6 +650,8 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
     } else {
         _load3rdPassUniforms(MVP, ModelView, InversedMV, fast);
 
+        _3rdPassSpecialHandling(fast);
+
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
@@ -700,19 +723,6 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
     glUniform4fv(uniformLocation, 6, planes);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-    if (fast)    // Disable lighting during "fast" rendering
-        glUniform1i(uniformLocation, int(0));
-    else {
-        RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
-        glUniform1i(uniformLocation, int(params->GetLighting()));
-
-        std::vector<double> coeffsD = params->GetLightingCoeffs();
-        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
-        glUniform1fv(uniformLocation, 4, coeffsF);
-    }
-
     // Pass in textures
     GLuint textureUnit = 0;
     glActiveTexture(GL_TEXTURE0 + textureUnit);
@@ -751,6 +761,12 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
         glUniform1i(uniformLocation, textureUnit);
     }
+}
+
+void RayCaster::_3rdPassSpecialHandling(bool fast)
+{
+    // Left empty intentially.
+    // Derived classes feel free to put stuff here.
 }
 
 void RayCaster::_renderTriangleStrips() const
@@ -846,7 +862,7 @@ void RayCaster::_renderTriangleStrips() const
     delete[] indexBuffer;
 }
 
-GLuint RayCaster::_loadShaders(const char *vertex_file_path, const char *fragment_file_path)
+GLuint RayCaster::_compileShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
