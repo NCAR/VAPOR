@@ -46,6 +46,9 @@ public:
 	VAPoR::RenderParams *rParams
  );
 
+ QButtonGroup* GetFidelityButtons();
+ std::vector<int> GetFidelityLodIdx() const;
+
  std::string GetCurrentLodString() const;
  std::string GetCurrentMultiresString() const;
  

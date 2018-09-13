@@ -9,6 +9,12 @@ using namespace VAPoR;
 
 #define THREED 3
 
+#define X  0
+#define Y  1
+#define Z  2
+#define XY 0
+#define XZ 1
+#define YZ 2
 
 const string SliceParams::_samplingRateTag = "SamplingRate";
 
@@ -46,6 +52,30 @@ SliceParams::~SliceParams() {
 
 void SliceParams::_init() {
 	SetDiagMsg("SliceParams::_init()");
+
+    Box* box = GetBox();
+    box->SetOrientation(XY);
+
+    std::vector<double> minExt, maxExt;
+    box->GetExtents(minExt, maxExt);
+    double average = (minExt[Z] + maxExt[Z])/2.f;
+    minExt[Z] = average;
+    maxExt[Z] = average;
+    box->SetExtents(minExt, maxExt);
+
+    int sampleRate = GetDefaultSampleRate();
+    cout << "Default sample rate " << sampleRate << endl;
+    std::vector<int> sampleRateVec(3, sampleRate);
+    SetSampleRates(sampleRateVec);
+}
+
+int SliceParams::GetDefaultSampleRate() const {
+    string varName = GetVariableName();
+    int refLevel = GetRefinementLevel();
+    vector<size_t> dimsAtLevel, bsAtLevel;
+    _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel, bsAtLevel);
+    int sampleRate = *max_element(dimsAtLevel.begin(), dimsAtLevel.end());
+    return sampleRate;
 }
 
 bool SliceParams::IsOpaque() const {
@@ -76,7 +106,8 @@ std::vector<int> SliceParams::GetSampleRates() const {
 void SliceParams::SetSampleRates(std::vector<int> rates) {
     std::vector<double> doubleVec;
     for (int i=0; i<rates.size(); i++) {
-        doubleVec.push_back((double)rates[i]);
+        doubleVec.push_back(rates[0]);
+        //doubleVec.push_back((double)rates[i]);
     }
     SetValueDoubleVec(_samplingRateTag, "Set sampling rate",  doubleVec);
 }

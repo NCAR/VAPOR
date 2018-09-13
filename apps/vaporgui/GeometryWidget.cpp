@@ -112,7 +112,6 @@ void GeometryWidget::adjustPlanarOrientation(int plane) {
 }
 
 void GeometryWidget::adjustLayoutToPlanarXY() {
-    cout << "XY" << endl;
     _xMinMaxFrame->show();
     _yMinMaxFrame->show();
     _zMinMaxFrame->hide();
@@ -130,11 +129,11 @@ void GeometryWidget::adjustLayoutToPlanarXY() {
     minExt[Z] = average;
     maxExt[Z] = average;
 	Box* box = _rParams->GetBox();
+    cout << "Z axis to " << minExt[Z] << " " << maxExt[Z] << endl;
     box->SetExtents(minExt, maxExt);
 }
 
 void GeometryWidget::adjustLayoutToPlanarXZ() {
-    cout << "XZ" << endl;
     _xMinMaxFrame->show();
     _yMinMaxFrame->hide();
     _zMinMaxFrame->show();
@@ -157,7 +156,6 @@ void GeometryWidget::adjustLayoutToPlanarXZ() {
 }
 
 void GeometryWidget::adjustLayoutToPlanarYZ() {
-    cout << "YZ" << endl;
     _xMinMaxFrame->hide();
     _yMinMaxFrame->show();
     _zMinMaxFrame->show();
@@ -197,18 +195,16 @@ void GeometryWidget::Reinit(
 	_varFlags = varFlags;
 
 	if (_dimFlags & TWOD) {
-        cout << "how did i get here?" << endl;
 		adjustLayoutTo2D();
 	}
 	else if(_dimFlags & THREED ) {
-        cout << "Showing zFrame" << endl;
 		_zFrame->show();
 	}
 
     if (_geometryFlags & PLANAR) {
+        cout << "we have PLANAR" << endl;
         showOrientationOptions();
         adjustPlanarOrientation(XY);
-        cout << "Reinit PLANAR" << endl;
     }
     else
         hideOrientationOptions();
@@ -280,7 +276,6 @@ void GeometryWidget::updateRangeLabels(
 	if (minExt.size() < 3) 
 	{
 		if (_dimFlags & THREED) {
-            cout << "Correcting dimensionality" << endl;
             Reinit(
 		    	(DimFlags)TWOD,
 		    	_varFlags,
@@ -402,7 +397,7 @@ void GeometryWidget::updateBoxCombos(
 	
 	// Force the user extents to be within the domain extents
 	//
-	size_t extSize = box->IsPlanar() ? 2 : 3;
+    int extSize = minExt.size(); // extSize = box->IsPlanar() ? 2 : 3;
 	for (int i=0; i<extSize; i++) {
 		if (minExt[i] < minFullExt[i]) minExt[i] = minFullExt[i];
 		if (maxExt[i] > maxFullExt[i]) maxExt[i] = maxFullExt[i];
@@ -418,7 +413,7 @@ void GeometryWidget::updateBoxCombos(
     _ySinglePoint->SetExtents(minFullExt[Y], maxFullExt[Y]);
     _ySinglePoint->SetValue((minExt[Y]+maxExt[Y])/2.f);
 
-	if (!box->IsPlanar()) {
+	if (extSize > 2) {
 		_zRangeCombo->Update(minFullExt[Z], maxFullExt[Z],
 							 minExt[Z], maxExt[Z]);
         _zSinglePoint->SetExtents(minFullExt[Z], maxFullExt[Z]);

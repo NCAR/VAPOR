@@ -28,6 +28,12 @@ public:
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
 	);
+
+private slots:
+    void _setDefaultSampleRate();
+
+private:
+    VAPoR::SliceParams* _params;
 };
 
 class SliceAppearanceSubtab : public QWidget, public Ui_SliceAppearanceGUI {
@@ -64,6 +70,12 @@ public:
 		VAPoR::DataMgr *dataMgr,
 		VAPoR::RenderParams *rParams
 	); 
+
+private:
+    VAPoR::SliceParams* _params;
+
+private slots:
+    void _orientationChanged(int plane);
 };
 
 class SliceAnnotationSubtab : public QWidget, public Ui_SliceAnnotationGUI {
