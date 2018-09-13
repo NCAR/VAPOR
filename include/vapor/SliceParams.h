@@ -31,6 +31,8 @@ class PARAMS_API SliceParams : public RenderParams {
 
     bool IsOpaque() const;
 
+    int GetDefaultSampleRate() const;
+
   private:
     void _init();
     bool usingVariable(const std::string &varname);
