@@ -41,6 +41,7 @@ enum GeometryFlags {
 enum TFFlags {
     SECONDARY = (1u << 0),
     CONSTANT = (1u << 1),
+    NOAUTOUPDATE = (1u << 2),
 };
 
 #endif
