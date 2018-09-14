@@ -436,9 +436,11 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 	std::vector<double> minFullExt, maxFullExt;
     getFullExtents(minFullExt, maxFullExt);
 
-
 	updateRangeLabels(minFullExt, maxFullExt);
 	updateBoxCombos(minFullExt, maxFullExt);
+
+    int orientation = _rParams->GetBox()->GetOrientation();
+    _planeComboBox->setCurrentIndex(orientation);
 	adjustSize();
 }
 
