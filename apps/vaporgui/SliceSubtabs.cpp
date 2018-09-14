@@ -33,63 +33,30 @@ void SliceVariablesSubtab::Update(
 }
 
 void SliceVariablesSubtab::_setDefaultSampleRate() {
-    std::vector<int> lods = _variablesWidget->_fidelityWidget->GetFidelityLodIdx();
-    for (int i=0; i<lods.size(); i++) 
-        cout << "lod " << i << " " << lods[i] << endl;
     int rate = _params->GetDefaultSampleRate();
-    cout << "default " << rate << endl;
-    std::vector<int> rates(3, rate);
-    _params->SetSampleRates(rates);
+    _params->SetSampleRate(rate);
 }
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {
     setupUi(this);
     _TFWidget->Reinit((TFFlags)(0));
 
-    _xSampleRate->SetLabel( QString::fromAscii("X sampling rate") );
-    _xSampleRate->SetIntType(true);
-    _xSampleRate->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
+    _TFWidget->mappingFrame->SetIsSlicing(true);
 
-    _ySampleRate->SetLabel( QString::fromAscii("Y sampling rate") );
-    _ySampleRate->SetIntType(true);
-    _ySampleRate->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
+    _sampleRateWidget->SetLabel( QString::fromAscii("Sampling rate") );
+    _sampleRateWidget->SetIntType(true);
+    _sampleRateWidget->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
 
-    _zSampleRate->SetLabel( QString::fromAscii("Z sampling rate") );
-    _zSampleRate->SetIntType(true);
-    _zSampleRate->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
-
-    connect(_xSampleRate, SIGNAL(valueChanged(int)), this,
-        SLOT(_xSampleRateChanged(int)));
-    connect(_ySampleRate, SIGNAL(valueChanged(int)), this,
-        SLOT(_ySampleRateChanged(int)));
-    connect(_zSampleRate, SIGNAL(valueChanged(int)), this,
-        SLOT(_zSampleRateChanged(int)));
-
-    _xSampleRate->setEnabled(true);
-    _ySampleRate->setEnabled(false);
-    _zSampleRate->setEnabled(false);
+    connect(_sampleRateWidget, SIGNAL(valueChanged(int)), 
+        this, SLOT(_sampleRateChanged(int)));
 
     _params = NULL;
 }
 
-void SliceAppearanceSubtab::_xSampleRateChanged(int rate) {
-    std::vector<int> rates = _params->GetSampleRates();
-    rates[X] = rate;
-    rates[Y] = rate;
-    rates[Z] = rate;
-    _params->SetSampleRates(rates);
-}
-
-void SliceAppearanceSubtab::_ySampleRateChanged(int rate) {
-    std::vector<int> rates = _params->GetSampleRates();
-    rates[Y] = rate;
-    _params->SetSampleRates(rates);
-}
-
-void SliceAppearanceSubtab::_zSampleRateChanged(int rate) {
-    std::vector<int> rates = _params->GetSampleRates();
-    rates[Z] = rate;
-    _params->SetSampleRates(rates);
+void SliceAppearanceSubtab::_sampleRateChanged(int rate) {
+    _params->SetSampleRate(rate);
+    cout << "sampleRateChanged" << endl;
+    _TFWidget->mappingFrame->RefreshHistogram(true);
 }
 
 void SliceAppearanceSubtab::Update(
@@ -105,23 +72,11 @@ void SliceAppearanceSubtab::Update(
     std::vector<double> minExt, maxExt;
     _params->GetBox()->GetExtents(minExt, maxExt);
 
-    std::vector<int> SR;
-    SR = _params->GetSampleRates();
-    _xSampleRate->SetValue(SR[X]);
+    int sampleRate = _params->GetSampleRate();
+    _sampleRateWidget->SetValue(sampleRate);
 
-/*    if (minExt[X]==maxExt[X])
-        _xSampleRate->setEnabled(false);
-    else
-        _xSampleRate->setEnabled(true);
-    if (minExt[Y]==maxExt[Y])
-        _ySampleRate->setEnabled(false);
-    else
-        _ySampleRate->setEnabled(true);
-    if (minExt[Z]==maxExt[Z])
-        _zSampleRate->setEnabled(false);
-    else
-        _zSampleRate->setEnabled(true);
-*/
+    //_TFWidget->mappingFrame->RefreshHistogram(true);
+    _TFWidget->RefreshHistogram();
 }
 
 SliceGeometrySubtab::SliceGeometrySubtab(QWidget* parent) 
@@ -154,14 +109,6 @@ void SliceGeometrySubtab::Update(
 
 void SliceGeometrySubtab::_orientationChanged(int plane) {
     _params->GetBox()->SetOrientation(plane);
-/*    std::vector<int> sampleRates = _params->GetSampleRates();
-    if (plane == XY)
-        sampleRates[Z] = 1;
-    if (plane == XZ)
-        sampleRates[Y] = 1;
-    if (plane == YZ)
-        sampleRates[X] = 1;
-    _params->SetSampleRates(sampleRates);*/
 }
 
 SliceAnnotationSubtab::SliceAnnotationSubtab(QWidget* parent) {
