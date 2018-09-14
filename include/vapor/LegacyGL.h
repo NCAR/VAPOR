@@ -29,6 +29,7 @@ class LegacyGL {
         float x, y, z;
         float nx, ny, nz;
         float r, g, b, a;
+        float s, t;
     };
 #pragma pack(pop)
 
@@ -40,7 +41,9 @@ class LegacyGL {
     unsigned int            _VAO, _VBO;
     float                   _nx, _ny, _nz;
     float                   _r, _g, _b, _a;
-    bool                    _initialized, _insideBeginEndBlock, _lightingEnabled;
+    float                   _s, _t;
+    bool                    _initialized, _insideBeginEndBlock;
+    bool                    _lightingEnabled, _textureEnabled;
     float                   _lightDir[3];
 
 public:
@@ -63,10 +66,14 @@ public:
     void Color3fv(const float *f);
     void Color4f(float r, float g, float b, float a);
     void Color4fv(const float *f);
+    void TexCoord(glm::vec2);
+    void TexCoord2f(float s, float t);
 
     void EnableLighting();
     void DisableLighting();
     void LightDirectionfv(const float *f);
+    void EnableTexture();
+    void DisableTexture();
 
 #ifndef NDEBUG
     void TestSquare();

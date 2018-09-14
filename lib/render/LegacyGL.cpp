@@ -10,8 +10,8 @@ using namespace VAPoR;
 using std::vector;
 
 LegacyGL::LegacyGL(GLManager *glManager)
-: _glManager(glManager), _mode(0), _emulateQuads(false), _firstQuadTriangle(true), _VAO(0), _VBO(0), _nx(0), _ny(0), _nz(0), _r(1), _g(1), _b(1), _a(1), _initialized(false),
-  _insideBeginEndBlock(false), _lightingEnabled(false), _lightDir{0}
+: _glManager(glManager), _mode(0), _emulateQuads(false), _firstQuadTriangle(true), _VAO(0), _VBO(0), _nx(0), _ny(0), _nz(0), _r(1), _g(1), _b(1), _a(1), _s(0), _t(0), _initialized(false),
+  _insideBeginEndBlock(false), _lightingEnabled(false), _textureEnabled(false), _lightDir{0}
 {
 }
 
@@ -37,9 +37,11 @@ void LegacyGL::Initialize()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, nx));
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, r));
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, s));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
@@ -75,6 +77,7 @@ void LegacyGL::End()
     _shader->SetUniform("P", _glManager->matrixManager->GetProjectionMatrix());
     _shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());
     _shader->SetUniform("lightingEnabled", _lightingEnabled);
+    _shader->SetUniform("textureEnabled", _textureEnabled);
     _shader->SetUniform("lightDir", glm::make_vec3(_lightDir));
     glDrawArrays(_mode, 0, _vertices.size());
 
@@ -95,7 +98,7 @@ void LegacyGL::Vertex2f(float x, float y) { Vertex3f(x, y, 0); }
 void LegacyGL::Vertex3f(float x, float y, float z)
 {
     assert(_insideBeginEndBlock);
-    _vertices.push_back({x, y, z, _nx, _ny, _nz, _r, _g, _b, _a});
+    _vertices.push_back({x, y, z, _nx, _ny, _nz, _r, _g, _b, _a, _s, _t});
 
     if (_emulateQuads && _vertices.size() % 3 == 0) {
         if (_firstQuadTriangle) {
@@ -147,8 +150,15 @@ void LegacyGL::Color4f(float r, float g, float b, float a)
 
 void LegacyGL::Color4fv(const float *f) { Color4f(f[0], f[1], f[2], f[3]); }
 
-void LegacyGL::EnableLighting() { _lightingEnabled = true; }
+void LegacyGL::TexCoord(glm::vec2 st) { TexCoord2f(st.s, st.t); }
 
+void LegacyGL::TexCoord2f(float s, float t)
+{
+    _s = s;
+    _t = t;
+}
+
+void LegacyGL::EnableLighting() { _lightingEnabled = true; }
 void LegacyGL::DisableLighting() { _lightingEnabled = false; }
 
 void LegacyGL::LightDirectionfv(const float *f)
@@ -159,6 +169,9 @@ void LegacyGL::LightDirectionfv(const float *f)
     _lightDir[1] = dir.y;
     _lightDir[2] = dir.z;
 }
+
+void LegacyGL::EnableTexture() { _textureEnabled = true; }
+void LegacyGL::DisableTexture() { _textureEnabled = false; }
 
 #ifndef NDEBUG
 void LegacyGL::TestSquare()
