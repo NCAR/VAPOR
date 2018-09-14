@@ -58,7 +58,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="spacing">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="leftMargin">
         <number>0</number>
@@ -469,12 +469,36 @@ available from the right mouse button.</string>
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="updateHistoButton">
-         <property name="toolTip">
-          <string>Click to build a new histogram based on the current region settings, animation timestep, and transfer function bounds</string>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
          </property>
-         <property name="whatsThis">
-          <string>Click the Histo button to refresh the
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="updateHistoButton">
+            <property name="toolTip">
+             <string>Click to build a new histogram based on the current region settings, animation timestep, and transfer function bounds</string>
+            </property>
+            <property name="whatsThis">
+             <string>Click the Histo button to refresh the
 histogram that is displayed in the transfer
 function edit window.  The data that is 
 histogrammed is determined by the 
@@ -484,10 +508,13 @@ and rotation, and the TF data bounds.
 Use the right mouse menu in the 
 transfer function window to choose
 how the histogram is scaled.</string>
-         </property>
-         <property name="text">
-          <string>Update Histogram</string>
-         </property>
+            </property>
+            <property name="text">
+             <string>Update Histogram</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>

@@ -49,6 +49,8 @@
     #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define numHistoBins 256
+
 using namespace VAPoR;
 using namespace std;
 
@@ -162,12 +164,10 @@ string MappingFrame::getActiveRendererName() const
 
 void MappingFrame::RefreshHistogram(bool force)
 {
-    cout << "refreshHistogram" << endl;
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
     if (!force && skipRefreshHistogram()) return;
-    cout << "not skipping" << endl;
     string var;
     var = _rParams->GetColorMapVariableName();
     MapperFunction *mf = _rParams->GetMapperFunc(var);
@@ -177,11 +177,12 @@ void MappingFrame::RefreshHistogram(bool force)
     size_t ts = _rParams->GetCurrentTimestep();
 
     if (_histogram) delete _histogram;
-    _histogram = new Histo(256, minRange, maxRange, var, ts);
+    _histogram = new Histo(numHistoBins, minRange, maxRange, var, ts);
 
     populateHistogram();
 
     _histogramMap[rendererName] = _histogram;
+    paintGL();
 }
 
 void MappingFrame::populateHistogram()
@@ -210,14 +211,18 @@ void MappingFrame::populateHistogram()
 
 void MappingFrame::populateSlicingHistogram()
 {
+    cout << "MappingFrame::populateSlicingHistogram" << endl;
     SliceParams *       sParams = dynamic_cast<SliceParams *>(_rParams);
     std::vector<double> cachedValues = sParams->GetCachedValues();
 
-    cout << "slicing " << cachedValues.size() << endl;
-    for (int i = 0; i < cachedValues.size(); i++) {
-        cout << i << " " << cachedValues[i] << endl;
-        _histogram->addToBin(cachedValues[i]);
-    }
+    /*    double min = *std::min_element(cachedValues.begin(), cachedValues.begin());
+    min -= min*.05;
+    double max = *std::max_element(cachedValues.begin(), cachedValues.end());
+    max += max*.05;
+    //_histogram->reset(numHistoBins, min, max);
+    //_histogram->reset(numHistoBins);
+*/
+    for (int i = 0; i < cachedValues.size(); i++) { _histogram->addToBin(cachedValues[i]); }
 }
 
 void MappingFrame::populateVolumetricHistogram(Grid *grid, std::vector<double> minExts, std::vector<double> maxExts)
@@ -333,6 +338,7 @@ void MappingFrame::setVariableName(std::string name)
 // void MappingFrame::updateTab()
 void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
 {
+    cout << "MappingFrame::Update" << endl;
     assert(dataMgr);
     assert(paramsMgr);
     assert(rParams);
@@ -354,9 +360,9 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     deselectWidgets();
 
-    if (_initialized == false) {
+    if ((_initialized == false) || (_isSlicing)) {
         _initialized = true;
-        RefreshHistogram();
+        RefreshHistogram(true);
     }
 
     _minValue = getMinEditBound();

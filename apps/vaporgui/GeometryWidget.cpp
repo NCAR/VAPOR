@@ -381,6 +381,9 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
 
     updateRangeLabels(minFullExt, maxFullExt);
     updateBoxCombos(minFullExt, maxFullExt);
+
+    int orientation = _rParams->GetBox()->GetOrientation();
+    _planeComboBox->setCurrentIndex(orientation);
     adjustSize();
 }
 
