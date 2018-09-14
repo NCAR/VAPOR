@@ -72,7 +72,6 @@ class IsoSurfaceGeometrySubtab : public QWidget, public Ui_IsoSurfaceGeometryGUI
     IsoSurfaceGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit((DimFlags)THREED,
-                                (GeometryFlags)MINMAX,
                                 (VariableFlags)SCALAR);
     }
 

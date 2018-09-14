@@ -64,13 +64,13 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
     void getRange(float range[2], float values[2]);
     float getOpacity();
+    void RefreshHistogram();
 
   private slots:
     void fileSaveTF();
     void setRange();
     void setRange(double min, double max);
     void updateHisto();
-    void refreshHistogram();
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();

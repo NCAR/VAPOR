@@ -128,7 +128,6 @@ void GeometryWidget::adjustLayoutToPlanarXY() {
     minExt[Z] = average;
     maxExt[Z] = average;
     Box *box = _rParams->GetBox();
-    cout << "Z axis to " << minExt[Z] << " " << maxExt[Z] << endl;
     box->SetExtents(minExt, maxExt);
 }
 
@@ -201,7 +200,6 @@ void GeometryWidget::Reinit(
     }
 
     if (_geometryFlags & PLANAR) {
-        cout << "we have PLANAR" << endl;
         showOrientationOptions();
         adjustPlanarOrientation(XY);
     } else

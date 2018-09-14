@@ -25,19 +25,24 @@ class PARAMS_API SliceParams : public RenderParams {
         return ("SliceParams");
     }
 
-    std::vector<int> GetSampleRates() const;
+    int GetSampleRate() const;
 
-    void SetSampleRates(std::vector<int> rates);
+    void SetSampleRate(int rate);
 
     bool IsOpaque() const;
 
     int GetDefaultSampleRate() const;
 
+    void SetCachedValues(std::vector<double> values);
+
+    std::vector<double> GetCachedValues() const;
+
   private:
     void _init();
     bool usingVariable(const std::string &varname);
+    std::vector<double> _cachedValues;
 
-    static const string _samplingRateTag;
+    static const string _sampleRateTag;
 
 }; //End of Class SliceParams
 }; // namespace VAPoR
