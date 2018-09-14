@@ -39,8 +39,9 @@ enum GeometryFlags {
  //! Bit masks to indicate whether the TFWidget maps constant color
  //! to a variable, or maps a secondary color variable
 enum TFFlags {
-	SECONDARY = (1u << 0),
-	CONSTANT  = (1u << 1),
+	SECONDARY    = (1u << 0),
+	CONSTANT     = (1u << 1),
+    NOAUTOUPDATE = (1u << 2),
 };
 
 #endif
