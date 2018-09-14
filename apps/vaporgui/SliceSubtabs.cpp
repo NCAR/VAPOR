@@ -37,11 +37,11 @@ void SliceVariablesSubtab::_setDefaultSampleRate() {
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent) {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(0));
+    _TFWidget->Reinit((TFFlags)(NOAUTOUPDATE));
 
     _TFWidget->mappingFrame->SetIsSlicing(true);
 
-    _sampleRateWidget->SetLabel(QString::fromAscii("Sampling rate"));
+    _sampleRateWidget->SetLabel(QString::fromAscii("Sample rate"));
     _sampleRateWidget->SetIntType(true);
     _sampleRateWidget->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
 
@@ -54,7 +54,7 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent) {
 void SliceAppearanceSubtab::_sampleRateChanged(int rate) {
     _params->SetSampleRate(rate);
     cout << "sampleRateChanged" << endl;
-    _TFWidget->mappingFrame->RefreshHistogram(true);
+    //_TFWidget->mappingFrame->RefreshHistogram(true);
 }
 
 void SliceAppearanceSubtab::Update(
@@ -73,7 +73,7 @@ void SliceAppearanceSubtab::Update(
     _sampleRateWidget->SetValue(sampleRate);
 
     //_TFWidget->mappingFrame->RefreshHistogram(true);
-    _TFWidget->RefreshHistogram();
+    //_TFWidget->RefreshHistogram();
 }
 
 SliceGeometrySubtab::SliceGeometrySubtab(QWidget *parent) {

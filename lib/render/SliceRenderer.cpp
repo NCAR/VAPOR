@@ -135,6 +135,7 @@ void SliceRenderer::_getSampleCoordinates(
 }
 
 int SliceRenderer::_saveTextureData() {
+    cout << "SaveTextureData" << endl;
     Grid *grid = NULL;
     int rc = DataMgrUtils::GetGrids(
         _dataMgr,
