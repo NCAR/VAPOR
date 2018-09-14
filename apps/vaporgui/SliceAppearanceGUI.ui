@@ -106,15 +106,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QSliderEdit" name="_xSampleRate" native="true"/>
-         </item>
-         <item>
-          <widget class="QSliderEdit" name="_ySampleRate" native="true"/>
-         </item>
-         <item>
-          <widget class="QSliderEdit" name="_zSampleRate" native="true">
-           <zorder>_xSampleRate</zorder>
-          </widget>
+          <widget class="QSliderEdit" name="_sampleRateWidget" native="true"/>
          </item>
         </layout>
        </widget>
