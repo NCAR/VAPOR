@@ -15,7 +15,7 @@ using namespace VAPoR;
 #define XZ 1
 #define YZ 2
 
-const string SliceParams::_samplingRateTag = "SamplingRate";
+const string SliceParams::_sampleRateTag = "SampleRate";
 
 //
 // Register class with object factory!!!
@@ -59,9 +59,7 @@ void SliceParams::_init()
     box->SetExtents(minExt, maxExt);
 
     int sampleRate = GetDefaultSampleRate();
-    cout << "Default sample rate " << sampleRate << endl;
-    std::vector<int> sampleRateVec(3, sampleRate);
-    SetSampleRates(sampleRateVec);
+    SetSampleRate(sampleRate);
 }
 
 int SliceParams::GetDefaultSampleRate() const
@@ -83,23 +81,18 @@ bool SliceParams::usingVariable(const std::string &varname)
     return (varname.compare(GetVariableName()) == 0);
 }
 
-std::vector<int> SliceParams::GetSampleRates() const
+int SliceParams::GetSampleRate() const
 {
-    std::vector<double> defaultVec(3, 1);
-    std::vector<double> tmpVec = GetValueDoubleVec(_samplingRateTag, defaultVec);
-
-    std::vector<int> returnVec;
-    for (int i = 0; i < tmpVec.size(); i++) returnVec.push_back((int)tmpVec[i]);
-
-    return returnVec;
+    int rate = (int)GetValueDouble(_sampleRateTag, 50);
+    return rate;
 }
 
-void SliceParams::SetSampleRates(std::vector<int> rates)
+void SliceParams::SetSampleRate(int rate) { SetValueDouble(_sampleRateTag, "Set sample rate", (double)rate); }
+
+void SliceParams::SetCachedValues(std::vector<double> values)
 {
-    std::vector<double> doubleVec;
-    for (int i = 0; i < rates.size(); i++) {
-        doubleVec.push_back(rates[0]);
-        // doubleVec.push_back((double)rates[i]);
-    }
-    SetValueDoubleVec(_samplingRateTag, "Set sampling rate", doubleVec);
+    _cachedValues.clear();
+    _cachedValues = values;
 }
+
+std::vector<double> SliceParams::GetCachedValues() const { return _cachedValues; }

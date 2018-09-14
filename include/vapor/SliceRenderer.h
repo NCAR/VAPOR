@@ -34,11 +34,11 @@ private:
         size_t              ts;
         int                 refinementLevel;
         int                 compressionLevel;
+        int                 textureSampleRate;
+        int                 orientation;
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
         std::vector<double> boxMin, boxMax;
-        std::vector<int>    textureSampleRates;
-        int                 orientation;
     } _cacheParams;
 
     int  _buildCache();
@@ -46,7 +46,7 @@ private:
     void _saveCacheParams();
     void _initTexture();
     int  _saveTextureData();
-    //        int  _getOrientation() const;
+    void _getSampleCoordinates(std::vector<double> &coords, int i, int j) const;
     void _getTextureCoordinates(std::vector<double> &textureMin, std::vector<double> &textureMax);
     void _renderXY(std::vector<double> min, std::vector<double> max) const;
     void _renderXZ(std::vector<double> min, std::vector<double> max) const;

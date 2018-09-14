@@ -32,6 +32,7 @@
 #include <vapor/MapperFunction.h>
 #include <vapor/OpacityMap.h>
 #include <vapor/ContourParams.h>
+#include <vapor/SliceParams.h>
 #include "OpacityWidget.h"
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
@@ -161,11 +162,12 @@ string MappingFrame::getActiveRendererName() const
 
 void MappingFrame::RefreshHistogram(bool force)
 {
+    cout << "refreshHistogram" << endl;
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
     if (!force && skipRefreshHistogram()) return;
-
+    cout << "not skipping" << endl;
     string var;
     var = _rParams->GetColorMapVariableName();
     MapperFunction *mf = _rParams->GetMapperFunc(var);
@@ -200,6 +202,26 @@ void MappingFrame::populateHistogram()
         return;
     }
 
+    if (_isSlicing)
+        populateSlicingHistogram();
+    else
+        populateVolumetricHistogram(grid, minExts, maxExts);
+}
+
+void MappingFrame::populateSlicingHistogram()
+{
+    SliceParams *       sParams = dynamic_cast<SliceParams *>(_rParams);
+    std::vector<double> cachedValues = sParams->GetCachedValues();
+
+    cout << "slicing " << cachedValues.size() << endl;
+    for (int i = 0; i < cachedValues.size(); i++) {
+        cout << i << " " << cachedValues[i] << endl;
+        _histogram->addToBin(cachedValues[i]);
+    }
+}
+
+void MappingFrame::populateVolumetricHistogram(Grid *grid, std::vector<double> minExts, std::vector<double> maxExts)
+{
     float          v;
     Grid::Iterator itr;
     Grid::Iterator enditr = grid->end();

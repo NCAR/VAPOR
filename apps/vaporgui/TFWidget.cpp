@@ -329,7 +329,7 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
     string newName = getCurrentVarName();
     if (_varName != newName) {
         _varName = newName;
-        refreshHistogram();
+        RefreshHistogram();
     }
 }
 
@@ -376,7 +376,7 @@ void TFWidget::checkForExternalChangesToHisto()
     }
     if (_somethingChanged) {
         if (autoUpdateHisto())
-            refreshHistogram();
+            RefreshHistogram();
         else
             updateHistoButton->setEnabled(true);
     }
@@ -468,8 +468,9 @@ void TFWidget::setRange(double min, double max)
     emit emitChange();
 }
 
-void TFWidget::refreshHistogram()
+void TFWidget::RefreshHistogram()
 {
+    cout << "RefreshHistogram" << endl;
     MapperFunction *mf = getCurrentMapperFunction();
     mappingFrame->updateMapperFunction(mf);
     bool force = true;
@@ -482,7 +483,7 @@ void TFWidget::updateHisto()
 {
     bool buttonRequest = sender() == updateHistoButton ? true : false;
     if (autoUpdateHisto() || buttonRequest) {
-        refreshHistogram();
+        RefreshHistogram();
     } else {
         mappingFrame->fitToView();
     }
