@@ -50,9 +50,7 @@ public:
 	);
 
 private slots:
-    void _xSampleRateChanged(int rate);
-    void _ySampleRateChanged(int rate);
-    void _zSampleRateChanged(int rate);
+    void _sampleRateChanged(int rate);
 
 private:
     VAPoR::SliceParams* _params;
