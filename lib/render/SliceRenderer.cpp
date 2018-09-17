@@ -12,6 +12,8 @@
 #define XZ 1
 #define YZ 2
 
+#define MAXTEXTURESIZE 8000
+
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -83,6 +85,8 @@ void SliceRenderer::_saveCacheParams()
 
     _textureWidth = _cacheParams.textureSampleRate;
     _textureHeight = _cacheParams.textureSampleRate;
+    if (_textureWidth > MAXTEXTURESIZE) _textureWidth = MAXTEXTURESIZE;
+    if (_textureHeight > MAXTEXTURESIZE) _textureHeight = MAXTEXTURESIZE;
 
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
