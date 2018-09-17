@@ -29,6 +29,7 @@ SliceParams::SliceParams(
 ) : RenderParams(dataMgr, ssave, SliceParams::GetClassType(), THREED) {
 	SetDiagMsg("SliceParams::SliceParams() this=%p", this);
 
+    _cachedValues.clear();
 	_init();
 }
 
