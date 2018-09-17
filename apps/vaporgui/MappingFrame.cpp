@@ -1372,6 +1372,8 @@ void MappingFrame::select(int hits, GLuint *selectionBuffer, Qt::KeyboardModifie
     int maxCount = 0;
     _lastSelectedIndex = -1;
 
+    cout << "Select" << endl;
+
     //
     // Find the hit with the maximum count
     //
@@ -1390,23 +1392,28 @@ void MappingFrame::select(int hits, GLuint *selectionBuffer, Qt::KeyboardModifie
     // Select the leaf object of the hit with the maximum count
     //
     if (selectionBuffer[hitOffset + 3] == OPACITY_WIDGETS) {
+        cout << "select 0" << endl;
         _lastSelected = _opacityWidgets[selectionBuffer[hitOffset + 4]];
     } else if (selectionBuffer[hitOffset + 3] == DOMAIN_WIDGET) {
+        cout << "select 1" << endl;
         deselectWidgets();
 
         _lastSelected = _domainSlider;
     } else if (selectionBuffer[hitOffset + 3] == ISO_WIDGET) {
+        cout << "select 2" << endl;
         deselectWidgets();
 
         _lastSelected = _isoSlider;
     } else if ((int)selectionBuffer[hitOffset + 3] > (int)ISO_WIDGET)    // must have selected one of the isoline widgets
     {
+        cout << "select 3" << endl;
         deselectWidgets();
-        return;
+        // return;
         int selectedIndex = (int)selectionBuffer[hitOffset + 3] - (int)ISO_WIDGET - 1;
         _lastSelected = _isolineSliders[selectedIndex];
         _lastSelectedIndex = selectedIndex;
     } else if (selectionBuffer[hitOffset + 3] == COLORBAR_WIDGET) {
+        cout << "select 4" << endl;
         _lastSelected = _colorbarWidget;
 
         if (maxCount < 2) {
@@ -1575,23 +1582,34 @@ void MappingFrame::mousePressEvent(QMouseEvent *event)
 
     _button = event->buttons();
 
+    cout << "MappingFrame::mousePressEvent" << endl;
+
     if (_editMode && (_button == Qt::LeftButton || _button == Qt::MidButton)) {
+        cout << "0" << endl;
         _paramsMgr->BeginSaveStateGroup("Transfer Function Editor edit");
         _mousePressFlag = true;
         if (_lastSelected) {
+            cout << "A" << endl;
             if (_lastSelected != _domainSlider) {
+                cout << "B" << endl;
                 if (_lastSelected == _colorbarWidget) {
+                    cout << "C" << endl;
                     emit startChange("Colormap edit");
                 } else if (_lastSelected == _isoSlider) {
+                    cout << "Iso slider move" << endl;
                     emit startChange("Iso slider move");
                 } else if (dynamic_cast<IsoSlider *>(_lastSelected))    // check if an isolineSlider was picked...
                 {
+                    cout << "Isoline slider move" << endl;
                     emit startChange("Isoline slider move");
                 } else {
+                    cout << "D" << endl;
                     emit startChange("Opacity map edit");
                 }
-            } else
+            } else {
+                cout << "E" << endl;
                 emit startChange("Domain slider move");
+            }
         }
 
     } else if (!_editMode && (_button == Qt::LeftButton))
@@ -2190,6 +2208,7 @@ void MappingFrame::setIsoSlider()
 //----------------------------------------------------------------------------
 void MappingFrame::setIsolineSlider(int index)
 {
+    cout << "setIsolineSlider" << endl;
 #ifdef VAPOR3_0_0_ALPHA
     if (!_mapper) return;
     IsoSlider *iSlider = _isolineSliders[index];
@@ -2210,6 +2229,7 @@ void MappingFrame::setIsolineSlider(int index)
 
 void MappingFrame::setIsolineSliders(const vector<double> &sliderVals)
 {
+    cout << "setIsolineSliders" << endl;
     // delete unused sliders
     if (sliderVals.size() < _isolineSliders.size()) {
         for (int i = sliderVals.size(); i < _isolineSliders.size(); i++) { delete _isolineSliders[i]; }
