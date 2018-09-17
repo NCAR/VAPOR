@@ -94,7 +94,7 @@ class VDF_API Grid {
     //! Get geometric dimension of cells
     //!
     //! Returns the geometric dimension of the cells in the mesh. I.e.
-    //! the number of spatial spatial coordinates for each grid point.
+    //! the number of spatial coordinates for each grid point.
     //! Valid values are 0..3. The geometric dimension must be equal to
     //! or greater than the topology dimension.
     //!
