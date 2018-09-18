@@ -428,6 +428,8 @@ void TextObject::drawOnScreen()
     double urx = llx + 2. * txtWidth;
     double ury = lly + 2. * txtHeight;
 
+    printf("(%g, %g)\n", llx, lly);
+
     applyOffset(llx, lly, urx, ury);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

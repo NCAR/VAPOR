@@ -23,6 +23,8 @@
 #include <cmath>
 
 #include "Manip.h"
+#include "vapor/GLManager.h"
+#include "vapor/LegacyGL.h"
 
 using namespace VAPoR;
 
@@ -47,7 +49,7 @@ const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
 #define MAXY 4
 #define MAXZ 5
 
-TranslateStretchManip::TranslateStretchManip() : Manip()
+TranslateStretchManip::TranslateStretchManip(GLManager *glManager) : Manip(glManager)
 {
     _buttonNum = 0;
     _selectedHandle = -1;
@@ -72,13 +74,15 @@ TranslateStretchManip::TranslateStretchManip() : Manip()
 
 void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform)
 {
-    glMatrixMode(GL_MODELVIEW);
+    MatrixManager *mm = _glManager->matrixManager;
+
+    mm->MatrixModeModelView();
 
     // Use the ModelViewMatrix passed in upon Update(),
     // not what is currently held in the gl state
-    glLoadMatrixd(_modelViewMatrix);
+    mm->LoadMatrixd(_modelViewMatrix);
 
-    glPushMatrix();
+    mm->PushMatrix();
 
     if (transform == NULL) return;
 
@@ -91,18 +95,19 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform)
     assert(scales.size() == 3);
     assert(origins.size() == 3);
 
-    glTranslatef(origins[X], origins[Y], origins[Z]);
-    glScalef(scales[X], scales[Y], scales[Z]);
-    glRotatef(rotations[X], 1, 0, 0);
-    glRotatef(rotations[Y], 0, 1, 0);
-    glRotatef(rotations[Z], 0, 0, 1);
-    glTranslatef(-origins[X], -origins[Y], -origins[Z]);
+    mm->Translate(origins[X], origins[Y], origins[Z]);
+    mm->Scale(scales[X], scales[Y], scales[Z]);
+    mm->Rotate(rotations[X], 1, 0, 0);
+    mm->Rotate(rotations[Y], 0, 1, 0);
+    mm->Rotate(rotations[Z], 0, 0, 1);
+    mm->Translate(-origins[X], -origins[Y], -origins[Z]);
 
-    glTranslatef(translations[X], translations[Y], translations[Z]);
+    mm->Translate(translations[X], translations[Y], translations[Z]);
 
     // Retrieve the transformed matrix and stick it back into
     // our _modelViewMatrix array
-    glGetDoublev(GL_MODELVIEW_MATRIX, _modelViewMatrix);
+    mm->MatrixModeModelView();
+    mm->GetDoublev(_modelViewMatrix);
 }
 
 void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, std::vector<double> cameraPosition,
@@ -593,98 +598,106 @@ void TranslateStretchManip::deScaleExtents(double *extents) const
 // Currently just used for handles.
 void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
 {
-    glLineWidth(2.0);
+    LegacyGL *lgl = _glManager->legacy;
+
+    GLfloat lineWidthRange[2] = {0.0f, 0.0f};
+    glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
+    GL_ERR_BREAK();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    if (isSelected)
-        glColor4fv(_faceSelectionColor);
-    else
-        glColor4fv(_unselectedFaceColor);
+    GL_ERR_BREAK();
 
     // Do left (x=0)
-    glBegin(GL_QUADS);
-    glVertex3f(extents[MINX], extents[MINY], extents[MINZ]);
-    glVertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
-    glVertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
-    glVertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
-    glEnd();
+    if (isSelected)
+        lgl->Color4fv(_faceSelectionColor);
+    else
+        lgl->Color4fv(_unselectedFaceColor);
+    lgl->Begin(LGL_QUADS);
+    lgl->Vertex3f(extents[MINX], extents[MINY], extents[MINZ]);
+    lgl->Vertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
+    lgl->End();
+    GL_ERR_BREAK();
 
     // do right
     if (isSelected)
-        glColor4fv(_faceSelectionColor);
+        lgl->Color4fv(_faceSelectionColor);
     else
-        glColor4fv(_unselectedFaceColor);
-    glBegin(GL_QUADS);
-    glVertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
-    glVertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
-    glVertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
-    glVertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
-    glEnd();
+        lgl->Color4fv(_unselectedFaceColor);
+    lgl->Begin(LGL_QUADS);
+    lgl->Vertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
+    lgl->End();
 
     // top
     if (isSelected)
-        glColor4fv(_faceSelectionColor);
+        lgl->Color4fv(_faceSelectionColor);
     else
-        glColor4fv(_unselectedFaceColor);
-    glBegin(GL_QUADS);
-    glVertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
-    glVertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
-    glVertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
-    glVertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
-    glEnd();
+        lgl->Color4fv(_unselectedFaceColor);
+    lgl->Begin(LGL_QUADS);
+    lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
+    lgl->End();
 
     // bottom
     if (isSelected)
-        glColor4fv(_faceSelectionColor);
+        lgl->Color4fv(_faceSelectionColor);
     else
-        glColor4fv(_unselectedFaceColor);
-    glBegin(GL_QUADS);
-    glVertex3f(extents[MINX], extents[MINY], extents[MINZ]);
-    glVertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
-    glVertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
-    glVertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
-    glEnd();
+        lgl->Color4fv(_unselectedFaceColor);
+    lgl->Begin(LGL_QUADS);
+    lgl->Vertex3f(extents[MINX], extents[MINY], extents[MINZ]);
+    lgl->Vertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
+    lgl->End();
 
     // back
     if (isSelected)
-        glColor4fv(_faceSelectionColor);
+        lgl->Color4fv(_faceSelectionColor);
     else
-        glColor4fv(_unselectedFaceColor);
-    glBegin(GL_QUADS);
-    glVertex3f(extents[MINX], extents[MINY], extents[MINZ]);
-    glVertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
-    glVertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
-    glVertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
-    glEnd();
+        lgl->Color4fv(_unselectedFaceColor);
+    lgl->Begin(LGL_QUADS);
+    lgl->Vertex3f(extents[MINX], extents[MINY], extents[MINZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MINY], extents[MINZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MAXY], extents[MINZ]);
+    lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
+    lgl->End();
 
     // do the front:
     //
     if (isSelected)
-        glColor4fv(_faceSelectionColor);
+        lgl->Color4fv(_faceSelectionColor);
     else
-        glColor4fv(_unselectedFaceColor);
-    glBegin(GL_QUADS);
-    glVertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
-    glVertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
-    glVertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
-    glVertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
-    glEnd();
+        lgl->Color4fv(_unselectedFaceColor);
+    lgl->Begin(LGL_QUADS);
+    lgl->Vertex3f(extents[MINX], extents[MINY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MINY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MAXX], extents[MAXY], extents[MAXZ]);
+    lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
+    lgl->End();
 
-    glColor4f(1, 1, 1, 1);
+    lgl->Color4f(1, 1, 1, 1);
     glDisable(GL_BLEND);
+    GL_ERR_BREAK();
 }
 
 // Renders handles and box
 // If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::Render()
 {
+    GL_ERR_BREAK();
     transformMatrix(_dmTransform);
     if (_rpTransform != NULL) transformMatrix(_rpTransform);
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
-    glPushAttrib(GL_CURRENT_BIT);
+    GL_LEGACY(glPushAttrib(GL_CURRENT_BIT));
     double handleExtents[6];
     for (int handleNum = 0; handleNum < 6; handleNum++) {
         makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _selection);
@@ -707,17 +720,25 @@ void TranslateStretchManip::Render()
                 handleExtents[axis + 3] += _dragDistance;
             }
         }
+        GL_ERR_BREAK();
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
+        GL_ERR_BREAK();
         drawHandleConnector(handleNum, handleExtents, _selection);
+        GL_ERR_BREAK();
     }
+    GL_ERR_BREAK();
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
+    GL_ERR_BREAK();
 
-    glPopAttrib();
+    GL_LEGACY(glPopAttrib());
 
-    glPopMatrix();               // Pop the matrix applied for the DataMgr's transform
+    MatrixManager *mm = _glManager->matrixManager;
+
+    mm->PopMatrix();             // Pop the matrix applied for the DataMgr's transform
     if (_rpTransform != NULL)    // Pop the matrix applied for the RenderParams' transform
-        glPopMatrix();
+        mm->PopMatrix();
+    GL_ERR_BREAK();
 }
 
 double TranslateStretchManip::getPixelSize() const
@@ -797,47 +818,52 @@ void TranslateStretchManip::drawBoxFaces() const
         else if (_dragDistance != 0.)
             _translateCorners(corners);
     }
+    GL_ERR_BREAK();
 
     // Now render the edges:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-    glLineWidth(2.0);
-    glColor3f(1.f, 0.f, 0.f);
-    glBegin(GL_LINES);
-    glVertex3dv(corners[0]);
-    glVertex3dv(corners[1]);
-    glVertex3dv(corners[0]);
-    glVertex3dv(corners[2]);
-    glVertex3dv(corners[0]);
-    glVertex3dv(corners[4]);
+    GL_LEGACY(glLineWidth(2.0));
 
-    glVertex3dv(corners[1]);
-    glVertex3dv(corners[3]);
-    glVertex3dv(corners[1]);
-    glVertex3dv(corners[5]);
+    LegacyGL *lgl = _glManager->legacy;
 
-    glVertex3dv(corners[2]);
-    glVertex3dv(corners[3]);
-    glVertex3dv(corners[2]);
-    glVertex3dv(corners[6]);
+    lgl->Color3f(1.f, 0.f, 0.f);
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3dv(corners[0]);
+    lgl->Vertex3dv(corners[1]);
+    lgl->Vertex3dv(corners[0]);
+    lgl->Vertex3dv(corners[2]);
+    lgl->Vertex3dv(corners[0]);
+    lgl->Vertex3dv(corners[4]);
 
-    glVertex3dv(corners[3]);
-    glVertex3dv(corners[7]);
+    lgl->Vertex3dv(corners[1]);
+    lgl->Vertex3dv(corners[3]);
+    lgl->Vertex3dv(corners[1]);
+    lgl->Vertex3dv(corners[5]);
 
-    glVertex3dv(corners[4]);
-    glVertex3dv(corners[5]);
-    glVertex3dv(corners[4]);
-    glVertex3dv(corners[6]);
+    lgl->Vertex3dv(corners[2]);
+    lgl->Vertex3dv(corners[3]);
+    lgl->Vertex3dv(corners[2]);
+    lgl->Vertex3dv(corners[6]);
 
-    glVertex3dv(corners[5]);
-    glVertex3dv(corners[7]);
+    lgl->Vertex3dv(corners[3]);
+    lgl->Vertex3dv(corners[7]);
 
-    glVertex3dv(corners[6]);
-    glVertex3dv(corners[7]);
-    glEnd();
+    lgl->Vertex3dv(corners[4]);
+    lgl->Vertex3dv(corners[5]);
+    lgl->Vertex3dv(corners[4]);
+    lgl->Vertex3dv(corners[6]);
+
+    lgl->Vertex3dv(corners[5]);
+    lgl->Vertex3dv(corners[7]);
+
+    lgl->Vertex3dv(corners[6]);
+    lgl->Vertex3dv(corners[7]);
+    lgl->End();
 
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
+    GL_ERR_BREAK();
 }
 
 void TranslateStretchManip::_stretchCorners(double corners[8][3]) const
@@ -1018,6 +1044,7 @@ void TranslateStretchManip::slideHandle(int handleNum, const double movedRay[3],
 // the box center only moves half as far.
 void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExtents, double *boxExtents)
 {
+    LegacyGL *lgl = _glManager->legacy;
     // Determine the side of the handle and the side of the box that is connected:
     int    axis = (handleNum < 3) ? (2 - handleNum) : (handleNum - 3);
     bool   posSide = (handleNum > 2);
@@ -1045,20 +1072,26 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
             handleDisp[i] = 0.f;
         }
     }
-    glLineWidth(2.0);
+    GL_ERR_BREAK();
+    GL_LEGACY(glLineWidth(2.0));
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPolygonMode(GL_FRONT, GL_FILL);
+    GL_ERR_BREAK();
+    GL_LEGACY(glPolygonMode(GL_FRONT, GL_FILL));
+    GL_ERR_BREAK();
     if ((handleNum == _selectedHandle) || (handleNum == (5 - _selectedHandle)))
-        glColor4fv(_faceSelectionColor);
+        lgl->Color4fv(_faceSelectionColor);
     else
-        glColor4fv(_unselectedFaceColor);
-    glBegin(GL_LINES);
-    glVertex3f(0.5f * (handleExtents[MAXX] + handleExtents[MINX]) + handleDisp[X], 0.5f * (handleExtents[MAXY] + handleExtents[MINY]) + handleDisp[Y],
-               0.5f * (handleExtents[MAXZ] + handleExtents[MINZ]) + handleDisp[Z]);
-    glVertex3f(0.5f * (boxExtents[MAXX] + boxExtents[MINX]) + boxDisp[X], 0.5f * (boxExtents[MAXY] + boxExtents[MINY]) + boxDisp[Y], 0.5f * (boxExtents[MAXZ] + boxExtents[MINZ]) + boxDisp[Z]);
-    glEnd();
+        lgl->Color4fv(_unselectedFaceColor);
+    GL_ERR_BREAK();
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(0.5f * (handleExtents[MAXX] + handleExtents[MINX]) + handleDisp[X], 0.5f * (handleExtents[MAXY] + handleExtents[MINY]) + handleDisp[Y],
+                  0.5f * (handleExtents[MAXZ] + handleExtents[MINZ]) + handleDisp[Z]);
+    lgl->Vertex3f(0.5f * (boxExtents[MAXX] + boxExtents[MINX]) + boxDisp[X], 0.5f * (boxExtents[MAXY] + boxExtents[MINY]) + boxDisp[Y], 0.5f * (boxExtents[MAXZ] + boxExtents[MINZ]) + boxDisp[Z]);
+    lgl->End();
+    GL_ERR_BREAK();
     glDisable(GL_BLEND);
+    GL_ERR_BREAK();
 }
 
 // This is a utility to draw the hitbox over the handle.  It can be

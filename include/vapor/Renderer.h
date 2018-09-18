@@ -26,11 +26,11 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
 #include <vapor/textRenderer.h>
-#include "vapor/GLManager.h"
 
 namespace VAPoR {
 
-class ShaderMgr;
+class ShaderProgram2;
+struct GLManager;
 
 //! \class RendererBase
 //! \ingroup Public_Render
@@ -53,7 +53,7 @@ public:
     //! Any OpenGL initialization is performed in initializeGL
     //! It will be called from an OpenGL rendering context.
     //! Sets _initialized to true if successful.
-    virtual int initializeGL(ShaderMgr *sm, GLManager *glManager);
+    virtual int initializeGL(GLManager *glManager);
 
     //! Obtain the Visualizer associated with this Renderer
     string GetVisualizer() { return _winName; }
@@ -89,7 +89,6 @@ protected:
     DataMgr *        _dataMgr;
 
     GLManager *_glManager;
-    ShaderMgr *_shaderMgr;
 
     //! Pure virtual method
     //! Any OpenGL initialization is performed in initializeGL
@@ -255,7 +254,7 @@ protected:
     //! May be invoked during _paintGL() by classes derived from this class.
     //! Clipping planes are specified in User coordinates.
     //! \sa DisableClippingPlanes
-    void EnableClipToBox() const;
+    void EnableClipToBox(ShaderProgram2 *shader) const;
 
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to
@@ -272,8 +271,7 @@ protected:
     static const int _imgHgt;
     static const int _imgWid;
     unsigned char *  _colorbarTexture;
-    TextObject *     _textObject;
-    string           _fontFile;
+    string           _fontName;
 
 private:
     size_t _timestep;

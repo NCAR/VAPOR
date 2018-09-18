@@ -22,7 +22,7 @@ Font::Font(GLManager *glManager, const std::string &path, int size, FT_Library l
     glGenBuffers(1, &_VBO);
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 4 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 4 * sizeof(float), NULL, GL_STREAM_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -41,7 +41,10 @@ Font::~Font()
 
 bool Font::LoadGlyph(int c)
 {
-    if (FT_Load_Char(_face, c, FT_LOAD_RENDER)) return false;
+    if (FT_Load_Char(_face, c, FT_LOAD_RENDER)) {
+        printf("FAILED TO LOAD CHAR\n");
+        return false;
+    }
 
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -70,10 +73,11 @@ Font::Glyph Font::GetGlyph(int c)
     return it->second;
 }
 
-void Font::DrawText(const std::string &text, float xStart, float yStart)
+void Font::DrawText(const std::string &text, const glm::vec4 &color, float xStart, float yStart)
 {
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("font");
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    shader->SetUniform("color", color);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -85,8 +89,7 @@ void Font::DrawText(const std::string &text, float xStart, float yStart)
 
     for (int i = 0; i < text.size(); i++) {
         if (text[i] == '\n') {
-            cursorY -= _face->size->metrics.height / 64;
-            // cursorY -= _face->height / 64;
+            cursorY -= LineHeight();
             cursorX = xStart;
             continue;
         }
@@ -115,4 +118,38 @@ void Font::DrawText(const std::string &text, float xStart, float yStart)
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
+}
+
+glm::vec2 Font::TextDimensions(const std::string &text)
+{
+    vec2  dimensions(0.f);
+    float lineWidth = 0;
+    float maxHeightForLine = 0;
+    for (int i = 0; i < text.size(); i++) {
+        if (text[i] == '\n') {
+            if (lineWidth > dimensions.x) dimensions.x = lineWidth;
+            dimensions.y += LineHeight();
+            maxHeightForLine = 0;
+            lineWidth = 0;
+            continue;
+        }
+        if (text[i] == '\r') {
+            if (lineWidth > dimensions.x) dimensions.x = lineWidth;
+            lineWidth = 0;
+            continue;
+        }
+
+        Glyph ch = GetGlyph(text[i]);
+        lineWidth += ch.advance / 64;
+        if (ch.sizeY > maxHeightForLine) maxHeightForLine = ch.sizeY;
+    }
+    if (lineWidth > dimensions.x) dimensions.x = lineWidth;
+    dimensions.y += maxHeightForLine;
+    return dimensions;
+}
+
+float Font::LineHeight() const
+{
+    return _face->size->metrics.height / 64;
+    // return _face->height / 64;
 }

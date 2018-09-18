@@ -5,6 +5,7 @@
 #include <stack>
 #include <glm/fwd.hpp>
 #include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using std::map;
 using std::stack;
@@ -18,9 +19,11 @@ class MatrixManager {
 public:
     MatrixManager();
 
-    glm::mat4 GetProjectionMatrix();
-    glm::mat4 GetModelViewMatrix();
-    glm::mat4 GetModelViewProjectionMatrix();
+    glm::mat4 GetCurrentMatrix() const;
+    glm::mat4 GetProjectionMatrix() const;
+    glm::mat4 GetModelViewMatrix() const;
+    glm::mat4 GetModelViewProjectionMatrix() const;
+    void      SetCurrentMatrix(const glm::mat4 m);
 
     void MatrixModeProjection();
     void MatrixModeModelView();
@@ -28,6 +31,7 @@ public:
     void PopMatrix();
 
     void LoadMatrixd(const double *m);
+    void GetDoublev(double *m) const;
 
     void LoadIdentity();
     void Translate(float x, float y, float z);
@@ -37,6 +41,10 @@ public:
     void Ortho(float left, float right, float bottom, float top);
     void Ortho(float left, float right, float bottom, float top, float zNear, float zFar);
 
+    glm::vec2 ProjectToScreen(float x, float y, float z) const;
+    glm::vec2 ProjectToScreen(const glm::vec3 &v) const;
+
+#ifndef NDEBUG
     void        Test();
     void        TestUpload();
     int         GetGLMatrixMode();
@@ -45,6 +53,9 @@ public:
     int         GetGLProjectionStackDepth();
     int         GetGLCurrentStackDepth();
     const char *GetMatrixModeStr();
+
+    float Near, Far;
+#endif
 
 private:
     stack<glm::mat4>  _modelviewStack;

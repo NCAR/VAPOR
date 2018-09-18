@@ -26,9 +26,9 @@ FontManager::~FontManager()
     #define PATH_SEPARATOR "/"
 #endif
 
-Font *FontManager::GetFont(const std::string name, unsigned int size) { return GetResource(pair<string, unsigned int>(name, size)); }
+Font *FontManager::GetFont(const std::string &name, unsigned int size) { return GetResource(pair<string, unsigned int>(name, size)); }
 
-bool FontManager::LoadResourceByKey(const std::pair<std::string, unsigned int> key)
+bool FontManager::LoadResourceByKey(const std::pair<std::string, unsigned int> &key)
 {
     if (HasResource(key)) {
         assert(!"Font already loaded");

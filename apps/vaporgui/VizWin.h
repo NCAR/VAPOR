@@ -25,7 +25,6 @@
 #include "vapor/Visualizer.h"
 #include "Manip.h"
 #include <QWheelEvent>
-#include "vapor/GLManager.h"
 
 class QCloseEvent;
 class QRect;
@@ -38,7 +37,8 @@ class Trackball;
 
 namespace VAPoR {
 class ControlExec;
-};
+struct GLManager;
+};    // namespace VAPoR
 
 //! \class VizWin
 //! \ingroup Public_GUI
@@ -61,7 +61,7 @@ class VizWin : public QGLWidget {
     Q_OBJECT
 
 public:
-    VizWin(QWidget *parent, const QString &name, string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
+    VizWin(const QGLFormat &format, QWidget *parent, const QString &name, string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
     ~VizWin();
 
     //! Identify the visualizer index

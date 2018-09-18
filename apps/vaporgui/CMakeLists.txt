@@ -84,6 +84,9 @@ set (SRCS
 	EventRouter.h
 	GLWidget.h
 	VizWin.h
+	Core3_2_context.h
+	TrackBall.h
+	Manip.h
 )
 
 set (UIS 
@@ -141,6 +144,7 @@ set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (APPLE)
+	set (SRCS ${SRCS} core_profile_attributes.mm)
 	set (MACOSX_BUNDLE_ICON_FILE VAPOR.icns)
 	set (MACOSX_BUNDLE_ICON_FILE_PATH ${CMAKE_SOURCE_DIR}/share/images/VAPOR.icns)
 	set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -158,7 +162,11 @@ endif()
 target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
 
 if (APPLE)
-	target_link_libraries (vapor "-framework CoreServices")
+	find_library (CORESERVICES CoreServices)
+	find_library (FOUNDATION Foundation)
+	find_library (COCOA Cocoa)
+	# target_link_libraries (vapor "-framework CoreServices")
+	target_link_libraries (vapor ${CORESERVICES} ${FOUNDATION} ${COCOA})
 elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 endif ()

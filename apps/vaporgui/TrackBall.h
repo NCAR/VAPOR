@@ -66,7 +66,7 @@ class Trackball {
 public:
     Trackball();
     Trackball(float scale[3]);
-    void TrackballSetMatrix();
+    void TrackballSetMatrix(VAPoR::GLManager *glManager);
     void TrackballFlip(int axis);
     void TrackballSpin();
     void TrackballStopSpinning();

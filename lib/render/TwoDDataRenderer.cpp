@@ -26,10 +26,10 @@
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
 #include <vapor/utils.h>
-#include <vapor/ShaderMgr.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/TwoDDataRenderer.h>
 #include <vapor/TwoDDataParams.h>
+#include "vapor/GLManager.h"
 
 using namespace VAPoR;
 
@@ -119,7 +119,6 @@ TwoDDataRenderer::TwoDDataRenderer(const ParamsMgr *pm, string winName, string d
     _nindices = 0;
     _colormap = NULL;
     _colormapsize = 0;
-    _vertexDataAttr = -1;
 
     _cMapTexID = 0;
 
@@ -145,39 +144,9 @@ TwoDDataRenderer::~TwoDDataRenderer()
 
 int TwoDDataRenderer::_initializeGL()
 {
-//#define	NOSHADER
-#ifndef NOSHADER
-    if (!_shaderMgr) {
-        SetErrMsg("Programmable shading not available");
-        return (-1);
-    }
+    GL_ERR_BREAK();
 
     int rc;
-
-    // First shader is used when 'GridAligned' is false
-    //
-    if (!_shaderMgr->EffectExists(EffectName)) {
-        rc = _shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
-        if (rc < 0) return (-1);
-    }
-
-    // Second shader is used when 'GridAligned' is true
-    //
-    if (!_shaderMgr->EffectExists(EffectNameAttr)) {
-        rc = _shaderMgr->DefineEffect(EffectBaseName, "USE_VERTEX_ATTR;", EffectNameAttr);
-        if (rc < 0) return (-1);
-    }
-
-    //	rc = _shaderMgr->EnableEffect(EffectNameAttr);
-    //	if (rc<0) return(-1);
-
-    rc = (int)_shaderMgr->AttributeLocation(EffectNameAttr, VertexDataAttr);
-    if (rc < 0) return (-1);
-    _vertexDataAttr = rc;
-
-    //	_shaderMgr->DisableEffect();
-
-#endif
 
     glGenTextures(1, &_cMapTexID);
 
@@ -195,10 +164,12 @@ int TwoDDataRenderer::_initializeGL()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, 0);
     return (TwoDRenderer::_initializeGL());
+    GL_ERR_BREAK();
 }
 
 int TwoDDataRenderer::_paintGL()
 {
+    GL_ERR_BREAK();
     if (printOpenGLError() != 0) return (-1);
 
     TwoDDataParams *rp = (TwoDDataParams *)GetActiveParams();
@@ -207,54 +178,60 @@ int TwoDDataRenderer::_paintGL()
     tf->makeLut(_colormap);
     vector<double> crange = tf->getMinMaxMapValue();
 
+    GL_ERR_BREAK();
     int rc;
 #ifndef NOSHADER
 
     string effect = getEffectInstance(GridAligned);
 
-    rc = _shaderMgr->EnableEffect(effect);
-    if (rc < 0) return (-1);
-
     // 2D Data LIGHT parameters hard coded
     //
-    _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int)false);
-    _shaderMgr->UploadEffectData(effect, "kd", (float)0.6);
-    _shaderMgr->UploadEffectData(effect, "ka", (float)0.3);
-    _shaderMgr->UploadEffectData(effect, "ks", (float)0.1);
-    _shaderMgr->UploadEffectData(effect, "expS", (float)16.0);
-    _shaderMgr->UploadEffectData(effect, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
+    // _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
+    // _shaderMgr->UploadEffectData(effect, "kd", (float) 0.6);
+    // _shaderMgr->UploadEffectData(effect, "ka", (float) 0.3);
+    // _shaderMgr->UploadEffectData(effect, "ks", (float) 0.1);
+    // _shaderMgr->UploadEffectData(effect, "expS", (float) 16.0);
+    // _shaderMgr->UploadEffectData( effect, "lightDirection", (float) 0.0, (float) 0.0, (float) 1.0);
 
-    _shaderMgr->UploadEffectData(effect, "minLUTValue", (float)crange[0]);
-    _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float)crange[1]);
+    // _shaderMgr->UploadEffectData(effect, "minLUTValue", (float) crange[0]);
+    // _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float) crange[1]);
 
-    _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
-
-    // If data aren't grid aligned we sample the data values with a
-    // texture.
-    //
-    if (!GridAligned) { _shaderMgr->UploadEffectData(effect, "dataTexture", dataTexUnit); }
+    // _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
 
 #endif
 
-    glActiveTexture(GL_TEXTURE1);
+    ShaderProgram2 *s = _glManager->shaderManager->GetShader("2DData");
+    s->Bind();
+    s->SetUniform("minLUTValue", (float)crange[0]);
+    s->SetUniform("maxLUTValue", (float)crange[1]);
+
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _cMapTexID);
-    glEnable(GL_TEXTURE_1D);
+
+    GL_ERR_BREAK();
+
+    glActiveTexture(GL_TEXTURE1);
+    GL_ERR_BREAK();
+    glBindTexture(GL_TEXTURE_1D, _cMapTexID);
+    GL_ERR_BREAK();
+    GL_LEGACY(glEnable(GL_TEXTURE_1D));
+
+    GL_ERR_BREAK();
 
     // Really only need to reload colormap texture if it changes
     //
     glTexSubImage1D(GL_TEXTURE_1D, 0, 0, _colormapsize, GL_RGBA, GL_FLOAT, _colormap);
 
+    GL_ERR_BREAK();
     glActiveTexture(GL_TEXTURE0);
     rc = TwoDRenderer::_paintGL();
+    GL_ERR_BREAK();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, 0);
-    glDisable(GL_TEXTURE_1D);
+    GL_LEGACY(glDisable(GL_TEXTURE_1D));
 
-#ifndef NOSHADER
-    _shaderMgr->DisableEffect();
-#endif
-
+    GL_ERR_BREAK();
     return (rc);
 }
 

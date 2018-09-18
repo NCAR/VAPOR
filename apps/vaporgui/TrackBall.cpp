@@ -77,6 +77,7 @@
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cmath>
 #include <iostream>
+#include "vapor/GLManager.h"
 #include "TrackBall.h"
 using namespace VAPoR;
 void Trackball::TrackballReset()
@@ -107,9 +108,10 @@ Trackball::Trackball(float scale[3])
     TrackballReset();
 }
 
-void Trackball::TrackballSetMatrix()
+void Trackball::TrackballSetMatrix(GLManager *glManager)
 // Note perspective must be set previously in setFromFrame.
 {
+    MatrixManager *mm = glManager->matrixManager;
     /* Modify the current gl matrix by the trackball
      * rotation and translation.
      */
@@ -119,21 +121,14 @@ void Trackball::TrackballSetMatrix()
     */
     // sendGLHomeViewpoint();
 
-    glLoadIdentity();
+    mm->LoadIdentity();
 
     if (_perspective) {
-        glTranslated(_center[0], _center[1], _center[2]);
-        glTranslated(_trans[0], _trans[1], _trans[2]);
+        mm->Translate(_center[0], _center[1], _center[2]);
+        mm->Translate(_trans[0], _trans[1], _trans[2]);
         qmatrix(_qrot, m);
-        glMultMatrixd(m);
-        glTranslated(-_center[0], -_center[1], -_center[2]);
-        // float* matrix = (float*)m;
-        /*
-        qWarning( "trackball perspective Matrix is: \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f ",
-            matrix[0], matrix[1],matrix[2],matrix[3],
-            matrix[4], matrix[5],matrix[6],matrix[7],
-            matrix[8], matrix[9],matrix[10],matrix[11],
-            matrix[12], matrix[13],matrix[14],matrix[15]);*/
+        mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::mat4(glm::make_mat4(m)));
+        mm->Translate(-_center[0], -_center[1], -_center[2]);
     } else {
         GLdouble scale_factor = 1.0;
 
@@ -143,18 +138,11 @@ void Trackball::TrackballSetMatrix()
             scale_factor = 5.0 + _trans[2];
         }
 
-        glTranslated(_trans[0], _trans[1], _trans[2]);
+        mm->Translate(_trans[0], _trans[1], _trans[2]);
         qmatrix(_qrot, m);
-        glMultMatrixd(m);
+        mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::mat4(glm::make_mat4(m)));
 
-        glScaled(scale_factor, scale_factor, scale_factor);
-        // qWarning("translate, scale %f %f %f %f", _trans[0], _trans[1], _trans[2], scale_factor);
-        // float* matrix = (float*)m;
-        /*qWarning( "trackball parallel Matrix is: \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f ",
-            matrix[0], matrix[1],matrix[2],matrix[3],
-            matrix[4], matrix[5],matrix[6],matrix[7],
-            matrix[8], matrix[9],matrix[10],matrix[11],
-            matrix[12], matrix[13],matrix[14],matrix[15]);*/
+        mm->Scale(scale_factor, scale_factor, scale_factor);
     }
 }
 

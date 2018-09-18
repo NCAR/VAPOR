@@ -32,6 +32,8 @@
 //#define HANDLE_DIAMETER 3
 namespace VAPoR {
 
+struct GLManager;
+
 // class Visualizer;
 // class DataStatus;
 //! \class Manip
@@ -46,7 +48,7 @@ namespace VAPoR {
 //!
 class RENDER_API Manip {
 public:
-    Manip(){};
+    Manip(GLManager *glManager) : _glManager(glManager){};
     virtual ~Manip() {}
 
     //! Pure virtual function renders the geometry of the Manip.
@@ -127,6 +129,7 @@ protected:
     //! param[in] corners describes the bounding box of the manipulator
     virtual void _stretchCorners(double corners[8][3]) const = 0;
 
+    GLManager *        _glManager;
     int                _buttonNum;
     int                _selectedHandle;
     double             _dragDistance;
@@ -150,7 +153,7 @@ protected:
 //! When you slide a handle with the right mouse it stretches the region
 class RENDER_API TranslateStretchManip : public Manip {
 public:
-    TranslateStretchManip();
+    TranslateStretchManip(GLManager *glManager);
     virtual ~TranslateStretchManip() {}
     virtual void Render();
 

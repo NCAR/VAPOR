@@ -28,6 +28,10 @@
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/GetAppPath.h>
+#include "vapor/GLManager.h"
+#include "vapor/LegacyGL.h"
+#include "vapor/TextLabel.h"
+#include <glm/gtc/type_ptr.hpp>
 
 #include <vapor/ViewpointParams.h>
 
@@ -49,12 +53,8 @@ Renderer::Renderer(const ParamsMgr *pm, string winName, string dataSetName, stri
 
     _colorbarTexture = 0;
     _timestep = 0;
-    _textObject = NULL;
 
-    vector<string> fpath;
-    fpath.push_back("fonts");
-    _fontFile = GetAppPath("VAPOR", "share", fpath);
-    _fontFile = _fontFile + "//arimo.ttf";
+    _fontName = "arimo";
 }
 
 RendererBase::RendererBase(const ParamsMgr *pm, string winName, string dataSetName, string paramsType, string classType, string instName, DataMgr *dataMgr)
@@ -70,7 +70,6 @@ RendererBase::RendererBase(const ParamsMgr *pm, string winName, string dataSetNa
     _dataMgr = dataMgr;
 
     _glManager = nullptr;
-    _shaderMgr = NULL;
     _glInitialized = false;
 }
 // Destructor
@@ -81,10 +80,9 @@ Renderer::~Renderer()
     if (_colorbarTexture) delete _colorbarTexture;
 }
 
-int RendererBase::initializeGL(ShaderMgr *sm, GLManager *glManager)
+int RendererBase::initializeGL(GLManager *glManager)
 {
     _glManager = glManager;
-    _shaderMgr = sm;
     int rc = _initializeGL();
     if (rc < 0) { return (rc); }
 
@@ -128,36 +126,29 @@ int Renderer::paintGL()
     assert(scale.size() == 3);
     assert(origin.size() == 3);
 
-    glMatrixMode(GL_MODELVIEW);
     _glManager->matrixManager->MatrixModeModelView();
-    glPushMatrix();
     _glManager->matrixManager->PushMatrix();
 
-    glTranslatef(origin[0], origin[1], origin[2]);
     _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
-    glScalef(scale[0], scale[1], scale[2]);
     _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
-    glRotatef(rotate[0], 1, 0, 0);
     _glManager->matrixManager->Rotate(rotate[0], 1, 0, 0);
-    glRotatef(rotate[1], 0, 1, 0);
     _glManager->matrixManager->Rotate(rotate[1], 0, 1, 0);
-    glRotatef(rotate[2], 0, 0, 1);
     _glManager->matrixManager->Rotate(rotate[2], 0, 0, 1);
-    glTranslatef(-origin[0], -origin[1], -origin[2]);
     _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 
-    glTranslatef(translate[0], translate[1], translate[2]);
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 
+    GL_ERR_BREAK();
     int rc = _paintGL();
+    GL_ERR_BREAK();
 
-    glPopMatrix();
     _glManager->matrixManager->PopMatrix();
 
     if (rc < 0) { return (-1); }
 
     vector<int> status;
     bool        ok = oglStatusOK(status);
+    GL_ERR_BREAK();
     if (!ok) {
         SetErrMsg("OpenGL error : %s", oglGetErrMsg(status).c_str());
         return (-1);
@@ -165,14 +156,17 @@ int Renderer::paintGL()
     return (0);
 }
 
-void Renderer::EnableClipToBox() const
+// TODO GL
+void Renderer::EnableClipToBox(ShaderProgram2 *shader) const
 {
-    GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
-    GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
-    GLdouble y0Plane[] = {0.0, 1.0, 0.0, 0.0};
-    GLdouble y1Plane[] = {0.0, -1.0, 0.0, 0.0};
-    GLdouble z0Plane[] = {0.0, 0.0, 1.0, 0.0};
-    GLdouble z1Plane[] = {0.0, 0.0, -1.0, 0.0};    // z largest
+    shader->Bind();
+
+    float x0Plane[] = {1.0, 0.0, 0.0, 0.0};
+    float x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
+    float y0Plane[] = {0.0, 1.0, 0.0, 0.0};
+    float y1Plane[] = {0.0, -1.0, 0.0, 0.0};
+    float z0Plane[] = {0.0, 0.0, 1.0, 0.0};
+    float z1Plane[] = {0.0, 0.0, -1.0, 0.0};    // z largest
 
     const RenderParams *rParams = GetActiveParams();
     vector<double>      minExts, maxExts;
@@ -182,42 +176,44 @@ void Renderer::EnableClipToBox() const
 
     int orientation = rParams->GetBox()->GetOrientation();
 
+    GL_ERR_BREAK();
     if (minExts.size() == 3 || orientation != 0) {
         x0Plane[3] = -minExts[0];
         x1Plane[3] = maxExts[0];
-        glEnable(GL_CLIP_PLANE0);
-        glClipPlane(GL_CLIP_PLANE0, x0Plane);
-        glEnable(GL_CLIP_PLANE1);
-        glClipPlane(GL_CLIP_PLANE1, x1Plane);
+        glEnable(GL_CLIP_DISTANCE0);
+        glEnable(GL_CLIP_DISTANCE1);
+        shader->SetUniform("clippingPlanes[0]", glm::make_vec4(x0Plane));
+        shader->SetUniform("clippingPlanes[1]", glm::make_vec4(x1Plane));
     }
 
     if (minExts.size() == 3 || orientation != 1) {
         y0Plane[3] = -minExts[1];
         y1Plane[3] = maxExts[1];
-        glEnable(GL_CLIP_PLANE2);
-        glClipPlane(GL_CLIP_PLANE2, y0Plane);
-        glEnable(GL_CLIP_PLANE3);
-        glClipPlane(GL_CLIP_PLANE3, y1Plane);
+        glEnable(GL_CLIP_DISTANCE2);
+        glEnable(GL_CLIP_DISTANCE3);
+        shader->SetUniform("clippingPlanes[2]", glm::make_vec4(y0Plane));
+        shader->SetUniform("clippingPlanes[3]", glm::make_vec4(y1Plane));
     }
 
     if (minExts.size() == 3 || orientation != 2) {
         z0Plane[3] = -minExts[2];
         z1Plane[3] = maxExts[2];
-        glEnable(GL_CLIP_PLANE4);
-        glClipPlane(GL_CLIP_PLANE4, z0Plane);
-        glEnable(GL_CLIP_PLANE5);
-        glClipPlane(GL_CLIP_PLANE5, z1Plane);
+        glEnable(GL_CLIP_DISTANCE4);
+        glEnable(GL_CLIP_DISTANCE5);
+        shader->SetUniform("clippingPlanes[4]", glm::make_vec4(z0Plane));
+        shader->SetUniform("clippingPlanes[5]", glm::make_vec4(z1Plane));
     }
+    GL_ERR_BREAK();
 }
 
 void Renderer::DisableClippingPlanes()
 {
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
+    glDisable(GL_CLIP_DISTANCE0);
+    glDisable(GL_CLIP_DISTANCE1);
+    glDisable(GL_CLIP_DISTANCE2);
+    glDisable(GL_CLIP_DISTANCE3);
+    glDisable(GL_CLIP_DISTANCE4);
+    glDisable(GL_CLIP_DISTANCE5);
 }
 
 bool Renderer::VariableExists(size_t ts, std::vector<string> &varnames, int level, int lod, bool zeroOK) const
@@ -404,6 +400,7 @@ void Renderer::renderColorbar()
 {
     const RenderParams *rParams = GetActiveParams();
     if (!rParams->IsEnabled()) return;
+    LegacyGL *lgl = _glManager->legacy;
 
     GLint dims[4] = {0};
     glGetIntegerv(GL_VIEWPORT, dims);
@@ -415,45 +412,53 @@ void Renderer::renderColorbar()
     if (!cbpb || !cbpb->IsEnabled()) return;
     if (makeColorbarTexture()) return;
 
-    glColor4fv(whitecolor);
+    lgl->Color4fv(whitecolor);    // glColor4fv(whitecolor);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     // Disable z-buffer compare, always overwrite:
     glDepthFunc(GL_ALWAYS);
-    glEnable(GL_TEXTURE_2D);
+    lgl->EnableTexture();    // glEnable(GL_TEXTURE_2D);
+    GL_ERR_BREAK();
 
     // create a polygon appropriately positioned in the scene.  It's inside the unit cube--
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE, _colorbarTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE, _colorbarTexture);
+    GL_ERR_BREAK();
 
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
+    GL_ERR_BREAK();
 
     // Note that GL reverses y coordinates
     float llx = 2. * cornerPosn[0] - 1.;
     float lly = 2. * (cornerPosn[1] + cbsize[1]) - 1.;
     float urx = 2. * (cornerPosn[0] + cbsize[0]) - 1.;
     float ury = 2. * cornerPosn[1] - 1.;
+    GL_ERR_BREAK();
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(llx, lly, 0.0f);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(llx, ury, 0.0f);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(urx, ury, 0.0f);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(urx, lly, 0.0f);
 
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
+    lgl->Begin(LGL_QUADS);
+    lgl->TexCoord2f(0.0f, 0.0f);
+    lgl->Vertex3f(llx, lly, 0.0f);
+    lgl->TexCoord2f(0.0f, 1.0f);
+    lgl->Vertex3f(llx, ury, 0.0f);
+    lgl->TexCoord2f(1.0f, 1.0f);
+    lgl->Vertex3f(urx, ury, 0.0f);
+    lgl->TexCoord2f(1.0f, 0.0f);
+    lgl->Vertex3f(urx, lly, 0.0f);
+    lgl->End();
+
+    lgl->DisableTexture();    // glDisable(GL_TEXTURE_2D);
+    GL_ERR_BREAK();
 
     // Draw numeric text annotation
     //
     renderColorbarText(cbpb, fbWidth, fbHeight, llx, lly, urx, ury);
+    GL_ERR_BREAK();
 
     glDepthFunc(GL_LESS);
+    GL_ERR_BREAK();
 }
 
 void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHeight, float llx, float lly, float urx, float ury)
@@ -478,6 +483,8 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
     //
     double Trx, Tlx, Tly, Tuy;
 
+    _glManager->PixelCoordinateSystemPush();
+
     double maxWidth = 0;
     int    numtics = cbpb->GetNumTicks();
     int    fontSize = cbpb->GetFontSize();
@@ -493,14 +500,13 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
         // Generate our text object so we can use proper width/height
         // values when calculating offsets
         //
-        if (_textObject != NULL) {
-            delete _textObject;
-            _textObject = NULL;
-        }
-        _textObject = new TextObject();
-        _textObject->Initialize(_fontFile, textString, fontSize, txtColor, bgColor);
-        _textObject->SetOrientation(TextObject::CENTERLEFT);
-        double texWidth = _textObject->getWidth();
+
+        TextLabel label(_glManager, _fontName, fontSize);
+        label.HorizontalAlignment = TextLabel::Left;
+        label.VerticalAlignment = TextLabel::Center;
+        label.BackgroundColor = glm::make_vec4(bgColor);
+        label.ForegroundColor = glm::make_vec4(txtColor);
+        float texWidth = label.GetFont()->TextDimensions(textString).x;
 
         // llx and lly are in visualizer coordinates between -1 and 1
         // TextRenderer takes pixel coordinates. Trx and Tuy are the
@@ -540,36 +546,26 @@ void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHe
             cbpb->SetSize(size);
         }
 
-        double inCoords[] = {Tx, Ty, 0};
-
-        _textObject->drawMe(inCoords);
+        label.DrawText(glm::vec2(Tx, Ty), textString);
     }
 
     // Render colorbar title, if any
     //
     string title = cbpb->GetTitle();
     if (title != "") {
-        if (_textObject != NULL) {
-            delete _textObject;
-            _textObject = NULL;
-        }
-
         txtColor[0] = bgColor[0];
         txtColor[1] = bgColor[1];
         txtColor[2] = bgColor[2];
         txtColor[3] = 1.f;
-        _textObject = new TextObject();
-        _textObject->Initialize(_fontFile, title, fontSize, txtColor, bgColor);
-        _textObject->SetOrientation(TextObject::CENTERLEFT);
-        Tuy -= _textObject->getHeight();
-        double coords[] = {Tlx, Tuy, 0.f};
-        _textObject->drawMe(coords);
+        TextLabel label(_glManager, _fontName, fontSize);
+        label.ForegroundColor = glm::make_vec4(txtColor);
+        label.BackgroundColor = glm::make_vec4(bgColor);
+        label.HorizontalAlignment = TextLabel::Left;
+        label.VerticalAlignment = TextLabel::Center;
+        Tuy -= label.GetFont()->TextDimensions(title).y;
+        label.DrawText(glm::vec2(Tlx, Tuy), title);
     }
-
-    if (_textObject != NULL) {
-        delete _textObject;
-        _textObject = NULL;
-    }
+    _glManager->PixelCoordinateSystemPop();
 }
 
 //////////////////////////////////////////////////////////////////////////

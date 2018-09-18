@@ -23,7 +23,7 @@ namespace VAPoR {
 
 struct GLManager;
 
-class LegacyGL {
+class RENDER_API LegacyGL {
 #pragma pack(push, 4)
     struct VertexData {
         float x, y, z;

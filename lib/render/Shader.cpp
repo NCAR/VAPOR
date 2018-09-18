@@ -22,7 +22,11 @@ bool Shader::CompileFromSource(const char *source)
     glCompileShader(_id);
     glGetShaderiv(_id, GL_COMPILE_STATUS, &_successStatus);
     _compiled = true;
-    assert(_successStatus);
+    if (!_successStatus) {
+        printf("--------------- Shader Compilation Failed ---------------\n");
+        printf("%s\n", GetLog().c_str());
+        printf("---------------------------------------------------------\n");
+    }
     return _successStatus;
 }
 
