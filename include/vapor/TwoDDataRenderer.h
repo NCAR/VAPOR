@@ -82,8 +82,6 @@ protected:
                             size_t &texelSize,
                             bool &gridAligned);
 
- virtual GLuint GetAttribIndex() const {return (_vertexDataAttr); }
-
 
 	
 private:
@@ -198,7 +196,6 @@ private:
  GLuint _cMapTexID;
  GLfloat *_colormap;
  size_t _colormapsize;
- GLuint _vertexDataAttr;
 
  bool _gridStateDirty() const; 
 
