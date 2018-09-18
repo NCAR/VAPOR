@@ -8,7 +8,7 @@
 
 namespace VAPoR {
 
-class ShaderProgram2 {
+class ShaderProgram {
     unsigned int _id;
     std::vector<Shader *> _shaders;
     bool _linked;
@@ -20,8 +20,8 @@ public:
     };
     static Policy UniformNotFoundPolicy;
     
-    ShaderProgram2();
-    ~ShaderProgram2();
+    ShaderProgram();
+    ~ShaderProgram();
     
     bool Link();
     void Bind();
@@ -53,13 +53,13 @@ public:
 };
     
 class SmartShaderProgram {
-    ShaderProgram2 *_program;
+    ShaderProgram *_program;
    
-    SmartShaderProgram(ShaderProgram2 *program);
+    SmartShaderProgram(ShaderProgram *program);
     
 public:
     ~SmartShaderProgram();
-    ShaderProgram2 *operator -> () { return _program; }
+    ShaderProgram *operator -> () { return _program; }
     friend class ShaderManager;
 };
 }

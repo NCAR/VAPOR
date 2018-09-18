@@ -173,7 +173,7 @@ int Renderer::paintGL() {
 
 
 // TODO GL
-void Renderer::EnableClipToBox(ShaderProgram2 *shader) const {
+void Renderer::EnableClipToBox(ShaderProgram *shader) const {
     shader->Bind();
 
 	float x0Plane[] = {1.0, 0.0, 0.0, 0.0};

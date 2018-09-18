@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "vapor/ShaderProgram2.h"
+#include "vapor/ShaderProgram.h"
 
 /*
 #ifdef GL_CURRENT_BIT

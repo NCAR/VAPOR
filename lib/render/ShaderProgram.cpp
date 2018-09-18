@@ -1,17 +1,17 @@
 #include <vapor/glutil.h>    // Must be included first!!!
-#include <vapor/ShaderProgram2.h>
+#include <vapor/ShaderProgram.h>
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
 
-ShaderProgram2::Policy ShaderProgram2::UniformNotFoundPolicy = ShaderProgram2::Policy::Relaxed;
+ShaderProgram::Policy ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
 
-ShaderProgram2::ShaderProgram2()
+ShaderProgram::ShaderProgram()
 : _linked(false), _successStatus(false) {}
 
-ShaderProgram2::~ShaderProgram2()
+ShaderProgram::~ShaderProgram()
 {
     if (_id)
         glDeleteProgram(_id);
@@ -19,7 +19,7 @@ ShaderProgram2::~ShaderProgram2()
         delete _shaders[i];
 }
 
-bool ShaderProgram2::Link()
+bool ShaderProgram::Link()
 {
     assert(!_linked);
     _id = glCreateProgram();
@@ -42,35 +42,35 @@ bool ShaderProgram2::Link()
     return _successStatus;
 }
 
-void ShaderProgram2::Bind()
+void ShaderProgram::Bind()
 {
     assert(_linked && WasLinkingSuccessful());
     glUseProgram(_id);
 }
 
-bool ShaderProgram2::IsBound() const
+bool ShaderProgram::IsBound() const
 {
     return _id == GetBoundProgramID();
 }
 
-void ShaderProgram2::UnBind()
+void ShaderProgram::UnBind()
 {
     glUseProgram(0);
 }
 
-int ShaderProgram2::GetBoundProgramID()
+int ShaderProgram::GetBoundProgramID()
 {
     int currentlyBoundProgramId;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentlyBoundProgramId);
     return currentlyBoundProgramId;
 }
 
-void ShaderProgram2::AddShader(Shader *s)
+void ShaderProgram::AddShader(Shader *s)
 {
     _shaders.push_back(s);
 }
 
-bool ShaderProgram2::AddShaderFromSource(unsigned int type, const char *source)
+bool ShaderProgram::AddShaderFromSource(unsigned int type, const char *source)
 {
     Shader *s = new Shader(type);
     bool ret = s->CompileFromSource(source);
@@ -78,7 +78,7 @@ bool ShaderProgram2::AddShaderFromSource(unsigned int type, const char *source)
     return ret;
 }
 
-bool ShaderProgram2::AddShaderFromFile(unsigned int type, const std::string path)
+bool ShaderProgram::AddShaderFromFile(unsigned int type, const std::string path)
 {
     Shader *s = new Shader(type);
     bool ret = s->CompileFromFile(path);
@@ -86,22 +86,22 @@ bool ShaderProgram2::AddShaderFromFile(unsigned int type, const std::string path
     return ret;
 }
 
-unsigned int ShaderProgram2::GetID() const { return _id; }
-unsigned int ShaderProgram2::WasLinkingSuccessful() const { return _successStatus; }
+unsigned int ShaderProgram::GetID() const { return _id; }
+unsigned int ShaderProgram::WasLinkingSuccessful() const { return _successStatus; }
 
 
-int ShaderProgram2::GetAttributeLocation(const std::string &name) const
+int ShaderProgram::GetAttributeLocation(const std::string &name) const
 {
     return glGetAttribLocation(_id, name.c_str());
 }
 
-int ShaderProgram2::GetUniformLocation(const std::string &name) const
+int ShaderProgram::GetUniformLocation(const std::string &name) const
 {
     return glGetUniformLocation(_id, name.c_str());
 }
 
 
-template<typename T> bool ShaderProgram2::SetUniform(const std::string &name, const T &value) const
+template<typename T> bool ShaderProgram::SetUniform(const std::string &name, const T &value) const
 {
     if (!IsBound()) {
         assert(!"Program not bound");
@@ -118,23 +118,23 @@ template<typename T> bool ShaderProgram2::SetUniform(const std::string &name, co
     return true;
 }
 
-template bool ShaderProgram2::SetUniform      <int>(const std::string &name, const int       &value) const;
-template bool ShaderProgram2::SetUniform     <bool>(const std::string &name, const bool      &value) const;
-template bool ShaderProgram2::SetUniform    <float>(const std::string &name, const float     &value) const;
-template bool ShaderProgram2::SetUniform<glm::vec2>(const std::string &name, const glm::vec2 &value) const;
-template bool ShaderProgram2::SetUniform<glm::vec3>(const std::string &name, const glm::vec3 &value) const;
-template bool ShaderProgram2::SetUniform<glm::vec4>(const std::string &name, const glm::vec4 &value) const;
-template bool ShaderProgram2::SetUniform<glm::mat4>(const std::string &name, const glm::mat4 &value) const;
+template bool ShaderProgram::SetUniform      <int>(const std::string &name, const int       &value) const;
+template bool ShaderProgram::SetUniform     <bool>(const std::string &name, const bool      &value) const;
+template bool ShaderProgram::SetUniform    <float>(const std::string &name, const float     &value) const;
+template bool ShaderProgram::SetUniform<glm::vec2>(const std::string &name, const glm::vec2 &value) const;
+template bool ShaderProgram::SetUniform<glm::vec3>(const std::string &name, const glm::vec3 &value) const;
+template bool ShaderProgram::SetUniform<glm::vec4>(const std::string &name, const glm::vec4 &value) const;
+template bool ShaderProgram::SetUniform<glm::mat4>(const std::string &name, const glm::mat4 &value) const;
 
-void ShaderProgram2::SetUniform(int location, const int       &value) const { glUniform1i(location, value); }
-void ShaderProgram2::SetUniform(int location, const float     &value) const { glUniform1f(location, value); }
-void ShaderProgram2::SetUniform(int location, const glm::vec2 &value) const { glUniform2fv(location, 1, glm::value_ptr(value)); }
-void ShaderProgram2::SetUniform(int location, const glm::vec3 &value) const { glUniform3fv(location, 1, glm::value_ptr(value)); }
-void ShaderProgram2::SetUniform(int location, const glm::vec4 &value) const { glUniform4fv(location, 1, glm::value_ptr(value)); }
-void ShaderProgram2::SetUniform(int location, const glm::mat4 &value) const { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const int       &value) const { glUniform1i(location, value); }
+void ShaderProgram::SetUniform(int location, const float     &value) const { glUniform1f(location, value); }
+void ShaderProgram::SetUniform(int location, const glm::vec2 &value) const { glUniform2fv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::vec3 &value) const { glUniform3fv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::vec4 &value) const { glUniform4fv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::mat4 &value) const { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)); }
 
 
-std::string ShaderProgram2::GetLog() const
+std::string ShaderProgram::GetLog() const
 {
     assert(!_shaders.empty());
     if (_linked) {
@@ -149,7 +149,7 @@ std::string ShaderProgram2::GetLog() const
     }
 }
 
-void ShaderProgram2::PrintUniforms() const
+void ShaderProgram::PrintUniforms() const
 {
     GLint count;
     GLint size;
@@ -164,7 +164,7 @@ void ShaderProgram2::PrintUniforms() const
     }
 }
 
-const char *ShaderProgram2::GLTypeToString(const unsigned int type)
+const char *ShaderProgram::GLTypeToString(const unsigned int type)
 {
     switch (type) {
 		case GL_FLOAT: return "float";
@@ -279,7 +279,7 @@ const char *ShaderProgram2::GLTypeToString(const unsigned int type)
 }
 
 
-SmartShaderProgram::SmartShaderProgram(ShaderProgram2 *program)
+SmartShaderProgram::SmartShaderProgram(ShaderProgram *program)
 : _program(program)
 {
     _program->Bind();
