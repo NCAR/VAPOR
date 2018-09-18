@@ -33,7 +33,7 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/ContourParams.h>
-#include <vapor/ShaderProgram2.h>
+#include <vapor/ShaderProgram.h>
 
 namespace VAPoR {
 

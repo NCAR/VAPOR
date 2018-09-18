@@ -200,7 +200,7 @@ int TwoDDataRenderer::_paintGL()
 
 #endif
 
-    ShaderProgram2 *s = _glManager->shaderManager->GetShader("2DData");
+    ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
     s->Bind();
     s->SetUniform("minLUTValue", (float)crange[0]);
     s->SetUniform("maxLUTValue", (float)crange[1]);

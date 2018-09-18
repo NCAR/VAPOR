@@ -157,7 +157,7 @@ int Renderer::paintGL()
 }
 
 // TODO GL
-void Renderer::EnableClipToBox(ShaderProgram2 *shader) const
+void Renderer::EnableClipToBox(ShaderProgram *shader) const
 {
     shader->Bind();
 

@@ -102,8 +102,8 @@ int TwoDRenderer::_paintGL()
     EnableClipToBox(_glManager->shaderManager->GetShader("2DData"));    // TODO GL
     GL_ERR_BREAK();
 
-    // ShaderProgram2::UniformNotFoundPolicy = ShaderProgram2::Policy::Relaxed;
-    // ShaderProgram2 *shader = _glManager->shaderManager->GetShader("2DData", true);
+    // ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
+    // ShaderProgram *shader = _glManager->shaderManager->GetShader("2DData", true);
     // shader->Bind();
     // shader->SetUniform("clippingPlanes[0]", glm::vec4(1000000,0,0,0));
 
@@ -202,7 +202,7 @@ void TwoDRenderer::_renderMeshUnAligned()
     RenderParams *myParams = (RenderParams *)GetActiveParams();
     float         opacity = myParams->GetConstantOpacity();
 
-    ShaderProgram2 *shader = _glManager->shaderManager->GetShader("Image");
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("Image");
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);
@@ -242,7 +242,7 @@ void TwoDRenderer::_renderMeshAligned()
     RenderParams *myParams = (RenderParams *)GetActiveParams();
     float         opacity = myParams->GetConstantOpacity();
 
-    ShaderProgram2 *shader = _glManager->shaderManager->GetShader("2DData");
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("2DData");
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);

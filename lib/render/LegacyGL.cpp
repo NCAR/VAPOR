@@ -72,7 +72,7 @@ void LegacyGL::End()
     glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData) * _vertices.size(), _vertices.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    ShaderProgram2 *_shader = _glManager->shaderManager->GetShader("Legacy");
+    ShaderProgram *_shader = _glManager->shaderManager->GetShader("Legacy");
     _shader->Bind();
     _shader->SetUniform("P", _glManager->matrixManager->GetProjectionMatrix());
     _shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());

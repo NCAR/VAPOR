@@ -29,7 +29,7 @@
 
 namespace VAPoR {
 
-class ShaderProgram2;
+class ShaderProgram;
 struct GLManager;
 
 //! \class RendererBase
@@ -254,7 +254,7 @@ protected:
     //! May be invoked during _paintGL() by classes derived from this class.
     //! Clipping planes are specified in User coordinates.
     //! \sa DisableClippingPlanes
-    void EnableClipToBox(ShaderProgram2 *shader) const;
+    void EnableClipToBox(ShaderProgram *shader) const;
 
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to
