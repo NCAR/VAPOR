@@ -527,7 +527,6 @@ class RENDER_API ControlExec : public MyBase {
   private:
     ParamsMgr *_paramsMgr;
     DataStatus *_dataStatus;
-    std::map<string, ShaderMgr *> _shaderMgrs;
     std::map<string, Visualizer *> _visualizers;
 
     //! obtain an existing visualizer
