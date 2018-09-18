@@ -50,6 +50,8 @@ protected:
         float *        rightFace, *leftFace;    // user coordinates, size == by * bz * 3
         float *        topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
         float *        dataField;               // data field of this volume
+        float *        xyCoords;                // !!NORMALIZED!! X-Y coordinate values
+        float *        zCoords;                 // !!NORMALIZED!! Z coordinate values
         unsigned char *missingValueMask;        // 0 == is missing value; non-zero == not missing value
         float          valueRange[2];           // min and max values of the volume
         size_t         dims[3];                 // num. of samples along each axis

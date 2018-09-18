@@ -121,6 +121,8 @@ RayCaster::UserCoordinates::UserCoordinates()
     topFace = nullptr;
     bottomFace = nullptr;
     dataField = nullptr;
+    xyCoords = nullptr;
+    zCoords = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
         dims[i] = 0;
@@ -165,6 +167,14 @@ RayCaster::UserCoordinates::~UserCoordinates()
         delete[] dataField;
         dataField = nullptr;
     }
+    if (xyCoords) {
+        delete[] xyCoords;
+        xyCoords = nullptr;
+    }
+    if (zCoords) {
+        delete[] zCoords;
+        zCoords = nullptr;
+    }
     if (missingValueMask) {
         delete[] missingValueMask;
         missingValueMask = nullptr;
@@ -191,11 +201,7 @@ bool RayCaster::UserCoordinates::IsUpToDate(const RayCasterParams *params, DataM
     }
 
     // compare grid boundaries and dimensions
-    StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
-    if (!grid) {
-        MyBase::SetErrMsg("Retrieving grid unsuccessful; "
-                          "the behavior is then undefined!");
-    }
+    StructuredGrid *    grid = this->GetCurrentGrid(params, dataMgr);
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -306,11 +312,46 @@ bool RayCaster::UserCoordinates::UpdateCoordinates(const RayCasterParams *params
             bottomFace[idx++] = (float)buf[2];
         }
 
+    // If using prism intersection ray casting mode, we collect Z coordinates as well!
+    if (params->GetCastingMode() == 2) {
+        if (xyCoords) delete[] xyCoords;
+        xyCoords = new float[dims[0] * dims[1]];
+        if (zCoords) delete[] zCoords;
+        zCoords = new float[dims[0] * dims[1] * dims[2]];
+        if (!zCoords)    // Test if allocation successful for 3D buffers.
+        {
+            delete grid;
+            return false;
+        }
+        std::vector<double> minExtents, maxExtents;
+        grid->GetUserExtents(minExtents, maxExtents);
+        float extent1o[3];
+        for (int i = 0; i < 3; i++) extent1o[i] = 1.0f / (maxExtents[i] - minExtents[i]);
+
+        // Normalize XY coordinate from frontFace buffer
+        size_t xyIdx = 0, xyzIdx = 0;
+        for (size_t y = 0; y < dims[1]; y++)
+            for (size_t x = 0; x < dims[0]; x++) {
+                xyCoords[xyIdx++] = (frontFace[xyzIdx++] - minExtents[0]) * extent1o[0];
+                xyCoords[xyIdx++] = (frontFace[xyzIdx++] - minExtents[1]) * extent1o[1];
+                xyzIdx++;
+            }
+
+        // Retrieve and normalize Z coordinates from grid
+        StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
+        size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
+        for (idx = 0; idx < numOfVertices; idx++) {
+            zCoords[idx] = ((float)(*coordItr)[2] - minExtents[2]) * extent1o[2];
+            ++coordItr;
+        }
+    }
+
     // Save the data field values and missing values
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     if (dataField) delete[] dataField;
     dataField = new float[numOfVertices];
-    if (!dataField) {
+    if (!dataField)    // Test if allocation successful for 3D buffers.
+    {
         delete grid;
         return false;
     }
@@ -413,7 +454,10 @@ int RayCaster::_paintGL(bool fast)
 
     /* Gather user coordinates */
     if (!_userCoordinates.IsUpToDate(params, _dataMgr)) {
-        _userCoordinates.UpdateCoordinates(params, _dataMgr);
+        if (!_userCoordinates.UpdateCoordinates(params, _dataMgr)) {
+            MyBase::SetErrMsg("Memory allocation failed!");
+            return 1;
+        }
 
         /* Also attach the new data to 3D textures */
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
