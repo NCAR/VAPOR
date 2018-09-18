@@ -62,7 +62,7 @@ bool ShouldSkip( in vec3 tc )
     vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
     for( int i = 0; i < 6; i++ )
     {
-        if( dot(positionModel, clipPlanes[i]) < -EPSILON )
+        if( dot(positionModel, clipPlanes[i]) < 0.0f )
             return true;
     }
 
