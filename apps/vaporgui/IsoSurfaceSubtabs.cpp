@@ -4,6 +4,7 @@ IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
     _TFWidget->Reinit((TFFlags)(CONSTANT));
+    _TFWidget->mappingFrame->setIsolineSliders(true);
 
     _params = nullptr;
 
