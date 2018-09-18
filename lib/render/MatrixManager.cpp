@@ -9,6 +9,7 @@
 using namespace VAPoR;
 using glm::mat4;
 using glm::vec3;
+using glm::vec4;
 using std::pair;
 
 MatrixManager::MatrixManager() {
@@ -18,16 +19,24 @@ MatrixManager::MatrixManager() {
     _mode = Mode::ModelView;
 }
 
-mat4 MatrixManager::GetProjectionMatrix() {
+glm::mat4 MatrixManager::GetCurrentMatrix() const {
+    return top();
+}
+
+mat4 MatrixManager::GetProjectionMatrix() const {
     return _projectionStack.top();
 }
 
-mat4 MatrixManager::GetModelViewMatrix() {
+mat4 MatrixManager::GetModelViewMatrix() const {
     return _modelviewStack.top();
 }
 
-mat4 MatrixManager::GetModelViewProjectionMatrix() {
+mat4 MatrixManager::GetModelViewProjectionMatrix() const {
     return GetProjectionMatrix() * GetModelViewMatrix();
+}
+
+void MatrixManager::SetCurrentMatrix(const glm::mat4 m) {
+    top() = m;
 }
 
 void MatrixManager::MatrixModeModelView() {
@@ -43,21 +52,27 @@ void MatrixManager::MatrixModeProjection() {
 void MatrixManager::PushMatrix() {
     _currentStack->push(top());
 #ifndef GLDEMO
-    printf("Push mode=%s depth=%li glMode=%s glDepth=%i\n", GetMatrixModeStr(), _currentStack->size(), GetGLMatrixModeStr(), GetGLCurrentStackDepth());
-    assert(GetGLCurrentStackDepth() == _currentStack->size());
+    // printf("Push mode=%s depth=%li glMode=%s glDepth=%i\n", GetMatrixModeStr(), _currentStack->size(), GetGLMatrixModeStr(), GetGLCurrentStackDepth());
+    // assert(GetGLCurrentStackDepth() == _currentStack->size());
 #endif
 }
 
 void MatrixManager::PopMatrix() {
     _currentStack->pop();
 #ifndef GLDEMO
-    printf("Push mode=%s depth=%li glMode=%s glDepth=%i\n", GetMatrixModeStr(), _currentStack->size(), GetGLMatrixModeStr(), GetGLCurrentStackDepth());
-    assert(GetGLCurrentStackDepth() == _currentStack->size());
+    // printf("Push mode=%s depth=%li glMode=%s glDepth=%i\n", GetMatrixModeStr(), _currentStack->size(), GetGLMatrixModeStr(), GetGLCurrentStackDepth());
+    // assert(GetGLCurrentStackDepth() == _currentStack->size());
 #endif
 }
 
 void MatrixManager::LoadMatrixd(const double *m) {
     top() = glm::make_mat4(m);
+}
+
+void MatrixManager::GetDoublev(double *m) const {
+    const float *data = glm::value_ptr(top());
+    for (int i = 0; i < 16; i++)
+        m[i] = data[i];
 }
 
 void MatrixManager::LoadIdentity() {
@@ -78,6 +93,11 @@ void MatrixManager::Rotate(float angle, float x, float y, float z) {
 
 void MatrixManager::Perspective(float fovy, float aspect, float zNear, float zFar) {
     top() = glm::perspective(fovy, aspect, zNear, zFar);
+
+#ifndef NDEBUG
+    Near = zNear;
+    Far = zFar;
+#endif
 }
 
 void MatrixManager::Ortho(float left, float right, float bottom, float top) {
@@ -88,10 +108,23 @@ void MatrixManager::Ortho(float left, float right, float bottom, float top, floa
     this->top() = glm::ortho(left, right, bottom, top, zNear, zFar);
 }
 
+glm::vec2 MatrixManager::ProjectToScreen(float x, float y, float z) const {
+    return ProjectToScreen(vec3(x, y, z));
+}
+
+glm::vec2 MatrixManager::ProjectToScreen(const glm::vec3 &v) const {
+    vec4 vs = GetModelViewProjectionMatrix() * vec4(v, 1.0f);
+    vs /= vs.w;
+    return vs;
+}
+
+#ifndef NDEBUG
 #ifndef GLDEMO
 #define GLM_ENABLE_EXPERIMENTAL 1
 #include <glm/gtx/string_cast.hpp>
 void MatrixManager::Test() {
+#ifndef Darwin
+    //return;
     float gl_modelview_matrix[16], gl_projection_matrix[16];
     int gl_modelview_stack_depth, gl_projection_stack_depth;
 
@@ -123,15 +156,18 @@ void MatrixManager::Test() {
         std::cout << "gl: " << glm::to_string(glm::make_mat4(gl_projection_matrix)) << std::endl
                   << "my: " << glm::to_string(_projectionStack.top()) << std::endl;
     }
+#endif
 }
 
 void MatrixManager::TestUpload() {
+#ifndef Darwin
     glPushAttrib(GL_TRANSFORM_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(glm::value_ptr(_modelviewStack.top()));
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(glm::value_ptr(_projectionStack.top()));
     glPopAttrib();
+#endif
 }
 
 int MatrixManager::GetGLMatrixMode() {
@@ -182,6 +218,7 @@ const char *MatrixManager::GetMatrixModeStr() {
     return "Projection";
 }
 
+#endif
 #endif
 
 glm::mat4 &MatrixManager::top() {

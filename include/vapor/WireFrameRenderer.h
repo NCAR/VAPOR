@@ -57,8 +57,11 @@ class RENDER_API WireFrameRenderer : public Renderer {
     virtual int _paintGL();
 
   private:
-    GLuint _drawList;
+    GLuint _VAO, _VBO, _EBO;
+    unsigned int _nVertices;
+    unsigned int _nIndices;
 
+    struct VertexData;
     struct {
         string varName;
         string heightVarName;
@@ -78,6 +81,8 @@ class RENDER_API WireFrameRenderer : public Renderer {
     bool _isCacheDirty() const;
     void _saveCacheParams();
     void _drawCell(
+        vector<VertexData> &vertices,
+        vector<unsigned int> &indices,
         const float *verts,
         const float *colors,
         int n,

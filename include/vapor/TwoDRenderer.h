@@ -116,8 +116,6 @@ class RENDER_API TwoDRenderer : public Renderer {
                                      size_t &texelSize,
                                      bool &gridAligned) = 0;
 
-    virtual GLuint GetAttribIndex() const = 0;
-
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
 
@@ -174,6 +172,8 @@ class RENDER_API TwoDRenderer : public Renderer {
     GLsizei _meshHeight;
     GLsizei _nindices;
     SmartBuf _sb_texCoords;
+
+    GLuint _VAO, _VBO, _dataVBO, _EBO;
 
     void _openGLInit();
     void _openGLRestore();

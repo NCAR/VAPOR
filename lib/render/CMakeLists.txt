@@ -3,8 +3,6 @@ set (SRC
 	ControlExecutive.cpp
 	HelloRenderer.cpp
 	Renderer.cpp
-	ShaderMgr.cpp
-	ShaderProgram.cpp
 	ShaderProgram2.cpp
 	TwoDDataRenderer.cpp
 	TwoDRenderer.cpp
@@ -30,6 +28,7 @@ set (SRC
 	GLManager.cpp
 	FontManager.cpp
 	Font.cpp
+	TextLabel.cpp
 )
 
 set (HEADERS
@@ -37,8 +36,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/HelloRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/ShaderMgr.h
-	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram2.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDRenderer.h
@@ -64,6 +61,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/FontManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Font.h
 	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})

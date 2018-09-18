@@ -31,6 +31,9 @@
 #include <vapor/MyBase.h>
 #include <vapor/errorcodes.h>
 #include <vapor/DataMgr.h>
+#include "vapor/LegacyGL.h"
+#include "vapor/GLManager.h"
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -52,13 +55,15 @@ BarbRenderer::BarbRenderer(
 //
 //----------------------------------------------------------------------------
 BarbRenderer::~BarbRenderer() {
+    if (_drawList)
+        glDeleteLists(_drawList, 1);
 }
 
 // Totally unnecessary?
 //
 int BarbRenderer::_initializeGL() {
     //_initialized = true;
-    _drawList = glGenLists(1);
+    LEGACY_TODO(_drawList = glGenLists(1));
     return (0);
 }
 
@@ -157,12 +162,14 @@ bool BarbRenderer::_isCacheDirty() const {
 
 int BarbRenderer::_paintGL() {
     int rc = 0;
-    if (!_isCacheDirty()) {
-        glCallList(_drawList);
-        return 0;
-    }
-    _saveCacheParams();
-    glNewList(_drawList, GL_COMPILE_AND_EXECUTE);
+    // if (!_isCacheDirty()) {
+    LEGACY_TODO(glCallList(_drawList));
+    //     return 0;
+    // }
+    // _saveCacheParams();
+    LEGACY_TODO(glNewList(_drawList, GL_COMPILE_AND_EXECUTE));
+
+    glFrontFace(GL_CW);
 
     // Set up the variable data required, while determining data
     // extents to use in rendering
@@ -186,6 +193,7 @@ int BarbRenderer::_paintGL() {
         rc = -1;
         goto RETURN;
     }
+    GL_ERR_BREAK();
 
     // Find box extents for ROI
     //
@@ -222,6 +230,7 @@ int BarbRenderer::_paintGL() {
         }
         varData[3] = sg;
     }
+    GL_ERR_BREAK();
 
     // Get grids for our auxillary variables
     //
@@ -256,7 +265,9 @@ int BarbRenderer::_paintGL() {
     }
 
 RETURN:
-    glEndList();
+    LEGACY_TODO(glEndList());
+    glFrontFace(GL_CCW);
+    GL_ERR_BREAK();
     return (rc);
 }
 
@@ -266,6 +277,9 @@ RETURN:
 void BarbRenderer::drawBarb(const float startPoint[3],
                             const float endPoint[3],
                             float radius) {
+    LegacyGL *lgl = _glManager->legacy;
+    GL_ERR_BREAK();
+
     //Constants are needed for cosines and sines, at
     //60 degree intervals. The barb is really a hexagonal tube,
     //but the shading makes it look round.
@@ -307,6 +321,7 @@ void BarbRenderer::drawBarb(const float startPoint[3],
 
     int i;
     //Calculate nextPoint and vertexPoint, for barbhead
+    GL_ERR_BREAK();
 
     for (i = 0; i < 3; i++) {
         nextPoint[i] = (1. - BARB_LENGTH_FACTOR) * startPoint[i] + BARB_LENGTH_FACTOR * endPoint[i];
@@ -328,12 +343,23 @@ void BarbRenderer::drawBarb(const float startPoint[3],
         vadd(startVertex + 3 * i, startPoint, startVertex + 3 * i);
     }
 
-    glBegin(GL_POLYGON);
-    glNormal3fv(dirVec);
-    for (int k = 0; k < 6; k++) {
-        glVertex3fv(startVertex + 3 * k);
+    glEnable(GL_DEPTH_TEST);
+
+    // TODO GL
+    // This is easier than figuring out the code above
+    glm::vec3 average(0.f);
+    for (int i = 0; i < 6; i++)
+        average += glm::make_vec3(startVertex + 3 * i);
+    average /= 6.0f;
+
+    lgl->Begin(GL_TRIANGLE_FAN);
+    lgl->Normal3f(-dirVec[0], -dirVec[1], -dirVec[2]);
+    lgl->Vertex3fv(glm::value_ptr(average));
+    for (int k = 5; k >= 0; k--) { // Consistent winding order
+        lgl->Vertex3fv(startVertex + 3 * k);
     }
-    glEnd();
+    lgl->Vertex3fv(startVertex + 3 * 5);
+    lgl->End();
 
     //calc for endpoints:
     for (i = 0; i < 6; i++) {
@@ -348,27 +374,30 @@ void BarbRenderer::drawBarb(const float startPoint[3],
         //add to current point
         vadd(nextVertex + 3 * i, nextPoint, nextVertex + 3 * i);
     }
+    GL_ERR_BREAK();
 
     //Now make a triangle strip for cylinder sides:
-    glBegin(GL_TRIANGLE_STRIP);
+    lgl->Begin(GL_TRIANGLE_STRIP); // glBegin(GL_TRIANGLE_STRIP);
 
     for (i = 0; i < 6; i++) {
 
-        glNormal3fv(nextNormal + 3 * i);
-        glVertex3fv(nextVertex + 3 * i);
+        lgl->Normal3fv(nextNormal + 3 * i); // glNormal3fv(nextNormal+3*i);
+        lgl->Vertex3fv(nextVertex + 3 * i); // glVertex3fv(nextVertex+3*i);
 
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
+        lgl->Normal3fv(startNormal + 3 * i); // glNormal3fv(startNormal+3*i);
+        lgl->Vertex3fv(startVertex + 3 * i); // glVertex3fv(startVertex+3*i);
     }
     //repeat first two vertices to close cylinder:
 
-    glNormal3fv(nextNormal);
-    glVertex3fv(nextVertex);
+    lgl->Normal3fv(nextNormal); // glNormal3fv(nextNormal);
+    lgl->Vertex3fv(nextVertex); // glVertex3fv(nextVertex);
 
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
+    lgl->Normal3fv(startNormal); // glNormal3fv(startNormal);
+    lgl->Vertex3fv(startVertex); // glVertex3fv(startVertex);
 
-    glEnd();
+    lgl->End(); // glEnd();
+    GL_ERR_BREAK();
+
     //Now draw the barb head.  First calc 6 vertices at back of barbhead
     //Reuse startNormal and startVertex vectors
     //calc for endpoints:
@@ -389,24 +418,27 @@ void BarbRenderer::drawBarb(const float startPoint[3],
             startNormal[3 * i + k] = 0.5 * startNormal[3 * i + k] + 0.5 * dirVec[k];
         }
     }
+    GL_ERR_BREAK();
     //Create a triangle fan from these 6 vertices.
-    glBegin(GL_TRIANGLE_FAN);
-    glNormal3fv(dirVec);
-    glVertex3fv(vertexPoint);
+    lgl->Begin(GL_TRIANGLE_FAN); // glBegin(GL_TRIANGLE_FAN);
+    lgl->Normal3fv(dirVec);      // glNormal3fv(dirVec);
+    lgl->Vertex3fv(vertexPoint); // glVertex3fv(vertexPoint);
     for (i = 0; i < 6; i++) {
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
+        lgl->Normal3fv(startNormal + 3 * i); // glNormal3fv(startNormal+3*i);
+        lgl->Vertex3fv(startVertex + 3 * i); // glVertex3fv(startVertex+3*i);
     }
     //Repeat first point to close fan:
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
-    glEnd();
+    lgl->Normal3fv(startNormal); // glNormal3fv(startNormal);
+    lgl->Vertex3fv(startVertex); // glVertex3fv(startVertex);
+    lgl->End();                  // glEnd();
+    GL_ERR_BREAK();
 }
 
 int BarbRenderer::performRendering(
     BarbParams *bParams, int actualRefLevel, float vectorLengthScale,
     vector<Grid *> variableData) {
     assert(variableData.size() == 5);
+    GL_ERR_BREAK();
 
     size_t timestep = bParams->GetCurrentTimestep();
 
@@ -414,6 +446,8 @@ int BarbRenderer::performRendering(
     bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
 
     double rakeExts[6]; //rake extents in user coordinates
+
+    LegacyGL *lgl = _glManager->legacy;
 
     rakeExts[0] = rMinExtents[0];
     rakeExts[1] = rMinExtents[1];
@@ -432,21 +466,25 @@ int BarbRenderer::performRendering(
     int nLights = vpParams->getNumLights();
     float fcolor[3];
     bParams->GetConstantColor(fcolor);
+    GL_ERR_BREAK();
     if (nLights == 0) {
-        glDisable(GL_LIGHTING);
+        // glDisable(GL_LIGHTING);
+        lgl->DisableLighting();
     } else {
-        glShadeModel(GL_SMOOTH);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent());
+        LEGACY_TODO(glShadeModel(GL_SMOOTH));
+        LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor));
+        LEGACY_TODO(glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent()));
         //All the geometry will get a white specular color:
         float specColor[4];
         specColor[0] = specColor[1] = specColor[2] = 0.8f;
         specColor[3] = 1.f;
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_COLOR_MATERIAL);
+        LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
+        LEGACY_TODO(glEnable(GL_COLOR_MATERIAL));
+        lgl->EnableLighting(); // glEnable(GL_LIGHTING);
     }
-    glColor3fv(fcolor);
+    // glColor3fv(fcolor);
+    lgl->Color3fv(fcolor);
+    GL_ERR_BREAK();
 
     vector<long> longGrid = bParams->GetGrid();
     int rakeGrid[3];
@@ -456,6 +494,10 @@ int BarbRenderer::performRendering(
 
     renderGrid(rakeGrid, rakeExts, variableData, timestep,
                vectorLengthScale, rad, bParams);
+
+    GL_ERR_BREAK();
+
+    lgl->DisableLighting();
 
     return 0;
 }
@@ -489,6 +531,8 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
     float yStride = (rakeExts[4] - rakeExts[1]) / ((float)rakeGrid[1] + 1);
     float zStride = (rakeExts[5] - rakeExts[2]) / ((float)rakeGrid[2] + 1);
 
+    GL_ERR_BREAK();
+
     string colorVar = bParams->GetColorMapVariableName();
     float clut[256 * 4];
     bool doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
@@ -498,6 +542,7 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
         assert(tf);
         tf->makeLut(clut);
     }
+    GL_ERR_BREAK();
 
     float xCoord, yCoord, zCoordGrid, zCoord;
     for (int k = 1; k <= rakeGrid[2]; k++) {
@@ -551,11 +596,14 @@ void BarbRenderer::renderGrid(int rakeGrid[3], double rakeExts[6],
                     assert(t);
                     vector<double> scales = t->GetScales();
 
-                    glMatrixMode(GL_MODELVIEW);
-                    glPushMatrix();
-                    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
+                    MatrixManager *mm = _glManager->matrixManager;
+
+                    mm->MatrixModeModelView();                                    // glMatrixMode(GL_MODELVIEW);
+                    mm->PushMatrix();                                             // glPushMatrix();
+                    mm->Scale(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]); // glScalef(1.f/scales[0], 1.f/scales[1], 1.f/scales[2]);
                     drawBarb(point, end, rad * 10);
-                    glPopMatrix();
+                    GL_ERR_BREAK();
+                    mm->PopMatrix(); // glPopMatrix();
                 }
             }
         }
@@ -574,7 +622,7 @@ bool BarbRenderer::GetColorMapping(MapperFunction *tf, float val, float clut[256
     int lutIndex = tf->mapFloatToIndex(val);
     for (int i = 0; i < 4; i++)
         mappedColor[i] = clut[4 * lutIndex + i];
-    glColor4fv(mappedColor);
+    _glManager->legacy->Color4fv(mappedColor); // glColor4fv(mappedColor);
     return missing;
 }
 
