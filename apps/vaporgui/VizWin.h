@@ -25,7 +25,6 @@
 #include "vapor/Visualizer.h"
 #include "Manip.h"
 #include <QWheelEvent>
-#include "vapor/GLManager.h"
 
 class QCloseEvent;
 class QRect;
@@ -38,6 +37,7 @@ class Trackball;
 
 namespace VAPoR {
 	class ControlExec;
+    struct GLManager;
 };
 
 //! \class VizWin
@@ -64,6 +64,7 @@ class VizWin : public QGLWidget
 public:
 
  VizWin(
+    const QGLFormat &format,
 	QWidget* parent ,  const QString& name,
 	string winName, VAPoR::ControlExec *ce, Trackball *trackBall
  );

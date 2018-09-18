@@ -59,7 +59,6 @@
  * routines.
  */
 
-
 /* The Trackball package gives that nice 3D rotation interface.
  * A TrackBall class is needed for each rotated scene.
  */
@@ -67,7 +66,7 @@ class Trackball {
 public:
 	Trackball();
 	Trackball(float scale[3]);
-	void	TrackballSetMatrix ();
+    void	TrackballSetMatrix (VAPoR::GLManager *glManager);
 	void	TrackballFlip (int axis);
 	void	TrackballSpin ();
 	void	TrackballStopSpinning ();

@@ -33,9 +33,17 @@
 #include <vapor/errorcodes.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/ControlExecutive.h>
+#include "vapor/GLManager.h"
 #include "vapor/debug.h"
 
 using namespace VAPoR;
+
+#pragma pack(push, 4)
+struct WireFrameRenderer::VertexData {
+    float x, y, z;
+    float r, g, b, a;
+};
+#pragma pack(pop)
 
 static RendererRegistrar<WireFrameRenderer> registrar(
 	WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType()
@@ -47,13 +55,16 @@ WireFrameRenderer::WireFrameRenderer(
 	DataMgr* dataMgr
 ) : Renderer(
 	pm, winName, dataSetName, WireFrameParams::GetClassType(),
-	WireFrameRenderer::GetClassType(), instName, dataMgr), _drawList(0)
+	WireFrameRenderer::GetClassType(), instName, dataMgr),
+    _VAO(0), _VBO(0), _EBO(0), _nVertices(0)
 {}
 
 WireFrameRenderer::~WireFrameRenderer()
 {
-    if (_drawList)
-        glDeleteLists(_drawList, 1);
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
+    if (_EBO) glDeleteBuffers(1, &_EBO);
+    _VAO = _VBO = 0;
 }
 
 void WireFrameRenderer::_saveCacheParams()
@@ -104,48 +115,50 @@ bool WireFrameRenderer::_isCacheDirty() const
 }
 
 void WireFrameRenderer::_drawCell(
+    vector<VertexData> &vertices,
+    vector<unsigned int> &indices,
 	const float *verts,
 	const float *colors,
 	int n,
 	bool layered
 ) {
 
-	glVertexPointer(3, GL_FLOAT, 0, verts);
-	glColorPointer(4, GL_FLOAT, 0, colors);
-
-	GLuint *indices = new GLuint[n];
+	// glVertexPointer(3, GL_FLOAT, 0, verts);
+	// glColorPointer(4, GL_FLOAT, 0, colors);
+    
+    int baseIndex = vertices.size();
+    for (int i = 0; i < n; i++) {
+        vertices.push_back({
+            verts[3*i], verts[3*i+1], verts[3*i+2],
+            colors[4*i], colors[4*i+1], colors[4*i+2], colors[4*i+3]
+        });
+    }
 
 	int count = layered ? n/2 : n;
 	for (int i=0; i<count; i++) {
-		indices[i] = i;
+		// indices[i] = i;
+        indices.push_back(baseIndex + i);
+        indices.push_back(baseIndex + ((i+1)%count));
 	}
-	glDrawElements(
-		GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices
-	);
 
 	if (! layered) return;
-
+    
 	// if layered the coordinates are ordered bottom face first, then top face
 	//
 	for (int i=0; i<count; i++) {
-		indices[i] = i + count;
+		// indices[i] = i + count;
+        indices.push_back(baseIndex + i + count);
+        indices.push_back(baseIndex + ((i+1)%count) + count);
 	}
-	glDrawElements(
-		GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices
-	);
-
+    
 	// Now draw edges between top and bottom face
 	//
 	for (int i=0; i<count; i++) {
-		indices[2*i+0] = i;
-		indices[2*i+1] = i + count;
+		// indices[2*i+0] = i;
+		// indices[2*i+1] = i + count;
+        indices.push_back(baseIndex + i);
+        indices.push_back(baseIndex + i + count);
 	}
-	glDrawElements(
-		GL_LINES, count, GL_UNSIGNED_INT, indices
-	);
-
-	delete [] indices;
-	
 }
 
 int WireFrameRenderer::_buildCache()
@@ -178,7 +191,8 @@ int WireFrameRenderer::_buildCache()
 		}
     }
 
-    glNewList(_drawList, GL_COMPILE);
+    vector<VertexData> vertices;
+    vector<unsigned int> indices;
     
 	double mv = grid->GetMissingValue();
 
@@ -193,7 +207,6 @@ int WireFrameRenderer::_buildCache()
 	);
 #else
     Grid::ConstCellIterator it = grid->ConstCellBegin();
-	EnableClipToBox();
 #endif
 
 
@@ -260,44 +273,73 @@ int WireFrameRenderer::_buildCache()
 			}
         }
 
-		_drawCell(coordsArray, colorsArray, nodes.size(), layered);
+		_drawCell(vertices, indices, coordsArray, colorsArray, nodes.size(), layered);
     }
 
-#if 0	// VAPOR_3_1_0
-#else
-	DisableClippingPlanes();
-#endif
 
 	delete [] coordsArray;
 	delete [] colorsArray;
 
 	if (grid) delete grid;
 	if (heightGrid) delete heightGrid;
+    
+    GL_ERR_BREAK();
+    
+    _nIndices = indices.size();
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
+    GL_ERR_BREAK();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
+    GL_ERR_BREAK();
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glEndList();
+    GL_ERR_BREAK();
+    // glEndList();
     return 0;
 }
 
 int WireFrameRenderer::_paintGL()
 {
-    int rc = 0;
-    if (_isCacheDirty()) {
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
-
-        rc = _buildCache();
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-	}
+    GL_ERR_BREAK();
     
-    glCallList(_drawList);
+    int rc = 0;
+    if (_isCacheDirty())
+        rc = _buildCache();
+    
+    GL_ERR_BREAK();
+    
+    EnableClipToBox(_glManager->shaderManager->GetShader("Wireframe"));
+    SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Wireframe");
+    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    glBindVertexArray(_VAO);
+    
+    glLineWidth(1);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glDrawElements(GL_LINES, _nIndices, GL_UNSIGNED_INT, 0);
+    
+    DisableClippingPlanes(); // TODO GL
+    glBindVertexArray(0);
+    
+    GL_ERR_BREAK();
     
     return rc;
 }
 
 int WireFrameRenderer::_initializeGL()
 {
-    _drawList = glGenLists(1);
+    glGenVertexArrays(1, &_VAO);
+    glBindVertexArray(_VAO);
+    glGenBuffers(1, &_VBO);
+    glGenBuffers(1, &_EBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(struct VertexData, r));
+    glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
     return 0;
 }

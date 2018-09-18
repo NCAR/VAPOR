@@ -40,6 +40,7 @@
 #include "vapor/debug.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "vapor/GLManager.h"
 
 using namespace VAPoR;
 
@@ -63,10 +64,8 @@ _VAO(0), _VBO(0), _nVertices(0) {}
 
 ContourRenderer::~ContourRenderer()
 {
-    if (_VAO)
-        glDeleteVertexArrays(1, &_VAO);
-    if (_VBO)
-        glDeleteBuffers(1, &_VBO);
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
     _VAO = _VBO = 0;
 }
 
@@ -232,8 +231,10 @@ int ContourRenderer::_buildCache()
     
     _nVertices = vertices.size();
     glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     delete [] contourColors;
     return 0;
@@ -247,7 +248,7 @@ int ContourRenderer::_paintGL()
     
     // glCallList(_drawList);
     
-    ShaderProgram2 *shader = _glManager->shaderManager->GetShader("contours");
+    ShaderProgram2 *shader = _glManager->shaderManager->GetShader("Contour");
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
@@ -263,6 +264,7 @@ int ContourRenderer::_paintGL()
 
 int ContourRenderer::_initializeGL()
 {
+    // _glManager->legacy->Initialize();
     glGenVertexArrays(1, &_VAO);
     glBindVertexArray(_VAO);
     glGenBuffers(1, &_VBO);
