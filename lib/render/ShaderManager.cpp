@@ -53,7 +53,7 @@ bool ShaderManager::_wasFileModified(const std::string &path) const {
     return false;
 }
 
-ShaderProgram2 *ShaderManager::GetShader(const std::string &name) {
+ShaderProgram *ShaderManager::GetShader(const std::string &name) {
 #if SHADER_AUTORELOAD
     if (HasResource(name)) {
         const vector<string> paths = _getSourceFilePaths(name);
@@ -79,7 +79,7 @@ bool ShaderManager::LoadResourceByKey(const std::string &name) {
         assert(!"Shader already loaded");
         return false;
     }
-    ShaderProgram2 *shader = new ShaderProgram2;
+    ShaderProgram *shader = new ShaderProgram;
     const vector<string> paths = _getSourceFilePaths(name);
     for (auto it = paths.begin(); it != paths.end(); ++it) {
         shader->AddShaderFromFile(_getShaderTypeFromPath(*it), *it);

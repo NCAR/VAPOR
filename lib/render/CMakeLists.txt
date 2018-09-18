@@ -3,7 +3,7 @@ set (SRC
 	ControlExecutive.cpp
 	HelloRenderer.cpp
 	Renderer.cpp
-	ShaderProgram2.cpp
+	ShaderProgram.cpp
 	TwoDDataRenderer.cpp
 	TwoDRenderer.cpp
 	WireFrameRenderer.cpp
@@ -36,7 +36,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/HelloRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram2.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/WireFrameRenderer.h
