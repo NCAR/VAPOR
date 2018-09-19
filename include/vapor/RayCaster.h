@@ -119,6 +119,8 @@ protected:
     GLuint              _1stPassShaderId;
     GLuint              _2ndPassShaderId;
     GLuint              _3rdPassShaderId;
+    GLuint              _3rdPassMode1ShaderId;
+    GLuint              _3rdPassMode2ShaderId;
 
     // current viewport in use
     GLint               _currentViewport[4];
