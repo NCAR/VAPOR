@@ -106,8 +106,7 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform) {
 
     // Retrieve the transformed matrix and stick it back into
     // our _modelViewMatrix array
-    mm->MatrixModeModelView();
-    mm->GetDoublev(_modelViewMatrix);
+    mm->GetDoublev(MatrixManager::Mode::ModelView, _modelViewMatrix);
 }
 
 void TranslateStretchManip::Update(
@@ -118,8 +117,9 @@ void TranslateStretchManip::Update(
     VAPoR::Transform *rpTransform,
     VAPoR::Transform *dmTransform,
     bool constrain) {
-    glGetDoublev(GL_PROJECTION_MATRIX, _projectionMatrix);
-    glGetDoublev(GL_MODELVIEW_MATRIX, _modelViewMatrix);
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->GetDoublev(MatrixManager::Mode::Projection, _projectionMatrix);
+    mm->GetDoublev(MatrixManager::Mode::ModelView, _modelViewMatrix);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);

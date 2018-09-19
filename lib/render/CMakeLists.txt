@@ -65,6 +65,9 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Font.h
 	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
+	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
