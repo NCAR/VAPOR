@@ -47,6 +47,20 @@ struct WireFrameRenderer::VertexData {
 
 static RendererRegistrar<WireFrameRenderer> registrar(WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType());
 
+namespace {
+
+// Product of elements in a vector
+//
+size_t vproduct(vector<size_t> a)
+{
+    size_t ntotal = 1;
+
+    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
+    return (ntotal);
+}
+
+};    // namespace
+
 WireFrameRenderer::WireFrameRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, WireFrameParams::GetClassType(), WireFrameRenderer::GetClassType(), instName, dataMgr), _VAO(0), _VBO(0), _EBO(0), _nVertices(0)
 {
@@ -57,7 +71,7 @@ WireFrameRenderer::~WireFrameRenderer()
     if (_VAO) glDeleteVertexArrays(1, &_VAO);
     if (_VBO) glDeleteBuffers(1, &_VBO);
     if (_EBO) glDeleteBuffers(1, &_EBO);
-    _VAO = _VBO = 0;
+    _VAO = _VBO = _EBO = 0;
 }
 
 void WireFrameRenderer::_saveCacheParams()
@@ -167,14 +181,14 @@ int WireFrameRenderer::_buildCache()
     double mv = grid->GetMissingValue();
 
 #if 0    // VAPOR_3_1_0
-
-	// Performance of the bounding box version of the Cell iterator 
-	// is too slow. So we render the entire grid and use clipping planes
-	// to restrict the displayed region
-	//
+    
+    // Performance of the bounding box version of the Cell iterator
+    // is too slow. So we render the entire grid and use clipping planes
+    // to restrict the displayed region
+    //
     Grid::ConstCellIterator it = grid->ConstCellBegin(
-		_cacheParams.boxMin, _cacheParams.boxMax
-	);
+                                                      _cacheParams.boxMin, _cacheParams.boxMax
+                                                      );
 #else
     Grid::ConstCellIterator it = grid->ConstCellBegin();
 #endif
@@ -257,7 +271,7 @@ int WireFrameRenderer::_buildCache()
     return 0;
 }
 
-int WireFrameRenderer::_paintGL()
+int WireFrameRenderer::_paintGL(bool fast)
 {
     GL_ERR_BREAK();
 

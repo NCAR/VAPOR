@@ -154,9 +154,11 @@ public:
     //! \param[in] j Index into second fastest varying dimension
     //! \param[in] k Index into third fastest varying dimension
     //
-    virtual float AccessIJK(size_t i, size_t j, size_t k) const;
+    virtual float AccessIJK(size_t i, size_t j = 0, size_t k = 0) const;
 
     void SetValueIJK(size_t i, size_t j, size_t k, float v);
+    void SetValueIJK(size_t i, size_t j, float v) { SetValueIJK(i, j, 0, v); }
+    void SetValueIJK(size_t i, float v) { SetValueIJK(i, 0, 0, v); }
 
     //! Get the reconstructed value of the sampled scalar function
     //!

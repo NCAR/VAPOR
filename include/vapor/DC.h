@@ -1524,6 +1524,17 @@ public:
         return (getDimLensAtLevel(varname, level, dims_at_level, bs_at_level));
     }
 
+    //! Return a variable's array dimension lengths
+    //!
+    //! This method is equivalent to calling GetDimLensAtLevel() with \p level
+    //! equal to -1
+    //!
+    virtual int GetDimLens(string varname, std::vector<size_t> &dims)
+    {
+        vector<size_t> dummy;
+        return (GetDimLensAtLevel(varname, -1, dims, dummy));
+    }
+
     //! Return default Proj4 map projection string.
     //!
     //! For georeference data sets that have map projections this

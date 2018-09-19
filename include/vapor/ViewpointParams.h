@@ -171,21 +171,43 @@ public:
 
     //! Return the current 4x4 model-view matrix
     //
-    void GetModelViewMatrix(double m[16]) const { getCurrentViewpoint()->GetModelViewMatrix(m); }
-    void SetModelViewMatrix(const double matrix[16])
+    void                GetModelViewMatrix(double m[16]) const { getCurrentViewpoint()->GetModelViewMatrix(m); }
+    std::vector<double> GetModelViewMatrix() const
     {
-        // printf( "trackball perspective Matrix is: \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f ",
-        //          matrix[0], matrix[1],matrix[2],matrix[3],
-        //        matrix[4], matrix[5],matrix[6],matrix[7],
-        //      matrix[8], matrix[9],matrix[10],matrix[11],
-        //    matrix[12], matrix[13],matrix[14],matrix[15]);
-        getCurrentViewpoint()->SetModelViewMatrix(matrix);
+        double m[16];
+        getCurrentViewpoint()->GetModelViewMatrix(m);
+        vector<double> vec(m, m + sizeof(m) / sizeof(m[0]));
+        return (vec);
+    }
+    void SetModelViewMatrix(const double matrix[16]) { getCurrentViewpoint()->SetModelViewMatrix(matrix); }
+    void SetModelViewMatrix(const std::vector<double> mvec)
+    {
+        assert(mvec.size() == 16);
+        double m[mvec.size()];
+        for (int i = 0; i < mvec.size(); i++) m[i] = mvec[i];
+        getCurrentViewpoint()->SetModelViewMatrix(m);
     }
 
     void GetProjectionMatrix(double m[16]) const { getCurrentViewpoint()->GetProjectionMatrix(m); }
     void SetProjectionMatrix(const double m[16]) { getCurrentViewpoint()->SetProjectionMatrix(m); }
 
     bool ReconstructCamera(const double m[16], double position[3], double upVec[3], double viewDir[3]) const { return (getCurrentViewpoint()->ReconstructCamera(m, position, upVec, viewDir)); }
+
+    std::vector<double> GetRotationCenter() const { return (getCurrentViewpoint()->GetRotationCenter()); }
+
+    void GetRotationCenter(double c[3]) const
+    {
+        vector<double> val = GetRotationCenter();
+        assert(val.size() == 3);
+        for (int i = 0; i < val.size(); i++) c[i] = val[i];
+    }
+
+    void SetRotationCenter(vector<double> c) { getCurrentViewpoint()->SetRotationCenter(c); }
+    void SetRotationCenter(const double c[3])
+    {
+        std::vector<double> vec = {c[0], c[1], c[2]};
+        SetRotationCenter(vec);
+    }
 
     //! Access the transform for a data set
     //!

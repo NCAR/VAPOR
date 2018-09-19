@@ -47,7 +47,7 @@ protected:
     virtual int _initializeGL();
 
     //! \copydoc Renderer::_paintGL()
-    virtual int _paintGL();
+    virtual int _paintGL(bool fast);
 
 private:
 };

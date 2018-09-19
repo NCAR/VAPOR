@@ -109,7 +109,7 @@ double Renderer::_getDefaultZ(DataMgr *dataMgr, size_t ts) const
     return (minExts.size() == 3 ? minExts[2] : 0.0);
 }
 
-int Renderer::paintGL()
+int Renderer::paintGL(bool fast)
 {
     const RenderParams *rParams = GetActiveParams();
 
@@ -138,8 +138,7 @@ int Renderer::paintGL()
 
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 
-    GL_ERR_BREAK();
-    int rc = _paintGL();
+    int rc = _paintGL(fast);
     GL_ERR_BREAK();
 
     _glManager->matrixManager->PopMatrix();
@@ -156,8 +155,7 @@ int Renderer::paintGL()
     return (0);
 }
 
-// TODO GL
-void Renderer::EnableClipToBox(ShaderProgram *shader) const
+void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const
 {
     shader->Bind();
 
@@ -176,7 +174,12 @@ void Renderer::EnableClipToBox(ShaderProgram *shader) const
 
     int orientation = rParams->GetBox()->GetOrientation();
 
-    GL_ERR_BREAK();
+    for (int i = 0; i < minExts.size(); i++) {
+        float halo = (maxExts[i] - minExts[i]) * haloFrac;
+        minExts[i] -= halo;
+        maxExts[i] += halo;
+    }
+
     if (minExts.size() == 3 || orientation != 0) {
         x0Plane[3] = -minExts[0];
         x1Plane[3] = maxExts[0];
@@ -204,6 +207,40 @@ void Renderer::EnableClipToBox(ShaderProgram *shader) const
         shader->SetUniform("clippingPlanes[5]", glm::make_vec4(z1Plane));
     }
     GL_ERR_BREAK();
+}
+
+void Renderer::EnableClipToBox2DXY(float haloFrac) const
+{
+    GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
+    GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
+    GLdouble y0Plane[] = {0.0, 1.0, 0.0, 0.0};
+    GLdouble y1Plane[] = {0.0, -1.0, 0.0, 0.0};
+
+    const RenderParams *rParams = GetActiveParams();
+    vector<double>      minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+    assert(minExts.size() == maxExts.size());
+    assert(minExts.size() > 0 && minExts.size() < 4);
+
+    for (int i = 0; i < minExts.size(); i++) {
+        float halo = (maxExts[i] - minExts[i]) * haloFrac;
+        minExts[i] -= halo;
+        maxExts[i] += halo;
+    }
+
+    x0Plane[3] = -minExts[0];
+    x1Plane[3] = maxExts[0];
+    glEnable(GL_CLIP_PLANE0);
+    glClipPlane(GL_CLIP_PLANE0, x0Plane);
+    glEnable(GL_CLIP_PLANE1);
+    glClipPlane(GL_CLIP_PLANE1, x1Plane);
+
+    y0Plane[3] = -minExts[1];
+    y1Plane[3] = maxExts[1];
+    glEnable(GL_CLIP_PLANE2);
+    glClipPlane(GL_CLIP_PLANE2, y0Plane);
+    glEnable(GL_CLIP_PLANE3);
+    glClipPlane(GL_CLIP_PLANE3, y1Plane);
 }
 
 void Renderer::DisableClippingPlanes()
@@ -628,6 +665,45 @@ vector<string> RendererFactory::GetFactoryNames() const
 
     for (itr = _factoryFunctionRegistry.begin(); itr != _factoryFunctionRegistry.end(); ++itr) { names.push_back(itr->first); }
     return (names);
+}
+
+void Renderer::GetClippingPlanes(float planes[24]) const
+{
+    float x0Plane[4] = {1.0, 0.0, 0.0, 0.0};
+    float x1Plane[4] = {-1.0, 0.0, 0.0, 0.0};
+    float y0Plane[4] = {0.0, 1.0, 0.0, 0.0};
+    float y1Plane[4] = {0.0, -1.0, 0.0, 0.0};
+    float z0Plane[4] = {0.0, 0.0, 1.0, 0.0};
+    float z1Plane[4] = {0.0, 0.0, -1.0, 0.0};
+
+    const RenderParams *rParams = GetActiveParams();
+    std::vector<double> minExts, maxExts;
+    rParams->GetBox()->GetExtents(minExts, maxExts);
+    assert(minExts.size() == maxExts.size());
+    assert(minExts.size() > 0 && minExts.size() < 4);
+
+    int orientation = rParams->GetBox()->GetOrientation();
+
+    if (minExts.size() == 3 || orientation != 0) {
+        x0Plane[3] = float(-minExts[0]);
+        x1Plane[3] = float(maxExts[0]);
+    }
+    if (minExts.size() == 3 || orientation != 1) {
+        y0Plane[3] = float(-minExts[1]);
+        y1Plane[3] = float(maxExts[1]);
+    }
+    if (minExts.size() == 3 || orientation != 2) {
+        z0Plane[3] = float(-minExts[2]);
+        z1Plane[3] = float(maxExts[2]);
+    }
+
+    size_t planeSize = sizeof(x0Plane);
+    std::memcpy(planes, x0Plane, planeSize);
+    std::memcpy(planes + 4, x1Plane, planeSize);
+    std::memcpy(planes + 8, y0Plane, planeSize);
+    std::memcpy(planes + 12, y1Plane, planeSize);
+    std::memcpy(planes + 16, z0Plane, planeSize);
+    std::memcpy(planes + 20, z1Plane, planeSize);
 }
 
 RendererFactory::RendererFactory() {}

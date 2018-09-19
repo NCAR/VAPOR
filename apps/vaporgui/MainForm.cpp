@@ -364,7 +364,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     if (files.size()) {
         // Assume VAPOR VDC file. Need to deal with import cases!
         //
-        if (files[0].endsWith(".nc")) { loadData(files[0].toStdString()); }
+        if (files[0].endsWith(".nc")) {
+            loadData(files[0].toStdString());
+            _stateChangeCB();
+        }
     }
     app->installEventFilter(this);
 
@@ -1267,7 +1270,7 @@ void MainForm::_setAnimationOnOff(bool on)
 void MainForm::_setAnimationDraw()
 {
     _tabMgr->Update();
-    _vizWinMgr->Update();
+    _vizWinMgr->Update(false);
 }
 
 void MainForm::enableKeyframing(bool ison)
@@ -1667,26 +1670,11 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         // force visualizer redraw
         //
-        _vizWinMgr->Update();
+        _vizWinMgr->Update(false);
 
         update();
 
         return (false);
-    }
-
-    //
-    // Force a redraw if mouse button is pressed and moving
-    //
-    switch (event->type()) {
-    case (QEvent::MouseButtonPress): _buttonPressed = true; break;
-
-    case (QEvent::MouseButtonRelease): _buttonPressed = false; break;
-
-    case (QEvent::MouseMove):
-        if (_buttonPressed) { _vizWinMgr->Update(); }
-        break;
-
-    default: break;
     }
 
     // Pass event on to target

@@ -696,7 +696,7 @@ public:
         std::vector<string> GetSpatialDimNames() const { return (_spatial_dim_names); };
         string              GetName() const { return (_name); };
 
-        size_t              GetNumTimeSteps() const { return (_time_varying ? _tvmaps.size() : 0); };
+        size_t              GetNumTimeSteps() const { return (_time_varying ? _tvmaps.size() : 1); };
         string              GetTimeDimName() const { return (_time_name); };
         int                 GetTime(size_t ts, double &time) const;
         std::vector<double> GetTimes() const;

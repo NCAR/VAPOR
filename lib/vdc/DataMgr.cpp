@@ -757,34 +757,105 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
 
 // Find the subset of the data dimension that are the coord dimensions
 //
-void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, vector<size_t> &coord_bmin,
-                                    vector<size_t> &coord_bmax) const
+void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order, vector<size_t> &coord_bmin,
+                                    vector<size_t> &coord_bmax, bool structured) const
 {
     assert(data_bmin.size() == data_bmax.size());
     coord_bmin.clear();
     coord_bmax.clear();
 
-    vector<string> data_dimnames;
-    bool           ok = _getVarDimNames(data_varname, data_dimnames);
+    vector<DC::Dimension> data_dims;
+    bool                  ok = _getVarDimensions(data_varname, data_dims);
     assert(ok);
-    assert(data_dimnames.size() == data_bmin.size());
+    assert(data_dims.size() == data_bmin.size());
 
-    vector<string> coord_dimnames;
-    ok = _getVarDimNames(coord_varname, coord_dimnames);
+    vector<DC::Dimension> coord_dims;
+    ok = _getVarDimensions(coord_varname, coord_dims);
     assert(ok);
 
-    int i = 0;
-    for (int j = 0; j < coord_dimnames.size(); j++) {
-        while (data_dimnames[i] != coord_dimnames[j] && i < data_dimnames.size()) { i++; }
-        assert(i < data_dimnames.size());
-        coord_bmin.push_back(data_bmin[i]);
-        coord_bmax.push_back(data_bmax[i]);
+    if (structured) {
+        // For structured data
+        // Here we try to match dimensions of coordinate variables
+        // with dimensions of data variables. Ideally, this would be done
+        // by matching the dimension names. However, some CF data sets (e.g. MOM)
+        // have data and coordinate variables that use different dimension
+        // names (but have the same length)
+        //
+        assert(data_dims.size() >= 1 && data_dims.size() <= 3);
+        if (data_dims.size() == 1) {
+            assert(coord_dims.size() == 1);
+            assert(order == 0);
+            assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
+
+            coord_bmin.push_back(data_bmin[0]);
+            coord_bmax.push_back(data_bmax[0]);
+        } else if (data_dims.size() == 2) {
+            assert(coord_dims.size() >= 1 && coord_dims.size() <= 2);
+            assert(order >= 0 && order <= 1);
+
+            if (coord_dims.size() == 1) {
+                assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
+
+                coord_bmin.push_back(data_bmin[order]);
+                coord_bmax.push_back(data_bmax[order]);
+            } else {
+                assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
+                assert(data_dims[1].GetLength() == coord_dims[1].GetLength());
+
+                coord_bmin.push_back(data_bmin[0]);
+                coord_bmax.push_back(data_bmax[0]);
+                coord_bmin.push_back(data_bmin[1]);
+                coord_bmax.push_back(data_bmax[1]);
+            }
+        } else if (data_dims.size() == 3) {
+            assert(coord_dims.size() >= 1 && coord_dims.size() <= 3);
+            assert(order >= 0 && order <= 2);
+
+            if (coord_dims.size() == 1) {
+                assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
+
+                coord_bmin.push_back(data_bmin[order]);
+                coord_bmax.push_back(data_bmax[order]);
+            } else if (coord_dims.size() == 2) {
+                // We assume 2D coordinates are horizontal (in XY plane).
+                // No way currently to distinguish XZ and YZ plane 2D coordinates
+                // for 3D data :-(
+                //
+                assert(order >= 0 && order <= 1);
+                coord_bmin.push_back(data_bmin[0]);
+                coord_bmax.push_back(data_bmax[0]);
+                coord_bmin.push_back(data_bmin[1]);
+                coord_bmax.push_back(data_bmax[1]);
+
+            } else if (coord_dims.size() == 3) {
+                coord_bmin.push_back(data_bmin[0]);
+                coord_bmax.push_back(data_bmax[0]);
+                coord_bmin.push_back(data_bmin[1]);
+                coord_bmax.push_back(data_bmax[1]);
+                coord_bmin.push_back(data_bmin[2]);
+                coord_bmax.push_back(data_bmax[2]);
+            }
+        } else {
+            assert(0 && "Only 1, 2, or 3D data supported");
+        }
+
+    } else {
+        // For unstructured data we can just match data dimension names
+        // with coord dimension names. Yay!
+        //
+        int i = 0;
+        for (int j = 0; j < coord_dims.size(); j++) {
+            while (data_dims[i].GetLength() != coord_dims[j].GetLength() && i < data_dims.size()) { i++; }
+            assert(i < data_dims.size());
+            coord_bmin.push_back(data_bmin[i]);
+            coord_bmax.push_back(data_bmax[i]);
+        }
     }
 }
 
 int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims,
                              vector<vector<size_t>> &dims_at_levelvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bs_at_levelvec, vector<vector<size_t>> &bminvec,
-                             vector<vector<size_t>> &bmaxvec) const
+                             vector<vector<size_t>> &bmaxvec, bool structured) const
 {
     varnames.clear();
     roi_dims.clear();
@@ -843,7 +914,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
         //
         vector<size_t> coord_bmin, coord_bmax;
         vector<size_t> coord_dims_at_level, coord_bs_at_level, coord_bs;
-        _setupCoordVecsHelper(varname, bmin, bmax, cvarnames[i], coord_bmin, coord_bmax);
+        _setupCoordVecsHelper(varname, bmin, bmax, cvarnames[i], i, coord_bmin, coord_bmax, structured);
 
         dims_at_levelvec.push_back(dims_at_level);
         bsvec.push_back(bs);
@@ -959,7 +1030,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
 
     // Get dimensions for coordinate variables
     //
-    int rc = _setupCoordVecs(ts, varname, level, lod, min, max, varnames, roi_dims, dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec);
+    int rc = _setupCoordVecs(ts, varname, level, lod, min, max, varnames, roi_dims, dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec, !_gridHelper.IsUnstructured(gridType));
     if (rc < 0) return (NULL);
 
     //
@@ -1144,7 +1215,6 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     float               mv = sg->GetMissingValue();
     Grid::ConstIterator itr;
     Grid::ConstIterator enditr = sg->cend();
-    //	for (itr = sg->cbegin(); itr!=sg->cend(); ++itr) {
     for (itr = sg->cbegin(); itr != enditr; ++itr) {
         float v = *itr;
         if (v != mv) {
@@ -2025,6 +2095,10 @@ bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &
 
     if (formula_terms.empty()) return (false);
 
+    // Currently only support one vertical transform!!!
+    //
+    if (!DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) { return (false); }
+
     return (true);
 }
 
@@ -2344,21 +2418,33 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
 
     DC::Dimension dimension;
 
+    size_t layers_dimlen = 0;
+    if (m.GetMeshType() == DC::Mesh::UNSTRUC_LAYERED) {
+        string dimname = m.GetLayersDimName();
+        assert(!dimname.empty());
+        status = _dc->GetDimension(dimname, dimension);
+        assert(status);
+        layers_dimlen = dimension.GetLength();
+    }
+
     string dimname = m.GetNodeDimName();
     status = _dc->GetDimension(dimname, dimension);
     assert(status);
     vertexDims.push_back(dimension.GetLength());
+    if (layers_dimlen) { vertexDims.push_back(layers_dimlen); }
 
     dimname = m.GetFaceDimName();
     status = _dc->GetDimension(dimname, dimension);
     assert(status);
     faceDims.push_back(dimension.GetLength());
+    if (layers_dimlen) { faceDims.push_back(layers_dimlen - 1); }
 
     dimname = m.GetEdgeDimName();
     if (dimname.size()) {
         status = _dc->GetDimension(dimname, dimension);
         assert(status);
         edgeDims.push_back(dimension.GetLength());
+        if (layers_dimlen) { edgeDims.push_back(layers_dimlen - 1); }
     }
 
     DC::Mesh::Location l = var.GetSamplingLocation();
@@ -2993,27 +3079,29 @@ int DataMgr::_initHorizontalCoordVars()
 
         // no duplicates
         //
-        if (_getDerivedCoordVar(derivedCoordvars[0])) continue;
-        if (_getDerivedCoordVar(derivedCoordvars[1])) continue;
+        if (!_getDerivedCoordVar(derivedCoordvars[0])) {
+            DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
 
-        DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[0], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, true);
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                SetErrMsg("Failed to initialize derived coord variable");
+                return (-1);
+            }
 
-        rc = derivedVar->Initialize();
-        if (rc < 0) {
-            SetErrMsg("Failed to initialize derived coord variable");
-            return (-1);
-        }
-        _dvm.AddCoordVar(derivedVar);
-
-        derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
-
-        rc = derivedVar->Initialize();
-        if (rc < 0) {
-            SetErrMsg("Failed to initialize derived coord variable");
-            return (-1);
+            _dvm.AddCoordVar(derivedVar);
         }
 
-        _dvm.AddCoordVar(derivedVar);
+        if (!_getDerivedCoordVar(derivedCoordvars[1])) {
+            DerivedCoordVar_PCSFromLatLon *derivedVar = new DerivedCoordVar_PCSFromLatLon(derivedCoordvars[1], _dc, coordvars, _proj4String, m.GetMeshType() != DC::Mesh::STRUCTURED, false);
+
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                SetErrMsg("Failed to initialize derived coord variable");
+                return (-1);
+            }
+
+            _dvm.AddCoordVar(derivedVar);
+        }
     }
 
     return (0);

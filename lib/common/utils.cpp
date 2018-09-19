@@ -103,3 +103,39 @@ void Wasp::Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, i
 }
 
 void Wasp::Transpose(const float *a, float *b, int s1, int s2) { Wasp::Transpose(a, b, 0, s1, s1, 0, s2, s2); }
+
+int Wasp::BinarySearchRange(const vector<double> &sorted, double x, size_t &i)
+{
+    i = 0;
+
+    // See if above or below the array
+    //
+    if (x < sorted[0]) return (-1);
+    if (x > sorted[sorted.size() - 1]) return (1);
+
+    // Binary search for starting index of cell containing x
+    //
+    size_t i0 = 0;
+    size_t i1 = sorted.size() - 1;
+    double x0 = sorted[i0];
+    double x1 = sorted[i1];
+    while (i1 - i0 > 1) {
+        x1 = sorted[(i0 + i1) >> 1];
+        if (x1 == x) {    // pathological case
+            i0 = (i0 + i1) >> 1;
+            break;
+        }
+
+        // if the signs of differences change then the coordinate
+        // is between x0 and x1
+        //
+        if ((x - x0) * (x - x1) <= 0.0) {
+            i1 = (i0 + i1) >> 1;
+        } else {
+            i0 = (i0 + i1) >> 1;
+            x0 = x1;
+        }
+    }
+    i = i0;
+    return (0);
+}

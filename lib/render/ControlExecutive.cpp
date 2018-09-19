@@ -107,29 +107,20 @@ int ControlExec::ResizeViz(string winName, int width, int height)
     return 0;
 }
 
-int ControlExec::Paint(string winName, bool force)
+int ControlExec::Paint(string winName, bool fast)
 {
-    GL_ERR_BREAK();
     Visualizer *v = getVisualizer(winName);
     if (!v) {
         SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
         return -1;
     }
 
-#ifdef VAPOR3_0_0_ALPHA
-    if (!force) {
-        if (!VizWinParams::VizIsDirty(viz)) return 0;    // Do nothing
-    }
-#endif
-
     // Disable state saving when generating the transfer function
     //
     bool enabled = _paramsMgr->GetSaveStateEnabled();
     _paramsMgr->SetSaveStateEnabled(false);
 
-    GL_ERR_BREAK();
-    int rc = v->paintEvent();
-    assert(!rc);    // TODO Delete
+    int rc = v->paintEvent(fast);
 
     _paramsMgr->SetSaveStateEnabled(enabled);
 
@@ -438,7 +429,7 @@ int ControlExec::EnableImageCapture(string filename, string winName)
     //
     bool enabled = _paramsMgr->GetSaveStateEnabled();
     _paramsMgr->SetSaveStateEnabled(false);
-    int rc = v->paintEvent();    // paint with image capture enabled
+    int rc = v->paintEvent(false);    // paint with image capture enabled
     _paramsMgr->SetSaveStateEnabled(enabled);
     if (rc != 0) {
         SetErrMsg("Visualizer (%s) failed to paint and thus not capturing image.", winName.c_str());

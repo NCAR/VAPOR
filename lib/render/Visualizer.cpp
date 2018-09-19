@@ -178,7 +178,7 @@ void Visualizer::applyTransforms(int i)
     mm->Translate(translations[0], translations[1], translations[2]);
 }
 
-int Visualizer::paintEvent()
+int Visualizer::paintEvent(bool fast)
 {
     MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
@@ -254,7 +254,7 @@ int Visualizer::paintEvent()
             GL_ERR_BREAK();
             _glManager->matrixManager->TestUpload();
             GL_ERR_BREAK();
-            int myrc = _renderer[i]->paintGL();
+            int myrc = _renderer[i]->paintGL(fast);
             if (myrc < 0) {
                 GL_BREAK();
                 rc = -1;

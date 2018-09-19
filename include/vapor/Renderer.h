@@ -131,7 +131,7 @@ public:
     //! This invokes _paintGL on the renderer subclass
     //! \param[in] dataMgr Current (valid) dataMgr
     //! \retval int zero if successful.
-    virtual int paintGL();
+    virtual int paintGL(bool fast);
 
 #ifdef VAPOR3_0_0_ALPHA
 #endif
@@ -246,21 +246,34 @@ protected:
     int makeColorbarTexture();
 
     //! All OpenGL rendering is performed in the pure virtual paintGL method.
-    virtual int _paintGL() = 0;
+    virtual int _paintGL(bool fast) = 0;
 
     //! Enable specified clipping planes during the GL rendering. This
     //! method clips the scene to the bounding box. See
     //!! RenderParams::GetBox()
     //! May be invoked during _paintGL() by classes derived from this class.
     //! Clipping planes are specified in User coordinates.
+    //!
+    //! \param[in] haloFrac Fraction of bounding box that should be used to
+    //! extend the min and max clippig planes. For example, if a min extent
+    //! is zero, and a max extent is 1.0, and haloFrac is 0.1 then the
+    //! min clipping plane will be set to -0.1 and the max to 1.1
+    //!
     //! \sa DisableClippingPlanes
-    void EnableClipToBox(ShaderProgram *shader) const;
+    void EnableClipToBox(ShaderProgram *shader, float haloFrac = 0.0) const;
+
+    void EnableClipToBox2DXY(float haloFrac = 0.0) const;
 
     //! Disable clipping planes.
     //! If clipping is enabled this  method should be called prior to
     //! returning from _paintGL()
     //
     void DisableClippingPlanes();
+
+    //! Get clipping planes in the model/user coordinates.
+    //! There are six planes in total that get stored in "planes"
+    //! It is the caller's responsibility to allocate memory for 24 floats.
+    void GetClippingPlanes(float planes[24]) const;
 
     //! return true if all of the specified variables exist in the DataMgr
     //! at the specified timestep, refinement level, and lod. If \p zeroOK

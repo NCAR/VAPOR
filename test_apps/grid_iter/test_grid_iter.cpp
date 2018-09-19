@@ -366,6 +366,85 @@ void test_cell_iterator(const StructuredGrid *sg)
     cout << endl;
 }
 
+void test_coord_iterator(const StructuredGrid *sg)
+{
+    cout << "Coord Iterator Test ----->" << endl;
+
+    double t0 = Wasp::GetTime();
+
+    Grid::ConstCoordItr itr;
+    Grid::ConstCoordItr enditr = sg->ConstCoordEnd();
+    size_t              count = 0;
+    //    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=->cend(); ++itr)
+    for (itr = sg->ConstCoordBegin(); itr != enditr; ++itr) {
+        const vector<double> &coord = *itr;
+        count++;
+    }
+    cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+    cout << "count: " << count << endl;
+    cout << endl;
+}
+
+void test_coord_accessor(const StructuredGrid *sg)
+{
+    cout << "Coord Accessor Test ----->" << endl;
+
+    double t0 = Wasp::GetTime();
+
+    size_t count = 0;
+
+    vector<size_t> index(3);
+    vector<double> coord;
+    for (size_t k = 0; k < sg->GetDimensions()[2]; k++) {
+        for (size_t j = 0; j < sg->GetDimensions()[1]; j++) {
+            for (size_t i = 0; i < sg->GetDimensions()[0]; i++) {
+                index[0] = i;
+                index[1] = j;
+                index[2] = k;
+
+                sg->GetUserCoordinates(index, coord);
+                count++;
+            }
+        }
+    }
+    cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+    cout << "count: " << count << endl;
+    cout << endl;
+}
+
+void test_getvalue(StructuredGrid *sg)
+{
+    cout << "GetValue Test ----->" << endl;
+
+    float rangev[2];
+    sg->GetRange(rangev);
+
+    sg->SetInterpolationOrder(1);
+
+    float range = rangev[1] - rangev[0];
+    if (range == 0.0) return;
+
+    double t0 = Wasp::GetTime();
+
+    Grid::ConstIterator itr;
+    Grid::ConstIterator enditr = sg->cend();
+    Grid::ConstCoordItr coord_itr = sg->ConstCoordBegin();
+    Grid::ConstCoordItr coord_enditr = sg->ConstCoordEnd();
+    float               maxErr = 0.0;
+    for (itr = sg->cbegin(); itr != enditr; ++itr, ++coord_itr) {
+        float                 v1 = *itr;
+        const vector<double> &coord = *coord_itr;
+
+        float v2 = sg->GetValue(coord);
+
+        float err = abs(v1 - v2) / range;
+        if (err > maxErr) { maxErr = err; }
+    }
+    cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
+    cout << "Lmax error : " << maxErr << endl;
+    cout << endl;
+}
+
 int main(int argc, char **argv)
 {
     OptionParser op;
@@ -429,6 +508,12 @@ int main(int argc, char **argv)
     test_node_iterator(sg);
 
     test_cell_iterator(sg);
+
+    test_coord_iterator(sg);
+
+    test_coord_accessor(sg);
+
+    test_getvalue(sg);
 
     delete sg;
 

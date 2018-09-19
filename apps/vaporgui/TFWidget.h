@@ -4,36 +4,43 @@
 #include "ui_TFWidgetGUI.h"
 #include "EventRouter.h"
 #include "RangeCombos.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class ControlExec;
 class MapperFunction;
 }    // namespace VAPoR
 
+//    V - Composition
+//    # - Association
+//
+//     |----------------|              |--------------|
+//     |    QWidget::   |     Update() | DataMgr      |
+//  |--|    TFWidget    |--------------#              |
+//  |  |----------------|   |          |--------------|
+//  |         |             |
+//  |         | 1           |
+//  |  |------V---------|   |          |--------------|
+//  |  |  QGLWidget::   |   | Update() | ParamsMgr    |
+//  |  |  MappingFrame  |---|----------#              |
+//  |  |----------------|   |          |--------------|
+//  |         |             |
+//  |         | 1           |
+//  |  |------V---------|   |          |--------------|
+//  |--# ParamsBase::   |   | Update() | RenderParams |
+//     | MapperFunction |   |----------#              |
+//     |------^---------|              |--------------|
+//            |                              |
+//            |------------------------------|
+//
+
 class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     Q_OBJECT
 
 public:
-    //! Bit masks to indicate what type of variables are to be supported by
-    //! a particular VariablesWidget instance. These flags correspond
-    //! to variable names returned by methods:
-    //!
-    //! SCALAR : RenderParams::GetVariableName()
-    //! VECTOR : RenderParams::GetFieldVariableNames()
-    //! HGT : RenderParams::GetHeightVariableName()
-    //! COLOR : RenderParams::GetColorMapVariableNames()
-    //!
-    enum Flags {
-        // We can map our renderer's colors to a secondary color variable
-        COLORVAR = (1u << 0),
-
-        // We can map the color of our renderer to a constant value
-        CONSTANT = (1u << 1),
-    };
-
     TFWidget(QWidget *parent = 0);
 
-    void Reinit(Flags flags);
+    void Reinit(TFFlags flags);
 
     ~TFWidget();
 
@@ -66,7 +73,7 @@ private slots:
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
-    void forwardTFChange();
+    void emitTFChange();
     void opacitySliderChanged(int value);
     void setSingleColor();
     void setUsingSingleColor(int checkState);
@@ -99,10 +106,11 @@ private:
     int                 _refLevel;
     int                 _timeStep;
     string              _varName;
+    bool                _somethingChanged;
 
-    bool  _autoUpdateHisto = false;
-    bool  _discreteColormap = false;
-    bool  _textChanged = false;
+    bool  _autoUpdateHisto;
+    bool  _discreteColormap;
+    bool  _textChanged;
     float _myRGB[3];
     float _savedMapperValues[2];
 
@@ -111,11 +119,11 @@ private:
     VAPoR::DataMgr *     _dataMgr;
     VAPoR::RenderParams *_rParams;
 
-    Combo *     _minCombo = NULL;
-    Combo *     _maxCombo = NULL;
-    RangeCombo *_rangeCombo = NULL;
+    Combo *     _minCombo;
+    Combo *     _maxCombo;
+    RangeCombo *_rangeCombo;
 
-    Flags _flags;
+    TFFlags _flags;
 
     static string _nDimsTag;
 

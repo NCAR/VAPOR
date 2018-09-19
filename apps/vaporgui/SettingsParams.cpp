@@ -142,14 +142,14 @@ SettingsParams::~SettingsParams() {}
 
 long SettingsParams::GetCacheMB() const
 {
-    long val = GetValueLong(_cacheMBTag, 1000);
-    if (val < 0) val = 1000;
+    long val = GetValueLong(_cacheMBTag, 8000);
+    if (val < 0) val = 8000;
     return (val);
 }
 
 void SettingsParams::SetCacheMB(long val)
 {
-    if (val < 0) val = 1000;
+    if (val < 0) val = 8000;
     SetValueLong(_cacheMBTag, "Set cache size", val);
 }
 

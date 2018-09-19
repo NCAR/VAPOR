@@ -229,7 +229,7 @@ void RegularGrid::GetUserCoordinates(const std::vector<size_t> &indices, std::ve
 
     coords.clear();
 
-    vector<size_t> dims = GetDimensions();
+    const vector<size_t> &dims = GetDimensions();
 
     for (int i = 0; i < cIndices.size(); i++) {
         size_t index = cIndices[i];

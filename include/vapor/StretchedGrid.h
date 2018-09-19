@@ -163,8 +163,6 @@ private:
 
     void _GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const;
 
-    int _binarySearchRange(const std::vector<double> &sorted, double x, size_t &i) const;
-
     bool _insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double xwgt[2], double ywgt[2], double zwgt[2]) const;
 
     virtual void _getMinCellExtents(std::vector<double> &minCellExtents) const;

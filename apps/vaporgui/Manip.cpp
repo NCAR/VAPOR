@@ -110,18 +110,24 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform)
     mm->GetDoublev(_modelViewMatrix);
 }
 
-void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, std::vector<double> cameraPosition,
-                                   double modelViewMatrix[16], double projectionMatrix[16], std::vector<int> windowSize, VAPoR::Transform *rpTransform, VAPoR::Transform *dmTransform, bool constrain)
+void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> urc, std::vector<double> minExts, std::vector<double> maxExts, VAPoR::Transform *rpTransform,
+                                   VAPoR::Transform *dmTransform, bool constrain)
 {
-    for (int i = 0; i < 16; i++) {
-        _modelViewMatrix[i] = modelViewMatrix[i];
-        _projectionMatrix[i] = projectionMatrix[i];
-    }
+    glGetDoublev(GL_PROJECTION_MATRIX, _projectionMatrix);
+    glGetDoublev(GL_MODELVIEW_MATRIX, _modelViewMatrix);
 
-    _windowSize = windowSize;
-    _cameraPosition[X] = cameraPosition[X];
-    _cameraPosition[Y] = cameraPosition[Y];
-    _cameraPosition[Z] = cameraPosition[Z];
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    _windowSize[0] = viewport[2];
+    _windowSize[1] = viewport[3];
+
+    double minv[16];
+    int    rc = minvert(_modelViewMatrix, minv);
+    assert(rc >= 0);
+
+    _cameraPosition[X] = minv[12];
+    _cameraPosition[Y] = minv[13];
+    _cameraPosition[Z] = minv[14];
 
     if (llc.size() == 2) llc.push_back(0);
     if (urc.size() == 2) urc.push_back(0);

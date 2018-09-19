@@ -40,6 +40,10 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
 {
     setupUi(this);
 
+    _somethingChanged = false;
+    _autoUpdateHisto = false;
+    _discreteColormap = false;
+
     _myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
 
     _minCombo = new Combo(minRangeEdit, minRangeSlider);
@@ -61,29 +65,36 @@ void TFWidget::collapseConstColorWidgets()
 {
     useConstColorFrame->hide();
     constColorFrame->hide();
+    adjustSize();
 }
 
 void TFWidget::showConstColorWidgets()
 {
-    useConstColorLabel->show();
-    useConstColorCheckbox->show();
-    constColorLabel->show();
-    colorDisplay->show();
-    colorSelectButton->show();
+    useConstColorFrame->show();
     constColorFrame->show();
+    adjustSize();
 }
 
-void TFWidget::hideWhitespaceFrame() { whitespaceFrame->hide(); }
+void TFWidget::hideWhitespaceFrame()
+{
+    whitespaceFrame->hide();
+    adjustSize();
+}
 
-void TFWidget::showWhitespaceFrame() { whitespaceFrame->show(); }
+void TFWidget::showWhitespaceFrame()
+{
+    whitespaceFrame->show();
+    adjustSize();
+}
 
-void TFWidget::Reinit(Flags flags)
+void TFWidget::Reinit(TFFlags flags)
 {
     _flags = flags;
     if ((_flags & CONSTANT))
         showConstColorWidgets();
     else
         collapseConstColorWidgets();
+    adjustSize();
 }
 
 TFWidget::~TFWidget()
@@ -110,7 +121,6 @@ void TFWidget::enableTFWidget(bool state)
     minRangeEdit->setEnabled(state);
     maxRangeEdit->setEnabled(state);
     opacitySlider->setEnabled(state);
-    updateHistoButton->setEnabled(state);
     autoUpdateHistoCheckbox->setEnabled(state);
     colorInterpCombo->setEnabled(state);
 }
@@ -208,7 +218,10 @@ void TFWidget::getRange(float range[2], float values[2])
 
     vector<double> rangev;
     int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, rangev);
-    assert(rc >= 0);
+    if (rc < 0) {
+        MSG_ERR("Error loading variable");
+        return;
+    }
     assert(rangev.size() == 2);
 
     range[0] = rangev[0];
@@ -322,18 +335,16 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
 
 void TFWidget::checkForExternalChangesToHisto()
 {
-    bool somethingChanged = false;
-
     int newCLevel = _rParams->GetCompressionLevel();
     if (_cLevel != newCLevel) {
         _cLevel = _rParams->GetCompressionLevel();
-        somethingChanged = true;
+        _somethingChanged = true;
     }
 
     int newRefLevel = _rParams->GetRefinementLevel();
     if (_refLevel != newRefLevel) {
         _refLevel = newRefLevel;
-        somethingChanged = true;
+        _somethingChanged = true;
     }
 
     std::vector<double> minExt, maxExt;
@@ -341,11 +352,11 @@ void TFWidget::checkForExternalChangesToHisto()
     box->GetExtents(minExt, maxExt);
     for (int i = 0; i < minExt.size(); i++) {
         if (minExt[i] != _minExt[i]) {
-            somethingChanged = true;
+            _somethingChanged = true;
             _minExt[i] = minExt[i];
         }
         if (maxExt[i] != _maxExt[i]) {
-            somethingChanged = true;
+            _somethingChanged = true;
             _maxExt[i] = maxExt[i];
         }
     }
@@ -355,21 +366,22 @@ void TFWidget::checkForExternalChangesToHisto()
     MapperFunction *tf = getCurrentMapperFunction();
     double          newMin = tf->getMinMapValue();
     double          newMax = tf->getMaxMapValue();
-    if (min != newMin) somethingChanged = true;
-    if (max != newMax) somethingChanged = true;
+    if (min != newMin) _somethingChanged = true;
+    if (max != newMax) _somethingChanged = true;
 
     int newTimestep = _rParams->GetCurrentTimestep();
     if (_timeStep != newTimestep) {
         _timeStep = newTimestep;
-        somethingChanged = true;
+        _somethingChanged = true;
     }
-
-    if (somethingChanged) {
+    if (_somethingChanged) {
         if (autoUpdateHisto())
             refreshHistogram();
         else
             updateHistoButton->setEnabled(true);
     }
+
+    _somethingChanged = false;
 }
 
 void TFWidget::updateConstColorWidgets()
@@ -390,7 +402,7 @@ void TFWidget::updateConstColorWidgets()
     useConstColorCheckbox->blockSignals(false);
 
     string varName;
-    if (_flags & COLORVAR) {
+    if (_flags & SECONDARY) {
         varName = _rParams->GetColorMapVariableName();
         // If we are using a single color instead of a
         // color mapped variable, disable the transfer function
@@ -418,13 +430,13 @@ void TFWidget::connectWidgets()
     connect(loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
     connect(mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
-    connect(mappingFrame, SIGNAL(endChange()), this, SLOT(forwardTFChange()));
+    connect(mappingFrame, SIGNAL(endChange()), this, SLOT(emitTFChange()));
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
     connect(colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(useConstColorCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUsingSingleColor(int)));
 }
 
-void TFWidget::forwardTFChange() { emit emitChange(); }
+void TFWidget::emitTFChange() { emit emitChange(); }
 
 void TFWidget::opacitySliderChanged(int value)
 {
@@ -445,6 +457,8 @@ void TFWidget::setRange()
 
 void TFWidget::setRange(double min, double max)
 {
+    _somethingChanged = true;
+
     MapperFunction *tf = getCurrentMapperFunction();
 
     tf->setMinMapValue(min);
@@ -511,7 +525,6 @@ void TFWidget::setUsingSingleColor(int state)
 {
     if (state > 0) {
         _rParams->SetUseSingleColor(true);
-
     } else {
         _rParams->SetUseSingleColor(false);
     }
@@ -548,7 +561,7 @@ bool TFWidget::autoUpdateHisto()
 string TFWidget::getCurrentVarName()
 {
     string varname = "";
-    if (_flags & COLORVAR) {
+    if (_flags & SECONDARY) {
         varname = _rParams->GetColorMapVariableName();
     } else {
         varname = _rParams->GetVariableName();

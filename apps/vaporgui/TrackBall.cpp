@@ -59,7 +59,7 @@
  *	On a Button or Motion event, call
  *		MouseOnTrackball
  *	When you want to draw, call
- *		TrackballSetMatrix to modify the gl matrix.
+ *		TrackballSetMatrix to modify the matrix.
  *	Misc. functions:
  *		TrackballReset to come to home position
  *		TrackballFlip to flip about an axis
@@ -74,10 +74,9 @@
  *			  (default = 0.65)
  */
 
-#include <vapor/glutil.h>    // Must be included first!!!
 #include <cmath>
 #include <iostream>
-#include "vapor/GLManager.h"
+#include <vapor/glutil.h>
 #include "TrackBall.h"
 using namespace VAPoR;
 void Trackball::TrackballReset()
@@ -108,29 +107,42 @@ Trackball::Trackball(float scale[3])
     TrackballReset();
 }
 
-void Trackball::TrackballSetMatrix(GLManager *glManager)
+void Trackball::TrackballSetMatrix()
 // Note perspective must be set previously in setFromFrame.
 {
-    MatrixManager *mm = glManager->matrixManager;
-    /* Modify the current gl matrix by the trackball
+    /* Modify the modelview matrix by the trackball
      * rotation and translation.
      */
-    GLdouble m[16];
-    /*Start with the "home" matrix:
-    Currently assuming identity??
-    */
-    // sendGLHomeViewpoint();
 
-    mm->LoadIdentity();
-
+    // Ugh. Use OpenGL to do matrix manipulation, then retrieve and store
+    // results in member variable
+    //
     if (_perspective) {
-        mm->Translate(_center[0], _center[1], _center[2]);
-        mm->Translate(_trans[0], _trans[1], _trans[2]);
-        qmatrix(_qrot, m);
-        mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::mat4(glm::make_mat4(m)));
-        mm->Translate(-_center[0], -_center[1], -_center[2]);
+        // glTranslated(_center[0], _center[1], _center[2]);
+        double m1[16];
+        makeTransMatrix(_center, m1);
+
+        // glTranslated(_trans[0],  _trans[1],  _trans[2]);
+        double m2[16];
+        makeTransMatrix(_trans, m2);
+
+        //	glMultMatrixd(m);
+        double m3[16];
+        qmatrix(_qrot, m3);
+
+        // glTranslated(-_center[0], -_center[1], -_center[2]);
+        double ncenter[3];
+        vcopy(_center, ncenter);
+        vscale(ncenter, -1.0);
+
+        double m4[16];
+        makeTransMatrix(ncenter, m4);
+
+        mmult(m2, m1, _modelViewMatrix);
+        mmult(m3, _modelViewMatrix, _modelViewMatrix);
+        mmult(m4, _modelViewMatrix, _modelViewMatrix);
     } else {
-        GLdouble scale_factor = 1.0;
+        double scale_factor = 1.0;
 
         if (_trans[2] < 0.0) {
             scale_factor = 5.0 / (1 - _trans[2]);
@@ -138,11 +150,23 @@ void Trackball::TrackballSetMatrix(GLManager *glManager)
             scale_factor = 5.0 + _trans[2];
         }
 
-        mm->Translate(_trans[0], _trans[1], _trans[2]);
-        qmatrix(_qrot, m);
-        mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::mat4(glm::make_mat4(m)));
+        // glTranslated(_trans[0],  _trans[1],  _trans[2]);
+        double m1[16];
+        makeTransMatrix(_center, m1);
 
-        mm->Scale(scale_factor, scale_factor, scale_factor);
+        double m2[16];
+        qmatrix(_qrot, m2);
+
+        // glMultMatrixd(m);
+
+        double scale[3] = {scale_factor, scale_factor, scale_factor};
+
+        // glScaled(scale_factor, scale_factor, scale_factor);
+        double m3[16];
+        makeScaleMatrix(scale, m3);
+
+        mmult(m2, m1, _modelViewMatrix);
+        mmult(m3, _modelViewMatrix, _modelViewMatrix);
     }
 }
 
@@ -198,12 +222,6 @@ void Trackball::TrackballSetPosition(double newx, double newy)
 
 void Trackball::TrackballRotate(double newx, double newy)
 {
-    /* OGLXXX glBegin: Use GL_LINES if only one line segment is desired. */
-    /* Call this when the mouse glBegin(GL_LINE_STRIP); glVertex3s(i.e. PointerMotion, $2, $3).
-     * Using the current coordinates and the last coordinates
-     * (initialized with TrackballSetPosition), calc the
-     * glide increment, then spin the trackball once.
-     */
     CalcRotation(_qinc, newx, newy, _lastx, _lasty, _ballsize);
     TrackballSpin();
 
@@ -213,9 +231,6 @@ void Trackball::TrackballRotate(double newx, double newy)
 
 void Trackball::TrackballPan(double newx, double newy)
 {
-    /* OGLXXX glBegin: Use GL_LINES if only one line segment is desired. */
-    /* Call this when the mouse glBegin(GL_LINE_STRIP); glVertex3s(i.e. PointerMotion, $2, $3).
-     */
     _trans[0] += (newx - _lastx) * _scale[0];
     _trans[1] += (newy - _lasty) * _scale[1];
 
@@ -225,9 +240,6 @@ void Trackball::TrackballPan(double newx, double newy)
 
 void Trackball::TrackballZoom(double newx, double newy)
 {
-    /* OGLXXX glBegin: Use GL_LINES if only one line segment is desired. */
-    /* Call this when the mouse glBegin(GL_LINE_STRIP); glVertex3s(i.e. PointerMotion, $2, $3).
-     */
     _trans[2] += (newy - _lasty) * _scale[2];
 
     _lastx = newx; /* remember for next time */
@@ -300,12 +312,9 @@ void Trackball::MouseOnTrackball(int eventNum, int thisButton, int xcrd, int ycr
 
 bool Trackball::ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const
 {
-    double m[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX, m);
-
     double minv[16];
 
-    int rc = minvert(m, minv);
+    int rc = minvert(_modelViewMatrix, minv);
     if (rc < 0) return (false);
 
     vscale(minv + 8, -1.0);

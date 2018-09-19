@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vapor/MyBase.h>
 #include <vapor/NetCDFCollection.h>
+#include <vapor/DerivedVar.h>
 #include <vapor/DerivedVarMgr.h>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/utils.h>
@@ -158,19 +159,17 @@ private:
         bool _derivedFlag;
     };
 
-    std::map<string, DC::Dimension>             _dimsMap;
-    std::map<string, DC::CoordVar>              _coordVarsMap;
-    std::map<string, DC::Mesh>                  _meshMap;
-    std::map<string, DC::DataVar>               _dataVarsMap;
-    std::map<string, DC::AuxVar>                _auxVarsMap;
-    std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
-    DerivedCoordVar_WRFTime *                   _derivedTime;
-    std::vector<string>                         _cellVars;
-    std::vector<string>                         _pointVars;
-    std::vector<string>                         _edgeVars;
-    Wasp::SmartBuf                              _nEdgesOnCellBuf;
-    Wasp::SmartBuf                              _lonCellSmartBuf;
-    Wasp::SmartBuf                              _lonVertexSmartBuf;
+    std::map<string, DC::Dimension> _dimsMap;
+    std::map<string, DC::CoordVar>  _coordVarsMap;
+    std::map<string, DC::Mesh>      _meshMap;
+    std::map<string, DC::DataVar>   _dataVarsMap;
+    std::map<string, DC::AuxVar>    _auxVarsMap;
+    std::vector<string>             _cellVars;
+    std::vector<string>             _pointVars;
+    std::vector<string>             _edgeVars;
+    Wasp::SmartBuf                  _nEdgesOnCellBuf;
+    Wasp::SmartBuf                  _lonCellSmartBuf;
+    Wasp::SmartBuf                  _lonVertexSmartBuf;
 
     int _InitDerivedVars(NetCDFCollection *ncdfc);
     int _InitCoordvars(NetCDFCollection *ncdfc);
@@ -194,6 +193,8 @@ private:
     bool _isCoordVar(string varname) const;
     bool _isDataVar(string varname) const;
 
+    template<class T> int _getVar(size_t ts, string varname, T *buf);
+
     int  _read_nEdgesOnCell(size_t ts);
     void _addMissingFlag(int *data) const;
     int  _readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartBuf);
@@ -201,49 +202,50 @@ private:
 
     void _splitOnBoundary(string varname, int *connData) const;
 
+    int _readRegionTransposed(MPASFileObject *w, const vector<size_t> &min, const vector<size_t> &max, float *region);
+
+    int _readRegionEdgeVariable(MPASFileObject *w, const vector<size_t> &min, const vector<size_t> &max, float *region);
+
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
-    ///////////////////////////////////////////////////////////////////////////
+    // Derive vertical coordinate variable for dual mesh from primary mesh
     //
-    //	Specializations of the NetCDFCollection::DerivedVar class used to
-    // support derived variables - required variables that are not
-    // found in the MPAS data.
-    //
-    ///////////////////////////////////////////////////////////////////////////
-
-    //
-    // Vertical coordinate  derived variables. This class computes
-    // vertical coordinate variables in meters for the unstaggered grid
-    // from the staggered grid.
-    //
-    class DerivedVarVertical : public NetCDFCollection::DerivedVar {
+    class DerivedCoordVertFromCell : public DerivedCoordVar {
     public:
-        DerivedVarVertical(NetCDFCollection *ncdfc, string staggeredVarName, string zDimNameUnstaggered);
-        virtual ~DerivedVarVertical();
+        DerivedCoordVertFromCell(string derivedVarName, string derivedDimName, DC *dc, string inName, string cellsOnVertexName);
 
-        virtual int                 Open(size_t ts);
-        virtual int                 ReadSlice(float *slice, int);
-        virtual int                 Read(float *buf, int);
-        virtual int                 SeekSlice(int offset, int whence, int);
-        virtual int                 Close(int fd);
-        virtual bool                TimeVarying() const { return (!_time_dim_name.empty()); };
-        virtual std::vector<size_t> GetSpatialDims() const { return (_sdims); }
-        virtual std::vector<string> GetSpatialDimNames() const { return (_sdimnames); }
-        virtual size_t              GetTimeDim() const { return (_time_dim); }
-        virtual string              GetTimeDimName() const { return (_time_dim_name); }
-        virtual bool                GetMissingValue(double &mv) const { return (false); }
+        int Initialize();
+
+        bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+        bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+        virtual std::vector<string> GetInputs() const { return (std::vector<string>{_inName}); }
+
+        int GetDimLensAtLevel(int, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+        int OpenVariableRead(size_t ts, int, int);
+
+        int CloseVariable(int fd);
+
+        int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+
+        int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+
+        bool VariableExists(size_t ts, int, int) const;
 
     private:
-        string              _staggeredVarName;    // name of unstaggered vertical coord var
-        size_t              _time_dim;            // number of time steps
-        string              _time_dim_name;       // Name of time dimension
-        std::vector<size_t> _sdims;               // spatial dimensions
-        std::vector<string> _sdimnames;           // spatial dimension names
-        bool                _is_open;             // Open for reading?
-        float *             _buf;                 // boundary points of lat and lon
-        int                 _fd;                  // file descriptors for reading coord vars
+        string       _derivedDimName;
+        DC *         _dc;
+        string       _inName;
+        string       _cellsOnVertexName;
+        DC::CoordVar _coordVarInfo;
+
+        float *_getCellData();
+
+        int *_getCellsOnVertex(size_t i0, size_t i1, int &vertexDegree);
     };
 };
 };    // namespace VAPoR

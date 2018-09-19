@@ -5,6 +5,7 @@
 #include "vapor/MyBase.h"
 #include "ui_VariablesWidgetGUI.h"
 #include "VaporTable.h"
+#include "Flags.h"
 
 QT_USE_NAMESPACE
 
@@ -41,37 +42,9 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
     Q_OBJECT
 
 public:
-    //! Bit masks to indicate what type of variables are to be supported by
-    //! a particular VariablesWidget instance. These flags correspond
-    //! to variable names returned by methods:
-    //!
-    //! SCALAR : RenderParams::GetVariableName()
-    //! VECTOR : RenderParams::GetFieldVariableNames()
-    //! HGT : RenderParams::GetHeightVariableName()
-    //! COLOR : RenderParams::GetColorMapVariableNames()
-    //!
-    enum DisplayFlags {
-        SCALAR = (1u << 0),
-        VECTOR = (1u << 1),
-        HGT = (1u << 2),
-        COLOR = (1u << 3),
-    };
-
-    //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to
-    //! be supported
-    //
-    enum DimFlags {
-        TWOD = (1u << 0),
-        THREED = (1u << 1),
-    };
-
-    enum ColorFlags {
-        COLORVAR = (1u << 0),
-    };
-
     VariablesWidget(QWidget *parent);
 
-    void Reinit(DisplayFlags dspFlags, DimFlags dimFlags, ColorFlags colorFlags);
+    void Reinit(VariableFlags varFlags, DimFlags dimFlags);
 
     virtual ~VariablesWidget() {}
 
@@ -80,8 +53,6 @@ public:
     virtual void confirmText() {}
 
     virtual void Update(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
-
-    string getNDimsTag() { return _nDimsTag; }
 
 protected slots:
     //! Respond to selecting the single (primary) variable of field
@@ -119,26 +90,33 @@ private:
     VAPoR::ParamsMgr *    _paramsMgr;
     VAPoR::RenderParams * _rParams;
 
+    void pushVarStartingWithLetter(std::vector<string> searchVars, std::vector<string> &returnVars, char letter);
+
     void setVectorVarName(const QString &name, int component);
-    void configureDefaultColoring();
-    // void configureColorMappingToVariable(string var);
-    // void configureConstantColor(string var);
-    void configureColorWidgets(string selection);
     void collapseColorVarSettings();
 
-    void showHideVar(bool on);
+    void showHideVarCombos(bool on);
 
     string updateVarCombo(QComboBox *varCombo, const vector<string> &varnames, bool doZero, string currentVar);
 
-    void updateVariableCombos(VAPoR::RenderParams *params);
+    void updateCombos();
+    void updateScalarCombo();
+    void updateVectorCombo();
+    void updateColorCombo();
+    void updateHeightCombo();
+    void updateDimCombo();
 
-    void updateDims(VAPoR::RenderParams *rParams);
+    void setDefaultVariables();
+    void setDefaultScalarVar(std::vector<string> vars);
+    void setDefaultVectorVar(std::vector<string> vars);
+    void setDefaultColorVar(std::vector<string> vars);
 
-    DisplayFlags _dspFlags;
-    DimFlags     _dimFlags;
-    ColorFlags   _colorFlags;
+    string findVarStartingWithLetter(std::vector<string> searchVars, char letter);
 
-    static string _nDimsTag;
+    int _activeDim;
+
+    VariableFlags _variableFlags;
+    DimFlags      _dimFlags;
 };
 
 #endif    // VARIABLESWIDGET_H
