@@ -62,9 +62,14 @@ void MatrixManager::PopMatrix()
 
 void MatrixManager::LoadMatrixd(const double *m) { top() = glm::make_mat4(m); }
 
-void MatrixManager::GetDoublev(double *m) const
+void MatrixManager::GetDoublev(Mode mode, double *m) const
 {
-    const float *data = glm::value_ptr(top());
+    const float *data;
+    if (mode == Mode::ModelView)
+        data = glm::value_ptr(_modelviewStack.top());
+    else if (mode == Mode::Projection)
+        data = glm::value_ptr(_projectionStack.top());
+
     for (int i = 0; i < 16; i++) m[i] = data[i];
 }
 
