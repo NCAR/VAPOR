@@ -321,8 +321,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     GL_ERR_BREAK();
 
 	double mvMatrix[16];
-    mm->MatrixModeModelView();
-    mm->GetDoublev(mvMatrix);
+    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
 	vpParams->SetModelViewMatrix(mvMatrix);
     GL_ERR_BREAK();
 
@@ -350,8 +349,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 	mm->MatrixModeModelView();
 	mm->PopMatrix();
 	
-    mm->MatrixModeModelView();
-    mm->GetDoublev(mvMatrix);
+    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
 	vpParams->SetModelViewMatrix(mvMatrix);
     
     GL_ERR_BREAK();

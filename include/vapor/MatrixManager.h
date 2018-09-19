@@ -15,9 +15,9 @@ using std::stack;
 namespace VAPoR {
 
 class MatrixManager {
+public:
     enum class Mode { ModelView, Projection };
     
-public:
     MatrixManager();
     
     glm::mat4 GetCurrentMatrix() const;
@@ -32,7 +32,7 @@ public:
     void PopMatrix();
     
     void LoadMatrixd(const double *m);
-    void GetDoublev(double *m) const;
+    void GetDoublev(Mode mode, double *m) const;
     
     void LoadIdentity();
     void Translate(float x, float y, float z);
