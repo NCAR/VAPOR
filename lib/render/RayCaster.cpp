@@ -37,6 +37,8 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _1stPassShaderId = 0;
     _2ndPassShaderId = 0;
     _3rdPassShaderId = 0;
+    _3rdPassMode1ShaderId = 0;
+    _3rdPassMode2ShaderId = 0;
 
     _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
     _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
@@ -105,10 +107,15 @@ RayCaster::~RayCaster()
         glDeleteProgram(_2ndPassShaderId);
         _2ndPassShaderId = 0;
     }
-    if (_3rdPassShaderId) {
-        glDeleteProgram(_3rdPassShaderId);
-        _3rdPassShaderId = 0;
+    if (_3rdPassMode1ShaderId) {
+        glDeleteProgram(_3rdPassMode1ShaderId);
+        _3rdPassMode1ShaderId = 0;
     }
+    if (_3rdPassMode2ShaderId) {
+        glDeleteProgram(_3rdPassMode2ShaderId);
+        _3rdPassMode2ShaderId = 0;
+    }
+    _3rdPassShaderId = 0;
 }
 
 // Constructor
@@ -544,6 +551,15 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    long castingMode = params->GetCastingMode();
+    if (castingMode == 1)
+        _3rdPassShaderId = _3rdPassMode1ShaderId;
+    else if (castingMode == 2)
+        _3rdPassShaderId = _3rdPassMode2ShaderId;
+    else {
+        MyBase::SetErrMsg("RayCasting Mode not supported!");
+        return 1;
+    }
     _drawVolumeFaces(3, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
 
     delete grid;
