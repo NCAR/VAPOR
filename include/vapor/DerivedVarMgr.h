@@ -187,8 +187,7 @@ class VDF_API DerivedVarMgr : public VAPoR::DC {
     DerivedCoordVar *_getCoordVar(string name) const;
 
   private:
-    string _ovrName;
-    int _ovrLevel;
+    DC::FileTable _fileTable;
 };
 }; // namespace VAPoR
 

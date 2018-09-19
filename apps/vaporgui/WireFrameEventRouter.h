@@ -73,6 +73,7 @@ class WireFrameEventRouter : public QTabWidget, public RenderEventRouter {
     WireFrameGeometrySubtab *_geometry;
     GLWireFrameImageWindow *_glWireFrameImageWindow;
     WireFrameAppearanceSubtab *_appearance;
+    WireFrameAnnotationSubtab *_annotation;
 };
 
 #endif //WIREFRAMEEVENTROUTER_H

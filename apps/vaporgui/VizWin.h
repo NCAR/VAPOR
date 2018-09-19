@@ -71,7 +71,11 @@ class VizWin : public QGLWidget {
     //! \retval visualizer index.
     string getWindowName() { return _winName; }
 
-    // void makeCurrent();
+    // Render the scene
+    //
+    // If \p fast is true try to render the scene quickly
+    //
+    void Render(bool fast);
 
   signals:
     // Sent prior to closing window - after receiving Qt closeEvent()
@@ -81,6 +85,14 @@ class VizWin : public QGLWidget {
     // Sent when window gains focus - after receiving Qt focusInEvent()
     //
     void HasFocus(const string &winName);
+
+    // Sent when window starts navigation
+    //
+    void StartNavigation(const string &winName);
+
+    // Sent when window ends navigation
+    //
+    void EndNavigation(const string &winName);
 
   public slots:
     virtual void setFocus();
@@ -105,13 +117,16 @@ class VizWin : public QGLWidget {
     virtual void _mouseReleaseEventNavigate(QMouseEvent *);
     virtual void _mouseMoveEventNavigate(QMouseEvent *);
 
+    virtual void _mousePressEventManip(QMouseEvent *);
+    virtual void _mouseReleaseEventManip(QMouseEvent *);
+    virtual void _mouseMoveEventManip(QMouseEvent *);
+
     virtual void focusInEvent(QFocusEvent *e);
     virtual void closeEvent(QCloseEvent *);
 
     // QGLWidget reimplementations
     virtual void resizeGL(int width, int height);
     virtual void initializeGL();
-    void paintGL();
 
     string _winName;
     VAPoR::ControlExec *_controlExec;
@@ -120,7 +135,8 @@ class VizWin : public QGLWidget {
 
     bool _mouseClicked; //Indicates mouse has been clicked but not move
     int _buttonNum;     // currently pressed button (0=none, 1=left,2=mid, 3=right)
-    bool _navigating;
+    bool _navigateFlag;
+    bool _manipFlag;
     Trackball *_trackBall;
 
     std::vector<double> _getScreenCoords(QMouseEvent *e) const;
@@ -135,10 +151,6 @@ class VizWin : public QGLWidget {
                                     int refLevel,
                                     std::vector<double> &minExts,
                                     std::vector<double> &maxExts);
-    void _getCenterAndCamPos(
-        std::vector<double> &rotationCenter,
-        std::vector<double> &cameraPos);
-    void _getWindowSize(std::vector<int> &windowSize);
     string _getCurrentDataMgrName() const;
     VAPoR::Transform *_getDataMgrTransform() const;
 
@@ -153,9 +165,7 @@ class VizWin : public QGLWidget {
 
     VAPoR::TranslateStretchManip *_manip;
 
-    void _setMatrixFromModeParams();
-
-    double _center[3], _posvec[3], _dirvec[3], _upvec[3];
+    bool _openGLInitFlag;
 };
 
 #endif // VIZWIN_H
