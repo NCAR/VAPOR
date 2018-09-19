@@ -23,12 +23,15 @@ void IsoSurfaceRenderer::_loadShaders()
     std::string FShader1stPass = shaderPath + "/IsoSurface1stPass.fgl";
     std::string VShader2ndPass = shaderPath + "/IsoSurface2ndPass.vgl";
     std::string FShader2ndPass = shaderPath + "/IsoSurface2ndPass.fgl";
-    std::string VShader3rdPass = shaderPath + "/IsoSurface3rdPass.vgl";
-    std::string FShader3rdPass = shaderPath + "/IsoSurface3rdPass.fgl";
+    std::string VShader3rdPassMode1 = shaderPath + "/IsoSurface3rdPassMode1.vgl";
+    std::string FShader3rdPassMode1 = shaderPath + "/IsoSurface3rdPassMode1.fgl";
+    std::string VShader3rdPassMode2 = shaderPath + "/IsoSurface3rdPassMode2.vgl";
+    std::string FShader3rdPassMode2 = shaderPath + "/IsoSurface3rdPassMode2.fgl";
 
     _1stPassShaderId = _compileShaders(VShader1stPass.data(), FShader1stPass.data());
     _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
-    _3rdPassShaderId = _compileShaders(VShader3rdPass.data(), FShader3rdPass.data());
+    _3rdPassMode1ShaderId = _compileShaders(VShader3rdPassMode1.data(), FShader3rdPassMode1.data());
+    _3rdPassMode2ShaderId = _compileShaders(VShader3rdPassMode2.data(), FShader3rdPassMode2.data());
 }
 
 void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast)
