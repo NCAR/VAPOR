@@ -207,7 +207,7 @@
               <string>The refinement level parameter and (in the case of VDC2 data) the level of detail (LOD) parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
              </property>
              <property name="maxCount">
-              <number>5</number>
+              <number>999</number>
              </property>
             </widget>
            </item>
@@ -276,7 +276,7 @@
               <string>The refinement level parameter and (in the case of VDC2 data) the level of detail (LOD) parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
              </property>
              <property name="maxCount">
-              <number>5</number>
+              <number>999</number>
              </property>
             </widget>
            </item>

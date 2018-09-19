@@ -49,6 +49,19 @@ static RendererRegistrar<WireFrameRenderer> registrar(
 	WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType()
 );
 
+namespace {
+
+// Product of elements in a vector
+//  
+size_t vproduct(vector <size_t> a) {
+	size_t ntotal = 1;
+		
+	for (int i=0; i<a.size(); i++) ntotal *= a[i];
+	return(ntotal);
+}
+
+};
+
 WireFrameRenderer::WireFrameRenderer(
 	const ParamsMgr* pm, string winName,
 	string dataSetName, string instName,
@@ -64,7 +77,7 @@ WireFrameRenderer::~WireFrameRenderer()
     if (_VAO) glDeleteVertexArrays(1, &_VAO);
     if (_VBO) glDeleteBuffers(1, &_VBO);
     if (_EBO) glDeleteBuffers(1, &_EBO);
-    _VAO = _VBO = 0;
+    _VAO = _VBO = _EBO = 0;
 }
 
 void WireFrameRenderer::_saveCacheParams()
@@ -170,54 +183,54 @@ int WireFrameRenderer::_buildCache()
     {
         return 0;
     }
-
+    
     Grid *grid = _dataMgr->GetVariable(
-		_cacheParams.ts, _cacheParams.varName,
-		_cacheParams.level, _cacheParams.lod,
-		_cacheParams.boxMin, _cacheParams.boxMax
-	);
-	if (! grid) return(-1);
-
+                                       _cacheParams.ts, _cacheParams.varName,
+                                       _cacheParams.level, _cacheParams.lod,
+                                       _cacheParams.boxMin, _cacheParams.boxMax
+                                       );
+    if (! grid) return(-1);
+    
     Grid *heightGrid = NULL;
     if (!_cacheParams.heightVarName.empty()) {
         heightGrid = _dataMgr->GetVariable(
-			_cacheParams.ts, _cacheParams.heightVarName,
-			_cacheParams.level, _cacheParams.lod,
-			_cacheParams.boxMin, _cacheParams.boxMax
-		);
-		if (! heightGrid) {
-			delete grid;
-			return(-1);
-		}
+                                           _cacheParams.ts, _cacheParams.heightVarName,
+                                           _cacheParams.level, _cacheParams.lod,
+                                           _cacheParams.boxMin, _cacheParams.boxMax
+                                           );
+        if (! heightGrid) {
+            delete grid;
+            return(-1);
+        }
     }
-
+    
     vector<VertexData> vertices;
     vector<unsigned int> indices;
     
-	double mv = grid->GetMissingValue();
-
-#if 0	// VAPOR_3_1_0
-
-	// Performance of the bounding box version of the Cell iterator 
-	// is too slow. So we render the entire grid and use clipping planes
-	// to restrict the displayed region
-	//
+    double mv = grid->GetMissingValue();
+    
+#if 0    // VAPOR_3_1_0
+    
+    // Performance of the bounding box version of the Cell iterator
+    // is too slow. So we render the entire grid and use clipping planes
+    // to restrict the displayed region
+    //
     Grid::ConstCellIterator it = grid->ConstCellBegin(
-		_cacheParams.boxMin, _cacheParams.boxMax
-	);
+                                                      _cacheParams.boxMin, _cacheParams.boxMax
+                                                      );
 #else
     Grid::ConstCellIterator it = grid->ConstCellBegin();
 #endif
-
-
-	size_t nverts = grid->GetMaxVertexPerCell();
-	bool layered = grid->GetTopologyDim() == 3;
-
-	float *coordsArray = new float[nverts*3];
-	float *colorsArray = new float[nverts*4];
+    
+    
+    size_t nverts = grid->GetMaxVertexPerCell();
+    bool layered = grid->GetTopologyDim() == 3;
+    
+    float *coordsArray = new float[nverts*3];
+    float *colorsArray = new float[nverts*4];
     Grid::ConstCellIterator end = grid->ConstCellEnd();
-
-	float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    
+    float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
     for (; it != end; ++it)
     {
         vector <vector<size_t> > nodes;
@@ -225,63 +238,63 @@ int WireFrameRenderer::_buildCache()
         
         for (int i = 0; i < nodes.size(); i++)
         {
-			vector <double> coord;
+            vector <double> coord;
             grid->GetUserCoordinates(nodes[i], coord);
-
-			coordsArray[3*i+0] = coord[0];
-			coordsArray[3*i+1] = coord[1];
-
-			if (coord.size() == 3) {
-				coordsArray[3*i+2] = coord[2];
-			}
-			else if (heightGrid) {
-				coordsArray[3*i+2] = heightGrid->AccessIndex(nodes[i]);
-			}
-			else {
-				coordsArray[3*i+2] = defaultZ;
-			}
-
+            
+            coordsArray[3*i+0] = coord[0];
+            coordsArray[3*i+1] = coord[1];
+            
+            if (coord.size() == 3) {
+                coordsArray[3*i+2] = coord[2];
+            }
+            else if (heightGrid) {
+                coordsArray[3*i+2] = heightGrid->AccessIndex(nodes[i]);
+            }
+            else {
+                coordsArray[3*i+2] = defaultZ;
+            }
+            
             float dataValue = grid->AccessIndex(nodes[i]);
-			if (dataValue == mv) {
-				colorsArray[4*i+0] = 0.0;
-				colorsArray[4*i+1] = 0.0;
-				colorsArray[4*i+2] = 0.0;
-				colorsArray[4*i+3] = 0.0;
-			}
-			else if (_cacheParams.useSingleColor) {
-				colorsArray[4*i+0] = _cacheParams.constantColor[0];
-				colorsArray[4*i+1] = _cacheParams.constantColor[1];
-				colorsArray[4*i+2] = _cacheParams.constantColor[2];
-				colorsArray[4*i+3] = _cacheParams.constantOpacity;
-			}
-			else {
-				size_t n = _cacheParams.tf_lut.size() >> 2;
-				int index = (dataValue - _cacheParams.tf_minmax[0]) / 
-					(_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) *
-					(n - 1);
-				if (index < 0) {
-					index = 0;
-				}
-				if (index >= n) {
-					index = n-1;
-				}
-				colorsArray[4*i+0] = _cacheParams.tf_lut[4*index+0];
-				colorsArray[4*i+1] = _cacheParams.tf_lut[4*index+1];
-				colorsArray[4*i+2] = _cacheParams.tf_lut[4*index+2];
-				colorsArray[4*i+3] = _cacheParams.tf_lut[4*index+3];
-
-			}
+            if (dataValue == mv) {
+                colorsArray[4*i+0] = 0.0;
+                colorsArray[4*i+1] = 0.0;
+                colorsArray[4*i+2] = 0.0;
+                colorsArray[4*i+3] = 0.0;
+            }
+            else if (_cacheParams.useSingleColor) {
+                colorsArray[4*i+0] = _cacheParams.constantColor[0];
+                colorsArray[4*i+1] = _cacheParams.constantColor[1];
+                colorsArray[4*i+2] = _cacheParams.constantColor[2];
+                colorsArray[4*i+3] = _cacheParams.constantOpacity;
+            }
+            else {
+                size_t n = _cacheParams.tf_lut.size() >> 2;
+                int index = (dataValue - _cacheParams.tf_minmax[0]) /
+                (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) *
+                (n - 1);
+                if (index < 0) {
+                    index = 0;
+                }
+                if (index >= n) {
+                    index = n-1;
+                }
+                colorsArray[4*i+0] = _cacheParams.tf_lut[4*index+0];
+                colorsArray[4*i+1] = _cacheParams.tf_lut[4*index+1];
+                colorsArray[4*i+2] = _cacheParams.tf_lut[4*index+2];
+                colorsArray[4*i+3] = _cacheParams.tf_lut[4*index+3];
+                
+            }
         }
-
-		_drawCell(vertices, indices, coordsArray, colorsArray, nodes.size(), layered);
+        
+        _drawCell(vertices, indices, coordsArray, colorsArray, nodes.size(), layered);
     }
-
-
-	delete [] coordsArray;
-	delete [] colorsArray;
-
-	if (grid) delete grid;
-	if (heightGrid) delete heightGrid;
+    
+    
+    delete [] coordsArray;
+    delete [] colorsArray;
+    
+    if (grid) delete grid;
+    if (heightGrid) delete heightGrid;
     
     GL_ERR_BREAK();
     
@@ -296,13 +309,13 @@ int WireFrameRenderer::_buildCache()
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
+    
     GL_ERR_BREAK();
     // glEndList();
     return 0;
 }
 
-int WireFrameRenderer::_paintGL()
+int WireFrameRenderer::_paintGL(bool fast)
 {
     GL_ERR_BREAK();
     

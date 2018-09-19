@@ -566,6 +566,148 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(
 	return(g);
 }
 
+UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(
+	size_t ts,
+	int level,
+	int lod,
+	const DC::DataVar &var,
+	const vector <DC::CoordVar> &cvarsinfo,
+	const vector <size_t> &dims,
+    const vector <float *> &blkvec,
+	const vector <size_t> &bs,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax,
+    const vector <int *> &conn_blkvec,
+	const vector <size_t> &conn_bs,
+	const vector <size_t> &conn_bmin,
+	const vector <size_t> &conn_bmax,
+	const vector <size_t> &vertexDims,
+	const vector <size_t> &faceDims,
+	const vector <size_t> &edgeDims,
+    UnstructuredGrid::Location location,
+    size_t maxVertexPerFace,
+    size_t maxFacePerVertex,
+	long vertexOffset, 
+	long faceOffset
+) {
+	assert (dims.size() == 2);
+	assert (dims.size() == bs.size());
+	assert (dims.size() == bmin.size());
+	assert (dims.size() == bmax.size());
+	assert(blkvec.size() == 4);
+
+	assert(conn_blkvec.size() >= 2);
+	
+
+	// block pointers for data
+	//
+	size_t nblocks = 1;
+	size_t block_size = 1;
+    for (int i=0; i<bs.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs[i];
+    }
+
+	vector <float *> blkptrs;
+    for (int i=0; i<nblocks; i++) {
+        if (blkvec[0]) blkptrs.push_back(blkvec[0] + i*block_size);
+	}
+
+
+	// Block pointers for X coordinates, which are always 1D
+	//
+	nblocks = 1;
+	block_size = 1;
+	vector <size_t> bs1d = {bs[0]};
+    for (int i=0; i<bs1d.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs1d[i];
+    }
+
+	vector <float *> xcblkptrs;
+    for (int i=0; i<nblocks; i++) {
+        xcblkptrs.push_back(blkvec[1] + i*block_size);
+	}
+
+	// Block pointers for Y coordinates, which are always 1D
+	//
+	nblocks = 1;
+	block_size = 1;
+    for (int i=0; i<bs1d.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs1d[i];
+    }
+	vector <float *> ycblkptrs;
+    for (int i=0; i<nblocks; i++) {
+        ycblkptrs.push_back(blkvec[2] + i*block_size);
+	}
+
+	// Block pointers for Z coordinates, which are always 2D
+	//
+	nblocks = 1;
+	block_size = 1;
+    for (int i=0; i<bs.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs[i];
+    }
+	vector <float *> zcblkptrs;
+    for (int i=0; i<nblocks; i++) {
+        zcblkptrs.push_back(blkvec[3] + i*block_size);
+	}
+
+	// N.B. assumes blkvec contains contiguous blocks :-(
+	//
+	const int *vertexOnFace = conn_blkvec[0];
+	const int *faceOnVertex = conn_blkvec[1];
+	const int *faceOnFace = conn_blkvec.size()==3 ? conn_blkvec[2] : NULL;
+
+	vector <size_t> vertexDims1D = {vertexDims[0]};
+	vector <size_t> faceDims1D = {faceDims[0]};
+	vector <size_t> edgeDims1D; 
+	if (edgeDims.size()) {
+		edgeDims1D.push_back(edgeDims[0]);
+	}
+
+	UnstructuredGridCoordless xug(
+		vertexDims1D, faceDims1D, edgeDims1D, bs1d, xcblkptrs, 2,
+		vertexOnFace, faceOnVertex, faceOnFace, location,
+		maxVertexPerFace, maxFacePerVertex
+	);
+	xug.SetNodeOffset(vertexOffset);
+	xug.SetCellOffset(faceOffset);
+
+	UnstructuredGridCoordless yug(
+		vertexDims1D, faceDims1D, edgeDims1D, bs1d, ycblkptrs, 2,
+		vertexOnFace, faceOnVertex, faceOnFace, location,
+		maxVertexPerFace, maxFacePerVertex
+	);
+	yug.SetNodeOffset(vertexOffset);
+	yug.SetCellOffset(faceOffset);
+
+	UnstructuredGridCoordless zug(
+		vertexDims, faceDims, edgeDims, bs, zcblkptrs, 3,
+		vertexOnFace, faceOnVertex, faceOnFace, location,
+		maxVertexPerFace, maxFacePerVertex
+	);
+	zug.SetNodeOffset(vertexOffset);
+	zug.SetCellOffset(faceOffset);
+
+	const KDTreeRG *kdtree = _getKDTree2D(
+		ts, level, lod, cvarsinfo, xug, yug, bmin, bmax
+	);
+
+	UnstructuredGridLayered *g = new UnstructuredGridLayered(
+		vertexDims, faceDims, edgeDims, bs, blkptrs, 
+		vertexOnFace, faceOnVertex, faceOnFace, location,
+		maxVertexPerFace, maxFacePerVertex,
+		xug, yug, zug, kdtree
+	);
+	g->SetNodeOffset(vertexOffset);
+	g->SetCellOffset(faceOffset);
+
+	return(g);
+}
+
 
 void GridHelper::_makeGridHelper(
     const DC::DataVar &var,
@@ -698,6 +840,15 @@ UnstructuredGrid *GridHelper::MakeGridUnstructured(
 			maxFacePerVertex, vertexOffset, faceOffset
 		);
 	}
+	else if (gridType == UnstructuredGridLayered::GetClassType()) {
+		rg = _make_grid_unstructured_layered(
+			ts, level, lod, var, cvarsinfo, roi_dims, 
+			blkvec, bsvec[0], bminvec[0], bmaxvec[0],
+			conn_blkvec, conn_bsvec[0], conn_bminvec[0], conn_bmaxvec[0],
+			vertexDims, faceDims, edgeDims, location, maxVertexPerFace,
+			maxFacePerVertex, vertexOffset, faceOffset
+		);
+	}
 	else {
 		return(NULL);
 	}
@@ -730,7 +881,7 @@ string GridHelper::GetGridType(
 	}
 
 	if (isUnstructuredLayered(m, cvarsinfo, cdimnames)) {
-		return ("");
+		return (UnstructuredGridLayered::GetClassType());
 	}
 
 	if (isRegular(m, cvarsinfo, cdimnames)) {
@@ -754,7 +905,10 @@ string GridHelper::GetGridType(
 
 bool GridHelper::IsUnstructured(std::string gridType) const {
 
-	return (gridType == UnstructuredGrid2D::GetClassType()); 
+	return (
+		gridType == UnstructuredGrid2D::GetClassType() ||
+		gridType == UnstructuredGridLayered::GetClassType()
+	); 
 
 }
 

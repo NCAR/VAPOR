@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>1133</height>
+    <height>706</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -51,7 +51,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
      <property name="spacing">
       <number>-1</number>
      </property>
@@ -211,61 +211,18 @@
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <property name="topMargin">
             <number>0</number>
            </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
-            <widget class="QLabel" name="zDimLabel">
-             <property name="text">
-              <string>Z Dimension</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QSlider" name="zDimSlider">
-             <property name="minimumSize">
-              <size>
-               <width>150</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="zDimEdit">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-            </widget>
+            <widget class="QSliderEdit" name="_zDimSelector" native="true"/>
            </item>
           </layout>
          </item>
@@ -381,6 +338,36 @@
            </item>
           </layout>
          </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_recalcScalesButton">
+             <property name="text">
+              <string>Recalculate Scales</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
         </layout>
        </widget>
       </widget>
@@ -397,22 +384,6 @@
         <size>
          <width>0</width>
          <height>484</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ColorbarWidget" name="_ColorbarWidget" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>350</height>
         </size>
        </property>
       </widget>
@@ -436,14 +407,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorbarWidget</class>
-   <extends>QWidget</extends>
-   <header>ColorbarWidget.h</header>
-  </customwidget>
-  <customwidget>
    <class>TFWidget</class>
    <extends>QWidget</extends>
    <header>TFWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QSliderEdit</class>
+   <extends>QWidget</extends>
+   <header location="global">QSliderEdit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

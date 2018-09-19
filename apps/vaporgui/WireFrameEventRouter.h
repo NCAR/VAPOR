@@ -80,7 +80,7 @@ private:
  WireFrameGeometrySubtab* _geometry;
  GLWireFrameImageWindow* _glWireFrameImageWindow;
  WireFrameAppearanceSubtab * _appearance;
-
+ WireFrameAnnotationSubtab *_annotation;
 };
 
 #endif //WIREFRAMEEVENTROUTER_H 

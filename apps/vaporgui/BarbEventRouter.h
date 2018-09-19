@@ -82,7 +82,7 @@ private:
 	BarbVariablesSubtab *_variables;
 	BarbGeometrySubtab *_geometry;
 	BarbAppearanceSubtab *_appearance;
-
+	BarbAnnotationSubtab *_annotation;
 };
 
 

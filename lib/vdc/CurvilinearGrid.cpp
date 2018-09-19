@@ -372,10 +372,10 @@ void CurvilinearGrid::_getIndicesHelper(
 			zcoords.push_back(_zrg.AccessIJK(i,j,k));
 		}
 
-		rc = _binarySearchRange(zcoords, coords[2], kFound);
+		rc = Wasp::BinarySearchRange(zcoords, coords[2], kFound);
 	}
 	else {
-		rc = _binarySearchRange(_zcoords, coords[2], kFound);
+		rc = Wasp::BinarySearchRange(_zcoords, coords[2], kFound);
 	}
 
 	
@@ -779,52 +779,6 @@ void CurvilinearGrid::_GetUserExtents(
 	CurvilinearGrid::GetBoundingBox(min, max, minext, maxext);
 }
 
-// Perform a binary search in a sorted 1D vector of values for the 
-// entry that it closest to 'x'. Return the offset 'i' of 'x' in 
-// 'sorted'
-//
-int CurvilinearGrid::_binarySearchRange(
-	const vector <double> &sorted,
-	double x,
-	size_t &i
-) const {
-	i = 0;
-
-
-	// See if above or below the array
-	//
-	if (x<sorted[0]) return(-1);
-	if (x>sorted[sorted.size()-1]) return(1);
-	
-
-	// Binary search for starting index of cell containing x
-	//
-	size_t i0 = 0;
-	size_t i1 = sorted.size()-1;
-	double x0 = sorted[i0];
-	double x1 = sorted[i1];
-	while (i1-i0>1) {
-
-		x1 = sorted[(i0+i1)>>1];
-		if (x1 == x) {  // pathological case
-			i0 = (i0+i1)>>1;
-			break;
-		}
-
-		// if the signs of differences change then the coordinate
-		// is between x0 and x1
-		//
-		if ((x-x0) * (x-x1) <= 0.0) {
-			i1 = (i0+i1)>>1;
-		}
-		else {
-			i0 = (i0+i1)>>1;
-			x0 = x1;
-		}
-	}
-	i = i0;
-	return(0);
-}
 
 bool CurvilinearGrid::_insideGridHelperStretched(
 	double z, size_t &k, double zwgt[2]
@@ -837,7 +791,7 @@ bool CurvilinearGrid::_insideGridHelperStretched(
 	int rc;
 	size_t kFound = 0;
 
-	rc = _binarySearchRange(_zcoords, z, kFound);
+	rc = Wasp::BinarySearchRange(_zcoords, z, kFound);
 
 	if (rc != 0) return(false);
 
@@ -855,6 +809,50 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 ) const {
 
 
+	// XZ and YZ cell sides are planar, but XY sides may not be. We divide
+	// the XY faces into two triangles (changing hexahedrals into prims)
+	// and figure out which triangle (prism) the point is in (first or 
+	// second). Then we search the stack of first (or second) prism in Z
+	//
+	//
+
+
+	// Check if point is in "first" triangle (0,0), (1,0), (1,1)
+	//
+	double lambda[3];
+	double pt[] = {x,y};
+	vector <size_t> iv = {i, i+1, i+1};
+	vector <size_t> jv = {j, j, j+1};
+	double tverts0[] = {
+		_xrg.AccessIJK(iv[0], jv[0], 0),
+		_yrg.AccessIJK(iv[0], jv[0], 0),
+		_xrg.AccessIJK(iv[1], jv[1], 0),
+		_yrg.AccessIJK(iv[1], jv[1], 0),
+		_xrg.AccessIJK(iv[2], jv[2], 0),
+		_yrg.AccessIJK(iv[2], jv[2], 0)
+	};
+
+	bool inside = VAPoR::BarycentricCoordsTri(tverts0, pt, lambda);
+	if (! inside) {
+
+		// Not in first triangle. 
+		// Now check if point is in "second" triangle (0,0), (1,1), (0,1)
+		//
+		iv = {i, i+1, i};
+		jv = {j, j+1, j+1};
+		double tverts1[] = {
+			_xrg.AccessIJK(iv[0], jv[0], 0),
+			_yrg.AccessIJK(iv[0], jv[0], 0),
+			_xrg.AccessIJK(iv[1], jv[1], 0),
+			_yrg.AccessIJK(iv[1], jv[1], 0),
+			_xrg.AccessIJK(iv[2], jv[2], 0),
+			_yrg.AccessIJK(iv[2], jv[2], 0)
+		};
+
+		inside = VAPoR::BarycentricCoordsTri(tverts1, pt, lambda);
+		assert(inside);
+	}
+
 
 	// Find k index of cell containing z. Already know i and j indices
 	//
@@ -862,71 +860,25 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 
 	size_t nz = GetDimensions()[2];
 	for (int kk=0; kk<nz; kk++) {
-		zcoords.push_back(_zrg.AccessIJK(i,j,kk));
+
+		// Interpolate Z coordinate across triangle
+		//
+		float zk = 
+			_zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] +
+			_zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] +
+			_zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
+
+		zcoords.push_back(zk);
 	}
 
-	int rc = _binarySearchRange(zcoords, z, k);
+	int rc = Wasp::BinarySearchRange(zcoords, z, k);
+	if (rc != 0) return(false);	// Must be above or below grid
 
-	if (rc != 0) return(false);
+	assert(k < nz-1);
 
-	// XY and YZ cell sides are planar, but XY sides may not be. We divide
-	// the XY faces into two triangles (changing hexahedrals into prims)
-	// and figure out which triangle (prism) the point is in.
-	//
-	//
+	float z0 = zcoords[k];
+	float z1 = zcoords[k+1];
 
-	float z0 = 0.0;
-	float z1 = 0.0;
-
-	// Check if point is in lower triangle
-	//
-	double lambda[3];
-	double pt[] = {x,y};
-	double tverts0[] = {
-		_xrg.AccessIJK(i,j,0),
-		_yrg.AccessIJK(i,j,0),
-		_xrg.AccessIJK(i+1,j,0),
-		_yrg.AccessIJK(i+1,j,0),
-		_xrg.AccessIJK(i+1,j+1,0),
-		_yrg.AccessIJK(i+1,j+1,0)
-	};
-
-	bool inside = VAPoR::BarycentricCoordsTri(tverts0, pt, lambda);
-	if (inside) {
-
-		z0 = _zrg.AccessIJK(i,j,k) * lambda[0] +
-			_zrg.AccessIJK(i+1,j,k) * lambda[1] + 
-			_zrg.AccessIJK(i+1,j+1,k) * lambda[2];
-
-		z1 = _zrg.AccessIJK(i,j,k+1) * lambda[0] +
-			_zrg.AccessIJK(i+1,j,k+1) * lambda[1] + 
-			_zrg.AccessIJK(i+1,j+1,k+1) * lambda[2];
-
-	}
-
-	else {
-
-		double tverts1[] = {
-			_xrg.AccessIJK(i,j,0),
-			_yrg.AccessIJK(i,j,0),
-			_xrg.AccessIJK(i+1,j+1,0),
-			_yrg.AccessIJK(i+1,j+1,0),
-			_xrg.AccessIJK(i,j+1,0),
-			_yrg.AccessIJK(i,j+1,0)
-		};
-
-		inside = VAPoR::BarycentricCoordsTri(tverts1, pt, lambda);
-		if (! inside) return(false);
-
-		z0 = _zrg.AccessIJK(i,j,k) * lambda[0] +
-			_zrg.AccessIJK(i+1,j+1,k) * lambda[1] + 
-			_zrg.AccessIJK(i,j+1,k) * lambda[2];
-
-		z1 = _zrg.AccessIJK(i,j,k+1) * lambda[0] +
-			_zrg.AccessIJK(i+1,j+1,k+1) * lambda[1] + 
-			_zrg.AccessIJK(i,j+1,k+1) * lambda[2];
-
-	}
 
 	zwgt[0] = 1.0 - (z - z0) / (z1 - z0);
 	zwgt[1] = 1.0 - zwgt[0];
