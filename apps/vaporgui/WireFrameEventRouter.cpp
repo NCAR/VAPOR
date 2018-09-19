@@ -47,6 +47,13 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce)
     qsgeo->setWidget(_geometry);
     qsgeo->setWidgetResizable(true);
     addTab(qsgeo, "Geometry");
+
+    _annotation = new WireFrameAnnotationSubtab(this);
+    QScrollArea *qsAnnotation = new QScrollArea(this);
+    qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    qsAnnotation->setWidget(_annotation);
+    qsAnnotation->setWidgetResizable(true);
+    addTab(qsAnnotation, "Annotation");
 }
 
 WireFrameEventRouter::~WireFrameEventRouter() {
@@ -96,7 +103,13 @@ void WireFrameEventRouter::_updateTab() {
         GetActiveDataMgr(),
         _controlExec->GetParamsMgr(),
         GetActiveParams());
+
     _geometry->Update(
+        _controlExec->GetParamsMgr(),
+        GetActiveDataMgr(),
+        GetActiveParams());
+
+    _annotation->Update(
         _controlExec->GetParamsMgr(),
         GetActiveDataMgr(),
         GetActiveParams());

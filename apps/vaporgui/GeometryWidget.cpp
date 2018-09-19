@@ -27,8 +27,6 @@
 
 using namespace VAPoR;
 
-const string GeometryWidget::_nDimsTag = "ActiveDimension";
-
 template <typename Out>
 void split(const std::string &s, char delim, Out result) {
     std::stringstream ss;
@@ -123,11 +121,11 @@ void GeometryWidget::adjustLayoutTo2D() {
 
 void GeometryWidget::Reinit(
     DimFlags dimFlags,
-    DisplayFlags displayFlags,
+    GeometryFlags geometryFlags,
     VariableFlags varFlags) {
 
     _dimFlags = dimFlags;
-    _displayFlags = displayFlags;
+    _geometryFlags = geometryFlags;
     _varFlags = varFlags;
 
     if (_dimFlags & TWOD) {
@@ -136,10 +134,10 @@ void GeometryWidget::Reinit(
         zMinMaxFrame->show();
     }
 
-    if (_displayFlags & MINMAX) {
+    if (_geometryFlags & MINMAX) {
         adjustLayoutToMinMax();
         stackedSliderWidget->setCurrentIndex(0);
-    } else if (_displayFlags & SINGLEPOINT) {
+    } else if (_geometryFlags & SINGLEPOINT) {
         adjustLayoutToSinglePoint();
         stackedSliderWidget->setCurrentIndex(1);
     }
@@ -224,15 +222,16 @@ void GeometryWidget::updateRangeLabels(
 
     if (minExt.size() < 3) {
         Reinit(
-            GeometryWidget::TWOD,
-            _displayFlags,
+            (DimFlags)TWOD,
+            _geometryFlags,
             _varFlags);
         zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
         Reinit(
-            GeometryWidget::THREED,
-            _displayFlags,
+            (DimFlags)THREED,
+            _geometryFlags,
             _varFlags);
+
         QString zTitle = QString("Z Min: ") +
                          QString::number(minExt[2], 'g', 3) +
                          QString("	Max: ") +
@@ -245,13 +244,26 @@ bool GeometryWidget::getAuxiliaryExtents(
     std::vector<double> &minFullExts,
     std::vector<double> &maxFullExts) {
 
-    size_t ts = _rParams->GetCurrentTimestep();
     std::vector<std::string> auxVarNames = _rParams->GetAuxVariableNames();
     if (auxVarNames.empty())
         return false;
     else {
         vector<int> axes;
-        DataMgrUtils::GetExtents(_dataMgr, ts, auxVarNames, minFullExts, maxFullExts, axes);
+        int ts = _rParams->GetCurrentTimestep();
+        int level = _rParams->GetRefinementLevel();
+        int rc = DataMgrUtils::GetExtents(
+            _dataMgr,
+            ts,
+            auxVarNames,
+            minFullExts,
+            maxFullExts,
+            axes,
+            level);
+
+        if (rc < 0) {
+            MyBase::SetErrMsg("Error: DataMgr could "
+                              "not return valid values from GetVariableExtents()");
+        }
     }
     return true;
 }
@@ -260,7 +272,6 @@ bool GeometryWidget::getVectorExtents(
     std::vector<double> &minFullExts,
     std::vector<double> &maxFullExts) {
 
-    size_t ts = _rParams->GetCurrentTimestep();
     std::vector<string> varNames = _rParams->GetFieldVariableNames();
     if (varNames.empty())
         return false;
@@ -270,8 +281,22 @@ bool GeometryWidget::getVectorExtents(
         (varNames[2] == ""))
         return false;
 
-    vector<int> axes;
-    DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minFullExts, maxFullExts, axes);
+    std::vector<int> axes;
+    int ts = _rParams->GetCurrentTimestep();
+    int level = _rParams->GetRefinementLevel();
+    int rc = DataMgrUtils::GetExtents(
+        _dataMgr,
+        ts,
+        varNames,
+        minFullExts,
+        maxFullExts,
+        axes,
+        level);
+
+    if (rc < 0) {
+        MyBase::SetErrMsg("Error: DataMgr could "
+                          "not return valid values from GetVariableExtents()");
+    }
     return true;
 }
 
