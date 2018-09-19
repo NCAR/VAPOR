@@ -63,7 +63,7 @@ int HelloRenderer::_initializeGL(){
 	return(0);
 }
 
-int HelloRenderer::_paintGL(){
+int HelloRenderer::_paintGL(bool){
 
 	HelloParams *rParams = (HelloParams *) GetActiveParams();
 

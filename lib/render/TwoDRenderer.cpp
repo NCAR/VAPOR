@@ -82,7 +82,7 @@ int TwoDRenderer::_initializeGL(){
 	return(0);
 }
 
-int TwoDRenderer::_paintGL() {
+int TwoDRenderer::_paintGL(bool) {
 
     GL_ERR_BREAK();
 

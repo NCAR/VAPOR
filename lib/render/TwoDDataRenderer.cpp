@@ -186,8 +186,7 @@ int TwoDDataRenderer::_initializeGL() {
     GL_ERR_BREAK();
 }
 
-int TwoDDataRenderer::_paintGL() {
-    GL_ERR_BREAK();
+int TwoDDataRenderer::_paintGL(bool fast) {
 	if (printOpenGLError() != 0) return(-1);
 
 
@@ -246,7 +245,7 @@ int TwoDDataRenderer::_paintGL() {
 
     GL_ERR_BREAK();
 	glActiveTexture(GL_TEXTURE0);
-	rc = TwoDRenderer::_paintGL();
+	rc = TwoDRenderer::_paintGL(fast);
     GL_ERR_BREAK();
 
 	glActiveTexture(GL_TEXTURE0);

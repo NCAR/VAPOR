@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>1098</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -68,6 +68,12 @@
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -376,36 +382,6 @@ accomodate the values of the other two settings.</string>
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="ColorbarWidget" name="_ColorbarWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>350</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -419,19 +395,11 @@ accomodate the values of the other two settings.</string>
     </spacer>
    </item>
   </layout>
-  <zorder>line</zorder>
-  <zorder>line_2</zorder>
-  <zorder>_ColorbarWidget</zorder>
   <zorder>_TFWidget</zorder>
   <zorder>line_3</zorder>
   <zorder>tabWidget</zorder>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ColorbarWidget</class>
-   <extends>QWidget</extends>
-   <header>ColorbarWidget.h</header>
-  </customwidget>
   <customwidget>
    <class>TFWidget</class>
    <extends>QWidget</extends>

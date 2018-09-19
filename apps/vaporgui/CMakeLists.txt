@@ -43,6 +43,9 @@ set (SRCS
 	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
+	DVREventRouter.cpp
+	IsoSurfaceEventRouter.cpp
+	IsoSurfaceSubtabs.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
@@ -61,6 +64,8 @@ set (SRCS
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
+	DVRSubtabs.h
+	IsoSurfaceSubtabs.h
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
@@ -87,49 +92,62 @@ set (SRCS
 	Core3_2_context.h
 	TrackBall.h
 	Manip.h
+	NavigationEventRouter.h
 )
 
 set (UIS 
+	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
 	boxframe.ui
 	startupTab.ui
+	AnnotationGUI.ui
 	SettingsGUI.ui
 	appSettingsTab.ui
-	AnnotationGUI.ui
-	ControlPointEditorBase.ui
 	NewRendererDialog.ui
-	LeftPanel.ui
+	errMsg.ui
+	DVRVariablesGUI.ui
+	DVRAppearanceGUI.ui
+	DVRGeometryGUI.ui
+	DVRAnnotationGUI.ui
+	IsoSurfaceVariablesGUI.ui
+	IsoSurfaceAppearanceGUI.ui
+	IsoSurfaceGeometryGUI.ui
+	IsoSurfaceAnnotationGUI.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
-	TwoDAppearanceGUI.ui
-	WireFrameAppearanceGUI.ui
 	BarbAppearanceGUI.ui
 	BarbVariablesGUI.ui
 	BarbGeometryGUI.ui
-	TwoDVariablesGUI.ui
-	WireFrameVariablesGUI.ui
-	TwoDGeometryGUI.ui
-	WireFrameGeometryGUI.ui
-	VariablesWidgetGUI.ui
-	HelloVariablesGUI.ui
-	statsWindow.ui
-	errMsg.ui
-	plotWindow.ui
-	firstTimeUser.ui
-	TFWidgetGUI.ui
-	StretchFactorTableGUI.ui
-	OrientationAnglesGUI.ui
-	GeometryWidgetGUI.ui
-	CopyRegionWidgetGUI.ui
-	ColorbarWidgetGUI.ui
+	BarbAnnotationGUI.ui
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	ImageVariablesGUI.ui
+	TwoDVariablesGUI.ui
+	TwoDAppearanceGUI.ui
+	TwoDGeometryGUI.ui
+	TwoDAnnotationGUI.ui
+	ContourVariablesGUI.ui
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
-	ContourVariablesGUI.ui
+	ContourAnnotationGUI.ui
+	WireFrameVariablesGUI.ui
+	WireFrameAppearanceGUI.ui
+	WireFrameGeometryGUI.ui
+	WireFrameAnnotationGUI.ui
+	VariablesWidgetGUI.ui
+	statsWindow.ui
+	plotWindow.ui
+	firstTimeUser.ui
+	TFWidgetGUI.ui
+	GeometryWidgetGUI.ui
+	ColorbarWidgetGUI.ui
 	FidelityWidgetGUI.ui
+	ControlPointEditorBase.ui
+	StretchFactorTableGUI.ui
+	OrientationAnglesGUI.ui
+	CopyRegionWidgetGUI.ui
+	
 	QSliderEdit.ui
 	QRange.ui
 	QSinglePoint.ui

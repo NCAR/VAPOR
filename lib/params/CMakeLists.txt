@@ -20,6 +20,9 @@ set (SRC
 	ImageParams.cpp
 	TFInterpolator.cpp
 	ContourParams.cpp
+	RayCasterParams.cpp
+	DVRParams.cpp
+	IsoSurfaceParams.cpp
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
 )

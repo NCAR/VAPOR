@@ -46,12 +46,6 @@
 #ifndef	TRACKBALL_H
 #define	TRACKBALL_H
 
-#ifdef Darwin
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
 #include <vector>
 #include <vapor/common.h>
 
@@ -66,7 +60,7 @@ class Trackball {
 public:
 	Trackball();
 	Trackball(float scale[3]);
-    void	TrackballSetMatrix (VAPoR::GLManager *glManager);
+    void	TrackballSetMatrix ();
 	void	TrackballFlip (int axis);
 	void	TrackballSpin ();
 	void	TrackballStopSpinning ();
@@ -118,6 +112,10 @@ public:
 		_scale[0] = scale[0]; _scale[1] = scale[1]; _scale[2] = scale[2];
 	}
 
+	const double *GetModelViewMatrix() {
+		return(_modelViewMatrix);
+	}
+
 	
 private:
 	void	setCenter(const std::vector<double>& newCenter){
@@ -130,8 +128,8 @@ private:
 	double	_center[3];
     double	_ballsize;
     double	_lastx, _lasty;
-	
 	bool _perspective;
+	double    _modelViewMatrix[16];
 } ;
 
 
