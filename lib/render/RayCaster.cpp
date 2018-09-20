@@ -437,6 +437,8 @@ int RayCaster::_paintGL(bool fast)
         std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
 
         // Re-size 2D textures
+        //   It turns out I don't need to delete the current storage and re-allocate
+        //   new storage, as glTexImage2D cleans things up.
         GLuint textureUnit = 0;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
@@ -619,7 +621,8 @@ void RayCaster::_initializeFramebufferTextures()
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
-    /* Set "_backFaceTextureId" as colour attachement #0, and "_frontFaceTextureId" as attachement #1 */
+    /* Set "_backFaceTextureId" as colour attachement #0,
+       and "_frontFaceTextureId" as attachement #1 */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
     glDrawBuffers(2, _drawBuffers);
