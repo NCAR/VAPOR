@@ -76,6 +76,12 @@
         <number>0</number>
        </property>
        <widget class="QWidget" name="_isoValueTab">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <attribute name="title">
          <string>Iso-Values</string>
         </attribute>
@@ -115,10 +121,23 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QSliderEdit" name="_isoWidget0" native="true"/>
+              <widget class="QSliderEdit" name="_isoWidget0" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="_isoValueCheckbox0">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -141,10 +160,23 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QSliderEdit" name="_isoWidget1" native="true"/>
+              <widget class="QSliderEdit" name="_isoWidget1" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="_isoValueCheckbox1">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -164,10 +196,23 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QSliderEdit" name="_isoWidget2" native="true"/>
+              <widget class="QSliderEdit" name="_isoWidget2" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="_isoValueCheckbox2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -187,10 +232,23 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QSliderEdit" name="_isoWidget3" native="true"/>
+              <widget class="QSliderEdit" name="_isoWidget3" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="_isoValueCheckbox3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -254,7 +312,7 @@
          <item>
           <widget class="QFrame" name="frame">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -283,6 +341,12 @@
             </property>
             <item>
              <widget class="QLabel" name="label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>Apply lighting</string>
               </property>
@@ -303,6 +367,12 @@
             </item>
             <item>
              <widget class="QCheckBox" name="_lightingCheckBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="mouseTracking">
                <bool>false</bool>
               </property>
@@ -386,6 +456,12 @@
          </item>
          <item>
           <widget class="QFrame" name="frame_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
            </property>
@@ -426,6 +502,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="_defaultLightingButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>Apply Defaults</string>
               </property>
@@ -457,15 +539,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TFWidget</class>
-   <extends>QWidget</extends>
-   <header>TFWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QSliderEdit</class>
    <extends>QWidget</extends>
    <header location="global">QSliderEdit.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TFWidget</class>
+   <extends>QWidget</extends>
+   <header>TFWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
