@@ -79,24 +79,36 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void setSingleColor();
     void setUsingSingleColor(int checkState);
     void setUseWhitespace(int state);
+    void setColorMapMinRange(double min);
+    void setColorMapMaxRange(double max);
 
   private:
     void collapseConstColorWidgets();
     void showConstColorWidgets();
     void showWhitespaceFrame();
     void hideWhitespaceFrame();
-    string getVariableName();
     void connectWidgets();
+    string getCurrentVarName();
+
+    void updateMainTransferFunction();
+    void updateColorTransferFunction();
     void updateSliders();
     void updateAutoUpdateHistoCheckbox();
     void updateColorInterpolation();
     void updateMappingFrame();
-    void enableTFWidget(bool state);
+    void updateColorMapMappingFrame();
     void updateConstColorWidgets();
+    void enableTFWidget(bool state);
+
     void checkForExternalChangesToHisto();
+    void checkForBoxChanges();
+    void checkForCompressionChanges();
+    void checkForMapperRangeChanges();
+    void checkForTimestepChanges();
+
     bool autoUpdateHisto();
-    string getCurrentVarName();
     VAPoR::MapperFunction *getCurrentMapperFunction();
+    VAPoR::MapperFunction *getColorMapperFunction();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
