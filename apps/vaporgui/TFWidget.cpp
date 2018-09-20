@@ -102,6 +102,7 @@ void TFWidget::Reinit(TFFlags flags) {
 
     if (_flags & COLORVAR_IS_IN_TF2) {
         if (_tabWidget->count() < 2)
+			_tabWidget->setSizePolicy(Minimum, Minimum);
             _tabWidget->insertTab(1,_colormapTFE, "Color Mapped VARIABLE");
     }
     else
