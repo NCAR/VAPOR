@@ -104,7 +104,7 @@ void TFWidget::Reinit(TFFlags flags)
         collapseConstColorWidgets();
 
     if (_flags & COLORVAR_IS_IN_TF2) {
-        if (_tabWidget->count() < 2) _tabWidget->insertTab(1, _colormapTFE, "Color Mapped Variable");
+        if (_tabWidget->count() < 2) _tabWidget->insertTab(1, _colormapTFE, "Color Mapped VARIABLE");
     } else
         _tabWidget->removeTab(1);
 
