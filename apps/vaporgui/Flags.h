@@ -49,8 +49,8 @@ enum GeometryFlags {
 //! variable, as we do with isosurfaces, when we have a MappingFrame for our
 //! primary variable, as well as a MappingFrame for the colormapped variable
 enum TFFlags {
-    COLORVAR_FOR_TF1 = (1u << 0),
-    COLORVAR_FOR_TF2 = (1u << 1),
+    COLORVAR_IS_IN_TF1 = (1u << 0),
+    COLORVAR_IS_IN_TF2 = (1u << 1),
     CONSTANT = (1u << 2),
 };
 
