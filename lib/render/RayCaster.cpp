@@ -601,7 +601,7 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Generate front-facing texture */
-    textureUnit = 1;
+    textureUnit++;    // == 1;
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
@@ -634,7 +634,7 @@ void RayCaster::_initializeFramebufferTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     /* Generate and configure 3D texture: _volumeTextureId */
-    textureUnit = 2;
+    textureUnit++;    // == 2;
     glGenTextures(1, &_volumeTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
@@ -647,7 +647,7 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 1D texture: _colorMapTextureId */
-    textureUnit = 3;
+    textureUnit++;    // == 3;
     glGenTextures(1, &_colorMapTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
@@ -658,7 +658,7 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 3D texture: _missingValueTextureId */
-    textureUnit = 4;
+    textureUnit++;    // == 4;
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
