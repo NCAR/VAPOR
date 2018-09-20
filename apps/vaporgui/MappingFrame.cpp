@@ -382,14 +382,19 @@ void MappingFrame::Update(DataMgr *dataMgr,
     _rParams = rParams;
     _paramsMgr = paramsMgr;
 
-    string varname;
-    varname = _rParams->GetColorMapVariableName();
+    //string varname;
 
-    if (varname.empty())
+    if (_colorMappingEnabled)
+        _variableName = _rParams->GetColorMapVariableName();
+    else
+        _variableName = _rParams->GetVariableName();
+    cout << this << " " << _variableName << endl;
+
+    if (_variableName.empty())
         return;
 
     MapperFunction *mapper;
-    mapper = _rParams->GetMapperFunc(varname);
+    mapper = _rParams->GetMapperFunc(_variableName);
     assert(mapper);
 
     updateMapperFunction(mapper);
@@ -409,7 +414,7 @@ void MappingFrame::Update(DataMgr *dataMgr,
         //	   _isoSlider->setIsoValue(xDataToWorld(_isoVal));
     } else if (_isolineSlidersEnabled) {
         //Synchronize sliders with isovalues
-        vector<double> isovals = ((ContourParams *)rParams)->GetContourValues(varname);
+        vector<double> isovals = ((ContourParams *)rParams)->GetContourValues(_variableName);
         setIsolineSliders(isovals);
 
         int size = isovals.size();
@@ -944,7 +949,7 @@ void MappingFrame::paintGL() {
     // select points
     //
 
-    _variableName = _rParams->GetColorMapVariableName();
+    //_variableName = _rParams->GetColorMapVariableName();
     if (_variableName != "") {
         //allow for 4 pixels per character in name:
         int wx = (width() - _variableName.size() * 8) / 2;
