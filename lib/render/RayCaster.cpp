@@ -424,11 +424,6 @@ int RayCaster::_initializeGL()
 
     _loadShaders();
 
-    // Create Vertex Array Object (VAO)
-    glGenVertexArrays(1, &_vertexArrayId);
-    glGenBuffers(1, &_vertexBufferId);
-    glGenBuffers(1, &_indexBufferId);
-
     _initializeFramebufferTextures();
 
     return 0;
@@ -486,7 +481,7 @@ int RayCaster::_paintGL(bool fast)
             return 1;
         }
 
-        /* Also attach the new data to 3D textures */
+        // Also attach the new data to 3D textures
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
@@ -494,13 +489,23 @@ int RayCaster::_paintGL(bool fast)
         // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask)    // Has missing value!
         {
-            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
             glActiveTexture(GL_TEXTURE3);
+            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
                          _userCoordinates.missingValueMask);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
+        }
+
+        // If using cell traverse ray casting, we need to upload user coordinates
+        if (castingMode == 2) {
+            glActiveTexture(GL_TEXTURE5);
+            glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
+            // glTexBuffer(     GL_TEXTURE_BUFFER, GL_RG32F, *** );
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
+            // glTexBuffer(     GL_TEXTURE_BUFFER, GL_RG32F, *** );
         }
 
         glBindTexture(GL_TEXTURE_3D, 0);
@@ -596,6 +601,11 @@ int RayCaster::_paintGL(bool fast)
 
 void RayCaster::_initializeFramebufferTextures()
 {
+    /* Create Vertex Array Object (VAO) */
+    glGenVertexArrays(1, &_vertexArrayId);
+    glGenBuffers(1, &_vertexBufferId);
+    glGenBuffers(1, &_indexBufferId);
+
     /* Create an Frame Buffer Object for the back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
