@@ -100,7 +100,7 @@ void UnstructuredGrid2D::GetBoundingBox(
     // access is tricky.
     //
     ConstCoordItr itr = ConstCoordBegin();
-    ConstCoordItr enditr = ConstCoordEnd();
+    ConstCoordItr enditr = ConstCoordBegin();
 
     for (size_t i = 0; i < start; i++)
         ++itr;
