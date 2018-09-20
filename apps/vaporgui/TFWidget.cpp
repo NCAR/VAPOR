@@ -100,7 +100,7 @@ void TFWidget::Reinit(TFFlags flags) {
 	else
 		collapseConstColorWidgets();
 
-    if (_flags & COLORVAR_FOR_TF2) {
+    if (_flags & COLORVAR_IS_IN_TF2) {
         if (_tabWidget->count() < 2)
             _tabWidget->insertTab(1,_colormapTFE, "Color Mapped Variable");
     }
@@ -263,7 +263,7 @@ float TFWidget::getOpacity()
 }
 
 void TFWidget::updateColorInterpolation() {
-	MapperFunction* tf = getCurrentMapperFunction();
+	MapperFunction* tf = getMainMapperFunction();
 	
 	TFInterpolator::type t = tf->getColorInterpType();
 	_colorInterpCombo->blockSignals(true);
@@ -298,7 +298,7 @@ void TFWidget::updateColorInterpolation() {
 }
 
 void TFWidget::updateAutoUpdateHistoCheckbox() {
-	MapperFunction* tf = getCurrentMapperFunction();
+	MapperFunction* tf = getMainMapperFunction();
 
 	// Update the state of autoUpdateHisto according to params
 	//
@@ -329,14 +329,14 @@ void TFWidget::updateSliders() {
 	_maxLabel->setText(QString::number(range[1]));
 }
 
-void TFWidget::updateMappingFrame() {
+void TFWidget::updateMappingFrames() {
 	_mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
 	_mappingFrame->fitToView();
-}
 
-void TFWidget::updateColorMapMappingFrame() {
-    _colorMapMappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
-    _colorMapMappingFrame->fitToView();
+	if (_flags & COLORVAR_IS_IN_TF2) {
+		_colorMapMappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+		_colorMapMappingFrame->fitToView();
+	}
 }
 
 void TFWidget::Update(DataMgr *dataMgr,
@@ -359,15 +359,8 @@ void TFWidget::Update(DataMgr *dataMgr,
 		setEnabled(true);
 	}
 
-    updateMainTransferFunction();
-    updateColorTransferFunction();
-	
-	checkForExternalChangesToHisto();
-}
-
-void TFWidget::updateMainTransferFunction() {
 	updateAutoUpdateHistoCheckbox();
-	updateMappingFrame();
+	updateMappingFrames();
 	updateColorInterpolation();
 	updateSliders();
 	updateConstColorWidgets();
@@ -375,20 +368,10 @@ void TFWidget::updateMainTransferFunction() {
 	string newName = getCurrentVarName();
 	if (_varName != newName) {
 		_varName = newName;
-		refreshHistogram();
+		refreshHistograms();
 	}
-}
-
-void TFWidget::updateColorTransferFunction() {
-    string currentVar = getCurrentVarName();
-    /*if ( (currentVar == _rParams->GetColorMapVariableName())
-        && (_tabWidget->count() > 1) ) {
-        _tabWidget->setTabEnabled(1, false);
-    }
-    else 
-        _tabWidget->setTabEnabled(1, true);*/
-
-    updateColorMapMappingFrame();
+	
+	checkForExternalChangesToHisto();
 }
 
 void TFWidget::checkForCompressionChanges() {
@@ -424,7 +407,7 @@ void TFWidget::checkForBoxChanges() {
 void TFWidget::checkForMapperRangeChanges() {
 	double min = _minCombo->GetValue();
 	double max = _maxCombo->GetValue();
-	MapperFunction *tf = getCurrentMapperFunction();
+	MapperFunction *tf = getMainMapperFunction();
 	double newMin = tf->getMinMapValue();
 	double newMax = tf->getMaxMapValue();
 	if (min != newMin)
@@ -449,7 +432,7 @@ void TFWidget::checkForExternalChangesToHisto() {
 
 	if (_somethingChanged) {
 		if (autoUpdateHisto())
-			refreshHistogram();
+			refreshHistograms();
 		else
 			_updateHistoButton->setEnabled(true);
 	}
@@ -471,7 +454,7 @@ void TFWidget::updateConstColorWidgets() {
 	_useConstColorCheckbox->blockSignals(false);
 
 	string varName;
-	if (_flags & COLORVAR_FOR_TF1) {
+	if (_flags & COLORVAR_IS_IN_TF1) {
 		varName = _rParams->GetColorMapVariableName();
 		// If we are using a single color instead of a
 		// color mapped variable, disable the transfer function
@@ -556,7 +539,7 @@ void TFWidget::setRange() {
 void TFWidget::setRange(double min, double max) {
 	_somethingChanged = true;
 
-	MapperFunction* tf = getCurrentMapperFunction();
+	MapperFunction* tf = getMainMapperFunction();
 
 	tf->setMinMapValue(min);
 	tf->setMaxMapValue(max);
@@ -565,19 +548,26 @@ void TFWidget::setRange(double min, double max) {
 	emit emitChange();
 }
 
-void TFWidget::refreshHistogram() {
-	MapperFunction *mf = getCurrentMapperFunction();
-	_mappingFrame->updateMapperFunction(mf);
+void TFWidget::refreshHistograms() {
 	bool force = true;
+	//MapperFunction *mf = getMainMapperFunction();
+//	_mappingFrame->updateMapperFunction(mf);
 	_mappingFrame->RefreshHistogram(force);
-	updateMappingFrame();
+
+	if (_flags & COLORVAR_IS_IN_TF2) {
+		//mf = getColorMapperFunction();
+//		_colorMapMappingFrame->updateMapperFunction(mf);
+		_colorMapMappingFrame->RefreshHistogram(force);
+	}
+
+	updateMappingFrames();
 	_updateHistoButton->setEnabled(false);
 }
 
 void TFWidget::updateHisto() {
 	bool buttonRequest = sender() == _updateHistoButton ? true : false;
 	if (autoUpdateHisto() || buttonRequest) {
-		refreshHistogram();
+		refreshHistograms();
 	}
 	else {
 		_mappingFrame->fitToView();
@@ -589,7 +579,7 @@ void TFWidget::autoUpdateHistoChecked(int state) {
 	if (state==0) bstate = false;
 	else bstate = true;
 	
-	MapperFunction *tf = getCurrentMapperFunction();
+	MapperFunction *tf = getMainMapperFunction();
 	tf->SetAutoUpdateHisto(bstate);
 
 	updateHisto();
@@ -623,7 +613,7 @@ void TFWidget::setUsingSingleColor(int state) {
 }
 
 void TFWidget::colorInterpChanged(int index) {
-	MapperFunction* tf = getCurrentMapperFunction();
+	MapperFunction* tf = getMainMapperFunction();
 
 	if (index==0) {
 		tf->setColorInterpType(TFInterpolator::diverging);
@@ -637,7 +627,7 @@ void TFWidget::colorInterpChanged(int index) {
 }
 
 void TFWidget::setUseWhitespace(int state) {
-	MapperFunction* tf = getCurrentMapperFunction();
+	MapperFunction* tf = getMainMapperFunction();
 	tf->setUseWhitespace(state);
 }
 
@@ -659,14 +649,14 @@ MapperFunction* TFWidget::getColorMapperFunction() {
 }
 
 bool TFWidget::autoUpdateHisto() {
-	MapperFunction *tf = getCurrentMapperFunction();
+	MapperFunction *tf = getMainMapperFunction();
 	if (tf->GetAutoUpdateHisto()) return true;
 	else return false;
 }	
 
 string TFWidget::getCurrentVarName() {
 	string varname = "";
-	if (_flags & COLORVAR_FOR_TF1) {
+	if (_flags & COLORVAR_IS_IN_TF1) {
 		varname = _rParams->GetColorMapVariableName();
 	}	
 	else {
@@ -675,7 +665,7 @@ string TFWidget::getCurrentVarName() {
 	return varname;
 }
 
-MapperFunction* TFWidget::getCurrentMapperFunction() {
+MapperFunction* TFWidget::getMainMapperFunction() {
 	string varname = getCurrentVarName();
 	MapperFunction *tf = _rParams->GetMapperFunc(varname);
 	assert(tf);
