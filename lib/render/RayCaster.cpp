@@ -255,8 +255,8 @@ RayCaster::UserCoordinates::GetCurrentGrid( const RayCasterParams* params,
     return grid;
 }
 
-bool RayCaster::UserCoordinates::IsUpToDate( const RayCasterParams* params,  
-                                                   DataMgr*         dataMgr ) const
+bool RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* params,  
+                                                           DataMgr*         dataMgr ) const
 {
     if( ( myCurrentTimeStep  != params->GetCurrentTimestep()  )  ||
         ( myVariableName     != params->GetVariableName()     )  ||
@@ -287,7 +287,7 @@ bool RayCaster::UserCoordinates::IsUpToDate( const RayCasterParams* params,
     return true;
 }
         
-bool RayCaster::UserCoordinates::UpdateCoordinates( const RayCasterParams* params,
+bool RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* params,
                                                           DataMgr*         dataMgr )
 {
     myCurrentTimeStep  = params->GetCurrentTimestep();
@@ -396,46 +396,6 @@ bool RayCaster::UserCoordinates::UpdateCoordinates( const RayCasterParams* param
             bottomFace[ idx++  ] = (float)buf[2];
         }
 
-    // If using prism intersection ray casting mode, we collect Z coordinates as well!
-    if( params->GetCastingMode() == 2 )
-    {
-        if( xyCoords )
-            delete[] xyCoords;
-        xyCoords = new float[ dims[0] * dims[1] ];
-        if( zCoords )
-            delete[] zCoords;
-        zCoords  = new float[ dims[0] * dims[1] * dims[2] ];
-        if( !zCoords )  // Test if allocation successful for 3D buffers. 
-        {
-            delete grid;
-            return false;
-        }
-        std::vector<double>   minExtents, maxExtents;
-        grid->GetUserExtents( minExtents, maxExtents );
-        float extent1o[3];
-        for( int i = 0; i < 3; i++ )
-            extent1o[i] = 1.0f / (maxExtents[i] - minExtents[i]);
-
-        // Normalize XY coordinate from frontFace buffer
-        size_t xyIdx = 0, xyzIdx = 0;
-        for( size_t y = 0; y < dims[1]; y++ )
-            for( size_t x = 0; x < dims[0]; x++ )
-            {
-                xyCoords[ xyIdx++ ] = (frontFace[xyzIdx++] - minExtents[0]) * extent1o[0];
-                xyCoords[ xyIdx++ ] = (frontFace[xyzIdx++] - minExtents[1]) * extent1o[1];
-                xyzIdx++;
-            }
-
-        // Retrieve and normalize Z coordinates from grid
-        StructuredGrid::ConstCoordItr coordItr    = grid->ConstCoordBegin();
-        size_t numOfVertices = dims[0] * dims[1] * dims[2];
-        for( idx = 0; idx < numOfVertices; idx++ )
-        {
-            zCoords[idx] = ((float)(*coordItr)[2] - minExtents[2]) * extent1o[2];
-            ++coordItr;
-        }
-    }
-
     // Save the data field values and missing values
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     if( dataField )
@@ -490,6 +450,49 @@ bool RayCaster::UserCoordinates::UpdateCoordinates( const RayCasterParams* param
     }
 
     delete grid;
+    return true;
+}
+
+bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* params,
+                                                          DataMgr*         dataMgr )
+{
+    assert( params->GetCastingMode() == 2 );
+
+    if( xyCoords )
+        delete[] xyCoords;
+    xyCoords = new float[ dims[0] * dims[1] ];
+    if( zCoords )
+        delete[] zCoords;
+    zCoords  = new float[ dims[0] * dims[1] * dims[2] ];
+    if( !zCoords )  // Test if allocation successful for 3D buffers. 
+        return false;
+
+    StructuredGrid*       grid = this->GetCurrentGrid( params, dataMgr );
+    std::vector<double>   minExtents, maxExtents;
+    grid->GetUserExtents( minExtents, maxExtents );
+    float extent1o[3];
+    for( int i = 0; i < 3; i++ )
+        extent1o[i] = 1.0f / (maxExtents[i] - minExtents[i]);
+
+    // Normalize XY coordinate from frontFace buffer
+    size_t xyIdx = 0, xyzIdx = 0;
+    for( size_t y = 0; y < dims[1]; y++ )
+        for( size_t x = 0; x < dims[0]; x++ )
+        {
+            xyCoords[ xyIdx++ ] = (frontFace[xyzIdx++] - minExtents[0]) * extent1o[0];
+            xyCoords[ xyIdx++ ] = (frontFace[xyzIdx++] - minExtents[1]) * extent1o[1];
+            xyzIdx++;
+        }
+
+    // Retrieve and normalize Z coordinates from grid
+    StructuredGrid::ConstCoordItr coordItr    = grid->ConstCoordBegin();
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    for( xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++ )
+    {
+        zCoords[xyzIdx] = ((float)(*coordItr)[2] - minExtents[2]) * extent1o[2];
+        ++coordItr;
+    }
+
     return true;
 }
 
@@ -552,20 +555,27 @@ int RayCaster::_paintGL( bool fast )
                           "the behavior becomes undefined!" );
     }
 
+    long castingMode = params->GetCastingMode();
+
     // Use our VAO
     glBindVertexArray( _vertexArrayId );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _indexBufferId );
 
     /* Gather user coordinates */
-    if( !_userCoordinates.IsUpToDate( params, _dataMgr ) )
+    if( !_userCoordinates.IsMetadataUpToDate( params, _dataMgr ) )
     {
-        if( !_userCoordinates.UpdateCoordinates( params, _dataMgr ) )
+        if( !_userCoordinates.UpdateFaceAndData( params, _dataMgr ) )
         {
             MyBase::SetErrMsg( "Memory allocation failed!" );
             return 1;
         }
         
+        if( castingMode == 2 && !_userCoordinates.UpdateCurviCoords( params, _dataMgr ) )
+        {
+            MyBase::SetErrMsg( "Memory allocation failed!" );
+            return 1;
+        }
 
         /* Also attach the new data to 3D textures */
         glBindTexture( GL_TEXTURE_3D, _volumeTextureId );
@@ -608,7 +618,6 @@ int RayCaster::_paintGL( bool fast )
         _colorMapRange[0]         = float(range[0]);
         _colorMapRange[1]         = float(range[1]);
     }
-
 
     glBindTexture( GL_TEXTURE_1D, _colorMapTextureId );
     glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
@@ -665,7 +674,6 @@ int RayCaster::_paintGL( bool fast )
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
-    long castingMode = params->GetCastingMode();
     if(  castingMode == 1 )
         _3rdPassShaderId = _3rdPassMode1ShaderId;
     else if( castingMode == 2 )
