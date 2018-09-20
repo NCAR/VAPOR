@@ -110,6 +110,8 @@ class RENDER_API RayCaster : public Renderer {
     GLuint _volumeTextureId;       // GL_TEXTURE2
     GLuint _missingValueTextureId; // GL_TEXTURE3
     GLuint _colorMapTextureId;     // GL_TEXTURE4
+    GLuint _xyCoordsTextureId;     // GL_TEXTURE5
+    GLuint _zCoordsTextureId;      // GL_TEXTURE6
 
     // buffers
     GLuint _frameBufferId;
