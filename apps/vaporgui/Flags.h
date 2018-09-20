@@ -12,11 +12,11 @@
  //!
 
 enum VariableFlags {
-	SCALAR = (1u << 0),
-	VECTOR = (1u << 1),
-	COLOR = (1u << 2),
+	SCALAR    = (1u << 0),
+	VECTOR    = (1u << 1),
+	COLOR     = (1u << 2),
 	AUXILIARY = (1u << 3),
-	HEIGHT = (1u << 4),
+	HEIGHT    = (1u << 4),
 };
 
  //! Bit mask to indicate whether 2D, 3D, or 2D and 3D variables are to
@@ -33,14 +33,25 @@ enum DimFlags {
  //! single point, or 3D extents with Min/Max controllers
 enum GeometryFlags {
 	SINGLEPOINT = (1u << 0),
-	MINMAX = (1u << 1),
+	MINMAX      = (1u << 1),
 };
 
  //! Bit masks to indicate whether the TFWidget maps constant color
  //! to a variable, or maps a secondary color variable
+ //! COLORVAR_FOR_TF - Indicates whether the main MappingFrame/MapperFunction
+ //! refer to to a color-mapped variable.  This is the case with Barbs, where
+ //! there is no primary variable.  We don't use the vector variables for our
+ //! transfer function, we use the color variable.
+ //! CONSTANT    - Indicates whether constant color options are enabled, for
+ //! renderers like Barbs and Isosurfaces
+ //! SECONDARYTF - This indicates whether we need to
+ //! display an additional transfer function for displaying the colormapped
+ //! variable, as we do with isosurfaces, when we have a MappingFrame for our
+ //! primary variable, as well as a MappingFrame for the colormapped variable
 enum TFFlags {
-	SECONDARY = (1u << 0),
-	CONSTANT = (1u << 1),
+	COLORVAR_FOR_TF1    = (1u << 0),
+	COLORVAR_FOR_TF2    = (1u << 1),
+	CONSTANT            = (1u << 2),
 };
 
 #endif
