@@ -3,7 +3,9 @@
 IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(CONSTANT));
+    _TFWidget->Reinit((TFFlags)(CONSTANT | COLORVAR_FOR_TF2));
+    _TFWidget->_mappingFrame->setColorMapping(false);
+    _TFWidget->_mappingFrame->setOpacityMapping(false);
 
     _params = nullptr;
 
