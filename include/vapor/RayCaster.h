@@ -68,7 +68,6 @@ protected:
         float   boxMin[3], boxMax[3];    // bounding box of the current volume
                 // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
 
-
         //             0---------2
         //              |       |
         //              |       |
@@ -87,9 +86,20 @@ protected:
         ~UserCoordinates();  
         StructuredGrid* GetCurrentGrid( const RayCasterParams* params,
                                               DataMgr*         dataMgr ) const;
-        bool IsUpToDate(                const RayCasterParams* params,
+        bool IsMetadataUpToDate(        const RayCasterParams* params,
                                               DataMgr*         dataMgr ) const;
-        bool UpdateCoordinates(         const RayCasterParams* params,
+        //
+        // Update meta data, as well as pointers: 
+        //   6 faces + dataField + missingValueMask
+        // 
+        bool UpdateFaceAndData(         const RayCasterParams* params,
+                                              DataMgr*         dataMgr );
+        //
+        // Update pointers: xyCoords + zCoords
+        //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
+        //         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        //
+        bool UpdateCurviCoords(         const RayCasterParams* params,
                                               DataMgr*         dataMgr );
     };  // end of struct UserCoordinates 
 
