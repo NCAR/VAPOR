@@ -3,8 +3,8 @@
 IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(CONSTANT | COLORVAR_FOR_TF2));
-    _TFWidget->mappingFrame->setIsolineSliders(true);
+    _TFWidget->Reinit((TFFlags)(CONSTANT | COLORVAR_IS_IN_TF2));
+    _TFWidget->_mappingFrame->setIsolineSliders(true);
     _TFWidget->_mappingFrame->setColorMapping(false);
     _TFWidget->_mappingFrame->setOpacityMapping(false);
 

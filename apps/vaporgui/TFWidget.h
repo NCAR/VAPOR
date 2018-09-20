@@ -69,7 +69,7 @@ private slots:
     void setRange();
     void setRange(double min, double max);
     void updateHisto();
-    void refreshHistogram();
+    void refreshHistograms();
     void autoUpdateHistoChecked(int state);
     void colorInterpChanged(int index);
     void loadTF();
@@ -94,7 +94,7 @@ private:
     void updateSliders();
     void updateAutoUpdateHistoCheckbox();
     void updateColorInterpolation();
-    void updateMappingFrame();
+    void updateMappingFrames();
     void updateColorMapMappingFrame();
     void updateConstColorWidgets();
     void enableTFWidget(bool state);
@@ -106,7 +106,8 @@ private:
     void checkForTimestepChanges();
 
     bool                   autoUpdateHisto();
-    VAPoR::MapperFunction *getCurrentMapperFunction();
+    VAPoR::MapperFunction *getMainMapperFunction();
+    VAPoR::MapperFunction *getColorMapMapperFunction();
     VAPoR::MapperFunction *getColorMapperFunction();
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
