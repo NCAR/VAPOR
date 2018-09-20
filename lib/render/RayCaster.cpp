@@ -27,6 +27,8 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _volumeTextureId = 0;
     _missingValueTextureId = 0;
     _colorMapTextureId = 0;
+    _xyCoordsTextureId = 0;
+    _zCoordsTextureId = 0;
     _frameBufferId = 0;
     _depthBufferId = 0;
 
@@ -72,6 +74,14 @@ RayCaster::~RayCaster()
     if (_colorMapTextureId) {
         glDeleteTextures(1, &_colorMapTextureId);
         _colorMapTextureId = 0;
+    }
+    if (_xyCoordsTextureId) {
+        glDeleteTextures(1, &_xyCoordsTextureId);
+        _xyCoordsTextureId = 0;
+    }
+    if (_zCoordsTextureId) {
+        glDeleteTextures(1, &_zCoordsTextureId);
+        _zCoordsTextureId = 0;
     }
 
     // delete buffers
@@ -439,13 +449,11 @@ int RayCaster::_paintGL(bool fast)
         // Re-size 2D textures
         //   It turns out I don't need to delete the current storage and re-allocate
         //   new storage, as glTexImage2D cleans things up.
-        GLuint textureUnit = 0;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
-        textureUnit = 1;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -479,6 +487,7 @@ int RayCaster::_paintGL(bool fast)
         }
 
         /* Also attach the new data to 3D textures */
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
 
@@ -486,6 +495,7 @@ int RayCaster::_paintGL(bool fast)
         if (_userCoordinates.missingValueMask)    // Has missing value!
         {
             // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
+            glActiveTexture(GL_TEXTURE3);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
@@ -512,6 +522,7 @@ int RayCaster::_paintGL(bool fast)
         _colorMapRange[1] = float(range[1]);
     }
 
+    glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -672,6 +683,10 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    /* Generate buffer texture for 2D X-Y and 3D Z coordinates */
+    glGenTextures(1, &_xyCoordsTextureId);
+    glGenTextures(1, &_zCoordsTextureId);
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
