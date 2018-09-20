@@ -101,12 +101,14 @@ void TFWidget::Reinit(TFFlags flags) {
 		collapseConstColorWidgets();
 
     if (_flags & COLORVAR_IS_IN_TF2) {
-        if (_tabWidget->count() < 2)
-			_tabWidget->setSizePolicy(Minimum, Minimum);
+		cout << "TabCount " << _tabWidget->count() << endl;
+        if (_tabWidget->count() < 2) {
             _tabWidget->insertTab(1,_colormapTFE, "Color Mapped VARIABLE");
+		}
     }
     else
         _tabWidget->removeTab(1);
+	_tabWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
 	adjustSize();
 }
