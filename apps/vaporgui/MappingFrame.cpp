@@ -449,7 +449,7 @@ void MappingFrame::Update(DataMgr *dataMgr,
 		 	isovals = ip->GetIsoValues();
 		}
 		else {
-			isovals = cp->GetContourValues(varname);
+			isovals = cp->GetContourValues(_variableName);
 		}
 
 		setIsolineSliders(isovals);
