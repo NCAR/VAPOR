@@ -75,8 +75,18 @@ protected:
         UserCoordinates();
         ~UserCoordinates();
         StructuredGrid *GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr) const;
-        bool            IsUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
-        bool            UpdateCoordinates(const RayCasterParams *params, DataMgr *dataMgr);
+        bool            IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
+        //
+        // Update meta data, as well as pointers:
+        //   6 faces + dataField + missingValueMask
+        //
+        bool UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
+        //
+        // Update pointers: xyCoords + zCoords
+        //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
+        //         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        //
+        bool UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr);
     };    // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;
