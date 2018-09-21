@@ -28,7 +28,7 @@ public:
     setupUi(this);
 		_variablesWidget->Reinit( 
 			(VariableFlags)(HEIGHT), 
-			(DimFlags)(TWODXY)
+			(DimFlags)(TWOD)
 		);
 	}
 
