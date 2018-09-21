@@ -23,7 +23,7 @@ public:
 		setupUi(this);
 		_variablesWidget->Reinit(
 			(VariableFlags)(SCALAR | HEIGHT),
-			(DimFlags)(TWODXY)
+			(DimFlags)(TWOD)
 		);
 	}
 
