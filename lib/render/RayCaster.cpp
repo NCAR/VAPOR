@@ -841,7 +841,7 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
     glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
 
     int volumeDimensions[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
     glUniform3iv(uniformLocation, 1, volumeDimensions);
 
     float stepSize1D = 0.005f;    // This is like ~200 samples
