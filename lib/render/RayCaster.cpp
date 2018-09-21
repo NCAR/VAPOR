@@ -492,19 +492,27 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
         return false;
 
     StructuredGrid*       grid = this->GetCurrentGrid( params, dataMgr );
+
+    /* for normalizing coordinate use
     std::vector<double>   minExtents, maxExtents;
     grid->GetUserExtents( minExtents, maxExtents );
     float extent1o[3];
     for( int i = 0; i < 3; i++ )
         extent1o[i] = 1.0f / (maxExtents[i] - minExtents[i]);
+    */
 
     // Normalize XY coordinate from frontFace buffer
     size_t xyIdx = 0, xyzIdx = 0;
     for( size_t y = 0; y < dims[1]; y++ )
         for( size_t x = 0; x < dims[0]; x++ )
         {
+            /* version 1: normalize the coordinate values 
             xyCoords[ xyIdx++ ] = (frontFace[xyzIdx++] - minExtents[0]) * extent1o[0];
             xyCoords[ xyIdx++ ] = (frontFace[xyzIdx++] - minExtents[1]) * extent1o[1];
+            */
+            /* version 2: NOT normalizing the coordinate values */
+            xyCoords[ xyIdx++ ] = frontFace[xyzIdx++];
+            xyCoords[ xyIdx++ ] = frontFace[xyzIdx++];
             xyzIdx++;
         }
 
@@ -513,7 +521,11 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     for( xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++ )
     {
+        /* version 1: normalize the coordinate values 
         zCoords[xyzIdx] = ((float)(*coordItr)[2] - minExtents[2]) * extent1o[2];
+        */
+        /* version 2: NOT normalizing the coordinate values */
+        zCoords[xyzIdx] = (float)(*coordItr)[2];
         ++coordItr;
     }
 
