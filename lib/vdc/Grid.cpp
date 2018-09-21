@@ -561,15 +561,20 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
             return (*this);    // last element
         }
 
-        xb = _index[0] / bs[0];
-        yb = _index[1] / bs[1];
-        zb = 0;
-        if (dims.size() == 3) zb = _index[2] / bs[2];
-
         x = _index[0] % bs[0];
-        y = _index[1] % bs[1];
+        xb = _index[0] / bs[0];
+        y = 0;
+        yb = 0;
         z = 0;
-        if (dims.size() == 3) z = _index[2] % bs[2];
+        zb = 0;
+        if (dims.size() >= 2) {
+            y = _index[1] % bs[1];
+            yb = _index[1] / bs[1];
+        }
+        if (dims.size() == 3) {
+            z = _index[2] % bs[2];
+            zb = _index[2] / bs[2];
+        }
 
         float *blk = _rg->GetBlks()[zb * bdims[0] * bdims[1] + yb * bdims[0] + xb];
         _itr = &blk[z * bs[0] * bs[1] + y * bs[0] + x];
