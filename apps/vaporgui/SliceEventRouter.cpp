@@ -136,6 +136,7 @@ void SliceEventRouter::_updateTab() {
 
 string SliceEventRouter::_getDescription() const {
     return (
-        "Displays "
-        "the user's 3D data variables along a user defined plane.\n\n");
+        "Displays an axis-aligned slice or cutting plane through"
+        "a 3D variable.  Slices are sampled along the plane's axes according"
+        " to a sampling rate define by the user.\n\n");
 }
