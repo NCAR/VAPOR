@@ -56,6 +56,8 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     _vertexArrayId               = 0;
     _vertexBufferId              = 0;
     _indexBufferId               = 0;
+    _xyCoordsBufferId            = 0;
+    _zCoordsBufferId             = 0;
 
     _1stPassShaderId             = 0;
     _2ndPassShaderId             = 0;
@@ -139,6 +141,16 @@ RayCaster::~RayCaster()
     {
         glDeleteBuffers( 1, &_indexBufferId );
         _indexBufferId = 0;
+    }
+    if( _xyCoordsBufferId )
+    {
+        glDeleteBuffers( 1, &_xyCoordsBufferId );
+        _xyCoordsBufferId = 0;
+    }
+    if( _zCoordsBufferId )
+    {
+        glDeleteBuffers( 1, &_zCoordsBufferId );
+        _zCoordsBufferId = 0;
     }
 
     // delete shader programs
@@ -472,7 +484,7 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
 
     if( xyCoords )
         delete[] xyCoords;
-    xyCoords = new float[ dims[0] * dims[1] ];
+    xyCoords = new float[ dims[0] * dims[1] * 2 ];
     if( zCoords )
         delete[] zCoords;
     zCoords  = new float[ dims[0] * dims[1] * dims[2] ];
@@ -608,12 +620,29 @@ int RayCaster::_paintGL( bool fast )
         // If using cell traverse ray casting, we need to upload user coordinates
         if( castingMode == 2 )
         {
+            size_t dims[3];
+            std::memcpy( dims, _userCoordinates.dims, sizeof(size_t) * 3 );
+
+            // Fill data to buffer object _xyCoordsBufferId
+            glBindBuffer(    GL_TEXTURE_BUFFER,     _xyCoordsBufferId );
+            glBufferData(    GL_TEXTURE_BUFFER,     2 * sizeof(float) * dims[0] * dims[1],
+                             _userCoordinates.xyCoords, GL_STATIC_READ );
+
+            // Pass data to the buffer texture: _xyCoordsTextureId
             glActiveTexture( GL_TEXTURE5 );
-            glBindTexture(   GL_TEXTURE_BUFFER, _xyCoordsTextureId );
-            //glTexBuffer(     GL_TEXTURE_BUFFER, GL_RG32F, *** );
+            glBindTexture(   GL_TEXTURE_BUFFER,     _xyCoordsTextureId );
+            glTexBuffer(     GL_TEXTURE_BUFFER,     GL_RG32F,   _xyCoordsBufferId );
+
+            // Repeat for the next buffer texture: _zCoordsBufferId
+            glBindBuffer(    GL_TEXTURE_BUFFER,     _zCoordsBufferId );
+            glBufferData(    GL_TEXTURE_BUFFER,     sizeof(float) * dims[0] * dims[1] * dims[2],
+                             _userCoordinates.zCoords, GL_STATIC_READ );
             glActiveTexture( GL_TEXTURE6 );
-            glBindTexture(   GL_TEXTURE_BUFFER, _zCoordsTextureId );
-            //glTexBuffer(     GL_TEXTURE_BUFFER, GL_RG32F, *** );
+            glBindTexture(   GL_TEXTURE_BUFFER,     _zCoordsTextureId );
+            glTexBuffer(     GL_TEXTURE_BUFFER,     GL_R32F,    _zCoordsBufferId );
+
+            glBindBuffer(    GL_TEXTURE_BUFFER, 0 );
+            glBindTexture(   GL_TEXTURE_BUFFER, 0 );
         }
 
         glBindTexture( GL_TEXTURE_3D, 0 );
@@ -818,6 +847,8 @@ void RayCaster::_initializeFramebufferTextures()
     /* Generate buffer texture for 2D X-Y and 3D Z coordinates */
     glGenTextures( 1, &_xyCoordsTextureId );
     glGenTextures( 1, &_zCoordsTextureId  );
+    glGenBuffers(  1, &_xyCoordsBufferId  );
+    glGenBuffers(  1, &_zCoordsBufferId   );
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -892,7 +923,7 @@ void RayCaster::_drawVolumeFaces( int            whichPass,
     if( insideACell )
     {
         glBufferData( GL_ARRAY_BUFFER,              12 * sizeof(GLfloat), 
-                      _userCoordinates.nearCoords,  GL_STREAM_DRAW );
+                      _userCoordinates.nearCoords,  GL_STREAM_READ );
         glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
     }
     else
@@ -995,11 +1026,28 @@ void RayCaster::_load3rdPassUniforms( const GLfloat*   MVP,
     else
     {
         glUniform1i( uniformLocation, 1 );      // Set to true
+
         textureUnit = 4;
-        glActiveTexture( GL_TEXTURE0 + textureUnit );
-        glBindTexture( GL_TEXTURE_3D, _missingValueTextureId );
+        glActiveTexture(  GL_TEXTURE0 + textureUnit );
+        glBindTexture(    GL_TEXTURE_3D, _missingValueTextureId );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
-        glUniform1i( uniformLocation, textureUnit );
+        glUniform1i(      uniformLocation, textureUnit );
+    }
+
+    RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
+    if( params->GetCastingMode() == 2 )
+    {
+        textureUnit = 5;
+        glActiveTexture(  GL_TEXTURE0 + textureUnit );
+        glBindTexture(    GL_TEXTURE_BUFFER, _xyCoordsTextureId );
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "xyCoordsTexture" );
+        glUniform1i(      uniformLocation, textureUnit );
+
+        textureUnit = 6;
+        glActiveTexture(  GL_TEXTURE0 + textureUnit );
+        glBindTexture(    GL_TEXTURE_BUFFER, _zCoordsTextureId );
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "zCoordsTexture" );
+        glUniform1i(      uniformLocation, textureUnit );
     }
 }
     
@@ -1022,7 +1070,7 @@ void RayCaster::_renderTriangleStrips() const
 
     // Render front face: 
     glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
-                  _userCoordinates.frontFace,   GL_STATIC_DRAW );
+                  _userCoordinates.frontFace,   GL_STATIC_READ );
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
     {
         idx = 0;
@@ -1032,14 +1080,14 @@ void RayCaster::_renderTriangleStrips() const
             indexBuffer[ idx++ ] = y * bx + x;
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
-                      indexBuffer,              GL_STREAM_DRAW );
+                      indexBuffer,              GL_STREAM_READ );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
 
     // Render back face: 
     glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
-                  _userCoordinates.backFace,    GL_STATIC_DRAW );
+                  _userCoordinates.backFace,    GL_STATIC_READ );
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
     {
         idx = 0;
@@ -1049,14 +1097,14 @@ void RayCaster::_renderTriangleStrips() const
             indexBuffer[ idx++ ] = (y + 1) * bx + x;
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_DRAW );
+                      indexBuffer,              GL_STREAM_READ );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
 
     // Render top face: 
     glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
-                  _userCoordinates.topFace,     GL_STATIC_DRAW );
+                  _userCoordinates.topFace,     GL_STATIC_READ );
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
         idx = 0;
@@ -1066,14 +1114,14 @@ void RayCaster::_renderTriangleStrips() const
             indexBuffer[ idx++ ] = (z + 1) * bx + x;
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_DRAW );
+                      indexBuffer,              GL_STREAM_READ );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
 
     // Render bottom face: 
     glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
-                  _userCoordinates.bottomFace,  GL_STATIC_DRAW );
+                  _userCoordinates.bottomFace,  GL_STATIC_READ );
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
         idx = 0;
@@ -1083,7 +1131,7 @@ void RayCaster::_renderTriangleStrips() const
             indexBuffer[ idx++ ] = z * bx + x;
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_DRAW );
+                      indexBuffer,              GL_STREAM_READ );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1095,7 +1143,7 @@ void RayCaster::_renderTriangleStrips() const
 
     // Render right face: 
     glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
-                  _userCoordinates.rightFace,   GL_STATIC_DRAW );
+                  _userCoordinates.rightFace,   GL_STATIC_READ );
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
         idx = 0;
@@ -1105,14 +1153,14 @@ void RayCaster::_renderTriangleStrips() const
             indexBuffer[ idx++ ] = z * by + y;
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_DRAW );
+                      indexBuffer,              GL_STREAM_READ );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
 
     // Render left face
     glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
-                  _userCoordinates.leftFace,    GL_STATIC_DRAW );
+                  _userCoordinates.leftFace,    GL_STATIC_READ );
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
         idx = 0;
@@ -1122,7 +1170,7 @@ void RayCaster::_renderTriangleStrips() const
             indexBuffer[ idx++ ] = (z + 1) * by + y;
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_DRAW );
+                      indexBuffer,              GL_STREAM_READ );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
