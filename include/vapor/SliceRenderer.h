@@ -52,6 +52,8 @@ private:
     void _renderXZ(std::vector<double> min, std::vector<double> max) const;
     void _renderYZ(std::vector<double> min, std::vector<double> max) const;
 
+    bool _initialized;
+
     GLuint         _texture;
     int            _textureWidth;
     int            _textureHeight;
