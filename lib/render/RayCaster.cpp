@@ -840,17 +840,17 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMax");
     glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
 
-    float volumeDimensions[3] = {float(_userCoordinates.dims[0]), float(_userCoordinates.dims[1]), float(_userCoordinates.dims[2])};
+    int volumeDimensions[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDimensions");
-    glUniform3fv(uniformLocation, 1, volumeDimensions);
+    glUniform3iv(uniformLocation, 1, volumeDimensions);
 
     float stepSize1D = 0.005f;    // This is like ~200 samples
     if (!fast)                    // Calculate a better step size if in fast rendering mode
     {
-        float maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
+        int maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
         maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
         maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
-        stepSize1D = 0.5f / maxVolumeDim;                          // Approximately 2 samples per cell
+        stepSize1D = 0.5f / float(maxVolumeDim);                   // Approximately 2 samples per cell
     }
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
     glUniform1f(uniformLocation, stepSize1D);
