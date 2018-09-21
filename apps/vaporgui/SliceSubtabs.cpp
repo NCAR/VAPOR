@@ -13,7 +13,7 @@
 SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     setupUi(this);
     _variablesWidget->Reinit(
-        (VariableFlags)(SCALAR | HEIGHT),
+        (VariableFlags)(SCALAR),
         (DimFlags)(THREED)
     );
 
