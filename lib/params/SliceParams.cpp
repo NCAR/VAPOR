@@ -11,9 +11,12 @@ using namespace VAPoR;
 #define X 0
 #define Y 1
 #define Z 2
+
 #define XY 0
 #define XZ 1
 #define YZ 2
+
+#define MAX_DEFAULT_SAMPLERATE 400
 
 const string SliceParams::_sampleRateTag = "SampleRate";
 
@@ -70,6 +73,10 @@ int SliceParams::GetDefaultSampleRate() const {
     vector<size_t> dimsAtLevel, bsAtLevel;
     _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel, bsAtLevel);
     int sampleRate = *max_element(dimsAtLevel.begin(), dimsAtLevel.end());
+
+    if (sampleRate > MAX_DEFAULT_SAMPLERATE)
+        sampleRate = MAX_DEFAULT_SAMPLERATE;
+
     return sampleRate;
 }
 

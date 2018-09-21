@@ -23,7 +23,7 @@ class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit(
             (VariableFlags)(SCALAR | HEIGHT),
-            (DimFlags)(TWODXY));
+            (DimFlags)(TWOD));
     }
 
     void Update(
