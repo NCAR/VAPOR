@@ -120,7 +120,8 @@ void GeometryWidget::adjustLayoutToPlanarXY()
     _zPointFrame->show();
 
     if (!_rParams) return;
-    std::vector<double> minExt, maxExt;
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
     getFullExtents(minExt, maxExt);
     double average = (minExt[Z] + maxExt[Z]) / 2.f;
     _zSinglePoint->SetValue(average);
@@ -142,7 +143,8 @@ void GeometryWidget::adjustLayoutToPlanarXZ()
     _zPointFrame->hide();
 
     if (!_rParams) return;
-    std::vector<double> minExt, maxExt;
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
     getFullExtents(minExt, maxExt);
     // box->GetExtents(minExt, maxExt);
     double average = (minExt[Y] + maxExt[Y]) / 2.f;
@@ -165,7 +167,8 @@ void GeometryWidget::adjustLayoutToPlanarYZ()
     _zPointFrame->hide();
 
     if (!_rParams) return;
-    std::vector<double> minExt, maxExt;
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
     getFullExtents(minExt, maxExt);
     // box->GetExtents(minExt, maxExt);
     double average = (minExt[X] + maxExt[X]) / 2.f;

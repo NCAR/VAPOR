@@ -134,7 +134,10 @@ int SliceRenderer::_saveTextureData()
     int   rc =
         DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
 
-    if (rc < 0) return (-1);
+    if (rc < 0) {
+        return (-1);
+        cout << "Returning..." << endl;
+    }
     assert(grid);
 
     std::vector<double> textureMin, textureMax;
@@ -142,6 +145,7 @@ int SliceRenderer::_saveTextureData()
 
     std::vector<double> cachedValuesForParams;
 
+    int                 missing = 0;
     float               varValue, minValue, maxValue, missingValue;
     std::vector<double> coords(3, 0.0);
     for (int j = 0; j < _textureHeight; j++) {
@@ -153,6 +157,7 @@ int SliceRenderer::_saveTextureData()
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue) {
+                missing++;
                 _textureData[index + 0] = 0.f;
                 _textureData[index + 1] = 0.f;
                 _textureData[index + 2] = 0.f;
@@ -182,6 +187,7 @@ int SliceRenderer::_saveTextureData()
         }
     }
 
+    cout << "Missing values " << missing << endl;
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
     p->SetCachedValues(cachedValuesForParams);
