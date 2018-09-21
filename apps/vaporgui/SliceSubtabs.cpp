@@ -13,7 +13,7 @@
 SliceVariablesSubtab::SliceVariablesSubtab(QWidget *parent)
 {
     setupUi(this);
-    _variablesWidget->Reinit((VariableFlags)(SCALAR | HEIGHT), (DimFlags)(THREED));
+    _variablesWidget->Reinit((VariableFlags)(SCALAR), (DimFlags)(THREED));
 
     QButtonGroup *fidelityButtons = _variablesWidget->_fidelityWidget->GetFidelityButtons();
     connect(fidelityButtons, SIGNAL(buttonClicked(int)), this, SLOT(_setDefaultSampleRate()));
