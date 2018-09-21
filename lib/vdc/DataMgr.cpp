@@ -590,6 +590,11 @@ void copy_block(
     }
 }
 
+bool is_blocked(const vector<size_t> &bs) {
+    return (
+        !std::all_of(bs.cbegin(), bs.cend(), [](size_t i) { return i == 1; }));
+}
+
 }; // namespace
 
 DataMgr::DataMgr(
@@ -1137,14 +1142,17 @@ Grid *DataMgr::_getVariable(
 //
 void DataMgr::_setupCoordVecsHelper(
     string data_varname,
+    const vector<size_t> &data_dimlens,
     const vector<size_t> &data_bmin,
     const vector<size_t> &data_bmax,
     string coord_varname,
     int order,
+    vector<size_t> &coord_dimlens,
     vector<size_t> &coord_bmin,
     vector<size_t> &coord_bmax,
     bool structured) const {
     assert(data_bmin.size() == data_bmax.size());
+    coord_dimlens.clear();
     coord_bmin.clear();
     coord_bmax.clear();
 
@@ -1171,6 +1179,7 @@ void DataMgr::_setupCoordVecsHelper(
             assert(order == 0);
             assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
 
+            coord_dimlens.push_back(data_dimlens[0]);
             coord_bmin.push_back(data_bmin[0]);
             coord_bmax.push_back(data_bmax[0]);
         } else if (data_dims.size() == 2) {
@@ -1180,14 +1189,17 @@ void DataMgr::_setupCoordVecsHelper(
             if (coord_dims.size() == 1) {
                 assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
 
+                coord_dimlens.push_back(data_dimlens[order]);
                 coord_bmin.push_back(data_bmin[order]);
                 coord_bmax.push_back(data_bmax[order]);
             } else {
                 assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
                 assert(data_dims[1].GetLength() == coord_dims[1].GetLength());
 
+                coord_dimlens.push_back(data_dimlens[0]);
                 coord_bmin.push_back(data_bmin[0]);
                 coord_bmax.push_back(data_bmax[0]);
+                coord_dimlens.push_back(data_dimlens[1]);
                 coord_bmin.push_back(data_bmin[1]);
                 coord_bmax.push_back(data_bmax[1]);
             }
@@ -1199,6 +1211,7 @@ void DataMgr::_setupCoordVecsHelper(
             if (coord_dims.size() == 1) {
                 assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
 
+                coord_dimlens.push_back(data_dimlens[order]);
                 coord_bmin.push_back(data_bmin[order]);
                 coord_bmax.push_back(data_bmax[order]);
             } else if (coord_dims.size() == 2) {
@@ -1208,16 +1221,21 @@ void DataMgr::_setupCoordVecsHelper(
                 // for 3D data :-(
                 //
                 assert(order >= 0 && order <= 1);
+                coord_dimlens.push_back(data_dimlens[0]);
                 coord_bmin.push_back(data_bmin[0]);
                 coord_bmax.push_back(data_bmax[0]);
+                coord_dimlens.push_back(data_dimlens[1]);
                 coord_bmin.push_back(data_bmin[1]);
                 coord_bmax.push_back(data_bmax[1]);
 
             } else if (coord_dims.size() == 3) {
+                coord_dimlens.push_back(data_dimlens[0]);
                 coord_bmin.push_back(data_bmin[0]);
                 coord_bmax.push_back(data_bmax[0]);
+                coord_dimlens.push_back(data_dimlens[1]);
                 coord_bmin.push_back(data_bmin[1]);
                 coord_bmax.push_back(data_bmax[1]);
+                coord_dimlens.push_back(data_dimlens[2]);
                 coord_bmin.push_back(data_bmin[2]);
                 coord_bmax.push_back(data_bmax[2]);
             }
@@ -1238,6 +1256,7 @@ void DataMgr::_setupCoordVecsHelper(
                 i++;
             }
             assert(i < data_dims.size());
+            coord_dimlens.push_back(data_dimlens[i]);
             coord_bmin.push_back(data_bmin[i]);
             coord_bmax.push_back(data_bmax[i]);
         }
@@ -1253,14 +1272,14 @@ int DataMgr::_setupCoordVecs(
     const vector<size_t> &max,
     vector<string> &varnames,
     vector<size_t> &roi_dims,
-    vector<size_t> &dims,
+    vector<vector<size_t>> &dimsvec,
     vector<vector<size_t>> &bsvec,
     vector<vector<size_t>> &bminvec,
     vector<vector<size_t>> &bmaxvec,
     bool structured) const {
     varnames.clear();
     roi_dims.clear();
-    dims.clear();
+    dimsvec.clear();
     bsvec.clear();
     bminvec.clear();
     bmaxvec.clear();
@@ -1273,11 +1292,11 @@ int DataMgr::_setupCoordVecs(
 
     // Grid and block dimensions at requested refinement
     //
-    vector<size_t> dummy;
-    vector<size_t> dims_at_level;
+    vector<size_t> dims, dummy;
     int rc = DataMgr::GetDimLensAtLevel(
         varname, level, dims, dummy);
     assert(rc >= 0);
+    dimsvec.push_back(dims);
 
     vector<size_t> bs(_bs.begin(), _bs.begin() + dims.size());
     bsvec.push_back(bs);
@@ -1299,13 +1318,14 @@ int DataMgr::_setupCoordVecs(
         // Map data indices to coordinate indices. Coordinate indices
         // are a subset of the data indices.
         //
-        vector<size_t> coord_bmin, coord_bmax;
+        vector<size_t> coord_dims, coord_bmin, coord_bmax;
         _setupCoordVecsHelper(
-            varname, bmin, bmax,
-            cvarnames[i], i, coord_bmin, coord_bmax, structured);
+            varname, dims, bmin, bmax,
+            cvarnames[i], i, coord_dims, coord_bmin, coord_bmax, structured);
 
         vector<size_t> bs(_bs.begin(), _bs.begin() + coord_bmin.size());
 
+        dimsvec.push_back(coord_dims);
         bsvec.push_back(bs);
         bminvec.push_back(coord_bmin);
         bmaxvec.push_back(coord_bmax);
@@ -1323,10 +1343,12 @@ int DataMgr::_setupConnVecs(
     int level,
     int lod,
     vector<string> &varnames,
+    vector<vector<size_t>> &dimsvec,
     vector<vector<size_t>> &bsvec,
     vector<vector<size_t>> &bminvec,
     vector<vector<size_t>> &bmaxvec) const {
     varnames.clear();
+    dimsvec.clear();
     bsvec.clear();
     bminvec.clear();
     bmaxvec.clear();
@@ -1388,6 +1410,7 @@ int DataMgr::_setupConnVecs(
         map_vox_to_blk(bs, conn_min, bmin);
         map_vox_to_blk(bs, conn_max, bmax);
 
+        dimsvec.push_back(dims);
         bsvec.push_back(bs);
         bminvec.push_back(bmin);
         bmaxvec.push_back(bmax);
@@ -1424,7 +1447,7 @@ Grid *DataMgr::_getVariable(
 
     vector<string> varnames;
     vector<size_t> roi_dims;
-    vector<size_t> dims;
+    vector<vector<size_t>> dimsvec;
     vector<vector<size_t>> bsvec;
     vector<vector<size_t>> bminvec;
     vector<vector<size_t>> bmaxvec;
@@ -1433,7 +1456,7 @@ Grid *DataMgr::_getVariable(
     //
     int rc = _setupCoordVecs(
         ts, varname, level, lod, min, max, varnames, roi_dims,
-        dims_at_levelvec, bsvec, bs_at_levelvec, bminvec, bmaxvec,
+        dimsvec, bsvec, bminvec, bmaxvec,
         !_gridHelper.IsUnstructured(gridType));
     if (rc < 0)
         return (NULL);
@@ -1446,13 +1469,14 @@ Grid *DataMgr::_getVariable(
 
     vector<float *> blkvec;
     rc = DataMgr::_get_regions<float>(
-        ts, varnames, level, lod, true, bsvec, bminvec, bmaxvec, blkvec);
+        ts, varnames, level, lod, true, dimsvec, bsvec, bminvec, bmaxvec, blkvec);
     if (rc < 0)
         return (NULL);
 
     // Get dimensions for connectivity variables (if any)
     //
     vector<string> conn_varnames;
+    vector<vector<size_t>> conn_dimsvec;
     vector<vector<size_t>> conn_bsvec;
     vector<vector<size_t>> conn_bminvec;
     vector<vector<size_t>> conn_bmaxvec;
@@ -1461,13 +1485,13 @@ Grid *DataMgr::_getVariable(
     if (_gridHelper.IsUnstructured(gridType)) {
         rc = _setupConnVecs(
             ts, varname, level, lod, conn_varnames,
-            conn_bsvec, conn_bminvec, conn_bmaxvec);
+            conn_dimsvec, conn_bsvec, conn_bminvec, conn_bmaxvec);
         if (rc < 0)
             return (NULL);
 
         rc = DataMgr::_get_regions<int>(
-            ts, conn_varnames, level, lod, true, conn_bsvec, conn_bminvec,
-            conn_bmaxvec, conn_blkvec);
+            ts, conn_varnames, level, lod, true, conn_dimsvec,
+            conn_bsvec, conn_bminvec, conn_bmaxvec, conn_blkvec);
         if (rc < 0)
             return (NULL);
     }
@@ -1488,7 +1512,7 @@ Grid *DataMgr::_getVariable(
 
         rg = _gridHelper.MakeGridUnstructured(
             gridType, ts, level, lod, dvar, cvarsinfo,
-            roi_dims, dims, blkvec,
+            roi_dims, dimsvec[0], blkvec,
             bsvec, bminvec, bmaxvec,
             conn_blkvec, conn_bsvec, conn_bminvec, conn_bmaxvec,
             vertexDims, faceDims, edgeDims, location, maxVertexPerFace,
@@ -1496,7 +1520,7 @@ Grid *DataMgr::_getVariable(
     } else {
         rg = _gridHelper.MakeGridStructured(
             gridType, ts, level, lod, dvar, cvarsinfo,
-            roi_dims, dims, blkvec, bsvec, bminvec, bmaxvec);
+            roi_dims, dimsvec[0], blkvec, bsvec, bminvec, bmaxvec);
     }
     assert(rg);
 
@@ -1987,89 +2011,119 @@ T *DataMgr::_get_region_from_cache(
 }
 
 template <typename T>
-int DataMgr::_get_region_from_fs_helper(
+int DataMgr::_get_unblocked_region_from_fs(
     size_t ts, string varname, int level, int lod,
-    const vector<size_t> &file_bmin,
-    const vector<size_t> &file_bmax,
-    const vector<size_t> &file_bs,
-    const vector<size_t> &downsample_bs,
+    const vector<size_t> &grid_dims,
     const vector<size_t> &grid_bs,
     const vector<size_t> &grid_min,
     const vector<size_t> &grid_max,
-    T *blks
+    T *blks) {
 
-) {
+    int fd = _openVariableRead(ts, varname, level, lod);
+    if (fd < 0)
+        return (fd);
+
+    T *region = new T[VProduct(Dims(grid_min, grid_max))];
+
+    int nlevels = DataMgr::GetNumRefLevels(varname);
+
+    // Downsample the data if needed
+    //
+    if (level < -nlevels) {
+
+        vector<size_t> dims, dummy;
+        int rc = DataMgr::GetDimLensAtLevel(varname, level, dims, dummy);
+        assert(rc >= 0);
+        assert(dims.size() == grid_dims.size());
+
+        // grid_min and grid_max are specified in voxel coordinates
+        // relative to the downsampled grid. Figure out coordinates for
+        // region we need on the native grid
+        //
+        vector<size_t> file_min, file_max;
+        for (int i = 0; i < dims.size(); i++) {
+            vector<float> weights;
+            downsample_compute_weights(dims[i], grid_dims[i], weights);
+            file_min.push_back((int)weights[grid_min[i]]);
+            file_max.push_back((int)weights[grid_max[i]] + 1);
+        }
+
+        T *buf = new T[VProduct(Dims(file_min, file_max))];
+
+        rc = _readRegion(fd, file_min, file_max, buf);
+        if (rc < 0) {
+            delete[] buf;
+            return (-1);
+        }
+
+        downsample(
+            buf, Dims(file_min, file_max), region, Dims(grid_min, grid_max));
+
+        delete[] buf;
+    } else {
+
+        int rc = _readRegion(fd, grid_min, grid_max, region);
+        if (rc < 0) {
+            delete[] region;
+            return (-1);
+        }
+    }
+
+    copy_block(region, grid_min, grid_max, blks, grid_bs, grid_min, grid_max);
+
+    (void)_closeVariable(fd);
+
+    if (region)
+        delete[] region;
+
+    return (0);
+}
+
+template <typename T>
+int DataMgr::_get_blocked_region_from_fs(
+    size_t ts, string varname, int level, int lod,
+    const vector<size_t> &file_bs,
+    const vector<size_t> &grid_bs,
+    const vector<size_t> &grid_min,
+    const vector<size_t> &grid_max,
+    T *blks) {
+
+    // Map requested region voxel coordinates to disk block coordinates
+    //
+    vector<size_t> file_bmin, file_bmax;
+    map_vox_to_blk(file_bs, grid_min, file_bmin);
+    map_vox_to_blk(file_bs, grid_max, file_bmax);
 
     int fd = _openVariableRead(ts, varname, level, lod);
     if (fd < 0)
         return (fd);
 
     T *file_block = NULL;
-    T *downsample_block = NULL;
 
-    // if data on disk aren't blocked we simply read the entire region
-    // at once
-    //
-    if (
-        std::all_of(file_bs.cbegin(), file_bs.cend(),
-                    [](size_t i) { return i == 1; })) {
+    file_block = new T[VProduct(file_bs)];
 
-        vector<size_t> min = grid_min;
-        vector<size_t> max = grid_max;
+    std::vector<size_t> bcoord = file_bmin;
+    for (size_t i = 0; i < VProduct(Dims(file_bmin, file_bmax)); i++) {
 
-        file_block = new T[VProduct(Dims(file_bmin, file_bmax))];
+        vector<size_t> min, max;
 
-        int rc = _readRegion(fd, min, max, file_block);
+        map_blk_to_vox(file_bs, bcoord, bcoord, min, max);
+
+        int rc = _readRegionBlock(fd, min, max, file_block);
         if (rc < 0) {
             delete[] file_block;
             return (-1);
         }
 
         copy_block(file_block, min, max, blks, grid_bs, grid_min, grid_max);
-    } else {
 
-        file_block = new T[VProduct(file_bs)];
-
-        if (file_bs != downsample_bs) {
-            downsample_block = new T[VProduct(downsample_bs)];
-        }
-
-        std::vector<size_t> bcoord = file_bmin;
-        for (size_t i = 0; i < VProduct(Dims(file_bmin, file_bmax)); i++) {
-
-            vector<size_t> min, max;
-
-            map_blk_to_vox(file_bs, bcoord, bcoord, min, max);
-
-            int rc = _readRegion(fd, min, max, file_block);
-            if (rc < 0) {
-                delete[] file_block;
-                return (-1);
-            }
-
-            if (file_bs != downsample_bs) {
-                downsample(file_block, file_bs, downsample_block, downsample_bs);
-
-                map_blk_to_vox(downsample_bs, file_bmin, file_bmax, min, max);
-
-                copy_block(
-                    downsample_block, min, max, blks, grid_bs, grid_min,
-                    grid_max);
-            } else {
-                copy_block(
-                    file_block, min, max, blks, grid_bs, grid_min,
-                    grid_max);
-            }
-            bcoord = IncrementCoords(file_bmin, file_bmax, bcoord);
-        }
+        bcoord = IncrementCoords(file_bmin, file_bmax, bcoord);
     }
 
     (void)_closeVariable(fd);
 
     if (file_block)
         delete[] file_block;
-    if (downsample_block)
-        delete[] downsample_block;
 
     return (0);
 }
@@ -2077,6 +2131,7 @@ int DataMgr::_get_region_from_fs_helper(
 template <typename T>
 T *DataMgr::_get_region_from_fs(
     size_t ts, string varname, int level, int lod,
+    const vector<size_t> &grid_dims,
     const vector<size_t> &grid_bs, const vector<size_t> &grid_bmin,
     const vector<size_t> &grid_bmax, bool lock) {
 
@@ -2086,30 +2141,34 @@ T *DataMgr::_get_region_from_fs(
     if (!blks)
         return (NULL);
 
-    vector<size_t> dims, file_bs, downsample_bs;
-    int rc = DataMgr::GetDimLensAtLevel(varname, level, dims, file_bs);
+    vector<size_t> dummy, file_bs;
+    int rc = DataMgr::GetDimLensAtLevel(varname, level, dummy, file_bs);
     assert(rc >= 0);
-    downsample_bs = file_bs;
 
     // Get voxel coordinates of requested region, clamped to grid
     // boundaries.
     //
     vector<size_t> grid_min, grid_max;
-    map_blk_to_vox(grid_bs, dims, grid_bmin, grid_bmax, grid_min, grid_max);
+    map_blk_to_vox(grid_bs, grid_dims, grid_bmin, grid_bmax, grid_min, grid_max);
 
-    // Map requested region voxel coordinates to disk block coordinates
+    int nlevels = DataMgr::GetNumRefLevels(varname);
+
+    // If data aren't blocked on disk or if the requested level is not
+    // available do a non-blocked read
     //
-    vector<size_t> file_bmin, file_bmax;
-    map_vox_to_blk(downsample_bs, grid_min, file_bmin);
-    map_vox_to_blk(downsample_bs, grid_max, file_bmax);
+    if (!is_blocked(file_bs) || level < -nlevels) {
+        rc = _get_unblocked_region_from_fs(
+            ts, varname, level, lod, grid_dims, grid_bs, grid_min,
+            grid_max, blks);
+    } else {
 
-    rc = _get_region_from_fs_helper(
-        ts, varname, level, lod, file_bmin, file_bmax, file_bs,
-        downsample_bs, grid_bs, grid_min, grid_max, blks);
+        rc = _get_blocked_region_from_fs(
+            ts, varname, level, lod, file_bs, grid_bs, grid_min, grid_max, blks);
 
-    if (rc < 0) {
-        _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
-        return (NULL);
+        if (rc < 0) {
+            _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
+            return (NULL);
+        }
     }
 
     SetDiagMsg("DataMgr::GetGrid() - data read from fs\n");
@@ -2121,9 +2180,9 @@ T *DataMgr::_get_region(
     size_t ts,
     string varname,
     int level,
-    int nlevels,
     int lod,
     int nlods,
+    const vector<size_t> &dims,
     const vector<size_t> &bs,
     const vector<size_t> &bmin,
     const vector<size_t> &bmax,
@@ -2139,7 +2198,7 @@ T *DataMgr::_get_region(
     if (!blks) {
 
         blks = (T *)_get_region_from_fs<T>(
-            ts, varname, level, lod, bs, bmin, bmax, lock);
+            ts, varname, level, lod, dims, bs, bmin, bmax, lock);
     }
     if (!blks) {
         SetErrMsg(
@@ -2156,6 +2215,7 @@ int DataMgr::_get_regions(
     const vector<string> &varnames,
     int level, int lod,
     bool lock,
+    const vector<vector<size_t>> &dimsvec,
     const vector<vector<size_t>> &bsvec, // native coordinates
     const vector<vector<size_t>> &bminvec,
     const vector<vector<size_t>> &bmaxvec,
@@ -2169,8 +2229,6 @@ int DataMgr::_get_regions(
             blkvec.push_back(NULL);
             continue;
         }
-
-        int nlevels = DataMgr::GetNumRefLevels(varnames[i]);
 
         DC::BaseVar var;
         int rc = GetBaseVarInfo(varnames[i], var);
@@ -2187,8 +2245,8 @@ int DataMgr::_get_regions(
             my_ts = 0;
 
         T *blks = _get_region<T>(
-            my_ts, varnames[i], level, nlevels, lod, nlods,
-            bsvec[i], bminvec[i], bmaxvec[i], true);
+            my_ts, varnames[i], level, lod, nlods,
+            dimsvec[i], bsvec[i], bminvec[i], bmaxvec[i], true);
         if (!blks) {
             for (int i = 0; i < blkvec.size(); i++) {
                 if (blkvec[i])
