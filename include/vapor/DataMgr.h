@@ -883,10 +883,12 @@ class VDF_API DataMgr : public Wasp::MyBase {
 
     void _setupCoordVecsHelper(
         string data_varname,
+        const vector<size_t> &data_dimlens,
         const vector<size_t> &data_bmin,
         const vector<size_t> &data_bmax,
         string coord_varname,
         int order,
+        vector<size_t> &coord_dimlens,
         vector<size_t> &coord_bmin,
         vector<size_t> &coord_bmax,
         bool structured) const;
@@ -900,7 +902,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const vector<size_t> &max,
         vector<string> &varnames,
         vector<size_t> &roi_dims,
-        vector<size_t> &dims,
+        vector<vector<size_t>> &dimsvec,
         vector<vector<size_t>> &bsvec,
         vector<vector<size_t>> &bminvec,
         vector<vector<size_t>> &bmaxvec,
@@ -912,6 +914,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
         int level,
         int lod,
         vector<string> &varnames,
+        vector<vector<size_t>> &dimsvec,
         vector<vector<size_t>> &bsvec,
         vector<vector<size_t>> &bminvec,
         vector<vector<size_t>> &bmaxvec) const;
@@ -947,12 +950,18 @@ class VDF_API DataMgr : public Wasp::MyBase {
         bool lock);
 
     template <typename T>
-    int _get_region_from_fs_helper(
+    int _get_unblocked_region_from_fs(
         size_t ts, string varname, int level, int lod,
-        const vector<size_t> &file_bmin,
-        const vector<size_t> &file_bmax,
+        const vector<size_t> &grid_dims,
+        const vector<size_t> &grid_bs,
+        const vector<size_t> &grid_min,
+        const vector<size_t> &grid_max,
+        T *blks);
+
+    template <typename T>
+    int _get_blocked_region_from_fs(
+        size_t ts, string varname, int level, int lod,
         const vector<size_t> &file_bs,
-        const vector<size_t> &downsample_bs,
         const vector<size_t> &grid_bs,
         const vector<size_t> &grid_min,
         const vector<size_t> &grid_max,
@@ -961,6 +970,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
     template <typename T>
     T *_get_region_from_fs(
         size_t ts, string varname, int level, int lod,
+        const std::vector<size_t> &grid_dims,
         const std::vector<size_t> &grid_bs,
         const std::vector<size_t> &grid_bmin,
         const std::vector<size_t> &grid_bmax, bool lock);
@@ -970,9 +980,9 @@ class VDF_API DataMgr : public Wasp::MyBase {
         size_t ts,
         string varname,
         int level,
-        int nlevels,
         int lod,
         int nlods,
+        const std::vector<size_t> &dims,
         const std::vector<size_t> &bs,
         const std::vector<size_t> &bmin,
         const std::vector<size_t> &bmax,
@@ -984,6 +994,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
         const std::vector<string> &varnames,
         int level, int lod,
         bool lock,
+        const std::vector<std::vector<size_t>> &dimsvec,
         const std::vector<std::vector<size_t>> &bsvec,
         const std::vector<std::vector<size_t>> &bminvec,
         const std::vector<std::vector<size_t>> &bmaxvec,
