@@ -56,9 +56,12 @@ protected:
         //              | /
         //              |/
         //            0 --------X
-        float *frontFace, *backFace;     // user coordinates, size == bx * by * 3
-        float *rightFace, *leftFace;     // user coordinates, size == by * bz * 3
-        float *topFace,   *bottomFace;   // user coordinates, size == bx * bz * 3   
+        float *frontFace,       *backFace;           // user coordinates, size == bx * by * 3
+        float *rightFace,       *leftFace;           // user coordinates, size == by * bz * 3
+        float *topFace,         *bottomFace;         // user coordinates, size == bx * bz * 3   
+        float *frontFaceAttrib, *backFaceAttrib;     // Logical indices, size == bx * by * 3
+        float *rightFaceAttrib, *leftFaceAttrib;     // Logical indices, size == by * bz * 3
+        float *topFaceAttrib,   *bottomFaceAttrib;   // Logical indices, size == bx * bz * 3   
         float *dataField;                // data field of this volume
         float *xyCoords;                 // X-Y coordinate values
         float *zCoords;                  // Z coordinate values
@@ -95,7 +98,7 @@ protected:
         bool UpdateFaceAndData(         const RayCasterParams* params,
                                               DataMgr*         dataMgr );
         //
-        // Update pointers: xyCoords + zCoords
+        // Update pointers: xyCoords and zCoords
         //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
         //         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
         //
@@ -144,7 +147,7 @@ protected:
     // Render the volume surface using triangle strips
     //   This is a subroutine used by _drawVolumeFaces().
     //
-    void _renderTriangleStrips( long castingMode ) const;
+    void _renderTriangleStrips(int whichPass, long castingMode ) const;
 
     void _drawVolumeFaces( int            whichPass, 
                            long           whichCastingMode,
