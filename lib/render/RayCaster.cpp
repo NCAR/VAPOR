@@ -896,7 +896,8 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glDepthFunc(GL_LEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
-    } else {
+    } else                                      // 3rd pass
+    {
         _load3rdPassUniforms(castingMode, MVP, ModelView, InversedMV, fast);
 
         _3rdPassSpecialHandling(fast, castingMode);
@@ -907,10 +908,15 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glDepthMask(GL_FALSE);
     }
 
-    if (insideACell) {
+    if (insideACell)    // only when 1st or 2nd pass
+    {
+        glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    } else {
+        glDisableVertexAttribArray(0);
+    } else    // could be all 3 passes
+    {
         _renderTriangleStrips(whichPass, castingMode);
     }
 
