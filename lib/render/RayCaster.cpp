@@ -433,6 +433,12 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
         ++coordItr;
     }
 
+    for (size_t y = 0; y < dims[1]; y++) {
+        for (size_t x = 0; x < dims[0]; x++) std::cout << "(" << xyCoords[2 * (y * dims[0] + x)] << ",  " << xyCoords[2 * (y * dims[0] + x) + 1] << ")  ";
+
+        std::cout << std::endl;
+    }
+
     return true;
 }
 
@@ -479,18 +485,17 @@ int RayCaster::_paintGL(bool fast)
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
     }
 
+    // Use our VAO
+    glBindVertexArray(_vertexArrayId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
+
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Not receiving RayCaster parameters; "
                           "the behavior becomes undefined!");
     }
-
     long castingMode = params->GetCastingMode();
-
-    // Use our VAO
-    glBindVertexArray(_vertexArrayId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
     /* Gather user coordinates */
     if (!_userCoordinates.IsMetadataUpToDate(params, _dataMgr)) {
@@ -800,7 +805,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
     if (insideACell) {
-        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_READ);
+        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     } else {
         _renderTriangleStrips();
@@ -934,7 +939,7 @@ void RayCaster::_renderTriangleStrips() const
     unsigned int *indexBuffer = new unsigned int[numOfVertices];
 
     // Render front face:
-    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFace, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFace, GL_STATIC_DRAW);
     for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
     {
         idx = 0;
@@ -947,7 +952,7 @@ void RayCaster::_renderTriangleStrips() const
     }
 
     // Render back face:
-    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFace, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFace, GL_STATIC_DRAW);
     for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
     {
         idx = 0;
@@ -960,7 +965,7 @@ void RayCaster::_renderTriangleStrips() const
     }
 
     // Render top face:
-    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFace, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFace, GL_STATIC_DRAW);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int x = 0; x < bx; x++) {
@@ -972,7 +977,7 @@ void RayCaster::_renderTriangleStrips() const
     }
 
     // Render bottom face:
-    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace, GL_STATIC_DRAW);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int x = 0; x < bx; x++) {
@@ -989,7 +994,7 @@ void RayCaster::_renderTriangleStrips() const
     indexBuffer = new unsigned int[numOfVertices];
 
     // Render right face:
-    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFace, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFace, GL_STATIC_DRAW);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int y = 0; y < by; y++) {
@@ -1001,7 +1006,7 @@ void RayCaster::_renderTriangleStrips() const
     }
 
     // Render left face
-    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_DRAW);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int y = 0; y < by; y++) {
