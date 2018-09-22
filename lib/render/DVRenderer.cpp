@@ -46,7 +46,7 @@ void DVRenderer::_loadShaders()
 }
 
 
-void DVRenderer::_3rdPassSpecialHandling( bool fast )
+void DVRenderer::_3rdPassSpecialHandling( bool fast, long castingMode )
 {
     // Special handling for DVR:
     //   turn off lighting during fast rendering.
