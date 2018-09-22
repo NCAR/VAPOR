@@ -35,6 +35,7 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _vertexArrayId = 0;
     _vertexBufferId = 0;
     _indexBufferId = 0;
+    _vertexAttribId = 0;
     _xyCoordsBufferId = 0;
     _zCoordsBufferId = 0;
 
@@ -108,6 +109,10 @@ RayCaster::~RayCaster()
     if (_indexBufferId) {
         glDeleteBuffers(1, &_indexBufferId);
         _indexBufferId = 0;
+    }
+    if (_vertexAttribId) {
+        glDeleteBuffers(1, &_vertexAttribId);
+        _vertexAttribId = 0;
     }
     if (_xyCoordsBufferId) {
         glDeleteBuffers(1, &_xyCoordsBufferId);
@@ -485,7 +490,7 @@ int RayCaster::_paintGL(bool fast)
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
     }
 
-    // Use our VAO
+    // Use our VAO. These buffers are used for all 3 passes.
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
@@ -578,7 +583,7 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
-    _drawVolumeFaces(1);    // 1st pass, render back facing polygons to texture0 of the framebuffer
+    _drawVolumeFaces(1, castingMode);    // 1st pass: render back facing polygons to texture0 of the framebuffer
 
     /* Detect if we're inside the volume */
     GLfloat ModelView[16], InversedMV[16];
@@ -617,7 +622,7 @@ int RayCaster::_paintGL(bool fast)
         }
     }
 
-    _drawVolumeFaces(2, insideACell);    // 2nd pass, render front facing polygons
+    _drawVolumeFaces(2, castingMode, insideACell);    // 2nd pass, render front facing polygons
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -630,7 +635,7 @@ int RayCaster::_paintGL(bool fast)
         MyBase::SetErrMsg("RayCasting Mode not supported!");
         return 1;
     }
-    _drawVolumeFaces(3, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
+    _drawVolumeFaces(3, castingMode, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
 
     delete grid;
 
@@ -648,6 +653,7 @@ void RayCaster::_initializeFramebufferTextures()
     glGenVertexArrays(1, &_vertexArrayId);
     glGenBuffers(1, &_vertexBufferId);
     glGenBuffers(1, &_indexBufferId);
+    glGenBuffers(1, &_vertexAttribId);
 
     /* Create an Frame Buffer Object for the back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
@@ -749,7 +755,7 @@ void RayCaster::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast)
 {
     GLint   uniformLocation;
     GLfloat MVP[16];
@@ -790,9 +796,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
     } else {
-        _load3rdPassUniforms(MVP, ModelView, InversedMV, fast);
+        _load3rdPassUniforms(castingMode, MVP, ModelView, InversedMV, fast);
 
-        _3rdPassSpecialHandling(fast);
+        _3rdPassSpecialHandling(fast, castingMode);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -800,7 +806,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
         glDepthMask(GL_FALSE);
     }
 
-    // Let's use our VAO here
+    // Let's use our VAO indices here
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
@@ -808,7 +814,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
         glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     } else {
-        _renderTriangleStrips();
+        _renderTriangleStrips(castingMode);
     }
 
     glDisableVertexAttribArray(0);
@@ -821,7 +827,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, bool insideACell, const GLfloat 
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast) const
+void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *MVP, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast) const
 {
     glUseProgram(_3rdPassShaderId);
     GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MVP");
@@ -905,8 +911,7 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
         glUniform1i(uniformLocation, textureUnit);
     }
 
-    RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
-    if (params->GetCastingMode() == 2) {
+    if (castingMode == 2) {
         textureUnit = 5;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
@@ -921,13 +926,13 @@ void RayCaster::_load3rdPassUniforms(const GLfloat *MVP, const GLfloat *ModelVie
     }
 }
 
-void RayCaster::_3rdPassSpecialHandling(bool fast)
+void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode)
 {
     // Left empty intentially.
     // Derived classes feel free to put stuff here.
 }
 
-void RayCaster::_renderTriangleStrips() const
+void RayCaster::_renderTriangleStrips(long castingMode) const
 {
     unsigned int bx = (unsigned int)_userCoordinates.dims[0];
     unsigned int by = (unsigned int)_userCoordinates.dims[1];

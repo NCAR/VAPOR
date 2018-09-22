@@ -34,7 +34,7 @@ void DVRenderer::_loadShaders()
     _3rdPassMode2ShaderId = _compileShaders(VShader3rdPassMode2.data(), FShader3rdPassMode2.data());
 }
 
-void DVRenderer::_3rdPassSpecialHandling(bool fast)
+void DVRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
 {
     // Special handling for DVR:
     //   turn off lighting during fast rendering.
