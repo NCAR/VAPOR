@@ -683,7 +683,8 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
-    _drawVolumeFaces(1, castingMode);    // 1st pass: render back facing polygons to texture0 of the framebuffer
+    // 1st pass: render back facing polygons to texture0 of the framebuffer
+    _drawVolumeFaces(1, castingMode);
 
     /* Detect if we're inside the volume */
     GLfloat ModelView[16], InversedMV[16];
