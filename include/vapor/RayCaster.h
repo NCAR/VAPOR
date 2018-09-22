@@ -56,8 +56,8 @@ class RENDER_API RayCaster : public Renderer {
         float *rightFace, *leftFace;     // user coordinates, size == by * bz * 3
         float *topFace, *bottomFace;     // user coordinates, size == bx * bz * 3
         float *dataField;                // data field of this volume
-        float *xyCoords;                 // !!NORMALIZED!! X-Y coordinate values
-        float *zCoords;                  // !!NORMALIZED!! Z coordinate values
+        float *xyCoords;                 // X-Y coordinate values
+        float *zCoords;                  // Z coordinate values
         unsigned char *missingValueMask; // 0 == is missing value; non-zero == not missing value
         float valueRange[2];             // min and max values of the volume
         size_t dims[3];                  // num. of samples along each axis
@@ -122,8 +122,9 @@ class RENDER_API RayCaster : public Renderer {
 
     // vertex arrays
     GLuint _vertexArrayId;
-    GLuint _vertexBufferId;
-    GLuint _indexBufferId;
+    GLuint _vertexBufferId; // Keeps user coordinates of 6 faces.
+    GLuint _indexBufferId;  // Auxiliary indices for efficiently drawing triangle strips.
+    GLuint _vertexAttribId; // Attribute of vertices: (i, j k) logical indices.
 
     // shaders
     GLuint _1stPassShaderId;
@@ -139,20 +140,22 @@ class RENDER_API RayCaster : public Renderer {
     // Render the volume surface using triangle strips
     //   This is a subroutine used by _drawVolumeFaces().
     //
-    void _renderTriangleStrips() const;
+    void _renderTriangleStrips(long castingMode) const;
 
     void _drawVolumeFaces(int whichPass,
+                          long whichCastingMode,
                           bool insideACell = false,
                           const GLfloat *ModelView = nullptr,
                           const GLfloat *InversedMV = nullptr,
                           bool fast = false);
 
-    void _load3rdPassUniforms(const GLfloat *MVP,
+    void _load3rdPassUniforms(long castingMode,
+                              const GLfloat *MVP,
                               const GLfloat *ModelView,
                               const GLfloat *InversedMV,
                               bool fast) const;
 
-    virtual void _3rdPassSpecialHandling(bool fast);
+    virtual void _3rdPassSpecialHandling(bool fast, long castingMode);
 
     //
     // Initialization for 1) framebuffers and 2) textures

@@ -42,7 +42,7 @@ void IsoSurfaceRenderer::_loadShaders() {
     _3rdPassMode2ShaderId = _compileShaders(VShader3rdPassMode2.data(), FShader3rdPassMode2.data());
 }
 
-void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast) {
+void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode) {
     IsoSurfaceParams *params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
     bool lighting = params->GetLighting();
     std::vector<double> isoValues = params->GetIsoValues();
