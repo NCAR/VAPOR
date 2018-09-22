@@ -46,17 +46,20 @@ protected:
         //              | /
         //              |/
         //            0 --------X
-        float *        frontFace, *backFace;    // user coordinates, size == bx * by * 3
-        float *        rightFace, *leftFace;    // user coordinates, size == by * bz * 3
-        float *        topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
-        float *        dataField;               // data field of this volume
-        float *        xyCoords;                // X-Y coordinate values
-        float *        zCoords;                 // Z coordinate values
-        unsigned char *missingValueMask;        // 0 == is missing value; non-zero == not missing value
-        float          valueRange[2];           // min and max values of the volume
-        size_t         dims[3];                 // num. of samples along each axis
-        float          boxMin[3], boxMax[3];    // bounding box of the current volume
-                                                // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
+        float *        frontFace, *backFace;                // user coordinates, size == bx * by * 3
+        float *        rightFace, *leftFace;                // user coordinates, size == by * bz * 3
+        float *        topFace, *bottomFace;                // user coordinates, size == bx * bz * 3
+        float *        frontFaceAttrib, *backFaceAttrib;    // Logical indices, size == bx * by * 3
+        float *        rightFaceAttrib, *leftFaceAttrib;    // Logical indices, size == by * bz * 3
+        float *        topFaceAttrib, *bottomFaceAttrib;    // Logical indices, size == bx * bz * 3
+        float *        dataField;                           // data field of this volume
+        float *        xyCoords;                            // X-Y coordinate values
+        float *        zCoords;                             // Z coordinate values
+        unsigned char *missingValueMask;                    // 0 == is missing value; non-zero == not missing value
+        float          valueRange[2];                       // min and max values of the volume
+        size_t         dims[3];                             // num. of samples along each axis
+        float          boxMin[3], boxMax[3];                // bounding box of the current volume
+                                                            // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
 
         //             0---------2
         //              |       |
@@ -82,7 +85,7 @@ protected:
         //
         bool UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
         //
-        // Update pointers: xyCoords + zCoords
+        // Update pointers: xyCoords and zCoords
         //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
         //         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
         //
@@ -130,7 +133,7 @@ protected:
     // Render the volume surface using triangle strips
     //   This is a subroutine used by _drawVolumeFaces().
     //
-    void _renderTriangleStrips(long castingMode) const;
+    void _renderTriangleStrips(int whichPass, long castingMode) const;
 
     void _drawVolumeFaces(int whichPass, long whichCastingMode, bool insideACell = false, const GLfloat *ModelView = nullptr, const GLfloat *InversedMV = nullptr, bool fast = false);
 
