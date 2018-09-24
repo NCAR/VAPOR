@@ -245,7 +245,11 @@ int ContourRenderer::_paintGL(bool)
     
     // glCallList(_drawList);
     
+    GL_ERR_BREAK();
     ShaderProgram *shader = _glManager->shaderManager->GetShader("Contour");
+    GL_ERR_BREAK();
+    if (shader == nullptr)
+        return -1;
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
