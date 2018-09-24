@@ -17,7 +17,6 @@ set (SRC
 	Visualizer.cpp
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
-	textRenderer.cpp
 	RayCaster.cpp
 	DVRenderer.cpp
 	IsoSurfaceRenderer.cpp
@@ -52,7 +51,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ImageRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Visualizer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationRenderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/textRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
