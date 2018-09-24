@@ -23,6 +23,16 @@ namespace VAPoR {
 
 struct GLManager;
 
+//! \class LegacyGL
+//! \ingroup Public_Render
+//!
+//! \brief Replements Legacy OpenGL API using OpenGL Core
+//!
+//! This class should not be used for any intensive rendering
+//!
+//! \author Stanislaw Jaroszynski
+//! \date   August, 2018
+
 class RENDER_API LegacyGL {
 #pragma pack(push, 4)
     struct VertexData {

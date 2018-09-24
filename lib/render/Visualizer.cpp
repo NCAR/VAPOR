@@ -260,14 +260,12 @@ int Visualizer::paintEvent(bool fast) {
             GL_ERR_BREAK();
             int myrc = _renderer[i]->paintGL(fast);
             if (myrc < 0) {
-                GL_BREAK();
                 rc = -1;
             }
             GL_ERR_BREAK();
             _glManager->matrixManager->PopMatrix();
             GL_ERR_BREAK();
             if (myrc < 0) {
-                GL_BREAK();
                 rc = -1;
             }
         }
@@ -279,7 +277,6 @@ int Visualizer::paintEvent(bool fast) {
         int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
         if (myrc < 0) {
             rc = -1;
-            GL_BREAK();
         }
     }
     GL_ERR_BREAK();
