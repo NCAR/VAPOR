@@ -525,7 +525,6 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
     _proj4String.clear();
     _proj4StringDefault.clear();
     _bs = {64, 64, 64};
-    cout << "HARD CODE BS\n";
 }
 
 DataMgr::~DataMgr()
@@ -1184,9 +1183,9 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
             return (-1);
         }
 
-        cerr << "BS set to 64^3, but connection vectors are flat\n";
-
-        vector<size_t> bs(_bs.begin(), _bs.begin() + dims.size());
+        // Ugh. Connection data are not blocked.
+        //
+        vector<size_t> bs = dims;
 
         // Always read the entire connection variable
         //
@@ -2530,6 +2529,17 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
+    }
+
+    // Currently unstructured grids can not be subset. We always need
+    // to read the entire data set.
+    //
+    if (_gridHelper.IsUnstructured(_get_grid_type(varname))) {
+        for (int i = 0; i < dims_at_level.size(); i++) {
+            min_ui.push_back(0);
+            max_ui.push_back(dims_at_level[i] - 1);
+        }
+        return (0);
     }
 
     vector<size_t> bs;
