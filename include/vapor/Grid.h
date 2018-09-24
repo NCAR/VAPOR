@@ -1013,7 +1013,7 @@ public:
   ForwardIterator<T>& operator=(ForwardIterator<T> &rhs) = delete;
 
   bool operator==(const ForwardIterator<T> &rhs) const {
-	return(_index == rhs._index && _rg == rhs._rg);
+	return(_index == rhs._index);
   }
   bool operator!=(const ForwardIterator<T> &rhs) {
 	return( ! (*this == rhs));
@@ -1027,7 +1027,11 @@ public:
 	Grid::ForwardIterator<T> &a,
 	Grid::ForwardIterator<T> &b
   ) {
-	std::swap(a._rg, b._rg);
+	std::swap(a._ndims, b._ndims);
+	std::swap(a._blks, b._blks);
+	std::swap(a._dims3d, b._dims3d);
+	std::swap(a._bdims3d, b._bdims3d);
+	std::swap(a._bs3d, b._bs3d);
 	std::swap(a._coordItr, b._coordItr);
 	std::swap(a._index, b._index);
 	std::swap(a._end_index, b._end_index);
@@ -1038,7 +1042,11 @@ public:
   }
 
  private:
-  T *_rg;
+  size_t _ndims;
+  std::vector <float *> _blks;
+  std::vector <size_t> _dims3d;
+  std::vector <size_t> _bdims3d;
+  std::vector <size_t> _bs3d;
   ConstCoordItr _coordItr;
   std::vector <size_t> _index;	// current index into grid
   std::vector <size_t> _end_index;	// Last valid index
