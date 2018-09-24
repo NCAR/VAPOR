@@ -22,7 +22,6 @@
 
 #include <vapor/Grid.h>
 #include <vapor/Renderer.h>
-#include <vapor/textRenderer.h>
 #include <vapor/Transform.h>
 #include <vapor/DataMgrUtils.h>
 
