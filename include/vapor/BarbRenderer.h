@@ -61,7 +61,6 @@ namespace VAPoR {
 	vector<double> _currentBoxMinExtsTex;
 	vector<double> _currentBoxMaxExtsTex;
       
-    GLuint _drawList;
 
 	double _maxValue;
 	
