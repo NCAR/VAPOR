@@ -73,7 +73,7 @@ Font::Glyph Font::GetGlyph(int c)
     return it->second;
 }
 
-void Font::DrawText(const std::string &text, const glm::vec4 &color, float xStart, float yStart)
+void Font::DrawText(const std::string &text, const glm::vec4 &color)
 {
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("font");
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
@@ -83,6 +83,9 @@ void Font::DrawText(const std::string &text, const glm::vec4 &color, float xStar
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    const float xStart = 0;
+    const float yStart = 0;
 
     float cursorX = xStart;
     float cursorY = yStart;

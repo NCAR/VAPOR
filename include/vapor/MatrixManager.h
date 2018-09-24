@@ -13,6 +13,17 @@ using std::string;
 
 namespace VAPoR {
 
+//! \class MatrixManager
+//! \ingroup Public_Render
+//!
+//! \brief Replaces the OpenGL matrix stack.
+//!
+//! Most functions are one to one replacements and have the same
+//! effects as their OpenGL or GLUT equivalents.
+//!
+//! \author Stanislaw Jaroszynski
+//! \date   August, 2018
+
 class MatrixManager {
 public:
     enum class Mode { ModelView, Projection };

@@ -1,5 +1,6 @@
-#include <vapor/glutil.h>    // Must be included first!!!
-#include <vapor/ShaderProgram.h>
+#include "vapor/glutil.h"    // Must be included first!!!
+#include "vapor/ShaderProgram.h"
+#include "vapor/FileUtils.h"
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,19 +14,17 @@ ShaderProgram::ShaderProgram() : _linked(false), _successStatus(false) {}
 ShaderProgram::~ShaderProgram()
 {
     if (_id) glDeleteProgram(_id);
-    for (int i = 0; i < _shaders.size(); i++) delete _shaders[i];
+    for (int i = 0; i < _shaders.size(); i++)
+        if (_shaders[i]) delete _shaders[i];
 }
 
-bool ShaderProgram::Link()
+int ShaderProgram::Link()
 {
-    assert(!_linked);
+    if (_linked) { return 1; }
     _id = glCreateProgram();
     assert(_id);
     for (auto it = _shaders.begin(); it != _shaders.end(); it++) {
-        if (!(*it)->WasCompilationSuccessful()) {
-            glDeleteProgram(_id);
-            return false;
-        }
+        if (*it == nullptr || !(*it)->WasCompilationSuccessful()) { return -1; }
         glAttachShader(_id, (*it)->GetID());
     }
     glLinkProgram(_id);
@@ -35,7 +34,10 @@ bool ShaderProgram::Link()
     for (int i = 0; i < _shaders.size(); i++) delete _shaders[i];
     _shaders.clear();
 
-    return _successStatus;
+    if (_successStatus)
+        return 1;
+    else
+        return -1;
 }
 
 void ShaderProgram::Bind()
@@ -55,23 +57,32 @@ int ShaderProgram::GetBoundProgramID()
     return currentlyBoundProgramId;
 }
 
-void ShaderProgram::AddShader(Shader *s) { _shaders.push_back(s); }
+void ShaderProgram::AddShader(Shader *s)
+{
+    if (_linked) {
+        SetErrMsg("Program already linked");
+        return;
+    }
+    _shaders.push_back(s);
+}
 
-bool ShaderProgram::AddShaderFromSource(unsigned int type, const char *source)
+int ShaderProgram::AddShaderFromSource(unsigned int type, const char *source)
 {
     Shader *s = new Shader(type);
-    bool    ret = s->CompileFromSource(source);
+    int     ret = s->CompileFromSource(source);
     _shaders.push_back(s);
     return ret;
 }
 
+/*
 bool ShaderProgram::AddShaderFromFile(unsigned int type, const std::string path)
 {
     Shader *s = new Shader(type);
-    bool    ret = s->CompileFromFile(path);
+    bool ret = s->CompileFromSource(FileUtils::ReadFileToString(path));
     _shaders.push_back(s);
     return ret;
 }
+ */
 
 unsigned int ShaderProgram::GetID() const { return _id; }
 unsigned int ShaderProgram::WasLinkingSuccessful() const { return _successStatus; }
@@ -120,9 +131,9 @@ std::string ShaderProgram::GetLog() const
         return std::string(buf);
     } else {
         if (_shaders.empty())
-            return "Not linked and no shaders";
+            return "Cannot linked because there are no shaders";
         else
-            return _shaders.back()->GetLog();
+            return "Cannot link because shader failed to compile";
     }
 }
 
@@ -255,6 +266,14 @@ const char *ShaderProgram::GLTypeToString(const unsigned int type)
     }
 }
 
-SmartShaderProgram::SmartShaderProgram(ShaderProgram *program) : _program(program) { _program->Bind(); }
+SmartShaderProgram::SmartShaderProgram(ShaderProgram *program) : _program(program)
+{
+    if (_program) _program->Bind();
+}
 
-SmartShaderProgram::~SmartShaderProgram() { _program->UnBind(); }
+SmartShaderProgram::~SmartShaderProgram()
+{
+    if (_program) _program->UnBind();
+}
+
+bool SmartShaderProgram::IsValid() const { return _program; }

@@ -280,8 +280,10 @@ int WireFrameRenderer::_paintGL(bool fast)
 
     GL_ERR_BREAK();
 
-    EnableClipToBox(_glManager->shaderManager->GetShader("Wireframe"));
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Wireframe");
+    if (!shader.IsValid()) return -1;
+
+    EnableClipToBox(_glManager->shaderManager->GetShader("Wireframe"));
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
 

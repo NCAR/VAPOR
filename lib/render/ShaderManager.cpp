@@ -1,6 +1,6 @@
 #include "vapor/glutil.h"
 #include "vapor/ShaderManager.h"
-#include <sys/stat.h>
+#include "vapor/FileUtils.h"
 
 using namespace VAPoR;
 
@@ -33,22 +33,6 @@ std::vector<std::string> ShaderManager::_getSourceFilePaths(const std::string &n
     return paths;
 }
 
-unsigned int ShaderManager::_getShaderTypeFromPath(const std::string &path) const
-{
-    string ext = path.substr(path.length() - 4, 4);
-    if (ext == "vert") return GL_VERTEX_SHADER;
-    if (ext == "frag") return GL_FRAGMENT_SHADER;
-    if (ext == "geom") return GL_GEOMETRY_SHADER;
-    return GL_INVALID_ENUM;
-}
-
-long ShaderManager::_getFileModifiedTime(const std::string &path)
-{
-    struct stat attrib;
-    stat(path.c_str(), &attrib);
-    return attrib.st_mtime;
-}
-
 bool ShaderManager::_wasFileModified(const std::string &path) const { return false; }
 
 ShaderProgram *ShaderManager::GetShader(const std::string &name)
@@ -57,7 +41,7 @@ ShaderProgram *ShaderManager::GetShader(const std::string &name)
     if (HasResource(name)) {
         const vector<string> paths = _getSourceFilePaths(name);
         for (auto it = paths.begin(); it != paths.end(); ++it) {
-            long mtime = _getFileModifiedTime(*it);
+            long mtime = FileUtils::GetFileModifiedTime(*it);
             if (mtime > _modifiedTimes[*it]) {
                 _modifiedTimes[*it] = mtime;
                 DeleteResource(name);
@@ -66,29 +50,67 @@ ShaderProgram *ShaderManager::GetShader(const std::string &name)
         }
     }
 #endif
+    GL_ERR_BREAK();
     return GetResource(name);
 }
 
 SmartShaderProgram ShaderManager::GetSmartShader(const std::string &name) { return SmartShaderProgram(GetShader(name)); }
 
-bool ShaderManager::LoadResourceByKey(const std::string &name)
+int ShaderManager::LoadResourceByKey(const std::string &name)
 {
+    GL_ERR_BREAK();
     if (HasResource(name)) {
         assert(!"Shader already loaded");
-        return false;
+        GL_ERR_BREAK();
+        return -1;
     }
-    ShaderProgram *      shader = new ShaderProgram;
+    ShaderProgram *      program = new ShaderProgram;
     const vector<string> paths = _getSourceFilePaths(name);
     for (auto it = paths.begin(); it != paths.end(); ++it) {
-        shader->AddShaderFromFile(_getShaderTypeFromPath(*it), *it);
-        _modifiedTimes[*it] = _getFileModifiedTime(*it);
+        program->AddShader(CompileNewShaderFromFile(*it));
+        _modifiedTimes[*it] = FileUtils::GetFileModifiedTime(*it);
     }
-    shader->Link();
-    if (!shader->WasLinkingSuccessful()) {
-        assert(!"Shader linking failed");
+    GL_ERR_BREAK();
+    program->Link();
+    GL_ERR_BREAK();
+    if (!program->WasLinkingSuccessful()) {
+        SetErrMsg("Failed to link shader:\n%s", program->GetLog().c_str());
+        GL_ERR_BREAK();
+        delete program;
+        GL_ERR_BREAK();
+        return -1;
+    }
+    GL_ERR_BREAK();
+    AddResource(name, program);
+    return 1;
+}
+
+Shader *ShaderManager::CompileNewShaderFromFile(const std::string &path)
+{
+    unsigned int shaderType = GetShaderTypeFromPath(path);
+    if (shaderType == GL_INVALID_ENUM) {
+        SetErrMsg("File \"%s\" does not have a valid shader file extension", FileUtils::Basename(path).c_str());
+        return nullptr;
+    }
+    if (!FileUtils::IsRegularFile(path)) {
+        SetErrMsg("Path \"%s\" is not a valid file", path.c_str());
+        return nullptr;
+    }
+    Shader *shader = new Shader(shaderType);
+    int     compilationSuccess = shader->CompileFromSource(FileUtils::ReadFileToString(path));
+    if (compilationSuccess < 0) {
+        SetErrMsg("Shader \"%s\" failed to compile", FileUtils::Basename(path).c_str());
         delete shader;
-        return false;
+        return nullptr;
     }
-    AddResource(name, shader);
-    return true;
+    return shader;
+}
+
+unsigned int ShaderManager::GetShaderTypeFromPath(const std::string &path)
+{
+    string ext = path.substr(path.length() - 4, 4);
+    if (ext == "vert") return GL_VERTEX_SHADER;
+    if (ext == "frag") return GL_FRAGMENT_SHADER;
+    if (ext == "geom") return GL_GEOMETRY_SHADER;
+    return GL_INVALID_ENUM;
 }

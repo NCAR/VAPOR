@@ -203,6 +203,7 @@ void TwoDRenderer::_renderMeshUnAligned()
     float         opacity = myParams->GetConstantOpacity();
 
     ShaderProgram *shader = _glManager->shaderManager->GetShader("Image");
+    if (shader == nullptr) return;
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);
@@ -243,6 +244,7 @@ void TwoDRenderer::_renderMeshAligned()
     float         opacity = myParams->GetConstantOpacity();
 
     ShaderProgram *shader = _glManager->shaderManager->GetShader("2DData");
+    if (shader == nullptr) return;
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);

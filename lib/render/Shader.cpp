@@ -14,41 +14,26 @@ Shader::~Shader()
     if (_id) glDeleteShader(_id);
 }
 
-bool Shader::CompileFromSource(const char *source)
+int Shader::CompileFromSource(const std::string &source)
 {
     assert(!_compiled);
+    char *buffer = new char[source.length() + 1];
+    strcpy(buffer, source.c_str());
     _id = glCreateShader(_type);
-    glShaderSource(_id, 1, &source, NULL);
+    glShaderSource(_id, 1, &buffer, NULL);
     glCompileShader(_id);
     glGetShaderiv(_id, GL_COMPILE_STATUS, &_successStatus);
     _compiled = true;
-    if (!_successStatus) {
-        printf("--------------- Shader Compilation Failed ---------------\n");
-        printf("%s\n", GetLog().c_str());
-        printf("---------------------------------------------------------\n");
-    }
-    return _successStatus;
-}
+    delete[] buffer;
 
-bool Shader::CompileFromFile(const std::string path)
-{
-    _name = path;
-    FILE *f = fopen(path.c_str(), "r");
-    if (f) {
-        fseek(f, 0, SEEK_END);
-        long length = ftell(f);
-        rewind(f);
-        char *buf = new char[length + 1];
-        fread(buf, length, 1, f);
-        buf[length] = 0;
-        bool ret = CompileFromSource(buf);
-        delete[] buf;
-        return ret;
-    } else {
-        // TODO GL
-        fprintf(stderr, "File \"%s\" not found\n", path.c_str());
-        return false;
+    if (!_successStatus) {
+        SetErrMsg("--------------- Shader Compilation Failed ---------------\n"
+                  "%s"
+                  "---------------------------------------------------------\n",
+                  GetLog().c_str());
+        return -1;
     }
+    return 1;
 }
 
 std::string Shader::GetLog() const

@@ -8,7 +8,15 @@
 
 namespace VAPoR {
 
-class ShaderProgram {
+//! \class ShaderProgram
+//! \ingroup Public_Render
+//!
+//! \brief Provides a C++ interface to the OpenGL shader program construct
+//!
+//! \author Stanislaw Jaroszynski
+//! \date August, 2018
+
+class RENDER_API ShaderProgram : public Wasp::MyBase {
     unsigned int          _id;
     std::vector<Shader *> _shaders;
     bool                  _linked;
@@ -21,15 +29,24 @@ public:
     ShaderProgram();
     ~ShaderProgram();
 
-    bool        Link();
+    //! \retval 1 is returned on success
+    //! \retval -1 is returned on failure
+    //!
+    int         Link();
     void        Bind();
     bool        IsBound() const;
     static void UnBind();
     static int  GetBoundProgramID();
 
     void AddShader(Shader *s);
-    bool AddShaderFromSource(unsigned int type, const char *source);
-    bool AddShaderFromFile(unsigned int type, const std::string path);
+
+    //! \param[in] type OpenGL shader type enum
+    //! \param[in] source GLSL source code
+    //!
+    //! \retval 1 is returned on success
+    //! \retval -1 is returned on failure
+    //!
+    int AddShaderFromSource(unsigned int type, const char *source);
 
     unsigned int GetID() const;
     unsigned int WasLinkingSuccessful() const;
@@ -50,6 +67,14 @@ public:
     static const char *GLTypeToString(const unsigned int type);
 };
 
+//! \class SmartShaderProgram
+//! \ingroup Public_Render
+//!
+//! \brief Provides a C++ interface to the OpenGL shader program construct
+//!
+//! \author Stanislaw Jaroszynski
+//! \date August, 2018
+
 class SmartShaderProgram {
     ShaderProgram *_program;
 
@@ -58,6 +83,7 @@ class SmartShaderProgram {
 public:
     ~SmartShaderProgram();
     ShaderProgram *operator->() { return _program; }
+    bool           IsValid() const;
     friend class ShaderManager;
 };
 }    // namespace VAPoR

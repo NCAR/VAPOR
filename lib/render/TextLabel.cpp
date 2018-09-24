@@ -18,12 +18,10 @@ void TextLabel::DrawText(const glm::vec2 &position, const std::string &text) { D
 
 void TextLabel::DrawText(const glm::vec3 &position, const std::string &text)
 {
-    printf("%s([%g, %g, %g], \"%s\")", __func__, position.x, position.y, position.z, text.c_str());
     Font *         font = _glManager->fontManager->GetFont(FontName, FontSize);
     MatrixManager *mm = _glManager->matrixManager;
     LegacyGL *     lgl = _glManager->legacy;
     glm::vec2      p = mm->ProjectToScreen(position);
-    printf(" -> [%g, %g]\n", p.x, p.y);
 
     GLint viewport[4] = {0};
     glGetIntegerv(GL_VIEWPORT, viewport);

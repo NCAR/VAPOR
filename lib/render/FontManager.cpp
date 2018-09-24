@@ -28,16 +28,16 @@ FontManager::~FontManager()
 
 Font *FontManager::GetFont(const std::string &name, unsigned int size) { return GetResource(pair<string, unsigned int>(name, size)); }
 
-bool FontManager::LoadResourceByKey(const std::pair<std::string, unsigned int> &key)
+int FontManager::LoadResourceByKey(const std::pair<std::string, unsigned int> &key)
 {
     if (HasResource(key)) {
         assert(!"Font already loaded");
-        return false;
+        return -1;
     }
     const string       name = key.first;
     const unsigned int size = key.second;
     const string       path = _resourceDirectory + PATH_SEPARATOR + name + ".ttf";
     Font *             f = new Font(_glManager, path, size, _library);
     AddResource(key, f);
-    return true;
+    return 1;
 }

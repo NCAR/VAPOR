@@ -8,6 +8,13 @@ namespace VAPoR {
 
 class LegacyGL;
 
+//! \class GLManager
+//! \ingroup Public_Render
+//!
+//! \brief Contains references to context scope OpenGL data
+//!
+//! \author Stanislaw Jaroszynski
+
 struct GLManager {
     ShaderManager *shaderManager;
     FontManager *  fontManager;
@@ -17,13 +24,21 @@ struct GLManager {
     GLManager();
     ~GLManager();
 
+    //! \retval vector<int>[4] from glGetIntegerv(GL_VIEWPORT)
+    //!
     static std::vector<int> GetViewport();
-    void                    PixelCoordinateSystemPush();
-    void                    PixelCoordinateSystemPop();
+
+    //! Utility function that pushes the current matrix state and
+    //! sets up a pixel coorinate 2D orthographic projection
+    //!
+    void PixelCoordinateSystemPush();
+    void PixelCoordinateSystemPop();
 
     static bool CheckError();
 
 #ifndef NDEBUG
+    //! Draws the depth buffer in the top right corner
+    //!
     void ShowDepthBuffer();
 #endif
 };

@@ -255,17 +255,11 @@ int Visualizer::paintEvent(bool fast)
             _glManager->matrixManager->TestUpload();
             GL_ERR_BREAK();
             int myrc = _renderer[i]->paintGL(fast);
-            if (myrc < 0) {
-                GL_BREAK();
-                rc = -1;
-            }
+            if (myrc < 0) { rc = -1; }
             GL_ERR_BREAK();
             _glManager->matrixManager->PopMatrix();
             GL_ERR_BREAK();
-            if (myrc < 0) {
-                GL_BREAK();
-                rc = -1;
-            }
+            if (myrc < 0) { rc = -1; }
         }
         GL_ERR_BREAK();
         GL_LEGACY(glPopAttrib());
@@ -273,10 +267,7 @@ int Visualizer::paintEvent(bool fast)
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PopMatrix();
         int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
-        if (myrc < 0) {
-            rc = -1;
-            GL_BREAK();
-        }
+        if (myrc < 0) { rc = -1; }
     }
     GL_ERR_BREAK();
 
