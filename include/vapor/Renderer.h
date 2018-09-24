@@ -25,7 +25,6 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
-#include <vapor/textRenderer.h>
 
 namespace VAPoR {
 
