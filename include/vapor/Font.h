@@ -24,8 +24,8 @@ struct GLManager;
 class RENDER_API Font : public Wasp::MyBase {
     struct Glyph {
         unsigned int textureID;
-        unsigned int sizeX;
-        unsigned int sizeY;
+        int          sizeX;
+        int          sizeY;
         int          bearingX;
         int          bearingY;
         long         advance;

@@ -58,7 +58,7 @@ bool Font::LoadGlyph(int c)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-    _glyphMap[c] = {texture, _face->glyph->bitmap.width, _face->glyph->bitmap.rows, _face->glyph->bitmap_left, _face->glyph->bitmap_top, _face->glyph->advance.x};
+    _glyphMap[c] = {texture, (int)_face->glyph->bitmap.width, (int)_face->glyph->bitmap.rows, _face->glyph->bitmap_left, _face->glyph->bitmap_top, _face->glyph->advance.x};
 
     return true;
 }
