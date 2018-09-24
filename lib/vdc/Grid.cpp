@@ -318,14 +318,14 @@ void Grid::ConstNodeIteratorBoxSG::next()
     do {
         ConstNodeIteratorSG::next();
         ++_coordItr;
-    } while (!_pred(*_coordItr) && _index != _lastIndex);
+    } while (_index != _lastIndex && !_pred(*_coordItr));
 }
 
 void Grid::ConstNodeIteratorBoxSG::next(const long &offset)
 {
     _coordItr += offset;
 
-    while (!_pred(*_coordItr) && _index != _lastIndex) {
+    while (_index != _lastIndex && !_pred(*_coordItr)) {
         ConstNodeIteratorSG::next();
         ++_coordItr;
     }
@@ -466,28 +466,44 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
 {
-    const vector<size_t> &dims = rg->GetDimensions();
+    _ndims = rg->GetDimensions().size();
 
-    _rg = rg;
-    _index = vector<size_t>(dims.size(), 0);
-    _end_index = vector<size_t>(dims.size(), 0);
-    if (dims.size()) _end_index[dims.size() - 1] = dims[dims.size() - 1];
-    if (!begin || !rg->GetBlks().size()) {
+    _blks = rg->GetBlks();
+
+    _dims3d = rg->GetDimensions();
+    _bdims3d = rg->GetDimensionInBlks();
+    _bs3d = rg->GetBlockSize();
+    for (int i = _ndims; i < 3; i++) {
+        _dims3d.push_back(1);
+        _bdims3d.push_back(1);
+        _bs3d.push_back(1);
+    }
+
+    _index = vector<size_t>(3, 0);
+    _end_index = vector<size_t>(3, 0);
+
+    if (_ndims < 1) return;
+
+    _end_index[_ndims - 1] = _dims3d[_ndims - 1];
+    if (!begin || !_blks.size()) {
         _index = _end_index;
         return;
     }
 
     _coordItr = rg->ConstCoordBegin();
     _xb = 0;
-    _itr = &rg->GetBlks()[0][0];
+    _itr = &_blks[0][0];
 
     if (!_pred(*_coordItr)) { operator++(); }
 }
 
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &&rhs)
 {
-    _rg = rhs._rg;
-    rhs._rg = nullptr;
+    _ndims = rhs._ndims;
+    _blks = rhs._blks;
+    _dims3d = rhs._dims3d;
+    _bdims3d = rhs._bdims3d;
+    _bs3d = rhs._bs3d;
     _coordItr = std::move(rhs._coordItr);
     _index = rhs._index;
     _end_index = rhs._end_index;
@@ -499,7 +515,11 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &
 
 template<class T> Grid::ForwardIterator<T>::ForwardIterator()
 {
-    _rg = nullptr;
+    _ndims = 0;
+    _blks.clear();
+    _dims3d = {1, 1, 1};
+    _bdims3d = {1, 1, 1};
+    _bs3d = {1, 1, 1};
     //_coordItr = xx;
     _index.clear();
     _end_index.clear();
@@ -516,11 +536,7 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator=(
 
 template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++()
 {
-    if (!_rg->GetBlks().size()) return (*this);
-
-    const vector<size_t> &dims = _rg->GetDimensions();
-    const vector<size_t> &bdims = _rg->GetDimensionInBlks();
-    const vector<size_t> &bs = _rg->GetBlockSize();
+    if (!_blks.size()) return (*this);
 
     size_t xb = 0;
     size_t yb = 0;
@@ -534,52 +550,44 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
         _index[0]++;
         ++_coordItr;
 
-        if (_xb < bs[0] && _index[0] < dims[0]) {
+        if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
             if (_pred(*_coordItr)) { return (*this); }
 
             continue;
         }
 
         _xb = 0;
-        if (_index[0] >= dims[0]) {
-            if (dims.size() == 1) {
+        if (_index[0] >= _dims3d[0]) {
+            if (_index == _end_index) {
                 return (*this);    // last element
             }
             _index[0] = _xb = 0;
             _index[1]++;
         }
 
-        if (_index[1] >= dims[1]) {
-            if (dims.size() == 2) {
+        if (_index[1] >= _dims3d[1]) {
+            if (_index == _end_index) {
                 return (*this);    // last element
             }
             _index[1] = 0;
             _index[2]++;
         }
 
-        if (dims.size() == 3 && _index[2] >= dims[2]) {
+        if (_index == _end_index) {
             return (*this);    // last element
         }
 
-        x = _index[0] % bs[0];
-        xb = _index[0] / bs[0];
-        y = 0;
-        yb = 0;
-        z = 0;
-        zb = 0;
-        if (dims.size() >= 2) {
-            y = _index[1] % bs[1];
-            yb = _index[1] / bs[1];
-        }
-        if (dims.size() == 3) {
-            z = _index[2] % bs[2];
-            zb = _index[2] / bs[2];
-        }
+        x = _index[0] % _bs3d[0];
+        xb = _index[0] / _bs3d[0];
+        y = _index[1] % _bs3d[1];
+        yb = _index[1] / _bs3d[1];
+        z = _index[2] % _bs3d[2];
+        zb = _index[2] / _bs3d[2];
 
-        float *blk = _rg->GetBlks()[zb * bdims[0] * bdims[1] + yb * bdims[0] + xb];
-        _itr = &blk[z * bs[0] * bs[1] + y * bs[0] + x];
+        float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
+        _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
 
-    } while (!_pred(*_coordItr) && _index != _end_index);
+    } while (_index != _end_index && !_pred(*_coordItr));
 
     return (*this);
 }
@@ -593,24 +601,20 @@ template<class T> Grid::ForwardIterator<T> Grid::ForwardIterator<T>::operator++(
 
 template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=(const long int &offset)
 {
-    if (!_rg->GetBlks().size()) return (*this);
-
-    const vector<size_t> &dims = _rg->GetDimensions();
-    const vector<size_t> &bdims = _rg->GetDimensionInBlks();
-    const vector<size_t> &bs = _rg->GetBlockSize();
+    if (!_blks.size()) return (*this);
 
     vector<size_t> maxIndex;
-    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+    for (int i = 0; i < _dims3d.size(); i++) maxIndex.push_back(_dims3d[i] - 1);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims3d);
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims3d) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
         _index = _end_index;
         return (*this);
     }
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index = Wasp::VectorizeCoords(newIndexL, _dims3d);
 
     size_t xb = 0;
     size_t yb = 0;
@@ -619,66 +623,62 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=
     size_t y = 0;
     size_t z = 0;
 
-    _xb = xb = _index[0] / bs[0];
-    yb = _index[1] / bs[1];
-    zb = 0;
-    if (dims.size() == 3) zb = _index[2] / bs[2];
+    _xb = xb = _index[0] / _bs3d[0];
+    yb = _index[1] / _bs3d[1];
+    zb = _index[2] / _bs3d[2];
 
-    x = _index[0] % bs[0];
-    y = _index[1] % bs[1];
-    z = 0;
-    if (dims.size() == 3) z = _index[2] % bs[2];
+    x = _index[0] % _bs3d[0];
+    y = _index[1] % _bs3d[1];
+    z = _index[2] % _bs3d[2];
 
-    float *blk = _rg->GetBlks()[zb * bdims[0] * bdims[1] + yb * bdims[0] + xb];
-    _itr = &blk[z * bs[0] * bs[1] + y * bs[0] + x];
+    float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
+    _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
 
     _coordItr += offset;
 
-    while (!_pred(*_coordItr) && _index != _end_index) {
+    while (_index != _end_index && !_pred(*_coordItr)) {
         _xb++;
         _itr++;
         _index[0]++;
         ++_coordItr;
 
-        if (_xb < bs[0] && _index[0] < dims[0]) {
+        if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
             if (_pred(*_coordItr)) { return (*this); }
 
             continue;
         }
 
         _xb = 0;
-        if (_index[0] >= dims[0]) {
-            if (dims.size() == 1) {
+        if (_index[0] >= _dims3d[0]) {
+            if (_index == _end_index) {
                 return (*this);    // last element
             }
             _index[0] = _xb = 0;
             _index[1]++;
         }
 
-        if (_index[1] >= dims[1]) {
-            if (dims.size() == 2) {
+        if (_index[1] >= _dims3d[1]) {
+            if (_index == _end_index) {
                 return (*this);    // last element
             }
             _index[1] = 0;
             _index[2]++;
         }
 
-        if (dims.size() == 3 && _index[2] >= dims[2]) {
+        if (_index == _end_index) {
             return (*this);    // last element
         }
 
-        xb = _index[0] / bs[0];
-        yb = _index[1] / bs[1];
-        zb = 0;
-        if (dims.size() == 3) zb = _index[2] / bs[2];
+        xb = _index[0] / _bs3d[0];
+        yb = _index[1] / _bs3d[1];
+        zb = _index[2] / _bs3d[2];
 
-        x = _index[0] % bs[0];
-        y = _index[1] % bs[1];
-        z = 0;
-        if (dims.size() == 3) z = _index[2] % bs[2];
+        x = _index[0] % _bs3d[0];
+        y = _index[1] % _bs3d[1];
+        z = _index[2] % _bs3d[2];
 
-        float *blk = _rg->GetBlks()[zb * bdims[0] * bdims[1] + yb * bdims[0] + xb];
-        _itr = &blk[z * bs[0] * bs[1] + y * bs[0] + x];
+        float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
+        _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
     }
 
     return (*this);
