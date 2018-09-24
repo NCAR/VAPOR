@@ -3,11 +3,13 @@
 #include <string>
 #include <map>
 #include <cassert>
+#include "vapor/MyBase.h"
+#include "vapor/FileUtils.h"
 
 namespace VAPoR {
 
 template <typename K, typename T>
-class IResourceManager {
+class RENDER_API IResourceManager : public Wasp::MyBase {
   protected:
     std::map<K, T *> _map;
     std::string _resourceDirectory;
@@ -18,8 +20,8 @@ class IResourceManager {
     virtual ~IResourceManager();
     bool HasResource(const K &key) const;
     bool HasResource(const T *resource) const;
-    bool SetResourceDirectory(const std::string &path);
-    virtual bool LoadResourceByKey(const K &key) = 0;
+    int SetResourceDirectory(const std::string &path);
+    virtual int LoadResourceByKey(const K &key) = 0;
     bool AddResource(const K &key, T *resource);
     void DeleteResource(const K &key);
 };
@@ -31,8 +33,8 @@ template <typename K, typename T>
 T *IResourceManager<K, T>::GetResource(const K &key) {
     auto it = _map.find(key);
     if (it == _map.end()) {
-        if (!LoadResourceByKey(key)) {
-            assert(!"Resource does not exist and unable to load by name");
+        if (LoadResourceByKey(key) < 0) {
+            SetErrMsg("Resource does not exist and unable to load by name");
             return nullptr;
         }
         it = _map.find(key);
@@ -54,9 +56,13 @@ bool IResourceManager<K, T>::HasResource(const T *resource) const {
 }
 
 template <typename K, typename T>
-bool IResourceManager<K, T>::SetResourceDirectory(const std::string &path) {
+int IResourceManager<K, T>::SetResourceDirectory(const std::string &path) {
+    if (!FileUtils::IsDirectory(path)) {
+        MyBase::SetErrMsg("Resource directory \"%s\" does not exist", path.c_str());
+        return -1;
+    }
     _resourceDirectory = path;
-    return true;
+    return 1;
 }
 
 template <typename K, typename T>

@@ -16,7 +16,7 @@ class FontManager : public IResourceManager<std::pair<std::string, unsigned int>
     ~FontManager();
 
     Font *GetFont(const std::string &name, unsigned int size);
-    bool LoadResourceByKey(const std::pair<std::string, unsigned int> &key);
+    int LoadResourceByKey(const std::pair<std::string, unsigned int> &key);
 };
 
 } // namespace VAPoR
