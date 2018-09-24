@@ -10,6 +10,7 @@ set (SRC
 	PVTime.cpp
 	GetAppPath.cpp
 	utils.cpp
+	FileUtils.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 )
 
@@ -25,6 +26,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/utils.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CMakeConfig.h
     ${PROJECT_SOURCE_DIR}/include/vapor/debug.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/FileUtils.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})
