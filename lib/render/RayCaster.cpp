@@ -582,7 +582,7 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
         {
             frontFaceAttrib[ xyzIdx++ ] = float(x);
             frontFaceAttrib[ xyzIdx++ ] = float(y);
-            frontFaceAttrib[ xyzIdx++ ] = float(dims[2]-1);;
+            frontFaceAttrib[ xyzIdx++ ] = float(dims[2]-1);
         }
 
     //   Save back face logical indices ( z == 0 )
@@ -650,7 +650,7 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             bottomFaceAttrib[ xyzIdx++  ] = float(z);
         }
 
-/* debug code */
+/* debug code 
 for( size_t y = 0; y < dims[1]; y++ )
 {
     for( size_t x = 0; x < dims[0]; x++ )
@@ -659,7 +659,7 @@ for( size_t y = 0; y < dims[1]; y++ )
 
     std::cout << std::endl;
 }
-/* finish debug */
+ finish debug */
 
     return true;
 }

@@ -2,6 +2,7 @@
 
 in vec4 positionClip;   // vertex position in the clip space
 in vec4 positionModel;  // vertex position in the clip space
+in vec3 logicalIdx;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D       backFaceTexture;
@@ -114,49 +115,13 @@ vec3 CalculateGradient(in vec3 tc)
     return (a1-a0 / h);
 }
 
-// 
-// Input:  model coordinates of a position
-// Output: index of a cell where this position is in
-//
-ivec3 LocateCell( in vec3 mc )
-{
-    int x, y;
-    for( y = 0; y < volumeDims.y - 1; y++ )
-        for( x = 0; x < volumeDims.x - 1; x++ )
-        {
-            // Test on vertex (x, y)
-            vec4 val   =  texelFetch( xyCoordsTexture, y * volumeDims.x + x );
-            if(  val.x <  mc.x )     continue;
-            if(  val.y <  mc.y )     continue;
-            // Test on vertex (x + 1, y)
-                 val   =  texelFetch( xyCoordsTexture, y * volumeDims.x + x + 1 );
-            if(  val.x >= mc.x )     continue;
-            if(  val.y <  mc.y )     continue;
-            // Test on vertex (x, y + 1)
-                 val   =  texelFetch( xyCoordsTexture, (y+1) * volumeDims.x + x );
-            if(  val.x <  mc.x )     continue;
-            if(  val.y >= mc.y )     continue;
-            // Test on vertex (x + 1, y + 1)
-                 val   =  texelFetch( xyCoordsTexture, (y+1) * volumeDims.x + x + 1 );
-            if(  val.x >= mc.x )     continue;
-            if(  val.y >= mc.y )     continue;
-
-            // If the execution reaches this point, we've found the (x, y) we wanted,
-            //   so let's return!
-            return ivec3( x, y, 0 );
-        }
-
-    return ivec3( 0 );
-}
 
 void main(void)
 {
-    ivec3 cellIdx = LocateCell( positionModel.xyz );
-    color = vec4( float(cellIdx.x) / volumeDimsf.x, float(cellIdx.y) / volumeDimsf.y,
-                  float(cellIdx.z) / volumeDimsf.z, 0.8f );
-    //color = vec4( positionModel.x / volumeDimsf.x, positionModel.y / volumeDimsf.y,
-    //              positionModel.z / volumeDimsf.z, 0.8f );
-                
+    color   = vec4( floor(logicalIdx) / volumeDimsf, 0.8f );
+    
+    //color   = vec4( (logicalIdx) / volumeDimsf, 0.8f );
+
     /* verify the size of buffer textures
     color = vec4( 0.0f, 0.0f, 0.0f, 0.8f );
     if( textureSize( xyCoordsTexture ) == volumeDims.x * volumeDims.y )

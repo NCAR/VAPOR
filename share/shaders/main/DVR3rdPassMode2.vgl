@@ -3,14 +3,19 @@
 // Input vertex positions, **un-normalized** model coordinate
 layout(location = 0) in vec3 vertexPosition;
 
+// Input vertex indices in X, Y, Z directions
+layout(location = 1) in vec3 vertexLogicalIdx;
+
 uniform mat4 MVP;
 
 out vec4 positionClip;   // vertex position in the clip space
 out vec4 positionModel;  // vertex position in the model space, just as it's passed in
+out vec3 logicalIdx;
 
 void main(void)
 {
     positionModel  = vec4( vertexPosition, 1.0f );
     positionClip   = MVP * positionModel;
+    logicalIdx     = vertexLogicalIdx;
     gl_Position    = positionClip;
 }

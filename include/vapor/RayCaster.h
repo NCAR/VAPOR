@@ -63,9 +63,10 @@ protected:
         float *rightFaceAttrib, *leftFaceAttrib;     // Logical indices, size == by * bz * 3
         float *topFaceAttrib,   *bottomFaceAttrib;   // Logical indices, size == bx * bz * 3   
         float *dataField;                // data field of this volume
+        unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
+
         float *xyCoords;                 // X-Y coordinate values
         float *zCoords;                  // Z coordinate values
-        unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
         float   valueRange[2];           // min and max values of the volume
         size_t  dims[3];                 // num. of samples along each axis
         float   boxMin[3], boxMax[3];    // bounding box of the current volume
