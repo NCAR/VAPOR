@@ -250,9 +250,6 @@ int Visualizer::paintEvent(bool fast)
         if (_renderer[i]->IsGLInitialized()) {
             applyTransforms(i);
             GL_ERR_BREAK();
-            _glManager->matrixManager->Test();
-            GL_ERR_BREAK();
-            _glManager->matrixManager->TestUpload();
             GL_ERR_BREAK();
             int myrc = _renderer[i]->paintGL(fast);
             if (myrc < 0) { rc = -1; }
@@ -278,8 +275,7 @@ int Visualizer::paintEvent(bool fast)
     }
     GL_ERR_BREAK();
 
-    _glManager->ShowDepthBuffer();
-    GL_ERR_BREAK();
+    // _glManager->ShowDepthBuffer();
 
     // Go back to MODELVIEW for any other matrix stuff
     // By default the matrix is expected to be MODELVIEW
