@@ -473,8 +473,8 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
     if (frontFaceAttrib) delete frontFaceAttrib;
     frontFaceAttrib = new float[dims[0] * dims[1] * 3];
     xyzIdx = 0;
-    for (int y = 0; y < dims[1]; y++)
-        for (int x = 0; x < dims[0]; x++) {
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
             frontFaceAttrib[xyzIdx++] = float(x);
             frontFaceAttrib[xyzIdx++] = float(y);
             frontFaceAttrib[xyzIdx++] = float(dims[2] - 1);
@@ -484,8 +484,8 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
     if (backFaceAttrib) delete[] backFaceAttrib;
     backFaceAttrib = new float[dims[0] * dims[1] * 3];
     xyzIdx = 0;
-    for (int y = 0; y < dims[1]; y++)
-        for (int x = 0; x < dims[0]; x++) {
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
             backFaceAttrib[xyzIdx++] = float(x);
             backFaceAttrib[xyzIdx++] = float(y);
             backFaceAttrib[xyzIdx++] = 0.0f;
@@ -1037,6 +1037,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
 {
     bool attrib1 = false;
     if (castingMode == 2 && whichPass == 3) attrib1 = true;
+    /* Give bx, by, bz type of "unsigned int" for indexBuffer */
     unsigned int bx = (unsigned int)_userCoordinates.dims[0];
     unsigned int by = (unsigned int)_userCoordinates.dims[1];
     unsigned int bz = (unsigned int)_userCoordinates.dims[2];
