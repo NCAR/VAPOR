@@ -10,7 +10,7 @@ uniform mat4 MVP;
 
 out vec4 positionClip;   // vertex position in the clip space
 out vec4 positionModel;  // vertex position in the model space, just as it's passed in
-out vec3 logicalIdx;
+flat out vec3 logicalIdx;
 
 void main(void)
 {
