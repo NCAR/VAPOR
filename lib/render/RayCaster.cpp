@@ -469,9 +469,7 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
     }
 
     // Fill in logical indices.
-    float epsilon = 5e-6f;
     //   Save front face logical indices ( z == dims[2] - 1 )
-    float frontZ = float(dims[2] - 1) - epsilon;
     if (frontFaceAttrib) delete frontFaceAttrib;
     frontFaceAttrib = new float[dims[0] * dims[1] * 3];
     xyzIdx = 0;
@@ -479,11 +477,10 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
         for (int x = 0; x < dims[0]; x++) {
             frontFaceAttrib[xyzIdx++] = float(x);
             frontFaceAttrib[xyzIdx++] = float(y);
-            frontFaceAttrib[xyzIdx++] = frontZ;
+            frontFaceAttrib[xyzIdx++] = float(dims[2] - 1);
         }
 
     //   Save back face logical indices ( z == 0 )
-    float backZ = 0.0f + epsilon;
     if (backFaceAttrib) delete[] backFaceAttrib;
     backFaceAttrib = new float[dims[0] * dims[1] * 3];
     xyzIdx = 0;
@@ -491,54 +488,50 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
         for (int x = 0; x < dims[0]; x++) {
             backFaceAttrib[xyzIdx++] = float(x);
             backFaceAttrib[xyzIdx++] = float(y);
-            backFaceAttrib[xyzIdx++] = backZ;
+            backFaceAttrib[xyzIdx++] = 0.0f;
         }
 
     //   Save right face logical indices ( x == dims[0] - 1 )
-    float rightX = float(dims[0] - 1) - epsilon;
     if (rightFaceAttrib) delete[] rightFaceAttrib;
     rightFaceAttrib = new float[dims[1] * dims[2] * 3];
     xyzIdx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t y = 0; y < dims[1]; y++) {
-            rightFaceAttrib[xyzIdx++] = rightX;
+            rightFaceAttrib[xyzIdx++] = float(dims[0] - 1);
             rightFaceAttrib[xyzIdx++] = float(y);
             rightFaceAttrib[xyzIdx++] = float(z);
         }
 
     //   Save left face user coordinates ( x == 0 )
-    float leftX = 0.0f + epsilon;
     if (leftFaceAttrib) delete[] leftFaceAttrib;
     leftFaceAttrib = new float[dims[1] * dims[2] * 3];
     xyzIdx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t y = 0; y < dims[1]; y++) {
-            leftFaceAttrib[xyzIdx++] = leftX;
+            leftFaceAttrib[xyzIdx++] = 0.0f;
             leftFaceAttrib[xyzIdx++] = float(y);
             leftFaceAttrib[xyzIdx++] = float(z);
         }
 
     //   Save top face user coordinates ( y == dims[1] - 1 )
-    float topY = float(dims[0] - 1) - epsilon;
     if (topFaceAttrib) delete[] topFaceAttrib;
     topFaceAttrib = new float[dims[0] * dims[2] * 3];
     xyzIdx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t x = 0; x < dims[0]; x++) {
             topFaceAttrib[xyzIdx++] = float(x);
-            topFaceAttrib[xyzIdx++] = topY;
+            topFaceAttrib[xyzIdx++] = float(dims[1] - 1);
             topFaceAttrib[xyzIdx++] = float(z);
         }
 
     // Save bottom face user coordinates ( y == 0 )
-    float bottomY = 0.0f + epsilon;
     if (bottomFaceAttrib) delete[] bottomFaceAttrib;
     bottomFaceAttrib = new float[dims[0] * dims[2] * 3];
     xyzIdx = 0;
     for (size_t z = 0; z < dims[2]; z++)
         for (size_t x = 0; x < dims[0]; x++) {
             bottomFaceAttrib[xyzIdx++] = float(x);
-            bottomFaceAttrib[xyzIdx++] = bottomY;
+            bottomFaceAttrib[xyzIdx++] = 0.0f;
             bottomFaceAttrib[xyzIdx++] = float(z);
         }
 
