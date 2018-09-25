@@ -2,7 +2,7 @@
 
 in vec4 positionClip;   // vertex position in the clip space
 in vec4 positionModel;  // vertex position in the clip space
-in vec3 logicalIdx;
+flat in vec3 logicalIdx;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D       backFaceTexture;
@@ -118,9 +118,8 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
-    color   = vec4( floor(logicalIdx) / volumeDimsf, 0.8f );
+    color   = vec4( (logicalIdx) / volumeDimsf, 0.8f );
     
-    //color   = vec4( (logicalIdx) / volumeDimsf, 0.8f );
 
     /* verify the size of buffer textures
     color = vec4( 0.0f, 0.0f, 0.0f, 0.8f );
