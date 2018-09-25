@@ -48,14 +48,6 @@ float TranslateValue( in float value )
     return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
 }
 
-bool AlmostEqual( in float v1, in float v2 )
-{
-    if( abs(v1 - v2) < EPSILON )
-        return true;
-    else
-        return false;
-}
-
 //
 // Input:  Location to be evaluated in texture coordinates.
 // Output: If this location should be skipped.
@@ -126,15 +118,9 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
-    color   = vec4( floor(logicalIdx) / (volumeDimsf-1.0f), 1.0f );
-    if( floor(logicalIdx) == vec3(6.0f) )
-        color = vec4(1.0f);
-
-    //vec3 logicalIdxF = floor( logicalIdx );
-    //if( AlmostEqual( logicalIdxF.x, 1.0f) && AlmostEqual( logicalIdxF.y, 0.0f) && 
-      //if( AlmostEqual( logicalIdxF.z, 6.0f) || AlmostEqual( logicalIdxF.z, 6.0f) )
-        //color = vec4(1.0f);
+    color   = vec4( floor(logicalIdx) / volumeDimsf, 0.8f );
     
+    //color   = vec4( (logicalIdx) / volumeDimsf, 0.8f );
 
     /* verify the size of buffer textures
     color = vec4( 0.0f, 0.0f, 0.0f, 0.8f );
