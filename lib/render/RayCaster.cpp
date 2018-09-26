@@ -572,16 +572,16 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
 
     // Fill in logical indices.
     //   Cast data type of dims.
-    unsigned int bx = (unsigned int)(dims[0]);
-    unsigned int by = (unsigned int)(dims[1]);
-    unsigned int bz = (unsigned int)(dims[2]);
+    int bx = int(dims[0]);
+    int by = int(dims[1]);
+    int bz = int(dims[2]);
     //   Save front face logical indices ( z == dims[2] - 1 )
     if( frontFaceAttrib )
         delete frontFaceAttrib;
-    frontFaceAttrib = new unsigned int[ dims[0] * dims[1] * 3 ];
+    frontFaceAttrib = new int[ dims[0] * dims[1] * 3 ];
     xyzIdx = 0;
-    for( unsigned int y = 0; y < by; y++ )
-        for( unsigned int x = 0; x < bx; x++ )
+    for( int y = 0; y < by; y++ )
+        for( int x = 0; x < bx; x++ )
         {
             frontFaceAttrib[ xyzIdx++ ] = (x);
             frontFaceAttrib[ xyzIdx++ ] = (y);
@@ -591,23 +591,23 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     //   Save back face logical indices ( z == 0 )
     if( backFaceAttrib )
         delete[] backFaceAttrib;
-    backFaceAttrib = new unsigned int[ dims[0] * dims[1] * 3 ];
+    backFaceAttrib = new int[ dims[0] * dims[1] * 3 ];
     xyzIdx = 0;
-    for( unsigned int y = 0; y < by; y++ )
-        for( unsigned int x = 0; x < bx; x++ )
+    for( int y = 0; y < by; y++ )
+        for( int x = 0; x < bx; x++ )
         {
             backFaceAttrib[ xyzIdx++  ] = (x);
             backFaceAttrib[ xyzIdx++  ] = (y);
-            backFaceAttrib[ xyzIdx++  ] = (0u);
+            backFaceAttrib[ xyzIdx++  ] = (0);
         }
 
     //   Save right face logical indices ( x == dims[0] - 1 )
     if( rightFaceAttrib )
         delete[] rightFaceAttrib;
-    rightFaceAttrib = new unsigned int[ dims[1] * dims[2] * 3 ];
+    rightFaceAttrib = new int[ dims[1] * dims[2] * 3 ];
     xyzIdx = 0;
-    for( unsigned int z = 0; z < bz; z++ )
-        for( unsigned int y = 0; y < by; y++ )
+    for( int z = 0; z < bz; z++ )
+        for( int y = 0; y < by; y++ )
         {
             rightFaceAttrib[ xyzIdx++  ] = (bx-1);
             rightFaceAttrib[ xyzIdx++  ] = (y);
@@ -617,12 +617,12 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     //   Save left face user coordinates ( x == 0 )
     if( leftFaceAttrib )
         delete[] leftFaceAttrib;
-    leftFaceAttrib = new unsigned int[ dims[1] * dims[2] * 3 ];
+    leftFaceAttrib = new int[ dims[1] * dims[2] * 3 ];
     xyzIdx = 0;
-    for( unsigned int z = 0; z < bz; z++ )
-        for( unsigned int y = 0; y < by; y++ )
+    for( int z = 0; z < bz; z++ )
+        for( int y = 0; y < by; y++ )
         {
-            leftFaceAttrib[ xyzIdx++  ] = (0u);
+            leftFaceAttrib[ xyzIdx++  ] = (0);
             leftFaceAttrib[ xyzIdx++  ] = (y);
             leftFaceAttrib[ xyzIdx++  ] = (z);
         }
@@ -630,10 +630,10 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     //   Save top face user coordinates ( y == dims[1] - 1 )
     if( topFaceAttrib )
         delete[] topFaceAttrib;
-    topFaceAttrib = new unsigned int[ dims[0] * dims[2] * 3 ];
+    topFaceAttrib = new int[ dims[0] * dims[2] * 3 ];
     xyzIdx = 0;
-    for( unsigned int z = 0; z < bz; z++ )
-        for( unsigned int x = 0; x < bx; x++ )
+    for( int z = 0; z < bz; z++ )
+        for( int x = 0; x < bx; x++ )
         {
             topFaceAttrib[ xyzIdx++  ] = (x);
             topFaceAttrib[ xyzIdx++  ] = (by-1);
@@ -643,10 +643,10 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     // Save bottom face user coordinates ( y == 0 )
     if( bottomFaceAttrib )
         delete[] bottomFaceAttrib;
-    bottomFaceAttrib = new unsigned int[ dims[0] * dims[2] * 3 ];
+    bottomFaceAttrib = new int[ dims[0] * dims[2] * 3 ];
     xyzIdx = 0;
-    for( unsigned int z = 0; z < bz; z++ )
-        for( unsigned int  x = 0; x < bx; x++ )
+    for( int z = 0; z < bz; z++ )
+        for( int  x = 0; x < bx; x++ )
         {
             bottomFaceAttrib[ xyzIdx++  ] = (x);
             bottomFaceAttrib[ xyzIdx++  ] = (0u);
@@ -1215,9 +1215,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );         // attribute 1 is the logical indices
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 3 * sizeof(unsigned int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 3 * sizeof(int),
                       _userCoordinates.frontFaceAttrib, GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_UNSIGNED_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
     }
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
     {
@@ -1243,9 +1243,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 3 * sizeof(unsigned int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 3 * sizeof(int),
                       _userCoordinates.backFaceAttrib,  GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_UNSIGNED_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
     }
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
     {
@@ -1271,9 +1271,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 3 * sizeof(unsigned int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 3 * sizeof(int),
                       _userCoordinates.topFaceAttrib,   GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_UNSIGNED_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
@@ -1299,9 +1299,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 3 * sizeof(unsigned int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 3 * sizeof(int),
                       _userCoordinates.bottomFaceAttrib,GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_UNSIGNED_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
@@ -1332,9 +1332,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 3 * sizeof(unsigned int),
+        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 3 * sizeof(int),
                       _userCoordinates.rightFaceAttrib, GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_UNSIGNED_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
@@ -1360,9 +1360,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 3 * sizeof(unsigned int),
+        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 3 * sizeof(int),
                       _userCoordinates.leftFaceAttrib,  GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_UNSIGNED_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
