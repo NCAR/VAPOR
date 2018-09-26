@@ -198,7 +198,7 @@ bool UnstructuredGrid2D::GetIndicesCell(
 		cindices.push_back(my_index);
 		for (int i=0; i<nlambda; i++) {
 			lambdav.push_back(lambda[i]);
-			nodes.push_back(vector <size_t> (my_nodes[i]));
+			nodes.push_back(vector <size_t> (1, my_nodes[i]));
 		}
 	}
 	
@@ -306,6 +306,11 @@ UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D(
 		_xCoordItr = ug->_xug.cbegin();
 		_yCoordItr = ug->_yug.cbegin();
 		_zCoordItr = ug->_zug.cbegin();
+		_coords[0] = *_xCoordItr;
+		_coords[1] = *_yCoordItr;
+		if (_ncoords >= 3) {
+			_coords[2] = *_zCoordItr;
+		}
 	}
 	else {
 		_xCoordItr = ug->_xug.cend();
@@ -469,7 +474,7 @@ bool UnstructuredGrid2D::_insideFace(
 
 		verts[i*2+0] = _xug.AccessIJK(vertex, 0, 0);
 		verts[i*2+1] = _yug.AccessIJK(vertex, 0, 0);
-		node_indices.push_back(*ptr);
+		node_indices.push_back(*ptr + offset);
 		ptr++;
 		nlambda++;
 	}
