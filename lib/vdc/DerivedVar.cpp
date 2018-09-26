@@ -571,7 +571,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
 {
     size_t ts = f->GetTS();
     string varname = f->GetVarname();
-    int    level = f->GetLevel();
     int    lod = f->GetLOD();
 
     // Need temporary buffer space for the X or Y coordinate
@@ -599,7 +598,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
     //
     vector<size_t> lonMin = {min[0]};
     vector<size_t> lonMax = {max[0]};
-    int            rc = _getVar(_dc, ts, _lonName, level, lod, lonMin, lonMax, lonBufPtr);
+    int            rc = _getVar(_dc, ts, _lonName, -1, lod, lonMin, lonMax, lonBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -607,7 +606,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
 
     vector<size_t> latMin = {min[1]};
     vector<size_t> latMax = {max[1]};
-    rc = _getVar(_dc, ts, _latName, level, lod, latMin, latMax, latBufPtr);
+    rc = _getVar(_dc, ts, _latName, -1, lod, latMin, latMax, latBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -628,7 +627,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper2D(DC::FileTable::FileObject
 {
     size_t ts = f->GetTS();
     string varname = f->GetVarname();
-    int    level = f->GetLevel();
     int    lod = f->GetLOD();
 
     // Need temporary buffer space for the X or Y coordinate
@@ -649,13 +647,13 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper2D(DC::FileTable::FileObject
         latBufPtr = region;
     }
 
-    int rc = _getVar(_dc, ts, _lonName, level, lod, min, max, lonBufPtr);
+    int rc = _getVar(_dc, ts, _lonName, -1, lod, min, max, lonBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
     }
 
-    rc = _getVar(_dc, ts, _latName, level, lod, min, max, latBufPtr);
+    rc = _getVar(_dc, ts, _latName, -1, lod, min, max, latBufPtr);
     if (rc < 0) {
         delete[] buf;
         return (rc);
@@ -1171,10 +1169,6 @@ int DerivedCoordVar_Staggered::Initialize()
     bool ok = _dc->GetCoordVarInfo(_inName, _coordVarInfo);
     if (!ok) return (-1);
 
-    vector<size_t> dims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(_inName, 0, dims, dummy);
-    if (rc < 0) return (-1);
-
     vector<string> dimNames = _coordVarInfo.GetDimNames();
     _stagDim = -1;
     for (int i = 0; i < dimNames.size(); i++) {
@@ -1214,7 +1208,7 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(int level, std::vector<size_t> 
     bs_at_level.clear();
 
     vector<size_t> dummy;
-    int            rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, dummy);
     if (rc < 0) return (-1);
 
     dims_at_level[_stagDim] += 1;
@@ -1225,7 +1219,7 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(int level, std::vector<size_t> 
 
 int DerivedCoordVar_Staggered::OpenVariableRead(size_t ts, int level, int lod)
 {
-    int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
+    int fd = _dc->OpenVariableRead(ts, _inName, -1, lod);
     if (fd < 0) return (fd);
 
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod, fd);
@@ -1257,10 +1251,9 @@ int DerivedCoordVar_Staggered::ReadRegion(int fd, const vector<size_t> &min, con
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    int level = f->GetLevel();
 
     vector<size_t> dims, dummy;
-    int            rc = GetDimLensAtLevel(level, dims, dummy);
+    int            rc = GetDimLensAtLevel(-1, dims, dummy);
     if (rc < 0) return (-1);
 
     vector<size_t> inMin = min;
@@ -1342,10 +1335,6 @@ int DerivedCoordVar_UnStaggered::Initialize()
     bool ok = _dc->GetCoordVarInfo(_inName, _coordVarInfo);
     if (!ok) return (-1);
 
-    vector<size_t> dims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(_inName, 0, dims, dummy);
-    if (rc < 0) return (-1);
-
     vector<string> dimNames = _coordVarInfo.GetDimNames();
     _stagDim = -1;
     for (int i = 0; i < dimNames.size(); i++) {
@@ -1384,7 +1373,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(int level, std::vector<size_t
     dims_at_level.clear();
     bs_at_level.clear();
 
-    int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, bs_at_level);
+    int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, bs_at_level);
     if (rc < 0) return (-1);
 
     dims_at_level[_stagDim] -= 1;
@@ -1395,7 +1384,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(int level, std::vector<size_t
 
 int DerivedCoordVar_UnStaggered::OpenVariableRead(size_t ts, int level, int lod)
 {
-    int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
+    int fd = _dc->OpenVariableRead(ts, _inName, -1, lod);
     if (fd < 0) return (fd);
 
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod, fd);
@@ -1427,10 +1416,9 @@ int DerivedCoordVar_UnStaggered::ReadRegion(int fd, const vector<size_t> &min, c
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    int level = f->GetLevel();
 
     vector<size_t> dims, dummy;
-    int            rc = GetDimLensAtLevel(level, dims, dummy);
+    int            rc = GetDimLensAtLevel(-1, dims, dummy);
     if (rc < 0) return (-1);
 
     vector<size_t> inMin = min;
@@ -1563,7 +1551,7 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(int level, std::vector
     bs_at_level.clear();
 
     vector<size_t> dummy;
-    int            rc = _dc->GetDimLensAtLevel(_PHVar, level, dims_at_level, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims_at_level, dummy);
     if (rc < 0) return (-1);
 
     if (_derivedVarName == "Elevation") {
@@ -1619,7 +1607,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> 
     // same grid as the W component of velocity
     //
     vector<size_t> wDims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_PHVar, -1, wDims, dummy);
     if (rc < 0) return (-1);
 
     // coordinates of "W" grid.
@@ -1652,14 +1640,14 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> 
     size_t nElements = std::max(numElements(wMin, wMax), numElements(min, max));
 
     float *buf1 = new float[nElements];
-    rc = _getVar(_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(), wMin, wMax, buf1);
+    rc = _getVar(_dc, f->GetTS(), _PHVar, -1, f->GetLOD(), wMin, wMax, buf1);
     if (rc < 0) {
         delete[] buf1;
         return (rc);
     }
 
     float *buf2 = new float[nElements];
-    rc = _getVar(_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(), wMin, wMax, buf2);
+    rc = _getVar(_dc, f->GetTS(), _PHBVar, -1, f->GetLOD(), wMin, wMax, buf2);
     if (rc < 0) {
         delete[] buf1;
         delete[] buf2;
