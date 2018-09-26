@@ -570,15 +570,17 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
         ++coordItr;
     }
 
-    // Fill in logical indices.
-    //   Cast data type of dims.
+    // Fill in logical indices to fill in first 3 channels.
+    // The 4th channel will keep information on what face the triangle is at:
+    // 0 == front; 1 == back; 2 == right; 3 == left; 4 == top; 5 == bottom
     int bx = int(dims[0]);
     int by = int(dims[1]);
     int bz = int(dims[2]);
+
     //   Save front face logical indices ( z == dims[2] - 1 )
     if( frontFaceAttrib )
         delete frontFaceAttrib;
-    frontFaceAttrib = new int[ dims[0] * dims[1] * 3 ];
+    frontFaceAttrib = new int[ dims[0] * dims[1] * 4 ];
     xyzIdx = 0;
     for( int y = 0; y < by; y++ )
         for( int x = 0; x < bx; x++ )
@@ -586,12 +588,13 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             frontFaceAttrib[ xyzIdx++ ] = (x);
             frontFaceAttrib[ xyzIdx++ ] = (y);
             frontFaceAttrib[ xyzIdx++ ] = (bz-1);
+            frontFaceAttrib[ xyzIdx++ ] = (0);
         }
 
     //   Save back face logical indices ( z == 0 )
     if( backFaceAttrib )
         delete[] backFaceAttrib;
-    backFaceAttrib = new int[ dims[0] * dims[1] * 3 ];
+    backFaceAttrib = new int[ dims[0] * dims[1] * 4 ];
     xyzIdx = 0;
     for( int y = 0; y < by; y++ )
         for( int x = 0; x < bx; x++ )
@@ -599,12 +602,13 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             backFaceAttrib[ xyzIdx++  ] = (x);
             backFaceAttrib[ xyzIdx++  ] = (y);
             backFaceAttrib[ xyzIdx++  ] = (0);
+            backFaceAttrib[ xyzIdx++  ] = (1);
         }
 
     //   Save right face logical indices ( x == dims[0] - 1 )
     if( rightFaceAttrib )
         delete[] rightFaceAttrib;
-    rightFaceAttrib = new int[ dims[1] * dims[2] * 3 ];
+    rightFaceAttrib = new int[ dims[1] * dims[2] * 4 ];
     xyzIdx = 0;
     for( int z = 0; z < bz; z++ )
         for( int y = 0; y < by; y++ )
@@ -612,12 +616,13 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             rightFaceAttrib[ xyzIdx++  ] = (bx-1);
             rightFaceAttrib[ xyzIdx++  ] = (y);
             rightFaceAttrib[ xyzIdx++  ] = (z);
+            rightFaceAttrib[ xyzIdx++  ] = (2);
         }
 
     //   Save left face user coordinates ( x == 0 )
     if( leftFaceAttrib )
         delete[] leftFaceAttrib;
-    leftFaceAttrib = new int[ dims[1] * dims[2] * 3 ];
+    leftFaceAttrib = new int[ dims[1] * dims[2] * 4 ];
     xyzIdx = 0;
     for( int z = 0; z < bz; z++ )
         for( int y = 0; y < by; y++ )
@@ -625,12 +630,13 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             leftFaceAttrib[ xyzIdx++  ] = (0);
             leftFaceAttrib[ xyzIdx++  ] = (y);
             leftFaceAttrib[ xyzIdx++  ] = (z);
+            leftFaceAttrib[ xyzIdx++  ] = (3);
         }
 
     //   Save top face user coordinates ( y == dims[1] - 1 )
     if( topFaceAttrib )
         delete[] topFaceAttrib;
-    topFaceAttrib = new int[ dims[0] * dims[2] * 3 ];
+    topFaceAttrib = new int[ dims[0] * dims[2] * 4 ];
     xyzIdx = 0;
     for( int z = 0; z < bz; z++ )
         for( int x = 0; x < bx; x++ )
@@ -638,19 +644,21 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             topFaceAttrib[ xyzIdx++  ] = (x);
             topFaceAttrib[ xyzIdx++  ] = (by-1);
             topFaceAttrib[ xyzIdx++  ] = (z);
+            topFaceAttrib[ xyzIdx++  ] = (4);
         }
 
     // Save bottom face user coordinates ( y == 0 )
     if( bottomFaceAttrib )
         delete[] bottomFaceAttrib;
-    bottomFaceAttrib = new int[ dims[0] * dims[2] * 3 ];
+    bottomFaceAttrib = new int[ dims[0] * dims[2] * 4 ];
     xyzIdx = 0;
     for( int z = 0; z < bz; z++ )
         for( int  x = 0; x < bx; x++ )
         {
             bottomFaceAttrib[ xyzIdx++  ] = (x);
-            bottomFaceAttrib[ xyzIdx++  ] = (0u);
+            bottomFaceAttrib[ xyzIdx++  ] = (0);
             bottomFaceAttrib[ xyzIdx++  ] = (z);
+            bottomFaceAttrib[ xyzIdx++  ] = (5);
         }
 
     return true;
@@ -1215,9 +1223,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );         // attribute 1 is the logical indices
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 3 * sizeof(int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 4 * sizeof(int),
                       _userCoordinates.frontFaceAttrib, GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 4, GL_INT, 0, (void*)0 );
     }
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
     {
@@ -1243,9 +1251,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 3 * sizeof(int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * by * 4 * sizeof(int),
                       _userCoordinates.backFaceAttrib,  GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 4, GL_INT, 0, (void*)0 );
     }
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
     {
@@ -1271,9 +1279,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 3 * sizeof(int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 4 * sizeof(int),
                       _userCoordinates.topFaceAttrib,   GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 4, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
@@ -1299,9 +1307,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 3 * sizeof(int),
+        glBufferData( GL_ARRAY_BUFFER,                  bx * bz * 4 * sizeof(int),
                       _userCoordinates.bottomFaceAttrib,GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 4, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
@@ -1332,9 +1340,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 3 * sizeof(int),
+        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 4 * sizeof(int),
                       _userCoordinates.rightFaceAttrib, GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 4, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
@@ -1360,9 +1368,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     {
         glEnableVertexAttribArray( 1 );
         glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
-        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 3 * sizeof(int),
+        glBufferData( GL_ARRAY_BUFFER,                  by * bz * 4 * sizeof(int),
                       _userCoordinates.leftFaceAttrib,  GL_STATIC_READ );
-        glVertexAttribIPointer( 1, 3, GL_INT, 0, (void*)0 );
+        glVertexAttribIPointer( 1, 4, GL_INT, 0, (void*)0 );
     }
     for( unsigned int z = 0; z < bz - 1; z++ )   
     {
