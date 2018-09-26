@@ -467,70 +467,74 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
     }
 
     // Fill in logical indices.
+    //   Cast data type of dims.
+    unsigned int bx = (unsigned int)(dims[0]);
+    unsigned int by = (unsigned int)(dims[1]);
+    unsigned int bz = (unsigned int)(dims[2]);
     //   Save front face logical indices ( z == dims[2] - 1 )
     if (frontFaceAttrib) delete frontFaceAttrib;
-    frontFaceAttrib = new float[dims[0] * dims[1] * 3];
+    frontFaceAttrib = new unsigned int[dims[0] * dims[1] * 3];
     xyzIdx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            frontFaceAttrib[xyzIdx++] = float(x);
-            frontFaceAttrib[xyzIdx++] = float(y);
-            frontFaceAttrib[xyzIdx++] = float(dims[2] - 1);
+    for (unsigned int y = 0; y < by; y++)
+        for (unsigned int x = 0; x < bx; x++) {
+            frontFaceAttrib[xyzIdx++] = (x);
+            frontFaceAttrib[xyzIdx++] = (y);
+            frontFaceAttrib[xyzIdx++] = (bz - 1);
         }
 
     //   Save back face logical indices ( z == 0 )
     if (backFaceAttrib) delete[] backFaceAttrib;
-    backFaceAttrib = new float[dims[0] * dims[1] * 3];
+    backFaceAttrib = new unsigned int[dims[0] * dims[1] * 3];
     xyzIdx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            backFaceAttrib[xyzIdx++] = float(x);
-            backFaceAttrib[xyzIdx++] = float(y);
-            backFaceAttrib[xyzIdx++] = 0.0f;
+    for (unsigned int y = 0; y < by; y++)
+        for (unsigned int x = 0; x < bx; x++) {
+            backFaceAttrib[xyzIdx++] = (x);
+            backFaceAttrib[xyzIdx++] = (y);
+            backFaceAttrib[xyzIdx++] = (0u);
         }
 
     //   Save right face logical indices ( x == dims[0] - 1 )
     if (rightFaceAttrib) delete[] rightFaceAttrib;
-    rightFaceAttrib = new float[dims[1] * dims[2] * 3];
+    rightFaceAttrib = new unsigned int[dims[1] * dims[2] * 3];
     xyzIdx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t y = 0; y < dims[1]; y++) {
-            rightFaceAttrib[xyzIdx++] = float(dims[0] - 1);
-            rightFaceAttrib[xyzIdx++] = float(y);
-            rightFaceAttrib[xyzIdx++] = float(z);
+    for (unsigned int z = 0; z < bz; z++)
+        for (unsigned int y = 0; y < by; y++) {
+            rightFaceAttrib[xyzIdx++] = (bx - 1);
+            rightFaceAttrib[xyzIdx++] = (y);
+            rightFaceAttrib[xyzIdx++] = (z);
         }
 
     //   Save left face user coordinates ( x == 0 )
     if (leftFaceAttrib) delete[] leftFaceAttrib;
-    leftFaceAttrib = new float[dims[1] * dims[2] * 3];
+    leftFaceAttrib = new unsigned int[dims[1] * dims[2] * 3];
     xyzIdx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t y = 0; y < dims[1]; y++) {
-            leftFaceAttrib[xyzIdx++] = 0.0f;
-            leftFaceAttrib[xyzIdx++] = float(y);
-            leftFaceAttrib[xyzIdx++] = float(z);
+    for (unsigned int z = 0; z < bz; z++)
+        for (unsigned int y = 0; y < by; y++) {
+            leftFaceAttrib[xyzIdx++] = (0u);
+            leftFaceAttrib[xyzIdx++] = (y);
+            leftFaceAttrib[xyzIdx++] = (z);
         }
 
     //   Save top face user coordinates ( y == dims[1] - 1 )
     if (topFaceAttrib) delete[] topFaceAttrib;
-    topFaceAttrib = new float[dims[0] * dims[2] * 3];
+    topFaceAttrib = new unsigned int[dims[0] * dims[2] * 3];
     xyzIdx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            topFaceAttrib[xyzIdx++] = float(x);
-            topFaceAttrib[xyzIdx++] = float(dims[1] - 1);
-            topFaceAttrib[xyzIdx++] = float(z);
+    for (unsigned int z = 0; z < bz; z++)
+        for (unsigned int x = 0; x < bx; x++) {
+            topFaceAttrib[xyzIdx++] = (x);
+            topFaceAttrib[xyzIdx++] = (by - 1);
+            topFaceAttrib[xyzIdx++] = (z);
         }
 
     // Save bottom face user coordinates ( y == 0 )
     if (bottomFaceAttrib) delete[] bottomFaceAttrib;
-    bottomFaceAttrib = new float[dims[0] * dims[2] * 3];
+    bottomFaceAttrib = new unsigned int[dims[0] * dims[2] * 3];
     xyzIdx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            bottomFaceAttrib[xyzIdx++] = float(x);
-            bottomFaceAttrib[xyzIdx++] = 0.0f;
-            bottomFaceAttrib[xyzIdx++] = float(z);
+    for (unsigned int z = 0; z < bz; z++)
+        for (unsigned int x = 0; x < bx; x++) {
+            bottomFaceAttrib[xyzIdx++] = (x);
+            bottomFaceAttrib[xyzIdx++] = (0u);
+            bottomFaceAttrib[xyzIdx++] = (z);
         }
 
     return true;
@@ -1042,8 +1046,8 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     if (attrib1) {
         glEnableVertexAttribArray(1);    // attribute 1 is the logical indices
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFaceAttrib, GL_STATIC_READ);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(unsigned int), _userCoordinates.frontFaceAttrib, GL_STATIC_READ);
+        glVertexAttribIPointer(1, 3, GL_UNSIGNED_INT, 0, (void *)0);
     }
     for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
     {
@@ -1064,8 +1068,8 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFaceAttrib, GL_STATIC_READ);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(unsigned int), _userCoordinates.backFaceAttrib, GL_STATIC_READ);
+        glVertexAttribIPointer(1, 3, GL_UNSIGNED_INT, 0, (void *)0);
     }
     for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
     {
@@ -1086,8 +1090,8 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFaceAttrib, GL_STATIC_READ);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(unsigned int), _userCoordinates.topFaceAttrib, GL_STATIC_READ);
+        glVertexAttribIPointer(1, 3, GL_UNSIGNED_INT, 0, (void *)0);
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1107,8 +1111,8 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFaceAttrib, GL_STATIC_READ);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(unsigned int), _userCoordinates.bottomFaceAttrib, GL_STATIC_READ);
+        glVertexAttribIPointer(1, 3, GL_UNSIGNED_INT, 0, (void *)0);
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1133,8 +1137,8 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFaceAttrib, GL_STATIC_READ);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(unsigned int), _userCoordinates.rightFaceAttrib, GL_STATIC_READ);
+        glVertexAttribIPointer(1, 3, GL_UNSIGNED_INT, 0, (void *)0);
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1147,15 +1151,15 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     }
 
     // Render left face
-    glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
+    glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
     if (attrib1) {
-        glEnableVertexAttribArray(1);    // attribute 1 is the logical indices
+        glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFaceAttrib, GL_STATIC_READ);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(unsigned int), _userCoordinates.leftFaceAttrib, GL_STATIC_READ);
+        glVertexAttribIPointer(1, 3, GL_UNSIGNED_INT, 0, (void *)0);
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;

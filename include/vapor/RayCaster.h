@@ -46,17 +46,18 @@ protected:
         //              | /
         //              |/
         //            0 --------X
-        float *        frontFace, *backFace;                // user coordinates, size == bx * by * 3
-        float *        rightFace, *leftFace;                // user coordinates, size == by * bz * 3
-        float *        topFace, *bottomFace;                // user coordinates, size == bx * bz * 3
-        float *        frontFaceAttrib, *backFaceAttrib;    // Logical indices, size == bx * by * 3
-        float *        rightFaceAttrib, *leftFaceAttrib;    // Logical indices, size == by * bz * 3
-        float *        topFaceAttrib, *bottomFaceAttrib;    // Logical indices, size == bx * bz * 3
-        float *        dataField;                           // data field of this volume
-        unsigned char *missingValueMask;                    // 0 == is missing value; non-zero == not missing value
+        float *        frontFace, *backFace;    // user coordinates, size == bx * by * 3
+        float *        rightFace, *leftFace;    // user coordinates, size == by * bz * 3
+        float *        topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
+        float *        dataField;               // data field of this volume
+        unsigned char *missingValueMask;        // 0 == is missing value; non-zero == not missing value
 
-        float *xyCoords;                // X-Y coordinate values
-        float *zCoords;                 // Z coordinate values
+        unsigned int *frontFaceAttrib, *backFaceAttrib;    // Logical indices, size == bx * by * 3
+        unsigned int *rightFaceAttrib, *leftFaceAttrib;    // Logical indices, size == by * bz * 3
+        unsigned int *topFaceAttrib, *bottomFaceAttrib;    // Logical indices, size == bx * bz * 3
+        float *       xyCoords;                            // X-Y coordinate values
+        float *       zCoords;                             // Z coordinate values
+
         float  valueRange[2];           // min and max values of the volume
         size_t dims[3];                 // num. of samples along each axis
         float  boxMin[3], boxMax[3];    // bounding box of the current volume
