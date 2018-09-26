@@ -45,7 +45,7 @@ UnstructuredGridLayered::UnstructuredGridLayered(
 		vector <size_t> {faceDims[0]}, 
 		edgeDims.size() ? vector <size_t> {edgeDims[0]} : vector <size_t> (), 
 		vector <size_t> {bs[0]},
-		blks, vertexOnFace, faceOnVertex, faceOnFace, location, 
+		vector <float *> (), vertexOnFace, faceOnVertex, faceOnFace, location, 
 		maxVertexPerFace, maxFacePerVertex, xug, yug, 
 		UnstructuredGridCoordless(), kdtree
 	),
