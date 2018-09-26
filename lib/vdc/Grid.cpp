@@ -40,6 +40,8 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     _missingValue = INFINITY;
     _hasMissing = false;
     _interpolationOrder = 0;
+    _nodeIDOffset = 0;
+    _cellIDOffset = 0;
 
     //
     // Shallow  copy blocks

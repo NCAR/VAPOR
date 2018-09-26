@@ -520,14 +520,14 @@ public:
     //! Return the smallest node ID. The default is zero
     //
     virtual long GetNodeOffset() const { return (_nodeIDOffset); }
-    void         SetNodeOffset(long offset) { _nodeIDOffset = offset; }
+    virtual void SetNodeOffset(long offset) { _nodeIDOffset = offset; }
 
     //! Get the linear offset to the cell IDs
     //!
     //! Return the smallest Cell ID. The default is zero
     //
     virtual long GetCellOffset() const { return (_cellIDOffset); }
-    void         SetCellOffset(long offset) { _cellIDOffset = offset; }
+    virtual void SetCellOffset(long offset) { _cellIDOffset = offset; }
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
