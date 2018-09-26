@@ -93,6 +93,42 @@ set (SRCS
 	TrackBall.h
 	Manip.h
 	NavigationEventRouter.h
+	AnimationEventRouter.h
+	AnimationParams.h
+	AnnotationEventRouter.h
+	BannerGUI.h
+	BarbEventRouter.h
+	BarbEventRouter.h
+	Combo.h
+	ContourEventRouter.h
+	ControlPointEditor.h
+	CopyRegionWidget.h
+	DomainWidget.h
+	FileOperationChecker.h
+	GLColorbarWidget.h
+	GUIStateParams.h
+	GeometryWidget.h
+	ImageEventRouter.h
+	ImageEventRouter.h
+	ImageFrame.h
+	ImageFrame.h
+	IsoSurfaceEventRouter.h
+	MappingFrame.h
+	MouseModeParams.h
+	PlotParams.h
+	QIntValidatorWithFixup.h
+	RangeCombos.h
+	RangeController.h
+	RenderEventRouter.h
+	RenderHolder.h
+	SettingsEventRouter.h
+	SettingsParams.h
+	StatisticsParams.h
+	TFWidget.h
+	TabManager.h
+	VariablesWidget.h
+	VizSelectCombo.h
+	WireFrameEventRouter.h
 )
 
 set (UIS 
