@@ -82,6 +82,18 @@ class VDF_API UnstructuredGridLayered : public UnstructuredGrid {
     float GetValueLinear(
         const std::vector<double> &coords) const override;
 
+    virtual void SetNodeOffset(long offset) override {
+        _ug2d.SetNodeOffset(offset);
+        _zug.SetNodeOffset(offset);
+        UnstructuredGrid::SetNodeOffset(offset);
+    }
+
+    virtual void SetCellOffset(long offset) override {
+        _ug2d.SetCellOffset(offset);
+        _zug.SetCellOffset(offset);
+        UnstructuredGrid::SetCellOffset(offset);
+    }
+
     /////////////////////////////////////////////////////////////////////////////
     //
     // Iterators
