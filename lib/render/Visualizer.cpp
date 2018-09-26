@@ -201,10 +201,8 @@ int Visualizer::paintEvent(bool fast)
 	//Do not proceed if there is no DataMgr
 	if (! m_dataStatus->GetDataMgrNames().size()) return(0);
 	
-    if (! fbSetup()) {
-        GL_BREAK();
-        return(0);
-    }
+    if (! fbSetup())
+        return 0;
 
 	//Set up the OpenGL environment
 	int timeStep = getCurrentTimestep();
@@ -258,10 +256,8 @@ int Visualizer::paintEvent(bool fast)
 		if (! _renderer[i]->IsGLInitialized()) {
 			int myrc = _renderer[i]->initializeGL(_glManager);
             GL_ERR_BREAK();
-            if (myrc < 0) {
-                GL_BREAK();
+            if (myrc < 0)
                 rc = -1;
-            }
 		}
 
         GL_ERR_BREAK();
@@ -327,10 +323,8 @@ int Visualizer::paintEvent(bool fast)
 		incrementPath(_captureImageFile);
 	}
     GL_ERR_BREAK();
-    if(printOpenGLError()) {
-        GL_BREAK();
+    if(printOpenGLError())
         return -1;
-    }
 	return rc;
 }
 
@@ -386,10 +380,8 @@ int Visualizer::paintSetup(int timeStep){
     assert(!printOpenGLError());
 	
     //Lights are positioned relative to the view direction, do this before the modelView matrix is set
-	if (placeLights()){
-        GL_BREAK();
+	if (placeLights())
 		return -1;
-	}
     
 	return 0;
 }
@@ -830,8 +822,7 @@ int Visualizer:: captureImage(string filename)
 	//Get the image buffer 
 	unsigned char* buf = new unsigned char[3*width*height];
 	//Use openGL to fill the buffer:
-	if(!getPixelData(buf)){
-        GL_BREAK();
+	if(!getPixelData(buf)) {
 		SetErrMsg("Image Capture Error; error obtaining GL data");
 		delete [] buf;
 		return -1;
@@ -876,9 +867,7 @@ int Visualizer:: captureImage(string filename)
     else  // PNG
     {
         int rc = Write_PNG( filename.c_str(), width, height, buf );
-		if (rc)
-        {
-            GL_BREAK();
+		if (rc) {
 			SetErrMsg("Image Capture Error; Error writing PNG file %s", 
                       (const char*)filename.c_str());
             delete[] buf;
