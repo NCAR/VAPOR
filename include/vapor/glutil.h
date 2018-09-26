@@ -55,26 +55,18 @@
 #include <string>
 #include <vapor/common.h>
 
+#ifndef NDEBUG
 #ifdef Darwin
-//#define glMatrixMode(x)
-//#define glLoadMatrixd(x)
-//#define glPushMatrix()
-//#define glPopMatrix()
-//#define glTranslate(x)
-//#define glRotate(x)
-//#define glScale(x)
-//#define glLoadIdentity()
-//#define glPushAttrib(x)
-//#define glPopAttrib()
-//#define glEnable(x) { if (x == GL_NORMALIZE) {} else glEnable(x); }
-
 #define GL_LEGACY(x) \
     {}
 #else
 #define GL_LEGACY(x) x
 #endif
 #define GL_ERR_BREAK() assert(!printOpenGLError())
-#define GL_BREAK() assert(0)
+#else
+#define GL_LEGACY(x)
+#define GL_ERR_BREAK()
+#endif
 
 /* These vector and quaternion macros complement similar
  * routines.
