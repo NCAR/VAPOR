@@ -26,6 +26,7 @@ struct {
     string                  ftype;
     std::vector<double>     minu;
     std::vector<double>     maxu;
+    OptionParser::Boolean_T tgetvalue;
     OptionParser::Boolean_T nogeoxform;
     OptionParser::Boolean_T novertxform;
     OptionParser::Boolean_T verbose;
@@ -53,6 +54,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"nts", 1, "1", "Number of timesteps to
                                           "Colon delimited 3-element vector "
                                           "specifying domain max extents in user coordinates (X1:Y1:Z1)"},
                                          {"verbose", 0, "", "Verobse output"},
+                                         {"tgetvalue", 0, "", "Apply Grid:;GetValue test"},
                                          {"nogeoxform", 0, "", "Do not apply geographic transform (projection to PCS"},
                                          {"novertxform", 0, "", "Do not apply to convert pressure, etc. to meters"},
                                          {"help", 0, "", "Print this message and exit"},
@@ -73,6 +75,7 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
                                         {"minu", Wasp::CvtToDoubleVec, &opt.minu, sizeof(opt.minu)},
                                         {"maxu", Wasp::CvtToDoubleVec, &opt.maxu, sizeof(opt.maxu)},
                                         {"verbose", Wasp::CvtToBoolean, &opt.verbose, sizeof(opt.verbose)},
+                                        {"tgetvalue", Wasp::CvtToBoolean, &opt.tgetvalue, sizeof(opt.tgetvalue)},
                                         {"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
                                         {"novertxform", Wasp::CvtToBoolean, &opt.novertxform, sizeof(opt.novertxform)},
                                         {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
@@ -140,6 +143,44 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
     cout << endl;
 }
 
+void test_get_value(const Grid *g)
+{
+    cout << "Get Value Test ----->" << endl;
+
+    Grid::ConstIterator itr = g->cbegin();
+    Grid::ConstIterator enditr = g->cend();
+
+    Grid::ConstCoordItr c_itr = g->ConstCoordBegin();
+    Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
+
+    const float epsilon = 0.000001;
+
+    size_t ecount = 0;
+    for (; itr != enditr; ++itr, ++c_itr) {
+        float v0 = *itr;
+
+        float v1 = g->GetValue(*c_itr);
+
+        if (v0 != v1) {
+            if (v0 == 0.0) {
+                if (abs(v1) > epsilon) {
+                    ecount++;
+                    v1 = g->GetValue(*c_itr);
+                    cout << "poop1\n";
+                }
+            } else {
+                if (abs((v1 - v0) / v0) > epsilon) {
+                    ecount++;
+                    v1 = g->GetValue(*c_itr);
+                    cout << "poop2\n";
+                }
+            }
+        }
+    }
+    cout << "error count: " << ecount << endl;
+    cout << endl;
+}
+
 void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
 {
     vector<double> timecoords;
@@ -190,6 +231,8 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
     }
 
     test_node_iterator(g, minu, maxu);
+
+    if (opt.tgetvalue) { test_get_value(g); }
 
     //			float r[2];
     //			g->GetRange(r);
