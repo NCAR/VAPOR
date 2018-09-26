@@ -25,8 +25,8 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
                                                  size_t maxVertexPerFace, size_t maxFacePerVertex, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
                                                  const UnstructuredGridCoordless &zug, const KDTreeRG *kdtree)
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex),
-  _ug2d(vector<size_t>{vertexDims[0]}, vector<size_t>{faceDims[0]}, edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(), vector<size_t>{bs[0]}, blks, vertexOnFace, faceOnVertex,
-        faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, UnstructuredGridCoordless(), kdtree),
+  _ug2d(vector<size_t>{vertexDims[0]}, vector<size_t>{faceDims[0]}, edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(), vector<size_t>{bs[0]}, vector<float *>(), vertexOnFace,
+        faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, UnstructuredGridCoordless(), kdtree),
   _zug(zug)
 {
     assert(xug.GetDimensions().size() == 1);
