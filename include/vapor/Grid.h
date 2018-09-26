@@ -571,7 +571,7 @@ class VDF_API Grid {
     //! Return the smallest node ID. The default is zero
     //
     virtual long GetNodeOffset() const { return (_nodeIDOffset); }
-    void SetNodeOffset(long offset) {
+    virtual void SetNodeOffset(long offset) {
         _nodeIDOffset = offset;
     }
 
@@ -580,7 +580,7 @@ class VDF_API Grid {
     //! Return the smallest Cell ID. The default is zero
     //
     virtual long GetCellOffset() const { return (_cellIDOffset); }
-    void SetCellOffset(long offset) {
+    virtual void SetCellOffset(long offset) {
         _cellIDOffset = offset;
     }
 
