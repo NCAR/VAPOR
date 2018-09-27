@@ -78,8 +78,6 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
                              size_t &texelSize,
                              bool &gridAligned);
 
-    virtual GLuint GetAttribIndex() const { return (_vertexDataAttr); }
-
   private:
     class _grid_state_c {
       public:
@@ -185,7 +183,6 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     GLuint _cMapTexID;
     GLfloat *_colormap;
     size_t _colormapsize;
-    GLuint _vertexDataAttr;
 
     bool _gridStateDirty() const;
 

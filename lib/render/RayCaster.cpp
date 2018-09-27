@@ -1,6 +1,7 @@
 #include <vapor/glutil.h>
 #include <vapor/RayCaster.h>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 
 //
