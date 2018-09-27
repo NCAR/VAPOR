@@ -47,6 +47,9 @@
 #include <vapor/MyBase.h>
 #include <vapor/errorcodes.h>
 #include <vapor/DataMgr.h>
+#include "vapor/LegacyGL.h"
+#include "vapor/GLManager.h"
+#include <glm/gtc/type_ptr.hpp>
 
 #define X    0
 #define Y    1
@@ -68,7 +71,6 @@ static RendererRegistrar<BarbRenderer> registrar(BarbRenderer::GetClassType(), B
 BarbRenderer::BarbRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, BarbParams::GetClassType(), BarbRenderer::GetClassType(), instName, dataMgr)
 {
-    _drawList = 0;
     _fieldVariables.clear();
     _vectorScaleFactor = .2;
     _maxThickness = .2;
@@ -85,7 +87,6 @@ BarbRenderer::~BarbRenderer() {}
 int BarbRenderer::_initializeGL()
 {
     //_initialized = true;
-    _drawList = glGenLists(1);
     return (0);
 }
 
@@ -238,12 +239,8 @@ int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std
 int BarbRenderer::_paintGL(bool)
 {
     int rc = 0;
-    if (!_isCacheDirty()) {
-        glCallList(_drawList);
-        return 0;
-    }
-    _saveCacheParams();
-    glNewList(_drawList, GL_COMPILE_AND_EXECUTE);
+
+    // _saveCacheParams();
 
     // Set up the variable data required, while determining data
     // extents to use in rendering
@@ -293,7 +290,6 @@ int BarbRenderer::_paintGL(bool)
         if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
     }
 
-    glEndList();
     return (rc);
 }
 
@@ -307,48 +303,57 @@ float BarbRenderer::_calculateDirVec(const float start[3], const float end[3], f
 
 void BarbRenderer::_drawBackOfBarb(const float dirVec[3], const float startVertex[3]) const
 {
+    // TODO GL
+    /*
     glBegin(GL_POLYGON);
     glNormal3fv(dirVec);
-    for (int k = 0; k < 6; k++) { glVertex3fv(startVertex + 3 * k); }
+    for (int k = 0; k<6; k++){
+        glVertex3fv(startVertex+3*k);
+    }
     glEnd();
+     */
 }
 
 void BarbRenderer::_drawCylinderSides(const float nextNormal[3], const float nextVertex[3], const float startNormal[3], const float startVertex[3]) const
 {
-    glBegin(GL_TRIANGLE_STRIP);
+    LegacyGL *lgl = _glManager->legacy;
+
+    lgl->Begin(GL_TRIANGLE_STRIP);
 
     for (int i = 0; i < 6; i++) {
-        glNormal3fv(nextNormal + 3 * i);
-        glVertex3fv(nextVertex + 3 * i);
+        lgl->Normal3fv(nextNormal + 3 * i);
+        lgl->Vertex3fv(nextVertex + 3 * i);
 
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
+        lgl->Normal3fv(startNormal + 3 * i);
+        lgl->Vertex3fv(startVertex + 3 * i);
     }
     // repeat first two vertices to close cylinder:
 
-    glNormal3fv(nextNormal);
-    glVertex3fv(nextVertex);
+    lgl->Normal3fv(nextNormal);
+    lgl->Vertex3fv(nextVertex);
 
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
+    lgl->Normal3fv(startNormal);
+    lgl->Vertex3fv(startVertex);
 
-    glEnd();
+    lgl->End();
 }
 
 void BarbRenderer::_drawBarbHead(const float dirVec[3], const float vertexPoint[3], const float startNormal[3], const float startVertex[3]) const
 {
+    LegacyGL *lgl = _glManager->legacy;
+
     // Create a triangle fan from these 6 vertices.
-    glBegin(GL_TRIANGLE_FAN);
-    glNormal3fv(dirVec);
-    glVertex3fv(vertexPoint);
+    lgl->Begin(GL_TRIANGLE_FAN);
+    lgl->Normal3fv(dirVec);
+    lgl->Vertex3fv(vertexPoint);
     for (int i = 0; i < 6; i++) {
-        glNormal3fv(startNormal + 3 * i);
-        glVertex3fv(startVertex + 3 * i);
+        lgl->Normal3fv(startNormal + 3 * i);
+        lgl->Vertex3fv(startVertex + 3 * i);
     }
     // Repeat first point to close fan:
-    glNormal3fv(startNormal);
-    glVertex3fv(startVertex);
-    glEnd();
+    lgl->Normal3fv(startNormal);
+    lgl->Vertex3fv(startVertex);
+    lgl->End();
 }
 
 #ifdef DEBUG
@@ -378,16 +383,17 @@ void BarbRenderer::_printBackDiameter(const float startVertex[18]) const
 void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, float startPoint[3], bool doColorMapping, float clut[1024])
 {
     assert(variableData.size() == 5);
+    MatrixManager *mm = _glManager->matrixManager;
 
     float endPoint[3];
     bool  missing = _defineBarb(variableData, startPoint, endPoint, doColorMapping, clut);
 
     if (missing) return;
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    mm->MatrixModeModelView();
+    mm->PushMatrix();
     vector<double> scales = _getScales();
-    glScalef(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
+    mm->Scale(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
 
     // Constants are needed for cosines and sines, at
     // 60 degree intervals. The barb is really a hexagonal tube,
@@ -510,11 +516,12 @@ void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, float start
 
     _drawBarbHead(dirVec, vertexPoint, startNormal, startVertex);
 
-    glPopMatrix();
+    mm->PopMatrix();
 }
 
 void BarbRenderer::_setUpLightingAndColor()
 {
+    LegacyGL *       lgl = _glManager->legacy;
     string           winName = GetVisualizer();    // GetVisualizer is not const :(
     ViewpointParams *vpParams = _paramsMgr->GetViewpointParams(winName);
     int              nLights = vpParams->getNumLights();
@@ -523,22 +530,22 @@ void BarbRenderer::_setUpLightingAndColor()
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     assert(bParams);
     bParams->GetConstantColor(fcolor);
-
     if (nLights == 0) {
-        glDisable(GL_LIGHTING);
+        // glDisable(GL_LIGHTING);
+        lgl->DisableLighting();
     } else {
-        glShadeModel(GL_SMOOTH);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent());
+        LEGACY_TODO(glShadeModel(GL_SMOOTH));
+        LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor));
+        LEGACY_TODO(glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent()));
         // All the geometry will get a white specular color:
         float specColor[4];
         specColor[0] = specColor[1] = specColor[2] = 0.8f;
         specColor[3] = 1.f;
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_COLOR_MATERIAL);
+        LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
+        LEGACY_TODO(glEnable(GL_COLOR_MATERIAL));
+        lgl->EnableLighting();    // glEnable(GL_LIGHTING);
     }
-    glColor3fv(fcolor);
+    lgl->Color3fv(fcolor);
 }
 
 void BarbRenderer::_reFormatExtents(vector<float> &rakeExts) const
@@ -753,7 +760,7 @@ bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
     // Use the transfer function to map the data:
     int lutIndex = tf->mapFloatToIndex(val);
     for (int i = 0; i < 4; i++) mappedColor[i] = clut[4 * lutIndex + i];
-    glColor4fv(mappedColor);
+    _glManager->legacy->Color4fv(mappedColor);    // glColor4fv(mappedColor);
     return missing;
 }
 

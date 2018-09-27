@@ -1,434 +1,279 @@
-//-- ShaderProgram.cpp -------------------------------------------------------
-//
-// Copyright (C) 2005 Kenny Gruchalla.  All rights reserved.
-//
-// OGSL Shader program C++ wrapper.
-//
-// Changelog:
-// 06/30/2011 - Yannick Polius
-// Modified to accomodate the new VAPOR shader architecture
-//
-//----------------------------------------------------------------------------
-
-#include <vapor/glutil.h>    // Must be included first!!!
-#include <vapor/ShaderProgram.h>
-#include <sstream>
-#include <iostream>
-#include <fstream>
+#include "vapor/glutil.h"    // Must be included first!!!
+#include "vapor/ShaderProgram.h"
+#include "vapor/FileUtils.h"
+#include <cassert>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
-using namespace Wasp;
 
-//----------------------------------------------------------------------------
-// Default constructor
-//----------------------------------------------------------------------------
-ShaderProgram::ShaderProgram()
-{
-    _program = 0;
-    _shaderObjects.clear();
-}
+ShaderProgram::Policy ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
 
-//----------------------------------------------------------------------------
-// Destructor
-//----------------------------------------------------------------------------
+ShaderProgram::ShaderProgram() : _linked(false), _successStatus(false) {}
+
 ShaderProgram::~ShaderProgram()
 {
-    if (!glIsProgram(_program)) return;
-
-    printOpenGLError();
-    for (std::map<std::string, GLuint>::const_iterator iter = _shaderObjects.begin(); iter != _shaderObjects.end(); iter++) {
-        GLuint shader = iter->second;
-        if (!glIsShader(shader)) continue;
-
-#ifdef DEBUG
-        std::cout << "Attempting to delete shader obj: " << shader << " prog: " << _program << std::endl;
-#endif
-        glDetachShader(_program, shader);
-
-#ifdef DEBUG
-        if (printOpenGLError() != 0) std::cout << "Delete " << shader << " FAILED" << std::endl;
-#endif
-        if (GLEW_VERSION_2_0) {
-            glDeleteShader(shader);
-        } else {
-            glDeleteObjectARB(shader);
-        }
-    }
-
-    printOpenGLError();
-    if (GLEW_VERSION_2_0) {
-        glDeleteProgram(_program);
-    } else {
-        glDeleteObjectARB(_program);
-    }
-    _shaderObjects.clear();
-    printOpenGLError();
+    if (_id) glDeleteProgram(_id);
+    for (int i = 0; i < _shaders.size(); i++)
+        if (_shaders[i]) delete _shaders[i];
 }
 
-//----------------------------------------------------------------------------
-// Load vertex shader source from a file.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadVertexShader(const string &filename) { return LoadShader(filename, GL_VERTEX_SHADER); }
-
-//----------------------------------------------------------------------------
-// Load fragment shader source from a file.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadFragmentShader(const string &filename) { return LoadShader(filename, GL_FRAGMENT_SHADER); }
-
-//----------------------------------------------------------------------------
-// Load shader source from a file.
-//
-// The shader is assumed to live in the executable directory.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadShader(const string &filename, GLenum shaderType)
+int ShaderProgram::Link()
 {
-    //
-    // Read the file
-    //
-    ifstream in;
-    in.open(filename);
-    if (!in) {
-        SetErrMsg("fopen(%s) : %M", filename.c_str());
-        return (-1);
+    if (_linked) { return 1; }
+    _id = glCreateProgram();
+    assert(_id);
+    for (auto it = _shaders.begin(); it != _shaders.end(); it++) {
+        if (*it == nullptr || !(*it)->WasCompilationSuccessful()) { return -1; }
+        glAttachShader(_id, (*it)->GetID());
     }
+    glLinkProgram(_id);
+    glGetProgramiv(_id, GL_LINK_STATUS, &_successStatus);
+    _linked = true;
 
-    std::ostringstream contents;
-    contents << in.rdbuf();
-    if (!in) {
-        SetErrMsg("Error reading file %s : %M", filename.c_str());
-        return (-1);
-    }
+    for (int i = 0; i < _shaders.size(); i++) delete _shaders[i];
+    _shaders.clear();
 
-    in.close();
-    string str = contents.str();
-
-    const GLchar *sourceBuffer = (const GLchar *)str.c_str();
-    int           size = str.size();
-
-    GLuint shader;
-    if (GLEW_VERSION_2_0) {
-        shader = glCreateShader(shaderType);
-        glShaderSource(shader, 1, &sourceBuffer, &size);
-        if (shader == 0) {
-            SetErrMsg("glCreateShader()");
-            return (-1);
-        }
-
-        glAttachShader(_program, shader);
-
-        if (printOpenGLError() < 0) return (-1);
-    } else {
-        shader = glCreateShaderObjectARB(shaderType);
-        glShaderSourceARB(shader, 1, &sourceBuffer, &size);
-        if (shader == 0) {
-            SetErrMsg("glCreateShader()");
-            return (-1);
-        }
-
-        glAttachObjectARB(_program, shader);
-
-        if (printOpenGLError() < 0) return (-1);
-    }
-
-    _shaderObjects[std::string(filename)] = shader;
-
-    SetDiagMsg("creating shader obj: %d, program: %d", shader, _program);
-
-    return 0;
+    if (_successStatus)
+        return 1;
+    else
+        return -1;
 }
 
-//----------------------------------------------------------------------------
-// Load vertex shader source from a string.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadVertexSource(const string &source, const std::string &fileName) { return LoadSource(source, GL_VERTEX_SHADER, fileName); }
-//----------------------------------------------------------------------------
-// Load vertex shader source from a string.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadVertexSource(const string &source) { return LoadSource(source, GL_VERTEX_SHADER, ""); }
-//----------------------------------------------------------------------------
-// Load fragment shader source from a file.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadFragmentSource(const string &source) { return LoadSource(source, GL_FRAGMENT_SHADER, ""); }
-//----------------------------------------------------------------------------
-// Load fragment shader source from a file.
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadFragmentSource(const string &source, const std::string &fileName) { return LoadSource(source, GL_FRAGMENT_SHADER, fileName); }
-
-//----------------------------------------------------------------------------
-// Create the shader from the char* source
-//----------------------------------------------------------------------------
-int ShaderProgram::LoadSource(const string &source, GLenum shaderType, const std::string &fileName)
+void ShaderProgram::Bind()
 {
-    GLuint shader;
+    assert(_linked && WasLinkingSuccessful());
+    glUseProgram(_id);
+}
 
-    //
-    // Create a shader object, and load it's source
-    //
-    int           length = source.size();
-    const GLchar *sourceBuffer = (const GLchar *)source.c_str();
+bool ShaderProgram::IsBound() const { return _id == GetBoundProgramID(); }
 
-    if (GLEW_VERSION_2_0) {
-        shader = glCreateShader(shaderType);
-        glShaderSource(shader, 1, &sourceBuffer, &length);
-        if (shader == 0) {
-            SetErrMsg("glCreateShader()");
-            return (-1);
-        }
+void ShaderProgram::UnBind() { glUseProgram(0); }
 
-        //
-        // Attach the shader
-        //
-        glAttachShader(_program, shader);
-        if (printOpenGLError() != 0) return (-1);
-    } else {
-        shader = glCreateShaderObjectARB(shaderType);
-        glShaderSourceARB(shader, 1, &sourceBuffer, &length);
-        if (shader == 0) {
-            SetErrMsg("glCreateShader()");
-            return (-1);
-        }
+int ShaderProgram::GetBoundProgramID()
+{
+    int currentlyBoundProgramId;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentlyBoundProgramId);
+    return currentlyBoundProgramId;
+}
 
-        //
-        // Attach the shader
-        //
-        glAttachObjectARB(_program, shader);
-        if (printOpenGLError() != 0) return (-1);
+void ShaderProgram::AddShader(Shader *s)
+{
+    if (_linked) {
+        SetErrMsg("Program already linked");
+        return;
     }
-    _shaderObjects[fileName] = shader;
+    _shaders.push_back(s);
+}
 
-    SetDiagMsg("creating shader obj: %d, program: %d", shader, _program);
+int ShaderProgram::AddShaderFromSource(unsigned int type, const char *source)
+{
+    Shader *s = new Shader(type);
+    int     ret = s->CompileFromSource(source);
+    _shaders.push_back(s);
+    return ret;
+}
+
+/*
+bool ShaderProgram::AddShaderFromFile(unsigned int type, const std::string path)
+{
+    Shader *s = new Shader(type);
+    bool ret = s->CompileFromSource(FileUtils::ReadFileToString(path));
+    _shaders.push_back(s);
+    return ret;
+}
+ */
+
+unsigned int ShaderProgram::GetID() const { return _id; }
+unsigned int ShaderProgram::WasLinkingSuccessful() const { return _successStatus; }
+
+int ShaderProgram::GetAttributeLocation(const std::string &name) const { return glGetAttribLocation(_id, name.c_str()); }
+
+int ShaderProgram::GetUniformLocation(const std::string &name) const { return glGetUniformLocation(_id, name.c_str()); }
+
+template<typename T> bool ShaderProgram::SetUniform(const std::string &name, const T &value) const
+{
+    if (!IsBound()) {
+        assert(!"Program not bound");
+        return false;
+    }
+    const int location = glGetUniformLocation(_id, name.c_str());
+    if (location == -1) {
+        printf("Uniform \"%s\" not found\n", name.c_str());
+        if (UniformNotFoundPolicy == Policy::Strict) assert(!"Uniform name not found");
+        return false;
+    }
+    SetUniform(location, value);
     return true;
 }
 
-//----------------------------------------------------------------------------
-// Create the shader program
-//----------------------------------------------------------------------------
-int ShaderProgram::Create()
+template bool ShaderProgram::SetUniform<int>(const std::string &name, const int &value) const;
+template bool ShaderProgram::SetUniform<bool>(const std::string &name, const bool &value) const;
+template bool ShaderProgram::SetUniform<float>(const std::string &name, const float &value) const;
+template bool ShaderProgram::SetUniform<glm::vec2>(const std::string &name, const glm::vec2 &value) const;
+template bool ShaderProgram::SetUniform<glm::vec3>(const std::string &name, const glm::vec3 &value) const;
+template bool ShaderProgram::SetUniform<glm::vec4>(const std::string &name, const glm::vec4 &value) const;
+template bool ShaderProgram::SetUniform<glm::mat4>(const std::string &name, const glm::mat4 &value) const;
+
+void ShaderProgram::SetUniform(int location, const int &value) const { glUniform1i(location, value); }
+void ShaderProgram::SetUniform(int location, const float &value) const { glUniform1f(location, value); }
+void ShaderProgram::SetUniform(int location, const glm::vec2 &value) const { glUniform2fv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::vec3 &value) const { glUniform3fv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::vec4 &value) const { glUniform4fv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::mat4 &value) const { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)); }
+
+std::string ShaderProgram::GetLog() const
 {
-    if (GLEW_VERSION_2_0) {
-        _program = glCreateProgram();
+    assert(!_shaders.empty());
+    if (_linked) {
+        char buf[512];
+        glGetProgramInfoLog(_id, 512, NULL, buf);
+        return std::string(buf);
     } else {
-        _program = glCreateProgramObjectARB();
+        if (_shaders.empty())
+            return "Cannot linked because there are no shaders";
+        else
+            return "Cannot link because shader failed to compile";
     }
-
-    if (printOpenGLError() != 0) return (-1);
-    return (true);
 }
 
-//----------------------------------------------------------------------------
-// Compile and link the shader program
-//----------------------------------------------------------------------------
-int ShaderProgram::Compile()
+void ShaderProgram::PrintUniforms() const
 {
-    //
-    // Compile all the shaders
-    //
+    GLint  count;
+    GLint  size;
+    GLenum type;
+    char   name[64];
+    int    nameLength;
 
-    bool        compileSuccess = true;
-    std::string shaderErrors("");
-    for (std::map<std::string, GLuint>::const_iterator iter = _shaderObjects.begin(); iter != _shaderObjects.end(); ++iter) {
-        GLuint shader = iter->second;
-        GLint  infologLength = 0;
-        GLint  shaderCompiled;
-
-        if (GLEW_VERSION_2_0) {
-            //
-            // Compile a single shader
-            //
-            glCompileShader(shader);
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderCompiled);
-            if (printOpenGLError() != 0) return (-1);
-
-            //
-            // Print log information
-            //
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLength);
-            if (printOpenGLError() != 0) return (-1);
-
-            if (shaderCompiled != GL_TRUE && infologLength > 1) {
-                GLchar *infoLog = new GLchar[infologLength];
-                int     nWritten = 0;
-
-                glGetShaderInfoLog(shader, infologLength, &nWritten, infoLog);
-
-                std::string output = iter->first + ":\t\n " + (char *)infoLog;
-
-                shaderErrors += output;
-
-                delete[] infoLog;
-                infoLog = NULL;
-            }
-        } else {
-            //
-            // Compile a single shader
-            //
-            glCompileShaderARB(shader);
-            glGetObjectParameterivARB(shader, GL_OBJECT_COMPILE_STATUS_ARB, &shaderCompiled);
-            if (printOpenGLError() != 0) return (-1);
-
-            //
-            // Print log information
-            //
-            glGetObjectParameterivARB(shader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infologLength);
-            if (printOpenGLError() != 0) return (-1);
-
-            if (shaderCompiled != GL_TRUE && infologLength > 1) {
-                GLchar *infoLog = new GLchar[infologLength];
-                int     nWritten = 0;
-
-                glGetInfoLogARB(shader, infologLength, &nWritten, infoLog);
-
-                std::string output = iter->first + ":\t\n " + (char *)infoLog;
-
-                shaderErrors += output;
-                delete[] infoLog;
-                infoLog = NULL;
-            }
-        }
-
-        // if (!compiled)
-        if (shaderCompiled != GL_TRUE) { compileSuccess = false; }
+    glGetProgramiv(_id, GL_ACTIVE_UNIFORMS, &count);
+    for (int i = 0; i < count; i++) {
+        glGetActiveUniform(_id, i, 64, &nameLength, &size, &type, name);
+        printf("%s %s\n", GLTypeToString(type), name);
     }
-
-    if (!compileSuccess) {
-        // print out errrors and exit
-        fprintf(stderr, "Shader InfoLog: %s\n", (GLchar *)shaderErrors.c_str());
-        SetErrMsg("Shader InfoLog:\n%s", (GLchar *)shaderErrors.c_str());
-        return -1;
-    }
-
-    //
-    // Link the program
-    //
-    GLint linked = 0;
-
-    if (GLEW_VERSION_2_0) {
-        glLinkProgram(_program);
-        glGetProgramiv(_program, GL_LINK_STATUS, &linked);
-        if (printOpenGLError() != 0) return (-1);
-
-        //
-        // Print log information
-        //
-        GLint infologLength = 0;
-        glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &infologLength);
-        if (printOpenGLError() != 0) return (-1);
-
-        if (linked != GL_TRUE && infologLength > 1) {
-            GLchar *infoLog = new GLchar[infologLength];
-            int     nWritten = 0;
-
-            glGetProgramInfoLog(_program, infologLength, &nWritten, infoLog);
-
-            SetErrMsg("ShaderProgram Link Error: %s\n", infoLog);
-
-            delete[] infoLog;
-            infoLog = NULL;
-        }
-    } else {
-        glLinkProgramARB(_program);
-        glGetObjectParameterivARB(_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
-        if (printOpenGLError() != 0) return (-1);
-
-        //
-        // Print log information
-        //
-        GLint infologLength = 0;
-        glGetObjectParameterivARB(_program, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infologLength);
-        if (printOpenGLError() != 0) return (-1);
-
-        if (linked != GL_TRUE && infologLength > 1) {
-            GLchar *infoLog = new GLchar[infologLength];
-            int     nWritten = 0;
-
-            glGetInfoLogARB(_program, infologLength, &nWritten, infoLog);
-
-            SetErrMsg("ShaderProgram Link Error: %s\n", infoLog);
-
-            delete[] infoLog;
-            infoLog = NULL;
-        }
-    }
-
-    if (!linked) return (-1);
-    return (0);
 }
 
-//----------------------------------------------------------------------------
-// Enable the shader program.
-//----------------------------------------------------------------------------
-int ShaderProgram::Enable()
+const char *ShaderProgram::GLTypeToString(const unsigned int type)
 {
-    if (GLEW_VERSION_2_0) {
-        glUseProgram(_program);
-    } else {
-        glUseProgramObjectARB(_program);
+    switch (type) {
+    case GL_FLOAT: return "float";
+    case GL_FLOAT_VEC2: return "vec2";
+    case GL_FLOAT_VEC3: return "vec3";
+    case GL_FLOAT_VEC4: return "vec4";
+    case GL_DOUBLE: return "double";
+    case GL_DOUBLE_VEC2: return "dvec2";
+    case GL_DOUBLE_VEC3: return "dvec3";
+    case GL_DOUBLE_VEC4: return "dvec4";
+    case GL_INT: return "int";
+    case GL_INT_VEC2: return "ivec2";
+    case GL_INT_VEC3: return "ivec3";
+    case GL_INT_VEC4: return "ivec4";
+    case GL_UNSIGNED_INT: return "unsigned int";
+    case GL_UNSIGNED_INT_VEC2: return "uvec2";
+    case GL_UNSIGNED_INT_VEC3: return "uvec3";
+    case GL_UNSIGNED_INT_VEC4: return "uvec4";
+    case GL_BOOL: return "bool";
+    case GL_BOOL_VEC2: return "bvec2";
+    case GL_BOOL_VEC3: return "bvec3";
+    case GL_BOOL_VEC4: return "bvec4";
+    case GL_FLOAT_MAT2: return "mat2";
+    case GL_FLOAT_MAT3: return "mat3";
+    case GL_FLOAT_MAT4: return "mat4";
+    case GL_FLOAT_MAT2x3: return "mat2x3";
+    case GL_FLOAT_MAT2x4: return "mat2x4";
+    case GL_FLOAT_MAT3x2: return "mat3x2";
+    case GL_FLOAT_MAT3x4: return "mat3x4";
+    case GL_FLOAT_MAT4x2: return "mat4x2";
+    case GL_FLOAT_MAT4x3: return "mat4x3";
+    case GL_DOUBLE_MAT2: return "dmat2";
+    case GL_DOUBLE_MAT3: return "dmat3";
+    case GL_DOUBLE_MAT4: return "dmat4";
+    case GL_DOUBLE_MAT2x3: return "dmat2x3";
+    case GL_DOUBLE_MAT2x4: return "dmat2x4";
+    case GL_DOUBLE_MAT3x2: return "dmat3x2";
+    case GL_DOUBLE_MAT3x4: return "dmat3x4";
+    case GL_DOUBLE_MAT4x2: return "dmat4x2";
+    case GL_DOUBLE_MAT4x3: return "dmat4x3";
+    case GL_SAMPLER_1D: return "sampler1D";
+    case GL_SAMPLER_2D: return "sampler2D";
+    case GL_SAMPLER_3D: return "sampler3D";
+    case GL_SAMPLER_CUBE: return "samplerCube";
+    case GL_SAMPLER_1D_SHADOW: return "sampler1DShadow";
+    case GL_SAMPLER_2D_SHADOW: return "sampler2DShadow";
+    case GL_SAMPLER_1D_ARRAY: return "sampler1DArray";
+    case GL_SAMPLER_2D_ARRAY: return "sampler2DArray";
+    case GL_SAMPLER_1D_ARRAY_SHADOW: return "sampler1DArrayShadow";
+    case GL_SAMPLER_2D_ARRAY_SHADOW: return "sampler2DArrayShadow";
+    case GL_SAMPLER_2D_MULTISAMPLE: return "sampler2DMS";
+    case GL_SAMPLER_2D_MULTISAMPLE_ARRAY: return "sampler2DMSArray";
+    case GL_SAMPLER_CUBE_SHADOW: return "samplerCubeShadow";
+    case GL_SAMPLER_BUFFER: return "samplerBuffer";
+    case GL_SAMPLER_2D_RECT: return "sampler2DRect";
+    case GL_SAMPLER_2D_RECT_SHADOW: return "sampler2DRectShadow";
+    case GL_INT_SAMPLER_1D: return "isampler1D";
+    case GL_INT_SAMPLER_2D: return "isampler2D";
+    case GL_INT_SAMPLER_3D: return "isampler3D";
+    case GL_INT_SAMPLER_CUBE: return "isamplerCube";
+    case GL_INT_SAMPLER_1D_ARRAY: return "isampler1DArray";
+    case GL_INT_SAMPLER_2D_ARRAY: return "isampler2DArray";
+    case GL_INT_SAMPLER_2D_MULTISAMPLE: return "isampler2DMS";
+    case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: return "isampler2DMSArray";
+    case GL_INT_SAMPLER_BUFFER: return "isamplerBuffer";
+    case GL_INT_SAMPLER_2D_RECT: return "isampler2DRect";
+    case GL_UNSIGNED_INT_SAMPLER_1D: return "usampler1D";
+    case GL_UNSIGNED_INT_SAMPLER_2D: return "usampler2D";
+    case GL_UNSIGNED_INT_SAMPLER_3D: return "usampler3D";
+    case GL_UNSIGNED_INT_SAMPLER_CUBE: return "usamplerCube";
+    case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: return "usampler2DArray";
+    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: return "usampler2DArray";
+    case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: return "usampler2DMS";
+    case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: return "usampler2DMSArray";
+    case GL_UNSIGNED_INT_SAMPLER_BUFFER: return "usamplerBuffer";
+    case GL_UNSIGNED_INT_SAMPLER_2D_RECT: return "usampler2DRect";
+#ifdef GL_IMAGE_1D
+    case GL_IMAGE_1D: return "image1D";
+    case GL_IMAGE_2D: return "image2D";
+    case GL_IMAGE_3D: return "image3D";
+    case GL_IMAGE_2D_RECT: return "image2DRect";
+    case GL_IMAGE_CUBE: return "imageCube";
+    case GL_IMAGE_BUFFER: return "imageBuffer";
+    case GL_IMAGE_1D_ARRAY: return "image1DArray";
+    case GL_IMAGE_2D_ARRAY: return "image2DArray";
+    case GL_IMAGE_2D_MULTISAMPLE: return "image2DMS";
+    case GL_IMAGE_2D_MULTISAMPLE_ARRAY: return "image2DMSArray";
+    case GL_INT_IMAGE_1D: return "iimage1D";
+    case GL_INT_IMAGE_2D: return "iimage2D";
+    case GL_INT_IMAGE_3D: return "iimage3D";
+    case GL_INT_IMAGE_2D_RECT: return "iimage2DRect";
+    case GL_INT_IMAGE_CUBE: return "iimageCube";
+    case GL_INT_IMAGE_BUFFER: return "iimageBuffer";
+    case GL_INT_IMAGE_1D_ARRAY: return "iimage1DArray";
+    case GL_INT_IMAGE_2D_ARRAY: return "iimage2DArray";
+    case GL_INT_IMAGE_2D_MULTISAMPLE: return "iimage2DMS";
+    case GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY: return "iimage2DMSArray";
+    case GL_UNSIGNED_INT_IMAGE_1D: return "uimage1D";
+    case GL_UNSIGNED_INT_IMAGE_2D: return "uimage2D";
+    case GL_UNSIGNED_INT_IMAGE_3D: return "uimage3D";
+    case GL_UNSIGNED_INT_IMAGE_2D_RECT: return "uimage2DRect";
+    case GL_UNSIGNED_INT_IMAGE_CUBE: return "uimageCube";
+    case GL_UNSIGNED_INT_IMAGE_BUFFER: return "uimageBuffer";
+    case GL_UNSIGNED_INT_IMAGE_1D_ARRAY: return "uimage1DArray";
+    case GL_UNSIGNED_INT_IMAGE_2D_ARRAY: return "uimage2DArray";
+    case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE: return "uimage2DMS";
+    case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY: return "uimage2DMSArray";
+    case GL_UNSIGNED_INT_ATOMIC_COUNTER: return "atomic_uint";
+#endif
+    default: return "INVALID ENUM";
     }
-
-    if (printOpenGLError() != 0) return (-1);
-    return (0);
 }
 
-//----------------------------------------------------------------------------
-// Disable the shader program.
-//----------------------------------------------------------------------------
-void ShaderProgram::Disable()
+SmartShaderProgram::SmartShaderProgram(ShaderProgram *program) : _program(program)
 {
-    if (GLEW_VERSION_2_0) {
-        glUseProgram(0);
-    } else {
-        glUseProgramObjectARB(0);
-    }
-
-    printOpenGLError();
+    if (_program) _program->Bind();
 }
 
-//----------------------------------------------------------------------------
-// Find uniform location in the shader.
-//----------------------------------------------------------------------------
-GLint ShaderProgram::UniformLocation(const string &uniformName)
+SmartShaderProgram::~SmartShaderProgram()
 {
-    GLint location;
-    if (GLEW_VERSION_2_0) {
-        location = glGetUniformLocation(_program, uniformName.c_str());
-    } else {
-        location = glGetUniformLocationARB(_program, uniformName.c_str());
-    }
-    if (location == -1) { SetErrMsg("uniform \"%s\" not found.\n", uniformName.c_str()); }
-
-    printOpenGLError();
-
-    return location;
+    if (_program) _program->UnBind();
 }
 
-//----------------------------------------------------------------------------
-// Find attribute location in the shader.
-//----------------------------------------------------------------------------
-GLint ShaderProgram::AttributeLocation(const string &attributeName) const
-{
-    GLint location;
-    if (GLEW_VERSION_2_0) {
-        location = glGetAttribLocation(_program, attributeName.c_str());
-    } else {
-        location = glGetAttribLocationARB(_program, attributeName.c_str());
-    }
-    if (location == -1) { SetErrMsg("attribute \"%s\" not found.\n", attributeName.c_str()); }
-
-    printOpenGLError();
-
-    return location;
-}
-
-//----------------------------------------------------------------------------
-// Determine if shader programming is supported.
-//----------------------------------------------------------------------------
-bool ShaderProgram::Supported() { return (GLEW_VERSION_2_0 || GLEW_ARB_shader_objects); }
-
-GLuint ShaderProgram::GetProgram() { return _program; }
-
-void ShaderProgram::PrintContents()
-{
-    std::cout << "Program " << (int)_program << " Shader Objects: \n\t";
-    for (std::map<std::string, GLuint>::const_iterator iter = _shaderObjects.begin(); iter != _shaderObjects.end(); ++iter) { std::cout << iter->first << "\n\t"; }
-    std::cout << std::endl;
-}
+bool SmartShaderProgram::IsValid() const { return _program; }
