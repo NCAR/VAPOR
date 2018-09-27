@@ -60,8 +60,8 @@ namespace {
 
 	// Texture units. Only use data texture if GridAligned is false
 	//
-	const int dataTexUnit = 0; // GL_TEXTURE0
-	const int colormapTexUnit = 1;          // GL_TEXTURE1
+	// const int dataTexUnit = 0; // GL_TEXTURE0
+    // const int colormapTexUnit = 1;          // GL_TEXTURE1
 
 	// Return name of GLSL shader instance to use
 	//
@@ -162,8 +162,6 @@ TwoDDataRenderer::~TwoDDataRenderer()
 
 int TwoDDataRenderer::_initializeGL() {
     GL_ERR_BREAK();
-
-	int rc;
 
 	glGenTextures(1, &_cMapTexID);
 
