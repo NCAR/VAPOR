@@ -214,7 +214,6 @@ int BarbRenderer::_getVectorVarGrids(
         return -1;
     	//glEndList();
 	}
-    GL_ERR_BREAK();
 
 	// Get grids for our vector variables
 	//
@@ -269,12 +268,11 @@ int BarbRenderer::_getVarGrid(
 		}
 		varData[varData.size()-1] = sg;
 	}
-    GL_ERR_BREAK();
 
 	return 0;
 }
 
-int BarbRenderer::_paintGL(bool){
+int BarbRenderer::_paintGL(bool) {
     int rc = 0;
     
     // _saveCacheParams();
