@@ -62,72 +62,102 @@ vec3 GetCoordinates( const in ivec3 index )
 }
 
 //
-// Input:  texture coordinates of the current fragment
-// Output: the triangle that this fragment is in, 
-//         represented as either v2 or v3 in the following diagram
-// Return: true  == the current fragment is inside one of the two triangles. false otherwise.
+// Input:  the coordinates of the current fragment and the provoking vertex.
+//         the indices of two vertices: v1 and v2.
+// Output: true or false that the current fragment is in between of v1-pv-v2.
 //
-bool GetTriangle( const in vec3 fragCoords, out int V2orV3 )
+bool BetweenTwoDirections( const in vec3  fragCoords, const in vec3  pvCoords,
+                           const in ivec3 v1Idx,      const in ivec3 v2Idx   )
 {
-    if( logicalIdx.w == 0 )                 // front face, so z is fixed
+        vec3 v1Coords = GetCoordinates( v1Idx );
+        vec3 v2Coords = GetCoordinates( v2Idx );
+
+        vec3 v1Dir = normalize( v1Coords   - pvCoords );
+        vec3 v2Dir = normalize( v2Coords   - pvCoords );
+        vec3 fgDir = normalize( fragCoords - pvCoords );
+
+        float dot1 = dot( v1Dir, v2Dir );
+        float dot2 = 1.0;
+        float dotf = dot( fgDir, v2Dir );
+
+        if( dot2 >= dotf && dotf > dot1 )   // fragCoords is between v1 and v2.
+            return true;
+        else
+            return false;
+}
+
+//
+// Input:  Texture coordinates of the current fragment
+// Output: Indication of which of the two triangle that this fragment is in.
+//         True == triangle of pv-v1-v2. False == triangle of pv-v1-v3.
+//         Please see the diagrams below.
+//
+bool DistinguishTriangle( const in vec3 fragCoords )
+{
+    ivec3 pvIdx = logicalIdx.xyz;       // provoking vertex
+    vec3  pvCds = GetCoordinates( pvIdx );
+    if( logicalIdx.w == 0 )             // front face, z == volumeDims.z - 1
     {
-        //        v3
-        //       /|
-        //      / |
-        //     /  |
-        //    /   |
-        //   /    |
-        //  v1----pv
-        //  |    /
-        //  |   /
-        //  |  /
-        //  | /
-        //  |/
-        //  v2
+        //  View direction: (0, 0, -Z)
+        //  (pv and v1 are with either triangle)
         //
-        ivec3 pvIdx = logicalIdx.xyz;       // provoking vertex
+        //               v3 (false)
+        //              /|
+        //             / |
+        //            /  |
+        //           /   |
+        //          /    |             Y
+        //         v1----pv            |
+        //         |    /              |
+        //         |   /               |
+        //         |  /                /-------- X
+        //         | /                /
+        //         |/                /
+        //         v2 (true)        Z  ( Z comes out of the screen )
+        //
         ivec3 v1Idx = ivec3( pvIdx.x - 1, pvIdx.y,     pvIdx.z );
         ivec3 v2Idx = ivec3( pvIdx.x - 1, pvIdx.y - 1, pvIdx.z );
         ivec3 v3Idx = ivec3( pvIdx.x,     pvIdx.y + 1, pvIdx.z );
-        vec3  pvCds = GetCoordinates( pvIdx );
-        vec3  v1Cds = GetCoordinates( v1Idx );
         if( v2Idx.y < 0 )                       // the triangle is pv, v1, v3
-        {
-            V2orV3  = 3;
-            return true;
-        }
+            return false;
         else if( v3Idx.y > (volumeDims.y - 1) ) // the triangle is pv, v1, v2
-        {
-            V2orV3  = 2;
             return true;
-        }
         else                                    // real detection work...
         {
-            vec3 v2Cds = GetCoordinates( v2Idx );
-            vec3 v3Cds = GetCoordinates( v3Idx );
-
-            vec3 v1Dir = normalize( v1Cds - pvCds );
-            vec3 v2Dir = normalize( v2Cds - pvCds );
-            vec3 v3Dir = normalize( v3Cds - pvCds );
-            vec3 fgDir = normalize( fragCoords - pvCds );
-
-            float dot1 = dot( v1Dir, v2Dir );
-            float dot2 = 1.0;
-            float dot3 = dot( v3Dir, v2Dir );
-            float dotf = dot( fgDir, v2Dir );
-
-            if( dot2 >= dotf && dotf >= dot1 )  // the triangle of pv, v1, v2
-            {
-                V2orV3  = 2;
-                return true;
-            }
-            else if( dot1 >= dotf && dotf >= dot3 ) // triangle of pv, v1, v3
-            {
-                V2orV3  = 3;
-                return true;
-            }
-            else
-                return false;
+            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+            return v1v2;
+        }
+    }
+    else if( logicalIdx.w == 1 )    // back face, so z == 0
+    {
+        //  View direction: (0, 0, +Z)
+        //  (pv and v1 are with either triangle)
+        //
+        //               v3 (false)
+        //              /|
+        //             / |
+        //            /  |
+        //           /   |
+        //          /    |
+        //         pv----v1 
+        //         |    /
+        //         |   /               Z    Y
+        //         |  /                 \   |
+        //         | /                   \  |
+        //         |/                     \ |
+        //         v2 (true)        X _____\|   ( Z goes into the screen )
+        //
+        ivec3 v1Idx = ivec3( pvIdx.x - 1, pvIdx.y,      pvIdx.z );
+        ivec3 v2Idx = ivec3( pvIdx.x,     pvIdx.y - 1,  pvIdx.z );
+        ivec3 v3Idx = ivec3( pvIdx.x - 1, pvIdx.y + 1,  pvIdx.z );
+        if( v2Idx.y < 0 )
+            return false;
+        else if( v3Idx.y > (volumeDims.y - 1) )
+            return true;
+        else
+        {
+            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+            return v1v2;
         }
     }
 }
@@ -247,11 +277,10 @@ void main(void)
         discard;
 
     color = vec4( vec3(logicalIdx.rgb) / volumeDimsf, 0.8f );
-    if( logicalIdx.a == 0 )
+    if( logicalIdx.a == 0 || logicalIdx.a == 1 )
     {
-        int  V2orV3;
-        bool rt = GetTriangle( startTexture, V2orV3 );
-        if(  V2orV3 == 2 )
+        bool v2Ques = DistinguishTriangle( startTexture );
+        if(  v2Ques )
             color.a = 1.0;
         else
             color.a = 0.5;
