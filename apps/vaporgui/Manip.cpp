@@ -463,6 +463,7 @@ bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3],
         // Subtract camera coords to get a direction vector:
         vsub(pt, _cameraPosition, dirVec);
     }
+    GL_ERR_BREAK();
     return success;
 }
 
@@ -608,11 +609,9 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
 
     GLfloat lineWidthRange[2] = {0.0f, 0.0f};
     glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
-    GL_ERR_BREAK();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    GL_ERR_BREAK();
 
     // Do left (x=0)
     if (isSelected)
@@ -625,7 +624,6 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
     lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MAXZ]);
     lgl->Vertex3f(extents[MINX], extents[MAXY], extents[MINZ]);
     lgl->End();
-    GL_ERR_BREAK();
 
     // do right
     if (isSelected)
@@ -690,20 +688,17 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected)
 
     lgl->Color4f(1, 1, 1, 1);
     glDisable(GL_BLEND);
-    GL_ERR_BREAK();
 }
 
 // Renders handles and box
 // If it is stretching, it only moves the one handle that is doing the stretching
 void TranslateStretchManip::Render()
 {
-    GL_ERR_BREAK();
     transformMatrix(_dmTransform);
     if (_rpTransform != NULL) transformMatrix(_rpTransform);
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
-    GL_LEGACY(glPushAttrib(GL_CURRENT_BIT));
     double handleExtents[6];
     for (int handleNum = 0; handleNum < 6; handleNum++) {
         makeHandleExtents(handleNum, handleExtents, 0 /*octant*/, _selection);
@@ -726,25 +721,17 @@ void TranslateStretchManip::Render()
                 handleExtents[axis + 3] += _dragDistance;
             }
         }
-        GL_ERR_BREAK();
         drawCubeFaces(handleExtents, (handleNum == _selectedHandle));
-        GL_ERR_BREAK();
         drawHandleConnector(handleNum, handleExtents, _selection);
-        GL_ERR_BREAK();
     }
-    GL_ERR_BREAK();
     // Then render the full box, unhighlighted and displaced
     drawBoxFaces();
-    GL_ERR_BREAK();
-
-    GL_LEGACY(glPopAttrib());
 
     MatrixManager *mm = _glManager->matrixManager;
 
     mm->PopMatrix();             // Pop the matrix applied for the DataMgr's transform
     if (_rpTransform != NULL)    // Pop the matrix applied for the RenderParams' transform
         mm->PopMatrix();
-    GL_ERR_BREAK();
 }
 
 double TranslateStretchManip::getPixelSize() const
@@ -824,7 +811,6 @@ void TranslateStretchManip::drawBoxFaces() const
         else if (_dragDistance != 0.)
             _translateCorners(corners);
     }
-    GL_ERR_BREAK();
 
     // Now render the edges:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -869,7 +855,6 @@ void TranslateStretchManip::drawBoxFaces() const
 
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
-    GL_ERR_BREAK();
 }
 
 void TranslateStretchManip::_stretchCorners(double corners[8][3]) const
@@ -1078,26 +1063,20 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
             handleDisp[i] = 0.f;
         }
     }
-    GL_ERR_BREAK();
     GL_LEGACY(glLineWidth(2.0));
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GL_ERR_BREAK();
     GL_LEGACY(glPolygonMode(GL_FRONT, GL_FILL));
-    GL_ERR_BREAK();
     if ((handleNum == _selectedHandle) || (handleNum == (5 - _selectedHandle)))
         lgl->Color4fv(_faceSelectionColor);
     else
         lgl->Color4fv(_unselectedFaceColor);
-    GL_ERR_BREAK();
     lgl->Begin(GL_LINES);
     lgl->Vertex3f(0.5f * (handleExtents[MAXX] + handleExtents[MINX]) + handleDisp[X], 0.5f * (handleExtents[MAXY] + handleExtents[MINY]) + handleDisp[Y],
                   0.5f * (handleExtents[MAXZ] + handleExtents[MINZ]) + handleDisp[Z]);
     lgl->Vertex3f(0.5f * (boxExtents[MAXX] + boxExtents[MINX]) + boxDisp[X], 0.5f * (boxExtents[MAXY] + boxExtents[MINY]) + boxDisp[Y], 0.5f * (boxExtents[MAXZ] + boxExtents[MINZ]) + boxDisp[Z]);
     lgl->End();
-    GL_ERR_BREAK();
     glDisable(GL_BLEND);
-    GL_ERR_BREAK();
 }
 
 // This is a utility to draw the hitbox over the handle.  It can be

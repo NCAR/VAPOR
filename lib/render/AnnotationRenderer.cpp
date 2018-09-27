@@ -77,8 +77,6 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const
     vector<double> minExts, maxExts;
     m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
 
-    GL_ERR_BREAK();
-
     int    i;
     int    numLines[3];
     double fullSize[3], modMin[3], modMax[3];
@@ -98,24 +96,16 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const
             numLines[i] = 1;
     }
 
-    GL_ERR_BREAK();
-
     double clr[3];
     vfParams->GetDomainColor(clr);
-    // glColor3dv(clr);
-    GL_ERR_BREAK();
     glLineWidth(1);
-    GL_ERR_BREAK();
     // Now draw the lines.  Divide each dimension into numLines[dim] sections.
 
     int x, y, z;
     // Do the lines in each z-plane
     // Turn on writing to the z-buffer
-    GL_ERR_BREAK();
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-
-    GL_ERR_BREAK();
 
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color3f(clr[0], clr[1], clr[2]);
@@ -139,8 +129,6 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const
     }
     // Do the lines in each y-plane
 
-    GL_ERR_BREAK();
-
     for (y = 0; y <= numLines[1]; y++) {
         float yCrd = modMin[1] + ((float)y / (float)numLines[1]) * fullSize[1];
         // Draw lines in x direction for each z
@@ -158,8 +146,6 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const
             lgl->Vertex3f(xCrd, yCrd, modMax[2]);
         }
     }
-
-    GL_ERR_BREAK();
 
     // Do the lines in each x-plane
     for (x = 0; x <= numLines[0]; x++) {
@@ -183,8 +169,6 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-
-    GL_ERR_BREAK();
 }
 
 void AnnotationRenderer::DrawText()
@@ -281,13 +265,10 @@ void AnnotationRenderer::applyTransform(Transform *t)
     _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);    // glTranslatef(-origin[0], -origin[1], -origin[2]);
 
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);    // glTranslatef(translate[0], translate[1], translate[2]);
-
-    GL_ERR_BREAK();
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts)
 {
-    GL_ERR_BREAK();
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     MatrixManager *   mm = _glManager->matrixManager;
 
@@ -300,42 +281,32 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     vector<string>   winNames = m_paramsMgr->GetVisualizerNames();
     ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
-    GL_ERR_BREAK();
 
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     Transform *    t = vpParams->GetTransform(names[0]);
     applyTransform(t);
-    GL_ERR_BREAK();
 
     double mvMatrix[16];
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
     vpParams->SetModelViewMatrix(mvMatrix);
-    GL_ERR_BREAK();
 
     if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
-    GL_ERR_BREAK();
 
     if (vfParams->GetShowAxisArrows()) {
         vector<double> minExts, maxExts;
         m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
-        GL_ERR_BREAK();
         drawAxisArrows(minExts, maxExts);
-        GL_ERR_BREAK();
     }
-    GL_ERR_BREAK();
 
     AxisAnnotation *aa = vfParams->GetAxisAnnotation();
     if (aa->GetAxisAnnotationEnabled()) drawAxisTics(aa);
-    GL_ERR_BREAK();
 
-    // glPopAttrib(); // TODO GL
     mm->MatrixModeModelView();
     mm->PopMatrix();
 
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
     vpParams->SetModelViewMatrix(mvMatrix);
 
-    GL_ERR_BREAK();
     printOpenGLErrorMsg(m_winName.c_str());
 }
 
@@ -454,9 +425,6 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa)
         _drawTic(startPosn, endPosn, width, axisColor);
         renderText(pointOnAxis[2], startPosn, aa);
     }
-
-    // glPopAttrib(); // TODO GL
-    GL_ERR_BREAK();
 }
 
 void AnnotationRenderer::_drawAxes(std::vector<double> min, std::vector<double> max, std::vector<double> origin, std::vector<double> color, double width)
@@ -480,7 +448,6 @@ void AnnotationRenderer::_drawAxes(std::vector<double> min, std::vector<double> 
     glDisable(GL_LINE_SMOOTH);
     // glEnable(GL_LIGHTING);
     // glPopAttrib(); // TODO GL
-    GL_ERR_BREAK();
 }
 
 void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double width, std::vector<double> color)
@@ -496,7 +463,6 @@ void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double w
     lgl->End();
     glDisable(GL_LINE_SMOOTH);
     // glPopAttrib(); // TODO GL
-    GL_ERR_BREAK();
 }
 
 void AnnotationRenderer::convertPointToLon(double &xCoord)
@@ -624,7 +590,6 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
         origin[i] = minExts[i] + (axisArrowCoords[i]) * (maxExts[i] - minExts[i]);
         if (maxExts[i] - minExts[i] > maxLen) { maxLen = maxExts[i] - minExts[i]; }
     }
-    GL_ERR_BREAK();
 
     LegacyGL *lgl = _glManager->legacy;
 
@@ -632,13 +597,10 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
     float len = maxLen * 0.2f;
     lgl->Color3f(1.f, 0.f, 0.f);
     GL_LEGACY(glLineWidth(4.0));
-    GL_ERR_BREAK();
     glEnable(GL_LINE_SMOOTH);
-    GL_ERR_BREAK();
     lgl->Begin(GL_LINES);
     lgl->Vertex3fv(origin);
     lgl->Vertex3f(origin[0] + len, origin[1], origin[2]);
-    GL_ERR_BREAK();
 
     lgl->End();
     lgl->Begin(GL_TRIANGLES);
@@ -658,7 +620,6 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
     lgl->Vertex3f(origin[0] + .8 * len, origin[1], origin[2] - .1 * len);
     lgl->Vertex3f(origin[0] + .8 * len, origin[1] + .1 * len, origin[2]);
     lgl->End();
-    GL_ERR_BREAK();
 
     lgl->Color3f(0.f, 1.f, 0.f);
     lgl->Begin(GL_LINES);
@@ -704,10 +665,6 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
     lgl->Vertex3f(origin[0], origin[1] - .1 * len, origin[2] + .8 * len);
     lgl->Vertex3f(origin[0] + .1 * len, origin[1], origin[2] + .8 * len);
     lgl->End();
-    GL_ERR_BREAK();
 
     glDisable(GL_LINE_SMOOTH);
-    // Revert to previous GL color state
-    // glPopAttrib(); // TODO GL
-    GL_ERR_BREAK();
 }

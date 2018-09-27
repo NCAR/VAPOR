@@ -139,7 +139,6 @@ int Renderer::paintGL(bool fast)
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 
     int rc = _paintGL(fast);
-    GL_ERR_BREAK();
 
     _glManager->matrixManager->PopMatrix();
 
@@ -147,7 +146,6 @@ int Renderer::paintGL(bool fast)
 
     vector<int> status;
     bool        ok = oglStatusOK(status);
-    GL_ERR_BREAK();
     if (!ok) {
         SetErrMsg("OpenGL error : %s", oglGetErrMsg(status).c_str());
         return (-1);
@@ -206,7 +204,6 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const
         shader->SetUniform("clippingPlanes[4]", glm::make_vec4(z0Plane));
         shader->SetUniform("clippingPlanes[5]", glm::make_vec4(z1Plane));
     }
-    GL_ERR_BREAK();
 }
 
 void Renderer::EnableClipToBox2DXY(float haloFrac) const
@@ -456,22 +453,18 @@ void Renderer::renderColorbar()
     // Disable z-buffer compare, always overwrite:
     glDepthFunc(GL_ALWAYS);
     lgl->EnableTexture();    // glEnable(GL_TEXTURE_2D);
-    GL_ERR_BREAK();
 
     // create a polygon appropriately positioned in the scene.  It's inside the unit cube--
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE, _colorbarTexture);
-    GL_ERR_BREAK();
 
     vector<double> cornerPosn = cbpb->GetCornerPosition();
     vector<double> cbsize = cbpb->GetSize();
-    GL_ERR_BREAK();
 
     // Note that GL reverses y coordinates
     float llx = 2. * cornerPosn[0] - 1.;
     float lly = 2. * (cornerPosn[1] + cbsize[1]) - 1.;
     float urx = 2. * (cornerPosn[0] + cbsize[0]) - 1.;
     float ury = 2. * cornerPosn[1] - 1.;
-    GL_ERR_BREAK();
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -487,15 +480,12 @@ void Renderer::renderColorbar()
     lgl->End();
 
     lgl->DisableTexture();    // glDisable(GL_TEXTURE_2D);
-    GL_ERR_BREAK();
 
     // Draw numeric text annotation
     //
     renderColorbarText(cbpb, fbWidth, fbHeight, llx, lly, urx, ury);
-    GL_ERR_BREAK();
 
     glDepthFunc(GL_LESS);
-    GL_ERR_BREAK();
 }
 
 void Renderer::renderColorbarText(ColorbarPbase *cbpb, float fbWidth, float fbHeight, float llx, float lly, float urx, float ury)

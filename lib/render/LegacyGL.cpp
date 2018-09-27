@@ -172,21 +172,3 @@ void LegacyGL::LightDirectionfv(const float *f)
 
 void LegacyGL::EnableTexture() { _textureEnabled = true; }
 void LegacyGL::DisableTexture() { _textureEnabled = false; }
-
-#ifndef NDEBUG
-void LegacyGL::TestSquare()
-{
-    GL_ERR_BREAK();
-    Normal3f(0, 0, 1);
-    Begin(GL_TRIANGLES);
-    Vertex3f(-1, -1, 0);
-    Vertex3f(1, -1, 0);
-    Vertex3f(-1, 1, 0);
-
-    Vertex3f(-1, 1, 0);
-    Vertex3f(1, -1, 0);
-    Vertex3f(1, 1, 0);
-    End();
-    GL_ERR_BREAK();
-}
-#endif

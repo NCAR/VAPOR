@@ -238,33 +238,22 @@ int WireFrameRenderer::_buildCache()
     if (grid) delete grid;
     if (heightGrid) delete heightGrid;
 
-    GL_ERR_BREAK();
-
     _nIndices = indices.size();
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
-    GL_ERR_BREAK();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
-    GL_ERR_BREAK();
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    GL_ERR_BREAK();
-    // glEndList();
     return 0;
 }
 
 int WireFrameRenderer::_paintGL(bool fast)
 {
-    GL_ERR_BREAK();
-
     int rc = 0;
     if (_isCacheDirty()) rc = _buildCache();
-
-    GL_ERR_BREAK();
 
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Wireframe");
     if (!shader.IsValid()) return -1;
@@ -279,8 +268,6 @@ int WireFrameRenderer::_paintGL(bool fast)
 
     DisableClippingPlanes();    // TODO GL
     glBindVertexArray(0);
-
-    GL_ERR_BREAK();
 
     return rc;
 }

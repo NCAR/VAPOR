@@ -203,8 +203,6 @@ int Visualizer::paintEvent(bool fast)
 
     if (timeStep != _previousTimeStep) { _previousTimeStep = timeStep; }
 
-    GL_ERR_BREAK();
-
     // Prepare for Renderers
     // Make the depth buffer writable
     glDepthMask(GL_TRUE);
@@ -220,19 +218,14 @@ int Visualizer::paintEvent(bool fast)
     // Sort them;  If they are opaque, they go first.  If not opaque, they
     // are sorted back-to-front.  Note: This only works if all the geometry of a renderer is ordered by
     // a simple depth test.
-
-    GL_ERR_BREAK();
     int rc = 0;
     // Now go through all the active renderers, provided the error has not been set
     for (int i = 0; i < _renderer.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
-        GL_ERR_BREAK();
         // Push or reset state
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
-        GL_LEGACY(glPushAttrib(GL_ALL_ATTRIB_BITS));
-        GL_ERR_BREAK();
 
         if (!_renderer[i]->IsGLInitialized()) {
             int myrc = _renderer[i]->initializeGL(_glManager);
@@ -240,41 +233,31 @@ int Visualizer::paintEvent(bool fast)
             if (myrc < 0) rc = -1;
         }
 
-        GL_ERR_BREAK();
         if (_renderer[i]->IsGLInitialized()) {
             applyTransforms(i);
-            GL_ERR_BREAK();
-            GL_ERR_BREAK();
             int myrc = _renderer[i]->paintGL(fast);
+            GL_ERR_BREAK();
             if (myrc < 0) { rc = -1; }
-            GL_ERR_BREAK();
             _glManager->matrixManager->PopMatrix();
-            GL_ERR_BREAK();
             if (myrc < 0) { rc = -1; }
         }
-        GL_ERR_BREAK();
-        GL_LEGACY(glPopAttrib());
-        GL_ERR_BREAK();
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PopMatrix();
         int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
         if (myrc < 0) { rc = -1; }
     }
-    GL_ERR_BREAK();
 
     if (m_vizFeatures) {
         // Draw the domain frame and other in-scene features
-        //
         m_vizFeatures->InScenePaint(timeStep);
+        GL_ERR_BREAK();
     }
-    GL_ERR_BREAK();
 
     // _glManager->ShowDepthBuffer();
 
     // Go back to MODELVIEW for any other matrix stuff
     // By default the matrix is expected to be MODELVIEW
     _glManager->matrixManager->MatrixModeModelView();
-    GL_ERR_BREAK();
 
     // Draw any features that are overlaid on scene
 
@@ -285,7 +268,6 @@ int Visualizer::paintEvent(bool fast)
 
     // Perform final touch-up on the final images, before capturing or displaying them.
     glFlush();
-    GL_ERR_BREAK();
 
     if (_imageCaptureEnabled) {
         captureImage(_captureImageFile);
@@ -552,7 +534,6 @@ int Visualizer::placeLights()
         GL_LEGACY(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
         GL_LEGACY(glLightfv(GL_LIGHT0, GL_POSITION, lightDirs[0]));
         lgl->LightDirectionfv(lightDirs[0]);
-        GL_ERR_BREAK();
 
         specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(0);
 
@@ -563,7 +544,6 @@ int Visualizer::placeLights()
         GL_LEGACY(glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient));
         // Following has unpleasant effects on flow line lighting
         // glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-        GL_ERR_BREAK();
 
         GL_LEGACY(glEnable(GL_LIGHT0));
         if (printOpenGLError()) {
@@ -791,19 +771,11 @@ bool Visualizer::getPixelData(unsigned char *data) const
         ;
 
     glReadBuffer(GL_BACK);
-    GL_ERR_BREAK();
     glDisable(GL_SCISSOR_TEST);
-    GL_ERR_BREAK();
-
-    // Turn off texturing in case it is on - some drivers have a problem
-    // getting / setting pixels with texturing enabled.
-    GL_ERR_BREAK();
 
     // Calling pack alignment ensures that we can grab the any size window
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    GL_ERR_BREAK();
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
-    GL_ERR_BREAK();
     if (glGetError() != GL_NO_ERROR) return false;
     // Unfortunately gl reads these in the reverse order that jpeg expects, so
     // Now we need to swap top and bottom!
@@ -832,7 +804,6 @@ void Visualizer::renderColorbars(int timeStep)
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
         _renderer[i]->renderColorbar();
-        GL_ERR_BREAK();
     }
     mm->MatrixModeProjection();
     mm->PopMatrix();

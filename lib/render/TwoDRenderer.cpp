@@ -77,14 +77,11 @@ int TwoDRenderer::_initializeGL()
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    GL_ERR_BREAK();
     return (0);
 }
 
 int TwoDRenderer::_paintGL(bool)
 {
-    GL_ERR_BREAK();
-
     // Get the 2D texture
     //
     _texture = GetTexture(_dataMgr, _texWidth, _texHeight, _texInternalFormat, _texFormat, _texType, _texelSize, _gridAligned);
@@ -98,9 +95,7 @@ int TwoDRenderer::_paintGL(bool)
     int rc = GetMesh(_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight, &_indices, _nindices, _structuredMesh);
     if (rc < 0) { return (-1); }
 
-    GL_ERR_BREAK();
     EnableClipToBox(_glManager->shaderManager->GetShader("2DData"));    // TODO GL
-    GL_ERR_BREAK();
 
     // ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
     // ShaderProgram *shader = _glManager->shaderManager->GetShader("2DData", true);
@@ -119,13 +114,11 @@ int TwoDRenderer::_paintGL(bool)
 
         // Render the 2D surface
         //
-        GL_ERR_BREAK();
         _renderMeshUnAligned();
     } else {
         assert(_meshWidth == _texWidth);
         assert(_meshHeight == _texHeight);
 
-        GL_ERR_BREAK();
         _renderMeshAligned();
     }
     // DisableClippingPlanes();
@@ -148,16 +141,11 @@ void TwoDRenderer::_openGLInit()
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, _texInternalFormat, _texWidth, _texHeight, 0, _texFormat, _texType, _texture);
     }
-    GL_ERR_BREAK();
 
     _glManager->matrixManager->MatrixModeModelView();
 
-    GL_ERR_BREAK();
     glEnable(GL_BLEND);
-    GL_ERR_BREAK();
-    GL_ERR_BREAK();
     glEnable(GL_DEPTH_TEST);
-    GL_ERR_BREAK();
 
     // LIGHTING IS NOT ENABLED
     //
@@ -173,16 +161,12 @@ void TwoDRenderer::_openGLInit()
     }
      */
 
-    GL_ERR_BREAK();
-
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GL_ERR_BREAK();
 
     // Do write to the z buffer
     //
     glDepthMask(GL_TRUE);
-    GL_ERR_BREAK();
 }
 
 // Restore OpenGL settings to OpenGL defaults
@@ -208,9 +192,7 @@ void TwoDRenderer::_renderMeshUnAligned()
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);
 
-    GL_ERR_BREAK();
     _openGLInit();
-    GL_ERR_BREAK();
 
     // Draw triangle strips one row at a time
     //
@@ -233,9 +215,7 @@ void TwoDRenderer::_renderMeshUnAligned()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    GL_ERR_BREAK();
     _openGLRestore();
-    GL_ERR_BREAK();
 }
 
 void TwoDRenderer::_renderMeshAligned()
@@ -249,9 +229,7 @@ void TwoDRenderer::_renderMeshAligned()
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);
 
-    GL_ERR_BREAK();
     _openGLInit();
-    GL_ERR_BREAK();
 
     // Ugh. For aligned data the type must be GLfloat.
     //
@@ -280,7 +258,6 @@ void TwoDRenderer::_renderMeshAligned()
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        GL_ERR_BREAK();
     } else {
         assert(_meshWidth >= 3);
         assert(_meshHeight == 1);
@@ -296,9 +273,7 @@ void TwoDRenderer::_renderMeshAligned()
         glDrawElements(GL_TRIANGLES, _nindices, GL_UNSIGNED_INT, _indices);
     }
 
-    GL_ERR_BREAK();
     _openGLRestore();
-    GL_ERR_BREAK();
 }
 
 void TwoDRenderer::ComputeNormals(const GLfloat *verts, GLsizei w, GLsizei h, GLfloat *normals)

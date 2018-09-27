@@ -50,7 +50,6 @@ ShaderProgram *ShaderManager::GetShader(const std::string &name)
         }
     }
 #endif
-    GL_ERR_BREAK();
     return GetResource(name);
 }
 
@@ -58,10 +57,8 @@ SmartShaderProgram ShaderManager::GetSmartShader(const std::string &name) { retu
 
 int ShaderManager::LoadResourceByKey(const std::string &name)
 {
-    GL_ERR_BREAK();
     if (HasResource(name)) {
         assert(!"Shader already loaded");
-        GL_ERR_BREAK();
         return -1;
     }
     ShaderProgram *      program = new ShaderProgram;
@@ -70,17 +67,12 @@ int ShaderManager::LoadResourceByKey(const std::string &name)
         program->AddShader(CompileNewShaderFromFile(*it));
         _modifiedTimes[*it] = FileUtils::GetFileModifiedTime(*it);
     }
-    GL_ERR_BREAK();
     program->Link();
-    GL_ERR_BREAK();
     if (!program->WasLinkingSuccessful()) {
         SetErrMsg("Failed to link shader:\n%s", program->GetLog().c_str());
-        GL_ERR_BREAK();
         delete program;
-        GL_ERR_BREAK();
         return -1;
     }
-    GL_ERR_BREAK();
     AddResource(name, program);
     return 1;
 }
