@@ -49,19 +49,6 @@ static RendererRegistrar<WireFrameRenderer> registrar(
 	WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType()
 );
 
-namespace {
-
-// Product of elements in a vector
-//  
-size_t vproduct(vector <size_t> a) {
-	size_t ntotal = 1;
-		
-	for (int i=0; i<a.size(); i++) ntotal *= a[i];
-	return(ntotal);
-}
-
-};
-
 WireFrameRenderer::WireFrameRenderer(
 	const ParamsMgr* pm, string winName,
 	string dataSetName, string instName,
@@ -69,7 +56,7 @@ WireFrameRenderer::WireFrameRenderer(
 ) : Renderer(
 	pm, winName, dataSetName, WireFrameParams::GetClassType(),
 	WireFrameRenderer::GetClassType(), instName, dataMgr),
-    _VAO(0), _VBO(0), _EBO(0), _nVertices(0)
+    _VAO(0), _VBO(0), _EBO(0)
 {}
 
 WireFrameRenderer::~WireFrameRenderer()
