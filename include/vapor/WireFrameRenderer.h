@@ -58,7 +58,6 @@ class RENDER_API WireFrameRenderer : public Renderer {
 
   private:
     GLuint _VAO, _VBO, _EBO;
-    unsigned int _nVertices;
     unsigned int _nIndices;
 
     struct VertexData;
