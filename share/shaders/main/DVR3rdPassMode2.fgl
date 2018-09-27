@@ -2,7 +2,7 @@
 
 in vec4 positionClip;   // vertex position in the clip space
 in vec4 positionModel;  // vertex position in the clip space
-flat in vec3 logicalIdx;
+flat in ivec4 logicalIdx;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D       backFaceTexture;
@@ -31,7 +31,7 @@ uniform mat4 ModelView;
 //
 // Derive helper variables
 //
-const float EPSILON  = 5e-6f;
+const float EPSILON  = 5e-6;
 float ambientCoeff   = lightingCoeffs[0];
 float diffuseCoeff   = lightingCoeffs[1];
 float specularCoeff  = lightingCoeffs[2];
@@ -42,10 +42,94 @@ vec3  volumeDimsf    = vec3( float(volumeDims.x), float(volumeDims.y), float(vol
 // Input:  normalized value w.r.t. valueRange.
 // Output: normalized value w.r.t. colorMapRange.
 //
-float TranslateValue( in float value )
+float TranslateValue( const in float value )
 {
-    float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
+    float   orig = value * (valueRange.y - valueRange.x) + valueRange.x;
     return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+}
+
+//
+// Input:  logical index of a vertex
+// Output: normalized user coordinate of this vertex
+//
+vec3 GetCoordinates( const in ivec3 index )
+{
+    int xyOffset = index.y *  volumeDims.x + index.x;
+    int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
+    vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
+    vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
+    return vec3( xyC.xy, zC.x );
+}
+
+//
+// Input:  texture coordinates of the current fragment
+// Output: the triangle that this fragment is in, 
+//         represented as either v2 or v3 in the following diagram
+// Return: true  == the current fragment is inside one of the two triangles. false otherwise.
+//
+bool GetTriangle( const in vec3 fragCoords, out int V2orV3 )
+{
+    if( logicalIdx.w == 0 )                 // front face, so z is fixed
+    {
+        //        v3
+        //       /|
+        //      / |
+        //     /  |
+        //    /   |
+        //   /    |
+        //  v1----pv
+        //  |    /
+        //  |   /
+        //  |  /
+        //  | /
+        //  |/
+        //  v2
+        //
+        ivec3 pvIdx = logicalIdx.xyz;       // provoking vertex
+        ivec3 v1Idx = ivec3( pvIdx.x - 1, pvIdx.y,     pvIdx.z );
+        ivec3 v2Idx = ivec3( pvIdx.x - 1, pvIdx.y - 1, pvIdx.z );
+        ivec3 v3Idx = ivec3( pvIdx.x,     pvIdx.y + 1, pvIdx.z );
+        vec3  pvCds = GetCoordinates( pvIdx );
+        vec3  v1Cds = GetCoordinates( v1Idx );
+        if( v2Idx.y < 0 )                       // the triangle is pv, v1, v3
+        {
+            V2orV3  = 3;
+            return true;
+        }
+        else if( v3Idx.y > (volumeDims.y - 1) ) // the triangle is pv, v1, v2
+        {
+            V2orV3  = 2;
+            return true;
+        }
+        else                                    // real detection work...
+        {
+            vec3 v2Cds = GetCoordinates( v2Idx );
+            vec3 v3Cds = GetCoordinates( v3Idx );
+
+            vec3 v1Dir = normalize( v1Cds - pvCds );
+            vec3 v2Dir = normalize( v2Cds - pvCds );
+            vec3 v3Dir = normalize( v3Cds - pvCds );
+            vec3 fgDir = normalize( fragCoords - pvCds );
+
+            float dot1 = dot( v1Dir, v2Dir );
+            float dot2 = 1.0;
+            float dot3 = dot( v3Dir, v2Dir );
+            float dotf = dot( fgDir, v2Dir );
+
+            if( dot2 >= dotf && dotf >= dot1 )  // the triangle of pv, v1, v2
+            {
+                V2orV3  = 2;
+                return true;
+            }
+            else if( dot1 >= dotf && dotf >= dot3 ) // triangle of pv, v1, v3
+            {
+                V2orV3  = 3;
+                return true;
+            }
+            else
+                return false;
+        }
+    }
 }
 
 //
@@ -54,15 +138,15 @@ float TranslateValue( in float value )
 // Note:   It is skipped in two cases: 1) it represents a missing value
 //                                     2) it is outside of clipping planes
 //
-bool ShouldSkip( in vec3 tc )
+bool ShouldSkip( const in vec3 tc )
 {
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
+    vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0 );
     for( int i = 0; i < 6; i++ )
     {
-        if( dot(positionModel, clipPlanes[i]) < 0.0f )
+        if( dot(positionModel, clipPlanes[i]) < 0.0 )
             return true;
     }
 
@@ -73,70 +157,87 @@ bool ShouldSkip( in vec3 tc )
 // Input:  Location to be evaluated in texture coordinates
 // Output: Gradient at that location
 //
-vec3 CalculateGradient(in vec3 tc)
+vec3 CalculateGradient( const in vec3 tc)
 {
-    vec3 h0 = vec3(-0.5f ) / volumeDimsf;
-    vec3 h1 = vec3( 0.5f ) / volumeDimsf;
-    vec3 h  = vec3( 1.0f );
+    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
+    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
+    vec3 h  = vec3( 1.0 );
 
-    if ((tc.x + h0.x) < 0.0f) {
-        h0.x = 0.0f;
-        h.x = 0.5f;
+    if ((tc.x + h0.x) < 0.0) {
+        h0.x = 0.0;
+        h.x = 0.5;
     }
-    if ((tc.x + h1.x) > 1.0f) {
-        h1.x = 0.0f;
-        h.x = 0.5f;
+    if ((tc.x + h1.x) > 1.0) {
+        h1.x = 0.0;
+        h.x = 0.5;
     }
-    if ((tc.y + h0.y) < 0.0f) {
-        h0.y = 0.0f;
-        h.y = 0.5f;
+    if ((tc.y + h0.y) < 0.0) {
+        h0.y = 0.0;
+        h.y = 0.5;
     }
-    if ((tc.y + h1.y) > 1.0f) {
-        h1.y = 0.0f;
-        h.y = 0.5f;
+    if ((tc.y + h1.y) > 1.0) {
+        h1.y = 0.0;
+        h.y = 0.5;
     }
-    if ((tc.z + h0.z) < 0.0f) {
-        h0.z = 0.0f;
-        h.z = 0.5f;
+    if ((tc.z + h0.z) < 0.0) {
+        h0.z = 0.0;
+        h.z = 0.5;
     }
-    if ((tc.z + h1.z) > 1.0f) {
-        h1.z = 0.0f;
-        h.z = 0.5f;
+    if ((tc.z + h1.z) > 1.0) {
+        h1.z = 0.0;
+        h.z = 0.5;
     }
 
     vec3 a0, a1;
-    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0f,0.0f) ).r;
-    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0f,0.0f) ).r;
-    a0.y = texture( volumeTexture, tc + vec3(0.0f,h0.y,0.0f) ).r;
-    a1.y = texture( volumeTexture, tc + vec3(0.0f,h1.y,0.0f) ).r;
-    a0.z = texture( volumeTexture, tc + vec3(0.0f,0.0f,h0.z) ).r;
-    a1.z = texture( volumeTexture, tc + vec3(0.0f,0.0f,h1.z) ).r;
+    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0,0.0) ).r;
+    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0,0.0) ).r;
+    a0.y = texture( volumeTexture, tc + vec3(0.0,h0.y,0.0) ).r;
+    a1.y = texture( volumeTexture, tc + vec3(0.0,h1.y,0.0) ).r;
+    a0.z = texture( volumeTexture, tc + vec3(0.0,0.0,h0.z) ).r;
+    a1.z = texture( volumeTexture, tc + vec3(0.0,0.0,h1.z) ).r;
 
     return (a1-a0 / h);
+}
+
+// reference implementation: 
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
+bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
+                           const in vec3 v0,   const in vec3 v1,  const in vec3 v2,
+                           out float t ) 
+{
+    vec3 v0v1 = v1 - v0;
+    vec3 v0v2 = v2 - v0;
+    vec3 pvec = cross( dir, v0v2 );
+    float det = dot(  v0v1, pvec );
+
+    if( abs(det) < EPSILON ) // ray and triangle are parallel
+        return false;
+
+    float invDet = 1.0 / det;
+    vec3  tvec   = orig - v0;
+    float u      = dot( tvec, pvec ) * invDet;
+    if( u < 0.0 || u > 1.0 )
+        return false;
+
+    vec3 qvec    = cross( tvec, v0v1 );
+    float v      = dot( dir, qvec ) * invDet;
+    if( v < 0.0 || u + v > 1.0 )
+        return false;
+
+    t = dot( v0v2, qvec ) * invDet;
+
+    return true;
 }
 
 
 void main(void)
 {
-    color   = vec4( (logicalIdx) / volumeDimsf, 0.8f );
-    
-
-    /* verify the size of buffer textures
-    color = vec4( 0.0f, 0.0f, 0.0f, 0.8f );
-    if( textureSize( xyCoordsTexture ) == volumeDims.x * volumeDims.y )
-        color.y = 0.6f;
-    if( textureSize( zCoordsTexture ) == volumeDims.x * volumeDims.y
-                                                            * volumeDims.z)
-        color.z = 0.8f;
-    */
-
-#if 0
-    vec3  lightDirEye   = vec3(0.0f, 0.0f, 1.0f); 
+    vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Get UV coordinates of this frament
-    if( positionClip.w == 0.0f )
+    if( positionClip.w == 0.0 )
         discard;
-    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
+    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0) / 2.0;
 
     vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
     vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
@@ -145,6 +246,18 @@ void main(void)
     if( rayDirLength < EPSILON )
         discard;
 
+    color = vec4( vec3(logicalIdx.rgb) / volumeDimsf, 0.8f );
+    if( logicalIdx.a == 0 )
+    {
+        int  V2orV3;
+        bool rt = GetTriangle( startTexture, V2orV3 );
+        if(  V2orV3 == 2 )
+            color.a = 1.0;
+        else
+            color.a = 0.5;
+    }
+
+#if 0
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirTexture / nStepsf;
 
