@@ -85,10 +85,6 @@ class RENDER_API LegacyGL {
     void EnableTexture();
     void DisableTexture();
 
-#ifndef NDEBUG
-    void TestSquare();
-#endif
-
     // void PushAttrib(int flag);
 };
 

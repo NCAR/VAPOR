@@ -242,11 +242,7 @@ int ContourRenderer::_paintGL(bool) {
     if (_isCacheDirty())
         rc = _buildCache();
 
-    // glCallList(_drawList);
-
-    GL_ERR_BREAK();
     ShaderProgram *shader = _glManager->shaderManager->GetShader("Contour");
-    GL_ERR_BREAK();
     if (shader == nullptr)
         return -1;
     shader->Bind();
@@ -263,7 +259,6 @@ int ContourRenderer::_paintGL(bool) {
 }
 
 int ContourRenderer::_initializeGL() {
-    // _glManager->legacy->Initialize();
     glGenVertexArrays(1, &_VAO);
     glBindVertexArray(_VAO);
     glGenBuffers(1, &_VBO);

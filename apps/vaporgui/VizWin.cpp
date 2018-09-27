@@ -43,6 +43,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include "vapor/FileUtils.h"
 
 using namespace VAPoR;
 
@@ -203,7 +204,6 @@ void VizWin::_getNearFarDist(
 }
 
 void VizWin::_setUpProjMatrix() {
-    GL_ERR_BREAK();
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
@@ -218,7 +218,6 @@ void VizWin::_setUpProjMatrix() {
         MSG_ERR("Failed to get camera parameters");
         return;
     }
-    GL_ERR_BREAK();
 
     double nearDist, farDist;
     _getNearFarDist(posvec, dirvec, nearDist, farDist);
@@ -235,12 +234,11 @@ void VizWin::_setUpProjMatrix() {
 
     double fov = vParams->GetFOV();
     _glManager->matrixManager->Perspective(fov, w, nearDist, farDist);
-    GL_ERR_BREAK();
+    // float s = 1000000;
+    // _glManager->matrixManager->Ortho(-s, s, -s, s, nearDist, farDist);
 
     double pMatrix[16];
     _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
-
-    GL_ERR_BREAK();
 
     bool enabled = _controlExec->GetSaveStateEnabled();
     _controlExec->SetSaveStateEnabled(false);
@@ -250,7 +248,6 @@ void VizWin::_setUpProjMatrix() {
     _controlExec->SetSaveStateEnabled(enabled);
 
     _glManager->matrixManager->MatrixModeModelView();
-    GL_ERR_BREAK();
 }
 
 void VizWin::_setUpModelViewMatrix() {
@@ -263,7 +260,6 @@ void VizWin::_setUpModelViewMatrix() {
     double m[16];
     vParams->GetModelViewMatrix(m);
     _glManager->matrixManager->LoadMatrixd(m);
-    GL_ERR_BREAK();
 }
 
 // React to a user-change in window size/position (or possibly max/min)
@@ -397,7 +393,6 @@ void VizWin::mousePressEvent(QMouseEvent *e) {
 
     if (_buttonNum == 0) {
         _mouseClicked = true; // mouse button is held
-        GL_ERR_BREAK();
         return;
     }
 
@@ -473,7 +468,6 @@ void VizWin::mouseReleaseEvent(QMouseEvent *e) {
     }
 
     _buttonNum = 0;
-    GL_ERR_BREAK();
 }
 
 void VizWin::_mouseMoveEventManip(QMouseEvent *e) {
@@ -494,7 +488,6 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e) {
         1, _buttonNum, e->x(), e->y(), width(), height());
 
     _trackBall->TrackballSetMatrix();
-    GL_ERR_BREAK();
 
     const double *m = _trackBall->GetModelViewMatrix();
 
@@ -520,7 +513,6 @@ string VizWin::_getCurrentMouseMode() const {
         GUIStateParams::GetClassType());
     MouseModeParams *p = guiP->GetMouseModeParams();
     string modeName = p->GetCurrentMouseMode();
-    GL_ERR_BREAK();
     return modeName;
 }
 
@@ -535,7 +527,6 @@ void VizWin::_setNewExtents() {
     box->GetExtents(pllc, purc);
 
     box->SetExtents(llc, urc);
-    GL_ERR_BREAK();
 }
 
 /* 
@@ -590,25 +581,20 @@ void VizWin::Render(bool fast) {
 
     glClearColor(0., 0., 0., 1.);
     glClear(GL_COLOR_BUFFER_BIT);
-    GL_ERR_BREAK();
 
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     if (!dataStatus->GetDataMgrNames().size())
         return;
-    GL_ERR_BREAK();
 
     // Set up projection and modelview matrices
     //
     _glManager->matrixManager->MatrixModeProjection();
     _glManager->matrixManager->PushMatrix();
-    GL_ERR_BREAK();
     _setUpProjMatrix();
-    GL_ERR_BREAK();
 
     _glManager->matrixManager->MatrixModeModelView();
     _glManager->matrixManager->PushMatrix();
     _setUpModelViewMatrix();
-    GL_ERR_BREAK();
 
     int rc = _controlExec->Paint(_winName, fast);
     if (rc < 0) {
@@ -621,7 +607,6 @@ void VizWin::Render(bool fast) {
 
     swapBuffers();
 
-    GL_ERR_BREAK();
     rc = printOpenGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) {
         MSG_ERR("OpenGL error");
@@ -631,7 +616,6 @@ void VizWin::Render(bool fast) {
     _glManager->matrixManager->PopMatrix();
     _glManager->matrixManager->MatrixModeModelView();
     _glManager->matrixManager->PopMatrix();
-    GL_ERR_BREAK();
 }
 
 VAPoR::RenderParams *VizWin::_getRenderParams() {
@@ -771,7 +755,6 @@ void VizWin::updateManip(bool initialize) {
         VAPoR::Box *box = rParams->GetBox();
         box->GetExtents(llc, urc);
     }
-    GL_ERR_BREAK();
 
     bool constrain = true;
     if (classType == ImageParams::GetClassType())
@@ -782,12 +765,10 @@ void VizWin::updateManip(bool initialize) {
     if (rParams != NULL)
         rpTransform = rParams->GetTransform();
 
-    GL_ERR_BREAK();
     _manip->Update(
         llc, urc, minExts,
         maxExts, rpTransform, dmTransform,
         constrain);
-    GL_ERR_BREAK();
 
     if (!initialize)
         _manip->Render();
