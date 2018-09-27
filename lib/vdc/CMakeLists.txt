@@ -69,7 +69,7 @@ set (HEADERS
 
 add_library (vdc SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (vdc PUBLIC common wasp udunits2 proj ${GLEW} ${OPENGL_LIBRARIES})
+target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ} ${GLEW} ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (vdc PUBLIC GLU)
