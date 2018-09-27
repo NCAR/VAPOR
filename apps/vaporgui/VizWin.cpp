@@ -39,6 +39,11 @@
 #include "ErrorReporter.h"
 #include "images/vapor-icon-32.xpm"
 #include "VizWin.h"
+#include "Core3_2_context.h"
+#include <glm/gtc/type_ptr.hpp>
+#include "vapor/GLManager.h"
+#include "vapor/LegacyGL.h"
+#include "vapor/FileUtils.h"
 
 using namespace VAPoR;
 
@@ -49,9 +54,10 @@ using namespace VAPoR;
  *
  */
 VizWin::VizWin(
+    const QGLFormat &format,
 	QWidget* parent, const QString& name, 
 	string winName, ControlExec *ce, Trackball *trackBall
-) : QGLWidget(parent)
+) : QGLWidget( new Core3_2_context(format), parent )
 {
 	_trackBall = trackBall;
 	
@@ -59,6 +65,15 @@ VizWin::VizWin(
 	_winName = winName;
 	setWindowIcon(QPixmap(vapor_icon___));
 	_controlExec = ce;
+    
+    // TODO GL
+    _glManager = new GLManager;
+    vector <string> paths; paths.push_back("shaders");
+    string shaderPath = GetAppPath("VAPOR", "share", paths);
+    paths.clear(); paths.push_back("fonts");
+    string fontPath = GetAppPath("VAPOR", "share", paths);
+    _glManager->shaderManager->SetResourceDirectory(shaderPath); // TODO GL
+    _glManager->fontManager->SetResourceDirectory(fontPath); // TODO GL
 
 	setAutoBufferSwap(false);
 	_mouseClicked = false;
@@ -69,7 +84,7 @@ VizWin::VizWin(
 
 	setMouseTracking(false);	// Only track mouse when button clicked/held
 
-	_manip = new TranslateStretchManip();
+	_manip = new TranslateStretchManip(_glManager);
 	bool initialize = true;
 	updateManip(initialize);
 }
@@ -79,7 +94,13 @@ VizWin::VizWin(
  */
 VizWin::~VizWin()
 {
+    delete _glManager;
 }
+
+// void VizWin::makeCurrent()
+// {
+// 	QGLWidget::makeCurrent();
+// }
 
 void VizWin::closeEvent(QCloseEvent* e){
 
@@ -186,6 +207,7 @@ void VizWin::_setUpProjMatrix() {
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
+    // _controlExec->visu
 
 	double m[16];
 	vParams->GetModelViewMatrix(m);
@@ -205,16 +227,18 @@ void VizWin::_setUpProjMatrix() {
 	size_t width, height;
 	vParams->GetWindowSize(width, height);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+    _glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->LoadIdentity();
 
 	GLfloat w = (float) width / (float) height;
 
 	double fov = vParams->GetFOV();
-	gluPerspective(fov, w, nearDist, farDist );
+    _glManager->matrixManager->Perspective(fov, w, nearDist, farDist);
+    // float s = 1000000;
+    // _glManager->matrixManager->Ortho(-s, s, -s, s, nearDist, farDist);
 
 	double pMatrix[16];
-	glGetDoublev(GL_PROJECTION_MATRIX, pMatrix);
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
 
 	bool enabled = _controlExec->GetSaveStateEnabled();
 	_controlExec->SetSaveStateEnabled(false);
@@ -223,8 +247,7 @@ void VizWin::_setUpProjMatrix() {
 
 	_controlExec->SetSaveStateEnabled(enabled);
 
-	glMatrixMode(GL_MODELVIEW);
-
+    _glManager->matrixManager->MatrixModeModelView();
 }
 
 void VizWin::_setUpModelViewMatrix() {
@@ -236,7 +259,7 @@ void VizWin::_setUpModelViewMatrix() {
 
 	double m[16];
 	vParams->GetModelViewMatrix(m);
-	glLoadMatrixd(m);
+    _glManager->matrixManager->LoadMatrixd(m);
 
 }
 
@@ -285,10 +308,11 @@ void VizWin::resizeGL(int width, int height){
 void VizWin::initializeGL(){
 
 	printOpenGLErrorMsg("GLVizWindowInitializeEvent");
-	int rc = _controlExec->InitializeViz(_winName);
+	int rc = _controlExec->InitializeViz(_winName, _glManager);
 	if (rc<0) {
 		MSG_ERR("Failure to initialize Visualizer");
 	}
+    _glManager->legacy->Initialize();
 	printOpenGLErrorMsg("GLVizWindowInitializeEvent");
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -345,7 +369,6 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e) {
 	// Only save camera parameters after user release mouse
 	//
 	paramsMgr->BeginSaveStateGroup("Navigate scene");
-
 	emit StartNavigation(_winName);
 }
 
@@ -477,7 +500,6 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent* e) {
 	//
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
 	vParams->SetModelViewMatrix(m);
-
 	Render(true);
 }
 
@@ -563,18 +585,18 @@ void VizWin::Render(bool fast) {
 
 	glClearColor(0.,0.,0.,1.);
 	glClear(GL_COLOR_BUFFER_BIT);
-
+    
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	if (! dataStatus->GetDataMgrNames().size()) return;
 
 	// Set up projection and modelview matrices
 	//
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
+    _glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->PushMatrix();
 	_setUpProjMatrix();
 
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PushMatrix();
 	_setUpModelViewMatrix();
 
 	int rc = _controlExec->Paint(_winName, fast);
@@ -587,16 +609,16 @@ void VizWin::Render(bool fast) {
 	}
 	
 	swapBuffers();
-
+    
 	rc = printOpenGLErrorMsg("VizWindowPaintGL");
 	if (rc < 0) {
 		MSG_ERR("OpenGL error");
 	}
 
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
+	_glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->PopMatrix();
+	_glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PopMatrix();
 }
 
 VAPoR::RenderParams* VizWin::_getRenderParams() {
@@ -756,12 +778,14 @@ void VizWin::updateManip(bool initialize) {
 	VAPoR::Transform* rpTransform = NULL;
 	if (rParams != NULL)
 		rpTransform = rParams->GetTransform();
-
+    
 	_manip->Update(
 		llc, urc, minExts, 
 		maxExts, rpTransform, dmTransform, 
 		constrain
 	);
 
-	_manip->Render();
+    if (!initialize)
+        _manip->Render();
+    GL_ERR_BREAK();
 }
