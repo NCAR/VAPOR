@@ -98,9 +98,6 @@ bool DistinguishTriangle( const in vec3 fragCoords )
     vec3  pvCds = GetCoordinates( pvIdx );
     if( logicalIdx.w == 0 )             // front face, z == volumeDims.z - 1
     {
-        //  View direction: (0, 0, -Z)
-        //  (pv and v1 are with either triangle)
-        //
         //               v3 (false)
         //              /|
         //             / |
@@ -130,9 +127,6 @@ bool DistinguishTriangle( const in vec3 fragCoords )
     }
     else if( logicalIdx.w == 1 )    // back face, so z == 0
     {
-        //  View direction: (0, 0, +Z)
-        //  (pv and v1 are with either triangle)
-        //
         //               v3 (false)
         //              /|
         //             / |
@@ -153,6 +147,122 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         if( v2Idx.y < 0 )
             return false;
         else if( v3Idx.y > (volumeDims.y - 1) )
+            return true;
+        else
+        {
+            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+            return v1v2;
+        }
+    }
+    else if( logicalIdx.w == 2 )    // right face, so x == volumedims.x - 1
+    {
+        //               v3 (false)
+        //              /|
+        //             / |
+        //            /  |
+        //           /   |
+        //          /    |             Z
+        //         v1----pv            |
+        //         |    /              |
+        //         |   /               |
+        //         |  /                /-------- Y
+        //         | /                /
+        //         |/                /
+        //         v2 (true)        X  ( X comes out of the screen )
+        //
+        ivec3 v1Idx = ivec3( pvIdx.x, pvIdx.y - 1, pvIdx.z     );
+        ivec3 v2Idx = ivec3( pvIdx.x, pvIdx.y - 1, pvIdx.z - 1 );
+        ivec3 v3Idx = ivec3( pvIdx.x, pvIdx.y    , pvIdx.z + 1 );
+        if( v2Idx.z < 0 )
+            return false;
+        else if( v3Idx.z > (volumeDims.z - 1) )
+            return true;
+        else
+        {
+            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+            return v1v2;
+        }
+    }
+    else if( logicalIdx.w == 3 )    // left face, x == 0
+    {
+        //               v3 (false)
+        //              /|
+        //             / |
+        //            /  |
+        //           /   |
+        //          /    |
+        //         pv----v1 
+        //         |    /
+        //         |   /               X    Z
+        //         |  /                 \   |
+        //         | /                   \  |
+        //         |/                     \ |
+        //         v2 (true)        Y _____\|   ( X goes into the screen )
+        //
+        ivec3 v1Idx = ivec3( pvIdx.x, pvIdx.y - 1, pvIdx.z     );
+        ivec3 v2Idx = ivec3( pvIdx.x, pvIdx.y,     pvIdx.z - 1 );
+        ivec3 v3Idx = ivec3( pvIdx.x, pvIdx.y - 1, pvIdx.z + 1 );
+        if( v2Idx.z < 0 )
+            return false;
+        else if( v3Idx.z > (volumeDims.z - 1) )
+            return true;
+        else
+        {
+            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+            return v1v2;
+        }
+    }
+    else if( logicalIdx.w == 4 )    // top face, y == volumeDims.y - 1
+    {
+        //               v3 (false)
+        //              /|
+        //             / |
+        //            /  |
+        //           /   |
+        //          /    |                      Z
+        //         pv----v1                     |
+        //         |    /                       |
+        //         |   /                        |
+        //         |  /                X--------\
+        //         | /                           \
+        //         |/                             \
+        //         v2 (true)                       Y  ( Y comes out of the screen )
+        //
+        ivec3 v1Idx = ivec3( pvIdx.x - 1, pvIdx.y, pvIdx.z     );
+        ivec3 v2Idx = ivec3( pvIdx.x,     pvIdx.y, pvIdx.z - 1 );
+        ivec3 v3Idx = ivec3( pvIdx.x - 1, pvIdx.y, pvIdx.z + 1 );
+        if( v2Idx.z < 0 )
+            return false;
+        else if( v3Idx.z > volumeDims.z - 1 )
+            return true;
+        else
+        {
+            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+            return v1v2;
+        }
+    }
+    else    // bottom face, y == 0
+    {
+        //               v3 (false)
+        //              /|
+        //             / |
+        //            /  |
+        //           /   |
+        //          /    |
+        //         v1----pv 
+        //         |    /               Z     Y (Y goes into the screen)
+        //         |   /                |    /
+        //         |  /                 |   /
+        //         | /                  |  /
+        //         |/                   | /
+        //         v2 (true)            |/_________ X
+        //
+        ivec3 v1Idx = ivec3( pvIdx.x - 1, pvIdx.y, pvIdx.z     );
+        ivec3 v2Idx = ivec3( pvIdx.x - 1, pvIdx.y, pvIdx.z - 1 );
+        ivec3 v3Idx = ivec3( pvIdx.x,     pvIdx.y, pvIdx.z + 1 );
+        if( v2Idx.z < 0 )
+            return false;
+        else if( v3Idx.z > volumeDims.z - 1 )
             return true;
         else
         {
@@ -277,14 +387,11 @@ void main(void)
         discard;
 
     color = vec4( vec3(logicalIdx.rgb) / volumeDimsf, 0.8f );
-    if( logicalIdx.a == 0 || logicalIdx.a == 1 )
-    {
-        bool v2Ques = DistinguishTriangle( startTexture );
-        if(  v2Ques )
-            color.a = 1.0;
-        else
-            color.a = 0.5;
-    }
+    bool v2Ques = DistinguishTriangle( startTexture );
+    if(  v2Ques )
+        color.a = 1.0;
+    else
+        color.a = 0.5;
 
 #if 0
     float nStepsf       = rayDirLength  / stepSize1D;
