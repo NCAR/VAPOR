@@ -88,14 +88,13 @@ bool BetweenTwoDirections( const in vec3  fragCoords, const in vec3  pvCoords,
 
 //
 // Input:  Texture coordinates of the current fragment
-// Output: Indication of which of the two triangle that this fragment is in.
-//         True == triangle of pv-v1-v2. False == triangle of pv-v1-v3.
-//         Please see the diagrams below.
+// Output: Logical indices of the current cube.
 //
-bool DistinguishTriangle( const in vec3 fragCoords )
+ivec3 GetCellIndices( const in vec3 fragCoords )
 {
     ivec3 pvIdx = provokingVertexIdx.xyz;       // provoking vertex
     vec3  pvCds = GetCoordinates( pvIdx );
+    bool  v1v2;
     if( provokingVertexIdx.w == 0 )             // front face, z == volumeDims.z - 1
     {
         //               v3 (false)
@@ -116,14 +115,15 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         ivec3 v2Idx = ivec3( pvIdx.x - 1, pvIdx.y - 1, pvIdx.z );
         ivec3 v3Idx = ivec3( pvIdx.x,     pvIdx.y + 1, pvIdx.z );
         if( v2Idx.y < 0 )                       // the triangle is pv, v1, v3
-            return false;
+            v1v2 = false;
         else if( v3Idx.y > (volumeDims.y - 1) ) // the triangle is pv, v1, v2
-            return true;
+            v1v2 = true;
         else                                    // real detection work...
-        {
-            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
-            return v1v2;
-        }
+            v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+        if( v1v2 )
+            return ivec3( v2Idx.x, v2Idx.y, v2Idx.z - 1 );
+        else
+            return ivec3( v1Idx.x, v1Idx.y, v1Idx.z - 1 );
     }
     else if( provokingVertexIdx.w == 1 )    // back face, so z == 0
     {
@@ -145,14 +145,15 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         ivec3 v2Idx = ivec3( pvIdx.x,     pvIdx.y - 1,  pvIdx.z );
         ivec3 v3Idx = ivec3( pvIdx.x - 1, pvIdx.y + 1,  pvIdx.z );
         if( v2Idx.y < 0 )
-            return false;
+            v1v2 =  false;
         else if( v3Idx.y > (volumeDims.y - 1) )
-            return true;
+            v1v2 =  true;
         else
-        {
-            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
-            return v1v2;
-        }
+            v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+        if( v1v2 )
+            return ivec3( v2Idx.x - 1, v2Idx.y, v2Idx.z );
+        else
+            return v1Idx;
     }
     else if( provokingVertexIdx.w == 2 )    // right face, so x == volumedims.x - 1
     {
@@ -174,14 +175,15 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         ivec3 v2Idx = ivec3( pvIdx.x, pvIdx.y - 1, pvIdx.z - 1 );
         ivec3 v3Idx = ivec3( pvIdx.x, pvIdx.y    , pvIdx.z + 1 );
         if( v2Idx.z < 0 )
-            return false;
+            v1v2 =  false;
         else if( v3Idx.z > (volumeDims.z - 1) )
-            return true;
+            v1v2 =  true;
         else
-        {
-            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
-            return v1v2;
-        }
+            v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+        if( v1v2 )
+            return ivec3( v2Idx.x - 1, v2Idx.y, v2Idx.z );
+        else
+            return ivec3( v1Idx.x - 1, v1Idx.y, v1Idx.z );
     }
     else if( provokingVertexIdx.w == 3 )    // left face, x == 0
     {
@@ -203,14 +205,15 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         ivec3 v2Idx = ivec3( pvIdx.x, pvIdx.y,     pvIdx.z - 1 );
         ivec3 v3Idx = ivec3( pvIdx.x, pvIdx.y - 1, pvIdx.z + 1 );
         if( v2Idx.z < 0 )
-            return false;
+            v1v2 =  false;
         else if( v3Idx.z > (volumeDims.z - 1) )
-            return true;
+            v1v2 =  true;
         else
-        {
-            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
-            return v1v2;
-        }
+            v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+        if( v1v2 )
+            return ivec3( v2Idx.x, v2Idx.y - 1, v2Idx.z );
+        else
+            return v1Idx;
     }
     else if( provokingVertexIdx.w == 4 )    // top face, y == volumeDims.y - 1
     {
@@ -232,14 +235,15 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         ivec3 v2Idx = ivec3( pvIdx.x,     pvIdx.y, pvIdx.z - 1 );
         ivec3 v3Idx = ivec3( pvIdx.x - 1, pvIdx.y, pvIdx.z + 1 );
         if( v2Idx.z < 0 )
-            return false;
+            v1v2 =  false;
         else if( v3Idx.z > volumeDims.z - 1 )
-            return true;
+            v1v2 =  true;
         else
-        {
-            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
-            return v1v2;
-        }
+            v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+        if( v1v2 )
+            return ivec3( v2Idx.x - 1, v2Idx.y - 1, v2Idx.z );
+        else
+            return ivec3( v1Idx.x, v1Idx.y - 1, v1Idx.z );
     }
     else    // bottom face, y == 0
     {
@@ -261,14 +265,15 @@ bool DistinguishTriangle( const in vec3 fragCoords )
         ivec3 v2Idx = ivec3( pvIdx.x - 1, pvIdx.y, pvIdx.z - 1 );
         ivec3 v3Idx = ivec3( pvIdx.x,     pvIdx.y, pvIdx.z + 1 );
         if( v2Idx.z < 0 )
-            return false;
+            v1v2 =  false;
         else if( v3Idx.z > volumeDims.z - 1 )
-            return true;
+            v1v2 =  true;
         else
-        {
-            bool v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
-            return v1v2;
-        }
+            v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
+        if( v1v2 )
+            return v2Idx;
+        else
+            return v1Idx;
     }
 }
 
@@ -386,12 +391,11 @@ void main(void)
     if( rayDirLength < EPSILON )
         discard;
 
-    color = vec4( vec3(provokingVertexIdx.rgb) / volumeDimsf, 0.8f );
-    bool v2Ques = DistinguishTriangle( startTexture );
-    if(  v2Ques )
+    color = vec4( vec3( GetCellIndices( startTexture )) / (volumeDimsf - 2.0), 0.7f );
+    if( color.r < EPSILON && color.g < EPSILON && color.b < EPSILON )
         color.a = 1.0;
-    else
-        color.a = 0.5;
+    else if( color.r > 1.0 - EPSILON && color.g > 1.0 - EPSILON && color.b > 1.0 - EPSILON )
+        color.a = 1.0;
 
 #if 0
     float nStepsf       = rayDirLength  / stepSize1D;
