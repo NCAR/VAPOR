@@ -35,7 +35,7 @@ void SliceVariablesSubtab::_setDefaultSampleRate()
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(NOAUTOUPDATE));
+    _TFWidget->Reinit((TFFlags)(0));
 
     _TFWidget->mappingFrame->SetIsSlicing(true);
 

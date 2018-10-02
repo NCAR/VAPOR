@@ -74,6 +74,7 @@ void SliceRenderer::_initTexture()
 
 void SliceRenderer::_saveCacheParams()
 {
+    cout << "_saveCacheParams()" << endl;
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
 
@@ -99,10 +100,13 @@ void SliceRenderer::_saveCacheParams()
     if (_textureData) delete[] _textureData;
     _textureData = new unsigned char[_textureWidth * _textureHeight * 4];
 
-    if (_initialized) {
-        int rc = _saveTextureData();
-        if (rc < 0) SetErrMsg("Unable to acquire data for Slice texture");
-    }
+    //    if (_initialized) {
+    int rc = _saveTextureData();
+    if (rc < 0) SetErrMsg("Unable to acquire data for Slice texture");
+    //    }
+    //    else {
+    //    cout << "SliceRenderer not initialized" << endl;
+    //    }
 }
 
 void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, int j) const
