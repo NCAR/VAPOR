@@ -10,7 +10,6 @@
 
 #include <vapor/GetAppPath.h>
 #include <vapor/ParamsMgr.h>
-#include <vapor/ShaderMgr.h>
 #include <vapor/ControlExecutive.h>
 
 using namespace VAPoR;
@@ -22,7 +21,6 @@ ControlExec::ControlExec(
 
     _paramsMgr = new ParamsMgr(appParamsNames, appRenderParamNames);
     _dataStatus = new DataStatus(cacheSizeMB, nThreads);
-    _shaderMgrs.clear();
     _visualizers.clear();
 }
 
@@ -73,13 +71,6 @@ int ControlExec::NewVisualizer(string winName) {
 }
 
 void ControlExec::RemoveVisualizer(string winName) {
-
-    map<string, ShaderMgr *>::iterator itr = _shaderMgrs.find(winName);
-    if (itr != _shaderMgrs.end()) {
-        delete itr->second;
-        _shaderMgrs.erase(itr);
-    }
-
     std::map<string, Visualizer *>::iterator itr2 = _visualizers.find(winName);
     if (itr2 != _visualizers.end()) {
         delete itr2->second;
@@ -87,35 +78,14 @@ void ControlExec::RemoveVisualizer(string winName) {
     }
 }
 
-int ControlExec::InitializeViz(string winName) {
+int ControlExec::InitializeViz(string winName, GLManager *glManager) {
     Visualizer *v = getVisualizer(winName);
     if (!v) {
         SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
         return -1;
     }
 
-    // initialization of ShaderMgr. Do we really need more than
-    // one ShaderMgr (one for each window?)
-    //
-    vector<string> paths;
-    paths.push_back("shaders");
-
-    ShaderMgr *shaderMgr = new ShaderMgr();
-
-    string shaderPath = GetAppPath("VAPOR", "share", paths);
-    shaderMgr->SetShaderSourceDir(shaderPath);
-    int rc = shaderMgr->LoadShaders();
-    if (rc < 0) {
-        SetErrMsg(
-            "Failed to initialize GLSL shaders in dir %s",
-            shaderPath.c_str());
-        printf("%s\n", GetErrMsg());
-        delete shaderMgr;
-        return (-1);
-    }
-    _shaderMgrs[winName] = shaderMgr;
-
-    if (v->initializeGL(shaderMgr) < 0) {
+    if (v->initializeGL(glManager) < 0) {
         SetErrMsg("InitializeGL failure");
         return -1;
     }
