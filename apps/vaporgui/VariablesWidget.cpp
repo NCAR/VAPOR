@@ -94,8 +94,8 @@ VariablesWidget::VariablesWidget(QWidget* parent)
 	// Legacy crap. Should remove
 	//
 	distribVariableFrame->hide();
+    
     orientationFrame->hide();
-
 }
 
 void VariablesWidget::Reinit(
@@ -241,7 +241,7 @@ void VariablesWidget::setVariableDims(int index){
 	//_activeDim = index == 0 ? TWODIMS : THREEDIMS;
     if (index == 0) {
         _activeDim = TWODIMS;
-        orientationFrame->show();
+        //orientationFrame->show();
     }
     else {
         _activeDim = THREEDIMS;
