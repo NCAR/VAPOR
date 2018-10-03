@@ -96,8 +96,6 @@ protected:
     //
     virtual const GLvoid *GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned) = 0;
 
-    virtual GLuint GetAttribIndex() const = 0;
-
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
 
@@ -151,6 +149,8 @@ private:
     GLsizei       _meshHeight;
     GLsizei       _nindices;
     SmartBuf      _sb_texCoords;
+
+    GLuint _VAO, _VBO, _dataVBO, _EBO;
 
     void _openGLInit();
     void _openGLRestore();
