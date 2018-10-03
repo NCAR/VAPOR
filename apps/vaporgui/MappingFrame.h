@@ -198,8 +198,10 @@ private:
     string  getActiveRendererName() const;
     void    populateHistogram();
     void    populateVolumetricHistogram(VAPoR::Grid *grid, std::vector<double> minExt, std::vector<double> maxExt);
-    void    populateSlicingHistogram();
-    bool    _isSlicing;
+    void    populateSlicingHistogram(VAPoR::Grid *grid, std::vector<double> minExt, std::vector<double> maxExt);
+    void    _getSampleCoordinates(std::vector<double> &coords, std::vector<double> minExts, std::vector<double> maxExts, int i, int j, int orientation, int sampleRate) const;
+
+    bool _isSlicing;
 
 protected slots:
     void setEditMode(bool);

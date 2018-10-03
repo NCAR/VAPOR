@@ -64,6 +64,7 @@ public:
     void  getRange(float range[2], float values[2]);
     float getOpacity();
     void  RefreshHistogram();
+    void  SetAutoUpdateParamChanged(bool changed);
 
 private slots:
     void fileSaveTF();
@@ -106,7 +107,7 @@ private:
     int                 _refLevel;
     int                 _timeStep;
     string              _varName;
-    bool                _somethingChanged;
+    bool                _autoUpdateParamChanged;
 
     bool  _autoUpdateHisto;
     bool  _discreteColormap;
