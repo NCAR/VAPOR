@@ -1,63 +1,91 @@
-//-- ShaderProgram.h ---------------------------------------------------------
-// 
-// Copyright (C) 2005 Kenny Gruchalla.  All rights reserved.
-//
-// OGSL Shader program C++ wrapper. 
-//
-//----------------------------------------------------------------------------
+#pragma once
 
+#include <vector>
+#include <string>
+#include <glm/fwd.hpp>
 
-
-#ifndef ShaderProgram_h
-#define ShaderProgram_h
-
-#include <vapor/glutil.h>
-#include <map>
-#include <vapor/MyBase.h>
-
-#ifdef WIN32
-#pragma warning(disable : 4251)
-#endif
+#include "vapor/Shader.h"
 
 namespace VAPoR {
-	
+
+//! \class ShaderProgram
+//! \ingroup Public_Render
+//!
+//! \brief Provides a C++ interface to the OpenGL shader program construct
+//!
+//! \author Stanislaw Jaroszynski
+//! \date August, 2018
+    
 class RENDER_API ShaderProgram : public Wasp::MyBase {
+    unsigned int _id;
+    std::vector<Shader *> _shaders;
+    bool _linked;
+    int _successStatus;
+    
 public:
-
- ShaderProgram();
- virtual ~ShaderProgram();
-
- int LoadVertexShader(const string& filename);
- int LoadFragmentShader(const string& filename);
- int LoadShader(const string& filename, GLenum shaderType);
- int LoadVertexSource(const string &source );
- int LoadFragmentSource(const string &source);
-
- int LoadVertexSource(const string &source, const std::string& fileName);
- int LoadFragmentSource(const string &source, const std::string& fileName);
- int LoadSource(const string &source, GLenum shaderType, const std::string& fileName);
-
- int Create();
- int Compile();
-
- int Enable();
- void Disable();
-
- GLint UniformLocation(const string& uniformName);
- GLint AttributeLocation(const string& attributeName) const;
-
-
- static bool Supported();
- GLuint GetProgram();
- void PrintContents();
-
-protected:
-
- GLuint      _program;
- std::map<std::string, GLuint> _shaderObjects;
-
+    enum class Policy {
+        Strict, Relaxed
+    };
+    static Policy UniformNotFoundPolicy;
+    
+    ShaderProgram();
+    ~ShaderProgram();
+    
+    //! \retval 1 is returned on success
+    //! \retval -1 is returned on failure
+    //!
+    int Link();
+    void Bind();
+    bool IsBound() const;
+    static void UnBind();
+    static int GetBoundProgramID();
+    
+    void AddShader(Shader *s);
+    
+    //! \param[in] type OpenGL shader type enum
+    //! \param[in] source GLSL source code
+    //!
+    //! \retval 1 is returned on success
+    //! \retval -1 is returned on failure
+    //!
+    int AddShaderFromSource(unsigned int type, const char *source);
+    
+    unsigned int GetID() const;
+    unsigned int WasLinkingSuccessful() const;
+    
+    int GetAttributeLocation(const std::string &name) const;
+    int GetUniformLocation(const std::string &name) const;
+    
+    template<typename T> bool SetUniform(const std::string &name, const T &value) const;
+    void SetUniform(int location, const int       &value) const;
+    void SetUniform(int location, const float     &value) const;
+    void SetUniform(int location, const glm::vec2 &value) const;
+    void SetUniform(int location, const glm::vec3 &value) const;
+    void SetUniform(int location, const glm::vec4 &value) const;
+    void SetUniform(int location, const glm::mat4 &value) const;
+    
+    std::string GetLog() const;
+    void PrintUniforms() const;
+    static const char *GLTypeToString(const unsigned int type);
 };
-	
-};
 
-#endif // ShaderProgram_h
+//! \class SmartShaderProgram
+//! \ingroup Public_Render
+//!
+//! \brief Provides a C++ interface to the OpenGL shader program construct
+//!
+//! \author Stanislaw Jaroszynski
+//! \date August, 2018
+    
+class SmartShaderProgram {
+    ShaderProgram *_program;
+   
+    SmartShaderProgram(ShaderProgram *program);
+    
+public:
+    ~SmartShaderProgram();
+    ShaderProgram *operator -> () { return _program; }
+    bool IsValid() const;
+    friend class ShaderManager;
+};
+}

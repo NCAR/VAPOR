@@ -45,7 +45,7 @@ UnstructuredGridLayered::UnstructuredGridLayered(
 		vector <size_t> {faceDims[0]}, 
 		edgeDims.size() ? vector <size_t> {edgeDims[0]} : vector <size_t> (), 
 		vector <size_t> {bs[0]},
-		blks, vertexOnFace, faceOnVertex, faceOnFace, location, 
+		vector <float *> (), vertexOnFace, faceOnVertex, faceOnFace, location, 
 		maxVertexPerFace, maxFacePerVertex, xug, yug, 
 		UnstructuredGridCoordless(), kdtree
 	),
@@ -219,7 +219,7 @@ bool UnstructuredGridLayered::_insideGrid(
 	for (int kk=0; kk<nz; kk++) {
 		float z = 0.0;
 		for (int i=0; i<lambda.size(); i++) {
-			z += _zug.AccessIJK(nodes2D[i]) * lambda[i];
+			z += _zug.AccessIJK(nodes2D[i],kk) * lambda[i];
 		}
 			
 		zcoords.push_back(z);
@@ -356,6 +356,9 @@ UnstructuredGridLayered::ConstCoordItrULayered::ConstCoordItrULayered(
 		_itr2D = ug->_ug2d.ConstCoordBegin();
 		_zCoordItr = ug->_zug.cbegin();
 		_index2D = 0;
+		_coords[0] = (*_itr2D)[0];
+		_coords[1] = (*_itr2D)[1];
+		_coords[2] = *_zCoordItr;
 	}
 	else {
 		_itr2D = ug->_ug2d.ConstCoordEnd();
