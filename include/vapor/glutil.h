@@ -45,7 +45,8 @@
 
 #include <GL/glew.h>
 #ifdef Darwin
-    #include <OpenGL/gl.h>
+    // #include <OpenGL/gl.h>
+    #include <OpenGL/gl3.h>
 #else
     #include <GL/gl.h>
 #endif
@@ -53,6 +54,20 @@
 #include <vector>
 #include <string>
 #include <vapor/common.h>
+
+#ifndef NDEBUG
+    #ifdef Darwin
+        #define GL_LEGACY(x) \
+            {                \
+            }
+    #else
+        #define GL_LEGACY(x) x
+    #endif
+    #define GL_ERR_BREAK() assert(!printOpenGLError())
+#else
+    #define GL_LEGACY(x)
+    #define GL_ERR_BREAK()
+#endif
 
 /* These vector and quaternion macros complement similar
  * routines.
