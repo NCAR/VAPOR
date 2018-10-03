@@ -88,9 +88,10 @@ bool BetweenTwoDirections( const in vec3  fragCoords, const in vec3  pvCoords,
 
 //
 // Input:  Texture coordinates of the current fragment
-// Output: Logical indices of the current cube.
+// Output: Logical indices of the current cube (first 3 element),
+//         and which face (0-5) does the ray come into this cube (last element).
 //
-ivec3 GetCellIndices( const in vec3 fragCoords )
+ivec4 GetCellIndices( const in vec3 fragCoords )
 {
     ivec3 pvIdx = provokingVertexIdx.xyz;       // provoking vertex
     vec3  pvCds = GetCoordinates( pvIdx );
@@ -121,9 +122,9 @@ ivec3 GetCellIndices( const in vec3 fragCoords )
         else                                    // real detection work...
             v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
         if( v1v2 )
-            return ivec3( v2Idx.x, v2Idx.y, v2Idx.z - 1 );
+            return ivec4( v2Idx.x, v2Idx.y, v2Idx.z - 1, 0 );
         else
-            return ivec3( v1Idx.x, v1Idx.y, v1Idx.z - 1 );
+            return ivec4( v1Idx.x, v1Idx.y, v1Idx.z - 1, 0 );
     }
     else if( provokingVertexIdx.w == 1 )    // back face, so z == 0
     {
@@ -151,9 +152,9 @@ ivec3 GetCellIndices( const in vec3 fragCoords )
         else
             v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
         if( v1v2 )
-            return ivec3( v2Idx.x - 1, v2Idx.y, v2Idx.z );
+            return ivec4( v2Idx.x - 1, v2Idx.y, v2Idx.z, 1 );
         else
-            return v1Idx;
+            return ivec4( v1Idx, 1 );
     }
     else if( provokingVertexIdx.w == 2 )    // right face, so x == volumedims.x - 1
     {
@@ -181,9 +182,9 @@ ivec3 GetCellIndices( const in vec3 fragCoords )
         else
             v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
         if( v1v2 )
-            return ivec3( v2Idx.x - 1, v2Idx.y, v2Idx.z );
+            return ivec4( v2Idx.x - 1, v2Idx.y, v2Idx.z, 2 );
         else
-            return ivec3( v1Idx.x - 1, v1Idx.y, v1Idx.z );
+            return ivec4( v1Idx.x - 1, v1Idx.y, v1Idx.z, 2 );
     }
     else if( provokingVertexIdx.w == 3 )    // left face, x == 0
     {
@@ -211,9 +212,9 @@ ivec3 GetCellIndices( const in vec3 fragCoords )
         else
             v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
         if( v1v2 )
-            return ivec3( v2Idx.x, v2Idx.y - 1, v2Idx.z );
+            return ivec4( v2Idx.x, v2Idx.y - 1, v2Idx.z, 3 );
         else
-            return v1Idx;
+            return ivec4( v1Idx, 3 );
     }
     else if( provokingVertexIdx.w == 4 )    // top face, y == volumeDims.y - 1
     {
@@ -241,9 +242,9 @@ ivec3 GetCellIndices( const in vec3 fragCoords )
         else
             v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
         if( v1v2 )
-            return ivec3( v2Idx.x - 1, v2Idx.y - 1, v2Idx.z );
+            return ivec4( v2Idx.x - 1, v2Idx.y - 1, v2Idx.z, 4 );
         else
-            return ivec3( v1Idx.x, v1Idx.y - 1, v1Idx.z );
+            return ivec4( v1Idx.x, v1Idx.y - 1, v1Idx.z, 4 );
     }
     else    // bottom face, y == 0
     {
@@ -271,9 +272,9 @@ ivec3 GetCellIndices( const in vec3 fragCoords )
         else
             v1v2 = BetweenTwoDirections( fragCoords, pvCds, v1Idx, v2Idx );
         if( v1v2 )
-            return v2Idx;
+            return ivec4( v2Idx, 5 );
         else
-            return v1Idx;
+            return ivec4( v1Idx, 5 );
     }
 }
 
@@ -374,6 +375,79 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     return true;
 }
 
+int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
+                    const in  vec3 rayDirTexture,
+                    out      ivec4 step2CellIdx,    out float t )
+{
+    //          Y
+    //        4 __________________5
+    //         /|               /|
+    //        / |              / |
+    //       /  |             /  |
+    //     7/___|___________6/   |
+    //      |   |           |    |
+    //      |   |           |    |
+    //      |   |___________|____|  X
+    //      |   /0          |   /1
+    //      |  /            |  /
+    //      | /             | /
+    //     3|/______________|/    
+    //                     2
+    //     Z
+    ivec3 V0 = step1CellIdx.xyz;
+
+    ivec3 cubeVertIdx[8]; 
+    cubeVertIdx[0] = V0;
+    cubeVertIdx[1] = ivec3(V0.x + 1, V0.y    , V0.z     );
+    cubeVertIdx[2] = ivec3(V0.x + 1, V0.y    , V0.z + 1 );
+    cubeVertIdx[3] = ivec3(V0.x    , V0.y    , V0.z + 1 );
+    cubeVertIdx[4] = ivec3(V0.x    , V0.y + 1, V0.z     );
+    cubeVertIdx[5] = ivec3(V0.x + 1, V0.y + 1, V0.z     );
+    cubeVertIdx[6] = ivec3(V0.x + 1, V0.y + 1, V0.z + 1 );
+    cubeVertIdx[7] = ivec3(V0.x    , V0.y + 1, V0.z + 1 );
+
+    vec3 cubeVertCoords[8];
+    for( int i = 0; i < 8; i++ )
+        cubeVertCoords[i] = GetCoordinates( cubeVertIdx[i] );
+
+    ivec3 triangles[12];
+    triangles[0]  =  ivec3( 7, 3, 6 );  // front face
+    triangles[1]  =  ivec3( 6, 3, 2 );
+    triangles[2]  =  ivec3( 0, 4, 1 );  // back face
+    triangles[3]  =  ivec3( 1, 4, 5 );
+    triangles[4]  =  ivec3( 5, 1, 6 );  // right face
+    triangles[5]  =  ivec3( 6, 1, 2 );
+    triangles[6]  =  ivec3( 4, 0, 7 );  // left face
+    triangles[7]  =  ivec3( 7, 0, 3 );
+    triangles[8]  =  ivec3( 4, 7, 5 );  // top face
+    triangles[9]  =  ivec3( 5, 7, 6 );
+    triangles[10] =  ivec3( 3, 0, 2 );  // bottom face
+    triangles[11] =  ivec3( 2, 0, 1 );
+
+    bool  intersectionTest[12];
+    float tVec[12];
+    for( int i = 0; i < 12; i++ )
+    {
+        intersectionTest[i] = false;
+        tVec[i] = -1.0;
+    }
+
+    for( int i = 0; i < 12; i++ )
+    {
+        if( i / 2 != step1CellIdx.w )
+            intersectionTest[i] = RayTriangleIntersect( startTexture, 
+                                                        rayDirTexture,
+                                                        cubeVertCoords[ triangles[i][0] ],
+                                                        cubeVertCoords[ triangles[i][1] ],
+                                                        cubeVertCoords[ triangles[i][2] ],
+                                                        tVec[i] );
+    }
+    int counter = 0;
+    for( int i = 0; i < 12; i++ )
+        if( intersectionTest[i] )
+            counter++;
+    return counter;    
+}
 
 void main(void)
 {
@@ -386,16 +460,28 @@ void main(void)
 
     vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
     vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
+    vec3 step1Texture   = startTexture;
     vec3 rayDirTexture  = stopTexture - startTexture;
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )
         discard;
 
-    color = vec4( vec3( GetCellIndices( startTexture )) / (volumeDimsf - 2.0), 0.7f );
-    if( color.r < EPSILON && color.g < EPSILON && color.b < EPSILON )
+    ivec4 cellIdx = GetCellIndices( step1Texture );
+
+    color = vec4( vec3( cellIdx.rgb ) / (volumeDimsf - 2.0), 0.7f );
+
+    ivec4 tmp;
+    float t;
+    int counter = FindNextCell( cellIdx, startTexture, rayDirTexture, tmp, t );
+    if( counter == 0 )
+        color.a = 0.0;
+    else if (counter > 1 )
+        color = vec4(0.7);
+
+    /* if( color.r < EPSILON && color.g < EPSILON && color.b < EPSILON )
         color.a = 1.0;
     else if( color.r > 1.0 - EPSILON && color.g > 1.0 - EPSILON && color.b > 1.0 - EPSILON )
-        color.a = 1.0;
+        color.a = 1.0; */
 
 #if 0
     float nStepsf       = rayDirLength  / stepSize1D;
