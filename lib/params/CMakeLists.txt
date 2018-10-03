@@ -39,6 +39,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/RenderParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/BarbParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Viewpoint.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ViewpointParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/regionparams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ParamsMgr.h
