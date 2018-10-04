@@ -54,8 +54,6 @@ SliceRenderer::~SliceRenderer()
 
 void SliceRenderer::_initTexture()
 {
-    LegacyGL *lgl = _glManager->legacy;
-
     glDeleteTextures(1, &_texture);
     glGenTextures(1, &_texture);
 
