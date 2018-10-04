@@ -116,7 +116,8 @@ VDF_API int ConvertLonLatToPCS(string projString, double coords[], int npoints =
 //! \param[out] grid is a vector of Grid* pointers, one
 //! for each variable
 //
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
+template<typename T>
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<T> &minExtsReq, const vector<T> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
                      std::vector<Grid *> &grids);
 
 VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr);
@@ -124,6 +125,8 @@ VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<d
 VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids);
 
 VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr);
+
+VDF_API void UnlockGrids(DataMgr *dataMgr, const std::vector<Grid *> &grids);
 
 //! Get the spatial coordinate axes for a variable
 //!

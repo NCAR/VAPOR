@@ -25,25 +25,40 @@ size_t vproduct(vector<size_t> a)
 }
 
 struct {
-    string                  varname;
+    int                     memsize;
+    int                     level;
+    int                     lod;
+    int                     nthreads;
+    string                  ftype;
     OptionParser::Boolean_T help;
     OptionParser::Boolean_T quiet;
     OptionParser::Boolean_T debug;
 } opt;
 
-OptionParser::OptDescRec_T set_opts[] = {
-    {"varname", 1, "", "Name of variable"}, {"help", 0, "", "Print this message and exit"}, {"quiet", 0, "", "Operate quitely"}, {"debug", 0, "", "Debug mode"}, {NULL}};
+OptionParser::OptDescRec_T set_opts[] = {{"memsize", 1, "2000", "Cache size in MBs"},
+                                         {"level", 1, "0", "Multiresution refinement level. Zero implies coarsest resolution"},
+                                         {"lod", 1, "0", "Level of detail. Zero implies coarsest resolution"},
+                                         {"nthreads", 1, "0",
+                                          "Specify number of execution threads "
+                                          "0 => use number of cores"},
+                                         {"ftype", 1, "vdc", "data set type (vdc|wrf|cf|mpas)"},
+                                         {"help", 0, "", "Print this message and exit"},
+                                         {"quiet", 0, "", "Operate quitely"},
+                                         {"debug", 0, "", "Debug mode"},
+                                         {NULL}};
 
-OptionParser::Option_T get_options[] = {{"varname", Wasp::CvtToCPPStr, &opt.varname, sizeof(opt.varname)},
-                                        {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
-                                        {"quiet", Wasp::CvtToBoolean, &opt.quiet, sizeof(opt.quiet)},
-                                        {"debug", Wasp::CvtToBoolean, &opt.debug, sizeof(opt.debug)},
-                                        {NULL}};
+OptionParser::Option_T get_options[] = {
+    {"memsize", Wasp::CvtToInt, &opt.memsize, sizeof(opt.memsize)},    {"level", Wasp::CvtToInt, &opt.level, sizeof(opt.level)},     {"lod", Wasp::CvtToInt, &opt.lod, sizeof(opt.lod)},
+    {"nthreads", Wasp::CvtToInt, &opt.nthreads, sizeof(opt.nthreads)}, {"ftype", Wasp::CvtToCPPStr, &opt.ftype, sizeof(opt.ftype)},  {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
+    {"quiet", Wasp::CvtToBoolean, &opt.quiet, sizeof(opt.quiet)},      {"debug", Wasp::CvtToBoolean, &opt.debug, sizeof(opt.debug)}, {NULL}};
 
 const char *ProgName;
 
-void test1(PyEngine &pyE)
+void test_calculate()
 {
+    int rc = PyEngine::Initialize();
+    if (rc < 0) return;
+
     vector<size_t>         dims = {2, 4, 6};
     string                 script = "C = A + B";
     vector<string>         inputVarNames = {"A", "B"};
@@ -63,7 +78,7 @@ void test1(PyEngine &pyE)
     vector<float *> inputVarArrays = {A, B};
     vector<float *> outputVarArrays = {C};
 
-    int rc = pyE.Calculate(script, inputVarNames, inputVarDims, inputVarArrays, outputVarNames, outputVarDims, outputVarArrays);
+    rc = PyEngine::Calculate(script, inputVarNames, inputVarDims, inputVarArrays, outputVarNames, outputVarDims, outputVarArrays);
     if (rc < 0) return;
 
     string status = "SUCCESS";
@@ -79,9 +94,73 @@ void test1(PyEngine &pyE)
     delete[] C;
 
     string s = MyPython::Instance()->PyOut();
-    if (!s.empty()) { cout << "test1 : " << s << endl; }
+    if (!s.empty()) { cout << "test_calculate : " << s << endl; }
 
-    cout << "test1 : " << status << endl;
+    cout << "test_calculate : " << status << endl;
+
+    return;
+}
+
+void test_datamgr(vector<string> files)
+{
+    if (files.empty()) return;
+
+    DataMgr datamgr(opt.ftype, opt.memsize, opt.nthreads);
+    int     rc = datamgr.Initialize(files, vector<string>());
+    if (rc < 0) exit(1);
+
+    PyEngine pyEngine(&datamgr);
+    if (pyEngine.Initialize() < 0) exit(1);
+
+    vector<string> varNames = datamgr.GetDataVarNames();
+    if (varNames.empty()) return;
+
+    string inputVarName = varNames[0];
+    string outputVarName = varNames[0] + "Copy";
+    string script = outputVarName + " = " + inputVarName;
+
+    DC::DataVar datavar;
+    rc = datamgr.GetDataVarInfo(inputVarName, datavar);
+    assert(rc >= 0);
+
+    vector<string> inputVarNames = {inputVarName};
+    vector<string> outputVarNames = {outputVarName};
+    vector<string> outputMeshNames = {datavar.GetMeshName()};
+
+    rc = pyEngine.AddFunction("myscript", script, inputVarNames, outputVarNames, outputMeshNames);
+    if (rc < 0) exit(1);
+
+    if (!opt.quiet) {
+        cout << "Derived variable :\n";
+        datamgr.GetDataVarInfo(outputVarName, datavar);
+        cout << datavar;
+    }
+
+    Grid *g1 = datamgr.GetVariable(0, inputVarName, opt.level, opt.lod, true);
+    if (!g1) exit(1);
+
+    Grid *g2 = datamgr.GetVariable(0, outputVarName, opt.level, opt.lod, true);
+    if (!g2) exit(1);
+
+    Grid::ConstIterator itr1 = g1->cbegin();
+    Grid::ConstIterator enditr1 = g1->cend();
+
+    Grid::ConstIterator itr2 = g2->cbegin();
+    Grid::ConstIterator enditr2 = g2->cend();
+
+    string status = "SUCCESS";
+    for (; itr1 != enditr1; ++itr1, ++itr2) {
+        if (itr2 == enditr2) {
+            status = "FAILED";
+            break;
+        }
+        if (*itr1 != *itr2) {
+            status = "FAILED";
+            break;
+        }
+    }
+
+    cout << "test_datamgr : " << status << endl;
 }
 
 int main(int argc, char **argv)
@@ -111,17 +190,12 @@ int main(int argc, char **argv)
 
     if (opt.debug) { MyBase::SetDiagMsgFilePtr(stderr); }
 
-    if (argc != 1) {
-        cerr << "Usage: " << ProgName << " [options] " << endl;
-        op.PrintOptionHelp(stderr);
-        exit(1);
-    }
+    vector<string> files;
+    for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
 
-    PyEngine pyE;
-    int      rc = pyE.Initialize();
-    if (rc < 0) return (-1);
+    test_calculate();
 
-    test1(pyE);
+    test_datamgr(files);
 
     return 0;
 }
