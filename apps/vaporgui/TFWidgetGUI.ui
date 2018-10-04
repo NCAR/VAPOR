@@ -41,7 +41,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="_mainTFE">
       <property name="sizePolicy">
@@ -288,7 +288,7 @@ available from the right mouse button.</string>
           <number>0</number>
          </property>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,1,0">
            <property name="spacing">
             <number>5</number>
            </property>
@@ -355,7 +355,7 @@ available from the right mouse button.</string>
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_17">
+          <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="0,1,0">
            <property name="spacing">
             <number>5</number>
            </property>
