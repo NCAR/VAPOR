@@ -4,6 +4,8 @@
 #include <vapor/SliceRenderer.h>
 #include <vapor/SliceParams.h>
 #include <vapor/ControlExecutive.h>
+#include <vapor/LegacyGL.h>
+#include <vapor/GLManager.h>
 
 #define X 0
 #define Y 1
@@ -324,22 +326,35 @@ void SliceRenderer::_renderXY(
     std::vector<double> max) const {
     double zCoord = min[Z];
 
-    glBegin(GL_TRIANGLES);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(min[X], min[Y], zCoord);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(max[X], min[Y], zCoord);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(max[X], max[Y], zCoord);
+    LegacyGL *lgl = _glManager->legacy;
 
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(min[X], min[Y], zCoord);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(max[X], max[Y], zCoord);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(min[X], max[Y], zCoord);
+    lgl->Begin(GL_TRIANGLES);
+    lgl->TexCoord2f(0.f, 0.f);
+    lgl->Vertex3f(min[X], min[Y], zCoord);
+    lgl->TexCoord2f(1.f, 0.f);
+    lgl->Vertex3f(max[X], min[Y], zCoord);
+    lgl->TexCoord2f(1.f, 1.f);
+    lgl->Vertex3f(max[X], max[Y], zCoord);
 
+    lgl->TexCoord2f(0.f, 0.f);
+    lgl->Vertex3f(min[X], min[Y], zCoord);
+    lgl->TexCoord2f(1.f, 1.f);
+    lgl->Vertex3f(max[X], max[Y], zCoord);
+    lgl->TexCoord2f(0.f, 1.f);
+    lgl->Vertex3f(min[X], max[Y], zCoord);
+    lgl->End();
+
+    /*    glBegin(GL_TRIANGLES);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], min[Y], zCoord);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(max[X], min[Y], zCoord);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], max[Y], zCoord);
+
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], min[Y], zCoord);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], max[Y], zCoord);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(min[X], max[Y], zCoord);
+   
     glEnd();
+*/
 }
 
 void SliceRenderer::_renderXZ(
@@ -347,30 +362,34 @@ void SliceRenderer::_renderXZ(
     std::vector<double> max) const {
     double yCoord = min[Y];
 
+    LegacyGL *lgl = _glManager->legacy;
+
+    lgl->Begin(GL_TRIANGLES);
+    lgl->TexCoord2f(0.0f, 0.0f);
+    lgl->Vertex3f(min[X], yCoord, min[Z]);
+    lgl->TexCoord2f(1.0f, 0.0f);
+    lgl->Vertex3f(max[X], yCoord, min[Z]);
+    lgl->TexCoord2f(1.0f, 1.0f);
+    lgl->Vertex3f(max[X], yCoord, max[Z]);
+
+    lgl->TexCoord2f(0.0f, 0.0f);
+    lgl->Vertex3f(min[X], yCoord, min[Z]);
+    lgl->TexCoord2f(1.0f, 1.0f);
+    lgl->Vertex3f(max[X], yCoord, max[Z]);
+    lgl->TexCoord2f(0.0f, 1.0f);
+    lgl->Vertex3f(min[X], yCoord, max[Z]);
+    lgl->End();
+    /*
     glBegin(GL_TRIANGLES);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(min[X], yCoord, min[Z]);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(max[X], yCoord, min[Z]);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(max[X], yCoord, max[Z]);
-
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(min[X], yCoord, min[Z]);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(max[X], yCoord, max[Z]);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(min[X], yCoord, max[Z]);
-
-    /*glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
     glTexCoord2f(1.0f, 0.0f); glVertex3f(max[X], yCoord, min[Z]);
     glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], yCoord, max[Z]);
 
     glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
     glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], yCoord, max[Z]);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(min[X], yCoord, max[Z]);*/
-
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(min[X], yCoord, max[Z]);
     glEnd();
+*/
 }
 
 void SliceRenderer::_renderYZ(
@@ -378,20 +397,33 @@ void SliceRenderer::_renderYZ(
     std::vector<double> max) const {
     double xCoord = min[X];
 
+    LegacyGL *lgl = _glManager->legacy;
+
+    lgl->Begin(GL_TRIANGLES);
+    lgl->TexCoord2f(0.0f, 0.0f);
+    lgl->Vertex3f(xCoord, min[Y], min[Z]);
+    lgl->TexCoord2f(1.0f, 0.0f);
+    lgl->Vertex3f(xCoord, max[Y], min[Z]);
+    lgl->TexCoord2f(1.0f, 1.0f);
+    lgl->Vertex3f(xCoord, max[Y], max[Z]);
+
+    lgl->TexCoord2f(0.0f, 0.0f);
+    lgl->Vertex3f(xCoord, min[Y], min[Z]);
+    lgl->TexCoord2f(1.0f, 1.0f);
+    lgl->Vertex3f(xCoord, max[Y], max[Z]);
+    lgl->TexCoord2f(0.0f, 1.0f);
+    lgl->Vertex3f(xCoord, min[Y], max[Z]);
+    lgl->End();
+    /*
     glBegin(GL_TRIANGLES);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(xCoord, min[Y], min[Z]);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(xCoord, max[Y], min[Z]);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(xCoord, max[Y], max[Z]);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(xCoord, min[Y], min[Z]);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(xCoord, max[Y], min[Z]);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(xCoord, max[Y], max[Z]);
 
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(xCoord, min[Y], min[Z]);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(xCoord, max[Y], max[Z]);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(xCoord, min[Y], max[Z]);
-
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(xCoord, min[Y], min[Z]);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(xCoord, max[Y], max[Z]);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(xCoord, min[Y], max[Z]);
+   
     glEnd();
+*/
 }
