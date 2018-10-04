@@ -54,22 +54,20 @@ SliceRenderer::~SliceRenderer()
 
 void SliceRenderer::_initTexture()
 {
+    LegacyGL *lgl = _glManager->legacy;
+
     glDeleteTextures(1, &_texture);
     glGenTextures(1, &_texture);
 
-    glMatrixMode(GL_MODELVIEW);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glBindTexture(GL_TEXTURE_2D, _texture);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-    glEnable(GL_TEXTURE_2D);
-    // glEnable(GL_DEPTH_TEST);
 
-    // Need to set the clamp parameter for OpenGL 3.0 here
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *)_textureData);
 }
@@ -101,13 +99,8 @@ void SliceRenderer::_saveCacheParams()
     if (_textureData) delete[] _textureData;
     _textureData = new unsigned char[_textureWidth * _textureHeight * 4];
 
-    //    if (_initialized) {
     int rc = _saveTextureData();
     if (rc < 0) SetErrMsg("Unable to acquire data for Slice texture");
-    //    }
-    //    else {
-    //    cout << "SliceRenderer not initialized" << endl;
-    //    }
 }
 
 void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, int j) const
@@ -267,13 +260,18 @@ int SliceRenderer::_paintGL(bool fast)
 
     glDisable(GL_DEPTH_TEST);
 
-    int orientation = _cacheParams.orientation;    //_getOrientation();
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->EnableTexture();
+
+    int orientation = _cacheParams.orientation;
     if (orientation == XY)
         _renderXY(min, max);
     else if (orientation == XZ)
         _renderXZ(min, max);
     else if (orientation == YZ)
         _renderYZ(min, max);
+
+    lgl->DisableTexture();
 
     return 0;
 }
@@ -299,18 +297,6 @@ void SliceRenderer::_renderXY(std::vector<double> min, std::vector<double> max) 
     lgl->TexCoord2f(0.f, 1.f);
     lgl->Vertex3f(min[X], max[Y], zCoord);
     lgl->End();
-
-    /*    glBegin(GL_TRIANGLES);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], min[Y], zCoord);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(max[X], min[Y], zCoord);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], max[Y], zCoord);
-
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], min[Y], zCoord);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], max[Y], zCoord);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(min[X], max[Y], zCoord);
-
-    glEnd();
-*/
 }
 
 void SliceRenderer::_renderXZ(std::vector<double> min, std::vector<double> max) const
@@ -334,17 +320,6 @@ void SliceRenderer::_renderXZ(std::vector<double> min, std::vector<double> max) 
     lgl->TexCoord2f(0.0f, 1.0f);
     lgl->Vertex3f(min[X], yCoord, max[Z]);
     lgl->End();
-    /*
-    glBegin(GL_TRIANGLES);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(max[X], yCoord, min[Z]);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], yCoord, max[Z]);
-
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(min[X], yCoord, min[Z]);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(max[X], yCoord, max[Z]);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(min[X], yCoord, max[Z]);
-    glEnd();
-*/
 }
 
 void SliceRenderer::_renderYZ(std::vector<double> min, std::vector<double> max) const
@@ -368,16 +343,4 @@ void SliceRenderer::_renderYZ(std::vector<double> min, std::vector<double> max) 
     lgl->TexCoord2f(0.0f, 1.0f);
     lgl->Vertex3f(xCoord, min[Y], max[Z]);
     lgl->End();
-    /*
-    glBegin(GL_TRIANGLES);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(xCoord, min[Y], min[Z]);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(xCoord, max[Y], min[Z]);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(xCoord, max[Y], max[Z]);
-
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(xCoord, min[Y], min[Z]);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(xCoord, max[Y], max[Z]);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(xCoord, min[Y], max[Z]);
-
-    glEnd();
-*/
 }
