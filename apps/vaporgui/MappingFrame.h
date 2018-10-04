@@ -288,7 +288,10 @@ class MappingFrame : public QGLWidget {
     virtual float getMaxDomainBound();
 
     virtual float getOpacityData(float val);
+
+#ifdef DEAD
     virtual Histo *getHistogram();
+#endif
 
   protected slots:
 
