@@ -552,6 +552,7 @@ void TFWidget::updateHisto()
         refreshHistograms();
     } else {
         _mappingFrame->fitToView();
+        if (_flags & COLORVAR_IS_IN_TF1) _colorMapMappingFrame->fitToView();
     }
 }
 

@@ -140,14 +140,15 @@ MappingFrame::~MappingFrame()
 bool MappingFrame::skipRefreshHistogram() const
 {
     bool skip = true;
+    cout << "skipRefreshHistogram() ";
     if (_histogram == NULL) return false;
 
     size_t ts = _rParams->GetCurrentTimestep();
     if (ts != _histogram->getTimestepOfUpdate()) { skip = false; }
 
-    string varName = _rParams->GetColorMapVariableName();
-    if (varName != _histogram->getVarnameOfUpdate()) { skip = false; }
-
+    // string varName = _rParams->GetColorMapVariableName();
+    if (_variableName != _histogram->getVarnameOfUpdate()) { skip = false; }
+    cout << skip << endl;
     return skip;
 }
 
@@ -167,16 +168,18 @@ void MappingFrame::RefreshHistogram(bool force)
 
     if (!force && skipRefreshHistogram()) return;
 
-    string var;
-    var = _rParams->GetColorMapVariableName();
-    MapperFunction *mf = _rParams->GetMapperFunc(var);
+    // string var;
+    // var = _rParams->GetColorMapVariableName();
+    MapperFunction *mf = _rParams->GetMapperFunc(_variableName);
 
     float  minRange = mf->getMinMapValue();
     float  maxRange = mf->getMaxMapValue();
     size_t ts = _rParams->GetCurrentTimestep();
 
     if (_histogram) delete _histogram;
-    _histogram = new Histo(256, minRange, maxRange, var, ts);
+
+    cout << "RefreshHistogram " << this << " " << _variableName << endl;
+    _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
     populateHistogram();
 
@@ -185,7 +188,7 @@ void MappingFrame::RefreshHistogram(bool force)
 
 void MappingFrame::populateHistogram()
 {
-    string var = _rParams->GetColorMapVariableName();
+    // string var = _rParams->GetColorMapVariableName();
     size_t ts = _rParams->GetCurrentTimestep();
     int    refLevel = _rParams->GetRefinementLevel();
     int    lod = _rParams->GetCompressionLevel();
@@ -195,7 +198,7 @@ void MappingFrame::populateHistogram()
 
     Grid *grid;
 
-    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, var, minExts, maxExts, true, &refLevel, &lod, &grid);
+    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, _variableName, minExts, maxExts, true, &refLevel, &lod, &grid);
     if (rc < 0) {
         MSG_ERR("Couldn't get data for Histogram");
         return;
@@ -322,13 +325,13 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     // string varname;
 
+    string variableName;
     if (_colorMappingEnabled)
-        _variableName = _rParams->GetColorMapVariableName();
+        variableName = _rParams->GetColorMapVariableName();
     else
-        _variableName = _rParams->GetVariableName();
-    cout << this << " " << _variableName << endl;
+        variableName = _rParams->GetVariableName();
 
-    if (_variableName.empty()) return;
+    if (variableName.empty()) return;
 
     MapperFunction *mapper;
     mapper = _rParams->GetMapperFunc(_variableName);
@@ -338,8 +341,13 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     deselectWidgets();
 
-    if (_initialized == false) {
+    // We always refresh the histogram if either
+    // 1) We are uninitialized
+    // 2) The variable changed
+    // 3) The timestep changed
+    if ((_initialized == false) || (variableName != _variableName)) {
         _initialized = true;
+        _variableName = variableName;
         RefreshHistogram();
     }
 
@@ -1953,6 +1961,7 @@ float MappingFrame::getOpacityData(float value)
     return 0.0;
 }
 
+#ifdef DEAD
 //----------------------------------------------------------------------------
 // Return the histogram
 //----------------------------------------------------------------------------
@@ -1969,6 +1978,7 @@ Histo *MappingFrame::getHistogram()
     string rendererName = _rParams->GetName();
     return _histogramMap[rendererName];
 }
+#endif
 
 //----------------------------------------------------------------------------
 // Add a new opacity widget

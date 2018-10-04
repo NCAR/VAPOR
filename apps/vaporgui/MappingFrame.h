@@ -274,8 +274,11 @@ private:
     virtual float getMinDomainBound();
     virtual float getMaxDomainBound();
 
-    virtual float  getOpacityData(float val);
+    virtual float getOpacityData(float val);
+
+#ifdef DEAD
     virtual Histo *getHistogram();
+#endif
 
 protected slots:
 
