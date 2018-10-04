@@ -31,6 +31,7 @@ set (SRC
 	FontManager.cpp
 	Font.cpp
 	TextLabel.cpp
+	PyEngine.cpp
 )
 
 set (HEADERS
@@ -66,6 +67,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
