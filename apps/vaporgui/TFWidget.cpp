@@ -104,7 +104,6 @@ void TFWidget::Reinit(TFFlags flags)
         collapseConstColorWidgets();
 
     if (_flags & COLORVAR_IS_IN_TF2) {
-        cout << "TabCount " << _tabWidget->count() << endl;
         if (_tabWidget->count() < 2) { _tabWidget->insertTab(1, _colormapTFE, "Color Mapped VARIABLE"); }
     } else
         _tabWidget->removeTab(1);
@@ -219,11 +218,15 @@ void TFWidget::fileSaveTF()
     }
 }
 
-void TFWidget::getRange(float range[2], float values[2])
+void TFWidget::getVariableRange(float range[2], float values[2], bool colorVar = false)
 {
     range[0] = range[1] = 0.0;
     values[0] = values[1] = 0.0;
-    string varName = getCurrentVarName();
+    string varName;
+    if (colorVar == true)
+        varName = _rParams->GetColorMapVariableName();
+    else
+        varName = getCurrentVarName();
     if (varName.empty() || varName == "Constant") return;
 
     size_t ts = _rParams->GetCurrentTimestep();
@@ -314,13 +317,22 @@ void TFWidget::updateSliders()
     // Update min/max transfer function sliders/lineEdits
     //
     float range[2], values[2];
-    getRange(range, values);
+    getVariableRange(range, values);
 
     _rangeCombo->Update(range[0], range[1], values[0], values[1]);
     _opacitySlider->setValue(getOpacity() * 100);
 
     _minLabel->setText(QString::number(range[0]));
     _maxLabel->setText(QString::number(range[1]));
+
+    bool colorMapVariable = true;
+    getVariableRange(range, values, colorMapVariable);
+    cout << "updating colormap values with " << values[0] << " " << values[1] << endl;
+    cout << "updating colormap ranges with " << range[0] << " " << range[1] << endl;
+    _colorMapMinSliderEdit->SetValue(values[0]);
+    _colorMapMinSliderEdit->SetExtents(range[0], range[1]);
+    _colorMapMaxSliderEdit->SetValue(values[1]);
+    _colorMapMaxSliderEdit->SetExtents(range[0], range[1]);
 }
 
 void TFWidget::updateMappingFrames()
@@ -620,7 +632,7 @@ void TFWidget::setUseWhitespace(int state)
 void TFWidget::setColorMapMinRange(double min)
 {
     MapperFunction *mf = getColorMapperFunction();
-    mf->setMaxMapValue(min);
+    mf->setMinMapValue(min);
 }
 
 void TFWidget::setColorMapMaxRange(double max)

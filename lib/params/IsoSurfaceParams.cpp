@@ -19,21 +19,8 @@ IsoSurfaceParams::IsoSurfaceParams(DataMgr *dataManager, ParamsBase::StateSave *
 
 std::vector<double> IsoSurfaceParams::GetIsoValues() const
 {
-    // std::vector<double> defaultVec( 4, 0.0 );
-    // return GetValueDoubleVec( _isoValuesTag, defaultVec );
-
     std::vector<double> defaultVec(4, 0.0);
-    std::vector<double> isovals = GetValueDoubleVec(_isoValuesTag, defaultVec);
-    std::vector<bool>   enabled = GetEnabledIsoValueFlags();
-
-    // Remove disabled isovalues
-    cout << "Before: " << isovals.size() << endl;
-    int size = enabled.size();
-    for (int i = size - 1; i >= 0; i--) {
-        if (!enabled[i]) isovals.erase(isovals.begin() + i);
-    }
-    cout << "After: " << isovals.size() << endl;
-    return isovals;
+    return GetValueDoubleVec(_isoValuesTag, defaultVec);
 }
 
 void IsoSurfaceParams::SetIsoValues(std::vector<double> vals)
@@ -61,4 +48,10 @@ void IsoSurfaceParams::SetEnabledIsoValueFlags(const std::vector<bool> &enabled)
     int expectedSize = 4;
     if (in.size() != expectedSize) in.resize(expectedSize, false);
     SetValueLongVec(_enabledIsoValuesTag, "Iso Surface Enabled Flags", in);
+}
+
+bool IsoSurfaceParams::UseSingleColor() const
+{
+    bool usingSingleColor = (bool)GetValueLong(_useSingleColorTag, (int)true);
+    return usingSingleColor;
 }
