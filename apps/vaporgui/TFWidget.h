@@ -62,7 +62,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
     void loadTF(string varname);
 
-    void getRange(float range[2], float values[2]);
+    void getVariableRange(float range[2], float values[2], bool colorVar);
     float getOpacity();
 
   private slots:

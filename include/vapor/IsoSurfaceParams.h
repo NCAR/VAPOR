@@ -21,6 +21,7 @@ class PARAMS_API IsoSurfaceParams : public RayCasterParams {
     void SetIsoValues(std::vector<double>);
     std::vector<bool> GetEnabledIsoValueFlags() const;
     void SetEnabledIsoValueFlags(const std::vector<bool> &);
+    bool UseSingleColor() const;
 
   protected:
     static const std::string _isoValuesTag;
