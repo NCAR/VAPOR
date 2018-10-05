@@ -427,11 +427,20 @@ void MappingFrame::Update(DataMgr *dataMgr,
         vector<double> isovals;
         ContourParams *cp;
         IsoSurfaceParams *ip;
+
+        // This should probably be rethought
+        // Maybe we need an IsoParams base class?
         cp = dynamic_cast<ContourParams *>(rParams);
         if (cp == NULL) {
             ip = dynamic_cast<IsoSurfaceParams *>(rParams);
             assert(ip);
             isovals = ip->GetIsoValues();
+            //			int size = isovals.size();
+            //			std::vector<bool> enabled = ip->GetEnabledIsoValueFlags();
+            //			for (int i=size-1; i>=0; i--) {
+            //				if (!enabled[i])
+            //					isovals.
+            //			}
         } else {
             isovals = cp->GetContourValues(_variableName);
         }
@@ -1182,10 +1191,6 @@ int MappingFrame::drawDomainSlider() {
     glPushName(DOMAIN_WIDGET);
 
     int rc = _domainSlider->paintGL();
-
-    if (_isolineSlidersEnabled) {
-        rc = _contourRangeSlider->paintGL();
-    }
 
     glPopName();
     return rc;
