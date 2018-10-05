@@ -19,8 +19,21 @@ IsoSurfaceParams::IsoSurfaceParams(DataMgr *dataManager, ParamsBase::StateSave *
 
 std::vector<double> IsoSurfaceParams::GetIsoValues() const
 {
+    // std::vector<double> defaultVec( 4, 0.0 );
+    // return GetValueDoubleVec( _isoValuesTag, defaultVec );
+
     std::vector<double> defaultVec(4, 0.0);
-    return GetValueDoubleVec(_isoValuesTag, defaultVec);
+    std::vector<double> isovals = GetValueDoubleVec(_isoValuesTag, defaultVec);
+    std::vector<bool>   enabled = GetEnabledIsoValueFlags();
+
+    // Remove disabled isovalues
+    cout << "Before: " << isovals.size() << endl;
+    int size = enabled.size();
+    for (int i = size - 1; i >= 0; i--) {
+        if (!enabled[i]) isovals.erase(isovals.begin() + i);
+    }
+    cout << "After: " << isovals.size() << endl;
+    return isovals;
 }
 
 void IsoSurfaceParams::SetIsoValues(std::vector<double> vals)
