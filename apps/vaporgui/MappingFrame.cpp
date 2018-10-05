@@ -435,12 +435,12 @@ void MappingFrame::Update(DataMgr *dataMgr,
             ip = dynamic_cast<IsoSurfaceParams *>(rParams);
             assert(ip);
             isovals = ip->GetIsoValues();
-            //			int size = isovals.size();
-            //			std::vector<bool> enabled = ip->GetEnabledIsoValueFlags();
-            //			for (int i=size-1; i>=0; i--) {
-            //				if (!enabled[i])
-            //					isovals.
-            //			}
+            //std::vector<bool>enabled = ip->GetEnabledIsoValueFlags();
+            //int size = enabled.size();
+            //for (int i=size-1; i>=0; i--) {
+            //    if (!enabled[i])
+            //        isovals.erase(isovals.begin()+i);
+            //}
         } else {
             isovals = cp->GetContourValues(_variableName);
         }
@@ -1211,14 +1211,20 @@ int MappingFrame::drawIsoSlider() {
 // Draw all the isoline sliders
 //----------------------------------------------------------------------------
 int MappingFrame::drawIsolineSliders() {
-    for (int i = 0; i < _isolineSliders.size(); i++) {
-        int sliderName = (int)(ISO_WIDGET) + i + 1;
-        glPushName(sliderName);
+    std::vector<bool> enabledIsoValues(true, _isolineSliders.size());
+    IsoSurfaceParams *ip = dynamic_cast<IsoSurfaceParams *>(_rParams);
+    if (ip != NULL)
+        enabledIsoValues = ip->GetEnabledIsoValueFlags();
 
-        int rc = _isolineSliders[i]->paintGL();
-        glPopName();
-        if (rc < 0)
-            return rc;
+    for (int i = 0; i < _isolineSliders.size(); i++) {
+        if (enabledIsoValues[i] == true) {
+            int sliderName = (int)(ISO_WIDGET) + i + 1;
+            glPushName(sliderName);
+            int rc = _isolineSliders[i]->paintGL();
+            glPopName();
+            if (rc < 0)
+                return rc;
+        }
     }
     return 0;
 }
