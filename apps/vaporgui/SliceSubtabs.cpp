@@ -19,6 +19,9 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget *parent) {
     QButtonGroup *fidelityButtons = _variablesWidget->_fidelityWidget->GetFidelityButtons();
     connect(fidelityButtons, SIGNAL(buttonClicked(int)),
             this, SLOT(_setDefaultSampleRate()));
+    QComboBox *refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
+    connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(_setDefaultSampleRate()));
 }
 
 void SliceVariablesSubtab::Update(
@@ -32,6 +35,7 @@ void SliceVariablesSubtab::Update(
 
 void SliceVariablesSubtab::_setDefaultSampleRate() {
     int rate = _params->GetDefaultSampleRate();
+    cout << "setting default sample rate to " << rate << endl;
     _params->SetSampleRate(rate);
 }
 
