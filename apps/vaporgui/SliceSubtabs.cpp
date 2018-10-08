@@ -53,7 +53,6 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent) {
 
 void SliceAppearanceSubtab::_sampleRateChanged(int rate) {
     _params->SetSampleRate(rate);
-    cout << "sampleRateChanged" << endl;
     _TFWidget->SetAutoUpdateParamChanged(true);
     //_TFWidget->mappingFrame->RefreshHistogram(true);
 }
