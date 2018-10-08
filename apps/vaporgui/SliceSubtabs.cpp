@@ -31,7 +31,6 @@ void SliceVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
 void SliceVariablesSubtab::_setDefaultSampleRate()
 {
     int rate = _params->GetDefaultSampleRate();
-    cout << "setting default sample rate to " << rate << endl;
     _params->SetSampleRate(rate);
 }
 
