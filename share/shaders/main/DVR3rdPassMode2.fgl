@@ -37,6 +37,7 @@ float diffuseCoeff   = lightingCoeffs[1];
 float specularCoeff  = lightingCoeffs[2];
 float specularExp    = lightingCoeffs[3];
 vec3  volumeDimsf    = vec3( float(volumeDims.x), float(volumeDims.y), float(volumeDims.z) );
+vec3  volumeStepf    = 1.0 / volumeDimsf;
 
 //
 // Input:  normalized value w.r.t. valueRange.
@@ -375,7 +376,7 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     return true;
 }
 
-int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
+void  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                     const in  vec3 rayDirTexture,
                     out      ivec4 step2CellIdx,    out float t )
 {
@@ -424,29 +425,65 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     triangles[10] =  ivec3( 3, 0, 2 );  // bottom face
     triangles[11] =  ivec3( 2, 0, 1 );
 
-    bool  intersectionTest[12];
-    float tVec[12];
     for( int i = 0; i < 12; i++ )
-    {
-        intersectionTest[i] = false;
-        tVec[i] = -1.0;
-    }
+        if( i / 2 != step1CellIdx.w )   // not the entry face
+        {
+            bool  intersect =  RayTriangleIntersect( startTexture, 
+                                                     rayDirTexture,
+                                                     cubeVertCoords[ triangles[i][0] ],
+                                                     cubeVertCoords[ triangles[i][1] ],
+                                                     cubeVertCoords[ triangles[i][2] ],
+                                                     t );
+            if( intersect )
+            {
+                if( i / 2 == 0 )    // exits the front face of current cell
+                {
+                    // enters the back face of the next cell
+                    step2CellIdx = ivec4( cubeVertIdx[3], 1 );
+                    break;
+                }
+                else if( i / 2 == 1 )   // exits the back face of current cell
+                {
+                    // enters the front face of the next cell
+                    step2CellIdx = ivec4( V0.x, V0.y, V0.z - 1, 0 );
+                    break;
+                }
+                else if( i / 2 == 2 )   // exits the right face of current cell
+                {
+                    // enters the left face of the next cell
+                    step2CellIdx = ivec4( cubeVertIdx[1], 3 );
+                    break;
+                }
+                else if( i / 2 == 3 )   // exits the left face of current cell
+                {
+                    // enters the right face of the next cell
+                    step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z, 2 );
+                    break;
+                }
+                else if( i / 2 == 4 )   // exits the top face of current cell
+                {
+                    // enters the bottom face of the next cell
+                    step2CellIdx = ivec4(  cubeVertIdx[4], 5 );
+                    break;
+                }
+                else                    // exits the bottom face of current cell
+                {
+                    // enters the top face of the next cell
+                    step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z, 4 );
+                    break;
+                }
+            }
+        }
+}
 
-    for( int i = 0; i < 12; i++ )
-    {
-        if( i / 2 != step1CellIdx.w )
-            intersectionTest[i] = RayTriangleIntersect( startTexture, 
-                                                        rayDirTexture,
-                                                        cubeVertCoords[ triangles[i][0] ],
-                                                        cubeVertCoords[ triangles[i][1] ],
-                                                        cubeVertCoords[ triangles[i][2] ],
-                                                        tVec[i] );
-    }
-    int counter = 0;
-    for( int i = 0; i < 12; i++ )
-        if( intersectionTest[i] )
-            counter++;
-    return counter;    
+bool CellOutsideBound( const in ivec3 cellIdx )
+{
+    if( cellIdx.x < 0 || cellIdx.x > volumeDims.x - 2 || 
+        cellIdx.y < 0 || cellIdx.y > volumeDims.y - 2 ||
+        cellIdx.z < 0 || cellIdx.z > volumeDims.z - 2   )
+        return true;
+    else
+        return false;
 }
 
 void main(void)
@@ -460,23 +497,50 @@ void main(void)
 
     vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
     vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
-    vec3 step1Texture   = startTexture;
     vec3 rayDirTexture  = stopTexture - startTexture;
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )
         discard;
 
-    ivec4 cellIdx = GetCellIndices( step1Texture );
+    vec3  step1Texture  = startTexture;
+    ivec4 step1CellIdx  = GetCellIndices( step1Texture );
+    vec3  step1CellCenterTexture = vec3( step1CellIdx.xyz + 1 ) * volumeStepf;
+    float step1Value    = texture( volumeTexture, step1CellCenterTexture ).r;
+          color         = texture( colorMapTexture, TranslateValue( step1Value ) );
+          color.rgb    *= color.a;
 
-    color = vec4( vec3( cellIdx.rgb ) / (volumeDimsf - 2.0), 0.7f );
-
-    ivec4 tmp;
+    ivec4 step2CellIdx;
     float t;
-    int counter = FindNextCell( cellIdx, startTexture, rayDirTexture, tmp, t );
-    if( counter == 0 )
-        color.a = 0.0;
-    else if (counter > 1 )
-        color = vec4(0.7);
+    FindNextCell( step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
+
+    if( CellOutsideBound( step2CellIdx.xyz ) )
+    {
+        step2CellIdx = step1CellIdx;
+    }
+    else
+    {
+        int maxCells     = 2 * int(ceil(length( volumeDimsf )));
+        for( int counter = 0; counter < maxCells; counter++ )
+        {
+            vec3  step2CellCenterTexture = vec3( step2CellIdx.xyz + 1 ) * volumeStepf;
+            float step2Value    = texture( volumeTexture, step2CellCenterTexture ).r;
+            vec4  backColor     = texture( colorMapTexture, TranslateValue( step2Value ) );
+            color.rgb          += (1.0 - color.a) * backColor.a * backColor.rgb;
+            color.a            += (1.0 - color.a) * backColor.a;
+
+            step1CellIdx = step2CellIdx;
+            FindNextCell(  step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
+            if( CellOutsideBound( step2CellIdx.xyz ) )
+            {
+                step2CellIdx = step1CellIdx;
+                break;
+            }
+        }
+    }
+
+
+
+
 
     /* if( color.r < EPSILON && color.g < EPSILON && color.b < EPSILON )
         color.a = 1.0;
