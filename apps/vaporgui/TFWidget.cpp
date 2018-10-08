@@ -479,7 +479,6 @@ void TFWidget::SetAutoUpdateParamChanged(bool changed) { _autoUpdateParamChanged
 
 void TFWidget::RefreshHistogram()
 {
-    cout << "TFWidget::RefreshHistogram()" << endl;
     std::vector<double> minExt, maxExt;
     MapperFunction *    mf = getCurrentMapperFunction();
     mappingFrame->updateMapperFunction(mf);
