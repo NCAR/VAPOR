@@ -357,18 +357,24 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     vec3 pvec = cross( dir, v0v2 );
     float det = dot(  v0v1, pvec );
 
-    if( abs(det) < EPSILON ) // ray and triangle are parallel
+    const float zero = 1e-9;
+    if( abs(det) < zero ) // ray and triangle are parallel
+    {
+        t = -1.0;
         return false;
+    }
 
     float invDet = 1.0 / det;
     vec3  tvec   = orig - v0;
     float u      = dot( tvec, pvec ) * invDet;
-    if( u < 0.0 || u > 1.0 )
+    //if( u < 0.0 || u > 1.0 )
+    if( u < -EPSILON || u > 1.0 + EPSILON )
         return false;
 
     vec3 qvec    = cross( tvec, v0v1 );
     float v      = dot( dir, qvec ) * invDet;
-    if( v < 0.0 || u + v > 1.0 )
+    //if( v < 0.0 || u + v > 1.0 )
+    if( v < -EPSILON || u + v > 1.0 + EPSILON )
         return false;
 
     t = dot( v0v2, qvec ) * invDet;
@@ -376,7 +382,7 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     return true;
 }
 
-void  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
+bool  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                     const in  vec3 rayDirTexture,
                     out      ivec4 step2CellIdx,    out float t )
 {
@@ -425,15 +431,16 @@ void  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     triangles[10] =  ivec3( 3, 0, 2 );  // bottom face
     triangles[11] =  ivec3( 2, 0, 1 );
 
+    bool intersect = false;
     for( int i = 0; i < 12; i++ )
         if( i / 2 != step1CellIdx.w )   // not the entry face
         {
-            bool  intersect =  RayTriangleIntersect( startTexture, 
-                                                     rayDirTexture,
-                                                     cubeVertCoords[ triangles[i][0] ],
-                                                     cubeVertCoords[ triangles[i][1] ],
-                                                     cubeVertCoords[ triangles[i][2] ],
-                                                     t );
+            intersect =  RayTriangleIntersect( startTexture, 
+                                               rayDirTexture,
+                                               cubeVertCoords[ triangles[i][0] ],
+                                               cubeVertCoords[ triangles[i][1] ],
+                                               cubeVertCoords[ triangles[i][2] ],
+                                               t );
             if( intersect )
             {
                 if( i / 2 == 0 )    // exits the front face of current cell
@@ -474,6 +481,8 @@ void  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 }
             }
         }
+
+    return intersect;
 }
 
 bool CellOutsideBound( const in ivec3 cellIdx )
@@ -504,6 +513,7 @@ void main(void)
 
     vec3  step1Texture  = startTexture;
     ivec4 step1CellIdx  = GetCellIndices( step1Texture );
+
     vec3  step1CellCenterTexture = vec3( step1CellIdx.xyz + 1 ) * volumeStepf;
     float step1Value    = texture( volumeTexture, step1CellCenterTexture ).r;
           color         = texture( colorMapTexture, TranslateValue( step1Value ) );
@@ -511,16 +521,32 @@ void main(void)
 
     ivec4 step2CellIdx;
     float t;
-    FindNextCell( step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
+    bool intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
 
     if( CellOutsideBound( step2CellIdx.xyz ) )
     {
         step2CellIdx = step1CellIdx;
+/*
+        if( !intersect )
+            color = vec4( 1.0, 0.2, 0.2, 1.0 );
+        else
+        {
+            vec3 travTexture = startTexture + t * rayDirTexture;
+            float threshold = 1e-4;
+            if(  abs( travTexture.x  - stopTexture.x ) > threshold ||
+                 abs( travTexture.y  - stopTexture.y ) > threshold ||
+                 abs( travTexture.z  - stopTexture.z ) > threshold  )
+                color = vec4( 1.0 );
+            else
+                color = vec4( 0.0 );
+        }
+*/
     }
     else
     {
-        int maxCells     = 2 * int(ceil(length( volumeDimsf )));
-        for( int counter = 0; counter < maxCells; counter++ )
+        int maxCells     = 16 * int(length( volumeDimsf ));
+        int counter;
+        for( counter = 0; counter < maxCells; counter++ )
         {
             vec3  step2CellCenterTexture = vec3( step2CellIdx.xyz + 1 ) * volumeStepf;
             float step2Value    = texture( volumeTexture, step2CellCenterTexture ).r;
@@ -529,14 +555,54 @@ void main(void)
             color.a            += (1.0 - color.a) * backColor.a;
 
             step1CellIdx = step2CellIdx;
-            FindNextCell(  step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
+            intersect = FindNextCell(  step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
+
             if( CellOutsideBound( step2CellIdx.xyz ) )
             {
                 step2CellIdx = step1CellIdx;
                 break;
             }
+            
+/*
+            if( !intersect )
+            {
+                color = vec4( 1.0, 0.2, 0.2, 1.0 );
+                break;
+            }
+            else if( CellOutsideBound( step2CellIdx.xyz ) )
+            {
+                step2CellIdx = step1CellIdx;
+
+                vec3 travTexture = startTexture + t * rayDirTexture;
+                float threshold = 1e-4;
+                if(  abs( travTexture.x  - stopTexture.x ) > threshold ||
+                     abs( travTexture.y  - stopTexture.y ) > threshold ||
+                     abs( travTexture.z  - stopTexture.z ) > threshold  )
+                    color = vec4( 1.0 );
+                else
+                    color = vec4( 0.0 );
+
+                break;
+            }
+*/
         }
+
+        if( counter == maxCells )
+            color = vec4( 1.0, 0.2, 0.2, 1.0 );
+
     }
+
+/*
+    vec3 travTexture = startTexture + t * rayDirTexture;
+    const float threshold = 1e-4;
+    if(  abs( travTexture.x  - stopTexture.x ) > threshold ||
+         abs( travTexture.y  - stopTexture.y ) > threshold ||
+         abs( travTexture.z  - stopTexture.z ) > threshold  )
+        color = vec4( 1.0 );
+    else
+        color = vec4( 0.0 );
+*/
+        
 
 
 
