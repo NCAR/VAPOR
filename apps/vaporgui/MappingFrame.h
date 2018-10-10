@@ -90,7 +90,7 @@ public:
     MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
 
-    void RefreshHistogram(bool force = false);
+    void RefreshHistogram();
 
     //! Enable or disable the color mapping in the Transfer Function.
     //! Should be specified in the RenderEventRouter constructor
@@ -121,9 +121,6 @@ public:
     //! contains the MapperFunction being used.  This should be invoked in RenderEventRouter::updateTab()
     // void updateTab();
     void Update(VAPoR::DataMgr *dataMgr = NULL, VAPoR::ParamsMgr *paramsMgr = NULL, VAPoR::RenderParams *rParams = NULL);
-
-    //! Specify the variable associated with the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
-    void setVariableName(std::string name);
 
     //! Identify the current mapperFunction associated with the MappingFrame.
     //! Needed by various GLWidgets embedded in the MappingFrame
@@ -174,7 +171,7 @@ signals:
 
 public slots:
     void updateHisto();
-    void fitToView();
+    void fitViewToDataRange();
     void updateMap();
 
 private:

@@ -4,7 +4,7 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
 
-    _TFWidget->Reinit((TFFlags)(CONSTANT));
+    _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     _TFWidget->_mappingFrame->setIsolineSliders(true);
     _TFWidget->_mappingFrame->setOpacityMapping(false);
 

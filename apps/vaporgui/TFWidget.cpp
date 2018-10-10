@@ -40,9 +40,10 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
 {
     setupUi(this);
 
-    _somethingChanged = false;
-    _autoUpdateHisto = false;
+    _externalChangeHappened = false;
     _discreteColormap = false;
+    _mainVarName = "";
+    _secondaryVarName = "";
 
     _myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
 
@@ -50,13 +51,13 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _maxCombo = new Combo(_maxRangeEdit, _maxRangeSlider);
     _rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 
-    _colorMapMinSliderEdit->SetLabel(QString::fromAscii("Min"));
-    _colorMapMinSliderEdit->SetIntType(false);
-    _colorMapMinSliderEdit->SetExtents(0.f, 1.f);
+    _secondaryMinSliderEdit->SetLabel(QString::fromAscii("Min"));
+    _secondaryMinSliderEdit->SetIntType(false);
+    _secondaryMinSliderEdit->SetExtents(0.f, 1.f);
 
-    _colorMapMaxSliderEdit->SetLabel(QString::fromAscii("Max"));
-    _colorMapMaxSliderEdit->SetIntType(false);
-    _colorMapMaxSliderEdit->SetExtents(0.f, 1.f);
+    _secondaryMaxSliderEdit->SetLabel(QString::fromAscii("Max"));
+    _secondaryMaxSliderEdit->SetIntType(false);
+    _secondaryMaxSliderEdit->SetExtents(0.f, 1.f);
 
     _cLevel = 0;
     _refLevel = 0;
@@ -69,44 +70,42 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     connectWidgets();
 }
 
-void TFWidget::collapseConstColorWidgets()
+void TFWidget::configureConstantColorControls()
 {
-    useConstColorFrame->hide();
-    constColorFrame->hide();
+    if (_flags & CONSTANT_COLOR) {
+        _useConstColorFrame->show();
+        _constColorFrame->show();
+    } else {
+        _useConstColorFrame->hide();
+        _constColorFrame->hide();
+    }
+
     adjustSize();
 }
 
-void TFWidget::showConstColorWidgets()
+void TFWidget::configureSecondaryTransferFunction()
 {
-    useConstColorFrame->show();
-    constColorFrame->show();
-    adjustSize();
-}
+    if (_flags & COLORVAR_IS_IN_TF2) {
+        if (_tabWidget->count() < 2) _tabWidget->insertTab(1, _secondaryTFE, "Color Mapped VARIABLE");
 
-void TFWidget::hideWhitespaceFrame()
-{
-    whitespaceFrame->hide();
-    adjustSize();
-}
-
-void TFWidget::showWhitespaceFrame()
-{
-    whitespaceFrame->show();
-    adjustSize();
+        _whitespaceFrame->hide();
+        _colorInterpolationFrame->hide();
+        _loadSaveFrame->hide();
+    } else {
+        _tabWidget->removeTab(1);
+        _whitespaceFrame->show();
+        _colorInterpolationFrame->show();
+        _useConstColorFrame->show();
+        _constColorFrame->show();
+        _loadSaveFrame->show();
+    }
 }
 
 void TFWidget::Reinit(TFFlags flags)
 {
     _flags = flags;
-    if (_flags & CONSTANT)
-        showConstColorWidgets();
-    else
-        collapseConstColorWidgets();
-
-    if (_flags & COLORVAR_IS_IN_TF2) {
-        if (_tabWidget->count() < 2) { _tabWidget->insertTab(1, _colormapTFE, "Color Mapped VARIABLE"); }
-    } else
-        _tabWidget->removeTab(1);
+    configureSecondaryTransferFunction();
+    configureConstantColorControls();
     _tabWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     adjustSize();
@@ -128,21 +127,9 @@ TFWidget::~TFWidget()
     }
 }
 
-void TFWidget::enableTFWidget(bool state)
-{
-    _loadButton->setEnabled(state);
-    _saveButton->setEnabled(state);
-    _tfFrame->setEnabled(state);
-    _minRangeEdit->setEnabled(state);
-    _maxRangeEdit->setEnabled(state);
-    _opacitySlider->setEnabled(state);
-    _autoUpdateHistoCheckbox->setEnabled(state);
-    _colorInterpCombo->setEnabled(state);
-}
-
 void TFWidget::loadTF()
 {
-    string varname = getCurrentVarName();
+    string varname = _rParams->GetColorMapVariableName();
     if (varname.empty()) return;
 
     // Ignore TF's in session, for now.
@@ -156,16 +143,15 @@ void TFWidget::loadTF()
     Update(_dataMgr, _paramsMgr, _rParams);
 }
 
-void TFWidget::loadTF(string varname)
-{
-    SettingsParams *sP;
-    sP = (SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType());
+/*void TFWidget::loadTF(string varname) {
+    SettingsParams* sP;
+    sP = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
 
     string path = sP->GetTFDir();
 
     fileLoadTF(varname, path.c_str(), true);
 }
-
+*/
 void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
 {
     QString s = QFileDialog::getOpenFileName(0, "Choose a transfer function file to open", startPath, "Vapor 3 Transfer Functions (*.tf3)");
@@ -218,15 +204,16 @@ void TFWidget::fileSaveTF()
     }
 }
 
-void TFWidget::getVariableRange(float range[2], float values[2], bool colorVar = false)
+void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryVariable = false)
 {
     range[0] = range[1] = 0.0;
     values[0] = values[1] = 0.0;
     string varName;
-    if (colorVar == true)
+    // if (colorVar == true)
+    if (secondaryVariable)
         varName = _rParams->GetColorMapVariableName();
     else
-        varName = getCurrentVarName();
+        varName = _rParams->GetVariableName();
     if (varName.empty() || varName == "Constant") return;
 
     size_t ts = _rParams->GetCurrentTimestep();
@@ -262,60 +249,71 @@ float TFWidget::getOpacity()
 
 void TFWidget::updateColorInterpolation()
 {
-    MapperFunction *tf = getMainMapperFunction();
+    MapperFunction *mf;
+    QComboBox *     colorInterpCombo;
+    QFrame *        whitespaceFrame;
+    QCheckBox *     whitespaceCheckbox;
 
-    TFInterpolator::type t = tf->getColorInterpType();
-    _colorInterpCombo->blockSignals(true);
-    _colorMapColorInterpCombo->blockSignals(true);
+    if (_flags & COLORVAR_IS_IN_TF2) {
+        mf = getSecondaryMapperFunction();
+        colorInterpCombo = _secondaryVarInterpCombo;
+        whitespaceFrame = _secondaryWhitespaceFrame;
+        whitespaceCheckbox = _secondaryWhitespaceCheckbox;
+    } else {
+        mf = getMainMapperFunction();
+        colorInterpCombo = _colorInterpCombo;
+        whitespaceFrame = _whitespaceFrame;
+        whitespaceCheckbox = _whitespaceCheckbox;
+    }
+
+    TFInterpolator::type t = mf->getColorInterpType();
+    colorInterpCombo->blockSignals(true);
     if (t == TFInterpolator::diverging) {
-        _colorInterpCombo->setCurrentIndex(0);
-        _colorMapColorInterpCombo->setCurrentIndex(0);
-        showWhitespaceFrame();
+        colorInterpCombo->setCurrentIndex(0);
+        whitespaceFrame->show();
     } else if (t == TFInterpolator::discrete) {
-        _colorInterpCombo->setCurrentIndex(1);
-        _colorMapColorInterpCombo->setCurrentIndex(1);
-        hideWhitespaceFrame();
+        colorInterpCombo->setCurrentIndex(1);
+        whitespaceFrame->hide();
     } else {
-        _colorInterpCombo->setCurrentIndex(2);
-        _colorMapColorInterpCombo->setCurrentIndex(2);
-        hideWhitespaceFrame();
+        colorInterpCombo->setCurrentIndex(2);
+        whitespaceFrame->hide();
     }
-    _colorInterpCombo->blockSignals(false);
-    _colorMapColorInterpCombo->blockSignals(false);
+    colorInterpCombo->blockSignals(false);
 
-    int useWhitespace = tf->getUseWhitespace();
+    int useWhitespace = mf->getUseWhitespace();
     if (useWhitespace) {
-        _whitespaceCheckbox->setCheckState(Qt::Checked);
-        _colorMapWhitespaceCheckbox->setCheckState(Qt::Checked);
+        whitespaceCheckbox->setCheckState(Qt::Checked);
     } else {
-        _whitespaceCheckbox->setCheckState(Qt::Unchecked);
-        _colorMapWhitespaceCheckbox->setCheckState(Qt::Unchecked);
+        whitespaceCheckbox->setCheckState(Qt::Unchecked);
     }
+
+    adjustSize();
 }
 
-void TFWidget::updateAutoUpdateHistoCheckbox()
+void TFWidget::updateMainAutoUpdateHistoCheckboxes()
 {
-    MapperFunction *tf = getMainMapperFunction();
-
-    // Update the state of autoUpdateHisto according to params
-    //
-    _autoUpdateHistoCheckbox->blockSignals(true);
-    _colorMapAutoUpdateHistoCheckbox->blockSignals(true);
-    if (tf->GetAutoUpdateHisto()) {
-        _autoUpdateHistoCheckbox->setCheckState(Qt::Checked);
-        _colorMapAutoUpdateHistoCheckbox->setCheckState(Qt::Checked);
-    } else {
-        _autoUpdateHistoCheckbox->setCheckState(Qt::Unchecked);
-        _colorMapAutoUpdateHistoCheckbox->setCheckState(Qt::Unchecked);
-    }
-    _autoUpdateHistoCheckbox->blockSignals(false);
-    _colorMapAutoUpdateHistoCheckbox->blockSignals(false);
+    MapperFunction *mf = getMainMapperFunction();
+    _autoUpdateMainHistoCheckbox->blockSignals(true);
+    if (mf->GetAutoUpdateHisto())
+        _autoUpdateMainHistoCheckbox->setCheckState(Qt::Checked);
+    else
+        _autoUpdateMainHistoCheckbox->setCheckState(Qt::Unchecked);
+    _autoUpdateMainHistoCheckbox->blockSignals(false);
 }
 
-void TFWidget::updateSliders()
+void TFWidget::updateSecondaryAutoUpdateHistoCheckbox()
 {
-    // Update min/max transfer function sliders/lineEdits
-    //
+    MapperFunction *mf = getSecondaryMapperFunction();
+    _autoUpdateSecondaryHistoCheckbox->blockSignals(true);
+    if (mf->GetAutoUpdateHisto())
+        _autoUpdateSecondaryHistoCheckbox->setCheckState(Qt::Checked);
+    else
+        _autoUpdateSecondaryHistoCheckbox->setCheckState(Qt::Unchecked);
+    _autoUpdateSecondaryHistoCheckbox->blockSignals(false);
+}
+
+void TFWidget::updateMainSliders()
+{
     float range[2], values[2];
     getVariableRange(range, values);
 
@@ -324,25 +322,48 @@ void TFWidget::updateSliders()
 
     _minLabel->setText(QString::number(range[0]));
     _maxLabel->setText(QString::number(range[1]));
-
-    bool colorMapVariable = true;
-    getVariableRange(range, values, colorMapVariable);
-    cout << "updating colormap values with " << values[0] << " " << values[1] << endl;
-    cout << "updating colormap ranges with " << range[0] << " " << range[1] << endl;
-    _colorMapMinSliderEdit->SetValue(values[0]);
-    _colorMapMinSliderEdit->SetExtents(range[0], range[1]);
-    _colorMapMaxSliderEdit->SetValue(values[1]);
-    _colorMapMaxSliderEdit->SetExtents(range[0], range[1]);
 }
 
-void TFWidget::updateMappingFrames()
+void TFWidget::updateSecondarySliders()
 {
-    _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
-    _mappingFrame->fitToView();
+    float range[2], values[2];
+    getVariableRange(range, values, true);
+    _secondaryMinSliderEdit->SetValue(values[0]);
+    _secondaryMinSliderEdit->SetExtents(range[0], range[1]);
+    _secondaryMaxSliderEdit->SetValue(values[1]);
+    _secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
+}
 
-    if (_flags & COLORVAR_IS_IN_TF2) {
-        _colorMapMappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
-        _colorMapMappingFrame->fitToView();
+void TFWidget::updateMainMappingFrame(bool refresh = false)
+{
+    MapperFunction *mf = getMainMapperFunction();
+    _mappingFrame->updateMapperFunction(mf);
+    _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+
+    if (getAutoUpdateMainHisto()) _mappingFrame->RefreshHistogram();
+
+    _mappingFrame->fitViewToDataRange();
+}
+
+void TFWidget::updateSecondaryMappingFrame(bool refresh = false)
+{
+    MapperFunction *mf = getSecondaryMapperFunction();
+    _secondaryMappingFrame->updateMapperFunction(mf);
+    _secondaryMappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+
+    if (getAutoUpdateSecondaryHisto()) _secondaryMappingFrame->RefreshHistogram();
+
+    _secondaryMappingFrame->fitViewToDataRange();
+}
+
+void TFWidget::refreshIfSecondaryVarChanged()
+{
+    // If the variable in the MappingFrame chages, we force a refresh
+    string newName = _rParams->GetColorMapVariableName();
+    if (getAutoUpdateSecondaryHisto() || _secondaryVarName != newName) {
+        _secondaryVarName = newName;
+        bool refresh = true;
+        updateSecondaryMappingFrame(refresh);
     }
 }
 
@@ -356,26 +377,96 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
     _dataMgr = dataMgr;
     _rParams = rParams;
 
-    if (getCurrentVarName() == "") {
+    if (_rParams->GetVariableName() == "") {
         setEnabled(false);
         return;
     } else {
         setEnabled(true);
     }
 
-    updateAutoUpdateHistoCheckbox();
-    updateMappingFrames();
-    updateColorInterpolation();
-    updateSliders();
-    updateConstColorWidgets();
+    updateMainMappingFrame();    // set mapper func to that of current variable, refresh _rParams etc
+    updateSecondaryMappingFrame();
 
-    string newName = getCurrentVarName();
-    if (_varName != newName) {
-        _varName = newName;
-        refreshHistograms();
+    if (mainVariableChanged()) {
+        refreshMainHisto();
+        _mappingFrame->fitViewToDataRange();
     }
 
-    checkForExternalChangesToHisto();
+    if (secondaryVariableChanged()) {
+        refreshSecondaryHisto();
+        _secondaryMappingFrame->fitViewToDataRange();
+    }
+
+    enableUpdateButtonsIfNeeded();
+
+    updateColorInterpolation();
+    updateConstColor();
+    updateMainAutoUpdateHistoCheckboxes();
+    updateSecondaryAutoUpdateHistoCheckbox();
+    updateMainSliders();
+    updateSecondarySliders();
+}
+
+bool TFWidget::mainVariableChanged()
+{
+    string newName = _rParams->GetVariableName();
+    if (_mainVarName != newName) {
+        _mainVarName = newName;
+        return true;
+    } else
+        return false;
+}
+
+bool TFWidget::secondaryVariableChanged()
+{
+    string newName = _rParams->GetVariableName();
+    if (_secondaryVarName != newName) {
+        _secondaryVarName = newName;
+        return true;
+    } else
+        return false;
+}
+
+void TFWidget::refreshMainHisto()
+{
+    _mappingFrame->RefreshHistogram();
+
+    refreshSecondaryHistoIfNecessary();
+
+    Update(_dataMgr, _paramsMgr, _rParams);
+    _updateMainHistoButton->setEnabled(false);
+}
+
+void TFWidget::refreshSecondaryHistoIfNecessary()
+{
+    if (_flags & COLORVAR_IS_IN_TF2) {
+        MapperFunction *mainMF = getMainMapperFunction();
+        MapperFunction *secondaryMF = getSecondaryMapperFunction();
+        if (mainMF == secondaryMF) {
+            _secondaryMappingFrame->RefreshHistogram();
+            _updateSecondaryHistoButton->setEnabled(false);
+        }
+    }
+}
+
+void TFWidget::refreshSecondaryHisto()
+{
+    _secondaryMappingFrame->RefreshHistogram();
+
+    refreshMainHistoIfNecessary();
+
+    Update(_dataMgr, _paramsMgr, _rParams);
+    _updateSecondaryHistoButton->setEnabled(false);
+}
+
+void TFWidget::refreshMainHistoIfNecessary()
+{
+    MapperFunction *mainMF = getMainMapperFunction();
+    MapperFunction *secondaryMF = getSecondaryMapperFunction();
+    if (mainMF == secondaryMF) {
+        _mappingFrame->RefreshHistogram();
+        _updateMainHistoButton->setEnabled(false);
+    }
 }
 
 void TFWidget::checkForCompressionChanges()
@@ -383,13 +474,13 @@ void TFWidget::checkForCompressionChanges()
     int newCLevel = _rParams->GetCompressionLevel();
     if (_cLevel != newCLevel) {
         _cLevel = _rParams->GetCompressionLevel();
-        _somethingChanged = true;
+        _externalChangeHappened = true;
     }
 
     int newRefLevel = _rParams->GetRefinementLevel();
     if (_refLevel != newRefLevel) {
         _refLevel = newRefLevel;
-        _somethingChanged = true;
+        _externalChangeHappened = true;
     }
 }
 
@@ -400,25 +491,30 @@ void TFWidget::checkForBoxChanges()
     box->GetExtents(minExt, maxExt);
     for (int i = 0; i < minExt.size(); i++) {
         if (minExt[i] != _minExt[i]) {
-            _somethingChanged = true;
+            _externalChangeHappened = true;
             _minExt[i] = minExt[i];
         }
         if (maxExt[i] != _maxExt[i]) {
-            _somethingChanged = true;
+            _externalChangeHappened = true;
             _maxExt[i] = maxExt[i];
         }
     }
 }
 
-void TFWidget::checkForMapperRangeChanges()
+void TFWidget::checkForMapperRangeChanges(bool colorVar = false)
 {
-    double          min = _minCombo->GetValue();
-    double          max = _maxCombo->GetValue();
-    MapperFunction *tf = getMainMapperFunction();
-    double          newMin = tf->getMinMapValue();
-    double          newMax = tf->getMaxMapValue();
-    if (min != newMin) _somethingChanged = true;
-    if (max != newMax) _somethingChanged = true;
+    MapperFunction *mf;
+    if (colorVar)
+        mf = getSecondaryMapperFunction();
+    else
+        mf = getMainMapperFunction();
+
+    double min = _minCombo->GetValue();
+    double max = _maxCombo->GetValue();
+    double newMin = mf->getMinMapValue();
+    double newMax = mf->getMaxMapValue();
+    if (min != newMin) _externalChangeHappened = true;
+    if (max != newMax) _externalChangeHappened = true;
 }
 
 void TFWidget::checkForTimestepChanges()
@@ -426,27 +522,30 @@ void TFWidget::checkForTimestepChanges()
     int newTimestep = _rParams->GetCurrentTimestep();
     if (_timeStep != newTimestep) {
         _timeStep = newTimestep;
-        _somethingChanged = true;
+        _externalChangeHappened = true;
     }
 }
 
-void TFWidget::checkForExternalChangesToHisto()
+// These tests will enable the Update Histo button if a change is found
+// If the Auto-update Histo checkbox is checked, we will perform a refresh
+void TFWidget::enableUpdateButtonsIfNeeded()
 {
     checkForCompressionChanges();
     checkForBoxChanges();
     checkForMapperRangeChanges();
     checkForTimestepChanges();
 
-    if (_somethingChanged) {
-        if (autoUpdateHisto())
-            refreshHistograms();
-        else
-            _updateHistoButton->setEnabled(true);
-    }
-    _somethingChanged = false;
+    if (_externalChangeHappened) { _updateMainHistoButton->setEnabled(true); }
+
+    bool secondary = true;
+    checkForMapperRangeChanges(secondary);
+
+    if (_externalChangeHappened) _updateSecondaryHistoButton->setEnabled(true);
+
+    _externalChangeHappened = false;
 }
 
-void TFWidget::updateConstColorWidgets()
+void TFWidget::updateConstColor()
 {
     float rgb[3];
     _rParams->GetConstantColor(rgb);
@@ -464,7 +563,7 @@ void TFWidget::updateConstColorWidgets()
     _useConstColorCheckbox->blockSignals(false);
 
     string varName;
-    if (_flags & COLORVAR_IS_IN_TF1) {
+    if (_flags & COLORVAR_IS_IN_TF2) {
         varName = _rParams->GetColorMapVariableName();
         // If we are using a single color instead of a
         // color mapped variable, disable the transfer function
@@ -482,30 +581,45 @@ void TFWidget::updateConstColorWidgets()
     }
 }
 
+void TFWidget::enableTFWidget(bool state)
+{
+    _loadButton->setEnabled(state);
+    _saveButton->setEnabled(state);
+    _tfFrame->setEnabled(state);
+    _minRangeEdit->setEnabled(state);
+    _maxRangeEdit->setEnabled(state);
+    _opacitySlider->setEnabled(state);
+    _autoUpdateMainHistoCheckbox->setEnabled(state);
+    _colorInterpCombo->setEnabled(state);
+}
+
 void TFWidget::connectWidgets()
 {
     connect(_rangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
-    connect(_updateHistoButton, SIGNAL(pressed()), this, SLOT(updateHisto()));
-    connect(_autoUpdateHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateHistoChecked(int)));
-    connect(_colorInterpCombo, SIGNAL(activated(int)), this, SLOT(colorInterpChanged(int)));
+    connect(_updateMainHistoButton, SIGNAL(pressed()), this, SLOT(refreshMainHisto()));
+    connect(_autoUpdateMainHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateMainHistoChecked(int)));
+    connect(_colorInterpCombo, SIGNAL(activated(int)), this, SLOT(setColorInterpolation(int)));
     connect(_whitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
     connect(_loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
     connect(_saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
     connect(_mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
-    connect(_mappingFrame, SIGNAL(endChange()), this, SLOT(emitTFChange()));
+    connect(_mappingFrame, SIGNAL(endChange()), this, SLOT(setRange()));
+    //	connect(_mappingFrame, SIGNAL(endChange()),
+    //		this, SLOT(emitTFChange()));
     connect(_opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
     connect(_colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(_useConstColorCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUsingSingleColor(int)));
 
-    // Connections for our ColorMapVariable transfer function
+    // Connections for our SecondaryVariable transfer function
     //
-    connect(_colorMapOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
-    connect(_colorMapUpdateHistoButton, SIGNAL(pressed()), this, SLOT(updateHisto()));
-    connect(_colorMapAutoUpdateHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateHistoChecked(int)));
-    connect(_colorMapColorInterpCombo, SIGNAL(activated(int)), this, SLOT(colorInterpChanged(int)));
-    connect(_colorMapWhitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
-    connect(_colorMapMinSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(setColorMapMinRange(double)));
-    connect(_colorMapMaxSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(setColorMapMaxRange(double)));
+    connect(_secondaryMappingFrame, SIGNAL(endChange()), this, SLOT(setSecondaryRange()));
+    connect(_secondaryOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
+    connect(_updateSecondaryHistoButton, SIGNAL(pressed()), this, SLOT(refreshSecondaryHisto()));
+    connect(_autoUpdateSecondaryHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateSecondaryHistoChecked(int)));
+    connect(_secondaryVarInterpCombo, SIGNAL(activated(int)), this, SLOT(setColorInterpolation(int)));
+    connect(_secondaryWhitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
+    connect(_secondaryMinSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(setSecondaryMinRange(double)));
+    connect(_secondaryMaxSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(setSecondaryMaxRange(double)));
 }
 
 void TFWidget::emitTFChange() { emit emitChange(); }
@@ -529,46 +643,71 @@ void TFWidget::setRange()
 
 void TFWidget::setRange(double min, double max)
 {
-    _somethingChanged = true;
+    _externalChangeHappened = true;
 
-    MapperFunction *tf = getMainMapperFunction();
+    MapperFunction *mf = getMainMapperFunction();
 
-    tf->setMinMapValue(min);
-    tf->setMaxMapValue(max);
+    mf->setMinMapValue(min);
+    mf->setMaxMapValue(max);
 
-    updateHisto();
+    if (getAutoUpdateMainHisto() == true) refreshMainHisto();
+    // updateMainHisto();
     emit emitChange();
 }
 
-void TFWidget::refreshHistograms()
+void TFWidget::setSecondaryRange()
 {
-    bool force = true;
-    // MapperFunction *mf = getMainMapperFunction();
-    //	_mappingFrame->updateMapperFunction(mf);
-    _mappingFrame->RefreshHistogram(force);
+    double min = _secondaryMappingFrame->getMinEditBound();
+    setSecondaryMinRange(min);
+
+    double max = _secondaryMappingFrame->getMaxEditBound();
+    setSecondaryMaxRange(max);
+
+    emit emitChange();
+}
+
+/*
+void TFWidget::refreshHistograms() {
+    //MapperFunction *mf = getMainMapperFunction();
+//	_mappingFrame->updateMapperFunction(mf);
+    _mappingFrame->RefreshHistogram();
+    //_mappingFrame->fitViewToDataRange();
+    _updateMainHistoButton->setEnabled(false);
 
     if (_flags & COLORVAR_IS_IN_TF2) {
-        // mf = getColorMapperFunction();
-        //		_colorMapMappingFrame->updateMapperFunction(mf);
-        _colorMapMappingFrame->RefreshHistogram(force);
+        //mf = getSecondaryperFunction();
+//		_secondaryMappingFrame->updateMapperFunction(mf);
+        _secondaryMappingFrame->RefreshHistogram();
+        //_secondaryMappingFrame->fitViewToDataRange();
+        _updateSecondaryHistoButton->setEnabled(false);
     }
 
-    updateMappingFrames();
-    _updateHistoButton->setEnabled(false);
-}
+//	updateMappingFrames();
+//	_mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
 
-void TFWidget::updateHisto()
-{
-    bool buttonRequest = sender() == _updateHistoButton ? true : false;
-    if (autoUpdateHisto() || buttonRequest) {
-        refreshHistograms();
-    } else {
-        _mappingFrame->fitToView();
-        if (_flags & COLORVAR_IS_IN_TF1) _colorMapMappingFrame->fitToView();
+}
+*/
+
+/*
+void TFWidget::updateMainHisto() {
+    bool buttonRequest = sender() == _updateMainHistoButton ? true : false;
+    if (getAutoUpdateMainHisto() || buttonRequest) {
+        bool refresh = true;
+        updateMainMappingFrame(refresh);
+        _updateMainHistoButton->setEnabled(false);
     }
-}
+}*/
 
-void TFWidget::autoUpdateHistoChecked(int state)
+/*void TFWidget::updateSecondaryHisto() {
+    bool buttonRequest = sender() == _updateSecondaryHistoButton ? true : false;
+    if (getAutoUpdateSecondaryHisto() || buttonRequest) {
+        _secondaryMappingFrame->RefreshHistogram();
+        updateSecondaryMappingFrame();
+        _updateSecondaryHistoButton->setEnabled(false);
+    }
+}*/
+
+void TFWidget::autoUpdateMainHistoChecked(int state)
 {
     bool bstate;
     if (state == 0)
@@ -576,10 +715,24 @@ void TFWidget::autoUpdateHistoChecked(int state)
     else
         bstate = true;
 
-    MapperFunction *tf = getMainMapperFunction();
-    tf->SetAutoUpdateHisto(bstate);
+    MapperFunction *mf = getMainMapperFunction();
+    mf->SetAutoUpdateHisto(bstate);
 
-    updateHisto();
+    if (state == true) refreshMainHisto();
+    // updateMainHisto();
+}
+
+void TFWidget::autoUpdateSecondaryHistoChecked(int state)
+{
+    bool bstate;
+    if (state == 0)
+        bstate = false;
+    else
+        bstate = true;
+
+    MapperFunction *mf = getSecondaryMapperFunction();
+    mf->SetAutoUpdateHisto(bstate);
+    refreshSecondaryHisto();
 }
 
 void TFWidget::setSingleColor()
@@ -605,74 +758,83 @@ void TFWidget::setUsingSingleColor(int state)
 {
     if (state > 0) {
         _rParams->SetUseSingleColor(true);
+        if (_flags & COLORVAR_IS_IN_TF2) _secondaryTFE->setEnabled(false);
     } else {
         _rParams->SetUseSingleColor(false);
+        if (_flags & COLORVAR_IS_IN_TF2) _secondaryTFE->setEnabled(true);
     }
 }
 
-void TFWidget::colorInterpChanged(int index)
+void TFWidget::setColorInterpolation(int index)
 {
-    MapperFunction *tf = getMainMapperFunction();
+    MapperFunction *mf = getMainMapperFunction();
 
     if (index == 0) {
-        tf->setColorInterpType(TFInterpolator::diverging);
+        mf->setColorInterpType(TFInterpolator::diverging);
     } else if (index == 1) {
-        tf->setColorInterpType(TFInterpolator::discrete);
+        mf->setColorInterpType(TFInterpolator::discrete);
     } else if (index == 2) {
-        tf->setColorInterpType(TFInterpolator::linear);
+        mf->setColorInterpType(TFInterpolator::linear);
     }
 }
 
 void TFWidget::setUseWhitespace(int state)
 {
-    MapperFunction *tf = getMainMapperFunction();
-    tf->setUseWhitespace(state);
+    MapperFunction *mf;
+    if (_flags & COLORVAR_IS_IN_TF2) {
+        mf = getSecondaryMapperFunction();
+    } else {
+        mf = getMainMapperFunction();
+    }
+    mf->setUseWhitespace(state);
 }
 
-void TFWidget::setColorMapMinRange(double min)
+void TFWidget::setSecondaryMinRange(double min)
 {
-    MapperFunction *mf = getColorMapperFunction();
+    MapperFunction *mf = getSecondaryMapperFunction();
     mf->setMinMapValue(min);
 }
 
-void TFWidget::setColorMapMaxRange(double max)
+void TFWidget::setSecondaryMaxRange(double max)
 {
-    MapperFunction *mf = getColorMapperFunction();
+    MapperFunction *mf = getSecondaryMapperFunction();
     mf->setMaxMapValue(max);
 }
 
-MapperFunction *TFWidget::getColorMapperFunction()
+bool TFWidget::getAutoUpdateMainHisto()
 {
-    string          varname = _rParams->GetColorMapVariableName();
-    MapperFunction *tf = _rParams->GetMapperFunc(varname);
-    assert(tf);
-    return tf;
-}
+    MapperFunction *mf;
+    mf = getMainMapperFunction();
 
-bool TFWidget::autoUpdateHisto()
-{
-    MapperFunction *tf = getMainMapperFunction();
-    if (tf->GetAutoUpdateHisto())
+    if (mf->GetAutoUpdateHisto())
         return true;
     else
         return false;
 }
 
-string TFWidget::getCurrentVarName()
+bool TFWidget::getAutoUpdateSecondaryHisto()
 {
-    string varname = "";
-    if (_flags & COLORVAR_IS_IN_TF1) {
-        varname = _rParams->GetColorMapVariableName();
-    } else {
-        varname = _rParams->GetVariableName();
-    }
-    return varname;
+    MapperFunction *mf;
+    mf = getSecondaryMapperFunction();
+
+    if (mf->GetAutoUpdateHisto())
+        return true;
+    else
+        return false;
 }
 
 MapperFunction *TFWidget::getMainMapperFunction()
 {
-    string          varname = getCurrentVarName();
-    MapperFunction *tf = _rParams->GetMapperFunc(varname);
-    assert(tf);
-    return tf;
+    string          varname = _rParams->GetVariableName();
+    MapperFunction *mf = _rParams->GetMapperFunc(varname);
+    assert(mf);
+    return mf;
+}
+
+MapperFunction *TFWidget::getSecondaryMapperFunction()
+{
+    string          varname = _rParams->GetColorMapVariableName();
+    MapperFunction *mf = _rParams->GetMapperFunc(varname);
+    assert(mf);
+    return mf;
 }
