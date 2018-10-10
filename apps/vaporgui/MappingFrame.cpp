@@ -186,7 +186,6 @@ MappingFrame::~MappingFrame() {
 
 bool MappingFrame::skipRefreshHistogram() const {
     bool skip = true;
-    cout << "skipRefreshHistogram() ";
     if (_histogram == NULL)
         return false;
 
@@ -199,7 +198,6 @@ bool MappingFrame::skipRefreshHistogram() const {
     if (_variableName != _histogram->getVarnameOfUpdate()) {
         skip = false;
     }
-    cout << skip << endl;
     return skip;
 }
 
@@ -213,15 +211,10 @@ string MappingFrame::getActiveRendererName() const {
     return activeRenderInst;
 }
 
-void MappingFrame::RefreshHistogram(bool force) {
+void MappingFrame::RefreshHistogram() {
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
-    if (!force && skipRefreshHistogram())
-        return;
-
-    //string var;
-    //var = _rParams->GetColorMapVariableName();
     MapperFunction *mf = _rParams->GetMapperFunc(_variableName);
 
     float minRange = mf->getMinMapValue();
@@ -231,12 +224,13 @@ void MappingFrame::RefreshHistogram(bool force) {
     if (_histogram)
         delete _histogram;
 
-    cout << "RefreshHistogram " << this << " " << _variableName << endl;
     _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
     populateHistogram();
 
     _histogramMap[rendererName] = _histogram;
+
+    //paintGL();
 }
 
 void MappingFrame::populateHistogram() {
@@ -363,15 +357,6 @@ void MappingFrame::setColorMapping(bool flag) {
 }
 
 //----------------------------------------------------------------------------
-// Set the variable name
-//----------------------------------------------------------------------------
-void MappingFrame::setVariableName(std::string name) {
-    _variableName = name;
-    if (_variableName.size() > 45)
-        _variableName.resize(45);
-}
-
-//----------------------------------------------------------------------------
 // Synchronize the frame with the underlying params
 //----------------------------------------------------------------------------
 //void MappingFrame::updateTab()
@@ -408,7 +393,6 @@ void MappingFrame::Update(DataMgr *dataMgr,
     // We always refresh the histogram if either
     // 1) We are uninitialized
     // 2) The variable changed
-    // 3) The timestep changed
     if ((_initialized == false) ||
         (variableName != _variableName)) {
         _initialized = true;
@@ -453,8 +437,9 @@ void MappingFrame::Update(DataMgr *dataMgr,
         _contourRangeSlider->setDomain(start, end);
     }
 
-    _domainSlider->setDomain(xDataToWorld(getMinDomainBound()),
-                             xDataToWorld(getMaxDomainBound()));
+    _domainSlider->setDomain(
+        xDataToWorld(getMinDomainBound()),
+        xDataToWorld(getMaxDomainBound()));
 
     _updateTexture = true;
 }
@@ -618,7 +603,7 @@ void MappingFrame::setEditMode(bool flag) {
 //----------------------------------------------------------------------------
 // Fit the mapping space to the current domain.
 //----------------------------------------------------------------------------
-void MappingFrame::fitToView() {
+void MappingFrame::fitViewToDataRange() {
     //Make sure it's current active params:
 
     emit startChange("Mapping window fit-to-view");
@@ -629,7 +614,10 @@ void MappingFrame::fitToView() {
     setMinEditBound(_minValue);
     setMaxEditBound(_maxValue);
 
-    _domainSlider->setDomain(xDataToWorld(_minValue), xDataToWorld(_maxValue));
+    _domainSlider->setDomain(
+        xDataToWorld(_minValue),
+        xDataToWorld(_maxValue));
+
     if (_colorbarWidget)
         _colorbarWidget->setDirty();
 
@@ -871,15 +859,15 @@ void MappingFrame::resizeGL(int width, int height) {
 // Draw the frame's contents
 //----------------------------------------------------------------------------
 void MappingFrame::paintGL() {
-
     // On Mac Qt invokes paintGL when frame frame buffer isn't ready :-(
     //
     if (!FrameBufferReady()) {
         return;
     }
 
-    if (!_mapper)
+    if (!_mapper) {
         return;
+    }
 
     resize();
 
@@ -2099,26 +2087,6 @@ float MappingFrame::getOpacityData(float value) {
     return 0.0;
 }
 
-#ifdef DEAD
-//----------------------------------------------------------------------------
-// Return the histogram
-//----------------------------------------------------------------------------
-Histo *MappingFrame::getHistogram() {
-    //string varname;
-    //varname = _rParams->GetColorMapVariableName();
-    //MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
-    //assert(mapFunc);
-
-    //if (skipRefreshHistogram(mapFunc)) {
-    if (skipRefreshHistogram()) {
-        RefreshHistogram();
-    }
-
-    string rendererName = _rParams->GetName();
-    return _histogramMap[rendererName];
-}
-#endif
-
 //----------------------------------------------------------------------------
 // Add a new opacity widget
 //----------------------------------------------------------------------------
@@ -2321,14 +2289,14 @@ void MappingFrame::setDomain() {
     float max = xWorldToData(_domainSlider->maxValue());
 
     if (_mapper) {
-        if (_opacityMappingEnabled || _colorMappingEnabled) {
+        //if (_opacityMappingEnabled || _colorMappingEnabled) {
 
-            emit startChange("Mapping window boundary change");
+        emit startChange("Mapping window boundary change");
 
-            _mapper->setMinMaxMapValue(min, max);
+        _mapper->setMinMaxMapValue(min, max);
 
-            emit endChange();
-        }
+        emit endChange();
+        //}
 
         updateGL();
     } else {
@@ -2398,7 +2366,7 @@ void MappingFrame::setIsolineSliders(const vector<double> &sliderVals) {
 }
 
 void MappingFrame::updateHisto() {
-    fitToView();
+    fitViewToDataRange();
     updateMap();
 }
 
