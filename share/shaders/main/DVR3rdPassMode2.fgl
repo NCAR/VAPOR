@@ -359,22 +359,17 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
 
     const float zero = 1e-9;
     if( abs(det) < zero ) // ray and triangle are parallel
-    {
-        t = -1.0;
         return false;
-    }
 
     float invDet = 1.0 / det;
     vec3  tvec   = orig - v0;
     float u      = dot( tvec, pvec ) * invDet;
-    //if( u < 0.0 || u > 1.0 )
-    if( u < -EPSILON || u > 1.0 + EPSILON )
+    if( u < 0.0 || u > 1.0 )
         return false;
 
     vec3 qvec    = cross( tvec, v0v1 );
     float v      = dot( dir, qvec ) * invDet;
-    //if( v < 0.0 || u + v > 1.0 )
-    if( v < -EPSILON || u + v > 1.0 + EPSILON )
+    if( v < 0.0 || u + v > 1.0 )
         return false;
 
     t = dot( v0v2, qvec ) * invDet;
@@ -587,7 +582,7 @@ void main(void)
 */
         }
 
-        if( counter == maxCells )
+        if( !intersect )
             color = vec4( 1.0, 0.2, 0.2, 1.0 );
 
     }
