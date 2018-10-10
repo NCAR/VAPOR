@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>386</width>
-    <height>610</height>
+    <height>636</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,6 +26,12 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_6">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QTabWidget" name="_tabWidget">
      <property name="sizePolicy">
@@ -61,100 +67,102 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="nonam3">
-         <item>
-          <spacer name="spacer45">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::MinimumExpanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>16</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="_loadButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>32767</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Load transfer function from file or session</string>
-           </property>
-           <property name="text">
-            <string>Load TF</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="spacer160">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::MinimumExpanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>31</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="_saveButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>32767</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Save this transfer function to a file or session</string>
-           </property>
-           <property name="text">
-            <string>Save TF</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="spacer46">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::MinimumExpanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>23</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+        <widget class="QFrame" name="_loadSaveFrame">
+         <layout class="QHBoxLayout" name="nonam3">
+          <item>
+           <spacer name="spacer45">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::MinimumExpanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>16</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="_loadButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>32767</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Load transfer function from file or session</string>
+            </property>
+            <property name="text">
+             <string>Load TF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacer160">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::MinimumExpanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>31</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="_saveButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>32767</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Save this transfer function to a file or session</string>
+            </property>
+            <property name="text">
+             <string>Save TF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacer46">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::MinimumExpanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>23</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="1,0">
@@ -508,7 +516,7 @@ available from the right mouse button.</string>
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="_updateHistoButton">
+        <widget class="QPushButton" name="_updateMainHistoButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -586,7 +594,7 @@ how the histogram is scaled.</string>
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="_autoUpdateHistoCheckbox">
+           <widget class="QCheckBox" name="_autoUpdateMainHistoCheckbox">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -608,7 +616,7 @@ how the histogram is scaled.</string>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="colorInterpolationFrame">
+        <widget class="QFrame" name="_colorInterpolationFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -717,7 +725,7 @@ how the histogram is scaled.</string>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="whitespaceFrame">
+        <widget class="QFrame" name="_whitespaceFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -792,7 +800,7 @@ how the histogram is scaled.</string>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="useConstColorFrame">
+        <widget class="QFrame" name="_useConstColorFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -864,7 +872,7 @@ how the histogram is scaled.</string>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="constColorFrame">
+        <widget class="QFrame" name="_constColorFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -976,9 +984,22 @@ how the histogram is scaled.</string>
          </property>
         </spacer>
        </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="_colormapTFE">
+     <widget class="QWidget" name="_secondaryTFE">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
         <horstretch>0</horstretch>
@@ -1014,7 +1035,7 @@ how the histogram is scaled.</string>
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="_colorMapLoadButton">
+          <widget class="QPushButton" name="_secondaryLoadButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>0</horstretch>
@@ -1052,7 +1073,7 @@ how the histogram is scaled.</string>
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="_colorMapSaveButton">
+          <widget class="QPushButton" name="_secondarySaveButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>0</horstretch>
@@ -1121,7 +1142,7 @@ how the histogram is scaled.</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
-             <widget class="MappingFrame" name="_colorMapMappingFrame" native="true">
+             <widget class="MappingFrame" name="_secondaryMappingFrame" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -1170,7 +1191,7 @@ available from the right mouse button.</string>
             <number>0</number>
            </property>
            <item>
-            <widget class="QSlider" name="_colorMapOpacitySlider">
+            <widget class="QSlider" name="_secondaryOpacitySlider">
              <property name="enabled">
               <bool>true</bool>
              </property>
@@ -1251,7 +1272,7 @@ available from the right mouse button.</string>
            <number>0</number>
           </property>
           <item>
-           <widget class="QSliderEdit" name="_colorMapMinSliderEdit" native="true">
+           <widget class="QSliderEdit" name="_secondaryMinSliderEdit" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -1297,7 +1318,7 @@ available from the right mouse button.</string>
            <number>0</number>
           </property>
           <item>
-           <widget class="QSliderEdit" name="_colorMapMaxSliderEdit" native="true">
+           <widget class="QSliderEdit" name="_secondaryMaxSliderEdit" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -1406,7 +1427,7 @@ available from the right mouse button.</string>
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="_colorMapUpdateHistoButton">
+        <widget class="QPushButton" name="_updateSecondaryHistoButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -1484,7 +1505,7 @@ how the histogram is scaled.</string>
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="_colorMapAutoUpdateHistoCheckbox">
+           <widget class="QCheckBox" name="_autoUpdateSecondaryHistoCheckbox">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -1506,7 +1527,7 @@ how the histogram is scaled.</string>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="colorInterpolationFrame_2">
+        <widget class="QFrame" name="_secondaryVarInterpFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -1575,7 +1596,7 @@ how the histogram is scaled.</string>
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="_colorMapColorInterpCombo">
+           <widget class="QComboBox" name="_secondaryVarInterpCombo">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -1615,7 +1636,7 @@ how the histogram is scaled.</string>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="whitespaceFrame_2">
+        <widget class="QFrame" name="_secondaryWhitespaceFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -1674,7 +1695,7 @@ how the histogram is scaled.</string>
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="_colorMapWhitespaceCheckbox">
+           <widget class="QCheckBox" name="_secondaryWhitespaceCheckbox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
