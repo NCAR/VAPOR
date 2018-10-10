@@ -54,64 +54,90 @@ public:
 										"necessary for making changes to a "
 										"Vapor Transfer Function.");}
 	bool isContainer() const {return true;}
-	void Update(VAPoR::DataMgr *dataMgr,
-				VAPoR::ParamsMgr *paramsMgr,
-				VAPoR::RenderParams *rParams);
+	void Update(
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::RenderParams *rParams
+	);
 
+	void fileLoadTF(
+		string varname, 
+		const char* path,
+		bool savePath
+	);
 
-	void fileLoadTF(string varname, const char* path,
-		bool savePath);
+	//void loadTF(string varname);
 
-	void loadTF(string varname);
-
-	void getVariableRange(float range[2], float values[2], bool colorVar);
+	void getVariableRange(
+		float range[2], 
+		float values[2], 
+		bool secondaryVariable
+	);
 	float getOpacity();
 
 private slots:
-	void fileSaveTF();
-	void setRange();
-	void setRange(double min, double max);
-	void updateHisto();
-	void refreshHistograms();
-	void autoUpdateHistoChecked(int state);
-	void colorInterpChanged(int index);
 	void loadTF();
+	void fileSaveTF();
+	
+//	void updateMainHisto();
+	void refreshMainHisto();
+	void refreshSecondaryHisto();
+
+	void autoUpdateMainHistoChecked(int state);
+	void autoUpdateSecondaryHistoChecked(int state);
+
+//	void refreshHistograms();
+	void setColorInterpolation(int index);
 	void emitTFChange();
 	void opacitySliderChanged(int value);
+
 	void setSingleColor();
 	void setUsingSingleColor(int checkState);
 	void setUseWhitespace(int state);
-    void setColorMapMinRange(double min);
-    void setColorMapMaxRange(double max);
+	
+	void setRange();
+	void setRange(double min, double max);
+	void setSecondaryRange();
+    void setSecondaryMinRange(double min);
+    void setSecondaryMaxRange(double max);
 
 private:
-	void collapseConstColorWidgets();
-	void showConstColorWidgets();
-	void showWhitespaceFrame();
-	void hideWhitespaceFrame();
-	void connectWidgets();
-	string getCurrentVarName();
-    
-    void updateMainTransferFunction();
-    void updateColorTransferFunction();
-	void updateSliders();
-	void updateAutoUpdateHistoCheckbox();
-	void updateColorInterpolation();
-	void updateMappingFrames();
-    void updateColorMapMappingFrame();
-	void updateConstColorWidgets();
-	void enableTFWidget(bool state);
+	void refreshMainHistoIfNecessary();
+	void refreshSecondaryHistoIfNecessary();
 
-	void checkForExternalChangesToHisto();
+	void configureConstantColorControls();
+	void configureSecondaryTransferFunction();
+	void connectWidgets();
+
+	void updateColorInterpolation();
+	void updateConstColor();
+
+	void updateMainAutoUpdateHistoCheckboxes();
+	void updateMainMappingFrame(bool refresh);
+	void updateMainSliders();
+
+	void updateSecondaryAutoUpdateHistoCheckbox();
+	void updateSecondaryMappingFrame(bool refresh);
+	void updateSecondarySliders();
+	
+//	void refreshIfMainVarChanged();
+	bool mainVariableChanged();
+	bool secondaryVariableChanged();
+	void refreshIfSecondaryVarChanged();
+
+	void enableTFWidget(bool state);
+    
+	void enableUpdateButtonsIfNeeded();
+	void checkForVariableChanges();
     void checkForBoxChanges();
     void checkForCompressionChanges();
-    void checkForMapperRangeChanges();
+    void checkForMapperRangeChanges(bool colorVar);
     void checkForTimestepChanges();
 
-	bool autoUpdateHisto();
+	bool getAutoUpdateMainHisto();
+	bool getAutoUpdateSecondaryHisto();
 	VAPoR::MapperFunction* getMainMapperFunction();
-	VAPoR::MapperFunction* getColorMapMapperFunction();
-	VAPoR::MapperFunction* getColorMapperFunction();
+	VAPoR::MapperFunction* getSecondaryMapperFunction();
 
 	int confirmMinRangeEdit(VAPoR::MapperFunction* tf, float* range);
 	int confirmMaxRangeEdit(VAPoR::MapperFunction* tf, float* range);
@@ -121,10 +147,10 @@ private:
 	int _cLevel;
 	int _refLevel;
 	int _timeStep;
-	string _varName;
-	bool _somethingChanged;
+	string _mainVarName;
+	string _secondaryVarName;
+	bool _externalChangeHappened;
 
-	bool _autoUpdateHisto;
 	bool _discreteColormap;
 	bool _textChanged;
 	float _myRGB[3];
