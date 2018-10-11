@@ -34,20 +34,33 @@
 #include <vapor/errorcodes.h>
 #include <vapor/GetAppPath.h>
 #include <vapor/ControlExecutive.h>
+#include "vapor/ShaderManager.h"
 #include "vapor/debug.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "vapor/GLManager.h"
 
 using namespace VAPoR;
+
+#pragma pack(push, 4)
+struct ContourRenderer::VertexData {
+    float x, y, z;
+    float r, g, b, a;
+};
+#pragma pack(pop)
 
 static RendererRegistrar<ContourRenderer> registrar(ContourRenderer::GetClassType(), ContourParams::GetClassType());
 
 ContourRenderer::ContourRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, ContourParams::GetClassType(), ContourRenderer::GetClassType(), instName, dataMgr), _drawList(0)
+: Renderer(pm, winName, dataSetName, ContourParams::GetClassType(), ContourRenderer::GetClassType(), instName, dataMgr), _VAO(0), _VBO(0), _nVertices(0)
 {
 }
 
 ContourRenderer::~ContourRenderer()
 {
-    if (_drawList) glDeleteLists(_drawList, 1);
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
+    _VAO = _VBO = 0;
 }
 
 void ContourRenderer::_saveCacheParams()
@@ -107,8 +120,9 @@ int ContourRenderer::_buildCache()
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     _saveCacheParams();
 
-    glNewList(_drawList, GL_COMPILE);
-    glLineWidth(_cacheParams.lineThickness);
+    vector<VertexData>           vertices;
+    vector<pair<int, glm::vec4>> colors;
+
     if (cParams->GetVariableName().empty()) {
         glEndList();
         return 0;
@@ -153,10 +167,7 @@ int ContourRenderer::_buildCache()
         }
         if (hasMissing) continue;
 
-        glBegin(GL_LINES);
-
         for (int ci = 0; ci != contours.size(); ci++) {
-            glColor4fv(contourColors[ci]);
             for (int a = nodes.size() - 1, b = 0; b < nodes.size(); a++, b++) {
                 if (a == nodes.size()) a = 0;
                 double contour = contours[ci];
@@ -175,15 +186,20 @@ int ContourRenderer::_buildCache()
                     v[2] = aHeight + t * (bHeight - aHeight);
                 }
 
-                glVertex3fv(v);
+                vertices.push_back({v[0], v[1], v[2], contourColors[ci][0], contourColors[ci][1], contourColors[ci][2], contourColors[ci][3]});
             }
         }
-        glEnd();
         delete[] coords;
         delete[] values;
     }
 
-    glEndList();
+    _nVertices = vertices.size();
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     delete[] contourColors;
     return 0;
 }
@@ -193,13 +209,32 @@ int ContourRenderer::_paintGL(bool)
     int rc = 0;
     if (_isCacheDirty()) rc = _buildCache();
 
-    glCallList(_drawList);
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("Contour");
+    if (shader == nullptr) return -1;
+    shader->Bind();
+    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    glBindVertexArray(_VAO);
+
+    glLineWidth(_cacheParams.lineThickness);
+    glDrawArrays(GL_LINES, 0, _nVertices);
+
+    glBindVertexArray(0);
+    shader->UnBind();
 
     return rc;
 }
 
 int ContourRenderer::_initializeGL()
 {
-    _drawList = glGenLists(1);
+    glGenVertexArrays(1, &_VAO);
+    glBindVertexArray(_VAO);
+    glGenBuffers(1, &_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, r));
+    glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
+
     return 0;
 }

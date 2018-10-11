@@ -130,7 +130,7 @@ public:
     //! The UI should make the OGL context associated with \p viz
     //! current prior to calling this method.
     //
-    int InitializeViz(string name);
+    int InitializeViz(string name, GLManager *glManager);
 
     //! Notify the control executive that a drawing object has
     //! changed size.
@@ -489,7 +489,6 @@ public:
 private:
     ParamsMgr *                    _paramsMgr;
     DataStatus *                   _dataStatus;
-    std::map<string, ShaderMgr *>  _shaderMgrs;
     std::map<string, Visualizer *> _visualizers;
 
     //! obtain an existing visualizer
