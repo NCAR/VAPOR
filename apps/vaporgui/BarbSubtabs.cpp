@@ -53,7 +53,7 @@ void BarbGeometrySubtab::Update(
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent) {
     setupUi(this);
     _TFWidget->Reinit(
-        (TFFlags)(CONSTANT_COLOR));
+        (TFFlags)(CONSTANT_COLOR | COLORMAP_VAR_IS_IN_TF1));
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
