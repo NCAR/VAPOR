@@ -536,13 +536,11 @@ void TFWidget::checkForMainMapperRangeChanges() {
     double newMax = mf->getMaxMapValue();
 
     if (min != newMin)
-        _externalChangeHappened = true;
+        _mainHistoRangeChanged = true;
     if (max != newMax)
-        _externalChangeHappened = true;
+        _mainHistoRangeChanged = true;
     if (_mainHistoRangeChanged)
-        _externalChangeHappened = true;
-
-    _mainHistoRangeChanged = false;
+        _mainHistoRangeChanged = true;
 }
 
 void TFWidget::checkForSecondaryMapperRangeChanges() {
@@ -555,13 +553,11 @@ void TFWidget::checkForSecondaryMapperRangeChanges() {
     double newMax = mf->getMaxMapValue();
 
     if (min != newMin)
-        _externalChangeHappened = true;
+        _secondaryHistoRangeChanged = true;
     if (max != newMax)
-        _externalChangeHappened = true;
+        _secondaryHistoRangeChanged = true;
     if (_secondaryHistoRangeChanged)
-        _externalChangeHappened = true;
-
-    _secondaryHistoRangeChanged = false;
+        _secondaryHistoRangeChanged = true;
 }
 
 void TFWidget::checkForTimestepChanges() {
@@ -581,29 +577,27 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
     checkForMainMapperRangeChanges();
     checkForTimestepChanges();
 
-    if (_externalChangeHappened) {
+    if (_externalChangeHappened || _mainHistoRangeChanged) {
         MapperFunction *mf = getMainMapperFunction();
         if (mf->GetAutoUpdateHisto())
             _mainHistoNeedsRefresh = true;
         else
             _updateMainHistoButton->setEnabled(true);
     }
+    _mainHistoRangeChanged = false;
 
     // Now check for changes to the secondary mapper function
     if (_flags & COLORMAP_VAR_IS_IN_TF2) {
-        _externalChangeHappened = false;
-        checkForCompressionChanges();
-        checkForBoxChanges();
         checkForSecondaryMapperRangeChanges();
-        checkForTimestepChanges();
 
-        if (_externalChangeHappened) {
+        if (_externalChangeHappened || _secondaryHistoRangeChanged) {
             MapperFunction *mf = getSecondaryMapperFunction();
             if (mf->GetAutoUpdateHisto())
                 _secondaryHistoNeedsRefresh = true;
             else
                 _updateSecondaryHistoButton->setEnabled(true);
         }
+        _secondaryHistoRangeChanged = false;
     }
     _externalChangeHappened = false;
 }
@@ -700,6 +694,10 @@ void TFWidget::connectWidgets() {
             this, SLOT(setSecondaryMinRange(double)));
     connect(_secondaryMaxSliderEdit, SIGNAL(valueChanged(double)),
             this, SLOT(setSecondaryMaxRange(double)));
+    connect(_secondaryLoadButton, SIGNAL(pressed()),
+            this, SLOT(loadTF()));
+    connect(_secondarySaveButton, SIGNAL(pressed()),
+            this, SLOT(fileSaveTF()));
 }
 
 void TFWidget::emitTFChange() {
