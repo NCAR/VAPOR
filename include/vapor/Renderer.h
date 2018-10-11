@@ -25,11 +25,11 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
-#include <vapor/textRenderer.h>
 
 namespace VAPoR {
 
-class ShaderMgr;
+class ShaderProgram;
+struct GLManager;
 
 //! \class RendererBase
 //! \ingroup Public_Render
@@ -54,7 +54,7 @@ class RENDER_API RendererBase : public MyBase {
     //! Any OpenGL initialization is performed in initializeGL
     //! It will be called from an OpenGL rendering context.
     //! Sets _initialized to true if successful.
-    virtual int initializeGL(ShaderMgr *sm);
+    virtual int initializeGL(GLManager *glManager);
 
     //! Obtain the Visualizer associated with this Renderer
     string GetVisualizer() { return _winName; }
@@ -91,7 +91,7 @@ class RENDER_API RendererBase : public MyBase {
     string _instName;
     DataMgr *_dataMgr;
 
-    ShaderMgr *_shaderMgr;
+    GLManager *_glManager;
 
     //! Pure virtual method
     //! Any OpenGL initialization is performed in initializeGL
@@ -272,8 +272,7 @@ class RENDER_API Renderer : public RendererBase {
     //! min clipping plane will be set to -0.1 and the max to 1.1
     //!
     //! \sa DisableClippingPlanes
-    //
-    void EnableClipToBox(float haloFrac = 0.0) const;
+    void EnableClipToBox(ShaderProgram *shader, float haloFrac = 0.0) const;
 
     void EnableClipToBox2DXY(float haloFrac = 0.0) const;
 
@@ -299,8 +298,7 @@ class RENDER_API Renderer : public RendererBase {
     static const int _imgHgt;
     static const int _imgWid;
     unsigned char *_colorbarTexture;
-    TextObject *_textObject;
-    string _fontFile;
+    string _fontName;
 
   private:
     size_t _timestep;
