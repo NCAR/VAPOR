@@ -181,11 +181,13 @@ void VizWin::_getNearFarDist(const double posVec[3], const double dirVec[3], dou
     return;
 }
 
+// #include "vapor/DebugConsole.h"
+
 void VizWin::_setUpProjMatrix()
 {
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-    // _controlExec->visu
+    MatrixManager *  mm = _glManager->matrixManager;
 
     double m[16];
     vParams->GetModelViewMatrix(m);
@@ -205,18 +207,20 @@ void VizWin::_setUpProjMatrix()
     size_t width, height;
     vParams->GetWindowSize(width, height);
 
-    _glManager->matrixManager->MatrixModeProjection();
-    _glManager->matrixManager->LoadIdentity();
+    mm->MatrixModeProjection();
+    mm->LoadIdentity();
 
     GLfloat w = (float)width / (float)height;
 
     double fov = vParams->GetFOV();
-    _glManager->matrixManager->Perspective(fov, w, nearDist, farDist);
-    // float s = 1000000;
-    // _glManager->matrixManager->Ortho(-s, s, -s, s, nearDist, farDist);
+
+    mm->Perspective(fov, w, nearDist, farDist);
+
+    // float s = 3.0f/GetFloat("Scale", 1);
+    // mm->Ortho(-s*w, s*w, -s, s, nearDist, farDist);
 
     double pMatrix[16];
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
+    mm->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
 
     bool enabled = _controlExec->GetSaveStateEnabled();
     _controlExec->SetSaveStateEnabled(false);
@@ -225,7 +229,7 @@ void VizWin::_setUpProjMatrix()
 
     _controlExec->SetSaveStateEnabled(enabled);
 
-    _glManager->matrixManager->MatrixModeModelView();
+    mm->MatrixModeModelView();
 }
 
 void VizWin::_setUpModelViewMatrix()
