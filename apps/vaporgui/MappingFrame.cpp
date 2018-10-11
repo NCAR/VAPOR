@@ -177,8 +177,6 @@ void MappingFrame::RefreshHistogram()
     populateHistogram();
 
     _histogramMap[rendererName] = _histogram;
-
-    // paintGL();
 }
 
 void MappingFrame::populateHistogram()
@@ -2205,7 +2203,17 @@ void MappingFrame::setIsolineSlider(int index)
 
     emit              startChange("Slide Isoline value slider");
     IsoSurfaceParams *iParams = dynamic_cast<IsoSurfaceParams *>(_rParams);
-    if (iParams == NULL) return;
+
+    // If _rParams is not an IsoSurfaceParams, then it's a ContourParams.
+    // Therefore, we ignore the user's change to the isoline, an force a
+    // redrawing of the MappingFrame through calls to Update() and updateGL().
+    // I wish there were a cleaner way to do this, with fewer dynamic casts.
+    if (iParams == NULL) {
+        Update(_dataMgr, _paramsMgr, _rParams);
+        updateGL();
+        return;
+    }
+
     vector<double> isovals = iParams->GetIsoValues();
     isovals[index] = (0.5 * (max + min));
     iParams->SetIsoValues(isovals);

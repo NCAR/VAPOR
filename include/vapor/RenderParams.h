@@ -333,6 +333,14 @@ public:
 protected:
     DataMgr *_dataMgr;
 
+private:
+    void             _init();
+    int              _maxDim;
+    ParamsContainer *_TFs;
+    Box *            _Box;
+    ColorbarPbase *  _Colorbar;
+    Transform *      _transform;
+
     static const string _EnabledTag;
     static const string _histoScaleTag;
     static const string _editBoundsTag;
@@ -353,35 +361,6 @@ protected:
     static const string _transferFunctionsTag;
     static const string _stretchFactorsTag;
     static const string _currentTimestepTag;
-
-private:
-    void             _init();
-    int              _maxDim;
-    ParamsContainer *_TFs;
-    Box *            _Box;
-    ColorbarPbase *  _Colorbar;
-    Transform *      _transform;
-
-    /*static const string _EnabledTag;
- static const string _histoScaleTag;
- static const string _editBoundsTag;
- static const string _histoBoundsTag;
- static const string _cursorCoordsTag;
- static const string _heightVariableNameTag;
- static const string _colorMapVariableNameTag;
- static const string _terrainMapTag;
- static const string _variableNameTag;
- static const string _fieldVariableNamesTag;
- static const string _auxVariableNamesTag;
- static const string _distribVariableNamesTag;
- static const string _useSingleColorTag;
- static const string _constantColorTag;
- static const string _constantOpacityTag;
- static const string _CompressionLevelTag;
- static const string _RefinementLevelTag;
- static const string _transferFunctionsTag;
- static const string _stretchFactorsTag;
- static const string _currentTimestepTag;*/
 
     string _findVarStartingWithLetter(std::vector<string> searchVars, char letter);
 };
