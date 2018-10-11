@@ -14,6 +14,7 @@
 #include <vapor/ViewpointParams.h>
 #include <vapor/MyBase.h>
 #include <vapor/TwoDRenderer.h>
+#include "vapor/GLManager.h"
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -40,6 +41,10 @@ TwoDRenderer::TwoDRenderer(
 	_normals = NULL;
 	_meshWidth = 0;
 	_meshHeight = 0;
+    _VAO = NULL;
+    _VBO = NULL;
+    _dataVBO = NULL;
+    _EBO = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -48,15 +53,35 @@ TwoDRenderer::TwoDRenderer(
 TwoDRenderer::~TwoDRenderer()
 {
 	if (_textureID) glDeleteTextures(1, &_textureID);
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
+    if (_dataVBO) glDeleteBuffers(1, &_dataVBO);
+    if (_EBO) glDeleteBuffers(1, &_EBO);
 }
 
 int TwoDRenderer::_initializeGL(){
 	glGenTextures(1, &_textureID);
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glGenBuffers(1, &_dataVBO);
+    glGenBuffers(1, &_EBO);
+    
+    glBindVertexArray(_VAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), NULL);
+    glEnableVertexAttribArray(0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), NULL);
+    glEnableVertexAttribArray(1);
+    
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 	return(0);
 }
 
 int TwoDRenderer::_paintGL(bool) {
-
 
 	// Get the 2D texture
 	//
@@ -81,7 +106,12 @@ int TwoDRenderer::_paintGL(bool) {
 		return(-1);
 	}
 
-	EnableClipToBox();
+	EnableClipToBox(_glManager->shaderManager->GetShader("2DData")); // TODO GL
+    
+    // ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
+    // ShaderProgram *shader = _glManager->shaderManager->GetShader("2DData", true);
+    // shader->Bind();
+    // shader->SetUniform("clippingPlanes[0]", glm::vec4(1000000,0,0,0));
 
 	if (! _gridAligned) {
 		assert(_structuredMesh);
@@ -105,8 +135,9 @@ int TwoDRenderer::_paintGL(bool) {
 
 		_renderMeshAligned();
 	}
-	DisableClippingPlanes();
+	// DisableClippingPlanes();
 
+    GL_ERR_BREAK();
 
 	return(0);
 }
@@ -115,8 +146,7 @@ int TwoDRenderer::_paintGL(bool) {
 //
 void TwoDRenderer::_openGLInit() {
 
-	RenderParams *myParams = (RenderParams *) GetActiveParams();
-	float opacity = myParams->GetConstantOpacity();
+	// RenderParams *myParams = (RenderParams *) GetActiveParams();
 
 	if (! _gridAligned) {
 		//glActiveTexture(GL_TEXTURE0);
@@ -127,21 +157,16 @@ void TwoDRenderer::_openGLInit() {
 			GL_TEXTURE_2D, 0, _texInternalFormat, _texWidth, _texHeight, 0,
 			_texFormat, _texType, _texture
 		);
-
-		glMatrixMode(GL_TEXTURE);
-		glLoadIdentity();
-
-		glEnable(GL_TEXTURE_2D);
 	}
 
-	glMatrixMode(GL_MODELVIEW);
+    _glManager->matrixManager->MatrixModeModelView();
 
 	glEnable(GL_BLEND);
-	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_DEPTH_TEST);
 
 	// LIGHTING IS NOT ENABLED
 	//
+    /*
 	int nLights = 0;
 	if (nLights >0){
 		glEnable(GL_LIGHTING);
@@ -151,86 +176,77 @@ void TwoDRenderer::_openGLInit() {
 		glDisable(GL_LIGHTING);
 //		glColor3fv(elevGridColor);
 	}
-
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glEnable(GL_COLOR_MATERIAL);
-	glColor4f(1.0, 1.0, 1.0, opacity);
+     */
 
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-//	glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// will not correct blending, but will be OK wrt other opaque geometry.
-	//
-	glAlphaFunc(GL_GREATER,.1);
 
 	// Do write to the z buffer
 	//
 	glDepthMask(GL_TRUE);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-
-	if (_gridAligned) {
-		GLuint attrindx = GetAttribIndex();
-		glEnableVertexAttribArray(attrindx);
-	}
-	else {
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-
 }
 
 // Restore OpenGL settings to OpenGL defaults
 //
-void TwoDRenderer::_openGLRestore() {
-
-	//glActiveTexture(GL_TEXTURE0);
+void TwoDRenderer::_openGLRestore()
+{
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
-	glDisable(GL_TEXTURE_2D);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-
-	if (_gridAligned) {
-		GLuint attrindx = GetAttribIndex();
-		glDisableVertexAttribArray(attrindx);
-	}
-	else {
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
 }
 
 void TwoDRenderer::_renderMeshUnAligned() {
+    // This appears to be pretty much the Image Renderer code
+    
+    RenderParams *myParams = (RenderParams *) GetActiveParams();
+    float opacity = myParams->GetConstantOpacity();
+    
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("Image");
+    if (shader == nullptr)
+        return;
+    shader->Bind();
+    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    shader->SetUniform("constantOpacity", opacity);
 
 	_openGLInit();
 
 	// Draw triangle strips one row at a time
 	//
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*_meshWidth*sizeof(float), _indices, GL_DYNAMIC_DRAW);
 	for (int j=0; j<_meshHeight-1; j++) {
-		glVertexPointer(3, GL_FLOAT, 0, &_verts[j*_meshWidth*3]);
-		glTexCoordPointer(2, GL_FLOAT, 0, &_texCoords[j*_meshWidth*2]);
-		glNormalPointer(GL_FLOAT, 0, &_normals[j*_meshWidth*3]);
-
-		glDrawElements(
-			GL_TRIANGLE_STRIP, 2*_meshWidth, GL_UNSIGNED_INT, _indices
-		);
+		// glVertexPointer(3, GL_FLOAT, 0, &_verts[j*_meshWidth*3]);
+		// glTexCoordPointer(2, GL_FLOAT, 0, &_texCoords[j*_meshWidth*2]);
+		// glNormalPointer(GL_FLOAT, 0, &_normals[j*_meshWidth*3]);
+        // glDrawElements(GL_TRIANGLE_STRIP, 2*_meshWidth, GL_UNSIGNED_INT, _indices);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        glBufferData(GL_ARRAY_BUFFER, _meshWidth*6*sizeof(float), &_verts[j*_meshWidth*3], GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+        glBufferData(GL_ARRAY_BUFFER, _meshWidth*4*sizeof(float), &_texCoords[j*_meshWidth*2], GL_STREAM_DRAW);
+        glDrawElements(GL_TRIANGLE_STRIP, 2*_meshWidth, GL_UNSIGNED_INT, 0);
 	}
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	_openGLRestore();
 }
 
 void TwoDRenderer::_renderMeshAligned() {
+    RenderParams *myParams = (RenderParams *) GetActiveParams();
+    float opacity = myParams->GetConstantOpacity();
+    
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("2DData");
+    if (shader == nullptr)
+        return;
+    shader->Bind();
+    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    shader->SetUniform("constantOpacity", opacity);
 
 	_openGLInit();
-
-	GLuint attrindx = GetAttribIndex();
 
 	// Ugh. For aligned data the type must be GLfloat.
 	//
@@ -241,17 +257,24 @@ void TwoDRenderer::_renderMeshAligned() {
 	if (_structuredMesh) {
 		// Draw triangle strips one row at a time
 		//
+        glBindVertexArray(_VAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*_meshWidth*sizeof(float), _indices, GL_DYNAMIC_DRAW);
 		for (int j=0; j<_meshHeight-1; j++) {
-			glVertexPointer(3, GL_FLOAT, 0, &_verts[j*_meshWidth*3]);
-			glVertexAttribPointer(
-				attrindx,  2,  GL_FLOAT,  false,  0, &data[j*_meshWidth*2]
-			);
-			glNormalPointer(GL_FLOAT, 0, &_normals[j*_meshWidth*3]);
-
-			glDrawElements(
-				GL_TRIANGLE_STRIP, 2*_meshWidth, GL_UNSIGNED_INT, _indices
-			);
+			// glVertexPointer(3, GL_FLOAT, 0, &_verts[j*_meshWidth*3]);
+			// glVertexAttribPointer(attrindx,  2,  GL_FLOAT,  false,  0, &data[j*_meshWidth*2]);
+			// glNormalPointer(GL_FLOAT, 0, &_normals[j*_meshWidth*3]);
+			// glDrawElements(GL_TRIANGLE_STRIP, 2*_meshWidth, GL_UNSIGNED_INT, _indices);
+            
+            glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+            glBufferData(GL_ARRAY_BUFFER, _meshWidth*6*sizeof(float), &_verts[j*_meshWidth*3], GL_STREAM_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+            glBufferData(GL_ARRAY_BUFFER, _meshWidth*4*sizeof(float), &data[j*_meshWidth*2], GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLE_STRIP, 2*_meshWidth, GL_UNSIGNED_INT, 0);
 		}
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	else {
 		assert(_meshWidth >= 3);
@@ -261,8 +284,9 @@ void TwoDRenderer::_renderMeshAligned() {
 
 		glVertexPointer(3, GL_FLOAT, 0, _verts);
 		glVertexAttribPointer(
-			attrindx,  2,  GL_FLOAT,  false,  0, data
+			/*attrindx*/ 0,  2,  GL_FLOAT,  false,  0, data
 		);
+        // TODO GL
 		glNormalPointer(GL_FLOAT, 0, _normals);
 
 		glDrawElements(
