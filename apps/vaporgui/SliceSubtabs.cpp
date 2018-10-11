@@ -17,6 +17,8 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget *parent)
 
     QButtonGroup *fidelityButtons = _variablesWidget->_fidelityWidget->GetFidelityButtons();
     connect(fidelityButtons, SIGNAL(buttonClicked(int)), this, SLOT(_setDefaultSampleRate()));
+    QComboBox *refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
+    connect(refinementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_setDefaultSampleRate()));
 }
 
 void SliceVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -51,7 +53,6 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
 void SliceAppearanceSubtab::_sampleRateChanged(int rate)
 {
     _params->SetSampleRate(rate);
-    cout << "sampleRateChanged" << endl;
     _TFWidget->SetAutoUpdateParamChanged(true);
     //_TFWidget->mappingFrame->RefreshHistogram(true);
 }
