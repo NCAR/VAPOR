@@ -66,8 +66,3 @@ void IsoSurfaceParams::SetEnabledIsoValueFlags( const std::vector<bool>& enabled
         in.resize(   expectedSize, false );
     SetValueLongVec( _enabledIsoValuesTag, "Iso Surface Enabled Flags", in );
 }
-
-bool IsoSurfaceParams::UseSingleColor() const {
-	bool usingSingleColor = (bool)GetValueLong(_useSingleColorTag, (int)true);
-	return usingSingleColor;
-}
