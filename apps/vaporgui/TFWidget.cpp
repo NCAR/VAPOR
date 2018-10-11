@@ -41,6 +41,8 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     setupUi(this);
 
     _externalChangeHappened = false;
+    _mainHistoRangeChanged = false;
+    _secondaryHistoRangeChanged = false;
     _mainHistoNeedsRefresh = false;
     _secondaryHistoNeedsRefresh = false;
     _discreteColormap = false;
@@ -470,7 +472,6 @@ void TFWidget::refreshSecondaryHistoIfNecessary()
 void TFWidget::refreshSecondaryHisto()
 {
     _secondaryMappingFrame->RefreshHistogram();
-
     refreshMainHistoIfNecessary();
 
     Update(_dataMgr, _paramsMgr, _rParams);
@@ -519,20 +520,38 @@ void TFWidget::checkForBoxChanges()
     }
 }
 
-void TFWidget::checkForMapperRangeChanges(bool colorVar = false)
+void TFWidget::checkForMainMapperRangeChanges()
 {
     MapperFunction *mf;
-    if (colorVar)
-        mf = getSecondaryMapperFunction();
-    else
-        mf = getMainMapperFunction();
+    mf = getMainMapperFunction();
 
     double min = _minCombo->GetValue();
     double max = _maxCombo->GetValue();
     double newMin = mf->getMinMapValue();
     double newMax = mf->getMaxMapValue();
+
     if (min != newMin) _externalChangeHappened = true;
     if (max != newMax) _externalChangeHappened = true;
+    if (_mainHistoRangeChanged) _externalChangeHappened = true;
+
+    _mainHistoRangeChanged = false;
+}
+
+void TFWidget::checkForSecondaryMapperRangeChanges()
+{
+    MapperFunction *mf;
+    mf = getSecondaryMapperFunction();
+
+    double min = _secondaryMinSliderEdit->GetCurrentValue();
+    double max = _secondaryMaxSliderEdit->GetCurrentValue();
+    double newMin = mf->getMinMapValue();
+    double newMax = mf->getMaxMapValue();
+
+    if (min != newMin) _externalChangeHappened = true;
+    if (max != newMax) _externalChangeHappened = true;
+    if (_secondaryHistoRangeChanged) _externalChangeHappened = true;
+
+    _secondaryHistoRangeChanged = false;
 }
 
 void TFWidget::checkForTimestepChanges()
@@ -551,7 +570,7 @@ void TFWidget::enableUpdateButtonsIfNeeded()
     // Check for changes to the primary MapperFunction
     checkForCompressionChanges();
     checkForBoxChanges();
-    checkForMapperRangeChanges();
+    checkForMainMapperRangeChanges();
     checkForTimestepChanges();
 
     if (_externalChangeHappened) {
@@ -567,8 +586,7 @@ void TFWidget::enableUpdateButtonsIfNeeded()
         _externalChangeHappened = false;
         checkForCompressionChanges();
         checkForBoxChanges();
-        bool secondary = true;
-        checkForMapperRangeChanges(secondary);
+        checkForSecondaryMapperRangeChanges();
         checkForTimestepChanges();
 
         if (_externalChangeHappened) {
@@ -683,31 +701,41 @@ void TFWidget::setRange()
 
 void TFWidget::setRange(double min, double max)
 {
-    _externalChangeHappened = true;
+    _mainHistoRangeChanged = true;
 
     float values[2];
     float range[2];
     getVariableRange(range, values);
     if (min < range[0]) min = range[0];
+    if (min > range[1]) min = range[1];
     if (max > range[1]) max = range[1];
+    if (max < range[0]) max = range[0];
 
     MapperFunction *mf = getMainMapperFunction();
+
+    _paramsMgr->BeginSaveStateGroup("Setting main TFWidget range");
 
     mf->setMinMapValue(min);
     mf->setMaxMapValue(max);
 
     if (getAutoUpdateMainHisto() == true) refreshMainHisto();
-    // updateMainHisto();
+
+    _paramsMgr->EndSaveStateGroup();
+
     emit emitChange();
 }
 
 void TFWidget::setSecondaryRange()
 {
+    _paramsMgr->BeginSaveStateGroup("Setting secondary TFWidget range");
+
     double min = _secondaryMappingFrame->getMinEditBound();
     setSecondaryMinRange(min);
 
     double max = _secondaryMappingFrame->getMaxEditBound();
     setSecondaryMaxRange(max);
+
+    _paramsMgr->EndSaveStateGroup();
 
     emit emitChange();
 }
@@ -723,8 +751,7 @@ void TFWidget::autoUpdateMainHistoChecked(int state)
     MapperFunction *mf = getMainMapperFunction();
     mf->SetAutoUpdateHisto(bstate);
 
-    if (state == true) refreshMainHisto();
-    // updateMainHisto();
+    if (bstate == true) refreshMainHisto();
 }
 
 void TFWidget::autoUpdateSecondaryHistoChecked(int state)
@@ -737,7 +764,8 @@ void TFWidget::autoUpdateSecondaryHistoChecked(int state)
 
     MapperFunction *mf = getSecondaryMapperFunction();
     mf->SetAutoUpdateHisto(bstate);
-    refreshSecondaryHisto();
+
+    if (bstate == true) { refreshSecondaryHisto(); }
 }
 
 void TFWidget::setSingleColor()
@@ -796,12 +824,32 @@ void TFWidget::setUseWhitespace(int state)
 
 void TFWidget::setSecondaryMinRange(double min)
 {
+    _secondaryHistoRangeChanged = true;
+
+    float values[2];
+    float range[2];
+    bool  secondaryVar = true;
+    getVariableRange(range, values, secondaryVar);
+
+    if (min < range[0]) min = range[0];
+    if (min > range[1]) min = range[1];
+
     MapperFunction *mf = getSecondaryMapperFunction();
     mf->setMinMapValue(min);
 }
 
 void TFWidget::setSecondaryMaxRange(double max)
 {
+    _secondaryHistoRangeChanged = true;
+
+    float values[2];
+    float range[2];
+    bool  secondaryVar = true;
+    getVariableRange(range, values, secondaryVar);
+
+    if (max > range[1]) max = range[1];
+    if (max < range[0]) max = range[0];
+
     MapperFunction *mf = getSecondaryMapperFunction();
     mf->setMaxMapValue(max);
 }
@@ -852,10 +900,8 @@ string TFWidget::getTFVariableName(bool mainTF = true)
 
     if (mainTF == true) {
         if (_flags & COLORMAP_VAR_IS_IN_TF2) {
-            cout << "A" << endl;
             varname = _rParams->GetVariableName();
         } else {
-            cout << "B" << endl;
             varname = _rParams->GetColorMapVariableName();
         }
     } else {
