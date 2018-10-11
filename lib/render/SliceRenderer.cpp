@@ -257,6 +257,7 @@ int SliceRenderer::_paintGL(bool fast)
     std::vector<double> max = _cacheParams.boxMax;
 
     glDisable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
 
     LegacyGL *lgl = _glManager->legacy;
     lgl->EnableTexture();
