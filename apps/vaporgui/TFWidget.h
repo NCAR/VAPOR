@@ -131,7 +131,8 @@ private:
 	void checkForVariableChanges();
     void checkForBoxChanges();
     void checkForCompressionChanges();
-    void checkForMapperRangeChanges(bool colorVar);
+    void checkForMainMapperRangeChanges();
+    void checkForSecondaryMapperRangeChanges();
     void checkForTimestepChanges();
 
 	bool getAutoUpdateMainHisto();
@@ -152,6 +153,8 @@ private:
 	string _mainVarName;
 	string _secondaryVarName;
 	bool _externalChangeHappened;
+	bool _mainHistoRangeChanged;
+	bool _secondaryHistoRangeChanged;
 	bool _mainHistoNeedsRefresh;
 	bool _secondaryHistoNeedsRefresh;
 
