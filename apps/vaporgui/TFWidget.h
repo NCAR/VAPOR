@@ -135,6 +135,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     VAPoR::MapperFunction *getMainMapperFunction();
     VAPoR::MapperFunction *getSecondaryMapperFunction();
 
+    string getTFVariableName(bool mainTF);
+
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
 
@@ -146,6 +148,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     string _mainVarName;
     string _secondaryVarName;
     bool _externalChangeHappened;
+    bool _mainHistoNeedsRefresh;
+    bool _secondaryHistoNeedsRefresh;
 
     bool _discreteColormap;
     bool _textChanged;
