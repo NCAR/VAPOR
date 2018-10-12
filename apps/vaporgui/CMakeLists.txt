@@ -20,6 +20,7 @@ set (SRCS
 	TwoDDataEventRouter.cpp
 	WireFrameEventRouter.cpp
 	RangeController.cpp
+    PythonVariables.cpp
 	Statistics.cpp
 	Plot.cpp
 	helloSubtabs.cpp
@@ -69,6 +70,7 @@ set (SRCS
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
+    PythonVariables.h
 	BarbSubtabs.h
 	ColorbarWidget.h
 	OrientationAngles.h
@@ -116,6 +118,7 @@ set (SRCS
 	MappingFrame.h
 	MouseModeParams.h
 	PlotParams.h
+    PythonVariablesParams.h
 	QIntValidatorWithFixup.h
 	RangeCombos.h
 	RangeController.h
@@ -175,6 +178,7 @@ set (UIS
 	statsWindow.ui
 	plotWindow.ui
 	firstTimeUser.ui
+    PythonVariablesGUI.ui
 	TFWidgetGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui

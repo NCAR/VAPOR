@@ -65,6 +65,7 @@
 #include "MappingFrame.h"
 #include "BannerGUI.h"
 #include "Statistics.h"
+#include "PythonVariables.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
@@ -206,6 +207,7 @@ void MainForm::_initMembers()
     _dataClose_MetafileAction = NULL;
     _plotAction = NULL;
     _statsAction = NULL;
+    _pythonAction = NULL;
 
     _captureStartJpegCaptureAction = NULL;
     _captureEndJpegCaptureAction = NULL;
@@ -722,12 +724,18 @@ void MainForm::_createToolsMenu()
     _statsAction->setText("Data Statistics");
     _statsAction->setEnabled(false);
 
+    _pythonAction = new QAction(this);
+    _pythonAction->setText("Python Variables");
+    _pythonAction->setEnabled(false);
+
     _Tools = menuBar()->addMenu(tr("Tools"));
     _Tools->addAction(_plotAction);
     _Tools->addAction(_statsAction);
+    _Tools->addAction(_pythonAction);
 
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
+    connect(_pythonAction, SIGNAL(triggered()), this, SLOT(launchPythonVariables()));
 }
 
 void MainForm::_createCaptureMenu()
@@ -1763,6 +1771,7 @@ void MainForm::enableWidgets(bool onOff)
     _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);
     _plotAction->setEnabled(onOff);
+    _pythonAction->setEnabled(onOff);
 
     _tabMgr->EnableRouters(onOff);
 }
