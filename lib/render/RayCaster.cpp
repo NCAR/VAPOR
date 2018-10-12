@@ -1104,12 +1104,12 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx] = int(x) - 1;
                 attrib1Buffer[attribIdx + 1] = int(by) - 2;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 4;
+                attrib1Buffer[attribIdx + 3] = 2;
                 attribIdx = ((z + 1) * bx + x) * 4;
                 attrib1Buffer[attribIdx] = int(x) - 1;
                 attrib1Buffer[attribIdx + 1] = int(by) - 2;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 4;
+                attrib1Buffer[attribIdx + 3] = 2;
             }
             glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
                          attrib1Buffer, GL_STREAM_READ);
@@ -1146,12 +1146,12 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx] = int(x) - 1;
                 attrib1Buffer[attribIdx + 1] = 0;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 5;
+                attrib1Buffer[attribIdx + 3] = 3;
                 attribIdx = (z * bx + x) * 4;
                 attrib1Buffer[attribIdx] = int(x) - 1;
                 attrib1Buffer[attribIdx + 1] = 0;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 5;
+                attrib1Buffer[attribIdx + 3] = 3;
             }
             glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
                          attrib1Buffer, GL_STREAM_READ);
@@ -1193,12 +1193,12 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx] = int(bx) - 2;
                 attrib1Buffer[attribIdx + 1] = int(y) - 1;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 2;
+                attrib1Buffer[attribIdx + 3] = 4;
                 attribIdx = (z * by + y) * 4;
                 attrib1Buffer[attribIdx] = int(bx) - 2;
                 attrib1Buffer[attribIdx + 1] = int(y) - 1;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 2;
+                attrib1Buffer[attribIdx + 3] = 4;
             }
             glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
                          attrib1Buffer, GL_STREAM_READ);
@@ -1235,12 +1235,12 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx] = 0;
                 attrib1Buffer[attribIdx + 1] = int(y) - 1;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 3;
+                attrib1Buffer[attribIdx + 3] = 5;
                 attribIdx = ((z + 1) * by + y) * 4;
                 attrib1Buffer[attribIdx] = 0;
                 attrib1Buffer[attribIdx + 1] = int(y) - 1;
                 attrib1Buffer[attribIdx + 2] = int(z);
-                attrib1Buffer[attribIdx + 3] = 3;
+                attrib1Buffer[attribIdx + 3] = 5;
             }
             glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
                          attrib1Buffer, GL_STREAM_READ);
