@@ -145,14 +145,6 @@ void Trackball::TrackballSetMatrix()
 
         for (int i = 0; i < 16; i++) _modelViewMatrix[i] = glm::value_ptr(m)[i];
     } else {
-        double scale_factor = 1.0;
-
-        if (_trans[2] < 0.0) {
-            scale_factor = 5.0 / (1 - _trans[2]);
-        } else {
-            scale_factor = 5.0 + _trans[2];
-        }
-
         glm::mat4 m(1.0);
 
         m = glm::translate(m, glm::vec3(_center[0], _center[1], _center[2]));
@@ -172,6 +164,18 @@ void Trackball::TrackballSetMatrix()
 
         for (int i = 0; i < 16; i++) _modelViewMatrix[i] = glm::value_ptr(m)[i];
     }
+}
+
+double Trackball::GetOrthoSize() const
+{
+    double scale_factor = 1.0;
+
+    if (_trans[2] < 0.0) {
+        scale_factor = 5.0 / (1 - _trans[2]);
+    } else {
+        scale_factor = 5.0 + _trans[2];
+    }
+    return 1 / scale_factor * 2.9;
 }
 
 #ifndef M_SQRT1_2

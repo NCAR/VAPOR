@@ -212,12 +212,13 @@ void VizWin::_setUpProjMatrix()
 
     GLfloat w = (float)width / (float)height;
 
-    double fov = vParams->GetFOV();
-
-    mm->Perspective(fov, w, nearDist, farDist);
-
-    // float s = 3.0f/GetFloat("Scale", 1);
-    // mm->Ortho(-s*w, s*w, -s, s, nearDist, farDist);
+    if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName()) {
+        float s = _trackBall->GetOrthoSize();
+        mm->Ortho(-s * w, s * w, -s, s, nearDist, farDist);
+    } else {
+        double fov = vParams->GetFOV();
+        mm->Perspective(fov, w, nearDist, farDist);
+    }
 
     double pMatrix[16];
     mm->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
@@ -328,17 +329,19 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
     // Set trackball from current ViewpointParams matrix;
     //
     _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-    _trackBall->TrackballSetMatrix();    // needed?
+    // _trackBall->TrackballSetMatrix();	// needed?
+
+    int trackballButtonNumber = _buttonNum;
+    if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName() && _buttonNum == 1) trackballButtonNumber = 2;
 
     // Let trackball handle mouse events for navigation
     //
-    _trackBall->MouseOnTrackball(0, _buttonNum, e->x(), e->y(), width(), height());
+    _trackBall->MouseOnTrackball(0, trackballButtonNumber, e->x(), e->y(), width(), height());
 
     // Create a state saving group.
     // Only save camera parameters after user release mouse
     //
     paramsMgr->BeginSaveStateGroup("Navigate scene");
-    emit StartNavigation(_winName);
 }
 
 // If the user presses the mouse on the active viz window,
@@ -446,6 +449,10 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
 {
     if (!_navigateFlag) return;
 
+    // if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName() && _buttonNum == 1)
+    // return;
+
+    // _buttonNum is ignored in MouseOnTrackball here
     _trackBall->MouseOnTrackball(1, _buttonNum, e->x(), e->y(), width(), height());
 
     _trackBall->TrackballSetMatrix();
@@ -555,7 +562,14 @@ void VizWin::Render(bool fast)
     int rc = _controlExec->Paint(_winName, fast);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
-    if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) { updateManip(); }
+    if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
+        updateManip();
+    } else if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName()) {
+        _glManager->PixelCoordinateSystemPush();
+        _glManager->matrixManager->Translate(10, 10, 0);
+        _glManager->fontManager->GetFont("arimo", 22)->DrawText("Geo Referenced Mode");
+        _glManager->PixelCoordinateSystemPop();
+    }
 
     swapBuffers();
 
