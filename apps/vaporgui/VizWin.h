@@ -86,10 +86,6 @@ class VizWin : public QGLWidget {
     //
     void HasFocus(const string &winName);
 
-    // Sent when window starts navigation
-    //
-    void StartNavigation(const string &winName);
-
     // Sent when window ends navigation
     //
     void EndNavigation(const string &winName);
