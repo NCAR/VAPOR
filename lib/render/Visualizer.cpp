@@ -27,7 +27,10 @@
     #include <tiff/tiffio.h>
 #else
     #include <tiffio.h>
+    #include <xtiffio.h>
 #endif
+
+#include "geotiffio.h"
 
 #ifdef WIN32
     #pragma warning(disable : 4996)
@@ -674,8 +677,13 @@ void Visualizer::resetTrackball()
 }
 #endif
 
+// #include "vapor/DebugConsole.h"
+
 int Visualizer::captureImage(string filename)
 {
+    // filename += ".tiff";
+    // printf("Adding .tiff\n");
+
     ViewpointParams *vpParams = getActiveViewpointParams();
 
     size_t width, height;
@@ -687,12 +695,24 @@ int Visualizer::captureImage(string filename)
 
     FILE *jpegFile = NULL;
     TIFF *tiffFile = NULL;
+    GTIF *gtif = NULL;
     if (suffix == ".tif" || suffix == "tiff") {
-        tiffFile = TIFFOpen((const char *)filename.c_str(), "wb");
+        tiffFile = XTIFFOpen((const char *)filename.c_str(), "wb");
         if (!tiffFile) {
             SetErrMsg("Image Capture Error: Error opening output Tiff file: %s", (const char *)filename.c_str());
             return -1;
         }
+        /*
+        if (GetBool("GeoTiff", true)) {
+            gtif = GTIFNew(tiffFile);
+            printf("New GeoTiff\n");
+            if (!gtif) {
+                if (tiffFile) XTIFFClose(tiffFile);
+                SetErrMsg("Image Capture Error: Error opening output Tiff file: %s",(const char*)filename.c_str());
+                return -1;
+            }
+        }
+         */
     } else if (suffix == ".jpg" || suffix == "jpeg") {
         jpegFile = fopen((const char *)filename.c_str(), "wb");
         if (!jpegFile) {
@@ -717,24 +737,43 @@ int Visualizer::captureImage(string filename)
     //
     if (suffix == ".tif" || suffix == "tiff")    // capture the tiff file, one scanline at a time
     {
-        uint32 imagelength = (uint32)width;
-        uint32 imagewidth = (uint32)height;
+        if (gtif) {
+            GTIFKeySet(gtif, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
+            GTIFKeySet(gtif, GTRasterTypeGeoKey, TYPE_SHORT, 1, RasterPixelIsArea);
+            GTIFKeySet(gtif, GTCitationGeoKey, TYPE_ASCII, 0, "Just An Example");
+            GTIFKeySet(gtif, GeographicTypeGeoKey, TYPE_SHORT, 1, KvUserDefined);
+            GTIFKeySet(gtif, GeogCitationGeoKey, TYPE_ASCII, 0, "Everest Ellipsoid Used.");
+            GTIFKeySet(gtif, GeogAngularUnitsGeoKey, TYPE_SHORT, 1, Angular_Degree);
+            GTIFKeySet(gtif, GeogLinearUnitsGeoKey, TYPE_SHORT, 1, Linear_Meter);
+            GTIFKeySet(gtif, GeogGeodeticDatumGeoKey, TYPE_SHORT, 1, KvUserDefined);
+            GTIFKeySet(gtif, GeogEllipsoidGeoKey, TYPE_SHORT, 1, Ellipse_Everest_1830_1967_Definition);
+            GTIFKeySet(gtif, GeogSemiMajorAxisGeoKey, TYPE_DOUBLE, 1, (double)6377298.556);
+            GTIFKeySet(gtif, GeogInvFlatteningGeoKey, TYPE_DOUBLE, 1, (double)300.8017);
+        }
+
         assert(tiffFile);
-        TIFFSetField(tiffFile, TIFFTAG_IMAGELENGTH, imagelength);
-        TIFFSetField(tiffFile, TIFFTAG_IMAGEWIDTH, imagewidth);
+        TIFFSetField(tiffFile, TIFFTAG_IMAGELENGTH, height);
+        TIFFSetField(tiffFile, TIFFTAG_IMAGEWIDTH, width);
         TIFFSetField(tiffFile, TIFFTAG_PLANARCONFIG, 1);
         TIFFSetField(tiffFile, TIFFTAG_SAMPLESPERPIXEL, 3);
         TIFFSetField(tiffFile, TIFFTAG_ROWSPERSTRIP, 8);
         TIFFSetField(tiffFile, TIFFTAG_BITSPERSAMPLE, 8);
         TIFFSetField(tiffFile, TIFFTAG_PHOTOMETRIC, 2);
-        for (int row = 0; row < imagelength; row++) {
-            int rc = TIFFWriteScanline(tiffFile, buf + row * 3 * imagewidth, row);
+        for (int row = 0; row < height; row++) {
+            int rc = TIFFWriteScanline(tiffFile, buf + row * 3 * width, row);
             if (rc != 1) {
                 SetErrMsg("Image Capture Error; Error writing tiff file %s", (const char *)filename.c_str());
                 break;
             }
         }
-        TIFFClose(tiffFile);
+
+        if (gtif) {
+            int ret = GTIFWriteKeys(gtif);
+            printf("GTIFWriteKeys returned %i\n", ret);
+        }
+
+        XTIFFClose(tiffFile);
+        if (gtif) GTIFFree(gtif);
     } else if (suffix == ".jpg" || suffix == "jpeg") {
         int quality = 95;
         int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
