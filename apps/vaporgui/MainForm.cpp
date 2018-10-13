@@ -70,6 +70,7 @@
 #include "MainForm.h"
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
+#include "MouseModeParams.h"
 
 //Following shortcuts are provided:
 // CTRL_N: new session
@@ -1480,6 +1481,11 @@ void MainForm::modeChange(int newmode) {
         return;
     }
 
+    if (modeName == MouseModeParams::GetGeoRefModeName()) {
+        _tabMgr->ViewAll();
+        _tabMgr->SetHomeViewpoint();
+    }
+
     _navigationAction->setChecked(false);
 
     if (_modeStatusWidget) {
@@ -1494,6 +1500,9 @@ void MainForm::modeChange(int newmode) {
 }
 
 void MainForm::showCitationReminder() {
+#ifndef NDEBUG
+    return;
+#endif
     if (!_begForCitation)
         return;
 
@@ -2006,11 +2015,18 @@ void MainForm::captureSingleJpeg() {
     QFileDialog fileDialog(this,
                            "Specify single image capture file name",
                            imageDir.c_str(),
-                           "PNG or JPEG images (*.png *.jpg *.jpeg)");
+                           "PNG (*.png)\n"
+                           "JPG (*.jpg *.jpeg)\n"
+                           "TIFF (*.tif *.tiff)");
     fileDialog.setDefaultSuffix(QString::fromAscii("png"));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
+    QStringList mimeTypeFilters;
+    mimeTypeFilters << "image/jpeg"                // will show "JPEG image (*.jpeg *.jpg *.jpe)
+                    << "image/png"                 // will show "PNG image (*.png)"
+                    << "application/octet-stream"; // will show "All files (*)"
+                                                   //fileDialog.setNameFilters(mimeTypeFilters);
     if (fileDialog.exec() != QDialog::Accepted)
         return;
 
@@ -2022,10 +2038,13 @@ void MainForm::captureSingleJpeg() {
     //Extract the path, and the root name, from the returned string.
     QFileInfo *fileInfo = new QFileInfo(fn);
     QString suffix = fileInfo->suffix();
-    if (suffix != "jpg" && suffix != "jpeg" && suffix != "png") {
-        MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
-        return;
-    }
+
+    /* QFileDialog takes care of this
+	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) {
+		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
+		return;
+	}
+     */
 
     string filepath = fileInfo->absoluteFilePath().toStdString();
 
