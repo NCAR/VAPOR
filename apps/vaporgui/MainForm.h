@@ -189,7 +189,7 @@ private:
 
  Statistics *_stats;
  Plot *_plot;
- PythonVariables *_python;
+ PythonVariables *_pythonVariables;
  BannerGUI* _banner;
  VizSelectCombo* _windowSelector;
  QLabel* _modeStatusWidget;
