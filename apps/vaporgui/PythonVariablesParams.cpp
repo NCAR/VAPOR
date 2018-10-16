@@ -9,6 +9,7 @@ const string PythonScript::_dataMgrGridsTag = "DataMgrGrids";
 const string PythonScript::_inputVarsTag = "InputVars";
 const string PythonScript::_outputVarsTag = "OutputVars";
 const string PythonScript::_outputVarGridsTag = "OutputVarGrids";
+const string PythonScript::_dataMgrNameTag = "DataMgrName";
 
 static ParamsRegistrar<PythonVariablesParams> registrar(PythonVariablesParams::GetClassType());
 
@@ -33,8 +34,40 @@ PythonScript::PythonScript(VAPoR::ParamsBase::StateSave *ssave) : ParamsBase(ssa
 
 PythonScript::PythonScript(VAPOR::ParamsBase::StateSave *ssave, VAPOR::XmlNode *node) : ParamsBase(ssave, node){};
 
-string GetScript() const
+string PythonScript::GetScript() const
 {
     string defaultScript = "";
     script = GetValueString(_pythonScriptTag, defaultScript);
 }
+
+void PythonScript::SetScript(string script) { SetValueString(_pythonScriptTag, "Set Python Script", script); }
+
+string PythonScript::GetScriptName() const
+{
+    string defaultName = "default.py";
+    GetValueString(_pythonScriptName, defaultName);
+}
+
+void PythonScript::SetScriptName(string scriptName) { SetValueString(_pythonScriptName, "Set Python Script Name", scriptName); }
+
+std::vector<string> PythonScript::GetOutputVars() const { return GetValueStringVec(_outputVarsTag); }
+
+void PythonScript::SetOutputVars(std::vector<string> vars) { SetValueStringVec(_outputVarsTag, "Set Python output variables", vars); }
+
+std::vector<string> PythonScript::GetOutputVars() const { return GetValueStringVec(_outputVarsTag); }
+
+void PythonScript::SetOutputGrids(std::vector<string> grids) { SetValueStringVec(_outputGridsTag, "Set Python output grids", grids); }
+
+std::vector<string> PythonScript::GetOutputGrids() const { return GetValueStringVec(_outputGridsTag); }
+
+void PythonScript::SetInputVars(std::vector<string> vars) { SetValueStringVec(_inputVarsTag, "Set Python input variables", vars); }
+
+std::vector<string> PythonScript::GetInputVars() const { return GetValueStringVec(_inputVarsTag); }
+
+void PythonScript::SetInputGrids(std::vector<string> grids) { SetValueStringVec(_inputGridsTag, "Set Python input grids", grids); }
+
+std::vector<string> PythonScript::GetInputGrids() const { return GetValueStringVec(_inputGridsTag); }
+
+string GetDataMgr() const { return GetValueString(_dataMgrNameTag, ""); }
+
+void PythonScript::SetDataMgr(string dataMgrName) { SetValueString(_dataMgrNameTag, "Set DataMgr name for Python script", dataMgrName); }

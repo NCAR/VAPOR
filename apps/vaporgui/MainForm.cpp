@@ -227,6 +227,7 @@ void MainForm::_initMembers()
 
     _stats = NULL;
     _plot = NULL;
+    _pythonVariables = NULL;
     _banner = NULL;
     _windowSelector = NULL;
     _modeStatusWidget = NULL;
@@ -1673,6 +1674,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == ParamsChangeEvent::type()) {
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
+        if (_pythonVariables) { _pythonVariables->Update(); }
 
         _tabMgr->Update();
 
@@ -1936,6 +1938,13 @@ void MainForm::launchPlotUtility()
         _plot->show();
         _plot->activateWindow();
     }
+}
+
+void MainForm::launchPythonVariables()
+{
+    if (!_pythonVariables) _pythonVariables = new PythonVariables(this);
+    if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
+    _pythonVariables->ShowMe();
 }
 
 // Begin capturing animation images.

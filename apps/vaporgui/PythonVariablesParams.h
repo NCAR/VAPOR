@@ -30,7 +30,7 @@ private:
     static const string _pythonScriptsTag;
 };
 
-class PythonScript : public ParamBase {
+class PythonScript : public ParamsBase {
 public:
     PythonScript(VAPoR::ParamsBase::StateSave *ssave);
 
@@ -58,9 +58,13 @@ public:
     std::vector<string> GetInputGrids() const;
     void                SetInputGrids(std::vector<string> inputGrids);
 
+    string GetDataMgr() const;
+    void   SetDataMgr(string dataMgrName);
+
 private:
-    string              _pythonScript;
-    string              _scriptName;
+    // string _pythonScript;
+    // string _scriptName;
+    // string _dataMgrName;
     DataMgr *           _dataMgr;
     std::vector<string> _grids;
     std::vector<string> _inputVars;
