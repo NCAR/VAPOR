@@ -995,7 +995,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (castingMode == 2 && whichPass == 3)
         attrib1 = true;
 
+    //
     // Render front face:
+    //
     glEnableVertexAttribArray(0); // attribute 0 is vertex coordinates
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float),
@@ -1038,7 +1040,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1)
         delete[] attrib1Buffer;
 
+    //
     // Render back face:
+    //
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float),
@@ -1081,7 +1085,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1)
         delete[] attrib1Buffer;
 
+    //
     // Render top face:
+    //
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float),
@@ -1123,7 +1129,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1)
         delete[] attrib1Buffer;
 
+    //
     // Render bottom face:
+    //
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float),
@@ -1170,7 +1178,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     delete[] indexBuffer;
     indexBuffer = new unsigned int[numOfVertices];
 
+    //
     // Render right face:
+    //
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float),
@@ -1212,7 +1222,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1)
         delete[] attrib1Buffer;
 
+    //
     // Render left face
+    //
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
     glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float),
