@@ -43,6 +43,10 @@
 #ifndef _glutil_h_
 #define _glutil_h_
 
+#ifdef __APPLE__
+    #define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
+#endif
+
 #include <GL/glew.h>
 #ifdef Darwin
     #include <OpenGL/gl3.h>
