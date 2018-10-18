@@ -45,7 +45,6 @@
 
 #include <GL/glew.h>
 #ifdef Darwin
-    // #include <OpenGL/gl.h>
     #include <OpenGL/gl3.h>
 #else
     #include <GL/gl.h>
