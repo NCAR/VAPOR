@@ -26,20 +26,22 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
 
   private slots:
     void _newScript();
-    void _openScript(){};
+    void _openScript() { cout << "Open" << endl; }
     void _saveScript(int index);
-    void _deleteScript(){};
+    void _deleteScript() { cout << "Delete" << endl; }
 
-    void _renameScript(){};
-    void _showGridVariables(){};
-    void _createNewVariable(){};
-    void _deleteVariable(){};
+    void _createNewVariable();
+    void _deleteVariable();
 
-    void _testScript(){};
+    void _testScript() { cout << "Test" << endl; }
+
+    void _2DInputVarChanged(int row, int col);
+    void _3DInputVarChanged(int row, int col);
 
   private:
     QMenuBar *_menuBar;
     QMenu *_fileMenu;
+    const QColor *_background;
 
     VAPoR::ControlExec *_controlExec;
     //    VAPoR::DataMgr* _dataMgr;
@@ -47,20 +49,45 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     VAPoR::PythonVariablesParams *_pythonParams;
 
     Fader *_fader;
-    NewItemDialog *_newScriptDialog;
-    VaporTable *_inputVariableTable;
+    NewItemDialog *_newItemDialog;
+    VaporTable *_2DInputVarTable;
+    VaporTable *_3DInputVarTable;
+    VaporTable *_summaryTable;
+    VaporTable *_outputVarTable;
 
     string _scriptName;
     string _dataMgrName;
 
+    bool _justSaved;
+
+    std::vector<string> _2DVars;
+    std::vector<bool> _2DVarsEnabled;
+    std::vector<string> _3DVars;
+    std::vector<bool> _3DVarsEnabled;
+    std::vector<string> _outputVars;
+    std::vector<string> _outputGrids;
+
     void _connectWidgets();
     void _setGUIEnabled(bool enabled);
+    void _makeInputTableValues(
+        std::vector<string> &tableValues2D,
+        std::vector<string> &tableValues3D,
+        std::vector<string> &summaryValues) const;
+    void _makeOutputTableValues(
+        std::vector<string> &outputValues) const;
+    int _checkForDuplicateNames(
+        std::vector<string> names,
+        string name);
+    void _deleteFader();
+    void _saveToSession();
+    void _saveToFile();
 
-    void _updateGridComboBox();
     void _updateNewItemDialog();
     void _updateInputVarTable(){};
     void _updateOutputVarTable(){};
     void _updatePythonScript(){};
+
+    void _fade(bool fadeIn);
 };
 
 class Fader : public QObject {
@@ -68,11 +95,17 @@ class Fader : public QObject {
 
   public:
     Fader(
+        bool fadeIn,
         QLabel *label,
         QColor background,
         QObject *parent = 0);
 
+  signals:
+    void faderDone();
+
   private:
+    bool _fadeIn;
+    QThread *_thread;
     QLabel *_myLabel;
     QColor _background;
 
@@ -86,8 +119,7 @@ class NewItemDialog : public QDialog {
   public:
     enum {
         SCRIPT = 0,
-        INVAR = 1,
-        OUTVAR = 2
+        OUTVAR = 1
     };
 
     NewItemDialog(QWidget *parent = 0);
@@ -100,6 +132,7 @@ class NewItemDialog : public QDialog {
   private:
     void _connectWidgets();
     void _setupGUI();
+    void _adjustToType(int type);
 
     string _itemName;
     string _optionName;
