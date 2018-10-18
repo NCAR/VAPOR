@@ -67,11 +67,16 @@ public:
     int      ColumnCount() const { return _table->columnCount(); }
     QWidget *CellWidget(int row, int col) { return _table->cellWidget(row, col); }
 
+    int GetActiveRow() const;
+    int GetActiveCol() const;
+
     void SetActiveRow(int row);
     void SetActiveCol(int col);
 
     void SetAutoResizeHeight(bool val);
     bool GetAutoResizeHeight() const;
+
+    void StretchToColumn(int column);
 
 public slots:
     void emitValueChanged();

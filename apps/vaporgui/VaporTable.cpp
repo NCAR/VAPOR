@@ -34,6 +34,8 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     _activeRow = -1;
     _activeCol = -1;
     _autoResizeHeight = false;
+
+    _table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 }
 
 // Clear current table, then generate table of rows x columns
@@ -67,6 +69,13 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 
     addCheckboxes(values);
 
+    if ((rows < 1) || (cols < 1)) {
+        _activeRow = -1;
+        _activeCol = -1;
+    }
+    if (_activeRow >= rows) _activeRow = rows - 1;
+    if (_activeCol >= cols) _activeCol = cols - 1;
+
     if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
     if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
 
@@ -76,6 +85,13 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 void VaporTable::SetAutoResizeHeight(bool val) { _autoResizeHeight = val; }
 
 bool VaporTable::GetAutoResizeHeight() const { return _autoResizeHeight; }
+
+void VaporTable::StretchToColumn(int column)
+{
+    QHeaderView *headerView = new QHeaderView(Qt::Horizontal, _table);
+    _table->setHorizontalHeader(headerView);
+    headerView->setResizeMode(column, QHeaderView::Stretch);
+}
 
 void VaporTable::resizeTableHeight()
 {
@@ -492,6 +508,10 @@ void VaporTable::highlightActiveCol(int col)
     }
 }
 
+int VaporTable::GetActiveRow() const { return _activeRow; }
+
 void VaporTable::SetActiveRow(int row) { _activeRow = row; }
+
+int VaporTable::GetActiveCol() const { return _activeCol; }
 
 void VaporTable::SetActiveCol(int col) { _activeCol = col; }
