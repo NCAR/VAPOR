@@ -212,7 +212,6 @@ int BarbRenderer::_getVectorVarGrids(
 	if (! VariableExists(ts, varnames, refLevel, lod, true)) {
 		SetErrMsg("One or more selected field variables does not exist");
         return -1;
-    	//glEndList();
 	}
 
 	// Get grids for our vector variables
@@ -593,7 +592,6 @@ void BarbRenderer::_setUpLightingAndColor() {
 	assert(bParams);
 	bParams->GetConstantColor(fcolor);
 	if (nLights == 0) {
-		// glDisable(GL_LIGHTING);
         lgl->DisableLighting();
 	}
 	else {
@@ -606,7 +604,7 @@ void BarbRenderer::_setUpLightingAndColor() {
 		specColor[3] = 1.f;
 		LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
 		LEGACY_TODO(glEnable(GL_COLOR_MATERIAL));
-        lgl->EnableLighting(); // glEnable(GL_LIGHTING);
+        lgl->EnableLighting();
 	}
 	lgl->Color3fv(fcolor);
 }
@@ -876,7 +874,7 @@ bool BarbRenderer::_getColorMapping(float val, float clut[256*4]) {
 	int lutIndex = tf->mapFloatToIndex(val);
 	for (int i = 0; i<4; i++)
 		mappedColor[i] = clut[4*lutIndex+i];
-    _glManager->legacy->Color4fv(mappedColor); // glColor4fv(mappedColor);
+    _glManager->legacy->Color4fv(mappedColor);
 	return missing;
 }
 
