@@ -68,9 +68,11 @@ VizWin::VizWin(
     
     // TODO GL
     _glManager = new GLManager;
-    vector <string> paths; paths.push_back("shaders");
+    vector <string> paths;
+	paths.push_back("shaders");
     string shaderPath = GetAppPath("VAPOR", "share", paths);
-    paths.clear(); paths.push_back("fonts");
+    paths.clear();
+	paths.push_back("fonts");
     string fontPath = GetAppPath("VAPOR", "share", paths);
     _glManager->shaderManager->SetResourceDirectory(shaderPath); // TODO GL
     _glManager->fontManager->SetResourceDirectory(fontPath); // TODO GL
