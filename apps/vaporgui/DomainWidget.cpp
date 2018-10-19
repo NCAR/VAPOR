@@ -291,7 +291,8 @@ IsoSlider::IsoSlider(QWidget *parent, float min, float max) : DomainWidget(paren
     _maxValue = 0.53;
     _minY = -.10;
     _maxY = 0.06;
-    _lineWidth = 0.02;
+    //_lineWidth = 0.02;
+    _lineWidth = 0.04;
 }
 
 //----------------------------------------------------------------------------
@@ -315,7 +316,6 @@ int IsoSlider::paintGL()
     glPushMatrix();
     glPushName(VERTLINE);
     {
-        cout << " at " << mid() << " lw " << _lineWidth << " rc ";
         glColor3f(1., 1., 1.);
 
         glBegin(GL_QUADS);
@@ -330,7 +330,6 @@ int IsoSlider::paintGL()
     glPopMatrix();
     glPopName();
     int rc = printOpenGLError();
-    cout << rc << endl;
     if (rc < 0) return -1;
     return 0;
 }
