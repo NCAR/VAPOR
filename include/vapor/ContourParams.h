@@ -137,8 +137,6 @@ public:
             if (!_node->HasElementDouble(_valuesTag)) return defaultv;
 
             vector<double> val = GetValueDoubleVec(_valuesTag);
-            for (int i = 0; i < val.size(); i++) cout << val[i] << endl;
-            cout << endl;
             return val;
         }
 

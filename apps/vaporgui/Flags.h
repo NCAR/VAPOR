@@ -48,10 +48,6 @@ enum GeometryFlags {
 //! the primary variable, as well as a MappingFrame for the colormapped variable
 //! CONSTANT_COLOR   - Indicates whether constant color options are enabled, for
 //! renderers like Barbs and Isosurfaces
-enum TFFlags {
-    COLORMAP_VAR_IS_IN_TF1 = (1u << 0),
-    COLORMAP_VAR_IS_IN_TF2 = (1u << 1),
-    CONSTANT_COLOR = (1u << 2),
-};
+enum TFFlags { COLORMAP_VAR_IS_IN_TF1 = (1u << 0), COLORMAP_VAR_IS_IN_TF2 = (1u << 1), CONSTANT_COLOR = (1u << 2), ISOLINES = (1u << 3) };
 
 #endif
