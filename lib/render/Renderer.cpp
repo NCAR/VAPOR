@@ -446,13 +446,13 @@ void Renderer::renderColorbar()
     if (!cbpb || !cbpb->IsEnabled()) return;
     if (makeColorbarTexture()) return;
 
-    lgl->Color4fv(whitecolor);    // glColor4fv(whitecolor);
+    lgl->Color4fv(whitecolor);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     // Disable z-buffer compare, always overwrite:
     glDepthFunc(GL_ALWAYS);
-    lgl->EnableTexture();    // glEnable(GL_TEXTURE_2D);
+    lgl->EnableTexture();
 
     // create a polygon appropriately positioned in the scene.  It's inside the unit cube--
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _imgWid, _imgHgt, 0, GL_RGB, GL_UNSIGNED_BYTE, _colorbarTexture);
@@ -479,7 +479,7 @@ void Renderer::renderColorbar()
     lgl->Vertex3f(urx, lly, 0.0f);
     lgl->End();
 
-    lgl->DisableTexture();    // glDisable(GL_TEXTURE_2D);
+    lgl->DisableTexture();
 
     // Draw numeric text annotation
     //
