@@ -52,6 +52,7 @@ enum TFFlags {
     COLORMAP_VAR_IS_IN_TF1 = (1u << 0),
     COLORMAP_VAR_IS_IN_TF2 = (1u << 1),
     CONSTANT_COLOR = (1u << 2),
+    ISOLINES = (1u << 3)
 };
 
 #endif
