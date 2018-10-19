@@ -149,6 +149,9 @@ class PARAMS_API ContourParams : public RenderParams {
                 return defaultv;
 
             vector<double> val = GetValueDoubleVec(_valuesTag);
+            for (int i = 0; i < val.size(); i++)
+                cout << val[i] << endl;
+            cout << endl;
             return val;
         }
 
