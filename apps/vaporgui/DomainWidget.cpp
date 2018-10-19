@@ -346,9 +346,9 @@ int IsoSlider::paintGL(){
 	glPushMatrix();
 	glPushName(VERTLINE);
 		{
-		
+		cout << " at " << mid() << " lw " << _lineWidth << " rc ";
 		glColor3f(1.,1.,1.);
-	
+
 		glBegin(GL_QUADS);
 		glNormal3f(0.,0.,1.);
 		glVertex3f(mid()- 0.1*_lineWidth, 0.0, 0.0);
@@ -362,6 +362,7 @@ int IsoSlider::paintGL(){
 	  glPopMatrix();
       glPopName();
 	  int rc = printOpenGLError();
+        cout << rc << endl;
 	  if (rc < 0) return -1;
 	  return 0;
 }
