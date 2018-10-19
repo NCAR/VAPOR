@@ -66,11 +66,12 @@ VizWin::VizWin(
 	setWindowIcon(QPixmap(vapor_icon___));
 	_controlExec = ce;
     
-    // TODO GL
     _glManager = new GLManager;
-    vector <string> paths; paths.push_back("shaders");
+    vector <string> paths;
+	paths.push_back("shaders");
     string shaderPath = GetAppPath("VAPOR", "share", paths);
-    paths.clear(); paths.push_back("fonts");
+    paths.clear();
+	paths.push_back("fonts");
     string fontPath = GetAppPath("VAPOR", "share", paths);
     _glManager->shaderManager->SetResourceDirectory(shaderPath); // TODO GL
     _glManager->fontManager->SetResourceDirectory(fontPath); // TODO GL
@@ -96,11 +97,6 @@ VizWin::~VizWin()
 {
     delete _glManager;
 }
-
-// void VizWin::makeCurrent()
-// {
-// 	QGLWidget::makeCurrent();
-// }
 
 void VizWin::closeEvent(QCloseEvent* e){
 
@@ -207,7 +203,6 @@ void VizWin::_setUpProjMatrix() {
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
-    // _controlExec->visu
 
 	double m[16];
 	vParams->GetModelViewMatrix(m);

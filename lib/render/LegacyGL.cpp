@@ -3,7 +3,6 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include "vapor/GLManager.h"
-// #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
