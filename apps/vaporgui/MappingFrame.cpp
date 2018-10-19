@@ -1285,21 +1285,17 @@ int MappingFrame::drawIsoSlider()
 //----------------------------------------------------------------------------
 int MappingFrame::drawIsolineSliders()
 {
-    cout << "draw isoline sliders" << endl;
 	//std::vector<bool> enabledIsoValues(true, _isolineSliders.size());
 	std::vector<bool> enabledIsoValues(_isolineSliders.size(), true);
 	IsoSurfaceParams* ip = dynamic_cast<IsoSurfaceParams*>(_rParams);
 	if (ip != NULL) {
-        cout << "cast to IsosurfaceParams" << endl;
 		enabledIsoValues = ip->GetEnabledIsoValueFlags();
     }
 
 	for (int i = 0; i<_isolineSliders.size(); i++){
-        cout << "enabled " << enabledIsoValues[i] << endl;
 		if (enabledIsoValues[i]==true) {
 			int sliderName = (int)(ISO_WIDGET) + i + 1;
 			glPushName(sliderName);  
-            cout << "Drawing isoline " << i << " of " << _isolineSliders.size();
 			int rc = _isolineSliders[i]->paintGL();
 			glPopName();
 			if (rc < 0) return rc;
@@ -2585,7 +2581,6 @@ void MappingFrame::setIsolineSlider(int index)
 }
 
 void MappingFrame::setIsolineSliders(const vector<double>& sliderVals){
-cout << "void MappingFrame::setIsolineSliders(const vector<double>& sliderVals){" << endl;
 	//delete unused sliders
 	if (sliderVals.size() < _isolineSliders.size()){
 		for (int i = sliderVals.size(); i< _isolineSliders.size();i++) {
@@ -2600,7 +2595,6 @@ cout << "void MappingFrame::setIsolineSliders(const vector<double>& sliderVals){
 	//set the isovalues
 	for (int i = 0; i< _isolineSliders.size(); i++){
 		_isolineSliders[i]->setIsoValue(xDataToWorld(sliderVals[i]));
-        cout << sliderVals[i] << " " << xDataToWorld(sliderVals[i]) << endl;
 	}
 }
 
