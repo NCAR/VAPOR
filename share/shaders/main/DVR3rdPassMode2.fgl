@@ -133,34 +133,35 @@ vec3 CalculateGradient( const in vec3 tc)
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
 bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
                            const in vec3 v0,   const in vec3 v1,  const in vec3 v2,
-                           out float t ) 
+                           out float t,        out float u,       out float v ) 
 {
     vec3 v0v1 = v1 - v0;
     vec3 v0v2 = v2 - v0;
     vec3 pvec = cross( dir, v0v2 );
     float det = dot(  v0v1, pvec );
 
-    const float zero = 1e-9;
+    const float zero = 1e-8;
     if( abs(det) < zero ) // ray and triangle are parallel
+    {
+        t = -1.0;   u = -1.0;   v = -1.0;
         return false;
+    }
 
     float invDet = 1.0 / det;
     vec3  tvec   = orig - v0;
-    float u      = dot( tvec, pvec ) * invDet;
-    if( u < 0.0 || u > 1.0 )
-        return false;
-
+    u            = dot( tvec, pvec ) * invDet;  // if u == 0, ray hits edge v0v2
     vec3 qvec    = cross( tvec, v0v1 );
-    float v      = dot( dir, qvec ) * invDet;
-    if( v < 0.0 || u + v > 1.0 )
+    v            = dot( dir, qvec ) * invDet;   // if v == 0, ray hits edge v0v1
+    t            = dot( v0v2, qvec ) * invDet;
+
+    if( u < 0.0 || v < 0.0 || u + v > 1.0 )
         return false;
-
-    t = dot( v0v2, qvec ) * invDet;
-
-    return true;
+    else
+        return true;
 }
 
-bool  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
+
+int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                     const in  vec3 rayDirTexture,
                     out      ivec4 step2CellIdx,    out float t )
 {
@@ -197,72 +198,337 @@ bool  FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
 
     ivec3 triangles[12];
     triangles[0]  =  ivec3( 7, 3, 6 );  // front face,  w == 0
-    triangles[1]  =  ivec3( 6, 3, 2 );
+    triangles[1]  =  ivec3( 2, 3, 6 );
     triangles[2]  =  ivec3( 0, 4, 1 );  // back face,   w == 1
-    triangles[3]  =  ivec3( 1, 4, 5 );
+    triangles[3]  =  ivec3( 5, 4, 1 );
     triangles[4]  =  ivec3( 4, 7, 5 );  // top face,    w == 2
-    triangles[5]  =  ivec3( 5, 7, 6 );
+    triangles[5]  =  ivec3( 6, 7, 5 );
     triangles[6]  =  ivec3( 3, 0, 2 );  // bottom face, w == 3
-    triangles[7]  =  ivec3( 2, 0, 1 );
+    triangles[7]  =  ivec3( 1, 0, 2 );
     triangles[8]  =  ivec3( 5, 1, 6 );  // right face,  w == 4
-    triangles[9]  =  ivec3( 6, 1, 2 );
+    triangles[9]  =  ivec3( 2, 1, 6 );
     triangles[10] =  ivec3( 4, 0, 7 );  // left face,   w == 5
-    triangles[11] =  ivec3( 7, 0, 3 );
+    triangles[11] =  ivec3( 3, 0, 7 );
 
-    bool intersect = false;
+    // Test intersection with 12 triangles
+    bool  intersect[12];
+    float tArr[12],    uArr[12],   vArr[12];
     for( int i = 0; i < 12; i++ )
     {
-        if( i / 2 != step1CellIdx.w )   // not the entry face
+        intersect[i] = RayTriangleIntersect( startTexture,   rayDirTexture,
+                                             cubeVertCoords[ triangles[i][0] ],
+                                             cubeVertCoords[ triangles[i][1] ],
+                                             cubeVertCoords[ triangles[i][2] ],
+                                             tArr[i],  uArr[i],  vArr[i]     );
+    }
+
+    // How many triangles does this ray hit? 
+    int counter = 0;
+    for( int i = 0; i < 12; i++ )
+    {
+        if( intersect[i] )
+            counter++;
+    }
+
+    // Bring back missing hits
+    if( counter < 2 )
+    {
+        float zero = 4e-4;
+        for( int i = 0; i < 12; i++ )
         {
-            intersect =  RayTriangleIntersect( startTexture, 
-                                               rayDirTexture,
-                                               cubeVertCoords[ triangles[i][0] ],
-                                               cubeVertCoords[ triangles[i][1] ],
-                                               cubeVertCoords[ triangles[i][2] ],
-                                               t );
-            if( intersect )
+            if( abs(uArr[i]) < zero || abs(vArr[i]) < zero || 
+                abs(uArr[i] + vArr[i] - 1.0) < zero )
+            intersect[i] = true;
+        }
+#if 0
+        // When a ray hits the diagonal of a face, and no triangle reports it. 
+        float zero = 3e-7;
+        for( int i = 0; i < 6; i++ )
+        {
+            if( (!intersect[ 2*i ]) && (!intersect[ 2*i+1 ]) )
             {
-                if( i / 2 == 0 )    // exits the front face of current cell
-                {
-                    // enters the back face of the next cell
-                    step2CellIdx = ivec4( cubeVertIdx[3], 1 );
-                    break;
-                }
-                else if( i / 2 == 1 )   // exits the back face of current cell
-                {
-                    // enters the front face of the next cell
-                    step2CellIdx = ivec4( V0.x, V0.y, V0.z - 1, 0 );
-                    break;
-                }
-                else if( i / 2 == 4 )   // exits the right face of current cell
-                {
-                    // enters the left face of the next cell
-                    step2CellIdx = ivec4( cubeVertIdx[1], 5 );
-                    break;
-                }
-                else if( i / 2 == 5 )   // exits the left face of current cell
-                {
-                    // enters the right face of the next cell
-                    step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z, 4 );
-                    break;
-                }
-                else if( i / 2 == 2 )   // exits the top face of current cell
-                {
-                    // enters the bottom face of the next cell
-                    step2CellIdx = ivec4(  cubeVertIdx[4], 3 );
-                    break;
-                }
-                else //( i / 2 == 3)    // exits the bottom face of current cell
-                {
-                    // enters the top face of the next cell
-                    step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z, 2 );
-                    break;
-                }
+                if( abs(uArr[ 2*i ] + vArr[ 2*i ] - 1.0) < zero )
+                    intersect[ 2*i ] = true;
+                else if( abs(uArr[ 2*i+1 ] + vArr[ 2*i+1 ] - 1.0) < zero )
+                    intersect[ 2*i+1 ] = true;
             }
+        }
+
+        // When a ray hits an edge, and no triangle reports it
+        zero = 1e-4;
+        int t1Arr[12],     t2Arr[12];
+        t1Arr[0]  = 5;     t2Arr[0]  = 0;     // edge 6-7
+        t1Arr[1]  = 4;     t2Arr[1]  = 10;    // edge 7-4
+        t1Arr[2]  = 3;     t2Arr[2]  = 4;     // edge 4-5
+        t1Arr[3]  = 8;     t2Arr[3]  = 3;     // edge 5-1
+
+        t1Arr[4]  = 1;     t2Arr[4]  = 6;     // edge 2-3
+        t1Arr[5]  = 0;     t2Arr[5]  = 11;    // edge 7-3
+        t1Arr[6]  = 7;     t2Arr[6]  = 2;     // edge 0-1
+        t1Arr[7]  = 9;     t2Arr[7]  = 7;     // edge 1-2
+
+        for( int i = 0; i < 8; i++ )         // test first 8 edges
+        {
+            int t1 = t1Arr[i],  t2 = t2Arr[i];
+            if( !intersect[t1]          && !intersect[t2]  &&
+                (abs(vArr[t1]) < zero)  && (abs(uArr[t2]) < zero) )
+            {
+                if( t1/2 == step1CellIdx.w )
+                    intersect[t1] = true;
+                else
+                    intersect[t2] = true;
+            }
+        }
+
+        // The following 4 edges require looking at different u, v coordinates
+        t1Arr[8]  = 11;    t2Arr[8]  = 6;     // edge 3-0
+        t1Arr[9]  = 10;    t2Arr[9]  = 2;     // edge 4-0
+        for( int i = 8; i < 10; i++ )
+        {
+            int t1 = t1Arr[i],  t2 = t2Arr[i];
+            if( !intersect[t1]          && !intersect[t2]  &&
+                (abs(vArr[t1]) < zero)  && (abs(vArr[t2]) < zero) )
+            {
+                if( t1/2 == step1CellIdx.w )
+                    intersect[t1] = true;
+                else
+                    intersect[t2] = true;
+            }
+        }
+        t1Arr[10] = 5;     t2Arr[10] = 8;     // edge 5-6
+        t1Arr[11] = 9;     t2Arr[11] = 1;     // edge 6-2
+        for( int i = 10; i < 12; i++ )
+        {
+            int t1 = t1Arr[i],  t2 = t2Arr[i];
+            if( !intersect[t1]          && !intersect[t2]  &&
+                (abs(uArr[t1]) < zero)  && (abs(uArr[t2]) < zero) )
+            {
+                if( t1/2 == step1CellIdx.w )
+                    intersect[t1] = true;
+                else
+                    intersect[t2] = true;
+            }
+        }
+#endif
+    }
+
+    // Re-count the number of intersections after all the treatments
+    counter = 0;
+    for( int i = 0; i < 12; i++ )
+    {
+        if( intersect[i] )
+            counter++;
+    }
+
+    // Eliminate invalid hits
+    if( counter > 2 )
+    {
+        // If a ray hits both front and back faces, then mark any other intersections false
+        if( (intersect[0] || intersect[1]) && (intersect[2] || intersect[3]) )
+        {
+            for( int i = 4; i < 12; i++ )
+                intersect[i] = false;
+        }
+        // If a ray hits both top and bottom faces, then mark any other intersections false
+        if( (intersect[4] || intersect[5]) && (intersect[6] || intersect[7]) )
+        {
+            for( int i = 0; i < 4; i++ )
+                intersect[i] = false;
+            for( int i = 8; i < 12; i++ )
+                intersect[i] = false;
+        }
+        // If a ray hits both left and right faces, then mark any other intersections false
+        if( (intersect[8] || intersect[9]) && (intersect[10] || intersect[11]) )
+        {
+            for( int i = 0; i < 8; i++ )
+                intersect[i] = false;
+        }
+
+        // If a ray hits both triangles of the same face, remove one of them
+        for( int i = 0; i < 6; i++ )
+        {
+            if( intersect[ i*2 ] && intersect[ i*2+1 ] )
+                intersect[ i*2 ] = false;
         }
     }
 
-    return intersect;
+    // Re-count the number of intersections after all the treatments
+    counter = 0;
+    for( int i = 0; i < 12; i++ )
+    {
+        if( intersect[i] )
+            counter++;
+    }
+
+    // Another round of hit elimination, where the ray entry point is on an edge.
+    if( counter > 2 )
+    {
+        const float zero = 3e-7;
+        int i = 0;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 7-3
+                intersect[11]  = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 7-6
+                intersect[5]   = false;
+        }
+        i = 1;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 2-3
+                intersect[6]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 2-6
+                intersect[9]   = false;
+        }
+        i = 2;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 0-4
+                intersect[10]  = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 0-1
+                intersect[7]   = false;
+        }
+        i = 3;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 5-4
+                intersect[4]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 5-1
+                intersect[8]   = false;
+        }
+        i = 4;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 4-7
+                intersect[10]  = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 4-5
+                intersect[3]   = false;
+        }
+        i = 5;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 6-7
+                intersect[0]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 6-5
+                intersect[8]   = false;
+        }
+        i = 6;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 3-0
+                intersect[11]  = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 3-2
+                intersect[1]   = false;
+        }
+        i = 7;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 1-0
+                intersect[2]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 1-2
+                intersect[9]   = false;
+        }
+        i = 8;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 5-1
+                intersect[3]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 5-6
+                intersect[5]   = false;
+        }
+        i = 9;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 2-1
+                intersect[7]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 2-6
+                intersect[1]   = false;
+        }
+        i = 10;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 4-0
+                intersect[2]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 4-7
+                intersect[4]   = false;
+        }
+        i = 11;
+        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        {
+            if( abs( vArr[i] ) < zero )     // hitting edge 3-0
+                intersect[6]   = false;
+            if( abs( uArr[i] ) < zero )     // hitting edge 3-7
+                intersect[0]   = false;
+        }
+    }
+
+    // Re-count the number of intersections after all the treatments
+    counter = 0;
+    for( int i = 0; i < 12; i++ )
+    {
+        if( intersect[i] )
+            counter++;
+    }
+
+
+#if 0
+    if( counter == 2 )      // one entry, and one exit
+    {
+        int i;
+        for( i = 0; i < 12; i++ )   // find the exit face
+        {
+            if( intersect[i] && i / 2 != step1CellIdx.w )
+                break;
+        }
+        
+        t = tArr[i];
+
+        if( i / 2 == 0 )        // exits the front face of current cell
+        {                       // enters the back face of the next cell
+            step2CellIdx = ivec4( cubeVertIdx[3], 1 );
+        }
+        else if( i / 2 == 1 )   // exits the back face of current cell
+        {                       // enters the front face of the next cell
+            step2CellIdx = ivec4( V0.x, V0.y, V0.z - 1, 0 );
+        }
+        else if( i / 2 == 4 )   // exits the right face of current cell
+        {                       // enters the left face of the next cell
+            step2CellIdx = ivec4( cubeVertIdx[1], 5 );
+        }
+        else if( i / 2 == 5 )   // exits the left face of current cell
+        {                       // enters the right face of the next cell
+            step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z, 4 );
+        }
+        else if( i / 2 == 2 )   // exits the top face of current cell
+        {                       // enters the bottom face of the next cell
+            step2CellIdx = ivec4(  cubeVertIdx[4], 3 );
+        }
+        else //( i / 2 == 3)    // exits the bottom face of current cell
+        {                       // enters the top face of the next cell
+            step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z, 2 );
+        }
+    }
+    else if( counter == 1 ) // ray hitting an edge
+    {
+        int i;
+        for( i = 0; i < 12; i++ )   // Find the only intersection face
+        {
+            if( intersect[i] )
+                break;
+        }
+
+    }
+    else if( counter == 0 ) // ray missing this cell ??
+    {
+
+    }
+    else                    // ray hitting more than 2 triangles ??
+    {
+
+    }
+#endif
+
+    return counter;
 }
 
 bool CellOutsideBound( const in ivec3 cellIdx )
@@ -301,8 +567,19 @@ void main(void)
 
     ivec4 step2CellIdx;
     float t;
-    bool intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
+    int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, step2CellIdx, t );
 
+    color = vec4( 0.0 );
+
+    if( intersect == 0 )
+        color = vec4( 1.0, 0.2, 0.2, 1.0 );
+    else if( intersect == 1 )
+        color = vec4( 0.2, 1.0, 0.2, 1.0 );
+    else if( intersect > 2 )
+        color = vec4( 1.0 );
+    
+
+#if 0
     if( CellOutsideBound( step2CellIdx.xyz ) )
     {
         step2CellIdx = step1CellIdx;
@@ -332,8 +609,8 @@ void main(void)
 
         if( !intersect )
             color = vec4( 1.0, 0.2, 0.2, 1.0 );
-
     }
+#endif
 
 
 
@@ -397,5 +674,5 @@ void main(void)
     }   // End ray casting
 #endif
 
-}       // End main()
+}
 
