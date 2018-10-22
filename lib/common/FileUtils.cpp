@@ -10,6 +10,12 @@ using namespace VAPoR;
 using FileUtils::FileType;
 using std::string;
 
+#ifdef WIN32
+const char FileUtils::Separator = '\\';
+#else
+const char FileUtils::Separator = '/';
+#endif
+
 string FileUtils::ReadFileToString(const string &path)
 {
     FILE *f = fopen(path.c_str(), "r");
@@ -31,6 +37,7 @@ string FileUtils::ReadFileToString(const string &path)
 std::string FileUtils::Basename(const std::string &path)
 {
 #ifdef WIN32
+    #error TODO
     return path;
 #else
     char *copy = new char[path.length() + 1];
@@ -40,6 +47,8 @@ std::string FileUtils::Basename(const std::string &path)
     return ret;
 #endif
 }
+
+std::string FileUtils::Extension(const std::string &path) { return path.substr(path.rfind(".") + 1); }
 
 long FileUtils::GetFileModifiedTime(const string &path)
 {
