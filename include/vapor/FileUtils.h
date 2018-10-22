@@ -12,8 +12,11 @@ enum class FileType {
     Does_Not_Exist
 };
 
+extern const char Separator;
+
 std::string ReadFileToString(const std::string &path);
 std::string Basename(const std::string &path);
+std::string Extension(const std::string &path);
 long GetFileModifiedTime(const std::string &path);
 bool FileExists(const std::string &path);
 bool IsRegularFile(const std::string &path);
