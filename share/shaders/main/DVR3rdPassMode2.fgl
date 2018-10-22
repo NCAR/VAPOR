@@ -180,7 +180,8 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     //     3|/______________|/    
     //                     2
     //     Z
-    ivec3 V0 = step1CellIdx.xyz;
+    ivec3 V0    = step1CellIdx.xyz;
+    int inFace  = step1CellIdx.w; 
 
     ivec3 cubeVertIdx[8]; 
     cubeVertIdx[0] = V0;
@@ -222,7 +223,63 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                                              tArr[i],  uArr[i],  vArr[i]     );
     }
 
-    // How many triangles does this ray hit? 
+    // Bring back the missing entry hit
+    if( !intersect[ 2*inFace ] && !intersect[ 2*inFace+1 ] )
+    {
+        int   i         = 2 * inFace;           // test the 1st triangle
+        int   triangle  = i;
+        float minDiff   = abs( uArr[i] - 1.0 );
+        float diff      = abs( vArr[i] - 1.0 );
+        minDiff         = min( minDiff, diff );
+        diff            = abs( uArr[i] + vArr[i] - 1.0 );
+        minDiff         = min( minDiff, diff );
+        i               = 2 * inFace + 1;       // test the 2nd triangle
+        diff            = abs( uArr[i] - 1.0 );
+        diff            = min( diff, abs( vArr[i] - 1.0 ) );
+        diff            = min( diff, abs( uArr[i] + vArr[i] - 1.0 ) );
+        if( diff < minDiff )
+        {
+            minDiff     = diff;
+            triangle    = i;
+        }
+        
+        intersect[ triangle ] = true;
+    }
+
+    // Bring back the missing exit hit
+    bool hasExitHit = false;
+    for( int i = 0; i < 12; i++ )
+    {
+        if( intersect[i] && i / 2 != inFace )
+        {
+            hasExitHit = true;
+            break;
+        }
+    }
+    if( !hasExitHit )
+    {
+        int   triangle = -1;
+        float minDiff  = 1.0;  
+        for(  int i = 0; i < 12; i++ )
+        {
+            float diff;
+            if( i / 2 != inFace )
+            {
+                diff = abs( uArr[i] - 1.0 );
+                diff = min( diff, abs( vArr[i] - 1.0 ) );
+                diff = min( diff, abs( uArr[i] + vArr[i] - 1.0 ) );
+                if( diff < minDiff )
+                {
+                    minDiff  = diff;
+                    triangle = i;
+                }
+            }
+        }
+    
+        intersect[ triangle ] = true;
+    }
+
+    // Count the number of intersections after all the treatments
     int counter = 0;
     for( int i = 0; i < 12; i++ )
     {
@@ -230,29 +287,16 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             counter++;
     }
 
-    // Bring back missing hits
-    if( counter < 2 )
-    {
-        float zero = 4e-4;
-        for( int i = 0; i < 12; i++ )
-        {
-            if( abs(uArr[i]) < zero || abs(vArr[i]) < zero || 
-                abs(uArr[i] + vArr[i] - 1.0) < zero )
-            intersect[i] = true;
-        }
-    }
-
-    // Re-count the number of intersections after all the treatments
-    counter = 0;
-    for( int i = 0; i < 12; i++ )
-    {
-        if( intersect[i] )
-            counter++;
-    }
-
-    // Eliminate invalid hits
+    // Eliminate redundant hits
     if( counter > 2 )
     {
+        // If a ray hits both triangles of the same face, remove one of them
+        for( int i = 0; i < 6; i++ )
+        {
+            if( intersect[ i*2 ] && intersect[ i*2+1 ] )
+                intersect[ i*2 ] = false;
+        }
+
         // If a ray hits both front and back faces, then mark any other intersections false
         if( (intersect[0] || intersect[1]) && (intersect[2] || intersect[3]) )
         {
@@ -273,13 +317,6 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             for( int i = 0; i < 8; i++ )
                 intersect[i] = false;
         }
-
-        // If a ray hits both triangles of the same face, remove one of them
-        for( int i = 0; i < 6; i++ )
-        {
-            if( intersect[ i*2 ] && intersect[ i*2+1 ] )
-                intersect[ i*2 ] = false;
-        }
     }
 
     // Re-count the number of intersections after all the treatments
@@ -295,7 +332,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     {
         const float zero = 3e-7;
         int i = 0;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 7-3
                 intersect[11]  = false;
@@ -303,7 +340,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[5]   = false;
         }
         i = 1;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 2-3
                 intersect[6]   = false;
@@ -311,7 +348,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[9]   = false;
         }
         i = 2;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 0-4
                 intersect[10]  = false;
@@ -319,7 +356,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[7]   = false;
         }
         i = 3;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 5-4
                 intersect[4]   = false;
@@ -327,7 +364,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[8]   = false;
         }
         i = 4;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 4-7
                 intersect[10]  = false;
@@ -335,7 +372,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[3]   = false;
         }
         i = 5;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 6-7
                 intersect[0]   = false;
@@ -343,7 +380,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[8]   = false;
         }
         i = 6;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 3-0
                 intersect[11]  = false;
@@ -351,7 +388,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[1]   = false;
         }
         i = 7;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 1-0
                 intersect[2]   = false;
@@ -359,7 +396,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[9]   = false;
         }
         i = 8;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 5-1
                 intersect[3]   = false;
@@ -367,7 +404,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[5]   = false;
         }
         i = 9;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 2-1
                 intersect[7]   = false;
@@ -375,7 +412,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[1]   = false;
         }
         i = 10;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 4-0
                 intersect[2]   = false;
@@ -383,7 +420,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                 intersect[4]   = false;
         }
         i = 11;
-        if( intersect[i] && (i/2 == step1CellIdx.w) )
+        if( intersect[i] && (i/2 == inFace) )
         {
             if( abs( vArr[i] ) < zero )     // hitting edge 3-0
                 intersect[6]   = false;
@@ -407,7 +444,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         int i;
         for( i = 0; i < 12; i++ )   // find the exit face
         {
-            if( intersect[i] && i / 2 != step1CellIdx.w )
+            if( intersect[i] && i / 2 != inFace )
                 break;
         }
         
