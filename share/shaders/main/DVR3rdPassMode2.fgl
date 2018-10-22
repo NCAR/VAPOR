@@ -287,46 +287,6 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             counter++;
     }
 
-    // Eliminate redundant hits
-    if( counter > 2 )
-    {
-        // If a ray hits both triangles of the same face, remove one of them
-        for( int i = 0; i < 6; i++ )
-        {
-            if( intersect[ i*2 ] && intersect[ i*2+1 ] )
-                intersect[ i*2 ] = false;
-        }
-
-        // If a ray hits both front and back faces, then mark any other intersections false
-        if( (intersect[0] || intersect[1]) && (intersect[2] || intersect[3]) )
-        {
-            for( int i = 4; i < 12; i++ )
-                intersect[i] = false;
-        }
-        // If a ray hits both top and bottom faces, then mark any other intersections false
-        if( (intersect[4] || intersect[5]) && (intersect[6] || intersect[7]) )
-        {
-            for( int i = 0; i < 4; i++ )
-                intersect[i] = false;
-            for( int i = 8; i < 12; i++ )
-                intersect[i] = false;
-        }
-        // If a ray hits both left and right faces, then mark any other intersections false
-        if( (intersect[8] || intersect[9]) && (intersect[10] || intersect[11]) )
-        {
-            for( int i = 0; i < 8; i++ )
-                intersect[i] = false;
-        }
-
-        // Re-count the number of intersections after all the treatments
-        counter = 0;
-        for( int i = 0; i < 12; i++ )
-        {
-            if( intersect[i] )
-                counter++;
-        }
-    }
-
     // Another round of hit elimination, where the exit point with the largest t is kept.
     if( counter > 2 )
     {
