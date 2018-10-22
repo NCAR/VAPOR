@@ -143,7 +143,7 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     const float zero = 1e-8;
     if( abs(det) < zero ) // ray and triangle are parallel
     {
-        t = -1.0;   u = -1.0;   v = -1.0;
+        t = 10.0;   u = 10.0;   v = 10.0;
         return false;
     }
 
@@ -334,13 +334,10 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         int   exitI = -1;
         for( int i = 0; i < 12; i++ )           // Find the largest T
         {
-            if( intersect[i] && i/2 != inFace )
+            if( intersect[i] && i/2 != inFace && tArr[i] > maxT )
             {
-                if( tArr[i] > maxT )
-                {
-                    maxT  = tArr[i];
-                    exitI = i;
-                }
+                maxT  = tArr[i];
+                exitI = i;
             }
         }
         
@@ -348,6 +345,33 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         {
             if( i/2 != inFace && i != exitI )
                 intersect[i] = false;
+        }
+
+        // Re-count the number of intersections after all the treatments
+        counter = 0;
+        for( int i = 0; i < 12; i++ )
+        {
+            if( intersect[i] )
+                counter++;
+        }
+    }
+
+    // The last round of hit elimination, where the entry point with the smallest t is kept
+    if( counter > 2 )
+    {
+        float minT   = 10.0;
+        int   entryI = -1;
+        for( int i = 2*inFace; i <= 2*inFace+1; i++ )
+        {
+            if( intersect[i] && tArr[i] < minT )
+            {
+                minT   = tArr[i];
+                entryI = i;
+            }
+        }
+        for( int i = 2*inFace; i <= 2*inFace+1; i++ )
+        {
+            intersect[i] = (i == entryI);
         }
 
         // Re-count the number of intersections after all the treatments
@@ -437,14 +461,13 @@ void main(void)
     int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
                                   step2CellIdx, t, u, v );
 
-
     if( CellOutsideBound( step2CellIdx.xyz ) )
     {
         step2CellIdx = step1CellIdx;
     }
     else
     {
-        int maxCells     = 2 * int(length( volumeDimsf ));
+        int maxCells = 2 * int(length( volumeDimsf ));
         int counter;
         for( counter = 0; counter < maxCells; counter++ )
         {
@@ -454,6 +477,24 @@ void main(void)
             color.rgb          += (1.0 - color.a) * backColor.a * backColor.rgb;
             color.a            += (1.0 - color.a) * backColor.a;
 
+            // Start error detection
+            /* if( intersect == 0 )
+            {
+                color = vec4( 1.0, 0.2, 0.2, 1.0 );
+                break;
+            }
+            else if( intersect == 1 )
+            {
+                color = vec4( 0.2, 1.0, 0.2, 1.0 );
+                break;
+            }
+            else if( intersect > 2 )
+            {
+                color = vec4( 1.0 );
+                break;
+            }*/
+            // Finish error detection
+
             step1CellIdx = step2CellIdx;
             intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
                                       step2CellIdx, t, u, v );
@@ -461,6 +502,10 @@ void main(void)
             if( CellOutsideBound( step2CellIdx.xyz ) )
             {
                 step2CellIdx = step1CellIdx;
+                // debug
+                //if( counter < 1 )
+                //    color = vec4( 1.0, 0.2, 0.2, 1.0 );
+                // finish debug
                 break;
             }
             
