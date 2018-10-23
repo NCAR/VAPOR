@@ -129,10 +129,6 @@ void WireFrameRenderer::_drawCell(
     const float *colors,
     int n,
     bool layered) {
-
-    // glVertexPointer(3, GL_FLOAT, 0, verts);
-    // glColorPointer(4, GL_FLOAT, 0, colors);
-
     int baseIndex = vertices.size();
     for (int i = 0; i < n; i++) {
         vertices.push_back({verts[3 * i], verts[3 * i + 1], verts[3 * i + 2],
@@ -309,7 +305,7 @@ int WireFrameRenderer::_paintGL(bool fast) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     glDrawElements(GL_LINES, _nIndices, GL_UNSIGNED_INT, 0);
 
-    DisableClippingPlanes(); // TODO GL
+    DisableClippingPlanes();
     glBindVertexArray(0);
 
     return rc;
