@@ -181,8 +181,6 @@ void VizWin::_getNearFarDist(const double posVec[3], const double dirVec[3], dou
     return;
 }
 
-// #include "vapor/DebugConsole.h"
-
 void VizWin::_setUpProjMatrix()
 {
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
@@ -212,7 +210,7 @@ void VizWin::_setUpProjMatrix()
 
     GLfloat w = (float)width / (float)height;
 
-    if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName()) {
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
         float s = _trackBall->GetOrthoSize();
         mm->Ortho(-s * w, s * w, -s, s, nearDist, farDist);
     } else {
@@ -227,6 +225,8 @@ void VizWin::_setUpProjMatrix()
     _controlExec->SetSaveStateEnabled(false);
 
     vParams->SetProjectionMatrix(pMatrix);
+
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) vParams->SetOrthoProjectionSize(_trackBall->GetOrthoSize());
 
     _controlExec->SetSaveStateEnabled(enabled);
 
@@ -332,7 +332,7 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
     // _trackBall->TrackballSetMatrix();	// needed?
 
     int trackballButtonNumber = _buttonNum;
-    if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName() && _buttonNum == 1) trackballButtonNumber = 2;
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic && _buttonNum == 1) trackballButtonNumber = 2;
 
     // Let trackball handle mouse events for navigation
     //
@@ -564,7 +564,7 @@ void VizWin::Render(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
-    } else if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName()) {
+    } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
         _glManager->PixelCoordinateSystemPush();
         _glManager->matrixManager->Translate(10, 10, 0);
         _glManager->fontManager->GetFont("arimo", 22)->DrawText("Geo Referenced Mode");

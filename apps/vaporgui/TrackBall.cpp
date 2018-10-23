@@ -113,8 +113,6 @@ Trackball::Trackball(float scale[3])
     TrackballReset();
 }
 
-// #include <vapor/DebugConsole.h>
-
 void Trackball::TrackballSetMatrix()
 // Note perspective must be set previously in setFromFrame.
 {

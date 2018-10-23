@@ -1,8 +1,28 @@
-#include <vapor/MyPython.h>
+#include "vapor/PNGWriter.h"
 
-namespace VAPoR {
-RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char *buffer)
+#define USE_PYTHON_PNG 1
+
+#if USE_PYTHON_PNG
+    #include "vapor/MyPython.h"
+#else
+    #include <png.h>
+#endif
+
+using namespace VAPoR;
+using namespace Wasp;
+
+REGISTER_IMAGEWRITER(PNGWriter);
+
+std::vector<std::string> PNGWriter::GetFileExtensions() { return {"png"}; }
+
+PNGWriter::PNGWriter(const string &path) : ImageWriter(path) {}
+
+int PNGWriter::Write(const unsigned char *buffer, const unsigned int width, const unsigned int height)
 {
+#if USE_PYTHON_PNG
+
+    assert(format == Format::RGB);
+
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
 
     int rc = Wasp::MyPython::Instance()->Initialize();
@@ -24,7 +44,7 @@ RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char 
         pArgs = PyTuple_New(4);
 
         // The 1st argument: output filename
-        pValue = PyString_FromString(file);
+        pValue = PyString_FromString(path.c_str());
         PyTuple_SetItem(pArgs, 0, pValue);
 
         // The 2nd argument: width
@@ -65,5 +85,35 @@ RENDER_API int Write_PNG(const char *file, int width, int height, unsigned char 
     Py_XDECREF(pModule);
 
     return 0;
+#else
+    int         code = 0;
+    FILE *      fp = NULL;
+    png_structp png_ptr = NULL;
+    png_infop   info_ptr = NULL;
+    png_bytep   row = NULL;
+
+    fp = fopen(file, "w");
+    if (!fp) return -1;
+
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (png_ptr == NULL) assert(0);
+
+    info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == NULL) assert(0);
+
+    png_init_io(png_ptr, fp);
+
+    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+    png_write_info(png_ptr, info_ptr);
+
+    #error Functionality Not Finished
+
+    png_write_end(png_ptr, NULL);
+    if (fp) fclose(fp);
+    if (info_ptr) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+    if (png_ptr) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+
+    return 0;
+#endif
 }
-}    // namespace VAPoR
