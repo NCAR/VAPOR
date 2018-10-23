@@ -84,7 +84,7 @@ void SliceRenderer::_initTexture() {
         0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *)_textureData);
 }
 
-void SliceRenderer::_saveCacheParams() {
+int SliceRenderer::_saveCacheParams() {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
 
@@ -116,6 +116,8 @@ void SliceRenderer::_saveCacheParams() {
     int rc = _saveTextureData();
     if (rc < 0)
         SetErrMsg("Unable to acquire data for Slice texture");
+
+    return rc;
 }
 
 void SliceRenderer::_getSampleCoordinates(
@@ -156,7 +158,8 @@ int SliceRenderer::_saveTextureData() {
         &grid);
 
     if (rc < 0) {
-        return (-1);
+        SetErrMsg("Unable to acquire Grid for Slice texture");
+        return (rc);
     }
     assert(grid);
 
@@ -212,7 +215,7 @@ int SliceRenderer::_saveTextureData() {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
     p->SetCachedValues(cachedValuesForParams);
-    return 0;
+    return rc;
 }
 
 void SliceRenderer::_getTextureCoordinates(
@@ -291,8 +294,10 @@ int SliceRenderer::_initializeGL() {
 }
 
 int SliceRenderer::_paintGL(bool fast) {
+    int rc = 0;
+
     if (_isCacheDirty()) {
-        _saveCacheParams();
+        rc = _saveCacheParams();
     }
 
     _initTexture();
@@ -315,7 +320,7 @@ int SliceRenderer::_paintGL(bool fast) {
 
     lgl->DisableTexture();
 
-    return 0;
+    return rc;
 }
 
 void SliceRenderer::_renderXY(
