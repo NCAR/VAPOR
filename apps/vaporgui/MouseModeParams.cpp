@@ -75,7 +75,6 @@ void MouseModeParams::_setUpDefault()
 {
     _modes.push_back({GetNavigateModeName(), wheel});
     _modes.push_back({GetRegionModeName(), cube});
-    _modes.push_back({GetGeoRefModeName(), sphere});
 
     // RegisterMouseMode("Barb rake", 1, arrowrake );
     // RegisterMouseMode("Contours", 3, isoline);
