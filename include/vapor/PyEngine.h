@@ -117,6 +117,8 @@ public:
     //
     string GetFunctionScript(string name) const;
 
+    bool GetFunctionScript(string name, string &script, std::vector<string> &inputVarNames, std::vector<string> &outputVarNames, std::vector<string> &outputMeshNames) const;
+
     //! Execute a NumPy script
     //!
     //! This static method executes the NumPy script \p script and copies the

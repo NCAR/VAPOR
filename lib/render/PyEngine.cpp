@@ -190,6 +190,27 @@ string PyEngine::GetFunctionScript(string name) const
     return (func._script);
 }
 
+bool PyEngine::GetFunctionScript(string name, string &script, std::vector<string> &inputVarNames, std::vector<string> &outputVarNames, std::vector<string> &outputMeshNames) const
+{
+    script.clear();
+    inputVarNames.clear();
+    outputVarNames.clear();
+    outputMeshNames.clear();
+
+    map<string, func_c>::const_iterator itr = _functions.find(name);
+
+    if (itr == _functions.cend()) return (false);
+
+    const func_c &func = itr->second;
+
+    script = func._script;
+    inputVarNames = func._inputVarNames;
+    outputVarNames = func._outputVarNames;
+    outputMeshNames = func._outputMeshNames;
+
+    return (true);
+}
+
 PyEngine::~PyEngine()
 {
     map<string, func_c>::iterator itr;
