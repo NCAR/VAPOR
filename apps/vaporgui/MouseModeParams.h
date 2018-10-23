@@ -110,10 +110,6 @@ public:
  static string GetRegionModeName() {
 	return("Region");
  }
-    
- static string GetGeoRefModeName() {
-    return("Geo Referenced");
- }
 
 private:
 
