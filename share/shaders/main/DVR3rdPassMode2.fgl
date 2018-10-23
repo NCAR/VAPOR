@@ -143,7 +143,7 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     const float zero = 1e-8;
     if( abs(det) < zero ) // ray and triangle are parallel
     {
-        t = 10.0;   u = 10.0;   v = 10.0;
+        t = 100.0;   u = 100.0;   v = 100.0;
         return false;
     }
 
@@ -158,6 +158,32 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
         return false;
     else
         return true;
+}
+
+float HowMuchOutside( const in float u, const in float v )
+{
+    float outAmt    = 0.0;
+    bool  penalized = false;
+    if( u < 0.0 )
+        outAmt   += -u;
+    else if( u > 1.0 )
+    {
+        outAmt   += u - 1.0;
+        penalized = true;
+    }
+    
+    if( v < 0.0 )
+        outAmt   += -v;
+    else if( v > 1.0 )
+    {
+        outAmt   += v - 1.0;
+        penalized = true;
+    }
+
+    if( !penalized && u + v > 1.0 )
+        outAmt  += u + v - 1.0;
+
+    return outAmt;
 }
 
 
@@ -226,6 +252,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     // Bring back the entry hit, if missing
     if( !intersect[ 2*inFace ] && !intersect[ 2*inFace+1 ] )
     {
+/*
         int   i         = 2 * inFace;           // test the 1st triangle
         int   triangle  = i;
         float minDiff   = abs( uArr[i] - 1.0 );
@@ -242,8 +269,14 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             minDiff     = diff;
             triangle    = i;
         }
+*/
+        float t1OutAmt = HowMuchOutside( uArr[ 2*inFace   ], vArr[ 2*inFace ] );
+        float t2OutAmt = HowMuchOutside( uArr[ 2*inFace+1 ], vArr[ 2*inFace+1 ] );
         
-        intersect[ triangle ] = true;
+        if( t1OutAmt < t2OutAmt )
+            intersect[ 2*inFace ] = true;
+        else
+            intersect[ 2*inFace+1 ] = true;
     }
 
     // Bring back the exit hit, if missing
@@ -287,7 +320,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             counter++;
     }
 
-    // Another round of hit elimination, where the exit point with the largest t is kept.
+    // Exit hit elimination, where the exit point with the largest t is kept.
     if( counter > 2 )
     {
         float maxT  = -1.0;
@@ -316,7 +349,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         }
     }
 
-    // The last round of hit elimination, where the entry point with the smallest t is kept
+    // Entry hit elimination, where the entry point with the smallest t is kept
     if( counter > 2 )
     {
         float minT   = 10.0;
