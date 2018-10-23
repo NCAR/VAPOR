@@ -104,10 +104,6 @@ class MouseModeParams : public VAPoR::ParamsBase {
         return ("Region");
     }
 
-    static string GetGeoRefModeName() {
-        return ("Geo Referenced");
-    }
-
   private:
     static const string _currentMouseModeTag;
 
