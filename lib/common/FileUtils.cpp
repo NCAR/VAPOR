@@ -1,4 +1,5 @@
 #include "vapor/FileUtils.h"
+#include <string.h>
 
 #ifdef WIN32
 #else
