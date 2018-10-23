@@ -1619,11 +1619,6 @@ void MainForm::modeChange(int newmode){
 		_navigationAction->setChecked(true);
 		return;
 	}
-    
-    if (modeName == MouseModeParams::GetGeoRefModeName()) {
-        _tabMgr->ViewAll();
-        _tabMgr->SetHomeViewpoint();
-    }
 	
 	_navigationAction->setChecked(false);
 	
