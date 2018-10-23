@@ -207,7 +207,7 @@ private:
 	//! Will turn off the captureEnabled switch.
 	//! \param[in] filename
 	//! \return zero if successful
-	int captureImage(string filename);
+    int captureImage(const std::string &path);
 
 #ifdef	VAPOR3_0_0_ALPHA
 	//! Render the current active manip, if we are not in navigation mode
