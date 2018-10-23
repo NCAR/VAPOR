@@ -198,10 +198,7 @@ int Visualizer::paintEvent(bool fast)
         return -1;
     }
 
-    if (paintSetup(timeStep)) {
-        assert(0);    // TODO Delete
-        return -1;
-    }
+    if (paintSetup(timeStep)) return -1;
     // make sure to capture whenever the time step or frame index changes (once we implement capture!)
 
     if (timeStep != _previousTimeStep) { _previousTimeStep = timeStep; }
@@ -514,10 +511,7 @@ Renderer *Visualizer::getRenderer(string type, string instance) const
 
 int Visualizer::placeLights()
 {
-    if (printOpenGLError()) {
-        assert(0);    // TODO Delete
-        return -1;
-    }
+    if (printOpenGLError()) return -1;
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t                 nLights = vpParams->getNumLights();
     if (nLights > 3) nLights = 3;
@@ -555,10 +549,7 @@ int Visualizer::placeLights()
         // glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
         GL_LEGACY(glEnable(GL_LIGHT0));
-        if (printOpenGLError()) {
-            assert(0);    // TODO Delete
-            return -1;
-        }
+        if (printOpenGLError()) { return -1; }
         if (nLights > 1) {
             if (printOpenGLError()) return -1;
             GL_LEGACY(glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]));
@@ -571,27 +562,18 @@ int Visualizer::placeLights()
 
         } else {
             GL_LEGACY(glDisable(GL_LIGHT1));
-            if (printOpenGLError()) {
-                assert(0);    // TODO Delete
-                return -1;
-            }
+            if (printOpenGLError()) return -1;
         }
         if (nLights > 2) {
             GL_LEGACY(glLightfv(GL_LIGHT2, GL_POSITION, lightDirs[2]); specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(2);
                       diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(2); glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight); glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
                       glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor); glEnable(GL_LIGHT2););
-            if (printOpenGLError()) {
-                assert(0);    // TODO Delete
-                return -1;
-            }
+            if (printOpenGLError()) return -1;
         } else {
             GL_LEGACY(glDisable(GL_LIGHT2));
         }
     }
-    if (printOpenGLError()) {
-        assert(0);    // TODO Delete
-        return -1;
-    }
+    if (printOpenGLError()) return -1;
     return 0;
 }
 

@@ -61,7 +61,6 @@ VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, st
     setWindowIcon(QPixmap(vapor_icon___));
     _controlExec = ce;
 
-    // TODO GL
     _glManager = new GLManager;
     vector<string> paths;
     paths.push_back("shaders");
@@ -90,11 +89,6 @@ VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, st
  *  Destroys the object and frees any allocated resources
  */
 VizWin::~VizWin() { delete _glManager; }
-
-// void VizWin::makeCurrent()
-// {
-// 	QGLWidget::makeCurrent();
-// }
 
 void VizWin::closeEvent(QCloseEvent *e)
 {
