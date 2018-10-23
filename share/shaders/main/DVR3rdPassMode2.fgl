@@ -273,20 +273,17 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     }
     if( !hasExitHit )
     {
-        int   triangle = -1;
-        float minDiff  = 1.0;  
+        int   triangle   = -1;
+        float minOutAmt  = 1000.0;
         for(  int i = 0; i < 12; i++ )
         {
-            float diff;
             if( i / 2 != inFace )
             {
-                diff = abs( uArr[i] - 1.0 );
-                diff = min( diff, abs( vArr[i] - 1.0 ) );
-                diff = min( diff, abs( uArr[i] + vArr[i] - 1.0 ) );
-                if( diff < minDiff )
+                float outAmt = HowMuchOutside( uArr[i], vArr[i] );
+                if( outAmt < minOutAmt )
                 {
-                    minDiff  = diff;
-                    triangle = i;
+                    minOutAmt = outAmt;
+                    triangle  = i;
                 }
             }
         }
@@ -307,7 +304,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     {
         float maxT  = -1.0;
         int   exitI = -1;
-        for( int i = 0; i < 12; i++ )           // Find the largest T
+        for( int i = 0; i < 12; i++ )       // Find the largest T
         {
             if( intersect[i] && i/2 != inFace && tArr[i] > maxT )
             {
@@ -316,7 +313,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             }
         }
         
-        for( int i = 0; i < 12; i++ )           // Mark every other intersection as false
+        for( int i = 0; i < 12; i++ )       // Mark every other intersection as false
         {
             if( i/2 != inFace && i != exitI )
                 intersect[i] = false;
@@ -334,7 +331,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     // Entry hit elimination, where the entry point with the smallest t is kept
     if( counter > 2 )
     {
-        float minT   = 10.0;
+        float minT   = 100.0;
         int   entryI = -1;
         for( int i = 2*inFace; i <= 2*inFace+1; i++ )
         {
