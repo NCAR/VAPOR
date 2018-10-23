@@ -291,16 +291,22 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         intersect[ triangle ] = true;
     }
 
-    // Count the number of intersections after all the treatments
-    int counter = 0;
+    // Count the number of intersections 
+    int entryCounter = 0;
+    int exitCounter  = 0;
     for( int i = 0; i < 12; i++ )
     {
         if( intersect[i] )
-            counter++;
+        {
+            if( i / 2 == inFace )
+                entryCounter++;
+            else
+                exitCounter++;
+        }
     }
 
     // Exit hit elimination, where the exit point with the largest t is kept.
-    if( counter > 2 )
+    if( exitCounter > 1 )
     {
         float maxT  = -1.0;
         int   exitI = -1;
@@ -318,18 +324,10 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             if( i/2 != inFace && i != exitI )
                 intersect[i] = false;
         }
-
-        // Re-count the number of intersections after all the treatments
-        counter = 0;
-        for( int i = 0; i < 12; i++ )
-        {
-            if( intersect[i] )
-                counter++;
-        }
     }
 
     // Entry hit elimination, where the entry point with the smallest t is kept
-    if( counter > 2 )
+    if( entryCounter > 1 )
     {
         float minT   = 100.0;
         int   entryI = -1;
@@ -344,14 +342,6 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         for( int i = 2*inFace; i <= 2*inFace+1; i++ )
         {
             intersect[i] = (i == entryI);
-        }
-
-        // Re-count the number of intersections after all the treatments
-        counter = 0;
-        for( int i = 0; i < 12; i++ )
-        {
-            if( intersect[i] )
-                counter++;
         }
     }
 
@@ -391,7 +381,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
     u = uArr[exitI];
     v = vArr[exitI];
 
-    return counter;
+    return 0;
 }
 
 bool CellOutsideBound( const in ivec3 cellIdx )
