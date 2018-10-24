@@ -34,6 +34,10 @@ public:
 
  DerivedVar *GetVar(string name) const;
 
+ bool HasVar(string name) const {
+	return(GetVar(name) != NULL);
+ }
+
  void AddMesh(const Mesh &m);
 
 protected:

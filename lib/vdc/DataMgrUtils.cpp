@@ -117,10 +117,11 @@ int DataMgrUtils::ConvertLonLatToPCS(
 	return 0;
 }
 
+template <typename T>
 int DataMgrUtils::GetGrids(
 	DataMgr *dataMgr,
 	size_t ts, const vector<string>& varnames, 
-	const vector <double> &minExtsReq, const vector <double> &maxExtsReq,
+	const vector <T> &minExtsReq, const vector <T> &maxExtsReq,
 	bool useLowerAccuracy,
 	int* refLevel, int* lod, vector <Grid*> &grids
 ) {
@@ -198,6 +199,22 @@ int DataMgrUtils::GetGrids(
 	return 0;	
 }
 
+template int DataMgrUtils::GetGrids<size_t>(
+	DataMgr *dataMgr,
+	size_t ts, const vector<string>& varnames, 
+	const vector <size_t> &minExtsReq, const vector <size_t> &maxExtsReq,
+	bool useLowerAccuracy,
+	int* refLevel, int* lod, vector <Grid*> &grids
+);
+
+template int DataMgrUtils::GetGrids<double>(
+	DataMgr *dataMgr,
+	size_t ts, const vector<string>& varnames, 
+	const vector <double> &minExtsReq, const vector <double> &maxExtsReq,
+	bool useLowerAccuracy,
+	int* refLevel, int* lod, vector <Grid*> &grids
+);
+
 int DataMgrUtils::GetGrids(
 	DataMgr *dataMgr,
 	size_t ts, string varname, 
@@ -268,6 +285,14 @@ int DataMgrUtils::GetGrids(
 
 	*gridptr = grids[0];
 	return(0);
+}
+
+void DataMgrUtils::UnlockGrids(
+	DataMgr *dataMgr, const std::vector <Grid *> &grids
+) {
+	for (int i=0; i<grids.size(); i++) {
+		dataMgr->UnlockGrid(grids[i]);
+	}
 }
 
 bool DataMgrUtils::GetAxes(
