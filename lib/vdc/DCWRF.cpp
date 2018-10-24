@@ -366,7 +366,8 @@ int DCWRF::getDimLensAtLevel(
 
 	// Never blocked
 	//
-	bs_at_level = dims_at_level;
+	bs_at_level = vector <size_t> (dims_at_level.size(), 1);
+
 
 	return(0);
 }

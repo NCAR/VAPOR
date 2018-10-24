@@ -36,10 +36,6 @@ public:
 
  virtual bool GetBaseVarInfo(DC::BaseVar &var) const = 0;
 
- virtual size_t GetNumRefLevels() const {
-	return(1);
- }
-
  virtual bool GetAtt(
 	string attname, std::vector <double> &values
  ) const {
@@ -75,6 +71,10 @@ public:
 	int level, std::vector <size_t> &dims_at_level,
 	std::vector <size_t> &bs_at_level
  ) const = 0;
+
+ virtual size_t GetNumRefLevels() const {
+	return(1);
+ }
 
  virtual int OpenVariableRead(
 	size_t ts, int level=0, int lod=0
@@ -226,15 +226,15 @@ public:
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- );
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
 
  virtual int ReadRegion(
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- ) {
-	return(ReadRegionBlock(fd, min, max, region));
- }
+ );
 
  virtual bool VariableExists(
 	size_t ts,
@@ -253,18 +253,17 @@ private:
  bool _uGridFlag;
  bool _lonFlag;
  std::vector <size_t> _dimLens;
- std::vector <size_t> _bs;
  Proj4API	_proj4API;
  DC::CoordVar	_coordVarInfo;
 
  int _setupVar();
 
- int _readRegionBlockHelper1D(
+ int _readRegionHelper1D(
 	DC::FileTable::FileObject *f,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
  );
- int _readRegionBlockHelper2D(
+ int _readRegionHelper2D(
 	DC::FileTable::FileObject *f,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
@@ -315,15 +314,15 @@ public:
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- );
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
 
  virtual int ReadRegion(
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- ) {
-	return(ReadRegionBlock(fd, min, max, region));
- }
+ );
 
  virtual bool VariableExists(
 	size_t ts,
@@ -381,15 +380,15 @@ public:
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- );
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
 
  virtual int ReadRegion(
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- ) {
-	return(ReadRegionBlock(fd, min, max, region));
- }
+ );
 
  virtual bool VariableExists(
 	size_t ts,
@@ -454,15 +453,15 @@ public:
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- );
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
 
  virtual int ReadRegion(
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- ) {
-	return(ReadRegionBlock(fd, min, max, region));
- }
+ );
 
  virtual bool VariableExists(
 	size_t ts,
@@ -640,7 +639,9 @@ public:
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	float *region
- );
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
 
  virtual int ReadRegion(
 	int fd,
