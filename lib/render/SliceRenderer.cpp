@@ -133,6 +133,8 @@ int SliceRenderer::_saveTextureData()
     int   rc =
         DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
 
+    grid->SetInterpolationOrder(1);
+
     if (rc < 0) {
         SetErrMsg("Unable to acquire Grid for Slice texture");
         return (rc);
@@ -277,10 +279,43 @@ int SliceRenderer::_paintGL(bool fast)
         _renderXZ(min, max);
     else if (orientation == YZ)
         _renderYZ(min, max);
+    //_render(orientation, min, max);
 
     lgl->DisableTexture();
 
     return rc;
+}
+
+void SliceRenderer::_render(int orientation, std::vector<double> min, std::vector<double> max) const
+{
+    int plane;
+    if (orientation == Z)
+        plane = XY;
+    else if (orientation == Y)
+        plane = XZ;
+    else
+        plane = YZ;
+
+    cout << "orientation/plane " << orientation << " " << plane << endl;
+    min[plane] = max[plane];
+
+    LegacyGL *lgl = _glManager->legacy;
+
+    lgl->Begin(GL_TRIANGLES);
+    lgl->TexCoord2f(0.f, 0.f);
+    lgl->Vertex3f(min[X], min[Y], min[Z]);
+    lgl->TexCoord2f(1.f, 0.f);
+    lgl->Vertex3f(max[X], min[Y], min[Z]);
+    lgl->TexCoord2f(1.f, 1.f);
+    lgl->Vertex3f(max[X], max[Y], max[Z]);
+
+    lgl->TexCoord2f(0.f, 0.f);
+    lgl->Vertex3f(min[X], min[Y], min[Z]);
+    lgl->TexCoord2f(1.f, 1.f);
+    lgl->Vertex3f(max[X], max[Y], max[Z]);
+    lgl->TexCoord2f(0.f, 1.f);
+    lgl->Vertex3f(min[X], max[Y], max[Z]);
+    lgl->End();
 }
 
 void SliceRenderer::_renderXY(std::vector<double> min, std::vector<double> max) const
