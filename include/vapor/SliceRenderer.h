@@ -52,7 +52,7 @@ namespace VAPoR {
 
         int  _buildCache();
         bool _isCacheDirty() const;
-        void _saveCacheParams();
+        int  _saveCacheParams();
         void _initTexture();
         int  _saveTextureData();
         void _getSampleCoordinates(
@@ -64,6 +64,11 @@ namespace VAPoR {
             std::vector<double> &textureMin,
             std::vector<double> &textureMax
         );
+        void _render(
+            int orientation, 
+            std::vector<double> min, 
+            std::vector<double> max
+        ) const;
         void _renderXY(std::vector<double> min, std::vector<double> max) const;
         void _renderXZ(std::vector<double> min, std::vector<double> max) const;
         void _renderYZ(std::vector<double> min, std::vector<double> max) const;
