@@ -12,6 +12,8 @@
 using namespace std;
 namespace VAPoR {
 
+class CalcEngineMgr;
+
 //! \class ControlExec
 //! \ingroup Public
 //! \brief Provides API for VAPOR visualizer User Interfaces (UIs)
@@ -486,9 +488,19 @@ public:
     //
     static string MakeStringConformant(string s);
 
+    int AddFunction(string scriptType, string datasetName, string name, string script, const vector<string> &inputVarNames, const vector<string> &outputVarNames,
+                    const vector<string> &outputVarMeshes);
+
+    void RemoveFunction(string scriptType, string dataSetName, string scriptName);
+
+    bool GetFunction(string scriptType, string datasetName, string name, string &script, vector<string> &inputVarNames, vector<string> &outputVarNames, vector<string> &outputVarMeshes) const;
+
+    std::vector<string> GetFunctionNames(string scriptType, string datasetName) const;
+
 private:
     ParamsMgr *                    _paramsMgr;
     DataStatus *                   _dataStatus;
+    CalcEngineMgr *                _calcEngineMgr;
     std::map<string, Visualizer *> _visualizers;
 
     //! obtain an existing visualizer

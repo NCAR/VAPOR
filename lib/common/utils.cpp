@@ -84,6 +84,42 @@ vector<size_t> Wasp::VectorizeCoords(size_t offset, const vector<size_t> &dims)
     return (Wasp::VectorizeCoords(offset, min, max));
 }
 
+vector<size_t> Wasp::IncrementCoords(const vector<size_t> &min, const vector<size_t> &max, vector<size_t> counter)
+{
+    assert(min.size() == max.size());
+    assert(min.size() == counter.size());
+
+    for (int i = 0; i < counter.size(); i++) {
+        if (counter[i] < (max[i])) {
+            counter[i] += 1;
+            break;
+        }
+        counter[i] = min[i];
+    }
+    return (counter);
+}
+
+vector<size_t> Wasp::Dims(const vector<size_t> &min, const vector<size_t> &max)
+{
+    assert(min.size() == max.size());
+    vector<size_t> dims;
+
+    for (int i = 0; i < min.size(); i++) {
+        assert(min[i] <= max[i]);
+        dims.push_back(max[i] - min[i] + 1);
+    }
+    return (dims);
+}
+
+size_t Wasp::VProduct(const vector<size_t> &a)
+{
+    size_t ntotal = 1;
+
+    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
+
+    return (ntotal);
+}
+
 #define BLOCKSIZE 256
 
 void Wasp::Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, int m2, int s2)
