@@ -249,48 +249,6 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                                              tArr[i],  uArr[i],  vArr[i]     );
     }
 
-    /* Bring back the entry hit, if missing
-    if( !intersect[ 2*inFace ] && !intersect[ 2*inFace+1 ] )
-    {
-        float t1OutAmt = HowMuchOutside( uArr[ 2*inFace   ], vArr[ 2*inFace ] );
-        float t2OutAmt = HowMuchOutside( uArr[ 2*inFace+1 ], vArr[ 2*inFace+1 ] );
-        
-        if( t1OutAmt < t2OutAmt )
-            intersect[ 2*inFace ] = true;
-        else
-            intersect[ 2*inFace+1 ] = true;
-    }*/
-
-    /* Bring back the exit hit, if missing
-    bool hasExitHit = false;
-    for( int i = 0; i < 12; i++ )
-    {
-        if( intersect[i] && i / 2 != inFace )
-        {
-            hasExitHit = true;
-            break;
-        }
-    }
-    if( !hasExitHit )
-    {
-        int   triangle   = -1;
-        float minOutAmt  = 1000.0;
-        for(  int i = 0; i < 12; i++ )
-        {
-            if( i / 2 != inFace )
-            {
-                float outAmt = HowMuchOutside( uArr[i], vArr[i] );
-                if( outAmt < minOutAmt )
-                {
-                    minOutAmt = outAmt;
-                    triangle  = i;
-                }
-            }
-        }
-    
-        intersect[ triangle ] = true;
-    }*/
-
     // Count the number of faces with intersections 
     int entryCounter = 0;
     int exitCounter  = 0;
@@ -305,45 +263,6 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         }
     }
 
-    /* Exit hit elimination, where the exit point with the largest t is kept.
-    if( exitCounter > 1 )
-    {
-        float maxT  = -10.0;
-        int   exitI = -1;
-        for( int i = 0; i < 12; i++ )       // Find the largest T
-        {
-            if( intersect[i] && i/2 != inFace && tArr[i] > maxT )
-            {
-                maxT  = tArr[i];
-                exitI = i;
-            }
-        }
-        
-        for( int i = 0; i < 12; i++ )       // Mark every other intersection as false
-        {
-            if( i/2 != inFace && i != exitI )
-                intersect[i] = false;
-        }
-    }*/
-
-    /* Entry hit elimination, where the entry point with the smallest t is kept
-    if( entryCounter > 1 )
-    {
-        float minT   = 100.0;
-        int   entryI = -1;
-        for( int i = 2*inFace; i <= 2*inFace+1; i++ )
-        {
-            if( intersect[i] && tArr[i] < minT )
-            {
-                minT   = tArr[i];
-                entryI = i;
-            }
-        }
-        for( int i = 2*inFace; i <= 2*inFace+1; i++ )
-        {
-            intersect[i] = (i == entryI);
-        }
-    }*/
 
     //if( exitCounter == 1 )
     {
