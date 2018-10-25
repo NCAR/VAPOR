@@ -129,6 +129,17 @@ int PyEngine::AddFunction(string name, string script, const vector<string> &inpu
     //
     if (_checkOutMeshes(outputVarMeshes) < 0) return (-1);
 
+    // Test the script syntatical correctness. Only way to do this
+    // with crappy Python API is to compile the string to an
+    // object :-(
+    //
+    PyObject *retObj = Py_CompileString(script.c_str(), "", Py_file_input);
+    if (!retObj) {
+        SetErrMsg("Py_CompileString() : %s", MyPython::Instance()->PyErr().c_str());
+        return -1;
+    }
+    Py_DECREF(retObj);
+
     const string timeCoordVarName = _getTimeCoordVarName(inputVarNames);
 
     vector<DerivedPythonVar *> dvars;
