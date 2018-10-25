@@ -249,17 +249,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                                              tArr[i],  uArr[i],  vArr[i]     );
     }
 
-    // How many exit hits
-    int origExitHit = 0;
-    for( int i = 0; i < 6; i++ )
-    {
-        if( (intersect[2*i] || intersect[2*i+1]) && i != inFace )
-        {
-            origExitHit++ ;
-        }
-    }
-
-    // Bring back the entry hit, if missing
+    /* Bring back the entry hit, if missing
     if( !intersect[ 2*inFace ] && !intersect[ 2*inFace+1 ] )
     {
         float t1OutAmt = HowMuchOutside( uArr[ 2*inFace   ], vArr[ 2*inFace ] );
@@ -269,9 +259,9 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             intersect[ 2*inFace ] = true;
         else
             intersect[ 2*inFace+1 ] = true;
-    }
+    }*/
 
-    // Bring back the exit hit, if missing
+    /* Bring back the exit hit, if missing
     bool hasExitHit = false;
     for( int i = 0; i < 12; i++ )
     {
@@ -299,7 +289,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         }
     
         intersect[ triangle ] = true;
-    }
+    }*/
 
     // Count the number of faces with intersections 
     int entryCounter = 0;
@@ -477,13 +467,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         v = vArr[ exitI[0] ];
     }*/
 
-    int counter = 0;
-    for( int i = 0; i < 12; i++ )
-        if( intersect[i] )
-            counter++;
-    //return counter;
-
-    return origExitHit;
+    return 0;
 }
 
 bool CellOutsideBound( const in ivec3 cellIdx )
