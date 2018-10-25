@@ -149,12 +149,12 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
 
     float invDet = 1.0 / det;
     vec3  tvec   = orig - v0;
+    vec3  qvec   = cross( tvec, v0v1 );
     u            = dot( tvec, pvec ) * invDet;  // if u == 0, ray hits edge v0v2
-    vec3 qvec    = cross( tvec, v0v1 );
-    v            = dot( dir, qvec ) * invDet;   // if v == 0, ray hits edge v0v1
+    v            = dot( dir,  qvec ) * invDet;  // if v == 0, ray hits edge v0v1
     t            = dot( v0v2, qvec ) * invDet;
 
-    if( u < 0.0 || v < 0.0 || u + v > 1.0 )
+    if( u <= 0.0 || v <= 0.0 || u + v >= 1.0 )
         return false;
     else
         return true;
@@ -249,6 +249,16 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
                                              tArr[i],  uArr[i],  vArr[i]     );
     }
 
+    // How many exit hits
+    int origExitHit = 0;
+    for( int i = 0; i < 6; i++ )
+    {
+        if( (intersect[2*i] || intersect[2*i+1]) && i != inFace )
+        {
+            origExitHit++ ;
+        }
+    }
+
     // Bring back the entry hit, if missing
     if( !intersect[ 2*inFace ] && !intersect[ 2*inFace+1 ] )
     {
@@ -291,24 +301,24 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         intersect[ triangle ] = true;
     }
 
-    // Count the number of intersections 
+    // Count the number of faces with intersections 
     int entryCounter = 0;
     int exitCounter  = 0;
-    for( int i = 0; i < 12; i++ )
+    for( int i = 0; i < 6; i++ )
     {
-        if( intersect[i] )
+        if( intersect[2*i] || intersect[2*i+1] )
         {
-            if( i / 2 == inFace )
+            if( i == inFace )
                 entryCounter++;
             else
                 exitCounter++;
         }
     }
 
-    // Exit hit elimination, where the exit point with the largest t is kept.
+    /* Exit hit elimination, where the exit point with the largest t is kept.
     if( exitCounter > 1 )
     {
-        float maxT  = -1.0;
+        float maxT  = -10.0;
         int   exitI = -1;
         for( int i = 0; i < 12; i++ )       // Find the largest T
         {
@@ -324,9 +334,9 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
             if( i/2 != inFace && i != exitI )
                 intersect[i] = false;
         }
-    }
+    }*/
 
-    // Entry hit elimination, where the entry point with the smallest t is kept
+    /* Entry hit elimination, where the entry point with the smallest t is kept
     if( entryCounter > 1 )
     {
         float minT   = 100.0;
@@ -343,45 +353,137 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3 startTexture,
         {
             intersect[i] = (i == entryI);
         }
-    }
+    }*/
 
-    int exitI;
-    for( exitI = 0; exitI < 12; exitI++ )   // find the exit face
+    //if( exitCounter == 1 )
     {
-        if( intersect[exitI] && exitI / 2 != inFace )
-            break;
-    }
+        int exitI;
+        for( exitI = 0; exitI < 12; exitI++ )   // find the exit face
+        {
+            if( intersect[exitI] && exitI / 2 != inFace )
+                break;
+        }
 
-    if( exitI / 2 == 0 )        // exits the front face of current cell
-    {                           // enters the back face of the next cell
-        step2CellIdx = ivec4( cubeVertIdx[3], 1 );
+        if( exitI / 2 == 0 )        // exits the front face of current cell
+        {                           // enters the back face of the next cell
+            step2CellIdx = ivec4( cubeVertIdx[3], 1 );
+        }
+        else if( exitI / 2 == 1 )   // exits the back face of current cell
+        {                           // enters the front face of the next cell
+            step2CellIdx = ivec4( V0.x, V0.y, V0.z - 1, 0 );
+        }
+        else if( exitI / 2 == 4 )   // exits the right face of current cell
+        {                           // enters the left face of the next cell
+            step2CellIdx = ivec4( cubeVertIdx[1], 5 );
+        }
+        else if( exitI / 2 == 5 )   // exits the left face of current cell
+        {                           // enters the right face of the next cell
+            step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z, 4 );
+        }
+        else if( exitI / 2 == 2 )   // exits the top face of current cell
+        {                           // enters the bottom face of the next cell
+            step2CellIdx = ivec4(  cubeVertIdx[4], 3 );
+        }
+        else //( exitI / 2 == 3)    // exits the bottom face of current cell
+        {                           // enters the top face of the next cell
+            step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z, 2 );
+        }
+        
+        t = tArr[exitI];
+        u = uArr[exitI];
+        v = vArr[exitI];
     }
-    else if( exitI / 2 == 1 )   // exits the back face of current cell
-    {                           // enters the front face of the next cell
-        step2CellIdx = ivec4( V0.x, V0.y, V0.z - 1, 0 );
-    }
-    else if( exitI / 2 == 4 )   // exits the right face of current cell
-    {                           // enters the left face of the next cell
-        step2CellIdx = ivec4( cubeVertIdx[1], 5 );
-    }
-    else if( exitI / 2 == 5 )   // exits the left face of current cell
-    {                           // enters the right face of the next cell
-        step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z, 4 );
-    }
-    else if( exitI / 2 == 2 )   // exits the top face of current cell
-    {                           // enters the bottom face of the next cell
-        step2CellIdx = ivec4(  cubeVertIdx[4], 3 );
-    }
-    else //( exitI / 2 == 3)    // exits the bottom face of current cell
-    {                           // enters the top face of the next cell
-        step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z, 2 );
-    }
-    
-    t = tArr[exitI];
-    u = uArr[exitI];
-    v = vArr[exitI];
+/*
+    else if( exitCounter == 2 )
+    {
+        int exitI[2],   idx = 0;
+        for( int i = 0; i < 6; i++ )
+        {
+            if( intersect[2*i] && i != inFace )
+            {
+                exitI[ idx ] = 2 * i;
+                idx++;
+            }
+            else if( intersect[2*i+1] && i != inFace )
+            {
+                exitI[ idx ] = 2 * i + 1;
+                idx++;
+            }
+        }
 
-    return 0;
+        if( (exitI[0] == 0 && exitI[1] == 2) ||     // edge 7-6
+            (exitI[0] == 2 && exitI[1] == 0) )
+        {
+            step2CellIdx = ivec4( cubeVertIdx[7], 3 );
+        }
+        else if( (exitI[0] == 2 && exitI[1] == 5) || // edge 7-4
+                 (exitI[0] == 5 && exitI[1] == 2) )
+        {
+            step2CellIdx = ivec4( V0.x - 1, V0.y + 1, V0.z, 3 );
+        }
+        else if( (exitI[0] == 1 && exitI[1] == 2) || // edge 4-5
+                 (exitI[0] == 2 && exitI[1] == 1) )
+        {
+            step2CellIdx = ivec4( V0.x, V0.y + 1, V0.z - 1, 3 );
+        }
+        else if( (exitI[0] == 2 && exitI[1] == 4) || // edge 5-6
+                 (exitI[0] == 4 && exitI[1] == 2) )
+        {
+            step2CellIdx = ivec4( V0.x + 1, V0.y + 1, V0.z, 3 );
+        }
+        else if( (exitI[0] == 0 && exitI[1] == 5) || // edge 7-3
+                 (exitI[0] == 5 && exitI[1] == 0) )
+        {
+            step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z + 1, 4 );
+        }
+        else if( (exitI[0] == 5 && exitI[1] == 1) || // edge 4-0
+                 (exitI[0] == 1 && exitI[1] == 5) )
+        {
+            step2CellIdx = ivec4( V0.x - 1, V0.y, V0.z - 1, 4 );
+        }
+        else if( (exitI[0] == 1 && exitI[1] == 4) || // edge 5-1
+                 (exitI[0] == 4 && exitI[1] == 1) )
+        {
+            step2CellIdx = ivec4( V0.x + 1, V0.y, V0.z - 1, 5 );
+        }
+        else if( (exitI[0] == 4 && exitI[1] == 0) || // edge 6-2
+                 (exitI[0] == 0 && exitI[1] == 4) )
+        {
+            step2CellIdx = ivec4( V0.x + 1, V0.y, V0.z + 1, 5 );
+        }
+        else if( (exitI[0] == 0 && exitI[1] == 3) || // edge 3-2
+                 (exitI[0] == 3 && exitI[1] == 0) )
+        {
+            step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z + 1, 2 );
+        }
+        else if( (exitI[0] == 3 && exitI[1] == 5) || // edge 3-0
+                 (exitI[0] == 5 && exitI[1] == 3) )
+        {
+            step2CellIdx = ivec4( V0.x - 1, V0.y - 1, V0.z, 2 );
+        }
+        else if( (exitI[0] == 3 && exitI[1] == 1) || // edge 0-1
+                 (exitI[0] == 1 && exitI[1] == 3) )
+        {
+            step2CellIdx = ivec4( V0.x, V0.y - 1, V0.z - 1, 2 );
+        }
+        else if( (exitI[0] == 3 && exitI[1] == 4) || // edge 1-2
+                 (exitI[0] == 4 && exitI[1] == 3) )
+        {
+            step2CellIdx = ivec4( V0.x + 1, V0.y - 1, V0.z, 5 );
+        }
+        
+        t = tArr[ exitI[0] ];
+        u = uArr[ exitI[0] ];
+        v = vArr[ exitI[0] ];
+    }*/
+
+    int counter = 0;
+    for( int i = 0; i < 12; i++ )
+        if( intersect[i] )
+            counter++;
+    //return counter;
+
+    return origExitHit;
 }
 
 bool CellOutsideBound( const in ivec3 cellIdx )
@@ -439,24 +541,6 @@ void main(void)
             color.rgb          += (1.0 - color.a) * backColor.a * backColor.rgb;
             color.a            += (1.0 - color.a) * backColor.a;
 
-            // Start error detection
-            /* if( intersect == 0 )
-            {
-                color = vec4( 1.0, 0.2, 0.2, 1.0 );
-                break;
-            }
-            else if( intersect == 1 )
-            {
-                color = vec4( 0.2, 1.0, 0.2, 1.0 );
-                break;
-            }
-            else if( intersect > 2 )
-            {
-                color = vec4( 1.0 );
-                break;
-            }*/
-            // Finish error detection
-
             step1CellIdx = step2CellIdx;
             intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
                                       step2CellIdx, t, u, v );
@@ -464,16 +548,12 @@ void main(void)
             if( CellOutsideBound( step2CellIdx.xyz ) )
             {
                 step2CellIdx = step1CellIdx;
-                // debug
-                //if( counter < 1 )
-                //    color = vec4( 1.0, 0.2, 0.2, 1.0 );
-                // finish debug
                 break;
             }
-            
         }
+        if( counter == maxCells )
+            color = vec4( 1.0, 0.2, 0.2, 1.0 );
     }
-
 
 
 
