@@ -135,19 +135,6 @@ string makename(string file)
     return (ControlExec::MakeStringConformant(qFileInfo.fileName().toStdString()));
 }
 
-#ifdef UNUSED_FUNCTION
-string concatpath(string s1, string s2)
-{
-    string s;
-    if (!s1.empty()) {
-        s = s1 + "/" + s2;
-    } else {
-        s = s2;
-    }
-    return (QDir::toNativeSeparators(s.c_str()).toStdString());
-}
-#endif
-
 };    // namespace
 
 void MainForm::_initMembers()
@@ -1836,7 +1823,9 @@ void MainForm::captureSingleJpeg()
     // Turn on "image capture mode" in the current active visualizer
     GUIStateParams *p = GetStateParams();
     string          vizName = p->GetActiveVizName();
-    _vizWinMgr->EnableImageCapture(filepath, vizName);
+    int             success = _vizWinMgr->EnableImageCapture(filepath, vizName);
+
+    if (success < 0) MSG_ERR("Error capturing image");
 
     delete fileInfo;
 }

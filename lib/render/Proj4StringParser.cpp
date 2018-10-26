@@ -32,6 +32,8 @@ map<string, string> Proj4StringParser::Proj4StringToParameterMap(string proj)
     return tokens;
 }
 
+bool Proj4StringParser::HasKey(const std::string &key) const { return _tokens.find(key) != _tokens.end(); }
+
 std::string Proj4StringParser::GetString(const std::string &key, const std::string &defaultValue) const
 {
     auto it = _tokens.find(key);
@@ -74,6 +76,6 @@ int Proj4StringParser::Proj4EllipseStringToGeoTIFEnum(const std::string &proj)
         return Ellipse_Plessis_1817;
     else if (proj == "sphere")
         return Ellipse_Sphere;
-    SetErrMsg("Invalid Proj4 ellipse parameter \"%s\"", proj.c_str());
+    SetErrMsg("Unsupported Proj4 ellipse parameter \"%s\"", proj.c_str());
     return -1;
 }

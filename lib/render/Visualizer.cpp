@@ -666,7 +666,7 @@ int Visualizer::captureImage(const std::string &path)
     size_t           width, height;
     vpParams->GetWindowSize(width, height);
 
-    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::Orthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
+    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
 
     ImageWriter *  writer = nullptr;
     unsigned char *framebuffer = nullptr;
@@ -696,9 +696,9 @@ int Visualizer::captureImage(const std::string &path)
         float aspect = width / (float)height;
 
         GeoTIFWriter *geo = (GeoTIFWriter *)writer;
-        geo->ConfigureFromProj4(projString);
         geo->SetTiePoint(x, y, width / 2.f, height / 2.f);
         geo->SetPixelScale(s * aspect * 2 / (float)width, s * 2 / (float)height);
+        if (geo->ConfigureFromProj4(projString) < 0) goto captureImageEnd;
     }
 
     writeReturn = writer->Write(framebuffer, width, height);
