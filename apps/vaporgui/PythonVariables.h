@@ -11,8 +11,16 @@
 #include <QMenuBar>
 #include <QMenu>
 
+//
+// QObjects do not support nested classes, so use a namespace :\
+//
+namespace PythonVariables_ {
 class Fader;
 class NewItemDialog;
+class OpenAndDeleteDialog;
+
+static const string _scriptType = "Python";
+} // namespace PythonVariables_
 
 class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     Q_OBJECT
@@ -20,41 +28,45 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
   public:
     PythonVariables(QWidget *parent);
     ~PythonVariables();
-    void Update();
+    void Update(bool internal = false);
     void InitControlExec(VAPoR::ControlExec *ce);
     void ShowMe();
 
   private slots:
     void _newScript();
-    void _openScript() { cout << "Open" << endl; }
+    void _openScript();
+    void _deleteScript();
+    void _importScript() { cout << "Import" << endl; }
+    void _exportScript() { cout << "Export" << endl; }
+    void _testScript() { cout << "Test" << endl; }
+    void _applyScript();
+
     void _saveScript(int index);
-    void _deleteScript() { cout << "Delete" << endl; }
 
     void _createNewVariable();
     void _deleteVariable();
-
-    void _testScript() { cout << "Test" << endl; }
+    void _scriptChanged();
 
     void _2DInputVarChanged(int row, int col);
     void _3DInputVarChanged(int row, int col);
 
+    void _deleteFader();
+
   private:
-    QMenuBar *_menuBar;
-    QMenu *_fileMenu;
     const QColor *_background;
 
     VAPoR::ControlExec *_controlExec;
-    //    VAPoR::DataMgr* _dataMgr;
-    VAPoR::ParamsMgr *_paramsMgr;
-    VAPoR::PythonVariablesParams *_pythonParams;
 
-    Fader *_fader;
-    NewItemDialog *_newItemDialog;
+    PythonVariables_::Fader *_fader;
+    PythonVariables_::NewItemDialog *_newItemDialog;
+    PythonVariables_::OpenAndDeleteDialog *_openAndDeleteDialog;
+
     VaporTable *_2DInputVarTable;
     VaporTable *_3DInputVarTable;
     VaporTable *_summaryTable;
     VaporTable *_outputVarTable;
 
+    string _script;
     string _scriptName;
     string _dataMgrName;
 
@@ -66,6 +78,8 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     std::vector<bool> _3DVarsEnabled;
     std::vector<string> _outputVars;
     std::vector<string> _outputGrids;
+    std::vector<string> _inputGrids;
+    std::vector<string> _otherGrids;
 
     void _connectWidgets();
     void _setGUIEnabled(bool enabled);
@@ -75,10 +89,15 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
         std::vector<string> &summaryValues) const;
     void _makeOutputTableValues(
         std::vector<string> &outputValues) const;
+    std::vector<string> _makeDialogOptions(
+        std::vector<string> grids);
     int _checkForDuplicateNames(
         std::vector<string> names,
         string name);
-    void _deleteFader();
+    bool _isGridSelected(
+        string grid,
+        std::vector<string> selectedVars,
+        std::vector<bool> varEnabled) const;
     void _saveToSession();
     void _saveToFile();
 
@@ -90,6 +109,8 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     void _fade(bool fadeIn);
 };
 
+namespace PythonVariables_ {
+
 class Fader : public QObject {
     Q_OBJECT
 
@@ -99,6 +120,8 @@ class Fader : public QObject {
         QLabel *label,
         QColor background,
         QObject *parent = 0);
+    ~Fader();
+    void Start();
 
   signals:
     void faderDone();
@@ -125,7 +148,10 @@ class NewItemDialog : public QDialog {
     NewItemDialog(QWidget *parent = 0);
     ~NewItemDialog(){};
 
-    void Update(int type, std::vector<string>);
+    void Update(
+        int type,
+        std::vector<string> optionNames,
+        std::vector<int> categoryItems = std::vector<int>());
     string GetItemName() const;
     string GetOptionName() const;
 
@@ -133,6 +159,7 @@ class NewItemDialog : public QDialog {
     void _connectWidgets();
     void _setupGUI();
     void _adjustToType(int type);
+    void _disableComboItem(int index);
 
     string _itemName;
     string _optionName;
@@ -146,9 +173,42 @@ class NewItemDialog : public QDialog {
 
   private slots:
     void _okClicked();
-    void _cancelClicked(){};
-    void _optionChanged(){};
-    void _itemNameChanged(const QString &){};
 };
+
+class OpenAndDeleteDialog : public QDialog {
+    Q_OBJECT
+
+  public:
+    enum {
+        OPEN = 0,
+        DELETE = 1
+    };
+
+    OpenAndDeleteDialog(QWidget *parent = 0);
+    ~OpenAndDeleteDialog(){};
+
+    int Update(int type, VAPoR::ControlExec *controlExec);
+
+    string GetDataMgrName() const;
+    string GetScriptName() const;
+
+  private:
+    void _setupGUI();
+
+    string _dataMgrName;
+    string _scriptName;
+
+    QLabel *_dataMgrNameLabel;
+    QComboBox *_dataMgrNameCombo;
+    QLabel *_scriptNameLabel;
+    QComboBox *_scriptNameCombo;
+    QPushButton *_okButton;
+    QPushButton *_cancelButton;
+
+  private slots:
+    void _okClicked();
+};
+
+} // namespace PythonVariables_
 
 #endif // PYTHOVARIABLES_H
