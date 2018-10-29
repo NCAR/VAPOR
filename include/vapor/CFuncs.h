@@ -32,22 +32,11 @@ using namespace std;
 
 namespace Wasp {
 
-COMMON_API const char *Basename(const char *path);
-COMMON_API string      Basename(const string &path);
-
-COMMON_API string Dirname(const string &path);
-
-COMMON_API string Catpath(string volume, string dir, string file);
-
 COMMON_API void Splitpath(string path, string &volume, string &dir, string &file, bool nofile);
-
-COMMON_API bool IsAbsPath(string path);
 
 COMMON_API double GetTime();
 
 COMMON_API int MkDirHier(const string &dir);
-
-COMMON_API bool FileExists(const string path);
 
 };    // namespace Wasp
 
