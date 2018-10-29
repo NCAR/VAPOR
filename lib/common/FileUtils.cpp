@@ -37,12 +37,23 @@ string FileUtils::ReadFileToString(const string &path) {
 std::string FileUtils::Basename(const std::string &path) {
 #ifdef WIN32
 #error TODO
+    return 0;
+#else
+    char *copy = strdup(path.c_str());
+    string ret(basename(copy));
+    free(copy);
+    return ret;
+#endif
+}
+
+std::string FileUtils::Dirname(const std::string &path) {
+#ifdef WIN32
+#error TODO
     return path;
 #else
-    char *copy = new char[path.length() + 1];
-    strcpy(copy, path.c_str());
-    string ret(basename(copy));
-    delete[] copy;
+    char *copy = strdup(path.c_str());
+    string ret(dirname(copy));
+    free(copy);
     return ret;
 #endif
 }
@@ -55,6 +66,14 @@ long FileUtils::GetFileModifiedTime(const string &path) {
     struct stat attrib;
     stat(path.c_str(), &attrib);
     return attrib.st_mtime;
+}
+
+bool FileUtils::IsPathAbsolute(const std::string &path) {
+#ifdef WIN32
+    return !PathIsRelative((LPCTSTR)path.c_str());
+#else
+    return path[0] == '/';
+#endif
 }
 
 bool FileUtils::FileExists(const std::string &path) {
