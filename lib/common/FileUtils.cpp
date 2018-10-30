@@ -1,9 +1,10 @@
 #include "vapor/FileUtils.h"
 #include <string.h>
+#include <sys/stat.h>
+#include <vapor/MyBase.h>
 
 #ifdef WIN32
 #else
-    #include <sys/stat.h>
     #include <libgen.h>
 #endif
 
@@ -12,9 +13,9 @@ using FileUtils::FileType;
 using std::string;
 
 #ifdef WIN32
-const char FileUtils::Separator = '\\';
+const string FileUtils::Separator = "\\";
 #else
-const char FileUtils::Separator = '/';
+const string FileUtils::Separator = "/";
 #endif
 
 string FileUtils::ReadFileToString(const string &path)
@@ -65,8 +66,8 @@ std::string FileUtils::Extension(const std::string &path) { return path.substr(p
 
 long FileUtils::GetFileModifiedTime(const string &path)
 {
-    struct stat attrib;
-    stat(path.c_str(), &attrib);
+    struct STAT64 attrib;
+    STAT64(path.c_str(), &attrib);
     return attrib.st_mtime;
 }
 
@@ -87,8 +88,8 @@ bool FileUtils::IsDirectory(const std::string &path) { return FileUtils::GetFile
 
 FileType FileUtils::GetFileType(const std::string &path)
 {
-    struct stat s;
-    if (stat(path.c_str(), &s) == 0) {
+    struct STAT64 s;
+    if (STAT64(path.c_str(), &s) == 0) {
         if (s.st_mode & S_IFDIR)
             return FileType::Directory;
         else if (s.st_mode & S_IFREG)
