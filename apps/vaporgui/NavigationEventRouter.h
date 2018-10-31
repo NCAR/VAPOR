@@ -64,6 +64,7 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
 
   signals:
     void Proj4StringChanged(string proj4String);
+    void ProjectionTypeChanged(int);
 
   protected:
     virtual void _confirmText(){};
@@ -111,6 +112,7 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
     void setLightChanged();
     void notImplemented();
     void projCheckboxChanged();
+    void projectionComboBoxChanged(const QString &);
 };
 
 #endif //VIEWPOINTEVENTROUTER_H
