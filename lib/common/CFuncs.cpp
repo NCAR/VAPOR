@@ -32,22 +32,6 @@ string Separator = "\\";
 string Separator = "/";
 #endif
 
-string clean_separators(string path) {
-
-#ifndef	WIN32
-	return(path);
-#else
-	string::size_type pos;
-	string unixsep = "/";
-	string winsep = "\\";
-	while ((pos = path.find(unixsep)) != string::npos) {
-		path.replace(pos, 1, winsep);
-	}
-	return(path);
-#endif
-
-}
-
 };
 
 using namespace Wasp;
@@ -80,8 +64,8 @@ void Wasp::Splitpath(
 		dir = path;
 	}
 	else {
-        dir = VAPoR::FileUtils::Dirname(path);
-        file = VAPoR::FileUtils::Basename(path);
+        dir = Wasp::FileUtils::Dirname(path);
+        file = Wasp::FileUtils::Basename(path);
 	}
 #endif
 
