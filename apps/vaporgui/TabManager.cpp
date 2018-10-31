@@ -470,6 +470,11 @@ void TabManager::_createAllDefaultTabs() {
 		(NavigationEventRouter *) er, SIGNAL(Proj4StringChanged(string)),
 		this, SLOT(_setProj4String(string))
 	);
+    
+    connect(
+        (NavigationEventRouter *) er, SIGNAL(ProjectionTypeChanged(int)),
+        this, SLOT(_projectionTypeChanged(int))
+    );
 
 	parent = _getSubTabWidget(_settingsTabName);
 	er = new SettingsEventRouter(parent, _controlExec);
@@ -492,6 +497,15 @@ void TabManager::_createAllDefaultTabs() {
 
 	//set up widgets in tabs:
 	_installWidgets();
+}
+
+void TabManager::_projectionTypeChanged(int itype)
+{
+    ViewpointParams::ProjectionType type = (ViewpointParams::ProjectionType)itype;
+    if (type == ViewpointParams::MapOrthographic) {
+        ViewAll();
+        SetHomeViewpoint();
+    }
 }
 
 void TabManager::_installTab(
