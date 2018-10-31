@@ -37,7 +37,12 @@
 //!
 class MouseModeParams : public VAPoR::ParamsBase {
 	
-public: 
+public:
+    
+    struct MouseMode {
+        string name;
+        const char * const *icon;
+    };
 
  //! Create a MouseModeParams object from scratch
  //     
@@ -56,37 +61,13 @@ public:
 	
  //! method identifies pixmap icon for each mode
  const char* const * GetIcon(string name) const {
- 	map <string, const char *const  *>::const_iterator itr;
-	itr = _iconMap.find(name);
-	assert(itr != _iconMap.end());
-	return itr->second;
+     auto itr = _modes.cbegin();
+     for (; itr != _modes.cend(); ++itr)
+         if (itr->name == name)
+             break;
+	assert(itr != _modes.end());
+	return itr->icon;
  }
-
-
- //! Method to register a mouse mode.  Called during startup.
- //! \param[in] name name of the mode, identifying it during selection
- //! \param[in] modeType An integer type identify associated with \p name
- //! \param[in] xpmIcon (as an xpm) used when displaying mode in GUI.
- //!
- void RegisterMouseMode(
-	string name, int modeType, const char* const xpmIcon[]
- );
-
-
- //! method that indicates the manipulator type that is associated with a 
- //! mouse mode.
- //! \param[in] name A valid mode name
- //! \retval int manipulator type 
- //
- int GetModeManipType(string name) const {
-	map <string, int>::const_iterator itr;
-	itr = _typeMap.find(name);
-	assert(itr != _typeMap.end());
-	return itr->second;
- }
-
-
-
 
  //! method indicates the current mouse mode
  //! \retval current mouse mode
@@ -103,16 +84,15 @@ public:
 
  //! method indicates how many mouse modes are available.
  int GetNumMouseModes() {
-	return _typeMap.size();
+	return _modes.size();
  }
 
  //! Return a vector of all registered mouse mode names
  //
  vector <string> GetAllMouseModes() {
 	vector <string> v;
-	map <string, int>::const_iterator itr;
-	for (itr = _typeMap.begin(); itr != _typeMap.end(); ++itr) {
-		v.push_back(itr->first);
+	for (auto itr = _modes.cbegin(); itr != _modes.cend(); ++itr) {
+		v.push_back(itr->name);
 	}
 	return(v);
  }
@@ -135,9 +115,7 @@ private:
 
  static const string _currentMouseModeTag;
 
-
- map <string, int> _typeMap;
- map <string, const char * const  *> _iconMap;
+ vector<MouseMode> _modes;
 
  void _init();
  void _setUpDefault();

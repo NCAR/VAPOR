@@ -70,6 +70,7 @@
 #include "MainForm.h"
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
+#include "MouseModeParams.h"
 
 //Following shortcuts are provided:
 // CTRL_N: new session
@@ -138,19 +139,6 @@ string makename(string file) {
 		ControlExec::MakeStringConformant(qFileInfo.fileName().toStdString())
 	);
 }
-
-#ifdef UNUSED_FUNCTION
-string concatpath(string s1, string s2) {
-	string s;
-	if (! s1.empty()) {
-		s = s1 + "/" + s2;
-	}
-	else {
-		s = s2;
-	}
-	return(QDir::toNativeSeparators(s.c_str()).toStdString());
-}
-#endif
 
 };
 
@@ -1633,6 +1621,9 @@ void MainForm::modeChange(int newmode){
 }
 
 void MainForm::showCitationReminder(){
+#ifndef NDEBUG
+    return;
+#endif
 	if (!_begForCitation) return;
 
 	_begForCitation = false;
@@ -2156,11 +2147,17 @@ void MainForm::captureSingleJpeg() {
 	QFileDialog fileDialog(this,
 		"Specify single image capture file name",
 		imageDir.c_str(),
-		"PNG or JPEG images (*.png *.jpg *.jpeg)");
-	fileDialog.setDefaultSuffix( QString::fromAscii("png") );
+		"PNG (*.png)\n"
+        "JPG (*.jpg *.jpeg)\n"
+        "TIFF (*.tif *.tiff)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
+    QStringList mimeTypeFilters;
+    mimeTypeFilters << "image/jpeg" // will show "JPEG image (*.jpeg *.jpg *.jpe)
+    << "image/png"  // will show "PNG image (*.png)"
+    << "application/octet-stream"; // will show "All files (*)"
+    //fileDialog.setNameFilters(mimeTypeFilters);
 	if (fileDialog.exec() != QDialog::Accepted) return;
 	
 	//Extract the path, and the root name, from the returned string.
@@ -2170,11 +2167,13 @@ void MainForm::captureSingleJpeg() {
 	//Extract the path, and the root name, from the returned string.
 	QFileInfo* fileInfo = new QFileInfo(fn);
 	QString suffix = fileInfo->suffix();
-	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) 
-    {
+    
+    /* QFileDialog takes care of this
+	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) {
 		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
 		return;
 	}
+     */
 
 	string filepath = fileInfo->absoluteFilePath().toStdString();
 
@@ -2184,7 +2183,10 @@ void MainForm::captureSingleJpeg() {
 	//Turn on "image capture mode" in the current active visualizer
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
-	_vizWinMgr->EnableImageCapture(filepath, vizName);
+	int success = _vizWinMgr->EnableImageCapture(filepath, vizName);
+    
+    if (success < 0)
+        MSG_ERR("Error capturing image");
 
     delete fileInfo;
 }
@@ -2306,11 +2308,12 @@ void MainForm::startAnimCapture()
 	if (imageDir=="") 
         imageDir = sP->GetDefaultImageDir();
 
-	QFileDialog fileDialog(this,
-		"Specify the base file name for image capture sequence",
-		imageDir.c_str(),
-		"PNG or JPEG images (*.png *.jpg *.jpeg )");
-	fileDialog.setDefaultSuffix( QString::fromAscii("png") );
+    QFileDialog fileDialog(this,
+                           "Specify single image capture file name",
+                           imageDir.c_str(),
+                           "PNG (*.png)\n"
+                           "JPG (*.jpg *.jpeg)\n"
+                           "TIFF (*.tif *.tiff)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
@@ -2324,11 +2327,6 @@ void MainForm::startAnimCapture()
 	QFileInfo* fileInfo = new QFileInfo( qsl[0] );
 
 	QString suffix = fileInfo->suffix();
-	if ( suffix != "png" && suffix != "jpg" && suffix != "jpeg" ) 
-    {
-		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
-		return;
-	}
 	//Save the path for future captures
 	sP->SetImageDir(fileInfo->absolutePath().toStdString());
 	QString fileBaseName = fileInfo->baseName();

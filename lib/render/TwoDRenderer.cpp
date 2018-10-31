@@ -130,8 +130,8 @@ int TwoDRenderer::_paintGL(bool) {
 
 		_renderMeshAligned();
 	}
-	// DisableClippingPlanes();
-
+	DisableClippingPlanes();
+    
     GL_ERR_BREAK();
 
 	return(0);

@@ -203,6 +203,7 @@ void VizWin::_setUpProjMatrix() {
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
+    MatrixManager *mm = _glManager->matrixManager;
 
 	double m[16];
 	vParams->GetModelViewMatrix(m);
@@ -222,27 +223,33 @@ void VizWin::_setUpProjMatrix() {
 	size_t width, height;
 	vParams->GetWindowSize(width, height);
 
-    _glManager->matrixManager->MatrixModeProjection();
-    _glManager->matrixManager->LoadIdentity();
+    mm->MatrixModeProjection();
+    mm->LoadIdentity();
 
 	GLfloat w = (float) width / (float) height;
 
-	double fov = vParams->GetFOV();
-    _glManager->matrixManager->Perspective(fov, w, nearDist, farDist);
-    // float s = 1000000;
-    // _glManager->matrixManager->Ortho(-s, s, -s, s, nearDist, farDist);
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
+        float s = _trackBall->GetOrthoSize();
+        mm->Ortho(-s*w, s*w, -s, s, nearDist, farDist);
+    } else {
+        double fov = vParams->GetFOV();
+        mm->Perspective(fov, w, nearDist, farDist);
+    }
 
 	double pMatrix[16];
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
+    mm->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
 
 	bool enabled = _controlExec->GetSaveStateEnabled();
 	_controlExec->SetSaveStateEnabled(false);
 
 	vParams->SetProjectionMatrix(pMatrix);
+    
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic)
+        vParams->SetOrthoProjectionSize(_trackBall->GetOrthoSize());
 
 	_controlExec->SetSaveStateEnabled(enabled);
 
-    _glManager->matrixManager->MatrixModeModelView();
+    mm->MatrixModeModelView();
 }
 
 void VizWin::_setUpModelViewMatrix() {
@@ -352,19 +359,23 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e) {
 	// Set trackball from current ViewpointParams matrix;
 	//
 	_trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-	_trackBall->TrackballSetMatrix();	// needed?
+	// _trackBall->TrackballSetMatrix();	// needed?
 
+    int trackballButtonNumber = _buttonNum;
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic
+        && _buttonNum == 1)
+        trackballButtonNumber = 2;
+    
 	// Let trackball handle mouse events for navigation
 	//
 	_trackBall->MouseOnTrackball(
-		0, _buttonNum, e->x(), e->y(), width(), height()
+		0, trackballButtonNumber, e->x(), e->y(), width(), height()
 	);
 
 	// Create a state saving group.
 	// Only save camera parameters after user release mouse
 	//
 	paramsMgr->BeginSaveStateGroup("Navigate scene");
-	emit StartNavigation(_winName);
 }
 
 // If the user presses the mouse on the active viz window,
@@ -480,7 +491,11 @@ void VizWin::_mouseMoveEventManip(QMouseEvent* e) {
 
 void VizWin::_mouseMoveEventNavigate(QMouseEvent* e) {
 	if (! _navigateFlag) return;
+    
+    // if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName() && _buttonNum == 1)
+        // return;
 
+    // _buttonNum is ignored in MouseOnTrackball here
 	_trackBall->MouseOnTrackball(
 		1, _buttonNum, e->x(), e->y(), width(), height()
 	);
@@ -602,6 +617,13 @@ void VizWin::Render(bool fast) {
 	if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
 		updateManip();
 	}
+    else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
+        _glManager->PixelCoordinateSystemPush();
+        _glManager->matrixManager->Translate(10, 10, 0);
+        glDisable(GL_DEPTH_TEST);
+        _glManager->fontManager->GetFont("arimo", 22)->DrawText("Geo Referenced Mode");
+        _glManager->PixelCoordinateSystemPop();
+    }
 	
 	swapBuffers();
     
