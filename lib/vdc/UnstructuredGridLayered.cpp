@@ -54,6 +54,18 @@ UnstructuredGridLayered::UnstructuredGridLayered(
     assert(location == NODE);
 }
 
+vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const {
+    if (dim == 0) {
+        return (_ug2d.GetCoordDimensions(dim));
+    } else if (dim == 1) {
+        return (_ug2d.GetCoordDimensions(dim));
+    } else if (dim == 2) {
+        return (_zug.GetDimensions());
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
 size_t UnstructuredGridLayered::GetGeometryDim() const {
     return (3);
 }
