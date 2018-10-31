@@ -51,7 +51,8 @@ public:
     //! script may compute multiple variables.
     //!
     //! \param[in] name A string identifier for the collection of derived variables
-    //! computed by \p script
+    //! computed by \p script. If a script named \p name already exists it is
+    //! removed with RemoveFunction() and replaced with the new definition.
     //!
     //! \param[in] script A Python (NumPy) script that will be invoked each time
     //! one of the variables listed in \p outputs is accessed. The scope of
@@ -172,6 +173,8 @@ private:
 
         int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
 
+        virtual size_t GetNumRefLevels() const;
+
         int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
         int CloseVariable(int fd);
@@ -191,7 +194,7 @@ private:
         DataMgr *           _dataMgr;
         DC::FileTable       _fileTable;
         vector<size_t>      _dims;
-        bool                _readSubsetFlag;
+        bool                _meshMatchFlag;
 
         int _readRegionAll(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 

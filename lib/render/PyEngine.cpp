@@ -101,6 +101,13 @@ void copy_region(const float *src, float *dst, const vector<size_t> &min, const 
     }
 }
 
+struct varinfo {
+    Grid *         _g;
+    string         _name;
+    vector<string> _coordnames;
+    vector<int>    _axes;
+};
+
 };    // namespace
 
 using namespace VAPoR;
@@ -122,6 +129,13 @@ int PyEngine::Initialize()
 int PyEngine::AddFunction(string name, string script, const vector<string> &inputVarNames, const vector<string> &outputVarNames, const vector<string> &outputVarMeshes)
 {
     assert(outputVarNames.size() == outputVarMeshes.size());
+
+    cout << "PyEngine::AddFunction() " << name << endl;
+    cout << "	" << script << endl;
+
+    // No-op if not defined
+    //
+    RemoveFunction(name);
 
     // Output variables can't already be defined (either derived or native vars)
     //
@@ -237,6 +251,8 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     assert(inputVarNames.size() == inputVarArrays.size());
     assert(outputVarNames.size() == outputVarDims.size());
     assert(outputVarNames.size() == outputVarArrays.size());
+
+    cout << "PyEngine::Calculate() " << script << endl;
 
     // Convert the input arrays and put into dictionary:
     //
@@ -364,7 +380,7 @@ PyEngine::DerivedPythonVar::DerivedPythonVar(string varName, string units, DC::X
     _script = script;
     _dataMgr = dataMgr;
     _dims.clear();
-    _readSubsetFlag = false;
+    _meshMatchFlag = false;
     if (hasMissing) {
         _varInfo.SetHasMissing(true);
         _varInfo.SetMissingValue(std::numeric_limits<double>::infinity());
@@ -395,14 +411,21 @@ int PyEngine::DerivedPythonVar::Initialize()
     // are on the same mesh we can optimize by only calculating the
     // derived variable over the requested ROI (min and max extents)
     //
-    _readSubsetFlag = true;
+    _meshMatchFlag = true;
     for (int i = 0; i < _inNames.size(); i++) {
         DC::DataVar dvar;
         bool        ok = _dataMgr->GetDataVarInfo(_inNames[i], dvar);
         if (!ok || dvar.GetMeshName() != mesh) {
-            _readSubsetFlag = false;
+            _meshMatchFlag = false;
             break;
         }
+    }
+
+    if (_meshMatchFlag && _inNames.size()) {
+        DC::DataVar dvar;
+        bool        ok = _dataMgr->GetDataVarInfo(_inNames[0], dvar);
+        assert(ok);
+        _varInfo.SetCRatios(dvar.GetCRatios());
     }
 
     return (0);
@@ -416,13 +439,25 @@ bool PyEngine::DerivedPythonVar::GetBaseVarInfo(DC::BaseVar &var) const
 
 int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
-    dims_at_level = _dims;
+    if (_meshMatchFlag && _inNames.size()) {
+        int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level);
+        assert(rc >= 0);
+    } else {
+        dims_at_level = _dims;
+    }
 
     // No blocking
     //
     bs_at_level = vector<size_t>(dims_at_level.size(), 1);
 
     return (0);
+}
+
+size_t PyEngine::DerivedPythonVar::GetNumRefLevels() const
+{
+    if (_meshMatchFlag && _inNames.size()) { return (_dataMgr->GetNumRefLevels(_inNames[0])); }
+
+    return (1);
 }
 
 int PyEngine::DerivedPythonVar::OpenVariableRead(size_t ts, int level, int lod)
@@ -538,7 +573,7 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
 
 int PyEngine::DerivedPythonVar::ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region)
 {
-    if (_readSubsetFlag) {
+    if (_meshMatchFlag) {
         return (_readRegionSubset(fd, min, max, region));
     } else {
         return (_readRegionAll(fd, min, max, region));

@@ -42,6 +42,23 @@ StretchedGrid::StretchedGrid(const vector<size_t> &dims, const vector<size_t> &b
 
 size_t StretchedGrid::GetGeometryDim() const { return (_zcoords.size() == 0 ? 2 : 3); }
 
+vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (vector<size_t>(1, GetDimensions()[0]));
+    } else if (dim == 1) {
+        return (vector<size_t>(1, GetDimensions()[1]));
+    } else if (dim == 2) {
+        if (GetDimensions().size() == 3) {
+            return (vector<size_t>(1, GetDimensions()[2]));
+        } else {
+            return (vector<size_t>(1, 1));
+        }
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
 void StretchedGrid::GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const
 {
     vector<size_t> cMin = min;

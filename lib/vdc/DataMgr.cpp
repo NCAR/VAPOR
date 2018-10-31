@@ -1555,6 +1555,8 @@ void DataMgr::RemoveDerivedVar(string varname)
     if (!_dvm.HasVar(varname)) return;
 
     _dvm.RemoveVar(_dvm.GetVar(varname));
+
+    _free_var(varname);
 }
 
 void DataMgr::Clear()
@@ -1783,11 +1785,10 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
         rc = _get_unblocked_region_from_fs(ts, varname, level, lod, grid_dims, grid_bs, grid_min, grid_max, blks);
     } else {
         rc = _get_blocked_region_from_fs(ts, varname, level, lod, file_bs, grid_dims, grid_bs, grid_min, grid_max, blks);
-
-        if (rc < 0) {
-            _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
-            return (NULL);
-        }
+    }
+    if (rc < 0) {
+        _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
+        return (NULL);
     }
 
     SetDiagMsg("DataMgr::GetGrid() - data read from fs\n");
