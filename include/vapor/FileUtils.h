@@ -3,7 +3,7 @@
 #include <vapor/common.h>
 #include <string>
 
-namespace VAPoR {
+namespace Wasp {
 namespace FileUtils {
 
 enum class FileType { File, Directory, Other, Does_Not_Exist };
@@ -21,5 +21,7 @@ COMMON_API bool        IsRegularFile(const std::string &path);
 COMMON_API bool        IsDirectory(const std::string &path);
 COMMON_API FileType    GetFileType(const std::string &path);
 
+COMMON_API const char *LegacyBasename(const char *path);
+
 }    // namespace FileUtils
-}    // namespace VAPoR
+}    // namespace Wasp

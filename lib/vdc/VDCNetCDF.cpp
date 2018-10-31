@@ -468,7 +468,7 @@ int VDCNetCDF::OpenVariableWrite(size_t ts, string varname, int lod)
     } else {
         wasp = new WASP(_nthreads);
         string dir;
-        dir = VAPoR::FileUtils::Dirname(path);
+        dir = FileUtils::Dirname(path);
         rc = MkDirHier(dir);
         if (rc < 0) return (-1);
 

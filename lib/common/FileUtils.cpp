@@ -8,7 +8,7 @@
     #include <libgen.h>
 #endif
 
-using namespace VAPoR;
+using namespace Wasp;
 using FileUtils::FileType;
 using std::string;
 
@@ -98,4 +98,14 @@ FileType FileUtils::GetFileType(const std::string &path)
             return FileType::Other;
     } else
         return FileType::Does_Not_Exist;
+}
+
+const char *FileUtils::LegacyBasename(const char *path)
+{
+    const char *last;
+    last = strrchr(path, Separator[0]);
+    if (!last)
+        return path;
+    else
+        return last + 1;
 }
