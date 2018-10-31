@@ -3,6 +3,7 @@
 #include "vapor/FileUtils.h"
 
 using namespace VAPoR;
+using namespace Wasp;
 
 using std::map;
 using std::pair;
