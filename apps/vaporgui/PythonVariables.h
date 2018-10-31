@@ -40,6 +40,7 @@ private slots:
     void _exportScript() { cout << "Export" << endl; }
     void _testScript() { cout << "Test" << endl; }
     void _applyScript();
+    void _updateLabelColor(int r, int g, int b);
 
     void _saveScript(int index);
 
@@ -105,11 +106,14 @@ class Fader : public QObject {
     Q_OBJECT
 
 public:
-    Fader(bool fadeIn, QLabel *label, QColor background, QObject *parent = 0);
+    Fader(bool fadeIn,
+          // QLabel* label,
+          QColor background, QObject *parent = 0);
     ~Fader();
     void Start();
 
 signals:
+    void cycle(int r, int g, int b);
     void faderDone();
 
 private:
