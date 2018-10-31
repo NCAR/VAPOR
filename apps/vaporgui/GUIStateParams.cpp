@@ -22,6 +22,7 @@
 #include <iostream>
 #include <QDir>
 
+#include "MouseModeParams.h"
 #include "GUIStateParams.h"
 
 using namespace VAPoR;

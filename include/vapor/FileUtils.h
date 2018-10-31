@@ -1,19 +1,27 @@
 #pragma once
 
+#include <vapor/common.h>
 #include <string>
 
-namespace VAPoR {
+namespace Wasp {
 namespace FileUtils {
 
 enum class FileType { File, Directory, Other, Does_Not_Exist };
 
-std::string ReadFileToString(const std::string &path);
-std::string Basename(const std::string &path);
-long        GetFileModifiedTime(const std::string &path);
-bool        FileExists(const std::string &path);
-bool        IsRegularFile(const std::string &path);
-bool        IsDirectory(const std::string &path);
-FileType    GetFileType(const std::string &path);
+extern const std::string Separator;
+
+COMMON_API std::string ReadFileToString(const std::string &path);
+COMMON_API std::string Basename(const std::string &path);
+COMMON_API std::string Dirname(const std::string &path);
+COMMON_API std::string Extension(const std::string &path);
+COMMON_API long        GetFileModifiedTime(const std::string &path);
+COMMON_API bool        IsPathAbsolute(const std::string &path);
+COMMON_API bool        FileExists(const std::string &path);
+COMMON_API bool        IsRegularFile(const std::string &path);
+COMMON_API bool        IsDirectory(const std::string &path);
+COMMON_API FileType    GetFileType(const std::string &path);
+
+COMMON_API const char *LegacyBasename(const char *path);
 
 }    // namespace FileUtils
-}    // namespace VAPoR
+}    // namespace Wasp

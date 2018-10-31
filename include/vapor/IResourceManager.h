@@ -51,7 +51,7 @@ template<typename K, typename T> bool IResourceManager<K, T>::HasResource(const 
 
 template<typename K, typename T> int IResourceManager<K, T>::SetResourceDirectory(const std::string &path)
 {
-    if (!FileUtils::IsDirectory(path)) {
+    if (!Wasp::FileUtils::IsDirectory(path)) {
         MyBase::SetErrMsg("Resource directory \"%s\" does not exist", path.c_str());
         return -1;
     }

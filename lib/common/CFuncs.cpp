@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <vapor/MyBase.h>
 #include <vapor/CFuncs.h>
+#include <vapor/FileUtils.h>
 
 #ifdef Darwin
     #include <mach/mach_time.h>
@@ -31,68 +32,9 @@ string Separator = "\\";
 string Separator = "/";
 #endif
 
-string clean_separators(string path)
-{
-#ifndef WIN32
-    return (path);
-#else
-    string::size_type pos;
-    string            unixsep = "/";
-    string            winsep = "\\";
-    while ((pos = path.find(unixsep)) != string::npos) { path.replace(pos, 1, winsep); }
-    return (path);
-#endif
-}
-
 };    // namespace
 
 using namespace Wasp;
-
-// Ugh. This should be deprecated
-//
-const char *Wasp::Basename(const char *path)
-{
-    const char *last;
-    last = strrchr(path, Separator[0]);
-    if (!last)
-        return path;
-    else
-        return last + 1;
-}
-
-string Wasp::Basename(const string &path)
-{
-    string mypath = clean_separators(path);
-
-    string::size_type pos = mypath.rfind(Separator);
-    if (pos == string::npos) return (mypath);
-
-    return (mypath.substr(pos + 1));
-}
-
-string Wasp::Dirname(const string &path)
-{
-    string mypath = clean_separators(path);
-
-    string::size_type pos = mypath.rfind(Separator);
-    if (pos == string::npos) return (".");
-
-    return (mypath.substr(0, pos));
-}
-
-string Wasp::Catpath(string volume, string dir, string file)
-{
-    string path;
-
-#ifdef WIN32
-    path = volume;
-#endif
-    path += dir;
-    path += Separator;
-    path += file;
-
-    return (path);
-}
 
 void Wasp::Splitpath(string path, string &volume, string &dir, string &file, bool nofile)
 {
@@ -116,19 +58,21 @@ void Wasp::Splitpath(string path, string &volume, string &dir, string &file, boo
     if (nofile || (path.substr(path.size() - 1, 1) == "/") || (path.substr(path.size() - 2, 2) == "/.") || (path.substr(path.size() - 3, 3) == "/..")) {
         dir = path;
     } else {
-        dir = Dirname(path);
-        file = Basename(path);
+        dir = Wasp::FileUtils::Dirname(path);
+        file = Wasp::FileUtils::Basename(path);
     }
 #endif
 }
 
-bool Wasp::IsAbsPath(string path)
-{
+/*
+bool Wasp::IsAbsPath(string path) {
+
     string vol, dir, fname;
     Splitpath(path, vol, dir, fname, true);
 
-    return (dir.substr(0, 1) == Separator);
+    return(dir.substr(0,1) == Separator);
 }
+ */
 
 double Wasp::GetTime()
 {
@@ -203,5 +147,3 @@ int Wasp::MkDirHier(const string &dir)
     }
     return (0);
 }
-
-bool Wasp::FileExists(const string path) { return (bool)std::ifstream(path.c_str()); }
