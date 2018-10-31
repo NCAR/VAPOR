@@ -1497,7 +1497,7 @@ bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) cons
     vector<size_t> exists_vec;
     for (int i = 0; i < native_vars.size(); i++) {
         if (_varInfoCache.Get(ts, native_vars[i], level, lod, key, exists_vec)) { continue; }
-        bool exists = _dc->VariableExists(ts, varname, level, lod);
+        bool exists = _dc->VariableExists(ts, native_vars[i], level, lod);
         if (exists) {
             _varInfoCache.Set(ts, native_vars[i], level, lod, key, exists_vec);
         } else {
@@ -1698,11 +1698,11 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 
         downsample(buf, Dims(file_min, file_max), region, Dims(grid_min, grid_max));
 
-        delete[] buf;
+        if (buf) delete[] buf;
     } else {
         int rc = _readRegion(fd, grid_min, grid_max, region);
         if (rc < 0) {
-            delete[] region;
+            if (region) delete[] region;
             return (-1);
         }
     }

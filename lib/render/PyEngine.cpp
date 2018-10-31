@@ -249,16 +249,11 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     PyObject *mainDict = PyModule_GetDict(mainModule);
     assert(mainDict != NULL);
 
-    // Make a copy (needed for later cleanup)
-    //
-    PyObject *copyDict = PyDict_Copy(mainDict);
-    assert(copyDict != NULL);
-
     // Copy arrays into python environment
     //
     int rc = _c2python(mainDict, inputVarNames, inputVarDims, inputVarArrays);
     if (rc < 0) {
-        _cleanupDict(mainDict, copyDict);
+        _cleanupDict(mainDict, inputVarNames);
         return (-1);
     }
 
@@ -268,7 +263,7 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
 
     if (!retObj) {
         SetErrMsg("PyRun_String() : %s", MyPython::Instance()->PyErr().c_str());
-        _cleanupDict(mainDict, copyDict);
+        _cleanupDict(mainDict, inputVarNames);
         return -1;
     }
 
@@ -276,23 +271,22 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     //
     rc = _python2c(mainDict, outputVarNames, outputVarDims, outputVarArrays);
     if (rc < 0) {
-        _cleanupDict(mainDict, copyDict);
+        _cleanupDict(mainDict, inputVarNames);
         return (-1);
     }
 
-    _cleanupDict(mainDict, copyDict);
+    _cleanupDict(mainDict, inputVarNames);
 
     return (0);
 }
 
-void PyEngine::_cleanupDict(PyObject *mainDict, PyObject *copyDict)
+void PyEngine::_cleanupDict(PyObject *mainDict, vector<string> keynames)
 {
-    Py_ssize_t pos = 0;
-    PyObject * key;
-    PyObject * val;
-    while (PyDict_Next(mainDict, &pos, &key, &val)) {
-        if (PyDict_Contains(copyDict, key)) { continue; }
-        PyObject_DelItem(mainDict, key);
+    for (int i = 0; i < keynames.size(); i++) {
+        PyObject *key = PyString_FromString(keynames[i].c_str());
+        if (!key) continue;
+        if (PyDict_Contains(mainDict, key)) { PyObject_DelItem(mainDict, key); }
+        Py_DECREF(key);
     }
 }
 
@@ -305,10 +299,11 @@ int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<vec
         const vector<size_t> &dims = inputVarDims[i];
         for (int j = 0; j < dims.size(); j++) { pyDims[dims.size() - j - 1] = dims[j]; }
 
-        PyObject *pyArray = PyArray_New(&PyArray_Type, dims.size(), pyDims, NPY_FLOAT32, NULL, (float *)inputVarArrays[i], 0, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE, NULL);
+        PyObject *pyArray = PyArray_SimpleNewFromData(dims.size(), pyDims, NPY_FLOAT32, inputVarArrays[i]);
 
         PyObject *ky = Py_BuildValue("s", inputVarNames[i].c_str());
         PyObject_SetItem(dict, ky, pyArray);
+        Py_DECREF(ky);
         Py_DECREF(pyArray);
     }
 
@@ -356,7 +351,6 @@ int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<ve
 
         float *outArray = outputVarArrays[i];
         for (size_t j = 0; j < nelements; j++) { outArray[j] = dataArray[j]; }
-        Py_DECREF(varArray);
     }
 
     return (0);
