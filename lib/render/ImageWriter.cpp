@@ -5,6 +5,7 @@
 #include "vapor/JPGWriter.h"
 
 using namespace VAPoR;
+using namespace Wasp;
 
 std::vector<ImageWriterFactory *> ImageWriter::factories;
 
