@@ -1757,7 +1757,7 @@ bool DataMgr::VariableExists(
         if (_varInfoCache.Get(ts, native_vars[i], level, lod, key, exists_vec)) {
             continue;
         }
-        bool exists = _dc->VariableExists(ts, varname, level, lod);
+        bool exists = _dc->VariableExists(ts, native_vars[i], level, lod);
         if (exists) {
             _varInfoCache.Set(ts, native_vars[i], level, lod, key, exists_vec);
         } else {
@@ -1820,6 +1820,8 @@ void DataMgr::RemoveDerivedVar(string varname) {
         return;
 
     _dvm.RemoveVar(_dvm.GetVar(varname));
+
+    _free_var(varname);
 }
 
 void DataMgr::Clear() {
@@ -1994,12 +1996,14 @@ int DataMgr::_get_unblocked_region_from_fs(
         downsample(
             buf, Dims(file_min, file_max), region, Dims(grid_min, grid_max));
 
-        delete[] buf;
+        if (buf)
+            delete[] buf;
     } else {
 
         int rc = _readRegion(fd, grid_min, grid_max, region);
         if (rc < 0) {
-            delete[] region;
+            if (region)
+                delete[] region;
             return (-1);
         }
     }
@@ -2101,11 +2105,10 @@ T *DataMgr::_get_region_from_fs(
         rc = _get_blocked_region_from_fs(
             ts, varname, level, lod, file_bs, grid_dims, grid_bs, grid_min,
             grid_max, blks);
-
-        if (rc < 0) {
-            _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
-            return (NULL);
-        }
+    }
+    if (rc < 0) {
+        _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
+        return (NULL);
     }
 
     SetDiagMsg("DataMgr::GetGrid() - data read from fs\n");

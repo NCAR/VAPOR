@@ -43,6 +43,10 @@ class VDF_API UnstructuredGridCoordless : public UnstructuredGrid {
     UnstructuredGridCoordless() = default;
     virtual ~UnstructuredGridCoordless() = default;
 
+    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override {
+        return (std::vector<size_t>(1, 1));
+    }
+
     static std::string GetClassType() {
         return ("UnstructuredCoordless");
     }
