@@ -89,6 +89,18 @@ class VDF_API Grid {
         return (_dims);
     }
 
+    //! Return the dimensions of the specified coordinate variable
+    //!
+    //! \param[in] dim An integer between 0 and the return value
+    //! of GetGeometryDim() - 1, indicating which
+    //! coordinate dimensions are to be returned.
+    //!
+    //! if \p dim is greater than or equal to GetGeometryDim() - 1
+    //! a vector of length one with its single component equal to
+    //! one is returned.
+    //!
+    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const = 0;
+
     virtual std::string GetType() const = 0;
 
     //! Get geometric dimension of cells
