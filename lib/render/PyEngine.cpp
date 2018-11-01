@@ -18,7 +18,7 @@ namespace {
 void free_arrays(vector<float *> &arrays)
 {
     for (int i = 0; i < arrays.size(); i++) {
-        if (arrays[i]) delete[] arrays[i];
+        if (arrays[i]) { delete[] arrays[i]; }
     }
 }
 
@@ -30,16 +30,18 @@ void free_arrays(vector<float *> &inputVarArrays, vector<float *> &outputVarArra
 
 int alloc_arrays(const vector<vector<size_t>> &dimsVectors, vector<float *> &arrays)
 {
+    arrays.clear();
+
     size_t nElements = 1;
-    for (int i = 0; i < dimsVectors.size(); i++) { nElements *= VProduct(dimsVectors[i]); }
-
-    float *buf = new (nothrow) float[nElements];
-    if (!buf) return (-1);
-
-    float *bufptr = buf;
     for (int i = 0; i < dimsVectors.size(); i++) {
-        arrays.push_back(bufptr);
-        bufptr += VProduct(dimsVectors[i]);
+        nElements *= VProduct(dimsVectors[i]);
+
+        float *buf = new (nothrow) float[nElements];
+        if (!buf) {
+            free_arrays(arrays);
+            return (-1);
+        }
+        arrays.push_back(buf);
     }
 
     return (0);
@@ -99,6 +101,13 @@ void copy_region(const float *src, float *dst, const vector<size_t> &min, const 
     }
 }
 
+struct varinfo {
+    Grid *         _g;
+    string         _name;
+    vector<string> _coordnames;
+    vector<int>    _axes;
+};
+
 };    // namespace
 
 using namespace VAPoR;
@@ -120,6 +129,13 @@ int PyEngine::Initialize()
 int PyEngine::AddFunction(string name, string script, const vector<string> &inputVarNames, const vector<string> &outputVarNames, const vector<string> &outputVarMeshes)
 {
     assert(outputVarNames.size() == outputVarMeshes.size());
+
+    cout << "PyEngine::AddFunction() " << name << endl;
+    cout << "	" << script << endl;
+
+    // No-op if not defined
+    //
+    RemoveFunction(name);
 
     // Output variables can't already be defined (either derived or native vars)
     //
@@ -236,6 +252,8 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     assert(outputVarNames.size() == outputVarDims.size());
     assert(outputVarNames.size() == outputVarArrays.size());
 
+    cout << "PyEngine::Calculate() " << script << endl;
+
     // Convert the input arrays and put into dictionary:
     //
     PyObject *mainModule = PyImport_AddModule("__main__");
@@ -247,16 +265,11 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     PyObject *mainDict = PyModule_GetDict(mainModule);
     assert(mainDict != NULL);
 
-    // Make a copy (needed for later cleanup)
-    //
-    PyObject *copyDict = PyDict_Copy(mainDict);
-    assert(copyDict != NULL);
-
     // Copy arrays into python environment
     //
     int rc = _c2python(mainDict, inputVarNames, inputVarDims, inputVarArrays);
     if (rc < 0) {
-        _cleanupDict(mainDict, copyDict);
+        _cleanupDict(mainDict, inputVarNames);
         return (-1);
     }
 
@@ -266,7 +279,7 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
 
     if (!retObj) {
         SetErrMsg("PyRun_String() : %s", MyPython::Instance()->PyErr().c_str());
-        _cleanupDict(mainDict, copyDict);
+        _cleanupDict(mainDict, inputVarNames);
         return -1;
     }
 
@@ -274,23 +287,22 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     //
     rc = _python2c(mainDict, outputVarNames, outputVarDims, outputVarArrays);
     if (rc < 0) {
-        _cleanupDict(mainDict, copyDict);
+        _cleanupDict(mainDict, inputVarNames);
         return (-1);
     }
 
-    _cleanupDict(mainDict, copyDict);
+    _cleanupDict(mainDict, inputVarNames);
 
     return (0);
 }
 
-void PyEngine::_cleanupDict(PyObject *mainDict, PyObject *copyDict)
+void PyEngine::_cleanupDict(PyObject *mainDict, vector<string> keynames)
 {
-    Py_ssize_t pos = 0;
-    PyObject * key;
-    PyObject * val;
-    while (PyDict_Next(mainDict, &pos, &key, &val)) {
-        if (PyDict_Contains(copyDict, key)) { continue; }
-        PyObject_DelItem(mainDict, key);
+    for (int i = 0; i < keynames.size(); i++) {
+        PyObject *key = PyString_FromString(keynames[i].c_str());
+        if (!key) continue;
+        if (PyDict_Contains(mainDict, key)) { PyObject_DelItem(mainDict, key); }
+        Py_DECREF(key);
     }
 }
 
@@ -303,10 +315,11 @@ int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<vec
         const vector<size_t> &dims = inputVarDims[i];
         for (int j = 0; j < dims.size(); j++) { pyDims[dims.size() - j - 1] = dims[j]; }
 
-        PyObject *pyArray = PyArray_New(&PyArray_Type, dims.size(), pyDims, NPY_FLOAT32, NULL, (float *)inputVarArrays[i], 0, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE, NULL);
+        PyObject *pyArray = PyArray_SimpleNewFromData(dims.size(), pyDims, NPY_FLOAT32, inputVarArrays[i]);
 
         PyObject *ky = Py_BuildValue("s", inputVarNames[i].c_str());
         PyObject_SetItem(dict, ky, pyArray);
+        Py_DECREF(ky);
         Py_DECREF(pyArray);
     }
 
@@ -354,7 +367,6 @@ int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<ve
 
         float *outArray = outputVarArrays[i];
         for (size_t j = 0; j < nelements; j++) { outArray[j] = dataArray[j]; }
-        Py_DECREF(varArray);
     }
 
     return (0);
@@ -368,7 +380,7 @@ PyEngine::DerivedPythonVar::DerivedPythonVar(string varName, string units, DC::X
     _script = script;
     _dataMgr = dataMgr;
     _dims.clear();
-    _readSubsetFlag = false;
+    _meshMatchFlag = false;
     if (hasMissing) {
         _varInfo.SetHasMissing(true);
         _varInfo.SetMissingValue(std::numeric_limits<double>::infinity());
@@ -399,14 +411,21 @@ int PyEngine::DerivedPythonVar::Initialize()
     // are on the same mesh we can optimize by only calculating the
     // derived variable over the requested ROI (min and max extents)
     //
-    _readSubsetFlag = true;
+    _meshMatchFlag = true;
     for (int i = 0; i < _inNames.size(); i++) {
         DC::DataVar dvar;
         bool        ok = _dataMgr->GetDataVarInfo(_inNames[i], dvar);
         if (!ok || dvar.GetMeshName() != mesh) {
-            _readSubsetFlag = false;
+            _meshMatchFlag = false;
             break;
         }
+    }
+
+    if (_meshMatchFlag && _inNames.size()) {
+        DC::DataVar dvar;
+        bool        ok = _dataMgr->GetDataVarInfo(_inNames[0], dvar);
+        assert(ok);
+        _varInfo.SetCRatios(dvar.GetCRatios());
     }
 
     return (0);
@@ -420,13 +439,25 @@ bool PyEngine::DerivedPythonVar::GetBaseVarInfo(DC::BaseVar &var) const
 
 int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
-    dims_at_level = _dims;
+    if (_meshMatchFlag && _inNames.size()) {
+        int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level);
+        assert(rc >= 0);
+    } else {
+        dims_at_level = _dims;
+    }
 
     // No blocking
     //
     bs_at_level = vector<size_t>(dims_at_level.size(), 1);
 
     return (0);
+}
+
+size_t PyEngine::DerivedPythonVar::GetNumRefLevels() const
+{
+    if (_meshMatchFlag && _inNames.size()) { return (_dataMgr->GetNumRefLevels(_inNames[0])); }
+
+    return (1);
 }
 
 int PyEngine::DerivedPythonVar::OpenVariableRead(size_t ts, int level, int lod)
@@ -530,19 +561,19 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     rc = PyEngine::Calculate(_script, _inNames, inputVarDims, inputVarArrays, outputVarNames, outputVarDims, outputVarArrays);
     if (rc < 0) {
         DataMgrUtils::UnlockGrids(_dataMgr, variables);
-        free_arrays(inputVarArrays, outputVarArrays);
+        free_arrays(inputVarArrays);    // output arrays aren't owned by us
         return (-1);
     }
 
     DataMgrUtils::UnlockGrids(_dataMgr, variables);
-    free_arrays(inputVarArrays);
+    free_arrays(inputVarArrays);    // output arrays aren't owned by us
 
     return (0);
 }
 
 int PyEngine::DerivedPythonVar::ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region)
 {
-    if (_readSubsetFlag) {
+    if (_meshMatchFlag) {
         return (_readRegionSubset(fd, min, max, region));
     } else {
         return (_readRegionAll(fd, min, max, region));

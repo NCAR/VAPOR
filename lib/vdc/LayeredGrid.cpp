@@ -44,6 +44,19 @@ LayeredGrid::LayeredGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
     _layeredGrid(minu, maxu, rg);
 }
 
+vector<size_t> LayeredGrid::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (vector<size_t>(1, GetDimensions()[0]));
+    } else if (dim == 1) {
+        return (vector<size_t>(1, GetDimensions()[1]));
+    } else if (dim == 2) {
+        return (_rg.GetDimensions());
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
 void LayeredGrid::GetUserExtents(vector<double> &minu, vector<double> &maxu) const
 {
     minu = _minu;

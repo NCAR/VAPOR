@@ -15,6 +15,8 @@
 #define TWOD   2
 #define THREED 3
 
+using namespace VAPoR;
+
 template<typename T> static void printVector(std::vector<T> v)
 {
     for (int i = 0; i < v.size(); i++) cout << v[i] << " ";
@@ -312,6 +314,42 @@ void PythonVariables::_deleteScript()
     }
 
     Update(true);
+}
+
+void PythonVariables::_testScript()
+{
+    string script = _scriptEdit->toPlainText().toStdString();
+
+    std::vector<string> inputVars;
+    for (int i = 0; i < _2DVars.size(); i++) {
+        if (_2DVarsEnabled[i] == true) inputVars.push_back(_2DVars[i]);
+    }
+    for (int i = 0; i < _3DVars.size(); i++) {
+        if (_3DVarsEnabled[i] == true) inputVars.push_back(_3DVars[i]);
+    }
+
+    if (inputVars.empty() || _outputVars.empty()) return;
+
+    int rc = _controlExec->AddFunction(_scriptType, _dataMgrName, _scriptName, script, inputVars, _outputVars, _outputGrids);
+
+    if (rc < 0) {
+        MSG_ERR("Failed to add script");
+        return;
+    }
+
+    DataMgr *dataMgr = _controlExec->GetDataStatus()->GetDataMgr(_dataMgrName);
+
+    string varname = _outputVars[0];
+    Grid * g = dataMgr->GetVariable(0, varname, 0, 0);
+    if (!g) {
+        MSG_ERR("Failed to calculate variable " + varname);
+        return;
+    }
+
+    // TODO: Post success message popup
+    //
+
+    _justSaved = true;
 }
 
 void PythonVariables::_applyScript()

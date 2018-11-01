@@ -43,6 +43,23 @@ RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
 
 size_t RegularGrid::GetGeometryDim() const { return (_minu.size()); }
 
+vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (vector<size_t>(1, GetDimensions()[0]));
+    } else if (dim == 1) {
+        return (vector<size_t>(1, GetDimensions()[1]));
+    } else if (dim == 2) {
+        if (GetDimensions().size() == 3) {
+            return (vector<size_t>(1, GetDimensions()[2]));
+        } else {
+            return (vector<size_t>(1, 1));
+        }
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
 float RegularGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
     std::vector<double> cCoords = coords;

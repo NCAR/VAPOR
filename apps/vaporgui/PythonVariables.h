@@ -14,7 +14,7 @@
 #include <QMenu>
 
 //
-// QObjects do not support nested classes, so use a namespace :\
+// QObjects do not support nested classes, so use a namespace
 //
 namespace PythonVariables_ {
 class Fader;
@@ -40,7 +40,7 @@ private slots:
     void _deleteScript();
     void _importScript() { cout << "Import" << endl; }
     void _exportScript() { cout << "Export" << endl; }
-    void _testScript() { cout << "Test" << endl; }
+    void _testScript();
     void _applyScript();
     void _updateLabelColor(int r, int g, int b);
 

@@ -33,6 +33,23 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
     assert(location == NODE);
 }
 
+vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (_xug.GetDimensions());
+    } else if (dim == 1) {
+        return (_yug.GetDimensions());
+    } else if (dim == 2) {
+        if (GetGeometryDim() == 3) {
+            return (_zug.GetDimensions());
+        } else {
+            return (vector<size_t>(1, 1));
+        }
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
 size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
 
 void UnstructuredGrid2D::GetUserExtents(vector<double> &minu, vector<double> &maxu) const

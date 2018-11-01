@@ -224,7 +224,15 @@ string MyPython::PyErr()
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    return (PyString_AsString(output));
+    char *    s = PyString_AsString(output);
+
+    // Erase the string
+    //
+    PyObject *eStr = PyString_FromString("");
+    int       rc = PyObject_SetAttrString(catcher, "value", eStr);
+    Py_DECREF(eStr);
+
+    return (s ? string(s) : string());
 }
 
 // Fetch an error message genereated by Python API.
