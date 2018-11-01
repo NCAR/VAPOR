@@ -10,6 +10,7 @@
 #include <QThread>
 #include <QDialog>
 #include <QMenuBar>
+#include <QComboBox>
 #include <QMenu>
 
 //
@@ -42,8 +43,6 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     void _testScript() { cout << "Test" << endl; }
     void _applyScript();
     void _updateLabelColor(int r, int g, int b);
-
-    void _saveScript(int index);
 
     void _createNewVariable();
     void _deleteVariable();

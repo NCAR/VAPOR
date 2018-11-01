@@ -28,8 +28,6 @@ PythonVariables::PythonVariables(
     QWidget *parent) : QDialog(parent), Ui_PythonVariablesGUI() {
     setupUi(this);
 
-    _saveScriptCombo->hide();
-
     setWindowTitle("Derived variables with Python");
 
     _script = "";
@@ -53,13 +51,6 @@ PythonVariables::PythonVariables(
     string pythonImagePath = imagePath + "/PythonLogo.png";
     QPixmap thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
-
-    _saveScriptCombo->setEditable(true);
-    _saveScriptCombo->lineEdit()->setAlignment(Qt::AlignCenter);
-    for (int i = 0; i < _saveScriptCombo->count(); ++i) {
-        _saveScriptCombo->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
-    }
-    _saveScriptCombo->setEditable(false);
 
     _2DInputVarTable = new VaporTable(_2DVarTable, false, true);
     _2DInputVarTable->Reinit(
@@ -183,10 +174,9 @@ void PythonVariables::_connectWidgets() {
     connect(_testScriptButton, SIGNAL(clicked()),
             this, SLOT(_testScript()));
     connect(_applyScriptButton, SIGNAL(clicked()),
-            this, SLOT(_applyScript()));
-
-    connect(_saveScriptCombo, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(_saveScript(int)));
+            this, SLOT(_applySript()));
+    connect(_cancelButton, SIGNAL(clicked()),
+            this, SLOT(close()));
 
     connect(_2DInputVarTable, SIGNAL(valueChanged(int, int)),
             this, SLOT(_2DInputVarChanged(int, int)));
@@ -409,21 +399,6 @@ void PythonVariables::_applyScript() {
     bool fadeIn = true;
     _fade(fadeIn);
     _justSaved = true;
-}
-
-void PythonVariables::_saveScript(int index) {
-    _saveScriptCombo->blockSignals(true);
-    _saveScriptCombo->setCurrentIndex(0);
-    _saveScriptCombo->blockSignals(false);
-
-    if (index == 0)
-        return;
-    if (index == 1) {
-        _saveToSession();
-    }
-    if (index == 2) {
-        _saveToFile();
-    }
 }
 
 void PythonVariables::_saveToSession() {
