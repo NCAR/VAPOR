@@ -41,8 +41,10 @@ private slots:
     void _importScript() { cout << "Import" << endl; }
     void _exportScript() { cout << "Export" << endl; }
     void _testScript();
-    void _applyScript();
-    void _updateLabelColor(int r, int g, int b);
+    void _saveScript();
+    void _cancelScript();
+    void _updateSaveLabelColor(int r, int g, int b);
+    void _updateTestLabelColor(int r, int g, int b);
 
     void _createNewVariable();
     void _deleteVariable();
@@ -51,14 +53,16 @@ private slots:
     void _2DInputVarChanged(int row, int col);
     void _3DInputVarChanged(int row, int col);
 
-    void _deleteFader();
+    void _deleteSaveFader();
+    void _deleteTestFader();
 
 private:
     const QColor *_background;
 
     VAPoR::ControlExec *_controlExec;
 
-    PythonVariables_::Fader *              _fader;
+    PythonVariables_::Fader *              _saveFader;
+    PythonVariables_::Fader *              _testFader;
     PythonVariables_::NewItemDialog *      _newItemDialog;
     PythonVariables_::OpenAndDeleteDialog *_openAndDeleteDialog;
 
@@ -93,11 +97,14 @@ private:
     void                _saveToFile();
 
     void _updateNewItemDialog();
+    void _updateLabelColor(int r, int g, int b, QLabel *label);
     void _updateInputVarTable(){};
     void _updateOutputVarTable(){};
     void _updatePythonScript(){};
 
-    void _fade(bool fadeIn);
+    void _fadeTest(bool fadeIn);
+    // void _fadeTestSuccess(bool fadeIn);
+    void _fadeSaveSession(bool fadeIn);
 };
 
 namespace PythonVariables_ {
@@ -106,7 +113,7 @@ class Fader : public QThread {
     Q_OBJECT
 
 public:
-    Fader(bool fadeIn, QColor background, QObject *parent = 0);
+    Fader(bool fadeIn, QColor background, QColor textColor, QObject *parent = 0);
 
     virtual void run();
 
@@ -116,6 +123,7 @@ signals:
 
 private:
     bool   _fadeIn;
+    QColor _textColor;
     QColor _background;
 
 private slots:
