@@ -39,10 +39,10 @@ TwoDRenderer::TwoDRenderer(const ParamsMgr *pm, string winName, string dataSetNa
     _normals = NULL;
     _meshWidth = 0;
     _meshHeight = 0;
-    _VAO = NULL;
-    _VBO = NULL;
-    _dataVBO = NULL;
-    _EBO = NULL;
+    _VAO = (int)NULL;
+    _VBO = (int)NULL;
+    _dataVBO = (int)NULL;
+    _EBO = (int)NULL;
 }
 
 //----------------------------------------------------------------------------
