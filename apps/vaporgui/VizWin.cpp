@@ -44,6 +44,7 @@
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/FileUtils.h"
+#include "vapor/GetAppPath.h"
 
 using namespace VAPoR;
 
