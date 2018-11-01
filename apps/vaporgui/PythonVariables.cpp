@@ -158,16 +158,15 @@ void PythonVariables::Update(bool internalUpdate) {
 }
 
 void PythonVariables::_fade(bool fadeIn) {
-    //while (_fader != nullptr) {cout << "waiting";}
-    //if (_fader) return;
+    if (_fader != nullptr)
+        return;
     QColor background = palette().color(QWidget::backgroundRole());
-    //_fader = new Fader(fadeIn, _scriptSaveLabel, background);
     _fader = new Fader(fadeIn, background);
     connect(_fader, SIGNAL(cycle(int, int, int)),
             this, SLOT(_updateLabelColor(int, int, int)));
     connect(_fader, SIGNAL(faderDone()),
             this, SLOT(_deleteFader()));
-    _fader->Start();
+    _fader->start(QThread::IdlePriority);
 }
 
 void PythonVariables::_connectWidgets() {
@@ -319,8 +318,6 @@ void PythonVariables::_openScript() {
         cout << "   RC " << rc << endl
              << endl;
 
-        //_outputVars.clear();
-        //_outputGrids.clear();
         _inputGrids.clear();
         _otherGrids.clear();
 
@@ -459,7 +456,6 @@ void PythonVariables::_saveToFile() {
 }
 
 void PythonVariables::_updateLabelColor(int r, int g, int b) {
-    cout << "Updating to " << r << " " << g << " " << b << endl;
     QColor newColor = QColor(r, g, b);
     QPalette labelPalette = _scriptSaveLabel->palette();
     labelPalette.setColor(_scriptSaveLabel->foregroundRole(), newColor);
@@ -467,9 +463,11 @@ void PythonVariables::_updateLabelColor(int r, int g, int b) {
 }
 
 void PythonVariables::_deleteFader() {
-    if (_fader != nullptr)
+    if (_fader != nullptr) {
+        _fader->wait();
         delete _fader;
-    _fader = nullptr;
+        _fader = nullptr;
+    }
 }
 
 void PythonVariables::_2DInputVarChanged(int row, int col) {
@@ -681,33 +679,19 @@ void PythonVariables::ShowMe() {
 
 Fader::Fader(
     bool fadeIn,
-    //QLabel* label,
     QColor background,
-    QObject *parent) : QObject(0) {
+    QObject *parent) : QThread(parent) {
     _fadeIn = fadeIn;
-    //_myLabel = label;
     _background = background;
-
-    _thread = new QThread(parent);
-    // moveToThread(_thread) ???
-    connect(_thread, SIGNAL(started()), this, SLOT(_fade()));
-    this->moveToThread(_thread);
 }
 
-Fader::~Fader() {
-    if (_thread != nullptr)
-        delete _thread;
-    _thread = nullptr;
-}
-
-void ::Fader::Start() {
-    _thread->start();
+void Fader::run() {
+    _fade();
 }
 
 void Fader::_fade() {
-    int cycles = 10;
+    int cycles = 20;
 
-    //QPalette labelPalette = _myLabel->palette();
     QColor textColor(0, 0, 255);
 
     QColor startColor = _background;
@@ -731,7 +715,7 @@ void Fader::_fade() {
 
     clock_t startTime = clock();
     double secondsPassed = 0.f;
-    double secondsToDelay = .15;
+    double secondsToDelay = .05;
     bool flag = true;
     int counter = 0;
 
@@ -743,9 +727,6 @@ void Fader::_fade() {
             int newGreen = startGreen + greenIncrement * counter;
             int newBlue = startBlue + blueIncrement * counter;
             emit cycle(newRed, newGreen, newBlue);
-            //            QColor newColor = QColor(newRed, newGreen, newBlue);
-            //            labelPalette.setColor(_myLabel->foregroundRole(), newColor);
-            //            _myLabel->setPalette(labelPalette);
             startTime = clock();
             counter++;
         }
@@ -753,11 +734,7 @@ void Fader::_fade() {
             flag = false;
     }
 
-    if (!_fadeIn) {
-        cout << "need cleanup in Fader::_fade()" << endl;
-        // labelPalette.setColor(_myLabel->foregroundRole(), _background);
-        //_myLabel->setPalette(labelPalette);
-    }
+    emit cycle(endRed, endGreen, endBlue);
 
     emit faderDone();
 }
