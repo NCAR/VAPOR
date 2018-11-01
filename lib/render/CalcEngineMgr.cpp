@@ -154,7 +154,7 @@ void CalcEngineMgr::_sync()
             bool errEnabled = MyBase::GetEnableErrMsg();
             EnableErrMsg(false);
 
-            (void)pyEngine->AddFunction(scriptNames[i], script, inputVarNames, outputVarNames, outputVarMeshes);
+            (void)pyEngine->AddFunction(scriptNames[j], script, inputVarNames, outputVarNames, outputVarMeshes);
 
             EnableErrMsg(errEnabled);
         }
