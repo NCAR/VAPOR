@@ -7,6 +7,7 @@
 #include "PythonVariablesParams.h"
 #include "VaporTable.h"
 
+#include <QThread>
 #include <QDialog>
 #include <QMenuBar>
 #include <QMenu>
@@ -112,17 +113,16 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
 
 namespace PythonVariables_ {
 
-class Fader : public QObject {
+class Fader : public QThread {
     Q_OBJECT
 
   public:
     Fader(
         bool fadeIn,
-        //QLabel* label,
         QColor background,
         QObject *parent = 0);
-    ~Fader();
-    void Start();
+
+    virtual void run();
 
   signals:
     void cycle(int r, int g, int b);
@@ -130,8 +130,6 @@ class Fader : public QObject {
 
   private:
     bool _fadeIn;
-    QThread *_thread;
-    QLabel *_myLabel;
     QColor _background;
 
   private slots:
