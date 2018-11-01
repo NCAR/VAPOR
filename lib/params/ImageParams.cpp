@@ -1,4 +1,5 @@
 #include <vapor/ImageParams.h>
+#include <vapor/GetAppPath.h>
 
 using namespace VAPoR;
 
@@ -42,4 +43,13 @@ ImageParams::ImageParams( DataMgr*                dataManager,
 ImageParams::~ImageParams()
 {
   SetDiagMsg( "ImageParams::~ImageParams() this=%p", this );
+}
+
+std::string ImageParams::GetImagePath( ) const
+{
+    std::vector<std::string> paths;
+    paths.push_back("images/NaturalEarth.tms");
+    std::string defaultImage = Wasp::GetAppPath("VAPOR", "share", paths);
+    
+    return GetValueString( _fileNameTag, defaultImage );
 }
