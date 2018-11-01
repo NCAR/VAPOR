@@ -90,6 +90,7 @@ private:
  public:
   _grid_state_c() = default;
   _grid_state_c(
+	size_t numRefLevels,
 	int refLevel,
 	int lod,
 	string hgtVar,
@@ -97,11 +98,13 @@ private:
 	size_t ts,
 	vector <double> minExts,
 	vector <double> maxExts
-  ) : _refLevel(refLevel), _lod(lod), _hgtVar(hgtVar), _meshName(meshName),
+  ) : _numRefLevels(numRefLevels), _refLevel(refLevel), _lod(lod),
+	_hgtVar(hgtVar), _meshName(meshName),
 	_ts(ts), _minExts(minExts), _maxExts(maxExts)
   {}
 
   void clear() {
+	_numRefLevels = 0;
 	_refLevel = _lod = -1;
 	_hgtVar = _meshName = "";
 	_ts = 0;
@@ -111,6 +114,7 @@ private:
 
   bool operator==(const _grid_state_c &rhs) const {
 	return(
+		_numRefLevels == rhs._numRefLevels &&
 		_refLevel == rhs._refLevel &&
 		_lod == rhs._lod &&
 		_hgtVar == rhs._hgtVar &&
@@ -125,6 +129,7 @@ private:
   }
 
  private:
+  size_t _numRefLevels;
   int _refLevel;
   int _lod;
   string _hgtVar;

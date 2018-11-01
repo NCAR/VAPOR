@@ -61,6 +61,9 @@ public:
 	return(3);
  }
 
+ virtual std::vector <size_t> GetCoordDimensions(size_t dim) const override;
+
+
  static std::string GetClassType() {
 	return("Layered");
  }  
