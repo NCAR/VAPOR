@@ -186,7 +186,7 @@ void CalcEngineMgr::_sync() {
             EnableErrMsg(false);
 
             (void)pyEngine->AddFunction(
-                scriptNames[i], script, inputVarNames,
+                scriptNames[j], script, inputVarNames,
                 outputVarNames, outputVarMeshes);
 
             EnableErrMsg(errEnabled);
