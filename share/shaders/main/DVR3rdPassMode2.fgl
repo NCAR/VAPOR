@@ -354,7 +354,6 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
         // First record the largest t value
         int   f0     = exitFaces[0];
         int   f1     = exitFaces[1];
-        int   edge   = (f0 + 1) * 10 + f1;
 
         // Second derive the next step cell
         if( f0 == 0 && f1 == 2 )            // exits edge 7-6
@@ -482,15 +481,16 @@ void main(void)
     int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
                                   0.0, step2CellIdx, step2T, u, v );
     
-    // Ray starts from an edge... Let's do something about it
+    // Ray starts from an edge, and technically not entering the surface cell... 
     const float zero = 1e-6;
     if( step2T < zero )
     {
-        // manipulate step2CellIdx.w to represent that it's coming from an edge
-        color = vec4( 0.2, 0.9, 0.2, 1.0 );
+        int inFace0 = min( step1CellIdx.w, step2CellIdx.w );
+        int inFace1 = max( step1CellIdx.w, step2CellIdx.w );
+        int inEdge  = (inFace0 + 1) * 10 + inFace1;
+        step2CellIdx.w = inEdge;
     }
 
-#if 0
     if( !CellOutsideBound( step2CellIdx.xyz ) )
     {
         int  maxCells = 2; //2 * int(length( volumeDimsf ));
@@ -515,7 +515,6 @@ void main(void)
             }
         }
     }
-#endif
 
 
 #if 0
