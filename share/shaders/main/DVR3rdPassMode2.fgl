@@ -147,14 +147,13 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
         return false;
     }
 
-    float invDet = 1.0 / det;
     vec3  tvec   = orig - v0;
     vec3  qvec   = cross( tvec, v0v1 );
-    u            = dot( tvec, pvec ) / det; //* invDet;  // if u == 0, ray hits edge v0v2
-    v            = dot( dir,  qvec ) / det; //* invDet;  // if v == 0, ray hits edge v0v1
-    t            = dot( v0v2, qvec ) / det; //* invDet;
+    u            = dot( tvec, pvec ) / det; // if u == 0, ray hits edge v0v2
+    v            = dot( dir,  qvec ) / det; // if v == 0, ray hits edge v0v1
+    t            = dot( v0v2, qvec ) / det;
 
-    if( u <= 0.0 || v <= 0.0 || u + v >= 1.0 )
+    if( u < 0.0 || v < 0.0 || u > 1.0 || v > 1.0 || u + v > 1.0 )
         return false;
     else
         return true;
@@ -493,7 +492,7 @@ void main(void)
 
     if( !CellOutsideBound( step2CellIdx.xyz ) )
     {
-        int  maxCells = 2; //2 * int(length( volumeDimsf ));
+        int  maxCells = 2 * int(length( volumeDimsf ));
         int  counter;
         for( counter = 0; counter < maxCells; counter++ )
         {
