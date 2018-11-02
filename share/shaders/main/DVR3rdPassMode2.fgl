@@ -206,10 +206,10 @@ float HowMuchOutside( const in float u, const in float v )
     return outAmt;
 }
 
-
-int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
-                    const in  vec3 rayDirTexture,   const in float step1T,
-                    out ivec4 step2CellIdx,  out float t,  out float u,  out float v  )
+void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
+                        out ivec3 cubeVertIdx[8],   // Output: indices of 8 vertices
+                        out vec3  cubeVertCoord[8], // Output: coordinates of 8 vertices
+                        out ivec3 triangles[12] )   // Output: 12 triangles of this cell
 {
     //          Y
     //        4 __________________5
@@ -226,9 +226,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     //     3|/______________|/    
     //                     2
     //     Z
-    ivec3 V0    = step1CellIdx.xyz;
-
-    ivec3 cubeVertIdx[8]; 
+    ivec3 V0       = cellIdx.xyz;
     cubeVertIdx[0] = V0;
     cubeVertIdx[1] = ivec3(V0.x + 1, V0.y    , V0.z     );
     cubeVertIdx[2] = ivec3(V0.x + 1, V0.y    , V0.z + 1 );
@@ -238,11 +236,9 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     cubeVertIdx[6] = ivec3(V0.x + 1, V0.y + 1, V0.z + 1 );
     cubeVertIdx[7] = ivec3(V0.x    , V0.y + 1, V0.z + 1 );
 
-    vec3 cubeVertCoords[8];
     for( int i = 0; i < 8; i++ )
-        cubeVertCoords[i] = GetCoordinates( cubeVertIdx[i] );
+        cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
 
-    ivec3 triangles[12];
     triangles[0]  =  ivec3( 7, 3, 6 );  // front face,  w == 0
     triangles[1]  =  ivec3( 2, 3, 6 );
     triangles[2]  =  ivec3( 0, 4, 1 );  // back face,   w == 1
@@ -255,6 +251,16 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     triangles[9]  =  ivec3( 2, 1, 6 );
     triangles[10] =  ivec3( 4, 0, 7 );  // left face,   w == 5
     triangles[11] =  ivec3( 3, 0, 7 );
+}
+
+
+int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
+                    const in  vec3 rayDirTexture,   const in float step1T,
+                    out ivec4 step2CellIdx,  out float t,  out float u,  out float v  )
+{
+    ivec3 cubeVertIdx[8], triangles[12];
+    vec3  cubeVertCoord[8];
+    FindCellIndices( step1CellIdx, cubeVertIdx, cubeVertCoord, triangles );
 
     // Test intersection with 12 triangles
     bool  intersect[12];
@@ -262,9 +268,9 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     for( int i = 0; i < 12; i++ )
     {
         intersect[i] = RayPlaneIntersect( startTexture,   rayDirTexture,
-                                          cubeVertCoords[ triangles[i][0] ],
-                                          cubeVertCoords[ triangles[i][1] ],
-                                          cubeVertCoords[ triangles[i][2] ],
+                                          cubeVertCoord[ triangles[i][0] ],
+                                          cubeVertCoord[ triangles[i][1] ],
+                                          cubeVertCoord[ triangles[i][2] ],
                                           tArr[i]                         );
     }
 
@@ -308,7 +314,8 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
 
     if( numSmallestT == 1 )
     {
-        int f0 = exitFaces[0];
+        int   f0 = exitFaces[0];
+        ivec3 V0 = step1CellIdx.xyz;
 
         switch( f0 )
         {
@@ -353,6 +360,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
         // First record the largest t value
         int   f0     = exitFaces[0];
         int   f1     = exitFaces[1];
+        ivec3 V0     = step1CellIdx.xyz;
 
         // Second derive the next step cell
         if( f0 == 0 && f1 == 2 )            // exits edge 7-6
