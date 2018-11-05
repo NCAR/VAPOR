@@ -484,7 +484,7 @@ void main(void)
 
     // Ray starts from an edge... Need to do something... 
     float biggestT1  = 0.0, biggestT2 = 0.0;
-    const float zero = 1e-4;
+    const float zero = 3e-4;
     if( step2T < zero )
     {
         // try to distinguish the two cubes.
@@ -575,7 +575,7 @@ void main(void)
           color.rgb    *= color.a;
 
 /*
-     if( biggestT1 > biggestT2 )
+     if( intersect > 2 ) 
          color = vec4( 0.2, 0.9, 0.2, 1.0 );
      else if( biggestT1 < biggestT2 )
          color = vec4( 0.9, 0.2, 0.2, 1.0 );
