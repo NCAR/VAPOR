@@ -38,11 +38,12 @@ private slots:
     void _newScript();
     void _openScript();
     void _deleteScript();
-    void _importScript() { cout << "Import" << endl; }
-    void _exportScript() { cout << "Export" << endl; }
+    void _importScript();
+    void _exportScript();
+    bool _getFilePath(QString &filePath, bool operation = true);
     void _testScript();
     void _saveScript();
-    void _cancelScript();
+    void _closeScript();
     void _updateSaveLabelColor(int r, int g, int b);
     void _updateTestLabelColor(int r, int g, int b);
 
@@ -94,7 +95,6 @@ private:
     int                 _checkForDuplicateNames(std::vector<string> names, string name);
     bool                _isGridSelected(string grid, std::vector<string> selectedVars, std::vector<bool> varEnabled) const;
     void                _saveToSession();
-    void                _saveToFile();
 
     void _updateNewItemDialog();
     void _updateLabelColor(int r, int g, int b, QLabel *label);
@@ -102,9 +102,10 @@ private:
     void _updateOutputVarTable(){};
     void _updatePythonScript(){};
 
-    void _fadeTest(bool fadeIn);
-    // void _fadeTestSuccess(bool fadeIn);
-    void _fadeSaveSession(bool fadeIn);
+    void _fadeTestLabel(bool fadeIn);
+    void _fadeSaveLabel(bool fadeIn);
+
+    void _reset();
 };
 
 namespace PythonVariables_ {
@@ -190,8 +191,11 @@ private:
     QPushButton *_okButton;
     QPushButton *_cancelButton;
 
+    VAPoR::ControlExec *_controlExec;
+
 private slots:
     void _okClicked();
+    void _updateOptions(int index);
 };
 
 }    // namespace PythonVariables_
