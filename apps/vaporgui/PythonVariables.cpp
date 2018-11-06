@@ -66,6 +66,8 @@ PythonVariables::PythonVariables(
     QPixmap thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
 
+    _variableTabs->removeTab(0);;
+
     _coordInputVarTable = new VaporTable(_coordVarTable, false, true);
     _coordInputVarTable->Reinit(
         (VaporTable::ValidatorFlags)(0),
@@ -110,7 +112,7 @@ PythonVariables::~PythonVariables()
 {
     if (_coordInputVarTable) {
         delete _coordInputVarTable;
-        _coordVarInputTable = nullptr;
+        _coordInputVarTable = nullptr;
     }
     if (_2DInputVarTable) {
         delete _2DInputVarTable;
@@ -158,7 +160,7 @@ void PythonVariables::Update(bool internalUpdate) {
     _outputVarTable->blockSignals(true);
 
     numRows = _coordVars.size();
-    _coordVarTable->Update(numRows, numCols, tableValuesCoords);
+    _coordInputVarTable->Update(numRows, numCols, tableValuesCoords);
 
     numRows = _2DVars.size();
     _2DInputVarTable->Update(numRows, numCols, tableValues2D);
@@ -255,6 +257,9 @@ void PythonVariables::_connectWidgets() {
     connect(_3DInputVarTable, SIGNAL(valueChanged(int, int)),
         this, SLOT(_3DInputVarChanged(int, int)));
 
+    connect(_coordinatesCheckbox, SIGNAL(stateChanged(int)),
+        this, SLOT(_coordinatesCheckboxClicked(int)));
+
     connect(_scriptEdit, SIGNAL(textChanged()),
         this, SLOT(_scriptChanged()));
 
@@ -303,8 +308,8 @@ void PythonVariables::_newScript() {
    
         VAPoR::DataMgr* dataMgr = dataStatus->GetDataMgr(_dataMgrName);
         _coordVars = dataMgr->GetCoordVarNames();
-        _coordVarsEnabled.resize(_CoordVars.size());
-        std::fill(_CoordVarsEnabled.begin(), _CoordVarsEnabled.end(), false);
+        _coordVarsEnabled.resize(_coordVars.size());
+        std::fill(_coordVarsEnabled.begin(), _coordVarsEnabled.end(), false);
 
         _2DVars = dataMgr->GetDataVarNames(TWOD);
         _2DVarsEnabled.resize(_2DVars.size());
@@ -437,7 +442,7 @@ void PythonVariables::_deleteScript() {
     );
 
     if (scriptName == _scriptName)
-        reset();
+        _reset();
 
     Update(true);
 }
@@ -602,7 +607,7 @@ void PythonVariables::_saveScript() {
     _justSaved = true;
 }
 
-std::vector<string> _buildInputVars() const {
+std::vector<string> PythonVariables::_buildInputVars() const {
     std::vector<string> inputVars;
     for (int i=0; i<_coordVars.size(); i++) {
         if (_coordVarsEnabled[i] == true)
@@ -621,7 +626,7 @@ std::vector<string> _buildInputVars() const {
 }
 
 void PythonVariables::_closeScript() {
-    reset();
+    _reset();
     Update(true);
     close();
 }
@@ -703,6 +708,19 @@ void PythonVariables::_3DInputVarChanged(int row, int col) {
         _3DVarsEnabled[row] = false;
 
     Update(true);
+}
+
+void PythonVariables::_coordinatesCheckboxClicked(int state) {
+    if (state == Qt::Unchecked) {
+        cout << "Unchecked" << endl;
+        _variableTabs->removeTab(0);
+        _coordVarsEnabled.resize(_coordVars.size());
+        std::fill(_coordVarsEnabled.begin(), _coordVarsEnabled.end(), false);
+    }
+    else {
+        cout << "checked" << endl;
+        _variableTabs->insertTab(0, _coordTab, "Coordinates");
+    }
 }
 
 void PythonVariables::_createNewVariable() {
@@ -840,7 +858,7 @@ void PythonVariables::_makeInputTableValues(
     std::vector<string> &summaryValues
 ) const {
     string onOff;
-    for (int i=0; i<_CoordVars.size(); i++) {
+    for (int i=0; i<_coordVars.size(); i++) {
         tableValuesCoords.push_back(_coordVars[i]);
 
         onOff = "0";
