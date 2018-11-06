@@ -55,6 +55,8 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     void _2DInputVarChanged(int row, int col);
     void _3DInputVarChanged(int row, int col);
 
+    void _coordinatesCheckboxClicked(int state);
+
     void _deleteSaveFader();
     void _deleteTestFader();
 
@@ -68,7 +70,7 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     PythonVariables_::NewItemDialog *_newItemDialog;
     PythonVariables_::OpenAndDeleteDialog *_openAndDeleteDialog;
 
-    VaporTable *_coordVarTable;
+    VaporTable *_coordInputVarTable;
     VaporTable *_2DInputVarTable;
     VaporTable *_3DInputVarTable;
     VaporTable *_summaryTable;
@@ -81,7 +83,7 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     bool _justSaved;
 
     std::vector<string> _coordVars;
-    std::vector<string> _coordVarsEnabled;
+    std::vector<bool> _coordVarsEnabled;
     std::vector<string> _2DVars;
     std::vector<bool> _2DVarsEnabled;
     std::vector<string> _3DVars;
