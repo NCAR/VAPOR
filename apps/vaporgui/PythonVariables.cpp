@@ -64,6 +64,12 @@ PythonVariables::PythonVariables(
     QPixmap thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
 
+    _coordInputVarTable = new VaporTable(_coordVarTable, false, true);
+    _coordInputVarTable->Reinit(
+        (VaporTable::ValidatorFlags)(0),
+        (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE),
+        (VaporTable::HighlightFlags)(0));
+
     _2DInputVarTable = new VaporTable(_2DVarTable, false, true);
     _2DInputVarTable->Reinit(
         (VaporTable::ValidatorFlags)(0),
@@ -94,6 +100,10 @@ PythonVariables::PythonVariables(
 }
 
 PythonVariables::~PythonVariables() {
+    if (_coordInputVarTable) {
+        delete _coordInputVarTable;
+        _coordVarInputTable = nullptr;
+    }
     if (_2DInputVarTable) {
         delete _2DInputVarTable;
         _2DInputVarTable = nullptr;
@@ -126,13 +136,19 @@ void PythonVariables::Update(bool internalUpdate) {
 
     int numRows;
     int numCols = 2;
-    std::vector<string> tableValues2D, tableValues3D, summaryValues;
-    _makeInputTableValues(tableValues2D, tableValues3D, summaryValues);
+    std::vector<string> tableValuesCoords, tableValues2D;
+    std::vector<string> tableValues3D, summaryValues;
+    _makeInputTableValues(
+        tableValuesCoords, tableValues2D, tableValues3D, summaryValues);
 
+    _coordInputVarTable->blockSignals(true);
     _2DInputVarTable->blockSignals(true);
     _3DInputVarTable->blockSignals(true);
     _summaryTable->blockSignals(true);
     _outputVarTable->blockSignals(true);
+
+    numRows = _coordVars.size();
+    _coordVarTable->Update(numRows, numCols, tableValuesCoords);
 
     numRows = _2DVars.size();
     _2DInputVarTable->Update(numRows, numCols, tableValues2D);
@@ -149,6 +165,7 @@ void PythonVariables::Update(bool internalUpdate) {
     _outputVarTable->Update(numRows, numCols, outputValues);
     _outputVarTable->StretchToColumn(1);
 
+    _coordInputVarTable->blockSignals(false);
     _2DInputVarTable->blockSignals(false);
     _3DInputVarTable->blockSignals(false);
     _summaryTable->blockSignals(false);
@@ -221,6 +238,8 @@ void PythonVariables::_connectWidgets() {
     connect(_closeButton, SIGNAL(clicked()),
             this, SLOT(_closeScript()));
 
+    connect(_coordInputVarTable, SIGNAL(valueChanged(int, int)),
+            this, SLOT(_coordInputVarChanged(int, int)));
     connect(_2DInputVarTable, SIGNAL(valueChanged(int, int)),
             this, SLOT(_2DInputVarChanged(int, int)));
     connect(_3DInputVarTable, SIGNAL(valueChanged(int, int)),
@@ -274,9 +293,14 @@ void PythonVariables::_newScript() {
         _dataMgrNameLabel->setText(QString::fromStdString(_dataMgrName));
 
         VAPoR::DataMgr *dataMgr = dataStatus->GetDataMgr(_dataMgrName);
+        _coordVars = dataMgr->GetCoordVarNames();
+        _coordVarsEnabled.resize(_CoordVars.size());
+        std::fill(_CoordVarsEnabled.begin(), _CoordVarsEnabled.end(), false);
+
         _2DVars = dataMgr->GetDataVarNames(TWOD);
         _2DVarsEnabled.resize(_2DVars.size());
         std::fill(_2DVarsEnabled.begin(), _2DVarsEnabled.end(), false);
+
         _3DVars = dataMgr->GetDataVarNames(THREED);
         _3DVarsEnabled.resize(_3DVars.size());
         std::fill(_3DVarsEnabled.begin(), _3DVarsEnabled.end(), false);
@@ -290,6 +314,8 @@ void PythonVariables::_reset() {
     _scriptName = "";
     _dataMgrName = "";
     _justSaved = false;
+    _coordVars.clear();
+    _coordVarsEnabled.clear();
     _2DVars.clear();
     _2DVarsEnabled.clear();
     _3DVars.clear();
@@ -337,6 +363,8 @@ void PythonVariables::_openScript() {
         VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
         VAPoR::DataMgr *dataMgr = dataStatus->GetDataMgr(_dataMgrName);
 
+        _coordVars = dataMgr->GetCoordVarNames();
+        _coordVarsEnabled.resize(_coordVars.size(), false);
         _2DVars = dataMgr->GetDataVarNames(TWOD);
         _2DVarsEnabled.resize(_2DVars.size(), false);
         _3DVars = dataMgr->GetDataVarNames(THREED);
@@ -346,11 +374,19 @@ void PythonVariables::_openScript() {
 
         for (int i = 0; i < inputVars.size(); i++) {
             string inVar = inputVars[i];
+
+            it = std::find(_coordVars.begin(), _coordVars.end(), inVar);
+            if (it != _coordVars.end()) {
+                int index = it - _coordVars.begin();
+                _coordVarsEnabled[index] = true;
+            }
+
             it = std::find(_2DVars.begin(), _2DVars.end(), inVar);
             if (it != _2DVars.end()) {
                 int index = it - _2DVars.begin();
                 _2DVarsEnabled[index] = true;
             }
+
             it = std::find(_3DVars.begin(), _3DVars.end(), inVar);
             if (it != _3DVars.end()) {
                 int index = it - _3DVars.begin();
@@ -387,20 +423,8 @@ void PythonVariables::_deleteScript() {
         dataMgrName,
         scriptName);
 
-    if (_scriptName == _scriptName) {
-        _script = "";
-        _scriptName = "";
-        _dataMgrName = "";
-
-        _2DVars.clear();
-        _2DVarsEnabled.clear();
-        _3DVars.clear();
-        _3DVarsEnabled.clear();
-        _outputVars.clear();
-        _outputGrids.clear();
-        _inputGrids.clear();
-        _otherGrids.clear();
-    }
+    if (scriptName == _scriptName)
+        reset();
 
     Update(true);
 }
@@ -487,15 +511,19 @@ void PythonVariables::_exportScript() {
 void PythonVariables::_testScript() {
     string script = _scriptEdit->toPlainText().toStdString();
 
-    std::vector<string> inputVars;
-    for (int i = 0; i < _2DVars.size(); i++) {
+    std::vector<string> inputVars = _buildInputVars();
+    /*for (int i=0; i<_coordVars.size(); i++) {
+        if (_coordVarsEnabled[i] == true)
+            inputVars.push_back(_coordVars[i]);
+    }
+    for (int i=0; i<_2DVars.size(); i++) {
         if (_2DVarsEnabled[i] == true)
             inputVars.push_back(_2DVars[i]);
     }
-    for (int i = 0; i < _3DVars.size(); i++) {
+    for (int i=0; i<_3DVars.size(); i++) {
         if (_3DVarsEnabled[i] == true)
             inputVars.push_back(_3DVars[i]);
-    }
+    }*/
 
     if (inputVars.empty() || _outputVars.empty()) {
         MSG_ERR("At least one Input Variable and one "
@@ -535,15 +563,7 @@ void PythonVariables::_testScript() {
 void PythonVariables::_saveScript() {
     string script = _scriptEdit->toPlainText().toStdString();
 
-    std::vector<string> inputVars;
-    for (int i = 0; i < _2DVars.size(); i++) {
-        if (_2DVarsEnabled[i] == true)
-            inputVars.push_back(_2DVars[i]);
-    }
-    for (int i = 0; i < _3DVars.size(); i++) {
-        if (_3DVarsEnabled[i] == true)
-            inputVars.push_back(_3DVars[i]);
-    }
+    std::vector<string> inputVars = _buildInputVars();
 
     int rc = _controlExec->AddFunction(
         _scriptType,
@@ -564,17 +584,26 @@ void PythonVariables::_saveScript() {
     _justSaved = true;
 }
 
-void PythonVariables::_closeScript() {
-    _scriptEdit->clear();
-    _dataMgrName = "";
-    _scriptName = "";
-    _outputVars.clear();
-    _outputGrids.clear();
-    _2DVars.clear();
-    _2DVarsEnabled.clear();
-    _3DVars.clear();
-    _3DVarsEnabled.clear();
+std::vector<string> _buildInputVars() const {
+    std::vector<string> inputVars;
+    for (int i = 0; i < _coordVars.size(); i++) {
+        if (_coordVarsEnabled[i] == true)
+            inputVars.push_back(_coordVars[i]);
+    }
+    for (int i = 0; i < _2DVars.size(); i++) {
+        if (_2DVarsEnabled[i] == true)
+            inputVars.push_back(_2DVars[i]);
+    }
+    for (int i = 0; i < _3DVars.size(); i++) {
+        if (_3DVarsEnabled[i] == true)
+            inputVars.push_back(_3DVars[i]);
+    }
 
+    return inputVars;
+}
+
+void PythonVariables::_closeScript() {
+    reset();
     Update(true);
     close();
 }
@@ -620,6 +649,19 @@ void PythonVariables::_deleteSaveFader() {
         delete _saveFader;
         _saveFader = nullptr;
     }
+}
+
+void PythonVariables::_coordInputVarChanged(int row, int col) {
+    if (col == 0)
+        return;
+
+    string value = _coordInputVarTable->GetValue(row, col);
+    if (value == "1")
+        _coordVarsEnabled[row] = true;
+    else
+        _coordVarsEnabled[row] = false;
+
+    Update(true);
 }
 
 void PythonVariables::_2DInputVarChanged(int row, int col) {
@@ -775,10 +817,23 @@ void PythonVariables::_scriptChanged() {
 }
 
 void PythonVariables::_makeInputTableValues(
+    std::vector<string> &tableValuesCoords,
     std::vector<string> &tableValues2D,
     std::vector<string> &tableValues3D,
     std::vector<string> &summaryValues) const {
     string onOff;
+    for (int i = 0; i < _CoordVars.size(); i++) {
+        tableValuesCoords.push_back(_coordVars[i]);
+
+        onOff = "0";
+        if (_coordVarsEnabled[i]) {
+            onOff = "1";
+            summaryValues.push_back(_coordVars[i]);
+            summaryValues.push_back("Coordinate");
+        }
+        tableValuesCoords.push_back(onOff);
+    }
+
     for (int i = 0; i < _2DVars.size(); i++) {
         tableValues2D.push_back(_2DVars[i]);
 
@@ -790,6 +845,7 @@ void PythonVariables::_makeInputTableValues(
         }
         tableValues2D.push_back(onOff);
     }
+
     for (int i = 0; i < _3DVars.size(); i++) {
         tableValues3D.push_back(_3DVars[i]);
 
