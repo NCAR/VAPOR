@@ -51,6 +51,7 @@ private slots:
     void _deleteVariable();
     void _scriptChanged();
 
+    void _coordInputVarChanged(int row, int col);
     void _2DInputVarChanged(int row, int col);
     void _3DInputVarChanged(int row, int col);
 
@@ -67,6 +68,7 @@ private:
     PythonVariables_::NewItemDialog *      _newItemDialog;
     PythonVariables_::OpenAndDeleteDialog *_openAndDeleteDialog;
 
+    VaporTable *_coordVarTable;
     VaporTable *_2DInputVarTable;
     VaporTable *_3DInputVarTable;
     VaporTable *_summaryTable;
@@ -78,6 +80,8 @@ private:
 
     bool _justSaved;
 
+    std::vector<string> _coordVars;
+    std::vector<string> _coordVarsEnabled;
     std::vector<string> _2DVars;
     std::vector<bool>   _2DVarsEnabled;
     std::vector<string> _3DVars;
@@ -89,9 +93,10 @@ private:
 
     void                _connectWidgets();
     void                _setGUIEnabled(bool enabled);
-    void                _makeInputTableValues(std::vector<string> &tableValues2D, std::vector<string> &tableValues3D, std::vector<string> &summaryValues) const;
+    void                _makeInputTableValues(std::vector<string> &tableValuesCoords, std::vector<string> &tableValues2D, std::vector<string> &tableValues3D, std::vector<string> &summaryValues) const;
     void                _makeOutputTableValues(std::vector<string> &outputValues) const;
     std::vector<string> _makeDialogOptions(std::vector<string> grids);
+    std::vector<string> _buildInputVars() const;
     int                 _checkForDuplicateNames(std::vector<string> names, string name);
     bool                _isGridSelected(string grid, std::vector<string> selectedVars, std::vector<bool> varEnabled) const;
     void                _saveToSession();

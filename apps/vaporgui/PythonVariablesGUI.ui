@@ -575,9 +575,34 @@
          <item>
           <widget class="QTabWidget" name="tabWidget">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
-           <widget class="QWidget" name="tab">
+           <widget class="QWidget" name="_coordTb">
+            <attribute name="title">
+             <string>Coordinates</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_19">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QTableWidget" name="_coordVarTable"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="_2DTab">
             <attribute name="title">
              <string>2D</string>
             </attribute>
@@ -602,7 +627,7 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="tab_2">
+           <widget class="QWidget" name="_3DTab">
             <attribute name="title">
              <string>3D</string>
             </attribute>
@@ -627,7 +652,7 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="tab_3">
+           <widget class="QWidget" name="_summaryTab">
             <attribute name="title">
              <string>Summary</string>
             </attribute>
@@ -652,6 +677,60 @@
              </item>
             </layout>
            </widget>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_25">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Use Coordinate Variables</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="_useCoordVarCheckbox">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
