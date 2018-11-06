@@ -1,6 +1,9 @@
 #include "vapor/DVRenderer.h"
 #include "vapor/GetAppPath.h"
 
+#include <chrono>
+#include <ctime>
+
 using namespace VAPoR;
 
 //
@@ -32,6 +35,9 @@ void DVRenderer::_loadShaders()
     _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
     _3rdPassMode1ShaderId = _compileShaders(VShader3rdPassMode1.data(), FShader3rdPassMode1.data());
     _3rdPassMode2ShaderId = _compileShaders(VShader3rdPassMode2.data(), FShader3rdPassMode2.data());
+
+    auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    std::cout << std::endl << "Shaders compiled at: " << ctime(&timenow) << std::endl;
 }
 
 void DVRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
