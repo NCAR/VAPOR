@@ -1,6 +1,6 @@
 #version 410 core
 
-in vec4 positionClip;   // vertex position in the clip space
+in vec4 gl_FragCoord;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
@@ -14,6 +14,7 @@ uniform vec2  colorMapRange;     // min and max values on this color map
 uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
 uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
+uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
 uniform float stepSize1D;       // ray casting step size
@@ -35,7 +36,7 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  volumeDimsf      = vec3( float(volumeDims.x), float(volumeDims.y), float(volumeDims.z) );
+vec3  volumeDimsf      = vec3( volumeDims );
 
 //
 // Input:  normalized value w.r.t. valueRange.
@@ -125,12 +126,10 @@ void main(void)
     vec3  lightDirEye   = vec3(0.0f, 0.0f, 1.0f); 
 
     // Get UV coordinates of this frament
-    if( positionClip.w == 0.0f )
-        discard;
-    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
+    vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
-    vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
+    vec3 stopTexture    = texture( backFaceTexture,  fragTexture ).xyz;
+    vec3 startTexture   = texture( frontFaceTexture, fragTexture ).xyz;
     vec3 rayDirTexture  = stopTexture - startTexture;
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )

@@ -839,6 +839,9 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *MVP, const
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
     glUniform3iv(uniformLocation, 1, volumeDimensions);
 
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "viewportDims");
+    glUniform2iv(uniformLocation, 1, _currentViewport + 2);
+
     float stepSize1D = 0.005f;    // This is like ~200 samples
     if (!fast)                    // Calculate a better step size if in fast rendering mode
     {
