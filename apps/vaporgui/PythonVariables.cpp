@@ -502,6 +502,17 @@ void PythonVariables::_testScript()
         return;
     }
 
+    //
+    // Get any output from script
+    //
+    string s = _controlExec->GetFunctionStdout(_scriptType, _dataMgrName, _scriptName);
+    if (!s.empty()) {
+        QMessageBox msgBox;
+        msgBox.setText("Script output:");
+        msgBox.setInformativeText(s.c_str());
+        msgBox.exec();
+    }
+
     bool fadeIn = true;
     _fadeTestLabel(fadeIn);
 
