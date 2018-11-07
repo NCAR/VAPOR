@@ -65,6 +65,9 @@ void DVRenderer::_3rdPassSpecialHandling( bool fast, long castingMode )
         bool lighting           = params->GetLighting();
         glUniform1i( uniformLocation, int(lighting) );
 
+        uniformLocation = glGetUniformLocation( _3rdPassShaderId, "viewportDims" );
+        glUniform2iv( uniformLocation, 1, _currentViewport + 2 );
+
         if( lighting )
         {
             std::vector<double> coeffsD = params->GetLightingCoeffs();

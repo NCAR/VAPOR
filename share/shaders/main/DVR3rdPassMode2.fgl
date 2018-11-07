@@ -1,7 +1,7 @@
 #version 410 core
 
 in vec4 positionClip;   // vertex position in the clip space
-in vec4 positionModel;  // vertex position in the clip space
+in vec4 positionModel;  // vertex position in the model space
 flat in ivec4 provokingVertexIdx;
 layout(location = 0) out vec4 color;
 
@@ -13,12 +13,13 @@ uniform sampler1D       colorMapTexture;
 uniform samplerBuffer   xyCoordsTexture;
 uniform samplerBuffer   zCoordsTexture;
 
-uniform vec2 valueRange;        // min and max values of this variable
-uniform vec2 colorMapRange;     // min and max values on this color map
-uniform vec3 boxMin;            // min coordinates of the bounding box of this volume
-uniform vec3 boxMax;            // max coordinates of the bounding box of this volume
-uniform ivec3 volumeDims;       // number of vertices in this volume
-uniform vec4 clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec2  valueRange;        // min and max values of this variable
+uniform vec2  colorMapRange;     // min and max values on this color map
+uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
+uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
+uniform ivec3 volumeDims;        // number of vertices in this volume
+uniform ivec2 viewportDims;      // width and height of this viewport
+uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
 uniform float stepSize1D;       // ray casting step size
 uniform bool  lighting;         // apply lighting or not
@@ -89,8 +90,8 @@ bool ShouldSkip( const in vec3 tc )
 //
 vec3 CalculateGradient( const in vec3 tc)
 {
-    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
-    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
+    vec3 h0 = vec3(-0.5 ) * volumeStepf;
+    vec3 h1 = vec3( 0.5 ) * volumeStepf;
     vec3 h  = vec3( 1.0 );
 
     if ((tc.x + h0.x) < 0.0) {
