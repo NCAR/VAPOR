@@ -18,6 +18,24 @@ using namespace VAPoR;
 
 namespace {
 
+struct varinfo_t {
+ varinfo_t() {
+	_g = NULL;
+	_name.clear();
+	_dims.clear();
+	_coordNames.clear();
+	_coordAxes.clear();
+	_coordDims.clear();
+ }
+
+ Grid *_g;
+ string _name;
+ vector <size_t> _dims;
+ vector <string> _coordNames;
+ vector <int> _coordAxes;
+ vector <vector <size_t> > _coordDims;
+};
+
 void free_arrays(vector <float *> &arrays) {
 	for (int i=0; i<arrays.size(); i++) {
 		if (arrays[i]) {
@@ -40,9 +58,8 @@ int alloc_arrays(
 ) {
 	arrays.clear();
 
-	size_t nElements = 1;
 	for (int i=0; i<dimsVectors.size(); i++) {
-		nElements *= VProduct(dimsVectors[i]);
+		size_t nElements = VProduct(dimsVectors[i]);
 
 		float *buf = new(nothrow) float[nElements];
 		if (! buf) {
@@ -77,35 +94,6 @@ int alloc_arrays(
 	return(0);
 }
 
-
-void grid2c(
-	const vector <Grid *> &variables,
-	const vector <float *> &inputVarArrays
-) {
-	assert(variables.size() == inputVarArrays.size());
-
-	for (int i=0; i<variables.size(); i++) {
-		Grid::ConstIterator itr = variables[i]->cbegin();
-		Grid::ConstIterator enditr = variables[i]->cend();
-
-		float *bufptr = inputVarArrays[i];
-
-		// Copy data. Missing values are always set to infinity for
-		// easier Python handling
-		//
-		float mv = variables[i]->GetMissingValue();
-		for (; itr!=enditr; ++itr) {
-			if (variables[i]->HasMissingData() && *itr == mv) {
-				*bufptr = std::numeric_limits<double>::infinity();
-			}
-			else {
-				*bufptr = *itr;
-			}
-			bufptr++;
-		}
-	}
-}
-
 void copy_region(
 	const float *src,
 	float *dst,
@@ -125,12 +113,133 @@ void copy_region(
 	}
 }
 
-struct varinfo {
-	Grid *_g;
-	string _name;
-	vector <string> _coordnames;
-	vector <int> _axes;
-};
+void copy_coord(
+	const Grid *g,
+	int axis,
+	float *dst
+) {
+	vector <size_t> dims = g->GetCoordDimensions(axis); 
+
+	vector <size_t> min;
+	vector <size_t> max;
+	for (int i=0; i<dims.size(); i++) {
+		min.push_back(0);
+		max.push_back(dims[i] - 1);
+	}
+				
+	// Fetch user coordinates from grid. Note: assumes that if coordinate
+	// dimensions are less than grid dimensions than the coordinate
+
+	vector <size_t> index = min;
+	for (size_t i=0; i < VProduct(Dims(min, max)); i++) {
+
+		dst[i] = g->GetUserCoordinate(index, axis);
+
+        index = IncrementCoords(min, max, index);
+	}
+}
+
+void grid2c(
+	const vector <varinfo_t> &varInfoVec,
+	const vector <float *> &inputVarArrays
+) {
+
+	int idx = 0;
+	for (int i=0; i<varInfoVec.size(); i++) {
+		const varinfo_t &vref = varInfoVec[i];
+
+		Grid *g = vref._g;
+
+		Grid::ConstIterator itr = g->cbegin();
+		Grid::ConstIterator enditr = g->cend();
+
+		assert(idx < inputVarArrays.size());
+		float *bufptr = inputVarArrays[idx];
+
+		// Copy data. Missing values are always set to infinity for
+		// easier Python handling
+		//
+		float mv = g->GetMissingValue();
+		for (; itr!=enditr; ++itr) {
+			if (g->HasMissingData() && *itr == mv) {
+				*bufptr = std::numeric_limits<double>::infinity();
+			}
+			else {
+				*bufptr = *itr;
+			}
+			bufptr++;
+		}
+
+		idx++;
+		for (int j=0; j<vref._coordNames.size(); j++) {
+			assert(idx < inputVarArrays.size());
+			float *bufptr = inputVarArrays[idx];
+
+			copy_coord(g, vref._coordAxes[j], bufptr);
+
+			idx++;
+		}
+	}
+}
+
+void get_var_info(
+	DataMgr *dataMgr,
+	const vector <Grid *> &gs, const vector <string> &varNames,
+	bool coordFlag, vector <varinfo_t> &varinfoVec
+) {
+	varinfoVec.clear();
+
+	assert(gs.size() == varNames.size());
+
+	// Need to keep track of all coordinate variables. We generate a 
+	// unique list
+	//
+	vector <string> allCoordVars;
+
+	// Build a vector of grids and *unique* coordinate variables
+	//
+	for (int i=0; i<gs.size(); i++) {
+		varinfo_t varinfo;
+		varinfo._g = gs[i];
+		varinfo._name = varNames[i];
+		varinfo._dims = gs[i]->GetDimensions();
+
+		varinfo._coordNames.clear();
+		varinfo._coordAxes.clear();
+		varinfo._coordDims.clear();
+
+		if (! coordFlag) {
+			varinfoVec.push_back(varinfo);
+			continue;
+		}
+
+		DC::DataVar dvar;
+		bool ok = dataMgr->GetDataVarInfo(varNames[i], dvar);
+		assert(ok);
+
+		DC::Mesh m;
+		ok = dataMgr->GetMesh(dvar.GetMeshName(), m);
+		assert(ok);
+
+		vector <string> coordNames = m.GetCoordVars();
+		for (int j=0; j<coordNames.size(); j++) {
+			vector <string>::iterator itr;
+			itr = find(allCoordVars.begin(),allCoordVars.end(), coordNames[j]);
+
+			if (itr != allCoordVars.end()) continue;
+
+			DC::CoordVar cvar;
+			ok = dataMgr->GetCoordVarInfo(coordNames[j], cvar);
+			assert(ok);
+
+			varinfo._coordNames.push_back(coordNames[j]);
+			varinfo._coordAxes.push_back(cvar.GetAxis());
+			varinfo._coordDims.push_back(gs[i]->GetCoordDimensions(cvar.GetAxis()));
+		}
+		varinfoVec.push_back(varinfo);
+	}
+}
+
 
 
 };
@@ -158,12 +267,13 @@ int PyEngine::AddFunction(
 	string script,
 	const vector <string> &inputVarNames,
 	const vector <string> &outputVarNames,
-	const vector <string> &outputVarMeshes
+	const vector <string> &outputVarMeshes,
+	bool coordFlag
 ) {
 	assert(outputVarNames.size() == outputVarMeshes.size());
 
-cout << "PyEngine::AddFunction() " << name << endl;
-cout << "	" << script << endl;
+//cout << "PyEngine::AddFunction() " << name << endl;
+//cout << "	" << script << endl;
 
 	// No-op if not defined
 	//
@@ -198,7 +308,8 @@ cout << "	" << script << endl;
 		string vname = outputVarNames[i];
 		DerivedPythonVar *dvar = new DerivedPythonVar(
 			vname, "", DC::XType::FLOAT, outputVarMeshes[i],
-			timeCoordVarName, true, inputVarNames, script, _dataMgr
+			timeCoordVarName, true, inputVarNames, script, _dataMgr,
+			coordFlag
 		);
 		dvars.push_back(dvar);
 
@@ -212,7 +323,8 @@ cout << "	" << script << endl;
 			
 
 	_functions[name] = func_c(
-		name, script, inputVarNames, outputVarNames, outputVarMeshes, dvars
+		name, script, inputVarNames, outputVarNames, outputVarMeshes, dvars,
+		coordFlag
 	);
 
 	return(0);
@@ -263,7 +375,8 @@ bool PyEngine::GetFunctionScript(
 	string &script,
 	std::vector <string> &inputVarNames,
 	std::vector <string> &outputVarNames,
-	std::vector <string> &outputMeshNames
+	std::vector <string> &outputMeshNames,
+	bool &coordFlag
 ) const {
 	script.clear();
 	inputVarNames.clear();
@@ -280,8 +393,22 @@ bool PyEngine::GetFunctionScript(
 	inputVarNames = func._inputVarNames;
 	outputVarNames = func._outputVarNames;
 	outputMeshNames = func._outputMeshNames;
+	coordFlag = func._coordFlag;
 
 	return(true);
+}
+
+string PyEngine::GetFunctionStdout(string name) const {
+	map<string, func_c>::const_iterator itr = _functions.find(name);
+
+	if (itr == _functions.cend()) return("");
+	const func_c &func = itr->second;
+
+	string s;
+	for (int i=0; i<func._derivedVars.size(); i++) {
+		s += func._derivedVars[i]->GetScriptStdout();
+	}
+	return(s);
 }
 
 PyEngine::~PyEngine() {
@@ -306,7 +433,10 @@ int PyEngine::Calculate(
 	assert (outputVarNames.size() == outputVarDims.size());
 	assert (outputVarNames.size() == outputVarArrays.size());
 
-cout << "PyEngine::Calculate() " << script << endl;
+	vector <string> allNames = inputVarNames;
+	allNames.insert(allNames.end(), outputVarNames.begin(), outputVarNames.end());
+
+//cout << "PyEngine::Calculate() " << script << endl;
 
     // Convert the input arrays and put into dictionary:
 	//
@@ -348,12 +478,12 @@ cout << "PyEngine::Calculate() " << script << endl;
 	//
 	rc = _python2c(mainDict, outputVarNames, outputVarDims, outputVarArrays);
 	if (rc<0) {
-		_cleanupDict(mainDict, inputVarNames);
+		_cleanupDict(mainDict, allNames);
 		return(-1);
 	}
 
 
-	_cleanupDict(mainDict, inputVarNames);
+	_cleanupDict(mainDict, allNames);
 
 	return(0);
 }
@@ -465,7 +595,8 @@ PyEngine::DerivedPythonVar::DerivedPythonVar(
 	bool hasMissing,
 	std::vector <string> inNames,
 	string script,
-	DataMgr *dataMgr
+	DataMgr *dataMgr,
+	bool coordFlag
 ) : DerivedDataVar(varName), 
 	_varInfo(varName, units, type, "", std::vector <size_t> (),
 	std::vector <bool> (), mesh, time_coord_var, DC::Mesh::NODE)
@@ -473,8 +604,10 @@ PyEngine::DerivedPythonVar::DerivedPythonVar(
 	_inNames = inNames;
 	_script = script;
 	_dataMgr = dataMgr;
+	_coordFlag = coordFlag;
 	_dims.clear();
 	_meshMatchFlag = false;
+	_stdoutString.clear();
 	if (hasMissing) {
 		_varInfo.SetHasMissing(true);
 		_varInfo.SetMissingValue(std::numeric_limits<double>::infinity());
@@ -583,6 +716,8 @@ int PyEngine::DerivedPythonVar::CloseVariable(int fd) {
 	return(0);
 }
 
+
+
 int PyEngine::DerivedPythonVar::_readRegionAll(
 	int fd,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
@@ -602,9 +737,22 @@ int PyEngine::DerivedPythonVar::_readRegionAll(
 	);
 	if (rc<0) return(-1);
 
+	vector <varinfo_t> varInfoVec;
+	get_var_info(
+		_dataMgr, variables, _inNames, _coordFlag, varInfoVec
+	);
+
 	vector <vector <size_t> > inputVarDims;
-	for (int i=0; i<variables.size(); i++) {
-		inputVarDims.push_back(variables[i]->GetDimensions());
+	vector <string> inputNames;
+	for (int i=0; i<varInfoVec.size(); i++) {
+		const varinfo_t &vref = varInfoVec[i];
+
+		inputNames.push_back(vref._name);
+		inputVarDims.push_back(vref._dims);
+		for (int j=0; j<vref._coordNames.size(); j++) {
+			inputNames.push_back(vref._coordNames[j]);
+			inputVarDims.push_back(vref._coordDims[j]);
+		}
 	}
 
 	vector <size_t> dims, dummy;
@@ -622,13 +770,24 @@ int PyEngine::DerivedPythonVar::_readRegionAll(
 		return(-1);
 	}
 
-	grid2c(variables, inputVarArrays);
+	grid2c(varInfoVec, inputVarArrays);
+
+	//
+	// clear stdout from static class
+	//
+	(void) MyPython::Instance()->PyOut();
 
 	vector <string> outputVarNames = {_derivedVarName};
 	rc = PyEngine::Calculate(
-		_script, _inNames, inputVarDims, inputVarArrays,
+		_script, inputNames, inputVarDims, inputVarArrays,
 		outputVarNames, outputVarDims, outputVarArrays
 	);
+
+	//
+	// Capture any stdout
+	//
+	_stdoutString = MyPython::Instance()->PyOut().c_str();
+
 	if (rc<0) {
 		DataMgrUtils::UnlockGrids(_dataMgr, variables);
 		free_arrays(inputVarArrays, outputVarArrays);
@@ -639,6 +798,7 @@ int PyEngine::DerivedPythonVar::_readRegionAll(
 
 	DataMgrUtils::UnlockGrids(_dataMgr, variables);
 	free_arrays(inputVarArrays, outputVarArrays);
+
 
 	return(0);
 }
@@ -662,37 +822,76 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(
 	);
 	if (rc<0) return(-1);
 
+	vector <varinfo_t> varInfoVec;
+	get_var_info(
+		_dataMgr, variables, _inNames, _coordFlag, varInfoVec
+	);
+
 	vector <vector <size_t> > inputVarDims;
-	for (int i=0; i<variables.size(); i++) {
-		inputVarDims.push_back(Dims(min, max));
+	vector <string> inputNames;
+	for (int i=0; i<varInfoVec.size(); i++) {
+		const varinfo_t &vref = varInfoVec[i];
+
+		inputNames.push_back(vref._name);
+		inputVarDims.push_back(vref._dims);
+		for (int j=0; j<vref._coordNames.size(); j++) {
+			inputNames.push_back(vref._coordNames[j]);
+			inputVarDims.push_back(vref._coordDims[j]);
+		}
 	}
 
-	vector <vector <size_t> > outputVarDims = {Dims(min, max)};
+	// output and input variable(s) (if they exist) are all defined
+	// on the same mesh (they have same dimensions)
+	//
+	vector <vector <size_t> > outputVarDims;
+	if (inputVarDims.size()) {
+		outputVarDims.push_back(inputVarDims[0]);
+	}
+	else {
+		outputVarDims.push_back(Dims(min,max));
+	}
+	
 
 	vector <float *> inputVarArrays;
-	rc = alloc_arrays(inputVarDims, inputVarArrays);
+	vector <float *> outputVarArrays;
+	rc = alloc_arrays(
+		inputVarDims, outputVarDims, inputVarArrays, outputVarArrays
+	);
 	if (rc<0) {
 		SetErrMsg("Error allocating  memory");
 		DataMgrUtils::UnlockGrids(_dataMgr, variables);
 		return(-1);
 	}
 
-	grid2c(variables, inputVarArrays);
+	grid2c(varInfoVec, inputVarArrays);
+
+	//
+	// clear stdout from static class
+	//
+	(void) MyPython::Instance()->PyOut();
 
 	vector <string> outputVarNames = {_derivedVarName};
-	vector <float *> outputVarArrays = {region};
 	rc = PyEngine::Calculate(
-		_script, _inNames, inputVarDims, inputVarArrays,
+		_script, inputNames, inputVarDims, inputVarArrays,
 		outputVarNames, outputVarDims, outputVarArrays
 	);
+
+	//
+	// Capture any stdout
+	//
+	_stdoutString = MyPython::Instance()->PyOut().c_str();
+
 	if (rc<0) {
 		DataMgrUtils::UnlockGrids(_dataMgr, variables);
-		free_arrays(inputVarArrays);	// output arrays aren't owned by us
+		free_arrays(inputVarArrays, outputVarArrays);
 		return(-1);
 	}
 
+	copy_region(outputVarArrays[0], region, min, max, outputVarDims[0]);
+
 	DataMgrUtils::UnlockGrids(_dataMgr, variables);
-	free_arrays(inputVarArrays);	// output arrays aren't owned by us
+	free_arrays(inputVarArrays, outputVarArrays);
+
 
 	return(0);
 }
