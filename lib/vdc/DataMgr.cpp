@@ -2115,7 +2115,7 @@ T *DataMgr::_get_region_from_fs(
             grid_max, blks);
     }
     if (rc < 0) {
-        _free_region(ts, varname, level, lod, grid_bmin, grid_bmax);
+        _free_region(ts, varname, level, lod, grid_bmin, grid_bmax, true);
         return (NULL);
     }
 
@@ -2245,7 +2245,7 @@ void *DataMgr::_alloc_region(
 
     // Free region already exists
     //
-    _free_region(ts, varname, level, lod, bmin, bmax);
+    _free_region(ts, varname, level, lod, bmin, bmax, true);
 
     size_t size = element_sz;
     for (int i = 0; i < bmin.size(); i++) {
@@ -2284,7 +2284,8 @@ void DataMgr::_free_region(
     int level,
     int lod,
     vector<size_t> bmin,
-    vector<size_t> bmax) {
+    vector<size_t> bmax,
+    bool forceFlag) {
 
     list<region_t>::iterator itr;
     for (itr = _regionsList.begin(); itr != _regionsList.end(); itr++) {
@@ -2297,7 +2298,7 @@ void DataMgr::_free_region(
             region.bmin == bmin &&
             region.bmax == bmax) {
 
-            if (region.lock_counter == 0) {
+            if (region.lock_counter == 0 || forceFlag) {
                 if (region.blks)
                     _blk_mem_mgr->FreeMem(region.blks);
 
