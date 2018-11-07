@@ -7,8 +7,10 @@
 #include "PythonVariablesParams.h"
 #include "VaporTable.h"
 
+#include <QThread>
 #include <QDialog>
 #include <QMenuBar>
+#include <QComboBox>
 #include <QMenu>
 
 //
@@ -36,31 +38,39 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     void _newScript();
     void _openScript();
     void _deleteScript();
-    void _importScript() { cout << "Import" << endl; }
-    void _exportScript() { cout << "Export" << endl; }
+    void _importScript();
+    void _exportScript();
+    bool _getFilePath(QString &filePath, bool operation = true);
     void _testScript();
-    void _applyScript();
-
-    void _saveScript(int index);
+    void _saveScript();
+    void _closeScript();
+    void _updateSaveLabelColor(int r, int g, int b);
+    void _updateTestLabelColor(int r, int g, int b);
 
     void _createNewVariable();
     void _deleteVariable();
     void _scriptChanged();
 
+    void _coordInputVarChanged(int row, int col);
     void _2DInputVarChanged(int row, int col);
     void _3DInputVarChanged(int row, int col);
 
-    void _deleteFader();
+    void _coordinatesCheckboxClicked(int state);
+
+    void _deleteSaveFader();
+    void _deleteTestFader();
 
   private:
     const QColor *_background;
 
     VAPoR::ControlExec *_controlExec;
 
-    PythonVariables_::Fader *_fader;
+    PythonVariables_::Fader *_saveFader;
+    PythonVariables_::Fader *_testFader;
     PythonVariables_::NewItemDialog *_newItemDialog;
     PythonVariables_::OpenAndDeleteDialog *_openAndDeleteDialog;
 
+    VaporTable *_coordInputVarTable;
     VaporTable *_2DInputVarTable;
     VaporTable *_3DInputVarTable;
     VaporTable *_summaryTable;
@@ -72,6 +82,8 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
 
     bool _justSaved;
 
+    std::vector<string> _coordVars;
+    std::vector<bool> _coordVarsEnabled;
     std::vector<string> _2DVars;
     std::vector<bool> _2DVarsEnabled;
     std::vector<string> _3DVars;
@@ -84,6 +96,7 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
     void _connectWidgets();
     void _setGUIEnabled(bool enabled);
     void _makeInputTableValues(
+        std::vector<string> &tableValuesCoords,
         std::vector<string> &tableValues2D,
         std::vector<string> &tableValues3D,
         std::vector<string> &summaryValues) const;
@@ -91,6 +104,7 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
         std::vector<string> &outputValues) const;
     std::vector<string> _makeDialogOptions(
         std::vector<string> grids);
+    std::vector<string> _buildInputVars() const;
     int _checkForDuplicateNames(
         std::vector<string> names,
         string name);
@@ -99,37 +113,40 @@ class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
         std::vector<string> selectedVars,
         std::vector<bool> varEnabled) const;
     void _saveToSession();
-    void _saveToFile();
 
     void _updateNewItemDialog();
+    void _updateLabelColor(int r, int g, int b, QLabel *label);
     void _updateInputVarTable(){};
     void _updateOutputVarTable(){};
     void _updatePythonScript(){};
 
-    void _fade(bool fadeIn);
+    void _fadeTestLabel(bool fadeIn);
+    void _fadeSaveLabel(bool fadeIn);
+
+    void _reset();
 };
 
 namespace PythonVariables_ {
 
-class Fader : public QObject {
+class Fader : public QThread {
     Q_OBJECT
 
   public:
     Fader(
         bool fadeIn,
-        QLabel *label,
         QColor background,
+        QColor textColor,
         QObject *parent = 0);
-    ~Fader();
-    void Start();
+
+    virtual void run();
 
   signals:
+    void cycle(int r, int g, int b);
     void faderDone();
 
   private:
     bool _fadeIn;
-    QThread *_thread;
-    QLabel *_myLabel;
+    QColor _textColor;
     QColor _background;
 
   private slots:
@@ -205,8 +222,11 @@ class OpenAndDeleteDialog : public QDialog {
     QPushButton *_okButton;
     QPushButton *_cancelButton;
 
+    VAPoR::ControlExec *_controlExec;
+
   private slots:
     void _okClicked();
+    void _updateOptions(int index);
 };
 
 } // namespace PythonVariables_
