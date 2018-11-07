@@ -50,6 +50,23 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
     }
 }
 
+float UnstructuredGrid2D::GetUserCoordinate(std::vector<size_t> &index, size_t dim) const
+{
+    if (dim == 0) {
+        return (_xug.AccessIndex(index));
+    } else if (dim == 1) {
+        return (_yug.AccessIndex(index));
+    } else if (dim == 2) {
+        if (GetGeometryDim() == 3) {
+            return (_zug.AccessIndex(index));
+        } else {
+            return (0.0);
+        }
+    } else {
+        return (0.0);
+    }
+}
+
 size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
 
 void UnstructuredGrid2D::GetUserExtents(vector<double> &minu, vector<double> &maxu) const

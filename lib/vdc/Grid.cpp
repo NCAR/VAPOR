@@ -42,6 +42,7 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     _interpolationOrder = 0;
     _nodeIDOffset = 0;
     _cellIDOffset = 0;
+    _minAbs = vector<size_t>(_dims.size(), 0);
 
     //
     // Shallow  copy blocks

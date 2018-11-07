@@ -49,6 +49,20 @@ vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
     }
 }
 
+float UnstructuredGridLayered::GetUserCoordinate(std::vector<size_t> &index, size_t dim) const
+{
+    if (dim == 0) {
+        return (_ug2d.GetUserCoordinate(index, dim));
+    } else if (dim == 1) {
+        return (_ug2d.GetUserCoordinate(index, dim));
+    } else if (dim == 2) {
+        ClampIndex(vector<size_t>(1, GetDimensions()[2]), index);
+        return (_zug.AccessIndex(index));
+    } else {
+        return (0.0);
+    }
+}
+
 size_t UnstructuredGridLayered::GetGeometryDim() const { return (3); }
 
 void UnstructuredGridLayered::GetUserExtents(vector<double> &minu, vector<double> &maxu) const

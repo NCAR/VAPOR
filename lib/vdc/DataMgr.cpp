@@ -1251,6 +1251,14 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     assert(rg);
 
     //
+    // Inform the grid of the offsets from the larger mesh to the
+    // mesh subset contained in g. In general, gmin<=min
+    //
+    vector<size_t> gmin, gmax;
+    map_blk_to_vox(bsvec[0], roi_dims, bminvec[0], bmaxvec[0], gmin, gmax);
+    rg->SetMinAbs(gmin);
+
+    //
     // Safe to remove locks now that were not explicitly requested
     //
     if (!lock) {
