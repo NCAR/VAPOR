@@ -47,6 +47,11 @@ class VDF_API UnstructuredGridCoordless : public UnstructuredGrid {
         return (std::vector<size_t>(1, 1));
     }
 
+    virtual float GetUserCoordinate(
+        std::vector<size_t> &index, size_t dim) const override {
+        return (0.0);
+    }
+
     static std::string GetClassType() {
         return ("UnstructuredCoordless");
     }
