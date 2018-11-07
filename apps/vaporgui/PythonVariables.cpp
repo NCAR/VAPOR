@@ -2,6 +2,9 @@
 #include "ui_PythonVariablesGUI.h"
 
 #include <ctime>
+#include <fstream>
+
+#include <QDebug>
 #include <QLineEdit>
 #include <QThread>
 #include <QFileDialog>
@@ -11,6 +14,9 @@
 #include <vapor/GetAppPath.h>
 #include "ErrorReporter.h"
 #include "FileOperationChecker.h"
+
+#define READ true
+#define WRITE false
 
 #define TWOD 2
 #define THREED 3
@@ -30,15 +36,14 @@ PythonVariables::PythonVariables(
     QWidget *parent) : QDialog(parent), Ui_PythonVariablesGUI() {
     setupUi(this);
 
-    _saveScriptCombo->hide();
-
     setWindowTitle("Derived variables with Python");
 
     _script = "";
     _scriptName = "";
     _dataMgrName = "";
 
-    _fader = nullptr;
+    _saveFader = nullptr;
+    _testFader = nullptr;
 
     _newItemDialog = new ::NewItemDialog(this);
     _openAndDeleteDialog = new ::OpenAndDeleteDialog(this);
@@ -49,6 +54,9 @@ PythonVariables::PythonVariables(
     QPalette labelPalette = _scriptSaveLabel->palette();
     labelPalette.setColor(_scriptSaveLabel->foregroundRole(), background);
     _scriptSaveLabel->setPalette(labelPalette);
+    labelPalette = _scriptTestLabel->palette();
+    labelPalette.setColor(_scriptTestLabel->foregroundRole(), background);
+    _scriptTestLabel->setPalette(labelPalette);
 
     std::vector<string> imagePathVec = {"images"};
     string imagePath = GetAppPath("VAPOR", "share", imagePathVec);
@@ -56,12 +64,14 @@ PythonVariables::PythonVariables(
     QPixmap thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
 
-    _saveScriptCombo->setEditable(true);
-    _saveScriptCombo->lineEdit()->setAlignment(Qt::AlignCenter);
-    for (int i = 0; i < _saveScriptCombo->count(); ++i) {
-        _saveScriptCombo->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
-    }
-    _saveScriptCombo->setEditable(false);
+    _variableTabs->removeTab(0);
+    ;
+
+    _coordInputVarTable = new VaporTable(_coordVarTable, false, true);
+    _coordInputVarTable->Reinit(
+        (VaporTable::ValidatorFlags)(0),
+        (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE),
+        (VaporTable::HighlightFlags)(0));
 
     _2DInputVarTable = new VaporTable(_2DVarTable, false, true);
     _2DInputVarTable->Reinit(
@@ -88,9 +98,15 @@ PythonVariables::PythonVariables(
         (VaporTable::HighlightFlags)(VaporTable::ROWS));
 
     _connectWidgets();
+
+    setModal(true);
 }
 
 PythonVariables::~PythonVariables() {
+    if (_coordInputVarTable) {
+        delete _coordInputVarTable;
+        _coordInputVarTable = nullptr;
+    }
     if (_2DInputVarTable) {
         delete _2DInputVarTable;
         _2DInputVarTable = nullptr;
@@ -123,13 +139,19 @@ void PythonVariables::Update(bool internalUpdate) {
 
     int numRows;
     int numCols = 2;
-    std::vector<string> tableValues2D, tableValues3D, summaryValues;
-    _makeInputTableValues(tableValues2D, tableValues3D, summaryValues);
+    std::vector<string> tableValuesCoords, tableValues2D;
+    std::vector<string> tableValues3D, summaryValues;
+    _makeInputTableValues(
+        tableValuesCoords, tableValues2D, tableValues3D, summaryValues);
 
+    _coordInputVarTable->blockSignals(true);
     _2DInputVarTable->blockSignals(true);
     _3DInputVarTable->blockSignals(true);
     _summaryTable->blockSignals(true);
     _outputVarTable->blockSignals(true);
+
+    numRows = _coordVars.size();
+    _coordInputVarTable->Update(numRows, numCols, tableValuesCoords);
 
     numRows = _2DVars.size();
     _2DInputVarTable->Update(numRows, numCols, tableValues2D);
@@ -146,30 +168,59 @@ void PythonVariables::Update(bool internalUpdate) {
     _outputVarTable->Update(numRows, numCols, outputValues);
     _outputVarTable->StretchToColumn(1);
 
+    _coordInputVarTable->blockSignals(false);
     _2DInputVarTable->blockSignals(false);
     _3DInputVarTable->blockSignals(false);
     _summaryTable->blockSignals(false);
     _outputVarTable->blockSignals(false);
 
     if (_justSaved && internalUpdate) {
-        cout << "fading out " << endl;
         bool fadeIn = false;
-        _fade(fadeIn);
+        _fadeTestLabel(fadeIn);
+        _fadeSaveLabel(fadeIn);
         _justSaved = false;
     }
 }
 
-void PythonVariables::_fade(bool fadeIn) {
-    return;
-    while (_fader != nullptr) {
-        cout << "waiting";
-    }
-    //if (_fader) return;
+void PythonVariables::_fadeTestLabel(bool fadeIn) {
+    if (_testFader != nullptr)
+        return;
+
     QColor background = palette().color(QWidget::backgroundRole());
-    _fader = new Fader(fadeIn, _scriptSaveLabel, background);
-    connect(_fader, SIGNAL(faderDone()),
-            this, SLOT(_deleteFader()));
-    _fader->Start();
+
+    QColor textColor;
+    if (fadeIn)
+        textColor = QColor(0, 0, 255);
+    else
+        textColor = _scriptTestLabel->palette().color(QPalette::WindowText);
+
+    _testFader = new Fader(fadeIn, background, textColor);
+
+    connect(_testFader, SIGNAL(cycle(int, int, int)),
+            this, SLOT(_updateTestLabelColor(int, int, int)));
+    connect(_testFader, SIGNAL(faderDone()),
+            this, SLOT(_deleteTestFader()));
+    _testFader->start(QThread::IdlePriority);
+}
+
+void PythonVariables::_fadeSaveLabel(bool fadeIn) {
+    if (_saveFader != nullptr)
+        return;
+
+    QColor background = palette().color(QWidget::backgroundRole());
+
+    QColor textColor;
+    if (fadeIn)
+        textColor = QColor(0, 0, 255);
+    else
+        textColor = _scriptSaveLabel->palette().color(QPalette::WindowText);
+    _saveFader = new Fader(fadeIn, background, textColor);
+
+    connect(_saveFader, SIGNAL(cycle(int, int, int)),
+            this, SLOT(_updateSaveLabelColor(int, int, int)));
+    connect(_saveFader, SIGNAL(faderDone()),
+            this, SLOT(_deleteSaveFader()));
+    _saveFader->start(QThread::IdlePriority);
 }
 
 void PythonVariables::_connectWidgets() {
@@ -185,16 +236,20 @@ void PythonVariables::_connectWidgets() {
             this, SLOT(_exportScript()));
     connect(_testScriptButton, SIGNAL(clicked()),
             this, SLOT(_testScript()));
-    connect(_applyScriptButton, SIGNAL(clicked()),
-            this, SLOT(_applyScript()));
+    connect(_saveScriptButton, SIGNAL(clicked()),
+            this, SLOT(_saveScript()));
+    connect(_closeButton, SIGNAL(clicked()),
+            this, SLOT(_closeScript()));
 
-    connect(_saveScriptCombo, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(_saveScript(int)));
-
+    connect(_coordInputVarTable, SIGNAL(valueChanged(int, int)),
+            this, SLOT(_coordInputVarChanged(int, int)));
     connect(_2DInputVarTable, SIGNAL(valueChanged(int, int)),
             this, SLOT(_2DInputVarChanged(int, int)));
     connect(_3DInputVarTable, SIGNAL(valueChanged(int, int)),
             this, SLOT(_3DInputVarChanged(int, int)));
+
+    connect(_coordinatesCheckbox, SIGNAL(stateChanged(int)),
+            this, SLOT(_coordinatesCheckboxClicked(int)));
 
     connect(_scriptEdit, SIGNAL(textChanged()),
             this, SLOT(_scriptChanged()));
@@ -208,7 +263,10 @@ void PythonVariables::_connectWidgets() {
 void PythonVariables::_setGUIEnabled(bool enabled) {
     _variableSelectionFrame->setEnabled(enabled);
     _scriptEdit->setEnabled(enabled);
-    _testFrame->setEnabled(enabled);
+    _testScriptButton->setEnabled(enabled);
+    _saveScriptButton->setEnabled(enabled);
+    _exportScriptButton->setEnabled(enabled);
+    _importScriptButton->setEnabled(enabled);
     _exportScriptButton->setEnabled(enabled);
 }
 
@@ -227,31 +285,51 @@ void PythonVariables::_newScript() {
     int rc = _newItemDialog->result();
 
     if (rc > 0) {
-        _scriptName = _newItemDialog->GetItemName();
-        if (_scriptName == "")
+        string scriptName = _newItemDialog->GetItemName();
+        if (scriptName == "")
             return;
 
+        _controlExec->MakeStringConformant(scriptName);
+
+        _reset();
+        _scriptName = scriptName;
         _dataMgrName = _newItemDialog->GetOptionName();
 
         _scriptNameLabel->setText(QString::fromStdString(_scriptName));
         _dataMgrNameLabel->setText(QString::fromStdString(_dataMgrName));
 
-        _scriptEdit->clear();
         VAPoR::DataMgr *dataMgr = dataStatus->GetDataMgr(_dataMgrName);
+        _coordVars = dataMgr->GetCoordVarNames();
+        _coordVarsEnabled.resize(_coordVars.size());
+        std::fill(_coordVarsEnabled.begin(), _coordVarsEnabled.end(), false);
+
         _2DVars = dataMgr->GetDataVarNames(TWOD);
         _2DVarsEnabled.resize(_2DVars.size());
         std::fill(_2DVarsEnabled.begin(), _2DVarsEnabled.end(), false);
+
         _3DVars = dataMgr->GetDataVarNames(THREED);
         _3DVarsEnabled.resize(_3DVars.size());
         std::fill(_3DVarsEnabled.begin(), _3DVarsEnabled.end(), false);
 
-        _outputVars.clear();
-        _outputGrids.clear();
-        _inputGrids.clear();
-        _otherGrids.clear();
-
         Update(true);
     }
+}
+
+void PythonVariables::_reset() {
+    _script = "";
+    _scriptName = "";
+    _dataMgrName = "";
+    _justSaved = false;
+    _coordVars.clear();
+    _coordVarsEnabled.clear();
+    _2DVars.clear();
+    _2DVarsEnabled.clear();
+    _3DVars.clear();
+    _3DVarsEnabled.clear();
+    _outputVars.clear();
+    _outputGrids.clear();
+    _inputGrids.clear();
+    _otherGrids.clear();
 }
 
 void PythonVariables::_openScript() {
@@ -267,6 +345,8 @@ void PythonVariables::_openScript() {
     rc = _openAndDeleteDialog->result();
 
     if (rc > 0) {
+        _reset();
+
         string scriptName = _openAndDeleteDialog->GetScriptName();
         string dataMgrName = _openAndDeleteDialog->GetDataMgrName();
 
@@ -287,9 +367,14 @@ void PythonVariables::_openScript() {
             return;
         }
 
+        _dataMgrName = dataMgrName;
+        _scriptName = scriptName;
+
         VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
         VAPoR::DataMgr *dataMgr = dataStatus->GetDataMgr(_dataMgrName);
 
+        _coordVars = dataMgr->GetCoordVarNames();
+        _coordVarsEnabled.resize(_coordVars.size(), false);
         _2DVars = dataMgr->GetDataVarNames(TWOD);
         _2DVarsEnabled.resize(_2DVars.size(), false);
         _3DVars = dataMgr->GetDataVarNames(THREED);
@@ -299,11 +384,19 @@ void PythonVariables::_openScript() {
 
         for (int i = 0; i < inputVars.size(); i++) {
             string inVar = inputVars[i];
+
+            it = std::find(_coordVars.begin(), _coordVars.end(), inVar);
+            if (it != _coordVars.end()) {
+                int index = it - _coordVars.begin();
+                _coordVarsEnabled[index] = true;
+            }
+
             it = std::find(_2DVars.begin(), _2DVars.end(), inVar);
             if (it != _2DVars.end()) {
                 int index = it - _2DVars.begin();
                 _2DVarsEnabled[index] = true;
             }
+
             it = std::find(_3DVars.begin(), _3DVars.end(), inVar);
             if (it != _3DVars.end()) {
                 int index = it - _3DVars.begin();
@@ -311,22 +404,6 @@ void PythonVariables::_openScript() {
             }
         }
 
-        cout << endl
-             << "Opening script with the following parameters:" << endl;
-        cout << "   _scriptType  " << _scriptType << endl;
-        cout << "   _dataMgrName " << _dataMgrName << endl;
-        cout << "   scriptName   " << _scriptName << endl;
-        cout << "   inputVars    ";
-        printVector(inputVars);
-        cout << "   _outputVars  ";
-        printVector(_outputVars);
-        cout << "   _outputGrids ";
-        printVector(_outputGrids);
-        cout << "   RC " << rc << endl
-             << endl;
-
-        //_outputVars.clear();
-        //_outputGrids.clear();
         _inputGrids.clear();
         _otherGrids.clear();
 
@@ -356,39 +433,113 @@ void PythonVariables::_deleteScript() {
         dataMgrName,
         scriptName);
 
-    if (_scriptName == _scriptName) {
-        _script = "";
-        _scriptName = "";
-        _dataMgrName = "";
+    if (scriptName == _scriptName)
+        _reset();
 
-        _2DVars.clear();
-        _2DVarsEnabled.clear();
-        _3DVars.clear();
-        _3DVarsEnabled.clear();
-        _outputVars.clear();
-        _outputGrids.clear();
-        _inputGrids.clear();
-        _otherGrids.clear();
+    Update(true);
+}
+
+bool PythonVariables::_getFilePath(
+    QString &filePath,
+    bool operation) {
+    QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
+    QFileDialog::FileMode fileMode = QFileDialog::ExistingFile;
+    QString title = "Import Python script from file";
+
+    if (operation == WRITE) {
+        acceptMode = QFileDialog::AcceptSave;
+        fileMode = QFileDialog::AnyFile;
+        title = "Export your Python script to a file";
+    }
+
+    std::vector<string> pythonPathVec = {"python"};
+    string pythonPath = GetAppPath("VAPOR", "share", pythonPathVec);
+    QFileDialog fileDialog(
+        this,
+        "Import Python script from file",
+        QString::fromStdString(pythonPath),
+        QString::fromAscii("Python file (*.py)"));
+
+    fileDialog.setAcceptMode(acceptMode);
+    fileDialog.setDefaultSuffix(QString::fromAscii("py"));
+    fileDialog.setFileMode(fileMode);
+    if (fileDialog.exec() != QDialog::Accepted)
+        return false;
+
+    QStringList files = fileDialog.selectedFiles();
+    if (files.size() != 1)
+        return false;
+
+    filePath = files[0];
+
+    bool operable;
+    if (operation == READ)
+        operable = FileOperationChecker::FileGoodToRead(filePath);
+    else
+        operable = FileOperationChecker::FileGoodToWrite(filePath);
+    if (!operable) {
+        MSG_ERR(
+            FileOperationChecker::GetLastErrorMessage().toStdString());
+        return false;
+    }
+
+    return true;
+}
+
+void PythonVariables::_importScript() {
+    QString filePath;
+    if (!_getFilePath(filePath, READ))
+        return;
+
+    _script.clear();
+    std::ifstream file;
+    file.open(filePath.toStdString());
+    if (file.is_open()) {
+        std::string line;
+        while (getline(file, line)) {
+            _script += line;
+            _script += "\n";
+        }
     }
 
     Update(true);
 }
 
+void PythonVariables::_exportScript() {
+    QString filePath;
+    if (!_getFilePath(filePath, WRITE))
+        return;
+
+    qDebug() << filePath;
+
+    std::ofstream file;
+    file.open(filePath.toStdString());
+    file << _script;
+    file.close();
+}
+
 void PythonVariables::_testScript() {
     string script = _scriptEdit->toPlainText().toStdString();
 
-    std::vector<string> inputVars;
-    for (int i = 0; i < _2DVars.size(); i++) {
+    std::vector<string> inputVars = _buildInputVars();
+    /*for (int i=0; i<_coordVars.size(); i++) {
+        if (_coordVarsEnabled[i] == true)
+            inputVars.push_back(_coordVars[i]);
+    }
+    for (int i=0; i<_2DVars.size(); i++) {
         if (_2DVarsEnabled[i] == true)
             inputVars.push_back(_2DVars[i]);
     }
-    for (int i = 0; i < _3DVars.size(); i++) {
+    for (int i=0; i<_3DVars.size(); i++) {
         if (_3DVarsEnabled[i] == true)
             inputVars.push_back(_3DVars[i]);
-    }
+    }*/
 
-    if (inputVars.empty() || _outputVars.empty())
+    if (inputVars.empty() || _outputVars.empty()) {
+        MSG_ERR("At least one Input Variable and one "
+                "Output Variable must be defined");
         return;
+    }
 
     int rc = _controlExec->AddFunction(
         _scriptType,
@@ -413,24 +564,16 @@ void PythonVariables::_testScript() {
         return;
     }
 
-    // TODO: Post success message popup
-    //
+    bool fadeIn = true;
+    _fadeTestLabel(fadeIn);
 
     _justSaved = true;
 }
 
-void PythonVariables::_applyScript() {
+void PythonVariables::_saveScript() {
     string script = _scriptEdit->toPlainText().toStdString();
 
-    std::vector<string> inputVars;
-    for (int i = 0; i < _2DVars.size(); i++) {
-        if (_2DVarsEnabled[i] == true)
-            inputVars.push_back(_2DVars[i]);
-    }
-    for (int i = 0; i < _3DVars.size(); i++) {
-        if (_3DVarsEnabled[i] == true)
-            inputVars.push_back(_3DVars[i]);
-    }
+    std::vector<string> inputVars = _buildInputVars();
 
     int rc = _controlExec->AddFunction(
         _scriptType,
@@ -446,73 +589,89 @@ void PythonVariables::_applyScript() {
         return;
     }
 
-    cout << endl
-         << "Saving script with the following parameters:" << endl;
-    cout << "   _scriptType  " << _scriptType << endl;
-    cout << "   _dataMgrName " << _dataMgrName << endl;
-    cout << "   scriptName   " << _scriptName << endl;
-    cout << "   inputVars    ";
-    printVector(inputVars);
-    cout << "   _outputVars  ";
-    printVector(_outputVars);
-    cout << "   _outputGrids ";
-    printVector(_outputGrids);
-    cout << "   RC " << rc << endl
-         << endl;
-
     bool fadeIn = true;
-    _fade(fadeIn);
+    _fadeSaveLabel(fadeIn);
     _justSaved = true;
 }
 
-void PythonVariables::_saveScript(int index) {
-    _saveScriptCombo->blockSignals(true);
-    _saveScriptCombo->setCurrentIndex(0);
-    _saveScriptCombo->blockSignals(false);
+std::vector<string> PythonVariables::_buildInputVars() const {
+    std::vector<string> inputVars;
+    for (int i = 0; i < _coordVars.size(); i++) {
+        if (_coordVarsEnabled[i] == true)
+            inputVars.push_back(_coordVars[i]);
+    }
+    for (int i = 0; i < _2DVars.size(); i++) {
+        if (_2DVarsEnabled[i] == true)
+            inputVars.push_back(_2DVars[i]);
+    }
+    for (int i = 0; i < _3DVars.size(); i++) {
+        if (_3DVarsEnabled[i] == true)
+            inputVars.push_back(_3DVars[i]);
+    }
 
-    if (index == 0)
-        return;
-    if (index == 1) {
-        _saveToSession();
-    }
-    if (index == 2) {
-        _saveToFile();
-    }
+    return inputVars;
+}
+
+void PythonVariables::_closeScript() {
+    _reset();
+    Update(true);
+    close();
 }
 
 void PythonVariables::_saveToSession() {
-
-    /*  bool fadeIn = true;
-    QColor background = palette().color(QWidget::backgroundRole());
-    _fader = new Fader(fadeIn, _scriptSaveLabel, background);
-    connect(_fader, SIGNAL(faderDone()),
-        this, SLOT(_deleteFader()));
-*/
     bool fadeIn = true;
-    _fade(fadeIn);
+    _fadeSaveLabel(fadeIn);
     _justSaved = true;
 }
 
-void PythonVariables::_saveToFile() {
-    QString defaultDir = QDir::homePath() + "/" + QString::fromStdString(_scriptName) + ".py";
-    QFileDialog fileDialog(this, "Save Python Script", defaultDir);
-    fileDialog.setDefaultSuffix(QString::fromAscii("py"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-
-    QStringList qsl = fileDialog.selectedFiles();
-
-    for (int i = 0; i < qsl.size(); ++i)
-        cout << qsl.at(i).toLocal8Bit().constData() << endl;
-
-    string script = _scriptEdit->toPlainText().toStdString();
+void PythonVariables::_updateSaveLabelColor(int r, int g, int b) {
+    QColor newColor = QColor(r, g, b);
+    QPalette labelPalette = _scriptSaveLabel->palette();
+    labelPalette.setColor(_scriptSaveLabel->foregroundRole(), newColor);
+    _scriptSaveLabel->setPalette(labelPalette);
 }
 
-void PythonVariables::_deleteFader() {
-    if (_fader != nullptr)
-        delete _fader;
-    _fader = nullptr;
+void PythonVariables::_updateTestLabelColor(int r, int g, int b) {
+    QColor newColor = QColor(r, g, b);
+    QPalette labelPalette = _scriptTestLabel->palette();
+    labelPalette.setColor(_scriptTestLabel->foregroundRole(), newColor);
+    _scriptTestLabel->setPalette(labelPalette);
+}
+
+void PythonVariables::_updateLabelColor(int r, int g, int b, QLabel *label) {
+    QColor newColor = QColor(r, g, b);
+    QPalette labelPalette = label->palette();
+    labelPalette.setColor(label->foregroundRole(), newColor);
+    label->setPalette(labelPalette);
+}
+
+void PythonVariables::_deleteTestFader() {
+    if (_testFader != nullptr) {
+        _testFader->wait();
+        delete _testFader;
+        _testFader = nullptr;
+    }
+}
+
+void PythonVariables::_deleteSaveFader() {
+    if (_saveFader != nullptr) {
+        _saveFader->wait();
+        delete _saveFader;
+        _saveFader = nullptr;
+    }
+}
+
+void PythonVariables::_coordInputVarChanged(int row, int col) {
+    if (col == 0)
+        return;
+
+    string value = _coordInputVarTable->GetValue(row, col);
+    if (value == "1")
+        _coordVarsEnabled[row] = true;
+    else
+        _coordVarsEnabled[row] = false;
+
+    Update(true);
 }
 
 void PythonVariables::_2DInputVarChanged(int row, int col) {
@@ -541,6 +700,18 @@ void PythonVariables::_3DInputVarChanged(int row, int col) {
     Update(true);
 }
 
+void PythonVariables::_coordinatesCheckboxClicked(int state) {
+    if (state == Qt::Unchecked) {
+        cout << "Unchecked" << endl;
+        _variableTabs->removeTab(0);
+        _coordVarsEnabled.resize(_coordVars.size());
+        std::fill(_coordVarsEnabled.begin(), _coordVarsEnabled.end(), false);
+    } else {
+        cout << "checked" << endl;
+        _variableTabs->insertTab(0, _coordTab, "Coordinates");
+    }
+}
+
 void PythonVariables::_createNewVariable() {
     VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
     VAPoR::DataMgr *dataMgr = dataStatus->GetDataMgr(_dataMgrName);
@@ -563,8 +734,11 @@ void PythonVariables::_createNewVariable() {
         return;
 
     string outputVar = _newItemDialog->GetItemName();
-    rc = _checkForDuplicateNames(_outputVars, outputVar);
 
+    if (outputVar == "")
+        return;
+
+    rc = _checkForDuplicateNames(_outputVars, outputVar);
     if (rc < 1)
         return;
 
@@ -652,18 +826,36 @@ void PythonVariables::_deleteVariable() {
     int index = std::distance(_outputVars.begin(), it);
 
     _outputVars.erase(_outputVars.begin() + index);
+    _outputGrids.erase(_outputGrids.begin() + index);
     Update(true);
 }
 
 void PythonVariables::_scriptChanged() {
     _script = _scriptEdit->toPlainText().toStdString();
+
+    bool fadeIn = false;
+    _fadeTestLabel(fadeIn);
+    _fadeSaveLabel(fadeIn);
 }
 
 void PythonVariables::_makeInputTableValues(
+    std::vector<string> &tableValuesCoords,
     std::vector<string> &tableValues2D,
     std::vector<string> &tableValues3D,
     std::vector<string> &summaryValues) const {
     string onOff;
+    for (int i = 0; i < _coordVars.size(); i++) {
+        tableValuesCoords.push_back(_coordVars[i]);
+
+        onOff = "0";
+        if (_coordVarsEnabled[i]) {
+            onOff = "1";
+            summaryValues.push_back(_coordVars[i]);
+            summaryValues.push_back("Coordinate");
+        }
+        tableValuesCoords.push_back(onOff);
+    }
+
     for (int i = 0; i < _2DVars.size(); i++) {
         tableValues2D.push_back(_2DVars[i]);
 
@@ -675,6 +867,7 @@ void PythonVariables::_makeInputTableValues(
         }
         tableValues2D.push_back(onOff);
     }
+
     for (int i = 0; i < _3DVars.size(); i++) {
         tableValues3D.push_back(_3DVars[i]);
 
@@ -724,38 +917,25 @@ void PythonVariables::ShowMe() {
 
 Fader::Fader(
     bool fadeIn,
-    QLabel *label,
     QColor background,
-    QObject *parent) : QObject(0) {
+    QColor textColor,
+    QObject *parent) : QThread(parent) {
     _fadeIn = fadeIn;
-    _myLabel = label;
+    _textColor = textColor;
     _background = background;
-
-    _thread = new QThread(parent);
-    connect(_thread, SIGNAL(started()), this, SLOT(_fade()));
-    this->moveToThread(_thread);
 }
 
-Fader::~Fader() {
-    if (_thread != nullptr)
-        delete _thread;
-    _thread = nullptr;
-}
-
-void ::Fader::Start() {
-    _thread->start();
+void Fader::run() {
+    _fade();
 }
 
 void Fader::_fade() {
-    int cycles = 10;
-
-    QPalette labelPalette = _myLabel->palette();
-    QColor textColor(0, 0, 255);
+    int cycles = 20;
 
     QColor startColor = _background;
-    QColor endColor = textColor;
+    QColor endColor = _textColor;
     if (!_fadeIn) {
-        startColor = textColor;
+        startColor = _textColor;
         endColor = _background;
     }
 
@@ -773,7 +953,7 @@ void Fader::_fade() {
 
     clock_t startTime = clock();
     double secondsPassed = 0.f;
-    double secondsToDelay = .15;
+    double secondsToDelay = .05;
     bool flag = true;
     int counter = 0;
 
@@ -784,9 +964,7 @@ void Fader::_fade() {
             int newRed = startRed + redIncrement * counter;
             int newGreen = startGreen + greenIncrement * counter;
             int newBlue = startBlue + blueIncrement * counter;
-            QColor newColor = QColor(newRed, newGreen, newBlue);
-            labelPalette.setColor(_myLabel->foregroundRole(), newColor);
-            _myLabel->setPalette(labelPalette);
+            emit cycle(newRed, newGreen, newBlue);
             startTime = clock();
             counter++;
         }
@@ -794,10 +972,7 @@ void Fader::_fade() {
             flag = false;
     }
 
-    if (!_fadeIn) {
-        labelPalette.setColor(_myLabel->foregroundRole(), _background);
-        _myLabel->setPalette(labelPalette);
-    }
+    emit cycle(endRed, endGreen, endBlue);
 
     emit faderDone();
 }
@@ -819,6 +994,8 @@ NewItemDialog::NewItemDialog(
     _setupGUI();
 
     _connectWidgets();
+
+    _itemNameEdit->setFocus();
 }
 
 void NewItemDialog::_connectWidgets() {
@@ -936,10 +1113,28 @@ OpenAndDeleteDialog::OpenAndDeleteDialog(QWidget *parent) {
 
     _setupGUI();
 
+    _dataMgrNameCombo->setFocus();
+
     connect(_okButton, SIGNAL(clicked()),
             this, SLOT(_okClicked()));
     connect(_cancelButton, SIGNAL(clicked()),
             this, SLOT(reject()));
+    connect(_dataMgrNameCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(_updateOptions(int)));
+}
+
+void OpenAndDeleteDialog::_updateOptions(int index) {
+    string dataSetName = _dataMgrNameCombo->itemText(index).toStdString();
+    std::vector<string> functionNames;
+    functionNames = _controlExec->GetFunctionNames(
+        _scriptType,
+        dataSetName);
+
+    _scriptNameCombo->clear();
+    for (int i = 0; i < functionNames.size(); i++) {
+        QString qName = QString::fromStdString(functionNames[i]);
+        _scriptNameCombo->addItem(qName);
+    }
 }
 
 void OpenAndDeleteDialog::_setupGUI() {
@@ -970,23 +1165,27 @@ void OpenAndDeleteDialog::_setupGUI() {
 int OpenAndDeleteDialog::Update(
     int type,
     VAPoR::ControlExec *controlExec) {
-    if (type == OPEN)
+    _controlExec = controlExec;
+
+    string errMsg;
+    if (type == OPEN) {
         setWindowTitle("Open saved script");
-    else if (type == DELETE)
+        errMsg = "There are no scripts to open in this session";
+    } else if (type == DELETE) {
         setWindowTitle("Delete saved script");
+        errMsg = "There are no scripts to delete in this session";
+    }
 
     _dataMgrNameCombo->clear();
     _scriptNameCombo->clear();
 
-    VAPoR::DataStatus *dataStatus = controlExec->GetDataStatus();
+    VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
     std::vector<string> dataMgrNames = dataStatus->GetDataMgrNames();
     std::vector<string> scriptNames;
     for (int i = 0; i < dataMgrNames.size(); i++) {
         QString qName = QString::fromStdString(dataMgrNames[i]);
         _dataMgrNameCombo->addItem(qName);
 
-        cout << "# of scripts for this DataMgr ";
-        cout << controlExec->GetFunctionNames(_scriptType, dataMgrNames[i]).size() << endl;
         if (scriptNames.empty()) {
             scriptNames = controlExec->GetFunctionNames(
                 _scriptType, dataMgrNames[i]);
@@ -996,14 +1195,10 @@ int OpenAndDeleteDialog::Update(
     }
 
     if (scriptNames.empty()) {
-        MSG_ERR("There are no scripts to open.");
+        MSG_ERR(errMsg);
         return -1;
     }
 
-    for (int i = 0; i < scriptNames.size(); i++) {
-        QString qName = QString::fromStdString(scriptNames[i]);
-        _scriptNameCombo->addItem(qName);
-    }
     _scriptName = _scriptNameCombo->currentText().toStdString();
 
     return 0;
