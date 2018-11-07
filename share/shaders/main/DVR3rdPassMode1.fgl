@@ -14,6 +14,7 @@ uniform vec2  colorMapRange;     // min and max values on this color map
 uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
 uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
+uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
 uniform float stepSize1D;       // ray casting step size
