@@ -724,11 +724,12 @@ int ControlExec::AddFunction(
     string script,
     const vector<string> &inputVarNames,
     const vector<string> &outputVarNames,
-    const vector<string> &outputVarMeshes) {
+    const vector<string> &outputVarMeshes,
+    bool coordFlag) {
     return (
         _calcEngineMgr->AddFunction(
             scriptType, dataSetName, scriptName, script,
-            inputVarNames, outputVarNames, outputVarMeshes));
+            inputVarNames, outputVarNames, outputVarMeshes, coordFlag));
 }
 
 void ControlExec::RemoveFunction(
@@ -747,7 +748,8 @@ bool ControlExec::GetFunction(
     string &script,
     vector<string> &inputVarNames,
     vector<string> &outputVarNames,
-    vector<string> &outputVarMeshes) const {
+    vector<string> &outputVarMeshes,
+    bool &coordFlag) const {
     script.clear();
     inputVarNames.clear();
     outputVarNames.clear();
@@ -756,7 +758,17 @@ bool ControlExec::GetFunction(
     return (
         _calcEngineMgr->GetFunctionScript(
             scriptType, dataSetName, scriptName, script,
-            inputVarNames, outputVarNames, outputVarMeshes));
+            inputVarNames, outputVarNames, outputVarMeshes,
+            coordFlag));
+}
+
+string ControlExec::GetFunctionStdout(
+    string scriptType,
+    string dataSetName,
+    string scriptName) const {
+
+    return (_calcEngineMgr->GetFunctionStdout(
+        scriptType, dataSetName, scriptName));
 }
 
 std::vector<string> ControlExec::GetFunctionNames(

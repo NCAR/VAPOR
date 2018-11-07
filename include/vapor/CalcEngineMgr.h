@@ -38,7 +38,8 @@ class VDF_API CalcEngineMgr : public Wasp::MyBase {
         string script,
         const vector<string> &inputVarNames,
         const vector<string> &outputVarNames,
-        const vector<string> &outputVarMeshes);
+        const vector<string> &outputVarMeshes,
+        bool coordFlag = false);
 
     void RemoveFunction(
         string scriptType,
@@ -52,7 +53,13 @@ class VDF_API CalcEngineMgr : public Wasp::MyBase {
         string &script,
         vector<string> &inputVarNames,
         vector<string> &outputVarNames,
-        vector<string> &outputVarMeshes);
+        vector<string> &outputVarMeshes,
+        bool &coordFlag);
+
+    string GetFunctionStdout(
+        string scriptType,
+        string dataSetName,
+        string scriptName);
 
     std::vector<string> GetFunctionNames(
         string scriptType,

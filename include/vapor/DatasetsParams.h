@@ -27,7 +27,8 @@ class PARAMS_API DatasetsParams : public ParamsBase {
         string script,
         const vector<string> &inputVarNames,
         const vector<string> &outputVarNames,
-        const vector<string> &outputVarMeshes);
+        const vector<string> &outputVarMeshes,
+        bool coordFlag);
 
     bool GetScript(
         string datasetName,
@@ -35,7 +36,8 @@ class PARAMS_API DatasetsParams : public ParamsBase {
         string &script,
         vector<string> &inputVarNames,
         vector<string> &outputVarNames,
-        vector<string> &outputVarMeshes) const;
+        vector<string> &outputVarMeshes,
+        bool &coordFlag) const;
 
     void RemoveDataset(string datasetName) {
         _datasets->Remove(datasetName);
@@ -77,14 +79,16 @@ class PARAMS_API DatasetParams : public ParamsBase {
         string script,
         const vector<string> &inputVarNames,
         const vector<string> &outputVarNames,
-        const vector<string> &outputVarMeshes);
+        const vector<string> &outputVarMeshes,
+        bool coordFlag);
 
     bool GetScript(
         string name,
         string &script,
         vector<string> &inputVarNames,
         vector<string> &outputVarNames,
-        vector<string> &outputVarMeshes) const;
+        vector<string> &outputVarMeshes,
+        bool &coordFlag) const;
 
     void RemoveScript(string name) {
         _scripts->Remove(name);
@@ -114,13 +118,15 @@ class PARAMS_API DatasetParams : public ParamsBase {
             string script,
             const vector<string> &inputVarNames,
             const vector<string> &outputVarNames,
-            const vector<string> &outputVarMeshes) {
+            const vector<string> &outputVarMeshes,
+            bool coordFlag) {
             _ssave->BeginGroup("Set derived variable script");
 
             SetValueString(_scriptTag, "", script);
             SetValueStringVec(_inputVarNamesTag, "", inputVarNames);
             SetValueStringVec(_outputVarNamesTag, "", outputVarNames);
-            SetValueStringVec(_outputVarMeshes, "", outputVarMeshes);
+            SetValueStringVec(_outputVarMeshesTag, "", outputVarMeshes);
+            SetValueLong(_coordFlagTag, "", 0);
 
             _ssave->EndGroup();
         }
@@ -129,11 +135,13 @@ class PARAMS_API DatasetParams : public ParamsBase {
             string &script,
             vector<string> &inputVarNames,
             vector<string> &outputVarNames,
-            vector<string> &outputVarMeshes) {
+            vector<string> &outputVarMeshes,
+            bool &coordFlag) {
             script = GetValueString(_scriptTag, "");
             inputVarNames = GetValueStringVec(_inputVarNamesTag);
             outputVarNames = GetValueStringVec(_outputVarNamesTag);
-            outputVarMeshes = GetValueStringVec(_outputVarMeshes);
+            outputVarMeshes = GetValueStringVec(_outputVarMeshesTag);
+            coordFlag = GetValueLong(_coordFlagTag, 0);
         }
 
         static string GetClassType() {
@@ -144,7 +152,8 @@ class PARAMS_API DatasetParams : public ParamsBase {
         static const string _scriptTag;
         static const string _inputVarNamesTag;
         static const string _outputVarNamesTag;
-        static const string _outputVarMeshes;
+        static const string _outputVarMeshesTag;
+        static const string _coordFlagTag;
     };
 
   private:
