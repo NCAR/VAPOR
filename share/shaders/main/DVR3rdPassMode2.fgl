@@ -1,6 +1,5 @@
 #version 410 core
 
-in vec4 positionClip;   // vertex position in the clip space
 in vec4 positionModel;  // vertex position in the model space
 flat in ivec4 provokingVertexIdx;
 layout(location = 0) out vec4 color;
@@ -464,13 +463,11 @@ void main(void)
 {
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
-    // Get UV coordinates of this frament
-    if( abs(positionClip.w) < EPSILON )
-        discard;
-    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0) / 2.0;
+    // Get texture coordinates of this frament
+    vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
-    vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
+    vec3 stopTexture    = texture( backFaceTexture,  fragTexture ).xyz;
+    vec3 startTexture   = texture( frontFaceTexture, fragTexture ).xyz;
     vec3 rayDirTexture  = stopTexture - startTexture;
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )
