@@ -187,7 +187,7 @@ if (WIN32)
 	set (CPACK_NSIS_MODIFY_PATH OFF)
 	set (CPACK_NSIS_URL_INFO_ABOUT "https://www.vapor.ucar.edu")
 	set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".") # Manually fixed in template file
-	set (CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
+	set (CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
 	set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 	
 	set (CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS  "${PRE_INSTALL_PATH}")
