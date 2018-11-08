@@ -158,6 +158,33 @@ bool RayTriangleIntersect( const in vec3 orig, const in vec3 dir,
     else
         return true;
 }
+bool RayTriangleIntersectD( const in vec3 orig, const in vec3 dir,
+                            const in vec3 v0,   const in vec3 v1,  const in vec3 v2,
+                            out double t,       out double u,      out double v ) 
+{
+    dvec3 v0v1 = dvec3( v1 ) - dvec3( v0 );
+    dvec3 v0v2 = dvec3( v2 ) - dvec3( v0 );
+    dvec3 pvec = cross( dvec3( dir ), v0v2 );
+    double det = dot(  v0v1, pvec );
+
+    const double zero = 1e-10;
+    if( abs(det) < zero ) // ray and triangle are parallel
+    {
+        t = 100.0LF;   u = 100.0LF;   v = 100.0LF;
+        return false;
+    }
+
+    dvec3  tvec  = dvec3( orig ) - dvec3( v0 );
+    dvec3  qvec  = cross( tvec, v0v1 );
+    u            = dot( tvec, pvec ) / det; // if u == 0, ray hits edge v0v2
+    v            = dot( dir,  qvec ) / det; // if v == 0, ray hits edge v0v1
+    t            = dot( v0v2, qvec ) / det;
+
+    if( u < 0.0 || v < 0.0 || u > 1.0 || v > 1.0 || u + v > 1.0 )
+        return false;
+    else
+        return true;
+}
 
 // From: https://courses.cs.washington.edu/courses/csep557/10au/lectures/triangle_intersection.pdf
 bool  RayPlaneIntersect( const in vec3 orig, const in vec3 dir,
@@ -508,13 +535,13 @@ bool RayIntersectingSurface( const in vec3 startTexture,    const in vec3 rayDir
     
     vec3 startBack = startTexture - rayDirTexture;
     bool intersect[2];
-    float tArr[2], uArr[2], vArr[2];
+    double tArr[2], uArr[2], vArr[2];
     for( int i = 0; i < 2; i++ )
-        intersect[i] = RayTriangleIntersect( startBack,     rayDirTexture,
-                                             cubeVertCoord[ triangles[i][0] ], 
-                                             cubeVertCoord[ triangles[i][1] ], 
-                                             cubeVertCoord[ triangles[i][2] ], 
-                                             tArr[i], uArr[i], vArr[i] );
+        intersect[i] = RayTriangleIntersectD( startBack,     rayDirTexture,
+                                              cubeVertCoord[ triangles[i][0] ], 
+                                              cubeVertCoord[ triangles[i][1] ], 
+                                              cubeVertCoord[ triangles[i][2] ], 
+                                              tArr[i], uArr[i], vArr[i] );
 
     return ( intersect[0] || intersect[1] );
 }
@@ -532,6 +559,9 @@ void main(void)
     vec3 rayDirTexture  = stopTexture - startTexture;
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )
+        discard;
+
+    if( !RayIntersectingSurface( startTexture, rayDirTexture, provokingVertexIdx ) )
         discard;
 
     vec3  step1Texture  = startTexture;
