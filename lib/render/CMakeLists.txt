@@ -33,6 +33,12 @@ set (SRC
 	TextLabel.cpp
 	PyEngine.cpp
 	CalcEngineMgr.cpp
+	GeoTIFWriter.cpp
+	ImageWriter.cpp
+	JPGWriter.cpp
+	PNGWriter.cpp
+	TIFWriter.cpp
+	Proj4StringParser.cpp
 )
 
 set (HEADERS
@@ -70,6 +76,13 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoTIFWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ImageWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/JPGWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/PNGWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TIFWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/jpegapi.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
