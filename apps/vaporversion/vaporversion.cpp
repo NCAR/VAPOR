@@ -32,6 +32,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/Version.h>
+#include <vapor/FileUtils.h>
 #ifdef WIN32
     #include "windows.h"
 #endif
@@ -61,7 +62,7 @@ int main(int argc, char **argv)
     //
     // Parse command line arguments
     //
-    ProgName = Basename(argv[0]);
+    ProgName = FileUtils::LegacyBasename(argv[0]);
 
     if (op.AppendOptions(set_opts) < 0) {
         cerr << ProgName << " : " << op.GetErrMsg();

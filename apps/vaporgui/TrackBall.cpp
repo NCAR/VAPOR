@@ -77,7 +77,13 @@
 #include <cmath>
 #include <iostream>
 #include <vapor/glutil.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include "TrackBall.h"
+
 using namespace VAPoR;
 void Trackball::TrackballReset()
 {
@@ -114,60 +120,60 @@ void Trackball::TrackballSetMatrix()
      * rotation and translation.
      */
 
-    // Ugh. Use OpenGL to do matrix manipulation, then retrieve and store
-    // results in member variable
-    //
     if (_perspective) {
-        // glTranslated(_center[0], _center[1], _center[2]);
-        double m1[16];
-        makeTransMatrix(_center, m1);
+        glm::mat4 m(1.0);
+        m = glm::translate(m, glm::vec3(_center[0], _center[1], _center[2]));
+        m = glm::translate(m, glm::vec3(_trans[0], _trans[1], _trans[2]));
 
-        // glTranslated(_trans[0],  _trans[1],  _trans[2]);
-        double m2[16];
-        makeTransMatrix(_trans, m2);
-
-        //	glMultMatrixd(m);
+        // Copying over because qmatrix is row major (it should be column major).
+        // I have no idea why this works because the surrounding functions that
+        // were here originaly were column major too. If I replace the current
+        // quat functions with the correct column major ones the rotations are correct
+        // every other rotation.
+        //
+        // Also for future reference since qmatrix has no documentation:
+        // qmatrix parameters are x,y,z,w while glm parameters are w,x,y,z
         double m3[16];
         qmatrix(_qrot, m3);
+        glm::mat4 mrot_row_major;
+        for (int i = 0; i < 16; i++) glm::value_ptr(mrot_row_major)[i] = m3[i];
+        m *= mrot_row_major;
 
-        // glTranslated(-_center[0], -_center[1], -_center[2]);
-        double ncenter[3];
-        vcopy(_center, ncenter);
-        vscale(ncenter, -1.0);
+        m = glm::translate(m, -glm::vec3(_center[0], _center[1], _center[2]));
 
-        double m4[16];
-        makeTransMatrix(ncenter, m4);
-
-        mmult(m2, m1, _modelViewMatrix);
-        mmult(m3, _modelViewMatrix, _modelViewMatrix);
-        mmult(m4, _modelViewMatrix, _modelViewMatrix);
+        for (int i = 0; i < 16; i++) _modelViewMatrix[i] = glm::value_ptr(m)[i];
     } else {
-        double scale_factor = 1.0;
+        glm::mat4 m(1.0);
 
-        if (_trans[2] < 0.0) {
-            scale_factor = 5.0 / (1 - _trans[2]);
-        } else {
-            scale_factor = 5.0 + _trans[2];
-        }
+        m = glm::translate(m, glm::vec3(_center[0], _center[1], _center[2]));
+        m = glm::translate(m, glm::vec3(_trans[0], _trans[1], _trans[2]));
 
-        // glTranslated(_trans[0],  _trans[1],  _trans[2]);
-        double m1[16];
-        makeTransMatrix(_center, m1);
-
-        double m2[16];
-        qmatrix(_qrot, m2);
-
-        // glMultMatrixd(m);
-
-        double scale[3] = {scale_factor, scale_factor, scale_factor};
-
-        // glScaled(scale_factor, scale_factor, scale_factor);
         double m3[16];
-        makeScaleMatrix(scale, m3);
+        qmatrix(_qrot, m3);
+        glm::mat4 mrot_row_major;
+        for (int i = 0; i < 16; i++) glm::value_ptr(mrot_row_major)[i] = m3[i];
+        m *= mrot_row_major;
 
-        mmult(m2, m1, _modelViewMatrix);
-        mmult(m3, _modelViewMatrix, _modelViewMatrix);
+        // Cannot scale due to how camera params are extracted from final matrix
+        // m = glm::scale(m, glm::vec3(scale_factor, scale_factor, scale_factor));
+        // SetFloat("Scale", scale_factor);
+
+        m = glm::translate(m, -glm::vec3(_center[0], _center[1], _center[2]));
+
+        for (int i = 0; i < 16; i++) _modelViewMatrix[i] = glm::value_ptr(m)[i];
     }
+}
+
+double Trackball::GetOrthoSize() const
+{
+    double scale_factor = 1.0;
+
+    if (_trans[2] < 0.0) {
+        scale_factor = 5.0 / (1 - _trans[2]);
+    } else {
+        scale_factor = 5.0 + _trans[2];
+    }
+    return 1 / scale_factor * 2.9;
 }
 
 #ifndef M_SQRT1_2

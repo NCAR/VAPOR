@@ -1,15 +1,22 @@
 #include "vapor/FileUtils.h"
 #include <string.h>
+#include <sys/stat.h>
+#include <vapor/MyBase.h>
 
 #ifdef WIN32
 #else
-    #include <sys/stat.h>
     #include <libgen.h>
 #endif
 
-using namespace VAPoR;
+using namespace Wasp;
 using FileUtils::FileType;
 using std::string;
+
+#ifdef WIN32
+const string FileUtils::Separator = "\\";
+#else
+const string FileUtils::Separator = "/";
+#endif
 
 string FileUtils::ReadFileToString(const string &path)
 {
@@ -32,21 +39,45 @@ string FileUtils::ReadFileToString(const string &path)
 std::string FileUtils::Basename(const std::string &path)
 {
 #ifdef WIN32
-    return path;
+    #error TODO
+    return 0;
 #else
-    char *copy = new char[path.length() + 1];
-    strcpy(copy, path.c_str());
+    char * copy = strdup(path.c_str());
     string ret(basename(copy));
-    delete[] copy;
+    free(copy);
     return ret;
 #endif
 }
 
+std::string FileUtils::Dirname(const std::string &path)
+{
+#ifdef WIN32
+    #error TODO
+    return path;
+#else
+    char * copy = strdup(path.c_str());
+    string ret(dirname(copy));
+    free(copy);
+    return ret;
+#endif
+}
+
+std::string FileUtils::Extension(const std::string &path) { return path.substr(path.rfind(".") + 1); }
+
 long FileUtils::GetFileModifiedTime(const string &path)
 {
-    struct stat attrib;
-    stat(path.c_str(), &attrib);
+    struct STAT64 attrib;
+    STAT64(path.c_str(), &attrib);
     return attrib.st_mtime;
+}
+
+bool FileUtils::IsPathAbsolute(const std::string &path)
+{
+#ifdef WIN32
+    return !PathIsRelative((LPCTSTR)path.c_str());
+#else
+    return path[0] == '/';
+#endif
 }
 
 bool FileUtils::FileExists(const std::string &path) { return FileUtils::GetFileType(path) != FileType::Does_Not_Exist; }
@@ -57,8 +88,8 @@ bool FileUtils::IsDirectory(const std::string &path) { return FileUtils::GetFile
 
 FileType FileUtils::GetFileType(const std::string &path)
 {
-    struct stat s;
-    if (stat(path.c_str(), &s) == 0) {
+    struct STAT64 s;
+    if (STAT64(path.c_str(), &s) == 0) {
         if (s.st_mode & S_IFDIR)
             return FileType::Directory;
         else if (s.st_mode & S_IFREG)
@@ -67,4 +98,14 @@ FileType FileUtils::GetFileType(const std::string &path)
             return FileType::Other;
     } else
         return FileType::Does_Not_Exist;
+}
+
+const char *FileUtils::LegacyBasename(const char *path)
+{
+    const char *last;
+    last = strrchr(path, Separator[0]);
+    if (!last)
+        return path;
+    else
+        return last + 1;
 }

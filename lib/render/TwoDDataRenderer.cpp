@@ -186,11 +186,6 @@ int TwoDDataRenderer::_paintGL(bool fast)
     // _shaderMgr->UploadEffectData(effect, "expS", (float) 16.0);
     // _shaderMgr->UploadEffectData( effect, "lightDirection", (float) 0.0, (float) 0.0, (float) 1.0);
 
-    // _shaderMgr->UploadEffectData(effect, "minLUTValue", (float) crange[0]);
-    // _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float) crange[1]);
-
-    // _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
-
 #endif
 
     ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
