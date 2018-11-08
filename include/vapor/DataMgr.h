@@ -814,7 +814,7 @@ private:
 
     void *_alloc_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, std::vector<size_t> bs, int element_sz, bool lock, bool fill);
 
-    void _free_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax);
+    void _free_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, bool forceFlag = false);
 
     bool _free_lru();
     void _free_var(string varname);
