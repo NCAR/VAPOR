@@ -36,7 +36,7 @@ float ambientCoeff   = lightingCoeffs[0];
 float diffuseCoeff   = lightingCoeffs[1];
 float specularCoeff  = lightingCoeffs[2];
 float specularExp    = lightingCoeffs[3];
-vec3  volumeDimsf    = vec3( float(volumeDims.x), float(volumeDims.y), float(volumeDims.z) );
+vec3  volumeDimsf    = vec3( volumeDims );
 vec3  volumeStepf    = 1.0 / volumeDimsf;
 
 //
@@ -458,6 +458,67 @@ bool CellOutsideBound( const in ivec3 cellIdx )
     else
         return false;
 }
+
+bool RayIntersectingSurface( const in vec3 startTexture,    const in vec3 rayDirTexture,
+                             const in ivec4 cellIdx )
+{
+    ivec3 cubeVertIdx[8];
+    ivec3 V0       = cellIdx.xyz;
+    cubeVertIdx[0] = V0;
+    cubeVertIdx[1] = ivec3(V0.x + 1, V0.y    , V0.z     );
+    cubeVertIdx[2] = ivec3(V0.x + 1, V0.y    , V0.z + 1 );
+    cubeVertIdx[3] = ivec3(V0.x    , V0.y    , V0.z + 1 );
+    cubeVertIdx[4] = ivec3(V0.x    , V0.y + 1, V0.z     );
+    cubeVertIdx[5] = ivec3(V0.x + 1, V0.y + 1, V0.z     );
+    cubeVertIdx[6] = ivec3(V0.x + 1, V0.y + 1, V0.z + 1 );
+    cubeVertIdx[7] = ivec3(V0.x    , V0.y + 1, V0.z + 1 );
+
+    vec3 cubeVertCoord[8];
+    for( int i = 0; i < 8; i++ )
+        cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
+
+    ivec3 triangles[2];     // two triangles on the indicated incoming face
+    switch( cellIdx.w )
+    {
+        case 0:             // front face,  w == 0
+            triangles[0]  = ivec3( 7, 3, 6 );
+            triangles[1]  = ivec3( 2, 3, 6 );
+            break;
+        case 1:             // back face,   w == 1
+            triangles[0]  = ivec3( 0, 4, 1 );  
+            triangles[1]  = ivec3( 5, 4, 1 );
+            break;
+        case 2:             // top face,    w == 2
+            triangles[0]  = ivec3( 4, 7, 5 ); 
+            triangles[1]  = ivec3( 6, 7, 5 );
+            break;
+        case 3:             // bottom face, w == 3
+            triangles[0]  = ivec3( 3, 0, 2 );
+            triangles[1]  = ivec3( 1, 0, 2 );
+            break;
+        case 4:             // right face,  w == 4
+            triangles[0]  = ivec3( 5, 1, 6 );
+            triangles[1]  = ivec3( 2, 1, 6 );
+            break;
+        case 5:             // left face,   w == 5
+            triangles[0]  = ivec3( 4, 0, 7 );
+            triangles[1]  = ivec3( 3, 0, 7 );
+            break;
+    }
+    
+    vec3 startBack = startTexture - rayDirTexture;
+    bool intersect[2];
+    float tArr[2], uArr[2], vArr[2];
+    for( int i = 0; i < 2; i++ )
+        intersect[i] = RayTriangleIntersect( startBack,     rayDirTexture,
+                                             cubeVertCoord[ triangles[i][0] ], 
+                                             cubeVertCoord[ triangles[i][1] ], 
+                                             cubeVertCoord[ triangles[i][2] ], 
+                                             tArr[i], uArr[i], vArr[i] );
+
+    return ( intersect[0] || intersect[1] );
+}
+
 
 void main(void)
 {
