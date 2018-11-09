@@ -38,6 +38,95 @@ float specularCoeff  = lightingCoeffs[2];
 float specularExp    = lightingCoeffs[3];
 vec3  volumeDimsf    = vec3( volumeDims );
 vec3  volumeStepf    = 1.0 / volumeDimsf;
+struct WoopPrecalculation
+{
+    int   kx, ky, kz;
+    float Sx, Sy, Sz;
+} woopPre;  // Precalculation of constants in the Woop transformation
+
+//
+// Initialize structure woopPre;
+//
+void InitializeWoopPre( const in vec3 dir )
+{
+    if( abs(dir[0]) > abs(dir[1]) )
+        woopPre.kz = 0;
+    else
+        woopPre.kz = 1;
+    if( abs(dir[2]) > abs(dir[woopPre.kz]) )
+        woopPre.kz = 2;
+    woopPre.kx = (woopPre.kz + 1) % 3;
+    woopPre.ky = (woopPre.kx + 1) % 3;
+
+    if( dir[woopPre.kz] < 0.0 )
+    {
+        int tmp    = woopPre.kx;
+        woopPre.kx = woopPre.ky;
+        woopPre.ky = tmp;
+    }
+
+    woopPre.Sx = dir[woopPre.kx] / dir[woopPre.kz];
+    woopPre.Sy = dir[woopPre.ky] / dir[woopPre.kz];
+    woopPre.Sz = 1.0             / dir[woopPre.kz];
+}
+
+// 
+// Woop ray-triangle intersection algorithm.
+// Note: woopPre must be initialized by InitializeWoopPre() before invoking this function.
+//
+bool  WoopIntersection( const in vec3 orig, const in vec3 dir,
+                        const in vec3 v0,   const in vec3 v1,   const in vec3 v2,
+                        out float outT,     out float outU,     out float outV,     out float outW )
+{
+    vec3 A   = v0 - orig;
+    vec3 B   = v1 - orig;
+    vec3 C   = v2 - orig;
+
+    float Ax = fma( -woopPre.Sx, A[ woopPre.kz ], A[ woopPre.kx ] );
+    float Ay = fma( -woopPre.Sy, A[ woopPre.kz ], A[ woopPre.ky ] );
+    float Bx = fma( -woopPre.Sx, B[ woopPre.kz ], B[ woopPre.kx ] );
+    float By = fma( -woopPre.Sy, B[ woopPre.kz ], B[ woopPre.ky ] );
+    float Cx = fma( -woopPre.Sx, C[ woopPre.kz ], C[ woopPre.kx ] );
+    float Cy = fma( -woopPre.Sy, C[ woopPre.kz ], C[ woopPre.ky ] );
+
+    float U  = fma( Cx, By, -Cy * Bx );
+    float V  = fma( Ax, Cy, -Ay * Cx );
+    float W  = fma( Bx, Ay, -By * Ax );
+
+    // Fall back to double precision
+    if( U == 0.0 || V == 0.0 || W == 0.0 )
+    {
+        double CxBy = double(Cx)  * double(By);
+        double CyBx = double(Cy)  * double(Bx);
+        U           = float( CxBy - CyBx );
+        double AxCy = double(Ax)  * double(Cy);
+        double AyCx = double(Ay)  * double(Cx);
+        V           = float( AxCy - AyCx );
+        double BxAy = double(Bx)  * double(Ay);
+        double ByAx = double(By)  * double(Ax);
+        W           = float( BxAy - ByAx );
+    }
+
+    // Edge test
+    if( (U < 0.0 || V < 0.0 || W < 0.0) && (U > 0.0 || V > 0.0 || W > 0.0) )
+        return false;
+
+    // Parallel test
+    float det = U + V + W;
+    if( det == 0.0 )
+        return false;
+
+    float Az = woopPre.Sz * A[ woopPre.kz ];
+    float Bz = woopPre.Sz * B[ woopPre.kz ];
+    float Cz = woopPre.Sz * C[ woopPre.kz ];
+    float T  = fma( U, Az, fma( V, Bz, W * Cz ) );
+    outT     = T / det;
+    outU     = U / det;
+    outV     = V / det;
+    outW     = W / det;
+
+    return true;
+}
 
 //
 // Input:  normalized value w.r.t. valueRange.
@@ -177,7 +266,7 @@ void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
     triangles[11] =  ivec3( 3, 0, 7 );
 }
 
-
+#if 0
 int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
                     const in  vec3 rayDirTexture,   const in float step1T,
                     out ivec4 step2CellIdx,  out float t,  out float u,  out float v  )
@@ -370,6 +459,8 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
 
     return numSmallestT;
 }
+#endif
+
 
 bool CellOutsideBound( const in ivec3 cellIdx )
 {
@@ -400,9 +491,10 @@ void main(void)
     ivec4 step1CellIdx  = provokingVertexIdx;
     ivec4 step2CellIdx  = ivec4( 0 );
     float step1T, step2T,  u,  v;
-    int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-                                  0.0, step2CellIdx, step2T, u, v );
+    //int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
+    //                              0.0, step2CellIdx, step2T, u, v );
 
+#if 0
     // Ray starts from an edge... Need to do something... 
     float biggestT1  = 0.0, biggestT2 = 0.0;
     const float zero = 3e-4;
@@ -488,6 +580,7 @@ void main(void)
                                         0.0, step2CellIdx, step2T, u, v );
         }
     }
+#endif
 
     // What's the color of Cell 1 
     vec3  step1CellCenterTexture = vec3( step1CellIdx.xyz + 1 ) * volumeStepf;
@@ -516,8 +609,8 @@ void main(void)
 
             step1CellIdx = step2CellIdx;
             step1T       = step2T;
-            intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-                                      step1T, step2CellIdx, step2T, u, v );
+            //intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
+            //                          step1T, step2CellIdx, step2T, u, v );
 
             if( CellOutsideBound( step2CellIdx.xyz ) )
             {
