@@ -63,15 +63,8 @@ VizWin::VizWin(
     setWindowIcon(QPixmap(vapor_icon___));
     _controlExec = ce;
 
-    _glManager = new GLManager;
-    vector<string> paths;
-    paths.push_back("shaders");
-    string shaderPath = GetAppPath("VAPOR", "share", paths);
-    paths.clear();
-    paths.push_back("fonts");
-    string fontPath = GetAppPath("VAPOR", "share", paths);
-    _glManager->shaderManager->SetResourceDirectory(shaderPath); // TODO GL
-    _glManager->fontManager->SetResourceDirectory(fontPath);     // TODO GL
+    _glManager = nullptr;
+    _manip = nullptr;
 
     setAutoBufferSwap(false);
     _mouseClicked = false;
@@ -81,16 +74,13 @@ VizWin::VizWin(
     _openGLInitFlag = false;
 
     setMouseTracking(false); // Only track mouse when button clicked/held
-
-    _manip = new TranslateStretchManip(_glManager);
-    bool initialize = true;
-    updateManip(initialize);
 }
 
 /*
  *  Destroys the object and frees any allocated resources
  */
 VizWin::~VizWin() {
+    this->makeCurrent();
     delete _glManager;
 }
 
@@ -305,6 +295,20 @@ void VizWin::resizeGL(int width, int height) {
 }
 
 void VizWin::initializeGL() {
+
+    _glManager = new GLManager;
+    vector<string> paths;
+    paths.push_back("shaders");
+    string shaderPath = GetAppPath("VAPOR", "share", paths);
+    paths.clear();
+    paths.push_back("fonts");
+    string fontPath = GetAppPath("VAPOR", "share", paths);
+    _glManager->shaderManager->SetResourceDirectory(shaderPath); // TODO GL
+    _glManager->fontManager->SetResourceDirectory(fontPath);     // TODO GL
+
+    _manip = new TranslateStretchManip(_glManager);
+    bool initialize = true;
+    updateManip(initialize);
 
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
     int rc = _controlExec->InitializeViz(_winName, _glManager);
