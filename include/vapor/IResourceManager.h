@@ -27,7 +27,10 @@ class RENDER_API IResourceManager : public Wasp::MyBase {
 };
 
 template <typename K, typename T>
-IResourceManager<K, T>::~IResourceManager() {}
+IResourceManager<K, T>::~IResourceManager() {
+    for (auto it = _map.begin(); it != _map.end(); ++it)
+        delete it->second;
+}
 
 template <typename K, typename T>
 T *IResourceManager<K, T>::GetResource(const K &key) {
