@@ -270,7 +270,6 @@ void VizWinMgr::_killViz(string vizName){
 	//
 	_vizWindow[vizName]->setEnabled(false);
 	_vizWindow[vizName]->close();
-
 }
 
 
@@ -315,6 +314,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 
 	// Remove the vizwin and the vizmdiwin
 	//
+    delete _vizWindow[vizName];
 	_vizWindow.erase(vizName);
 	_vizMdiWin.erase(vizName);
 
