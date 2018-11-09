@@ -91,8 +91,6 @@ public slots:
     virtual void setFocus();
 
 private:
-    VizWin() {}
-
     void updateManip(bool initialize = false);
 
     // Event handling
