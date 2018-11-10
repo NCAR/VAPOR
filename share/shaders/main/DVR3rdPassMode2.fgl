@@ -266,10 +266,9 @@ void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
     triangles[11] =  ivec3( 3, 0, 7 );
 }
 
-#if 0
 int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
                     const in  vec3 rayDirTexture,   const in float step1T,
-                    out ivec4 step2CellIdx,  out float t,  out float u,  out float v  )
+                    out ivec4 step2CellIdx,  out float step2T                 )
 {
     ivec3 cubeVertIdx[8], triangles[12];
     vec3  cubeVertCoord[8];
@@ -277,14 +276,14 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
 
     // Test intersection with 12 triangles
     bool  intersect[12];
-    float tArr[12],    uArr[12],   vArr[12];
+    float tArr[12],    uArr[12],   vArr[12],    wArr[12];
     for( int i = 0; i < 12; i++ )
     {
-        intersect[i] = RayPlaneIntersect( startTexture,   rayDirTexture,
-                                          cubeVertCoord[ triangles[i][0] ],
-                                          cubeVertCoord[ triangles[i][1] ],
-                                          cubeVertCoord[ triangles[i][2] ],
-                                          tArr[i]                         );
+        intersect[i] = WoopIntersection( startTexture,   rayDirTexture,
+                                         cubeVertCoord[ triangles[i][0] ],
+                                         cubeVertCoord[ triangles[i][1] ],
+                                         cubeVertCoord[ triangles[i][2] ],
+                                         tArr[i], uArr[i], vArr[i], wArr[i] );
     }
 
     // Extract which 2 faces the ray is coming in.
@@ -299,33 +298,15 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     else                            // An edge
     {
         inFace[0] = step1CellIdx.w / 10 - 1;
-        inFace[1] = int( mod( float(step1CellIdx.w), 10.0 ) );
         inFace[1] = step1CellIdx.w % 10;
     }
-
-    // Find the smallest t that's larger than step1T
-    const float zero  = 1e-4;
-    float smallestT   = 100.0;
-    for( int i = 0; i < 12; i++ )
-    {
-        if( (i / 2 != inFace[0])        && (i / 2 != inFace[1])   &&
-            (tArr[i] - step1T > -zero ) && (tArr[i] < smallestT)   )
-            smallestT = tArr[i];
-    }
-    t = smallestT;
-
-    int  numSmallestT = 0;
-    int  exitFaces[6] = int[]( -1, -1, -1, -1, -1, -1 );
+    
+    int numInterceptFace = 0;
     for( int i = 0; i < 6; i++ )
-    {
-        if( (i != inFace[0]) && (i != inFace[1]) &&
-            (abs(tArr[2*i] - smallestT) < zero || abs(tArr[2*i+1] - smallestT) < zero) )
-        {
-            exitFaces[ numSmallestT ] = i;
-            numSmallestT++;
-        }
-    }
+        if( intersect[2*i] || intersect[2*i+1] )
+            numInterceptFace++;
 
+#if 0
     if( numSmallestT == 1 )
     {
         int   f0 = exitFaces[0];
@@ -449,17 +430,10 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
             int edge = (top + 1) * 10 + left;
             step2CellIdx = ivec4( V0.x + 1, V0.y - 1, V0.z, edge );
         }
-        else
-            step2CellIdx = ivec4( -10 );
     }
-    else
-    {
-
-    }
-
-    return numSmallestT;
-}
 #endif
+    return numInterceptFace;
+}
 
 
 bool CellOutsideBound( const in ivec3 cellIdx )
@@ -483,16 +457,17 @@ void main(void)
     vec3 stopTexture    = texture( backFaceTexture,  fragTexture ).xyz;
     vec3 startTexture   = texture( frontFaceTexture, fragTexture ).xyz;
     vec3 rayDirTexture  = stopTexture - startTexture;
+    vec3 origTexture    = startTexture - rayDirTexture; // So the ray does not start from the volume surface.
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )
         discard;
+    InitializeWoopPre( rayDirTexture );
 
-    vec3  step1Texture  = startTexture;
     ivec4 step1CellIdx  = provokingVertexIdx;
     ivec4 step2CellIdx  = ivec4( 0 );
-    float step1T, step2T,  u,  v;
-    //int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-    //                              0.0, step2CellIdx, step2T, u, v );
+    float step1T = 1.0 + 1e-5, step2T;
+    int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
+                                  step1T, step2CellIdx, step2T           );
 
 #if 0
     // Ray starts from an edge... Need to do something... 
@@ -588,13 +563,12 @@ void main(void)
           color         = texture( colorMapTexture, TranslateValue( step1Value ) );
           color.rgb    *= color.a;
 
-/*
-     if( intersect > 2 ) 
-         color = vec4( 0.2, 0.9, 0.2, 1.0 );
-     else if( biggestT1 < biggestT2 )
+     if( intersect < 2 ) 
          color = vec4( 0.9, 0.2, 0.2, 1.0 );
-*/
+     else if( intersect > 2 ) 
+         color = vec4( 0.2, 0.9, 0.2, 1.0 );
 
+#if 0
     if( !CellOutsideBound( step2CellIdx.xyz ) )
     {
         int  maxCells = 2 * int(length( volumeDimsf ));
@@ -607,10 +581,10 @@ void main(void)
             color.rgb          += (1.0 - color.a) * backColor.a * backColor.rgb;
             color.a            += (1.0 - color.a) * backColor.a;
 
-            step1CellIdx = step2CellIdx;
-            step1T       = step2T;
-            //intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-            //                          step1T, step2CellIdx, step2T, u, v );
+            step1CellIdx        = step2CellIdx;
+            step1T              = step2T;
+            intersect           = FindNextCell( step1CellIdx, origTexture, rayDirTexture, 
+                                                step1T, step2CellIdx, step2T           );
 
             if( CellOutsideBound( step2CellIdx.xyz ) )
             {
@@ -619,6 +593,7 @@ void main(void)
             }
         }
     }
+#endif
 
 
 #if 0
