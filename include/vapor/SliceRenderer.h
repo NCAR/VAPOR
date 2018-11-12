@@ -53,7 +53,7 @@ namespace VAPoR {
         int  _buildCache();
         bool _isCacheDirty() const;
         int  _saveCacheParams();
-        void _initTexture();
+        void _initTextures();
         int  _saveTextureData();
         void _getSampleCoordinates(
             std::vector<double> &coords,
@@ -69,16 +69,39 @@ namespace VAPoR {
             std::vector<double> min, 
             std::vector<double> max
         ) const;
-        void _renderXY(std::vector<double> min, std::vector<double> max) const;
-        void _renderXZ(std::vector<double> min, std::vector<double> max) const;
-        void _renderYZ(std::vector<double> min, std::vector<double> max) const;
+//        void _renderXY(std::vector<double> min, std::vector<double> max) const;
+//        void _renderXZ(std::vector<double> min, std::vector<double> max) const;
+//        void _renderYZ(std::vector<double> min, std::vector<double> max) const;
+
+        void _setVertexPositions(
+            std::vector<double> min, 
+            std::vector<double> max
+        );
+        void _setXYVertexPositions(
+            std::vector<double> min, 
+            std::vector<double> max
+        );
+        void _setXZVertexPositions(
+            std::vector<double> min, 
+            std::vector<double> max
+        );
+        void _setYZVertexPositions(
+            std::vector<double> min, 
+            std::vector<double> max
+        );
         
         bool           _initialized;
 
-        GLuint         _texture;
+        GLuint         _colorMapTextureID;
+
+        GLuint         _textureID;
         int            _textureWidth;
         int            _textureHeight;
-        unsigned char* _textureData;
+        //unsigned char* _textureData;
+        float*         _dataValues;
+        float*         _vertexPositions;
+
+        GLuint _VAO, _vertexVBO, _dataVBO, _EBO;
 
         int _colorMapSize;
         GLfloat* _colorMap;
