@@ -28,10 +28,10 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _textureWidth = 250;
     _textureHeight = 250;
 
-    _VAO = NULL;
-    _vertexVBO = NULL;
-    _dataVBO = NULL;
-    _EBO = NULL;
+    _VAO = 0;
+    _vertexVBO = 0;
+    _dataVBO = 0;
+    _EBO = 0;
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
@@ -47,8 +47,12 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     }
 
     //    _dataValues = new unsigned char[_textureWidth * _textureHeight * 4];
-    _dataValues = new float[_textureWidth * _textureHeight];
-    _vertexPositions = new float[NUMVERTICES * 3];
+
+    // _dataValues consists of 1) a data value, and 2) a missing value flag
+    // at every sampled point in the plane of the texture
+    _dataValues = new float[_textureWidth * _textureHeight * 2];
+
+    _vertexPositions.clear();
 
     _saveCacheParams();
     _initialized = true;
@@ -56,7 +60,9 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 
 SliceRenderer::~SliceRenderer()
 {
-    glDeleteTextures(1, &_textureID);
+    // glDeleteTextures(1, &_textureID);
+    glDeleteTextures(1, &_colorMapTextureID);
+
     if (_colorMap) {
         delete[] _colorMap;
         _colorMap = nullptr;
@@ -65,68 +71,14 @@ SliceRenderer::~SliceRenderer()
         delete[] _dataValues;
         _dataValues = nullptr;
     }
-    if (_VAO) {
-        delete _VAO;
-        _VAO = nullptr;
-    }
-    if (_vertexVBO) {
-        delete _vertexVBO;
-        _vertexVBO = nullptr;
-    }
-    if (_dataVBO) {
-        delete _dataVBO;
-        _dataVBO = nullptr;
-    }
-    if (_EBO) {
-        delete _EBO;
-        _EBO = nullptr;
-    }
+
+    glDeleteVertexArrays(1, &_VAO);
+    glDeleteBuffers(1, &_dataVBO);
+    glDeleteBuffers(1, &_vertexVBO);
+    glDeleteBuffers(1, &_EBO);
 }
 
-/*void SliceRenderer::_initTextures() {
-    glDeleteTextures(1, &_textureID);
-    glGenTextures(1, &_textureID);
-
-    glBindTexture(GL_TEXTURE_2D, _textureID);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight,
-        0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)_textureData
-    );
-}*/
-
-void SliceRenderer::_initTextures()
-{
-    glGenTextures(1, &_textureID);
-    glGenTextures(1, &_colorMapTextureID);
-    glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_vertexVBO);
-    glGenBuffers(1, &_dataVBO);
-    glGenBuffers(1, &_EBO);
-
-    glBindVertexArray(_VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
+int SliceRenderer::_initializeGL() { return 0; }
 
 int SliceRenderer::_saveCacheParams()
 {
@@ -140,6 +92,7 @@ int SliceRenderer::_saveCacheParams()
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
+    cout << "CP.orientation " << _cacheParams.orientation << endl;
 
     _textureWidth = _cacheParams.textureSampleRate;
     _textureHeight = _cacheParams.textureSampleRate;
@@ -150,10 +103,12 @@ int SliceRenderer::_saveCacheParams()
 
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     tf->makeLut(_cacheParams.tf_lut);
+    cout << "ToDo: eliminate either _colorMap or tf_lut in SliceRenderer" << endl;
+    // tf->makeLut(_colorMap);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
 
     if (_dataValues) delete[] _dataValues;
-    _dataValues = new float[_textureWidth * _textureHeight];
+    _dataValues = new float[_textureWidth * _textureHeight * 2];
 
     int rc = _saveTextureData();
     if (rc < 0) SetErrMsg("Unable to acquire data for Slice texture");
@@ -183,84 +138,6 @@ void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, in
     }
 }
 
-/*int SliceRenderer::_saveTextureData() {
-    Grid* grid = NULL;
-    int rc = DataMgrUtils::GetGrids(
-        _dataMgr,
-        _cacheParams.ts,
-        _cacheParams.varName,
-        _cacheParams.boxMin,
-        _cacheParams.boxMax,
-        true,
-        &_cacheParams.refinementLevel,
-        &_cacheParams.compressionLevel,
-        &grid
-    );
-
-    grid->SetInterpolationOrder(1);
-
-    if (rc<0) {
-        SetErrMsg("Unable to acquire Grid for Slice texture");
-        return(rc);
-    }
-    assert(grid);
-
-    std::vector<double> textureMin, textureMax;
-    _getTextureCoordinates(textureMin, textureMax);
-
-    std::vector<double> cachedValuesForParams;
-
-    int missing=0;
-    float varValue, minValue, maxValue, missingValue;
-    std::vector<double> coords(3, 0.0);
-    for (int j=0; j<_textureHeight; j++) {
-        for (int i=0; i<_textureWidth; i++) {
-            _getSampleCoordinates(coords, i, j);
-
-            int index = (j*_textureWidth + i)*4;
-
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue) {
-                missing++;
-                _textureData[index + 0] = 0.f;
-                _textureData[index + 1] = 0.f;
-                _textureData[index + 2] = 0.f;
-                _textureData[index + 3] = 0.f;
-                continue;
-            }
-
-            cachedValuesForParams.push_back(varValue);
-
-            minValue = _cacheParams.tf_minMax[0];
-            maxValue = _cacheParams.tf_minMax[1];
-            int bin = 255 * (varValue-minValue) / (maxValue-minValue);
-            bin *= 4;
-            if (bin < 0)
-                bin = 0;
-            if (bin >= _cacheParams.tf_lut.size())
-                bin = _cacheParams.tf_lut.size()-4;
-
-            unsigned char red, green, blue, alpha;
-            red   = _cacheParams.tf_lut[bin + 0]*255;
-            green = _cacheParams.tf_lut[bin + 1]*255;
-            blue  = _cacheParams.tf_lut[bin + 2]*255;
-            alpha = _cacheParams.tf_lut[bin + 3]*255;
-
-            _textureData[index + 0] = red;
-            _textureData[index + 1] = green;
-            _textureData[index + 2] = blue;
-            _textureData[index + 3] = alpha;
-        }
-    }
-
-
-    SliceParams* p = dynamic_cast<SliceParams*>(GetActiveParams());
-    assert(p);
-    p->SetCachedValues(cachedValuesForParams);
-    return rc;
-}*/
-
 int SliceRenderer::_saveTextureData()
 {
     Grid *grid = NULL;
@@ -276,6 +153,11 @@ int SliceRenderer::_saveTextureData()
     assert(grid);
 
     _setVertexPositions();
+
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    assert(p);
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+    tf->makeLut(_colorMap);
 
     float               varValue, minValue, maxValue, missingValue;
     std::vector<double> coords(3, 0.0);
@@ -302,49 +184,7 @@ int SliceRenderer::_saveTextureData()
         }
     }
 
-    size_t dataSize = _textureWidth * _textureHeight * 2 * sizeof(float);
-    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
-    glBufferData(GL_ARRAY_BUFFER, dataSize, &_dataValues, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    glBufferData(GL_ARRAY_BUFFER, NUMVERTICES * 3 * sizeof(float), &_vertexPositions, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    glBufferData(EL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(unsigned int), &_indexValues, GL_STATIC_DRAW);
-
-    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    assert(p);
-    p->SetCachedValues(cachedValuesForParams);
     return rc;
-}
-
-void SliceRenderer::_getTextureCoordinates(std::vector<double> &textureMin, std::vector<double> &textureMax)
-{
-    textureMin.clear();
-    textureMax.clear();
-
-    std::vector<double> boxMin = _cacheParams.boxMin;
-    std::vector<double> boxMax = _cacheParams.boxMax;
-
-    int orientation = _cacheParams.orientation;
-    if (orientation == XY) {
-        textureMin.push_back(boxMin[X]);
-        textureMin.push_back(boxMin[Y]);
-        textureMax.push_back(boxMax[X]);
-        textureMax.push_back(boxMax[Y]);
-    }
-    if (orientation == XZ) {
-        textureMin.push_back(boxMin[X]);
-        textureMin.push_back(boxMin[Z]);
-        textureMax.push_back(boxMax[X]);
-        textureMax.push_back(boxMax[Z]);
-    }
-    if (orientation == YZ) {
-        textureMin.push_back(boxMin[Y]);
-        textureMin.push_back(boxMin[Z]);
-        textureMax.push_back(boxMax[Y]);
-        textureMax.push_back(boxMax[Z]);
-    }
 }
 
 bool SliceRenderer::_isCacheDirty() const
@@ -378,49 +218,99 @@ bool SliceRenderer::_isCacheDirty() const
     return false;
 }
 
-int SliceRenderer::_initializeGL() { return 0; }
-
-/*int SliceRenderer::_paintGL(bool fast) {
-    int rc = 0;
-
-    if (_isCacheDirty()) {
-        rc = _saveCacheParams();
-    }
-
-    _initTextures();
-
-    std::vector<double> min = _cacheParams.boxMin;
-    std::vector<double> max = _cacheParams.boxMax;
-
-    glEnable(GL_DEPTH_TEST);
-
-    LegacyGL *lgl = _glManager->legacy;
-    lgl->EnableTexture();
-
-    int orientation = _cacheParams.orientation;
-    if (orientation == XY)
-        _renderXY(min, max);
-    else if (orientation == XZ)
-        _renderXZ(min, max);
-    else if (orientation == YZ)
-        _renderYZ(min, max);
-    //_render(orientation, min, max);
-
-    lgl->DisableTexture();
-
-    return rc;
-}*/
-
 int SliceRenderer::_paintGL(bool fast)
 {
-    if (printOpenGLError() != 0) return -1;
+    int rc = 0;
+    if (_isCacheDirty()) { rc = _saveCacheParams(); }
 
+    _glManager->matrixManager->MatrixModeModelView();
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_TRUE);
+
+    glGenVertexArrays(1, &_VAO);
+    glBindVertexArray(_VAO);
+
+    glGenBuffers(1, &_vertexVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), NULL);
+    glEnableVertexAttribArray(0);
+    glBufferData(GL_ARRAY_BUFFER, NUMVERTICES * 3 * sizeof(double), &_vertexPositions[0], GL_STATIC_DRAW);
+
+    glGenBuffers(1, &_dataVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+    glEnableVertexAttribArray(1);
+    size_t dataSize = _textureWidth * _textureHeight * 2 * sizeof(float);
+    glBufferData(GL_ARRAY_BUFFER, dataSize, &_dataValues, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &_EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    std::vector<GLuint> indexValues = {0, 1, 2, 1, 3, 2};
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexValues.size() * sizeof(unsigned int), &indexValues[0], GL_STATIC_DRAW);
+
+    // Configure our colormap texture
+    //
+    // glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &_colorMapTextureID);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, _colorMapSize, 0, GL_RGBA, GL_FLOAT, _colorMap
+                 // GL_TEXTURE_1D, 0 GL_RGBA, _colorMapSize, 0, GL_RGBA, GL_FLOAT, _cacheParams.tf_lut
+    );
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_1D, 0);
+    // Question:
+    // Is this setting my "uniform sampler1D colormap" in the frag shader?
+    //
+
+    if (printOpenGLError() != 0) {
+        cout << "A" << endl;
+        return -1;
+    }
+
+    // Configure the shader program //
     ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
+    EnableClipToBox(s);
     s->Bind();
+    // one fragment shader uniform
+    s->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    // remaining vertex shader uniforms
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    assert(p);
+    float opacity = p->GetConstantOpacity();
+    s->SetUniform("constantOpacity", opacity);
     s->SetUniform("minLUTValue", (float)_cacheParams.tf_minMax[0]);
     s->SetUniform("maxLUTValue", (float)_cacheParams.tf_minMax[1]);
 
-    glActiveTexture(GL_TEXTURE0);
+    // Question:
+    // the TwoDRenderer binds its colormap to two textures??? why???
+    //      glActiveTexture(GL_TEXTURE1);
+    //      glBindTexture(GL_TEXTURE_1D, _cMapTexID);
+
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+
+    glDrawElements(GL_TRIANGLES, 2, GL_UNSIGNED_INT, 0);
+
+    // Unbind everything
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    if (printOpenGLError() != 0) {
+        cout << "B" << endl;
+        return -1;
+    }
+    return rc;
 }
 
 void SliceRenderer::_render(int orientation, std::vector<double> min, std::vector<double> max) const
@@ -433,7 +323,6 @@ void SliceRenderer::_render(int orientation, std::vector<double> min, std::vecto
     else
         plane = YZ;
 
-    cout << "orientation/plane " << orientation << " " << plane << endl;
     min[plane] = max[plane];
 
     LegacyGL *lgl = _glManager->legacy;
@@ -460,126 +349,46 @@ void SliceRenderer::_setVertexPositions()
     std::vector<double> min = _cacheParams.boxMin;
     std::vector<double> max = _cacheParams.boxMax;
     int                 orientation = _cacheParams.orientation;
-
-    if (orientation == XY)
+    cout << "_sestVertexPositions() " << orientation << endl;
+    if (orientation == XY) {
+        cout << "should be here" << endl;
         _setXYVertexPositions(min, max);
-    else if (orientation == XZ)
+    } else if (orientation == XZ)
         _setXZVertexPositions(min, max);
     else if (orientation == YZ)
         _setXZVertexPositions(min, max);
+    cout << "oops" << endl;
 }
 
 void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<double> max)
 {
     double zCoord = min[Z];
 
-    flaot tempArray[] = {
+    cout << min[X] << " " << min[Y] << " " << zCoord << endl;
+    cout << max[X] << " " << min[Y] << " " << zCoord << endl;
+    cout << max[X] << " " << max[Y] << " " << zCoord << endl;
+    cout << min[X] << " " << max[Y] << " " << zCoord << endl;
+    std::vector<double> temp = {
         min[X], min[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord,
     };
 
-    /*float tempArray[] = {
-        min[X], min[Y], zCoord,     // triangle 1
-        max[X], min[Y], zCoord,
-        max[X], max[Y], zCoord,
-
-        min[X], min[Y], zCoord,     // triangle 2
-        max[X], max[Y], zCoord,
-        min[X], max[Y], zCoord
-    };*/
-
-    std::copy(tempArray, temparray + NUMVERTICES * 3, _vertexPositions);
+    _vertexPositions = temp;
 }
 
 void SliceRenderer::_setXZVertexPositions(std::vector<double> min, std::vector<double> max)
 {
     double yCoord = min[Y];
 
-    flaot tempArray[] = {min[X], yCoord, min[Z], max[X], yCoord, min[Z], max[X], yCoord, max[Z], min[X], yCoord, max[Z]};
+    std::vector<double> temp = {min[X], yCoord, min[Z], max[X], yCoord, min[Z], max[X], yCoord, max[Z], min[X], yCoord, max[Z]};
 
-    /*float tempArray[] = {
-        min[X], yCoord, min[Z],     // triangle 1
-        max[X], yCoord, min[Z],
-        max[X], yCoord, max[Z],
-
-        min[X], yCoord, min[Z],     // triangle 2
-        max[X], yCoord, max[Z],
-        min[X], yCoord, max[Z]
-    };*/
-
-    std::copy(tempArray, temparray + NUMVERTICES * 3, _vertexPositions);
+    _vertexPositions = temp;
 }
 
 void SliceRenderer::_setYZVertexPositions(std::vector<double> min, std::vector<double> max)
 {
     double xCoord = min[X];
 
-    flaot tempArray[] = {xCoord, min[Y], min[Z], xCoord, max[Y], min[Z], xCoord, max[Y], max[Z], xCoord, min[Y], max[Z]};
-    /*float tempArray [] = {
-        xCoord, min[Y], min[Z],     // triangle 1
-        xCoord, max[Y], min[Z],
-        xCoord, max[Y], max[Z],
+    std::vector<double> temp = {xCoord, min[Y], min[Z], xCoord, max[Y], min[Z], xCoord, max[Y], max[Z], xCoord, min[Y], max[Z]};
 
-        xCoord, min[Y], min[Z],     // triangle 2
-        xCoord, max[Y], max[Z],
-        xCoord, min[Y], max[Z]
-    };*/
-
-    std::copy(tempArray, temparray + NUMVERTICES * 3, _vertexPositions);
+    _vertexPositions = temp;
 }
-
-/*void SliceRenderer::_renderXY(
-    std::vector<double> min,
-    std::vector<double> max
-) const {
-    double zCoord = min[Z];
-
-    LegacyGL *lgl = _glManager->legacy;
-
-    lgl->Begin(GL_TRIANGLES);
-    lgl->TexCoord2f(0.f, 0.f); lgl->Vertex3f(min[X], min[Y], zCoord);
-    lgl->TexCoord2f(1.f, 0.f); lgl->Vertex3f(max[X], min[Y], zCoord);
-    lgl->TexCoord2f(1.f, 1.f); lgl->Vertex3f(max[X], max[Y], zCoord);
-
-    lgl->TexCoord2f(0.f, 0.f); lgl->Vertex3f(min[X], min[Y], zCoord);
-    lgl->TexCoord2f(1.f, 1.f); lgl->Vertex3f(max[X], max[Y], zCoord);
-    lgl->TexCoord2f(0.f, 1.f); lgl->Vertex3f(min[X], max[Y], zCoord);
-    lgl->End();
-}
-
-void SliceRenderer::_renderXZ(
-    std::vector<double> min,
-    std::vector<double> max
-) const {
-    double yCoord = min[Y];
-
-    LegacyGL *lgl = _glManager->legacy;
-
-    lgl->Begin(GL_TRIANGLES);
-    lgl->TexCoord2f(0.0f, 0.0f); lgl->Vertex3f(min[X], yCoord, min[Z]);
-    lgl->TexCoord2f(1.0f, 0.0f); lgl->Vertex3f(max[X], yCoord, min[Z]);
-    lgl->TexCoord2f(1.0f, 1.0f); lgl->Vertex3f(max[X], yCoord, max[Z]);
-
-    lgl->TexCoord2f(0.0f, 0.0f); lgl->Vertex3f(min[X], yCoord, min[Z]);
-    lgl->TexCoord2f(1.0f, 1.0f); lgl->Vertex3f(max[X], yCoord, max[Z]);
-    lgl->TexCoord2f(0.0f, 1.0f); lgl->Vertex3f(min[X], yCoord, max[Z]);
-    lgl->End();
-}
-
-void SliceRenderer::_renderYZ(
-    std::vector<double> min,
-    std::vector<double> max
-) const {
-    double xCoord = min[X];
-
-    LegacyGL *lgl = _glManager->legacy;
-
-    lgl->Begin(GL_TRIANGLES);
-    lgl->TexCoord2f(0.0f, 0.0f); lgl->Vertex3f(xCoord, min[Y], min[Z]);
-    lgl->TexCoord2f(1.0f, 0.0f); lgl->Vertex3f(xCoord, max[Y], min[Z]);
-    lgl->TexCoord2f(1.0f, 1.0f); lgl->Vertex3f(xCoord, max[Y], max[Z]);
-
-    lgl->TexCoord2f(0.0f, 0.0f); lgl->Vertex3f(xCoord, min[Y], min[Z]);
-    lgl->TexCoord2f(1.0f, 1.0f); lgl->Vertex3f(xCoord, max[Y], max[Z]);
-    lgl->TexCoord2f(0.0f, 1.0f); lgl->Vertex3f(xCoord, min[Y], max[Z]);
-    lgl->End();
-}*/

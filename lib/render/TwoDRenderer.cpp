@@ -167,12 +167,15 @@ void TwoDRenderer::_openGLInit()
     // Do write to the z buffer
     //
     glDepthMask(GL_TRUE);
+
+    cout << "_openGLInit()" << endl;
 }
 
 // Restore OpenGL settings to OpenGL defaults
 //
 void TwoDRenderer::_openGLRestore()
 {
+    cout << "_openGLRestore()" << endl;
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -254,6 +257,7 @@ void TwoDRenderer::_renderMeshAligned()
             glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
             glBufferData(GL_ARRAY_BUFFER, _meshWidth * 4 * sizeof(float), &data[j * _meshWidth * 2], GL_STREAM_DRAW);
             glDrawElements(GL_TRIANGLE_STRIP, 2 * _meshWidth, GL_UNSIGNED_INT, 0);
+            cout << "coordinate for 2D " << _verts[0] << " " << _verts[1] << " " << _verts[2] << endl;
         }
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
