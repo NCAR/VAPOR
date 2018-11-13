@@ -69,6 +69,11 @@ namespace VAPoR {
 //        void _renderXZ(std::vector<double> min, std::vector<double> max) const;
 //        void _renderYZ(std::vector<double> min, std::vector<double> max) const;
 
+        void _configureTexture();
+        void _configureShader();
+        void _resetState();
+        void _initializeState();
+
         void _setVertexPositions();
         void _setXYVertexPositions(
             std::vector<double> min, 
