@@ -25,5 +25,7 @@ void main(void)
 	vec4 color = texture(colormap, s);
 	// vec4 color = vec4(s, s, s, constantOpacity);
 
-	fragColor = vec4(color.rgb, color.a * constantOpacity);
+	//fragColor = vec4(color.rgb, color.a * constantOpacity);
+
+    fragColor = vec4(1, 0, 0, constantOpacity);
 }
