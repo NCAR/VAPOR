@@ -46,9 +46,6 @@ public:
     Value       GetValue(int row, int col);
     std::string GetStringValue(int row, int col);
 
-    // template <class T>
-    // void GetRow(int row, std::vector<T> & values);
-
     // Dump all values in the table back to the user
     void GetValues(std::vector<std::string> &vec);
     void GetValues(std::vector<int> &vec);
@@ -59,6 +56,7 @@ public:
 
     void SetCheckboxesInFinalColumn(bool enabled);
     void SetCheckboxesInFinalRow(bool enabled);
+    void EnableDisableCheckboxes(bool enabled);
 
     // I think we may need something like this.  TBD...
     void SetCellMutability(int row, int col);
@@ -80,7 +78,6 @@ public:
 
 public slots:
     void emitValueChanged();
-    // void emitCellClicked();
     void emitReturnPressed();
 
 signals:
@@ -123,6 +120,7 @@ private:
     int           _activeCol;
     bool          _lastRowIsCheckboxes;
     bool          _lastColIsCheckboxes;
+    bool          _checkboxesEnabled;
     bool          _autoResizeHeight;
     QTableWidget *_table;
 
