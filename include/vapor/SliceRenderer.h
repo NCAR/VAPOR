@@ -57,9 +57,6 @@ class RENDER_API SliceRenderer : public Renderer {
         std::vector<double> &coords,
         int i,
         int j) const;
-    void _getTextureCoordinates(
-        std::vector<double> &textureMin,
-        std::vector<double> &textureMax);
     void _render(
         int orientation,
         std::vector<double> min,
@@ -68,9 +65,7 @@ class RENDER_API SliceRenderer : public Renderer {
     //        void _renderXZ(std::vector<double> min, std::vector<double> max) const;
     //        void _renderYZ(std::vector<double> min, std::vector<double> max) const;
 
-    void _setVertexPositions(
-        std::vector<double> min,
-        std::vector<double> max);
+    void _setVertexPositions();
     void _setXYVertexPositions(
         std::vector<double> min,
         std::vector<double> max);
@@ -85,12 +80,12 @@ class RENDER_API SliceRenderer : public Renderer {
 
     GLuint _colorMapTextureID;
 
-    GLuint _textureID;
     int _textureWidth;
     int _textureHeight;
-    //unsigned char* _textureData;
     float *_dataValues;
-    float *_vertexPositions;
+    std::vector<double> _vertexPositions;
+    //GLuint         _textureID;
+    //unsigned char* _textureData;
 
     GLuint _VAO, _vertexVBO, _dataVBO, _EBO;
 
