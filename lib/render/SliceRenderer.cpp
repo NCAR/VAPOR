@@ -17,6 +17,8 @@
 
 #define MAXTEXTURESIZE 8000
 
+bool useEBO = false;
+
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -180,7 +182,7 @@ int SliceRenderer::_saveTextureData()
             // The second element of our shader indicates a missing value
             // if it's not equal to 0, so set it to 0 here
             _dataValues[index] = varValue;
-            _dataValues[index + 1] = 0.f;
+            _dataValues[index + 1] = 0.0f;
         }
     }
 
@@ -223,34 +225,88 @@ int SliceRenderer::_paintGL(bool fast)
     int rc = 0;
     if (_isCacheDirty()) { rc = _saveCacheParams(); }
 
-    _glManager->matrixManager->MatrixModeModelView();
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_TRUE);
+    _initializeState();
 
     glGenVertexArrays(1, &_VAO);
     glBindVertexArray(_VAO);
 
     glGenBuffers(1, &_vertexVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), NULL);
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, NUMVERTICES * 3 * sizeof(double), &_vertexPositions[0], GL_STATIC_DRAW);
+    if (useEBO) {
+        glBufferData(GL_ARRAY_BUFFER, NUMVERTICES * 3 * sizeof(double), &_vertexPositions[0], GL_STATIC_DRAW);
+    } else {
+        glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), &_vertexPositions[0], GL_STATIC_DRAW);
+    }
 
     glGenBuffers(1, &_dataVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
     size_t dataSize = _textureWidth * _textureHeight * 2 * sizeof(float);
-    glBufferData(GL_ARRAY_BUFFER, dataSize, &_dataValues, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_dataValues), _dataValues, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &_EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    std::vector<GLuint> indexValues = {0, 1, 2, 1, 3, 2};
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexValues.size() * sizeof(unsigned int), &indexValues[0], GL_STATIC_DRAW);
+    if (useEBO) {
+        glGenBuffers(1, &_EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+        unsigned short indexValues[] = {0, 1, 2, 1, 3, 2};
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                     // indexValues.size()*sizeof(unsigned short),
+                     sizeof(indexValues),
+                     //&indexValues[0],
+                     &indexValues, GL_STATIC_DRAW);
+    }
 
+    _configureTexture();
+    _configureShader();
+
+    if (printOpenGLError() != 0) {
+        cout << "A" << endl;
+        return -1;
+    }
+
+    // Question:
+    // the TwoDRenderer binds its colormap to two textures??? why???
+    //      glActiveTexture(GL_TEXTURE1);
+    //      glBindTexture(GL_TEXTURE_1D, _cMapTexID);
+
+    glBindVertexArray(_VAO);
+    if (useEBO) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+        // glDrawElements(GL_TRIANGLES, 2, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 4);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+    _resetState();
+
+    if (printOpenGLError() != 0) {
+        cout << "B" << endl;
+        return -1;
+    }
+    return rc;
+}
+
+void SliceRenderer::_configureShader()
+{
+    ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
+    EnableClipToBox(s);
+    s->Bind();
+    // one fragment shader uniform
+    s->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    // remaining vertex shader uniforms
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    assert(p);
+    float opacity = p->GetConstantOpacity();
+    s->SetUniform("constantOpacity", opacity);
+    s->SetUniform("minLUTValue", (float)_cacheParams.tf_minMax[0]);
+    s->SetUniform("maxLUTValue", (float)_cacheParams.tf_minMax[1]);
+}
+
+void SliceRenderer::_configureTexture()
+{
     // Configure our colormap texture
     //
     // glActiveTexture(GL_TEXTURE0);
@@ -269,48 +325,29 @@ int SliceRenderer::_paintGL(bool fast)
     // Question:
     // Is this setting my "uniform sampler1D colormap" in the frag shader?
     //
+}
 
-    if (printOpenGLError() != 0) {
-        cout << "A" << endl;
-        return -1;
-    }
+void SliceRenderer::_initializeState()
+{
+    _glManager->matrixManager->MatrixModeModelView();
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_TRUE);
+}
 
-    // Configure the shader program //
-    ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
-    EnableClipToBox(s);
-    s->Bind();
-    // one fragment shader uniform
-    s->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
-    // remaining vertex shader uniforms
-    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    assert(p);
-    float opacity = p->GetConstantOpacity();
-    s->SetUniform("constantOpacity", opacity);
-    s->SetUniform("minLUTValue", (float)_cacheParams.tf_minMax[0]);
-    s->SetUniform("maxLUTValue", (float)_cacheParams.tf_minMax[1]);
-
-    // Question:
-    // the TwoDRenderer binds its colormap to two textures??? why???
-    //      glActiveTexture(GL_TEXTURE1);
-    //      glBindTexture(GL_TEXTURE_1D, _cMapTexID);
-
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-
-    glDrawElements(GL_TRIANGLES, 2, GL_UNSIGNED_INT, 0);
-
+void SliceRenderer::_resetState()
+{
     // Unbind everything
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-
-    if (printOpenGLError() != 0) {
-        cout << "B" << endl;
-        return -1;
-    }
-    return rc;
 }
 
 void SliceRenderer::_render(int orientation, std::vector<double> min, std::vector<double> max) const
@@ -349,15 +386,12 @@ void SliceRenderer::_setVertexPositions()
     std::vector<double> min = _cacheParams.boxMin;
     std::vector<double> max = _cacheParams.boxMax;
     int                 orientation = _cacheParams.orientation;
-    cout << "_sestVertexPositions() " << orientation << endl;
     if (orientation == XY) {
-        cout << "should be here" << endl;
         _setXYVertexPositions(min, max);
     } else if (orientation == XZ)
         _setXZVertexPositions(min, max);
     else if (orientation == YZ)
         _setXZVertexPositions(min, max);
-    cout << "oops" << endl;
 }
 
 void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<double> max)
@@ -368,11 +402,21 @@ void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<d
     cout << max[X] << " " << min[Y] << " " << zCoord << endl;
     cout << max[X] << " " << max[Y] << " " << zCoord << endl;
     cout << min[X] << " " << max[Y] << " " << zCoord << endl;
-    std::vector<double> temp = {
-        min[X], min[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord,
-    };
 
-    _vertexPositions = temp;
+    std::vector<double> temp;
+    if (useEBO) {
+        std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
+        _vertexPositions = temp;
+    } else {
+        std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, min[X], max[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
+        _vertexPositions = temp;
+    }
+    /*std::vector<double> temp = {
+        0., 0., 0.,
+        1., 0., 0.,
+        1., 1., 0.,
+        0., 1., 0.
+    };*/
 }
 
 void SliceRenderer::_setXZVertexPositions(std::vector<double> min, std::vector<double> max)
