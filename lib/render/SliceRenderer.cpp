@@ -6,6 +6,7 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/LegacyGL.h>
 #include <vapor/GLManager.h>
+#include <vapor/GetAppPath.h>
 
 #define X           0
 #define Y           1
@@ -48,11 +49,9 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
         _colorMap[i * 4 + 3] = 1.0;
     }
 
-    //    _dataValues = new unsigned char[_textureWidth * _textureHeight * 4];
-
     // _dataValues consists of 1) a data value, and 2) a missing value flag
     // at every sampled point in the plane of the texture
-    _dataValues = new float[_textureWidth * _textureHeight * 2];
+    _dataValues = new float[_textureWidth * _textureHeight];    // * 2];
 
     _vertexPositions.clear();
 
@@ -75,7 +74,7 @@ SliceRenderer::~SliceRenderer()
     }
 
     glDeleteVertexArrays(1, &_VAO);
-    glDeleteBuffers(1, &_dataVBO);
+    // glDeleteBuffers(1, &_dataVBO);
     glDeleteBuffers(1, &_vertexVBO);
     glDeleteBuffers(1, &_EBO);
 }
@@ -94,7 +93,6 @@ int SliceRenderer::_saveCacheParams()
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
-    cout << "CP.orientation " << _cacheParams.orientation << endl;
 
     _textureWidth = _cacheParams.textureSampleRate;
     _textureHeight = _cacheParams.textureSampleRate;
@@ -106,11 +104,11 @@ int SliceRenderer::_saveCacheParams()
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     tf->makeLut(_cacheParams.tf_lut);
     cout << "ToDo: eliminate either _colorMap or tf_lut in SliceRenderer" << endl;
-    // tf->makeLut(_colorMap);
+    tf->makeLut(_colorMap);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
 
     if (_dataValues) delete[] _dataValues;
-    _dataValues = new float[_textureWidth * _textureHeight * 2];
+    _dataValues = new float[_textureWidth * _textureHeight];
 
     int rc = _saveTextureData();
     if (rc < 0) SetErrMsg("Unable to acquire data for Slice texture");
@@ -167,22 +165,24 @@ int SliceRenderer::_saveTextureData()
         for (int i = 0; i < _textureWidth; i++) {
             _getSampleCoordinates(coords, i, j);
 
-            int index = (j * _textureWidth + i) * 2;
+            // int index = (j*_textureWidth + i)*2;
+            int index = (j * _textureWidth + i);
 
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue) {
                 // The second element of our shader indicates a missing value
                 // if it's not equal to 0, so set it to 1.f here
+
                 _dataValues[index] = 1.f;
-                _dataValues[index + 1] = 1.f;
+                //_dataValues[index+1] = 1.f;
                 continue;
             }
 
             // The second element of our shader indicates a missing value
             // if it's not equal to 0, so set it to 0 here
             _dataValues[index] = varValue;
-            _dataValues[index + 1] = 0.0f;
+            //_dataValues[index+1] = 0.0f;
         }
     }
 
@@ -240,12 +240,34 @@ int SliceRenderer::_paintGL(bool fast)
         glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), &_vertexPositions[0], GL_STATIC_DRAW);
     }
 
-    glGenBuffers(1, &_dataVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+    float texCoords[] = {
+        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.0f, 1.0f, 1.0f, 0.0f, 1.0f
+        /*1.0f, 1.0f,
+        1.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 1.0f*/
+    };
+    glGenBuffers(1, &_texCoordVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
-    size_t dataSize = _textureWidth * _textureHeight * 2 * sizeof(float);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_dataValues), _dataValues, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
+
+    /*    glGenBuffers(1, &_dataVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(1);
+    //size_t dataSize = _textureWidth*_textureHeight*2*sizeof(float);
+    size_t dataSize = _textureWidth*_textureHeight*sizeof(float);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        dataSize,//sizeof(_dataValues),
+        _dataValues,
+        GL_STATIC_DRAW
+    );
+*/
 
     if (useEBO) {
         glGenBuffers(1, &_EBO);
@@ -258,7 +280,7 @@ int SliceRenderer::_paintGL(bool fast)
                      &indexValues, GL_STATIC_DRAW);
     }
 
-    _configureTexture();
+    _configureTextures();
     _configureShader();
 
     if (printOpenGLError() != 0) {
@@ -291,40 +313,64 @@ int SliceRenderer::_paintGL(bool fast)
 
 void SliceRenderer::_configureShader()
 {
-    ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
+    ShaderProgram *s = _glManager->shaderManager->GetShader("Slice");
     EnableClipToBox(s);
     s->Bind();
-    // one fragment shader uniform
+
+    // One vertex shader uniform vec4
     s->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
-    // remaining vertex shader uniforms
+
+    // Remaining fragment shader uniform floats
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
     float opacity = p->GetConstantOpacity();
     s->SetUniform("constantOpacity", opacity);
     s->SetUniform("minLUTValue", (float)_cacheParams.tf_minMax[0]);
     s->SetUniform("maxLUTValue", (float)_cacheParams.tf_minMax[1]);
+
+    // And finally our uniform samplers
+    GLint colormapLocation;
+    colormapLocation = s->GetUniformLocation("colormap");
+    glUniform1i(colormapLocation, 0);
+
+    GLint dataValuesLocation;
+    dataValuesLocation = s->GetUniformLocation("dataValues");
+    glUniform1i(dataValuesLocation, 1);
 }
 
-void SliceRenderer::_configureTexture()
+void SliceRenderer::_configureTextures()
 {
     // Configure our colormap texture
     //
-    // glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &_colorMapTextureID);
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, _colorMapSize, 0, GL_RGBA, GL_FLOAT, _colorMap
-                 // GL_TEXTURE_1D, 0 GL_RGBA, _colorMapSize, 0, GL_RGBA, GL_FLOAT, _cacheParams.tf_lut
-    );
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_1D, 0);
-    // Question:
-    // Is this setting my "uniform sampler1D colormap" in the frag shader?
-    //
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, _colorMap);
+
+    // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glGenTextures(1, &_dataValueTextureID);
+    // glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE1);
+    // glActiveTexture(GL_TEXTURE0+1);
+    glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    /*float dataValues[2][2];
+    dataValues[0][0] = (float)0.f;
+    dataValues[0][1] = (float)0.25f;
+    dataValues[1][0] = (float)0.5f;
+    dataValues[1][1] = (float)0.75f;*/
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F,
+                 // 2,
+                 // 2,
+                 _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, _dataValues);
 }
 
 void SliceRenderer::_initializeState()
@@ -340,14 +386,16 @@ void SliceRenderer::_initializeState()
 void SliceRenderer::_resetState()
 {
     // Unbind everything
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    // glDisableVertexAttribArray(0);
+    // glDisableVertexAttribArray(1);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
+
+    // Need to delete textures
 }
 
 void SliceRenderer::_render(int orientation, std::vector<double> min, std::vector<double> max) const

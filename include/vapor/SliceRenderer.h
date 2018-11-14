@@ -52,7 +52,7 @@ private:
     //        void _renderXZ(std::vector<double> min, std::vector<double> max) const;
     //        void _renderYZ(std::vector<double> min, std::vector<double> max) const;
 
-    void _configureTexture();
+    void _configureTextures();
     void _configureShader();
     void _resetState();
     void _initializeState();
@@ -65,6 +65,7 @@ private:
     bool _initialized;
 
     GLuint _colorMapTextureID;
+    GLuint _dataValueTextureID;
 
     int                 _textureWidth;
     int                 _textureHeight;
@@ -74,6 +75,7 @@ private:
     // unsigned char* _textureData;
 
     GLuint _VAO, _vertexVBO, _dataVBO, _EBO;
+    GLuint _texCoordVBO;
 
     int      _colorMapSize;
     GLfloat *_colorMap;
