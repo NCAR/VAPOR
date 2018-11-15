@@ -41,8 +41,19 @@ SliceRenderer::SliceRenderer(
     _textureWidth = 250;
     _textureHeight = 250;
 
+    _texCoords = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f};
+
     //_VAO        = 0;
     _EBO = 0;
+
+    _cacheParams.domainMin.resize(3, 0.f);
+    _cacheParams.domainMax.resize(3, 1.f);
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
@@ -52,7 +63,7 @@ SliceRenderer::SliceRenderer(
 
     _dataValues = new float[_textureWidth * _textureHeight];
 
-    _vertexPositions.clear();
+    _vertexCoords.clear();
 
     _initialized = true;
 }
@@ -72,7 +83,8 @@ SliceRenderer::~SliceRenderer() {
 }
 
 int SliceRenderer::_initializeGL() {
-    _resetColormapCache();
+    //_resetBoxCache();
+    //_resetColormapCache();
     _resetDataCache();
 
     _initVAO();
@@ -88,21 +100,14 @@ void SliceRenderer::_initVAO() {
 }
 
 void SliceRenderer::_initTexCoordVBO() {
-    float texCoords[] = {
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        0.0f, 1.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f};
     glGenBuffers(1, &_texCoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(texCoords),
-        texCoords,
+        sizeof(float) * sizeof(_texCoords),
+        &_texCoords[0],
         GL_STATIC_DRAW);
 }
 
@@ -115,13 +120,13 @@ void SliceRenderer::_initVertexVBO() {
         glBufferData(
             GL_ARRAY_BUFFER,
             NUMVERTICES * 3 * sizeof(double),
-            &_vertexPositions[0],
+            &_vertexCoords[0],
             GL_STATIC_DRAW);
     } else {
         glBufferData(
             GL_ARRAY_BUFFER,
             6 * 3 * sizeof(double),
-            &_vertexPositions[0],
+            &_vertexCoords[0],
             GL_STATIC_DRAW);
     }
 }
@@ -138,6 +143,8 @@ int SliceRenderer::_resetDataCache() {
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
+    cout << "orientation " << _cacheParams.orientation << endl;
+
     _textureWidth = _cacheParams.textureSampleRate;
     _textureHeight = _cacheParams.textureSampleRate;
     if (_textureWidth > MAXTEXTURESIZE)
@@ -145,7 +152,27 @@ int SliceRenderer::_resetDataCache() {
     if (_textureHeight > MAXTEXTURESIZE)
         _textureHeight = MAXTEXTURESIZE;
 
-    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+    /*    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
+    rc = _dataMgr->GetVariableExtents(
+        _cacheParams.ts,
+        _cacheParams.varName,
+        _cacheParams.refinementLevel,
+        _cacheParams.domainMin,
+        _cacheParams.domainMax
+    );
+    if (!rc) {
+        SetErrMsg("
+            Unable to determine domain extents for %s", 
+            _cacheParams.varName
+        );
+        return rc;
+    }
+    _resetTextureCoordinates();
+*/
+
+    _resetBoxCache();
+    _resetColormapCache();
 
     if (_dataValues)
         delete[] _dataValues;
@@ -205,6 +232,74 @@ void SliceRenderer::_resetColormapCache() {
         GL_RGBA,
         GL_FLOAT,
         &_cacheParams.tf_lut[0]);
+}
+
+int SliceRenderer::_resetBoxCache() {
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    assert(p);
+    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
+    int rc = _dataMgr->GetVariableExtents(
+        _cacheParams.ts,
+        _cacheParams.varName,
+        _cacheParams.refinementLevel,
+        _cacheParams.domainMin,
+        _cacheParams.domainMax);
+    cout << "RC " << rc << endl;
+    if (rc < 0) {
+        SetErrMsg(
+            "Unable to determine domain extents for %s",
+            _cacheParams.varName.c_str());
+        return rc;
+    }
+    _resetTextureCoordinates();
+    return rc;
+}
+
+void SliceRenderer::_resetTextureCoordinates() {
+    float texMinX, texMinY, texMaxX, texMaxY;
+
+    std::vector<double> boxMin = _cacheParams.boxMin;
+    std::vector<double> boxMax = _cacheParams.boxMax;
+    std::vector<double> domainMin = _cacheParams.domainMin;
+    std::vector<double> domainMax = _cacheParams.domainMax;
+
+    int xAxis, yAxis;
+    int orientation = _cacheParams.orientation;
+    if (orientation == XY) {
+        xAxis = X;
+        yAxis = Y;
+    } else if (orientation == XZ) {
+        xAxis = X;
+        yAxis = Z;
+    } else { // (orientation = YZ)
+        xAxis = Y;
+        yAxis = Z;
+    }
+    texMinX = (boxMin[xAxis] - domainMin[xAxis]) /
+              (domainMax[xAxis] - domainMin[xAxis]);
+    texMaxX = (boxMax[xAxis] - domainMin[xAxis]) /
+              (domainMax[xAxis] - domainMin[xAxis]);
+    texMinY = (boxMin[yAxis] - domainMin[yAxis]) /
+              (domainMax[yAxis] - domainMin[yAxis]);
+    texMaxY = (boxMax[yAxis] - domainMin[yAxis]) /
+              (domainMax[yAxis] - domainMin[yAxis]);
+
+    _texCoords.clear();
+    _texCoords = {
+        texMinX, texMinY,
+        texMaxX, texMinY,
+        texMinX, texMaxY,
+        texMaxX, texMinY,
+        texMaxX, texMaxY,
+        texMinX, texMaxY
+        /*0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f*/
+    };
 }
 
 void SliceRenderer::_getSampleCoordinates(
@@ -270,9 +365,10 @@ int SliceRenderer::_saveTextureData() {
             }
 
             _dataValues[index] = varValue;
+            cout << _dataValues[index] << " ";
         }
     }
-
+    cout << endl;
     return rc;
 }
 
@@ -294,17 +390,15 @@ bool SliceRenderer::_isDataCacheDirty() const {
     if (_cacheParams.textureSampleRate != p->GetSampleRate())
         return true;
 
-    vector<double> min, max;
+    //  vector<double> min, max;
     Box *box = p->GetBox();
-    box->GetExtents(min, max);
+    //    box->GetExtents(min, max);
     int orientation = box->GetOrientation();
 
     if (_cacheParams.orientation != orientation)
         return true;
-    if (_cacheParams.boxMin != min)
-        return true;
-    if (_cacheParams.boxMax != max)
-        return true;
+    //    if (_cacheParams.boxMin != min)                                  return true;
+    //    if (_cacheParams.boxMax != max)                                  return true;
 
     return false;
 }
@@ -323,19 +417,40 @@ bool SliceRenderer::_isColormapCacheDirty() const {
     return false;
 }
 
+bool SliceRenderer::_isBoxCacheDirty() const {
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    assert(p);
+
+    Box *box = p->GetBox();
+    vector<double> min, max;
+    box->GetExtents(min, max);
+    if (_cacheParams.boxMin != min)
+        return true;
+    if (_cacheParams.boxMax != max)
+        return true;
+    return false;
+}
+
 int SliceRenderer::_paintGL(bool fast) {
     int rc = 0;
 
     _initializeState();
 
-    if (_isColormapCacheDirty()) {
+    if (_isDataCacheDirty()) {
+        cout << "data cache is dirty" << endl;
+        //_resetColormapCache();
+        rc = _resetDataCache();
+    } else if (_isColormapCacheDirty()) {
         _resetColormapCache();
+    } else if (_isBoxCacheDirty()) {
+        rc = _resetBoxCache();
     }
 
-    if (_isDataCacheDirty()) {
-        _resetColormapCache();
-        _resetDataCache();
-    }
+    if (rc < 0)
+        return rc; // error message set by _resetBoxCache()
+
+    if (rc < 0)
+        return rc; // error message set by _resetDataCache()
 
     if (useEBO) {
         glGenBuffers(1, &_EBO);
@@ -456,7 +571,7 @@ void SliceRenderer::_setXYVertexPositions(
             max[X], min[Y], zCoord,
             max[X], max[Y], zCoord,
             min[X], max[Y], zCoord};
-        _vertexPositions = temp;
+        _vertexCoords = temp;
     } else {
         std::vector<double> temp = {
             min[X], min[Y], zCoord,
@@ -465,7 +580,7 @@ void SliceRenderer::_setXYVertexPositions(
             max[X], min[Y], zCoord,
             max[X], max[Y], zCoord,
             min[X], max[Y], zCoord};
-        _vertexPositions = temp;
+        _vertexCoords = temp;
     }
 }
 
@@ -488,7 +603,7 @@ void SliceRenderer::_setXZVertexPositions(
         min[X], yCoord, max[Z]
     };*/
 
-    _vertexPositions = temp;
+    _vertexCoords = temp;
 }
 
 void SliceRenderer::_setYZVertexPositions(
@@ -510,5 +625,5 @@ void SliceRenderer::_setYZVertexPositions(
         xCoord, min[Y], max[Z]
     };*/
 
-    _vertexPositions = temp;
+    _vertexCoords = temp;
 }
