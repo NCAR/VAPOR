@@ -256,6 +256,7 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
 
     // set up the refinement and LOD combos
     //
+    lodCombo->blockSignals(true);
     lodCombo->clear();
     for (int i = 0; i < lodStrs.size(); i++) {
         QString s = QString::fromStdString(lodStrs[i]);
@@ -263,11 +264,14 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
     }
     lodCombo->setCurrentIndex(lod);
     _currentLodStr = lodStrs.at(lod);
+    lodCombo->blockSignals(false);
 
+    refinementCombo->blockSignals(true);
     refinementCombo->clear();
     for (int i = 0; i < multiresStrs.size(); i++) { refinementCombo->addItem(QString(multiresStrs[i].c_str())); }
     refinementCombo->setCurrentIndex(refLevel);
     _currentMultiresStr = multiresStrs.at(refLevel);
+    refinementCombo->blockSignals(false);
 
     if (lodReq != lod) { _rParams->SetCompressionLevel(lod); }
     if (refLevelReq != refLevel) { _rParams->SetRefinementLevel(refLevel); }
@@ -298,6 +302,7 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
         }
     } while (l < lodCFs.size() && m < multiresCFs.size());
 
+    _fidelityButtons->blockSignals(true);
     // Remove buttons from the group
     //
     QList<QAbstractButton *> btns = _fidelityButtons->buttons();
@@ -324,6 +329,7 @@ void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Render
 
         if (lod == _fidelityLodIdx[i] && refLevel == _fidelityMultiresIdx[i]) { rd->setChecked(true); }
     }
+    _fidelityButtons->blockSignals(false);
 }
 
 std::string FidelityWidget::GetCurrentLodString() const { return _currentLodStr; }
