@@ -66,6 +66,7 @@ class RENDER_API SliceRenderer : public Renderer {
         std::vector<double> &coords,
         int i,
         int j) const;
+    int _getConstantAxis() const;
 
     void _configureShader();
     void _resetState();
