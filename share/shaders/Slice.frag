@@ -19,6 +19,7 @@ void main(void)
 
     float normalized = (value - minLUTValue) / (maxLUTValue - minLUTValue);
 
+    //fragColor = texture(colormap, fTexCoord.x);
     vec4  color = texture(colormap, normalized);
     fragColor = vec4(color.rgb, color.a*constantOpacity);
 }

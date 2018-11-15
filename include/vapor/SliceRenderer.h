@@ -69,6 +69,7 @@ namespace VAPoR {
             int i,
             int j
         ) const;
+        int  _getConstantAxis() const;
 
         void _configureShader();
         void _resetState();
