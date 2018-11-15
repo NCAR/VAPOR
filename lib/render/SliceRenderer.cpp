@@ -61,6 +61,7 @@ SliceRenderer::~SliceRenderer()
 
     glDeleteVertexArrays(1, &_VAO);
     glDeleteBuffers(1, &_vertexVBO);
+    glDeleteBuffers(1, &_texCoordVBO);
     glDeleteBuffers(1, &_EBO);
 
     glDeleteTextures(1, &_colorMapTextureID);
@@ -69,8 +70,6 @@ SliceRenderer::~SliceRenderer()
 
 int SliceRenderer::_initializeGL()
 {
-    //_resetBoxCache();
-    //_resetColormapCache();
     _resetDataCache();
 
     _initVAO();
@@ -88,6 +87,7 @@ void SliceRenderer::_initVAO()
 
 void SliceRenderer::_initTexCoordVBO()
 {
+    glDeleteBuffers(1, &_texCoordVBO);
     glGenBuffers(1, &_texCoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
@@ -97,6 +97,7 @@ void SliceRenderer::_initTexCoordVBO()
 
 void SliceRenderer::_initVertexVBO()
 {
+    glDeleteBuffers(1, &_vertexVBO);
     glGenBuffers(1, &_vertexVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
@@ -120,8 +121,6 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
-
-    cout << "orientation " << _cacheParams.orientation << endl;
 
     _textureWidth = _cacheParams.textureSampleRate;
     _textureHeight = _cacheParams.textureSampleRate;
@@ -159,6 +158,9 @@ int SliceRenderer::_resetDataCache()
         return rc;
     }
 
+    cout << _dataValues[0] << endl;
+    cout << _cacheParams.tf_lut[0] << endl;
+
     glDeleteTextures(1, &_dataValueTextureID);
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
@@ -167,6 +169,11 @@ int SliceRenderer::_resetDataCache()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    //    for (int i=0; i<_textureWidth*_textureHeight; i++ ) {
+    //        cout << _dataValues[i] << " ";
+    //    }
+    //    cout << endl;
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, _dataValues);
 
@@ -181,6 +188,11 @@ void SliceRenderer::_resetColormapCache()
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     tf->makeLut(_cacheParams.tf_lut);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
+
+    //    for (int i=0; i<256; i++ ) {
+    //        cout << _cacheParams.tf_lut[i] << " ";
+    //    }
+    //    cout << endl;
 
     glDeleteTextures(1, &_colorMapTextureID);
     glGenTextures(1, &_colorMapTextureID);
@@ -200,11 +212,11 @@ int SliceRenderer::_resetBoxCache()
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
     int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.domainMin, _cacheParams.domainMax);
-    cout << "RC " << rc << endl;
     if (rc < 0) {
         SetErrMsg("Unable to determine domain extents for %s", _cacheParams.varName.c_str());
         return rc;
     }
+    _setVertexPositions();
     _resetTextureCoordinates();
     return rc;
 }
@@ -230,11 +242,15 @@ void SliceRenderer::_resetTextureCoordinates()
         xAxis = Y;
         yAxis = Z;
     }
+
     texMinX = (boxMin[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
     texMaxX = (boxMax[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
     texMinY = (boxMin[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
     texMaxY = (boxMax[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
 
+    // cout << endl;
+    // for (int i=0; i<6; i++)
+    //    cout << _texCoords[i*2] << " " << _texCoords[i*2+1] << endl;
     _texCoords.clear();
     _texCoords = {
         texMinX, texMinY, texMaxX, texMinY, texMinX, texMaxY, texMaxX,
@@ -246,29 +262,58 @@ void SliceRenderer::_resetTextureCoordinates()
         1.0f, 1.0f,
         0.0f, 1.0f*/
     };
+    cout << endl;
+    for (int i = 0; i < 6; i++) cout << _texCoords[i * 2] << " " << _texCoords[i * 2 + 1] << endl;
 }
 
 void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, int j) const
 {
     int    sampleRate = _cacheParams.textureSampleRate;
-    double dx = (_cacheParams.boxMax[X] - _cacheParams.boxMin[X]) / (1 + sampleRate);
-    double dy = (_cacheParams.boxMax[Y] - _cacheParams.boxMin[Y]) / (1 + sampleRate);
-    double dz = (_cacheParams.boxMax[Z] - _cacheParams.boxMin[Z]) / (1 + sampleRate);
+    double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
+    double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
+    double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
 
     if (_cacheParams.orientation == XY) {
-        coords[X] = _cacheParams.boxMin[X] + dx * i + dx / 2.f;
-        coords[Y] = _cacheParams.boxMin[Y] + dy * j + dy / 2.f;
-        coords[Z] = _cacheParams.boxMin[Z];
+        coords[X] = _cacheParams.domainMin[X] + dx * i + dx / 2.f;
+        coords[Y] = _cacheParams.domainMin[Y] + dy * j + dy / 2.f;
+        coords[Z] = _cacheParams.domainMin[Z];
     } else if (_cacheParams.orientation == XZ) {
-        coords[X] = _cacheParams.boxMin[X] + dx * i + dx / 2.f;
-        coords[Y] = _cacheParams.boxMin[Y];
-        coords[Z] = _cacheParams.boxMin[Z] + dz * j + dz / 2.f;
+        coords[X] = _cacheParams.domainMin[X] + dx * i + dx / 2.f;
+        coords[Y] = _cacheParams.domainMin[Y];
+        coords[Z] = _cacheParams.domainMin[Z] + dz * j + dz / 2.f;
     } else {    // Y corresponds to i, the faster axis; Z to j, the slower axis
-        coords[Z] = _cacheParams.boxMin[Z] + dz * j + dz / 2.f;
-        coords[Y] = _cacheParams.boxMin[Y] + dy * i + dy / 2.f;
-        coords[X] = _cacheParams.boxMin[X];
+        coords[Z] = _cacheParams.domainMin[Z] + dz * j + dz / 2.f;
+        coords[Y] = _cacheParams.domainMin[Y] + dy * i + dy / 2.f;
+        coords[X] = _cacheParams.domainMin[X];
     }
 }
+
+/*void SliceRenderer::_getSampleCoordinates(
+    std::vector<double> &coords,
+    int i,
+    int j
+) const {
+    int sampleRate = _cacheParams.textureSampleRate;
+    double dx = (_cacheParams.boxMax[X]-_cacheParams.boxMin[X])/(1+sampleRate);
+    double dy = (_cacheParams.boxMax[Y]-_cacheParams.boxMin[Y])/(1+sampleRate);
+    double dz = (_cacheParams.boxMax[Z]-_cacheParams.boxMin[Z])/(1+sampleRate);
+
+    if (_cacheParams.orientation == XY) {
+        coords[X] = _cacheParams.boxMin[X] + dx*i + dx/2.f;
+        coords[Y] = _cacheParams.boxMin[Y] + dy*j + dy/2.f;
+        coords[Z] = _cacheParams.boxMin[Z];
+    }
+    else if (_cacheParams.orientation == XZ) {
+        coords[X] = _cacheParams.boxMin[X] + dx*i + dx/2.f;
+        coords[Y] = _cacheParams.boxMin[Y];
+        coords[Z] = _cacheParams.boxMin[Z] + dz*j + dz/2.f;
+    }
+    else {  // Y corresponds to i, the faster axis; Z to j, the slower axis
+        coords[Z] = _cacheParams.boxMin[Z] + dz*j + dz/2.f;
+        coords[Y] = _cacheParams.boxMin[Y] + dy*i + dy/2.f;
+        coords[X] = _cacheParams.boxMin[X];
+    }
+}*/
 
 int SliceRenderer::_saveTextureData()
 {
@@ -302,10 +347,8 @@ int SliceRenderer::_saveTextureData()
             }
 
             _dataValues[index] = varValue;
-            cout << _dataValues[index] << " ";
         }
     }
-    cout << endl;
     return rc;
 }
 
@@ -322,12 +365,18 @@ bool SliceRenderer::_isDataCacheDirty() const
 
     if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
 
-    //  vector<double> min, max;
-    Box *box = p->GetBox();
-    //    box->GetExtents(min, max);
-    int orientation = box->GetOrientation();
-
+    vector<double> min, max;
+    Box *          box = p->GetBox();
+    int            orientation = box->GetOrientation();
     if (_cacheParams.orientation != orientation) return true;
+    // Special case: if our plane shifts its position along its orthognal axis,
+    // then we will need to return true and resample our data.  If its extents
+    // change along its perimeter, then we will just reconfigure the texture
+    // coordinates via _resetBoxCache in our _paintGL routine.
+    box->GetExtents(min, max);
+    int constantAxis = _getConstantAxis();
+    if (min[constantAxis] != _cacheParams.boxMin[constantAxis]) return true;
+
     //    if (_cacheParams.boxMin != min)                                  return true;
     //    if (_cacheParams.boxMax != max)                                  return true;
 
@@ -367,7 +416,6 @@ int SliceRenderer::_paintGL(bool fast)
     _initializeState();
 
     if (_isDataCacheDirty()) {
-        cout << "data cache is dirty" << endl;
         //_resetColormapCache();
         rc = _resetDataCache();
     } else if (_isColormapCacheDirty()) {
@@ -419,9 +467,8 @@ int SliceRenderer::_paintGL(bool fast)
 void SliceRenderer::_configureShader()
 {
     ShaderProgram *s = _glManager->shaderManager->GetShader("Slice");
+    //    EnableClipToBox(s);
     s->Bind();
-
-    EnableClipToBox(s);
 
     // One vertex shader uniform vec4
     s->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
@@ -483,6 +530,12 @@ void SliceRenderer::_setVertexPositions()
         _setXZVertexPositions(min, max);
     else if (orientation == YZ)
         _setYZVertexPositions(min, max);
+
+    for (int i = 0; i < _vertexCoords.size(); i++) {
+        if ((i) % 3 == 0) cout << endl << (i) / 3 << " ";
+        cout << _vertexCoords[i] << " ";
+    }
+    cout << endl;
 }
 
 void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<double> max)
@@ -527,4 +580,14 @@ void SliceRenderer::_setYZVertexPositions(std::vector<double> min, std::vector<d
     };*/
 
     _vertexCoords = temp;
+}
+
+int SliceRenderer::_getConstantAxis() const
+{
+    if (_cacheParams.orientation == XY)
+        return Z;
+    else if (_cacheParams.orientation == XZ)
+        return Y;
+    else    // (_cacheParams.orientation == XY )
+        return X;
 }
