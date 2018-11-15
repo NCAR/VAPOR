@@ -48,6 +48,7 @@ namespace VAPoR {
             std::vector<float> tf_lut;
             std::vector<double> tf_minMax;
             std::vector<double> boxMin, boxMax;
+            std::vector<double> domainMin, domainMax;
         } _cacheParams;
 
         void _initVAO();
@@ -56,8 +57,10 @@ namespace VAPoR {
 
         bool _isColormapCacheDirty() const;
         bool _isDataCacheDirty() const;
+        bool _isBoxCacheDirty() const;
         int  _saveCacheParams();
         void _resetColormapCache();
+        int  _resetBoxCache();
         int  _resetDataCache();
         void _initTextures();
         int  _saveTextureData();
@@ -70,6 +73,7 @@ namespace VAPoR {
         void _configureShader();
         void _resetState();
         void _initializeState();
+        void _resetTextureCoordinates();
 
         void _setVertexPositions();
         void _setXYVertexPositions(
@@ -93,7 +97,8 @@ namespace VAPoR {
         int            _textureWidth;
         int            _textureHeight;
         float*         _dataValues;
-        std::vector<double>        _vertexPositions;
+        std::vector<double>     _vertexCoords;
+        std::vector<float>      _texCoords;
 
         GLuint _VAO;
         GLuint _vertexVBO;
