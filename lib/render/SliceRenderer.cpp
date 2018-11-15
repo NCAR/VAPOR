@@ -18,8 +18,6 @@
 
 #define MAXTEXTURESIZE 8000
 
-bool useEBO = false;
-
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -31,10 +29,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _textureWidth = 250;
     _textureHeight = 250;
 
+    _vertexCoords.clear();
     _texCoords = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
-
-    //_VAO        = 0;
-    _EBO = 0;
 
     _cacheParams.domainMin.resize(3, 0.f);
     _cacheParams.domainMax.resize(3, 1.f);
@@ -42,27 +38,14 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     assert(p);
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
-
     _colorMapSize = tf->getNumEntries();
-
-    _dataValues = new float[_textureWidth * _textureHeight];
-
-    _vertexCoords.clear();
-
-    _initialized = true;
 }
 
 SliceRenderer::~SliceRenderer()
 {
-    if (_dataValues) {
-        delete[] _dataValues;
-        _dataValues = nullptr;
-    }
-
     glDeleteVertexArrays(1, &_VAO);
     glDeleteBuffers(1, &_vertexVBO);
     glDeleteBuffers(1, &_texCoordVBO);
-    glDeleteBuffers(1, &_EBO);
 
     glDeleteTextures(1, &_colorMapTextureID);
     glDeleteTextures(1, &_dataValueTextureID);
@@ -70,11 +53,11 @@ SliceRenderer::~SliceRenderer()
 
 int SliceRenderer::_initializeGL()
 {
-    _resetDataCache();
-
     _initVAO();
     _initTexCoordVBO();
     _initVertexVBO();
+
+    _initialized = true;
 
     return 0;
 }
@@ -102,11 +85,7 @@ void SliceRenderer::_initVertexVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    if (useEBO) {
-        glBufferData(GL_ARRAY_BUFFER, NUMVERTICES * 3 * sizeof(double), &_vertexCoords[0], GL_STATIC_DRAW);
-    } else {
-        glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), &_vertexCoords[0], GL_STATIC_DRAW);
-    }
+    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), &_vertexCoords[0], GL_STATIC_DRAW);
 }
 
 int SliceRenderer::_resetDataCache()
@@ -127,55 +106,14 @@ int SliceRenderer::_resetDataCache()
     if (_textureWidth > MAXTEXTURESIZE) _textureWidth = MAXTEXTURESIZE;
     if (_textureHeight > MAXTEXTURESIZE) _textureHeight = MAXTEXTURESIZE;
 
-    /*    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
-
-    rc = _dataMgr->GetVariableExtents(
-        _cacheParams.ts,
-        _cacheParams.varName,
-        _cacheParams.refinementLevel,
-        _cacheParams.domainMin,
-        _cacheParams.domainMax
-    );
-    if (!rc) {
-        SetErrMsg("
-            Unable to determine domain extents for %s",
-            _cacheParams.varName
-        );
-        return rc;
-    }
-    _resetTextureCoordinates();
-*/
-
     _resetBoxCache();
     _resetColormapCache();
-
-    if (_dataValues) delete[] _dataValues;
-    _dataValues = new float[_textureWidth * _textureHeight];
 
     int rc = _saveTextureData();
     if (rc < 0) {
         SetErrMsg("Unable to acquire data for Slice texture");
         return rc;
     }
-
-    cout << _dataValues[0] << endl;
-    cout << _cacheParams.tf_lut[0] << endl;
-
-    glDeleteTextures(1, &_dataValueTextureID);
-    glGenTextures(1, &_dataValueTextureID);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    //    for (int i=0; i<_textureWidth*_textureHeight; i++ ) {
-    //        cout << _dataValues[i] << " ";
-    //    }
-    //    cout << endl;
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, _dataValues);
 
     return rc;
 }
@@ -188,11 +126,6 @@ void SliceRenderer::_resetColormapCache()
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     tf->makeLut(_cacheParams.tf_lut);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
-
-    //    for (int i=0; i<256; i++ ) {
-    //        cout << _cacheParams.tf_lut[i] << " ";
-    //    }
-    //    cout << endl;
 
     glDeleteTextures(1, &_colorMapTextureID);
     glGenTextures(1, &_colorMapTextureID);
@@ -248,22 +181,11 @@ void SliceRenderer::_resetTextureCoordinates()
     texMinY = (boxMin[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
     texMaxY = (boxMax[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
 
-    // cout << endl;
-    // for (int i=0; i<6; i++)
-    //    cout << _texCoords[i*2] << " " << _texCoords[i*2+1] << endl;
     _texCoords.clear();
-    _texCoords = {
-        texMinX, texMinY, texMaxX, texMinY, texMinX, texMaxY, texMaxX,
-        texMinY, texMaxX, texMaxY, texMinX, texMaxY
-        /*0.0f, 0.0f,
-        1.0f, 0.0f,
-        0.0f, 1.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f*/
-    };
-    cout << endl;
-    for (int i = 0; i < 6; i++) cout << _texCoords[i * 2] << " " << _texCoords[i * 2 + 1] << endl;
+    _texCoords = {texMinX, texMinY, texMaxX, texMinY, texMinX, texMaxY, texMaxX, texMinY, texMaxX, texMaxY, texMinX, texMaxY};
+
+    glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * sizeof(_texCoords), &_texCoords[0]);
 }
 
 void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, int j) const
@@ -276,44 +198,17 @@ void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, in
     if (_cacheParams.orientation == XY) {
         coords[X] = _cacheParams.domainMin[X] + dx * i + dx / 2.f;
         coords[Y] = _cacheParams.domainMin[Y] + dy * j + dy / 2.f;
-        coords[Z] = _cacheParams.domainMin[Z];
+        coords[Z] = _cacheParams.boxMin[Z];
     } else if (_cacheParams.orientation == XZ) {
         coords[X] = _cacheParams.domainMin[X] + dx * i + dx / 2.f;
-        coords[Y] = _cacheParams.domainMin[Y];
+        coords[Y] = _cacheParams.boxMin[Y];
         coords[Z] = _cacheParams.domainMin[Z] + dz * j + dz / 2.f;
     } else {    // Y corresponds to i, the faster axis; Z to j, the slower axis
-        coords[Z] = _cacheParams.domainMin[Z] + dz * j + dz / 2.f;
+        coords[X] = _cacheParams.boxMin[X];
         coords[Y] = _cacheParams.domainMin[Y] + dy * i + dy / 2.f;
-        coords[X] = _cacheParams.domainMin[X];
+        coords[Z] = _cacheParams.domainMin[Z] + dz * j + dz / 2.f;
     }
 }
-
-/*void SliceRenderer::_getSampleCoordinates(
-    std::vector<double> &coords,
-    int i,
-    int j
-) const {
-    int sampleRate = _cacheParams.textureSampleRate;
-    double dx = (_cacheParams.boxMax[X]-_cacheParams.boxMin[X])/(1+sampleRate);
-    double dy = (_cacheParams.boxMax[Y]-_cacheParams.boxMin[Y])/(1+sampleRate);
-    double dz = (_cacheParams.boxMax[Z]-_cacheParams.boxMin[Z])/(1+sampleRate);
-
-    if (_cacheParams.orientation == XY) {
-        coords[X] = _cacheParams.boxMin[X] + dx*i + dx/2.f;
-        coords[Y] = _cacheParams.boxMin[Y] + dy*j + dy/2.f;
-        coords[Z] = _cacheParams.boxMin[Z];
-    }
-    else if (_cacheParams.orientation == XZ) {
-        coords[X] = _cacheParams.boxMin[X] + dx*i + dx/2.f;
-        coords[Y] = _cacheParams.boxMin[Y];
-        coords[Z] = _cacheParams.boxMin[Z] + dz*j + dz/2.f;
-    }
-    else {  // Y corresponds to i, the faster axis; Z to j, the slower axis
-        coords[Z] = _cacheParams.boxMin[Z] + dz*j + dz/2.f;
-        coords[Y] = _cacheParams.boxMin[Y] + dy*i + dy/2.f;
-        coords[X] = _cacheParams.boxMin[X];
-    }
-}*/
 
 int SliceRenderer::_saveTextureData()
 {
@@ -331,6 +226,8 @@ int SliceRenderer::_saveTextureData()
 
     _setVertexPositions();
 
+    float *dataValues = new float[_textureWidth * _textureHeight];
+
     float               varValue, missingValue;
     std::vector<double> coords(3, 0.0);
     for (int j = 0; j < _textureHeight; j++) {
@@ -342,13 +239,27 @@ int SliceRenderer::_saveTextureData()
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue) {
-                _dataValues[index] = NAN;
+                dataValues[index] = NAN;
                 continue;
             }
 
-            _dataValues[index] = varValue;
+            dataValues[index] = varValue;
         }
     }
+
+    glDeleteTextures(1, &_dataValueTextureID);
+    glGenTextures(1, &_dataValueTextureID);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, dataValues);
+
+    delete[] dataValues;
+
     return rc;
 }
 
@@ -376,9 +287,6 @@ bool SliceRenderer::_isDataCacheDirty() const
     box->GetExtents(min, max);
     int constantAxis = _getConstantAxis();
     if (min[constantAxis] != _cacheParams.boxMin[constantAxis]) return true;
-
-    //    if (_cacheParams.boxMin != min)                                  return true;
-    //    if (_cacheParams.boxMax != max)                                  return true;
 
     return false;
 }
@@ -416,27 +324,15 @@ int SliceRenderer::_paintGL(bool fast)
     _initializeState();
 
     if (_isDataCacheDirty()) {
-        //_resetColormapCache();
         rc = _resetDataCache();
-    } else if (_isColormapCacheDirty()) {
-        _resetColormapCache();
-    } else if (_isBoxCacheDirty()) {
-        rc = _resetBoxCache();
-    }
+        if (rc < 0) return rc;    // error message already set by _resetDataCache()
+    } else {
+        if (_isColormapCacheDirty()) _resetColormapCache();
 
-    if (rc < 0) return rc;    // error message set by _resetBoxCache()
-
-    if (rc < 0) return rc;    // error message set by _resetDataCache()
-
-    if (useEBO) {
-        glGenBuffers(1, &_EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-        unsigned short indexValues[] = {0, 1, 2, 1, 3, 2};
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                     // indexValues.size()*sizeof(unsigned short),
-                     sizeof(indexValues),
-                     //&indexValues[0],
-                     &indexValues, GL_STATIC_DRAW);
+        if (_isBoxCacheDirty()) {
+            rc = _resetBoxCache();
+            if (rc < 0) return rc;    // error message already set by _resetBoxCache()
+        }
     }
 
     _configureShader();
@@ -450,13 +346,7 @@ int SliceRenderer::_paintGL(bool fast)
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
 
     glBindVertexArray(_VAO);
-    if (useEBO) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-        // glDrawElements(GL_TRIANGLES, 2, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 4);
-    } else {
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-    }
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _resetState();
 
@@ -467,7 +357,6 @@ int SliceRenderer::_paintGL(bool fast)
 void SliceRenderer::_configureShader()
 {
     ShaderProgram *s = _glManager->shaderManager->GetShader("Slice");
-    //    EnableClipToBox(s);
     s->Bind();
 
     // One vertex shader uniform vec4
@@ -531,38 +420,23 @@ void SliceRenderer::_setVertexPositions()
     else if (orientation == YZ)
         _setYZVertexPositions(min, max);
 
-    for (int i = 0; i < _vertexCoords.size(); i++) {
-        if ((i) % 3 == 0) cout << endl << (i) / 3 << " ";
-        cout << _vertexCoords[i] << " ";
-    }
-    cout << endl;
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), &_vertexCoords[0]);
 }
 
 void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<double> max)
 {
     double zCoord = min[Z];
 
-    std::vector<double> temp;
-    if (useEBO) {
-        std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
-        _vertexCoords = temp;
-    } else {
-        std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, min[X], max[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
-        _vertexCoords = temp;
-    }
+    std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, min[X], max[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
+
+    _vertexCoords = temp;
 }
 
 void SliceRenderer::_setXZVertexPositions(std::vector<double> min, std::vector<double> max)
 {
     double              yCoord = min[Y];
     std::vector<double> temp = {min[X], yCoord, min[Z], max[X], yCoord, min[Z], min[X], yCoord, max[Z], max[X], yCoord, min[Z], max[X], yCoord, max[Z], min[X], yCoord, max[Z]};
-
-    /*    std::vector<double> temp = {
-        min[X], yCoord, min[Z],
-        max[X], yCoord, min[Z],
-        max[X], yCoord, max[Z],
-        min[X], yCoord, max[Z]
-    };*/
 
     _vertexCoords = temp;
 }
@@ -571,13 +445,6 @@ void SliceRenderer::_setYZVertexPositions(std::vector<double> min, std::vector<d
 {
     double              xCoord = min[X];
     std::vector<double> temp = {xCoord, min[Y], min[Z], xCoord, max[Y], min[Z], xCoord, min[Y], max[Z], xCoord, max[Y], min[Z], xCoord, max[Y], max[Z], xCoord, min[Y], max[Z]};
-
-    /*    std::vector<double> temp = {
-        xCoord, min[Y], min[Z],
-        xCoord, max[Y], min[Z],
-        xCoord, max[Y], max[Z],
-        xCoord, min[Y], max[Z]
-    };*/
 
     _vertexCoords = temp;
 }
