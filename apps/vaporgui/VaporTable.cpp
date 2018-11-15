@@ -31,6 +31,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     _table = table;
     _lastRowIsCheckboxes = lastRowIsCheckboxes;
     _lastColIsCheckboxes = lastColIsCheckboxes;
+    _checkboxesEnabled = true;
     _activeRow = -1;
     _activeCol = -1;
     _autoResizeHeight = false;
@@ -224,6 +225,8 @@ void VaporTable::addCheckbox(int row, int column, bool checked)
     cbWidget->setProperty("row", row);
     cbWidget->setProperty("col", column);
 
+    checkBox->setEnabled(_checkboxesEnabled);
+
     connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(emitValueChanged()));
 
     cbWidget->installEventFilter(this);
@@ -359,6 +362,13 @@ void VaporTable::SetCheckboxesInFinalRow(bool enabled) { _lastRowIsCheckboxes = 
 
 void VaporTable::SetCheckboxesInFinalColumn(bool enabled) { _lastColIsCheckboxes = enabled; }
 
+void VaporTable::EnableDisableCheckboxes(bool enabled)
+{
+    if (!_lastRowIsCheckboxes && !_lastColIsCheckboxes) return;
+
+    _checkboxesEnabled = enabled;
+}
+
 Value VaporTable::GetValue(int row, int col)
 {
     std::string value;
@@ -381,17 +391,6 @@ Value VaporTable::GetValue(int row, int col)
 
     return {value};
 }
-
-/*template <class T>
-void VaporTable::GetRow(int row, std::vector<T> & values) {
-    values.clear();
-
-    int nCols = _table->columnCount();
-    for (int col=0; col<nCols; col++) {
-        T v = GetValue(row, col);
-        values.push_back(v);
-    }
-}*/
 
 std::string VaporTable::GetStringValue(int row, int col)
 {

@@ -55,6 +55,7 @@ private slots:
     void _2DInputVarChanged(int row, int col);
     void _3DInputVarChanged(int row, int col);
 
+    void _findEnabledCoordinateVariables(const std::vector<string> variables, const std::vector<bool> variablesEnabled);
     void _coordinatesCheckboxClicked(int state);
 
     void _deleteSaveFader();
@@ -81,6 +82,7 @@ private:
     string _dataMgrName;
 
     bool _justSaved;
+    bool _showCoordVars;
 
     std::vector<string> _coordVars;
     std::vector<bool>   _coordVarsEnabled;

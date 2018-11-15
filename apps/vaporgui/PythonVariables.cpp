@@ -63,10 +63,13 @@ PythonVariables::PythonVariables(QWidget *parent) : QDialog(parent), Ui_PythonVa
     QPixmap             thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
 
+    _showCoordVars = false;
     _variableTabs->removeTab(0);
     ;
 
     _coordInputVarTable = new VaporTable(_coordVarTable, false, true);
+    bool checkboxesEnabled = false;
+    _coordInputVarTable->EnableDisableCheckboxes(checkboxesEnabled);
     _coordInputVarTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(0));
 
     _2DInputVarTable = new VaporTable(_2DVarTable, false, true);
@@ -121,6 +124,13 @@ void PythonVariables::Update(bool internalUpdate)
     _scriptNameLabel->setText(QString::fromStdString(_scriptName));
     _dataMgrNameLabel->setText(QString::fromStdString(_dataMgrName));
     _scriptEdit->setText(QString::fromStdString(_script));
+
+    if (_showCoordVars) {
+        _coordVarsEnabled.clear();
+        _coordVarsEnabled.resize(_coordVars.size(), false);
+        _findEnabledCoordinateVariables(_2DVars, _2DVarsEnabled);
+        _findEnabledCoordinateVariables(_3DVars, _3DVarsEnabled);
+    }
 
     int                 numRows;
     int                 numCols = 2;
@@ -651,13 +661,46 @@ void PythonVariables::_3DInputVarChanged(int row, int col)
 void PythonVariables::_coordinatesCheckboxClicked(int state)
 {
     if (state == Qt::Unchecked) {
-        cout << "Unchecked" << endl;
+        _showCoordVars = false;
         _variableTabs->removeTab(0);
         _coordVarsEnabled.resize(_coordVars.size());
         std::fill(_coordVarsEnabled.begin(), _coordVarsEnabled.end(), false);
     } else {
-        cout << "checked" << endl;
+        _showCoordVars = true;
         _variableTabs->insertTab(0, _coordTab, "Coordinates");
+    }
+    Update(true);
+}
+
+void PythonVariables::_findEnabledCoordinateVariables(const std::vector<string> vars, const std::vector<bool> varsEnabled)
+{
+    VAPoR::DataStatus *dataStatus = _controlExec->GetDataStatus();
+    VAPoR::DataMgr *   dataMgr = dataStatus->GetDataMgr(_dataMgrName);
+    if (dataMgr == NULL) MSG_ERR("Invalid DataMgr " + _dataMgrName);
+
+    std::vector<string> enabledCoordVarNames;
+    std::vector<string> tmpCoordVarNames;
+    VAPoR::DC::DataVar  dataVar;
+    VAPoR::DC::Mesh     mesh;
+
+    // Gather the currently used coord variables
+    for (int i = 0; i < vars.size(); i++) {
+        if (varsEnabled[i] == false) continue;
+
+        string varName = vars[i];
+        dataMgr->GetDataVarInfo(varName, dataVar);
+        string meshName = dataVar.GetMeshName();
+        dataMgr->GetMesh(meshName, mesh);
+        tmpCoordVarNames = mesh.GetCoordVars();
+
+        std::move(tmpCoordVarNames.begin(), tmpCoordVarNames.end(), std::back_inserter(enabledCoordVarNames));
+    }
+
+    // Set current coord variables to be enabled
+    for (int i = 0; i < _coordVars.size(); i++) {
+        for (int j = 0; j < enabledCoordVarNames.size(); j++) {
+            if (_coordVars[i] == enabledCoordVarNames[j]) { _coordVarsEnabled[i] = true; }
+        }
     }
 }
 
@@ -778,18 +821,6 @@ void PythonVariables::_scriptChanged()
 void PythonVariables::_makeInputTableValues(std::vector<string> &tableValuesCoords, std::vector<string> &tableValues2D, std::vector<string> &tableValues3D, std::vector<string> &summaryValues) const
 {
     string onOff;
-    for (int i = 0; i < _coordVars.size(); i++) {
-        tableValuesCoords.push_back(_coordVars[i]);
-
-        onOff = "0";
-        if (_coordVarsEnabled[i]) {
-            onOff = "1";
-            summaryValues.push_back(_coordVars[i]);
-            summaryValues.push_back("Coordinate");
-        }
-        tableValuesCoords.push_back(onOff);
-    }
-
     for (int i = 0; i < _2DVars.size(); i++) {
         tableValues2D.push_back(_2DVars[i]);
 
@@ -812,6 +843,18 @@ void PythonVariables::_makeInputTableValues(std::vector<string> &tableValuesCoor
             summaryValues.push_back("3D");
         }
         tableValues3D.push_back(onOff);
+    }
+
+    for (int i = 0; i < _coordVars.size(); i++) {
+        tableValuesCoords.push_back(_coordVars[i]);
+
+        onOff = "0";
+        if (_coordVarsEnabled[i]) {
+            onOff = "1";
+            summaryValues.push_back(_coordVars[i]);
+            summaryValues.push_back("Coordinate");
+        }
+        tableValuesCoords.push_back(onOff);
     }
 }
 
