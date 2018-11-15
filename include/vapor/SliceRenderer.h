@@ -85,20 +85,18 @@ class RENDER_API SliceRenderer : public Renderer {
         std::vector<double> max);
 
     bool _initialized;
+    int _textureWidth;
+    int _textureHeight;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;
 
-    int _textureWidth;
-    int _textureHeight;
-    float *_dataValues;
     std::vector<double> _vertexCoords;
     std::vector<float> _texCoords;
 
     GLuint _VAO;
     GLuint _vertexVBO;
     GLuint _texCoordVBO;
-    GLuint _EBO;
 
     int _colorMapSize;
 };
