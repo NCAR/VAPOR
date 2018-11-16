@@ -44,7 +44,6 @@
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/FileUtils.h"
-#include "vapor/GetAppPath.h"
 
 using namespace VAPoR;
 
@@ -68,14 +67,6 @@ VizWin::VizWin(
 	_controlExec = ce;
     
     _glManager = new GLManager;
-    vector <string> paths;
-	paths.push_back("shaders");
-    string shaderPath = GetAppPath("VAPOR", "share", paths);
-    paths.clear();
-	paths.push_back("fonts");
-    string fontPath = GetAppPath("VAPOR", "share", paths);
-    _glManager->shaderManager->SetResourceDirectory(shaderPath); // TODO GL
-    _glManager->fontManager->SetResourceDirectory(fontPath); // TODO GL
 
 	setAutoBufferSwap(false);
 	_mouseClicked = false;
