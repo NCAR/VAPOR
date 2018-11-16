@@ -1,6 +1,7 @@
-#include "vapor/ResourcePath.h"
-#include "vapor/CMakeConfig.h"
-#include "vapor/FileUtils.h"
+#include <vapor/ResourcePath.h>
+#include <vapor/CMakeConfig.h>
+#include <vapor/FileUtils.h>
+#include <vapor/CFuncs.h>
 
 #define INCLUDE_DEPRECATED_GET_APP_PATH
 #include "vapor/GetAppPath.h"
@@ -55,9 +56,9 @@ string GetInstalledResourceRoot()
     path = GetMacBundlePath();
     path = Wasp::FileUtils::JoinPaths({path, "Contents"});
 #elif defined WIN32
-    path = string(getenv("VAPOR3_HOME"));
+    path = string(Wasp::GetEnvironmentalVariable("VAPOR3_HOME"));
 #else
-    path = string(getenv("VAPOR_HOME"));
+    path = string(Wasp::GetEnvironmentalVariable("VAPOR_HOME"));
 #endif
 
     return path;
