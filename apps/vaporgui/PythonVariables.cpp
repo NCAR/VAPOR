@@ -622,7 +622,6 @@ std::vector<string> PythonVariables::_buildInputVars() const {
 
 void PythonVariables::_closeScript() {
     _reset();
-    //Update(true);
     close();
 }
 
