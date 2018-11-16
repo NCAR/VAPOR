@@ -82,7 +82,7 @@ private:
     string _dataMgrName;
 
     bool _justSaved;
-    bool _showCoordVars;
+    bool _includeCoordVars;
 
     std::vector<string> _coordVars;
     std::vector<bool>   _coordVarsEnabled;
