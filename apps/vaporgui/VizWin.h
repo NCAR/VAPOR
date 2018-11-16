@@ -94,8 +94,6 @@ class VizWin : public QGLWidget {
     virtual void setFocus();
 
   private:
-    VizWin() {}
-
     void updateManip(bool initialize = false);
 
     //Event handling
