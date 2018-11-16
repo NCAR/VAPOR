@@ -1,5 +1,5 @@
 #include "vapor/DVRenderer.h"
-#include "vapor/GetAppPath.h"
+#include "vapor/ResourcePath.h"
 
 using namespace VAPoR;
 
@@ -26,10 +26,9 @@ DVRenderer::DVRenderer( const ParamsMgr*    pm,
 
 void DVRenderer::_loadShaders()
 {
+#warning This needs to use the ShaderManager
     std::vector< std::string > extraPath;
-    extraPath.push_back("shaders");
-    extraPath.push_back("main");
-    std::string shaderPath      = Wasp::GetAppPath( "VAPOR", "share", extraPath );
+    std::string shaderPath      = Wasp::GetSharePath("shaders/main");
     std::string VShader1stPass  = shaderPath + "/DVR1stPass.vgl";
     std::string FShader1stPass  = shaderPath + "/DVR1stPass.fgl";
     std::string VShader2ndPass  = shaderPath + "/DVR2ndPass.vgl";
