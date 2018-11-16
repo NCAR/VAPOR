@@ -61,7 +61,8 @@ VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, st
     setWindowIcon(QPixmap(vapor_icon___));
     _controlExec = ce;
 
-    _glManager = new GLManager;
+    _glManager = nullptr;
+    _manip = nullptr;
 
     setAutoBufferSwap(false);
     _mouseClicked = false;
@@ -71,16 +72,16 @@ VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, st
     _openGLInitFlag = false;
 
     setMouseTracking(false);    // Only track mouse when button clicked/held
-
-    _manip = new TranslateStretchManip(_glManager);
-    bool initialize = true;
-    updateManip(initialize);
 }
 
 /*
  *  Destroys the object and frees any allocated resources
  */
-VizWin::~VizWin() { delete _glManager; }
+VizWin::~VizWin()
+{
+    this->makeCurrent();
+    delete _glManager;
+}
 
 void VizWin::closeEvent(QCloseEvent *e)
 {
@@ -269,6 +270,20 @@ void VizWin::resizeGL(int width, int height)
 
 void VizWin::initializeGL()
 {
+    _glManager = new GLManager;
+    vector<string> paths;
+    paths.push_back("shaders");
+    string shaderPath = GetAppPath("VAPOR", "share", paths);
+    paths.clear();
+    paths.push_back("fonts");
+    string fontPath = GetAppPath("VAPOR", "share", paths);
+    _glManager->shaderManager->SetResourceDirectory(shaderPath);    // TODO GL
+    _glManager->fontManager->SetResourceDirectory(fontPath);        // TODO GL
+
+    _manip = new TranslateStretchManip(_glManager);
+    bool initialize = true;
+    updateManip(initialize);
+
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
     int rc = _controlExec->InitializeViz(_winName, _glManager);
     if (rc < 0) { MSG_ERR("Failure to initialize Visualizer"); }

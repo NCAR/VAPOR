@@ -23,7 +23,10 @@ public:
     void        DeleteResource(const K &key);
 };
 
-template<typename K, typename T> IResourceManager<K, T>::~IResourceManager() {}
+template<typename K, typename T> IResourceManager<K, T>::~IResourceManager()
+{
+    for (auto it = _map.begin(); it != _map.end(); ++it) delete it->second;
+}
 
 template<typename K, typename T> T *IResourceManager<K, T>::GetResource(const K &key)
 {
