@@ -20,7 +20,6 @@
 #include <QLineEdit>
 #include <QTemporaryFile>
 #include "GUIStateParams.h"
-#include <vapor/GetAppPath.h>
 #include <vapor/DataMgrUtils.h>
 #include "ErrorReporter.h"
 #include "Plot.h"

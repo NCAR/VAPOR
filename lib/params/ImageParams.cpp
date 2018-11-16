@@ -1,5 +1,5 @@
 #include <vapor/ImageParams.h>
-#include <vapor/GetAppPath.h>
+#include <vapor/ResourcePath.h>
 
 using namespace VAPoR;
 
@@ -29,9 +29,7 @@ ImageParams::~ImageParams() { SetDiagMsg("ImageParams::~ImageParams() this=%p", 
 
 std::string ImageParams::GetImagePath() const
 {
-    std::vector<std::string> paths;
-    paths.push_back("images/NaturalEarth.tms");
-    std::string defaultImage = Wasp::GetAppPath("VAPOR", "share", paths);
+    std::string defaultImage = Wasp::GetSharePath("images/NaturalEarth.tms");
 
     return GetValueString(_fileNameTag, defaultImage);
 }
