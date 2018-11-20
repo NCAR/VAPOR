@@ -380,7 +380,6 @@ void TFWidget::checkForExternalChangesToHisto()
 
     std::vector<double> newRange(2, 0.f);
     _dataMgr->GetDataRange(_timeStep, _varName, _refLevel, _cLevel, newRange);
-    cout << "checking range " << newRange[0] << " " << newRange[1] << " " << _varRange[0] << " " << _varRange[1] << endl;
     if ((newRange[0] != _varRange[0]) || (newRange[1] != _varRange[1])) {
         _varRange = newRange;
         _somethingChanged = true;
