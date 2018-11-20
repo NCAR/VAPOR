@@ -60,7 +60,7 @@ void RayCasterParams::SetLightingCoeffs(const std::vector<double> &coeffs) {
 }
 
 long RayCasterParams::GetCastingMode() const {
-    return GetValueLong(_castingModeTag, 2);
+    return GetValueLong(_castingModeTag, 1);
 }
 
 void RayCasterParams::SetCastingMode(long mode) {

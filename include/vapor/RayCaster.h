@@ -146,14 +146,12 @@ class RENDER_API RayCaster : public Renderer {
     void _drawVolumeFaces(int whichPass,
                           long whichCastingMode,
                           bool insideACell = false,
-                          const GLfloat *ModelView = nullptr,
-                          const GLfloat *InversedMV = nullptr,
+                          const GLfloat *modelView = nullptr,
+                          const GLfloat *inversedMV = nullptr,
                           bool fast = false);
 
     void _load3rdPassUniforms(long castingMode,
-                              const GLfloat *MVP,
-                              const GLfloat *ModelView,
-                              const GLfloat *InversedMV,
+                              const GLfloat *inversedMV,
                               bool fast) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, long castingMode);
