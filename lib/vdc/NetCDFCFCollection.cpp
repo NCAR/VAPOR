@@ -8,7 +8,6 @@
 #else
     #include <udunits2.h>
 #endif
-#include <vapor/GetAppPath.h>
 #include <vapor/NetCDFCFCollection.h>
 
 using namespace VAPoR;

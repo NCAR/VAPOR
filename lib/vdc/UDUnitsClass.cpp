@@ -8,7 +8,7 @@
 #else
     #include <udunits2.h>
 #endif
-#include <vapor/GetAppPath.h>
+#include <vapor/ResourcePath.h>
 #include <vapor/UDUnitsClass.h>
 
 using namespace VAPoR;
@@ -50,10 +50,7 @@ int UDUnits::Initialize()
     //
     ut_set_error_message_handler(ut_ignore);
 
-    vector<string> paths;
-    paths.push_back("udunits");
-    paths.push_back("udunits2.xml");
-    string path = GetAppPath("VAPOR", "share", paths).c_str();
+    string path = GetSharePath("udunits/udunits2.xml");
     if (!path.empty()) {
         _unitSystem = ut_read_xml(path.c_str());
     } else {
