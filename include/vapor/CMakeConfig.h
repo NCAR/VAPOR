@@ -1,17 +1,25 @@
 #ifndef CMAKECONFIG_H
 #define CMAKECONFIG_H
 
+#include <string>
+
+#define CMakeConfigStringType std::string
+
 extern const int MAJOR;
 extern const int MINOR;
 extern const int MICRO;
 
-extern const char VERSION_RC[];
-extern const char VERSION_DATE[];
-extern const char VERSION_COMMIT[];
-extern const char VERSION_STRING[];
-extern const char VERSION_STRING_FULL[];
+extern const CMakeConfigStringType VERSION_RC;
+extern const CMakeConfigStringType VERSION_DATE;
+extern const CMakeConfigStringType VERSION_COMMIT;
+extern const CMakeConfigStringType VERSION_STRING;
+extern const CMakeConfigStringType VERSION_STRING_FULL;
 
-extern const char BUILD_TYPE[];
-extern const char SOURCE_DIR[];
+extern const CMakeConfigStringType BUILD_TYPE;
+extern const CMakeConfigStringType SOURCE_DIR;
+
+extern const CMakeConfigStringType PYTHON_VERSION;
+extern const CMakeConfigStringType PYTHON_DIR;
+extern const CMakeConfigStringType PYTHON_PATH;
 
 #endif
