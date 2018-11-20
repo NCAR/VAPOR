@@ -133,9 +133,9 @@ protected:
     //
     void _renderTriangleStrips(int whichPass, long castingMode) const;
 
-    void _drawVolumeFaces(int whichPass, long whichCastingMode, bool insideACell = false, const GLfloat *ModelView = nullptr, const GLfloat *InversedMV = nullptr, bool fast = false);
+    void _drawVolumeFaces(int whichPass, long whichCastingMode, bool insideACell = false, const GLfloat *modelView = nullptr, const GLfloat *inversedMV = nullptr, bool fast = false);
 
-    void _load3rdPassUniforms(long castingMode, const GLfloat *MVP, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast) const;
+    void _load3rdPassUniforms(long castingMode, const GLfloat *inversedMV, bool fast) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, long castingMode);
 

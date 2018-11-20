@@ -565,13 +565,16 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    /* Collect ModelView matrix */
+    GLfloat ModelView[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
+
     // 1st pass: render back facing polygons to texture0 of the framebuffer
-    _drawVolumeFaces(1, castingMode);
+    _drawVolumeFaces(1, castingMode, false, ModelView);
 
     /* Detect if we're inside the volume */
-    GLfloat ModelView[16], InversedMV[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
-    bool success = _mesa_invert_matrix_general(InversedMV, ModelView);
+    GLfloat InversedMV[16];
+    bool    success = _mesa_invert_matrix_general(InversedMV, ModelView);
     if (!success) {
         MyBase::SetErrMsg("ModelView matrix is a singular matrix; "
                           "the behavior becomes undefined!");
@@ -605,7 +608,8 @@ int RayCaster::_paintGL(bool fast)
         }
     }
 
-    _drawVolumeFaces(2, castingMode, insideACell);    // 2nd pass, render front facing polygons
+    // 2nd pass, render front facing polygons
+    _drawVolumeFaces(2, castingMode, insideACell, ModelView);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -618,7 +622,9 @@ int RayCaster::_paintGL(bool fast)
         MyBase::SetErrMsg("RayCasting Mode not supported!");
         return 1;
     }
-    _drawVolumeFaces(3, castingMode, insideACell, ModelView, InversedMV, fast);    // 3rd pass, perform ray casting
+
+    // 3rd pass, perform ray casting
+    _drawVolumeFaces(3, castingMode, insideACell, ModelView, InversedMV, fast);
 
     delete grid;
 
@@ -739,18 +745,16 @@ void RayCaster::_initializeFramebufferTextures()
 
 void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast)
 {
-    GLint   uniformLocation;
-    GLfloat MVP[16];
-    _getMVPMatrix(MVP);
+    GLfloat modelview[16], projection[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
+    glGetFloatv(GL_PROJECTION_MATRIX, projection);    // This is from OpenGL 2...
 
     if (whichPass == 1) {
         glUseProgram(_1stPassShaderId);
-        uniformLocation = glGetUniformLocation(_1stPassShaderId, "MVP");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
-        uniformLocation = glGetUniformLocation(_1stPassShaderId, "boxMin");
-        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
-        uniformLocation = glGetUniformLocation(_1stPassShaderId, "boxMax");
-        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
+        GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+        uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -762,12 +766,10 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
     } else if (whichPass == 2) {
         glUseProgram(_2ndPassShaderId);
-        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "MVP");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
-        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "boxMin");
-        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
-        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "boxMax");
-        glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
+        GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+        uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -779,7 +781,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
     } else                                      // 3rd pass
     {
-        _load3rdPassUniforms(castingMode, MVP, ModelView, InversedMV, fast);
+        _load3rdPassUniforms(castingMode, InversedMV, fast);
 
         _3rdPassSpecialHandling(fast, castingMode);
 
@@ -811,29 +813,31 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *MVP, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast) const
+void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV, bool fast) const
 {
+    GLfloat modelview[16], projection[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
+    glGetFloatv(GL_PROJECTION_MATRIX, projection);    // This is from OpenGL 2...
+
     glUseProgram(_3rdPassShaderId);
-    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MVP");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, MVP);
+    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MV");
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "ModelView");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, ModelView);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "Projection");
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "transposedInverseMV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_TRUE, InversedMV);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "inversedMV");
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, inversedMV);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "valueRange");
-    glUniform2fv(uniformLocation, 1, _userCoordinates.valueRange);
+    float dataRanges[4] = {_userCoordinates.valueRange[0], _userCoordinates.valueRange[1], _colorMapRange[0], _colorMapRange[1]};
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "dataRanges");
+    glUniform2fv(uniformLocation, 2, dataRanges);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapRange");
-    glUniform2fv(uniformLocation, 1, _colorMapRange);
-
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMin");
-    glUniform3fv(uniformLocation, 1, _userCoordinates.boxMin);
-
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxMax");
-    glUniform3fv(uniformLocation, 1, _userCoordinates.boxMax);
+    float boxExtents[6];
+    std::memcpy(boxExtents, _userCoordinates.boxMin, sizeof(float) * 3);
+    std::memcpy(boxExtents + 3, _userCoordinates.boxMax, sizeof(float) * 3);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxExtents");
+    glUniform3fv(uniformLocation, 2, boxExtents);
 
     int volumeDimensions[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
@@ -841,17 +845,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *MVP, const
 
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "viewportDims");
     glUniform2iv(uniformLocation, 1, _currentViewport + 2);
-
-    float stepSize1D = 0.005f;    // This is like ~200 samples
-    if (!fast)                    // Calculate a better step size if in fast rendering mode
-    {
-        int maxVolumeDim = volumeDimensions[0] > volumeDimensions[1] ? volumeDimensions[0] : volumeDimensions[1];
-        maxVolumeDim = maxVolumeDim > volumeDimensions[2] ? maxVolumeDim : volumeDimensions[2];
-        maxVolumeDim = maxVolumeDim > 200 ? maxVolumeDim : 200;    // Make sure at least 400 smaples
-        stepSize1D = 0.5f / float(maxVolumeDim);                   // Approximately 2 samples per cell
-    }
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
-    glUniform1f(uniformLocation, stepSize1D);
 
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);

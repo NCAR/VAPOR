@@ -9,31 +9,34 @@ uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 
-uniform vec2  valueRange;        // min and max values of this variable
-uniform vec2  colorMapRange;     // min and max values on this color map
-uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
-uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
+uniform vec2  dataRanges[2];
+uniform vec3  boxExtents[2];
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
-uniform float stepSize1D;       // ray casting step size
 uniform bool  lighting;         // apply lighting or not
 uniform bool  hasMissingValue;  // has missing values or not
 uniform float lightingCoeffs[4]; // lighting parameters
 
-uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
-uniform mat4 ModelView;
+uniform mat4 MV;
+uniform mat4 inversedMV;
 
 // 
 // Derive helper variables
 //
 const float EPSILON    = 5e-6f;
+vec2  valueRange       = dataRanges[0];         // min and max values of this variable
+vec2  colorMapRange    = dataRanges[1];         // min and max values on this color map
+vec3  boxMin           = boxExtents[0];         // min coordinates of the bounding box of this volume
+vec3  boxMax           = boxExtents[1];         // max coordinates of the bounding box of this volume
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDimsf      = vec3( volumeDims );
+vec3  boxSpan          = boxMax - boxMin;
+mat4  transposedInverseMV = transpose(inversedMV);
 
 //
 // Input:  normalized value w.r.t. valueRange.
@@ -53,6 +56,7 @@ float TranslateValue( in float value )
 //
 bool ShouldSkip( in vec3 tc )
 {
+#if 0
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
@@ -62,6 +66,7 @@ bool ShouldSkip( in vec3 tc )
         if( dot(positionModel, clipPlanes[i]) < 0.0f )
             return true;
     }
+#endif
 
     return false;
 }
@@ -72,33 +77,33 @@ bool ShouldSkip( in vec3 tc )
 //
 vec3 CalculateGradient(in vec3 tc)
 {
-    vec3 h0 = vec3(-0.5f ) / volumeDimsf;
-    vec3 h1 = vec3( 0.5f ) / volumeDimsf;
-    vec3 h  = vec3( 1.0f );
+    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
+    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
+    vec3 h  = vec3( 1.0 );
 
-    if ((tc.x + h0.x) < 0.0f) {
-        h0.x = 0.0f;
-        h.x = 0.5f;
+    if ((tc.x + h0.x) < 0.0) {
+        h0.x = 0.0;
+        h.x  = 0.5;
     }
-    if ((tc.x + h1.x) > 1.0f) {
-        h1.x = 0.0f;
-        h.x = 0.5f;
+    if ((tc.x + h1.x) > 1.0) {
+        h1.x = 0.0;
+        h.x  = 0.5;
     }
-    if ((tc.y + h0.y) < 0.0f) {
-        h0.y = 0.0f;
-        h.y = 0.5f;
+    if ((tc.y + h0.y) < 0.0) {
+        h0.y = 0.0;
+        h.y  = 0.5;
     }
-    if ((tc.y + h1.y) > 1.0f) {
-        h1.y = 0.0f;
-        h.y = 0.5f;
+    if ((tc.y + h1.y) > 1.0) {
+        h1.y = 0.0;
+        h.y  = 0.5;
     }
-    if ((tc.z + h0.z) < 0.0f) {
-        h0.z = 0.0f;
-        h.z = 0.5f;
+    if ((tc.z + h0.z) < 0.0) {
+        h0.z = 0.0;
+        h.z  = 0.5;
     }
-    if ((tc.z + h1.z) > 1.0f) {
-        h1.z = 0.0f;
-        h.z = 0.5f;
+    if ((tc.z + h1.z) > 1.0) {
+        h1.z = 0.0;
+        h.z  = 0.5;
     }
 
     vec3 a0, a1;
@@ -115,45 +120,49 @@ vec3 CalculateGradient(in vec3 tc)
 
 void main(void)
 {
-    vec3  lightDirEye   = vec3(0.0f, 0.0f, 1.0f); 
+    vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
-    // Get texture coordinates of this frament
+    // Calculate texture coordinates of this frament
     vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopTexture    = texture( backFaceTexture,  fragTexture    ).xyz;
-    vec3 startTexture   = texture( frontFaceTexture, fragTexture    ).xyz;
-    vec3 rayDirTexture  = stopTexture - startTexture;
-    float rayDirLength  = length( rayDirTexture );
+    vec3 stopEye        = texture( backFaceTexture,  fragTexture    ).xyz;
+    vec3 startEye       = texture( frontFaceTexture, fragTexture    ).xyz;
+    vec3 rayDirEye      = stopEye - startEye ;
+    float rayDirLength  = length( rayDirEye );
     if( rayDirLength < EPSILON )
         discard;
+    
+    vec3 startModel     = (inverse( MV ) * vec4(startEye, 1.0)).xyz;
+    color = vec4( (startModel - boxMin) / (boxMax - boxMin), 0.8 );
 
-    float nStepsf       = rayDirLength  / stepSize1D;
-    vec3  stepSize3D    = rayDirTexture / nStepsf;
+    int   nSteps        = int(length( volumeDimsf ) * 3.0);
+    vec3  stepSize3D    = rayDirEye / float(nSteps);
 
-    vec3  step1Texture  = startTexture;
-    if( ShouldSkip( step1Texture ) )
+    if( ShouldSkip( startEye ) )
     {
         color = vec4( 0.0f );
     }
     else
     {
-        float step1Value = texture( volumeTexture, step1Texture ).r;
-              color      = texture( colorMapTexture, TranslateValue(step1Value) );
-              color.rgb *= color.a;
+        vec3  step1Texture = ((inversedMV * vec4(startEye, 1.0)).xyz - boxMin) / boxSpan;
+        float step1Value   = texture( volumeTexture, step1Texture ).r;
+              color        = texture( colorMapTexture, TranslateValue(step1Value) );
+              color.rgb   *= color.a;
     }
 
     // let's do a ray casting! 
-    for( int i = 0; i < int(nStepsf); i++ )
+    for( int i = 1; i <= nSteps; i++ )
     {
-        if( color.a > 0.999f )  // You can still see through with 0.99...
+        if( color.a > 0.999 )  // You can still see something with 0.99...
             break;
 
-        vec3 step2Texture = startTexture + stepSize3D * float(i + 1);
+        vec3 step2Eye     = startEye + stepSize3D * float( i );
+        vec3 step2Texture = ((inversedMV * vec4(step2Eye, 1.0)).xyz - boxMin) / boxSpan;
         if( ShouldSkip( step2Texture ) )
             continue;
 
-        float step2Value  = texture( volumeTexture, step2Texture ).r;
-        vec4  backColor   = texture( colorMapTexture, TranslateValue(step2Value) );
+        float step2Value   = texture( volumeTexture, step2Texture ).r;
+        vec4  backColor    = texture( colorMapTexture, TranslateValue(step2Value) );
         
         // Apply lighting if big enough gradient
         if( lighting )
@@ -164,12 +173,7 @@ void main(void)
                 vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0f )).xyz;
                      gradientEye = normalize( gradientEye );
                 float diffuse    = abs( dot(lightDirEye, gradientEye) );
-
-                // Calculate eye space coordinates of "step2Texture"
-                vec3 step2Model  = boxMin + step2Texture * (boxMax - boxMin);
-                vec3 step2Eye    = (ModelView * vec4(step2Model, 1.0f)).xyz;
                 vec3 viewDirEye  = normalize( -step2Eye );
-
                 vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                 float specular   = pow( max(0.0f, dot( reflectionEye, viewDirEye )), specularExp ); 
                 backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
