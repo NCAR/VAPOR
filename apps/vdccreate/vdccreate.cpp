@@ -251,7 +251,7 @@ int	main(int argc, char **argv) {
 		);
 		exit(1);
 	}
-	if (FileUtils::FileExists(master) && !opt.force) {
+	if (FileUtils::Exists(master) && !opt.force) {
 		MyBase::SetErrMsg(
 			"\"%s\" already exists and -force option not used.", master.c_str()
 		);
