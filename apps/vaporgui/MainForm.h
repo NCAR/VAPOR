@@ -337,9 +337,6 @@ class MainForm : public QMainWindow {
     void launchPlotUtility();
     void launchPythonVariables();
 
-    //Set navigate mode
-    void setNavigate(bool);
-
     //animation toolbar:
     void _setTimeStep() {
         int ts = _timeStepEdit->text().toInt();
