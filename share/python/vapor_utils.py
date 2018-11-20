@@ -1,4 +1,5 @@
-''' The vapor_utils module contains:
+""" The vapor_utils module contains:
+	StaggeredToUnstaggeredGrid - resample staggered grid
 	mag3d - calculate magnitude of 3-vector
 	mag2d - calculate magnitude of 2-vector
 	deriv_findiff - calculate derivative using 6th order finite differences
@@ -9,7 +10,148 @@
 variable with respect to another variable.
 	interp3d - interpolate a 3D variable to a vertical level surface of another variable.
 	vector_rotate - rotate and scale vector field for lat-lon grid.	
-'''
+"""
+
+import numpy as np
+
+def _StaggeredToUnstaggeredGrid2D(a, axis):
+	assert isinstance(a, np.ndarray), 'A is not np.ndarray'
+	assert a.ndim == 2
+	assert axis >= 0 and axis < a.ndim
+
+	from scipy.interpolate import RectBivariateSpline
+
+	x = np.arange(a.shape[1])
+	y = np.arange(a.shape[0])
+
+	if (axis == 0):
+		xprime = np.arange(0.5, a.shape[1] - 0.5)
+		yprime = y
+	else:
+		xprime = x
+		yprime = np.arange(0.5, a.shape[0] - 0.5)
+		
+
+	interp_spline = RectBivariateSpline(y, x,a)
+	return interp_spline(yprime, xprime)
+
+def StaggeredToUnstaggeredGrid(a, axis):
+
+	"""Resample a numpy array on a staggered grid to an unstaggered grid
+
+	This function is useful for resampling data sampled on an Arakawa C-grid
+	to an Arakawa A-grid. E.g. resampling the velocity grid to the mass
+	grid. It simply down samples the specified axis specified by *axis*
+	by one grid point, locating the new grid points in the returned
+	array at the midpoints of the samples in the original array, *a*
+
+	Args:
+		a (:class:`numpy.ndarray'): A two or three dimensional Numpy array
+
+		axis (:obj:`int`): an integer in the range 0..n, where n is a.ndim - 1, 
+		specifying which axis should be downsampled. Zero is the fastest
+		varying dimension.
+
+	Returns:
+		:class:`numpy.ndarray`: The resampled array
+
+	"""
+
+ 
+	assert isinstance(a, np.ndarray), 'A is not np.ndarray'
+	assert a.ndim >= 2 and a.ndim <= 3
+	assert axis >= 0 and axis < a.ndim
+
+	if (a.ndim == 2):
+		return _StaggeredToUnstaggeredGrid2D(a,axis)
+
+	newshape = list(a.shape)
+	newshape[a.ndim - axis - 1] -= 1;
+	aprime = np.empty(newshape, a.dtype)
+
+	if (axis == 0 or axis == 1):
+		for k in range(0,aprime.shape[0]):
+			aprime[k,::,::] =  _StaggeredToUnstaggeredGrid2D(a[k,::,::],axis)
+
+	else:
+		for i in range(0,aprime.shape[2]):
+			aprime[::,::,i] =  _StaggeredToUnstaggeredGrid2D(a[::,::,i],1)
+
+	return(aprime)
+
+def Mag(*argv):
+
+	"""Return the magnitude of one or more vectors
+
+	This method computes the vector magnitude of the Numpy arrays in
+	*args*.  Each array in *args* must have the same number of dimensions. 
+	The arrays may be a mixture of staggered and unstaggered arrays. I.e.
+	for any axis the dimension length may differ by no more than one. 
+	Staggered arrays are downsampled along the staggered axis to have the 
+	same dimension length as unstaggered array. This all arrays are 
+	resampled as necessary to have the same shape prior to compute 
+	the array magnitude.
+
+	Args:
+		argv : A a list of two or three dimensional Numpy arrays
+
+	Returns:
+		:class:`numpy.ndarray`: The vector magnitude
+
+	"""
+
+	for arg in argv:
+		assert isinstance(arg, np.ndarray), 'A is not np.ndarray'
+
+	ndim = argv[0].ndim
+	for i in range(0,len(argv)-1):
+		assert ndim == argv[i].ndim, 'Arrays must all have same rank'
+
+	#
+	# Get the shape of each array and if staggered arrays are present
+	# figure out the shape of the base grid
+	#
+	shapes = np.empty(ndim*len(argv), dtype=int).reshape(len(argv), ndim)
+	for i in range(0,len(argv)):
+		shapes[i,::] = argv[i].shape
+	
+	baseshape = np.empty(ndim, dtype=int)
+	for i in range(0,ndim):
+		baseshape[i] = np.amin(shapes[::,i])
+
+	# 
+	# make sure each dimension is equal to or one greater than the corresponding
+	# dimension in the base dimension
+	#
+	for i in range(0,len(argv)):
+		if (np.sum(np.array(argv[i].shape)-baseshape) > 1):
+			raise ValueError("array dimensions may only differ by one")
+
+	magsqr = np.zeros(np.prod(baseshape), argv[0].dtype).reshape(baseshape)
+
+	for i in range(0,len(argv)):
+		myshape = np.array(argv[i].shape)
+
+		if np.array_equal(myshape,baseshape):
+			#
+			# Unstaggered array. 
+			#
+			magsqr += argv[i] * argv[i]
+		else:
+
+			#
+			# Staggered array. Need to down sample
+			#
+			axis = -1
+			for j in range(0,myshape.size):
+				if (myshape[j] == baseshape[j] + 1):
+					axis = ndim - j - 1
+
+			tmp = StaggeredToUnstaggeredGrid(argv[i], axis)
+			magsqr += tmp * tmp
+
+
+	return(np.sqrt(magsqr))
 
 def mag3d(a1,a2,a3): 
 	'''Calculate the magnitude of a 3-vector.
@@ -17,6 +159,8 @@ def mag3d(a1,a2,a3):
 	Where:  A, B, and C are float32 numpy arrays.
 	Result MAG is a float32 numpy array containing the square root
 	of the sum of the squares of A, B, and C.'''
+
+	raise DeprecationWarning('Use Mag() instead')
 	from numpy import sqrt
 	return sqrt(a1*a1 + a2*a2 + a3*a3)
 
@@ -569,5 +713,6 @@ def vector_rotate(angleRad, latDeg, u, v):
 	vmod = -numpy.sin(angleRad)*u + numpy.cos(angleRad)*v
 	umod = umod/numpy.cos(latDeg*math.pi/180.)
 	return umod,vmod
+
 
 
