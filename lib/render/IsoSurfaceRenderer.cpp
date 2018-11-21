@@ -1,5 +1,5 @@
 #include "vapor/IsoSurfaceRenderer.h"
-#include "vapor/GetAppPath.h"
+#include "vapor/ResourcePath.h"
 
 using namespace VAPoR;
 
@@ -15,16 +15,15 @@ IsoSurfaceRenderer::IsoSurfaceRenderer(const ParamsMgr *pm, std::string &winName
 
 void IsoSurfaceRenderer::_loadShaders()
 {
+#warning This needs to use the ShaderManager
     std::vector<std::string> extraPath;
-    extraPath.push_back("shaders");
-    extraPath.push_back("main");
-    std::string shaderPath = Wasp::GetAppPath("VAPOR", "share", extraPath);
-    std::string VShader1stPass = shaderPath + "/IsoSurface1stPass.vgl";
-    std::string FShader1stPass = shaderPath + "/IsoSurface1stPass.fgl";
-    std::string VShader2ndPass = shaderPath + "/IsoSurface2ndPass.vgl";
-    std::string FShader2ndPass = shaderPath + "/IsoSurface2ndPass.fgl";
-    std::string VShader3rdPass = shaderPath + "/IsoSurface3rdPass.vgl";
-    std::string FShader3rdPass = shaderPath + "/IsoSurface3rdPass.fgl";
+    std::string              shaderPath = Wasp::GetSharePath("shaders/main");
+    std::string              VShader1stPass = shaderPath + "/IsoSurface1stPass.vgl";
+    std::string              FShader1stPass = shaderPath + "/IsoSurface1stPass.fgl";
+    std::string              VShader2ndPass = shaderPath + "/IsoSurface2ndPass.vgl";
+    std::string              FShader2ndPass = shaderPath + "/IsoSurface2ndPass.fgl";
+    std::string              VShader3rdPass = shaderPath + "/IsoSurface3rdPass.vgl";
+    std::string              FShader3rdPass = shaderPath + "/IsoSurface3rdPass.fgl";
 
     _1stPassShaderId = _compileShaders(VShader1stPass.data(), FShader1stPass.data());
     _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
