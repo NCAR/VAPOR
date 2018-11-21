@@ -150,7 +150,6 @@ protected:
     void _drawVolumeFaces( int            whichPass, 
                            long           whichCastingMode,
                            bool           insideACell = false,
-                           const GLfloat* modelView   = nullptr,
                            const GLfloat* inversedMV  = nullptr,
                            bool           fast        = false );
 
