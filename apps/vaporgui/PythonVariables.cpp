@@ -11,7 +11,7 @@
 #include <QStandardItemModel>
 
 #include <vapor/DC.h>
-#include <vapor/GetAppPath.h>
+#include "vapor/ResourcePath.h"
 #include "ErrorReporter.h"
 #include "FileOperationChecker.h"
 
@@ -57,10 +57,9 @@ PythonVariables::PythonVariables(QWidget *parent) : QDialog(parent), Ui_PythonVa
     labelPalette.setColor(_scriptTestLabel->foregroundRole(), background);
     _scriptTestLabel->setPalette(labelPalette);
 
-    std::vector<string> imagePathVec = {"images"};
-    string              imagePath = GetAppPath("VAPOR", "share", imagePathVec);
-    string              pythonImagePath = imagePath + "/PythonLogo.png";
-    QPixmap             thumbnail(pythonImagePath.c_str());
+    string pythonImagePath = Wasp::GetSharePath(string("images") + string("/PythonLogo.png"));
+
+    QPixmap thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
 
     _includeCoordVars = false;
@@ -413,9 +412,8 @@ bool PythonVariables::_getFilePath(QString &filePath, bool operation)
         title = "Export your Python script to a file";
     }
 
-    std::vector<string> pythonPathVec = {"python"};
-    string              pythonPath = GetAppPath("VAPOR", "share", pythonPathVec);
-    QFileDialog         fileDialog(this, "Import Python script from file", QString::fromStdString(pythonPath), QString::fromAscii("Python file (*.py)"));
+    string      pythonPath = Wasp::GetSharePath("python");
+    QFileDialog fileDialog(this, "Import Python script from file", QString::fromStdString(pythonPath), QString::fromAscii("Python file (*.py)"));
 
     fileDialog.setAcceptMode(acceptMode);
     fileDialog.setDefaultSuffix(QString::fromAscii("py"));
