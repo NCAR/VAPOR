@@ -11,7 +11,7 @@
 #include <QStandardItemModel>
 
 #include <vapor/DC.h>
-#include <vapor/GetAppPath.h>
+#include "vapor/ResourcePath.h"
 #include "ErrorReporter.h"
 #include "FileOperationChecker.h"
 
@@ -60,9 +60,10 @@ PythonVariables::PythonVariables(
     labelPalette.setColor(_scriptTestLabel->foregroundRole(), background);
     _scriptTestLabel->setPalette(labelPalette);
 
-    std::vector<string> imagePathVec = { "images" };
-    string imagePath = GetAppPath("VAPOR", "share", imagePathVec);
-    string pythonImagePath = imagePath + "/PythonLogo.png";
+    string pythonImagePath = Wasp::GetSharePath(
+		string("images") + string("/PythonLogo.png")
+	);
+
     QPixmap thumbnail(pythonImagePath.c_str());
     _pythonLabel->setPixmap(thumbnail);
 
@@ -475,8 +476,7 @@ bool PythonVariables::_getFilePath(
         title      = "Export your Python script to a file";
     }
 
-    std::vector<string> pythonPathVec = { "python" };
-    string pythonPath= GetAppPath("VAPOR", "share", pythonPathVec);
+    string pythonPath= Wasp::GetSharePath("python");
     QFileDialog fileDialog(
         this, 
         "Import Python script from file",
