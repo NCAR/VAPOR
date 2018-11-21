@@ -570,7 +570,7 @@ int RayCaster::_paintGL(bool fast)
     glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
-    _drawVolumeFaces(1, castingMode, false, ModelView);
+    _drawVolumeFaces(1, castingMode, false);
 
     /* Detect if we're inside the volume */
     GLfloat InversedMV[16];
@@ -609,7 +609,7 @@ int RayCaster::_paintGL(bool fast)
     }
 
     // 2nd pass, render front facing polygons
-    _drawVolumeFaces(2, castingMode, insideACell, ModelView);
+    _drawVolumeFaces(2, castingMode, insideACell);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -624,7 +624,7 @@ int RayCaster::_paintGL(bool fast)
     }
 
     // 3rd pass, perform ray casting
-    _drawVolumeFaces(3, castingMode, insideACell, ModelView, InversedMV, fast);
+    _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
     delete grid;
 
@@ -743,7 +743,7 @@ void RayCaster::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const GLfloat *ModelView, const GLfloat *InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const GLfloat *InversedMV, bool fast)
 {
     GLfloat modelview[16], projection[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
