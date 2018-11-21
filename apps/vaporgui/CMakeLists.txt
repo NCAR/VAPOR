@@ -229,6 +229,10 @@ elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 endif ()
 
+add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
+add_definitions (-DPYTHONDIR="${PYTHONDIR}")
+# add_definitions (-DPARAMS_EXPORTS)
+
 install (
 	TARGETS vapor
 	DESTINATION ${INSTALL_BIN_DIR}

@@ -331,6 +331,9 @@ private slots:
     void launchPlotUtility();
     void launchPythonVariables();
 
+    // Set navigate mode
+    void setNavigate(bool);
+
     // animation toolbar:
     void _setTimeStep()
     {
