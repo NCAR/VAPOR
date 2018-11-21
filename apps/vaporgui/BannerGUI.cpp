@@ -7,7 +7,7 @@
 #include <qdesktopwidget.h>
 #include <QDesktopServices>
 #include <QUrl>
-#include <vapor/ResourcePath.h>
+#include <vapor/GetAppPath.h>
 #include "BannerGUI.h"
 
 BannerGUI::BannerGUI(
@@ -43,7 +43,10 @@ BannerGUI::BannerGUI(
     connect(closeButton, SIGNAL(released()), this, SLOT(closeButton_action()));
 
     if (!imagefile.empty()) {
-        QImage image(Wasp::GetSharePath("images/" + imagefile).c_str());
+        std::vector<std::string> vec = std::vector<std::string>();
+        vec.push_back("images");
+        vec.push_back(imagefile);
+        QImage image(Wasp::GetAppPath("VAPOR", "share", vec).c_str());
         //QImage image(imagefile.c_str());
         if (image.isNull()) {
             QMessageBox::information(this, tr("VAPoR Banner"), tr("Could not load banner image.\n"));
