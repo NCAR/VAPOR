@@ -42,10 +42,9 @@ void DVRenderer::_loadShaders()
 
 void DVRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
 {
-    // Special handling for DVR:
-    //   turn off lighting during fast rendering.
+    // Special handling for DVR: turn off lighting during fast rendering.
     GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-    if (fast)    // Disable lighting during "fast" DVR rendering
+    if (fast)
         glUniform1i(uniformLocation, int(0));
     else {
         RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
