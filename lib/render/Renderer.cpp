@@ -27,7 +27,6 @@
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/GetAppPath.h>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"

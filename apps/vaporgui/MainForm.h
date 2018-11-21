@@ -327,9 +327,6 @@ private slots:
     void launchStats();
     void launchPlotUtility();
 
-    // Set navigate mode
-    void setNavigate(bool);
-
     // animation toolbar:
     void _setTimeStep()
     {
