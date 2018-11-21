@@ -56,17 +56,15 @@ float TranslateValue( in float value )
 //
 bool ShouldSkip( in vec3 tc )
 {
-#if 0
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
+    vec4 positionModel  = vec4( (boxMin + tc * boxSpan), 1.0f );
     for( int i = 0; i < 6; i++ )
     {
         if( dot(positionModel, clipPlanes[i]) < 0.0f )
             return true;
     }
-#endif
 
     return false;
 }
@@ -107,12 +105,12 @@ vec3 CalculateGradient(in vec3 tc)
     }
 
     vec3 a0, a1;
-    a0.x = texture( volumeTexture, tc + vec3(h0.x,0.0f,0.0f) ).r;
-    a1.x = texture( volumeTexture, tc + vec3(h1.x,0.0f,0.0f) ).r;
-    a0.y = texture( volumeTexture, tc + vec3(0.0f,h0.y,0.0f) ).r;
-    a1.y = texture( volumeTexture, tc + vec3(0.0f,h1.y,0.0f) ).r;
-    a0.z = texture( volumeTexture, tc + vec3(0.0f,0.0f,h0.z) ).r;
-    a1.z = texture( volumeTexture, tc + vec3(0.0f,0.0f,h1.z) ).r;
+    a0.x = texture( volumeTexture, tc + vec3(h0.x, 0.0f, 0.0f) ).r;
+    a1.x = texture( volumeTexture, tc + vec3(h1.x, 0.0f, 0.0f) ).r;
+    a0.y = texture( volumeTexture, tc + vec3(0.0f, h0.y, 0.0f) ).r;
+    a1.y = texture( volumeTexture, tc + vec3(0.0f, h1.y, 0.0f) ).r;
+    a0.z = texture( volumeTexture, tc + vec3(0.0f, 0.0f, h0.z) ).r;
+    a1.z = texture( volumeTexture, tc + vec3(0.0f, 0.0f, h1.z) ).r;
 
     return (a1-a0 / h);
 }
@@ -131,21 +129,18 @@ void main(void)
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength < EPSILON )
         discard;
-    
-    vec3 startModel     = (inverse( MV ) * vec4(startEye, 1.0)).xyz;
-    color = vec4( (startModel - boxMin) / (boxMax - boxMin), 0.8 );
 
-    int   nSteps        = int(length( volumeDimsf ) * 3.0);
+    int   nSteps        = int(length( volumeDimsf ) * 2.0);
     vec3  stepSize3D    = rayDirEye / float(nSteps);
 
-    if( ShouldSkip( startEye ) )
+    vec3  startTexture  = ((inversedMV * vec4(startEye, 1.0)).xyz - boxMin) / boxSpan;
+    if( ShouldSkip( startTexture ) )
     {
-        color = vec4( 0.0f );
+        color = vec4( 0.0 );
     }
     else
     {
-        vec3  step1Texture = ((inversedMV * vec4(startEye, 1.0)).xyz - boxMin) / boxSpan;
-        float step1Value   = texture( volumeTexture, step1Texture ).r;
+        float step1Value   = texture( volumeTexture, startTexture ).r;
               color        = texture( colorMapTexture, TranslateValue(step1Value) );
               color.rgb   *= color.a;
     }
@@ -179,11 +174,12 @@ void main(void)
                 backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
                                    specular * specularCoeff;
             }
-        }   // End lighting
+        }
 
         // Color compositing
         color.rgb += (1.0f - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0f - color.a) * backColor.a;
+
     }   // End ray casting
 
 }       // End main()
