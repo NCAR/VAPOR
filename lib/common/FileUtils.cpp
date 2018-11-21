@@ -1,6 +1,5 @@
 #include "vapor/FileUtils.h"
 #include <string.h>
-#include <algorithm>
 #include <sys/stat.h>
 #include <vapor/MyBase.h>
 
@@ -64,19 +63,6 @@ std::string FileUtils::Extension(const std::string &path) {
     return path.substr(path.rfind(".") + 1);
 }
 
-std::string FileUtils::POSIXPathToWindows(std::string path) {
-    std::replace(path.begin(), path.end(), '/', '\\');
-    return path;
-}
-
-std::string FileUtils::POSIXPathToCurrentOS(const std::string &path) {
-#ifdef WIN32
-    return POSIXPathToWindows(path);
-#else
-    return path;
-#endif
-}
-
 long FileUtils::GetFileModifiedTime(const string &path) {
     struct STAT64 attrib;
     STAT64(path.c_str(), &attrib);
@@ -91,7 +77,7 @@ bool FileUtils::IsPathAbsolute(const std::string &path) {
 #endif
 }
 
-bool FileUtils::Exists(const std::string &path) {
+bool FileUtils::FileExists(const std::string &path) {
     return FileUtils::GetFileType(path) != FileType::Does_Not_Exist;
 }
 
@@ -114,18 +100,6 @@ FileType FileUtils::GetFileType(const std::string &path) {
             return FileType::Other;
     } else
         return FileType::Does_Not_Exist;
-}
-
-std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths) {
-    string path;
-    for (auto it = paths.begin(); it != paths.end(); ++it) {
-        if (!it->empty()) {
-            if (!path.empty())
-                path += Separator;
-            path += *it;
-        }
-    }
-    return path;
 }
 
 const char *FileUtils::LegacyBasename(const char *path) {
