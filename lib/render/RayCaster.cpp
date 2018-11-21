@@ -157,10 +157,10 @@ RayCaster::UserCoordinates::UserCoordinates()
     zCoords = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
-        dims[i] = 0;
         boxMin[i] = 0;
         boxMax[i] = 0;
     }
+    for (int i = 0; i < 4; i++) { dims[i] = 0; }
 
     myCurrentTimeStep = 0;
     myVariableName = "";
@@ -268,6 +268,8 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     dims[0] = gridDims[0];
     dims[1] = gridDims[1];
     dims[2] = gridDims[2];
+    float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
+    dims[3] = size_t(std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2])) + 1;
     grid->GetRange(valueRange);
 
     double buf[3];
@@ -516,8 +518,7 @@ int RayCaster::_paintGL(bool fast)
 
         // If using cell traverse ray casting, we need to upload user coordinates
         if (castingMode == 2) {
-            size_t dims[3];
-            std::memcpy(dims, _userCoordinates.dims, sizeof(size_t) * 3);
+            const size_t *dims = _userCoordinates.dims;
 
             // Fill data to buffer object _xyCoordsBufferId
             glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
@@ -839,9 +840,9 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxExtents");
     glUniform3fv(uniformLocation, 2, boxExtents);
 
-    int volumeDimensions[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
+    int volumeDims[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
-    glUniform3iv(uniformLocation, 1, volumeDimensions);
+    glUniform3iv(uniformLocation, 1, volumeDims);
 
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "viewportDims");
     glUniform2iv(uniformLocation, 1, _currentViewport + 2);
@@ -851,8 +852,17 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
     glUniform4fv(uniformLocation, 6, planes);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "fast");
-    glUniform1i(uniformLocation, int(fast));
+    // Calculate the step size
+    float boxMin[4] = {boxExtents[0], boxExtents[1], boxExtents[2], 1.0f};
+    float boxMax[4] = {boxExtents[3], boxExtents[4], boxExtents[5], 1.0f};
+    float boxminEye[4], boxmaxEye[4];
+    _matMultiVec(modelview, boxMin, boxminEye);
+    _matMultiVec(modelview, boxMax, boxmaxEye);
+    float span[3] = {boxmaxEye[0] - boxminEye[0], boxmaxEye[1] - boxminEye[1], boxmaxEye[2] - boxminEye[2]};
+    float stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3]);
+    if (fast) stepSize1D *= 4.0;
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
+    glUniform1f(uniformLocation, stepSize1D);
 
     // Pass in textures
     GLuint textureUnit = 0;
