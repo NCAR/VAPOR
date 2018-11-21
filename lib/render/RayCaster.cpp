@@ -908,6 +908,9 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
     glUniform4fv(uniformLocation, 6, planes);
 
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "fast");
+    glUniform1i(uniformLocation, int(fast));
+
     // Pass in textures
     GLuint textureUnit = 0;
     glActiveTexture(GL_TEXTURE0 + textureUnit);
