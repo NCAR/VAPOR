@@ -133,7 +133,6 @@ void main(void)
         discard;
 
     float nStepsf       = rayDirLength / stepSize1D;
-    nStepsf             = max( nStepsf, 100.0 );    // At least 100 steps
     vec3  stepSize3D    = rayDirEye    / nStepsf;
 
     vec3  startModel    = (inversedMV * vec4(startEye, 1.0)).xyz;
