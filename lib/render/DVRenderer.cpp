@@ -1,5 +1,5 @@
 #include "vapor/DVRenderer.h"
-#include "vapor/ResourcePath.h"
+#include "vapor/GetAppPath.h"
 
 using namespace VAPoR;
 
@@ -15,15 +15,16 @@ DVRenderer::DVRenderer(const ParamsMgr *pm, std::string &winName, std::string &d
 
 void DVRenderer::_loadShaders()
 {
-#warning This needs to use the ShaderManager
     std::vector<std::string> extraPath;
-    std::string              shaderPath = Wasp::GetSharePath("shaders/main");
-    std::string              VShader1stPass = shaderPath + "/DVR1stPass.vgl";
-    std::string              FShader1stPass = shaderPath + "/DVR1stPass.fgl";
-    std::string              VShader2ndPass = shaderPath + "/DVR2ndPass.vgl";
-    std::string              FShader2ndPass = shaderPath + "/DVR2ndPass.fgl";
-    std::string              VShader3rdPass = shaderPath + "/DVR3rdPass.vgl";
-    std::string              FShader3rdPass = shaderPath + "/DVR3rdPass.fgl";
+    extraPath.push_back("shaders");
+    extraPath.push_back("main");
+    std::string shaderPath = Wasp::GetAppPath("VAPOR", "share", extraPath);
+    std::string VShader1stPass = shaderPath + "/DVR1stPass.vgl";
+    std::string FShader1stPass = shaderPath + "/DVR1stPass.fgl";
+    std::string VShader2ndPass = shaderPath + "/DVR2ndPass.vgl";
+    std::string FShader2ndPass = shaderPath + "/DVR2ndPass.fgl";
+    std::string VShader3rdPass = shaderPath + "/DVR3rdPass.vgl";
+    std::string FShader3rdPass = shaderPath + "/DVR3rdPass.fgl";
 
     _1stPassShaderId = _compileShaders(VShader1stPass.data(), FShader1stPass.data());
     _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());

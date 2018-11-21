@@ -28,7 +28,7 @@
 
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
-#include <vapor/ResourcePath.h>
+#include <vapor/GetAppPath.h>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"
@@ -49,7 +49,10 @@ AnnotationRenderer::AnnotationRenderer(const ParamsMgr *pm, const DataStatus *da
     _currentTimestep = 0;
 
     _fontName = "arimo";
-    _fontFile = GetSharePath("fonts/" + _fontName + ".ttf");
+    vector<string> fpath;
+    fpath.push_back("fonts");
+    _fontFile = GetAppPath("VAPOR", "share", fpath);
+    _fontFile = _fontFile + "//" + _fontName + ".ttf";
 }
 
 //----------------------------------------------------------------------------

@@ -29,7 +29,7 @@
 #include <ostream>
 #include <fstream>
 #include <vector>
-#include <vapor/ResourcePath.h>
+#include <vapor/GetAppPath.h>
 
 #include "SettingsParams.h"
 
@@ -454,14 +454,16 @@ void SettingsParams::_init()
     SetDefaultMetadataDir(string("~"));
     SetDefaultFlowDir(string("~"));
 
-    string palettes = GetSharePath("palettes");
+    std::vector<string> ppaths = {"palettes"};
+    string              palettes = GetAppPath("VAPOR", "share", ppaths);
     SetDefaultTFDir(string(palettes));
 
-    string images = GetSharePath("images");
+    std::vector<string> ipaths = {"images"};
+    string              images = GetAppPath("VAPOR", "share", ipaths);
     SetDefaultImageDir(string(images));
 
-#warning TODO GetAppPath
-    string python = GetSharePath("python");
+    std::vector<string> pypaths = {"python"};
+    string              python = GetAppPath("VAPOR", "share", pypaths);
     SetDefaultPythonDir(string(python));
 }
 
