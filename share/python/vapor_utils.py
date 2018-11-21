@@ -24,12 +24,12 @@ def _StaggeredToUnstaggeredGrid2D(a, axis):
 	x = np.arange(a.shape[1])
 	y = np.arange(a.shape[0])
 
-	if (axis == 0):
-		xprime = np.arange(0.5, a.shape[1] - 0.5)
+	if (axis == 1):
+		xprime = np.arange(0.5, a.shape[axis] - 0.5)
 		yprime = y
 	else:
 		xprime = x
-		yprime = np.arange(0.5, a.shape[0] - 0.5)
+		yprime = np.arange(0.5, a.shape[axis] - 0.5)
 		
 
 	interp_spline = RectBivariateSpline(y, x,a)
@@ -41,19 +41,25 @@ def StaggeredToUnstaggeredGrid(a, axis):
 
 	This function is useful for resampling data sampled on an Arakawa C-grid
 	to an Arakawa A-grid. E.g. resampling the velocity grid to the mass
-	grid. It simply down samples the specified axis specified by *axis*
+	grid. It simply down samples the specified axis specified by `axis`
 	by one grid point, locating the new grid points in the returned
-	array at the midpoints of the samples in the original array, *a*
+	array at the midpoints of the samples in the original array, `a`
 
-	Args:
-		a (:class:`numpy.ndarray'): A two or three dimensional Numpy array
+	Parameters
+	-----------
+	a : numpy.ndarray
+		A two or three dimensional Numpy array
 
-		axis (:obj:`int`): an integer in the range 0..n, where n is a.ndim - 1, 
-		specifying which axis should be downsampled. Zero is the fastest
+	axis : int 
+
+		An integer in the range 0..n, where n is a.ndim - 1, 
+		specifying which axis should be downsampled. Zero is the slowest
 		varying dimension.
 
-	Returns:
-		:class:`numpy.ndarray`: The resampled array
+	Returns
+	-------
+	aprime: numpy.ndarray:
+		The resampled array
 
 	"""
 
@@ -66,16 +72,16 @@ def StaggeredToUnstaggeredGrid(a, axis):
 		return _StaggeredToUnstaggeredGrid2D(a,axis)
 
 	newshape = list(a.shape)
-	newshape[a.ndim - axis - 1] -= 1;
+	newshape[axis] -= 1;
 	aprime = np.empty(newshape, a.dtype)
 
-	if (axis == 0 or axis == 1):
+	if (axis == 1 or axis == 2):
 		for k in range(0,aprime.shape[0]):
-			aprime[k,::,::] =  _StaggeredToUnstaggeredGrid2D(a[k,::,::],axis)
+			aprime[k,::,::] =  _StaggeredToUnstaggeredGrid2D(a[k,::,::],axis-1)
 
 	else:
 		for i in range(0,aprime.shape[2]):
-			aprime[::,::,i] =  _StaggeredToUnstaggeredGrid2D(a[::,::,i],1)
+			aprime[::,::,i] =  _StaggeredToUnstaggeredGrid2D(a[::,::,i],axis)
 
 	return(aprime)
 
@@ -84,33 +90,33 @@ def Mag(*argv):
 	"""Return the magnitude of one or more vectors
 
 	This method computes the vector magnitude of the Numpy arrays in
-	*args*.  Each array in *args* must have the same number of dimensions. 
+	*args*.  Each array in *args* must have the same number of dimensions.
 	The arrays may be a mixture of staggered and unstaggered arrays. I.e.
-	for any axis the dimension length may differ by no more than one. 
-	Staggered arrays are downsampled along the staggered axis to have the 
-	same dimension length as unstaggered array. This all arrays are 
-	resampled as necessary to have the same shape prior to compute 
+	for any axis the dimension length may differ by no more than one.
+	Staggered arrays are downsampled along the staggered axis to have the
+	same dimension length as the unstaggered array. Thus all arrays are
+	resampled as necessary to have the same shape prior to computing
 	the array magnitude.
 
-	Args:
-		argv : A a list of two or three dimensional Numpy arrays
+	Parameters
+	----------
+	*argv : tuple of numpy.ndarray
+		A a list of two or three-dimensional Numpy arrays
 
-	Returns:
-		:class:`numpy.ndarray`: The vector magnitude
+	Returns
+	-------
+	a : numpy.ndarray
+		The vector magnitude
 
 	"""
 
 	for arg in argv:
-		assert isinstance(arg, np.ndarray), 'A is not np.ndarray'
+		assert isinstance(a, np.ndarray), 'A is not np.ndarray'
 
 	ndim = argv[0].ndim
 	for i in range(0,len(argv)-1):
 		assert ndim == argv[i].ndim, 'Arrays must all have same rank'
 
-	#
-	# Get the shape of each array and if staggered arrays are present
-	# figure out the shape of the base grid
-	#
 	shapes = np.empty(ndim*len(argv), dtype=int).reshape(len(argv), ndim)
 	for i in range(0,len(argv)):
 		shapes[i,::] = argv[i].shape
@@ -119,10 +125,6 @@ def Mag(*argv):
 	for i in range(0,ndim):
 		baseshape[i] = np.amin(shapes[::,i])
 
-	# 
-	# make sure each dimension is equal to or one greater than the corresponding
-	# dimension in the base dimension
-	#
 	for i in range(0,len(argv)):
 		if (np.sum(np.array(argv[i].shape)-baseshape) > 1):
 			raise ValueError("array dimensions may only differ by one")
@@ -133,19 +135,12 @@ def Mag(*argv):
 		myshape = np.array(argv[i].shape)
 
 		if np.array_equal(myshape,baseshape):
-			#
-			# Unstaggered array. 
-			#
 			magsqr += argv[i] * argv[i]
 		else:
-
-			#
-			# Staggered array. Need to down sample
-			#
 			axis = -1
 			for j in range(0,myshape.size):
 				if (myshape[j] == baseshape[j] + 1):
-					axis = ndim - j - 1
+					axis = j
 
 			tmp = StaggeredToUnstaggeredGrid(argv[i], axis)
 			magsqr += tmp * tmp
@@ -153,38 +148,19 @@ def Mag(*argv):
 
 	return(np.sqrt(magsqr))
 
-def mag3d(a1,a2,a3): 
-	'''Calculate the magnitude of a 3-vector.
-	Calling sequence: MAG = mag3d(A,B,C)
-	Where:  A, B, and C are float32 numpy arrays.
-	Result MAG is a float32 numpy array containing the square root
-	of the sum of the squares of A, B, and C.'''
+def _deriv_findiff2(a,axis,dx):
+	"""Function that calculates first-order derivatives 
+	using 2nd order finite differences in regular Cartesian grids.
+	"""
 
-	raise DeprecationWarning('Use Mag() instead')
-	from numpy import sqrt
-	return sqrt(a1*a1 + a2*a2 + a3*a3)
-
-def mag2d(a1,a2): 
-	'''Calculate the magnitude of a 2-vector.
-	Calling sequence: MAG = mag2d(A,B)
-	Where:  A, and B are float32 numpy arrays.
-	Result MAG is a float32 numpy array containing the square root
-	of the sum of the squares of A and B.'''
-	from numpy import sqrt
-	return sqrt(a1*a1 + a2*a2)
-
-def deriv_findiff2(a,dir,dx):
-	''' Function that calculates first-order derivatives 
-	using 2nd order finite differences in regular Cartesian grids.'''
-
-	import numpy 
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
+	s = np.shape(a)	#size of the input array
+	aprime = np.array(a)	#output has the same size than input
 
 	#
-	# derivative for user dir=1, in python this is third coordinate
+	# derivative for user axis=2. In python this is the slowest 
+	# varying 
 	#
-	if dir == 1: 
+	if axis == 2: 
 
 		#forward differences near the first boundary
 		for i in range(1):
@@ -199,9 +175,9 @@ def deriv_findiff2(a,dir,dx):
 			aprime[:,:,i] = (a[:,:,i-1]-a[:,:,i]) /(dx)     
 
 	#
-	# derivative for dir=2
+	# derivative for axis=1
 	#
-	if dir == 2: 
+	if axis == 1: 
 		#forward differences near the first boundary
 		for i in range(1):
 			aprime[:,i,:] = (-a[:,i,:]+a[:,i+1,:]) / (dx)     
@@ -215,9 +191,9 @@ def deriv_findiff2(a,dir,dx):
 			aprime[:,i,:] = (a[:,i-1,:]-a[:,i,:]) /(dx)     
 
 	#
-	# derivative for user dir=3
+	# derivative for user axis=0
 	#
-	if dir == 3:
+	if axis == 0:
 		#forward differences near the first boundary
 		for i in range(1):
 			aprime[i,:,:] = (-a[i,:,:]+a[i+1,:,:]) / (dx)     
@@ -232,18 +208,15 @@ def deriv_findiff2(a,dir,dx):
 
 	return aprime
 
-def deriv_findiff4(a,dir,dx):
-	''' Function that calculates first-order derivatives 
-	using 4th order finite differences in regular Cartesian grids.'''
+def _deriv_findiff4(a,axis,dx):
+	"""Function that calculates first-order derivatives 
+	using 4th order finite differences in regular Cartesian grids.
+	"""
 
-	import numpy 
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
+	s = np.shape(a)	#size of the input array
+	aprime = np.array(a)	#output has the same size than input
 
-	#
-	# derivative for user dir=1, in python this is third coordinate
-	#
-	if dir == 1: 
+	if axis == 2: 
 
 		#forward differences near the first boundary
 		for i in range(2):
@@ -258,9 +231,9 @@ def deriv_findiff4(a,dir,dx):
 			aprime[:,:,i] = (a[:,:,i-2]-4*a[:,:,i-1]+3*a[:,:,i]) /(2*dx)     
 
 	#
-	# derivative for dir=2
+	# derivative for axis=2
 	#
-	if dir == 2: 
+	if axis == 1: 
 		#forward differences near the first boundary
 		for i in range(2):
 			aprime[:,i,:] = (-3*a[:,i,:]+4*a[:,i+1,:]-a[:,i+2,:]) / (2*dx)     
@@ -274,9 +247,9 @@ def deriv_findiff4(a,dir,dx):
 			aprime[:,i,:] = (a[:,i-2,:]-4*a[:,i-1,:]+3*a[:,i,:]) /(2*dx)     
 
 	#
-	# derivative for user dir=3
+	# derivative for user axis=3
 	#
-	if dir == 3:
+	if axis == 0:
 		#forward differences near the first boundary
 		for i in range(2):
 			aprime[i,:,:] = (-3*a[i,:,:]+4*a[i+1,:,:]-a[i+2,:,:]) / (2*dx)     
@@ -292,37 +265,62 @@ def deriv_findiff4(a,dir,dx):
 
 	return aprime
 
-def deriv_findiff(a,dir,dx,order=6):
-	''' Function that calculates first-order derivatives 
-	using sixth order finite differences in regular Cartesian grids.
-	Calling sequence: deriv = deriv_findiff(ary,dir,delta, order=6)
-	ary is a 3-dimensional float32 numpy array
-	dir is 1, 2, or 3 (for X, Y, or Z directions in user coordinates)
-	delta is the grid spacing in the direction dir.
-	order is the accuracy order (one of 6,4,2)
-	Returned array 'deriv' is the derivative of ary in the 
-	specified direction dir. '''
-	import numpy 
+def DerivFinDiff(a,axis,dx,order=6):
+
+	""" Function that calculates first-order derivatives on Cartesian grids.
+
+	This function computes the partial derivative of a multidimensional
+	array using 2nd, 4th, or 6th order finite differences.
+
+	Parameters
+	----------
+
+	a : numpy.ndarray
+		A two or three-dimensional Numpy array
+
+	axis : int
+		The axis along which the derivative should be taken. The slowest
+		varying axis is 0. The next slowest is 1.
+
+	dx : float
+		The differential step size
+
+	order : int, optional
+		The accuracy order of finite difference method. The default is 6. Valid 
+		values are 2, 4, 6.
+
+	Calling sequence
+	----------------
+
+	>>> deriv = DerivFinDiff(a,axis,delta, order=6)
+
+	Returns
+	-------
+
+	da_dx : numpy.ndarray
+		The derivative of `a` with respect to `axis` 
+
+	"""
 
 	if order == 4:
-		return deriv_findiff4(a,dir,dx)
+		return _deriv_findiff4(a,axis,dx)
 
 	if order == 2:
-		return deriv_findiff2(a,dir,dx)
+		return _deriv_findiff2(a,axis,dx)
 
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
+	s = np.shape(a)	#size of the input array
+	aprime = np.array(a)	#output has the same size than input
 
 	#
-	# derivative for user dir=1, in python this is third coordinate
+	# derivative for user axis=2, in python this is third coordinate
 	#
-	if dir == 1: 
+	if axis == 2: 
 		if (s[2] < 2):
-			return numpy.zeros_like(a)
+			return np.zeros_like(a)
 		if (s[2] < 4):
-			return deriv_findiff2(a,dir,dx)
+			return deriv_findiff2(a,axis,dx)
 		if (s[2] < 6):
-			return deriv_findiff4(a,dir,dx)
+			return deriv_findiff4(a,axis,dx)
 
 		#forward differences near the first boundary
 		for i in range(3):
@@ -337,15 +335,15 @@ def deriv_findiff(a,dir,dx,order=6):
 			aprime[:,:,i] = (-2*a[:,:,i-3]+9*a[:,:,i-2]-18*a[:,:,i-1]+11*a[:,:,i]) /(6*dx)     
 
 	#
-	# derivative for dir=2
+	# derivative for axis=1
 	#
-	if dir == 2: 
+	if axis == 1: 
 		if (s[1] < 2):
-			return numpy.zeros_like(a)
+			return np.zeros_like(a)
 		if (s[1] < 4):
-			return deriv_findiff2(a,dir,dx)
+			return deriv_findiff2(a,axis,dx)
 		if (s[1] < 6):
-			return deriv_findiff4(a,dir,dx)
+			return deriv_findiff4(a,axis,dx)
 
 		for i in range(3):
 			aprime[:,i,:] = (-11*a[:,i,:]+18*a[:,i+1,:]-9*a[:,i+2,:]+2*a[:,i+3,:]) /(6*dx)     #forward differences near the first boundary
@@ -357,15 +355,15 @@ def deriv_findiff(a,dir,dx,order=6):
 			aprime[:,i,:] = (-2*a[:,i-3,:]+9*a[:,i-2,:]-18*a[:,i-1,:]+11*a[:,i,:]) /(6*dx)     #backward differences near the second boundary
 
 	#
-	# derivative for user dir=3
+	# derivative for user axis=0
 	#
-	if dir == 3:
+	if axis == 0:
 		if (s[0] < 2):
-			return numpy.zeros_like(a)
+			return np.zeros_like(a)
 		if (s[0] < 4):
-			return deriv_findiff2(a,dir,dx)
+			return deriv_findiff2(a,axis,dx)
 		if (s[0] < 6):
-			return deriv_findiff4(a,dir,dx)
+			return deriv_findiff4(a,axis,dx)
 
 		for i in range(3):
 			aprime[i,:,:] = (-11*a[i,:,:]+18*a[i+1,:,:]-9*a[i+2,:,:]+2*a[i+3,:,:]) /(6*dx)     #forward differences near the first boundary
@@ -382,9 +380,8 @@ def deriv_var_findiff2(a,var,dir):
 	''' Function that calculates first-order derivatives 
 	using 2nd order finite differences in regular Cartesian grids.'''
 
-	import numpy 
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
+	s = np.shape(a)	#size of the input array
+	aprime = np.array(a)	#output has the same size than input
 
 	#
 	# derivative for user dir=1, in python this is third coordinate
@@ -444,9 +441,8 @@ def deriv_var_findiff4(a,var,dir):
 	with respect to another variable 'var' 
 	using 4th order finite differences in regular Cartesian grids.'''
 
-	import numpy 
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
+	s = np.shape(a)	#size of the input array
+	aprime = np.array(a)	#output has the same size than input
 
 	#
 	# derivative for user dir=1, in python this is third coordinate
@@ -507,14 +503,12 @@ def deriv_var_findiff(a,var,dir,order=6):
 	The variable var should be increasing or decreasing in the
 	specified coordinate. 
 	Calling sequence: aprime = deriv_var_findiff(a,var,dir,order)
-	a and var are 3-dimensional float32 numpy arrays
+	a and var are 3-dimensional float32 np arrays
 	dir is 1, 2, or 3 (for X, Y, or Z directions in user coords.
 	order is the accuracy order, one of (2,4 or 6)
 	Note that these correspond to Z,Y,X directions in python coords.
 
 	Returned array 'aprime' is the derivative of a wrt var. '''
-
-	import numpy 
 
 	if order == 4:
 		return deriv_var_findiff4(a,var,dir)
@@ -522,15 +516,15 @@ def deriv_var_findiff(a,var,dir,order=6):
 	if order == 2:
 		return deriv_var_findiff2(a,var,dir)
 
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
+	s = np.shape(a)	#size of the input array
+	aprime = np.array(a)	#output has the same size than input
 
 	#
 	# derivative for dir=1
 	#
 	if dir == 1: 
 		if (s[2] < 2):
-			return numpy.zeros_like(a)
+			return np.zeros_like(a)
 		if (s[2] < 4):
 			return deriv_var_findiff2(a,var,dir)
 		if (s[2] < 6):
@@ -553,7 +547,7 @@ def deriv_var_findiff(a,var,dir,order=6):
 	#
 	if dir == 2: 
 		if (s[1] < 2):
-			return numpy.zeros_like(a)
+			return np.zeros_like(a)
 		if (s[1] < 4):
 			return deriv_var_findiff2(a,var,dir)
 		if (s[1] < 6):
@@ -573,7 +567,7 @@ def deriv_var_findiff(a,var,dir,order=6):
 	#
 	if dir == 3:
 		if (s[0] < 2):
-			return numpy.zeros_like(a)
+			return np.zeros_like(a)
 		if (s[0] < 4):
 			return deriv_var_findiff2(a,var,dir)
 		if (s[0] < 6):
@@ -600,7 +594,6 @@ def curl_findiff(A,B,C,order=6):
 	order is the accuracy order (6,4, or 2)
 	curlfield is a 3-tuple of 3-dimensional float32 arrays that is 
 	returned by this operator.'''
-	import vapor
 	ext = (vapor.BOUNDS[3]-vapor.BOUNDS[0], vapor.BOUNDS[4]-vapor.BOUNDS[1],vapor.BOUNDS[5]-vapor.BOUNDS[2])
 	usrmax = vapor.MapVoxToUser([vapor.BOUNDS[3],vapor.BOUNDS[4],vapor.BOUNDS[5]],vapor.REFINEMENT,vapor.LOD)
 	usrmin = vapor.MapVoxToUser([vapor.BOUNDS[0],vapor.BOUNDS[1],vapor.BOUNDS[2]],vapor.REFINEMENT,vapor.LOD)
@@ -633,7 +626,6 @@ def div_findiff(A,B,C,order=6):
 	order is the accuracy order, one of (6,4, or 2)
 	Resulting DIV is a 3-dimensional float3d array consisting of
 	the divergence of the triple (A,B,C).'''
-	import vapor
 	ext = (vapor.BOUNDS[3]-vapor.BOUNDS[0], vapor.BOUNDS[4]-vapor.BOUNDS[1],vapor.BOUNDS[5]-vapor.BOUNDS[2])
         usrmax = vapor.MapVoxToUser([vapor.BOUNDS[3],vapor.BOUNDS[4],vapor.BOUNDS[5]],vapor.REFINEMENT,vapor.LOD)
         usrmin = vapor.MapVoxToUser([vapor.BOUNDS[0],vapor.BOUNDS[1],vapor.BOUNDS[2]],vapor.REFINEMENT,vapor.LOD)
@@ -653,7 +645,6 @@ def grad_findiff(A,order=6):
 	order is the accuracy order, one of (6,4,or 2)
 	Result GRD is a triple of 3 3-dimensional float3d arrays consisting of
 	the gradient of A.'''
-	import vapor
 	ext = (vapor.BOUNDS[3]-vapor.BOUNDS[0], vapor.BOUNDS[4]-vapor.BOUNDS[1],vapor.BOUNDS[5]-vapor.BOUNDS[2]) #note that BOUNDS are in python coord order
 	usrmax = vapor.MapVoxToUser([vapor.BOUNDS[3],vapor.BOUNDS[4],vapor.BOUNDS[5]],vapor.REFINEMENT,vapor.LOD)
 	usrmin = vapor.MapVoxToUser([vapor.BOUNDS[0],vapor.BOUNDS[1],vapor.BOUNDS[2]],vapor.REFINEMENT,vapor.LOD)
@@ -674,24 +665,23 @@ def grad_findiff(A,order=6):
 # values interpolated to the surface defined by PR = val
 # Sweep array from bottom to top
 def interp3d(A,PR,val):
-	import numpy 
-	s = numpy.shape(PR)	#size of the input arrays
+	s = np.shape(PR)	#size of the input arrays
 	ss = [s[1],s[2]] # shape of 2d arrays
-	interpVal = numpy.empty(ss,numpy.float32)
-	ratio = numpy.zeros(ss,numpy.float32)
+	interpVal = np.empty(ss,np.float32)
+	ratio = np.zeros(ss,np.float32)
 
 	#  the LEVEL value is determine the lowest level where P<=val
-	LEVEL = numpy.empty(ss,numpy.int32)
+	LEVEL = np.empty(ss,np.int32)
 	LEVEL[:,:] = -1 #value where PR<=val has not been found
 	for K in range(s[0]):
 		#LEVNEED is true if this is first time PR<val.
-		LEVNEED = numpy.logical_and(numpy.less(LEVEL,0), numpy.less(PR[K,:,:] , val))
+		LEVNEED = np.logical_and(np.less(LEVEL,0), np.less(PR[K,:,:] , val))
 		LEVEL[LEVNEED]=K
 		ratio[LEVNEED] = (val-PR[K,LEVNEED])/(PR[K-1,LEVNEED]-PR[K,LEVNEED])
 		interpVal[LEVNEED] = ratio[LEVNEED]*A[K,LEVNEED]+(1-ratio[LEVNEED])*A[K-1,LEVNEED] 
-		LEVNEED = numpy.greater(LEVEL,0)
+		LEVNEED = np.greater(LEVEL,0)
 	# Set unspecified values to value of A at top of data:
-	LEVNEED = numpy.less(LEVEL,0)
+	LEVNEED = np.less(LEVEL,0)
 	interpVal[LEVNEED] = A[s[0]-1,LEVNEED]
 	return interpVal
 
@@ -707,12 +697,30 @@ def vector_rotate(angleRad, latDeg, u, v):
 	rotfield is a 2-tuple of 3-dimensional float32 arrays,
 	representing rotation of u,v, returned by this operator.
 	''' 	
-	import numpy 
 	import math
-	umod = numpy.cos(angleRad)*u + numpy.sin(angleRad)*v
-	vmod = -numpy.sin(angleRad)*u + numpy.cos(angleRad)*v
-	umod = umod/numpy.cos(latDeg*math.pi/180.)
+	umod = np.cos(angleRad)*u + np.sin(angleRad)*v
+	vmod = -np.sin(angleRad)*u + np.cos(angleRad)*v
+	umod = umod/np.cos(latDeg*math.pi/180.)
 	return umod,vmod
 
 
 
+def mag3d(a1,a2,a3): 
+	'''Calculate the magnitude of a 3-vector.
+	Calling sequence: MAG = mag3d(A,B,C)
+	Where:  A, B, and C are float32 np arrays.
+	Result MAG is a float32 np array containing the square root
+	of the sum of the squares of A, B, and C.'''
+
+	raise DeprecationWarning('Use Mag() instead')
+	from np import sqrt
+	return sqrt(a1*a1 + a2*a2 + a3*a3)
+
+def mag2d(a1,a2): 
+	'''Calculate the magnitude of a 2-vector.
+	Calling sequence: MAG = mag2d(A,B)
+	Where:  A, and B are float32 np arrays.
+	Result MAG is a float32 np array containing the square root
+	of the sum of the squares of A and B.'''
+	from np import sqrt
+	return sqrt(a1*a1 + a2*a2)
