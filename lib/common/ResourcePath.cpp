@@ -97,9 +97,13 @@ std::string Wasp::GetPythonPath()
 
 std::string Wasp::GetPythonDir()
 {
+#ifdef WIN32
+    #error TODO Check
+#endif
+
     string path = GetResourcePath("");
 
-    if (!FileUtils::Exists(path)) path = string(PYTHON_DIR);
+    if (!FileUtils::Exists(FileUtils::JoinPaths({path, "lib/python" + string(PYTHON_VERSION)}))) path = string(PYTHON_DIR);
 
     return path;
 }

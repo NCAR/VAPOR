@@ -120,6 +120,8 @@ int MyPython::Initialize()
     init_signals();
 #endif
 
+    // This is dependent on the environmental variable PYTHONHOME which is
+    // set in vaporgui/main.cpp
     Py_Initialize();
 
 #ifdef VAPOR3_0_0

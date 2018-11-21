@@ -271,15 +271,6 @@ void VizWin::resizeGL(int width, int height)
 void VizWin::initializeGL()
 {
     _glManager = new GLManager;
-    vector<string> paths;
-    paths.push_back("shaders");
-    string shaderPath = GetAppPath("VAPOR", "share", paths);
-    paths.clear();
-    paths.push_back("fonts");
-    string fontPath = GetAppPath("VAPOR", "share", paths);
-    _glManager->shaderManager->SetResourceDirectory(shaderPath);    // TODO GL
-    _glManager->fontManager->SetResourceDirectory(fontPath);        // TODO GL
-
     _manip = new TranslateStretchManip(_glManager);
     bool initialize = true;
     updateManip(initialize);
