@@ -132,8 +132,9 @@ void main(void)
         discard;
 
     int   nSteps        = int(length( volumeDimsf ) * 2.0);
-    if( fast )  nSteps /= 10;
-    nSteps              = min( nSteps, 200 );
+    if( fast && nSteps > 1000 )  
+          nSteps       /= 10;
+    nSteps              = min( nSteps, 100 );
     vec3  stepSize3D    = rayDirEye / float(nSteps);
 
     vec3  startTexture  = ((inversedMV * vec4(startEye, 1.0)).xyz - boxMin) / boxSpan;
