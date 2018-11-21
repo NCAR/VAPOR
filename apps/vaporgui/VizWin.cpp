@@ -297,8 +297,8 @@ void VizWin::resizeGL(int width, int height){
 	_controlExec->SetSaveStateEnabled(enabled);
 }
 
-void VizWin::initializeGL(){
-    
+void VizWin::initializeGL()
+{
     _glManager = new GLManager;
     _manip = new TranslateStretchManip(_glManager);
     bool initialize = true;

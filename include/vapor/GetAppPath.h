@@ -1,11 +1,6 @@
 //
 // $Id$
 //
-
-#ifndef INCLUDE_DEPRECATED_GET_APP_PATH
-#error GetAppPath.h is deprecated. Please use ResourcePath.h
-#endif
-
 #ifndef	_GetAppPath_h_
 #define	_GetAppPath_h_
 #include <vapor/MyBase.h>
@@ -21,7 +16,7 @@ COMMON_API std::string GetAppPath(
 	bool forwardSeparator = true
 #endif
 	);
-    
+
 };
 
 #endif
