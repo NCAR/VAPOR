@@ -15,8 +15,9 @@ uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
-uniform bool  lighting;         // apply lighting or not
-uniform bool  hasMissingValue;  // has missing values or not
+uniform bool  fast;
+uniform bool  lighting;          // apply lighting or not
+uniform bool  hasMissingValue;   // has missing values or not
 uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4 MV;
@@ -26,10 +27,10 @@ uniform mat4 inversedMV;
 // Derive helper variables
 //
 const float EPSILON    = 5e-6f;
-vec2  valueRange       = dataRanges[0];         // min and max values of this variable
-vec2  colorMapRange    = dataRanges[1];         // min and max values on this color map
-vec3  boxMin           = boxExtents[0];         // min coordinates of the bounding box of this volume
-vec3  boxMax           = boxExtents[1];         // max coordinates of the bounding box of this volume
+vec2  valueRange       = dataRanges[0];     // min and max values of this variable
+vec2  colorMapRange    = dataRanges[1];     // min and max values on this color map
+vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
+vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -112,7 +113,7 @@ vec3 CalculateGradient(in vec3 tc)
     a0.z = texture( volumeTexture, tc + vec3(0.0f, 0.0f, h0.z) ).r;
     a1.z = texture( volumeTexture, tc + vec3(0.0f, 0.0f, h1.z) ).r;
 
-    return (a1-a0 / h);
+    return (a1 - a0 / h);
 }
 
 
@@ -127,10 +128,12 @@ void main(void)
     vec3 startEye       = texture( frontFaceTexture, fragTexture    ).xyz;
     vec3 rayDirEye      = stopEye - startEye ;
     float rayDirLength  = length( rayDirEye );
-    if( rayDirLength < EPSILON )
+    if( rayDirLength    < EPSILON )
         discard;
 
     int   nSteps        = int(length( volumeDimsf ) * 2.0);
+    if( fast )  nSteps /= 10;
+    nSteps              = min( nSteps, 200 );
     vec3  stepSize3D    = rayDirEye / float(nSteps);
 
     vec3  startTexture  = ((inversedMV * vec4(startEye, 1.0)).xyz - boxMin) / boxSpan;
