@@ -18,6 +18,7 @@
 #include <vapor/DataMgrUtils.h>
 #include <vapor/Grid.h>
 #include <vapor/utils.h>
+#include <vapor/GetAppPath.h>
 
 namespace VAPoR {
 

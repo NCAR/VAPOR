@@ -30,6 +30,7 @@
 #include "ui_NewRendererDialog.h"
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
+#include <vapor/GetAppPath.h>
 #include "RenderHolder.h"
 
 using namespace VAPoR;
