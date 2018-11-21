@@ -11,6 +11,7 @@ set (SRC
 	GetAppPath.cpp
 	utils.cpp
 	FileUtils.cpp
+	ResourcePath.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 )
 
@@ -27,6 +28,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/CMakeConfig.h
     ${PROJECT_SOURCE_DIR}/include/vapor/debug.h
     ${PROJECT_SOURCE_DIR}/include/vapor/FileUtils.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/ResourcePath.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})
