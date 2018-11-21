@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 
+#include <vapor/GetAppPath.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
 

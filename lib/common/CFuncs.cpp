@@ -35,7 +35,6 @@ string Separator = "/";
 };    // namespace
 
 using namespace Wasp;
-using namespace std;
 
 void Wasp::Splitpath(string path, string &volume, string &dir, string &file, bool nofile)
 {
@@ -147,13 +146,4 @@ int Wasp::MkDirHier(const string &dir)
 #endif
     }
     return (0);
-}
-
-std::string Wasp::GetEnvironmentalVariable(const std::string &name)
-{
-    const char *env = getenv(name.c_str());
-    if (env)
-        return string(env);
-    else
-        return "";
 }

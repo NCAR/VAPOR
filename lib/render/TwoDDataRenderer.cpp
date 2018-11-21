@@ -196,6 +196,10 @@ int TwoDDataRenderer::_paintGL(bool fast)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _cMapTexID);
 
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_1D, _cMapTexID);
+    GL_LEGACY(glEnable(GL_TEXTURE_1D));
+
     // Really only need to reload colormap texture if it changes
     //
     glTexSubImage1D(GL_TEXTURE_1D, 0, 0, _colormapsize, GL_RGBA, GL_FLOAT, _colormap);
@@ -205,6 +209,7 @@ int TwoDDataRenderer::_paintGL(bool fast)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, 0);
+    GL_LEGACY(glDisable(GL_TEXTURE_1D));
 
     return (rc);
 }
