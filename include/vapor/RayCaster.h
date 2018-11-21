@@ -61,7 +61,8 @@ class RENDER_API RayCaster : public Renderer {
         float *zCoords;                  // Z coordinate values
 
         float valueRange[2];        // min and max values of the volume
-        size_t dims[3];             // num. of samples along each axis
+        size_t dims[4];             // num. of samples along each axis.
+                                    // !! Note: the last element is the diagnal length !!
         float boxMin[3], boxMax[3]; // bounding box of the current volume
                                     // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
 
