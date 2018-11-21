@@ -28,16 +28,16 @@
 #include <string>
 #include <vapor/common.h>
 
+using namespace std;
+
 namespace Wasp {
 
 COMMON_API void Splitpath(
-    std::string path, std::string &volume, std::string &dir, std::string &file, bool nofile);
+    string path, string &volume, string &dir, string &file, bool nofile);
 
 COMMON_API double GetTime();
 
-COMMON_API int MkDirHier(const std::string &dir);
-
-COMMON_API std::string GetEnvironmentalVariable(const std::string &name);
+COMMON_API int MkDirHier(const string &dir);
 
 }; // namespace Wasp
 
