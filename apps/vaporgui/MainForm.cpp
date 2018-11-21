@@ -53,7 +53,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/ControlExecutive.h>
-#include <vapor/ResourcePath.h>
+#include <vapor/GetAppPath.h>
 #include <vapor/CFuncs.h>
 
 #include "VizWinMgr.h"
@@ -438,6 +438,10 @@ void MainForm::_createModeToolBar() {
 	
 	_modeToolBar->addWidget(_modeCombo);
 
+	connect (
+		_navigationAction, SIGNAL(toggled(bool)),
+		this, SLOT(setNavigate(bool))
+	);
 	connect(
 		_modeCombo, SIGNAL(currentIndexChanged(int)), 
 		this, SLOT( modeChange(int))
@@ -1538,6 +1542,31 @@ void MainForm::sessionNew()
     _stateChangeFlag = false;
 	_sessionNewFlag = true;
 }
+	
+	
+
+//
+// Respond to toolbar clicks:
+// navigate mode.  Don't change tab menu
+//
+void MainForm::setNavigate(bool on)
+{
+#ifdef	VAPOR3_0_0_ALPHA
+	//Only do something if this is an actual change of mode
+	if (MouseModeParams::GetCurrentMouseMode() == MouseModeParams::navigateMode) return;
+	if (on){
+		MouseModeParams::SetCurrentMouseMode(MouseModeParams::navigateMode);
+		_modeCombo->setCurrentIndex(0);
+		
+		if(_modeStatusWidget) {
+			statusBar()->removeWidget(_modeStatusWidget);
+			delete _modeStatusWidget;
+		}
+		_modeStatusWidget = new QLabel("Navigation Mode:  Use left mouse to rotate or spin-animate, right to zoom, middle to translate",this);
+		statusBar()->addWidget(_modeStatusWidget,2);
+	}	
+#endif
+}
 
 void MainForm::setInteractiveRefLevel(int val){
 	
@@ -1894,7 +1923,7 @@ void MainForm::loadStartingPrefs(){
 		vector<string> tpath;
 		tpath.push_back("examples");
 		tpath.push_back(preffile);
-		prefPath = GetSharePath("examples/" + preffile);
+		prefPath = GetAppPath("VAPOR","share",tpath);
 	} else {
 		prefPath = string(pPath) + preffile;
 	}
@@ -2179,12 +2208,13 @@ void MainForm::captureSingleJpeg() {
 }
 
 void MainForm::installCLITools(){
+	vector<string> pths;
     QMessageBox box;
     box.addButton(QMessageBox::Ok);
     
 #ifdef Darwin
-	string home = GetResourcePath("");
-    string binPath = home + "/MacOS";
+	string home = GetAppPath("VAPOR", "home", pths, true);
+    string path = home + "/MacOS";
     home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
     
     string profilePath = string(getenv("HOME")) + "/.profile";
@@ -2192,7 +2222,7 @@ void MainForm::installCLITools(){
     if (prof) {
         fprintf(prof, "\n");
         fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
-        fprintf(prof, "export PATH=\"%s:$PATH\"\n", binPath.c_str());
+        fprintf(prof, "export PATH=\"%s:$PATH\"\n", path.c_str());
         fclose(prof);
         
         box.setText("Environmental variables set in ~/.profile");
@@ -2209,7 +2239,7 @@ void MainForm::installCLITools(){
 	long error;
 	long errorClose;
 	bool pathWasModified = false;
-	string home = GetResourcePath("");
+	string home = GetAppPath("VAPOR", "", pths, true);
 
 	error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
 	if (error == WINDOWS_SUCCESS) {

@@ -6,7 +6,7 @@
 #include "ui_ImageGeometryGUI.h"
 #include "RangeCombos.h"
 #include "vapor/ImageParams.h"
-#include "vapor/ResourcePath.h"
+#include "vapor/GetAppPath.h"
 #include <QFileDialog>
 #include "Flags.h"
 
@@ -108,7 +108,9 @@ private slots:
 
   void SelectImage()
   {
-    std::string installedImagePath = Wasp::GetSharePath("images");
+    std::vector<std::string> paths;
+    paths.push_back("images");
+    std::string installedImagePath = Wasp::GetAppPath("VAPOR", "share", paths);
     QString fileName = QFileDialog::getOpenFileName( this, 
                           tr("Specify installed image to load"),
                           QString::fromStdString(installedImagePath),
