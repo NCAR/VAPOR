@@ -32,6 +32,7 @@
 #include <vapor/ViewpointParams.h>
 #include <vapor/DataStatus.h>
 #include <vapor/errorcodes.h>
+#include <vapor/GetAppPath.h>
 #include <vapor/ControlExecutive.h>
 #include "vapor/ShaderManager.h"
 #include "vapor/debug.h"
