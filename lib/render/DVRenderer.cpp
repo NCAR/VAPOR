@@ -48,10 +48,3 @@ void DVRenderer::_loadShaders() {
     std::cout << std::endl
               << "Shaders compiled at: " << ctime(&timenow) << std::endl;
 }
-
-void DVRenderer::_3rdPassSpecialHandling(bool fast, long castingMode) {
-    // Special handling for DVR: turn off lighting during fast rendering.
-    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-    if (fast)
-        glUniform1i(uniformLocation, int(false));
-}
