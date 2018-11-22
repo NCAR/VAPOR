@@ -39,10 +39,3 @@ void DVRenderer::_loadShaders()
     auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
     std::cout << std::endl << "Shaders compiled at: " << ctime(&timenow) << std::endl;
 }
-
-void DVRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
-{
-    // Special handling for DVR: turn off lighting during fast rendering.
-    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-    if (fast) glUniform1i(uniformLocation, int(false));
-}
