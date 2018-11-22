@@ -37,21 +37,10 @@ void IsoSurfaceRenderer::_loadShaders()
 void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
 {
     IsoSurfaceParams *  params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
-    bool                lighting = params->GetLighting();
     std::vector<double> isoValues = params->GetIsoValues();
     std::vector<bool>   isoFlags = params->GetEnabledIsoValueFlags();
 
-    // Special handling for IsoSurface #1:
-    //   honor GUI lighting selection even in fast rendering mode.
-    glUniform1i(glGetUniformLocation(_3rdPassShaderId, "lighting"), int(lighting));
-    if (lighting) {
-        std::vector<double> coeffsD = params->GetLightingCoeffs();
-        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
-        glUniform1fv(glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs"), (GLsizei)4, coeffsF);
-    }
-
-    // Special handling for IsoSurface #2:
-    //   pass in *normalized* iso values.
+    // Special handling for IsoSurface: pass in *normalized* iso values.
     std::vector<float> validValues;
     for (int i = 0; i < isoFlags.size(); i++)
         if (isoFlags[i]) validValues.push_back((float(isoValues[i]) - _userCoordinates.valueRange[0]) / (_userCoordinates.valueRange[1] - _userCoordinates.valueRange[0]));
