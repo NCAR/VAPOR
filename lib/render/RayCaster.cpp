@@ -998,6 +998,20 @@ void RayCaster::_load3rdPassUniforms( long             castingMode,
     uniformLocation = glGetUniformLocation( _3rdPassShaderId, "clipPlanes" );
     glUniform4fv( uniformLocation, 6, planes );
 
+    // Get light settings from params.
+    RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
+    bool lighting           = params->GetLighting();
+    uniformLocation = glGetUniformLocation( _3rdPassShaderId, "lighting" );
+    glUniform1i( uniformLocation, int(lighting) );
+    if( lighting )
+    {
+        std::vector<double> coeffsD = params->GetLightingCoeffs();
+        float coeffsF[4]            = { float(coeffsD[0]), float(coeffsD[1]), 
+                                        float(coeffsD[2]), float(coeffsD[3]) };
+        uniformLocation             = glGetUniformLocation( _3rdPassShaderId, "lightingCoeffs" );
+        glUniform1fv( uniformLocation, (GLsizei)4, coeffsF );
+    }
+
     // Calculate the step size
     float boxMin[4] = {boxExtents[0], boxExtents[1], boxExtents[2], 1.0f};
     float boxMax[4] = {boxExtents[3], boxExtents[4], boxExtents[5], 1.0f};
@@ -1014,7 +1028,7 @@ void RayCaster::_load3rdPassUniforms( long             castingMode,
         stepSize1D = std::sqrt( span[0]*span[0] + span[1]*span[1] + span[2]*span[2] ) / 
                      float( _userCoordinates.dims[3] * 2 );     
     if( fast )
-        stepSize1D *= 4.0;
+        stepSize1D *= 4.0;      // Quadruple step size when fast rendering
     uniformLocation = glGetUniformLocation( _3rdPassShaderId, "stepSize1D" );
     glUniform1f( uniformLocation, stepSize1D );
 
