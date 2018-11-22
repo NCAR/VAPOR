@@ -914,8 +914,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
     // Get light settings from params.
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     bool lighting = params->GetLighting();
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lighting");
-    glUniform1i(uniformLocation, int(lighting));
     if (lighting) {
         std::vector<double> coeffsD = params->GetLightingCoeffs();
         float coeffsF[4] = {float(coeffsD[0]), float(coeffsD[1]),
@@ -923,6 +921,11 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
         glUniform1fv(uniformLocation, (GLsizei)4, coeffsF);
     }
+
+    // Pack in fast mode, lighting, and missing value booleans together
+    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask == nullptr)};
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "flags");
+    glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
     // Calculate the step size
     float boxMin[4] = {boxExtents[0], boxExtents[1], boxExtents[2], 1.0f};
@@ -969,14 +972,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
     glUniform1i(uniformLocation, textureUnit);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "hasMissingValue");
-    // If there is missing value, pass in missingValueMaskTexture as well.
-    //   Otherwise, leave it empty.
-    if (_userCoordinates.missingValueMask == nullptr)
-        glUniform1i(uniformLocation, 0); // Set to false
-    else {
-        glUniform1i(uniformLocation, 1); // Set to true
-
+    if (_userCoordinates.missingValueMask == nullptr) {
         textureUnit = 4;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
