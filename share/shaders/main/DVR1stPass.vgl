@@ -6,7 +6,7 @@ layout(location = 0) in vec3 vertexPosition;
 uniform mat4 MV;
 uniform mat4 Projection;
 
-// Output model coordinate vertex positions, in eye coordinates
+// Output vertex positions in eye coordinates
 out vec4 vEye;
 
 void main(void)
