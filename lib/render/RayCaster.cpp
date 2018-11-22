@@ -835,7 +835,6 @@ void RayCaster::_drawVolumeFaces(int whichPass,
     } else                                   // 3rd pass
     {
         _load3rdPassUniforms(castingMode, InversedMV, fast);
-
         _3rdPassSpecialHandling(fast, castingMode);
 
         glEnable(GL_CULL_FACE);
