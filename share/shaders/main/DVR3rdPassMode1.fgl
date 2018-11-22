@@ -16,8 +16,7 @@ uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
 uniform float stepSize1D;
-uniform bool  lighting;          // apply lighting or not
-uniform bool  hasMissingValue;   // has missing values or not
+uniform bool  flags[3];
 uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4 MV;
@@ -28,6 +27,9 @@ uniform mat4 inversedMV;
 //
 const float EPSILON    = 5e-6f;
 const float ULP        = 1e-7f;
+bool  fast             = flags[0];          // fast rendering mode
+bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
+bool  hasMissingValue  = flags[2];          // has missing values or not
 vec2  valueRange       = dataRanges[0];     // min and max values of this variable
 vec2  colorMapRange    = dataRanges[1];     // min and max values on this color map
 vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
