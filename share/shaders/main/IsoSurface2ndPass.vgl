@@ -3,16 +3,15 @@
 // Input vertex positions, model coordinate
 layout(location = 0) in vec3 vertexPosition;
 
-uniform mat4 MVP;
-uniform vec3 boxMin;
-uniform vec3 boxMax;
+uniform mat4 MV;
+uniform mat4 Projection;
 
-// Output model coordinate vertex positions, normalized
-out vec3 vPosNormalized;
+// Output vertex positions in eye coordinates
+out vec4 vEye;
 
 void main(void)
 {
-    gl_Position = MVP * vec4( vertexPosition, 1.0f );
+    gl_Position = Projection * MV * vec4( vertexPosition, 1.0 );
 
-    vPosNormalized = (vertexPosition - boxMin) / (boxMax - boxMin);
+    vEye = MV * vec4( vertexPosition, 1.0 );
 }

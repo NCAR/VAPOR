@@ -54,13 +54,14 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling( bool fast, long castingMode )
     // Special handling for IsoSurface: pass in *normalized* iso values.
     std::vector<float>  validValues;
     for( int i = 0; i < isoFlags.size(); i++ )
+    {
         if( isoFlags[i] )
             validValues.push_back( (float(isoValues[i]) - _userCoordinates.valueRange[0]) /
                         (_userCoordinates.valueRange[1] - _userCoordinates.valueRange[0]) );
+    }
     int numOfIsoValues  = (int)validValues.size();
 
-    glUniform1i( glGetUniformLocation( _3rdPassShaderId, "numOfIsoValues" ),
-                 numOfIsoValues );
+    glUniform1i( glGetUniformLocation( _3rdPassShaderId, "numOfIsoValues" ), numOfIsoValues );
     
     glUniform1fv( glGetUniformLocation( _3rdPassShaderId, "isoValues" ),
                   (GLsizei)numOfIsoValues,  validValues.data() );
