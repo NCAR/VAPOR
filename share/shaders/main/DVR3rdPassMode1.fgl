@@ -30,14 +30,16 @@ const float ULP        = 1e-7f;
 bool  fast             = flags[0];          // fast rendering mode
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
 bool  hasMissingValue  = flags[2];          // has missing values or not
-vec2  valueRange       = dataRanges[0];     // min and max values of this variable
-vec2  colorMapRange    = dataRanges[1];     // min and max values on this color map
-vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
-vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
+// min, max, and range values of this variable. 
+vec3  valueRange       = vec3(dataRanges[0], dataRanges[0].y - dataRanges[0].x); 
+// min, max, and range values on this color map
+vec3  colorMapRange    = vec3(dataRanges[1], dataRanges[1].y - dataRanges[1].x); 
+vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
+vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 mat4  transposedInverseMV = transpose(inversedMV);
@@ -48,12 +50,10 @@ mat4  transposedInverseMV = transpose(inversedMV);
 //
 float TranslateValue( in float value )
 {
-    float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
-    return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
     if( colorMapRange.x != colorMapRange.y )
     {
-        float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
-        return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+        float orig = value * valueRange.z + valueRange.x;
+        return (orig - colorMapRange.x) / colorMapRange.z;
     }
     else
         return value;
