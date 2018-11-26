@@ -6,14 +6,13 @@ layout(location = 0) in vec3 vertexPosition;
 // Input vertex indices in X, Y, Z directions
 layout(location = 1) in ivec4 vertexLogicalIdx;
 
-uniform mat4 MVP;
+uniform mat4 MV;
+uniform mat4 Projection;
 
-out vec4 positionModel;  // vertex position in the model space, just as it's passed in
 flat out ivec4 provokingVertexIdx;
 
 void main(void)
 {
-    positionModel      = vec4( vertexPosition, 1.0 );
-    gl_Position        = MVP * positionModel;
+    gl_Position        = Projection * MV * vec4( vertexPosition, 1.0 );
     provokingVertexIdx = vertexLogicalIdx;
 }
