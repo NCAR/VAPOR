@@ -1,6 +1,8 @@
 #include <sstream>
 #include <string>
 
+#include <ctime>
+
 #include <vapor/SliceRenderer.h>
 #include <vapor/SliceParams.h>
 #include <vapor/ControlExecutive.h>
@@ -109,7 +111,10 @@ int SliceRenderer::_resetDataCache()
     _resetBoxCache();
     _resetColormapCache();
 
-    int rc = _saveTextureData();
+    int rc;
+    rc = _saveTextureData(0);
+    rc = _saveTextureData(1);
+    rc = _saveTextureData(2);
     if (rc < 0) {
         SetErrMsg("Unable to acquire data for Slice texture");
         return rc;
@@ -188,6 +193,17 @@ void SliceRenderer::_resetTextureCoordinates()
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * sizeof(_texCoords), &_texCoords[0]);
 }
 
+std::vector<double> SliceRenderer::_calculateDeltas() const
+{
+    int    sampleRate = _cacheParams.textureSampleRate;
+    double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
+    double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
+    double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
+
+    std::vector<double> deltas = {dx, dy, dz};
+    return deltas;
+}
+
 void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, int j) const
 {
     int    sampleRate = _cacheParams.textureSampleRate;
@@ -210,8 +226,64 @@ void SliceRenderer::_getSampleCoordinates(std::vector<double> &coords, int i, in
     }
 }
 
-int SliceRenderer::_saveTextureData()
+inline void SliceRenderer::_getInlineJSampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int j) const
 {
+    if (_cacheParams.orientation == XY) {
+        coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] * j + deltas[Y] / 2.f;
+        coords[Z] = _cacheParams.boxMin[Z];
+    } else if (_cacheParams.orientation == XZ) {
+        coords[Y] = _cacheParams.boxMin[Y];
+        coords[Z] = _cacheParams.domainMin[Z] + deltas[Z] * j + deltas[Z] / 2.f;
+    } else {    // Z corresponds to j, the slower axis
+        coords[X] = _cacheParams.boxMin[X];
+        coords[Z] = _cacheParams.domainMin[Z] + deltas[Z] * j + deltas[Z] / 2.f;
+    }
+}
+
+// inline void SliceRenderer::_getJSampleCoordinates(
+void SliceRenderer::_getJSampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int j) const
+{
+    if (_cacheParams.orientation == XY) {
+        coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] * j + deltas[Y] / 2.f;
+        coords[Z] = _cacheParams.boxMin[Z];
+    } else if (_cacheParams.orientation == XZ) {
+        coords[Y] = _cacheParams.boxMin[Y];
+        coords[Z] = _cacheParams.domainMin[Z] + deltas[Z] * j + deltas[Z] / 2.f;
+    } else {    // Z corresponds to j, the slower axis
+        coords[X] = _cacheParams.boxMin[X];
+        coords[Z] = _cacheParams.domainMin[Z] + deltas[Z] * j + deltas[Z] / 2.f;
+    }
+}
+
+inline void SliceRenderer::_getInlineISampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int i) const
+{
+    if (_cacheParams.orientation == XY) {
+        coords[X] = _cacheParams.domainMin[X] + deltas[X] * i + deltas[X] / 2.f;
+    } else if (_cacheParams.orientation == XZ) {
+        coords[X] = _cacheParams.domainMin[X] + deltas[X] * i + deltas[X] / 2.f;
+    } else {    // Y corresponds to i, the faster axis
+        coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] * i + deltas[Y] / 2.f;
+    }
+}
+
+// inline void SliceRenderer::_getISampleCoordinates(
+void SliceRenderer::_getISampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int i) const
+{
+    if (_cacheParams.orientation == XY) {
+        coords[X] = _cacheParams.domainMin[X] + deltas[X] * i + deltas[X] / 2.f;
+    } else if (_cacheParams.orientation == XZ) {
+        coords[X] = _cacheParams.domainMin[X] + deltas[X] * i + deltas[X] / 2.f;
+    } else {    // Y corresponds to i, the faster axis
+        coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] * i + deltas[Y] / 2.f;
+    }
+}
+
+int SliceRenderer::_saveTextureData(int method = 0)
+{
+    if (method != 0) return 0;
+    std::clock_t start = std::clock();
+    double       duration;
+
     Grid *grid = NULL;
     int   rc =
         DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
@@ -230,9 +302,22 @@ int SliceRenderer::_saveTextureData()
 
     float               varValue, missingValue;
     std::vector<double> coords(3, 0.0);
+
+    std::vector<double> deltas;
+    if (method == 0 || method == 1) deltas = _calculateDeltas();
     for (int j = 0; j < _textureHeight; j++) {
+        if (method == 0)
+            _getJSampleCoordinates(coords, deltas, j);
+        else if (method == 1)
+            _getInlineJSampleCoordinates(coords, deltas, j);
+
         for (int i = 0; i < _textureWidth; i++) {
-            _getSampleCoordinates(coords, i, j);
+            if (method == 0)
+                _getISampleCoordinates(coords, deltas, i);
+            else if (method == 1)
+                _getInlineISampleCoordinates(coords, deltas, i);
+            else if (method == 2)
+                _getSampleCoordinates(coords, i, j);
 
             int index = (j * _textureWidth + i);
 
@@ -259,6 +344,14 @@ int SliceRenderer::_saveTextureData()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, dataValues);
 
     delete[] dataValues;
+
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+    if (method == 0)
+        cout << "New way         " << duration << endl;
+    else if (method == 1)
+        cout << "New with inline " << duration << endl;
+    else if (method == 2)
+        cout << "Old way         " << duration << endl;
 
     return rc;
 }
