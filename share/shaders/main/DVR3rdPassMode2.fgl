@@ -1,6 +1,6 @@
 #version 410 core
 
-in vec4 positionModel;  // vertex position in the model space
+in vec4 gl_FragCoord;
 flat in ivec4 provokingVertexIdx;
 layout(location = 0) out vec4 color;
 
@@ -12,32 +12,41 @@ uniform sampler1D       colorMapTexture;
 uniform samplerBuffer   xyCoordsTexture;
 uniform samplerBuffer   zCoordsTexture;
 
-uniform vec2  valueRange;        // min and max values of this variable
-uniform vec2  colorMapRange;     // min and max values on this color map
-uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
-uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
+uniform vec2  dataRanges[2];
+uniform vec3  boxExtents[2];
 uniform ivec3 volumeDims;        // number of vertices in this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
-uniform float stepSize1D;       // ray casting step size
-uniform bool  lighting;         // apply lighting or not
-uniform bool  hasMissingValue;  // has missing values or not
+uniform float stepSize1D;        // ray casting step size
+uniform bool  flags[3];
 uniform float lightingCoeffs[4]; // lighting parameters
 
-uniform mat4  transposedInverseMV;   // transpose(inverse(ModelView))
-uniform mat4  ModelView;
+uniform mat4  MV;
+uniform mat4  inversedMV;
 
 //
 // Derive helper variables
 //
-const float EPSILON  = 5e-6;
-float ambientCoeff   = lightingCoeffs[0];
-float diffuseCoeff   = lightingCoeffs[1];
-float specularCoeff  = lightingCoeffs[2];
-float specularExp    = lightingCoeffs[3];
-vec3  volumeDimsf    = vec3( volumeDims );
-vec3  volumeStepf    = 1.0 / volumeDimsf;
+const float EPSILON    = 5e-6f;
+const float ULP        = 1.2e-7f;           // 2^-23 == 1.192e-7
+bool  fast             = flags[0];          // fast rendering mode
+bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
+bool  hasMissingValue  = flags[2];          // has missing values or not
+float ambientCoeff     = lightingCoeffs[0];
+float diffuseCoeff     = lightingCoeffs[1];
+float specularCoeff    = lightingCoeffs[2];
+float specularExp      = lightingCoeffs[3];
+// min, max, and range values of this variable. 
+vec3  valueRange       = vec3(dataRanges[0], dataRanges[0].y - dataRanges[0].x); 
+// min, max, and range values on this color map
+vec3  colorMapRange    = vec3(dataRanges[1], dataRanges[1].y - dataRanges[1].x); 
+vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
+vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
+vec3  volumeDimsf      = vec3( volumeDims );
+vec3  boxSpan          = boxMax - boxMin;
+mat4  transposedInverseMV = transpose(inversedMV);
+
 struct WoopPrecalculation
 {
     int   kx, ky, kz;
@@ -76,7 +85,7 @@ void InitializeWoopPre( const in vec3 dir )
 //
 bool  WoopIntersection( const in vec3 orig, const in vec3 dir,
                         const in vec3 v0,   const in vec3 v1,   const in vec3 v2,
-                        out float outT,     out float outU,     out float outV,     out float outW )
+                        out float outT,  out float outU,  out float outV,  out float outW )
 {
     vec3 A   = v0 - orig;
     vec3 B   = v1 - orig;
@@ -93,7 +102,7 @@ bool  WoopIntersection( const in vec3 orig, const in vec3 dir,
     float V  = fma( Ax, Cy, -Ay * Cx );
     float W  = fma( Bx, Ay, -By * Ax );
 
-    // Fall back to double precision
+    /* Fall back to double precision
     if( U == 0.0 || V == 0.0 || W == 0.0 )
     {
         double CxBy = double(Cx)  * double(By);
@@ -105,15 +114,15 @@ bool  WoopIntersection( const in vec3 orig, const in vec3 dir,
         double BxAy = double(Bx)  * double(Ay);
         double ByAx = double(By)  * double(Ax);
         W           = float( BxAy - ByAx );
-    }
+    }*/
 
     // Edge test
-    if( (U < 0.0 || V < 0.0 || W < 0.0) && (U > 0.0 || V > 0.0 || W > 0.0) )
+    if( (U < -ULP || V < -ULP || W < -ULP) && (U > ULP || V > ULP || W > ULP) )
         return false;
 
     // Parallel test
     float det = U + V + W;
-    if( det == 0.0 )
+    if( abs(det) < ULP )
         return false;
 
     float Az = woopPre.Sz * A[ woopPre.kz ];
@@ -134,13 +143,18 @@ bool  WoopIntersection( const in vec3 orig, const in vec3 dir,
 //
 float TranslateValue( const in float value )
 {
-    float   orig = value * (valueRange.y - valueRange.x) + valueRange.x;
-    return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
+    if( colorMapRange.x != colorMapRange.y )
+    {   
+        float orig = value * valueRange.z + valueRange.x;
+        return (orig - colorMapRange.x) / colorMapRange.z;
+    }   
+    else
+        return value;
 }
 
 //
 // Input:  logical index of a vertex
-// Output: normalized user coordinate of this vertex
+// Output: user coordinates in the eye space
 //
 vec3 GetCoordinates( const in ivec3 index )
 {
@@ -148,26 +162,27 @@ vec3 GetCoordinates( const in ivec3 index )
     int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
     vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
     vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
-    return vec3( xyC.xy, zC.x );
+    vec4 eyeC    = MV * vec4( xyC.xy, zC.x, 1.0 );
+    return eyeC.xyz;
 }
 
 //
-// Input:  Location to be evaluated in texture coordinates.
+// Input:  Location to be evaluated in texture coordinates and model coordinates.
 // Output: If this location should be skipped.
 // Note:   It is skipped in two cases: 1) it represents a missing value
 //                                     2) it is outside of clipping planes
 //
-bool ShouldSkip( const in vec3 tc )
+bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 {
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0 );
+    vec4 positionModel = vec4( mc, 1.0 );
     for( int i = 0; i < 6; i++ )
-    {
+    {   
         if( dot(positionModel, clipPlanes[i]) < 0.0 )
             return true;
-    }
+    }   
 
     return false;
 }
@@ -178,8 +193,8 @@ bool ShouldSkip( const in vec3 tc )
 //
 vec3 CalculateGradient( const in vec3 tc)
 {
-    vec3 h0 = vec3(-0.5 ) * volumeStepf;
-    vec3 h1 = vec3( 0.5 ) * volumeStepf;
+    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
+    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
     vec3 h  = vec3( 1.0 );
 
     if ((tc.x + h0.x) < 0.0) {
@@ -266,9 +281,8 @@ void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
     triangles[11] =  ivec3( 3, 0, 7 );
 }
 
-int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
-                    const in  vec3 rayDirTexture,   const in float step1T,
-                    out ivec4 step2CellIdx,  out float step2T                 )
+int   FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in vec3 rayDir,
+                    out ivec4 step2CellIdx,      out float step2T )
 {
     ivec3 cubeVertIdx[8], triangles[12];
     vec3  cubeVertCoord[8];
@@ -279,7 +293,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     float tArr[12],    uArr[12],   vArr[12],    wArr[12];
     for( int i = 0; i < 12; i++ )
     {
-        intersect[i] = WoopIntersection( startTexture,   rayDirTexture,
+        intersect[i] = WoopIntersection( rayOrig,       rayDir,
                                          cubeVertCoord[ triangles[i][0] ],
                                          cubeVertCoord[ triangles[i][1] ],
                                          cubeVertCoord[ triangles[i][2] ],
@@ -302,9 +316,11 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
     }
     
     int numInterceptFace = 0;
-    for( int i = 0; i < 6; i++ )
-        if( intersect[2*i] || intersect[2*i+1] )
-            numInterceptFace++;
+    //for( int i = 0; i < 6; i++ )
+    //    if( i != step1CellIdx.w && (intersect[2*i] || intersect[2*i+1] ) )     numInterceptFace++;
+    int i = step1CellIdx.w;
+    if( intersect[2*i] || intersect[2*i+1] )            numInterceptFace++;
+    return numInterceptFace;
 
 #if 0
     if( numSmallestT == 1 )
@@ -432,7 +448,7 @@ int   FindNextCell( const in ivec4 step1CellIdx,    const in vec3  startTexture,
         }
     }
 #endif
-    return numInterceptFace;
+
 }
 
 
@@ -454,20 +470,19 @@ void main(void)
     // Get texture coordinates of this frament
     vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopTexture    = texture( backFaceTexture,  fragTexture ).xyz;
-    vec3 startTexture   = texture( frontFaceTexture, fragTexture ).xyz;
-    vec3 rayDirTexture  = stopTexture - startTexture;
-    vec3 origTexture    = startTexture - rayDirTexture; // So the ray does not start from the volume surface.
-    float rayDirLength  = length( rayDirTexture );
-    if( rayDirLength < EPSILON )
+    vec3 stopEye        = texture( backFaceTexture,  fragTexture ).xyz;
+    vec3 startEye       = texture( frontFaceTexture, fragTexture ).xyz;
+    vec3 rayDirEye      = stopEye - startEye;
+    float rayDirLength  = length( rayDirEye );
+    if(   rayDirLength  < ULP )
         discard;
-    InitializeWoopPre( rayDirTexture );
+    InitializeWoopPre( rayDirEye );
 
     ivec4 step1CellIdx  = provokingVertexIdx;
     ivec4 step2CellIdx  = ivec4( 0 );
-    float step1T = 1.0 + 1e-5, step2T;
-    int intersect = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-                                  step1T, step2CellIdx, step2T           );
+    float step1T, step2T;
+    int intersect = FindNextCell( step1CellIdx, startEye, rayDirEye, 
+                                  step2CellIdx, step2T );
 
 #if 0
     // Ray starts from an edge... Need to do something... 
@@ -558,15 +573,19 @@ void main(void)
 #endif
 
     // What's the color of Cell 1 
-    vec3  step1CellCenterTexture = vec3( step1CellIdx.xyz + 1 ) * volumeStepf;
+    vec3  step1CellCenterTexture = vec3( step1CellIdx.xyz + 1 ) / volumeDimsf;
     float step1Value    = texture( volumeTexture, step1CellCenterTexture ).r;
           color         = texture( colorMapTexture, TranslateValue( step1Value ) );
           color.rgb    *= color.a;
 
-     if( intersect < 2 ) 
-         color = vec4( 0.9, 0.2, 0.2, 1.0 );
-     else if( intersect > 2 ) 
-         color = vec4( 0.2, 0.9, 0.2, 1.0 );
+     if( intersect == 0 ) 
+         color = vec4( 0.9, 0.2, 0.2, 1.0 );    // red
+     else if( intersect == 2 ) 
+         color = vec4( 0.2, 0.9, 0.2, 1.0 );    // green
+     else if( intersect == 3 )
+         color = vec4( 0.99, 0.99, 0.1, 1.0 );    // yellow
+     else if( intersect > 3 )
+         color = vec4( 0.9, 0.9, 0.9, 1.0 );    // white
 
 #if 0
     if( !CellOutsideBound( step2CellIdx.xyz ) )
