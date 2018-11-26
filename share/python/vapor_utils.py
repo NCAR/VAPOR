@@ -1,13 +1,11 @@
 """ The vapor_utils module contains:
 	StaggeredToUnstaggeredGrid - resample staggered grid
-	mag3d - calculate magnitude of 3-vector
-	mag2d - calculate magnitude of 2-vector
-	deriv_findiff - calculate derivative using 6th order finite differences
-	curl_findiff - calculate curl using 6th order finite differences
-	div_findiff - calculate divergence using 6 order finite differences
-	grad_findiff - calculate gradient using 6th order finite differences.
-	deriv_var_findiff - calculate a derivative of one 3D 
-variable with respect to another variable.
+	DerivFinDiff - calculate derivative using 6th order finite differences
+	DerivVarFinDiff - calculate a derivative of one 3D 
+	variable with respect to another variable.
+	CurlFinDiff - calculate curl using finite differences
+	DivFinDiff - calculate divergence using finite differences
+	GradFinDiff - calculate gradient using finite differences.
 	interp3d - interpolate a 3D variable to a vertical level surface of another variable.
 	vector_rotate - rotate and scale vector field for lat-lon grid.	
 """
@@ -298,7 +296,7 @@ def DerivFinDiff(a,axis,dx,order=6):
 	-------
 
 	da_dx : numpy.ndarray
-		The derivative of `a` with respect to `axis` 
+		The derivative of `a` with respect to `dx` along `axis` 
 
 	"""
 
@@ -376,17 +374,12 @@ def DerivFinDiff(a,axis,dx,order=6):
 
 	return aprime
 
-def deriv_var_findiff2(a,var,dir):
-	''' Function that calculates first-order derivatives 
-	using 2nd order finite differences in regular Cartesian grids.'''
+def _deriv_var_findiff2(a,var,axis):
 
 	s = np.shape(a)	#size of the input array
 	aprime = np.array(a)	#output has the same size than input
 
-	#
-	# derivative for user dir=1, in python this is third coordinate
-	#
-	if dir == 1: 
+	if axis == 2: 
 
 		#forward differences near the first boundary
 		for i in range(1):
@@ -400,10 +393,7 @@ def deriv_var_findiff2(a,var,dir):
 		for i in range(s[2]-1,s[2]):
 			aprime[:,:,i] = (a[:,:,i-1]-a[:,:,i]) / (var[:,:,i-1]-var[:,:,i])
 
-	#
-	# derivative for dir=2
-	#
-	if dir == 2: 
+	if axis == 1:
 		#forward differences near the first boundary
 		for i in range(1):
 			aprime[:,i,:] = (-a[:,i,:]+a[:,i+1,:]) / (-var[:,i,:]+var[:,i+1,:]) 
@@ -417,9 +407,8 @@ def deriv_var_findiff2(a,var,dir):
 			aprime[:,i,:] = (a[:,i-1,:]-a[:,i,:]) / (var[:,i-1,:]-var[:,i,:])
 
 	#
-	# derivative for user dir=3
 	#
-	if dir == 3:
+	if axis == 0:
 		#forward differences near the first boundary
 		for i in range(1):
 			aprime[i,:,:] = (-a[i,:,:]+a[i+1,:,:]) / (-var[i,:,:]+var[i+1,:,:])
@@ -436,18 +425,15 @@ def deriv_var_findiff2(a,var,dir):
 
 
 
-def deriv_var_findiff4(a,var,dir):
-	''' Function that calculates first-order derivatives of a 	variable 
-	with respect to another variable 'var' 
-	using 4th order finite differences in regular Cartesian grids.'''
+def _deriv_var_findiff4(a,var,axis):
 
 	s = np.shape(a)	#size of the input array
 	aprime = np.array(a)	#output has the same size than input
 
 	#
-	# derivative for user dir=1, in python this is third coordinate
+	# derivative for user axis=2
 	#
-	if dir == 1: 
+	if axis == 2: 
 
 		#forward differences near the first boundary
 		for i in range(2):
@@ -462,9 +448,8 @@ def deriv_var_findiff4(a,var,dir):
 			aprime[:,:,i] = (a[:,:,i-2]-4*a[:,:,i-1]+3*a[:,:,i]) / (var[:,:,i-2]-4*var[:,:,i-1]+3*var[:,:,i])
 
 	#
-	# derivative for dir=2
 	#
-	if dir == 2: 
+	if axis == 1: 
 		#forward differences near the first boundary
 		for i in range(2):
 			aprime[:,i,:] = (-3*a[:,i,:]+4*a[:,i+1,:]-a[:,i+2,:]) / (-3*var[:,i,:]+4*var[:,i+1,:]-var[:,i+2,:])
@@ -478,9 +463,8 @@ def deriv_var_findiff4(a,var,dir):
 			aprime[:,i,:] = (a[:,i-2,:]-4*a[:,i-1,:]+3*a[:,i,:]) / (var[:,i-2,:]-4*var[:,i-1,:]+3*var[:,i,:])
 
 	#
-	# derivative for user dir=3
 	#
-	if dir == 3:
+	if axis == 0:
 		#forward differences near the first boundary
 		for i in range(2):
 			aprime[i,:,:] = (-3*a[i,:,:]+4*a[i+1,:,:]-a[i+2,:,:]) / (-3*var[i,:,:]+4*var[i+1,:,:]-var[i+2,:,:])
@@ -496,39 +480,65 @@ def deriv_var_findiff4(a,var,dir):
 
 	return aprime
 
-def deriv_var_findiff(a,var,dir,order=6):
-	''' Function that calculates first-order derivatives of a 	variable 
-	with respect to another variable 'var' 
-	using sixth order finite differences in regular Cartesian grids.
-	The variable var should be increasing or decreasing in the
-	specified coordinate. 
-	Calling sequence: aprime = deriv_var_findiff(a,var,dir,order)
-	a and var are 3-dimensional float32 np arrays
-	dir is 1, 2, or 3 (for X, Y, or Z directions in user coords.
-	order is the accuracy order, one of (2,4 or 6)
-	Note that these correspond to Z,Y,X directions in python coords.
+def DerivVarFinDiff(a,var,axis,order=6):
 
-	Returned array 'aprime' is the derivative of a wrt var. '''
+	""" Function that calculates first-order derivatives on Cartesian grids
+	with respect to another variable
+
+	This function computes the partial derivative of a multidimensional
+	array using 2nd, 4th, or 6th order finite differences with respect
+	to a second multidimensional array of the same shape.
+
+	Parameters
+	----------
+
+	a : numpy.ndarray
+		A two or three-dimensional Numpy array
+
+	var : numpy.ndarray
+		A two or three-dimensional Numpy array of the same shape as
+		`a`
+
+	axis : int
+		The axis along which the derivative should be taken. The slowest
+		varying axis is 0. The next slowest is 1.
+
+	order : int, optional
+		The accuracy order of finite difference method. The default is 6. Valid 
+		values are 2, 4, 6.
+
+	Calling sequence
+	----------------
+
+	>>> deriv = DerivFinDiff(a,var,delta, order=6)
+
+	Returns
+	-------
+
+	da_var : numpy.ndarray
+		The derivative of `a` with respect to `var` along `axis` 
+
+	"""
 
 	if order == 4:
-		return deriv_var_findiff4(a,var,dir)
+		return deriv_var_findiff4(a,var,axis)
 
 	if order == 2:
-		return deriv_var_findiff2(a,var,dir)
+		return deriv_var_findiff2(a,var,axis)
 
 	s = np.shape(a)	#size of the input array
 	aprime = np.array(a)	#output has the same size than input
 
 	#
-	# derivative for dir=1
+	# derivative for axis=2
 	#
-	if dir == 1: 
+	if axis == 2:
 		if (s[2] < 2):
 			return np.zeros_like(a)
 		if (s[2] < 4):
-			return deriv_var_findiff2(a,var,dir)
+			return deriv_var_findiff2(a,var,axis)
 		if (s[2] < 6):
-			return deriv_var_findiff4(a,var,dir)
+			return deriv_var_findiff4(a,var,axis)
 
 		#forward differences near the first boundary
 		for i in range(3):
@@ -543,15 +553,15 @@ def deriv_var_findiff(a,var,dir,order=6):
 			aprime[:,:,i] = (-2*a[:,:,i-3]+9*a[:,:,i-2]-18*a[:,:,i-1]+11*a[:,:,i]) /(-2*var[:,:,i-3]+9*var[:,:,i-2]-18*var[:,:,i-1]+11*var[:,:,i])     
 
 	#
-	# derivative for dir=2
+	# derivative for axis=1
 	#
-	if dir == 2: 
+	if axis == 1: 
 		if (s[1] < 2):
 			return np.zeros_like(a)
 		if (s[1] < 4):
-			return deriv_var_findiff2(a,var,dir)
+			return deriv_var_findiff2(a,var,axis)
 		if (s[1] < 6):
-			return deriv_var_findiff4(a,var,dir)
+			return deriv_var_findiff4(a,var,axis)
 
 		for i in range(3):
 			aprime[:,i,:] = (-11*a[:,i,:]+18*a[:,i+1,:]-9*a[:,i+2,:]+2*a[:,i+3,:]) /(-11*var[:,i,:]+18*var[:,i+1,:]-9*var[:,i+2,:]+2*var[:,i+3,:])      #forward differences near the first boundary
@@ -563,15 +573,15 @@ def deriv_var_findiff(a,var,dir,order=6):
 			aprime[:,i,:] = (-2*a[:,i-3,:]+9*a[:,i-2,:]-18*a[:,i-1,:]+11*a[:,i,:]) /(-2*var[:,i-3,:]+9*var[:,i-2,:]-18*var[:,i-1,:]+11*var[:,i,:])     #backward differences near the second boundary
 
 	#
-	# derivative for dir=3
+	# derivative for axis=0
 	#
-	if dir == 3:
+	if axis == 0:
 		if (s[0] < 2):
 			return np.zeros_like(a)
 		if (s[0] < 4):
-			return deriv_var_findiff2(a,var,dir)
+			return deriv_var_findiff2(a,var,axis)
 		if (s[0] < 6):
-			return deriv_var_findiff4(a,var,dir)
+			return deriv_var_findiff4(a,var,axis)
 
 		for i in range(3):
 			aprime[i,:,:] = (-11*a[i,:,:]+18*a[i+1,:,:]-9*a[i+2,:,:]+2*a[i+3,:,:]) /(-11*var[i,:,:]+18*var[i+1,:,:]-9*var[i+2,:,:]+2*var[i+3,:,:])     #forward differences near the first boundary
@@ -584,77 +594,178 @@ def deriv_var_findiff(a,var,dir,order=6):
 
 	return aprime
 
-def curl_findiff(A,B,C,order=6):
-	''' Operator that calculates the curl of a vector field 
-	using 6th order finite differences, on a regular Cartesian grid.
-	Calling sequence:  curlfield = curl_findiff(A,B,C,order)
-	Where:
-	A,B,C are three 3-dimensional float32 arrays that define a
-	vector field.  
-	order is the accuracy order (6,4, or 2)
-	curlfield is a 3-tuple of 3-dimensional float32 arrays that is 
-	returned by this operator.'''
-	ext = (vapor.BOUNDS[3]-vapor.BOUNDS[0], vapor.BOUNDS[4]-vapor.BOUNDS[1],vapor.BOUNDS[5]-vapor.BOUNDS[2])
-	usrmax = vapor.MapVoxToUser([vapor.BOUNDS[3],vapor.BOUNDS[4],vapor.BOUNDS[5]],vapor.REFINEMENT,vapor.LOD)
-	usrmin = vapor.MapVoxToUser([vapor.BOUNDS[0],vapor.BOUNDS[1],vapor.BOUNDS[2]],vapor.REFINEMENT,vapor.LOD)
-	dx =  (usrmax[2]-usrmin[2])/ext[2]	# grid delta is dx in user coord system
-	dy =  (usrmax[1]-usrmin[1])/ext[1]
-	dz =  (usrmax[0]-usrmin[0])/ext[0]
+def CurlFinDiff(M,N,P,dx,dy,dz,order=6):
+
+	""" Function that calculates the Curl of a vector field on Cartesian grids
+
+	This function computes the curl of a 3D vector field defined by
+	the vector component arrays `M`, `N`, and `P`
+	using 2nd, 4th, or 6th order finite differences. 
+
+	If F is defined as 
+
+		M(x,y,z)i + N(x,y,z)j + P(x,y,z)
+
+	then curl F is given by:
+
+		(dP/dy - dN/dz)i + (dM/dz - dP/dx)j + (dN/dx - dM/dy)k
+
+	Parameters
+	----------
+
+	M : numpy.ndarray
+		A three-dimensional Numpy array giving the x component of the vector
+
+	N : numpy.ndarray
+		A three-dimensional Numpy array giving the y component of the vector
+
+	P : numpy.ndarray
+		A three-dimensional Numpy array giving the z component of the vector
+
+	dx : float 
+		The differential step size along the fastest varying axis
+
+	dy : float 
+		The differential step size along the second fastest varying axis
+
+	dz : float 
+		The differential step size along the third fastest varying axis
+
+	order : int, optional
+		The accuracy order of finite difference method. The default is 6. Valid 
+		values are 2, 4, 6.
+
+	Calling sequence
+	----------------
+
+	>>> wx,wy,wz = CurlFinDiff(M,N,P,dx,dy,dz,order=6)
+
+	Returns
+	-------
+
+	wx,wy,wz : numpy.ndarray
+		The i,j,k components of the curl, respectively
+
+	"""
 	
-	aux1 = deriv_findiff(C,2,dy,order)       #x component of the curl
-	aux2 = deriv_findiff(B,3,dz,order)     
+	aux1 = DerivFinDiff(P,1,dy,order)       #x component of the curl
+	aux2 = DerivFinDiff(N,0,dz,order)     
 	outx = aux1-aux2						
 
-	aux1 = deriv_findiff(A,3,dz,order)       #y component of the curl
-	aux2 = deriv_findiff(C,1,dx,order)
+	aux1 = DerivFinDiff(M,0,dz,order)       #y component of the curl
+	aux2 = DerivFinDiff(P,2,dx,order)
 	outy = aux1-aux2
 
-	aux1 = deriv_findiff(B,1,dx,order)       #z component of the curl
-	aux2 = deriv_findiff(A,2,dy,order)
+	aux1 = DerivFinDiff(N,2,dx,order)       #z component of the curl
+	aux2 = DerivFinDiff(M,1,dy,order)
 	outz = aux1-aux2
 
 	return outx, outy, outz     	#return results in user coordinate order
 
 
 # Calculate divergence
-def div_findiff(A,B,C,order=6):
-	''' Operator that calculates the divergence of a vector field
-	using 6th order finite differences.
-	Calling sequence:  DIV = div_findiff(A,B,C)
-	Where:
-	A, B, and C are 3-dimensional float32 arrays defining a vector field.
-	order is the accuracy order, one of (6,4, or 2)
-	Resulting DIV is a 3-dimensional float3d array consisting of
-	the divergence of the triple (A,B,C).'''
-	ext = (vapor.BOUNDS[3]-vapor.BOUNDS[0], vapor.BOUNDS[4]-vapor.BOUNDS[1],vapor.BOUNDS[5]-vapor.BOUNDS[2])
-        usrmax = vapor.MapVoxToUser([vapor.BOUNDS[3],vapor.BOUNDS[4],vapor.BOUNDS[5]],vapor.REFINEMENT,vapor.LOD)
-        usrmin = vapor.MapVoxToUser([vapor.BOUNDS[0],vapor.BOUNDS[1],vapor.BOUNDS[2]],vapor.REFINEMENT,vapor.LOD)
-        dx = (usrmax[2]-usrmin[2])/ext[2]       # grid delta-x in user coord system
-        dy = (usrmax[1]-usrmin[1])/ext[1]
-        dz = (usrmax[0]-usrmin[0])/ext[0]
-# in User coords, A,B,C are x,y,z components
-        return deriv_findiff(C,3,dz,order)+deriv_findiff(B,2,dy,order)+deriv_findiff(A,1,dx,order)
+def DivFinDiff(M,N,P,dx,dy,dz,order=6):
+
+	""" Function that calculates the Divergence of a vector field on
+	Cartesian grids
+
+	This function computes the divergence of a 3D vector field defined by
+	the vector component arrays `M`, `N`, and `P`
+	using 2nd, 4th, or 6th order finite differences. 
+
+	If F is defined as 
+
+		M(x,y,z)i + N(x,y,z)j + P(x,y,z)
+
+	then div F is given by:
+
+		dM/dx + dN/dy + dP/dz
+
+	Parameters
+	----------
+
+	M : numpy.ndarray
+		A three-dimensional Numpy array giving the x component of the vector
+
+	N : numpy.ndarray
+		A three-dimensional Numpy array giving the y component of the vector
+
+	P : numpy.ndarray
+		A three-dimensional Numpy array giving the z component of the vector
+
+	dx : float 
+		The differential step size along the fastest varying axis
+
+	dy : float 
+		The differential step size along the second fastest varying axis
+
+	dz : float 
+		The differential step size along the third fastest varying axis
+
+	order : int, optional
+		The accuracy order of finite difference method. The default is 6. Valid 
+		values are 2, 4, 6.
+
+	Calling sequence
+	----------------
+
+	>>> a = DivFinDiff(M,N,P,dx,dy,dz,order=6)
+
+	Returns
+	-------
+
+	wx,wy,wz : numpy.ndarray
+		The i,j,k components of the curl, respectively
+
+	"""
+
+        return deriv_findiff(P,0,dz,order) + \
+		deriv_findiff(N,1,dy,order) + deriv_findiff(M,2,dx,order)
 
 
-def grad_findiff(A,order=6):
-	''' Operator that calculates the gradient of a scalar field 
-	using 6th order finite differences.
-	Calling sequence:  GRD = grad_findiff(A)
-	Where:
-	A is a float32 array defining a scalar field.
-	order is the accuracy order, one of (6,4,or 2)
-	Result GRD is a triple of 3 3-dimensional float3d arrays consisting of
-	the gradient of A.'''
-	ext = (vapor.BOUNDS[3]-vapor.BOUNDS[0], vapor.BOUNDS[4]-vapor.BOUNDS[1],vapor.BOUNDS[5]-vapor.BOUNDS[2]) #note that BOUNDS are in python coord order
-	usrmax = vapor.MapVoxToUser([vapor.BOUNDS[3],vapor.BOUNDS[4],vapor.BOUNDS[5]],vapor.REFINEMENT,vapor.LOD)
-	usrmin = vapor.MapVoxToUser([vapor.BOUNDS[0],vapor.BOUNDS[1],vapor.BOUNDS[2]],vapor.REFINEMENT,vapor.LOD)
-	dx = (usrmax[2]-usrmin[2])/ext[2] #delta in python z coordinate, user x
-	dy =  (usrmax[1]-usrmin[1])/ext[1]
-	dz =  (usrmax[0]-usrmin[0])/ext[0]# user z
+def GradFinDif(A,dx,dy,dz,order=6):
+	""" Function that calculates the Gradient of a scalar field on
+	Cartesian grids
 
-	aux1 = deriv_findiff(A,1,dx,order)       #x component of the gradient (in python system)
-	aux2 = deriv_findiff(A,2,dy,order)
-	aux3 = deriv_findiff(A,3,dz,order)
+	This function computes the gradient of a scalar field `A`:
+
+		dA/dx*i + dA/dy*j + dA/dz*k
+
+	Parameters
+	----------
+
+	A : numpy.ndarray
+		A three-dimensional Numpy array 
+
+	dx : float 
+		The differential step size along the fastest varying axis
+
+	dy : float 
+		The differential step size along the second fastest varying axis
+
+	dz : float 
+		The differential step size along the third fastest varying axis
+
+	order : int, optional
+		The accuracy order of finite difference method. The default is 6. Valid 
+		values are 2, 4, 6.
+
+	Calling sequence
+	----------------
+
+	>>> da_dx,da_dy,da_dz = GradFinDif(A,dx,dy,dz,order=6)
+
+	Returns
+	-------
+
+	da_dx,da_dy,da_dz: numpy.ndarray
+		The partial derivatives of A with respect to x,y,z, respectively
+
+	"""
+
+	aux1 = DerivFinDiff(A,2,dx,order)	#x component of the gradient 
+	aux2 = DerivFinDiff(A,1,dy,order)
+	aux3 = DerivFinDiff(A,0,dz,order)
 	
 	return aux1,aux2,aux3 # return in user coordinate (x,y,z) order
 
