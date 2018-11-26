@@ -26,7 +26,7 @@ uniform mat4 inversedMV;
 // Derive helper variables
 //
 const float EPSILON    = 5e-6f;
-const float ULP        = 1e-7f;
+const float ULP        = 1.2e-7f;
 bool  fast             = flags[0];          // fast rendering mode
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
 bool  hasMissingValue  = flags[2];          // has missing values or not
@@ -48,7 +48,7 @@ mat4  transposedInverseMV = transpose(inversedMV);
 // Input:  normalized value w.r.t. valueRange.
 // Output: normalized value w.r.t. colorMapRange.
 //
-float TranslateValue( in float value )
+float TranslateValue( const in float value )
 {
     if( colorMapRange.x != colorMapRange.y )
     {
