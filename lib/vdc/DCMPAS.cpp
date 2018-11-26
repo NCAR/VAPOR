@@ -477,7 +477,7 @@ int DCMPAS::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_
 
     // Never blocked
     //
-    bs_at_level = dims_at_level;
+    bs_at_level = vector<size_t>(dims_at_level.size(), 1);
 
     return (0);
 }
@@ -1375,8 +1375,6 @@ int DCMPAS::DerivedCoordVertFromCell::GetDimLensAtLevel(int, std::vector<size_t>
     int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, bs_at_level);
     if (rc < 0) return (-1);
 
-    assert(dims_at_level == bs_at_level);    // no blocking
-
     DC::Dimension dimension;
     bool          ok = _dc->GetDimension(_derivedDimName, dimension);
     if (!ok) {
@@ -1385,7 +1383,10 @@ int DCMPAS::DerivedCoordVertFromCell::GetDimLensAtLevel(int, std::vector<size_t>
     }
 
     dims_at_level[0] = dimension.GetLength();
-    bs_at_level[0] = dimension.GetLength();
+
+    // Never blocked
+    //
+    bs_at_level = vector<size_t>(dims_at_level.size(), 1);
 
     return (0);
 }
@@ -1416,8 +1417,8 @@ float *DCMPAS::DerivedCoordVertFromCell::_getCellData()
 {
     // Dimensions of input (cell) grid:
     //
-    vector<size_t> inDims, inBS;
-    int            rc = _dc->GetDimLensAtLevel(_inName, -1, inDims, inBS);
+    vector<size_t> inDims, dummy;
+    int            rc = _dc->GetDimLensAtLevel(_inName, -1, inDims, dummy);
     if (rc < 0) return (NULL);
 
     vector<size_t> inMin, inMax;

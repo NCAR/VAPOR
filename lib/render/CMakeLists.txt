@@ -31,6 +31,8 @@ set (SRC
 	FontManager.cpp
 	Font.cpp
 	TextLabel.cpp
+	PyEngine.cpp
+	CalcEngineMgr.cpp
 	GeoTIFWriter.cpp
 	ImageWriter.cpp
 	JPGWriter.cpp
@@ -72,6 +74,8 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
+	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTIFWriter.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ImageWriter.h
 	${PROJECT_SOURCE_DIR}/include/vapor/JPGWriter.h

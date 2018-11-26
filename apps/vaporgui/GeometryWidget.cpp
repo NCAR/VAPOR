@@ -126,7 +126,7 @@ void GeometryWidget::Reinit(DimFlags dimFlags, GeometryFlags geometryFlags, Vari
     _geometryFlags = geometryFlags;
     _varFlags = varFlags;
 
-    if (_dimFlags & TWOD) {
+    if (_dimFlags & TWODXY) {
         adjustLayoutTo2D();
     } else if (_dimFlags & THREED) {
         zMinMaxFrame->show();
@@ -211,7 +211,7 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
     yMinMaxLabel->setText(yTitle);
 
     if (minExt.size() < 3) {
-        Reinit((DimFlags)TWOD, _geometryFlags, _varFlags);
+        Reinit((DimFlags)TWODXY, _geometryFlags, _varFlags);
         zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
     } else {
         Reinit((DimFlags)THREED, _geometryFlags, _varFlags);
