@@ -60,6 +60,7 @@ class VizSelectCombo;
 class BannerGUI;
 class Statistics;
 class Plot;
+class PythonVariables;
 class ErrorReporter;
 
 class MainForm : public QMainWindow {
@@ -159,6 +160,7 @@ class MainForm : public QMainWindow {
     QAction *_fileNew_SessionAction;
     QAction *_plotAction;
     QAction *_statsAction;
+    QAction *_pythonAction;
 
     // Capture menu
     //
@@ -182,6 +184,7 @@ class MainForm : public QMainWindow {
 
     Statistics *_stats;
     Plot *_plot;
+    PythonVariables *_pythonVariables;
     BannerGUI *_banner;
     VizSelectCombo *_windowSelector;
     QLabel *_modeStatusWidget;
@@ -332,6 +335,7 @@ class MainForm : public QMainWindow {
     void installCLITools();
     void launchStats();
     void launchPlotUtility();
+    void launchPythonVariables();
 
     //animation toolbar:
     void _setTimeStep() {

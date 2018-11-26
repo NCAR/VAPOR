@@ -10,6 +10,7 @@
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
+#include <vapor/CalcEngineMgr.h>
 
 using namespace VAPoR;
 using namespace std;
@@ -20,6 +21,7 @@ ControlExec::ControlExec(
 
     _paramsMgr = new ParamsMgr(appParamsNames, appRenderParamNames);
     _dataStatus = new DataStatus(cacheSizeMB, nThreads);
+    _calcEngineMgr = new CalcEngineMgr(_dataStatus, _paramsMgr);
     _visualizers.clear();
 }
 
@@ -712,4 +714,66 @@ int ControlExec::ClearText() {
     }
 
     return 0;
+}
+
+int ControlExec::AddFunction(
+    string scriptType,
+    string dataSetName,
+    string scriptName,
+    string script,
+    const vector<string> &inputVarNames,
+    const vector<string> &outputVarNames,
+    const vector<string> &outputVarMeshes,
+    bool coordFlag) {
+    return (
+        _calcEngineMgr->AddFunction(
+            scriptType, dataSetName, scriptName, script,
+            inputVarNames, outputVarNames, outputVarMeshes, coordFlag));
+}
+
+void ControlExec::RemoveFunction(
+    string scriptType,
+    string dataSetName,
+    string scriptName) {
+    return (
+        _calcEngineMgr->RemoveFunction(
+            scriptType, dataSetName, scriptName));
+}
+
+bool ControlExec::GetFunction(
+    string scriptType,
+    string dataSetName,
+    string scriptName,
+    string &script,
+    vector<string> &inputVarNames,
+    vector<string> &outputVarNames,
+    vector<string> &outputVarMeshes,
+    bool &coordFlag) const {
+    script.clear();
+    inputVarNames.clear();
+    outputVarNames.clear();
+    outputVarMeshes.clear();
+
+    return (
+        _calcEngineMgr->GetFunctionScript(
+            scriptType, dataSetName, scriptName, script,
+            inputVarNames, outputVarNames, outputVarMeshes,
+            coordFlag));
+}
+
+string ControlExec::GetFunctionStdout(
+    string scriptType,
+    string dataSetName,
+    string scriptName) const {
+
+    return (_calcEngineMgr->GetFunctionStdout(
+        scriptType, dataSetName, scriptName));
+}
+
+std::vector<string> ControlExec::GetFunctionNames(
+    string scriptType,
+    string dataSetName) const {
+
+    return (
+        _calcEngineMgr->GetFunctionNames(scriptType, dataSetName));
 }
