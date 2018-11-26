@@ -1012,8 +1012,13 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
 
     bool attrib1 = false;
     int *attrib1Buffer = nullptr;
-    if (castingMode == 2 && whichPass == 3)
+    if (castingMode == 2 && whichPass == 3) {
         attrib1 = true;
+        unsigned int big1 = bx > by ? bx : by;
+        unsigned int small = bx < by ? bx : by;
+        unsigned int big2 = bz > small ? bz : small;
+        attrib1Buffer = new int[big1 * big2 * 4]; // enough length for all faces
+    }
 
     //
     // Render front face:
@@ -1023,10 +1028,10 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float),
                  _userCoordinates.frontFace, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1) {
+    if (attrib1) // specify shader input: vertexLogicalIdx
+    {
         glEnableVertexAttribArray(1); // attribute 1 is the logical indices
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        attrib1Buffer = new int[bx * by * 4];
     }
     for (unsigned int y = 0; y < by - 1; y++) // strip by strip
     {
@@ -1057,8 +1062,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
-    if (attrib1)
-        delete[] attrib1Buffer;
 
     //
     // Render back face:
@@ -1071,7 +1074,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        attrib1Buffer = new int[bx * by * 4];
     }
     for (unsigned int y = 0; y < by - 1; y++) // strip by strip
     {
@@ -1102,8 +1104,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
-    if (attrib1)
-        delete[] attrib1Buffer;
 
     //
     // Render top face:
@@ -1116,7 +1116,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        attrib1Buffer = new int[bx * bz * 4];
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1146,8 +1145,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
-    if (attrib1)
-        delete[] attrib1Buffer;
 
     //
     // Render bottom face:
@@ -1160,7 +1157,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        attrib1Buffer = new int[bx * bz * 4];
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1190,8 +1186,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
-    if (attrib1)
-        delete[] attrib1Buffer;
 
     // Each strip will have the same numOfVertices for the rest 2 faces.
     numOfVertices = by * 2;
@@ -1209,7 +1203,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        attrib1Buffer = new int[by * bz * 4];
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1239,8 +1232,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
-    if (attrib1)
-        delete[] attrib1Buffer;
 
     //
     // Render left face
@@ -1253,7 +1244,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
     if (attrib1) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-        attrib1Buffer = new int[by * bz * 4];
     }
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
@@ -1283,9 +1273,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+
     if (attrib1)
         delete[] attrib1Buffer;
-
     delete[] indexBuffer;
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
