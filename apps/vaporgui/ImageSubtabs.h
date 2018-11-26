@@ -28,7 +28,7 @@ public:
     setupUi(this);
 		_variablesWidget->Reinit( 
 			(VariableFlags)(HEIGHT), 
-			(DimFlags)(TWOD)
+			(DimFlags)(TWODXY)
 		);
 	}
 
@@ -139,7 +139,7 @@ public:
   {
 		setupUi(this);
 		_geometryWidget->Reinit( 
-			(DimFlags)TWOD,
+			(DimFlags)TWODXY,
 			(GeometryFlags)MINMAX,
 			(VariableFlags)SCALAR
 		);
