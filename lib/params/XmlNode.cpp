@@ -63,6 +63,27 @@ bool isValidXMLElement(string s)
 
     return (true);
 }
+
+string escapeStr(string s)
+{
+    string eS;
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] == '<') {
+            eS += "&lt;";
+        } else if (s[i] == '>') {
+            eS += "&gt;";
+        } else if (s[i] == '"') {
+            eS += "&quot;";
+        } else if (s[i] == '\'') {
+            eS += "&apos;";
+        } else if (s[i] == '&') {
+            eS += "&apos;";
+        } else {
+            eS += s[i];
+        }
+    }
+    return (eS);
+}
 };    // namespace
 
 XmlNode::XmlNode(const string &tag, const map<string, string> &attrs, size_t numChildrenHint)
@@ -652,7 +673,7 @@ std::ostream &operator<<(ostream &os, const VAPoR::XmlNode &node)
 
         os << "<" << tag << " Type=\"String\">" << endl << "  ";
 
-        const string &v = pstring->second;
+        string v = escapeStr(pstring->second);
 
         os << v;
 

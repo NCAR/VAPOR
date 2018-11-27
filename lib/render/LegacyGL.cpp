@@ -3,7 +3,6 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include "vapor/GLManager.h"
-// #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
@@ -79,6 +78,10 @@ void LegacyGL::End()
     _shader->SetUniform("lightingEnabled", _lightingEnabled);
     _shader->SetUniform("textureEnabled", _textureEnabled);
     _shader->SetUniform("lightDir", glm::make_vec3(_lightDir));
+
+    assert(glIsVertexArray(_VAO) == GL_TRUE);
+    assert(glIsBuffer(_VBO) == GL_TRUE);
+
     glDrawArrays(_mode, 0, _vertices.size());
 
     glBindVertexArray(0);

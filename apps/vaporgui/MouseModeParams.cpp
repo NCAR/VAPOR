@@ -28,6 +28,7 @@
 
 #include "../../apps/vaporgui/images/wheel.xpm"
 #include "../../apps/vaporgui/images/cube.xpm"
+#include "../../apps/vaporgui/images/sphere.xpm"
 #ifdef VAPOR3_0_0_ALPHA
     #include "../../apps/vaporgui/images/twoDData.xpm"
     #include "../../apps/vaporgui/images/twoDImage.xpm"
@@ -69,20 +70,12 @@ void MouseModeParams::_init()
     SetCurrentMouseMode(GetNavigateModeName());
 }
 
-// Stash the name and icon where the gui can find them
-void MouseModeParams::RegisterMouseMode(string name, int manipType, const char *const xpmIcon[])
-{
-    _typeMap[name] = manipType;
-    _iconMap[name] = xpmIcon;
-}
-
-//! Static method called at startup to register all the built-in mouse modes,
-//! by calling RegisterMouseMode() for each built-in mode.
-//! Also calls InstallExtensionMouseModes() to register extension modes.
+//! Static method called at startup to register all the built-in mouse modes
 void MouseModeParams::_setUpDefault()
 {
-    RegisterMouseMode(GetNavigateModeName(), 0, wheel);
-    RegisterMouseMode(GetRegionModeName(), 1, cube);
+    _modes.push_back({GetNavigateModeName(), wheel});
+    _modes.push_back({GetRegionModeName(), cube});
+
     // RegisterMouseMode("Barb rake", 1, arrowrake );
     // RegisterMouseMode("Contours", 3, isoline);
     // RegisterMouseMode(Params::GetClassType(),1, "Flow rake",rake );
@@ -95,7 +88,10 @@ void MouseModeParams::SetCurrentMouseMode(string t)
 {
     // Make sure mode is registered. If not, use default
     //
-    if (_typeMap.find(t) == _typeMap.end()) t = GetNavigateModeName();
+    auto itr = _modes.cbegin();
+    for (; itr != _modes.cend(); ++itr)
+        if (itr->name == t) break;
+    if (itr == _modes.cend()) t = GetNavigateModeName();
 
     SetValueString(_currentMouseModeTag, "Set mouse mode", t);
 }

@@ -31,9 +31,12 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     _table = table;
     _lastRowIsCheckboxes = lastRowIsCheckboxes;
     _lastColIsCheckboxes = lastColIsCheckboxes;
+    _checkboxesEnabled = true;
     _activeRow = -1;
     _activeCol = -1;
     _autoResizeHeight = false;
+
+    _table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 }
 
 // Clear current table, then generate table of rows x columns
@@ -67,6 +70,13 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 
     addCheckboxes(values);
 
+    if ((rows < 1) || (cols < 1)) {
+        _activeRow = -1;
+        _activeCol = -1;
+    }
+    if (_activeRow >= rows) _activeRow = rows - 1;
+    if (_activeCol >= cols) _activeCol = cols - 1;
+
     if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
     if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
 
@@ -76,6 +86,13 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 void VaporTable::SetAutoResizeHeight(bool val) { _autoResizeHeight = val; }
 
 bool VaporTable::GetAutoResizeHeight() const { return _autoResizeHeight; }
+
+void VaporTable::StretchToColumn(int column)
+{
+    QHeaderView *headerView = new QHeaderView(Qt::Horizontal, _table);
+    _table->setHorizontalHeader(headerView);
+    headerView->setResizeMode(column, QHeaderView::Stretch);
+}
 
 void VaporTable::resizeTableHeight()
 {
@@ -207,6 +224,8 @@ void VaporTable::addCheckbox(int row, int column, bool checked)
     checkBox->setProperty("col", column);
     cbWidget->setProperty("row", row);
     cbWidget->setProperty("col", column);
+
+    checkBox->setEnabled(_checkboxesEnabled);
 
     connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(emitValueChanged()));
 
@@ -343,6 +362,13 @@ void VaporTable::SetCheckboxesInFinalRow(bool enabled) { _lastRowIsCheckboxes = 
 
 void VaporTable::SetCheckboxesInFinalColumn(bool enabled) { _lastColIsCheckboxes = enabled; }
 
+void VaporTable::EnableDisableCheckboxes(bool enabled)
+{
+    if (!_lastRowIsCheckboxes && !_lastColIsCheckboxes) return;
+
+    _checkboxesEnabled = enabled;
+}
+
 Value VaporTable::GetValue(int row, int col)
 {
     std::string value;
@@ -365,17 +391,6 @@ Value VaporTable::GetValue(int row, int col)
 
     return {value};
 }
-
-/*template <class T>
-void VaporTable::GetRow(int row, std::vector<T> & values) {
-    values.clear();
-
-    int nCols = _table->columnCount();
-    for (int col=0; col<nCols; col++) {
-        T v = GetValue(row, col);
-        values.push_back(v);
-    }
-}*/
 
 std::string VaporTable::GetStringValue(int row, int col)
 {
@@ -492,6 +507,10 @@ void VaporTable::highlightActiveCol(int col)
     }
 }
 
+int VaporTable::GetActiveRow() const { return _activeRow; }
+
 void VaporTable::SetActiveRow(int row) { _activeRow = row; }
+
+int VaporTable::GetActiveCol() const { return _activeCol; }
 
 void VaporTable::SetActiveCol(int col) { _activeCol = col; }

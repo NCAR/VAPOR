@@ -12,6 +12,8 @@
 using namespace std;
 namespace VAPoR {
 
+class CalcEngineMgr;
+
 //! \class ControlExec
 //! \ingroup Public
 //! \brief Provides API for VAPOR visualizer User Interfaces (UIs)
@@ -486,9 +488,129 @@ public:
     //
     static string MakeStringConformant(string s);
 
+    //! Add a variable calculation function
+    //!
+    //! This method adds one or more derived variables to the data set
+    //! specified by \p dataSetName.
+    //! Each derived variable is calculated on-the-fly as needed
+    //! by executing
+    //! the script \p script.
+    //!
+    //! \param[in] scriptName A string identifier for the collection
+    //! of derived variables
+    //! computed by \p script
+    //!
+    //! \param[in] scriptType The language the script contained in \p script
+    //! is implemented in. Currently the only accepted value is "Python".
+    //!
+    //! \param[in] dataSetName The name of the data set for which this
+    //! script is to be run. See DataStatus::GetDataMgrNames()
+    //!
+    //! \param[in] script A script that will be invoked each time
+    //! one of the variables listed in \p outputs is accessed. The scope of
+    //! the script will contain NumPy Array (numpy.array) variables named
+    //! in \p inputs.
+    //!
+    //! \param[in] inputVarNames A list of input variable names. The named
+    //! variables will be made available in the scope of the Python
+    //! script as NumPy Arrays. The variables must exist as native variables
+    //! of the dataset named by \p dataSetName. I.e. Input variables cannot
+    //! be derived variables themselves.
+    //!
+    //! \param[in] outputVarNames A list of derived variable names. The named
+    //! variables are expected to be computed by \p script as NumPy Arrays
+    //! and will appear as derived variables in the dataset named by
+    //! \p dataSetName.
+    //!
+    //! \param[in] outVarMeshes A list of output mesh names, one for each output
+    //! variable listed in \p outputVarNames. The output mesh names must be known
+    //! to the dataset. Each output variable created by \p script is expected
+    //! to be sampled by the named mesh. See DataMgr::GetMesh()
+    //!
+    //! \retval status A negative integer is returned on failure and an error
+    //! message is reported with MyBase::SetErrMsg(). AddFunction() will fail
+    //! if any of the output variables named in \p outputVarNames already exist
+    //! in the dataset as returned by DataMgr::GetDataVarNames(), or if any of
+    //! the output mesh names in \p outVarMeshes are not known to the
+    //! DataMgr (see DataMgr::GetMeshNames())
+    //!
+    //! \note The Python script \p script is executed when one of the output
+    //! variables is read. Depending on the region requested only a subset
+    //! of the native variable may be provided to \p script as a NumPy
+    //! array. Currently this occurs if all of the input variables named
+    //! by \p inputs and the requested output variable are sampled on the
+    //! same mesh.
+    //!
+    //! \sa PyEngine::AddFunction(), CalcEngineMgr::AddFunction()
+    //
+    int AddFunction(string scriptType, string dataSetName, string scriptName, string script, const vector<string> &inputVarNames, const vector<string> &outputVarNames,
+                    const vector<string> &outputVarMeshes, bool coordFlag = false);
+
+    //! Remove a previously defined function
+    //!
+    //! This method removes the function previously created by AddFunction()
+    //! All of the associated derived variables are
+    //! removed from the dataset. The method is a no-op if \p scriptName is not
+    //! an active function.
+    //!
+    //! \param[in] scriptType Language of script. Currently only "Python" is
+    //! supported
+    //!
+    //! \param[in] dataSetName Name of data set for which \p scriptName is to
+    //! be removed.
+    //!
+    //! \param[in] scriptName Name of script to remove
+    //!
+    //! \sa PyEngineMgr::RemoveFunction()
+    //
+    void RemoveFunction(string scriptType, string dataSetName, string scriptName);
+
+    //! Return the script for a named function
+    //!
+    //! This method returns as a string the script associated with the
+    //! function named by \p name. It also returns the input and output
+    //! variable names, and the output variable mesh names.
+    //!
+    //! \param[in] scriptType Type of script
+    //! \param[in] dataSetName Name of data set
+    //! \param[in] scriptName Name of script
+    //!
+    //! \param[out] script Script returned as a string
+    //! \param[out] inputVarNames Vector of input variable names to script
+    //! \param[out] outputVarNames Vector of output variable names generated
+    //! by script
+    //! \param[out] outputVarMeshes Vector of output variable mesh names
+    //! associated with \p outputVarNames
+    //!
+    //! \retval status Returns true upon success. If the tupple \p scriptName
+    //! \p dataSetName, \p scriptName is invalid false is returned.
+    //!
+    //! \sa AddFunction(), RemoveFunction()
+    //
+    bool GetFunction(string scriptType, string dataSetName, string scriptName, string &script, vector<string> &inputVarNames, vector<string> &outputVarNames, vector<string> &outputVarMeshes,
+                     bool &coordFlag) const;
+
+    //! Return any standard output from the last invocation of a script
+    //!
+    //! This method returns as a string any standard output from the last
+    //! (most recent) invocation of the named script
+    //
+    string GetFunctionStdout(string scriptType, string dataSetName, string scriptName) const;
+
+    //! Return a list of all active function names
+    //!
+    //! This method returns a vector of names for all active (not previously
+    //! removed) functions created with AddFunction() for the specified
+    //! dataset \p dataSetName and the specifed script language type \p scriptType
+    //!
+    //! \sa AddFunction();
+    //!
+    std::vector<string> GetFunctionNames(string scriptType, string dataSetName) const;
+
 private:
     ParamsMgr *                    _paramsMgr;
     DataStatus *                   _dataStatus;
+    CalcEngineMgr *                _calcEngineMgr;
     std::map<string, Visualizer *> _visualizers;
 
     //! obtain an existing visualizer

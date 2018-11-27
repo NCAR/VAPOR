@@ -26,6 +26,7 @@ set (SRC
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
     SliceParams.cpp
+	DatasetsParams.cpp
 )
 
 set (HEADERS
@@ -51,6 +52,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/AxisAnnotation.h
 	${PROJECT_SOURCE_DIR}/include/vapor/WireFrameParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DatasetsParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})

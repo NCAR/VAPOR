@@ -186,11 +186,6 @@ int TwoDDataRenderer::_paintGL(bool fast)
     // _shaderMgr->UploadEffectData(effect, "expS", (float) 16.0);
     // _shaderMgr->UploadEffectData( effect, "lightDirection", (float) 0.0, (float) 0.0, (float) 1.0);
 
-    // _shaderMgr->UploadEffectData(effect, "minLUTValue", (float) crange[0]);
-    // _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float) crange[1]);
-
-    // _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
-
 #endif
 
     ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
@@ -201,10 +196,6 @@ int TwoDDataRenderer::_paintGL(bool fast)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _cMapTexID);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_1D, _cMapTexID);
-    GL_LEGACY(glEnable(GL_TEXTURE_1D));
-
     // Really only need to reload colormap texture if it changes
     //
     glTexSubImage1D(GL_TEXTURE_1D, 0, 0, _colormapsize, GL_RGBA, GL_FLOAT, _colormap);
@@ -214,7 +205,6 @@ int TwoDDataRenderer::_paintGL(bool fast)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, 0);
-    GL_LEGACY(glDisable(GL_TEXTURE_1D));
 
     return (rc);
 }
@@ -317,7 +307,8 @@ bool TwoDDataRenderer::_gridStateDirty() const
     vector<double> minExts, maxExts;
     rParams->GetBox()->GetExtents(minExts, maxExts);
 
-    _grid_state_c current_state(rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(), dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
+    _grid_state_c current_state(_dataMgr->GetNumRefLevels(rParams->GetVariableName()), rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(),
+                                dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
 
     return (_grid_state != current_state);
 }
@@ -335,7 +326,8 @@ void TwoDDataRenderer::_gridStateSet()
     rParams->GetBox()->GetExtents(minExts, maxExts);
     string meshName;
 
-    _grid_state = _grid_state_c(rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(), dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
+    _grid_state = _grid_state_c(_dataMgr->GetNumRefLevels(rParams->GetVariableName()), rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(),
+                                dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
 }
 
 bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const
