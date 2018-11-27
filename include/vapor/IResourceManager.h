@@ -12,7 +12,6 @@ template <typename K, typename T>
 class RENDER_API IResourceManager  : public Wasp::MyBase {
 protected:
     std::map<K, T*> _map;
-    std::string _resourceDirectory;
     
     T *GetResource(const K &key);
     
@@ -20,14 +19,16 @@ public:
     virtual ~IResourceManager();
     bool HasResource(const K &key) const;
     bool HasResource(const T *resource) const;
-    int SetResourceDirectory(const std::string &path);
     virtual int LoadResourceByKey(const K &key) = 0;
     bool AddResource(const K &key, T *resource);
     void DeleteResource(const K &key);
 };
 
 template <typename K, typename T>
-IResourceManager<K, T>::~IResourceManager() {}
+IResourceManager<K, T>::~IResourceManager() {
+    for (auto it = _map.begin(); it != _map.end(); ++it)
+        delete it->second;
+}
     
 template <typename K, typename T>
 T* IResourceManager<K, T>::GetResource(const K &key)
@@ -56,17 +57,6 @@ bool IResourceManager<K, T>::HasResource(const T *resource) const
         if (it->second == resource)
             return true;
     return false;
-}
-
-template <typename K, typename T>
-int IResourceManager<K, T>::SetResourceDirectory(const std::string &path)
-{
-    if (!FileUtils::IsDirectory(path)) {
-        MyBase::SetErrMsg("Resource directory \"%s\" does not exist", path.c_str());
-        return -1;
-    }
-    _resourceDirectory = path;
-    return 1;
 }
 
 template <typename K, typename T>

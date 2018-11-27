@@ -63,7 +63,13 @@ namespace VAPoR {
         int  _resetBoxCache();
         int  _resetDataCache();
         void _initTextures();
-        int  _saveTextureData(int method);
+        int  _saveTextureData0();
+        int  _saveTextureData1();
+        int  _saveTextureData2();
+
+        double _newWaySeconds;
+        double _newWayInlineSeconds;
+        double _oldWaySeconds;
 
         void _getSampleCoordinates(
             std::vector<double> &coords,

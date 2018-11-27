@@ -57,6 +57,42 @@ LayeredGrid::LayeredGrid(
 	_layeredGrid(minu, maxu, rg);
 }
 
+vector <size_t> LayeredGrid::GetCoordDimensions(size_t dim) const {
+	if (dim == 0) {
+		return(vector <size_t> (1,GetDimensions()[0]));
+	}
+	else if (dim == 1) {
+		return(vector <size_t> (1,GetDimensions()[1]));
+	}
+	else if (dim == 2) {
+		return(_rg.GetDimensions());
+	}
+	else {
+		return(vector <size_t> (1,1));
+	}
+}
+
+float LayeredGrid::GetUserCoordinate(
+	vector <size_t> &index, size_t dim
+) const {
+	if (dim == 0) {
+		ClampIndex(vector<size_t> (1,GetDimensions()[0]), index);
+        return(index[0] * _delta[0] + _minu[0]);
+	}
+	else if (dim == 1) {
+		ClampIndex(vector<size_t> (1,GetDimensions()[1]), index);
+        return(index[0] * _delta[1] + _minu[1]);
+	}
+	else if (dim == 2) {
+        return(_rg.AccessIndex(index));
+	}
+	else {
+		return(0.0);
+	}
+}
+
+
+
 void LayeredGrid::GetUserExtents(
     vector <double> &minu, vector <double> &maxu
 ) const {

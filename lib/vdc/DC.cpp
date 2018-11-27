@@ -421,9 +421,9 @@ int DC::GetHyperSliceInfo(
 	nslice = 0;
 
 	vector <size_t> dims_at_level;
-	vector <size_t> bs_at_level;
+	vector <size_t> dummy;
 
-	int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+	int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
 	if (rc < 0) return(-1);
 
 	if (dims_at_level.size() == 0) return(0);
@@ -620,7 +620,7 @@ int DC::_closeVariable(int fd) {
 template <class T> 
 int DC::_readSliceTemplate(int fd, T *slice) {
 	vector <size_t> dims_at_level;
-	vector <size_t> bs_at_level;
+	vector <size_t> dummy;
 
 	FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -634,7 +634,7 @@ int DC::_readSliceTemplate(int fd, T *slice) {
 	int sliceNum = f->GetSlice();
 
 	int rc = GetDimLensAtLevel(
-		varname, level,  dims_at_level, bs_at_level
+		varname, level,  dims_at_level, dummy
 	);
 	if (rc<0) return(rc);
 
@@ -674,7 +674,7 @@ int DC::_readSliceTemplate(int fd, T *slice) {
 template <class T> 
 int DC::_readTemplate(int fd, T *data) {
 	vector <size_t> dims_at_level;
-	vector <size_t> bs_at_level;
+	vector <size_t> dummy;
 
 	FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -686,7 +686,7 @@ int DC::_readTemplate(int fd, T *data) {
 	int level = f->GetLevel();
 
 	int rc = GetDimLensAtLevel(
-		varname, level,  dims_at_level, bs_at_level
+		varname, level,  dims_at_level, dummy
 	);
 	if (rc<0) return(rc);
 

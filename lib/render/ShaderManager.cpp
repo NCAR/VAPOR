@@ -1,8 +1,10 @@
 #include "vapor/glutil.h"
 #include "vapor/ShaderManager.h"
 #include "vapor/FileUtils.h"
+#include <vapor/ResourcePath.h>
 
 using namespace VAPoR;
+using namespace Wasp;
 
 using std::string;
 using std::vector;
@@ -20,18 +22,11 @@ using std::pair;
 #endif
 #endif
 
-#ifdef _WINDOWS
-#define PATH_SEPARATOR "\\"
-#else
-#define PATH_SEPARATOR "/"
-#endif
-
 std::vector<std::string> ShaderManager::_getSourceFilePaths(const std::string &name) const
 {
-    // TODO GL add use of GetAppPath for windows separators
     vector<string> paths;
-    paths.push_back(_resourceDirectory + PATH_SEPARATOR + name + ".vert");
-    paths.push_back(_resourceDirectory + PATH_SEPARATOR + name + ".frag");
+    paths.push_back(GetSharePath("shaders/" + name + ".vert"));
+    paths.push_back(GetSharePath("shaders/" + name + ".frag"));
     return paths;
 }
 
@@ -108,7 +103,7 @@ Shader *ShaderManager::CompileNewShaderFromFile(const std::string &path)
 
 unsigned int ShaderManager::GetShaderTypeFromPath(const std::string &path)
 {
-    string ext = path.substr(path.length()-4, 4);
+    string ext = FileUtils::Extension(path);
     if (ext == "vert") return GL_VERTEX_SHADER;
     if (ext == "frag") return GL_FRAGMENT_SHADER;
     if (ext == "geom") return GL_GEOMETRY_SHADER;
