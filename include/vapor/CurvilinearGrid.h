@@ -169,6 +169,11 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     }
     std::string GetType() const override { return (GetClassType()); }
 
+    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+
+    virtual float GetUserCoordinate(
+        std::vector<size_t> &index, size_t dim) const override;
+
     virtual size_t GetGeometryDim() const override {
         return (GetTopologyDim());
     };
