@@ -52,6 +52,11 @@ class VDF_API RegularGrid : public StructuredGrid {
 
     virtual size_t GetGeometryDim() const override;
 
+    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+
+    virtual float GetUserCoordinate(
+        std::vector<size_t> &index, size_t dim) const override;
+
     static std::string GetClassType() {
         return ("Regular");
     }
